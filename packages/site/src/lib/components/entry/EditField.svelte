@@ -129,7 +129,7 @@
       {#if field === 'notes'}
         {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
           <Keyman fixed target=".ck-editor__editable_inline" canChooseKeyboard position="bottom">
-            <ClassicCustomized {editorConfig} html={value} on:update={({ detail }) => (value = detail)} />
+            <ClassicCustomized {editorConfig} html={value} on_update={(detail) => (value = detail)} />
           </Keyman>
         {/await}
       {:else if field === 'gloss' || field === 'example_sentence'}

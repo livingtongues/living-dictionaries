@@ -14,7 +14,7 @@
 <script lang="ts">
   import { run } from 'svelte/legacy';
 
-  import { createEventDispatcher, getContext, onMount, setContext } from 'svelte'
+  import { getContext, onMount, setContext } from 'svelte'
   import type { LngLat, Marker, MarkerOptions } from 'mapbox-gl'
   import { type MapKeyContext, type MarkerKeyContext, mapKey, markerKey } from '../context'
 
@@ -28,6 +28,7 @@
     color?: 'blue' | 'black';
     options?: MarkerOptions;
     draggable?: boolean;
+    on_dragend?: (lngLat: LngLat) => void;
     pin?: import('svelte').Snippet<[any]>;
     children?: import('svelte').Snippet<[any]>;
   }
@@ -38,6 +39,7 @@
     color = 'black',
     options = {},
     draggable = false,
+    on_dragend,
     pin,
     children
   }: Props = $props();
@@ -54,8 +56,6 @@
     marker?.setLngLat({ lng, lat })
   });
 
-  const dispatch = createEventDispatcher<{ dragend: LngLat }>()
-
   function handleClick(e) {
     e.stopPropagation()
     closeOtherPopups(marker)
@@ -65,7 +65,7 @@
   function handleDragEnd() {
     markerEl.removeEventListener('click', handleClick)
     const coordinates = marker.getLngLat()
-    dispatch('dragend', coordinates);
+    on_dragend?.(coordinates);
     ({ lat, lng } = coordinates)
   }
 

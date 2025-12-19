@@ -2,7 +2,7 @@
   import { run } from 'svelte/legacy';
 
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
-  import { createEventDispatcher, getContext, onDestroy } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
   import { mapKey, sourceKey, type MapKeyContext, type SourceKeyContext } from '../context';
   import { randomId } from '../../utils/randomId';
   import type {
@@ -26,6 +26,19 @@
     minzoom?: number; // 0-24
     maxzoom?: number; // 0-24
     beforeLayerId?: string; // see https://docs.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/ to create a FindFirstSymbolLayer component.
+    onclick?: (e: MapLayerMouseEvent) => void;
+    ondblclick?: (e: MapLayerMouseEvent) => void;
+    onmousedown?: (e: MapLayerMouseEvent) => void;
+    onmouseup?: (e: MapLayerMouseEvent) => void;
+    onmousemove?: (e: MapLayerMouseEvent) => void;
+    onmouseenter?: (e: MapLayerMouseEvent) => void;
+    onmouseleave?: (e: MapLayerMouseEvent) => void;
+    onmouseover?: (e: MapLayerMouseEvent) => void;
+    onmouseout?: (e: MapLayerMouseEvent) => void;
+    oncontextmenu?: (e: MapLayerMouseEvent) => void;
+    ontouchstart?: (e: MapLayerTouchEvent) => void;
+    ontouchend?: (e: MapLayerTouchEvent) => void;
+    ontouchcancel?: (e: MapLayerTouchEvent) => void;
   }
 
   let {
@@ -39,7 +52,20 @@
   },
     minzoom = undefined,
     maxzoom = undefined,
-    beforeLayerId = undefined
+    beforeLayerId = undefined,
+    onclick,
+    ondblclick,
+    onmousedown,
+    onmouseup,
+    onmousemove,
+    onmouseenter,
+    onmouseleave,
+    onmouseover,
+    onmouseout,
+    oncontextmenu,
+    ontouchstart,
+    ontouchend,
+    ontouchcancel
   }: Props = $props();
 
   function addLayer() {
@@ -51,43 +77,28 @@
   }
 
   // Cf https://docs.mapbox.com/mapbox-gl-js/api/#map#on
-  const dispatch = createEventDispatcher<{
-    click: MapLayerMouseEvent;
-    dblclick: MapLayerMouseEvent;
-    mousedown: MapLayerMouseEvent;
-    mouseup: MapLayerMouseEvent;
-    mousemove: MapLayerMouseEvent;
-    mouseenter: MapLayerMouseEvent;
-    mouseleave: MapLayerMouseEvent;
-    mouseover: MapLayerMouseEvent;
-    mouseout: MapLayerMouseEvent;
-    contextmenu: MapLayerMouseEvent;
-    touchstart: MapLayerTouchEvent;
-    touchend: MapLayerTouchEvent;
-    touchcancel: MapLayerTouchEvent;
-  }>();
-  const eventNames = [
-    'click',
-    'dblclick',
-    'mousedown',
-    'mouseup',
-    'mousemove',
-    'mouseenter',
-    'mouseleave',
-    'mouseover',
-    'mouseout',
-    'contextmenu',
-    'touchstart',
-    'touchend',
-    'touchcancel',
-  ];
+  const eventCallbacks = {
+    click: onclick,
+    dblclick: ondblclick,
+    mousedown: onmousedown,
+    mouseup: onmouseup,
+    mousemove: onmousemove,
+    mouseenter: onmouseenter,
+    mouseleave: onmouseleave,
+    mouseover: onmouseover,
+    mouseout: onmouseout,
+    contextmenu: oncontextmenu,
+    touchstart: ontouchstart,
+    touchend: ontouchend,
+    touchcancel: ontouchcancel,
+  };
 
-  const handlers: [keyof MapLayerEventType, (e: any) => any][] = eventNames.map((eventName) => {
-    return [
+  const handlers: [keyof MapLayerEventType, (e: any) => any][] = Object.entries(eventCallbacks)
+    .filter(([_, callback]) => callback)
+    .map(([eventName, callback]) => [
       eventName as keyof MapLayerEventType,
-      (e) => dispatch(eventName as keyof MapLayerEventType, e),
-    ];
-  });
+      (e) => callback?.(e),
+    ]);
 
   // If the style changes, check that source is defined, because many "styledata" events are triggered,
   // and source is not defined when the first one occurs, then re-create the layer

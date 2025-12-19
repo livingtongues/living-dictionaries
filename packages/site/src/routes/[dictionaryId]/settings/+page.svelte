@@ -101,13 +101,13 @@
 
   <PrintAccessCheckbox
     checked={dictionary.print_access}
-    on:changed={async ({ detail: { checked } }) => await updateDictionary({ print_access: checked })} />
+    on_changed={async ({ checked }) => await updateDictionary({ print_access: checked })} />
   <div class="mb-5"></div>
 
   {#if !dictionary.con_language_description}
     <PublicCheckbox
       checked={dictionary.public}
-      on:changed={async ({ detail: { checked } }) => {
+      on_changed={async ({ checked }) => {
         if (!checked) {
           await updateDictionary({ public: false })
         } else if ($admin) {

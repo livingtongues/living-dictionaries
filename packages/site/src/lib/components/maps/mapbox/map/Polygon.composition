@@ -33,13 +33,13 @@
       lng={-95}
       lat={44}
       zoom={3}
-      on:click={({ detail: { lng, lat } }) => {
+      on_click={({ lng, lat }) => {
         add({ longitude: lng, latitude: lat });
       }}>
       {#each points as point, index (point)}
         <Marker
           draggable
-          on:dragend={({ detail: { lng, lat } }) => {
+          on_dragend={({ lng, lat }) => {
             remove(point);
             add({ longitude: lng, latitude: lat });
           }}

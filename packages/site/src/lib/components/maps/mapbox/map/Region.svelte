@@ -47,9 +47,9 @@
             'fill-opacity': 0.5,
           },
         }}
-        on:click={toggle}
-        on:mouseenter={() => children && (map.getCanvas().style.cursor = 'pointer')}
-        on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
+        onclick={toggle}
+        onmouseenter={() => children && (map.getCanvas().style.cursor = 'pointer')}
+        onmouseleave={() => (map.getCanvas().style.cursor = '')} />
       <Layer
         options={{
           type: 'line',

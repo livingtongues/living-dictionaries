@@ -31,7 +31,7 @@ buttonAtTop: true
 CKEditor
 <div class="w-full">
   <Keyman bcp="as" target=".ck-editor__editable_inline" position="bottom">
-    <ClassicCustomized {html} on:update={({ detail }) => (html = detail)} />
+    <ClassicCustomized {html} on_update={(detail) => (html = detail)} />
   </Keyman>
   <pre class="pl-3">{html}</pre>
 </div>
@@ -39,7 +39,7 @@ CKEditor
 CKEditor - no language - can choose
 <div class="w-full">
   <Keyman canChooseKeyboard target=".ck-editor__editable_inline" position="bottom">
-    <ClassicCustomized {html} on:update={({ detail }) => (html = detail)} />
+    <ClassicCustomized {html} on_update={(detail) => (html = detail)} />
   </Keyman>
   <pre class="pl-3">{html}</pre>
 </div> -->

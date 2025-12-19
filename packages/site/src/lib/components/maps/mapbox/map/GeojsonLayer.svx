@@ -57,9 +57,9 @@ From https://gitlab.com/jailbreak/svelte-mapbox-gl
               // 'fill-outline-color': '#000',
             },
           }}
-          on:click={() => alert('Maine clicked')}
-          on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
-          on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
+          onclick={() => alert('Maine clicked')}
+          onmouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
+          onmouseleave={() => (map.getCanvas().style.cursor = '')} />
         {#if outlineMaine}
           <Layer
             options={{

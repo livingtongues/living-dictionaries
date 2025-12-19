@@ -107,7 +107,7 @@
             finalizedEntries={formattedEntries}
             entriesWithImages={includeImages ? entriesWithImages : []}
             entriesWithAudio={includeAudio ? entriesWithAudio : []}
-            on:completed={toggle}
+            on_completed={toggle}
             >
             {#snippet children({ progress })}
                     <Progress {progress} />

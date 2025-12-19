@@ -3,13 +3,15 @@
   import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
 
   // https://www.npmjs.com/package/@mapbox/mapbox-gl-geocoder
-  import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte'
+  import { getContext, onDestroy, onMount } from 'svelte'
   import { mapKey, type MapKeyContext } from '../context'
   import { bindEvents } from '../event-bindings'
 
   const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
   const map = getMap()
   const mapbox = getMapbox()
+
+  type ResultOrUserCoordinates = Result | { user_coordinates: [number, number] }
 
   interface Props {
     position?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'
@@ -19,6 +21,12 @@
     placeholder?: string
     value?: any
     customStylesheetUrl?: string
+    on_clear?: () => void
+    on_loading?: (query: string) => void
+    on_result?: (result: ResultOrUserCoordinates) => void
+    on_result_coordinates?: (coords: { longitude: number, latitude: number }) => void
+    on_results?: (results: Results) => void
+    on_error?: (error: string) => void
     children?: import('svelte').Snippet<[any]>
   }
 
@@ -40,19 +48,14 @@
     placeholder = 'Search',
     value = null,
     customStylesheetUrl = undefined,
+    on_clear,
+    on_loading,
+    on_result,
+    on_result_coordinates,
+    on_results,
+    on_error,
     children,
   }: Props = $props()
-
-  type ResultOrUserCoordinates = Result | { user_coordinates: [number, number] }
-
-  const dispatch = createEventDispatcher<{
-    clear: boolean
-    loading: any
-    result: ResultOrUserCoordinates
-    resultCoordinates: { longitude: number, latitude: number }
-    results: Results
-    error: string
-  }>()
 
   function handleGeocoderResult(result: ResultOrUserCoordinates): { longitude: number, latitude: number } {
     if ('user_coordinates' in result)
@@ -62,14 +65,14 @@
   }
 
   const handlers: Record<string, any> = {
-    clear: () => dispatch('clear'),
-    loading: ({ query }: { query: string }) => dispatch('loading', query),
+    clear: () => on_clear?.(),
+    loading: ({ query }: { query: string }) => on_loading?.(query),
     result: ({ result }: { result: ResultOrUserCoordinates }) => {
-      dispatch('result', result)
-      if (result) dispatch('resultCoordinates', handleGeocoderResult(result))
+      on_result?.(result)
+      if (result) on_result_coordinates?.(handleGeocoderResult(result))
     },
-    results: (e: Results) => dispatch('results', e),
-    error: ({ error }) => dispatch('error', error),
+    results: (e: Results) => on_results?.(e),
+    error: ({ error }) => on_error?.(error),
   }
 
   let unbind: () => void

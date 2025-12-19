@@ -1,19 +1,20 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-
   interface Props {
     name: string;
     size?: number;
     required?: boolean;
     disabled?: boolean;
+    on_input?: (value: string) => void;
+    on_submit?: () => void;
   }
 
   let {
     name,
     size = 1,
     required = false,
-    disabled = false
+    disabled = false,
+    on_input,
+    on_submit
   }: Props = $props();
 
   function resize({ target }) {
@@ -44,12 +45,12 @@
     {disabled}
     oninput={(e) => {
       //@ts-ignore
-      dispatch('input', e.target.value.trim());
+      on_input?.(e.target.value.trim());
     }}
     use:autoresize
     onkeyup={(e) => {
       if (e.code === 'Enter')
-        dispatch('submit');
+        on_submit?.();
 
     }}
     autocomplete="off"></textarea>
