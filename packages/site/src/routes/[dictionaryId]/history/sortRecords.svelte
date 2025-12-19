@@ -2,7 +2,7 @@
   import type { EntryData, Tables } from '@living-dictionaries/types'
   import { sortedColumn } from './sortedColumnStore'
   import { HistoryFields } from './historyFields'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     history?: Tables<'content_updates'>[];
@@ -68,7 +68,7 @@
       class="cursor-pointer"
       onclick={() => setSortSettings(field.key)}
       title="Click to sort asc/desc">
-      {$page.data.t(`history.${field.value}`)}
+      {page.data.t(`history.${field.value}`)}
       {#if sortKey === field.key}
         {#if sortDescending}
           <i class="fas fa-sort-amount-down"></i>

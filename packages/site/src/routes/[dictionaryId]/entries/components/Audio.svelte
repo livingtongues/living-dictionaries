@@ -33,7 +33,7 @@
 <script lang="ts">
   import { ShowHide, longpress } from '$lib/svelte-pieces'
   import type { EntryData } from '@living-dictionaries/types'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
 
   let { entry, context, sound_file = undefined, can_edit = false, class: class_prop = '' }: {
@@ -43,7 +43,7 @@
     can_edit?: boolean
     class?: string
   } = $props()
-  let { url_from_storage_path } = $derived($page.data)
+  let { url_from_storage_path } = $derived(page.data)
 
   function initAudio() {
     playAudio(url_from_storage_path(sound_file.storage_path))
@@ -71,7 +71,7 @@
       class:border-b-2={updated_within_last_5_minutes}
       class="{class_prop} hover:bg-gray-200 flex flex-col items-center
         justify-center cursor-pointer select-none border-green-300"
-      title={$page.data.t('audio.listen')}
+      title={page.data.t('audio.listen')}
       use:longpress_action={800}
       onclick={() => {
         if (can_edit)
@@ -82,7 +82,7 @@
       {#if context === 'list'}
         <span class:text-blue-700={playing} class="i-material-symbols-hearing text-xl mt-1" />
         <div class="text-xs text-center line-clamp-1 w-full" style="overflow-wrap: break-word;">
-          {$page.data.t('audio.listen')}
+          {page.data.t('audio.listen')}
         </div>
       {:else if context === 'table'}
         <span class:text-blue-700={playing} class="i-material-symbols-hearing text-lg mt-1" />
@@ -91,10 +91,10 @@
           class:text-blue-700={playing}
           class="i-material-symbols-hearing text-lg mb-1" />
         <div class="text-center text-xs">
-          {$page.data.t('audio.listen')}
+          {page.data.t('audio.listen')}
           {#if can_edit}
             +
-            {$page.data.t('audio.edit_audio')}
+            {page.data.t('audio.edit_audio')}
           {/if}
         </div>
       {/if}
@@ -107,7 +107,7 @@
       <span class="i-uil-microphone text-lg m-1" class:text-blue-800={context === 'list' || context === 'table'} />
       {#if context === 'entry'}
         <div class="text-xs">
-          {$page.data.t('audio.add_audio')}
+          {page.data.t('audio.add_audio')}
         </div>
       {/if}
     </div>

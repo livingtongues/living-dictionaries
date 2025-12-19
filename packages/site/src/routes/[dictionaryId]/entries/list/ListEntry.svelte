@@ -7,7 +7,7 @@
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/helpers/glosses'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import type { DbOperations } from '$lib/dbOperations'
 
   interface Props {
@@ -29,7 +29,7 @@
   let glosses = $derived(order_glosses({
     glosses: entry.senses?.[0]?.glosses,
     dictionary_gloss_languages: dictionary.gloss_languages,
-    t: $page.data.t,
+    t: page.data.t,
     label: dictionary.id !== 'jewish-neo-aramaic',
   }).join(', '))
 
@@ -69,7 +69,7 @@
       <div class="text-xs text-gray-600 mr-auto mb-1">
         {#if first_sense.parts_of_speech}
           {#each first_sense.parts_of_speech as pos}
-            <i>{$page.data.t({ dynamicKey: `psAbbrev.${pos}`, fallback: pos })}, </i>
+            <i>{page.data.t({ dynamicKey: `psAbbrev.${pos}`, fallback: pos })}, </i>
           {/each}
         {/if}
 
@@ -89,21 +89,21 @@
         {/if}
 
         {#if entry.dialects?.length}<p class="text-xs">
-          <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.map(({ name }) => name.default).join(', ')}</i>
+          <i class="mr-1">{page.data.t('entry_field.dialects')}: {entry.dialects.map(({ name }) => name.default).join(', ')}</i>
         </p>{/if}
 
         {#if dictionary.id === 'jewish-neo-aramaic'}
           {#if entry.dialects}<p class="text-xs">
-            <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.map(({ name }) => name.default).join(', ')}</i>
+            <i class="mr-1">{page.data.t('entry_field.dialects')}: {entry.dialects.map(({ name }) => name.default).join(', ')}</i>
           </p>{/if}
           {#each first_sense.sentences || [] as sentence}
             {#each Object.entries(sentence.text) as [bcp, content]}
               <p>
                 <span class="font-semibold">
                   {#if bcp !== 'vn'}
-                    {$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}
+                    {page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}
                   {/if}
-                  {$page.data.t('entry_field.example_sentence')}:</span>
+                  {page.data.t('entry_field.example_sentence')}:</span>
                 {content}
               </p>
             {/each}
@@ -112,7 +112,7 @@
 
         {#if first_sense.plural_form}
           <p class="text-xs">
-            {$page.data.t('entry_field.plural_form')}: {first_sense.plural_form.default}
+            {page.data.t('entry_field.plural_form')}: {first_sense.plural_form.default}
           </p>
         {/if}
       </div>
@@ -127,7 +127,7 @@
         <span
           class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1
             mb-1">
-          {$page.data.t({ dynamicKey: `sd.${domain}`, fallback: domain })}
+          {page.data.t({ dynamicKey: `sd.${domain}`, fallback: domain })}
         </span>
       {/each}
     </div>
@@ -188,7 +188,7 @@
             <span class="i-ic-outline-camera-alt text-xl"></span>
           </span>
           <div class="text-xs">
-            {$page.data.t('entry_field.photo')}
+            {page.data.t('entry_field.photo')}
           </div>
         </div>
       {/if}

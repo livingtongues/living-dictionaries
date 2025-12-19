@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { QueryParamStore } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import type { QueryParams } from '$lib/search/types'
 
   interface Props {
@@ -31,7 +31,7 @@
           $search_params.page = 1
         }
       }}
-      placeholder={$page.data.t('entry.search_entries')}
+      placeholder={page.data.t('entry.search_entries')}
       class="form-input text-sm w-full pl-10 pr-3 py-2 rounded-none ltr:!rounded-l-md rtl:!rounded-r-md md:!rounded-r-md md:!rounded-l-md" />
   </div>
   <button
@@ -43,7 +43,7 @@
       focus:z-10 transition ease-in-out duration-150 md:hidden">
     <span class="i-material-symbols-filter-alt text-gray-400"></span>
     <span class="ml-2 hidden sm:inline">
-      {$page.data.t('entry.filters')}
+      {page.data.t('entry.filters')}
     </span>
   </button>
 </div>

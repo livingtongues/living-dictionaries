@@ -5,7 +5,7 @@
   import Partners from './Partners.svelte'
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   let { data } = $props();
   let { dictionary, is_manager, is_contributor, admin, editor_edits, dictionary_info, dictionary_editors } = $derived(data)
@@ -27,11 +27,11 @@
 </script>
 
 <p class="mb-2">
-  <i>{$page.data.t('contributors.manager_contributor_distinction')}</i>
+  <i>{page.data.t('contributors.manager_contributor_distinction')}</i>
 </p>
 
 <h3 class="font-semibold text-lg mb-1 mt-3">
-  {$page.data.t('contributors.managers')}
+  {page.data.t('contributors.managers')}
 </h3>
 
 <div class="divide-y divide-gray-200">
@@ -54,7 +54,7 @@
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
           {#snippet prefix()}
-                    <i >{$page.data.t('contributors.invitation_sent')}:</i>
+                    <i >{page.data.t('contributors.invitation_sent')}:</i>
                   {/snippet}
         </ContributorInvitationStatus>
       </div>
@@ -64,13 +64,13 @@
 {#if $is_manager}
   <Button onclick={editor_edits.inviteHelper('manager')} form="filled">
     <i class="far fa-envelope"></i>
-    {$page.data.t('contributors.invite_manager')}
+    {page.data.t('contributors.invite_manager')}
   </Button>
 {/if}
 
 <hr class="my-4" />
 <h3 class="font-semibold text-lg mb-1 mt-3">
-  {$page.data.t('dictionary.contributors')}
+  {page.data.t('dictionary.contributors')}
 </h3>
 <div class="divide-y divide-gray-200">
   {#each contributors as contributor}
@@ -88,7 +88,7 @@
           onclick={editor_edits.removeContributor(contributor.user_id)}
           color="red"
           size="sm">
-          {$page.data.t('misc.delete')}
+          {page.data.t('misc.delete')}
           <i class="fas fa-times"></i>
         </Button>
       {/if}
@@ -102,20 +102,20 @@
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
           {#snippet prefix()}
-                    <i >{$page.data.t('contributors.invitation_sent')}:</i>
+                    <i >{page.data.t('contributors.invitation_sent')}:</i>
                   {/snippet}
         </ContributorInvitationStatus>
       </div>
     {/each}
     <Button onclick={editor_edits.inviteHelper('contributor')} form="filled">
       <i class="far fa-envelope"></i>
-      {$page.data.t('contributors.invite_contributors')}
+      {page.data.t('contributors.invite_contributors')}
     </Button>
   {:else if !$is_contributor}
     <ShowHide  >
       {#snippet children({ show, toggle })}
                 <Button onclick={toggle} form="filled">
-          {$page.data.t('contributors.request_access')}
+          {page.data.t('contributors.request_access')}
         </Button>
         {#if show}
           {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
@@ -129,7 +129,7 @@
 
 <hr class="my-4" />
 <h3 class="font-semibold text-lg mb-1 mt-3">
-  {$page.data.t('contributors.other_contributors')}
+  {page.data.t('contributors.other_contributors')}
 </h3>
 <div class="divide-y divide-gray-200">
   {#each $dictionary_info?.write_in_collaborators || [] as collaborator}
@@ -142,7 +142,7 @@
         <Button
           color="red"
           size="sm"
-          onclick={editor_edits.removeWriteInCollaborator($dictionary_info?.write_in_collaborators || [], collaborator)}>{$page.data.t('misc.delete')}
+          onclick={editor_edits.removeWriteInCollaborator($dictionary_info?.write_in_collaborators || [], collaborator)}>{page.data.t('misc.delete')}
           <i class="fas fa-times"></i></Button>
       {/if}
     </div>
@@ -150,13 +150,13 @@
 </div>
 
 <!-- <div class="text-gray-600 mb-2 text-sm">
-  ({$page.data.t('contributors.speakers_other_collaborators')})
+  ({page.data.t('contributors.speakers_other_collaborators')})
 </div> -->
 
 {#if $is_manager}
   <Button onclick={async () => await editor_edits.writeInCollaborator($dictionary_info?.write_in_collaborators || [])} form="filled">
     <i class="far fa-pencil"></i>
-    {$page.data.t('contributors.write_in_contributor')}
+    {page.data.t('contributors.write_in_contributor')}
   </Button>
 {/if}
 
@@ -170,32 +170,32 @@
 
   {#if dictionary.id !== 'onondaga'}
     <h3 class="font-semibold mb-1 mt-3">
-      {$page.data.t('contributors.LD_team')}
+      {page.data.t('contributors.LD_team')}
     </h3>
     <div class="mb-4">
       Gregory D. S. Anderson -
       <span class="text-sm">
-        {$page.data.t('contributors.LD_founder')}
+        {page.data.t('contributors.LD_founder')}
       </span>
       <br />
       K. David Harrison -
       <span class="text-sm">
-        {$page.data.t('contributors.LD_founder')}
+        {page.data.t('contributors.LD_founder')}
       </span>
       <br />
       Anna Luisa Daigneault -
       <span class="text-sm">
-        {$page.data.t('contributors.coordinator_editor')}
+        {page.data.t('contributors.coordinator_editor')}
       </span>
       <br />
       Jacob Bowdoin -
       <span class="text-sm">
-        {$page.data.t('contributors.developer_designer')}
+        {page.data.t('contributors.developer_designer')}
       </span>
       <br />
       Diego Córdova Nieto -
       <span class="text-sm">
-        {$page.data.t('contributors.developer_designer')}
+        {page.data.t('contributors.developer_designer')}
       </span>
       <br />
     </div>
@@ -203,11 +203,11 @@
 
   <hr class="my-3" />
   <p class="mb-3 text-sm">
-    {$page.data.t('contributors.all_rights_reserved_permission')}
+    {page.data.t('contributors.all_rights_reserved_permission')}
   </p>
 
   <h3 class="font-semibold">
-    {$page.data.t('contributors.how_to_cite_academics')}
+    {page.data.t('contributors.how_to_cite_academics')}
   </h3>
 
   <CitationComponent isManager={$is_manager} {dictionary} {partners} citation={$dictionary_info.citation} update_citation={data.update_citation} />
@@ -217,7 +217,7 @@
 
 <SeoMetaTags
   norobots={!dictionary.public}
-  title={$page.data.t('dictionary.contributors')}
+  title={page.data.t('dictionary.contributors')}
   dictionaryName={dictionary.name}
   description="Learn about the people who are building and managing this Living Dictionary."
   keywords="Contributors, Managers, Writers, Editors, Dictionary builders, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary, Print a dictionary" />

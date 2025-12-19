@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button } from '$lib/svelte-pieces'
   import EditString from '../[dictionaryId]/EditString.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import { sign_out } from '$lib/supabase/auth'
 
@@ -23,11 +23,11 @@
 
 <svelte:head>
   <title>
-    {$page.data.t('account.account_settings')}
+    {page.data.t('account.account_settings')}
   </title>
 </svelte:head>
 
-<Header>{$page.data.t('account.account_settings')}</Header>
+<Header>{page.data.t('account.account_settings')}</Header>
 
 <div class="max-w-screen-md mx-auto p-3">
   {#if $user}
@@ -41,13 +41,13 @@
       required
       id="name"
       save={async name => await update_name(name)}
-      display={$page.data.t('account.your_name')} />
+      display={page.data.t('account.your_name')} />
     <div class="mt-3 text-lg">
       <span class="i-ic-outline-mail -align-4px"></span>
       {$user.email}</div>
     <div class="mt-3">
       <Button
-        onclick={sign_out}>{$page.data.t('account.log_out')}</Button>
+        onclick={sign_out}>{page.data.t('account.log_out')}</Button>
     </div>
   {:else}
     Not logged in

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   import AddImage from '$lib/components/image/AddImage.svelte'
   import { Button, Modal } from '$lib/svelte-pieces'
@@ -17,7 +17,7 @@
   let rights = $state(false)
   let ai_image = $state(false)
 
-  let { dbOperations } = $derived($page.data)
+  let { dbOperations } = $derived(page.data)
 
   function handleImageUpload(file: File) {
     const status = dbOperations.addImage({
@@ -59,7 +59,7 @@
 
 <Modal {on_close}>
   <label class="block mb-2 text-sm font-medium text-gray-700" for="photo_source">
-    {$page.data.t('entry.source', { values: { media: $page.data.t('entry_field.photo') } })} <i class="text-gray-500">{$page.data.t('entry.source_message', { values: { media: $page.data.t('entry.this_image') } })}</i> (<span class="text-red-500">{$page.data.t('misc.required')}</span>)
+    {page.data.t('entry.source', { values: { media: page.data.t('entry_field.photo') } })} <i class="text-gray-500">{page.data.t('entry.source_message', { values: { media: page.data.t('entry.this_image') } })}</i> (<span class="text-red-500">{page.data.t('misc.required')}</span>)
   </label>
   <textarea
     name="photo_source"
@@ -74,15 +74,15 @@
   </div>
   <div>
     <input bind:checked={rights} type="checkbox" id="rigths" name="rigths" required />
-    <label for="rigths">{$page.data.t('entry.rights', { values: { media: $page.data.t('entry.this_image') } })} (<span class="text-red-500 font-medium">{$page.data.t('misc.required')}</span>)</label>
+    <label for="rigths">{page.data.t('entry.rights', { values: { media: page.data.t('entry.this_image') } })} (<span class="text-red-500 font-medium">{page.data.t('misc.required')}</span>)</label>
   </div>
   <div>
     <input bind:checked={ai_image} type="checkbox" id="ai_image" name="ai_image" />
-    <label for="ai_image">{$page.data.t('entry.AI_generated', { values: { media: $page.data.t('entry.this_image') } })}</label>
+    <label for="ai_image">{page.data.t('entry.AI_generated', { values: { media: page.data.t('entry.this_image') } })}</label>
   </div>
   {#if !ai_image}
     <label class="block mb-2 text-sm font-medium text-gray-700 mt-3" for="photographer">
-      {$page.data.t('image.photographer')} ({$page.data.t('misc.optional')})
+      {page.data.t('image.photographer')} ({page.data.t('misc.optional')})
     </label>
     <textarea
       name="photographer"
@@ -97,7 +97,7 @@
 
   <AddImage upload_image={handleImageUpload}>
     <div class="text-xs">
-      {$page.data.t('entry_field.photo')}
+      {page.data.t('entry_field.photo')}
     </div>
   </AddImage>
 
@@ -112,25 +112,25 @@
         href={url_from_storage_path(image_file.storage_path)}
         target="_blank">
         <i class="fas fa-download" />
-        <span class="hidden sm:inline">{$page.data.t('misc.download')}</span>
+        <span class="hidden sm:inline">{page.data.t('misc.download')}</span>
       </Button>
       <div class="w-1" />
 
       <Button
         onclick={async () => {
-          const confirmation = confirm($page.data.t('entry.delete_audio'))
+          const confirmation = confirm(page.data.t('entry.delete_audio'))
           if (confirmation) await dbOperations.update_audio({ deleted: new Date().toISOString(), id: image_file.id })
           on_close()
         }}
         color="red">
         <i class="far fa-trash-alt" />&nbsp;
-        <span class="hidden sm:inline">{$page.data.t('misc.delete')}</span>
+        <span class="hidden sm:inline">{page.data.t('misc.delete')}</span>
       </Button>
       <div class="w-1" />
     {/if} -->
 
     <Button onclick={on_close} color="black">
-      {$page.data.t('misc.close')}
+      {page.data.t('misc.close')}
     </Button>
   </div>
 </Modal>

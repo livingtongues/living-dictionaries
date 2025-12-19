@@ -2,7 +2,7 @@
   import { Button, Form } from '$lib/svelte-pieces'
   import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import { build_citation } from './build-citation'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     dictionary: Tables<'dictionaries'>;
@@ -37,7 +37,7 @@
     }}>
     {#snippet children({ loading })}
         <label for="names" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-        {$page.data.t('contributors.how_to_cite_instructions')}
+        {page.data.t('contributors.how_to_cite_instructions')}
       </label>
       <div class="mt-1 flex">
         <input
@@ -54,7 +54,7 @@
           }} />
         <div class="w-1"></div>
         <Button class="shrink-0" {loading} type="submit">
-          {$page.data.t('misc.save')}
+          {page.data.t('misc.save')}
         </Button>
       </div>
           {/snippet}
@@ -62,5 +62,5 @@
 {/if}
 
 <div dir="ltr" class:text-orange={unsaved}>
-  {build_citation({ t: $page.data.t, dictionary, custom_citation: value || citation, partners })}
+  {build_citation({ t: page.data.t, dictionary, custom_citation: value || citation, partners })}
 </div>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { DictionaryView } from '@living-dictionaries/types'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { Button } from '$lib/svelte-pieces'
   import { onMount } from 'svelte'
   import sanitize from 'xss'
@@ -22,7 +22,7 @@
   }
 
   onMount(async () => {
-    const { data } = await $page.data.supabase.from('dictionary_info').select().eq('id', dictionary.id).single()
+    const { data } = await page.data.supabase.from('dictionary_info').select().eq('id', dictionary.id).single()
     if (data?.about) {
       ({ about } = data)
     }
@@ -49,7 +49,7 @@
   {#if dictionary.gloss_languages}
     <div class="mb-2">
       <i class="far fa-info-circle fa-fw"></i>
-      {dictionary.gloss_languages.map(bcp => $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })).join(', ')}
+      {dictionary.gloss_languages.map(bcp => page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })).join(', ')}
     </div>
   {/if}
 
@@ -57,7 +57,7 @@
     <span
       class="mb-2 mr-2 inline-flex items-center px-2 py-1 rounded-full
         text-xs font-medium leading-4 bg-gray-200 text-gray-800">
-      {$page.data.t('dictionary.entries')}:&nbsp;
+      {page.data.t('dictionary.entries')}:&nbsp;
       <b>{dictionary.entry_count}</b>
     </span>
   {/if}
@@ -81,19 +81,19 @@
 
   {#if dictionary.metadata?.url}
     <Button target="_blank" class="mt-1 w-full" form="filled" color="black" href={dictionary.metadata.url}>
-      {$page.data.t('home.open_dictionary')}
+      {page.data.t('home.open_dictionary')}
     </Button>
   {:else}
     <div class="mb-2 text-sm inline-children-elements">
       {@html sanitize(truncateString(about, 200))}
       {#if about.length > 200}
         <a class="hover:underline" href={`${dictionary.url}/about`}>
-          {$page.data.t('home.read_more')}
+          {page.data.t('home.read_more')}
         </a>
       {/if}
     </div>
     <Button class="mt-1 w-full" form="filled" color="black" href={dictionary.url}>
-      {$page.data.t('home.open_dictionary')}
+      {page.data.t('home.open_dictionary')}
       <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1"></span>
     </Button>
   {/if}

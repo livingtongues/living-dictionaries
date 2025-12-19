@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Readable } from 'svelte/store'
   import type { ImageUploadStatus } from './upload-image'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     upload_status: Readable<ImageUploadStatus>;
@@ -22,7 +22,7 @@
   {#if $upload_status.error}
     <div class="p-2 text-red-600 text-center">
       <div><span class="i-fa-solid-times"></span></div>
-      {$page.data.t('misc.error')}: {$upload_status.error}
+      {page.data.t('misc.error')}: {$upload_status.error}
     </div>
   {:else}
     {#if $upload_status.serving_url}

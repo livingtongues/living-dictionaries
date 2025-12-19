@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { apply_button_label } from './image-store'
 
   const { border, on_file_added = undefined, class: class_prop = '' }: {
@@ -18,13 +18,13 @@
     // Client-side validation: Must be an image (not SVG) and smaller than 10MB.
     if (fileToCheck.type.split('/')[0] !== 'image' || fileToCheck.type === 'image/svg+xml') {
       return alert(
-        `${$page.data.t('upload.error')}`,
+        `${page.data.t('upload.error')}`,
       )
     }
     const tenMB = 10485760 // http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > tenMB) {
       return alert(
-        `${$page.data.t('upload.file_must_be_smaller')} 10MB`,
+        `${page.data.t('upload.file_must_be_smaller')} 10MB`,
       )
     }
 

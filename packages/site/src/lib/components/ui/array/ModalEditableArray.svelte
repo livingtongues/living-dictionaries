@@ -2,7 +2,7 @@
   import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import MultiSelect from './MultiSelect.svelte'
   import type { SelectOption } from './select-options.interface'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     values: string[];
@@ -97,11 +97,11 @@
               }}
               form="simple"
               color="black">
-              {$page.data.t('misc.cancel')}
+              {page.data.t('misc.cancel')}
             </Button>
 
             <Button type="submit" form="filled">
-              {$page.data.t('misc.save')}
+              {page.data.t('misc.save')}
             </Button>
           </div>
         </form>

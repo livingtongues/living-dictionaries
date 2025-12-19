@@ -9,7 +9,7 @@
   import type { PageData } from './$types'
   import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
   import Filter from '$lib/components/Filter.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     data: PageData;
@@ -25,7 +25,7 @@
     }
   }))
 
-  let active_section = $derived($page.url.searchParams.get('filter') as 'public' | 'private' | 'other')
+  let active_section = $derived(page.url.searchParams.get('filter') as 'public' | 'private' | 'other')
 
   const invites = writable<Tables<'invites'>[]>([])
 

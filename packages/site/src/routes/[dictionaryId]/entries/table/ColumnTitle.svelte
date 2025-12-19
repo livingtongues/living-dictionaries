@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { IColumn, i18nEntryFieldKey } from '@living-dictionaries/types'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     column: IColumn;
@@ -15,14 +15,14 @@
 <span class:flex={!verbose}>
   {#if column.field === 'audio'}
     <span class="i-material-symbols-hearing text-lg mx-auto"></span>
-    {#if verbose}{$page.data.t('entry_field.audio')}{/if}
+    {#if verbose}{page.data.t('entry_field.audio')}{/if}
   {:else if column.field === 'photo'}
     <span class="i-ic-outline-image text-xl mx-auto"></span>
-    {#if verbose}{$page.data.t('entry.image')}{/if}
+    {#if verbose}{page.data.t('entry.image')}{/if}
     <!-- {:else if column.field === 'checked'} ✓ -->
   {:else if ['gloss', 'example_sentence', 'local_orthography'].includes(column.field)}
-    <span class="capitalize" title={column.explanation}> {column.display || $page.data.t(i18nKey)} </span>
+    <span class="capitalize" title={column.explanation}> {column.display || page.data.t(i18nKey)} </span>
   {:else}
-    {$page.data.t(i18nKey)}
+    {page.data.t(i18nKey)}
   {/if}
 </span>

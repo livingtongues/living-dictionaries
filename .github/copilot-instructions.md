@@ -188,9 +188,9 @@ Entries support rich multimedia content:
 - Access translations in Svelte components:
   ```svelte
   <script>
-    import { page } from '$app/stores'
+    import { page } from '$app/state'
   </script>
-  {$page.data.t.section.key}
+  {page.data.t.section.key}
   ```
 - Organize translations by logical sections
 - Use descriptive keys that indicate purpose
@@ -387,6 +387,6 @@ Utility scripts for maintenance tasks:
 ### Internationalization Pattern
 1. Add English text to `locales/en.json`
 2. Use descriptive section-based keys
-3. Access via `$page.data.t.section.key`
+3. Access via `{page.data.t.section.key}`
 4. Interpolate variables with helper function
 5. Human translators add other languages later

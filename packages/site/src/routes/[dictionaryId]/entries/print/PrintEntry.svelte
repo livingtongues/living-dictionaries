@@ -4,7 +4,7 @@
   import { tick } from 'svelte'
   import QrCode from './QrCode.svelte'
   import { defaultPrintFields } from './printFields'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { order_example_sentences, order_glosses } from '$lib/helpers/glosses'
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
@@ -55,7 +55,7 @@
         {@html sanitize(order_glosses({
           glosses: sense.glosses,
           dictionary_gloss_languages: dictionary.gloss_languages,
-          t: $page.data.t,
+          t: page.data.t,
         }).join(', '))}{selectedFields.example_sentence && sense.sentences?.length > 0 ? ';' : ''}
       </span>
     {/if}
@@ -66,10 +66,10 @@
         <div>
           {#if showLabels}
             <span class="italic text-[80%]">
-              {$page.data.t('entry_field.semantic_domains')}:
+              {page.data.t('entry_field.semantic_domains')}:
             </span>
           {/if}
-          {semantic_domains.map(domain => $page.data.t({ dynamicKey: `sd.${domain}`, fallback: domain })).join(', ')}
+          {semantic_domains.map(domain => page.data.t({ dynamicKey: `sd.${domain}`, fallback: domain })).join(', ')}
         </div>
       {/if}
     {/if}
@@ -77,7 +77,7 @@
     {#if selectedFields.noun_class && sense.noun_class}
       <div>
         {#if showLabels}
-          <span class="italic text-[80%]">{$page.data.t('entry_field.noun_class')}: </span>
+          <span class="italic text-[80%]">{page.data.t('entry_field.noun_class')}: </span>
         {/if}
         {sense.noun_class}
       </div>
@@ -86,7 +86,7 @@
     {#if selectedFields.plural_form && sense.plural_form}
       <div>
         {#if showLabels}
-          <span class="italic text-[80%]">{$page.data.t('entry_field.plural_form')}: </span>
+          <span class="italic text-[80%]">{page.data.t('entry_field.plural_form')}: </span>
         {/if}
         {sense.plural_form?.default}
       </div>
@@ -95,7 +95,7 @@
     {#if selectedFields.variant && sense.variant}
       <div>
         {#if showLabels}
-          <span class="italic text-[80%]">{$page.data.t('entry_field.variant')}: </span>
+          <span class="italic text-[80%]">{page.data.t('entry_field.variant')}: </span>
         {/if}
         {sense.variant?.default}
       </div>
@@ -112,7 +112,7 @@
   {#if selectedFields.custom_tags && entry.tags?.length}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('print.tags')}:</span>
+        <span class="italic text-[80%]">{page.data.t('print.tags')}:</span>
       {/if}
       {entry.tags.map(tag => tag.name).join(', ')}
     </div>
@@ -121,7 +121,7 @@
   {#if selectedFields.notes && entry.main.notes}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('entry_field.notes')}:</span>
+        <span class="italic text-[80%]">{page.data.t('entry_field.notes')}:</span>
       {/if}
       {@html sanitize(entry.main.notes.default)}
     </div>
@@ -130,7 +130,7 @@
   {#if selectedFields.dialects && entry.dialects?.length}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t(`entry_field.dialects`)}:</span>
+        <span class="italic text-[80%]">{page.data.t(`entry_field.dialects`)}:</span>
       {/if}
       {entry.dialects.map(dialect => dialect.name.default).join(', ')}
     </div>
@@ -139,7 +139,7 @@
   {#if selectedFields.interlinearization && entry.main.interlinearization}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t(`entry_field.interlinearization`)}:</span>
+        <span class="italic text-[80%]">{page.data.t(`entry_field.interlinearization`)}:</span>
       {/if}
       {entry.main.interlinearization}
     </div>
@@ -148,7 +148,7 @@
   {#if selectedFields.morphology && entry.main.morphology}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t(`entry_field.morphology`)}:</span>
+        <span class="italic text-[80%]">{page.data.t(`entry_field.morphology`)}:</span>
       {/if}
       {entry.main.morphology}
     </div>
@@ -157,7 +157,7 @@
   {#if selectedFields.sources && entry.main.sources}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('entry_field.sources')}: </span>
+        <span class="italic text-[80%]">{page.data.t('entry_field.sources')}: </span>
       {/if}
       {entry.main.sources.join(', ')}
     </div>
@@ -166,7 +166,7 @@
   {#if selectedFields.speaker && first_audio?.speakers?.[0].name}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('entry_field.speaker')}: </span>
+        <span class="italic text-[80%]">{page.data.t('entry_field.speaker')}: </span>
       {/if}
       {first_audio.speakers[0].name}
     </div>

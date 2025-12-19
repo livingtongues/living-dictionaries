@@ -9,7 +9,7 @@
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
   import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { api_delete_dictionary } from '$api/db/delete-dictionary/_call'
 
   interface Props {
@@ -32,7 +32,7 @@
 
   let typedId = $state('')
 
-  let { admin, supabase, add_editor, remove_editor, inviteHelper } = $derived($page.data as PageData)
+  let { admin, supabase, add_editor, remove_editor, inviteHelper } = $derived(page.data as PageData)
 
   let managers = $derived(dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'manager' && dictionary_id === dictionary.id)))
   let contributors = $derived(dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'contributor' && dictionary_id === dictionary.id)))

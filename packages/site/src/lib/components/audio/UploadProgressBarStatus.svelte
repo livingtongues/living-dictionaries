@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Readable } from 'svelte/store'
   import type { AudioVideoUploadStatus } from './upload-audio'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     upload_status: Readable<AudioVideoUploadStatus>;
@@ -14,14 +14,14 @@
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
       text-red-600 bg-red-200">
-    {$page.data.t('misc.error')}: {$upload_status.error}
+    {page.data.t('misc.error')}: {$upload_status.error}
   </span>
 {:else if $upload_status.progress === 100}
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
       text-green-600 bg-green-200">
     <i class="far fa-check"></i>
-    {$page.data.t('upload.success')}
+    {page.data.t('upload.success')}
   </span>
 {:else}
   <div class="relative pt-1">
@@ -30,7 +30,7 @@
         <span
           class="text-xs font-semibold inline-block py-1 px-2 uppercase
             rounded-full text-blue-600 bg-blue-200">
-          {$page.data.t('upload.uploading')}
+          {page.data.t('upload.uploading')}
         </span>
       </div>
       <div class="text-right">
