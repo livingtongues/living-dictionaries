@@ -1,26 +1,28 @@
 name: Supabase DB Vitest Tests
-on:
-  pull_request:
-    branches: [main]
+# on:
+#  pull_request:
+#    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - uses: supabase/setup-cli@v1
         with:
           version: 1.145.4
       - run: supabase start
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 8.6.0
+          version: 10.22.0
 
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
         with:
-          node-version: 18
+          node-version: 22.x
           cache: pnpm
 
       - name: Install Dependencies

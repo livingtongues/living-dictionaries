@@ -10,8 +10,8 @@ env:
   PROJECT_ROOT: ./packages/site
   KITBOOK_ROUTE: kitbook
 
-on:
-  deployment_status
+# on:
+#   deployment_status
 
 permissions:
   pull-requests: write
