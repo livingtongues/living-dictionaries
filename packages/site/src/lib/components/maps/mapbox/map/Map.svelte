@@ -1,33 +1,33 @@
 <script lang="ts">
+  import type { ErrorEvent, EventData, LngLat, LngLatBoundsLike, LngLatLike, Map, MapboxOptions } from 'mapbox-gl'
+  import { PUBLIC_mapboxAccessToken } from '$env/static/public'
+  import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
   // from https://github.com/beyonk-adventures/svelte-mapbox
   import { onDestroy, onMount, setContext, tick } from 'svelte'
-  import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
-  import type { ErrorEvent, EventData, LngLat, LngLatBoundsLike, LngLatLike, Map, MapboxOptions } from 'mapbox-gl'
-  import { mapKey } from '../context'
-  import { EventQueue } from '../queue'
-  import { bindEvents } from '../event-bindings'
   import { getTimeZoneLongitude } from '../../utils/getTimeZoneLongitude'
   import { ADDED_FEATURE_ID_PREFIX } from '../../utils/randomId'
-  import { PUBLIC_mapboxAccessToken } from '$env/static/public'
+  import { mapKey } from '../context'
+  import { bindEvents } from '../event-bindings'
+  import { EventQueue } from '../queue'
 
   interface Props {
-    map?: Map;
-    version?: string;
-    customStylesheetUrl?: string;
-    accessToken?: any;
-    options?: Partial<MapboxOptions>;
-    zoom?: number;
-    style?: string; // 'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
-    lng?: number;
-    lat?: number;
-    pointsToFit?: number[][];
-    on_ready?: () => void;
-    on_dragend?: (lngLat: LngLat) => void;
-    on_moveend?: (lngLat: LngLat) => void;
-    on_click?: (lngLat: LngLat) => void;
-    on_zoomend?: (zoom: number) => void;
-    on_error?: (error: ErrorEvent & EventData) => void;
-    children?: import('svelte').Snippet<[any]>;
+    map?: Map
+    version?: string
+    customStylesheetUrl?: string
+    accessToken?: any
+    options?: Partial<MapboxOptions>
+    zoom?: number
+    style?: string // 'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
+    lng?: number
+    lat?: number
+    pointsToFit?: number[][]
+    on_ready?: () => void
+    on_dragend?: (lngLat: LngLat) => void
+    on_moveend?: (lngLat: LngLat) => void
+    on_click?: (lngLat: LngLat) => void
+    on_zoomend?: (zoom: number) => void
+    on_error?: (error: ErrorEvent & EventData) => void
+    children?: import('svelte').Snippet<[any]>
   }
 
   let {
@@ -47,8 +47,8 @@
     on_click,
     on_zoomend,
     on_error,
-    children
-  }: Props = $props();
+    children,
+  }: Props = $props()
 
   let center: LngLatLike = $state()
 
@@ -78,7 +78,7 @@
     },
     zoomend: () => on_zoomend?.(map.getZoom()),
     error: (e: ErrorEvent & EventData) => on_error?.(e),
-    load: () => { 
+    load: () => {
       // map.fitBounds(
       //   [
       //     [-180, -90], // Southwest corner
@@ -91,7 +91,7 @@
       // );
       // map.setCenter(center);
       on_ready?.();
-      (ready = true);
+      (ready = true)
     },
   // drag: () => dispatch('drag', map.getCenter()),
   }
@@ -159,7 +159,6 @@
     return mapbox
   }
 
-
   async function fitPoints() {
     if (pointsToFit.length === 1) {
       setCenter(pointsToFit[0])
@@ -175,21 +174,21 @@
   }
   $effect(() => {
     center = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10]
-  });
+  })
   $effect(() => {
     if (zoom) setZoom(zoom)
-  });
+  })
   $effect(() => {
     if (center) setCenter(center)
-  });
+  })
   $effect(() => {
     if (pointsToFit?.length) fitPoints()
-  });
+  })
 </script>
 
 <div bind:this={container}>
   {#if ready}
-    {@render children?.({ map, })}
+    {@render children?.({ map })}
   {:else}
     <div class="w-full h-full bg-gray-100 flex items-center justify-center">
       <span class="i-fa-solid-globe-asia text-6xl text-gray-300 animate-pulse"></span>
