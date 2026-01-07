@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { DeprecatedVariant, Viewport } from 'kitbook'
 // import type Component from './EntriesTable.svelte'
 // import { complex, hasVideo, simple } from '$lib/mocks/entries'

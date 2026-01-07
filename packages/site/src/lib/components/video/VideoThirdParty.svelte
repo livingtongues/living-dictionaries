@@ -1,9 +1,13 @@
 <script lang="ts">
   import type { HostedVideo } from '@living-dictionaries/types'
 
-  export let hosted_video: HostedVideo
+  interface Props {
+    hosted_video: HostedVideo;
+  }
 
-  let window_width: number
+  let { hosted_video }: Props = $props();
+
+  let window_width: number = $state()
 </script>
 
 <svelte:window bind:innerWidth={window_width} />
@@ -17,7 +21,7 @@
       src={`https://www.youtube.com/embed/${hosted_video.video_id}${hosted_video.start_at_seconds ? `?start=${hosted_video.start_at_seconds}` : ''}`}
       title="YouTube video player"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen />
+      allowfullscreen></iframe>
   {/if}
   {#if hosted_video.type === 'vimeo'}
     <iframe
@@ -27,6 +31,6 @@
       src={`https://player.vimeo.com/video/${hosted_video.video_id}${hosted_video.start_at_seconds ? `#t=${hosted_video.start_at_seconds}` : ''}`}
       title="Vimeo video player"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen />
+      allowfullscreen></iframe>
   {/if}
 </section>

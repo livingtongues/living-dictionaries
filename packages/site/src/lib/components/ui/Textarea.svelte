@@ -1,11 +1,21 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
+  interface Props {
+    name: string;
+    size?: number;
+    required?: boolean;
+    disabled?: boolean;
+    on_input?: (value: string) => void;
+    on_submit?: () => void;
+  }
 
-  export let name: string,
+  let {
+    name,
     size = 1,
     required = false,
-    disabled = false;
+    disabled = false,
+    on_input,
+    on_submit
+  }: Props = $props();
 
   function resize({ target }) {
     target.style.height = '1px';
@@ -33,18 +43,18 @@
     {name}
     {required}
     {disabled}
-    on:input={(e) => {
+    oninput={(e) => {
       //@ts-ignore
-      dispatch('input', e.target.value.trim());
+      on_input?.(e.target.value.trim());
     }}
     use:autoresize
-    on:keyup={(e) => {
+    onkeyup={(e) => {
       if (e.code === 'Enter')
-        dispatch('submit');
+        on_submit?.();
 
     }}
-    autocomplete="false" />
-  <!-- svelte-ignore a11y-label-has-associated-control -->
+    autocomplete="off"></textarea>
+  <!-- svelte-ignore a11y_label_has_associated_control -->
   <label>{name}</label>
 </div>
 

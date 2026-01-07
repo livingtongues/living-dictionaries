@@ -1,40 +1,54 @@
 <script lang="ts">
   import type { DictionaryView, IPoint } from '@living-dictionaries/types'
-  import { Button, ShowHide } from 'svelte-pieces'
-  import { page } from '$app/stores'
 
-  export let dictionaries: DictionaryView[] = []
-  export let my_dictionaries: DictionaryView[] = []
-  export let selectedDictionaryId: string
-  export let on_selected_dictionary_point: (point: IPoint) => void
+  import { page } from '$app/state'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
 
-  let currentDictionary: DictionaryView
-  $: ({ admin } = $page.data)
-
-  $: if (selectedDictionaryId) {
-    currentDictionary = dictionaries.find((dictionary) => {
-      return selectedDictionaryId === dictionary.id
-    })
-  } else {
-    currentDictionary = null
+  interface Props {
+    dictionaries?: DictionaryView[]
+    my_dictionaries?: DictionaryView[]
+    selectedDictionaryId: string
+    on_selected_dictionary_point: (point: IPoint) => void
   }
 
-  let searchFocused = false
-  let searchString = ''
+  let {
+    dictionaries = [],
+    my_dictionaries = [],
+    selectedDictionaryId = $bindable(),
+    on_selected_dictionary_point,
+  }: Props = $props()
 
-  let filteredDictionaries: DictionaryView[] = []
-  $: filteredDictionaries = dictionaries
-    .filter((dictionary) => {
-      return Object.keys(dictionary).some((k) => {
-        return (
-          typeof dictionary[k] === 'string'
-          && dictionary[k].toLowerCase().includes(searchString.toLowerCase())
-        )
+  let currentDictionary: DictionaryView = $state()
+  let { admin } = $derived(page.data)
+
+  $effect(() => {
+    if (selectedDictionaryId) {
+      currentDictionary = dictionaries.find((dictionary) => {
+        return selectedDictionaryId === dictionary.id
       })
-    })
-    .reduce((acc, dictionary) => {
-      return acc.find(e => e.id === dictionary.id) ? [...acc] : [...acc, dictionary]
-    }, [])
+    } else {
+      currentDictionary = null
+    }
+  })
+
+  let searchFocused = $state(false)
+  let searchString = $state('')
+
+  let filteredDictionaries: DictionaryView[] = $state([])
+  $effect(() => {
+    filteredDictionaries = dictionaries
+      .filter((dictionary) => {
+        return Object.keys(dictionary).some((k) => {
+          return (
+            typeof dictionary[k] === 'string'
+            && dictionary[k].toLowerCase().includes(searchString.toLowerCase())
+          )
+        })
+      })
+      .reduce((acc, dictionary) => {
+        return acc.find(e => e.id === dictionary.id) ? [...acc] : [...acc, dictionary]
+      }, [])
+  })
 
   let searchBlurTimeout
   function delayedSearchClose() {
@@ -67,24 +81,24 @@
       <div
         class="absolute inset-y-0 left-0 pl-5 flex items-center
           pointer-events-none text-gray-500">
-        <span class="i-carbon-search" />
+        <span class="i-carbon-search"></span>
       </div>
       <input
         type="text"
         bind:value={searchString}
         class="form-input w-full pl-10 pr-8 py-1 rounded-lg
           text-gray-900 placeholder-gray-500 shadow"
-        placeholder={$page.data.t('home.find_dictionary')}
-        on:focus={() => (searchFocused = true)}
-        on:blur={delayedSearchClose} />
+        placeholder={page.data.t('home.find_dictionary')}
+        onfocus={() => (searchFocused = true)}
+        onblur={delayedSearchClose} />
       {#if searchString || searchFocused}
-        <button type="button" on:click={() => (searchString = '')} class="absolute inset-y-0 right-0 px-4 flex items-center focus:outline-none">
-          <span class="i-la-times text-gray-400" />
+        <button type="button" onclick={() => (searchString = '')} class="absolute inset-y-0 right-0 px-4 flex items-center focus:outline-none">
+          <span class="i-la-times text-gray-400"></span>
         </button>
       {/if}
     </div>
 
-    <div on:click={keepSearchOpen}>
+    <div onclick={keepSearchOpen}>
       {#if searchString}
         <div class="text-sm text-gray-500 px-3 my-1">
           <i> {filteredDictionaries.length}/{dictionaries.length} </i>
@@ -93,7 +107,7 @@
 
       {#if !searchString && my_dictionaries?.length}
         <!-- <div class="text-sm font-semibold px-3 my-1">
-          {$page.data.t('home.my_dictionaries')}
+          {page.data.t('home.my_dictionaries')}
         </div> -->
         <!-- {#each my_dictionaries as dictionary}
           <button
@@ -108,7 +122,7 @@
         {/each} -->
         <!-- <hr class="my-2" />
         <div class="text-sm font-semibold px-3 my-1">
-          {$page.data.t('home.public_dictionaries')}
+          {page.data.t('home.public_dictionaries')}
           {#if $admin}
             (+ Private)
           {/if}
@@ -128,7 +142,7 @@
       {/each} -->
       {#if !filteredDictionaries.length}
         <div class="p-3">
-          <i> {$page.data.t('home.no_results')} </i>
+          <i> {page.data.t('home.no_results')} </i>
         </div>
       {/if}
     </div>
@@ -136,28 +150,30 @@
     <div
       class="flex flex-wrap sm:flex-col overflow-y-auto
         overflow-x-hidden px-2 pb-2">
-      <ShowHide let:show let:toggle>
-        {#if !searchFocused && my_dictionaries}
-          {#each my_dictionaries as dictionary, i}
-            {#if show || i < 3}
-              <Button
-                class="mb-1 mr-1"
-                color="black"
-                on:click={() => setCurrentDictionary(dictionary)}>
-                {dictionary?.name}
-              </Button>
-            {/if}
-          {/each}
-          <!-- {#if my_dictionaries.length > 3 && !show}
-            <button
-              type="button"
-              class="sm:hidden rounded px-3 py-2 bg-white mt-2"
-              on:click={toggle}>
-              {$page.data.t('home.show_all_my_dictionaries')}
-            </button>
-            <div class="w-2 sm:hidden" />
-          {/if} -->
-        {/if}
+      <ShowHide>
+        {#snippet children({ show, toggle })}
+          {#if !searchFocused && my_dictionaries}
+            {#each my_dictionaries as dictionary, i}
+              {#if show || i < 3}
+                <Button
+                  class="mb-1 mr-1"
+                  color="black"
+                  onclick={() => setCurrentDictionary(dictionary)}>
+                  {dictionary?.name}
+                </Button>
+              {/if}
+            {/each}
+            <!-- {#if my_dictionaries.length > 3 && !show}
+              <button
+                type="button"
+                class="sm:hidden rounded px-3 py-2 bg-white mt-2"
+                on:click={toggle}>
+                {page.data.t('home.show_all_my_dictionaries')}
+              </button>
+              <div class="w-2 sm:hidden" />
+            {/if} -->
+          {/if}
+        {/snippet}
       </ShowHide>
     </div>
   {:else}
@@ -165,10 +181,10 @@
       <button
         type="button"
         class="flex flex-start items-center px-2 py-2 -mx-1 rounded hover:bg-gray-200"
-        on:click={clearDictionary}>
-        <span class="i-fa6-solid-chevron-left rtl-x-flip" />
-        <div class="w-1" />
-        {$page.data.t('misc.back')}
+        onclick={clearDictionary}>
+        <span class="i-fa6-solid-chevron-left rtl-x-flip"></span>
+        <div class="w-1"></div>
+        {page.data.t('misc.back')}
       </button>
       {#await import('./SelectedDict.svelte') then { default: SelectedDict }}
         <SelectedDict dictionary={currentDictionary} />

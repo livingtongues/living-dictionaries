@@ -2,24 +2,28 @@
   import type { EntryData, Tables, TablesUpdate } from '@living-dictionaries/types'
   import EntryField from './EntryField.svelte'
   import EntrySentence from './EntrySentence.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
 
-  export let sense: EntryData['senses'][0]
-  export let glossLanguages: Tables<'dictionaries'>['gloss_languages']
-  export let can_edit = false
+  interface Props {
+    sense: EntryData['senses'][0];
+    glossLanguages: Tables<'dictionaries'>['gloss_languages'];
+    can_edit?: boolean;
+  }
 
-  $: ({ dictionary, dbOperations } = $page.data)
+  let { sense, glossLanguages, can_edit = false }: Props = $props();
+
+  let { dictionary, dbOperations } = $derived(page.data)
 
   function update_sense(update: TablesUpdate<'senses'>) {
     dbOperations.update_sense({ ...update, id: sense.id })
   }
 
-  $: glossingLanguages = order_entry_and_dictionary_gloss_languages(sense.glosses, glossLanguages)
-  $: hasSemanticDomain = sense.semantic_domains?.length || sense.write_in_semantic_domains?.length
+  let glossingLanguages = $derived(order_entry_and_dictionary_gloss_languages(sense.glosses, glossLanguages))
+  let hasSemanticDomain = $derived(sense.semantic_domains?.length || sense.write_in_semantic_domains?.length)
 </script>
 
 {#each glossingLanguages as bcp}
@@ -28,7 +32,7 @@
     field="gloss"
     {bcp}
     {can_edit}
-    display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${$page.data.t('entry_field.gloss')}`}
+    display={`${page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${page.data.t('entry_field.gloss')}`}
     on_update={(new_value) => {
       update_sense({ glosses: { ...sense.glosses, [bcp]: new_value } })
     }} />
@@ -50,20 +54,20 @@
 
 {#if sense.parts_of_speech?.length || can_edit}
   <div class="md:px-2" class:order-2={!sense.parts_of_speech?.length}>
-    <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.parts_of_speech')}</div>
+    <div class="rounded text-xs text-gray-500 mt-1 mb-2">{page.data.t('entry_field.parts_of_speech')}</div>
     <EntryPartOfSpeech
       value={sense.parts_of_speech}
       {can_edit}
       on_update={(new_value) => {
         update_sense({ parts_of_speech: new_value })
       }} />
-    <div class="border-b-2 pb-1 mb-2 border-dashed" />
+    <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
   </div>
 {/if}
 
 {#if hasSemanticDomain || can_edit}
   <div class="md:px-2" class:order-2={!hasSemanticDomain}>
-    <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.semantic_domains')}</div>
+    <div class="rounded text-xs text-gray-500 mt-1 mb-2">{page.data.t('entry_field.semantic_domains')}</div>
     <EntrySemanticDomains
       {can_edit}
       semantic_domain_keys={sense.semantic_domains}
@@ -74,7 +78,7 @@
       on_update_write_in={(new_value) => {
         update_sense({ write_in_semantic_domains: new_value })
       }} />
-    <div class="border-b-2 pb-1 mb-2 border-dashed" />
+    <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
   </div>
 {/if}
 
@@ -82,7 +86,7 @@
   value={sense.noun_class}
   field="noun_class"
   {can_edit}
-  display={$page.data.t('entry_field.noun_class')}
+  display={page.data.t('entry_field.noun_class')}
   on_update={(new_value) => {
     update_sense({ noun_class: new_value })
   }} />
@@ -99,7 +103,7 @@
   value={sense.plural_form?.default}
   field="plural_form"
   {can_edit}
-  display={$page.data.t('entry_field.plural_form')}
+  display={page.data.t('entry_field.plural_form')}
   on_update={(new_value) => {
     update_sense({ plural_form: { default: new_value } })
   }} />
@@ -109,6 +113,6 @@
     value={sense.variant?.default}
     field="variant"
     {can_edit}
-    display={$page.data.t('entry_field.variant')}
+    display={page.data.t('entry_field.variant')}
     on_update={new_value => update_sense({ variant: { ...sense.variant, default: new_value } })} />
 {/if}

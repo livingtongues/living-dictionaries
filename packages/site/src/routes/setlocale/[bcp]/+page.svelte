@@ -4,7 +4,11 @@
   import { setLocaleCookie } from '$lib/i18n/changeLocale';
   import { getSupportedLocale } from '$lib/i18n/locales';
 
-  export let data: PageData;
+  interface Props {
+    data: PageData;
+  }
+
+  let { data }: Props = $props();
 
   onMount(() => {
     const locale = getSupportedLocale(data.bcp);

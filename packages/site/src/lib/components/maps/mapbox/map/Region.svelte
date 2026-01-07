@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ShowHide } from 'svelte-pieces';
+  import { ShowHide } from '$lib/svelte-pieces';
   import GeoJSONSource from '../sources/GeoJSONSource.svelte';
   import Layer from './Layer.svelte';
   import PopupOfMap from './PopupOfMap.svelte';
@@ -13,47 +13,56 @@
   const { getMap } = getContext<MapKeyContext>(mapKey);
   const map = getMap();
 
-  export let region: IRegion;
-  export let color: string = undefined;
+  interface Props {
+    region: IRegion;
+    color?: string;
+    children?: import('svelte').Snippet;
+  }
 
-  $: coordinatesArray =
-    region?.coordinates.map(({ longitude, latitude }) => [longitude, latitude]) || [];
-  $: [lng, lat] = center(points(coordinatesArray)).geometry.coordinates;
+  let { region, color = undefined, children }: Props = $props();
+
+  let coordinatesArray =
+    $derived(region?.coordinates.map(({ longitude, latitude }) => [longitude, latitude]) || []);
+  let [lng, lat] = $derived(center(points(coordinatesArray)).geometry.coordinates);
+
+  const children_render = $derived(children);
 </script>
 
-<ShowHide let:show let:toggle>
-  <GeoJSONSource
-    data={{
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: polygonFeatureCoordinates(region.coordinates),
-      },
-      properties: undefined,
-    }}>
-    <Layer
-      options={{
-        type: 'fill',
-        paint: {
-          'fill-color': color || region.color || '#0080ff',
-          'fill-opacity': 0.5,
+<ShowHide  >
+  {#snippet children({ show, toggle })}
+    <GeoJSONSource
+      data={{
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: polygonFeatureCoordinates(region.coordinates),
         },
-      }}
-      on:click={toggle}
-      on:mouseenter={() => $$slots.default && (map.getCanvas().style.cursor = 'pointer')}
-      on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
-    <Layer
-      options={{
-        type: 'line',
-        paint: {
-          'line-color': '#555555',
-          'line-width': 1,
-        },
-      }} />
-  </GeoJSONSource>
-  {#if $$slots.default && show}
-    <PopupOfMap {lng} {lat}>
-      <slot />
-    </PopupOfMap>
-  {/if}
+        properties: undefined,
+      }}>
+      <Layer
+        options={{
+          type: 'fill',
+          paint: {
+            'fill-color': color || region.color || '#0080ff',
+            'fill-opacity': 0.5,
+          },
+        }}
+        onclick={toggle}
+        onmouseenter={() => children && (map.getCanvas().style.cursor = 'pointer')}
+        onmouseleave={() => (map.getCanvas().style.cursor = '')} />
+      <Layer
+        options={{
+          type: 'line',
+          paint: {
+            'line-color': '#555555',
+            'line-width': 1,
+          },
+        }} />
+    </GeoJSONSource>
+    {#if children && show}
+      <PopupOfMap {lng} {lat}>
+        {@render children_render?.()}
+      </PopupOfMap>
+    {/if}
+  {/snippet}
 </ShowHide>
