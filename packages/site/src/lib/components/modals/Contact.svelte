@@ -124,7 +124,7 @@
     </Button>
   </div>
 
-  {#if !dictionary.con_language_description}
+  {#if !dictionary?.con_language_description}
     <hr class="my-5" />
 
     <h2 class="text-xl mb-3">

@@ -222,7 +222,7 @@
     form="filled"
     class="w-full my-3"
     target="_blank"
-    href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
+    href="https://www.paypal.com/donate?hosted_button_id=QCELFXU8ZGTVC"
     rel="noopener">
     {$page.data.t('header.donate')}
   </Button>
