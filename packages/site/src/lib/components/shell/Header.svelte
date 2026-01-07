@@ -34,7 +34,7 @@
     <Button
       class="!hidden !md:inline"
       form="text"
-      href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
+      href="https://www.paypal.com/donate?hosted_button_id=QCELFXU8ZGTVC"
       target="_blank">
       <i class="far fa-donate" />
       <span class="ml-1 hidden lg:inline">{$page.data.t('header.donate')}</span>
