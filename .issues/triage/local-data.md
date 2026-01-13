@@ -1,6 +1,6 @@
 ---
 title: Local data
-type: task
+type: feature
 priority: 1
 assignee: jacob-8
 github_issue: 626
