@@ -2,6 +2,7 @@
 title: Set up GitHub Issues sync with local .issues folder
 type: feature
 priority: 1
+github_issue: 629
 ---
 
 ## Goal
