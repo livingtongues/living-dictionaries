@@ -1,0 +1,37 @@
+name: Pull Issues from GitHub
+
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled, assigned, unassigned, closed, reopened]
+
+jobs:
+  sync-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Pull issue to local file
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_PAT }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: ./.github/workflows/issues-pull-single.sh "$ISSUE_NUMBER"
+
+      - name: Commit and push if changed
+        run: |
+          git add .issues/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "sync: update issue #${{ github.event.issue.number }} from GitHub"
+            git push
+          fi
