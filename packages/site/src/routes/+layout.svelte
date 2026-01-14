@@ -1,14 +1,15 @@
 <!-- @migration task: review uses of `navigating` -->
 <script lang="ts">
-  import './global.css'
-  import LoadingIndicator from './LoadingIndicator.svelte'
-  import { navigating, page } from '$app/state'
   import { browser } from '$app/environment'
+  import { navigating, page } from '$app/state'
+  import LoadingIndicator from './LoadingIndicator.svelte'
+  import './global.css'
+
   interface Props {
-    children?: import('svelte').Snippet;
+    children?: import('svelte').Snippet
   }
 
-  let { children }: Props = $props();
+  let { children }: Props = $props()
 
 // export let data
   // $: ({ user } = data)
