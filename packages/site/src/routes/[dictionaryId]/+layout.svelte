@@ -1,23 +1,25 @@
 <script lang="ts">
-  import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
-  import SideMenu from './SideMenu.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
+  import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
+  import SideMenu from './SideMenu.svelte'
+  import { derived } from 'svelte/store'
   import './custom-fonts.css'
 
-  let { data, children } = $props();
+  let { data, children } = $props()
   let { dictionary, is_manager, entries_data } = $derived(data)
-  let { loading } = $derived(entries_data)
+  let loading = $derived(entries_data.loading)
+  let entry_count = derived(entries_data, ($entries) => Object.keys($entries).length)
 
-  const children_render = $derived(children);
+  const children_render = $derived(children)
 </script>
 
-<ShowHide   >
+<ShowHide>
   {#snippet children({ show, toggle, set })}
     <Header>
       {#snippet left()}
         <div
-          
+
           class="font-semibold sm:text-xl overflow-x-auto md:overflow-hidden">
           <a
             class="p-3 hover:text-black hidden md:inline print:hidden"
@@ -45,7 +47,7 @@
         open={show}>
         <div
           class="h-full md:h-unset flex flex-col flex-shrink-0 md:top-12 md:sticky md:w-44 lg:w-48 print:hidden">
-          <SideMenu {dictionary} is_manager={$is_manager} entry_count={Object.keys(entries_data).length} on_close={() => set(false)} loading={$loading} />
+          <SideMenu {dictionary} is_manager={$is_manager} entry_count={$entry_count} on_close={() => set(false)} loading={$loading} />
           <hr class="md:hidden" />
           <Button form="menu" class="text-left !md:hidden" onclick={toggle}>
             <i class="far fa-times fa-lg fa-fw"></i>
