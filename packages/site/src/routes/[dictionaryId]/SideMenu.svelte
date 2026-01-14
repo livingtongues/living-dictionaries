@@ -3,11 +3,11 @@
   import { page } from '$app/state'
 
   interface Props {
-    dictionary: Tables<'dictionaries'>;
-    entry_count: number;
-    on_close: () => void;
-    is_manager: boolean;
-    loading: boolean;
+    dictionary: Tables<'dictionaries'>
+    entry_count: number
+    on_close: () => void
+    is_manager: boolean
+    loading: boolean
   }
 
   let {
@@ -15,8 +15,10 @@
     entry_count,
     on_close,
     is_manager,
-    loading
-  }: Props = $props();
+    loading,
+  }: Props = $props()
+
+  console.log('Entry count:', entry_count)
 </script>
 
 <div class="md:hidden">
