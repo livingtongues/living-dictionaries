@@ -37,14 +37,14 @@ This is a pnpm workspace monorepo containing the Living Dictionaries web applica
   - Svelte-scoped UnoCSS configuration
   - Iconify icons (prefix: `i-`, e.g., `<span class="i-iconamoon-arrow-left-1"></span>`)
   - Forms preset from `@julr/unocss-preset-forms`
-- **Database & Auth**: 
+- **Database & Auth**:
   - Supabase (PostgreSQL with Row Level Security)
   - Authentication via Supabase Auth
   - Storage for media files (audio, images, video)
   - Real-time subscriptions where needed
 - **Deployment**: Vercel with SSR (Server-Side Rendering)
 - **Search**: Orama for client-side full-text search
-- **Media Storage**: 
+- **Media Storage**:
   - Google Cloud Storage (GCP) for media
 - **Email**: AWS SES (Simple Email Service)
 - **Internationalization**: Custom i18n system with JSON locale files
@@ -59,10 +59,7 @@ This is a pnpm workspace monorepo containing the Living Dictionaries web applica
 - **Maps**: Mapbox GL JS for geographical visualizations
 - **Rich Text**: CKEditor 5 for formatted text editing
 - **Other Libraries**:
-  - RecordRTC for audio/video recording
-  - JSZip for file compression
   - D3 for data visualization (geo)
-  - Turf.js for geospatial operations
   - Comlink for Web Workers
   - idb-keyval for IndexedDB storage
 
@@ -112,7 +109,7 @@ Entries support rich multimedia content:
 
 #### Core Dictionary Features
 - **Entry Management**: Create, read, update, delete dictionary entries in real-time
-- **Multimedia Support**: 
+- **Multimedia Support**:
   - Audio recording and playback with multiple speakers
   - Photo upload with automatic resizing
   - Video upload and playback
@@ -120,7 +117,7 @@ Entries support rich multimedia content:
 - **Offline Access**: IndexedDB caching for offline dictionary access
 - **Semantic Domains**: Categorize entries by semantic field
 - **Glossing Languages**: Multiple target languages with on-screen keyboards
-- **Import/Export**: 
+- **Import/Export**:
   - CSV and JSON import
   - PDF and CSV export
   - FLEx (FieldWorks Language Explorer) format support
@@ -158,12 +155,21 @@ Entries support rich multimedia content:
 
 ## Coding Guidelines
 
+### How to Edit Svelte Components
+This includes all files ending in `.svelte` including `+page.svelte` and `+layout.svelte`
+
+The user runs the dev server themselves. To check for build errors or server output after making changes, tail the log file:
+
+```bash
+tail -100 app/.dev-server.log
+```
+
+**Important:**
+- Do NOT start a dev server yourself - the user already has one running
+- Before verifying changes work, check the log for errors
+
 ### Code Style
-- Use `snake_case` for variables, functions, and file names (not camelCase)
-- Use Svelte 4 syntax (not Svelte 5 runes)
-- Spell out variable names - avoid single letter variables except for short-lived loop indices (i, j, k)
 - Use hard-coded constants from `lib/constants.ts` instead of arbitrary string values or magic numbers
-- Add very few comments - only use them if code is doing something non-obvious
 - Follow existing patterns in the codebase for consistency
 
 ### Styling
@@ -196,7 +202,6 @@ Entries support rich multimedia content:
 - Use descriptive keys that indicate purpose
 
 ### TypeScript
-- Use strict type checking
 - Import types from `@living-dictionaries/types` package
 - Prefer interfaces over type aliases for object shapes
 - Use enums from `constants.ts` (e.g., `ResponseCodes`)
