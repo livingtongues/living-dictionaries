@@ -1,9 +1,36 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "model": "github-copilot/claude-opus-4.5",
+  "small_model": "opencode/grok-code",
   "tui": {
-    "scroll_acceleration": {
-      "enabled": true
+    "scroll_speed": 3
+  },
+  // "permission": {
+  //   "external_directory": "allow"
+  // },
+  "agent": {
+    "fast": {
+      "description": "Fast agent for quick responses using grok-code",
+      "model": "opencode/grok-code"
     }
   },
-  "instructions": [".github/copilot-instructions.md"]
+  "mcp": {
+    // "context7": {
+    //   "type": "remote",
+    //   "url": "https://mcp.context7.com/mcp",
+    // },
+    // "gh_grep": {
+    //   "type": "remote",
+    //   "url": "https://mcp.grep.app"
+    // },
+    "chrome-devtools": {
+      "type": "local",
+      "command": ["npx", "-y", "chrome-devtools-mcp@latest", "--executable-path=/usr/bin/chromium"]
+      // "enable": false
+    },
+    "svelte": {
+      "type": "remote",
+      "url": "https://mcp.svelte.dev/mcp"
+    }
+  }
 }
