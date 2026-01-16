@@ -1,11 +1,16 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button } from 'svelte-pieces';
+  import { page } from '$app/state';
+  import { Button } from '$lib/svelte-pieces';
   import MediaStream from '../record/MediaStream.svelte';
   import Recorder from '../record/Recorder.svelte';
   import { srcObject } from './srcObject';
+  interface Props {
+    children?: import('svelte').Snippet<[any]>;
+  }
 
-  let videoBlob: Blob;
+  let { children }: Props = $props();
+
+  let videoBlob: Blob = $state();
 </script>
 
 {#if !videoBlob}
@@ -17,7 +22,7 @@
     let:chooseCamera
     let:selectedMicrophone
     let:selectedCamera>
-    <video muted volume={0} use:srcObject={stream} autoplay playsinline />
+    <video muted volume={0} use:srcObject={stream} autoplay playsinline></video>
 
     <Recorder
       {stream}
@@ -35,14 +40,14 @@
       let:state>
       {#if state === 'inactive'}
         <Button onclick={start} color="red" class="w-full h-24 mt-1">
-          {$page.data.t('audio.tap_to_record')}
+          {page.data.t('audio.tap_to_record')}
         </Button>
 
         {#if microphones.length > 1 && selectedMicrophone}
           <select
             class="p-1 text-sm max-w-full mt-1"
             value={selectedMicrophone.deviceId}
-            on:change={(e) =>
+            onchange={(e) =>
               //@ts-ignore
               chooseMicrophone(e.target.value)}>
             {#each microphones as microphone}
@@ -56,7 +61,7 @@
           <select
             class="p-1 text-sm max-w-full mt-1"
             value={selectedCamera.deviceId}
-            on:change={(e) =>
+            onchange={(e) =>
               //@ts-ignore
               chooseCamera(e.target.value)}>
             {#each cameras as camera}
@@ -76,7 +81,7 @@
           color="red"
           class="w-full h-24 mt-1">
           <div class="font-semibold font-mono text-2xl">{recordingTime}s</div>
-          {$page.data.t('audio.stop_recording')}
+          {page.data.t('audio.stop_recording')}
         </Button>
         <Button class="w-full mt-1" color="black" onclick={pause}>{state === 'recording' ? 'Pause' : 'Unpause'}</Button>
       {/if}
@@ -92,7 +97,7 @@
         form="filled"
         href="https://www.google.com/search?q=How+do+I+enable+microphone+access"
         target="_blank"
-        rel="noopener">{$page.data.t('audio.learn_more')}</Button>
+        rel="noopener">{page.data.t('audio.learn_more')}</Button>
     </div>
 
     <div slot="dismissed">
@@ -101,16 +106,14 @@
         browser asks for permission.
       </div>
       <div>
-        <Button form="filled" class="mt-2" onclick={() => location.reload()}>{$page.data.t('audio.reload')}</Button>
+        <Button form="filled" class="mt-2" onclick={() => location.reload()}>{page.data.t('audio.reload')}</Button>
       </div>
     </div>
 
-    <div slot="loading">Accessing Microphone and Camera <i class="far fa-spinner fa-pulse" /></div>
+    <div slot="loading">Accessing Microphone and Camera <i class="far fa-spinner fa-pulse"></i></div>
   </MediaStream>
 {:else}
-  <slot
-    {videoBlob}
-    reset={() => {
+  {@render children?.({ videoBlob, reset: () => {
       videoBlob = undefined;
-    }} />
+    }, })}
 {/if}

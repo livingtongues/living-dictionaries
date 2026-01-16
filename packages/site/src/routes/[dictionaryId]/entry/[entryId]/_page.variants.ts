@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { DeprecatedVariant } from 'kitbook'
 // import { readable } from 'svelte/store'
 // import type { ComponentProps } from 'svelte'

@@ -2,7 +2,11 @@
   import type { ComponentProps } from 'svelte'
   import Row from './Row.svelte'
 
-  export let row: ComponentProps<Row> = {}
+  interface Props {
+    row?: ComponentProps<typeof Row>
+  }
+
+  let { row = {} }: Props = $props()
 </script>
 
 <Row {...row}>

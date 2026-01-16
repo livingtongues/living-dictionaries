@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (error to error_1) making the component unusable -->
 <script context="module" lang="ts">
   import { writable } from 'svelte/store';
   const selectedMicrophone = writable<MediaDeviceInfo>(null);

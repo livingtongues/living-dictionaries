@@ -7,3 +7,4 @@ vite.config.ts*
 test-results
 playwright-report
 /playwright/.cache/
+.dev-server.log

@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { Button, Form, Modal } from 'svelte-pieces'
-  import { createEventDispatcher } from 'svelte'
-  import { page } from '$app/stores'
+  import { Button, Form, Modal } from '$lib/svelte-pieces'
+  import { page } from '$app/state'
   import { goto } from '$app/navigation'
   import type { SupportRequestBody } from '$api/email/support/+server'
   import type { LearningMaterialsRequestBody } from '$api/email/learning_materials/+server'
@@ -9,14 +8,17 @@
   import { post_request } from '$lib/helpers/get-post-requests'
   import { api_request_access } from '$api/email/request_access/_call'
 
-  export let subject: Subjects = undefined
-  $: ({ dictionary, user, about_is_too_short } = $page.data)
-  $: if (dictionary && subject === 'public_dictionary') warn_if_about_too_short()
+  interface Props {
+    subject?: Subjects;
+    on_close: () => void;
+  }
+
+  let { subject = $bindable(undefined), on_close }: Props = $props();
 
   function warn_if_about_too_short() {
     if (about_is_too_short()) {
-      close()
-      alert($page.data.t('about.message'))
+      on_close()
+      alert(page.data.t('about.message'))
       goto(`/${dictionary.id}/about`)
     }
   }
@@ -34,23 +36,11 @@
   type Subjects = keyof typeof subjects
   type SubjectValues = typeof subjects[Subjects]
   const typedSubjects = Object.entries(subjects) as [Subjects, SubjectValues][]
-  $: filteredSubjects = typedSubjects.filter((subjects) => {
-    if (!dictionary && subjects[0] === 'public_dictionary') {
-      return false
-    }
-    return true
-  })
 
-  const dispatch = createEventDispatcher<{ close: boolean }>()
+  let message = $state('')
+  let email = $state('')
 
-  function close() {
-    dispatch('close')
-  }
-
-  let message = ''
-  let email = ''
-
-  let status: 'success' | 'fail'
+  let status: 'success' | 'fail' = $state()
 
   async function send() {
     if (dictionary && subject === 'request_access') {
@@ -65,7 +55,7 @@
 
       if (error) {
         status = 'fail'
-        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
+        return alert(`${page.data.t('misc.error')}: ${error.message}`)
       }
     } else if (subject === 'learning_materials') {
       const { error } = await post_request<LearningMaterialsRequestBody, null>('/api/email/learning_materials', {
@@ -78,7 +68,7 @@
 
       if (error) {
         status = 'fail'
-        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
+        return alert(`${page.data.t('misc.error')}: ${error.message}`)
       }
     } else {
       const { error } = await post_request<SupportRequestBody, null>('/api/email/support', {
@@ -91,35 +81,47 @@
 
       if (error) {
         status = 'fail'
-        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
+        return alert(`${page.data.t('misc.error')}: ${error.message}`)
       }
     }
 
     status = 'success'
   }
+  let { dictionary, user, about_is_too_short } = $derived(page.data)
+  $effect(() => {
+    if (dictionary && subject === 'public_dictionary') warn_if_about_too_short()
+  });
+  let filteredSubjects = $derived(typedSubjects.filter((subjects) => {
+    if (!dictionary && subjects[0] === 'public_dictionary') {
+      return false
+    }
+    return true
+  }))
 </script>
 
-<Modal on:close class="bg-gray-100">
-  <span slot="heading">
-    <i class="far fa-question-circle" />
-  </span>
+<Modal {on_close} class="bg-gray-100">
+  {#snippet heading()}
+    <span >
+      <i class="far fa-question-circle"></i>
+    </span>
+  {/snippet}
   <div class="flex flex-col mb-5">
     <Button
       onclick={() => {
         goto('/tutorials')
-        close()
+        on_close()
       }}
       class="mb-2">
-      <span class="i-fluent-learning-app-24-regular -mt-2px" />
-      {$page.data.t('header.tutorials')}
+      <span class="i-fluent-learning-app-24-regular -mt-2px"></span>
+      {page.data.t('header.tutorials')}
     </Button>
     <Button
       href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
       target="_blank">
-      <i class="far fa-question-circle" />
+      <i class="far fa-question-circle"></i>
       <span class="ml-1">
         FAQ
-        <!-- {$page.data.t('header.faq')} -->
+        <!-- {page.data.t('header.faq')} -->
       </span>
     </Button>
   </div>
@@ -128,73 +130,75 @@
     <hr class="my-5" />
 
     <h2 class="text-xl mb-3">
-      <i class="far fa-comment" />
-      {$page.data.t('header.contact_us')}
+      <i class="far fa-comment"></i>
+      {page.data.t('header.contact_us')}
     </h2>
 
     {#if !status}
-      <Form let:loading onsubmit={send}>
-        <div class="my-2">
-          <select class="w-full" bind:value={subject}>
-            <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
-            {#each filteredSubjects as [key, value]}
-              <option value={key}>{$page.data.t(value)}</option>
-            {/each}
-          </select>
-        </div>
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
-          {$page.data.t('contact.what_is_your_question')}
-        </label>
-        <textarea
-          name="message"
-          required
-          rows="4"
-          maxlength="1000"
-          bind:value={message}
-          class="form-input bg-white w-full"
-          placeholder={`${$page.data.t('contact.enter_message')}...`} />
-        <div class="flex text-xs">
-          <div class="text-gray-500 ml-auto">{message.length}/1000</div>
-        </div>
-
-        {#if !$user}
-          <div class="mt-3">
-            <label class="block uppercase text-gray-700 text-xs font-bold mb-2" for="email">
-              {$page.data.t('contact.your_email_address')}
-            </label>
-            <input
-              type="email"
-              required
-              bind:value={email}
-              class="form-input bg-white w-full"
-              placeholder={$page.data.t('contact.email')}
-              style="direction: ltr" />
+      <Form  onsubmit={send}>
+        {#snippet children({ loading })}
+                <div class="my-2">
+            <select class="w-full" bind:value={subject}>
+              <option disabled selected value="">{page.data.t('contact.select_topic')}:</option>
+              {#each filteredSubjects as [key, value]}
+                <option value={key}>{page.data.t(value)}</option>
+              {/each}
+            </select>
           </div>
-        {/if}
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
+            {page.data.t('contact.what_is_your_question')}
+          </label>
+          <textarea
+            name="message"
+            required
+            rows="4"
+            maxlength="1000"
+            bind:value={message}
+            class="form-input bg-white w-full"
+            placeholder={`${page.data.t('contact.enter_message')}...`}></textarea>
+          <div class="flex text-xs">
+            <div class="text-gray-500 ml-auto">{message.length}/1000</div>
+          </div>
 
-        <div class="mt-5">
-          <Button {loading} form="filled" type="submit">
-            {$page.data.t('contact.send_message')}
-          </Button>
-          <Button disabled={loading} onclick={close} form="simple" color="black">
-            {$page.data.t('misc.cancel')}
-          </Button>
-        </div>
-      </Form>
+          {#if !$user}
+            <div class="mt-3">
+              <label class="block uppercase text-gray-700 text-xs font-bold mb-2" for="email">
+                {page.data.t('contact.your_email_address')}
+              </label>
+              <input
+                type="email"
+                required
+                bind:value={email}
+                class="form-input bg-white w-full"
+                placeholder={page.data.t('contact.email')}
+                style="direction: ltr" />
+            </div>
+          {/if}
+
+          <div class="mt-5">
+            <Button {loading} form="filled" type="submit">
+              {page.data.t('contact.send_message')}
+            </Button>
+            <Button disabled={loading} onclick={close} form="simple" color="black">
+              {page.data.t('misc.cancel')}
+            </Button>
+          </div>
+                      {/snippet}
+            </Form>
     {:else if status === 'success'}
       <h4 class="text-lg mt-3 mb-4">
-        <i class="fas fa-check" />
-        {$page.data.t('contact.message_sent')}
+        <i class="fas fa-check"></i>
+        {page.data.t('contact.message_sent')}
       </h4>
       <div>
         <Button onclick={close} color="black">
-          {$page.data.t('misc.close')}
+          {page.data.t('misc.close')}
         </Button>
       </div>
     {/if}
   {:else if status === 'fail'}
     <h4 class="text-xl mt-1 mb-4">
-      {$page.data.t('contact.message_failed')}
+      {page.data.t('contact.message_failed')}
       <a class="underline ml-1" href="mailto:dictionaries@livingtongues.org">
         dictionaries@livingtongues.org
       </a>

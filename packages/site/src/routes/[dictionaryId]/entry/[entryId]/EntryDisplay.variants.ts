@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { DeepPartial, DeprecatedVariant, Viewport } from 'kitbook'
 // import type Component from './EntryDisplay.svelte'
 // import { logDbOperations } from '$lib/mocks/db'

@@ -6,13 +6,13 @@
 # Public checkbox
 
 <Story knobs={{ checked: true }} let:props={{ checked }} let:set>
-  <PublicCheckbox {checked} on:changed={({ detail: { checked } }) => set('checked', checked)} />
+  <PublicCheckbox {checked} on_changed={({ checked }) => set('checked', checked)} />
 </Story>
 
 <Story name="Change can be reversed" knobs={{ checked: true }} let:props={{ checked }} let:set>
   <PublicCheckbox
     {checked}
-    on:changed={({ detail: { checked } }) => {
+    on_changed={({ checked }) => {
       set('checked', checked);
       setTimeout(() => {
         if (checked && !confirm('make change?')) {
