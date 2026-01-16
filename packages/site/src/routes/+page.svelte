@@ -1,26 +1,25 @@
 <script lang="ts">
-  import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { DictionaryView } from '@living-dictionaries/types'
-  import { onMount } from 'svelte'
   import type { PageData } from './$types'
-  import { page } from '$app/state'
-  import Map from '$lib/components/maps/mapbox/map/Map.svelte'
-  import ToggleStyle from '$lib/components/maps/mapbox/controls/ToggleStyle.svelte'
-  import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
-  import CustomControl from '$lib/components/maps/mapbox/controls/CustomControl.svelte'
-  import DictionaryPoints from '$lib/components/home/DictionaryPoints.svelte'
-  import Header from '$lib/components/shell/Header.svelte'
-  import Footer from '$lib/components/shell/Footer.svelte'
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { browser } from '$app/environment'
+  import { page } from '$app/state'
+  import Canvas from '$lib/components/globe/Canvas.svelte'
+  import GlobeDictionaryPoints from '$lib/components/globe/DictionaryPoints.svelte'
+  import Globe from '$lib/components/globe/Globe.svelte'
+  import Zoomer from '$lib/components/globe/Zoomer.svelte'
   import MyDictionaries from '$lib/components/home/MyDictionaries.svelte'
   import SearchDictionaries from '$lib/components/home/SearchDictionaries.svelte'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import Footer from '$lib/components/shell/Footer.svelte'
+  import Header from '$lib/components/shell/Header.svelte'
+  import { Button } from '$lib/svelte-pieces'
+  import { onMount } from 'svelte'
 
   interface Props {
-    data: PageData;
+    data: PageData
   }
 
-  let { data }: Props = $props();
+  let { data }: Props = $props()
   let { admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries, user_latitude, user_longitude } = $derived(data)
 
   let public_dictionaries: DictionaryView[] = $state([])
@@ -38,7 +37,7 @@
       selectedDictionary = dictionaries.find(d => d.id === selectedDictionaryId)
     else
       selectedDictionary = null
-  });
+  })
 
   const featured_dict_names = ['Achi', 'GtaɁ', 'Gutob', 'Kihunde', 'Sora']
   let featured_dictionaries = $derived(public_dictionaries.filter(d => featured_dict_names.includes(d.name)))
@@ -49,16 +48,18 @@
     } else {
       private_dictionaries = []
     }
-  });
+  })
 
-  let mapComponent: Map = $state()
+  let globe_component: Globe = $state()
+  let show_private_dictionaries = $state(false)
+  let globe_width = $state(0)
+  let globe_height = $state(0)
 
   function setCurrentDictionary(dictionary: DictionaryView) {
     selectedDictionaryId = dictionary.id
     if (dictionary.coordinates?.points?.[0]) {
       const [point] = dictionary.coordinates.points
-      mapComponent.setZoom(7)
-      mapComponent.setCenter([point.coordinates.longitude, point.coordinates.latitude])
+      globe_component?.rotate_to(point.coordinates.longitude, point.coordinates.latitude)
     }
   }
 </script>
@@ -101,50 +102,59 @@
       {/await}
     {/if}
   </div>
-  <div class="relative h-50vh md:h-70vh md:flex-grow">
-    <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2} options={{ projection: 'globe' }} lat={+user_latitude} lng={+user_longitude}>
-      {#if selectedDictionary?.coordinates}
-        {#if selectedDictionary.coordinates.points}
-          {#await import('$lib/components/maps/mapbox/map/Marker.svelte') then { default: Marker }}
-            {#each selectedDictionary.coordinates.points as point, index (point)}
-              <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude} color={index === 0 ? 'blue' : 'black'} />
-            {/each}
-          {/await}
-        {/if}
-        {#if selectedDictionary.coordinates.regions}
-          {#await import('$lib/components/maps/mapbox/map/Region.svelte') then { default: Region }}
-            {#each selectedDictionary.coordinates.regions as region (region)}
-              <Region {region} />
-            {/each}
-          {/await}
-        {/if}
-      {/if}
-      {#if $admin}
-        <ShowHide  >
-          {#snippet children({ show, toggle })}
-                    <CustomControl position="bottom-right">
-              <button type="button" class="whitespace-nowrap w-90px! px-2" onclick={toggle}>Toggle Private</button>
-            </CustomControl>
-
-            {#if show && private_dictionaries.length}
-              <DictionaryPoints
-                dictionaries={private_dictionaries}
-                type="private"
-                bind:selectedDictionaryId />
-            {/if}
-                            {/snippet}
-                </ShowHide>
-      {/if}
-      <DictionaryPoints dictionaries={public_dictionaries} bind:selectedDictionaryId />
-      {#if $my_dictionaries.length}
-        <DictionaryPoints
-          dictionaries={$my_dictionaries}
-          type="personal"
-          bind:selectedDictionaryId />
-      {/if}
-      <NavigationControl position="bottom-right" showCompass={false} />
-      <ToggleStyle />
-    </Map>
+  <div class="relative h-50vh md:h-70vh md:flex-grow" bind:clientWidth={globe_width} bind:clientHeight={globe_height}>
+    {#if globe_width > 0 && globe_height > 0}
+      <Canvas width={globe_width} height={globe_height}>
+        {#snippet children({ context })}
+          <Globe
+            bind:this={globe_component}
+            width={globe_width}
+            height={globe_height}
+            initial_longitude={+user_longitude || 0}
+            initial_latitude={+user_latitude || 20}>
+            {#snippet children({ projection, is_moving })}
+              <GlobeDictionaryPoints
+                {projection}
+                {is_moving}
+                dictionaries={public_dictionaries}
+                selected_dictionary_id={selectedDictionaryId}
+                on_select={(id) => selectedDictionaryId = id} />
+              {#if $my_dictionaries.length}
+                <GlobeDictionaryPoints
+                  {projection}
+                  {is_moving}
+                  dictionaries={$my_dictionaries}
+                  type="personal"
+                  selected_dictionary_id={selectedDictionaryId}
+                  on_select={(id) => selectedDictionaryId = id} />
+              {/if}
+              {#if $admin && show_private_dictionaries && private_dictionaries.length}
+                <GlobeDictionaryPoints
+                  {projection}
+                  {is_moving}
+                  dictionaries={private_dictionaries}
+                  type="private"
+                  selected_dictionary_id={selectedDictionaryId}
+                  on_select={(id) => selectedDictionaryId = id} />
+              {/if}
+              <Zoomer
+                {context}
+                {projection}
+                on_move_start={() => globe_component?.on_move_start()}
+                on_move_end={() => globe_component?.on_move_end()} />
+            {/snippet}
+          </Globe>
+        {/snippet}
+      </Canvas>
+    {/if}
+    {#if $admin}
+      <button
+        type="button"
+        class="absolute bottom-4 right-4 bg-white/80 px-2 py-1 rounded text-sm z-10"
+        onclick={() => show_private_dictionaries = !show_private_dictionaries}>
+        Toggle Private
+      </button>
+    {/if}
   </div>
 </div>
 

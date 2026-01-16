@@ -17,8 +17,6 @@
     is_manager,
     loading,
   }: Props = $props()
-
-  console.log('Entry count:', entry_count)
 </script>
 
 <div class="md:hidden">
