@@ -158,7 +158,7 @@ Entries support rich multimedia content:
 ### How to Edit Svelte Components
 This includes all files ending in `.svelte` including `+page.svelte` and `+layout.svelte`
 
-The user runs the dev server themselves. To check for build errors or server output after making changes, tail the log file:
+The user runs the dev server themselves at http://localhost:3041 - To check for build errors or server output after making changes, tail the log file:
 
 ```bash
 tail -100 app/.dev-server.log
