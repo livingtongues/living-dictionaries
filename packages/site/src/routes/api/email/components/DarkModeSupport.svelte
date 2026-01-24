@@ -1,5 +1,5 @@
 <script>
-  export let emulateEmailAddingDarkClasses = false
+  let { emulateEmailAddingDarkClasses = false } = $props()
 </script>
 <meta name="color-scheme" content="light dark">
 <meta name="supported-color-schemes" content="light dark only">

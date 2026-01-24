@@ -23,9 +23,9 @@ From https://github.com/beyonk-adventures/svelte-mapbox
   <Map
     {lng}
     {lat}
-    on:click={(e) => {
-      set('lng', e.detail.lng);
-      set('lat', e.detail.lat);
+    on_click={(lngLat) => {
+      set('lng', lngLat.lng);
+      set('lat', lngLat.lat);
     }}>
     <Marker {lng} {lat} />
   </Map>
@@ -33,27 +33,27 @@ From https://github.com/beyonk-adventures/svelte-mapbox
 
 <Story name="Everything" knobs={{ showControls: true }} let:props={{ showControls }} height={400}>
   <Map
-    on:dragend={(e) => console.info(e.detail)}
-    on:moveend={(e) => console.info(e.detail)}
-    on:click={(e) => console.info({ lng: e.detail.lng, lat: e.detail.lat })}
-    on:zoomend={(e) => console.info(e.detail)}
-    on:error={(e) => console.info(e.detail)}>
+    on_dragend={(lngLat) => console.info(lngLat)}
+    on_moveend={(lngLat) => console.info(lngLat)}
+    on_click={(lngLat) => console.info({ lng: lngLat.lng, lat: lngLat.lat })}
+    on_zoomend={(zoom) => console.info(zoom)}
+    on_error={(e) => console.info(e)}>
     {#if showControls}
       <Geocoder
         placeholder={'Search Places'}
-        on:clear={() => console.info('cleared')}
-        on:loading={(e) => console.info(e.detail)}
-        on:result={(e) => console.info(e.detail)}
-        on:resultCoordinates={(e) => console.info(e.detail)}
-        on:results={(e) => console.info(e.detail)}
-        on:error={(e) => console.info(e.detail)} />
+        on_clear={() => console.info('cleared')}
+        on_loading={(query) => console.info(query)}
+        on_result={(result) => console.info(result)}
+        on_result_coordinates={(coords) => console.info(coords)}
+        on_results={(results) => console.info(results)}
+        on_error={(e) => console.info(e)} />
       <NavigationControl />
       <GeolocateControl
-        on:geolocate={(e) => console.info(e.detail)}
-        on:outofmaxbounds={(e) => console.info(e.detail)}
-        on:trackuserlocationstart={(e) => console.info(e.detail)}
-        on:trackuserlocationend={(e) => console.info(e.detail)}
-        on:error={(e) => console.info(e.detail)} />
+        on_geolocate={(e) => console.info(e)}
+        on_outofmaxbounds={(e) => console.info(e)}
+        on_trackuserlocationstart={(e) => console.info(e)}
+        on_trackuserlocationend={(e) => console.info(e)}
+        on_error={(e) => console.info(e)} />
       <ScaleControl />
       <ToggleStyle />
     {/if}

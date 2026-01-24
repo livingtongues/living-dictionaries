@@ -2,10 +2,15 @@
   import type { EntryData, Tables } from '@living-dictionaries/types'
   import { sortedColumn } from './sortedColumnStore'
   import { HistoryFields } from './historyFields'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
-  export let history: Tables<'content_updates'>[] = []
-  export let get_entry: (record: Tables<'content_updates'>) => EntryData
+  interface Props {
+    history?: Tables<'content_updates'>[];
+    get_entry: (record: Tables<'content_updates'>) => EntryData;
+    children?: import('svelte').Snippet<[any]>;
+  }
+
+  let { history = [], get_entry, children }: Props = $props();
 
   type SortFields = keyof typeof HistoryFields
   // @ts-ignore
@@ -16,12 +21,14 @@
     return { key, value }
   })
 
-  let sortKey: SortFields = 'date'
-  let sortDescending = true
+  let sortKey: SortFields = $state('date')
+  let sortDescending = $state(true)
 
-  $: sortedColumn.set(sortKey)
+  $effect(() => {
+    sortedColumn.set(sortKey)
+  });
 
-  $: sortedRecords = history.sort((a, b) => {
+  let sortedRecords = $derived(history.sort((a, b) => {
     let valueA: string | number
     let valueB: string | number
 
@@ -44,7 +51,7 @@
         valueB = b[sortKey] ? JSON.stringify(b[sortKey]).toUpperCase() : 'zz'
     }
     return sortDescending ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB)
-  })
+  }))
 
   function setSortSettings(paraSortKey: SortFields) {
     // Changes the key if the sort wasn't based on the button before, and if it was, change the direction
@@ -59,24 +66,24 @@
   {#each historyFields as field}
     <th
       class="cursor-pointer"
-      on:click={() => setSortSettings(field.key)}
+      onclick={() => setSortSettings(field.key)}
       title="Click to sort asc/desc">
-      {$page.data.t(`history.${field.value}`)}
+      {page.data.t(`history.${field.value}`)}
       {#if sortKey === field.key}
         {#if sortDescending}
-          <i class="fas fa-sort-amount-down" />
+          <i class="fas fa-sort-amount-down"></i>
         {:else}
-          <i class="fas fa-sort-amount-up" />
+          <i class="fas fa-sort-amount-up"></i>
         {/if}
       {/if}
     </th>
   {/each}
 </thead>
 
-<slot {sortedRecords} />
+{@render children?.({ sortedRecords, })}
 
 <style>
   th {
-    --at-apply: text-xs font-semibold text-gray-600 uppercase tracking-wider;
+    @apply text-xs font-semibold text-gray-600 uppercase tracking-wider;
   }
 </style>

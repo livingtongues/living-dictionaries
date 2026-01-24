@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, type QueryParamStore, createPersistedStore } from 'svelte-pieces'
+  import { Button, type QueryParamStore, createPersistedStore } from '$lib/svelte-pieces'
   import type { EntryData, IPrintFields, PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import { build_citation } from '../contributors/build-citation'
@@ -7,20 +7,29 @@
   import PrintFieldCheckboxes from './print/PrintFieldCheckboxes.svelte'
   import { defaultPrintFields } from './print/printFields'
   import { truncateAuthors } from './print/truncateAuthors'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import type { QueryParams } from '$lib/search/types'
 
-  export let search_params: QueryParamStore<QueryParams>
-  export let entries: EntryData[] = []
-  export let dictionary: Tables<'dictionaries'>
-  export let can_edit = false
+  interface Props {
+    search_params: QueryParamStore<QueryParams>;
+    entries?: EntryData[];
+    dictionary: Tables<'dictionaries'>;
+    can_edit?: boolean;
+  }
+
+  let {
+    search_params,
+    entries = [],
+    dictionary,
+    can_edit = false
+  }: Props = $props();
 
   const print_per_page = 100
-  let partners: PartnerWithPhoto[] = []
-  $: ({ dictionary_info } = $page.data)
+  let partners: PartnerWithPhoto[] = $state([])
+  let { dictionary_info } = $derived(page.data)
 
   onMount(() => {
-    $page.data.load_partners().then(data => partners = data)
+    page.data.load_partners().then(data => partners = data)
     $search_params.page = 1
     $search_params.entries_per_page = print_per_page
     return () => $search_params.entries_per_page = null
@@ -41,12 +50,12 @@
   <div class="print:hidden bg-white md:sticky z-1 md:top-22 py-3">
     <div class="flex flex-wrap mb-1">
       <Button class="mb-1 mr-2" form="filled" type="button" onclick={() => window.print()}>
-        <span class="i-fa-print -mt-1" />
-        {$page.data.t('entry.print')}
+        <span class="i-fa-print -mt-1"></span>
+        {page.data.t('entry.print')}
       </Button>
 
       <div class="mb-1 mr-2">
-        <label class="font-medium text-gray-700" for="maxEntries">{$page.data.t('print.max_entries')}</label>
+        <label class="font-medium text-gray-700" for="maxEntries">{page.data.t('print.max_entries')}</label>
         <input
           class="form-input text-sm w-17"
           id="maxEntries"
@@ -56,7 +65,7 @@
           bind:value={$search_params.entries_per_page} />
       </div>
       <div class="mb-1 mr-2">
-        <label class="font-medium text-gray-700" for="columnCount">{$page.data.t('print.columns')}</label>
+        <label class="font-medium text-gray-700" for="columnCount">{page.data.t('print.columns')}</label>
         <input
           class="form-input text-sm w-17"
           id="columnCount"
@@ -66,7 +75,7 @@
           bind:value={$columnCount} />
       </div>
       <div class="mb-1 mr-2">
-        <label class="font-medium text-gray-700" for="headwordSize">{$page.data.t('print.headword_size')} (pt)</label>
+        <label class="font-medium text-gray-700" for="headwordSize">{page.data.t('print.headword_size')} (pt)</label>
         <input
           class="form-input text-sm w-17"
           id="headwordSize"
@@ -76,7 +85,7 @@
           bind:value={$headwordSize} />
       </div>
       <div class="mb-1 mr-2">
-        <label class="font-medium text-gray-700" for="fontSize">{$page.data.t('print.font_size')} (pt)</label>
+        <label class="font-medium text-gray-700" for="fontSize">{page.data.t('print.font_size')} (pt)</label>
         <input
           class="form-input text-sm w-15"
           id="fontSize"
@@ -86,7 +95,7 @@
           bind:value={$fontSize} />
       </div>
       <div class="mb-1 mr-2">
-        <label class="font-medium text-gray-700" for="imageSize">{$page.data.t('misc.images')}:</label>
+        <label class="font-medium text-gray-700" for="imageSize">{page.data.t('misc.images')}:</label>
         <input
           class="form-input text-sm w-17"
           id="imageSize"
@@ -101,7 +110,7 @@
 
   <div class="hidden print:block text-2xl mb-5">
     {dictionary.name}
-    {$page.data.t('misc.LD_singular')}
+    {page.data.t('misc.LD_singular')}
   </div>
 
   <div class="flex print:block overflow-x-hidden">
@@ -124,7 +133,7 @@
       dir="ltr"
       class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
       style="writing-mode: tb; min-width: 0;">
-      {build_citation({ t: $page.data.t, dictionary, custom_citation: truncateAuthors($dictionary_info.citation), partners })}
+      {build_citation({ t: page.data.t, dictionary, custom_citation: truncateAuthors($dictionary_info.citation), partners })}
     </div>
   </div>
 {:else}

@@ -6,7 +6,11 @@
   const { getMap } = getContext<MapKeyContext>(mapKey);
   const map = getMap();
 
-  export let alternateStyle = 'mapbox://styles/mapbox/satellite-streets-v12?optimize=true'; // 'Mapbox Satellite Streets'
+  interface Props {
+    alternateStyle?: string; // 'Mapbox Satellite Streets'
+  }
+
+  let { alternateStyle = 'mapbox://styles/mapbox/satellite-streets-v12?optimize=true' }: Props = $props();
   let initialStyle: Style;
 
   onMount(() => {
@@ -24,9 +28,9 @@
 </script>
 
 <button
-  on:click={toggleStyle}
+  onclick={toggleStyle}
   type="button"
   class="px-2 py-1 absolute rounded shadow bg-white"
   style="bottom: 40px; left: 8px; z-index: 1;">
-  <span class="i-fa-solid-globe-asia" />
+  <span class="i-fa-solid-globe-asia"></span>
 </button>

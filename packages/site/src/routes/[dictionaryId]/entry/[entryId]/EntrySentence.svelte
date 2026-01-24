@@ -1,14 +1,23 @@
 <script lang="ts">
   import type { Tables } from '@living-dictionaries/types'
   import EntryField from './EntryField.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
-  export let glossingLanguages: string[]
-  export let sentence: Partial<Tables<'sentences'>>
-  export let can_edit = false
-  export let sense_id: string
+  interface Props {
+    glossingLanguages: string[];
+    sentence: Partial<Tables<'sentences'>>;
+    can_edit?: boolean;
+    sense_id: string;
+  }
 
-  $: ({ dbOperations } = $page.data)
+  let {
+    glossingLanguages,
+    sentence,
+    can_edit = false,
+    sense_id
+  }: Props = $props();
+
+  let { dbOperations } = $derived(page.data)
 
   const writing_systems = ['default']
 </script>
@@ -19,7 +28,7 @@
       value={sentence.text[orthography]}
       field="example_sentence"
       {can_edit}
-      display={$page.data.t('entry_field.example_sentence')}
+      display={page.data.t('entry_field.example_sentence')}
       on_update={(new_value) => {
         if (!sentence.id) {
           dbOperations.insert_sentence({
@@ -42,7 +51,7 @@
         field="example_sentence"
         {bcp}
         {can_edit}
-        display="{$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: {$page.data.t('entry_field.example_sentence')}"
+        display="{page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: {page.data.t('entry_field.example_sentence')}"
         on_update={(new_value) => {
           dbOperations.update_sentence({
             translation: {

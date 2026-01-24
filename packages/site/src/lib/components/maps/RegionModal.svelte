@@ -1,158 +1,173 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { onMount, createEventDispatcher } from 'svelte';
-  import { Button, Modal, ReactiveSet } from 'svelte-pieces';
-  import Map from './mapbox/map/Map.svelte';
-  import Geocoder from './mapbox/geocoder/Geocoder.svelte';
-  import Marker from './mapbox/map/Marker.svelte';
-  import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
-  import NavigationControl from './mapbox/controls/NavigationControl.svelte';
-  import type { IRegion } from '@living-dictionaries/types';
-  import GeoJSONSource from './mapbox/sources/GeoJSONSource.svelte';
-  import { polygonFeatureCoordinates } from './utils/polygonFromCoordinates';
-  import Layer from './mapbox/map/Layer.svelte';
-  import { randomColor } from './utils/randomColor';
-  import Popup from './mapbox/map/Popup.svelte';
-  import { points } from '@turf/helpers';
-  import center from '@turf/center';
-  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface';
+  import type { IRegion } from '@living-dictionaries/types'
+  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface'
+  import type { Snippet } from 'svelte'
+  import { page } from '$app/state'
+  import { Button, Modal, ReactiveSet } from '$lib/svelte-pieces'
+  import center from '@turf/center'
+  import { points } from '@turf/helpers'
+  import { onMount } from 'svelte'
+  import NavigationControl from './mapbox/controls/NavigationControl.svelte'
+  import ToggleStyle from './mapbox/controls/ToggleStyle.svelte'
+  import Geocoder from './mapbox/geocoder/Geocoder.svelte'
+  import Layer from './mapbox/map/Layer.svelte'
+  import Map from './mapbox/map/Map.svelte'
+  import Marker from './mapbox/map/Marker.svelte'
+  import Popup from './mapbox/map/Popup.svelte'
+  import GeoJSONSource from './mapbox/sources/GeoJSONSource.svelte'
+  import { polygonFeatureCoordinates } from './utils/polygonFromCoordinates'
+  import { randomColor } from './utils/randomColor'
 
-  export let initialCenter: LngLatFull = undefined;
-  export let region: IRegion;
-  const zoom = region ? 4 : 3;
+  interface Props {
+    initialCenter?: LngLatFull
+    region: IRegion | null
+    on_update?: (detail: IRegion) => void
+    on_remove?: () => void
+    on_close: () => void
+    children?: Snippet
+  }
 
-  let centerLng: number;
-  let centerLat: number;
+  let {
+    initialCenter = undefined,
+    region,
+    on_update = undefined,
+    on_remove = undefined,
+    on_close,
+    children: childrenSnippet,
+  }: Props = $props()
+
+  const zoom = region ? 4 : 3
+
+  let centerLng: number = $state()
+  let centerLat: number = $state()
 
   onMount(() => {
     if (region) {
       const features = points(
-        region.coordinates.map(({ longitude, latitude }) => [longitude, latitude])
-      );
-      const c = center(features);
+        region.coordinates.map(({ longitude, latitude }) => [longitude, latitude]),
+      )
+      const c = center(features)
       if (c?.geometry?.coordinates)
-        [centerLng, centerLat] = c.geometry.coordinates;
-    }
-    else if (initialCenter) {
-      ({longitude: centerLng, latitude: centerLat} = initialCenter);
+        [centerLng, centerLat] = c.geometry.coordinates
+    } else if (initialCenter) {
+      ({ longitude: centerLng, latitude: centerLat } = initialCenter)
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        centerLng = position.coords.longitude;
-        centerLat = position.coords.latitude;
-      });
+        centerLng = position.coords.longitude
+        centerLat = position.coords.latitude
+      })
     }
-  });
+  })
 
-  function handleGeocoderResult({ detail }, add) {
-    if (detail?.user_coordinates?.[0])
-    {add({
-      longitude: detail.user_coordinates[0],
-      latitude: detail.user_coordinates[1],
-    });}
-    else {add({ longitude: detail.center[0], latitude: detail.center[1] });}
+  function handleGeocoderResult(result: any, add: (item: LngLatFull) => void) {
+    if (result?.user_coordinates?.[0]) {
+      add({
+        longitude: result.user_coordinates[0],
+        latitude: result.user_coordinates[1],
+      })
+    } else {
+      add({ longitude: result.center[0], latitude: result.center[1] })
+    }
   }
 
-  const dispatch = createEventDispatcher<{
-    update: IRegion;
-    remove: boolean;
-    close: boolean;
-  }>();
   function update(coordinates: IRegion['coordinates']) {
-    dispatch('update', { coordinates });
-    dispatch('close');
+    on_update?.({ coordinates })
+    on_close()
   }
   function removeRegion() {
-    dispatch('remove');
-    dispatch('close');
+    on_remove?.()
+    on_close()
   }
 </script>
 
 <ReactiveSet
-  input={region?.coordinates || []}
-  let:value={points}
-  let:add
-  let:size
-  let:remove>
-  <Modal on:close noscroll>
-    <span slot="heading">
-      {$page.data.t('create.select_region')}
-    </span>
-    <form on:submit|preventDefault={() => update(points)}>
-      <form on:submit={(e) => e.preventDefault()} style="height: 50vh;">
-        <Map
-          lng={centerLng}
-          lat={centerLat}
-          {zoom}
-          on:click={({ detail: { lng, lat } }) =>
-            add({ longitude: lng, latitude: lat })}>
-          <slot />
-          <NavigationControl />
-          <Geocoder
-            options={{ marker: false }}
-            placeholder={$page.data.t('about.search')}
-            on:result={(e) => handleGeocoderResult(e, add)}
-            on:error={(e) => console.error(e.detail)} />
-          {#each Array.from(points) as point (point)}
-            <Marker
-              draggable
-              on:dragend={({ detail: { lng, lat } }) => {
-                remove(point);
-                add({ longitude: lng, latitude: lat });
-              }}
-              lng={point.longitude}
-              lat={point.latitude}>
-              <Popup>
-                <Button
-                  form="simple"
-                  size="sm"
-                  color="red"
-                  onclick={() => remove(point)}><span class="i-fa-trash-o" /></Button>
-              </Popup>
-            </Marker>
-          {/each}
-          {#if size > 2}
-            <GeoJSONSource
-              data={{
-                type: 'Feature',
-                geometry: {
-                  type: 'Polygon',
-                  coordinates: polygonFeatureCoordinates(points),
-                },
-                properties: undefined,
-              }}>
-              <Layer
-                options={{
-                  type: 'fill',
-                  paint: {
-                    'fill-color': randomColor(),
-                    'fill-opacity': 0.5,
+  input={region?.coordinates || []}>
+  {#snippet children({ value: regionPoints, add, size, remove })}
+    <Modal {on_close} noscroll>
+      {#snippet heading()}
+        <span>
+          {page.data.t('create.select_region')}
+        </span>
+      {/snippet}
+      <form onsubmit={(e) => { e.preventDefault(); update(regionPoints) }}>
+        <div style="height: 50vh;">
+          <Map
+            lng={centerLng}
+            lat={centerLat}
+            {zoom}
+            on_click={({ lng, lat }) =>
+              add({ longitude: lng, latitude: lat })}>
+            {#if childrenSnippet}
+              {@render childrenSnippet()}
+            {/if}
+            <NavigationControl />
+            <Geocoder
+              options={{ marker: false }}
+              placeholder={page.data.t('about.search')}
+              on_result={result => handleGeocoderResult(result, add)}
+              on_error={e => console.error(e)} />
+            {#each regionPoints as point (point)}
+              <Marker
+                draggable
+                on_dragend={({ lng, lat }) => {
+                  remove(point)
+                  add({ longitude: lng, latitude: lat })
+                }}
+                lng={point.longitude}
+                lat={point.latitude}>
+                <Popup>
+                  <Button
+                    form="simple"
+                    size="sm"
+                    color="red"
+                    onclick={() => remove(point)}><span class="i-fa-trash-o"></span></Button>
+                </Popup>
+              </Marker>
+            {/each}
+            {#if size > 2}
+              <GeoJSONSource
+                data={{
+                  type: 'Feature',
+                  geometry: {
+                    type: 'Polygon',
+                    coordinates: polygonFeatureCoordinates(regionPoints),
                   },
-                }} />
-              <Layer
-                options={{
-                  type: 'line',
-                  paint: {
-                    'line-color': '#555555',
-                    'line-width': 1,
-                  },
-                }} />
-            </GeoJSONSource>
-          {/if}
-          <ToggleStyle />
-        </Map>
-      </form>
+                  properties: undefined,
+                }}>
+                <Layer
+                  options={{
+                    type: 'fill',
+                    paint: {
+                      'fill-color': randomColor(),
+                      'fill-opacity': 0.5,
+                    },
+                  }} />
+                <Layer
+                  options={{
+                    type: 'line',
+                    paint: {
+                      'line-color': '#555555',
+                      'line-width': 1,
+                    },
+                  }} />
+              </GeoJSONSource>
+            {/if}
+            <ToggleStyle />
+          </Map>
+        </div>
 
-      <div class="modal-footer">
-        <Button onclick={() => dispatch('close')} form="simple" color="black">
-          {$page.data.t('misc.cancel')}
-        </Button>
-        <Button onclick={removeRegion} form="simple" color="red">
-          {$page.data.t('misc.remove')}
-        </Button>
-        <Button type="submit" form="filled" disabled={size < 3}>
-          {$page.data.t('misc.save')}
-        </Button>
-      </div>
-    </form>
-  </Modal>
+        <div class="modal-footer">
+          <Button onclick={on_close} form="simple" color="black">
+            {page.data.t('misc.cancel')}
+          </Button>
+          <Button onclick={removeRegion} form="simple" color="red">
+            {page.data.t('misc.remove')}
+          </Button>
+          <Button type="submit" form="filled" disabled={size < 3}>
+            {page.data.t('misc.save')}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  {/snippet}
 </ReactiveSet>

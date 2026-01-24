@@ -1,20 +1,20 @@
 <script lang="ts">
   import type { Tables } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
-  export let data
+  let { data } = $props();
 
-  let keys: Tables<'api_keys'>[]
+  let keys: Tables<'api_keys'>[] = $state()
 
   onMount(async () => {
     keys = await data.get_keys()
   })
 
   function generate_read_curl(api_key: string) {
-    return `curl -X POST '${$page.url.origin}/api/external/read-entries' \
+    return `curl -X POST '${page.url.origin}/api/external/read-entries' \
 -H 'Content-Type: application/json' \
 -d '{
   "dictionary_id": "${data.dictionary.id}",
@@ -23,7 +23,7 @@
   }
 
   function generate_write_curl(api_key: string) {
-    return `curl -X POST '${$page.url.origin}/api/external/add-entry' \
+    return `curl -X POST '${page.url.origin}/api/external/add-entry' \
 -H 'Content-Type: application/json' \
 -d '{
   "dictionary_id": "${data.dictionary.id}",
@@ -53,7 +53,7 @@
 {#if keys?.length}
   <div class="pb-2 mb-2">
     Read entry data from a cache (updated once an hour) by making a POST request to:
-    {$page.url.origin}/api/external/read-entries - You'll need to cache the results on your end, as the API is rate-limited. If you edit entries, you'll need to wait until the next hourly cache update to see the changes reflected in the API response.
+    {page.url.origin}/api/external/read-entries - You'll need to cache the results on your end, as the API is rate-limited. If you edit entries, you'll need to wait until the next hourly cache update to see the changes reflected in the API response.
   </div>
 
   {#each keys as { id, created_at, can_write, use_count, last_read_at, last_write_at }}
