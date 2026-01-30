@@ -2,16 +2,25 @@
   import type { EntryData } from '@living-dictionaries/types'
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
-  export let dialects: EntryData['dialects']
-  export let entry_id: string
-  export let can_edit = false
-  export let showPlus = true
+  interface Props {
+    dialects: EntryData['dialects'];
+    entry_id: string;
+    can_edit?: boolean;
+    showPlus?: boolean;
+  }
 
-  $: ({ dialects: dictionary_dialects, dbOperations } = $page.data)
-  $: dialect_ids = dialects.map(dialect => dialect.id)
-  $: options = $dictionary_dialects.map(dialect => ({ value: dialect.id, name: dialect.name.default })) satisfies SelectOption[]
+  let {
+    dialects,
+    entry_id,
+    can_edit = false,
+    showPlus = true
+  }: Props = $props();
+
+  let { dialects: dictionary_dialects, dbOperations } = $derived(page.data)
+  let dialect_ids = $derived(dialects.map(dialect => dialect.id))
+  let options = $derived($dictionary_dialects.map(dialect => ({ value: dialect.id, name: dialect.name.default })) satisfies SelectOption[])
 
   async function on_update(new_values: string[]) {
     // go through current dialect_ids and check if they are in the new_values, if not remove them
@@ -44,7 +53,9 @@
   {can_edit}
   canWriteIn
   {showPlus}
-  placeholder={$page.data.t('entry_field.dialects')}
+  placeholder={page.data.t('entry_field.dialects')}
   {on_update}>
-  <span slot="heading">{$page.data.t('entry_field.dialects')}</span>
+  {#snippet heading()}
+    <span >{page.data.t('entry_field.dialects')}</span>
+  {/snippet}
 </ModalEditableArray>

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import Tab from './Tab.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Header from '$lib/components/shell/Header.svelte'
   import AdminGuard from '$lib/components/ui/AdminGuard.svelte'
 
-  export let data
+  let { data, children } = $props();
 </script>
 
 <SeoMetaTags title="Admin Panel" />
@@ -34,12 +34,12 @@
   </div>
 
   <div class="p-3">
-    <slot />
+    {@render children?.()}
   </div>
 </AdminGuard>
 
 <style>
   nav {
-    --at-apply: -mb-px flex overflow-x-auto;
+    @apply -mb-px flex overflow-x-auto;
   }
 </style>

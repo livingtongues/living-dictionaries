@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BadgeArrayEmit, Button, JSON, Modal, ShowHide } from 'svelte-pieces'
+  import { BadgeArrayEmit, Button, JSON, Modal, ShowHide } from '$lib/svelte-pieces'
   import type { TablesUpdate } from '@living-dictionaries/types'
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte'
@@ -9,26 +9,37 @@
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
   import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { api_delete_dictionary } from '$api/db/delete-dictionary/_call'
 
-  export let index: number
-  export let is_public: boolean
-  export let dictionary: DictionaryWithHelpers
-  export let users: UserWithDictionaryRoles[]
-  export let update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>
-  export let load_extras: () => Promise<void>
+  interface Props {
+    index: number;
+    is_public: boolean;
+    dictionary: DictionaryWithHelpers;
+    users: UserWithDictionaryRoles[];
+    update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>;
+    load_extras: () => Promise<void>;
+  }
 
-  let typedId = ''
+  let {
+    index,
+    is_public,
+    dictionary,
+    users,
+    update_dictionary,
+    load_extras
+  }: Props = $props();
 
-  $: ({ admin, supabase, add_editor, remove_editor, inviteHelper } = $page.data as PageData)
+  let typedId = $state('')
 
-  $: managers = dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'manager' && dictionary_id === dictionary.id))
-  $: contributors = dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'contributor' && dictionary_id === dictionary.id))
+  let { admin, supabase, add_editor, remove_editor, inviteHelper } = $derived(page.data as PageData)
+
+  let managers = $derived(dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'manager' && dictionary_id === dictionary.id)))
+  let contributors = $derived(dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'contributor' && dictionary_id === dictionary.id)))
 </script>
 
 <td class="relative">
-  <span on:click={() => window.open(`/${dictionary.id}`)} class="absolute top-0 left-0 text-xs text-gray-400 cursor-pointer">{index + 1}</span>
+  <span onclick={() => window.open(`/${dictionary.id}`)} class="absolute top-0 left-0 text-xs text-gray-400 cursor-pointer">{index + 1}</span>
   <DictionaryFieldEdit field="name" value={dictionary.name} {update_dictionary} />
 </td>
 <td>
@@ -52,7 +63,7 @@
   </Button>
 </td>
 <td>
-  <div style="width: 300px;" />
+  <div style="width: 300px;"></div>
   <RolesManagment
     editors={managers}
     add_editor={async (user_id) => {
@@ -84,7 +95,9 @@
                 await load_extras()
               }
             }}>
-            <span class="i-mdi-email-send" slot="prefix" />
+            {#snippet prefix()}
+                        <span class="i-mdi-email-send" ></span>
+                      {/snippet}
           </ContributorInvitationStatus>
         </div>
       {/if}
@@ -92,7 +105,7 @@
   </div>
 </td>
 <td>
-  <div style="width: 300px;" />
+  <div style="width: 300px;"></div>
   <RolesManagment
     editors={contributors}
     add_editor={async (user_id) => {
@@ -124,7 +137,9 @@
                 await load_extras()
               }
             }}>
-            <span class="i-mdi-email-send" slot="prefix" />
+            {#snippet prefix()}
+                        <span class="i-mdi-email-send" ></span>
+                      {/snippet}
           </ContributorInvitationStatus>
         </div>
       {/if}
@@ -144,41 +159,43 @@
     {update_dictionary} />
 </td>
 <td>
-  <ShowHide let:show let:toggle>
-    <Button class="text-nowrap -ml-2" size="sm" form="simple" onclick={toggle}>
-      {#if dictionary.coordinates?.points?.length}
-        <LatLngDisplay
-          lat={dictionary.coordinates.points[0].coordinates.latitude}
-          lng={dictionary.coordinates.points[0].coordinates.longitude} />
-      {:else}<b>Add</b>{/if}
-    </Button>
-    {#if show}
-      {#await import('$lib/components/maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
-        <CoordinatesModal
-          lat={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.latitude : undefined}
-          lng={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.longitude : undefined}
-          on:update={({ detail: { lat, lng } }) => {
-            const [, ...rest] = dictionary.coordinates?.points || []
-            update_dictionary({
-              coordinates: {
-                points: [{ coordinates: { latitude: lat, longitude: lng } }, ...rest],
-                regions: dictionary.coordinates?.regions,
-              },
-            })
-          }}
-          on:remove={() => {
-            const [, ...rest] = dictionary.coordinates?.points || []
-            update_dictionary({
-              coordinates: {
-                points: rest,
-                regions: dictionary.coordinates?.regions,
-              },
-            })
-          }}
-          on:close={toggle} />
-      {/await}
-    {/if}
-  </ShowHide>
+  <ShowHide  >
+    {#snippet children({ show, toggle })}
+        <Button class="text-nowrap -ml-2" size="sm" form="simple" onclick={toggle}>
+        {#if dictionary.coordinates?.points?.length}
+          <LatLngDisplay
+            lat={dictionary.coordinates.points[0].coordinates.latitude}
+            lng={dictionary.coordinates.points[0].coordinates.longitude} />
+        {:else}<b>Add</b>{/if}
+      </Button>
+      {#if show}
+        {#await import('$lib/components/maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
+          <CoordinatesModal
+            lat={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.latitude : undefined}
+            lng={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.longitude : undefined}
+            on_update={({ lat, lng }) => {
+              const [, ...rest] = dictionary.coordinates?.points || []
+              update_dictionary({
+                coordinates: {
+                  points: [{ coordinates: { latitude: lat, longitude: lng } }, ...rest],
+                  regions: dictionary.coordinates?.regions,
+                },
+              })
+            }}
+            on_remove={() => {
+              const [, ...rest] = dictionary.coordinates?.points || []
+              update_dictionary({
+                coordinates: {
+                  points: rest,
+                  regions: dictionary.coordinates?.regions,
+                },
+              })
+            }}
+            on_close={toggle} />
+        {/await}
+      {/if}
+          {/snippet}
+    </ShowHide>
 </td>
 <td>
   <DictionaryFieldEdit
@@ -193,12 +210,12 @@
   {/if}
 </td>
 <td>
-  <div style="width: 300px;" />
+  <div style="width: 300px;"></div>
   <BadgeArrayEmit
     canEdit
     addMessage="Add"
     strings={dictionary.alternate_names?.slice(0, 8)}
-    on:additem={() => {
+    onadditem={() => {
       const name = prompt('Enter alternate name:')
       if (name) {
         update_dictionary({
@@ -206,7 +223,7 @@
         })
       }
     }}
-    on:itemremoved={({ detail: { value } }) => {
+    onitemremoved={({ value }) => {
       update_dictionary({
         alternate_names: dictionary.alternate_names.filter(name => name !== value),
       })
@@ -254,40 +271,44 @@
   {/if}
 </td>
 <td>
-  <ShowHide let:show let:toggle>
-    <Button
-      color="red"
-      form="filled"
-      size="sm"
-      onclick={toggle}>
-      Delete
-    </Button>
-    {#if show}
-      <Modal on:close={toggle}>
-        <span slot="heading">Delete {dictionary.name}?</span>
-        <div class="mb-2">
-          id: {dictionary.id}, url: /{dictionary.url}
-        </div>
-        <input type="text" bind:value={typedId} placeholder="Type the dictionary ID to confirm deletion" class="mb-2 form-input w-full" />
+  <ShowHide  >
+    {#snippet children({ show, toggle })}
         <Button
-          disabled={!typedId || typedId !== dictionary.id}
-          color="red"
-          form="filled"
-          size="sm"
-          class="block!"
-          onclick={async () => {
-            const { error } = await api_delete_dictionary({ dictionary_id: dictionary.id })
-            if (error) {
-              alert(error.message)
-            } else {
-              alert('Dictionary deleted. Please check your email to confirm it was successful and then close the dialog to continue working (the view is updated once a day).')
-            }
-          }}>
-          Delete
-        </Button>
-      </Modal>
-    {/if}
-  </ShowHide>
+        color="red"
+        form="filled"
+        size="sm"
+        onclick={toggle}>
+        Delete
+      </Button>
+      {#if show}
+        <Modal on_close={toggle}>
+          {#snippet heading()}
+                <span >Delete {dictionary.name}?</span>
+              {/snippet}
+          <div class="mb-2">
+            id: {dictionary.id}, url: /{dictionary.url}
+          </div>
+          <input type="text" bind:value={typedId} placeholder="Type the dictionary ID to confirm deletion" class="mb-2 form-input w-full" />
+          <Button
+            disabled={!typedId || typedId !== dictionary.id}
+            color="red"
+            form="filled"
+            size="sm"
+            class="block!"
+            onclick={async () => {
+              const { error } = await api_delete_dictionary({ dictionary_id: dictionary.id })
+              if (error) {
+                alert(error.message)
+              } else {
+                alert('Dictionary deleted. Please check your email to confirm it was successful and then close the dialog to continue working (the view is updated once a day).')
+              }
+            }}>
+            Delete
+          </Button>
+        </Modal>
+      {/if}
+          {/snippet}
+    </ShowHide>
 </td>
 {#if $admin > 1}
   <td class="cursor-pointer">

@@ -22,9 +22,15 @@
   ] as const;
 
   type SupportedLanguages = typeof supportedLanguages[number]
-  export let bcp: SupportedLanguages = 'en';
+  interface Props {
+    bcp?: SupportedLanguages;
+  }
 
-  $: if (bcp !== 'en')
-    map.setLayoutProperty('country-label', 'text-field', ['get', `name_${bcp}`]);
+  let { bcp = 'en' }: Props = $props();
+
+  $effect(() => {
+    if (bcp !== 'en')
+      map.setLayoutProperty('country-label', 'text-field', ['get', `name_${bcp}`]);
+  });
 
 </script>

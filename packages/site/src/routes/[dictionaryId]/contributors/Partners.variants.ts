@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import { type DeprecatedVariant, type Viewport, delay, sleep } from 'kitbook'
 // import { writable } from 'svelte/store'
 // import type Component from './Partners.svelte'

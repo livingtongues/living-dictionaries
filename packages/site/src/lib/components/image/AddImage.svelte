@@ -2,12 +2,17 @@
   import type { Readable } from 'svelte/store'
   import ImageDropZone from './ImageDropZone.svelte'
   import type { ImageUploadStatus } from './upload-image'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
-  export let upload_image: (file: File) => Readable<ImageUploadStatus>
-  export let border = false
+  interface Props {
+    upload_image: (file: File) => Readable<ImageUploadStatus>;
+    border?: boolean;
+    children?: import('svelte').Snippet;
+  }
 
-  let upload_statuses: Readable<ImageUploadStatus>[] = []
+  let { upload_image, border = false, children }: Props = $props();
+
+  let upload_statuses: Readable<ImageUploadStatus>[] = $state([])
 </script>
 
 {#each upload_statuses as upload_status, index}
@@ -24,8 +29,8 @@
 
 {#if !upload_statuses.length}
   <ImageDropZone {border} class="p-3 rounded" on_file_added={file => upload_statuses = [...upload_statuses, upload_image(file)]}>
-    <svelte:fragment slot="label">
-      <slot>{$page.data.t('misc.upload')}</slot>
-    </svelte:fragment>
+    <span slot="label">
+      {#if children}{@render children()}{:else}{page.data.t('misc.upload')}{/if}
+    </span>
   </ImageDropZone>
 {/if}

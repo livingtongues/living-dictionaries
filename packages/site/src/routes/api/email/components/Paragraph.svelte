@@ -2,11 +2,16 @@
   import type { ComponentProps } from 'svelte'
   import Row from './Row.svelte'
 
-  export let row: ComponentProps<Row> = {}
+  interface Props {
+    row?: ComponentProps<typeof Row>
+    children?: import('svelte').Snippet
+  }
+
+  let { row = {}, children }: Props = $props()
 </script>
 
 <Row {...row}>
   <td align="left" style="font-size: 16px; line-height: 25px; font-family: Helvetica, Arial, sans-serif; color: #666666;">
-    <slot />
+    {@render children?.()}
   </td>
 </Row>

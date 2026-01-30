@@ -1,12 +1,16 @@
 <script lang="ts">
   import type { TablesUpdate } from '@living-dictionaries/types'
 
-  export let field: keyof TablesUpdate<'dictionaries'>
-  export let value: string
-  export let update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>
+  interface Props {
+    field: keyof TablesUpdate<'dictionaries'>;
+    value: string;
+    update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>;
+  }
+
+  let { field, value = $bindable(), update_dictionary }: Props = $props();
 
   let debouncedSaveTimer: NodeJS.Timeout
-  let unsaved = false
+  let unsaved = $state(false)
 
   function valueChanged() {
     unsaved = true
@@ -24,7 +28,7 @@
   }
 </script>
 
-<input bind:value on:input={valueChanged} class:unsaved={unsaved} />
+<input bind:value oninput={valueChanged} class:unsaved={unsaved} />
 
 <style>
   .unsaved {

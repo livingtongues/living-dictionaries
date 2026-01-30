@@ -2,9 +2,13 @@
   import type { ComponentProps } from 'svelte'
   import Row from './Row.svelte'
 
-  export let row: ComponentProps<Row> = {}
-  export let text: string
-  export let fontSize = 28
+  interface Props {
+    row?: ComponentProps<typeof Row>
+    text: string
+    fontSize?: number
+  }
+
+  let { row = {}, text, fontSize = 28 }: Props = $props()
 </script>
 
 <Row {...row}>

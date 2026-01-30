@@ -1,40 +1,53 @@
 <script lang="ts">
   import type { EntryFieldValue } from '@living-dictionaries/types'
-  import { ShowHide } from 'svelte-pieces'
+  import { ShowHide } from '$lib/svelte-pieces'
   import sanitize from 'xss'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
-  export let value: string
-  export let htmlValue: string = undefined
-  export let field: EntryFieldValue
-  export let bcp: string = undefined
-  export let display: string
-  export let on_update: (new_value: string) => void
-  $: ({ can_edit } = $page.data)
+  interface Props {
+    value: string;
+    htmlValue?: string;
+    field: EntryFieldValue;
+    bcp?: string;
+    display: string;
+    on_update: (new_value: string) => void;
+  }
 
-  $: sanitizedHtml = sanitize(htmlValue || value) || ''
+  let {
+    value,
+    htmlValue = undefined,
+    field,
+    bcp = undefined,
+    display,
+    on_update
+  }: Props = $props();
+  let { can_edit } = $derived(page.data)
+
+  let sanitizedHtml = $derived(sanitize(htmlValue || value) || '')
 </script>
 
-<ShowHide let:show let:toggle let:set>
-  <div
-    class:cursor-pointer={$can_edit}
-    class:italic={field === 'scientific_names' && !value?.includes('<i>')}
-    class="h-full"
-    style="padding: 0.1em 0.25em"
-    on:click={() => set($can_edit)}>
-    {@html sanitizedHtml}
-    &nbsp;
-  </div>
+<ShowHide   >
+  {#snippet children({ show, toggle, set })}
+    <div
+      class:cursor-pointer={can_edit}
+      class:italic={field === 'scientific_names' && !value?.includes('<i>')}
+      class="h-full"
+      style="padding: 0.1em 0.25em"
+      onclick={() => set(can_edit)}>
+      {@html sanitizedHtml}
+      &nbsp;
+    </div>
 
-  {#if show}
-    {#await import('$lib/components/entry/EditFieldModal.svelte') then { default: EditFieldModal }}
-      <EditFieldModal
-        {on_update}
-        {value}
-        {field}
-        {display}
-        {bcp}
-        on_close={toggle} />
-    {/await}
-  {/if}
+    {#if show}
+      {#await import('$lib/components/entry/EditFieldModal.svelte') then { default: EditFieldModal }}
+        <EditFieldModal
+          {on_update}
+          {value}
+          {field}
+          {display}
+          {bcp}
+          on_close={toggle} />
+      {/await}
+    {/if}
+  {/snippet}
 </ShowHide>

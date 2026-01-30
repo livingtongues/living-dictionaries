@@ -3,30 +3,42 @@
   import { feature } from 'topojson-client';
   import world from './land-110m.json';
 
-  export let fill = '#6f8d9b'; // '#999';
-  export let showGraticule = false;
-  export let label: string = undefined;
-  export let rotation = 0;
-  export let placeLongitude = 10;
-  export let placeLatitude = 30;
-  export let size = 400;
-  $: width = size;
-  $: height = size;
+  interface Props {
+    fill?: string; // '#999';
+    showGraticule?: boolean;
+    label?: string;
+    rotation?: number;
+    placeLongitude?: number;
+    placeLatitude?: number;
+    size?: number;
+  }
+
+  let {
+    fill = '#6f8d9b',
+    showGraticule = false,
+    label = undefined,
+    rotation = 0,
+    placeLongitude = 10,
+    placeLatitude = 30,
+    size = 400
+  }: Props = $props();
+  let width = $derived(size);
+  let height = $derived(size);
 
   const MIN_LAT = -5;
   const MAX_LAT = 30;
   function clamp(num: number, min: number, max: number) {
     return num < min ? min : num > max ? max : num;
   }
-  $: latitude = clamp(placeLatitude, MIN_LAT, MAX_LAT);
-  $: longitude = placeLongitude;
+  let latitude = $derived(clamp(placeLatitude, MIN_LAT, MAX_LAT));
+  let longitude = $derived(placeLongitude);
 
-  $: land = feature(world, world.objects.land);
+  let land = $derived(feature(world, world.objects.land));
 
-  $: projection = geoOrthographic()
+  let projection = $derived(geoOrthographic()
     .fitSize([width, height - size * 0.06], land)
-    .rotate([-longitude, -latitude, rotation]);
-  $: path = geoPath(projection);
+    .rotate([-longitude, -latitude, rotation]));
+  let path = $derived(geoPath(projection));
 </script>
 
 <svg {width} {height} viewBox="0 0 {width} {height}">

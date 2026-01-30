@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { Button, JSON } from 'svelte-pieces'
+  import { Button, JSON } from '$lib/svelte-pieces'
   import EntryDisplay from './EntryDisplay.svelte'
   import { seo_description } from './seo_description'
   import { share } from '$lib/helpers/share'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { dev } from '$app/environment'
 
-  export let data
-  $: ({
+  let { data } = $props();
+  let {
     entry_from_page,
     derived_entry,
     shallow,
@@ -17,9 +17,9 @@
     can_edit,
     dbOperations,
     entry_history,
-  } = data)
+  } = $derived(data)
 
-  $: entry = entry_from_page || $derived_entry
+  let entry = $derived(entry_from_page || $derived_entry)
 </script>
 
 <div
@@ -37,8 +37,8 @@
         window.location.href = `/${dictionary.id}/entries`
       }
     }}>
-    <i class="fas fa-arrow-left rtl-x-flip" />
-    {$page.data.t('misc.back')}
+    <i class="fas fa-arrow-left rtl-x-flip"></i>
+    {page.data.t('misc.back')}
   </Button>
 
   <div>
@@ -50,22 +50,22 @@
         color="red"
         form="simple"
         onclick={async () => {
-          const confirmation = confirm($page.data.t('entry.delete_entry'))
+          const confirmation = confirm(page.data.t('entry.delete_entry'))
           if (confirmation) await dbOperations.update_entry({ deleted: new Date().toISOString() })
           history.back()
         }}>
 
         <span class="hidden md:inline">
-          {$page.data.t('misc.delete')}
+          {page.data.t('misc.delete')}
         </span>
-        <i class="fas fa-trash ml-1" />
+        <i class="fas fa-trash ml-1"></i>
       </Button>
     {/if}
     {#if !shallow}
       <Button class="inline-flex! items-center" form="simple" onclick={() => share(dictionary.id, entry)}>
-        <span>{$page.data.t('misc.share')}</span>
+        <span>{page.data.t('misc.share')}</span>
         <div class="w-2"></div>
-        <i class="fas fa-share-square rtl-x-flip" />
+        <i class="fas fa-share-square rtl-x-flip"></i>
       </Button>
     {/if}
   </div>
@@ -81,7 +81,7 @@
 <SeoMetaTags
   norobots={!dictionary.public}
   imageTitle={entry.main.lexeme.default}
-  imageDescription={seo_description({ entry, gloss_languages: dictionary.gloss_languages, t: $page.data.t })}
+  imageDescription={seo_description({ entry, gloss_languages: dictionary.gloss_languages, t: page.data.t })}
   dictionaryName={dictionary.name}
   lng={dictionary.coordinates?.points?.[0]?.coordinates.longitude}
   lat={dictionary.coordinates?.points?.[0]?.coordinates.latitude}

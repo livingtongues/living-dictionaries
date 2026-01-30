@@ -1,18 +1,23 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let last_selected_speaker_id: string
 </script>
 
 <script lang="ts">
-  import { Button } from 'svelte-pieces'
-  import { page } from '$app/stores'
+  import { Button } from '$lib/svelte-pieces'
+  import { page } from '$app/state'
 
-  export let select_speaker: (speaker_id: string) => Promise<void> = undefined
-  export let initialSpeakerId: string = undefined
+  interface Props {
+    select_speaker?: (speaker_id: string) => Promise<void>;
+    initialSpeakerId?: string;
+    children?: import('svelte').Snippet<[any]>;
+  }
 
-  $: ({ speakers } = $page.data)
+  let { select_speaker = undefined, initialSpeakerId = undefined, children }: Props = $props();
+
+  let { speakers } = $derived(page.data)
 
   const addSpeaker = 'AddSpeaker'
-  $: speaker_id = initialSpeakerId || last_selected_speaker_id
+  let speaker_id = $derived(initialSpeakerId || last_selected_speaker_id)
 
   function autofocus(node: HTMLSelectElement) {
     setTimeout(() => node.focus(), 5)
@@ -21,24 +26,24 @@
 
 {#if !speaker_id}
   <div class="text-sm font-medium leading-5 text-gray-600 mb-2">
-    {$page.data.t('audio.select_speaker')}
+    {page.data.t('audio.select_speaker')}
   </div>
 {/if}
 
 {#if !$speakers?.length}
-  <Button onclick={() => speaker_id = addSpeaker} form="filled"><span class="i-fa-solid-plus -mt-1" /> {$page.data.t('misc.add')}</Button>
+  <Button onclick={() => speaker_id = addSpeaker} form="filled"><span class="i-fa-solid-plus -mt-1"></span> {page.data.t('misc.add')}</Button>
 {:else}
   <div class="flex rounded-md shadow-sm mb-4">
     <label
       for="speaker"
       class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
         border-gray-300 bg-gray-50 text-gray-500">
-      {$page.data.t('entry_field.speaker')}
+      {page.data.t('entry_field.speaker')}
     </label>
     <select
       use:autofocus
       bind:value={speaker_id}
-      on:change={() => {
+      onchange={() => {
         // Currently means you can't remove a speaker
         if (speaker_id && speaker_id !== addSpeaker) {
           last_selected_speaker_id = speaker_id
@@ -47,7 +52,7 @@
       }}
       class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input hover:outline-blue-600">
       {#if !speaker_id}
-        <option />
+        <option></option>
       {/if}
       {#each $speakers as speaker}
         <option value={speaker.id}>
@@ -56,7 +61,7 @@
       {/each}
       <option value={addSpeaker}>
         +
-        {$page.data.t('misc.add')}
+        {page.data.t('misc.add')}
       </option>
     </select>
   </div>
@@ -72,5 +77,5 @@
       }} />
   {/await}
 {:else if speaker_id}
-  <slot {speaker_id} />
+  {@render children?.({ speaker_id, })}
 {/if}

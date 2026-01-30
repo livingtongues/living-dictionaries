@@ -1,18 +1,31 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { compressToEncodedURIComponent as encode } from 'kitbook'
+  import { compressToEncodedURIComponent as encode } from '$lib/lz/lz-string'
   import { dev } from '$app/environment'
 
-  export let width: number
-  export let height: number
-  export let title: string
-  export let description: string
-  export let dictionaryName: string
-  export let lat: number
-  export let lng: number
-  export let gcsPath: string = undefined
+  interface Props {
+    width: number;
+    height: number;
+    title: string;
+    description: string;
+    dictionaryName: string;
+    lat: number;
+    lng: number;
+    gcsPath?: string;
+  }
 
-  let version = new Date().getTime()
+  let {
+    width,
+    height,
+    title,
+    description,
+    dictionaryName,
+    lat,
+    lng,
+    gcsPath = undefined
+  }: Props = $props();
+
+  let version = $state(new Date().getTime())
   onMount(() => {
     if (dev) {
       const interval = setInterval(

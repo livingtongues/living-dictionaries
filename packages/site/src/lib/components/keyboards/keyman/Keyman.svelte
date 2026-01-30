@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
   // https://help.keyman.com/DEVELOPER/engine/web/15.0/reference/
   import type { KeymanWeb } from './Keyman.interface'
 
@@ -6,26 +6,41 @@
 </script>
 
 <script lang="ts">
-  import './keyman.css'
-  import { onDestroy, onMount, tick } from 'svelte'
-  import { Button, Modal, ShowHide, loadScriptOnce } from 'svelte-pieces'
-  import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages'
   import { browser } from '$app/environment'
 
-  /**
-   * When using keyboard inside a fixed context like a modal, set fixed to true to use fixed positioning instead of absolute positioning to keep keyboard with fixed input, otherwise it will match page scroll height
-   */
-  export let fixed = false
-  export let bcp: string = undefined
-  export let canChooseKeyboard = false
-  export let target: string = undefined
-  export let show = false
-  export let position: 'top' | 'bottom' = 'top'
-  export let version = '16.0.141' // https://keyman.com/developer/keymanweb/, https://keyman.com/downloads/pre-release/, https://help.keyman.com/developer/engine/web/history
+  import { Button, loadScriptOnce, Modal, ShowHide } from '$lib/svelte-pieces'
+  import { onDestroy, onMount, tick } from 'svelte'
+  import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages'
+  import './keyman.css'
 
-  let kmw: KeymanWeb
-  let wrapperEl: HTMLDivElement
-  let inputEl: HTMLInputElement | HTMLTextAreaElement
+  interface Props {
+    /**
+     * When using keyboard inside a fixed context like a modal, set fixed to true to use fixed positioning instead of absolute positioning to keep keyboard with fixed input, otherwise it will match page scroll height
+     */
+    fixed?: boolean
+    bcp?: string
+    canChooseKeyboard?: boolean
+    target?: string
+    show?: boolean
+    position?: 'top' | 'bottom'
+    version?: string // https://keyman.com/developer/keymanweb/, https://keyman.com/downloads/pre-release/, https://help.keyman.com/developer/engine/web/history
+    children?: import('svelte').Snippet
+  }
+
+  let {
+    fixed = false,
+    bcp = undefined,
+    canChooseKeyboard = false,
+    target = undefined,
+    show = $bindable(false),
+    position = 'top',
+    version = '16.0.141',
+    children,
+  }: Props = $props()
+
+  let kmw: KeymanWeb = $state()
+  let wrapperEl: HTMLDivElement = $state()
+  let inputEl: HTMLInputElement | HTMLTextAreaElement = $state()
 
   onMount(async () => {
     await loadScriptOnce(`https://s.keyman.com/kmw/engine/${version}/keymanweb.js`)
@@ -74,89 +89,98 @@
     })
   }
 
-  let selectedBcp: string
-  $: currentBcp = selectedBcp || bcp
-  $: glossLanguage = glossingLanguages[currentBcp] || additionalKeyboards[currentBcp]
-  $: internalName = glossLanguage?.internalName
-  $: keyboardBcp = glossLanguage?.useKeyboard ? glossLanguage.useKeyboard : currentBcp
-  $: keyboardId = `${internalName}@${keyboardBcp}`
+  let selectedBcp: string = $state()
+  let currentBcp = $derived(selectedBcp || bcp)
+  let glossLanguage = $derived(glossingLanguages[currentBcp] || additionalKeyboards[currentBcp])
+  let internalName = $derived(glossLanguage?.internalName)
+  let keyboardBcp = $derived(glossLanguage?.useKeyboard ? glossLanguage.useKeyboard : currentBcp)
+  let keyboardId = $derived(`${internalName}@${keyboardBcp}`)
 
-  $: if (kmw && show && internalName) {
-    (async () => {
-      await kmw.addKeyboards(keyboardId)
-      if (inputEl) {
-        kmw.attachToControl(inputEl)
-        kmw.setKeyboardForControl(inputEl, internalName, keyboardBcp)
-        inputEl.focus()
+  $effect(() => {
+    if (kmw && show && internalName) {
+      (async () => {
+        await kmw.addKeyboards(keyboardId)
+        if (inputEl) {
+          kmw.attachToControl(inputEl)
+          kmw.setKeyboardForControl(inputEl, internalName, keyboardBcp)
+          inputEl.focus()
 
-        if (currentBcp === 'srb-sora') {
-          await tick()
-          document.querySelector('.kmw-osk-frame')?.classList.add('sompeng')
-        } else {
-          document.querySelector('.kmw-osk-frame')?.classList.remove('sompeng')
+          if (currentBcp === 'srb-sora') {
+            await tick()
+            document.querySelector('.kmw-osk-frame')?.classList.add('sompeng')
+          } else {
+            document.querySelector('.kmw-osk-frame')?.classList.remove('sompeng')
+          }
         }
-      }
-    })()
-  }
+      })()
+    }
+  })
 
-  $: if (show)
-    inputEl?.classList.remove('kmw-disabled')
-  else
-    inputEl?.classList.add('kmw-disabled')
+  $effect(() => {
+    if (show)
+      inputEl?.classList.remove('kmw-disabled')
+    else
+      inputEl?.classList.add('kmw-disabled')
+  })
 
+  const children_render = $derived(children)
 </script>
 
-<ShowHide let:show={showKeyboardOptions} let:toggle>
-  <div bind:this={wrapperEl} class="w-full relative" class:sompeng={currentBcp === 'srb-sora'}>
-    <slot />
+<ShowHide>
+  {#snippet children({ show: showKeyboardOptions, toggle })}
+    <div bind:this={wrapperEl} class="w-full relative" class:sompeng={currentBcp === 'srb-sora'}>
+      {@render children_render?.()}
 
-    {#if kmw}
-      <div
-        class:top-0.75={position === 'top'}
-        class:bottom-0.75={position === 'bottom'}
-        class="absolute right-0.5 z-1 flex">
-        {#if (show || !bcp) && canChooseKeyboard}
-          <button
-            class="hover:text-black p-2 flex items-center bg-white rounded"
-            type="button"
-            on:click={toggle}
-            title="Select Keyboard">
-            <span class="i-ph-globe" />
-          </button>
-        {/if}
-        {#if glossLanguage?.showKeyboard}
-          <button
-            class="hover:text-black p-2 flex items-center bg-white rounded"
-            type="button"
-            on:click={() => (show = !show)}
-            title={show ? 'Keyboard active' : 'Keyboard inactive'}>
-            {#if show}
-              <span class="i-mdi-keyboard" />
-            {:else}
-              <span class="i-mdi-keyboard-off-outline" />
-            {/if}
-          </button>
-        {/if}
-      </div>
+      {#if kmw}
+        <div
+          class:top-0.75={position === 'top'}
+          class:bottom-0.75={position === 'bottom'}
+          class="absolute right-0.5 z-1 flex">
+          {#if (show || !bcp) && canChooseKeyboard}
+            <button
+              class="hover:text-black p-2 flex items-center bg-white rounded"
+              type="button"
+              onclick={toggle}
+              title="Select Keyboard">
+              <span class="i-ph-globe"></span>
+            </button>
+          {/if}
+          {#if glossLanguage?.showKeyboard}
+            <button
+              class="hover:text-black p-2 flex items-center bg-white rounded"
+              type="button"
+              onclick={() => (show = !show)}
+              title={show ? 'Keyboard active' : 'Keyboard inactive'}>
+              {#if show}
+                <span class="i-mdi-keyboard"></span>
+              {:else}
+                <span class="i-mdi-keyboard-off-outline"></span>
+              {/if}
+            </button>
+          {/if}
+        </div>
+      {/if}
+    </div>
+
+    {#if showKeyboardOptions}
+      <Modal on_close={toggle} noscroll>
+        {#snippet heading()}
+          <span>Select Keyboard</span>
+        {/snippet}
+        {#each [...Object.entries(glossingLanguages), ...Object.entries(additionalKeyboards)] as [_bcp, languageDefinition]}
+          {#if languageDefinition.showKeyboard}
+            <Button
+              form="menu"
+              size="sm"
+              onclick={() => {
+                toggle()
+                selectedBcp = _bcp
+                show = true
+              }}
+              active={_bcp === bcp}>{languageDefinition.vernacularName}</Button>
+          {/if}
+        {/each}
+      </Modal>
     {/if}
-  </div>
-
-  {#if showKeyboardOptions}
-    <Modal on:close={toggle} noscroll>
-      <span slot="heading">Select Keyboard</span>
-      {#each [...Object.entries(glossingLanguages), ...Object.entries(additionalKeyboards)] as [_bcp, languageDefinition]}
-        {#if languageDefinition.showKeyboard}
-          <Button
-            form="menu"
-            size="sm"
-            onclick={() => {
-              toggle()
-              selectedBcp = _bcp
-              show = true
-            }}
-            active={_bcp === bcp}>{languageDefinition.vernacularName}</Button>
-        {/if}
-      {/each}
-    </Modal>
-  {/if}
+  {/snippet}
 </ShowHide>

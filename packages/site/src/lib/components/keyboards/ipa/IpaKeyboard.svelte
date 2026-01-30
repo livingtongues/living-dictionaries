@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import vowelTrapezoid from './vowel-trapezoid.gif'
 
   export let on_ipa_change: (new_value: string) => void
@@ -79,9 +79,10 @@
     onclick={() => (activeTable = 'coarticulated')}>Co-Articulated Consonants</Button>
 </div>
 
-<div class="overflow-x-auto" on:click={addSelectedLetter}>
+<div class="overflow-x-auto" onclick={addSelectedLetter}>
   {#if activeTable === 'consonants'}
     <table cellspacing="0">
+      <thead>
       <tr class="consonant-header">
         <td class="rowheader" style="font-size: 15px; padding: 5px"><b>Consonants</b></td>
         <td class="labial" title="Labial" colspan="2">Bilabial</td>
@@ -98,6 +99,8 @@
         <td class="radical" title="Radical" colspan="2">Epi-<br />glottal</td>
         <td colspan="2">Glottal</td>
       </tr>
+      </thead>
+      <tbody>
       <tr>
         <td class="rowheader">Nasal</td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless bilabial nasal">m̥</span></td>
@@ -288,11 +291,13 @@
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Velar lateral flap">ʟ̆</span></td>
         <td colspan="8" class="bt0 br1 bb1 bl1 nd" />
       </tr>
+      </tbody>
     </table>
   {/if}
 
   {#if activeTable === 'vowels'}
     <table class="vowels" cellspacing="0" style="border:1px solid #aaa;">
+      <thead>
       <tr class="vowelheader">
         <td style="font-size: 15px; padding: 3px"><b>Vowels</b></td>
         <td style="width: 85px">
@@ -303,6 +308,8 @@
         <td style="line-height:100%" title="Near-back vowel">Near<br />back</td>
         <td style="" title="Back vowel">Back</td>
       </tr>
+      </thead>
+      <tbody>
       <tr>
         <td class="rowheader" style="height:36.5px; text-align:right;" title="Close vowel"><b>Close</b></td>
         <td rowspan="7" colspan="5" style="font-size: 80%; padding: 15px 30px 15px 17px;">
@@ -316,6 +323,7 @@
             <div style="position:absolute; top:-20px;">
               <table
                 style="position:relative; width:300px; height:224px; text-align:left; font-size:131%;">
+                <tbody>
                 <tr>
                   <td style="vertical-align: top;">
                     <div class="vowel_row">
@@ -382,6 +390,7 @@
                     </div>
                   </td>
                 </tr>
+                </tbody>
               </table>
             </div>
           </div>
@@ -405,14 +414,18 @@
       <tr>
         <td class="rowheader" style="height:36.5px;" title="Open vowel"><b>Open</b></td>
       </tr>
+      </tbody>
     </table>
   {/if}
 
   {#if activeTable === 'diacritics'}
     <table cellpadding="3" cellspacing="0" style="float:left;">
+      <thead>
       <tr>
         <th colspan="4">Diacritics</th>
       </tr>
+      </thead>
+      <tbody>
       <tr>
         <td class="rowheader">Aspirated</td>
         <td><span class="ipa">◌ʰ</span></td>
@@ -515,16 +528,20 @@
         <td />
         <td />
       </tr>
+      </tbody>
     </table>
   {/if}
 
   {#if activeTable === 'other'}
     <table cellpadding="3" cellspacing="0" style="float:left;">
+      <thead>
       <tr>
         <th class="align-middle" colspan="2" rowspan="1">Suprasegmentals</th>
         <th colspan="2" rowspan="1" style="line-height:100%">Diacritic<br />tone marks</th>
         <th colspan="2" rowspan="1" style="line-height:100%">Tone&nbsp;Letters<br />&amp; Numbers</th>
       </tr>
+      </thead>
+      <tbody>
       <tr>
         <td class="rowheader">Long</td>
         <td><span class="ipa">◌ː</span></td>
@@ -654,9 +671,12 @@
 
   {#if activeTable === 'nonPulmonic'}
     <table cellspacing="0" style="float: left;">
-      <tr>
-        <th colspan="8">Non-pulmonic consonants</th>
-      </tr>
+      <thead>
+        <tr>
+          <th colspan="8">Non-pulmonic consonants</th>
+        </tr>
+      </thead>
+      <tbody>
       <tr>
         <td rowspan="2" class="rowheader">Clicks</td>
         <td class="bt0 br1 bb1 bl1" title="Bilabial clicks"><span class="ipa">ʘ</span></td>
@@ -707,14 +727,18 @@
         <td class="b1"><span class="ipa" title="Velar ejective affricate">kxʼ</span></td>
         <td class="b1"><span class="ipa" title="Velar lateral ejective affricate">kʟ̝̊ʼ</span></td>
       </tr>
+      </tbody>
     </table>
   {/if}
 
   {#if activeTable === 'affricates'}
     <table cellspacing="0" style="float: left;">
-      <tr>
-        <th colspan="10">Affricates</th>
-      </tr>
+      <thead>
+        <tr>
+          <th colspan="10">Affricates</th>
+        </tr>
+      </thead>
+      <tbody>
       <tr>
         <td class="bt0 br0 bb0 bl1"><span class="ipa" title="Voiceless labiodental affricate">p̪f</span></td>
         <td class="bt0 br1 bb0 bl0"><span class="ipa" title="Voiced labiodental affricate">b̪v</span></td>
@@ -739,14 +763,18 @@
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless velar lateral affricate">kʟ̝̊</span></td>
         <td class="bt1 br1 bb1 bl0" />
       </tr>
+      </tbody>
     </table>
   {/if}
 
   {#if activeTable === 'coarticulated'}
     <table cellspacing="0" width="225">
-      <tr>
-        <th colspan="5">Co-articulated consonants</th>
-      </tr>
+      <thead>
+        <tr>
+          <th colspan="5">Co-articulated consonants</th>
+        </tr>
+      </thead>
+      <tbody>
       <tr>
         <td class="rowheader">Continuants</td>
         <td class="bt0 br0 bb1 bl1"><span class="ipa" title="Voiceless labio-velar approximant">ʍ</span></td>
@@ -760,6 +788,7 @@
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced labial-velar stop">ɡ͡b</span></td>
         <td class="b1" colspan="2"><span class="ipa" title="Labial-velar nasal">ŋ͡m</span></td>
       </tr>
+      </tbody>
     </table>
   {/if}
 </div>

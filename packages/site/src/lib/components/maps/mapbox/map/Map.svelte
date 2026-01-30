@@ -1,52 +1,71 @@
 <script lang="ts">
-  // from https://github.com/beyonk-adventures/svelte-mapbox
-  import { createEventDispatcher, onDestroy, onMount, setContext, tick } from 'svelte'
-  import { loadScriptOnce, loadStylesOnce } from 'svelte-pieces'
   import type { ErrorEvent, EventData, LngLat, LngLatBoundsLike, LngLatLike, Map, MapboxOptions } from 'mapbox-gl'
-  import { mapKey } from '../context'
-  import { EventQueue } from '../queue'
-  import { bindEvents } from '../event-bindings'
+  import { PUBLIC_mapboxAccessToken } from '$env/static/public'
+  import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
+  // from https://github.com/beyonk-adventures/svelte-mapbox
+  import { onDestroy, onMount, setContext, tick } from 'svelte'
   import { getTimeZoneLongitude } from '../../utils/getTimeZoneLongitude'
   import { ADDED_FEATURE_ID_PREFIX } from '../../utils/randomId'
-  import { PUBLIC_mapboxAccessToken } from '$env/static/public'
+  import { mapKey } from '../context'
+  import { bindEvents } from '../event-bindings'
+  import { EventQueue } from '../queue'
 
-  export let map: Map = null
-  export let version = 'v3.13.0'
-  export let customStylesheetUrl: string = undefined
-  export let accessToken = PUBLIC_mapboxAccessToken
-  export let options: Partial<MapboxOptions> = {}
-  export let zoom = 4
-  export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true' // 'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
-  export let lng: number = undefined
-  export let lat: number = undefined
-  export let pointsToFit: number[][] = undefined
+  interface Props {
+    map?: Map
+    version?: string
+    customStylesheetUrl?: string
+    accessToken?: any
+    options?: Partial<MapboxOptions>
+    zoom?: number
+    style?: string // 'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
+    lng?: number
+    lat?: number
+    pointsToFit?: number[][]
+    on_ready?: () => void
+    on_dragend?: (lngLat: LngLat) => void
+    on_moveend?: (lngLat: LngLat) => void
+    on_click?: (lngLat: LngLat) => void
+    on_zoomend?: (zoom: number) => void
+    on_error?: (error: ErrorEvent & EventData) => void
+    children?: import('svelte').Snippet<[any]>
+  }
 
-  let center: LngLatLike
-  $: center = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10]
+  let {
+    map = $bindable(null),
+    version = 'v3.13.0',
+    customStylesheetUrl = undefined,
+    accessToken = PUBLIC_mapboxAccessToken,
+    options = {},
+    zoom = 4,
+    style = 'mapbox://styles/mapbox/streets-v11?optimize=true',
+    lng = undefined,
+    lat = undefined,
+    pointsToFit = undefined,
+    on_ready,
+    on_dragend,
+    on_moveend,
+    on_click,
+    on_zoomend,
+    on_error,
+    children,
+  }: Props = $props()
 
-  let container: HTMLDivElement
+  let center: LngLatLike = $state()
+
+  let container: HTMLDivElement = $state()
   let mapbox: typeof import('mapbox-gl')
   const queue = new EventQueue()
-  let ready = false
+  let ready = $state(false)
 
   setContext(mapKey, {
     getMap: () => map,
     getMapbox: () => mapbox,
   })
 
-  const dispatch = createEventDispatcher<{
-    ready: null
-    dragend: LngLat
-    moveend: LngLat
-    click: LngLat
-    zoomend: number
-    error: ErrorEvent & EventData
-  }>()
-
   // More events at https://docs.mapbox.com/mapbox-gl-js/api/map/#map-events
   const handlers: Record<string, any> = {
-    dragend: () => dispatch('dragend', map.getCenter()),
-    moveend: () => dispatch('moveend', map.getCenter()),
+    dragend: () => on_dragend?.(map.getCenter()),
+    moveend: () => on_moveend?.(map.getCenter()),
     click: (e) => {
       if (
         map
@@ -54,12 +73,12 @@
           .filter(f => f.source.startsWith(ADDED_FEATURE_ID_PREFIX))
           .length === 0
       ) {
-        dispatch('click', e.lngLat)
+        on_click?.(e.lngLat)
       }
     },
-    zoomend: () => dispatch('zoomend', map.getZoom()),
-    error: (e: ErrorEvent & EventData) => dispatch('error', e),
-    load: () => { 
+    zoomend: () => on_zoomend?.(map.getZoom()),
+    error: (e: ErrorEvent & EventData) => on_error?.(e),
+    load: () => {
       // map.fitBounds(
       //   [
       //     [-180, -90], // Southwest corner
@@ -71,8 +90,8 @@
       //   }
       // );
       // map.setCenter(center);
-      dispatch('ready');
-      (ready = true);
+      on_ready?.();
+      (ready = true)
     },
   // drag: () => dispatch('drag', map.getCenter()),
   }
@@ -140,10 +159,6 @@
     return mapbox
   }
 
-  $: if (zoom) setZoom(zoom)
-  $: if (center) setCenter(center)
-  $: if (pointsToFit?.length) fitPoints()
-
   async function fitPoints() {
     if (pointsToFit.length === 1) {
       setCenter(pointsToFit[0])
@@ -157,14 +172,26 @@
       maxZoom: 6,
     })
   }
+  $effect(() => {
+    center = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10]
+  })
+  $effect(() => {
+    if (zoom) setZoom(zoom)
+  })
+  $effect(() => {
+    if (center) setCenter(center)
+  })
+  $effect(() => {
+    if (pointsToFit?.length) fitPoints()
+  })
 </script>
 
 <div bind:this={container}>
   {#if ready}
-    <slot {map} />
+    {@render children?.({ map })}
   {:else}
     <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-      <span class="i-fa-solid-globe-asia text-6xl text-gray-300 animate-pulse" />
+      <span class="i-fa-solid-globe-asia text-6xl text-gray-300 animate-pulse"></span>
     </div>
   {/if}
 </div>

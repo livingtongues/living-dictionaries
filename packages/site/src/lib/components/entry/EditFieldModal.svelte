@@ -1,22 +1,37 @@
 <script lang="ts">
-  import { Modal } from 'svelte-pieces'
   import type { EntryFieldValue } from '@living-dictionaries/types'
+  import { Modal } from '$lib/svelte-pieces'
   import EditField from './EditField.svelte'
 
-  export let display: string
-  export let value = ''
-  export let field: EntryFieldValue
-  export let bcp: string = undefined
-  export let isSompeng = false
-  export let addingLexeme = false
-  export let on_update: (new_value: string) => void | Promise<void>
-  export let on_close: () => void
+  interface Props {
+    display: string
+    value?: string
+    field: EntryFieldValue
+    bcp?: string
+    isSompeng?: boolean
+    addingLexeme?: boolean
+    on_update: (new_value: string) => void | Promise<void>
+    on_close: () => void
+  }
+
+  let {
+    display,
+    value = '',
+    field,
+    bcp = undefined,
+    isSompeng = false,
+    addingLexeme = false,
+    on_update,
+    on_close,
+  }: Props = $props()
 </script>
 
 <Modal
   noscroll
   class={field === 'phonetic' && 'wider-phonetic-modal'}
   {on_close}>
-  <span slot="heading">{display}</span>
+  {#snippet heading()}
+    <span>{display}</span>
+  {/snippet}
   <EditField {on_close} {on_update} {value} {field} {bcp} {isSompeng} {addingLexeme} />
 </Modal>

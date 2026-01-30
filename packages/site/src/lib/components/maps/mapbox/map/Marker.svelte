@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
   const markers = new Set<Marker>()
 
   function closeOtherPopups(currentMarker: Marker) {
@@ -12,7 +12,7 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, getContext, onMount, setContext } from 'svelte'
+  import { getContext, onMount, setContext } from 'svelte'
   import type { LngLat, Marker, MarkerOptions } from 'mapbox-gl'
   import { type MapKeyContext, type MarkerKeyContext, mapKey, markerKey } from '../context'
 
@@ -20,23 +20,39 @@
   const map = getMap()
   const mapbox = getMapbox()
 
-  export let lat: number
-  export let lng: number
-  export let color: 'blue' | 'black' = 'black'
-  export let options: MarkerOptions = {}
-  export let draggable = false
+  interface Props {
+    lat: number;
+    lng: number;
+    color?: 'blue' | 'black';
+    options?: MarkerOptions;
+    draggable?: boolean;
+    on_dragend?: (lngLat: LngLat) => void;
+    pin?: import('svelte').Snippet<[any]>;
+    children?: import('svelte').Snippet<[any]>;
+  }
 
-  let marker: Marker
-  let element: HTMLDivElement
+  let {
+    lat = $bindable(),
+    lng = $bindable(),
+    color = 'black',
+    options = {},
+    draggable = false,
+    on_dragend,
+    pin,
+    children
+  }: Props = $props();
+
+  let marker: Marker = $state()
+  let element: HTMLDivElement = $state()
   let markerEl: HTMLElement
 
   setContext<MarkerKeyContext>(markerKey, {
     getMarker: () => marker,
   })
 
-  $: marker?.setLngLat({ lng, lat })
-
-  const dispatch = createEventDispatcher<{ dragend: LngLat }>()
+  $effect(() => {
+    marker?.setLngLat({ lng, lat })
+  });
 
   function handleClick(e) {
     e.stopPropagation()
@@ -47,7 +63,7 @@
   function handleDragEnd() {
     markerEl.removeEventListener('click', handleClick)
     const coordinates = marker.getLngLat()
-    dispatch('dragend', coordinates);
+    on_dragend?.(coordinates);
     ({ lat, lng } = coordinates)
   }
 
@@ -76,9 +92,9 @@
 </script>
 
 <div bind:this={element}>
-  <slot name="pin" {marker} {lat} {lng} />
+  {@render pin?.({ marker, lat, lng, })}
 </div>
 
 {#if marker}
-  <slot {marker} {lat} {lng} />
+  {@render children?.({ marker, lat, lng, })}
 {/if}

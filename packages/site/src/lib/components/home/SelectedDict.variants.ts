@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { Variant } from 'kitbook';
 // import type Component from './SelectedDict.svelte';
 // import type { IDictionary } from '@living-dictionaries/types';

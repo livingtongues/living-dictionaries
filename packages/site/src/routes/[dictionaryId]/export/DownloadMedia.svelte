@@ -1,22 +1,34 @@
 <script lang="ts">
   import JSZip from 'jszip'
   import type { Tables } from '@living-dictionaries/types'
-  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
   import type { EntryForCSV } from './prepareEntriesForCsv'
   import { objectsToCsvByHeaders } from '$lib/export/csv'
   import { downloadBlob } from '$lib/export/downloadBlob'
 
-  export let dictionary: Tables<'dictionaries'>
-  export let entryHeaders: EntryForCSV
-  export let finalizedEntries: EntryForCSV[]
-  export let entriesWithImages: EntryForCSV[] = []
-  export let entriesWithAudio: EntryForCSV[] = []
+  interface Props {
+    dictionary: Tables<'dictionaries'>;
+    entryHeaders: EntryForCSV;
+    finalizedEntries: EntryForCSV[];
+    entriesWithImages?: EntryForCSV[];
+    entriesWithAudio?: EntryForCSV[];
+    on_completed?: () => void;
+    children?: import('svelte').Snippet<[any]>;
+  }
 
-  const dispatch = createEventDispatcher<{ completed: null }>()
+  let {
+    dictionary,
+    entryHeaders,
+    finalizedEntries,
+    entriesWithImages = [],
+    entriesWithAudio = [],
+    on_completed,
+    children
+  }: Props = $props();
 
-  let fetched = 0
-  $: progress = fetched / (entriesWithImages.length + entriesWithAudio.length)
-  let errors = []
+  let fetched = $state(0)
+  let progress = $derived(fetched / (entriesWithImages.length + entriesWithAudio.length))
+  let errors = $state([])
   let destroyed = false
 
   onMount(async () => {
@@ -73,7 +85,7 @@
     if (destroyed) return
     downloadBlob(blob, dictionary.id, '.zip')
     if (!errors.length)
-      dispatch('completed')
+      on_completed?.()
   })
 
   onDestroy(() => {
@@ -82,7 +94,7 @@
 </script>
 
 <div>
-  <slot {progress} />
+  {@render children?.({ progress, })}
 </div>
 
 {#if errors.length}

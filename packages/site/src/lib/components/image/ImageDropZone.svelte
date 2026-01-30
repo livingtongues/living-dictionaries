@@ -1,10 +1,13 @@
 <script lang="ts">
+  import { page } from '$app/state'
   import { apply_button_label } from './image-store'
-  import { page } from '$app/stores'
 
-  export let border: boolean
-  export let on_file_added: (file: File) => void = undefined
-  let dragging = false
+  const { border, on_file_added = undefined, class: class_prop = '' }: {
+    border: boolean
+    on_file_added?: (file: File) => void
+    class?: string
+  } = $props()
+  let dragging = $state(false)
   // const applyButtonLabel: any = getContext('applyButtonLabel')
 
   function handleImage(files: FileList) {
@@ -15,13 +18,13 @@
     // Client-side validation: Must be an image (not SVG) and smaller than 10MB.
     if (fileToCheck.type.split('/')[0] !== 'image' || fileToCheck.type === 'image/svg+xml') {
       return alert(
-        `${$page.data.t('upload.error')}`,
+        `${page.data.t('upload.error')}`,
       )
     }
     const tenMB = 10485760 // http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > tenMB) {
       return alert(
-        `${$page.data.t('upload.file_must_be_smaller')} 10MB`,
+        `${page.data.t('upload.file_must_be_smaller')} 10MB`,
       )
     }
 
@@ -34,20 +37,19 @@
   class:dashed-border={border}
   class:button-label={$apply_button_label.ready_to_upload}
   class:blocked={!$apply_button_label.ready_to_upload}
-  class="{$$props.class} text-gray-600
+  class="{class_prop} text-gray-600
     h-full grow-1 flex flex-col items-center justify-center
     cursor-pointer"
   title="Add Photo"
-  on:drop|preventDefault={e => handleImage(e.dataTransfer.files)}
-  on:dragover|preventDefault={() => (dragging = true)}
-  on:dragleave|preventDefault={() => (dragging = false)}>
+  ondrop={(e) => { e.preventDefault(); handleImage(e.dataTransfer.files) }}
+  ondragover={(e) => { e.preventDefault(); dragging = true }}
+  ondragleave={(e) => { e.preventDefault(); dragging = false }}>
   <input
     type="file"
     accept="image/*"
     class="hidden"
-    on:input={(e) => {
-      // @ts-expect-error
-      handleImage(e.target.files)
+    oninput={(e) => {
+      handleImage((e.target as HTMLInputElement).files)
     }} />
   <span class="hidden md:inline">
     <span class="i-ic-outline-cloud-upload text-2xl" />
@@ -61,19 +63,16 @@
 
 <style>
   .blocked {
-            --at-apply: pointer-events-none opacity-60 cursor-not-allowed select-none px-3 py-2 border border-gray-500;
+    @apply pointer-events-none opacity-60 cursor-not-allowed select-none px-3 py-2 border border-gray-500;
   }
   .button-label {
-      --at-apply: flex justify-center items-center px-3 py-2 border font-medium
-    cursor-pointer focus:outline-none border-green-300
-    focus:ring focus:ring-green-300 active:bg-green-200 transition ease-in-out
-    duration-150 rounded hover:bg-green-100 text-green-700;
+    @apply flex justify-center items-center px-3 py-2 border font-medium cursor-pointer focus:outline-none border-green-300 focus:ring focus:ring-green-300 active:bg-green-200 transition ease-in-out duration-150 rounded hover:bg-green-100 text-green-700;
   }
 
   .dragging {
-    --at-apply: bg-blue-200 border-blue-300 text-blue-700;
+    @apply bg-blue-200 border-blue-300 text-blue-700;
   }
   .dashed-border {
-    --at-apply: border-2 border-dashed;
+    @apply border-2 border-dashed;
   }
 </style>

@@ -2,10 +2,14 @@
   import type { EntryData, Tables } from '@living-dictionaries/types'
   import { sortedColumn } from './sortedColumnStore'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
-  export let record: Tables<'content_updates'>
-  export let get_entry: (record: Tables<'content_updates'>) => EntryData
+  interface Props {
+    record: Tables<'content_updates'>;
+    get_entry: (record: Tables<'content_updates'>) => EntryData;
+  }
+
+  let { record, get_entry }: Props = $props();
 </script>
 
 <tr>
@@ -19,6 +23,6 @@
     {`${JSON.stringify(record.change.data)}` || ''}
   </td>
   <td class="md:w-32" class:font-bold={$sortedColumn === 'date'}>
-    {supabase_date_to_friendly(record.timestamp, $page.data.locale) || ''}
+    {supabase_date_to_friendly(record.timestamp, page.data.locale) || ''}
   </td>
 </tr>

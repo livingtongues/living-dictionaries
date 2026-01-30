@@ -27,13 +27,13 @@
     {#if show}
       <RegionModal
         {region}
-        on:update={({ detail }) => {
+        on_update={(detail) => {
           region = { coordinates: [...detail.coordinates, detail.coordinates[0]] };
         }}
-        on:remove={() => {
+        on_remove={() => {
           region = null;
         }}
-        on:close={toggle} />
+        on_close={toggle} />
     {/if}
   </ShowHide>
 </Story>
@@ -44,8 +44,8 @@
     {#if show}
       <RegionModal
         region={undefined}
-        on:update={({ detail }) => alert(JSON.stringify(detail.coordinates))}
-        on:close={toggle} />
+        on_update={(detail) => alert(JSON.stringify(detail.coordinates))}
+        on_close={toggle} />
     {/if}
   </ShowHide>
 </Story>

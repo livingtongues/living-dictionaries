@@ -1,19 +1,31 @@
 <script lang="ts">
-  import { Button, Form } from 'svelte-pieces'
-  import sanitize from 'xss'
   import type { EntryFieldValue } from '@living-dictionaries/types'
+  import { page } from '$app/state'
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
-  import { page } from '$app/stores'
+  import { Button, Form } from '$lib/svelte-pieces'
+  import sanitize from 'xss'
 
-  export let value = ''
-  export let field: EntryFieldValue
-  export let isSompeng = false
-  export let addingLexeme = false
-  export let bcp: string = undefined
-  export let on_update: (new_value: string) => void | Promise<void>
-  export let on_close: () => void
+  interface Props {
+    value?: string
+    field: EntryFieldValue
+    isSompeng?: boolean
+    addingLexeme?: boolean
+    bcp?: string
+    on_update: (new_value: string) => void | Promise<void>
+    on_close: () => void
+  }
 
-  let inputEl: HTMLInputElement
+  let {
+    value = $bindable(''),
+    field,
+    isSompeng = false,
+    addingLexeme = false,
+    bcp = undefined,
+    on_update,
+    on_close,
+  }: Props = $props()
+
+  let inputEl: HTMLInputElement = $state()
 
   async function save() {
     value = inputEl?.value || value // IpaKeyboard modifies input's value from outside this component so the bound value here doesn't update. This is hacky and the alternative is to emit events from the IpaKeyboard rather than bind to any neighboring element. This makes the adding and backspacing functions potentially needing to be applied in every context where the IPA keyboard is used. Until we know more how the IPA keyboard will be used, this line here is sufficient.
@@ -111,103 +123,105 @@
   }
 </script>
 
-<Form let:loading onsubmit={save}>
-  <div class="rounded-md shadow-sm">
-    {#if field === 'notes'}
-      {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-        <Keyman fixed target=".ck-editor__editable_inline" canChooseKeyboard position="bottom">
-          <ClassicCustomized {editorConfig} html={value} on:update={({ detail }) => (value = detail)} />
+<Form onsubmit={save}>
+  {#snippet children({ loading })}
+    <div class="rounded-md shadow-sm">
+      {#if field === 'notes'}
+        {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
+          <Keyman fixed target=".ck-editor__editable_inline" canChooseKeyboard position="bottom">
+            <ClassicCustomized {editorConfig} html={value} on_update={(detail) => (value = detail)} />
+          </Keyman>
+        {/await}
+      {:else if field === 'gloss' || field === 'example_sentence'}
+        <Keyman fixed {bcp}>
+          <input
+            bind:this={inputEl}
+            dir="ltr"
+            type="text"
+            use:autofocus
+            bind:value
+            class:sompeng={isSompeng}
+            class="form-input block w-full pr-16" />
         </Keyman>
-      {/await}
-    {:else if field === 'gloss' || field === 'example_sentence'}
-      <Keyman fixed {bcp}>
+      {:else if field === 'local_orthography' || field === 'lexeme'}
+        <Keyman fixed canChooseKeyboard>
+          <input
+            bind:this={inputEl}
+            dir="ltr"
+            type="text"
+            required={field === 'lexeme'}
+            use:autofocus
+            bind:value
+            class:sompeng={isSompeng}
+            class="form-input block w-full pr-16" />
+        </Keyman>
+      {:else if field === 'phonetic'}
+        {#await import('$lib/components/keyboards/ipa/IpaKeyboard.svelte') then { default: IpaKeyboard }}
+          <div class="mt-2">
+            <IpaKeyboard on_ipa_change={new_value => value = new_value}>
+              <input
+                dir="ltr"
+                type="text"
+                use:autofocus
+                bind:value
+                class="form-input block w-full" />
+            </IpaKeyboard>
+          </div>
+        {/await}
+      {:else}
         <input
           bind:this={inputEl}
           dir="ltr"
           type="text"
           use:autofocus
           bind:value
-          class:sompeng={isSompeng}
-          class="form-input block w-full pr-16" />
-      </Keyman>
-    {:else if field === 'local_orthography' || field === 'lexeme'}
-      <Keyman fixed canChooseKeyboard>
-        <input
-          bind:this={inputEl}
-          dir="ltr"
-          type="text"
-          required={field === 'lexeme'}
-          use:autofocus
-          bind:value
-          class:sompeng={isSompeng}
-          class="form-input block w-full pr-16" />
-      </Keyman>
-    {:else if field === 'phonetic'}
-      {#await import('$lib/components/keyboards/ipa/IpaKeyboard.svelte') then { default: IpaKeyboard }}
-        <div class="mt-2">
-          <IpaKeyboard on_ipa_change={new_value => value = new_value}>
-            <input
-              dir="ltr"
-              type="text"
-              use:autofocus
-              bind:value
-              class="form-input block w-full" />
-          </IpaKeyboard>
-        </div>
-      {/await}
-    {:else}
-      <input
-        bind:this={inputEl}
-        dir="ltr"
-        type="text"
-        use:autofocus
-        bind:value
-        class="form-input block w-full" />
-    {/if}
-
-    {#if field === 'interlinearization'}
-      <div class="mt-3 text-sm hidden md:block" />
-      <Button
-        class="mt-1"
-        size="sm"
-        form="simple"
-        onclick={() => (value = smallCapsSelection(inputEl))}>Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
-    {/if}
-
-    {#if field === 'scientific_names'}
-      <Button
-        class="mt-1"
-        size="sm"
-        form="simple"
-        onclick={() => (value = italicizeSelection(inputEl))}><i>Italicize</i> selection</Button>
-      {#if value.includes('<i>')}
-        <div class="tw-prose mt-2 p-1 shadow bg-gray-200">
-          {@html sanitize(value)}
-        </div>
+          class="form-input block w-full" />
       {/if}
-    {/if}
-  </div>
 
-  <div class="modal-footer">
-    <Button disabled={loading} onclick={on_close} form="simple" color="black">
-      {$page.data.t('misc.cancel')}
-    </Button>
-    <div class="w-1" />
-    {#if addingLexeme}
-      <Button {loading} type="submit" form="filled">
-        {$page.data.t('misc.next')}
-        <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-.5" />
+      {#if field === 'interlinearization'}
+        <div class="mt-3 text-sm hidden md:block"></div>
+        <Button
+          class="mt-1"
+          size="sm"
+          form="simple"
+          onclick={() => (value = smallCapsSelection(inputEl))}>Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
+      {/if}
+
+      {#if field === 'scientific_names'}
+        <Button
+          class="mt-1"
+          size="sm"
+          form="simple"
+          onclick={() => (value = italicizeSelection(inputEl))}><i>Italicize</i> selection</Button>
+        {#if value.includes('<i>')}
+          <div class="tw-prose mt-2 p-1 shadow bg-gray-200">
+            {@html sanitize(value)}
+          </div>
+        {/if}
+      {/if}
+    </div>
+
+    <div class="modal-footer">
+      <Button disabled={loading} onclick={on_close} form="simple" color="black">
+        {page.data.t('misc.cancel')}
       </Button>
-    {:else}
-      <Button {loading} type="submit" form="filled">
-        {$page.data.t('misc.save')}
-      </Button>
-    {/if}
-  </div>
+      <div class="w-1"></div>
+      {#if addingLexeme}
+        <Button {loading} type="submit" form="filled">
+          {page.data.t('misc.next')}
+          <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-.5"></span>
+        </Button>
+      {:else}
+        <Button {loading} type="submit" form="filled">
+          {page.data.t('misc.save')}
+        </Button>
+      {/if}
+    </div>
+  {/snippet}
 </Form>
 
 <style>
   :global(.ck-editor__editable_inline) {
-    --at-apply: md:min-h-50vh;
+    @apply md:min-h-50vh;
   }
 </style>
