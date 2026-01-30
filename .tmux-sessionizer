@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# Window 2
+tmux new-window -dn terminals
+tmux send-keys -t terminals "pnpm dev" C-m
+# tmux send-keys -t terminals "pnpm dev & sleep 3 && xdg-open http://localhost:7878" C-m
+tmux split-window -t terminals -h -c "$(pwd)"
+
+# Window 3
+tmux new-window -dn scratch
+
+# Window 1
+# Prefer port 7788 if not already in use so that OpenCode web tunnel works
+if ss -tln | grep -q ':7788 '; then
+  tmux split-window -h -c "$(pwd)" opencode
+else
+  tmux split-window -h -c "$(pwd)" "opencode --port 7788"
+fi
+tmux select-pane -L
+nvim .
+
+clear
