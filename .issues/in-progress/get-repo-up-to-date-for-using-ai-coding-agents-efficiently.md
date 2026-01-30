@@ -8,7 +8,7 @@ github_issue: 625
 
 - [ ] Chrome DevTools MCP - get it able to navigate the site locally (requires getting local login working)
 - [ ] Kitbook snapshotting
-- [ ] Skills documentation
+- [x] Skills documentation
 - [ ] /opencode issue mentioning
 - [x] Issues syncing
 - [ ] Svelte 5 migration
