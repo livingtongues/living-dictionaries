@@ -1,25 +1,20 @@
 <script lang="ts">
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
-  import type { PageData } from './$types'
+  import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import { Button, ResponsiveTable } from '$lib/svelte-pieces'
   import SortUsers from './SortUsers.svelte'
   import UserRow from './UserRow.svelte'
 
-  interface Props {
-    data: PageData
-  }
-
-  let { data }: Props = $props()
-  let { admin_dictionaries, users, dictionary_roles } = $derived(data)
-
-  let users_with_roles = $derived($users.map((user) => {
-    return {
-      ...user,
-      dictionary_roles: $dictionary_roles.filter(role => role.user_id === user.id),
-    }
-  }))
+  let users_with_roles = $derived(
+    (page.data.db?.users.rows ?? []).map((user) => {
+      return {
+        ...user,
+        dictionary_roles: (page.data.db?.dictionary_roles.rows ?? []).filter(role => role.user_id === user.id),
+      } as UserWithDictionaryRoles
+    }),
+  )
 
   function exportUsersAsCSV(users: UserWithDictionaryRoles[]) {
     const headers = {
@@ -54,15 +49,7 @@
         <SortUsers users={filteredUsers}>
           {#snippet children({ sortedUsers })}
             {#each sortedUsers as user (user.id)}
-              <UserRow
-                load_data={async () => {
-                  await Promise.all([
-                    users.refresh(),
-                    dictionary_roles.reset(),
-                  ])
-                }}
-                dictionaries={$admin_dictionaries}
-                {user} />
+              <UserRow {user} />
             {/each}
           {/snippet}
         </SortUsers>

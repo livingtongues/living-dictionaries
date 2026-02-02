@@ -1,9 +1,11 @@
 /* eslint-disable test/no-conditional-in-test */
+import type { Database } from '@living-dictionaries/types'
 import * as local_schema from '$lib/pglite/schema'
 import { PGlite } from '@electric-sql/pglite'
+import { createClient } from '@supabase/supabase-js'
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/pglite'
-import { admin_supabase, anon_supabase, generate_uuid, PASSWORD, supabase_pg } from './clients'
+import { admin_supabase, anon_supabase, generate_uuid, PASSWORD, PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL, supabase_pg } from './clients'
 import { Sync } from './sync-engine.svelte.js'
 
 vi.mock('$app/state', () => ({
@@ -103,7 +105,7 @@ describe(Sync, () => {
       const result = await device1.sync.sync()
 
       expect(result.success).toBeTruthy()
-      expect(result.items_downloaded).toBe(4)
+      expect(result.items_downloaded).toBe(5) // 2 users, 1 dictionary, 1 dictionary_role, 1 user_data
 
       // Verify the test user is present
       const [test_user] = await device1.db.select().from(local_schema.users).where(eq(local_schema.users.id, TEST_USER_ID))
@@ -240,6 +242,7 @@ describe(Sync, () => {
         public: false,
         url: CONFLICT_DICT_ID,
         created_by: TEST_USER_ID,
+        created_at: new Date(),
         updated_at: new Date(),
       })
       await device1.sync.sync()
@@ -523,6 +526,7 @@ describe(Sync, () => {
         name: 'Dictionary to Delete',
         url: DELETE_DICT_ID,
         created_by: TEST_USER_ID,
+        created_at: new Date(),
         updated_at: new Date(),
       })
       await device1.sync.sync()
@@ -631,6 +635,40 @@ describe(Sync, () => {
       // Verify device 2 no longer has the invite
       const after = await device2.db.select().from(local_schema.invites).where(eq(local_schema.invites.id, DELETE_INVITE_ID))
       expect(after).toHaveLength(0)
+    })
+  })
+
+  describe('deletes table RLS - non-admin cannot insert', () => {
+    const NON_ADMIN_USER_ID = generate_uuid(40)
+    const NON_ADMIN_EMAIL = `non-admin-${NON_ADMIN_USER_ID}@test.com`
+    let non_admin_supabase: typeof anon_supabase
+
+    beforeAll(async () => {
+      // Create a non-admin user
+      await admin_supabase.auth.admin.createUser({
+        id: NON_ADMIN_USER_ID,
+        email: NON_ADMIN_EMAIL,
+        password: PASSWORD,
+        email_confirm: true,
+        // No admin metadata
+      })
+
+      // Create a separate Supabase client and sign in as non-admin
+      non_admin_supabase = createClient<Database>(PUBLIC_SUPABASE_API_URL, PUBLIC_SUPABASE_ANON_KEY)
+      await non_admin_supabase.auth.signInWithPassword({
+        email: NON_ADMIN_EMAIL,
+        password: PASSWORD,
+      })
+    })
+
+    test('non-admin user cannot insert into deletes table', async () => {
+      const { error } = await non_admin_supabase.from('deletes' as any).insert({
+        table_name: 'dictionaries',
+        id: 'should-not-be-allowed',
+      })
+
+      expect(error).toBeDefined()
+      expect(error!.code).toBe('42501') // PostgreSQL insufficient privilege error
     })
   })
 

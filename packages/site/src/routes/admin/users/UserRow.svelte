@@ -9,13 +9,12 @@
 
   interface Props {
     user: UserWithDictionaryRoles
-    dictionaries: DictionaryView[]
-    load_data: () => Promise<void>
   }
 
-  let { user, dictionaries, load_data }: Props = $props()
+  let { user }: Props = $props()
 
-  let { admin, supabase, add_editor, remove_editor } = $derived(page.data as PageData)
+  let { admin, db, add_editor, remove_editor } = $derived(page.data as PageData)
+  let dictionaries = $derived((db?.dictionaries.rows ?? []) as unknown as DictionaryView[])
   let managing_dictionary_ids = $derived(user.dictionary_roles.filter(({ role }) => role === 'manager').map(({ dictionary_id }) => dictionary_id) || [])
   let contributing_dictionary_ids = $derived(user.dictionary_roles.filter(({ role }) => role === 'contributor').map(({ dictionary_id }) => dictionary_id) || [])
 </script>
@@ -33,11 +32,9 @@
       dictionary_ids={managing_dictionary_ids}
       remove_dictionary={async (dictionary_id) => {
         await remove_editor({ dictionary_id, user_id: user.id })
-        await load_data()
       }}
       add_dictionary={async (dictionary_id) => {
         await add_editor({ dictionary_id, user_id: user.id, role: 'manager' })
-        await load_data()
       }} />
   </td>
   <td>
@@ -46,11 +43,9 @@
       dictionary_ids={contributing_dictionary_ids}
       remove_dictionary={async (dictionary_id) => {
         await remove_editor({ dictionary_id, user_id: user.id })
-        await load_data()
       }}
       add_dictionary={async (dictionary_id) => {
         await add_editor({ dictionary_id, user_id: user.id, role: 'contributor' })
-        await load_data()
       }} />
   </td>
   <td class="whitespace-nowrap">
@@ -69,12 +64,10 @@
         class="-ml-2"
         onclick={async () => {
           if (confirm('Re-subscribe user?')) {
-            const { error } = await supabase.from('user_data').update({ unsubscribed_from_emails: null }).eq('id', user.id)
-            if (error) {
-              alert(error.message)
-              console.error(error)
-            } else {
-              await load_data()
+            const user_data = db?.user_data.id[user.id]
+            if (user_data) {
+              user_data.unsubscribed_from_emails = null
+              await user_data._save()
             }
           }
         }}>{supabase_date_to_friendly(user.unsubscribed_from_emails)}</Button>
@@ -85,12 +78,10 @@
         size="sm"
         class="-ml-2"
         onclick={async () => {
-          const { error } = await supabase.from('user_data').update({ unsubscribed_from_emails: new Date().toISOString() }).eq('id', user.id)
-          if (error) {
-            alert(error.message)
-            console.error(error)
-          } else {
-            await load_data()
+          const user_data = db?.user_data.id[user.id]
+          if (user_data) {
+            user_data.unsubscribed_from_emails = new Date()
+            await user_data._save()
           }
         }}>Mark Unsubscribed</Button>
     {/if}

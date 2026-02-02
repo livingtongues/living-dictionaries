@@ -160,6 +160,7 @@ export class Sync {
 
       // Phase 2: Write in dependency order
       for (const tier of SYNC_TIERS) {
+        console.log(`[sync] Processing tier:`, tier)
         const tier_results = tier
           .map(name => fetch_results_map.get(name))
           .filter((r): r is TableFetchResult => r !== undefined)
@@ -167,6 +168,7 @@ export class Sync {
         const write_results = await Promise.all(
           tier_results.map(r => this.write_table_changes(r)),
         )
+        console.log(`[sync] Tier complete:`, tier)
 
         for (const result of write_results) {
           uploaded_timestamps.push(...result.uploaded_timestamps)
@@ -340,6 +342,7 @@ export class Sync {
         page_num++
       }
     }
+    console.log(`[sync] Fetched ${all_rows.length} rows from ${supabase_table}`)
     return all_rows
   }
 
@@ -365,6 +368,7 @@ export class Sync {
       })
     }
 
+    console.log(`[sync] Fetched ${data.length} users from RPC`)
     return data as Record<string, unknown>[]
   }
 
@@ -454,11 +458,14 @@ export class Sync {
     }
 
     // Download to local
+    console.log(`[sync] Downloading ${to_download.length} rows to ${table_name}`)
     for (const item of to_download) {
       try {
+        console.log(`[sync] Saving to ${table_name}:`, item.id ?? get_row_key(table_name, item))
         await this.save_to_local(table_name, item)
         downloaded_timestamps.push(new Date(item[timestamp_column] as string))
       } catch (err) {
+        console.error(`[sync] Error saving to ${table_name}:`, item, err)
         errors.push({ operation: 'download', table_name, id: get_row_key(table_name, item), error: String(err) })
       }
     }

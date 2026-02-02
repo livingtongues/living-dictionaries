@@ -144,7 +144,7 @@ Update `sync/types.ts`:
 - Replace `SYNC_TIERS` with admin tables:
   ```ts
   const SYNC_TIERS: SyncableTableName[][] = [
-    ['users', 'dictionaries'],      // Tier 1: no FK dependencies
+    ['users', 'dictionaries'], // Tier 1: no FK dependencies
     ['user_data', 'dictionary_roles', 'invites'], // Tier 2: depends on tier 1
   ]
   ```
@@ -164,9 +164,6 @@ Update `live/live-pglite.svelte.ts` to use `composite-changes.ts` for `dictionar
 - Update `reset_supabase_user_data_sql` to reset admin tables
 - Remove words table tests
 - Test composite PK handling for dictionary_roles
-
-### Task 7: Wire up to admin route
-Update `/routes/admin/+layout.ts` to use PGlite with manual sync button.
 
 ## Trigger Code
 

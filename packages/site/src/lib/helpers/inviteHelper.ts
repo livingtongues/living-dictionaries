@@ -1,19 +1,16 @@
-import { get } from 'svelte/store'
-import { page } from '$app/stores'
 import { api_dictionary_invite } from '$api/email/invite/_call'
+import { page } from '$app/state'
 
 export async function inviteHelper(
   role: 'manager' | 'contributor',
   dictionary_id: string,
 ) {
-  const { data: { t } } = get(page)
-
-  const target_email = prompt(`${t('contact.email')}?`)
+  const target_email = prompt(`${page.data.t('contact.email')}?`)
   if (!target_email) return
 
   const isEmail = /^\S[^\s@]*@\S[^\s.]*\.\S+$/.test(target_email)
   if (!isEmail)
-    return alert(t('misc.invalid'))
+    return alert(page.data.t('misc.invalid'))
 
   const { error } = await api_dictionary_invite({
     dictionary_id,
@@ -23,7 +20,7 @@ export async function inviteHelper(
   })
 
   if (error) {
-    alert(`${t('misc.error')}: ${error.message}`)
+    alert(`${page.data.t('misc.error')}: ${error.message}`)
     console.error(error)
   }
 }

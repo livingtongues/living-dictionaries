@@ -1,12 +1,10 @@
 <script lang="ts">
-  import type { Tables, TablesUpdate } from '@living-dictionaries/types'
+  import type { TablesUpdate } from '@living-dictionaries/types'
   import type { PageData } from './$types'
   import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
   import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
   import { Button, IntersectionObserverShared, ResponsiveTable } from '$lib/svelte-pieces'
-  import { onMount } from 'svelte'
-  import { writable } from 'svelte/store'
   import DictionaryRow from './DictionaryRow.svelte'
   import { exportAdminDictionariesAsCSV } from './export'
   import SortDictionaries from './SortDictionaries.svelte'
@@ -16,52 +14,45 @@
   }
 
   let { data }: Props = $props()
-  let { users, dictionary_roles, admin_dictionaries } = $derived(data)
 
-  let users_with_roles = $derived($users.map((user) => {
-    return {
-      ...user,
-      dictionary_roles: $dictionary_roles.filter(role => role.user_id === user.id),
-    }
-  }))
+  let db = $derived(data.db)
+
+  let users_with_roles = $derived(
+    db?.users.rows.map((user) => {
+      return {
+        ...user,
+        dictionary_roles: db?.dictionary_roles.rows.filter(role => role.user_id === user.id) ?? [],
+      }
+    }) ?? []
+  )
 
   let active_section = $derived(page.url.searchParams.get('filter') as 'public' | 'private' | 'other')
 
-  const invites = writable<Tables<'invites'>[]>([])
+  let active_invites = $derived(
+    db?.invites.rows.filter(invite => invite.status === 'queued' || invite.status === 'sent') ?? []
+  )
 
-  let dictionaries_with_editors_invites = $derived($admin_dictionaries
-    // eslint-disable-next-line array-callback-return
-    .filter((dictionary) => {
-      if (active_section === 'public') return dictionary.public
-      if (active_section === 'private') return !dictionary.public && !dictionary.con_language_description
-      if (active_section === 'other') return !dictionary.public && dictionary.con_language_description
-    })
-    .map((dictionary) => {
-      return {
-        ...dictionary,
-        editors: users_with_roles.filter(user => user.dictionary_roles.some(role => role.dictionary_id === dictionary.id)),
-        invites: $invites.filter(invite => invite.dictionary_id === dictionary.id),
-      } as DictionaryWithHelpers
-    }))
-
-  onMount(() => {
-    load_extras()
-  })
-
-  async function load_extras() {
-    const _invites = await data.get_invites()
-    invites.set(_invites)
-    dictionary_roles.refresh()
-  }
+  let dictionaries_with_editors_invites = $derived(
+    (db?.dictionaries.rows ?? [])
+      .filter((dictionary) => {
+        if (active_section === 'public') return dictionary.public
+        if (active_section === 'private') return !dictionary.public && !dictionary.con_language_description
+        if (active_section === 'other') return !dictionary.public && dictionary.con_language_description
+      })
+      .map((dictionary) => {
+        return {
+          ...dictionary,
+          editors: users_with_roles.filter(user => user.dictionary_roles.some(role => role.dictionary_id === dictionary.id)),
+          invites: active_invites.filter(invite => invite.dictionary_id === dictionary.id),
+        } as unknown as DictionaryWithHelpers
+      })
+  )
 
   async function update_dictionary(change: TablesUpdate<'dictionaries'>, dictionary_id: string) {
-    try {
-      const { error } = await data.supabase.from('dictionaries').update(change).eq('id', dictionary_id)
-      if (error) throw new Error(error.message)
-      await admin_dictionaries.refresh()
-    } catch (err) {
-      alert(`Error: ${err}`)
-    }
+    const dictionary = db?.dictionaries.rows.find(d => d.id === dictionary_id)
+    if (!dictionary) return
+    Object.assign(dictionary, change)
+    await dictionary._save()
   }
 
   function asDictionaries(items: unknown[]): DictionaryWithHelpers[] {
@@ -105,10 +96,9 @@
                       <DictionaryRow
                         {index}
                         {dictionary}
-                        users={users_with_roles}
+                        users={users_with_roles as any}
                         is_public={active_section === 'public'}
-                        update_dictionary={async change => await update_dictionary(change, dictionary.id)}
-                        {load_extras} />
+                        update_dictionary={async change => await update_dictionary(change, dictionary.id)} />
                     {:else}
                       <td colspan="30"> Loading... </td>
                     {/if}

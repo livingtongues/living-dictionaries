@@ -1,6 +1,6 @@
 import type { Coordinates, DictionaryPhoto, Orthography } from '@living-dictionaries/types'
 import type { DictionaryMetadata } from '@living-dictionaries/types/supabase/dictionary.types'
-import { jsonb, pgTable, primaryKey, text, timestamp, uuid, boolean, integer } from 'drizzle-orm/pg-core'
+import { boolean, integer, jsonb, pgTable, primaryKey, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 export const migrations = pgTable('migrations', {
   id: uuid().primaryKey().defaultRandom(),
@@ -57,7 +57,7 @@ export const dictionaries = pgTable('dictionaries', {
   con_language_description: text(),
   copyright: text(),
   url: text(),
-  created_at: timestamp({ withTimezone: true }),
+  created_at: timestamp({ withTimezone: true }).notNull(),
   created_by: uuid(),
   updated_at: timestamp({ withTimezone: true }).notNull(),
   updated_by: uuid(),
@@ -68,10 +68,10 @@ export const dictionary_roles = pgTable('dictionary_roles', {
   dictionary_id: text().notNull().references(() => dictionaries.id, { onDelete: 'cascade' }),
   user_id: uuid().notNull().references(() => users.id, { onDelete: 'cascade' }),
   role: text().notNull(),
-  created_at: timestamp({ withTimezone: true }).notNull(),
+  created_at: timestamp({ withTimezone: true }).defaultNow().notNull(),
   invited_by: uuid(),
   local_saved_at: timestamp({ withTimezone: true }),
-}, (table) => [
+}, table => [
   primaryKey({ columns: [table.dictionary_id, table.user_id, table.role] }),
 ])
 
@@ -91,6 +91,6 @@ export const deletes = pgTable('deletes', {
   table_name: text().notNull(),
   id: text().notNull(),
   local_saved_at: timestamp({ withTimezone: true }).defaultNow().notNull(),
-}, (table) => [
+}, table => [
   primaryKey({ columns: [table.table_name, table.id] }),
 ])

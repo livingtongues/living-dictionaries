@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { sveltekit } from '@sveltejs/kit/vite'
-import { type Plugin, type PluginOption, defineConfig } from 'vite'
 import UnoCSS from '@unocss/svelte-scoped/vite'
+import { defineConfig, type Plugin, type PluginOption } from 'vite'
 // import { kitbook } from 'kitbook/plugins/vite'
 // import kitbookConfig from './kitbook.config'
 
@@ -22,7 +22,7 @@ export default defineConfig({
     target: 'es2015',
   },
   worker: {
-    format: 'es', // to allow code-splitted supabase to be imported into the worker
+    format: 'es', // to allow code-splitted supabase to be imported into the worker; might also be needed for pglite workers
   },
   define: getReplacements(),
   optimizeDeps: {
@@ -46,6 +46,7 @@ export default defineConfig({
       'sveltefirets',
       'svelte-pieces',
       '@sentry/browser',
+      '@electric-sql/pglite',
     ],
   },
 })
