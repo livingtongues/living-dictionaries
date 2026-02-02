@@ -13,6 +13,24 @@ export interface LivePgLiteOptions {
   log?: boolean
 }
 
+// Primary key configuration for each table
+const TABLE_PRIMARY_KEYS: Record<TableName, string[]> = {
+  migrations: ['id'],
+  db_metadata: ['key'],
+  users: ['id'],
+  user_data: ['id'],
+  dictionaries: ['id'],
+  dictionary_roles: ['dictionary_id', 'user_id', 'role'],
+  invites: ['id'],
+  deletes: ['table_name', 'id'],
+}
+
+// Tables that are fully read-only (no _save, _delete, _reset methods)
+const READ_ONLY_TABLES = new Set<TableName>(['users', 'migrations', 'db_metadata', 'deletes'])
+
+// Tables that can be saved/reset but not deleted
+const NO_DELETE_TABLES = new Set<TableName>(['user_data'])
+
 // Type for direct table access - db.labels, db.tasks, etc.
 type TableProperties = {
   [K in TableName]: TableAccessor<K>
@@ -51,6 +69,7 @@ class LivePgLiteImpl {
    * Get or create a TableAccessor for the given table name
    */
   #get_table_accessor<T extends TableName>(table_name: T): TableAccessor<T> {
+    // eslint-disable-next-line ts/no-this-alias
     const self = this
 
     return {
@@ -99,14 +118,19 @@ class LivePgLiteImpl {
     let store = this.#table_stores.get(table_name)
 
     if (!store) {
+      const is_read_only = READ_ONLY_TABLES.has(table_name)
+      const is_no_delete = NO_DELETE_TABLES.has(table_name)
+      const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+
       store = new TableStore({
         pg: this.#pg,
         query: `SELECT * FROM "${table_name}"`,
         params: [],
+        primary_keys,
         log: this.#options.log,
-        on_save: this.#create_save_callback(table_name),
-        on_delete: this.#create_delete_callback(table_name),
-        on_reset: this.#create_reset_callback(table_name),
+        on_save: is_read_only ? undefined : this.#create_save_callback(table_name),
+        on_delete: (is_read_only || is_no_delete) ? undefined : this.#create_delete_callback(table_name),
+        on_reset: is_read_only ? undefined : this.#create_reset_callback(table_name),
       })
       this.#table_stores.set(table_name, store)
     }
@@ -118,15 +142,19 @@ class LivePgLiteImpl {
    * Create a save callback for a given table
    */
   #create_save_callback(table_name: TableName): (row: Record<string, unknown>) => Promise<void> {
+    const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+
     return async (row: Record<string, unknown>) => {
-      const id = row.id as string
-      if (!id) {
-        console.warn('LivePgLite save: row has no id')
-        return
+      // Validate all primary key values exist
+      for (const pk of primary_keys) {
+        if (row[pk] == null) {
+          alert(`LivePgLite save: row is missing primary key column "${pk}"`)
+          return
+        }
       }
 
-      // Build UPDATE statement from all columns except 'id', 'created_at', and method properties
-      const exclude_columns = ['id', 'created_at', '_save', '_delete', '_reset']
+      // Build UPDATE statement excluding PK columns, created_at, and method properties
+      const exclude_columns = [...primary_keys, 'created_at', '_save', '_delete', '_reset']
       const columns = Object.keys(row).filter(col => !exclude_columns.includes(col))
 
       // Prepare params - update updated_at to current timestamp if column exists
@@ -136,10 +164,15 @@ class LivePgLiteImpl {
         }
         return row[col]
       })
-      params.push(id)
+
+      // Add primary key values as WHERE params
+      for (const pk of primary_keys) {
+        params.push(row[pk])
+      }
 
       const set_clauses = columns.map((col, i) => `"${col}" = $${i + 1}`).join(', ')
-      const sql = `UPDATE "${table_name}" SET ${set_clauses} WHERE id = $${columns.length + 1}`
+      const where_clauses = primary_keys.map((pk, i) => `"${pk}" = $${columns.length + i + 1}`).join(' AND ')
+      const sql = `UPDATE "${table_name}" SET ${set_clauses} WHERE ${where_clauses}`
 
       try {
         await this.#pg.query(sql, params)
@@ -153,13 +186,15 @@ class LivePgLiteImpl {
 
   /**
    * Create a delete callback for a given table
+   * Inserts into the `deletes` table - the process_delete trigger handles actual deletion
    */
-  #create_delete_callback(table_name: TableName): (id: string) => Promise<void> {
-    return async (id: string) => {
-      const sql = `DELETE FROM "${table_name}" WHERE id = $1`
+  #create_delete_callback(table_name: TableName): (composite_key: string) => Promise<void> {
+    return async (composite_key: string) => {
+      const sql = `INSERT INTO deletes (table_name, id) VALUES ($1, $2)`
+      const params = [table_name, composite_key]
 
       try {
-        await this.#pg.query(sql, [id])
+        await this.#pg.query(sql, params)
       } catch (error) {
         console.error('LivePgLite delete error:', error)
         this.#show_toast(`Delete error: ${(error as Error).message}`)
@@ -172,17 +207,23 @@ class LivePgLiteImpl {
    * Create a reset callback for a given table - reads fresh data from DB
    */
   #create_reset_callback(table_name: TableName): (row: Record<string, unknown>) => Promise<void> {
+    const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+
     return async (row: Record<string, unknown>) => {
-      const id = row.id as string
-      if (!id) {
-        console.warn('LivePgLite reset: row has no id')
-        return
+      // Validate all primary key values exist
+      for (const pk of primary_keys) {
+        if (row[pk] == null) {
+          console.warn(`LivePgLite reset: row is missing primary key column "${pk}"`)
+          return
+        }
       }
 
-      const sql = `SELECT * FROM "${table_name}" WHERE id = $1`
+      const where_clauses = primary_keys.map((pk, i) => `"${pk}" = $${i + 1}`).join(' AND ')
+      const params = primary_keys.map(pk => row[pk])
+      const sql = `SELECT * FROM "${table_name}" WHERE ${where_clauses}`
 
       try {
-        const result = await this.#pg.query<Record<string, unknown>>(sql, [id])
+        const result = await this.#pg.query<Record<string, unknown>>(sql, params)
         const [dbRow] = result.rows
         if (dbRow) {
           // Copy all values from DB back to the row object
@@ -200,6 +241,7 @@ class LivePgLiteImpl {
 
   /**
    * Get a single row by ID with its own efficient subscription
+   * For composite key tables, the id should be the composite key string (e.g., "dict_id|user_id|role")
    */
   #get_row_by_id<T extends TableName>(
     table_name: T,
@@ -209,15 +251,33 @@ class LivePgLiteImpl {
     let store = this.#row_stores.get(store_key)
 
     if (!store) {
-      // Create a dedicated store for this single row
+      const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+      const is_read_only = READ_ONLY_TABLES.has(table_name)
+      const is_no_delete = NO_DELETE_TABLES.has(table_name)
+
+      let query: string
+      let params: unknown[]
+
+      if (primary_keys.length === 1) {
+        query = `SELECT * FROM "${table_name}" WHERE "${primary_keys[0]}" = $1`
+        params = [id]
+      } else {
+        // Parse composite key string
+        const key_values = id.split('|')
+        const where_clauses = primary_keys.map((pk, i) => `"${pk}" = $${i + 1}`).join(' AND ')
+        query = `SELECT * FROM "${table_name}" WHERE ${where_clauses}`
+        params = key_values
+      }
+
       store = new TableStore({
         pg: this.#pg,
-        query: `SELECT * FROM "${table_name}" WHERE id = $1`,
-        params: [id],
+        query,
+        params,
+        primary_keys,
         log: this.#options.log,
-        on_save: this.#create_save_callback(table_name),
-        on_delete: this.#create_delete_callback(table_name),
-        on_reset: this.#create_reset_callback(table_name),
+        on_save: is_read_only ? undefined : this.#create_save_callback(table_name),
+        on_delete: (is_read_only || is_no_delete) ? undefined : this.#create_delete_callback(table_name),
+        on_reset: is_read_only ? undefined : this.#create_reset_callback(table_name),
       })
       this.#row_stores.set(store_key, store)
     }
@@ -240,19 +300,23 @@ class LivePgLiteImpl {
     let store = this.#query_stores.get(query_key)
 
     if (!store) {
+      const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+      const is_read_only = READ_ONLY_TABLES.has(table_name)
+      const is_no_delete = NO_DELETE_TABLES.has(table_name)
+
       store = new TableStore({
         pg: this.#pg,
         query: sql,
         params,
+        primary_keys,
         log: this.#options.log,
-        on_save: this.#create_save_callback(table_name),
-        on_delete: this.#create_delete_callback(table_name),
-        on_reset: this.#create_reset_callback(table_name),
+        on_save: is_read_only ? undefined : this.#create_save_callback(table_name),
+        on_delete: (is_read_only || is_no_delete) ? undefined : this.#create_delete_callback(table_name),
+        on_reset: is_read_only ? undefined : this.#create_reset_callback(table_name),
       })
       this.#query_stores.set(query_key, store)
     }
 
-    const self = this
     return {
       get rows(): RowType<T>[] {
         return store!.rows as RowType<T>[]
@@ -329,18 +393,20 @@ class LivePgLiteImpl {
   }
 
   /**
-   * Delete multiple rows by their IDs
+   * Delete multiple rows by their IDs (or composite key strings)
+   * Inserts into the `deletes` table - the process_delete trigger handles actual deletions
    */
   async #delete_all<T extends TableName>(
     table_name: T,
     ids: string[],
   ): Promise<void> {
-    // Build a single DELETE query with IN clause
-    const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ')
-    const sql = `DELETE FROM "${table_name}" WHERE id IN (${placeholders})`
+    // Insert each delete record - triggers will handle the actual deletion
+    const sql = `INSERT INTO deletes (table_name, id) VALUES ($1, $2)`
 
     try {
-      await this.#pg.query(sql, ids)
+      for (const id of ids) {
+        await this.#pg.query(sql, [table_name, id])
+      }
     } catch (error) {
       console.error('LivePgLite deleteAll error:', error)
       this.#show_toast(`Delete error: ${(error as Error).message}`)
