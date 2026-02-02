@@ -1,19 +1,19 @@
 <script lang="ts">
-  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import type { DictionaryView } from '@living-dictionaries/types'
+  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
+  import type { PageData } from './$types'
+  import { page } from '$app/state'
+  import { supabase_date_to_friendly } from '$lib/helpers/time'
   import { Button } from '$lib/svelte-pieces'
   import DictionariesHelping from './DictionariesHelping.svelte'
-  import type { PageData } from './$types'
-  import { supabase_date_to_friendly } from '$lib/helpers/time'
-  import { page } from '$app/state'
 
   interface Props {
-    user: UserWithDictionaryRoles;
-    dictionaries: DictionaryView[];
-    load_data: () => Promise<void>;
+    user: UserWithDictionaryRoles
+    dictionaries: DictionaryView[]
+    load_data: () => Promise<void>
   }
 
-  let { user, dictionaries, load_data }: Props = $props();
+  let { user, dictionaries, load_data }: Props = $props()
 
   let { admin, supabase, add_editor, remove_editor } = $derived(page.data as PageData)
   let managing_dictionary_ids = $derived(user.dictionary_roles.filter(({ role }) => role === 'manager').map(({ dictionary_id }) => dictionary_id) || [])

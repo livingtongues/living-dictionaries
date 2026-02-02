@@ -1,21 +1,21 @@
 <script lang="ts">
   import type { Tables, TablesUpdate } from '@living-dictionaries/types'
-  import { Button, IntersectionObserverShared, ResponsiveTable } from '$lib/svelte-pieces'
-  import { writable } from 'svelte/store'
-  import { onMount } from 'svelte'
-  import DictionaryRow from './DictionaryRow.svelte'
-  import SortDictionaries from './SortDictionaries.svelte'
-  import { exportAdminDictionariesAsCSV } from './export'
   import type { PageData } from './$types'
   import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
-  import Filter from '$lib/components/Filter.svelte'
   import { page } from '$app/state'
+  import Filter from '$lib/components/Filter.svelte'
+  import { Button, IntersectionObserverShared, ResponsiveTable } from '$lib/svelte-pieces'
+  import { onMount } from 'svelte'
+  import { writable } from 'svelte/store'
+  import DictionaryRow from './DictionaryRow.svelte'
+  import { exportAdminDictionariesAsCSV } from './export'
+  import SortDictionaries from './SortDictionaries.svelte'
 
   interface Props {
-    data: PageData;
+    data: PageData
   }
 
-  let { data }: Props = $props();
+  let { data }: Props = $props()
   let { users, dictionary_roles, admin_dictionaries } = $derived(data)
 
   let users_with_roles = $derived($users.map((user) => {
@@ -56,8 +56,7 @@
 
   async function update_dictionary(change: TablesUpdate<'dictionaries'>, dictionary_id: string) {
     try {
-      const { error } = await data.supabase.from('dictionaries').update(change)
-        .eq('id', dictionary_id)
+      const { error } = await data.supabase.from('dictionaries').update(change).eq('id', dictionary_id)
       if (error) throw new Error(error.message)
       await admin_dictionaries.refresh()
     } catch (err) {
@@ -80,10 +79,10 @@
 <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
   <Filter
     items={dictionaries_with_editors_invites || []}
-    
+
     placeholder="Search dictionaries and users">
     {#snippet right({ filteredItems: filteredDictionaries })}
-        <div  >
+      <div>
         <Button
           form="filled"
           color="black"
@@ -92,16 +91,16 @@
           Download {filteredDictionaries.length} Dictionaries as CSV
         </Button>
       </div>
-      {/snippet}
+    {/snippet}
     {#snippet children({ filteredItems: filteredDictionaries })}
-        <div class="mb-1"></div>
+      <div class="mb-1"></div>
       <ResponsiveTable stickyHeading stickyColumn>
-        <SortDictionaries dictionaries={asDictionaries(filteredDictionaries)} >
+        <SortDictionaries dictionaries={asDictionaries(filteredDictionaries)}>
           {#snippet children({ sortedDictionaries })}
-                {#each sortedDictionaries as dictionary, index (dictionary.id)}
-              <IntersectionObserverShared bottom={4000}  once>
+            {#each sortedDictionaries as dictionary, index (dictionary.id)}
+              <IntersectionObserverShared bottom={4000} once>
                 {#snippet children({ intersecting })}
-                        <tr>
+                  <tr>
                     {#if intersecting}
                       <DictionaryRow
                         {index}
@@ -114,12 +113,12 @@
                       <td colspan="30"> Loading... </td>
                     {/if}
                   </tr>
-                                      {/snippet}
-                    </IntersectionObserverShared>
+                {/snippet}
+              </IntersectionObserverShared>
             {/each}
-                        {/snippet}
-            </SortDictionaries>
-      </ResponsiveTable>
           {/snippet}
-    </Filter>
+        </SortDictionaries>
+      </ResponsiveTable>
+    {/snippet}
+  </Filter>
 </div>

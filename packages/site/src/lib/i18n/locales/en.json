@@ -412,5 +412,13 @@
   },
   "image": {
     "photographer": "Photographer"
+  },
+  "sync": {
+    "rows_uploaded": "rows uploaded",
+    "rows_downloaded": "rows downloaded",
+    "deletes_pushed": "deletes pushed",
+    "deletes_pulled": "deletes pulled",
+    "sync_errors": "sync errors",
+    "sync_error": "Sync error"
   }
 }

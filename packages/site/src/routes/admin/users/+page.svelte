@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { Button, ResponsiveTable } from '$lib/svelte-pieces'
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
-  import UserRow from './UserRow.svelte'
-  import SortUsers from './SortUsers.svelte'
   import type { PageData } from './$types'
-  import { downloadObjectsAsCSV } from '$lib/export/csv'
   import Filter from '$lib/components/Filter.svelte'
+  import { downloadObjectsAsCSV } from '$lib/export/csv'
+  import { Button, ResponsiveTable } from '$lib/svelte-pieces'
+  import SortUsers from './SortUsers.svelte'
+  import UserRow from './UserRow.svelte'
 
   interface Props {
-    data: PageData;
+    data: PageData
   }
 
-  let { data }: Props = $props();
+  let { data }: Props = $props()
   let { admin_dictionaries, users, dictionary_roles } = $derived(data)
 
   let users_with_roles = $derived($users.map((user) => {
@@ -39,21 +39,21 @@
 </script>
 
 <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
-  <Filter items={users_with_roles}  placeholder="Search names, emails, and dictionary ids">
+  <Filter items={users_with_roles} placeholder="Search names, emails, and dictionary ids">
     {#snippet right({ filteredItems: filteredUsers })}
-        <div  >
+      <div>
         <Button form="filled" color="black" onclick={() => exportUsersAsCSV(filteredUsers)}>
           <i class="fas fa-download mr-1"></i>
           Download {filteredUsers.length} Users as CSV
         </Button>
       </div>
-      {/snippet}
+    {/snippet}
     {#snippet children({ filteredItems: filteredUsers })}
-        <div class="mb-1"></div>
+      <div class="mb-1"></div>
       <ResponsiveTable stickyColumn stickyHeading>
-        <SortUsers users={filteredUsers} >
+        <SortUsers users={filteredUsers}>
           {#snippet children({ sortedUsers })}
-                {#each sortedUsers as user (user.id)}
+            {#each sortedUsers as user (user.id)}
               <UserRow
                 load_data={async () => {
                   await Promise.all([
@@ -64,9 +64,9 @@
                 dictionaries={$admin_dictionaries}
                 {user} />
             {/each}
-                        {/snippet}
-            </SortUsers>
-      </ResponsiveTable>
           {/snippet}
-    </Filter>
+        </SortUsers>
+      </ResponsiveTable>
+    {/snippet}
+  </Filter>
 </div>

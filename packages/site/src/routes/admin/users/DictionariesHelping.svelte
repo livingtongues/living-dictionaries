@@ -3,23 +3,23 @@
   import { BadgeArrayEmit, Button, ShowHide } from '$lib/svelte-pieces'
 
   interface Props {
-    dictionaries: DictionaryView[];
-    dictionary_ids: string[];
-    remove_dictionary: (dictionary_id: string) => Promise<void>;
-    add_dictionary: (dictionary_id: string) => Promise<void>;
+    dictionaries: DictionaryView[]
+    dictionary_ids: string[]
+    remove_dictionary: (dictionary_id: string) => Promise<void>
+    add_dictionary: (dictionary_id: string) => Promise<void>
   }
 
   let {
     dictionaries,
     dictionary_ids,
     remove_dictionary,
-    add_dictionary
-  }: Props = $props();
+    add_dictionary,
+  }: Props = $props()
 </script>
 
-<ShowHide  >
+<ShowHide>
   {#snippet children({ show: show_all, toggle: toggle_all })}
-    <ShowHide  >
+    <ShowHide>
       {#snippet children({ show, toggle })}
         <BadgeArrayEmit
           strings={dictionary_ids.slice(0, show_all ? 1000 : 8)}
@@ -41,7 +41,7 @@
             <SelectDictionaryModal dictionaries={dictionaries_not_already_editing} {add_dictionary} on_close={toggle} />
           {/await}
         {/if}
-            {/snippet}
+      {/snippet}
     </ShowHide>
   {/snippet}
 </ShowHide>
