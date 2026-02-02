@@ -1,6 +1,8 @@
+import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { defaultExclude, defineProject } from 'vitest/config'
 
 export default defineProject({
+  plugins: [svelte()],
   test: {
     name: 'site:unit',
     alias: {
@@ -9,6 +11,5 @@ export default defineProject({
     globals: true,
     includeSource: ['src/**/*.ts'],
     exclude: [...defaultExclude, 'e2e/**', 'src/db-tests/**'],
-    passWithNoTests: true,
   },
 })
