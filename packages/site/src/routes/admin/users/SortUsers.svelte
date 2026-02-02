@@ -81,8 +81,9 @@
 </script>
 
 <thead>
-  {#each userFields as field}
-    <th
+  <tr>
+    {#each userFields as field}
+      <th
       class="cursor-pointer"
       onclick={() => setSortSettings(field.key)}
       title="Click to sort asc/desc">
@@ -95,7 +96,8 @@
         {/if}
       {/if}
     </th>
-  {/each}
+    {/each}
+  </tr>
 </thead>
 
 {@render children?.({ sortedUsers, })}

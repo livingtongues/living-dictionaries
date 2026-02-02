@@ -471,6 +471,42 @@ export interface Database {
           },
         ]
       }
+      deletes: {
+        Row: {
+          deleted_at: string
+          deleted_by: string | null
+          id: string
+          table_name: string
+        }
+        Insert: {
+          deleted_at?: string
+          deleted_by?: string | null
+          id: string
+          table_name: string
+        }
+        Update: {
+          deleted_at?: string
+          deleted_by?: string | null
+          id?: string
+          table_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'deletes_deleted_by_fkey'
+            columns: ['deleted_by']
+            isOneToOne: false
+            referencedRelation: 'profiles_view'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'deletes_deleted_by_fkey'
+            columns: ['deleted_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       dialects: {
         Row: {
           created_at: string
@@ -1690,13 +1726,6 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: 'foreign_key_entries'
-            columns: ['entry_id']
-            isOneToOne: false
-            referencedRelation: 'entries'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'senses_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
@@ -1736,6 +1765,13 @@ export interface Database {
             columns: ['dictionary_id']
             isOneToOne: false
             referencedRelation: 'materialized_dictionaries_view'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'senses_entry_id_fkey'
+            columns: ['entry_id']
+            isOneToOne: false
+            referencedRelation: 'entries'
             referencedColumns: ['id']
           },
           {
@@ -2923,9 +2959,7 @@ export interface Database {
       role_enum: 'manager' | 'contributor'
       status_enum: 'queued' | 'sent' | 'claimed' | 'cancelled'
     }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+    CompositeTypes: Record<never, never>
   }
 }
 
@@ -2941,21 +2975,21 @@ export type Tables<
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-  DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
       Row: infer R
     }
       ? R
       : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] &
-  DefaultSchema['Views'])
+    DefaultSchema['Views'])
     ? (DefaultSchema['Tables'] &
-    DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+      DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
         ? R

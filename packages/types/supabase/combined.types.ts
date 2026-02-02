@@ -1,11 +1,11 @@
-import type { MultiString } from '../gloss.interface'
-import type { Coordinates } from '../coordinates.interface'
-import type { DictionaryPhoto } from '../photo.interface'
 import type { HostedVideo, UnsupportedFields } from '../.'
-import type { Change } from './content-update.interface'
+import type { Coordinates } from '../coordinates.interface'
+import type { MultiString } from '../gloss.interface'
+import type { DictionaryPhoto } from '../photo.interface'
 import type { ImportContentUpdate } from './content-import.interface'
-import type { Orthography } from './orthography.interface'
+import type { Change } from './content-update.interface'
 import type { DictionaryMetadata } from './dictionary.types'
+import type { Orthography } from './orthography.interface'
 
 export interface Database {
   public: {
@@ -630,6 +630,50 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'videos'
+            referencedColumns: [
+              'id',
+            ]
+          },
+        ]
+      }
+      deletes: {
+        Row: {
+          deleted_at: string
+          deleted_by: string | null
+          id: string
+          table_name: string
+        }
+        Insert: {
+          deleted_at?: string
+          deleted_by?: string | null
+          id: string
+          table_name: string
+        }
+        Update: {
+          deleted_at?: string
+          deleted_by?: string | null
+          id?: string
+          table_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'deletes_deleted_by_fkey'
+            columns: [
+              'deleted_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'profiles_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'deletes_deleted_by_fkey'
+            columns: [
+              'deleted_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'user_emails'
             referencedColumns: [
               'id',
             ]
@@ -2221,17 +2265,6 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: 'foreign_key_entries'
-            columns: [
-              'entry_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'entries'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
             foreignKeyName: 'senses_created_by_fkey'
             columns: [
               'created_by',
@@ -2293,6 +2326,17 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'materialized_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_entry_id_fkey'
+            columns: [
+              'entry_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'entries'
             referencedColumns: [
               'id',
             ]
@@ -3847,9 +3891,7 @@ export interface Database {
       role_enum: 'manager' | 'contributor'
       status_enum: 'queued' | 'sent' | 'claimed' | 'cancelled'
     }
-    CompositeTypes: {
-      [_ in never]: never;
-    }
+    CompositeTypes: Record<never, never>
   }
 }
 type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>

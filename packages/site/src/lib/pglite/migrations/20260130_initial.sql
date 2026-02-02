@@ -53,7 +53,7 @@ CREATE TABLE dictionaries (
   con_language_description text,
   copyright text,
   url text,
-  created_at timestamp with time zone,
+  created_at timestamp with time zone NOT NULL,
   created_by uuid,
   updated_at timestamp with time zone NOT NULL,
   updated_by uuid,
@@ -64,7 +64,7 @@ CREATE TABLE dictionary_roles (
   dictionary_id text NOT NULL REFERENCES dictionaries(id) ON DELETE CASCADE,
   user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   role text NOT NULL,
-  created_at timestamp with time zone NOT NULL,
+  created_at timestamp with time zone DEFAULT now() NOT NULL,
   invited_by uuid,
   local_saved_at timestamp with time zone,
   PRIMARY KEY (dictionary_id, user_id, role)

@@ -1,6 +1,6 @@
 import type { PageLoad } from './$types'
-import { upload_image } from '$lib/components/image/upload-image'
 import { invalidate } from '$app/navigation'
+import { upload_image } from '$lib/components/image/upload-image'
 import { inviteHelper } from '$lib/helpers/inviteHelper'
 
 const CONTRIBUTORS_UPDATED_LOAD_TRIGGER = 'contributors:updated'
@@ -98,7 +98,9 @@ export const load = (async ({ parent, depends }) => {
       status.subscribe(async ({ storage_path, serving_url }) => {
         if (storage_path && serving_url) {
           const { data, error: photo_saving_error } = await supabase.from('photos')
-            .insert({ dictionary_id, storage_path, serving_url }).select('id').single()
+            .insert({ dictionary_id, storage_path, serving_url })
+            .select('id')
+            .single()
           if (photo_saving_error) throw new Error(photo_saving_error.message)
 
           const { error } = await supabase.from('dictionary_partners')

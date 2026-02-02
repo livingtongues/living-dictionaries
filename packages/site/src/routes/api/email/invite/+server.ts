@@ -1,9 +1,9 @@
-import { error, json } from '@sveltejs/kit'
 import type { TablesInsert } from '@living-dictionaries/types'
-import { getAdminRecipients } from '../addresses'
-import { send_email } from '../send-email'
 import type { RequestHandler } from './$types'
 import { ResponseCodes } from '$lib/constants'
+import { error, json } from '@sveltejs/kit'
+import { getAdminRecipients } from '../addresses'
+import { send_email } from '../send-email'
 
 export type InviteRequestBody = Pick<TablesInsert<'invites'>, 'dictionary_id' | 'role' | 'target_email'> & {
   origin: string

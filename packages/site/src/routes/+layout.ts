@@ -1,12 +1,12 @@
-import { derived } from 'svelte/store'
-import { createPersistedStore } from '$lib/svelte-pieces'
 import type { LayoutLoad } from './$types'
-import { getSupportedLocale } from '$lib/i18n/locales'
 import { getTranslator } from '$lib/i18n'
+import { getSupportedLocale } from '$lib/i18n/locales'
 import { defaultColumns } from '$lib/stores/columns'
 import { getSession, getSupabase } from '$lib/supabase'
-import { createUserStore } from '$lib/supabase/user'
 import { create_my_dictionaries_store } from '$lib/supabase/dictionaries'
+import { createUserStore } from '$lib/supabase/user'
+import { createPersistedStore } from '$lib/svelte-pieces'
+import { derived } from 'svelte/store'
 
 export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLocale, access_token, refresh_token, user_latitude, user_longitude } }) => {
   const urlLocale = searchParams.get('lang')

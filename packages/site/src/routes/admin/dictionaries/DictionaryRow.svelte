@@ -18,7 +18,6 @@
     dictionary: DictionaryWithHelpers;
     users: UserWithDictionaryRoles[];
     update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>;
-    load_extras: () => Promise<void>;
   }
 
   let {
@@ -27,12 +26,11 @@
     dictionary,
     users,
     update_dictionary,
-    load_extras
   }: Props = $props();
 
   let typedId = $state('')
 
-  let { admin, supabase, add_editor, remove_editor, inviteHelper } = $derived(page.data as PageData)
+  let { admin, add_editor, remove_editor, inviteHelper, db } = $derived(page.data as PageData)
 
   let managers = $derived(dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'manager' && dictionary_id === dictionary.id)))
   let contributors = $derived(dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'contributor' && dictionary_id === dictionary.id)))
@@ -68,15 +66,12 @@
     editors={managers}
     add_editor={async (user_id) => {
       await add_editor({ role: 'manager', user_id, dictionary_id: dictionary.id })
-      await load_extras()
     }}
     remove_editor={async (user_id) => {
       await remove_editor({ user_id, dictionary_id: dictionary.id })
-      await load_extras()
     }}
     invite_editor={async () => {
       await inviteHelper('manager', dictionary.id)
-      await load_extras()
     }}
     {users} />
   <div class="max-h-150px overflow-y-auto">
@@ -87,12 +82,10 @@
             admin
             {invite}
             on_delete_invite={async () => {
-              const { error } = await supabase.from('invites').update({ status: 'cancelled' }).eq('id', invite.id)
-              if (error) {
-                alert(error.message)
-                console.error(error)
-              } else {
-                await load_extras()
+              const pglite_invite = db?.invites.rows.find(i => i.id === invite.id)
+              if (pglite_invite) {
+                pglite_invite.status = 'cancelled'
+                await pglite_invite._save()
               }
             }}>
             {#snippet prefix()}
@@ -110,15 +103,12 @@
     editors={contributors}
     add_editor={async (user_id) => {
       await add_editor({ role: 'contributor', user_id, dictionary_id: dictionary.id })
-      await load_extras()
     }}
     remove_editor={async (user_id) => {
       await remove_editor({ user_id, dictionary_id: dictionary.id })
-      await load_extras()
     }}
     invite_editor={async () => {
       await inviteHelper('contributor', dictionary.id)
-      await load_extras()
     }}
     {users} />
   <div class="max-h-150px overflow-y-auto">
@@ -129,12 +119,10 @@
             admin
             {invite}
             on_delete_invite={async () => {
-              const { error } = await supabase.from('invites').update({ status: 'cancelled' }).eq('id', invite.id)
-              if (error) {
-                alert(error.message)
-                console.error(error)
-              } else {
-                await load_extras()
+              const pglite_invite = db?.invites.rows.find(i => i.id === invite.id)
+              if (pglite_invite) {
+                pglite_invite.status = 'cancelled'
+                await pglite_invite._save()
               }
             }}>
             {#snippet prefix()}

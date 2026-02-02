@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { Button } from '$lib/svelte-pieces'
-  import Tab from './Tab.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Header from '$lib/components/shell/Header.svelte'
   import AdminGuard from '$lib/components/ui/AdminGuard.svelte'
+  import { Button } from '$lib/svelte-pieces'
+  import Tab from './Tab.svelte'
 
-  let { data, children } = $props();
+  let { data, children } = $props()
 </script>
 
 <SeoMetaTags title="Admin Panel" />
@@ -24,12 +24,14 @@
         class="ml-auto my-1"
         size="sm"
         form="simple"
-        onclick={async () => {
-          await data.admin_dictionaries.reset()
-          await data.dictionary_roles.reset()
-          await data.users.reset()
-          location.reload()
-        }}>Reset cache (after public/private toggle, remove editor)</Button>
+        disabled={data.sync?.is_syncing}
+        onclick={() => data.sync?.sync_with_notice()}>
+        {#if data.sync?.is_syncing}
+          Syncing...
+        {:else}
+          Sync
+        {/if}
+      </Button>
     </nav>
   </div>
 
