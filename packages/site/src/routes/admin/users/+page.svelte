@@ -1,18 +1,19 @@
 <script lang="ts">
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
-  import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import { Button, ResponsiveTable } from '$lib/svelte-pieces'
   import SortUsers from './SortUsers.svelte'
   import UserRow from './UserRow.svelte'
 
+  let { data } = $props()
+
   let users_with_roles = $derived(
-    (page.data.db?.users.rows ?? []).map((user) => {
+    (data.db?.users.rows ?? []).map((user) => {
       return {
         ...user,
-        dictionary_roles: (page.data.db?.dictionary_roles.rows ?? []).filter(role => role.user_id === user.id),
-      } as UserWithDictionaryRoles
+        dictionary_roles: (data.db?.dictionary_roles.rows ?? []).filter(role => role.user_id === user.id),
+      } // as UserWithDictionaryRoles
     }),
   )
 

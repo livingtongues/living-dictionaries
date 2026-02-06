@@ -64,10 +64,10 @@ export type InsertType<T extends TableName> = Schema[T] extends Table
 
 // What you get when accessing db.table_name
 export interface TableAccessor<T extends TableName> {
+  readonly loading: boolean
   readonly rows: RowType<T>[]
   readonly objects: Record<string, RowType<T>>
-  readonly id: IdAccessor<T>
-  readonly loading: boolean
+  id: (row_id: string) => RowType<T> | undefined
   query: (options: QueryOptions) => QueryAccessor<T>
 
   // Table-level operations (row-level operations are on the row object via Saveable)

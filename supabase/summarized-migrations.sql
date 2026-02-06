@@ -677,7 +677,7 @@ SELECT cron.schedule (
     $$ REFRESH MATERIALIZED VIEW CONCURRENTLY materialized_dictionaries_view $$
 ); -- SELECT cron.unschedule('refresh-materialized_dictionaries_view');
 
-
+-- only used by dictionary_roles_with_profiles for full_name and avatar_url
 CREATE VIEW profiles_view AS
 SELECT 
     id,

@@ -114,21 +114,23 @@
 </script>
 
 <thead>
-  {#each dictionary_fields as field}
-    <th
-      class="cursor-pointer"
-      onclick={() => setSortSettings(field.key)}
-      title="Click to sort asc/desc">
-      {field.value}
-      {#if sortKey === field.key}
-        {#if sortDescending}
-          <i class="fas fa-sort-amount-down"></i>
-        {:else}
-          <i class="fas fa-sort-amount-up"></i>
+  <tr>
+    {#each dictionary_fields as field}
+      <th
+        class="cursor-pointer"
+        onclick={() => setSortSettings(field.key)}
+        title="Click to sort asc/desc">
+        {field.value}
+        {#if sortKey === field.key}
+          {#if sortDescending}
+            <i class="fas fa-sort-amount-down"></i>
+          {:else}
+            <i class="fas fa-sort-amount-up"></i>
+          {/if}
         {/if}
-      {/if}
-    </th>
-  {/each}
+      </th>
+    {/each}
+  </tr>
 </thead>
 
 {@render children?.({ sortedDictionaries, })}

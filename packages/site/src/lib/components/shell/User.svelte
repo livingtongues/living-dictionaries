@@ -27,6 +27,8 @@
       console.error(error)
     } else {
       invalidateAll()
+      if (role_level === 1 || role_level === 2)
+        alert('You must logout and login again for custom claims to take effect (e.g., admin dashboard user syncing).')
     }
   }
 
