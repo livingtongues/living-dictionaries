@@ -83,6 +83,39 @@ async function create_PG_lite() {
   return { db, pg, was_resumed, live_db }
 }
 
+function close_db() {
+  if (db_instance) {
+    db_instance.pg.close()
+    db_instance = null
+    db_promise = null
+  }
+}
+
+export function delete_db_and_reload() {
+  const db_id_to_delete = get_db_id()
+
+  try {
+    close_db()
+  } catch (error) {
+    console.error('Failed to close database:', error)
+  }
+
+  const request = indexedDB.deleteDatabase(`/pglite/${db_id_to_delete}`)
+  request.onsuccess = () => {
+    console.info(`Deleted database: ${db_id_to_delete}, reloading...`)
+    location.reload()
+  }
+  request.onerror = () => {
+    console.error('Failed to delete database:', request.error)
+    location.reload()
+  }
+  request.onblocked = () => {
+    console.warn('Database deletion blocked, reloading anyway...')
+    location.reload()
+  }
+  setTimeout(() => location.reload(), 5000)
+}
+
 async function run_needed_migrations(pg: LivePGLite, was_resumed: boolean): Promise<string[] | null> {
   let existing_migration_names: string[] = []
   if (was_resumed) {
@@ -108,9 +141,3 @@ async function run_needed_migrations(pg: LivePGLite, was_resumed: boolean): Prom
 
   return applied_migration_names
 }
-
-// const METADATA_KEYS = {
-//   DB_ID: 'db_id',
-//   SYNCED_UP_TO: 'synced_up_to',
-//   LAST_SYNCED_AT: 'last_synced_at',
-// } as const

@@ -15,25 +15,23 @@
 
   let { data }: Props = $props()
 
-  let db = $derived(data.db)
-
   let users_with_roles = $derived(
-    db?.users.rows.map((user) => {
+    data.db?.users.rows.map((user) => {
       return {
         ...user,
-        dictionary_roles: db?.dictionary_roles.rows.filter(role => role.user_id === user.id) ?? [],
+        dictionary_roles: data.db?.dictionary_roles.rows.filter(role => role.user_id === user.id) ?? [],
       }
-    }) ?? []
+    }) ?? [],
   )
 
   let active_section = $derived(page.url.searchParams.get('filter') as 'public' | 'private' | 'other')
 
   let active_invites = $derived(
-    db?.invites.rows.filter(invite => invite.status === 'queued' || invite.status === 'sent') ?? []
+    data.db?.invites.rows.filter(invite => invite.status === 'queued' || invite.status === 'sent') ?? [],
   )
 
   let dictionaries_with_editors_invites = $derived(
-    (db?.dictionaries.rows ?? [])
+    (data.db?.dictionaries.rows ?? [])
       .filter((dictionary) => {
         if (active_section === 'public') return dictionary.public
         if (active_section === 'private') return !dictionary.public && !dictionary.con_language_description
@@ -45,11 +43,11 @@
           editors: users_with_roles.filter(user => user.dictionary_roles.some(role => role.dictionary_id === dictionary.id)),
           invites: active_invites.filter(invite => invite.dictionary_id === dictionary.id),
         } as unknown as DictionaryWithHelpers
-      })
+      }),
   )
 
   async function update_dictionary(change: TablesUpdate<'dictionaries'>, dictionary_id: string) {
-    const dictionary = db?.dictionaries.rows.find(d => d.id === dictionary_id)
+    const dictionary = data.db?.dictionaries.rows.find(d => d.id === dictionary_id)
     if (!dictionary) return
     Object.assign(dictionary, change)
     await dictionary._save()

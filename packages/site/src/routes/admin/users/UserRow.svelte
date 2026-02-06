@@ -64,7 +64,7 @@
         class="-ml-2"
         onclick={async () => {
           if (confirm('Re-subscribe user?')) {
-            const user_data = db?.user_data.id[user.id]
+            const user_data = db?.user_data.id(user.id)
             if (user_data) {
               user_data.unsubscribed_from_emails = null
               await user_data._save()
@@ -78,7 +78,7 @@
         size="sm"
         class="-ml-2"
         onclick={async () => {
-          const user_data = db?.user_data.id[user.id]
+          const user_data = db?.user_data.id(user.id)
           if (user_data) {
             user_data.unsubscribed_from_emails = new Date()
             await user_data._save()

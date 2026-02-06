@@ -1,7 +1,10 @@
 <script lang="ts">
+  import { dev } from '$app/environment'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Header from '$lib/components/shell/Header.svelte'
   import AdminGuard from '$lib/components/ui/AdminGuard.svelte'
+  import { delete_db_and_reload } from '$lib/pglite/db'
+  import { live_share } from '$lib/pglite/live-share.svelte'
   import { Button } from '$lib/svelte-pieces'
   import Tab from './Tab.svelte'
 
@@ -32,6 +35,20 @@
           Sync
         {/if}
       </Button>
+      <Button
+        type="button"
+        class="my-1"
+        size="sm"
+        form="simple"
+        color="red"
+        onclick={delete_db_and_reload}>
+        Delete Local DB
+      </Button>
+      {#if dev && live_share.status === 'connected'}
+        <a href="https://local.drizzle.studio" target="_blank" class="px-2 py-1 rounded hover:bg-gray-200 text-green-600" title="Open Drizzle Studio">
+          <span class="i-mdi-database-outline" />
+        </a>
+      {/if}
     </nav>
   </div>
 

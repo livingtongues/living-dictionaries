@@ -5,6 +5,7 @@ import type { BaseUser } from '$lib/supabase/user'
 import type { AuthResponse } from '@supabase/supabase-js'
 import type { Readable } from 'svelte/store'
 import type { LayoutData as DictionaryLayoutData } from './routes/[dictionaryId]/$types'
+// import type { LayoutData as AdminLayoutData } from './routes/admin/$types'
 import 'svelte/elements'
 
 declare global {
@@ -36,6 +37,9 @@ declare global {
       dictionary_editors?: DictionaryLayoutData['dictionary_editors']
       load_partners?: DictionaryLayoutData['load_partners']
       update_dictionary?: DictionaryLayoutData['update_dictionary']
+
+      // admin route
+      // db?: AdminLayoutData['db']
     }
     interface PageState {
       entry_id?: string

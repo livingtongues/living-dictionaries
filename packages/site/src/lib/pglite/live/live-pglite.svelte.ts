@@ -85,14 +85,9 @@ class LivePgLiteImpl {
         return self.#get_or_create_table_store(table_name).loading
       },
 
-      get id() {
-        return new Proxy({}, {
-          get(_: unknown, id: string) {
-            if (id == null || id === 'undefined' || id === 'null')
-              return undefined
-            return self.#get_row_by_id(table_name, id)
-          },
-        }) as Readonly<Record<string, RowType<T> | undefined>>
+      id(row_id: string): RowType<T> | undefined {
+        const rows = $derived(self.#get_row_by_id(table_name, row_id).rows)
+        return rows[0] as RowType<T> | undefined
       },
 
       query(options: QueryOptions): QueryAccessor<T> {
@@ -246,7 +241,7 @@ class LivePgLiteImpl {
   #get_row_by_id<T extends TableName>(
     table_name: T,
     id: string,
-  ): RowType<T> | undefined {
+  ): TableStore<Record<string, unknown>> {
     const store_key = `${table_name}:${id}`
     let store = this.#row_stores.get(store_key)
 
@@ -282,8 +277,7 @@ class LivePgLiteImpl {
       this.#row_stores.set(store_key, store)
     }
 
-    const { rows } = store
-    return rows[0] as RowType<T> | undefined
+    return store
   }
 
   /**

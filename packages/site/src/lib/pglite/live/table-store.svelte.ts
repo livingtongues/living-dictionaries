@@ -125,13 +125,6 @@ export class TableStore<T extends Record<string, unknown>> {
   }
 
   /**
-   * Get a row by its primary key
-   */
-  get_by_id(id: string): T | undefined {
-    return this.#objects[id]
-  }
-
-  /**
    * Start the live query subscription
    */
   async #start() {

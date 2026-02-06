@@ -44,15 +44,38 @@ This is a pnpm monorepo containing a dictionary-building platform built with Sve
 ### How to Edit Svelte Components
 This includes all files ending in `.svelte` including `+page.svelte` and `+layout.svelte`
 
-The user runs the dev server themselves at http://localhost:3041 - To check for build errors or server output after making changes, tail the log file:
+When testing in the browser:
+- **Dev server**: Use [port 3041](http://localhost:3041) (user is responsible for running it). Check logs at `app/.dev-server.log` if needed.
+- **Login**: In dev mode, enter any email and click "Send Code" - login is instant with no OTP required. Use `agent@mock.com` for testing unless you have a reason to be using multiple accounts.
+- **Don't start dev servers**: The user runs `pnpm dev` themselves.
 
+### PGlite Proxy for Database Queries
+
+The PGlite proxy starts automatically with the dev server (`pnpm dev`). You can execute SQL queries directly against browser PGlite instances via HTTP. This is useful for inspecting or modifying data during testing.
+
+**Check connected browsers:**
 ```bash
-tail -100 app/.dev-server.log
+curl -s http://localhost:4001/clients
+# Returns: {"clients":[{"id":"agent@mock.com","connected_at":"..."}]}
 ```
 
-**Important:**
-- Do NOT start a dev server yourself - the user already has one running
-- Before verifying changes work, check the log for errors
+**Execute SQL query:**
+```bash
+curl -s -X POST "http://localhost:4001/query?client=agent@mock.com" \
+  -H "Content-Type: application/json" \
+  -d '{"sql": "SELECT * FROM words LIMIT 5"}'
+```
+
+**Insert data example:**
+```bash
+curl -s -X POST "http://localhost:4001/query?client=agent@mock.com" \
+  -H "Content-Type: application/json" \
+  -d '{"sql": "INSERT INTO ..."}'
+```
+
+**Notes:**
+- Your agent browser (`agent@mock.com`) will also appear when you log in
+- Use `?client=<email>` to target a specific browser's database
 
 ### Code Style
 - Use hard-coded constants from `lib/constants.ts` instead of arbitrary string values or magic numbers
@@ -109,8 +132,8 @@ The `page.data.db` object provides a reactive, live-query interface to PGlite ta
 
 **Get a single row by id:**
 ```svelte
-{#if page.data.db.texts.id[text_id]}
-  <div>{page.data.db.texts.id[text_id].title}</div>
+{#if page.data.db.texts.id(text_id)}
+  <div>{page.data.db.texts.id(text_id).title}</div>
 {/if}
 ```
 
@@ -253,7 +276,7 @@ Each `page.data.db.<table>` has these available:
 |-----------------|-------------|
 | `.rows` | Reactive array of all rows |
 | `.objects` | Reactive object keyed by id for fast lookups |
-| `.id[some_id]` | Get a single row by id (subscribe just to single row instead of entire table) |
+| `.id(some_id)` | Get a single row by id (subscribe just to single row instead of entire table) |
 | `.loading` | Boolean indicating if initial data is still loading |
 | `.insert(data)` | Insert one or more new rows |
 | `.delete_all(ids)` | Delete multiple rows by their ids |
