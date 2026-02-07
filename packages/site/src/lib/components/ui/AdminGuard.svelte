@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { browser } from '$app/environment'
   import { page } from '$app/state'
 
   interface Props {
@@ -10,7 +11,9 @@
 </script>
 
 {#if $admin}
-  {@render children?.()}
+  {#if browser}
+    {@render children?.()}
+  {/if}
 {:else}
   <div class="p-3">Not logged in as admin.</div>
 {/if}
