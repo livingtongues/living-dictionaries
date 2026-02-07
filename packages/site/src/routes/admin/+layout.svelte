@@ -23,8 +23,7 @@
       <Tab link="dictionaries?filter=private" label="private dictionaries" />
       <Tab link="dictionaries?filter=other" label="other dictionaries" />
       <Button
-        type="button"
-        class="ml-auto my-1"
+        class="ml-auto"
         size="sm"
         form="simple"
         disabled={data.sync?.is_syncing}
@@ -36,8 +35,6 @@
         {/if}
       </Button>
       <Button
-        type="button"
-        class="my-1"
         size="sm"
         form="simple"
         color="red"
@@ -45,9 +42,16 @@
         Reset Local
       </Button>
       {#if dev && live_share.status === 'connected'}
-        <a href="https://local.drizzle.studio" target="_blank" class="px-2 py-1 rounded hover:bg-gray-200 text-green-600" title="Open Drizzle Studio">
+        <Button
+          size="sm"
+          form="simple"
+          class="flex items-center !text-base"
+          color="green"
+          href="https://local.drizzle.studio"
+          title="Open Drizzle Studio"
+          target="_blank">
           <span class="i-mdi-database-outline" />
-        </a>
+        </Button>
       {/if}
     </nav>
   </div>
