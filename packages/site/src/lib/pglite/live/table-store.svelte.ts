@@ -1,5 +1,6 @@
 import type { LiveChanges, PGliteWithLive } from '@electric-sql/pglite/live'
 import type { Change, ChangeInsert, Saveable } from './types'
+import { toast } from '$lib/components/ui/toast'
 import { tick } from 'svelte'
 import { composite_changes, type CompositeChangesResult } from './composite-changes'
 
@@ -175,7 +176,7 @@ export class TableStore<T extends Record<string, unknown>> {
     } catch (error) {
       console.error(this.#query, this.#params, this.#primary_keys)
       console.error('LivePgLite subscription error:', error)
-      this.#show_toast(`Database error: ${(error as Error).message}`)
+      toast.error(`Database error: ${(error as Error).message}`)
       this.#loading = false
       this.#started = false
     }
@@ -217,10 +218,10 @@ export class TableStore<T extends Record<string, unknown>> {
         // Remove internal fields before storing
         const row = this.#clean_row(change)
         this.#rows.push(row)
-        this.#objects[row_key] = row
-        // Attach methods after pushing so they capture the $state proxy
-        const proxyRow = this.#rows[this.#rows.length - 1] as Record<string, unknown> & Saveable
-        this.#attach_methods(proxyRow)
+        // Grab the $state proxy from the array, attach methods, and share the same reference in #objects
+        const proxy_row = this.#rows[this.#rows.length - 1] as Record<string, unknown> & Saveable
+        this.#attach_methods(proxy_row)
+        this.#objects[row_key] = proxy_row as T
         break
       }
 
@@ -234,12 +235,12 @@ export class TableStore<T extends Record<string, unknown>> {
       }
 
       case 'UPDATE': {
+        // #rows and #objects share the same proxy reference, so mutating one updates both
         const index = this.#rows.findIndex(r => this.#get_row_key(r as unknown as Record<string, unknown>) === row_key)
         if (index !== -1) {
           for (const col of change.__changed_columns__) {
             if (col !== '__after__') {
               (this.#rows[index] as Record<string, unknown>)[col] = change[col]
-              ;(this.#objects[row_key] as Record<string, unknown>)[col] = change[col]
             }
           }
         }
@@ -285,26 +286,5 @@ export class TableStore<T extends Record<string, unknown>> {
         await on_reset(row)
       }
     }
-  }
-
-  /**
-   * Simple toast notification for errors
-   */
-  #show_toast(message: string) {
-    if (typeof document === 'undefined')
-      return
-
-    const toast = document.createElement('div')
-    toast.className = 'live-pglite-toast'
-    toast.textContent = message
-    toast.style.cssText = `
-      position: fixed; bottom: 1rem; right: 1rem;
-      background: #dc2626; color: white;
-      padding: 0.75rem 1rem; border-radius: 0.5rem;
-      z-index: 9999; font-family: system-ui, sans-serif;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    `
-    document.body.appendChild(toast)
-    setTimeout(() => toast.remove(), 5000)
   }
 }

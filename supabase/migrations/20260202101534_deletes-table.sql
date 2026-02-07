@@ -9,16 +9,12 @@ CREATE TABLE deletes (
 
 ALTER TABLE deletes ENABLE ROW LEVEL SECURITY;
 
--- RLS policies for deletes table (admins only for now)
-CREATE POLICY "Admins can view deletes"
-ON deletes FOR SELECT
+-- RLS policies for deletes table (admins only for now) - important to allow reads, inserts, and updates
+CREATE POLICY "Admin level 1 can perform any action on deletes"
+ON deletes FOR ALL
 TO authenticated
-USING ((auth.jwt() -> 'app_metadata' ->> 'admin')::int = 1);
-
-CREATE POLICY "Admins can insert deletes"
-ON deletes FOR INSERT
-TO authenticated
-WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'admin')::int = 1);
+USING (is_admin())
+WITH CHECK (is_admin());
 
 -- Trigger function to cascade deletes to the actual tables
 CREATE OR REPLACE FUNCTION process_delete_record()

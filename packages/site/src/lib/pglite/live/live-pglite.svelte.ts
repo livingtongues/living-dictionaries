@@ -7,6 +7,7 @@ import type {
   TableAccessor,
   TableName,
 } from './types'
+import { toast } from '$lib/components/ui/toast'
 import { TableStore } from './table-store.svelte'
 
 export interface LivePgLiteOptions {
@@ -173,7 +174,7 @@ class LivePgLiteImpl {
         await this.#pg.query(sql, params)
       } catch (error) {
         console.error('LivePgLite save error:', error)
-        this.#show_toast(`Save error: ${(error as Error).message}`)
+        toast.error(`Save error: ${(error as Error).message}`)
         throw error
       }
     }
@@ -192,7 +193,7 @@ class LivePgLiteImpl {
         await this.#pg.query(sql, params)
       } catch (error) {
         console.error('LivePgLite delete error:', error)
-        this.#show_toast(`Delete error: ${(error as Error).message}`)
+        toast.error(`Delete error: ${(error as Error).message}`)
         throw error
       }
     }
@@ -228,7 +229,7 @@ class LivePgLiteImpl {
         }
       } catch (error) {
         console.error('LivePgLite reset error:', error)
-        this.#show_toast(`Reset error: ${(error as Error).message}`)
+        toast.error(`Reset error: ${(error as Error).message}`)
         throw error
       }
     }
@@ -378,7 +379,7 @@ class LivePgLiteImpl {
         }
       } catch (error) {
         console.error('LivePgLite insert error:', error)
-        this.#show_toast(`Insert error: ${(error as Error).message}`)
+        toast.error(`Insert error: ${(error as Error).message}`)
         throw error
       }
     }
@@ -403,30 +404,9 @@ class LivePgLiteImpl {
       }
     } catch (error) {
       console.error('LivePgLite deleteAll error:', error)
-      this.#show_toast(`Delete error: ${(error as Error).message}`)
+      toast.error(`Delete error: ${(error as Error).message}`)
       throw error
     }
-  }
-
-  /**
-   * Simple toast notification for errors
-   */
-  #show_toast(message: string) {
-    if (typeof document === 'undefined')
-      return
-
-    const toast = document.createElement('div')
-    toast.className = 'live-pglite-toast'
-    toast.textContent = message
-    toast.style.cssText = `
-      position: fixed; bottom: 1rem; right: 1rem;
-      background: #dc2626; color: white;
-      padding: 0.75rem 1rem; border-radius: 0.5rem;
-      z-index: 9999; font-family: system-ui, sans-serif;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    `
-    document.body.appendChild(toast)
-    setTimeout(() => toast.remove(), 5000)
   }
 }
 

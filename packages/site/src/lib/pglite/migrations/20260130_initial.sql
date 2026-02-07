@@ -99,7 +99,7 @@ BEGIN
     NEW.local_saved_at := NULL;
     RETURN NEW;
   END IF;
-  IF NEW.local_saved_at IS NULL THEN
+  IF TG_OP = 'UPDATE' OR NEW.local_saved_at IS NULL THEN
     NEW.local_saved_at := now();
   END IF;
   RETURN NEW;
@@ -127,8 +127,25 @@ CREATE TRIGGER set_local_saved_at_trigger
 BEFORE INSERT OR UPDATE ON invites
 FOR EACH ROW EXECUTE FUNCTION set_local_saved_at();
 
+-- Handle duplicate deletes by updating local_saved_at instead of throwing unique constraint error
+CREATE OR REPLACE FUNCTION handle_delete_conflict()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM deletes WHERE table_name = NEW.table_name AND id = NEW.id) THEN
+    UPDATE deletes SET local_saved_at = now()
+    WHERE table_name = NEW.table_name AND id = NEW.id;
+    RETURN NULL;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER handle_delete_conflict_trigger
+BEFORE INSERT ON deletes
+FOR EACH ROW EXECUTE FUNCTION handle_delete_conflict();
+
 -- Trigger function to process deletes
--- When a row is inserted into deletes, cascade delete to the actual table
+-- When a row is inserted or updated in deletes, cascade delete to the actual table
 CREATE OR REPLACE FUNCTION process_delete()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -150,5 +167,5 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER process_delete_trigger
-AFTER INSERT ON deletes
+AFTER INSERT OR UPDATE ON deletes
 FOR EACH ROW EXECUTE FUNCTION process_delete();
