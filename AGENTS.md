@@ -38,6 +38,7 @@ This is a pnpm monorepo containing a dictionary-building platform built with Sve
   - Authentication via Supabase Auth
 - **Testing**:
   - Vitest for unit and integration tests
+  - Never use `test.fails` — always work until tests pass
 
 ## Coding Guidelines
 
@@ -257,6 +258,9 @@ Use `query()` for filtered/sorted/paginated data:
   )
 </script>
 ```
+
+### Tips
+- Don't spread row objects (e.g. `<div {...text}>`) as any mutations will not be applied to the original proxy object and will be lost.
 
 ### Row Methods Summary
 

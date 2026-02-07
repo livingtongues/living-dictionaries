@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { dev } from '$app/environment'
+
   let service_worker_updated = $state(false)
 
-  if ('serviceWorker' in navigator) {
+  if (!dev && 'serviceWorker' in navigator) {
     let is_initial_sw_activation = !navigator.serviceWorker.controller
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
