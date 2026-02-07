@@ -1,25 +1,25 @@
 <script lang="ts">
+  import { api_email_otp } from '$api/email/otp/_call'
+  import { dev } from '$app/environment'
+  import { page } from '$app/state'
+  import { display_one_tap_button } from '$lib/supabase/auth'
   import { Button, Form, Modal } from '$lib/svelte-pieces'
   import { onMount } from 'svelte'
-  import { toast } from '../ui/Toasts.svelte'
   import { handle_sign_in_response } from '../../supabase/sign_in'
-  import { display_one_tap_button } from '$lib/supabase/auth'
-  import { page } from '$app/state'
-  import { dev } from '$app/environment'
-  import { api_email_otp } from '$api/email/otp/_call'
+  import { toast } from '../ui/toast'
 
   interface Props {
-    context?: 'force';
-    on_close: () => void;
+    context?: 'force'
+    on_close: () => void
   }
 
-  let { context = undefined, on_close }: Props = $props();
+  let { context = undefined, on_close }: Props = $props()
 
   let email = $state(dev ? 'manual@mock.com' : '')
   let sixDigitCodeSent = $state(false)
   let sixDigitCode: string = $state()
-  const TEN_SECONDS = 10000
-  const FOUR_SECONDS = 4000
+  const TEN_SECONDS = 10
+  const FOUR_SECONDS = 4
 
   async function sendCode() {
     const { data, error } = await api_email_otp({ email })
@@ -57,7 +57,7 @@
     if (code_is_6_digits && !submitting_code) {
       handleOTP(sixDigitCode)
     }
-  });
+  })
 
   function autofocus(node: HTMLInputElement) {
     setTimeout(() => node.focus(), 15)
@@ -79,7 +79,7 @@
 
 <Modal {on_close}>
   {#snippet heading()}
-    <span >{page.data.t('header.login')}
+    <span>{page.data.t('header.login')}
       {#if submitting_code}
         <span class="i-svg-spinners-3-dots-fade align--4px"></span>
       {/if}
@@ -99,9 +99,9 @@
         {page.data.t('misc.disjunctive').toUpperCase()}
       </div>
     {/if}
-    <Form onsubmit={sendCode} >
+    <Form onsubmit={sendCode}>
       {#snippet children({ loading })}
-            <div class="flex">
+        <div class="flex">
           <input
             type="email"
             use:autofocus
@@ -111,8 +111,8 @@
             bind:value={email} />
           <Button class="text-nowrap ml-1" {loading} form="filled" type="submit">{page.data.t('account.send_code')}</Button>
         </div>
-                {/snippet}
-        </Form>
+      {/snippet}
+    </Form>
   {:else}
     <div class="mb-2">
       {page.data.t('account.enter_6_digit_code_sent_to')}: {email}
