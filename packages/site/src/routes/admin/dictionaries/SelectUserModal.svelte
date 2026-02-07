@@ -1,30 +1,30 @@
 <script lang="ts">
-  import { Button, Modal } from '$lib/svelte-pieces'
-  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
+  import type { UserWithRoles } from './dictionaryWithHelpers.types'
   import Filter from '$lib/components/Filter.svelte'
+  import { Button, Modal } from '$lib/svelte-pieces'
 
   interface Props {
-    on_close: () => void;
-    add_editor: (user_id: string) => Promise<void>;
-    invite_editor: () => Promise<void>;
-    users?: UserWithDictionaryRoles[];
+    on_close: () => void
+    add_editor: (user_id: string) => Promise<void>
+    invite_editor: () => Promise<void>
+    users?: UserWithRoles[]
   }
 
   let {
     on_close,
     add_editor,
     invite_editor,
-    users = []
-  }: Props = $props();
+    users = [],
+  }: Props = $props()
 </script>
 
 <Modal {on_close}>
   {#snippet heading()}
-    <span > Select a user to add role to</span>
+    <span> Select a user to add role to</span>
   {/snippet}
-  <Filter items={users}  placeholder="Search names and emails">
+  <Filter items={users} placeholder="Search names and emails">
     {#snippet children({ filteredItems: filteredUsers })}
-        {#each filteredUsers as user}
+      {#each filteredUsers as user}
         <Button
           onclick={async () => {
             await add_editor(user.id)
@@ -46,6 +46,6 @@
       <div class="modal-footer space-x-1">
         <Button onclick={on_close} color="black">Cancel</Button>
       </div>
-          {/snippet}
-    </Filter>
+    {/snippet}
+  </Filter>
 </Modal>

@@ -1,10 +1,10 @@
 <script lang="ts">
+  import type { UserWithRoles } from './dictionaryWithHelpers.types'
   import { BadgeArrayEmit, ShowHide } from '$lib/svelte-pieces'
-  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
 
   interface Props {
-    users?: UserWithDictionaryRoles[];
-    editors?: UserWithDictionaryRoles[];
+    users?: UserWithRoles[];
+    editors?: UserWithRoles[];
     remove_editor: (user_id: string) => Promise<void>;
     add_editor: (user_id: string) => Promise<void>;
     invite_editor: () => Promise<void>;

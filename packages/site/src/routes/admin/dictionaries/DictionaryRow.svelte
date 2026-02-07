@@ -1,23 +1,20 @@
 <script lang="ts">
+  import type { PageData } from './$types'
+  import type { DictionaryWithHelpers, UserWithRoles } from './dictionaryWithHelpers.types'
+  import { api_delete_dictionary } from '$api/db/delete-dictionary/_call'
+  import { page } from '$app/state'
+  import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
+  import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte'
+  import { db_date_to_friendly } from '$lib/helpers/time'
   import { BadgeArrayEmit, Button, JSON, Modal, ShowHide } from '$lib/svelte-pieces'
-  import type { TablesUpdate } from '@living-dictionaries/types'
-  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte'
   import RolesManagment from './RolesManagment.svelte'
-  import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
-  import type { PageData } from './$types'
-  import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
-  import { supabase_date_to_friendly } from '$lib/helpers/time'
-  import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte'
-  import { page } from '$app/state'
-  import { api_delete_dictionary } from '$api/db/delete-dictionary/_call'
 
   interface Props {
-    index: number;
-    is_public: boolean;
-    dictionary: DictionaryWithHelpers;
-    users: UserWithDictionaryRoles[];
-    update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>;
+    index: number
+    is_public: boolean
+    dictionary: DictionaryWithHelpers
+    users: UserWithRoles[]
   }
 
   let {
@@ -25,8 +22,7 @@
     is_public,
     dictionary,
     users,
-    update_dictionary,
-  }: Props = $props();
+  }: Props = $props()
 
   let typedId = $state('')
 
@@ -38,7 +34,7 @@
 
 <td class="relative">
   <span onclick={() => window.open(`/${dictionary.id}`)} class="absolute top-0 left-0 text-xs text-gray-400 cursor-pointer">{index + 1}</span>
-  <DictionaryFieldEdit field="name" value={dictionary.name} {update_dictionary} />
+  <DictionaryFieldEdit field="name" {dictionary} />
 </td>
 <td>
   <Button
@@ -46,9 +42,8 @@
     size="sm"
     onclick={async () => {
       if (confirm('Flip this dictionary\'s visibility?')) {
-        await update_dictionary({
-          public: !dictionary.public,
-        })
+        dictionary.public = !dictionary.public
+        await dictionary._save()
       }
     }}>
     {dictionary.public ? 'Public' : 'Private'}
@@ -57,7 +52,6 @@
 <td>
   <Button title="View Entries" size="sm" form="simple" href="/{dictionary.url}">
     {dictionary.entry_count}
-    <!-- <span class="i-tabler-external-link" style="vertical-align: -1px;" /> -->
   </Button>
 </td>
 <td>
@@ -89,8 +83,8 @@
               }
             }}>
             {#snippet prefix()}
-                        <span class="i-mdi-email-send" ></span>
-                      {/snippet}
+              <span class="i-mdi-email-send"></span>
+            {/snippet}
           </ContributorInvitationStatus>
         </div>
       {/if}
@@ -126,8 +120,8 @@
               }
             }}>
             {#snippet prefix()}
-                        <span class="i-mdi-email-send" ></span>
-                      {/snippet}
+              <span class="i-mdi-email-send"></span>
+            {/snippet}
           </ContributorInvitationStatus>
         </div>
       {/if}
@@ -137,19 +131,17 @@
 <td>
   <DictionaryFieldEdit
     field="iso_639_3"
-    value={dictionary.iso_639_3}
-    {update_dictionary} />
+    {dictionary} />
 </td>
 <td>
   <DictionaryFieldEdit
     field="glottocode"
-    value={dictionary.glottocode}
-    {update_dictionary} />
+    {dictionary} />
 </td>
 <td>
-  <ShowHide  >
+  <ShowHide>
     {#snippet children({ show, toggle })}
-        <Button class="text-nowrap -ml-2" size="sm" form="simple" onclick={toggle}>
+      <Button class="text-nowrap -ml-2" size="sm" form="simple" onclick={toggle}>
         {#if dictionary.coordinates?.points?.length}
           <LatLngDisplay
             lat={dictionary.coordinates.points[0].coordinates.latitude}
@@ -163,33 +155,30 @@
             lng={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.longitude : undefined}
             on_update={({ lat, lng }) => {
               const [, ...rest] = dictionary.coordinates?.points || []
-              update_dictionary({
-                coordinates: {
-                  points: [{ coordinates: { latitude: lat, longitude: lng } }, ...rest],
-                  regions: dictionary.coordinates?.regions,
-                },
-              })
+              dictionary.coordinates = {
+                points: [{ coordinates: { latitude: lat, longitude: lng } }, ...rest],
+                regions: dictionary.coordinates?.regions,
+              }
+              dictionary._save()
             }}
             on_remove={() => {
               const [, ...rest] = dictionary.coordinates?.points || []
-              update_dictionary({
-                coordinates: {
-                  points: rest,
-                  regions: dictionary.coordinates?.regions,
-                },
-              })
+              dictionary.coordinates = {
+                points: rest,
+                regions: dictionary.coordinates?.regions,
+              }
+              dictionary._save()
             }}
             on_close={toggle} />
         {/await}
       {/if}
-          {/snippet}
-    </ShowHide>
+    {/snippet}
+  </ShowHide>
 </td>
 <td>
   <DictionaryFieldEdit
     field="location"
-    value={dictionary.location}
-    {update_dictionary} />
+    {dictionary} />
 </td>
 <td>
   <BadgeArrayEmit addMessage="Add" strings={dictionary.gloss_languages?.slice(0, 8)} />
@@ -206,15 +195,13 @@
     onadditem={() => {
       const name = prompt('Enter alternate name:')
       if (name) {
-        update_dictionary({
-          alternate_names: [...(dictionary.alternate_names || []), name],
-        })
+        dictionary.alternate_names = [...(dictionary.alternate_names || []), name]
+        dictionary._save()
       }
     }}
     onitemremoved={({ value }) => {
-      update_dictionary({
-        alternate_names: dictionary.alternate_names.filter(name => name !== value),
-      })
+      dictionary.alternate_names = dictionary.alternate_names?.filter(name => name !== value) || []
+      dictionary._save()
     }} />
   {#if dictionary.alternate_names?.length > 8}
     <span class="text-xs text-gray-400">+{dictionary.alternate_names.length - 8}</span>
@@ -224,10 +211,10 @@
   {dictionary.orthographies?.length? dictionary.orthographies.map(({ name }) => name.default) : ''}
 </td>
 <td class="whitespace-nowrap">
-  {#if dictionary.created_at}{supabase_date_to_friendly(dictionary.created_at)}{/if}
+  {#if dictionary.created_at}{db_date_to_friendly(dictionary.created_at)}{/if}
 </td>
 <td class="whitespace-nowrap">
-  {#if dictionary.updated_at}{supabase_date_to_friendly(dictionary.updated_at)}{/if}
+  {#if dictionary.updated_at}{db_date_to_friendly(dictionary.updated_at)}{/if}
 </td>
 <td>{typeof dictionary.language_used_by_community === 'boolean'
   ? dictionary.language_used_by_community
@@ -251,7 +238,8 @@
       size="sm"
       onclick={() => {
         if (confirm('Toggle con lang status?')) {
-          update_dictionary({ con_language_description: dictionary?.con_language_description === 'YES' ? null : 'YES' })
+          dictionary.con_language_description = dictionary?.con_language_description === 'YES' ? null : 'YES'
+          dictionary._save()
         }
       }}>
       {dictionary?.con_language_description === 'YES' ? 'YES' : 'NO'}
@@ -259,9 +247,9 @@
   {/if}
 </td>
 <td>
-  <ShowHide  >
+  <ShowHide>
     {#snippet children({ show, toggle })}
-        <Button
+      <Button
         color="red"
         form="filled"
         size="sm"
@@ -271,8 +259,8 @@
       {#if show}
         <Modal on_close={toggle}>
           {#snippet heading()}
-                <span >Delete {dictionary.name}?</span>
-              {/snippet}
+            <span>Delete {dictionary.name}?</span>
+          {/snippet}
           <div class="mb-2">
             id: {dictionary.id}, url: /{dictionary.url}
           </div>
@@ -295,8 +283,8 @@
           </Button>
         </Modal>
       {/if}
-          {/snippet}
-    </ShowHide>
+    {/snippet}
+  </ShowHide>
 </td>
 {#if $admin > 1}
   <td class="cursor-pointer">

@@ -42,7 +42,7 @@
         form="simple"
         color="red"
         onclick={delete_db_and_reload}>
-        Delete Local DB
+        Reset Local
       </Button>
       {#if dev && live_share.status === 'connected'}
         <a href="https://local.drizzle.studio" target="_blank" class="px-2 py-1 rounded hover:bg-gray-200 text-green-600" title="Open Drizzle Studio">

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
+  import type { UserWithRoles } from '../dictionaries/dictionaryWithHelpers.types'
 
   interface Props {
-    users?: UserWithDictionaryRoles[];
-    children?: import('svelte').Snippet<[any]>;
+    users?: UserWithRoles[]
+    children?: import('svelte').Snippet<[{ sortedUsers: UserWithRoles[] }]>
   }
 
-  let { users = [], children }: Props = $props();
+  let { users = [], children }: Props = $props()
 
   const UserFields = {
     email: 'Email',
@@ -20,7 +20,6 @@
 
   type SortFields = keyof typeof UserFields
   type UserFieldValue = typeof UserFields[SortFields]
-  // @ts-ignore
   const userFields: {
     key: SortFields
     value: UserFieldValue
@@ -84,23 +83,23 @@
   <tr>
     {#each userFields as field}
       <th
-      class="cursor-pointer"
-      onclick={() => setSortSettings(field.key)}
-      title="Click to sort asc/desc">
-      {field.value}
-      {#if sortKey === field.key}
-        {#if sortDescending}
-          <i class="fas fa-sort-amount-down"></i>
-        {:else}
-          <i class="fas fa-sort-amount-up"></i>
+        class="cursor-pointer"
+        onclick={() => setSortSettings(field.key)}
+        title="Click to sort asc/desc">
+        {field.value}
+        {#if sortKey === field.key}
+          {#if sortDescending}
+            <i class="fas fa-sort-amount-down"></i>
+          {:else}
+            <i class="fas fa-sort-amount-up"></i>
+          {/if}
         {/if}
-      {/if}
-    </th>
+      </th>
     {/each}
   </tr>
 </thead>
 
-{@render children?.({ sortedUsers, })}
+{@render children?.({ sortedUsers })}
 
 <style>
   th {

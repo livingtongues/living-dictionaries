@@ -1,11 +1,11 @@
 <script lang="ts">
   import type { Tables } from '@living-dictionaries/types'
-  import { onMount } from 'svelte'
-  import { Button } from '$lib/svelte-pieces'
-  import { supabase_date_to_friendly } from '$lib/helpers/time'
   import { page } from '$app/state'
+  import { db_date_to_friendly } from '$lib/helpers/time'
+  import { Button } from '$lib/svelte-pieces'
+  import { onMount } from 'svelte'
 
-  let { data } = $props();
+  let { data } = $props()
 
   let keys: Tables<'api_keys'>[] = $state()
 
@@ -58,9 +58,9 @@
 
   {#each keys as { id, created_at, can_write, use_count, last_read_at, last_write_at }}
     <div class="mb-1 border-t pt-2">
-      Key: <b>{id}</b> generated at {supabase_date_to_friendly(created_at)} with {can_write ? 'read/write' : 'read'} permission. {last_read_at ? `Last read at ${supabase_date_to_friendly(last_read_at)}` : 'Never read'}.
+      Key: <b>{id}</b> generated at {db_date_to_friendly(created_at)} with {can_write ? 'read/write' : 'read'} permission. {last_read_at ? `Last read at ${db_date_to_friendly(last_read_at)}` : 'Never read'}.
       {#if can_write}
-        {last_write_at ? `Last write at ${supabase_date_to_friendly(last_write_at)}.` : 'Never wrote.'}
+        {last_write_at ? `Last write at ${db_date_to_friendly(last_write_at)}.` : 'Never wrote.'}
       {/if}
       {#if use_count}
         Use count: {use_count}.
