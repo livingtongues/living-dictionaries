@@ -4,8 +4,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PgliteDatabase } from 'drizzle-orm/pglite'
 import type { SyncableTableName, SyncError, SyncResult, TableFetchResult } from './types'
 import { page } from '$app/state'
+import { toast } from '$lib/components/ui/toast'
 import * as local_schema from '$lib/pglite/schema'
-import { toast } from '$lib/svelte-pieces-5/toast'
 import { eq } from 'drizzle-orm'
 import { untrack } from 'svelte'
 import { LOCAL_BATCH_SIZE, SYNC_BATCH_SIZE } from './constants'
@@ -96,17 +96,16 @@ export class Sync {
   async sync_with_notice(): Promise<SyncResult> {
     try {
       const result = await this.sync()
-      const parts = [
-        `${result.items_uploaded} ${page.data.t('sync.rows_uploaded')}`,
-        `${result.items_downloaded} ${page.data.t('sync.rows_downloaded')}`,
-      ]
-      if (result.deletes_pushed > 0) {
+      const parts: string[] = []
+      if (result.items_uploaded > 0)
+        parts.push(`${result.items_uploaded} ${page.data.t('sync.rows_uploaded')}`)
+      if (result.items_downloaded > 0)
+        parts.push(`${result.items_downloaded} ${page.data.t('sync.rows_downloaded')}`)
+      if (result.deletes_pushed > 0)
         parts.push(`${result.deletes_pushed} ${page.data.t('sync.deletes_pushed')}`)
-      }
-      if (result.deletes_pulled > 0) {
+      if (result.deletes_pulled > 0)
         parts.push(`${result.deletes_pulled} ${page.data.t('sync.deletes_pulled')}`)
-      }
-      toast.success(parts.join('\n'))
+      toast.success(parts.join('\n') || page.data.t('sync.already_up_to_date'))
       if (result.errors.length > 0) {
         const [first_error] = result.errors
         const error_detail = 'word' in first_error
@@ -131,8 +130,8 @@ export class Sync {
 
     const start_time = Date.now()
     const errors: SyncError[] = []
-    const uploaded_timestamps: Date[] = []
-    const downloaded_timestamps: Date[] = []
+    const uploaded_timestamps: string[] = []
+    const downloaded_timestamps: string[] = []
     let deletes_pushed = 0
     let deletes_pulled = 0
 
@@ -178,9 +177,9 @@ export class Sync {
       }
 
       // Update synced_up_to
-      const all_timestamps = [...uploaded_timestamps, ...downloaded_timestamps]
+      const all_timestamps = [...uploaded_timestamps, ...downloaded_timestamps, ...delete_result.timestamps]
       if (all_timestamps.length > 0) {
-        const max_ts = new Date(Math.max(...all_timestamps.map(d => d.getTime())))
+        const max_ts = all_timestamps.reduce((a, b) => a > b ? a : b)
         await this.update_synced_up_to(max_ts)
       }
 
@@ -219,24 +218,21 @@ export class Sync {
     }
   }
 
-  private async get_synced_up_to(): Promise<Date | null> {
+  private async get_synced_up_to(): Promise<string | null> {
     const result = await this.local_db
       .select()
       .from(local_schema.db_metadata)
       .where(eq(local_schema.db_metadata.key, METADATA_KEYS.SYNCED_UP_TO))
-    const date_string = result[0]?.value
-    if (!date_string)
-      return null
-    return new Date(date_string)
+    return result[0]?.value ?? null
   }
 
-  private async update_synced_up_to(timestamp: Date): Promise<void> {
+  private async update_synced_up_to(timestamp: string): Promise<void> {
     await this.local_db
       .insert(local_schema.db_metadata)
-      .values({ key: METADATA_KEYS.SYNCED_UP_TO, value: timestamp.toISOString() })
+      .values({ key: METADATA_KEYS.SYNCED_UP_TO, value: timestamp })
       .onConflictDoUpdate({
         target: local_schema.db_metadata.key,
-        set: { value: timestamp.toISOString() },
+        set: { value: timestamp },
       })
   }
 
@@ -252,7 +248,7 @@ export class Sync {
 
   private async fetch_and_merge_table(
     table_name: SyncableTableName,
-    synced_up_to: Date | null,
+    synced_up_to: string | null,
   ): Promise<TableFetchResult> {
     const errors: SyncError[] = []
     const [cloud_changes, local_dirty_rows] = await Promise.all([
@@ -307,7 +303,7 @@ export class Sync {
     return all_rows
   }
 
-  private async fetch_cloud_changes(table_name: SyncableTableName, since: Date | null): Promise<Record<string, unknown>[]> {
+  private async fetch_cloud_changes(table_name: SyncableTableName, since: string | null): Promise<Record<string, unknown>[]> {
     const source = DOWNLOAD_SOURCE[table_name]
 
     if (source === 'rpc') {
@@ -327,7 +323,7 @@ export class Sync {
         .range(page_num * SYNC_BATCH_SIZE, (page_num + 1) * SYNC_BATCH_SIZE - 1)
 
       if (since) {
-        query = query.gt(timestamp_column, since.toISOString())
+        query = query.gt(timestamp_column, since)
       }
 
       const { data, error } = await query
@@ -346,7 +342,7 @@ export class Sync {
     return all_rows
   }
 
-  private async fetch_from_rpc(table_name: SyncableTableName, since: Date | null): Promise<Record<string, unknown>[]> {
+  private async fetch_from_rpc(table_name: SyncableTableName, since: string | null): Promise<Record<string, unknown>[]> {
     if (table_name !== 'users') {
       throw new Error(`RPC fetch not supported for table: ${table_name}`)
     }
@@ -364,7 +360,7 @@ export class Sync {
     if (since) {
       return data.filter((row: Record<string, unknown>) => {
         const updated_at = row.updated_at as string
-        return updated_at && new Date(updated_at) > since
+        return updated_at && updated_at > since
       })
     }
 
@@ -443,11 +439,11 @@ export class Sync {
 
   private async write_table_changes(
     fetch_result: TableFetchResult,
-  ): Promise<{ uploaded_timestamps: Date[], downloaded_timestamps: Date[], errors: SyncError[] }> {
+  ): Promise<{ uploaded_timestamps: string[], downloaded_timestamps: string[], errors: SyncError[] }> {
     const { table_name, to_upload, to_download } = fetch_result
     const errors: SyncError[] = [...fetch_result.errors]
-    const uploaded_timestamps: Date[] = []
-    const downloaded_timestamps: Date[] = []
+    const uploaded_timestamps: string[] = []
+    const downloaded_timestamps: string[] = []
     const timestamp_column = CREATED_AT_TABLES.has(table_name) ? 'created_at' : 'updated_at'
 
     // Upload to Supabase (skip read-only tables like users)
@@ -463,7 +459,7 @@ export class Sync {
       try {
         console.log(`[sync] Saving to ${table_name}:`, item.id ?? get_row_key(table_name, item))
         await this.save_to_local(table_name, item)
-        downloaded_timestamps.push(new Date(item[timestamp_column] as string))
+        downloaded_timestamps.push(item[timestamp_column] as string)
       } catch (err) {
         console.error(`[sync] Error saving to ${table_name}:`, item, err)
         errors.push({ operation: 'download', table_name, id: get_row_key(table_name, item), error: String(err) })
@@ -476,9 +472,9 @@ export class Sync {
   private async upload_to_supabase(
     table_name: SyncableTableName,
     items: Record<string, unknown>[],
-  ): Promise<{ timestamps: Date[], errors: SyncError[] }> {
+  ): Promise<{ timestamps: string[], errors: SyncError[] }> {
     const errors: SyncError[] = []
-    const timestamps: Date[] = []
+    const timestamps: string[] = []
 
     const upload_data = items.map(item => this.prepare_for_supabase(table_name, item))
     const pk_columns = COMPOSITE_PK_TABLES[table_name]
@@ -491,6 +487,7 @@ export class Sync {
       .select(select_columns)
 
     if (error) {
+      console.error(`[sync] Error uploading to ${table_name}:`, error)
       errors.push({ operation: 'upload', table_name, id: '', error: error.message })
       return { timestamps, errors }
     }
@@ -499,7 +496,7 @@ export class Sync {
       // Mark uploaded rows as synced
       for (const row of data as any[]) {
         const timestamp_value = row[timestamp_column] || row.created_at
-        if (timestamp_value) timestamps.push(new Date(timestamp_value))
+        if (timestamp_value) timestamps.push(timestamp_value as string)
 
         if (pk_columns) {
           const conditions = pk_columns.map((col, i) => `${col} = $${i + 1}`).join(' AND ')
@@ -580,7 +577,7 @@ export class Sync {
     )
   }
 
-  private async sync_deletes(synced_up_to: Date | null): Promise<{ pushed: number, pulled: number, errors: SyncError[] }> {
+  private async sync_deletes(synced_up_to: string | null): Promise<{ pushed: number, pulled: number, timestamps: string[], errors: SyncError[] }> {
     const errors: SyncError[] = []
     let pushed = 0
     let pulled = 0
@@ -605,37 +602,50 @@ export class Sync {
       await this.local_db.delete(local_schema.deletes)
     }
 
-    return { pushed, pulled, errors }
+    return { pushed, pulled, timestamps: pull_result.timestamps, errors }
   }
 
-  private async pull_remote_deletes(since: Date | null): Promise<{ count: number, errors: SyncError[] }> {
+  private async pull_remote_deletes(since: string | null): Promise<{ count: number, timestamps: string[], errors: SyncError[] }> {
     const errors: SyncError[] = []
 
-    let query = this.supabase
+    if (!since) {
+      // First sync: nothing local to delete. Just fetch max deleted_at to advance synced_up_to.
+      const { data, error } = await this.supabase
+        .from('deletes' as any)
+        .select('deleted_at')
+        .order('deleted_at', { ascending: false })
+        .limit(1)
+      if (error) {
+        errors.push({ operation: 'delete_pull', table_name: 'deletes', id: '', error: error.message })
+        return { count: 0, timestamps: [], errors }
+      }
+      const timestamps: string[] = (data as any[])?.length ? [(data as any[])[0].deleted_at as string] : []
+      return { count: 0, timestamps, errors }
+    }
+
+    const { data, error } = await this.supabase
       .from('deletes' as any)
       .select('*')
+      .gt('deleted_at', since)
 
-    if (since) {
-      query = query.gt('deleted_at', since.toISOString())
-    }
-
-    const { data, error } = await query
     if (error) {
       errors.push({ operation: 'delete_pull', table_name: 'deletes', id: '', error: error.message })
-      return { count: 0, errors }
+      return { count: 0, timestamps: [], errors }
     }
 
-    if (!data || data.length === 0) {
-      return { count: 0, errors }
-    }
+    if (!data || data.length === 0)
+      return { count: 0, timestamps: [], errors }
+
+    const timestamps: string[] = (data as any[]).map(d => d.deleted_at as string)
+    let applied_count = 0
 
     for (const remote_delete of data as any[]) {
       try {
-        // Insert into local deletes table (trigger will cascade the delete)
         await this.local_pg.query(
           `INSERT INTO deletes (table_name, id, local_saved_at) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
           [remote_delete.table_name, remote_delete.id, SYNC_SENTINEL],
         )
+        applied_count++
       } catch (err) {
         errors.push({
           operation: 'delete_pull',
@@ -646,7 +656,7 @@ export class Sync {
       }
     }
 
-    return { count: data.length, errors }
+    return { count: applied_count, timestamps, errors }
   }
 
   private async push_local_deletes(local_deletes: typeof local_schema.deletes.$inferSelect[]): Promise<{ count: number, errors: SyncError[] }> {
@@ -660,10 +670,12 @@ export class Sync {
       })))
 
     if (error) {
+      console.error('[sync] Error pushing deletes:', error)
       errors.push({ operation: 'delete_push', table_name: 'user_deletes', id: '', error: error.message })
       return { count: 0, errors }
     }
 
     return { count: local_deletes.length, errors }
   }
+
 }

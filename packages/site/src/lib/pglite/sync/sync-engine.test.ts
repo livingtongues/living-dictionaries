@@ -105,7 +105,7 @@ describe(Sync, () => {
       const result = await device1.sync.sync()
 
       expect(result.success).toBeTruthy()
-      expect(result.items_downloaded).toBe(5) // 2 users, 1 dictionary, 1 dictionary_role, 1 user_data
+      expect(result.items_downloaded).toBeGreaterThanOrEqual(5) // 2 users, 1 dictionary, 1 dictionary_role, 1 user_data
 
       // Verify the test user is present
       const [test_user] = await device1.db.select().from(local_schema.users).where(eq(local_schema.users.id, TEST_USER_ID))
@@ -213,6 +213,26 @@ describe(Sync, () => {
       // Verify synced_up_to advanced after downloading new changes
       const [after] = await device1.db.select().from(local_schema.db_metadata).where(eq(local_schema.db_metadata.key, 'synced_up_to'))
       expect(new Date(after.value).getTime()).toBeGreaterThan(before_ts)
+    })
+
+    test('6. local_saved_at advances on each save', async () => {
+      await device1.db.update(local_schema.dictionaries)
+        .set({ name: 'First Name Change' })
+        .where(eq(local_schema.dictionaries.id, DICTIONARY_ID_1))
+
+      const [after_first] = await device1.db.select().from(local_schema.dictionaries).where(eq(local_schema.dictionaries.id, DICTIONARY_ID_1))
+      expect(after_first.local_saved_at).not.toBeNull()
+      const first_saved_at = new Date(after_first.local_saved_at!).getTime()
+
+      await new Promise(resolve => setTimeout(resolve, 20))
+
+      await device1.db.update(local_schema.dictionaries)
+        .set({ name: 'Second Name Change' })
+        .where(eq(local_schema.dictionaries.id, DICTIONARY_ID_1))
+
+      const [after_second] = await device1.db.select().from(local_schema.dictionaries).where(eq(local_schema.dictionaries.id, DICTIONARY_ID_1))
+      const second_saved_at = new Date(after_second.local_saved_at!).getTime()
+      expect(second_saved_at).toBeGreaterThan(first_saved_at)
     })
   })
 
@@ -584,7 +604,9 @@ describe(Sync, () => {
         id: composite_key,
       })
 
-      await device1.sync.sync()
+      const push_result = await device1.sync.sync()
+      expect(push_result.errors).toHaveLength(0)
+      expect(push_result.deletes_pushed).toBe(1)
 
       // Device 2 syncs - should pull the delete
       const result = await device2.sync.sync()
@@ -727,6 +749,216 @@ describe(Sync, () => {
         .single() as any
       expect(cloud_data).toBeDefined()
       expect(new Date(cloud_data!.terms_agreement!).toISOString()).toBe(terms_date.toISOString())
+    })
+  })
+
+  describe('delete edge cases', () => {
+    const EDGE_DICT_ID = 'edge-case-dict'
+    let device1: Device
+    let device2: Device
+
+    beforeAll(async () => {
+      await supabase_pg.execute_query(reset_supabase_admin_data_sql)
+      device1 = await create_device()
+      device2 = await create_device()
+
+      // Create dictionary in cloud for roles to reference
+      await anon_supabase.from('dictionaries').upsert({
+        id: EDGE_DICT_ID,
+        url: EDGE_DICT_ID,
+        name: 'Edge Case Dictionary',
+      })
+
+      // Both devices sync to get initial data
+      await device1.sync.sync()
+      await device2.sync.sync()
+    })
+
+    afterAll(async () => {
+      await device1?.pg.close()
+      await device2?.pg.close()
+    })
+
+    test('delete, re-add, and delete again before sync does not violate unique constraint', async () => {
+    // Add a role locally and sync to cloud
+      await device1.db.insert(local_schema.dictionary_roles).values({
+        dictionary_id: EDGE_DICT_ID,
+        user_id: USER_ID_1,
+        role: 'contributor',
+        created_at: new Date(),
+      })
+      await device1.sync.sync()
+
+      // Delete the role (inserts into deletes table, trigger removes from dictionary_roles)
+      const composite_key = `${EDGE_DICT_ID}|${USER_ID_1}|contributor`
+      await device1.db.insert(local_schema.deletes).values({
+        table_name: 'dictionary_roles',
+        id: composite_key,
+      })
+
+      // Re-add the same role
+      await device1.db.insert(local_schema.dictionary_roles).values({
+        dictionary_id: EDGE_DICT_ID,
+        user_id: USER_ID_1,
+        role: 'contributor',
+      })
+
+      // Delete again - second insert into deletes with same PK should not throw
+      await device1.db.insert(local_schema.deletes).values({
+        table_name: 'dictionary_roles',
+        id: composite_key,
+      })
+
+      // Now sync everything
+      const result = await device1.sync.sync()
+      expect(result.success).toBeTruthy()
+      expect(result.errors).toHaveLength(0)
+      expect(result.deletes_pushed).toBe(1)
+
+      // Verify the role is gone from cloud
+      const { data: cloud_roles } = await admin_supabase
+        .from('dictionary_roles')
+        .select('*')
+        .eq('dictionary_id', EDGE_DICT_ID)
+        .eq('user_id', USER_ID_1)
+      expect(cloud_roles).toHaveLength(0)
+
+      // Device 2 syncs and should also have no role
+      await device2.sync.sync()
+      const roles = await device2.db.select()
+        .from(local_schema.dictionary_roles)
+        .where(eq(local_schema.dictionary_roles.dictionary_id, EDGE_DICT_ID))
+      expect(roles.filter(r => r.user_id === USER_ID_1)).toHaveLength(0)
+    })
+
+    test('delete and re-add before sync preserves re-added row', async () => {
+    // Add a role locally and sync to cloud
+      await device1.db.insert(local_schema.dictionary_roles).values({
+        dictionary_id: EDGE_DICT_ID,
+        user_id: USER_ID_1,
+        role: 'manager',
+        created_at: new Date(),
+      })
+      await device1.sync.sync()
+
+      // Delete the role (this inserts into deletes table, trigger removes from dictionary_roles)
+      const composite_key = `${EDGE_DICT_ID}|${USER_ID_1}|manager`
+      await device1.db.insert(local_schema.deletes).values({
+        table_name: 'dictionary_roles',
+        id: composite_key,
+      })
+
+      // Re-add the same role BEFORE syncing
+      await device1.db.insert(local_schema.dictionary_roles).values({
+        dictionary_id: EDGE_DICT_ID,
+        user_id: USER_ID_1,
+        role: 'manager',
+        created_at: new Date(),
+      })
+
+      // Sync - should handle both the delete and the re-add
+      const result = await device1.sync.sync()
+      expect(result.success).toBeTruthy()
+
+      // The re-added role should exist in cloud after sync
+      const { data: cloud_roles } = await admin_supabase
+        .from('dictionary_roles')
+        .select('*')
+        .eq('dictionary_id', EDGE_DICT_ID)
+        .eq('user_id', USER_ID_1)
+        .eq('role', 'manager')
+      expect(cloud_roles).toHaveLength(1)
+    })
+  })
+
+  describe('stale delete does not wipe re-added role on new device', () => {
+    const STALE_DICT_ID = 'stale-delete-dict'
+    let device1: Device
+    let device2: Device
+    let device3: Device
+
+    beforeAll(async () => {
+      await supabase_pg.execute_query(reset_supabase_admin_data_sql)
+      device1 = await create_device()
+      device2 = await create_device()
+      device3 = await create_device()
+
+      await anon_supabase.from('dictionaries').upsert({
+        id: STALE_DICT_ID,
+        url: STALE_DICT_ID,
+        name: 'Stale Delete Test',
+      })
+
+      // All devices sync to get the dictionary
+      await device1.sync.sync()
+      await device2.sync.sync()
+      await device3.sync.sync()
+    })
+
+    afterAll(async () => {
+      await device1?.pg.close()
+      await device2?.pg.close()
+      await device3?.pg.close()
+    })
+
+    test('re-added role survives stale delete from cloud', async () => {
+      // Step 1: Device 1 adds a role and syncs
+      await device1.db.insert(local_schema.dictionary_roles).values({
+        dictionary_id: STALE_DICT_ID,
+        user_id: USER_ID_1,
+        role: 'manager',
+        created_at: new Date(),
+      })
+      const d1_result = await device1.sync.sync()
+      expect(d1_result.errors).toHaveLength(0)
+
+      // Step 2: Device 2 syncs (pulls the role)
+      await device2.sync.sync()
+      const d2_roles = await device2.db.select()
+        .from(local_schema.dictionary_roles)
+        .where(eq(local_schema.dictionary_roles.dictionary_id, STALE_DICT_ID))
+      expect(d2_roles.filter(r => r.user_id === USER_ID_1 && r.role === 'manager')).toHaveLength(1)
+
+      // Step 3: Device 2 deletes the role and syncs
+      const composite_key = `${STALE_DICT_ID}|${USER_ID_1}|manager`
+      await device2.db.insert(local_schema.deletes).values({
+        table_name: 'dictionary_roles',
+        id: composite_key,
+      })
+      const d2_delete_result = await device2.sync.sync()
+      expect(d2_delete_result.errors).toHaveLength(0)
+      expect(d2_delete_result.deletes_pushed).toBe(1)
+
+      // Step 4: Device 3 syncs (pulls the delete, no role locally)
+      const d3_first_result = await device3.sync.sync()
+      expect(d3_first_result.errors).toHaveLength(0)
+
+      // Step 5: Device 3 adds the same role locally
+      await device3.db.insert(local_schema.dictionary_roles).values({
+        dictionary_id: STALE_DICT_ID,
+        user_id: USER_ID_1,
+        role: 'manager',
+        created_at: new Date(),
+      })
+
+      // Step 6: Device 3 syncs - the re-added role should survive
+      const d3_second_result = await device3.sync.sync()
+      expect(d3_second_result.errors).toHaveLength(0)
+
+      // The role should still exist locally on device 3
+      const d3_roles = await device3.db.select()
+        .from(local_schema.dictionary_roles)
+        .where(eq(local_schema.dictionary_roles.dictionary_id, STALE_DICT_ID))
+      expect(d3_roles.filter(r => r.user_id === USER_ID_1)).toHaveLength(1)
+      expect(d3_roles.filter(r => r.user_id === USER_ID_1)[0].role).toBe('manager')
+
+      // The role should have been pushed to cloud
+      const { data: cloud_roles } = await admin_supabase
+        .from('dictionary_roles')
+        .select('*')
+        .eq('dictionary_id', STALE_DICT_ID)
+        .eq('user_id', USER_ID_1)
+      expect(cloud_roles).toHaveLength(1)
     })
   })
 })

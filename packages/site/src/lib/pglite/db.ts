@@ -1,7 +1,8 @@
-import type { PGlite } from '@electric-sql/pglite'
 import type { Migration } from './types'
+import { PGlite } from '@electric-sql/pglite'
 import { live, type LiveNamespace } from '@electric-sql/pglite/live'
-import { PGliteWorker } from '@electric-sql/pglite/worker'
+// import { vector } from '@electric-sql/pglite/vector'
+// import { PGliteWorker } from '@electric-sql/pglite/worker'
 import { drizzle } from 'drizzle-orm/pglite'
 import { create_live_pglite } from './live/live-pglite.svelte'
 import * as schema from './schema'
@@ -39,16 +40,24 @@ export async function get_PG_lite() {
 
 async function create_PG_lite() {
   const db_id = get_db_id()
-
-  const pg = await PGliteWorker.create(
-    new Worker(new URL('./pglite-worker.js', import.meta.url), { type: 'module' }),
-    {
-      dataDir: `idb://${db_id}`,
-      extensions: {
-        live,
-      },
+  const pg = await PGlite.create({
+    dataDir: `idb://${db_id}`,
+    relaxedDurability: true,
+    extensions: {
+      live, // Live query extension, is a PGlite client plugin
+      // vector, // Postgres pgvector extension
     },
-  ) as unknown as LivePGLite
+  })
+  // const pg = await PGliteWorker.create(
+  //   new Worker(new URL('./pglite-worker.js', import.meta.url), { type: 'module' }),
+  //   {
+  //     dataDir: `idb://${db_id}`,
+  //     relaxedDurability: true,
+  //     extensions: {
+  //       live,
+  //     },
+  //   },
+  // ) as unknown as LivePGLite
   await pg.waitReady
 
   const _db = drizzle({ client: pg, schema })
