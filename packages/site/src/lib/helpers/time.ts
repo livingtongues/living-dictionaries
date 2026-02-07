@@ -16,8 +16,8 @@ export function printDate(date: Date | number): string {
   }).format(date)
 }
 
-export function supabase_date_to_friendly(supabase_date: string, language_code = 'en-US'): string {
-  const date = new Date(supabase_date)
+export function db_date_to_friendly(supabase_or_pglite_date: string | Date, language_code = 'en-US'): string {
+  const date = supabase_or_pglite_date instanceof Date ? supabase_or_pglite_date : new Date(supabase_or_pglite_date)
   const is_this_year = date.getFullYear() === new Date().getFullYear()
   return new Intl.DateTimeFormat(language_code, {
     year: is_this_year ? undefined : 'numeric',

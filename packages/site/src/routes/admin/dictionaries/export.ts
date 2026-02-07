@@ -1,7 +1,7 @@
 import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
 import { downloadObjectsAsCSV } from '$lib/export/csv'
-import { type StandardDictionaryForCSV, prepareDictionaryForCsv, dictionary_headers as standard_headers } from '$lib/export/prepareDictionariesForCsv'
-import { supabase_date_to_friendly } from '$lib/helpers/time'
+import { prepareDictionaryForCsv, dictionary_headers as standard_headers, type StandardDictionaryForCSV } from '$lib/export/prepareDictionariesForCsv'
+import { db_date_to_friendly } from '$lib/helpers/time'
 
 enum AdminDictionaryCSVFields {
   entryCount = 'Entries',
@@ -19,9 +19,7 @@ enum AdminDictionaryCSVFields {
 }
 
 type DictionaryForCSVKeys = keyof typeof AdminDictionaryCSVFields
-type AdminDictionaryForCSV = {
-  [key in DictionaryForCSVKeys]: string | boolean | number;
-}
+type AdminDictionaryForCSV = Record<DictionaryForCSVKeys, string | boolean | number>
 
 const admin_headers: AdminDictionaryForCSV = { ...AdminDictionaryCSVFields }
 
@@ -39,12 +37,12 @@ export function exportAdminDictionariesAsCSV(dictionaries: DictionaryWithHelpers
       gloss_languages: dictionary.gloss_languages?.join(', '),
       alternate_names: dictionary.alternate_names?.join(', '),
       alternate_orthographies: dictionary.orthographies?.map(({ name }) => name.default)?.join(', '),
-      created_at: dictionary.created_at,
+      created_at: db_date_to_friendly(dictionary.created_at),
 
       managers: dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'manager')).map(({ full_name, email }) => full_name || email).join(', '),
       contributors: dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'contributor')).map(({ full_name, email }) => full_name || email).join(', '),
       invites: dictionary.invites.map((invite) => {
-        return `${invite.inviter_email} invited ${invite.target_email} as ${invite.role} on ${supabase_date_to_friendly(invite.created_at)}`
+        return `${invite.inviter_email} invited ${invite.target_email} as ${invite.role} on ${db_date_to_friendly(invite.created_at)}`
       }).join(', '),
     }
 

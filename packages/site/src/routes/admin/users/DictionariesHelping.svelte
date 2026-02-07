@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { DictionaryView } from '@living-dictionaries/types'
+  import type { RowType } from '$lib/pglite/live/types'
   import { BadgeArrayEmit, Button, ShowHide } from '$lib/svelte-pieces'
 
   interface Props {
-    dictionaries: DictionaryView[]
+    dictionaries: RowType<'dictionaries'>[]
     dictionary_ids: string[]
     remove_dictionary: (dictionary_id: string) => Promise<void>
     add_dictionary: (dictionary_id: string) => Promise<void>

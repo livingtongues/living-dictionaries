@@ -1,20 +1,20 @@
 <script lang="ts">
-  import { Button, ResponsiveTable } from '$lib/svelte-pieces'
   import type { EntryData, Tables } from '@living-dictionaries/types'
-  import { onMount } from 'svelte'
-  import RecordRow from './RecordRow.svelte'
-  import SortRecords from './sortRecords.svelte'
   import type { PageData } from './$types'
   import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
   import { downloadObjectsAsCSV } from '$lib/export/csv'
-  import { supabase_date_to_friendly } from '$lib/helpers/time'
+  import { db_date_to_friendly } from '$lib/helpers/time'
+  import { Button, ResponsiveTable } from '$lib/svelte-pieces'
+  import { onMount } from 'svelte'
+  import RecordRow from './RecordRow.svelte'
+  import SortRecords from './sortRecords.svelte'
 
   interface Props {
-    data: PageData;
+    data: PageData
   }
 
-  let { data }: Props = $props();
+  let { data }: Props = $props()
   let loading_content_updates = $state(true)
   const { entries_data } = page.data
   let { dictionary, can_edit, get_content_updates } = $derived(data)
@@ -51,7 +51,7 @@
         entryName: get_entry(record)?.main.lexeme.default,
         type: JSON.stringify(record.change.type),
         change: JSON.stringify(record.change.data),
-        date: supabase_date_to_friendly(record.timestamp),
+        date: db_date_to_friendly(record.timestamp),
       }
     })
 
@@ -62,28 +62,28 @@
 {#if $can_edit}
   {#if content_updates?.length > 0}
     <div class="sticky top-0 h-[calc(100vh-1.5rem)] flex flex-col">
-      <Filter items={content_updates}  placeholder={page.data.t('history.history_search')}>
+      <Filter items={content_updates} placeholder={page.data.t('history.history_search')}>
         {#snippet right()}
-                <div >
+          <div>
             <Button form="filled" color="black" class="flex items-center space-x-1" onclick={() => exportHistoryAsCSV()}>
               <i class="fas fa-download"></i>
               <span class="hidden sm:inline">{page.data.t('history.download_history')}</span>
             </Button>
           </div>
-              {/snippet}
+        {/snippet}
         {#snippet children({ filteredItems: filteredRecords })}
-                <div class="mb-1"></div>
+          <div class="mb-1"></div>
           <ResponsiveTable stickyColumn stickyHeading>
-            <SortRecords history={filteredRecords}  {get_entry}>
+            <SortRecords history={filteredRecords} {get_entry}>
               {#snippet children({ sortedRecords })}
-                        {#each sortedRecords as record}
+                {#each sortedRecords as record}
                   <RecordRow {record} {get_entry} />
                 {/each}
-                                    {/snippet}
-                    </SortRecords>
+              {/snippet}
+            </SortRecords>
           </ResponsiveTable>
-                      {/snippet}
-            </Filter>
+        {/snippet}
+      </Filter>
     </div>
   {:else if loading_content_updates}
     {page.data.t('misc.loading')}...

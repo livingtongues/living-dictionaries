@@ -1,23 +1,31 @@
 <script lang="ts">
-  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
+  import type { PageData } from './$types'
   import Filter from '$lib/components/Filter.svelte'
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import { Button, ResponsiveTable } from '$lib/svelte-pieces'
   import SortUsers from './SortUsers.svelte'
   import UserRow from './UserRow.svelte'
 
-  let { data } = $props()
+  interface Props {
+    data: PageData
+  }
+
+  let { data }: Props = $props()
+  const users = $derived(data.db.users.rows)
+  const user_data = $derived(data.db.user_data.objects)
+  const roles = $derived(data.db.dictionary_roles.rows)
+  const dictionaries = $derived(data.db.dictionaries.rows)
 
   let users_with_roles = $derived(
-    (data.db?.users.rows ?? []).map((user) => {
+    (users || []).map((user) => {
       return {
         ...user,
-        dictionary_roles: (data.db?.dictionary_roles.rows ?? []).filter(role => role.user_id === user.id),
-      } // as UserWithDictionaryRoles
+        dictionary_roles: (roles || []).filter(role => role.user_id === user.id),
+      }
     }),
   )
 
-  function exportUsersAsCSV(users: UserWithDictionaryRoles[]) {
+  function exportUsersAsCSV(users: typeof users_with_roles) {
     const headers = {
       displayName: 'Name',
       email: 'Email',
@@ -35,7 +43,7 @@
 </script>
 
 <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
-  <Filter items={users_with_roles} placeholder="Search names, emails, and dictionary ids">
+  <Filter items={users_with_roles} placeholder="Search names and emails">
     {#snippet right({ filteredItems: filteredUsers })}
       <div>
         <Button form="filled" color="black" onclick={() => exportUsersAsCSV(filteredUsers)}>
@@ -50,7 +58,7 @@
         <SortUsers users={filteredUsers}>
           {#snippet children({ sortedUsers })}
             {#each sortedUsers as user (user.id)}
-              <UserRow {user} />
+              <UserRow {user} user_data={user_data[user.id]} {dictionaries} />
             {/each}
           {/snippet}
         </SortUsers>

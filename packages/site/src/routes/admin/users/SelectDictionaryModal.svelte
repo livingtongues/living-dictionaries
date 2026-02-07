@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type { DictionaryView } from '@living-dictionaries/types'
+  import type { RowType } from '$lib/pglite/live/types'
   import Filter from '$lib/components/Filter.svelte'
   import { Button, Modal } from '$lib/svelte-pieces'
 
   interface Props {
     on_close: () => void
     add_dictionary: (dictionary_id: string) => Promise<void>
-    dictionaries: DictionaryView[]
+    dictionaries: RowType<'dictionaries'>[]
   }
 
   let { on_close, add_dictionary, dictionaries }: Props = $props()

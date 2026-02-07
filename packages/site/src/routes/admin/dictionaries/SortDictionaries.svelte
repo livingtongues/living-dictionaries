@@ -3,7 +3,7 @@
 
   interface Props {
     dictionaries?: DictionaryWithHelpers[];
-    children?: import('svelte').Snippet<[any]>;
+    children?: import('svelte').Snippet<[{ sortedDictionaries: DictionaryWithHelpers[] }]>;
   }
 
   let { dictionaries = [], children }: Props = $props();
@@ -33,7 +33,6 @@
 
   type SortFields = keyof typeof DictionaryFields
   type DictionaryFieldValue = typeof DictionaryFields[SortFields]
-  // @ts-ignore
   const dictionary_fields: {
     key: SortFields
     value: DictionaryFieldValue

@@ -1,7 +1,10 @@
-import type { DictionaryView, Tables } from '@living-dictionaries/types'
-import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
+import type { RowType } from '$lib/pglite/live/types'
 
-export type DictionaryWithHelpers = DictionaryView & {
-  editors: UserWithDictionaryRoles[]
-  invites: Tables<'invites'>[]
+export type UserWithRoles = RowType<'users'> & {
+  dictionary_roles: RowType<'dictionary_roles'>[]
+}
+
+export type DictionaryWithHelpers = RowType<'dictionaries'> & {
+  editors: UserWithRoles[]
+  invites: RowType<'invites'>[]
 }

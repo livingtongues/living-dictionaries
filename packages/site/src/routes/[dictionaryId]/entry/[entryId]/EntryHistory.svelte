@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Tables } from '@living-dictionaries/types'
   import { page } from '$app/state'
-  import { supabase_date_to_friendly } from '$lib/helpers/time'
+  import { db_date_to_friendly } from '$lib/helpers/time'
 
   let { can_edit = false, entry_history, class: class_prop = '' }: {
     can_edit?: boolean
@@ -18,7 +18,7 @@
     {#each entry_history as record}
       {@const editor_name = $dictionary_editors.find(({ user_id }) => user_id === record.user_id)?.full_name}
       <div class="mb-2" title={record.change.data ? JSON.stringify(record.change.data, null, 2) : ''}>
-        {supabase_date_to_friendly(record.timestamp, page.data.locale)},
+        {db_date_to_friendly(record.timestamp, page.data.locale)},
         {#if editor_name}
           <b>{editor_name}</b>,
         {/if}
@@ -26,6 +26,6 @@
       </div>
     {/each}
   {:else if entry_history?.length}
-    <p class="m-3">{page.data.t('history.edited')} {supabase_date_to_friendly(entry_history[0].timestamp, page.data.locale)}</p>
+    <p class="m-3">{page.data.t('history.edited')} {db_date_to_friendly(entry_history[0].timestamp, page.data.locale)}</p>
   {/if}
 </div>
