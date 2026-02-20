@@ -10,13 +10,10 @@ tmux split-window -t terminals -h -c "$(pwd)"
 tmux new-window -dn scratch
 
 # Window 1
-# Prefer port 7788 if not already in use so that OpenCode web tunnel works
-if ss -tln | grep -q ':7788 '; then
-  tmux split-window -h -c "$(pwd)" opencode
-else
-  tmux split-window -h -c "$(pwd)" "opencode --port 7788"
-fi
+tmux split-window -h -c "$(pwd)"
+tmux send-keys "pi" Enter
 tmux select-pane -L
-nvim .
+tmux send-keys "nvim ." Enter
+tmux select-pane -R
 
 clear

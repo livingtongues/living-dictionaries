@@ -359,29 +359,37 @@ class LivePgLiteImpl {
    */
   async #insert<T extends TableName>(
     table_name: T,
-    item: InsertType<T> | InsertType<T>[],
+    set: InsertType<T> | InsertType<T>[],
   ): Promise<RowType<T>[]> {
-    const items = Array.isArray(item) ? item : [item]
+    const items = Array.isArray(set) ? set : [set]
     const columns = Object.keys(items[0] as object)
 
+    const BATCH_SIZE = 5000
     const results: RowType<T>[] = []
+    const columns_sql = columns.map(c => `"${c}"`).join(', ')
 
-    for (const row of items) {
-      const values = columns.map((_, i) => `$${i + 1}`).join(', ')
-      const params = columns.map(col => (row as Record<string, unknown>)[col])
+    try {
+      for (let offset = 0; offset < items.length; offset += BATCH_SIZE) {
+        const batch = items.slice(offset, offset + BATCH_SIZE)
+        const params: unknown[] = []
+        const value_groups: string[] = []
 
-      const sql = `INSERT INTO "${table_name}" (${columns.map(c => `"${c}"`).join(', ')}) VALUES (${values}) RETURNING *`
-
-      try {
-        const result = await this.#pg.query<RowType<T>>(sql, params)
-        if (result.rows[0]) {
-          results.push(result.rows[0])
+        for (const row of batch) {
+          const placeholders = columns.map((col) => {
+            params.push((row as Record<string, unknown>)[col])
+            return `$${params.length}`
+          })
+          value_groups.push(`(${placeholders.join(', ')})`)
         }
-      } catch (error) {
-        console.error('LivePgLite insert error:', error)
-        toast.error(`Insert error: ${(error as Error).message}`)
-        throw error
+
+        const sql = `INSERT INTO "${table_name}" (${columns_sql}) VALUES ${value_groups.join(', ')} RETURNING *`
+        const result = await this.#pg.query<RowType<T>>(sql, params)
+        results.push(...result.rows)
       }
+    } catch (error) {
+      console.error('LivePgLite insert error:', error)
+      toast.error(`Insert error: ${(error as Error).message}`)
+      throw error
     }
 
     return results
