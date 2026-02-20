@@ -1,33 +1,13 @@
 # Universal Agent Instructions
 
-Use markdown files in `.issues/..` for managing issues and coordinating work.
-
 ## Core Rules
-- Track strategic work in markdown files (multi-session, dependencies, discovered work)
-- Create markdown issues for work that you need to get to in future sessions; use your own todo task list tool for simple single-session execution
-- When in doubt, prefer using markdown files for task persistence so you don't lose context
+- Track work in markdown files in `.issues/..` for coordination and memory.
+- Always verify your work with tests, browser use/screenshots, log messages, etc, based on the type of task. We want to use good feedback loops. If you don't have the tooling in place yet to verify your work, tell me what you need and we'll work together to get it setup.
 
 ## Workflow
 
 ### Planning Work
-- To create a plan for future works, add a new markdown file in `.issues/triage` and write down the current plan as far as it's been developed. This file will be used for planning.
-- When the plan is complete, the file can be moved in `.issues/ready` for execution.
-
-### Starting Work
-- To start working on the next task list files in `.issues/ready` to find available work defined in markdown files.
-- Open a markdown file to review issue details for the chosen task and then move it to `.issues/in-progress` to claim it.
-- Print out a short plan and update your local todo task list and then ask me any questions you have as well as asking if you've understood the task correctly and can proceed. Wait for my confirmation.
-- As you work and need to save important details on the issue, just edit the markdown file.
-
-### Completing Work
-When you've finished a task, give me a summary and ask if it's complete. If you get my confirmation that it's completed then:
-- 1. Update the markdown file contents with any pertinent information that changed during the task or that would be good to remember for the future and move it to `.issues/done`.
-- 2. Do a grep of the `.issues/blocked` file contents to find any issues for which the just completed issue was a blocker. If so, remove that issue from it's `blocked_by` frontmatter field. If there is now no more issue ids in the `blocked_by` move that blocked issue to `.issues/ready`
-
-### Creating & Updating Issues
-- Save new issues into the `.issues/ready` or `.issues/blocked` folders according to their status. The filename is the issue id.
-- If an issue depends on another issue being completed first, then place the blocked issue markdown file into `.issues/blocked`.
-- Use YAML frontmatter at the top of each markdown file for metadata:
+- To create a plan for work, add a new markdown file in `.issues/triage` with this format:
 ```markdown
 ---
 title: Short descriptive title
@@ -37,8 +17,19 @@ assignee: jacob          # optional
 blocked_by: [other-issue]  # optional, filename(s) without .md
 ---
 
-Issue description and details here...
+Issue description and plan details here...
 ```
+- proceed to write down the current plan. You and I will iterate on this document until all your questions are answered and until I'm satisfied that the plan is complete and thorough. Do a very thorough job of reading the codebase as we make a plan. Be comprehensive and write down everything of value into the plan. Most likely after we make a thorough plan, I'm going to clear the session and start fresh on implementing the task with just the plan file.
+- Sometimes I will just mention an issue to you and won't have time to work on a plan. It that situation, just write down a brief plan according to your current knowledge and then make some notes about what needs researched in the future to complete the plan.
+- When the plan is complete, the file can be moved to `.issues/ready`, unless the task depends on another issue being completed first, then place the blocked issue markdown file into `.issues/blocked`.
+
+### Starting Work
+- You can start implementing a task when I point you to an issue markdown file. Read it and then move it to `.issues/in-progress`.
+- As you work, be sure to update the markdown file often, checking off completed tasks with a ✅, saving important lessons learned and other pertinent details on the issue that would be needed if a new coding session was required to continue this task. By the time you finish a task, the markdown file should have been turned into a journal of what happened and what we should remember from the process. Try to make small, incremental edits to the markdown file and not wipe out big chunks unless they're completely irrelevant because our course of action took a different direction.
+
+### Completing Work
+When you've finished a task, give me a summary and ask if it's complete. If you get my confirmation that it's completed then:
+- 1. Update the markdown file contents with any further pertinent information that you learned during the task that hasn't already been recorded or that would be good to remember for the future and move it to `.issues/done`.
 
 ## JavaScript Coding Guidelines
 
@@ -57,3 +48,8 @@ Issue description and details here...
 - When adding new functionality to already existing pages or classes, prefer creating new functions in separate files if easy to do so, rather than adding to existing large files.
 - When adding functions to buttons in Svelte components, if they are simple functions, just write them inline in the onclick handler. If they are more complex, create a new function in the script block.
 - SvelteKit +page.ts and +layout.ts files automatically pass parent data to children, no need to repass it.
+- Don't use ! at the end of values to assert they exist. I don't use strict ts mode anyway so it's just noise.
+
+## General Guidelines
+- I use voice transcription to write out my messages to you sometimes so if an underscore is missing when saying a function or db table name or something is misspelled, just extrapolate and don't take spoken names too literally if the punctuation is a little off because of the transcription process.
+- If you are working with code and using an environment variable name, don't try to read any .env files. Just assume I've already taken care of adding the proper variables and continue on.
