@@ -19,7 +19,7 @@
       const cursorPosition = input_element.selectionEnd
       input_element.value
         = input_element.value.substring(0, cursorPosition)
-          + letter
+        + letter // eslint-disable-line style/indent-binary-ops
         + input_element.value.substring(cursorPosition)
       input_element.selectionEnd = cursorPosition + letter.length
       on_ipa_change(input_element.value)
@@ -32,7 +32,7 @@
     const cursorPosition = input_element.selectionEnd
     input_element.value
       = input_element.value.substring(0, cursorPosition - 1)
-        + input_element.value.substring(cursorPosition, input_element.value.length)
+      + input_element.value.substring(cursorPosition, input_element.value.length) // eslint-disable-line style/indent-binary-ops
     on_ipa_change(input_element.value)
     setTimeout(() => (input_element.selectionEnd = cursorPosition - 1), 50)
   }

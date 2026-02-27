@@ -1,10 +1,8 @@
 import type { EntryData } from '@living-dictionaries/types'
-import { page } from '$app/stores'
-import { get } from 'svelte/store'
+import { page } from '$app/state'
 
 export async function share(dictionaryId: string, entry: EntryData) {
-  const { data: { t } } = get(page)
-  const title = `${dictionaryId} ${t('misc.LD_singular')}`
+  const title = `${dictionaryId} ${page.data.t('misc.LD_singular')}`
   const text = `${entry.main.lexeme.default}`
   const url = `https://livingdictionaries.app/${dictionaryId}/entry/${entry.id}`
 
@@ -20,12 +18,10 @@ export async function share(dictionaryId: string, entry: EntryData) {
 }
 
 function copy(message: string) {
-  const { data: { t } } = get(page)
-
   try {
     navigator.clipboard.writeText(message)
-    alert(t('entry.link_copied'))
+    alert(page.data.t('entry.link_copied'))
   } catch {
-    alert(`${t('entry.copy_and_share')} ${message}`)
+    alert(`${page.data.t('entry.copy_and_share')} ${message}`)
   }
 }

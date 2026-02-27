@@ -72,14 +72,12 @@
     {/if}
     {#if description}
       <div
-        style="overflow: hidden; flex-grow: 1; font-size: 30px; margin-top: 10px; margin-bottom: 20px; padding-right: {xPADDING
-        + globeSize}px;">
+        style="overflow: hidden; flex-grow: 1; font-size: 30px; margin-top: 10px; margin-bottom: 20px; padding-right: {xPADDING + globeSize}px;">
         {description}
       </div>
     {/if}
     <div
-      style="display: flex; align-items: center; font-size: 40px; padding-right: {xPADDING
-      + globeSize}px;">
+      style="display: flex; align-items: center; font-size: 40px; padding-right: {xPADDING + globeSize}px;">
       <img
         style="height: 40px; width: 40px; margin-right: 10px;"
         alt="Living Dictionaries"

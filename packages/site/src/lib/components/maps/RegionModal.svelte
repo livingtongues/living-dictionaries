@@ -89,7 +89,11 @@
           {page.data.t('create.select_region')}
         </span>
       {/snippet}
-      <form onsubmit={(e) => { e.preventDefault(); update(regionPoints) }}>
+      <form
+        onsubmit={(e) => {
+          e.preventDefault()
+          update(regionPoints)
+        }}>
         <div style="height: 50vh;">
           <Map
             lng={centerLng}

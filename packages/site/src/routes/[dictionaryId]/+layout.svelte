@@ -9,7 +9,7 @@
   let { data, children } = $props()
   let { dictionary, is_manager, entries_data } = $derived(data)
   let loading = $derived(entries_data.loading)
-  let entry_count = derived(entries_data, $entries => Object.keys($entries).length)
+  let entry_count = derived(entries_data, $entries_data => Object.keys($entries_data).length)
 
   const children_render = $derived(children)
 </script>

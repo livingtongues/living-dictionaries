@@ -103,7 +103,7 @@ export class ConnectionManager {
     const client = this.clients.get(client_id)
     if (!client) return
 
-    const message_type = data[0]
+    const [message_type] = data
 
     if (message_type === 0x02) {
       // SQL response

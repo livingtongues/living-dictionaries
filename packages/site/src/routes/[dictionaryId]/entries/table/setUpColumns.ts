@@ -1,16 +1,14 @@
 import type { IColumn, Tables } from '@living-dictionaries/types'
 import { browser } from '$app/environment'
-import { page } from '$app/stores'
+import { page } from '$app/state'
 import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
 import { vernacularName } from '$lib/helpers/vernacularName'
-import { get } from 'svelte/store'
 
 export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionaries'>): IColumn[] {
   const cols = columns.filter(column => !column.hidden)
 
   const glossIndex = cols.findIndex(col => col.field === 'gloss')
   if (browser && glossIndex >= 0) {
-    const { data } = get(page)
     const glossColumns: IColumn[] = []
     dictionary.gloss_languages.forEach((bcp) => {
       glossColumns.push({
@@ -18,7 +16,7 @@ export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionarie
         bcp,
         width: cols[glossIndex].width,
         sticky: cols[glossIndex].sticky || false,
-        display: data?.t({ dynamicKey: `gl.${bcp}`, fallback: bcp }),
+        display: page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp }),
         explanation: vernacularName(bcp),
       })
     })
@@ -27,14 +25,13 @@ export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionarie
 
   const exampleSentenceIndex = cols.findIndex(col => col.field === 'example_sentence')
   if (browser && exampleSentenceIndex >= 0) {
-    const { data } = get(page)
     const exampleSentenceColumns: IColumn[] = [
       {
         field: 'example_sentence',
         bcp: 'vn', // vernacular
         width: cols[exampleSentenceIndex].width,
         sticky: cols[exampleSentenceIndex].sticky || false,
-        display: data?.t('entry_field.example_sentence'),
+        display: page.data.t('entry_field.example_sentence'),
       },
     ]
     dictionary.gloss_languages.forEach((bcp) => {
@@ -43,7 +40,7 @@ export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionarie
         bcp,
         width: cols[exampleSentenceIndex].width,
         sticky: cols[exampleSentenceIndex].sticky || false,
-        display: `${data?.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })} ${data?.t('entry_field.example_sentence')}`,
+        display: `${page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })} ${page.data.t('entry_field.example_sentence')}`,
       })
     })
     cols.splice(exampleSentenceIndex, 1, ...exampleSentenceColumns)

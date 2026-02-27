@@ -43,9 +43,18 @@
     h-full grow-1 flex flex-col items-center justify-center
     cursor-pointer"
   title="Add Photo"
-  ondrop={(e) => { e.preventDefault(); handleImage(e.dataTransfer.files) }}
-  ondragover={(e) => { e.preventDefault(); dragging = true }}
-  ondragleave={(e) => { e.preventDefault(); dragging = false }}>
+  ondrop={(e) => {
+    e.preventDefault()
+    handleImage(e.dataTransfer.files)
+  }}
+  ondragover={(e) => {
+    e.preventDefault()
+    dragging = true
+  }}
+  ondragleave={(e) => {
+    e.preventDefault()
+    dragging = false
+  }}>
   <input
     type="file"
     accept="image/*"

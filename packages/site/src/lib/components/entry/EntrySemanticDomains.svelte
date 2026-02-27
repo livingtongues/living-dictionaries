@@ -53,7 +53,10 @@
             type="button"
             class="cursor-pointer justify-center items-center flex opacity-50 hover:opacity-100 rounded-full h-4 w-4 ml-1"
             title="Remove"
-            onclick={(e) => { e.stopPropagation(); deleteWriteIn(domain) }}>
+            onclick={(e) => {
+              e.stopPropagation()
+              deleteWriteIn(domain)
+            }}>
             <span class="i-fa-solid-times"></span>
           </button>
         {/if}

@@ -24,7 +24,7 @@ if (import.meta.vitest) {
 
     test('warns for keys found in items not found in headers', () => {
       const headers = { name: 'Name', age: 'Age' }
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { /* suppress warn */ })
       checkForMissingKeysInHeaders(headers, items)
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         'Missing keys in headers: city. These keys will not be included in the CSV.',
@@ -33,7 +33,7 @@ if (import.meta.vitest) {
 
     test('does not warn when all item keys are found in headers', () => {
       const headers = { name: 'Name', age: 'Age', city: 'City' }
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { /* suppress warn */ })
       checkForMissingKeysInHeaders(headers, items)
       expect(consoleWarnSpy).not.toHaveBeenCalled()
     })

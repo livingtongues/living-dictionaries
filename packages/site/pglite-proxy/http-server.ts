@@ -45,9 +45,8 @@ export function create_http_server(connection_manager: ConnectionManager, port: 
       let sql: string
       let params: unknown[] = []
       try {
-        const parsed = JSON.parse(body)
-        sql = parsed.sql
-        params = parsed.params ?? []
+        const parsed = JSON.parse(body);
+        ({ sql, params = [] } = parsed)
       } catch {
         res.writeHead(400, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify({ success: false, error: 'Invalid JSON body' }))

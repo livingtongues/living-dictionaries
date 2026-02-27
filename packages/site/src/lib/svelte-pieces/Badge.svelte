@@ -31,7 +31,14 @@
     {@render children?.()}
     {#if onx}
       <span class="w-2"></span>
-      <button type="button" onclick={(e) => { e.preventDefault(); onx(e) }} class="badge-x" aria-label="Remove">
+      <button
+        type="button"
+        onclick={(e) => {
+          e.preventDefault()
+          onx(e)
+        }}
+        class="badge-x"
+        aria-label="Remove">
         <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
           <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
         </svg>
@@ -54,7 +61,14 @@
     {@render children?.()}
     {#if onx}
       <span class="w-2"></span>
-      <button type="button" onclick={(e) => { e.stopPropagation(); onx(e) }} class="badge-x" aria-label="Remove">
+      <button
+        type="button"
+        onclick={(e) => {
+          e.stopPropagation()
+          onx(e)
+        }}
+        class="badge-x"
+        aria-label="Remove">
         <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
           <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
         </svg>
