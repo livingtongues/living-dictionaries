@@ -3,18 +3,18 @@
 </script>
 
 <script lang="ts">
-  import { Button, ReactiveSet } from 'svelte-pieces';
-  import Map from './Map.svelte';
-  import Marker from './Marker.svelte';
-  import Popup from './Popup.svelte';
-  import GeoJSONSource from '../sources/GeoJSONSource.svelte';
-  import Layer from './Layer.svelte';
-  import { polygonFeatureCoordinates } from '../../utils/polygonFromCoordinates';
-  import MapboxStatic from '../static/MapboxStatic.svelte';
-  import { convertPointsIntoRegion } from '../static/shapeGeoJson';
+  import { Button, ReactiveSet } from 'svelte-pieces'
+  import { polygonFeatureCoordinates } from '../../utils/polygonFromCoordinates'
+  import GeoJSONSource from '../sources/GeoJSONSource.svelte'
+  import MapboxStatic from '../static/MapboxStatic.svelte'
+  import { convertPointsIntoRegion } from '../static/shapeGeoJson'
+  import Layer from './Layer.svelte'
+  import Map from './Map.svelte'
+  import Marker from './Marker.svelte'
+  import Popup from './Popup.svelte'
 
-  export let openFirst = false;
-  export let autoDrawShape = true;
+  export let openFirst = false
+  export let autoDrawShape = true
   // name="Draw Polygon with Updating Static Map
 </script>
 
@@ -34,14 +34,14 @@
       lat={44}
       zoom={3}
       on_click={({ lng, lat }) => {
-        add({ longitude: lng, latitude: lat });
+        add({ longitude: lng, latitude: lat })
       }}>
       {#each points as point, index (point)}
         <Marker
           draggable
           on_dragend={({ lng, lat }) => {
-            remove(point);
-            add({ longitude: lng, latitude: lat });
+            remove(point)
+            add({ longitude: lng, latitude: lat })
           }}
           lng={point.longitude}
           lat={point.latitude}>

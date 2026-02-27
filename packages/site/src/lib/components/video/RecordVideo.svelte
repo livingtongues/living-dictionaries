@@ -1,16 +1,17 @@
 <script lang="ts">
-  import { page } from '$app/state';
-  import { Button } from '$lib/svelte-pieces';
-  import MediaStream from '../record/MediaStream.svelte';
-  import Recorder from '../record/Recorder.svelte';
-  import { srcObject } from './srcObject';
+  import { page } from '$app/state'
+  import { Button } from '$lib/svelte-pieces'
+  import MediaStream from '../record/MediaStream.svelte'
+  import Recorder from '../record/Recorder.svelte'
+  import { srcObject } from './srcObject'
+
   interface Props {
-    children?: import('svelte').Snippet<[any]>;
+    children?: import('svelte').Snippet<[any]>
   }
 
-  let { children }: Props = $props();
+  let { children }: Props = $props()
 
-  let videoBlob: Blob = $state();
+  let videoBlob: Blob = $state()
 </script>
 
 {#if !videoBlob}
@@ -47,8 +48,8 @@
           <select
             class="p-1 text-sm max-w-full mt-1"
             value={selectedMicrophone.deviceId}
-            onchange={(e) =>
-              //@ts-ignore
+            onchange={e =>
+              // @ts-ignore
               chooseMicrophone(e.target.value)}>
             {#each microphones as microphone}
               <option value={microphone.deviceId}>
@@ -61,8 +62,8 @@
           <select
             class="p-1 text-sm max-w-full mt-1"
             value={selectedCamera.deviceId}
-            onchange={(e) =>
-              //@ts-ignore
+            onchange={e =>
+              // @ts-ignore
               chooseCamera(e.target.value)}>
             {#each cameras as camera}
               <option value={camera.deviceId}>
@@ -76,7 +77,7 @@
       {#if state === 'recording' || state === 'paused'}
         <Button
           onclick={async () => {
-            videoBlob = await stop();
+            videoBlob = await stop()
           }}
           color="red"
           class="w-full h-24 mt-1">
@@ -114,6 +115,6 @@
   </MediaStream>
 {:else}
   {@render children?.({ videoBlob, reset: () => {
-      videoBlob = undefined;
-    }, })}
+    videoBlob = undefined
+  } })}
 {/if}

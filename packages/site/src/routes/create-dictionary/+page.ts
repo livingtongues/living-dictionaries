@@ -1,9 +1,9 @@
 import type { TablesInsert } from '@living-dictionaries/types'
-import { get } from 'svelte/store'
 import type { PageLoad } from './$types'
-import { pruneObject } from '$lib/helpers/prune'
 import { api_create_dictionary } from '$api/db/create-dictionary/_call'
+import { pruneObject } from '$lib/helpers/prune'
 import { mode } from '$lib/supabase'
+import { get } from 'svelte/store'
 
 export const load = (({ parent }) => {
   const MIN_URL_LENGTH = 3

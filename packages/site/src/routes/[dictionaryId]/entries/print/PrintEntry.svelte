@@ -1,23 +1,23 @@
 <script lang="ts">
   import type { EntryData, Tables } from '@living-dictionaries/types'
-  import sanitize from 'xss'
-  import { tick } from 'svelte'
-  import QrCode from './QrCode.svelte'
-  import { defaultPrintFields } from './printFields'
   import { page } from '$app/state'
-  import { order_example_sentences, order_glosses } from '$lib/helpers/glosses'
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
+  import { order_example_sentences, order_glosses } from '$lib/helpers/glosses'
+  import { tick } from 'svelte'
+  import sanitize from 'xss'
+  import { defaultPrintFields } from './printFields'
+  import QrCode from './QrCode.svelte'
 
   interface Props {
-    entry: EntryData;
-    selectedFields?: any;
-    imagePercent?: number;
-    fontSize?: number;
-    headwordSize?: number;
-    dictionary: Tables<'dictionaries'>;
-    showLabels?: boolean;
-    showQrCode?: boolean;
+    entry: EntryData
+    selectedFields?: any
+    imagePercent?: number
+    fontSize?: number
+    headwordSize?: number
+    dictionary: Tables<'dictionaries'>
+    showLabels?: boolean
+    showQrCode?: boolean
   }
 
   let {
@@ -28,8 +28,8 @@
     headwordSize = 12,
     dictionary,
     showLabels = false,
-    showQrCode = false
-  }: Props = $props();
+    showQrCode = false,
+  }: Props = $props()
 
   let first_photo = $derived(entry.senses?.[0]?.photos?.[0])
   let first_audio = $derived(entry.audios?.[0])

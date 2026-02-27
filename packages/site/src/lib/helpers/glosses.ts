@@ -1,5 +1,5 @@
-import type { MultiString, Tables } from '@living-dictionaries/types'
 import type { TranslateFunction } from '$lib/i18n/types'
+import type { MultiString, Tables } from '@living-dictionaries/types'
 
 export function order_glosses({ glosses, dictionary_gloss_languages, t, label = false }:
 {

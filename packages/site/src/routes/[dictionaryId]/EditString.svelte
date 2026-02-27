@@ -1,16 +1,15 @@
 <script lang="ts">
-  import { Button, Form } from '$lib/svelte-pieces'
   import { page } from '$app/state'
-
+  import { Button, Form } from '$lib/svelte-pieces'
 
   interface Props {
-    id: string;
-    display: string;
-    value: string;
-    minlength?: number;
-    maxlength?: number;
-    required?: boolean;
-    save: (value: string) => Promise<void>;
+    id: string
+    display: string
+    value: string
+    minlength?: number
+    maxlength?: number
+    required?: boolean
+    save: (value: string) => Promise<void>
   }
 
   let {
@@ -20,11 +19,11 @@
     minlength = 0,
     maxlength = 30,
     required = false,
-    save
-  }: Props = $props();
+    save,
+  }: Props = $props()
 </script>
 
-<Form  onsubmit={async () => await save(value.trim())}>
+<Form onsubmit={async () => await save(value.trim())}>
   {#snippet children({ loading })}
     <label for={id} class="text-sm font-medium text-gray-700 mb-2">
       {display}

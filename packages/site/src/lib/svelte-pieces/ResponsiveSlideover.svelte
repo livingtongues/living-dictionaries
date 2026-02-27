@@ -80,7 +80,7 @@
               onclick={on_close}
               type="button"
               class="text-gray-400 px-3 py-4 flex hover:text-gray-500 focus:outline-none
-    focus:text-gray-500 transition ease-in-out duration-150"
+                focus:text-gray-500 transition ease-in-out duration-150"
               aria-label="Close">
               <span class="i-fa-solid-times text-lg"></span></button>
           </div>

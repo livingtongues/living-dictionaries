@@ -1,14 +1,14 @@
 <script lang="ts">
+  import { dev } from '$app/environment'
+  import { page } from '$app/state'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import { downloadObjectsAsCSV } from '$lib/export/csv'
+  import Progress from '$lib/export/Progress.svelte'
   import { Button, ShowHide } from '$lib/svelte-pieces'
   import DownloadMedia from './DownloadMedia.svelte'
   import { type EntryForCSV, formatCsvEntries, getCsvHeaders, translate_entries } from './prepareEntriesForCsv'
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import Progress from '$lib/export/Progress.svelte'
-  import { page } from '$app/state'
-  import { downloadObjectsAsCSV } from '$lib/export/csv'
-  import { dev } from '$app/environment'
 
-  let { data } = $props();
+  let { data } = $props()
   let { is_manager, dictionary, admin, entries_data, url_from_storage_path } = $derived(data)
   let { loading: entries_loading } = $derived(entries_data)
 
@@ -33,7 +33,7 @@
 
       ready = true
     }
-  });
+  })
 </script>
 
 <h3 class="text-xl font-semibold mb-4">{page.data.t('misc.export')}</h3>
@@ -86,9 +86,9 @@
   </div>
 
   {#if includeImages || includeAudio}
-    <ShowHide  >
+    <ShowHide>
       {#snippet children({ show, toggle })}
-            {#if !show}
+        {#if !show}
           <Button onclick={toggle} form="filled">
             {page.data.t('export.download_csv')}
             {#if includeImages}
@@ -105,20 +105,19 @@
             finalizedEntries={formattedEntries}
             entriesWithImages={includeImages ? entriesWithImages : []}
             entriesWithAudio={includeAudio ? entriesWithAudio : []}
-            on_completed={toggle}
-            >
+            on_completed={toggle}>
             {#snippet children({ progress })}
-                    <Progress {progress} />
+              <Progress {progress} />
               {#if progress < 1}
                 <Button onclick={toggle} color="red">{page.data.t('misc.cancel')}</Button>
               {:else}
                 <Button onclick={toggle}>{page.data.t('misc.reset')}</Button>
               {/if}
-                              {/snippet}
-                </DownloadMedia>
+            {/snippet}
+          </DownloadMedia>
         {/if}
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
   {:else}
     <Button
       loading={!formattedEntries.length}

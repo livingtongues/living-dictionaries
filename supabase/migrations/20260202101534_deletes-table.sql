@@ -33,7 +33,8 @@ BEGIN
   ELSIF NEW.table_name = 'invites' THEN
     DELETE FROM invites WHERE id = NEW.id::uuid;
   ELSIF NEW.table_name = 'dictionaries' THEN
-    DELETE FROM dictionaries WHERE id = NEW.id;
+    UPDATE dictionaries SET deleted = NOW() WHERE id = NEW.id;
+    -- DELETE FROM dictionaries WHERE id = NEW.id;
   END IF;
   
   RETURN NEW;

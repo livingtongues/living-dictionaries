@@ -1,16 +1,16 @@
 <script lang="ts">
   import type { EntryData, Tables } from '@living-dictionaries/types'
-  import { sortedColumn } from './sortedColumnStore'
-  import { HistoryFields } from './historyFields'
   import { page } from '$app/state'
+  import { HistoryFields } from './historyFields'
+  import { sortedColumn } from './sortedColumnStore'
 
   interface Props {
-    history?: Tables<'content_updates'>[];
-    get_entry: (record: Tables<'content_updates'>) => EntryData;
-    children?: import('svelte').Snippet<[any]>;
+    history?: Tables<'content_updates'>[]
+    get_entry: (record: Tables<'content_updates'>) => EntryData
+    children?: import('svelte').Snippet<[any]>
   }
 
-  let { history = [], get_entry, children }: Props = $props();
+  let { history = [], get_entry, children }: Props = $props()
 
   type SortFields = keyof typeof HistoryFields
   // @ts-ignore
@@ -26,7 +26,7 @@
 
   $effect(() => {
     sortedColumn.set(sortKey)
-  });
+  })
 
   let sortedRecords = $derived(history.sort((a, b) => {
     let valueA: string | number
@@ -80,7 +80,7 @@
   {/each}
 </thead>
 
-{@render children?.({ sortedRecords, })}
+{@render children?.({ sortedRecords })}
 
 <style>
   th {

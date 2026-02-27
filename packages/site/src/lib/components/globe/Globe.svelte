@@ -1,18 +1,18 @@
 <script lang="ts">
   import type { GeoProjection } from 'd3'
-  import { geoGraticule10, geoPath, geoOrthographic } from 'd3'
-  import { getContext, onMount, onDestroy, type Snippet } from 'svelte'
+  import { geoGraticule10, geoOrthographic, geoPath } from 'd3'
+  import { getContext, onDestroy, onMount, type Snippet } from 'svelte'
   import * as topojson from 'topojson-client'
-  import land110Json from './data/land-110m.json'
-  import countries110Json from './data/countries-110m.json'
   import { CANVAS_CONTEXT_NAME } from './constants'
+  import countries110Json from './data/countries-110m.json'
+  import land110Json from './data/land-110m.json'
 
   interface Props {
     width?: number
     height?: number
     initial_longitude?: number
     initial_latitude?: number
-    children?: Snippet<[{ projection: GeoProjection; is_moving: boolean }]>
+    children?: Snippet<[{ projection: GeoProjection, is_moving: boolean }]>
   }
 
   let {
@@ -20,7 +20,7 @@
     height = 0,
     initial_longitude = 0,
     initial_latitude = 20,
-    children
+    children,
   }: Props = $props()
 
   const sphere = { type: 'Sphere' }
@@ -30,13 +30,12 @@
     invalidate: () => void
   }>(CANVAS_CONTEXT_NAME)
 
-  // eslint-disable-next-line ts/no-explicit-any
   const land110 = topojson.feature(land110Json as any, (land110Json as any).objects.land)
-  // eslint-disable-next-line ts/no-explicit-any
+
   const borders110 = topojson.mesh(
     countries110Json as any,
     (countries110Json as any).objects.countries,
-    (a: any, b: any) => a !== b
+    (a: any, b: any) => a !== b,
   )
 
   let land50: any = null
@@ -57,7 +56,7 @@
     borders50 = topojson.mesh(
       countries50Json as any,
       (countries50Json as any).objects.countries,
-      (a: any, b: any) => a !== b
+      (a: any, b: any) => a !== b,
     )
     invalidate()
   }
@@ -80,26 +79,29 @@
     }, 150)
   }
 
+  let projection = geoOrthographic()
+    .rotate([-initial_longitude, -initial_latitude])
+
+  $effect(() => {
+    projection
+      .fitExtent(
+        [
+          [-1, -1],
+          [width + 1, height + 1],
+        ],
+        sphere as any,
+      )
+      .clipExtent([
+        [-1, -1],
+        [width + 1, height + 1],
+      ])
+    invalidate()
+  })
+
   export function rotate_to(longitude: number, latitude: number) {
     projection.rotate([-longitude, -latitude, 0])
     invalidate()
   }
-
-  let projection = $derived(
-    geoOrthographic()
-      .fitExtent(
-        [
-          [-1, -1],
-          [width + 1, height + 1]
-        ],
-        sphere as any
-      )
-      .clipExtent([
-        [-1, -1],
-        [width + 1, height + 1]
-      ])
-      .rotate([-initial_longitude, -initial_latitude])
-  )
 
   function draw(context: CanvasRenderingContext2D) {
     const path = geoPath(projection, context).pointRadius(1.5)
@@ -143,11 +145,6 @@
 
   onDestroy(invalidate)
 
-  $effect(() => {
-    width
-    height
-    invalidate()
-  })
 </script>
 
 {@render children?.({ projection, is_moving })}

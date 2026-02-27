@@ -1,20 +1,20 @@
 <script lang="ts">
   import type { EntryData, Tables, TablesUpdate } from '@living-dictionaries/types'
-  import EntryField from './EntryField.svelte'
-  import EntrySentence from './EntrySentence.svelte'
   import { page } from '$app/state'
-  import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
+  import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
+  import EntryField from './EntryField.svelte'
+  import EntrySentence from './EntrySentence.svelte'
 
   interface Props {
-    sense: EntryData['senses'][0];
-    glossLanguages: Tables<'dictionaries'>['gloss_languages'];
-    can_edit?: boolean;
+    sense: EntryData['senses'][0]
+    glossLanguages: Tables<'dictionaries'>['gloss_languages']
+    can_edit?: boolean
   }
 
-  let { sense, glossLanguages, can_edit = false }: Props = $props();
+  let { sense, glossLanguages, can_edit = false }: Props = $props()
 
   let { dictionary, dbOperations } = $derived(page.data)
 

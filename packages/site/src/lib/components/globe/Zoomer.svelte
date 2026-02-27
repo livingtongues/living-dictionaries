@@ -2,8 +2,8 @@
   import type { GeoProjection } from 'd3'
   import { select, zoomIdentity } from 'd3'
   import { getContext } from 'svelte'
-  import { versor_zoom } from './utils/versor-zoom'
   import { CANVAS_CONTEXT_NAME } from './constants'
+  import { versor_zoom } from './utils/versor-zoom'
 
   interface Props {
     context: CanvasRenderingContext2D
@@ -20,7 +20,7 @@
     invalidate: () => void
   }>(CANVAS_CONTEXT_NAME)
 
-  export function sync_transform(options: { zoom: number; center: [number, number] }) {
+  export function sync_transform(options: { zoom: number, center: [number, number] }) {
     if (!projection || !context || initial_scale === null) return
     const new_scale = options.zoom * initial_scale
     projection.scale(new_scale)

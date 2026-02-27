@@ -1,2 +1,2 @@
-export interface keymanKeyContext { getKeyman: () => any; }
-export const keymanKey = {};
+export interface keymanKeyContext { getKeyman: () => any }
+export const keymanKey = {}

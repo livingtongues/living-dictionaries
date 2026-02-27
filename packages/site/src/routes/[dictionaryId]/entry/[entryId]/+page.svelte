@@ -1,13 +1,13 @@
 <script lang="ts">
+  import { dev } from '$app/environment'
+  import { page } from '$app/state'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import { share } from '$lib/helpers/share'
   import { Button, JSON } from '$lib/svelte-pieces'
   import EntryDisplay from './EntryDisplay.svelte'
   import { seo_description } from './seo_description'
-  import { share } from '$lib/helpers/share'
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { page } from '$app/state'
-  import { dev } from '$app/environment'
 
-  let { data } = $props();
+  let { data } = $props()
   let {
     entry_from_page,
     derived_entry,

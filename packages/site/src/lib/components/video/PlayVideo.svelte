@@ -1,24 +1,24 @@
 <script lang="ts">
   import type { EntryData } from '@living-dictionaries/types'
+  import { page } from '$app/state'
   import { Button } from '$lib/svelte-pieces'
   import VideoThirdParty from './VideoThirdParty.svelte'
-  import { page } from '$app/state'
 
   let { dbOperations, url_from_storage_path } = $derived(page.data)
 
   interface Props {
-    lexeme: string;
-    video: EntryData['senses'][0]['videos'][0];
-    can_edit?: boolean;
-    on_close: () => void;
+    lexeme: string
+    video: EntryData['senses'][0]['videos'][0]
+    can_edit?: boolean
+    on_close: () => void
   }
 
   let {
     lexeme,
     video,
     can_edit = false,
-    on_close
-  }: Props = $props();
+    on_close,
+  }: Props = $props()
 </script>
 
 <div
@@ -29,7 +29,7 @@
     <div
       class="font-semibold text-white p-4 flex justify-between items-center
         absolute top-0 inset-x-0 bg-opacity-25 bg-black">
-      <span onclick={(e) => e.stopPropagation()}>{lexeme}</span>
+      <span onclick={e => e.stopPropagation()}>{lexeme}</span>
       <span class="i-fa-solid-times p-3 cursor-pointer"></span>
     </div>
     {#if video.storage_path}

@@ -1,27 +1,27 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte'
 
-  let progress = $state(0);
-  let visible = $state(false);
+  let progress = $state(0)
+  let visible = $state(false)
 
-   let timeoutId: ReturnType<typeof setTimeout>;
+  let timeoutId: ReturnType<typeof setTimeout>
 
-   onMount(() => {
-     function next() {
-       visible = true;
-       progress += Math.min(0.05, 1 - progress);
-       if (progress < 1) {
-         timeoutId = setTimeout(next, Math.max(50, 200 / (1 - progress)));
-       }
-     }
-     setTimeout(next, 250);
-   });
+  onMount(() => {
+    function next() {
+      visible = true
+      progress += Math.min(0.05, 1 - progress)
+      if (progress < 1) {
+        timeoutId = setTimeout(next, Math.max(50, 200 / (1 - progress)))
+      }
+    }
+    setTimeout(next, 250)
+  })
 
-   onDestroy(() => {
-     if (timeoutId) clearTimeout(timeoutId);
-     progress = 1;
-     setTimeout(() => visible = false, 200);
-   });
+  onDestroy(() => {
+    if (timeoutId) clearTimeout(timeoutId)
+    progress = 1
+    setTimeout(() => visible = false, 200)
+  })
 </script>
 
 {#if visible}

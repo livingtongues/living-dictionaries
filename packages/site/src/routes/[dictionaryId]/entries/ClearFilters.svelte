@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type { QueryParamStore } from '$lib/svelte-pieces'
   import type { QueryParams } from '$lib/search/types'
+  import type { QueryParamStore } from '$lib/svelte-pieces'
 
   interface Props {
-    search_params: QueryParamStore<QueryParams>;
+    search_params: QueryParamStore<QueryParams>
   }
 
-  let { search_params }: Props = $props();
+  let { search_params }: Props = $props()
   let filtered = $derived(!!Object.keys($search_params).filter(key => !['page', 'query', 'view'].includes(key)).length)
 
   function clear_filters() {

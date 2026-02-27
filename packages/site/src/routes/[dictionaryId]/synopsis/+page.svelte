@@ -1,12 +1,12 @@
 <script lang="ts">
-  import DisplayString from './DisplayString.svelte'
-  import VisualMap from './VisualMap.svelte'
+  import { page } from '$app/state'
   import Image from '$lib/components/image/Image.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { page } from '$app/state'
   import { glossingLanguages } from '$lib/glosses/glossing-languages'
+  import DisplayString from './DisplayString.svelte'
+  import VisualMap from './VisualMap.svelte'
 
-  let { data } = $props();
+  let { data } = $props()
   const { dictionary } = data
   let activeGlossingBcps = $derived(Array.isArray(dictionary.gloss_languages)
     ? dictionary.gloss_languages.map(bcp =>

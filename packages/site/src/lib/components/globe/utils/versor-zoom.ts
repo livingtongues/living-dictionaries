@@ -13,7 +13,6 @@ interface VersorZoomOptions {
   latitude_limit?: number
 }
 
-// eslint-disable-next-line ts/no-explicit-any
 export function versor_zoom(projection: any, options: VersorZoomOptions = {}) {
   const {
     scale = projection._scale === undefined
@@ -68,7 +67,7 @@ export function versor_zoom(projection: any, options: VersorZoomOptions = {}) {
       q1 = versor.multiply([Math.sqrt(1 - s * s), 0, 0, c * s], q1)
     }
 
-    let rotation = versor.rotation(q1)
+    const rotation = versor.rotation(q1)
 
     if (keep_equator_level) {
       rotation[1] = Math.max(-latitude_limit, Math.min(latitude_limit, rotation[1]))
@@ -81,14 +80,13 @@ export function versor_zoom(projection: any, options: VersorZoomOptions = {}) {
     if (delta[0] < 0.7) zoomstarted.call(this, event)
   }
 
-  // eslint-disable-next-line ts/no-explicit-any
   return Object.assign(
     (selection: Selection<Element, unknown, any, any>) =>
       selection
         .property('__zoom', zoomIdentity.scale(projection.scale()))
         .call(zoomer),
     {
-      // eslint-disable-next-line ts/no-explicit-any
+
       on(type: string, listener?: (...args: any[]) => void) {
         if (listener !== undefined) {
           zoomer.on(type, listener)

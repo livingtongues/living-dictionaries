@@ -1,34 +1,34 @@
 <script lang="ts">
-  import { ShowHide } from '$lib/svelte-pieces';
-  import GeoJSONSource from '../sources/GeoJSONSource.svelte';
-  import Layer from './Layer.svelte';
-  import PopupOfMap from './PopupOfMap.svelte';
-  import { polygonFeatureCoordinates } from '../../utils/polygonFromCoordinates';
-  import type { IRegion } from '@living-dictionaries/types';
-  import { getContext } from 'svelte';
-  import { mapKey, type MapKeyContext } from '../context';
-  import { points } from '@turf/helpers';
-  import center from '@turf/center';
+  import type { IRegion } from '@living-dictionaries/types'
+  import { ShowHide } from '$lib/svelte-pieces'
+  import center from '@turf/center'
+  import { points } from '@turf/helpers'
+  import { getContext } from 'svelte'
+  import { polygonFeatureCoordinates } from '../../utils/polygonFromCoordinates'
+  import { mapKey, type MapKeyContext } from '../context'
+  import GeoJSONSource from '../sources/GeoJSONSource.svelte'
+  import Layer from './Layer.svelte'
+  import PopupOfMap from './PopupOfMap.svelte'
 
-  const { getMap } = getContext<MapKeyContext>(mapKey);
-  const map = getMap();
+  const { getMap } = getContext<MapKeyContext>(mapKey)
+  const map = getMap()
 
   interface Props {
-    region: IRegion;
-    color?: string;
-    children?: import('svelte').Snippet;
+    region: IRegion
+    color?: string
+    children?: import('svelte').Snippet
   }
 
-  let { region, color = undefined, children }: Props = $props();
+  let { region, color = undefined, children }: Props = $props()
 
-  let coordinatesArray =
-    $derived(region?.coordinates.map(({ longitude, latitude }) => [longitude, latitude]) || []);
-  let [lng, lat] = $derived(center(points(coordinatesArray)).geometry.coordinates);
+  let coordinatesArray
+    = $derived(region?.coordinates.map(({ longitude, latitude }) => [longitude, latitude]) || [])
+  let [lng, lat] = $derived(center(points(coordinatesArray)).geometry.coordinates)
 
-  const children_render = $derived(children);
+  const children_render = $derived(children)
 </script>
 
-<ShowHide  >
+<ShowHide>
   {#snippet children({ show, toggle })}
     <GeoJSONSource
       data={{

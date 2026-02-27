@@ -1,11 +1,11 @@
-import { expose } from 'comlink'
+import type { Supabase } from '$lib/supabase'
 import type { Database, EntryData, Tables, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
+import { should_include_tag } from '$lib/helpers/tag-visibility'
+import { cached_data_table, cached_join_table } from '$lib/supabase/cached-data'
 import { createClient } from '@supabase/supabase-js'
+import { expose } from 'comlink'
 import { clear } from 'idb-keyval'
 import { _search_entries, create_index, update_index_entry } from './orama.worker'
-import { should_include_tag } from '$lib/helpers/tag-visibility'
-import type { Supabase } from '$lib/supabase'
-import { cached_data_table, cached_join_table } from '$lib/supabase/cached-data'
 
 const log = false
 let supabase: Supabase | undefined

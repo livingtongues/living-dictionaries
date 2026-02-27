@@ -3,11 +3,11 @@
   import { BadgeArrayEmit, ShowHide } from '$lib/svelte-pieces'
 
   interface Props {
-    users?: UserWithRoles[];
-    editors?: UserWithRoles[];
-    remove_editor: (user_id: string) => Promise<void>;
-    add_editor: (user_id: string) => Promise<void>;
-    invite_editor: () => Promise<void>;
+    users?: UserWithRoles[]
+    editors?: UserWithRoles[]
+    remove_editor: (user_id: string) => Promise<void>
+    add_editor: (user_id: string) => Promise<void>
+    invite_editor: () => Promise<void>
   }
 
   let {
@@ -15,11 +15,11 @@
     editors = [],
     remove_editor,
     add_editor,
-    invite_editor
-  }: Props = $props();
+    invite_editor,
+  }: Props = $props()
 </script>
 
-<ShowHide  >
+<ShowHide>
   {#snippet children({ show, toggle })}
     <BadgeArrayEmit
       strings={editors.map(({ full_name, email }) => full_name || email)}

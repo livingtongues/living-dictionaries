@@ -1,16 +1,16 @@
 <script lang="ts">
   import type { Readable } from 'svelte/store'
-  import ImageDropZone from './ImageDropZone.svelte'
   import type { ImageUploadStatus } from './upload-image'
   import { page } from '$app/state'
+  import ImageDropZone from './ImageDropZone.svelte'
 
   interface Props {
-    upload_image: (file: File) => Readable<ImageUploadStatus>;
-    border?: boolean;
-    children?: import('svelte').Snippet;
+    upload_image: (file: File) => Readable<ImageUploadStatus>
+    border?: boolean
+    children?: import('svelte').Snippet
   }
 
-  let { upload_image, border = false, children }: Props = $props();
+  let { upload_image, border = false, children }: Props = $props()
 
   let upload_statuses: Readable<ImageUploadStatus>[] = $state([])
 </script>

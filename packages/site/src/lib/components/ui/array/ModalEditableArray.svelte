@@ -1,20 +1,20 @@
 <script lang="ts">
-  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
-  import MultiSelect from './MultiSelect.svelte'
   import type { SelectOption } from './select-options.interface'
   import { page } from '$app/state'
+  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
+  import MultiSelect from './MultiSelect.svelte'
 
   interface Props {
-    values: string[];
-    options: SelectOption[];
-    placeholder: string;
-    can_edit?: boolean;
-    showPlus?: boolean;
-    canWriteIn?: boolean;
-    on_update: (new_value: string[]) => void;
-    additional?: import('svelte').Snippet;
-    plus?: import('svelte').Snippet;
-    heading?: import('svelte').Snippet;
+    values: string[]
+    options: SelectOption[]
+    placeholder: string
+    can_edit?: boolean
+    showPlus?: boolean
+    canWriteIn?: boolean
+    on_update: (new_value: string[]) => void
+    additional?: import('svelte').Snippet
+    plus?: import('svelte').Snippet
+    heading?: import('svelte').Snippet
   }
 
   let {
@@ -27,8 +27,8 @@
     on_update,
     additional,
     plus,
-    heading
-  }: Props = $props();
+    heading,
+  }: Props = $props()
 
   let selectedOptions: Record<string, SelectOption> = $state({})
 
@@ -41,12 +41,12 @@
   }
   $effect(() => {
     prepareSelected(values, options)
-  });
+  })
 
-  const heading_render = $derived(heading);
+  const heading_render = $derived(heading)
 </script>
 
-<ShowHide   >
+<ShowHide>
   {#snippet children({ show, set, toggle })}
     <div
       class:cursor-pointer={can_edit}
@@ -77,8 +77,8 @@
           toggle()
         }}>
         {#snippet heading()}
-            <span >{#if heading_render}{@render heading_render()}{:else}Select{/if}</span>
-          {/snippet}
+          <span>{#if heading_render}{@render heading_render()}{:else}Select{/if}</span>
+        {/snippet}
 
         <form
           onsubmit={(e) => {

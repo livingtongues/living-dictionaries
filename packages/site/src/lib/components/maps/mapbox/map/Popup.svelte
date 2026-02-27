@@ -1,24 +1,24 @@
 <script lang="ts">
+  import type { Marker, Popup, PopupOptions } from 'mapbox-gl'
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
-  import { onMount, getContext } from 'svelte';
-  import { mapKey, markerKey } from '../context';
-  import type { Popup, PopupOptions, Marker } from 'mapbox-gl';
+  import { getContext, onMount } from 'svelte'
+  import { mapKey, markerKey } from '../context'
 
-  const { getMapbox } = getContext<{ getMapbox: () => typeof import('mapbox-gl') }>(mapKey);
-  const mapbox = getMapbox();
+  const { getMapbox } = getContext<{ getMapbox: () => typeof import('mapbox-gl') }>(mapKey)
+  const mapbox = getMapbox()
 
-  const { getMarker } = getContext<{ getMarker: () => Marker }>(markerKey);
-  const marker = getMarker();
+  const { getMarker } = getContext<{ getMarker: () => Marker }>(markerKey)
+  const marker = getMarker()
 
   interface Props {
-    closeButton?: boolean;
-    closeOnClick?: boolean;
-    closeOnMove?: boolean;
-    options?: PopupOptions;
-    offset?: number;
-    label?: string;
-    open?: boolean;
-    children?: import('svelte').Snippet;
+    closeButton?: boolean
+    closeOnClick?: boolean
+    closeOnMove?: boolean
+    options?: PopupOptions
+    offset?: number
+    label?: string
+    open?: boolean
+    children?: import('svelte').Snippet
   }
 
   let {
@@ -29,12 +29,12 @@
     offset = 15,
     label = 'Marker',
     open = false,
-    children
-  }: Props = $props();
+    children,
+  }: Props = $props()
   // make my own close button
 
-  let popup: Popup = $state();
-  let container: HTMLDivElement = $state();
+  let popup: Popup = $state()
+  let container: HTMLDivElement = $state()
 
   onMount(() => {
     popup = new mapbox.Popup({
@@ -43,28 +43,26 @@
       closeOnClick,
       closeOnMove,
       offset,
-    });
+    })
 
     if (container.hasChildNodes())
-      popup.setDOMContent(container);
+      popup.setDOMContent(container)
     else
-      popup.setText(label);
+      popup.setText(label)
 
-
-    marker.setPopup(popup);
+    marker.setPopup(popup)
 
     return () => {
-      marker.setPopup(null);
-    };
-  });
+      marker.setPopup(null)
+    }
+  })
 
   $effect(() => {
     if (popup) {
       if (open !== popup.isOpen())
-        marker.togglePopup();
-
+        marker.togglePopup()
     }
-  });
+  })
 </script>
 
 <div bind:this={container}>

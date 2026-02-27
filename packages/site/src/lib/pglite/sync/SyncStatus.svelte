@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Sync } from './sync-engine.svelte.js'
-  import { dev } from '$app/environment'
   // import { toast } from '$lib/svelte-pieces/toast'
 
   interface Props {

@@ -3,16 +3,16 @@
 </script>
 
 <script lang="ts">
-  import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/state'
+  import { Button } from '$lib/svelte-pieces'
 
   interface Props {
-    select_speaker?: (speaker_id: string) => Promise<void>;
-    initialSpeakerId?: string;
-    children?: import('svelte').Snippet<[any]>;
+    select_speaker?: (speaker_id: string) => Promise<void>
+    initialSpeakerId?: string
+    children?: import('svelte').Snippet<[any]>
   }
 
-  let { select_speaker = undefined, initialSpeakerId = undefined, children }: Props = $props();
+  let { select_speaker = undefined, initialSpeakerId = undefined, children }: Props = $props()
 
   let { speakers } = $derived(page.data)
 
@@ -77,5 +77,5 @@
       }} />
   {/await}
 {:else if speaker_id}
-  {@render children?.({ speaker_id, })}
+  {@render children?.({ speaker_id })}
 {/if}

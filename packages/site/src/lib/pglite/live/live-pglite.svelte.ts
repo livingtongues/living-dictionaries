@@ -16,21 +16,24 @@ export interface LivePgLiteOptions {
 
 // Primary key configuration for each table
 const TABLE_PRIMARY_KEYS: Record<TableName, string[]> = {
+  // editable/not-deletable
+  user_data: ['id'],
+  // not editable
+  users: ['id'],
   migrations: ['id'],
   db_metadata: ['key'],
-  users: ['id'],
-  user_data: ['id'],
+  deletes: ['table_name', 'id'],
+  // editable/deletable
   dictionaries: ['id'],
   dictionary_roles: ['dictionary_id', 'user_id', 'role'],
   invites: ['id'],
-  deletes: ['table_name', 'id'],
 }
-
-// Tables that are fully read-only (no _save, _delete, _reset methods)
-const READ_ONLY_TABLES = new Set<TableName>(['users', 'migrations', 'db_metadata', 'deletes'])
 
 // Tables that can be saved/reset but not deleted
 const NO_DELETE_TABLES = new Set<TableName>(['user_data'])
+
+// Tables that are fully read-only (no _save, _delete, _reset methods)
+const READ_ONLY_TABLES = new Set<TableName>(['users', 'migrations', 'db_metadata', 'deletes'])
 
 // Type for direct table access - db.labels, db.tasks, etc.
 type TableProperties = {

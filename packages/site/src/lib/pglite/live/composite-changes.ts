@@ -10,8 +10,8 @@ import type {
   Results,
   Transaction,
 } from '@electric-sql/pglite'
-import { formatQuery, uuid } from '@electric-sql/pglite'
 import type { Change } from './types'
+import { formatQuery, uuid } from '@electric-sql/pglite'
 
 // --- Types ---
 

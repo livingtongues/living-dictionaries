@@ -1,7 +1,7 @@
-// import { DKIM_PRIVATE_KEY, MAILCHANNELS_API_KEY } from '$env/static/private'
-import { SESClient, SendEmailCommand, type SendEmailCommandOutput } from '@aws-sdk/client-ses'
-import { dictionary_address, no_reply_address } from './addresses'
 import { AWS_SES_ACCESS_KEY_ID, AWS_SES_REGION, AWS_SES_SECRET_ACCESS_KEY } from '$env/static/private'
+// import { DKIM_PRIVATE_KEY, MAILCHANNELS_API_KEY } from '$env/static/private'
+import { SendEmailCommand, type SendEmailCommandOutput, SESClient } from '@aws-sdk/client-ses'
+import { dictionary_address, no_reply_address } from './addresses'
 
 export interface EmailParts {
   from?: Address

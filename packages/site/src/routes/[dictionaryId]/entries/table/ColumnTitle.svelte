@@ -1,13 +1,13 @@
 <script lang="ts">
-  import type { IColumn, i18nEntryFieldKey } from '@living-dictionaries/types'
+  import type { i18nEntryFieldKey, IColumn } from '@living-dictionaries/types'
   import { page } from '$app/state'
 
   interface Props {
-    column: IColumn;
-    verbose?: boolean;
+    column: IColumn
+    verbose?: boolean
   }
 
-  let { column, verbose = false }: Props = $props();
+  let { column, verbose = false }: Props = $props()
 
   let i18nKey = $derived(`entry_field.${column.field}` as i18nEntryFieldKey)
 </script>

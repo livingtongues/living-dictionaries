@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
-  import { Button, ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/state'
-  import Header from '$lib/components/shell/Header.svelte'
-  import Footer from '$lib/components/shell/Footer.svelte'
   import { dev } from '$app/environment'
+  import { page } from '$app/state'
+  import Footer from '$lib/components/shell/Footer.svelte'
+  import Header from '$lib/components/shell/Header.svelte'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
+  import { onMount } from 'svelte'
 
   onMount(async () => {
     const Sentry = await import('@sentry/browser')
@@ -34,16 +34,16 @@
     </b>
   </p>
 
-  <ShowHide  >
+  <ShowHide>
     {#snippet children({ show, toggle })}
-        <Button form="filled" onclick={toggle}>{page.data.t('header.contact_us')}</Button>
+      <Button form="filled" onclick={toggle}>{page.data.t('header.contact_us')}</Button>
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
           <Contact subject="report_problem" on_close={toggle} />
         {/await}
       {/if}
-          {/snippet}
-    </ShowHide>
+    {/snippet}
+  </ShowHide>
 
   <p class="text-gray-600 text-sm mt-6">
     {page.data.t('misc.error')}:

@@ -1,17 +1,17 @@
 <script lang="ts">
   interface Props {
-    pages: number;
-    current_page: number;
-    go_to_page: (page: number) => void;
-    children?: import('svelte').Snippet;
+    pages: number
+    current_page: number
+    go_to_page: (page: number) => void
+    children?: import('svelte').Snippet
   }
 
   let {
     pages,
     current_page,
     go_to_page,
-    children
-  }: Props = $props();
+    children,
+  }: Props = $props()
 
   function center_current(node: HTMLElement, active = false) {
     if (active) center()

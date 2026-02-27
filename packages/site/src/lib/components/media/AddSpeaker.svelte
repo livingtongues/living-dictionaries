@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { Button, Form, Modal } from '$lib/svelte-pieces'
   import type { Tables } from '@living-dictionaries/types'
-  import { decades } from './ages'
   import { page } from '$app/state'
+  import { Button, Form, Modal } from '$lib/svelte-pieces'
+  import { decades } from './ages'
 
   interface Props {
-    on_close: () => void;
-    on_speaker_added: (speaker_id: string) => void;
+    on_close: () => void
+    on_speaker_added: (speaker_id: string) => void
   }
 
-  let { on_close, on_speaker_added }: Props = $props();
+  let { on_close, on_speaker_added }: Props = $props()
   let { dbOperations } = $derived(page.data)
 
   let displayName = $state('')
@@ -21,12 +21,12 @@
 
 <Modal {on_close}>
   {#snippet heading()}
-    <span >{page.data.t('speakers.add_new_speaker')}
+    <span>{page.data.t('speakers.add_new_speaker')}
     </span>
   {/snippet}
 
   <Form
-    
+
     onsubmit={async () => {
       const speaker = await dbOperations.insert_speaker({
         name: displayName.trim(),
@@ -37,7 +37,7 @@
       on_speaker_added(speaker.id)
     }}>
     {#snippet children({ loading })}
-        <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
+      <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
         {page.data.t('speakers.name')}
       </label>
       <div class="mt-1 rounded-md shadow-sm">
@@ -125,6 +125,6 @@
           {page.data.t('misc.save')}
         </Button>
       </div>
-          {/snippet}
-    </Form>
+    {/snippet}
+  </Form>
 </Modal>

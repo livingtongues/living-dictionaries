@@ -1,47 +1,48 @@
 <script lang="ts">
-  import { page } from '$app/state';
+  import { page } from '$app/state'
+
   interface Props {
-    children?: import('svelte').Snippet<[any]>;
+    children?: import('svelte').Snippet<[any]>
   }
 
-  let { children }: Props = $props();
-  let dragging = $state(false);
-  let file: File = $state();
+  let { children }: Props = $props()
+  let dragging = $state(false)
+  let file: File = $state()
 
   function checkVideo(files: FileList) {
-    dragging = false;
+    dragging = false
 
-    const fileToCheck = files.item(0);
+    const fileToCheck = files.item(0)
 
     // Client-side validation: Must be video and smaller than 100MB.
     if (fileToCheck.type.split('/')[0] !== 'video')
-      return alert(`${page.data.t('upload.error')}`);
+      return alert(`${page.data.t('upload.error')}`)
 
     // Must be smaller than 100MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > 104857600) {
       return alert(
-        `${page.data.t('upload.file_must_be_smaller')} 100MB`
-      );
+        `${page.data.t('upload.file_must_be_smaller')} 100MB`,
+      )
     }
 
-    file = fileToCheck;
+    file = fileToCheck
   }
 </script>
 
 {#if file}
-  {@render children?.({ file, })}
+  {@render children?.({ file })}
 {:else}
   <label
     class:dragging
-    ondrop={(e) => { e.preventDefault(); checkVideo(e.dataTransfer.files); }}
-    ondragover={(e) => { e.preventDefault(); dragging = true; }}
-    ondragleave={(e) => { e.preventDefault(); dragging = false; }}>
+    ondrop={(e) => { e.preventDefault(); checkVideo(e.dataTransfer.files) }}
+    ondragover={(e) => { e.preventDefault(); dragging = true }}
+    ondragleave={(e) => { e.preventDefault(); dragging = false }}>
     <input
       type="file"
       accept="video/*"
       class="hidden"
       oninput={(e: Event & { currentTarget: HTMLInputElement }) => {
-        checkVideo(e.currentTarget.files);
+        checkVideo(e.currentTarget.files)
       }} />
 
     <div>

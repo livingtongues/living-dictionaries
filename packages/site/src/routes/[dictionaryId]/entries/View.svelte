@@ -1,22 +1,22 @@
 <script lang="ts">
-  import { Modal } from '$lib/svelte-pieces'
-  import { readable } from 'svelte/store'
   import type { EntryData } from '@living-dictionaries/types'
-  import EntryPage from '../entry/[entryId]/+page.svelte'
-  import ListEntry from './list/ListEntry.svelte'
-  import EntriesTable from './table/EntriesTable.svelte'
   import type { PageData as EntriesPageData } from './$types'
-  import EntriesGallery from './EntriesGallery.svelte'
-  import EntriesPrint from './EntriesPrint.svelte'
   import { pushState } from '$app/navigation'
   import { page } from '$app/state'
+  import { Modal } from '$lib/svelte-pieces'
+  import { readable } from 'svelte/store'
+  import EntryPage from '../entry/[entryId]/+page.svelte'
+  import EntriesGallery from './EntriesGallery.svelte'
+  import EntriesPrint from './EntriesPrint.svelte'
+  import ListEntry from './list/ListEntry.svelte'
+  import EntriesTable from './table/EntriesTable.svelte'
 
   interface Props {
-    entries: EntryData[];
-    page_data: EntriesPageData;
+    entries: EntryData[]
+    page_data: EntriesPageData
   }
 
-  let { entries, page_data }: Props = $props();
+  let { entries, page_data }: Props = $props()
   let { dictionary, can_edit, preferred_table_columns, dbOperations, search_params } = $derived(page_data)
 
   function handle_entry_click(e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }, entry: EntryData) {

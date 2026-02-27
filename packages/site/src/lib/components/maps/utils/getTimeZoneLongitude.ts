@@ -1,9 +1,9 @@
 export function getTimeZoneLongitude(): number {
-  const date = new Date();
-  const timeZoneOffset = date.getTimezoneOffset() || 0;
-  const timeZoneMaxOffset = 60 * 12;
-  const percentageAwayFromGreenwich = timeZoneOffset / timeZoneMaxOffset;
-  return percentageAwayFromGreenwich * -1 * 180;
+  const date = new Date()
+  const timeZoneOffset = date.getTimezoneOffset() || 0
+  const timeZoneMaxOffset = 60 * 12
+  const percentageAwayFromGreenwich = timeZoneOffset / timeZoneMaxOffset
+  return percentageAwayFromGreenwich * -1 * 180
   // -180 to 180 is the longitude range
 }
 

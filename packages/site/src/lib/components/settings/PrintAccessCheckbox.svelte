@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { page } from '$app/state';
+  import { page } from '$app/state'
 
   interface Props {
-    checked: boolean;
-    on_changed?: (payload: { checked: boolean }) => void;
+    checked: boolean
+    on_changed?: (payload: { checked: boolean }) => void
   }
 
-  let { checked, on_changed }: Props = $props();
+  let { checked, on_changed }: Props = $props()
 </script>
 
 <div class="flex items-center">
@@ -15,7 +15,7 @@
     type="checkbox"
     {checked}
     onchange={(e: Event & { currentTarget: HTMLInputElement }) => {
-      on_changed?.({ checked: e.currentTarget.checked });
+      on_changed?.({ checked: e.currentTarget.checked })
     }} />
   <label for="public" class="mx-2 block text-sm font-medium text-gray-700">
     {page.data.t('create.print_access')}

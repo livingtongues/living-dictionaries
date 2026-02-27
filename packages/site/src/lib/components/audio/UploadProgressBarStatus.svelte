@@ -4,10 +4,10 @@
   import { page } from '$app/state'
 
   interface Props {
-    upload_status: Readable<AudioVideoUploadStatus>;
+    upload_status: Readable<AudioVideoUploadStatus>
   }
 
-  let { upload_status }: Props = $props();
+  let { upload_status }: Props = $props()
 </script>
 
 {#if $upload_status.error}

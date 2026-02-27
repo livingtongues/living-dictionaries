@@ -1,20 +1,20 @@
 <script lang="ts">
-  import PaginationButtons from './PaginationButtons.svelte'
   import type { DbOperations } from '$lib/dbOperations'
+  import PaginationButtons from './PaginationButtons.svelte'
 
   interface Props {
-    add_entry: DbOperations['insert_entry'];
-    can_edit?: boolean;
-    page_from_url: number;
-    number_of_pages: number;
+    add_entry: DbOperations['insert_entry']
+    can_edit?: boolean
+    page_from_url: number
+    number_of_pages: number
   }
 
   let {
     add_entry,
     can_edit = false,
     page_from_url = $bindable(),
-    number_of_pages
-  }: Props = $props();
+    number_of_pages,
+  }: Props = $props()
 
   function go_to_page(one_based_page: number) {
     page_from_url = one_based_page
@@ -24,7 +24,7 @@
   $effect(() => {
     if (page_from_url === 1)
       page_from_url = null
-  });
+  })
 </script>
 
 {#if can_edit}

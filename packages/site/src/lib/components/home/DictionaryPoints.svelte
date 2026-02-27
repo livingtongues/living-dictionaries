@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { getContext } from 'svelte'
   import type { DictionaryView } from '@living-dictionaries/types'
-  import GeoJSONSource from '$lib/components/maps/mapbox/sources/GeoJSONSource.svelte'
+  import { mapKey, type MapKeyContext } from '$lib/components/maps/mapbox/context'
   import Layer from '$lib/components/maps/mapbox/map/Layer.svelte'
+  import GeoJSONSource from '$lib/components/maps/mapbox/sources/GeoJSONSource.svelte'
   import { dictionaryGeoJsonCollection } from '$lib/components/maps/utils/dictionaryGeoJsonCollection'
-  import { type MapKeyContext, mapKey } from '$lib/components/maps/mapbox/context'
+  import { getContext } from 'svelte'
 
   interface Props {
-    dictionaries?: DictionaryView[];
-    selectedDictionaryId?: string;
-    type?: 'public' | 'private' | 'personal';
+    dictionaries?: DictionaryView[]
+    selectedDictionaryId?: string
+    type?: 'public' | 'private' | 'personal'
   }
 
-  let { dictionaries = [], selectedDictionaryId = $bindable(undefined), type = 'public' }: Props = $props();
+  let { dictionaries = [], selectedDictionaryId = $bindable(undefined), type = 'public' }: Props = $props()
 
   const { getMap } = getContext<MapKeyContext>(mapKey)
   const map = getMap()
@@ -27,8 +27,7 @@
 
 <GeoJSONSource
   data={dictionaryGeoJsonCollection(dictionaries)}
-  options={{ cluster: true, clusterMaxZoom: 6, clusterRadius: 28 }}
-  >
+  options={{ cluster: true, clusterMaxZoom: 6, clusterRadius: 28 }}>
   {#snippet children({ source })}
     <Layer
       id={clustersId}

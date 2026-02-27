@@ -1,7 +1,7 @@
 // @ts-nocheck
 import type { Variant, VariantMeta } from 'kitbook'
-import { readable } from 'svelte/store'
 import type Component from './UploadProgressBarStatus.svelte'
+import { readable } from 'svelte/store'
 
 export const shared_meta: VariantMeta = {
   viewports: [

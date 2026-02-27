@@ -1,11 +1,11 @@
 // https://developers.google.com/identity/gsi/web/guides/overview
 
 import type { CredentialResponse } from 'google-one-tap'
+import { invalidateAll } from '$app/navigation'
+import { getSupabase } from '$lib/supabase'
 import { loadScriptOnce } from '$lib/svelte-pieces'
 import { handle_sign_in_response } from './sign_in'
 import { remove_cached_user } from './user'
-import { getSupabase } from '$lib/supabase'
-import { invalidateAll } from '$app/navigation'
 
 const client_id = '215143435444-fugm4gpav71r3l89n6i0iath4m436qnv.apps.googleusercontent.com'
 

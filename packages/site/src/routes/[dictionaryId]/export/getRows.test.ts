@@ -1,4 +1,7 @@
 import type { Orthography, Tables } from '@living-dictionaries/types'
+import { format_orthographies } from './assignFormattedEntryValuesForCsv'
+
+import { get_orthography_headers } from './assignHeadersForCsv'
 import {
   get_example_sentence,
   get_glosses,
@@ -6,9 +9,6 @@ import {
   get_parts_of_speech,
   get_semantic_domain,
 } from './getRows'
-
-import { get_orthography_headers } from './assignHeadersForCsv'
-import { format_orthographies } from './assignFormattedEntryValuesForCsv'
 
 describe(get_orthography_headers, () => {
   test('assigns alternate orthography headrers if any exists', () => {

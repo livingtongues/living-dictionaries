@@ -1,6 +1,6 @@
-import { get } from 'svelte/store'
 import type { EntryData } from '@living-dictionaries/types'
 import { page } from '$app/stores'
+import { get } from 'svelte/store'
 
 export async function share(dictionaryId: string, entry: EntryData) {
   const { data: { t } } = get(page)

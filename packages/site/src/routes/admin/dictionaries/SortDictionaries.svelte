@@ -2,11 +2,11 @@
   import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
 
   interface Props {
-    dictionaries?: DictionaryWithHelpers[];
-    children?: import('svelte').Snippet<[{ sortedDictionaries: DictionaryWithHelpers[] }]>;
+    dictionaries?: DictionaryWithHelpers[]
+    children?: import('svelte').Snippet<[{ sortedDictionaries: DictionaryWithHelpers[] }]>
   }
 
-  let { dictionaries = [], children }: Props = $props();
+  let { dictionaries = [], children }: Props = $props()
 
   const DictionaryFields = {
     name: 'Dictionary Name',
@@ -132,7 +132,7 @@
   </tr>
 </thead>
 
-{@render children?.({ sortedDictionaries, })}
+{@render children?.({ sortedDictionaries })}
 
 <style>
   th {

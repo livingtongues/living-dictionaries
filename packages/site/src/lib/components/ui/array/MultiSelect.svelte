@@ -1,21 +1,21 @@
 <script lang="ts">
-  import { fly } from 'svelte/transition'
-  import { onMount } from 'svelte'
   import type { SelectOption } from './select-options.interface'
+  import { onMount } from 'svelte'
+  import { fly } from 'svelte/transition'
 
   interface Props {
-    selectedOptions: Record<string, SelectOption>;
-    options: SelectOption[];
-    placeholder?: string;
-    canWriteIn?: boolean;
+    selectedOptions: Record<string, SelectOption>
+    options: SelectOption[]
+    placeholder?: string
+    canWriteIn?: boolean
   }
 
   let {
     selectedOptions = $bindable(),
     options,
     placeholder = 'Select...',
-    canWriteIn = false
-  }: Props = $props();
+    canWriteIn = false,
+  }: Props = $props()
 
   let container: HTMLDivElement = $state()
   let input: HTMLInputElement = $state()
@@ -36,8 +36,6 @@
     document.addEventListener('click', handleClickOutside, true)
     return () => document.removeEventListener('click', handleClickOutside, true)
   })
-
-
 
   function add(option: SelectOption) {
     selectedOptions[option.value] = option
@@ -104,10 +102,10 @@
   $effect(() => {
     if ((activeOption && !filtered.includes(activeOption)) || (!activeOption && inputValue))
       [activeOption] = filtered
-  });
+  })
   $effect(() => {
     if (!showOptions && inputValue) setShowOptions(true)
-  });
+  })
 </script>
 
 <div

@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { Button, Form } from '$lib/svelte-pieces'
   import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
-  import { build_citation } from './build-citation'
   import { page } from '$app/state'
+  import { Button, Form } from '$lib/svelte-pieces'
+  import { build_citation } from './build-citation'
 
   interface Props {
-    dictionary: Tables<'dictionaries'>;
-    isManager?: boolean;
-    partners: PartnerWithPhoto[];
-    citation: string;
-    update_citation: (citation: string) => Promise<void>;
+    dictionary: Tables<'dictionaries'>
+    isManager?: boolean
+    partners: PartnerWithPhoto[]
+    citation: string
+    update_citation: (citation: string) => Promise<void>
   }
 
   let {
@@ -17,8 +17,8 @@
     isManager = false,
     partners,
     citation,
-    update_citation
-  }: Props = $props();
+    update_citation,
+  }: Props = $props()
 
   let value = $state('')
   let unsaved = $state(false)
@@ -26,7 +26,7 @@
 
 {#if isManager}
   <Form
-    
+
     onsubmit={async () => {
       try {
         await update_citation(value.trim())
@@ -36,7 +36,7 @@
       }
     }}>
     {#snippet children({ loading })}
-        <label for="names" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
+      <label for="names" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
         {page.data.t('contributors.how_to_cite_instructions')}
       </label>
       <div class="mt-1 flex">
@@ -57,8 +57,8 @@
           {page.data.t('misc.save')}
         </Button>
       </div>
-          {/snippet}
-    </Form>
+    {/snippet}
+  </Form>
 {/if}
 
 <div dir="ltr" class:text-orange={unsaved}>

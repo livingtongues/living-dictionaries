@@ -1,6 +1,6 @@
-import { get as get_idb, set as set_idb } from 'idb-keyval'
 import type { Tables } from '@living-dictionaries/types'
 import type { Supabase } from '.'
+import { get as get_idb, set as set_idb } from 'idb-keyval'
 
 interface CachedDataStoreOptions<Name, FieldName> {
   dictionary_id: string

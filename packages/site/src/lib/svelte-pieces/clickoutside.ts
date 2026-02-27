@@ -1,7 +1,7 @@
 import type { ActionReturn } from 'svelte/action'
 
 interface Attributes {
-  'onclickoutside'?: () => void
+  onclickoutside?: () => void
 }
 
 export function clickoutside(node: HTMLElement, callback?: () => void): ActionReturn<(() => void) | undefined, Attributes> {

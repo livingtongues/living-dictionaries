@@ -1,28 +1,28 @@
 <script lang="ts">
-  import { Button, type QueryParamStore, createPersistedStore } from '$lib/svelte-pieces'
+  import type { QueryParams } from '$lib/search/types'
   import type { EntryData, IPrintFields, PartnerWithPhoto, Tables } from '@living-dictionaries/types'
+  import { page } from '$app/state'
+  import { Button, createPersistedStore, type QueryParamStore } from '$lib/svelte-pieces'
   import { onMount } from 'svelte'
   import { build_citation } from '../contributors/build-citation'
   import PrintEntry from './print/PrintEntry.svelte'
   import PrintFieldCheckboxes from './print/PrintFieldCheckboxes.svelte'
   import { defaultPrintFields } from './print/printFields'
   import { truncateAuthors } from './print/truncateAuthors'
-  import { page } from '$app/state'
-  import type { QueryParams } from '$lib/search/types'
 
   interface Props {
-    search_params: QueryParamStore<QueryParams>;
-    entries?: EntryData[];
-    dictionary: Tables<'dictionaries'>;
-    can_edit?: boolean;
+    search_params: QueryParamStore<QueryParams>
+    entries?: EntryData[]
+    dictionary: Tables<'dictionaries'>
+    can_edit?: boolean
   }
 
   let {
     search_params,
     entries = [],
     dictionary,
-    can_edit = false
-  }: Props = $props();
+    can_edit = false,
+  }: Props = $props()
 
   const print_per_page = 100
   let partners: PartnerWithPhoto[] = $state([])

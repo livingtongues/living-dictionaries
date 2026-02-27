@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
-  import CitationComponent from './Citation.svelte'
-  import Partners from './Partners.svelte'
+  import { page } from '$app/state'
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { page } from '$app/state'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
+  import CitationComponent from './Citation.svelte'
+  import Partners from './Partners.svelte'
 
-  let { data } = $props();
+  let { data } = $props()
   let { dictionary, is_manager, is_contributor, admin, editor_edits, dictionary_info, dictionary_editors } = $derived(data)
 
   let managers = $derived($dictionary_editors.filter(editor => editor.role === 'manager'))
@@ -16,14 +16,14 @@
   let invites: Tables<'invites'>[] = $state([])
   $effect(() => {
     data.invites_promise.then(_invites => invites = _invites)
-  });
+  })
   let manager_invites = $derived(invites.filter(invite => invite.role === 'manager'))
   let contributor_invites = $derived(invites.filter(invite => invite.role === 'contributor'))
 
   let partners: PartnerWithPhoto[] = $state([])
   $effect(() => {
     data.partners_promise.then(_partners => partners = _partners)
-  });
+  })
 </script>
 
 <p class="mb-2">
@@ -54,8 +54,8 @@
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
           {#snippet prefix()}
-                    <i >{page.data.t('contributors.invitation_sent')}:</i>
-                  {/snippet}
+            <i>{page.data.t('contributors.invitation_sent')}:</i>
+          {/snippet}
         </ContributorInvitationStatus>
       </div>
     {/each}
@@ -102,8 +102,8 @@
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
           {#snippet prefix()}
-                    <i >{page.data.t('contributors.invitation_sent')}:</i>
-                  {/snippet}
+            <i>{page.data.t('contributors.invitation_sent')}:</i>
+          {/snippet}
         </ContributorInvitationStatus>
       </div>
     {/each}
@@ -112,9 +112,9 @@
       {page.data.t('contributors.invite_contributors')}
     </Button>
   {:else if !$is_contributor}
-    <ShowHide  >
+    <ShowHide>
       {#snippet children({ show, toggle })}
-                <Button onclick={toggle} form="filled">
+        <Button onclick={toggle} form="filled">
           {page.data.t('contributors.request_access')}
         </Button>
         {#if show}
@@ -122,8 +122,8 @@
             <Contact subject="request_access" on_close={toggle} />
           {/await}
         {/if}
-                    {/snippet}
-            </ShowHide>
+      {/snippet}
+    </ShowHide>
   {/if}
 </div>
 

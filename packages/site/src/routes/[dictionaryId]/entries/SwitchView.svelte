@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { page } from '$app/state'
   import type { View } from '$lib/search/types'
+  import { page } from '$app/state'
 
   interface Props {
-    view: View;
-    can_print?: boolean;
+    view: View
+    can_print?: boolean
   }
 
-  let { view = $bindable(), can_print = false }: Props = $props();
+  let { view = $bindable(), can_print = false }: Props = $props()
 </script>
 
 <div class="flex text-gray-600 font-medium text-sm">

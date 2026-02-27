@@ -4,16 +4,16 @@
   import { page } from '$app/state'
 
   interface Props {
-    upload_status: Readable<ImageUploadStatus>;
-    on_finish: () => void;
+    upload_status: Readable<ImageUploadStatus>
+    on_finish: () => void
   }
 
-  let { upload_status, on_finish }: Props = $props();
+  let { upload_status, on_finish }: Props = $props()
   $effect(() => {
     if ($upload_status.storage_path) {
       on_finish()
     }
-  });
+  })
 </script>
 
 <div

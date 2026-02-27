@@ -1,6 +1,6 @@
 import type { LayoutServerLoad } from './$types'
-import { findSupportedLocaleFromAcceptedLanguages } from '$lib/i18n/locales'
 import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from '$lib/constants'
+import { findSupportedLocaleFromAcceptedLanguages } from '$lib/i18n/locales'
 
 export const load: LayoutServerLoad = ({ cookies, request }) => {
   const chosenLocale = cookies.get('locale')

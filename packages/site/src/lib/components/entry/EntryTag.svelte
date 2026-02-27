@@ -1,23 +1,23 @@
 <script lang="ts">
-  import type { EntryData } from '@living-dictionaries/types'
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
-  import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
+  import type { EntryData } from '@living-dictionaries/types'
   import { page } from '$app/state'
+  import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
   import { should_include_tag } from '$lib/helpers/tag-visibility'
 
   interface Props {
-    tags: EntryData['tags'];
-    entry_id: string;
-    can_edit?: boolean;
-    showPlus?: boolean;
+    tags: EntryData['tags']
+    entry_id: string
+    can_edit?: boolean
+    showPlus?: boolean
   }
 
   let {
     tags,
     entry_id,
     can_edit = false,
-    showPlus = true
-  }: Props = $props();
+    showPlus = true,
+  }: Props = $props()
 
   let { tags: dictionary_tags, dbOperations, admin } = $derived(page.data)
   let tag_ids = $derived(tags.map(tag => tag.id))
@@ -58,6 +58,6 @@
   placeholder={page.data.t('entry_field.custom_tags')}
   {on_update}>
   {#snippet heading()}
-    <span >{page.data.t('entry_field.custom_tags')}</span>
+    <span>{page.data.t('entry_field.custom_tags')}</span>
   {/snippet}
 </ModalEditableArray>

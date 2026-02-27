@@ -1,18 +1,15 @@
 <script lang="ts">
-  import SvgGlobe from './SvgGlobe.svelte';
-
-
-
+  import SvgGlobe from './SvgGlobe.svelte'
 
   interface Props {
-    title: string;
-    description: string;
-    dictionaryName: string;
-    lat?: number;
-    lng?: number;
-    height: number;
-    width: number;
-    gcsPath?: string;
+    title: string
+    description: string
+    dictionaryName: string
+    lat?: number
+    lng?: number
+    height: number
+    width: number
+    gcsPath?: string
   }
 
   let {
@@ -23,15 +20,15 @@
     lng = undefined,
     height,
     width,
-    gcsPath = undefined
-  }: Props = $props();
-  let src = $derived(gcsPath ? `https://lh3.googleusercontent.com/${gcsPath}=w${width}-h${height}-c` : null);
+    gcsPath = undefined,
+  }: Props = $props()
+  let src = $derived(gcsPath ? `https://lh3.googleusercontent.com/${gcsPath}=w${width}-h${height}-c` : null)
 
-  const MAX_TITLE_LENGTH = 90;
-  const xPADDING = 48;
-  const yPADDING = 36;
+  const MAX_TITLE_LENGTH = 90
+  const xPADDING = 48
+  const yPADDING = 36
 
-  let globeSize = $derived(src ? 200 : 400);
+  let globeSize = $derived(src ? 200 : 400)
 </script>
 
 <!-- https://cssgradient.io/ is helpful with making gradients -->
@@ -66,8 +63,8 @@
     {/if}
     {#if title}
       <div
-        style="text-shadow: 2px 2px 3px hsla(0, 0%, 0%, 40%); font-size: {(title.length >
-          MAX_TITLE_LENGTH / 2
+        style="text-shadow: 2px 2px 3px hsla(0, 0%, 0%, 40%); font-size: {(title.length
+          > MAX_TITLE_LENGTH / 2
           ? 3
           : 4) * 20}px;">
         {title.slice(0, MAX_TITLE_LENGTH)}{title.length > MAX_TITLE_LENGTH ? '...' : ''}
@@ -75,14 +72,14 @@
     {/if}
     {#if description}
       <div
-        style="overflow: hidden; flex-grow: 1; font-size: 30px; margin-top: 10px; margin-bottom: 20px; padding-right: {xPADDING +
-          globeSize}px;">
+        style="overflow: hidden; flex-grow: 1; font-size: 30px; margin-top: 10px; margin-bottom: 20px; padding-right: {xPADDING
+        + globeSize}px;">
         {description}
       </div>
     {/if}
     <div
-      style="display: flex; align-items: center; font-size: 40px; padding-right: {xPADDING +
-        globeSize}px;">
+      style="display: flex; align-items: center; font-size: 40px; padding-right: {xPADDING
+      + globeSize}px;">
       <img
         style="height: 40px; width: 40px; margin-right: 10px;"
         alt="Living Dictionaries"

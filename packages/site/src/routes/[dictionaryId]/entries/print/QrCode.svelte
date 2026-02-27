@@ -2,11 +2,11 @@
   import { QrCode, QrCodeEcc } from './qrcodegen'
 
   interface Props {
-    value: string;
-    pixelsPerModule?: number;
-    errorCorrection?: 'low' | 'medium' | 'quartile' | 'high';
-    bgColor?: string;
-    fgColor?: string;
+    value: string
+    pixelsPerModule?: number
+    errorCorrection?: 'low' | 'medium' | 'quartile' | 'high'
+    bgColor?: string
+    fgColor?: string
   }
 
   let {
@@ -14,8 +14,8 @@
     pixelsPerModule = 4,
     errorCorrection = 'high',
     bgColor = '#FFFFFF',
-    fgColor = '#000000'
-  }: Props = $props();
+    fgColor = '#000000',
+  }: Props = $props()
 
   let ecl = $derived((() => {
     if (errorCorrection === 'high') return QrCodeEcc.HIGH

@@ -1,15 +1,15 @@
 <script lang="ts">
+  import type { QueryParams } from '$lib/search/types'
   import type { QueryParamStore } from '$lib/svelte-pieces'
   import { page } from '$app/state'
-  import type { QueryParams } from '$lib/search/types'
 
   interface Props {
-    on_show_filter_menu: () => void;
-    search_params: QueryParamStore<QueryParams>;
-    index_ready?: boolean;
+    on_show_filter_menu: () => void
+    search_params: QueryParamStore<QueryParams>
+    index_ready?: boolean
   }
 
-  let { on_show_filter_menu, search_params, index_ready = false }: Props = $props();
+  let { on_show_filter_menu, search_params, index_ready = false }: Props = $props()
 </script>
 
 <div class="flex flex-grow rounded-md shadow-sm">

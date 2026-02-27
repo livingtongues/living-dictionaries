@@ -1,9 +1,9 @@
-import { json, error as kit_error } from '@sveltejs/kit'
 import type { TablesInsert } from '@living-dictionaries/types'
 import type { RequestHandler } from './$types'
+import { send_delete_dictionary_admin_notice } from '$api/email/delete_dictionary'
 import { ResponseCodes } from '$lib/constants'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
-import { send_delete_dictionary_admin_notice } from '$api/email/delete_dictionary'
+import { json, error as kit_error } from '@sveltejs/kit'
 
 export interface DeleteDictionaryRequestBody {
   dictionary_id: string

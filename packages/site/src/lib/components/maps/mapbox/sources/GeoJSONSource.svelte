@@ -1,24 +1,23 @@
 <script lang="ts">
-  import { getContext, onDestroy, setContext } from 'svelte'
   import type { GeoJSONSource, GeoJSONSourceOptions, GeoJSONSourceRaw } from 'mapbox-gl'
-  import { type MapKeyContext, type SourceKeyContext, mapKey, sourceKey } from '../context'
+  import { getContext, onDestroy, setContext } from 'svelte'
   import { randomId } from '../../utils/randomId'
+  import { mapKey, type MapKeyContext, sourceKey, type SourceKeyContext } from '../context'
 
-  
   interface Props {
     // Cf https://docs.mapbox.com/mapbox-gl-js/style-spec/sources/#geojson
-    id?: any;
-    data: GeoJSONSourceOptions['data']; // URL or inline data
-    options?: Partial<GeoJSONSourceRaw>;
-    children?: import('svelte').Snippet<[any]>;
+    id?: any
+    data: GeoJSONSourceOptions['data'] // URL or inline data
+    options?: Partial<GeoJSONSourceRaw>
+    children?: import('svelte').Snippet<[any]>
   }
 
   let {
     id = randomId(),
     data,
     options = {},
-    children
-  }: Props = $props();
+    children,
+  }: Props = $props()
 
   const { getMap } = getContext<MapKeyContext>(mapKey)
   const map = getMap()
@@ -60,7 +59,7 @@
       // Listen to "styledata" event to re-create the source if the style changes.
       map.on('styledata', handleStyledata)
     }
-  });
+  })
 
   onDestroy(() => {
     map.off('styledata', handleStyledata)
@@ -76,4 +75,4 @@
   })
 </script>
 
-{@render children?.({ source, })}
+{@render children?.({ source })}

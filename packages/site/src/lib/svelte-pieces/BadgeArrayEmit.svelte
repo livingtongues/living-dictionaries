@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte'
-  import Button from './Button.svelte'
   import Badge from './Badge.svelte'
+  import Button from './Button.svelte'
   import DetectUrl from './DetectUrl.svelte'
 
   interface Props {

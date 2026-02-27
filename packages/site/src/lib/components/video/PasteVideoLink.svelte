@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { Button } from '$lib/svelte-pieces'
   import type { HostedVideo } from '@living-dictionaries/types'
-  import { parse_hosted_video_url } from './parse-hosted-video-url'
   import { page } from '$app/state'
+  import { Button } from '$lib/svelte-pieces'
+  import { parse_hosted_video_url } from './parse-hosted-video-url'
 
   let url: string = $state()
   interface Props {
-    on_pasted_valid_url: (hosted_video: HostedVideo) => void;
+    on_pasted_valid_url: (hosted_video: HostedVideo) => void
   }
 
-  let { on_pasted_valid_url }: Props = $props();
+  let { on_pasted_valid_url }: Props = $props()
 
   function handle() {
     const video = parse_hosted_video_url(url)

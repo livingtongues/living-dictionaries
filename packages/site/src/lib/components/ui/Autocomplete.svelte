@@ -1,11 +1,11 @@
 <script lang="ts">
   interface Props {
-    items?: any[];
-    placeholder?: string;
-    keyField?: string;
-    labelField?: string;
-    value?: string;
-    on_selected_result?: (result: { value: string }) => void;
+    items?: any[]
+    placeholder?: string
+    keyField?: string
+    labelField?: string
+    value?: string
+    on_selected_result?: (result: { value: string }) => void
   }
 
   let {
@@ -14,47 +14,44 @@
     keyField = 'key',
     labelField = 'name',
     value = $bindable(''),
-    on_selected_result
-  }: Props = $props();
+    on_selected_result,
+  }: Props = $props()
 
-  let search = $state('');
-  let active = $state(false);
-  let results: { value: string; boldedLabel: string; label: string }[] = $state([]);
-
+  let search = $state('')
+  let active = $state(false)
+  let results: { value: string, boldedLabel: string, label: string }[] = $state([])
 
   const regExpEscape = (s) => {
-    return s.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
-  };
-
-
+    return s.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&')
+  }
 
   $effect(() => {
     const matchingItems = items.filter(
-      (item) => search.length && JSON.stringify(item).toLowerCase().includes(search.toLowerCase())
-    );
+      item => search.length && JSON.stringify(item).toLowerCase().includes(search.toLowerCase()),
+    )
     results = matchingItems.map((item) => {
       const boldedLabel = item[labelField].replace(
-        RegExp(regExpEscape(search.trim()), 'i'),
-        '<span class=\'font-semibold text-gray-900\'>$&</span>'
-      );
-      return { value: item[keyField], boldedLabel, label: item[labelField] };
-    });
-  });
+        new RegExp(regExpEscape(search.trim()), 'i'),
+        '<span class=\'font-semibold text-gray-900\'>$&</span>',
+      )
+      return { value: item[keyField], boldedLabel, label: item[labelField] }
+    })
+  })
   $effect(() => {
     if (results.length === 1)
-      [{value}] = results;
+      [{ value }] = results
     else
-      value = '';
-  });
+      value = ''
+  })
   $effect(() => {
     if (value.length)
-      on_selected_result?.({ value });
-  });
+      on_selected_result?.({ value })
+  })
 </script>
 
 <svelte:window onclick={() => (active = false)} />
 
-<div onclick={(e) => e.stopPropagation()} class="relative w-56">
+<div onclick={e => e.stopPropagation()} class="relative w-56">
   <input
     type="search"
     {placeholder}
@@ -70,8 +67,8 @@
       <li
         onclick={() => {
           search = result.label;
-          ({value} = result);
-          active = false;
+          ({ value } = result)
+          active = false
         }}
         class="text-gray-600 px-2 py-1 hover:bg-gray-200 cursor-pointer">
         {@html result.boldedLabel}

@@ -3,12 +3,12 @@
   import GalleryEntry from './gallery/GalleryEntry.svelte'
 
   interface Props {
-    entries?: EntryData[];
-    dictionary: Tables<'dictionaries'>;
-    can_edit?: boolean;
+    entries?: EntryData[]
+    dictionary: Tables<'dictionaries'>
+    can_edit?: boolean
   }
 
-  let { entries = [], dictionary, can_edit = false }: Props = $props();
+  let { entries = [], dictionary, can_edit = false }: Props = $props()
 </script>
 
 <div class="gallery">

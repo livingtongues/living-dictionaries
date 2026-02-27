@@ -4,7 +4,7 @@
 
   let { can_edit } = $derived(page.data)
 
-  let { column, row } = $props();
+  let { column, row } = $props()
 </script>
 
 {#if browser}

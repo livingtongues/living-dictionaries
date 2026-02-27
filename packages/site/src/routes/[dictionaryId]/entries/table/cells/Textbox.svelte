@@ -1,16 +1,16 @@
 <script lang="ts">
   import type { EntryFieldValue } from '@living-dictionaries/types'
+  import { page } from '$app/state'
   import { ShowHide } from '$lib/svelte-pieces'
   import sanitize from 'xss'
-  import { page } from '$app/state'
 
   interface Props {
-    value: string;
-    htmlValue?: string;
-    field: EntryFieldValue;
-    bcp?: string;
-    display: string;
-    on_update: (new_value: string) => void;
+    value: string
+    htmlValue?: string
+    field: EntryFieldValue
+    bcp?: string
+    display: string
+    on_update: (new_value: string) => void
   }
 
   let {
@@ -19,14 +19,14 @@
     field,
     bcp = undefined,
     display,
-    on_update
-  }: Props = $props();
+    on_update,
+  }: Props = $props()
   let { can_edit } = $derived(page.data)
 
   let sanitizedHtml = $derived(sanitize(htmlValue || value) || '')
 </script>
 
-<ShowHide   >
+<ShowHide>
   {#snippet children({ show, toggle, set })}
     <div
       class:cursor-pointer={can_edit}

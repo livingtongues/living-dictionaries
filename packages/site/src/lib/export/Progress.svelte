@@ -1,21 +1,21 @@
 <script lang="ts">
-  import { page } from '$app/state';
-  import { tweened } from 'svelte/motion';
-  import { cubicOut } from 'svelte/easing';
+  import { page } from '$app/state'
+  import { cubicOut } from 'svelte/easing'
+  import { tweened } from 'svelte/motion'
 
   interface Props {
-    progress?: number;
+    progress?: number
   }
 
-  let { progress = 0 }: Props = $props();
+  let { progress = 0 }: Props = $props()
   const tweenedProgress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
-  });
+  })
   $effect(() => {
-    tweenedProgress.set(progress);
-  });
-  let percentage = $derived(Math.floor($tweenedProgress * 100));
+    tweenedProgress.set(progress)
+  })
+  let percentage = $derived(Math.floor($tweenedProgress * 100))
 </script>
 
 <div class="relative pt-1">

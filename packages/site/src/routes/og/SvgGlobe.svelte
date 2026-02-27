@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { geoPath, geoOrthographic, geoGraticule10 } from 'd3-geo';
-  import { feature } from 'topojson-client';
-  import world from './land-110m.json';
+  import { geoGraticule10, geoOrthographic, geoPath } from 'd3-geo'
+  import { feature } from 'topojson-client'
+  import world from './land-110m.json'
 
   interface Props {
-    fill?: string; // '#999';
-    showGraticule?: boolean;
-    label?: string;
-    rotation?: number;
-    placeLongitude?: number;
-    placeLatitude?: number;
-    size?: number;
+    fill?: string // '#999';
+    showGraticule?: boolean
+    label?: string
+    rotation?: number
+    placeLongitude?: number
+    placeLatitude?: number
+    size?: number
   }
 
   let {
@@ -20,25 +20,25 @@
     rotation = 0,
     placeLongitude = 10,
     placeLatitude = 30,
-    size = 400
-  }: Props = $props();
-  let width = $derived(size);
-  let height = $derived(size);
+    size = 400,
+  }: Props = $props()
+  let width = $derived(size)
+  let height = $derived(size)
 
-  const MIN_LAT = -5;
-  const MAX_LAT = 30;
+  const MIN_LAT = -5
+  const MAX_LAT = 30
   function clamp(num: number, min: number, max: number) {
-    return num < min ? min : num > max ? max : num;
+    return num < min ? min : num > max ? max : num
   }
-  let latitude = $derived(clamp(placeLatitude, MIN_LAT, MAX_LAT));
-  let longitude = $derived(placeLongitude);
+  let latitude = $derived(clamp(placeLatitude, MIN_LAT, MAX_LAT))
+  let longitude = $derived(placeLongitude)
 
-  let land = $derived(feature(world, world.objects.land));
+  let land = $derived(feature(world, world.objects.land))
 
   let projection = $derived(geoOrthographic()
     .fitSize([width, height - size * 0.06], land)
-    .rotate([-longitude, -latitude, rotation]));
-  let path = $derived(geoPath(projection));
+    .rotate([-longitude, -latitude, rotation]))
+  let path = $derived(geoPath(projection))
 </script>
 
 <svg {width} {height} viewBox="0 0 {width} {height}">

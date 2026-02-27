@@ -1,22 +1,22 @@
 <script lang="ts">
+  import type { createPersistedStore } from '$lib/svelte-pieces'
+
+  import { page } from '$app/state'
   import { type EntryData, type IPrintFields, StandardPrintFields } from '@living-dictionaries/types'
 
-  import type { createPersistedStore } from '$lib/svelte-pieces'
-  import { page } from '$app/state'
-
   interface Props {
-    entries: EntryData[];
-    preferredPrintFields: ReturnType<typeof createPersistedStore<IPrintFields>>;
-    showLabels: ReturnType<typeof createPersistedStore<boolean>>;
-    showQrCode: ReturnType<typeof createPersistedStore<boolean>>;
+    entries: EntryData[]
+    preferredPrintFields: ReturnType<typeof createPersistedStore<IPrintFields>>
+    showLabels: ReturnType<typeof createPersistedStore<boolean>>
+    showQrCode: ReturnType<typeof createPersistedStore<boolean>>
   }
 
   let {
     entries,
     preferredPrintFields,
     showLabels,
-    showQrCode
-  }: Props = $props();
+    showQrCode,
+  }: Props = $props()
 
   let fieldsThatExist = $derived((Object.keys($preferredPrintFields) as (keyof IPrintFields)[]).filter((field) => {
     if (field === 'gloss') return true

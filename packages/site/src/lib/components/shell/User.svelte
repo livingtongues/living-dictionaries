@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { Button, Menu, ShowHide } from '$lib/svelte-pieces'
-  import { onMount } from 'svelte'
-  import { display_one_tap_popover, sign_out } from '$lib/supabase/auth'
+  import { api_update_dev_admin_role } from '$api/db/update-dev-admin-role/_call'
+  import { dev } from '$app/environment'
+  import { invalidateAll } from '$app/navigation'
   import { page } from '$app/state'
   import { mode } from '$lib/supabase'
-  import { api_update_dev_admin_role } from '$api/db/update-dev-admin-role/_call'
-  import { invalidateAll } from '$app/navigation'
-  import { dev } from '$app/environment'
+  import { display_one_tap_popover, sign_out } from '$lib/supabase/auth'
+  import { Button, Menu, ShowHide } from '$lib/svelte-pieces'
+  import { onMount } from 'svelte'
 
   let { user, admin } = $derived(page.data)
   let show_menu = $state(false)
@@ -86,9 +86,9 @@
     {/if}
   </div>
 {:else}
-  <ShowHide  >
+  <ShowHide>
     {#snippet children({ show, toggle })}
-        <Button form="text" onclick={toggle}>
+      <Button form="text" onclick={toggle}>
         <i class="far fa-sign-in"></i>
         <span class="ml-1 hidden sm:inline">
           {page.data.t('header.login')}
@@ -99,6 +99,6 @@
           <AuthModal on_close={toggle} />
         {/await}
       {/if}
-          {/snippet}
-    </ShowHide>
+    {/snippet}
+  </ShowHide>
 {/if}

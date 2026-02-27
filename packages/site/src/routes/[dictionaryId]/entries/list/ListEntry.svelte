@@ -1,21 +1,21 @@
 <script lang="ts">
+  import type { DbOperations } from '$lib/dbOperations'
   import type { EntryData, Tables } from '@living-dictionaries/types'
+  import { page } from '$app/state'
+  import Image from '$lib/components/image/Image.svelte'
+  import { order_glosses } from '$lib/helpers/glosses'
+  import { minutes_ago_in_ms } from '$lib/helpers/time'
   import { ShowHide } from '$lib/svelte-pieces'
   import sanitize from 'xss'
   import Audio from '../components/Audio.svelte'
   import Video from '../components/Video.svelte'
-  import Image from '$lib/components/image/Image.svelte'
-  import { order_glosses } from '$lib/helpers/glosses'
-  import { minutes_ago_in_ms } from '$lib/helpers/time'
-  import { page } from '$app/state'
-  import type { DbOperations } from '$lib/dbOperations'
 
   interface Props {
-    entry: EntryData;
-    dictionary: Tables<'dictionaries'>;
-    can_edit?: boolean;
-    dbOperations: DbOperations;
-    on_click?: (e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => void;
+    entry: EntryData
+    dictionary: Tables<'dictionaries'>
+    can_edit?: boolean
+    dbOperations: DbOperations
+    on_click?: (e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => void
   }
 
   let {
@@ -23,8 +23,8 @@
     dictionary,
     can_edit = false,
     dbOperations,
-    on_click = undefined
-  }: Props = $props();
+    on_click = undefined,
+  }: Props = $props()
 
   let glosses = $derived(order_glosses({
     glosses: entry.senses?.[0]?.glosses,
@@ -140,9 +140,9 @@
         video={first_video}
         {can_edit} />
     {:else if can_edit}
-      <ShowHide  >
+      <ShowHide>
         {#snippet children({ show, toggle })}
-                    <button
+          <button
             type="button"
             class="media-block bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
               justify-center cursor-pointer p-2 text-lg"
@@ -154,15 +154,15 @@
               <AddVideo {entry} on_close={toggle} />
             {/await}
           {/if}
-                          {/snippet}
-                </ShowHide>
+        {/snippet}
+      </ShowHide>
     {/if}
   {/if}
   <!-- {#each sense_photos as photo (photo.id)} -->
 
-  <ShowHide  >
+  <ShowHide>
     {#snippet children({ show, toggle })}
-        {#if first_sense.photos?.length}
+      {#if first_sense.photos?.length}
         {@const [first_photo] = first_sense.photos}
         <div class="media-block bg-gray-300 relative">
           <Image
@@ -197,8 +197,8 @@
           <EditImage on_close={toggle} sense_id={first_sense.id} />
         {/await}
       {/if}
-          {/snippet}
-    </ShowHide>
+    {/snippet}
+  </ShowHide>
 </div>
 
 <style>

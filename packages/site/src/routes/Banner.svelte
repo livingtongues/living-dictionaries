@@ -1,9 +1,9 @@
 <script lang='ts'>
-  import { Button, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/state'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
 </script>
 
-<ShowHide  >
+<ShowHide>
   {#snippet children({ show: hide, toggle })}
     {#if !hide}
       <div class='bg-amber-400 fixed bottom-3 left-3 right-3 rounded z-99999 p-2 flex'>

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { page } from '$app/state'
-  import Header from '$lib/components/shell/Header.svelte'
-  import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import Footer from '$lib/components/shell/Footer.svelte'
+  import Header from '$lib/components/shell/Header.svelte'
 </script>
 
 <Header>

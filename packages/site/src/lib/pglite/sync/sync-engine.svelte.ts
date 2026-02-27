@@ -677,5 +677,4 @@ export class Sync {
 
     return { count: local_deletes.length, errors }
   }
-
 }

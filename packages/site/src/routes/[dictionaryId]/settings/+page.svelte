@@ -1,19 +1,19 @@
 <script lang="ts">
+  import { goto } from '$app/navigation'
+  import { page } from '$app/state'
+  import AddImage from '$lib/components/image/AddImage.svelte'
+  import Image from '$lib/components/image/Image.svelte'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
+  import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
+  import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte' // only used here - perhaps colocate
+  import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte' // only used here - perhaps colocate
+  import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
+  import { glossingLanguages } from '$lib/glosses/glossing-languages'
   import { Button, JSON, ShowHide } from '$lib/svelte-pieces'
   import EditString from '../EditString.svelte'
-  import { page } from '$app/state'
-  import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
-  import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
-  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
-  import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte' // only used here - perhaps colocate
-  import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte' // only used here - perhaps colocate
-  import { glossingLanguages } from '$lib/glosses/glossing-languages'
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import Image from '$lib/components/image/Image.svelte'
-  import AddImage from '$lib/components/image/AddImage.svelte'
-  import { goto } from '$app/navigation'
 
-  let { data } = $props();
+  let { data } = $props()
   let { dictionary, admin, is_manager, updateDictionary, remove_gloss_language, add_featured_image, about_is_too_short } = $derived(data)
 
 </script>
@@ -127,9 +127,9 @@
 
   {#if $is_manager}
     <div>
-      <ShowHide  >
+      <ShowHide>
         {#snippet children({ show, toggle })}
-                <Button onclick={toggle} class="mb-5" color="red">
+          <Button onclick={toggle} class="mb-5" color="red">
             {page.data.t('misc.delete')}:
             {page.data.t('header.contact_us')}
           </Button>
@@ -138,8 +138,8 @@
               <Contact subject="delete_dictionary" on_close={toggle} />
             {/await}
           {/if}
-                      {/snippet}
-            </ShowHide>
+        {/snippet}
+      </ShowHide>
     </div>
   {/if}
 

@@ -1,19 +1,19 @@
 <script lang="ts">
-  import JSZip from 'jszip'
   import type { Tables } from '@living-dictionaries/types'
-  import { onDestroy, onMount } from 'svelte'
   import type { EntryForCSV } from './prepareEntriesForCsv'
   import { objectsToCsvByHeaders } from '$lib/export/csv'
   import { downloadBlob } from '$lib/export/downloadBlob'
+  import JSZip from 'jszip'
+  import { onDestroy, onMount } from 'svelte'
 
   interface Props {
-    dictionary: Tables<'dictionaries'>;
-    entryHeaders: EntryForCSV;
-    finalizedEntries: EntryForCSV[];
-    entriesWithImages?: EntryForCSV[];
-    entriesWithAudio?: EntryForCSV[];
-    on_completed?: () => void;
-    children?: import('svelte').Snippet<[any]>;
+    dictionary: Tables<'dictionaries'>
+    entryHeaders: EntryForCSV
+    finalizedEntries: EntryForCSV[]
+    entriesWithImages?: EntryForCSV[]
+    entriesWithAudio?: EntryForCSV[]
+    on_completed?: () => void
+    children?: import('svelte').Snippet<[any]>
   }
 
   let {
@@ -23,8 +23,8 @@
     entriesWithImages = [],
     entriesWithAudio = [],
     on_completed,
-    children
-  }: Props = $props();
+    children,
+  }: Props = $props()
 
   let fetched = $state(0)
   let progress = $derived(fetched / (entriesWithImages.length + entriesWithAudio.length))
@@ -94,7 +94,7 @@
 </script>
 
 <div>
-  {@render children?.({ progress, })}
+  {@render children?.({ progress })}
 </div>
 
 {#if errors.length}

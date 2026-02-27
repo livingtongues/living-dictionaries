@@ -1,21 +1,21 @@
 <script lang="ts">
   import type { Tables } from '@living-dictionaries/types'
-  import EntryField from './EntryField.svelte'
   import { page } from '$app/state'
+  import EntryField from './EntryField.svelte'
 
   interface Props {
-    glossingLanguages: string[];
-    sentence: Partial<Tables<'sentences'>>;
-    can_edit?: boolean;
-    sense_id: string;
+    glossingLanguages: string[]
+    sentence: Partial<Tables<'sentences'>>
+    can_edit?: boolean
+    sense_id: string
   }
 
   let {
     glossingLanguages,
     sentence,
     can_edit = false,
-    sense_id
-  }: Props = $props();
+    sense_id,
+  }: Props = $props()
 
   let { dbOperations } = $derived(page.data)
 

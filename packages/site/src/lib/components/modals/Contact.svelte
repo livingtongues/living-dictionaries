@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { Button, Form, Modal } from '$lib/svelte-pieces'
-  import { page } from '$app/state'
-  import { goto } from '$app/navigation'
-  import type { SupportRequestBody } from '$api/email/support/+server'
   import type { LearningMaterialsRequestBody } from '$api/email/learning_materials/+server'
-  import enBase from '$lib/i18n/locales/en.json'
-  import { post_request } from '$lib/helpers/get-post-requests'
+  import type { SupportRequestBody } from '$api/email/support/+server'
   import { api_request_access } from '$api/email/request_access/_call'
+  import { goto } from '$app/navigation'
+  import { page } from '$app/state'
+  import { post_request } from '$lib/helpers/get-post-requests'
+  import enBase from '$lib/i18n/locales/en.json'
+  import { Button, Form, Modal } from '$lib/svelte-pieces'
 
   interface Props {
-    subject?: Subjects;
-    on_close: () => void;
+    subject?: Subjects
+    on_close: () => void
   }
 
-  let { subject = $bindable(undefined), on_close }: Props = $props();
+  let { subject = $bindable(undefined), on_close }: Props = $props()
 
   function warn_if_about_too_short() {
     if (about_is_too_short()) {
@@ -90,7 +90,7 @@
   let { dictionary, user, about_is_too_short } = $derived(page.data)
   $effect(() => {
     if (dictionary && subject === 'public_dictionary') warn_if_about_too_short()
-  });
+  })
   let filteredSubjects = $derived(typedSubjects.filter((subjects) => {
     if (!dictionary && subjects[0] === 'public_dictionary') {
       return false
@@ -101,7 +101,7 @@
 
 <Modal {on_close} class="bg-gray-100">
   {#snippet heading()}
-    <span >
+    <span>
       <i class="far fa-question-circle"></i>
     </span>
   {/snippet}
@@ -135,9 +135,9 @@
     </h2>
 
     {#if !status}
-      <Form  onsubmit={send}>
+      <Form onsubmit={send}>
         {#snippet children({ loading })}
-                <div class="my-2">
+          <div class="my-2">
             <select class="w-full" bind:value={subject}>
               <option disabled selected value="">{page.data.t('contact.select_topic')}:</option>
               {#each filteredSubjects as [key, value]}
@@ -183,8 +183,8 @@
               {page.data.t('misc.cancel')}
             </Button>
           </div>
-                      {/snippet}
-            </Form>
+        {/snippet}
+      </Form>
     {:else if status === 'success'}
       <h4 class="text-lg mt-3 mb-4">
         <i class="fas fa-check"></i>

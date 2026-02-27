@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fly } from 'svelte/transition'
-  import { portal } from './portal'
   import { clickoutside } from './clickoutside'
+  import { portal } from './portal'
 
   interface Props {
     /** `body` or `#direction` for example */

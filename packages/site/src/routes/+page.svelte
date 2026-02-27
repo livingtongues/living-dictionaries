@@ -118,7 +118,7 @@
                 {is_moving}
                 dictionaries={public_dictionaries}
                 selected_dictionary_id={selectedDictionaryId}
-                on_select={(id) => selectedDictionaryId = id} />
+                on_select={id => selectedDictionaryId = id} />
               {#if $my_dictionaries.length}
                 <GlobeDictionaryPoints
                   {projection}
@@ -126,7 +126,7 @@
                   dictionaries={$my_dictionaries}
                   type="personal"
                   selected_dictionary_id={selectedDictionaryId}
-                  on_select={(id) => selectedDictionaryId = id} />
+                  on_select={id => selectedDictionaryId = id} />
               {/if}
               {#if $admin && show_private_dictionaries && private_dictionaries.length}
                 <GlobeDictionaryPoints
@@ -135,7 +135,7 @@
                   dictionaries={private_dictionaries}
                   type="private"
                   selected_dictionary_id={selectedDictionaryId}
-                  on_select={(id) => selectedDictionaryId = id} />
+                  on_select={id => selectedDictionaryId = id} />
               {/if}
               <Zoomer
                 {context}

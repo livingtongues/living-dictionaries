@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { Button, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/state'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
 
-  let { data } = $props();
+  let { data } = $props()
   let { dictionary } = $derived(data)
 </script>
 
@@ -29,9 +29,9 @@
     <Button form="filled" type="button" target="_blank" href="https://docs.google.com/spreadsheets/d/1Bqy1q_XZzlZLDM_glTxQ9gw0Pb5JEUssqQFtINxbwzY/edit#gid=1392642957">
       {page.data.t('import_page.template_link')}
     </Button>
-    <ShowHide  >
+    <ShowHide>
       {#snippet children({ show, toggle })}
-            <Button onclick={toggle}>
+        <Button onclick={toggle}>
           <span class="lg:inline">
             <i class="far fa-comment"></i>
           </span>
@@ -44,8 +44,8 @@
             <Contact subject="import_data" on_close={toggle} />
           {/await}
         {/if}
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
   </div>
   <!-- <p class="m-10 text-xl font-semibold">{page.data.t('import_page.no_imports')}</p> -->
 </div>
