@@ -18,6 +18,7 @@
     on_update?: (detail: { lat: number, lng: number }) => void
     on_remove?: () => void
     on_close: () => void
+    children?: import('svelte').Snippet
   }
 
   let {
@@ -28,6 +29,7 @@
     on_update = undefined,
     on_remove = undefined,
     on_close,
+    children,
   }: Props = $props()
 
   let centerLng = lng
@@ -116,7 +118,7 @@
         lat={centerLat}
         {zoom}
         on_click={lngLat => ({ lng, lat } = setMarker(lngLat.lng, lngLat.lat))}>
-        <slot />
+        {#if children}{@render children()}{/if}
         <NavigationControl />
         <Geocoder
           options={{ marker: false }}

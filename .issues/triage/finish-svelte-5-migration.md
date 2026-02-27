@@ -95,8 +95,3 @@ These errors will resolve once the above files are migrated:
 - **`require-await`** (2 errors) - RecordAudio.svelte, Image2.svelte
 - **Misc** (1 each) - `regexp/no-unused-capturing-group`, `one-var`, `unicorn/no-new-array`, `node/prefer-global/buffer`, `array-callback-return`
 
-## Cleanup
-
-- [ ] Remove `.bak` files:
-  - `routes/api/email/components/markdown/MarkdownToEmailHtml.bak`
-  - `routes/api/email/components/markdown/RenderToken.bak`

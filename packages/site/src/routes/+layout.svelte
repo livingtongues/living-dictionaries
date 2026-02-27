@@ -1,4 +1,3 @@
-<!-- @migration task: review uses of `navigating` -->
 <script lang="ts">
   import { browser } from '$app/environment'
   import { navigating, page } from '$app/state'
@@ -10,9 +9,6 @@
   }
 
   let { children }: Props = $props()
-
-// export let data
-  // $: ({ user } = data)
 </script>
 
 {#if browser}

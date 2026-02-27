@@ -7,14 +7,16 @@
   import ColumnTitle from './ColumnTitle.svelte'
   import { setUpColumns } from './setUpColumns'
 
-  export let entries: EntryData[] = []
-  export let can_edit = false
-  export let dictionary: Tables<'dictionaries'>
-  export let preferred_table_columns: IColumn[]
-  export let dbOperations: DbOperations
+  const { entries = [], can_edit = false, dictionary, preferred_table_columns, dbOperations }: {
+    entries?: EntryData[]
+    can_edit?: boolean
+    dictionary: Tables<'dictionaries'>
+    preferred_table_columns: IColumn[]
+    dbOperations: DbOperations
+  } = $props()
 
-  $: columns = setUpColumns(preferred_table_columns, dictionary)
-  let selectedColumn: IColumn
+  const columns = $derived(setUpColumns(preferred_table_columns, dictionary))
+  let selectedColumn: IColumn = $state(undefined)
 
   function getLeftValue(index: number) {
     if (index === 0) return 0

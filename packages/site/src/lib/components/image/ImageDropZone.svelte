@@ -1,11 +1,13 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte'
   import { page } from '$app/state'
   import { apply_button_label } from './image-store'
 
-  const { border, on_file_added = undefined, class: class_prop = '' }: {
+  const { border, on_file_added = undefined, class: class_prop = '', label }: {
     border: boolean
     on_file_added?: (file: File) => void
     class?: string
+    label?: Snippet
   } = $props()
   let dragging = $state(false)
   // const applyButtonLabel: any = getContext('applyButtonLabel')
@@ -58,7 +60,7 @@
     <span class="i-ic-outline-camera-alt text-xl" />
   </span>
 
-  <slot name="label" />
+  {#if label}{@render label()}{/if}
 </label>
 
 <style>

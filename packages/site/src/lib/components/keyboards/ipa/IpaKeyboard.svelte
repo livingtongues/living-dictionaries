@@ -1,9 +1,13 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte'
   import { Button } from '$lib/svelte-pieces'
   import vowelTrapezoid from './vowel-trapezoid.gif'
 
-  export let on_ipa_change: (new_value: string) => void
-  let activeTable = 'consonants'
+  const { on_ipa_change, children }: {
+    on_ipa_change: (new_value: string) => void
+    children?: Snippet
+  } = $props()
+  let activeTable = $state('consonants')
   let wrapperEl: HTMLDivElement
 
   function addSelectedLetter(e) {
@@ -35,7 +39,7 @@
 </script>
 
 <div bind:this={wrapperEl} class="w-full relative">
-  <slot />
+  {#if children}{@render children()}{/if}
 </div>
 
 <div class="flex overflow-x-auto md:flex-wrap whitespace-nowrap mb-1">
