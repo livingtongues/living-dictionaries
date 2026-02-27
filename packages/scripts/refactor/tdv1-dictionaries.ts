@@ -1,4 +1,4 @@
-﻿export const tdLocations = [
+export const tdLocations = [
   {
     geometry: {
       coordinates: [92.555133, 27.20845],
@@ -1131,4 +1131,4 @@
       date: 2014,
     },
   },
-];
+]

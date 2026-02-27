@@ -16,12 +16,12 @@ The home page (`/packages/site/src/routes/+page.svelte`) used Mapbox GL JS with 
 
 ### Map Component
 ```svelte
-<Map 
-  bind:this={mapComponent} 
-  style="mapbox://styles/mapbox/light-v10?optimize=true" 
-  zoom={2} 
-  options={{ projection: 'globe' }} 
-  lat={+user_latitude} 
+<Map
+  bind:this={mapComponent}
+  style="mapbox://styles/mapbox/light-v10?optimize=true"
+  zoom={2}
+  options={{ projection: 'globe' }}
+  lat={+user_latitude}
   lng={+user_longitude}
 >
 ```
@@ -48,8 +48,7 @@ When a dictionary was selected:
 {#if selectedDictionary?.coordinates}
   {#if selectedDictionary.coordinates.points}
     {#each selectedDictionary.coordinates.points as point, index}
-      <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude} 
-              color={index === 0 ? 'blue' : 'black'} />
+      <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude} color={index === 0 ? 'blue' : 'black'} />
     {/each}
   {/if}
   {#if selectedDictionary.coordinates.regions}

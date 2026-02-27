@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types'
   import type { DictionaryWithHelpers, UserWithRoles } from './dictionaryWithHelpers.types'
-  import { api_delete_dictionary } from '$api/db/delete-dictionary/_call'
   import { page } from '$app/state'
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
   import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte'

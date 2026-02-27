@@ -21,6 +21,10 @@ export default antfu(
       '**/locales/**',
       'supabase/functions/**',
       '**.snap.json',
+      'packages/scripts/create-entry-caches/caches/**',
+      'packages/ids-import/**',
+      '.issues/**',
+      '.opencode/**',
     ],
     stylistic: {
       overrides: {
@@ -96,6 +100,17 @@ export default antfu(
       'ts/no-unused-vars': 'off',
       'no-undef': 'off',
       'unused-imports/no-unused-vars': 'off',
+    },
+  },
+  {
+    name: 'ld/pglite-proxy',
+    files: ['packages/site/pglite-proxy/**'],
+    rules: {
+      'no-restricted-globals': 'off',
+      'no-console': 'off',
+      'node/prefer-global/process': 'off',
+      'node/prefer-global/buffer': 'off',
+      'require-await': 'off',
     },
   },
 ).overrides({

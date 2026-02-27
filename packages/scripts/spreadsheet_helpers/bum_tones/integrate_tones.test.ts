@@ -1,12 +1,12 @@
-import { readFileSync } from 'fs';
-import { test_words } from './fixtures/words';
-import { test_tones } from './fixtures/tones';
-import {
-  count_vowels,
-  add_tones_to_word,
-  integrate_tones_to_bum_phonetics,
-} from './integrate_tones';
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { test_tones } from './fixtures/tones'
+import { test_words } from './fixtures/words'
+import {
+  add_tones_to_word,
+  count_vowels,
+  integrate_tones_to_bum_phonetics,
+} from './integrate_tones'
 
 describe('count_vowels', () => {
   test.each([
@@ -26,9 +26,9 @@ describe('count_vowels', () => {
       expected: 3,
     },
   ])('counting vowels on different words', ({ word, vowels, expected }) => {
-    expect(count_vowels(word, vowels)).toEqual(expected);
-  });
-});
+    expect(count_vowels(word, vowels)).toEqual(expected)
+  })
+})
 
 describe('add_tones_to_word', () => {
   test.each([
@@ -53,8 +53,8 @@ describe('add_tones_to_word', () => {
       expected: 'pè-tɔ̀',
     },
   ])('adds tones to vowels in different words', ({ word, accents, expected }) => {
-    expect(add_tones_to_word(word, accents)).toEqual(expected);
-  });
+    expect(add_tones_to_word(word, accents)).toEqual(expected)
+  })
 
   test.each([
     {
@@ -68,56 +68,56 @@ describe('add_tones_to_word', () => {
       expected: 'ìɔtɛ́ə',
     },
   ])('adds tones to diphthongs in different words', ({ word, accents, expected }) => {
-    expect(add_tones_to_word(word, accents)).toEqual(expected);
-  });
+    expect(add_tones_to_word(word, accents)).toEqual(expected)
+  })
 
   test('add tones when number of vowels and tones are the same, even when the word has two vowels toghether: false diphthongs', () => {
-    const word = 'liɛnda';
-    const accents = '\u0301 \u0300 \u0300';
-    expect(add_tones_to_word(word, accents)).toEqual('líɛ̀ndà');
-  });
+    const word = 'liɛnda'
+    const accents = '\u0301 \u0300 \u0300'
+    expect(add_tones_to_word(word, accents)).toEqual('líɛ̀ndà')
+  })
 
   test('more accents than vowels', () => {
-    const word = 'təst';
-    const accents = '\u0302 \u0301';
-    expect(add_tones_to_word(word, accents)).toEqual('təst (please check it!)');
-  });
+    const word = 'təst'
+    const accents = '\u0302 \u0301'
+    expect(add_tones_to_word(word, accents)).toEqual('təst (please check it!)')
+  })
 
   test('more vowels than accents', () => {
-    const word = 'potɨ';
-    const accents = '\u0300';
-    expect(add_tones_to_word(word, accents)).toEqual('potɨ (please check it!)');
-  });
+    const word = 'potɨ'
+    const accents = '\u0300'
+    expect(add_tones_to_word(word, accents)).toEqual('potɨ (please check it!)')
+  })
 
   test('no accents at all', () => {
-    const word = 'pluma';
-    const accents = '';
-    expect(add_tones_to_word(word, accents)).toEqual('pluma');
-  });
-});
+    const word = 'pluma'
+    const accents = ''
+    expect(add_tones_to_word(word, accents)).toEqual('pluma')
+  })
+})
 
 describe('integrate_tones_to_bum_phonetics', () => {
   const fixturesFilePath = path.join(__dirname, './fixtures/result.txt')
 
-  const created_contents = readFileSync(fixturesFilePath, 'utf8');
-  const expected_contents = `àbâ\nàbâh\nábâm\nàbâŋ\nabehi\nàbɛ̂n\nàbə̂h\nàbə̂h\nàbî\nábìn\nàbɔ̂ŋ\nabɔŋ\nábúk`;
+  const created_contents = readFileSync(fixturesFilePath, 'utf8')
+  const expected_contents = `àbâ\nàbâh\nábâm\nàbâŋ\nabehi\nàbɛ̂n\nàbə̂h\nàbə̂h\nàbî\nábìn\nàbɔ̂ŋ\nabɔŋ\nábúk`
 
   test('file written successfully', () => {
     integrate_tones_to_bum_phonetics(
       test_words,
       test_tones,
-      fixturesFilePath
-    );
-    expect(created_contents).toEqual(expected_contents);
-  });
+      fixturesFilePath,
+    )
+    expect(created_contents).toEqual(expected_contents)
+  })
 
   test('tones and phonetics don\'t match', () => {
     expect(() =>
       integrate_tones_to_bum_phonetics(
         test_words,
         test_tones.slice(0, test_tones.length - 1),
-        fixturesFilePath
-      )
-    ).toThrow('Tones and phonetics have to correspond to each other');
-  });
-});
+        fixturesFilePath,
+      ),
+    ).toThrowError('Tones and phonetics have to correspond to each other')
+  })
+})

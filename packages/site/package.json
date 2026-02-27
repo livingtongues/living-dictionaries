@@ -24,7 +24,6 @@
     "pglite:studio": "drizzle-kit studio --config drizzle-studio.config.ts"
   },
   "devDependencies": {
-    "@types/ws": "^8.5.14",
     "@aws-sdk/client-s3": "^3.693.0",
     "@aws-sdk/client-ses": "^3.750.0",
     "@aws-sdk/s3-request-presigner": "^3.693.0",
@@ -54,6 +53,7 @@
     "@types/mapbox__mapbox-gl-geocoder": "^4.7.3",
     "@types/pg": "^8.11.8",
     "@types/recordrtc": "^5.6.10",
+    "@types/ws": "^8.5.14",
     "@unocss/preset-icons": "^0.58.5",
     "@unocss/svelte-scoped": "^0.58.5",
     "@vitest/ui": "^4.0.16",

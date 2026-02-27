@@ -20,7 +20,7 @@ Once we complete the migration, it would be great to show our impact numbers som
 
 On the About page, we can flesh out more about the Impact of the project itself.
 https://livingdictionaries.app/about
-Under "About Living Dictionaries" we will insert a new heading called "Testimonials" and Anna will send the text + 1 image to Diego for display. 
+Under "About Living Dictionaries" we will insert a new heading called "Testimonials" and Anna will send the text + 1 image to Diego for display.
 
 - A heatmap of where people are visiting the platform (IP addresses) - needs plug-in
 - Total number of dictionary editors - we need to figure out what exact numbers we want to share here. We have around 1k editors, but many of them only did on entry a long time ago. Is there a way to check how many times a person has logged in or how many entries have they added or edited?

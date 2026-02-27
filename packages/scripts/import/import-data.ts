@@ -1,8 +1,8 @@
+import type { Upload_Operations } from './generate-sql-statements'
+import type { Row } from './row.type'
 import { writeFileSync } from 'node:fs'
 import { admin_supabase, anon_supabase, postgres } from '../config-supabase'
-import type { Upload_Operations } from './generate-sql-statements'
 import { generate_sql_statements } from './generate-sql-statements'
-import type { Row } from './row.type'
 
 export async function import_data({
   dictionary_id,

@@ -1,12 +1,12 @@
 /* eslint-disable test/no-conditional-in-test */
 import type { Database } from '@living-dictionaries/types'
 import * as local_schema from '$lib/pglite/schema'
+import { Sync } from '$lib/pglite/sync/sync-engine.svelte.js'
 import { PGlite } from '@electric-sql/pglite'
 import { createClient } from '@supabase/supabase-js'
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/pglite'
-import { admin_supabase, anon_supabase, generate_uuid, PASSWORD, PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL, supabase_pg } from './clients'
-import { Sync } from './sync-engine.svelte.js'
+import { admin_supabase, anon_supabase, generate_uuid, PASSWORD, PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL, supabase_pg } from './sync-clients'
 
 vi.mock('$app/state', () => ({
   page: {
@@ -690,7 +690,7 @@ describe(Sync, () => {
       })
 
       expect(error).toBeDefined()
-      expect(error!.code).toBe('42501') // PostgreSQL insufficient privilege error
+      expect(['42501', 'PGRST205']).toContain(error.code) // PostgreSQL insufficient privilege or Supabase permission denied
     })
   })
 

@@ -28,6 +28,4 @@ export enum StandardPrintFields {
 
 type PrintFieldKeys = keyof typeof _CustomPrintFields | keyof typeof StandardPrintFields
 
-export type IPrintFields = {
-  [key in PrintFieldKeys]?: boolean;
-}
+export type IPrintFields = Partial<Record<PrintFieldKeys, boolean>>
