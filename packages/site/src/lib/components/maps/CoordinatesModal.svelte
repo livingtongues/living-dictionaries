@@ -72,7 +72,11 @@
       {page.data.t('create.select_coordinates')}
     </span>
   {/snippet}
-  <form onsubmit={(e) => { e.preventDefault(); update() }}>
+  <form
+    onsubmit={(e) => {
+      e.preventDefault()
+      update()
+    }}>
     <div class="flex flex-wrap items-center mb-2">
       <div class="flex flex-grow">
         <div class="relative">

@@ -25,6 +25,10 @@
   }
 </script>
 
-<form onsubmit={(e) => { e.preventDefault(); submitWithLoading(e) }}>
+<form
+  onsubmit={(e) => {
+    e.preventDefault()
+    submitWithLoading(e)
+  }}>
   {@render children?.({ loading })}
 </form>

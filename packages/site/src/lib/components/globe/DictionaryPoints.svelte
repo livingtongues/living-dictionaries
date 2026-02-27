@@ -97,8 +97,8 @@
       // Check if point is on visible hemisphere
       const dist = Math.acos(
         Math.sin(dict_with_coords.latitude * Math.PI / 180) * Math.sin(center_lat * Math.PI / 180)
-          + Math.cos(dict_with_coords.latitude * Math.PI / 180) * Math.cos(center_lat * Math.PI / 180)
-          * Math.cos((dict_with_coords.longitude - center_lon) * Math.PI / 180),
+          + Math.cos(dict_with_coords.latitude * Math.PI / 180) * Math.cos(center_lat * Math.PI / 180) // eslint-disable-line style/indent-binary-ops
+          * Math.cos((dict_with_coords.longitude - center_lon) * Math.PI / 180), // eslint-disable-line style/indent-binary-ops
       )
       if (dist > Math.PI / 2) continue
 
@@ -133,15 +133,29 @@
           if (overlap_x > 0 && overlap_y > 0) {
             const move = Math.min(overlap_x, overlap_y) / 2 + 0.5
             if (overlap_x < overlap_y) {
-              if (a.x < b.x) { a.x -= move; b.x += move } else { a.x += move; b.x -= move }
+              if (a.x < b.x) {
+                a.x -= move
+                b.x += move
+              } else {
+                a.x += move
+                b.x -= move
+              }
             } else {
-              if (a.y < b.y) { a.y -= move; b.y += move } else { a.y += move; b.y -= move }
+              if (a.y < b.y) {
+                a.y -= move
+                b.y += move
+              } else {
+                a.y += move
+                b.y -= move
+              }
             }
           }
         }
       }
     }
-    force.initialize = (n: LabelNode[]) => { nodes = n }
+    force.initialize = (n: LabelNode[]) => {
+      nodes = n
+    }
     return force
   }
 

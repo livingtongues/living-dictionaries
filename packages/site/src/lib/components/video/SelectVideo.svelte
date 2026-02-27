@@ -34,9 +34,18 @@
 {:else}
   <label
     class:dragging
-    ondrop={(e) => { e.preventDefault(); checkVideo(e.dataTransfer.files) }}
-    ondragover={(e) => { e.preventDefault(); dragging = true }}
-    ondragleave={(e) => { e.preventDefault(); dragging = false }}>
+    ondrop={(e) => {
+      e.preventDefault()
+      checkVideo(e.dataTransfer.files)
+    }}
+    ondragover={(e) => {
+      e.preventDefault()
+      dragging = true
+    }}
+    ondragleave={(e) => {
+      e.preventDefault()
+      dragging = false
+    }}>
     <input
       type="file"
       accept="video/*"

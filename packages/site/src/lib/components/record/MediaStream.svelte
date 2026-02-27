@@ -33,9 +33,9 @@
 
   $effect(() => {
     if (!selected_microphone && microphones.length)
-      selected_microphone = microphones[0]
+      [selected_microphone] = microphones
     if (!selected_camera && cameras.length)
-      selected_camera = cameras[0]
+      [selected_camera] = cameras
   })
 
   onMount(async () => {

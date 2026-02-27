@@ -25,6 +25,7 @@ export default antfu(
       'packages/ids-import/**',
       '.issues/**',
       '.opencode/**',
+      '**/*.md',
     ],
     stylistic: {
       overrides: {
@@ -115,7 +116,7 @@ export default antfu(
   },
 ).overrides({
   'antfu/typescript/rules': {
-    files: ['**/*.svelte', '**/*.composition'],
+    files: ['**/*.svelte'],
     rules: {
       'constructor-super': 'error',
       'for-direction': 'error',
@@ -200,6 +201,8 @@ export default antfu(
       }],
 
       'ts/no-explicit-any': 'off',
+      'ts/no-use-before-define': 'off', // $derived can reference variables declared later in Svelte 5
+      'ts/no-unused-expressions': 'off', // $effect dependency tracking uses bare variable references
       'prefer-named-capture-group': 'warn',
       'eqeqeq': 'warn',
 
@@ -214,7 +217,6 @@ export default antfu(
     },
   },
   'antfu/svelte/rules': {
-    files: ['**/*.composition'],
     rules: {
       'svelte/valid-compile': ['error', { ignoreWarnings: true }], // throws error on a11y issues
       'svelte/no-dom-manipulating': 'error',

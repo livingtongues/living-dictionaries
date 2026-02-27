@@ -20,7 +20,7 @@
       onAdd(_map) {
         return el
       },
-      onRemove() {},
+      onRemove() { /* required by mapbox IControl interface */ },
     }
     map.addControl(customControl, position)
     return () => {

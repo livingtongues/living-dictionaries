@@ -26,7 +26,7 @@ export function convertFLExToLDFormat(data: IFLExData[]) {
   const entries: ActualDatabaseEntry[] = []
   // const check = new Set();
 
-  data.map((e) => {
+  data.forEach((e) => {
     const entry: ActualDatabaseEntry = {
       lx: e.lx.trim(),
       gl: {

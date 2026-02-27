@@ -69,7 +69,7 @@ export function create_query_params_store<T>(options: QueryParamStoreOptions<T>)
     let parsed_value = parse(value) as T
     if (!parsed_value && typeof startWith === 'object')
       parsed_value = {} as T
-    // eslint-disable-next-line ts/no-use-before-define
+
     set(parsed_value)
     storage?.setItem(storageKey, JSON.stringify(parsed_value))
     if (log && storage)

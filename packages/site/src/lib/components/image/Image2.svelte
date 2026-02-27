@@ -24,7 +24,7 @@
     // const top_offset = parseInt(styles.getPropertyValue('margin-top'));
     const left_offset = Number.parseInt(styles.getPropertyValue('margin-left'))
     const { left, right, top, bottom, width } = imageEl.getBoundingClientRect()
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line ts/no-unused-vars
     const pos = [left < ww - right ? 0 : 100, top < wh - bottom ? 0 : 100]
     // active_el.index = i;
     // active_el.left = `${left - left_offset}px`;
@@ -37,14 +37,14 @@
     })
   }
 
-  async function clear() {
+  function clear() {
     requestAnimationFrame(async () => {
       await Promise.all([scale.set(1), opacity.set(0)])
       // active_el = {
-      // 	index: -1,
-      // 	left: '0',
-      // 	top: '0',
-      // 	origin: '0 0'
+      //   index: -1,
+      //   left: '0',
+      //   top: '0',
+      //   origin: '0 0'
       // };
       viewing = false
     })

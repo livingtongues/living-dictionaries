@@ -1,14 +1,14 @@
 import type { MultiString, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
 import type { Supabase } from '.'
 import { goto } from '$app/navigation'
-import { page } from '$app/stores'
+import { page } from '$app/state'
 import { get, type Writable } from 'svelte/store'
 
 function randomUUID() {
   return window.crypto.randomUUID()
 }
 async function get_pieces() {
-  const { params: { entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { dictionary, supabase, entries_data } } = get(page) as any as {
+  const { params: { entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { dictionary, supabase, entries_data } } = page as any as {
     params: { entryId: string }
     state: { entry_id: string }
     data: { dictionary: { id: string }, supabase: Supabase, entries_data: { loading: Writable<boolean> } }

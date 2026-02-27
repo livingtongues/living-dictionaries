@@ -15,8 +15,8 @@ export const load = (async ({ parent }) => {
     return {
       db: null,
       sync: null,
-      add_editor: async () => {},
-      remove_editor: async () => {},
+      add_editor: async () => { /* noop for non-admin */ },
+      remove_editor: async () => { /* noop for non-admin */ },
       inviteHelper,
     }
   }
