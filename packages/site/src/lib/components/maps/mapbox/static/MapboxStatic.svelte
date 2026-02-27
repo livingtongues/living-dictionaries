@@ -2,19 +2,19 @@
   // https://docs.mapbox.com/api/maps/static-images
   // https://stackoverflow.com/questions/69287390/request-static-image-from-mapbox-with-polygon-via-url // use decodeURIComponent to read example
 
-  import type { IPoint, IRegion } from '@living-dictionaries/types';
-  import { shapeGeoJson } from './shapeGeoJson';
-  import { PUBLIC_mapboxAccessToken } from '$env/static/public';
+  import type { IPoint, IRegion } from '@living-dictionaries/types'
+  import { PUBLIC_mapboxAccessToken } from '$env/static/public'
+  import { shapeGeoJson } from './shapeGeoJson'
 
   interface Props {
-    points?: IPoint[];
-    regions?: IRegion[];
-    width?: number;
-    height?: number;
-    accessToken?: any;
-    style?: string;
-    highDef?: boolean;
-    singlePointZoom?: number;
+    points?: IPoint[]
+    regions?: IRegion[]
+    width?: number
+    height?: number
+    accessToken?: any
+    style?: string
+    highDef?: boolean
+    singlePointZoom?: number
   }
 
   let {
@@ -25,26 +25,26 @@
     accessToken = PUBLIC_mapboxAccessToken,
     style = 'streets-v11',
     highDef = true,
-    singlePointZoom = 3
-  }: Props = $props();
+    singlePointZoom = 3,
+  }: Props = $props()
 
-  let geoJson = $derived(shapeGeoJson(points, regions));
-  let urlFriendlyGeoJson = $derived(encodeURIComponent(JSON.stringify(geoJson)));
-  let urlPrefix = $derived(`https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${urlFriendlyGeoJson})`);
+  let geoJson = $derived(shapeGeoJson(points, regions))
+  let urlFriendlyGeoJson = $derived(encodeURIComponent(JSON.stringify(geoJson)))
+  let urlPrefix = $derived(`https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${urlFriendlyGeoJson})`)
   let urlSuffix = $derived(`${width}x${height}${highDef ? '@2x' : ''}?logo=false&access_token=${accessToken}`)
 
-  let src = $state('');
-  let isSinglePoint = $derived(points?.length === 1 && !regions?.length);
+  let src = $state('')
+  let isSinglePoint = $derived(points?.length === 1 && !regions?.length)
   $effect(() => {
     if (isSinglePoint) {
       const [{ coordinates: firstPoint }] = points
-      const { longitude } = firstPoint;
-      const { latitude } = firstPoint;
+      const { longitude } = firstPoint
+      const { latitude } = firstPoint
       src = `${urlPrefix}/${longitude},${latitude},${singlePointZoom}/${urlSuffix}`
     } else {
       src = `${urlPrefix}/auto/${urlSuffix}`
     }
-  });
+  })
 </script>
 
 {#if src}
@@ -64,4 +64,3 @@
     </div>
   {/await}
 {/if}
-

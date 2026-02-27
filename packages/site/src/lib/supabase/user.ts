@@ -1,9 +1,9 @@
-import type { AuthResponse, Session, User } from '@supabase/supabase-js'
-import { writable } from 'svelte/store'
 import type { GoogleAuthUserMetaData } from '@living-dictionaries/types'
-import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME, USER_LOCAL_STORAGE_KEY } from '../constants'
+import type { AuthResponse, Session, User } from '@supabase/supabase-js'
 import type { Supabase } from '.'
 import { set_cookie } from '$lib/helpers/cookies'
+import { writable } from 'svelte/store'
+import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME, USER_LOCAL_STORAGE_KEY } from '../constants'
 
 const browser = typeof window !== 'undefined'
 

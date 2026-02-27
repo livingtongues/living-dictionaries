@@ -31,10 +31,10 @@
 </script>
 
 <script lang="ts">
-  import { ShowHide, longpress } from '$lib/svelte-pieces'
   import type { EntryData } from '@living-dictionaries/types'
   import { page } from '$app/state'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
+  import { longpress, ShowHide } from '$lib/svelte-pieces'
 
   let { entry, context, sound_file = undefined, can_edit = false, class: class_prop = '' }: {
     entry: EntryData

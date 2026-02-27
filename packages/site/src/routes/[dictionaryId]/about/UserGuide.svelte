@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { slide } from 'svelte/transition'
   import { page } from '$app/state'
+  import { slide } from 'svelte/transition'
 
   let hide_questions = $state(false)
   let parentElement: HTMLDivElement | null = $state(null)
@@ -13,7 +13,7 @@
       const elementWidth = h4Element.offsetWidth
       centerMargin = `${parentWidth / 2 - elementWidth / 2}px`
     }
-  });
+  })
 </script>
 
 <style>

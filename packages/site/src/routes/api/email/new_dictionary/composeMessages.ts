@@ -11,10 +11,10 @@ export function notifyAdminsOnNewDictionary(dictionary: Tables<'dictionaries'>, 
   Alternate names: ${dictionary.alternate_names ? dictionary.alternate_names.join(', ') : ''}
   
   Coordinates: ${
-  dictionary.coordinates?.points?.[0]
-    ? `lat: ${dictionary.coordinates.points[0].coordinates.latitude}, lon: ${dictionary.coordinates.points[0].coordinates.longitude}`
-    : ''
-}
+    dictionary.coordinates?.points?.[0]
+      ? `lat: ${dictionary.coordinates.points[0].coordinates.latitude}, lon: ${dictionary.coordinates.points[0].coordinates.longitude}`
+      : ''
+  }
   Location: ${dictionary.location ? dictionary.location : ''}
   
   Public: Users can no longer make their dictionaries public.

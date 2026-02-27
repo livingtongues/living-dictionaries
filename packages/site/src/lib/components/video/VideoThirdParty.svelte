@@ -2,10 +2,10 @@
   import type { HostedVideo } from '@living-dictionaries/types'
 
   interface Props {
-    hosted_video: HostedVideo;
+    hosted_video: HostedVideo
   }
 
-  let { hosted_video }: Props = $props();
+  let { hosted_video }: Props = $props()
 
   let window_width: number = $state()
 </script>

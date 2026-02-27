@@ -70,7 +70,7 @@
       {page.data.t('create.select_coordinates')}
     </span>
   {/snippet}
-  <form onsubmit={(e) => { e.preventDefault(); update(); }}>
+  <form onsubmit={(e) => { e.preventDefault(); update() }}>
     <div class="flex flex-wrap items-center mb-2">
       <div class="flex flex-grow">
         <div class="relative">
@@ -115,7 +115,7 @@
         lng={centerLng}
         lat={centerLat}
         {zoom}
-        on_click={(lngLat) => ({ lng, lat } = setMarker(lngLat.lng, lngLat.lat))}>
+        on_click={lngLat => ({ lng, lat } = setMarker(lngLat.lng, lngLat.lat))}>
         <slot />
         <NavigationControl />
         <Geocoder
@@ -126,7 +126,7 @@
         {#if lng && lat}
           <Marker
             draggable
-            on_dragend={(lngLat) => ({ lng, lat } = setMarker(lngLat.lng, lngLat.lat))}
+            on_dragend={lngLat => ({ lng, lat } = setMarker(lngLat.lng, lngLat.lat))}
             {lng}
             {lat} />
         {/if}

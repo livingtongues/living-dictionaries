@@ -1,9 +1,9 @@
 <script lang="ts">
   interface Props {
-    preview?: string;
+    preview?: string
   }
 
-  let { preview = '' }: Props = $props();
+  let { preview = '' }: Props = $props()
 
   const add_whitespace_to_fill_remaining_preview_area = (text: string) => {
     const whiteSpaceCodes = '\xA0\u200C\u200B\u200D\u200E\u200F\uFEFF'

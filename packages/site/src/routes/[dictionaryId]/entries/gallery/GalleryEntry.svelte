@@ -1,16 +1,16 @@
 <script lang="ts">
   import type { EntryData, Tables } from '@living-dictionaries/types'
+  import { page } from '$app/state'
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/helpers/glosses'
-  import { page } from '$app/state'
 
   interface Props {
-    entry: EntryData;
-    can_edit?: boolean;
-    dictionary: Tables<'dictionaries'>;
+    entry: EntryData
+    can_edit?: boolean
+    dictionary: Tables<'dictionaries'>
   }
 
-  let { entry, can_edit = false, dictionary }: Props = $props();
+  let { entry, can_edit = false, dictionary }: Props = $props()
 
   let { dbOperations } = $derived(page.data)
 

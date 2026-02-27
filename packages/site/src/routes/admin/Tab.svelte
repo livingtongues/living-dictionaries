@@ -2,11 +2,11 @@
   import { page } from '$app/state'
 
   interface Props {
-    link: string;
-    label: string;
+    link: string
+    label: string
   }
 
-  let { link, label }: Props = $props();
+  let { link, label }: Props = $props()
 </script>
 
 <a

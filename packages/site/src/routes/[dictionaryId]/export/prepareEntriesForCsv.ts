@@ -1,12 +1,12 @@
 import type { EntryData, Tables } from '@living-dictionaries/types'
-import { get } from 'svelte/store'
-import { friendlyName } from './friendlyName'
-import { get_orthography_headers, get_sense_headers } from './assignHeadersForCsv'
-import { display_speaker_gender, format_orthographies, format_senses } from './assignFormattedEntryValuesForCsv'
-import { stripHTMLTags } from './stripHTMLTags'
+import { page } from '$app/stores'
 import { decades } from '$lib/components/media/ages'
 import { translate_part_of_speech, translate_part_of_speech_abbreviation, translate_semantic_domain_keys } from '$lib/transformers/translate_keys_to_current_language'
-import { page } from '$app/stores'
+import { get } from 'svelte/store'
+import { display_speaker_gender, format_orthographies, format_senses } from './assignFormattedEntryValuesForCsv'
+import { get_orthography_headers, get_sense_headers } from './assignHeadersForCsv'
+import { friendlyName } from './friendlyName'
+import { stripHTMLTags } from './stripHTMLTags'
 
 export enum StandardEntryCSVFields {
   ID = 'Entry Id',
@@ -27,9 +27,7 @@ export enum StandardEntryCSVFields {
 
 export type EntryForCSVKeys = keyof typeof StandardEntryCSVFields
 
-export type EntryForCSV = {
-  [key in EntryForCSVKeys]?: string; // TODO: where type problems exist, update using row.type.ts as a reference
-}
+export type EntryForCSV = Partial<Record<EntryForCSVKeys, string>>
 
 export function translate_entries({ entries }: { entries: EntryData[] }) {
   const $page = get(page)

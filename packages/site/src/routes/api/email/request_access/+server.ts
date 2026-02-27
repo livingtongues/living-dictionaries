@@ -1,10 +1,10 @@
-import { error, json } from '@sveltejs/kit'
-import { getSupportMessageRecipients } from '../addresses'
-import { type Address, send_email } from '../send-email'
 import type { RequestHandler } from './$types'
 import { dev } from '$app/environment'
 import { ResponseCodes } from '$lib/constants'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
+import { error, json } from '@sveltejs/kit'
+import { getSupportMessageRecipients } from '../addresses'
+import { type Address, send_email } from '../send-email'
 
 export interface RequestAccessBody {
   email: string

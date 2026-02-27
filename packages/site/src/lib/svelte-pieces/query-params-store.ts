@@ -1,6 +1,6 @@
 import { goto } from '$app/navigation'
 import { page } from '$app/stores'
-import { writable, type Readable } from 'svelte/store'
+import { type Readable, writable } from 'svelte/store'
 import { clean_object } from './clean-object'
 
 export interface QueryParamStoreOptions<T> {

@@ -1,8 +1,8 @@
-import { json, error as kit_error } from '@sveltejs/kit'
 import type { TablesInsert } from '@living-dictionaries/types'
 import type { RequestHandler } from './$types'
-import { ResponseCodes } from '$lib/constants'
 import { send_dictionary_emails } from '$api/email/new_dictionary/dictionary-emails'
+import { ResponseCodes } from '$lib/constants'
+import { json, error as kit_error } from '@sveltejs/kit'
 
 export interface CreateDictionaryRequestBody {
   dictionary: TablesInsert<'dictionaries'>

@@ -72,8 +72,7 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
     context_wc = context_w + context_c
     if (Object.prototype.hasOwnProperty.call(context_dictionary, context_wc)) {
       context_w = context_wc
-    }
-    else {
+    } else {
       if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate, context_w)) {
         if (context_w.charCodeAt(0) < 256) {
           for (i = 0; i < context_numBits; i++) {
@@ -82,8 +81,7 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
               context_data_position = 0
               context_data.push(getCharFromInt(context_data_val))
               context_data_val = 0
-            }
-            else {
+            } else {
               context_data_position++
             }
           }
@@ -94,14 +92,12 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
               context_data_position = 0
               context_data.push(getCharFromInt(context_data_val))
               context_data_val = 0
-            }
-            else {
+            } else {
               context_data_position++
             }
             value = value >> 1
           }
-        }
-        else {
+        } else {
           value = 1
           for (i = 0; i < context_numBits; i++) {
             context_data_val = (context_data_val << 1) | value
@@ -109,8 +105,7 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
               context_data_position = 0
               context_data.push(getCharFromInt(context_data_val))
               context_data_val = 0
-            }
-            else {
+            } else {
               context_data_position++
             }
             value = 0
@@ -122,8 +117,7 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
               context_data_position = 0
               context_data.push(getCharFromInt(context_data_val))
               context_data_val = 0
-            }
-            else {
+            } else {
               context_data_position++
             }
             value = value >> 1
@@ -135,8 +129,7 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
           context_numBits++
         }
         delete context_dictionaryToCreate[context_w]
-      }
-      else {
+      } else {
         value = context_dictionary[context_w]
         for (i = 0; i < context_numBits; i++) {
           context_data_val = (context_data_val << 1) | (value & 1)
@@ -144,8 +137,7 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
             context_data_position = 0
             context_data.push(getCharFromInt(context_data_val))
             context_data_val = 0
-          }
-          else {
+          } else {
             context_data_position++
           }
           value = value >> 1
@@ -172,8 +164,7 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
             context_data_position = 0
             context_data.push(getCharFromInt(context_data_val))
             context_data_val = 0
-          }
-          else {
+          } else {
             context_data_position++
           }
         }
@@ -184,14 +175,12 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
             context_data_position = 0
             context_data.push(getCharFromInt(context_data_val))
             context_data_val = 0
-          }
-          else {
+          } else {
             context_data_position++
           }
           value = value >> 1
         }
-      }
-      else {
+      } else {
         value = 1
         for (i = 0; i < context_numBits; i++) {
           context_data_val = (context_data_val << 1) | value
@@ -199,8 +188,7 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
             context_data_position = 0
             context_data.push(getCharFromInt(context_data_val))
             context_data_val = 0
-          }
-          else {
+          } else {
             context_data_position++
           }
           value = 0
@@ -212,8 +200,7 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
             context_data_position = 0
             context_data.push(getCharFromInt(context_data_val))
             context_data_val = 0
-          }
-          else {
+          } else {
             context_data_position++
           }
           value = value >> 1
@@ -225,8 +212,7 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
         context_numBits++
       }
       delete context_dictionaryToCreate[context_w]
-    }
-    else {
+    } else {
       value = context_dictionary[context_w]
       for (i = 0; i < context_numBits; i++) {
         context_data_val = (context_data_val << 1) | (value & 1)
@@ -234,8 +220,7 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
           context_data_position = 0
           context_data.push(getCharFromInt(context_data_val))
           context_data_val = 0
-        }
-        else {
+        } else {
           context_data_position++
         }
         value = value >> 1
@@ -256,22 +241,20 @@ function _compress(uncompressed: string, bitsPerChar: number, getCharFromInt: (i
       context_data_position = 0
       context_data.push(getCharFromInt(context_data_val))
       context_data_val = 0
-    }
-    else {
+    } else {
       context_data_position++
     }
     value = value >> 1
   }
 
   // Flush the last char
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     context_data_val = (context_data_val << 1)
     if (context_data_position === bitsPerChar - 1) {
       context_data.push(getCharFromInt(context_data_val))
       break
-    }
-    else { context_data_position++ }
+    } else { context_data_position++ }
   }
   return context_data.join('')
 }
@@ -351,7 +334,7 @@ function _decompress(length: number, resetValue: number, getNextValue: (index: n
   dictionary[3] = c
   w = c
   result.push(c)
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     if (data.index > length)
       return ''
@@ -419,8 +402,7 @@ function _decompress(length: number, resetValue: number, getNextValue: (index: n
 
     if (dictionary[c]) {
       entry = dictionary[c]
-    }
-    else {
+    } else {
       if (c === dictSize)
         entry = w + w.charAt(0)
 

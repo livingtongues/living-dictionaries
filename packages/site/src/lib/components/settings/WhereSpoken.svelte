@@ -1,23 +1,23 @@
 <script lang="ts">
-  import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { DictionaryView, IPoint, IRegion } from '@living-dictionaries/types'
   import type { LngLat } from 'mapbox-gl'
   import { page } from '$app/state'
+  import CoordinatesModal from '$lib/components/maps/CoordinatesModal.svelte'
+  import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import Marker from '$lib/components/maps/mapbox/map/Marker.svelte'
   import Popup from '$lib/components/maps/mapbox/map/Popup.svelte'
   import Region from '$lib/components/maps/mapbox/map/Region.svelte'
-  import CoordinatesModal from '$lib/components/maps/CoordinatesModal.svelte'
   import RegionModal from '$lib/components/maps/RegionModal.svelte'
-  import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
 
   interface Props {
-    on_update_points: (points: IPoint[]) => void;
-    on_update_regions: (regions: IRegion[]) => void;
-    dictionary: Partial<DictionaryView>;
+    on_update_points: (points: IPoint[]) => void
+    on_update_regions: (regions: IRegion[]) => void
+    dictionary: Partial<DictionaryView>
   }
 
-  let { on_update_points, on_update_regions, dictionary }: Props = $props();
+  let { on_update_points, on_update_regions, dictionary }: Props = $props()
 
   let first_longitude = $derived(dictionary.coordinates?.points?.[0]?.coordinates?.longitude)
   let first_latitude = $derived(dictionary.coordinates?.points?.[0]?.coordinates?.latitude)
@@ -43,7 +43,7 @@
     <Map
       lng={first_longitude}
       lat={first_latitude}
-      on_click={(lngLat) => (mapClickCoordinates = lngLat)}>
+      on_click={lngLat => (mapClickCoordinates = lngLat)}>
       <NavigationControl />
       {#if mapClickCoordinates}
         <CoordinatesModal
@@ -60,9 +60,9 @@
           lat={point.coordinates.latitude}
           lng={point.coordinates.longitude}>
           <Popup>
-            <ShowHide  >
+            <ShowHide>
               {#snippet children({ show, toggle })}
-                            <Button form="simple" size="sm" onclick={toggle}>
+                <Button form="simple" size="sm" onclick={toggle}>
                   <span class="i-octicon-pencil"></span>
                   {#if index === 0}
                     {page.data.t('create.primary_coordinate')}
@@ -87,17 +87,17 @@
                     on_close={toggle}>
                   </CoordinatesModal>
                 {/if}
-                                        {/snippet}
-                        </ShowHide>
+              {/snippet}
+            </ShowHide>
           </Popup>
         </Marker>
       {/each}
 
       {#each dictionary.coordinates.regions || [] as region, index (region)}
         <Region {region}>
-          <ShowHide  >
+          <ShowHide>
             {#snippet children({ show, toggle })}
-                        <Button form="simple" size="sm" onclick={toggle}>
+              <Button form="simple" size="sm" onclick={toggle}>
                 <span class="i-octicon-pencil"></span>
               </Button>
               {#if show}
@@ -116,8 +116,8 @@
                   on_close={toggle}>
                 </RegionModal>
               {/if}
-                                  {/snippet}
-                    </ShowHide>
+            {/snippet}
+          </ShowHide>
         </Region>
       {/each}
     </Map>
@@ -125,9 +125,9 @@
 {/if}
 
 <div class="mt-1">
-  <ShowHide  >
+  <ShowHide>
     {#snippet children({ show, toggle })}
-        <Button
+      <Button
         onclick={toggle}
         color={first_longitude ? 'black' : 'primary'}
         size={first_longitude ? 'sm' : 'md'}>
@@ -140,13 +140,13 @@
           on_update={({ lat, lng }) => addCoordinates({ detail: { lng, lat } })}
           on_close={toggle} />
       {/if}
-          {/snippet}
-    </ShowHide>
+    {/snippet}
+  </ShowHide>
 
   {#if first_longitude}
-    <ShowHide  >
+    <ShowHide>
       {#snippet children({ show, toggle })}
-            <Button onclick={toggle} color="black" size="sm">
+        <Button onclick={toggle} color="black" size="sm">
           <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;"></span>
           {page.data.t('create.select_region')}
         </Button>
@@ -160,7 +160,7 @@
             }}
             on_close={toggle} />
         {/if}
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
   {/if}
 </div>

@@ -5,6 +5,7 @@
 
 <script lang="ts">
   import Image from './Image.svelte'
+
   export let can_edit = true
   export let width = 80
   export let height = 80

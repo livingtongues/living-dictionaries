@@ -1,18 +1,19 @@
 <script lang="ts" context="module">
-  import type { Viewport } from 'kitbook';
+  import type { Viewport } from 'kitbook'
+
   export const languages = []
-  export const viewports: Viewport[] = [{width: 700, height: 250}]
+  export const viewports: Viewport[] = [{ width: 700, height: 250 }]
 </script>
 
 <script lang="ts">
-  import Keyman from './Keyman.svelte';
-  import { Button } from 'svelte-pieces';
+  import { Button } from 'svelte-pieces'
+  import Keyman from './Keyman.svelte'
 
   // name="input - with option to change keyboard"
-  export let value = '';
-  export let bcp = 'am';
-  export let show = false;
-  export let canChooseKeyboard = true;
+  export let value = ''
+  export let bcp = 'am'
+  export let show = false
+  export let canChooseKeyboard = true
 </script>
 
 <Keyman {bcp} {show} {canChooseKeyboard}>
@@ -25,5 +26,5 @@
     form="menu"
     size="sm"
     onclick={() => (bcp = 'en')}
-    active={'en' === bcp}>English (en)</Button>
+    active={bcp === 'en'}>English (en)</Button>
 </div>

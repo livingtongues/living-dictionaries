@@ -1,6 +1,6 @@
 import type { DeepPartial, EntryData } from '@living-dictionaries/types'
-import { seo_description } from './seo_description'
 import { english_translate } from '$lib/i18n'
+import { seo_description } from './seo_description'
 
 describe('seo_description', () => {
   const t = english_translate

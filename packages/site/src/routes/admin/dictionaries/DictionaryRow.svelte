@@ -272,12 +272,8 @@
             size="sm"
             class="block!"
             onclick={async () => {
-              const { error } = await api_delete_dictionary({ dictionary_id: dictionary.id })
-              if (error) {
-                alert(error.message)
-              } else {
-                alert('Dictionary deleted. Please check your email to confirm it was successful and then close the dialog to continue working (the view is updated once a day).')
-              }
+              await dictionary._delete()
+              alert('Dictionary deleted locally. Make sure to sync your changes.')
             }}>
             Delete
           </Button>

@@ -1,8 +1,8 @@
-import { type Readable, get, writable } from 'svelte/store'
 import type { EntryData, Tables } from '@living-dictionaries/types'
-import { init_entries, reset_caches, search_entries } from '$lib/search'
 import { browser } from '$app/environment'
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL } from '$env/static/public'
+import { init_entries, reset_caches, search_entries } from '$lib/search'
+import { get, type Readable, writable } from 'svelte/store'
 
 export function create_entries_ui_store({
   dictionary_id,

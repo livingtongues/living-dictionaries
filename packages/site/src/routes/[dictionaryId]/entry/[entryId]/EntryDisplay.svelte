@@ -1,21 +1,21 @@
 <script lang="ts">
+  import type { DbOperations } from '$lib/dbOperations'
   import type { EntryData, EntryFieldValue, Tables, TablesUpdate } from '@living-dictionaries/types'
+  import { page } from '$app/state'
+  import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
+  import EntrySource from '$lib/components/entry/EntrySource.svelte'
+  import EntryTag from '$lib/components/entry/EntryTag.svelte'
   import { Button } from '$lib/svelte-pieces'
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
   import Sense from './Sense.svelte'
-  import { page } from '$app/state'
-  import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
-  import EntrySource from '$lib/components/entry/EntrySource.svelte'
-  import type { DbOperations } from '$lib/dbOperations'
-  import EntryTag from '$lib/components/entry/EntryTag.svelte'
 
   interface Props {
-    entry: EntryData;
-    dictionary: Tables<'dictionaries'>;
-    can_edit?: boolean;
-    dbOperations: DbOperations;
-    entry_history: Tables<'content_updates'>[];
+    entry: EntryData
+    dictionary: Tables<'dictionaries'>
+    can_edit?: boolean
+    dbOperations: DbOperations
+    entry_history: Tables<'content_updates'>[]
   }
 
   let {
@@ -23,8 +23,8 @@
     dictionary,
     can_edit = false,
     dbOperations,
-    entry_history
-  }: Props = $props();
+    entry_history,
+  }: Props = $props()
 
   const text_fields = ['morphology', 'interlinearization'] satisfies EntryFieldValue[]
 

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import CKEditor from './CKEditor.svelte';
-  import type { EditorConfig } from '@ckeditor/ckeditor5-core/src/editor/editorconfig';
+  import type { EditorConfig } from '@ckeditor/ckeditor5-core/src/editor/editorconfig'
+  import CKEditor from './CKEditor.svelte'
 
   interface Props {
-    html: string;
-    editorConfig?: EditorConfig;
-    on_update?: (value: string) => void;
+    html: string
+    editorConfig?: EditorConfig
+    on_update?: (value: string) => void
   }
 
   let { html, editorConfig = {
@@ -32,7 +32,7 @@
       'undo',
       'redo',
     ],
-  }, on_update }: Props = $props();
+  }, on_update }: Props = $props()
 
 </script>
 

@@ -2,14 +2,14 @@
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
-  import SideMenu from './SideMenu.svelte'
   import { derived } from 'svelte/store'
+  import SideMenu from './SideMenu.svelte'
   import './custom-fonts.css'
 
   let { data, children } = $props()
   let { dictionary, is_manager, entries_data } = $derived(data)
   let loading = $derived(entries_data.loading)
-  let entry_count = derived(entries_data, ($entries) => Object.keys($entries).length)
+  let entry_count = derived(entries_data, $entries => Object.keys($entries).length)
 
   const children_render = $derived(children)
 </script>

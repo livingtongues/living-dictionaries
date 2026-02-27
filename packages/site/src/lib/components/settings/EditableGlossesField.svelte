@@ -1,15 +1,15 @@
 <script lang="ts">
   import type { IGlossLanguages } from '@living-dictionaries/types'
-  import { BadgeArrayEmit, Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
+  import { BadgeArrayEmit, Button, Modal, ShowHide } from '$lib/svelte-pieces'
 
   interface Props {
-    availableLanguages: IGlossLanguages;
-    selectedLanguages: string[];
-    minimum?: number;
-    add_language: (languageId: string) => void;
-    remove_language: (languageId: string) => void;
+    availableLanguages: IGlossLanguages
+    selectedLanguages: string[]
+    minimum?: number
+    add_language: (languageId: string) => void
+    remove_language: (languageId: string) => void
   }
 
   let {
@@ -17,8 +17,8 @@
     selectedLanguages,
     minimum = 1,
     add_language,
-    remove_language
-  }: Props = $props();
+    remove_language,
+  }: Props = $props()
 
   let activeGlossingBcps = $derived(Array.isArray(selectedLanguages)
     ? selectedLanguages.map(bcp =>
@@ -37,7 +37,7 @@
   {page.data.t('create.gloss_dictionary_in')}
 </div>
 
-<ShowHide  >
+<ShowHide>
   {#snippet children({ show, toggle })}
     <BadgeArrayEmit
       strings={activeGlossingBcps}
@@ -49,16 +49,16 @@
     {#if show}
       <Modal on_close={toggle}>
         {#snippet heading()}
-            <span >
-{page.data.t('create.gloss_dictionary_in')}
+          <span>
+            {page.data.t('create.gloss_dictionary_in')}
           </span>
-          {/snippet}
+        {/snippet}
         <Filter
           items={remainingGlossingLanguagesAsArray}
-          
+
           placeholder={page.data.t('about.search')}>
           {#snippet children({ filteredItems: filteredLanguages })}
-                {#each filteredLanguages as language}
+            {#each filteredLanguages as language}
               <Button
                 onclick={() => {
                   add_language(language.bcp)
@@ -76,8 +76,8 @@
                 {/if}
               </Button>
             {/each}
-                        {/snippet}
-            </Filter>
+          {/snippet}
+        </Filter>
         <div class="modal-footer">
           <Button onclick={toggle} color="black">Cancel</Button>
         </div>

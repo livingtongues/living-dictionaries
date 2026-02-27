@@ -1,6 +1,6 @@
-import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
 import type { TranslateOptions } from '$lib/i18n'
 import type { TranslateFunction, TranslationKeys } from '$lib/i18n/types'
+import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
 
 export function build_citation({ t, dictionary, custom_citation, partners }: {
   t: TranslateFunction

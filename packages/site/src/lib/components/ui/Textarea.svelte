@@ -1,11 +1,11 @@
 <script lang="ts">
   interface Props {
-    name: string;
-    size?: number;
-    required?: boolean;
-    disabled?: boolean;
-    on_input?: (value: string) => void;
-    on_submit?: () => void;
+    name: string
+    size?: number
+    required?: boolean
+    disabled?: boolean
+    on_input?: (value: string) => void
+    on_submit?: () => void
   }
 
   let {
@@ -14,21 +14,21 @@
     required = false,
     disabled = false,
     on_input,
-    on_submit
-  }: Props = $props();
+    on_submit,
+  }: Props = $props()
 
   function resize({ target }) {
-    target.style.height = '1px';
-    target.style.height = +target.scrollHeight + 'px';
+    target.style.height = '1px'
+    target.style.height = `${+target.scrollHeight}px`
   }
 
   function autoresize(el: HTMLTextAreaElement) {
-    resize({ target: el });
-    el.addEventListener('input', resize);
+    resize({ target: el })
+    el.addEventListener('input', resize)
 
     return {
       destroy: () => el.removeEventListener('input', resize),
-    };
+    }
   }
 </script>
 
@@ -44,14 +44,13 @@
     {required}
     {disabled}
     oninput={(e) => {
-      //@ts-ignore
-      on_input?.(e.target.value.trim());
+      // @ts-ignore
+      on_input?.(e.target.value.trim())
     }}
     use:autoresize
     onkeyup={(e) => {
       if (e.code === 'Enter')
-        on_submit?.();
-
+        on_submit?.()
     }}
     autocomplete="off"></textarea>
   <!-- svelte-ignore a11y_label_has_associated_control -->

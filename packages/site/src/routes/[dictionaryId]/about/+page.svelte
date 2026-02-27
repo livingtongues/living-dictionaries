@@ -1,11 +1,11 @@
 <script lang="ts">
+  import { page } from '$app/state'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { Button } from '$lib/svelte-pieces'
   import sanitize from 'xss'
   import UserGuide from './UserGuide.svelte'
-  import { page } from '$app/state'
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
-  let { data } = $props();
+  let { data } = $props()
   let { is_manager, is_contributor, dictionary, update_about, dictionary_info, admin } = $derived(data)
   let updated = $state('')
 
@@ -39,7 +39,7 @@
     {#if editing}
       <div class="max-w-screen-md tw-prose prose-lg">
         {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-          <ClassicCustomized html={$dictionary_info.about} on_update={(detail) => (updated = detail)} />
+          <ClassicCustomized html={$dictionary_info.about} on_update={detail => (updated = detail)} />
         {/await}
       </div>
     {/if}

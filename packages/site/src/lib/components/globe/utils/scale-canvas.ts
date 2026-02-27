@@ -10,8 +10,8 @@ export function scale_canvas(
   canvas.width = width * device_pixel_ratio
   canvas.height = height * device_pixel_ratio
 
-  canvas.style.width = width + 'px'
-  canvas.style.height = height + 'px'
+  canvas.style.width = `${width}px`
+  canvas.style.height = `${height}px`
 
   context.scale(device_pixel_ratio, device_pixel_ratio)
 

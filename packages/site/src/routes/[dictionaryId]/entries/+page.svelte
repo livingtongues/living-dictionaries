@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { Button, ShowHide } from '$lib/svelte-pieces'
-  import type { FacetResult } from '@orama/orama'
-  import Pagination from './Pagination.svelte'
-  import SwitchView from './SwitchView.svelte'
-  import EntryFilters from './EntryFilters.svelte'
-  import SearchInput from './SearchInput.svelte'
-  import View from './View.svelte'
   import type { QueryParams } from '$lib/search/types'
+  import type { FacetResult } from '@orama/orama'
+  import { browser } from '$app/environment'
   import { page } from '$app/state'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { browser } from '$app/environment'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
+  import EntryFilters from './EntryFilters.svelte'
+  import Pagination from './Pagination.svelte'
+  import SearchInput from './SearchInput.svelte'
+  import SwitchView from './SwitchView.svelte'
+  import View from './View.svelte'
 
-  let { data } = $props();
+  let { data } = $props()
 
   // let page_entries: EntryData[] = []
   let _hits = $state([])
@@ -19,7 +19,6 @@
   let search_time: string = $state()
   let search_results_count: number = $state()
   let result_facets: FacetResult = $state()
-
 
   let search_inited_ms: number
 
@@ -52,7 +51,7 @@
     if (browser || $search_index_updated) {
       search($search_params, current_page_index)
     }
-  });
+  })
   let page_entries = $derived(_hits.map((hit) => {
     const entry = $entries_data[hit.id]
     if (!entry) return null
@@ -63,7 +62,7 @@
   }).filter(Boolean))
 </script>
 
-<ShowHide  >
+<ShowHide>
   {#snippet children({ show: show_mobile_filters, toggle })}
     <div
       class="flex mb-1 items-center sticky top-0 md:top-12 pt-2 md:pt-0 pb-1

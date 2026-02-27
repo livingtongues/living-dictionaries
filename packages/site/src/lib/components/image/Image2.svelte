@@ -1,52 +1,53 @@
 <script lang="ts">
   // learning from https://github.com/pngwn/peng-move/blob/main/src/lib/Animal.svelte
-  import { spring } from 'svelte/motion';
+  import { spring } from 'svelte/motion'
+
   interface Props {
-    gcs: string;
-    length: number;
-    dimensionType?: 'square' | 'width' | 'height';
+    gcs: string
+    length: number
+    dimensionType?: 'square' | 'width' | 'height'
   }
 
-  let { gcs, length, dimensionType = 'width' }: Props = $props();
+  let { gcs, length, dimensionType = 'width' }: Props = $props()
 
-  let imageEl: HTMLImageElement = $state();
+  let imageEl: HTMLImageElement = $state()
 
-  let ww = $state(0);
-  let wh = $state(0);
-  const scale = spring(1);
-  const opacity = spring(0, { stiffness: 0.2, damping: 1 });
-  let viewing = $state(false);
+  let ww = $state(0)
+  let wh = $state(0)
+  const scale = spring(1)
+  const opacity = spring(0, { stiffness: 0.2, damping: 1 })
+  let viewing = $state(false)
 
   function handle_click() {
-    if (imageEl === null) return;
-    const styles = window.getComputedStyle(imageEl);
+    if (imageEl === null) return
+    const styles = window.getComputedStyle(imageEl)
     // const top_offset = parseInt(styles.getPropertyValue('margin-top'));
-    const left_offset = parseInt(styles.getPropertyValue('margin-left'));
-    const { left, right, top, bottom, width } = imageEl.getBoundingClientRect();
+    const left_offset = Number.parseInt(styles.getPropertyValue('margin-left'))
+    const { left, right, top, bottom, width } = imageEl.getBoundingClientRect()
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const pos = [left < ww - right ? 0 : 100, top < wh - bottom ? 0 : 100];
+    const pos = [left < ww - right ? 0 : 100, top < wh - bottom ? 0 : 100]
     // active_el.index = i;
     // active_el.left = `${left - left_offset}px`;
     // active_el.top = `${top - top_offset}px`;
     // active_el.origin = `${pos[0]}% ${pos[1]}%`;
-    viewing = !viewing;
+    viewing = !viewing
     requestAnimationFrame(() => {
-      scale.set((ww - 2 - left_offset * 2) / width);
-      opacity.set(0.95);
-    });
+      scale.set((ww - 2 - left_offset * 2) / width)
+      opacity.set(0.95)
+    })
   }
 
   async function clear() {
     requestAnimationFrame(async () => {
-      await Promise.all([scale.set(1), opacity.set(0)]);
+      await Promise.all([scale.set(1), opacity.set(0)])
       // active_el = {
       // 	index: -1,
       // 	left: '0',
       // 	top: '0',
       // 	origin: '0 0'
       // };
-      viewing = false;
-    });
+      viewing = false
+    })
   }
 
   let src = $derived(`https://lh3.googleusercontent.com/${gcs}=${
@@ -57,7 +58,7 @@
       : dimensionType === 'height'
       ? `h${length}`
       : 's0'
-  }`);
+  }`)
 </script>
 
 <img

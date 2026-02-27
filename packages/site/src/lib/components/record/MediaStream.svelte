@@ -1,42 +1,42 @@
 <!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (error to error_1) making the component unusable -->
 <script context="module" lang="ts">
-  import { writable } from 'svelte/store';
-  const selectedMicrophone = writable<MediaDeviceInfo>(null);
-  const selectedCamera = writable<MediaDeviceInfo>(null);
+  import { writable } from 'svelte/store'
+
+  const selectedMicrophone = writable<MediaDeviceInfo>(null)
+  const selectedCamera = writable<MediaDeviceInfo>(null)
 </script>
 
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte'
 
   export let audio = true,
-    video = true;
-  let stream: MediaStream;
-  let devices: MediaDeviceInfo[] = [];
-  $: microphones = devices.filter((d) => d.kind === 'audioinput');
-  $: cameras = devices.filter((d) => d.kind === 'videoinput');
+    video = true
+  let stream: MediaStream
+  let devices: MediaDeviceInfo[] = []
+  $: microphones = devices.filter(d => d.kind === 'audioinput')
+  $: cameras = devices.filter(d => d.kind === 'videoinput')
   $: {
     if (!$selectedMicrophone)
-      selectedMicrophone.set(microphones[0]);
+      selectedMicrophone.set(microphones[0])
 
     if (!$selectedCamera)
-      selectedCamera.set(cameras[0]);
-
+      selectedCamera.set(cameras[0])
   }
 
-  let error: any;
+  let error: any
 
   onMount(async () => {
     try {
-      stream = await requestStream();
-      devices = await navigator.mediaDevices.enumerateDevices();
+      stream = await requestStream()
+      devices = await navigator.mediaDevices.enumerateDevices()
     } catch (e) {
-      error = { name: e.name, message: e.message };
-      console.error(e.name + ': ' + e.message);
+      error = { name: e.name, message: e.message }
+      console.error(`${e.name}: ${e.message}`)
     }
-  });
+  })
 
   function requestStream() {
-    closeStream();
+    closeStream()
     const constraints: MediaStreamConstraints = {
       audio: audio
         ? {
@@ -48,27 +48,27 @@
           deviceId: $selectedCamera ? $selectedCamera.deviceId : undefined,
         }
         : false,
-    };
-    return navigator.mediaDevices.getUserMedia(constraints);
+    }
+    return navigator.mediaDevices.getUserMedia(constraints)
   }
 
   function closeStream() {
     if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-      stream = null;
+      stream.getTracks().forEach(track => track.stop())
+      stream = null
     }
   }
 
   async function chooseMicrophone(microphoneId: string) {
-    selectedMicrophone.set(microphones.find((m) => m.deviceId === microphoneId));
-    stream = await requestStream();
+    selectedMicrophone.set(microphones.find(m => m.deviceId === microphoneId))
+    stream = await requestStream()
   }
   async function chooseCamera(cameraId: string) {
-    selectedCamera.set(cameras.find((c) => c.deviceId === cameraId));
-    stream = await requestStream();
+    selectedCamera.set(cameras.find(c => c.deviceId === cameraId))
+    stream = await requestStream()
   }
 
-  onDestroy(() => closeStream());
+  onDestroy(() => closeStream())
 </script>
 
 {#if stream}

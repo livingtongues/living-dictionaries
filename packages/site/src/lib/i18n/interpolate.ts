@@ -1,4 +1,4 @@
-const VARIABLE_PLACEHOLDER = /{(?<key>\w+)}/g
+const VARIABLE_PLACEHOLDER = /\{(?<key>\w+)\}/g
 
 export function interpolate(template: string, values?: Record<string, string>) {
   if (!values)

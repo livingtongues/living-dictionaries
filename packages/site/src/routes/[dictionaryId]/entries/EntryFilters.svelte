@@ -1,26 +1,26 @@
 <script lang="ts">
-  import { Button, type QueryParamStore, ResponsiveSlideover } from '$lib/svelte-pieces'
-  import type { FacetResult } from '@orama/orama'
-  import ToggleFacet from './ToggleFacet.svelte'
-  import ClearFilters from './ClearFilters.svelte'
-  import FilterList from './FilterList.svelte'
   import type { QueryParams } from '$lib/search/types'
+  import type { FacetResult } from '@orama/orama'
   import { page } from '$app/state'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
+  import { Button, type QueryParamStore, ResponsiveSlideover } from '$lib/svelte-pieces'
+  import ClearFilters from './ClearFilters.svelte'
+  import FilterList from './FilterList.svelte'
+  import ToggleFacet from './ToggleFacet.svelte'
 
   interface Props {
-    search_params: QueryParamStore<QueryParams>;
-    show_mobile_filters?: boolean;
-    on_close: () => void;
-    result_facets: FacetResult;
+    search_params: QueryParamStore<QueryParams>
+    show_mobile_filters?: boolean
+    on_close: () => void
+    result_facets: FacetResult
   }
 
   let {
     search_params,
     show_mobile_filters = false,
     on_close,
-    result_facets
-  }: Props = $props();
+    result_facets,
+  }: Props = $props()
 
   let { tags, dialects, speakers } = $derived(page.data)
 </script>

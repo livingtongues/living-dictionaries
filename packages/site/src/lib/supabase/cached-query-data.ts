@@ -1,7 +1,7 @@
-import { writable } from 'svelte/store'
-import { del as del_idb, get as get_idb, set as set_idb } from 'idb-keyval'
-import { mode } from '.'
 import { browser, dev } from '$app/environment'
+import { del as del_idb, get as get_idb, set as set_idb } from 'idb-keyval'
+import { writable } from 'svelte/store'
+import { mode } from '.'
 
 interface CachedDataStoreOptions {
   key: string

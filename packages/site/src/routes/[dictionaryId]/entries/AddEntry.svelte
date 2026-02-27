@@ -1,22 +1,22 @@
 <script lang="ts">
-  import { Button, ShowHide } from '$lib/svelte-pieces'
+  import type { DbOperations } from '$lib/dbOperations'
   import { page } from '$app/state'
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte'
-  import type { DbOperations } from '$lib/dbOperations'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
 
   interface Props {
-    add_entry: DbOperations['insert_entry'];
+    add_entry: DbOperations['insert_entry']
     [key: string]: any
   }
 
-  let { ...props }: Props = $props();
+  let { ...props }: Props = $props()
 
   let online = $state(true)
 </script>
 
 <svelte:window bind:online />
 
-<ShowHide  >
+<ShowHide>
   {#snippet children({ show, toggle })}
     <Button class="text-nowrap {props.class}" form="filled" onclick={toggle} disabled={!online}>
       {#if online}

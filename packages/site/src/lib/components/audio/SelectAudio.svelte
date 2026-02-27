@@ -18,10 +18,10 @@
   ]
   let dragging = $state(false)
   interface Props {
-    file: File;
+    file: File
   }
 
-  let { file = $bindable() }: Props = $props();
+  let { file = $bindable() }: Props = $props()
 
   function handleAudio(files: FileList) {
     dragging = false

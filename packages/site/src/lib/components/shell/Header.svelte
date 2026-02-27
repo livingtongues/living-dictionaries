@@ -1,14 +1,15 @@
 <script lang="ts">
-  import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
-  import User from './User.svelte'
   import { page } from '$app/state'
   import { mode } from '$lib/supabase'
+  import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
+  import User from './User.svelte'
+
   interface Props {
-    children?: import('svelte').Snippet;
-    left?: import('svelte').Snippet;
+    children?: import('svelte').Snippet
+    left?: import('svelte').Snippet
   }
 
-  let { children, left }: Props = $props();
+  let { children, left }: Props = $props()
 </script>
 
 <header class="print:hidden sticky top-0 left-0 right-0 flex items-center bg-white h-12 z-2 whitespace-nowrap">
@@ -64,9 +65,9 @@
       </span>
     </Button>
 
-    <ShowHide  >
+    <ShowHide>
       {#snippet children({ show, toggle })}
-            <Button form="text" onclick={toggle}>
+        <Button form="text" onclick={toggle}>
           <span class="inline">
             <i class="far fa-comment"></i>
           </span>
@@ -82,12 +83,12 @@
             <Contact on_close={toggle} />
           {/await}
         {/if}
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
 
-    <ShowHide  >
+    <ShowHide>
       {#snippet children({ show, toggle })}
-            <Button form="text" onclick={toggle}>
+        <Button form="text" onclick={toggle}>
           <i class="far fa-language"></i>
           <span class="ml-1 hidden lg:inline">
             {page.data.t('header.language')}
@@ -98,12 +99,12 @@
             <SelectLanguage on_close={toggle} />
           {/await}
         {/if}
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
 
-    <ShowHide   >
+    <ShowHide>
       {#snippet children({ show, toggle, set })}
-            <button type="button" class="p-3 md:hidden print:p-0" onclick={toggle}>
+        <button type="button" class="p-3 md:hidden print:p-0" onclick={toggle}>
           <i class="far fa-bars print:hidden"></i>
         </button>
         <ResponsiveSlideover
@@ -152,8 +153,8 @@
             </div>
           </div>
         </ResponsiveSlideover>
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
 
     <User />
   </div>

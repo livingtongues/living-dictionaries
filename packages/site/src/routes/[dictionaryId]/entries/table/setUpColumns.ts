@@ -1,9 +1,9 @@
 import type { IColumn, Tables } from '@living-dictionaries/types'
-import { get } from 'svelte/store'
-import { page } from '$app/stores'
-import { vernacularName } from '$lib/helpers/vernacularName'
-import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
 import { browser } from '$app/environment'
+import { page } from '$app/stores'
+import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
+import { vernacularName } from '$lib/helpers/vernacularName'
+import { get } from 'svelte/store'
 
 export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionaries'>): IColumn[] {
   const cols = columns.filter(column => !column.hidden)

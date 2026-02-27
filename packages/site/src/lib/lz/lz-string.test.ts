@@ -1,7 +1,7 @@
 import { compressToEncodedURIComponent as compress, decompressFromEncodedURIComponent as decompress } from './lz-string'
 
 function range(length) {
-  return [...Array(length).keys()]
+  return [...new Array(length).keys()]
 };
 
 function allPrintableCharacters() {

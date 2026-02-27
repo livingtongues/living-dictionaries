@@ -1,9 +1,9 @@
-import { error, json } from '@sveltejs/kit'
-import { getSupportMessageRecipients } from '../addresses'
-import { send_email } from '../send-email'
 import type { RequestHandler } from './$types'
 import { dev } from '$app/environment'
 import { ResponseCodes } from '$lib/constants'
+import { error, json } from '@sveltejs/kit'
+import { getSupportMessageRecipients } from '../addresses'
+import { send_email } from '../send-email'
 
 export interface SupportRequestBody {
   email: string

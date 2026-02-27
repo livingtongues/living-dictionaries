@@ -1,7 +1,7 @@
-import { readable } from 'svelte/store'
 import type { DictionaryView } from '@living-dictionaries/types'
 import type { Supabase } from '.'
 import { browser } from '$app/environment'
+import { readable } from 'svelte/store'
 
 export interface DictionaryWithRoles extends DictionaryView {
   role: 'manager' | 'contributor'

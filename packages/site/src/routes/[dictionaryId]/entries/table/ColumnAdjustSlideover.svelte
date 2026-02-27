@@ -1,18 +1,18 @@
 <script lang="ts">
+  import type { IColumn } from '@living-dictionaries/types'
+  import { page } from '$app/state'
+  import { Slideover } from '$lib/svelte-pieces'
   import { onMount } from 'svelte'
   import { flip } from 'svelte/animate'
   import { fade } from 'svelte/transition'
-  import { Slideover } from '$lib/svelte-pieces'
-  import type { IColumn } from '@living-dictionaries/types'
   import ColumnTitle from './ColumnTitle.svelte'
-  import { page } from '$app/state'
 
   interface Props {
-    selectedColumn: IColumn;
-    on_close: () => void;
+    selectedColumn: IColumn
+    on_close: () => void
   }
 
-  let { selectedColumn, on_close }: Props = $props();
+  let { selectedColumn, on_close }: Props = $props()
   let { preferred_table_columns } = $derived(page.data)
 
   let selectedColumnElement: HTMLElement = $state()

@@ -1,9 +1,9 @@
-import { get } from 'svelte/store'
-import { assign_speaker, insert_audio, insert_photo, insert_video } from '$lib/supabase/operations'
 import { page } from '$app/stores'
-import { upload_image } from '$lib/components/image/upload-image'
 import { upload_audio } from '$lib/components/audio/upload-audio'
+import { upload_image } from '$lib/components/image/upload-image'
 import { upload_video } from '$lib/components/video/upload-video'
+import { assign_speaker, insert_audio, insert_photo, insert_video } from '$lib/supabase/operations'
+import { get } from 'svelte/store'
 
 export function addImage({ sense_id, image_options }: { sense_id: string, image_options: { file: File, source: string, photographer?: string } }) {
   const { file, source, photographer } = image_options

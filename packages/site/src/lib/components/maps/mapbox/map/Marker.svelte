@@ -12,23 +12,23 @@
 </script>
 
 <script lang="ts">
-  import { getContext, onMount, setContext } from 'svelte'
   import type { LngLat, Marker, MarkerOptions } from 'mapbox-gl'
-  import { type MapKeyContext, type MarkerKeyContext, mapKey, markerKey } from '../context'
+  import { getContext, onMount, setContext } from 'svelte'
+  import { mapKey, type MapKeyContext, markerKey, type MarkerKeyContext } from '../context'
 
   const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
   const map = getMap()
   const mapbox = getMapbox()
 
   interface Props {
-    lat: number;
-    lng: number;
-    color?: 'blue' | 'black';
-    options?: MarkerOptions;
-    draggable?: boolean;
-    on_dragend?: (lngLat: LngLat) => void;
-    pin?: import('svelte').Snippet<[any]>;
-    children?: import('svelte').Snippet<[any]>;
+    lat: number
+    lng: number
+    color?: 'blue' | 'black'
+    options?: MarkerOptions
+    draggable?: boolean
+    on_dragend?: (lngLat: LngLat) => void
+    pin?: import('svelte').Snippet<[any]>
+    children?: import('svelte').Snippet<[any]>
   }
 
   let {
@@ -39,8 +39,8 @@
     draggable = false,
     on_dragend,
     pin,
-    children
-  }: Props = $props();
+    children,
+  }: Props = $props()
 
   let marker: Marker = $state()
   let element: HTMLDivElement = $state()
@@ -52,7 +52,7 @@
 
   $effect(() => {
     marker?.setLngLat({ lng, lat })
-  });
+  })
 
   function handleClick(e) {
     e.stopPropagation()
@@ -92,9 +92,9 @@
 </script>
 
 <div bind:this={element}>
-  {@render pin?.({ marker, lat, lng, })}
+  {@render pin?.({ marker, lat, lng })}
 </div>
 
 {#if marker}
-  {@render children?.({ marker, lat, lng, })}
+  {@render children?.({ marker, lat, lng })}
 {/if}

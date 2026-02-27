@@ -1,7 +1,7 @@
 import type { DeepPartial, EntryData, MultiString } from '@living-dictionaries/types'
 import type { EntryForCSV, translate_entries } from './prepareEntriesForCsv'
-import { friendlyName } from './friendlyName'
 import { glossingLanguages } from '$lib/glosses/glossing-languages'
+import { friendlyName } from './friendlyName'
 
 interface ExportMetaData {
   sense_index: number

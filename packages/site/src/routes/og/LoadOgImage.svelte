@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
-  import { compressToEncodedURIComponent as encode } from '$lib/lz/lz-string'
   import { dev } from '$app/environment'
+  import { compressToEncodedURIComponent as encode } from '$lib/lz/lz-string'
+  import { onMount } from 'svelte'
 
   interface Props {
-    width: number;
-    height: number;
-    title: string;
-    description: string;
-    dictionaryName: string;
-    lat: number;
-    lng: number;
-    gcsPath?: string;
+    width: number
+    height: number
+    title: string
+    description: string
+    dictionaryName: string
+    lat: number
+    lng: number
+    gcsPath?: string
   }
 
   let {
@@ -22,8 +22,8 @@
     dictionaryName,
     lat,
     lng,
-    gcsPath = undefined
-  }: Props = $props();
+    gcsPath = undefined,
+  }: Props = $props()
 
   let version = $state(new Date().getTime())
   onMount(() => {

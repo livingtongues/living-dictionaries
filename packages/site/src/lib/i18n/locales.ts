@@ -15,7 +15,7 @@ export enum Locales {
   vi = 'Vietnamese',
 }
 
-export type LocaleCode = keyof typeof Locales;
+export type LocaleCode = keyof typeof Locales
 
 export enum UnpublishedLocales {
   ha = 'Harshen Hausa / هَرْشَن هَوْسَ',
@@ -31,7 +31,7 @@ export enum UnpublishedLocales {
 }
 // add more codes from https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 
-export type UnpublishedLocaleCode = keyof typeof UnpublishedLocales;
+export type UnpublishedLocaleCode = keyof typeof UnpublishedLocales
 
 export function findSupportedLocaleFromAcceptedLanguages(acceptedLanguageHeader: string | null) {
   const locales = acceptedLanguageHeader

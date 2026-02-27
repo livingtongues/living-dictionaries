@@ -1,9 +1,9 @@
-import { error, json } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
+import { dev } from '$app/environment'
 import { ResponseCodes } from '$lib/constants'
 import { mode } from '$lib/supabase'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
-import { dev } from '$app/environment'
+import { error, json } from '@sveltejs/kit'
 
 export interface UpdateDevAdminRoleRequestBody {
   role_level: number

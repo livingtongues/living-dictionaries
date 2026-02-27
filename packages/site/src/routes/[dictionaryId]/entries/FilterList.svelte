@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { type QueryParamStore, ShowHide } from '$lib/svelte-pieces'
-  import { slide } from 'svelte/transition'
+  import type { FilterListKeys, QueryParams } from '$lib/search/types'
   import { page } from '$app/state'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
-  import type { FilterListKeys, QueryParams } from '$lib/search/types'
+  import { type QueryParamStore, ShowHide } from '$lib/svelte-pieces'
+  import { slide } from 'svelte/transition'
 
   interface Props {
-    search_params: QueryParamStore<QueryParams>;
-    search_param_key: FilterListKeys;
-    label: string;
-    values: Record<string, number>; // keys are item key, numbers are count found
-    keys_to_values?: Record<string, string>;
+    search_params: QueryParamStore<QueryParams>
+    search_param_key: FilterListKeys
+    label: string
+    values: Record<string, number> // keys are item key, numbers are count found
+    keys_to_values?: Record<string, string>
   }
 
   let {
@@ -18,8 +18,8 @@
     search_param_key,
     label,
     values,
-    keys_to_values = undefined
-  }: Props = $props();
+    keys_to_values = undefined,
+  }: Props = $props()
 
   let search_value: string = $state()
 
@@ -54,7 +54,7 @@
   </div>
 {/if}
 
-<ShowHide  >
+<ShowHide>
   {#snippet children({ show, toggle })}
     <ul transition:slide>
       {#each filtered_values as [item, item_count], index (item)}

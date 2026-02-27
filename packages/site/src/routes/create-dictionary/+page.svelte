@@ -1,20 +1,20 @@
 <script lang="ts">
-  import { Button, Form } from '$lib/svelte-pieces'
   import type { IPoint, IRegion } from '@living-dictionaries/types'
-  import { onMount } from 'svelte'
-  import { convertToFriendlyUrl } from './convertToFriendlyUrl'
+  import { browser, dev } from '$app/environment'
   import { page } from '$app/state'
-  import Header from '$lib/components/shell/Header.svelte'
-  import Footer from '$lib/components/shell/Footer.svelte'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
   import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
-  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
+  import Footer from '$lib/components/shell/Footer.svelte'
+  import Header from '$lib/components/shell/Header.svelte'
   import { glossingLanguages } from '$lib/glosses/glossing-languages'
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { debounce } from '$lib/helpers/debounce'
-  import { browser, dev } from '$app/environment'
+  import { Button, Form } from '$lib/svelte-pieces'
+  import { onMount } from 'svelte'
+  import { convertToFriendlyUrl } from './convertToFriendlyUrl'
 
-  let { data } = $props();
+  let { data } = $props()
   let { user } = $derived(data)
 
   const MAX_URL_LENGTH = 25
@@ -42,7 +42,7 @@
   const debouncedCheckIfUniqueUrl = debounce(checkIfUniqueUrl, 500)
   $effect(() => {
     if (urlToUse.length >= data.MIN_URL_LENGTH) debouncedCheckIfUniqueUrl(urlToUse)
-  });
+  })
 
   async function checkIfUniqueUrl(url: string): Promise<boolean> {
     isUniqueURL = !(await data.dictionary_id_exists(url))
@@ -68,7 +68,7 @@
 <Header>{page.data.t('create.create_new_dictionary')}</Header>
 
 <Form
-  
+
   onsubmit={async () => {
     if (!$user) return modal = 'auth'
 

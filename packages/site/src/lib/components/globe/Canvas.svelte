@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { onMount, onDestroy, setContext, type Snippet } from 'svelte'
-  import { scale_canvas } from './utils/scale-canvas'
+  import { onDestroy, onMount, setContext, type Snippet } from 'svelte'
   import { CANVAS_CONTEXT_NAME } from './constants'
+  import { scale_canvas } from './utils/scale-canvas'
 
   interface Props {
     width?: number
@@ -14,10 +14,10 @@
     width = 0,
     height = 0,
     center = false,
-    children
+    children,
   }: Props = $props()
 
-  const draw_functions: Array<(ctx: CanvasRenderingContext2D) => void> = []
+  const draw_functions: ((ctx: CanvasRenderingContext2D) => void)[] = []
 
   let canvas: HTMLCanvasElement
   let context = $state<CanvasRenderingContext2D | null>(null)
@@ -55,7 +55,7 @@
     deregister(fn: (ctx: CanvasRenderingContext2D) => void) {
       draw_functions.splice(draw_functions.indexOf(fn), 1)
     },
-    invalidate
+    invalidate,
   })
 
   onMount(() => {
@@ -75,7 +75,7 @@
   })
 </script>
 
-<canvas bind:this={canvas}></canvas>
+<canvas bind:this={canvas} class="absolute inset-0"></canvas>
 {#if context}
   {@render children?.({ context })}
 {/if}

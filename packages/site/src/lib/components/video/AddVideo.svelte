@@ -1,23 +1,23 @@
 <script lang="ts">
-  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import type { EntryData, HostedVideo } from '@living-dictionaries/types'
   import type { Readable } from 'svelte/store'
-  import SelectVideo from './SelectVideo.svelte'
-  import PasteVideoLink from './PasteVideoLink.svelte'
   import type { VideoUploadStatus } from './upload-video'
   import { page } from '$app/state'
+  import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
   import RecordVideo from '$lib/components/video/RecordVideo.svelte'
   import VideoThirdParty from '$lib/components/video/VideoThirdParty.svelte'
-  import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
+  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
+  import PasteVideoLink from './PasteVideoLink.svelte'
+  import SelectVideo from './SelectVideo.svelte'
 
   let { dbOperations } = $derived(page.data)
 
   interface Props {
-    on_close: () => void;
-    entry: EntryData;
+    on_close: () => void
+    entry: EntryData
   }
 
-  let { on_close, entry }: Props = $props();
+  let { on_close, entry }: Props = $props()
 
   let hosted_video: HostedVideo = $state()
   let upload_triggered = $state(false)
@@ -36,12 +36,12 @@
 
 <Modal {on_close}>
   {#snippet heading()}
-    <span > <i class="far fa-film-alt text-sm"></i> {entry.main.lexeme.default} </span>
+    <span> <i class="far fa-film-alt text-sm"></i> {entry.main.lexeme.default} </span>
   {/snippet}
 
-  <SelectSpeaker >
+  <SelectSpeaker>
     {#snippet children({ speaker_id })}
-        {#if hosted_video}
+      {#if hosted_video}
         <VideoThirdParty {hosted_video} />
         <div class="modal-footer">
           <Button onclick={() => hosted_video = null} color="black">
@@ -59,31 +59,31 @@
           </Button>
         </div>
       {:else if speaker_id}
-        <ShowHide  >
+        <ShowHide>
           {#snippet children({ show: record, toggle })}
-                    {#if !record && !upload_triggered}
+            {#if !record && !upload_triggered}
               <PasteVideoLink on_pasted_valid_url={video_info => hosted_video = video_info} />
-              <SelectVideo >
+              <SelectVideo>
                 {#snippet children({ file })}
-                            {@const upload_status = startUpload(file, speaker_id)}
+                  {@const upload_status = startUpload(file, speaker_id)}
                   {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
                     <UploadProgressBarStatus {upload_status} />
                   {/await}
-                                          {/snippet}
-                        </SelectVideo>
+                {/snippet}
+              </SelectVideo>
 
               <Button onclick={toggle} class="mt-4 !py-4 w-full" color="red" type="button">
                 <span class="i-uil-microphone"></span>
                 {page.data.t('video.prepare_to_record_video')}
               </Button>
             {:else}
-              <RecordVideo  >
+              <RecordVideo>
                 {#snippet children({ videoBlob, reset })}
-                            <video controls autoplay playsinline src={URL.createObjectURL(videoBlob)}></video>
+                  <video controls autoplay playsinline src={URL.createObjectURL(videoBlob)}></video>
 
-                  <ShowHide  >
+                  <ShowHide>
                     {#snippet children({ show, toggle })}
-                                {#if !show}
+                      {#if !show}
                         <div class="modal-footer">
                           <Button onclick={reset} color="red"><i class="far fa-trash-alt"></i>
                             {page.data.t('misc.delete')}</Button>
@@ -96,13 +96,13 @@
                           <UploadProgressBarStatus {upload_status} />
                         {/await}
                       {/if}
-                                                  {/snippet}
-                            </ShowHide>
-                                          {/snippet}
-                        </RecordVideo>
+                    {/snippet}
+                  </ShowHide>
+                {/snippet}
+              </RecordVideo>
             {/if}
-                            {/snippet}
-                </ShowHide>
+          {/snippet}
+        </ShowHide>
       {:else}
         <div class="modal-footer">
           <Button onclick={close} color="black">
@@ -110,6 +110,6 @@
           </Button>
         </div>
       {/if}
-          {/snippet}
-    </SelectSpeaker>
+    {/snippet}
+  </SelectSpeaker>
 </Modal>

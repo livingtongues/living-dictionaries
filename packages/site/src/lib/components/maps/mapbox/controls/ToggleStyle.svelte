@@ -1,29 +1,28 @@
 <script lang="ts">
-  import { getContext, onMount } from 'svelte';
-  import { mapKey, type MapKeyContext } from '../context';
-  import type { Style } from 'mapbox-gl';
+  import type { Style } from 'mapbox-gl'
+  import { getContext, onMount } from 'svelte'
+  import { mapKey, type MapKeyContext } from '../context'
 
-  const { getMap } = getContext<MapKeyContext>(mapKey);
-  const map = getMap();
+  const { getMap } = getContext<MapKeyContext>(mapKey)
+  const map = getMap()
 
   interface Props {
-    alternateStyle?: string; // 'Mapbox Satellite Streets'
+    alternateStyle?: string // 'Mapbox Satellite Streets'
   }
 
-  let { alternateStyle = 'mapbox://styles/mapbox/satellite-streets-v12?optimize=true' }: Props = $props();
-  let initialStyle: Style;
+  let { alternateStyle = 'mapbox://styles/mapbox/satellite-streets-v12?optimize=true' }: Props = $props()
+  let initialStyle: Style
 
   onMount(() => {
-    initialStyle = map.getStyle();
-  });
+    initialStyle = map.getStyle()
+  })
 
   function toggleStyle() {
-    const style = map.getStyle();
+    const style = map.getStyle()
     if (style.name === initialStyle.name)
-      map.setStyle(alternateStyle);
+      map.setStyle(alternateStyle)
     else
-      map.setStyle(initialStyle);
-
+      map.setStyle(initialStyle)
   }
 </script>
 

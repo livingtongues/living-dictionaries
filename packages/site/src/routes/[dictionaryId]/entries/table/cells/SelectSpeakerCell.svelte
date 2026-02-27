@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { ShowHide } from '$lib/svelte-pieces'
   import type { EntryData } from '@living-dictionaries/types'
+  import { ShowHide } from '$lib/svelte-pieces'
 
   interface Props {
-    entry: EntryData;
-    can_edit?: boolean;
+    entry: EntryData
+    can_edit?: boolean
   }
 
-  let { entry, can_edit = false }: Props = $props();
+  let { entry, can_edit = false }: Props = $props()
 
   let first_audio = $derived(entry?.audios?.[0])
   let speaker_name = $derived(first_audio?.speakers?.[0].name || '')
 </script>
 
-<ShowHide   >
+<ShowHide>
   {#snippet children({ show, set, toggle })}
     <div
       class:cursor-pointer={can_edit}

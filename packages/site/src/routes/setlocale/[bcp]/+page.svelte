@@ -1,20 +1,20 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import type { PageData } from './$types';
-  import { setLocaleCookie } from '$lib/i18n/changeLocale';
-  import { getSupportedLocale } from '$lib/i18n/locales';
+  import type { PageData } from './$types'
+  import { setLocaleCookie } from '$lib/i18n/changeLocale'
+  import { getSupportedLocale } from '$lib/i18n/locales'
+  import { onMount } from 'svelte'
 
   interface Props {
-    data: PageData;
+    data: PageData
   }
 
-  let { data }: Props = $props();
+  let { data }: Props = $props()
 
   onMount(() => {
-    const locale = getSupportedLocale(data.bcp);
+    const locale = getSupportedLocale(data.bcp)
     if (locale)
-      setLocaleCookie(locale);
+      setLocaleCookie(locale)
 
-    location.assign('/');
-  });
+    location.assign('/')
+  })
 </script>

@@ -1,35 +1,35 @@
 <script lang="ts">
+  import type { DbOperations } from '$lib/dbOperations'
   import type {
     EntryData,
     IColumn,
     TablesUpdate,
   } from '@living-dictionaries/types'
+  import { page } from '$app/state'
+  import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
+  import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
+  import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
+  import EntrySource from '$lib/components/entry/EntrySource.svelte'
+  import EntryTag from '$lib/components/entry/EntryTag.svelte'
+  import Image from '$lib/components/image/Image.svelte'
   import { ShowHide } from '$lib/svelte-pieces'
   import Audio from '../components/Audio.svelte'
-  import Textbox from './cells/Textbox.svelte'
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte'
-  import { page } from '$app/state'
-  import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
-  import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
-  import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
-  import EntrySource from '$lib/components/entry/EntrySource.svelte'
-  import Image from '$lib/components/image/Image.svelte'
-  import type { DbOperations } from '$lib/dbOperations'
-  import EntryTag from '$lib/components/entry/EntryTag.svelte'
+  import Textbox from './cells/Textbox.svelte'
 
   interface Props {
-    column: IColumn;
-    entry: EntryData;
-    can_edit?: boolean;
-    dbOperations: DbOperations;
+    column: IColumn
+    entry: EntryData
+    can_edit?: boolean
+    dbOperations: DbOperations
   }
 
   let {
     column,
     entry = $bindable(),
     can_edit = false,
-    dbOperations
-  }: Props = $props();
+    dbOperations,
+  }: Props = $props()
 
   let sense = $derived(entry.senses?.[0])
   let first_photo = $derived(entry.senses?.[0]?.photos?.[0])
@@ -63,9 +63,9 @@
           })} />
     {:else if can_edit}
       <!-- <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col"> -->
-      <ShowHide  >
+      <ShowHide>
         {#snippet children({ show, toggle })}
-                        <div class="text-gray-600 text-center cursor-pointer" onclick={toggle}>
+          <div class="text-gray-600 text-center cursor-pointer" onclick={toggle}>
             <span class="hidden md:inline">
               <span class="i-ic-outline-cloud-upload text-2xl"></span>
             </span>
@@ -79,8 +79,8 @@
               <EditImage on_close={toggle} sense_id={sense.id} />
             {/await}
           {/if}
-                              {/snippet}
-                    </ShowHide>
+        {/snippet}
+      </ShowHide>
       <!-- </div> -->
     {/if}
   {:else if column.field === 'speaker'}

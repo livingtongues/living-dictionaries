@@ -1,21 +1,21 @@
 <script lang="ts">
-  import { Button } from '$lib/svelte-pieces'
-  import type { Readable } from 'svelte/store'
   import type { PartnerWithPhoto } from '@living-dictionaries/types'
+  import type { Readable } from 'svelte/store'
   import { page } from '$app/state'
-  import Image from '$lib/components/image/Image.svelte'
   import AddImage from '$lib/components/image/AddImage.svelte'
+  import Image from '$lib/components/image/Image.svelte'
+  import { Button } from '$lib/svelte-pieces'
 
   interface Props {
-    admin?: number;
-    can_edit?: boolean;
-    partners: PartnerWithPhoto[];
-    add_partner_name: (name: string) => Promise<void>;
-    delete_partner: (partner_id: string) => Promise<void>;
-    add_partner_image: (partner_id: string, file: File) => Readable<{ progress: number, error?: string, preview_url: string }>;
-    delete_partner_image: ({ partner_id, photo_id }: { partner_id: string, photo_id: string }) => Promise<void>;
-    hide_living_tongues_logo: (allow: boolean) => Promise<void>;
-    hideLivingTonguesLogo?: boolean;
+    admin?: number
+    can_edit?: boolean
+    partners: PartnerWithPhoto[]
+    add_partner_name: (name: string) => Promise<void>
+    delete_partner: (partner_id: string) => Promise<void>
+    add_partner_image: (partner_id: string, file: File) => Readable<{ progress: number, error?: string, preview_url: string }>
+    delete_partner_image: ({ partner_id, photo_id }: { partner_id: string, photo_id: string }) => Promise<void>
+    hide_living_tongues_logo: (allow: boolean) => Promise<void>
+    hideLivingTonguesLogo?: boolean
   }
 
   let {
@@ -27,8 +27,8 @@
     add_partner_image,
     delete_partner_image,
     hide_living_tongues_logo,
-    hideLivingTonguesLogo = false
-  }: Props = $props();
+    hideLivingTonguesLogo = false,
+  }: Props = $props()
 
   const LIVING_TONGUES_LOGO
     = 'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FLiving_Tongues_Logo_transparent%20300dpi.png?alt=media'

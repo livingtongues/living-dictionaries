@@ -1,19 +1,19 @@
 <script lang="ts" generics="T">
-  
+
   interface Props {
     // type T = $$Generic
-    items: T[];
-    placeholder?: string;
-    right?: import('svelte').Snippet<[any]>;
-    children?: import('svelte').Snippet<[any]>;
+    items: T[]
+    placeholder?: string
+    right?: import('svelte').Snippet<[any]>
+    children?: import('svelte').Snippet<[any]>
   }
 
   let {
     items,
     placeholder = 'Search',
     right,
-    children
-  }: Props = $props();
+    children,
+  }: Props = $props()
 
   let value = $state('')
 
@@ -30,10 +30,10 @@
 <div class="flex items-center mb-2">
   <input type="search" bind:value use:autofocus placeholder={`${placeholder} (${items.length})`} />
   <div class="mr-1"></div>
-  {@render right?.({ filteredItems, })}
+  {@render right?.({ filteredItems })}
 </div>
 
-{@render children?.({ filteredItems, })}
+{@render children?.({ filteredItems })}
 
 <style>
   input {

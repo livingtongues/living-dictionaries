@@ -1,12 +1,12 @@
-import { error, json } from '@sveltejs/kit'
-import { send_email } from '../send-email'
-import { render_component_to_html } from '../render-component-to-html'
-import { jacobAddress, no_reply_address } from '../addresses'
 import type { RequestHandler } from './$types'
-import Announcement from './Announcement.svelte'
-import { ResponseCodes } from '$lib/constants'
 import { dev } from '$app/environment'
+import { ResponseCodes } from '$lib/constants'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
+import { error, json } from '@sveltejs/kit'
+import { jacobAddress, no_reply_address } from '../addresses'
+import { render_component_to_html } from '../render-component-to-html'
+import { send_email } from '../send-email'
+import Announcement from './Announcement.svelte'
 
 const batchSize = 50
 

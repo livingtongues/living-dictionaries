@@ -1,5 +1,5 @@
-import { getSession, getSupabase } from '$lib/supabase'
 import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from '$lib/constants'
+import { getSession, getSupabase } from '$lib/supabase'
 
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {

@@ -1,7 +1,7 @@
 import type { TablesUpdate } from '@living-dictionaries/types'
-import { get } from 'svelte/store'
 import type { PageLoad } from './$types'
 import { upload_image } from '$lib/components/image/upload-image'
+import { get } from 'svelte/store'
 
 export const load: PageLoad = async ({ parent }) => {
   const { t, admin, user, dictionary, update_dictionary } = await parent()

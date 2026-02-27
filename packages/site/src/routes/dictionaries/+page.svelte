@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { Button, ResponsiveTable } from '$lib/svelte-pieces'
   import { page } from '$app/state'
-  import Header from '$lib/components/shell/Header.svelte'
-  import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import Footer from '$lib/components/shell/Footer.svelte'
+  import Header from '$lib/components/shell/Header.svelte'
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import { dictionary_headers, prepareDictionaryForCsv } from '$lib/export/prepareDictionariesForCsv'
+  import { Button, ResponsiveTable } from '$lib/svelte-pieces'
 
   export let data
   $: ({ admin } = data)

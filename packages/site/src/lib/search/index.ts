@@ -1,7 +1,7 @@
-import { proxy } from 'comlink'
 import type { EntryData, Tables } from '@living-dictionaries/types'
 import type { InitEntryWorkerOptions } from './entry.worker'
 import type { SearchEntriesOptions } from './search-entries'
+import { proxy } from 'comlink'
 
 export async function search_entries(options: SearchEntriesOptions) {
   const { api } = await import('./expose-entry-worker')

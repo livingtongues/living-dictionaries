@@ -1,10 +1,10 @@
 <script lang="ts">
   interface Props {
-    display: string;
-    value: string | string[];
+    display: string
+    value: string | string[]
   }
 
-  let { display, value }: Props = $props();
+  let { display, value }: Props = $props()
 </script>
 
 {#if value?.length > 0}

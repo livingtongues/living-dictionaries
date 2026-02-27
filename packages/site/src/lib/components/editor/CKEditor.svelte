@@ -1,17 +1,17 @@
 <!-- From: https://github.com/techlab23/ckeditor5-svelte -->
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte'
   import type { Editor } from '@ckeditor/ckeditor5-core'
   import type { EditorConfig } from '@ckeditor/ckeditor5-core/src/editor/editorconfig'
+  import { onDestroy, onMount } from 'svelte'
 
   interface Props {
-    editor: typeof Editor;
-    editorConfig: EditorConfig;
-    value?: string;
-    on_update?: (value: string) => void;
+    editor: typeof Editor
+    editorConfig: EditorConfig
+    value?: string
+    on_update?: (value: string) => void
   }
 
-  let { editor, editorConfig, value = $bindable(''), on_update }: Props = $props();
+  let { editor, editorConfig, value = $bindable(''), on_update }: Props = $props()
 
   let editorEl: HTMLDivElement = $state()
   let instance: Editor

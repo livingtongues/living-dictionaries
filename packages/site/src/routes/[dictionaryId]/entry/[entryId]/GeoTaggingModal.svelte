@@ -1,27 +1,27 @@
 <script lang="ts">
-  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import type { Coordinates, IPoint, IRegion } from '@living-dictionaries/types'
-  import { onMount } from 'svelte'
   import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface'
-  import InitableShowHide from './InitableShowHide.svelte'
-  import { flattenCoordinates } from './flattenCoordinates'
   import { page } from '$app/state'
-  import Map from '$lib/components/maps/mapbox/map/Map.svelte'
+  import CoordinatesModal from '$lib/components/maps/CoordinatesModal.svelte'
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
   import ToggleStyle from '$lib/components/maps/mapbox/controls/ToggleStyle.svelte'
+  import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import Marker from '$lib/components/maps/mapbox/map/Marker.svelte'
   import Popup from '$lib/components/maps/mapbox/map/Popup.svelte'
-  import CoordinatesModal from '$lib/components/maps/CoordinatesModal.svelte'
-  import RegionModal from '$lib/components/maps/RegionModal.svelte'
   import Region from '$lib/components/maps/mapbox/map/Region.svelte'
+  import RegionModal from '$lib/components/maps/RegionModal.svelte'
+  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
+  import { onMount } from 'svelte'
+  import { flattenCoordinates } from './flattenCoordinates'
+  import InitableShowHide from './InitableShowHide.svelte'
 
   interface Props {
-    coordinates: Coordinates;
-    initialCenter: LngLatFull | undefined;
-    addPoint?: boolean;
-    addRegion?: boolean;
-    on_update: (new_value: Coordinates) => Promise<void>;
-    on_close: () => void;
+    coordinates: Coordinates
+    initialCenter: LngLatFull | undefined
+    addPoint?: boolean
+    addRegion?: boolean
+    on_update: (new_value: Coordinates) => Promise<void>
+    on_close: () => void
   }
 
   let {
@@ -30,8 +30,8 @@
     addPoint = false,
     addRegion = false,
     on_update,
-    on_close
-  }: Props = $props();
+    on_close,
+  }: Props = $props()
 
   let lng: number = $state()
   let lat: number = $state()
@@ -76,9 +76,9 @@
           lat={point.coordinates.latitude}
           lng={point.coordinates.longitude}>
           <Popup>
-            <ShowHide  >
+            <ShowHide>
               {#snippet children({ show, toggle })}
-                            <Button form="simple" size="sm" onclick={toggle}>
+                <Button form="simple" size="sm" onclick={toggle}>
                   <span class="i-octicon-pencil"></span>
                 </Button>
                 {#if show}
@@ -102,17 +102,17 @@
                     }}
                     on_close={toggle} />
                 {/if}
-                                        {/snippet}
-                        </ShowHide>
+              {/snippet}
+            </ShowHide>
           </Popup>
         </Marker>
       {/each}
 
       {#each coordinates?.regions || [] as region, index (region)}
         <Region {region}>
-          <ShowHide  >
+          <ShowHide>
             {#snippet children({ show, toggle })}
-                        <Button form="simple" size="sm" onclick={toggle}>
+              <Button form="simple" size="sm" onclick={toggle}>
                 <span class="i-octicon-pencil"></span>
               </Button>
               {#if show}
@@ -131,8 +131,8 @@
                   }}
                   on_close={toggle} />
               {/if}
-                                  {/snippet}
-                    </ShowHide>
+            {/snippet}
+          </ShowHide>
         </Region>
       {/each}
 
@@ -140,9 +140,9 @@
     </Map>
     <div class="mt-1">
       {#if mounted}
-        <InitableShowHide show={addPoint}  >
+        <InitableShowHide show={addPoint}>
           {#snippet children({ show, toggle })}
-                    <Button onclick={toggle} color="black" size="sm">
+            <Button onclick={toggle} color="black" size="sm">
               <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;"></span>
               {page.data.t('create.select_coordinates')}
             </Button>
@@ -158,12 +158,12 @@
                 }}
                 on_close={toggle} />
             {/if}
-                            {/snippet}
-                </InitableShowHide>
+          {/snippet}
+        </InitableShowHide>
 
-        <InitableShowHide show={addRegion}  >
+        <InitableShowHide show={addRegion}>
           {#snippet children({ show, toggle })}
-                    <Button onclick={toggle} color="black" size="sm">
+            <Button onclick={toggle} color="black" size="sm">
               <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;"></span>
               {page.data.t('create.select_region')}
             </Button>
@@ -177,8 +177,8 @@
                 }}
                 on_close={toggle} />
             {/if}
-                            {/snippet}
-                </InitableShowHide>
+          {/snippet}
+        </InitableShowHide>
       {/if}
     </div>
   </div>

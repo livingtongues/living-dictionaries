@@ -1,8 +1,8 @@
-import { type Writable, get } from 'svelte/store'
 import type { MultiString, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
 import type { Supabase } from '.'
-import { page } from '$app/stores'
 import { goto } from '$app/navigation'
+import { page } from '$app/stores'
+import { get, type Writable } from 'svelte/store'
 
 function randomUUID() {
   return window.crypto.randomUUID()
@@ -231,8 +231,7 @@ export async function assign_speaker({
           deleted: new Date().toISOString(),
         }
         await api.delete_audio_speaker(audio_speaker)
-        const { error: delete_error } = await supabase.from('audio_speakers').update(audio_speaker)
-          .eq('audio_id', media_id).eq('speaker_id', speaker_id)
+        const { error: delete_error } = await supabase.from('audio_speakers').update(audio_speaker).eq('audio_id', media_id).eq('speaker_id', speaker_id)
         if (delete_error)
           throw new Error(delete_error.message)
       } else {
@@ -258,8 +257,7 @@ export async function assign_speaker({
           deleted: new Date().toISOString(),
         }
         await api.delete_video_speaker(video_speaker)
-        const { error: delete_error } = await supabase.from('video_speakers').update(video_speaker)
-          .eq('video_id', media_id).eq('speaker_id', speaker_id)
+        const { error: delete_error } = await supabase.from('video_speakers').update(video_speaker).eq('video_id', media_id).eq('speaker_id', speaker_id)
         if (delete_error)
           throw new Error(delete_error.message)
       } else {
@@ -322,8 +320,7 @@ export async function assign_tag({
         deleted: new Date().toISOString(),
       }
       await api.delete_entry_tag(entry_tag)
-      const { error: delete_error } = await supabase.from('entry_tags').update(entry_tag)
-        .eq('tag_id', tag_id).eq('entry_id', entry_id)
+      const { error: delete_error } = await supabase.from('entry_tags').update(entry_tag).eq('tag_id', tag_id).eq('entry_id', entry_id)
       if (delete_error)
         throw new Error(delete_error.message)
     } else {
@@ -385,8 +382,7 @@ export async function assign_dialect({
         deleted: new Date().toISOString(),
       }
       await api.delete_entry_dialect(entry_dialect)
-      const { error: delete_error } = await supabase.from('entry_dialects').update(entry_dialect)
-        .eq('dialect_id', dialect_id).eq('entry_id', entry_id)
+      const { error: delete_error } = await supabase.from('entry_dialects').update(entry_dialect).eq('dialect_id', dialect_id).eq('entry_id', entry_id)
       if (delete_error)
         throw new Error(delete_error.message)
     } else {

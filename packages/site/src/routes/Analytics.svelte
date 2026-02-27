@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { page } from '$app/state';
+  import { page } from '$app/state'
+  import { onMount } from 'svelte'
 
-  const analyticsId = 'REPLACED_WITH_VERCEL_ANALYTICS_ID';
+  const analyticsId = 'REPLACED_WITH_VERCEL_ANALYTICS_ID'
 
   onMount(async () => {
     if (!analyticsId.startsWith('REPLACED')) {
-      const { measureWebVitals } = await import('$lib/webvitals');
-      measureWebVitals({ path: page.url.pathname, params: page.params, analyticsId });
+      const { measureWebVitals } = await import('$lib/webvitals')
+      measureWebVitals({ path: page.url.pathname, params: page.params, analyticsId })
     }
 
-    const { init } = await import('@sentry/browser');
+    const { init } = await import('@sentry/browser')
     // const { Integrations } = await import('@sentry/tracing');
     init({
       dsn: 'https://b344dd4315d54249afd9c03762aec0c9@o424638.ingest.sentry.io/5888340',
@@ -18,8 +18,8 @@
 
       // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring. We recommend adjusting this value in production
       // tracesSampleRate: 1.0,
-    });
-  });
+    })
+  })
 </script>
 
 {#if page.url.host.includes('livingdictionaries.app')}

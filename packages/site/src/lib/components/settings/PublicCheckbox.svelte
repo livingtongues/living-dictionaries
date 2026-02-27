@@ -2,11 +2,11 @@
   import { page } from '$app/state'
 
   interface Props {
-    checked: boolean;
-    on_changed?: (payload: { checked: boolean }) => void;
+    checked: boolean
+    on_changed?: (payload: { checked: boolean }) => void
   }
 
-  let { checked, on_changed }: Props = $props();
+  let { checked, on_changed }: Props = $props()
 </script>
 
 <div class="flex items-center">

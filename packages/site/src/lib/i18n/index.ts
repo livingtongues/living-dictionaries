@@ -1,13 +1,14 @@
 /* eslint-disable require-atomic-updates */
-import enBase from './locales/en.json' assert { type: 'json' };
-import enGloss from './locales/gl/en.json' assert { type: 'json' };
-import enPartsOfSpeech from './locales/ps/en.json' assert { type: 'json' };
-import enPartsOfSpeechAbbrev from './locales/psAbbrev/en.json' assert { type: 'json' };
-import enSemanticDomains from './locales/sd/en.json' assert { type: 'json' };
-
 import type { LocaleCode } from './locales'
 import type { TranslateFunction, TranslationKeys } from './types'
 import { interpolate } from './interpolate'
+import enBase from './locales/en.json' assert { type: 'json' }
+import enGloss from './locales/gl/en.json' assert { type: 'json' }
+
+import enPartsOfSpeech from './locales/ps/en.json' assert { type: 'json' }
+import enPartsOfSpeechAbbrev from './locales/psAbbrev/en.json' assert { type: 'json' }
+import enSemanticDomains from './locales/sd/en.json' assert { type: 'json' }
+
 export const en = {
   ...enBase,
   ...enGloss,
@@ -80,17 +81,17 @@ if (import.meta.vitest) {
   describe(splitByFirstPeriod, () => {
     test('splits with one period', () => {
       const [section, item] = splitByFirstPeriod('hello.world')
-      expect([section, item]).toEqual(['hello', 'world']);
-    });
+      expect([section, item]).toEqual(['hello', 'world'])
+    })
 
     test('only splits on first period when there are two', () => {
       const [section, item] = splitByFirstPeriod('ps.pr.n')
-      expect([section, item]).toEqual(['ps', 'pr.n']);
-    });
-  });
+      expect([section, item]).toEqual(['ps', 'pr.n'])
+    })
+  })
 }
 
-export const english_translate = (({dynamicKey: key, fallback}: { dynamicKey: string, fallback?: string}) => {
+export const english_translate = (({ dynamicKey: key, fallback }: { dynamicKey: string, fallback?: string }) => {
   const [section, item] = splitByFirstPeriod(key)
-  return en[section][item] || fallback;
+  return en[section][item] || fallback
 }) as TranslateFunction

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { Button } from '$lib/svelte-pieces'
-  import EditString from '../[dictionaryId]/EditString.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import { sign_out } from '$lib/supabase/auth'
+  import { Button } from '$lib/svelte-pieces'
+  import EditString from '../[dictionaryId]/EditString.svelte'
 
-  let { data } = $props();
+  let { data } = $props()
   let { user } = $derived(data)
 
   let broken_avatar_image = $state(false)

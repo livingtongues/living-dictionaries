@@ -3,18 +3,18 @@
   import { slide } from 'svelte/transition'
 
   interface Props {
-    checked: boolean;
-    uncheck_when_destroyed?: boolean;
-    count: number;
-    label: string;
+    checked: boolean
+    uncheck_when_destroyed?: boolean
+    count: number
+    label: string
   }
 
   let {
     checked = $bindable(),
     uncheck_when_destroyed = false,
     count,
-    label
-  }: Props = $props();
+    label,
+  }: Props = $props()
   let id = $derived(label.replace(' ', ''))
 
   onDestroy(() => {

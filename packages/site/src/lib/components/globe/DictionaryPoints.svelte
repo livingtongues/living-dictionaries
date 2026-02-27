@@ -1,8 +1,8 @@
 <script lang="ts">
-import type { GeoProjection } from 'd3'
   import type { DictionaryView } from '@living-dictionaries/types'
+  import type { GeoProjection } from 'd3'
   import { forceSimulation, forceX, forceY } from 'd3-force'
-  import { getContext, onMount, onDestroy } from 'svelte'
+  import { getContext, onDestroy, onMount } from 'svelte'
   import { tweened } from 'svelte/motion'
   import { CANVAS_CONTEXT_NAME } from './constants'
 
@@ -21,7 +21,7 @@ import type { GeoProjection } from 'd3'
     dictionaries = [],
     selected_dictionary_id = undefined,
     on_select,
-    type = 'public'
+    type = 'public',
   }: Props = $props()
 
   const { register, deregister, invalidate } = getContext<{
@@ -43,7 +43,7 @@ import type { GeoProjection } from 'd3'
         dictionary: d,
         longitude: d.coordinates!.points![0].coordinates.longitude,
         latitude: d.coordinates!.points![0].coordinates.latitude,
-      }))
+      })),
   )
 
   const dot_radius = 3
@@ -96,13 +96,13 @@ import type { GeoProjection } from 'd3'
 
       // Check if point is on visible hemisphere
       const dist = Math.acos(
-        Math.sin(dict_with_coords.latitude * Math.PI / 180) * Math.sin(center_lat * Math.PI / 180) +
-        Math.cos(dict_with_coords.latitude * Math.PI / 180) * Math.cos(center_lat * Math.PI / 180) *
-        Math.cos((dict_with_coords.longitude - center_lon) * Math.PI / 180)
+        Math.sin(dict_with_coords.latitude * Math.PI / 180) * Math.sin(center_lat * Math.PI / 180)
+          + Math.cos(dict_with_coords.latitude * Math.PI / 180) * Math.cos(center_lat * Math.PI / 180)
+          * Math.cos((dict_with_coords.longitude - center_lon) * Math.PI / 180),
       )
       if (dist > Math.PI / 2) continue
 
-      const name = dict_with_coords.dictionary.name
+      const { name } = dict_with_coords.dictionary
       const width = name.length * font_size * 0.6
       const height = font_size
 
@@ -133,11 +133,9 @@ import type { GeoProjection } from 'd3'
           if (overlap_x > 0 && overlap_y > 0) {
             const move = Math.min(overlap_x, overlap_y) / 2 + 0.5
             if (overlap_x < overlap_y) {
-              if (a.x < b.x) { a.x -= move; b.x += move }
-              else { a.x += move; b.x -= move }
+              if (a.x < b.x) { a.x -= move; b.x += move } else { a.x += move; b.x -= move }
             } else {
-              if (a.y < b.y) { a.y -= move; b.y += move }
-              else { a.y += move; b.y -= move }
+              if (a.y < b.y) { a.y -= move; b.y += move } else { a.y += move; b.y -= move }
             }
           }
         }
@@ -149,7 +147,7 @@ import type { GeoProjection } from 'd3'
 
   function run_force_simulation(nodes: LabelNode[]): LabelNode[] {
     if (nodes.length === 0) return nodes
-    // eslint-disable-next-line ts/no-explicit-any
+
     const simulation = forceSimulation(nodes as any)
       .force('x', forceX((d: any) => d.dot_x - d.width / 2).strength(0.15))
       .force('y', forceY((d: any) => d.dot_y - d.height - dot_radius - label_offset).strength(0.15))

@@ -1,5 +1,6 @@
 <script context="module" lang="ts">
-  import type { Viewport } from 'kitbook';
+  import type { Viewport } from 'kitbook'
+
   export const viewports: Viewport[] = [{ width: 600, height: 400 }]
 </script>
 
@@ -9,4 +10,3 @@
 
 <input id="targetMe" type="text" value="input has id" class="form-input block w-full mb-2" />
 <IpaKeyboard target="#targetMe" />
-

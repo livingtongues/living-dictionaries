@@ -1,15 +1,15 @@
 <script lang="ts">
   import type { Tables } from '@living-dictionaries/types'
+  import { page } from '$app/state'
+  import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import Marker from '$lib/components/maps/mapbox/map/Marker.svelte'
-  import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
-  import { page } from '$app/state'
 
   interface Props {
-    coordinates: Tables<'dictionaries'>['coordinates'];
+    coordinates: Tables<'dictionaries'>['coordinates']
   }
 
-  let { coordinates }: Props = $props();
+  let { coordinates }: Props = $props()
 </script>
 
 {#if coordinates?.points?.[0]}
