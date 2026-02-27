@@ -29,8 +29,10 @@
 
 {#if !upload_statuses.length}
   <ImageDropZone {border} class="p-3 rounded" on_file_added={file => upload_statuses = [...upload_statuses, upload_image(file)]}>
-    <span slot="label">
-      {#if children}{@render children()}{:else}{page.data.t('misc.upload')}{/if}
-    </span>
+    {#snippet label()}
+      <span>
+        {#if children}{@render children()}{:else}{page.data.t('misc.upload')}{/if}
+      </span>
+    {/snippet}
   </ImageDropZone>
 {/if}

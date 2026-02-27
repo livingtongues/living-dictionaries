@@ -7,11 +7,9 @@
   import { dictionary_headers, prepareDictionaryForCsv } from '$lib/export/prepareDictionariesForCsv'
   import { Button, ResponsiveTable } from '$lib/svelte-pieces'
 
-  export let data
-  $: ({ admin } = data)
-  $: ({ dictionaries } = page.data)
-  $: filtered_dictionaries = $admin >= 1 ? $dictionaries : $dictionaries?.filter(dictionary => dictionary.public)
-
+  let { data } = $props()
+  let { admin, my_dictionaries } = $derived(data)
+  const filtered_dictionaries = $derived($admin >= 1 ? $my_dictionaries : $my_dictionaries?.filter(dictionary => dictionary.public))
 </script>
 
 <Header>{page.data.t('home.list_of_dictionaries')}</Header>
@@ -42,34 +40,22 @@
   <ResponsiveTable stickyColumn stickyHeading class="my-1">
     <thead>
       <tr>
-        <th>
-          {page.data.t('dictionary.name_of_language')}
-        </th>
-        <th> {page.data.t('about.entry_count')} </th>
-        <th> URL </th>
-        <th> ISO 639-3 </th>
-        <th> Glottocode </th>
-        <th>
-          {page.data.t('dictionary.location')}
-        </th>
-        <th>
-          {page.data.t('dictionary.latitude')}
-        </th>
-        <th>
-          {page.data.t('dictionary.longitude')}
-        </th>
+        <th>{page.data.t('dictionary.name_of_language')}</th>
+        <th>{page.data.t('about.entry_count')}</th>
+        <th>URL</th>
+        <th>ISO 639-3</th>
+        <th>Glottocode</th>
+        <th>{page.data.t('dictionary.location')}</th>
+        <th>{page.data.t('dictionary.latitude')}</th>
+        <th>{page.data.t('dictionary.longitude')}</th>
       </tr>
     </thead>
     {#each filtered_dictionaries as { url, metadata, name, entry_count, iso_639_3, glottocode, location, coordinates }}
       {@const first_latitude = coordinates?.points?.[0]?.coordinates.latitude}
       {@const first_longitude = coordinates?.points?.[0]?.coordinates.longitude}
       <tr>
-        <td class="font-semibold">
-          {name}
-        </td>
-        <td>
-          {metadata?.url?.startsWith('http://talkingdictionary') ? '' : entry_count}
-        </td>
+        <td class="font-semibold">{name}</td>
+        <td>{metadata?.url?.startsWith('http://talkingdictionary') ? '' : entry_count}</td>
         <td class="underline">
           {#if metadata?.url}
             <a href={metadata.url} target="_blank" rel="noreferrer">{metadata.url}</a>
@@ -77,15 +63,9 @@
             <a href={`/${url}`}>https://livingdictionaries.app/{url}</a>
           {/if}
         </td>
-        <td>
-          {iso_639_3 || ''}
-        </td>
-        <td>
-          {glottocode || ''}
-        </td>
-        <td>
-          {location || ''}
-        </td>
+        <td>{iso_639_3 || ''}</td>
+        <td>{glottocode || ''}</td>
+        <td>{location || ''}</td>
         <td class="whitespace-nowrap">
           {first_latitude ? `${first_latitude}° ${first_latitude < 0 ? 'S' : 'N'}` : ''}
         </td>

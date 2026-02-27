@@ -1,36 +1,49 @@
-<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (error to error_1) making the component unusable -->
-<script context="module" lang="ts">
-  import { writable } from 'svelte/store'
-
-  const selectedMicrophone = writable<MediaDeviceInfo>(null)
-  const selectedCamera = writable<MediaDeviceInfo>(null)
-</script>
-
 <script lang="ts">
+  import type { Snippet } from 'svelte'
   import { onDestroy, onMount } from 'svelte'
 
-  export let audio = true,
-    video = true
-  let stream: MediaStream
-  let devices: MediaDeviceInfo[] = []
-  $: microphones = devices.filter(d => d.kind === 'audioinput')
-  $: cameras = devices.filter(d => d.kind === 'videoinput')
-  $: {
-    if (!$selectedMicrophone)
-      selectedMicrophone.set(microphones[0])
+  let selected_microphone: MediaDeviceInfo = $state(null)
+  let selected_camera: MediaDeviceInfo = $state(null)
 
-    if (!$selectedCamera)
-      selectedCamera.set(cameras[0])
-  }
+  const { audio = true, video = true, children, dismissed, denied, error: error_snippet, loading }: {
+    audio?: boolean
+    video?: boolean
+    children: Snippet<[{
+      stream: MediaStream
+      closeStream: () => void
+      microphones: MediaDeviceInfo[]
+      cameras: MediaDeviceInfo[]
+      chooseMicrophone: (id: string) => void
+      chooseCamera: (id: string) => void
+      selectedMicrophone: MediaDeviceInfo
+      selectedCamera: MediaDeviceInfo
+    }]>
+    dismissed?: Snippet
+    denied?: Snippet
+    error?: Snippet<[{ message: string }]>
+    loading?: Snippet
+  } = $props()
 
-  let error: any
+  let stream: MediaStream = $state(undefined)
+  let devices: MediaDeviceInfo[] = $state([])
+  let error_state: any = $state(undefined)
+
+  const microphones = $derived(devices.filter(d => d.kind === 'audioinput'))
+  const cameras = $derived(devices.filter(d => d.kind === 'videoinput'))
+
+  $effect(() => {
+    if (!selected_microphone && microphones.length)
+      selected_microphone = microphones[0]
+    if (!selected_camera && cameras.length)
+      selected_camera = cameras[0]
+  })
 
   onMount(async () => {
     try {
       stream = await requestStream()
       devices = await navigator.mediaDevices.enumerateDevices()
     } catch (e) {
-      error = { name: e.name, message: e.message }
+      error_state = { name: e.name, message: e.message }
       console.error(`${e.name}: ${e.message}`)
     }
   })
@@ -39,14 +52,10 @@
     closeStream()
     const constraints: MediaStreamConstraints = {
       audio: audio
-        ? {
-          deviceId: $selectedMicrophone ? $selectedMicrophone.deviceId : undefined,
-        }
+        ? { deviceId: selected_microphone ? selected_microphone.deviceId : undefined }
         : false,
       video: video
-        ? {
-          deviceId: $selectedCamera ? $selectedCamera.deviceId : undefined,
-        }
+        ? { deviceId: selected_camera ? selected_camera.deviceId : undefined }
         : false,
     }
     return navigator.mediaDevices.getUserMedia(constraints)
@@ -60,11 +69,11 @@
   }
 
   async function chooseMicrophone(microphoneId: string) {
-    selectedMicrophone.set(microphones.find(m => m.deviceId === microphoneId))
+    selected_microphone = microphones.find(m => m.deviceId === microphoneId)
     stream = await requestStream()
   }
   async function chooseCamera(cameraId: string) {
-    selectedCamera.set(cameras.find(c => c.deviceId === cameraId))
+    selected_camera = cameras.find(c => c.deviceId === cameraId)
     stream = await requestStream()
   }
 
@@ -72,25 +81,26 @@
 </script>
 
 {#if stream}
-  <slot
-    {stream}
-    {closeStream}
-    {microphones}
-    {cameras}
-    {chooseMicrophone}
-    {chooseCamera}
-    selectedMicrophone={$selectedMicrophone}
-    selectedCamera={$selectedCamera} />
-{:else if error}
-  {#if error.message === 'Permission dismissed'}
-    <slot name="dismissed" />
-  {:else if error.message === 'Permission denied'}
-    <slot name="denied" />
+  {@render children({
+    stream,
+    closeStream,
+    microphones,
+    cameras,
+    chooseMicrophone,
+    chooseCamera,
+    selectedMicrophone: selected_microphone,
+    selectedCamera: selected_camera,
+  })}
+{:else if error_state}
+  {#if error_state.message === 'Permission dismissed'}
+    {#if dismissed}{@render dismissed()}{/if}
+  {:else if error_state.message === 'Permission denied'}
+    {#if denied}{@render denied()}{/if}
+  {:else if error_snippet}
+    {@render error_snippet({ message: error_state.message })}
   {:else}
-    <slot name="error" message={error.message}>
-      Error: {error.message}
-    </slot>
+    Error: {error_state.message}
   {/if}
-{:else}
-  <slot name="loading" />
+{:else if loading}
+  {@render loading()}
 {/if}

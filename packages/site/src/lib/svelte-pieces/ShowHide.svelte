@@ -1,5 +1,11 @@
 <script lang="ts">
-  let show = false
+  import type { Snippet } from 'svelte'
+
+  const { children }: {
+    children: Snippet<[{ show: boolean, toggle: () => void, set: (value: boolean) => void }]>
+  } = $props()
+
+  let show = $state(false)
   function toggle() {
     show = !show
   }
@@ -8,4 +14,4 @@
   }
 </script>
 
-<slot {show} {toggle} {set} />
+{@render children({ show, toggle, set })}
