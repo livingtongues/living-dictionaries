@@ -1,10 +1,10 @@
 /* eslint-disable require-await */
+import type { Row } from './row.type'
 import { readFileSync } from 'node:fs'
 import { admin_supabase, anon_supabase, diego_ld_user_id, postgres, test_dictionary_id } from '../config-supabase'
 import { reset_local_db } from '../reset-local-db'
 import { import_data as _import_data } from './import-data'
 import { parseCSVFrom } from './parse-csv'
-import type { Row } from './row.type'
 
 const import_id = `v4-test`
 const timestamp_from_which_to_fetch_data = '1971-01-01T00:00:00Z'

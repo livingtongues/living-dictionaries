@@ -138,9 +138,9 @@ Change from store subscriptions to `page.data.db`:
 
 **Before (`+page.svelte`):**
 ```ts
-let { users, dictionary_roles, admin_dictionaries } = $derived(data)
+const { users, dictionary_roles, admin_dictionaries } = $derived(data)
 
-let users_with_roles = $derived($users.map(user => ({
+const users_with_roles = $derived($users.map(user => ({
   ...user,
   dictionary_roles: $dictionary_roles.filter(role => role.user_id === user.id),
 })))
@@ -150,7 +150,7 @@ let users_with_roles = $derived($users.map(user => ({
 ```ts
 import { page } from '$app/state'
 
-let users_with_roles = $derived(
+const users_with_roles = $derived(
   page.data.db.users.rows.map(user => ({
     ...user,
     dictionary_roles: page.data.db.dictionary_roles.rows.filter(

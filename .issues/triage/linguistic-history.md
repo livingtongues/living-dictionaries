@@ -6,7 +6,7 @@ assignee: jacob-8
 github_issue: 512
 ---
 
-We need to add a new data field that is called "Linguistic History" that would have the same coding and front-end display functionality as "Notes". In there, people can add as much information about the entry as they want! They can add Etymological information, folk etymologies, information such as whether this term is archaic, etc. 
+We need to add a new data field that is called "Linguistic History" that would have the same coding and front-end display functionality as "Notes". In there, people can add as much information about the entry as they want! They can add Etymological information, folk etymologies, information such as whether this term is archaic, etc.
 
 It would open up a large typing area like this (no character limit)
 

@@ -1,9 +1,9 @@
+import type { Row } from './row.type'
 import { readFileSync } from 'node:fs'
 import { program } from 'commander'
-import { parseCSVFrom } from './parse-csv.js'
-import type { Row } from './row.type'
 import { import_data } from './import-data.js'
 import { upload_audio_to_gcs, upload_photo_to_gcs } from './import-media.js'
+import { parseCSVFrom } from './parse-csv.js'
 
 program
   .option('-e, --environment [dev/prod]', 'Database Project', 'dev')

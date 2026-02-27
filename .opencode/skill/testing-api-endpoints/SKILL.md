@@ -35,7 +35,7 @@ Before writing tests, create a simple throwaway script to capture the real respo
 import { createXai } from '@ai-sdk/xai'
 import { generateText } from 'ai'
 
-const XAI_API_KEY = process.env.XAI_API_KEY
+const { XAI_API_KEY } = process.env
 if (!XAI_API_KEY) {
   console.error('XAI_API_KEY not found in environment')
   process.exit(1)
@@ -43,7 +43,7 @@ if (!XAI_API_KEY) {
 
 async function test() {
   const xai = createXai({ apiKey: XAI_API_KEY })
-  
+
   const result = await generateText({
     model: xai('grok-4-fast-non-reasoning'),
     prompt: 'Say hello in one word',
@@ -85,7 +85,6 @@ export default defineProject({
   },
 })
 ```
-
 
 ## Testing Philosophy: Test the Client, Not the Server
 
@@ -151,7 +150,6 @@ beforeEach(() => {
 
 This pattern lets you test `api_xai_chat()` and `ChatStreamer` as users would use them, while the real endpoint handler processes the requests.
 
-
 ## Core Helper: Request Function
 
 This helper simulates SvelteKit's RequestEvent for testing endpoints:
@@ -201,7 +199,6 @@ export function request(handler, options: RequestOptions = {}): MaybePromise<Res
 }
 ```
 
-
 ## Mocking Supabase Auth
 
 Our endpoints use `access_token` in the request body, validated via `get_supabase().auth.getUser()`. Mock the entire `$lib/supabase` module:
@@ -227,9 +224,9 @@ vi.mock('$lib/supabase', () => ({
         if (token === 'valid-token') {
           return Promise.resolve({ data: { user: mock_user }, error: null })
         }
-        return Promise.resolve({ 
-          data: { user: null }, 
-          error: { message: 'Invalid token' } 
+        return Promise.resolve({
+          data: { user: null },
+          error: { message: 'Invalid token' }
         })
       }),
     },
@@ -246,7 +243,8 @@ describe('authentication', () => {
   test('returns 401 when access_token is missing', async () => {
     const body = { messages: [{ role: 'user', content: 'Hello' }] }
     await expect(() => request(POST, { body }))
-      .rejects.toThrowErrorMatchingInlineSnapshot(`
+      .rejects
+      .toThrowErrorMatchingInlineSnapshot(`
         HttpError {
           "body": {
             "message": "access_token is required",
@@ -259,7 +257,8 @@ describe('authentication', () => {
   test('returns 401 when access_token is empty', async () => {
     const body = { access_token: '', messages: [{ role: 'user', content: 'Hello' }] }
     await expect(() => request(POST, { body }))
-      .rejects.toThrowErrorMatchingInlineSnapshot(`
+      .rejects
+      .toThrowErrorMatchingInlineSnapshot(`
         HttpError {
           "body": {
             "message": "access_token is required",
@@ -272,7 +271,8 @@ describe('authentication', () => {
   test('returns 401 when access_token is invalid/expired', async () => {
     const body = { access_token: 'expired-token', messages: [{ role: 'user', content: 'Hello' }] }
     await expect(() => request(POST, { body }))
-      .rejects.toThrowErrorMatchingInlineSnapshot(`
+      .rejects
+      .toThrowErrorMatchingInlineSnapshot(`
         HttpError {
           "body": {
             "message": "Invalid or expired token",
@@ -290,7 +290,6 @@ describe('authentication', () => {
 })
 ```
 
-
 ## Mocking External APIs with Fetch
 
 Mock `fetch` directly using Vitest.
@@ -303,7 +302,7 @@ const original_fetch = global.fetch
 beforeEach(() => {
   global.fetch = vi.fn((url: string | URL, options?: RequestInit) => {
     const url_string = url.toString()
-    
+
     // Mock xAI API
     if (url_string.includes('api.x.ai')) {
       return Promise.resolve(new Response(JSON.stringify({
@@ -313,7 +312,7 @@ beforeEach(() => {
         }]
       }), { status: 200 }))
     }
-    
+
     // Let other requests through (or fail them)
     return Promise.reject(new Error(`Unmocked fetch: ${url_string}`))
   }) as typeof fetch
@@ -338,7 +337,8 @@ test('passes through rate limit error from xAI', async () => {
 
   const body = { access_token: 'valid-token', messages: [{ role: 'user', content: 'Hello' }] }
   await expect(() => request(POST, { body }))
-    .rejects.toThrowErrorMatchingInlineSnapshot(`
+    .rejects
+    .toThrowErrorMatchingInlineSnapshot(`
       HttpError {
         "body": {
           "message": "Rate limit exceeded. Please try again later.",
@@ -357,7 +357,8 @@ test('passes through quota exceeded error from xAI', async () => {
 
   const body = { access_token: 'valid-token', messages: [{ role: 'user', content: 'Hello' }] }
   await expect(() => request(POST, { body }))
-    .rejects.toThrowErrorMatchingInlineSnapshot(`
+    .rejects
+    .toThrowErrorMatchingInlineSnapshot(`
       HttpError {
         "body": {
           "message": "Insufficient credits. Please upgrade your plan.",
@@ -376,7 +377,8 @@ test('passes through service unavailable error', async () => {
 
   const body = { access_token: 'valid-token', messages: [{ role: 'user', content: 'Hello' }] }
   await expect(() => request(POST, { body }))
-    .rejects.toThrowErrorMatchingInlineSnapshot(`
+    .rejects
+    .toThrowErrorMatchingInlineSnapshot(`
       HttpError {
         "body": {
           "message": "Service temporarily unavailable",
@@ -402,7 +404,7 @@ if (!xai_response.ok) {
 ### Mocking Streaming Responses
 
 ```ts
-function create_mock_sse_stream(events: Array<{ event: string, data: any }>) {
+function create_mock_sse_stream(events: { event: string, data: any }[]) {
   const encoder = new TextEncoder()
   return new ReadableStream({
     start(controller) {
@@ -427,7 +429,6 @@ if (url_string.includes('api.x.ai') && body?.stream) {
 }
 ```
 
-
 ## Complete Test Example (Client-Focused)
 
 Here's a full example testing an xAI chat client that routes through the real endpoint:
@@ -448,9 +449,9 @@ vi.mock('$lib/supabase', () => ({
     auth: {
       getUser: vi.fn((token: string) => {
         if (token === 'valid-token') {
-          return Promise.resolve({ 
-            data: { user: { id: 'user-1', email: 'test@test.com' } }, 
-            error: null 
+          return Promise.resolve({
+            data: { user: { id: 'user-1', email: 'test@test.com' } },
+            error: null
           })
         }
         return Promise.resolve({ data: { user: null }, error: { message: 'Invalid' } })
@@ -597,7 +598,6 @@ describe(ChatStreamer, () => {
 })
 ```
 
-
 ## Testing Streaming Endpoints
 
 When testing streaming, you may need to mock at different levels:
@@ -649,7 +649,7 @@ function create_server_stream_with_error(partial_text: string, error_message: st
 
 test('handles error event during stream', async () => {
   mock_storage[ACCESS_TOKEN_NAME] = 'valid-token'
-  
+
   // Mock the endpoint directly to test client error handling
   global.fetch = vi.fn((url: string | URL | Request) => {
     if (url.toString().includes('/api/xai/chat')) {
@@ -674,7 +674,6 @@ This pattern is useful when:
 - The server doesn't produce certain events you want to test the client handling
 - You want to test client behavior in isolation
 - You need precise control over the SSE event sequence
-
 
 ## Mocking Environment Variables
 
@@ -712,7 +711,6 @@ vi.mock('$api/helper/some-helper', () => ({
 }))
 ```
 
-
 ## Test Patterns
 
 ### Use `describe` with Handler Reference
@@ -728,7 +726,7 @@ describe(POST, () => {
 ### Import Request Body Types
 
 ```ts
-import { POST, type ChatRequestBody } from './+server'
+import { type ChatRequestBody, POST } from './+server'
 
 test('validates input', async () => {
   const body: ChatRequestBody = {
@@ -744,7 +742,7 @@ test('validates input', async () => {
 
 ```ts
 test('uses id from params', async () => {
-  const response = await request(POST, { 
+  const response = await request(POST, {
     params: { id: 'item-123' },
     body: { access_token: 'valid-token' }
   })
@@ -756,12 +754,13 @@ test('uses id from params', async () => {
 
 ```ts
 test('returns 500 when external API fails', async () => {
-  global.fetch = vi.fn(() => 
+  global.fetch = vi.fn(() =>
     Promise.resolve(new Response('Service unavailable', { status: 503 }))
   ) as typeof fetch
 
   await expect(() => request(POST, { body }))
-    .rejects.toThrowErrorMatchingInlineSnapshot(`
+    .rejects
+    .toThrowErrorMatchingInlineSnapshot(`
       HttpError {
         "body": "xAI API error: 503",
         "status": 503,
@@ -769,7 +768,6 @@ test('returns 500 when external API fails', async () => {
     `)
 })
 ```
-
 
 ## Snapshot Testing Strategy
 
@@ -780,7 +778,8 @@ Use `toMatchInlineSnapshot` for small, simple assertions that fit on a few lines
 ```ts
 test('returns error for missing token', async () => {
   await expect(() => request(POST, { body: { messages: [] } }))
-    .rejects.toThrowErrorMatchingInlineSnapshot(`
+    .rejects
+    .toThrowErrorMatchingInlineSnapshot(`
       HttpError {
         "body": {
           "message": "access_token is required",

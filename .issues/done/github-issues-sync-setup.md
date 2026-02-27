@@ -27,7 +27,7 @@ Set up bidirectional sync between GitHub issues and local `.issues/` folder, mir
 2. **Add PROJECT_PAT secret to GitHub repo** - A Personal Access Token with:
    - `repo` scope (for issues)
    - `project` scope (for GitHub Projects, if using)
-   
+
    Add it in: Repository Settings → Secrets and variables → Actions → New repository secret
 
 ## How the Sync Works

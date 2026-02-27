@@ -1,11 +1,11 @@
-import { partsOfSpeech } from '@living-dictionaries/parts';
+import { partsOfSpeech } from '@living-dictionaries/parts'
 
 // export interface IMatchResult {
 //     matchedPOS?: string;
 //     unMatchedPOS?: string;
 // }
 
-export const abbreviateTDPartOfSpeech = (input: string): string => {
+export function abbreviateTDPartOfSpeech(input: string): string {
   // save any notes in parentheses
   // const parentheticalNote = input.match(/\(.+\)/);
 
@@ -13,22 +13,21 @@ export const abbreviateTDPartOfSpeech = (input: string): string => {
     .replace(/\(.+\)/, '') // remove notes in parentheses
     .trim()
     .toLowerCase()
-    .replace(/[.]$/, '') // removes word-final periods
-    .replace(/:/g, ''); // removes random colons in old TD data
+    .replace(/\.$/, '') // removes word-final periods
+    .replace(/:/g, '') // removes random colons in old TD data
   const matchingPOS = partsOfSpeech.find((part) => {
-    //TODO, possibly more efficient just to return enAbbrev and not whole part object
+    // TODO, possibly more efficient just to return enAbbrev and not whole part object
     return (
-      part.enName === sanitizedInput ||
-      part.esName === sanitizedInput ||
-      part.enAbbrev === sanitizedInput ||
-      part.esAbbrev === sanitizedInput ||
-      (part.tdAlternates?.includes(sanitizedInput))
-    );
-  });
+      part.enName === sanitizedInput
+      || part.esName === sanitizedInput
+      || part.enAbbrev === sanitizedInput
+      || part.esAbbrev === sanitizedInput
+      || (part.tdAlternates?.includes(sanitizedInput))
+    )
+  })
   if (matchingPOS)
-    return matchingPOS.enAbbrev;
+    return matchingPOS.enAbbrev
 
-  console.log('unmatched: ', input);
-  return null;
-
-};
+  console.log('unmatched: ', input)
+  return null
+}

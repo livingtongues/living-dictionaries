@@ -1,9 +1,9 @@
+import type { EntryData, Tables } from '@living-dictionaries/types'
+import { access, constants, mkdir, writeFile } from 'node:fs/promises'
 // pnpm -F scripts create-entry-caches
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { access, constants, mkdir, writeFile } from 'node:fs/promises'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import type { EntryData, Tables } from '@living-dictionaries/types'
 import { admin_supabase } from '../config-supabase'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))

@@ -1,10 +1,10 @@
-import { program } from 'commander'
-import PG from 'pg'
-import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@living-dictionaries/types'
-import * as dotenv from 'dotenv'
-import './record-logs'
 import { S3Client } from '@aws-sdk/client-s3'
+import { createClient } from '@supabase/supabase-js'
+import { program } from 'commander'
+import * as dotenv from 'dotenv'
+import PG from 'pg'
+import './record-logs'
 
 program
   .option('-e, --environment [dev/prod]', 'Supabase Project', 'dev')

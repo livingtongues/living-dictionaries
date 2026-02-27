@@ -1,6 +1,6 @@
+import * as fs from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import * as fs from 'node:fs'
 
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { GCLOUD_MEDIA_BUCKET_S3, storage_bucket } from '../config-supabase'

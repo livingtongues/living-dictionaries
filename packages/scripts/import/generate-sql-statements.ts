@@ -1,9 +1,9 @@
-import { randomUUID } from 'node:crypto'
 import type { MultiString, TablesInsert } from '@living-dictionaries/types'
-import { diego_ld_user_id } from '../constants'
 import type { Number_Suffix, Row, Sense_Prefix } from './row.type'
-import { sql_file_string } from './to-sql-string'
+import { randomUUID } from 'node:crypto'
+import { diego_ld_user_id } from '../constants'
 import { millisecond_incrementing_timestamp } from './incrementing-timestamp'
+import { sql_file_string } from './to-sql-string'
 
 export interface Upload_Operations {
   upload_photo: (filepath: string, entry_id: string) => Promise<

@@ -1,11 +1,11 @@
-import type { MultiString } from '../gloss.interface'
-import type { Coordinates } from '../coordinates.interface'
-import type { DictionaryPhoto } from '../photo.interface'
 import type { HostedVideo, UnsupportedFields } from '../.'
-import type { Change } from './content-update.interface'
+import type { Coordinates } from '../coordinates.interface'
+import type { MultiString } from '../gloss.interface'
+import type { DictionaryPhoto } from '../photo.interface'
 import type { ImportContentUpdate } from './content-import.interface'
-import type { Orthography } from './orthography.interface'
+import type { Change } from './content-update.interface'
 import type { DictionaryMetadata } from './dictionary.types'
+import type { Orthography } from './orthography.interface'
 
 export interface DatabaseAugments {
   public: {
