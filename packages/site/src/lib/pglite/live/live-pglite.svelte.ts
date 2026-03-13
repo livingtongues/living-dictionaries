@@ -3,9 +3,11 @@ import type {
   InsertType,
   QueryAccessor,
   QueryOptions,
+  RawRowType,
   RowType,
   TableAccessor,
   TableName,
+  UpdateType,
 } from './types'
 import { toast } from '$lib/components/ui/toast'
 import { TableStore } from './table-store.svelte'
@@ -102,8 +104,20 @@ class LivePgLiteImpl {
         return self.#insert(table_name, item)
       },
 
-      delete_all(ids: string[]): Promise<void> {
-        return self.#delete_all(table_name, ids)
+      upsert(item: InsertType<T> | InsertType<T>[]): Promise<RowType<T>[]> {
+        return self.#upsert(table_name, item)
+      },
+
+      update(set: UpdateType<T>): Promise<void> {
+        return self.#update(table_name, set)
+      },
+
+      delete(ids: string | string[]): Promise<void> {
+        return self.#delete(table_name, ids)
+      },
+
+      find(row_id: string): Promise<RawRowType<T> | undefined> {
+        return self.#find(table_name, row_id)
       },
     }
   }
@@ -322,6 +336,10 @@ class LivePgLiteImpl {
       get loading(): boolean {
         return store!.loading
       },
+      snapshot: async (): Promise<RawRowType<T>[]> => {
+        const result = await this.#pg.query<RawRowType<T>>(sql, params)
+        return result.rows
+      },
     }
   }
 
@@ -402,20 +420,143 @@ class LivePgLiteImpl {
    * Delete multiple rows by their IDs (or composite key strings)
    * Inserts into the `deletes` table - the process_delete trigger handles actual deletions
    */
-  async #delete_all<T extends TableName>(
+  async #delete<T extends TableName>(
     table_name: T,
-    ids: string[],
+    ids: string | string[],
   ): Promise<void> {
-    // Insert each delete record - triggers will handle the actual deletion
+    const id_list = Array.isArray(ids) ? ids : [ids]
     const sql = `INSERT INTO deletes (table_name, id) VALUES ($1, $2)`
 
     try {
-      for (const id of ids) {
+      for (const id of id_list) {
         await this.#pg.query(sql, [table_name, id])
       }
     } catch (error) {
-      console.error('LivePgLite deleteAll error:', error)
+      console.error('LivePgLite delete error:', error)
       toast.error(`Delete error: ${(error as Error).message}`)
+      throw error
+    }
+  }
+
+  /**
+   * Find a single row by ID without creating a live subscription
+   */
+  async #find<T extends TableName>(
+    table_name: T,
+    row_id: string,
+  ): Promise<RawRowType<T> | undefined> {
+    const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+
+    let sql: string
+    let params: unknown[]
+
+    if (primary_keys.length === 1) {
+      sql = `SELECT * FROM "${table_name}" WHERE "${primary_keys[0]}" = $1`
+      params = [row_id]
+    } else {
+      const key_values = row_id.split('|')
+      const where_clauses = primary_keys.map((pk, i) => `"${pk}" = $${i + 1}`).join(' AND ')
+      sql = `SELECT * FROM "${table_name}" WHERE ${where_clauses}`
+      params = key_values
+    }
+
+    try {
+      const result = await this.#pg.query<RawRowType<T>>(sql, params)
+      return result.rows[0]
+    } catch (error) {
+      console.error('LivePgLite find error:', error)
+      toast.error(`Find error: ${(error as Error).message}`)
+      throw error
+    }
+  }
+
+  /**
+   * Upsert one or more rows into a table
+   */
+  async #upsert<T extends TableName>(
+    table_name: T,
+    set: InsertType<T> | InsertType<T>[],
+  ): Promise<RowType<T>[]> {
+    const items = Array.isArray(set) ? set : [set]
+    const columns = Object.keys(items[0] as object)
+    const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+    const conflict_columns = primary_keys.map(pk => `"${pk}"`).join(', ')
+    const update_columns = columns.filter(col =>
+      !primary_keys.includes(col) && col !== 'created_at',
+    )
+
+    const BATCH_SIZE = 5000
+    const results: RowType<T>[] = []
+    const columns_sql = columns.map(c => `"${c}"`).join(', ')
+
+    try {
+      for (let offset = 0; offset < items.length; offset += BATCH_SIZE) {
+        const batch = items.slice(offset, offset + BATCH_SIZE)
+        const params: unknown[] = []
+        const value_groups: string[] = []
+
+        for (const row of batch) {
+          const placeholders = columns.map((col) => {
+            params.push((row as Record<string, unknown>)[col])
+            return `$${params.length}`
+          })
+          value_groups.push(`(${placeholders.join(', ')})`)
+        }
+
+        const update_set = update_columns
+          .map(col => `"${col}" = EXCLUDED."${col}"`)
+          .join(', ')
+        const sql = `INSERT INTO "${table_name}" (${columns_sql}) VALUES ${value_groups.join(', ')} ON CONFLICT (${conflict_columns}) DO UPDATE SET ${update_set} RETURNING *`
+        const result = await this.#pg.query<RowType<T>>(sql, params)
+        results.push(...result.rows)
+      }
+    } catch (error) {
+      console.error('LivePgLite upsert error:', error)
+      toast.error(`Upsert error: ${(error as Error).message}`)
+      throw error
+    }
+
+    return results
+  }
+
+  /**
+   * Update specific fields of a row by its primary key(s)
+   */
+  async #update<T extends TableName>(
+    table_name: T,
+    set: UpdateType<T>,
+  ): Promise<void> {
+    const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+    const row = set as Record<string, unknown>
+
+    for (const pk of primary_keys) {
+      if (row[pk] == null) {
+        console.error(`LivePgLite update: missing primary key column "${pk}"`)
+        return
+      }
+    }
+
+    const exclude_columns = [...primary_keys, '_save', '_delete', '_reset']
+    const columns = Object.keys(row).filter(col => !exclude_columns.includes(col))
+
+    if (columns.length === 0) return
+
+    const params: unknown[] = columns.map(col => row[col])
+    for (const pk of primary_keys) {
+      params.push(row[pk])
+    }
+
+    const set_clauses = columns.map((col, i) => `"${col}" = $${i + 1}`).join(', ')
+    const where_clauses = primary_keys
+      .map((pk, i) => `"${pk}" = $${columns.length + i + 1}`)
+      .join(' AND ')
+    const sql = `UPDATE "${table_name}" SET ${set_clauses} WHERE ${where_clauses}`
+
+    try {
+      await this.#pg.query(sql, params)
+    } catch (error) {
+      console.error('LivePgLite update error:', error)
+      toast.error(`Update error: ${(error as Error).message}`)
       throw error
     }
   }

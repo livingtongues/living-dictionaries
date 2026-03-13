@@ -35,6 +35,7 @@ export class TableStore<T extends Record<string, unknown>> {
   #subscribers = 0
   #unsubscribe: (() => Promise<void>) | null = null
   #started = false
+  #stop_timeout: ReturnType<typeof setTimeout> | null = null
 
   // Loading state
   #loading = $state(true)
@@ -86,7 +87,7 @@ export class TableStore<T extends Record<string, unknown>> {
           tick().then(() => {
             this.#subscribers--
             if (this.#subscribers === 0) {
-              this.#stop()
+              this.#schedule_stop()
             }
           })
         }
@@ -116,7 +117,7 @@ export class TableStore<T extends Record<string, unknown>> {
           tick().then(() => {
             this.#subscribers--
             if (this.#subscribers === 0) {
-              this.#stop()
+              this.#schedule_stop()
             }
           })
         }
@@ -129,6 +130,10 @@ export class TableStore<T extends Record<string, unknown>> {
    * Start the live query subscription
    */
   async #start() {
+    if (this.#stop_timeout) {
+      clearTimeout(this.#stop_timeout)
+      this.#stop_timeout = null
+    }
     this.#started = true
     this.#loading = true
 
@@ -180,6 +185,19 @@ export class TableStore<T extends Record<string, unknown>> {
       this.#loading = false
       this.#started = false
     }
+  }
+
+  /**
+   * Schedule a delayed stop to prevent rapid subscribe/unsubscribe cycles
+   */
+  #schedule_stop() {
+    if (this.#stop_timeout) return
+    this.#stop_timeout = setTimeout(() => {
+      this.#stop_timeout = null
+      if (this.#subscribers === 0) {
+        this.#stop()
+      }
+    }, 5000)
   }
 
   /**

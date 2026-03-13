@@ -62,6 +62,9 @@ export type InsertType<T extends TableName> = Schema[T] extends Table
   ? InferInsertModel<Schema[T]>
   : never
 
+// Partial insert with required id for updating specific fields
+export type UpdateType<T extends TableName> = Partial<InsertType<T>> & { id: string }
+
 // What you get when accessing db.table_name
 export interface TableAccessor<T extends TableName> {
   readonly loading: boolean
@@ -72,7 +75,10 @@ export interface TableAccessor<T extends TableName> {
 
   // Table-level operations (row-level operations are on the row object via Saveable)
   insert: (item: InsertType<T> | InsertType<T>[]) => Promise<RowType<T>[]>
-  delete_all: (ids: string[]) => Promise<void>
+  upsert: (item: InsertType<T> | InsertType<T>[]) => Promise<RowType<T>[]>
+  update: (set: UpdateType<T>) => Promise<void>
+  delete: (ids: string | string[]) => Promise<void>
+  find: (row_id: string) => Promise<RawRowType<T> | undefined>
 }
 
 // What you get when accessing db.table_name.id
@@ -91,4 +97,5 @@ export interface QueryOptions {
 export interface QueryAccessor<T extends TableName> {
   readonly rows: RowType<T>[]
   readonly loading: boolean
+  snapshot: () => Promise<RawRowType<T>[]>
 }

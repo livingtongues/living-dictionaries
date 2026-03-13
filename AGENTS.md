@@ -221,7 +221,9 @@ Call `_delete()` on a row to remove it:
 
 **Delete multiple rows at once:**
 ```ts
-await page.data.db.texts.delete_all([id1, id2, id3])
+await page.data.db.texts.delete([id1, id2, id3])
+// also accepts a single id
+await page.data.db.texts.delete(some_id)
 ```
 
 ### Custom Queries
@@ -259,6 +261,31 @@ Use `query()` for filtered/sorted/paginated data:
 </script>
 ```
 
+### Additional Table Operations
+
+**Find a single row by id (non-reactive, async):**
+```ts
+const text = await page.data.db.texts.find(some_id)
+```
+
+**Upsert (insert or update on conflict):**
+```ts
+await page.data.db.texts.upsert({ id: some_id, title: { en: 'Updated' } })
+// also accepts arrays
+await page.data.db.texts.upsert([item1, item2])
+```
+
+**Update specific fields without loading the row:**
+```ts
+await page.data.db.texts.update({ id: some_id, title: { en: 'New Title' } })
+```
+
+**Snapshot a query (non-reactive one-time read):**
+```ts
+const query = page.data.db.texts.query({ where: 'read_at IS NOT NULL', limit: 10 })
+const snapshot = await query.snapshot()
+```
+
 ### Tips
 - Don't spread row objects (e.g. `<div {...text}>`) as any mutations will not be applied to the original proxy object and will be lost.
 
@@ -283,5 +310,8 @@ Each `page.data.db.<table>` has these available:
 | `.id(some_id)` | Get a single row by id (subscribe just to single row instead of entire table) |
 | `.loading` | Boolean indicating if initial data is still loading |
 | `.insert(data)` | Insert one or more new rows |
-| `.delete_all(ids)` | Delete multiple rows by their ids |
-| `.query(options)` | Create a filtered/sorted query accessor that has .rows and .loading properties |
+| `.upsert(data)` | Insert or update on conflict |
+| `.update(data)` | Partial update by primary key |
+| `.delete(ids)` | Delete one or more rows by id(s) |
+| `.find(id)` | Async non-reactive single row lookup |
+| `.query(options)` | Create a filtered/sorted query accessor with .rows, .loading, and .snapshot() |
