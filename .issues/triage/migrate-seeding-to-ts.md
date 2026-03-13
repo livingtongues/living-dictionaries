@@ -7,7 +7,7 @@ assignee: jacob
 
 ## Goal
 
-When `pnpm dev` is run and a user navigates to the admin route, the PGlite database should be automatically seeded with realistic data (1000 users, 1000 dictionaries) on first initialization. Move away from `supabase/seed.sql` for this purpose and use JS/TS programmatically.
+When `pnpm dev` is run and a user navigates to the admin route, the PGlite database should be automatically seeded with realistic data (1000 users, 1000 dictionaries) on first initialization.
 
 ## Current State
 
@@ -49,7 +49,6 @@ Tables available to seed: `users`, `user_data`, `dictionaries`, `dictionary_role
 - Takes the drizzle db instance and PGlite pg instance
 - Uses drizzle `db.insert()` to batch insert generated data
 - Insert in correct order respecting FK constraints: users → user_data → dictionaries → dictionary_roles
-- Batch inserts (e.g. 100 at a time) to avoid overwhelming PGlite
 - Only runs when `is_new_db` is true
 
 ### 3. Hook into PGlite init (`lib/pglite/db.ts`)
