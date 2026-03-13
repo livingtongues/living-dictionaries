@@ -2,7 +2,7 @@ import type { PGlite } from '@electric-sql/pglite'
 import type { Database } from '@living-dictionaries/types/supabase/combined.types'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PgliteDatabase } from 'drizzle-orm/pglite'
-import type { SyncableTableName, SyncError, SyncResult, TableFetchResult } from './types'
+import type { SyncableTableName, SyncError, SyncLogEntry, SyncResult, TableFetchResult } from './types'
 import { page } from '$app/state'
 import { toast } from '$lib/components/ui/toast'
 import * as local_schema from '$lib/pglite/schema'
@@ -15,6 +15,8 @@ type Supabase = SupabaseClient<Database>
 
 // Sentinel value: pass epoch to trigger which converts it to NULL (marks row as synced)
 const SYNC_SENTINEL = new Date(0)
+
+const DOWNLOAD_BATCH_SIZE = 200
 
 const METADATA_KEYS = {
   SYNCED_UP_TO: 'synced_up_to',
@@ -32,8 +34,14 @@ const SYNC_TIERS: SyncableTableName[][] = [
 // Tables that are read-only (downloaded but never uploaded)
 const READ_ONLY_TABLES = new Set<SyncableTableName>(['users'])
 
+// Tables that reference dictionaries.id via foreign key
+const TABLES_WITH_DICTIONARY_FK = new Set<SyncableTableName>(['dictionary_roles', 'invites'])
+
 // Tables that use created_at instead of updated_at (immutable after creation)
 const CREATED_AT_TABLES = new Set<SyncableTableName>(['dictionary_roles', 'invites'])
+
+// Tables that use text (not uuid) for their primary key
+const TEXT_ID_TABLES = new Set<SyncableTableName>(['dictionaries'])
 
 // Tables with composite primary keys (no id column)
 const COMPOSITE_PK_TABLES: Record<string, string[]> = {
@@ -49,7 +57,6 @@ function get_row_key(table_name: SyncableTableName, row: Record<string, unknown>
 }
 
 // Mapping of local table to Supabase source (for download)
-// users comes from RPC, dictionaries from view, rest from tables
 const DOWNLOAD_SOURCE: Record<SyncableTableName, 'rpc' | 'view' | 'table'> = {
   users: 'rpc',
   dictionaries: 'view',
@@ -62,6 +69,15 @@ export class Sync {
   is_syncing = $state(false)
   last_error: string | null = $state(null)
   last_sync_result: SyncResult | null = $state(null)
+  log_entries: SyncLogEntry[] = $state([])
+
+  #log(entry: Omit<SyncLogEntry, 'timestamp'>) {
+    this.log_entries.push({ ...entry, timestamp: new Date() })
+  }
+
+  async #yield() {
+    await new Promise(resolve => setTimeout(resolve, 0))
+  }
 
   constructor(
     private local_db: LocalDb,
@@ -81,16 +97,6 @@ export class Sync {
 
   async #trigger_sync_if_needed() {
     // TODO: re-enable auto-sync when ready
-    // const now = Date.now()
-    // if (now - this.last_sync_time > SYNC_COOLDOWN_MS && !this.is_syncing) {
-    //   try {
-    //     await this.full_sync()
-    //   } catch (error) {
-    //     console.error('Sync failed:', error)
-    //   }
-    // } else {
-    //   console.info(`Will not sync yet. Still need ${Math.ceil((SYNC_COOLDOWN_MS - (now - this.last_sync_time)) / 60000)} more minutes of cooldown.`)
-    // }
   }
 
   async sync_with_notice(): Promise<SyncResult> {
@@ -127,6 +133,9 @@ export class Sync {
 
     this.is_syncing = true
     this.last_error = null
+    this.log_entries = []
+
+    this.#log({ level: 'info', phase: 'start', message: 'Starting sync' })
 
     const start_time = Date.now()
     const errors: SyncError[] = []
@@ -137,14 +146,23 @@ export class Sync {
 
     try {
       const synced_up_to = await this.get_synced_up_to()
+      this.#log({ level: 'info', phase: 'start', message: `Synced up to: ${synced_up_to ?? 'never (first sync)'}` })
 
       // Phase 0: Handle deletes first (delete wins over update)
+      this.#log({ level: 'info', phase: 'deletes', message: 'Syncing deletes...' })
       const delete_result = await this.sync_deletes(synced_up_to)
       deletes_pushed = delete_result.pushed
       deletes_pulled = delete_result.pulled
       errors.push(...delete_result.errors)
+      this.#log({
+        level: delete_result.errors.length > 0 ? 'warn' : 'info',
+        phase: 'deletes',
+        message: `Deletes: ${delete_result.pushed} pushed, ${delete_result.pulled} pulled`,
+        row_count: delete_result.pushed + delete_result.pulled,
+      })
 
       // Phase 1: Fetch and merge all tables in parallel
+      this.#log({ level: 'info', phase: 'fetch', message: 'Fetching changes for all tables...' })
       const all_tables = SYNC_TIERS.flat()
       const fetch_results = await Promise.all(
         all_tables.map(table => this.fetch_and_merge_table(table, synced_up_to)),
@@ -155,11 +173,48 @@ export class Sync {
       for (const result of fetch_results) {
         fetch_results_map.set(result.table_name, result)
         errors.push(...result.errors)
+        this.#log({
+          level: result.errors.length > 0 ? 'warn' : 'info',
+          phase: 'fetch',
+          table: result.table_name,
+          message: `${result.table_name}: ${result.to_upload.length} to upload, ${result.to_download.length} to download`,
+          row_count: result.to_upload.length + result.to_download.length,
+        })
+      }
+
+      // Filter out rows referencing deleted dictionaries
+      const dictionaries_result = fetch_results_map.get('dictionaries')
+      if (dictionaries_result) {
+        const valid_dictionary_ids = new Set(
+          [...dictionaries_result.to_download, ...dictionaries_result.to_upload]
+            .map(row => row.id as string),
+        )
+        // Also include dictionaries already in local DB
+        const local_dicts = await this.local_pg.query<{ id: string }>(`SELECT id FROM dictionaries`)
+        for (const row of local_dicts.rows) {
+          valid_dictionary_ids.add(row.id)
+        }
+
+        for (const table_name of TABLES_WITH_DICTIONARY_FK) {
+          const table_result = fetch_results_map.get(table_name)
+          if (!table_result) continue
+          const before_download = table_result.to_download
+          table_result.to_download = before_download.filter(
+            row => valid_dictionary_ids.has(row.dictionary_id as string),
+          )
+          const removed = before_download.filter(
+            row => !valid_dictionary_ids.has(row.dictionary_id as string),
+          )
+          if (removed.length > 0) {
+            const dict_ids = [...new Set(removed.map(row => row.dictionary_id as string))]
+            this.#log({ level: 'info', phase: 'fetch', table: table_name, message: `Filtered ${removed.length} rows referencing deleted dictionaries: ${dict_ids.join(', ')}` })
+          }
+        }
       }
 
       // Phase 2: Write in dependency order
+      this.#log({ level: 'info', phase: 'write', message: 'Writing changes in dependency order...' })
       for (const tier of SYNC_TIERS) {
-        console.log(`[sync] Processing tier:`, tier)
         const tier_results = tier
           .map(name => fetch_results_map.get(name))
           .filter((r): r is TableFetchResult => r !== undefined)
@@ -167,12 +222,30 @@ export class Sync {
         const write_results = await Promise.all(
           tier_results.map(r => this.write_table_changes(r)),
         )
-        console.log(`[sync] Tier complete:`, tier)
 
         for (const result of write_results) {
           uploaded_timestamps.push(...result.uploaded_timestamps)
           downloaded_timestamps.push(...result.downloaded_timestamps)
           errors.push(...result.errors)
+          const table_name = tier_results[write_results.indexOf(result)]?.table_name
+          if (result.uploaded_timestamps.length > 0 || result.downloaded_timestamps.length > 0) {
+            this.#log({
+              level: result.errors.length > 0 ? 'warn' : 'success',
+              phase: 'write',
+              table: table_name,
+              message: `${table_name}: ${result.uploaded_timestamps.length} uploaded, ${result.downloaded_timestamps.length} downloaded`,
+              row_count: result.uploaded_timestamps.length + result.downloaded_timestamps.length,
+            })
+          }
+          for (const error of result.errors) {
+            this.#log({
+              level: 'error',
+              phase: 'write',
+              table: table_name,
+              message: `Error in ${table_name}: ${error.error}`,
+              detail: `Operation: ${error.operation}, ID: ${error.id}`,
+            })
+          }
         }
       }
 
@@ -185,7 +258,7 @@ export class Sync {
 
       await this.update_last_synced_at(new Date())
 
-      return {
+      const sync_result: SyncResult = {
         success: errors.length === 0,
         items_uploaded: uploaded_timestamps.length,
         items_downloaded: downloaded_timestamps.length,
@@ -195,15 +268,31 @@ export class Sync {
         duration_ms: Date.now() - start_time,
         last_sync_time: new Date().toISOString(),
       }
+
+      this.last_sync_result = sync_result
+
+      this.#log({
+        level: sync_result.success ? 'success' : 'warn',
+        phase: 'complete',
+        message: `Sync complete in ${sync_result.duration_ms}ms — ${sync_result.items_uploaded} up, ${sync_result.items_downloaded} down, ${sync_result.errors.length} errors`,
+      })
+
+      return sync_result
     } catch (error) {
       this.last_error = error instanceof Error ? error.message : 'Unknown error'
+      this.#log({
+        level: 'error',
+        phase: 'complete',
+        message: `Sync failed: ${this.last_error}`,
+        detail: error instanceof Error ? error.stack : undefined,
+      })
       errors.push({
         operation: 'download',
         table_name: 'unknown',
         id: '',
         error: this.last_error,
       })
-      return {
+      const fail_result: SyncResult = {
         success: false,
         items_uploaded: 0,
         items_downloaded: 0,
@@ -213,6 +302,8 @@ export class Sync {
         duration_ms: Date.now() - start_time,
         last_sync_time: null,
       }
+      this.last_sync_result = fail_result
+      return fail_result
     } finally {
       this.is_syncing = false
     }
@@ -256,7 +347,6 @@ export class Sync {
       this.fetch_local_changes(table_name),
     ])
 
-    // Get keys of cloud rows to check which ones exist locally (including clean rows)
     const local_existing_rows = cloud_changes.length > 0
       ? await this.fetch_local_rows_by_keys(table_name, cloud_changes)
       : []
@@ -272,7 +362,6 @@ export class Sync {
     const pk_columns = COMPOSITE_PK_TABLES[table_name]
 
     if (pk_columns) {
-      // For composite PK tables, fetch each row individually
       const all_rows: Record<string, unknown>[] = []
       for (const cloud_row of cloud_rows) {
         const conditions = pk_columns.map((col, i) => `${col} = $${i + 1}`).join(' AND ')
@@ -286,7 +375,6 @@ export class Sync {
       return all_rows
     }
 
-    // For simple id-based tables
     const ids = cloud_rows.map(row => row.id as string)
     const all_rows: Record<string, unknown>[] = []
 
@@ -338,7 +426,7 @@ export class Sync {
         page_num++
       }
     }
-    console.log(`[sync] Fetched ${all_rows.length} rows from ${supabase_table}`)
+    this.#log({ level: 'info', phase: 'fetch', table: table_name, message: `Fetched ${all_rows.length} rows from ${supabase_table}`, row_count: all_rows.length })
     return all_rows
   }
 
@@ -347,8 +435,6 @@ export class Sync {
       throw new Error(`RPC fetch not supported for table: ${table_name}`)
     }
 
-    // Fetch users via RPC - returns all users for admin table
-    // TODO: Add pagination and since filter when RPC supports it
     const { data, error } = await this.supabase.rpc('users_for_admin_table')
     if (error)
       throw new Error(error.message)
@@ -356,22 +442,19 @@ export class Sync {
     if (!data)
       return []
 
-    // Filter by since if provided
+    let result = data as Record<string, unknown>[]
     if (since) {
-      return data.filter((row: Record<string, unknown>) => {
+      result = result.filter((row) => {
         const updated_at = row.updated_at as string
         return updated_at && updated_at > since
       })
     }
 
-    console.log(`[sync] Fetched ${data.length} users from RPC`)
-    return data as Record<string, unknown>[]
+    this.#log({ level: 'info', phase: 'fetch', table: 'users', message: `Fetched ${result.length} users from RPC`, row_count: result.length })
+    return result
   }
 
   private async fetch_local_changes(table_name: SyncableTableName): Promise<Record<string, unknown>[]> {
-    // Fetch rows where local_saved_at IS NOT NULL (dirty/needs sync)
-    // local_saved_at = NULL means synced (trigger converts epoch sentinel to NULL)
-    // local_saved_at = timestamp means needs sync (trigger sets on app saves)
     const result = await this.local_pg.query<Record<string, unknown>>(
       `SELECT * FROM ${table_name} WHERE local_saved_at IS NOT NULL`,
     )
@@ -384,8 +467,6 @@ export class Sync {
     cloud: Record<string, unknown>[],
     local_existing: Record<string, unknown>[],
   ): { to_upload: Record<string, unknown>[], to_download: Record<string, unknown>[] } {
-    // local_dirty: rows with local_saved_at IS NOT NULL (need to be uploaded)
-    // local_existing: all local rows that match cloud keys (to check for conflicts)
     const local_dirty_map = new Map(local_dirty.map(item => [get_row_key(table_name, item), item]))
     const local_existing_map = new Map(local_existing.map(item => [get_row_key(table_name, item), item]))
     const cloud_map = new Map(cloud.map(item => [get_row_key(table_name, item), item]))
@@ -394,14 +475,11 @@ export class Sync {
     const to_upload: Record<string, unknown>[] = []
     const to_download: Record<string, unknown>[] = []
 
-    // Determine what needs to be uploaded
     for (const [key, local_item] of local_dirty_map) {
       const cloud_item = cloud_map.get(key)
       if (!cloud_item) {
-        // Not in cloud at all, upload it
         to_upload.push(local_item)
       } else {
-        // Compare timestamps - local wins if local_saved_at > cloud timestamp
         const local_ts = (local_item.local_saved_at as Date)?.getTime() ?? 0
         const cloud_ts = new Date(cloud_item[timestamp_column] as string).getTime()
         if (local_ts > cloud_ts)
@@ -409,23 +487,18 @@ export class Sync {
       }
     }
 
-    // Determine what needs to be downloaded
     for (const [key, cloud_item] of cloud_map) {
       const local_dirty_item = local_dirty_map.get(key)
       const local_existing_item = local_existing_map.get(key)
 
       if (!local_existing_item) {
-        // Doesn't exist locally at all, download it
         to_download.push(cloud_item)
       } else if (local_dirty_item) {
-        // Exists locally AND is dirty - only download if cloud is newer
         const local_ts = (local_dirty_item.local_saved_at as Date)?.getTime() ?? 0
         const cloud_ts = new Date(cloud_item[timestamp_column] as string).getTime()
         if (cloud_ts > local_ts)
           to_download.push(cloud_item)
       } else {
-        // Exists locally but is clean (local_saved_at IS NULL)
-        // Compare cloud timestamp with local timestamp
         const local_timestamp = local_existing_item[timestamp_column]
         const local_ts = local_timestamp ? new Date(local_timestamp as string).getTime() : 0
         const cloud_ts = new Date(cloud_item[timestamp_column] as string).getTime()
@@ -448,21 +521,35 @@ export class Sync {
 
     // Upload to Supabase (skip read-only tables like users)
     if (to_upload.length > 0 && !READ_ONLY_TABLES.has(table_name)) {
+      this.#log({ level: 'info', phase: 'upload', table: table_name, message: `Uploading ${to_upload.length} rows`, row_count: to_upload.length })
       const upload_result = await this.upload_to_supabase(table_name, to_upload)
       uploaded_timestamps.push(...upload_result.timestamps)
       errors.push(...upload_result.errors)
+      await this.#yield()
     }
 
-    // Download to local
-    console.log(`[sync] Downloading ${to_download.length} rows to ${table_name}`)
-    for (const item of to_download) {
-      try {
-        console.log(`[sync] Saving to ${table_name}:`, item.id ?? get_row_key(table_name, item))
-        await this.save_to_local(table_name, item)
-        downloaded_timestamps.push(item[timestamp_column] as string)
-      } catch (err) {
-        console.error(`[sync] Error saving to ${table_name}:`, item, err)
-        errors.push({ operation: 'download', table_name, id: get_row_key(table_name, item), error: String(err) })
+    // Download to local in batches
+    if (to_download.length > 0) {
+      this.#log({ level: 'info', phase: 'download', table: table_name, message: `Downloading ${to_download.length} rows`, row_count: to_download.length })
+      for (let offset = 0; offset < to_download.length; offset += DOWNLOAD_BATCH_SIZE) {
+        const batch = to_download.slice(offset, offset + DOWNLOAD_BATCH_SIZE)
+        try {
+          await this.save_batch_to_local(table_name, batch)
+          for (const item of batch) {
+            downloaded_timestamps.push(item[timestamp_column] as string)
+          }
+        } catch {
+          // Batch failed — fall back to one-by-one to save what we can
+          for (const item of batch) {
+            try {
+              await this.save_batch_to_local(table_name, [item])
+              downloaded_timestamps.push(item[timestamp_column] as string)
+            } catch (single_err) {
+              errors.push({ operation: 'download', table_name, id: get_row_key(table_name, item), error: String(single_err) })
+            }
+          }
+        }
+        await this.#yield()
       }
     }
 
@@ -492,31 +579,52 @@ export class Sync {
       return { timestamps, errors }
     }
 
-    if (data) {
-      // Mark uploaded rows as synced
-      for (const row of data as any[]) {
+    if (data && (data as any[]).length > 0) {
+      const rows = data as any[]
+      for (const row of rows) {
         const timestamp_value = row[timestamp_column] || row.created_at
         if (timestamp_value) timestamps.push(timestamp_value as string)
+      }
 
-        if (pk_columns) {
+      if (pk_columns) {
+        // Composite PK: batch update one at a time (can't easily batch composite keys)
+        for (const row of rows) {
           const conditions = pk_columns.map((col, i) => `${col} = $${i + 1}`).join(' AND ')
           const params = [...pk_columns.map(col => row[col]), SYNC_SENTINEL]
           await this.local_pg.query(
             `UPDATE ${table_name} SET local_saved_at = $${pk_columns.length + 1} WHERE ${conditions}`,
             params,
           )
+        }
+      } else {
+        // id-based tables: single batch UPDATE
+        const params: unknown[] = []
+        const value_rows: string[] = []
+        for (const row of rows) {
+          const timestamp_value = row[timestamp_column] || row.created_at
+          params.push(row.id, timestamp_value)
+          const id_cast = TEXT_ID_TABLES.has(table_name) ? '' : '::uuid'
+          value_rows.push(`($${params.length - 1}${id_cast}, $${params.length}::timestamptz)`)
+        }
+        params.push(SYNC_SENTINEL)
+
+        if (CREATED_AT_TABLES.has(table_name)) {
+          await this.local_pg.query(
+            `UPDATE ${table_name} SET
+              local_saved_at = $${params.length}::timestamptz
+            FROM (VALUES ${value_rows.join(', ')}) AS batch(id, ts)
+            WHERE ${table_name}.id = batch.id`,
+            params,
+          )
         } else {
-          if (CREATED_AT_TABLES.has(table_name)) {
-            await this.local_pg.query(
-              `UPDATE ${table_name} SET local_saved_at = $1 WHERE id = $2`,
-              [SYNC_SENTINEL, row.id],
-            )
-          } else {
-            await this.local_pg.query(
-              `UPDATE ${table_name} SET updated_at = $1, local_saved_at = $2 WHERE id = $3`,
-              [timestamp_value, SYNC_SENTINEL, row.id],
-            )
-          }
+          await this.local_pg.query(
+            `UPDATE ${table_name} SET
+              updated_at = batch.ts,
+              local_saved_at = $${params.length}::timestamptz
+            FROM (VALUES ${value_rows.join(', ')}) AS batch(id, ts)
+            WHERE ${table_name}.id = batch.id`,
+            params,
+          )
         }
       }
     }
@@ -527,19 +635,16 @@ export class Sync {
   private prepare_for_supabase(table_name: SyncableTableName, item: Record<string, unknown>): Record<string, unknown> {
     const result = { ...item }
     delete result.local_saved_at
-    delete result.entry_count // Computed column, not in base table
+    delete result.entry_count
 
-    // Only delete updated_at for tables that have it (Supabase trigger sets it)
     if (!CREATED_AT_TABLES.has(table_name)) {
       delete result.updated_at
     }
 
     for (const key of Object.keys(result)) {
-      // Convert Date objects to ISO strings
       if (result[key] instanceof Date) {
         result[key] = (result[key] as Date).toISOString()
       }
-      // Remove null values so Supabase defaults can apply
       if (result[key] === null) {
         delete result[key]
       }
@@ -547,34 +652,81 @@ export class Sync {
     return result
   }
 
-  private async save_to_local(table_name: SyncableTableName, cloud_item: Record<string, unknown>): Promise<void> {
-    const local_item = { ...cloud_item }
-    local_item.local_saved_at = SYNC_SENTINEL
+  private async save_batch_to_local(table_name: SyncableTableName, cloud_items: Record<string, unknown>[]): Promise<void> {
+    if (cloud_items.length === 0)
+      return
 
-    // For users table, ensure updated_at is set (RPC may return NULL if user never signed in)
-    if (table_name === 'users' && !local_item.updated_at) {
-      local_item.updated_at = local_item.created_at || new Date().toISOString()
+    // Prepare first item to determine columns
+    const first = { ...cloud_items[0] }
+    first.local_saved_at = SYNC_SENTINEL
+    if (table_name === 'users' && !first.updated_at) {
+      first.updated_at = first.created_at || new Date().toISOString()
     }
 
-    const columns = Object.keys(local_item)
-    const values = Object.values(local_item)
-    const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ')
-    const update_set = columns.map((col, i) => `${col} = $${i + 1}`).join(', ')
+    const columns = Object.keys(first)
+    const columns_sql = columns.join(', ')
 
-    // Handle special PKs
     const pk_columns = COMPOSITE_PK_TABLES[table_name]
-    let conflict_target: string
-    if (pk_columns) {
-      conflict_target = `(${pk_columns.join(', ')})`
-    } else {
-      conflict_target = '(id)'
+    const conflict_target = pk_columns
+      ? `(${pk_columns.join(', ')})`
+      : '(id)'
+    // Exclude local_saved_at from ON CONFLICT SET — PGlite's BEFORE trigger
+    // doesn't see EXCLUDED values correctly (it sees the UPDATE and sets
+    // local_saved_at = NOW() before checking for the epoch sentinel). Direct
+    // parameter references ($3) work but EXCLUDED references don't, and we need
+    // EXCLUDED for multi-row batch inserts. So we do a separate UPDATE afterward.
+    const update_columns = columns.filter(col =>
+      col !== 'local_saved_at' && (pk_columns ? !pk_columns.includes(col) : col !== 'id'),
+    )
+    const update_set = update_columns.map(col => `${col} = EXCLUDED.${col}`).join(', ')
+
+    const params: unknown[] = []
+    const value_groups: string[] = []
+
+    for (const cloud_item of cloud_items) {
+      const local_item = { ...cloud_item }
+      local_item.local_saved_at = SYNC_SENTINEL
+      if (table_name === 'users' && !local_item.updated_at) {
+        local_item.updated_at = local_item.created_at || new Date().toISOString()
+      }
+
+      const placeholders = columns.map((col) => {
+        params.push(local_item[col])
+        return `$${params.length}`
+      })
+      value_groups.push(`(${placeholders.join(', ')})`)
     }
 
     await this.local_pg.query(
-      `INSERT INTO ${table_name} (${columns.join(', ')}) VALUES (${placeholders})
+      `INSERT INTO ${table_name} (${columns_sql}) VALUES ${value_groups.join(', ')}
        ON CONFLICT ${conflict_target} DO UPDATE SET ${update_set}`,
-      values,
+      params,
     )
+
+    // Mark all rows as synced via separate UPDATE (trigger converts epoch → NULL)
+    if (pk_columns) {
+      const tuples: string[] = []
+      const tuple_params: unknown[] = [SYNC_SENTINEL]
+      for (const cloud_item of cloud_items) {
+        const placeholders = pk_columns.map((col) => {
+          tuple_params.push(cloud_item[col])
+          return `$${tuple_params.length}`
+        })
+        tuples.push(`(${placeholders.join(', ')})`)
+      }
+      const pk_list = pk_columns.join(', ')
+      await this.local_pg.query(
+        `UPDATE ${table_name} SET local_saved_at = $1 WHERE (${pk_list}) IN (${tuples.join(', ')})`,
+        tuple_params,
+      )
+    } else {
+      const ids = cloud_items.map(item => item.id)
+      const id_placeholders = ids.map((_, i) => `$${i + 1}`).join(', ')
+      await this.local_pg.query(
+        `UPDATE ${table_name} SET local_saved_at = $${ids.length + 1} WHERE id IN (${id_placeholders})`,
+        [...ids, SYNC_SENTINEL],
+      )
+    }
   }
 
   private async sync_deletes(synced_up_to: string | null): Promise<{ pushed: number, pulled: number, timestamps: string[], errors: SyncError[] }> {
@@ -582,22 +734,18 @@ export class Sync {
     let pushed = 0
     let pulled = 0
 
-    // Step 1: Read local deletes FIRST (before pulling remote, to avoid pushing back what we pull)
     const local_deletes = await this.local_db.select().from(local_schema.deletes)
 
-    // Step 2: Pull remote deletes
     const pull_result = await this.pull_remote_deletes(synced_up_to)
     pulled = pull_result.count
     errors.push(...pull_result.errors)
 
-    // Step 3: Push local deletes (only the ones we read before pulling)
     if (local_deletes.length > 0) {
       const push_result = await this.push_local_deletes(local_deletes)
       pushed = push_result.count
       errors.push(...push_result.errors)
     }
 
-    // Step 4: Clear local deletes table after both operations complete
     if (local_deletes.length > 0 || pulled > 0) {
       await this.local_db.delete(local_schema.deletes)
     }
@@ -609,7 +757,6 @@ export class Sync {
     const errors: SyncError[] = []
 
     if (!since) {
-      // First sync: nothing local to delete. Just fetch max deleted_at to advance synced_up_to.
       const { data, error } = await this.supabase
         .from('deletes' as any)
         .select('deleted_at')

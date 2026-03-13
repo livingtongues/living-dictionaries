@@ -1,3 +1,13 @@
+export interface SyncLogEntry {
+  timestamp: Date
+  level: 'info' | 'warn' | 'error' | 'success'
+  phase: string
+  table?: string
+  message: string
+  detail?: string
+  row_count?: number
+}
+
 export interface SyncResult {
   success: boolean
   items_uploaded: number
