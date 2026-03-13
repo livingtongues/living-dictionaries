@@ -440,6 +440,46 @@ describe(Sync, () => {
       expect(cloud_roles).toHaveLength(1)
       expect(cloud_roles![0].role).toBe('contributor')
     })
+
+    test('filters out dictionary_roles referencing deleted dictionaries', async () => {
+      const deleted_dict_id = 'deleted-dict-for-roles'
+      const fresh_device = await create_device()
+
+      // Create a dictionary and a role for it
+      await anon_supabase.from('dictionaries').upsert({
+        id: deleted_dict_id,
+        url: deleted_dict_id,
+        name: 'Will Be Deleted',
+      })
+      await admin_supabase.from('dictionary_roles').upsert({
+        dictionary_id: deleted_dict_id,
+        user_id: TEST_USER_ID,
+        role: 'manager',
+      })
+
+      // Soft-delete the dictionary
+      await admin_supabase.from('dictionaries')
+        .update({ deleted: new Date().toISOString() })
+        .eq('id', deleted_dict_id)
+
+      // Sync fresh device - should NOT download the role for the deleted dictionary
+      const result = await fresh_device.sync.sync()
+
+      expect(result.success).toBeTruthy()
+
+      const roles = await fresh_device.db.select()
+        .from(local_schema.dictionary_roles)
+        .where(eq(local_schema.dictionary_roles.dictionary_id, deleted_dict_id))
+      expect(roles).toHaveLength(0)
+
+      // Verify it did download the role for the non-deleted dictionary
+      const valid_roles = await fresh_device.db.select()
+        .from(local_schema.dictionary_roles)
+        .where(eq(local_schema.dictionary_roles.dictionary_id, ROLE_DICT_ID))
+      expect(valid_roles.length).toBeGreaterThan(0)
+
+      await fresh_device.pg.close()
+    })
   })
 
   describe('invites sync', () => {

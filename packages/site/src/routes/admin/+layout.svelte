@@ -22,18 +22,20 @@
       <Tab link="dictionaries?filter=public" label="public dictionaries" />
       <Tab link="dictionaries?filter=private" label="private dictionaries" />
       <Tab link="dictionaries?filter=other" label="other dictionaries" />
-      <Button
-        class="ml-auto"
-        size="sm"
-        form="simple"
-        disabled={data.sync?.is_syncing}
-        onclick={() => data.sync?.sync_with_notice()}>
+      <a
+        href="/admin/sync"
+        class="ml-auto flex items-center p-2 text-lg"
+        title="Sync Dashboard">
         {#if data.sync?.is_syncing}
-          Syncing...
+          <span class="i-mdi-loading animate-spin text-blue-600"></span>
+        {:else if data.sync?.last_sync_result?.success}
+          <span class="i-mdi-cloud-check text-green-600"></span>
+        {:else if data.sync?.last_sync_result && !data.sync.last_sync_result.success}
+          <span class="i-mdi-cloud-alert text-red-600"></span>
         {:else}
-          Sync
+          <span class="i-mdi-cloud-outline text-gray-500"></span>
         {/if}
-      </Button>
+      </a>
       <Button
         size="sm"
         form="simple"
