@@ -2,6 +2,7 @@
 title: Notes section: stylizing display problem
 type: task
 priority: 2
+assignee: AnnaLuisaD
 github_issue: 634
 ---
 
