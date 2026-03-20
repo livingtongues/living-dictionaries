@@ -1,0 +1,51 @@
+name: Push Issues to GitHub
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.issues/**/*.md'
+
+jobs:
+  sync-issues:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Need previous commit to diff
+
+      - name: Get changed issue files
+        id: changed
+        run: |
+          FILES=$(git diff --name-only --diff-filter=ACMR HEAD~1 HEAD -- '.issues/**/*.md' | tr '\n' ' ')
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+          echo "Changed files: $FILES"
+
+      - name: Sync each changed file
+        if: steps.changed.outputs.files != ''
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_PAT }}
+        run: |
+          for file in ${{ steps.changed.outputs.files }}; do
+            if [ -f "$file" ]; then
+              echo "Processing: $file"
+              ./.github/workflows/issues-push-single.sh "$file"
+            fi
+          done
+
+      - name: Commit frontmatter updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .issues/
+          if git diff --staged --quiet; then
+            echo "No frontmatter changes to commit"
+          else
+            git commit -m "chore: update issue frontmatter after sync"
+            git push
+          fi
