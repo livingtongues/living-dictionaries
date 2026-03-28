@@ -27,7 +27,7 @@
     "@typescript-eslint/eslint-plugin": "^8.50.0",
     "eslint": "^9.39.2",
     "eslint-plugin-svelte": "^3.13.1",
-    "eslint-plugin-svelte-stylistic": "^0.0.4",
+    "eslint-plugin-svelte-stylistic": "github:jacob-8/eslint-plugin-svelte-stylistic",
     "start-server-and-test": "^2.0.5",
     "supabase": "^1.145.4",
     "typescript": "~5.9.3",
