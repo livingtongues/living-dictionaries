@@ -1,0 +1,22 @@
+{
+  "name": "@living-dictionaries/new-site",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --threshold error --diagnostic-sources js,svelte"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-node": "^5.2.12",
+    "@sveltejs/kit": "^2.21.1",
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "@supabase/supabase-js": "^2.49.4",
+    "svelte": "^5.46.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0"
+  }
+}
