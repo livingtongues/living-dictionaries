@@ -1,0 +1,15 @@
+services:
+  sveltekit:
+    build: .
+    container_name: sveltekit
+    restart: always
+    env_file: .env
+    expose:
+      - "3000"
+    networks:
+      - web
+
+networks:
+  web:
+    name: web
+    external: true
