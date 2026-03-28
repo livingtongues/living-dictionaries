@@ -1,8 +1,8 @@
-import { json, error as kit_error } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
+import { dev } from '$app/environment'
 import { ResponseCodes } from '$lib/constants'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
-import { dev } from '$app/environment'
+import { json, error as kit_error } from '@sveltejs/kit'
 
 export interface AddEntryRequestBody {
   api_key: string

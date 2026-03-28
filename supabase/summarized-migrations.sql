@@ -615,7 +615,7 @@ SELECT
   alternate_names,
   gloss_languages,
   location,
-  dictionaries.coordinates,
+  dictionaries.coordinates, -- needs dictionaries prefix to distinguish when dictionaries and entries have fields with the same names
   iso_639_3,
   glottocode,
   public,
@@ -634,6 +634,8 @@ SELECT
   dictionaries.created_by,
   dictionaries.updated_at,
   dictionaries.updated_by
+  -- hide_living_tongues_logo -- not included in view
+  -- deleted -- not included in view
 FROM dictionaries
   LEFT JOIN entries ON entries.dictionary_id = dictionaries.id AND entries.deleted IS NULL -- can take out the LEFT to eliminate dictionaries with 0 entries
 WHERE dictionaries.deleted IS NULL
@@ -675,7 +677,7 @@ SELECT cron.schedule (
     $$ REFRESH MATERIALIZED VIEW CONCURRENTLY materialized_dictionaries_view $$
 ); -- SELECT cron.unschedule('refresh-materialized_dictionaries_view');
 
-
+-- only used by dictionary_roles_with_profiles for full_name and avatar_url
 CREATE VIEW profiles_view AS
 SELECT 
     id,

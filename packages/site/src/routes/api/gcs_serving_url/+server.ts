@@ -1,7 +1,7 @@
-import { error, json } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
 import { PROCESS_IMAGE_URL } from '$env/static/private'
 import { ResponseCodes } from '$lib/constants'
+import { error, json } from '@sveltejs/kit'
 
 export interface GCSServingUrlRequestBody {
   storage_path: string

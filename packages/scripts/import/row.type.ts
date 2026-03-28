@@ -1,8 +1,6 @@
 import type { Glossing_Languages } from '@living-dictionaries/site/src/lib/glosses/glossing-languages'
 
-export type Row = {
-  [key in (Entry_Fields | Prefixed_Sense_Fields | Prefixed_Sentence_Fields | Media)]?: string;
-}
+export type Row = Partial<Record<Entry_Fields | Prefixed_Sense_Fields | Prefixed_Sentence_Fields | Media, string>>
 // 's3.es_gloss': 'hi',
 // 'semanticDomain4': '2.3',
 // 's4.fr_exampleSentence': 'Bonjour docteur',

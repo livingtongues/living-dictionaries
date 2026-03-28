@@ -1,6 +1,6 @@
-import { program } from 'commander'
 import { DeleteObjectCommand } from '@aws-sdk/client-s3'
-import { GCLOUD_MEDIA_BUCKET_S3, admin_supabase, storage_bucket } from '../config-supabase'
+import { program } from 'commander'
+import { admin_supabase, GCLOUD_MEDIA_BUCKET_S3, storage_bucket } from '../config-supabase'
 
 // First do dry, then check, then live
 // pnpm -F scripts delete-dictionary-media

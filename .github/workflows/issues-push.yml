@@ -17,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Need previous commit to diff
+          fetch-depth: 2 # Need previous commit to diff
 
       - name: Get changed issue files
         id: changed

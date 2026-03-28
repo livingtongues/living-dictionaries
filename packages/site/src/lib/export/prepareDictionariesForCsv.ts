@@ -1,4 +1,16 @@
-import type { DictionaryView } from '@living-dictionaries/types'
+import type { Coordinates } from '@living-dictionaries/types'
+
+interface DictionaryForCsvInput {
+  id: string
+  name: string
+  public: boolean | null
+  entry_count: number | null
+  metadata: { url?: string, thumbnail?: string } | null
+  iso_639_3: string | null
+  glottocode: string | null
+  location: string | null
+  coordinates: Coordinates | null
+}
 
 enum StandardDictionaryCSVFields {
   name = 'Dictionary Name',
@@ -13,13 +25,11 @@ enum StandardDictionaryCSVFields {
   thumbnail = 'Thumbnail',
 }
 type DictionaryForCSVKeys = keyof typeof StandardDictionaryCSVFields
-export type StandardDictionaryForCSV = {
-  [key in DictionaryForCSVKeys]: string | number | boolean;
-}
+export type StandardDictionaryForCSV = Record<DictionaryForCSVKeys, string | number | boolean>
 
 export const dictionary_headers: StandardDictionaryForCSV = { ...StandardDictionaryCSVFields }
 
-export function prepareDictionaryForCsv(dictionary: DictionaryView): StandardDictionaryForCSV {
+export function prepareDictionaryForCsv(dictionary: DictionaryForCsvInput): StandardDictionaryForCSV {
   let cleanedLocation = ''
   if (dictionary.location) {
     const location = `${dictionary.location}`

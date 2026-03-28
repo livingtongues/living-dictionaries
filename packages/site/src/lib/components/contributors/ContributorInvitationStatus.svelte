@@ -1,15 +1,28 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
-  import { Button } from 'svelte-pieces'
-  import { supabase_date_to_friendly } from '$lib/helpers/time'
+  import { db_date_to_friendly } from '$lib/helpers/time'
+  import { Button } from '$lib/svelte-pieces'
 
-  export let invite: Tables<'invites'>
-  export let admin = false
-  export let on_delete_invite: () => Promise<void>
+  interface Props {
+    invite: {
+      inviter_email: string
+      target_email: string
+      created_at: string | Date
+    }
+    admin?: boolean
+    on_delete_invite: () => Promise<void>
+    prefix?: import('svelte').Snippet
+  }
+
+  let {
+    invite,
+    admin = false,
+    on_delete_invite,
+    prefix,
+  }: Props = $props()
 </script>
 
-<div title="Sent by {invite.inviter_email} on {supabase_date_to_friendly(invite.created_at)}">
-  <slot name="prefix"><i>Invited: </i></slot>
+<div title="Sent by {invite.inviter_email} on {db_date_to_friendly(invite.created_at)}">
+  {#if prefix}{@render prefix()}{:else}<i>Invited: </i>{/if}
 
   <span class="text-sm leading-5 font-medium text-gray-900">
     {invite.target_email}
@@ -19,8 +32,8 @@
       color="red"
       size="sm"
       onclick={on_delete_invite}>
-      <span class="i-fa-solid-times" />
-      <span class="i-fa-key" />
+      <span class="i-fa-solid-times"></span>
+      <span class="i-fa-key"></span>
     </Button>
   {/if}
 </div>

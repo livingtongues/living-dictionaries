@@ -12,4 +12,4 @@ export const test_words = [
   'abɔŋ',
   'abɔŋ',
   'abuk',
-];
+]

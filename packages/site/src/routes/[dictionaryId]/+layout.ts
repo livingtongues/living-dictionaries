@@ -1,14 +1,14 @@
-import { error, redirect } from '@sveltejs/kit'
 import type { Tables, TablesUpdate } from '@living-dictionaries/types'
-import { type Readable, derived, get } from 'svelte/store'
-import { readable } from 'svelte/store'
 import type { LayoutLoad } from './$types'
-import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
-import { DICTIONARY_UPDATED_LOAD_TRIGGER, dbOperations } from '$lib/dbOperations'
-import { url_from_storage_path } from '$lib/helpers/media'
-import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
 import { invalidate } from '$app/navigation'
+import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
+import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
+import { dbOperations, DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
+import { url_from_storage_path } from '$lib/helpers/media'
 import { create_entries_ui_store } from '$lib/search/entries-ui-store'
+import { error, redirect } from '@sveltejs/kit'
+import { derived, get, type Readable } from 'svelte/store'
+import { readable } from 'svelte/store'
 
 export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url }, parent, depends }) => {
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
@@ -88,8 +88,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
     }
 
     async function update_dictionary(change: TablesUpdate<'dictionaries'>) {
-      const { error } = await supabase.from('dictionaries').update(change)
-        .eq('id', dictionary.id)
+      const { error } = await supabase.from('dictionaries').update(change).eq('id', dictionary.id)
       if (error) throw new Error(error.message)
       await invalidate(DICTIONARY_UPDATED_LOAD_TRIGGER)
     }

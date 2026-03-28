@@ -1,27 +1,27 @@
-import type { IPoint, IRegion } from '@living-dictionaries/types';
-import { sortPoints } from '../../utils/polygonFromCoordinates';
+import type { IPoint, IRegion } from '@living-dictionaries/types'
 // http://geojson.io/ to create GeoJSON easily
-import type { FeatureCollection, Feature, Polygon, Point } from 'geojson';
+import type { Feature, FeatureCollection, Point, Polygon } from 'geojson'
+import { sortPoints } from '../../utils/polygonFromCoordinates'
 
 export function convertPointsIntoRegion(
   points: {
-    longitude: number;
-    latitude: number;
-  }[]
+    longitude: number
+    latitude: number
+  }[],
 ) {
   const sorted = sortPoints(
-    points.map(({ longitude, latitude }) => ({ lng: longitude, lat: latitude }))
-  );
-  const sortedLooped = [...sorted, sorted[0]];
-  return sortedLooped.map(({ lng, lat }) => ({ longitude: lng, latitude: lat }));
+    points.map(({ longitude, latitude }) => ({ lng: longitude, lat: latitude })),
+  )
+  const sortedLooped = [...sorted, sorted[0]]
+  return sortedLooped.map(({ lng, lat }) => ({ longitude: lng, latitude: lat }))
 }
 
 function getPointFeature(point: IPoint, options = { primary: false }): Feature<Point> {
   const coordinates = [
     +point.coordinates.longitude.toFixed(3),
     +point.coordinates.latitude.toFixed(3),
-  ];
-  const properties = options.primary ? { 'marker-color': '#578da5', 'marker-symbol': 'star' } : {};
+  ]
+  const properties = options.primary ? { 'marker-color': '#578da5', 'marker-symbol': 'star' } : {}
   return {
     type: 'Feature',
     properties,
@@ -29,18 +29,18 @@ function getPointFeature(point: IPoint, options = { primary: false }): Feature<P
       type: 'Point',
       coordinates,
     },
-  };
+  }
 }
 
 function getPolygonFeature(region: IRegion): Feature<Polygon> {
-  const sorted = sortPoints(region.coordinates.map(({ longitude, latitude }) => ({ lng: longitude, lat: latitude })));
-  const sortedLooped = [...sorted, sorted[0]];
+  const sorted = sortPoints(region.coordinates.map(({ longitude, latitude }) => ({ lng: longitude, lat: latitude })))
+  const sortedLooped = [...sorted, sorted[0]]
   const coordinates = [
     sortedLooped.map(({ lng, lat }) => [
       +lng.toFixed(3),
       +lat.toFixed(3),
     ]),
-  ];
+  ]
   return {
     type: 'Feature',
     properties: {
@@ -54,23 +54,23 @@ function getPolygonFeature(region: IRegion): Feature<Polygon> {
       type: 'Polygon',
       coordinates,
     },
-  };
+  }
 }
 
 export function shapeGeoJson(points: IPoint[] = [], regions: IRegion[] = [], options = { primary: false }): FeatureCollection {
-  const features: FeatureCollection['features'] = [];
+  const features: FeatureCollection['features'] = []
   for (const region of regions)
-    features.push(getPolygonFeature(region));
+    features.push(getPolygonFeature(region))
 
   // add points afterwards so pins show on top of regions
   for (const [index, point] of points.entries()) {
-    const isFirstPoint = index === 0;
-    features.push(getPointFeature(point, { primary: options.primary && isFirstPoint }));
+    const isFirstPoint = index === 0
+    features.push(getPointFeature(point, { primary: options.primary && isFirstPoint }))
   }
   return {
     type: 'FeatureCollection',
     features,
-  };
+  }
 }
 
 if (import.meta.vitest) {
@@ -110,7 +110,7 @@ if (import.meta.vitest) {
           "type": "FeatureCollection",
         }
       `)
-    });
+    })
 
     test('primary, secondary points and region', () => {
       expect(
@@ -126,8 +126,8 @@ if (import.meta.vitest) {
               ],
             },
           ],
-          { primary: true }
-        )
+          { primary: true },
+        ),
       ).toMatchInlineSnapshot(`
         {
           "features": [
@@ -190,7 +190,7 @@ if (import.meta.vitest) {
           ],
           "type": "FeatureCollection",
         }
-      `);
-    });
-  });
+      `)
+    })
+  })
 }

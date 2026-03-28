@@ -5,4 +5,4 @@ priority: 3
 github_issue: 76
 ---
 
-At least one user has requested that he wants to delete his accout from our LD app 
+At least one user has requested that he wants to delete his accout from our LD app

@@ -1,6 +1,6 @@
-import { type Readable, get, writable } from 'svelte/store'
-import { page } from '$app/stores'
 import { api_upload } from '$api/upload/_call'
+import { page } from '$app/state'
+import { type Readable, writable } from 'svelte/store'
 
 export interface AudioVideoUploadStatus {
   progress: number
@@ -23,8 +23,7 @@ export function upload_audio({
     const is_blob = file instanceof Blob && !(file instanceof File)
     const [,extension] = file.type.split('/')
     const file_name = is_blob ? `audio.${extension}` : file.name
-    const { data: { dictionary } } = get(page)
-    const { data: { presigned_upload_url, object_key }, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name, file_type: file.type })
+    const { data: { presigned_upload_url, object_key }, error } = await api_upload({ folder, dictionary_id: page.data.dictionary.id, file_name, file_type: file.type })
     if (error) {
       console.error(error)
       set({ progress: 0, error: error.message })

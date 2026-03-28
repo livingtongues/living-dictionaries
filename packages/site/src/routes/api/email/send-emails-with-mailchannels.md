@@ -158,9 +158,9 @@ const no_reply_address: Address = {
 Now we can use our `send_email` function in a SvelteKit server endpoint like this:
 
 ```ts
+import type { RequestHandler } from './$types'
 import { error, json } from '@sveltejs/kit'
 import { send_email } from '../send-email'
-import type { RequestHandler } from './$types'
 
 export interface NewUserEmailRequestBody {
   name: string

@@ -1,51 +1,56 @@
 <script lang="ts">
   // learning from https://github.com/pngwn/peng-move/blob/main/src/lib/Animal.svelte
-  import { spring } from 'svelte/motion';
-  export let gcs: string;
-  export let length: number;
-  export let dimensionType: 'square' | 'width' | 'height' = 'width';
+  import { spring } from 'svelte/motion'
 
-  let imageEl: HTMLImageElement;
+  interface Props {
+    gcs: string
+    length: number
+    dimensionType?: 'square' | 'width' | 'height'
+  }
 
-  let ww = 0;
-  let wh = 0;
-  const scale = spring(1);
-  const opacity = spring(0, { stiffness: 0.2, damping: 1 });
-  let viewing = false;
+  let { gcs, length, dimensionType = 'width' }: Props = $props()
+
+  let imageEl: HTMLImageElement = $state()
+
+  let ww = $state(0)
+  let wh = $state(0)
+  const scale = spring(1)
+  const opacity = spring(0, { stiffness: 0.2, damping: 1 })
+  let viewing = $state(false)
 
   function handle_click() {
-    if (imageEl === null) return;
-    const styles = window.getComputedStyle(imageEl);
+    if (imageEl === null) return
+    const styles = window.getComputedStyle(imageEl)
     // const top_offset = parseInt(styles.getPropertyValue('margin-top'));
-    const left_offset = parseInt(styles.getPropertyValue('margin-left'));
-    const { left, right, top, bottom, width } = imageEl.getBoundingClientRect();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const pos = [left < ww - right ? 0 : 100, top < wh - bottom ? 0 : 100];
+    const left_offset = Number.parseInt(styles.getPropertyValue('margin-left'))
+    const { left, right, top, bottom, width } = imageEl.getBoundingClientRect()
+    // eslint-disable-next-line ts/no-unused-vars
+    const pos = [left < ww - right ? 0 : 100, top < wh - bottom ? 0 : 100]
     // active_el.index = i;
     // active_el.left = `${left - left_offset}px`;
     // active_el.top = `${top - top_offset}px`;
     // active_el.origin = `${pos[0]}% ${pos[1]}%`;
-    viewing = !viewing;
+    viewing = !viewing
     requestAnimationFrame(() => {
-      scale.set((ww - 2 - left_offset * 2) / width);
-      opacity.set(0.95);
-    });
+      scale.set((ww - 2 - left_offset * 2) / width)
+      opacity.set(0.95)
+    })
   }
 
-  async function clear() {
+  function clear() {
     requestAnimationFrame(async () => {
-      await Promise.all([scale.set(1), opacity.set(0)]);
+      await Promise.all([scale.set(1), opacity.set(0)])
       // active_el = {
-      // 	index: -1,
-      // 	left: '0',
-      // 	top: '0',
-      // 	origin: '0 0'
+      //   index: -1,
+      //   left: '0',
+      //   top: '0',
+      //   origin: '0 0'
       // };
-      viewing = false;
-    });
+      viewing = false
+    })
   }
 
-  $: src = `https://lh3.googleusercontent.com/${gcs}=${
+  let src = $derived(`https://lh3.googleusercontent.com/${gcs}=${
     dimensionType === 'square'
       ? `s${length}-p`
       : dimensionType === 'width'
@@ -53,23 +58,23 @@
       : dimensionType === 'height'
       ? `h${length}`
       : 's0'
-  }`;
+  }`)
 </script>
 
 <img
   bind:this={imageEl}
-  on:click={handle_click}
+  onclick={handle_click}
   class="h-full w-full object-cover cursor-pointer"
   alt=""
   {src} />
 
 <div
   class="overlay"
-  on:click={clear}
+  onclick={clear}
   style:opacity={$opacity}
   style:pointer-events={viewing ? 'auto' : 'none'}
   bind:clientWidth={ww}
-  bind:clientHeight={wh} />
+  bind:clientHeight={wh}></div>
 
 <style>
   .overlay {

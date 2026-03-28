@@ -1,19 +1,23 @@
 <script lang="ts">
-  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
-  import type { DictionaryView } from '@living-dictionaries/types'
-  import { Button } from 'svelte-pieces'
-  import DictionariesHelping from './DictionariesHelping.svelte'
+  import type { RowType } from '$lib/pglite/live/types'
+  import type { UserWithRoles } from '../dictionaries/dictionaryWithHelpers.types'
   import type { PageData } from './$types'
-  import { supabase_date_to_friendly } from '$lib/helpers/time'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
+  import { db_date_to_friendly } from '$lib/helpers/time'
+  import { Button } from '$lib/svelte-pieces'
+  import DictionariesHelping from './DictionariesHelping.svelte'
 
-  export let user: UserWithDictionaryRoles
-  export let dictionaries: DictionaryView[]
-  export let load_data: () => Promise<void>
+  interface Props {
+    user: UserWithRoles
+    user_data: RowType<'user_data'>
+    dictionaries: RowType<'dictionaries'>[]
+  }
 
-  $: ({ admin, supabase, add_editor, remove_editor } = $page.data as PageData)
-  $: managing_dictionary_ids = user.dictionary_roles.filter(({ role }) => role === 'manager').map(({ dictionary_id }) => dictionary_id) || []
-  $: contributing_dictionary_ids = user.dictionary_roles.filter(({ role }) => role === 'contributor').map(({ dictionary_id }) => dictionary_id) || []
+  let { user, user_data, dictionaries }: Props = $props()
+
+  let { admin, add_editor, remove_editor } = $derived(page.data as PageData)
+  let managing_dictionary_ids = $derived(user.dictionary_roles.filter(({ role }) => role === 'manager').map(({ dictionary_id }) => dictionary_id) || [])
+  let contributing_dictionary_ids = $derived(user.dictionary_roles.filter(({ role }) => role === 'contributor').map(({ dictionary_id }) => dictionary_id) || [])
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(user, null, 1)}>
@@ -29,11 +33,9 @@
       dictionary_ids={managing_dictionary_ids}
       remove_dictionary={async (dictionary_id) => {
         await remove_editor({ dictionary_id, user_id: user.id })
-        await load_data()
       }}
       add_dictionary={async (dictionary_id) => {
         await add_editor({ dictionary_id, user_id: user.id, role: 'manager' })
-        await load_data()
       }} />
   </td>
   <td>
@@ -42,21 +44,19 @@
       dictionary_ids={contributing_dictionary_ids}
       remove_dictionary={async (dictionary_id) => {
         await remove_editor({ dictionary_id, user_id: user.id })
-        await load_data()
       }}
       add_dictionary={async (dictionary_id) => {
         await add_editor({ dictionary_id, user_id: user.id, role: 'contributor' })
-        await load_data()
       }} />
   </td>
   <td class="whitespace-nowrap">
-    {#if user.last_sign_in_at}{supabase_date_to_friendly(user.last_sign_in_at)}{/if}
+    {#if user.last_sign_in_at}{db_date_to_friendly(user.last_sign_in_at)}{/if}
   </td>
   <td class="whitespace-nowrap">
-    {#if user.created_at}{supabase_date_to_friendly(user.created_at)}{/if}
+    {#if user.created_at}{db_date_to_friendly(user.created_at)}{/if}
   </td>
   <td>
-    {#if user.unsubscribed_from_emails}
+    {#if user_data?.unsubscribed_from_emails}
       <Button
         title="Click to re-subscribe"
         color="red"
@@ -65,15 +65,12 @@
         class="-ml-2"
         onclick={async () => {
           if (confirm('Re-subscribe user?')) {
-            const { error } = await supabase.from('user_data').update({ unsubscribed_from_emails: null }).eq('id', user.id)
-            if (error) {
-              alert(error.message)
-              console.error(error)
-            } else {
-              await load_data()
+            if (user_data) {
+              user_data.unsubscribed_from_emails = null
+              await user_data._save()
             }
           }
-        }}>{supabase_date_to_friendly(user.unsubscribed_from_emails)}</Button>
+        }}>{db_date_to_friendly(user_data.unsubscribed_from_emails)}</Button>
     {:else}
       <Button
         color="black"
@@ -81,12 +78,9 @@
         size="sm"
         class="-ml-2"
         onclick={async () => {
-          const { error } = await supabase.from('user_data').update({ unsubscribed_from_emails: new Date().toISOString() }).eq('id', user.id)
-          if (error) {
-            alert(error.message)
-            console.error(error)
-          } else {
-            await load_data()
+          if (user_data) {
+            user_data.unsubscribed_from_emails = new Date()
+            await user_data._save()
           }
         }}>Mark Unsubscribed</Button>
     {/if}

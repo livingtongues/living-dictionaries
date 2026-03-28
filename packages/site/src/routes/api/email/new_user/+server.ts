@@ -1,9 +1,9 @@
+import type { RequestHandler } from './$types'
+import { ResponseCodes } from '$lib/constants'
 import { error, json } from '@sveltejs/kit'
 import { getAdminRecipients } from '../addresses'
 import newUserWelcome from '../html/newUserWelcome'
 import { send_email } from '../send-email'
-import type { RequestHandler } from './$types'
-import { ResponseCodes } from '$lib/constants'
 
 export interface NewUserEmailRequestBody {
   // language: LanguageCode

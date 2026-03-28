@@ -1,6 +1,6 @@
-import { type AuthResponse, type SupabaseClient, createClient } from '@supabase/supabase-js'
 import type { Database } from '@living-dictionaries/types'
 import { PUBLIC_MODE, PUBLIC_STUDIO_URL, PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL } from '$env/static/public'
+import { type AuthResponse, createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 // https://supabase.com/docs/reference/javascript/typescript-support
 export type Supabase = SupabaseClient<Database>

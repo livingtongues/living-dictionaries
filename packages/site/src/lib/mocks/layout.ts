@@ -1,7 +1,7 @@
-import { readable } from 'svelte/store'
 import type { DictionaryView } from '@living-dictionaries/types'
 import type { LayoutData } from '../../routes/$types'
 import type { LayoutData as DictionaryLayoutData } from '../../routes/[dictionaryId]/$types'
+import { readable } from 'svelte/store'
 import { logDbOperations } from './db'
 
 // @ts-expect-error

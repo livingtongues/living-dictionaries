@@ -1,7 +1,7 @@
 import type { Tables } from '@living-dictionaries/types'
+import { english_translate } from '$lib/i18n'
 import { order_entry_and_dictionary_gloss_languages, order_example_sentences, order_glosses } from './glosses'
 import { remove_italic_tags } from './remove_italic_tags'
-import { english_translate } from '$lib/i18n'
 
 describe(order_glosses, () => {
   const t = english_translate

@@ -1,7 +1,7 @@
 import { writeFileSync } from 'node:fs'
-import { sql_file_string } from './to-sql-string'
-import { seed_dictionaries, seed_entries, users } from './tables'
 import { postgres } from '$lib/mocks/seed/postgres'
+import { seed_dictionaries, seed_entries, users } from './tables'
+import { sql_file_string } from './to-sql-string'
 
 function sql_string_for_all_seeded_tables() {
   return `${sql_file_string('auth.users', users)}

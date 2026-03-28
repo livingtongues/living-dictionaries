@@ -1,5 +1,3 @@
-// To run automatically on commit, add `simple-git-hooks` and `lint-staged` then run `npx simple-git-hooks` once. After that all commits will be linted.
-
 // @ts-check
 import { antfu } from '@antfu/eslint-config'
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin'
@@ -19,10 +17,15 @@ export default antfu(
       '**/.svelte-kit**',
       '.eslintcache',
       'packages/scripts/import/old**',
-      '**/route/kitbook/**',
+      '**/kitbook/**',
       '**/locales/**',
       'supabase/functions/**',
       '**.snap.json',
+      'packages/scripts/create-entry-caches/caches/**',
+      'packages/ids-import/**',
+      '.issues/**',
+      '.opencode/**',
+      '**/*.md',
     ],
     stylistic: {
       overrides: {
@@ -32,6 +35,7 @@ export default antfu(
       },
     },
     svelte: true,
+    typescript: true,
   },
   {
     name: 'jacob/svelte/stylistic',
@@ -48,7 +52,7 @@ export default antfu(
     name: 'jacob/test/rules',
     files: ['**/*.test.ts'],
     rules: {
-      'test/consistent-test-it': ['error', { fn: 'test' }],
+      'test/consistent-test-it': ['error', { fn: 'test', withinDescribe: 'test' }],
       'test/no-disabled-tests': 'error',
       'test/consistent-test-filename': 'error',
       'test/expect-expect': 'error',
@@ -57,7 +61,7 @@ export default antfu(
       'test/no-conditional-in-test': 'error',
       'test/no-conditional-tests': 'error',
       'test/no-duplicate-hooks': 'error',
-      'test/no-focused-tests': 'error',
+      'test/no-focused-tests': ['error', { fixable: false }],
       'test/no-standalone-expect': 'error',
       'test/no-test-return-statement': 'error',
       'test/prefer-comparison-matcher': 'error',
@@ -99,11 +103,21 @@ export default antfu(
       'unused-imports/no-unused-vars': 'off',
     },
   },
+  {
+    name: 'ld/pglite-proxy',
+    files: ['packages/site/pglite-proxy/**'],
+    rules: {
+      'no-restricted-globals': 'off',
+      'no-console': 'off',
+      'node/prefer-global/process': 'off',
+      'node/prefer-global/buffer': 'off',
+      'require-await': 'off',
+    },
+  },
 ).overrides({
   'antfu/typescript/rules': {
-    files: ['**/*.svelte', '**/*.composition'],
+    files: ['**/*.svelte'],
     rules: {
-      // ...jsEslintPlugin.configs.recommended.rules,
       'constructor-super': 'error',
       'for-direction': 'error',
       'getter-return': 'error',
@@ -172,8 +186,8 @@ export default antfu(
       'prefer-object-spread': 'error',
       'no-useless-concat': 'error',
       'no-else-return': 'error',
-      'no-console': ['error', { allow: ['warn', 'error', 'info', 'time', 'timeEnd'] }],
-      'require-atomic-updates': 'error',
+      'no-console': ['warn', { allow: ['warn', 'error', 'info', 'time', 'timeEnd'] }],
+      'require-atomic-updates': 'warn',
       'style/quotes': ['error', 'single', {
         allowTemplateLiterals: true,
         avoidEscape: true,
@@ -186,7 +200,9 @@ export default antfu(
         varsIgnorePattern: '^\\$\\$Props$',
       }],
 
-      'ts/no-explicit-any': 'warn',
+      'ts/no-explicit-any': 'off',
+      'ts/no-use-before-define': 'off', // $derived can reference variables declared later in Svelte 5
+      'ts/no-unused-expressions': 'off', // $effect dependency tracking uses bare variable references
       'prefer-named-capture-group': 'warn',
       'eqeqeq': 'warn',
 
@@ -201,7 +217,6 @@ export default antfu(
     },
   },
   'antfu/svelte/rules': {
-    files: ['**/*.composition'],
     rules: {
       'svelte/valid-compile': ['error', { ignoreWarnings: true }], // throws error on a11y issues
       'svelte/no-dom-manipulating': 'error',
@@ -224,13 +239,7 @@ export default antfu(
       'no-undef-init': 'off',
       'no-self-assign': 'off',
       'import/no-self-import': 'off',
+      'prefer-const': 'off',
     },
   },
 })
-
-// learn more
-// https://github.com/AndreaPontrandolfo/sheriff
-// https://github.com/enso-org/enso/blob/b2c1f97437870fa7b7a4d7c2d3630e2d2bd6fc2c/app/ide-desktop/eslint.config.js
-// https://github.com/azat-io/eslint-config/blob/044959d8fef2acff50e252b8a238be933cd38eea/base/index.ts
-// https://github.com/darkobits/eslint-plugin/blob/f55a64dc9038148f3227cda7ae4543dffcb0b14e/src/config-sets/ts
-// https://github.com/azat-io/eslint-config/blob/044959d8fef2acff50e252b8a238be933cd38eea/react/index.ts

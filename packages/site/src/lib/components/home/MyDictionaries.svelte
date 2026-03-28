@@ -1,32 +1,38 @@
 <script lang="ts">
   import type { DictionaryView } from '@living-dictionaries/types'
-  import { Button, ShowHide } from 'svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
 
-  export let my_dictionaries: DictionaryView[] = []
-  export let setCurrentDictionary: (dictionary: DictionaryView) => void
+  interface Props {
+    my_dictionaries?: DictionaryView[]
+    setCurrentDictionary: (dictionary: DictionaryView) => void
+  }
+
+  let { my_dictionaries = [], setCurrentDictionary }: Props = $props()
 </script>
 
 {#if my_dictionaries?.length}
   <div class="flex lt-md:flex-wrap md:flex-col overflow-y-auto overflow-x-hidden mb-1 md:max-h-70vh">
-    <ShowHide let:show let:toggle>
-      {#each my_dictionaries as dictionary, i}
-        {#if show || i < 3}
+    <ShowHide>
+      {#snippet children({ show, toggle })}
+        {#each my_dictionaries as dictionary, i}
+          {#if show || i < 3}
+            <Button
+              class="mb-1 lt-md:mr-1"
+              color="black"
+              onclick={() => setCurrentDictionary(dictionary)}>
+              {dictionary?.name}
+            </Button>
+          {/if}
+        {/each}
+        {#if my_dictionaries.length > 3 && !show}
           <Button
-            class="mb-1 lt-md:mr-1"
-            color="black"
-            onclick={() => setCurrentDictionary(dictionary)}>
-            {dictionary?.name}
+            form="simple"
+            onclick={toggle}>
+            {page.data.t('home.show_all_my_dictionaries')}
           </Button>
         {/if}
-      {/each}
-      {#if my_dictionaries.length > 3 && !show}
-        <Button
-          form="simple"
-          onclick={toggle}>
-          {$page.data.t('home.show_all_my_dictionaries')}
-        </Button>
-      {/if}
+      {/snippet}
     </ShowHide>
   </div>
 {/if}

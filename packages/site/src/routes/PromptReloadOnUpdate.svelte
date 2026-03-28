@@ -1,7 +1,9 @@
 <script lang="ts">
-  let service_worker_updated = false
+  import { dev } from '$app/environment'
 
-  if ('serviceWorker' in navigator) {
+  let service_worker_updated = $state(false)
+
+  if (!dev && 'serviceWorker' in navigator) {
     let is_initial_sw_activation = !navigator.serviceWorker.controller
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -20,7 +22,7 @@
   <div class="fixed top-3 inset-x-0 flex justify-center z-100">
     <div class="bg-gray-700 text-white p-3 rounded shadow-lg flex items-center">
       <div class="mr-2">New version available.</div>
-      <button type="button" on:click={() => location.reload()} class="bg-blue-500 text-white px-3 py-1.5 rounded">Reload</button>
+      <button type="button" onclick={() => location.reload()} class="bg-blue-500 text-white px-3 py-1.5 rounded">Reload</button>
     </div>
   </div>
 {/if}

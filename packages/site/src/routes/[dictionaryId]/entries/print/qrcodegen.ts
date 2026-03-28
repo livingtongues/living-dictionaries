@@ -627,10 +627,10 @@ export class QrCode {
     assert(n <= this.size * 3)
     const core: boolean
       = n > 0
-      && runHistory[2] == n
-      && runHistory[3] == n * 3
-      && runHistory[4] == n
-      && runHistory[5] == n
+        && runHistory[2] == n
+        && runHistory[3] == n * 3
+        && runHistory[4] == n
+        && runHistory[5] == n
     return (
       (core && runHistory[0] >= n * 4 && runHistory[6] >= n ? 1 : 0)
       + (core && runHistory[6] >= n * 4 && runHistory[0] >= n ? 1 : 0)

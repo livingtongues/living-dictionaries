@@ -1,31 +1,37 @@
 <script lang="ts">
-  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
+  import type { UserWithRoles } from '../dictionaries/dictionaryWithHelpers.types'
 
-  export let users: UserWithDictionaryRoles[] = []
-  enum UserFields {
-    email = 'Email',
-    full_name = 'Name',
-    manager = 'Manager',
-    contributor = 'Contributor',
-    last_sign_in_at = 'Last Visit',
-    created_at = 'Created At',
-    unsubscribed_from_emails = 'Unsubscribed',
+  interface Props {
+    users?: UserWithRoles[]
+    children?: import('svelte').Snippet<[{ sortedUsers: UserWithRoles[] }]>
   }
 
+  let { users = [], children }: Props = $props()
+
+  const UserFields = {
+    email: 'Email',
+    full_name: 'Name',
+    manager: 'Manager',
+    contributor: 'Contributor',
+    last_sign_in_at: 'Last Visit',
+    created_at: 'Created At',
+    unsubscribed_from_emails: 'Unsubscribed',
+  } as const
+
   type SortFields = keyof typeof UserFields
-  // @ts-ignore
+  type UserFieldValue = typeof UserFields[SortFields]
   const userFields: {
     key: SortFields
-    value: UserFields
+    value: UserFieldValue
   }[] = Object.entries(UserFields).map(([key, value]) => {
-    return { key, value }
+    return { key: key as SortFields, value }
   })
 
-  let sortKey: SortFields = 'email'
-  let sortDescending = true
-  $: keep_null_date_at_end = sortDescending ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER
+  let sortKey: SortFields = $state('email')
+  let sortDescending = $state(true)
+  let keep_null_date_at_end = $derived(sortDescending ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER)
 
-  $: sortedUsers = users.sort((a, b) => {
+  let sortedUsers = $derived(users.sort((a, b) => {
     let valueA: string | number
     let valueB: string | number
     // prettier-ignore
@@ -62,7 +68,7 @@
       return sortDescending ? 1 : -1
 
     return 0
-  })
+  }))
 
   function setSortSettings(paraSortKey: SortFields) {
     // Changes the key if the sort wasn't based on the button before, and if it was, change the direction
@@ -74,27 +80,29 @@
 </script>
 
 <thead>
-  {#each userFields as field}
-    <th
-      class="cursor-pointer"
-      on:click={() => setSortSettings(field.key)}
-      title="Click to sort asc/desc">
-      {field.value}
-      {#if sortKey === field.key}
-        {#if sortDescending}
-          <i class="fas fa-sort-amount-down" />
-        {:else}
-          <i class="fas fa-sort-amount-up" />
+  <tr>
+    {#each userFields as field}
+      <th
+        class="cursor-pointer"
+        onclick={() => setSortSettings(field.key)}
+        title="Click to sort asc/desc">
+        {field.value}
+        {#if sortKey === field.key}
+          {#if sortDescending}
+            <i class="fas fa-sort-amount-down"></i>
+          {:else}
+            <i class="fas fa-sort-amount-up"></i>
+          {/if}
         {/if}
-      {/if}
-    </th>
-  {/each}
+      </th>
+    {/each}
+  </tr>
 </thead>
 
-<slot {sortedUsers} />
+{@render children?.({ sortedUsers })}
 
 <style>
   th {
-    --at-apply: text-xs font-semibold text-gray-600 uppercase tracking-wider;
+    @apply text-xs font-semibold text-gray-600 uppercase tracking-wider;
   }
 </style>

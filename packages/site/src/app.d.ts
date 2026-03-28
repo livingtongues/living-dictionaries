@@ -1,10 +1,12 @@
+import type { Supabase } from '$lib/supabase'
+import type { DictionaryWithRoles } from '$lib/supabase/dictionaries'
+import type { BaseUser } from '$lib/supabase/user'
 // https://kit.svelte.dev/docs/types#app
 import type { AuthResponse } from '@supabase/supabase-js'
 import type { Readable } from 'svelte/store'
 import type { LayoutData as DictionaryLayoutData } from './routes/[dictionaryId]/$types'
-import type { BaseUser } from '$lib/supabase/user'
-import type { DictionaryWithRoles } from '$lib/supabase/dictionaries'
-import type { Supabase } from '$lib/supabase'
+// import type { LayoutData as AdminLayoutData } from './routes/admin/$types'
+import 'svelte/elements'
 
 declare global {
   namespace App {
@@ -35,6 +37,9 @@ declare global {
       dictionary_editors?: DictionaryLayoutData['dictionary_editors']
       load_partners?: DictionaryLayoutData['load_partners']
       update_dictionary?: DictionaryLayoutData['update_dictionary']
+
+      // admin route
+      // db?: AdminLayoutData['db']
     }
     interface PageState {
       entry_id?: string
@@ -58,6 +63,22 @@ declare global {
   interface Window {
     handleSignInWithGoogle: (response) => Promise<void>
   }
+}
+
+declare module 'svelte/elements' {
+  interface HTMLAttributes<T> {
+    // Legacy email-friendly attributes
+    bgcolor?: string
+    border?: string | number
+  }
+
+  // If you need them specifically on table-related elements only:
+  // interface HTMLTableCellAttributes {
+  //   bgcolor?: string;
+  // }
+  // interface HTMLTableAttributes {
+  //   bgcolor?: string;
+  // }
 }
 
 export {}

@@ -1,6 +1,7 @@
+// @ts-nocheck
 import type { DeprecatedVariant, Viewport } from 'kitbook'
-import { readable } from 'svelte/store'
 import type Component from './AddImage.svelte'
+import { readable } from 'svelte/store'
 
 export const viewports: Viewport[] = [
   { width: 400, height: 200 },

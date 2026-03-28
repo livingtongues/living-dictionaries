@@ -1,33 +1,15 @@
 <script lang="ts">
-  import type { TablesUpdate } from '@living-dictionaries/types'
+  import type { RowType } from '$lib/pglite/live/types'
 
-  export let field: keyof TablesUpdate<'dictionaries'>
-  export let value: string
-  export let update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>
-
-  let debouncedSaveTimer: NodeJS.Timeout
-  let unsaved = false
-
-  function valueChanged() {
-    unsaved = true
-    clearTimeout(debouncedSaveTimer)
-    debouncedSaveTimer = setTimeout(save, 2000)
+  interface Props {
+    dictionary: RowType<'dictionaries'>
+    field: 'name' | 'iso_639_3' | 'glottocode' | 'location'
   }
 
-  async function save() {
-    try {
-      await update_dictionary({ [field]: value })
-      unsaved = false
-    } catch (err) {
-      alert(err)
-    }
-  }
+  let { dictionary, field }: Props = $props()
 </script>
 
-<input bind:value on:input={valueChanged} class:unsaved={unsaved} />
-
-<style>
-  .unsaved {
-    outline: solid 1px #00cc00;
-  }
-</style>
+<input
+  value={dictionary[field]}
+  oninput={e => dictionary[field] = e.currentTarget.value}
+  onchange={dictionary._save} />

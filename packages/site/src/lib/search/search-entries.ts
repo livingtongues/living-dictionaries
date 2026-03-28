@@ -1,7 +1,7 @@
-import { type SearchParams as OramaSearchParams, search } from '@orama/orama'
 import type { EntryData } from '@living-dictionaries/types'
-import type { QueryParams } from './types'
 import type { EntriesIndex } from './entries-schema'
+import type { QueryParams } from './types'
+import { type SearchParams as OramaSearchParams, search } from '@orama/orama'
 
 type Indexed_Entry = {
   _lexeme: string[]

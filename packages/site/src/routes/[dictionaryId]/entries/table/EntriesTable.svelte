@@ -1,20 +1,22 @@
 <script lang="ts">
-  import type { EntryData, IColumn, Tables } from '@living-dictionaries/types'
-  import ColumnTitle from './ColumnTitle.svelte'
-  import Cell from './Cell.svelte'
-  import { setUpColumns } from './setUpColumns'
-  import { minutes_ago_in_ms } from '$lib/helpers/time'
-  import { browser } from '$app/environment'
   import type { DbOperations } from '$lib/dbOperations'
+  import type { EntryData, IColumn, Tables } from '@living-dictionaries/types'
+  import { browser } from '$app/environment'
+  import { minutes_ago_in_ms } from '$lib/helpers/time'
+  import Cell from './Cell.svelte'
+  import ColumnTitle from './ColumnTitle.svelte'
+  import { setUpColumns } from './setUpColumns'
 
-  export let entries: EntryData[] = []
-  export let can_edit = false
-  export let dictionary: Tables<'dictionaries'>
-  export let preferred_table_columns: IColumn[]
-  export let dbOperations: DbOperations
+  const { entries = [], can_edit = false, dictionary, preferred_table_columns, dbOperations }: {
+    entries?: EntryData[]
+    can_edit?: boolean
+    dictionary: Tables<'dictionaries'>
+    preferred_table_columns: IColumn[]
+    dbOperations: DbOperations
+  } = $props()
 
-  $: columns = setUpColumns(preferred_table_columns, dictionary)
-  let selectedColumn: IColumn
+  const columns = $derived(setUpColumns(preferred_table_columns, dictionary))
+  let selectedColumn: IColumn = $state(undefined)
 
   function getLeftValue(index: number) {
     if (index === 0) return 0
@@ -29,41 +31,45 @@
     overflow-auto relative"
   style="height: calc(100vh - 189px);">
   <table class="relative">
-    <tr class="text-left">
-      {#each columns as column, i}
-        <th
-          on:click={() => {
-            selectedColumn = column
-          }}
-          class:z-10={column.sticky}
-          class="cursor-pointer bg-gray-100 top-0 sticky z-1
-            hover:bg-gray-200 active:bg-gray-300 text-xs font-semibold"
-          style="{column.sticky
-            ? `left:${getLeftValue(i)}px; --border-right-width: 3px;`
-            : ''} --col-width: {column.width}px;">
-          <ColumnTitle {column} />
-        </th>
-      {/each}
-    </tr>
-    {#each entries as entry (entry.id)}
-      {@const updated_within_last_5_minutes = can_edit && new Date(entry.updated_at).getTime() > minutes_ago_in_ms(5)}
-      <tr class="row-hover">
+    <thead>
+      <tr class="text-left">
         {#each columns as column, i}
-          <td
-            class:bg-green-100!={updated_within_last_5_minutes}
-            class="{column.sticky ? 'sticky bg-white z-1' : ''} {isFirefox ? '' : 'h-0'}"
+          <th
+            onclick={() => {
+              selectedColumn = column
+            }}
+            class:z-10={column.sticky}
+            class="cursor-pointer bg-gray-100 top-0 sticky z-1
+              hover:bg-gray-200 active:bg-gray-300 text-xs font-semibold"
             style="{column.sticky
               ? `left:${getLeftValue(i)}px; --border-right-width: 3px;`
-              : ''} --col-width: {entry.main.sources ? 'auto' : `${column.width}px`};">
-            <Cell
-              {column}
-              {entry}
-              {can_edit}
-              {dbOperations} />
-          </td>
+              : ''} --col-width: {column.width}px;">
+            <ColumnTitle {column} />
+          </th>
         {/each}
       </tr>
-    {/each}
+    </thead>
+    <tbody>
+      {#each entries as entry (entry.id)}
+        {@const updated_within_last_5_minutes = can_edit && new Date(entry.updated_at).getTime() > minutes_ago_in_ms(5)}
+        <tr class="row-hover">
+          {#each columns as column, i}
+            <td
+              class:bg-green-100!={updated_within_last_5_minutes}
+              class="{column.sticky ? 'sticky bg-white z-1' : ''} {isFirefox ? '' : 'h-0'}"
+              style="{column.sticky
+                ? `left:${getLeftValue(i)}px; --border-right-width: 3px;`
+                : ''} --col-width: {entry.main.sources ? 'auto' : `${column.width}px`};">
+              <Cell
+                {column}
+                {entry}
+                {can_edit}
+                {dbOperations} />
+            </td>
+          {/each}
+        </tr>
+      {/each}
+    </tbody>
   </table>
 </div>
 
@@ -71,7 +77,7 @@
   {#await import('./ColumnAdjustSlideover.svelte') then { default: ColumnAdjustSlideover }}
     <ColumnAdjustSlideover
       {selectedColumn}
-      on:close={() => {
+      on_close={() => {
         selectedColumn = null
       }} />
   {/await}

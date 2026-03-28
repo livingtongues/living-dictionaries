@@ -1,5 +1,5 @@
-import { S3Client } from '@aws-sdk/client-s3'
 import { GCLOUD_MEDIA_BUCKET_ACCESS_KEY_ID, GCLOUD_MEDIA_BUCKET_SECRET_ACCESS_KEY } from '$env/static/private'
+import { S3Client } from '@aws-sdk/client-s3'
 
 /* Requires adjusting CORS settings on bucket.
   1) Go to the Cloud Shell from the Google Cloud Console where your bucket exists

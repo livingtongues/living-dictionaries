@@ -1,19 +1,23 @@
 <script lang="ts">
-  import { Modal } from 'svelte-pieces'
-  import { readable } from 'svelte/store'
   import type { EntryData } from '@living-dictionaries/types'
-  import EntryPage from '../entry/[entryId]/+page.svelte'
-  import ListEntry from './list/ListEntry.svelte'
-  import EntriesTable from './table/EntriesTable.svelte'
   import type { PageData as EntriesPageData } from './$types'
+  import { pushState } from '$app/navigation'
+  import { page } from '$app/state'
+  import { Modal } from '$lib/svelte-pieces'
+  import { readable } from 'svelte/store'
+  import EntryPage from '../entry/[entryId]/+page.svelte'
   import EntriesGallery from './EntriesGallery.svelte'
   import EntriesPrint from './EntriesPrint.svelte'
-  import { pushState } from '$app/navigation'
-  import { page } from '$app/stores'
+  import ListEntry from './list/ListEntry.svelte'
+  import EntriesTable from './table/EntriesTable.svelte'
 
-  export let entries: EntryData[]
-  export let page_data: EntriesPageData
-  $: ({ dictionary, can_edit, preferred_table_columns, dbOperations, search_params } = page_data)
+  interface Props {
+    entries: EntryData[]
+    page_data: EntriesPageData
+  }
+
+  let { entries, page_data }: Props = $props()
+  let { dictionary, can_edit, preferred_table_columns, dbOperations, search_params } = $derived(page_data)
 
   function handle_entry_click(e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }, entry: EntryData) {
     // bail if opening a new tab
@@ -37,7 +41,7 @@
         on_click={(e) => { handle_entry_click(e, entry) }}
         {dbOperations} />
 
-      {#if $page.state.entry_id === entry.id}
+      {#if page.state.entry_id === entry.id}
         <Modal noscroll class="sm:max-w-95vw xl:max-w-1100px" on_close={() => history.back()} show_x={false}>
           <EntryPage
             data={{

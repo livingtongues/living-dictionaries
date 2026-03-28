@@ -1,4 +1,4 @@
-Keyman will accept an element (documentQuerySelector usable string or element itself) and if none is given then it will attach to the first child element it finds inside its slot. The slot method is used in the first two examples, and the target method is used for the CKEditor example because it's input component is nested multiple layers deep. 
+Keyman will accept an element (documentQuerySelector usable string or element itself) and if none is given then it will attach to the first child element it finds inside its slot. The slot method is used in the first two examples, and the target method is used for the CKEditor example because it's input component is nested multiple layers deep.
 
 ### Useful Links
 
@@ -27,11 +27,10 @@ buttonAtTop: true
 </Keyman>
 <pre class="pl-3">{paragraph}</pre>
 
-
 CKEditor
 <div class="w-full">
   <Keyman bcp="as" target=".ck-editor__editable_inline" position="bottom">
-    <ClassicCustomized {html} on:update={({ detail }) => (html = detail)} />
+    <ClassicCustomized {html} on_update={(detail) => (html = detail)} />
   </Keyman>
   <pre class="pl-3">{html}</pre>
 </div>
@@ -39,7 +38,7 @@ CKEditor
 CKEditor - no language - can choose
 <div class="w-full">
   <Keyman canChooseKeyboard target=".ck-editor__editable_inline" position="bottom">
-    <ClassicCustomized {html} on:update={({ detail }) => (html = detail)} />
+    <ClassicCustomized {html} on_update={(detail) => (html = detail)} />
   </Keyman>
   <pre class="pl-3">{html}</pre>
 </div> -->

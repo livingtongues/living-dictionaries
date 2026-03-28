@@ -1,23 +1,31 @@
 <script lang="ts">
-  import { Button, ResponsiveTable } from 'svelte-pieces'
-  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
-  import UserRow from './UserRow.svelte'
-  import SortUsers from './SortUsers.svelte'
   import type { PageData } from './$types'
-  import { downloadObjectsAsCSV } from '$lib/export/csv'
   import Filter from '$lib/components/Filter.svelte'
+  import { downloadObjectsAsCSV } from '$lib/export/csv'
+  import { Button, ResponsiveTable } from '$lib/svelte-pieces'
+  import SortUsers from './SortUsers.svelte'
+  import UserRow from './UserRow.svelte'
 
-  export let data: PageData
-  $: ({ admin_dictionaries, users, dictionary_roles } = data)
+  interface Props {
+    data: PageData
+  }
 
-  $: users_with_roles = $users.map((user) => {
-    return {
-      ...user,
-      dictionary_roles: $dictionary_roles.filter(role => role.user_id === user.id),
-    }
-  })
+  let { data }: Props = $props()
+  const users = $derived(data.db.users.rows)
+  const user_data = $derived(data.db.user_data.objects)
+  const roles = $derived(data.db.dictionary_roles.rows)
+  const dictionaries = $derived(data.db.dictionaries.rows)
 
-  function exportUsersAsCSV(users: UserWithDictionaryRoles[]) {
+  let users_with_roles = $derived(
+    (users || []).map((user) => {
+      return {
+        ...user,
+        dictionary_roles: (roles || []).filter(role => role.user_id === user.id),
+      }
+    }),
+  )
+
+  function exportUsersAsCSV(users: typeof users_with_roles) {
     const headers = {
       displayName: 'Name',
       email: 'Email',
@@ -35,28 +43,26 @@
 </script>
 
 <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
-  <Filter items={users_with_roles} let:filteredItems={filteredUsers} placeholder="Search names, emails, and dictionary ids">
-    <div slot="right" let:filteredItems={filteredUsers}>
-      <Button form="filled" color="black" onclick={() => exportUsersAsCSV(filteredUsers)}>
-        <i class="fas fa-download mr-1" />
-        Download {filteredUsers.length} Users as CSV
-      </Button>
-    </div>
-    <div class="mb-1" />
-    <ResponsiveTable stickyColumn stickyHeading>
-      <SortUsers users={filteredUsers} let:sortedUsers>
-        {#each sortedUsers as user (user.id)}
-          <UserRow
-            load_data={async () => {
-              await Promise.all([
-                users.refresh(),
-                dictionary_roles.reset(),
-              ])
-            }}
-            dictionaries={$admin_dictionaries}
-            {user} />
-        {/each}
-      </SortUsers>
-    </ResponsiveTable>
+  <Filter items={users_with_roles} placeholder="Search names and emails">
+    {#snippet right({ filteredItems: filteredUsers })}
+      <div>
+        <Button form="filled" color="black" onclick={() => exportUsersAsCSV(filteredUsers)}>
+          <i class="fas fa-download mr-1"></i>
+          Download {filteredUsers.length} Users as CSV
+        </Button>
+      </div>
+    {/snippet}
+    {#snippet children({ filteredItems: filteredUsers })}
+      <div class="mb-1"></div>
+      <ResponsiveTable stickyColumn stickyHeading>
+        <SortUsers users={filteredUsers}>
+          {#snippet children({ sortedUsers })}
+            {#each sortedUsers as user (user.id)}
+              <UserRow {user} user_data={user_data[user.id]} {dictionaries} />
+            {/each}
+          {/snippet}
+        </SortUsers>
+      </ResponsiveTable>
+    {/snippet}
   </Filter>
 </div>

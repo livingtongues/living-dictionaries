@@ -1,0 +1,586 @@
+import type { PGliteWithLive } from '@electric-sql/pglite/live'
+import type {
+  InsertType,
+  QueryAccessor,
+  QueryOptions,
+  RawRowType,
+  RowType,
+  TableAccessor,
+  TableName,
+  UpdateType,
+} from './types'
+import { toast } from '$lib/components/ui/toast'
+import { TableStore } from './table-store.svelte'
+
+export interface LivePgLiteOptions {
+  log?: boolean
+}
+
+// Primary key configuration for each table
+const TABLE_PRIMARY_KEYS: Record<TableName, string[]> = {
+  // editable/not-deletable
+  user_data: ['id'],
+  // not editable
+  users: ['id'],
+  migrations: ['id'],
+  db_metadata: ['key'],
+  deletes: ['table_name', 'id'],
+  // editable/deletable
+  dictionaries: ['id'],
+  dictionary_roles: ['dictionary_id', 'user_id', 'role'],
+  invites: ['id'],
+}
+
+// Tables that can be saved/reset but not deleted
+const NO_DELETE_TABLES = new Set<TableName>(['user_data'])
+
+// Tables that are fully read-only (no _save, _delete, _reset methods)
+const READ_ONLY_TABLES = new Set<TableName>(['users', 'migrations', 'db_metadata', 'deletes'])
+
+// Type for direct table access - db.labels, db.tasks, etc.
+type TableProperties = {
+  [K in TableName]: TableAccessor<K>
+}
+
+/**
+ * LivePgLite provides a reactive Svelte 5 interface to PGLite.
+ * Access tables directly via db.labels.rows with automatic subscriptions.
+ */
+class LivePgLiteImpl {
+  #pg: PGliteWithLive
+  #options: LivePgLiteOptions
+
+  // Store instances for full table subscriptions
+  #table_stores = new Map<string, TableStore<Record<string, unknown>>>()
+
+  // Store instances for single-row subscriptions (by table.id)
+  #row_stores = new Map<string, TableStore<Record<string, unknown>>>()
+
+  // Store instances for custom queries (keyed by SQL+params hash)
+  #query_stores = new Map<string, TableStore<Record<string, unknown>>>()
+
+  constructor(pg: PGliteWithLive, options: LivePgLiteOptions = {}) {
+    this.#pg = pg
+    this.#options = options
+  }
+
+  /**
+   * Get a table accessor by name (used by the proxy)
+   */
+  get_table_accessor<T extends TableName>(table_name: T): TableAccessor<T> {
+    return this.#get_table_accessor(table_name)
+  }
+
+  /**
+   * Get or create a TableAccessor for the given table name
+   */
+  #get_table_accessor<T extends TableName>(table_name: T): TableAccessor<T> {
+    // eslint-disable-next-line ts/no-this-alias
+    const self = this
+
+    return {
+      get rows(): RowType<T>[] {
+        return self.#get_or_create_table_store(table_name).rows as RowType<T>[]
+      },
+
+      get objects(): Record<string, RowType<T>> {
+        return self.#get_or_create_table_store(table_name).objects as Record<string, RowType<T>>
+      },
+
+      get loading(): boolean {
+        return self.#get_or_create_table_store(table_name).loading
+      },
+
+      id(row_id: string): RowType<T> | undefined {
+        const rows = $derived(self.#get_row_by_id(table_name, row_id).rows)
+        return rows[0] as RowType<T> | undefined
+      },
+
+      query(options: QueryOptions): QueryAccessor<T> {
+        return self.#create_query_accessor(table_name, options)
+      },
+
+      insert(item: InsertType<T> | InsertType<T>[]): Promise<RowType<T>[]> {
+        return self.#insert(table_name, item)
+      },
+
+      upsert(item: InsertType<T> | InsertType<T>[]): Promise<RowType<T>[]> {
+        return self.#upsert(table_name, item)
+      },
+
+      update(set: UpdateType<T>): Promise<void> {
+        return self.#update(table_name, set)
+      },
+
+      delete(ids: string | string[]): Promise<void> {
+        return self.#delete(table_name, ids)
+      },
+
+      find(row_id: string): Promise<RawRowType<T> | undefined> {
+        return self.#find(table_name, row_id)
+      },
+    }
+  }
+
+  /**
+   * Get or create a TableStore for a full table subscription
+   */
+  #get_or_create_table_store<T extends TableName>(
+    table_name: T,
+  ): TableStore<Record<string, unknown>> {
+    let store = this.#table_stores.get(table_name)
+
+    if (!store) {
+      const is_read_only = READ_ONLY_TABLES.has(table_name)
+      const is_no_delete = NO_DELETE_TABLES.has(table_name)
+      const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+
+      store = new TableStore({
+        pg: this.#pg,
+        query: `SELECT * FROM "${table_name}"`,
+        params: [],
+        primary_keys,
+        log: this.#options.log,
+        on_save: is_read_only ? undefined : this.#create_save_callback(table_name),
+        on_delete: (is_read_only || is_no_delete) ? undefined : this.#create_delete_callback(table_name),
+        on_reset: is_read_only ? undefined : this.#create_reset_callback(table_name),
+      })
+      this.#table_stores.set(table_name, store)
+    }
+
+    return store
+  }
+
+  /**
+   * Create a save callback for a given table
+   */
+  #create_save_callback(table_name: TableName): (row: Record<string, unknown>) => Promise<void> {
+    const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+
+    return async (row: Record<string, unknown>) => {
+      // Validate all primary key values exist
+      for (const pk of primary_keys) {
+        if (row[pk] == null) {
+          alert(`LivePgLite save: row is missing primary key column "${pk}"`)
+          return
+        }
+      }
+
+      // Build UPDATE statement excluding PK columns, created_at, and method properties
+      const exclude_columns = [...primary_keys, 'created_at', '_save', '_delete', '_reset']
+      const columns = Object.keys(row).filter(col => !exclude_columns.includes(col))
+
+      // Prepare params - update updated_at to current timestamp if column exists
+      const params: unknown[] = columns.map((col) => {
+        if (col === 'updated_at') {
+          return new Date()
+        }
+        return row[col]
+      })
+
+      // Add primary key values as WHERE params
+      for (const pk of primary_keys) {
+        params.push(row[pk])
+      }
+
+      const set_clauses = columns.map((col, i) => `"${col}" = $${i + 1}`).join(', ')
+      const where_clauses = primary_keys.map((pk, i) => `"${pk}" = $${columns.length + i + 1}`).join(' AND ')
+      const sql = `UPDATE "${table_name}" SET ${set_clauses} WHERE ${where_clauses}`
+
+      try {
+        await this.#pg.query(sql, params)
+      } catch (error) {
+        console.error('LivePgLite save error:', error)
+        toast.error(`Save error: ${(error as Error).message}`)
+        throw error
+      }
+    }
+  }
+
+  /**
+   * Create a delete callback for a given table
+   * Inserts into the `deletes` table - the process_delete trigger handles actual deletion
+   */
+  #create_delete_callback(table_name: TableName): (composite_key: string) => Promise<void> {
+    return async (composite_key: string) => {
+      const sql = `INSERT INTO deletes (table_name, id) VALUES ($1, $2)`
+      const params = [table_name, composite_key]
+
+      try {
+        await this.#pg.query(sql, params)
+      } catch (error) {
+        console.error('LivePgLite delete error:', error)
+        toast.error(`Delete error: ${(error as Error).message}`)
+        throw error
+      }
+    }
+  }
+
+  /**
+   * Create a reset callback for a given table - reads fresh data from DB
+   */
+  #create_reset_callback(table_name: TableName): (row: Record<string, unknown>) => Promise<void> {
+    const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+
+    return async (row: Record<string, unknown>) => {
+      // Validate all primary key values exist
+      for (const pk of primary_keys) {
+        if (row[pk] == null) {
+          console.warn(`LivePgLite reset: row is missing primary key column "${pk}"`)
+          return
+        }
+      }
+
+      const where_clauses = primary_keys.map((pk, i) => `"${pk}" = $${i + 1}`).join(' AND ')
+      const params = primary_keys.map(pk => row[pk])
+      const sql = `SELECT * FROM "${table_name}" WHERE ${where_clauses}`
+
+      try {
+        const result = await this.#pg.query<Record<string, unknown>>(sql, params)
+        const [dbRow] = result.rows
+        if (dbRow) {
+          // Copy all values from DB back to the row object
+          for (const key of Object.keys(dbRow)) {
+            row[key] = dbRow[key]
+          }
+        }
+      } catch (error) {
+        console.error('LivePgLite reset error:', error)
+        toast.error(`Reset error: ${(error as Error).message}`)
+        throw error
+      }
+    }
+  }
+
+  /**
+   * Get a single row by ID with its own efficient subscription
+   * For composite key tables, the id should be the composite key string (e.g., "dict_id|user_id|role")
+   */
+  #get_row_by_id<T extends TableName>(
+    table_name: T,
+    id: string,
+  ): TableStore<Record<string, unknown>> {
+    const store_key = `${table_name}:${id}`
+    let store = this.#row_stores.get(store_key)
+
+    if (!store) {
+      const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+      const is_read_only = READ_ONLY_TABLES.has(table_name)
+      const is_no_delete = NO_DELETE_TABLES.has(table_name)
+
+      let query: string
+      let params: unknown[]
+
+      if (primary_keys.length === 1) {
+        query = `SELECT * FROM "${table_name}" WHERE "${primary_keys[0]}" = $1`
+        params = [id]
+      } else {
+        // Parse composite key string
+        const key_values = id.split('|')
+        const where_clauses = primary_keys.map((pk, i) => `"${pk}" = $${i + 1}`).join(' AND ')
+        query = `SELECT * FROM "${table_name}" WHERE ${where_clauses}`
+        params = key_values
+      }
+
+      store = new TableStore({
+        pg: this.#pg,
+        query,
+        params,
+        primary_keys,
+        log: this.#options.log,
+        on_save: is_read_only ? undefined : this.#create_save_callback(table_name),
+        on_delete: (is_read_only || is_no_delete) ? undefined : this.#create_delete_callback(table_name),
+        on_reset: is_read_only ? undefined : this.#create_reset_callback(table_name),
+      })
+      this.#row_stores.set(store_key, store)
+    }
+
+    return store
+  }
+
+  /**
+   * Create a QueryAccessor for a custom query
+   */
+  #create_query_accessor<T extends TableName>(
+    table_name: T,
+    options: QueryOptions,
+  ): QueryAccessor<T> {
+    const sql = this.#build_query_sql(table_name, options)
+    const params = options.params ?? []
+    const query_key = this.#get_query_key(sql, params)
+
+    let store = this.#query_stores.get(query_key)
+
+    if (!store) {
+      const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+      const is_read_only = READ_ONLY_TABLES.has(table_name)
+      const is_no_delete = NO_DELETE_TABLES.has(table_name)
+
+      store = new TableStore({
+        pg: this.#pg,
+        query: sql,
+        params,
+        primary_keys,
+        log: this.#options.log,
+        on_save: is_read_only ? undefined : this.#create_save_callback(table_name),
+        on_delete: (is_read_only || is_no_delete) ? undefined : this.#create_delete_callback(table_name),
+        on_reset: is_read_only ? undefined : this.#create_reset_callback(table_name),
+      })
+      this.#query_stores.set(query_key, store)
+    }
+
+    return {
+      get rows(): RowType<T>[] {
+        return store!.rows as RowType<T>[]
+      },
+      get loading(): boolean {
+        return store!.loading
+      },
+      snapshot: async (): Promise<RawRowType<T>[]> => {
+        const result = await this.#pg.query<RawRowType<T>>(sql, params)
+        return result.rows
+      },
+    }
+  }
+
+  /**
+   * Build SQL query from QueryOptions
+   */
+  #build_query_sql(table_name: TableName, options: QueryOptions): string {
+    let sql = `SELECT * FROM "${table_name}"`
+
+    if (options.where) {
+      sql += ` WHERE ${options.where}`
+    }
+
+    if (options.order_by) {
+      sql += ` ORDER BY ${options.order_by}`
+    }
+
+    if (options.limit !== undefined) {
+      sql += ` LIMIT ${options.limit}`
+    }
+
+    if (options.offset !== undefined) {
+      sql += ` OFFSET ${options.offset}`
+    }
+
+    return sql
+  }
+
+  /**
+   * Generate a cache key for a query
+   */
+  #get_query_key(sql: string, params: unknown[]): string {
+    return JSON.stringify({ sql, params })
+  }
+
+  /**
+   * Insert one or more rows into a table
+   */
+  async #insert<T extends TableName>(
+    table_name: T,
+    set: InsertType<T> | InsertType<T>[],
+  ): Promise<RowType<T>[]> {
+    const items = Array.isArray(set) ? set : [set]
+    const columns = Object.keys(items[0] as object)
+
+    const BATCH_SIZE = 5000
+    const results: RowType<T>[] = []
+    const columns_sql = columns.map(c => `"${c}"`).join(', ')
+
+    try {
+      for (let offset = 0; offset < items.length; offset += BATCH_SIZE) {
+        const batch = items.slice(offset, offset + BATCH_SIZE)
+        const params: unknown[] = []
+        const value_groups: string[] = []
+
+        for (const row of batch) {
+          const placeholders = columns.map((col) => {
+            params.push((row as Record<string, unknown>)[col])
+            return `$${params.length}`
+          })
+          value_groups.push(`(${placeholders.join(', ')})`)
+        }
+
+        const sql = `INSERT INTO "${table_name}" (${columns_sql}) VALUES ${value_groups.join(', ')} RETURNING *`
+        const result = await this.#pg.query<RowType<T>>(sql, params)
+        results.push(...result.rows)
+      }
+    } catch (error) {
+      console.error('LivePgLite insert error:', error)
+      toast.error(`Insert error: ${(error as Error).message}`)
+      throw error
+    }
+
+    return results
+  }
+
+  /**
+   * Delete multiple rows by their IDs (or composite key strings)
+   * Inserts into the `deletes` table - the process_delete trigger handles actual deletions
+   */
+  async #delete<T extends TableName>(
+    table_name: T,
+    ids: string | string[],
+  ): Promise<void> {
+    const id_list = Array.isArray(ids) ? ids : [ids]
+    const sql = `INSERT INTO deletes (table_name, id) VALUES ($1, $2)`
+
+    try {
+      for (const id of id_list) {
+        await this.#pg.query(sql, [table_name, id])
+      }
+    } catch (error) {
+      console.error('LivePgLite delete error:', error)
+      toast.error(`Delete error: ${(error as Error).message}`)
+      throw error
+    }
+  }
+
+  /**
+   * Find a single row by ID without creating a live subscription
+   */
+  async #find<T extends TableName>(
+    table_name: T,
+    row_id: string,
+  ): Promise<RawRowType<T> | undefined> {
+    const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+
+    let sql: string
+    let params: unknown[]
+
+    if (primary_keys.length === 1) {
+      sql = `SELECT * FROM "${table_name}" WHERE "${primary_keys[0]}" = $1`
+      params = [row_id]
+    } else {
+      const key_values = row_id.split('|')
+      const where_clauses = primary_keys.map((pk, i) => `"${pk}" = $${i + 1}`).join(' AND ')
+      sql = `SELECT * FROM "${table_name}" WHERE ${where_clauses}`
+      params = key_values
+    }
+
+    try {
+      const result = await this.#pg.query<RawRowType<T>>(sql, params)
+      return result.rows[0]
+    } catch (error) {
+      console.error('LivePgLite find error:', error)
+      toast.error(`Find error: ${(error as Error).message}`)
+      throw error
+    }
+  }
+
+  /**
+   * Upsert one or more rows into a table
+   */
+  async #upsert<T extends TableName>(
+    table_name: T,
+    set: InsertType<T> | InsertType<T>[],
+  ): Promise<RowType<T>[]> {
+    const items = Array.isArray(set) ? set : [set]
+    const columns = Object.keys(items[0] as object)
+    const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+    const conflict_columns = primary_keys.map(pk => `"${pk}"`).join(', ')
+    const update_columns = columns.filter(col =>
+      !primary_keys.includes(col) && col !== 'created_at',
+    )
+
+    const BATCH_SIZE = 5000
+    const results: RowType<T>[] = []
+    const columns_sql = columns.map(c => `"${c}"`).join(', ')
+
+    try {
+      for (let offset = 0; offset < items.length; offset += BATCH_SIZE) {
+        const batch = items.slice(offset, offset + BATCH_SIZE)
+        const params: unknown[] = []
+        const value_groups: string[] = []
+
+        for (const row of batch) {
+          const placeholders = columns.map((col) => {
+            params.push((row as Record<string, unknown>)[col])
+            return `$${params.length}`
+          })
+          value_groups.push(`(${placeholders.join(', ')})`)
+        }
+
+        const update_set = update_columns
+          .map(col => `"${col}" = EXCLUDED."${col}"`)
+          .join(', ')
+        const sql = `INSERT INTO "${table_name}" (${columns_sql}) VALUES ${value_groups.join(', ')} ON CONFLICT (${conflict_columns}) DO UPDATE SET ${update_set} RETURNING *`
+        const result = await this.#pg.query<RowType<T>>(sql, params)
+        results.push(...result.rows)
+      }
+    } catch (error) {
+      console.error('LivePgLite upsert error:', error)
+      toast.error(`Upsert error: ${(error as Error).message}`)
+      throw error
+    }
+
+    return results
+  }
+
+  /**
+   * Update specific fields of a row by its primary key(s)
+   */
+  async #update<T extends TableName>(
+    table_name: T,
+    set: UpdateType<T>,
+  ): Promise<void> {
+    const primary_keys = TABLE_PRIMARY_KEYS[table_name]
+    const row = set as Record<string, unknown>
+
+    for (const pk of primary_keys) {
+      if (row[pk] == null) {
+        console.error(`LivePgLite update: missing primary key column "${pk}"`)
+        return
+      }
+    }
+
+    const exclude_columns = [...primary_keys, '_save', '_delete', '_reset']
+    const columns = Object.keys(row).filter(col => !exclude_columns.includes(col))
+
+    if (columns.length === 0) return
+
+    const params: unknown[] = columns.map(col => row[col])
+    for (const pk of primary_keys) {
+      params.push(row[pk])
+    }
+
+    const set_clauses = columns.map((col, i) => `"${col}" = $${i + 1}`).join(', ')
+    const where_clauses = primary_keys
+      .map((pk, i) => `"${pk}" = $${columns.length + i + 1}`)
+      .join(' AND ')
+    const sql = `UPDATE "${table_name}" SET ${set_clauses} WHERE ${where_clauses}`
+
+    try {
+      await this.#pg.query(sql, params)
+    } catch (error) {
+      console.error('LivePgLite update error:', error)
+      toast.error(`Update error: ${(error as Error).message}`)
+      throw error
+    }
+  }
+}
+
+/**
+ * LivePgLite type - allows direct table access via db.labels, db.tasks, etc.
+ */
+export type LivePgLite = LivePgLiteImpl & TableProperties
+
+/**
+ * Create a LivePgLite instance with direct table access via proxy
+ */
+export function create_live_pglite(pg: PGliteWithLive, options: LivePgLiteOptions = {}): LivePgLite {
+  const instance = new LivePgLiteImpl(pg, options)
+
+  return new Proxy(instance, {
+    get(target, prop, receiver) {
+      // First check if it's a property on the instance itself
+      if (prop in target || typeof prop === 'symbol') {
+        return Reflect.get(target, prop, receiver)
+      }
+      // Otherwise, treat it as a table name
+      return target.get_table_accessor(prop as TableName)
+    },
+  }) as LivePgLite
+}

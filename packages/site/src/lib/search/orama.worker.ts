@@ -1,9 +1,9 @@
-import { create, insertMultiple, remove, update } from '@orama/orama'
 import type { EntryData } from '@living-dictionaries/types'
+import { create, insertMultiple, remove, update } from '@orama/orama'
 import { augment_entry_for_search } from './augment-entry-for-search'
-import { type EntriesIndex, entries_index_schema } from './entries-schema'
-import { type SearchEntriesOptions, search_entries } from './search-entries'
+import { entries_index_schema, type EntriesIndex } from './entries-schema'
 import { createMultilingualTokenizer } from './multilingual-tokenizer'
+import { search_entries, type SearchEntriesOptions } from './search-entries'
 
 let orama_index: Record<string, EntriesIndex>
 

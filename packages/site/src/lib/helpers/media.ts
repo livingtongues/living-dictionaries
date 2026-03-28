@@ -1,14 +1,12 @@
-import { get } from 'svelte/store'
-import { assign_speaker, insert_audio, insert_photo, insert_video } from '$lib/supabase/operations'
-import { page } from '$app/stores'
-import { upload_image } from '$lib/components/image/upload-image'
+import { page } from '$app/state'
 import { upload_audio } from '$lib/components/audio/upload-audio'
+import { upload_image } from '$lib/components/image/upload-image'
 import { upload_video } from '$lib/components/video/upload-video'
+import { assign_speaker, insert_audio, insert_photo, insert_video } from '$lib/supabase/operations'
 
 export function addImage({ sense_id, image_options }: { sense_id: string, image_options: { file: File, source: string, photographer?: string } }) {
   const { file, source, photographer } = image_options
-  const { data: { dictionary } } = get(page)
-  const status = upload_image({ file, folder: `${dictionary.id}/images/${sense_id}` })
+  const status = upload_image({ file, folder: `${page.data.dictionary.id}/images/${sense_id}` })
   const unsubscribe = status.subscribe(async ({ storage_path, serving_url }) => {
     if (storage_path && serving_url) {
       await insert_photo({ photo: { storage_path, serving_url, source, photographer }, sense_id })
@@ -19,8 +17,7 @@ export function addImage({ sense_id, image_options }: { sense_id: string, image_
 }
 
 export function addAudio({ entry_id, speaker_id, file }: { entry_id: string, speaker_id: string, file: File | Blob }) {
-  const { data: { dictionary } } = get(page)
-  const status = upload_audio({ file, folder: `${dictionary.id}/audio/${entry_id}` })
+  const status = upload_audio({ file, folder: `${page.data.dictionary.id}/audio/${entry_id}` })
   const unsubscribe = status.subscribe(async ({ storage_path }) => {
     if (storage_path) {
       const audio = await insert_audio({ storage_path, entry_id })
@@ -32,8 +29,7 @@ export function addAudio({ entry_id, speaker_id, file }: { entry_id: string, spe
 }
 
 export function uploadVideo({ sense_id, speaker_id, file }: { sense_id: string, speaker_id: string, file: File | Blob }) {
-  const { data: { dictionary } } = get(page)
-  const status = upload_video({ file, folder: `${dictionary.id}/videos/${sense_id}` })
+  const status = upload_video({ file, folder: `${page.data.dictionary.id}/videos/${sense_id}` })
   const unsubscribe = status.subscribe(async ({ storage_path }) => {
     if (storage_path) {
       const data = await insert_video({ video: { storage_path }, sense_id })

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Window 2
+tmux new-window -dn terminals
+tmux send-keys -t terminals "pnpm dev" C-m
+# tmux send-keys -t terminals "pnpm dev & sleep 3 && xdg-open http://localhost:7878" C-m
+tmux split-window -t terminals -h -c "$(pwd)"
+
+# Window 3
+tmux new-window -dn scratch
+
+# Window 1
+tmux split-window -h -c "$(pwd)"
+tmux send-keys "pi" Enter
+tmux select-pane -L
+tmux send-keys "nvim ." Enter
+tmux select-pane -R
+
+clear

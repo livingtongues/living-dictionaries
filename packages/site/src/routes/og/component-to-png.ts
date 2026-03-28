@@ -1,50 +1,36 @@
-/* eslint-disable no-await-in-loop */
-import satori from 'satori';
-import { Resvg } from '@resvg/resvg-js';
-import { html as toReactNode } from 'satori-html';
+import type { Component } from 'svelte'
+import { Buffer } from 'node:buffer'
+import { ResponseCodes } from '$lib/constants'
+import { Resvg } from '@resvg/resvg-js'
 
+import satori from 'satori'
+import { html as toReactNode } from 'satori-html'
+import { render } from 'svelte/server'
 // Vite plugin turns import into the result of readFileSync during build
-import NotoSans from './notoSans.ttf';
-import type { SvelteComponent } from 'svelte';
-import { ResponseCodes } from '$lib/constants';
+import NotoSans from './notoSans.ttf'
 
-// based on what text is contained in the props, load fonts accordingly
+function hash(str: string) {
+  let i
+  let l
+  let hval = 0x811C9DC5
 
-const get_png = withCache(async (html: string, height: number, width: number) => {
-  const markup = toReactNode(html);
-  const svg = await satori(markup, {
-    fonts: [
-      {
-        name: 'Noto+Sans',
-        data: Buffer.from(NotoSans),
-        style: 'normal'
-      },
-    ],
-    // debug: true,
-    height,
-    width,
-    loadAdditionalAsset: (...args: string[]) => loadDynamicAsset(...args),
-  });
+  for (i = 0, l = str.length; i < l; i++) {
+    hval ^= str.charCodeAt(i)
+    hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24)
+  }
+  return (`00000${(hval >>> 0).toString(36)}`).slice(-6)
+}
 
-  const resvg = new Resvg(svg, {
-    fitTo: {
-      mode: 'width',
-      value: width
-    }
-  });
-
-  return resvg.render().asPng();
-});
-
-export async function component_to_png(component, props, height: number, width: number) {
-  const result = (component as SvelteComponent).render(props);
-  const png = await get_png(result.html, height, width);
-  return new Response(png, {
-    headers: {
-      'content-type': 'image/png',
-      'cache-control': 'public, immutable, no-transform, max-age=31536000',
-    }
-  });
+function withCache(fn: (...args: any[]) => any) {
+  const cache = new Map()
+  return async (...args: (string | number)[]) => {
+    const key = hash(args.join())
+    if (cache.has(key))
+      return cache.get(key)
+    const result = await fn(...args)
+    cache.set(key, result)
+    return result
+  }
 }
 
 // @TODO: Cover most languages with Noto Sans.
@@ -64,73 +50,84 @@ const languageFontMap = {
   symbol: ['Noto+Sans+Symbols', 'Noto+Sans+Symbols+2'],
   math: 'Noto+Sans+Math',
   unknown: 'Noto+Sans',
-};
-type LanguageCode = keyof typeof languageFontMap;
+}
+type LanguageCode = keyof typeof languageFontMap
 
 const loadDynamicAsset = withCache(
   async (code: LanguageCode, text: string) => {
-    // Try to load from Google Fonts.
-    let names = languageFontMap[code];
-    if (!names) code = 'unknown';
+    let names = languageFontMap[code]
+    if (!names) code = 'unknown'
 
     try {
       if (typeof names === 'string')
-        names = [names];
-
+        names = [names]
 
       for (const name of names) {
-        const API = `https://fonts.googleapis.com/css2?family=${name}&text=${encodeURIComponent(text)}`;
+        const API = `https://fonts.googleapis.com/css2?family=${name}&text=${encodeURIComponent(text)}`
 
         const css = await (
           await fetch(API, {
             headers: {
-              // Make sure it returns TTF.
               'User-Agent':
-								'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1',
+                'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1',
             },
           })
-        ).text();
+        ).text()
 
-        const resource = css.match(/src: url\((.+)\) format\('(opentype|truetype)'\)/);
+        const resource = css.match(/src: url\((.+)\) format\('(?:opentype|truetype)'\)/)
 
-        if (!resource) return;
+        if (!resource) return
 
-        const res = await fetch(resource[1]);
+        const res = await fetch(resource[1])
         if (res.status === ResponseCodes.OK) {
-          const font = await res.arrayBuffer();
+          const font = await res.arrayBuffer()
           return {
             name: `satori_${code}_fallback_${text}`,
             data: font,
             weight: 400,
             style: 'normal',
-          };
+          }
         }
       }
     } catch (e) {
-      console.error('Failed to load dynamic font for', text, '. Error:', e);
+      console.error('Failed to load dynamic font for', text, '. Error:', e)
     }
-  }
-);
+  },
+)
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-function withCache(fn: Function) {
-  const cache = new Map();
-  return async (...args: (string | number)[]) => {
-    const key = hash(args.join());
-    if (cache.has(key)) return cache.get(key);
-    const result = await fn(...args);
-    cache.set(key, result);
-    return result;
-  };
-}
+// based on what text is contained in the props, load fonts accordingly
+const get_png = withCache(async (html: string, height: number, width: number) => {
+  const markup = toReactNode(html)
+  const svg = await satori(markup, {
+    fonts: [
+      {
+        name: 'Noto+Sans',
+        data: Buffer.from(NotoSans),
+        style: 'normal',
+      },
+    ],
+    height,
+    width,
+    loadAdditionalAsset: (...args: string[]) => loadDynamicAsset(...args),
+  })
 
-function hash(str: string) {
-  let i; let l;
-  let hval = 0x811C9DC5;
+  const resvg = new Resvg(svg, {
+    fitTo: {
+      mode: 'width',
+      value: width,
+    },
+  })
 
-  for (i = 0, l = str.length; i < l; i++) {
-    hval ^= str.charCodeAt(i);
-    hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
-  }
-  return (`00000${(hval >>> 0).toString(36)}`).slice(-6);
+  return resvg.render().asPng()
+})
+
+export async function component_to_png(component: Component, props: Record<string, any>, height: number, width: number) {
+  const result = render(component, { props })
+  const png = await get_png(result.body, height, width)
+  return new Response(png, {
+    headers: {
+      'content-type': 'image/png',
+      'cache-control': 'public, immutable, no-transform, max-age=31536000',
+    },
+  })
 }
