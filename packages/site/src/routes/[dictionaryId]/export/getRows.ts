@@ -27,7 +27,7 @@ export function get_glosses(glosses: MultiString, metadata: ExportMetaData) {
   if (glosses) {
     Object.entries(glosses).forEach(([bcp, value]) => {
       formatted_data[`${count_sense(sense_index)}${bcp}_gloss`] = position === 'header'
-        ? `${get_readable_sense(sense_index)}${glossingLanguages[bcp].vernacularName || bcp} Gloss`
+        ? `${get_readable_sense(sense_index)}${glossingLanguages[bcp]?.vernacularName || bcp} Gloss`
         : value
     })
   }
@@ -77,7 +77,7 @@ export function get_example_sentence(
   if (sentence?.translation) {
     Object.keys(sentence?.translation).forEach((bcp) => {
       formatted_data[`${count_sense(sense_index)}${bcp}_exampleSentence`] = position === 'header'
-        ? `${get_readable_sense(sense_index)}Example sentence in ${glossingLanguages[bcp].vernacularName || bcp}`
+        ? `${get_readable_sense(sense_index)}Example sentence in ${glossingLanguages[bcp]?.vernacularName || bcp}`
         : sentence.translation?.[bcp]
     })
   }
