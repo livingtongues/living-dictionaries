@@ -1,4 +1,4 @@
-export const DICTIONARIES_WITH_VARIANTS = ['babanki', 'torwali', 'ksingmul', 'tutelo-saponi', 'tseltal', 'namtrik-de-totoro', 'werikyana', 'woleaia', 'guwar', 'sugtstun-test', 'yaruro-colombiano']
+export const DICTIONARIES_WITH_VARIANTS = ['babanki', 'torwali', 'ksingmul', 'tutelo-saponi', 'tseltal', 'namtrik-de-totoro', 'werikyana', 'woleaia', 'guwar', 'sugtstun-test', 'yaruro-colombiano', 'rusitene']
 
 export enum ResponseCodes {
   OK = 200,
