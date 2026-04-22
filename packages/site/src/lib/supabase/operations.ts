@@ -148,6 +148,21 @@ export async function update_sentence(sentence: TablesUpdate<'sentences'>) {
   }
 }
 
+export async function delete_sentence(sentence_id: string) {
+  try {
+    if (!confirm('Are you sure you want to delete this sentence?')) return
+
+    const { api, supabase } = await get_pieces()
+    await api.delete_sentence(sentence_id)
+    const { error } = await supabase.from('sentences').update({ deleted: new Date().toISOString() }).eq('id', sentence_id)
+    if (error)
+      throw new Error(error.message)
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
 export async function insert_audio({
   storage_path,
   entry_id,
