@@ -95,7 +95,7 @@
   <EntrySentence sentence={{ text: {}, id: null, translation: null }} {can_edit} sense_id={sense.id} glossingLanguages={glossingLanguages} />
 {/if}
 
-{#if can_edit}
+{#if can_edit && sense.sentences?.length}
   <button
     type="button"
     class="text-start p-2 mb-2 rounded hover:bg-gray-100 text-gray-600"
