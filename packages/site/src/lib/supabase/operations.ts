@@ -114,8 +114,6 @@ export async function insert_sentence({ sentence, sense_id }: {
       dictionary_id,
       ...sentence,
     }
-    await api.insert_sentence(new_sentence, sense_id)
-
     const { data, error } = await supabase.from('sentences').insert(new_sentence).select().single()
     if (error)
       throw new Error(error.message)
@@ -127,7 +125,14 @@ export async function insert_sentence({ sentence, sense_id }: {
     })
     if (sense_in_sentence_error)
       throw new Error(sense_in_sentence_error.message)
-    return data
+
+    try {
+      await api.insert_sentence(new_sentence, sense_id)
+    } catch (worker_err) {
+      console.error('insert_sentence: worker error', worker_err)
+    }
+
+return data
   } catch (err) {
     alert(err)
     console.error(err)
@@ -137,10 +142,14 @@ export async function insert_sentence({ sentence, sense_id }: {
 export async function update_sentence(sentence: TablesUpdate<'sentences'>) {
   try {
     const { api, supabase } = await get_pieces()
-    await api.update_sentence(sentence)
     const { data, error } = await supabase.from('sentences').update(sentence).eq('id', sentence.id).select().single()
     if (error)
       throw new Error(error.message)
+    try {
+      await api.update_sentence(sentence)
+    } catch (worker_err) {
+      console.error('update_sentence: worker error', worker_err)
+    }
     return data
   } catch (err) {
     alert(err)
@@ -153,10 +162,14 @@ export async function delete_sentence(sentence_id: string) {
     if (!confirm('Are you sure you want to delete this sentence?')) return
 
     const { api, supabase } = await get_pieces()
-    await api.delete_sentence(sentence_id)
     const { error } = await supabase.from('sentences').update({ deleted: new Date().toISOString() }).eq('id', sentence_id)
     if (error)
       throw new Error(error.message)
+    try {
+      await api.delete_sentence(sentence_id)
+    } catch (worker_err) {
+      console.error('delete_sentence: worker error', worker_err)
+    }
   } catch (err) {
     alert(err)
     console.error(err)
