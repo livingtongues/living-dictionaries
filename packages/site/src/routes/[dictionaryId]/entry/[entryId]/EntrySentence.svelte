@@ -14,9 +14,19 @@
 </script>
 
 <div class:order-2={!sentence.id} class="flex flex-col">
+  {#if can_edit && sentence.id}
+    <button
+      type="button"
+      class="self-end text-gray-400 hover:text-red-500"
+      title={$page.data.t('sentence.delete')}
+      on:click={() => dbOperations.delete_sentence(sentence.id)}>
+      <span class="i-system-uicons-trash text-xl" />
+    </button>
+  {/if}
+
   {#each writing_systems as orthography}
     <EntryField
-      value={sentence.text[orthography]}
+      value={sentence.text?.[orthography]}
       field="example_sentence"
       {can_edit}
       display={$page.data.t('entry_field.example_sentence')}
@@ -46,7 +56,7 @@
         on_update={(new_value) => {
           dbOperations.update_sentence({
             translation: {
-              ...sentence.translation,
+              ...(sentence.translation || {}),
               [bcp]: new_value,
             },
             id: sentence.id,

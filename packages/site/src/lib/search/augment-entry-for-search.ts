@@ -21,7 +21,7 @@ export function augment_entry_for_search(entry: EntryData) {
   const _glosses = senses.flatMap(sense => Object.values(sense.glosses || {}).filter(Boolean))
 
   const sentences = senses.flatMap(sense =>
-    sense.sentences?.flatMap(({ text }) => Object.values(text).filter(Boolean)) || [],
+    sense.sentences?.flatMap(s => (s.text ? Object.values(s.text).filter(Boolean) : [])) || [],
   )
   const plural_forms = senses.flatMap(sense => Object.values(sense.plural_form || {}).filter(Boolean))
 

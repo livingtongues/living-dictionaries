@@ -412,5 +412,9 @@
   },
   "image": {
     "photographer": "Photographer"
+  },
+  "sentence": {
+    "add": "Add sentence",
+    "delete": "Delete sentence"
   }
 }

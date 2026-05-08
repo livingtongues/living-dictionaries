@@ -44,6 +44,7 @@ export const logDbOperations: DbOperations = {
   update_sense: log_args,
   insert_sentence: log_args,
   update_sentence: log_args,
+  delete_sentence: log_args,
   insert_audio: log_args,
   update_audio: log_args,
   insert_speaker: log_args,
