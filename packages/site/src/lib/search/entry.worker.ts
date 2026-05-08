@@ -263,7 +263,14 @@ const operations = {
       })
     }
     const entry_id = senses[sense_id]?.entry_id
-    await process_and_update_entry(entries[entry_id])
+    if (entry_id && entries[entry_id]) await process_and_update_entry(entries[entry_id])
+  },
+  delete_sentence: async (sentence_id: string) => {
+    const sense_id = sentence_id_to_sense_ids[sentence_id]?.[0]
+    delete sentences[sentence_id]
+    sense_id_to_sentences[sense_id] = sense_id_to_sentences[sense_id]?.filter(s => s.id !== sentence_id) || []
+    const entry_id = senses[sense_id]?.entry_id
+    if (entry_id && entries[entry_id]) await process_and_update_entry(entries[entry_id])
   },
   insert_tag: async (tag: TablesInsert<'tags'>) => {
     tags[tag.id] = tag as Tables<'tags'>
