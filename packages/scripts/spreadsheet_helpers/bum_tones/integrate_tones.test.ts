@@ -118,6 +118,6 @@ describe('integrate_tones_to_bum_phonetics', () => {
         test_tones.slice(0, test_tones.length - 1),
         fixturesFilePath,
       ),
-    ).toThrowError('Tones and phonetics have to correspond to each other')
+    ).toThrow('Tones and phonetics have to correspond to each other')
   })
 })

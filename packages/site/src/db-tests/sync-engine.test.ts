@@ -339,7 +339,7 @@ describe(Sync, () => {
     test('sync already in progress throws error', async () => {
       const sync_promise = device.sync.sync()
 
-      await expect(device.sync.sync()).rejects.toThrowError('Sync already in progress')
+      await expect(device.sync.sync()).rejects.toThrow('Sync already in progress')
 
       await sync_promise
     })

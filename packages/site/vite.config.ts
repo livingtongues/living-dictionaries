@@ -2,14 +2,11 @@ import { readFileSync } from 'node:fs'
 import { sveltekit } from '@sveltejs/kit/vite'
 import UnoCSS from '@unocss/svelte-scoped/vite'
 import { defineConfig, type Plugin, type PluginOption } from 'vite'
-import { pglite_proxy } from './pglite-proxy/vite-plugin'
-// import { kitbook } from 'kitbook/plugins/vite'
-// import kitbookConfig from './kitbook.config'
+import { dev_log_plugin } from './vite-dev-log-plugin'
 
 export default defineConfig({
   plugins: [
-    // kitbook(kitbookConfig),
-    pglite_proxy(),
+    dev_log_plugin(),
     UnoCSS({
       injectReset: '@unocss/reset/tailwind.css',
     }) as unknown as PluginOption,
@@ -75,7 +72,8 @@ function rawFonts(extensions: string[]): Plugin {
     transform(code, id) {
       if (extensions.some(ext => id.endsWith(ext))) {
         const buffer = readFileSync(id)
-        return { code: `export default ${JSON.stringify(buffer)}`, map: null }
+        return { code: `export default ${JSON.stringify(buffer)}`, map: null,
+        }
       }
     },
   }

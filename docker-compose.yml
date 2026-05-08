@@ -5,7 +5,7 @@ services:
     restart: always
     env_file: .env
     expose:
-      - "3000"
+      - '3000'
     networks:
       - web
 
