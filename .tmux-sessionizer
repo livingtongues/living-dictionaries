@@ -1,19 +1,14 @@
 #!/usr/bin/env bash
 
 # Window 2
-tmux new-window -dn terminals
-tmux send-keys -t terminals "pnpm dev" C-m
-# tmux send-keys -t terminals "pnpm dev & sleep 3 && xdg-open http://localhost:7878" C-m
-tmux split-window -t terminals -h -c "$(pwd)"
-
-# Window 3
 tmux new-window -dn scratch
 
-# Window 1
-tmux split-window -h -c "$(pwd)"
-tmux send-keys "pi" Enter
-tmux select-pane -L
+# Window 1: nvim left, pnpm dev top-right, empty bottom-right
+tmux split-window -h -c "$(pwd)"        # right pane becomes active
+tmux split-window -v -c "$(pwd)"        # right-bottom becomes active
+tmux select-pane -U                      # move to right-top
+tmux send-keys "pnpm dev" Enter
+tmux select-pane -L                      # move to left (nvim)
 tmux send-keys "nvim ." Enter
-tmux select-pane -R
 
 clear
