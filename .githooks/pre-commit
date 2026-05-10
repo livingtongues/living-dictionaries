@@ -1,0 +1,33 @@
+#!/bin/sh
+
+export PATH="$HOME/.local/share/pnpm:$PATH"
+
+# Run tests, check, and lint before committing.
+# Scoped to new-site (the active rebuild). The legacy production site
+# (packages/site) is not gated by these hooks — it's being phased out.
+echo "Running pre-commit checks..."
+
+echo "→ pnpm test:new"
+pnpm test:new --reporter=dot
+if [ $? -ne 0 ]; then
+    echo "❌ Tests failed. Commit aborted."
+    exit 1
+fi
+
+echo "→ pnpm check:new"
+pnpm check:new
+if [ $? -ne 0 ]; then
+    echo "❌ svelte-check failed. Commit aborted."
+    exit 1
+fi
+
+echo "→ pnpm lint:fix"
+pnpm lint:fix
+if [ $? -ne 0 ]; then
+    echo "❌ Lint failed. Commit aborted."
+    exit 1
+fi
+# Re-stage only files that were already staged (in case lint:fix modified them)
+git diff --cached --name-only --diff-filter=d | xargs -r git add
+
+echo "✅ All pre-commit checks passed."
