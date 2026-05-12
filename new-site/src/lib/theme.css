@@ -1,0 +1,97 @@
+/*
+How it works:
+- `:root` sets light as the default (light-* base vars exist; semantic vars map to them via the `:root, .light { ... }` rule below)
+- `.light` on `<body>` or `<html>` forces light even when system prefers dark
+- `.dark` on `<body>` or `<html>` forces dark regardless of system preference
+- `@media (prefers-color-scheme: dark) :root:not(.light)` handles system dark preference
+- No class on `<body>`/`<html>` = follow system preference
+
+svelte-look toggles dark by adding `class="dark"` on `<html>`; dark-mode.ts toggles
+by adding `class="dark"` or `class="light"` on `<body>`. Both match the unprefixed
+`.dark` / `.light` selectors below.
+
+No webfont imports — LD uses a carefully-tuned system-font stack (configured in
+uno.config.ts's theme.font.sans) that intentionally avoids Mac Chrome's .SF NS
+to preserve diacritic rendering across many scripts.
+*/
+
+:root {
+  --light-primary: hsl(217, 91%, 60%);           /* ~#3b82f6, Tailwind blue-500 */
+  --light-on-primary: #ffffff;
+  --light-background: #ffffff;
+  --light-surface: hsl(0, 0%, 96%);
+  --light-border-color: hsla(240, 11%, 7%, 0.08);
+  --light-color: hsl(240, 11%, 7%);
+  --light-color-secondary: hsla(240, 11%, 7%, 0.7);
+  --light-danger: hsl(0, 72%, 47%);
+  --light-warning: hsl(38, 80%, 45%);
+
+  --dark-primary: hsl(217, 91%, 75%);             /* lighter blue for dark bg readability */
+  --dark-on-primary: #ffffff;
+  --dark-background: hsl(240, 11%, 7%);
+  --dark-surface: hsl(240, 8%, 11%);
+  --dark-border-color: hsla(0, 0%, 100%, 0.06);
+  --dark-color: #ffffff;
+  --dark-color-secondary: hsla(0, 0%, 100%, 0.36);
+  --dark-danger: hsl(0, 72%, 60%);
+  --dark-warning: hsl(38, 80%, 60%);
+
+  --transition-time: 0.325s;
+}
+
+/* Light: default and forced */
+:root,
+.light {
+  --primary: var(--light-primary);
+  --on-primary: var(--light-on-primary);
+  --background: var(--light-background);
+  --surface: var(--light-surface);
+  --border-color: var(--light-border-color);
+  --color: var(--light-color);
+  --color-secondary: var(--light-color-secondary);
+  --danger: var(--light-danger);
+  --warning: var(--light-warning);
+  color-scheme: light;
+  background-color: var(--background);
+  color: var(--color);
+}
+
+/* Dark: forced */
+.dark {
+  --primary: var(--dark-primary);
+  --on-primary: var(--dark-on-primary);
+  --background: var(--dark-background);
+  --surface: var(--dark-surface);
+  --border-color: var(--dark-border-color);
+  --color: var(--dark-color);
+  --color-secondary: var(--dark-color-secondary);
+  --danger: var(--dark-danger);
+  --warning: var(--dark-warning);
+  color-scheme: dark;
+  background-color: var(--background);
+  color: var(--color);
+}
+
+/* Dark: system preference (unless .light is forced) */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --primary: var(--dark-primary);
+    --on-primary: var(--dark-on-primary);
+    --background: var(--dark-background);
+    --surface: var(--dark-surface);
+    --border-color: var(--dark-border-color);
+    --color: var(--dark-color);
+    --color-secondary: var(--dark-color-secondary);
+    --danger: var(--dark-danger);
+    --warning: var(--dark-warning);
+    color-scheme: dark;
+    background-color: var(--background);
+    color: var(--color);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-time: 0s;
+  }
+}
