@@ -4,3 +4,7 @@ packages:
   - e2e
   - '!packages/ids-import'
   - '!packages/functions'
+
+onlyBuiltDependencies:
+  # Linked workspace package; runs `tsc` via its prepare script to build dist/.
+  - svelte-look
