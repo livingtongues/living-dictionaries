@@ -28,7 +28,7 @@
     "help_us_launch_more": "Ayúdenos a lanzar más Diccionarios Vivos",
     "with_your_help": "Con su ayuda, podemos seguir mejorando nuestro software y ponerlo a disposición de cualquier comunidad que desee crear su propio Diccionario Vivo. Por favor, haga una donación hoy.",
     "translators": "Traductores",
-    "interns": "Pasantes",
+    "interns": "pasantes",
     "video_upload": "Subir videos",
     "export_data": "Exportar datos (en formatos CSV, PDF)",
     "import_export": "Importar/exportar (flex, formato estándar)",
@@ -38,11 +38,11 @@
     "suggestions_from_users": "Sugerencias de usuarios",
     "push_notifications": "Notificaciones a colaboradores",
     "contributor_awards": "Premios a la comunidad de colaboradores",
-    "question_1": "Proporcione información sobre este idioma. ¿Dónde se habla? ¿Qué comunidades lo hablan? ¿Está en peligro de extinción?",
-    "question_2": "¿Cuáles son los nombres de las personas que crearon este diccionario? ¿De quiénes son las voces que aparecen en él?",
-    "question_3": "¿De dónde provienen los datos de este diccionario? Por favor, describa si los recopiló usted mismo. Si utilizó alguna fuente de referencia publicada, indíquela.",
-    "question_4": "¿Quién usará este diccionario? ¿Se utilizará en algún proyecto educativo?",
-    "question_5": "Si desea que el público se ponga en contacto con usted para informarle sobre este proyecto, proporcione su información de contacto o un enlace donde puedan obtener más información. Esto es opcional.",
+    "question_1": "Por favor, proporcione información general sobre este idioma. ¿Dónde se habla? ¿Qué comunidades lo hablan? ¿Está en peligro de extinción?",
+    "question_2": "¿Cuáles son los nombres de las personas que crearon este diccionario? ¿De quiénes son las voces que aparecen en este diccionario?",
+    "question_3": "¿De dónde proceden los datos de este diccionario? Si los recopiló usted mismo, por favor, descríbalo. Si utilizó alguna fuente de referencia publicada, por favor, indíquela.",
+    "question_4": "¿Quién utilizará este diccionario? ¿Se utilizará en algún proyecto educativo?",
+    "question_5": "Si desea que el público se ponga en contacto con usted en relación con este proyecto, proporcione su información de contacto o un enlace donde puedan obtener más información. Esto es opcional.",
     "message": "Antes de hacer público su diccionario, complete la sección de Acerca de."
   },
   "contributors": {
@@ -185,12 +185,12 @@
     "delete_image": "¿Borrar imagen?",
     "delete_video": "¿Borrar el vídeo?",
     "source": "Atribución de {media} / Fuente de {media}",
-    "source_message": "Si {media} proviene de la web, incluya el enlace y la licencia de {media}, si corresponde",
+    "source_message": "Si el contenido multimedia proviene de la web, incluya el enlace y la licencia correspondiente, si procede.",
     "rights": "Tengo los derechos para cargar el archivo de {media}",
     "AI_generated": "{media} fue generado por IA",
     "this_image": "esta imagen",
     "this_audio": "este audio",
-    "this_video": "este vídeo"
+    "this_video": "este video"
   },
   "entry_field": {
     "photo": "Foto",
@@ -209,7 +209,7 @@
     "notes": "Notas",
     "sources": "Fuente",
     "example_sentence": "Oración de ejemplo",
-    "noun_class": "Clase de sustantivo",
+    "noun_class": "Clase de sustantivos",
     "variant": "Variante",
     "gloss": "Traducción",
     "plural_form": "Forma plural",
@@ -244,7 +244,7 @@
     "my_dictionaries": "Mis diccionarios",
     "public_dictionaries": "Diccionarios públicos",
     "read_more": "Leer más",
-    "main_banner": "Al servicio de más de 200 comunidades lingüísticas en todo el mundo, con más de 1/4 millón de entradas publicadas, así como cientos de diccionarios más en proceso."
+    "main_banner": "Damos servicio a más de 200 comunidades lingüísticas en todo el mundo, con más de un cuarto de millón de entradas publicadas, además de cientos de diccionarios más en proceso de elaboración."
   },
   "misc": {
     "settings": "Configuración",
@@ -374,7 +374,7 @@
     "history": "Historial",
     "entry": "Entrada",
     "editor": "Editor",
-    "entry_history": "Historial de entradas",
+    "entry_history": "Historial de entrada",
     "field": "Campo",
     "date": "Fecha",
     "old_value": "Valor anterior",
@@ -390,7 +390,7 @@
   "partnership": {
     "title": "Organizaciones asociadas",
     "button": "Escribir la organización asociada",
-    "name": "Nombre de la organización socia"
+    "name": "Nombre de la organización asociada"
   },
   "synopsis": {
     "translations": "Traducciones",
@@ -411,5 +411,9 @@
   },
   "image": {
     "photographer": "Fotógrafo"
+  },
+  "sentence": {
+    "add": "Agregar oración",
+    "delete": "Eliminar oración"
   }
 }

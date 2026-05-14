@@ -250,7 +250,7 @@
     "tft": "Ternate",
     "tet": "Tetum / Fehan Tetun",
     "th": "Thai",
-    "bo": "Tibet",
+    "bo": "'Yan Tibet",
     "tvo": "Tidore",
     "tig": "Tigre",
     "ti": "Tigriyanci",
@@ -295,11 +295,12 @@
     "jen": "Dza",
     "mko": "Mingang Doso",
     "hbo-hebr": "Ibrananci",
-    "ne-2": "Nepali (Romaniyanci)",
+    "ne-2": "Nepal (Romanization)",
     "apd": "Larabcin Sudan",
     "hoi": "Holikachuk",
     "mtq": "Muong",
     "cag": "Nivaclé",
-    "haw": "Hawaiian"
+    "haw": "Hawaiian",
+    "qvi": "Babban Titin Imbabura Quichua"
   }
 }
