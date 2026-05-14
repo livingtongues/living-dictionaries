@@ -95,6 +95,15 @@
   <EntrySentence sentence={{ text: {}, id: null, translation: null }} {can_edit} sense_id={sense.id} glossingLanguages={glossingLanguages} />
 {/if}
 
+{#if can_edit && sense.sentences?.length}
+  <button
+    type="button"
+    class="text-start p-2 mb-2 rounded hover:bg-gray-100 text-gray-600"
+    on:click={() => dbOperations.insert_sentence({ sentence: {}, sense_id: sense.id })}>
+    <span class="i-system-uicons-versions text-xl" /> {$page.data.t('sentence.add')}
+  </button>
+{/if}
+
 <EntryField
   value={sense.plural_form?.default}
   field="plural_form"
