@@ -250,7 +250,7 @@
     "tft": "Ternate",
     "tet": "Tetum / Fehan Tetun",
     "th": "Thaï",
-    "bo": "tibétain",
+    "bo": "Tibétain",
     "tvo": "Tidore",
     "tig": "Tigre",
     "ti": "tigrinya",
@@ -300,6 +300,7 @@
     "hoi": "Holikachuk",
     "mtq": "Muong",
     "cag": "Nivaclé",
-    "haw": "hawaïen"
+    "haw": "hawaïen",
+    "qvi": "Quichua des hauts plateaux d'Imbabura"
   }
 }

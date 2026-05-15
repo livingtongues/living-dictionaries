@@ -32,17 +32,17 @@
     "video_upload": "Muat Naik Video",
     "export_data": "Eksport Data (format CSV, PDF)",
     "import_export": "Import/Eksport (FLEx, Format Standard)",
-    "geo_tagging": "Entri penandaan geo",
+    "geo_tagging": "Entri Geo-penandaan",
     "flashcard_view": "Paparan Kad Imbas untuk Pelajar Bahasa",
-    "peer_review": "Tinjauan Rakan Sebaya terhadap Ejaan",
+    "peer_review": "Semakan Sebaya Ejaan",
     "suggestions_from_users": "Cadangan daripada Pengguna",
     "push_notifications": "Pemberitahuan Tolak kepada Penyumbang",
     "contributor_awards": "Anugerah Komuniti Penyumbang",
-    "question_1": "Sila berikan beberapa maklumat latar belakang tentang bahasa ini. Di mana ia dituturkan? Komuniti apa yang bercakap bahasa ini? Adakah bahasa ini terancam?",
-    "question_2": "Apakah nama orang yang membina kamus ini? Suara siapa dalam kamus ini?",
-    "question_3": "Dari mana datangnya data dalam kamus ini? Sila terangkan jika anda mengumpul data sendiri. Jika anda menggunakan mana-mana sumber rujukan yang diterbitkan, sila senaraikan.",
-    "question_4": "Siapa yang akan menggunakan kamus ini? Adakah ia akan digunakan dalam mana-mana projek pendidikan?",
-    "question_5": "Jika anda mahu orang ramai menghubungi anda tentang projek ini, sila berikan maklumat hubungan anda atau pautan ke tempat orang boleh mengetahui lebih lanjut. Ini adalah pilihan.",
+    "question_1": "Sila berikan sedikit maklumat latar belakang tentang bahasa ini. Di manakah ia dituturkan? Komuniti manakah yang bertutur dalam bahasa ini? Adakah bahasa ini terancam?",
+    "question_2": "Siapakah nama orang yang membina kamus ini? Suara siapakah yang terdapat dalam kamus ini?",
+    "question_3": "Dari manakah data dalam kamus ini datang? Sila huraikan jika anda sendiri yang mengumpul data tersebut. Jika anda menggunakan mana-mana sumber rujukan yang diterbitkan, sila senaraikannya.",
+    "question_4": "Siapakah yang akan menggunakan kamus ini? Adakah ia akan digunakan dalam sebarang projek pendidikan?",
+    "question_5": "Jika anda mahu orang ramai menghubungi anda tentang projek ini, sila berikan maklumat perhubungan anda atau pautan ke tempat orang ramai boleh mengetahui lebih lanjut. Ini adalah pilihan.",
     "message": "Sebelum menjadikan kamus anda awam, sila lengkapkan bahagian Perihal."
   },
   "contributors": {
@@ -62,14 +62,14 @@
     "write_in_contributor": "Tulis di Contributor",
     "invitation_sent": "Undangan dihantar",
     "manager_contributor_distinction": "Nota: Para pengurus kamus boleh menambah, mengedit atau memadam kandungan. Para penyumbang merupakan rakan usaha sama projek yang juga boleh menambah dan mengedit, tetapi tidak boleh memadam sebarang kandungan.",
-    "other_contributors": "Penyumbang lain",
+    "other_contributors": "Penyumbang Lain",
     "how_to_cite_instructions": "Tambahkan pengarang kamus ini untuk menunjukkan nama mereka dalam petikan"
   },
   "account": {
     "account_settings": "Tetapan Akaun",
     "log_out": "Log Keluar",
     "send_code": "Hantar Kod",
-    "enter_6_digit_code_sent_to": "Masukkan kod 6 digit yang dihantar ke"
+    "enter_6_digit_code_sent_to": "Masukkan kod 6 digit yang dihantar kepada"
   },
   "audio": {
     "tapToStopRecording": "Seterusnya anda akan ketik untuk berhenti merakam",
@@ -95,11 +95,11 @@
     "send_message": "Hantar Mesej",
     "message_sent": "Mesej dihantar. Kami akan membalas mesej anda dengan secepat mungkin.",
     "what_is_your_question": "Apakah soalan atau komen anda?",
-    "message_failed": "Hantar mesej gagal. Semak sambungan internet anda atau e-mel kami:",
-    "delete_dictionary": "Padamkan kamus",
-    "public_dictionary": "Jadikan kamus umum",
+    "message_failed": "Penghantaran mesej gagal. Periksa sambungan internet anda atau emel kami:",
+    "delete_dictionary": "Padam kamus",
+    "public_dictionary": "Jadikan kamus awam",
     "import_data": "Import data",
-    "request_access": "Minta akses pengeditan",
+    "request_access": "Minta akses penyuntingan",
     "report_problem": "Laporkan masalah",
     "other": "Topik lain",
     "select_topic": "Pilih topik",
@@ -123,26 +123,26 @@
     "visible_to_public": "Dapat Dilihat oleh Umum",
     "req_com_consent": "Memerlukan Persetujuan Masyarakat",
     "create_dictionary": "Cipta Kamus",
-    "permanent_url_msg": "Nama URL adalah kekal dan tidak boleh ditukar kemudian.",
-    "add_gloss_msg": "Anda boleh menambah lebih banyak bahasa berkilat kemudian dalam di bawah Tetapan.",
-    "language_used_by_community": "Adakah kamus ini untuk bahasa yang dituturkan atau ditandatangani oleh komuniti manusia tertentu?",
+    "permanent_url_msg": "Nama URL adalah kekal dan tidak boleh diubah kemudian.",
+    "add_gloss_msg": "Anda boleh menambah lebih banyak bahasa pengilapan kemudian di bawah Tetapan.",
+    "language_used_by_community": "Adakah kamus ini untuk bahasa yang dituturkan atau ditandatangan oleh komuniti manusia tertentu?",
     "community_permission": "Adakah komuniti bahasa telah memberi anda kebenaran untuk membuat kamus ini?",
-    "author_connection": "Sila terangkan secara ringkas cara anda mengetahui bahasa ini dan sebab anda mencipta Kamus Hidup untuknya. Adakah anda sebahagian daripada komuniti yang akan menggunakan Kamus Hidup ini? Jika tidak, bagaimana anda mengenali masyarakat?",
-    "con_lang_description": "Adakah kamus ini untuk bahasa yang dibina (bahasa yang dicipta oleh manusia dalam beberapa tahun kebelakangan ini, untuk buku atau filem)? Jika ya, sila terangkan secara ringkas.",
-    "uncertainty": "saya tak tahu",
+    "author_connection": "Sila huraikan secara ringkas bagaimana anda mengetahui bahasa ini dan mengapa anda mencipta Kamus Hidup untuknya. Adakah anda sebahagian daripada komuniti yang akan menggunakan Kamus Hidup ini? Jika tidak, bagaimana anda mengenali komuniti ini?",
+    "con_lang_description": "Adakah kamus ini untuk bahasa binaan (bahasa yang dicipta oleh manusia sejak kebelakangan ini, untuk buku atau filem)? Jika ya, sila huraikan secara ringkas.",
+    "uncertainty": "Saya tidak tahu",
     "select_region": "Pilih Wilayah",
-    "secondary_coordinates": "Koordinat Menengah",
+    "secondary_coordinates": "Koordinat Sekunder",
     "map_instructions": "Klik pada peta untuk menambah koordinat sekunder.",
     "print_access": "Benarkan Penonton Mencetak Kamus",
     "primary_coordinate": "Koordinat utama",
     "conlang_question": "Adakah ini bahasa binaan atau bahasa buatan?",
-    "conlang_info_1": "Memandangkan misi kami tertumpu pada mendokumentasikan bahasa semula jadi manusia yang terancam dan minoriti, kami tidak menawarkan sokongan teknikal untuk bahasa binaan (konlang) atau bahasa buatan. Disebabkan pasukan kami yang kecil dan waktu operasi yang terhad, kami tidak menawarkan import data untuk conlang.",
-    "conlang_info_2": "Kamus Hidup untuk bahasa yang dibina tidak akan didedahkan kepada umum di tapak web kami atau tersedia pada peta halaman utama kami. Jika kami melihat kandungan yang menghina dalam Kamus Hidup ini, kami juga berhak untuk memadamkannya.",
-    "agree_above": "Saya bersetuju dengan perkara di atas.",
-    "agree_to_cite": "Saya bersetuju untuk memetik mana-mana karya yang diterbitkan berkaitan dalam entri kamus.",
-    "agree_for_non-commercial": "Saya bersetuju bahawa kerja ini bukan komersial.",
-    "source_question": "Dari mana datangnya data dalam kamus ini? Sila terangkan jika anda mengumpul data sendiri. Jika anda menggunakan mana-mana sumber rujukan yang diterbitkan, sila senaraikan di sini.",
-    "use_question": "Siapa yang akan menggunakan kamus ini? Adakah ia akan digunakan dalam mana-mana projek pendidikan atau media?",
+    "conlang_info_1": "Memandangkan misi kami tertumpu pada pendokumentasian bahasa manusia semula jadi yang terancam dan minoriti, kami tidak menawarkan sokongan teknikal untuk bahasa binaan (conlang) atau bahasa buatan. Disebabkan pasukan kami yang kecil dan waktu operasi yang terhad, kami tidak menawarkan import data untuk conlang.",
+    "conlang_info_2": "Kamus Hidup untuk bahasa binaan tidak akan dipaparkan kepada umum di laman web kami atau tersedia di peta laman utama kami. Jika kami melihat kandungan yang menghina dalam Kamus Hidup ini, kami juga berhak untuk memadamkannya.",
+    "agree_above": "Saya setuju dengan perkara di atas.",
+    "agree_to_cite": "Saya bersetuju untuk memetik mana-mana karya terbitan yang berkaitan dalam entri kamus.",
+    "agree_for_non-commercial": "Saya setuju bahawa karya ini bukan untuk tujuan komersial.",
+    "source_question": "Dari manakah data dalam kamus ini berasal? Sila huraikan jika anda sendiri yang mengumpul data tersebut. Jika anda menggunakan mana-mana sumber rujukan yang diterbitkan, sila senaraikannya di sini.",
+    "use_question": "Siapakah yang akan menggunakan kamus ini? Adakah ia akan digunakan dalam sebarang projek pendidikan atau media?",
     "conlang_warning": "Jika kamus ini adalah untuk bahasa yang dibina (atau buatan), dan anda tidak menyatakannya, kami berhak untuk mengalih keluarnya."
   },
   "dictionary": {
@@ -180,14 +180,14 @@
     "copy_and_share": "Salin dan kongsi",
     "print": "Cetak",
     "id": "ID",
-    "switch_opposite": "Beralih ke bertentangan",
-    "delete_audio": "Padamkan audio?",
-    "delete_image": "Padamkan imej?",
-    "delete_video": "Padamkan video?",
+    "switch_opposite": "Tukar ke sebaliknya",
+    "delete_audio": "Padam audio?",
+    "delete_image": "Padam imej?",
+    "delete_video": "Padam video?",
     "source": "{media} Atribusi / Sumber {media}",
-    "source_message": "Jika {media} datang daripada web, sila sertakan pautan dan lesen {media}, jika berkenaan",
-    "rights": "Saya mempunyai hak untuk memuat naik fail {media}.",
-    "AI_generated": "{media} telah dihasilkan oleh AI",
+    "source_message": "Jika {media} datang dari web, sila sertakan pautan dan lesen {media}, jika berkenaan",
+    "rights": "Saya mempunyai hak untuk memuat naik fail {media}",
+    "AI_generated": "{media} telah dijana oleh AI",
     "this_image": "imej ini",
     "this_audio": "audio ini",
     "this_video": "video ini"
@@ -244,7 +244,7 @@
     "my_dictionaries": "Kamus Saya",
     "public_dictionaries": "Kamus Umum",
     "read_more": "Baca Lebih Lanjut",
-    "main_banner": "Melayan 200+ komuniti bahasa di seluruh dunia dengan lebih 1/4 juta penyertaan yang diterbitkan, serta ratusan lagi kamus sedang dijalankan."
+    "main_banner": "Memberi perkhidmatan kepada lebih 200 komuniti bahasa di seluruh dunia dengan lebih 1/4 juta entri yang diterbitkan, serta ratusan lagi kamus yang sedang dibangunkan."
   },
   "misc": {
     "settings": "Tetapan",
@@ -269,14 +269,14 @@
     "reset": "Tetapkan semula",
     "invalid_url": "Ini bukan URL yang sah",
     "downloading": "Memuat turun",
-    "upload": "Muat naik",
+    "upload": "Muat Naik",
     "assertion": "ya",
     "negation": "tidak",
     "clean": "Bersih",
     "map": "Peta",
-    "guidance": "Bimbingan",
-    "out_of_service": "Terima kasih kerana melawat laman web kami! Halaman ini sedang dalam pembinaan buat sementara waktu.\nIa tidak akan tersedia antara 3 Februari dan 28 Februari 2025.\nSila lawati halaman ini sekali lagi pada 1 Mac 2025.\nAnda akan dapat mencipta Kamus Hidup baharu pada masa itu.\nMaaf atas kesulitan ini, dan terima kasih atas kesabaran anda.\nSementara itu, seluruh platform berfungsi seperti biasa.",
-    "transmitter": "Yang benar, pasukan Kamus Hidup",
+    "guidance": "Panduan",
+    "out_of_service": "Terima kasih kerana melayari laman web kami! Halaman ini sedang dalam pembinaan buat sementara waktu.\nIa tidak akan tersedia antara 3 Februari dan 28 Februari 2025.\nSila lawati halaman ini sekali lagi pada 1 Mac 2025.\nAnda akan dapat mencipta Kamus Hidup baharu pada masa itu.\nMaaf atas kesulitan ini, dan terima kasih atas kesabaran anda.\nSementara itu, platform lain berfungsi seperti biasa.",
+    "transmitter": "Yang ikhlas, pasukan Kamus Hidup",
     "disjunctive": "atau",
     "required": "diperlukan",
     "optional": "pilihan"
@@ -287,7 +287,7 @@
     "dict_name": "Nama Kamus",
     "public_private_meaning": "Umum bermakna sesiapa sahaja boleh melihat kamus anda. Pilihan ini memerlukan persetujuan masyarakat. Kamus peribadi hanya dapat dilihat oleh anda dan rakan usaha sama anda.",
     "optional_data_fields": "Bidang Data Tidak Wajib",
-    "unable_to_delete": "Nota: anda tidak akan dapat memadamkan bahasa berkilat ini kemudian.",
+    "unable_to_delete": "Nota: anda tidak akan dapat memadam bahasa pengilapan ini kemudian.",
     "print_access_meaning": "Ini memberi orang ramai keupayaan untuk memuat turun dan mencetak Kamus Hidup ini sebagai .PDF",
     "featured_image": "Imej Pilihan"
   },
@@ -314,7 +314,7 @@
     "success": "Berjaya",
     "uploading": "Memuat naik",
     "select_video_file": "Pilih Fail Video",
-    "format_error": "Format audio tidak disokong"
+    "format_error": "Format audio yang tidak disokong"
   },
   "invite": {
     "invitation_claimed": "Undangan diisytiharkan",
@@ -325,19 +325,19 @@
   },
   "export": {
     "csv_data": "Data sebagai .CSV",
-    "checking_images": "Menyemak sama ada fail imej wujud",
+    "checking_images": "Memeriksa sama ada fail imej wujud",
     "no_images": "Tiada fail imej",
-    "checking_audios": "Menyemak sama ada fail audio wujud",
+    "checking_audios": "Memeriksa sama ada fail audio wujud",
     "no_audios": "Tiada fail audio",
     "download_csv": "Muat turun CSV",
-    "availability": "Eksport hanya tersedia kepada pengurus kamus",
+    "availability": "Eksport hanya tersedia untuk pengurus kamus",
     "download_pdf": "Muat turun PDF",
     "spreadsheet": "Hamparan"
   },
   "video": {
-    "video_url": "URL video",
+    "video_url": "URL Video",
     "video_credit": "Kredit video",
-    "prepare_to_record_video": "Bersedia untuk Rakam dengan Mikrofon & Kamera",
+    "prepare_to_record_video": "Bersedia untuk Merakam dengan Mikrofon & Kamera",
     "video_info": "Terdapat dua cara untuk memaparkan video anda dalam kamus yang hidup: 1) Anda boleh merakam video anda di sini, atau memuat naik video anda yang dirakam sebelumnya ke platform kami. Kelebihan: Mudah dan hebat untuk rakaman cepat. Kelemahan: Anda hanya boleh memuat naik video sehingga 100MB supaya ia hanya perlu resolusi pendek dan rendah. 2) Mempunyai video anda pada perkhidmatan hosting yang mengkhususkan diri dalam penyimpanan video dan menghubungkan URL ke laman web kami. Kelebihan: Mudah (selagi video anda sudah dimuat naik di platform itu), video anda boleh mempunyai resolusi dan panjang yang anda inginkan. Kelemahan: Jika anda ingin merakam sesuatu yang tidak dijangka atau sangat mudah, mungkin terlalu banyak usaha untuk melakukannya dengan cara itu, dan anda mungkin ingin mengutamakan Kaedah 1.",
     "paste_video_url": "Tampal pautan YouTube atau Vimeo",
     "record_upload_video": "Rakam atau muat naik video",
@@ -345,46 +345,46 @@
     "edit_video": "Edit Video",
     "add_video": "Tambah Video",
     "accesing": "Mengakses Mikrofon dan Kamera",
-    "pause": "jeda",
+    "pause": "Jeda",
     "unpause": "Nyahjeda",
-    "previously_dismissed_msg": "Jika anda sebelum ini menolak permintaan penyemak imbas, sila muat semula dan klik 'Ya' apabila penyemak imbas anda meminta kebenaran.",
-    "permission_denied": "Kebenaran untuk mengakses media telah ditolak.",
+    "previously_dismissed_msg": "Jika anda sebelum ini menolak permintaan pelayar, sila muat semula dan klik 'Ya' apabila pelayar anda meminta kebenaran.",
+    "permission_denied": "Kebenaran untuk mengakses media telah dinafikan.",
     "videographer": "Juruvideo"
   },
   "print": {
     "qr_code": "Tunjukkan Kod QR",
     "labels": "Tunjukkan Label",
-    "availability": "Paparan cetakan hanya tersedia kepada pengurus kamus dan penyumbang",
-    "max_entries": "Kemasukan maksimum",
+    "availability": "Paparan cetakan hanya tersedia untuk pengurus kamus dan penyumbang",
+    "max_entries": "Entri maksimum",
     "columns": "Lajur",
-    "headword_size": "Saiz kata kepala",
+    "headword_size": "Saiz kata kunci",
     "font_size": "Saiz fon",
     "tags": "Tag"
   },
   "import_page": {
     "import": "Import",
     "template_link": "Pautan ke Templat",
-    "instructions_1": "Jika anda sudah mempunyai data linguistik yang ingin anda import ke dalam Kamus anda, sila ikuti langkah di bawah.",
-    "instructions_2": "Klik pada butang biru \"Pautan ke Templat\" di bawah. Muat turun templat sebagai fail Excel atau buat salinan pada Dokumen Google. Edit templat mengikut keperluan projek anda. Salin dan tampal data anda ke dalam hamparan.",
-    "instructions_3": "Gunakan \"Hubungi Kami\" di bawah untuk menghubungi kami. Beritahu kami bahawa anda mempunyai hamparan baharu yang sedia untuk diimport. Tanya kami apa-apa soalan yang anda ada. Kami akan membalas anda melalui e-mel, dan kemudian anda boleh menghantar fail anda kepada kami.",
-    "instructions_4": "Untuk menghantar data yang dieksport daripada perisian kamus seperti FLEx, Lexique Pro, Shoebox kepada kami, sila gunakan butang \"Hubungi Kami\" di bawah dan beritahu kami butiran projek anda.",
-    "no_imports": "Kami sedang bekerjasama dengan banyak komuniti dan organisasi rakan kongsi untuk mengimport sejumlah besar entri kamus ke platform ini. Kami juga membuat kemas kini besar pada pangkalan data kami. Kami akan menerima import data baharu mulai 1 Julai 2024. Kami menghargai kesabaran anda dan kami memohon maaf atas kesulitan tersebut."
+    "instructions_1": "Jika anda sudah mempunyai data linguistik yang ingin anda import ke dalam Kamus anda, sila ikuti langkah-langkah di bawah.",
+    "instructions_2": "Klik pada butang biru “Pautan ke Templat” di bawah. Muat turun templat sebagai fail Excel atau buat salinan di Google Docs. Edit templat mengikut keperluan projek anda. Salin dan tampal data anda ke dalam hamparan.",
+    "instructions_3": "Gunakan \"Hubungi Kami\" di bawah untuk menghubungi kami. Beritahu kami bahawa anda mempunyai hamparan baharu yang sedia untuk diimport. Ajukan sebarang soalan kepada kami. Kami akan membalas anda melalui e-mel, dan kemudian anda boleh menghantar fail anda kepada kami.",
+    "instructions_4": "Untuk menghantar data yang dieksport daripada perisian kamus seperti FLEx, Lexique Pro, Shoebox, sila gunakan butang “Hubungi Kami” di bawah dan beritahu kami butiran projek anda.",
+    "no_imports": "Kami sedang bekerjasama dengan banyak komuniti dan organisasi rakan kongsi untuk mengimport sejumlah besar entri kamus ke platform ini. Kami juga sedang membuat kemas kini besar pada pangkalan data kami. Kami akan menerima import data baharu bermula 1 Julai 2024. Kami menghargai kesabaran anda dan memohon maaf atas kesulitan yang dihadapi."
   },
   "history": {
     "history": "Sejarah",
     "entry": "Kemasukan",
     "editor": "Editor",
-    "entry_history": "sejarah kemasukan",
+    "entry_history": "Sejarah kemasukan",
     "field": "Padang",
-    "date": "tarikh",
-    "old_value": "Nilai Dahulu",
-    "new_value": "Nilai Baru",
-    "entry_message": "Seorang pengguna mengedit entri ini pada ",
-    "edited": "Terakhir diedit pada",
+    "date": "Tarikh",
+    "old_value": "Nilai Terdahulu",
+    "new_value": "Nilai Baharu",
+    "entry_message": "Seorang pengguna telah mengedit entri ini pada",
+    "edited": "Disunting terakhir pada",
     "history_search": "Cari entri, editor, medan dan nilai",
-    "download_history": "Muat turun Sejarah sebagai CSV",
+    "download_history": "Muat Turun Sejarah sebagai CSV",
     "empty": "Tiada sejarah lagi",
-    "type": "taip",
+    "type": "jenis",
     "change": "sejarah_perubahan"
   },
   "partnership": {
@@ -398,18 +398,22 @@
   },
   "sense": {
     "sense": "Rasa",
-    "add": "Tambah Sense"
+    "add": "Tambah Rasa"
   },
   "banner": {
-    "message": "Kami sedang membuat penambahbaikan pada pangkalan data kami pada 22 Oktober bermula jam 7 malam Waktu Timur (New York), selama 24 jam. Keupayaan mengedit tidak akan tersedia dalam tempoh tersebut. Maaf atas kesulitan.",
+    "message": "Kami sedang membuat penambahbaikan pada pangkalan data kami pada 22 Oktober bermula jam 7PM Waktu Timur (New York), selama 24 jam. Keupayaan penyuntingan tidak akan tersedia dalam tempoh tersebut. Maaf atas kesulitan ini.",
     "attention": "Perhatian"
   },
   "footer": {
     "public_LD": "Kamus Kehidupan Awam",
     "entries": "Entri Kamus",
-    "LD_project": "Kamus Hidup adalah projek"
+    "LD_project": "Kamus Hidup merupakan satu projek"
   },
   "image": {
     "photographer": "Jurugambar"
+  },
+  "sentence": {
+    "add": "Tambah ayat",
+    "delete": "Padam ayat"
   }
 }
