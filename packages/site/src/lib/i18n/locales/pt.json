@@ -31,19 +31,19 @@
     "interns": "Estagiários",
     "video_upload": "Upload de vídeo",
     "export_data": "Exportar dados (formatos CSV, PDF)",
-    "import_export": "Importação/Exportação (FLEx, Formato Padrão)",
-    "geo_tagging": "Entradas de geocodificação",
-    "flashcard_view": "Visualização de Flashcards para Estudantes de Línguas",
-    "peer_review": "Revisão por pares de ortografia",
-    "suggestions_from_users": "Sugestões de usuários",
+    "import_export": "Importar/Exportar (FLEx, Formato Padrão)",
+    "geo_tagging": "Entradas com georreferenciamento",
+    "flashcard_view": "Visualização em Flashcards para Aprendizes de Idiomas",
+    "peer_review": "Revisão por pares da ortografia",
+    "suggestions_from_users": "Sugestões dos usuários",
     "push_notifications": "Notificações push para colaboradores",
     "contributor_awards": "Prêmios da Comunidade de Colaboradores",
-    "question_1": "Forneça algumas informações básicas sobre este idioma. Onde ele é falado? Quais comunidades falam este idioma? Este idioma está ameaçado de extinção?",
-    "question_2": "Quais são os nomes das pessoas que criaram este dicionário? De quem são as vozes que estão neste dicionário?",
-    "question_3": "De onde vieram os dados deste dicionário? Descreva se você mesmo coletou os dados. Se você utilizou alguma fonte de referência publicada, liste-a.",
+    "question_1": "Por favor, forneça algumas informações básicas sobre esse idioma. Onde ele é falado? Quais comunidades falam esse idioma? Esse idioma está em perigo de extinção?",
+    "question_2": "Quais são os nomes das pessoas que construíram este dicionário? De quem são as vozes presentes neste dicionário?",
+    "question_3": "De onde vieram os dados deste dicionário? Descreva se você coletou os dados pessoalmente. Se utilizou alguma fonte de referência publicada, liste-a.",
     "question_4": "Quem usará este dicionário? Ele será usado em algum projeto educacional?",
-    "question_5": "Se você deseja que o público entre em contato com você sobre este projeto, forneça suas informações de contato ou um link para que as pessoas possam saber mais. Isso é opcional.",
-    "message": "Antes de tornar seu dicionário público, preencha a seção Sobre."
+    "question_5": "Se você deseja que o público entre em contato com você sobre este projeto, forneça suas informações de contato ou um link para que as pessoas possam obter mais informações. Isso é opcional.",
+    "message": "Antes de tornar seu dicionário público, complete a seção Sobre."
   },
   "contributors": {
     "invite_contributors": "Convidar Contribuintes",
@@ -62,8 +62,8 @@
     "write_in_contributor": "Escrever em Contribuinte ",
     "invitation_sent": "Convite enviado",
     "manager_contributor_distinction": "Nota: gestores dicionário pode adicionar, editar ou conteúdo de exclusão. Contribuintes são colaboradores do projeto que também pode adicionar e editar, mas não pode excluir qualquer conteúdo.",
-    "other_contributors": "Outros colaboradores",
-    "how_to_cite_instructions": "Adicione os autores deste dicionário para mostrar seus nomes na citação"
+    "other_contributors": "Outros Colaboradores",
+    "how_to_cite_instructions": "Adicione os autores deste dicionário para que seus nomes apareçam na citação."
   },
   "account": {
     "account_settings": "Definições da conta",
@@ -95,16 +95,16 @@
     "send_message": "Enviar Mensagem",
     "message_sent": "Mensagem enviada. Nós responderemos o mais rápido possível.",
     "what_is_your_question": "Qual é a sua pergunta ou comentário?",
-    "message_failed": "Falha no envio da mensagem. Verifique sua conexão com a internet ou envie um e-mail para:",
-    "delete_dictionary": "Excluir um dicionário",
+    "message_failed": "Falha ao enviar a mensagem. Verifique sua conexão com a internet ou envie-nos um e-mail:",
+    "delete_dictionary": "Apagar dicionário",
     "public_dictionary": "Tornar um dicionário público",
     "import_data": "Importar dados",
-    "request_access": "Solicitar acesso de edição",
+    "request_access": "Solicitar acesso para edição",
     "report_problem": "Reportar um problema",
     "other": "Outro tópico",
     "select_topic": "Selecione um tópico",
     "data_fields": "Campos de dados opcionais",
-    "learning": "Crie materiais de aprendizagem de idiomas a partir do meu dicionário"
+    "learning": "Criar materiais de aprendizagem de idiomas a partir do meu dicionário"
   },
   "create": {
     "select_coordinates": "Seleccione coordenadas",
@@ -125,25 +125,25 @@
     "create_dictionary": "Criar Dicionário",
     "permanent_url_msg": "O nome do URL é permanente e não pode ser alterado mais tarde.",
     "add_gloss_msg": "Você pode adicionar mais linguagens de brilho posteriormente em ambientes.",
-    "language_used_by_community": "Este dicionário é para uma língua falada ou sinalizada por uma comunidade humana específica?",
+    "language_used_by_community": "Este dicionário se refere a uma língua falada ou gestual utilizada por uma comunidade humana específica?",
     "community_permission": "A comunidade linguística lhe deu permissão para criar este dicionário?",
-    "author_connection": "Descreva resumidamente como você conhece este idioma e por que está criando um Dicionário Vivo para ele. Você faz parte da comunidade que utilizará este Dicionário Vivo? Se não, como você conhece a comunidade?",
-    "con_lang_description": "Este dicionário é para uma língua artificial (uma língua inventada por humanos nos últimos anos, para um livro ou filme)? Em caso afirmativo, descreva-o brevemente.",
+    "author_connection": "Descreva brevemente como você conhece esse idioma e por que está criando um Dicionário Vivo para ele. Você faz parte da comunidade que usará este Dicionário Vivo? Caso contrário, como você conhece essa comunidade?",
+    "con_lang_description": "Este dicionário é para uma língua construída (uma língua inventada por humanos nos últimos anos, para um livro ou um filme)? Se sim, por favor, descreva brevemente.",
     "uncertainty": "Não sei",
     "select_region": "Selecione a região",
-    "secondary_coordinates": "Coordenadas Secundárias",
+    "secondary_coordinates": "Coordenadas secundárias",
     "map_instructions": "Clique no mapa para adicionar coordenadas secundárias.",
-    "print_access": "Permitir que os visualizadores imprimam o dicionário",
+    "print_access": "Permitir que os usuários imprimam o dicionário.",
     "primary_coordinate": "Coordenada primária",
-    "conlang_question": "Esta é uma linguagem construída ou artificial?",
-    "conlang_info_1": "Como nossa missão se concentra na documentação de línguas humanas naturais ameaçadas de extinção e minoritárias, não oferecemos suporte técnico para línguas artificiais (conlangs) ou línguas artificiais. Devido à nossa equipe pequena e ao horário limitado de funcionamento, não oferecemos importação de dados para conlangs.",
-    "conlang_info_2": "Os Dicionários Vivos para línguas artificiais não serão disponibilizados publicamente em nosso site nem no mapa da nossa página inicial. Caso encontremos conteúdo depreciativo neste Dicionário Vivo, também nos reservamos o direito de excluí-lo.",
-    "agree_above": "Concordo com o exposto acima.",
+    "conlang_question": "Trata-se de uma língua construída ou de uma língua artificial?",
+    "conlang_info_1": "Como nossa missão se concentra em documentar línguas humanas naturais ameaçadas de extinção e minoritárias, não oferecemos suporte técnico para línguas construídas (conlangs) ou línguas artificiais. Devido à nossa equipe pequena e horário de funcionamento limitado, não oferecemos importação de dados para conlangs.",
+    "conlang_info_2": "Dicionários vivos para línguas construídas não serão publicados em nosso site nem estarão disponíveis no mapa da página inicial. Caso identifiquemos conteúdo depreciativo neste dicionário vivo, reservamo-nos o direito de excluí-lo.",
+    "agree_above": "Concordo com o que foi dito acima.",
     "agree_to_cite": "Concordo em citar quaisquer trabalhos publicados relevantes nas entradas do dicionário.",
-    "agree_for_non-commercial": "Concordo que este trabalho não é comercial.",
-    "source_question": "De onde vieram os dados deste dicionário? Descreva se você mesmo coletou os dados. Se você utilizou alguma fonte de referência publicada, liste-a aqui.",
-    "use_question": "Quem usará este dicionário? Ele será usado em algum projeto educacional ou de mídia?",
-    "conlang_warning": "Se este dicionário for para uma linguagem construída (ou artificial) e você não indicar isso, nos reservamos o direito de removê-lo."
+    "agree_for_non-commercial": "Concordo que esta obra não tem fins comerciais.",
+    "source_question": "De onde vieram os dados deste dicionário? Descreva se você coletou os dados pessoalmente. Se utilizou alguma fonte de referência publicada, liste-a aqui.",
+    "use_question": "Quem usará este dicionário? Ele será usado em algum projeto educacional ou midiático?",
+    "conlang_warning": "Se este dicionário for para uma língua construída (ou artificial) e você não indicar isso, reservamo-nos o direito de removê-lo."
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -180,13 +180,13 @@
     "copy_and_share": "Copiar e partilhar",
     "print": "Imprimir",
     "id": "EU IA",
-    "switch_opposite": "Mudar para o oposto",
-    "delete_audio": "Excluir áudio?",
+    "switch_opposite": "Mude para o oposto.",
+    "delete_audio": "Apagar áudio?",
     "delete_image": "Excluir imagem?",
-    "delete_video": "Excluir vídeo?",
-    "source": "{media} Atribuição / Fonte de {media}",
-    "source_message": "Se {media} vier da web, inclua o link e a licença {media}, se aplicável",
-    "rights": "Tenho direitos para fazer upload do arquivo {media}",
+    "delete_video": "Apagar vídeo?",
+    "source": "Atribuição/Fonte de {media}",
+    "source_message": "Se o conteúdo {media} for proveniente da internet, inclua o link e a licença do {media}, se aplicável.",
+    "rights": "Tenho permissão para enviar o arquivo {media}",
     "AI_generated": "{media} foi gerado por IA",
     "this_image": "esta imagem",
     "this_audio": "este áudio",
@@ -244,7 +244,7 @@
     "my_dictionaries": "Meu Dicionário",
     "public_dictionaries": "Dicionário Público",
     "read_more": "Ler Mais ",
-    "main_banner": "Atendendo mais de 200 comunidades linguísticas ao redor do mundo, com mais de 1/4 milhão de entradas publicadas, além de centenas de outros dicionários em andamento."
+    "main_banner": "Atendemos mais de 200 comunidades linguísticas em todo o mundo, com mais de 250 mil verbetes publicados, além de centenas de outros dicionários em desenvolvimento."
   },
   "misc": {
     "settings": "Definições ",
@@ -267,7 +267,7 @@
     "export": "Exportar",
     "images": "Imagens",
     "reset": "Reiniciar",
-    "invalid_url": "Este não é um URL válido",
+    "invalid_url": "Esta não é uma URL válida.",
     "downloading": "Baixando",
     "upload": "Carregar",
     "assertion": "sim",
@@ -275,7 +275,7 @@
     "clean": "Limpar",
     "map": "Mapa",
     "guidance": "Orientação",
-    "out_of_service": "Obrigado por visitar nosso site! Esta página está temporariamente em construção.\nEla não estará disponível entre 3 e 28 de fevereiro de 2025.\nVisite esta página novamente em 1º de março de 2025.\nVocê poderá criar novos Dicionários Vivos nesse período.\nDesculpe o inconveniente e agradecemos sua paciência.\nEnquanto isso, o restante da plataforma está funcionando normalmente.",
+    "out_of_service": "Obrigado por visitar nosso site! Esta página está temporariamente em construção.\nEla ficará indisponível entre 3 e 28 de fevereiro de 2025.\nPor favor, visite esta página novamente em 1º de março de 2025.\nVocê poderá criar novos Dicionários Vivos a partir dessa data.\nPedimos desculpas pelo inconveniente e agradecemos sua paciência.\nEnquanto isso, o restante da plataforma está funcionando normalmente.",
     "transmitter": "Atenciosamente, a equipe do Living Dictionaries",
     "disjunctive": "ou",
     "required": "obrigatório",
@@ -288,7 +288,7 @@
     "public_private_meaning": "Público significa que qualquer um pode ver o seu Dicionário o qual requer consentimento da comunidade. Os Dicionários Privados são visíveis apenas para si e para os seus colaboradores.",
     "optional_data_fields": "Campo de dados opcionais",
     "unable_to_delete": "NOTA: Você não poderá excluir esses idiomas de brilho posteriormente.",
-    "print_access_meaning": "Isso dá ao público a capacidade de baixar e imprimir este Dicionário Vivo como um .PDF",
+    "print_access_meaning": "Isso permite que o público baixe e imprima este Dicionário Vivo em formato PDF.",
     "featured_image": "Imagem em destaque"
   },
   "speakers": {
@@ -324,11 +324,11 @@
     "role": "Função "
   },
   "export": {
-    "csv_data": "Dados como .CSV",
-    "checking_images": "Verificando se os arquivos de imagem existem",
-    "no_images": "Não há arquivos de imagem",
+    "csv_data": "Dados em formato .CSV",
+    "checking_images": "Verificando se os arquivos de imagem existem.",
+    "no_images": "Não existem arquivos de imagem.",
     "checking_audios": "Verificando se existem arquivos de áudio",
-    "no_audios": "Não há arquivos de áudio",
+    "no_audios": "Não existem arquivos de áudio.",
     "download_csv": "Baixar CSV",
     "availability": "A exportação está disponível apenas para gerentes de dicionário",
     "download_pdf": "Baixar PDF",
@@ -337,8 +337,8 @@
   "video": {
     "video_url": "URL do vídeo",
     "video_credit": "Crédito do vídeo",
-    "prepare_to_record_video": "Prepare-se para gravar com microfone e câmera",
-    "video_info": "Existem duas maneiras de exibir seus vídeos em um Dicionário Vivo: 1) Você pode gravar seus vídeos aqui mesmo ou enviar seus vídeos gravados anteriormente para nossa plataforma. Vantagens: fácil e ótimo para gravações rápidas. Desvantagens: Você só pode enviar um vídeo de até 100 MB, então ele deve ser curto e de baixa resolução. 2) Tenha seus vídeos em um serviço de hospedagem especializado em armazenamento de vídeos e vincule a URL ao nosso site. Vantagens: fácil (desde que seus vídeos já estejam enviados naquela plataforma), seus vídeos podem ter a resolução e a duração que você quiser. Desvantagens: se você quiser gravar algo inesperado ou muito simples, pode ser muito trabalhoso fazer dessa forma, e você pode querer priorizar o método 1.",
+    "prepare_to_record_video": "Prepare-se para gravar com microfone e câmera.",
+    "video_info": "Existem duas maneiras de exibir seus vídeos no Dicionário Vivo: 1) Você pode gravar seus vídeos aqui mesmo ou enviar vídeos gravados anteriormente para nossa plataforma. Vantagens: fácil e ótimo para gravações rápidas. Desvantagens: você só pode enviar vídeos de até 100 MB, portanto, eles devem ser curtos e de baixa resolução. 2) Hospede seus vídeos em um serviço de hospedagem especializado em armazenamento de vídeos e vincule o URL ao nosso site. Vantagens: fácil (desde que seus vídeos já estejam hospedados nessa plataforma), seus vídeos podem ter a resolução e a duração desejadas. Desvantagens: se você quiser gravar algo inesperado ou muito simples, pode ser muito trabalhoso fazer dessa forma, e talvez seja melhor priorizar o método 1.",
     "paste_video_url": "Cole o link do YouTube ou Vimeo",
     "record_upload_video": "Grave ou carregue um vídeo",
     "view": "Visualizar",
@@ -347,15 +347,15 @@
     "accesing": "Acessando o microfone e a câmera",
     "pause": "Pausa",
     "unpause": "Despausar",
-    "previously_dismissed_msg": "Se você rejeitou a solicitação do navegador anteriormente, recarregue e clique em \"Sim\" quando o navegador solicitar permissão.",
-    "permission_denied": "A permissão para acessar a mídia foi negada.",
+    "previously_dismissed_msg": "Se você rejeitou a solicitação do navegador anteriormente, recarregue a página e clique em \"Sim\" quando o navegador solicitar permissão.",
+    "permission_denied": "O acesso à mídia foi negado.",
     "videographer": "Videógrafo"
   },
   "print": {
-    "qr_code": "Mostrar código QR",
+    "qr_code": "Exibir código QR",
     "labels": "Mostrar rótulos",
     "availability": "A exibição de impressão está disponível apenas para gerentes e colaboradores de dicionários",
-    "max_entries": "Entradas máximas",
+    "max_entries": "Número máximo de entradas",
     "columns": "Colunas",
     "headword_size": "Tamanho do cabeçalho",
     "font_size": "Tamanho da fonte",
@@ -364,32 +364,32 @@
   "import_page": {
     "import": "Importar",
     "template_link": "Link para modelo",
-    "instructions_1": "Se você já possui dados linguísticos que deseja importar para o seu Dicionário, siga as etapas abaixo.",
-    "instructions_2": "Clique no botão azul \"Link para o modelo\" abaixo. Baixe o modelo como um arquivo Excel ou crie uma cópia no Google Docs. Edite o modelo de acordo com as necessidades do seu projeto. Copie e cole seus dados na planilha.",
-    "instructions_3": "Use o botão \"Fale Conosco\" abaixo para entrar em contato conosco. Informe-nos que você tem uma nova planilha pronta para importação. Tire suas dúvidas conosco. Responderemos por e-mail e, em seguida, você poderá nos enviar seu arquivo.",
-    "instructions_4": "Para nos enviar dados exportados de softwares de dicionário como FLEx, Lexique Pro, Shoebox, use o botão “Fale conosco” abaixo e conte-nos os detalhes do seu projeto.",
+    "instructions_1": "Se você já possui dados linguísticos que deseja importar para o seu dicionário, siga os passos abaixo.",
+    "instructions_2": "Clique no botão azul “Link para o modelo” abaixo. Baixe o modelo como um arquivo do Excel ou crie uma cópia no Google Docs. Edite o modelo de acordo com as necessidades do seu projeto. Copie e cole seus dados na planilha.",
+    "instructions_3": "Use a opção “Fale Conosco” abaixo para entrar em contato conosco. Informe-nos que você tem uma nova planilha pronta para importação. Tire todas as suas dúvidas. Responderemos por e-mail e, em seguida, você poderá nos enviar o arquivo.",
+    "instructions_4": "Para nos enviar dados exportados de softwares de dicionário como FLEx, Lexique Pro, Shoebox, utilize o botão “Fale Conosco” abaixo e nos informe os detalhes do seu projeto.",
     "no_imports": "Atualmente, estamos trabalhando com diversas comunidades e organizações parceiras para importar um grande número de verbetes de dicionário para esta plataforma. Também estamos realizando grandes atualizações em nosso banco de dados. Aceitaremos novas importações de dados a partir de 1º de julho de 2024. Agradecemos sua paciência e pedimos desculpas pelo inconveniente."
   },
   "history": {
     "history": "História",
     "entry": "Entrada",
     "editor": "Editor",
-    "entry_history": "Histórico de entrada",
+    "entry_history": "Histórico de entradas",
     "field": "Campo",
     "date": "Data",
     "old_value": "Valor anterior",
-    "new_value": "Novo Valor",
+    "new_value": "Novo valor",
     "entry_message": "Um usuário editou esta entrada em",
     "edited": "Última edição em",
     "history_search": "Pesquisar entradas, editores, campos e valores",
     "download_history": "Baixar histórico como CSV",
-    "empty": "Nenhum histórico ainda",
+    "empty": "Ainda não há histórico.",
     "type": "tipo",
     "change": "mudança_histórica"
   },
   "partnership": {
     "title": "Organizações Parceiras",
-    "button": "Escreva na Organização Parceira",
+    "button": "Escreva na organização parceira",
     "name": "Nome da organização parceira"
   },
   "synopsis": {
@@ -398,18 +398,22 @@
   },
   "sense": {
     "sense": "Sentido",
-    "add": "Adicionar sentido"
+    "add": "Adicione bom senso"
   },
   "banner": {
-    "message": "A partir de 22 de outubro, às 19h (horário do leste dos EUA) (Nova York), faremos melhorias em nosso banco de dados por 24 horas. Os recursos de edição não estarão disponíveis durante esse período. Pedimos desculpas pelo inconveniente.",
+    "message": "Estaremos realizando melhorias em nosso banco de dados no dia 22 de outubro, a partir das 19h (horário de Nova York), durante 24 horas. Os recursos de edição estarão indisponíveis durante esse período. Pedimos desculpas pelo inconveniente.",
     "attention": "Atenção"
   },
   "footer": {
-    "public_LD": "Dicionários Públicos Vivos",
-    "entries": "Entradas do dicionário",
-    "LD_project": "Dicionários Vivos é um projeto de"
+    "public_LD": "Dicionários de Vida Pública",
+    "entries": "Entradas de dicionário",
+    "LD_project": "Living Dictionaries é um projeto de"
   },
   "image": {
     "photographer": "Fotógrafo"
+  },
+  "sentence": {
+    "add": "Adicionar frase",
+    "delete": "Apagar frase"
   }
 }

@@ -250,7 +250,7 @@
     "tft": "Ternate",
     "tet": "Tétum",
     "th": "Tailandês ",
-    "bo": "Tibetano",
+    "bo": "tibetano",
     "tvo": "Tidore",
     "tig": "Tigré",
     "ti": "Tigrínia",
@@ -295,11 +295,12 @@
     "jen": "Dza",
     "mko": "Mingang Doso",
     "hbo-hebr": "hebraico",
-    "ne-2": "Nepalês (romanização)",
-    "apd": "Árabe sudanês",
+    "ne-2": "Nepalês (Romanização)",
+    "apd": "árabe sudanês",
     "hoi": "Holikachuk",
     "mtq": "Muong",
     "cag": "Nivaclé",
-    "haw": "havaiano"
+    "haw": "havaiano",
+    "qvi": "Quíchua das Terras Altas de Imbabura"
   }
 }
