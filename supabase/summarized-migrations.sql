@@ -457,7 +457,7 @@ CREATE OR REPLACE FUNCTION update_sense_sentences_when_sentence_deleted()
 RETURNS TRIGGER AS $$
 BEGIN
   IF NEW.deleted IS NOT NULL THEN
-    UPDATE sense_sentences
+    UPDATE senses_in_sentences
     SET deleted = NEW.deleted
     WHERE sentence_id = NEW.id;
   END IF;
