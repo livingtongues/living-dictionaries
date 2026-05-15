@@ -86,7 +86,7 @@
 
   <div class="mb-6" />
 
-  <AddImage upload_image={handleImageUpload}>
+  <AddImage upload_image={handleImageUpload} require_entry_fields>
     <div class="text-xs">
       {$page.data.t('entry_field.photo')}
     </div>
