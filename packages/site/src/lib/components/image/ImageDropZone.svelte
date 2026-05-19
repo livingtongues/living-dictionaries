@@ -4,6 +4,7 @@
 
   export let border: boolean
   export let on_file_added: (file: File) => void = undefined
+  export let require_entry_fields = false
   let dragging = false
   // const applyButtonLabel: any = getContext('applyButtonLabel')
 
@@ -32,8 +33,8 @@
 <label
   class:dragging
   class:dashed-border={border}
-  class:button-label={$apply_button_label.ready_to_upload}
-  class:blocked={!$apply_button_label.ready_to_upload}
+  class:button-label={require_entry_fields && $apply_button_label.ready_to_upload}
+  class:blocked={require_entry_fields && !$apply_button_label.ready_to_upload}
   class="{$$props.class} text-gray-600
     h-full grow-1 flex flex-col items-center justify-center
     cursor-pointer"
