@@ -1,4 +1,4 @@
-import { defineConfig, presetIcons, presetWind4 } from 'unocss'
+import { defineConfig, presetIcons, presetWind3 } from 'unocss'
 
 // LD intentionally avoids system-ui / -apple-system / BlinkMacSystemFont / Helvetica Neue / ui-sans-serif.
 // Reason: Mac Chrome's system font (.SF NS) renders diacritics incorrectly — stacks them vertically on
@@ -29,9 +29,7 @@ export default defineConfig({
     },
   ],
   presets: [
-    presetWind4({
-      preflights: { reset: true },
-    }),
+    presetWind3(),
     presetIcons({
       prefix: 'i-',
       extraProperties: {
@@ -41,7 +39,7 @@ export default defineConfig({
     }),
   ],
   theme: {
-    font: {
+    fontFamily: {
       sans: ld_font_stack,
       mono: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
     },

@@ -7,18 +7,18 @@ RUN corepack enable pnpm
 # Copy workspace config and lockfile
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 
-# Copy package.json for new-site and any workspace dependencies it needs
-COPY new-site/package.json new-site/
+# Copy package.json for site and any workspace dependencies it needs
+COPY site/package.json site/
 
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
-# Copy new-site source code
-COPY new-site/ new-site/
+# Copy site source code
+COPY site/ site/
 
 # Copy .env for SvelteKit build (manually maintained on VPS)
-COPY .env new-site/.env
+COPY .env site/.env
 
-RUN pnpm --filter @living-dictionaries/new-site build
+RUN pnpm --filter @living-dictionaries/site build
 
 
 FROM node:22-alpine AS runner
@@ -27,14 +27,14 @@ WORKDIR /workspace
 
 # Recreate workspace structure for pnpm prod install
 COPY --from=builder /app/pnpm-lock.yaml /app/pnpm-workspace.yaml /app/package.json ./
-COPY --from=builder /app/new-site/package.json new-site/
+COPY --from=builder /app/site/package.json site/
 RUN corepack enable pnpm
 RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # Copy build output
-COPY --from=builder /app/new-site/build new-site/build/
+COPY --from=builder /app/site/build site/build/
 
-WORKDIR /workspace/new-site
+WORKDIR /workspace/site
 
 ENV NODE_ENV=production
 ENV PORT=3000

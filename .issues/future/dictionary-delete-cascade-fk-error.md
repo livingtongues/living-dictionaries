@@ -15,13 +15,13 @@ This happens because:
 
 ## Affected Tables
 
-From `packages/site/src/lib/pglite/migrations/20260130_initial.sql`:
+From `packages/old-site/src/lib/pglite/migrations/20260130_initial.sql`:
 - `dictionary_roles` → `REFERENCES dictionaries(id) ON DELETE CASCADE`
 - `invites` → `REFERENCES dictionaries(id) ON DELETE CASCADE`
 
 ## Sync Architecture Context
 
-From `packages/site/src/lib/pglite/sync/sync-engine.svelte.ts`:
+From `packages/old-site/src/lib/pglite/sync/sync-engine.svelte.ts`:
 - Sync tiers: `[['users', 'dictionaries'], ['user_data', 'dictionary_roles', 'invites']]`
 - Tiers are synced in order, so dictionaries sync before dictionary_roles
 - `save_to_local()` uses raw SQL INSERT...ON CONFLICT with no FK guard
@@ -42,7 +42,7 @@ Reorder sync to push/pull deletes first, then pull data. This way the dictionary
 
 ## Test Plan
 
-Add a test in `packages/site/src/lib/pglite/sync/sync-engine.test.ts` that:
+Add a test in `packages/old-site/src/lib/pglite/sync/sync-engine.test.ts` that:
 1. Creates a dictionary and dictionary_role on device 1, syncs to cloud
 2. Device 2 syncs to get both
 3. Device 2 deletes the dictionary locally
@@ -54,5 +54,5 @@ The existing test at line 542 (`dictionary delete syncs to cloud and cascades to
 
 ## Files to Modify
 
-- `packages/site/src/lib/pglite/sync/sync-engine.svelte.ts` — fix in `save_to_local()` or sync ordering
-- `packages/site/src/lib/pglite/sync/sync-engine.test.ts` — add regression test
+- `packages/old-site/src/lib/pglite/sync/sync-engine.svelte.ts` — fix in `save_to_local()` or sync ordering
+- `packages/old-site/src/lib/pglite/sync/sync-engine.test.ts` — add regression test

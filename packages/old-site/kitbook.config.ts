@@ -4,7 +4,7 @@ import { Locales } from './src/lib/i18n/locales'
 export default defineConfig({
   title: 'Living Dictionaries',
   description: 'Svelte Component Documentation and Prototyping Workbench built for Living Dictionaries using Kitbook',
-  githubURL: 'https://github.com/livingtongues/living-dictionaries/tree/main/packages/site',
+  githubURL: 'https://github.com/livingtongues/living-dictionaries/tree/main/packages/old-site',
   // expandTree: true,
   viewports: [
     { name: 'mobile', width: 375, height: 400 },

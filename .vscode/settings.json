@@ -6,7 +6,7 @@
     "titleBar.inactiveForeground": "#e7e7e799",
   },
   "i18n-ally.localesPaths": [
-    "packages/site/src/lib/i18n/locales",
+    "packages/old-site/src/lib/i18n/locales",
   ],
   "i18n-ally.keystyle": "nested",
   "i18n-ally.sourceLanguage": "en",
@@ -62,7 +62,7 @@
   ],
   "eslint.experimental.useFlatConfig": true,
 
-  "unocss.root": "packages/site",
+  "unocss.root": "site",
 
   "svelte.plugin.svelte.compilerWarnings": {
     "a11y-click-events-have-key-events": "ignore",

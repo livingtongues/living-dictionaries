@@ -13,8 +13,6 @@ When creating, modifying, or testing SvelteKit API endpoints (`+server.ts` files
 - Type-safe request/response contracts
 - Automatic auth header attachment (via `post_request`/`get_request`)
 
-For streaming SSE endpoints, see [STREAMING.md](./STREAMING.md).
-
 ## Endpoint Structure
 
 Interface names are derived by PascalCasing the route path segments after `api/`. For `routes/api/foo/bar/+server.ts` → `FooBar`, `routes/api/auth/email/verify/+server.ts` → `AuthEmailVerify`, etc:

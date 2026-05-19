@@ -1,4 +1,4 @@
-import type { Glossing_Languages } from '@living-dictionaries/site/src/lib/glosses/glossing-languages'
+import type { Glossing_Languages } from '@living-dictionaries/old-site/src/lib/glosses/glossing-languages'
 
 export type Row = Partial<Record<Entry_Fields | Prefixed_Sense_Fields | Prefixed_Sentence_Fields | Media, string>>
 // 's3.es_gloss': 'hi',

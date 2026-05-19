@@ -2,7 +2,7 @@
 
 ## Overview
 
-Replace the Mapbox-based globe view on the home page (`/packages/site/src/routes/+page.svelte`) with a Canvas-based D3 orthographic projection globe from the svelte-globe example project. Mapbox will remain for all other pages in the project.
+Replace the Mapbox-based globe view on the home page (`/packages/old-site/src/routes/+page.svelte`) with a Canvas-based D3 orthographic projection globe from the svelte-globe example project. Mapbox will remain for all other pages in the project.
 
 ## Source Reference
 
@@ -34,7 +34,7 @@ The globe implementation comes from `/home/jacob/code/examples/svelte-globe/src/
 
 ## Files to Modify
 
-- `/packages/site/src/routes/+page.svelte` - Replace Mapbox with new Globe components
+- `/packages/old-site/src/routes/+page.svelte` - Replace Mapbox with new Globe components
 
 ## Dependencies to Add
 

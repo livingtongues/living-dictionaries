@@ -1,7 +1,7 @@
 import * as fs from 'node:fs'
 import { pipeline } from 'node:stream/promises'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
-import { friendlyName } from '@living-dictionaries/site/src/routes/[dictionaryId]/export/friendlyName'
+import { friendlyName } from '@living-dictionaries/old-site/src/routes/[dictionaryId]/export/friendlyName'
 import { admin_supabase, GCLOUD_MEDIA_BUCKET_S3 } from './config-supabase'
 
 const directory_path = 'downloaded'

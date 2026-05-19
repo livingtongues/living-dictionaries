@@ -14,7 +14,7 @@ async function load_svelte_look(): Promise<PluginOption> {
 }
 
 const plugins: PluginOption[] = [
-  UnoCSS() as PluginOption,
+  UnoCSS({ injectReset: '@unocss/reset/tailwind.css' }) as PluginOption,
   await load_svelte_look(),
   sveltekit(),
 ]

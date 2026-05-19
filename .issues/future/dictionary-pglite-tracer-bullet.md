@@ -116,7 +116,7 @@ export async function get_dictionary_db(dictionary_id: string) {
 
 ### 6. LivePgLite adapted for dictionary schema (`src/lib/pglite/live/`)
 
-Copy the three files from `packages/site/src/lib/pglite/live/` and adapt:
+Copy the three files from `packages/old-site/src/lib/pglite/live/` and adapt:
 - **`types.ts`** — import from the new local `../schema` instead of site's schema. Same type derivation approach works since it reads table names from the schema export.
 - **`live-pglite.svelte.ts`** — update `TABLE_PRIMARY_KEYS` to dictionary tables: `{ entries: ['id'], migrations: ['id'], db_metadata: ['key'], deletes: ['table_name', 'id'] }`. Update `READ_ONLY_TABLES` to `['migrations', 'db_metadata', 'deletes']`. For the tracer bullet, entries is read-only too but we can leave it editable in the LivePgLite config for future use.
 - **`table-store.svelte.ts`** — copy as-is, no changes needed. It's generic.

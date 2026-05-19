@@ -13,13 +13,13 @@ Tutor sync page: `/home/jacob/code/tutor/app/src/routes/(app)/sync/+page.svelte`
 1. **No CSS variables** — tutor uses `var(--primary)`, `var(--surface)`, etc. We must use hardcoded Tailwind colors (e.g. `blue-600`, `gray-100`, `gray-500`)
 2. **No i18n** — tutor uses `page.data.t.sync.*` translations. Admin panel uses hardcoded English strings already, so we'll do the same.
 3. **No `log_entries`** — LD's `Sync` class currently only uses `console.log`. We need to add a `log_entries` reactive array and `#log()` method to the sync engine, replacing/supplementing the existing `console.log` calls.
-4. **No `SyncLogEntry` type** — needs to be added to `packages/site/src/lib/pglite/sync/types.ts`
+4. **No `SyncLogEntry` type** — needs to be added to `packages/old-site/src/lib/pglite/sync/types.ts`
 5. **No `Pod` component** — tutor uses a custom shell component. We're inside the admin layout which already has Header + tabs.
 6. **No download-report helper** — needs to be created
 
 ## Implementation Plan
 
-### 1. Add `SyncLogEntry` type to `packages/site/src/lib/pglite/sync/types.ts`
+### 1. Add `SyncLogEntry` type to `packages/old-site/src/lib/pglite/sync/types.ts`
 
 ```ts
 export interface SyncLogEntry {
@@ -33,7 +33,7 @@ export interface SyncLogEntry {
 }
 ```
 
-### 2. Add logging to `Sync` class in `packages/site/src/lib/pglite/sync/sync-engine.svelte.ts`
+### 2. Add logging to `Sync` class in `packages/old-site/src/lib/pglite/sync/sync-engine.svelte.ts`
 
 Add two new reactive properties and a private method:
 
@@ -61,7 +61,7 @@ Replace all `console.log('[sync]...')` calls with `this.#log(...)` calls using a
 - Errors: `{ level: 'error', phase: relevant_phase, table, message: error_msg }`
 - Sync complete: `{ level: 'success', phase: 'complete', message: 'Sync complete in Nms' }`
 
-### 3. Create download report helper at `packages/site/src/routes/admin/sync/download-report.ts`
+### 3. Create download report helper at `packages/old-site/src/routes/admin/sync/download-report.ts`
 
 Port from tutor's version. Two functions:
 - `generate_sync_report_text({ log_entries, result })` — returns string
@@ -69,7 +69,7 @@ Port from tutor's version. Two functions:
 
 Remove `user_id` param (admin context, not needed) or keep it optional.
 
-### 4. Add Tab link in admin layout `packages/site/src/routes/admin/+layout.svelte`
+### 4. Add Tab link in admin layout `packages/old-site/src/routes/admin/+layout.svelte`
 
 Add a `sync` tab alongside the existing tabs:
 ```svelte
@@ -78,7 +78,7 @@ Add a `sync` tab alongside the existing tabs:
 
 Replace the existing inline Sync button with a cloud icon link to `/admin/sync`. The icon should reflect the last sync status (spinning if syncing, check if success, alert if error). Sync auto-runs on admin page load already, so the nav just needs a status indicator + link, not a trigger.
 
-### 5. Create page at `packages/site/src/routes/admin/sync/+page.svelte`
+### 5. Create page at `packages/old-site/src/routes/admin/sync/+page.svelte`
 
 Port from tutor's sync page with these adaptations:
 
@@ -112,15 +112,15 @@ Port from tutor's sync page with these adaptations:
 
 | File | Action |
 |---|---|
-| `packages/site/src/lib/pglite/sync/types.ts` | Add `SyncLogEntry` interface |
-| `packages/site/src/lib/pglite/sync/sync-engine.svelte.ts` | Add `log_entries`, `#log()`, replace console.logs |
-| `packages/site/src/routes/admin/sync/download-report.ts` | Create (port from tutor) |
-| `packages/site/src/routes/admin/sync/+page.svelte` | Create (port from tutor, hardcoded colors) |
-| `packages/site/src/routes/admin/+layout.svelte` | Add sync tab, remove inline sync button |
+| `packages/old-site/src/lib/pglite/sync/types.ts` | Add `SyncLogEntry` interface |
+| `packages/old-site/src/lib/pglite/sync/sync-engine.svelte.ts` | Add `log_entries`, `#log()`, replace console.logs |
+| `packages/old-site/src/routes/admin/sync/download-report.ts` | Create (port from tutor) |
+| `packages/old-site/src/routes/admin/sync/+page.svelte` | Create (port from tutor, hardcoded colors) |
+| `packages/old-site/src/routes/admin/+layout.svelte` | Add sync tab, remove inline sync button |
 
 ### 7. Port batch improvements from tutor's sync engine into LD's sync engine
 
-The tutor sync engine has several batch optimizations that the LD engine is missing. These should be ported to `packages/site/src/lib/pglite/sync/sync-engine.svelte.ts`:
+The tutor sync engine has several batch optimizations that the LD engine is missing. These should be ported to `packages/old-site/src/lib/pglite/sync/sync-engine.svelte.ts`:
 
 #### 7a. Batch upload mark-as-synced (single SQL instead of per-row)
 

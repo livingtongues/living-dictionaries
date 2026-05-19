@@ -7,21 +7,21 @@ Remove the `api_delete_dictionary` API endpoint and move its logic into a standa
 ## Current Architecture
 
 ### API Endpoint (to be removed)
-- **`packages/site/src/routes/api/db/delete-dictionary/+server.ts`** - POST endpoint requiring admin auth that:
+- **`packages/old-site/src/routes/api/db/delete-dictionary/+server.ts`** - POST endpoint requiring admin auth that:
   1. Fetches all `audio`, `photos`, `videos` storage paths for the dictionary
   2. Inserts them into `media_to_delete` table
   3. Deletes the dictionary row from `dictionaries` table (all related rows cascade due to `ON DELETE CASCADE`)
   4. Sends admin email notification via `$api/email/delete_dictionary`
-- **`packages/site/src/routes/api/db/delete-dictionary/_call.ts`** - Client-side caller (`api_delete_dictionary` function, exported as `n` currently)
+- **`packages/old-site/src/routes/api/db/delete-dictionary/_call.ts`** - Client-side caller (`api_delete_dictionary` function, exported as `n` currently)
 
 ### Admin UI caller
-- **`packages/site/src/routes/admin/dictionaries/DictionaryRow.svelte`** - Has a Delete button with confirmation modal that calls `api_delete_dictionary`
+- **`packages/old-site/src/routes/admin/dictionaries/DictionaryRow.svelte`** - Has a Delete button with confirmation modal that calls `api_delete_dictionary`
 
 ### Existing media deletion script
 - **`packages/scripts/delete-dictionary-media/index.ts`** - Reads from `media_to_delete` table and deletes files from S3/GCloud storage using `@aws-sdk/client-s3`. Supports `--live` flag (dry run by default).
 
 ### Email notification
-- **`packages/site/src/routes/api/email/delete_dictionary/index.ts`** - Sends admin notice email about deletion
+- **`packages/old-site/src/routes/api/email/delete_dictionary/index.ts`** - Sends admin notice email about deletion
 
 ## Database Notes
 - All tables with `dictionary_id` reference `dictionaries ON DELETE CASCADE`, so deleting the dictionary row automatically cleans up words, senses, audio, photos, videos, dictionary_roles, invites, etc.
@@ -46,8 +46,8 @@ Create `packages/scripts/delete-dictionary/index.ts` that:
 - Need to decide: should the UI still allow triggering deletion, or should it be script-only?
 
 ### 3. Remove API endpoint files
-- Delete `packages/site/src/routes/api/db/delete-dictionary/+server.ts`
-- Delete `packages/site/src/routes/api/db/delete-dictionary/_call.ts`
+- Delete `packages/old-site/src/routes/api/db/delete-dictionary/+server.ts`
+- Delete `packages/old-site/src/routes/api/db/delete-dictionary/_call.ts`
 
 ### 4. Handle email notification
 - Decide if the script should also send the email notification, or if that's no longer needed since it's a manual admin action

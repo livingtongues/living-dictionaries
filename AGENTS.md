@@ -4,10 +4,10 @@
 This is a pnpm monorepo containing a dictionary-building platform built with SvelteKit for the main application and backend serverless functions. Supabase is used for database and authentication.
 
 ### Key Directories
-- `/packages/site` - Main SvelteKit/Svelte 5 application
-  - `/packages/site/src/routes` - SvelteKit routes
-  - `/packages/site/src/routes/api` - Main app API routes (backend endpoints), import using `$api/...` alias
-  - `/packages/site/src/lib` - Shared libraries and utilities (import using `$lib/...` alias)
+- `/packages/old-site` - Main SvelteKit/Svelte 5 application
+  - `/packages/old-site/src/routes` - SvelteKit routes
+  - `/packages/old-site/src/routes/api` - Main app API routes (backend endpoints), import using `$api/...` alias
+  - `/packages/old-site/src/lib` - Shared libraries and utilities (import using `$lib/...` alias)
     - `/lib/supabase` - Supabase client, operations, and authentication
     - `/lib/pglite` - PGlite database setup, schema, and migrations
     - `/lib/components` - Reusable Svelte components (modals, keyboards, UI elements, maps)
@@ -17,7 +17,7 @@ This is a pnpm monorepo containing a dictionary-building platform built with Sve
     - `/lib/search` - Orama client-side full-text search integration
     - `/lib/export` - Data export functionality
     - `/lib/mocks` - Test mocks and seed data
-  - `/packages/site/src/docs` - Documentation (markdown files served via Kitbook) - out of date
+  - `/packages/old-site/src/docs` - Documentation (markdown files served via Kitbook) - out of date
 - `/packages/types` - Shared TypeScript types and interfaces
   - Database types (Supabase generated + custom)
   - Entry, dictionary, and user interfaces
@@ -88,7 +88,7 @@ curl -s -X POST "http://localhost:4001/query?client=agent@mock.com" \
 - Use typed Supabase client methods (from `@living-dictionaries/types`)
 
 ### Internationalization (i18n)
-- Place new English strings in `packages/site/src/lib/i18n/locales/en.json`
+- Place new English strings in `packages/old-site/src/lib/i18n/locales/en.json`
 - Do NOT add translations for other languages - human translators handle these
 - Access translations in Svelte components:
   ```svelte

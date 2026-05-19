@@ -2,12 +2,12 @@ name: Kitbook Visual Regression Tests
 
 env:
   PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.target_url }}
-  UPDATE_SNAPSHOTS_SCRIPT: pnpm -F site test:components:update
-  COMPARE_SNAPSHOTS_SCRIPT: pnpm -F site test:components
+  UPDATE_SNAPSHOTS_SCRIPT: pnpm -F old-site test:components:update
+  COMPARE_SNAPSHOTS_SCRIPT: pnpm -F old-site test:components
   GOOGLE_CLOUD_CREDENTIALS: ${{ secrets.GCS_COMPONENT_CHECK_BUCKETS_CREDENTIALS }}
   BUCKET_NAME: component-snapshots
   PROJECT_NAME: living-dictionaries
-  PROJECT_ROOT: ./packages/site
+  PROJECT_ROOT: ./packages/old-site
   KITBOOK_ROUTE: kitbook
 
 # on:

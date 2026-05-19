@@ -1,6 +1,6 @@
 packages:
   - 'packages/*'
-  - new-site
+  - site
   - e2e
   - '!packages/ids-import'
   - '!packages/functions'

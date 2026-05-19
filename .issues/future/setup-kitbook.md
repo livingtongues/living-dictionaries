@@ -15,7 +15,7 @@ Set up Kitbook in living-dictionaries matching tutor's setup so we can use the K
 ## Steps
 
 ### 1. Install kitbook dependency
-- Add `kitbook` to `packages/site/package.json` devDependencies using the same pkg.pr.new URL as tutor: `https://pkg.pr.new/jacob-8/kitbook-llm/kitbook@1fed7d5`
+- Add `kitbook` to `packages/old-site/package.json` devDependencies using the same pkg.pr.new URL as tutor: `https://pkg.pr.new/jacob-8/kitbook-llm/kitbook@1fed7d5`
 - Run `pnpm install`
 
 ### 2. Update `kitbook.config.ts`
@@ -113,7 +113,7 @@ export { component_page_load as load } from 'kitbook'
 ### 6. Verify setup
 - Dev server should still work on port 3041
 - Navigate to `localhost:3041/kitbook` to see Kitbook UI
-- Test Kitshot MCP tool with `npx kitbook list` from `packages/site`
+- Test Kitshot MCP tool with `npx kitbook list` from `packages/old-site`
 - Take a test screenshot of any existing component
 
 ## Questions to Resolve
