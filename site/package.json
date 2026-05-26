@@ -12,13 +12,25 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1050.0",
+    "@aws-sdk/client-ses": "^3.1045.0",
+    "better-sqlite3": "^12.8.0",
+    "drizzle-orm": "^0.44.7",
+    "jose": "^6.2.3",
+    "nodemailer": "^8.0.8",
+    "wa-sqlite": "^1.0.0"
+  },
   "devDependencies": {
     "@iconify/json": "^2.2.443",
     "@supabase/supabase-js": "^2.49.4",
     "@sveltejs/adapter-node": "^5.2.12",
-    "@types/node": "^24.10.15",
     "@sveltejs/kit": "^2.59.1",
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/google-one-tap": "^1.2.7",
+    "@types/node": "^24.10.15",
+    "@types/nodemailer": "^8.0.0",
     "@typescript/native-preview": "^7.0.0-dev.20260508.1",
     "@unocss/reset": "https://pkg.pr.new/@unocss/reset@78eae3f",
     "@unocss/svelte-scoped": "https://pkg.pr.new/@unocss/svelte-scoped@78eae3f",

@@ -3,19 +3,19 @@
 export PATH="$HOME/.local/share/pnpm:$PATH"
 
 # Run tests, check, and lint before committing.
-# Scoped to new-site (the active rebuild). The legacy production site
-# (packages/site) is not gated by these hooks — it's being phased out.
+# Scoped to site/ (the active rebuild). The legacy production site
+# (packages/old-site) is not gated by these hooks — it's being phased out.
 echo "Running pre-commit checks..."
 
-echo "→ pnpm test:new"
-pnpm test:new --reporter=dot
+echo "→ pnpm test:site"
+pnpm test:site --run --reporter=dot
 if [ $? -ne 0 ]; then
     echo "❌ Tests failed. Commit aborted."
     exit 1
 fi
 
-echo "→ pnpm check:new"
-pnpm check:new
+echo "→ pnpm check"
+pnpm check
 if [ $? -ne 0 ]; then
     echo "❌ svelte-check failed. Commit aborted."
     exit 1

@@ -73,11 +73,6 @@ Entries support rich multimedia content:
 - **API access**: External API with key-based authentication
 - **Embeddable widgets**: Share dictionary data on external sites
 
-#### Language Learning Features
-- **Flashcard view**: Study mode for language learners
-- **Audio practice**: Listen to native speaker pronunciations
-- **Example sentences**: Contextualized usage examples
-
 #### Advanced Features
 - **Geo-tagging**: Associate entries with specific locations
 - **Dialect variants**: Track regional or dialectal variations
@@ -89,5 +84,3 @@ Entries support rich multimedia content:
 #### Administrative Features
 - **User management**: Admin dashboard for user oversight
 - **Dictionary statistics**: Entry counts, contributor metrics
-- **Content moderation**: Review and approve suggested changes
-- **Data migration**: Tools for importing from legacy systems

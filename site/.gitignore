@@ -1,4 +1,11 @@
 node_modules
 build
 .svelte-kit
-.env
+
+# Local SQLite data — shared.db lives at site/.data/shared.db in dev,
+# /opt/hosting/data/shared.db on the VPS. The on-disk file is never committed.
+.data/
+
+# Secrets — `.env` (no suffix) IS committed with non-secret dev defaults.
+# Real secrets live in `.env.local` (gitignored by the root `*.local`) +
+# `/opt/hosting/sveltekit/.env` on the VPS.

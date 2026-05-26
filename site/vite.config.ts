@@ -21,4 +21,12 @@ const plugins: PluginOption[] = [
 
 export default defineConfig({
   plugins,
+  ssr: {
+    external: ['better-sqlite3'],
+  },
+  // `import.meta.vitest` stripped at build time so in-source test blocks
+  // don't ship to production. (Test config + actual runner live in vitest.config.ts.)
+  define: {
+    'import.meta.vitest': 'undefined',
+  },
 })

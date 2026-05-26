@@ -1,8 +1,8 @@
 // @ts-check
 // Living Dictionaries ESLint config — hand-written (no @antfu/eslint-config) for clarity.
-// SCOPE: only `new-site/` is linted. The legacy production app at `packages/site/` and
+// SCOPE: only `site/` is linted. The legacy production app at `packages/old-site/` and
 // other workspace packages are deliberately ignored — they're being phased out as
-// `new-site` rebuilds the platform (mirrors the house repo's `site/` migration).
+// `site/` rebuilds the platform (mirrors the house repo's `site/` migration).
 //
 // Naming: canonical plugin namespaces (e.g. `@typescript-eslint/*`, `@stylistic/*`,
 // `import-x/*`). When a rule fails, the rule id in the error matches a key in this file
@@ -407,6 +407,32 @@ export default tseslint.config(
     files: ['.vscode/*.json'],
     rules: {
       'jsonc/comma-dangle': ['error', 'always-multiline'],
+    },
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // 19. i18n locale JSON — allow irregular whitespace in translated strings.
+  // French uses non-breaking spaces before punctuation (« hello ! »), Hebrew/Arabic
+  // contain bidi/RTL marks, etc. These aren't bugs; they're intentional content.
+  // ─────────────────────────────────────────────────────────────
+  {
+    name: 'ld/i18n-locales',
+    files: ['site/src/lib/i18n/locales/**/*.json'],
+    rules: {
+      'no-irregular-whitespace': 'off',
+    },
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // 20. Email templates — Svelte components rendered server-side as raw HTML
+  //     (not normal SPA pages). They legitimately need <html>, <head>, <style>,
+  //     <body>, <table> etc. that the default svelte rules forbid.
+  // ─────────────────────────────────────────────────────────────
+  {
+    name: 'ld/email-templates',
+    files: ['site/src/routes/api/email/components/**/*.svelte'],
+    rules: {
+      'svelte/no-raw-special-elements': 'off',
     },
   },
 )
