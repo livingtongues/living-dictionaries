@@ -1,6 +1,7 @@
 {
   "name": "living-dictionaries",
   "type": "module",
+  "packageManager": "pnpm@10.26.1",
   "scripts": {
     "prepare": "command -v git >/dev/null 2>&1 && [ -d .git ] && git config core.hooksPath .githooks || true",
     "dev": "pnpm --filter=site dev",
