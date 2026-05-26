@@ -2,7 +2,7 @@
   "name": "living-dictionaries",
   "type": "module",
   "scripts": {
-    "prepare": "git config core.hooksPath .githooks",
+    "prepare": "command -v git >/dev/null 2>&1 && [ -d .git ] && git config core.hooksPath .githooks || true",
     "dev": "pnpm --filter=site dev",
     "prod": "pnpm --filter=site prod",
     "build": "pnpm --filter=site build",
