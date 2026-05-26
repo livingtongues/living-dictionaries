@@ -13,6 +13,7 @@ onlyBuiltDependencies:
 
 # Git-hosted packages that need to execute their `prepare` build script.
 # pnpm 10.26+ requires explicit allow-listing for git-hosted deps separately
-# from the regular onlyBuiltDependencies allowlist.
+# from the regular onlyBuiltDependencies allowlist. Note: `allowBuilds` is
+# a *map*, not a list — pnpm's error message shows the right shape.
 allowBuilds:
-  - eslint-plugin-svelte-stylistic
+  eslint-plugin-svelte-stylistic: true
