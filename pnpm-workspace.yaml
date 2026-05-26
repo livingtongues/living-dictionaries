@@ -10,6 +10,9 @@ onlyBuiltDependencies:
   - esbuild
   # Linked workspace package; runs `tsc` via its prepare script to build dist/.
   - svelte-look
+  # Required by pnpm 10.26+'s strict-build check during install:
+  - supabase
+  - unrs-resolver
 
 # Git-hosted packages that need to execute their `prepare` build script.
 # pnpm 10.26+ requires explicit allow-listing for git-hosted deps separately
