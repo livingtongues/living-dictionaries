@@ -10,3 +10,9 @@ onlyBuiltDependencies:
   - esbuild
   # Linked workspace package; runs `tsc` via its prepare script to build dist/.
   - svelte-look
+
+# Git-hosted packages that need to execute their `prepare` build script.
+# pnpm 10.26+ requires explicit allow-listing for git-hosted deps separately
+# from the regular onlyBuiltDependencies allowlist.
+allowBuilds:
+  - eslint-plugin-svelte-stylistic
