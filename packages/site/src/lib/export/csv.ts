@@ -2,7 +2,7 @@ import { downloadBlob } from './downloadBlob'
 
 export function downloadObjectsAsCSV(headers: Record<string, any>, items: Record<string, any>[], title: string) {
   const csv = objectsToCsvByHeaders(headers, items)
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
   downloadBlob(blob, title, '.csv')
 }
 

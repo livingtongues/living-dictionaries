@@ -1269,6 +1269,7 @@ export interface Database {
           id: string
           interlinearization: string | null
           lexeme: MultiString
+          linguistic_history: MultiString | null
           morphology: string | null
           notes: MultiString | null
           phonetic: string | null
@@ -1288,6 +1289,7 @@ export interface Database {
           id: string
           interlinearization?: string | null
           lexeme: MultiString
+          linguistic_history?: MultiString | null
           morphology?: string | null
           notes?: MultiString | null
           phonetic?: string | null
@@ -1307,6 +1309,7 @@ export interface Database {
           id?: string
           interlinearization?: string | null
           lexeme?: MultiString
+          linguistic_history?: MultiString | null
           morphology?: string | null
           notes?: MultiString | null
           phonetic?: string | null
