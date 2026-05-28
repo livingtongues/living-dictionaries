@@ -216,7 +216,8 @@
     "scientific_names": "Nama Saintifik",
     "definition_english": "",
     "video": "Video",
-    "custom_tags": "Tag tersuai"
+    "custom_tags": "Tag tersuai",
+    "linguistic_history": "Sejarah Linguistik"
   },
   "error": {
     "run_into_error": "Maaf, kami telah menghadapi masalah.",

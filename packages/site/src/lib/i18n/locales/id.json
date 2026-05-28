@@ -126,7 +126,7 @@
     "permanent_url_msg": "Nama URL bersifat permanen dan tidak dapat diubah di kemudian hari.",
     "add_gloss_msg": "Anda dapat menambahkan lebih banyak bahasa glosarium nanti di bagian Pengaturan.",
     "language_used_by_community": "Apakah kamus ini untuk bahasa yang dituturkan atau diisyaratkan oleh komunitas manusia tertentu?",
-    "community_permission": "Apakah komunitas bahasa telah memberi Anda izin untuk membuat kamus ini?",
+    "community_permission": "Apakah komunitas bahasa tersebut telah memberi Anda izin untuk membuat kamus ini?",
     "author_connection": "Mohon jelaskan secara singkat bagaimana Anda mengetahui bahasa ini dan mengapa Anda membuat Kamus Hidup (Living Dictionary) untuk bahasa ini. Apakah Anda bagian dari komunitas yang akan menggunakan Kamus Hidup ini? Jika tidak, bagaimana Anda mengenal komunitas tersebut?",
     "con_lang_description": "Apakah kamus ini untuk bahasa buatan (bahasa yang diciptakan oleh manusia dalam beberapa tahun terakhir, untuk buku atau film)? Jika ya, mohon jelaskan secara singkat.",
     "uncertainty": "Saya tidak tahu",
@@ -216,7 +216,8 @@
     "scientific_names": "Nama Ilmiah",
     "definition_english": "",
     "video": "Video",
-    "custom_tags": "Tag khusus"
+    "custom_tags": "Tag khusus",
+    "linguistic_history": "Sejarah Linguistik"
   },
   "error": {
     "run_into_error": "Maaf, sistem kami mengalami masalah",

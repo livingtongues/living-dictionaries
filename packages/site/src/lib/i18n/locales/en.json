@@ -66,7 +66,6 @@
     "how_to_cite_instructions": "Add the authors of this dictionary to show their names in the citation"
   },
   "account": {
-    "your_name": "Your Name",
     "account_settings": "Account Settings",
     "log_out": "Log Out",
     "send_code": "Send Code",
@@ -208,7 +207,6 @@
     "dialects": "Dialect",
     "interlinearization": "Interlinearization",
     "notes": "Notes",
-    "linguistic_history": "Linguistic History",
     "sources": "Source",
     "example_sentence": "Example Sentence",
     "noun_class": "Noun Class",
@@ -218,7 +216,8 @@
     "scientific_names": "Scientific Name",
     "definition_english": "Definition (deprecated)",
     "video": "Video",
-    "custom_tags": "Custom tags"
+    "custom_tags": "Custom tags",
+    "linguistic_history": "Linguistic History"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",

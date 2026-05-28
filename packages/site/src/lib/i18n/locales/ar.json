@@ -34,7 +34,7 @@
     "import_export": "استيراد/تصدير (FLEx ، التنسيق القياسي)",
     "geo_tagging": "العلامات الجغرافية للإدخالات ",
     "flashcard_view": "عرض البطاقات التعليمية لمتعلمي اللغات",
-    "peer_review": "مراجعة النظراء للإملاء",
+    "peer_review": "مراجعة الأقران للإملاء",
     "suggestions_from_users": "اقتراحات من المستخدمين",
     "push_notifications": "إرسال إشعارات فورية للمساهمين",
     "contributor_awards": "جوائز مجتمع المساهمين",
@@ -63,7 +63,7 @@
     "invitation_sent": "تم إرسال الدعوة",
     "manager_contributor_distinction": "ملاحظة: يمكن لمديري القاموس إضافة المحتوى أو تعديله أو حذفه. أما المساهمون فهم متعاونون في المشروع، ويمكنهم أيضاً إضافة المحتوى وتعديله، ولكن لا يمكنهم حذفه.",
     "other_contributors": "مساهمون آخرون",
-    "how_to_cite_instructions": "أضف أسماء مؤلفي هذا القاموس لإظهارها في الاقتباس."
+    "how_to_cite_instructions": "أضف مؤلفي هذا القاموس لإظهار أسمائهم في الاقتباس."
   },
   "account": {
     "account_settings": "إعدادات الحساب",
@@ -216,7 +216,8 @@
     "scientific_names": "الاسم العلمي",
     "definition_english": "",
     "video": "فيديو",
-    "custom_tags": "علامات مخصصة"
+    "custom_tags": "علامات مخصصة",
+    "linguistic_history": "التاريخ اللغوي"
   },
   "error": {
     "run_into_error": "نعتذر، لقد واجهنا خطأً",
