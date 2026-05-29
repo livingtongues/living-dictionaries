@@ -25,7 +25,7 @@ export function augment_entry_for_search(entry: EntryData) {
   )
   const plural_forms = senses.flatMap(sense => Object.values(sense.plural_form || {}).filter(Boolean))
 
-  const _other: string[] = [entry.main.phonetic, Object.values(entry.main.notes || {}), entry.main.scientific_names, entry.main.sources, entry.main.interlinearization, entry.main.morphology, plural_forms, entry.main.elicitation_id, sentences].flat().filter(Boolean)
+  const _other: string[] = [entry.main.phonetic, Object.values(entry.main.notes || {}), Object.values(entry.main.linguistic_history || {}), entry.main.scientific_names, entry.main.sources, entry.main.interlinearization, entry.main.morphology, plural_forms, entry.main.elicitation_id, sentences].flat().filter(Boolean)
 
   return {
     id: entry.id,

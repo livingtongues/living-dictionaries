@@ -15,6 +15,7 @@ export const defaultPrintFields: IPrintFields = {
   variant: false,
   dialects: false,
   notes: false,
+  linguistic_history: false,
   photo: false,
   speaker: false,
   sources: false,

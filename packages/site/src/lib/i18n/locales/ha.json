@@ -33,7 +33,7 @@
     "export_data": "Fitar da Bayanai (CSV, Tsarin PDF)",
     "import_export": "Shigo da/Fitar da kaya (FLex, Tsarin Daidaitacce)",
     "geo_tagging": "Shigar da alamun ƙasa",
-    "flashcard_view": "Kallon Flashcard ga ɗaliban Harshe",
+    "flashcard_view": "Duba Katin Flashcard ga ɗaliban Harshe",
     "peer_review": "Sharhin Abokan Hulɗa",
     "suggestions_from_users": "Shawarwari daga Masu Amfani",
     "push_notifications": "Tura Sanarwa ga Masu Ba da Gudummawa",
@@ -216,7 +216,8 @@
     "scientific_names": "Sunan Kimiyya",
     "definition_english": "",
     "video": "Bidiyo",
-    "custom_tags": "Alamun musamman"
+    "custom_tags": "Alamun musamman",
+    "linguistic_history": "Tarihin Harsuna"
   },
   "error": {
     "run_into_error": "Muna yi hakuri, mun gudu a cikin wani kuskure.",
@@ -279,7 +280,7 @@
     "transmitter": "Da gaske, ƙungiyar Living Dictionary",
     "disjunctive": "ko",
     "required": "ake buƙata",
-    "optional": "zaɓi"
+    "optional": "na zaɓi"
   },
   "settings": {
     "community_permission": "Shin magana al'umma damar wannan harshe ya zama online?",
@@ -379,7 +380,7 @@
     "date": "Kwanan wata",
     "old_value": "Tsohon Darajar",
     "new_value": "Sabuwar Darajar",
-    "entry_message": "Wani mai amfani ya gyara wannan shigarwar akan",
+    "entry_message": "Wani mai amfani ya gyara wannan shigarwar a kan",
     "edited": "An gyara shi na ƙarshe a ranar",
     "history_search": "Bincika shigarwar, editoci, filayen da ƙima",
     "download_history": "Sauke Tarihi a matsayin CSV",

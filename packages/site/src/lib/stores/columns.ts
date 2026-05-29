@@ -81,6 +81,10 @@ export const defaultColumns: IColumn[] = [
     width: 300,
   },
   {
+    field: 'linguistic_history',
+    width: 300,
+  },
+  {
     field: 'example_sentence',
     width: 300,
   },

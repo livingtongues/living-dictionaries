@@ -206,6 +206,17 @@
           update_entry({ notes: entry.main.notes })
         }
       }} />
+  {:else if column.field === 'linguistic_history'}
+    <Textbox
+      field={column.field}
+      value={entry.main.linguistic_history?.default}
+      display={$page.data.t('entry_field.linguistic_history')}
+      on_update={(new_value) => {
+        if (new_value) {
+          entry.main.linguistic_history = { default: new_value }
+          update_entry({ linguistic_history: entry.main.linguistic_history })
+        }
+      }} />
   {:else if column.field === 'interlinearization' || column.field === 'morphology' || column.field === 'phonetic' || column.field === 'elicitation_id'}
     <Textbox
       field={column.field}

@@ -956,6 +956,7 @@ export interface Database {
           id: string
           interlinearization: string | null
           lexeme: Json
+          linguistic_history: Json | null
           morphology: string | null
           notes: Json | null
           phonetic: string | null
@@ -975,6 +976,7 @@ export interface Database {
           id: string
           interlinearization?: string | null
           lexeme: Json
+          linguistic_history?: Json | null
           morphology?: string | null
           notes?: Json | null
           phonetic?: string | null
@@ -994,6 +996,7 @@ export interface Database {
           id?: string
           interlinearization?: string | null
           lexeme?: Json
+          linguistic_history?: Json | null
           morphology?: string | null
           notes?: Json | null
           phonetic?: string | null
@@ -1690,13 +1693,6 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: 'foreign_key_entries'
-            columns: ['entry_id']
-            isOneToOne: false
-            referencedRelation: 'entries'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'senses_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
@@ -1736,6 +1732,13 @@ export interface Database {
             columns: ['dictionary_id']
             isOneToOne: false
             referencedRelation: 'materialized_dictionaries_view'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'senses_entry_id_fkey'
+            columns: ['entry_id']
+            isOneToOne: false
+            referencedRelation: 'entries'
             referencedColumns: ['id']
           },
           {

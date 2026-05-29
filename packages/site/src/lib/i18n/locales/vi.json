@@ -140,7 +140,7 @@
     "conlang_info_2": "Từ điển sống dành cho các ngôn ngữ nhân tạo sẽ không được công khai trên trang web của chúng tôi hoặc hiển thị trên bản đồ trang chủ. Nếu chúng tôi phát hiện nội dung xúc phạm trong Từ điển sống này, chúng tôi cũng có quyền xóa bỏ nó.",
     "agree_above": "Tôi đồng ý với những điều trên.",
     "agree_to_cite": "Tôi đồng ý trích dẫn bất kỳ tác phẩm đã xuất bản nào có liên quan trong các mục từ điển.",
-    "agree_for_non-commercial": "Tôi đồng ý rằng công việc này không mang tính thương mại.",
+    "agree_for_non-commercial": "Tôi đồng ý rằng tác phẩm này không mang tính thương mại.",
     "source_question": "Dữ liệu trong từ điển này đến từ đâu? Vui lòng mô tả nếu bạn tự thu thập dữ liệu. Nếu bạn sử dụng bất kỳ nguồn tham khảo nào đã được công bố, vui lòng liệt kê chúng ở đây.",
     "use_question": "Ai sẽ sử dụng từ điển này? Nó sẽ được sử dụng trong bất kỳ dự án giáo dục hoặc truyền thông nào không?",
     "conlang_warning": "Nếu từ điển này dành cho một ngôn ngữ nhân tạo (hoặc được tạo ra) và bạn không ghi rõ điều đó, chúng tôi có quyền xóa bỏ nó."
@@ -216,7 +216,8 @@
     "scientific_names": "Tên khoa học",
     "definition_english": "",
     "video": "Băng hình",
-    "custom_tags": "Thẻ tùy chỉnh"
+    "custom_tags": "Thẻ tùy chỉnh",
+    "linguistic_history": "Lịch sử ngôn ngữ"
   },
   "error": {
     "run_into_error": "Lỗi đã xảy ra. Xin quý vị thông cảm.",
@@ -389,7 +390,7 @@
   },
   "partnership": {
     "title": "Các tổ chức đối tác",
-    "button": "Viết thư cho Tổ chức Đối tác",
+    "button": "Viết cho Tổ chức Đối tác",
     "name": "Tên tổ chức đối tác"
   },
   "synopsis": {
@@ -398,7 +399,7 @@
   },
   "sense": {
     "sense": "Giác quan",
-    "add": "Thêm ý nghĩa"
+    "add": "Thêm Sense"
   },
   "banner": {
     "message": "Chúng tôi sẽ tiến hành nâng cấp cơ sở dữ liệu vào ngày 22 tháng 10, bắt đầu lúc 7 giờ tối theo giờ miền Đông (New York), trong vòng 24 giờ. Chức năng chỉnh sửa sẽ không khả dụng trong thời gian này. Xin lỗi vì sự bất tiện này.",

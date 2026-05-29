@@ -184,7 +184,7 @@
     "delete_audio": "Supprimer l'audio ?",
     "delete_image": "Supprimer l'image ?",
     "delete_video": "Supprimer la vidéo ?",
-    "source": "Attribution / Source de {media}",
+    "source": "Attribution / Source des médias",
     "source_message": "Si le contenu multimédia provient du Web, veuillez inclure le lien et la licence du contenu multimédia, le cas échéant.",
     "rights": "J'ai les droits de télécharger le fichier {media}",
     "AI_generated": "{media} a été généré par l'IA",
@@ -216,7 +216,8 @@
     "scientific_names": "Nom scientifique",
     "definition_english": "",
     "video": "Vidéo",
-    "custom_tags": "Étiquettes personnalisées"
+    "custom_tags": "Étiquettes personnalisées",
+    "linguistic_history": "Histoire linguistique"
   },
   "error": {
     "run_into_error": "Nous sommes désolés, il y a une erreur.",
