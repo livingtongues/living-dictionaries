@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "Account Settings",
+    "your_name": "Your Name",
     "log_out": "Log Out",
     "send_code": "Send Code",
     "enter_6_digit_code_sent_to": "Enter the 6-digit code sent to"
