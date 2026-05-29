@@ -130,7 +130,7 @@
           class:sompeng={isSompeng}
           class="form-input block w-full pr-16" />
       </Keyman>
-    {:else if field === 'local_orthography' || field === 'lexeme'}
+    {:else if field === 'local_orthography' || field === 'lexeme' || field === 'linguistic_history'}
       <Keyman fixed canChooseKeyboard>
         <input
           bind:this={inputEl}

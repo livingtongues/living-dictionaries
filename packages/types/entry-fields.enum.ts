@@ -3,6 +3,7 @@ enum EntryFields {
   lexeme = 'lx',
   phonetic = 'ph',
   notes = 'nt',
+  linguistic_history = 'lh',
   interlinearization = 'in',
   morphology = 'mr',
   plural_form = 'pl',

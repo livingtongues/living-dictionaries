@@ -65,7 +65,7 @@
     }
 
     const csv = objectsToCsvByHeaders(entryHeaders, finalizedEntries)
-    const csvBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const csvBlob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
 
     zip.file(`${dictionary.id}.csv`, csvBlob)
 

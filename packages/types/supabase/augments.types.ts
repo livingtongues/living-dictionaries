@@ -66,18 +66,21 @@ export interface DatabaseAugments {
           coordinates: Coordinates | null
           lexeme: MultiString
           notes: MultiString | null
+          linguistic_history: MultiString | null
           unsupported_fields: UnsupportedFields | null
         }
         Insert: {
           coordinates?: Coordinates | null
           lexeme: MultiString
           notes?: MultiString | null
+          linguistic_history?: MultiString | null
           unsupported_fields?: UnsupportedFields | null
         }
         Update: {
           coordinates?: Coordinates | null
           lexeme?: MultiString
           notes?: MultiString | null
+          linguistic_history?: MultiString | null
           unsupported_fields?: UnsupportedFields | null
         }
       }
