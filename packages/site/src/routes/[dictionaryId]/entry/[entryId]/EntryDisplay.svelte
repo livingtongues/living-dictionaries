@@ -146,6 +146,15 @@
         update_entry({ notes: { default: new_value } })
       }} />
 
+    <EntryField
+      value={entry.main.linguistic_history?.default}
+      field="linguistic_history"
+      {can_edit}
+      display={$page.data.t('entry_field.linguistic_history')}
+      on_update={(new_value) => {
+        update_entry({ linguistic_history: { default: new_value } })
+      }} />
+
     {#if entry.main.sources?.length || can_edit}
       <div class="md:px-2" class:order-2={!entry.main.sources?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.sources')}</div>

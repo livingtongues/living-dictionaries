@@ -216,7 +216,8 @@
     "scientific_names": "Nombre científico",
     "definition_english": "",
     "video": "Video",
-    "custom_tags": "Etiquetas personalizadas"
+    "custom_tags": "Etiquetas personalizadas",
+    "linguistic_history": "Historia lingüística"
   },
   "error": {
     "run_into_error": "Lo sentimos, hay un error.",

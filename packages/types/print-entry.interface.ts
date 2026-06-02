@@ -24,6 +24,7 @@ export enum StandardPrintFields {
   noun_class = 'Noun Class',
   dialects = 'Dialects',
   notes = 'Notes',
+  linguistic_history = 'Linguistic History',
 }
 
 type PrintFieldKeys = keyof typeof _CustomPrintFields | keyof typeof StandardPrintFields

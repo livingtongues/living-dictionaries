@@ -382,7 +382,7 @@ export async function init_entries(
     return
   }
 
-  const entries_promise = cached_data_table({ table: 'entries', include: ['coordinates', 'elicitation_id', 'interlinearization', 'lexeme', 'morphology', 'notes', 'phonetic', 'scientific_names', 'sources'], dictionary_id, supabase, log })
+  const entries_promise = cached_data_table({ table: 'entries', include: ['coordinates', 'elicitation_id', 'interlinearization', 'lexeme', 'linguistic_history', 'morphology', 'notes', 'phonetic', 'scientific_names', 'sources'], dictionary_id, supabase, log })
   const senses_promise = cached_data_table({ table: 'senses', include: ['created_at', 'entry_id', 'definition', 'glosses', 'noun_class', 'parts_of_speech', 'plural_form', 'semantic_domains', 'variant', 'write_in_semantic_domains'], dictionary_id, supabase, log })
   const audios_promise = cached_data_table({ table: 'audio', include: ['created_at', 'entry_id', 'source', 'storage_path'], dictionary_id, supabase, log })
   const speakers_promise = cached_data_table({ table: 'speakers', include: ['birthplace', 'decade', 'gender', 'name'], dictionary_id, supabase, log })

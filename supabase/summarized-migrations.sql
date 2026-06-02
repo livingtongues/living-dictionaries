@@ -63,6 +63,7 @@ CREATE TABLE entries (
   interlinearization text,
   morphology text,
   notes jsonb, -- MultiString
+  linguistic_history jsonb, -- MultiString
   sources text[],
   scientific_names text[],
   coordinates jsonb, -- Coordinates

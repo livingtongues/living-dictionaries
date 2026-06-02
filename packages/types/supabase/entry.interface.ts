@@ -12,7 +12,7 @@ type EntryDataAudio = Pick<Tables<'audio'>, 'id' | 'updated_at' | 'source' | 'st
 
 export interface EntryData {
   id: string
-  main: Pick<Tables<'entries'>, 'coordinates' | 'elicitation_id' | 'lexeme' | 'interlinearization' | 'morphology' | 'notes' | 'phonetic' | 'scientific_names' | 'sources'>
+  main: Pick<Tables<'entries'>, 'coordinates' | 'elicitation_id' | 'lexeme' | 'interlinearization' | 'linguistic_history' | 'morphology' | 'notes' | 'phonetic' | 'scientific_names' | 'sources'>
   senses: EntryDataSense[]
   audios?: EntryDataAudio[]
   dialects?: Pick<Tables<'dialects'>, 'id' | 'updated_at' | 'name'>[]

@@ -73,6 +73,7 @@ export async function generate_sql_statements({
     if (row.scientificName) entry.scientific_names = [row.scientificName]
     if (row.ID) entry.elicitation_id = row.ID
     if (row.notes) entry.notes = { default: row.notes }
+    if (row.linguisticHistory) entry.linguistic_history = { default: row.linguisticHistory }
 
     sql_statements += sql_file_string('entries', entry)
 

@@ -114,6 +114,15 @@
     </div>
   {/if}
 
+  {#if selectedFields.linguistic_history && entry.main.linguistic_history}
+    <div>
+      {#if showLabels}
+        <span class="italic text-[80%]">{$page.data.t('entry_field.linguistic_history')}:</span>
+      {/if}
+      {entry.main.linguistic_history.default}
+    </div>
+  {/if}
+
   {#if selectedFields.dialects && entry.dialects?.length}
     <div>
       {#if showLabels}

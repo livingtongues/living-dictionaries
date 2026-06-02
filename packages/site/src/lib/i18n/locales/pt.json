@@ -141,7 +141,7 @@
     "agree_above": "Concordo com o que foi dito acima.",
     "agree_to_cite": "Concordo em citar quaisquer trabalhos publicados relevantes nas entradas do dicionário.",
     "agree_for_non-commercial": "Concordo que esta obra não tem fins comerciais.",
-    "source_question": "De onde vieram os dados deste dicionário? Descreva se você coletou os dados pessoalmente. Se utilizou alguma fonte de referência publicada, liste-a aqui.",
+    "source_question": "De onde vieram os dados deste dicionário? Descreva se você mesmo coletou os dados. Se utilizou alguma fonte de referência publicada, liste-a aqui.",
     "use_question": "Quem usará este dicionário? Ele será usado em algum projeto educacional ou midiático?",
     "conlang_warning": "Se este dicionário for para uma língua construída (ou artificial) e você não indicar isso, reservamo-nos o direito de removê-lo."
   },
@@ -216,7 +216,8 @@
     "scientific_names": "Nome científico",
     "definition_english": "",
     "video": "Vídeo",
-    "custom_tags": "Etiquetas personalizadas"
+    "custom_tags": "Etiquetas personalizadas",
+    "linguistic_history": "História Linguística"
   },
   "error": {
     "run_into_error": "Lamentamos, tivemos um erro.",
@@ -401,7 +402,7 @@
     "add": "Adicione bom senso"
   },
   "banner": {
-    "message": "Estaremos realizando melhorias em nosso banco de dados no dia 22 de outubro, a partir das 19h (horário de Nova York), durante 24 horas. Os recursos de edição estarão indisponíveis durante esse período. Pedimos desculpas pelo inconveniente.",
+    "message": "Estaremos realizando melhorias em nosso banco de dados no dia 22 de outubro, a partir das 19h (horário do leste dos EUA, Nova York), durante 24 horas. Os recursos de edição estarão indisponíveis durante esse período. Pedimos desculpas pelo inconveniente.",
     "attention": "Atenção"
   },
   "footer": {
