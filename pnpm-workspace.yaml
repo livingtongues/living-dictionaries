@@ -1,4 +1,5 @@
 packages:
+  - 'site'
   - 'packages/*'
   - e2e
   - '!packages/ids-import'

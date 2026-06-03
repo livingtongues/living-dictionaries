@@ -22,6 +22,11 @@
     "generate-types": "supabase gen types typescript --local --schema public > packages/types/supabase/generated.types.ts && eslint --fix packages/types/supabase/generated.types.ts && pnpm -F scripts merge-types && eslint --fix packages/types/supabase/combined.types.ts",
     "check-packages": "pnpm update --interactive --recursive --latest"
   },
+  "pnpm": {
+    "overrides": {
+      "@types/node": "22.8.6"
+    }
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^2.27.3",
     "@typescript-eslint/eslint-plugin": "8.3.0",

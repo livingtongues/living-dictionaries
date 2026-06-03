@@ -7,7 +7,7 @@ env:
   GOOGLE_CLOUD_CREDENTIALS: ${{ secrets.GCS_COMPONENT_CHECK_BUCKETS_CREDENTIALS }}
   BUCKET_NAME: component-snapshots
   PROJECT_NAME: living-dictionaries
-  PROJECT_ROOT: ./packages/site
+  PROJECT_ROOT: ./site
   KITBOOK_ROUTE: kitbook
 
 # on:
