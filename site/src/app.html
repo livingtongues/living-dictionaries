@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<link rel='icon' type='image/png' href='%sveltekit.assets%/icons/favicon-32x32_adjusted.png'>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name='theme-color' content='#546e7a'>
+	<link rel='manifest' href='%sveltekit.assets%/manifest.json'>
+	<meta name="application-name" content="Living Dictionaries">
+
+	<!-- Add , user-scalable=no for Keyman mobile viewports? -->
+
+	<meta name="mobile-web-app-capable" content="yes">
+	<!-- Learn more: https://web.dev/native-hardware-fullscreen -->
+
+	<link rel="mask-icon" href="%sveltekit.assets%/icons/safari-pinned-tab.svg" color="#546e7a">
+	<link rel="apple-touch-icon" sizes="180x180" href="%sveltekit.assets%/icons/apple-touch-icon.png">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<!-- <link rel="apple-touch-startup-image" href="%sveltekit.assets%/icons/apple-touch-startup-image.png"> -->
+	<link href="%sveltekit.assets%/icons/iOS_splashscreens/iphone5_splash.png"
+		media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"
+		rel="apple-touch-startup-image" />
+	<link href="%sveltekit.assets%/icons/iOS_splashscreens/iphone6_splash.png"
+		media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"
+		rel="apple-touch-startup-image" />
+	<link href="%sveltekit.assets%/icons/iOS_splashscreens/iphoneplus_splash.png"
+		media="(device-width: 621px) and (device-height: 1104px) and (-webkit-device-pixel-ratio: 3)"
+		rel="apple-touch-startup-image" />
+	<link href="%sveltekit.assets%/icons/iOS_splashscreens/iphonex_splash.png"
+		media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)"
+		rel="apple-touch-startup-image" />
+	<link href="%sveltekit.assets%/icons/iOS_splashscreens/iphonexr_splash.png"
+		media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)"
+		rel="apple-touch-startup-image" />
+	<link href="%sveltekit.assets%/icons/iOS_splashscreens/iphonexsmax_splash.png"
+		media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)"
+		rel="apple-touch-startup-image" />
+	<link href="%sveltekit.assets%/icons/iOS_splashscreens/ipad_splash.png"
+		media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)"
+		rel="apple-touch-startup-image" />
+	<link href="%sveltekit.assets%/icons/iOS_splashscreens/ipadpro1_splash.png"
+		media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)"
+		rel="apple-touch-startup-image" />
+	<link href="%sveltekit.assets%/icons/iOS_splashscreens/ipadpro3_splash.png"
+		media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)"
+		rel="apple-touch-startup-image" />
+	<link href="%sveltekit.assets%/icons/iOS_splashscreens/ipadpro2_splash.png"
+		media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)"
+		rel="apple-touch-startup-image" />
+
+
+	<!-- <meta name="msapplication-starturl" content="/"> -->
+
+	<!-- <script src='https://js.sentry-cdn.com/b344dd4315d54249afd9c03762aec0c9.min.js' crossorigin="anonymous"
+		data-lazy="no"></script> -->
+
+	%sveltekit.head%
+
+	<script src="https://kit.fontawesome.com/b5a05fc445.js" crossorigin="anonymous"></script>
+</head>
+
+<body data-sveltekit-preload-data="hover" class="text-gray-800 antialiased">
+	<div style="display: contents">%sveltekit.body%</div>
+
+	<style>
+		.antialiased {
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+		}
+
+		.text-gray-800 {
+			color: rgba(31, 41, 55, 1);
+		}
+	</style>
+</body>
+
+<!-- Google tag (gtag.js) - change async to defer -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7BFYSTZ0T6"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-7BFYSTZ0T6');
+</script>
+
+</html>

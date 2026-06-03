@@ -18,6 +18,7 @@ export default antfu(
     ignores: [
       '**/.svelte-kit**',
       '.eslintcache',
+      '**/lib/lz/lz-string.ts', // vendored third-party (lz-string)
       'packages/scripts/import/old**',
       '**/route/kitbook/**',
       '**/locales/**',
