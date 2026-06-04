@@ -21,9 +21,21 @@ PORT=3097 pnpm -F site test:flow            # change the self-booted server's po
 Exit code is non-zero on any failed assertion. Screenshots land in `e2e/screenshots/` (git-ignored).
 
 ## What `achi-flow.mjs` covers
-The M2b mock seeds dummy achi entries + a logged-in **mock manager** (`can_edit`), so the script
-exercises the full editor: entries list (13 entries) → open an entry overlay → edit the phonetic
-field via its EditFieldModal → add a sense → delete that sense → assert the original survives.
+A logged-in **mock manager** (`can_edit`) exercises the full editor: entries list (13 entries) →
+open an entry overlay → edit the phonetic field via its EditFieldModal → add a sense → delete that
+sense → assert the original survives. Since M4 the 13 achi entries are read from `achi.db`
+(seeded by `pnpm -F site seed:achi-fixture`); edits still ride the stub (write = M4-write).
+
+## M4 SQLite-read flows
+- `test:catalog` (`catalog-sqlite.mjs`) — the dictionary catalog reads from `shared.db`: API
+  public/private counts, the `/dictionaries` list, dict detail resolution, unknown-slug redirect.
+- `test:entries` (`entries-sqlite.mjs`, `DICT=torwali`) — the Orama worker is fed from the per-dict
+  SQLite db via `/api/dictionaries/[id]/entries-data`; asserts the real torwali corpus renders.
+- `review-shots.mjs` (`node e2e/review-shots.mjs`) — quick visual pass: screenshots `/`,
+  `/dictionaries`, `/<dict>/entries`, `/<dict>/about` into `e2e/review/` (git-ignored) for eyeballing.
+- Both SQLite flows **filter known-external console errors** (Mapbox tile 403s in headless, the
+  entries-worker CDN-cache 403) so the pageerror assertion reflects the conversion, not ambient noise.
+- Needs `site/.data` seeded (shared.db + per-dict dbs from the example; `VACUUM INTO` for clean copies).
 
 ## Authoring more flows — the workflow
 1. **Explore** with the `browser-tools` skill (interactive CDP on `:9222`) to discover selectors.
