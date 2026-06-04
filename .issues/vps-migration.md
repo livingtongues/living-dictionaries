@@ -189,7 +189,15 @@ Each is its own milestone with a checkpoint. Order TBD, rough sequence:
       migrations; seeded `.data` from the example (catalog 2136 dicts; real entries for torwali + the 3
       other populated dicts; achi seeded with dev fixtures via `seed:achi-fixture`). `better-sqlite3` in
       `dependencies` (adapter-node gotcha). Writes/auth-gated reads stay on the stub until M4-write/auth.
-- [ ] SQLite **write** path + sync engine (wa-sqlite browser, SharedWorker dict.db, `/changes`).
+- [~] SQLite **write** path + sync engine (wa-sqlite browser, SharedWorker dict.db, `/changes`) —
+      **P1–P4a DONE** (`.issues/m4-write-sync.md`; 📘 `.knowledge/migration/m4-write-sync.md`; commits
+      `f6016bdf`/`685126d4`/`098aa003`/`70334be9` on `vps-migration`, not pushed). Browser wa-sqlite
+      per-dict DB + SharedWorker + bidirectional sync; Orama now fed from wa-sqlite (entries-data
+      endpoint retired); editor edits PERSIST to real server SQLite + round-trip (verified via
+      `e2e/dict-sync.mjs` + achi-flow reload assertion). Fixed two latent example bugs (lmod trigger
+      `OR REPLACE`-under-upsert; `/changes` fast-bail dropping editor pushes). **P4b remaining:**
+      replace the interim `api.X` double-write with a watcher so Orama watches wa-sqlite (handles
+      remote sync-pulls too) — the watermark-delta + row→entry_id-resolution design is in the issue.
 - [x] Real auth (JWT + Google + email-OTP) ✅ DONE (`.issues/m4-real-auth.md`;
       📘 `.knowledge/migration/m4-real-auth.md`). Full port of the example's `AuthUser`/`ssr_user`/
       `dict_roles` model: `lib/auth/*` + `lib/admins.ts` + `/api/auth/*` + `/api/me/*`; `ssr_user`

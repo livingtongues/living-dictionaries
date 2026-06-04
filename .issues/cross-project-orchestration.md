@@ -307,11 +307,43 @@ report back here; I relay learnings and Jacob's decisions across the fence.
   firestore-to-sqlite-admin-port.md` = LD's M4-WRITE/sync playbook.** Deferred (missing /site deps, not
   design): Stripe reconcile, compose-new-email, attachments/R2, inbound ingest, rich-text reply.
   💡 **House→LD:** this is the wa-sqlite sync-engine port LD was waiting on → unblocks LD-WRITE.
-- **LD-WRITE** — 🔶 spawned `e17570b6` (project `living-dictionaries`). Step 0: commit LD-AUTH's 69
-  files. Then **M4 · write/sync** — real wa-sqlite browser DB + SharedWorker + bidirectional sync so the
-  edit/write path stops being a JWT-shim stub. PRIMARY = example `lib/db/{client,dict-client,sync}/*`;
-  SECONDARY = house's just-proven `firestore-to-sqlite-admin-port.md`. PLAN + interview Jacob (multi-dict
-  sector mapping, which writes move first, achi-flow → real write/sync round-trip).
+- **LD-WRITE** — ✅ **P1–P4a DONE** (`e17570b6`, project `living-dictionaries`; 6 commits on
+  `vps-migration`, NOT pushed: `e764c10c`+`7dae981f` = LD-AUTH step-0; `f6016bdf` P1 server ·
+  `685126d4` P2 client engine · `098aa003` P3 feed-flip · `70334be9` P4a real writes). **M4 · write/
+  sync:** browser **wa-sqlite** per-dict DB + **SharedWorker** + **bidirectional sync** (ported the
+  example's `dict-client/*` + `client/{connection,live}` near-verbatim; server `dictionary-sync-helpers`
+  + `/api/dictionary/[id]/{changes,db}`; `wa-sqlite@^1.0.0` lockfile-faithful). **LD design (Jacob):**
+  wa-sqlite = client source of truth; **Orama fed FROM wa-sqlite** (entries-data endpoint + CDN
+  fast-path RETIRED); saves → wa-sqlite. Editor edits now **persist to real server SQLite + round-trip**
+  (verified: NEW `e2e/dict-sync.mjs` — edit → server `.data/dictionaries/achi.db` updates + a fresh
+  no-OPFS context reads it; achi-flow PASS with a reload-persistence assertion). Gate: check 0/15 ·
+  test 178 · build. 📘 `.knowledge/migration/m4-write-sync.md`.
+  **P4b REMAINING:** replace the interim `api.X` Orama double-write with a watcher so **Orama watches
+  wa-sqlite** (one path for local edits + remote sync-pulls) — Jacob's watermark-delta design; the hard
+  part is row→entry_id resolution across ~16 tables (design in `.issues/m4-write-sync.md`).
+  **LD↔house sync-engine gotchas (cross-pollinate — these bite house's wa-sqlite engine too):**
+  - 🆕🐞 **`INSERT OR REPLACE` in a trigger fired by an UPSERT → `UNIQUE constraint failed`.** The
+    `last_modified_at` bump triggers used `INSERT OR REPLACE INTO db_metadata`; the sync engine's
+    `merge_dict_row`/`#upsert_row` write via `INSERT … ON CONFLICT(id) DO UPDATE`, and under
+    `defer_foreign_keys=ON` the outer upsert's conflict policy clashes with the trigger's OR REPLACE →
+    every editor push to an existing row 500s. **Both the example AND house's learn-from engine have
+    this latent** (only surfaces on a real push to a row whose table has an OR-REPLACE trigger). Fix:
+    rewrite the trigger as `INSERT … ON CONFLICT(key) DO UPDATE`. **House should audit its bump/`updated_at`
+    triggers.**
+  - 🆕🐞 **`/changes` (and admin-sync) fast-bail drops editor pushes.** The "nothing changed since
+    cursor" early-return ran before processing dirty rows; the client cursor usually EQUALS the server
+    watermark, so the editor's next push hit `last_modified_at <= synced_up_to` and returned empty —
+    rows never merged. Fix: skip the fast-bail when the caller has dirty rows/tombstones to push.
+    **House's `process_sync` likely has the same guard — check it.**
+  - 🆕 **OPFS works in a dedicated Worker but NOT inside the SharedWorker** (headless Chromium 148) →
+    falls back to MemoryVFS. Fine: sync-from-null backfills, and persistence rides the POST (verify by
+    reading the server db + a fresh no-OPFS context, not just a reload — a reload can be satisfied by
+    local OPFS). SharedWorker `fetch`/`console` don't surface on puppeteer `page.on(...)` — debug by
+    writing state into `db_metadata` from `sync_once` + logging server-side.
+  - 🆕 **New migration to fix shipped triggers:** don't edit the immutable initial migration; add a new
+    `*.sql` (drops+recreates the triggers). `run_sql_migrations` runs on every db open → existing
+    server dbs + client snapshots pick it up; `LATEST_DICT_MIGRATION` advances on both sides so the
+    handshake stays matched. Make seed scripts run migrations from disk (tsx has no `import.meta.glob`).
 - **HOUSE-EDIT** — 🔶 spawned `eacecdd8` (project `house`). Tree clean. PLAN + interview Jacob on the
   next milestone, recommending **(A) library editing on SQLite** (now unblocked by reader-SQLite + the
   admin sync engine) over (B) local search / (C) admin deferred follow-ups / (D) deploy-prep. Carries

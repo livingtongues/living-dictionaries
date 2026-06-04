@@ -26,6 +26,14 @@ Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. Plan + st
   adapter-node `dependencies` gotcha, the "only 4 of 2136 dbs have entries" data finding (+ `VACUUM
   INTO` seeding), keeping achi-flow unchanged by seeding fixtures into `achi.db`, the e2e harnesses
   + their external-error filtering, and what intentionally stays on the stub until auth/M4-write.
+- [m4-write-sync.md](./m4-write-sync.md) — M4 write/sync: the browser wa-sqlite per-dict DB +
+  SharedWorker + bidirectional sync. LD's design (wa-sqlite = client source of truth, Orama fed from
+  it, saves to wa-sqlite); the main-thread-orchestrated Orama feed (worker boundary); the editor write
+  path + interim double-write; **two latent sync bugs found + fixed (also in the example):** the
+  `INSERT OR REPLACE` trigger failing under an UPSERT (fixed via `ON CONFLICT(key)` in a new
+  migration) and the `/changes` fast-bail dropping editor pushes; OPFS→MemoryVFS fallback inside the
+  SharedWorker (round-trip still works via sync-from-null); public snapshot endpoint (no R2; GCS
+  stays); the self-sufficient seed; how to debug SharedWorker fetch/console (invisible to puppeteer).
 - [m4-real-auth.md](./m4-real-auth.md) — M4 auth: porting the example's `AuthUser`/`ssr_user`/
   `dict_roles` model (full port) with two pragmatic LD adaptations (plain `page.data.admin` mirror;
   plain role booleans wrapped in `readable()` only for the search store); the legacy `getSession`
