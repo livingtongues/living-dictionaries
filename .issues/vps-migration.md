@@ -190,7 +190,13 @@ Each is its own milestone with a checkpoint. Order TBD, rough sequence:
       other populated dicts; achi seeded with dev fixtures via `seed:achi-fixture`). `better-sqlite3` in
       `dependencies` (adapter-node gotcha). Writes/auth-gated reads stay on the stub until M4-write/auth.
 - [ ] SQLite **write** path + sync engine (wa-sqlite browser, SharedWorker dict.db, `/changes`).
-- [ ] Real auth (JWT + Google + email-OTP; instant dev login).
+- [x] Real auth (JWT + Google + email-OTP) ✅ DONE (`.issues/m4-real-auth.md`;
+      📘 `.knowledge/migration/m4-real-auth.md`). Full port of the example's `AuthUser`/`ssr_user`/
+      `dict_roles` model: `lib/auth/*` + `lib/admins.ts` + `/api/auth/*` + `/api/me/*`; `ssr_user`
+      from the session-cookie JWT; `can_edit`/`is_manager` from real `dictionary_roles`. send-code
+      rate-limit FIX carried from house. Dev `dev_admin_level` cookie replaces the old admin toggle.
+      6 legacy write/media endpoints keep a real-JWT `getSession` shim until M4-write. check 0/15 ·
+      test 160 · build ✔ · achi-flow reworked to real dev-OTP login (non-admin manager).
 - [ ] Media upload (legacy GCS bucket, presigned PUT).
 - [ ] R2 snapshot builder + cron.
 - [ ] Then the legacy cutover runbook (DNS, catch-up migration) — far future.
