@@ -36,19 +36,38 @@ let sense_videos: Record<string, Tables<'sense_videos'>>
 let sentences: Record<string, Tables<'sentences'>>
 let senses_in_sentences: Record<string, Tables<'senses_in_sentences'>>
 
-const entry_id_to_tags: Record<string, Tables<'tags'>[]> = {}
-const entry_id_to_dialects: Record<string, Tables<'dialects'>[]> = {}
-const entry_id_to_senses: Record<string, Tables<'senses'>[]> = {}
-const sense_id_to_sentences: Record<string, Tables<'sentences'>[]> = {}
-const sense_id_to_photos: Record<string, Tables<'photos'>[]> = {}
-const video_id_to_speakers: Record<string, Tables<'speakers'>[]> = {}
-const sense_id_to_videos: Record<string, Tables<'videos'>[]> = {}
-const audio_id_to_speakers: Record<string, Tables<'speakers'>[]> = {}
-const entry_id_to_audios: Record<string, Tables<'audio'>[]> = {}
+let entry_id_to_tags: Record<string, Tables<'tags'>[]> = {}
+let entry_id_to_dialects: Record<string, Tables<'dialects'>[]> = {}
+let entry_id_to_senses: Record<string, Tables<'senses'>[]> = {}
+let sense_id_to_sentences: Record<string, Tables<'sentences'>[]> = {}
+let sense_id_to_photos: Record<string, Tables<'photos'>[]> = {}
+let video_id_to_speakers: Record<string, Tables<'speakers'>[]> = {}
+let sense_id_to_videos: Record<string, Tables<'videos'>[]> = {}
+let audio_id_to_speakers: Record<string, Tables<'speakers'>[]> = {}
+let entry_id_to_audios: Record<string, Tables<'audio'>[]> = {}
 
-const sentence_id_to_sense_ids: Record<string, string[]> = {}
-const photo_id_to_sense_ids: Record<string, string[]> = {}
-const video_id_to_sense_ids: Record<string, string[]> = {}
+let sentence_id_to_sense_ids: Record<string, string[]> = {}
+let photo_id_to_sense_ids: Record<string, string[]> = {}
+let video_id_to_sense_ids: Record<string, string[]> = {}
+
+// The grouping maps above accumulate via .push() across the bulk load. On a long-running
+// dev server init_entries can run more than once (CDN cache pass + dummy-data pass, navigation),
+// so they must be cleared before each bulk rebuild or items duplicate (e.g. one sense rendered N times).
+// The incremental insert/update/delete operations rebuild correctly from the deduped dicts after a reset.
+function reset_grouping_maps() {
+  entry_id_to_tags = {}
+  entry_id_to_dialects = {}
+  entry_id_to_senses = {}
+  sense_id_to_sentences = {}
+  sense_id_to_photos = {}
+  video_id_to_speakers = {}
+  sense_id_to_videos = {}
+  audio_id_to_speakers = {}
+  entry_id_to_audios = {}
+  sentence_id_to_sense_ids = {}
+  photo_id_to_sense_ids = {}
+  video_id_to_sense_ids = {}
+}
 
 const operations = {
   insert_entry: async (entry: TablesInsert<'entries'>) => {
@@ -432,6 +451,8 @@ export async function init_entries(
     sense_videos_promise,
     senses_in_sentences_promise,
   ]))
+
+  reset_grouping_maps()
 
   for (const entry_tag of Object.values(entry_tags)) {
     if (!entry_id_to_tags[entry_tag.entry_id]) entry_id_to_tags[entry_tag.entry_id] = []
