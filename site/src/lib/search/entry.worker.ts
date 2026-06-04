@@ -2,13 +2,9 @@ import { expose } from 'comlink'
 import type { EntryData, Tables, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
 import { clear } from 'idb-keyval'
 import { _search_entries, create_index, update_index_entry } from './orama.worker'
-import { create_stub_supabase_client } from '$lib/supabase/stub-client'
 import { should_include_tag } from '$lib/helpers/tag-visibility'
-import type { Supabase } from '$lib/supabase'
-import { cached_data_table, cached_join_table } from '$lib/supabase/cached-data'
 
 const log = false
-let supabase: Supabase | undefined
 
 let dictionary_id: string
 let admin: number
@@ -363,7 +359,6 @@ export async function init_entries(
   mark_search_index_updated = _mark_search_index_updated
 
   ;({ dictionary_id, admin } = options)
-  const { can_edit } = options
 
   const cached = await load_cache(dictionary_id)
   if (cached) {
@@ -382,75 +377,27 @@ export async function init_entries(
     console.info('can search using cached entries_data')
   }
 
-  if (!supabase) {
-    // vps-migration M1: in-memory stub instead of a real Supabase client.
-    supabase = create_stub_supabase_client()
-  }
+  // vps-migration M4 Phase B: load the full per-dictionary content bundle from the
+  // server SQLite endpoint (better-sqlite3, server-only) instead of the Supabase
+  // stub / cached_data_table paging. Rows arrive in the legacy supabase shape.
+  const bundle = await fetch_entries_data(dictionary_id)
 
-  if (cached && !can_edit) {
-    const tags_promise = cached_data_table({ table: 'tags', include: ['name'], dictionary_id, supabase, log })
-    const dialects_promise = cached_data_table({ table: 'dialects', include: ['name'], dictionary_id, supabase, log });
-    ([tags, dialects] = await Promise.all([tags_promise, dialects_promise]))
-    set_tags(Object.values(tags))
-    set_dialects(Object.values(dialects))
-
-    set_loading(false)
-    return
-  }
-
-  const entries_promise = cached_data_table({ table: 'entries', include: ['coordinates', 'elicitation_id', 'interlinearization', 'lexeme', 'linguistic_history', 'morphology', 'notes', 'phonetic', 'scientific_names', 'sources'], dictionary_id, supabase, log })
-  const senses_promise = cached_data_table({ table: 'senses', include: ['created_at', 'entry_id', 'definition', 'glosses', 'noun_class', 'parts_of_speech', 'plural_form', 'semantic_domains', 'variant', 'write_in_semantic_domains'], dictionary_id, supabase, log })
-  const audios_promise = cached_data_table({ table: 'audio', include: ['created_at', 'entry_id', 'source', 'storage_path'], dictionary_id, supabase, log })
-  const speakers_promise = cached_data_table({ table: 'speakers', include: ['birthplace', 'decade', 'gender', 'name'], dictionary_id, supabase, log })
-  const tags_promise = cached_data_table({ table: 'tags', include: ['name', 'private'], dictionary_id, supabase, log })
-  const dialects_promise = cached_data_table({ table: 'dialects', include: ['name'], dictionary_id, supabase, log })
-  const photos_promise = cached_data_table({ table: 'photos', include: ['photographer', 'storage_path', 'serving_url', 'source'], dictionary_id, supabase, log })
-  const videos_promise = cached_data_table({ table: 'videos', include: ['hosted_elsewhere', 'source', 'storage_path', 'videographer'], dictionary_id, supabase, log })
-  const sentences_promise = cached_data_table({ table: 'sentences', include: ['text', 'translation'], dictionary_id, supabase, log })
-
-  const audio_speakers_promise = cached_join_table({ table: 'audio_speakers', id_field_1: 'audio_id', id_field_2: 'speaker_id', dictionary_id, supabase, log })
-  const entry_tags_promise = cached_join_table({ table: 'entry_tags', id_field_1: 'entry_id', id_field_2: 'tag_id', dictionary_id, supabase, log })
-  const entry_dialects_promise = cached_join_table({ table: 'entry_dialects', id_field_1: 'entry_id', id_field_2: 'dialect_id', dictionary_id, supabase, log })
-  const sense_photos_promise = cached_join_table({ table: 'sense_photos', id_field_1: 'sense_id', id_field_2: 'photo_id', dictionary_id, supabase, log })
-  const video_speakers_promise = cached_join_table({ table: 'video_speakers', id_field_1: 'video_id', id_field_2: 'speaker_id', dictionary_id, supabase, log })
-  const sense_videos_promise = cached_join_table({ table: 'sense_videos', id_field_1: 'sense_id', id_field_2: 'video_id', dictionary_id, supabase, log })
-  const senses_in_sentences_promise = cached_join_table({ table: 'senses_in_sentences', id_field_1: 'sense_id', id_field_2: 'sentence_id', dictionary_id, supabase, log })
-
-    ;([
-    entries,
-    senses,
-    audios,
-    speakers,
-    tags,
-    dialects,
-    photos,
-    videos,
-    sentences,
-    audio_speakers,
-    entry_tags,
-    entry_dialects,
-    sense_photos,
-    video_speakers,
-    sense_videos,
-    senses_in_sentences,
-  ] = await Promise.all([
-    entries_promise,
-    senses_promise,
-    audios_promise,
-    speakers_promise,
-    tags_promise,
-    dialects_promise,
-    photos_promise,
-    videos_promise,
-    sentences_promise,
-    audio_speakers_promise,
-    entry_tags_promise,
-    entry_dialects_promise,
-    sense_photos_promise,
-    video_speakers_promise,
-    sense_videos_promise,
-    senses_in_sentences_promise,
-  ]))
+  entries = key_by_id(bundle.entries)
+  senses = key_by_id(bundle.senses)
+  audios = key_by_id(bundle.audio)
+  speakers = key_by_id(bundle.speakers)
+  tags = key_by_id(bundle.tags)
+  dialects = key_by_id(bundle.dialects)
+  photos = key_by_id(bundle.photos)
+  videos = key_by_id(bundle.videos)
+  sentences = key_by_id(bundle.sentences)
+  audio_speakers = key_by_pair(bundle.audio_speakers, 'audio_id', 'speaker_id')
+  entry_tags = key_by_pair(bundle.entry_tags, 'entry_id', 'tag_id')
+  entry_dialects = key_by_pair(bundle.entry_dialects, 'entry_id', 'dialect_id')
+  sense_photos = key_by_pair(bundle.sense_photos, 'sense_id', 'photo_id')
+  video_speakers = key_by_pair(bundle.video_speakers, 'video_id', 'speaker_id')
+  sense_videos = key_by_pair(bundle.sense_videos, 'sense_id', 'video_id')
+  senses_in_sentences = key_by_pair(bundle.senses_in_sentences, 'sense_id', 'sentence_id')
 
   reset_grouping_maps()
 
@@ -563,6 +510,42 @@ function process_entry(entry: Tables<'entries'>) {
     ...(entry_id_to_dialects[id] ? { dialects: entry_id_to_dialects[id] } : {}),
     ...(deleted ? { deleted } : {}),
   }
+}
+
+type EntriesDataBundle = Record<string, any[]>
+
+// vps-migration M4 Phase B: fetch the full per-dictionary content bundle from the
+// server SQLite endpoint (better-sqlite3 reads `dictionaries/{id}.db`).
+async function fetch_entries_data(dictionary_id: string): Promise<EntriesDataBundle> {
+  const empty: EntriesDataBundle = {
+    entries: [], senses: [], audio: [], speakers: [], tags: [], dialects: [], photos: [], videos: [], sentences: [],
+    audio_speakers: [], entry_tags: [], entry_dialects: [], sense_photos: [], video_speakers: [], sense_videos: [], senses_in_sentences: [],
+  }
+  try {
+    const response = await fetch(`/api/dictionaries/${dictionary_id}/entries-data`)
+    if (!response.ok) {
+      console.error(`Could not load entries data for ${dictionary_id}: ${response.status}`)
+      return empty
+    }
+    return { ...empty, ...(await response.json() as EntriesDataBundle) }
+  } catch (err) {
+    console.error('Error loading entries data', err)
+    return empty
+  }
+}
+
+function key_by_id(rows: any[]): Record<string, any> {
+  return rows.reduce((acc, row) => {
+    acc[row.id] = row
+    return acc
+  }, {} as Record<string, any>)
+}
+
+function key_by_pair(rows: any[], field_1: string, field_2: string): Record<string, any> {
+  return rows.reduce((acc, row) => {
+    acc[`${row[field_1]}_${row[field_2]}`] = row
+    return acc
+  }, {} as Record<string, any>)
 }
 
 async function load_cache(dictionary_id: string) {
