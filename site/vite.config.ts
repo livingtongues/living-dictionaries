@@ -42,6 +42,7 @@ export default defineConfig({
       '@turf/turf',
       'sveltefirets',
       '@sentry/browser',
+      'wa-sqlite', // Emscripten loader resolves its .wasm via a relative import.meta.url that pre-bundling breaks
     ],
   },
 })

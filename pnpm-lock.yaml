@@ -167,6 +167,9 @@ importers:
       satori-html:
         specifier: ^0.3.0
         version: 0.3.0
+      wa-sqlite:
+        specifier: ^1.0.0
+        version: 1.0.0
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.693.0
@@ -5695,6 +5698,9 @@ packages:
         optional: true
       jsdom:
         optional: true
+
+  wa-sqlite@1.0.0:
+    resolution: {integrity: sha512-Kyybo5/BaJp76z7gDWGk2J6Hthl4NIPsE+swgraEjy3IY6r5zIR02wAs1OJH4XtJp1y3puj3Onp5eMGS0z7nUA==}
 
   wait-on@7.2.0:
     resolution: {integrity: sha512-wCQcHkRazgjG5XoAq9jbTMLpNIjoSlZslrJ2+N9MxDsGEv1HnFoVjOCexL0ESva7Y9cu350j+DWADdk54s4AFQ==}
@@ -12698,6 +12704,8 @@ snapshots:
       '@vitest/ui': 4.1.8(vitest@4.1.8)
     transitivePeerDependencies:
       - msw
+
+  wa-sqlite@1.0.0: {}
 
   wait-on@7.2.0(debug@4.3.6):
     dependencies:
