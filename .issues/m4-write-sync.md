@@ -155,20 +155,39 @@ Q5 achi-flow round-trip · Q6 reuse dict-live-db write methods vs thin writer ·
 verification risk.
 
 ## Build phases (each a verified commit on `vps-migration`; no push)
-- [ ] **P1 · server:** port `dictionary-sync-helpers.ts` + `/api/dictionary/[id]/{changes,db}`
-      (snapshot public read, drop R2; push editor-gated) + constants; port the example's
-      `dictionary-sync.test.ts`. Gate: check/test/build.
-- [ ] **P2 · client engine:** port `client/connection.ts` + `client/live/{notifier,reconcile-rows}.ts`
-      + `dict-client/*` (incl. dict-live-db) + `wa-sqlite` dep + vite `optimizeDeps.exclude`. Build +
-      a tiny headless smoke (open SharedWorker → opfs probe / sync-from-null populates) to confirm the
-      browser stack loads. Gate: check/test/build/boot.
-- [ ] **P3 · feed flip:** wire `[dictionaryId]/+layout.ts` (everyone opens dict_db; bootstrap via
-      snapshot then sync) → feed the Orama worker from wa-sqlite (new `init_entries` source) →
-      **retire** the entries-data endpoint + CDN fast-path. Gate: list/search/single-entry render from
-      wa-sqlite; check/test/build/boot.
-- [ ] **P4 · writes + watch-reindex:** swap operations.ts persistence → `dict_db.X` (drop `api.X`);
-      add the local-watermark delta watcher (tables_changed → reindex changed entries). Gate: edit
-      reflects in UI via the watcher (not double-write).
-- [ ] **P5 · round-trip e2e:** rework achi-flow to edit → sync_now → reload → assert persisted from
-      server SQLite + no pageerror; add a dedicated `e2e/dict-sync.mjs`. Gate: flows green.
-- [ ] Update `.knowledge/` + the orchestration ledger (LD↔house sync gotchas).
+- [x] **P1 · server** ✅ `f6016bdf`. Ported `dictionary-sync-helpers.ts` + `/api/dictionary/[id]/
+      {changes,db}` (snapshot served publicly; push editor-gated; resolves url→id) + constants +
+      `dictionary-sync.test.ts`. check 0/15 · test 164 · build · curl smoke (snapshot + pull).
+- [x] **P2 · client engine** ✅ `685126d4`. Ported `client/{connection,live/*}` + `dict-client/*`
+      (incl. dict-live-db) + `wa-sqlite@^1.0.0` (lockfile-faithful) + vite exclude. Headless probe
+      confirmed SharedWorker + OPFS + SyncAccessHandle all work in Chromium 148. check 0/15 · test 178.
+- [x] **P3 · feed flip** ✅ `098aa003`. `[dictionaryId]/+layout.ts` opens dict_db for everyone
+      (bootstrap snapshot + sync_now) → Orama worker fed from wa-sqlite (`read-dict-bundle.ts` →
+      `init_entries(bundle)`) → **retired** the entries-data endpoint + CDN fast-path. achi-flow PASS
+      (13 entries from wa-sqlite logged-out + in).
+- [x] **P4a · real writes + round-trip** ✅ `70334be9`. operations.ts persists to `dict_db.X` (drop
+      `dictionary_id`; audit ids; junction composite link/unlink; soft-delete via `deleted`). Kept
+      `api.X` for instant UI (interim — P4b removes it). Self-sufficient seed (runs migrations).
+      **Two latent bugs fixed (also in the example):** (1) `20260605_fix_lmod_triggers.sql` — the
+      last_modified_at triggers' `INSERT OR REPLACE INTO db_metadata` 500s when fired from an UPSERT
+      (outer ON CONFLICT vs trigger OR REPLACE under defer_foreign_keys); recreated all 38 with
+      `ON CONFLICT(key) DO UPDATE`. (2) `/changes` fast-bail silently dropped an editor's dirty rows
+      when `last_modified_at <= synced_up_to` (cursor usually == watermark); now only bails when
+      nothing to push. **Verified:** NEW `e2e/dict-sync.mjs` PASS (edit → server SQLite persists +
+      fresh no-OPFS context reads it) · achi-flow PASS with a reload round-trip assertion · check 0/15
+      · test 178 · build.
+- [ ] **P4b · watch-based Orama feed (drop the double-write)** — REMAINING. Replace operations.ts's
+      `api.X` calls with a watcher so **Orama watches wa-sqlite** (one path for local edits + remote
+      sync-pulls). Design (Jacob's T2-Q1 = local-watermark delta): subscribe to `dict_db`'s notifier
+      (fires on local writes via dict-live-db.notify AND on remote pulls via the SharedWorker
+      `tables_changed` broadcast → DictLiveDbImpl → notifier); debounced, query wa-sqlite for rows
+      `WHERE updated_at > last_indexed_at`, resolve affected entry_ids, reindex only those.
+      **The hard part (Jacob flagged it):** row→entry_id resolution across the ~16 tables (junctions/
+      media need FK joins, e.g. sense_photos→senses→entry_id; a tag/speaker rename fans out via
+      entry_tags / audio_speakers→audio). Two impl options: (a) main-thread `assemble_entry(entry_id)`
+      from wa-sqlite + new worker `index_entry`/`remove_entry` ops (duplicates process_entry assembly),
+      or (b) refactor the worker's per-row `operations` into one upsert-safe `apply_row(table,row)`
+      dispatcher (keeps assembly in the worker; `update_X` must insert-if-missing for pulled-new rows).
+      Verify by removing `api.X` and confirming achi-flow's "edit reflected in UI" still passes (now
+      via the watcher) + a 2-context remote-pull reindex test.
+- [ ] Update `.knowledge/` + the orchestration ledger (LD↔house sync gotchas). ✅ knowledge written.
