@@ -110,7 +110,7 @@
       on:changed={async ({ detail: { checked } }) => {
         if (!checked) {
           await updateDictionary({ public: false })
-        } else if ($admin) {
+        } else if (admin) {
           await updateDictionary({ public: true })
           dictionary.public = true
         } else if (about_is_too_short()) {
@@ -125,7 +125,7 @@
     <div class="mb-5"></div>
   {/if}
 
-  {#if $is_manager}
+  {#if is_manager}
     <div>
       <ShowHide>
         {#snippet children({ show, toggle })}
@@ -143,7 +143,7 @@
     </div>
   {/if}
 
-  {#if $admin > 1}
+  {#if admin > 1}
     <div class="mt-5">
       <JSON obj={dictionary} />
     </div>

@@ -37,7 +37,7 @@
       <ListEntry
         {dictionary}
         {entry}
-        can_edit={$can_edit}
+        can_edit={can_edit}
         on_click={(e) => { handle_entry_click(e, entry) }}
         {dbOperations} />
 
@@ -58,18 +58,18 @@
       {entries}
       preferred_table_columns={$preferred_table_columns}
       {dictionary}
-      can_edit={$can_edit}
+      can_edit={can_edit}
       {dbOperations} />
   {:else if $search_params.view === 'gallery'}
     <EntriesGallery
       {entries}
       {dictionary}
-      can_edit={$can_edit} />
+      can_edit={can_edit} />
   {:else if $search_params.view === 'print'}
     <EntriesPrint
       {search_params}
       {entries}
       {dictionary}
-      can_edit={$can_edit} />
+      can_edit={can_edit} />
   {/if}
 {/if}

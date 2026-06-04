@@ -1,5 +1,4 @@
 import type { TablesInsert } from '@living-dictionaries/types'
-import { get } from 'svelte/store'
 import type { PageLoad } from './$types'
 import { pruneObject } from '$lib/helpers/prune'
 import { api_create_dictionary } from '$api/db/create-dictionary/_call'
@@ -15,9 +14,8 @@ export const load = (({ parent }) => {
   }
 
   async function create_dictionary(dictionary: TablesInsert<'dictionaries'>) {
-    const { t, user, supabase } = await parent()
-    const $user = get(user)
-    if (!$user) return alert('Please login first') // this should never fire as should be caught in page
+    const { t, ssr_user, supabase } = await parent()
+    if (!ssr_user) return alert('Please login first') // this should never fire as should be caught in page
 
     if (dictionary.id.length < MIN_URL_LENGTH) {
       return alert(t('create.choose_different_url'))
@@ -38,7 +36,7 @@ export const load = (({ parent }) => {
 
       const { error: terms_agreement_error } = await supabase.from('user_data').update({
         terms_agreement: new Date().toISOString(),
-      }).eq('id', $user.id)
+      }).eq('id', ssr_user.id)
       if (terms_agreement_error) {
         console.error(terms_agreement_error)
       }

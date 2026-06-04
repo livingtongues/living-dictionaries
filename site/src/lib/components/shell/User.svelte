@@ -1,14 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { Button, Menu, ShowHide } from '$lib/svelte-pieces'
-  import { display_one_tap_popover, sign_out } from '$lib/supabase/auth'
+  import { display_one_tap_popover } from '$lib/auth/google-one-tap'
+  import { sign_out } from '$lib/auth/sign-out'
   import { page } from '$app/stores'
   import { mode } from '$lib/supabase'
-  import { api_update_dev_admin_role } from '$api/db/update-dev-admin-role/_call'
+  import { api_dev_admin_level } from '$api/auth/dev-admin-level/_call'
   import { invalidateAll } from '$app/navigation'
   import { dev } from '$app/environment'
 
-  const { user, admin } = $derived($page.data)
+  const { auth_user, admin } = $derived($page.data)
+  const user = $derived(auth_user.user)
   let show_menu = $state(false)
   function toggle_menu() {
     const state = show_menu
@@ -19,10 +21,11 @@
   }
 
   async function setAdminRole() {
-    const role_level = +prompt('Enter 0, 1, or 2')
-    if (role_level !== 0 && role_level !== 1 && role_level !== 2)
+    const input = prompt('Enter 0, 1, or 2')
+    const level = input === null ? null : +input
+    if (level !== 0 && level !== 1 && level !== 2)
       return
-    const { error } = await api_update_dev_admin_role({ role_level })
+    const { error } = await api_dev_admin_level({ level })
     if (error) {
       console.error(error)
     } else {
@@ -33,39 +36,37 @@
   onMount(() => {
     if (location.origin.includes('vercel.app'))
       return
-    if ($user)
+    if (user)
       return
-    if (!$page.data.supabase)
-      return
-    display_one_tap_popover()
+    display_one_tap_popover().catch(error => console.error('[google one-tap]', error))
   })
 
   let broken_avatar_image = $state(false)
 </script>
 
-{#if $user}
+{#if user}
   <div class="relative flex-shrink-0">
     <button class="px-3 py-1" type="button" onclick={toggle_menu}>
-      {#if $user.user_metadata?.avatar_url && !broken_avatar_image}
+      {#if user.avatar_url && !broken_avatar_image}
         <img
           class="w-34px h-34px rounded-full"
-          alt={$user.email[0]}
-          src={$user.user_metadata.avatar_url}
+          alt={user.email?.[0]}
+          src={user.avatar_url}
           onerror={() => broken_avatar_image = true} />
       {:else}
         <div
           class="w-34px h-34px rounded-full flex items-center justify-center font-semibold bg-gray-100 hover:bg-gray-200 uppercase">
-          {($user.user_metadata?.full_name || $user.email)[0]}
+          {(user.name || user.email)[0]}
         </div>
       {/if}
     </button>
     {#if show_menu}
       <Menu portalTarget="#direction" class="right-2 rtl:left-2 top-11" onclickoutside={toggle_menu}>
-        <div class="px-4 py-2 text-xs font-semibold text-gray-600">{$user.user_metadata?.full_name || $user.email}</div>
-        {#if $user.user_metadata?.full_name}
-          <div class="px-4 py-2 -mt-3 text-xs text-gray-600 border-b">{$user.email}</div>
+        <div class="px-4 py-2 text-xs font-semibold text-gray-600">{user.name || user.email}</div>
+        {#if user.name}
+          <div class="px-4 py-2 -mt-3 text-xs text-gray-600 border-b">{user.email}</div>
         {/if}
-        {#if $admin}
+        {#if admin}
           <a href="/admin">
             Admin Panel
             <i class="fas fa-key"></i>
@@ -77,7 +78,7 @@
           <button
             type="button"
             onclick={setAdminRole}>
-            Dev: Set Admin Role Level (currently {$user.app_metadata.admin})
+            Dev: Set Admin Role Level (currently {admin})
           </button>
         {/if}
       </Menu>

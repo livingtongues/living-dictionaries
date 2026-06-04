@@ -16,7 +16,7 @@
     {$page.data.t('dictionary.grammar')}
   </h3>
 
-  {#if $is_manager}
+  {#if is_manager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}>{$page.data.t('misc.cancel')}</Button>
       <Button

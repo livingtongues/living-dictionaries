@@ -1,26 +1,31 @@
 // https://kit.svelte.dev/docs/types#app
-import type { AuthResponse } from '@supabase/supabase-js'
 import type { Readable } from 'svelte/store'
 import type { LayoutData as DictionaryLayoutData } from './routes/[dictionaryId]/$types'
-import type { BaseUser } from '$lib/supabase/user'
+import type { AuthUser } from '$lib/auth/user.svelte'
+import type { AuthUserData } from '$lib/auth/types'
+import type { MyDictionaryRolesCache } from '$lib/me/dictionary-roles.svelte'
 import type { DictionaryWithRoles } from '$lib/supabase/dictionaries'
 import type { Supabase } from '$lib/supabase'
 
 declare global {
   namespace App {
     interface Locals {
-      getSession: () => Promise<AuthResponse & { supabase: Supabase }> | null
+      getSession: () => Promise<{ data: { user: any, session: any }, error: any, supabase: Supabase }>
     }
     interface PageData {
       locale: import('$lib/i18n/locales').LocaleCode
       t: import('$lib/i18n/types.ts').TranslateFunction
-      admin: Readable<number>
       supabase: Supabase
-      authResponse: AuthResponse
-      user: Readable<BaseUser>
+      auth_user: AuthUser
+      dict_roles: MyDictionaryRolesCache
+      ssr_user: AuthUserData | null
+      admin: number
       my_dictionaries: Readable<DictionaryWithRoles[]>
 
       // From dictionary layout so all optional
+      can_edit?: boolean
+      is_manager?: boolean
+      is_contributor?: boolean
       dictionary?: DictionaryLayoutData['dictionary']
       dbOperations?: DictionaryLayoutData['dbOperations']
       url_from_storage_path?: DictionaryLayoutData['url_from_storage_path']
@@ -52,10 +57,6 @@ declare global {
 
   interface Document {
     startViewTransition: (updateCallback: () => Promise<void>) => ViewTransition
-  }
-
-  interface Window {
-    handleSignInWithGoogle: (response) => Promise<void>
   }
 }
 

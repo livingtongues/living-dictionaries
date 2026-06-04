@@ -29,11 +29,11 @@
 <ShowHide>
   {#snippet children({ show, toggle, set })}
     <div
-      class:cursor-pointer={$can_edit}
+      class:cursor-pointer={can_edit}
       class:italic={field === 'scientific_names' && !value?.includes('<i>')}
       class="h-full"
       style="padding: 0.1em 0.25em"
-      onclick={() => set($can_edit)}>
+      onclick={() => set(can_edit)}>
       {@html sanitizedHtml}
       &nbsp;
     </div>

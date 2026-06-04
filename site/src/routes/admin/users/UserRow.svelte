@@ -20,7 +20,7 @@
   const contributing_dictionary_ids = $derived(user.dictionary_roles.filter(({ role }) => role === 'contributor').map(({ dictionary_id }) => dictionary_id) || [])
 </script>
 
-<tr title={$admin > 1 && JSON.stringify(user, null, 1)}>
+<tr title={admin > 1 && JSON.stringify(user, null, 1)}>
   <td class="font-bold">
     {user.email}
   </td>

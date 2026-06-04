@@ -1,14 +1,13 @@
-import { getSession, getSupabase } from '$lib/supabase'
-import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from '$lib/constants'
+import { getSupabase } from '$lib/supabase'
+import { get_legacy_session } from '$lib/supabase/get-legacy-session.server'
 
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
-  // only useful for things that are guaranteed to run server-side but not for passing to the client
+  // M4-auth: rebuild the legacy Supabase-shaped session from the real
+  // session-cookie JWT for the not-yet-migrated write/media/email endpoints.
   event.locals.getSession = async () => {
     const supabase = getSupabase()
-    const access_token = event.cookies.get(ACCESS_TOKEN_COOKIE_NAME)
-    const refresh_token = event.cookies.get(REFRESH_TOKEN_COOKIE_NAME)
-    const session = await getSession({ supabase, access_token, refresh_token })
+    const session = await get_legacy_session({ supabase, cookies: event.cookies })
     return { ...session, supabase }
   }
 

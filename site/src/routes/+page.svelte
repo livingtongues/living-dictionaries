@@ -46,7 +46,7 @@
   const featured_dictionaries = $derived(public_dictionaries.filter(d => featured_dict_names.includes(d.name)))
 
   run(() => {
-    if (browser && $admin) {
+    if (browser && admin) {
       get_private_dictionaries().then(_dictionaries => private_dictionaries = _dictionaries)
     } else {
       private_dictionaries = []
@@ -121,7 +121,7 @@
           {/await}
         {/if}
       {/if}
-      {#if $admin}
+      {#if admin}
         <ShowHide>
           {#snippet children({ show, toggle })}
                     <CustomControl position="bottom-right">

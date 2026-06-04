@@ -23,7 +23,7 @@
         {name}
       </Button>
     {/each}
-    {#if $admin}
+    {#if admin}
       {#each unpublishedLocales as [bcp, name] (bcp)}
         <Button
           class="mr-1 mb-1 !normal-case"

@@ -1,7 +1,7 @@
 export async function load({ params: { inviteId }, parent }) {
-  const { t, supabase, authResponse } = await parent()
+  const { t, supabase, ssr_user } = await parent()
 
-  if (!authResponse?.data?.user) {
+  if (!ssr_user) {
     return { invite: null, accept_invite: null }
   }
 
@@ -27,7 +27,7 @@ export async function load({ params: { inviteId }, parent }) {
         throw new Error(update_error.message)
       }
 
-      const { error } = await supabase.from('user_data').update({ terms_agreement: new Date().toISOString() }).eq('id', authResponse.data.user.id)
+      const { error } = await supabase.from('user_data').update({ terms_agreement: new Date().toISOString() }).eq('id', ssr_user.id)
       if (error) {
         throw new Error(error.message)
       }

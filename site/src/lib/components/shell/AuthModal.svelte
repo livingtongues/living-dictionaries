@@ -3,12 +3,14 @@
 
   import { onMount } from 'svelte'
   import { toast } from '../ui/Toasts.svelte'
-  import { handle_sign_in_response } from '../../supabase/sign_in'
   import { Button, Form, Modal } from '$lib/svelte-pieces'
-  import { display_one_tap_button } from '$lib/supabase/auth'
+  import { display_one_tap_button } from '$lib/auth/google-one-tap'
+  import { get_auth_user } from '$lib/auth/user.svelte'
   import { page } from '$app/stores'
+  import { invalidateAll } from '$app/navigation'
   import { dev } from '$app/environment'
-  import { api_email_otp } from '$api/email/otp/_call'
+  import { api_auth_email_send_code } from '$api/auth/email/send-code/_call'
+  import { api_auth_email_verify } from '$api/auth/email/verify/_call'
 
   interface Props {
     context?: 'force'
@@ -17,23 +19,24 @@
 
   const { context = undefined, on_close }: Props = $props()
 
-  let email = $state(dev ? 'manual@mock.com' : '')
+  let email = $state(dev ? 'jwrunner7@gmail.com' : '')
   let sixDigitCodeSent = $state(false)
   let sixDigitCode: string = $state()
   const TEN_SECONDS = 10000
   const FOUR_SECONDS = 4000
 
   async function sendCode() {
-    const { data, error } = await api_email_otp({ email })
+    const { data, error } = await api_auth_email_send_code({ email })
 
-    if (data?.otp) {
-      sixDigitCode = data.otp
+    if (error)
+      return toast(error.message, TEN_SECONDS)
+
+    // In dev the server returns the code inline — auto-fill so the effect below submits it.
+    if (data.code) {
+      sixDigitCode = data.code
       return
     }
 
-    console.info({ data, error })
-    if (error)
-      return toast(error.message, TEN_SECONDS)
     toast(`Sent code to: ${email}`, FOUR_SECONDS)
     sixDigitCodeSent = true
   }
@@ -41,17 +44,16 @@
   let submitting_code = $state(false)
   async function handleOTP(code: string) {
     submitting_code = true
-    const { data, error } = await $page.data.supabase.auth.verifyOtp({
-      email,
-      token: code.toString(),
-      type: 'email',
-    })
+    const { data, error } = await api_auth_email_verify({ email, code: code.toString() })
 
     sixDigitCode = null
     submitting_code = false
-    handle_sign_in_response({ user: data?.user, error, supabase: $page.data.supabase })
-    if (!error)
-      on_close()
+    if (error)
+      return toast(error.message, TEN_SECONDS)
+
+    get_auth_user().set_session({ user: data.user })
+    await invalidateAll()
+    on_close()
   }
 
   const code_is_6_digits = $derived(/^\d{6}$/.test(sixDigitCode))

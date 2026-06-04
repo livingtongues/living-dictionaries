@@ -106,7 +106,7 @@
 
   <div class="modal-footer">
     {#if sound_file}
-      {#if $admin > 1}
+      {#if admin > 1}
         <JSON obj={sound_file} />
         <div class="w-1"></div>
       {/if}

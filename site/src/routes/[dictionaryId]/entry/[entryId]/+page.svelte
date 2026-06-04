@@ -42,10 +42,10 @@
   </Button>
 
   <div>
-    {#if dev || $admin > 1}
+    {#if dev || admin > 1}
       <JSON obj={entry} />
     {/if}
-    {#if $can_edit}
+    {#if can_edit}
       <Button
         color="red"
         form="simple"
@@ -75,7 +75,7 @@
   {entry}
   entry_history={$entry_history}
   {dictionary}
-  can_edit={$can_edit}
+  can_edit={can_edit}
   {dbOperations} />
 
 <SeoMetaTags

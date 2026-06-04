@@ -7,7 +7,10 @@
 //   pnpm -F site build && pnpm -F site test:flow        # build once, then run
 //   BASE_URL=http://localhost:3041 pnpm -F site test:flow   # against a running server
 //
-// Relies on the M2b stub seeding dummy achi entries + a logged-in mock manager (can_edit=true).
+// M4-auth: real auth. Logs in via the dev OTP path (send-code returns the code when
+// E2E_EXPOSE_OTP=true) as the seeded NON-admin `achi-manager@example.com`, so `can_edit`
+// resolves from a real `dictionary_roles` row (not an admin bypass). Run `pnpm seed:achi-fixture`
+// first to seed the achi entries + the manager user/role into `.data`.
 /* eslint-disable no-console, node/prefer-global/process, unicorn/prefer-dom-node-text-content -- node CLI: console is the output channel + process drives the exit code; innerText (not textContent) is the right API for asserting on whitespace-normalized RENDERED text */
 
 import { spawn } from 'node:child_process'
@@ -48,7 +51,16 @@ async function ensure_build() {
 function boot_server() {
   return new Promise((resolve, reject) => {
     console.log(`• booting \`node build\` on :${port}…`)
-    server = spawn('node', ['build'], { cwd: site_dir, env: { ...process.env, PORT: port } })
+    server = spawn('node', ['build'], {
+      cwd: site_dir,
+      env: {
+        ...process.env,
+        PORT: port,
+        // Real auth needs a signing secret; the e2e OTP escape hatch returns the code inline.
+        JWT_SECRET: process.env.JWT_SECRET || 'e2e-test-secret-that-is-long-enough-for-hs256',
+        E2E_EXPOSE_OTP: 'true',
+      },
+    })
     const timer = setTimeout(() => reject(new Error('server did not log "Listening on" within 30s')), 30000)
     server.stdout.on('data', (chunk) => {
       if (chunk.toString().includes('Listening on')) {
@@ -91,6 +103,32 @@ async function main() {
   // Force English UI — the app picks locale from accept-language and headless Chrome may default
   // to another locale (e.g. zh), which would break the English text assertions below.
   await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
+
+  const page_errors = []
+  page.on('pageerror', error => page_errors.push(error.message))
+
+  // 0a — logged out: entry renders read-only. `Add Audio` is gated behind
+  // can_edit, so its ABSENCE proves the logged-out viewer can't edit.
+  await page.goto(`${base}/achi/entry/e_ja`, { waitUntil: 'domcontentloaded' })
+  await page.waitForFunction(() => document.body.innerText.includes('water'))
+  const logged_out_can_edit = await page.evaluate(() => document.body.innerText.includes('Add Audio'))
+  if (logged_out_can_edit) throw new Error('logged-out user sees the "Add Audio" edit affordance — can_edit should be false')
+  await shot(page, 'logged-out-entry')
+  step('logged out → entry renders read-only (no edit affordance)')
+
+  // 0b — log in as the seeded NON-admin achi manager via the dev OTP API (in-page, cookies stick)
+  const login = await page.evaluate(async (email) => {
+    const send = await fetch('/api/auth/email/send-code', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email }) })
+    const { code } = await send.json()
+    const verify = await fetch('/api/auth/email/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, code }) })
+    const verify_body = await verify.json()
+    const me = await (await fetch('/api/auth/me')).json()
+    return { verify_status: verify.status, user: verify_body.user, me }
+  }, 'achi-manager@example.com')
+  if (login.verify_status !== 200) throw new Error(`verify failed: ${login.verify_status} ${JSON.stringify(login.user)}`)
+  if (!login.me?.email) throw new Error('logged-in /api/auth/me returned no user')
+  if (login.me.is_admin || login.me.admin_level !== null) throw new Error(`achi manager must be NON-admin, got is_admin=${login.me.is_admin} admin_level=${login.me.admin_level}`)
+  step(`logged in as ${login.me.email} (non-admin: is_admin=${login.me.is_admin}, admin_level=${login.me.admin_level})`)
 
   // 1 — entries list renders the seeded dummy entries
   await page.goto(`${base}/achi/entries`, { waitUntil: 'domcontentloaded' })
@@ -159,7 +197,10 @@ async function main() {
   await shot(page, 'sense-deleted')
   step('deleted Sense 2 → back to 1 sense, original sense intact')
 
-  console.log('\n✅ achi deep-flow PASS — all 5 steps verified')
+  if (page_errors.length) throw new Error(`pageerror(s) during flow: ${page_errors.join(' | ')}`)
+  step('no uncaught page errors during the flow')
+
+  console.log('\n✅ achi deep-flow PASS — real-auth manager edit verified')
 }
 
 async function cleanup() {
