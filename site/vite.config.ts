@@ -22,6 +22,9 @@ export default defineConfig({
   worker: {
     format: 'es', // to allow code-splitted supabase to be imported into the worker
   },
+  ssr: {
+    external: ['better-sqlite3'], // native module: keep external so adapter-node doesn't inline its bindings loader
+  },
   define: getReplacements(),
   optimizeDeps: {
     include: [ // if the dependency is large with many internal modules or is CommonJS then include it
