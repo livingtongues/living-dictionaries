@@ -326,6 +326,7 @@ export interface InitEntryWorkerOptions {
   dictionary_id: string
   can_edit: boolean
   admin: number
+  bundle: EntriesDataBundle
   set_entries_data: (entries_data: Record<string, EntryData>) => void
   upsert_entry_data: (entries_data: Record<string, EntryData>) => void
   delete_entry: (entry_id: string) => void
@@ -342,6 +343,7 @@ export async function init_entries(
     can_edit: boolean
     admin: number
   },
+  bundle: EntriesDataBundle,
   set_entries_data: (entries_data: Record<string, EntryData>) => Promise<void>,
   _upsert_entry_data: (entries_data: Record<string, EntryData>) => Promise<void>,
   _delete_entry: (entry_id: string) => Promise<void>,
@@ -360,28 +362,9 @@ export async function init_entries(
 
   ;({ dictionary_id, admin } = options)
 
-  const cached = await load_cache(dictionary_id)
-  if (cached) {
-    const filtered_cached = cached.map((entry) => {
-      if (entry.tags) {
-        entry.tags = entry.tags.filter(tag => should_include_tag(tag, admin))
-      }
-      return entry
-    })
-    set_entries_data(filtered_cached.reduce((acc, entry) => {
-      acc[entry.id] = entry
-      return acc
-    }, {}))
-    await create_index(filtered_cached, dictionary_id)
-    mark_search_index_updated()
-    console.info('can search using cached entries_data')
-  }
-
-  // vps-migration M4 Phase B: load the full per-dictionary content bundle from the
-  // server SQLite endpoint (better-sqlite3, server-only) instead of the Supabase
-  // stub / cached_data_table paging. Rows arrive in the legacy supabase shape.
-  const bundle = await fetch_entries_data(dictionary_id)
-
+  // vps-migration M4 write/sync: the bundle is read on the main thread from the
+  // browser wa-sqlite dict.db (snapshot + sync), NOT fetched from an endpoint.
+  // Rows arrive in the legacy supabase shape (JSON parsed, soft-deletes excluded).
   entries = key_by_id(bundle.entries)
   senses = key_by_id(bundle.senses)
   audios = key_by_id(bundle.audio)
@@ -514,26 +497,6 @@ function process_entry(entry: Tables<'entries'>) {
 
 type EntriesDataBundle = Record<string, any[]>
 
-// vps-migration M4 Phase B: fetch the full per-dictionary content bundle from the
-// server SQLite endpoint (better-sqlite3 reads `dictionaries/{id}.db`).
-async function fetch_entries_data(dictionary_id: string): Promise<EntriesDataBundle> {
-  const empty: EntriesDataBundle = {
-    entries: [], senses: [], audio: [], speakers: [], tags: [], dialects: [], photos: [], videos: [], sentences: [],
-    audio_speakers: [], entry_tags: [], entry_dialects: [], sense_photos: [], video_speakers: [], sense_videos: [], senses_in_sentences: [],
-  }
-  try {
-    const response = await fetch(`/api/dictionaries/${dictionary_id}/entries-data`)
-    if (!response.ok) {
-      console.error(`Could not load entries data for ${dictionary_id}: ${response.status}`)
-      return empty
-    }
-    return { ...empty, ...(await response.json() as EntriesDataBundle) }
-  } catch (err) {
-    console.error('Error loading entries data', err)
-    return empty
-  }
-}
-
 function key_by_id(rows: any[]): Record<string, any> {
   return rows.reduce((acc, row) => {
     acc[row.id] = row
@@ -546,25 +509,6 @@ function key_by_pair(rows: any[], field_1: string, field_2: string): Record<stri
     acc[`${row[field_1]}_${row[field_2]}`] = row
     return acc
   }, {} as Record<string, any>)
-}
-
-async function load_cache(dictionary_id: string) {
-  const url = `https://cache.livingdictionaries.app/entries_data/${dictionary_id}.json`
-  try {
-    console.info('loading cached entries_data')
-    const response = await fetch(url)
-    if (!response.ok) {
-      console.info('cached entries_data not found')
-      return null
-    }
-    const serialized_json = await response.text()
-    console.info('got cached entries_data')
-    const deserialized = JSON.parse(serialized_json) as EntryData[]
-    console.info('parsed cached entries_data')
-    return deserialized
-  } catch (err) {
-    console.error('Error loading cached index', err)
-  }
 }
 
 export const api = {

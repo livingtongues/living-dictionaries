@@ -14,10 +14,11 @@ export async function reset_caches() {
 }
 
 export async function init_entries(options: InitEntryWorkerOptions) {
-  const { dictionary_id, can_edit, admin } = options
+  const { dictionary_id, can_edit, admin, bundle } = options
   const { api } = await import('./expose-entry-worker')
   return api.init_entries(
     { dictionary_id, can_edit, admin },
+    bundle,
     proxy(options.set_entries_data as (entries_data: Record<string, EntryData>) => Promise<void>),
     proxy(options.upsert_entry_data as (entries_data: Record<string, EntryData>) => Promise<void>),
     proxy(options.delete_entry as (entry_id: string) => Promise<void>),
