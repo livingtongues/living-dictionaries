@@ -1,14 +1,17 @@
 <script lang="ts">
-  import { Button, Modal } from '$lib/svelte-pieces';
+  import { Button, Modal } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
-  import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/changeLocale';
-  $: ({admin} = $page.data)
+  import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/changeLocale'
+
+  const { admin } = $derived($page.data)
 </script>
 
 <Modal on:close>
-  <span slot="heading">
-    {$page.data.t('header.select_language')}
-  </span>
+  {#snippet heading()}
+    <span>
+      {$page.data.t('header.select_language')}
+    </span>
+  {/snippet}
 
   <div>
     {#each locales as [bcp, name]}
@@ -28,7 +31,7 @@
           form={$page.data.locale.includes(bcp) ? 'filled' : 'simple'}
           onclick={() => changeLocale(bcp)}>
           {name}
-          <i class="far fa-key" />
+          <i class="far fa-key"></i>
         </Button>
       {/each}
     {/if}

@@ -1,7 +1,12 @@
 <script lang="ts">
   import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
 
-  export let dictionaries: DictionaryWithHelpers[] = []
+  interface Props {
+    dictionaries?: DictionaryWithHelpers[]
+    children?: import('svelte').Snippet<[any]>
+  }
+
+  const { dictionaries = [], children }: Props = $props()
 
   enum DictionaryFields {
     name = 'Dictionary Name',
@@ -35,11 +40,11 @@
     return { key, value }
   })
 
-  let sortKey: SortFields = 'name'
-  let sortDescending = true
-  $: keep_null_date_at_end = sortDescending ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER
+  let sortKey: SortFields = $state('name')
+  let sortDescending = $state(true)
+  const keep_null_date_at_end = $derived(sortDescending ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER)
 
-  $: sortedDictionaries = dictionaries.sort((a, b) => {
+  const sortedDictionaries = $derived(dictionaries.sort((a, b) => {
     let valueA: string | number
     let valueB: string | number
     // prettier-ignore
@@ -96,7 +101,7 @@
       return sortDescending ? 1 : -1
 
     return 0
-  })
+  }))
 
   function setSortSettings(paraSortKey: SortFields) {
     // Changes the key if the sort wasn't based on the button before, and if it was, change the direction
@@ -108,24 +113,26 @@
 </script>
 
 <thead>
-  {#each dictionary_fields as field}
-    <th
-      class="cursor-pointer"
-      on:click={() => setSortSettings(field.key)}
-      title="Click to sort asc/desc">
-      {field.value}
-      {#if sortKey === field.key}
-        {#if sortDescending}
-          <i class="fas fa-sort-amount-down" />
-        {:else}
-          <i class="fas fa-sort-amount-up" />
+  <tr>
+    {#each dictionary_fields as field}
+      <th
+        class="cursor-pointer"
+        onclick={() => setSortSettings(field.key)}
+        title="Click to sort asc/desc">
+        {field.value}
+        {#if sortKey === field.key}
+          {#if sortDescending}
+            <i class="fas fa-sort-amount-down"></i>
+          {:else}
+            <i class="fas fa-sort-amount-up"></i>
+          {/if}
         {/if}
-      {/if}
-    </th>
-  {/each}
+      </th>
+    {/each}
+  </tr>
 </thead>
 
-<slot {sortedDictionaries} />
+{@render children?.({ sortedDictionaries })}
 
 <style>
   th {

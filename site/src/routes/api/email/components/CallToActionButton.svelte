@@ -3,9 +3,19 @@
   import type { ComponentProps } from 'svelte'
   import Row from './Row.svelte'
 
-  export let row: ComponentProps<Row> = {}
-  export let backgroundColor: string
-  export let href: string
+  interface Props {
+    row?: ComponentProps<typeof Row>
+    backgroundColor: string
+    href: string
+    children?: import('svelte').Snippet
+  }
+
+  const {
+    row = {},
+    backgroundColor,
+    href,
+    children,
+  }: Props = $props()
 </script>
 
 <Row {...row}>
@@ -17,7 +27,7 @@
             <tr>
               <td align="center" style="border-radius: 3px;" bgcolor={backgroundColor}>
                 <a target="_blank" {href} style="font-size: 16px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 3px; padding: 15px 25px; border: 1px solid {backgroundColor}; display: inline-block;" class="mobile-button">
-                  <slot />
+                  {@render children?.()}
                 </a>
               </td>
             </tr>

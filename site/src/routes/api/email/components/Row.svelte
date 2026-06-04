@@ -1,17 +1,29 @@
 <script lang="ts">
-  // @ts-nocheck
-  export let backgroundColor = '#ffffff'
-  export let space = 0
-  export let top = space
-  export let bottom = space
+
+  interface Props {
+    // @ts-nocheck
+    backgroundColor?: string
+    space?: number
+    top?: any
+    bottom?: any
+    children?: import('svelte').Snippet
+  }
+
+  const {
+    backgroundColor = '#ffffff',
+    space = 0,
+    top = space,
+    bottom = space,
+    children,
+  }: Props = $props()
 </script>
 
 <tr>
-  <td bgcolor={backgroundColor} align="center" style="padding: {top}px 12px {bottom}px;">
+  <td {...{ bgcolor: backgroundColor }} align="center" style="padding: {top}px 12px {bottom}px; background-color: {backgroundColor};">
     {@html `<!--[if (gte mso 9)|(IE)]><table align="center" border="0" cellspacing="0" cellpadding="0" width="500"><tr><td align="center" valign="top" width="500"><![endif]-->`}
     <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px;" class="make-responsive-on-small-screens">
       <tbody><tr>
-        <slot />
+        {@render children?.()}
       </tr></tbody>
     </table>
     {@html `<!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->`}

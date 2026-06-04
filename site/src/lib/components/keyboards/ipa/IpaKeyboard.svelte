@@ -1,10 +1,15 @@
 <script lang="ts">
-  import { Button } from '$lib/svelte-pieces'
   import vowelTrapezoid from './vowel-trapezoid.gif'
+  import { Button } from '$lib/svelte-pieces'
 
-  export let on_ipa_change: (new_value: string) => void
-  let activeTable = 'consonants'
-  let wrapperEl: HTMLDivElement
+  interface Props {
+    on_ipa_change: (new_value: string) => void
+    children?: import('svelte').Snippet
+  }
+
+  const { on_ipa_change, children }: Props = $props()
+  let activeTable = $state('consonants')
+  let wrapperEl: HTMLDivElement = $state()
 
   function addSelectedLetter(e) {
     const input_element = wrapperEl.firstElementChild as HTMLInputElement
@@ -35,12 +40,12 @@
 </script>
 
 <div bind:this={wrapperEl} class="w-full relative">
-  <slot />
+  {@render children?.()}
 </div>
 
 <div class="flex overflow-x-auto md:flex-wrap whitespace-nowrap mb-1">
   <Button form="menu" color="black" class="!pt-0 !pb-1 !px-2 !text-lg" onclick={backSpace}>
-    <span class="i-heroicons:backspace-20-solid" />
+    <span class="i-heroicons:backspace-20-solid"></span>
   </Button>
   <Button
     form="menu"
@@ -79,7 +84,7 @@
     onclick={() => (activeTable = 'coarticulated')}>Co-Articulated Consonants</Button>
 </div>
 
-<div class="overflow-x-auto" on:click={addSelectedLetter}>
+<div class="overflow-x-auto" onclick={addSelectedLetter}>
   {#if activeTable === 'consonants'}
     <table cellspacing="0"><tbody>
       <tr class="consonant-header">
@@ -102,25 +107,25 @@
         <td class="rowheader">Nasal</td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless bilabial nasal">m̥</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Bilabial nasal">m</span></td>
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Labiodental nasal">ɱ</span></td>
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Dental nasal">n̪</span></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Voiceless alveolar nasal">n̥</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Alveolar nasal">n</span></td>
-        <td class="bt1 br0 bb1 bl0" />
+        <td class="bt1 br0 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Postalveolar nasal">n̠</span></td>
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Retroflex nasal">ɳ</span></td>
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Alveolo-palatal nasal">ɲ̟</span></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Voiceless palatal nasal">ɲ̊</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Palatal nasal">ɲ</span></td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless velar nasal">ŋ̊</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Velar nasal">ŋ</span></td>
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Uvular nasal">ɴ</span></td>
-        <td colspan="6" class="bt1 br1 bb0 bl1 nd" />
+        <td colspan="6" class="bt1 br1 bb0 bl1 nd"></td>
       </tr>
       <tr>
         <td class="rowheader">Stop</td>
@@ -135,18 +140,18 @@
         <td class="bt1 br1 bb1 bl0" colspan="2">&nbsp;</td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless retroflex stop">ʈ</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced retroflex stop">ɖ</span></td>
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiceless palatal stop">c</span></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Voiced palatal stop">ɟ</span></td>
-        <td class="bt1 br1 bb1 bl0" />
+        <td class="bt1 br1 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless velar stop">k</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced velar stop">ɡ</span></td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless uvular stop">q</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced uvular stop">ɢ</span></td>
-        <td colspan="2" class="bt0 br0 bb1 bl0 nd" />
+        <td colspan="2" class="bt0 br0 bb1 bl0 nd"></td>
         <td colspan="2" class="b1"><span class="ipa" title="Epiglottal stop">ʡ</span></td>
         <td class="bt1 br1 bb1 bl1"><span class="ipa" title="Glottal stop">ʔ</span></td>
-        <td class="bt0 br1 bb1 bl0 nd" />
+        <td class="bt0 br1 bb1 bl0 nd"></td>
       </tr>
       <tr>
         <td class="rowheader">Fricative</td>
@@ -179,114 +184,114 @@
       </tr>
       <tr>
         <td class="rowheader">Approximant</td>
-        <td colspan="2" class="nd" />
-        <td class="bt1 br0 bb1 bl1" />
+        <td colspan="2" class="nd"></td>
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Labiodental approximant">ʋ</span></td>
-        <td colspan="2" style="width:3em;" class="bt1 br0 bb1 bl1" />
-        <td class="bt1 br0 bb1 bl0" />
+        <td colspan="2" style="width:3em;" class="bt1 br0 bb1 bl1"></td>
+        <td class="bt1 br0 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Alveolar approximant">ɹ</span></td>
-        <td colspan="2" style="width:3em;" class="bt1 br1 bb1 bl0" />
-        <td class="bt1 br0 bb1 bl1" />
+        <td colspan="2" style="width:3em;" class="bt1 br1 bb1 bl0"></td>
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Retroflex approximant">ɻ</span></td>
-        <td class="bt1 br0 bb1 bl1" />
-        <td class="bt1 br0 bb1 bl0" />
+        <td class="bt1 br0 bb1 bl1"></td>
+        <td class="bt1 br0 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Palatal approximant">j</span></td>
-        <td class="bt1 br1 bb1 bl0" />
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br1 bb1 bl0"></td>
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Velar approximant">ɰ</span></td>
-        <td class="bt1 br0 bb1 bl1" />
-        <td class="bt1 br0 bb1 bl1" />
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br0 bb1 bl1"></td>
+        <td class="bt1 br0 bb1 bl1"></td>
+        <td class="bt1 br0 bb1 bl1"></td>
       </tr>
       <tr>
         <td class="rowheader">Flap or tap</td>
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Bilabial flap">ⱱ̟</span></td>
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Labiodental flap">ⱱ</span></td>
-        <td colspan="2" style="width:3em;" class="bt1 br0 bb1 bl1" />
-        <td class="bt1 br0 bb1 bl0" />
+        <td colspan="2" style="width:3em;" class="bt1 br0 bb1 bl1"></td>
+        <td class="bt1 br0 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Alveolar tap">ɾ</span></td>
-        <td colspan="2" style="width:3em;" class="bt1 br1 bb1 bl0" />
-        <td class="bt1 br0 bb1 bl1" />
+        <td colspan="2" style="width:3em;" class="bt1 br1 bb1 bl0"></td>
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Retroflex flap">ɽ</span></td>
-        <td colspan="4" class="nd bt0 br0 bb0 bl0" />
-        <td colspan="2" class="nd" />
+        <td colspan="4" class="nd bt0 br0 bb0 bl0"></td>
+        <td colspan="2" class="nd"></td>
         <td colspan="2" class="bt1 br1 bb1 bl1"><span class="ipa" title="Uvular flap">ɢ̆</span></td>
-        <td colspan="2" class="bt1 br1 bb0 bl1 nd" />
-        <td class="bt0 br0 bb0 bl1" />
+        <td colspan="2" class="bt1 br1 bb0 bl1 nd"></td>
+        <td class="bt0 br0 bb0 bl1"></td>
         <td class="bt0 br1 bb1 bl0"><span class="ipa" title="Epiglottal flap">ʡ̯</span></td>
-        <td colspan="2" class="bt1 br1 bb0 bl1 nd" />
+        <td colspan="2" class="bt1 br1 bb0 bl1 nd"></td>
       </tr>
       <tr>
         <td class="rowheader">Trill</td>
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Bilabial trill">ʙ</span></td>
-        <td colspan="2" class="nd" />
-        <td colspan="2" class="bt1 br0 bb1 bl1 " />
+        <td colspan="2" class="nd"></td>
+        <td colspan="2" class="bt1 br0 bb1 bl1 "></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Voiceless alveolar trill">r̥</span></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Alveolar trill">r</span></td>
-        <td colspan="2" style="width:3em;" class="bt1 br1 bb1 bl0" />
-        <td class="bt1 br0 bb1 bl1" />
+        <td colspan="2" style="width:3em;" class="bt1 br1 bb1 bl0"></td>
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Retroflex trill">ɽ͡r</span></td>
-        <td colspan="4" class="nd" />
-        <td colspan="2" class="nd" />
+        <td colspan="4" class="nd"></td>
+        <td colspan="2" class="nd"></td>
         <td colspan="2" class="bt1 br1 bb1 bl1"><span class="ipa" title="Uvular trill">ʀ</span></td>
-        <td colspan="2" class="bt0 br1 bb0 bl1 nd" />
-        <td class="bt1 br0 bb1 bl1" />
+        <td colspan="2" class="bt0 br1 bb0 bl1 nd"></td>
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Epiglottal trill">ᴙ</span></td>
-        <td colspan="2" class="bt0 br1 bb0 bl1 nd" />
+        <td colspan="2" class="bt0 br1 bb0 bl1 nd"></td>
       </tr>
       <tr>
         <td class="rowheader">Lateral Fric.</td>
-        <td colspan="4" class="bt0 br1 bb0 bl1 nd" />
-        <td colspan="2" class="bt1 br0 bb1 bl1" />
+        <td colspan="4" class="bt0 br1 bb0 bl1 nd"></td>
+        <td colspan="2" class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Voiceless alveolar lateral fricative">ɬ</span></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Voiced alveolar lateral fricative">ɮ</span></td>
-        <td colspan="2" class="bt1 br1 bb1 bl0" />
+        <td colspan="2" class="bt1 br1 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless retroflex lateral fricative">ɭ˔̊</span></td>
-        <td class="bt1 br1 bb1 bl0" />
-        <td class="bt1 br0 bb1 bl1" />
-        <td class="bt1 br0 bb1 bl0" />
+        <td class="bt1 br1 bb1 bl0"></td>
+        <td class="bt1 br0 bb1 bl1"></td>
+        <td class="bt1 br0 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Voiceless palatal lateral fricative">ʎ̥˔</span></td>
-        <td class="bt1 br1 bb1 bl0" />
+        <td class="bt1 br1 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless velar lateral fricative">ʟ̝̊</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced velar lateral fricative">ʟ̝</span></td>
-        <td colspan="8" class="bt0 br1 bb0 bl1 nd" />
+        <td colspan="8" class="bt0 br1 bb0 bl1 nd"></td>
       </tr>
       <tr>
         <td class="rowheader">Lateral Appr.</td>
-        <td colspan="4" class="bt0 br1 bb0 bl1 nd" />
-        <td colspan="2" class="bt1 br0 bb1 bl1" />
-        <td class="bt1 br0 bb1 bl0" />
+        <td colspan="4" class="bt0 br1 bb0 bl1 nd"></td>
+        <td colspan="2" class="bt1 br0 bb1 bl1"></td>
+        <td class="bt1 br0 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Alveolar lateral approximant">l</span></td>
-        <td colspan="2" style="width:3em;" class="bt1 br1 bb1 bl0" />
-        <td class="bt1 br0 bb1 bl1" />
+        <td colspan="2" style="width:3em;" class="bt1 br1 bb1 bl0"></td>
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Retroflex lateral approximant">ɭ</span></td>
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Lateral alveolo-palatal approximant">ʎ̟</span></td>
-        <td class="bt1 br0 bb1 bl0" />
+        <td class="bt1 br0 bb1 bl0"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Palatal lateral approximant">ʎ</span></td>
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Velar lateral approximant">ʟ</span></td>
-        <td colspan="8" class="bt0 br1 bb0 bl1 nd" />
+        <td colspan="8" class="bt0 br1 bb0 bl1 nd"></td>
       </tr>
       <tr>
         <td class="rowheader">Lateral flap</td>
-        <td colspan="4" class="bt0 br1 bb1 bl1 nd" />
-        <td colspan="2" class="bt1 br0 bb1 bl1" />
-        <td class="bt1 br0 bb1 bl0" />
+        <td colspan="4" class="bt0 br1 bb1 bl1 nd"></td>
+        <td colspan="2" class="bt1 br0 bb1 bl1"></td>
+        <td class="bt1 br0 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Alveolar lateral flap">ɺ</span></td>
-        <td colspan="2" class="bt1 br1 bb1 bl0" />
-        <td class="bt1 br0 bb1 bl1" />
+        <td colspan="2" class="bt1 br1 bb1 bl0"></td>
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Retroflex lateral flap">ɺ̠</span></td>
-        <td class="bt1 br0 bb1 bl1" />
-        <td class="bt1 br0 bb1 bl0" />
+        <td class="bt1 br0 bb1 bl1"></td>
+        <td class="bt1 br0 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl0"><span class="ipa" title="Palatal lateral flap">ʎ̯</span></td>
-        <td class="bt1 br1 bb1 bl0" />
-        <td class="bt1 br0 bb1 bl1" />
+        <td class="bt1 br1 bb1 bl0"></td>
+        <td class="bt1 br0 bb1 bl1"></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Velar lateral flap">ʟ̆</span></td>
-        <td colspan="8" class="bt0 br1 bb1 bl1 nd" />
+        <td colspan="8" class="bt0 br1 bb1 bl1 nd"></td>
       </tr>
     </tbody></table>
   {/if}
@@ -512,8 +517,8 @@
       <tr>
         <td class="rowheader">Voiced</td>
         <td class="br1 bb1"><span class="ipa">◌̬</span></td>
-        <td />
-        <td />
+        <td></td>
+        <td></td>
       </tr>
     </tbody></table>
   {/if}
@@ -584,47 +589,47 @@
       <tr>
         <td class="rowheader">Minor group:<br />foot</td>
         <td class="br1"><span class="ipa">|</span></td>
-        <td />
-        <td />
+        <td></td>
+        <td></td>
         <td class="rowheader">Low rising<br />tone</td>
         <td class="br1"><span class="ipa">˩˧</span></td>
       </tr>
       <tr>
         <td class="rowheader">Major group</td>
         <td class="br1"><span class="ipa">‖</span></td>
-        <td />
-        <td />
+        <td></td>
+        <td></td>
         <td class="rowheader">Low falling<br />tone</td>
         <td class="br1"><span class="ipa">˧˩</span></td>
       </tr>
       <tr>
         <td class="rowheader bdashed">Linking -<br />no break</td>
         <td class="br1"><span class="ipa">‿</span></td>
-        <td />
-        <td />
+        <td></td>
+        <td></td>
         <td class="rowheader">High falling<br />tone</td>
         <td class="br1"><span class="ipa">˥˧</span></td>
       </tr>
       <tr>
         <td class="rowheader">Rising<br />intonation</td>
         <td class="br1"><span class="ipa">↗</span></td>
-        <td />
-        <td />
+        <td></td>
+        <td></td>
         <td class="rowheader">High rising<br />tone</td>
         <td class="br1"><span class="ipa">˧˥</span></td>
       </tr>
       <tr>
         <td class="rowheader bdashed">Falling<br />intonation</td>
         <td class="br1"><span class="ipa">↘</span></td>
-        <td />
-        <td />
+        <td></td>
+        <td></td>
         <td colspan="2" class="rowheader" style="text-align: left">Superscripts</td>
       </tr>
       <tr>
         <td class="rowheader">Downstep</td>
         <td class="br1"><span class="ipa">↓</span></td>
-        <td />
-        <td />
+        <td></td>
+        <td></td>
         <td
           rowspan="2"
           colspan="2"
@@ -646,8 +651,8 @@
       <tr>
         <td class="rowheader">Upstep</td>
         <td class="br1 bb1"><span class="ipa">↑</span></td>
-        <td />
-        <td />
+        <td></td>
+        <td></td>
       </tr>
     </tbody></table>
   {/if}
@@ -728,16 +733,16 @@
         <td class="bt0 br1 bb0 bl0"><span class="ipa" title="Voiced retroflex affricate">ɖʐ</span></td>
       </tr>
       <tr>
-        <td class="bt1 br0 bb1 bl1" />
-        <td class="bt1 br1 bb1 bl0" />
+        <td class="bt1 br0 bb1 bl1"></td>
+        <td class="bt1 br1 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless alveolar lateral affricate">tɬ</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced alveolar lateral affricate">dɮ</span></td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless palatal affricate">cç</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced palatal affricate">ɟʝ</span></td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless palatal lateral affricate">cʎ̥˔</span></td>
-        <td class="bt1 br1 bb1 bl0" />
+        <td class="bt1 br1 bb1 bl0"></td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless velar lateral affricate">kʟ̝̊</span></td>
-        <td class="bt1 br1 bb1 bl0" />
+        <td class="bt1 br1 bb1 bl0"></td>
       </tr>
     </tbody></table>
   {/if}

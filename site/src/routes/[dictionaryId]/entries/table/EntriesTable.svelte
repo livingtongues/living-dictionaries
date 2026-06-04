@@ -7,14 +7,24 @@
   import { browser } from '$app/environment'
   import type { DbOperations } from '$lib/dbOperations'
 
-  export let entries: EntryData[] = []
-  export let can_edit = false
-  export let dictionary: Tables<'dictionaries'>
-  export let preferred_table_columns: IColumn[]
-  export let dbOperations: DbOperations
+  interface Props {
+    entries?: EntryData[]
+    can_edit?: boolean
+    dictionary: Tables<'dictionaries'>
+    preferred_table_columns: IColumn[]
+    dbOperations: DbOperations
+  }
 
-  $: columns = setUpColumns(preferred_table_columns, dictionary)
-  let selectedColumn: IColumn
+  const {
+    entries = [],
+    can_edit = false,
+    dictionary,
+    preferred_table_columns,
+    dbOperations,
+  }: Props = $props()
+
+  const columns = $derived(setUpColumns(preferred_table_columns, dictionary))
+  let selectedColumn: IColumn = $state()
 
   function getLeftValue(index: number) {
     if (index === 0) return 0
@@ -32,7 +42,7 @@
     <tr class="text-left">
       {#each columns as column, i}
         <th
-          on:click={() => {
+          onclick={() => {
             selectedColumn = column
           }}
           class:z-10={column.sticky}

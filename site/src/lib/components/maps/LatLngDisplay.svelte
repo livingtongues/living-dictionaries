@@ -1,5 +1,10 @@
 <script lang="ts">
-  export let lat: number, lng: number;
+  interface Props {
+    lat: number
+    lng: number
+  }
+
+  const { lat, lng }: Props = $props()
 </script>
 
 {#if lat && lng}

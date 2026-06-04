@@ -1,67 +1,82 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { onMount, createEventDispatcher } from 'svelte';
-  import { Button, Modal } from '$lib/svelte-pieces';
-  import Map from './mapbox/map/Map.svelte';
-  import Geocoder from './mapbox/geocoder/Geocoder.svelte';
-  import Marker from './mapbox/map/Marker.svelte';
-  import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
-  import NavigationControl from './mapbox/controls/NavigationControl.svelte';
-  import { setMarker } from './utils/setCoordinatesToMarker';
-  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface';
+  import { preventDefault } from 'svelte/legacy'
 
-  export let initialCenter: LngLatFull = undefined;
-  export let lng: number = undefined;
-  export let lat: number = undefined;
-  export let canRemove = true;
+  import { createEventDispatcher, onMount } from 'svelte'
+  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface'
+  import Map from './mapbox/map/Map.svelte'
+  import Geocoder from './mapbox/geocoder/Geocoder.svelte'
+  import Marker from './mapbox/map/Marker.svelte'
+  import ToggleStyle from './mapbox/controls/ToggleStyle.svelte'
+  import NavigationControl from './mapbox/controls/NavigationControl.svelte'
+  import { setMarker } from './utils/setCoordinatesToMarker'
+  import { Button, Modal } from '$lib/svelte-pieces'
+  import { page } from '$app/stores'
 
-  let centerLng = lng;
-  let centerLat = lat;
+  interface Props {
+    initialCenter?: LngLatFull
+    lng?: number
+    lat?: number
+    canRemove?: boolean
+    children?: import('svelte').Snippet
+  }
 
-  const zoom = lng && lat ? 6 : 3;
+  let {
+    initialCenter = undefined,
+    lng = $bindable(undefined),
+    lat = $bindable(undefined),
+    canRemove = true,
+    children,
+  }: Props = $props()
+
+  let centerLng = $state(lng)
+  let centerLat = $state(lat)
+
+  const zoom = lng && lat ? 6 : 3
 
   onMount(() => {
-    if (lng && lat) return;
+    if (lng && lat) return
     if (initialCenter) {
-      ({longitude: centerLng, latitude: centerLat} = initialCenter);
+      ({ longitude: centerLng, latitude: centerLat } = initialCenter)
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        centerLng = position.coords.longitude;
-        centerLat = position.coords.latitude;
-      });
+        centerLng = position.coords.longitude
+        centerLat = position.coords.latitude
+      })
     }
-  });
+  })
 
   function handleGeocoderResult({ detail }) {
     if (detail?.user_coordinates?.[0])
-      setMarker(detail.user_coordinates[0], detail.user_coordinates[1]);
+      setMarker(detail.user_coordinates[0], detail.user_coordinates[1])
     else
-      setMarker(detail.center[0], detail.center[1]);
+      setMarker(detail.center[0], detail.center[1])
   }
 
   const dispatch = createEventDispatcher<{
-    update: { lat: number; lng: number };
-    remove: boolean;
-    close: boolean;
-  }>();
+    update: { lat: number, lng: number }
+    remove: boolean
+    close: boolean
+  }>()
   function update() {
     dispatch('update', {
       lat,
       lng,
-    });
-    dispatch('close');
+    })
+    dispatch('close')
   }
   function remove() {
-    dispatch('remove');
-    dispatch('close');
+    dispatch('remove')
+    dispatch('close')
   }
 </script>
 
 <Modal on:close noscroll>
-  <span slot="heading">
-    {$page.data.t('create.select_coordinates')}
-  </span>
-  <form on:submit|preventDefault={update}>
+  {#snippet heading()}
+    <span>
+      {$page.data.t('create.select_coordinates')}
+    </span>
+  {/snippet}
+  <form onsubmit={preventDefault(update)}>
     <div class="flex flex-wrap items-center mb-2">
       <div class="flex flex-grow">
         <div class="relative">
@@ -80,7 +95,7 @@
             class="w-32 pl-10 pr-3 py-2 form-input"
             placeholder={$page.data.t('dictionary.latitude')} />
         </div>
-        <div class="w-1" />
+        <div class="w-1"></div>
 
         <div class="relative">
           <div
@@ -106,18 +121,18 @@
         lng={centerLng}
         lat={centerLat}
         {zoom}
-        on:click={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}>
-        <slot />
+        on:click={({ detail }) => ({ lng, lat } = setMarker(detail.lng, detail.lat))}>
+        {@render children?.()}
         <NavigationControl />
         <Geocoder
           options={{ marker: false }}
           placeholder={$page.data.t('about.search')}
           on:result={handleGeocoderResult}
-          on:error={(e) => console.error(e.detail)} />
+          on:error={e => console.error(e.detail)} />
         {#if lng && lat}
           <Marker
             draggable
-            on:dragend={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}
+            on:dragend={({ detail }) => ({ lng, lat } = setMarker(detail.lng, detail.lat))}
             {lng}
             {lat} />
         {/if}

@@ -23,15 +23,15 @@ report back here; I relay learnings and Jacob's decisions across the fence.
 | Latest toolchain (Vite 8 / vps7 / svelte 5.56 / kit 2.62 / vitest 4 / ts 5.9) | ✅ M2b P1 | ✅ |
 | Vendor svelte-pieces (→ Svelte 5) | ✅ M2b P2 (copied house's set) | ✅ (vendored first) |
 | Kitbook → svelte-look | ✅ M2b P3 | ✅ |
-| **Runes codemod** (component syntax) | ❌ **not yet — this is M2c, the next big step** | ✅ DONE (142 files; 0 err / 6 warn) |
-| Lint clean + hook re-enabled | partial (eslint clean on touched files) | ✅ DONE |
+| **Runes codemod** (component syntax) | ✅ **DONE (M2c)** — 367 files; 0 err / 15 warn | ✅ DONE (142 files; 0 err / 6 warn) |
+| Lint clean + hook re-enabled | blocked: eslint-plugin-svelte@2.43 crashes on Svelte 5 (needs bump) | ✅ DONE |
 | SQLite + Email-OTP/JWT auth **backend** | ❌ (M4, later) | ✅ Phase A (better-sqlite3, jose, endpoints, 112 tests) |
 | App identity on new auth | ❌ | ✅ Phase B core committed (`2253f0c`) |
 | Login modal UI + Google One-Tap | ❌ | 🔶 **in progress** (idle session, mid-interview) |
 | Real backend DATA reads on SQLite | ❌ (M4) | ❌ (still Firestore; the big remaining swap) |
 | puppeteer-core deep-flow e2e | ✅ `site/e2e/achi-flow.mjs` (own launcher) | ✅ `tools/e2e/*` (uses shared skill launcher) |
-| Uses shared `browser-launch.mjs` (new skill) | ❌ — still its own puppeteer-core+chrome-launcher | ✅ adopted (`efedb37`) |
-| Working tree | **dirty** (M2b + puppeteer work uncommitted) | clean |
+| Uses shared `browser-launch.mjs` (new skill) | ✅ adopted (M2c; dropped local puppeteer-core+chrome-launcher) | ✅ adopted (`efedb37`) |
+| Working tree | clean (M2b `6aa75c16` + M2c committed) | clean |
 
 ## What each needs to do NEXT
 
@@ -86,6 +86,22 @@ report back here; I relay learnings and Jacob's decisions across the fence.
   ambient `PORT`/`FLOW_PORT` shell vars leak in (use a dedicated var); **`innerText` not `textContent`**
   for visible-text assertions (textContent keeps source whitespace, breaks `"1-13 / 13"`); Svelte
   input edits need the native value setter + `input`/`change` dispatch.
+- **Runes-migration learnings house can confirm/reuse** (LD ran the same codemod after house;
+  durable page: LD `.knowledge/migration/svelte-5-runes-migration.md`):
+  - Run the codemod from a **per-file Node driver, one child process + 30s timeout** (the
+    interactive CLI hangs in non-TTY) — import `migrate` from the project's own svelte 5 compiler at
+    `node_modules/svelte/src/compiler/index.js` (the `./compiler` *require* entry doesn't export it);
+    install `svelte-migrate` in a throwaway dir so the lockfile never drifts; exclude vendored
+    svelte-pieces.
+  - **Legacy slot → runes snippet interop:** a runes parent passing `{#snippet name()}` to a legacy
+    `<slot name>` component **type-errors** in svelte-check though it often runs. Convert the vendored
+    slot component to runes once all consumers are runes; in a **JS** vendored file, snippet props
+    need `= undefined` defaults or they're inferred *required* and break every consumer.
+  - **`bind:value={item.member}` is NOT `each_item_invalid_assignment`** — only the bare each-item
+    identifier triggers it; don't rewrite member binds.
+  - **eslint-plugin-svelte@2.43's `svelte/indent` stack-overflows on Svelte 5** + `no-use-before-define`
+    false-positives (no runes-hoisting model) — house's lint-off stance is the right call until the
+    plugin is bumped; `--fix --rule '{"svelte/indent":"off"}'` still cleans codemod whitespace.
 
 ## Standing decisions (apply to BOTH, and to future work)
 - **Verify with puppeteer-core + system Chrome**, via the **new universal `browser-launch.mjs`**

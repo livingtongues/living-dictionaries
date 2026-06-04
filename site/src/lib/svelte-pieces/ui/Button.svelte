@@ -36,8 +36,8 @@
     children,
   } = $props()
 
-  let disable = $derived(disabled || loading)
-  let fill = $derived(form === 'outline' ? 'outlined' : form)
+  const disable = $derived(disabled || loading)
+  const fill = $derived(form === 'outline' ? 'outlined' : form)
 
   async function runWithSpinner(event) {
     if (onclick) {

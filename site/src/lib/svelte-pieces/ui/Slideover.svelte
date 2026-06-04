@@ -1,41 +1,45 @@
-<script>import { createEventDispatcher, onMount } from "svelte";
-import { fly, fade } from "svelte/transition";
-import { portal } from "../actions/portal";
-import { trapFocus } from "./trapFocus";
-export let zIndex = 60;
-export let duration = 200;
-export let side = "right";
-export let widthRem = 16;
-export let maxWidthPercentage = 70;
-const dispatch = createEventDispatcher();
-const close = () => dispatch("close");
-let slideover;
+<script> import { createEventDispatcher, onMount } from 'svelte'
+import { fade, fly } from 'svelte/transition'
+import { portal } from '../actions/portal'
+import { trapFocus } from './trapFocus'
+
+const {
+  zIndex = 60,
+  duration = 200,
+  side = 'right',
+  widthRem = 16,
+  maxWidthPercentage = 70,
+  title = undefined,
+  heading = undefined,
+  children = undefined,
+} = $props()
+const dispatch = createEventDispatcher()
+const close = () => dispatch('close')
+let slideover = $state()
 onMount(() => {
-  const previouslyFocused = typeof document !== "undefined" && document.activeElement;
+  const previouslyFocused = typeof document !== 'undefined' && document.activeElement
   return () => {
     if (previouslyFocused instanceof HTMLElement) {
-      previouslyFocused.focus();
+      previouslyFocused.focus()
     }
-  };
-});
+  }
+})
 </script>
 
 <svelte:window
-  on:keydown={(e) => {
-    if (e.key === 'Escape') return close();
-    if (e.key === 'Tab') trapFocus(e, slideover);
-  }}
-/>
+  onkeydown={(e) => {
+    if (e.key === 'Escape') return close()
+    if (e.key === 'Tab') trapFocus(e, slideover)
+  }} />
 
 <div
   use:portal
   class:sp-o6uv9u={side === 'right'}
   class:sp-an5m11={side === 'left'}
   class="sp-fip344"
-  style="z-index: {zIndex};"
->
+  style="z-index: {zIndex};">
   <div class="sp-8qzqby" transition:fade={{ duration }}>
-    <button type="button" class="sp-j2ssgo" on:click={close} />
+    <button type="button" class="sp-j2ssgo" onclick={close} aria-label="Close"></button>
   </div>
 
   <div
@@ -45,28 +49,25 @@ onMount(() => {
     role="dialog"
     aria-modal="true"
     aria-labelledby="slideover-headline"
-    bind:this={slideover}
-  >
-    {#if $$slots.title}
+    bind:this={slideover}>
+    {#if title}
       <div class="sp-rlcy6p">
         <h3 class="sp-47qeee" id="slideover-headline">
-          <slot name="title" />
+          {@render title()}
         </h3>
         <button
-          on:click={close}
+          onclick={close}
           type="button"
           class="sp-8nzu0g"
-          aria-label="Close"
-        >
-          <span class="sp-bdhoou" /></button
-        >
+          aria-label="Close">
+          <span class="sp-bdhoou"></span></button>
       </div>
     {/if}
 
-    <slot name="heading" />
+    {@render heading?.()}
 
     <div class="sp-4lu7m2">
-      <slot />
+      {@render children?.()}
     </div>
   </div>
 </div>

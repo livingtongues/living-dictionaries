@@ -1,4 +1,4 @@
-import { pruneObject } from './prune';
+import { pruneObject } from './prune'
 
 test('pruneObject removes empty string, empty array, null, false, and undefined at root and nested level', () => {
   expect(
@@ -20,7 +20,7 @@ test('pruneObject removes empty string, empty array, null, false, and undefined 
         show: false,
         that: undefined,
       },
-    })
+    }),
   ).toMatchInlineSnapshot(`
     {
       "baz": false,
@@ -37,5 +37,5 @@ test('pruneObject removes empty string, empty array, null, false, and undefined 
         ],
       },
     }
-  `);
-});
+  `)
+})

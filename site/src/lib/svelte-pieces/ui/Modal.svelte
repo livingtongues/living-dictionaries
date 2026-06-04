@@ -16,7 +16,7 @@
    *   children?: import('svelte').Snippet
    * }}
    */
-  let {
+  const {
     noscroll = false,
     zIndex = 60,
     duration = 200,

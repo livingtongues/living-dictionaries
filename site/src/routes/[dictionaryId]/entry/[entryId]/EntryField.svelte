@@ -1,7 +1,8 @@
+<!-- @migration-task Error while migrating Svelte code: $$props is used together with named props in a way that cannot be automatically migrated. -->
 <script lang="ts">
   import type { EntryFieldValue } from '@living-dictionaries/types'
-  import { ShowHide } from '$lib/svelte-pieces'
   import sanitize from 'xss'
+  import { ShowHide } from '$lib/svelte-pieces'
 
   export let value: string
   export let field: EntryFieldValue

@@ -15,6 +15,7 @@ import { existsSync } from 'node:fs'
 import { mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { launch } from '/home/jacob/.claude/skills/browser-tools/browser-launch.mjs'
 
 const dir = dirname(fileURLToPath(import.meta.url))
 const site_dir = join(dir, '..')
@@ -82,19 +83,14 @@ async function main() {
     console.log(`• using BASE_URL=${base} (not booting a server)`)
   }
 
-  const puppeteer = (await import('puppeteer-core')).default
-  const { getChromePath } = await import('chrome-launcher')
-  browser = await puppeteer.launch({
-    executablePath: getChromePath(),
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-US'],
-  })
+  // Shared headless launcher (universal browser-tools skill) — brings its own puppeteer-core +
+  // system Chrome, so this repo needs no puppeteer dependency of its own.
+  browser = await launch({ viewport: { width: 1100, height: 900 }, args: ['--lang=en-US'] })
   const page = await browser.newPage()
   active_page = page
   // Force English UI — the app picks locale from accept-language and headless Chrome may default
   // to another locale (e.g. zh), which would break the English text assertions below.
   await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
-  await page.setViewport({ width: 1100, height: 900 })
 
   // 1 — entries list renders the seeded dummy entries
   await page.goto(`${base}/achi/entries`, { waitUntil: 'domcontentloaded' })

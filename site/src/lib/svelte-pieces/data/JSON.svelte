@@ -1,28 +1,29 @@
-<script lang="ts">import Button from "../ui/Button.svelte";
-import ShowHide from "../functions/ShowHide.svelte";
-  let { obj } = $props();
+<script lang="ts"> import Button from '../ui/Button.svelte'
+import ShowHide from '../functions/ShowHide.svelte'
+
+  const { obj } = $props()
 function string_and_colorize(obj2) {
-  return JSON.stringify(obj2, null, 2).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(
+  return JSON.stringify(obj2, null, 2).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(
     /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
     (match) => {
-      let color = "darkorange";
+      let color = 'darkorange'
       if (match.startsWith('"')) {
-        if (match.endsWith(":"))
-          color = "red";
+        if (match.endsWith(':'))
+          color = 'red'
         else
-          color = "green";
+          color = 'green'
       } else if (/true|false/.test(match)) {
-        color = "blue";
+        color = 'blue'
       } else if (/null/.test(match)) {
-        color = "magenta";
+        color = 'magenta'
       }
-      return `<span style="color:${color}">${match}</span>`;
-    }
-  );
+      return `<span style="color:${color}">${match}</span>`
+    },
+  )
 }
 </script>
 
-<ShowHide  >
+<ShowHide>
   {#snippet children({ show, toggle })}
     <Button onclick={toggle} form="simple" color="black">
       <span class="sp-646rvl"></span>

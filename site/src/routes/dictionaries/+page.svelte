@@ -7,10 +7,10 @@
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import { dictionary_headers, prepareDictionaryForCsv } from '$lib/export/prepareDictionariesForCsv'
 
-  export let data
-  $: ({ admin } = data)
-  $: ({ dictionaries } = $page.data)
-  $: filtered_dictionaries = $admin >= 1 ? $dictionaries : $dictionaries?.filter(dictionary => dictionary.public)
+  const { data } = $props()
+  const { admin } = $derived(data)
+  const { dictionaries } = $derived($page.data)
+  const filtered_dictionaries = $derived($admin >= 1 ? $dictionaries : $dictionaries?.filter(dictionary => dictionary.public))
 
 </script>
 
@@ -27,15 +27,15 @@
           filtered_dictionaries.map(prepareDictionaryForCsv),
           'living-dictionaries-list',
         )}>
-      <i class="fas fa-download mr-1" />
+      <i class="fas fa-download mr-1"></i>
       {$page.data.t('misc.download')}
       (.csv)
     </Button>
     {#if $admin}
       <Button href="/admin/dictionaries" color="black">
-        <i class="far fa-pencil mr-1" />
+        <i class="far fa-pencil mr-1"></i>
         Edit
-        <i class="far fa-key fa-sm ml-1" />
+        <i class="far fa-key fa-sm ml-1"></i>
       </Button>
     {/if}
   </div>

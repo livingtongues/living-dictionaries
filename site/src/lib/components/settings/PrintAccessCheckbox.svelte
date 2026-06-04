@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { createEventDispatcher } from 'svelte'
+  import { page } from '$app/stores'
 
-  export let checked: boolean;
+  interface Props {
+    checked: boolean
+  }
 
-  import { createEventDispatcher } from 'svelte';
+  const { checked }: Props = $props()
   const dispatch = createEventDispatcher<{
-    changed: { checked: boolean };
-  }>();
+    changed: { checked: boolean }
+  }>()
 </script>
 
 <div class="flex items-center">
@@ -14,9 +17,9 @@
     id="print-access"
     type="checkbox"
     {checked}
-    on:change={async (e) => {
+    onchange={async (e) => {
       // @ts-ignore
-      dispatch('changed', { checked: e.target.checked });
+      dispatch('changed', { checked: e.target.checked })
     }} />
   <label for="public" class="mx-2 block text-sm font-medium text-gray-700">
     {$page.data.t('create.print_access')}

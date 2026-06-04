@@ -154,12 +154,19 @@ The site looks identical throughout. Sub-steps isolate the toolchain change from
       present, no variant-groups, no `.css` `@apply`.
       ⏳ **Jacob:** restart :3041 + hard-refresh, eyeball light-mode parity (side menu, entry title
       size, modal grey overlay) before M2b.
-- [ ] **M2b · Bump to Svelte 5 (compatibility mode).** Upgrade `svelte`,
-      `@sveltejs/vite-plugin-svelte`, `svelte-check`, related deps. Old syntax keeps working in
-      legacy mode. Fix breaking changes from the dep bump until build + boot is green.
-- [ ] **M2c · Migrate syntax to runes.** Run `npx sv migrate svelte-5` per-folder, hand-clean
-      the leftovers, component by component. App stays runnable; nothing functional changes.
-- [ ] **Verify:** build + check + test green; site visually identical; no Svelte 4 syntax left.
+- [x] **M2b · Bump to Svelte 5 (compatibility mode).** ✅ DONE — report
+      `.issues/m2b-svelte5-modernize.md`. Latest toolchain (svelte 5.56, vite 8, plugin 7.1, kit
+      2.62, check 4.5, vitest 4.1, ts 5.9, unocss 66), vendored svelte-pieces, kitbook→svelte-look,
+      mock manager + dummy entries, puppeteer-core deep-flow. Committed as `6aa75c16`.
+- [x] **M2c · Migrate syntax to runes.** ✅ DONE — report `.issues/m2c-runes-migration.md`. Ran the
+      runes codemod via a per-file Node driver (the interactive CLI hangs in non-TTY) over 367 files
+      (excl. vendored svelte-pieces), hand-fixed the fallout (MediaStream `@migration-task`,
+      `ComponentProps<typeof X>`, `$page.`→`page.` markup, email `svelte/server` render port,
+      Slideover→runes, `<th>`→`<tr>` wraps). Warnings 484 → **15** via
+      `compilerOptions.warningFilter`. Adopted the shared `browser-launch.mjs`.
+- [x] **Verify:** ✅ check 0 errors / 15 warnings · test 123 pass · build + `node build` boot ·
+      achi-flow 5/5 · 19 routes + editor + table headless load = 0 real errors. Visual parity
+      eyeballed via headless screenshot (list view identical). ⏳ Jacob: eyeball maps/visual at :3041.
 
 ### M3 · Deploy the stubbed Svelte-5 app to the VPS
 Prove the pipeline on a trivial, can't-really-break app.

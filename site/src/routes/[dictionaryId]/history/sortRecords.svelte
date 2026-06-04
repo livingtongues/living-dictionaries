@@ -1,11 +1,18 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy'
+
   import type { EntryData, Tables } from '@living-dictionaries/types'
   import { sortedColumn } from './sortedColumnStore'
   import { HistoryFields } from './historyFields'
   import { page } from '$app/stores'
 
-  export let history: Tables<'content_updates'>[] = []
-  export let get_entry: (record: Tables<'content_updates'>) => EntryData
+  interface Props {
+    history?: Tables<'content_updates'>[]
+    get_entry: (record: Tables<'content_updates'>) => EntryData
+    children?: import('svelte').Snippet<[any]>
+  }
+
+  const { history = [], get_entry, children }: Props = $props()
 
   type SortFields = keyof typeof HistoryFields
   // @ts-ignore
@@ -16,12 +23,14 @@
     return { key, value }
   })
 
-  let sortKey: SortFields = 'date'
-  let sortDescending = true
+  let sortKey: SortFields = $state('date')
+  let sortDescending = $state(true)
 
-  $: sortedColumn.set(sortKey)
+  run(() => {
+    sortedColumn.set(sortKey)
+  })
 
-  $: sortedRecords = history.sort((a, b) => {
+  const sortedRecords = $derived(history.sort((a, b) => {
     let valueA: string | number
     let valueB: string | number
 
@@ -44,7 +53,7 @@
         valueB = b[sortKey] ? JSON.stringify(b[sortKey]).toUpperCase() : 'zz'
     }
     return sortDescending ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB)
-  })
+  }))
 
   function setSortSettings(paraSortKey: SortFields) {
     // Changes the key if the sort wasn't based on the button before, and if it was, change the direction
@@ -56,24 +65,26 @@
 </script>
 
 <thead>
-  {#each historyFields as field}
-    <th
-      class="cursor-pointer"
-      on:click={() => setSortSettings(field.key)}
-      title="Click to sort asc/desc">
-      {$page.data.t(`history.${field.value}`)}
-      {#if sortKey === field.key}
-        {#if sortDescending}
-          <i class="fas fa-sort-amount-down" />
-        {:else}
-          <i class="fas fa-sort-amount-up" />
+  <tr>
+    {#each historyFields as field}
+      <th
+        class="cursor-pointer"
+        onclick={() => setSortSettings(field.key)}
+        title="Click to sort asc/desc">
+        {$page.data.t(`history.${field.value}`)}
+        {#if sortKey === field.key}
+          {#if sortDescending}
+            <i class="fas fa-sort-amount-down"></i>
+          {:else}
+            <i class="fas fa-sort-amount-up"></i>
+          {/if}
         {/if}
-      {/if}
-    </th>
-  {/each}
+      </th>
+    {/each}
+  </tr>
 </thead>
 
-<slot {sortedRecords} />
+{@render children?.({ sortedRecords })}
 
 <style>
   th {
