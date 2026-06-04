@@ -89,7 +89,12 @@ async function main() {
   const page = await browser.newPage()
   await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
   const page_errors = []
-  page.on('pageerror', error => page_errors.push(error.message))
+  // Ignore the pre-existing SvelteKit service-worker registration 404 (see
+  // achi-flow.mjs / .issues/service-worker-404.md) — unrelated to sync.
+  page.on('pageerror', (error) => {
+    if (/ServiceWorker|service-worker\.js/i.test(error.message)) return
+    page_errors.push(error.message)
+  })
   page.on('dialog', (d) => { console.log('  [dialog]', d.message().slice(0, 200)); d.dismiss().catch(() => {}) })
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log(`  [console.${m.type()}]`, m.text().slice(0, 200)) })
   page.on('request', (r) => { if (r.url().includes('/api/dictionary/')) console.log(`  [request] ${r.method()} ${r.url().replace(base, '')}`) })

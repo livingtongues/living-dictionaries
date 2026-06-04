@@ -28,7 +28,7 @@ report back here; I relay learnings and Jacob's decisions across the fence.
 | SQLite + Email-OTP/JWT auth **backend** | ✅ **M4 real-auth DONE** (OTP/JWT/Google + dict-roles) | ✅ DONE (Phase A/B) |
 | App identity / login UI on new auth | ✅ DONE (AuthModal/account rewired) | ✅ DONE (login modal + Google One-Tap) |
 | **Real backend DATA reads on SQLite** | ✅ **M4-read DONE** (catalog 2136 dicts + per-dict entries) | ✅ reader + **admin** both Firestore-free |
-| **Write path on SQLite** | 🔶 **M4-write/sync in flight** (LD-WRITE) | 🔶 admin writes ✅ (sync engine); library editing in flight |
+| **Write path on SQLite** | ✅ writes round-trip (M4 P1–P4a); 🔶 P4b watcher in flight | ✅ admin + **library editing** both on local-first sync |
 | puppeteer-core deep-flow e2e | ✅ `site/e2e/achi-flow.mjs` (shared launcher) | ✅ `tools/e2e/*` (shared launcher) |
 | Uses shared `browser-launch.mjs` (new skill) | ✅ adopted (M2c) | ✅ adopted (`efedb37`) |
 | Working tree | clean (through M4-read) | clean (through reader) |
@@ -42,8 +42,12 @@ report back here; I relay learnings and Jacob's decisions across the fence.
 2. **M4 · write/sync** — wa-sqlite browser + SharedWorker + bidirectional sync engine. **HOLD until
    house's local-first admin-sync engine lands** (HOUSE-ADMIN may build it) so LD inherits the wa-sqlite/
    sync playbook — same cross-pollination that made M4-read smooth.
-3. **Media upload** (legacy GCS presigned PUT) → **R2 snapshots** → then **M3 deploy** (save-for-last;
-   existing CI → `new.livingdictionaries.app`, Jacob re-aims the branch at the very end).
+3. **Media upload** (legacy GCS presigned PUT — bytes stay on the legacy bucket, like house kept image
+   bytes on Firebase Storage) → then **M3 deploy** (save-for-last; existing CI → `new.livingdictionaries.app`,
+   Jacob re-aims the branch at the very end).
+   ⛔ **R2 is OUT this month (Jacob 2026-06-04)** — no R2 snapshot builder / image-bytes-to-R2 migration
+   for now. Media stays on the legacy GCS bucket. Don't spawn R2 work. Applies to house too (its image
+   bytes stay on Firebase Storage; the deferred "attachments/R2" admin item is likewise on hold).
 
 ### house  (auth ✅ · customer reader 100% Firestore-free ✅)
 1. **Admin surface off Firestore → SQLite** — HOUSE-ADMIN (`0a9cfdc3`) in flight (server-reads first,
@@ -344,10 +348,51 @@ report back here; I relay learnings and Jacob's decisions across the fence.
     `*.sql` (drops+recreates the triggers). `run_sql_migrations` runs on every db open → existing
     server dbs + client snapshots pick it up; `LATEST_DICT_MIGRATION` advances on both sides so the
     handshake stays matched. Make seed scripts run migrations from disk (tsx has no `import.meta.glob`).
-- **HOUSE-EDIT** — 🔶 spawned `eacecdd8` (project `house`). Tree clean. PLAN + interview Jacob on the
-  next milestone, recommending **(A) library editing on SQLite** (now unblocked by reader-SQLite + the
-  admin sync engine) over (B) local search / (C) admin deferred follow-ups / (D) deploy-prep. Carries
-  LD's `dev_admin_level` + `E2E_EXPOSE_OTP` patterns for house to mirror.
+- **HOUSE-EDIT** — ✅ DONE + committed (`eacecdd8`, 7 commits `5a695a0`→`a45db6c` on `repo-restructure`).
+  **Library editing (docs/images/videos/intros) off Firestore → local-first SQLite:** a bidirectional
+  `library` sync sector (editor-gated) + a server image-upload endpoint (bytes stay on Firebase Storage) +
+  the **net-new `lib/db/client/library-writes.ts`** (the client write module learn-from lacks — its writes
+  are server-side). e2e: create/edit/save → local write → library sync → `shared.db` → SSR reader reflects
+  it (0 Firestore / 0 pageerrors). check 0 · test 261 · build clean. 📘 `.knowledge/architecture/
+  local-first-library-editing.md` + `sync-deletes.md` = **template for LD's library/content writes.**
+  **House→LD fixes to audit (3, in the shared engine):** (1) `ensure_initial_sync()` before writes (cold
+  DB mints lookup ids colliding with server `UNIQUE(name)` + skips junction tombstones); (2) a local
+  `users` row so `created_by`/`updated_by` FKs resolve on a fresh DB; (3) **sector-scoped `deletes`** —
+  unscoped `DELETE FROM deletes` let `messages` wipe `library`'s pending tombstones (latent until a 2nd
+  writable sector). **Deferred:** SQL proxy (`live-share.svelte.ts`) not wired → agent-via-proxy write
+  path needs it; first-save cold-sync latency; orphaned-media cleanup; translate editing; dev-admin
+  toggle (skipped — `EDITORS` empty, all editors admin).
+- **LD-P4B** — ✅ DONE on `vps-migration` (not yet pushed). **P4b watch-based Orama feed** shipped:
+  in-worker `apply_rows` dispatcher (assembly stays in the worker; base/junction maps hold LIVE rows,
+  grouping slices recomputed per change → resolves row→entry_id across all 16 tables incl.
+  speaker/tag/dialect rename fan-out) + main-thread `orama-watcher.ts` (watermark-delta, driven off
+  `dict_db.subscribe` which fires for BOTH local writes AND remote pulls — ONE path). **Dropped every
+  `api.X` double-write.** Verified: check 0/15 · test 178 · build+boot · achi-flow PASS · dict-sync
+  PASS · **NEW `e2e/dict-watch-2ctx.mjs` PASS** (ctx A edit → ctx B pull-only watcher reindexes, no
+  reload/double-write). 📘 `.knowledge/migration/m4-write-sync.md` (P4b section).
+  - 🆕 **The watch hook already existed for free:** `dict_db.subscribe(table,…)` (DictLiveDbImpl's
+    notifier) fires on local writes (`#insert/#update/#save_cb`) AND on remote pulls (sync engine
+    `on_tables_changed` → SharedWorker `tables_changed` broadcast → notifier). No new plumbing.
+  - 🆕 **LD↔house sync audit — all 3 house fixes are N/A to LD (architecture prevents them);** no LD
+    code changed. (1) writes already gated until synced (layout cold-open `sync_now` + the
+    `entries_data.loading` gate in `get_pieces`); (2) LD's per-dict dict.db has **no `users` table/FK** —
+    `created_by_user_id` is plain NOT NULL TEXT (users live in shared.db); (3) the dict engine is
+    **single-sector**, so unscoped `DELETE FROM deletes` is safe (and LD soft-deletes via the `deleted`
+    column, never touching `deletes`). Invariants recorded in `.knowledge/migration/dict-sync-invariants.md`
+    — **house's three rules are real, LD just doesn't trip them yet; keep the invariants true.**
+  - 🆕 **Pre-existing SvelteKit service-worker 404** surfaced (not caused) by P4b's timing: default
+    `kit.paths.relative` registers the SW at a route-relative URL (`/achi/service-worker.js`) that 404s.
+    Proven pre-existing (committed P4a tree passes "no pageerrors" on rebuild). e2es now filter that one
+    error; real fix (drop SW like the example, or `paths.relative:false`) is a global call for Jacob →
+    `.issues/service-worker-404.md`.
+  - ⚠️ **e2e infra gotcha:** puppeteer `browser.close()` lingers for minutes after a flow prints its
+    verdict (esp. on FAIL). The test logic is done; don't read the long runtime as a hang. Run e2es to a
+    logfile and poll for the PASS/FAIL line; `pkill -f <test>.mjs` to reclaim — but it can also kill the
+    chaining subshell + leak orphaned `node build` servers, so clean up `node build` between runs.
+- **HOUSE-FIXES** — 🔶 spawned `331156d4` (project `house`). Tree clean. PRIORITY: **audit + fix LD's 2
+  sync-engine bugs** (OR-REPLACE-trigger-under-UPSERT 500; `/changes` fast-bail dropping pushes) — data-
+  integrity risks in house's engine. Then interview Jacob on the deferred niggles (esp. wiring the **SQL
+  proxy** for the agent write path).
 
 > **Commit policy (Jacob 2026-06-04):** each repo's NEXT spawned session commits its predecessor's
 > uncommitted tree first (LD-M4 does this). HOUSE-NEXT + horse are now committed. **Same-repo

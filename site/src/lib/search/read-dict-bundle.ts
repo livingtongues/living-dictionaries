@@ -14,6 +14,9 @@ const DROP_COLUMNS = ['dirty', 'created_by_user_id', 'updated_by_user_id']
 const DATA_TABLES = ['entries', 'senses', 'audio', 'speakers', 'tags', 'dialects', 'photos', 'videos', 'sentences'] as const
 const JOIN_TABLES = ['audio_speakers', 'entry_tags', 'entry_dialects', 'sense_photos', 'video_speakers', 'sense_videos', 'senses_in_sentences'] as const
 
+/** The 16 per-dict content tables the Orama worker assembles entries from — the watcher scans these for deltas. */
+export const WATCHED_TABLES = [...DATA_TABLES, ...JOIN_TABLES] as const
+
 export type EntriesDataBundle = Record<string, Record<string, unknown>[]>
 
 interface QueryableConnection {

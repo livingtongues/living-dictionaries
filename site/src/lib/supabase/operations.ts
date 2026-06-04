@@ -5,20 +5,21 @@ import type { DictLiveDb } from '$lib/db/dict-client/dict-live-db.svelte'
 import { page } from '$app/stores'
 import { goto } from '$app/navigation'
 
-// vps-migration M4 write/sync: persistence moved from the Supabase stub to the
-// browser wa-sqlite per-dict DB (`dict_db`). Each op (1) updates the in-memory
-// Orama worker via `api.X` for instant UI, and (2) writes to `dict_db` (the
-// SharedWorker sync engine pushes dirty rows to the server, which re-checks the
-// caller's role). Per-dict rows carry NO `dictionary_id` (single-dict file) and
-// REQUIRE `created_by_user_id` / `updated_by_user_id` (NOT NULL). The `api.X`
-// double-write is removed in P4b once the change-watcher feeds Orama from
-// wa-sqlite directly.
+// vps-migration M4 write/sync: persistence is the browser wa-sqlite per-dict DB
+// (`dict_db`). Each op writes ONLY to `dict_db` (the SharedWorker sync engine
+// pushes dirty rows to the server, which re-checks the caller's role). The
+// Orama search index + entry-view store are kept in sync by the watch-based
+// feed (`orama-watcher.ts` → worker `apply_rows`), which reindexes changed rows
+// for BOTH these local writes AND remote sync-pulls — so there is NO direct
+// Orama double-write here anymore (P4b). Per-dict rows carry NO `dictionary_id`
+// (single-dict file) and REQUIRE `created_by_user_id` / `updated_by_user_id`
+// (NOT NULL).
 
 function randomUUID() {
   return window.crypto.randomUUID()
 }
 
-async function get_pieces() {
+function get_pieces() {
   const { params: { entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { dictionary, dict_db, auth_user, entries_data } } = get(page) as any as {
     params: { entryId: string }
     state: { entry_id: string }
@@ -29,7 +30,6 @@ async function get_pieces() {
       entries_data: { loading: Writable<boolean> }
     }
   }
-  const { api } = await import('$lib/search/expose-entry-worker')
   const loading = get(entries_data.loading)
   if (loading) {
     alert('Wait until loading spinner stops to make edits.')
@@ -41,7 +41,7 @@ async function get_pieces() {
   if (!user_id)
     throw new Error('You must be signed in to edit')
 
-  return { api, dictionary_id: dictionary.id, entry_id_from_page: entry_id_from_url || entry_id_from_state, dict_db, user_id }
+  return { dictionary_id: dictionary.id, entry_id_from_page: entry_id_from_url || entry_id_from_state, dict_db, user_id }
 }
 
 /** Strip columns that don't exist on / shouldn't be hand-set in the per-dict schema. */
@@ -86,18 +86,16 @@ async function unlink_junction({ dict_db, table, where, params, user_id }: {
 
 export async function insert_entry(lexeme: MultiString) {
   try {
-    const { dictionary_id, api, dict_db, user_id } = await get_pieces()
+    const { dictionary_id, dict_db, user_id } = get_pieces()
     const audit = { created_by_user_id: user_id, updated_by_user_id: user_id }
     const entry_id = randomUUID()
     const entry = { id: entry_id, lexeme, ...audit }
     const sense = { id: randomUUID(), entry_id, ...audit }
-    await api.insert_entry(entry as any)
-    await api.insert_sense(sense as any)
-
-    goto(`/${dictionary_id}/entry/${entry_id}`)
 
     await dict_db.entries.insert(entry as never)
     await dict_db.senses.insert(sense as never)
+
+    goto(`/${dictionary_id}/entry/${entry_id}`)
   } catch (err) {
     alert(err)
     console.error(err)
@@ -106,9 +104,8 @@ export async function insert_entry(lexeme: MultiString) {
 
 export async function update_entry(entry: TablesUpdate<'entries'>) {
   try {
-    const { entry_id_from_page, api, dict_db, user_id } = await get_pieces()
+    const { entry_id_from_page, dict_db, user_id } = get_pieces()
     const id = entry.id || entry_id_from_page
-    await api.update_entry({ id, ...entry })
     await dict_db.entries.update({ ...clean(entry), id, updated_by_user_id: user_id } as never)
   } catch (err) {
     alert(err)
@@ -118,14 +115,13 @@ export async function update_entry(entry: TablesUpdate<'entries'>) {
 
 export async function insert_sense(entry_id: string) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     const sense = {
       id: randomUUID(),
       entry_id,
       created_by_user_id: user_id,
       updated_by_user_id: user_id,
     }
-    await api.insert_sense(sense as any)
     await dict_db.senses.insert(sense as never)
   } catch (err) {
     alert(err)
@@ -135,8 +131,7 @@ export async function insert_sense(entry_id: string) {
 
 export async function update_sense(sense: TablesUpdate<'senses'>) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
-    await api.update_sense(sense)
+    const { dict_db, user_id } = get_pieces()
     await dict_db.senses.update({ ...clean(sense), updated_by_user_id: user_id } as never)
   } catch (err) {
     alert(err)
@@ -149,7 +144,7 @@ export async function insert_sentence({ sentence, sense_id }: {
   sense_id: string
 }) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     const new_sentence = {
       id: randomUUID(),
       ...clean(sentence),
@@ -164,12 +159,6 @@ export async function insert_sentence({ sentence, sense_id }: {
       updated_by_user_id: user_id,
     } as never)
 
-    try {
-      await api.insert_sentence(new_sentence as any, sense_id)
-    } catch (worker_err) {
-      console.error('insert_sentence: worker error', worker_err)
-    }
-
     return new_sentence
   } catch (err) {
     alert(err)
@@ -179,13 +168,8 @@ export async function insert_sentence({ sentence, sense_id }: {
 
 export async function update_sentence(sentence: TablesUpdate<'sentences'>) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     await dict_db.sentences.update({ ...clean(sentence), updated_by_user_id: user_id } as never)
-    try {
-      await api.update_sentence(sentence)
-    } catch (worker_err) {
-      console.error('update_sentence: worker error', worker_err)
-    }
     return sentence
   } catch (err) {
     alert(err)
@@ -197,13 +181,8 @@ export async function delete_sentence(sentence_id: string) {
   try {
     if (!confirm('Are you sure you want to delete this sentence?')) return
 
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     await dict_db.sentences.update({ id: sentence_id, deleted: new Date().toISOString(), updated_by_user_id: user_id } as never)
-    try {
-      await api.delete_sentence(sentence_id)
-    } catch (worker_err) {
-      console.error('delete_sentence: worker error', worker_err)
-    }
   } catch (err) {
     alert(err)
     console.error(err)
@@ -218,7 +197,7 @@ export async function insert_audio({
   entry_id: string
 }) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     const audio = {
       entry_id,
       id: randomUUID(),
@@ -226,7 +205,6 @@ export async function insert_audio({
       created_by_user_id: user_id,
       updated_by_user_id: user_id,
     }
-    await api.insert_audio(audio as any)
     await dict_db.audio.insert(audio as never)
     return audio
   } catch (err) {
@@ -237,8 +215,7 @@ export async function insert_audio({
 
 export async function update_audio(audio: TablesUpdate<'audio'>) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
-    await api.update_audio(audio)
+    const { dict_db, user_id } = get_pieces()
     await dict_db.audio.update({ ...clean(audio), updated_by_user_id: user_id } as never)
     return audio
   } catch (err) {
@@ -249,14 +226,13 @@ export async function update_audio(audio: TablesUpdate<'audio'>) {
 
 export async function insert_speaker(_speaker: Omit<TablesInsert<'speakers'>, 'dictionary_id'>) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     const speaker = {
       id: randomUUID(),
       ...clean(_speaker),
       created_by_user_id: user_id,
       updated_by_user_id: user_id,
     }
-    await api.insert_speaker(speaker as any)
     await dict_db.speakers.insert(speaker as never)
     return speaker
   } catch (err) {
@@ -277,21 +253,17 @@ export async function assign_speaker({
   remove?: boolean
 }) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     if (media === 'audio') {
       if (remove) {
-        await api.delete_audio_speaker({ speaker_id, audio_id: media_id, deleted: new Date().toISOString() })
         await unlink_junction({ dict_db, table: 'audio_speakers', where: 'audio_id = ? AND speaker_id = ?', params: [media_id, speaker_id], user_id })
       } else {
-        await api.insert_audio_speaker({ speaker_id, audio_id: media_id, deleted: null, created_at: new Date().toISOString() } as any)
         await link_junction({ dict_db, table: 'audio_speakers', where: 'audio_id = ? AND speaker_id = ?', params: [media_id, speaker_id], insert_row: { audio_id: media_id, speaker_id }, user_id })
       }
     } else if (media === 'video') {
       if (remove) {
-        await api.delete_video_speaker({ speaker_id, video_id: media_id, deleted: new Date().toISOString() })
         await unlink_junction({ dict_db, table: 'video_speakers', where: 'video_id = ? AND speaker_id = ?', params: [media_id, speaker_id], user_id })
       } else {
-        await api.insert_video_speaker({ speaker_id, video_id: media_id, deleted: null, created_at: new Date().toISOString() } as any)
         await link_junction({ dict_db, table: 'video_speakers', where: 'video_id = ? AND speaker_id = ?', params: [media_id, speaker_id], insert_row: { video_id: media_id, speaker_id }, user_id })
       }
     }
@@ -303,14 +275,13 @@ export async function assign_speaker({
 
 export async function insert_tag({ name }: { name: string }) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     const tag = {
       id: randomUUID(),
       name,
       created_by_user_id: user_id,
       updated_by_user_id: user_id,
     }
-    await api.insert_tag(tag as any)
     await dict_db.tags.insert(tag as never)
     return tag
   } catch (err) {
@@ -329,12 +300,10 @@ export async function assign_tag({
   remove?: boolean
 }) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     if (remove) {
-      await api.delete_entry_tag({ tag_id, entry_id, deleted: new Date().toISOString() })
       await unlink_junction({ dict_db, table: 'entry_tags', where: 'entry_id = ? AND tag_id = ?', params: [entry_id, tag_id], user_id })
     } else {
-      await api.insert_entry_tag({ tag_id, entry_id, deleted: null, created_at: new Date().toISOString() } as any)
       await link_junction({ dict_db, table: 'entry_tags', where: 'entry_id = ? AND tag_id = ?', params: [entry_id, tag_id], insert_row: { entry_id, tag_id }, user_id })
     }
   } catch (err) {
@@ -345,14 +314,13 @@ export async function assign_tag({
 
 export async function insert_dialect({ name }: { name: MultiString }) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     const dialect = {
       id: randomUUID(),
       name,
       created_by_user_id: user_id,
       updated_by_user_id: user_id,
     }
-    await api.insert_dialect(dialect as any)
     await dict_db.dialects.insert(dialect as never)
     return dialect
   } catch (err) {
@@ -371,12 +339,10 @@ export async function assign_dialect({
   remove?: boolean
 }) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     if (remove) {
-      await api.delete_entry_dialect({ dialect_id, entry_id, deleted: new Date().toISOString() })
       await unlink_junction({ dict_db, table: 'entry_dialects', where: 'entry_id = ? AND dialect_id = ?', params: [entry_id, dialect_id], user_id })
     } else {
-      await api.insert_entry_dialect({ dialect_id, entry_id, deleted: null, created_at: new Date().toISOString() } as any)
       await link_junction({ dict_db, table: 'entry_dialects', where: 'entry_id = ? AND dialect_id = ?', params: [entry_id, dialect_id], insert_row: { entry_id, dialect_id }, user_id })
     }
   } catch (err) {
@@ -393,14 +359,13 @@ export async function insert_photo({
   sense_id: string
 }) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     const photo = {
       id: randomUUID(),
       ...clean(_photo),
       created_by_user_id: user_id,
       updated_by_user_id: user_id,
     }
-    await api.insert_photo(photo as any, sense_id)
     await dict_db.photos.insert(photo as never)
     await dict_db.sense_photos.insert({
       photo_id: photo.id,
@@ -417,8 +382,7 @@ export async function insert_photo({
 
 export async function update_photo(photo: TablesUpdate<'photos'>) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
-    await api.update_photo(photo)
+    const { dict_db, user_id } = get_pieces()
     await dict_db.photos.update({ ...clean(photo), updated_by_user_id: user_id } as never)
     return photo
   } catch (err) {
@@ -435,14 +399,13 @@ export async function insert_video({
   sense_id: string
 }) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
+    const { dict_db, user_id } = get_pieces()
     const video = {
       id: randomUUID(),
       ...clean(_video),
       created_by_user_id: user_id,
       updated_by_user_id: user_id,
     }
-    await api.insert_video(video as any, sense_id)
     await dict_db.videos.insert(video as never)
     await dict_db.sense_videos.insert({
       video_id: video.id,
@@ -459,8 +422,7 @@ export async function insert_video({
 
 export async function update_video(video: TablesUpdate<'videos'>) {
   try {
-    const { api, dict_db, user_id } = await get_pieces()
-    await api.update_video(video)
+    const { dict_db, user_id } = get_pieces()
     await dict_db.videos.update({ ...clean(video), updated_by_user_id: user_id } as never)
     return video
   } catch (err) {

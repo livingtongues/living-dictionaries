@@ -176,18 +176,43 @@ verification risk.
       nothing to push. **Verified:** NEW `e2e/dict-sync.mjs` PASS (edit → server SQLite persists +
       fresh no-OPFS context reads it) · achi-flow PASS with a reload round-trip assertion · check 0/15
       · test 178 · build.
-- [ ] **P4b · watch-based Orama feed (drop the double-write)** — REMAINING. Replace operations.ts's
-      `api.X` calls with a watcher so **Orama watches wa-sqlite** (one path for local edits + remote
-      sync-pulls). Design (Jacob's T2-Q1 = local-watermark delta): subscribe to `dict_db`'s notifier
-      (fires on local writes via dict-live-db.notify AND on remote pulls via the SharedWorker
-      `tables_changed` broadcast → DictLiveDbImpl → notifier); debounced, query wa-sqlite for rows
-      `WHERE updated_at > last_indexed_at`, resolve affected entry_ids, reindex only those.
-      **The hard part (Jacob flagged it):** row→entry_id resolution across the ~16 tables (junctions/
-      media need FK joins, e.g. sense_photos→senses→entry_id; a tag/speaker rename fans out via
-      entry_tags / audio_speakers→audio). Two impl options: (a) main-thread `assemble_entry(entry_id)`
-      from wa-sqlite + new worker `index_entry`/`remove_entry` ops (duplicates process_entry assembly),
-      or (b) refactor the worker's per-row `operations` into one upsert-safe `apply_row(table,row)`
-      dispatcher (keeps assembly in the worker; `update_X` must insert-if-missing for pulled-new rows).
-      Verify by removing `api.X` and confirming achi-flow's "edit reflected in UI" still passes (now
-      via the watcher) + a 2-context remote-pull reindex test.
-- [ ] Update `.knowledge/` + the orchestration ledger (LD↔house sync gotchas). ✅ knowledge written.
+### P4b implementation decision (LD-P4B session, 2026-06-04)
+Chosen: **in-worker `apply_rows` dispatcher** (LD-WRITE option b) — entry assembly stays in the worker.
+- **Watch hook:** `dict_db.subscribe(table, cb)` (DictLiveDbImpl.#notifier) already fires on BOTH local
+  writes (`#insert/#update/#upsert/#save_cb/#delete_cb` call `notify(table)`) AND remote pulls (sync
+  engine `on_tables_changed` → SharedWorker broadcast `tables_changed` → DictLiveDbImpl fans to notifier).
+  One subscription covers both paths.
+- **Watermark-delta watcher** (`src/lib/search/orama-watcher.ts`, main thread): on any notify (40ms
+  debounce, in-flight guard + rescan), `SELECT * FROM <16 tables> WHERE updated_at > watermark` (incl.
+  soft-deleted rows), `parse_dict_row`, batch by table → `apply_rows(changes)` in the worker, advance
+  watermark to max updated_at seen. Initial watermark = max(updated_at) across the init bundle; one
+  catch-up scan on start covers the bundle-read→subscribe gap.
+- **Worker `apply_rows`:** FK-ordered dispatch. Base/junction maps hold only LIVE rows (delete on
+  `deleted`); grouping slices RECOMPUTED from source maps per change (robust, no fragile in-place
+  mutation) → resolves row→entry_id across all 16 tables (junctions via pair maps, speaker/tag/dialect
+  renames fan out through entry_tags/entry_dialects/audio_speakers/video_speakers). Affected entries
+  re-assembled via existing `process_entry` + reindexed once. Perf: recompute scans `Object.values`
+  (O(rows)) per affected entity — fine for now; index later if needed (noted in knowledge).
+- **Drop `api.X`** from operations.ts entirely (only caller); remove worker `operations` object.
+- entries-ui-store gains `dict_db`; watcher cached on `globalThis.__ld_orama_watchers[dict_id]`
+  (stop+replace) since init_entries re-runs per navigation.
+
+- [x] **P4b · watch-based Orama feed (drop the double-write)** ✅ (LD-P4B, `vps-migration`). Chose
+      option (b): in-worker `apply_rows` dispatcher (assembly stays in the worker) + main-thread
+      `src/lib/search/orama-watcher.ts` watermark-delta feed driven off `dict_db.subscribe(table,…)`
+      (fires on local writes AND remote pulls — ONE path). Dropped ALL `api.X` double-writes from
+      operations.ts; removed the worker `operations` object + 3 dead reverse-index maps. Base/junction
+      maps now hold LIVE rows only; grouping slices RECOMPUTED from source per change (robust). Watcher
+      cached on `globalThis.__ld_orama_watchers[dict_id]` (stop+replace per navigation). **Verified:**
+      check 0/15 · test 178 · build + node build boot · **achi-flow PASS** (edit/add/delete-sense via
+      the watcher; reload persistence intact) · **dict-sync round-trip PASS** · **NEW
+      `e2e/dict-watch-2ctx.mjs` PASS** (ctx A edits → ctx B pull-only watcher re-indexes from synced
+      row, no reload, no double-write). Surfaced (did NOT cause) a pre-existing SW-registration 404 →
+      `.issues/service-worker-404.md`; filtered the specific error in both e2e harnesses.
+- [x] **Task 2 · house→LD sync audit** ✅ (LD-P4B). All three house bugs checked against LD's engine:
+      none apply (architecture already prevents them) — see `.knowledge/migration/dict-sync-invariants.md`.
+      (1) writes already gated until synced (layout `sync_now` on cold open + the `entries_data.loading`
+      gate in `get_pieces`); (2) dict.db has NO `users` table/FK — `created_by_user_id` is plain NOT NULL
+      TEXT; (3) dict-sync-engine is single-sector → unscoped `DELETE FROM deletes` is safe (and the
+      `deletes` table is unused since LD soft-deletes via the `deleted` column).
+- [x] Update `.knowledge/` + the orchestration ledger (LD↔house sync gotchas). ✅
