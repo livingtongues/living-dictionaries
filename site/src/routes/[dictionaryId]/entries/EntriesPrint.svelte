@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, type QueryParamStore, createPersistedStore } from 'svelte-pieces'
+  import { Button, type QueryParamStore, createPersistedStore } from '$lib/svelte-pieces'
   import type { EntryData, IPrintFields, PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import { build_citation } from '../contributors/build-citation'

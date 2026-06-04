@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Modal } from 'svelte-pieces';
+  import { Button, Modal } from '$lib/svelte-pieces';
   import { page } from '$app/stores'
   import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/changeLocale';
   $: ({admin} = $page.data)

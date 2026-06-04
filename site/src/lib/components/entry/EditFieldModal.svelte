@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Modal } from 'svelte-pieces'
+  import { Modal } from '$lib/svelte-pieces'
   import type { EntryFieldValue } from '@living-dictionaries/types'
   import EditField from './EditField.svelte'
 

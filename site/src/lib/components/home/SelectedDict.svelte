@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { DictionaryView } from '@living-dictionaries/types'
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import sanitize from 'xss'
   import { onMount } from 'svelte'
   import { page } from '$app/stores'

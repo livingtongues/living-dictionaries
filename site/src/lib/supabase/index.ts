@@ -1,6 +1,7 @@
-import type { AuthResponse, SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@living-dictionaries/types'
 import { create_stub_supabase_client } from './stub-client'
+import { mock_auth_response } from '$lib/mocks/mock-user'
 
 // https://supabase.com/docs/reference/javascript/typescript-support
 export type Supabase = SupabaseClient<Database>
@@ -27,18 +28,8 @@ export function getSupabase() {
   return _supabase
 }
 
-const NULL_RESPONSE = {
-  data: {
-    user: null,
-    session: null,
-  },
-  error: { message: 'no session' },
-} as AuthResponse
-
-export async function getSession({ supabase, access_token, refresh_token }: { supabase: Supabase, access_token: string, refresh_token: string }) {
-  if (!access_token || !refresh_token)
-    return NULL_RESPONSE
-
-  const authResponse = await supabase.auth.setSession({ access_token, refresh_token })
-  return authResponse
+// vps-migration dev mock: always return a logged-in mock user (manager of `achi`) so interactions
+// can be tested while real auth is stubbed. Revert to a null AuthResponse for logged-out.
+export function getSession(_options: { supabase: Supabase, access_token: string, refresh_token: string }) {
+  return Promise.resolve(mock_auth_response)
 }

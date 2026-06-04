@@ -13,7 +13,7 @@
 
 <Row {...row}>
   <td>
-    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0"><tbody>
       <tr>
         <td align="center" style="font-family: Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;">
           <a style="font-weight:bold; color:#555555; text-decoration:none" target="_blank" {href}>
@@ -41,6 +41,6 @@
           {/if}
         </td>
       </tr>
-    </table>
+    </tbody></table>
   </td>
 </Row>

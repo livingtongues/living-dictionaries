@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ShowHide } from 'svelte-pieces'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { FacetResult } from '@orama/orama'
   import Pagination from './Pagination.svelte'
   import SwitchView from './SwitchView.svelte'

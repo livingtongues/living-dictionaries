@@ -1,6 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@living-dictionaries/types'
 import { dummy_dictionaries } from '$lib/mocks/dummy-dictionaries'
+import { dummy_audio, dummy_audio_speakers, dummy_dialects, dummy_entries, dummy_entry_dialects, dummy_entry_tags, dummy_senses, dummy_speakers, dummy_tags } from '$lib/mocks/dummy-entries'
+import { MOCK_MANAGED_DICTIONARY_ID, MOCK_USER_ID } from '$lib/mocks/mock-user'
 
 /**
  * vps-migration M1 stub. Replaces the real Supabase client so the app boots with
@@ -23,6 +25,20 @@ const dummy_data: Record<string, Row[]> = {
   materialized_dictionaries_view: dummy_dictionaries as unknown as Row[],
   materialized_admin_dictionaries_view: dummy_dictionaries as unknown as Row[],
   dictionaries: dummy_dictionaries as unknown as Row[],
+  // vps-migration dev mock: the mock user manages one dictionary so `is_manager`/`can_edit`
+  // resolve true and editor interactions can be tested (see mocks/mock-user.ts).
+  dictionary_roles: [{ user_id: MOCK_USER_ID, dictionary_id: MOCK_MANAGED_DICTIONARY_ID, role: 'manager' }],
+  // vps-migration M2b dev mock: dummy entries (+ senses, media, tags, dialects) for `achi` so the
+  // search worker builds a non-empty index and the entries list / entry editor can be exercised.
+  entries: dummy_entries as unknown as Row[],
+  senses: dummy_senses as unknown as Row[],
+  audio: dummy_audio as unknown as Row[],
+  speakers: dummy_speakers as unknown as Row[],
+  tags: dummy_tags as unknown as Row[],
+  dialects: dummy_dialects as unknown as Row[],
+  audio_speakers: dummy_audio_speakers as unknown as Row[],
+  entry_tags: dummy_entry_tags as unknown as Row[],
+  entry_dialects: dummy_entry_dialects as unknown as Row[],
 }
 
 const LOGGED_OUT = { data: { user: null, session: null }, error: null }
@@ -35,11 +51,18 @@ function noop() {
   // intentional no-op (stubbed realtime / unsubscribe)
 }
 
+type PendingWrite =
+  | { kind: 'insert', values: Row[] }
+  | { kind: 'upsert', values: Row[] }
+  | { kind: 'update', values: Row }
+  | { kind: 'delete' }
+
 class StubQueryBuilder {
   private filters: Predicate[] = []
   private want_single = false
   private range_bounds: [number, number] | null = null
   private row_limit: number | null = null
+  private pending_write: PendingWrite | null = null
 
   constructor(private readonly table: string) {}
 
@@ -128,24 +151,73 @@ class StubQueryBuilder {
     return this
   }
 
-  // Writes (no-ops while logged out) ------------------------------------
-  insert() {
+  // Writes — vps-migration M2b: mutate the in-memory `dummy_data` so editor
+  // interactions (edit field, add/delete sense, etc.) round-trip in dev. Returns
+  // affected rows so `.select().single()` callers get their inserted/updated row.
+  insert(values: Row | Row[]) {
+    this.pending_write = { kind: 'insert', values: Array.isArray(values) ? values : [values] }
     return this
   }
 
-  upsert() {
+  upsert(values: Row | Row[]) {
+    this.pending_write = { kind: 'upsert', values: Array.isArray(values) ? values : [values] }
     return this
   }
 
-  update() {
+  update(values: Row) {
+    this.pending_write = { kind: 'update', values }
     return this
   }
 
   delete() {
+    this.pending_write = { kind: 'delete' }
     return this
   }
 
+  private matches(row: Row) {
+    return this.filters.every(predicate => predicate(row))
+  }
+
+  private apply_write(): Row[] {
+    const table_rows = (dummy_data[this.table] ||= [])
+    const write = this.pending_write
+    if (!write) return []
+
+    if (write.kind === 'insert') {
+      table_rows.push(...write.values)
+      return write.values
+    }
+    if (write.kind === 'upsert') {
+      for (const value of write.values) {
+        const index = table_rows.findIndex(row => row.id != null && row.id === value.id)
+        if (index >= 0)
+          table_rows[index] = { ...table_rows[index], ...value }
+        else
+          table_rows.push(value)
+      }
+      return write.values
+    }
+    if (write.kind === 'update') {
+      const affected: Row[] = []
+      for (const row of table_rows) {
+        if (this.matches(row)) {
+          Object.assign(row, write.values)
+          affected.push(row)
+        }
+      }
+      return affected
+    }
+    // delete
+    const affected = table_rows.filter(row => this.matches(row))
+    dummy_data[this.table] = table_rows.filter(row => !this.matches(row))
+    return affected
+  }
+
   private resolve() {
+    if (this.pending_write) {
+      const affected = this.apply_write()
+      return this.want_single ? { data: affected[0] ?? null, error: null } : { data: affected, error: null }
+    }
     let rows = (dummy_data[this.table] || []).slice()
     for (const predicate of this.filters)
       rows = rows.filter(predicate)

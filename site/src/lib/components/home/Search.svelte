@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { DictionaryView, IPoint } from '@living-dictionaries/types'
-  import { Button, ShowHide } from 'svelte-pieces'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 
   export let dictionaries: DictionaryView[] = []
@@ -99,7 +99,7 @@
           <button
             type="button"
             class="text-left px-3 py-1 my-1 hover:bg-gray-200"
-            on:click={() => setCurrentDictionary(dictionary)}>
+            onclick={() => setCurrentDictionary(dictionary)}>
             <div>{dictionary.name}</div>
             {#if dictionary.location}
               <small class="-mt-1 text-gray-600">{dictionary.location}</small>
@@ -119,7 +119,7 @@
         <button
           type="button"
           class="text-left px-3 py-1 my-1 hover:bg-gray-200"
-          on:click={() => setCurrentDictionary(dictionary)}>
+          onclick={() => setCurrentDictionary(dictionary)}>
           <div>{dictionary?.name}</div>
           {#if dictionary.location}
             <small class="-mt-1 text-gray-600">{dictionary.location}</small>
@@ -143,7 +143,7 @@
               <Button
                 class="mb-1 mr-1"
                 color="black"
-                on:click={() => setCurrentDictionary(dictionary)}>
+                onclick={() => setCurrentDictionary(dictionary)}>
                 {dictionary?.name}
               </Button>
             {/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import Tab from './Tab.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Header from '$lib/components/shell/Header.svelte'

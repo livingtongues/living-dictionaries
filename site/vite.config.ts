@@ -2,12 +2,11 @@ import { readFileSync } from 'node:fs'
 import { sveltekit } from '@sveltejs/kit/vite'
 import { type Plugin, defineConfig } from 'vite'
 import UnoCSS from 'unocss/vite'
-// import { kitbook } from 'kitbook/plugins/vite'
-// import kitbookConfig from './kitbook.config'
+import { svelte_look } from 'svelte-look/vite'
 
 export default defineConfig({
   plugins: [
-    // kitbook(kitbookConfig),
+    svelte_look(),
     UnoCSS(),
     sveltekit(),
     rawFonts(['.ttf']),
@@ -26,10 +25,6 @@ export default defineConfig({
   optimizeDeps: {
     include: [ // if the dependency is large with many internal modules or is CommonJS then include it
       'xss',
-      'typescript', // bc kitbook uses it
-      // 'kitbook',
-      // 'kitbook/viewer/load-viewer',
-      // '@turf/turf',
       'wavesurfer.js',
       'recordrtc',
       '@supabase/supabase-js',
@@ -42,7 +37,6 @@ export default defineConfig({
       '@turf/center',
       '@turf/turf',
       'sveltefirets',
-      'svelte-pieces',
       '@sentry/browser',
     ],
   },

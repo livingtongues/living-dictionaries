@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { EntryData, EntryFieldValue, Tables, TablesUpdate } from '@living-dictionaries/types'
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
   import Sense from './Sense.svelte'

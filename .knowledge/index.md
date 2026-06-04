@@ -6,6 +6,8 @@ Active plans live in `.issues/`; the migration master plan is `.issues/vps-migra
 ## Categories
 - [migration/](./migration/index.md) — gotchas and decisions for the Vercel/Supabase →
   VPS/SQLite evolution (build/deploy, lockfile discipline, what's deferred).
+- [testing/](./testing/index.md) — verification conventions: the puppeteer-core deep-flow
+  harness and its headless-browser gotchas.
 
 ## Pointers to the reference repo
 The **target** architecture (SQLite shared.db + per-dict dict.db, wa-sqlite/better-sqlite3,

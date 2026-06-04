@@ -31,7 +31,7 @@
 </script>
 
 <script lang="ts">
-  import { ShowHide, longpress } from 'svelte-pieces'
+  import { ShowHide, longpress } from '$lib/svelte-pieces'
   import type { EntryData } from '@living-dictionaries/types'
   import { page } from '$app/stores'
   import { minutes_ago_in_ms } from '$lib/helpers/time'

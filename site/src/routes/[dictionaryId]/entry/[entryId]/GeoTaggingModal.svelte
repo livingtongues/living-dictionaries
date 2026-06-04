@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Modal, ShowHide } from 'svelte-pieces'
+  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import type { Coordinates, IPoint, IRegion } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface'

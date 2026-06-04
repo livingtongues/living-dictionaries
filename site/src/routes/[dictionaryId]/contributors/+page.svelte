@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ShowHide } from 'svelte-pieces'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import CitationComponent from './Citation.svelte'
   import Partners from './Partners.svelte'

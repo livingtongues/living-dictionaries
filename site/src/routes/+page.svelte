@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ShowHide } from 'svelte-pieces'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { DictionaryView } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import type { PageData } from './$types'

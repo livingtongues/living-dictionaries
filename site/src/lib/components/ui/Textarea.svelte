@@ -43,7 +43,7 @@
         dispatch('submit');
 
     }}
-    autocomplete="false" />
+    autocomplete="off" />
   <!-- svelte-ignore a11y-label-has-associated-control -->
   <label>{name}</label>
 </div>

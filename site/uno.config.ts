@@ -1,21 +1,7 @@
-import { type Extractor, defineConfig, presetIcons, presetTypography, presetUno, transformerDirectives } from 'unocss'
+import { defineConfig, presetIcons, presetTypography, presetUno } from 'unocss'
 import { presetForms } from '@julr/unocss-preset-forms'
-
-// The universal `unocss/vite` plugin's default extractor doesn't understand Svelte's
-// `class:utility={condition}` directive syntax (the old `@unocss/svelte-scoped` plugin did),
-// so utilities only ever applied that way (e.g. `class:text-4xl`) never get generated.
-// This extractor pulls the utility name out of every `class:` directive. The built-in default
-// extractor still runs (core re-adds it), so plain `class="..."` extraction is unaffected.
-const svelte_class_directive_extractor: Extractor = {
-  name: 'svelte-class-directive',
-  extract({ code }) {
-    const tokens = new Set<string>()
-    const matches = code.matchAll(/\bclass:([\w!:./[\]%-]+)/g)
-    for (const match of matches)
-      tokens.add(match[1])
-    return tokens
-  },
-}
+import extractorSvelte from '@unocss/extractor-svelte'
+import transformerDirectives from '@unocss/transformer-directives'
 
 export default defineConfig({
   presets: [
@@ -32,14 +18,11 @@ export default defineConfig({
       },
     }),
   ],
-  // `@unocss/svelte-scoped` ran the directives transformer by default so that `--at-apply`
-  // (and `@apply`) inside component `<style>` blocks worked; the universal plugin needs it added.
-  transformers: [
-    transformerDirectives(),
-  ],
-  extractors: [
-    svelte_class_directive_extractor,
-  ],
+  // `@unocss/svelte-scoped` bundled these; the universal `unocss/vite` plugin needs them explicit:
+  // extractorSvelte → understands Svelte `class:utility={cond}` directives
+  // transformerDirectives → processes `@apply` / `--at-apply` inside <style> blocks
+  extractors: [extractorSvelte()],
+  transformers: [transformerDirectives()],
   theme: {
     screens: {
       print: { raw: 'print' },

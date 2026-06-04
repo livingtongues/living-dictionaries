@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { Button } from 'svelte-pieces';
+  import { Button } from '$lib/svelte-pieces';
   import { onMount } from 'svelte';
   import type { StereoAudioRecorder, Options } from 'recordrtc';
 

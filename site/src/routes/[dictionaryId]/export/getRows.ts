@@ -1,5 +1,5 @@
 import type { EntryData, MultiString } from '@living-dictionaries/types'
-import type { DeepPartial } from 'kitbook'
+import type { DeepPartial } from '$lib/helpers/deep-partial'
 import type { EntryForCSV, translate_entries } from './prepareEntriesForCsv'
 import { friendlyName } from './friendlyName'
 import { glossingLanguages } from '$lib/glosses/glossing-languages'

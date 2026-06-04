@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
 
   export let audioUrl: string = undefined
   export let audioBlob = undefined

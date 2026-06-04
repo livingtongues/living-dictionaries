@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { DictionaryView } from '@living-dictionaries/types'
-  import { Button, Modal, ShowHide } from 'svelte-pieces'
+  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 
   export let dictionaries: DictionaryView[] = []

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, type QueryParamStore, ResponsiveSlideover } from 'svelte-pieces'
+  import { Button, type QueryParamStore, ResponsiveSlideover } from '$lib/svelte-pieces'
   import type { FacetResult } from '@orama/orama'
   import ToggleFacet from './ToggleFacet.svelte'
   import ClearFilters from './ClearFilters.svelte'

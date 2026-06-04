@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Modal } from 'svelte-pieces'
+  import { Button, Modal } from '$lib/svelte-pieces'
   import { get } from 'svelte/store'
   import { apply_button_label } from './image-store'
   import { page } from '$app/stores'

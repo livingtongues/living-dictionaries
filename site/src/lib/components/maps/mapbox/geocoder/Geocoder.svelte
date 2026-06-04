@@ -1,7 +1,7 @@
 <script lang="ts">
   // https://www.npmjs.com/package/@mapbox/mapbox-gl-geocoder
   import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte'
-  import { loadScriptOnce, loadStylesOnce } from 'svelte-pieces'
+  import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
 
   import type { GeocoderOptions, Result, Results } from '@mapbox/mapbox-gl-geocoder'
   import { type MapKeyContext, mapKey } from '../context'

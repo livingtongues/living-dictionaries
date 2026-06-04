@@ -35,8 +35,8 @@
     "eslint-plugin-svelte-stylistic": "^0.0.4",
     "start-server-and-test": "^2.0.5",
     "supabase": "^1.145.4",
-    "svelte": "^4.2.12",
-    "typescript": "~5.1.6",
-    "vitest": "^2.1.4"
+    "svelte": "^5.56.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.8"
   }
 }

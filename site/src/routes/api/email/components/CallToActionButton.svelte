@@ -10,10 +10,10 @@
 
 <Row {...row}>
   <td align="center">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0"><tbody>
       <tr>
         <td align="center">
-          <table border="0" cellspacing="0" cellpadding="0" class="mobile-button-container">
+          <table border="0" cellspacing="0" cellpadding="0" class="mobile-button-container"><tbody>
             <tr>
               <td align="center" style="border-radius: 3px;" bgcolor={backgroundColor}>
                 <a target="_blank" {href} style="font-size: 16px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 3px; padding: 15px 25px; border: 1px solid {backgroundColor}; display: inline-block;" class="mobile-button">
@@ -21,10 +21,10 @@
                 </a>
               </td>
             </tr>
-          </table>
+          </tbody></table>
         </td>
       </tr>
-    </table>
+    </tbody></table>
   </td>
 </Row>
 
