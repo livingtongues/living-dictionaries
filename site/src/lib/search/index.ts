@@ -13,6 +13,11 @@ export async function reset_caches() {
   return api.reset_caches()
 }
 
+export async function apply_rows(changes: Record<string, Record<string, unknown>[]>) {
+  const { api } = await import('./expose-entry-worker')
+  return api.apply_rows(changes)
+}
+
 export async function init_entries(options: InitEntryWorkerOptions) {
   const { dictionary_id, can_edit, admin, bundle } = options
   const { api } = await import('./expose-entry-worker')

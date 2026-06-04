@@ -98,3 +98,52 @@ also guarantees the new trigger-fix migration lands in the fixture db.
 sync is already in-flight (the bootstrap pull can briefly hold it) — then the next is the 30s periodic
 timer. For deterministic e2es we nudge `connection.sync_now()` after the edit (same path). A future UX
 nicety: a short retry after a skipped in-flight sync.
+
+## P4b — the watch-based Orama feed (drop the double-write) (LD-P4B)
+P4a kept an interim `api.X` double-write: every op wrote wa-sqlite AND directly pushed the change into
+the Orama worker for instant UI. P4b removes that — **Orama now WATCHES wa-sqlite**, one path covering
+both local edits and remote sync-pulls.
+
+- **The single watch hook is `dict_db.subscribe(table, cb)`** (DictLiveDbImpl's internal
+  `TableChangeNotifier`). It already fires for BOTH paths: local writes call `#notifier.notify(table)`
+  inside `#insert/#update/#upsert/#save_cb/#delete_cb`; remote pulls arrive as the sync engine's
+  `on_tables_changed` → SharedWorker `tables_changed` broadcast → DictLiveDbImpl fans it into the same
+  notifier. So subscribing once per table covers everything — no separate broadcast plumbing needed.
+- **`src/lib/search/orama-watcher.ts`** (main thread): on any notify (40ms debounce + in-flight guard
+  with rescan), `SELECT * FROM <16 content tables> WHERE updated_at > watermark` (includes soft-deleted
+  rows so removals propagate), `parse_dict_row`, batch by table → worker `apply_rows(changes)`, advance
+  watermark to the max `updated_at` seen. Initial watermark = max `updated_at` across the init bundle;
+  one catch-up scan on start closes the bundle-read→subscribe gap. **`updated_at` is compared as an ISO
+  string** (lexicographic = chronological for the uniform ISO/UTC stamps both the client writes and the
+  server LWW preserve).
+- **Worker `apply_rows` (chosen over a main-thread re-assembler so entry assembly stays in ONE place):**
+  FK-ordered dispatch (`apply_one(table, row)`). Base + junction maps hold **LIVE rows only** (a row
+  with `deleted` set is removed from its map); the affected grouping slices are **RECOMPUTED from the
+  source maps** per change (`recompute_entry_senses/_audios/_tags/_dialects`, `recompute_sense_*`,
+  `recompute_audio/video_speakers`) rather than mutated in place — robust against upserts, soft-deletes,
+  and pulled-new rows. This is what resolves **row→entry_id across all 16 tables**: junctions resolve via
+  their pair maps (`sense_photos→senses→entry_id`), and speaker/tag/dialect renames fan out through
+  `audio_speakers`/`video_speakers`/`entry_tags`/`entry_dialects` to every affected entry. Affected
+  entries are re-assembled via the unchanged `process_entry` and reindexed once.
+- **operations.ts** dropped every `api.X` call (it was the only caller); `get_pieces` no longer imports
+  the worker. The worker's old `operations` object + 3 now-dead reverse-index maps
+  (`sentence/photo/video_id_to_sense_ids`) were deleted.
+- **Watcher lifecycle:** `init_entries` (hence `create_entries_ui_store`) re-runs on every in-dict
+  navigation, so the watcher is cached on `globalThis.__ld_orama_watchers[dict_id]` and the prior one
+  is `.stop()`ped before a new one subscribes — otherwise subscribers stack and apply_rows runs N times.
+- **Perf note (deferred):** `recompute_*` / `apply_one` scan `Object.values(map)` (O(rows-in-table)) per
+  affected entity. Fine for the verified dicts; for 50k-entry dicts add membership indexes before it
+  matters. Not optimized now by design (correctness-first, per the plan).
+- **Verification:** `e2e/dict-watch-2ctx.mjs` (NEW, `test:watch`) is the remote-pull proof — two
+  isolated browser contexts (separate OPFS): ctx A (manager) edits + pushes; ctx B (logged-out,
+  pull-only) `sync_now`s and its watcher re-indexes the entry, showing the new value **without a reload
+  and without any double-write**. achi-flow + dict-sync still pass with the double-write gone.
+
+## Pre-existing service-worker 404 surfaced by P4b (NOT caused by it)
+The achi-flow/dict-sync `page.on('pageerror')` gate started failing on a SvelteKit service-worker
+registration 404 (`/achi/service-worker.js`): with the default `kit.paths.relative`, the SW registers
+at a route-relative URL that 404s (the SW is served at root). It's async/timing-dependent — P4a passed
+by luck; P4b's extra watcher async shifts timing so the 404 lands inside the assertion window. Proven
+pre-existing by rebuilding+running the committed P4a tree (passes "no uncaught page errors"). The two
+e2e harnesses now filter that specific error; the real fix (drop the SW like the example repo, or
+`paths.relative:false`) is a global call left for Jacob — tracked in `.issues/service-worker-404.md`.

@@ -1,5 +1,5 @@
 import { expose } from 'comlink'
-import type { EntryData, Tables, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
+import type { EntryData, Tables } from '@living-dictionaries/types'
 import { clear } from 'idb-keyval'
 import { _search_entries, create_index, update_index_entry } from './orama.worker'
 import { should_include_tag } from '$lib/helpers/tag-visibility'
@@ -42,10 +42,6 @@ let sense_id_to_videos: Record<string, Tables<'videos'>[]> = {}
 let audio_id_to_speakers: Record<string, Tables<'speakers'>[]> = {}
 let entry_id_to_audios: Record<string, Tables<'audio'>[]> = {}
 
-let sentence_id_to_sense_ids: Record<string, string[]> = {}
-let photo_id_to_sense_ids: Record<string, string[]> = {}
-let video_id_to_sense_ids: Record<string, string[]> = {}
-
 // The grouping maps above accumulate via .push() across the bulk load. On a long-running
 // dev server init_entries can run more than once (CDN cache pass + dummy-data pass, navigation),
 // so they must be cleared before each bulk rebuild or items duplicate (e.g. one sense rendered N times).
@@ -60,259 +56,305 @@ function reset_grouping_maps() {
   sense_id_to_videos = {}
   audio_id_to_speakers = {}
   entry_id_to_audios = {}
-  sentence_id_to_sense_ids = {}
-  photo_id_to_sense_ids = {}
-  video_id_to_sense_ids = {}
 }
 
-const operations = {
-  insert_entry: async (entry: TablesInsert<'entries'>) => {
-    entries[entry.id] = entry as Tables<'entries'>
-    await process_and_update_entry(entry as Tables<'entries'>)
-  },
-  update_entry: async (entry: TablesUpdate<'entries'>) => {
-    if (entry.deleted) {
-      await delete_entry(entry.id)
-      await update_index_entry(entry as EntryData, dictionary_id)
-      await mark_search_index_updated()
-      return
+// vps-migration M4 write/sync P4b: the watch-based Orama feed. The main-thread
+// `orama-watcher` reads rows changed since a watermark from wa-sqlite (local
+// edits AND remote sync-pulls — one path) and hands them here. `apply_rows`
+// upserts each changed row into the in-memory base/junction maps (LIVE rows
+// only — a `deleted` row is removed), RECOMPUTES the affected grouping slices
+// from those maps (robust, no fragile in-place mutation), resolves the owning
+// entry_id(s) across all 16 tables, and re-assembles + reindexes each affected
+// entry once via the existing `process_entry`. This replaces the prior interim
+// `api.X` double-write from operations.ts.
+
+const SYNC_TABLE_ORDER = [
+  'entries', 'senses', 'speakers', 'tags', 'dialects', 'audio', 'photos', 'videos', 'sentences',
+  'audio_speakers', 'entry_tags', 'entry_dialects', 'sense_photos', 'video_speakers', 'sense_videos', 'senses_in_sentences',
+] as const
+
+function pair_values<T>(map: Record<string, T>, field: 'audio_id' | 'speaker_id' | 'video_id' | 'entry_id' | 'tag_id' | 'dialect_id' | 'sense_id' | 'photo_id' | 'sentence_id', value: string): T[] {
+  return Object.values(map).filter(row => (row as Record<string, unknown>)[field] === value)
+}
+
+function recompute_entry_senses(entry_id: string) {
+  if (!entry_id) return
+  const list = Object.values(senses).filter(sense => sense.entry_id === entry_id)
+  list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+  entry_id_to_senses[entry_id] = list
+}
+
+function recompute_audio_speakers(audio_id: string) {
+  audio_id_to_speakers[audio_id] = pair_values(audio_speakers, 'audio_id', audio_id)
+    .map(join => speakers[(join as Tables<'audio_speakers'>).speaker_id])
+    .filter(Boolean)
+}
+
+function recompute_video_speakers(video_id: string) {
+  video_id_to_speakers[video_id] = pair_values(video_speakers, 'video_id', video_id)
+    .map(join => speakers[(join as Tables<'video_speakers'>).speaker_id])
+    .filter(Boolean)
+}
+
+function recompute_entry_audios(entry_id: string) {
+  if (!entry_id) return
+  const list = Object.values(audios)
+    .filter(audio => audio.entry_id === entry_id)
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    .map(audio => ({
+      ...audio,
+      ...(audio_id_to_speakers[audio.id]?.length ? { speakers: audio_id_to_speakers[audio.id] } : {}),
+    }))
+  entry_id_to_audios[entry_id] = list
+}
+
+function recompute_entry_tags(entry_id: string) {
+  if (!entry_id) return
+  entry_id_to_tags[entry_id] = pair_values(entry_tags, 'entry_id', entry_id)
+    .map(join => tags[(join as Tables<'entry_tags'>).tag_id])
+    .filter(tag => tag && should_include_tag(tag, admin))
+}
+
+function recompute_entry_dialects(entry_id: string) {
+  if (!entry_id) return
+  entry_id_to_dialects[entry_id] = pair_values(entry_dialects, 'entry_id', entry_id)
+    .map(join => dialects[(join as Tables<'entry_dialects'>).dialect_id])
+    .filter(Boolean)
+}
+
+function recompute_sense_sentences(sense_id: string) {
+  if (!sense_id) return
+  sense_id_to_sentences[sense_id] = pair_values(senses_in_sentences, 'sense_id', sense_id)
+    .map(join => sentences[(join as Tables<'senses_in_sentences'>).sentence_id])
+    .filter(Boolean)
+}
+
+function recompute_sense_photos(sense_id: string) {
+  if (!sense_id) return
+  sense_id_to_photos[sense_id] = pair_values(sense_photos, 'sense_id', sense_id)
+    .map(join => photos[(join as Tables<'sense_photos'>).photo_id])
+    .filter(Boolean)
+}
+
+function recompute_sense_videos(sense_id: string) {
+  if (!sense_id) return
+  sense_id_to_videos[sense_id] = pair_values(sense_videos, 'sense_id', sense_id)
+    .map((join) => {
+      const video = videos[(join as Tables<'sense_videos'>).video_id]
+      if (!video) return null
+      return {
+        ...video,
+        ...(video_id_to_speakers[video.id]?.length ? { speakers: video_id_to_speakers[video.id] } : {}),
+      }
+    })
+    .filter(Boolean) as Tables<'videos'>[]
+}
+
+/** Upsert (or remove if `deleted`) one changed row and return the entry_id(s) it affects. */
+function apply_one(table: string, row: Record<string, any>): string[] {
+  const is_deleted = !!row.deleted
+  switch (table) {
+    case 'entries': {
+      if (is_deleted) {
+        delete entries[row.id]
+        return []
+      }
+      entries[row.id] = { ...entries[row.id], ...row }
+      return [row.id]
     }
-    const old_entry = entries[entry.id]
-    if (!old_entry) return
-    entries[entry.id] = { ...old_entry, ...entry } as Tables<'entries'>
-    await process_and_update_entry(entries[entry.id])
-  },
-  insert_sense: async (sense: TablesInsert<'senses'>) => {
-    senses[sense.id] = sense as Tables<'senses'>
-    if (!entry_id_to_senses[sense.entry_id]) entry_id_to_senses[sense.entry_id] = []
-    entry_id_to_senses[sense.entry_id].push(sense as Tables<'senses'>)
-    await process_and_update_entry(entries[sense.entry_id])
-  },
-  update_sense: async (sense: TablesUpdate<'senses'>) => {
-    const entry_id = senses[sense.id]?.entry_id
-    if (sense.deleted) {
-      delete senses[sense.id]
-      entry_id_to_senses[entry_id] = entry_id_to_senses[entry_id].filter(s => s.id !== sense.id)
-    } else {
-      const old_sense = senses[sense.id]
-      if (!old_sense) return
-      senses[sense.id] = { ...old_sense, ...sense }
-      entry_id_to_senses[entry_id] = entry_id_to_senses[entry_id].map((s) => {
-        if (s.id === sense.id) {
-          return senses[sense.id]
-        }
-        return s
-      })
+    case 'senses': {
+      const entry_id = row.entry_id ?? senses[row.id]?.entry_id
+      if (is_deleted) delete senses[row.id]
+      else senses[row.id] = { ...senses[row.id], ...row }
+      recompute_entry_senses(entry_id)
+      return entry_id ? [entry_id] : []
     }
-    await process_and_update_entry(entries[entry_id])
-  },
-  insert_audio: async (audio: TablesInsert<'audio'>) => {
-    const audio_with_temp_updated_at = { ...audio, updated_at: new Date().toISOString() } as Tables<'audio'>
-    audios[audio.id] = audio_with_temp_updated_at
-    if (!entry_id_to_audios[audio.entry_id]) entry_id_to_audios[audio.entry_id] = []
-    entry_id_to_audios[audio.entry_id].push(audio_with_temp_updated_at)
-    await process_and_update_entry(entries[audio.entry_id])
-  },
-  update_audio: async (audio: TablesUpdate<'audio'>) => {
-    const old_audio = audios[audio.id]
-    if (!old_audio) return
-    const new_audio = { ...old_audio, ...audio }
-    const { entry_id } = old_audio
-    if (audio.deleted) {
-      delete audios[audio.id]
-      entry_id_to_audios[entry_id] = entry_id_to_audios[entry_id].filter(a => a.id !== audio.id)
-    } else {
-      audios[audio.id] = new_audio
-      entry_id_to_audios[entry_id] = entry_id_to_audios[entry_id].map((a) => {
-        if (a.id === audio.id) {
-          return new_audio
-        }
-        return a
-      })
+    case 'audio': {
+      const entry_id = row.entry_id ?? audios[row.id]?.entry_id
+      if (is_deleted) delete audios[row.id]
+      else audios[row.id] = { ...audios[row.id], ...row }
+      recompute_entry_audios(entry_id)
+      return entry_id ? [entry_id] : []
     }
-    await process_and_update_entry(entries[entry_id])
-  },
-  insert_photo: async (photo: TablesInsert<'photos'>, sense_id: string) => {
-    photos[photo.id] = photo as Tables<'photos'>
-    if (!sense_id_to_photos[sense_id]) sense_id_to_photos[sense_id] = []
-    sense_id_to_photos[sense_id].push(photo as Tables<'photos'>)
-    if (!photo_id_to_sense_ids[photo.id]) photo_id_to_sense_ids[photo.id] = []
-    photo_id_to_sense_ids[photo.id].push(sense_id)
-    const entry_id = senses[sense_id]?.entry_id
-    await process_and_update_entry(entries[entry_id])
-  },
-  update_photo: async (photo: TablesUpdate<'photos'>) => {
-    const sense_id = photo_id_to_sense_ids[photo.id]?.[0]
-    if (photo.deleted) {
-      delete photos[photo.id]
-      sense_id_to_photos[sense_id] = sense_id_to_photos[sense_id].filter(p => p.id !== photo.id)
-    } else {
-      const old_photo = photos[photo.id]
-      if (!old_photo) return
-      photos[photo.id] = { ...old_photo, ...photo }
-      sense_id_to_photos[sense_id] = sense_id_to_photos[sense_id].map((p) => {
-        if (p.id === photo.id) {
-          return photos[photo.id]
-        }
-        return p
-      })
+    case 'photos': {
+      if (is_deleted) delete photos[row.id]
+      else photos[row.id] = { ...photos[row.id], ...row }
+      const affected: string[] = []
+      for (const join of pair_values(sense_photos, 'photo_id', row.id)) {
+        const { sense_id } = join as Tables<'sense_photos'>
+        recompute_sense_photos(sense_id)
+        const entry_id = senses[sense_id]?.entry_id
+        if (entry_id) affected.push(entry_id)
+      }
+      return affected
     }
-    const entry_id = senses[sense_id]?.entry_id
-    await process_and_update_entry(entries[entry_id])
-  },
-  insert_video: async (video: TablesInsert<'videos'>, sense_id: string) => {
-    videos[video.id] = video as Tables<'videos'>
-    if (!sense_id_to_videos[sense_id]) sense_id_to_videos[sense_id] = []
-    sense_id_to_videos[sense_id].push(video as Tables<'videos'>)
-    if (!video_id_to_sense_ids[video.id]) video_id_to_sense_ids[video.id] = []
-    video_id_to_sense_ids[video.id].push(sense_id)
-    const entry_id = senses[sense_id]?.entry_id
-    await process_and_update_entry(entries[entry_id])
-  },
-  update_video: async (video: TablesUpdate<'videos'>) => {
-    const sense_id = video_id_to_sense_ids[video.id]?.[0]
-    if (video.deleted) {
-      delete videos[video.id]
-      sense_id_to_videos[sense_id] = sense_id_to_videos[sense_id].filter(v => v.id !== video.id)
-    } else {
-      const old_video = videos[video.id]
-      if (!old_video) return
-      videos[video.id] = { ...old_video, ...video }
-      sense_id_to_videos[sense_id] = sense_id_to_videos[sense_id].map((v) => {
-        if (v.id === video.id) {
-          return videos[video.id]
-        }
-        return v
-      })
+    case 'videos': {
+      if (is_deleted) delete videos[row.id]
+      else videos[row.id] = { ...videos[row.id], ...row }
+      const affected: string[] = []
+      for (const join of pair_values(sense_videos, 'video_id', row.id)) {
+        const { sense_id } = join as Tables<'sense_videos'>
+        recompute_sense_videos(sense_id)
+        const entry_id = senses[sense_id]?.entry_id
+        if (entry_id) affected.push(entry_id)
+      }
+      return affected
     }
-    const entry_id = senses[sense_id]?.entry_id
-    await process_and_update_entry(entries[entry_id])
-  },
-  insert_speaker: async (speaker: TablesInsert<'speakers'>) => {
-    speakers[speaker.id] = speaker as Tables<'speakers'>
-    await set_speakers(Object.values(speakers))
-  },
-  insert_audio_speaker: async ({ audio_id, speaker_id }: TablesInsert<'audio_speakers'>) => {
-    if (!audio_id_to_speakers[audio_id]) audio_id_to_speakers[audio_id] = []
-    audio_id_to_speakers[audio_id].push(speakers[speaker_id])
-    const entry_id = audios[audio_id]?.entry_id
-    entry_id_to_audios[entry_id] = entry_id_to_audios[entry_id].map((a) => {
-      if (a.id === audio_id) {
-        return {
-          ...a,
-          speakers: audio_id_to_speakers[audio_id],
+    case 'sentences': {
+      if (is_deleted) delete sentences[row.id]
+      else sentences[row.id] = { ...sentences[row.id], ...row }
+      const affected: string[] = []
+      for (const join of pair_values(senses_in_sentences, 'sentence_id', row.id)) {
+        const { sense_id } = join as Tables<'senses_in_sentences'>
+        recompute_sense_sentences(sense_id)
+        const entry_id = senses[sense_id]?.entry_id
+        if (entry_id) affected.push(entry_id)
+      }
+      return affected
+    }
+    case 'speakers': {
+      if (is_deleted) delete speakers[row.id]
+      else speakers[row.id] = { ...speakers[row.id], ...row }
+      set_speakers(Object.values(speakers))
+      const affected: string[] = []
+      for (const join of pair_values(audio_speakers, 'speaker_id', row.id)) {
+        const { audio_id } = join as Tables<'audio_speakers'>
+        recompute_audio_speakers(audio_id)
+        const entry_id = audios[audio_id]?.entry_id
+        if (entry_id) { recompute_entry_audios(entry_id); affected.push(entry_id) }
+      }
+      for (const join of pair_values(video_speakers, 'speaker_id', row.id)) {
+        const { video_id } = join as Tables<'video_speakers'>
+        recompute_video_speakers(video_id)
+        for (const sv of pair_values(sense_videos, 'video_id', video_id)) {
+          const { sense_id } = sv as Tables<'sense_videos'>
+          recompute_sense_videos(sense_id)
+          const entry_id = senses[sense_id]?.entry_id
+          if (entry_id) affected.push(entry_id)
         }
       }
-      return a
-    })
-    await process_and_update_entry(entries[entry_id])
-  },
-  delete_audio_speaker: async ({ audio_id, speaker_id }: TablesUpdate<'audio_speakers'>) => {
-    audio_id_to_speakers[audio_id] = audio_id_to_speakers[audio_id].filter(s => s.id !== speaker_id)
-    const entry_id = audios[audio_id]?.entry_id
-    entry_id_to_audios[entry_id] = entry_id_to_audios[entry_id].map((a) => {
-      if (a.id === audio_id) {
-        return {
-          ...a,
-          speakers: null,
-        }
-      }
-      return a
-    })
-    await process_and_update_entry(entries[entry_id])
-  },
-  insert_video_speaker: async ({ video_id, speaker_id }: TablesInsert<'video_speakers'>) => {
-    if (!video_id_to_speakers[video_id]) video_id_to_speakers[video_id] = []
-    video_id_to_speakers[video_id].push(speakers[speaker_id])
-    const sense_id = video_id_to_sense_ids[video_id]?.[0]
-    sense_id_to_videos[sense_id] = sense_id_to_videos[sense_id].map((v) => {
-      if (v.id === video_id) {
-        return {
-          ...v,
-          speakers: video_id_to_speakers[video_id],
-        }
-      }
-      return v
-    })
-    const entry_id = senses[sense_id]?.entry_id
-    await process_and_update_entry(entries[entry_id])
-  },
-  delete_video_speaker: async ({ video_id, speaker_id }: TablesUpdate<'video_speakers'>) => {
-    video_id_to_speakers[video_id] = video_id_to_speakers[video_id].filter(s => s.id !== speaker_id)
-    const sense_id = video_id_to_sense_ids[video_id]?.[0]
-    sense_id_to_videos[sense_id] = sense_id_to_videos[sense_id].map((v) => {
-      if (v.id === video_id) {
-        return {
-          ...v,
-          speakers: null,
-        }
-      }
-      return v
-    })
-    const entry_id = senses[sense_id]?.entry_id
-    await process_and_update_entry(entries[entry_id])
-  },
-  insert_sentence: async (sentence: TablesInsert<'sentences'>, sense_id: string) => {
-    sentences[sentence.id] = sentence as Tables<'sentences'>
-    if (!sense_id_to_sentences[sense_id]) sense_id_to_sentences[sense_id] = []
-    sense_id_to_sentences[sense_id].push(sentence as Tables<'sentences'>)
-    if (!sentence_id_to_sense_ids[sentence.id]) sentence_id_to_sense_ids[sentence.id] = []
-    sentence_id_to_sense_ids[sentence.id].push(sense_id)
-    const entry_id = senses[sense_id]?.entry_id
-    await process_and_update_entry(entries[entry_id])
-  },
-  update_sentence: async (sentence: TablesUpdate<'sentences'>) => {
-    const sense_id = sentence_id_to_sense_ids[sentence.id]?.[0]
-    if (sentence.deleted) {
-      delete sentences[sentence.id]
-      sense_id_to_sentences[sense_id] = sense_id_to_sentences[sense_id].filter(s => s.id !== sentence.id)
-    } else {
-      const old_sentence = sentences[sentence.id]
-      if (!old_sentence) return
-      sentences[sentence.id] = { ...old_sentence, ...sentence }
-      sense_id_to_sentences[sense_id] = sense_id_to_sentences[sense_id].map((s) => {
-        if (s.id === sentence.id) {
-          return sentences[sentence.id]
-        }
-        return s
-      })
+      return affected
     }
-    const entry_id = senses[sense_id]?.entry_id
-    if (entry_id && entries[entry_id]) await process_and_update_entry(entries[entry_id])
-  },
-  delete_sentence: async (sentence_id: string) => {
-    const sense_id = sentence_id_to_sense_ids[sentence_id]?.[0]
-    delete sentences[sentence_id]
-    sense_id_to_sentences[sense_id] = sense_id_to_sentences[sense_id]?.filter(s => s.id !== sentence_id) || []
-    const entry_id = senses[sense_id]?.entry_id
-    if (entry_id && entries[entry_id]) await process_and_update_entry(entries[entry_id])
-  },
-  insert_tag: async (tag: TablesInsert<'tags'>) => {
-    tags[tag.id] = tag as Tables<'tags'>
-    await set_tags(Object.values(tags))
-  },
-  insert_entry_tag: async ({ entry_id, tag_id }: TablesInsert<'entry_tags'>) => {
-    if (!entry_id_to_tags[entry_id]) entry_id_to_tags[entry_id] = []
-    entry_id_to_tags[entry_id].push(tags[tag_id])
-    await process_and_update_entry(entries[entry_id])
-  },
-  delete_entry_tag: async ({ entry_id, tag_id }: TablesUpdate<'entry_tags'>) => {
-    entry_id_to_tags[entry_id] = entry_id_to_tags[entry_id].filter(t => t.id !== tag_id)
-    await process_and_update_entry(entries[entry_id])
-  },
-  insert_dialect: async (dialect: TablesInsert<'dialects'>) => {
-    dialects[dialect.id] = dialect as Tables<'dialects'>
-    await set_dialects(Object.values(dialects))
-  },
-  insert_entry_dialect: async ({ entry_id, dialect_id }: TablesInsert<'entry_dialects'>) => {
-    if (!entry_id_to_dialects[entry_id]) entry_id_to_dialects[entry_id] = []
-    entry_id_to_dialects[entry_id].push(dialects[dialect_id])
-    await process_and_update_entry(entries[entry_id])
-  },
-  delete_entry_dialect: async ({ entry_id, dialect_id }: TablesUpdate<'entry_dialects'>) => {
-    entry_id_to_dialects[entry_id] = entry_id_to_dialects[entry_id].filter(d => d.id !== dialect_id)
-    await process_and_update_entry(entries[entry_id])
-  },
+    case 'tags': {
+      if (is_deleted) delete tags[row.id]
+      else tags[row.id] = { ...tags[row.id], ...row }
+      set_tags(Object.values(tags))
+      const affected: string[] = []
+      for (const join of pair_values(entry_tags, 'tag_id', row.id)) {
+        const { entry_id } = join as Tables<'entry_tags'>
+        recompute_entry_tags(entry_id)
+        affected.push(entry_id)
+      }
+      return affected
+    }
+    case 'dialects': {
+      if (is_deleted) delete dialects[row.id]
+      else dialects[row.id] = { ...dialects[row.id], ...row }
+      set_dialects(Object.values(dialects))
+      const affected: string[] = []
+      for (const join of pair_values(entry_dialects, 'dialect_id', row.id)) {
+        const { entry_id } = join as Tables<'entry_dialects'>
+        recompute_entry_dialects(entry_id)
+        affected.push(entry_id)
+      }
+      return affected
+    }
+    case 'audio_speakers': {
+      const key = `${row.audio_id}_${row.speaker_id}`
+      if (is_deleted) delete audio_speakers[key]
+      else audio_speakers[key] = row as Tables<'audio_speakers'>
+      recompute_audio_speakers(row.audio_id)
+      const entry_id = audios[row.audio_id]?.entry_id
+      if (entry_id) recompute_entry_audios(entry_id)
+      return entry_id ? [entry_id] : []
+    }
+    case 'entry_tags': {
+      const key = `${row.entry_id}_${row.tag_id}`
+      if (is_deleted) delete entry_tags[key]
+      else entry_tags[key] = row as Tables<'entry_tags'>
+      recompute_entry_tags(row.entry_id)
+      return [row.entry_id]
+    }
+    case 'entry_dialects': {
+      const key = `${row.entry_id}_${row.dialect_id}`
+      if (is_deleted) delete entry_dialects[key]
+      else entry_dialects[key] = row as Tables<'entry_dialects'>
+      recompute_entry_dialects(row.entry_id)
+      return [row.entry_id]
+    }
+    case 'sense_photos': {
+      const key = `${row.sense_id}_${row.photo_id}`
+      if (is_deleted) delete sense_photos[key]
+      else sense_photos[key] = row as Tables<'sense_photos'>
+      recompute_sense_photos(row.sense_id)
+      const entry_id = senses[row.sense_id]?.entry_id
+      return entry_id ? [entry_id] : []
+    }
+    case 'video_speakers': {
+      const key = `${row.video_id}_${row.speaker_id}`
+      if (is_deleted) delete video_speakers[key]
+      else video_speakers[key] = row as Tables<'video_speakers'>
+      recompute_video_speakers(row.video_id)
+      const affected: string[] = []
+      for (const sv of pair_values(sense_videos, 'video_id', row.video_id)) {
+        const { sense_id } = sv as Tables<'sense_videos'>
+        recompute_sense_videos(sense_id)
+        const entry_id = senses[sense_id]?.entry_id
+        if (entry_id) affected.push(entry_id)
+      }
+      return affected
+    }
+    case 'sense_videos': {
+      const key = `${row.sense_id}_${row.video_id}`
+      if (is_deleted) delete sense_videos[key]
+      else sense_videos[key] = row as Tables<'sense_videos'>
+      recompute_sense_videos(row.sense_id)
+      const entry_id = senses[row.sense_id]?.entry_id
+      return entry_id ? [entry_id] : []
+    }
+    case 'senses_in_sentences': {
+      const key = `${row.sense_id}_${row.sentence_id}`
+      if (is_deleted) delete senses_in_sentences[key]
+      else senses_in_sentences[key] = row as Tables<'senses_in_sentences'>
+      recompute_sense_sentences(row.sense_id)
+      const entry_id = senses[row.sense_id]?.entry_id
+      return entry_id ? [entry_id] : []
+    }
+    default:
+      return []
+  }
+}
+
+export async function apply_rows(changes: Record<string, Record<string, any>[]>) {
+  const affected_entry_ids = new Set<string>()
+  const removed_entry_ids = new Set<string>()
+
+  for (const table of SYNC_TABLE_ORDER) {
+    const rows = changes[table]
+    if (!rows?.length) continue
+    for (const row of rows) {
+      if (table === 'entries' && row.deleted) {
+        removed_entry_ids.add(row.id)
+        affected_entry_ids.delete(row.id)
+        apply_one(table, row)
+        continue
+      }
+      for (const entry_id of apply_one(table, row)) {
+        if (entry_id) affected_entry_ids.add(entry_id)
+      }
+    }
+  }
+
+  for (const entry_id of removed_entry_ids) {
+    await delete_entry(entry_id)
+    await update_index_entry({ id: entry_id, deleted: new Date().toISOString() } as EntryData, dictionary_id)
+  }
+  for (const entry_id of affected_entry_ids) {
+    const entry = entries[entry_id]
+    if (entry) await process_and_update_entry(entry)
+  }
+  if (affected_entry_ids.size || removed_entry_ids.size)
+    await mark_search_index_updated()
 }
 
 async function process_and_update_entry(entry: Tables<'entries'>) {
@@ -407,15 +449,11 @@ export async function init_entries(
   for (const { sense_id, sentence_id } of Object.values(senses_in_sentences)) {
     if (!sense_id_to_sentences[sense_id]) sense_id_to_sentences[sense_id] = []
     sense_id_to_sentences[sense_id].push(sentences[sentence_id])
-    if (!sentence_id_to_sense_ids[sentence_id]) sentence_id_to_sense_ids[sentence_id] = []
-    sentence_id_to_sense_ids[sentence_id].push(sense_id)
   }
 
   for (const { sense_id, photo_id } of Object.values(sense_photos)) {
     if (!sense_id_to_photos[sense_id]) sense_id_to_photos[sense_id] = []
     sense_id_to_photos[sense_id].push(photos[photo_id])
-    if (!photo_id_to_sense_ids[photo_id]) photo_id_to_sense_ids[photo_id] = []
-    photo_id_to_sense_ids[photo_id].push(sense_id)
   }
 
   for (const video_speaker of Object.values(video_speakers)) {
@@ -431,9 +469,6 @@ export async function init_entries(
       ...video,
       ...(video_id_to_speakers[video_id] ? { speakers: video_id_to_speakers[video_id] } : {}),
     })
-
-    if (!video_id_to_sense_ids[video_id]) video_id_to_sense_ids[video_id] = []
-    video_id_to_sense_ids[video_id].push(sense_id)
   }
 
   for (const audio_speaker of Object.values(audio_speakers)) {
@@ -513,9 +548,9 @@ function key_by_pair(rows: any[], field_1: string, field_2: string): Record<stri
 
 export const api = {
   init_entries,
+  apply_rows,
   reset_caches: clear,
   search_entries: _search_entries,
-  ...operations,
 }
 
 expose(api)

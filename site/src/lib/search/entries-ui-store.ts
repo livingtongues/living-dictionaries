@@ -2,20 +2,29 @@ import { get, writable } from 'svelte/store'
 import type { Readable } from 'svelte/store'
 import type { EntryData, Tables } from '@living-dictionaries/types'
 import type { DictConnection } from '$lib/db/dict-client/dict-connection'
+import type { DictLiveDb } from '$lib/db/dict-client/dict-live-db.svelte'
 import { init_entries, reset_caches, search_entries } from '$lib/search'
 import { read_dict_bundle } from '$lib/search/read-dict-bundle'
+import { create_orama_watcher } from '$lib/search/orama-watcher'
+import type { OramaWatcher } from '$lib/search/orama-watcher'
 import { browser } from '$app/environment'
+
+interface OramaWatcherGlobals {
+  __ld_orama_watchers?: Record<string, OramaWatcher>
+}
 
 export function create_entries_ui_store({
   dictionary_id,
   can_edit,
   admin,
   connection,
+  dict_db,
 }: {
   dictionary_id: string
   can_edit: Readable<boolean>
   admin: Readable<number>
   connection: DictConnection | null
+  dict_db: DictLiveDb | null
 }) {
   const entries_data = writable<Record<string, EntryData>>({})
   const speakers = writable<Tables<'speakers'>[]>([])
@@ -71,8 +80,8 @@ export function create_entries_ui_store({
 
   if (browser && connection) {
     read_dict_bundle({ connection })
-      .then((bundle) => {
-        init_entries({
+      .then(async (bundle) => {
+        await init_entries({
           dictionary_id,
           can_edit: is_editor,
           admin: is_admin,
@@ -86,6 +95,25 @@ export function create_entries_ui_store({
           set_loading,
           mark_search_index_updated,
         })
+
+        // P4b: start the watch-based Orama feed once the bulk index is built.
+        // Watermark = newest row already indexed; the watcher reindexes only
+        // rows that change after it (local edits + remote pulls). init_entries
+        // re-runs per navigation, so stop+replace any prior watcher for this
+        // dict to avoid stacked subscribers.
+        if (dict_db) {
+          let watermark = ''
+          for (const rows of Object.values(bundle)) {
+            for (const row of rows) {
+              const updated_at = String((row as { updated_at?: unknown }).updated_at ?? '')
+              if (updated_at > watermark) watermark = updated_at
+            }
+          }
+          const globals = globalThis as OramaWatcherGlobals
+          globals.__ld_orama_watchers ??= {}
+          globals.__ld_orama_watchers[dictionary_id]?.stop()
+          globals.__ld_orama_watchers[dictionary_id] = create_orama_watcher({ connection, dict_db, initial_watermark: watermark })
+        }
       })
       .catch((err) => {
         console.error('Failed to read dict bundle from wa-sqlite', err)

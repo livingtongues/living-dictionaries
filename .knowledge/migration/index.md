@@ -41,6 +41,11 @@ Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. Plan + st
   "Set Admin Role Level" in the allow-list world (house should mirror); the send-code rate-limit FIX
   + LD's `created_at` NOT NULL twist; the `E2E_EXPOSE_OTP` escape hatch for e2e on `node build`; the
   vitest `$env/dynamic/private` alias; hand-adding jose to the lockfile.
+- [dict-sync-invariants.md](./dict-sync-invariants.md) — LD-P4B audit of LD's per-dict sync engine
+  against the three house local-first-editing bugs (cold-DB id collisions, missing local `users` FK
+  row, unscoped cross-sector `DELETE FROM deletes`). All three are prevented by LD's architecture
+  (loading-gate + cold-open `sync_now`; dict.db has no `users` FK; single-sector engine) — records the
+  invariants to keep true so they stay prevented.
 - [unocss-svelte-scoped-to-universal.md](./unocss-svelte-scoped-to-universal.md) — M2a plugin
   swap: the svelte-scoped defaults the universal plugin drops (directives transformer +
   Svelte `class:` extraction) and how to restore them; `@unocss/reset` becoming a direct dep AND

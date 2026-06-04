@@ -64,7 +64,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       ;({ connection, dict_db } = cached)
     }
 
-    const entries_ui = create_entries_ui_store({ dictionary_id, can_edit: readable(can_edit), admin: readable(admin_level), connection })
+    const entries_ui = create_entries_ui_store({ dictionary_id, can_edit: readable(can_edit), admin: readable(admin_level), connection, dict_db })
 
     const dictionary_info = readable<Tables<'dictionary_info'>>({} as Tables<'dictionary_info'>, (set) => {
       (async () => {
