@@ -29,7 +29,8 @@
     "drizzle-orm": "^0.44.7",
     "jose": "^6.2.3",
     "satori": "^0.0.44",
-    "satori-html": "^0.3.0"
+    "satori-html": "^0.3.0",
+    "wa-sqlite": "^1.0.0"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.693.0",

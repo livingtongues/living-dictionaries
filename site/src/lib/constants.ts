@@ -24,6 +24,9 @@ export const DICT_DB_OPFS_PREFIX = 'dictionaries/'
 /** Snapshot freshness threshold for the `/changes` snapshot_expired sentinel. */
 export const SNAPSHOT_EXPIRED_DAYS = 60
 
+/** Total OPFS budget for viewer-only dict.db files (editor dicts are exempt). */
+export const VIEWER_OPFS_BUDGET_BYTES = 200 * 1024 * 1024
+
 export const ACCESS_TOKEN_COOKIE_NAME = 'sb-access-token'
 export const REFRESH_TOKEN_COOKIE_NAME = 'sb-refresh-token'
 
