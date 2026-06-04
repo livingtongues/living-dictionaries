@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { DictionaryView } from '@living-dictionaries/types'
-  import { BadgeArrayEmit, Button, ShowHide } from 'svelte-pieces'
+  import { BadgeArrayEmit, Button, ShowHide } from '$lib/svelte-pieces'
 
   export let dictionaries: DictionaryView[]
   export let dictionary_ids: string[]

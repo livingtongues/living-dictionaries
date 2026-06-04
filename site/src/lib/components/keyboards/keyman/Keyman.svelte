@@ -8,7 +8,7 @@
 <script lang="ts">
   import './keyman.css'
   import { onDestroy, onMount, tick } from 'svelte'
-  import { Button, Modal, ShowHide, loadScriptOnce } from 'svelte-pieces'
+  import { Button, Modal, ShowHide, loadScriptOnce } from '$lib/svelte-pieces'
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages'
   import { browser } from '$app/environment'
 

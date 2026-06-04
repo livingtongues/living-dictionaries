@@ -7,11 +7,11 @@
 
 <head>
   <!-- Help character display properly. -->
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <!-- Set the initial scale of the email. -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Force Outlook clients to render with a better MS engine. -->
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta http-equiv="x-ua-compatible" content="IE=Edge">
   <!-- Help prevent blue links and autolinking -->
   <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
   <!-- prevent Apple from reformatting and zooming messages. -->

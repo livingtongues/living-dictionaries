@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Modal } from 'svelte-pieces'
+  import { Modal } from '$lib/svelte-pieces'
   import { readable } from 'svelte/store'
   import type { EntryData } from '@living-dictionaries/types'
   import EntryPage from '../entry/[entryId]/+page.svelte'

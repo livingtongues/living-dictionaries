@@ -28,7 +28,7 @@
   class="shadow rounded flex-1 mb-1 border border-gray-400 whitespace-nowrap
     overflow-auto relative"
   style="height: calc(100vh - 189px);">
-  <table class="relative">
+  <table class="relative"><tbody>
     <tr class="text-left">
       {#each columns as column, i}
         <th
@@ -64,7 +64,7 @@
         {/each}
       </tr>
     {/each}
-  </table>
+  </tbody></table>
 </div>
 
 {#if selectedColumn}

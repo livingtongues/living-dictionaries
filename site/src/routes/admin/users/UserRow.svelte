@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import type { DictionaryView } from '@living-dictionaries/types'
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import DictionariesHelping from './DictionariesHelping.svelte'
   import type { PageData } from './$types'
   import { supabase_date_to_friendly } from '$lib/helpers/time'

@@ -1,4 +1,4 @@
-import type { DeepPartial } from 'kitbook'
+import type { DeepPartial } from '$lib/helpers/deep-partial'
 import type { EntryData } from '@living-dictionaries/types'
 import { seo_description } from './seo_description'
 import { english_translate } from '$lib/i18n'

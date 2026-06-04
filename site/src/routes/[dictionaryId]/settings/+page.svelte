@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, JSON, ShowHide } from 'svelte-pieces'
+  import { Button, JSON, ShowHide } from '$lib/svelte-pieces'
   import EditString from '../EditString.svelte'
   import { page } from '$app/stores'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'

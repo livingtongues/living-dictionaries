@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BadgeArrayEmit, Button, JSON, Modal, ShowHide } from 'svelte-pieces'
+  import { BadgeArrayEmit, Button, JSON, Modal, ShowHide } from '$lib/svelte-pieces'
   import type { TablesUpdate } from '@living-dictionaries/types'
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte'

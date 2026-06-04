@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fly } from 'svelte/transition'
   import { onMount } from 'svelte'
-  import { clickoutside } from 'svelte-pieces'
+  import { clickoutside } from '$lib/svelte-pieces'
   import type { SelectOption } from './select-options.interface'
 
   export let selectedOptions: Record<string, SelectOption>

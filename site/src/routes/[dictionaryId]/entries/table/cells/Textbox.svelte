@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { EntryFieldValue } from '@living-dictionaries/types'
-  import { ShowHide } from 'svelte-pieces'
+  import { ShowHide } from '$lib/svelte-pieces'
   import sanitize from 'xss'
   import { page } from '$app/stores'
 

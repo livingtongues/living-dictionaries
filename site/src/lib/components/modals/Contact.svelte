@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Form, Modal } from 'svelte-pieces'
+  import { Button, Form, Modal } from '$lib/svelte-pieces'
   import { createEventDispatcher } from 'svelte'
   import { page } from '$app/stores'
   import { goto } from '$app/navigation'

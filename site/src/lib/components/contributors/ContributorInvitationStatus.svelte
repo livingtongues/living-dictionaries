@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Tables } from '@living-dictionaries/types'
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
 
   export let invite: Tables<'invites'>

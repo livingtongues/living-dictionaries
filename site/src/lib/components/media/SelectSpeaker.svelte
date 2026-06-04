@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 
   export let select_speaker: (speaker_id: string) => Promise<void> = undefined

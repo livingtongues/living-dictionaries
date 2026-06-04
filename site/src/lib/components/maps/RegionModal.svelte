@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount, createEventDispatcher } from 'svelte';
-  import { Button, Modal, ReactiveSet } from 'svelte-pieces';
+  import { Button, Modal, ReactiveSet } from '$lib/svelte-pieces';
   import Map from './mapbox/map/Map.svelte';
   import Geocoder from './mapbox/geocoder/Geocoder.svelte';
   import Marker from './mapbox/map/Marker.svelte';
@@ -78,7 +78,7 @@
       {$page.data.t('create.select_region')}
     </span>
     <form on:submit|preventDefault={() => update(points)}>
-      <form on:submit={(e) => e.preventDefault()} style="height: 50vh;">
+      <div style="height: 50vh;">
         <Map
           lng={centerLng}
           lat={centerLat}
@@ -140,7 +140,7 @@
           {/if}
           <ToggleStyle />
         </Map>
-      </form>
+      </div>
 
       <div class="modal-footer">
         <Button onclick={() => dispatch('close')} form="simple" color="black">

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { crossfade, scale } from 'svelte/transition'
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 
   export let title: string

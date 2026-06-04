@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Form } from 'svelte-pieces'
+  import { Button, Form } from '$lib/svelte-pieces'
   import sanitize from 'xss'
   import type { EntryFieldValue } from '@living-dictionaries/types'
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'

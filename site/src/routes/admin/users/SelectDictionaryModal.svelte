@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { DictionaryView } from '@living-dictionaries/types'
-  import { Button, Modal } from 'svelte-pieces'
+  import { Button, Modal } from '$lib/svelte-pieces'
   import Filter from '$lib/components/Filter.svelte'
 
   export let on_close: () => void

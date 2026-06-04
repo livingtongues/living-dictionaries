@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Modal, ShowHide } from 'svelte-pieces'
+  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import MultiSelect from './MultiSelect.svelte'
   import type { SelectOption } from './select-options.interface'
   import { page } from '$app/stores'

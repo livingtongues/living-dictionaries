@@ -1,0 +1,23 @@
+// Vendored subset of `svelte-pieces` (the package shipped Svelte-4-compiled components whose
+// CSS the Svelte 5 build rejects). UI components from house's already-ported set; the rest
+// copied from svelte-pieces source (legacy syntax still runs in Svelte 5; runes migration is M2c).
+export { default as Button } from './ui/Button.svelte'
+export { default as Badge } from './ui/Badge.svelte'
+export { default as Modal } from './ui/Modal.svelte'
+export { default as ResponsiveTable } from './ui/ResponsiveTable.svelte'
+export { default as Slideover } from './ui/Slideover.svelte'
+export { default as ResponsiveSlideover } from './ui/ResponsiveSlideover.svelte'
+export { default as ShowHide } from './functions/ShowHide.svelte'
+export { default as ReactiveSet } from './functions/ReactiveSet.svelte'
+export { default as Menu } from './functions/Menu.svelte'
+export { default as IntersectionObserverShared } from './functions/IntersectionObserverShared.svelte'
+export { default as Form } from './data/Form.svelte'
+export { default as JSON } from './data/JSON.svelte'
+export { default as BadgeArray } from './data/BadgeArray.svelte'
+export { default as BadgeArrayEmit } from './data/BadgeArrayEmit.svelte'
+export { longpress } from './actions/longpress'
+export { clickoutside } from './actions/clickoutside'
+export { loadScriptOnce, loadStylesOnce } from './functions/loadOnce'
+export { createPersistedStore } from './stores/persisted-store'
+export { createQueryParamStore } from './stores/query-param-store'
+export type { QueryParamStore } from './stores/query-param-store'

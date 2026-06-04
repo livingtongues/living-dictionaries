@@ -42,7 +42,7 @@ function at(longitude: number, latitude: number) {
 }
 
 export const dummy_dictionaries: DictionaryView[] = [
-  dict({ id: 'achi', url: 'achi', name: 'Achi', location: 'Guatemala', coordinates: at(-90.4, 15.1), entry_count: 1240, glottocode: 'achi1257' }),
+  dict({ id: 'achi', url: 'achi', name: 'Achi', location: 'Guatemala', coordinates: at(-90.4, 15.1), entry_count: 1240, glottocode: 'achi1257', gloss_languages: ['en', 'es'] }),
   dict({ id: 'gta', url: 'gta', name: 'GtaɁ', location: 'Odisha, India', coordinates: at(82.5, 18.8), entry_count: 2103, glottocode: 'gata1239' }),
   dict({ id: 'kihunde', url: 'kihunde', name: 'Kihunde', location: 'North Kivu, DRC', coordinates: at(29.0, -0.6), entry_count: 942, glottocode: 'hund1238' }),
   dict({ id: 'ainu', url: 'ainu', name: 'Ainu', location: 'Hokkaido, Japan', coordinates: at(142.0, 43.0), entry_count: 1580, glottocode: 'ainu1240' }),

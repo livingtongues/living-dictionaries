@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ShowHide } from 'svelte-pieces'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { DictionaryView, IPoint, IRegion } from '@living-dictionaries/types'
   import type { LngLat } from 'mapbox-gl'
   import { page } from '$app/stores'

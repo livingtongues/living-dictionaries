@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ResponsiveSlideover, ShowHide } from 'svelte-pieces'
+  import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
   import User from './User.svelte'
   import { page } from '$app/stores'
   import { mode } from '$lib/supabase'

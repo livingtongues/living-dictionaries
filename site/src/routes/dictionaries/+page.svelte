@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ResponsiveTable } from 'svelte-pieces'
+  import { Button, ResponsiveTable } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
   import Footer from '$lib/components/shell/Footer.svelte'
@@ -41,22 +41,24 @@
   </div>
   <ResponsiveTable stickyColumn stickyHeading class="my-1">
     <thead>
-      <th>
-        {$page.data.t('dictionary.name_of_language')}
-      </th>
-      <th> {$page.data.t('about.entry_count')} </th>
-      <th> URL </th>
-      <th> ISO 639-3 </th>
-      <th> Glottocode </th>
-      <th>
-        {$page.data.t('dictionary.location')}
-      </th>
-      <th>
-        {$page.data.t('dictionary.latitude')}
-      </th>
-      <th>
-        {$page.data.t('dictionary.longitude')}
-      </th>
+      <tr>
+        <th>
+          {$page.data.t('dictionary.name_of_language')}
+        </th>
+        <th> {$page.data.t('about.entry_count')} </th>
+        <th> URL </th>
+        <th> ISO 639-3 </th>
+        <th> Glottocode </th>
+        <th>
+          {$page.data.t('dictionary.location')}
+        </th>
+        <th>
+          {$page.data.t('dictionary.latitude')}
+        </th>
+        <th>
+          {$page.data.t('dictionary.longitude')}
+        </th>
+      </tr>
     </thead>
     {#each filtered_dictionaries as { url, metadata, name, entry_count, iso_639_3, glottocode, location, coordinates }}
       {@const first_latitude = coordinates?.points?.[0]?.coordinates.latitude}

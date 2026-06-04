@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BadgeArrayEmit, ShowHide } from 'svelte-pieces'
+  import { BadgeArrayEmit, ShowHide } from '$lib/svelte-pieces'
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
 
   export let users: UserWithDictionaryRoles[] = []

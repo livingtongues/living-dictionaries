@@ -1,5 +1,5 @@
 import { create, insertMultiple, save } from '@orama/orama'
-import type { DeepPartial } from 'kitbook'
+import type { DeepPartial } from '$lib/helpers/deep-partial'
 import type { EntryData } from '@living-dictionaries/types'
 import { search_entries } from './search-entries'
 import { entries_index_schema } from './entries-schema'

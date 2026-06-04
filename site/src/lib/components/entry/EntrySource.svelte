@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BadgeArray } from 'svelte-pieces'
+  import { BadgeArray } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 
   export let can_edit = false

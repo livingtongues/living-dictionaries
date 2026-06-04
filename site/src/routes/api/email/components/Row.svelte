@@ -10,9 +10,9 @@
   <td bgcolor={backgroundColor} align="center" style="padding: {top}px 12px {bottom}px;">
     {@html `<!--[if (gte mso 9)|(IE)]><table align="center" border="0" cellspacing="0" cellpadding="0" width="500"><tr><td align="center" valign="top" width="500"><![endif]-->`}
     <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px;" class="make-responsive-on-small-screens">
-      <tr>
+      <tbody><tr>
         <slot />
-      </tr>
+      </tr></tbody>
     </table>
     {@html `<!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->`}
   </td>

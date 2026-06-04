@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Form, Modal } from 'svelte-pieces'
+  import { Button, Form, Modal } from '$lib/svelte-pieces'
   import { onMount } from 'svelte'
   import { toast } from '../ui/Toasts.svelte'
   import { handle_sign_in_response } from '../../supabase/sign_in'

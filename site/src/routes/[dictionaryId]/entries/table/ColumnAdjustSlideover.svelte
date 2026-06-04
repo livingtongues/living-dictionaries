@@ -2,7 +2,7 @@
   import { onMount } from 'svelte'
   import { flip } from 'svelte/animate'
   import { fade } from 'svelte/transition'
-  import { Slideover } from 'svelte-pieces'
+  import { Slideover } from '$lib/svelte-pieces'
   import type { IColumn } from '@living-dictionaries/types'
   import ColumnTitle from './ColumnTitle.svelte'
   import { page } from '$app/stores'
