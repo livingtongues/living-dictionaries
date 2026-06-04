@@ -45,6 +45,12 @@ export const POST: RequestHandler = async (event) => {
   const caller = await resolve_caller(event, dict_id)
   const { user_id, is_editor } = caller
 
+  // Does this editor have rows/tombstones to PUSH this round?
+  const has_push = is_editor && (
+    Object.values(body.dirty_rows ?? {}).some(rows => rows && rows.length)
+    || (body.deletes?.length ?? 0) > 0
+  )
+
   // Migration version handshake (Q10.3 / B.3 error sentinels).
   const client_migration = strip_sql_ext(body.latest_dict_migration ?? '')
   const server_migration = strip_sql_ext(LATEST_DICT_MIGRATION)
@@ -58,8 +64,10 @@ export const POST: RequestHandler = async (event) => {
   const dict_db = get_dictionary_db(dict_id)
   const last_modified_at = read_last_modified_at(dict_db)
 
-  // Fast bail: nothing changed since cursor (Story C.6).
-  if (last_modified_at && body.synced_up_to && last_modified_at <= body.synced_up_to) {
+  // Fast bail: nothing to push AND nothing changed on the server since cursor.
+  // MUST NOT bail when the editor has dirty rows/tombstones to push, or the
+  // push is silently dropped (cursor often equals the server watermark).
+  if (!has_push && last_modified_at && body.synced_up_to && last_modified_at <= body.synced_up_to) {
     const fast_bail: DictChangesResponse = {
       new_synced_up_to: body.synced_up_to,
       changes: {},
