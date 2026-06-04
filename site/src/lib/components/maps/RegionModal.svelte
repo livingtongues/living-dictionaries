@@ -51,11 +51,11 @@
 
   function handleGeocoderResult({ detail }, add) {
     if (detail?.user_coordinates?.[0]) {
- add({
-      longitude: detail.user_coordinates[0],
-      latitude: detail.user_coordinates[1],
-    })
-} else { add({ longitude: detail.center[0], latitude: detail.center[1] }) }
+      add({
+        longitude: detail.user_coordinates[0],
+        latitude: detail.user_coordinates[1],
+      })
+    } else { add({ longitude: detail.center[0], latitude: detail.center[1] }) }
   }
 
   const dispatch = createEventDispatcher<{

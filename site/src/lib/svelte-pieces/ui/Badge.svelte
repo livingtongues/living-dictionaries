@@ -1,18 +1,23 @@
-<script> export let onclick = void 0
-export let onx = void 0
-export let href = void 0
-export let target = ''
-export let size = 'sm'
-export let color = void 0
-export let active = false
+<script>
+  let {
+    onclick = undefined,
+    onx = undefined,
+    href = undefined,
+    target = '',
+    size = 'sm',
+    color = undefined,
+    active = false,
+    class: klass = '',
+    children,
+  } = $props()
 </script>
 
 {#if href}
-  <a {href} {target} rel="noopener noreferrer" data-sveltekit-prefetch class:active class="{$$props.class} {size} {color}">
-    <slot />
+  <a {href} {target} rel="noopener noreferrer" data-sveltekit-prefetch class:active class="{klass} {size} {color}">
+    {@render children?.()}
     {#if onx}
-      <span class="sp-7gktzh" />
-      <button type="button" on:click|preventDefault={onx} class="badge-x">
+      <span class="sp-7gktzh"></span>
+      <button type="button" onclick={(event) => { event.preventDefault(); onx(event) }} class="badge-x">
         <svg class="sp-toedj4" stroke="currentColor" fill="none" viewBox="0 0 8 8">
           <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
         </svg>
@@ -31,11 +36,11 @@ export let active = false
     {/if}
   </a>
 {:else if onclick}
-  <button type="button" on:click={onclick} class:active class="{$$props.class} {size} {color}">
-    <slot />
+  <button type="button" {onclick} class:active class="{klass} {size} {color}">
+    {@render children?.()}
     {#if onx}
-      <span class="sp-7gktzh" />
-      <button type="button" on:click|stopPropagation={onx} class="badge-x">
+      <span class="sp-7gktzh"></span>
+      <button type="button" onclick={(event) => { event.stopPropagation(); onx(event) }} class="badge-x">
         <svg class="sp-toedj4" stroke="currentColor" fill="none" viewBox="0 0 8 8">
           <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
         </svg>
@@ -43,11 +48,11 @@ export let active = false
     {/if}
   </button>
 {:else}
-  <div class:active class="{$$props.class} {size} {color}">
-    <slot />
+  <div class:active class="{klass} {size} {color}">
+    {@render children?.()}
     {#if onx}
-      <span class="sp-7gktzh" />
-      <button type="button" on:click={onx} class="badge-x">
+      <span class="sp-7gktzh"></span>
+      <button type="button" onclick={onx} class="badge-x">
         <svg class="sp-toedj4" stroke="currentColor" fill="none" viewBox="0 0 8 8">
           <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
         </svg>

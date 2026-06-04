@@ -54,7 +54,7 @@
       {#if !speaker_id}
         <option></option>
       {/if}
-      {#each $speakers as speaker}
+      {#each $speakers as speaker (speaker.id)}
         <option value={speaker.id}>
           {speaker.name}
         </option>

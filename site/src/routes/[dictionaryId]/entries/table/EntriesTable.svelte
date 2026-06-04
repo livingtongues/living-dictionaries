@@ -40,7 +40,7 @@
   style="height: calc(100vh - 189px);">
   <table class="relative"><tbody>
     <tr class="text-left">
-      {#each columns as column, i}
+      {#each columns as column, i (i)}
         <th
           onclick={() => {
             selectedColumn = column
@@ -58,7 +58,7 @@
     {#each entries as entry (entry.id)}
       {@const updated_within_last_5_minutes = can_edit && new Date(entry.updated_at).getTime() > minutes_ago_in_ms(5)}
       <tr class="row-hover">
-        {#each columns as column, i}
+        {#each columns as column, i (i)}
           <td
             class:bg-green-100!={updated_within_last_5_minutes}
             class="{column.sticky ? 'sticky bg-white z-1' : ''} {isFirefox ? '' : 'h-0'}"

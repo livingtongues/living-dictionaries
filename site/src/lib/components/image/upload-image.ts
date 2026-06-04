@@ -1,4 +1,5 @@
-import { type Readable, get, writable } from 'svelte/store'
+import { get, writable } from 'svelte/store'
+import type { Readable } from 'svelte/store'
 import { api_gcs_serving_url } from '$api/gcs_serving_url/_call'
 import { api_upload } from '$api/upload/_call'
 import { page } from '$app/stores'

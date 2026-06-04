@@ -58,7 +58,7 @@
       {/if}
 
       {#if dictionary.id !== 'garifuna'}
-        {#each Object.entries(entry.main.lexeme) as [key, value]}
+        {#each Object.entries(entry.main.lexeme) as [key, value] (key)}
           {#if key !== 'default'}
             <i class="mr-1" class:sompeng={dictionary.id === 'sora' && key === 'lo2'}>{value}</i>
           {/if}
@@ -68,7 +68,7 @@
     <div class="flex flex-wrap items-center justify-end -mb-1">
       <div class="text-xs text-gray-600 mr-auto mb-1">
         {#if first_sense.parts_of_speech}
-          {#each first_sense.parts_of_speech as pos}
+          {#each first_sense.parts_of_speech as pos (pos)}
             <i>{$page.data.t({ dynamicKey: `psAbbrev.${pos}`, fallback: pos })}, </i>
           {/each}
         {/if}
@@ -96,8 +96,8 @@
           {#if entry.dialects}<p class="text-xs">
             <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.map(({ name }) => name.default).join(', ')}</i>
           </p>{/if}
-          {#each first_sense.sentences || [] as sentence}
-            {#each Object.entries(sentence.text) as [bcp, content]}
+          {#each first_sense.sentences || [] as sentence (sentence.id)}
+            {#each Object.entries(sentence.text) as [bcp, content] (bcp)}
               <p>
                 <span class="font-semibold">
                   {#if bcp !== 'vn'}
@@ -123,7 +123,7 @@
         </span>
       {/if}
 
-      {#each first_sense.semantic_domains || [] as domain}
+      {#each first_sense.semantic_domains || [] as domain (domain)}
         <span
           class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1
             mb-1">

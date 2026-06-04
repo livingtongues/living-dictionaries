@@ -4,7 +4,8 @@
   import GeoJSONSource from '$lib/components/maps/mapbox/sources/GeoJSONSource.svelte'
   import Layer from '$lib/components/maps/mapbox/map/Layer.svelte'
   import { dictionaryGeoJsonCollection } from '$lib/components/maps/utils/dictionaryGeoJsonCollection'
-  import { type MapKeyContext, mapKey } from '$lib/components/maps/mapbox/context'
+  import { mapKey } from '$lib/components/maps/mapbox/context'
+import type { MapKeyContext } from '$lib/components/maps/mapbox/context'
 
   interface Props {
     dictionaries?: DictionaryView[]
@@ -20,9 +21,9 @@
   const clustersId = `${type}_clusters`
 
 // map.loadImage("/icons/favicon-32x32.png", function(error, image) {
-  //   if (error) throw error;
-  //   map.addImage("logo", image);
-  // });
+    //   if (error) throw error;
+    //   map.addImage("logo", image);
+    // });
 </script>
 
 <GeoJSONSource

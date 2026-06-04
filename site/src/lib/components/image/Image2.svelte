@@ -37,14 +37,14 @@
     })
   }
 
-  async function clear() {
+  function clear() {
     requestAnimationFrame(async () => {
       await Promise.all([scale.set(1), opacity.set(0)])
       // active_el = {
-      // 	index: -1,
-      // 	left: '0',
-      // 	top: '0',
-      // 	origin: '0 0'
+      //   index: -1,
+      //   left: '0',
+      //   top: '0',
+      //   origin: '0 0'
       // };
       viewing = false
     })
@@ -54,10 +54,10 @@
     dimensionType === 'square'
       ? `s${length}-p`
       : dimensionType === 'width'
-      ? `w${length}`
-      : dimensionType === 'height'
-      ? `h${length}`
-      : 's0'
+        ? `w${length}`
+        : dimensionType === 'height'
+          ? `h${length}`
+          : 's0'
   }`)
 </script>
 

@@ -31,9 +31,9 @@ export const POST: RequestHandler = async ({ request, locals: { getSession } }) 
       throw new Error(insert_invite_error.message)
 
     const roleMessage
-    = role === 'manager'
-      ? 'manager'
-      : 'contributor, which allows you to add and edit entries'
+      = role === 'manager'
+        ? 'manager'
+        : 'contributor, which allows you to add and edit entries'
 
     const { data: dictionary, error: dictionary_error } = await supabase.from('dictionaries').select('name').eq('id', dictionary_id).single()
     if (dictionary_error)

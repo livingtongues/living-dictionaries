@@ -60,7 +60,7 @@
         </th>
       </tr>
     </thead>
-    {#each filtered_dictionaries as { url, metadata, name, entry_count, iso_639_3, glottocode, location, coordinates }}
+    {#each filtered_dictionaries as { url, metadata, name, entry_count, iso_639_3, glottocode, location, coordinates } (url)}
       {@const first_latitude = coordinates?.points?.[0]?.coordinates.latitude}
       {@const first_longitude = coordinates?.points?.[0]?.coordinates.longitude}
       <tr>

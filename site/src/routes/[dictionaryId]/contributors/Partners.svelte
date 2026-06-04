@@ -73,7 +73,7 @@
         await hide_living_tongues_logo(false)
       }}>Show Living Tongues Logo</Button>
   {/if}
-  {#each partners as partner}
+  {#each partners as partner (partner.id)}
     <div class="py-3 flex flex-wrap items-center">
       <div class="text-sm leading-5 font-medium text-gray-900">
         {partner.name}

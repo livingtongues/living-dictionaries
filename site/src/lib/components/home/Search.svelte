@@ -154,7 +154,7 @@
       <ShowHide>
         {#snippet children({ show, toggle })}
                 {#if !searchFocused && my_dictionaries}
-            {#each my_dictionaries as dictionary, i}
+            {#each my_dictionaries as dictionary, i (dictionary.id)}
               {#if show || i < 3}
                 <Button
                   class="mb-1 mr-1"

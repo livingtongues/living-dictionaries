@@ -1,6 +1,7 @@
 import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
 import { downloadObjectsAsCSV } from '$lib/export/csv'
-import { type StandardDictionaryForCSV, prepareDictionaryForCsv, dictionary_headers as standard_headers } from '$lib/export/prepareDictionariesForCsv'
+import { prepareDictionaryForCsv, dictionary_headers as standard_headers } from '$lib/export/prepareDictionariesForCsv'
+import type { StandardDictionaryForCSV } from '$lib/export/prepareDictionariesForCsv'
 import { supabase_date_to_friendly } from '$lib/helpers/time'
 
 enum AdminDictionaryCSVFields {
@@ -19,9 +20,7 @@ enum AdminDictionaryCSVFields {
 }
 
 type DictionaryForCSVKeys = keyof typeof AdminDictionaryCSVFields
-type AdminDictionaryForCSV = {
-  [key in DictionaryForCSVKeys]: string | boolean | number;
-}
+type AdminDictionaryForCSV = Record<DictionaryForCSVKeys, string | boolean | number>
 
 const admin_headers: AdminDictionaryForCSV = { ...AdminDictionaryCSVFields }
 

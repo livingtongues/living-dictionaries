@@ -1,31 +1,32 @@
-<script> import { createEventDispatcher } from 'svelte'
+<script>
+  import { SvelteSet } from 'svelte/reactivity'
 
-const dispatch = createEventDispatcher()
-import { readable } from 'svelte/store'
+  let { input, on_modified = undefined, children } = $props()
 
-export let input
-let set
-$:
-  if (input) {
-    update(input)
-  } else {
-    update([])
+  const set = new SvelteSet()
+
+  $effect(() => {
+    set.clear()
+    for (const item of input || [])
+      set.add(item)
+  })
+
+  function update(newSet) {
+    set.clear()
+    for (const item of newSet || [])
+      set.add(item)
   }
-$:
-  array = readable(Array.from(set) || null)
-function update(newSet) {
-  set = new Set(newSet)
-}
-function add(item) {
-  set.add(item)
-  set = set
-  dispatch('modified', Array.from(set))
-}
-function remove(item) {
-  set.delete(item)
-  set = set
-  dispatch('modified', Array.from(set))
-}
+  function add(item) {
+    set.add(item)
+    on_modified?.(Array.from(set))
+  }
+  function remove(item) {
+    set.delete(item)
+    on_modified?.(Array.from(set))
+  }
+
+  const value = $derived(Array.from(set))
+  const size = $derived(set.size)
 </script>
 
-<slot value={$array} {add} {update} {remove} size={set.size} />
+{@render children?.({ value, add, update, remove, size })}

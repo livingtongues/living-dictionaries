@@ -1,13 +1,18 @@
-<!-- @migration-task Error while migrating Svelte code: $$props is used together with named props in a way that cannot be automatically migrated. -->
 <script lang="ts">
+  import type { Snippet } from 'svelte'
   import { apply_button_label } from './image-store'
   import { page } from '$app/stores'
 
-  export let border: boolean
-  export let on_file_added: (file: File) => void = undefined
-  export let require_entry_fields = false
-  let dragging = false
-  // const applyButtonLabel: any = getContext('applyButtonLabel')
+  interface Props {
+    border: boolean
+    on_file_added?: (file: File) => void
+    require_entry_fields?: boolean
+    class?: string
+    label?: Snippet
+  }
+
+  const { border, on_file_added = undefined, require_entry_fields = false, class: klass = '', label }: Props = $props()
+  let dragging = $state(false)
 
   function handleImage(files: FileList) {
     dragging = false
@@ -36,29 +41,29 @@
   class:dashed-border={border}
   class:button-label={require_entry_fields && $apply_button_label.ready_to_upload}
   class:blocked={require_entry_fields && !$apply_button_label.ready_to_upload}
-  class="{$$props.class} text-gray-600
+  class="{klass} text-gray-600
     h-full grow-1 flex flex-col items-center justify-center
     cursor-pointer"
   title="Add Photo"
-  on:drop|preventDefault={e => handleImage(e.dataTransfer.files)}
-  on:dragover|preventDefault={() => (dragging = true)}
-  on:dragleave|preventDefault={() => (dragging = false)}>
+  ondrop={(e) => { e.preventDefault(); handleImage(e.dataTransfer.files) }}
+  ondragover={(e) => { e.preventDefault(); dragging = true }}
+  ondragleave={(e) => { e.preventDefault(); dragging = false }}>
   <input
     type="file"
     accept="image/*"
     class="hidden"
-    on:input={(e) => {
+    oninput={(e) => {
       // @ts-expect-error
       handleImage(e.target.files)
     }} />
   <span class="hidden md:inline">
-    <span class="i-ic-outline-cloud-upload text-2xl" />
+    <span class="i-ic-outline-cloud-upload text-2xl"></span>
   </span>
   <span class="md:hidden">
-    <span class="i-ic-outline-camera-alt text-xl" />
+    <span class="i-ic-outline-camera-alt text-xl"></span>
   </span>
 
-  <slot name="label" />
+  {@render label?.()}
 </label>
 
 <style>

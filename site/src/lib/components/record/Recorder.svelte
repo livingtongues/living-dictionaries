@@ -1,44 +1,58 @@
-<!-- @migration-task Error while migrating Svelte code: can't migrate `let RecordRTC: typeof RecordRTCType;` to `$state` because there's a variable named state.
-     Rename the variable and try again or migrate by hand. -->
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte'
+  import { onDestroy, onMount, untrack } from 'svelte'
+  import type { Snippet } from 'svelte'
   import type RecordRTCType from 'recordrtc'
 
   import type { Options, State } from 'recordrtc'
 
-  export let stream: MediaStream, options: Options
-  let RecordRTC: typeof RecordRTCType
-  let recorder: RecordRTCType
-  let recordingTime = 0
+  interface Props {
+    stream: MediaStream
+    options: Options
+    children?: Snippet<[{
+      start: () => void
+      pause: () => void
+      stop: () => Promise<Blob>
+      recorder: RecordRTCType
+      recordingTime: number
+      state: State
+    }]>
+  }
+
+  const { stream, options, children }: Props = $props()
+
+  let RecordRTC = $state<typeof RecordRTCType>()
+  let recorder = $state<RecordRTCType>()
+  let recordingTime = $state(0)
   let interval
-  let state: State
+  let recorder_state = $state<State>()
 
   onMount(async () => {
     RecordRTC = (await import('recordrtc')).default // Will cause issues w/ making the window object exist and other SSR problems if imported server side
   })
 
-  $: if (RecordRTC) {
-    if (recorder)
-      recorder.stopRecording()
-
-    recorder = new RecordRTC(stream, options)
-    state = recorder.getState()
-  }
+  $effect(() => {
+    if (RecordRTC) {
+      untrack(() => recorder?.stopRecording())
+      const new_recorder = new RecordRTC(stream, options)
+      recorder = new_recorder
+      recorder_state = new_recorder.getState()
+    }
+  })
 
   function start() {
     recorder.startRecording()
-    state = recorder.getState()
+    recorder_state = recorder.getState()
     startTimer()
   }
 
   function pause() {
-    if (state === 'recording') {
+    if (recorder_state === 'recording') {
       recorder.pauseRecording()
-      state = recorder.getState()
+      recorder_state = recorder.getState()
       clearInterval(interval)
-    } else if (state === 'paused') {
+    } else if (recorder_state === 'paused') {
       recorder.resumeRecording()
-      state = recorder.getState()
+      recorder_state = recorder.getState()
       startTimer()
     }
   }
@@ -48,7 +62,7 @@
       clearInterval(interval)
       recordingTime = 0
       recorder.stopRecording(() => {
-        state = recorder.getState()
+        recorder_state = recorder.getState()
         const blob = recorder.getBlob()
         resolve(blob)
       })
@@ -64,4 +78,4 @@
   onDestroy(() => recorder?.stopRecording())
 </script>
 
-<slot {start} {pause} {stop} {recorder} {recordingTime} {state} />
+{@render children?.({ start, pause, stop, recorder, recordingTime, state: recorder_state })}

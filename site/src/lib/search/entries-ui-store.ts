@@ -1,4 +1,5 @@
-import { type Readable, get, writable } from 'svelte/store'
+import { get, writable } from 'svelte/store'
+import type { Readable } from 'svelte/store'
 import type { EntryData, Tables } from '@living-dictionaries/types'
 import { init_entries, reset_caches, search_entries } from '$lib/search'
 import { browser } from '$app/environment'

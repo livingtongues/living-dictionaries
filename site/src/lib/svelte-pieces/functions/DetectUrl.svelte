@@ -1,6 +1,7 @@
-<script> import { prepareDisplay, prepareHref } from './detectUrl'
+<script>
+  import { prepareDisplay, prepareHref } from './detectUrl'
 
-export let string
+  let { string, children } = $props()
 </script>
 
-<slot display={prepareDisplay(string)} href={prepareHref(string)} />
+{@render children?.({ display: prepareDisplay(string), href: prepareHref(string) })}

@@ -6,7 +6,8 @@
   import PrintFieldCheckboxes from './print/PrintFieldCheckboxes.svelte'
   import { defaultPrintFields } from './print/printFields'
   import { truncateAuthors } from './print/truncateAuthors'
-  import { Button, type QueryParamStore, createPersistedStore } from '$lib/svelte-pieces'
+  import { Button, createPersistedStore } from '$lib/svelte-pieces'
+import type { QueryParamStore } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import type { QueryParams } from '$lib/search/types'
 

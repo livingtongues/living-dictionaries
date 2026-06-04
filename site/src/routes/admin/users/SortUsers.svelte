@@ -80,7 +80,7 @@
 
 <thead>
   <tr>
-    {#each userFields as field}
+    {#each userFields as field (field)}
       <th
         class="cursor-pointer"
         onclick={() => setSortSettings(field.key)}

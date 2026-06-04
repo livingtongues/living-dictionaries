@@ -1,4 +1,5 @@
-import { type LocaleCode, Locales, type UnpublishedLocaleCode, UnpublishedLocales } from '$lib/i18n/locales'
+import { Locales, UnpublishedLocales } from '$lib/i18n/locales'
+import type { LocaleCode, UnpublishedLocaleCode } from '$lib/i18n/locales'
 
 export const locales = Object.entries(Locales) as [LocaleCode, Locales][]
 

@@ -37,7 +37,7 @@
 </h3>
 
 <div class="divide-y divide-gray-200">
-  {#each managers as manager}
+  {#each managers as manager (manager.user_id)}
     <div class="py-3">
       <div class="text-sm leading-5 font-medium text-gray-900">
         {#if manager.full_name}
@@ -49,7 +49,7 @@
     </div>
   {/each}
   {#if $is_manager}
-    {#each manager_invites as invite}
+    {#each manager_invites as invite (invite.id)}
       <div class="my-1">
         <ContributorInvitationStatus
           admin={$admin > 0}
@@ -75,7 +75,7 @@
   {$page.data.t('dictionary.contributors')}
 </h3>
 <div class="divide-y divide-gray-200">
-  {#each contributors as contributor}
+  {#each contributors as contributor (contributor.user_id)}
     <div class="py-3 flex flex-wrap items-center">
       <div class="text-sm leading-5 font-medium text-gray-900">
         {#if contributor.full_name}
@@ -97,7 +97,7 @@
     </div>
   {/each}
   {#if $is_manager}
-    {#each contributor_invites as invite}
+    {#each contributor_invites as invite (invite.id)}
       <div class="my-1">
         <ContributorInvitationStatus
           admin={$admin > 0}
@@ -134,7 +134,7 @@
   {$page.data.t('contributors.other_contributors')}
 </h3>
 <div class="divide-y divide-gray-200">
-  {#each $dictionary_info?.write_in_collaborators || [] as collaborator}
+  {#each $dictionary_info?.write_in_collaborators || [] as collaborator (collaborator)}
     <div class="py-3 flex flex-wrap items-center">
       <div class="text-sm leading-5 font-medium text-gray-900">
         {collaborator}

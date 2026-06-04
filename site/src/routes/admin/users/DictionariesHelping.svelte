@@ -25,9 +25,9 @@
           strings={dictionary_ids.slice(0, show_all ? 1000 : 8)}
           canEdit
           addMessage="Add"
-          on:itemclicked={e => window.open(`/${e.detail.value}`, '_blank')}
-          on:itemremoved={async e => await remove_dictionary(e.detail.value)}
-          on:additem={toggle} />
+          on_itemclicked={({ value }) => window.open(`/${value}`, '_blank')}
+          on_itemremoved={async ({ value }) => await remove_dictionary(value)}
+          on_additem={toggle} />
         {#if dictionary_ids.length > 8}
           <Button
             color="black"

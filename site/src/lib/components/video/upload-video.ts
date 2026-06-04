@@ -1,4 +1,5 @@
-import { type Readable, get, writable } from 'svelte/store'
+import { get, writable } from 'svelte/store'
+import type { Readable } from 'svelte/store'
 import { page } from '$app/stores'
 import { api_upload } from '$api/upload/_call'
 

@@ -58,7 +58,7 @@
         // numberOfAudioChannels: 2;
       }
 
-      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+      const isSafari = /^(?:(?!chrome|android).)*safari/i.test(navigator.userAgent)
       if (isSafari)
         options.sampleRate = 44100
 
@@ -73,7 +73,7 @@
     }
   }
 
-  async function stop() {
+  function stop() {
     if (recorder) {
       recorder.stop(
         (blob) => {

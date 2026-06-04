@@ -47,7 +47,7 @@
   {/snippet}
   {#snippet additional()}
 
-      {#each write_in_semantic_domains || [] as domain}
+      {#each write_in_semantic_domains || [] as domain (domain)}
         <div class="px-2 py-1 leading-tight text-xs bg-blue-100 rounded mb-1 whitespace-nowrap flex items-center">
           <i>{domain}</i>
           {#if can_edit}

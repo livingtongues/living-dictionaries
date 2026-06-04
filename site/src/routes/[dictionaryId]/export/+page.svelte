@@ -2,7 +2,8 @@
   import { run } from 'svelte/legacy'
 
   import DownloadMedia from './DownloadMedia.svelte'
-  import { type EntryForCSV, formatCsvEntries, getCsvHeaders, translate_entries } from './prepareEntriesForCsv'
+  import { formatCsvEntries, getCsvHeaders, translate_entries } from './prepareEntriesForCsv'
+import type { EntryForCSV } from './prepareEntriesForCsv'
   import { Button, ShowHide } from '$lib/svelte-pieces'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Progress from '$lib/export/Progress.svelte'

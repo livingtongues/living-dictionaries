@@ -50,7 +50,7 @@
   {/if}
 
   <div class="overflow-x-auto flex no-scrollbar shadow">
-    {#each { length: pages } as _, index}
+    {#each { length: pages } as _, index (index)}
       {@const current = index + 1 === current_page}
       <button
         type="button"

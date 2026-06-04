@@ -28,9 +28,7 @@ export enum StandardEntryCSVFields {
 
 export type EntryForCSVKeys = keyof typeof StandardEntryCSVFields
 
-export type EntryForCSV = {
-  [key in EntryForCSVKeys]?: string; // TODO: where type problems exist, update using row.type.ts as a reference
-}
+export type EntryForCSV = Partial<Record<EntryForCSVKeys, string>>
 
 export function translate_entries({ entries }: { entries: EntryData[] }) {
   const $page = get(page)

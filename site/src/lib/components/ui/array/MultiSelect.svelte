@@ -70,8 +70,8 @@
         = calcIndex < 0
           ? filtered[filtered.length - 1]
           : calcIndex === filtered.length
-          ? filtered[0]
-          : filtered[calcIndex]
+            ? filtered[0]
+            : filtered[calcIndex]
     }
   }
 
@@ -108,7 +108,7 @@
     setShowOptions(false)
   }}>
   <div class="tokens" class:showOptions onclick={() => setShowOptions(true)}>
-    {#each Object.values(selectedOptions) as option}
+    {#each Object.values(selectedOptions) as option (option.value)}
       <div
         class="items-center flex rounded-lg px-2 py-1 whitespace-nowrap
           text-sm font-medium leading-4 bg-blue-100 text-blue-800 mr-2 my-1">
@@ -140,7 +140,7 @@
     <ul
       class="options"
       transition:fly={{ duration: 200, y: 5 }}>
-      {#each filtered as option}
+      {#each filtered as option (option.value)}
         <li
           class:selected={selectedOptions[option.value]}
           class:active={activeOption === option}

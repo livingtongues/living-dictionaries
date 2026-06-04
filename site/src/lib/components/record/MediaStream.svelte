@@ -59,13 +59,13 @@
     const constraints: MediaStreamConstraints = {
       audio: audio
         ? {
-          deviceId: $selectedMicrophone ? $selectedMicrophone.deviceId : undefined,
-        }
+            deviceId: $selectedMicrophone ? $selectedMicrophone.deviceId : undefined,
+          }
         : false,
       video: video
         ? {
-          deviceId: $selectedCamera ? $selectedCamera.deviceId : undefined,
-        }
+            deviceId: $selectedCamera ? $selectedCamera.deviceId : undefined,
+          }
         : false,
     }
     return navigator.mediaDevices.getUserMedia(constraints)

@@ -9,7 +9,8 @@
     MapLayerMouseEvent,
     MapLayerTouchEvent,
   } from 'mapbox-gl'
-  import { type MapKeyContext, type SourceKeyContext, mapKey, sourceKey } from '../context'
+  import { mapKey, sourceKey } from '../context'
+import type { MapKeyContext, SourceKeyContext } from '../context'
   import { randomId } from '../../utils/randomId'
 
   const { getMap } = getContext<MapKeyContext>(mapKey)
@@ -29,12 +30,12 @@
   const {
     id = randomId(),
     options = {
-    type: 'fill',
-    paint: {
-      'fill-color': '#f08',
-      'fill-opacity': 0.4,
+      type: 'fill',
+      paint: {
+        'fill-color': '#f08',
+        'fill-opacity': 0.4,
+      },
     },
-  },
     minzoom = undefined,
     maxzoom = undefined,
     beforeLayerId = undefined,

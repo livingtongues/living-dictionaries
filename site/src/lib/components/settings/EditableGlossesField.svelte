@@ -22,8 +22,8 @@
 
   const activeGlossingBcps = $derived(Array.isArray(selectedLanguages)
     ? selectedLanguages.map(bcp =>
-      $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: availableLanguages[bcp].vernacularName }),
-    )
+        $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: availableLanguages[bcp].vernacularName }),
+      )
     : [])
   const remainingGlossingLanguagesAsArray = $derived(Object.entries(availableLanguages)
     .map(e => ({
@@ -44,8 +44,8 @@
       {minimum}
       canEdit
       addMessage={$page.data.t('misc.add')}
-      on:itemremoved={({ detail: { index } }) => remove_language(selectedLanguages[index])}
-      on:additem={toggle} />
+      on_itemremoved={({ index }) => remove_language(selectedLanguages[index])}
+      on_additem={toggle} />
     {#if show}
       <Modal on:close={toggle}>
         {#snippet heading()}
@@ -58,7 +58,7 @@
 
           placeholder={$page.data.t('about.search')}>
           {#snippet children({ filteredItems: filteredLanguages })}
-                {#each filteredLanguages as language}
+                {#each filteredLanguages as language (language.bcp)}
               <Button
                 onclick={() => {
                   add_language(language.bcp)

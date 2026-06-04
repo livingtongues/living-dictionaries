@@ -1,6 +1,7 @@
 <script lang="ts">
   import { slide } from 'svelte/transition'
-  import { type QueryParamStore, ShowHide } from '$lib/svelte-pieces'
+  import { ShowHide } from '$lib/svelte-pieces'
+import type { QueryParamStore } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import type { FilterListKeys, QueryParams } from '$lib/search/types'

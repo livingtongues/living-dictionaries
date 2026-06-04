@@ -1,0 +1,26 @@
+#!/bin/sh
+
+export PATH="$HOME/.local/share/pnpm:$PATH"
+
+# Pre-commit checks: test + check + lint:fix (lint scoped to site/ + root; the legacy/reference
+# trees packages/, supabase/, site/e2e/ are ignored in eslint.config.js). lint:fix auto-formats
+# then re-stages the already-staged files (mirrors house/example), so the auto-fixes land in the
+# commit without pulling in files you didn't stage.
+echo "Running pre-commit checks..."
+
+echo "→ pnpm test:site"
+pnpm test:site --run --reporter=dot
+if [ $? -ne 0 ]; then
+    echo "❌ Tests failed. Commit aborted."
+    exit 1
+fi
+
+echo "→ pnpm check"
+pnpm check || { echo "❌ svelte-check failed. Commit aborted."; exit 1; }
+
+echo "→ pnpm lint:fix"
+pnpm lint:fix || { echo "❌ Lint failed. Commit aborted."; exit 1; }
+# Re-stage only files that were already staged (in case lint:fix modified them)
+git diff --cached --name-only --diff-filter=d | xargs -r git add
+
+echo "✅ All pre-commit checks passed."

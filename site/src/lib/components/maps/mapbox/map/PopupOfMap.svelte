@@ -4,7 +4,8 @@
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { getContext, onMount } from 'svelte'
   import type { Popup, PopupOptions } from 'mapbox-gl'
-  import { type MapKeyContext, mapKey } from '../context'
+  import { mapKey } from '../context'
+import type { MapKeyContext } from '../context'
 
   const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
   const map = getMap()

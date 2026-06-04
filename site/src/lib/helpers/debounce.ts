@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function debounce(func: Function, delay = 1000) {
+export function debounce(func: (...args: any[]) => any, delay = 1000) {
   let timer
   return (...args: any[]) => {
     clearTimeout(timer)

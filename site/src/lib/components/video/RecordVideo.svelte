@@ -41,7 +41,7 @@
                 onchange={e =>
                   // @ts-ignore
                   chooseMicrophone(e.target.value)}>
-                {#each microphones as microphone}
+                {#each microphones as microphone (microphone.deviceId)}
                   <option value={microphone.deviceId}>
                     {microphone.label}
                   </option>
@@ -55,7 +55,7 @@
                 onchange={e =>
                   // @ts-ignore
                   chooseCamera(e.target.value)}>
-                {#each cameras as camera}
+                {#each cameras as camera (camera.deviceId)}
                   <option value={camera.deviceId}>
                     {camera.label}
                   </option>
@@ -113,6 +113,6 @@
   </MediaStream>
 {:else}
   {@render children?.({ videoBlob, reset: () => {
-      videoBlob = undefined
-    } })}
+    videoBlob = undefined
+  } })}
 {/if}

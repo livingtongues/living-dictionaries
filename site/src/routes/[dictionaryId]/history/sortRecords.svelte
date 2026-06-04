@@ -66,7 +66,7 @@
 
 <thead>
   <tr>
-    {#each historyFields as field}
+    {#each historyFields as field (field)}
       <th
         class="cursor-pointer"
         onclick={() => setSortSettings(field.key)}

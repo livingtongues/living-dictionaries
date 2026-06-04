@@ -2,17 +2,15 @@ const urlRegex = /(((https?:\/\/)|(www\.))[^\s>]+\w\/?)/g
 export function prepareDisplay(s) {
   if (urlRegex.test(s)) {
     return s.replace(/https?:\/\//, '')
-  } else {
-    return s
   }
+  return s
 }
 export function prepareHref(s) {
   const match = s?.match(urlRegex)
   if (match?.length) {
     return match[0].replace(/^www\./, 'http://')
-  } else {
-    return null
   }
+  return null
 }
 if (import.meta.vitest) {
   test('prepareHref finds urls starting with https://, http://, and www.', () => {

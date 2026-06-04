@@ -19,4 +19,4 @@
   canEdit
   promptMessage={$page.data.t('create.enter_alternate_name')}
   addMessage={$page.data.t('misc.add')}
-  on:valueupdated={e => on_update(e.detail)} />
+  on_valueupdated={value => on_update(value)} />

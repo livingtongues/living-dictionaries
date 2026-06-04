@@ -3,7 +3,8 @@
 
   import { getContext, onDestroy, setContext } from 'svelte'
   import type { GeoJSONSource, GeoJSONSourceOptions, GeoJSONSourceRaw } from 'mapbox-gl'
-  import { type MapKeyContext, type SourceKeyContext, mapKey, sourceKey } from '../context'
+  import { mapKey, sourceKey } from '../context'
+import type { MapKeyContext, SourceKeyContext } from '../context'
   import { randomId } from '../../utils/randomId'
 
   interface Props {

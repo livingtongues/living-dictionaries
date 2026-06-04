@@ -51,11 +51,11 @@ function noop() {
   // intentional no-op (stubbed realtime / unsubscribe)
 }
 
-type PendingWrite =
-  | { kind: 'insert', values: Row[] }
-  | { kind: 'upsert', values: Row[] }
-  | { kind: 'update', values: Row }
-  | { kind: 'delete' }
+type PendingWrite
+  = | { kind: 'insert', values: Row[] }
+    | { kind: 'upsert', values: Row[] }
+    | { kind: 'update', values: Row }
+    | { kind: 'delete' }
 
 class StubQueryBuilder {
   private filters: Predicate[] = []

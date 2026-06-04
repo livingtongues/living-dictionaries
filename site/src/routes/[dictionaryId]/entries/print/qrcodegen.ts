@@ -532,7 +532,7 @@ export class QrCode {
 
     const numAlign: int = Math.floor(this.version / 7) + 2
     const step: int
-        = this.version == 32 ? 26 : Math.ceil((this.version * 4 + 4) / (numAlign * 2 - 2)) * 2
+      = this.version == 32 ? 26 : Math.ceil((this.version * 4 + 4) / (numAlign * 2 - 2)) * 2
     const result: int[] = [6]
     for (let pos = this.size - 7; result.length < numAlign; pos -= step) result.splice(1, 0, pos)
     return result
@@ -627,10 +627,10 @@ export class QrCode {
     assert(n <= this.size * 3)
     const core: boolean
       = n > 0
-      && runHistory[2] == n
-      && runHistory[3] == n * 3
-      && runHistory[4] == n
-      && runHistory[5] == n
+        && runHistory[2] == n
+        && runHistory[3] == n * 3
+        && runHistory[4] == n
+        && runHistory[5] == n
     return (
       (core && runHistory[0] >= n * 4 && runHistory[6] >= n ? 1 : 0)
       + (core && runHistory[6] >= n * 4 && runHistory[0] >= n ? 1 : 0)

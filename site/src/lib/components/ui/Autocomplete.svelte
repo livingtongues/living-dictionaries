@@ -36,7 +36,7 @@
     )
     results = matchingItems.map((item) => {
       const boldedLabel = item[labelField].replace(
-        RegExp(regExpEscape(search.trim()), 'i'),
+        new RegExp(regExpEscape(search.trim()), 'i'),
         '<span class=\'font-semibold text-gray-900\'>$&</span>',
       )
       return { value: item[keyField], boldedLabel, label: item[labelField] }
@@ -68,7 +68,7 @@
   <ul
     class:hidden={!active}
     class="border absolute w-full bg-white overflow-auto 6rem z-10 shadow-lg">
-    {#each results as result}
+    {#each results as result (result)}
       <li
         onclick={() => {
           search = result.label;

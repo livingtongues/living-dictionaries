@@ -29,7 +29,7 @@ export function get_table_cache_key(table: DataTableName | JoinTableName, dictio
 }
 
 export async function cached_data_table<Name extends DataTableName, T extends Tables<Name>>(options: CachedDataStoreOptions<Name, keyof T>) {
-  let data: Record<string, T> = {}
+  let data: Record<string, T>
   const order_field = 'updated_at'
 
   const { dictionary_id, table, supabase, log, include } = options
