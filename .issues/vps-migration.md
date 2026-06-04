@@ -183,9 +183,12 @@ Prove the pipeline on a trivial, can't-really-break app.
 
 ### M4+ · Reintroduce real systems, one at a time
 Each is its own milestone with a checkpoint. Order TBD, rough sequence:
-- [ ] SQLite **read** layer (server better-sqlite3 `shared.db` + `dictionaries/{id}.db`; copy
-      example's `lib/db/server/*`; bring migration script from
-      `example/packages/scripts/migrate-to-sqlite`; ship real migrated `.data`).
+- [x] SQLite **read** layer ✅ DONE (`.issues/m4-sqlite-read.md`; commits `7c99b58a`/`0ad7873e`/`b2b949d6`).
+      Server better-sqlite3 `shared.db` (catalog: globe/list/detail) + per-dict `dictionaries/{id}.db`
+      (entries worker via a bundle endpoint). Copied the example's `lib/db/server/*` + drizzle schemas/
+      migrations; seeded `.data` from the example (catalog 2136 dicts; real entries for torwali + the 3
+      other populated dicts; achi seeded with dev fixtures via `seed:achi-fixture`). `better-sqlite3` in
+      `dependencies` (adapter-node gotcha). Writes/auth-gated reads stay on the stub until M4-write/auth.
 - [ ] SQLite **write** path + sync engine (wa-sqlite browser, SharedWorker dict.db, `/changes`).
 - [ ] Real auth (JWT + Google + email-OTP; instant dev login).
 - [ ] Media upload (legacy GCS bucket, presigned PUT).

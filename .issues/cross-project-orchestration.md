@@ -145,6 +145,27 @@ report back here; I relay learnings and Jacob's decisions across the fence.
     (and antfu `ts/*` aliases) throw "Definition for rule not found" under eslint 10. Replace `Function`
     with `(...args: any[]) => any` and delete the directive. `new Error(msg,{cause})` may exceed the TS
     lib target (Expected 0-1 args) → keep single-arg + disable `preserve-caught-error` with a reason.
+- **M4 · SQLite-read learnings (LD applied house's reader playbook; house can reuse on its remaining
+  swaps — durable page: LD `.knowledge/migration/m4-sqlite-read-layer.md`):**
+  - **The reader-port "isomorphic seam + legacy-shape projection" generalized cleanly** from house's
+    Firestore→SQLite to LD's Supabase→SQLite. LD's twist vs house: data was threaded through a
+    *client-side stub* + a *web worker* search index, so the seam was **server endpoints** the browser
+    fetches (`/api/dictionaries`, `/api/dictionaries/[id]/entries-data`) rather than only server loads —
+    avoids SSR-ing a 2136-row catalog and keeps the existing client store/worker contracts. House should
+    expect the same when a data path lives in a worker/store, not a load.
+  - **adapter-node native-deps gotcha CONFIRMED end-to-end** (house's warning was exactly right): putting
+    `better-sqlite3` in `dependencies` (+ `ssr.external` + `onlyBuiltDependencies`) yields `from
+    'better-sqlite3'` + **0 `__filename`** in the server chunk. Cheap build-time check worth keeping.
+  - **Seeding from already-local data:** `sqlite3 SRC "VACUUM INTO 'DEST'"` makes a clean single-file copy
+    (folds the WAL, no `-wal`/`-shm` to chase) — nicer than the ATTACH+per-table copy when you want whole
+    DBs. Watch for **partially-migrated local data** (LD: catalog complete but only 4/2136 per-dict dbs had
+    content) — verify row counts before assuming a copied `.data` is whole.
+  - **Keep an e2e regression dict unchanged by seeding its FIXTURES into SQLite** rather than re-pulling
+    real data: when assertions are fixture-specific (LD's achi-flow), real migrated data wouldn't satisfy
+    them; a tiny reproducible seed script (legacy→schema map: rename `*_by`→`*_by_user_id`, drop the old
+    tenant FK, JSON-stringify, synth junction PKs, insert only existing columns) keeps the flow green.
+  - **e2e error filtering:** assert `pageerror`/console-error emptiness but filter known-external noise
+    (Mapbox tile 403s in headless, a still-attempted CDN-cache 403) so the gate reflects YOUR change.
 
 ## Standing decisions (apply to BOTH, and to future work)
 - **Verify with puppeteer-core + system Chrome**, via the **new universal `browser-launch.mjs`**
@@ -188,12 +209,13 @@ report back here; I relay learnings and Jacob's decisions across the fence.
 - **LD-A** — ✅ DONE (`cc59407a`). M2c runes migration: 367 files, check 0 err / 15 warn, test 123,
   build+boot, achi-flow 5/5. Commits `6aa75c16` (M2b) + `f6ad5ad2` (M2c) on `vps-migration` (not pushed).
   Adopted shared `browser-launch.mjs`. Reply-to-parent failed (see note) — result fetched from artifacts.
-- **HORSE-CLI** — ✅ DONE (`0d6acd8d`). Went past investigation and **built the fix**: per-session
-  **inbox** + **`horse send`**, verified live end-to-end (send→flush→drain→agent acts on it→inbox
-  cleared→delete). Slimmed CLI: `spawn`=new-only, `send` added, `run`/`projects` cut, `status` folded
-  into `list <id>`, parent flags+banner removed, `HORSE_DEFAULT_PROVIDER` honored. Help/AGENTS/skill
-  updated. **Open:** busy-mid-turn send path not yet exercised live. Tracked in
-  `~/code/horse/.issues/cli-messaging-and-slimming.md`. **Nothing committed.**
+- **HORSE-CLI** — ✅ DONE + **COMMITTED & LIVE** (`0d6acd8d`). Built the messaging fix: per-session
+  **inbox** + **`horse send <project> <id> "msg"`** (`spawn`=new-only, `run`/`projects` cut, `status`→
+  `list <id>`, `HORSE_DEFAULT_PROVIDER`). The updated `~/.claude/skills/horse-cli/SKILL.md` is the live
+  reference — I use it as-is now. ⚠️ **Orchestrator-relevant constraint (still true):** inbox delivery is
+  automatic only for sessions **Horse runs**; THIS orchestrator is a non-Horse interactive session, so a
+  child's `horse send` to me **sits undelivered** → children must use the **file handoff** (ledger +
+  issue), and Jacob relays "done". No longer tracked here as in-flight.
 - **LD-A2** — ✅ DONE (`4c4b59fd`). Two commits on `vps-migration` (not pushed):
   (1) **`4499a358`** — fix `entry.worker.ts` SENSE DUPLICATION: the module-level grouping maps
   (`entry_id_to_senses`/`_to_audios`/`_to_tags`/`_to_dialects`, `sense_id_to_*`, `*_id_to_sense_ids`,
@@ -229,6 +251,38 @@ report back here; I relay learnings and Jacob's decisions across the fence.
 - **HOUSE-A** — **Jacob is driving this himself** (login modal + Google One-Tap, Phase-B tail; +
   the send-code rate-limit bug). Not spawned by me. I still track its learnings here when they land —
   esp. the finished OTP/JWT/Google auth surface, which becomes LD's M4 real-auth template.
+- **LD-M4** — ✅ DONE (`3747b3c9`). **M4 · SQLite read** complete in 4 commits on `vps-migration`
+  (NOT pushed): `3452ad39` (predecessor docs) · `7c99b58a` (phase 0: port the example's
+  `lib/db/server/*` + drizzle schemas/migrations + deps, dormant) · `0ad7873e` (phase A: catalog —
+  globe/list/footer/detail read `shared.db`) · `b2b949d6` (phase B: entries worker reads per-dict
+  `dictionaries/{id}.db` via a bundle endpoint). Decisions: **copy** the example's `.data` (catalog
+  2136 dicts complete; **per-dict entries exist for only 4 of 2136** — torwali 9908 etc; achi=0);
+  catalog via `/api/dictionaries` endpoint + a server layout load (NOT full-catalog SSR); entries via
+  `/api/dictionaries/[id]/entries-data` feeding the Orama worker (dropped the `cached_data_table`/IDB
+  paging); **achi-flow kept unchanged** by seeding the dummy fixtures into `achi.db`
+  (`seed:achi-fixture`) since real Supabase repop needs the prod DB password + is a VPS-scale job and
+  wouldn't keep the fixture-specific assertions anyway. Gate: check 0/15 · test 132 · build
+  (better-sqlite3 external, 0 `__filename`) · `test:catalog` (220 public/949 private, real Torwali) ·
+  `test:entries` (torwali 9908 from SQLite) · achi-flow 5/5 (13 fixtures from SQLite). 📘
+  `.knowledge/migration/m4-sqlite-read-layer.md`. ⏳ Jacob eyeballs :3041 globe/list/maps + a dict's
+  entries. **Deferred (own milestones):** M4-write (wa-sqlite+SharedWorker+sync), real auth (port
+  house OTP/JWT — then admin list / my-dictionaries / writes leave the stub), media, R2.
+- **HOUSE-NEXT** — ✅ DONE + committed (`18374ca2`, 5 commits on `repo-restructure`). **Customer reader
+  now 100% Firestore-free:** intro page + series navigator + dr-house bio + Vimeo thumbnails all on SQLite
+  (re-pulled 28 intros / 1 series / 8 series_items live from Firestore into `site/.data`; backfilled
+  108/109 Vimeo thumbs; dr-house → static `bio.ts`). check 0 · test 147 · build clean · 0 Firestore /
+  0 pageerrors. Editing + admin stayed inert. Knowledge appended to `firestore-to-sqlite-reader-port.md`
+  (intro/series projections, live re-pull workflow, bare-import + migration-id gotchas for LD).
+- **HOUSE-ADMIN** — 🔶 spawned `0a9cfdc3` (project `house`). Next house step: **admin surface off
+  Firestore → SQLite** (supportMessages + users), leaning on learn-from's local-first admin backend.
+  PLAN + interview Jacob on depth — (a) server-side SQLite reads first (bounded, mirrors the reader),
+  (b) full wa-sqlite local-first sync engine next — or pivot to **local search**. Library editing stays
+  inert. Tree was clean at start (no pre-commit needed).
+
+> **Commit policy (Jacob 2026-06-04):** each repo's NEXT spawned session commits its predecessor's
+> uncommitted tree first (LD-M4 does this). HOUSE-NEXT + horse are now committed. **Same-repo
+> serialization holds:** never spawn a 2nd agent into a tree while the prior one is still
+> committing/working (HOUSE-NEXT had to finish its commit + go idle before HOUSE-ADMIN was spawned).
 
 Each sub-session reports its result back here; I fold gotchas/decisions into the ledger above and
 cross-pollinate to the other project.

@@ -107,9 +107,23 @@ but the **entries slice can only be proven on a populated dict** (use `torwali`)
 - [x] `cached-data.ts` now orphaned in app code (only its own db-test imports it) — left in place (harmless;
       the write/stub path is untouched until M4-write). check 0/15 · test 132 · build clean.
 
-### Phase C · Cleanup
-- [ ] Retire `stub-client.ts` read paths that are now real; keep write no-ops until M4-write.
-- [ ] Update `.issues/vps-migration.md` M4 checkbox; write `.knowledge/`; append to the orchestration ledger.
+### Phase C · Cleanup ✅ DONE
+- [x] Stub read paths retired where converted (public catalog, dictionary resolution, entries worker).
+      Still-stub (deferred to their own milestones, NOT read-milestone scope): admin dictionary list +
+      `create_my_dictionaries_store` + all WRITES (need real auth / M4-write); `dictionary_info`/editors on
+      the dict layout; `cached-data.ts` orphaned (kept, harmless). `stub-client.ts` stays for those.
+- [x] `.issues/vps-migration.md` M4 read checkbox ticked; `.knowledge/migration/m4-sqlite-read-layer.md`
+      written; orchestration ledger appended.
+
+## Outcome (2026-06-04)
+M4 **SQLite read** complete + verified in 3 bisectable commits on `vps-migration` (not pushed):
+`7c99b58a` (phase 0 plumbing) · `0ad7873e` (phase A catalog) · `b2b949d6` (phase B entries).
+Gate: check 0/15 · test 132 · build (better-sqlite3 external, 0 `__filename`) · `test:catalog` all-pass
+(220 public / 949 private, real Torwali in the list) · `test:entries` all-pass (torwali 9908 from SQLite) ·
+`test:flow` achi 5/5 (13 fixtures from SQLite). ⏳ Jacob eyeballs :3041 globe/list/maps + a dict's entries.
+
+**Deferred (next milestones, by design):** M4-write (wa-sqlite browser + SharedWorker + sync); real auth
+(port house OTP/JWT — then admin list, my-dictionaries, writes come off the stub); media upload; R2.
 
 ## Verify (each phase green)
 - `pnpm --filter=site check` → 0 errors · `test --run` green · `build` + `node build` boot.
