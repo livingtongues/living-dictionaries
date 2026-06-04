@@ -11,9 +11,18 @@ export enum ResponseCodes {
   MOVED_PERMANENTLY_PRESERVE_REQUEST = 308,
   TOO_MANY_REQUESTS = 429,
   FORBIDDEN = 403,
+  CONFLICT = 409,
+  GONE = 410,
+  SERVICE_UNAVAILABLE = 503,
 }
 
 export const MINIMUM_ABOUT_LENGTH = 200
+
+/** Per-dictionary OPFS file path prefix (rooted in OPFS) for the wa-sqlite browser DB. */
+export const DICT_DB_OPFS_PREFIX = 'dictionaries/'
+
+/** Snapshot freshness threshold for the `/changes` snapshot_expired sentinel. */
+export const SNAPSHOT_EXPIRED_DAYS = 60
 
 export const ACCESS_TOKEN_COOKIE_NAME = 'sb-access-token'
 export const REFRESH_TOKEN_COOKIE_NAME = 'sb-refresh-token'
