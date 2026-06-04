@@ -158,6 +158,9 @@ importers:
       drizzle-orm:
         specifier: ^0.44.7
         version: 0.44.7(@types/better-sqlite3@7.6.13)(@types/pg@8.11.8)(better-sqlite3@12.10.0)(pg@8.13.1)
+      jose:
+        specifier: ^6.2.3
+        version: 6.2.3
       satori:
         specifier: ^0.0.44
         version: 0.0.44
@@ -4482,6 +4485,9 @@ packages:
 
   joi@17.12.2:
     resolution: {integrity: sha512-RonXAIzCiHLc8ss3Ibuz45u28GOsWE1UpfDXLbN/9NKbL4tCJf8TWYVKsoYuuh+sAUt7fsSNpA+r2+TBA6Wjmw==}
+
+  jose@6.2.3:
+    resolution: {integrity: sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==}
 
   jsdoc-type-pratt-parser@7.2.0:
     resolution: {integrity: sha512-dh140MMgjyg3JhJZY/+iEzW+NO5xR2gpbDFKHqotCmexElVntw7GjWjt511+C/Ef02RU5TKYrJo/Xlzk+OLaTw==}
@@ -11466,6 +11472,8 @@ snapshots:
       '@sideway/address': 4.1.5
       '@sideway/formula': 3.0.1
       '@sideway/pinpoint': 2.0.0
+
+  jose@6.2.3: {}
 
   jsdoc-type-pratt-parser@7.2.0: {}
 

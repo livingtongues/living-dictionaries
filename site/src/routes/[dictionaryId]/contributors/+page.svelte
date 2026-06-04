@@ -48,11 +48,11 @@
       </div>
     </div>
   {/each}
-  {#if $is_manager}
+  {#if is_manager}
     {#each manager_invites as invite (invite.id)}
       <div class="my-1">
         <ContributorInvitationStatus
-          admin={$admin > 0}
+          admin={admin > 0}
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
           {#snippet prefix()}
@@ -63,7 +63,7 @@
     {/each}
   {/if}
 </div>
-{#if $is_manager}
+{#if is_manager}
   <Button onclick={editor_edits.inviteHelper('manager')} form="filled">
     <i class="far fa-envelope"></i>
     {$page.data.t('contributors.invite_manager')}
@@ -84,7 +84,7 @@
           Anonymous
         {/if}
       </div>
-      {#if $is_manager}
+      {#if is_manager}
         <div class="w-1"></div>
         <Button
           onclick={editor_edits.removeContributor(contributor.user_id)}
@@ -96,11 +96,11 @@
       {/if}
     </div>
   {/each}
-  {#if $is_manager}
+  {#if is_manager}
     {#each contributor_invites as invite (invite.id)}
       <div class="my-1">
         <ContributorInvitationStatus
-          admin={$admin > 0}
+          admin={admin > 0}
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
           {#snippet prefix()}
@@ -113,7 +113,7 @@
       <i class="far fa-envelope"></i>
       {$page.data.t('contributors.invite_contributors')}
     </Button>
-  {:else if !$is_contributor}
+  {:else if !is_contributor}
     <ShowHide>
       {#snippet children({ show, toggle })}
                 <Button onclick={toggle} form="filled">
@@ -139,7 +139,7 @@
       <div class="text-sm leading-5 font-medium text-gray-900">
         {collaborator}
       </div>
-      {#if $is_manager}
+      {#if is_manager}
         <div class="w-1"></div>
         <Button
           color="red"
@@ -155,7 +155,7 @@
   ({$page.data.t('contributors.speakers_other_collaborators')})
 </div> -->
 
-{#if $is_manager}
+{#if is_manager}
   <Button onclick={async () => await editor_edits.writeInCollaborator($dictionary_info?.write_in_collaborators || [])} form="filled">
     <i class="far fa-pencil"></i>
     {$page.data.t('contributors.write_in_contributor')}
@@ -164,7 +164,7 @@
 
 {#if !dictionary.con_language_description}
   <hr class="my-4" />
-  <Partners {partners} can_edit={$is_manager} hideLivingTonguesLogo={dictionary.hide_living_tongues_logo} admin={$admin} {...data.partner_edits} />
+  <Partners {partners} can_edit={is_manager} hideLivingTonguesLogo={dictionary.hide_living_tongues_logo} admin={admin} {...data.partner_edits} />
 
   <!-- Not using contributors.request_to_add_manager -->
 
@@ -212,7 +212,7 @@
     {$page.data.t('contributors.how_to_cite_academics')}
   </h3>
 
-  <CitationComponent isManager={$is_manager} {dictionary} {partners} citation={$dictionary_info.citation} update_citation={data.update_citation} />
+  <CitationComponent isManager={is_manager} {dictionary} {partners} citation={$dictionary_info.citation} update_citation={data.update_citation} />
 
   <div class="mb-12"></div>
 {/if}

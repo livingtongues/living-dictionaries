@@ -31,6 +31,15 @@ import {
   dummy_speakers,
   dummy_tags,
 } from '../src/lib/mocks/dummy-entries'
+import { MOCK_USER_ID } from '../src/lib/mocks/mock-user'
+
+/**
+ * Non-admin e2e test user who MANAGES `achi`. Logs in via the dev OTP path
+ * (`send-code` returns the code) using this email, then `can_edit` resolves
+ * from the real `dictionary_roles` row below — NOT an admin bypass. Reuses
+ * `MOCK_USER_ID` so the dummy entry/speaker `created_by` ids line up.
+ */
+const ACHI_MANAGER_EMAIL = 'achi-manager@example.com'
 
 const data_dir = process.env.DATA_DIR || '.data'
 const db_path = join(data_dir, 'dictionaries', 'achi.db')
@@ -79,4 +88,30 @@ seed('audio_speakers', dummy_audio_speakers, { junction: true })
 seed('entry_tags', dummy_entry_tags, { junction: true })
 seed('entry_dialects', dummy_entry_dialects, { junction: true })
 db.close()
+
+// shared.db: seed the non-admin achi-manager user + their manager role so the
+// real auth + role resolution (M4-auth) has data to exercise can_edit.
+const shared_db_path = join(data_dir, 'shared.db')
+const shared = new Database(shared_db_path)
+const now = new Date().toISOString()
+shared.prepare(
+  `INSERT INTO users (id, email, name, avatar_url, providers, created_at, updated_at)
+   VALUES (?, ?, ?, ?, ?, ?, ?)
+   ON CONFLICT(id) DO UPDATE SET email = excluded.email, name = excluded.name, providers = excluded.providers, updated_at = excluded.updated_at`,
+).run(
+  MOCK_USER_ID,
+  ACHI_MANAGER_EMAIL,
+  'Achi Manager',
+  null,
+  JSON.stringify([{ provider: 'email', provider_id: ACHI_MANAGER_EMAIL }]),
+  now,
+  now,
+)
+shared.prepare('DELETE FROM dictionary_roles WHERE user_id = ? AND dictionary_id = ?').run(MOCK_USER_ID, 'achi')
+shared.prepare(
+  'INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
+).run(randomUUID(), 'achi', MOCK_USER_ID, 'manager', now, now)
+shared.close()
+console.info(`  seeded shared.db user ${ACHI_MANAGER_EMAIL} as manager of achi`)
+
 console.info('Done.')

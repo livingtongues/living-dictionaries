@@ -59,7 +59,7 @@
   }
 </script>
 
-{#if $can_edit}
+{#if can_edit}
   {#if content_updates?.length > 0}
     <div class="sticky top-0 h-[calc(100vh-1.5rem)] flex flex-col">
       <Filter items={content_updates} placeholder={$page.data.t('history.history_search')}>

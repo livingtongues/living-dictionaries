@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit'
-import { derived, get, readable } from 'svelte/store'
+import { derived, readable } from 'svelte/store'
 import type { EntryData, Tables } from '@living-dictionaries/types'
 import { ResponseCodes } from '$lib/constants'
 import { should_include_tag } from '$lib/helpers/tag-visibility'
@@ -7,7 +7,7 @@ import { browser } from '$app/environment'
 
 export async function load({ params: { entryId: entry_id }, parent }) {
   const { admin } = await parent()
-  const is_admin = get(admin)
+  const is_admin = admin
   const entry_history = readable<Tables<'content_updates'>[]>([], (set) => {
     (async () => {
       const { supabase } = await parent()

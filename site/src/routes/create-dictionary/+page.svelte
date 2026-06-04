@@ -17,7 +17,7 @@
   import { browser, dev } from '$app/environment'
 
   const { data } = $props()
-  const { user } = $derived(data)
+  const user = $derived(data.auth_user.user)
 
   const MAX_URL_LENGTH = 25
 
@@ -72,7 +72,7 @@
 <Form
 
   onsubmit={async () => {
-    if (!$user) return modal = 'auth'
+    if (!user) return modal = 'auth'
 
     await data.create_dictionary({
       id: urlToUse,

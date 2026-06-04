@@ -49,3 +49,21 @@ export function load_all_dictionaries({ db }: { db: Database.Database }): Dictio
   })
   return rows.map(project_to_dictionary_view)
 }
+
+/**
+ * The signed-in user's dictionaries — every catalog row they hold a
+ * `dictionary_roles` grant on, projected to `DictionaryView` + their `role`.
+ * Backs the homepage "My Dictionaries" personalization.
+ */
+export function load_dictionaries_for_user({ db, user_id }: { db: Database.Database, user_id: string }): (DictionaryView & { role: string })[] {
+  const rows = db.prepare(`
+    SELECT dictionaries.*, dictionary_roles.role AS dictionary_role
+    FROM dictionary_roles
+    INNER JOIN dictionaries ON dictionaries.id = dictionary_roles.dictionary_id
+    WHERE dictionary_roles.user_id = ?
+  `).all(user_id) as Record<string, any>[]
+  return rows.map((row) => {
+    const { dictionary_role, ...dictionary } = row
+    return { ...project_to_dictionary_view(dictionary), role: dictionary_role }
+  })
+}

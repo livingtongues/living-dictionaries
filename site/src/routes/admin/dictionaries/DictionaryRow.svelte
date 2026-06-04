@@ -310,7 +310,7 @@
           {/snippet}
     </ShowHide>
 </td>
-{#if $admin > 1}
+{#if admin > 1}
   <td class="cursor-pointer">
     <JSON obj={dictionary} />
   </td>

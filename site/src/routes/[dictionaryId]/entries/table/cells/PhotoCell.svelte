@@ -9,8 +9,8 @@
 
 {#if browser}
   {#if row.data.pf}
-    <column.imageComponent size={60} entry={row.data} can_edit={$can_edit} />
-  {:else if $can_edit}
+    <column.imageComponent size={60} entry={row.data} can_edit={can_edit} />
+  {:else if can_edit}
     <column.addImageComponent entry={row.data} class="text-xs" />
   {/if}
 {/if}

@@ -17,7 +17,7 @@
     {$page.data.t('header.about')}
   </h3>
 
-  {#if $is_manager}
+  {#if is_manager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}>{$page.data.t('misc.cancel')}</Button>
       <Button
@@ -32,7 +32,7 @@
     {/if}
   {/if}
 
-  {#if $is_manager || $is_contributor || $admin > 1}
+  {#if is_manager || is_contributor || admin > 1}
     <UserGuide />
   {/if}
   <div class="flex">

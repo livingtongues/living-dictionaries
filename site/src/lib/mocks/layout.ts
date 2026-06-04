@@ -2,16 +2,20 @@ import { readable } from 'svelte/store'
 import type { DictionaryView } from '@living-dictionaries/types'
 import type { LayoutData } from '../../routes/$types'
 import type { LayoutData as DictionaryLayoutData } from '../../routes/[dictionaryId]/$types'
+import { AuthUser } from '$lib/auth/user.svelte'
+import { get_my_dictionary_roles } from '$lib/me/dictionary-roles.svelte'
 import { logDbOperations } from './db'
 
 // @ts-expect-error
 export const mockAppLayoutData: LayoutData = {
   t: null,
   locale: null,
-  admin: readable(0),
+  admin: 0,
   supabase: null,
-  authResponse: null,
-  user: readable(null),
+  auth_user: new AuthUser(),
+  dict_roles: get_my_dictionary_roles(),
+  ssr_user: null,
+  my_dictionaries: readable([]),
   preferred_table_columns: null,
 }
 
@@ -22,9 +26,9 @@ export const justMockDictionaryLayoutData = {
     gloss_languages: [],
   } as DictionaryView,
   speakers: null,
-  is_manager: readable(false),
-  is_contributor: readable(false),
-  can_edit: readable(false),
+  is_manager: false,
+  is_contributor: false,
+  can_edit: false,
   entries: null,
   search_entries: null,
   default_entries_per_page: null,

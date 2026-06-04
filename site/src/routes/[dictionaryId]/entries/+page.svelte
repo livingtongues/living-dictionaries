@@ -72,7 +72,7 @@
 
       <SearchInput {search_params} index_ready={true} on_show_filter_menu={toggle} />
       <div class="w-1"></div>
-      <SwitchView bind:view={$search_params.view} can_print={dictionary.print_access || $can_edit} />
+      <SwitchView bind:view={$search_params.view} can_print={dictionary.print_access || can_edit} />
     </div>
 
     <div class="flex">
@@ -88,7 +88,7 @@
               0 /
               {entries_length}
             {/if}
-            {#if $can_edit}
+            {#if can_edit}
               <div class="grow"></div>
               <Button
                 type="button"
@@ -109,7 +109,7 @@
           <div class="text-red text-sm">Entries loading error: {$entries_error} (reload page if results are not working properly.)</div>
         {/if} -->
         <View entries={page_entries} page_data={data} />
-        <Pagination bind:page_from_url={$search_params.page} {number_of_pages} can_edit={$can_edit} add_entry={dbOperations.insert_entry} />
+        <Pagination bind:page_from_url={$search_params.page} {number_of_pages} can_edit={can_edit} add_entry={dbOperations.insert_entry} />
       </div>
       <div class="hidden md:block w-2 flex-shrink-0 print:hidden"></div>
       <EntryFilters {search_params} {show_mobile_filters} on_close={toggle} {result_facets} />
@@ -119,7 +119,7 @@
 
 <SeoMetaTags
   norobots={!dictionary.public}
-  admin={$admin > 0}
+  admin={admin > 0}
   title="Entries"
   dictionaryName={dictionary.name}
   gcsPath={dictionary.featured_image?.specifiable_image_url}

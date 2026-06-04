@@ -104,7 +104,7 @@
 
   <div class="modal-footer">
     <!-- {#if image_file}
-      {#if $admin > 1}
+      {#if admin > 1}
         <JSON obj={image_file} />
         <div class="w-1" />
       {/if}

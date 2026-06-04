@@ -41,7 +41,7 @@ import type { EntryForCSV } from './prepareEntriesForCsv'
 
 <h3 class="text-xl font-semibold mb-4">{$page.data.t('misc.export')}</h3>
 
-{#if $is_manager}
+{#if is_manager}
   <div class="mb-6">
     <div>
       <i class="far fa-check"></i>
@@ -135,13 +135,13 @@ import type { EntryForCSV } from './prepareEntriesForCsv'
   <p>{$page.data.t('export.availability')}</p>
 {/if}
 
-{#if $admin}
+{#if admin}
   <div class="mt-5">
     <Button form="filled" href='entries?q=%7B"view"%3A"print"%2C"entries_per_page"%3A100%7D'>{$page.data.t('export.download_pdf')}</Button>
   </div>
 {/if}
 
-{#if $admin || dev}
+{#if admin || dev}
   <div class="mt-2">
     <a href="/{dictionary.id}/keys" class="text-sm text-gray-500 hover:underline">API Keys</a>
   </div>

@@ -10,7 +10,7 @@
   const { data } = $props()
   const { admin } = $derived(data)
   const { dictionaries } = $derived($page.data)
-  const filtered_dictionaries = $derived($admin >= 1 ? $dictionaries : $dictionaries?.filter(dictionary => dictionary.public))
+  const filtered_dictionaries = $derived(admin >= 1 ? $dictionaries : $dictionaries?.filter(dictionary => dictionary.public))
 
 </script>
 
@@ -31,7 +31,7 @@
       {$page.data.t('misc.download')}
       (.csv)
     </Button>
-    {#if $admin}
+    {#if admin}
       <Button href="/admin/dictionaries" color="black">
         <i class="far fa-pencil mr-1"></i>
         Edit

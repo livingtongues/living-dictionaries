@@ -1,7 +1,6 @@
 import { error } from '@sveltejs/kit'
 import type { Tables, TablesUpdate } from '@living-dictionaries/types'
-import { derived, get, readable } from 'svelte/store'
-import type { Readable } from 'svelte/store'
+import { get, readable } from 'svelte/store'
 import type { LayoutLoad } from './$types'
 import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
 import { dbOperations, DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
@@ -14,27 +13,28 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
 
   try {
-    const { supabase, admin, my_dictionaries } = await parent()
+    const { supabase, auth_user, dict_roles } = await parent()
 
     // M4: the catalog row is resolved server-side from shared.db in +layout.server.ts.
     const { dictionary } = data
     const dictionary_id = dictionary.id
 
-    const is_manager: Readable<boolean> = derived([admin, my_dictionaries], ([$admin, $my_dictionaries], set) => {
-      if ($admin > 0) return set(true)
-      if ($my_dictionaries.find(({ id, role }) => id === dictionary_id && role === 'manager')) return set(true)
-    }, false)
-
-    const is_contributor: Readable<boolean> = derived([admin, my_dictionaries], ([$admin, $my_dictionaries], set) => {
-      if ($admin > 0) return set(true)
-      if ($my_dictionaries.find(({ id, role }) => id === dictionary_id && role === 'contributor')) return set(true)
-    }, false)
-
-    const can_edit = derived([is_manager, is_contributor], ([$is_manager, $is_contributor]) => $is_manager || $is_contributor)
+    // M4-auth: role resolves from the real `dictionary_roles` cache + the admin
+    // allow-list. Plain values, recomputed on every load (login / logout / the
+    // dev admin-level toggle all `invalidateAll`). Server push endpoints
+    // re-check the role on every write (verify-dict-role), so a stale cache is
+    // safe — UI badges just lag.
+    const admin_level = auth_user.user?.admin_level ?? 0
+    const is_site_admin = admin_level >= 1
+    const role_grant = dict_roles.roles.find(grant => grant.dictionary_id === dictionary_id)?.role
+    const role = is_site_admin ? 'admin' : (role_grant ?? null)
+    const is_manager = role === 'admin' || role === 'manager'
+    const is_contributor = role === 'admin' || role === 'contributor'
+    const can_edit = is_manager || is_contributor || role === 'editor'
 
     const default_entries_per_page = 20
 
-    const entries_ui = create_entries_ui_store({ dictionary_id, can_edit, admin })
+    const entries_ui = create_entries_ui_store({ dictionary_id, can_edit: readable(can_edit), admin: readable(admin_level) })
 
     const dictionary_info = readable<Tables<'dictionary_info'>>({} as Tables<'dictionary_info'>, (set) => {
       (async () => {

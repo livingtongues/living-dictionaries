@@ -124,7 +124,7 @@
         <!-- <hr class="my-2" />
         <div class="text-sm font-semibold px-3 my-1">
           {$page.data.t('home.public_dictionaries')}
-          {#if $admin}
+          {#if admin}
             (+ Private)
           {/if}
         </div> -->

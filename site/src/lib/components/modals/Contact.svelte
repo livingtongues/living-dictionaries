@@ -54,8 +54,8 @@
     if (dictionary && subject === 'request_access') {
       const { error } = await api_request_access({
         message,
-        email: $user?.email || email,
-        name: $user?.user_metadata.full_name || 'Anonymous',
+        email: user?.email || email,
+        name: user?.name || 'Anonymous',
         url: window.location.href,
         dictionaryId: dictionary.id,
         dictionaryName: dictionary.name,
@@ -68,8 +68,8 @@
     } else if (subject === 'learning_materials') {
       const { error } = await post_request<LearningMaterialsRequestBody, null>('/api/email/learning_materials', {
         message,
-        email: $user?.email || email,
-        name: $user?.user_metadata.full_name || 'Anonymous',
+        email: user?.email || email,
+        name: user?.name || 'Anonymous',
         url: window.location.href,
         dictionaryName: dictionary?.name,
       })
@@ -81,8 +81,8 @@
     } else {
       const { error } = await post_request<SupportRequestBody, null>('/api/email/support', {
         message,
-        email: $user?.email || email,
-        name: $user?.user_metadata.full_name || 'Anonymous',
+        email: user?.email || email,
+        name: user?.name || 'Anonymous',
         url: window.location.href,
         subject: enBase.contact[subject],
       })
@@ -95,7 +95,8 @@
 
     status = 'success'
   }
-  let { dictionary, user, about_is_too_short } = $derived($page.data)
+  let { dictionary, auth_user, about_is_too_short } = $derived($page.data)
+  const user = $derived(auth_user.user)
   run(() => {
     if (dictionary && subject === 'public_dictionary') warn_if_about_too_short()
   })
@@ -168,7 +169,7 @@
             <div class="text-gray-500 ml-auto">{message.length}/1000</div>
           </div>
 
-          {#if !$user}
+          {#if !user}
             <div class="mt-3">
               <label class="block uppercase text-gray-700 text-xs font-bold mb-2" for="email">
                 {$page.data.t('contact.your_email_address')}

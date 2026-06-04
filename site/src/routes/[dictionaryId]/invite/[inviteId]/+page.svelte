@@ -3,7 +3,8 @@
   import { page } from '$app/stores'
 
   const { data } = $props()
-  const { user, dictionary, is_manager, is_contributor, invite, accept_invite } = $derived(data)
+  const { auth_user, dictionary, is_manager, is_contributor, invite, accept_invite } = $derived(data)
+  const user = $derived(auth_user.user)
 </script>
 
 {#if invite?.status === 'sent'}
@@ -13,8 +14,8 @@
   <p class="font-semibold mb-2">
     {$page.data.t('invite.role')}: {invite.role}
   </p>
-  {#if $user}
-    {#if $is_manager}
+  {#if user}
+    {#if is_manager}
       <p class="mb-2">
         You are already a manager.
       </p>
@@ -22,7 +23,7 @@
         {$page.data.t('dictionary.entries')}
         <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1"></span>
       </Button>
-    {:else if $is_contributor && invite.role === 'contributor'}
+    {:else if is_contributor && invite.role === 'contributor'}
       <p class="mb-2">
         You are already a contributor.
       </p>
@@ -67,7 +68,7 @@
     {$page.data.t('dictionary.entries')}
     <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1"></span>
   </Button>
-{:else if !$user}
+{:else if !user}
   {$page.data.t('header.please_create_account')}
   <ShowHide>
     {#snippet children({ show: hide, toggle })}
