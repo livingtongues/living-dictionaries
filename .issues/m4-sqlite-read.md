@@ -86,13 +86,26 @@ but the **entries slice can only be proven on a populated dict** (use `torwali`)
       build: better-sqlite3 **external, 0 `__filename`** in server chunks. achi-flow **5/5** still passes.
       check 0/15 · test 132. ⏳ Jacob eyeballs :3041 globe/list/maps.
 
-### Phase B · Entries reads (sequenced after A)
-- [ ] Server endpoint (e.g. `/api/dictionaries/[id]/entries`) reads per-dict `dictionaries/{id}.db`
-      via better-sqlite3 and returns the entry/sense/media tables projected into the **legacy
-      `Tables<'entries'>` etc. shapes** the worker already consumes (preserving `updated_at` batching).
-- [ ] Point `entry.worker.ts` (`cached_data_table`/`cached_join_table`) at the endpoint instead of the stub.
-- [ ] Verify against a POPULATED dict (`torwali`): real entries list + entry detail; index builds; 0 errors.
-- [ ] Re-point or add an e2e flow for the populated dict (achi-flow targets `achi`, which has 0 SQLite entries).
+### Phase B · Entries reads (sequenced after A) ✅ DONE (commit pending)
+- [x] New `db/server/get-dictionary-entries-data.ts`: reads the per-dict db, returns the 9 data + 7
+      junction tables as arrays projected to the **legacy supabase shape** (JSON columns parsed via
+      `parse_dict_row`, soft-deleted excluded, new-schema bookkeeping cols `dirty`/`*_by_user_id` dropped).
+- [x] New `routes/api/dictionaries/[dictionaryId]/entries-data/+server.ts` GET: resolves url→id (shared.db),
+      opens `dictionaries/{id}.db`, returns the bundle.
+- [x] Rewired `entry.worker.ts`: dropped the Supabase stub + `cached_data_table`/`cached_join_table` bulk
+      load; `init_entries` now fetches the bundle once and keys it (`key_by_id` / `key_by_pair`), then runs
+      the SAME grouping + index build. Removed `supabase`/stub imports + the `cached && !can_edit` shortcut.
+- [x] **Verify on REAL data (`torwali`, `e2e/entries-sqlite.mjs` / `test:entries`):** bundle = 9908 entries
+      / 9908 senses; lexeme parsed as MultiString; bookkeeping stripped; `/torwali/entries` renders real
+      entry links + the large count; **0 unexpected pageerrors**.
+- [x] **achi-flow kept UNCHANGED** (Jacob's Q3 lean): seeded `achi.db` with the existing dummy fixtures via
+      new reproducible `scripts/seed-achi-fixture.ts` (`seed:achi-fixture`) — maps legacy→per-dict schema
+      (rename `*_by`→`*_by_user_id`, drop `dictionary_id`, JSON-stringify, synth junction PKs). achi-flow
+      **5/5** now reads its 13 entries from SQLite; edits still ride the stub (write = M4-write, out of scope).
+      (Repopulating achi from prod Supabase was moot: the flow asserts on dummy-specific entries, so real
+      data wouldn't keep it "unchanged"; seeding the fixtures into SQLite does — and needs no prod secret.)
+- [x] `cached-data.ts` now orphaned in app code (only its own db-test imports it) — left in place (harmless;
+      the write/stub path is untouched until M4-write). check 0/15 · test 132 · build clean.
 
 ### Phase C · Cleanup
 - [ ] Retire `stub-client.ts` read paths that are now real; keep write no-ops until M4-write.
