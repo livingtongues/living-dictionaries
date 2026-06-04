@@ -16,6 +16,7 @@
     "test": "vitest",
     "test:db": "vitest --config ./vitest.config.db.ts",
     "test:flow": "node e2e/achi-flow.mjs",
+    "test:sync": "node e2e/dict-sync.mjs",
     "test:catalog": "node e2e/catalog-sqlite.mjs",
     "test:entries": "node e2e/entries-sqlite.mjs",
     "seed:achi-fixture": "tsx scripts/seed-achi-fixture.ts",

@@ -16,8 +16,10 @@
  *   pnpm -F site seed:achi-fixture
  */
 import process from 'node:process'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { randomUUID } from 'node:crypto'
+import { readdirSync, readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import Database from 'better-sqlite3'
 import { DICT_JSON_COLUMNS } from '../src/lib/db/schemas/dictionary-json-columns'
 import {
@@ -45,6 +47,26 @@ const data_dir = process.env.DATA_DIR || '.data'
 const db_path = join(data_dir, 'dictionaries', 'achi.db')
 const db = new Database(db_path)
 db.pragma('foreign_keys = OFF')
+
+// Apply the per-dict migrations from disk so the seed is self-sufficient (creates
+// the schema on a fresh db + picks up new migrations like the lmod-trigger fix).
+// Mirrors run_sql_migrations, but reads the .sql files directly (this tsx script
+// has no vite import.meta.glob).
+function run_migrations() {
+  const migrations_dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'lib', 'db', 'schemas', 'dictionary-migrations')
+  const files = readdirSync(migrations_dir).filter(name => name.endsWith('.sql')).sort()
+  const has_table = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'`).get()
+  const applied = new Set<string>(
+    has_table ? (db.prepare('SELECT name FROM migrations').all() as { name: string }[]).map(row => row.name) : [],
+  )
+  for (const name of files) {
+    if (applied.has(name)) continue
+    db.exec(`BEGIN; ${readFileSync(join(migrations_dir, name), 'utf8')}; COMMIT;`)
+    if (db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'`).get())
+      db.prepare('INSERT INTO migrations (id, name, run_on) VALUES (?, ?, ?)').run(randomUUID(), name, new Date().toISOString())
+  }
+}
+run_migrations()
 
 function table_columns(table: string): Set<string> {
   const rows = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]

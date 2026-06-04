@@ -197,10 +197,31 @@ async function main() {
   await shot(page, 'sense-deleted')
   step('deleted Sense 2 → back to 1 sense, original sense intact')
 
+  // 6 — round-trip: flush the sync, reload (fresh load reads from the synced
+  // server SQLite via snapshot), and assert the phonetic edit PERSISTED + the
+  // add/delete-sense netted back to one sense.
+  await page.evaluate(async () => {
+    const c = globalThis.__ld_dict_connections?.achi?.connection
+    if (c) await c.sync_now().catch(() => {})
+  })
+  await page.goto(`${base}/achi/entry/e_ja`, { waitUntil: 'domcontentloaded' })
+  await page.waitForFunction(() => document.body.innerText.includes('Add Audio'), { timeout: 25000 })
+  await page.waitForFunction(() => document.body.innerText.includes('haʔ-EDITED'), { timeout: 10000 })
+  const after_reload = await page.evaluate(() => ({
+    persisted: document.body.innerText.includes('haʔ-EDITED'),
+    original: document.body.innerText.includes('water'),
+    no_sense_2: !document.body.innerText.includes('Sense 2'),
+  }))
+  if (!after_reload.persisted) throw new Error('phonetic edit did not persist across reload (server SQLite)')
+  if (!after_reload.original) throw new Error('original sense missing after reload')
+  if (!after_reload.no_sense_2) throw new Error('deleted Sense 2 reappeared after reload')
+  await shot(page, 'reloaded-persisted')
+  step('reload → phonetic edit persisted from server SQLite; senses back to 1')
+
   if (page_errors.length) throw new Error(`pageerror(s) during flow: ${page_errors.join(' | ')}`)
   step('no uncaught page errors during the flow')
 
-  console.log('\n✅ achi deep-flow PASS — real-auth manager edit verified')
+  console.log('\n✅ achi deep-flow PASS — real-auth manager edit + sync round-trip verified')
 }
 
 async function cleanup() {

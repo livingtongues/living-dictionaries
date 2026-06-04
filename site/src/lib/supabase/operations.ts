@@ -1,18 +1,33 @@
 import { get } from 'svelte/store'
 import type { Writable } from 'svelte/store'
 import type { MultiString, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
-import type { Supabase } from '.'
+import type { DictLiveDb } from '$lib/db/dict-client/dict-live-db.svelte'
 import { page } from '$app/stores'
 import { goto } from '$app/navigation'
+
+// vps-migration M4 write/sync: persistence moved from the Supabase stub to the
+// browser wa-sqlite per-dict DB (`dict_db`). Each op (1) updates the in-memory
+// Orama worker via `api.X` for instant UI, and (2) writes to `dict_db` (the
+// SharedWorker sync engine pushes dirty rows to the server, which re-checks the
+// caller's role). Per-dict rows carry NO `dictionary_id` (single-dict file) and
+// REQUIRE `created_by_user_id` / `updated_by_user_id` (NOT NULL). The `api.X`
+// double-write is removed in P4b once the change-watcher feeds Orama from
+// wa-sqlite directly.
 
 function randomUUID() {
   return window.crypto.randomUUID()
 }
+
 async function get_pieces() {
-  const { params: { entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { dictionary, supabase, entries_data } } = get(page) as any as {
+  const { params: { entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { dictionary, dict_db, auth_user, entries_data } } = get(page) as any as {
     params: { entryId: string }
     state: { entry_id: string }
-    data: { dictionary: { id: string }, supabase: Supabase, entries_data: { loading: Writable<boolean> } }
+    data: {
+      dictionary: { id: string }
+      dict_db: DictLiveDb | null
+      auth_user: { user: { id: string } | null }
+      entries_data: { loading: Writable<boolean> }
+    }
   }
   const { api } = await import('$lib/search/expose-entry-worker')
   const loading = get(entries_data.loading)
@@ -20,35 +35,69 @@ async function get_pieces() {
     alert('Wait until loading spinner stops to make edits.')
     throw new Error('db operations not ready yet')
   }
+  if (!dict_db)
+    throw new Error('Editing database is not ready yet')
+  const user_id = auth_user.user?.id
+  if (!user_id)
+    throw new Error('You must be signed in to edit')
 
-  return { api, dictionary_id: dictionary.id, entry_id_from_page: entry_id_from_url || entry_id_from_state, supabase }
+  return { api, dictionary_id: dictionary.id, entry_id_from_page: entry_id_from_url || entry_id_from_state, dict_db, user_id }
+}
+
+/** Strip columns that don't exist on / shouldn't be hand-set in the per-dict schema. */
+function clean<T extends Record<string, any>>(row: T): T {
+  const { dictionary_id, created_by, updated_by, ...rest } = row
+  return rest as T
+}
+
+/**
+ * Add a junction link (or revive a soft-deleted one) keyed by its natural key.
+ * Junctions have a synthetic id PK + UNIQUE on the natural key.
+ */
+async function link_junction({ dict_db, table, where, params, insert_row, user_id }: {
+  dict_db: DictLiveDb
+  table: string
+  where: string
+  params: unknown[]
+  insert_row: Record<string, unknown>
+  user_id: string
+}) {
+  const existing = await (dict_db as any)[table].query({ where, params }).snapshot()
+  if (existing[0]) {
+    if (existing[0].deleted)
+      await (dict_db as any)[table].update({ id: existing[0].id, deleted: null, updated_by_user_id: user_id })
+  } else {
+    await (dict_db as any)[table].insert({ ...insert_row, created_by_user_id: user_id, updated_by_user_id: user_id })
+  }
+}
+
+/** Soft-delete a junction link (set `deleted`) keyed by its natural key. */
+async function unlink_junction({ dict_db, table, where, params, user_id }: {
+  dict_db: DictLiveDb
+  table: string
+  where: string
+  params: unknown[]
+  user_id: string
+}) {
+  const existing = await (dict_db as any)[table].query({ where, params }).snapshot()
+  if (existing[0])
+    await (dict_db as any)[table].update({ id: existing[0].id, deleted: new Date().toISOString(), updated_by_user_id: user_id })
 }
 
 export async function insert_entry(lexeme: MultiString) {
   try {
-    const { dictionary_id, api, supabase } = await get_pieces()
+    const { dictionary_id, api, dict_db, user_id } = await get_pieces()
+    const audit = { created_by_user_id: user_id, updated_by_user_id: user_id }
     const entry_id = randomUUID()
-    const entry = {
-      id: entry_id,
-      dictionary_id,
-      lexeme,
-    }
-    await api.insert_entry(entry)
-    const sense = {
-      id: randomUUID(),
-      entry_id,
-      dictionary_id,
-    }
-    await api.insert_sense(sense)
+    const entry = { id: entry_id, lexeme, ...audit }
+    const sense = { id: randomUUID(), entry_id, ...audit }
+    await api.insert_entry(entry as any)
+    await api.insert_sense(sense as any)
 
     goto(`/${dictionary_id}/entry/${entry_id}`)
 
-    const { error } = await supabase.from('entries').insert(entry)
-    if (error)
-      throw new Error(error.message)
-    const { error: sense_error } = await supabase.from('senses').insert(sense)
-    if (sense_error)
-      throw new Error(sense_error.message)
+    await dict_db.entries.insert(entry as never)
+    await dict_db.senses.insert(sense as never)
   } catch (err) {
     alert(err)
     console.error(err)
@@ -57,15 +106,10 @@ export async function insert_entry(lexeme: MultiString) {
 
 export async function update_entry(entry: TablesUpdate<'entries'>) {
   try {
-    const { entry_id_from_page, api, supabase } = await get_pieces()
+    const { entry_id_from_page, api, dict_db, user_id } = await get_pieces()
     const id = entry.id || entry_id_from_page
-    await api.update_entry({
-      id,
-      ...entry,
-    })
-    const { error } = await supabase.from('entries').update(entry).eq('id', id)
-    if (error)
-      throw new Error(error.message)
+    await api.update_entry({ id, ...entry })
+    await dict_db.entries.update({ ...clean(entry), id, updated_by_user_id: user_id } as never)
   } catch (err) {
     alert(err)
     console.error(err)
@@ -74,17 +118,15 @@ export async function update_entry(entry: TablesUpdate<'entries'>) {
 
 export async function insert_sense(entry_id: string) {
   try {
-    const { dictionary_id, api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     const sense = {
       id: randomUUID(),
       entry_id,
-      dictionary_id,
+      created_by_user_id: user_id,
+      updated_by_user_id: user_id,
     }
-    await api.insert_sense(sense)
-
-    const { error } = await supabase.from('senses').insert(sense)
-    if (error)
-      throw new Error(error.message)
+    await api.insert_sense(sense as any)
+    await dict_db.senses.insert(sense as never)
   } catch (err) {
     alert(err)
     console.error(err)
@@ -93,11 +135,9 @@ export async function insert_sense(entry_id: string) {
 
 export async function update_sense(sense: TablesUpdate<'senses'>) {
   try {
-    const { api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     await api.update_sense(sense)
-    const { error } = await supabase.from('senses').update(sense).eq('id', sense.id)
-    if (error)
-      throw new Error(error.message)
+    await dict_db.senses.update({ ...clean(sense), updated_by_user_id: user_id } as never)
   } catch (err) {
     alert(err)
     console.error(err)
@@ -109,31 +149,28 @@ export async function insert_sentence({ sentence, sense_id }: {
   sense_id: string
 }) {
   try {
-    const { dictionary_id, api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     const new_sentence = {
       id: randomUUID(),
-      dictionary_id,
-      ...sentence,
+      ...clean(sentence),
+      created_by_user_id: user_id,
+      updated_by_user_id: user_id,
     }
-    const { data, error } = await supabase.from('sentences').insert(new_sentence).select().single()
-    if (error)
-      throw new Error(error.message)
-
-    const { error: sense_in_sentence_error } = await supabase.from('senses_in_sentences').upsert({
+    await dict_db.sentences.insert(new_sentence as never)
+    await dict_db.senses_in_sentences.insert({
       sentence_id: new_sentence.id,
       sense_id,
-      dictionary_id,
-    })
-    if (sense_in_sentence_error)
-      throw new Error(sense_in_sentence_error.message)
+      created_by_user_id: user_id,
+      updated_by_user_id: user_id,
+    } as never)
 
     try {
-      await api.insert_sentence(new_sentence, sense_id)
+      await api.insert_sentence(new_sentence as any, sense_id)
     } catch (worker_err) {
       console.error('insert_sentence: worker error', worker_err)
     }
 
-    return data
+    return new_sentence
   } catch (err) {
     alert(err)
     console.error(err)
@@ -142,16 +179,14 @@ export async function insert_sentence({ sentence, sense_id }: {
 
 export async function update_sentence(sentence: TablesUpdate<'sentences'>) {
   try {
-    const { api, supabase } = await get_pieces()
-    const { data, error } = await supabase.from('sentences').update(sentence).eq('id', sentence.id).select().single()
-    if (error)
-      throw new Error(error.message)
+    const { api, dict_db, user_id } = await get_pieces()
+    await dict_db.sentences.update({ ...clean(sentence), updated_by_user_id: user_id } as never)
     try {
       await api.update_sentence(sentence)
     } catch (worker_err) {
       console.error('update_sentence: worker error', worker_err)
     }
-    return data
+    return sentence
   } catch (err) {
     alert(err)
     console.error(err)
@@ -162,10 +197,8 @@ export async function delete_sentence(sentence_id: string) {
   try {
     if (!confirm('Are you sure you want to delete this sentence?')) return
 
-    const { api, supabase } = await get_pieces()
-    const { error } = await supabase.from('sentences').update({ deleted: new Date().toISOString() }).eq('id', sentence_id)
-    if (error)
-      throw new Error(error.message)
+    const { api, dict_db, user_id } = await get_pieces()
+    await dict_db.sentences.update({ id: sentence_id, deleted: new Date().toISOString(), updated_by_user_id: user_id } as never)
     try {
       await api.delete_sentence(sentence_id)
     } catch (worker_err) {
@@ -185,19 +218,17 @@ export async function insert_audio({
   entry_id: string
 }) {
   try {
-    const { dictionary_id, api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     const audio = {
-      dictionary_id,
       entry_id,
       id: randomUUID(),
       storage_path,
+      created_by_user_id: user_id,
+      updated_by_user_id: user_id,
     }
-    await api.insert_audio(audio)
-    const { data, error } = await supabase.from('audio').insert(audio).select().single()
-    if (error)
-      throw new Error(error.message)
-
-    return data
+    await api.insert_audio(audio as any)
+    await dict_db.audio.insert(audio as never)
+    return audio
   } catch (err) {
     alert(err)
     console.error(err)
@@ -206,13 +237,10 @@ export async function insert_audio({
 
 export async function update_audio(audio: TablesUpdate<'audio'>) {
   try {
-    const { api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     await api.update_audio(audio)
-    const { data, error } = await supabase.from('audio').update(audio).eq('id', audio.id).select().single()
-    if (error)
-      throw new Error(error.message)
-
-    return data
+    await dict_db.audio.update({ ...clean(audio), updated_by_user_id: user_id } as never)
+    return audio
   } catch (err) {
     alert(err)
     console.error(err)
@@ -221,18 +249,16 @@ export async function update_audio(audio: TablesUpdate<'audio'>) {
 
 export async function insert_speaker(_speaker: Omit<TablesInsert<'speakers'>, 'dictionary_id'>) {
   try {
-    const { dictionary_id, api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     const speaker = {
       id: randomUUID(),
-      dictionary_id,
-      ..._speaker,
+      ...clean(_speaker),
+      created_by_user_id: user_id,
+      updated_by_user_id: user_id,
     }
-    await api.insert_speaker(speaker)
-    const { data, error } = await supabase.from('speakers').insert(speaker).select().single()
-    if (error)
-      throw new Error(error.message)
-
-    return data
+    await api.insert_speaker(speaker as any)
+    await dict_db.speakers.insert(speaker as never)
+    return speaker
   } catch (err) {
     alert(err)
     console.error(err)
@@ -251,60 +277,22 @@ export async function assign_speaker({
   remove?: boolean
 }) {
   try {
-    const { dictionary_id, api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     if (media === 'audio') {
       if (remove) {
-        const audio_speaker = {
-          speaker_id,
-          audio_id: media_id,
-          deleted: new Date().toISOString(),
-        }
-        await api.delete_audio_speaker(audio_speaker)
-        const { error: delete_error } = await supabase.from('audio_speakers').update(audio_speaker)
-          .eq('audio_id', media_id).eq('speaker_id', speaker_id)
-        if (delete_error)
-          throw new Error(delete_error.message)
+        await api.delete_audio_speaker({ speaker_id, audio_id: media_id, deleted: new Date().toISOString() })
+        await unlink_junction({ dict_db, table: 'audio_speakers', where: 'audio_id = ? AND speaker_id = ?', params: [media_id, speaker_id], user_id })
       } else {
-        const audio_speaker = {
-          dictionary_id,
-          speaker_id,
-          audio_id: media_id,
-          // to handle upsert over previously deleted connection
-          deleted: null,
-          created_at: new Date().toISOString(),
-        }
-        await api.insert_audio_speaker(audio_speaker)
-        const { data, error } = await supabase.from('audio_speakers').upsert(audio_speaker).select().single()
-        if (error)
-          throw new Error(error.message)
-        return data
+        await api.insert_audio_speaker({ speaker_id, audio_id: media_id, deleted: null, created_at: new Date().toISOString() } as any)
+        await link_junction({ dict_db, table: 'audio_speakers', where: 'audio_id = ? AND speaker_id = ?', params: [media_id, speaker_id], insert_row: { audio_id: media_id, speaker_id }, user_id })
       }
     } else if (media === 'video') {
       if (remove) {
-        const video_speaker = {
-          speaker_id,
-          video_id: media_id,
-          deleted: new Date().toISOString(),
-        }
-        await api.delete_video_speaker(video_speaker)
-        const { error: delete_error } = await supabase.from('video_speakers').update(video_speaker)
-          .eq('video_id', media_id).eq('speaker_id', speaker_id)
-        if (delete_error)
-          throw new Error(delete_error.message)
+        await api.delete_video_speaker({ speaker_id, video_id: media_id, deleted: new Date().toISOString() })
+        await unlink_junction({ dict_db, table: 'video_speakers', where: 'video_id = ? AND speaker_id = ?', params: [media_id, speaker_id], user_id })
       } else {
-        const video_speaker = {
-          dictionary_id,
-          speaker_id,
-          video_id: media_id,
-          // to handle upsert over previously deleted connection
-          deleted: null,
-          created_at: new Date().toISOString(),
-        }
-        await api.insert_video_speaker(video_speaker)
-        const { data, error } = await supabase.from('video_speakers').upsert(video_speaker).select().single()
-        if (error)
-          throw new Error(error.message)
-        return data
+        await api.insert_video_speaker({ speaker_id, video_id: media_id, deleted: null, created_at: new Date().toISOString() } as any)
+        await link_junction({ dict_db, table: 'video_speakers', where: 'video_id = ? AND speaker_id = ?', params: [media_id, speaker_id], insert_row: { video_id: media_id, speaker_id }, user_id })
       }
     }
   } catch (err) {
@@ -315,18 +303,16 @@ export async function assign_speaker({
 
 export async function insert_tag({ name }: { name: string }) {
   try {
-    const { dictionary_id, api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     const tag = {
-      dictionary_id,
       id: randomUUID(),
       name,
+      created_by_user_id: user_id,
+      updated_by_user_id: user_id,
     }
-    await api.insert_tag(tag)
-    const { data, error } = await supabase.from('tags').insert(tag).select().single()
-    if (error)
-      throw new Error(error.message)
-
-    return data
+    await api.insert_tag(tag as any)
+    await dict_db.tags.insert(tag as never)
+    return tag
   } catch (err) {
     alert(err)
     console.error(err)
@@ -343,32 +329,13 @@ export async function assign_tag({
   remove?: boolean
 }) {
   try {
-    const { dictionary_id, api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     if (remove) {
-      const entry_tag = {
-        tag_id,
-        entry_id,
-        deleted: new Date().toISOString(),
-      }
-      await api.delete_entry_tag(entry_tag)
-      const { error: delete_error } = await supabase.from('entry_tags').update(entry_tag)
-        .eq('tag_id', tag_id).eq('entry_id', entry_id)
-      if (delete_error)
-        throw new Error(delete_error.message)
+      await api.delete_entry_tag({ tag_id, entry_id, deleted: new Date().toISOString() })
+      await unlink_junction({ dict_db, table: 'entry_tags', where: 'entry_id = ? AND tag_id = ?', params: [entry_id, tag_id], user_id })
     } else {
-      const entry_tag = {
-        dictionary_id,
-        tag_id,
-        entry_id,
-        // to handle upsert over previously deleted connection
-        deleted: null,
-        created_at: new Date().toISOString(),
-      }
-      await api.insert_entry_tag(entry_tag)
-      const { data, error } = await supabase.from('entry_tags').upsert(entry_tag).select().single()
-      if (error)
-        throw new Error(error.message)
-      return data
+      await api.insert_entry_tag({ tag_id, entry_id, deleted: null, created_at: new Date().toISOString() } as any)
+      await link_junction({ dict_db, table: 'entry_tags', where: 'entry_id = ? AND tag_id = ?', params: [entry_id, tag_id], insert_row: { entry_id, tag_id }, user_id })
     }
   } catch (err) {
     alert(err)
@@ -378,18 +345,16 @@ export async function assign_tag({
 
 export async function insert_dialect({ name }: { name: MultiString }) {
   try {
-    const { dictionary_id, api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     const dialect = {
-      dictionary_id,
       id: randomUUID(),
       name,
+      created_by_user_id: user_id,
+      updated_by_user_id: user_id,
     }
-    await api.insert_dialect(dialect)
-    const { data, error } = await supabase.from('dialects').insert(dialect).select().single()
-    if (error)
-      throw new Error(error.message)
-
-    return data
+    await api.insert_dialect(dialect as any)
+    await dict_db.dialects.insert(dialect as never)
+    return dialect
   } catch (err) {
     alert(err)
     console.error(err)
@@ -406,32 +371,13 @@ export async function assign_dialect({
   remove?: boolean
 }) {
   try {
-    const { dictionary_id, api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     if (remove) {
-      const entry_dialect = {
-        dialect_id,
-        entry_id,
-        deleted: new Date().toISOString(),
-      }
-      await api.delete_entry_dialect(entry_dialect)
-      const { error: delete_error } = await supabase.from('entry_dialects').update(entry_dialect)
-        .eq('dialect_id', dialect_id).eq('entry_id', entry_id)
-      if (delete_error)
-        throw new Error(delete_error.message)
+      await api.delete_entry_dialect({ dialect_id, entry_id, deleted: new Date().toISOString() })
+      await unlink_junction({ dict_db, table: 'entry_dialects', where: 'entry_id = ? AND dialect_id = ?', params: [entry_id, dialect_id], user_id })
     } else {
-      const entry_dialect = {
-        dictionary_id,
-        dialect_id,
-        entry_id,
-        // to handle upsert over previously deleted connection
-        deleted: null,
-        created_at: new Date().toISOString(),
-      }
-      await api.insert_entry_dialect(entry_dialect)
-      const { data, error } = await supabase.from('entry_dialects').upsert(entry_dialect).select().single()
-      if (error)
-        throw new Error(error.message)
-      return data
+      await api.insert_entry_dialect({ dialect_id, entry_id, deleted: null, created_at: new Date().toISOString() } as any)
+      await link_junction({ dict_db, table: 'entry_dialects', where: 'entry_id = ? AND dialect_id = ?', params: [entry_id, dialect_id], insert_row: { entry_id, dialect_id }, user_id })
     }
   } catch (err) {
     alert(err)
@@ -447,25 +393,22 @@ export async function insert_photo({
   sense_id: string
 }) {
   try {
-    const { dictionary_id, api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     const photo = {
-      dictionary_id,
       id: randomUUID(),
-      ..._photo,
+      ...clean(_photo),
+      created_by_user_id: user_id,
+      updated_by_user_id: user_id,
     }
-    await api.insert_photo(photo, sense_id)
-    const { data, error } = await supabase.from('photos').insert(photo).select().single()
-    if (error)
-      throw new Error(error.message)
-
-    const { error: sense_error } = await supabase.from('sense_photos').upsert({
-      photo_id: data.id,
+    await api.insert_photo(photo as any, sense_id)
+    await dict_db.photos.insert(photo as never)
+    await dict_db.sense_photos.insert({
+      photo_id: photo.id,
       sense_id,
-      dictionary_id,
-    })
-    if (sense_error)
-      throw new Error(sense_error.message)
-    return data
+      created_by_user_id: user_id,
+      updated_by_user_id: user_id,
+    } as never)
+    return photo
   } catch (err) {
     alert(err)
     console.error(err)
@@ -474,13 +417,10 @@ export async function insert_photo({
 
 export async function update_photo(photo: TablesUpdate<'photos'>) {
   try {
-    const { api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     await api.update_photo(photo)
-    const { data, error } = await supabase.from('photos').update(photo).eq('id', photo.id).select().single()
-    if (error)
-      throw new Error(error.message)
-
-    return data
+    await dict_db.photos.update({ ...clean(photo), updated_by_user_id: user_id } as never)
+    return photo
   } catch (err) {
     alert(err)
     console.error(err)
@@ -495,26 +435,22 @@ export async function insert_video({
   sense_id: string
 }) {
   try {
-    const { dictionary_id, api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     const video = {
-      dictionary_id,
       id: randomUUID(),
-      ..._video,
+      ...clean(_video),
+      created_by_user_id: user_id,
+      updated_by_user_id: user_id,
     }
-    await api.insert_video(video, sense_id)
-    const { data, error } = await supabase.from('videos').insert(video).select().single()
-    if (error)
-      throw new Error(error.message)
-
-    const { error: sense_error } = await supabase.from('sense_videos').upsert({
-      video_id: data.id,
+    await api.insert_video(video as any, sense_id)
+    await dict_db.videos.insert(video as never)
+    await dict_db.sense_videos.insert({
+      video_id: video.id,
       sense_id,
-      dictionary_id,
-    })
-    if (sense_error)
-      throw new Error(sense_error.message)
-
-    return data
+      created_by_user_id: user_id,
+      updated_by_user_id: user_id,
+    } as never)
+    return video
   } catch (err) {
     alert(err)
     console.error(err)
@@ -523,13 +459,10 @@ export async function insert_video({
 
 export async function update_video(video: TablesUpdate<'videos'>) {
   try {
-    const { api, supabase } = await get_pieces()
+    const { api, dict_db, user_id } = await get_pieces()
     await api.update_video(video)
-    const { data, error } = await supabase.from('videos').update(video).eq('id', video.id).select().single()
-    if (error)
-      throw new Error(error.message)
-
-    return data
+    await dict_db.videos.update({ ...clean(video), updated_by_user_id: user_id } as never)
+    return video
   } catch (err) {
     alert(err)
     console.error(err)

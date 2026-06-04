@@ -470,7 +470,7 @@ export async function init_entries(
 }
 
 function process_entry(entry: Tables<'entries'>) {
-  const { id, deleted, dictionary_id, created_at, created_by, updated_by, updated_at, ...main } = entry
+  const { id, deleted, dictionary_id, created_at, created_by, updated_by, created_by_user_id, updated_by_user_id, dirty, updated_at, ...main } = entry as Tables<'entries'> & Record<string, unknown>
 
   const senses_for_entry = entry_id_to_senses[id] || []
   const senses_with_all = senses_for_entry.map((sense) => {
