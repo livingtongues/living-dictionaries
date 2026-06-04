@@ -22,6 +22,8 @@
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.2.0",
+    "better-sqlite3": "^12.8.0",
+    "drizzle-orm": "^0.44.7",
     "satori": "^0.0.44",
     "satori-html": "^0.3.0"
   },
@@ -41,6 +43,7 @@
     "@turf/center": "^6.5.0",
     "@turf/helpers": "^6.5.0",
     "@turf/turf": "7.0.0-alpha.1",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/ckeditor__ckeditor5-core": "^33.0.3",
     "@types/d3-dsv": "^3.0.0",
     "@types/d3-geo": "^3.1.0",
