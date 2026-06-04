@@ -1,17 +1,21 @@
 import { get, writable } from 'svelte/store'
 import type { Readable } from 'svelte/store'
 import type { EntryData, Tables } from '@living-dictionaries/types'
+import type { DictConnection } from '$lib/db/dict-client/dict-connection'
 import { init_entries, reset_caches, search_entries } from '$lib/search'
+import { read_dict_bundle } from '$lib/search/read-dict-bundle'
 import { browser } from '$app/environment'
 
 export function create_entries_ui_store({
   dictionary_id,
   can_edit,
   admin,
+  connection,
 }: {
   dictionary_id: string
   can_edit: Readable<boolean>
   admin: Readable<number>
+  connection: DictConnection | null
 }) {
   const entries_data = writable<Record<string, EntryData>>({})
   const speakers = writable<Tables<'speakers'>[]>([])
@@ -65,20 +69,28 @@ export function create_entries_ui_store({
   const is_editor = get(can_edit)
   const is_admin = get(admin)
 
-  if (browser) {
-    init_entries({
-      dictionary_id,
-      can_edit: is_editor,
-      admin: is_admin,
-      set_entries_data,
-      upsert_entry_data,
-      delete_entry,
-      set_speakers,
-      set_tags,
-      set_dialects,
-      set_loading,
-      mark_search_index_updated,
-    })
+  if (browser && connection) {
+    read_dict_bundle({ connection })
+      .then((bundle) => {
+        init_entries({
+          dictionary_id,
+          can_edit: is_editor,
+          admin: is_admin,
+          bundle,
+          set_entries_data,
+          upsert_entry_data,
+          delete_entry,
+          set_speakers,
+          set_tags,
+          set_dialects,
+          set_loading,
+          mark_search_index_updated,
+        })
+      })
+      .catch((err) => {
+        console.error('Failed to read dict bundle from wa-sqlite', err)
+        set_loading(false)
+      })
   }
 
   return {

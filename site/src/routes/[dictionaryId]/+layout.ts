@@ -2,12 +2,21 @@ import { error } from '@sveltejs/kit'
 import type { Tables, TablesUpdate } from '@living-dictionaries/types'
 import { get, readable } from 'svelte/store'
 import type { LayoutLoad } from './$types'
+import type { DictConnection } from '$lib/db/dict-client/dict-connection'
+import type { DictLiveDb } from '$lib/db/dict-client/dict-live-db.svelte'
 import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
 import { dbOperations, DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
 import { url_from_storage_path } from '$lib/helpers/media'
+import { create_dict_live_db } from '$lib/db/dict-client/dict-live-db.svelte'
+import { open_dict } from '$lib/db/dict-client/shared-worker-lifecycle'
 import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
+import { browser } from '$app/environment'
 import { invalidate } from '$app/navigation'
 import { create_entries_ui_store } from '$lib/search/entries-ui-store'
+
+interface DictLayoutGlobals {
+  __ld_dict_connections?: Record<string, { connection: DictConnection, dict_db: DictLiveDb }>
+}
 
 export const load: LayoutLoad = async ({ parent, depends, data }) => {
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
@@ -34,7 +43,28 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
 
     const default_entries_per_page = 20
 
-    const entries_ui = create_entries_ui_store({ dictionary_id, can_edit: readable(can_edit), admin: readable(admin_level) })
+    // vps-migration M4 write/sync: open the browser wa-sqlite dict.db (everyone;
+    // editors push, viewers pull-only) via the SharedWorker. It's the client
+    // source of truth — the Orama worker is fed from it, and saves write to it.
+    // Cached per dict_id on globalThis to survive layout invalidation.
+    let connection: DictConnection | null = null
+    let dict_db: DictLiveDb | null = null
+    if (browser) {
+      const globals = globalThis as DictLayoutGlobals
+      globals.__ld_dict_connections ??= {}
+      let cached = globals.__ld_dict_connections[dictionary_id]
+      if (!cached) {
+        const conn = await open_dict({ dict_id: dictionary_id, has_editor_role: can_edit, auth: {} })
+        // Bootstrap: snapshot (OPFS) already populated the file; sync_now pulls
+        // any deltas and backfills a fresh/MemoryVFS db (pull-since-null).
+        await conn.sync_now().catch(err => console.error('initial dict sync failed', err))
+        cached = { connection: conn, dict_db: create_dict_live_db(conn) }
+        globals.__ld_dict_connections[dictionary_id] = cached
+      }
+      ;({ connection, dict_db } = cached)
+    }
+
+    const entries_ui = create_entries_ui_store({ dictionary_id, can_edit: readable(can_edit), admin: readable(admin_level), connection })
 
     const dictionary_info = readable<Tables<'dictionary_info'>>({} as Tables<'dictionary_info'>, (set) => {
       (async () => {
@@ -90,6 +120,8 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       is_manager,
       is_contributor,
       can_edit,
+      dict_db,
+      connection,
       dictionary_editors,
       load_partners,
       about_is_too_short,
