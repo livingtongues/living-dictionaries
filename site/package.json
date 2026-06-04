@@ -16,6 +16,7 @@
     "test": "vitest",
     "test:db": "vitest --config ./vitest.config.db.ts",
     "test:flow": "node e2e/achi-flow.mjs",
+    "test:catalog": "node e2e/catalog-sqlite.mjs",
     "reset-db": "pnpx tsx ./src/lib/mocks/seed/write-seed-and-reset-db-script.ts",
     "local-kitbook": "link:../../../kitbook/packages/kitbook",
     "local-svelte-pieces": "link:../../../svelte-pieces"

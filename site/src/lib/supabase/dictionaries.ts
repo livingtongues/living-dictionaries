@@ -8,18 +8,19 @@ export interface DictionaryWithRoles extends DictionaryView {
 }
 
 // Global catalog store consumed via `$page.data.dictionaries` (Footer + /dictionaries list).
-// Backed by the (currently stubbed) supabase client — returns dummy dictionaries in M1.
-export function create_dictionaries_store({ supabase }: { supabase: Supabase }) {
+// M4: backed by the server SQLite catalog endpoint (`/api/dictionaries` → shared.db).
+export function create_dictionaries_store() {
   if (!browser)
     return readable<DictionaryView[]>([])
   return readable<DictionaryView[]>([], (set) => {
     (async () => {
-      const { data, error } = await supabase.from('materialized_dictionaries_view').select()
-      if (error) {
-        console.error(error)
+      const response = await fetch('/api/dictionaries?visibility=public')
+      if (!response.ok) {
+        console.error(`Could not load dictionaries: ${response.status}`)
         return
       }
-      set((data || []) as DictionaryView[])
+      const { dictionaries } = await response.json() as { dictionaries: DictionaryView[] }
+      set(dictionaries || [])
     })()
   })
 }

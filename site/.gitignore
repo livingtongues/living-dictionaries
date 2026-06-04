@@ -3,6 +3,10 @@
 /.svelte-kit*
 vite.config.ts*
 
+# Local SQLite data (shared.db catalog + per-dictionary dbs). Seeded from the
+# example repo; DATA_DIR points here in dev, /opt/hosting/data on the VPS.
+/.data
+
 **/e2e/snapshots/*
 test-results
 playwright-report

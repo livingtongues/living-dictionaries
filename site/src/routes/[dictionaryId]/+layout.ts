@@ -1,4 +1,4 @@
-import { error, redirect } from '@sveltejs/kit'
+import { error } from '@sveltejs/kit'
 import type { Tables, TablesUpdate } from '@living-dictionaries/types'
 import { derived, get, readable } from 'svelte/store'
 import type { Readable } from 'svelte/store'
@@ -10,24 +10,14 @@ import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
 import { invalidate } from '$app/navigation'
 import { create_entries_ui_store } from '$lib/search/entries-ui-store'
 
-export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url }, parent, depends }) => {
+export const load: LayoutLoad = async ({ parent, depends, data }) => {
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
 
   try {
     const { supabase, admin, my_dictionaries } = await parent()
 
-    let dictionary: Tables<'dictionaries'>
-    const { data: url_dictionary, error: url_dictionary_error } = await supabase.from('dictionaries').select().eq('url', dictionary_url).single()
-    if (url_dictionary_error) {
-      const { data: id_dictionary, error: dictionary_id_error } = await supabase.from('dictionaries').select().eq('id', dictionary_url).single()
-      if (dictionary_id_error) {
-        redirect(ResponseCodes.MOVED_PERMANENTLY, '/')
-      }
-      dictionary = id_dictionary
-    } else {
-      dictionary = url_dictionary
-    }
-
+    // M4: the catalog row is resolved server-side from shared.db in +layout.server.ts.
+    const { dictionary } = data
     const dictionary_id = dictionary.id
 
     const is_manager: Readable<boolean> = derived([admin, my_dictionaries], ([$admin, $my_dictionaries], set) => {
