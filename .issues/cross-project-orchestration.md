@@ -25,38 +25,32 @@ report back here; I relay learnings and Jacob's decisions across the fence.
 | Kitbook → svelte-look | ✅ M2b P3 | ✅ |
 | **Runes codemod** (component syntax) | ✅ **DONE (M2c)** — 367 files; 0 err / 15 warn | ✅ DONE (142 files; 0 err / 6 warn) |
 | Lint clean + hook re-enabled | ✅ DONE (LD-A2: custom flat config, finished runes stragglers) | ✅ DONE |
-| SQLite + Email-OTP/JWT auth **backend** | ❌ (M4, later) | ✅ Phase A (better-sqlite3, jose, endpoints, 112 tests) |
-| App identity on new auth | ❌ | ✅ Phase B core committed (`2253f0c`) |
-| Login modal UI + Google One-Tap | ❌ | 🔶 **in progress** (idle session, mid-interview) |
-| Real backend DATA reads on SQLite | ❌ (M4) | ❌ (still Firestore; the big remaining swap) |
-| puppeteer-core deep-flow e2e | ✅ `site/e2e/achi-flow.mjs` (own launcher) | ✅ `tools/e2e/*` (uses shared skill launcher) |
-| Uses shared `browser-launch.mjs` (new skill) | ✅ adopted (M2c; dropped local puppeteer-core+chrome-launcher) | ✅ adopted (`efedb37`) |
-| Working tree | clean (M2b `6aa75c16` + M2c committed) | clean |
+| SQLite + Email-OTP/JWT auth **backend** | ✅ **M4 real-auth DONE** (OTP/JWT/Google + dict-roles) | ✅ DONE (Phase A/B) |
+| App identity / login UI on new auth | ✅ DONE (AuthModal/account rewired) | ✅ DONE (login modal + Google One-Tap) |
+| **Real backend DATA reads on SQLite** | ✅ **M4-read DONE** (catalog 2136 dicts + per-dict entries) | ✅ reader + **admin** both Firestore-free |
+| **Write path on SQLite** | 🔶 **M4-write/sync in flight** (LD-WRITE) | 🔶 admin writes ✅ (sync engine); library editing in flight |
+| puppeteer-core deep-flow e2e | ✅ `site/e2e/achi-flow.mjs` (shared launcher) | ✅ `tools/e2e/*` (shared launcher) |
+| Uses shared `browser-launch.mjs` (new skill) | ✅ adopted (M2c) | ✅ adopted (`efedb37`) |
+| Working tree | clean (through M4-read) | clean (through reader) |
 
 ## What each needs to do NEXT
 
-### living-dictionaries
-1. **Commit the dirty tree first** — M2b (svelte-pieces vendoring, kitbook→svelte-look, mock-user,
-   dummy entries) + the puppeteer-core deep-flow swap are all uncommitted on `vps-migration`.
-   Land them as a checkpoint before the runes churn so M2c is bisectable.
-2. **M2c — migrate component syntax to runes** (the next milestone; mirrors what house already did).
-   This is the prime cross-learning beneficiary — see house's runes-codemod gotchas below. 0 errors /
-   **484 warnings** today (all Svelte-5 legacy deprecations) → drive to ~0 via the codemod + hand-fixes.
-3. **Adopt the shared `browser-launch.mjs`** in `site/e2e/achi-flow.mjs` (house already did) — small.
-4. Then **M3** (Docker + VPS deploy of the stubbed app) → **M4+** (SQLite read → write/sync →
-   **real auth** [port house's backend] → media → R2).
+### living-dictionaries  (M0–M2c + lint + M4-read all ✅ DONE & committed on `vps-migration`)
+1. **M4 · real auth** (recommended next) — port house's already-built & proven OTP/JWT/SQLite auth +
+   login modal + Google One-Tap; **inherit the send-code rate-limit FIX** house applied. Replaces the M1
+   stub at the auth chokepoint → unblocks logged-in surfaces (admin list, my-dictionaries) off the stub.
+2. **M4 · write/sync** — wa-sqlite browser + SharedWorker + bidirectional sync engine. **HOLD until
+   house's local-first admin-sync engine lands** (HOUSE-ADMIN may build it) so LD inherits the wa-sqlite/
+   sync playbook — same cross-pollination that made M4-read smooth.
+3. **Media upload** (legacy GCS presigned PUT) → **R2 snapshots** → then **M3 deploy** (save-for-last;
+   existing CI → `new.livingdictionaries.app`, Jacob re-aims the branch at the very end).
 
-### house
-1. **Finish login modal UI + Google One-Tap** (sqlite-auth Phase B tail). The idle session
-   `3367d00b` is paused **mid-interview** awaiting 3 answers: `toast` (alert vs port toast system),
-   `popover` (modal button only vs auto one-tap), `clientid` (`PUBLIC_GOOGLE_OAUTH_CLIENT_ID` plan).
-   Decisions already locked earlier in that session: Modal-only entry, port Google One-Tap, stay-on-page
-   + `invalidateAll()`, repoint `AuthSubscribeGuard`, port full `update-profile` (wire newsletter toggle
-   only), **fix the send-code rate-limit bug now**.
-2. **Fix the inherited send-code rate-limit bug** (429 unreachable — the invalidating DELETE wipes the
-   count) — applies to LD's future auth too; fix in `/learn-from` upstream as well.
-3. Then the **big backend swap: Firestore DATA reads → SQLite** (articles/scripture/media), then deploy,
-   then the one-time data migration + hosting cutover (`port-customer-site-from-old.md`).
+### house  (auth ✅ · customer reader 100% Firestore-free ✅)
+1. **Admin surface off Firestore → SQLite** — HOUSE-ADMIN (`0a9cfdc3`) in flight (server-reads first,
+   then full local-first sync). Or pivot to **local search** (Algolia → local data).
+2. **Library editing on SQLite** (deferred — needs the local-first sync foundation first).
+3. Then **data migration + hosting cutover** (`port-customer-site-from-old.md`): Firestore→SQLite
+   one-time import, Stripe dedup, email archive, DNS/webhook flip.
 
 ## Cross-project shared-learning ledger
 
@@ -267,17 +261,61 @@ report back here; I relay learnings and Jacob's decisions across the fence.
   `.knowledge/migration/m4-sqlite-read-layer.md`. ⏳ Jacob eyeballs :3041 globe/list/maps + a dict's
   entries. **Deferred (own milestones):** M4-write (wa-sqlite+SharedWorker+sync), real auth (port
   house OTP/JWT — then admin list / my-dictionaries / writes leave the stub), media, R2.
+- **LD-AUTH** — ✅ DONE (`6bc752ca`, project `living-dictionaries`; the 69-file tree is committed by
+  **LD-WRITE** as its step 0).
+  **M4 · real auth** shipped: FULL port of the example's `AuthUser`/`ssr_user`/`dict_roles` model
+  (Jacob chose full port over a bridge) + `lib/admins.ts` + `/api/auth/*` + `/api/me/{dictionary-roles,
+  dictionaries}`. `ssr_user` resolved from the session-cookie JWT in `+layout.server.ts`;
+  `can_edit`/`is_manager` from REAL `dictionary_roles` (+ admin allow-list). 6 legacy write/media/email
+  endpoints keep a real-JWT `locals.getSession` shim (`get-legacy-session.server.ts`) until M4-write.
+  Gate: **check 0/15 · test 160 · build ✔ · achi-flow e2e PASS** (logged-out read-only → dev-OTP login
+  as NON-admin `achi-manager@example.com` → `is_admin=false`/`admin_level=null` so can_edit is
+  role-derived, not admin bypass → full editor flow → no pageerror). 📘
+  `.knowledge/migration/m4-real-auth.md`.
+  **LD↔house auth gotchas to cross-pollinate:**
+  - ✅ **send-code rate-limit FIX carried** (house's in-memory per-email counter; the example DID still
+    have the latent 429-unreachable bug). LD twist: LD's `email_codes.created_at` is NOT NULL w/ no
+    default → the INSERT must supply `created_at` (house's omits it; house schema defaults).
+  - 🆕 **Dev admin-level toggle for the allow-list world:** the old "Set Admin Role Level" button can't
+    mutate an email-derived admin level, so re-established via a **dev-only `dev_admin_level` cookie**
+    (`0|1|2`, honored only when `dev`) applied in a `resolve-admin-level.ts` helper used by get-user /
+    verify-dict-role / +layout.server / the legacy getSession shim. Endpoint `/api/auth/dev-admin-level`
+    (404 in prod). **House should mirror this** when it moves admin to an allow-list.
+  - 🆕 **`can_edit` cold-cache bug** (likely latent in the example too, and relevant to house's
+    client-cached role/entitlement stores): client `dict_roles` is fetched async, so the first
+    authenticated load computed can_edit from an EMPTY cache → manager flashed read-only. Fix: AWAIT the
+    role refresh in the root layout when the cache is cold (don't await inside the child layout — it
+    races the root's in-flight `refresh()`).
+  - 🆕 **e2e on a prod `node build`** can't use the `dev`-gated OTP-returns-code path → added an explicit
+    env-gated `E2E_EXPOSE_OTP` escape hatch (never set in deploys). House's e2e likely runs against dev;
+    if it ever tests `node build`, it needs the same.
+  - Google client-id reused from the example (`215143435444-…`); graceful no-op if `PUBLIC_GOOGLE_
+    OAUTH_CLIENT_ID` unset so email-OTP + e2e work without it (house pattern). jose hand-added to the
+    lockfile (a plain install drifted picomatch).
 - **HOUSE-NEXT** — ✅ DONE + committed (`18374ca2`, 5 commits on `repo-restructure`). **Customer reader
   now 100% Firestore-free:** intro page + series navigator + dr-house bio + Vimeo thumbnails all on SQLite
   (re-pulled 28 intros / 1 series / 8 series_items live from Firestore into `site/.data`; backfilled
   108/109 Vimeo thumbs; dr-house → static `bio.ts`). check 0 · test 147 · build clean · 0 Firestore /
   0 pageerrors. Editing + admin stayed inert. Knowledge appended to `firestore-to-sqlite-reader-port.md`
   (intro/series projections, live re-pull workflow, bare-import + migration-id gotchas for LD).
-- **HOUSE-ADMIN** — 🔶 spawned `0a9cfdc3` (project `house`). Next house step: **admin surface off
-  Firestore → SQLite** (supportMessages + users), leaning on learn-from's local-first admin backend.
-  PLAN + interview Jacob on depth — (a) server-side SQLite reads first (bounded, mirrors the reader),
-  (b) full wa-sqlite local-first sync engine next — or pivot to **local search**. Library editing stays
-  inert. Tree was clean at start (no pre-commit needed).
+- **HOUSE-ADMIN** — ✅ DONE + committed (`0a9cfdc3`, 3 commits `ba69c33`/`df73167`/`3f20621` on
+  `repo-restructure`). **Entire `/admin` surface is Firestore-free on the local-first wa-sqlite sync
+  engine** ported from learn-from (wa-sqlite client + LiveDb + Sync + `/api/admin-sync`, `directory` +
+  `messages` sectors), verified against REAL prod-backup data (1827 users · 373 subs · 285 threads · 590
+  messages; FK-clean seed, dev session preserved). Shell/users/inbox/detail + sync dashboard (initial
+  `0↑ 3089↓`) + a real SES send confirmed. check 0 · test 233 · build clean. 📘 **`.knowledge/architecture/
+  firestore-to-sqlite-admin-port.md` = LD's M4-WRITE/sync playbook.** Deferred (missing /site deps, not
+  design): Stripe reconcile, compose-new-email, attachments/R2, inbound ingest, rich-text reply.
+  💡 **House→LD:** this is the wa-sqlite sync-engine port LD was waiting on → unblocks LD-WRITE.
+- **LD-WRITE** — 🔶 spawned `e17570b6` (project `living-dictionaries`). Step 0: commit LD-AUTH's 69
+  files. Then **M4 · write/sync** — real wa-sqlite browser DB + SharedWorker + bidirectional sync so the
+  edit/write path stops being a JWT-shim stub. PRIMARY = example `lib/db/{client,dict-client,sync}/*`;
+  SECONDARY = house's just-proven `firestore-to-sqlite-admin-port.md`. PLAN + interview Jacob (multi-dict
+  sector mapping, which writes move first, achi-flow → real write/sync round-trip).
+- **HOUSE-EDIT** — 🔶 spawned `eacecdd8` (project `house`). Tree clean. PLAN + interview Jacob on the
+  next milestone, recommending **(A) library editing on SQLite** (now unblocked by reader-SQLite + the
+  admin sync engine) over (B) local search / (C) admin deferred follow-ups / (D) deploy-prep. Carries
+  LD's `dev_admin_level` + `E2E_EXPOSE_OTP` patterns for house to mirror.
 
 > **Commit policy (Jacob 2026-06-04):** each repo's NEXT spawned session commits its predecessor's
 > uncommitted tree first (LD-M4 does this). HOUSE-NEXT + horse are now committed. **Same-repo

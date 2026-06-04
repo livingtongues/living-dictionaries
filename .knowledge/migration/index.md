@@ -26,6 +26,13 @@ Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. Plan + st
   adapter-node `dependencies` gotcha, the "only 4 of 2136 dbs have entries" data finding (+ `VACUUM
   INTO` seeding), keeping achi-flow unchanged by seeding fixtures into `achi.db`, the e2e harnesses
   + their external-error filtering, and what intentionally stays on the stub until auth/M4-write.
+- [m4-real-auth.md](./m4-real-auth.md) — M4 auth: porting the example's `AuthUser`/`ssr_user`/
+  `dict_roles` model (full port) with two pragmatic LD adaptations (plain `page.data.admin` mirror;
+  plain role booleans wrapped in `readable()` only for the search store); the legacy `getSession`
+  JWT shim kept for 6 write/media endpoints; the dev `dev_admin_level` cookie that re-establishes
+  "Set Admin Role Level" in the allow-list world (house should mirror); the send-code rate-limit FIX
+  + LD's `created_at` NOT NULL twist; the `E2E_EXPOSE_OTP` escape hatch for e2e on `node build`; the
+  vitest `$env/dynamic/private` alias; hand-adding jose to the lockfile.
 - [unocss-svelte-scoped-to-universal.md](./unocss-svelte-scoped-to-universal.md) — M2a plugin
   swap: the svelte-scoped defaults the universal plugin drops (directives transformer +
   Svelte `class:` extraction) and how to restore them; `@unocss/reset` becoming a direct dep AND
