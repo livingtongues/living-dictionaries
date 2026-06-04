@@ -79,7 +79,7 @@
           {setCurrentDictionary} />
       {:else}
         <div class="lt-md:hidden flex flex-col">
-          {#each featured_dictionaries as dictionary}
+          {#each featured_dictionaries as dictionary (dictionary.id)}
             <Button
               class="mb-1"
               color="black"

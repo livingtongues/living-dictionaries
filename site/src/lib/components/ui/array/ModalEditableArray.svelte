@@ -56,7 +56,7 @@
       class="w-full"
       onclick={() => set(can_edit)}>
       <div class="flex flex-wrap whitespace-nowrap" onclick={() => set(can_edit)}>
-        {#each Object.values(selectedOptions) as { name }}
+        {#each Object.values(selectedOptions) as { name } (name)}
           <div class="px-2 py-1 leading-tight text-xs bg-blue-100 rounded mb-1">
             {name}
           </div>

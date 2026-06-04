@@ -1,5 +1,6 @@
 // import { DKIM_PRIVATE_KEY, MAILCHANNELS_API_KEY } from '$env/static/private'
-import { SESClient, SendEmailCommand, type SendEmailCommandOutput } from '@aws-sdk/client-ses'
+import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses'
+import type { SendEmailCommandOutput } from '@aws-sdk/client-ses'
 import { dictionary_address, no_reply_address } from './addresses'
 import { AWS_SES_ACCESS_KEY_ID, AWS_SES_REGION, AWS_SES_SECRET_ACCESS_KEY } from '$env/static/private'
 
@@ -95,6 +96,7 @@ export function send_email({ from, to, cc, bcc, reply_to, subject, body, type, d
       return response
     } catch (error) {
       console.error('Error sending email to', recipient.email, ':', error)
+      // eslint-disable-next-line preserve-caught-error -- Error `cause` option not in the current TS lib target; original logged above
       throw new Error(`Failed to send email to ${recipient.email}: ${error.message}`)
     }
   }

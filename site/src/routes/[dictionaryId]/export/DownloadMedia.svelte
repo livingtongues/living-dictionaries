@@ -100,7 +100,7 @@
 {#if errors.length}
   <div class="mt-4 text-red-600 text-sm">
     <div class="font-semibold">Errors:</div>
-    {#each errors as error}
+    {#each errors as error (error)}
       <div class="mb-3">{error}</div>
     {/each}
   </div>

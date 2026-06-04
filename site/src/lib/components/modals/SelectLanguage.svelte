@@ -14,7 +14,7 @@
   {/snippet}
 
   <div>
-    {#each locales as [bcp, name]}
+    {#each locales as [bcp, name] (bcp)}
       <Button
         class="mr-1 mb-1 !normal-case"
         color="black"
@@ -24,7 +24,7 @@
       </Button>
     {/each}
     {#if $admin}
-      {#each unpublishedLocales as [bcp, name]}
+      {#each unpublishedLocales as [bcp, name] (bcp)}
         <Button
           class="mr-1 mb-1 !normal-case"
           color="black"

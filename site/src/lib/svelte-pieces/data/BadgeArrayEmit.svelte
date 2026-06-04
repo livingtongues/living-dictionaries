@@ -1,50 +1,59 @@
-<script> import Button from '../ui/Button.svelte'
-import Badge from '../ui/Badge.svelte'
-import DetectUrl from '../functions/DetectUrl.svelte'
+<script>
+  import Button from '../ui/Button.svelte'
+  import Badge from '../ui/Badge.svelte'
+  import DetectUrl from '../functions/DetectUrl.svelte'
 
-export let strings = [], canEdit = false, addMessage = 'Add', minimum = 0
-$:
-  if (typeof strings === 'string') {
-    strings = [strings]
-  }
-import { createEventDispatcher } from 'svelte'
+  let {
+    strings = [],
+    canEdit = false,
+    addMessage = 'Add',
+    minimum = 0,
+    class: klass = '',
+    on_itemclicked = undefined,
+    on_itemremoved = undefined,
+    on_additem = undefined,
+    add = undefined,
+  } = $props()
 
-const dispatch = createEventDispatcher()
+  const list = $derived(typeof strings === 'string' ? [strings] : (strings || []))
 </script>
 
-<div class="sp-8nwa50 {$$props.class}">
+<div class="sp-8nwa50 {klass}">
   {#if canEdit}
-    {#if strings}
-      {#each strings as string, index}
-        <DetectUrl {string} let:display let:href>
+    {#each list as string, index (index)}
+      <DetectUrl {string}>
+        {#snippet children({ display, href })}
           <Badge
             {href}
             class="sp-rvzs98"
             target="_blank"
-            rel="noopener noreferrer"
-            onclick={() => dispatch('itemclicked', { value: string, index })}
-            onx={strings.length > minimum
-              ? () => dispatch('itemremoved', { value: string, index })
+            onclick={() => on_itemclicked?.({ value: string, index })}
+            onx={list.length > minimum
+              ? () => on_itemremoved?.({ value: string, index })
               : null}>
             {display}
           </Badge>
-          <div class="sp-vx1uno" />
-        </DetectUrl>
-      {/each}
-    {/if}
-    <slot name="add">
-      <Button class="sp-rvzs98" onclick={() => dispatch('additem')} color="orange" size="sm">
-        <span class="sp-sc2s0v" />
+          <div class="sp-vx1uno"></div>
+        {/snippet}
+      </DetectUrl>
+    {/each}
+    {#if add}
+      {@render add()}
+    {:else}
+      <Button class="sp-rvzs98" onclick={() => on_additem?.()} color="orange" size="sm">
+        <span class="sp-sc2s0v"></span>
         {addMessage}
       </Button>
-    </slot>
-  {:else if strings}
-    {#each strings as string}
-      <DetectUrl {string} let:display let:href>
-        <Badge class="sp-rvzs98" {href} target="_blank" rel="noopener noreferrer">
-          {display}
-        </Badge>
-        <div class="sp-vx1uno" />
+    {/if}
+  {:else}
+    {#each list as string, index (index)}
+      <DetectUrl {string}>
+        {#snippet children({ display, href })}
+          <Badge class="sp-rvzs98" {href} target="_blank">
+            {display}
+          </Badge>
+          <div class="sp-vx1uno"></div>
+        {/snippet}
       </DetectUrl>
     {/each}
   {/if}

@@ -14,7 +14,7 @@
   const { children }: Props = $props()
 
 // export let data
-  // $: ({ user } = data)
+    // $: ({ user } = data)
 </script>
 
 {#if browser}

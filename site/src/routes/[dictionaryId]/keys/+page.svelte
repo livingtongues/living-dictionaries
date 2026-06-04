@@ -56,7 +56,7 @@
     {$page.url.origin}/api/external/read-entries - You'll need to cache the results on your end, as the API is rate-limited. If you edit entries, you'll need to wait until the next hourly cache update to see the changes reflected in the API response.
   </div>
 
-  {#each keys as { id, created_at, can_write, use_count, last_read_at, last_write_at }}
+  {#each keys as { id, created_at, can_write, use_count, last_read_at, last_write_at } (id)}
     <div class="mb-1 border-t pt-2">
       Key: <b>{id}</b> generated at {supabase_date_to_friendly(created_at)} with {can_write ? 'read/write' : 'read'} permission. {last_read_at ? `Last read at ${supabase_date_to_friendly(last_read_at)}` : 'Never read'}.
       {#if can_write}

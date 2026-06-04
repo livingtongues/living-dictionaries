@@ -1,15 +1,19 @@
-<script> import Slideover from './Slideover.svelte'
+<script>
+  import Slideover from './Slideover.svelte'
 
-export let zIndex = 60
-export let duration = 200
-export let side = 'right'
-export let widthRem = 16
-export let maxWidthPercentage = 70
-export let showWidth
-export let desktopClasses = ''
-export let mobileClasses = ''
-export let open = false
-export let on_close = void 0
+  let {
+    zIndex = 60,
+    duration = 200,
+    side = 'right',
+    widthRem = 16,
+    maxWidthPercentage = 70,
+    showWidth = undefined,
+    desktopClasses = '',
+    mobileClasses = '',
+    open = false,
+    on_close = undefined,
+    children,
+  } = $props()
 </script>
 
 <div
@@ -18,15 +22,7 @@ export let on_close = void 0
   class:sp-0dkduh={showWidth === 'lg'}
   class:sp-hvht9m={showWidth === 'xl'}
   class="sp-zmjiff {desktopClasses}">
-  {#if $$slots.desktopTitle}
-    <h3 class="sp-i7iidx">
-      <slot name="desktopTitle" />
-    </h3>
-  {/if}
-  <slot name="desktopHeading" />
-  <slot name="heading" />
-  <slot />
-  <!-- <slot name="desktop" /> -->
+  {@render children?.()}
 </div>
 
 {#if open}
@@ -43,24 +39,7 @@ export let on_close = void 0
       {widthRem}
       {maxWidthPercentage}
       on:close={on_close}>
-      <svelte:fragment slot="heading">
-        {#if $$slots.mobileTitle}
-          <div class="sp-serhln">
-            <h3 class="sp-1qujs0" id="modal-headline">
-              <slot name="mobileTitle" />
-            </h3>
-            <button
-              on:click={on_close}
-              type="button"
-              class="sp-7muc4a"
-              aria-label="Close">
-              <span class="sp-gb3q14" /></button>
-          </div>
-        {/if}
-        <slot name="mobileHeading" />
-        <slot name="heading" />
-      </svelte:fragment>
-      <slot />
+      {@render children?.()}
       <!-- <slot name="mobile" /> -->
     </Slideover>
   </div>

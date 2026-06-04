@@ -1,4 +1,9 @@
-export function longpress(node, duration = 400) {
+import type { Action } from 'svelte/action'
+
+export const longpress: Action<HTMLElement, number | undefined, {
+  onlongpress?: (event: CustomEvent) => void
+  onshortpress?: (event: CustomEvent) => void
+}> = (node, duration = 400) => {
   let start // for shortpress
   let shortpressEmitted // so touchend and mouseup events don't both emit on touch devices
   let timer // for longpress

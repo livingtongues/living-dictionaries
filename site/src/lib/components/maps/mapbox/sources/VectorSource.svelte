@@ -3,7 +3,8 @@
 
   import { getContext, onDestroy, setContext } from 'svelte'
   import type { VectorSource, VectorSourceImpl } from 'mapbox-gl'
-  import { type MapKeyContext, type SourceKeyContext, mapKey, sourceKey } from '../context.js'
+  import { mapKey, sourceKey } from '../context.js'
+import type { MapKeyContext, SourceKeyContext } from '../context.js'
 
   interface Props {
     // Cf https://docs.mapbox.com/mapbox-gl-js/style-spec/sources/#vector

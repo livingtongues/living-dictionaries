@@ -1,4 +1,5 @@
-import { type Writable, get } from 'svelte/store'
+import { get } from 'svelte/store'
+import type { Writable } from 'svelte/store'
 import type { MultiString, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
 import type { Supabase } from '.'
 import { page } from '$app/stores'

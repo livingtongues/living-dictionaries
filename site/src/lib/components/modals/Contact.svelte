@@ -148,7 +148,7 @@
                 <div class="my-2">
             <select class="w-full" bind:value={subject}>
               <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
-              {#each filteredSubjects as [key, value]}
+              {#each filteredSubjects as [key, value] (key)}
                 <option value={key}>{$page.data.t(value)}</option>
               {/each}
             </select>

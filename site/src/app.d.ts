@@ -51,8 +51,7 @@ declare global {
   }
 
   interface Document {
-    // eslint-disable-next-line ts/method-signature-style
-    startViewTransition(updateCallback: () => Promise<void>): ViewTransition
+    startViewTransition: (updateCallback: () => Promise<void>) => ViewTransition
   }
 
   interface Window {

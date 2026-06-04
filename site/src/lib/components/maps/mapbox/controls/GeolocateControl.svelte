@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, getContext, onMount } from 'svelte'
-  import { type MapKeyContext, mapKey } from '../context'
+  import { mapKey } from '../context'
+import type { MapKeyContext } from '../context'
   import { bindEvents } from '../event-bindings'
 
   const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)

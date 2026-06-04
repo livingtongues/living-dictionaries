@@ -33,7 +33,7 @@
     </button>
   {/if}
 
-  {#each writing_systems as orthography}
+  {#each writing_systems as orthography (orthography)}
     <EntryField
       value={sentence.text?.[orthography]}
       field="example_sentence"
@@ -55,7 +55,7 @@
   {/each}
 
   {#if sentence.id}
-    {#each glossingLanguages as bcp}
+    {#each glossingLanguages as bcp (bcp)}
       <EntryField
         value={sentence.translation?.[bcp]}
         field="example_sentence"

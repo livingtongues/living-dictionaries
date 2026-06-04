@@ -3,7 +3,8 @@
   import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte'
 
   import type { GeocoderOptions, Result, Results } from '@mapbox/mapbox-gl-geocoder'
-  import { type MapKeyContext, mapKey } from '../context'
+  import { mapKey } from '../context'
+import type { MapKeyContext } from '../context'
   import { bindEvents } from '../event-bindings'
   import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
 
@@ -27,16 +28,16 @@
     options = {},
     version = 'v5.0.0',
     types = [
-    'country',
-    'region',
-    'postcode',
-    'district',
-    'place',
-    'locality',
-    'neighborhood',
-    'address',
-    'poi', // must include map to search points of interest
-  ],
+      'country',
+      'region',
+      'postcode',
+      'district',
+      'place',
+      'locality',
+      'neighborhood',
+      'address',
+      'poi', // must include map to search points of interest
+    ],
     placeholder = 'Search',
     value = null,
     customStylesheetUrl = undefined,

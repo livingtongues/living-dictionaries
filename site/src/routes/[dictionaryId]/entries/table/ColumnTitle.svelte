@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IColumn, i18nEntryFieldKey } from '@living-dictionaries/types'
+  import type { i18nEntryFieldKey, IColumn } from '@living-dictionaries/types'
   import { page } from '$app/stores'
 
   interface Props {

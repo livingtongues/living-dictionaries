@@ -13,9 +13,7 @@ enum StandardDictionaryCSVFields {
   thumbnail = 'Thumbnail',
 }
 type DictionaryForCSVKeys = keyof typeof StandardDictionaryCSVFields
-export type StandardDictionaryForCSV = {
-  [key in DictionaryForCSVKeys]: string | number | boolean;
-}
+export type StandardDictionaryForCSV = Record<DictionaryForCSVKeys, string | number | boolean>
 
 export const dictionary_headers: StandardDictionaryForCSV = { ...StandardDictionaryCSVFields }
 

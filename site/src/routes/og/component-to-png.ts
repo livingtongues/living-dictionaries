@@ -84,7 +84,7 @@ const loadDynamicAsset = withCache(
             headers: {
               // Make sure it returns TTF.
               'User-Agent':
-								'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1',
+                'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1',
             },
           })
         ).text()
@@ -110,8 +110,7 @@ const loadDynamicAsset = withCache(
   },
 )
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-function withCache(fn: Function) {
+function withCache(fn: (...args: any[]) => any) {
   const cache = new Map()
   return async (...args: (string | number)[]) => {
     const key = hash(args.join())

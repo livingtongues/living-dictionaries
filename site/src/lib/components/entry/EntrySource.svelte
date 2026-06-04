@@ -18,7 +18,7 @@
     canEdit={can_edit}
     promptMessage={$page.data.t('entry_field.sources')}
     addMessage=""
-    on:valueupdated={({ detail }) => on_update(detail)}>
+    on_valueupdated={value => on_update(value)}>
     {#snippet add({ add })}
 
         <button type="button" onclick={add} class="opacity-40 p-0.5 text-left grow-1 hover:bg-gray-200 rounded">

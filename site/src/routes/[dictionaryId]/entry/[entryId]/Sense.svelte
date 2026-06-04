@@ -26,7 +26,7 @@
   const hasSemanticDomain = $derived(sense.semantic_domains?.length || sense.write_in_semantic_domains?.length)
 </script>
 
-{#each glossingLanguages as bcp}
+{#each glossingLanguages as bcp (bcp)}
   <EntryField
     value={sense.glosses?.[bcp]}
     field="gloss"
@@ -92,7 +92,7 @@
   }} />
 
 {#if sense.sentences?.length}
-  {#each sense.sentences as sentence}
+  {#each sense.sentences as sentence (sentence.id)}
     <EntrySentence {sentence} {can_edit} sense_id={sense.id} glossingLanguages={glossingLanguages} />
   {/each}
 {:else}

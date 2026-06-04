@@ -16,23 +16,23 @@
 
   let filteredDictionaries: DictionaryView[] = $state([])
 run(() => {
-    filteredDictionaries = dictionaries
-      .filter((dictionary) => {
-        return Object.keys(dictionary).some((k) => {
-          return (
-            typeof dictionary[k] === 'string'
+  filteredDictionaries = dictionaries
+    .filter((dictionary) => {
+      return Object.keys(dictionary).some((k) => {
+        return (
+          typeof dictionary[k] === 'string'
             && dictionary[k].toLowerCase().includes(searchString.toLowerCase())
-          )
-        })
+        )
       })
-      .reduce((acc, dictionary) => {
-        return acc.find(e => e.id === dictionary.id) ? [...acc] : [...acc, dictionary]
-      }, [])
-  })
+    })
+    .reduce((acc, dictionary) => {
+      return acc.find(e => e.id === dictionary.id) ? [...acc] : [...acc, dictionary]
+    }, [])
+})
 
     function autofocus(node: HTMLInputElement) {
-    setTimeout(() => node.focus(), 5)
-  }
+      setTimeout(() => node.focus(), 5)
+    }
 </script>
 
 <ShowHide>
@@ -61,7 +61,7 @@ run(() => {
           </button>
       </div>
         <div class="flex flex-col">
-          {#each filteredDictionaries as dictionary, i}
+          {#each filteredDictionaries as dictionary, i (dictionary.id)}
               <Button
                 class="mb-1 text-left {i === 0 && 'bg-gray-200'}"
                 color="black"

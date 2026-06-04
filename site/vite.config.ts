@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { sveltekit } from '@sveltejs/kit/vite'
-import { type Plugin, defineConfig } from 'vite'
+import { defineConfig } from 'vite'
+import type { Plugin } from 'vite'
 import UnoCSS from 'unocss/vite'
 import { svelte_look } from 'svelte-look/vite'
 

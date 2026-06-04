@@ -13,7 +13,7 @@ export function tokenize(input: string, language?: string, prop = '', _withCache
     return [input]
   }
 
-  let tokens: string[] = []
+  let tokens: string[]
   const words = input
     .toLowerCase()
     .split(/[\s.,;:!?()、，。！？（）]+/g)

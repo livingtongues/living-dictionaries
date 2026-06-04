@@ -76,7 +76,7 @@
           <ResponsiveTable stickyColumn stickyHeading>
             <SortRecords history={filteredRecords} {get_entry}>
               {#snippet children({ sortedRecords })}
-                        {#each sortedRecords as record}
+                        {#each sortedRecords as record (record.id)}
                   <RecordRow {record} {get_entry} />
                 {/each}
                                     {/snippet}

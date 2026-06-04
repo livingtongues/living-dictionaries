@@ -23,7 +23,7 @@
 
     placeholder="Search dictionaries">
     {#snippet children({ filteredItems: filteredDictionaries })}
-        {#each filteredDictionaries as dictionary}
+        {#each filteredDictionaries as dictionary (dictionary.id)}
         <Button
           onclick={async () => {
             await add_dictionary(dictionary.id)

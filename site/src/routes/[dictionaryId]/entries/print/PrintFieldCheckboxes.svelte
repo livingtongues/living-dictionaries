@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { type EntryData, type IPrintFields, StandardPrintFields } from '@living-dictionaries/types'
+  import { StandardPrintFields } from '@living-dictionaries/types'
+import type { EntryData, IPrintFields } from '@living-dictionaries/types'
 
   import type { createPersistedStore } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
@@ -44,7 +45,7 @@
   ))
 </script>
 
-{#each fieldsThatExist as field}
+{#each fieldsThatExist as field (field)}
   <div class="flex items-center mr-3 mb-1">
     <input id={field} type="checkbox" bind:checked={$preferredPrintFields[field]} />
     <label class="ml-1 text-sm text-gray-700" for={field}>{$page.data.t(`entry_field.${field}`)}</label>

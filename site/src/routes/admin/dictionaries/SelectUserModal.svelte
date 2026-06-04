@@ -24,7 +24,7 @@
   {/snippet}
   <Filter items={users} placeholder="Search names and emails">
     {#snippet children({ filteredItems: filteredUsers })}
-        {#each filteredUsers as user}
+        {#each filteredUsers as user (user.id)}
         <Button
           onclick={async () => {
             await add_editor(user.id)

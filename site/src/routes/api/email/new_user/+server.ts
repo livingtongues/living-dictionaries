@@ -5,6 +5,7 @@ import { send_email } from '../send-email'
 import type { RequestHandler } from './$types'
 import { ResponseCodes } from '$lib/constants'
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- request body has no fields yet (language commented out for future use)
 export interface NewUserEmailRequestBody {
   // language: LanguageCode
 }

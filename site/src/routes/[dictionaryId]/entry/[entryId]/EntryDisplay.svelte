@@ -57,7 +57,7 @@
   </div>
 
   <div class="flex flex-col grow" style="grid-area: content;">
-    {#each dictionary.orthographies || [] as orthography, index}
+    {#each dictionary.orthographies || [] as orthography, index (index)}
       {@const orthography_field = `lo${index + 1}`}
       <EntryField
         value={entry.main.lexeme[orthography_field]}
@@ -78,7 +78,7 @@
         update_entry({ phonetic: new_value })
       }} />
 
-    {#each entry.senses || [] as sense, index}
+    {#each entry.senses || [] as sense, index (sense.id)}
       {#if entry.senses.length === 1}
         <Sense {sense} glossLanguages={dictionary.gloss_languages} {can_edit} />
 
@@ -136,7 +136,7 @@
         update_entry({ scientific_names: [new_value] })
       }} />
 
-    {#each text_fields as field}
+    {#each text_fields as field (field)}
       <EntryField
         value={entry.main[field]}
         {field}

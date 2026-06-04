@@ -15,7 +15,7 @@
   <div class="flex lt-md:flex-wrap md:flex-col overflow-y-auto overflow-x-hidden mb-1 md:max-h-70vh">
     <ShowHide>
       {#snippet children({ show, toggle })}
-            {#each my_dictionaries as dictionary, i}
+            {#each my_dictionaries as dictionary, i (dictionary.id)}
           {#if show || i < 3}
             <Button
               class="mb-1 lt-md:mr-1"

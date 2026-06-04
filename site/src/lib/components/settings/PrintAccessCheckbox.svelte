@@ -17,7 +17,7 @@
     id="print-access"
     type="checkbox"
     {checked}
-    onchange={async (e) => {
+    onchange={(e) => {
       // @ts-ignore
       dispatch('changed', { checked: e.target.checked })
     }} />

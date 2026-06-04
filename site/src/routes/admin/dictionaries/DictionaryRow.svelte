@@ -80,7 +80,7 @@
     }}
     {users} />
   <div class="max-h-150px overflow-y-auto">
-    {#each dictionary.invites as invite}
+    {#each dictionary.invites as invite (invite.id)}
       {#if invite.role === 'manager'}
         <div class="my-1">
           <ContributorInvitationStatus
@@ -122,7 +122,7 @@
     }}
     {users} />
   <div class="max-h-150px overflow-y-auto">
-    {#each dictionary.invites as invite}
+    {#each dictionary.invites as invite (invite.id)}
       {#if invite.role === 'contributor'}
         <div class="my-1">
           <ContributorInvitationStatus
@@ -215,7 +215,7 @@
     canEdit
     addMessage="Add"
     strings={dictionary.alternate_names?.slice(0, 8)}
-    on:additem={() => {
+    on_additem={() => {
       const name = prompt('Enter alternate name:')
       if (name) {
         update_dictionary({
@@ -223,7 +223,7 @@
         })
       }
     }}
-    on:itemremoved={({ detail: { value } }) => {
+    on_itemremoved={({ value }) => {
       update_dictionary({
         alternate_names: dictionary.alternate_names.filter(name => name !== value),
       })

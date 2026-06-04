@@ -2,7 +2,8 @@
   import { run } from 'svelte/legacy'
 
   import { getContext } from 'svelte'
-  import { type MapKeyContext, mapKey } from '../context'
+  import { mapKey } from '../context'
+import type { MapKeyContext } from '../context'
 
   const { getMap } = getContext<MapKeyContext>(mapKey)
   const map = getMap()

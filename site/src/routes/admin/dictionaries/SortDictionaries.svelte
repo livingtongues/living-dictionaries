@@ -114,7 +114,7 @@
 
 <thead>
   <tr>
-    {#each dictionary_fields as field}
+    {#each dictionary_fields as field (field)}
       <th
         class="cursor-pointer"
         onclick={() => setSortSettings(field.key)}

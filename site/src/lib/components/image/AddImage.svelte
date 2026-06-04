@@ -21,7 +21,7 @@
   let upload_statuses: Readable<ImageUploadStatus>[] = $state([])
 </script>
 
-{#each upload_statuses as upload_status, index}
+{#each upload_statuses as upload_status, index (index)}
   {#await import('$lib/components/image/UploadImageStatus.svelte') then { default: UploadImageStatus }}
     <div class="flex flex-col grow-1">
       <UploadImageStatus

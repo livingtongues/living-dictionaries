@@ -1,6 +1,6 @@
 // From https://ivoberger.com/posts/using-vercel-analytics-with-svelte-kit/ which was from https://github.com/vercel/gatsby-plugin-vercel/blob/main/src/web-vitals.js
 
-import type { Metric, getCLS, getFCP, getFID, getLCP, getTTFB } from 'web-vitals'
+import type { getCLS, getFCP, getFID, getLCP, getTTFB, Metric } from 'web-vitals'
 
 declare const webVitals: {
   getFID: typeof getFID

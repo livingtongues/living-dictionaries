@@ -1,4 +1,5 @@
 <script lang="ts" module>
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- module-level registry of mounted markers, not reactive state
   const markers = new Set<Marker>()
 
   function closeOtherPopups(currentMarker: Marker) {
@@ -16,7 +17,8 @@
 
   import { createEventDispatcher, getContext, onMount, setContext } from 'svelte'
   import type { LngLat, Marker, MarkerOptions } from 'mapbox-gl'
-  import { type MapKeyContext, type MarkerKeyContext, mapKey, markerKey } from '../context'
+  import { mapKey, markerKey } from '../context'
+import type { MapKeyContext, MarkerKeyContext } from '../context'
 
   const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
   const map = getMap()

@@ -1,4 +1,4 @@
-import { PASSWORD, admin_supabase, anon_supabase, incremental_consistent_uuid } from './clients'
+import { admin_supabase, anon_supabase, incremental_consistent_uuid, PASSWORD } from './clients'
 import { postgres } from '$lib/mocks/seed/postgres'
 
 const reset_db_sql = `truncate table auth.users cascade;`

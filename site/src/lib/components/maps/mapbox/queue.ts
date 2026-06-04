@@ -23,8 +23,7 @@ export class EventQueue {
       while (queue.length) {
         const [command, params] = queue.shift()
 
-        map[command].apply(map, params)
-        // map[command](...params);
+        map[command](...params)
       }
     })
     this.started = true

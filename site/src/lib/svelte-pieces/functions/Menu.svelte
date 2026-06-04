@@ -1,30 +1,30 @@
-<script> import { fly } from 'svelte/transition'
-import { portal } from '../actions/portal'
-import { clickoutside } from '../actions/clickoutside'
+<script>
+  import { fly } from 'svelte/transition'
+  import { portal } from '../actions/portal'
+  import { clickoutside } from '../actions/clickoutside'
 
-export let portalTarget = void 0
-export let onclickoutside = void 0
+  let { portalTarget = undefined, onclickoutside = undefined, class: klass = '', children } = $props()
 </script>
 
 {#if portalTarget}
   <div
     use:portal={portalTarget}
     use:clickoutside
-    on:clickoutside={onclickoutside}
+    onclickoutside={onclickoutside}
     transition:fly={{ y: -10, duration: 150 }}
-    class="sp-d8trwd {$$props.class}">
+    class="sp-d8trwd {klass}">
     <div class="sv-menu">
-      <slot />
+      {@render children?.()}
     </div>
   </div>
 {:else}
   <div
     use:clickoutside
-    on:clickoutside={onclickoutside}
+    onclickoutside={onclickoutside}
     transition:fly={{ y: -10, duration: 150 }}
-    class="sp-d8trwd {$$props.class}">
+    class="sp-d8trwd {klass}">
     <div class="sv-menu">
-      <slot />
+      {@render children?.()}
     </div>
   </div>
 {/if}

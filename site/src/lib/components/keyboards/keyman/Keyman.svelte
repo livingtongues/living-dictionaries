@@ -11,7 +11,7 @@
   import './keyman.css'
   import { onDestroy, onMount, tick } from 'svelte'
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages'
-  import { Button, Modal, ShowHide, loadScriptOnce } from '$lib/svelte-pieces'
+  import { Button, loadScriptOnce, Modal, ShowHide } from '$lib/svelte-pieces'
   import { browser } from '$app/environment'
 
   interface Props {
@@ -168,7 +168,7 @@
         {#snippet heading()}
             <span>Select Keyboard</span>
           {/snippet}
-        {#each [...Object.entries(glossingLanguages), ...Object.entries(additionalKeyboards)] as [_bcp, languageDefinition]}
+        {#each [...Object.entries(glossingLanguages), ...Object.entries(additionalKeyboards)] as [_bcp, languageDefinition] (_bcp)}
           {#if languageDefinition.showKeyboard}
             <Button
               form="menu"
