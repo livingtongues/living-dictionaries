@@ -13,6 +13,12 @@ Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. Plan + st
   `svelte/server` render port, legacy-slot↔runes-snippet interop / Slideover conversion), why
   `bind:value={item.member}` is NOT `each_item_invalid_assignment`, driving warnings down via
   `compilerOptions.warningFilter`, runtime regression verification, and why eslint isn't a gate yet.
+- [eslint-custom-config-and-runes-finish.md](./eslint-custom-config-and-runes-finish.md) — LD-A2:
+  replacing antfu with the example's hand-written flat config (eslint 10 / svelte-plugin 3); why
+  `lint:fix` churns ~125 files harmlessly; finishing the runes migration of the legacy stragglers to
+  reach 0 lint errors (svelte-pieces slot/event conversion, the `state`/`$state` clash, `untrack`-ing a
+  self-referential `$effect`, typing a JS action's custom event, `ban-types` removal, `{#each}` key
+  conventions); the re-enabled pre-commit hook.
 - [unocss-svelte-scoped-to-universal.md](./unocss-svelte-scoped-to-universal.md) — M2a plugin
   swap: the svelte-scoped defaults the universal plugin drops (directives transformer +
   Svelte `class:` extraction) and how to restore them; `@unocss/reset` becoming a direct dep AND
