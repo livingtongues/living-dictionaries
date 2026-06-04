@@ -65,13 +65,26 @@ but the **entries slice can only be proven on a populated dict** (use `torwali`)
 - [ ] `DATA_DIR` env: `.data` local (gitignored), `/opt/hosting/data` VPS — wired/verified in Phase A
       (no route imports the db layer yet, so no DB hit / `__filename` exposure until Phase A).
 
-### Phase A · Catalog reads (the clean vertical slice)
-- [ ] Seed `site/.data/` from the example (`shared.db` + the populated per-dict dbs at least).
-- [ ] `+layout.server.ts`: surface the catalog (projection `dictionaries` row → `DictionaryView` shape).
-- [ ] Convert `create_dictionaries_store` / globe / `/dictionaries` list to the SQLite-backed catalog.
-- [ ] Convert `[dictionaryId]/+layout` dictionary resolution to `get_dictionary_by_url_or_id` (server).
-- [ ] Retire the stub's catalog rows (`dictionaries*`) once nothing reads them.
-- [ ] Verify headless: globe + `/dictionaries` + a dict detail render REAL data; 0 pageerrors; Jacob eyeballs maps.
+### Phase A · Catalog reads (the clean vertical slice) ✅ DONE (commit pending)
+- [x] Seeded `site/.data/` from the example via `VACUUM INTO` (folds WAL): `shared.db` (2136 dicts) +
+      per-dict dbs `torwali`(9908), `svetsian`(412), `80CcDQ4DRyiYSPIWZ9Hy`(227), `a-fala`(6), `achi`(0).
+      `.data` gitignored.
+- [x] New `db/server/get-dictionaries-catalog.ts`: `load_{public,private,all}_dictionaries({ db })` +
+      `project_to_dictionary_view` (near pass-through; aliases `*_by_user_id` → legacy `created_by`/`updated_by`).
+- [x] New `routes/api/dictionaries/+server.ts` GET (`?visibility=public|private|all`) reading shared.db.
+      Browser globe/list/footer fetch this (SQLite is server-only; keeps the lazy client pattern + parallels
+      the Phase-B entries endpoint).
+- [x] Repointed `+page.ts` (`get_public/private_dictionaries`) + `create_dictionaries_store` to the endpoint.
+- [x] Converted `[dictionaryId]/+layout` resolution → new `+layout.server.ts` (`get_dictionary_by_url_or_id`,
+      shared.db, redirect-home on miss); `+layout.ts` reads `data.dictionary`. Per-dict content (entries,
+      info, editors) stays on the stub for now (incremental).
+- [x] Stub catalog rows kept: still legitimately back UNCONVERTED auth-gated paths (`admin/+layout.ts` list,
+      `create_my_dictionaries_store`, `dictionaries` writes). Converted public catalog no longer hits the stub.
+- [x] Verify (`e2e/catalog-sqlite.mjs`, new `test:catalog` script): API public=**220** (not 12 dummy) /
+      private=949; `/dictionaries` list = 221 rows incl. real "Torwali"; `/torwali` resolves; unknown slug →
+      home; **0 catalog-relevant pageerrors** (Mapbox + entries-CDN 403s are pre-existing/external, filtered).
+      build: better-sqlite3 **external, 0 `__filename`** in server chunks. achi-flow **5/5** still passes.
+      check 0/15 · test 132. ⏳ Jacob eyeballs :3041 globe/list/maps.
 
 ### Phase B · Entries reads (sequenced after A)
 - [ ] Server endpoint (e.g. `/api/dictionaries/[id]/entries`) reads per-dict `dictionaries/{id}.db`

@@ -19,7 +19,7 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
   const user_id = authResponse?.data?.user?.id
   const user = createUserStore({ supabase, authResponse })
   const my_dictionaries = create_my_dictionaries_store({ supabase, user_id })
-  const dictionaries = create_dictionaries_store({ supabase })
+  const dictionaries = create_dictionaries_store()
   const admin = derived(user, $user => $user?.app_metadata.admin || 0)
 
   const columns_key = `table_columns_03.18.2024-${user_id}` // rename when adding more columns to invalidate the user's cache
