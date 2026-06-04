@@ -24,7 +24,7 @@ report back here; I relay learnings and Jacob's decisions across the fence.
 | Vendor svelte-pieces (→ Svelte 5) | ✅ M2b P2 (copied house's set) | ✅ (vendored first) |
 | Kitbook → svelte-look | ✅ M2b P3 | ✅ |
 | **Runes codemod** (component syntax) | ✅ **DONE (M2c)** — 367 files; 0 err / 15 warn | ✅ DONE (142 files; 0 err / 6 warn) |
-| Lint clean + hook re-enabled | blocked: eslint-plugin-svelte@2.43 crashes on Svelte 5 (needs bump) | ✅ DONE |
+| Lint clean + hook re-enabled | ✅ DONE (LD-A2: custom flat config, finished runes stragglers) | ✅ DONE |
 | SQLite + Email-OTP/JWT auth **backend** | ❌ (M4, later) | ✅ Phase A (better-sqlite3, jose, endpoints, 112 tests) |
 | App identity on new auth | ❌ | ✅ Phase B core committed (`2253f0c`) |
 | Login modal UI + Google One-Tap | ❌ | 🔶 **in progress** (idle session, mid-interview) |
@@ -78,6 +78,18 @@ report back here; I relay learnings and Jacob's decisions across the fence.
 - House's **already-built SQLite + Email-OTP/JWT auth backend** (`jwt.ts`, `verify.ts`,
   `admins.ts` allow-list, `find-or-create-auth-user.ts`, OTP email on existing components, the
   send-code/verify/me/logout endpoints, 112 tests) is the **direct template for LD's M4 real-auth**.
+- **HOUSE-DATA → LD M4 · SQLite read (the playbook is now written):** house's
+  `.knowledge/architecture/firestore-to-sqlite-reader-port.md` captures the reusable moves — convert
+  the reader's **universal `+layout.ts` → server `+layout.server.ts`** (SQLite is server-only), use an
+  **isomorphic `load_*({ db })` seam** + **pure projections** that adapt SQLite rows back to the
+  *existing legacy view shapes* (so components don't change), keep scripture/HTML-on-disk as a separate
+  stream from media, and when seeding from an already-local DB **preserve the destination's
+  `migrations` row** so its migration runner stays idempotent. ⚠️ **adapter-node native-deps gotcha
+  (would bite LD's VPS deploy too):** `better-sqlite3` MUST be in **`dependencies`**, not
+  `devDependencies` — adapter-node **bundles devDeps but externalizes deps**; in devDeps it inlines the
+  `bindings` loader → `__filename is not defined` crash on first DB hit. (LD already saw a sibling
+  `__filename` SSR crash in M1 from a different cause; same adapter-node mechanism.) See house
+  `.knowledge/tooling/adapter-node-native-deps.md`.
 
 **LD → house (LD is ahead on the deep-flow e2e pattern):**
 - LD's `site/e2e/achi-flow.mjs` is a clean **single-script deep flow** (self-boot `node build` →
@@ -100,8 +112,39 @@ report back here; I relay learnings and Jacob's decisions across the fence.
   - **`bind:value={item.member}` is NOT `each_item_invalid_assignment`** — only the bare each-item
     identifier triggers it; don't rewrite member binds.
   - **eslint-plugin-svelte@2.43's `svelte/indent` stack-overflows on Svelte 5** + `no-use-before-define`
-    false-positives (no runes-hoisting model) — house's lint-off stance is the right call until the
-    plugin is bumped; `--fix --rule '{"svelte/indent":"off"}'` still cleans codemod whitespace.
+    false-positives (no runes-hoisting model). ⚠️ **CORRECTION (orchestrator):** the LD-A child wrote
+    "house kept lint off for the same reason" — that is **wrong**. **House bumped to
+    `eslint-plugin-svelte@^3.17.1`** (+ the `github:jacob-8/eslint-plugin-svelte-stylistic` fork) and
+    got `pnpm lint` to **0 errors** (`lint-clean-and-reenable-hook.md`, re-enabled in its pre-commit
+    hook). So **LD's lint unblock = bump 2.43 → 3.17.1 to match house** (LD is still on `^2.43.0`), not
+    "keep lint off". `--fix --rule '{"svelte/indent":"off"}'` was the interim hack on the old plugin.
+- **LD-A2 lint outcome (2026-06-04):** LD went **fully custom** (ported the example's hand-written flat
+  config — same stack as house: eslint 10 / svelte-plugin 3 / parser 1 / @stylistic / canonical names),
+  not antfu-overrides. `pnpm lint:fix` repo-wide churn was **~125 files but purely stylistic**
+  (perfectionist import-sorting, quote/comma normalization, `import-x/consistent-type-specifier-style`
+  splitting inline `type` imports) — behavior-neutral; expected one-time cost of adopting the config.
+- **Finishing the runes migration to satisfy lint (svelte-pieces gotchas, house can reuse):**
+  - In **runes mode `<slot>`, `$:`, `$$props` are hard ERRORS**, but `createEventDispatcher` + consumer
+    `on:event` stay *warnings* — so converting a piece's props to `$props()` forces converting its
+    slots→snippets and `$:`→`$derived`/`$effect` too (all-or-nothing), but you can defer the event→callback
+    swap. We did swap events→callback props (`on:valueupdated`→`on_valueupdated`, etc.) for cleanliness.
+  - The M2c codemod **already converted slot-prop CONSUMERS to `{#snippet children({…})}`** while the
+    pieces stayed legacy `<slot {x}>` — so converting the pieces to `{@render children?.({x})}` *aligns*
+    with consumers; only component-**event** consumers (`on:foo`) needed edits. Audit before churning.
+  - `import-x/no-mutable-exports` fires on Svelte `export let` (false-positive for legacy props) — the
+    real fix is converting to `$props()`, not disabling.
+  - **A `let state` variable breaks the `$state` rune** (svelte-check: "$state used before declaration" /
+    "untyped call may not accept type args") — rename the variable (the migration tool flags this).
+  - **JS action with a custom event** needs the event typed for `on<event>` in a lang=ts consumer:
+    `@type` JSDoc on a `function`/`const` did NOT bind; converting `longpress.js`→`.ts` with
+    `Action<HTMLElement, P, { onlongpress?: (e: CustomEvent)=>void }>` worked.
+  - **`{#each}` keys (svelte/require-each-key):** DB-row arrays→`(x.id)`, string arrays→`(x)`,
+    `Object.entries`→`(key)`, `SelectOption`→`(x.value)`, device lists→`(x.deviceId)`,
+    roles→`(x.user_id)`; fixed-range / id-less / uncertain → index (behavior-identical to pre-key).
+  - **`@typescript-eslint/ban-types` was removed in TS-ESLint v8** → stale `// eslint-disable … ban-types`
+    (and antfu `ts/*` aliases) throw "Definition for rule not found" under eslint 10. Replace `Function`
+    with `(...args: any[]) => any` and delete the directive. `new Error(msg,{cause})` may exceed the TS
+    lib target (Expected 0-1 args) → keep single-arg + disable `preserve-caught-error` with a reason.
 
 ## Standing decisions (apply to BOTH, and to future work)
 - **Verify with puppeteer-core + system Chrome**, via the **new universal `browser-launch.mjs`**
@@ -132,11 +175,57 @@ report back here; I relay learnings and Jacob's decisions across the fence.
   house; same logic will land in LD's M4 auth. Fix in house + `/learn-from` upstream so LD inherits it fixed.
 
 ## Sessions in flight
-- **LD-A** — ✅ spawned `2026-06-04`, session `cc59407a` (project `living-dictionaries`, linked to
-  orchestrator). Brief: commit the dirty M2b/puppeteer tree → **M2c runes migration** (house's
-  codemod gotchas pre-loaded) → adopt the shared `browser-launch.mjs` in `achi-flow.mjs`. Will report
-  back here on completion + any house-applicable learnings. Verify gate: check 0 err / warnings driven
-  down · test 123 · build + boot · `test:flow` 5/5 · headless pageerror-empty.
+> **Reporting note (updated 2026-06-04):** the old `horse spawn --session <id>` reply path didn't reach
+> the human's interactive session. **HORSE-CLI fixed this** — there's now a real **`horse send <id>
+> "msg"`** that drops the note into a per-session **inbox**, drained as a real user turn (idle-wake path
+> verified live; busy-mid-turn path coded, not yet exercised). CLI was slimmed: **`spawn` = new session
+> only** (no `--session` resume), **`send` = message an existing session**, `run`/`projects` cut,
+> `status` folded into `list <id>`, parent flags/banner removed, `HORSE_DEFAULT_PROVIDER` honored. ⚠️
+> These changes are **uncommitted** in the horse repo — until committed + relinked, keep using the
+> current CLI; `horse spawn` (new session) is unchanged and safe. Jacob still relays "done" for now.
+> **Same-repo serialization:** never run two agents in one working tree at once.
+
+- **LD-A** — ✅ DONE (`cc59407a`). M2c runes migration: 367 files, check 0 err / 15 warn, test 123,
+  build+boot, achi-flow 5/5. Commits `6aa75c16` (M2b) + `f6ad5ad2` (M2c) on `vps-migration` (not pushed).
+  Adopted shared `browser-launch.mjs`. Reply-to-parent failed (see note) — result fetched from artifacts.
+- **HORSE-CLI** — ✅ DONE (`0d6acd8d`). Went past investigation and **built the fix**: per-session
+  **inbox** + **`horse send`**, verified live end-to-end (send→flush→drain→agent acts on it→inbox
+  cleared→delete). Slimmed CLI: `spawn`=new-only, `send` added, `run`/`projects` cut, `status` folded
+  into `list <id>`, parent flags+banner removed, `HORSE_DEFAULT_PROVIDER` honored. Help/AGENTS/skill
+  updated. **Open:** busy-mid-turn send path not yet exercised live. Tracked in
+  `~/code/horse/.issues/cli-messaging-and-slimming.md`. **Nothing committed.**
+- **LD-A2** — ✅ DONE (`4c4b59fd`). Two commits on `vps-migration` (not pushed):
+  (1) **`4499a358`** — fix `entry.worker.ts` SENSE DUPLICATION: the module-level grouping maps
+  (`entry_id_to_senses`/`_to_audios`/`_to_tags`/`_to_dialects`, `sense_id_to_*`, `*_id_to_sense_ids`,
+  `audio/video_id_to_speakers`) were only `.push()`ed, never reset; `init_entries` re-runs on the
+  persistent worker (SPA re-entry of `[dictionaryId]` layout, CDN-cache + dummy passes) → N copies.
+  Fix = `reset_grouping_maps()` (let-rebind to `{}`) before the bulk push loops; deduped id-keyed dicts
+  + incremental ops unaffected. Prod (single load) was never affected.
+  (2) **`5d1e9354`** — `pnpm lint` → 0 errors. Jacob redirected to **go FULLY CUSTOM like the
+  example/house** (not antfu): ported `living-dictionaries-example`'s hand-written flat config (eslint 10,
+  eslint-plugin-svelte@3 + svelte-eslint-parser@1, @stylistic, import-x/n/perfectionist/regexp/unicorn/
+  jsonc/@vitest, canonical namespaces), scoped to `site/`+root. Then **finished the runes migration of the
+  legacy stragglers** rather than disabling rules (Jacob's call). Re-enabled `.githooks/pre-commit`
+  (test→check→lint:fix→re-stage) + `prepare` hooksPath. Deleted stale `site/.vercel`.
+  Gate: check 0/15 · test 123 · build+boot · achi-flow 5/5 · sense-dup repro 1 sense · 9-route headless
+  scan 0 real errors · lint 0.
+- **M3** — ⏸ DEFERRED TO LAST (Jacob). **Deploy = an existing GitHub Actions workflow auto-deploys
+  pushed code to `new.livingdictionaries.app`** — NOT a manual `vps-setup` sync, NOT `staging.*`. The
+  deploy workflow is **not even in `vps-migration`'s `.github/workflows/`** (lives on/aimed at another
+  branch); Jacob **re-aims it to `vps-migration` and pushes at the very END** to test. Nothing to
+  prep-spin now (build is already adapter-node + boots). Revisit only when Jacob says "do the deploy".
+- **LD status — clean checkpoint; M2c visual parity CONFIRMED** (Jacob eyeballed :3041 maps 2026-06-04 →
+  good). Fully-runes, lint-clean, green. **Next: M4 · SQLite read — now UNBLOCKED** (HOUSE-DATA done; its
+  playbook + gotchas are ready to lean on). Uncommitted docs only (`.knowledge` + these `.issues`).
+- **HOUSE-DATA** — ✅ DONE (`6794244c`). Customer reader now reads from SQLite in **4 verified phases**
+  (seed `site/.data/shared.db` from local learn-from DB → chapter reader `+layout.server.ts` → leaf
+  doc/img/vid `+page.server.ts` → retire Firestore reader helpers). Verified via `tools/e2e/reader-sqlite.mjs`:
+  MAT.1+JHN.3 real scripture+media, all 4 leaves from SQLite, **0 Firestore calls / 0 pageerrors**, admin
+  unpublished 77→188. check 0 · test 147 · build clean. Decisions: copy content tables · intros/series stay
+  on Firestore (not imported) · no paywall · isomorphic `load_*({ db })` seam. **Nothing committed.**
+  **Deferred:** intro/series import, Vimeo thumbnail caching, paywall port, an `include_unpublished`
+  integration test. 📘 **Cross-repo knowledge for LD M4:** `.knowledge/architecture/firestore-to-sqlite-reader-port.md`
+  + the adapter-node native-deps gotcha below.
 - **HOUSE-A** — **Jacob is driving this himself** (login modal + Google One-Tap, Phase-B tail; +
   the send-code rate-limit bug). Not spawned by me. I still track its learnings here when they land —
   esp. the finished OTP/JWT/Google auth surface, which becomes LD's M4 real-auth template.

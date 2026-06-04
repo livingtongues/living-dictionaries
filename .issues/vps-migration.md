@@ -168,14 +168,18 @@ The site looks identical throughout. Sub-steps isolate the toolchain change from
       achi-flow 5/5 · 19 routes + editor + table headless load = 0 real errors. Visual parity
       eyeballed via headless screenshot (list view identical). ⏳ Jacob: eyeball maps/visual at :3041.
 
-### M3 · Deploy the stubbed Svelte-5 app to the VPS
+### M3 · Deploy the stubbed Svelte-5 app
 Prove the pipeline on a trivial, can't-really-break app.
-- [ ] Swap `@sveltejs/adapter-vercel` → `adapter-node`.
-- [ ] Add `Dockerfile` + `docker-compose.yml` (adapt from example; better-sqlite3 native build
-      step only matters once we add it in M4 — keep minimal for now).
-- [ ] Wire into `~/code/vps-setup` `sync` (subdomain, `web` network, env_file). Research the
-      `sync` tool + `deploy-shanding.sh` pattern.
-- [ ] **Verify:** stubbed app reachable at a staging subdomain; boots; pages render.
+> **Deploy path decided (Jacob 2026-06-04):** an existing **GitHub Actions workflow auto-deploys
+> pushed code to `new.livingdictionaries.app`** — we do NOT hand-roll a `vps-setup` sync or a
+> `staging.*` subdomain. The workflow currently targets a different branch; Jacob **re-aims it to
+> `vps-migration` at the very END** to exercise the deploy. So M3's job is to make the build
+> deploy-ready; the push-to-deploy itself is the final step, saved for last.
+- [x] `adapter-node` (done back in M0.5).
+- [ ] Confirm the existing CI workflow's build/deploy steps suit the stubbed app (Docker/compose if it
+      uses them; better-sqlite3 native build only matters at M4 — keep minimal now).
+- [ ] **(LAST) Jacob re-aims the deploy workflow's branch → `vps-migration`**, pushes, verifies the
+      stubbed app boots + renders at `new.livingdictionaries.app`.
 
 ### M4+ · Reintroduce real systems, one at a time
 Each is its own milestone with a checkpoint. Order TBD, rough sequence:
