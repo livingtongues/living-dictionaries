@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: $$props is used together with named props in a way that cannot be automatically migrated. -->
 <script context="module" lang="ts">
   import { writable } from 'svelte/store'
 
@@ -31,8 +32,8 @@
 </script>
 
 <script lang="ts">
-  import { ShowHide, longpress } from '$lib/svelte-pieces'
   import type { EntryData } from '@living-dictionaries/types'
+  import { ShowHide, longpress } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
 

@@ -16,12 +16,22 @@ const config = {
     },
   },
 
-  // https://github.com/sveltejs/language-tools/issues/650#issuecomment-1337317336
-  onwarn: (warning, handler) => {
-    if (warning.code.startsWith('a11y'))
-      return
-
-    handler(warning)
+  compilerOptions: {
+    // Honoured by both `svelte-check` and the build (unlike `onwarn`, which svelte-check ignores).
+    // Silences pre-existing legacy a11y + harmless deprecation noise so real warnings stay visible.
+    // Intentionally NOT silenced: state_referenced_locally (init-value captures worth eyeballing) and
+    // node_invalid_placement_ssr (real SSR/hydration nesting).
+    warningFilter: (warning) => {
+      const silenced = [
+        'element_invalid_self_closing_tag',
+        'attribute_quoted',
+      ]
+      if (warning.code?.startsWith('a11y'))
+        return false
+      if (silenced.includes(warning.code))
+        return false
+      return true
+    },
   },
 }
 

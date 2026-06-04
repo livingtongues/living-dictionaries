@@ -1,10 +1,10 @@
-<script>export let onclick = void 0;
-export let onx = void 0;
-export let href = void 0;
-export let target = "";
-export let size = "sm";
-export let color = void 0;
-export let active = false;
+<script> export let onclick = void 0
+export let onx = void 0
+export let href = void 0
+export let target = ''
+export let size = 'sm'
+export let color = void 0
+export let active = false
 </script>
 
 {#if href}

@@ -1,13 +1,25 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy'
+
   import { getContext, onDestroy, setContext } from 'svelte'
   import type { GeoJSONSource, GeoJSONSourceOptions, GeoJSONSourceRaw } from 'mapbox-gl'
   import { type MapKeyContext, type SourceKeyContext, mapKey, sourceKey } from '../context'
   import { randomId } from '../../utils/randomId'
 
-  // Cf https://docs.mapbox.com/mapbox-gl-js/style-spec/sources/#geojson
-  export let id = randomId()
-  export let data: GeoJSONSourceOptions['data'] // URL or inline data
-  export let options: Partial<GeoJSONSourceRaw> = {}
+  interface Props {
+    // Cf https://docs.mapbox.com/mapbox-gl-js/style-spec/sources/#geojson
+    id?: any
+    data: GeoJSONSourceOptions['data'] // URL or inline data
+    options?: Partial<GeoJSONSourceRaw>
+    children?: import('svelte').Snippet<[any]>
+  }
+
+  const {
+    id = randomId(),
+    data,
+    options = {},
+    children,
+  }: Props = $props()
 
   const { getMap } = getContext<MapKeyContext>(mapKey)
   const map = getMap()
@@ -22,7 +34,7 @@
     },
   })
 
-  let source: GeoJSONSource
+  let source: GeoJSONSource = $state()
   function addSource() {
     map.addSource(id, {
       ...options,
@@ -37,7 +49,7 @@
       addSource()
   }
 
-  $: {
+  run(() => {
     source = map.getSource(id) as GeoJSONSource
     if (source) {
       // @ts-expect-error
@@ -49,7 +61,7 @@
       // Listen to "styledata" event to re-create the source if the style changes.
       map.on('styledata', handleStyledata)
     }
-  }
+  })
 
   onDestroy(() => {
     map.off('styledata', handleStyledata)
@@ -65,4 +77,4 @@
   })
 </script>
 
-<slot {source} />
+{@render children?.({ source })}

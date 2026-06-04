@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Button, type QueryParamStore, createPersistedStore } from '$lib/svelte-pieces'
   import type { EntryData, IPrintFields, PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import { build_citation } from '../contributors/build-citation'
@@ -7,17 +6,27 @@
   import PrintFieldCheckboxes from './print/PrintFieldCheckboxes.svelte'
   import { defaultPrintFields } from './print/printFields'
   import { truncateAuthors } from './print/truncateAuthors'
+  import { Button, type QueryParamStore, createPersistedStore } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import type { QueryParams } from '$lib/search/types'
 
-  export let search_params: QueryParamStore<QueryParams>
-  export let entries: EntryData[] = []
-  export let dictionary: Tables<'dictionaries'>
-  export let can_edit = false
+  interface Props {
+    search_params: QueryParamStore<QueryParams>
+    entries?: EntryData[]
+    dictionary: Tables<'dictionaries'>
+    can_edit?: boolean
+  }
+
+  const {
+    search_params,
+    entries = [],
+    dictionary,
+    can_edit = false,
+  }: Props = $props()
 
   const print_per_page = 100
-  let partners: PartnerWithPhoto[] = []
-  $: ({ dictionary_info } = $page.data)
+  let partners: PartnerWithPhoto[] = $state([])
+  const { dictionary_info } = $derived($page.data)
 
   onMount(() => {
     $page.data.load_partners().then(data => partners = data)
@@ -41,7 +50,7 @@
   <div class="print:hidden bg-white md:sticky z-1 md:top-22 py-3">
     <div class="flex flex-wrap mb-1">
       <Button class="mb-1 mr-2" form="filled" type="button" onclick={() => window.print()}>
-        <span class="i-fa-print -mt-1" />
+        <span class="i-fa-print -mt-1"></span>
         {$page.data.t('entry.print')}
       </Button>
 

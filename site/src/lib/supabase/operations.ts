@@ -132,7 +132,7 @@ export async function insert_sentence({ sentence, sense_id }: {
       console.error('insert_sentence: worker error', worker_err)
     }
 
-return data
+    return data
   } catch (err) {
     alert(err)
     console.error(err)

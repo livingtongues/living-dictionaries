@@ -1,9 +1,9 @@
-<script>let show = false;
+<script> let show = false
 function toggle() {
-  show = !show;
+  show = !show
 }
 function set(value) {
-  show = value;
+  show = value
 }
 </script>
 

@@ -1,9 +1,9 @@
 // https://developers.google.com/identity/gsi/web/guides/overview
 
 import type { CredentialResponse } from 'google-one-tap'
-import { loadScriptOnce } from '$lib/svelte-pieces'
 import { handle_sign_in_response } from './sign_in'
 import { remove_cached_user } from './user'
+import { loadScriptOnce } from '$lib/svelte-pieces'
 import { getSupabase } from '$lib/supabase'
 import { invalidateAll } from '$app/navigation'
 

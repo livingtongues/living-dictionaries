@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { Button } from '$lib/svelte-pieces'
   import sanitize from 'xss'
   import UserGuide from './UserGuide.svelte'
+  import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
-  export let data
-  $: ({ is_manager, is_contributor, dictionary, update_about, dictionary_info, admin } = data)
-  let updated = ''
+  const { data } = $props()
+  const { is_manager, is_contributor, dictionary, update_about, dictionary_info, admin } = $derived(data)
+  let updated = $state('')
 
-  let editing = false
+  let editing = $state(false)
 </script>
 
 <div class="about">

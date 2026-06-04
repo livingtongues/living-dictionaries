@@ -1,15 +1,15 @@
-<script>export let onsubmit;
-let loading = false;
+<script> export let onsubmit
+let loading = false
 async function submitWithLoading(event) {
   if (onsubmit) {
-    loading = true;
+    loading = true
     try {
-      await onsubmit(event);
+      await onsubmit(event)
     } catch (err) {
-      console.error(err);
-      alert(err);
+      console.error(err)
+      alert(err)
     }
-    loading = false;
+    loading = false
   }
 }
 </script>

@@ -1,5 +1,5 @@
 <script>
-  let { stickyHeading = false, stickyColumn = false, class: className = '', children } = $props()
+  const { stickyHeading = false, stickyColumn = false, class: className = '', children } = $props()
 </script>
 
 <div class:stickyHeading class:stickyColumn class="responsive-wrapper {className}">

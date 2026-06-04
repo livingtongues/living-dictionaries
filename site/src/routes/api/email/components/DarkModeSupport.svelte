@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: end is out of bounds -->
 <script>
   export let emulateEmailAddingDarkClasses = false
 </script>

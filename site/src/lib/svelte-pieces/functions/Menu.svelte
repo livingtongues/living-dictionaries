@@ -1,8 +1,9 @@
-<script>import { fly } from "svelte/transition";
-import { portal } from "../actions/portal";
-import { clickoutside } from "../actions/clickoutside";
-export let portalTarget = void 0;
-export let onclickoutside = void 0;
+<script> import { fly } from 'svelte/transition'
+import { portal } from '../actions/portal'
+import { clickoutside } from '../actions/clickoutside'
+
+export let portalTarget = void 0
+export let onclickoutside = void 0
 </script>
 
 {#if portalTarget}

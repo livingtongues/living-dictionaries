@@ -2,14 +2,14 @@
   // User Experience Logging, 3 second delayed init after load completes
   async function loadLogRocket() {
     console.info('load in logrocket');
-    (await import('logrocket')).default.init('wsolfu/td-dev');
+    (await import('logrocket')).default.init('wsolfu/td-dev')
   }
 
   if (document.readyState == 'loading') {
-    document.addEventListener('DOMContentLoaded', loadLogRocket);
+    document.addEventListener('DOMContentLoaded', loadLogRocket)
   } else {
     setTimeout(() => {
-      loadLogRocket();
-    }, 3000);
+      loadLogRocket()
+    }, 3000)
   }
 </script>

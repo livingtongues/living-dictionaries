@@ -1,87 +1,88 @@
-<script context="module">let observer;
-const mapping = /* @__PURE__ */ new Map();
+<script context="module"> let observer
+const mapping = /* @__PURE__ */ new Map()
 function add(element, callback) {
-  mapping.set(element, callback);
-  observer.observe(element);
+  mapping.set(element, callback)
+  observer.observe(element)
 }
 function remove(element) {
-  const deleted = mapping.delete(element);
-  deleted && observer.unobserve(element);
+  const deleted = mapping.delete(element)
+  deleted && observer.unobserve(element)
 }
 </script>
 
-<script>import { createEventDispatcher, onDestroy, onMount } from "svelte";
-export let once = false;
-export let intervalMs = void 0;
-export let top = 0;
-export let bottom = 0;
-export let left = 0;
-export let right = 0;
-export let threshold = 0;
-let intersecting = false;
-let container;
-let childElement;
-let interval;
-const dispatch = createEventDispatcher();
+<script> import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+
+export let once = false
+export let intervalMs = void 0
+export let top = 0
+export let bottom = 0
+export let left = 0
+export let right = 0
+export let threshold = 0
+let intersecting = false
+let container
+let childElement
+let interval
+const dispatch = createEventDispatcher()
 onMount(() => {
-  childElement = container.firstElementChild;
+  childElement = container.firstElementChild
   if (!childElement) {
-    return console.error("IntersectionObserver: No child element found");
+    return console.error('IntersectionObserver: No child element found')
   }
-  if (typeof IntersectionObserver !== "undefined") {
+  if (typeof IntersectionObserver !== 'undefined') {
     if (!observer) {
-      const isIframe = window !== window.parent;
-      const root = isIframe ? window.document : null;
-      const rootMargin = `${top}px ${right}px ${bottom}px ${left}px`;
+      const isIframe = window !== window.parent
+      const root = isIframe ? window.document : null
+      const rootMargin = `${top}px ${right}px ${bottom}px ${left}px`
       observer = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
-            const callback = mapping.get(entry.target);
-            callback && callback(entry.isIntersecting);
+            const callback = mapping.get(entry.target)
+            callback && callback(entry.isIntersecting)
           }
         },
         {
           root,
           rootMargin,
-          threshold
-        }
-      );
+          threshold,
+        },
+      )
     }
     const fired_when_interesecting_changes = (isIntersecting) => {
       if (once && isIntersecting)
-        remove(childElement);
+        remove(childElement)
       if (isIntersecting)
-        dispatch("intersected");
-      intersecting = isIntersecting;
-    };
-    add(childElement, fired_when_interesecting_changes);
-    return () => remove(childElement);
+        dispatch('intersected')
+      intersecting = isIntersecting
+    }
+    add(childElement, fired_when_interesecting_changes)
+    return () => remove(childElement)
   }
   function handler() {
-    const bcr = childElement.getBoundingClientRect();
-    intersecting = bcr.bottom + bottom > 0 && bcr.right + right > 0 && bcr.top - top < window.innerHeight && bcr.left - left < window.innerWidth;
+    const bcr = childElement.getBoundingClientRect()
+    intersecting = bcr.bottom + bottom > 0 && bcr.right + right > 0 && bcr.top - top < window.innerHeight && bcr.left - left < window.innerWidth
     if (intersecting && once) {
-      window.removeEventListener("scroll", handler);
+      window.removeEventListener('scroll', handler)
     }
   }
-  window.addEventListener("scroll", handler);
-  return () => window.removeEventListener("scroll", handler);
-});
+  window.addEventListener('scroll', handler)
+  return () => window.removeEventListener('scroll', handler)
+})
 $:
   if (intersecting === true) {
     if (intervalMs) {
       interval = setInterval(() => {
         if (intersecting === true) {
-          dispatch("intersected");
+          dispatch('intersected')
         }
-      }, intervalMs);
+      }, intervalMs)
     }
   } else {
-    dispatch("hidden");
+    dispatch('hidden')
   }
 onDestroy(() => {
-  clearInterval(interval);
-});
+  clearInterval(interval)
+})
 </script>
 
 <div style="display: contents" bind:this={container}>

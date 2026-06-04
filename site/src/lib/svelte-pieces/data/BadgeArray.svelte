@@ -1,22 +1,23 @@
-<script>import { createEventDispatcher } from "svelte";
-import Button from "../ui/Button.svelte";
-import Badge from "../ui/Badge.svelte";
-import DetectUrl from "../functions/DetectUrl.svelte";
-export let strings = [];
-export let canEdit = false;
-export let promptMessage;
-export let addMessage;
+<script> import { createEventDispatcher } from 'svelte'
+import Button from '../ui/Button.svelte'
+import Badge from '../ui/Badge.svelte'
+import DetectUrl from '../functions/DetectUrl.svelte'
+
+export let strings = []
+export let canEdit = false
+export let promptMessage
+export let addMessage
 $:
-  if (typeof strings === "string") {
-    strings = [strings];
+  if (typeof strings === 'string') {
+    strings = [strings]
   }
-const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher()
 function add() {
-  const string = prompt(promptMessage);
+  const string = prompt(promptMessage)
   if (!string)
-    return;
-  strings = [...strings || [], string.trim()];
-  dispatch("valueupdated", strings);
+    return
+  strings = [...strings || [], string.trim()]
+  dispatch('valueupdated', strings)
 }
 </script>
 

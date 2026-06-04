@@ -1,14 +1,15 @@
-<script>import Slideover from "./Slideover.svelte";
-export let zIndex = 60;
-export let duration = 200;
-export let side = "right";
-export let widthRem = 16;
-export let maxWidthPercentage = 70;
-export let showWidth;
-export let desktopClasses = "";
-export let mobileClasses = "";
-export let open = false;
-export let on_close = void 0;
+<script> import Slideover from './Slideover.svelte'
+
+export let zIndex = 60
+export let duration = 200
+export let side = 'right'
+export let widthRem = 16
+export let maxWidthPercentage = 70
+export let showWidth
+export let desktopClasses = ''
+export let mobileClasses = ''
+export let open = false
+export let on_close = void 0
 </script>
 
 <div
@@ -16,8 +17,7 @@ export let on_close = void 0;
   class:sp-nrzatl={showWidth === 'md'}
   class:sp-0dkduh={showWidth === 'lg'}
   class:sp-hvht9m={showWidth === 'xl'}
-  class="sp-zmjiff {desktopClasses}"
->
+  class="sp-zmjiff {desktopClasses}">
   {#if $$slots.desktopTitle}
     <h3 class="sp-i7iidx">
       <slot name="desktopTitle" />
@@ -35,16 +35,14 @@ export let on_close = void 0;
     class:sp-i2kcv6={showWidth === 'md'}
     class:sp-ni7hsi={showWidth === 'lg'}
     class:sp-s0n6gx={showWidth === 'xl'}
-    class="sp-zmjiff {mobileClasses}"
-  >
+    class="sp-zmjiff {mobileClasses}">
     <Slideover
       {duration}
       {zIndex}
       {side}
       {widthRem}
       {maxWidthPercentage}
-      on:close={on_close}
-    >
+      on:close={on_close}>
       <svelte:fragment slot="heading">
         {#if $$slots.mobileTitle}
           <div class="sp-serhln">
@@ -55,10 +53,8 @@ export let on_close = void 0;
               on:click={on_close}
               type="button"
               class="sp-7muc4a"
-              aria-label="Close"
-            >
-              <span class="sp-gb3q14" /></button
-            >
+              aria-label="Close">
+              <span class="sp-gb3q14" /></button>
           </div>
         {/if}
         <slot name="mobileHeading" />

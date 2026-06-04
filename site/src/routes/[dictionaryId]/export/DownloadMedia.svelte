@@ -6,17 +6,29 @@
   import { objectsToCsvByHeaders } from '$lib/export/csv'
   import { downloadBlob } from '$lib/export/downloadBlob'
 
-  export let dictionary: Tables<'dictionaries'>
-  export let entryHeaders: EntryForCSV
-  export let finalizedEntries: EntryForCSV[]
-  export let entriesWithImages: EntryForCSV[] = []
-  export let entriesWithAudio: EntryForCSV[] = []
+  interface Props {
+    dictionary: Tables<'dictionaries'>
+    entryHeaders: EntryForCSV
+    finalizedEntries: EntryForCSV[]
+    entriesWithImages?: EntryForCSV[]
+    entriesWithAudio?: EntryForCSV[]
+    children?: import('svelte').Snippet<[any]>
+  }
+
+  const {
+    dictionary,
+    entryHeaders,
+    finalizedEntries,
+    entriesWithImages = [],
+    entriesWithAudio = [],
+    children,
+  }: Props = $props()
 
   const dispatch = createEventDispatcher<{ completed: null }>()
 
-  let fetched = 0
-  $: progress = fetched / (entriesWithImages.length + entriesWithAudio.length)
-  let errors = []
+  let fetched = $state(0)
+  const progress = $derived(fetched / (entriesWithImages.length + entriesWithAudio.length))
+  let errors = $state([])
   let destroyed = false
 
   onMount(async () => {
@@ -65,7 +77,7 @@
     }
 
     const csv = objectsToCsvByHeaders(entryHeaders, finalizedEntries)
-    const csvBlob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+    const csvBlob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' })
 
     zip.file(`${dictionary.id}.csv`, csvBlob)
 
@@ -82,7 +94,7 @@
 </script>
 
 <div>
-  <slot {progress} />
+  {@render children?.({ progress })}
 </div>
 
 {#if errors.length}

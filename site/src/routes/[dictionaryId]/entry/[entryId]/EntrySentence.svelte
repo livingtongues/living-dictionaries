@@ -3,12 +3,21 @@
   import EntryField from './EntryField.svelte'
   import { page } from '$app/stores'
 
-  export let glossingLanguages: string[]
-  export let sentence: Partial<Tables<'sentences'>>
-  export let can_edit = false
-  export let sense_id: string
+  interface Props {
+    glossingLanguages: string[]
+    sentence: Partial<Tables<'sentences'>>
+    can_edit?: boolean
+    sense_id: string
+  }
 
-  $: ({ dbOperations } = $page.data)
+  const {
+    glossingLanguages,
+    sentence,
+    can_edit = false,
+    sense_id,
+  }: Props = $props()
+
+  const { dbOperations } = $derived($page.data)
 
   const writing_systems = ['default']
 </script>
@@ -19,8 +28,8 @@
       type="button"
       class="self-end text-gray-400 hover:text-red-500"
       title={$page.data.t('sentence.delete')}
-      on:click={() => dbOperations.delete_sentence(sentence.id)}>
-      <span class="i-system-uicons-trash text-xl" />
+      onclick={() => dbOperations.delete_sentence(sentence.id)}>
+      <span class="i-system-uicons-trash text-xl"></span>
     </button>
   {/if}
 

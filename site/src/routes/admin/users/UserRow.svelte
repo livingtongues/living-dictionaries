@@ -1,19 +1,23 @@
 <script lang="ts">
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import type { DictionaryView } from '@living-dictionaries/types'
-  import { Button } from '$lib/svelte-pieces'
   import DictionariesHelping from './DictionariesHelping.svelte'
   import type { PageData } from './$types'
+  import { Button } from '$lib/svelte-pieces'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
   import { page } from '$app/stores'
 
-  export let user: UserWithDictionaryRoles
-  export let dictionaries: DictionaryView[]
-  export let load_data: () => Promise<void>
+  interface Props {
+    user: UserWithDictionaryRoles
+    dictionaries: DictionaryView[]
+    load_data: () => Promise<void>
+  }
 
-  $: ({ admin, supabase, add_editor, remove_editor } = $page.data as PageData)
-  $: managing_dictionary_ids = user.dictionary_roles.filter(({ role }) => role === 'manager').map(({ dictionary_id }) => dictionary_id) || []
-  $: contributing_dictionary_ids = user.dictionary_roles.filter(({ role }) => role === 'contributor').map(({ dictionary_id }) => dictionary_id) || []
+  const { user, dictionaries, load_data }: Props = $props()
+
+  const { admin, supabase, add_editor, remove_editor } = $derived($page.data as PageData)
+  const managing_dictionary_ids = $derived(user.dictionary_roles.filter(({ role }) => role === 'manager').map(({ dictionary_id }) => dictionary_id) || [])
+  const contributing_dictionary_ids = $derived(user.dictionary_roles.filter(({ role }) => role === 'contributor').map(({ dictionary_id }) => dictionary_id) || [])
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(user, null, 1)}>

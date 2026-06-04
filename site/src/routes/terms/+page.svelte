@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 </script>
 
 <Header>
-  {$page.data.t('dictionary.terms_of_use')}
+  {page.data.t('dictionary.terms_of_use')}
 </Header>
 
 <div class="max-w-screen-md mx-auto p-3">
   <div class="tw-prose max-w-none">
-    <h2 class="uppercase">{$page.data.t('terms.agreement_to_terms')}</h2>
+    <h2 class="uppercase">{page.data.t('terms.agreement_to_terms')}</h2>
     <div style="direction: ltr">
       <p>
         These Terms of Use constitute a legally binding agreement made between you, whether
@@ -486,7 +486,7 @@
         the requisite and verifiable parental consent, we will delete that information from the Site
         as quickly as is reasonably practical.
       </p>
-      <p />
+      <p></p>
 
       <h2>DIGITAL MILLENNIUM COPYRIGHT ACT (DMCA) NOTICE AND POLICY</h2>
       <h3>Notifications</h3>
@@ -553,7 +553,7 @@
         Salem, OR 97302<br />
         dictionaries@livingtongues.org
       </p>
-      <p />
+      <p></p>
 
       <h2>TERM AND TERMINATION</h2>
       <p>
@@ -812,6 +812,6 @@
 <Footer />
 
 <SeoMetaTags
-  title={$page.data.t('dictionary.terms_of_use')}
+  title={page.data.t('dictionary.terms_of_use')}
   description="Terms of Use for the Living Dictionaries platform. This page includes information about the terms, intellectual property rights, user representations, prohibited activities, user-generated contributions, and more."
   keywords="Terms of Use for the Living Dictionaries platform. This page includes information about the terms, intellectual property rights, user representations, prohibited activities, user-generated contributions, and more." />

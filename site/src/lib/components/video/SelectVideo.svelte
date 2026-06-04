@@ -1,53 +1,61 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  let dragging = false;
-  let file: File;
+  import { preventDefault } from 'svelte/legacy'
+
+  import { page } from '$app/state'
+
+  interface Props {
+    children?: import('svelte').Snippet<[any]>
+  }
+
+  const { children }: Props = $props()
+  let dragging = $state(false)
+  let file: File = $state()
 
   function checkVideo(files: FileList) {
-    dragging = false;
+    dragging = false
 
-    const fileToCheck = files.item(0);
+    const fileToCheck = files.item(0)
 
     // Client-side validation: Must be video and smaller than 100MB.
     if (fileToCheck.type.split('/')[0] !== 'video')
-      return alert(`${$page.data.t('upload.error')}`);
+      return alert(`${page.data.t('upload.error')}`)
 
     // Must be smaller than 100MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > 104857600) {
       return alert(
-        `${$page.data.t('upload.file_must_be_smaller')} 100MB`
-      );
+        `${page.data.t('upload.file_must_be_smaller')} 100MB`,
+      )
     }
 
-    file = fileToCheck;
+    file = fileToCheck
   }
 </script>
 
 {#if file}
-  <slot {file} />
+  {@render children?.({ file })}
 {:else}
   <label
     class:dragging
-    on:drop|preventDefault={(e) => checkVideo(e.dataTransfer.files)}
-    on:dragover|preventDefault={() => (dragging = true)}
-    on:dragleave|preventDefault={() => (dragging = false)}>
+    ondrop={preventDefault((e: DragEvent) => checkVideo(e.dataTransfer.files))}
+    ondragover={preventDefault(() => (dragging = true))}
+    ondragleave={preventDefault(() => (dragging = false))}>
     <input
       type="file"
       accept="video/*"
       class="hidden"
-      on:input={(e) => {
+      oninput={(e) => {
         // @ts-ignore
-        checkVideo(e.target.files);
+        checkVideo(e.target.files)
       }} />
 
     <div>
-      <i class="far fa-upload" />&nbsp;
+      <i class="far fa-upload"></i>&nbsp;
       {dragging
-        ? $page.data.t('upload.drop_to_upload')
-        : $page.data.t('upload.select_video_file')}
+        ? page.data.t('upload.drop_to_upload')
+        : page.data.t('upload.select_video_file')}
     </div>
     <div class="text-xs">
-      {$page.data.t('upload.file_must_be_smaller')} 100MB
+      {page.data.t('upload.file_must_be_smaller')} 100MB
     </div>
   </label>
 {/if}

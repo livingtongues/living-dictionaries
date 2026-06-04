@@ -1,12 +1,16 @@
 <script lang="ts">
-  export let show: string | boolean = false;
+  interface Props {
+    show?: string | boolean
+    children?: import('svelte').Snippet<[any]>
+  }
+
+  let { show = $bindable(false), children }: Props = $props()
   function toggle() {
-    show = !show;
+    show = !show
   }
   function set(value: string | boolean) {
-    show = value;
+    show = value
   }
 </script>
 
-<slot {show} {toggle} {set} />
-
+{@render children?.({ show, toggle, set })}

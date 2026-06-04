@@ -1,1 +1,1 @@
-export { semanticDomains } from './mappings/semantic-domains';
+export { semanticDomains } from './mappings/semantic-domains'

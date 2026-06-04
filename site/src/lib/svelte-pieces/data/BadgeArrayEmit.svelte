@@ -1,13 +1,15 @@
-<script>import Button from "../ui/Button.svelte";
-import Badge from "../ui/Badge.svelte";
-import DetectUrl from "../functions/DetectUrl.svelte";
-export let strings = [], canEdit = false, addMessage = "Add", minimum = 0;
+<script> import Button from '../ui/Button.svelte'
+import Badge from '../ui/Badge.svelte'
+import DetectUrl from '../functions/DetectUrl.svelte'
+
+export let strings = [], canEdit = false, addMessage = 'Add', minimum = 0
 $:
-  if (typeof strings === "string") {
-    strings = [strings];
+  if (typeof strings === 'string') {
+    strings = [strings]
   }
-import { createEventDispatcher } from "svelte";
-const dispatch = createEventDispatcher();
+import { createEventDispatcher } from 'svelte'
+
+const dispatch = createEventDispatcher()
 </script>
 
 <div class="sp-8nwa50 {$$props.class}">
@@ -23,8 +25,7 @@ const dispatch = createEventDispatcher();
             onclick={() => dispatch('itemclicked', { value: string, index })}
             onx={strings.length > minimum
               ? () => dispatch('itemremoved', { value: string, index })
-              : null}
-          >
+              : null}>
             {display}
           </Badge>
           <div class="sp-vx1uno" />

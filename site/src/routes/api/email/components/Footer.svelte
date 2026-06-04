@@ -3,12 +3,23 @@
   import Link from './Link.svelte'
   import Row from './Row.svelte'
 
-  export let row: ComponentProps<Row> = {}
-  export let brand: string
-  export let href: string
-  export let address: string
-  export let show_unsubscribe = true
-  export let reason_for_email: string = undefined
+  interface Props {
+    row?: ComponentProps<typeof Row>
+    brand: string
+    href: string
+    address: string
+    show_unsubscribe?: boolean
+    reason_for_email?: string
+  }
+
+  const {
+    row = {},
+    brand,
+    href,
+    address,
+    show_unsubscribe = true,
+    reason_for_email = undefined,
+  }: Props = $props()
 </script>
 
 <Row {...row}>
