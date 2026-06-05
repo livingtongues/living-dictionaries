@@ -3,29 +3,13 @@
   "compilerOptions": {
     "strict": false,
     "target": "es2020",
+    "module": "esnext",
     "lib": [
       "es2021",
       "WebWorker",
       "DOM"
     ],
-    "baseUrl": ".",
-    "module": "esnext",
     "moduleResolution": "bundler",
-    // defining paths here and adding baseUrl for Playwright to work
-    "paths": {
-      "$lib": [
-        "./src/lib"
-      ],
-      "$lib/*": [
-        "./src/lib/*"
-      ],
-      "$api": [
-        "./src/routes/api"
-      ],
-      "$api/*": [
-        "./src/routes/api/*"
-      ]
-    },
     "resolveJsonModule": true,
     "types": [
       "vitest/globals",
@@ -37,7 +21,6 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "ignoreDeprecations": "5.0",
     "skipLibCheck": true
   }
 }

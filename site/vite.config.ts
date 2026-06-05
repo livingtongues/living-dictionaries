@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import type { Plugin, UserConfig } from 'vite'
 import UnoCSS from 'unocss/vite'
 import Icons from 'unplugin-icons/vite'
+import { sqlite_proxy } from './sqlite-proxy/vite-plugin'
 
 // svelte-look is a `link:../../svelte-look` workspace dep that doesn't exist in
 // the Docker build context. Import it lazily so a missing target degrades to
@@ -26,6 +27,9 @@ export default defineConfig(async (): Promise<UserConfig> => ({
     Icons({ compiler: 'svelte' }),
     sveltekit(),
     rawFonts(['.ttf']),
+    // Dev-only HTTP+WS proxy so the agent CLI (`scripts/sqlite-query.sh`) can
+    // query the live browser wa-sqlite DBs (admin shared.db + per-dict dict.db).
+    sqlite_proxy(),
   ],
   server: {
     port: 3041,

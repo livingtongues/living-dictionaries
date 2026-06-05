@@ -1,8 +1,10 @@
 import type { LayoutLoad } from './$types'
 import type { LiveDb } from '$lib/db/client/live/live-db.svelte'
+import type { TableName } from '$lib/db/client/live/types'
 import type { SyncableTableName } from '$lib/db/sync/types'
-import { browser } from '$app/environment'
+import { browser, dev } from '$app/environment'
 import { get_admin_db } from '$lib/db/client/db'
+import { live_share } from '$lib/db/client/live-share.svelte'
 import { Sync } from '$lib/db/sync/engine.svelte.js'
 import { error } from '@sveltejs/kit'
 
@@ -57,6 +59,12 @@ export const load: LayoutLoad = async ({ parent }) => {
     globals.__ld_admin_sync = sync
   }
   mark_dirty = t => sync.mark_dirty(t)
+
+  // Dev-only: expose the admin shared.db to the SQL proxy so the agent CLI
+  // (`scripts/sqlite-query.sh`) can read/write it. client_id = the admin email.
+  // No-op in prod (`dev` is false).
+  if (dev)
+    live_share.register({ connection, client_id: auth_user.user.email ?? auth_user.user.id, notify: t => live_db.notify_table(t as TableName) })
 
   return { auth_user, db: live_db, sync }
 }

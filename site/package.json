@@ -9,8 +9,6 @@
     "preview": "vite preview",
     "sync": "svelte-kit sync",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --threshold error --diagnostic-sources js,svelte",
-    "check:warnings": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --diagnostic-sources js,svelte",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch",
     "test": "vitest",
     "test:flow": "node e2e/achi-flow.mjs",
     "test:sync": "node e2e/dict-sync.mjs",
@@ -61,11 +59,11 @@
     "@types/mapbox-gl": "^3.4.1",
     "@types/mapbox__mapbox-gl-geocoder": "^4.7.3",
     "@types/recordrtc": "^5.6.15",
+    "@types/ws": "^8.18.1",
     "@unocss/extractor-svelte": "^66.7.0",
     "@unocss/preset-icons": "^66.7.0",
     "@unocss/reset": "^66.7.0",
     "@unocss/transformer-directives": "^66.7.0",
-    "@vitest/ui": "^4.1.8",
     "ckeditor5-build-classic-with-alignment-underline-smallcaps": "^1.0.0",
     "comlink": "^4.4.2",
     "csvtojson": "^2.0.14",
@@ -86,6 +84,7 @@
     "vite": "^8.0.16",
     "vitest": "^4.1.8",
     "wavesurfer.js": "^5.2.0",
+    "ws": "^8.21.0",
     "xss": "^1.0.15"
   }
 }

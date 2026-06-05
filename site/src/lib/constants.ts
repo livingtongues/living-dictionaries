@@ -24,6 +24,14 @@ export const MINIMUM_ABOUT_LENGTH = 200
 /** Per-dictionary OPFS file path prefix (rooted in OPFS) for the wa-sqlite browser DB. */
 export const DICT_DB_OPFS_PREFIX = 'dictionaries/'
 
+/** R2 object key template for per-dictionary snapshots (public snapshots bucket). */
+export function r2_dict_snapshot_key(dictionary_id: string): string {
+  return `dictionaries/${dictionary_id}.db.gz`
+}
+
+/** R2 snapshot rebuild interval for the in-process builder cron. */
+export const R2_SNAPSHOT_INTERVAL_MS = 30 * 60 * 1000
+
 /** Snapshot freshness threshold for the `/changes` snapshot_expired sentinel. */
 export const SNAPSHOT_EXPIRED_DAYS = 60
 

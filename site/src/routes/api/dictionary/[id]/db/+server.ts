@@ -4,6 +4,7 @@ import { unlink } from 'node:fs/promises'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
+import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
@@ -12,14 +13,13 @@ import { error } from '@sveltejs/kit'
 /**
  * GET /api/dictionary/[id]/db
  *
- * Full snapshot of `dictionaries/{id}.db` — the wa-sqlite bootstrap fast-path
- * (the browser writes these bytes into OPFS, then opens with the OPFS VFS, then
- * syncs deltas via `/changes`).
+ * Fresh full snapshot of `dictionaries/{id}.db` for editors — the wa-sqlite
+ * bootstrap fast-path (the browser writes these bytes into OPFS, then opens with
+ * the OPFS VFS, then syncs deltas via `/changes`).
  *
- * Read access mirrors the (retiring) entries-data endpoint: served to anyone
- * who can read the dictionary. Editors additionally push via `/changes`. (The
- * example gated this to editors with viewers on a public R2 bucket; LD has no
- * R2 yet, so the VPS endpoint serves everyone — R2 is far-future, not this port.)
+ * Editor+ only (site admins bypass). Viewers fetch the public R2 path instead
+ * (`snapshots.livingdictionaries.app/dictionaries/{id}.db.gz`) — a public,
+ * CDN-cached bucket rebuilt by the in-process r2-snapshot-builder cron.
  *
  * Uses `db.backup()` (page-by-page copy under a SHARED lock, safe under WAL),
  * gzips, streams back.
@@ -32,6 +32,8 @@ export const GET: RequestHandler = async (event) => {
   const dictionary = get_dictionary_by_url_or_id(dict_id_or_url)
   if (!dictionary)
     error(ResponseCodes.NOT_FOUND, 'dictionary not found')
+
+  await verify_auth_dict_role(event, dictionary.id, 'editor')
 
   const dict_db = get_dictionary_db(dictionary.id)
 

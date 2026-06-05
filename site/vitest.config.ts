@@ -11,6 +11,5 @@ export default defineProject({
     globals: true,
     includeSource: ['src/**/*.ts'],
     exclude: [...defaultExclude, 'e2e/**'],
-    passWithNoTests: true,
   },
 })

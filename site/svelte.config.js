@@ -4,9 +4,8 @@ import adapter from '@sveltejs/adapter-node'
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-  extensions: ['.svelte', '.composition'],
   preprocess: [
-    vitePreprocess({ script: true }),
+    vitePreprocess(),
   ],
 
   kit: {
@@ -26,7 +25,7 @@ const config = {
         'element_invalid_self_closing_tag',
         'attribute_quoted',
       ]
-      if (warning.code?.startsWith('a11y'))
+      if (warning.code.startsWith('a11y') || warning.code.startsWith('constant_assignment'))
         return false
       if (silenced.includes(warning.code))
         return false

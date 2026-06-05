@@ -9,9 +9,10 @@ import { dbOperations, DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations
 import { url_from_storage_path } from '$lib/helpers/media'
 import { create_dict_live_db } from '$lib/db/dict-client/dict-live-db.svelte'
 import { open_dict } from '$lib/db/dict-client/shared-worker-lifecycle'
+import { live_share } from '$lib/db/client/live-share.svelte'
 import { api_dictionaries_catalog } from '$api/dictionaries/[id]/catalog/_call'
 import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
-import { browser } from '$app/environment'
+import { browser, dev } from '$app/environment'
 import { invalidate } from '$app/navigation'
 import { create_entries_ui_store } from '$lib/search/entries-ui-store'
 
@@ -63,6 +64,15 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
         await conn.sync_now().catch(err => console.error('initial dict sync failed', err))
         cached = { connection: conn, dict_db: create_dict_live_db(conn) }
         globals.__ld_dict_connections[dictionary_id] = cached
+
+        // Dev-only: expose this dict.db to the SQL proxy under a composite
+        // client_id so `sqlite-query.sh --dict <id>` can reach it. Writes route
+        // through the DictConnection's `execute()` → SharedWorker broadcast, so
+        // open tabs live-update. No-op in prod (`dev` is false).
+        if (dev) {
+          const email = auth_user.user?.email ?? auth_user.user?.id ?? 'dev'
+          live_share.register({ connection: conn, client_id: `${email}::dict::${dictionary_id}` })
+        }
       }
       ;({ connection, dict_db } = cached)
     }

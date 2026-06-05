@@ -8,6 +8,8 @@ Active plans live in `.issues/`; the migration master plan is `.issues/cross-pro
   VPS/SQLite evolution (build/deploy, lockfile discipline, what's deferred).
 - [testing/](./testing/index.md) — verification conventions: the puppeteer-core deep-flow
   harness and its headless-browser gotchas.
+- [tooling/](./tooling/index.md) — dev tooling that augments the app: the sqlite-proxy /
+  `live_share` / `sqlite-query.sh` stack for querying the live browser DBs.
 
 ## Pointers to the reference repo
 The **target** architecture (SQLite shared.db + per-dict dict.db, wa-sqlite/better-sqlite3,
