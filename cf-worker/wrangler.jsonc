@@ -1,0 +1,29 @@
+{
+  // Living Dictionaries email worker.
+  // Receives inbound emails routed by Cloudflare Email Routing for
+  // *@livingdictionaries.app (catch-all). Parses MIME, uploads each
+  // attachment to R2 via the `ATTACHMENTS` binding (livingdictionaries-attachments),
+  // then POSTs metadata-only JSON to
+  //   https://new.livingdictionaries.app/api/messages/email-inbound
+  // with the INTERNAL_INGEST_SECRET header.
+  //
+  // Outbound is handled by the VPS via AWS SES (Workers Free plan; no
+  // send_email binding here — pure inbound relay).
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ld-email",
+  "account_id": "94e4ac04197fc5e946e7f3515062077f",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-26",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "LD_VPS_URL": "https://new.livingdictionaries.app"
+  },
+  // INTERNAL_INGEST_SECRET set via `wrangler secret put INTERNAL_INGEST_SECRET`
+  // (must match the value at /opt/hosting/sveltekit/.env on the living VPS).
+  "r2_buckets": [
+    {
+      "binding": "ATTACHMENTS",
+      "bucket_name": "livingdictionaries-attachments"
+    }
+  ]
+}
