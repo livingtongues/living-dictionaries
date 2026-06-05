@@ -1,5 +1,4 @@
 /build
-.vercel
 /.svelte-kit*
 vite.config.ts*
 
@@ -11,3 +10,5 @@ vite.config.ts*
 test-results
 playwright-report
 /playwright/.cache/
+
+.env*
