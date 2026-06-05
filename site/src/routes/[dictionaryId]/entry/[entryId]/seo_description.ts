@@ -1,4 +1,4 @@
-import type { EntryData } from '@living-dictionaries/types'
+import type { EntryData } from '$lib/types'
 import type { DeepPartial } from '$lib/helpers/deep-partial'
 import { order_glosses } from '$lib/helpers/glosses'
 import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'

@@ -1,7 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
-  import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import CitationComponent from './Citation.svelte'
   import Partners from './Partners.svelte'
   import { Button, ShowHide } from '$lib/svelte-pieces'
@@ -10,22 +7,11 @@
   import { page } from '$app/stores'
 
   const { data } = $props()
-  const { dictionary, is_manager, is_contributor, admin, editor_edits, dictionary_info, dictionary_editors } = $derived(data)
+  const { dictionary, is_manager, is_contributor, admin, editor_edits, managers, contributors, partners } = $derived(data)
 
-  const managers = $derived($dictionary_editors.filter(editor => editor.role === 'manager'))
-  const contributors = $derived($dictionary_editors.filter(editor => editor.role === 'contributor'))
-
-  let invites: Tables<'invites'>[] = $state([])
-  run(() => {
-    data.invites_promise.then(_invites => invites = _invites)
-  })
-  const manager_invites = $derived(invites.filter(invite => invite.role === 'manager'))
-  const contributor_invites = $derived(invites.filter(invite => invite.role === 'contributor'))
-
-  let partners: PartnerWithPhoto[] = $state([])
-  run(() => {
-    data.partners_promise.then(_partners => partners = _partners)
-  })
+  const manager_invites = $derived(data.invites.filter(invite => invite.role === 'manager'))
+  const contributor_invites = $derived(data.invites.filter(invite => invite.role === 'contributor'))
+  const write_in_collaborators = $derived(dictionary.write_in_collaborators ?? [])
 </script>
 
 <p class="mb-2">
@@ -87,7 +73,7 @@
       {#if is_manager}
         <div class="w-1"></div>
         <Button
-          onclick={editor_edits.removeContributor(contributor.user_id)}
+          onclick={editor_edits.removeContributor(contributor.id)}
           color="red"
           size="sm">
           {$page.data.t('misc.delete')}
@@ -134,7 +120,7 @@
   {$page.data.t('contributors.other_contributors')}
 </h3>
 <div class="divide-y divide-gray-200">
-  {#each $dictionary_info?.write_in_collaborators || [] as collaborator (collaborator)}
+  {#each write_in_collaborators as collaborator (collaborator)}
     <div class="py-3 flex flex-wrap items-center">
       <div class="text-sm leading-5 font-medium text-gray-900">
         {collaborator}
@@ -144,7 +130,7 @@
         <Button
           color="red"
           size="sm"
-          onclick={editor_edits.removeWriteInCollaborator($dictionary_info?.write_in_collaborators || [], collaborator)}>{$page.data.t('misc.delete')}
+          onclick={editor_edits.removeWriteInCollaborator(write_in_collaborators, collaborator)}>{$page.data.t('misc.delete')}
           <i class="fas fa-times"></i></Button>
       {/if}
     </div>
@@ -156,7 +142,7 @@
 </div> -->
 
 {#if is_manager}
-  <Button onclick={async () => await editor_edits.writeInCollaborator($dictionary_info?.write_in_collaborators || [])} form="filled">
+  <Button onclick={async () => await editor_edits.writeInCollaborator(write_in_collaborators)} form="filled">
     <i class="far fa-pencil"></i>
     {$page.data.t('contributors.write_in_contributor')}
   </Button>
@@ -164,7 +150,7 @@
 
 {#if !dictionary.con_language_description}
   <hr class="my-4" />
-  <Partners {partners} can_edit={is_manager} hideLivingTonguesLogo={dictionary.hide_living_tongues_logo} admin={admin} {...data.partner_edits} />
+  <Partners {partners} can_edit={is_manager} hideLivingTonguesLogo={!!dictionary.hide_living_tongues_logo} admin={admin} {...data.partner_edits} />
 
   <!-- Not using contributors.request_to_add_manager -->
 
@@ -212,7 +198,7 @@
     {$page.data.t('contributors.how_to_cite_academics')}
   </h3>
 
-  <CitationComponent isManager={is_manager} {dictionary} {partners} citation={$dictionary_info.citation} update_citation={data.update_citation} />
+  <CitationComponent isManager={is_manager} {dictionary} {partners} citation={dictionary.citation} update_citation={data.update_citation} />
 
   <div class="mb-12"></div>
 {/if}

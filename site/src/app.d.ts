@@ -5,18 +5,13 @@ import type { LayoutData as DictionaryLayoutData } from './routes/[dictionaryId]
 import type { AuthUser } from '$lib/auth/user.svelte'
 import type { AuthUserData } from '$lib/auth/types'
 import type { MyDictionaryRolesCache } from '$lib/me/dictionary-roles.svelte'
-import type { DictionaryWithRoles } from '$lib/supabase/dictionaries'
-import type { Supabase } from '$lib/supabase'
+import type { DictionaryWithRoles } from '$lib/dictionaries'
 
 declare global {
   namespace App {
-    interface Locals {
-      getSession: () => Promise<{ data: { user: any, session: any }, error: any, supabase: Supabase }>
-    }
     interface PageData {
       locale: import('$lib/i18n/locales').LocaleCode
       t: import('$lib/i18n/types.ts').TranslateFunction
-      supabase: Supabase
       auth_user: AuthUser
       dict_roles: MyDictionaryRolesCache
       ssr_user: AuthUserData | null
@@ -37,9 +32,6 @@ declare global {
       photos?: DictionaryLayoutData['photos']
       videos?: DictionaryLayoutData['videos']
       sentences?: DictionaryLayoutData['sentences']
-      dictionary_info?: DictionaryLayoutData['dictionary_info']
-      dictionary_editors?: DictionaryLayoutData['dictionary_editors']
-      load_partners?: DictionaryLayoutData['load_partners']
       update_dictionary?: DictionaryLayoutData['update_dictionary']
     }
     interface PageState {

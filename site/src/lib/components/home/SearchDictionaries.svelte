@@ -1,7 +1,7 @@
 <script lang="ts">
   import { run } from 'svelte/legacy'
 
-  import type { DictionaryView } from '@living-dictionaries/types'
+  import type { DictionaryView } from '$lib/types'
   import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 

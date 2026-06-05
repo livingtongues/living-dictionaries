@@ -1,4 +1,4 @@
-import type { IColumn, Tables } from '@living-dictionaries/types'
+import type { IColumn, Tables } from '$lib/types'
 import { get } from 'svelte/store'
 import { page } from '$app/stores'
 import { vernacularName } from '$lib/helpers/vernacularName'
@@ -57,7 +57,7 @@ export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionarie
         alternateOrthographyColumns.push({
           field: 'local_orthography',
           width: 170,
-          display: orthography.name.default,
+          display: orthography.name,
           orthography_index: index + 1,
         })
       }

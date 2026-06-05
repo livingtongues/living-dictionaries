@@ -6,7 +6,7 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
   const { data } = $props()
-  const { is_manager, is_contributor, dictionary, update_about, dictionary_info, admin } = $derived(data)
+  const { is_manager, is_contributor, dictionary, update_about, admin } = $derived(data)
   let updated = $state('')
 
   let editing = $state(false)
@@ -39,13 +39,13 @@
     {#if editing}
       <div class="max-w-screen-md tw-prose prose-lg">
         {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-          <ClassicCustomized html={$dictionary_info.about} on:update={({ detail }) => (updated = detail)} />
+          <ClassicCustomized html={dictionary.about} on:update={({ detail }) => (updated = detail)} />
         {/await}
       </div>
     {/if}
     <div class="tw-prose prose-lg max-w-screen-md {editing && 'hidden md:block mt-14 ml-3'}">
-      {#if updated || $dictionary_info.about}
-        {@html sanitize(updated || $dictionary_info.about)}
+      {#if updated || dictionary.about}
+        {@html sanitize(updated || dictionary.about)}
       {:else}
         <i>{$page.data.t('dictionary.no_info_yet')}</i>
       {/if}

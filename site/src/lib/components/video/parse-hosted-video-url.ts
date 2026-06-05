@@ -1,4 +1,4 @@
-import type { HostedVideo } from '@living-dictionaries/types'
+import type { HostedVideo } from '$lib/types'
 
 export function parse_hosted_video_url(url: string): HostedVideo {
   const videoIdParseRegex

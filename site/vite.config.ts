@@ -46,7 +46,6 @@ export default defineConfig(async (): Promise<UserConfig> => ({
       'xss',
       'wavesurfer.js',
       'recordrtc',
-      '@supabase/supabase-js',
     ],
     exclude: [ // if the dependency is small, ESM, no CJS imports, then exclude and let the browser load directly - https://vitejs.dev/guide/dep-pre-bundling.html
       'idb-keyval',
@@ -55,21 +54,12 @@ export default defineConfig(async (): Promise<UserConfig> => ({
       '@turf/helpers',
       '@turf/center',
       '@turf/turf',
-      'sveltefirets',
-      '@sentry/browser',
       'wa-sqlite', // Emscripten loader resolves its .wasm via a relative import.meta.url that pre-bundling breaks
     ],
   },
 }))
 
 function getReplacements() {
-  if (typeof process !== 'undefined' && process.env.VERCEL_ANALYTICS_ID) {
-    return {
-      'import.meta.vitest': false,
-      'REPLACED_WITH_VERCEL_ANALYTICS_ID': process.env.VERCEL_ANALYTICS_ID,
-    }
-  }
-
   return {
     'import.meta.vitest': false,
   }

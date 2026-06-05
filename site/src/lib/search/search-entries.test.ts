@@ -1,5 +1,5 @@
 import { create, insertMultiple, save } from '@orama/orama'
-import type { EntryData } from '@living-dictionaries/types'
+import type { EntryData } from '$lib/types'
 import { search_entries } from './search-entries'
 import { entries_index_schema } from './entries-schema'
 import { augment_entry_for_search } from './augment-entry-for-search'
@@ -584,6 +584,9 @@ describe(search_entries, () => {
           "vectorIndexes": {},
         },
         "language": "multi",
+        "pinning": {
+          "rules": [],
+        },
         "sorting": {
           "enabled": true,
           "isSorted": true,

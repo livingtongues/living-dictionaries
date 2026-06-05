@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
+  import type { Tables } from '$lib/types'
   import { decades } from './ages'
   import { Button, Form, Modal } from '$lib/svelte-pieces'
   import { page } from '$app/stores'

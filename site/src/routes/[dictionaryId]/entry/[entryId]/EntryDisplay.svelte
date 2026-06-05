@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryData, EntryFieldValue, Tables, TablesUpdate } from '@living-dictionaries/types'
+  import type { EntryData, EntryFieldValue, Tables, TablesUpdate } from '$lib/types'
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
   import Sense from './Sense.svelte'
@@ -15,7 +15,6 @@
     dictionary: Tables<'dictionaries'>
     can_edit?: boolean
     dbOperations: DbOperations
-    entry_history: Tables<'content_updates'>[]
   }
 
   const {
@@ -23,7 +22,6 @@
     dictionary,
     can_edit = false,
     dbOperations,
-    entry_history,
   }: Props = $props()
 
   const text_fields = ['morphology', 'interlinearization'] satisfies EntryFieldValue[]
@@ -49,11 +47,6 @@
 
   <div style="grid-area: media;">
     <EntryMedia {dictionary} {entry} {can_edit} {dbOperations} />
-    {#if entry_history?.length}
-      {#await import('./EntryHistory.svelte') then { default: EntryHistory }}
-        <EntryHistory {entry_history} {can_edit} class="mt-5 hidden md:block" />
-      {/await}
-    {/if}
   </div>
 
   <div class="flex flex-col grow" style="grid-area: content;">
@@ -63,7 +56,7 @@
         value={entry.main.lexeme[orthography_field]}
         field="local_orthography"
         {can_edit}
-        display={orthography.name.default}
+        display={orthography.name}
         on_update={(new_value) => {
           update_entry({ lexeme: { ...entry.main.lexeme, [orthography_field]: new_value } })
         }} />

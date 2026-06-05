@@ -1,10 +1,22 @@
 <script lang="ts">
   import { Button, ShowHide } from '$lib/svelte-pieces'
+  import { api_dictionaries_id_invites_accept } from '$api/dictionaries/[id]/invites/[invite_id]/accept/_call'
+  import { invalidateAll } from '$app/navigation'
   import { page } from '$app/stores'
 
   const { data } = $props()
-  const { auth_user, dictionary, is_manager, is_contributor, invite, accept_invite } = $derived(data)
+  const { auth_user, dictionary, is_manager, is_contributor, invite } = $derived(data)
   const user = $derived(auth_user.user)
+
+  async function accept_invite() {
+    if (!invite) return
+    const { error } = await api_dictionaries_id_invites_accept({ dict_id: invite.dictionary_id, invite_id: invite.id })
+    if (error) {
+      alert(`${$page.data.t('misc.error')}: ${error.message}`)
+      return
+    }
+    await invalidateAll()
+  }
 </script>
 
 {#if invite?.status === 'sent'}

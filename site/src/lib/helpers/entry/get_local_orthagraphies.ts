@@ -1,4 +1,4 @@
-import type { MultiString } from '@living-dictionaries/types'
+import type { MultiString } from '$lib/types'
 
 export function get_local_orthographies(lexeme: MultiString): string[] {
   if (!lexeme) return []

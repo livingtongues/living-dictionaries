@@ -1,23 +1,8 @@
-import { derived, readable } from 'svelte/store'
-import type { EntryData, Tables } from '@living-dictionaries/types'
+import { derived } from 'svelte/store'
+import type { EntryData } from '$lib/types'
 import { browser } from '$app/environment'
 
 export async function load({ params: { entryId: entry_id }, parent }) {
-  const entry_history = readable<Tables<'content_updates'>[]>([], (set) => {
-    (async () => {
-      const { supabase } = await parent()
-      const { data: entry_content_updates, error } = await supabase.from('content_updates')
-        .select('*')
-        .eq('entry_id', entry_id)
-        .order('timestamp', { ascending: false })
-      if (error) {
-        console.error(error)
-        return []
-      }
-      if (entry_content_updates.length) set(entry_content_updates)
-    })()
-  })
-
   const loading_entry = { id: entry_id, main: { lexeme: { default: 'Loading...' } }, senses: [{}] } as unknown as EntryData
 
   if (!browser) {
@@ -28,7 +13,6 @@ export async function load({ params: { entryId: entry_id }, parent }) {
     return {
       entry_from_page: loading_entry,
       shallow: false,
-      entry_history,
     }
   }
 
@@ -53,6 +37,5 @@ export async function load({ params: { entryId: entry_id }, parent }) {
   return {
     derived_entry,
     shallow: false,
-    entry_history,
   }
 }

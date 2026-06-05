@@ -1,4 +1,4 @@
-import type { DictionaryView } from '@living-dictionaries/types'
+import type { DictionaryView } from '$lib/types'
 
 enum StandardDictionaryCSVFields {
   name = 'Dictionary Name',

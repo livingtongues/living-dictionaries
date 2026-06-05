@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getContext } from 'svelte'
-  import type { DictionaryView } from '@living-dictionaries/types'
+  import type { DictionaryView } from '$lib/types'
   import GeoJSONSource from '$lib/components/maps/mapbox/sources/GeoJSONSource.svelte'
   import Layer from '$lib/components/maps/mapbox/map/Layer.svelte'
   import { dictionaryGeoJsonCollection } from '$lib/components/maps/utils/dictionaryGeoJsonCollection'

@@ -1,4 +1,4 @@
-import type { Coordinates } from '@living-dictionaries/types'
+import type { Coordinates } from '$lib/types'
 
 export function flattenCoordinates(coordinates: Coordinates): number[][] {
   const flattened = []

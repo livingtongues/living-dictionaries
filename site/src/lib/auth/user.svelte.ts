@@ -14,6 +14,16 @@ export type { AuthUserData }
 export class AuthUser {
   user = $state<AuthUserData | null>(null)
 
+  /** Site-admin gate (computed server-side from the `$lib/admins` allow-list). */
+  get is_admin(): boolean {
+    return !!this.user?.is_admin
+  }
+
+  /** Numeric admin tier: 0 = not an admin, else `admin_level` (1 | 2). For `>= 1` checks. */
+  get admin_level(): number {
+    return this.user?.admin_level ?? 0
+  }
+
   /**
    * Refresh user details from `/api/auth/me`. Useful when re-validating an
    * existing session. A 401/404 wipes local state (the server cookie is the

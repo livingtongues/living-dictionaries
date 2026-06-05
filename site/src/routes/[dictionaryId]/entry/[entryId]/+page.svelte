@@ -16,7 +16,6 @@
     admin,
     can_edit,
     dbOperations,
-    entry_history,
   } = $derived(data)
 
   const entry = $derived(entry_from_page || $derived_entry)
@@ -73,7 +72,6 @@
 
 <EntryDisplay
   {entry}
-  entry_history={$entry_history}
   {dictionary}
   can_edit={can_edit}
   {dbOperations} />

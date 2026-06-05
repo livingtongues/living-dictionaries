@@ -1,4 +1,4 @@
-import type { IExampleSentence } from '@living-dictionaries/types'
+import type { IExampleSentence } from '$lib/types'
 
 export function printExampleSentences(
   exampleSentences: IExampleSentence,

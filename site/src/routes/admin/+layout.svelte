@@ -8,7 +8,6 @@
   import { onMount } from 'svelte'
   import IconMdiArrowLeft from '~icons/mdi/arrow-left'
   import IconMdiShieldAccount from '~icons/mdi/shield-account'
-  import '$lib/admin/admin-theme.css'
 
   let { children, data } = $props()
 
@@ -63,7 +62,7 @@
 </svelte:head>
 
 {#if !data.auth_user.user}
-  <div class="signed-out admin-root">
+  <div class="signed-out">
     <IconMdiShieldAccount style="font-size: 2rem; color: var(--primary)" />
     <h1 class="signed-out-title">Admin area</h1>
     <p class="signed-out-text">Please sign in to continue.</p>
@@ -77,7 +76,7 @@
     </ShowHide>
   </div>
 {:else}
-  <div class="page admin-root">
+  <div class="page">
     <header class="page-header">
       <div class="header-row">
         <a href="/" class="back-link" title="Back to site">

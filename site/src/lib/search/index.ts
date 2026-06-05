@@ -1,5 +1,5 @@
 import { proxy } from 'comlink'
-import type { EntryData, Tables } from '@living-dictionaries/types'
+import type { EntryData, Tables } from '$lib/types'
 import type { InitEntryWorkerOptions } from './entry.worker'
 import type { SearchEntriesOptions } from './search-entries'
 

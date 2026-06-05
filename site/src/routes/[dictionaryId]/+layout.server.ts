@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit'
-import type { Tables } from '@living-dictionaries/types'
+import type { Tables } from '$lib/types'
 import type { LayoutServerLoad } from './$types'
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'

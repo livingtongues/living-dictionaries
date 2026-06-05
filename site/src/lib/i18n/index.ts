@@ -1,9 +1,9 @@
 /* eslint-disable require-atomic-updates */
-import enBase from './locales/en.json' assert { type: 'json' }
-import enGloss from './locales/gl/en.json' assert { type: 'json' }
-import enPartsOfSpeech from './locales/ps/en.json' assert { type: 'json' }
-import enPartsOfSpeechAbbrev from './locales/psAbbrev/en.json' assert { type: 'json' }
-import enSemanticDomains from './locales/sd/en.json' assert { type: 'json' }
+import enBase from './locales/en.json' with { type: 'json' }
+import enGloss from './locales/gl/en.json' with { type: 'json' }
+import enPartsOfSpeech from './locales/ps/en.json' with { type: 'json' }
+import enPartsOfSpeechAbbrev from './locales/psAbbrev/en.json' with { type: 'json' }
+import enSemanticDomains from './locales/sd/en.json' with { type: 'json' }
 
 import type { LocaleCode } from './locales'
 import type { TranslateFunction, TranslationKeys } from './types'

@@ -5,7 +5,7 @@ export default define_config({
   // root layout, not per-component), so pull it + the reset in for CSR screenshots. Order matches
   // src/routes/+layout.svelte.
   css_imports: ['@unocss/reset/tailwind.css', 'virtual:uno.css'],
-  css_files: ['src/routes/global.css'],
+  css_files: ['src/lib/theme.css', 'src/lib/buttons.css', 'src/routes/global.css'],
 
   // Default viewport for +page.svelte / +layout.svelte stories; components set their own.
   page_viewports: [

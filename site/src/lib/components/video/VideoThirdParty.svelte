@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { HostedVideo } from '@living-dictionaries/types'
+  import type { HostedVideo } from '$lib/types'
 
   interface Props {
     hosted_video: HostedVideo

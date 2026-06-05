@@ -1,7 +1,6 @@
 <script lang="ts">
-  import type { DictionaryView } from '@living-dictionaries/types'
+  import type { DictionaryView } from '$lib/types'
   import sanitize from 'xss'
-  import { onMount } from 'svelte'
   import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 
@@ -10,7 +9,8 @@
   }
 
   const { dictionary }: Props = $props()
-  let about = $state('')
+  // `about` is folded into the catalog row (legacy `dictionary_info`).
+  const about = $derived(dictionary.about ?? '')
 
   function truncateString(str: string, num: number) {
     if (!str) return ''
@@ -20,13 +20,6 @@
 
     return `${str.slice(0, num).trim()}...`
   }
-
-  onMount(async () => {
-    const { data } = await $page.data.supabase.from('dictionary_info').select().eq('id', dictionary.id).single()
-    if (data?.about) {
-      ({ about } = data)
-    }
-  })
 </script>
 
 <div>

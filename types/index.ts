@@ -1,9 +1,9 @@
 import type { Tables } from './supabase/combined.types'
 
 export type { EntryData } from './supabase/entry.interface'
-export type { VideoCustomMetadata, HostedVideo } from './video.interface'
+export type { HostedVideo, VideoCustomMetadata } from './video.interface'
 export type { Coordinates, IPoint, IRegion } from './coordinates.interface'
-export type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface'
+export type { IGlossLanguage, IGlossLanguages } from './gloss-language.interface'
 export type { MultiString } from './gloss.interface'
 export type { IExampleSentence } from './example-sentence.interface'
 export type { DictionaryPhoto } from './photo.interface'

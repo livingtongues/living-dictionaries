@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
+  import type { Tables } from '$lib/types'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import Marker from '$lib/components/maps/mapbox/map/Marker.svelte'
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'

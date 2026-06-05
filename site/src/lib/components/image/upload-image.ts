@@ -3,6 +3,7 @@ import type { Readable } from 'svelte/store'
 import { api_gcs_serving_url } from '$api/gcs_serving_url/_call'
 import { api_upload } from '$api/upload/_call'
 import { page } from '$app/stores'
+import { DEV_LOCAL_PREFIX } from '$lib/helpers/media'
 
 export interface ImageUploadStatus {
   progress: number
@@ -26,12 +27,20 @@ export function upload_image({
 
   (async () => {
     const { data: { dictionary } } = get(page)
-    const { data: { presigned_upload_url, bucket, object_key }, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name: file.name, file_type: file.type })
+    const { data: { presigned_upload_url, bucket, object_key, dev_mock }, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name: file.name, file_type: file.type })
     if (error) {
       console.error(error)
       set({ preview_url, progress: 0, error: error.message })
     } else {
       await upload_file(file, presigned_upload_url)
+
+      // Dev media mock: bytes were stored locally; skip the (unconfigured)
+      // serving-url service and point at the local store via a sentinel.
+      if (dev_mock) {
+        set({ preview_url, progress: 100, storage_path: object_key, serving_url: `${DEV_LOCAL_PREFIX}${object_key}` })
+        on_success?.()
+        return
+      }
 
       const { data, error: serving_url_error } = await api_gcs_serving_url({ storage_path: `${bucket}/${object_key}` })
 

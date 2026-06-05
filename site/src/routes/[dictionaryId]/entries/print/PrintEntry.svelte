@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryData, Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '$lib/types'
   import sanitize from 'xss'
   import { tick } from 'svelte'
   import QrCode from './QrCode.svelte'
@@ -8,6 +8,7 @@
   import { order_example_sentences, order_glosses } from '$lib/helpers/glosses'
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
+  import { image_src } from '$lib/helpers/media'
 
   interface Props {
     entry: EntryData
@@ -187,7 +188,7 @@
   <img
     class="block mb-1 mt-1px"
     style="width:{imagePercent}%; max-height: 100vh;"
-    src="https://lh3.googleusercontent.com/{first_photo.serving_url}"
+    src={image_src(first_photo.serving_url, 's0')}
     alt={entry.main.lexeme.default} />
 {/if}
 

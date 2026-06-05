@@ -1,6 +1,6 @@
 <script lang="ts">
   import JSZip from 'jszip'
-  import type { Tables } from '@living-dictionaries/types'
+  import type { Tables } from '$lib/types'
   import { createEventDispatcher, onDestroy, onMount } from 'svelte'
   import type { EntryForCSV } from './prepareEntriesForCsv'
   import { objectsToCsvByHeaders } from '$lib/export/csv'

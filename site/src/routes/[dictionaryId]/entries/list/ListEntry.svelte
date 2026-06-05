@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryData, Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '$lib/types'
   import sanitize from 'xss'
   import Audio from '../components/Audio.svelte'
   import Video from '../components/Video.svelte'

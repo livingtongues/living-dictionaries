@@ -5,32 +5,32 @@ export interface Change {
   data: Record<string, any>
 }
 
-export type ContentUpdateRequestBody =
-  | Insert_Entry
-  | Update_Entry
+export type ContentUpdateRequestBody
+  = | Insert_Entry
+    | Update_Entry
 
-  | Insert_Sense
-  | Update_Sense
+    | Insert_Sense
+    | Update_Sense
 
-  | Upsert_Audio
+    | Upsert_Audio
 
-  | Insert_Photo
-  | Update_Photo
+    | Insert_Photo
+    | Update_Photo
 
-  | Insert_Video
-  | Update_Video
+    | Insert_Video
+    | Update_Video
 
-  | Upsert_Speaker
-  | Assign_Speaker
+    | Upsert_Speaker
+    | Assign_Speaker
 
-  | Insert_Tag
-  | Assign_Tag
+    | Insert_Tag
+    | Assign_Tag
 
-  | Insert_Dialect
-  | Assign_Dialect
+    | Insert_Dialect
+    | Assign_Dialect
 
-  | Insert_Sentence
-  | Update_Sentence
+    | Insert_Sentence
+    | Update_Sentence
 
 interface ContentUpdateBase {
   update_id: string // id of the change, a uuidv4 created on client to make things idempotent

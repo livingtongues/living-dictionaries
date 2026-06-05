@@ -2,7 +2,7 @@
   import { createBubbler, stopPropagation } from 'svelte/legacy'
 
   const bubble = createBubbler()
-  import type { EntryData } from '@living-dictionaries/types'
+  import type { EntryData } from '$lib/types'
   import VideoThirdParty from './VideoThirdParty.svelte'
   import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/stores'

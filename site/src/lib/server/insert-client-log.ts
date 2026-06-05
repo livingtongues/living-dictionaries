@@ -1,0 +1,279 @@
+import type Database from 'better-sqlite3'
+import type { ClientLogLevel } from '$lib/db/schemas/shared.types'
+import { get_shared_db, open_shared_db } from '$lib/db/server/shared-db'
+
+/**
+ * One client-side log entry as accepted by `POST /api/log`. Fields beyond
+ * `level` + `message` are optional — clients may skip anything they don't
+ * have. Validation is best-effort: malformed entries are dropped silently
+ * because logging must never spawn more errors.
+ */
+export interface ClientLogPayload {
+  level: ClientLogLevel
+  message: string
+  client_time?: string
+  stack?: string | null
+  url?: string | null
+  user_agent?: string | null
+  platform?: 'web' | 'ios' | 'android' | null
+  app_version?: string | null
+  build_target?: string | null
+  /** Free-form JSON; the helper stringifies, agent triage parses. */
+  context?: Record<string, unknown> | null
+}
+
+const VALID_LEVELS: ReadonlySet<ClientLogLevel> = new Set([
+  'error',
+  'warn',
+  'info',
+  'unhandled_rejection',
+  'crash',
+])
+
+const MAX_MESSAGE_LEN = 2000
+const MAX_STACK_LEN = 16_000
+const MAX_CONTEXT_LEN = 16_000
+
+function clamp(value: string | null | undefined, max: number): string | null {
+  if (value === null || value === undefined)
+    return null
+  return value.length > max ? value.slice(0, max) : value
+}
+
+/**
+ * Insert one client log into `shared.db`. Returns `true` on success and
+ * `false` on any failure (validation or DB) so callers can count accepted
+ * vs dropped without try/catch boilerplate. Errors surface to the server
+ * console for operator visibility but never re-throw.
+ */
+export function insert_client_log({
+  payload,
+  user_id,
+  db = get_shared_db(),
+  now = new Date(),
+}: {
+  payload: ClientLogPayload
+  user_id: string | null
+  db?: Database.Database
+  now?: Date
+}): boolean {
+  try {
+    if (!payload || typeof payload !== 'object')
+      return false
+    if (!payload.message || typeof payload.message !== 'string')
+      return false
+    if (!VALID_LEVELS.has(payload.level))
+      return false
+
+    const id = crypto.randomUUID()
+    const received_at = now.toISOString()
+    const message = clamp(payload.message, MAX_MESSAGE_LEN) ?? ''
+    const stack = clamp(payload.stack, MAX_STACK_LEN)
+    const context_json = payload.context
+      ? clamp(safe_stringify(payload.context), MAX_CONTEXT_LEN)
+      : null
+
+    db.prepare(`
+      INSERT INTO client_logs (
+        id, received_at, client_time, user_id, level, message, stack,
+        url, user_agent, platform, app_version, build_target, context
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      id,
+      received_at,
+      payload.client_time ?? null,
+      user_id,
+      payload.level,
+      message,
+      stack,
+      payload.url ?? null,
+      payload.user_agent ?? null,
+      payload.platform ?? null,
+      payload.app_version ?? null,
+      payload.build_target ?? null,
+      context_json,
+    )
+    return true
+  } catch (err) {
+    console.error('[insert_client_log] failed:', (err as Error).message)
+    return false
+  }
+}
+
+function safe_stringify(value: unknown): string | null {
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Tiny in-process IP rate limiter — token bucket per remote address. We don't
+ * need anything sophisticated: this is a guard against a runaway client
+ * looping logs, not abuse mitigation. State lives on `globalThis` so HMR in
+ * dev doesn't reset the bucket between edits.
+ */
+const RATE_KEY = Symbol.for('living:client-log-rate-buckets')
+interface Bucket { tokens: number, last_refill_ms: number }
+interface RateState { buckets: Map<string, Bucket>, last_purge_ms: number }
+
+function get_rate_state(): RateState {
+  const global_object = globalThis as unknown as Record<symbol, RateState | undefined>
+  if (!global_object[RATE_KEY])
+    global_object[RATE_KEY] = { buckets: new Map(), last_purge_ms: Date.now() }
+  return global_object[RATE_KEY] as RateState
+}
+
+const RATE_CAPACITY = 30 // burst
+const RATE_REFILL_PER_MS = 30 / 60_000 // 30 logs per minute steady-state
+const PURGE_INTERVAL_MS = 5 * 60_000
+
+/**
+ * Returns `true` if the IP is allowed to log right now (and consumes a token);
+ * `false` if it's over the cap. Use `now_ms` injection for deterministic tests.
+ */
+export function rate_limit_allow({ ip, now_ms = Date.now() }: { ip: string, now_ms?: number }): boolean {
+  const state = get_rate_state()
+
+  // Periodic purge so a long-running process doesn't leak per-IP buckets forever.
+  if (now_ms - state.last_purge_ms > PURGE_INTERVAL_MS) {
+    for (const [key, bucket] of state.buckets) {
+      const refilled = Math.min(RATE_CAPACITY, bucket.tokens + (now_ms - bucket.last_refill_ms) * RATE_REFILL_PER_MS)
+      if (refilled >= RATE_CAPACITY)
+        state.buckets.delete(key)
+    }
+    state.last_purge_ms = now_ms
+  }
+
+  let bucket = state.buckets.get(ip)
+  if (!bucket) {
+    bucket = { tokens: RATE_CAPACITY, last_refill_ms: now_ms }
+    state.buckets.set(ip, bucket)
+  } else {
+    const elapsed_ms = now_ms - bucket.last_refill_ms
+    bucket.tokens = Math.min(RATE_CAPACITY, bucket.tokens + elapsed_ms * RATE_REFILL_PER_MS)
+    bucket.last_refill_ms = now_ms
+  }
+
+  if (bucket.tokens < 1)
+    return false
+  bucket.tokens -= 1
+  return true
+}
+
+/** Test-only: reset all rate buckets between tests. */
+export function _reset_rate_state(): void {
+  const state = get_rate_state()
+  state.buckets.clear()
+  state.last_purge_ms = Date.now()
+}
+
+if (import.meta.vitest) {
+  const { describe, test, expect } = import.meta.vitest
+  describe(insert_client_log, () => {
+    test('inserts a minimal valid payload', () => {
+      const db = open_shared_db(':memory:')
+      const ok = insert_client_log({ payload: { level: 'error', message: 'boom' }, user_id: null, db })
+      expect(ok).toBe(true)
+      const row = db.prepare('SELECT level, message, user_id FROM client_logs').get() as { level: string, message: string, user_id: string | null }
+      expect(row.level).toBe('error')
+      expect(row.message).toBe('boom')
+      expect(row.user_id).toBeNull()
+    })
+
+    test('attributes user_id when provided', () => {
+      const db = open_shared_db(':memory:')
+      insert_client_log({ payload: { level: 'crash', message: 'died' }, user_id: 'u-7', db })
+      const row = db.prepare('SELECT user_id FROM client_logs').get() as { user_id: string }
+      expect(row.user_id).toBe('u-7')
+    })
+
+    test('stringifies context to JSON in storage', () => {
+      const db = open_shared_db(':memory:')
+      insert_client_log({
+        payload: { level: 'error', message: 'x', context: { route: '/admin/messages', breadcrumbs: ['a', 'b'] } },
+        user_id: null,
+        db,
+      })
+      const row = db.prepare('SELECT context FROM client_logs').get() as { context: string }
+      expect(JSON.parse(row.context)).toEqual({ route: '/admin/messages', breadcrumbs: ['a', 'b'] })
+    })
+
+    test('rejects payloads missing level or message', () => {
+      const db = open_shared_db(':memory:')
+      // @ts-expect-error — testing invalid payload
+      expect(insert_client_log({ payload: { message: 'no level' }, user_id: null, db })).toBe(false)
+      // @ts-expect-error — testing invalid payload
+      expect(insert_client_log({ payload: { level: 'error' }, user_id: null, db })).toBe(false)
+      const count = (db.prepare('SELECT COUNT(*) AS c FROM client_logs').get() as { c: number }).c
+      expect(count).toBe(0)
+    })
+
+    test('rejects unknown levels', () => {
+      const db = open_shared_db(':memory:')
+      // @ts-expect-error — testing invalid level
+      expect(insert_client_log({ payload: { level: 'fatal', message: 'x' }, user_id: null, db })).toBe(false)
+    })
+
+    test('truncates oversize message and stack', () => {
+      const db = open_shared_db(':memory:')
+      const huge_message = 'x'.repeat(MAX_MESSAGE_LEN + 100)
+      const huge_stack = 'y'.repeat(MAX_STACK_LEN + 100)
+      insert_client_log({
+        payload: { level: 'error', message: huge_message, stack: huge_stack },
+        user_id: null,
+        db,
+      })
+      const row = db.prepare('SELECT message, stack FROM client_logs').get() as { message: string, stack: string }
+      expect(row.message).toHaveLength(MAX_MESSAGE_LEN)
+      expect(row.stack).toHaveLength(MAX_STACK_LEN)
+    })
+
+    test('survives a context object containing a circular reference', () => {
+      const db = open_shared_db(':memory:')
+      const cyclic: Record<string, unknown> = { a: 1 }
+      cyclic.self = cyclic
+      const ok = insert_client_log({
+        payload: { level: 'error', message: 'cyclic', context: cyclic },
+        user_id: null,
+        db,
+      })
+      expect(ok).toBe(true)
+      const row = db.prepare('SELECT context FROM client_logs').get() as { context: string | null }
+      expect(row.context).toBeNull()
+    })
+  })
+
+  describe(rate_limit_allow, () => {
+    test('allows up to RATE_CAPACITY immediate calls per IP, then blocks', () => {
+      _reset_rate_state()
+      const ip = '1.2.3.4'
+      let allowed = 0
+      for (let index = 0; index < RATE_CAPACITY + 5; index++) {
+        if (rate_limit_allow({ ip, now_ms: 1000 }))
+          allowed++
+      }
+      expect(allowed).toBe(RATE_CAPACITY)
+    })
+
+    test('refills tokens at the configured steady-state rate', () => {
+      _reset_rate_state()
+      const ip = '5.6.7.8'
+      for (let index = 0; index < RATE_CAPACITY; index++)
+        rate_limit_allow({ ip, now_ms: 1000 })
+      expect(rate_limit_allow({ ip, now_ms: 1000 })).toBe(false)
+
+      // 30s later, ~15 tokens should have refilled (30 / minute) — enough to unblock.
+      expect(rate_limit_allow({ ip, now_ms: 1000 + 30_000 })).toBe(true)
+    })
+
+    test('tracks separate buckets per IP', () => {
+      _reset_rate_state()
+      for (let index = 0; index < RATE_CAPACITY; index++)
+        rate_limit_allow({ ip: 'a', now_ms: 0 })
+      expect(rate_limit_allow({ ip: 'a', now_ms: 0 })).toBe(false)
+      expect(rate_limit_allow({ ip: 'b', now_ms: 0 })).toBe(true)
+    })
+  })
+}

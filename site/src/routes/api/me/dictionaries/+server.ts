@@ -1,4 +1,4 @@
-import type { DictionaryView } from '@living-dictionaries/types'
+import type { DictionaryView } from '$lib/types'
 import type { RequestHandler } from './$types'
 import { verify_auth } from '$lib/auth/verify'
 import { get_shared_db } from '$lib/db/server/shared-db'

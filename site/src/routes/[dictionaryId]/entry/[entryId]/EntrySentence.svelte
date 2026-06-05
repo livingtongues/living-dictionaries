@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
+  import type { Tables } from '$lib/types'
   import EntryField from './EntryField.svelte'
   import { page } from '$app/stores'
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IRegion } from '@living-dictionaries/types'
+  import type { IRegion } from '$lib/types'
   import { getContext } from 'svelte'
   import { points } from '@turf/helpers'
   import center from '@turf/center'

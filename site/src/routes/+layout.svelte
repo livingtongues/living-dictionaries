@@ -2,10 +2,14 @@
 <script lang="ts">
   import './reset.css'
   import 'virtual:uno.css'
+  import '$lib/theme.css'
+  import '$lib/buttons.css'
   import './global.css'
   import LoadingIndicator from './LoadingIndicator.svelte'
+  import { onMount } from 'svelte'
   import { navigating, page } from '$app/state'
   import { browser } from '$app/environment'
+  import { init_remote_logging } from '$lib/debug/remote-log'
 
   interface Props {
     children?: import('svelte').Snippet
@@ -13,8 +17,9 @@
 
   const { children }: Props = $props()
 
-// export let data
-    // $: ({ user } = data)
+  onMount(() => {
+    init_remote_logging()
+  })
 </script>
 
 {#if browser}
@@ -36,9 +41,3 @@
 <div id="direction" dir={page.data.t('page.direction') as 'ltr' | 'rtl' | 'auto'}>
   {@render children?.()}
 </div>
-
-{#if browser}
-  {#await import('./Analytics.svelte') then { default: Analytics }}
-    <Analytics />
-  {/await}
-{/if}

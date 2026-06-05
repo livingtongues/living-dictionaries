@@ -5,7 +5,7 @@ import type { Address } from '../send-email'
 import type { RequestHandler } from './$types'
 import { dev } from '$app/environment'
 import { ResponseCodes } from '$lib/constants'
-import { getAdminSupabaseClient } from '$lib/supabase/admin'
+import { get_shared_db } from '$lib/db/server/shared-db'
 
 export interface RequestAccessBody {
   email: string
@@ -16,36 +16,25 @@ export interface RequestAccessBody {
   dictionaryName: string
 }
 
-async function get_manager_addresses(dictionary_id: string): Promise<Address[]> {
-  const admin_supabase = getAdminSupabaseClient()
+function get_manager_addresses(dictionary_id: string): Address[] {
+  const db = get_shared_db()
+  const managers = db.prepare(`
+    SELECT users.name AS name, users.email AS email
+    FROM dictionary_roles
+    LEFT JOIN users ON users.id = dictionary_roles.user_id
+    WHERE dictionary_roles.role = 'manager' AND dictionary_roles.dictionary_id = ?
+  `).all(dictionary_id) as { name: string | null, email: string | null }[]
 
-  const { data: managers, error: manager_error } = await admin_supabase.from('dictionary_roles')
-    .select(`
-      dictionary_id,
-      user_id,
-      role,
-      profile:profiles_view!user_id (
-        full_name,
-        email
-      )
-      `)
-    .eq('role', 'manager')
-    .eq('dictionary_id', dictionary_id)
-  if (manager_error) throw new Error(manager_error.message)
-
-  return managers.map((manager) => {
-    return {
-      name: manager.profile.full_name,
-      email: manager.profile.email,
-    }
-  })
+  return managers
+    .filter(manager => !!manager.email)
+    .map(manager => ({ name: manager.name ?? undefined, email: manager.email as string }))
 }
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
     const { email, message, name, url, dictionaryId, dictionaryName } = await request.json() as RequestAccessBody
 
-    const managerAddresses = await get_manager_addresses(dictionaryId)
+    const managerAddresses = get_manager_addresses(dictionaryId)
     await send_email({
       to: [...getSupportMessageRecipients({ dev }), ...managerAddresses],
       reply_to: { email },

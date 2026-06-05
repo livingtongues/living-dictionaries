@@ -6,7 +6,7 @@ description: Learn about the Living Dictionaries app architecture, data structur
 ## When to use me
 To quickly understand the Living Dictionaries domain (what a dictionary/entry/sense is) and how
 **this repo** is currently built. For the migration plan and milestone status, read
-`.issues/vps-migration.md`. For the *target* architecture we're migrating toward, read the
+`.issues/cross-project-orchestration.md`. For the *target* architecture we're migrating toward, read the
 example repo's `.knowledge/architecture/*` (don't assume it exists here yet).
 
 ## What the app is
@@ -53,7 +53,7 @@ contributors, grammar, history, export, import, invite) · `/admin/*` · `/og` (
 ## Where to look
 | Need | Where |
 |---|---|
-| Migration plan + status | `.issues/vps-migration.md` |
+| Migration plan + status | `.issues/cross-project-orchestration.md` |
 | Current domain types | `packages/types`, `site/src/lib/supabase/*` |
 | Target SQLite/sync/VPS architecture | example repo `.knowledge/architecture/*` (reference) |
 | Build/deploy gotchas | `.knowledge/migration/build-and-deploy-gotchas.md` |

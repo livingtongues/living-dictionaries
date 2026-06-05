@@ -1,7 +1,7 @@
 <script lang="ts">
   import { run } from 'svelte/legacy'
 
-  import type { DictionaryView, IPoint } from '@living-dictionaries/types'
+  import type { DictionaryView, IPoint } from '$lib/types'
   import { Button, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 

@@ -1,10 +1,9 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
   import { Button } from '$lib/svelte-pieces'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
 
   interface Props {
-    invite: Tables<'invites'>
+    invite: { id: string, inviter_email: string, target_email: string, role: string, status: string, created_at: string }
     admin?: boolean
     on_delete_invite: () => Promise<void>
     prefix?: import('svelte').Snippet

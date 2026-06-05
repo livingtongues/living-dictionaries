@@ -71,3 +71,27 @@ exists, so deletion stops registration — no `kit.serviceWorker`/`paths` overri
 
 ## Jacob's remaining step
 Set the real GCS env on the VPS, then eyeball a real upload at :3041 (the agent can't reach GCS).
+
+## Dev media mock — local upload + serve, no bucket (added 2026-06-05)
+So media works on dev with **no GCS bucket** (plan: `.issues/dev-media-mock.md`). Gated on
+`import.meta.env.DEV && !gcs_is_configured()` — **prod-without-creds still returns the dormant 503**
+(the dev branch compiles out of a prod build). Mirrors house's dev-mock idea but goes further on two
+points house doesn't have:
+- **LD's client PUTs the bytes** (house POSTs them to the server). So on dev `/api/upload` returns
+  `{ dev_mock:true, presigned_upload_url:'/api/dev-media/<object_key>', … }` and the client XHR-PUTs to
+  **our own** `api/dev-media/[...path]` endpoint (vs a presigned GCS url).
+- **Jacob chose store-local-and-serve-back** (not house's discard+placeholder): `api/dev-media` PUT writes
+  `<DATA_DIR>/dev-media/<path>`; GET serves it back, or **307-redirects to a bundled dummy when the file
+  isn't local**. That redirect is the elegant bit — existing pulled-dict audio/video (whose bytes live in
+  the bucket we don't have) automatically fall back to `static/dev-placeholder-{audio.mp3,video.mp4}`,
+  while a file you just uploaded plays back for real. No env check needed in the serve path.
+- **Photos stay real on dev:** `image_src()` (in `$lib/helpers/media-url.ts`) sends real serving_url hashes
+  to the **public lh3 CDN** (works with no bucket), maps the `dev-local:<key>` sentinel (set by a dev image
+  upload) to `/api/dev-media/<key>`, and empty hashes to `static/dev-placeholder-image.svg`. So pulled-dict
+  photos display for real; only dev-uploaded/empty ones use the local store/placeholder.
+- **Why `media-url.ts` is its own file:** the pure URL builders (`image_src`, `url_from_storage_path`,
+  `DEV_LOCAL_PREFIX`) were split out of `media.ts` because `media.ts` imports the dict-client `operations`
+  (→ `$app/stores`), which can't resolve in the `site:unit` vitest project — so an in-source test there
+  fails the suite. `media.ts` re-exports them, so import sites are unchanged.
+- **Prod `talking-dictionaries-alpha` photos are publicly lh3-served**, so the pulled dicts' real photos load
+  on dev. Audio/video need the bucket → dummy on dev. (Media *files* aren't part of a Supabase data pull.)

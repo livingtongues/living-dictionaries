@@ -1,4 +1,4 @@
-import type { Tables } from '@living-dictionaries/types'
+import type { Tables } from '$lib/types'
 import { order_entry_and_dictionary_gloss_languages, order_example_sentences, order_glosses } from './glosses'
 import { remove_italic_tags } from './remove_italic_tags'
 import { english_translate } from '$lib/i18n'

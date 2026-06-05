@@ -10,7 +10,7 @@ export default defineProject({
     },
     globals: true,
     includeSource: ['src/**/*.ts'],
-    exclude: [...defaultExclude, 'e2e/**', 'src/db-tests/**'],
+    exclude: [...defaultExclude, 'e2e/**'],
     passWithNoTests: true,
   },
 })

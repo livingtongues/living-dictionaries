@@ -4,7 +4,7 @@
   import { display_one_tap_popover } from '$lib/auth/google-one-tap'
   import { sign_out } from '$lib/auth/sign-out'
   import { page } from '$app/stores'
-  import { mode } from '$lib/supabase'
+  import { mode } from '$lib/mode'
   import { api_dev_admin_level } from '$api/auth/dev-admin-level/_call'
   import { invalidateAll } from '$app/navigation'
   import { dev } from '$app/environment'

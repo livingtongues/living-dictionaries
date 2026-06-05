@@ -1,60 +1,42 @@
 {
   "name": "living-dictionaries",
   "type": "module",
+  "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "prepare": "command -v git >/dev/null 2>&1 && [ -d .git ] && git config core.hooksPath .githooks || true",
     "dev": "pnpm --filter=site dev",
     "prod": "pnpm --filter=site prod",
-    "dev:open": "pnpm --filter=site dev --open",
     "build": "pnpm --filter=site build",
     "preview": "pnpm --filter=site preview",
     "check": "pnpm --filter=site check",
-    "test": "vitest",
-    "test:db": "pnpm --filter=site test:db",
-    "test:db:ci": "start-server-and-test dev http://localhost:3041/kitbook test:db",
+    "test": "pnpm --filter=site test",
     "test:site": "pnpm --filter=site test",
     "test:all": "pnpm --recursive --stream test -- --run",
     "test:e2e": "pnpm --filter=site test:e2e",
     "lint": "eslint --cache --quiet",
-    "lint:fix": "eslint --cache --fix --quiet",
-    "lint:inspect": "npx @eslint/config-inspector",
-    "lint:inspect-future": "eslint --inspect-config",
-    "reset-db": "pnpm --filter=site reset-db",
-    "generate-types": "supabase gen types typescript --local --schema public > packages/types/supabase/generated.types.ts && eslint --fix packages/types/supabase/generated.types.ts && pnpm -F scripts merge-types && eslint --fix packages/types/supabase/combined.types.ts",
-    "check-packages": "pnpm update --interactive --recursive --latest"
-  },
-  "pnpm": {
-    "overrides": {
-      "@types/node": "22.8.6"
-    },
-    "onlyBuiltDependencies": [
-      "better-sqlite3",
-      "esbuild",
-      "eslint-plugin-svelte-stylistic"
-    ]
+    "lint:fix": "eslint --cache --fix --quiet"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@typescript-eslint/eslint-plugin": "^8.59.2",
-    "@vitest/eslint-plugin": "^1.6.17",
-    "eslint": "^10.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.60.1",
+    "@vitest/eslint-plugin": "^1.6.19",
+    "eslint": "^10.4.1",
     "eslint-plugin-import-x": "^4.16.2",
-    "eslint-plugin-jsonc": "^3.1.2",
+    "eslint-plugin-jsonc": "^3.2.0",
     "eslint-plugin-n": "^18.0.1",
     "eslint-plugin-perfectionist": "^5.9.0",
     "eslint-plugin-regexp": "^3.1.0",
-    "eslint-plugin-svelte": "^3.17.1",
+    "eslint-plugin-svelte": "^3.19.0",
     "eslint-plugin-svelte-stylistic": "github:jacob-8/eslint-plugin-svelte-stylistic",
     "eslint-plugin-unicorn": "^64.0.0",
     "jsonc-eslint-parser": "^3.1.0",
     "start-server-and-test": "^2.0.5",
-    "supabase": "^1.145.4",
-    "svelte": "^5.56.1",
-    "svelte-eslint-parser": "^1.6.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.59.2",
+    "svelte": "^5.56.2",
+    "svelte-eslint-parser": "^1.8.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.60.1",
     "vitest": "^4.1.8"
   }
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IGlossLanguages } from '@living-dictionaries/types'
+  import type { IGlossLanguages } from '$lib/types'
   import { BadgeArrayEmit, Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import Filter from '$lib/components/Filter.svelte'

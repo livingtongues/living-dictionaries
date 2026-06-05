@@ -52,5 +52,11 @@ export interface FeaturedImage {
   height?: number
 }
 
-/** Catch-all dictionary catalog metadata (legacy `dictionaries.metadata` JSON). */
-export type DictionaryCatalogMetadata = Record<string, unknown>
+/** Dictionary catalog metadata (legacy `dictionaries.metadata` JSON). */
+export interface DictionaryCatalogMetadata {
+  url?: string
+  publish_year?: number
+  population?: number
+  thumbnail?: string
+  type?: string
+}

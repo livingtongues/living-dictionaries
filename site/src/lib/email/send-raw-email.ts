@@ -1,23 +1,23 @@
 import type { SendRawEmailCommandOutput } from '@aws-sdk/client-ses'
 import { SendRawEmailCommand, SESClient } from '@aws-sdk/client-ses'
 import { env } from '$env/dynamic/private'
-import MailComposer from 'nodemailer/lib/mail-composer'
-import type { Address } from './send-email'
+import { createMimeMessage, Mailbox } from 'mimetext'
+import type { Address } from './addresses'
 import { support_address } from './addresses'
 
 /**
  * Sends a raw MIME email via AWS SES `SendRawEmailCommand` — needed because
- * SES's high-level `SendEmail` doesn't expose custom headers (`Message-ID`,
- * `In-Reply-To`, `References`, `Auto-Submitted`) and we need them for proper
- * RFC 5322 threading on admin replies.
+ * SES's high-level `SendEmail` doesn't expose the custom headers (`Message-ID`,
+ * `In-Reply-To`, `References`, `Auto-Submitted`) required for RFC 5322 thread
+ * continuity on admin replies.
  *
- * MIME assembly uses `nodemailer.MailComposer` (no SMTP transport — just
- * `.compile().build()` to get the raw buffer) so we don't hand-roll boundary
- * strings, RFC 2047 subject encoding, quoted-printable text, or base64
- * attachment wrapping.
+ * MIME assembly uses `mimetext` (`createMimeMessage`) — a tiny, dependency-light
+ * builder. Note: `mimetext` sets the transfer-encoding *header* but does NOT
+ * transcode the body/attachment bytes, so we base64-encode every part ourselves
+ * (safe for arbitrary UTF-8) and normalize line endings to CRLF for SES.
  *
- * OTP delivery continues to use the simpler `send-email.ts` (high-level
- * `SendEmail`) since OTPs don't need threading headers.
+ * OTP delivery and one-off transactional sends that don't need threading headers
+ * continue to use the simpler high-level `SendEmail` path.
  */
 
 export interface Attachment {
@@ -25,7 +25,7 @@ export interface Attachment {
   /** Raw bytes (Buffer) or UTF-8 text. */
   content: Buffer | string
   mimetype: string
-  /** RFC 2392 cid for inline images referenced from body_html. */
+  /** RFC 2392 cid for inline images referenced from html_body (e.g. `<img src="cid:logo@example.com">`). */
   content_id?: string
   /** Defaults to `'attachment'`. */
   disposition?: 'attachment' | 'inline'
@@ -44,10 +44,10 @@ export interface SendRawEmailParts {
   html_body?: string
   /**
    * Full RFC 5322 message identifier including angle brackets, e.g.
-   * `<a1b2c3d4@livingdictionaries.app>`. Caller is responsible for generating;
-   * the reply endpoint generates `<${crypto.randomUUID()}@livingdictionaries.app>`
-   * and persists this same value on the `messages.message_id` column so
-   * inbound replies match via `email_references` / `in_reply_to` lookups.
+   * `<a1b2c3d4@example.com>`. Caller is responsible for generating; the reply
+   * endpoint generates `<${crypto.randomUUID()}@…>` and persists this same
+   * value on the `messages.message_id` column so inbound replies match via
+   * `email_references` / `in_reply_to` lookups.
    */
   message_id: string
   /** Full angle-bracketed prior message_id, or null when this is the first message in a thread. */
@@ -57,7 +57,7 @@ export interface SendRawEmailParts {
   /** RFC 3834. Defaults to `'no'` for human admin replies; agent replies should pass `'auto-generated'`. */
   auto_submitted?: 'no' | 'auto-generated' | 'auto-replied' | 'auto-notified'
   attachments?: Attachment[]
-  /** When true, builds the MIME but doesn't send. */
+  /** When true, builds the MIME but doesn't send. Logs the raw envelope + first 200 chars to console. */
   dry_run?: boolean
 }
 
@@ -65,7 +65,22 @@ function format_address({ name, email }: Address): string {
   return name ? `${name} <${email}>` : email
 }
 
-function compose_options(parts: SendRawEmailParts): Record<string, unknown> {
+function to_mailbox({ email, name }: Address): { addr: string, name?: string } {
+  return name ? { addr: email, name } : { addr: email }
+}
+
+/** Base64-encode a part's bytes and hard-wrap at 76 chars per RFC 2045. */
+function to_base64_part(content: Buffer | string): string {
+  const buffer = typeof content === 'string' ? Buffer.from(content, 'utf-8') : content
+  const base64 = buffer.toString('base64')
+  return base64.match(/.{1,76}/g)?.join('\n') ?? base64
+}
+
+/**
+ * Pure MIME builder. No SES dep, no env reads — fully unit-testable. Returns the
+ * raw RFC 5322 string (CRLF line endings) that SES `SendRawEmailCommand` consumes.
+ */
+export function compose_raw_mime(parts: SendRawEmailParts): string {
   const {
     from = support_address,
     to,
@@ -85,56 +100,39 @@ function compose_options(parts: SendRawEmailParts): Record<string, unknown> {
   if (!text_body && !html_body)
     throw new Error('send_raw_email requires at least one of text_body / html_body')
 
-  const headers: Record<string, string> = {
-    'Auto-Submitted': auto_submitted,
-  }
+  const msg = createMimeMessage()
+  msg.setSender(to_mailbox(from))
+  msg.setRecipient(to_mailbox(to))
+  if (cc?.length)
+    msg.setCc(cc.map(to_mailbox))
+  if (bcc?.length)
+    msg.setBcc(bcc.map(to_mailbox))
+  msg.setHeader('Reply-To', new Mailbox(to_mailbox(reply_to ?? from)))
+  msg.setSubject(subject)
+  msg.setHeader('Message-ID', message_id)
+  msg.setHeader('Auto-Submitted', auto_submitted)
   if (in_reply_to)
-    headers['In-Reply-To'] = in_reply_to
-  if (references && references.length > 0)
-    headers.References = references.join(' ')
+    msg.setHeader('In-Reply-To', in_reply_to)
+  if (references?.length)
+    msg.setHeader('References', references.join(' '))
 
-  return {
-    from: format_address(from),
-    to: format_address(to),
-    cc: cc?.map(format_address),
-    bcc: bcc?.map(format_address),
-    replyTo: reply_to ? format_address(reply_to) : format_address(from),
-    subject,
-    text: text_body,
-    html: html_body,
-    messageId: message_id,
-    headers,
-    attachments: attachments?.map(att => ({
-      filename: att.filename,
-      content: att.content,
-      contentType: att.mimetype,
-      cid: att.content_id,
-      contentDisposition: att.disposition ?? 'attachment',
-    })),
-  }
-}
+  if (text_body)
+    msg.addMessage({ contentType: 'text/plain', encoding: 'base64', data: to_base64_part(text_body) })
+  if (html_body)
+    msg.addMessage({ contentType: 'text/html', encoding: 'base64', data: to_base64_part(html_body) })
 
-/**
- * Pure MIME builder. No SES dep, no env reads — fully unit-testable. Returns
- * the raw RFC 5322 byte buffer that SES `SendRawEmailCommand` consumes.
- */
-export function compose_raw_mime(parts: SendRawEmailParts): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    let mail: Record<string, unknown>
-    try {
-      mail = compose_options(parts)
-    } catch (composer_error) {
-      reject(composer_error instanceof Error ? composer_error : new Error(String(composer_error)))
-      return
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    new MailComposer(mail as any).compile().build((err, message) => {
-      if (err)
-        reject(err)
-      else
-        resolve(message)
+  for (const attachment of attachments ?? []) {
+    msg.addAttachment({
+      filename: attachment.filename,
+      contentType: attachment.mimetype,
+      encoding: 'base64',
+      data: to_base64_part(attachment.content),
+      inline: attachment.disposition === 'inline',
+      headers: attachment.content_id ? { 'Content-ID': attachment.content_id } : {},
     })
-  })
+  }
+
+  return msg.asRaw().replace(/\r\n|\r|\n/g, '\r\n')
 }
 
 let ses_client_singleton: SESClient | null = null
@@ -155,7 +153,7 @@ function get_ses_client(): SESClient {
 }
 
 export async function send_raw_email(parts: SendRawEmailParts): Promise<{ ses_message_id: string }> {
-  const raw_mime = await compose_raw_mime(parts)
+  const raw_mime = compose_raw_mime(parts)
 
   if (parts.dry_run) {
     console.info('Dry run: raw email not sent')
@@ -167,8 +165,8 @@ export async function send_raw_email(parts: SendRawEmailParts): Promise<{ ses_me
       console.info('In-Reply-To:', parts.in_reply_to)
     if (parts.references?.length)
       console.info('References:', parts.references.join(' '))
-    console.info('MIME size:', raw_mime.byteLength, 'bytes')
-    console.info('MIME preview:', raw_mime.toString('utf-8').slice(0, 200), '...')
+    console.info('MIME size:', raw_mime.length, 'bytes')
+    console.info('MIME preview:', raw_mime.slice(0, 200), '...')
     return { ses_message_id: 'dry-run' }
   }
 
@@ -183,13 +181,13 @@ export async function send_raw_email(parts: SendRawEmailParts): Promise<{ ses_me
     const command = new SendRawEmailCommand({
       Source: format_address(parts.from ?? support_address),
       Destinations: destinations,
-      RawMessage: { Data: raw_mime },
+      RawMessage: { Data: Buffer.from(raw_mime, 'utf-8') },
     })
     const response: SendRawEmailCommandOutput = await ses_client.send(command)
     console.info('Raw email sent to', parts.to.email, '— SES MessageId:', response.MessageId, '— our Message-ID:', parts.message_id)
     return { ses_message_id: response.MessageId ?? '' }
-  } catch (sender_error) {
-    console.error('Error sending raw email to', parts.to.email, ':', sender_error)
-    throw Object.assign(new Error(`Failed to send raw email to ${parts.to.email}: ${(sender_error as Error).message}`), { cause: sender_error })
+  } catch (error) {
+    console.error('Error sending raw email to', parts.to.email, ':', error)
+    throw Object.assign(new Error(`Failed to send raw email to ${parts.to.email}: ${(error as Error).message}`), { cause: error })
   }
 }

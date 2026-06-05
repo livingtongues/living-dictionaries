@@ -1,4 +1,4 @@
-import type { Tables } from '@living-dictionaries/types'
+import type { Tables } from '$lib/types'
 import { notifyAdminsOnNewDictionary } from './composeMessages'
 
 test('composeAdminNotice returns', () => {
@@ -13,7 +13,7 @@ test('composeAdminNotice returns', () => {
     coordinates: {
       points: [{ coordinates: { latitude: 1, longitude: 2 } }],
     },
-  } as Tables<'dictionaries'>
+  } as unknown as Tables<'dictionaries'>
   const user = {
     email: 'jamesj@gmail.com',
   }

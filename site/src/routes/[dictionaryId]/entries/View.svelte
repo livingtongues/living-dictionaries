@@ -1,6 +1,6 @@
 <script lang="ts">
   import { readable } from 'svelte/store'
-  import type { EntryData } from '@living-dictionaries/types'
+  import type { EntryData } from '$lib/types'
   import EntryPage from '../entry/[entryId]/+page.svelte'
   import ListEntry from './list/ListEntry.svelte'
   import EntriesTable from './table/EntriesTable.svelte'
@@ -48,7 +48,6 @@
               ...page_data,
               entry_from_page: entry,
               shallow: true,
-              entry_history: readable([]),
             }} />
         </Modal>
       {/if}

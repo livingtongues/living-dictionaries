@@ -1,4 +1,4 @@
-import type { DictionaryView } from '@living-dictionaries/types'
+import type { DictionaryView } from '$lib/types'
 import type { PageLoad } from './$types'
 
 export const load: PageLoad = ({ fetch }) => {

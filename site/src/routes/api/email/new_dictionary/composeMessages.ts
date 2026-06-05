@@ -1,4 +1,4 @@
-import type { Tables } from '@living-dictionaries/types'
+import type { Tables } from '$lib/types'
 
 export function notifyAdminsOnNewDictionary(dictionary: Tables<'dictionaries'>, email: string) {
   return `Hey Admins,

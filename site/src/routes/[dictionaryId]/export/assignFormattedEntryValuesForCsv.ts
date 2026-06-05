@@ -1,4 +1,4 @@
-import type { MultiString, Orthography, PartOfSpeech } from '@living-dictionaries/types'
+import type { MultiString, Orthography, PartOfSpeech } from '$lib/types'
 import type { EntryForCSV, translate_entries } from './prepareEntriesForCsv'
 import { get_example_sentence, get_glosses, get_image_files, get_noun_class, get_parts_of_speech, get_plural_form, get_semantic_domain, get_variant } from './getRows'
 

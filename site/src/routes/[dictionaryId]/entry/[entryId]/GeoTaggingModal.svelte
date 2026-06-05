@@ -1,8 +1,7 @@
 <script lang="ts">
-  import type { Coordinates, IPoint, IRegion } from '@living-dictionaries/types'
+  import type { Coordinates, IPoint, IRegion, LngLatFull } from '$lib/types'
   import { onMount } from 'svelte'
-  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface'
-  import InitableShowHide from './InitableShowHide.svelte'
+    import InitableShowHide from './InitableShowHide.svelte'
   import { flattenCoordinates } from './flattenCoordinates'
   import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'

@@ -1,16 +1,16 @@
 import type { TablesInsert } from './combined.types'
 
-export type ImportContentUpdate =
-  | Insert_Entry
-  | Insert_Sense
-  | Insert_Audio // used Upsert_Audio in migration
-  | Insert_Photo
-  | Insert_Video
-  | Insert_Speaker // used Upsert_Speaker in migration
-  | Assign_Speaker
-  | Insert_Dialect
-  | Assign_Dialect
-  | Insert_Sentence
+export type ImportContentUpdate
+  = | Insert_Entry
+    | Insert_Sense
+    | Insert_Audio // used Upsert_Audio in migration
+    | Insert_Photo
+    | Insert_Video
+    | Insert_Speaker // used Upsert_Speaker in migration
+    | Assign_Speaker
+    | Insert_Dialect
+    | Assign_Dialect
+    | Insert_Sentence
 
 interface Insert_Entry {
   type: 'insert_entry'

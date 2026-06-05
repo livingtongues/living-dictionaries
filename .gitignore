@@ -1,9 +1,8 @@
 .DS_Store
 node_modules
 
-*.local
-
 .eslintcache
 notes
-# Local docker-build test env (not for prod; copy of site/.env)
-/.env
+.env*
+/.data/
+
