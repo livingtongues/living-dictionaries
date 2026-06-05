@@ -1,9 +1,10 @@
 import type { RequestHandler } from './$types'
 import { is_admin } from '$lib/admins'
 import { verify_auth } from '$lib/auth/verify'
-import { ResponseCodes } from '$lib/constants'
+import { r2_dict_snapshot_key, ResponseCodes } from '$lib/constants'
 import { delete_dictionary_db_file } from '$lib/db/server/dictionary-db'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { delete_object } from '$lib/r2/delete-object'
 import { error, json } from '@sveltejs/kit'
 
 /**
@@ -16,10 +17,10 @@ import { error, json } from '@sveltejs/kit'
  *      itself. The cascade trigger removes the live rows; admin clients pull the
  *      tombstones on next sync and drop their local copies.
  *   2. Delete the per-dict SQLite file (+ -wal/-shm).
+ *   3. Delete the R2 snapshot object `dictionaries/{id}.db.gz`.
  *
- * NOTE: orphaned-media harvest + R2 snapshot cleanup are DEFERRED with the rest
- * of the R2 work (out this month). Media blobs on the legacy bucket and any R2
- * snapshot are left for a future cleanup sweep.
+ * NOTE: orphaned-media harvest is DEFERRED — media blobs live on legacy GCS
+ * (not moving off GCS yet) and are left for a future cleanup sweep.
  */
 
 export interface DictionariesIdDeleteResponseBody {
@@ -78,9 +79,16 @@ export const DELETE: RequestHandler = async (event) => {
     console.error(`[delete dictionary ${dict_id}] db file removal failed:`, err)
   }
 
+  // 3. R2 snapshot (idempotent; missing key is fine).
+  try {
+    await delete_object({ key: r2_dict_snapshot_key(dict_id) })
+  } catch (err) {
+    console.error(`[delete dictionary ${dict_id}] R2 snapshot removal failed:`, err)
+  }
+
   return json({
     result: 'deleted',
-    orphaned_media_count: 0, // deferred with R2/orphaned-media cleanup
+    orphaned_media_count: 0, // deferred — media stays on legacy GCS for now
     db_files_removed,
   } satisfies DictionariesIdDeleteResponseBody)
 }

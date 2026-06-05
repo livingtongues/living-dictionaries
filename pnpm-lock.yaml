@@ -22,7 +22,7 @@ importers:
         version: 8.60.1(@typescript-eslint/parser@8.60.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)
       '@vitest/eslint-plugin':
         specifier: ^1.6.19
-        version: 1.6.19(@typescript-eslint/eslint-plugin@8.60.1(@typescript-eslint/parser@8.60.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)(vitest@4.1.8)
+        version: 1.6.19(@typescript-eslint/eslint-plugin@8.60.1(@typescript-eslint/parser@8.60.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)(vitest@4.1.8(@types/node@22.8.6)(vite@8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0)))
       eslint:
         specifier: ^10.4.1
         version: 10.4.1(jiti@2.7.0)
@@ -70,7 +70,7 @@ importers:
         version: 8.60.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)
       vitest:
         specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.8.6)(@vitest/ui@4.1.8)(vite@8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0))
+        version: 4.1.8(@types/node@22.8.6)(vite@8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0))
 
   site:
     dependencies:
@@ -189,6 +189,9 @@ importers:
       '@types/recordrtc':
         specifier: ^5.6.15
         version: 5.6.15
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
       '@unocss/extractor-svelte':
         specifier: ^66.7.0
         version: 66.7.0
@@ -201,9 +204,6 @@ importers:
       '@unocss/transformer-directives':
         specifier: ^66.7.0
         version: 66.7.0
-      '@vitest/ui':
-        specifier: ^4.1.8
-        version: 4.1.8(vitest@4.1.8)
       ckeditor5-build-classic-with-alignment-underline-smallcaps:
         specifier: ^1.0.0
         version: 1.0.0
@@ -260,10 +260,13 @@ importers:
         version: 8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0)
       vitest:
         specifier: ^4.1.8
-        version: 4.1.8(@types/node@22.8.6)(@vitest/ui@4.1.8)(vite@8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0))
+        version: 4.1.8(@types/node@22.8.6)(vite@8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0))
       wavesurfer.js:
         specifier: ^5.2.0
         version: 5.2.0
+      ws:
+        specifier: ^8.21.0
+        version: 8.21.0
       xss:
         specifier: ^1.0.15
         version: 1.0.15
@@ -2167,6 +2170,9 @@ packages:
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
 
+  '@types/ws@8.18.1':
+    resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
+
   '@types/yoga-layout@1.9.2':
     resolution: {integrity: sha512-S9q47ByT2pPvD65IvrWp7qppVMpk9WGMbVq9wbWZOHg6tnXSD4vyhao6nOSBwwfDdV2p3Kx9evA9vI+XWTfDvw==}
 
@@ -2489,11 +2495,6 @@ packages:
 
   '@vitest/spy@4.1.8':
     resolution: {integrity: sha512-6EevtBp6OZOPF7bmz36HrGMeP3txgVSrgebWxHOafDXGkhIzfXK14f8KF6MuFfgXXUeHxmpD3BQxkV00/3s5mA==}
-
-  '@vitest/ui@4.1.8':
-    resolution: {integrity: sha512-RUS2ZU2TsduVrI+9c12uTNaKrNUTsm6yFt3fueEUB9iKvyC2UP83F+sqIz00HQIah4UOL1TMoDAki8K0NjGvsA==}
-    peerDependencies:
-      vitest: 4.1.8
 
   '@vitest/utils@4.1.8':
     resolution: {integrity: sha512-uOJamYALNhfJ6iolExyQM40yIQwDqYnkKtQ5VCiSe17E33H0aQ/u+1GlRuz4LZBk6Mm3sg90G9hEbmEt37C1Zg==}
@@ -3278,9 +3279,6 @@ packages:
 
   fflate@0.7.4:
     resolution: {integrity: sha512-5u2V/CDW15QM1XbbgS+0DfPxVB+jUKhWEKuuFuHncbk3tEEqzmoXL+2KyOFuKGqOnmdIy0/davWF1CkuwtibCw==}
-
-  fflate@0.8.2:
-    resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
 
   file-entry-cache@8.0.0:
     resolution: {integrity: sha512-XXTUwCvisa5oacNGRP9SfNtYBNAMi+RPwBFmblZEF7N7swHYQS6/Zfk7SRwx4D5j3CH211YNRco1DEMNVfZCnQ==}
@@ -4651,6 +4649,18 @@ packages:
     peerDependencies:
       bufferutil: ^4.0.1
       utf-8-validate: ^5.0.2
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
+  ws@8.21.0:
+    resolution: {integrity: sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
     peerDependenciesMeta:
       bufferutil:
         optional: true
@@ -7148,6 +7158,10 @@ snapshots:
 
   '@types/trusted-types@2.0.7': {}
 
+  '@types/ws@8.18.1':
+    dependencies:
+      '@types/node': 22.8.6
+
   '@types/yoga-layout@1.9.2': {}
 
   '@typescript-eslint/eslint-plugin@8.60.1(@typescript-eslint/parser@8.60.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)':
@@ -7484,7 +7498,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vitest/eslint-plugin@1.6.19(@typescript-eslint/eslint-plugin@8.60.1(@typescript-eslint/parser@8.60.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)(vitest@4.1.8)':
+  '@vitest/eslint-plugin@1.6.19(@typescript-eslint/eslint-plugin@8.60.1(@typescript-eslint/parser@8.60.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)(vitest@4.1.8(@types/node@22.8.6)(vite@8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0)))':
     dependencies:
       '@typescript-eslint/scope-manager': 8.60.1
       '@typescript-eslint/utils': 8.60.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)
@@ -7492,7 +7506,7 @@ snapshots:
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 8.60.1(@typescript-eslint/parser@8.60.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)
       typescript: 6.0.3
-      vitest: 4.1.8(@types/node@22.8.6)(@vitest/ui@4.1.8)(vite@8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0))
+      vitest: 4.1.8(@types/node@22.8.6)(vite@8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -7530,17 +7544,6 @@ snapshots:
       pathe: 2.0.3
 
   '@vitest/spy@4.1.8': {}
-
-  '@vitest/ui@4.1.8(vitest@4.1.8)':
-    dependencies:
-      '@vitest/utils': 4.1.8
-      fflate: 0.8.2
-      flatted: 3.4.2
-      pathe: 2.0.3
-      sirv: 3.0.2
-      tinyglobby: 0.2.17
-      tinyrainbow: 3.1.0
-      vitest: 4.1.8(@types/node@22.8.6)(@vitest/ui@4.1.8)(vite@8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0))
 
   '@vitest/utils@4.1.8':
     dependencies:
@@ -8306,8 +8309,6 @@ snapshots:
       picomatch: 4.0.4
 
   fflate@0.7.4: {}
-
-  fflate@0.8.2: {}
 
   file-entry-cache@8.0.0:
     dependencies:
@@ -9653,7 +9654,7 @@ snapshots:
     optionalDependencies:
       vite: 8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0)
 
-  vitest@4.1.8(@types/node@22.8.6)(@vitest/ui@4.1.8)(vite@8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0)):
+  vitest@4.1.8(@types/node@22.8.6)(vite@8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0)):
     dependencies:
       '@vitest/expect': 4.1.8
       '@vitest/mocker': 4.1.8(vite@8.0.16(@types/node@22.8.6)(jiti@2.7.0)(tsx@4.19.0))
@@ -9677,7 +9678,6 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.8.6
-      '@vitest/ui': 4.1.8(vitest@4.1.8)
     transitivePeerDependencies:
       - msw
 
@@ -9711,6 +9711,8 @@ snapshots:
   wrappy@1.0.2: {}
 
   ws@8.11.0: {}
+
+  ws@8.21.0: {}
 
   xml-naming@0.1.0: {}
 
