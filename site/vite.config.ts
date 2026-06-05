@@ -1,14 +1,25 @@
 import { readFileSync } from 'node:fs'
 import { sveltekit } from '@sveltejs/kit/vite'
 import { defineConfig } from 'vite'
-import type { Plugin } from 'vite'
+import type { Plugin, UserConfig } from 'vite'
 import UnoCSS from 'unocss/vite'
-import { svelte_look } from 'svelte-look/vite'
 import Icons from 'unplugin-icons/vite'
 
-export default defineConfig({
+// svelte-look is a `link:../../svelte-look` workspace dep that doesn't exist in
+// the Docker build context. Import it lazily so a missing target degrades to
+// "no story plugin" instead of failing the production build.
+async function load_svelte_look() {
+  try {
+    const { svelte_look } = await import('svelte-look/vite')
+    return svelte_look()
+  } catch {
+    return false
+  }
+}
+
+export default defineConfig(async (): Promise<UserConfig> => ({
   plugins: [
-    svelte_look(),
+    await load_svelte_look(),
     UnoCSS(),
     // `~icons/<collection>/<name>` → Svelte component (used by the ported /admin section).
     // Coexists with UnoCSS presetIcons (`class="i-*"`); both read @iconify/json.
@@ -49,7 +60,7 @@ export default defineConfig({
       'wa-sqlite', // Emscripten loader resolves its .wasm via a relative import.meta.url that pre-bundling breaks
     ],
   },
-})
+}))
 
 function getReplacements() {
   if (typeof process !== 'undefined' && process.env.VERCEL_ANALYTICS_ID) {

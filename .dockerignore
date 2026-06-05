@@ -1,0 +1,17 @@
+# Keep the build context small. On the VPS the context is a fresh git checkout
+# (no node_modules), but locally our cwd has them — exclude heavy/irrelevant paths.
+# Do NOT ignore `.env` — the Dockerfile copies the context-root `.env` into the build.
+**/node_modules
+**/.svelte-kit
+**/build
+**/.vercel
+site/.data
+**/*.log
+.git
+.github
+.issues
+.knowledge
+supabase
+packages/ids-import
+packages/python-scripts
+packages/functions
