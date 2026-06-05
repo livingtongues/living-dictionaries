@@ -1,317 +1,364 @@
 <script lang="ts">
-  import type { TablesUpdate } from '@living-dictionaries/types'
-  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
+  import type { RowType } from '$lib/db/client/live/types'
+  import IconMdiMapMarkerOutline from '~icons/mdi/map-marker-outline'
+  import IconMdiMapMarkerPlusOutline from '~icons/mdi/map-marker-plus-outline'
+  import BadgeArray from '$lib/components/entry/BadgeArray.svelte'
+  import Modal from '$lib/svelte-pieces/Modal.svelte'
+  import { format_date } from '$lib/utils/format-relative-time'
+  import { api_dictionaries_id_delete } from '../../api/dictionaries/[id]/_call'
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte'
-  import RolesManagment from './RolesManagment.svelte'
-  import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
-  import type { PageData } from './$types'
-  import { BadgeArrayEmit, Button, JSON, Modal, ShowHide } from '$lib/svelte-pieces'
-  import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
-  import { supabase_date_to_friendly } from '$lib/helpers/time'
-  import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte'
-  import { page } from '$app/stores'
-  import { api_delete_dictionary } from '$api/db/delete-dictionary/_call'
+  import RoleCell from './RoleCell.svelte'
+
+  interface Editor {
+    role_id: string
+    user_id: string
+    name: string
+    email: string | null
+  }
 
   interface Props {
     index: number
     is_public: boolean
-    dictionary: DictionaryWithHelpers
-    users: UserWithDictionaryRoles[]
-    update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>
-    load_extras: () => Promise<void>
+    dictionary: RowType<'dictionaries'>
+    managers: Editor[]
+    contributors: Editor[]
+    manager_invites: RowType<'invites'>[]
+    contributor_invites: RowType<'invites'>[]
+    users: RowType<'users'>[]
+    on_change: () => Promise<void>
   }
 
-  const {
+  let {
     index,
     is_public,
     dictionary,
+    managers,
+    contributors,
+    manager_invites,
+    contributor_invites,
     users,
-    update_dictionary,
-    load_extras,
+    on_change,
   }: Props = $props()
 
-  let typedId = $state('')
+  let show_coordinates = $state(false)
+  let show_delete = $state(false)
+  let typed_id = $state('')
+  let deleting = $state(false)
 
-  const { admin, supabase, add_editor, remove_editor, inviteHelper } = $derived($page.data as PageData)
+  const point = $derived(dictionary.coordinates?.points?.[0]?.coordinates)
 
-  const managers = $derived(dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'manager' && dictionary_id === dictionary.id)))
-  const contributors = $derived(dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'contributor' && dictionary_id === dictionary.id)))
+  async function toggle_public() {
+    if (!confirm(`Make "${dictionary.name}" ${dictionary.public ? 'PRIVATE' : 'PUBLIC'}?`))
+      return
+    dictionary.public = dictionary.public ? null : 1
+    await dictionary._save()
+  }
+
+  async function toggle_conlang() {
+    if (!confirm('Toggle conlang status?'))
+      return
+    dictionary.con_language_description = dictionary.con_language_description === 'YES' ? null : 'YES'
+    await dictionary._save()
+  }
+
+  async function set_coordinates({ lat, lng }: { lat: number, lng: number }) {
+    const [, ...rest] = dictionary.coordinates?.points ?? []
+    dictionary.coordinates = {
+      points: [{ coordinates: { latitude: lat, longitude: lng } }, ...rest],
+      regions: dictionary.coordinates?.regions,
+    }
+    await dictionary._save()
+  }
+
+  async function remove_coordinates() {
+    const [, ...rest] = dictionary.coordinates?.points ?? []
+    dictionary.coordinates = { points: rest, regions: dictionary.coordinates?.regions }
+    await dictionary._save()
+  }
+
+  async function save_alternate_names(strings: string[]) {
+    dictionary.alternate_names = strings
+    await dictionary._save()
+  }
+
+  async function confirm_delete() {
+    deleting = true
+    const { error } = await api_dictionaries_id_delete({ dict_id: dictionary.id })
+    if (error) {
+      deleting = false
+      alert(`Could not delete dictionary: ${error.message}`)
+      return
+    }
+    await dictionary._delete() // optimistic local removal
+    await on_change()
+    deleting = false
+    show_delete = false
+  }
 </script>
 
-<td class="relative">
-  <span onclick={() => window.open(`/${dictionary.id}`)} class="absolute top-0 left-0 text-xs text-gray-400 cursor-pointer">{index + 1}</span>
-  <DictionaryFieldEdit field="name" value={dictionary.name} {update_dictionary} />
+<td class="index-cell">
+  <a href="/{dictionary.id}" target="_blank" class="index-link">{index + 1}</a>
 </td>
+<td class="edit-cell"><DictionaryFieldEdit {dictionary} field="name" /></td>
 <td>
-  <Button
-    color={dictionary.public ? 'green' : 'orange'}
-    size="sm"
-    onclick={async () => {
-      if (confirm('Flip this dictionary\'s visibility?')) {
-        await update_dictionary({
-          public: !dictionary.public,
-        })
-      }
-    }}>
+  <button type="button" class={['pill-btn', dictionary.public ? 'is-public' : 'is-private']} onclick={toggle_public}>
     {dictionary.public ? 'Public' : 'Private'}
-  </Button>
+  </button>
+</td>
+<td class="num-cell">
+  <a href="/{dictionary.id}" target="_blank" class="entry-link">{(dictionary.entry_count ?? 0).toLocaleString()}</a>
 </td>
 <td>
-  <Button title="View Entries" size="sm" form="simple" href="/{dictionary.url}">
-    {dictionary.entry_count}
-    <!-- <span class="i-tabler-external-link" style="vertical-align: -1px;" /> -->
-  </Button>
+  <RoleCell dictionary_id={dictionary.id} role="manager" editors={managers} invites={manager_invites} {users} {on_change} />
 </td>
 <td>
-  <div style="width: 300px;"></div>
-  <RolesManagment
-    editors={managers}
-    add_editor={async (user_id) => {
-      await add_editor({ role: 'manager', user_id, dictionary_id: dictionary.id })
-      await load_extras()
-    }}
-    remove_editor={async (user_id) => {
-      await remove_editor({ user_id, dictionary_id: dictionary.id })
-      await load_extras()
-    }}
-    invite_editor={async () => {
-      await inviteHelper('manager', dictionary.id)
-      await load_extras()
-    }}
-    {users} />
-  <div class="max-h-150px overflow-y-auto">
-    {#each dictionary.invites as invite (invite.id)}
-      {#if invite.role === 'manager'}
-        <div class="my-1">
-          <ContributorInvitationStatus
-            admin
-            {invite}
-            on_delete_invite={async () => {
-              const { error } = await supabase.from('invites').update({ status: 'cancelled' }).eq('id', invite.id)
-              if (error) {
-                alert(error.message)
-                console.error(error)
-              } else {
-                await load_extras()
-              }
-            }}>
-            {#snippet prefix()}
-                        <span class="i-mdi-email-send"></span>
-                      {/snippet}
-          </ContributorInvitationStatus>
-        </div>
-      {/if}
-    {/each}
-  </div>
+  <RoleCell dictionary_id={dictionary.id} role="contributor" editors={contributors} invites={contributor_invites} {users} {on_change} />
 </td>
+<td class="edit-cell"><DictionaryFieldEdit {dictionary} field="iso_639_3" /></td>
+<td class="edit-cell"><DictionaryFieldEdit {dictionary} field="glottocode" /></td>
 <td>
-  <div style="width: 300px;"></div>
-  <RolesManagment
-    editors={contributors}
-    add_editor={async (user_id) => {
-      await add_editor({ role: 'contributor', user_id, dictionary_id: dictionary.id })
-      await load_extras()
-    }}
-    remove_editor={async (user_id) => {
-      await remove_editor({ user_id, dictionary_id: dictionary.id })
-      await load_extras()
-    }}
-    invite_editor={async () => {
-      await inviteHelper('contributor', dictionary.id)
-      await load_extras()
-    }}
-    {users} />
-  <div class="max-h-150px overflow-y-auto">
-    {#each dictionary.invites as invite (invite.id)}
-      {#if invite.role === 'contributor'}
-        <div class="my-1">
-          <ContributorInvitationStatus
-            admin
-            {invite}
-            on_delete_invite={async () => {
-              const { error } = await supabase.from('invites').update({ status: 'cancelled' }).eq('id', invite.id)
-              if (error) {
-                alert(error.message)
-                console.error(error)
-              } else {
-                await load_extras()
-              }
-            }}>
-            {#snippet prefix()}
-                        <span class="i-mdi-email-send"></span>
-                      {/snippet}
-          </ContributorInvitationStatus>
-        </div>
-      {/if}
-    {/each}
-  </div>
+  <button type="button" class="coord-btn" onclick={() => show_coordinates = true}>
+    {#if point}
+      <IconMdiMapMarkerOutline />
+      <span class="coord-text">{point.latitude.toFixed(3)}, {point.longitude.toFixed(3)}</span>
+    {:else}
+      <IconMdiMapMarkerPlusOutline />
+      <span class="coord-add">Add</span>
+    {/if}
+  </button>
 </td>
-<td>
-  <DictionaryFieldEdit
-    field="iso_639_3"
-    value={dictionary.iso_639_3}
-    {update_dictionary} />
-</td>
-<td>
-  <DictionaryFieldEdit
-    field="glottocode"
-    value={dictionary.glottocode}
-    {update_dictionary} />
-</td>
-<td>
-  <ShowHide>
-    {#snippet children({ show, toggle })}
-        <Button class="text-nowrap -ml-2" size="sm" form="simple" onclick={toggle}>
-        {#if dictionary.coordinates?.points?.length}
-          <LatLngDisplay
-            lat={dictionary.coordinates.points[0].coordinates.latitude}
-            lng={dictionary.coordinates.points[0].coordinates.longitude} />
-        {:else}<b>Add</b>{/if}
-      </Button>
-      {#if show}
-        {#await import('$lib/components/maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
-          <CoordinatesModal
-            lat={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.latitude : undefined}
-            lng={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.longitude : undefined}
-            on:update={({ detail: { lat, lng } }) => {
-              const [, ...rest] = dictionary.coordinates?.points || []
-              update_dictionary({
-                coordinates: {
-                  points: [{ coordinates: { latitude: lat, longitude: lng } }, ...rest],
-                  regions: dictionary.coordinates?.regions,
-                },
-              })
-            }}
-            on:remove={() => {
-              const [, ...rest] = dictionary.coordinates?.points || []
-              update_dictionary({
-                coordinates: {
-                  points: rest,
-                  regions: dictionary.coordinates?.regions,
-                },
-              })
-            }}
-            on:close={toggle} />
-        {/await}
-      {/if}
-          {/snippet}
-    </ShowHide>
-</td>
-<td>
-  <DictionaryFieldEdit
-    field="location"
-    value={dictionary.location}
-    {update_dictionary} />
-</td>
-<td>
-  <BadgeArrayEmit addMessage="Add" strings={dictionary.gloss_languages?.slice(0, 8)} />
-  {#if dictionary.gloss_languages?.length > 8}
-    <span class="text-xs text-gray-400">+{dictionary.gloss_languages.length - 8}</span>
+<td class="edit-cell"><DictionaryFieldEdit {dictionary} field="location" /></td>
+<td class="wide-cell">
+  {#if dictionary.gloss_languages?.length}
+    <BadgeArray strings={dictionary.gloss_languages.slice(0, 8)} />
+    {#if dictionary.gloss_languages.length > 8}
+      <span class="overflow">+{dictionary.gloss_languages.length - 8}</span>
+    {/if}
+  {:else}
+    <span class="dim">—</span>
   {/if}
 </td>
-<td>
-  <div style="width: 300px;"></div>
-  <BadgeArrayEmit
+<td class="wide-cell">
+  <BadgeArray
+    strings={dictionary.alternate_names ?? []}
     canEdit
     addMessage="Add"
-    strings={dictionary.alternate_names?.slice(0, 8)}
-    on_additem={() => {
-      const name = prompt('Enter alternate name:')
-      if (name) {
-        update_dictionary({
-          alternate_names: [...(dictionary.alternate_names || []), name],
-        })
-      }
-    }}
-    on_itemremoved={({ value }) => {
-      update_dictionary({
-        alternate_names: dictionary.alternate_names.filter(name => name !== value),
-      })
-    }} />
-  {#if dictionary.alternate_names?.length > 8}
-    <span class="text-xs text-gray-400">+{dictionary.alternate_names.length - 8}</span>
+    promptMessage="Enter alternate name:"
+    onvalueupdated={save_alternate_names} />
+</td>
+<td class="wide-cell">
+  {#if dictionary.orthographies?.length}
+    {dictionary.orthographies.map(orthography => orthography.name).join(', ')}
+  {:else}
+    <span class="dim">—</span>
   {/if}
 </td>
-<td>
-  {dictionary.orthographies?.length? dictionary.orthographies.map(({ name }) => name.default) : ''}
+<td class="meta-cell">{format_date(dictionary.created_at)}</td>
+<td class="meta-cell">{format_date(dictionary.updated_at)}</td>
+<td class="center-cell">
+  {typeof dictionary.language_used_by_community === 'number' ? (dictionary.language_used_by_community ? 'Yes' : 'No') : '—'}
 </td>
-<td class="whitespace-nowrap">
-  {#if dictionary.created_at}{supabase_date_to_friendly(dictionary.created_at)}{/if}
+<td class="wide-cell">{dictionary.community_permission || '—'}</td>
+<td class="text-cell">
+  <div class="clamp" title={dictionary.author_connection ?? ''}>{dictionary.author_connection || '—'}</div>
 </td>
-<td class="whitespace-nowrap">
-  {#if dictionary.updated_at}{supabase_date_to_friendly(dictionary.updated_at)}{/if}
-</td>
-<td>{typeof dictionary.language_used_by_community === 'boolean'
-  ? dictionary.language_used_by_community
-  : ''}</td>
-<td>{dictionary.community_permission ? dictionary.community_permission : ''}</td>
-
-<td class="w-300px max-w-300px">
-  <div class="w-300px line-clamp-5" title={dictionary.author_connection}>
-    {dictionary.author_connection ? dictionary.author_connection : ''}
-  </div>
-</td>
-<td class="w-300px max-w-300px">
-  <div class="w-300px line-clamp-5" title={dictionary.con_language_description}>
-    {dictionary.con_language_description ? dictionary.con_language_description : ''}
-  </div>
+<td class="text-cell">
+  <div class="clamp" title={dictionary.con_language_description ?? ''}>{dictionary.con_language_description || '—'}</div>
 </td>
 <td>
   {#if !is_public}
-    <Button
-      color={dictionary?.con_language_description === 'YES' ? 'green' : 'orange'}
-      size="sm"
-      onclick={() => {
-        if (confirm('Toggle con lang status?')) {
-          update_dictionary({ con_language_description: dictionary?.con_language_description === 'YES' ? null : 'YES' })
-        }
-      }}>
-      {dictionary?.con_language_description === 'YES' ? 'YES' : 'NO'}
-    </Button>
+    <button type="button" class={['pill-btn', dictionary.con_language_description === 'YES' ? 'is-public' : 'is-private']} onclick={toggle_conlang}>
+      {dictionary.con_language_description === 'YES' ? 'YES' : 'NO'}
+    </button>
+  {:else}
+    <span class="dim">—</span>
   {/if}
 </td>
 <td>
-  <ShowHide>
-    {#snippet children({ show, toggle })}
-        <Button
-        color="red"
-        form="filled"
-        size="sm"
-        onclick={toggle}>
-        Delete
-      </Button>
-      {#if show}
-        <Modal on:close={toggle}>
-          {#snippet heading()}
-                <span>Delete {dictionary.name}?</span>
-              {/snippet}
-          <div class="mb-2">
-            id: {dictionary.id}, url: /{dictionary.url}
-          </div>
-          <input type="text" bind:value={typedId} placeholder="Type the dictionary ID to confirm deletion" class="mb-2 form-input w-full" />
-          <Button
-            disabled={!typedId || typedId !== dictionary.id}
-            color="red"
-            form="filled"
-            size="sm"
-            class="block!"
-            onclick={async () => {
-              const { error } = await api_delete_dictionary({ dictionary_id: dictionary.id })
-              if (error) {
-                alert(error.message)
-              } else {
-                alert('Dictionary deleted. Please check your email to confirm it was successful and then close the dialog to continue working (the view is updated once a day).')
-              }
-            }}>
-            Delete
-          </Button>
-        </Modal>
-      {/if}
-          {/snippet}
-    </ShowHide>
+  <button type="button" class="delete-btn" onclick={() => { typed_id = ''; show_delete = true }}>Delete</button>
 </td>
-{#if admin > 1}
-  <td class="cursor-pointer">
-    <JSON obj={dictionary} />
-  </td>
+
+{#if show_coordinates}
+  {#await import('$lib/components/maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
+    <CoordinatesModal
+      lat={point?.latitude}
+      lng={point?.longitude}
+      on:update={({ detail }) => set_coordinates(detail)}
+      on:remove={remove_coordinates}
+      on:close={() => show_coordinates = false} />
+  {/await}
 {/if}
+
+{#if show_delete}
+  <Modal on_close={() => show_delete = false}>
+    {#snippet heading()}
+      Delete {dictionary.name}?
+    {/snippet}
+    <p class="delete-info">
+      Full teardown: catalog row, roles, invites, the per-dictionary database, and its R2 snapshot.
+      Media files orphan on legacy storage (queued for later cleanup). This cannot be undone.
+    </p>
+    <p class="delete-meta">id: <code>{dictionary.id}</code></p>
+    <input
+      type="text"
+      bind:value={typed_id}
+      placeholder="Type the dictionary id to confirm"
+      class="delete-input" />
+    <div class="delete-actions">
+      <button type="button" class="btn btn-default" onclick={() => show_delete = false}>Cancel</button>
+      <button
+        type="button"
+        class="btn delete-confirm"
+        disabled={typed_id !== dictionary.id || deleting}
+        onclick={confirm_delete}>
+        {deleting ? 'Deleting…' : 'Delete forever'}
+      </button>
+    </div>
+  </Modal>
+{/if}
+
+<style>
+  td {
+    padding: 0.375rem 0.5rem;
+    vertical-align: top;
+  }
+  .index-cell {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+  .index-link {
+    font-size: 0.75rem;
+    color: var(--color-secondary);
+    text-decoration: none;
+  }
+  .index-link:hover {
+    color: var(--primary);
+  }
+  .edit-cell {
+    min-width: 8rem;
+  }
+  .num-cell {
+    text-align: right;
+    white-space: nowrap;
+  }
+  .entry-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .entry-link:hover {
+    text-decoration: underline;
+  }
+  .pill-btn {
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .pill-btn.is-public {
+    background: color-mix(in srgb, var(--success), transparent 85%);
+    color: var(--success);
+  }
+  .pill-btn.is-private {
+    background: color-mix(in srgb, var(--warning), transparent 85%);
+    color: var(--warning);
+  }
+  .coord-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border: 0;
+    background: transparent;
+    color: var(--color);
+    cursor: pointer;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+  .coord-btn:hover {
+    color: var(--primary);
+  }
+  .coord-add {
+    font-weight: 600;
+  }
+  .wide-cell {
+    min-width: 9rem;
+    max-width: 16rem;
+  }
+  .text-cell {
+    min-width: 12rem;
+    max-width: 18rem;
+  }
+  .clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.8125rem;
+  }
+  .meta-cell {
+    white-space: nowrap;
+    font-size: 0.75rem;
+    color: var(--color-secondary);
+  }
+  .center-cell {
+    text-align: center;
+    white-space: nowrap;
+  }
+  .overflow {
+    font-size: 0.75rem;
+    color: var(--color-secondary);
+  }
+  .dim {
+    color: var(--color-secondary);
+  }
+  .delete-btn {
+    padding: 0.125rem 0.625rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--danger);
+    background: transparent;
+    color: var(--danger);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .delete-btn:hover {
+    background: var(--danger);
+    color: white;
+  }
+  .delete-info {
+    font-size: 0.875rem;
+    color: var(--color-secondary);
+    margin: 0 0 0.75rem;
+  }
+  .delete-meta {
+    font-size: 0.8125rem;
+    margin: 0 0 0.5rem;
+  }
+  .delete-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    background: var(--background);
+    color: var(--color);
+    margin-bottom: 0.75rem;
+  }
+  .delete-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+  .delete-confirm {
+    background: var(--danger);
+    color: white;
+    border: 0;
+  }
+  .delete-confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>

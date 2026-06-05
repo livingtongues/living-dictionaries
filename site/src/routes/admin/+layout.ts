@@ -1,78 +1,62 @@
-import type { DictionaryView, Tables } from '@living-dictionaries/types'
-import type { UserForAdminTable } from '@living-dictionaries/types/supabase/users.types'
 import type { LayoutLoad } from './$types'
-import { inviteHelper } from '$lib/helpers/inviteHelper'
-import { cached_query_data_store } from '$lib/supabase/cached-query-data'
+import type { LiveDb } from '$lib/db/client/live/live-db.svelte'
+import type { SyncableTableName } from '$lib/db/sync/types'
+import { browser } from '$app/environment'
+import { get_admin_db } from '$lib/db/client/db'
+import { Sync } from '$lib/db/sync/engine.svelte.js'
+import { error } from '@sveltejs/kit'
 
-export const load = (async ({ parent }) => {
-  const { supabase } = await parent()
+interface AdminLayoutGlobals {
+  __ld_admin_sync?: Sync
+}
 
-  const admin_dictionaries = cached_query_data_store<DictionaryView>({
-    materialized_query: supabase.from('materialized_admin_dictionaries_view')
-      .select(),
-    live_query: supabase.from('dictionaries_view')
-      .select(),
-    key: 'dictionaries',
+export const load: LayoutLoad = async ({ parent }) => {
+  const { auth_user } = await parent()
+
+  // Source of truth = SSR-resolved user from the session cookie (set in root
+  // `+layout.server.ts`). No session → render the admin shell's signed-out
+  // state, which offers the login modal in place (no redirect to /login).
+  if (!auth_user.user)
+    return { auth_user, db: null as LiveDb | null, sync: null as Sync | null }
+
+  if (!auth_user.user.is_admin)
+    error(403, 'You do not have access to the admin area.')
+
+  if (!browser)
+    return { auth_user, db: null as LiveDb | null, sync: null as Sync | null }
+
+  // Singleton — survive layout invalidation.
+  const globals = globalThis as AdminLayoutGlobals
+  let sync = globals.__ld_admin_sync
+
+  // No-op until sync is created below; closures defer until then.
+  let mark_dirty: (table: SyncableTableName) => void = (_table) => {
+    void _table
+  }
+  let live_db_ref: LiveDb | null = null
+
+  const { connection, live_db } = await get_admin_db(auth_user.user.id, {
+    on_dirty: t => mark_dirty(t),
   })
+  live_db_ref = live_db
 
-  const users = cached_query_data_store<UserForAdminTable>({
-    live_query: supabase.rpc('users_for_admin_table')
-      .select(),
-    key: 'users',
-    order_field: 'id',
-  })
-
-  const dictionary_roles = cached_query_data_store<Tables<'dictionary_roles'>>({
-    live_query: supabase.from('dictionary_roles')
-      .select(),
-    key: 'dictionary_roles',
-    order_field: 'created_at',
-    id_fields: ['dictionary_id', 'user_id'],
-  })
-
-  async function get_invites() {
-    const { supabase } = await parent()
-    const { data: invites, error } = await supabase.from('invites')
-      .select()
-      .in('status', ['queued', 'sent'])
-
-    if (error) {
-      console.error(error)
-      alert(error.message)
-      return []
-    }
-    return invites
+  if (!sync) {
+    sync = new Sync({
+      connection,
+      user_id: auth_user.user.id,
+      on_tables_changed: (tables) => {
+        if (!live_db_ref)
+          return
+        for (const table of tables)
+          live_db_ref.notify_table(table)
+      },
+      on_client_behind: () => {
+        console.warn('Sync blocked: client bundle is behind. Reload to update.')
+      },
+    })
+    globals.__ld_admin_sync = sync
   }
+  mark_dirty = t => sync.mark_dirty(t)
 
-  async function add_editor({ role, dictionary_id, user_id }: { role: 'manager' | 'contributor', dictionary_id: string, user_id: string }) {
-    const { supabase } = await parent()
-    const { error } = await supabase.from('dictionary_roles')
-      .insert({ dictionary_id, user_id, role })
-    if (error) {
-      console.error(error)
-      alert(error.message)
-    }
-  }
-
-  async function remove_editor({ dictionary_id, user_id }: { dictionary_id: string, user_id: string }) {
-    const { supabase } = await parent()
-    const { error } = await supabase.from('dictionary_roles')
-      .delete()
-      .eq('dictionary_id', dictionary_id)
-      .eq('user_id', user_id)
-    if (error) {
-      console.error(error)
-      alert(error.message)
-    }
-  }
-
-  return {
-    admin_dictionaries,
-    users,
-    dictionary_roles,
-    get_invites,
-    add_editor,
-    remove_editor,
-    inviteHelper,
-  }
-}) satisfies LayoutLoad
+  return { auth_user, db: live_db, sync }
+}
