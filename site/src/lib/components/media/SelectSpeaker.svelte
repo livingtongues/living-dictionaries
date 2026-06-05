@@ -17,7 +17,10 @@
   const { speakers } = $derived($page.data)
 
   const addSpeaker = 'AddSpeaker'
-  let speaker_id = $derived(initialSpeakerId || last_selected_speaker_id)
+  // Must be $state (not $derived) so `bind:value` on the speaker <select> can write to it —
+  // a $derived is not writable, which silently broke speaker selection (and thus audio/video
+  // upload). Initialized once from the prop, matching the pre-runes `let` semantics.
+  let speaker_id = $state(initialSpeakerId || last_selected_speaker_id)
 
   function autofocus(node: HTMLSelectElement) {
     setTimeout(() => node.focus(), 5)

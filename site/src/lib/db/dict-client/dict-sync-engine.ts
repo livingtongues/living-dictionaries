@@ -115,7 +115,7 @@ export class DictSyncEngine {
     try {
       const request = await this.#build_request()
       const response = await this.#post(request)
-      await this.#apply_response(response)
+      await this.#apply_response(response, request)
       this.#last_error = null
       this.#last_sync_at = new Date().toISOString()
       return response
@@ -196,7 +196,7 @@ export class DictSyncEngine {
     return await response.json() as DictChangesResponse
   }
 
-  async #apply_response(response: DictChangesResponse): Promise<void> {
+  async #apply_response(response: DictChangesResponse, request: DictChangesRequest): Promise<void> {
     const affected = new Set<string>()
 
     await this.#connection.execute('PRAGMA defer_foreign_keys = ON')
@@ -226,14 +226,19 @@ export class DictSyncEngine {
         }
       }
 
-      // Clear dirty flags on rows we just successfully pushed.
+      // Clear dirty flags ONLY on the rows we actually pushed (keyed by id), not a blanket
+      // `WHERE dirty = 1`. A blanket clear would silently drop rows inserted AFTER
+      // #build_request snapshotted but DURING this in-flight sync (e.g. insert_photo writes
+      // `photos` then `sense_photos`; a sync fires between the two), marking them clean without
+      // ever pushing them — they'd never reach the server. Matches the example engine.
       if (this.#has_editor_role) {
         for (const table of DICT_SYNCABLE_TABLES) {
-          await this.#connection.execute(`UPDATE "${table}" SET dirty = NULL WHERE dirty = 1`)
+          for (const row of request.dirty_rows[table] ?? [])
+            await this.#connection.execute(`UPDATE "${table}" SET dirty = NULL WHERE id = ?`, [(row as { id: string }).id])
         }
-        // Tombstones successfully pushed (server returned them in deletes echo
-        // or they're rows we own anyway): drain the local table.
-        await this.#connection.execute(`DELETE FROM deletes`)
+        // Drain only the tombstones we actually pushed (a delete added mid-flight stays queued).
+        for (const { table_name, id } of request.deletes ?? [])
+          await this.#connection.execute(`DELETE FROM deletes WHERE table_name = ? AND id = ?`, [table_name, id])
       }
 
       // Persist the new watermark in db_metadata for next sync.

@@ -41,6 +41,13 @@ Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. Plan + st
   "Set Admin Role Level" in the allow-list world (house should mirror); the send-code rate-limit FIX
   + LD's `created_at` NOT NULL twist; the `E2E_EXPOSE_OTP` escape hatch for e2e on `node build`; the
   vitest `$env/dynamic/private` alias; hand-adding jose to the lockfile.
+- [media-upload.md](./media-upload.md) — LD-MEDIA: wiring media upload to real auth + GCS HMAC presigned
+  PUT (legacy bucket, NOT R2); env names kept + `$env/dynamic/private` 503-when-unset; dev/prod bucket
+  split via `import.meta.env.DEV`; testing without GCS (fake creds + puppeteer-intercepted PUT/lh3 +
+  local PROCESS_IMAGE_URL stub, CORS-preflight gotcha, e2e photo-accumulation hygiene); THREE
+  runes/sync bugs that blocked audio/media (SelectSpeaker `$derived`→`$state`, EditAudio `$bindable`
+  fallback mismatch → `props_invalid_value`, and the sync dirty-clear race); and dropping the service
+  worker to kill the deep-link 404.
 - [dict-sync-invariants.md](./dict-sync-invariants.md) — LD-P4B audit of LD's per-dict sync engine
   against the three house local-first-editing bugs (cold-DB id collisions, missing local `users` FK
   row, unscoped cross-sector `DELETE FROM deletes`). All three are prevented by LD's architecture

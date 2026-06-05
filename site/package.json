@@ -17,6 +17,7 @@
     "test:db": "vitest --config ./vitest.config.db.ts",
     "test:flow": "node e2e/achi-flow.mjs",
     "test:sync": "node e2e/dict-sync.mjs",
+    "test:media": "node e2e/media-upload.mjs",
     "test:watch": "node e2e/dict-watch-2ctx.mjs",
     "test:catalog": "node e2e/catalog-sqlite.mjs",
     "test:entries": "node e2e/entries-sqlite.mjs",

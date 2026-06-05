@@ -1,11 +1,10 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { error, json } from '@sveltejs/kit'
-import type { RequestHandler } from '@sveltejs/kit'
-import { check_can_edit } from '$api/db/check-permission'
+import type { RequestHandler } from './$types'
+import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
-import { GCLOUD_MEDIA_BUCKET_S3 } from '$lib/server/gcloud'
-import { mode } from '$lib/supabase'
+import { gcs_is_configured, get_gcs } from '$lib/server/gcloud'
 
 export interface UploadRequestBody {
   folder: string
@@ -21,31 +20,32 @@ export interface UploadResponseBody {
   item_id: string
 }
 
-export const POST: RequestHandler = async ({ request, locals: { getSession } }) => {
-  const { data: session_data, error: _error, supabase } = await getSession()
-  if (_error || !session_data?.user)
-    error(ResponseCodes.UNAUTHORIZED, { message: _error.message || 'Unauthorized' })
+export const POST: RequestHandler = async (event) => {
+  const { folder, dictionary_id, file_name, file_type } = await event.request.json() as UploadRequestBody
+
+  if (!dictionary_id?.trim())
+    error(ResponseCodes.BAD_REQUEST, 'Missing dictionary_id')
+
+  // Editor (or admin) on this dictionary — re-checked server-side every upload.
+  await verify_auth_dict_role(event, dictionary_id, 'editor')
+
+  if (!folder?.trim())
+    error(ResponseCodes.BAD_REQUEST, 'Missing folder')
+  if (!file_name?.trim())
+    error(ResponseCodes.BAD_REQUEST, 'Missing file_name')
+  if (!file_type?.trim())
+    error(ResponseCodes.BAD_REQUEST, 'Missing file_type')
+
+  if (!gcs_is_configured())
+    error(ResponseCodes.SERVICE_UNAVAILABLE, 'Media uploads are not configured (missing GCS credentials)')
 
   try {
-    const { folder, dictionary_id, file_name, file_type } = await request.json() as UploadRequestBody
-
-    if (!session_data.user.app_metadata.admin) {
-      await check_can_edit(supabase, dictionary_id)
-    }
-
-    if (!folder)
-      throw new Error('Missing folder')
-    if (!file_name?.trim())
-      throw new Error('Missing file_name')
-    if (!file_type?.trim())
-      throw new Error('Missing file_type')
-
-    const bucket = mode === 'development' ? 'talking-dictionaries-dev.appspot.com' : 'talking-dictionaries-alpha.appspot.com'
+    const { client, bucket } = get_gcs()
     const extension = file_name.split('.').pop()
     const item_id = Date.now().toString()
     const object_key = `${folder}/${item_id}.${extension}`
 
-    const presigned_upload_url = await getSignedUrl(GCLOUD_MEDIA_BUCKET_S3, new PutObjectCommand({
+    const presigned_upload_url = await getSignedUrl(client, new PutObjectCommand({
       Bucket: bucket,
       Key: object_key,
       ContentType: file_type,
@@ -56,7 +56,7 @@ export const POST: RequestHandler = async ({ request, locals: { getSession } }) 
 
     return json({ presigned_upload_url, bucket, object_key, item_id } satisfies UploadResponseBody)
   } catch (err) {
-    console.error(`Error uploading: ${err.message}`)
-    error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error uploading: ${err.message}`)
+    console.error(`Error creating upload URL: ${err.message}`)
+    error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error creating upload URL: ${err.message}`)
   }
 }
