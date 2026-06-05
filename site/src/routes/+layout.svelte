@@ -22,10 +22,6 @@
     <LoadingIndicator />
   {/if}
 
-  {#await import('./PromptReloadOnUpdate.svelte') then { default: PromptReloadOnUpdate }}
-    <PromptReloadOnUpdate />
-  {/await}
-
   {#await import('$lib/components/ui/Toasts.svelte') then { default: Toasts }}
     <Toasts />
   {/await}

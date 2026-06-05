@@ -52,9 +52,7 @@ function boot_server() {
 }
 
 function attach_error_capture(page, errors) {
-  // Ignore the pre-existing SvelteKit service-worker registration 404 (see .issues/service-worker-404.md).
   page.on('pageerror', (error) => {
-    if (/ServiceWorker|service-worker\.js/i.test(error.message)) return
     errors.push(error.message)
   })
 }

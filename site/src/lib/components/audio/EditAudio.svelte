@@ -21,15 +21,18 @@
 
   let upload_triggered = $state(false)
   const { admin, dbOperations, url_from_storage_path } = $derived($page.data)
-  let readyToRecord: boolean = $state()
+  // Must match RecordAudio's $bindable fallbacks (permissionGranted = false, audioBlob = null):
+  // binding an `undefined` $state to a prop with a non-undefined fallback throws Svelte's
+  // `props_invalid_value` at runtime, which crashed the audio editor (no record/upload UI showed).
+  let readyToRecord: boolean = $state(false)
 
   let file: File = $state()
-  let audioBlob: Blob = $state()
+  let audioBlob: Blob = $state(null)
 
   run(() => {
     if (sound_file) {
       file = undefined
-      audioBlob = undefined
+      audioBlob = null
     }
   })
 

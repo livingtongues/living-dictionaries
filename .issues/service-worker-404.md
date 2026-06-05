@@ -1,4 +1,15 @@
-# Service-worker registration 404 on deep links (pre-existing)
+# Service-worker registration 404 on deep links (pre-existing) — ✅ RESOLVED (LD-MEDIA, 2026-06-05)
+
+**Fix shipped:** Option 1 — dropped the service worker entirely (matches the example repo). Deleted
+`src/service-worker.ts` + `src/routes/PromptReloadOnUpdate.svelte` (SW-only) + its `+layout.svelte` use;
+removed the `ServiceWorker|service-worker.js` pageerror filter from `e2e/{achi-flow,dict-sync,
+dict-watch-2ctx}.mjs`. All three e2es pass with `pageerror` empty — the 404 is gone. SvelteKit only
+auto-registers the SW when `src/service-worker.*` exists, so deleting it stops registration; no
+`kit.serviceWorker`/`paths` override needed.
+
+---
+## Original report (for context)
+
 
 **Found by LD-P4B (2026-06-04) while verifying the P4b achi-flow.** Pre-existing; not caused by P4b.
 

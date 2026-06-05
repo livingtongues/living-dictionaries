@@ -65,6 +65,22 @@ Both only surface once you actually PUSH an editor edit, which is why M4-read/au
    `<=` and was returned empty — the dirty rows never merged. **Fix:** compute `has_push` (editor has
    dirty rows or tombstones) and skip the fast-bail when `has_push`.
 
+### A THIRD sync bug (LD-only divergence from the example) — found by LD-MEDIA
+**The dirty-flag clear was a blanket `UPDATE "<table>" SET dirty = NULL WHERE dirty = 1`** in
+`dict-sync-engine.ts` `#apply_response` — it cleared EVERY currently-dirty row, not just the ones this
+sync pushed. Sync is read-then-push-then-clear: `#build_request` snapshots dirty rows, `#post` sends
+them, `#apply_response` clears. Any row written AFTER the snapshot but BEFORE the clear (i.e. DURING the
+in-flight HTTP round-trip) gets marked clean WITHOUT ever being pushed → it silently never reaches the
+server. This bites whenever an op does **sequential writes** and a sync fires between them — exactly
+`insert_photo` (writes `photos` then `sense_photos`) and `assign_speaker` (link_junction) under
+`handle_exec`'s post-write `sync_if_needed()`. Symptom: the base row (photo/audio) synced but the
+**junction** (sense_photos / audio_speakers — and by extension entry_tags, entry_dialects, etc.) did
+NOT, so uploaded media looked unlinked on reload. Client rows showed `dirty=null` (falsely "synced")
+while the server never had them. **Fix:** clear dirty ONLY by the pushed rows' ids
+(`WHERE id = ?` per row in `request.dirty_rows[table]`) and drain ONLY the pushed tombstones by key —
+matching the example engine (`db/sync/engine.svelte.ts`). The example was correct here; LD had
+diverged. Required threading `request` into `#apply_response(response, request)`.
+
 Debugging these: the SharedWorker's `fetch` + `console` do NOT surface on puppeteer `page.on('request'
 /'console')`. Surface engine state by writing into `db_metadata` from inside `sync_once` and reading it
 back via the cached connection (`globalThis.__ld_dict_connections[id].connection.query(...)`), and log

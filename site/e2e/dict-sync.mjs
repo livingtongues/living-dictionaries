@@ -89,10 +89,7 @@ async function main() {
   const page = await browser.newPage()
   await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
   const page_errors = []
-  // Ignore the pre-existing SvelteKit service-worker registration 404 (see
-  // achi-flow.mjs / .issues/service-worker-404.md) — unrelated to sync.
   page.on('pageerror', (error) => {
-    if (/ServiceWorker|service-worker\.js/i.test(error.message)) return
     page_errors.push(error.message)
   })
   page.on('dialog', (d) => { console.log('  [dialog]', d.message().slice(0, 200)); d.dismiss().catch(() => {}) })
