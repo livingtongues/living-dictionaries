@@ -205,8 +205,16 @@ Each is its own milestone with a checkpoint. Order TBD, rough sequence:
       rate-limit FIX carried from house. Dev `dev_admin_level` cookie replaces the old admin toggle.
       6 legacy write/media endpoints keep a real-JWT `getSession` shim until M4-write. check 0/15 ·
       test 160 · build ✔ · achi-flow reworked to real dev-OTP login (non-admin manager).
-- [ ] Media upload (legacy GCS bucket, presigned PUT).
-- [ ] R2 snapshot builder + cron.
+- [x] Media upload (legacy GCS bucket, presigned PUT) ✅ DONE (LD-MEDIA; `.issues/media-upload-and-sw-fix.md`;
+      📘 `.knowledge/migration/media-upload.md`). Wired `/api/upload` + `/api/gcs_serving_url` to real
+      `verify_auth_dict_role`/`verify_auth` (off the M4-auth JWT shim); `gcloud.ts` → `$env/dynamic/private`
+      + 503-when-unset + dev/prod bucket split. Dropped the service worker (404 fix) + its `PromptReloadOnUpdate`.
+      Found+fixed THREE real runes/sync bugs that blocked audio/media: SelectSpeaker `$derived`→`$state`,
+      EditAudio `$bindable`-fallback mismatch (`props_invalid_value`), and the sync engine's blanket
+      dirty-clear race (junctions never synced — general M4-write-sync bug). New `e2e/media-upload.mjs`.
+      check 0/16 · test 189 · build ✔ · achi-flow+dict-sync+dict-watch-2ctx+media-upload PASS. ⏳ Jacob:
+      set real GCS env on VPS + eyeball a real upload at :3041 (agent can't reach GCS). Not pushed.
+- [ ] ⛔ R2 snapshot builder + cron — **DEFERRED, not this month (Jacob 2026-06-04).** No R2 work for now.
 - [ ] Then the legacy cutover runbook (DNS, catch-up migration) — far future.
 
 ## Reuse pointers (where to peek in the example)
