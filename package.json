@@ -1,6 +1,7 @@
 {
   "name": "living-dictionaries",
   "type": "module",
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "prepare": "command -v git >/dev/null 2>&1 && [ -d .git ] && git config core.hooksPath .githooks || true",
     "dev": "pnpm --filter=site dev",
@@ -28,7 +29,9 @@
       "@types/node": "22.8.6"
     },
     "onlyBuiltDependencies": [
-      "better-sqlite3"
+      "better-sqlite3",
+      "esbuild",
+      "eslint-plugin-svelte-stylistic"
     ]
   },
   "devDependencies": {
