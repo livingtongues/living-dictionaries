@@ -1,4 +1,5 @@
 // https://kit.svelte.dev/docs/types#app
+/// <reference types="unplugin-icons/types/svelte" />
 import type { Readable } from 'svelte/store'
 import type { LayoutData as DictionaryLayoutData } from './routes/[dictionaryId]/$types'
 import type { AuthUser } from '$lib/auth/user.svelte'
@@ -43,6 +44,8 @@ declare global {
     }
     interface PageState {
       entry_id?: string
+      // Smart back-target persisted into history.state by admin detail pages (use_admin_back).
+      admin_back?: { label: string, url: string }
     }
     // interface Error {}
     // interface Platform {}

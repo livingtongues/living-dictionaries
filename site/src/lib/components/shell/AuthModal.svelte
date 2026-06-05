@@ -9,6 +9,7 @@
   import { page } from '$app/stores'
   import { invalidateAll } from '$app/navigation'
   import { dev } from '$app/environment'
+  import { env as public_env } from '$env/dynamic/public'
   import { api_auth_email_send_code } from '$api/auth/email/send-code/_call'
   import { api_auth_email_verify } from '$api/auth/email/verify/_call'
 
@@ -68,7 +69,10 @@
   }
 
   let button_parent: HTMLDivElement = $state()
-  const can_google_authenticate = !location.origin.includes('vercel.app')
+  // Gracefully no-op when Google isn't configured (no client id) — mirrors house's
+  // `google_enabled` guard. Without this the GSI helper throws an uncaught rejection
+  // and the email-OTP path is the only way to sign in.
+  const can_google_authenticate = !location.origin.includes('vercel.app') && !!public_env.PUBLIC_GOOGLE_OAUTH_CLIENT_ID
   onMount(() => {
     if (can_google_authenticate && button_parent)
       display_one_tap_button(button_parent)

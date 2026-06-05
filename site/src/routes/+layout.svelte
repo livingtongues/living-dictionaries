@@ -18,7 +18,7 @@
 </script>
 
 {#if browser}
-  {#if navigating}
+  {#if navigating?.to}
     <LoadingIndicator />
   {/if}
 

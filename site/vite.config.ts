@@ -4,11 +4,15 @@ import { defineConfig } from 'vite'
 import type { Plugin } from 'vite'
 import UnoCSS from 'unocss/vite'
 import { svelte_look } from 'svelte-look/vite'
+import Icons from 'unplugin-icons/vite'
 
 export default defineConfig({
   plugins: [
     svelte_look(),
     UnoCSS(),
+    // `~icons/<collection>/<name>` → Svelte component (used by the ported /admin section).
+    // Coexists with UnoCSS presetIcons (`class="i-*"`); both read @iconify/json.
+    Icons({ compiler: 'svelte' }),
     sveltekit(),
     rawFonts(['.ttf']),
   ],

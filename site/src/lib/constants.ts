@@ -1,5 +1,8 @@
 export const DICTIONARIES_WITH_VARIANTS = ['babanki', 'torwali', 'ksingmul', 'tutelo-saponi', 'tseltal', 'namtrik-de-totoro', 'werikyana', 'woleaia', 'guwar', 'sugtstun-test', 'yaruro-colombiano', 'rusitene']
 
+// localStorage key prefix for the per-user browser admin wa-sqlite DB id (admin sync engine).
+export const ADMIN_DB_ID_FOR_USER_PREFIX = 'admin_db_id_for_user_'
+
 export enum ResponseCodes {
   OK = 200,
   INTERNAL_SERVER_ERROR = 500,

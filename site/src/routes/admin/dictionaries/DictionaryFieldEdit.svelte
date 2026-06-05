@@ -1,37 +1,51 @@
 <script lang="ts">
-  import type { TablesUpdate } from '@living-dictionaries/types'
+  import type { RowType } from '$lib/db/client/live/types'
+
+  type EditableField = 'name' | 'iso_639_3' | 'glottocode' | 'location'
 
   interface Props {
-    field: keyof TablesUpdate<'dictionaries'>
-    value: string
-    update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>
+    dictionary: RowType<'dictionaries'>
+    field: EditableField
+    placeholder?: string
   }
 
-  let { field, value = $bindable(), update_dictionary }: Props = $props()
+  let { dictionary, field, placeholder = '' }: Props = $props()
 
-  let debouncedSaveTimer: NodeJS.Timeout
-  let unsaved = $state(false)
-
-  function valueChanged() {
-    unsaved = true
-    clearTimeout(debouncedSaveTimer)
-    debouncedSaveTimer = setTimeout(save, 2000)
-  }
-
-  async function save() {
-    try {
-      await update_dictionary({ [field]: value })
-      unsaved = false
-    } catch (err) {
-      alert(err)
-    }
+  async function save(event: Event) {
+    const { value } = event.currentTarget as HTMLInputElement
+    const next = value.trim() || null
+    if (dictionary[field] === next)
+      return
+    // `name` is NOT NULL — never blank it out.
+    dictionary[field] = field === 'name' ? (next ?? dictionary.name) : next
+    await dictionary._save()
   }
 </script>
 
-<input bind:value oninput={valueChanged} class:unsaved={unsaved} />
+<input
+  type="text"
+  {placeholder}
+  value={dictionary[field] ?? ''}
+  onchange={save}
+  class="field-input" />
 
 <style>
-  .unsaved {
-    outline: solid 1px #00cc00;
+  .field-input {
+    width: 100%;
+    min-width: 7rem;
+    padding: 0.25rem 0.375rem;
+    border-radius: 0.25rem;
+    border: 1px solid transparent;
+    background: transparent;
+    font-size: 0.875rem;
+    color: var(--color);
+  }
+  .field-input:hover {
+    border-color: var(--border-color);
+  }
+  .field-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--background);
   }
 </style>
