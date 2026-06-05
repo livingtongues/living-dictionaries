@@ -11,30 +11,20 @@
   "i18n-ally.keystyle": "nested",
   "i18n-ally.sourceLanguage": "en",
 
-  // Kitbook
-  "files.associations": {
-    "*.svx": "svelte",
-    "*.composition": "svelte",
-  },
-  "foam.completion.label": "title",
-  "foam.edit.linkReferenceDefinitions": "withExtensions",
-  "foam.files.ignore": [
-    "**/node_modules/**/*",
-    "**/.svelte-kit/**/*",
-  ],
-  "foam.files.notesExtensions": "composition",
-
   // ESLint
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "prettier.enable": false,
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never",
   },
-  // Silence stylistic rules in IDE, but still auto fix them
+
+  // Silence stylistic rules in the IDE so cosmetic issues don't muddy the
+  // problems panel — but they still get auto-fixed on save by the action above.
+  // Pattern matches (e.g. "*-spacing") catch rules across plugins regardless of namespace.
   "eslint.rules.customizations": [
-    { "rule": "style/*", "severity": "off" },
-    { "rule": "format/*", "severity": "off" },
+    { "rule": "@stylistic/*", "severity": "off" },
     { "rule": "*-indent", "severity": "off" },
     { "rule": "*-spacing", "severity": "off" },
     { "rule": "*-spaces", "severity": "off" },
@@ -43,24 +33,25 @@
     { "rule": "*-newline", "severity": "off" },
     { "rule": "*quotes", "severity": "off" },
     { "rule": "*semi", "severity": "off" },
-    { "rule": "import/newline-after-import", "severity": "off" },
-    { "rule": "import/order", "severity": "off" },
+    { "rule": "import-x/newline-after-import", "severity": "off" },
+    { "rule": "import-x/order", "severity": "off" },
+    { "rule": "perfectionist/sort-named-imports", "severity": "off" },
+    { "rule": "perfectionist/sort-named-exports", "severity": "off" },
     { "rule": "sort-imports", "severity": "off" },
-    { "rule": "ts/no-empty-function", "severity": "off" },
+    { "rule": "@typescript-eslint/no-empty-function", "severity": "off" },
     { "rule": "svelte/indent", "severity": "off" },
   ],
+
+  // File types ESLint should validate. We don't include yaml/toml/markdown
+  // because we're not running those plugins.
   "eslint.validate": [
     "javascript",
     "typescript",
     "html",
-    "markdown",
     "svelte",
     "json",
     "jsonc",
-    "yaml",
-    "toml",
   ],
-  "eslint.experimental.useFlatConfig": true,
 
   "unocss.root": "site",
 
@@ -93,11 +84,4 @@
   },
 
   "comments.visible": false,
-
-  "deno.enable": true,
-  "deno.lint": true,
-  "deno.enablePaths": [
-    "supabase",
-  ],
-  "deno.importMap": "./supabase/functions/import-map.json",
 }
