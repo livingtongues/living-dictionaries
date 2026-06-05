@@ -3,7 +3,7 @@
     EntryData,
     IColumn,
     TablesUpdate,
-  } from '@living-dictionaries/types'
+  } from '$lib/types'
   import Audio from '../components/Audio.svelte'
   import Textbox from './cells/Textbox.svelte'
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte'

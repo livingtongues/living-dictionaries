@@ -3,7 +3,7 @@
 // internalName pulled from: https://keyman.com/keyboards > search for keyboard, select one with desktop and mobile web if possible, then copy Keyboard ID. Alternatively, all keyboards available can be seen at https://keyman.com/developer/keymanweb/keyboards
 // Latin script options: european, sil_euro_latin, basic_kbdus, us
 
-import type { IGlossLanguages } from '@living-dictionaries/types'
+import type { IGlossLanguages } from '$lib/types'
 import glossing_languages_list from './glossing-languages-list.json'
 
 export const glossingLanguages: IGlossLanguages = glossing_languages_list

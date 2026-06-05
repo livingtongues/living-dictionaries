@@ -1,6 +1,7 @@
 <script lang="ts">
   // learning from https://github.com/pngwn/peng-move/blob/main/src/lib/Animal.svelte
   import { spring } from 'svelte/motion'
+  import { image_src } from '$lib/helpers/media'
 
   interface Props {
     gcs: string
@@ -50,15 +51,13 @@
     })
   }
 
-  const src = $derived(`https://lh3.googleusercontent.com/${gcs}=${
-    dimensionType === 'square'
-      ? `s${length}-p`
-      : dimensionType === 'width'
-        ? `w${length}`
-        : dimensionType === 'height'
-          ? `h${length}`
-          : 's0'
-  }`)
+  const src = $derived(image_src(gcs, dimensionType === 'square'
+    ? `s${length}-p`
+    : dimensionType === 'width'
+      ? `w${length}`
+      : dimensionType === 'height'
+        ? `h${length}`
+        : 's0'))
 </script>
 
 <img

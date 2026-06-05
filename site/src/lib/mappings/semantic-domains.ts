@@ -1,4 +1,4 @@
-import type { SemanticDomain } from '@living-dictionaries/types'
+import type { SemanticDomain } from '$lib/types'
 
 export const semanticDomains: SemanticDomain[] = [
   { key: '1', name: 'Universe and the natural world' },

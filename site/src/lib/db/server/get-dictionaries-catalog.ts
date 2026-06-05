@@ -1,5 +1,5 @@
 import type Database from 'better-sqlite3'
-import type { DictionaryView } from '@living-dictionaries/types'
+import type { DictionaryView } from '$lib/types'
 import { query_all } from './typed-query'
 
 /**

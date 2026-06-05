@@ -1,0 +1,123 @@
+/*
+App-wide theme: semantic CSS variables + body paint + font-family.
+Ported from the example repo's `lib/theme.css` (was admin-scoped `.admin-root` in
+admin-theme.css; promoted to global 2026-06-05 so the shared svelte-pieces /
+layout components — Modal, Slideover, Toasts, CopyButton, RichTextEditor,
+BadgeArray, UserMenu, SyncStatus — resolve their `var(--…)` everywhere, not only
+under /admin).
+
+THIS FILE IS PLAIN CSS (no UnoCSS). It is one of the pieces staged for the eventual
+UnoCSS → vanilla-CSS migration. We KEEP UnoCSS for now (dropping it is too big a
+visual shift to do at once); see `archive/css/reset.css` for the plain reset that
+replaces uno's reset when that day comes.
+
+DARK MODE — currently LIGHT-FORCED site-wide:
+  The legacy main pages are not dark-ready, so we do NOT auto-switch on the OS
+  preference. The explicit `.dark` / `.light` class selectors below are kept ACTIVE
+  (so svelte-look previews and a future admin dark-toggle can opt in by putting
+  `.dark` on <html>/<body>/a wrapper). The `@media (prefers-color-scheme: dark)`
+  block is COMMENTED OUT — nothing is lost; uncomment it (per-section or globally)
+  once those pages are audited for dark mode.
+
+LD avoids system-ui / -apple-system / BlinkMacSystemFont / Helvetica Neue /
+ui-sans-serif on purpose: Mac Chrome's .SF NS renders diacritics incorrectly
+(stacks them on a dotted-i instead of replacing the dot). Stack mirrors global.css.
+*/
+
+:root {
+  --light-primary: hsl(217, 91%, 60%);           /* ~#3b82f6, Tailwind blue-500 */
+  --light-on-primary: #ffffff;
+  --light-background: #ffffff;
+  --light-surface: hsl(0, 0%, 96%);
+  --light-border-color: hsla(240, 11%, 7%, 0.08);
+  --light-color: hsl(240, 11%, 7%);
+  --light-color-secondary: hsla(240, 11%, 7%, 0.7);
+  --light-danger: hsl(0, 72%, 47%);
+  --light-warning: hsl(38, 80%, 45%);
+  --light-success: hsl(142, 71%, 40%);
+
+  --dark-primary: hsl(217, 91%, 75%);             /* lighter blue for dark bg readability */
+  --dark-on-primary: #ffffff;
+  --dark-background: hsl(240, 11%, 7%);
+  --dark-surface: hsl(240, 8%, 11%);
+  --dark-border-color: hsla(0, 0%, 100%, 0.06);
+  --dark-color: #ffffff;
+  --dark-color-secondary: hsla(0, 0%, 100%, 0.36);
+  --dark-danger: hsl(0, 72%, 60%);
+  --dark-warning: hsl(38, 80%, 60%);
+  --dark-success: hsl(142, 60%, 55%);
+
+  --transition-time: 0.325s;
+
+  --font-sans: "Segoe UI", Arial, "Noto Sans", "Noto Sans Wancho", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* Light: default and forced (self or ancestor .light) */
+:root,
+.light {
+  --primary: var(--light-primary);
+  --on-primary: var(--light-on-primary);
+  --background: var(--light-background);
+  --surface: var(--light-surface);
+  --border-color: var(--light-border-color);
+  --color: var(--light-color);
+  --color-secondary: var(--light-color-secondary);
+  --danger: var(--light-danger);
+  --warning: var(--light-warning);
+  --success: var(--light-success);
+  color-scheme: light;
+  background-color: var(--background);
+  color: var(--color);
+}
+
+/* Dark: forced via an explicit `.dark` class (kept active for svelte-look + future admin toggle) */
+.dark {
+  --primary: var(--dark-primary);
+  --on-primary: var(--dark-on-primary);
+  --background: var(--dark-background);
+  --surface: var(--dark-surface);
+  --border-color: var(--dark-border-color);
+  --color: var(--dark-color);
+  --color-secondary: var(--dark-color-secondary);
+  --danger: var(--dark-danger);
+  --warning: var(--dark-warning);
+  --success: var(--dark-success);
+  color-scheme: dark;
+  background-color: var(--background);
+  color: var(--color);
+}
+
+/*
+Dark: system preference — DISABLED while the main site is light-only (see header).
+To follow the OS dark preference again, uncomment this block (or scope its selector
+to a dark-ready section, e.g. `.admin-root:not(.light)`).
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --primary: var(--dark-primary);
+    --on-primary: var(--dark-on-primary);
+    --background: var(--dark-background);
+    --surface: var(--dark-surface);
+    --border-color: var(--dark-border-color);
+    --color: var(--dark-color);
+    --color-secondary: var(--dark-color-secondary);
+    --danger: var(--dark-danger);
+    --warning: var(--dark-warning);
+    --success: var(--dark-success);
+    color-scheme: dark;
+    background-color: var(--background);
+    color: var(--color);
+  }
+}
+*/
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-time: 0s;
+  }
+}

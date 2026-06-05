@@ -1,4 +1,4 @@
-import type { EntryData } from '@living-dictionaries/types'
+import type { EntryData } from '$lib/types'
 import { augment_entry_for_search, simplify_lexeme_for_search } from './augment-entry-for-search'
 // import { complex } from '$lib/mocks/entries'
 

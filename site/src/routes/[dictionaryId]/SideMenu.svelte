@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
+  import type { Tables } from '$lib/types'
   import { page } from '$app/stores'
 
   interface Props {
@@ -82,14 +82,6 @@
     </span>
   </a>
   {#if is_manager}
-    <a
-      href={`/${dictionary.url}/history`}
-      class:active={$page.url.pathname.includes('history')}>
-      <span class="i-mdi-history text-xl"></span>
-      <span class="font-medium mx-2">
-        {$page.data.t('history.history')}
-      </span>
-    </a>
     <a
       href={`/${dictionary.url}/settings`}
       class:active={$page.url.pathname.includes('settings')}>

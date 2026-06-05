@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryData } from '@living-dictionaries/types'
+  import type { EntryData } from '$lib/types'
   import { ShowHide } from '$lib/svelte-pieces'
 
   interface Props {

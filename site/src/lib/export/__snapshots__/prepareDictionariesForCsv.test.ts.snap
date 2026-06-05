@@ -9,7 +9,7 @@ exports[`prepareDictionaryForCsv > dictionary example 1 1`] = `
   "location": "",
   "longitude": 79.539,
   "name": "<xaxdeleted>",
-  "public": false,
+  "public": 0,
   "thumbnail": undefined,
   "url": "https://livingdictionaries.app/badhani",
 }
@@ -24,7 +24,7 @@ exports[`prepareDictionaryForCsv > dictionary example 2 1`] = `
   "location": "",
   "longitude": 107.616,
   "name": "Buryat",
-  "public": false,
+  "public": 0,
   "thumbnail": undefined,
   "url": "https://livingdictionaries.app/buryat",
 }
@@ -39,7 +39,7 @@ exports[`prepareDictionaryForCsv > dictionary example 3 1`] = `
   "location": "South Eastern States of Nigeria_ West Africa",
   "longitude": undefined,
   "name": " IGBO LANGUAGE (ASUSU IGBO)",
-  "public": false,
+  "public": 0,
   "thumbnail": undefined,
   "url": "https://livingdictionaries.app/igbo-language-(asusu-igb",
 }

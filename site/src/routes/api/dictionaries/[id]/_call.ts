@@ -1,5 +1,16 @@
-import type { DictionariesIdDeleteResponseBody } from './+server'
+import type { DictionariesIdDeleteResponseBody, DictionariesIdGetResponseBody } from './+server'
 import { ResponseCodes } from '$lib/constants'
+
+export async function api_dictionaries_id_exists(dict_id: string): Promise<boolean> {
+  try {
+    const response = await fetch(`/api/dictionaries/${dict_id}`)
+    if (!response.ok) return false
+    const { exists } = await response.json() as DictionariesIdGetResponseBody
+    return exists
+  } catch {
+    return false
+  }
+}
 
 export async function api_dictionaries_id_delete({ dict_id }: { dict_id: string }) {
   try {

@@ -1,9 +1,9 @@
 // @ts-check
-// Living Dictionaries ESLint config — hand-written (no @antfu/eslint-config) for clarity.
-// SCOPE: only the active `site/` app + root config files are linted. The legacy/reference
-// trees (`packages/**`, `supabase/**`, `site/e2e/**`) are deliberately ignored — they're not
-// part of the vps-migration surface (mirrors the house repo's `site/` migration, and the
-// finished living-dictionaries-example config this is ported from).
+// Living Dictionaries ESLint config —
+// SCOPE: only the active `site/` app + root config files are linted. The legacy/reference and
+// out-of-workspace tooling trees (`packages/**`, `scripts/**`, `ids-import/**`, `site/e2e/**`)
+// are deliberately ignored — they're not part of the vps-migration surface (mirrors the house
+// repo's `site/` migration, and the finished living-dictionaries-example config this is ported from).
 //
 // Naming: canonical plugin namespaces (e.g. `@typescript-eslint/*`, `@stylistic/*`,
 // `import-x/*`). When a rule fails, the rule id in the error matches a key in this file
@@ -45,9 +45,10 @@ export default tseslint.config(
       '.knowledge/**',
       '.issues/**',
 
-      // Legacy / out-of-scope trees (not part of the vps-migration surface)
+      // Legacy / out-of-scope trees + out-of-workspace tooling (not part of the vps-migration surface)
       'packages/**',
-      'supabase/**',
+      'scripts/**',
+      'ids-import/**',
       'site/e2e/**',
 
       // Vendored third-party
@@ -412,6 +413,16 @@ export default tseslint.config(
     files: ['.vscode/*.json'],
     rules: {
       'jsonc/comma-dangle': ['error', 'always-multiline'],
+    },
+  },
+  {
+    name: 'ld/no-pnpm-config-in-package-json',
+    files: ['package.json'],
+    rules: {
+      'no-restricted-syntax': ['error', {
+        selector: 'JSONProperty[key.value="pnpm"]',
+        message: 'Put pnpm settings (overrides, onlyBuiltDependencies, etc.) in pnpm-workspace.yaml, not package.json. A package.json `pnpm` block silently OVERRIDES (not merges with) the workspace file and breaks fresh/Docker installs.',
+      }],
     },
   },
 

@@ -75,4 +75,4 @@ export const semanticDomains = [
     sd_Eng: 'States',
     sd_Urd: 'حالت',
   },
-];
+]

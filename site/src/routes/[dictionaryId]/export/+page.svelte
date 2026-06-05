@@ -9,7 +9,6 @@ import type { EntryForCSV } from './prepareEntriesForCsv'
   import Progress from '$lib/export/Progress.svelte'
   import { page } from '$app/stores'
   import { downloadObjectsAsCSV } from '$lib/export/csv'
-  import { dev } from '$app/environment'
 
   const { data } = $props()
   const { is_manager, dictionary, admin, entries_data, url_from_storage_path } = $derived(data)
@@ -138,12 +137,6 @@ import type { EntryForCSV } from './prepareEntriesForCsv'
 {#if admin}
   <div class="mt-5">
     <Button form="filled" href='entries?q=%7B"view"%3A"print"%2C"entries_per_page"%3A100%7D'>{$page.data.t('export.download_pdf')}</Button>
-  </div>
-{/if}
-
-{#if admin || dev}
-  <div class="mt-2">
-    <a href="/{dictionary.id}/keys" class="text-sm text-gray-500 hover:underline">API Keys</a>
   </div>
 {/if}
 

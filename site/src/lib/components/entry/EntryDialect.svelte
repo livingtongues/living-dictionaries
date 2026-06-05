@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryData } from '@living-dictionaries/types'
+  import type { EntryData } from '$lib/types'
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
   import { page } from '$app/stores'

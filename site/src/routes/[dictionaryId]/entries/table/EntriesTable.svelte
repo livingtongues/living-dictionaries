@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryData, IColumn, Tables } from '@living-dictionaries/types'
+  import type { EntryData, IColumn, Tables } from '$lib/types'
   import ColumnTitle from './ColumnTitle.svelte'
   import Cell from './Cell.svelte'
   import { setUpColumns } from './setUpColumns'

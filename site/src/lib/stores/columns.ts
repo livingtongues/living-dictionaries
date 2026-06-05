@@ -1,4 +1,4 @@
-import type { IColumn } from '@living-dictionaries/types'
+import type { IColumn } from '$lib/types'
 
 export const defaultColumns: IColumn[] = [
   // field must match those used for i18n (e.g. lx = entry.lx)

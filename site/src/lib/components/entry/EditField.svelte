@@ -1,6 +1,6 @@
 <script lang="ts">
   import sanitize from 'xss'
-  import type { EntryFieldValue } from '@living-dictionaries/types'
+  import type { EntryFieldValue } from '$lib/types'
   import { Button, Form } from '$lib/svelte-pieces'
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
   import { page } from '$app/stores'

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryData, HostedVideo } from '@living-dictionaries/types'
+  import type { EntryData, HostedVideo } from '$lib/types'
   import type { Readable } from 'svelte/store'
   import SelectVideo from './SelectVideo.svelte'
   import PasteVideoLink from './PasteVideoLink.svelte'

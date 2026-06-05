@@ -1,4 +1,4 @@
-import type { EntryData, Tables } from '@living-dictionaries/types'
+import type { EntryData, Tables } from '$lib/types'
 import { get } from 'svelte/store'
 import { friendlyName } from './friendlyName'
 import { get_orthography_headers, get_sense_headers } from './assignHeadersForCsv'

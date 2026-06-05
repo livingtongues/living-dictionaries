@@ -18,6 +18,8 @@ export interface UploadResponseBody {
   bucket: string
   object_key: string
   item_id: string
+  /** DEV-only: bytes go to the local `/api/dev-media` store, not GCS. Images skip the serving-url fetch. */
+  dev_mock?: boolean
 }
 
 export const POST: RequestHandler = async (event) => {
@@ -36,8 +38,25 @@ export const POST: RequestHandler = async (event) => {
   if (!file_type?.trim())
     error(ResponseCodes.BAD_REQUEST, 'Missing file_type')
 
-  if (!gcs_is_configured())
+  if (!gcs_is_configured()) {
+    // Dev media mock: no bucket configured locally — hand the client a PUT url to
+    // the local `/api/dev-media` store so the upload→save→sync→render path works
+    // end-to-end (bytes are kept locally + served back). Prod-without-creds keeps
+    // the dormant 503.
+    if (import.meta.env.DEV) {
+      const extension = file_name.split('.').pop()
+      const item_id = Date.now().toString()
+      const object_key = `${folder}/${item_id}.${extension}`
+      return json({
+        presigned_upload_url: `/api/dev-media/${object_key}`,
+        bucket: '',
+        object_key,
+        item_id,
+        dev_mock: true,
+      } satisfies UploadResponseBody)
+    }
     error(ResponseCodes.SERVICE_UNAVAILABLE, 'Media uploads are not configured (missing GCS credentials)')
+  }
 
   try {
     const { client, bucket } = get_gcs()

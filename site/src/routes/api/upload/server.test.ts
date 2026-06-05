@@ -83,9 +83,13 @@ describe(POST, () => {
       .rejects.toMatchObject({ status: 400 })
   })
 
-  test('503 when GCS not configured', async () => {
-    await expect(call({ token: await token({ id: 'u_ed', email: 'editor@example.com' }), body: valid_body }))
-      .rejects.toMatchObject({ status: 503 })
+  test('dev media mock (200) when GCS not configured — points at the local /api/dev-media store', async () => {
+    const response = await call({ token: await token({ id: 'u_ed', email: 'editor@example.com' }), body: valid_body })
+    expect(response.status).toBe(200)
+    const data = await response.json()
+    expect(data.dev_mock).toBeTruthy()
+    expect(data.object_key).toMatch(/^dict1\/images\/\d+\.jpg$/)
+    expect(data.presigned_upload_url).toBe(`/api/dev-media/${data.object_key}`)
   })
 
   test('editor gets a presigned PUT url + object_key', async () => {

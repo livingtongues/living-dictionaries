@@ -2,7 +2,7 @@
   import { preventDefault } from 'svelte/legacy'
 
   import { createEventDispatcher, onMount } from 'svelte'
-  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface'
+  import type { LngLatFull } from '$lib/types'
   import Map from './mapbox/map/Map.svelte'
   import Geocoder from './mapbox/geocoder/Geocoder.svelte'
   import Marker from './mapbox/map/Marker.svelte'

@@ -1,4 +1,4 @@
-import type { Tables } from '@living-dictionaries/types'
+import type { Tables } from '$lib/types'
 import { getAdminRecipients } from '../addresses'
 import newDictionary from '../html/newDictionary'
 import { send_email } from '../send-email'

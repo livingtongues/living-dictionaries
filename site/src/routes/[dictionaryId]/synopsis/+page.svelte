@@ -37,7 +37,7 @@
         can_edit={false}
         height={300}
         title="{name} Featured Image"
-        gcs={featured_image.specifiable_image_url}
+        gcs={featured_image.serving_url}
         on_delete_image={null} />
     {/if}
   {/if}

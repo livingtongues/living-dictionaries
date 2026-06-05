@@ -1,4 +1,4 @@
-import type { IPoint, IRegion } from '@living-dictionaries/types'
+import type { IPoint, IRegion } from '$lib/types'
 import type { Feature, FeatureCollection, Point, Polygon } from 'geojson'
 import { sortPoints } from '../../utils/polygonFromCoordinates'
 // http://geojson.io/ to create GeoJSON easily

@@ -5,13 +5,15 @@
   import Header from '$lib/components/shell/Header.svelte'
   import Footer from '$lib/components/shell/Footer.svelte'
   import { dev } from '$app/environment'
+  import { init_remote_logging, log_event } from '$lib/debug/remote-log'
 
-  onMount(async () => {
-    const Sentry = await import('@sentry/browser')
-    const eventId = Sentry.captureException(page.error)
-    console.error('sent error', eventId)
-  // https://docs.sentry.io/enriching-error-data/user-feedback
-    // Sentry.showReportDialog({ eventId });
+  onMount(() => {
+    init_remote_logging()
+    log_event({
+      level: 'crash',
+      message: page.error?.message || 'Error page shown',
+      context: { status: page.status, url: page.url?.href },
+    })
   })
 </script>
 

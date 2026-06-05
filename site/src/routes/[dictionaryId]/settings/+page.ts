@@ -1,4 +1,4 @@
-import type { TablesUpdate } from '@living-dictionaries/types'
+import type { TablesUpdate } from '$lib/types'
 import type { PageLoad } from './$types'
 import { upload_image } from '$lib/components/image/upload-image'
 
@@ -34,10 +34,8 @@ export const load: PageLoad = async ({ parent }) => {
     const unsubscribe = status.subscribe(async ({ storage_path, serving_url }) => {
       if (storage_path && serving_url) {
         await updateDictionary({ featured_image: {
-          fb_storage_path: storage_path,
-          specifiable_image_url: serving_url,
-          uid_added_by: ssr_user?.id,
-          timestamp: new Date(),
+          storage_path,
+          serving_url,
         } })
         unsubscribe()
       }

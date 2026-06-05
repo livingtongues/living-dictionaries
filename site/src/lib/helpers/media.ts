@@ -1,5 +1,5 @@
 import { get } from 'svelte/store'
-import { assign_speaker, insert_audio, insert_photo, insert_video } from '$lib/supabase/operations'
+import { assign_speaker, insert_audio, insert_photo, insert_video } from '$lib/db/dict-client/operations'
 import { page } from '$app/stores'
 import { upload_image } from '$lib/components/image/upload-image'
 import { upload_audio } from '$lib/components/audio/upload-audio'
@@ -44,6 +44,4 @@ export function uploadVideo({ sense_id, speaker_id, file }: { sense_id: string, 
   return status
 }
 
-export function url_from_storage_path(path: string, storage_bucket: string): string {
-  return `https://firebasestorage.googleapis.com/v0/b/${storage_bucket}/o/${encodeURIComponent(path)}?alt=media`
-}
+export { DEV_LOCAL_PREFIX, image_src, url_from_storage_path } from './media-url'

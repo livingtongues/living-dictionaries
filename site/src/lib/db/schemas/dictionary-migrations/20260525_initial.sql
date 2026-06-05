@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS entries (
   interlinearization TEXT,
   morphology TEXT,
   notes TEXT, -- JSON MultiString
+  linguistic_history TEXT, -- JSON MultiString
   sources TEXT, -- JSON string[]
   scientific_names TEXT, -- JSON string[]
   coordinates TEXT, -- JSON

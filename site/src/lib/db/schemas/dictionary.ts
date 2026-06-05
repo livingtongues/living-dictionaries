@@ -52,6 +52,7 @@ export const entries = sqliteTable('entries', {
   interlinearization: text(),
   morphology: text(),
   notes: text({ mode: 'json' }).$type<MultiString>(),
+  linguistic_history: text({ mode: 'json' }).$type<MultiString>(),
   sources: text({ mode: 'json' }).$type<string[]>(),
   scientific_names: text({ mode: 'json' }).$type<string[]>(),
   /**

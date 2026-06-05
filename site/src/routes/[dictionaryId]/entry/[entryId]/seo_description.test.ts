@@ -1,4 +1,4 @@
-import type { EntryData } from '@living-dictionaries/types'
+import type { EntryData } from '$lib/types'
 import { seo_description } from './seo_description'
 import type { DeepPartial } from '$lib/helpers/deep-partial'
 import { english_translate } from '$lib/i18n'

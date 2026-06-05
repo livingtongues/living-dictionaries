@@ -1,4 +1,4 @@
-import type { Tables } from '@living-dictionaries/types/supabase/combined.types'
+import type { Tables } from '$lib/types'
 
 type Tag = Pick<Tables<'tags'>, 'id' | 'updated_at' | 'name' | 'private'>
 

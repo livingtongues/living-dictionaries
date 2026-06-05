@@ -1,9 +1,15 @@
 # Migration knowledge
 
 Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. Plan + status:
-`.issues/vps-migration.md`.
+`.issues/cross-project-orchestration.md`.
 
 ## Pages
+- [pulling-supabase-data-locally.md](./pulling-supabase-data-locally.md) — operational runbook
+  for refreshing `site/.data` with real dictionaries: run the migrator from the **example** repo
+  (this repo's `scripts/` can't install — `workspace:` deps, not a workspace member), the
+  `--content-dicts`/`--data-dir` flags, the two post-pull reconciliations vs this schema (ALTER
+  `linguistic_history`; app auto-applies the lmod-trigger fix), and the gotchas (`process.exit`
+  truncates piped stdout; `linguistic_history` is empty in prod; media files aren't pulled).
 - [build-and-deploy-gotchas.md](./build-and-deploy-gotchas.md) — pnpm lockfile discipline,
   the adapter-node swap fallout (deps/devDeps bucketing, rollup bump, `@types/node` dedup),
   and the local-build/boot loop.

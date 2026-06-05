@@ -2,7 +2,7 @@
   import User from './User.svelte'
   import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/state'
-  import { mode } from '$lib/supabase'
+  import { mode } from '$lib/mode'
 
   interface Props {
     children?: import('svelte').Snippet

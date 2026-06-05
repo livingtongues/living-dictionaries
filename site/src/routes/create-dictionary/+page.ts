@@ -1,20 +1,20 @@
-import type { TablesInsert } from '@living-dictionaries/types'
 import type { PageLoad } from './$types'
 import { pruneObject } from '$lib/helpers/prune'
-import { api_create_dictionary } from '$api/db/create-dictionary/_call'
-import { mode } from '$lib/supabase'
+import { api_dictionaries_create } from '$api/dictionaries/create/_call'
+import type { DictionariesCreateRequestBody } from '$api/dictionaries/create/+server'
+import { api_dictionaries_id_exists } from '$api/dictionaries/[id]/_call'
+
+const mode = import.meta.env.MODE as 'development' | 'production'
 
 export const load = (({ parent }) => {
   const MIN_URL_LENGTH = 3
 
-  async function dictionary_id_exists(url: string): Promise<boolean> {
-    const { supabase } = await parent()
-    const { data: exists } = await supabase.from('dictionaries').select('id').eq('id', url).single()
-    return !!exists
+  function dictionary_id_exists(url: string): Promise<boolean> {
+    return api_dictionaries_id_exists(url)
   }
 
-  async function create_dictionary(dictionary: TablesInsert<'dictionaries'>) {
-    const { t, ssr_user, supabase } = await parent()
+  async function create_dictionary(dictionary: DictionariesCreateRequestBody) {
+    const { t, ssr_user } = await parent()
     if (!ssr_user) return alert('Please login first') // this should never fire as should be caught in page
 
     if (dictionary.id.length < MIN_URL_LENGTH) {
@@ -22,7 +22,7 @@ export const load = (({ parent }) => {
     }
 
     try {
-      const pruned_dictionary = pruneObject(dictionary)
+      const pruned_dictionary = pruneObject(dictionary) as DictionariesCreateRequestBody
       if (mode === 'development') {
         console.info(pruned_dictionary)
         if (!confirm('Dictionary value logged to console because in dev mode. Do you still want to create this dictionary?')) {
@@ -30,18 +30,11 @@ export const load = (({ parent }) => {
         }
       }
 
-      const { error } = await api_create_dictionary({ dictionary: pruned_dictionary })
-      if (error)
-        throw new Error(error.message)
+      const { data, error } = await api_dictionaries_create(pruned_dictionary)
+      if (error || !data)
+        throw new Error(error?.message || 'Could not create dictionary')
 
-      const { error: terms_agreement_error } = await supabase.from('user_data').update({
-        terms_agreement: new Date().toISOString(),
-      }).eq('id', ssr_user.id)
-      if (terms_agreement_error) {
-        console.error(terms_agreement_error)
-      }
-
-      window.location.replace(`/${dictionary.id}/entries`)
+      window.location.replace(`/${data.id}/entries`)
     } catch (err) {
       alert(`${t('misc.error')}: ${err}`)
     }

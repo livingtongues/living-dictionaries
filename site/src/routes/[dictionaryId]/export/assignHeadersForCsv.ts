@@ -1,4 +1,4 @@
-import type { Orthography } from '@living-dictionaries/types'
+import type { Orthography } from '$lib/types'
 import type { EntryForCSV, translate_entries } from './prepareEntriesForCsv'
 import { get_example_sentence, get_glosses, get_image_files, get_noun_class, get_parts_of_speech, get_plural_form, get_semantic_domain, get_variant } from './getRows'
 
@@ -7,10 +7,10 @@ export function get_orthography_headers(orthographies: Orthography[]) {
   if (orthographies?.length) {
     orthographies.forEach((orthography, index) => {
       if (index > 0) {
-        headers[`localOrthography.${index + 1}`] = orthography.name.default
+        headers[`localOrthography.${index + 1}`] = orthography.name
       } else {
         // @ts-ignore
-        headers.localOrthography = orthography.name.default
+        headers.localOrthography = orthography.name
       }
     })
   }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryData, IPrintFields, PartnerWithPhoto, Tables } from '@living-dictionaries/types'
+  import type { EntryData, IPrintFields, PartnerWithPhoto, Tables } from '$lib/types'
   import { onMount } from 'svelte'
   import { build_citation } from '../contributors/build-citation'
   import PrintEntry from './print/PrintEntry.svelte'
@@ -10,6 +10,7 @@
 import type { QueryParamStore } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import type { QueryParams } from '$lib/search/types'
+  import { api_dictionaries_partners_get } from '$api/dictionaries/[id]/partners/_call'
 
   interface Props {
     search_params: QueryParamStore<QueryParams>
@@ -27,10 +28,9 @@ import type { QueryParamStore } from '$lib/svelte-pieces'
 
   const print_per_page = 100
   let partners: PartnerWithPhoto[] = $state([])
-  const { dictionary_info } = $derived($page.data)
 
   onMount(() => {
-    $page.data.load_partners().then(data => partners = data)
+    api_dictionaries_partners_get(dictionary.id).then(data => partners = data)
     $search_params.page = 1
     $search_params.entries_per_page = print_per_page
     return () => $search_params.entries_per_page = null
@@ -134,7 +134,7 @@ import type { QueryParamStore } from '$lib/svelte-pieces'
       dir="ltr"
       class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
       style="writing-mode: tb; min-width: 0;">
-      {build_citation({ t: $page.data.t, dictionary, custom_citation: truncateAuthors($dictionary_info.citation), partners })}
+      {build_citation({ t: $page.data.t, dictionary, custom_citation: truncateAuthors(dictionary.citation), partners })}
     </div>
   </div>
 {:else}

@@ -4,10 +4,9 @@ import { createPersistedStore } from '$lib/svelte-pieces'
 import { getSupportedLocale } from '$lib/i18n/locales'
 import { getTranslator } from '$lib/i18n'
 import { defaultColumns } from '$lib/stores/columns'
-import { getSupabase } from '$lib/supabase'
 import { get_auth_user } from '$lib/auth/user.svelte'
 import { get_my_dictionary_roles } from '$lib/me/dictionary-roles.svelte'
-import { create_dictionaries_store, create_my_dictionaries_store } from '$lib/supabase/dictionaries'
+import { create_dictionaries_store, create_my_dictionaries_store } from '$lib/dictionaries'
 
 export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLocale, ssr_user, user_latitude, user_longitude } }) => {
   const urlLocale = searchParams.get('lang')
@@ -37,9 +36,6 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
     dict_roles.forget()
   }
 
-  // Stub Supabase client still backs the not-yet-migrated reads (dictionary_info,
-  // editors, partners, writes) until M4-write.
-  const supabase = getSupabase()
   const dictionaries = create_dictionaries_store()
   const my_dictionaries = create_my_dictionaries_store({ user_id: ssr_user?.id })
 
@@ -50,7 +46,6 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
   return {
     locale,
     t,
-    supabase,
     auth_user,
     dict_roles,
     ssr_user,

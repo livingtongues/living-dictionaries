@@ -1,5 +1,5 @@
 import { create, insertMultiple, remove, update } from '@orama/orama'
-import type { EntryData } from '@living-dictionaries/types'
+import type { EntryData } from '$lib/types'
 import { augment_entry_for_search } from './augment-entry-for-search'
 import { entries_index_schema } from './entries-schema'
 import type { EntriesIndex } from './entries-schema'

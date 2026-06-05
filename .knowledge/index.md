@@ -1,7 +1,7 @@
-# Knowledge wiki — Living Dictionaries (vps-migration)
+# Knowledge wiki — Living Dictionaries (svelte-5-migration)
 
 Durable decisions/gotchas that augment the code (not discoverable by reading a single file).
-Active plans live in `.issues/`; the migration master plan is `.issues/vps-migration.md`.
+Active plans live in `.issues/`; the migration master plan is `.issues/cross-project-orchestration.md`.
 
 ## Categories
 - [migration/](./migration/index.md) — gotchas and decisions for the Vercel/Supabase →

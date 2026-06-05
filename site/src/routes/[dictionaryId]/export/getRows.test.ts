@@ -1,4 +1,4 @@
-import type { Orthography, Tables } from '@living-dictionaries/types'
+import type { Orthography, Tables } from '$lib/types'
 import {
   get_example_sentence,
   get_glosses,
@@ -13,9 +13,9 @@ import { format_orthographies } from './assignFormattedEntryValuesForCsv'
 describe(get_orthography_headers, () => {
   test('assigns alternate orthography headrers if any exists', () => {
     const orthographies: Orthography[] = [
-      { bcp: '', name: { default: 'native-1' } },
-      { bcp: '', name: { default: 'native-2' } },
-      { bcp: '', name: { default: 'native-3' } },
+      { bcp: '', name: 'native-1' },
+      { bcp: '', name: 'native-2' },
+      { bcp: '', name: 'native-3' },
     ]
     expect(get_orthography_headers(orthographies)).toEqual({
       'localOrthography': 'native-1',
@@ -36,8 +36,8 @@ describe(get_orthography_headers, () => {
 describe(format_orthographies, () => {
   test('assigns formatted alterante orthographies', () => {
     const orthographies: Orthography[] = [
-      { bcp: '', name: { default: 'native-1' } },
-      { bcp: '', name: { default: 'native-2' } },
+      { bcp: '', name: 'native-1' },
+      { bcp: '', name: 'native-2' },
     ]
     const lexeme = { default: 'foo', lo1: 'פו', lo2: 'ཕུ།' }
     expect(format_orthographies(orthographies, lexeme)).toEqual(

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryData, Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '$lib/types'
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/helpers/glosses'
   import { page } from '$app/stores'

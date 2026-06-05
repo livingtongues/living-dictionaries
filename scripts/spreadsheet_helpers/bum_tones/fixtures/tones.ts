@@ -12,4 +12,4 @@ export const test_tones = [
   '\u0300 \u0302',
   '',
   '\u0301 \u0301',
-];
+]

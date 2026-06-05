@@ -2,7 +2,7 @@
   import { run } from 'svelte/legacy'
 
   import type { Readable } from 'svelte/store'
-  import type { EntryData } from '@living-dictionaries/types'
+  import type { EntryData } from '$lib/types'
   import type { AudioVideoUploadStatus } from './upload-audio'
   import { Button, JSON, Modal } from '$lib/svelte-pieces'
   import { page } from '$app/stores'

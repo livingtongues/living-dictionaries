@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryData, Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '$lib/types'
   import Video from '../../entries/components/Video.svelte'
   import GeoTaggingModal from './GeoTaggingModal.svelte'
   import InitableShowHide from './InitableShowHide.svelte'

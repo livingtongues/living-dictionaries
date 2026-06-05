@@ -2,7 +2,7 @@
 //   ExpandedEntry,
 //   PartOfSpeech,
 //   ISpeaker,
-// } from '@living-dictionaries/types'
+// } from '$lib/types'
 // import { StandardEntryCSVFields, formatCsvEntries, getCsvHeaders } from './prepareEntriesForCsv'
 // import { objectsToCsvByHeaders } from '$lib/export/csv'
 

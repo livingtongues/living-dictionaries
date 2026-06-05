@@ -89,7 +89,7 @@
         can_edit
         height={300}
         title="{dictionary.name} Featured Image"
-        gcs={dictionary.featured_image.specifiable_image_url}
+        gcs={dictionary.featured_image.serving_url}
         on_delete_image={async () => await updateDictionary({ featured_image: null })} />
     {:else}
       <div class="hover:bg-gray-100 min-h-150px flex flex-col">
@@ -100,19 +100,19 @@
   {/if}
 
   <PrintAccessCheckbox
-    checked={dictionary.print_access}
-    on:changed={async ({ detail: { checked } }) => await updateDictionary({ print_access: checked })} />
+    checked={!!dictionary.print_access}
+    on:changed={async ({ detail: { checked } }) => await updateDictionary({ print_access: checked ? 1 : 0 })} />
   <div class="mb-5"></div>
 
   {#if !dictionary.con_language_description}
     <PublicCheckbox
-      checked={dictionary.public}
+      checked={!!dictionary.public}
       on:changed={async ({ detail: { checked } }) => {
         if (!checked) {
-          await updateDictionary({ public: false })
+          await updateDictionary({ public: 0 })
         } else if (admin) {
-          await updateDictionary({ public: true })
-          dictionary.public = true
+          await updateDictionary({ public: 1 })
+          dictionary.public = 1
         } else if (about_is_too_short()) {
           alert($page.data.t('about.message'))
           goto(`/${dictionary.id}/about`)
@@ -120,7 +120,7 @@
           const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
           if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
         }
-        dictionary.public = false
+        dictionary.public = 0
       }} />
     <div class="mb-5"></div>
   {/if}

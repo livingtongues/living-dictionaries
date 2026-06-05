@@ -1,5 +1,5 @@
 import { expose } from 'comlink'
-import type { EntryData, Tables } from '@living-dictionaries/types'
+import type { EntryData, Tables } from '$lib/types'
 import { clear } from 'idb-keyval'
 import { _search_entries, create_index, update_index_entry } from './orama.worker'
 import { should_include_tag } from '$lib/helpers/tag-visibility'

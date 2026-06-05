@@ -1,6 +1,6 @@
 import { search } from '@orama/orama'
 import type { SearchParams as OramaSearchParams } from '@orama/orama'
-import type { EntryData } from '@living-dictionaries/types'
+import type { EntryData } from '$lib/types'
 import type { QueryParams } from './types'
 import type { EntriesIndex } from './entries-schema'
 

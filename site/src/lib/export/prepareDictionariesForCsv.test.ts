@@ -1,4 +1,4 @@
-import type { DictionaryView } from '@living-dictionaries/types'
+import type { DictionaryView } from '$lib/types'
 import { prepareDictionaryForCsv } from './prepareDictionariesForCsv'
 
 const timestamp = new Date('2021-08-02T14:00:00.000Z').toISOString()
@@ -13,7 +13,7 @@ describe(prepareDictionaryForCsv, () => {
       updated_by: 'OeVwHacvXMTW0ocKuidCWxBrCIP2',
       name: '<xaxdeleted>',
       entry_count: 0,
-      public: false,
+      public: 0,
       alternate_names: [],
       coordinates: {
         points: [{
@@ -38,7 +38,7 @@ describe(prepareDictionaryForCsv, () => {
         }],
       },
       gloss_languages: ['en', 'ru', 'mn', 'cmn'],
-      public: false,
+      public: 0,
       entry_count: 1,
       iso_639_3: 'bua',
       glottocode: 'buri1258',
@@ -51,7 +51,7 @@ describe(prepareDictionaryForCsv, () => {
       updated_by: 'FtP0LHfC9SMzyfcWN48HaNclSxC3',
       gloss_languages: ['ig'],
       name: ' IGBO LANGUAGE (ASUSU IGBO)',
-      public: false,
+      public: 0,
       location: 'South Eastern States of Nigeria, West Africa',
       created_by: 'vLfYz1Fja8SlL5dSIV7spGeFCXj1',
       entry_count: 1,

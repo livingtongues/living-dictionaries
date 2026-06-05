@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" role="img" aria-label="Dev placeholder image">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#g)"/>
+  <g fill="#ffffff" fill-opacity="0.92" text-anchor="middle" font-family="system-ui, sans-serif">
+    <path d="M150 165 h100 a10 10 0 0 1 10 10 v60 a10 10 0 0 1 -10 10 h-100 a10 10 0 0 1 -10 -10 v-60 a10 10 0 0 1 10 -10 z M168 188 a10 10 0 1 0 0.1 0 z M150 235 l32 -34 l24 26 l18 -16 l26 24 v10 a10 10 0 0 1 -10 10 h-100 a10 10 0 0 1 -10 -10 z" fill-opacity="0.85"/>
+    <text x="200" y="285" font-size="22" font-weight="700">dev placeholder</text>
+    <text x="200" y="312" font-size="15" fill-opacity="0.75">no storage bucket</text>
+  </g>
+</svg>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
+  import type { PartnerWithPhoto, Tables } from '$lib/types'
   import { build_citation } from './build-citation'
   import { Button, Form } from '$lib/svelte-pieces'
   import { page } from '$app/stores'

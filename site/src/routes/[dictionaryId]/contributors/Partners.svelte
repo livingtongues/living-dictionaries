@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Readable } from 'svelte/store'
-  import type { PartnerWithPhoto } from '@living-dictionaries/types'
+  import type { PartnerWithPhoto } from '$lib/types'
   import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import Image from '$lib/components/image/Image.svelte'

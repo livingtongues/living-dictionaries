@@ -2,6 +2,7 @@ import type { SendEmailCommandOutput } from '@aws-sdk/client-ses'
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses'
 import { env } from '$env/dynamic/private'
 import { no_reply_address } from './addresses'
+import type { Address } from './addresses'
 
 const { AWS_SES_ACCESS_KEY_ID, AWS_SES_REGION, AWS_SES_SECRET_ACCESS_KEY } = env
 
@@ -23,11 +24,6 @@ interface EmailParts {
   type?: 'text/plain' | 'text/html'
   /** Defaults to false; when true the message will not be sent (logs body to console). */
   dry_run?: boolean
-}
-
-export interface Address {
-  email: string
-  name?: string
 }
 
 function format_address({ name, email }: Address): string {

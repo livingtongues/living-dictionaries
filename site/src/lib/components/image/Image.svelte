@@ -5,6 +5,7 @@
   import { crossfade, scale } from 'svelte/transition'
   import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
+  import { image_src } from '$lib/helpers/media'
 
   interface Props {
     title: string
@@ -42,7 +43,7 @@
   let viewing = $state(false)
 
   const isDesktop = $derived(windowWidth >= 768)
-  const fullscreenSource = $derived(`https://lh3.googleusercontent.com/${gcs}=w${isDesktop ? windowWidth - 24 : windowWidth}`)
+  const fullscreenSource = $derived(image_src(gcs, `w${isDesktop ? windowWidth - 24 : windowWidth}`))
 
   function load() {
     const timeout = setTimeout(() => (loading = true), 100)
@@ -73,13 +74,13 @@
       in:receive|local={{ key }}
       out:send|local={{ key }}
       alt=""
-      src="https://lh3.googleusercontent.com/{gcs}={square
+      src={image_src(gcs, square
         ? `s${square}-p`
         : width
           ? `w${width}`
           : height
             ? `h${height}`
-            : 's0'}" />
+            : 's0')} />
     {#if loading}
       <span class="i-gg-spinner animate-spin absolute bottom-1 right-1 text-white"></span>
     {:else if photographer === 'AI'}

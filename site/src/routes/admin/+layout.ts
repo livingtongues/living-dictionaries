@@ -19,7 +19,7 @@ export const load: LayoutLoad = async ({ parent }) => {
   if (!auth_user.user)
     return { auth_user, db: null as LiveDb | null, sync: null as Sync | null }
 
-  if (!auth_user.user.is_admin)
+  if (!auth_user.is_admin)
     error(403, 'You do not have access to the admin area.')
 
   if (!browser)

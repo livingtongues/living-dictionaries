@@ -1,4 +1,4 @@
-import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
+import type { PartnerWithPhoto, Tables } from '$lib/types'
 import type { TranslateOptions } from '$lib/i18n'
 import type { TranslateFunction, TranslationKeys } from '$lib/i18n/types'
 
@@ -50,12 +50,12 @@ if (import.meta.vitest) {
     })
 
     test('one partner, hide Living Tongues', () => {
-      const citation = build_citation({ t, dictionary: { ...dictionary, hide_living_tongues_logo: true }, partners: [{ name: 'The Language Team' }] as PartnerWithPhoto[] })
+      const citation = build_citation({ t, dictionary: { ...dictionary, hide_living_tongues_logo: 1 }, partners: [{ name: 'The Language Team' }] as PartnerWithPhoto[] })
       expect(citation).toEqual('2026. Trabajar Living Dictionary. The Language Team. https://livingdictionaries.app/traba')
     })
 
     test('hide Living Tongues', () => {
-      const citation = build_citation({ t, dictionary: { ...dictionary, hide_living_tongues_logo: true } })
+      const citation = build_citation({ t, dictionary: { ...dictionary, hide_living_tongues_logo: 1 } })
       expect(citation).toEqual('2026. Trabajar Living Dictionary. https://livingdictionaries.app/traba')
     })
   })

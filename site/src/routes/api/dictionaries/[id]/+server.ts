@@ -28,6 +28,20 @@ export interface DictionariesIdDeleteResponseBody {
   db_files_removed: number
 }
 
+export interface DictionariesIdGetResponseBody {
+  exists: boolean
+}
+
+/** Lightweight existence check (used by the create-dictionary URL uniqueness check). */
+export const GET: RequestHandler = (event) => {
+  const dict_id = event.params.id
+  if (!dict_id)
+    error(ResponseCodes.BAD_REQUEST, 'Missing dictionary id')
+  const db = get_shared_db()
+  const row = db.prepare('SELECT id FROM dictionaries WHERE id = ? OR url = ?').get(dict_id, dict_id)
+  return json({ exists: !!row } satisfies DictionariesIdGetResponseBody)
+}
+
 export const DELETE: RequestHandler = async (event) => {
   const dict_id = event.params.id
   if (!dict_id)

@@ -1,40 +1,6 @@
-export async function load({ params: { inviteId }, parent }) {
-  const { t, supabase, ssr_user } = await parent()
+import type { PageLoad } from './$types'
 
-  if (!ssr_user) {
-    return { invite: null, accept_invite: null }
-  }
-
-  const { data: invite, error: invite_error } = await supabase.from('invites').select().eq('id', inviteId).single()
-
-  if (invite_error) {
-    console.error({ invite_error })
-    return { invite: null, accept_invite: null }
-  }
-
-  async function accept_invite() {
-    try {
-      const { error: role_error } = await supabase.from('dictionary_roles').insert({
-        dictionary_id: invite.dictionary_id,
-        role: invite.role,
-      })
-      if (role_error) {
-        throw new Error(role_error.message)
-      }
-
-      const { error: update_error } = await supabase.from('invites').update({ status: 'claimed' }).eq('id', inviteId)
-      if (update_error) {
-        throw new Error(update_error.message)
-      }
-
-      const { error } = await supabase.from('user_data').update({ terms_agreement: new Date().toISOString() }).eq('id', ssr_user.id)
-      if (error) {
-        throw new Error(error.message)
-      }
-    } catch (err) {
-      alert(`${t('misc.error')}: ${err}`)
-    }
-  }
-
-  return { invite, accept_invite }
-}
+// Re-expose the server load's `{ invite }` through a universal load so this
+// route's PageData includes the parent layout's universal data (App.PageData
+// declares those as required, which a `+page.server.ts`-only route can't satisfy).
+export const load: PageLoad = ({ data }) => data
