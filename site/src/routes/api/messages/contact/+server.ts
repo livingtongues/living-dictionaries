@@ -1,6 +1,8 @@
 import type { RequestHandler } from './$types'
 import { randomUUID } from 'node:crypto'
+import { dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
+import { languages_7000_address } from '$api/email/addresses'
 import { send_email } from '$api/email/send-email'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
@@ -134,6 +136,20 @@ export const POST: RequestHandler = async ({ request, url: request_url }) => {
         body: `${message}\n\nSent by ${name?.trim() || 'Anonymous'} (${email}) from ${url}`,
       }).catch(err => console.error('request_access manager email failed:', err))
     }
+  }
+
+  // Learning-materials requests must reach the external 7000.org Languages
+  // partner (the admin team already gets the backend thread + ntfy ping). Skip
+  // in dev so we never email the real partner from a developer machine — same
+  // dev-safety the legacy `api/email/learning_materials` endpoint had.
+  if (subject_key === 'learning_materials' && !dev) {
+    void send_email({
+      to: [languages_7000_address],
+      reply_to: { email },
+      subject: `Request for learning materials - ${dictionary_name || 'unknown'} Living Dictionary`,
+      type: 'text/plain',
+      body: `${message}\n\nSent by ${name?.trim() || 'Anonymous'} (${email}) from ${url}`,
+    }).catch(err => console.error('learning_materials 7000.org email failed:', err))
   }
 
   return json({ ok: true, thread_id } satisfies MessagesContactResponseBody)

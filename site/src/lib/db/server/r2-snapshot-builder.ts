@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { gzipSync } from 'node:zlib'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { r2_dict_snapshot_key, R2_SNAPSHOT_INTERVAL_MS } from '$lib/constants'
-import { get_r2 } from '$lib/r2/client'
+import { get_r2_snapshot_client } from '$lib/r2/snapshot-client'
 import { get_dictionary_db } from './dictionary-db'
 import { get_shared_db } from './shared-db'
 
@@ -120,7 +120,7 @@ export async function build_and_upload_snapshot(dict_id: string) {
 }
 
 async function upload_to_r2({ key, bytes }: { key: string, bytes: Uint8Array }) {
-  const { client, bucket } = get_r2()
+  const { client, bucket } = get_r2_snapshot_client()
   await client.send(new PutObjectCommand({
     Bucket: bucket,
     Key: key,

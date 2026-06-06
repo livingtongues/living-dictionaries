@@ -3,7 +3,6 @@
   import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
-  import { sign_out } from '$lib/auth/sign-out'
 
   const { data } = $props()
   const user = $derived(data.auth_user.user)
@@ -42,7 +41,7 @@
       {user.email}</div>
     <div class="mt-3">
       <Button
-        onclick={sign_out}>{$page.data.t('account.log_out')}</Button>
+        onclick={() => data.auth_user.logout()}>{$page.data.t('account.log_out')}</Button>
     </div>
   {:else}
     Not logged in

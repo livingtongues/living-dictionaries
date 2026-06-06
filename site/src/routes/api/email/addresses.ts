@@ -9,7 +9,8 @@ export const no_reply_address = {
 export const dictionary_address = { email: 'dictionaries@livingtongues.org' }
 export const jacobAddress = { email: 'jacob@livingtongues.org' }
 const gregAddress = { email: 'livingtongues@gmail.com' }
-const languages7000 = { email: 'info@7000.org' }
+/** The external 7000.org Languages partner — emailed on learning-materials requests. */
+export const languages_7000_address = { email: 'info@7000.org' }
 
 export function getAdminRecipients(initiatorEmail?: string): Address[] {
   if (initiatorEmail === 'jacob@livingtongues.org'
@@ -29,36 +30,5 @@ export function getAdminRecipients(initiatorEmail?: string): Address[] {
     ...recipients,
     dictionary_address,
     gregAddress,
-  ]
-}
-
-export function getSupportMessageRecipients({ dev }: { dev: boolean }): Address[] {
-  const recipients: Address[] = [
-    { email: 'jacob@livingtongues.org' },
-    { email: 'diego@livingtongues.org' },
-  ]
-
-  if (dev)
-    return recipients
-
-  return [
-    ...recipients,
-    dictionary_address,
-  ]
-}
-
-export function getLanguageLearningMaterialsRecipients({ dev }: { dev: boolean }): Address[] {
-  const recipients: Address[] = [
-    { email: 'jacob@livingtongues.org' },
-    { email: 'diego@livingtongues.org' },
-  ]
-
-  if (dev)
-    return recipients
-
-  return [
-    ...recipients,
-    dictionary_address,
-    languages7000,
   ]
 }

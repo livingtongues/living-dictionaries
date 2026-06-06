@@ -1,6 +1,7 @@
 import type { AuthUserData } from './types'
 import { api_auth_logout } from '$api/auth/logout/_call.js'
 import { api_auth_me } from '$api/auth/me/_call.js'
+import { invalidateAll } from '$app/navigation'
 
 export type { AuthUserData }
 
@@ -50,10 +51,11 @@ export class AuthUser {
     this.user = user
   }
 
-  /** Clear server cookie + local state. */
+  /** Clear the server session cookie + local state, then re-run loads so SSR data clears. */
   async logout() {
-    this.user = null
     await api_auth_logout()
+    this.user = null
+    await invalidateAll()
   }
 }
 
