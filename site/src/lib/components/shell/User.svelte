@@ -2,7 +2,6 @@
   import { onMount } from 'svelte'
   import { Button, Menu, ShowHide } from '$lib/svelte-pieces'
   import { display_one_tap_popover } from '$lib/auth/google-one-tap'
-  import { sign_out } from '$lib/auth/sign-out'
   import { page } from '$app/stores'
   import { mode } from '$lib/mode'
   import { api_dev_admin_level } from '$api/auth/dev-admin-level/_call'
@@ -73,7 +72,7 @@
           </a>
         {/if}
         <a href="/account"> {$page.data.t('account.account_settings')} </a>
-        <button type="button" onclick={sign_out}>{$page.data.t('account.log_out')}</button>
+        <button type="button" onclick={() => auth_user.logout()}>{$page.data.t('account.log_out')}</button>
         {#if dev || mode === 'development'}
           <button
             type="button"

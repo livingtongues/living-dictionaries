@@ -17,8 +17,8 @@ vi.mock('./dictionary-db', () => ({
   get_dictionary_db: (dict_id: string) => dict_dbs.get(dict_id),
 }))
 
-vi.mock('$lib/r2/client', () => ({
-  get_r2: () => ({ client: { send: put_spy }, bucket: 'test-snapshots' }),
+vi.mock('$lib/r2/snapshot-client', () => ({
+  get_r2_snapshot_client: () => ({ client: { send: put_spy }, bucket: 'test-snapshots' }),
 }))
 
 function make_dict_db(): Database.Database {
