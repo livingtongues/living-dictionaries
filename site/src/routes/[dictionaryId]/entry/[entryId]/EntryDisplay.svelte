@@ -29,6 +29,25 @@
   function update_entry(update: TablesUpdate<'entries'>) {
     dbOperations.update_entry(update)
   }
+
+  // PILOT (livedb-adoption): the live `dict_db` entries row for this entry.
+  // The detail screen still renders most fields from the assembled `EntryData`
+  // read-model, but `phonetic` below demonstrates the target pattern — render
+  // and save directly off the reactive row (mutate, then `_save()`), no
+  // dbOperations wrapper. The Orama watcher reflects the change back into the
+  // read-model that the rest of the page uses. See
+  // `.issues/livedb-adoption-and-db-skill.md` for the broader rollout plan.
+  const dict_db = $derived($page.data.dict_db)
+  const entry_row = $derived(dict_db?.entries.id(entry.id))
+
+  async function save_phonetic(new_value: string) {
+    if (!entry_row) {
+      update_entry({ phonetic: new_value })
+      return
+    }
+    entry_row.phonetic = new_value
+    await entry_row._save()
+  }
 </script>
 
 <div class="flex flex-col md:grid mb-3 media-on-right-grid grid-gap-2">
@@ -63,13 +82,11 @@
     {/each}
 
     <EntryField
-      value={entry.main.phonetic}
+      value={entry_row?.phonetic ?? entry.main.phonetic}
       field="phonetic"
       {can_edit}
       display={$page.data.t('entry_field.phonetic')}
-      on_update={(new_value) => {
-        update_entry({ phonetic: new_value })
-      }} />
+      on_update={save_phonetic} />
 
     {#each entry.senses || [] as sense, index (sense.id)}
       {#if entry.senses.length === 1}

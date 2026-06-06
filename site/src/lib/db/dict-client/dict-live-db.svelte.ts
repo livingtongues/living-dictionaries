@@ -199,19 +199,32 @@ class DictLiveDbImpl {
   #notifier = new TableChangeNotifier()
   #unsubscribe_broadcasts: (() => void) | null = null
 
+  // Current editing user. Every syncable content table carries NOT NULL
+  // `created_by_user_id` / `updated_by_user_id`; when this is set the write
+  // paths auto-stamp them so components can mutate-then-`_save()` without a
+  // wrapper layer doing it (the `dbOperations` layer used to). Kept mutable via
+  // `set_user_id` because the dict_db is cached across layout invalidations, so
+  // a login/logout while a dict is open must update who gets stamped.
+  #user_id: string | undefined
+
   #table_stores = new Map<string, DictTableStore<Record<string, unknown>>>()
   #row_stores = new Map<string, DictTableStore<Record<string, unknown>>>()
   #query_stores = new Map<string, DictTableStore<Record<string, unknown>>>()
   #has_id_column_cache = new Map<string, boolean>()
   #savepoint_counter = 0
 
-  constructor(connection: DictConnection) {
+  constructor(connection: DictConnection, options: { user_id?: string } = {}) {
     this.#connection = connection
+    this.#user_id = options.user_id
     this.#unsubscribe_broadcasts = connection.subscribe_broadcasts((broadcast) => {
       if (broadcast.type === 'tables_changed') {
         for (const table of broadcast.tables) this.#notifier.notify(table)
       }
     })
+  }
+
+  set_user_id(user_id: string | undefined): void {
+    this.#user_id = user_id
   }
 
   /** Called by the connection-holding component on unmount. */
@@ -362,6 +375,9 @@ class DictLiveDbImpl {
         'created_by_user_id',
         'dirty',
         'updated_at',
+        // appended explicitly below so each save re-stamps the current editor
+        // rather than re-writing the row's loaded (previous-editor) value
+        'updated_by_user_id',
         '_save',
         '_delete',
         '_reset',
@@ -378,6 +394,10 @@ class DictLiveDbImpl {
       clauses.push('"dirty" = 1')
       clauses.push('"updated_at" = ?')
       params.push(new Date().toISOString())
+      if (is_dict_syncable(table) && this.#user_id) {
+        clauses.push('"updated_by_user_id" = ?')
+        params.push(this.#user_id)
+      }
       params.push(row.id)
 
       try {
@@ -440,6 +460,10 @@ class DictLiveDbImpl {
             if (row_data.dirty === undefined) row_data.dirty = 1
             if (!row_data.updated_at) row_data.updated_at = new Date().toISOString()
             if (!row_data.created_at) row_data.created_at = row_data.updated_at
+            if (this.#user_id) {
+              if (row_data.created_by_user_id === undefined) row_data.created_by_user_id = this.#user_id
+              if (row_data.updated_by_user_id === undefined) row_data.updated_by_user_id = this.#user_id
+            }
           }
           const stringified = stringify_dict_row(table_name, { ...row_data })
           const columns = Object.keys(stringified)
@@ -486,6 +510,10 @@ class DictLiveDbImpl {
           if (syncable) {
             if (row_data.dirty === undefined) row_data.dirty = 1
             if (!row_data.updated_at) row_data.updated_at = new Date().toISOString()
+            if (this.#user_id) {
+              if (row_data.created_by_user_id === undefined) row_data.created_by_user_id = this.#user_id
+              if (row_data.updated_by_user_id === undefined) row_data.updated_by_user_id = this.#user_id
+            }
           }
           const stringified = stringify_dict_row(table_name, { ...row_data })
           const columns = Object.keys(stringified)
@@ -523,6 +551,10 @@ class DictLiveDbImpl {
       set_clauses.push('"dirty" = 1')
       set_clauses.push('"updated_at" = ?')
       params.push(new Date().toISOString())
+      if (this.#user_id && !columns.includes('updated_by_user_id')) {
+        set_clauses.push('"updated_by_user_id" = ?')
+        params.push(this.#user_id)
+      }
     }
     params.push(id)
     await this.#connection.execute(
@@ -548,8 +580,8 @@ class DictLiveDbImpl {
 type DictTableProperties = { [K in DictTableName]: DictTableAccessor<K> }
 export type DictLiveDb = DictLiveDbImpl & DictTableProperties
 
-export function create_dict_live_db(connection: DictConnection): DictLiveDb {
-  const instance = new DictLiveDbImpl(connection)
+export function create_dict_live_db(connection: DictConnection, options: { user_id?: string } = {}): DictLiveDb {
+  const instance = new DictLiveDbImpl(connection, options)
   return new Proxy(instance, {
     get(target, prop, receiver) {
       if (prop in target || typeof prop === 'symbol') {

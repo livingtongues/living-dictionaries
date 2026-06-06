@@ -37,7 +37,7 @@ export interface Admin {
 export const ADMINS: readonly Admin[] = [
   { email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', ntfy_topic: 'living_pings', ld_address: 'jacob@livingdictionaries.app', level: 2 },
   { email: 'diego@livingtongues.org', name: 'Diego Mariscal', ntfy_topic: 'living_pings_diego', ld_address: 'diego@livingdictionaries.app', level: 2 },
-  { email: 'dictionaries@livingtongues.org', name: 'Anna Luisa Daigneault', ntfy_topic: 'living_pings_anna', ld_address: 'anna@livingdictionaries.app', level: 1 },
+  { email: 'dictionaries@livingtongues.org', name: 'Anna Luisa Daigneault', ntfy_topic: 'living_pings_anna', ld_address: 'annaluisa@livingdictionaries.app', level: 1 },
   { email: 'livingtongues@gmail.com', name: 'Dr. Greg Anderson', ntfy_topic: 'living_pings_greg', ld_address: 'greg@livingdictionaries.app', level: 1 },
 ]
 

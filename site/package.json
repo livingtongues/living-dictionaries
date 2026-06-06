@@ -10,6 +10,8 @@
     "sync": "svelte-kit sync",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --threshold error --diagnostic-sources js,svelte",
     "test": "vitest",
+    "seed:achi-fixture": "tsx scripts/seed-achi-fixture.ts",
+    "test:db": "node e2e/db-ops-flow.mjs",
     "test:flow": "node e2e/achi-flow.mjs",
     "test:sync": "node e2e/dict-sync.mjs",
     "test:media": "node e2e/media-upload.mjs",

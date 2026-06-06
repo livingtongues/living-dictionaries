@@ -1,7 +1,6 @@
 # Svelte 5 runes migration (M2c)
 
-How LD's components were moved from Svelte-4 legacy syntax to Svelte-5 runes. Status/plan:
-`.issues/cross-project-orchestration.md`. This page is the
+How LD's components were moved from Svelte-4 legacy syntax to Svelte-5 runes. This page is the
 durable "do it this way next time / why these choices" layer.
 
 ## Running the codemod headlessly (the CLI hangs)

@@ -1,9 +1,13 @@
 # Migration knowledge
 
-Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. Plan + status:
-`.issues/cross-project-orchestration.md`.
+Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. The migration is done +
+staging is live; remaining production cutover: `.issues/cutover.md`.
 
 ## Pages
+- [shared-stack-conventions.md](./shared-stack-conventions.md) — the durable LD ↔ house contract:
+  orchestration norms, the stack/architecture decisions (keep UnoCSS, numeric roles rejected,
+  native deps in `dependencies`), the sync-engine invariants, the R2/media boundary, and
+  deploy-via-webhook-not-Actions. Relocated from the retired master plan.
 - [pulling-supabase-data-locally.md](./pulling-supabase-data-locally.md) — operational runbook
   for refreshing `site/.data` with real dictionaries: run the migrator from the **example** repo
   (this repo's `scripts/` can't install — `workspace:` deps, not a workspace member), the

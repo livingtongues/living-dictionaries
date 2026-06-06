@@ -1,8 +1,9 @@
-.DS_Store
 node_modules
 
-.eslintcache
 notes
 .env*
 /.data/
 
+# Personal / local-only
+.eslintcache
+.tmux-sessionizer
