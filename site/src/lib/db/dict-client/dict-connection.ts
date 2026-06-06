@@ -30,6 +30,15 @@ export interface DictConnectionInternals {
 }
 
 export interface DictConnection extends SqliteConnection {
+  /**
+   * `execute` with optional broadcast hints. `affected_tables` overrides the
+   * tables the worker tells other tabs to re-query (the SQL target may differ
+   * from the tables that actually changed — e.g. a `deletes` tombstone fires a
+   * trigger that DELETEs content rows). `deleted_rows` carries hard-deleted
+   * `(table, id)` pairs so the worker re-broadcasts them as `rows_deleted` to
+   * OTHER tabs' search indexes (a deleted row vanishes from their delta scan).
+   */
+  execute: (sql: string, params?: unknown[], options?: { affected_tables?: string[], deleted_rows?: { table_name: string, id: string }[] }) => Promise<void>
   /** Connection's dict_id. */
   readonly dict_id: string
   /** Subscribe to broadcasts for this dict (`tables_changed`, etc.). */
@@ -167,19 +176,25 @@ export async function create_dict_connection(options: CreateConnectionOptions): 
       }).then(payload => payload.rows as T[])
     },
 
-    execute(sql: string, params?: unknown[]): Promise<void> {
+    execute(sql: string, params?: unknown[], options?: { affected_tables?: string[], deleted_rows?: { table_name: string, id: string }[] }): Promise<void> {
       // Heuristic: pull the affected table name from `UPDATE`/`INSERT`/`DELETE`
       // statements so the worker can broadcast a `tables_changed` event to
       // other tabs. Best-effort; over-broad notifications just trigger extra
-      // re-queries on the other tabs (no correctness impact).
-      const affected = extract_table_name(sql)
+      // re-queries on the other tabs (no correctness impact). Callers may pass
+      // an explicit `affected_tables` override when the SQL target differs from
+      // the tables that actually changed (e.g. a `deletes`-table trigger).
+      const affected = options?.affected_tables ?? (() => {
+        const table = extract_table_name(sql)
+        return table ? [table] : undefined
+      })()
       return send<null>(internals.port, {
         type: 'exec',
         req_id: next_req_id(),
         dict_id: internals.dict_id,
         sql,
         params,
-        affected_tables: affected ? [affected] : undefined,
+        affected_tables: affected,
+        deleted_rows: options?.deleted_rows,
       }).then(() => undefined)
     },
 

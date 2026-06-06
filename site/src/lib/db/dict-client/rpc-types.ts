@@ -54,6 +54,13 @@ export interface ExecRequest {
   params?: unknown[]
   /** Which tables this write affected — broadcast hints (saves a SQL probe). */
   affected_tables?: string[]
+  /**
+   * Rows hard-deleted by this exec (a `deletes`-tombstone write). The worker
+   * re-broadcasts these as `rows_deleted` to OTHER tabs so their per-tab Orama
+   * index drops them — a deleted row vanishes from the watcher's `updated_at`
+   * delta scan, so it can't be discovered any other way.
+   */
+  deleted_rows?: { table_name: string, id: string }[]
 }
 
 export interface CloseRequest {
@@ -137,6 +144,18 @@ export interface TablesChangedBroadcast {
   tables: (DictSyncableTable | 'deletes' | string)[]
 }
 
+/**
+ * Broadcast fired when the sync engine PULLED hard-deletes from the server.
+ * Carries the (table, id) of each removed row so receiving tabs can drop them
+ * from their in-memory Orama search index (the rows are already gone from the
+ * DB, so a `tables_changed` re-query alone can't surface the removal).
+ */
+export interface RowsDeletedBroadcast {
+  type: 'rows_deleted'
+  dict_id: string
+  deletes: { table_name: string, id: string }[]
+}
+
 export interface SyncStatusBroadcast {
   type: 'sync_status'
   dict_id: string
@@ -157,6 +176,7 @@ export interface SnapshotExpiredBroadcast {
 
 export type BroadcastMessage
   = TablesChangedBroadcast
+    | RowsDeletedBroadcast
     | SyncStatusBroadcast
     | SchemaOutdatedBroadcast
     | SnapshotExpiredBroadcast
@@ -166,6 +186,7 @@ export type AnyOutgoingMessage = ResponseEnvelope | BroadcastMessage
 export function is_broadcast(message: AnyOutgoingMessage): message is BroadcastMessage {
   return (
     message.type === 'tables_changed'
+    || message.type === 'rows_deleted'
     || message.type === 'sync_status'
     || message.type === 'schema_outdated'
     || message.type === 'snapshot_expired'

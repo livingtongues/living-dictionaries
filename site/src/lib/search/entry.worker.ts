@@ -325,23 +325,68 @@ function apply_one(table: string, row: Record<string, any>): string[] {
   }
 }
 
-export async function apply_rows(changes: Record<string, Record<string, any>[]>) {
+/**
+ * Resolve the in-memory row for a hard-deleted (table, id) so `apply_one` can
+ * remove it + recompute the owning entry. The DB row is already gone, so we look
+ * it up in the worker's own base/junction maps (junctions are pair-keyed, so we
+ * scan by id). Returns undefined if we never indexed it (then there's nothing to
+ * remove).
+ */
+function find_row_by_id(table: string, id: string): Record<string, any> | undefined {
+  switch (table) {
+    case 'entries': return entries[id]
+    case 'senses': return senses[id]
+    case 'audio': return audios[id]
+    case 'photos': return photos[id]
+    case 'videos': return videos[id]
+    case 'sentences': return sentences[id]
+    case 'speakers': return speakers[id]
+    case 'tags': return tags[id]
+    case 'dialects': return dialects[id]
+    case 'audio_speakers': return Object.values(audio_speakers).find(row => row.id === id)
+    case 'entry_tags': return Object.values(entry_tags).find(row => row.id === id)
+    case 'entry_dialects': return Object.values(entry_dialects).find(row => row.id === id)
+    case 'sense_photos': return Object.values(sense_photos).find(row => row.id === id)
+    case 'video_speakers': return Object.values(video_speakers).find(row => row.id === id)
+    case 'sense_videos': return Object.values(sense_videos).find(row => row.id === id)
+    case 'senses_in_sentences': return Object.values(senses_in_sentences).find(row => row.id === id)
+    default: return undefined
+  }
+}
+
+export async function apply_rows(
+  changes: Record<string, Record<string, any>[]>,
+  deletes?: { table_name: string, id: string }[],
+) {
   const affected_entry_ids = new Set<string>()
   const removed_entry_ids = new Set<string>()
 
+  // Upserts. Content rows have no `deleted` column anymore (hard-delete), so
+  // `apply_one`'s removal branch is never reached from `changes` — only via the
+  // `deletes` events below.
   for (const table of SYNC_TABLE_ORDER) {
     const rows = changes[table]
     if (!rows?.length) continue
     for (const row of rows) {
-      if (table === 'entries' && row.deleted) {
-        removed_entry_ids.add(row.id)
-        affected_entry_ids.delete(row.id)
-        apply_one(table, row)
-        continue
-      }
       for (const entry_id of apply_one(table, row)) {
         if (entry_id) affected_entry_ids.add(entry_id)
       }
+    }
+  }
+
+  // Hard-deletes (local + sync-pulled). Reconstruct the row from our maps and
+  // route it through `apply_one`'s removal branch via a synthetic `deleted` mark.
+  for (const { table_name, id } of deletes ?? []) {
+    const base = find_row_by_id(table_name, id)
+    const row = { ...(base ?? {}), id, deleted: true }
+    if (table_name === 'entries') {
+      removed_entry_ids.add(id)
+      affected_entry_ids.delete(id)
+      apply_one('entries', row)
+      continue
+    }
+    for (const entry_id of apply_one(table_name, row)) {
+      if (entry_id) affected_entry_ids.add(entry_id)
     }
   }
 
@@ -505,7 +550,7 @@ export async function init_entries(
 }
 
 function process_entry(entry: Tables<'entries'>) {
-  const { id, deleted, dictionary_id, created_at, created_by, updated_by, created_by_user_id, updated_by_user_id, dirty, updated_at, ...main } = entry as Tables<'entries'> & Record<string, unknown>
+  const { id, dictionary_id, created_at, created_by, updated_by, created_by_user_id, updated_by_user_id, dirty, updated_at, ...main } = entry as Tables<'entries'> & Record<string, unknown>
 
   const senses_for_entry = entry_id_to_senses[id] || []
   const senses_with_all = senses_for_entry.map((sense) => {
@@ -526,7 +571,6 @@ function process_entry(entry: Tables<'entries'>) {
     ...(entry_id_to_audios[id] ? { audios: entry_id_to_audios[id] } : {}),
     ...(entry_id_to_tags[id] ? { tags: entry_id_to_tags[id] } : {}),
     ...(entry_id_to_dialects[id] ? { dialects: entry_id_to_dialects[id] } : {}),
-    ...(deleted ? { deleted } : {}),
   }
 }
 

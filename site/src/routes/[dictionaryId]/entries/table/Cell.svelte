@@ -34,11 +34,18 @@
   const sense = $derived(entry.senses?.[0])
   const first_photo = $derived(entry.senses?.[0]?.photos?.[0])
 
+  // Table cells DISPLAY from the read-model (and optimistically mutate it for
+  // instant feedback), but persist scalar edits straight to the live `dict_db`
+  // row via `update({ id })` — a partial update by id, so no per-cell reactive
+  // row subscription. The audit columns + dirty are auto-stamped; the Orama
+  // watcher reflects the write back into the read-model. (Sentences/photos stay
+  // on `dbOperations` — multi-table.)
+  const dict_db = $derived($page.data.dict_db)
   function update_entry(update: TablesUpdate<'entries'>) {
-    dbOperations.update_entry({ ...update, id: entry.id })
+    dict_db?.entries.update({ ...update, id: entry.id })
   }
   function update_sense(update: TablesUpdate<'senses'>) {
-    dbOperations.update_sense({ ...update, id: sense.id })
+    dict_db?.senses.update({ ...update, id: sense.id })
   }
 </script>
 
@@ -56,11 +63,7 @@
         photo_source={first_photo.source}
         photographer={first_photo.photographer}
         {can_edit}
-        on_delete_image={async () =>
-          await dbOperations.update_photo({
-            deleted: new Date().toISOString(),
-            id: first_photo.id,
-          })} />
+        on_delete_image={async () => await dbOperations.delete_photo(first_photo.id)} />
     {:else if can_edit}
       <!-- <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col"> -->
       <ShowHide>

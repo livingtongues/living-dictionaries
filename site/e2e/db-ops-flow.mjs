@@ -44,6 +44,23 @@ function step(msg) { passes += 1; console.log(`✓ ${msg}`) }
 function assert(cond, msg) { if (!cond) throw new Error(`ASSERT FAILED: ${msg}`) }
 const wait = ms => new Promise(r => setTimeout(r, ms))
 
+// In dev, the first hit of a route can trip Vite dep-optimization / an HMR full
+// reload that aborts the in-flight navigation (net::ERR_ABORTED). That's a
+// dev-server artifact, not an app bug — retry the goto a few times.
+async function goto(page, url, opts = {}) {
+  let last
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      return await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000, ...opts })
+    } catch (err) {
+      last = err
+      if (!/ERR_ABORTED|detached|Navigation/i.test(err.message)) throw err
+      await wait(800)
+    }
+  }
+  throw last
+}
+
 function run(command, args) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { cwd: site_dir, stdio: 'inherit' })
@@ -125,14 +142,14 @@ async function main() {
   page.on('pageerror', e => page_errors.push(e.message))
 
   // Preflight: the target IS the Living dev server (not house on :5000).
-  const res = await page.goto(`${base}/`, { waitUntil: 'domcontentloaded' }).catch(() => null)
+  const res = await goto(page, `${base}/`).catch(() => null)
   const title = await page.title().catch(() => '')
   assert(res && res.status() < 500, `dev server not reachable at ${base} (start it: pnpm --filter=site dev)`)
   assert(!/House/i.test(title), `${base} is serving "${title}" — not Living. Is 3041 Living's dev server?`)
   step(`preflight: Living dev server reachable at ${base} (title="${title}")`)
 
   // ── G1: logged-out → entry read-only (no edit affordance) ──────────────────
-  await page.goto(`${base}/${DICT}/entry/e_ja`, { waitUntil: 'domcontentloaded' })
+  await goto(page, `${base}/${DICT}/entry/e_ja`)
   await page.waitForFunction(() => document.body.innerText.includes('water'), { timeout: 25000 })
   assert(!(await page.evaluate(() => document.body.innerText.includes('Add Audio'))), 'logged-out viewer must NOT see edit affordances')
   await shot(page, 'logged-out')
@@ -152,10 +169,10 @@ async function main() {
   step(`logged in as ${login.me.email} (non-admin manager — can_edit from a real role)`)
 
   // ── G2: manager → entries list (13) + can_edit on an entry ────────────────
-  await page.goto(`${base}/${DICT}/entries`, { waitUntil: 'domcontentloaded' })
+  await goto(page, `${base}/${DICT}/entries`)
   await page.waitForFunction(() => document.body.innerText.includes('1-13 / 13'), { timeout: 25000 })
   assert(await page.evaluate(() => document.querySelectorAll('a[href*="/entry/"]').length) === 13, 'expected 13 entries')
-  await page.goto(`${base}/${DICT}/entry/e_ja`, { waitUntil: 'domcontentloaded' })
+  await goto(page, `${base}/${DICT}/entry/e_ja`)
   await page.waitForFunction(() => document.body.innerText.includes('Add Audio'), { timeout: 25000 })
   step('G2 manager → 13 entries; entry shows edit affordances (can_edit)')
 
@@ -205,11 +222,10 @@ async function main() {
   step('F sync → row persisted to REAL server achi.db with stamped editor; local dirty cleared by id')
 
   // ── net-zero cleanup of the test rows (keeps the list at 13 for section E) ──
-  // The app deletes ENTRIES via soft-delete (`update({ deleted })`, code path
-  // covered by B2 above); the `.delete()` tombstone path + its cross-client
-  // sync/cascade timing is a separate concern out of this change's scope. So we
-  // remove the test rows deterministically: purge the server file FIRST (so a
-  // concurrent auto-sync pull can't re-add them), then direct local SQL.
+  // Deletes are now HARD (tombstone trigger + FK cascade). To stay deterministic
+  // against a concurrent auto-sync, we remove the test rows directly: purge the
+  // server file FIRST (so a concurrent auto-sync pull can't re-add them), then
+  // direct local SQL.
   purge_server_leftovers()
   await page.evaluate(async (ids) => {
     const conn = globalThis.__ld_dict_connections.achi.connection
@@ -256,7 +272,7 @@ async function main() {
     add.click()
   })
   await page.waitForFunction(() => document.body.innerText.includes('Sense 2'), { timeout: 10000 })
-  assert((await dbq(page, 'SELECT count(*) c FROM senses WHERE entry_id = ? AND deleted IS NULL', ['e_ja']))[0].c >= 2, 'insert_sense (dbOperations) did not add a sense')
+  assert((await dbq(page, 'SELECT count(*) c FROM senses WHERE entry_id = ?', ['e_ja']))[0].c >= 2, 'insert_sense (dbOperations) did not add a sense')
   await page.evaluate(() => {
     const dels = [...document.querySelectorAll('button')].filter(b => b.offsetParent !== null && b.innerHTML.includes('i-fa-solid-times'))
     dels[dels.length - 1].click()
@@ -265,7 +281,7 @@ async function main() {
   step('C dbOperations via $app/state OK at runtime (insert_sense + delete-sense round-trip)')
 
   // ── E: read-model rebuilds from dict.db — list back to 13 after the churn ──
-  await page.goto(`${base}/${DICT}/entries`, { waitUntil: 'domcontentloaded' })
+  await goto(page, `${base}/${DICT}/entries`)
   await page.waitForFunction(() => document.body.innerText.includes('1-13 / 13'), { timeout: 25000 })
   step('E entries list re-renders exactly 13 (Orama read-model rebuilt from dict.db)')
 
@@ -274,7 +290,7 @@ async function main() {
   let eja_srv
   for (let i = 0; i < 20 && eja_srv?.phonetic !== 'PILOT-EDITED'; i++) { await wait(500); eja_srv = serverRow('entries', 'e_ja') }
   assert(eja_srv?.phonetic === 'PILOT-EDITED', 'pilot phonetic did not persist to server achi.db')
-  await page.goto(`${base}/${DICT}/entry/e_ja`, { waitUntil: 'domcontentloaded' })
+  await goto(page, `${base}/${DICT}/entry/e_ja`)
   await page.waitForFunction(() => document.body.innerText.includes('PILOT-EDITED'), { timeout: 25000 })
   step('reload → pilot phonetic persisted to REAL server SQLite + re-rendered from it')
 

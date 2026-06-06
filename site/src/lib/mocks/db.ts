@@ -39,14 +39,15 @@ export const logDbOperations: DbOperations = {
   },
 
   insert_entry: log_args,
-  update_entry: log_args,
+  delete_entry: log_args,
   insert_sense: log_args,
-  update_sense: log_args,
+  delete_sense: log_args,
   insert_sentence: log_args,
   update_sentence: log_args,
   delete_sentence: log_args,
   insert_audio: log_args,
   update_audio: log_args,
+  delete_audio: log_args,
   insert_speaker: log_args,
   assign_speaker: log_args,
   insert_tag: log_args,
@@ -55,7 +56,9 @@ export const logDbOperations: DbOperations = {
   assign_dialect: log_args,
   insert_photo: log_args,
   update_photo: log_args,
+  delete_photo: log_args,
   insert_video: log_args,
   update_video: log_args,
+  delete_video: log_args,
 
 }

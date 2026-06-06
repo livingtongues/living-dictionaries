@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3'
+import Database from 'better-sqlite3'
 import { existsSync, readFileSync } from 'node:fs'
 import { unlink } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -110,6 +110,22 @@ export async function build_and_upload_snapshot(dict_id: string) {
     await dict_db.backup(temp_path)
     if (!existsSync(temp_path))
       throw new Error(`backup() did not produce ${temp_path}`)
+
+    // Strip the durable tombstone log from the snapshot. The deleted rows are
+    // already absent (server hard-deleted them), so the tombstones carry no
+    // info a fresh client needs — and leaving them in would make the client
+    // re-push the server's ENTIRE delete history on its first sync (the client
+    // `deletes` table doubles as its push queue).
+    const temp_db = new Database(temp_path)
+    try {
+      const has_deletes = temp_db.prepare(
+        `SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'deletes'`,
+      ).get()
+      if (has_deletes)
+        temp_db.exec('DELETE FROM deletes')
+    } finally {
+      temp_db.close()
+    }
 
     const bytes = readFileSync(temp_path)
     const gzipped = gzipSync(bytes)

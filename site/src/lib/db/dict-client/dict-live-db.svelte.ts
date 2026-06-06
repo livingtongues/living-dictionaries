@@ -38,12 +38,19 @@ export type DictPlainRowType<T extends DictTableName> = DictSchema[T] extends Ta
   : never
 
 /**
- * Insert shape: `id` is auto-generated when omitted, so we widen it to
- * optional vs Drizzle's `InferInsertModel` (which requires `id` since the
- * schema declares it `notNull primaryKey`).
+ * Columns the write paths auto-fill on insert (PK + audit + sync bookkeeping),
+ * so callers never have to pass them. See the auto-stamping in `#insert`.
+ */
+type DictAutoColumn = 'id' | 'created_at' | 'created_by_user_id' | 'updated_at' | 'updated_by_user_id' | 'dirty'
+
+/**
+ * Insert shape: the auto-stamped columns above are optional (the write path
+ * generates the `id` and stamps audit + sync columns), so callers only provide
+ * real content. Everything else mirrors Drizzle's `InferInsertModel`.
  */
 export type DictInsertType<T extends DictTableName> = DictSchema[T] extends Table
-  ? Omit<InferInsertModel<DictSchema[T]>, 'id'> & { id?: string }
+  ? Omit<InferInsertModel<DictSchema[T]>, DictAutoColumn>
+    & Partial<Pick<InferInsertModel<DictSchema[T]>, Extract<keyof InferInsertModel<DictSchema[T]>, DictAutoColumn>>>
   : never
 
 export type DictUpdateType<T extends DictTableName> = DictSchema[T] extends Table
@@ -197,6 +204,7 @@ class DictTableStore<T extends Record<string, unknown>> {
 class DictLiveDbImpl {
   #connection: DictConnection
   #notifier = new TableChangeNotifier()
+  #delete_subscribers = new Set<(deletes: { table_name: string, id: string }[]) => void>()
   #unsubscribe_broadcasts: (() => void) | null = null
 
   // Current editing user. Every syncable content table carries NOT NULL
@@ -219,8 +227,29 @@ class DictLiveDbImpl {
     this.#unsubscribe_broadcasts = connection.subscribe_broadcasts((broadcast) => {
       if (broadcast.type === 'tables_changed') {
         for (const table of broadcast.tables) this.#notifier.notify(table)
+      } else if (broadcast.type === 'rows_deleted') {
+        // A sync pull hard-deleted these rows — let the search index drop them
+        // (the rows are gone, so a table re-query alone can't surface removal).
+        this.#notify_deletes(broadcast.deletes)
       }
     })
+  }
+
+  /**
+   * Subscribe to hard-delete events (local deletes + sync-pulled deletes).
+   * The Orama search watcher uses this to drop removed rows from its in-memory
+   * index, since a hard-deleted row vanishes from the `updated_at` delta scan.
+   */
+  subscribe_deletes = (callback: (deletes: { table_name: string, id: string }[]) => void) => {
+    this.#delete_subscribers.add(callback)
+    return () => { this.#delete_subscribers.delete(callback) }
+  }
+
+  #notify_deletes(deletes: { table_name: string, id: string }[]): void {
+    if (deletes.length === 0) return
+    for (const callback of this.#delete_subscribers) {
+      try { callback(deletes) } catch (err) { console.error('DictLiveDb delete subscriber threw:', err) }
+    }
   }
 
   set_user_id(user_id: string | undefined): void {
@@ -287,7 +316,7 @@ class DictLiveDbImpl {
         connection: this.#connection,
         notifier: this.#notifier,
         table_name,
-        query: `SELECT * FROM "${table_name}" WHERE deleted IS NULL`,
+        query: `SELECT * FROM "${table_name}"`,
         params: [],
         on_save: this.#save_cb(table_name),
         on_delete: this.#delete_cb(table_name),
@@ -410,13 +439,11 @@ class DictLiveDbImpl {
     }
   }
 
+  // Hard-delete via the `deletes` tombstone (see `#delete`).
   #delete_cb(table: string) {
     return async (id: string) => {
       try {
-        const now = new Date().toISOString()
-        await this.#connection.execute(`INSERT OR REPLACE INTO deletes (table_name, id, updated_at) VALUES (?, ?, ?)`, [table, id, now])
-        this.#notifier.notify(table)
-        this.#notifier.notify('deletes')
+        await this.#delete(table as DictTableName, [id])
       } catch (err) {
         console.error('DictLiveDb delete error:', err)
         throw err
@@ -564,16 +591,26 @@ class DictLiveDbImpl {
     this.#notifier.notify(table_name)
   }
 
+  // Hard-delete by id. Writing the `deletes` tombstone fires
+  // `process_delete_cascade`, which DELETEs the row outright (FK ON DELETE
+  // CASCADE then sweeps its children); the tombstone row stays as the durable
+  // delete log + sync push queue. We notify ALL syncable tables locally (a
+  // cascade can touch any of them) and emit a delete event so the Orama search
+  // index drops the removed rows (they vanish from the `updated_at` scan).
   async #delete<T extends DictTableName>(table_name: T, ids: string[]): Promise<void> {
-    const now = new Date().toISOString()
+    if (ids.length === 0) return
     for (const id of ids) {
       await this.#connection.execute(
-        `INSERT OR REPLACE INTO deletes (table_name, id, updated_at) VALUES (?, ?, ?)`,
-        [table_name, id, now],
+        `INSERT OR IGNORE INTO deletes (table_name, id) VALUES (?, ?)`,
+        [table_name, id],
+        // `affected_tables` refreshes other tabs' table stores; `deleted_rows`
+        // makes the worker re-broadcast `rows_deleted` so other tabs' Orama
+        // index drops them too (this tab handles its own via #notify_deletes).
+        { affected_tables: [...DICT_SYNCABLE_TABLES, 'deletes'], deleted_rows: [{ table_name, id }] },
       )
     }
-    this.#notifier.notify(table_name)
-    this.#notifier.notify('deletes')
+    for (const table of DICT_SYNCABLE_TABLES) this.#notifier.notify(table)
+    this.#notify_deletes(ids.map(id => ({ table_name, id })))
   }
 }
 

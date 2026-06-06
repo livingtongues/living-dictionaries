@@ -25,6 +25,10 @@
 
   const photos = $derived(entry?.senses?.map(({ photos }) => photos).filter(Boolean).flat())
   const videos = $derived(entry?.senses?.map(({ videos }) => videos).filter(Boolean).flat())
+
+  // Coordinates persist straight to the live `dict_db` entries row (auto-stamps
+  // editor + dirty); the Orama watcher reflects it back into the read-model.
+  const dict_db = $derived($page.data.dict_db)
 </script>
 
 <div class="flex flex-col">
@@ -49,7 +53,7 @@
         photo_source={photo.source}
         photographer={photo.photographer}
         {can_edit}
-        on_delete_image={async () => await dbOperations.update_photo({ deleted: new Date().toISOString(), id: photo.id })} />
+        on_delete_image={async () => await dbOperations.delete_photo(photo.id)} />
     </div>
   {/each}
   {#if can_edit}
@@ -150,7 +154,7 @@
           coordinates={entry.main.coordinates}
           initialCenter={dictionary.coordinates?.points?.[0]?.coordinates}
           on_close={toggle}
-          on_update={async new_value => await dbOperations.update_entry({ coordinates: new_value })} />
+          on_update={async new_value => await dict_db?.entries.update({ id: entry.id, coordinates: new_value })} />
       {/if}
           {/snippet}
     </InitableShowHide>

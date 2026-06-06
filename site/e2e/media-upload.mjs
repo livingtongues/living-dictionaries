@@ -81,8 +81,8 @@ function boot_server() {
 function read_server_media(entry_id) {
   const db = new Database(dict_db_path, { readonly: true })
   try {
-    const audio = db.prepare('SELECT id, storage_path FROM audio WHERE entry_id = ? AND deleted IS NULL').all(entry_id)
-    const photos = db.prepare('SELECT id, storage_path, serving_url FROM photos WHERE deleted IS NULL').all()
+    const audio = db.prepare('SELECT id, storage_path FROM audio WHERE entry_id = ?').all(entry_id)
+    const photos = db.prepare('SELECT id, storage_path, serving_url FROM photos').all()
     const audio_speakers = db.prepare('SELECT COUNT(*) AS c FROM audio_speakers').get()
     return { audio, photos, audio_speaker_links: audio_speakers.c }
   } finally {
@@ -93,7 +93,7 @@ function read_server_media(entry_id) {
 function read_junction(table) {
   const db = new Database(dict_db_path, { readonly: true })
   try {
-    return db.prepare(`SELECT id FROM "${table}" WHERE deleted IS NULL`).all()
+    return db.prepare(`SELECT id FROM "${table}"`).all()
   } finally {
     db.close()
   }

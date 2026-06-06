@@ -1,12 +1,12 @@
-import { assign_dialect, assign_speaker, assign_tag, delete_sentence, insert_audio, insert_dialect, insert_entry, insert_photo, insert_sense, insert_sentence, insert_speaker, insert_tag, insert_video, update_audio, update_entry, update_photo, update_sense, update_sentence, update_video } from '$lib/db/dict-client/operations'
+import { assign_dialect, assign_speaker, assign_tag, delete_audio, delete_entry, delete_photo, delete_sense, delete_sentence, delete_video, insert_audio, insert_dialect, insert_entry, insert_photo, insert_sense, insert_sentence, insert_speaker, insert_tag, insert_video, update_audio, update_photo, update_sentence, update_video } from '$lib/db/dict-client/operations'
 import { addAudio, addImage, uploadVideo } from '$lib/helpers/media'
 
 export const dbOperations = {
   insert_entry,
-  update_entry,
+  delete_entry,
 
   insert_sense,
-  update_sense,
+  delete_sense,
 
   insert_sentence,
   update_sentence,
@@ -14,6 +14,7 @@ export const dbOperations = {
 
   insert_audio,
   update_audio,
+  delete_audio,
 
   insert_speaker,
   assign_speaker,
@@ -26,9 +27,11 @@ export const dbOperations = {
 
   insert_photo,
   update_photo,
+  delete_photo,
 
   insert_video,
   update_video,
+  delete_video,
 
   addAudio,
   addImage,

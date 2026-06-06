@@ -56,7 +56,7 @@
           form="filled"
           onclick={async () => {
             const confirmation = confirm($page.data.t('entry.delete_video'))
-            if (confirmation) await dbOperations.update_video({ deleted: new Date().toISOString(), id: video.id })
+            if (confirmation) await dbOperations.delete_video(video.id)
           }}>
           <span class="i-fa-trash-o" style="margin: -1px 0 2px;"></span>
           {$page.data.t('misc.delete')}

@@ -42,8 +42,9 @@ staging is live; remaining production cutover: `.issues/cutover.md`.
   path + interim double-write; **two latent sync bugs found + fixed (also in the example):** the
   `INSERT OR REPLACE` trigger failing under an UPSERT (fixed via `ON CONFLICT(key)` in a new
   migration) and the `/changes` fast-bail dropping editor pushes; OPFS→MemoryVFS fallback inside the
-  SharedWorker (round-trip still works via sync-from-null); public snapshot endpoint (no R2; GCS
-  stays); the self-sufficient seed; how to debug SharedWorker fetch/console (invisible to puppeteer).
+  SharedWorker (round-trip still works via sync-from-null); the "everyone opens wa-sqlite" snapshot
+  decision (the page's original "no R2" framing is superseded — R2 dict snapshots are now live);
+  the self-sufficient seed; how to debug SharedWorker fetch/console (invisible to puppeteer).
 - [m4-real-auth.md](./m4-real-auth.md) — M4 auth: porting the example's `AuthUser`/`ssr_user`/
   `dict_roles` model (full port) with two pragmatic LD adaptations (plain `page.data.admin` mirror;
   plain role booleans wrapped in `readable()` only for the search store); the legacy `getSession`

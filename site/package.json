@@ -16,6 +16,7 @@
     "test:sync": "node e2e/dict-sync.mjs",
     "test:media": "node e2e/media-upload.mjs",
     "test:watch": "node e2e/dict-watch-2ctx.mjs",
+    "test:delete-2tab": "node e2e/dict-delete-2tab.mjs",
     "test:catalog": "node e2e/catalog-sqlite.mjs",
     "test:entries": "node e2e/entries-sqlite.mjs",
     "local-svelte-pieces": "link:../../../svelte-pieces"

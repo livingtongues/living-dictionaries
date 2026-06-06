@@ -1,4 +1,4 @@
-export type { DictionaryView, SystemInsertFields, Tables, TablesInsert, TablesUpdate } from './db'
+export type { DictionaryView, Tables, TablesInsert, TablesUpdate } from './db'
 export type { EntryData } from './entry.interface'
 export type { HostedVideo, VideoCustomMetadata } from './video.interface'
 export type { Coordinates, IPoint, IRegion, LngLatFull } from './coordinates.interface'

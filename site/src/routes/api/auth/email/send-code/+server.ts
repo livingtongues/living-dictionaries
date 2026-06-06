@@ -50,7 +50,11 @@ export const POST: RequestHandler = async ({ request }) => {
   if (!/^[^\s@]+@[^\s@][^\s.@]*\.[^\s@]+$/.test(email))
     error(ResponseCodes.BAD_REQUEST, 'Invalid email format')
 
-  if (track_send_attempt(email) > MAX_CODES_PER_EMAIL_PER_HOUR)
+  // Dev + e2e return the code inline and re-run constantly, so don't rate-limit
+  // them; the per-email/hour cap is a production abuse guard only.
+  const expose_otp = dev || env.E2E_EXPOSE_OTP === 'true'
+
+  if (!expose_otp && track_send_attempt(email) > MAX_CODES_PER_EMAIL_PER_HOUR)
     error(ResponseCodes.TOO_MANY_REQUESTS, 'Too many code requests. Please try again later.')
 
   const db = get_shared_db()
@@ -69,7 +73,7 @@ export const POST: RequestHandler = async ({ request }) => {
   // Dev returns the code inline so we skip inboxes. `E2E_EXPOSE_OTP` does the
   // same against a production `node build` for the headless e2e — explicit,
   // env-gated, and never set in real deployments.
-  if (dev || env.E2E_EXPOSE_OTP === 'true')
+  if (expose_otp)
     return json({ result: 'success', code } satisfies AuthEmailSendCodeResponseBody)
 
   try {

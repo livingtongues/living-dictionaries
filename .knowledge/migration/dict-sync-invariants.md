@@ -17,8 +17,9 @@ LD gets the same guarantee two ways, so there's no explicit `ensure_initial_sync
   only flips false at the END of `init_entries`, which runs after `read_dict_bundle` (after the layout's
   sync). So the editor literally cannot fire a write until the full dict is loaded.
 
-LD also doesn't have house's junction-replace tombstone hazard: junction unlink is a **soft-delete**
-(`deleted` column via `unlink_junction`), synced as an ordinary dirty row, not a `deletes` tombstone.
+Junction unlink is a **hard-delete tombstone** (`unlink_junction` → `dict_db.X.delete(id)` →
+`INSERT INTO deletes`); the engine drains `deletes` by pushed `(table_name, id)`, never blanket, so
+it has no house-style junction-tombstone-wipe hazard (see §3).
 
 **Invariant to preserve:** never let an editor write before `entries_data.loading` is false / before the
 cold-open `sync_now`. If a future write path bypasses `get_pieces`, re-add the gate.
@@ -29,7 +30,7 @@ an `INSERT OR IGNORE` of the editor's own users row first.
 
 LD's **per-dict** `dictionaries/{id}.db` has **no `users` table and no FK** on these columns —
 `created_by_user_id`/`updated_by_user_id` are plain `TEXT NOT NULL` (see
-`dictionary-migrations/20260525_initial.sql`). Users live in the separate `shared.db`. operations.ts
+`dictionary-migrations/20260606_initial.sql`). Users live in the separate `shared.db`. operations.ts
 always stamps both from the auth user id, satisfying NOT NULL. So there's nothing to seed locally.
 
 **Invariant to preserve:** if a future dict migration ever adds a `users` table + FK to dict.db, port
@@ -41,12 +42,37 @@ unscoped `DELETE FROM deletes` lets the first-synced writable sector wipe anothe
 (latent until ≥2 writable sectors).
 
 LD's `dict-client/dict-sync-engine.ts` is **single-sector by design** (one dict.db, one
-`db_metadata.last_modified_at` watermark — the file comment says so). Its `DELETE FROM deletes` after a
-successful push is therefore safe: there is no second writable sector sharing that `deletes` table.
-Moreover LD currently **doesn't use the `deletes` table at all** for content — operations.ts soft-deletes
-via the `deleted` column (`dict_db.X.update({deleted})`), never `dict_db.X.delete()` (which is the only
-thing that writes `deletes`).
+`db_metadata.last_modified_at` watermark — the file comment says so). Its drain after a successful push
+clears `deletes` by pushed `(table_name, id)` — NOT a blanket `DELETE FROM deletes` — so a tombstone
+queued mid-flight survives, and there's no second writable sector to wipe.
 
-**Invariant to preserve:** the per-dict engine stays single-sector. If LD ever shares one dict.db across
-multiple independently-synced writable scopes, scope the `DELETE FROM deletes` to the sector's tables
-(copy house's `#sync_sector`) before adding the second scope.
+**Dict deletion is HARD-delete via the `deletes` tombstone (2026-06, was soft-delete).** Full model:
+- **Client write** (`DictLiveDb.#delete`, `operations.ts unlink_junction`/`delete_*`): `INSERT INTO
+  deletes(table_name,id)`. The `process_delete_cascade` trigger DELETEs the row; FK `ON DELETE CASCADE`
+  sweeps children. The tombstone row persists as the push queue.
+- **Server** (`process_dict_changes`): `INSERT OR REPLACE INTO deletes` fires the SAME hard-delete
+  trigger → server row gone. PULL forwards a tombstone only `if (!exists)` (skips re-created ids).
+- **Snapshot** (`r2-snapshot-builder.ts`): `DELETE FROM deletes` on the `.backup()` before gzip — else a
+  fresh client re-pushes the server's whole tombstone log (its `deletes` table doubles as a push queue).
+  Because the server already hard-deleted, the snapshot can't resurrect anything.
+- **`last_modified_at` bump:** a DELETE fires no per-table bump trigger, so `process_delete_cascade`
+  bumps the cursor itself (one line at the end of the trigger). Bump triggers use
+  `INSERT … ON CONFLICT(key) DO UPDATE`, never `INSERT OR REPLACE` (the latter 500s when a trigger fires
+  during the sync engine's outer UPSERT).
+- **There is no `deleted` column** and no `WHERE deleted IS NULL` filtering anywhere — purged rows are
+  simply absent.
+
+**Search index (the non-obvious part):** hard-deleted rows vanish from the orama-watcher's
+`updated_at > watermark` delta scan, so deletes are fed out-of-band. Local `#delete` emits
+`#notify_deletes`; sync-pulled deletes emit a `rows_deleted` broadcast (engine `on_rows_deleted` →
+SharedWorker → each tab). `orama-watcher` buffers them via `dict_db.subscribe_deletes` and passes to
+`entry.worker apply_rows(changes, deletes)`, which reconstructs the removed row from its in-memory maps
+(resolving the owning entry_id) to drop it from the index. KNOWN minor gap: a tab doesn't learn of
+ANOTHER tab's *local* delete for its search index until reload (cross-tab table stores DO refresh;
+sync-pulled deletes DO propagate).
+
+**Invariants to preserve:**
+- The per-dict engine stays single-sector; drain `deletes` by pushed `(table,id)`, never blanket.
+- If you add a writable scope sharing one dict.db, scope the drain to that scope's tables.
+- Keep the snapshot's `DELETE FROM deletes` and the server-side hard-delete trigger together: dropping
+  either reintroduces the resurrection/re-push bug.

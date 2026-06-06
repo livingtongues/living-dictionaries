@@ -36,7 +36,7 @@
           photographer={first_photo.photographer}
           page_context="gallery"
           {can_edit}
-          on_delete_image={async () => await dbOperations.update_photo({ deleted: new Date().toISOString(), id: first_photo.id })} />
+          on_delete_image={async () => await dbOperations.delete_photo(first_photo.id)} />
       </div>
       <a href="/{dictionary.url}/entry/{entry.id}" style="background: #f3f3f3;" class="block p-[10px] h-60px">
         <div class="font-semibold">

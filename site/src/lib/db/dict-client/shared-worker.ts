@@ -191,6 +191,12 @@ async function boot_instance({ dict_id, has_editor_role, auth }: BootOptions): P
         message: { type: 'tables_changed', dict_id, tables: [...tables] },
       })
     },
+    on_rows_deleted: (deletes) => {
+      broadcast_to_dict({
+        dict_id,
+        message: { type: 'rows_deleted', dict_id, deletes },
+      })
+    },
     on_status: (status) => {
       broadcast_to_dict({
         dict_id,
@@ -284,6 +290,16 @@ async function handle_exec({ context, message }: {
     broadcast_to_dict({
       dict_id: message.dict_id,
       message: { type: 'tables_changed', dict_id: message.dict_id, tables: message.affected_tables },
+      exclude_port: context.port,
+    })
+  }
+
+  // Re-broadcast hard-deletes so OTHER tabs drop them from their per-tab Orama
+  // index (the originating tab already did so in-process via #notify_deletes).
+  if (message.deleted_rows?.length) {
+    broadcast_to_dict({
+      dict_id: message.dict_id,
+      message: { type: 'rows_deleted', dict_id: message.dict_id, deletes: message.deleted_rows },
       exclude_port: context.port,
     })
   }
