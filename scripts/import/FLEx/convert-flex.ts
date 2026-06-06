@@ -1,6 +1,6 @@
 // import { data } from "./Babanki-Kejom";
 
-import { ActualDatabaseEntry } from '@living-dictionaries/types'
+import { ActualDatabaseEntry } from '../../types'
 
 interface IFLExData {
   lx: string

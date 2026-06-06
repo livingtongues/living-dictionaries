@@ -1,8 +1,10 @@
 import type { RequestHandler } from './$types'
 import { randomUUID } from 'node:crypto'
 import { env } from '$env/dynamic/private'
+import { send_email } from '$api/email/send-email'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { notify_admins } from '$lib/notifications/notify-admins'
 import { error, json } from '@sveltejs/kit'
 
 /**
@@ -24,6 +26,11 @@ export interface MessagesContactRequestBody {
   message: string
   url: string
   subject?: string
+  /** Machine key of the contact topic (e.g. `request_access`) — drives targeted routing. */
+  subject_key?: string
+  /** Set when the submission targets a specific dictionary (e.g. an access request). */
+  dictionary_id?: string
+  dictionary_name?: string
 }
 
 export interface MessagesContactResponseBody {
@@ -35,7 +42,7 @@ function get_internal_secret(): string | undefined {
   return env.INTERNAL_INGEST_SECRET
 }
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, url: request_url }) => {
   const expected = get_internal_secret()
   if (!expected)
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'INTERNAL_INGEST_SECRET not configured')
@@ -45,7 +52,7 @@ export const POST: RequestHandler = async ({ request }) => {
     error(ResponseCodes.UNAUTHORIZED, 'Invalid internal secret')
 
   const body = await request.json() as MessagesContactRequestBody
-  const { name, email: raw_email, message, url, subject } = body
+  const { name, email: raw_email, message, url, subject, subject_key, dictionary_id, dictionary_name } = body
 
   if (!raw_email || !message || !url)
     error(ResponseCodes.BAD_REQUEST, 'email, message, and url are required')
@@ -96,6 +103,38 @@ export const POST: RequestHandler = async ({ request }) => {
   })
 
   insert()
+
+  void notify_admins({
+    subject: subject ? `New contact: ${subject}` : 'New contact form message',
+    body: `${name?.trim() || email}: ${message.slice(0, 200)}`,
+    link: `${request_url.origin}/admin/messages/${thread_id}`,
+  })
+
+  // Targeted submissions still email the people who must personally act and
+  // aren't on the admin team. Access requests email the dictionary's managers
+  // (as the legacy `api/email/request_access` endpoint did).
+  if (subject_key === 'request_access' && dictionary_id) {
+    const managers = db.prepare(`
+      SELECT users.name AS name, users.email AS email
+      FROM dictionary_roles
+      LEFT JOIN users ON users.id = dictionary_roles.user_id
+      WHERE dictionary_roles.role = 'manager' AND dictionary_roles.dictionary_id = ?
+    `).all(dictionary_id) as { name: string | null, email: string | null }[]
+
+    const manager_addresses = managers
+      .filter(manager => !!manager.email)
+      .map(manager => ({ name: manager.name ?? undefined, email: manager.email as string }))
+
+    if (manager_addresses.length) {
+      void send_email({
+        to: manager_addresses,
+        reply_to: { email },
+        subject: `${dictionary_name ?? 'Living Dictionary'}: ${email} requests editing access`,
+        type: 'text/plain',
+        body: `${message}\n\nSent by ${name?.trim() || 'Anonymous'} (${email}) from ${url}`,
+      }).catch(err => console.error('request_access manager email failed:', err))
+    }
+  }
 
   return json({ ok: true, thread_id } satisfies MessagesContactResponseBody)
 }

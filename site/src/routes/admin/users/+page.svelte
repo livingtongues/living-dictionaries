@@ -1,15 +1,21 @@
 <script lang="ts">
+  import type { RowType } from '$lib/db/client/live/types'
   import IconMdiAccountSearch from '~icons/mdi/account-search'
+  import IconMdiClose from '~icons/mdi/close'
   import IconMdiDownload from '~icons/mdi/download'
   import IconMdiMagnify from '~icons/mdi/magnify'
   import IconMdiMenuDown from '~icons/mdi/menu-down'
   import IconMdiMenuUp from '~icons/mdi/menu-up'
   import AdminBadge from '$lib/admin/AdminBadge.svelte'
+  import DictionaryPickerModal from '$lib/admin/DictionaryPickerModal.svelte'
   import { get_admin_level } from '$lib/admins'
   import { download_as_csv } from '$lib/utils/csv'
   import { format_date } from '$lib/utils/format-relative-time'
   import { score_record } from '$lib/utils/fuzzy-score'
   import { api_admin_user_unsubscribe } from '../../api/admin/users/[id]/unsubscribe/_call'
+  import { api_dictionaries_id_roles_post } from '../../api/dictionaries/[id]/roles/_call'
+
+  type DictionaryRole = 'manager' | 'editor' | 'contributor'
 
   let { data } = $props()
   const db = $derived(data.db)
@@ -52,6 +58,20 @@
     }
     return map
   })
+
+  const role_rows_by_user_id = $derived.by(() => {
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
+    const map = new Map<string, RowType<'dictionary_roles'>[]>()
+    for (const role of roles_query?.rows ?? []) {
+      const list = map.get(role.user_id) ?? []
+      list.push(role)
+      map.set(role.user_id, list)
+    }
+    return map
+  })
+
+  const dictionaries_objects = $derived(db?.dictionaries.objects ?? {})
+  const all_dictionaries = $derived(db?.dictionaries.rows ?? [])
 
   const thread_stats_by_user_id = $derived.by(() => {
     // eslint-disable-next-line svelte/prefer-svelte-reactivity
@@ -190,12 +210,39 @@
     return Date.now() - new Date(iso).getTime() <= THIRTY_DAYS_MS
   }
 
-  function roles_summary(roles: RoleCounts): string {
-    const parts: string[] = []
-    if (roles.manager) parts.push(`${roles.manager} manager`)
-    if (roles.editor) parts.push(`${roles.editor} editor`)
-    if (roles.contributor) parts.push(`${roles.contributor} contributor`)
-    return parts.join(' · ')
+  let add_target = $state<{ email: string, exclude_dictionary_ids: Set<string> } | null>(null)
+  let add_role_value = $state<DictionaryRole>('manager')
+
+  function start_add_role(user: UserRow, role: DictionaryRole) {
+    if (!user.email) {
+      alert('This user has no email on file, so a role cannot be added.')
+      return
+    }
+    const existing = role_rows_by_user_id.get(user.id) ?? []
+    const exclude = new Set(existing.filter(existing_role => existing_role.role === role).map(existing_role => existing_role.dictionary_id))
+    add_role_value = role
+    add_target = { email: user.email, exclude_dictionary_ids: exclude }
+  }
+
+  async function confirm_add_role(dictionary_id: string) {
+    if (!add_target) return
+    const { email } = add_target
+    const role = add_role_value
+    add_target = null
+    const { error } = await api_dictionaries_id_roles_post(dictionary_id, { target_email: email, role })
+    if (error) {
+      alert(`Could not add role: ${error.message}`)
+      return
+    }
+    await data.sync?.sync()
+  }
+
+  async function remove_role(role: RowType<'dictionary_roles'>) {
+    const dictionary_name = dictionaries_objects[role.dictionary_id]?.name || role.dictionary_id
+    if (!confirm(`Remove ${role.role} role on "${dictionary_name}"?`))
+      return
+    await role._delete()
+    await data.sync?.sync()
   }
 
   async function toggle_unsubscribed(user_id: string) {
@@ -321,6 +368,7 @@
       <tbody>
         {#each rendered_rows as row (row.id)}
           {@const row_admin_level = get_admin_level(row.email)}
+          {@const user_roles = role_rows_by_user_id.get(row.id) ?? []}
           <tr class="user-row">
             <td class="td td-name">
               <div class="name-row">
@@ -338,12 +386,39 @@
                 <div class="alias-line" title={alias}>{alias}</div>
               {/each}
             </td>
-            <td class="td nowrap">
-              {#if row.roles.total > 0}
-                <span title={roles_summary(row.roles)}>{roles_summary(row.roles)}</span>
-              {:else}
-                <span class="dim">—</span>
-              {/if}
+            <td class="td td-roles">
+              <div class="roles-cell">
+                {#each user_roles as role (role.id)}
+                  <span
+                    class={['role-badge', `role-${role.role}`]}
+                    title="{role.role} · {dictionaries_objects[role.dictionary_id]?.name || role.dictionary_id}">
+                    <a href="/{role.dictionary_id}" target="_blank" rel="noreferrer" class="role-badge-link">
+                      {dictionaries_objects[role.dictionary_id]?.name || role.dictionary_id}
+                    </a>
+                    <button
+                      type="button"
+                      title="Remove role"
+                      aria-label="Remove role"
+                      onclick={() => remove_role(role)}
+                      class="role-badge-remove">
+                      <IconMdiClose />
+                    </button>
+                  </span>
+                {/each}
+                <select
+                  aria-label="Add dictionary role"
+                  value=""
+                  onchange={(event) => {
+                    start_add_role(row, event.currentTarget.value as DictionaryRole)
+                    event.currentTarget.value = ''
+                  }}
+                  class="add-role-select">
+                  <option value="" disabled selected>+ role…</option>
+                  <option value="manager">+ manager</option>
+                  <option value="editor">+ editor</option>
+                  <option value="contributor">+ contributor</option>
+                </select>
+              </div>
             </td>
             <td class="td align-right nowrap">
               {#if row.thread_count > 0}
@@ -375,6 +450,14 @@
       </tbody>
     </table>
   </div>
+{/if}
+
+{#if add_target}
+  {@const excluded = add_target.exclude_dictionary_ids}
+  <DictionaryPickerModal
+    dictionaries={all_dictionaries.filter(dictionary => !excluded.has(dictionary.id))}
+    on_select={confirm_add_role}
+    on_close={() => add_target = null} />
 {/if}
 
 <style>
@@ -590,6 +673,74 @@
   .dim {
     color: var(--color-secondary);
   }
+
+  .td-roles {
+    min-width: 12rem;
+    max-width: 20rem;
+  }
+  .roles-cell {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    max-width: 9rem;
+    padding: 0.0625rem 0.25rem 0.0625rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+  }
+  .role-badge-link {
+    color: inherit;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .role-badge-link:hover {
+    text-decoration: underline;
+  }
+  .role-badge-remove {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: inherit;
+    opacity: 0.55;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.75rem;
+  }
+  .role-badge-remove:hover {
+    opacity: 1;
+  }
+  .role-manager {
+    background: color-mix(in srgb, var(--primary), transparent 86%);
+    color: var(--primary);
+  }
+  .role-editor {
+    background: color-mix(in srgb, var(--warning), transparent 86%);
+    color: var(--warning);
+  }
+  .role-contributor {
+    background: color-mix(in srgb, var(--success), transparent 86%);
+    color: var(--success);
+  }
+  .add-role-select {
+    font-size: 0.6875rem;
+    padding: 0.0625rem 0.25rem;
+    border-radius: 9999px;
+    border: 1px dashed var(--border-color);
+    background: transparent;
+    color: var(--color-secondary);
+    cursor: pointer;
+  }
+
   .unsub-btn {
     font-size: 0.75rem;
     color: var(--color-secondary);

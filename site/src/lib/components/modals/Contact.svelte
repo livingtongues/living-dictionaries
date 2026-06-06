@@ -5,11 +5,7 @@
   import { Button, Form, Modal } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import { goto } from '$app/navigation'
-  import type { SupportRequestBody } from '$api/email/support/+server'
-  import type { LearningMaterialsRequestBody } from '$api/email/learning_materials/+server'
-  import enBase from '$lib/i18n/locales/en.json'
-  import { post_request } from '$lib/helpers/get-post-requests'
-  import { api_request_access } from '$api/email/request_access/_call'
+  import { api_contact } from '$api/contact/_call'
 
   interface Props {
     subject?: Subjects
@@ -51,46 +47,22 @@
   let status: 'success' | 'fail' = $state()
 
   async function send() {
-    if (dictionary && subject === 'request_access') {
-      const { error } = await api_request_access({
-        message,
-        email: user?.email || email,
-        name: user?.name || 'Anonymous',
-        url: window.location.href,
-        dictionaryId: dictionary.id,
-        dictionaryName: dictionary.name,
-      })
+    if (!subject) return
+    const subject_label = $page.data.t(subjects[subject])
+    const { error } = await api_contact({
+      name: user?.name || 'Anonymous',
+      email: user?.email || email,
+      message,
+      url: window.location.href,
+      subject: dictionary?.name ? `${subject_label} — ${dictionary.name}` : subject_label,
+      subject_key: subject,
+      dictionary_id: dictionary?.id,
+      dictionary_name: dictionary?.name,
+    })
 
-      if (error) {
-        status = 'fail'
-        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
-      }
-    } else if (subject === 'learning_materials') {
-      const { error } = await post_request<LearningMaterialsRequestBody, null>('/api/email/learning_materials', {
-        message,
-        email: user?.email || email,
-        name: user?.name || 'Anonymous',
-        url: window.location.href,
-        dictionaryName: dictionary?.name,
-      })
-
-      if (error) {
-        status = 'fail'
-        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
-      }
-    } else {
-      const { error } = await post_request<SupportRequestBody, null>('/api/email/support', {
-        message,
-        email: user?.email || email,
-        name: user?.name || 'Anonymous',
-        url: window.location.href,
-        subject: enBase.contact[subject],
-      })
-
-      if (error) {
-        status = 'fail'
-        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
-      }
+    if (error) {
+      status = 'fail'
+      return alert(`${$page.data.t('misc.error')}: ${error.message}`)
     }
 
     status = 'success'
@@ -147,7 +119,7 @@
       <Form onsubmit={send}>
         {#snippet children({ loading })}
                 <div class="my-2">
-            <select class="w-full" bind:value={subject}>
+            <select class="w-full" required bind:value={subject}>
               <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
               {#each filteredSubjects as [key, value] (key)}
                 <option value={key}>{$page.data.t(value)}</option>
@@ -204,13 +176,13 @@
           {$page.data.t('misc.close')}
         </Button>
       </div>
+    {:else if status === 'fail'}
+      <h4 class="text-xl mt-1 mb-4">
+        {$page.data.t('contact.message_failed')}
+        <a class="underline ml-1" href="mailto:dictionaries@livingtongues.org">
+          dictionaries@livingtongues.org
+        </a>
+      </h4>
     {/if}
-  {:else if status === 'fail'}
-    <h4 class="text-xl mt-1 mb-4">
-      {$page.data.t('contact.message_failed')}
-      <a class="underline ml-1" href="mailto:dictionaries@livingtongues.org">
-        dictionaries@livingtongues.org
-      </a>
-    </h4>
   {/if}
 </Modal>

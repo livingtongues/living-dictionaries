@@ -2,13 +2,13 @@ packages:
   - 'site'
 
 overrides:
-  '@types/node': 22.8.6
+  '@types/node': 24.13.1
 
 # Single source of truth for the build-script allowlist. A
 # `pnpm.onlyBuiltDependencies` block in package.json would OVERRIDE (not merge
 # with) this list, so keep everything here — a fresh `pnpm install` (e.g. in
 # Docker) enforces it and silently skips any package not listed, breaking
-# native builds. Enforced by the no-pnpm-config-in-package-json eslint rule.
+# native builds.
 onlyBuiltDependencies:
   - better-sqlite3
   - esbuild

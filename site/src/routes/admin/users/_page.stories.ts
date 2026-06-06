@@ -23,6 +23,12 @@ const users = [
   { id: 'user-2', email: 'tomas@example.com', name: 'Tomás Núñez', unsubscribed_from_emails: '2026-04-01T00:00:00Z', last_visit_at: '2026-02-10T09:00:00Z', created_at: '2025-06-20T00:00:00Z', updated_at: '2026-02-10T09:00:00Z' },
 ]
 
+const dictionaries = [
+  { id: 'dict-1', name: 'Kalanga' },
+  { id: 'dict-2', name: 'Tira' },
+  { id: 'dict-3', name: 'Gourmanché' },
+]
+
 const roles = [
   { id: 'r1', dictionary_id: 'dict-1', user_id: 'user-1', role: 'manager' },
   { id: 'r2', dictionary_id: 'dict-2', user_id: 'user-1', role: 'contributor' },
@@ -38,6 +44,7 @@ const db = {
   email_aliases: { ...make_table([] as Row[], 'email'), query: () => ({ rows: [], loading: false }) },
   message_threads: { ...make_table(threads, 'id'), query: () => ({ rows: threads, loading: false }) },
   dictionary_roles: { ...make_table(roles, 'id'), query: () => ({ rows: roles, loading: false }) },
+  dictionaries: make_table(dictionaries, 'id'),
 }
 
 export const List: PageStory<typeof Component> = {

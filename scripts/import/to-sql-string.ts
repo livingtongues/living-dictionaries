@@ -1,4 +1,4 @@
-import type { Database, TablesInsert } from '@living-dictionaries/types'
+import type { Database, TablesInsert } from '../types'
 import { convert_to_sql_string } from '../../site/src/lib/mocks/seed/to-sql-string'
 
 export function sql_file_string<Table extends keyof Database['public']['Tables']>(table_name: Table, row: TablesInsert<Table>, operation: 'INSERT' | 'UPSERT' = 'INSERT') {

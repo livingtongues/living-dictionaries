@@ -2,7 +2,7 @@ import type Database from 'better-sqlite3'
 import type { Attachment } from '$lib/email/send-raw-email'
 import type { RequestHandler } from './$types'
 import { randomUUID } from 'node:crypto'
-import { is_admin } from '$lib/admins'
+import { get_admin, is_admin } from '$lib/admins'
 import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
@@ -20,10 +20,10 @@ import { error, json } from '@sveltejs/kit'
  * `SendRawEmailCommand`, persists an outbound `messages` row + attachment
  * rows, and updates thread workflow state (replied_at, replied_by_user_id).
  *
- * LD-specific: all replies are sent from `support@livingdictionaries.app`.
- * (House has per-admin `*@hvsb.app` aliases — LD doesn't have that
- * `hvsb_address`-equivalent column on `lib/admins.ts` yet. When LD wants
- * per-admin reply addresses, add it then.)
+ * Replies are sent FROM the authoring admin's `*@livingdictionaries.app`
+ * address (`Admin.ld_address` in `lib/admins.ts`), matching house's per-admin
+ * `*@hvsb.app` aliases; falls back to `support@livingdictionaries.app` for any
+ * admin without one.
  */
 
 export interface MessagesReplyAttachment {
@@ -152,9 +152,14 @@ export const POST: RequestHandler = async (event) => {
     },
   })
 
-  // LD ships all admin replies from `support@livingdictionaries.app` — no
-  // per-admin alias system yet.
-  const from_address = support_address
+  // Replies are sent FROM the authoring admin's own `*@livingdictionaries.app`
+  // address (so the customer sees the specific person, and their reply routes
+  // back via the CF Worker catch-all → email-inbound). Falls back to the shared
+  // support address for any admin without a configured ld_address.
+  const admin_record = get_admin(email)
+  const from_address = admin_record
+    ? { email: admin_record.ld_address, name: admin_record.name }
+    : support_address
 
   // Send via SES — failure marks the row as 'failed' but doesn't throw.
   try {

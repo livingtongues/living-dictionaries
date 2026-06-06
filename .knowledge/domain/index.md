@@ -1,0 +1,13 @@
+# domain/ — app-domain knowledge
+
+Durable knowledge about the Living Dictionaries *domain* and external services it leans on —
+the stuff you can't learn by reading one file. The data model itself lives in `AGENTS.md`
+("Domain data model") and the schemas in `site/src/lib/db/schemas/`.
+
+## Pages
+- [related-entries-model.md](./related-entries-model.md) — why related entries use flat
+  parent/child/sibling references instead of nested sub-entries, and the per-type editing rules.
+- [media-serving-urls.md](./media-serving-urls.md) — how GCS storage paths become image/audio
+  URLs, and the App Engine Images `lh3` magic-URL resize/crop spec the photo pipeline depends on.
+- [dictionary-import-process.md](./dictionary-import-process.md) — the human + script process for
+  importing a dictionary from the Google Sheets template (dev dry-run → prod → make public).

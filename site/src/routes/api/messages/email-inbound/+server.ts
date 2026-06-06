@@ -5,6 +5,7 @@ import { env } from '$env/dynamic/private'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { find_or_create_thread } from '$lib/email/find-or-create-thread'
+import { notify_admins } from '$lib/notifications/notify-admins'
 import { error, json } from '@sveltejs/kit'
 
 /**
@@ -80,7 +81,7 @@ function valid_payload(body: Partial<MessagesEmailInboundRequestBody>): body is 
     && Array.isArray(body.attachments)
 }
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, url }) => {
   const expected = get_internal_secret()
   if (!expected)
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'INTERNAL_INGEST_SECRET not configured')
@@ -154,9 +155,11 @@ export const POST: RequestHandler = async ({ request }) => {
     )
   }
 
-  // TODO(D4-followup): admin notifications. House sends a fire-and-forget
-  // ntfy push to all admins on every inbound. LD's `$lib/admins.ts` doesn't
-  // have ntfy_topic columns yet — when added, fire it here.
+  void notify_admins({
+    subject: is_new ? `New email: ${body.subject}` : `Reply: ${body.subject}`,
+    body: `${body.from_name?.trim() || from_email_lower}: ${(body.body_text ?? '').slice(0, 200)}`,
+    link: `${url.origin}/admin/messages/${thread_id}`,
+  })
 
   return json({
     ok: true,

@@ -3,8 +3,9 @@
 import type * as GoogleOneTap from 'google-one-tap'
 import type { CredentialResponse } from 'google-one-tap'
 import { api_auth_google } from '$api/auth/google/_call.js'
-import { goto, invalidateAll } from '$app/navigation'
+import { invalidateAll } from '$app/navigation'
 import { env as public_env } from '$env/dynamic/public'
+import { toast } from '$lib/svelte-pieces/toast.svelte'
 import { load_script_once } from './load-script-once'
 import { get_auth_user } from './user.svelte.js'
 
@@ -43,23 +44,15 @@ async function load_google_sign_in() {
 async function handle_google_credential(response: CredentialResponse) {
   const { data, error } = await api_auth_google({ id_token: response.credential })
   if (error) {
-    // TODO(L9): replace with toast once svelte-pieces lands in LD.
-    console.error('[google-sign-in]', error.message)
+    toast.error(error.message, 10)
     return
   }
   get_auth_user().set_session({ user: data.user })
+  toast.success(`Signed in as ${data.user.name || data.user.email}`, 4)
 
-  // If the user kicked this off from /login (clicked the GSI button), navigate
-  // them onward to ?redirect= or the homepage — same UX contract as the
-  // email-OTP flow. Otherwise (one-tap popover fired on another page), just
-  // invalidate so the page re-renders with the freshly-signed-in shell.
-  const url = new URL(window.location.href)
-  if (url.pathname === '/login') {
-    const redirect = url.searchParams.get('redirect') || '/'
-    await goto(redirect)
-  } else {
-    await invalidateAll()
-  }
+  // The one-tap popover can fire on any page; just invalidate so the page
+  // re-renders with the freshly-signed-in shell (staying put is correct).
+  await invalidateAll()
 }
 
 /**

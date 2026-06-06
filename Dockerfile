@@ -1,44 +1,41 @@
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-# better-sqlite3 has no prebuild for alpine/musl + node 22, so we compile from source.
+# better-sqlite3 has no prebuild for alpine/musl + node 24, so we compile from source.
 # python3/make/g++ are needed at install time; we discard them in the runner stage.
 RUN apk add --no-cache python3 make g++ && corepack enable pnpm
 
 # Workspace config + lockfile, then every workspace member's package.json the
-# lockfile knows about (`.`, site, packages/types, packages/scripts) so
-# `--frozen-lockfile` sees the exact same importer set and doesn't bail.
+# lockfile knows about (`.`, site) so `--frozen-lockfile` sees the exact same
+# importer set and doesn't bail. (scripts is a standalone pnpm project, not a
+# workspace member; the legacy top-level types package is gone — site uses its
+# own `src/lib/types`.)
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY site/package.json site/
-COPY packages/types/package.json packages/types/
-COPY packages/scripts/package.json packages/scripts/
 
 # `pnpm.onlyBuiltDependencies` in package.json gates which packages may run
 # install scripts. Run install WITHOUT --ignore-scripts so better-sqlite3's
 # `install` hook (prebuild-install || node-gyp rebuild) compiles the native binary.
 RUN pnpm install --frozen-lockfile
 
-# Source: site + the workspace `@living-dictionaries/types` it imports.
+# Source: site (self-contained; imports its own `$lib/types`).
 COPY site/ site/
-COPY packages/types/ packages/types/
 
 # Copy .env for the SvelteKit build (manually maintained on the VPS; copied into
 # the build context by deploy.sh). Supplies `$env/static/*` vars baked at build time.
 COPY .env site/.env
 
-RUN pnpm --filter @living-dictionaries/site build
+RUN pnpm --filter=site build
 
 
-FROM node:22-alpine AS runner
+FROM node:24-alpine AS runner
 
 WORKDIR /workspace
 
 # Recreate workspace structure for the prod install.
 COPY --from=builder /app/pnpm-lock.yaml /app/pnpm-workspace.yaml /app/package.json ./
 COPY --from=builder /app/site/package.json site/
-COPY --from=builder /app/packages/types/package.json packages/types/
-COPY --from=builder /app/packages/scripts/package.json packages/scripts/
 RUN corepack enable pnpm
 RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 

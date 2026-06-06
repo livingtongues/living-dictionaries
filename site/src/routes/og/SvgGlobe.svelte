@@ -33,7 +33,7 @@
   const latitude = $derived(clamp(placeLatitude, MIN_LAT, MAX_LAT))
   const longitude = $derived(placeLongitude)
 
-  const land = $derived(feature(world, world.objects.land))
+  const land = $derived(feature(world as any, (world as any).objects.land))
 
   const projection = $derived(geoOrthographic()
     .fitSize([width, height - size * 0.06], land)
