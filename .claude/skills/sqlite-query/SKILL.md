@@ -19,7 +19,7 @@ Two DBs are reachable:
 ## Prerequisites
 
 - The Vite dev server is running (`pnpm dev` in `/home/jacob/code/living-dictionaries`, port 3041).
-  **Jacob runs the dev server — never start it yourself.**
+  It's usually already up (Jacob's); you may start it yourself if it isn't.
 - For `shared.db`: an `/admin/*` page open + logged in as an admin (the admin layout opens the DB and
   registers it with the proxy in dev).
 - For a `dict.db`: a `/<dictionaryId>` page open (the dict layout opens the SharedWorker DB and

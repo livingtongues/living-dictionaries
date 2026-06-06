@@ -47,5 +47,7 @@ sense → assert the original survives. Since M4 the 13 achi entries are read fr
   (`Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input, x)`) then
   dispatch `input` + `change`.
 - Prefer `page.waitForFunction(() => document.body.innerText.includes(…))` over fixed sleeps.
-- The dev server (`:3041`) is Jacob's — boot your own `node build` (this script does) for agent runs.
+- The dev server (`:3041`) is usually Jacob's already-running `pnpm dev` (you may start it if not);
+  point `BASE_URL` at it, or boot your own `node build` (this script does) for an isolated agent run.
+  Note: media-upload + the `dev_admin_level` toggle are DEV-gated, so they only work against `pnpm dev`.
 - At M4+ (real auth), log in once and reuse puppeteer's `storageState` / cookies to start deep.

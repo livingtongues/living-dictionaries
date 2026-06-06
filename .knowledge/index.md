@@ -1,7 +1,9 @@
 # Knowledge wiki — Living Dictionaries (svelte-5-migration)
 
 Durable decisions/gotchas that augment the code (not discoverable by reading a single file).
-Active plans live in `.issues/`; the migration master plan is `.issues/cross-project-orchestration.md`.
+Active plans live in `.issues/`. The migration is done + staging is live; the remaining
+production cutover is `.issues/cutover.md`, and the durable cross-project conventions are
+`migration/shared-stack-conventions.md`.
 
 ## Categories
 - [migration/](./migration/index.md) — gotchas and decisions for the Vercel/Supabase →

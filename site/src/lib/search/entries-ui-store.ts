@@ -35,7 +35,6 @@ export function create_entries_ui_store({
 
   function set_entries_data(_entries_data: Record<string, EntryData>) {
     entries_data.set(_entries_data)
-    console.info({ _entries_data })
   }
 
   function upsert_entry_data(_entries_data: Record<string, EntryData>) {
@@ -54,16 +53,13 @@ export function create_entries_ui_store({
 
   function set_speakers(_speakers: Tables<'speakers'>[]) {
     speakers.set(_speakers)
-    console.info({ _speakers })
   }
 
   function set_tags(_tags: Tables<'tags'>[]) {
     tags.set(_tags)
-    console.info({ _tags })
   }
   function set_dialects(_dialects: Tables<'dialects'>[]) {
     dialects.set(_dialects)
-    console.info({ _dialects })
   }
 
   function set_loading(_loading: boolean) {

@@ -62,7 +62,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
         // Bootstrap: snapshot (OPFS) already populated the file; sync_now pulls
         // any deltas and backfills a fresh/MemoryVFS db (pull-since-null).
         await conn.sync_now().catch(err => console.error('initial dict sync failed', err))
-        cached = { connection: conn, dict_db: create_dict_live_db(conn) }
+        cached = { connection: conn, dict_db: create_dict_live_db(conn, { user_id: auth_user.user?.id }) }
         globals.__ld_dict_connections[dictionary_id] = cached
 
         // Dev-only: expose this dict.db to the SQL proxy under a composite
@@ -75,6 +75,10 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
         }
       }
       ;({ connection, dict_db } = cached)
+      // The dict_db is cached on globalThis and survives layout invalidation, so
+      // refresh who gets audit-stamped on writes after a login/logout while a
+      // dict is open (this load re-runs on auth changes via invalidateAll).
+      dict_db?.set_user_id(auth_user.user?.id)
     }
 
     const entries_ui = create_entries_ui_store({ dictionary_id, can_edit: readable(can_edit), admin: readable(admin_level), connection, dict_db })
