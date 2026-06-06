@@ -2,7 +2,7 @@
   import { run } from 'svelte/legacy'
 
   import { onMount } from 'svelte'
-  import { toast } from '../ui/Toasts.svelte'
+  import { toast } from '$lib/svelte-pieces/toast.svelte'
   import { Button, Form, Modal } from '$lib/svelte-pieces'
   import { display_one_tap_button } from '$lib/auth/google-one-tap'
   import { get_auth_user } from '$lib/auth/user.svelte'
@@ -23,14 +23,12 @@
   let email = $state(dev ? 'jwrunner7@gmail.com' : '')
   let sixDigitCodeSent = $state(false)
   let sixDigitCode: string = $state()
-  const TEN_SECONDS = 10000
-  const FOUR_SECONDS = 4000
 
   async function sendCode() {
     const { data, error } = await api_auth_email_send_code({ email })
 
     if (error)
-      return toast(error.message, TEN_SECONDS)
+      return toast.error(error.message, 10)
 
     // In dev the server returns the code inline — auto-fill so the effect below submits it.
     if (data.code) {
@@ -38,7 +36,7 @@
       return
     }
 
-    toast(`Sent code to: ${email}`, FOUR_SECONDS)
+    toast(`Sent code to: ${email}`, 4)
     sixDigitCodeSent = true
   }
 
@@ -50,7 +48,7 @@
     sixDigitCode = null
     submitting_code = false
     if (error)
-      return toast(error.message, TEN_SECONDS)
+      return toast.error(error.message, 10)
 
     get_auth_user().set_session({ user: data.user })
     await invalidateAll()

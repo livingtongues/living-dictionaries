@@ -129,12 +129,17 @@ Deploy *prep* is done & committed (`9919df8f`). VPS-side steps, at the cutover:
 
 ### 3. Outstanding live verifications (Jacob, :3041)
 - Visual/maps parity across the Svelte-5 site (globe + dictionary points need a real browser).
+  Includes the experimental `/globe` route (custom WebGL canvas globe, distinct from the Mapbox
+  home globe) — pulled from the example, wired to real public dictionaries; needs a WebGL eyeball.
 - A real media upload end-to-end (needs real GCS env set locally/VPS — agent can't reach GCS).
 
 ### Deferred (intentionally, by Jacob)
-- ⛔ **R2 snapshot builder + cron** — not this month.
-- The **legacy cutover runbook** (production DNS swap, catch-up Supabase→SQLite migration) — far
-  future, after the staging deploy is proven on `new.livingdictionaries.app`.
+- ✅ **R2 snapshot builder** — DONE (commit `391d88c0`): per-dict snapshot upload/read wiring +
+  constants/hooks (media stays on GCS). Standalone cron scheduling still TBD.
+- The **legacy cutover runbook** (production DNS swap, running the Supabase→SQLite migration) — far
+  future, after the staging deploy is proven on `new.livingdictionaries.app`. The migration script
+  itself now lives **in this repo** at `scripts/supabase-cutover/` (ported from the example;
+  `migrate.test.ts` green against the live schema) — only the prod run (needs Supabase creds) remains.
 
 ---
 
@@ -148,7 +153,8 @@ repo, not here. The durable conventions above are the shared contract between th
 - Server SQLite: `site/src/lib/db/server/{shared-db,dictionary-db,get-dictionary}.ts`; schemas
   `site/src/lib/db/schemas/{shared,dictionary}.ts` (+ migrations).
 - Sync engine: `site/src/lib/db/sync/*`. Deploy: `Dockerfile`, `docker-compose.yml`.
-- Migration script: `packages/scripts/migrate-to-sqlite/`.
+- Migration script: now **in-repo** at `scripts/supabase-cutover/` (run via `pnpm -C scripts
+  migrate-to-sqlite:dry` / `migrate-to-sqlite` / `verify-migration`) — no longer "peek in the example".
 - **Knowledge (durable gotchas):** `.knowledge/migration/*` (build/deploy, lockfile discipline,
   runes migration, eslint config, sqlite read, write/sync, real auth, media upload, dict-sync
   invariants, UnoCSS plugin swap) and `.knowledge/testing/*` (browser deep-flow).

@@ -1,7 +1,7 @@
 import { program } from 'commander'
 import PG from 'pg'
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@living-dictionaries/types'
+import type { Database } from './types'
 import * as dotenv from 'dotenv'
 import './record-logs'
 import { S3Client } from '@aws-sdk/client-s3'

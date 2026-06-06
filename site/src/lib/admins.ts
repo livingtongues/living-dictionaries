@@ -23,11 +23,22 @@ export interface Admin {
   email: string
   name: string
   ntfy_topic: string
+  /**
+   * The admin's `*@livingdictionaries.app` outbound address. Message-backend
+   * replies are sent FROM this address so customers see the specific admin
+   * (`jacob@livingdictionaries.app`, …), not a generic `support@`. Replies from
+   * customers land back here and route via the CF Worker catch-all →
+   * `email-inbound`, same as any other `*@livingdictionaries.app`.
+   */
+  ld_address: string
   level: AdminLevel
 }
 
 export const ADMINS: readonly Admin[] = [
-  { email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', ntfy_topic: 'living_pings', level: 2 },
+  { email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', ntfy_topic: 'living_pings', ld_address: 'jacob@livingdictionaries.app', level: 2 },
+  { email: 'diego@livingtongues.org', name: 'Diego Mariscal', ntfy_topic: 'living_pings_diego', ld_address: 'diego@livingdictionaries.app', level: 2 },
+  { email: 'dictionaries@livingtongues.org', name: 'Anna Luisa Daigneault', ntfy_topic: 'living_pings_anna', ld_address: 'anna@livingdictionaries.app', level: 1 },
+  { email: 'livingtongues@gmail.com', name: 'Dr. Greg Anderson', ntfy_topic: 'living_pings_greg', ld_address: 'greg@livingdictionaries.app', level: 1 },
 ]
 
 export function is_admin(email: string | undefined | null): boolean {
@@ -77,6 +88,12 @@ if (import.meta.vitest) {
     const topics = ADMINS.map(admin => admin.ntfy_topic)
     expect(topics.every(topic => topic && topic.length >= 10)).toBe(true)
     expect(new Set(topics).size).toBe(topics.length)
+  })
+
+  test('every admin has a unique @livingdictionaries.app ld_address', () => {
+    const addresses = ADMINS.map(admin => admin.ld_address)
+    expect(addresses.every(address => address.endsWith('@livingdictionaries.app'))).toBe(true)
+    expect(new Set(addresses).size).toBe(addresses.length)
   })
 
   test('is_admin_at_least respects threshold', () => {

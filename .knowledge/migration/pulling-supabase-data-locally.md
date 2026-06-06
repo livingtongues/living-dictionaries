@@ -5,26 +5,28 @@ read layer + seeding rationale is in [m4-sqlite-read-layer.md](./m4-sqlite-read-
 this page is the operational "how do I pull N dictionaries down to look around" runbook +
 the gotchas that aren't obvious from the code.
 
-## Run the pull from the EXAMPLE repo, not this one
-The Supabase→SQLite migrator lives at
-`~/code/living-dictionaries-example/packages/scripts/migrate-to-sqlite/` (entry
-`migrate.ts`). **Run it there**, targeting this repo's data dir:
+## Where the migrator lives
+The Supabase→SQLite migrator now lives **in this repo** at `scripts/supabase-cutover/`
+(entry `migrate.ts`). `scripts/` is a standalone pnpm project — it links to site via
+`link:../site` and carries its own `pnpm-lock.yaml`; the legacy Supabase TS types it needs
+were moved in-tree to `scripts/types/` (no more `@living-dictionaries/types` package). Run a
+one-time `pnpm install` inside `scripts/`, then target this repo's data dir:
 
 ```bash
-cd ~/code/living-dictionaries-example/packages/scripts
+cd ~/code/living-dictionaries/scripts
+pnpm install --ignore-workspace   # one-time. --ignore-workspace is REQUIRED: scripts/ sits
+                                  # under the root pnpm-workspace.yaml (which lists only `site`),
+                                  # so a plain `pnpm install` here installs the ROOT workspace, not
+                                  # scripts. --ignore-workspace makes pnpm use scripts/pnpm-lock.yaml.
 pnpm migrate-to-sqlite \
   --data-dir ~/code/living-dictionaries/site/.data \
   --content-dicts matukar,gta,apatani,nukuoro
 ```
 
-Why not run it from this repo's own `scripts/`? Because this repo's `scripts/package.json`
-declares `workspace:` deps (`@living-dictionaries/site`, `@living-dictionaries/types`) but
-`scripts/` is **not** in `pnpm-workspace.yaml` (only `site` is), and its `node_modules` is
-nearly empty — so a standalone `pnpm install` can't resolve the `workspace:` protocol.
-Untangling that (the real cutover task) is deferred in `.issues/supabase-removal.md`. The
-example repo's `packages/scripts` is a proper workspace member, fully installed, with the
-prod creds wired (`config-supabase.ts` reads `../old-site/.env.production.local` →
-`~/.secrets.d`; `-e prod` → `aws-0-us-west-1.pooler.supabase.com` w/ `SUPABASE_DB_PASSWORD`).
+Prod creds: `config-supabase.ts` reads `../site/.env.production.local`; `-e prod` (already in
+the `migrate-to-sqlite` npm script) → `aws-0-us-west-1.pooler.supabase.com` w/
+`SUPABASE_DB_PASSWORD`. The example repo's `packages/scripts/migrate-to-sqlite/` still exists
+as a fallback. The full cutover task is tracked in `.issues/supabase-removal.md`.
 
 ## Flags worth knowing (`migrate.ts`)
 - `--content-dicts a,b,c` — full catalog + ALL users into `shared.db`, **content** only for

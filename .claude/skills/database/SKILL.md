@@ -305,4 +305,4 @@ $lib/db/
 - UI conventions for LiveDb in components: root `AGENTS.md` "UI Database Interaction"
 - Architecture deep-dives: `.knowledge/architecture/`
 - Decision records: `.knowledge/decisions/`
-- Migration script (Supabase → SQLite cutover): `.knowledge/architecture/supabase-to-sqlite-migration.md` + `packages/scripts/migrate-to-sqlite/`
+- Migration script (Supabase → SQLite cutover): `.knowledge/architecture/supabase-to-sqlite-migration.md` + `scripts/supabase-cutover/`

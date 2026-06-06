@@ -12,6 +12,8 @@ site/.data
 .issues
 .knowledge
 supabase
-packages/ids-import
-packages/python-scripts
-packages/functions
+ids-import
+python-scripts
+scripts
+archive
+cf-worker

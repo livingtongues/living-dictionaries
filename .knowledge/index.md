@@ -10,6 +10,8 @@ Active plans live in `.issues/`; the migration master plan is `.issues/cross-pro
   harness and its headless-browser gotchas.
 - [tooling/](./tooling/index.md) — dev tooling that augments the app: the sqlite-proxy /
   `live_share` / `sqlite-query.sh` stack for querying the live browser DBs.
+- [domain/](./domain/index.md) — app-domain knowledge: related-entries model, media serving
+  URLs (GCS + lh3 magic URLs), the dictionary import process.
 
 ## Pointers to the reference repo
 The **target** architecture (SQLite shared.db + per-dict dict.db, wa-sqlite/better-sqlite3,

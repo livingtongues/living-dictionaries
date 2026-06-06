@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 import csv from 'csvtojson'
 import { promises as fs } from 'node:fs'
 import { Locales, UnpublishedLocales } from '../../site/src/lib/i18n/locales.js'
-import type { IGlossLanguage } from '@living-dictionaries/types'
+import type { IGlossLanguage } from '../types'
 
 const languages = [...Object.keys(Locales), ...Object.keys(UnpublishedLocales)]
 

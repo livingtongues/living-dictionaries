@@ -1,5 +1,5 @@
 // import torwali from './torwali-edited.json'; **Note that data files aren't in this repo**
-import { ActualDatabaseEntry } from '@living-dictionaries/types'
+import { ActualDatabaseEntry } from '../../types'
 import { abbreviateTDPartOfSpeech } from './abbreviate-pos'
 
 // const entries = [...torwali];

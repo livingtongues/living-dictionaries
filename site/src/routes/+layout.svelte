@@ -6,6 +6,7 @@
   import '$lib/buttons.css'
   import './global.css'
   import LoadingIndicator from './LoadingIndicator.svelte'
+  import Toasts from '$lib/svelte-pieces/Toasts.svelte'
   import { onMount } from 'svelte'
   import { navigating, page } from '$app/state'
   import { browser } from '$app/environment'
@@ -26,11 +27,9 @@
   {#if navigating?.to}
     <LoadingIndicator />
   {/if}
-
-  {#await import('$lib/components/ui/Toasts.svelte') then { default: Toasts }}
-    <Toasts />
-  {/await}
 {/if}
+
+<Toasts />
 
 <!-- {#if $user}
   {#await import('./Banner.svelte') then { default: Banner }}
