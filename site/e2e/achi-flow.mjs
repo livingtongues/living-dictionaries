@@ -18,11 +18,19 @@ import { existsSync } from 'node:fs'
 import { mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import Database from 'better-sqlite3'
 import { launch } from '/home/jacob/.claude/skills/browser-tools/browser-launch.mjs'
 
 const dir = dirname(fileURLToPath(import.meta.url))
 const site_dir = join(dir, '..')
 const screenshot_dir = join(dir, 'screenshots')
+const server_db_path = join(site_dir, '.data', 'dictionaries', 'achi.db')
+const wait = ms => new Promise(r => setTimeout(r, ms))
+
+function server_phonetic(id) {
+  const db = new Database(server_db_path, { readonly: true })
+  try { return db.prepare('SELECT phonetic FROM entries WHERE id = ?').get(id)?.phonetic } finally { db.close() }
+}
 
 // Dedicated var so an ambient PORT (e.g. a dev shell's) doesn't collide with our self-booted server.
 const port = process.env.FLOW_PORT || '3095'
@@ -151,16 +159,19 @@ async function main() {
   await shot(page, 'entry-overlay')
   step('clicked entry e_ja → overlay editor open')
 
-  // 3 — edit the phonetic field via its EditFieldModal (IPA keyboard input)
+  // 3 — edit the phonetic field via its EditFieldModal (IPA keyboard input).
+  // Value-agnostic + idempotent: target the visible modal input (not the literal
+  // value 'haʔ') and set a fixed test value, so a re-run — or a prior crashed run
+  // that left the field edited — still works. Restored at the end (net-zero).
   await page.evaluate(() => {
     const field = [...document.querySelectorAll('div,span,button')]
       .find(el => el.textContent.trim().startsWith('Phonetic') && el.textContent.trim().length < 30)
     if (!field) throw new Error('phonetic field not found')
     field.click()
   })
-  await page.waitForFunction(() => [...document.querySelectorAll('input[type=text]')].some(i => i.value === 'haʔ'))
+  await page.waitForFunction(() => [...document.querySelectorAll('input[type=text]')].some(i => i.offsetParent !== null))
   await page.evaluate(() => {
-    const input = [...document.querySelectorAll('input[type=text]')].find(i => i.value === 'haʔ')
+    const input = [...document.querySelectorAll('input[type=text]')].find(i => i.offsetParent !== null)
     const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
     setter.call(input, 'haʔ-EDITED')
     input.dispatchEvent(new Event('input', { bubbles: true }))
@@ -219,6 +230,19 @@ async function main() {
   if (!after_reload.no_sense_2) throw new Error('deleted Sense 2 reappeared after reload')
   await shot(page, 'reloaded-persisted')
   step('reload → phonetic edit persisted from server SQLite; senses back to 1')
+
+  // restore e_ja phonetic (net-zero) so the fixture stays clean + the flow re-runs.
+  // Mutate-then-save the live row, then poll the server file until the sync lands.
+  await page.evaluate(async () => {
+    const conn = globalThis.__ld_dict_connections?.achi?.connection
+    const db = globalThis.__ld_dict_connections?.achi?.dict_db
+    if (db) await db.entries.update({ id: 'e_ja', phonetic: 'haʔ' })
+    if (conn) await conn.sync_now().catch(() => {})
+  })
+  let restored
+  for (let i = 0; i < 20 && restored !== 'haʔ'; i++) { await wait(500); restored = server_phonetic('e_ja') }
+  if (restored !== 'haʔ') throw new Error(`net-zero restore failed: e_ja phonetic is "${restored}" (expected "haʔ")`)
+  step('net-zero cleanup: e_ja phonetic restored to "haʔ" on the server — fixture clean')
 
   if (page_errors.length) throw new Error(`pageerror(s) during flow: ${page_errors.join(' | ')}`)
   step('no uncaught page errors during the flow')

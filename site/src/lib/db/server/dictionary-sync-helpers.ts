@@ -149,12 +149,20 @@ export function process_dict_changes({ db, request, user_id, is_editor }: {
         response.changes[table_name] = filtered
     }
 
-    // PULL: tombstones since cursor.
+    // PULL: tombstones since cursor. Skip any whose row currently exists — it
+    // was re-created (same id) after the delete, so forwarding the tombstone
+    // would wrongly delete the live row on peers.
     if (request.synced_up_to) {
       const tombstones = db.prepare(
         `SELECT table_name, id FROM deletes WHERE updated_at > ? ORDER BY updated_at ASC`,
       ).all(request.synced_up_to) as { table_name: string, id: string }[]
-      response.deletes = tombstones
+      for (const tombstone of tombstones) {
+        if (!is_dict_syncable_table(tombstone.table_name))
+          continue
+        const exists = db.prepare(`SELECT 1 FROM "${tombstone.table_name}" WHERE id = ?`).get(tombstone.id)
+        if (!exists)
+          response.deletes.push(tombstone)
+      }
     }
 
     // New cursor = post-write last_modified_at. The trigger already fired on

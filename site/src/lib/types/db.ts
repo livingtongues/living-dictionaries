@@ -38,13 +38,6 @@ interface TableModels {
   entry_tags: typeof dict.entry_tags
 }
 
-/**
- * Primary key + audit + sync-bookkeeping columns the write layer fills in. The
- * dict-client `operations.ts` inserts strip these from their public params
- * (`NewRecord<T>`) so callers only provide real content.
- */
-export type SystemInsertFields = 'id' | 'created_at' | 'updated_at' | 'created_by_user_id' | 'updated_by_user_id' | 'dirty' | 'deleted'
-
 export type Tables<T extends keyof TableModels | 'dictionaries_view'>
   = T extends 'dictionaries_view' ? DictionaryView
     : T extends keyof TableModels ? InferSelectModel<TableModels[T]>

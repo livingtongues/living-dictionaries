@@ -22,7 +22,6 @@ describe('dictionary.db push + pull', () => {
           coordinates: null,
           unsupported_fields: null,
           elicitation_id: null,
-          deleted: null,
           dirty: 1,
           created_by_user_id: 'u1',
           created_at: now,
@@ -31,7 +30,7 @@ describe('dictionary.db push + pull', () => {
         }],
       },
       deletes: [],
-      latest_dict_migration: '20260525_initial.sql',
+      latest_dict_migration: '20260606_initial.sql',
     }
 
     const response = process_dict_changes({ db, request, user_id: 'u1', is_editor: true })
@@ -69,7 +68,6 @@ describe('dictionary.db push + pull', () => {
             coordinates: null,
             unsupported_fields: null,
             elicitation_id: null,
-            deleted: null,
             dirty: 1,
             created_by_user_id: 'editor',
             created_at: now,
@@ -78,7 +76,7 @@ describe('dictionary.db push + pull', () => {
           }],
         },
         deletes: [],
-        latest_dict_migration: '20260525_initial.sql',
+        latest_dict_migration: '20260606_initial.sql',
       },
       user_id: 'editor',
       is_editor: true,
@@ -102,7 +100,6 @@ describe('dictionary.db push + pull', () => {
             coordinates: null,
             unsupported_fields: null,
             elicitation_id: null,
-            deleted: null,
             dirty: 1,
             created_by_user_id: 'viewer',
             created_at: now,
@@ -111,7 +108,7 @@ describe('dictionary.db push + pull', () => {
           }],
         },
         deletes: [],
-        latest_dict_migration: '20260525_initial.sql',
+        latest_dict_migration: '20260606_initial.sql',
       },
       user_id: '',
       is_editor: false,
@@ -123,7 +120,7 @@ describe('dictionary.db push + pull', () => {
     db.close()
   })
 
-  test('soft-delete via tombstone propagates through the trigger', () => {
+  test('hard-delete via tombstone removes the row + propagates to peers', () => {
     const db = open_dictionary_db_in_memory('test_dict')
     const now = new Date().toISOString()
 
@@ -144,7 +141,6 @@ describe('dictionary.db push + pull', () => {
             coordinates: null,
             unsupported_fields: null,
             elicitation_id: null,
-            deleted: null,
             dirty: 1,
             created_by_user_id: 'editor',
             created_at: now,
@@ -153,7 +149,7 @@ describe('dictionary.db push + pull', () => {
           }],
         },
         deletes: [],
-        latest_dict_migration: '20260525_initial.sql',
+        latest_dict_migration: '20260606_initial.sql',
       },
       user_id: 'editor',
       is_editor: true,
@@ -165,14 +161,31 @@ describe('dictionary.db push + pull', () => {
         synced_up_to: now,
         dirty_rows: {},
         deletes: [{ table_name: 'entries', id: 'entry_doomed' }],
-        latest_dict_migration: '20260525_initial.sql',
+        latest_dict_migration: '20260606_initial.sql',
       },
       user_id: 'editor',
       is_editor: true,
     })
 
-    const row = db.prepare('SELECT deleted FROM entries WHERE id = ?').get('entry_doomed') as { deleted: string | null }
-    expect(row.deleted).toBeTruthy() // soft-deleted (deleted timestamp set)
+    // Row is hard-deleted (gone, not merely flagged) and the tombstone is logged.
+    const row = db.prepare('SELECT id FROM entries WHERE id = ?').get('entry_doomed')
+    expect(row).toBeUndefined()
+    const tombstone = db.prepare(`SELECT id FROM deletes WHERE table_name = 'entries' AND id = ?`).get('entry_doomed')
+    expect(tombstone).toBeTruthy()
+
+    // A peer behind the delete pulls the tombstone (row no longer exists → forwarded).
+    const peer_response = process_dict_changes({
+      db,
+      request: {
+        synced_up_to: '2026-01-01T00:00:00.000Z',
+        dirty_rows: {},
+        deletes: [],
+        latest_dict_migration: '20260606_initial.sql',
+      },
+      user_id: 'peer',
+      is_editor: false,
+    })
+    expect(peer_response.deletes).toContainEqual({ table_name: 'entries', id: 'entry_doomed' })
     db.close()
   })
 
@@ -199,7 +212,6 @@ describe('dictionary.db push + pull', () => {
             coordinates: null,
             unsupported_fields: null,
             elicitation_id: null,
-            deleted: null,
             dirty: 1,
             created_by_user_id: 'a',
             created_at: t2,
@@ -208,7 +220,7 @@ describe('dictionary.db push + pull', () => {
           }],
         },
         deletes: [],
-        latest_dict_migration: '20260525_initial.sql',
+        latest_dict_migration: '20260606_initial.sql',
       },
       user_id: 'a',
       is_editor: true,
@@ -232,7 +244,6 @@ describe('dictionary.db push + pull', () => {
             coordinates: null,
             unsupported_fields: null,
             elicitation_id: null,
-            deleted: null,
             dirty: 1,
             created_by_user_id: 'b',
             created_at: t1,
@@ -241,7 +252,7 @@ describe('dictionary.db push + pull', () => {
           }],
         },
         deletes: [],
-        latest_dict_migration: '20260525_initial.sql',
+        latest_dict_migration: '20260606_initial.sql',
       },
       user_id: 'b',
       is_editor: true,

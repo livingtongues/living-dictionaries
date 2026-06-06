@@ -2,14 +2,16 @@
 --   1. The server's per-dict better-sqlite3 file (via `get_dictionary_db()`)
 --   2. The R2 snapshot pipeline (snapshot is built FROM the server's file, so
 --      this migration's tables are what viewers pull down)
---   3. Every client's wa-sqlite OPFS instance (via the SharedWorker — pending
---      Story B.1 implementation; for now applied server-side only)
+--   3. Every client's wa-sqlite OPFS instance (via the SharedWorker)
 --
 -- Conventions (per port-db-sync-architecture.md):
---   - Every content table has `deleted TEXT` (NULL = visible).
+--   - Deletion is HARD: INSERT INTO deletes(table_name, id) fires
+--     `process_delete_cascade` which DELETEs the row; FK ON DELETE CASCADE
+--     sweeps children. There is NO `deleted` column — purged rows are gone.
 --   - Every content table has `dirty INTEGER` (NULL/0 = clean, 1 = pending push).
 --   - Every junction table has synthetic UUID PK + UNIQUE on natural key.
---   - `last_modified_at` triggers fan out on every syncable table.
+--   - `last_modified_at` triggers fan out on every syncable table (+ on the
+--     `deletes` tombstone, so a delete advances the sync cursor too).
 
 CREATE TABLE IF NOT EXISTS migrations (
   id TEXT PRIMARY KEY,
@@ -23,7 +25,10 @@ CREATE TABLE IF NOT EXISTS db_metadata (
 );
 
 -- Tombstones — INSERT INTO deletes(table_name, id) fires the
--- `process_delete_cascade` trigger to soft-delete the matching row.
+-- `process_delete_cascade` trigger, which HARD-DELETEs the matching row.
+-- The tombstone row persists as the durable delete log: the server forwards it
+-- to peers (pull `WHERE updated_at > cursor`); the client uses it as the push
+-- queue (drained after push). Snapshots are stripped of these rows at build.
 CREATE TABLE IF NOT EXISTS deletes (
   table_name TEXT NOT NULL,
   id TEXT NOT NULL,
@@ -49,7 +54,6 @@ CREATE TABLE IF NOT EXISTS entries (
   coordinates TEXT, -- JSON
   unsupported_fields TEXT, -- JSON
   elicitation_id TEXT,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -57,7 +61,6 @@ CREATE TABLE IF NOT EXISTS entries (
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 CREATE INDEX IF NOT EXISTS idx_entries_updated_at ON entries(updated_at);
-CREATE INDEX IF NOT EXISTS idx_entries_deleted ON entries(deleted) WHERE deleted IS NULL;
 
 -- A per-dictionary long-text / story object. Order + paragraph breaks live on
 -- the child sentences (sentences.sort_key + sentences.ends_paragraph), not on
@@ -65,7 +68,6 @@ CREATE INDEX IF NOT EXISTS idx_entries_deleted ON entries(deleted) WHERE deleted
 CREATE TABLE IF NOT EXISTS texts (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL, -- JSON MultiString
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -85,7 +87,6 @@ CREATE TABLE IF NOT EXISTS senses (
   noun_class TEXT,
   plural_form TEXT,
   variant TEXT,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -102,7 +103,6 @@ CREATE TABLE IF NOT EXISTS sentences (
   text_id TEXT REFERENCES texts(id) ON DELETE SET NULL,
   sort_key TEXT, -- fractional index (LexoRank-style) ordering within text_id; NULL for standalone example sentences
   ends_paragraph INTEGER, -- 1 = a paragraph break follows this sentence
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -117,7 +117,6 @@ CREATE TABLE IF NOT EXISTS senses_in_sentences (
   id TEXT PRIMARY KEY,
   sense_id TEXT NOT NULL REFERENCES senses(id) ON DELETE CASCADE,
   sentence_id TEXT NOT NULL REFERENCES sentences(id) ON DELETE CASCADE,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -136,7 +135,6 @@ CREATE TABLE IF NOT EXISTS speakers (
   gender TEXT, -- 'm' | 'f' | 'o'
   birthplace TEXT,
   user_id TEXT,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -152,7 +150,6 @@ CREATE TABLE IF NOT EXISTS audio (
   text_id TEXT REFERENCES texts(id) ON DELETE CASCADE,
   storage_path TEXT NOT NULL,
   source TEXT,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -168,7 +165,6 @@ CREATE TABLE IF NOT EXISTS audio_speakers (
   id TEXT PRIMARY KEY,
   audio_id TEXT NOT NULL REFERENCES audio(id) ON DELETE CASCADE,
   speaker_id TEXT NOT NULL REFERENCES speakers(id) ON DELETE CASCADE,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -187,7 +183,6 @@ CREATE TABLE IF NOT EXISTS videos (
   source TEXT,
   videographer TEXT,
   text_id TEXT REFERENCES texts(id) ON DELETE CASCADE,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -201,7 +196,6 @@ CREATE TABLE IF NOT EXISTS video_speakers (
   id TEXT PRIMARY KEY,
   video_id TEXT NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
   speaker_id TEXT NOT NULL REFERENCES speakers(id) ON DELETE CASCADE,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -217,7 +211,6 @@ CREATE TABLE IF NOT EXISTS sense_videos (
   id TEXT PRIMARY KEY,
   sense_id TEXT NOT NULL REFERENCES senses(id) ON DELETE CASCADE,
   video_id TEXT NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -233,7 +226,6 @@ CREATE TABLE IF NOT EXISTS sentence_videos (
   id TEXT PRIMARY KEY,
   sentence_id TEXT NOT NULL REFERENCES sentences(id) ON DELETE CASCADE,
   video_id TEXT NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -251,7 +243,6 @@ CREATE TABLE IF NOT EXISTS photos (
   serving_url TEXT NOT NULL,
   source TEXT,
   photographer TEXT,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -264,7 +255,6 @@ CREATE TABLE IF NOT EXISTS sense_photos (
   id TEXT PRIMARY KEY,
   sense_id TEXT NOT NULL REFERENCES senses(id) ON DELETE CASCADE,
   photo_id TEXT NOT NULL REFERENCES photos(id) ON DELETE CASCADE,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -280,7 +270,6 @@ CREATE TABLE IF NOT EXISTS sentence_photos (
   id TEXT PRIMARY KEY,
   sentence_id TEXT NOT NULL REFERENCES sentences(id) ON DELETE CASCADE,
   photo_id TEXT NOT NULL REFERENCES photos(id) ON DELETE CASCADE,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -295,7 +284,6 @@ CREATE INDEX IF NOT EXISTS idx_sentence_photos_updated_at ON sentence_photos(upd
 CREATE TABLE IF NOT EXISTS dialects (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -308,7 +296,6 @@ CREATE TABLE IF NOT EXISTS entry_dialects (
   id TEXT PRIMARY KEY,
   entry_id TEXT NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
   dialect_id TEXT NOT NULL REFERENCES dialects(id) ON DELETE CASCADE,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -324,7 +311,6 @@ CREATE TABLE IF NOT EXISTS tags (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   private INTEGER,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -337,7 +323,6 @@ CREATE TABLE IF NOT EXISTS entry_tags (
   id TEXT PRIMARY KEY,
   entry_id TEXT NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
   tag_id TEXT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
-  deleted TEXT,
   dirty INTEGER,
   created_by_user_id TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -358,221 +343,269 @@ CREATE INDEX IF NOT EXISTS idx_entry_tags_updated_at ON entry_tags(updated_at);
 -- syncable table in a future migration, the table + its trigger live in the
 -- same SQL file so there's one place to look.
 
--- Macro: a `AFTER INSERT OR UPDATE OR DELETE` trigger per syncable table.
--- Sqlite has no "OR" syntax — split into three triggers per table.
+-- One AFTER INSERT + one AFTER UPDATE bump trigger per syncable table (SQLite
+-- has no multi-event "OR" trigger syntax). DELETE doesn't need a per-table
+-- trigger — `process_delete_cascade` bumps `last_modified_at` once instead.
+--
+-- The bump uses `INSERT ... ON CONFLICT(key) DO UPDATE`, NOT `INSERT OR REPLACE`:
+-- the sync engine writes rows via an outer UPSERT, and an `OR REPLACE` inside a
+-- trigger firing during that UPSERT throws `UNIQUE constraint failed:
+-- db_metadata.key`. `ON CONFLICT DO UPDATE` composes cleanly with the outer upsert.
 
 -- entries
 CREATE TRIGGER IF NOT EXISTS entries_after_insert_bump_lmod
 AFTER INSERT ON entries BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS entries_after_update_bump_lmod
 AFTER UPDATE ON entries BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- texts
 CREATE TRIGGER IF NOT EXISTS texts_after_insert_bump_lmod
 AFTER INSERT ON texts BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS texts_after_update_bump_lmod
 AFTER UPDATE ON texts BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- senses
 CREATE TRIGGER IF NOT EXISTS senses_after_insert_bump_lmod
 AFTER INSERT ON senses BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS senses_after_update_bump_lmod
 AFTER UPDATE ON senses BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- sentences
 CREATE TRIGGER IF NOT EXISTS sentences_after_insert_bump_lmod
 AFTER INSERT ON sentences BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS sentences_after_update_bump_lmod
 AFTER UPDATE ON sentences BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- senses_in_sentences
 CREATE TRIGGER IF NOT EXISTS senses_in_sentences_after_insert_bump_lmod
 AFTER INSERT ON senses_in_sentences BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS senses_in_sentences_after_update_bump_lmod
 AFTER UPDATE ON senses_in_sentences BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- speakers
 CREATE TRIGGER IF NOT EXISTS speakers_after_insert_bump_lmod
 AFTER INSERT ON speakers BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS speakers_after_update_bump_lmod
 AFTER UPDATE ON speakers BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- audio
 CREATE TRIGGER IF NOT EXISTS audio_after_insert_bump_lmod
 AFTER INSERT ON audio BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS audio_after_update_bump_lmod
 AFTER UPDATE ON audio BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- audio_speakers
 CREATE TRIGGER IF NOT EXISTS audio_speakers_after_insert_bump_lmod
 AFTER INSERT ON audio_speakers BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS audio_speakers_after_update_bump_lmod
 AFTER UPDATE ON audio_speakers BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- videos
 CREATE TRIGGER IF NOT EXISTS videos_after_insert_bump_lmod
 AFTER INSERT ON videos BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS videos_after_update_bump_lmod
 AFTER UPDATE ON videos BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- video_speakers
 CREATE TRIGGER IF NOT EXISTS video_speakers_after_insert_bump_lmod
 AFTER INSERT ON video_speakers BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS video_speakers_after_update_bump_lmod
 AFTER UPDATE ON video_speakers BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- sense_videos
 CREATE TRIGGER IF NOT EXISTS sense_videos_after_insert_bump_lmod
 AFTER INSERT ON sense_videos BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS sense_videos_after_update_bump_lmod
 AFTER UPDATE ON sense_videos BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- sentence_videos
 CREATE TRIGGER IF NOT EXISTS sentence_videos_after_insert_bump_lmod
 AFTER INSERT ON sentence_videos BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS sentence_videos_after_update_bump_lmod
 AFTER UPDATE ON sentence_videos BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- photos
 CREATE TRIGGER IF NOT EXISTS photos_after_insert_bump_lmod
 AFTER INSERT ON photos BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS photos_after_update_bump_lmod
 AFTER UPDATE ON photos BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- sense_photos
 CREATE TRIGGER IF NOT EXISTS sense_photos_after_insert_bump_lmod
 AFTER INSERT ON sense_photos BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS sense_photos_after_update_bump_lmod
 AFTER UPDATE ON sense_photos BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- sentence_photos
 CREATE TRIGGER IF NOT EXISTS sentence_photos_after_insert_bump_lmod
 AFTER INSERT ON sentence_photos BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS sentence_photos_after_update_bump_lmod
 AFTER UPDATE ON sentence_photos BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- dialects
 CREATE TRIGGER IF NOT EXISTS dialects_after_insert_bump_lmod
 AFTER INSERT ON dialects BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS dialects_after_update_bump_lmod
 AFTER UPDATE ON dialects BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- entry_dialects
 CREATE TRIGGER IF NOT EXISTS entry_dialects_after_insert_bump_lmod
 AFTER INSERT ON entry_dialects BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS entry_dialects_after_update_bump_lmod
 AFTER UPDATE ON entry_dialects BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- tags
 CREATE TRIGGER IF NOT EXISTS tags_after_insert_bump_lmod
 AFTER INSERT ON tags BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS tags_after_update_bump_lmod
 AFTER UPDATE ON tags BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
 -- entry_tags
 CREATE TRIGGER IF NOT EXISTS entry_tags_after_insert_bump_lmod
 AFTER INSERT ON entry_tags BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 CREATE TRIGGER IF NOT EXISTS entry_tags_after_update_bump_lmod
 AFTER UPDATE ON entry_tags BEGIN
-  INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;
 
--- Soft-delete cascade: INSERT INTO deletes(table_name, id) sets the
--- corresponding row's `deleted` column to now. The row stays around as a
--- tombstone so other dictionaries' sync can pull the delete.
+-- Hard-delete cascade: INSERT INTO deletes(table_name, id) DELETEs the matching
+-- row outright (FK ON DELETE CASCADE then sweeps its children). The tombstone
+-- row itself stays in `deletes` as the durable delete log + sync push queue.
+-- Also bump `last_modified_at` so the delete advances the sync cursor (a DELETE
+-- fires no per-table bump trigger of its own).
 CREATE TRIGGER IF NOT EXISTS process_delete_cascade AFTER INSERT ON deletes
 BEGIN
-  UPDATE entries             SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'entries' AND deleted IS NULL;
-  UPDATE texts               SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'texts' AND deleted IS NULL;
-  UPDATE senses              SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'senses' AND deleted IS NULL;
-  UPDATE sentences           SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'sentences' AND deleted IS NULL;
-  UPDATE senses_in_sentences SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'senses_in_sentences' AND deleted IS NULL;
-  UPDATE speakers            SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'speakers' AND deleted IS NULL;
-  UPDATE audio               SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'audio' AND deleted IS NULL;
-  UPDATE audio_speakers      SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'audio_speakers' AND deleted IS NULL;
-  UPDATE videos              SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'videos' AND deleted IS NULL;
-  UPDATE video_speakers      SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'video_speakers' AND deleted IS NULL;
-  UPDATE sense_videos        SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'sense_videos' AND deleted IS NULL;
-  UPDATE sentence_videos     SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'sentence_videos' AND deleted IS NULL;
-  UPDATE photos              SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'photos' AND deleted IS NULL;
-  UPDATE sense_photos        SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'sense_photos' AND deleted IS NULL;
-  UPDATE sentence_photos     SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'sentence_photos' AND deleted IS NULL;
-  UPDATE dialects            SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'dialects' AND deleted IS NULL;
-  UPDATE entry_dialects      SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'entry_dialects' AND deleted IS NULL;
-  UPDATE tags                SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'tags' AND deleted IS NULL;
-  UPDATE entry_tags          SET deleted = NEW.updated_at, updated_at = NEW.updated_at WHERE id = NEW.id AND NEW.table_name = 'entry_tags' AND deleted IS NULL;
+  DELETE FROM entries             WHERE id = NEW.id AND NEW.table_name = 'entries';
+  DELETE FROM texts               WHERE id = NEW.id AND NEW.table_name = 'texts';
+  DELETE FROM senses              WHERE id = NEW.id AND NEW.table_name = 'senses';
+  DELETE FROM sentences           WHERE id = NEW.id AND NEW.table_name = 'sentences';
+  DELETE FROM senses_in_sentences WHERE id = NEW.id AND NEW.table_name = 'senses_in_sentences';
+  DELETE FROM speakers            WHERE id = NEW.id AND NEW.table_name = 'speakers';
+  DELETE FROM audio               WHERE id = NEW.id AND NEW.table_name = 'audio';
+  DELETE FROM audio_speakers      WHERE id = NEW.id AND NEW.table_name = 'audio_speakers';
+  DELETE FROM videos              WHERE id = NEW.id AND NEW.table_name = 'videos';
+  DELETE FROM video_speakers      WHERE id = NEW.id AND NEW.table_name = 'video_speakers';
+  DELETE FROM sense_videos        WHERE id = NEW.id AND NEW.table_name = 'sense_videos';
+  DELETE FROM sentence_videos     WHERE id = NEW.id AND NEW.table_name = 'sentence_videos';
+  DELETE FROM photos              WHERE id = NEW.id AND NEW.table_name = 'photos';
+  DELETE FROM sense_photos        WHERE id = NEW.id AND NEW.table_name = 'sense_photos';
+  DELETE FROM sentence_photos     WHERE id = NEW.id AND NEW.table_name = 'sentence_photos';
+  DELETE FROM dialects            WHERE id = NEW.id AND NEW.table_name = 'dialects';
+  DELETE FROM entry_dialects      WHERE id = NEW.id AND NEW.table_name = 'entry_dialects';
+  DELETE FROM tags                WHERE id = NEW.id AND NEW.table_name = 'tags';
+  DELETE FROM entry_tags          WHERE id = NEW.id AND NEW.table_name = 'entry_tags';
+  INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 END;

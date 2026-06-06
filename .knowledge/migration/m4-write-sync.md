@@ -96,12 +96,17 @@ the sync POST (server SQLite), so it's independent of browser OPFS entirely. The
 persistence by reading the **server** `.data/dictionaries/achi.db` directly (better-sqlite3) AND by
 loading a **fresh no-OPFS browser context** that must fetch the snapshot from the server.
 
-## Snapshot endpoint: public read, no R2 (yet)
-The example gates `/api/dictionary/[id]/db` to editors with viewers on a public R2 bucket. LD has **no
-R2** (far-future; media stays on **Google Cloud Storage** — see house). Since everyone opens wa-sqlite
-(viewers pull-only), the snapshot endpoint **serves everyone** (mirrors the now-retired, ungated
-entries-data endpoint); `fetch-snapshot` dropped the R2 branch → always the VPS endpoint. Push
-(`/changes`) stays editor-gated; viewers/anonymous get pull-only.
+## Snapshot endpoint — the "everyone opens wa-sqlite" decision (R2 added later)
+The load-bearing decision worth keeping: **everyone opens the per-dict wa-sqlite DB** (editors push,
+viewers pull-only), so the snapshot bootstrap serves everyone, not just editors. Push (`/changes`)
+stays editor-gated; viewers/anonymous are pull-only.
+
+> ⚠️ Superseded detail: this milestone shipped with **no R2** (VPS-only snapshot endpoint;
+> `fetch-snapshot` had no R2 branch). R2 dict snapshots have since been added —
+> `r2-snapshot-builder.ts` (cron) builds them and `fetch-snapshot.ts` now branches editor→VPS (fresh)
+> vs viewer→public R2 (`snapshots.livingdictionaries.app`, CDN-cached). The current read path is the
+> source of truth in the **database skill** (`dictionaries/<id>.db` section); don't trust this
+> paragraph's original "no R2" framing.
 
 ## Seed self-sufficiency
 `seed-achi-fixture.ts` opened achi.db raw (assumed M4-read pre-created the schema). The e2es re-seed,

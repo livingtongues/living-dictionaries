@@ -40,6 +40,8 @@ export interface SyncEngineOptions {
   get_auth: () => AuthHeaders
   /** Fires when one or more tables changed locally (post-pull). */
   on_tables_changed?: (tables: Set<string>) => void
+  /** Fires with the (table, id) of rows hard-deleted by a pull (for the search index). */
+  on_rows_deleted?: (deletes: { table_name: string, id: string }[]) => void
   /** Fires before/after a sync attempt. */
   on_status?: (status: { is_syncing: boolean, last_error: string | null, last_sync_at: string | null }) => void
 }
@@ -50,6 +52,7 @@ export class DictSyncEngine {
   #has_editor_role: boolean
   #get_auth: () => AuthHeaders
   #on_tables_changed?: (tables: Set<string>) => void
+  #on_rows_deleted?: (deletes: { table_name: string, id: string }[]) => void
   #on_status?: (status: { is_syncing: boolean, last_error: string | null, last_sync_at: string | null }) => void
 
   #timer: ReturnType<typeof setInterval> | null = null
@@ -64,6 +67,7 @@ export class DictSyncEngine {
     this.#has_editor_role = options.has_editor_role
     this.#get_auth = options.get_auth
     this.#on_tables_changed = options.on_tables_changed
+    this.#on_rows_deleted = options.on_rows_deleted
     this.#on_status = options.on_status
   }
 
@@ -198,6 +202,7 @@ export class DictSyncEngine {
 
   async #apply_response(response: DictChangesResponse, request: DictChangesRequest): Promise<void> {
     const affected = new Set<string>()
+    const deleted_rows: { table_name: string, id: string }[] = []
 
     await this.#connection.execute('PRAGMA defer_foreign_keys = ON')
     await this.#connection.execute('BEGIN')
@@ -223,6 +228,7 @@ export class DictSyncEngine {
         if (!is_dirty) {
           await this.#connection.execute(`DELETE FROM "${table_name}" WHERE id = ?`, [id])
           affected.add(table_name)
+          deleted_rows.push({ table_name, id })
         }
       }
 
@@ -255,6 +261,8 @@ export class DictSyncEngine {
 
     if (affected.size > 0)
       this.#on_tables_changed?.(affected)
+    if (deleted_rows.length > 0)
+      this.#on_rows_deleted?.(deleted_rows)
   }
 
   async #upsert_row({ table, row }: { table: DictSyncableTable, row: Record<string, unknown> }) {

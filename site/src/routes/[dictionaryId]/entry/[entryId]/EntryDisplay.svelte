@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryData, EntryFieldValue, Tables, TablesUpdate } from '$lib/types'
+  import type { EntryData, Tables } from '$lib/types'
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
   import Sense from './Sense.svelte'
@@ -24,28 +24,18 @@
     dbOperations,
   }: Props = $props()
 
-  const text_fields = ['morphology', 'interlinearization'] satisfies EntryFieldValue[]
-
-  function update_entry(update: TablesUpdate<'entries'>) {
-    dbOperations.update_entry(update)
-  }
-
-  // PILOT (livedb-adoption): the live `dict_db` entries row for this entry.
-  // The detail screen still renders most fields from the assembled `EntryData`
-  // read-model, but `phonetic` below demonstrates the target pattern — render
-  // and save directly off the reactive row (mutate, then `_save()`), no
-  // dbOperations wrapper. The Orama watcher reflects the change back into the
-  // read-model that the rest of the page uses. See
-  // `.issues/livedb-adoption-and-db-skill.md` for the broader rollout plan.
+  // Scalar entry fields render + save directly off the live `dict_db` row
+  // (mutate, then `_save()` — auto-stamps the editing user + dirty). The Orama
+  // watcher reflects each save back into the `EntryData` read-model that the
+  // list/gallery/table/SEO surfaces use. Multi-table concerns (senses, media,
+  // dialects, tags) stay on `dbOperations`/the read-model for now. See
+  // `.issues/livedb-scalar-field-migration.md`.
   const dict_db = $derived($page.data.dict_db)
   const entry_row = $derived(dict_db?.entries.id(entry.id))
 
-  async function save_phonetic(new_value: string) {
-    if (!entry_row) {
-      update_entry({ phonetic: new_value })
-      return
-    }
-    entry_row.phonetic = new_value
+  async function save_entry(patch: Partial<NonNullable<typeof entry_row>>) {
+    if (!entry_row) return
+    Object.assign(entry_row, patch)
     await entry_row._save()
   }
 </script>
@@ -53,14 +43,13 @@
 <div class="flex flex-col md:grid mb-3 media-on-right-grid grid-gap-2">
   <div dir="ltr" style="grid-area: title;">
     <EntryField
-      value={entry.main.lexeme.default}
+      value={entry_row?.lexeme?.default}
       field="lexeme"
       {can_edit}
       display={$page.data.t('entry_field.lexeme')}
       on_update={(new_value) => {
-        if (new_value) {
-          update_entry({ lexeme: { ...entry.main.lexeme, default: new_value } })
-        }
+        if (new_value)
+          save_entry({ lexeme: { ...entry_row?.lexeme, default: new_value } })
       }} />
   </div>
 
@@ -72,21 +61,21 @@
     {#each dictionary.orthographies || [] as orthography, index (index)}
       {@const orthography_field = `lo${index + 1}`}
       <EntryField
-        value={entry.main.lexeme[orthography_field]}
+        value={entry_row?.lexeme?.[orthography_field]}
         field="local_orthography"
         {can_edit}
         display={orthography.name}
         on_update={(new_value) => {
-          update_entry({ lexeme: { ...entry.main.lexeme, [orthography_field]: new_value } })
+          save_entry({ lexeme: { ...entry_row?.lexeme, [orthography_field]: new_value } })
         }} />
     {/each}
 
     <EntryField
-      value={entry_row?.phonetic ?? entry.main.phonetic}
+      value={entry_row?.phonetic}
       field="phonetic"
       {can_edit}
       display={$page.data.t('entry_field.phonetic')}
-      on_update={save_phonetic} />
+      on_update={new_value => save_entry({ phonetic: new_value })} />
 
     {#each entry.senses || [] as sense, index (sense.id)}
       {#if entry.senses.length === 1}
@@ -103,7 +92,7 @@
             </div>
             <div class="mx-auto"></div>
             {#if can_edit}
-              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.update_sense({ deleted: new Date().toISOString(), id: sense.id })}><span class="i-fa-solid-times -mt-1"></span></Button>
+              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.delete_sense(sense.id)}><span class="i-fa-solid-times -mt-1"></span></Button>
               <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><span class="i-fa-solid-plus -mt-1"></span></Button>
             {/if}
           </div>
@@ -138,65 +127,58 @@
     {/if}
 
     <EntryField
-      value={entry.main.scientific_names?.[0]}
+      value={entry_row?.scientific_names?.[0]}
       field="scientific_names"
       {can_edit}
       display={$page.data.t('entry_field.scientific_names')}
-      on_update={(new_value) => {
-        update_entry({ scientific_names: [new_value] })
-      }} />
-
-    {#each text_fields as field (field)}
-      <EntryField
-        value={entry.main[field]}
-        {field}
-        {can_edit}
-        display={$page.data.t(`entry_field.${field}`)}
-        on_update={(new_value) => {
-          update_entry({ [field]: new_value })
-        }} />
-    {/each}
+      on_update={new_value => save_entry({ scientific_names: [new_value] })} />
 
     <EntryField
-      value={entry.main.notes?.default}
+      value={entry_row?.morphology}
+      field="morphology"
+      {can_edit}
+      display={$page.data.t('entry_field.morphology')}
+      on_update={new_value => save_entry({ morphology: new_value })} />
+
+    <EntryField
+      value={entry_row?.interlinearization}
+      field="interlinearization"
+      {can_edit}
+      display={$page.data.t('entry_field.interlinearization')}
+      on_update={new_value => save_entry({ interlinearization: new_value })} />
+
+    <EntryField
+      value={entry_row?.notes?.default}
       field="notes"
       {can_edit}
       display={$page.data.t('entry_field.notes')}
-      on_update={(new_value) => {
-        update_entry({ notes: { default: new_value } })
-      }} />
+      on_update={new_value => save_entry({ notes: { default: new_value } })} />
 
     <EntryField
-      value={entry.main.linguistic_history?.default}
+      value={entry_row?.linguistic_history?.default}
       field="linguistic_history"
       {can_edit}
       display={$page.data.t('entry_field.linguistic_history')}
-      on_update={(new_value) => {
-        update_entry({ linguistic_history: { default: new_value } })
-      }} />
+      on_update={new_value => save_entry({ linguistic_history: { default: new_value } })} />
 
-    {#if entry.main.sources?.length || can_edit}
-      <div class="md:px-2" class:order-2={!entry.main.sources?.length}>
+    {#if entry_row?.sources?.length || can_edit}
+      <div class="md:px-2" class:order-2={!entry_row?.sources?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.sources')}</div>
         <EntrySource
           {can_edit}
-          value={entry.main.sources}
-          on_update={(new_value) => {
-            update_entry({ sources: new_value })
-          }} />
+          value={entry_row?.sources}
+          on_update={new_value => save_entry({ sources: new_value })} />
         <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
       </div>
     {/if}
 
-    {#if entry.main.elicitation_id || can_edit}
+    {#if entry_row?.elicitation_id || can_edit}
       <EntryField
-        value={entry.main.elicitation_id}
+        value={entry_row?.elicitation_id}
         field="ID"
         {can_edit}
         display="ID"
-        on_update={(new_value) => {
-          update_entry({ elicitation_id: new_value })
-        }} />
+        on_update={new_value => save_entry({ elicitation_id: new_value })} />
     {/if}
 
     <!-- <div class="grow-1 order-last"></div> -->

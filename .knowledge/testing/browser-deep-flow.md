@@ -70,14 +70,32 @@ drives the actual store in-page via `globalThis.__ld_dict_connections.<dict>.{co
    rather than assuming one `syncNow` + one read.
 2. **Direct WAL file reads are eventually consistent.** A fresh readonly `better-sqlite3` open right
    after a push sometimes misses the just-committed row — poll with a short backoff.
-3. **`.delete()` (the `deletes`-tombstone path) is racy in tests and unused by the app.** The app
-   deletes entries via **soft-delete** (`update({ deleted })`); a local tombstone+cascade can be
-   **pull-resurrected** by a concurrent auto-sync (server still has the row) before the tombstone
-   reaches the server. For net-zero test cleanup, purge the server file FIRST, then delete locally
-   with direct SQL — don't fight the tombstone sync.
+3. **Deletes are HARD now (tombstone + FK cascade) — and the app USES `.delete()`.** As of the
+   hard-delete conversion (`.issues/dict-tombstone-path-incomplete.md`), `.delete()`/`_delete()`
+   `INSERT INTO deletes` → trigger `DELETE`s the row + FK-cascades children. The server trigger truly
+   `DELETE`s, so the old "pull-resurrection on snapshot" fear is GONE (the snapshot is taken from a DB
+   where the row is already gone). For deterministic net-zero test cleanup of created rows, still purge
+   the server file FIRST (so a concurrent auto-sync pull can't re-add) then delete locally — but this is
+   now belt-and-braces, not fighting a soft/hard mismatch.
 4. **Net-zero or self-heal.** A mid-run crash after auto-sync leaves a test row in the server
    `achi.db` (entry count drifts off 13). `db-ops-flow.mjs` purges `ZZ-test*` leftovers from the
    server file at startup.
-5. **`achi-flow.mjs` is NOT net-zero on `e_ja.phonetic`** — it edits it to `haʔ-EDITED` and doesn't
-   restore, so a second run (which waits for the original `haʔ`) breaks until you reset it. Minor
-   pre-existing hygiene bug.
+5. **`achi-flow.mjs` is net-zero (fixed 2026-06-06b).** It edits `e_ja.phonetic` to `haʔ-EDITED`,
+   asserts persistence, then restores it to `haʔ` (mutate-then-save the live row + poll the server file
+   until the sync lands). The phonetic-edit step is value-agnostic (targets the visible modal input, not
+   the literal `haʔ`) so it's idempotent even if a prior crashed run left the field edited.
+
+## Dev-server / fixture gotchas (livedb-scalar-field-migration, 2026-06-06b)
+- **OTP `send-code` rate limit is DISABLED in dev + e2e** (`expose_otp = dev || E2E_EXPOSE_OTP`) — the
+  10/email/hour cap is a production abuse guard only, so heavy automated/manual login loops never 429.
+  (Historically it bit us: hammering one email 400'd `verify` because `send-code` stopped returning the
+  inline `code`. If you ever see that against a real prod server, that's the cap working as intended.)
+- **Vite dev cold-start / HMR can `net::ERR_ABORTED` the first `page.goto` to a route.** Dep
+  optimization (or an HMR full reload right after you edit a route's module) aborts the in-flight
+  navigation. Not an app bug. `db-ops-flow.mjs` wraps `goto` in a retry-on-`ERR_ABORTED` helper; reuse
+  that pattern in any new puppeteer script (only needed against the **dev** server, not `node build`).
+- **Restoring a damaged achi fixture.** If achi.db loses rows (e.g. a stray hard-delete during
+  delete-flow smoke testing — `e_ja` got tombstoned once, dropping achi to 12 entries), rebuild it from
+  the set-aside `.data/dictionaries.old-soft-delete-schema/achi.db` using the per-file copy logic in
+  `scripts/migrate-dict-dbs-hard-delete.mjs` (stop the dev server first — better-sqlite3 holds the file
+  open; then restart). That backup is the only source for the achi fixture (it's not in git).

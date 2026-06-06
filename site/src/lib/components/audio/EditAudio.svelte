@@ -125,7 +125,7 @@
       <Button
         onclick={async () => {
           const confirmation = confirm($page.data.t('entry.delete_audio'))
-          if (confirmation) await dbOperations.update_audio({ deleted: new Date().toISOString(), id: sound_file.id })
+          if (confirmation) await dbOperations.delete_audio(sound_file.id)
           on_close()
         }}
         color="red">

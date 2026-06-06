@@ -56,7 +56,7 @@ function read_server_entry(id) {
   const db = new Database(dict_db_path, { readonly: true })
   try {
     const entry = db.prepare('SELECT phonetic FROM entries WHERE id = ?').get(id)
-    const sense_count = db.prepare('SELECT COUNT(*) AS c FROM senses WHERE entry_id = ? AND deleted IS NULL').get(id)
+    const sense_count = db.prepare('SELECT COUNT(*) AS c FROM senses WHERE entry_id = ?').get(id)
     return { phonetic: entry?.phonetic, sense_count: sense_count.c }
   } finally {
     db.close()

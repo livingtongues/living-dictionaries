@@ -36,6 +36,10 @@ export function create_orama_watcher({ connection, dict_db, initial_watermark }:
   let rescan_requested = false
   let timer: ReturnType<typeof setTimeout> | null = null
   let stopped = false
+  // Hard-deletes vanish from the `updated_at` delta scan, so they arrive
+  // out-of-band via `dict_db.subscribe_deletes` (local writes + sync pulls) and
+  // queue here until the next scan hands them to the worker.
+  let pending_deletes: { table_name: string, id: string }[] = []
 
   async function scan() {
     if (scanning) {
@@ -59,8 +63,10 @@ export function create_orama_watcher({ connection, dict_db, initial_watermark }:
         }
         changes[table] = rows
       }
-      if (Object.keys(changes).length) {
-        await apply_rows(changes)
+      const deletes = pending_deletes
+      pending_deletes = []
+      if (Object.keys(changes).length || deletes.length) {
+        await apply_rows(changes, deletes.length ? deletes : undefined)
         watermark = max_seen
       }
     } catch (err) {
@@ -83,6 +89,10 @@ export function create_orama_watcher({ connection, dict_db, initial_watermark }:
   }
 
   const unsubscribers = WATCHED_TABLES.map(table => dict_db.subscribe(table, trigger))
+  unsubscribers.push(dict_db.subscribe_deletes((events) => {
+    pending_deletes.push(...events)
+    trigger()
+  }))
 
   // Catch anything written/pulled between the init-bundle read and this subscribe.
   void scan()

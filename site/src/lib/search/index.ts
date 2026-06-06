@@ -13,9 +13,12 @@ export async function reset_caches() {
   return api.reset_caches()
 }
 
-export async function apply_rows(changes: Record<string, Record<string, unknown>[]>) {
+export async function apply_rows(
+  changes: Record<string, Record<string, unknown>[]>,
+  deletes?: { table_name: string, id: string }[],
+) {
   const { api } = await import('./expose-entry-worker')
-  return api.apply_rows(changes)
+  return api.apply_rows(changes, deletes)
 }
 
 export async function init_entries(options: InitEntryWorkerOptions) {

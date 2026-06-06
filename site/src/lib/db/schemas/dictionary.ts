@@ -10,7 +10,8 @@ import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
  * `CREATE TABLE` statements in sync when adding columns or tables.
  *
  * Conventions (per Q5/Q8/Q9 in port-db-sync-architecture.md):
- *   - Every content table has `deleted TEXT` (NULL = visible, ISO8601 = soft-deleted).
+ *   - Deletion is HARD (no `deleted` column): INSERT into `deletes(table_name, id)`
+ *     fires `process_delete_cascade`, which DELETEs the row (FK cascade sweeps children).
  *   - Every content table has `dirty INTEGER` (NULL/0 = clean, 1 = needs push).
  *   - Every content table has `created_at`, `created_by_user_id`, `updated_at`, `updated_by_user_id`.
  *   - All junction tables use synthetic UUID PK + UNIQUE on natural key.
@@ -38,7 +39,7 @@ export const db_metadata = sqliteTable('db_metadata', {
   value: text(),
 })
 
-/** Sync vehicle. INSERT into `deletes(table_name, id)` fires soft-delete via trigger. */
+/** Sync vehicle + durable delete log. INSERT into `deletes(table_name, id)` HARD-deletes via trigger. */
 export const deletes = sqliteTable('deletes', {
   table_name: text().notNull(),
   id: text().notNull(),
@@ -63,7 +64,6 @@ export const entries = sqliteTable('entries', {
   coordinates: text({ mode: 'json' }).$type<DictionaryCoordinates>(),
   unsupported_fields: text({ mode: 'json' }).$type<Record<string, unknown>>(),
   elicitation_id: text(),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -74,7 +74,6 @@ export const entries = sqliteTable('entries', {
 export const texts = sqliteTable('texts', {
   id: text().primaryKey(),
   title: text({ mode: 'json' }).$type<MultiString>().notNull(),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -93,7 +92,6 @@ export const senses = sqliteTable('senses', {
   noun_class: text(),
   plural_form: text({ mode: 'json' }).$type<MultiString>(),
   variant: text({ mode: 'json' }).$type<MultiString>(),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -110,7 +108,6 @@ export const sentences = sqliteTable('sentences', {
   sort_key: text(),
   /** 1 = a paragraph break follows this sentence (replaces the legacy id-array's paragraph markers). */
   ends_paragraph: integer(),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -122,7 +119,6 @@ export const senses_in_sentences = sqliteTable('senses_in_sentences', {
   id: text().primaryKey(),
   sense_id: text().notNull().references(() => senses.id, { onDelete: 'cascade' }),
   sentence_id: text().notNull().references(() => sentences.id, { onDelete: 'cascade' }),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -137,7 +133,6 @@ export const speakers = sqliteTable('speakers', {
   gender: text({ enum: ['m', 'f', 'o'] }),
   birthplace: text(),
   user_id: text(),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -152,7 +147,6 @@ export const audio = sqliteTable('audio', {
   text_id: text().references(() => texts.id, { onDelete: 'cascade' }),
   storage_path: text().notNull(),
   source: text(),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -164,7 +158,6 @@ export const audio_speakers = sqliteTable('audio_speakers', {
   id: text().primaryKey(),
   audio_id: text().notNull().references(() => audio.id, { onDelete: 'cascade' }),
   speaker_id: text().notNull().references(() => speakers.id, { onDelete: 'cascade' }),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -179,7 +172,6 @@ export const videos = sqliteTable('videos', {
   source: text(),
   videographer: text(),
   text_id: text().references(() => texts.id, { onDelete: 'cascade' }),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -191,7 +183,6 @@ export const video_speakers = sqliteTable('video_speakers', {
   id: text().primaryKey(),
   video_id: text().notNull().references(() => videos.id, { onDelete: 'cascade' }),
   speaker_id: text().notNull().references(() => speakers.id, { onDelete: 'cascade' }),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -203,7 +194,6 @@ export const sense_videos = sqliteTable('sense_videos', {
   id: text().primaryKey(),
   sense_id: text().notNull().references(() => senses.id, { onDelete: 'cascade' }),
   video_id: text().notNull().references(() => videos.id, { onDelete: 'cascade' }),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -215,7 +205,6 @@ export const sentence_videos = sqliteTable('sentence_videos', {
   id: text().primaryKey(),
   sentence_id: text().notNull().references(() => sentences.id, { onDelete: 'cascade' }),
   video_id: text().notNull().references(() => videos.id, { onDelete: 'cascade' }),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -229,7 +218,6 @@ export const photos = sqliteTable('photos', {
   serving_url: text().notNull(),
   source: text(),
   photographer: text(),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -241,7 +229,6 @@ export const sense_photos = sqliteTable('sense_photos', {
   id: text().primaryKey(),
   sense_id: text().notNull().references(() => senses.id, { onDelete: 'cascade' }),
   photo_id: text().notNull().references(() => photos.id, { onDelete: 'cascade' }),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -253,7 +240,6 @@ export const sentence_photos = sqliteTable('sentence_photos', {
   id: text().primaryKey(),
   sentence_id: text().notNull().references(() => sentences.id, { onDelete: 'cascade' }),
   photo_id: text().notNull().references(() => photos.id, { onDelete: 'cascade' }),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -264,7 +250,6 @@ export const sentence_photos = sqliteTable('sentence_photos', {
 export const dialects = sqliteTable('dialects', {
   id: text().primaryKey(),
   name: text({ mode: 'json' }).$type<MultiString>().notNull(),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -276,7 +261,6 @@ export const entry_dialects = sqliteTable('entry_dialects', {
   id: text().primaryKey(),
   entry_id: text().notNull().references(() => entries.id, { onDelete: 'cascade' }),
   dialect_id: text().notNull().references(() => dialects.id, { onDelete: 'cascade' }),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -289,7 +273,6 @@ export const tags = sqliteTable('tags', {
   name: text().notNull(),
   /** NULL/0 = visible to all; 1 = admin-only (legacy `private` column). */
   private: integer(),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -301,7 +284,6 @@ export const entry_tags = sqliteTable('entry_tags', {
   id: text().primaryKey(),
   entry_id: text().notNull().references(() => entries.id, { onDelete: 'cascade' }),
   tag_id: text().notNull().references(() => tags.id, { onDelete: 'cascade' }),
-  deleted: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryData, Tables, TablesUpdate } from '$lib/types'
+  import type { EntryData, Tables } from '$lib/types'
   import EntryField from './EntryField.svelte'
   import EntrySentence from './EntrySentence.svelte'
   import { page } from '$app/stores'
@@ -16,51 +16,56 @@
 
   const { sense, glossLanguages, can_edit = false }: Props = $props()
 
-  const { dictionary, dbOperations } = $derived($page.data)
+  const dictionary = $derived($page.data.dictionary)
+  const dbOperations = $derived($page.data.dbOperations)
 
-  function update_sense(update: TablesUpdate<'senses'>) {
-    dbOperations.update_sense({ ...update, id: sense.id })
+  // Scalar sense fields render + save off the live `dict_db` senses row (mutate,
+  // then `_save()` — auto-stamps editor + dirty); the Orama watcher reflects each
+  // save back into the read-model. Sentences stay on `dbOperations` (multi-table).
+  const dict_db = $derived($page.data.dict_db)
+  const sense_row = $derived(dict_db?.senses.id(sense.id))
+
+  async function save_sense(patch: Partial<NonNullable<typeof sense_row>>) {
+    if (!sense_row) return
+    Object.assign(sense_row, patch)
+    await sense_row._save()
   }
 
-  const glossingLanguages = $derived(order_entry_and_dictionary_gloss_languages(sense.glosses, glossLanguages))
-  const hasSemanticDomain = $derived(sense.semantic_domains?.length || sense.write_in_semantic_domains?.length)
+  const glossingLanguages = $derived(order_entry_and_dictionary_gloss_languages(sense_row?.glosses, glossLanguages))
+  const hasSemanticDomain = $derived(sense_row?.semantic_domains?.length || sense_row?.write_in_semantic_domains?.length)
 </script>
 
 {#each glossingLanguages as bcp (bcp)}
   <EntryField
-    value={sense.glosses?.[bcp]}
+    value={sense_row?.glosses?.[bcp]}
     field="gloss"
     {bcp}
     {can_edit}
     display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${$page.data.t('entry_field.gloss')}`}
     on_update={(new_value) => {
-      update_sense({ glosses: { ...sense.glosses, [bcp]: new_value } })
+      save_sense({ glosses: { ...sense_row?.glosses, [bcp]: new_value } })
     }} />
 {/each}
 
 <!-- Only in Bahasa Lani (id: jaRhn6MAZim4Blvr1iEv) -->
-{#if sense.definition}
+{#if sense_row?.definition}
   <EntryField
-    value={sense.definition?.en}
+    value={sense_row?.definition?.en}
     field="definition_english"
     display="Definition (deprecated)"
     {can_edit}
     on_update={(new_value) => {
-      update_sense({
-        definition: new_value ? { en: new_value } : null,
-      })
+      save_sense({ definition: new_value ? { en: new_value } : null })
     }} />
 {/if}
 
-{#if sense.parts_of_speech?.length || can_edit}
-  <div class="md:px-2" class:order-2={!sense.parts_of_speech?.length}>
+{#if sense_row?.parts_of_speech?.length || can_edit}
+  <div class="md:px-2" class:order-2={!sense_row?.parts_of_speech?.length}>
     <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.parts_of_speech')}</div>
     <EntryPartOfSpeech
-      value={sense.parts_of_speech}
+      value={sense_row?.parts_of_speech}
       {can_edit}
-      on_update={(new_value) => {
-        update_sense({ parts_of_speech: new_value })
-      }} />
+      on_update={new_value => save_sense({ parts_of_speech: new_value })} />
     <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
   </div>
 {/if}
@@ -70,26 +75,20 @@
     <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.semantic_domains')}</div>
     <EntrySemanticDomains
       {can_edit}
-      semantic_domain_keys={sense.semantic_domains}
-      write_in_semantic_domains={sense.write_in_semantic_domains}
-      on_update={(new_value) => {
-        update_sense({ semantic_domains: new_value })
-      }}
-      on_update_write_in={(new_value) => {
-        update_sense({ write_in_semantic_domains: new_value })
-      }} />
+      semantic_domain_keys={sense_row?.semantic_domains}
+      write_in_semantic_domains={sense_row?.write_in_semantic_domains}
+      on_update={new_value => save_sense({ semantic_domains: new_value })}
+      on_update_write_in={new_value => save_sense({ write_in_semantic_domains: new_value })} />
     <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
   </div>
 {/if}
 
 <EntryField
-  value={sense.noun_class}
+  value={sense_row?.noun_class}
   field="noun_class"
   {can_edit}
   display={$page.data.t('entry_field.noun_class')}
-  on_update={(new_value) => {
-    update_sense({ noun_class: new_value })
-  }} />
+  on_update={new_value => save_sense({ noun_class: new_value })} />
 
 {#if sense.sentences?.length}
   {#each sense.sentences as sentence (sentence.id)}
@@ -109,19 +108,17 @@
 {/if}
 
 <EntryField
-  value={sense.plural_form?.default}
+  value={sense_row?.plural_form?.default}
   field="plural_form"
   {can_edit}
   display={$page.data.t('entry_field.plural_form')}
-  on_update={(new_value) => {
-    update_sense({ plural_form: { default: new_value } })
-  }} />
+  on_update={new_value => save_sense({ plural_form: { default: new_value } })} />
 
 {#if DICTIONARIES_WITH_VARIANTS.includes(dictionary.id)}
   <EntryField
-    value={sense.variant?.default}
+    value={sense_row?.variant?.default}
     field="variant"
     {can_edit}
     display={$page.data.t('entry_field.variant')}
-    on_update={new_value => update_sense({ variant: { ...sense.variant, default: new_value } })} />
+    on_update={new_value => save_sense({ variant: { ...sense_row?.variant, default: new_value } })} />
 {/if}

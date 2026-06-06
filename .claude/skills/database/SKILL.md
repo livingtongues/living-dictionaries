@@ -1,21 +1,12 @@
 ---
 name: database
-description: Database guidelines for LD's shared.db (admin/global catalog) + per-dict dictionaries/<id>.db (content), wa-sqlite in browsers + better-sqlite3 on the VPS, sync engines, and live reactive UI data.
+description: SQLite Database guidelines for admin's shared.db + per-dict dictionaries/<id>.db (content), wa-sqlite in browsers + better-sqlite3 on the VPS, sync engines, schema, migrations, queries, and live reactive UI data.
 ---
 
-## When to use me
+## Guidelines
 
-When working with databases in the `site/` package: schema design, queries
-(client-side via LiveDb / DictLiveDb, server-side via better-sqlite3),
-migrations, sync, live-reactive data in Svelte components.
-
-## Style
-
-- Use **ALLCAPS** for SQL keywords (`SELECT`, `FROM`, `WHERE`, `INSERT`,
-  `UPDATE`, `DELETE`). Drizzle tooling often lowercases — fix it when you see it.
-- Use the typed Drizzle schema for TS types
-  (`import { users, type User } from '$lib/db/schemas/shared'`), but **NOT**
-  for migrations — migrations are raw SQL files (see Migrations below).
+- All timestamps stored as ISO 8601 strings: `strftime('%Y-%m-%dT%H:%M:%fZ', 'now')` for defaults
+- Use the typed Drizzle schema for TS types (`import { users, type User } from '$lib/db/schemas/shared'`), but **NOT** for migrations — migrations are raw SQL files (see Migrations below).
 
 ## Two database classes — the most important thing to remember
 
@@ -170,12 +161,16 @@ db.prepare('INSERT INTO users (...) VALUES (...)').run(row.id, row.email, ...)
 
 ## Client-side reactive data (LiveDb / DictLiveDb)
 
-Two reactive accessors, **identical API shape**, differing only in which DB
-they wrap and whether they expose write methods:
+Two reactive accessors with the **same core shape** (`.rows` / `.objects` /
+`.id()` / `.find()` / `.query()`, `insert`/`upsert`/`update`/`delete`, and row
+`_save`/`_reset`/`_delete`). They differ in which DB they wrap and in a handful
+of methods/semantics — composite keys, `.merge()`, delete semantics, audit
+auto-stamping — all spelled out under **"shared.db (`LiveDb`) differences"**
+below. Both expose write methods.
 
 | Accessor | Wraps | Mounted at | Routes | Writes? |
 |---|---|---|---|---|
-| **`LiveDb`** (`client/live/`) | admin shared.db mirror (wa-sqlite, IDB) | `page.data.db` | `/admin/*` | yes |
+| **`LiveDb`** (`client/live/`) | admin shared.db mirror (wa-sqlite, IDB) | `page.data.db` | `/admin/*` | yes (admins) |
 | **`DictLiveDb`** (`dict-client/dict-live-db.svelte.ts`) | per-dict dict.db (wa-sqlite, OPFS, SharedWorker) | `page.data.dict_db` | `[dictionaryId]/*` | yes (editors) |
 
 The `[dictionaryId]/+layout.ts` owns the dict connection lifecycle: it opens
@@ -195,46 +190,232 @@ caches `{ connection, dict_db }` on `globalThis.__ld_dict_connections[dict_id]`
 {/if}
 ```
 
-### The accessor API (both LiveDb and DictLiveDb)
+### Accessing & mutating data — the full walkthrough
 
-**Read accessors** on `db.<table>`:
-- `.rows` — reactive array of all (non-deleted) rows.
-- `.objects` — reactive object keyed by id for O(1) lookups.
-- `.id(some_id)` — a single-row reactive subscription (efficient — doesn't
-  re-fire when other rows change). Use it when a component cares about one row.
-- `.find(some_id)` — async, non-reactive one-shot lookup straight from the DB.
-- `.loading` — boolean, true until the first read resolves.
-- `.query({ where, params, order_by, limit, offset })` — filtered/sorted/paginated
-  accessor with its own `.rows` / `.loading` / `.snapshot()`.
-- `.query(...).snapshot()` — async non-reactive one-time read (raw rows, no row methods).
+The examples below use **`page.data.dict_db`** (the per-dict editing surface,
+where almost all content work happens). The admin **`page.data.db`** shared.db
+accessor has the same API with the differences noted in the callout at the end.
+`dict_db` can be `null` (SSR / before the SharedWorker opens) — guard with
+`dict_db?.…`.
 
-**Write methods** on `db.<table>`:
-- `.insert(item | item[])` — insert one or many; auto-generates `id` when omitted; returns the inserted rows.
-- `.upsert(set | set[])` — insert or update on PK conflict.
-- `.update({ id, ...fields })` — partial update by id without loading the row first.
-- `.delete(id | id[])` — soft-delete (writes to `deletes`, dict.db) / delete by id.
+```svelte
+<script lang="ts">
+  import { page } from '$app/state'
+  const dict_db = $derived(page.data.dict_db) // DictLiveDb | null
+</script>
+```
 
-**Row methods** (every row carries these):
+> **CRITICAL: never spread or copy rows** (`[...rows]`, `{ ...row }`, `.map()`,
+> `.filter()`, `.sort()`, `.reverse()`, `Array.from()`). That breaks reactivity
+> AND strips `_save` / `_delete` / `_reset`. Use `.query({ where, order_by,
+> limit, offset })` for filtering/sorting/paginating, and iterate the original
+> rows directly.
+
+#### Accessing data
+
+**All rows as a reactive array:**
+```svelte
+<script lang="ts">
+  const speakers = $derived(dict_db?.speakers.rows ?? [])
+</script>
+
+{#each speakers as speaker (speaker.id)}
+  <div>{speaker.name}</div>
+{/each}
+```
+
+**All rows keyed by id (O(1) lookup):**
+```svelte
+<script lang="ts">
+  const senses = $derived(dict_db?.senses.objects ?? {})
+</script>
+
+{#if senses[some_sense_id]}
+  <span>{senses[some_sense_id].definition?.en}</span>
+{/if}
+```
+
+**A single row by id** (efficient single-row subscription — doesn't re-fire when
+other rows change):
+```svelte
+<script lang="ts">
+  const entry = $derived(dict_db?.entries.id(entry_id))
+</script>
+
+{#if entry}
+  <input bind:value={entry.lexeme.default} onblur={() => entry._save()} />
+{/if}
+```
+
+**Loading state:**
+```svelte
+{#if dict_db?.entries.loading}
+  <p>Loading…</p>
+{:else}
+  {#each dict_db?.entries.rows ?? [] as entry (entry.id)}…{/each}
+{/if}
+```
+
+#### Non-reactive single-row lookup
+
+`find()` is an async, non-reactive read straight from the DB (don't `await` the
+reactive `.id()` / `.objects` — those are sync stores):
+```ts
+const entry = await dict_db.entries.find(entry_id)
+if (entry) console.log(entry.lexeme.default)
+```
+
+#### Creating rows
+
+`insert()` auto-generates `id` (and, for syncable tables, stamps `dirty` /
+`updated_at` / `created_by_user_id` / `updated_by_user_id`). Returns the
+inserted rows:
+```ts
+await dict_db.speakers.insert({ name: 'Ada', birthplace: 'Lagos' })
+
+// multiple at once:
+await dict_db.dialects.insert([{ name: 'Coastal' }, { name: 'Highland' }])
+```
+
+#### Upserting rows
+
+`upsert()` inserts or updates on primary-key conflict:
+```ts
+await dict_db.speakers.upsert({ id: existing_id, name: 'Ada Lovelace' })
+```
+
+#### Partial update by id
+
+`update()` patches fields without loading the row first (use when you don't have
+the live row in hand):
+```ts
+await dict_db.entries.update({ id: entry_id, phonetic: 'əˈda' })
+```
+
+#### Updating rows (mutate-then-save)
+
+Rows are reactive `$state` — assign a property (UI updates optimistically), then
+`_save()` to persist:
+```svelte
+<script lang="ts">
+  const speaker = $derived(dict_db?.speakers.id(speaker_id))
+</script>
+
+{#if speaker}
+  <input bind:value={speaker.name} onkeydown={(e) => e.key === 'Enter' && speaker._save()} />
+  <button onclick={() => speaker._save()}>Save</button>
+{/if}
+```
+
+#### Discarding changes
+
+`_reset()` throws away unsaved mutations and reloads from the DB:
+```svelte
+<input bind:value={speaker.name} />
+<button onclick={() => speaker._save()}>Save</button>
+<button onclick={() => speaker._reset()}>Cancel</button>
+```
+
+#### Deleting rows
+
+`_delete()` (row) / `.delete(id | id[])` (table) **hard-delete** via a tombstone:
+they `INSERT INTO deletes (table_name, id)`, which fires the
+`process_delete_cascade` trigger that `DELETE`s the row (FK `ON DELETE CASCADE`
+sweeps its children). The row vanishes from `.rows` / `.objects` instantly, the
+tombstone is the durable delete log + sync push queue, and on sync every peer +
+the snapshot builder hard-delete it too (the server trigger truly `DELETE`s, so
+the raw `.backup()` snapshot is taken from a DB where the row is already gone —
+nothing to resurrect). There is **no `deleted` column** anymore. Multi-table
+intent (entry→senses, sentence→junctions) is just the FK cascade; junction
+link/unlink + multi-row creates still go through `operations.ts`:
+```svelte
+<button onclick={() => speaker._delete()}>Delete</button>
+```
+```ts
+await dict_db.dialects.delete([id1, id2, id3])
+```
+
+#### Custom queries
+
+`query()` returns its own accessor with `.rows` / `.loading` / `.snapshot()`:
+```svelte
+<script lang="ts">
+  const recent = $derived(
+    dict_db?.entries.query({ order_by: 'updated_at DESC', limit: 10 }).rows ?? []
+  )
+</script>
+```
+
+**With parameters:**
+```ts
+const for_speaker = $derived(
+  dict_db?.audio.query({ where: 'speaker_id = ?', params: [speaker_id] }).rows ?? []
+)
+```
+
+**Non-reactive snapshot** (one-time read, raw rows without `_save`/`_delete`/`_reset`):
+```ts
+const rows = await dict_db.entries.query({ order_by: 'updated_at DESC', limit: 10 }).snapshot()
+```
+
+#### Row methods summary
+
 | Method | Description |
 |--------|-------------|
-| `_save()` | Persist the row's current mutations to the DB (sets `dirty`/`updated_at`, stamps the editor — see below). |
+| `_save()` | Persist the row's current mutations (auto-stamps `dirty`/`updated_at`, re-stamps the editor on syncable tables). |
 | `_reset()` | Discard unsaved mutations, reload from the DB. |
-| `_delete()` | Soft-delete this row. |
+| `_delete()` | Hard-delete this row (writes a `deletes` tombstone → trigger `DELETE`s it + FK-cascades children). |
 
-### The two ways to write — and when to use each
+#### Table accessor properties
 
-1. **Mutate-then-save (preferred for single-row scalar edits).** Rows are
-   reactive `$state` — assign a property (UI updates optimistically) then call
-   `_save()`. `_reset()` reverts. This is the ergonomic tutor/house share:
+| Property/Method | Description |
+|-----------------|-------------|
+| `.rows` | Reactive array of all rows (hard-delete: deleted rows are gone, not filtered) |
+| `.objects` | Reactive object keyed by id for O(1) lookups |
+| `.id(some_id)` | Single-row reactive subscription (efficient; doesn't re-fire on unrelated row changes) |
+| `.find(some_id)` | Async, non-reactive single-row lookup straight from the DB |
+| `.loading` | Boolean — true until the first read resolves |
+| `.insert(data)` | Insert one or many; auto-generates `id`; returns inserted rows |
+| `.upsert(data)` | Insert or update on primary-key conflict |
+| `.update({ id, …fields })` | Partial update by id without loading the row first |
+| `.delete(id \| id[])` | Hard-delete by id (writes a `deletes` tombstone → trigger `DELETE`s + FK-cascades) |
+| `.query(options)` | Build a filtered/sorted/paginated query accessor |
 
-   ```svelte
-   <input bind:value={speaker.name} />
-   <button onclick={() => speaker._save()}>Save</button>
-   <button onclick={() => speaker._reset()}>Cancel</button>
-   ```
+> **Auto-stamping (syncable tables).** `insert`/`upsert`/`update`/`_save`
+> automatically set `dirty = 1` and bump `updated_at`, and `insert` auto-generates
+> `id`. On **dict.db** they also stamp `created_by_user_id` (insert/upsert) and
+> re-stamp `updated_by_user_id` (every write) from the `DictLiveDb`'s `user_id`
+> (which is why `DictInsertType` makes those auto-columns optional — callers pass
+> only real content). Don't set these by hand. (`_delete`/`.delete()` instead
+> write a `deletes` tombstone; `DictLiveDb` has no `.merge()` — that's shared.db only.)
 
-2. **Partial update by id** (`.update({ id, field })`) — when you don't have the
-   live row in hand, or you're updating from a different component.
+#### Query accessor properties
+
+| Property/Method | Description |
+|-----------------|-------------|
+| `.rows` | Reactive array of query result rows |
+| `.loading` | Boolean — true while the query is still loading |
+| `.snapshot()` | Async non-reactive one-time read (raw rows, no `_save`/`_delete`/`_reset`) |
+
+#### shared.db (`LiveDb`) differences
+
+`page.data.db` (admin shared.db, `/admin/*`) is the same API with these
+exceptions:
+
+- **Composite-key tables** — `deletes` (`table_name`,`id`), `db_metadata`
+  (`key`), `email_aliases` (`email`). For these, `.id()` / `.find()` take the
+  compound key as an **object** and `.update()` requires the key columns. dict.db
+  has none of this — every table has a synthetic UUID `id`.
+- **`.merge(rows)`** — last-write-wins bulk upsert (only writes a row when the
+  incoming `updated_at` is newer; requires `updated_at` on every input row).
+  Exists on `LiveDb` only.
+- **`.delete()` is a hard delete + tombstone** — it `DELETE`s the row locally and
+  writes a `deletes` row. Composite-key tables **throw** on delete (append-only).
+  dict.db is **also** hard-delete-via-tombstone (same `deletes`-table +
+  `process_delete_cascade` trigger model), but with FK `ON DELETE CASCADE` to sweep
+  children; it has no composite-key tables.
+- **No audit columns** — shared.db tables don't carry `created_by_user_id` /
+  `updated_by_user_id`, so no editor stamping happens there.
 
 ### Auto-stamped audit columns (dict.db)
 
@@ -260,13 +441,26 @@ Per-dict content currently has **two representations**:
    by `orama-watcher.ts`. This feeds the Orama search index and the
    list/gallery/table/print views + SEO.
 
-The entry list/detail UI historically **reads** from #2 and **writes** via
-`dbOperations`→#1, so the rendered object isn't the live row. An in-progress
-migration moves scalar entry/sense field edits to render+mutate+`_save()`
-directly off `DictLiveDb` rows (the `phonetic` field on the entry detail is the
-first pilot). When adding/editing per-dict fields, prefer the live-row pattern;
-the read-model stays for search/list/SEO. Plan + rationale:
-`.issues/livedb-adoption-and-db-skill.md`.
+**Scalar entry/sense field edits now go straight to the live `DictLiveDb` row**,
+not through `dbOperations`:
+- **Entry detail** (`EntryDisplay.svelte` / `Sense.svelte`) **renders** each scalar
+  field off `dict_db.entries.id(entry.id)` / `dict_db.senses.id(sense.id)` and saves
+  with a small `save_entry(patch)` / `save_sense(patch)` helper (`Object.assign` the
+  patch, then `_save()`). No read-model fallback there — the route gates on data
+  being loaded, so the live row is present.
+- **Table inline-edit** (`entries/table/Cell.svelte`) keeps **displaying** from the
+  read-model (#2) but **persists** via `dict_db.entries.update({ id, … })` /
+  `dict_db.senses.update({ id, … })` (partial update by id — no per-cell
+  subscription). Entry coordinates (`EntryMedia.svelte`) likewise.
+
+The Orama watcher reflects every such `_save()`/`update()` back into the `EntryData`
+read-model, which stays the index for search + list/gallery/table/print + SEO.
+`dbOperations`/`operations.ts` is now **only** multi-table orchestration (entry+sense
+create, sentence+junction, media+junction) and junction link/unlink — it no longer
+has `update_entry`/`update_sense` or a `clean()` shim. When adding/editing a per-dict
+**scalar** field, use the live-row pattern. Plan + rationale:
+`.issues/livedb-scalar-field-migration.md` (and the foundation in
+`.issues/livedb-adoption-and-db-skill.md`).
 
 ### Pitfall reminders
 

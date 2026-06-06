@@ -4,6 +4,12 @@ Decisions/gotchas from replacing the M1 Supabase stub's READ path with real serv
 better-sqlite3 reads. Plan + per-phase log: `.issues/m4-sqlite-read.md`. Code is the
 source of truth; this captures what the code can't tell you.
 
+> ⚠️ Partially superseded: the **entries** read path described here (the
+> `/api/dictionaries/[id]/entries-data` bundle endpoint feeding the Orama worker) was **retired in
+> M4-write** — Orama is now fed FROM the per-dict wa-sqlite DB (`read-dict-bundle.ts` +
+> `orama-watcher.ts`, see `m4-write-sync.md` + the database skill). The **catalog** read path
+> (globe / `/dictionaries`) is still current. Read the entries sections below as history.
+
 ## Architecture LD inherited (why it differs from house's reader port)
 LD's data flowed through a **client-side Supabase stub** threaded via *universal*
 `+layout.ts`/`+page.ts` loads + stores, and entries came through an **Orama search worker**
