@@ -319,6 +319,9 @@ export default tseslint.config(
       'svelte/no-extra-reactive-curlies': 'error',
       'svelte/mustache-spacing': 'error',
       'svelte/html-closing-bracket-spacing': 'error',
+      'svelte/no-spaces-around-equal-signs-in-attribute': 'error',
+      'svelte/spaced-html-comment': ['error', 'always'],
+      'svelte/no-trailing-spaces': 'error',
       'svelte/no-reactive-reassign': ['warn', { props: false }],
 
       'svelte-stylistic/brackets-same-line': 'error',
