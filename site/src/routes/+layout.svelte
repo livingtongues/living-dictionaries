@@ -1,4 +1,3 @@
-<!-- @migration task: review uses of `navigating` -->
 <script lang="ts">
   import './reset.css'
   import 'virtual:uno.css'
@@ -30,12 +29,6 @@
 {/if}
 
 <Toasts />
-
-<!-- {#if $user}
-  {#await import('./Banner.svelte') then { default: Banner }}
-    <Banner />
-  {/await}
-{/if} -->
 
 <div id="direction" dir={page.data.t('page.direction') as 'ltr' | 'rtl' | 'auto'}>
   {@render children?.()}
