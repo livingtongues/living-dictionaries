@@ -153,7 +153,7 @@
         overflow-x-hidden px-2 pb-2">
       <ShowHide>
         {#snippet children({ show, toggle })}
-                {#if !searchFocused && my_dictionaries}
+          {#if !searchFocused && my_dictionaries}
             {#each my_dictionaries as dictionary, i (dictionary.id)}
               {#if show || i < 3}
                 <Button
@@ -174,8 +174,8 @@
               <div class="w-2 sm:hidden" />
             {/if} -->
           {/if}
-                      {/snippet}
-            </ShowHide>
+        {/snippet}
+      </ShowHide>
     </div>
   {:else}
     <div class="p-2 flex flex-col flex-1">

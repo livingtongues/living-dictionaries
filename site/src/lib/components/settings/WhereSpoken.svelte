@@ -62,7 +62,7 @@
           <Popup>
             <ShowHide>
               {#snippet children({ show, toggle })}
-                            <Button form="simple" size="sm" onclick={toggle}>
+                <Button form="simple" size="sm" onclick={toggle}>
                   <span class="i-octicon-pencil"></span>
                   {#if index === 0}
                     {$page.data.t('create.primary_coordinate')}
@@ -87,8 +87,8 @@
                     on:close={toggle}>
                   </CoordinatesModal>
                 {/if}
-                                        {/snippet}
-                        </ShowHide>
+              {/snippet}
+            </ShowHide>
           </Popup>
         </Marker>
       {/each}
@@ -97,7 +97,7 @@
         <Region {region}>
           <ShowHide>
             {#snippet children({ show, toggle })}
-                        <Button form="simple" size="sm" onclick={toggle}>
+              <Button form="simple" size="sm" onclick={toggle}>
                 <span class="i-octicon-pencil"></span>
               </Button>
               {#if show}
@@ -116,8 +116,8 @@
                   on:close={toggle}>
                 </RegionModal>
               {/if}
-                                  {/snippet}
-                    </ShowHide>
+            {/snippet}
+          </ShowHide>
         </Region>
       {/each}
     </Map>
@@ -127,7 +127,7 @@
 <div class="mt-1">
   <ShowHide>
     {#snippet children({ show, toggle })}
-        <Button
+      <Button
         onclick={toggle}
         color={first_longitude ? 'black' : 'primary'}
         size={first_longitude ? 'sm' : 'md'}>
@@ -140,13 +140,13 @@
           on:update={addCoordinates}
           on:close={toggle} />
       {/if}
-          {/snippet}
-    </ShowHide>
+    {/snippet}
+  </ShowHide>
 
   {#if first_longitude}
     <ShowHide>
       {#snippet children({ show, toggle })}
-            <Button onclick={toggle} color="black" size="sm">
+        <Button onclick={toggle} color="black" size="sm">
           <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;"></span>
           {$page.data.t('create.select_region')}
         </Button>
@@ -160,7 +160,7 @@
             }}
             on:close={toggle} />
         {/if}
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
   {/if}
 </div>

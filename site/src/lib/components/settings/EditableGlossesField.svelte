@@ -22,8 +22,8 @@
 
   const activeGlossingBcps = $derived(Array.isArray(selectedLanguages)
     ? selectedLanguages.map(bcp =>
-        $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: availableLanguages[bcp].vernacularName }),
-      )
+      $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: availableLanguages[bcp].vernacularName }),
+    )
     : [])
   const remainingGlossingLanguagesAsArray = $derived(Object.entries(availableLanguages)
     .map(e => ({
@@ -49,16 +49,16 @@
     {#if show}
       <Modal on:close={toggle}>
         {#snippet heading()}
-            <span>
+          <span>
             {$page.data.t('create.gloss_dictionary_in')}
           </span>
-          {/snippet}
+        {/snippet}
         <Filter
           items={remainingGlossingLanguagesAsArray}
 
           placeholder={$page.data.t('about.search')}>
           {#snippet children({ filteredItems: filteredLanguages })}
-                {#each filteredLanguages as language (language.bcp)}
+            {#each filteredLanguages as language (language.bcp)}
               <Button
                 onclick={() => {
                   add_language(language.bcp)
@@ -76,8 +76,8 @@
                 {/if}
               </Button>
             {/each}
-                        {/snippet}
-            </Filter>
+          {/snippet}
+        </Filter>
         <div class="modal-footer">
           <Button onclick={toggle} color="black">Cancel</Button>
         </div>

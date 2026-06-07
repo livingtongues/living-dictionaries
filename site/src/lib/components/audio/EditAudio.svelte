@@ -75,7 +75,7 @@
 
     {select_speaker}>
     {#snippet children({ speaker_id })}
-        {#if sound_file}
+      {#if sound_file}
         <div class="px-1">
           <Waveform audioUrl={url_from_storage_path(sound_file.storage_path)} />
         </div>
@@ -104,8 +104,8 @@
           </div>
         {/if}
       {/if}
-          {/snippet}
-    </SelectSpeaker>
+    {/snippet}
+  </SelectSpeaker>
 
   <div class="modal-footer">
     {#if sound_file}

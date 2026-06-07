@@ -4,7 +4,7 @@
   import { points } from '@turf/helpers'
   import center from '@turf/center'
   import { mapKey } from '../context'
-import type { MapKeyContext } from '../context'
+  import type { MapKeyContext } from '../context'
   import { polygonFeatureCoordinates } from '../../utils/polygonFromCoordinates'
   import GeoJSONSource from '../sources/GeoJSONSource.svelte'
   import PopupOfMap from './PopupOfMap.svelte'

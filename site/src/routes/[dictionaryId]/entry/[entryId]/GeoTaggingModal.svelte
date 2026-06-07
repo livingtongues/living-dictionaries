@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Coordinates, IPoint, IRegion, LngLatFull } from '$lib/types'
   import { onMount } from 'svelte'
-    import InitableShowHide from './InitableShowHide.svelte'
+  import InitableShowHide from './InitableShowHide.svelte'
   import { flattenCoordinates } from './flattenCoordinates'
   import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
@@ -77,7 +77,7 @@
           <Popup>
             <ShowHide>
               {#snippet children({ show, toggle })}
-                            <Button form="simple" size="sm" onclick={toggle}>
+                <Button form="simple" size="sm" onclick={toggle}>
                   <span class="i-octicon-pencil"></span>
                 </Button>
                 {#if show}
@@ -101,8 +101,8 @@
                     }}
                     on:close={toggle} />
                 {/if}
-                                        {/snippet}
-                        </ShowHide>
+              {/snippet}
+            </ShowHide>
           </Popup>
         </Marker>
       {/each}
@@ -111,7 +111,7 @@
         <Region {region}>
           <ShowHide>
             {#snippet children({ show, toggle })}
-                        <Button form="simple" size="sm" onclick={toggle}>
+              <Button form="simple" size="sm" onclick={toggle}>
                 <span class="i-octicon-pencil"></span>
               </Button>
               {#if show}
@@ -130,8 +130,8 @@
                   }}
                   on:close={toggle} />
               {/if}
-                                  {/snippet}
-                    </ShowHide>
+            {/snippet}
+          </ShowHide>
         </Region>
       {/each}
 
@@ -141,7 +141,7 @@
       {#if mounted}
         <InitableShowHide show={addPoint}>
           {#snippet children({ show, toggle })}
-                    <Button onclick={toggle} color="black" size="sm">
+            <Button onclick={toggle} color="black" size="sm">
               <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;"></span>
               {$page.data.t('create.select_coordinates')}
             </Button>
@@ -157,12 +157,12 @@
                 }}
                 on:close={toggle} />
             {/if}
-                            {/snippet}
-                </InitableShowHide>
+          {/snippet}
+        </InitableShowHide>
 
         <InitableShowHide show={addRegion}>
           {#snippet children({ show, toggle })}
-                    <Button onclick={toggle} color="black" size="sm">
+            <Button onclick={toggle} color="black" size="sm">
               <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;"></span>
               {$page.data.t('create.select_region')}
             </Button>
@@ -176,8 +176,8 @@
                 }}
                 on:close={toggle} />
             {/if}
-                            {/snippet}
-                </InitableShowHide>
+          {/snippet}
+        </InitableShowHide>
       {/if}
     </div>
   </div>

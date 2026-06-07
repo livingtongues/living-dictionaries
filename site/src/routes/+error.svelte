@@ -38,14 +38,14 @@
 
   <ShowHide>
     {#snippet children({ show, toggle })}
-        <Button form="filled" onclick={toggle}>{page.data.t('header.contact_us')}</Button>
+      <Button form="filled" onclick={toggle}>{page.data.t('header.contact_us')}</Button>
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
           <Contact subject="report_problem" on:close={toggle} />
         {/await}
       {/if}
-          {/snippet}
-    </ShowHide>
+    {/snippet}
+  </ShowHide>
 
   <p class="text-gray-600 text-sm mt-6">
     {page.data.t('misc.error')}:

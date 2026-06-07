@@ -79,8 +79,8 @@
           toggle()
         }}>
         {#snippet heading()}
-            <span>{#if heading_render}{@render heading_render()}{:else}Select{/if}</span>
-          {/snippet}
+          <span>{#if heading_render}{@render heading_render()}{:else}Select{/if}</span>
+        {/snippet}
 
         <form
           onsubmit={preventDefault(() => {

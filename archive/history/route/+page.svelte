@@ -64,26 +64,26 @@
     <div class="sticky top-0 h-[calc(100vh-1.5rem)] flex flex-col">
       <Filter items={content_updates} placeholder={$page.data.t('history.history_search')}>
         {#snippet right()}
-                <div>
+          <div>
             <Button form="filled" color="black" class="flex items-center space-x-1" onclick={() => exportHistoryAsCSV()}>
               <i class="fas fa-download"></i>
               <span class="hidden sm:inline">{$page.data.t('history.download_history')}</span>
             </Button>
           </div>
-              {/snippet}
+        {/snippet}
         {#snippet children({ filteredItems: filteredRecords })}
-                <div class="mb-1"></div>
+          <div class="mb-1"></div>
           <ResponsiveTable stickyColumn stickyHeading>
             <SortRecords history={filteredRecords} {get_entry}>
               {#snippet children({ sortedRecords })}
-                        {#each sortedRecords as record (record.id)}
+                {#each sortedRecords as record (record.id)}
                   <RecordRow {record} {get_entry} />
                 {/each}
-                                    {/snippet}
-                    </SortRecords>
+              {/snippet}
+            </SortRecords>
           </ResponsiveTable>
-                      {/snippet}
-            </Filter>
+        {/snippet}
+      </Filter>
     </div>
   {:else if loading_content_updates}
     {$page.data.t('misc.loading')}...

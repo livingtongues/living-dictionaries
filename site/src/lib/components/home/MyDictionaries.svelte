@@ -15,7 +15,7 @@
   <div class="flex lt-md:flex-wrap md:flex-col overflow-y-auto overflow-x-hidden mb-1 md:max-h-70vh">
     <ShowHide>
       {#snippet children({ show, toggle })}
-            {#each my_dictionaries as dictionary, i (dictionary.id)}
+        {#each my_dictionaries as dictionary, i (dictionary.id)}
           {#if show || i < 3}
             <Button
               class="mb-1 lt-md:mr-1"
@@ -32,7 +32,7 @@
             {$page.data.t('home.show_all_my_dictionaries')}
           </Button>
         {/if}
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
   </div>
 {/if}

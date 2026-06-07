@@ -5,7 +5,7 @@
   import { getContext, onMount } from 'svelte'
   import type { Popup, PopupOptions } from 'mapbox-gl'
   import { mapKey } from '../context'
-import type { MapKeyContext } from '../context'
+  import type { MapKeyContext } from '../context'
 
   const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
   const map = getMap()

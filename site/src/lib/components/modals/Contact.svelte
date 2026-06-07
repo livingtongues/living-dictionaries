@@ -118,7 +118,7 @@
     {#if !status}
       <Form onsubmit={send}>
         {#snippet children({ loading })}
-                <div class="my-2">
+          <div class="my-2">
             <select class="w-full" required bind:value={subject}>
               <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
               {#each filteredSubjects as [key, value] (key)}
@@ -164,8 +164,8 @@
               {$page.data.t('misc.cancel')}
             </Button>
           </div>
-                      {/snippet}
-            </Form>
+        {/snippet}
+      </Form>
     {:else if status === 'success'}
       <h4 class="text-lg mt-3 mb-4">
         <i class="fas fa-check"></i>

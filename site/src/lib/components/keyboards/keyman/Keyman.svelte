@@ -166,8 +166,8 @@
     {#if showKeyboardOptions}
       <Modal on:close={toggle} noscroll>
         {#snippet heading()}
-            <span>Select Keyboard</span>
-          {/snippet}
+          <span>Select Keyboard</span>
+        {/snippet}
         {#each [...Object.entries(glossingLanguages), ...Object.entries(additionalKeyboards)] as [_bcp, languageDefinition] (_bcp)}
           {#if languageDefinition.showKeyboard}
             <Button

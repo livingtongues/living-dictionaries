@@ -75,13 +75,13 @@
   const built = $derived(focused_table_id
     ? build_focused_graph(schema, focused_table_id)
     : build_graph(schema, {
-        filters: {
-          hide_junctions: persisted?.value.hide_junctions ?? false,
-          hide_system: persisted?.value.hide_system ?? true,
-          hidden: hidden_set,
-        },
-        saved_positions: persisted?.value.positions ?? {},
-      }))
+      filters: {
+        hide_junctions: persisted?.value.hide_junctions ?? false,
+        hide_system: persisted?.value.hide_system ?? true,
+        hidden: hidden_set,
+      },
+      saved_positions: persisted?.value.positions ?? {},
+    }))
 
   // Hover state for highlighting incident edges/nodes.
   let hovered_node_id = $state<string | null>(null)
@@ -160,8 +160,8 @@
       style: highlighted
         ? 'stroke: var(--primary); stroke-width: 2.5;'
         : has_hover
-          ? 'stroke: var(--border-color); stroke-width: 1; opacity: 0.25;'
-          : 'stroke: var(--color-secondary); stroke-width: 1;',
+        ? 'stroke: var(--border-color); stroke-width: 1; opacity: 0.25;'
+        : 'stroke: var(--color-secondary); stroke-width: 1;',
       label: highlighted && glyph ? glyph : undefined,
       labelStyle: 'font-size: 14px; fill: var(--color);',
       labelBgStyle: 'fill: var(--surface); stroke: var(--border-color);',
@@ -239,60 +239,60 @@
 {#if browser && persisted}
   <div class="schema-graph-wrapper">
     {#key focused_table_id}
-    <SvelteFlow
-      nodes={display_nodes}
-      edges={display_edges}
-      nodeTypes={node_types}
-      fitView
-      fitViewOptions={{ padding: 0.15 }}
-      minZoom={0.1}
-      maxZoom={2}
-      proOptions={{ hideAttribution: true }}
-      onnodeclick={on_node_click}
-      onnodecontextmenu={on_node_context_menu}
-      onnodedragstop={on_drag_stop}
-      onnodepointerenter={({ node }) => hovered_node_id = node.id}
-      onnodepointerleave={() => hovered_node_id = null}
-      onedgepointerenter={({ edge }) => hovered_edge_id = edge.id}
-      onedgepointerleave={() => hovered_edge_id = null}>
-      <Background />
-      <Controls />
-      <MiniMap pannable zoomable />
-      {#if focused_table_id}
-        <Panel position="top-left">
-          <div class="focus-bar">
-            <button type="button" class="btn-ghost btn-sm" onclick={exit_focus}>
-              <IconMdiArrowLeft style="margin-right: 0.25rem" />Back to full graph
-            </button>
-            <div class="focus-label">
-              <span class="muted">Focused on </span>
-              <span class="mono strong">{focused_table_id}</span>
+      <SvelteFlow
+        nodes={display_nodes}
+        edges={display_edges}
+        nodeTypes={node_types}
+        fitView
+        fitViewOptions={{ padding: 0.15 }}
+        minZoom={0.1}
+        maxZoom={2}
+        proOptions={{ hideAttribution: true }}
+        onnodeclick={on_node_click}
+        onnodecontextmenu={on_node_context_menu}
+        onnodedragstop={on_drag_stop}
+        onnodepointerenter={({ node }) => hovered_node_id = node.id}
+        onnodepointerleave={() => hovered_node_id = null}
+        onedgepointerenter={({ edge }) => hovered_edge_id = edge.id}
+        onedgepointerleave={() => hovered_edge_id = null}>
+        <Background />
+        <Controls />
+        <MiniMap pannable zoomable />
+        {#if focused_table_id}
+          <Panel position="top-left">
+            <div class="focus-bar">
+              <button type="button" class="btn-ghost btn-sm" onclick={exit_focus}>
+                <IconMdiArrowLeft style="margin-right: 0.25rem" />Back to full graph
+              </button>
+              <div class="focus-label">
+                <span class="muted">Focused on </span>
+                <span class="mono strong">{focused_table_id}</span>
+              </div>
+              <button type="button" class="btn-ghost btn-sm" onclick={open_focused_card}>
+                <IconMdiCardTextOutline style="margin-right: 0.25rem" />Open card
+              </button>
             </div>
-            <button type="button" class="btn-ghost btn-sm" onclick={open_focused_card}>
-              <IconMdiCardTextOutline style="margin-right: 0.25rem" />Open card
-            </button>
-          </div>
-        </Panel>
-        <Panel position="bottom-left">
-          <div class="hint">click a neighbor → focus on it</div>
-        </Panel>
-      {:else}
-        <Panel position="top-right">
-          <GraphToolbar
-            hide_junctions={persisted.value.hide_junctions}
-            hide_system={persisted.value.hide_system}
-            hidden_count={built.hidden_count}
-            visible_count={built.visible_count}
-            on_toggle_junctions={toggle_junctions}
-            on_toggle_system={toggle_system}
-            on_show_all={show_all}
-            on_reset_layout={reset_layout} />
-        </Panel>
-        <Panel position="bottom-left">
-          <div class="hint">click → focus on table · right-click → hide · drag to arrange</div>
-        </Panel>
-      {/if}
-    </SvelteFlow>
+          </Panel>
+          <Panel position="bottom-left">
+            <div class="hint">click a neighbor → focus on it</div>
+          </Panel>
+        {:else}
+          <Panel position="top-right">
+            <GraphToolbar
+              hide_junctions={persisted.value.hide_junctions}
+              hide_system={persisted.value.hide_system}
+              hidden_count={built.hidden_count}
+              visible_count={built.visible_count}
+              on_toggle_junctions={toggle_junctions}
+              on_toggle_system={toggle_system}
+              on_show_all={show_all}
+              on_reset_layout={reset_layout} />
+          </Panel>
+          <Panel position="bottom-left">
+            <div class="hint">click → focus on table · right-click → hide · drag to arrange</div>
+          </Panel>
+        {/if}
+      </SvelteFlow>
     {/key}
   </div>
 {/if}

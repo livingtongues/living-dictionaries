@@ -36,7 +36,7 @@
       }
     }}>
     {#snippet children({ loading })}
-        <label for="names" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
+      <label for="names" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
         {$page.data.t('contributors.how_to_cite_instructions')}
       </label>
       <div class="mt-1 flex">
@@ -57,8 +57,8 @@
           {$page.data.t('misc.save')}
         </Button>
       </div>
-          {/snippet}
-    </Form>
+    {/snippet}
+  </Form>
 {/if}
 
 <div dir="ltr" class:text-orange={unsaved}>

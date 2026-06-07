@@ -4,7 +4,7 @@
 
   import type { GeocoderOptions, Result, Results } from '@mapbox/mapbox-gl-geocoder'
   import { mapKey } from '../context'
-import type { MapKeyContext } from '../context'
+  import type { MapKeyContext } from '../context'
   import { bindEvents } from '../event-bindings'
   import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
 

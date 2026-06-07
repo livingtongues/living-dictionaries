@@ -5,7 +5,7 @@
   import Layer from '$lib/components/maps/mapbox/map/Layer.svelte'
   import { dictionaryGeoJsonCollection } from '$lib/components/maps/utils/dictionaryGeoJsonCollection'
   import { mapKey } from '$lib/components/maps/mapbox/context'
-import type { MapKeyContext } from '$lib/components/maps/mapbox/context'
+  import type { MapKeyContext } from '$lib/components/maps/mapbox/context'
 
   interface Props {
     dictionaries?: DictionaryView[]

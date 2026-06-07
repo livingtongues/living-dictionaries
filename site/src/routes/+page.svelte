@@ -124,7 +124,7 @@
       {#if admin}
         <ShowHide>
           {#snippet children({ show, toggle })}
-                    <CustomControl position="bottom-right">
+            <CustomControl position="bottom-right">
               <button type="button" class="whitespace-nowrap w-90px! px-2" onclick={toggle}>Toggle Private</button>
             </CustomControl>
 
@@ -134,8 +134,8 @@
                 type="private"
                 bind:selectedDictionaryId />
             {/if}
-                            {/snippet}
-                </ShowHide>
+          {/snippet}
+        </ShowHide>
       {/if}
       <DictionaryPoints dictionaries={public_dictionaries} bind:selectedDictionaryId />
       {#if $my_dictionaries.length}

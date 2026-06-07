@@ -1,10 +1,10 @@
 <script> let show = false
-function toggle() {
-  show = !show
-}
-function set(value) {
-  show = value
-}
+  function toggle() {
+    show = !show
+  }
+  function set(value) {
+    show = value
+  }
 </script>
 
 <slot {show} {toggle} {set} />

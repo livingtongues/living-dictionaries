@@ -31,7 +31,7 @@
     </Button>
     <ShowHide>
       {#snippet children({ show, toggle })}
-            <Button onclick={toggle}>
+        <Button onclick={toggle}>
           <span class="lg:inline">
             <i class="far fa-comment"></i>
           </span>
@@ -44,8 +44,8 @@
             <Contact subject="import_data" on:close={toggle} />
           {/await}
         {/if}
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
   </div>
   <!-- <p class="m-10 text-xl font-semibold">{$page.data.t('import_page.no_imports')}</p> -->
 </div>

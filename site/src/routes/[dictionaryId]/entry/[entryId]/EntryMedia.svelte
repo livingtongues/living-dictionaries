@@ -59,7 +59,7 @@
   {#if can_edit}
     <ShowHide>
       {#snippet children({ show, toggle })}
-            <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col" onclick={toggle}>
+        <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col" onclick={toggle}>
           <div
             class="text-gray-600
               h-full grow-1 flex flex-col items-center justify-center
@@ -80,8 +80,8 @@
             {/await}
           {/if}
         </div>
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
   {/if}
 
   {#each videos as video (video.id)}
@@ -96,7 +96,7 @@
   {#if can_edit}
     <ShowHide>
       {#snippet children({ show, toggle })}
-            <button
+        <button
           type="button"
           class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
             justify-center cursor-pointer p-6 mb-2"
@@ -111,13 +111,13 @@
             <AddVideo {entry} on_close={toggle} />
           {/await}
         {/if}
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
   {/if}
 
   <InitableShowHide>
     {#snippet children({ show, toggle, set })}
-        {#if entry?.main.coordinates?.points?.length || entry?.main.coordinates?.regions?.length}
+      {#if entry?.main.coordinates?.points?.length || entry?.main.coordinates?.regions?.length}
         <div
           class="rounded overflow-hidden cursor-pointer"
           onclick={() => set(can_edit)}>
@@ -156,6 +156,6 @@
           on_close={toggle}
           on_update={async new_value => await dict_db?.entries.update({ id: entry.id, coordinates: new_value })} />
       {/if}
-          {/snippet}
-    </InitableShowHide>
+    {/snippet}
+  </InitableShowHide>
 </div>

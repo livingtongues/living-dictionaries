@@ -54,10 +54,10 @@
   const src = $derived(image_src(gcs, dimensionType === 'square'
     ? `s${length}-p`
     : dimensionType === 'width'
-      ? `w${length}`
-      : dimensionType === 'height'
-        ? `h${length}`
-        : 's0'))
+    ? `w${length}`
+    : dimensionType === 'height'
+    ? `h${length}`
+    : 's0'))
 </script>
 
 <img

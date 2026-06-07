@@ -80,7 +80,7 @@
       if (next && next !== height)
         height = next
     } catch {
-      // cross-origin (shouldn't happen with allow-same-origin + srcdoc, but be safe)
+    // cross-origin (shouldn't happen with allow-same-origin + srcdoc, but be safe)
     }
   }
 
@@ -98,7 +98,7 @@
           img.addEventListener('load', measure, { once: true })
       }
     } catch {
-      // ignore
+    // ignore
     }
   }
 </script>

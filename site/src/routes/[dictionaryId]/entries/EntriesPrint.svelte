@@ -7,7 +7,7 @@
   import { defaultPrintFields } from './print/printFields'
   import { truncateAuthors } from './print/truncateAuthors'
   import { Button, createPersistedStore } from '$lib/svelte-pieces'
-import type { QueryParamStore } from '$lib/svelte-pieces'
+  import type { QueryParamStore } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import type { QueryParams } from '$lib/search/types'
   import { api_dictionaries_partners_get } from '$api/dictionaries/[id]/partners/_call'

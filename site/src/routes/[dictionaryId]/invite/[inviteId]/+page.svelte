@@ -57,7 +57,7 @@
   {:else}
     <ShowHide>
       {#snippet children({ show, toggle })}
-            <Button form="text" onclick={toggle}>
+        <Button form="text" onclick={toggle}>
           <i class="far fa-sign-in"></i>
           <span class="ml-1">
             {$page.data.t('header.login')}
@@ -68,8 +68,8 @@
             <AuthModal on_close={toggle} />
           {/await}
         {/if}
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
   {/if}
 {:else if invite?.status === 'claimed'}
   <p class="font-semibold mb-2">
@@ -84,15 +84,15 @@
   {$page.data.t('header.please_create_account')}
   <ShowHide>
     {#snippet children({ show: hide, toggle })}
-                {#if !hide}
+      {#if !hide}
         {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
           <AuthModal
             context="force"
             on_close={toggle} />
         {/await}
       {/if}
-                  {/snippet}
-            </ShowHide>
+    {/snippet}
+  </ShowHide>
 {:else}
   <p class="font-semibold">
     {$page.data.t('invite.invalid_invitation')}

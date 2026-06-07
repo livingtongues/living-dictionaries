@@ -241,12 +241,12 @@
     <h2 class="section-heading inline-heading">History <span class="history-count">({sync.history.reports.length})</span></h2>
     {#if sync.history.reports.length > 0}
       <button
-type="button"
-class="btn-ghost clear-history"
-onclick={() => {
-  if (confirm('Clear all sync history?'))
-    sync.history.clear()
-}}>
+        type="button"
+        class="btn-ghost clear-history"
+        onclick={() => {
+          if (confirm('Clear all sync history?'))
+            sync.history.clear()
+        }}>
         Clear history
       </button>
     {/if}
@@ -277,26 +277,26 @@ onclick={() => {
             <span class="history-summary">{report.summary}</span>
             <span class="history-duration">{(report.duration_ms / 1000).toFixed(1)}s</span>
             <button
-type="button"
-class="btn-ghost history-action-btn"
-title="Copy report"
-onclick={(event) => {
-  event.stopPropagation()
-  const text = generate_history_report_text({ report })
-  navigator.clipboard.writeText(text)
-  toast.success('Copied to clipboard')
-}}>
+              type="button"
+              class="btn-ghost history-action-btn"
+              title="Copy report"
+              onclick={(event) => {
+                event.stopPropagation()
+                const text = generate_history_report_text({ report })
+                navigator.clipboard.writeText(text)
+                toast.success('Copied to clipboard')
+              }}>
               <IconMdiContentCopy style="font-size: 0.875rem" />
             </button>
             <button
-type="button"
-class="btn-ghost history-action-btn"
-title="Delete from history"
-onclick={(event) => {
-  event.stopPropagation()
-  sync.history.remove(index)
-  expanded_history.delete(index)
-}}>
+              type="button"
+              class="btn-ghost history-action-btn"
+              title="Delete from history"
+              onclick={(event) => {
+                event.stopPropagation()
+                sync.history.remove(index)
+                expanded_history.delete(index)
+              }}>
               <IconMdiDeleteOutline style="font-size: 0.875rem" />
             </button>
             <IconMdiChevronDown class={['chevron', { rotated: expanded_history.has(index) }]} style="font-size: 0.875rem" />

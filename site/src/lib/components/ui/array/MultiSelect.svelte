@@ -70,8 +70,8 @@
         = calcIndex < 0
           ? filtered[filtered.length - 1]
           : calcIndex === filtered.length
-            ? filtered[0]
-            : filtered[calcIndex]
+          ? filtered[0]
+          : filtered[calcIndex]
     }
   }
 

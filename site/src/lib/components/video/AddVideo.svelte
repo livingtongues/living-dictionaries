@@ -41,7 +41,7 @@
 
   <SelectSpeaker>
     {#snippet children({ speaker_id })}
-        {#if hosted_video}
+      {#if hosted_video}
         <VideoThirdParty {hosted_video} />
         <div class="modal-footer">
           <Button onclick={() => hosted_video = null} color="black">
@@ -61,16 +61,16 @@
       {:else if speaker_id}
         <ShowHide>
           {#snippet children({ show: record, toggle })}
-                    {#if !record && !upload_triggered}
+            {#if !record && !upload_triggered}
               <PasteVideoLink on_pasted_valid_url={video_info => hosted_video = video_info} />
               <SelectVideo>
                 {#snippet children({ file })}
-                            {@const upload_status = startUpload(file, speaker_id)}
+                  {@const upload_status = startUpload(file, speaker_id)}
                   {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
                     <UploadProgressBarStatus {upload_status} />
                   {/await}
-                                          {/snippet}
-                        </SelectVideo>
+                {/snippet}
+              </SelectVideo>
 
               <Button onclick={toggle} class="mt-4 !py-4 w-full" color="red" type="button">
                 <span class="i-uil-microphone"></span>
@@ -79,11 +79,11 @@
             {:else}
               <RecordVideo>
                 {#snippet children({ videoBlob, reset })}
-                            <video controls autoplay playsinline src={URL.createObjectURL(videoBlob)}></video>
+                  <video controls autoplay playsinline src={URL.createObjectURL(videoBlob)}></video>
 
                   <ShowHide>
                     {#snippet children({ show, toggle })}
-                                {#if !show}
+                      {#if !show}
                         <div class="modal-footer">
                           <Button onclick={reset} color="red"><i class="far fa-trash-alt"></i>
                             {$page.data.t('misc.delete')}</Button>
@@ -96,13 +96,13 @@
                           <UploadProgressBarStatus {upload_status} />
                         {/await}
                       {/if}
-                                                  {/snippet}
-                            </ShowHide>
-                                          {/snippet}
-                        </RecordVideo>
+                    {/snippet}
+                  </ShowHide>
+                {/snippet}
+              </RecordVideo>
             {/if}
-                            {/snippet}
-                </ShowHide>
+          {/snippet}
+        </ShowHide>
       {:else}
         <div class="modal-footer">
           <Button onclick={close} color="black">
@@ -110,6 +110,6 @@
           </Button>
         </div>
       {/if}
-          {/snippet}
-    </SelectSpeaker>
+    {/snippet}
+  </SelectSpeaker>
 </Modal>

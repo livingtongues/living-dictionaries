@@ -3,7 +3,7 @@
 
   import DownloadMedia from './DownloadMedia.svelte'
   import { formatCsvEntries, getCsvHeaders, translate_entries } from './prepareEntriesForCsv'
-import type { EntryForCSV } from './prepareEntriesForCsv'
+  import type { EntryForCSV } from './prepareEntriesForCsv'
   import { Button, ShowHide } from '$lib/svelte-pieces'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Progress from '$lib/export/Progress.svelte'
@@ -90,7 +90,7 @@ import type { EntryForCSV } from './prepareEntriesForCsv'
   {#if includeImages || includeAudio}
     <ShowHide>
       {#snippet children({ show, toggle })}
-            {#if !show}
+        {#if !show}
           <Button onclick={toggle} form="filled">
             {$page.data.t('export.download_csv')}
             {#if includeImages}
@@ -109,17 +109,17 @@ import type { EntryForCSV } from './prepareEntriesForCsv'
             entriesWithAudio={includeAudio ? entriesWithAudio : []}
             on:completed={toggle}>
             {#snippet children({ progress })}
-                    <Progress {progress} />
+              <Progress {progress} />
               {#if progress < 1}
                 <Button onclick={toggle} color="red">{$page.data.t('misc.cancel')}</Button>
               {:else}
                 <Button onclick={toggle}>{$page.data.t('misc.reset')}</Button>
               {/if}
-                              {/snippet}
-                </DownloadMedia>
+            {/snippet}
+          </DownloadMedia>
         {/if}
-                {/snippet}
-        </ShowHide>
+      {/snippet}
+    </ShowHide>
   {:else}
     <Button
       loading={!formattedEntries.length}

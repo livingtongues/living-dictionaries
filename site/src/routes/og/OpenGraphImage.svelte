@@ -64,7 +64,7 @@
     {#if title}
       <div
         style="text-shadow: 2px 2px 3px hsla(0, 0%, 0%, 40%); font-size: {(title.length
-        > MAX_TITLE_LENGTH / 2
+          > MAX_TITLE_LENGTH / 2
           ? 3
           : 4) * 20}px;">
         {title.slice(0, MAX_TITLE_LENGTH)}{title.length > MAX_TITLE_LENGTH ? '...' : ''}
@@ -73,13 +73,13 @@
     {#if description}
       <div
         style="overflow: hidden; flex-grow: 1; font-size: 30px; margin-top: 10px; margin-bottom: 20px; padding-right: {xPADDING
-        + globeSize}px;">
+          + globeSize}px;">
         {description}
       </div>
     {/if}
     <div
       style="display: flex; align-items: center; font-size: 40px; padding-right: {xPADDING
-      + globeSize}px;">
+        + globeSize}px;">
       <img
         style="height: 40px; width: 40px; margin-right: 10px;"
         alt="Living Dictionaries"
