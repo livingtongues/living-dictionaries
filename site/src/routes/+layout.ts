@@ -49,9 +49,6 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
     auth_user,
     dict_roles,
     ssr_user,
-    // Plain convenience mirror of `auth_user.user.admin_level` (0 | 1 | 2) for the
-    // many `admin`-gated views. Recomputed each load; login/logout/dev-toggle all
-    // invalidateAll. The AuthUser class remains the source of truth.
     admin: ssr_user?.admin_level ?? 0,
     dictionaries,
     my_dictionaries,

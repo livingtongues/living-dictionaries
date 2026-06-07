@@ -6,17 +6,17 @@ import { get_user } from '$lib/server/get-user'
 import { findSupportedLocaleFromAcceptedLanguages } from '$lib/i18n/locales'
 
 /**
- * M4-auth: resolve the SSR user from the httpOnly `session` cookie (JWT) so the
- * first-paint shell renders auth-aware. Replaces the legacy Supabase
- * access/refresh-token cookies. On verify failure (expired/mismatched secret),
- * we behave as logged-out — a stale cookie clears itself on the client.
+ * Resolve the signed-in user from the httpOnly `session` JWT cookie so the
+ * auth-aware shell renders on first paint. A
+ * verify failure (expired / wrong-secret token) self-clears the cookie and we
+ * behave as logged-out.
  */
 export const load: LayoutServerLoad = async ({ cookies, request }) => {
   const chosenLocale = cookies.get('locale')
   const acceptedLanguage = findSupportedLocaleFromAcceptedLanguages(request.headers.get('accept-language'))
 
-  const user_latitude = request.headers.get('x-vercel-ip-latitude')
-  const user_longitude = request.headers.get('x-vercel-ip-longitude')
+  const user_latitude = request.headers.get('cf-iplatitude')
+  const user_longitude = request.headers.get('cf-iplongitude')
 
   let ssr_user: AuthUserData | null = null
   const token = cookies.get('session')
