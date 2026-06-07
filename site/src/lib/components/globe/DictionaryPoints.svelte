@@ -104,8 +104,8 @@
       // Check if point is on visible hemisphere
       const dist = Math.acos(
         Math.sin(dict_with_coords.latitude * Math.PI / 180) * Math.sin(center_lat * Math.PI / 180)
-        + Math.cos(dict_with_coords.latitude * Math.PI / 180) * Math.cos(center_lat * Math.PI / 180)
-        * Math.cos((dict_with_coords.longitude - center_lon) * Math.PI / 180),
+          + Math.cos(dict_with_coords.latitude * Math.PI / 180) * Math.cos(center_lat * Math.PI / 180)
+          * Math.cos((dict_with_coords.longitude - center_lon) * Math.PI / 180),
       )
       if (dist > Math.PI / 2) continue
 

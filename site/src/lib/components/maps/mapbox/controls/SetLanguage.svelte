@@ -3,7 +3,7 @@
 
   import { getContext } from 'svelte'
   import { mapKey } from '../context'
-import type { MapKeyContext } from '../context'
+  import type { MapKeyContext } from '../context'
 
   const { getMap } = getContext<MapKeyContext>(mapKey)
   const map = getMap()

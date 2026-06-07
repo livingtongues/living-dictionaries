@@ -17,7 +17,7 @@
 {#if !videoBlob}
   <MediaStream>
     {#snippet children({ stream, microphones, cameras, chooseMicrophone, chooseCamera, selectedMicrophone, selectedCamera })}
-        <video muted volume={0} use:srcObject={stream} autoplay playsinline></video>
+      <video muted volume={0} use:srcObject={stream} autoplay playsinline></video>
 
       <Recorder
         {stream}
@@ -29,7 +29,7 @@
           timeSlice: 1000,
         }}>
         {#snippet children({ start, pause, stop, recordingTime, state })}
-            {#if state === 'inactive'}
+          {#if state === 'inactive'}
             <Button onclick={start} color="red" class="w-full h-24 mt-1">
               {page.data.t('audio.tap_to_record')}
             </Button>
@@ -76,12 +76,12 @@
             </Button>
             <Button class="w-full mt-1" color="black" onclick={pause}>{state === 'recording' ? 'Pause' : 'Unpause'}</Button>
           {/if}
-                  {/snippet}
-        </Recorder>
+        {/snippet}
+      </Recorder>
 
-      {/snippet}
-      {#snippet denied()}
-        <div>
+    {/snippet}
+    {#snippet denied()}
+      <div>
         <div class="text-red-500">
           <!-- audio.undo_permission_denied_explanation needs split -->
           Permission to access media was denied.
@@ -93,10 +93,10 @@
           target="_blank"
           rel="noopener">{page.data.t('audio.learn_more')}</Button>
       </div>
-      {/snippet}
+    {/snippet}
 
     {#snippet dismissed()}
-        <div>
+      <div>
         <div class="text-red-500">
           If you previously dismissed the browser's request, please reload and click 'Yes' when your
           browser asks for permission.
@@ -105,11 +105,11 @@
           <Button form="filled" class="mt-2" onclick={() => location.reload()}>{page.data.t('audio.reload')}</Button>
         </div>
       </div>
-      {/snippet}
+    {/snippet}
 
     {#snippet loading()}
-        <div>Accessing Microphone and Camera <i class="far fa-spinner fa-pulse"></i></div>
-      {/snippet}
+      <div>Accessing Microphone and Camera <i class="far fa-spinner fa-pulse"></i></div>
+    {/snippet}
   </MediaStream>
 {:else}
   {@render children?.({ videoBlob, reset: () => {

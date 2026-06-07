@@ -4,7 +4,7 @@
   import ClearFilters from './ClearFilters.svelte'
   import FilterList from './FilterList.svelte'
   import { Button, ResponsiveSlideover } from '$lib/svelte-pieces'
-import type { QueryParamStore } from '$lib/svelte-pieces'
+  import type { QueryParamStore } from '$lib/svelte-pieces'
   import type { QueryParams } from '$lib/search/types'
   import { page } from '$app/stores'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'

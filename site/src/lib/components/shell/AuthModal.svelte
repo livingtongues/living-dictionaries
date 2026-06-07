@@ -107,7 +107,7 @@
     {/if}
     <Form onsubmit={sendCode}>
       {#snippet children({ loading })}
-            <div class="flex">
+        <div class="flex">
           <input
             type="email"
             use:autofocus
@@ -117,8 +117,8 @@
             bind:value={email} />
           <Button class="text-nowrap ml-1" {loading} form="filled" type="submit">{$page.data.t('account.send_code')}</Button>
         </div>
-                {/snippet}
-        </Form>
+      {/snippet}
+    </Form>
   {:else}
     <div class="mb-2">
       {$page.data.t('account.enter_6_digit_code_sent_to')}: {email}

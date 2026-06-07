@@ -86,7 +86,7 @@
 {:else}
   <ShowHide>
     {#snippet children({ show, toggle })}
-        <Button form="text" onclick={toggle}>
+      <Button form="text" onclick={toggle}>
         <i class="far fa-sign-in"></i>
         <span class="ml-1 hidden sm:inline">
           {$page.data.t('header.login')}
@@ -97,6 +97,6 @@
           <AuthModal on_close={toggle} />
         {/await}
       {/if}
-          {/snippet}
-    </ShowHide>
+    {/snippet}
+  </ShowHide>
 {/if}

@@ -10,7 +10,7 @@
     MapLayerTouchEvent,
   } from 'mapbox-gl'
   import { mapKey, sourceKey } from '../context'
-import type { MapKeyContext, SourceKeyContext } from '../context'
+  import type { MapKeyContext, SourceKeyContext } from '../context'
   import { randomId } from '../../utils/randomId'
 
   const { getMap } = getContext<MapKeyContext>(mapKey)

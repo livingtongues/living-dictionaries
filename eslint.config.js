@@ -310,6 +310,7 @@ export default tseslint.config(
     },
     rules: {
       'svelte/valid-compile': ['error', { ignoreWarnings: true }],
+      'svelte/indent': ['error', { indent: 2 }],
       'svelte/no-dom-manipulating': 'error',
       'svelte/no-store-async': 'error',
       'svelte/require-store-reactive-access': 'error',
@@ -334,6 +335,7 @@ export default tseslint.config(
       'no-unused-vars': 'warn',
       'prefer-const': 'off',
       'import-x/no-self-import': 'off',
+      '@stylistic/indent': 'off', // svelte/indent handles .svelte indentation; @stylistic/indent can't model template markup
       '@stylistic/indent-binary-ops': 'off',
       '@stylistic/space-infix-ops': 'off',
 

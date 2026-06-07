@@ -30,9 +30,9 @@
 
   const loading = $derived(
     (users_query?.loading ?? true)
-    || (aliases_query?.loading ?? true)
-    || (threads_query?.loading ?? true)
-    || (roles_query?.loading ?? true),
+      || (aliases_query?.loading ?? true)
+      || (threads_query?.loading ?? true)
+      || (roles_query?.loading ?? true),
   )
 
   const aliases_by_user_id = $derived.by(() => {

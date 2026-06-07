@@ -42,8 +42,8 @@
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
           {#snippet prefix()}
-                    <i>{$page.data.t('contributors.invitation_sent')}:</i>
-                  {/snippet}
+            <i>{$page.data.t('contributors.invitation_sent')}:</i>
+          {/snippet}
         </ContributorInvitationStatus>
       </div>
     {/each}
@@ -90,8 +90,8 @@
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
           {#snippet prefix()}
-                    <i>{$page.data.t('contributors.invitation_sent')}:</i>
-                  {/snippet}
+            <i>{$page.data.t('contributors.invitation_sent')}:</i>
+          {/snippet}
         </ContributorInvitationStatus>
       </div>
     {/each}
@@ -102,7 +102,7 @@
   {:else if !is_contributor}
     <ShowHide>
       {#snippet children({ show, toggle })}
-                <Button onclick={toggle} form="filled">
+        <Button onclick={toggle} form="filled">
           {$page.data.t('contributors.request_access')}
         </Button>
         {#if show}
@@ -110,8 +110,8 @@
             <Contact subject="request_access" on:close={toggle} />
           {/await}
         {/if}
-                    {/snippet}
-            </ShowHide>
+      {/snippet}
+    </ShowHide>
   {/if}
 </div>
 

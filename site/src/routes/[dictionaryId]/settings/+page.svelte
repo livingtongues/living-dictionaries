@@ -129,7 +129,7 @@
     <div>
       <ShowHide>
         {#snippet children({ show, toggle })}
-                <Button onclick={toggle} class="mb-5" color="red">
+          <Button onclick={toggle} class="mb-5" color="red">
             {$page.data.t('misc.delete')}:
             {$page.data.t('header.contact_us')}
           </Button>
@@ -138,8 +138,8 @@
               <Contact subject="delete_dictionary" on:close={toggle} />
             {/await}
           {/if}
-                      {/snippet}
-            </ShowHide>
+        {/snippet}
+      </ShowHide>
     </div>
   {/if}
 

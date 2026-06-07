@@ -1,26 +1,26 @@
 <script lang="ts"> import Button from '../ui/Button.svelte'
-import ShowHide from '../functions/ShowHide.svelte'
+  import ShowHide from '../functions/ShowHide.svelte'
 
   const { obj } = $props()
-function string_and_colorize(obj2) {
-  return JSON.stringify(obj2, null, 2).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(
-    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
-    (match) => {
-      let color = 'darkorange'
-      if (match.startsWith('"')) {
-        if (match.endsWith(':'))
-          color = 'red'
-        else
-          color = 'green'
-      } else if (/true|false/.test(match)) {
-        color = 'blue'
-      } else if (/null/.test(match)) {
-        color = 'magenta'
-      }
-      return `<span style="color:${color}">${match}</span>`
-    },
-  )
-}
+  function string_and_colorize(obj2) {
+    return JSON.stringify(obj2, null, 2).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(
+      /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
+      (match) => {
+        let color = 'darkorange'
+        if (match.startsWith('"')) {
+          if (match.endsWith(':'))
+            color = 'red'
+          else
+            color = 'green'
+        } else if (/true|false/.test(match)) {
+          color = 'blue'
+        } else if (/null/.test(match)) {
+          color = 'magenta'
+        }
+        return `<span style="color:${color}">${match}</span>`
+      },
+    )
+  }
 </script>
 
 <ShowHide>

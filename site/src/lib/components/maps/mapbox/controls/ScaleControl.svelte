@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getContext, onDestroy } from 'svelte'
   import { mapKey } from '../context'
-import type { MapKeyContext } from '../context'
+  import type { MapKeyContext } from '../context'
 
   const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
   const map = getMap()

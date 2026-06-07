@@ -37,7 +37,7 @@
       on_speaker_added(speaker.id)
     }}>
     {#snippet children({ loading })}
-        <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
+      <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
         {$page.data.t('speakers.name')}
       </label>
       <div class="mt-1 rounded-md shadow-sm">
@@ -125,6 +125,6 @@
           {$page.data.t('misc.save')}
         </Button>
       </div>
-          {/snippet}
-    </Form>
+    {/snippet}
+  </Form>
 </Modal>

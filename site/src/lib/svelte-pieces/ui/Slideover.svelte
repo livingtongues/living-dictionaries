@@ -1,29 +1,29 @@
 <script> import { createEventDispatcher, onMount } from 'svelte'
-import { fade, fly } from 'svelte/transition'
-import { portal } from '../actions/portal'
-import { trapFocus } from './trapFocus'
+  import { fade, fly } from 'svelte/transition'
+  import { portal } from '../actions/portal'
+  import { trapFocus } from './trapFocus'
 
-const {
-  zIndex = 60,
-  duration = 200,
-  side = 'right',
-  widthRem = 16,
-  maxWidthPercentage = 70,
-  title = undefined,
-  heading = undefined,
-  children = undefined,
-} = $props()
-const dispatch = createEventDispatcher()
-const close = () => dispatch('close')
-let slideover = $state()
-onMount(() => {
-  const previouslyFocused = typeof document !== 'undefined' && document.activeElement
-  return () => {
-    if (previouslyFocused instanceof HTMLElement) {
-      previouslyFocused.focus()
+  const {
+    zIndex = 60,
+    duration = 200,
+    side = 'right',
+    widthRem = 16,
+    maxWidthPercentage = 70,
+    title = undefined,
+    heading = undefined,
+    children = undefined,
+  } = $props()
+  const dispatch = createEventDispatcher()
+  const close = () => dispatch('close')
+  let slideover = $state()
+  onMount(() => {
+    const previouslyFocused = typeof document !== 'undefined' && document.activeElement
+    return () => {
+      if (previouslyFocused instanceof HTMLElement) {
+        previouslyFocused.focus()
+      }
     }
-  }
-})
+  })
 </script>
 
 <svelte:window

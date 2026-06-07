@@ -77,10 +77,10 @@
       src={image_src(gcs, square
         ? `s${square}-p`
         : width
-          ? `w${width}`
-          : height
-            ? `h${height}`
-            : 's0')} />
+        ? `w${width}`
+        : height
+        ? `h${height}`
+        : 's0')} />
     {#if loading}
       <span class="i-gg-spinner animate-spin absolute bottom-1 right-1 text-white"></span>
     {:else if photographer === 'AI'}

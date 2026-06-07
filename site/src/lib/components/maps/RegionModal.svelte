@@ -5,7 +5,7 @@
   import type { IRegion, LngLatFull } from '$lib/types'
   import { points } from '@turf/helpers'
   import center from '@turf/center'
-    import Map from './mapbox/map/Map.svelte'
+  import Map from './mapbox/map/Map.svelte'
   import Geocoder from './mapbox/geocoder/Geocoder.svelte'
   import Marker from './mapbox/map/Marker.svelte'
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte'

@@ -68,7 +68,7 @@
       <!-- <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col"> -->
       <ShowHide>
         {#snippet children({ show, toggle })}
-                        <div class="text-gray-600 text-center cursor-pointer" onclick={toggle}>
+          <div class="text-gray-600 text-center cursor-pointer" onclick={toggle}>
             <span class="hidden md:inline">
               <span class="i-ic-outline-cloud-upload text-2xl"></span>
             </span>
@@ -82,8 +82,8 @@
               <EditImage on_close={toggle} sense_id={sense.id} />
             {/await}
           {/if}
-                              {/snippet}
-                    </ShowHide>
+        {/snippet}
+      </ShowHide>
       <!-- </div> -->
     {/if}
   {:else if column.field === 'speaker'}

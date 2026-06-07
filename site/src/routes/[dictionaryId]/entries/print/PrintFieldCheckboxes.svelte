@@ -1,6 +1,6 @@
 <script lang="ts">
   import { StandardPrintFields } from '$lib/types'
-import type { EntryData, IPrintFields } from '$lib/types'
+  import type { EntryData, IPrintFields } from '$lib/types'
 
   import type { createPersistedStore } from '$lib/svelte-pieces'
   import { page } from '$app/stores'

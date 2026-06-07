@@ -2,7 +2,7 @@
   import { getContext, onMount } from 'svelte'
   import type { IControl } from 'mapbox-gl'
   import { mapKey } from '../context'
-import type { MapKeyContext } from '../context'
+  import type { MapKeyContext } from '../context'
 
   const { getMap } = getContext<MapKeyContext>(mapKey)
   const map = getMap()

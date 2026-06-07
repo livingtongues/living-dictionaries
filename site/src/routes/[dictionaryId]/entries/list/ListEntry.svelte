@@ -142,7 +142,7 @@
     {:else if can_edit}
       <ShowHide>
         {#snippet children({ show, toggle })}
-                    <button
+          <button
             type="button"
             class="media-block bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
               justify-center cursor-pointer p-2 text-lg"
@@ -154,15 +154,15 @@
               <AddVideo {entry} on_close={toggle} />
             {/await}
           {/if}
-                          {/snippet}
-                </ShowHide>
+        {/snippet}
+      </ShowHide>
     {/if}
   {/if}
   <!-- {#each sense_photos as photo (photo.id)} -->
 
   <ShowHide>
     {#snippet children({ show, toggle })}
-        {#if first_sense.photos?.length}
+      {#if first_sense.photos?.length}
         {@const [first_photo] = first_sense.photos}
         <div class="media-block bg-gray-300 relative">
           <Image
@@ -197,8 +197,8 @@
           <EditImage on_close={toggle} sense_id={first_sense.id} />
         {/await}
       {/if}
-          {/snippet}
-    </ShowHide>
+    {/snippet}
+  </ShowHide>
 </div>
 
 <style>

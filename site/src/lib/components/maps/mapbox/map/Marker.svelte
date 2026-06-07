@@ -18,7 +18,7 @@
   import { createEventDispatcher, getContext, onMount, setContext } from 'svelte'
   import type { LngLat, Marker, MarkerOptions } from 'mapbox-gl'
   import { mapKey, markerKey } from '../context'
-import type { MapKeyContext, MarkerKeyContext } from '../context'
+  import type { MapKeyContext, MarkerKeyContext } from '../context'
 
   const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
   const map = getMap()

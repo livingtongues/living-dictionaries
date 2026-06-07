@@ -21,11 +21,11 @@
     on_valueupdated={value => on_update(value)}>
     {#snippet add({ add })}
 
-        <button type="button" onclick={add} class="opacity-40 p-0.5 text-left grow-1 hover:bg-gray-200 rounded">
-          <span class="i-fa-solid-plus mb-1"></span>
-          {$page.data.t('misc.add')}
-        </button>
+      <button type="button" onclick={add} class="opacity-40 p-0.5 text-left grow-1 hover:bg-gray-200 rounded">
+        <span class="i-fa-solid-plus mb-1"></span>
+        {$page.data.t('misc.add')}
+      </button>
 
-      {/snippet}
+    {/snippet}
   </BadgeArray>
 </div>
