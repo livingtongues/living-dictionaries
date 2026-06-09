@@ -111,16 +111,17 @@
         if (!checked) {
           await updateDictionary({ public: false })
         } else if ($admin) {
-          await updateDictionary({ public: true })
           dictionary.public = true
+          await updateDictionary({ public: true })
         } else if (about_is_too_short()) {
           alert($page.data.t('about.message'))
           goto(`/${dictionary.id}/about`)
+          dictionary.public = false
         } else {
           const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
           if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
+          dictionary.public = false
         }
-        dictionary.public = false
       }} />
     <div class="mb-5" />
   {/if}
