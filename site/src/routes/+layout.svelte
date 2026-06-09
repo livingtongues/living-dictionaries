@@ -6,6 +6,7 @@
   import './global.css'
   import LoadingIndicator from './LoadingIndicator.svelte'
   import Toasts from '$lib/svelte-pieces/Toasts.svelte'
+  import ViewAsBanner from '$lib/components/shell/ViewAsBanner.svelte'
   import { onMount } from 'svelte'
   import { navigating, page } from '$app/state'
   import { browser } from '$app/environment'
@@ -29,6 +30,7 @@
 {/if}
 
 <Toasts />
+<ViewAsBanner />
 
 <div id="direction" dir={page.data.t('page.direction') as 'ltr' | 'rtl' | 'auto'}>
   {@render children?.()}

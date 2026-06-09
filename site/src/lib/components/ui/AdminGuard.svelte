@@ -6,10 +6,10 @@
   }
 
   const { children }: Props = $props()
-  const { admin } = $derived($page.data)
+  const { auth_user } = $derived($page.data)
 </script>
 
-{#if admin}
+{#if auth_user.is_admin}
   {@render children?.()}
 {:else}
   <div class="p-3">Not logged in as admin.</div>

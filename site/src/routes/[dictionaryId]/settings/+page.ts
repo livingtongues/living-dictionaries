@@ -3,7 +3,7 @@ import type { PageLoad } from './$types'
 import { upload_image } from '$lib/components/image/upload-image'
 
 export const load: PageLoad = async ({ parent }) => {
-  const { t, admin, ssr_user, dictionary, update_dictionary } = await parent()
+  const { t, auth_user, ssr_user, dictionary, update_dictionary } = await parent()
 
   async function updateDictionary(change: TablesUpdate<'dictionaries'>) {
     try {
@@ -15,7 +15,7 @@ export const load: PageLoad = async ({ parent }) => {
 
   async function remove_gloss_language(languageId: string) {
     try {
-      if (admin) {
+      if (auth_user.is_admin) {
         const remove_language = confirm('Remove as admin even though this glossing language may be in use already? Know that regular editors get a message saying "Contact Us"')
         if (remove_language) {
           const gloss_languages = dictionary.gloss_languages.filter(id => id !== languageId)

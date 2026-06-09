@@ -3,12 +3,9 @@
   import { Button, Menu, ShowHide } from '$lib/svelte-pieces'
   import { display_one_tap_popover } from '$lib/auth/google-one-tap'
   import { page } from '$app/stores'
-  import { mode } from '$lib/mode'
-  import { api_dev_admin_level } from '$api/auth/dev-admin-level/_call'
-  import { invalidateAll } from '$app/navigation'
-  import { dev } from '$app/environment'
+  import UserMenu from './UserMenu.svelte'
 
-  const { auth_user, admin } = $derived($page.data)
+  const { auth_user } = $derived($page.data)
   const user = $derived(auth_user.user)
   let show_menu = $state(false)
   function toggle_menu() {
@@ -17,19 +14,6 @@
       if (state === show_menu)
         show_menu = !state
     }, 1)
-  }
-
-  async function setAdminRole() {
-    const input = prompt('Enter 0, 1, or 2')
-    const level = input === null ? null : +input
-    if (level !== 0 && level !== 1 && level !== 2)
-      return
-    const { error } = await api_dev_admin_level({ level })
-    if (error) {
-      console.error(error)
-    } else {
-      invalidateAll()
-    }
   }
 
   onMount(() => {
@@ -61,25 +45,7 @@
     </button>
     {#if show_menu}
       <Menu portalTarget="#direction" class="right-2 rtl:left-2 top-11" onclickoutside={toggle_menu}>
-        <div class="px-4 py-2 text-xs font-semibold text-gray-600">{user.name || user.email}</div>
-        {#if user.name}
-          <div class="px-4 py-2 -mt-3 text-xs text-gray-600 border-b">{user.email}</div>
-        {/if}
-        {#if admin}
-          <a href="/admin">
-            Admin Panel
-            <i class="fas fa-key"></i>
-          </a>
-        {/if}
-        <a href="/account"> {$page.data.t('account.account_settings')} </a>
-        <button type="button" onclick={() => auth_user.logout()}>{$page.data.t('account.log_out')}</button>
-        {#if dev || mode === 'development'}
-          <button
-            type="button"
-            onclick={setAdminRole}>
-            Dev: Set Admin Role Level (currently {admin})
-          </button>
-        {/if}
+        <UserMenu close={() => (show_menu = false)} />
       </Menu>
     {/if}
   </div>

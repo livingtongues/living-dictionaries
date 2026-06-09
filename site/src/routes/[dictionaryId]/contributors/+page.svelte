@@ -7,7 +7,7 @@
   import { page } from '$app/stores'
 
   const { data } = $props()
-  const { dictionary, is_manager, is_contributor, admin, editor_edits, managers, contributors, partners } = $derived(data)
+  const { dictionary, is_manager, is_contributor, auth_user, editor_edits, managers, contributors, partners } = $derived(data)
 
   const manager_invites = $derived(data.invites.filter(invite => invite.role === 'manager'))
   const contributor_invites = $derived(data.invites.filter(invite => invite.role === 'contributor'))
@@ -38,7 +38,7 @@
     {#each manager_invites as invite (invite.id)}
       <div class="my-1">
         <ContributorInvitationStatus
-          admin={admin > 0}
+          admin={auth_user.admin_level > 0}
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
           {#snippet prefix()}
@@ -86,7 +86,7 @@
     {#each contributor_invites as invite (invite.id)}
       <div class="my-1">
         <ContributorInvitationStatus
-          admin={admin > 0}
+          admin={auth_user.admin_level > 0}
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
           {#snippet prefix()}
@@ -150,7 +150,7 @@
 
 {#if !dictionary.con_language_description}
   <hr class="my-4" />
-  <Partners {partners} can_edit={is_manager} hideLivingTonguesLogo={!!dictionary.hide_living_tongues_logo} admin={admin} {...data.partner_edits} />
+  <Partners {partners} can_edit={is_manager} hideLivingTonguesLogo={!!dictionary.hide_living_tongues_logo} admin={auth_user.admin_level} {...data.partner_edits} />
 
   <!-- Not using contributors.request_to_add_manager -->
 

@@ -20,7 +20,6 @@
   }: Props = $props()
 
   let currentDictionary: DictionaryView = $state()
-  const { admin } = $derived($page.data)
 
   run(() => {
     if (selectedDictionaryId) {

@@ -14,7 +14,7 @@
   import { goto } from '$app/navigation'
 
   const { data } = $props()
-  const { dictionary, admin, is_manager, updateDictionary, remove_gloss_language, add_featured_image, about_is_too_short } = $derived(data)
+  const { dictionary, auth_user, is_manager, updateDictionary, remove_gloss_language, add_featured_image, about_is_too_short } = $derived(data)
 
 </script>
 
@@ -110,7 +110,7 @@
       on:changed={async ({ detail: { checked } }) => {
         if (!checked) {
           await updateDictionary({ public: 0 })
-        } else if (admin) {
+        } else if (auth_user.is_admin) {
           await updateDictionary({ public: 1 })
           dictionary.public = 1
         } else if (about_is_too_short()) {
@@ -143,7 +143,7 @@
     </div>
   {/if}
 
-  {#if admin > 1}
+  {#if auth_user.admin_level > 1}
     <div class="mt-5">
       <JSON obj={dictionary} />
     </div>

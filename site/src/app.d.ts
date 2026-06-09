@@ -15,7 +15,6 @@ declare global {
       auth_user: AuthUser
       dict_roles: MyDictionaryRolesCache
       ssr_user: AuthUserData | null
-      admin: number
       my_dictionaries: Readable<DictionaryWithRoles[]>
 
       // From dictionary layout so all optional

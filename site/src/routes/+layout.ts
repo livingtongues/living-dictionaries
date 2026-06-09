@@ -49,7 +49,6 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
     auth_user,
     dict_roles,
     ssr_user,
-    admin: ssr_user?.admin_level ?? 0,
     dictionaries,
     my_dictionaries,
     preferred_table_columns,

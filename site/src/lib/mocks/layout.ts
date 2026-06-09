@@ -10,7 +10,6 @@ import { logDbOperations } from './db'
 export const mockAppLayoutData: LayoutData = {
   t: null,
   locale: null,
-  admin: 0,
   auth_user: new AuthUser(),
   dict_roles: get_my_dictionary_roles(),
   ssr_user: null,

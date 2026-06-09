@@ -19,9 +19,9 @@
     showPlus = true,
   }: Props = $props()
 
-  const { tags: dictionary_tags, dbOperations, admin } = $derived($page.data)
+  const { tags: dictionary_tags, dbOperations, auth_user } = $derived($page.data)
   const tag_ids = $derived(tags.map(tag => tag.id))
-  const visible_tags = $derived($dictionary_tags.filter(tag => should_include_tag(tag, admin)))
+  const visible_tags = $derived($dictionary_tags.filter(tag => should_include_tag(tag, auth_user.admin_level)))
   const options = $derived(visible_tags.map(tag => ({ value: tag.id, name: tag.name })) satisfies SelectOption[])
 
   async function on_update(new_values: string[]) {

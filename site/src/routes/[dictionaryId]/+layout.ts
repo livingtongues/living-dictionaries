@@ -37,6 +37,11 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
     // dev admin-level toggle all `invalidateAll`). Server push endpoints
     // re-check the role on every write (verify-dict-role), so a stale cache is
     // safe — UI badges just lag.
+    // `admin_level` is preview-aware (the "View as…" persona), but it's read once
+    // here and baked into role / can_edit / the entries-search `readable(admin_level)`
+    // below — so an active preview downgrades this view on the NEXT navigation into a
+    // dictionary, not live while already on the page (no invalidation fires). Mirrors
+    // house's accepted search-bound-once gap; see .issues/view-as-persona-preview.md.
     const { admin_level } = auth_user
     const is_site_admin = admin_level >= 1
     const role_grant = dict_roles.roles.find(grant => grant.dictionary_id === dictionary_id)?.role

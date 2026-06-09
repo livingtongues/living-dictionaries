@@ -6,7 +6,7 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
   const { data } = $props()
-  const { is_manager, is_contributor, dictionary, update_about, admin } = $derived(data)
+  const { is_manager, is_contributor, dictionary, update_about, auth_user } = $derived(data)
   let updated = $state('')
 
   let editing = $state(false)
@@ -32,7 +32,7 @@
     {/if}
   {/if}
 
-  {#if is_manager || is_contributor || admin > 1}
+  {#if is_manager || is_contributor || auth_user.admin_level > 1}
     <UserGuide />
   {/if}
   <div class="flex">
