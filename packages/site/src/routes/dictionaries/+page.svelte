@@ -10,7 +10,7 @@
   export let data
   $: ({ admin } = data)
   $: ({ dictionaries } = $page.data)
-  $: filtered_dictionaries = $admin >= 1 ? $dictionaries : $dictionaries?.filter(dictionary => dictionary.public)
+  $: filtered_dictionaries = $dictionaries?.filter(dictionary => dictionary.public)
 
 </script>
 
