@@ -13,7 +13,7 @@
     derived_entry,
     shallow,
     dictionary,
-    admin,
+    auth_user,
     can_edit,
     dbOperations,
   } = $derived(data)
@@ -41,7 +41,7 @@
   </Button>
 
   <div>
-    {#if dev || admin > 1}
+    {#if dev || auth_user.admin_level > 1}
       <JSON obj={entry} />
     {/if}
     {#if can_edit}

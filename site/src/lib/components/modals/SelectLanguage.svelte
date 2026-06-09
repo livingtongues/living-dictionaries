@@ -3,7 +3,7 @@
   import { page } from '$app/stores'
   import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/changeLocale'
 
-  const { admin } = $derived($page.data)
+  const { auth_user } = $derived($page.data)
 </script>
 
 <Modal on:close>
@@ -23,7 +23,7 @@
         {name}
       </Button>
     {/each}
-    {#if admin}
+    {#if auth_user.is_admin}
       {#each unpublishedLocales as [bcp, name] (bcp)}
         <Button
           class="mr-1 mb-1 !normal-case"

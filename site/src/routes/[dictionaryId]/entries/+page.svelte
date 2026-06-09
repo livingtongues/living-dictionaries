@@ -39,7 +39,7 @@
       console.error(err)
     }
   }
-  let { entries_data, admin, search_entries, default_entries_per_page, search_params, dictionary, can_edit, dbOperations, reset_caches, search_index_updated } = $derived(data)
+  let { entries_data, auth_user, search_entries, default_entries_per_page, search_params, dictionary, can_edit, dbOperations, reset_caches, search_index_updated } = $derived(data)
   const { loading } = $derived(entries_data)
   const entries_length = $derived(Object.keys(entries_data).length)
   const current_page_index = $derived($search_params.page - 1 || 0)
@@ -119,7 +119,7 @@
 
 <SeoMetaTags
   norobots={!dictionary.public}
-  admin={admin > 0}
+  admin={auth_user.admin_level > 0}
   title="Entries"
   dictionaryName={dictionary.name}
   gcsPath={dictionary.featured_image?.serving_url}

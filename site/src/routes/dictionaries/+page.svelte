@@ -7,10 +7,8 @@
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import { dictionary_headers, prepareDictionaryForCsv } from '$lib/export/prepareDictionariesForCsv'
 
-  const { data } = $props()
-  const { admin } = $derived(data)
-  const { dictionaries } = $derived($page.data)
-  const filtered_dictionaries = $derived(admin >= 1 ? $dictionaries : $dictionaries?.filter(dictionary => dictionary.public))
+  const { auth_user, dictionaries } = $derived($page.data)
+  const filtered_dictionaries = $derived(auth_user.admin_level >= 1 ? $dictionaries : $dictionaries?.filter(dictionary => dictionary.public))
 
 </script>
 
@@ -31,7 +29,7 @@
       {$page.data.t('misc.download')}
       (.csv)
     </Button>
-    {#if admin}
+    {#if auth_user.is_admin}
       <Button href="/admin/dictionaries" color="black">
         <i class="far fa-pencil mr-1"></i>
         Edit

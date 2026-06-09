@@ -11,7 +11,7 @@
   import { downloadObjectsAsCSV } from '$lib/export/csv'
 
   const { data } = $props()
-  const { is_manager, dictionary, admin, entries_data, url_from_storage_path } = $derived(data)
+  const { is_manager, dictionary, auth_user, entries_data, url_from_storage_path } = $derived(data)
   const { loading: entries_loading } = $derived(entries_data)
 
   let includeImages = $state(false)
@@ -134,7 +134,7 @@
   <p>{$page.data.t('export.availability')}</p>
 {/if}
 
-{#if admin}
+{#if auth_user.is_admin}
   <div class="mt-5">
     <Button form="filled" href='entries?q=%7B"view"%3A"print"%2C"entries_per_page"%3A100%7D'>{$page.data.t('export.download_pdf')}</Button>
   </div>

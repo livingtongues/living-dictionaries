@@ -23,7 +23,7 @@
   }
 
   const { data }: Props = $props()
-  const { admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries, user_latitude, user_longitude } = $derived(data)
+  const { auth_user, get_private_dictionaries, get_public_dictionaries, my_dictionaries, user_latitude, user_longitude } = $derived(data)
 
   let public_dictionaries: DictionaryView[] = $state([])
   let private_dictionaries: DictionaryView[] = $state([])
@@ -46,7 +46,7 @@
   const featured_dictionaries = $derived(public_dictionaries.filter(d => featured_dict_names.includes(d.name)))
 
   run(() => {
-    if (browser && admin) {
+    if (browser && auth_user.admin_level >= 1) {
       get_private_dictionaries().then(_dictionaries => private_dictionaries = _dictionaries)
     } else {
       private_dictionaries = []
@@ -121,7 +121,7 @@
           {/await}
         {/if}
       {/if}
-      {#if admin}
+      {#if auth_user.is_admin}
         <ShowHide>
           {#snippet children({ show, toggle })}
             <CustomControl position="bottom-right">
