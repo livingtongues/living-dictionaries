@@ -16,6 +16,26 @@
   export let data
   $: ({ dictionary, admin, is_manager, updateDictionary, remove_gloss_language, add_featured_image, about_is_too_short } = data)
 
+  async function handle_public_change(checked: boolean) {
+    if (!checked) {
+      dictionary.public = false
+      await updateDictionary({ public: false })
+    } else if ($admin) {
+      dictionary.public = true
+      await updateDictionary({ public: true })
+    } else {
+      const input = document.getElementById('public') as HTMLInputElement
+      if (input) input.checked = false
+      if (about_is_too_short()) {
+        alert($page.data.t('about.message'))
+        goto(`/${dictionary.id}/about`)
+      } else {
+        const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
+        if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
+        dictionary.public = false
+      }
+    }
+  }
 </script>
 
 <div style="max-width: 700px">
@@ -107,22 +127,7 @@
   {#if !dictionary.con_language_description}
     <PublicCheckbox
       checked={dictionary.public}
-      on:changed={async ({ detail: { checked } }) => {
-        if (!checked) {
-          await updateDictionary({ public: false })
-        } else if ($admin) {
-          dictionary.public = true
-          await updateDictionary({ public: true })
-        } else if (about_is_too_short()) {
-          alert($page.data.t('about.message'))
-          goto(`/${dictionary.id}/about`)
-          dictionary.public = false
-        } else {
-          const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
-          if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
-          dictionary.public = false
-        }
-      }} />
+      on:changed={({ detail: { checked } }) => handle_public_change(checked)} />
     <div class="mb-5" />
   {/if}
 
