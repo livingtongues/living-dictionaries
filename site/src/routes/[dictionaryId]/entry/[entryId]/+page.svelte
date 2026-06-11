@@ -18,7 +18,10 @@
     dbOperations,
   } = $derived(data)
 
-  const entry = $derived(entry_from_page || $derived_entry)
+  // Prefer the live read-model row (reactive to edits + sync) once the bundle
+  // has loaded it; until then fall back to the SSR/cold-fetched entry so a
+  // shared link paints real content immediately.
+  const entry = $derived($derived_entry ?? entry_from_page)
 </script>
 
 <div
@@ -78,6 +81,7 @@
 
 <SeoMetaTags
   norobots={!dictionary.public}
+  generate_og_image
   imageTitle={entry.main.lexeme.default}
   imageDescription={seo_description({ entry, gloss_languages: dictionary.gloss_languages, t: $page.data.t })}
   dictionaryName={dictionary.name}

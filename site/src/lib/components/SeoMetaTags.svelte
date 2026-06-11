@@ -23,6 +23,10 @@
     width?: number
     height?: number
     gcsPath?: string
+    /** Force the generated `/og` card even without a photo (e.g. entries, which
+     * render a globe + lexeme + gloss card). Without a photo and without this,
+     * the og:image falls back to the generic Living Tongues logo. */
+    generate_og_image?: boolean
     lng?: number
     lat?: number
   }
@@ -42,6 +46,7 @@
     width = 1200,
     height = 600,
     gcsPath = undefined,
+    generate_og_image = false,
     lng = undefined,
     lat = undefined,
   }: Props = $props()
@@ -63,7 +68,7 @@
     gcsPath: gcsPath?.replace('\n', ''), // this slipped into the server response, can remove after database cleaned
   })
   const encodedImageProps = $derived(encode(JSON.stringify(imageProps)))
-  const imageUrl = $derived(gcsPath ? `${IMAGE_API}?props=${encodedImageProps}&v=${OG_IMAGE_VERSION}` : DEFAULT_IMAGE)
+  const imageUrl = $derived(gcsPath || generate_og_image ? `${IMAGE_API}?props=${encodedImageProps}&v=${OG_IMAGE_VERSION}` : DEFAULT_IMAGE)
   const imageWidth = $derived(dictionaryName ? width.toString() : '987')
   const imageHeight = $derived(dictionaryName ? width.toString() : '299')
 </script>

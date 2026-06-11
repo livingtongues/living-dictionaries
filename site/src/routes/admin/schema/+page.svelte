@@ -27,15 +27,21 @@
   interface SchemaGraphProps { schema: SchemaInfo, on_node_jump?: (table_name: string) => void }
   let SchemaGraph = $state<Component<SchemaGraphProps> | null>(null)
   let graph_loading = $state(false)
-  $effect(() => {
-    if (view_mode !== 'graph' || SchemaGraph || !browser) return
+  function load_graph() {
+    if (SchemaGraph || !browser)
+      return
     graph_loading = true
     import('./graph/schema-graph.svelte').then((module_) => {
       SchemaGraph = module_.default as unknown as Component<SchemaGraphProps>
     }).finally(() => {
       graph_loading = false
     })
-  })
+  }
+
+  function show_graph() {
+    view_mode = 'graph'
+    load_graph()
+  }
 
   // Per-source lazily-loaded schema. Paste lives separately (it can be re-pasted).
   interface SourceState { schema: SchemaInfo | null, loading: boolean, error: string | null }
@@ -82,6 +88,8 @@
 
   onMount(() => {
     void activate('shared')
+    if (view_mode === 'graph')
+      load_graph()
   })
 
   async function on_node_jump(table_name: string) {
@@ -123,7 +131,7 @@
       </button>
     </div>
     <div class="view-tabs">
-      <button type="button" class={['view-tab', { active: view_mode === 'graph' }]} onclick={() => view_mode = 'graph'}>
+      <button type="button" class={['view-tab', { active: view_mode === 'graph' }]} onclick={show_graph}>
         <IconMdiGraphOutline style="margin-right: 0.25rem" />Graph
       </button>
       <button type="button" class={['view-tab', { active: view_mode === 'cards' }]} onclick={() => view_mode = 'cards'}>

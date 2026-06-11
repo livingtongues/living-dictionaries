@@ -84,6 +84,7 @@
           if (intersecting === true)
             on_intersected?.()
         }, intervalMs)
+        return () => clearInterval(interval)
       }
     } else {
       on_hidden?.()

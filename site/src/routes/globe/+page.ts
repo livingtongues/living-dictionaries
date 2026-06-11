@@ -1,15 +1,14 @@
 import type { DictionaryView } from '$lib/types'
 import type { PageLoad } from './$types'
+import { api_dictionaries_list } from '$api/dictionaries/_call'
 
 export const load: PageLoad = async ({ fetch }) => {
   let public_dictionaries: DictionaryView[] = []
-  const response = await fetch('/api/dictionaries?visibility=public')
-  if (response.ok) {
-    const { dictionaries } = await response.json() as { dictionaries: DictionaryView[] }
-    public_dictionaries = dictionaries
-  } else {
-    console.error(`Could not load public dictionaries: ${response.status}`)
-  }
+  const { data, error } = await api_dictionaries_list('public', { fetch })
+  if (error)
+    console.error(`Could not load public dictionaries: ${error.message}`)
+  else
+    public_dictionaries = data.dictionaries
 
   return {
     public_dictionaries,

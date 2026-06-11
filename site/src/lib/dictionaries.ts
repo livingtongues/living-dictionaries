@@ -1,6 +1,7 @@
 import { readable } from 'svelte/store'
 import type { DictionaryView } from '$lib/types'
 import { browser } from '$app/environment'
+import { api_dictionaries_list } from '$api/dictionaries/_call'
 
 export interface DictionaryWithRoles extends DictionaryView {
   role: string
@@ -13,13 +14,12 @@ export function create_dictionaries_store() {
     return readable<DictionaryView[]>([])
   return readable<DictionaryView[]>([], (set) => {
     (async () => {
-      const response = await fetch('/api/dictionaries?visibility=public')
-      if (!response.ok) {
-        console.error(`Could not load dictionaries: ${response.status}`)
+      const { data, error } = await api_dictionaries_list('public')
+      if (error) {
+        console.error(`Could not load dictionaries: ${error.message}`)
         return
       }
-      const { dictionaries } = await response.json() as { dictionaries: DictionaryView[] }
-      set(dictionaries || [])
+      set(data.dictionaries || [])
     })()
   })
 }

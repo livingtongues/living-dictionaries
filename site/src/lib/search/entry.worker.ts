@@ -3,6 +3,7 @@ import type { EntryData, Tables } from '$lib/types'
 import { clear } from 'idb-keyval'
 import { _search_entries, create_index, update_index_entry } from './orama.worker'
 import { should_include_tag } from '$lib/helpers/tag-visibility'
+import { assemble_entry_data } from './assemble-entry-data'
 
 const log = false
 
@@ -549,29 +550,21 @@ export async function init_entries(
   set_loading(false)
 }
 
+// Delegates the final shaping to the shared `assemble_entry_data` (also used by
+// the server SSR endpoint) so SSR-built and client-built entries are
+// byte-identical. The grouping maps above stay for O(1) per-entry slices.
 function process_entry(entry: Tables<'entries'>) {
-  const { id, dictionary_id, created_at, created_by, updated_by, created_by_user_id, updated_by_user_id, dirty, updated_at, ...main } = entry as Tables<'entries'> & Record<string, unknown>
-
-  const senses_for_entry = entry_id_to_senses[id] || []
-  const senses_with_all = senses_for_entry.map((sense) => {
-    const { entry_id, ...sense_to_include } = sense
-
-    return {
-      ...sense_to_include,
-      ...(sense_id_to_sentences[sense.id] ? { sentences: sense_id_to_sentences[sense.id] } : {}),
-      ...(sense_id_to_photos[sense.id] ? { photos: sense_id_to_photos[sense.id] } : {}),
-      ...(sense_id_to_videos[sense.id] ? { videos: sense_id_to_videos[sense.id] } : {}),
-    }
+  return assemble_entry_data({
+    entry: entry as Tables<'entries'> & Record<string, unknown>,
+    senses: entry_id_to_senses[entry.id] || [],
+    sentences_by_sense: sense_id_to_sentences as any,
+    photos_by_sense: sense_id_to_photos as any,
+    videos_by_sense: sense_id_to_videos as any,
+    audios: (entry_id_to_audios[entry.id] || []) as any,
+    tags: (entry_id_to_tags[entry.id] || []) as any,
+    dialects: (entry_id_to_dialects[entry.id] || []) as any,
+    admin_level: admin,
   })
-  return {
-    id,
-    main,
-    updated_at,
-    senses: senses_with_all,
-    ...(entry_id_to_audios[id] ? { audios: entry_id_to_audios[id] } : {}),
-    ...(entry_id_to_tags[id] ? { tags: entry_id_to_tags[id] } : {}),
-    ...(entry_id_to_dialects[id] ? { dialects: entry_id_to_dialects[id] } : {}),
-  }
 }
 
 type EntriesDataBundle = Record<string, any[]>
