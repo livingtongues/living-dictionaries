@@ -415,12 +415,18 @@ class DictLiveDbImpl {
         const { result } = await this.#dict_write<T>(op, args)
         return result
       }
+      // The PRIMARY row's id is generated HERE (client-side), not in the
+      // worker: if a leader applies an op and dies before responding, the
+      // transport re-sends it to the NEW leader — a stamped id makes the
+      // re-application collide on the PK and fail loudly instead of a fresh
+      // worker-side id silently creating a duplicate. (Caller-provided ids
+      // win via spread order; link/unlink are naturally idempotent.)
       this.#writes = {
-        insert_entry: args => write('insert_entry', args),
-        insert_sentence: args => write('insert_sentence', args),
-        insert_audio: args => write('insert_audio', args),
-        insert_photo: args => write('insert_photo', args),
-        insert_video: args => write('insert_video', args),
+        insert_entry: args => write('insert_entry', { entry_id: crypto.randomUUID(), ...args }),
+        insert_sentence: args => write('insert_sentence', { ...args, sentence: { id: crypto.randomUUID(), ...args.sentence } }),
+        insert_audio: args => write('insert_audio', { ...args, audio: { id: crypto.randomUUID(), ...args.audio } }),
+        insert_photo: args => write('insert_photo', { ...args, photo: { id: crypto.randomUUID(), ...args.photo } }),
+        insert_video: args => write('insert_video', { ...args, video: { id: crypto.randomUUID(), ...args.video } }),
         link_junction: args => write('link_junction', args),
         unlink_junction: args => write('unlink_junction', args),
       }
@@ -515,7 +521,12 @@ class DictLiveDbImpl {
   async #insert<T extends DictTableName>(table_name: T, set: DictInsertType<T> | DictInsertType<T>[]): Promise<DictRowType<T>[]> {
     const items = Array.isArray(set) ? set : [set]
     if (items.length === 0) return []
-    const { result } = await this.#dict_write<Record<string, unknown>[]>('insert_rows', { table: table_name, rows: items })
+    // Stamp ids client-side (content tables all have a synthetic UUID id) so a
+    // hand-off re-send collides loudly instead of duplicating — see `writes`.
+    const rows = is_dict_syncable(table_name)
+      ? items.map(item => (item as { id?: string }).id ? item : { id: crypto.randomUUID(), ...item })
+      : items
+    const { result } = await this.#dict_write<Record<string, unknown>[]>('insert_rows', { table: table_name, rows })
     return result as DictRowType<T>[]
   }
 

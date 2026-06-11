@@ -10,11 +10,20 @@ import { DICT_SYNCABLE_TABLES } from '$lib/db/server/dictionary-sync-helpers'
  * logical write (entry+sense, media+junction, …) is atomic as a group and can
  * never interleave with the sync engine's apply-transaction.
  *
- * Stamping (id generation, `dirty`/`updated_at`/audit columns, JSON
- * stringification) lives HERE — `DictLiveDb`'s insert/upsert delegate to the
- * generic `insert_rows`/`upsert_rows` ops, so there is exactly one insert code
- * path. Rows are returned PARSED (JSON columns as objects — structured clone
+ * Stamping (`dirty`/`updated_at`/audit columns, JSON stringification) lives
+ * HERE — `DictLiveDb`'s insert/upsert delegate to the generic
+ * `insert_rows`/`upsert_rows` ops, so there is exactly one insert code path.
+ * Rows are returned PARSED (JSON columns as objects — structured clone
  * carries them back to the calling tab).
+ *
+ * Ids: the `DictLiveDb.writes` facade pre-generates the PRIMARY row's id
+ * CLIENT-side (worker-side generation is only a fallback). This matters for
+ * the at-least-once edge across a leader hand-off: if the old leader applies
+ * an op and dies before responding, the transport re-sends it to the new
+ * leader — with a client-stamped id the re-application collides on the PK and
+ * the whole transaction fails LOUDLY (no duplicate); a fresh worker-side id
+ * would silently create a second row. Junction link/unlink and upserts are
+ * naturally idempotent on re-application.
  */
 
 export interface DictWriteConnection {
@@ -168,12 +177,14 @@ export async function upsert_rows_local({ connection, user_id, table, rows }: {
 }
 
 /** New entry + its first (empty) sense. */
-export async function insert_entry_local({ connection, user_id, lexeme }: {
+export async function insert_entry_local({ connection, user_id, lexeme, entry_id }: {
   connection: DictWriteConnection
   user_id?: string
   lexeme: MultiString
+  /** Client-generated (see the ids note in the header) — worker generates only as a fallback. */
+  entry_id?: string
 }): Promise<DictWriteOutcome<Record<string, unknown>>> {
-  const entry = await insert_row({ connection, table: 'entries', row: { lexeme }, user_id })
+  const entry = await insert_row({ connection, table: 'entries', row: { id: entry_id, lexeme }, user_id })
   await insert_row({ connection, table: 'senses', row: { entry_id: entry.id }, user_id })
   return { result: entry, affected_tables: ['entries', 'senses'] }
 }
