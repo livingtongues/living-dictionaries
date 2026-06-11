@@ -46,11 +46,11 @@ Verified: 392 vitest ✓ · tsc 0 · eslint 0 · svelte-check 0 errors · e2e sm
 
 ## P0 — operational (Jacob action)
 
-- [ ] **Local dev pushes snapshots to the PROD R2 bucket.** LD's `site/.env` has
-  `R2_SNAPSHOT_BUILDER_ENABLED=true` (house dev correctly has it off) — any local dict edit is swept
-  to `snapshots.livingdictionaries.app` within 30 min. **Flip the flag off in local `site/.env`**
-  (agent can't edit .env files); longer term consider a separate dev bucket or a prod-only guard.
-  (The polluted prod `nukuoro.db.gz` was already healed on 2026-06-10.)
+- ✅ **Local dev pushes snapshots to the PROD R2 bucket.** RESOLVED 2026-06-11: Jacob flipped
+  `R2_SNAPSHOT_BUILDER_ENABLED` off in local `site/.env`; dev server restarted and verified — no
+  `[r2-snapshot-builder] Started` in the boot log (module-level gate in `hooks.server.ts`).
+  Longer term a separate dev bucket or prod-only guard would remove the foot-gun class entirely.
+  (The polluted prod `nukuoro.db.gz` was healed 2026-06-10.)
 
 ## Remaining (accepted/deferred)
 
