@@ -66,8 +66,11 @@ Verified: 392 vitest ✓ · tsc 0 · eslint 0 · svelte-check 0 errors · e2e sm
   (the race) entirely. 14-test vitest suite + extended editor e2e prove it.
 - [ ] **In-worker Orama (house's model)** — LD's per-tab index pulls the full bundle over the
   BroadcastChannel (structured-cloned to ALL tabs). Matters once big dicts meet multi-tab editors.
-- [ ] **First-paint blocking `sync_now`** — `+layout.ts` awaits a `/changes` round trip on every cold
-  open; could be fire-and-forget for OPFS-backed boots (data fills reactively).
+- ✅ **First-paint blocking `sync_now`** — DONE 2026-06-11: fire-and-forget for OPFS-backed boots
+  (deltas fill reactively via `tables_changed`); MemoryVFS fallback still blocks (empty boot,
+  pull-since-null is its only data source). Proof with `/changes` delayed 4s: first paint
+  4819ms → 863ms. Smoke/editor/heal e2e all pass (heal's empty-OPFS backfill polls, so
+  fire-and-forget is safe there too).
 - [ ] **Media-byte orphan sweep** — hard-deleting a media row never deletes GCS bytes (also listed in
   `cutover.md` deferred backlog).
 - [ ] **opfs-lru size staleness** (minor) — `size_bytes` only refreshed at open; a dict growing
