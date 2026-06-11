@@ -1,6 +1,6 @@
 import type { InferInsertModel, InferSelectModel, Table } from 'drizzle-orm'
 import type * as dict_schema from '$lib/db/schemas/dictionary'
-import type { DictConnection } from './dict-connection'
+import type { DictConnection } from './worker-connection'
 import { TableChangeNotifier } from '$lib/db/client/live/notifier'
 import { reconcile_rows } from '$lib/db/client/live/reconcile-rows'
 import { DICT_JSON_COLUMNS, parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'

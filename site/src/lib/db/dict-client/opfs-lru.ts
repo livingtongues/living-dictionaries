@@ -1,4 +1,5 @@
 import { DICT_DB_OPFS_PREFIX, VIEWER_OPFS_BUDGET_BYTES } from '$lib/constants'
+import { db_lock_name } from './worker/instance'
 
 /**
  * LRU eviction for viewer-only dict.db files in OPFS (Story B.1 — 200 MB
@@ -10,6 +11,12 @@ import { DICT_DB_OPFS_PREFIX, VIEWER_OPFS_BUDGET_BYTES } from '$lib/constants'
  * every `touch()` call (typically once per open). When total OPFS bytes for
  * tracked viewer dicts exceeds the budget, the oldest non-exempt dict gets
  * its OPFS file deleted (and its entry removed from the LRU map).
+ *
+ * Held-SAH guard: a dict with a live leader holds its OPFS sync-access-handle
+ * for the whole session, so deleting its file out from under it would fail (or
+ * corrupt a mid-write). Eviction skips any dict whose leader Web Lock
+ * (`ld-db-<dict_id>-leader`) is currently held — `navigator.locks.query()`
+ * replaces the `open_dict_ids` set the retired SharedWorker used to pass.
  */
 
 const IDB_NAME = 'dict-opfs-lru'
@@ -78,10 +85,13 @@ async function delete_entry(dict_id: string): Promise<void> {
   }
 }
 
+/** `dictionaries/` → the OPFS directory name, derived from the shared constant. */
+const OPFS_DIR_NAME = DICT_DB_OPFS_PREFIX.replace(/\/$/, '')
+
 async function get_opfs_size(dict_id: string): Promise<number> {
   try {
     const root = await navigator.storage.getDirectory()
-    const dir = await root.getDirectoryHandle('dictionaries').catch(() => null)
+    const dir = await root.getDirectoryHandle(OPFS_DIR_NAME).catch(() => null)
     if (!dir)
       return 0
     const file = await dir.getFileHandle(`${dict_id}.db`).catch(() => null)
@@ -97,7 +107,7 @@ async function get_opfs_size(dict_id: string): Promise<number> {
 async function delete_opfs_file(dict_id: string): Promise<void> {
   try {
     const root = await navigator.storage.getDirectory()
-    const dir = await root.getDirectoryHandle('dictionaries').catch(() => null)
+    const dir = await root.getDirectoryHandle(OPFS_DIR_NAME).catch(() => null)
     if (!dir)
       return
     await dir.removeEntry(`${dict_id}.db`).catch(() => { /* not there */ })
@@ -118,28 +128,33 @@ export async function touch_dict({ dict_id, is_editor }: { dict_id: string, is_e
   })
 }
 
-/**
- * Drop the LRU entry for a dict (without deleting the underlying OPFS file).
- * Used when promoting a dict from viewer → editor (it stops being eligible
- * for eviction and we no longer need to track its size).
- */
-export async function untrack_dict(dict_id: string): Promise<void> {
-  await delete_entry(dict_id)
+/** Names of every Web Lock held right now, across the whole origin. */
+async function held_lock_names(): Promise<Set<string>> {
+  const names = new Set<string>()
+  try {
+    if (typeof navigator === 'undefined' || !navigator.locks?.query)
+      return names
+    const { held = [] } = await navigator.locks.query()
+    for (const lock of held) {
+      if (lock.name) names.add(lock.name)
+    }
+  } catch { /* treat as none held — eviction stays best-effort */ }
+  return names
 }
 
 /**
  * Evict the least-recently-used non-editor entries until total bytes fit
- * under `VIEWER_OPFS_BUDGET_BYTES`. Skips entries currently held in the
- * SharedWorker (caller passes via `open_dict_ids` to prevent yanking a file
- * out from under an active connection).
+ * under `VIEWER_OPFS_BUDGET_BYTES`. Skips dicts with a live leader (held SAH —
+ * see the held-SAH guard note above).
  *
- * Returns the list of dict_ids that were evicted (caller can broadcast
- * `snapshot_expired` to any tabs still on those dicts).
+ * Returns the list of dict_ids that were evicted (their next open re-fetches
+ * the snapshot).
  */
-export async function evict_if_over_budget({ open_dict_ids }: { open_dict_ids: ReadonlySet<string> }): Promise<string[]> {
+export async function evict_if_over_budget(): Promise<string[]> {
   const entries = await read_all()
+  const held = await held_lock_names()
   const viewers = entries
-    .filter(e => !e.is_editor && !open_dict_ids.has(e.dict_id))
+    .filter(e => !e.is_editor && !held.has(db_lock_name(e.dict_id)))
     .sort((a, b) => a.last_accessed_at - b.last_accessed_at)
 
   let total = entries.reduce((sum, entry) => sum + (entry.is_editor ? 0 : entry.size_bytes), 0)

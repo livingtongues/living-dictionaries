@@ -281,7 +281,10 @@
     "transmitter": "Sincerely, the Living Dictionaries team",
     "disjunctive": "or",
     "required": "required",
-    "optional": "optional"
+    "optional": "optional",
+    "reload": "Reload",
+    "app_update_needed": "A new version of the app is needed to keep syncing this dictionary. Please reload the page.",
+    "local_data_expired": "This dictionary's offline data is too old to sync and must be refreshed."
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",

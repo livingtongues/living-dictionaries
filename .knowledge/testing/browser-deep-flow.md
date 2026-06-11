@@ -71,7 +71,7 @@ drives the actual store in-page via `globalThis.__ld_dict_connections.<dict>.{co
 2. **Direct WAL file reads are eventually consistent.** A fresh readonly `better-sqlite3` open right
    after a push sometimes misses the just-committed row — poll with a short backoff.
 3. **Deletes are HARD now (tombstone + FK cascade) — and the app USES `.delete()`.** As of the
-   hard-delete conversion (`.issues/dict-tombstone-path-incomplete.md`), `.delete()`/`_delete()`
+   hard-delete conversion (issue complete + deleted 2026-06-11), `.delete()`/`_delete()`
    `INSERT INTO deletes` → trigger `DELETE`s the row + FK-cascades children. The server trigger truly
    `DELETE`s, so the old "pull-resurrection on snapshot" fear is GONE (the snapshot is taken from a DB
    where the row is already gone). For deterministic net-zero test cleanup of created rows, still purge

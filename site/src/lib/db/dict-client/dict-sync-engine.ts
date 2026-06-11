@@ -3,15 +3,21 @@ import type {
   DictChangesResponse,
   DictSyncableTable,
 } from '$lib/db/server/dictionary-sync-helpers'
-import type { AuthHeaders } from './rpc-types'
-import type { DictSqliteConnection } from './opfs-vfs-loader'
+import type { AuthHeaders } from './worker/instance'
 import { ResponseCodes } from '$lib/constants'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/server/dictionary-sync-helpers'
 import { LATEST_DICT_MIGRATION } from './dict-migrations-bundle'
 
+/** The slice of the worker's connection the engine needs (reads + writes). */
+export interface EngineConnection {
+  query: <T>(sql: string, params?: unknown[]) => Promise<T[]>
+  execute: (sql: string, params?: unknown[]) => Promise<void>
+}
+
 /**
- * Per-dict sync engine. Runs inside the SharedWorker for each open dict.
+ * Per-dict sync engine. Runs inside the leader dedicated worker for each open
+ * dict (one leader per dictionary — see `worker/instance.ts`).
  *
  * Push + pull in one atomic round-trip, mirroring the server endpoint
  * (`/api/dictionary/[id]/changes`). The shape is a slimmer cousin of the
@@ -19,25 +25,33 @@ import { LATEST_DICT_MIGRATION } from './dict-migrations-bundle'
  * watermark in `db_metadata.last_modified_at`.
  *
  * Lifecycle:
- *   - Caller (SharedWorker) constructs one per `dict_id` after the OPFS file
- *     is open and migrations applied.
+ *   - The dict instance constructs one per `dict_id` after the OPFS file is
+ *     open and migrations applied.
  *   - `start()` schedules periodic syncs. `stop()` cancels them on close.
  *   - `sync_once()` is the explicit "right now" call used after every write
  *     and on `sync_now` RPC.
  *
- * Error sentinels surface as throws — the SharedWorker translates them into
- * either a broadcast (`schema_outdated`, `snapshot_expired`) or an
- * `ErrorResponse` on the originating port.
+ * Error sentinels surface as throws — the dict instance translates them into
+ * either a broadcast (`schema_outdated`, `snapshot_expired`) or an RPC error
+ * for the originating tab.
  */
 
 export const DICT_SYNC_INTERVAL_MS = 30 * 1000
 
 export interface SyncEngineOptions {
   dict_id: string
-  connection: DictSqliteConnection
+  connection: EngineConnection
   has_editor_role: boolean
   /** Resolves the latest auth context (so token refresh propagates here). */
   get_auth: () => AuthHeaders
+  /**
+   * Op-level mutex shared with the dict instance. Held across the WHOLE
+   * apply-transaction (BEGIN..COMMIT) so a main-thread `exec` RPC can never
+   * land mid-sync-transaction on the shared connection (SQLite txns are
+   * per-connection — an interleaved write would silently enrol and could be
+   * rolled back with it). The network round-trip stays OUTSIDE the lock.
+   */
+  serialize?: <T>(fn: () => Promise<T>) => Promise<T>
   /** Fires when one or more tables changed locally (post-pull). */
   on_tables_changed?: (tables: Set<string>) => void
   /** Fires with the (table, id) of rows hard-deleted by a pull (for the search index). */
@@ -48,9 +62,10 @@ export interface SyncEngineOptions {
 
 export class DictSyncEngine {
   #dict_id: string
-  #connection: DictSqliteConnection
+  #connection: EngineConnection
   #has_editor_role: boolean
   #get_auth: () => AuthHeaders
+  #serialize: <T>(fn: () => Promise<T>) => Promise<T>
   #on_tables_changed?: (tables: Set<string>) => void
   #on_rows_deleted?: (deletes: { table_name: string, id: string }[]) => void
   #on_status?: (status: { is_syncing: boolean, last_error: string | null, last_sync_at: string | null }) => void
@@ -66,6 +81,7 @@ export class DictSyncEngine {
     this.#connection = options.connection
     this.#has_editor_role = options.has_editor_role
     this.#get_auth = options.get_auth
+    this.#serialize = options.serialize ?? (fn => fn())
     this.#on_tables_changed = options.on_tables_changed
     this.#on_rows_deleted = options.on_rows_deleted
     this.#on_status = options.on_status
@@ -168,7 +184,7 @@ export class DictSyncEngine {
       headers.Authorization = `Bearer ${auth.bearer}`
 
     // Browser flow: the `session` cookie auto-attaches to same-origin fetch
-    // from the SharedWorker. `credentials: 'include'` is belt-and-braces.
+    // from the leader worker. `credentials: 'include'` is belt-and-braces.
     const response = await fetch(`/api/dictionary/${this.#dict_id}/changes`, {
       method: 'POST',
       headers,
@@ -204,6 +220,20 @@ export class DictSyncEngine {
     const affected = new Set<string>()
     const deleted_rows: { table_name: string, id: string }[] = []
 
+    await this.#serialize(() => this.#apply_transaction({ response, request, affected, deleted_rows }))
+
+    if (affected.size > 0)
+      this.#on_tables_changed?.(affected)
+    if (deleted_rows.length > 0)
+      this.#on_rows_deleted?.(deleted_rows)
+  }
+
+  async #apply_transaction({ response, request, affected, deleted_rows }: {
+    response: DictChangesResponse
+    request: DictChangesRequest
+    affected: Set<string>
+    deleted_rows: { table_name: string, id: string }[]
+  }): Promise<void> {
     await this.#connection.execute('PRAGMA defer_foreign_keys = ON')
     await this.#connection.execute('BEGIN')
     try {
@@ -247,9 +277,12 @@ export class DictSyncEngine {
           await this.#connection.execute(`DELETE FROM deletes WHERE table_name = ? AND id = ?`, [table_name, id])
       }
 
-      // Persist the new watermark in db_metadata for next sync.
+      // Persist the new watermark in db_metadata for next sync. `ON CONFLICT DO
+      // UPDATE`, never `INSERT OR REPLACE` (delete+reinsert breaks upsert
+      // semantics under triggers — shared sync invariant).
       await this.#connection.execute(
-        `INSERT OR REPLACE INTO db_metadata (key, value) VALUES ('last_modified_at', ?)`,
+        `INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
         [response.new_synced_up_to],
       )
 
@@ -258,11 +291,6 @@ export class DictSyncEngine {
       await this.#connection.execute('ROLLBACK')
       throw err
     }
-
-    if (affected.size > 0)
-      this.#on_tables_changed?.(affected)
-    if (deleted_rows.length > 0)
-      this.#on_rows_deleted?.(deleted_rows)
   }
 
   async #upsert_row({ table, row }: { table: DictSyncableTable, row: Record<string, unknown> }) {

@@ -50,6 +50,7 @@ export default tseslint.config(
       'scripts/**',
       'ids-import/**',
       'site/e2e/**',
+      'tools/**', // standalone e2e/bench harness scripts (mirrors house's ignore)
 
       // Vendored third-party
       '**/lib/lz/lz-string.ts',

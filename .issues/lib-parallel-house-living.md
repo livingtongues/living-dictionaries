@@ -29,6 +29,18 @@ Domain-driven differences (livingdictionaries.app↔hvsb.app strings, 2-level vs
 tiers, LD dict-roles vs house subscriptions/stripe, LD i18n/mapbox/keyman) are **intentional**
 and out of scope. Only the shared substrate is being aligned.
 
+### Addendum 2026-06-10 — OPFS leader-worker DB topology ported house → LD ✅
+
+The biggest substrate convergence: LD's browser dict DB moved from IndexedDB-style
+SharedWorker (actually MemoryVFS-fallback) to house's **OPFS-in-a-leader-elected-dedicated-worker**
+topology. The four harness files (`dict-client/worker/{opfs-sah-vfs.js,opfs-connection.ts,
+leader-election.ts,transport.ts}`) are **byte-identical to house** — keep them in sync. The three
+seam files (`worker/{instance,leader-worker,db-client}.ts`) diverge only by LD's dict_id keying
+(house keys by role+user_id). Landed fully verified 2026-06-10 (port issue since deleted);
+remaining tasks consolidated in `.issues/opfs-db-follow-ups.md` (house twin:
+`~/code/house/.issues/opfs-db-follow-ups.md`); durable notes in
+`.knowledge/migration/opfs-leader-worker-dict-db.md`.
+
 ---
 
 ## A. House fixes (adopt from living)

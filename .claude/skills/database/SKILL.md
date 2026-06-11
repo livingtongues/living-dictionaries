@@ -44,9 +44,9 @@ Knowing which database you're touching dictates everything else.
 | **Server access** | `get_dictionary_db(dict_id)` from `$lib/db/server/dictionary-db.ts` (better-sqlite3, on demand). Also `open_dictionary_db_in_memory(dict_id)` for tests. |
 | **Drizzle schema** | `$lib/db/schemas/dictionary.ts` |
 | **Migrations** | `$lib/db/schemas/dictionary-migrations/*.sql` (date-prefixed, applied per-DB) |
-| **Browser mirror** | One per dict, in wa-sqlite (OPFS-backed) inside a **SharedWorker** (`$lib/db/dict-client/shared-worker.ts`), exposed via `DictLiveDb` (`dict-live-db.svelte.ts`). Mounted at **`page.data.dict_db`** for all `[dictionaryId]/*` routes. |
+| **Browser mirror** | One per dict, in wa-sqlite **OPFS in a leader-elected dedicated worker** (`$lib/db/dict-client/dict-instance.ts`, harness in `dict-client/worker/`; opened via `dict-lifecycle.ts` `open_dict`), exposed via `DictLiveDb` (`dict-live-db.svelte.ts`) over the `worker-connection.ts` shim. Mounted at **`page.data.dict_db`** for all `[dictionaryId]/*` routes. One leader per dict (keyed by `dict_id`); other tabs are followers over a BroadcastChannel. See `.knowledge/migration/opfs-leader-worker-dict-db.md`. |
 | **Read path** | R2 snapshot (`snapshots.livingdictionaries.app/<id>.db.gz`) seeds the OPFS file; `/api/dictionary/[id]/changes` applies any deltas newer than the snapshot. |
-| **Write path** | Editor mutations → `dict_db` (dirty rows) → SharedWorker sync pushes to `/api/dictionary/[id]/db` (gated by `verify_auth_dict_role`). A cron-driven snapshot builder rebuilds the R2 `.db.gz` periodically. |
+| **Write path** | Editor mutations → `dict_db` (dirty rows) → the leader worker's sync engine pushes to `/api/dictionary/[id]/changes`; editors fetch their fresh snapshot from `/api/dictionary/[id]/db` (gated by `verify_auth_dict_role`). A cron-driven snapshot builder rebuilds the R2 `.db.gz` periodically. **Snapshots must ship a rollback-journal header (`journal_mode = DELETE`) — the single-file OPFS VFS can't open a WAL-mode header.** |
 
 **Tables**: `entries`, `senses`, `sentences`, `senses_in_sentences`,
 `speakers`, `audio`, `audio_speakers`, `videos`, `video_speakers`,
@@ -107,8 +107,8 @@ types only; SQL is the source of truth.
   open. Mirrors only what the sync engine populates (server-only tables like
   `client_logs` are created empty client-side but stay empty).
 - **Client (per-dict)**: the snapshot it pulls from R2 is already at a known
-  schema version. The SharedWorker compares the snapshot's stamped
-  `dict_db_schema_version` against the bundled migrations
+  schema version. The leader worker (`dict-instance.ts`) compares the snapshot's
+  stamped `dict_db_schema_version` against the bundled migrations
   (`dict-migrations-bundle.ts`) and applies any newer ones locally.
 
 ### Writing a migration
@@ -171,7 +171,7 @@ below. Both expose write methods.
 | Accessor | Wraps | Mounted at | Routes | Writes? |
 |---|---|---|---|---|
 | **`LiveDb`** (`client/live/`) | admin shared.db mirror (wa-sqlite, IDB) | `page.data.db` | `/admin/*` | yes (admins) |
-| **`DictLiveDb`** (`dict-client/dict-live-db.svelte.ts`) | per-dict dict.db (wa-sqlite, OPFS, SharedWorker) | `page.data.dict_db` | `[dictionaryId]/*` | yes (editors) |
+| **`DictLiveDb`** (`dict-client/dict-live-db.svelte.ts`) | per-dict dict.db (wa-sqlite, OPFS, leader dedicated worker) | `page.data.dict_db` | `[dictionaryId]/*` | yes (editors) |
 
 The `[dictionaryId]/+layout.ts` owns the dict connection lifecycle: it opens
 the dict via `open_dict()`, builds `create_dict_live_db(conn, { user_id })`,
@@ -195,7 +195,7 @@ caches `{ connection, dict_db }` on `globalThis.__ld_dict_connections[dict_id]`
 The examples below use **`page.data.dict_db`** (the per-dict editing surface,
 where almost all content work happens). The admin **`page.data.db`** shared.db
 accessor has the same API with the differences noted in the callout at the end.
-`dict_db` can be `null` (SSR / before the SharedWorker opens) — guard with
+`dict_db` can be `null` (SSR / before the leader worker opens) — guard with
 `dict_db?.…`.
 
 ```svelte
@@ -472,7 +472,7 @@ has `update_entry`/`update_sense` or a `clean()` shim. When adding/editing a per
   `await` them. Use `.find()` for an async non-reactive lookup.
 - **Updates need `_save()`.** Mutating a property updates the UI optimistically
   (reactive `$state`) but does NOT write to the DB until `_save()`.
-- **`page.data.dict_db` can be `null`** (SSR, or before the SharedWorker opens).
+- **`page.data.dict_db` can be `null`** (SSR, or before the leader worker opens).
   Guard with `dict_db?.…`.
 
 ## Sync engines (read this when touching sync code)
@@ -482,9 +482,10 @@ has `update_entry`/`update_sense` or a `clean()` shim. When adding/editing a per
   `db_metadata`. Dirty rows uploaded, server rows pulled by sector.
 - **Per-dict sync**: `$lib/db/dict-client/dict-sync-engine.ts` is much simpler —
   snapshot-as-of-build + change-since-snapshot fetch on connect, and editors'
-  dirty rows pushed through `/api/dictionary/[id]/db`. The snapshot builder
-  eventually reflects them in R2. Server helpers:
-  `dictionary-sync-helpers.ts`.
+  dirty rows pushed through `/api/dictionary/[id]/changes` (the `/db` endpoint is
+  the editor snapshot fetch, not the push). Runs inside the leader dedicated
+  worker; its apply-transaction shares the instance op-mutex. The snapshot builder
+  eventually reflects pushed rows in R2. Server helpers: `dictionary-sync-helpers.ts`.
 
 **Sync-engine invariants (don't relearn):** clear `dirty` ONLY by pushed row id
 (not blanket `WHERE dirty=1` — junctions silently never sync); `db_metadata`
@@ -510,17 +511,24 @@ $lib/db/
     connection.ts                      SqliteConnection wrapper
     db.ts                              Boot + apply migrations
     live/                              LiveDb reactive store (page.data.db)
-  dict-client/                         Per-dict (wa-sqlite, OPFS, SharedWorker)
-    shared-worker.ts                   The worker entry
-    shared-worker-lifecycle.ts         open_dict / lifecycle helpers
-    dict-connection.ts                 Connection wrapper inside the worker
+  dict-client/                         Per-dict (wa-sqlite, OPFS leader dedicated worker)
+    worker/                            Generic harness (4 files verbatim from house)
+      opfs-sah-vfs.js                  Single-owner OPFS sync-access-handle VFS (held SAH → ~1×)
+      opfs-connection.ts               open_opfs_connection + raw OPFS file helpers (snapshot drop-in)
+      leader-election.ts               navigator.locks leader election (one leader per dict)
+      transport.ts                     BroadcastChannel RPC client/server (the swappable seam)
+      instance.ts                      DbRequest/DbEvent/LeaderMeta contract; channel/lock keyed by dict_id
+      leader-worker.ts                 Dedicated-worker entry; imports dict-instance
+      db-client.ts                     Main-thread client: election + transport + spawn leader
+    dict-instance.ts                   The per-dict DB instance (boot/promote, op-mutex, migrations, sync)
+    dict-lifecycle.ts                  open_dict (per-dict DbClient cache, set_role re-assert on hand-off)
+    worker-connection.ts               Main-thread DictConnection shim over the DbClient
+    memory-connection.ts               MemoryVFS fallback (pre-iOS-17, no OPFS SAH)
     dict-live-db.svelte.ts             DictLiveDb reactive store (page.data.dict_db)
     operations.ts                      Thin multi-table write helpers (dbOperations)
-    dict-sync-engine.ts                Snapshot + changes-since + push
-    fetch-snapshot.ts                  R2 snapshot fetch
-    opfs-vfs-loader.ts                 OPFS VFS for wa-sqlite
-    opfs-lru.ts                        LRU eviction for offline storage
-    rpc-types.ts                       Client ↔ worker message shapes
+    dict-sync-engine.ts                Snapshot + changes-since + push (plain class, op-mutex-wrapped)
+    fetch-snapshot.ts                  R2/VPS snapshot fetch + normalize_snapshot_header (WAL→rollback)
+    opfs-lru.ts                        LRU eviction for offline storage (held-SAH-guarded)
     dict-migrations-bundle.ts          Bundled migrations for client-side apply
   server/
     shared-db.ts                       better-sqlite3 shared DB singleton
@@ -543,8 +551,14 @@ $lib/db/
   before the snapshot builder runs against it — else the boot sweep tries to
   migrate every dict on every boot. The migration script handles this.
 - **OPFS first-write race** — first connect to a per-dict DB writes the
-  snapshot; a second tab connecting in the same instant can race. The
-  SharedWorker serializes this within a browser; watch cross-tab edge cases.
+  snapshot. Only the ONE leader tab (elected via `navigator.locks`) owns the
+  OPFS file + writes the snapshot; other tabs are followers that RPC the leader,
+  so there's no cross-tab write race. Leader-tab close hands off to another tab.
+- **Snapshots must be rollback-journal, not WAL** — the single-file OPFS SAH VFS
+  returns `SQLITE_CANTOPEN` on a WAL-mode header (better-sqlite3 `.backup()`
+  preserves it). The R2 cron + editor `/db` endpoint run `journal_mode = DELETE`;
+  the client `normalize_snapshot_header` flips the header bytes as a safety net.
+  See `.knowledge/migration/opfs-leader-worker-dict-db.md`.
 - **`storage_path` is a path, not a URL** — media (audio/photos/videos) stores
   a storage path; resolve to the GCS / lh3 serving URL at render time (see
   `src/lib/helpers/media-url.ts` and `.knowledge/domain/media-serving-urls.md`),

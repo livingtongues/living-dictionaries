@@ -80,6 +80,12 @@ the live schema). `scripts/` is NOT a workspace member — install with
      `process.exit` truncates piped stdout; media files aren't pulled — they stay on GCS).
 3. **Seed the VPS:** `rsync` the migrated `.data/` (`shared.db` + all dict DBs) →
    `living:/opt/hosting/data/`. First boot self-migrates an empty catalog if absent.
+3b. **One-time R2 snapshot sweep** (OPFS op note, 2026-06-10): rebuild every dict's R2 snapshot from
+   the freshly-seeded VPS data — clear `dictionaries.snapshot_uploaded_at` (or loop
+   `force_rebuild_snapshot`) so the cron re-uploads all. This (a) replaces any artifact a LOCAL dev
+   sweep ever pushed to the prod bucket (see `.issues/opfs-db-follow-ups.md` P0), and (b) replaces
+   legacy WAL-header snapshots with clean rollback-mode ones (clients tolerate WAL via
+   `normalize_snapshot_header`, but clean artifacts are smaller and don't lean on the client shim).
 4. **DNS swap:** point `livingdictionaries.app` from the old Vercel/Supabase app → the VPS
    (Caddy already serves `new.livingdictionaries.app`; cutover repoints the apex/`www`).
 5. **Verify** production boots + renders globe / catalog / a dict's entries on the real dataset.

@@ -2,14 +2,15 @@ import { error } from '@sveltejs/kit'
 import type { TablesUpdate } from '$lib/types'
 import { readable } from 'svelte/store'
 import type { LayoutLoad } from './$types'
-import type { DictConnection } from '$lib/db/dict-client/dict-connection'
+import type { DictConnection } from '$lib/db/dict-client/worker-connection'
 import type { DictLiveDb } from '$lib/db/dict-client/dict-live-db.svelte'
 import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
 import { dbOperations, DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
 import { url_from_storage_path } from '$lib/helpers/media'
 import { create_dict_live_db } from '$lib/db/dict-client/dict-live-db.svelte'
-import { open_dict } from '$lib/db/dict-client/shared-worker-lifecycle'
+import { open_dict } from '$lib/db/dict-client/dict-lifecycle'
 import { live_share } from '$lib/db/client/live-share.svelte'
+import { toast } from '$lib/svelte-pieces/toast.svelte'
 import { api_dictionaries_catalog } from '$api/dictionaries/[id]/catalog/_call'
 import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
 import { browser, dev } from '$app/environment'
@@ -21,10 +22,16 @@ interface DictLayoutGlobals {
 }
 
 export const load: LayoutLoad = async ({ parent, depends, data }) => {
+  // Catalog-edit refresh hinges on this: `invalidate(DICTIONARY_UPDATED_LOAD_TRIGGER)`
+  // re-runs THIS universal load, and because it `await parent()`s a server load
+  // (`+layout.server.ts`, which holds the authoritative catalog row), SvelteKit
+  // re-runs that parent too and re-reads the catalog. Don't remove the
+  // `await parent()` below or catalog edits (settings/about/grammar) silently
+  // stop refreshing. (The server layout itself does NOT depend on this trigger.)
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
 
   try {
-    const { auth_user, dict_roles } = await parent()
+    const { auth_user, dict_roles, t } = await parent()
 
     // M4: the catalog row is resolved server-side from shared.db in +layout.server.ts.
     // Long-form `about`/`grammar`/`citation`/`write_in_collaborators` are folded onto it
@@ -53,9 +60,9 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
     const default_entries_per_page = 20
 
     // vps-migration M4 write/sync: open the browser wa-sqlite dict.db (everyone;
-    // editors push, viewers pull-only) via the SharedWorker. It's the client
-    // source of truth — the Orama worker is fed from it, and saves write to it.
-    // Cached per dict_id on globalThis to survive layout invalidation.
+    // editors push, viewers pull-only) via the per-dict leader worker. It's the
+    // client source of truth — the Orama worker is fed from it, and saves write
+    // to it. Cached per dict_id on globalThis to survive layout invalidation.
     let connection: DictConnection | null = null
     let dict_db: DictLiveDb | null = null
     if (browser) {
@@ -70,14 +77,36 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
         cached = { connection: conn, dict_db: create_dict_live_db(conn, { user_id: auth_user.user?.id }) }
         globals.__ld_dict_connections[dictionary_id] = cached
 
+        // Surface sync-fatal sentinels (these otherwise die silently in the
+        // worker): schema_outdated = this bundle is older than the server's
+        // schema; snapshot_expired = cursor > 60 days behind (the worker
+        // auto-resets viewers/clean editors — the toast matters for editors
+        // with un-pushed writes). Once per connection lifetime.
+        let sentinel_toasted = false
+        conn.subscribe_broadcasts((broadcast) => {
+          if (sentinel_toasted || (broadcast.type !== 'schema_outdated' && broadcast.type !== 'snapshot_expired'))
+            return
+          sentinel_toasted = true
+          const message = broadcast.type === 'schema_outdated' ? t('misc.app_update_needed') : t('misc.local_data_expired')
+          toast(message, { action: { label: t('misc.reload'), callback: () => location.reload() }, dismiss_label: t('misc.close') })
+        })
+
         // Dev-only: expose this dict.db to the SQL proxy under a composite
         // client_id so `sqlite-query.sh --dict <id>` can reach it. Writes route
-        // through the DictConnection's `execute()` → SharedWorker broadcast, so
+        // through the DictConnection's `execute()` → leader-worker broadcast, so
         // open tabs live-update. No-op in prod (`dev` is false).
         if (dev) {
           const email = auth_user.user?.email ?? auth_user.user?.id ?? 'dev'
           live_share.register({ connection: conn, client_id: `${email}::dict::${dictionary_id}` })
         }
+      } else if (can_edit) {
+        // The connection was cached (possibly opened pull-only before the user
+        // gained edit rights — login or role grant mid-session). Re-assert the
+        // editor capability: `open_dict` reuses the cached per-dict client and
+        // `set_role` is idempotent, so this is cheap. Without it, local writes
+        // would queue dirty=1 and never push until a full reload.
+        void open_dict({ dict_id: dictionary_id, has_editor_role: true, auth: {} })
+          .catch(err => console.warn('editor capability re-assert failed (retried next load)', err))
       }
       ;({ connection, dict_db } = cached)
       // The dict_db is cached on globalThis and survives layout invalidation, so
