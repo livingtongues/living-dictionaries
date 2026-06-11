@@ -70,6 +70,8 @@ Verified: 392 vitest ✓ · tsc 0 · eslint 0 · svelte-check 0 errors · e2e sm
   (the race) entirely. 14-test vitest suite + extended editor e2e prove it.
 - [ ] **In-worker Orama (house's model)** — LD's per-tab index pulls the full bundle over the
   BroadcastChannel (structured-cloned to ALL tabs). Matters once big dicts meet multi-tab editors.
+  **Full plan with pros/cons, ride-along checklist, and phased Jacob checkpoints:
+  `.issues/in-worker-orama.md`** (post-cutover; trigger conditions listed there).
 - ✅ **First-paint blocking `sync_now`** — DONE 2026-06-11: fire-and-forget for OPFS-backed boots
   (deltas fill reactively via `tables_changed`); MemoryVFS fallback still blocks (empty boot,
   pull-since-null is its only data source). Proof with `/changes` delayed 4s: first paint
