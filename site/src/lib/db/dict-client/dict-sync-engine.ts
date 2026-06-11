@@ -264,8 +264,8 @@ export class DictSyncEngine {
 
       // Clear dirty flags ONLY on the rows we actually pushed (keyed by id), not a blanket
       // `WHERE dirty = 1`. A blanket clear would silently drop rows inserted AFTER
-      // #build_request snapshotted but DURING this in-flight sync (e.g. insert_photo writes
-      // `photos` then `sense_photos`; a sync fires between the two), marking them clean without
+      // #build_request snapshotted but DURING this sync's network round-trip (writes only
+      // serialize against the apply-transaction, not the fetch), marking them clean without
       // ever pushing them — they'd never reach the server. Matches the example engine.
       if (this.#has_editor_role) {
         for (const table of DICT_SYNCABLE_TABLES) {

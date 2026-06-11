@@ -1,4 +1,5 @@
 import type { SqliteConnection } from '$lib/db/client/connection'
+import type { DictWriteOp, DictWriteOutcome } from './dict-writes'
 import type { DbClient } from './worker/db-client'
 import type { DbEvent } from './worker/instance'
 
@@ -22,6 +23,13 @@ export interface DictConnection extends SqliteConnection {
    * OTHER tabs' search indexes (a deleted row vanishes from their delta scan).
    */
   execute: (sql: string, params?: unknown[], options?: { affected_tables?: string[], deleted_rows?: { table_name: string, id: string }[] }) => Promise<void>
+  /**
+   * Atomic multi-statement write: ONE RPC to the leader worker, which runs the
+   * matching `dict-writes.ts` orchestrator inside `BEGIN/COMMIT` under the
+   * op-mutex (events broadcast from the worker; the outcome also comes back
+   * here so the caller can notify its own stores without waiting on the bus).
+   */
+  dict_write: <T>(op: DictWriteOp, args: Record<string, unknown>) => Promise<DictWriteOutcome<T>>
   /** Connection's dict_id. */
   readonly dict_id: string
   /** Subscribe to leader broadcasts for this dict (`tables_changed`, etc.). */
@@ -55,6 +63,10 @@ export function create_dict_worker_connection({ client, dict_id }: { client: DbC
         return table ? [table] : undefined
       })()
       await client.request({ type: 'exec', sql, params, affected_tables: affected, deleted_rows: options?.deleted_rows })
+    },
+
+    dict_write<T>(op: DictWriteOp, args: Record<string, unknown>): Promise<DictWriteOutcome<T>> {
+      return client.request<DictWriteOutcome<T>>({ type: 'dict_write', op, args })
     },
 
     exec_raw(_sql: string): Promise<void> {

@@ -1,5 +1,7 @@
 import type { InferInsertModel, InferSelectModel, Table } from 'drizzle-orm'
+import type { MultiString } from '$lib/types'
 import type * as dict_schema from '$lib/db/schemas/dictionary'
+import type { DictWriteOp, DictWriteOutcome, JunctionTable } from './dict-writes'
 import type { DictConnection } from './worker-connection'
 import { TableChangeNotifier } from '$lib/db/client/live/notifier'
 import { reconcile_rows } from '$lib/db/client/live/reconcile-rows'
@@ -69,6 +71,22 @@ export interface DictQueryAccessor<T extends DictTableName> {
   readonly rows: DictRowType<T>[]
   readonly loading: boolean
   snapshot: () => Promise<DictPlainRowType<T>[]>
+}
+
+/**
+ * Typed facade over the worker-side atomic multi-table writes (`dict-writes.ts`,
+ * mirror of house's `admin-writes.ts`). Each call is ONE `dict_write` RPC; the
+ * leader runs the orchestrator inside `BEGIN/COMMIT` under the op-mutex. The
+ * facade injects the current `user_id` for audit stamping.
+ */
+export interface DictWrites {
+  insert_entry: (args: { lexeme: MultiString }) => Promise<DictPlainRowType<'entries'>>
+  insert_sentence: (args: { sentence: DictInsertType<'sentences'>, sense_id: string }) => Promise<DictPlainRowType<'sentences'>>
+  insert_audio: (args: { audio: DictInsertType<'audio'>, speaker_id?: string }) => Promise<DictPlainRowType<'audio'>>
+  insert_photo: (args: { photo: DictInsertType<'photos'>, sense_id: string }) => Promise<DictPlainRowType<'photos'>>
+  insert_video: (args: { video: DictInsertType<'videos'>, sense_id: string, speaker_id?: string }) => Promise<DictPlainRowType<'videos'>>
+  link_junction: (args: { table: JunctionTable, key: Record<string, string> }) => Promise<{ linked: boolean }>
+  unlink_junction: (args: { table: JunctionTable, key: Record<string, string> }) => Promise<{ unlinked: boolean }>
 }
 
 export interface DictTableAccessor<T extends DictTableName> {
@@ -218,8 +236,7 @@ class DictLiveDbImpl {
   #table_stores = new Map<string, DictTableStore<Record<string, unknown>>>()
   #row_stores = new Map<string, DictTableStore<Record<string, unknown>>>()
   #query_stores = new Map<string, DictTableStore<Record<string, unknown>>>()
-  #has_id_column_cache = new Map<string, boolean>()
-  #savepoint_counter = 0
+  #writes: DictWrites | null = null
 
   constructor(connection: DictConnection, options: { user_id?: string } = {}) {
     this.#connection = connection
@@ -379,13 +396,36 @@ class DictLiveDbImpl {
     }
   }
 
-  async #check_id_column(table: string): Promise<boolean> {
-    const cached = this.#has_id_column_cache.get(table)
-    if (cached !== undefined) return cached
-    const cols = await this.#connection.query<{ name: string }>(`PRAGMA table_info("${table}")`)
-    const has = cols.some(c => c.name === 'id')
-    this.#has_id_column_cache.set(table, has)
-    return has
+  /**
+   * Run a worker-side atomic write op, injecting the current editor for audit
+   * stamping. The worker broadcasts `tables_changed`/`rows_deleted` to every
+   * tab (including this one); we also notify locally off the returned outcome
+   * so this tab's stores refresh without waiting on the broadcast bus.
+   */
+  async #dict_write<T>(op: DictWriteOp, args: Record<string, unknown>): Promise<DictWriteOutcome<T>> {
+    const outcome = await this.#connection.dict_write<T>(op, { ...args, user_id: this.#user_id })
+    for (const table of outcome.affected_tables) this.#notifier.notify(table)
+    if (outcome.deleted_rows?.length) this.#notify_deletes(outcome.deleted_rows)
+    return outcome
+  }
+
+  get writes(): DictWrites {
+    if (!this.#writes) {
+      const write = async <T>(op: DictWriteOp, args: Record<string, unknown>): Promise<T> => {
+        const { result } = await this.#dict_write<T>(op, args)
+        return result
+      }
+      this.#writes = {
+        insert_entry: args => write('insert_entry', args),
+        insert_sentence: args => write('insert_sentence', args),
+        insert_audio: args => write('insert_audio', args),
+        insert_photo: args => write('insert_photo', args),
+        insert_video: args => write('insert_video', args),
+        link_junction: args => write('link_junction', args),
+        unlink_junction: args => write('unlink_junction', args),
+      }
+    }
+    return this.#writes
   }
 
   #save_cb(table: string) {
@@ -467,98 +507,22 @@ class DictLiveDbImpl {
     }
   }
 
+  // Inserts/upserts run worker-side via the atomic `insert_rows`/`upsert_rows`
+  // ops (stamping + JSON stringification live in `dict-writes.ts`); a multi-row
+  // batch commits or rolls back as ONE transaction. This replaced the old
+  // main-thread SAVEPOINT batches, whose SAVEPOINT/RELEASE spanned several
+  // `exec` RPCs — a sync apply-transaction could interleave and error.
   async #insert<T extends DictTableName>(table_name: T, set: DictInsertType<T> | DictInsertType<T>[]): Promise<DictRowType<T>[]> {
     const items = Array.isArray(set) ? set : [set]
     if (items.length === 0) return []
-    const has_id_column = await this.#check_id_column(table_name)
-    const syncable = is_dict_syncable(table_name)
-    const results: DictRowType<T>[] = []
-    const BATCH = 500
-    for (let offset = 0; offset < items.length; offset += BATCH) {
-      const batch = items.slice(offset, offset + BATCH)
-      const use_sp = batch.length > 1
-      const sp = use_sp ? `sp_${++this.#savepoint_counter}` : ''
-      if (use_sp) await this.#connection.execute(`SAVEPOINT ${sp}`)
-      try {
-        for (const item of batch) {
-          const row_data = { ...item } as Record<string, unknown>
-          if (has_id_column && !row_data.id) row_data.id = crypto.randomUUID()
-          if (syncable) {
-            if (row_data.dirty === undefined) row_data.dirty = 1
-            if (!row_data.updated_at) row_data.updated_at = new Date().toISOString()
-            if (!row_data.created_at) row_data.created_at = row_data.updated_at
-            if (this.#user_id) {
-              if (row_data.created_by_user_id === undefined) row_data.created_by_user_id = this.#user_id
-              if (row_data.updated_by_user_id === undefined) row_data.updated_by_user_id = this.#user_id
-            }
-          }
-          const stringified = stringify_dict_row(table_name, { ...row_data })
-          const columns = Object.keys(stringified)
-          const placeholders = columns.map(() => '?').join(', ')
-          const values = columns.map(c => stringified[c])
-          await this.#connection.execute(
-            `INSERT INTO "${table_name}" (${columns.map(c => `"${c}"`).join(', ')}) VALUES (${placeholders})`,
-            values,
-          )
-          if (has_id_column && row_data.id) {
-            const echo = await this.#connection.query<Record<string, unknown>>(
-              `SELECT * FROM "${table_name}" WHERE id = ?`,
-              [row_data.id],
-            )
-            if (echo[0]) {
-              parse_dict_row(table_name, echo[0])
-              results.push(echo[0] as DictRowType<T>)
-            }
-          }
-        }
-        if (use_sp) await this.#connection.execute(`RELEASE ${sp}`)
-      } catch (err) {
-        if (use_sp) await this.#connection.execute(`ROLLBACK TO ${sp}`)
-        throw err
-      }
-    }
-    this.#notifier.notify(table_name)
-    return results
+    const { result } = await this.#dict_write<Record<string, unknown>[]>('insert_rows', { table: table_name, rows: items })
+    return result as DictRowType<T>[]
   }
 
   async #upsert<T extends DictTableName>(table_name: T, set: DictInsertType<T> | DictInsertType<T>[]): Promise<void> {
     const items = Array.isArray(set) ? set : [set]
     if (items.length === 0) return
-    const syncable = is_dict_syncable(table_name)
-    const BATCH = 500
-    for (let offset = 0; offset < items.length; offset += BATCH) {
-      const batch = items.slice(offset, offset + BATCH)
-      const use_sp = batch.length > 1
-      const sp = use_sp ? `sp_${++this.#savepoint_counter}` : ''
-      if (use_sp) await this.#connection.execute(`SAVEPOINT ${sp}`)
-      try {
-        for (const row of batch) {
-          const row_data = { ...row } as Record<string, unknown>
-          if (syncable) {
-            if (row_data.dirty === undefined) row_data.dirty = 1
-            if (!row_data.updated_at) row_data.updated_at = new Date().toISOString()
-            if (this.#user_id) {
-              if (row_data.created_by_user_id === undefined) row_data.created_by_user_id = this.#user_id
-              if (row_data.updated_by_user_id === undefined) row_data.updated_by_user_id = this.#user_id
-            }
-          }
-          const stringified = stringify_dict_row(table_name, { ...row_data })
-          const columns = Object.keys(stringified)
-          const placeholders = columns.map(() => '?').join(', ')
-          const update_set = columns.map(c => `"${c}" = excluded."${c}"`).join(', ')
-          const values = columns.map(c => stringified[c])
-          await this.#connection.execute(
-            `INSERT INTO "${table_name}" (${columns.map(c => `"${c}"`).join(', ')}) VALUES (${placeholders}) ON CONFLICT(id) DO UPDATE SET ${update_set}`,
-            values,
-          )
-        }
-        if (use_sp) await this.#connection.execute(`RELEASE ${sp}`)
-      } catch (err) {
-        if (use_sp) await this.#connection.execute(`ROLLBACK TO ${sp}`)
-        throw err
-      }
-    }
-    this.#notifier.notify(table_name)
+    await this.#dict_write('upsert_rows', { table: table_name, rows: items })
   }
 
   async #update<T extends DictTableName>(table_name: T, set: DictUpdateType<T>): Promise<void> {

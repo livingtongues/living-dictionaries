@@ -60,8 +60,10 @@ Verified: 392 vitest ✓ · tsc 0 · eslint 0 · svelte-check 0 errors · e2e sm
 - [ ] ⇄ **At-least-once exec across a REAL leader hand-off** — old leader dies after applying but
   before responding → new leader re-applies the re-sent exec. Plain INSERTs surface a UNIQUE error;
   UPDATEs idempotent. Accepted; revisit with op idempotency keys if it ever bites.
-- [ ] **Move `operations.ts` worker-side as an atomic `dict_write` op** (whole-op atomicity; kills
-  the known SAVEPOINT-vs-sync-txn race). House's `library_write` is the template.
+- ✅ **Move `operations.ts` worker-side as an atomic `dict_write` op** — DONE 2026-06-11 (see
+  `.issues/dict-write-atomic-ops.md`): `dict-writes.ts` orchestrators run inside BEGIN/COMMIT under
+  the op-mutex; `.insert()`/`.upsert()` also route through it, deleting the SAVEPOINT batches
+  (the race) entirely. 14-test vitest suite + extended editor e2e prove it.
 - [ ] **In-worker Orama (house's model)** — LD's per-tab index pulls the full bundle over the
   BroadcastChannel (structured-cloned to ALL tabs). Matters once big dicts meet multi-tab editors.
 - [ ] **First-paint blocking `sync_now`** — `+layout.ts` awaits a `/changes` round trip on every cold
