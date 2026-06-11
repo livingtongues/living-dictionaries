@@ -71,9 +71,15 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       let cached = globals.__ld_dict_connections[dictionary_id]
       if (!cached) {
         const conn = await open_dict({ dict_id: dictionary_id, has_editor_role: can_edit, auth: {} })
-        // Bootstrap: snapshot (OPFS) already populated the file; sync_now pulls
-        // any deltas and backfills a fresh/MemoryVFS db (pull-since-null).
-        await conn.sync_now().catch(err => console.error('initial dict sync failed', err))
+        // Bootstrap sync. OPFS-backed boots already hold the snapshot on disk,
+        // so the `/changes` round-trip is fire-and-forget — first paint renders
+        // local data and deltas fill in reactively (the apply broadcasts
+        // `tables_changed`, re-querying every store + the Orama feed). A
+        // MemoryVFS fallback boot (pre-iOS-17) starts EMPTY and pull-since-null
+        // is its only data source, so it still blocks to avoid an empty flash.
+        const initial_sync = conn.sync_now().catch(err => console.error('initial dict sync failed', err))
+        if (!conn.is_opfs_backed)
+          await initial_sync
         cached = { connection: conn, dict_db: create_dict_live_db(conn, { user_id: auth_user.user?.id }) }
         globals.__ld_dict_connections[dictionary_id] = cached
 
