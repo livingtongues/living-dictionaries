@@ -32,6 +32,11 @@
   // `.issues/livedb-scalar-field-migration.md`.
   const dict_db = $derived($page.data.dict_db)
   const entry_row = $derived(dict_db?.entries.id(entry.id))
+  // Display values prefer the live row, but fall back to the read-model
+  // (`entry.main`) so the entry renders server-side / during the cold window
+  // before the live dict.db opens. `entry.main` shares the entries row's scalar
+  // field names, so the swap to `entry_row` once it arrives is seamless.
+  const fields = $derived(entry_row ?? entry.main)
 
   async function save_entry(patch: Partial<NonNullable<typeof entry_row>>) {
     if (!entry_row) return
@@ -43,7 +48,7 @@
 <div class="flex flex-col md:grid mb-3 media-on-right-grid grid-gap-2">
   <div dir="ltr" style="grid-area: title;">
     <EntryField
-      value={entry_row?.lexeme?.default}
+      value={fields?.lexeme?.default}
       field="lexeme"
       {can_edit}
       display={$page.data.t('entry_field.lexeme')}
@@ -61,7 +66,7 @@
     {#each dictionary.orthographies || [] as orthography, index (index)}
       {@const orthography_field = `lo${index + 1}`}
       <EntryField
-        value={entry_row?.lexeme?.[orthography_field]}
+        value={fields?.lexeme?.[orthography_field]}
         field="local_orthography"
         {can_edit}
         display={orthography.name}
@@ -71,7 +76,7 @@
     {/each}
 
     <EntryField
-      value={entry_row?.phonetic}
+      value={fields?.phonetic}
       field="phonetic"
       {can_edit}
       display={$page.data.t('entry_field.phonetic')}
@@ -127,54 +132,54 @@
     {/if}
 
     <EntryField
-      value={entry_row?.scientific_names?.[0]}
+      value={fields?.scientific_names?.[0]}
       field="scientific_names"
       {can_edit}
       display={$page.data.t('entry_field.scientific_names')}
       on_update={new_value => save_entry({ scientific_names: [new_value] })} />
 
     <EntryField
-      value={entry_row?.morphology}
+      value={fields?.morphology}
       field="morphology"
       {can_edit}
       display={$page.data.t('entry_field.morphology')}
       on_update={new_value => save_entry({ morphology: new_value })} />
 
     <EntryField
-      value={entry_row?.interlinearization}
+      value={fields?.interlinearization}
       field="interlinearization"
       {can_edit}
       display={$page.data.t('entry_field.interlinearization')}
       on_update={new_value => save_entry({ interlinearization: new_value })} />
 
     <EntryField
-      value={entry_row?.notes?.default}
+      value={fields?.notes?.default}
       field="notes"
       {can_edit}
       display={$page.data.t('entry_field.notes')}
       on_update={new_value => save_entry({ notes: { default: new_value } })} />
 
     <EntryField
-      value={entry_row?.linguistic_history?.default}
+      value={fields?.linguistic_history?.default}
       field="linguistic_history"
       {can_edit}
       display={$page.data.t('entry_field.linguistic_history')}
       on_update={new_value => save_entry({ linguistic_history: { default: new_value } })} />
 
-    {#if entry_row?.sources?.length || can_edit}
-      <div class="md:px-2" class:order-2={!entry_row?.sources?.length}>
+    {#if fields?.sources?.length || can_edit}
+      <div class="md:px-2" class:order-2={!fields?.sources?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.sources')}</div>
         <EntrySource
           {can_edit}
-          value={entry_row?.sources}
+          value={fields?.sources}
           on_update={new_value => save_entry({ sources: new_value })} />
         <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
       </div>
     {/if}
 
-    {#if entry_row?.elicitation_id || can_edit}
+    {#if fields?.elicitation_id || can_edit}
       <EntryField
-        value={entry_row?.elicitation_id}
+        value={fields?.elicitation_id}
         field="ID"
         {can_edit}
         display="ID"

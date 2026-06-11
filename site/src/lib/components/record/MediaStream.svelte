@@ -34,13 +34,8 @@
   let devices: MediaDeviceInfo[] = $state([])
   const microphones = $derived(devices.filter(d => d.kind === 'audioinput'))
   const cameras = $derived(devices.filter(d => d.kind === 'videoinput'))
-  $effect(() => {
-    if (!$selectedMicrophone)
-      selectedMicrophone.set(microphones[0])
-
-    if (!$selectedCamera)
-      selectedCamera.set(cameras[0])
-  })
+  const effective_microphone = $derived($selectedMicrophone ?? microphones[0])
+  const effective_camera = $derived($selectedCamera ?? cameras[0])
 
   let error: any = $state()
 
@@ -59,12 +54,12 @@
     const constraints: MediaStreamConstraints = {
       audio: audio
         ? {
-          deviceId: $selectedMicrophone ? $selectedMicrophone.deviceId : undefined,
+          deviceId: effective_microphone ? effective_microphone.deviceId : undefined,
         }
         : false,
       video: video
         ? {
-          deviceId: $selectedCamera ? $selectedCamera.deviceId : undefined,
+          deviceId: effective_camera ? effective_camera.deviceId : undefined,
         }
         : false,
     }
@@ -98,8 +93,8 @@
     cameras,
     chooseMicrophone,
     chooseCamera,
-    selectedMicrophone: $selectedMicrophone,
-    selectedCamera: $selectedCamera,
+    selectedMicrophone: effective_microphone,
+    selectedCamera: effective_camera,
   })}
 {:else if error}
   {#if error.message === 'Permission dismissed'}

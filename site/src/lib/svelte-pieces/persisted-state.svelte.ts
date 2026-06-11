@@ -11,8 +11,7 @@ export class PersistedState<T> {
       this.#get_cached()
 
     $effect(() => {
-      if (browser)
-        localStorage.setItem(this.key, this.#serialize(this.value))
+      localStorage.setItem(this.key, this.#serialize(this.value))
     })
 
     if (sync_tabs && browser) {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount, untrack } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
   import type { Snippet } from 'svelte'
   import type RecordRTCType from 'recordrtc'
 
@@ -32,10 +32,10 @@
 
   $effect(() => {
     if (RecordRTC) {
-      untrack(() => recorder?.stopRecording())
       const new_recorder = new RecordRTC(stream, options)
       recorder = new_recorder
       recorder_state = new_recorder.getState()
+      return () => new_recorder.stopRecording()
     }
   })
 
@@ -75,7 +75,7 @@
     }, 1000)
   }
 
-  onDestroy(() => recorder?.stopRecording())
+  onDestroy(() => clearInterval(interval))
 </script>
 
 {@render children?.({ start, pause, stop, recorder, recordingTime, state: recorder_state })}

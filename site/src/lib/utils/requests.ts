@@ -34,9 +34,15 @@ export async function post_request<T extends Record<string, any>, ExpectedRespon
   }
 }
 
-export async function get_request<ExpectedResponse extends Record<string, any>>(route: string): Promise<Return<ExpectedResponse>> {
+export async function get_request<ExpectedResponse extends Record<string, any>>(route: string, options?: {
+  // Pass a SvelteKit load's injected `fetch` so server-side loads keep the
+  // direct-handler + HTML-inlining optimization (no real HTTP round-trip on SSR,
+  // no refetch on hydration). Defaults to the global `fetch`.
+  fetch?: typeof fetch
+}): Promise<Return<ExpectedResponse>> {
+  const fetcher = options?.fetch ?? fetch
   try {
-    const response = await fetch(route, {
+    const response = await fetcher(route, {
       headers: get_default_headers(),
     })
     return handle_response<ExpectedResponse>(response)

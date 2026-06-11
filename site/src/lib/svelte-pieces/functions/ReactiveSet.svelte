@@ -3,13 +3,7 @@
 
   let { input, on_modified = undefined, children } = $props()
 
-  const set = new SvelteSet()
-
-  $effect(() => {
-    set.clear()
-    for (const item of input || [])
-      set.add(item)
-  })
+  const set = $derived(new SvelteSet(input || []))
 
   function update(newSet) {
     set.clear()

@@ -24,6 +24,10 @@
   // save back into the read-model. Sentences stay on `dbOperations` (multi-table).
   const dict_db = $derived($page.data.dict_db)
   const sense_row = $derived(dict_db?.senses.id(sense.id))
+  // Display values prefer the live row, falling back to the read-model `sense`
+  // so the sense renders server-side / during the cold window before the live
+  // dict.db opens (they share the senses row's scalar field names → seamless swap).
+  const sense_fields = $derived(sense_row ?? sense)
 
   async function save_sense(patch: Partial<NonNullable<typeof sense_row>>) {
     if (!sense_row) return
@@ -31,13 +35,13 @@
     await sense_row._save()
   }
 
-  const glossingLanguages = $derived(order_entry_and_dictionary_gloss_languages(sense_row?.glosses, glossLanguages))
-  const hasSemanticDomain = $derived(sense_row?.semantic_domains?.length || sense_row?.write_in_semantic_domains?.length)
+  const glossingLanguages = $derived(order_entry_and_dictionary_gloss_languages(sense_fields?.glosses, glossLanguages))
+  const hasSemanticDomain = $derived(sense_fields?.semantic_domains?.length || sense_fields?.write_in_semantic_domains?.length)
 </script>
 
 {#each glossingLanguages as bcp (bcp)}
   <EntryField
-    value={sense_row?.glosses?.[bcp]}
+    value={sense_fields?.glosses?.[bcp]}
     field="gloss"
     {bcp}
     {can_edit}
@@ -48,9 +52,9 @@
 {/each}
 
 <!-- Only in Bahasa Lani (id: jaRhn6MAZim4Blvr1iEv) -->
-{#if sense_row?.definition}
+{#if sense_fields?.definition}
   <EntryField
-    value={sense_row?.definition?.en}
+    value={sense_fields?.definition?.en}
     field="definition_english"
     display="Definition (deprecated)"
     {can_edit}
@@ -59,11 +63,11 @@
     }} />
 {/if}
 
-{#if sense_row?.parts_of_speech?.length || can_edit}
-  <div class="md:px-2" class:order-2={!sense_row?.parts_of_speech?.length}>
+{#if sense_fields?.parts_of_speech?.length || can_edit}
+  <div class="md:px-2" class:order-2={!sense_fields?.parts_of_speech?.length}>
     <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.parts_of_speech')}</div>
     <EntryPartOfSpeech
-      value={sense_row?.parts_of_speech}
+      value={sense_fields?.parts_of_speech}
       {can_edit}
       on_update={new_value => save_sense({ parts_of_speech: new_value })} />
     <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
@@ -75,8 +79,8 @@
     <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.semantic_domains')}</div>
     <EntrySemanticDomains
       {can_edit}
-      semantic_domain_keys={sense_row?.semantic_domains}
-      write_in_semantic_domains={sense_row?.write_in_semantic_domains}
+      semantic_domain_keys={sense_fields?.semantic_domains}
+      write_in_semantic_domains={sense_fields?.write_in_semantic_domains}
       on_update={new_value => save_sense({ semantic_domains: new_value })}
       on_update_write_in={new_value => save_sense({ write_in_semantic_domains: new_value })} />
     <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
@@ -84,7 +88,7 @@
 {/if}
 
 <EntryField
-  value={sense_row?.noun_class}
+  value={sense_fields?.noun_class}
   field="noun_class"
   {can_edit}
   display={$page.data.t('entry_field.noun_class')}
@@ -108,7 +112,7 @@
 {/if}
 
 <EntryField
-  value={sense_row?.plural_form?.default}
+  value={sense_fields?.plural_form?.default}
   field="plural_form"
   {can_edit}
   display={$page.data.t('entry_field.plural_form')}
@@ -116,7 +120,7 @@
 
 {#if DICTIONARIES_WITH_VARIANTS.includes(dictionary.id)}
   <EntryField
-    value={sense_row?.variant?.default}
+    value={sense_fields?.variant?.default}
     field="variant"
     {can_edit}
     display={$page.data.t('entry_field.variant')}

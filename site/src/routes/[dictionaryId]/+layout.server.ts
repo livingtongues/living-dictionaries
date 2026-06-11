@@ -10,6 +10,11 @@ import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
  * `+layout.ts`. Unknown slug → 301 home (matches the legacy behavior). The
  * per-dictionary content (entries, info, editors) still loads via the stub in
  * `+layout.ts` for now — converted incrementally in later M4 phases.
+ *
+ * Re-runs only when `params.dictionaryId` changes (dict→dict nav) or on
+ * `invalidateAll()` — NOT on within-dict navigation. Catalog edits refresh it
+ * indirectly: `+layout.ts` depends on DICTIONARY_UPDATED_LOAD_TRIGGER and
+ * `await parent()`s this server load, which drags it along on a re-run.
  */
 export const load: LayoutServerLoad = ({ params: { dictionaryId: dictionary_url } }) => {
   const dictionary = get_dictionary_by_url_or_id(dictionary_url)

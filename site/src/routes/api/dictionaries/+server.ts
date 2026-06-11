@@ -1,7 +1,12 @@
 import { json } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
+import type { DictionaryView } from '$lib/types'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { load_all_dictionaries, load_private_dictionaries, load_public_dictionaries } from '$lib/db/server/get-dictionaries-catalog'
+
+export interface DictionariesResponseBody {
+  dictionaries: DictionaryView[]
+}
 
 /**
  * M4 catalog read endpoint. Serves the dictionary catalog from `shared.db`
@@ -23,5 +28,5 @@ export const GET: RequestHandler = ({ url }) => {
       ? load_private_dictionaries({ db })
       : load_public_dictionaries({ db })
 
-  return json({ dictionaries })
+  return json({ dictionaries } satisfies DictionariesResponseBody)
 }

@@ -10,7 +10,10 @@ import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
  * hard, so there's no `deleted` column to filter — purged rows are simply absent.
  */
 
-const DROP_COLUMNS = ['dirty', 'created_by_user_id', 'updated_by_user_id']
+/** Sync-bookkeeping columns dropped from every bundle row so the read-model
+ * matches across the client bundle path and the server SSR assembler. */
+export const BUNDLE_DROP_COLUMNS = ['dirty', 'created_by_user_id', 'updated_by_user_id'] as const
+const DROP_COLUMNS = BUNDLE_DROP_COLUMNS
 const DATA_TABLES = ['entries', 'senses', 'audio', 'speakers', 'tags', 'dialects', 'photos', 'videos', 'sentences'] as const
 const JOIN_TABLES = ['audio_speakers', 'entry_tags', 'entry_dialects', 'sense_photos', 'video_speakers', 'sense_videos', 'senses_in_sentences'] as const
 

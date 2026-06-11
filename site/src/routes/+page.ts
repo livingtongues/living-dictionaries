@@ -1,15 +1,15 @@
 import type { DictionaryView } from '$lib/types'
 import type { PageLoad } from './$types'
+import { api_dictionaries_list } from '$api/dictionaries/_call'
 
 export const load: PageLoad = ({ fetch }) => {
   async function get_dictionaries(visibility: 'public' | 'private') {
-    const response = await fetch(`/api/dictionaries?visibility=${visibility}`)
-    if (!response.ok) {
-      console.error(`Could not load ${visibility} dictionaries: ${response.status}`)
+    const { data, error } = await api_dictionaries_list(visibility, { fetch })
+    if (error) {
+      console.error(`Could not load ${visibility} dictionaries: ${error.message}`)
       return [] as DictionaryView[]
     }
-    const { dictionaries } = await response.json() as { dictionaries: DictionaryView[] }
-    return dictionaries
+    return data.dictionaries
   }
 
   return {

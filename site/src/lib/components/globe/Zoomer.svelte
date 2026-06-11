@@ -48,6 +48,7 @@
       zoom_behavior.on('end.move', () => on_move_end?.())
 
       select(context.canvas).call(zoom_behavior)
+      return () => select(context.canvas).on('.zoom', null)
     }
   })
 </script>
