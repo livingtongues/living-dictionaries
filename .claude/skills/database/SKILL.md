@@ -457,8 +457,14 @@ The Orama watcher reflects every such `_save()`/`update()` back into the `EntryD
 read-model, which stays the index for search + list/gallery/table/print + SEO.
 `dbOperations`/`operations.ts` is now **only** multi-table orchestration (entry+sense
 create, sentence+junction, media+junction) and junction link/unlink — it no longer
-has `update_entry`/`update_sense` or a `clean()` shim. When adding/editing a per-dict
-**scalar** field, use the live-row pattern. Plan + rationale:
+has `update_entry`/`update_sense` or a `clean()` shim. Each such group is ONE atomic
+**`dict_write`** RPC: the leader worker runs the matching orchestrator in
+`dict-client/dict-writes.ts` inside `BEGIN/COMMIT` under the op-mutex (so a group can
+never half-land or interleave with a sync apply-transaction). `.insert()`/`.upsert()`
+also route through `dict_write` (`insert_rows`/`upsert_rows`) — the stamping lives
+worker-side in `dict-writes.ts`. When adding/editing a per-dict
+**scalar** field, use the live-row pattern; when adding a NEW multi-table write, add
+an orchestrator to `dict-writes.ts` + a line to the `DictWrites` facade. Plan + rationale:
 `.issues/livedb-scalar-field-migration.md` (and the foundation in
 `.issues/livedb-adoption-and-db-skill.md`).
 
@@ -524,8 +530,9 @@ $lib/db/
     dict-lifecycle.ts                  open_dict (per-dict DbClient cache, set_role re-assert on hand-off)
     worker-connection.ts               Main-thread DictConnection shim over the DbClient
     memory-connection.ts               MemoryVFS fallback (pre-iOS-17, no OPFS SAH)
-    dict-live-db.svelte.ts             DictLiveDb reactive store (page.data.dict_db)
-    operations.ts                      Thin multi-table write helpers (dbOperations)
+    dict-live-db.svelte.ts             DictLiveDb reactive store (page.data.dict_db) + `writes` facade
+    dict-writes.ts                     Worker-side atomic write orchestrators (`dict_write` op dispatch)
+    operations.ts                      Thin main-thread wrappers over `dict_db.writes` (dbOperations)
     dict-sync-engine.ts                Snapshot + changes-since + push (plain class, op-mutex-wrapped)
     fetch-snapshot.ts                  R2/VPS snapshot fetch + normalize_snapshot_header (WAL→rollback)
     opfs-lru.ts                        LRU eviction for offline storage (held-SAH-guarded)

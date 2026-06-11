@@ -137,7 +137,56 @@ const synced = (await rpc_in_page(a, { type: 'query', sql: 'SELECT phonetic, dir
 check('editor push cleared dirty after sync', synced?.dirty === null || synced?.dirty === 0, `dirty=${synced?.dirty}`)
 check('value survived the sync round-trip', synced?.phonetic === marker, synced?.phonetic)
 
-// 7. NET-ZERO cleanup: restore the original phonetic and push it, so the dev
+// 7. dict_write: atomic multi-table op through the worker — insert_entry runs
+// entry + first sense inside ONE BEGIN/COMMIT under the op-mutex.
+const me = await a.evaluate(async () => await (await fetch('/api/auth/me')).json().catch(() => null))
+const write_outcome = await rpc_in_page(a, {
+  type: 'dict_write',
+  op: 'insert_entry',
+  args: { lexeme: { default: `opfs-e2e-entry-${Date.now()}` }, user_id: me?.id },
+}).catch(err => ({ error: err.message }))
+const new_entry_id = write_outcome?.result?.id
+check('dict_write insert_entry returned the new entry', !!new_entry_id && write_outcome?.affected_tables?.join(',') === 'entries,senses', JSON.stringify(write_outcome).slice(0, 200))
+const sense_count = (await rpc_in_page(a, { type: 'query', sql: 'SELECT COUNT(*) AS c FROM senses WHERE entry_id = ?', params: [new_entry_id] }))?.[0]
+check('entry + first sense landed atomically', sense_count?.c === 1, `senses=${sense_count?.c}`)
+await sleep(800)
+const write_events = await read_events(b)
+const got_write_broadcast = write_events.some(e => e?.type === 'tables_changed' && e.tables?.includes('senses'))
+check('follower got tables_changed for the dict_write', got_write_broadcast, JSON.stringify(write_events.slice(-3)).slice(0, 160))
+
+// Junction ops: atomic check-then-insert (idempotent) + tombstone unlink.
+const dialect_outcome = await rpc_in_page(a, { type: 'dict_write', op: 'insert_rows', args: { table: 'dialects', rows: [{ name: { default: `e2e-dialect-${Date.now()}` } }], user_id: me?.id } })
+const dialect_id = dialect_outcome?.result?.[0]?.id
+const link1 = await rpc_in_page(a, { type: 'dict_write', op: 'link_junction', args: { table: 'entry_dialects', key: { entry_id: new_entry_id, dialect_id }, user_id: me?.id } })
+const link2 = await rpc_in_page(a, { type: 'dict_write', op: 'link_junction', args: { table: 'entry_dialects', key: { entry_id: new_entry_id, dialect_id }, user_id: me?.id } })
+check('link_junction linked once, idempotent on repeat', link1?.result?.linked === true && link2?.result?.linked === false, JSON.stringify({ link1: link1?.result, link2: link2?.result }))
+const unlink = await rpc_in_page(a, { type: 'dict_write', op: 'unlink_junction', args: { table: 'entry_dialects', key: { entry_id: new_entry_id, dialect_id } } })
+check('unlink_junction tombstoned the link (trigger hard-deleted it)', unlink?.result?.unlinked === true && unlink?.deleted_rows?.length === 1, JSON.stringify(unlink).slice(0, 160))
+
+// Push the new rows, then NET-ZERO: tombstone the entry (FK cascade sweeps the
+// sense on client AND server) + the dialect, and push the tombstones.
+await rpc_in_page(a, { type: 'sync_now' }, { timeout_ms: 60000 }).catch(err => a_logs.push(`dict_write sync err: ${err.message}`))
+const pushed = (await rpc_in_page(a, { type: 'query', sql: 'SELECT dirty FROM entries WHERE id = ?', params: [new_entry_id] }))?.[0]
+check('dict_write rows pushed (dirty cleared by id)', pushed?.dirty === null || pushed?.dirty === 0, `dirty=${pushed?.dirty}`)
+await rpc_in_page(a, {
+  type: 'exec',
+  sql: 'INSERT OR IGNORE INTO deletes (table_name, id) VALUES (?, ?)',
+  params: ['entries', new_entry_id],
+  affected_tables: ['entries', 'senses', 'deletes'],
+  deleted_rows: [{ table_name: 'entries', id: new_entry_id }],
+})
+await rpc_in_page(a, {
+  type: 'exec',
+  sql: 'INSERT OR IGNORE INTO deletes (table_name, id) VALUES (?, ?)',
+  params: ['dialects', dialect_id],
+  affected_tables: ['dialects', 'deletes'],
+  deleted_rows: [{ table_name: 'dialects', id: dialect_id }],
+})
+await rpc_in_page(a, { type: 'sync_now' }, { timeout_ms: 60000 }).catch(err => a_logs.push(`dict_write cleanup sync err: ${err.message}`))
+const e2e_entry_gone = (await rpc_in_page(a, { type: 'query', sql: 'SELECT COUNT(*) AS c FROM entries WHERE id = ?', params: [new_entry_id] }))?.[0]
+check('cleanup tombstoned the e2e entry (net-zero)', e2e_entry_gone?.c === 0, `count=${e2e_entry_gone?.c}`)
+
+// 8. NET-ZERO cleanup: restore the original phonetic and push it, so the dev
 // server DB (and anything built from it — e.g. the R2 snapshot the local
 // builder may upload) never keeps the e2e marker.
 await rpc_in_page(a, {
@@ -146,9 +195,15 @@ await rpc_in_page(a, {
   params: [entry.phonetic ?? null, new Date().toISOString(), entry.id],
   affected_tables: ['entries'],
 })
-await rpc_in_page(a, { type: 'sync_now' }, { timeout_ms: 60000 }).catch(err => a_logs.push(`cleanup sync err: ${err.message}`))
-await sleep(1000)
-const restored = (await rpc_in_page(a, { type: 'query', sql: 'SELECT phonetic, dirty FROM entries WHERE id = ?', params: [entry.id] }))?.[0]
+// Retry loop: `sync_now` no-ops while a (background-triggered) sync is already
+// in flight, so a single call can silently skip the freshly-dirty row.
+let restored
+for (let attempt = 0; attempt < 6; attempt++) {
+  await rpc_in_page(a, { type: 'sync_now' }, { timeout_ms: 60000 }).catch(err => a_logs.push(`cleanup sync err: ${err.message}`))
+  await sleep(1000)
+  restored = (await rpc_in_page(a, { type: 'query', sql: 'SELECT phonetic, dirty FROM entries WHERE id = ?', params: [entry.id] }))?.[0]
+  if (restored?.dirty === null || restored?.dirty === 0) break
+}
 check('cleanup restored the original value (net-zero)', (restored?.phonetic ?? null) === (entry.phonetic ?? null) && (restored?.dirty === null || restored?.dirty === 0), `phonetic=${restored?.phonetic} dirty=${restored?.dirty}`)
 
 await browser.close()

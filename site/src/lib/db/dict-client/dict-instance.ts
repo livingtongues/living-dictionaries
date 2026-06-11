@@ -1,7 +1,9 @@
 import type { DbInstance, DbRequest, InstanceContext, InstanceFactory, InstanceOptions, LeaderMeta } from './worker/instance'
 import type { OpfsConnection } from './worker/opfs-connection'
+import type { DictWriteOutcome } from './dict-writes'
 import { DICT_MIGRATION_NAMES, DICT_MIGRATIONS, LATEST_DICT_MIGRATION } from './dict-migrations-bundle'
 import { DictSyncEngine } from './dict-sync-engine'
+import { dispatch_dict_write } from './dict-writes'
 import { evict_if_over_budget, touch_dict } from './opfs-lru'
 import { fetch_dict_snapshot } from './fetch-snapshot'
 import { open_memory_connection } from './memory-connection'
@@ -22,10 +24,12 @@ import { DICT_DB_OPFS_PREFIX } from '$lib/constants'
  * (pre-iOS-17) — those re-pull everything each boot via `/changes?since=null`.
  *
  * Concurrency: a single op-level mutex serializes ALL writes — every `exec`
- * RPC and the engine's apply-transaction — so a write statement never lands
- * mid-sync-transaction on the shared connection. Reads don't take the lock.
- * (Multi-statement main-thread ops are NOT atomic as a whole — same as the
- * retired SharedWorker model; moving them worker-side is a flagged follow-up.)
+ * RPC, every `dict_write` op, and the engine's apply-transaction — so a write
+ * statement never lands mid-sync-transaction on the shared connection. Reads
+ * don't take the lock. Multi-statement logical writes (entry+sense,
+ * media+junction, batch inserts, …) arrive as ONE `dict_write` RPC and run
+ * inside `BEGIN/COMMIT` under the lock (see `../dict-writes.ts`), so the
+ * group is atomic and can never interleave with a sync apply-transaction.
  */
 
 export function create_dict_instance(options: InstanceOptions): InstanceFactory {
@@ -200,6 +204,28 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
               if (has_editor_role)
                 void engine.sync_if_needed()
               return null
+            })
+          case 'dict_write':
+            // Atomic multi-statement write: the whole orchestrator runs inside
+            // BEGIN/COMMIT under the op-mutex, so the group commits or rolls
+            // back as one and can never interleave with a sync apply-txn.
+            return op_lock(async () => {
+              await connection.execute('BEGIN')
+              let outcome: DictWriteOutcome
+              try {
+                outcome = await dispatch_dict_write({ op: request.op, connection, args: request.args })
+                await connection.execute('COMMIT')
+              } catch (err) {
+                await connection.execute('ROLLBACK').catch(() => undefined)
+                throw err
+              }
+              if (outcome.affected_tables.length)
+                context.emit_event({ type: 'tables_changed', tables: outcome.affected_tables })
+              if (outcome.deleted_rows?.length)
+                context.emit_event({ type: 'rows_deleted', deletes: outcome.deleted_rows })
+              if (has_editor_role)
+                void engine.sync_if_needed()
+              return outcome
             })
           case 'sync_now':
             await engine.sync_once().catch((err) => {

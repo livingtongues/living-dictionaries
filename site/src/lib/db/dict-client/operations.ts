@@ -6,23 +6,21 @@ import { page } from '$app/state'
 import { goto } from '$app/navigation'
 
 // vps-migration M4 write/sync: persistence is the browser wa-sqlite per-dict DB
-// (`dict_db`). Each op writes ONLY to `dict_db` (the SharedWorker sync engine
-// pushes dirty rows to the server, which re-checks the caller's role). The
-// Orama search index + entry-view store are kept in sync by the watch-based
-// feed (`orama-watcher.ts` → worker `apply_rows`), which reindexes changed rows
-// for BOTH these local writes AND remote sync-pulls — so there is NO direct
-// Orama double-write here anymore (P4b). Per-dict rows carry NO `dictionary_id`
-// (single-dict file) and REQUIRE `created_by_user_id` / `updated_by_user_id`
-// (NOT NULL) — those (plus `id` / `created_at` / `updated_at` / `dirty`) are
-// auto-stamped by `dict_db` from the editing user set in the layout (see
-// `create_dict_live_db({ user_id })`), which is why the `DictInsertType` params
-// below omit them. This layer stays only for genuinely multi-table
-// orchestration (entry+sense, sentence+junction, media+junction) and junction
-// link/unlink; single-row scalar field edits mutate the live row + `_save()`.
-
-function randomUUID() {
-  return window.crypto.randomUUID()
-}
+// (`dict_db`). Single-row ops go through the `dict_db` table accessors; the
+// multi-table groups (entry+sense, sentence+junction, media+junction) and
+// junction link/unlink go through `dict_db.writes` — ONE atomic `dict_write`
+// RPC each, run by the leader worker inside BEGIN/COMMIT under the op-mutex
+// (see `dict-writes.ts`). The sync engine pushes dirty rows to the server,
+// which re-checks the caller's role. The Orama search index + entry-view store
+// are kept in sync by the watch-based feed (`orama-watcher.ts` → worker
+// `apply_rows`), which reindexes changed rows for BOTH these local writes AND
+// remote sync-pulls. Per-dict rows carry NO `dictionary_id` (single-dict file)
+// and REQUIRE `created_by_user_id` / `updated_by_user_id` (NOT NULL) — those
+// (plus `id` / `created_at` / `updated_at` / `dirty`) are auto-stamped from
+// the editing user set in the layout (see `create_dict_live_db({ user_id })`),
+// which is why the params below omit them. This layer stays only for genuinely
+// multi-table orchestration and junction link/unlink; single-row scalar field
+// edits mutate the live row + `_save()`.
 
 function get_pieces() {
   const { dictionary, dict_db, auth_user, entries_data } = page.data as unknown as {
@@ -45,44 +43,11 @@ function get_pieces() {
   return { dictionary_id: dictionary.id, entry_id_from_page, dict_db }
 }
 
-/**
- * Add a junction link keyed by its natural key (no-op if it already exists).
- * Junctions have a synthetic id PK + UNIQUE on the natural key. Deletes are
- * hard now, so there's no soft-deleted row to revive — just insert if absent.
- */
-async function link_junction({ dict_db, table, where, params, insert_row }: {
-  dict_db: DictLiveDb
-  table: string
-  where: string
-  params: unknown[]
-  insert_row: Record<string, unknown>
-}) {
-  const existing = await (dict_db as any)[table].query({ where, params }).snapshot()
-  if (!existing[0])
-    await (dict_db as any)[table].insert({ ...insert_row })
-}
-
-/** Hard-delete a junction link (tombstone) keyed by its natural key. */
-async function unlink_junction({ dict_db, table, where, params }: {
-  dict_db: DictLiveDb
-  table: string
-  where: string
-  params: unknown[]
-}) {
-  const existing = await (dict_db as any)[table].query({ where, params }).snapshot()
-  if (existing[0])
-    await (dict_db as any)[table].delete(existing[0].id)
-}
-
 export async function insert_entry(lexeme: MultiString) {
   try {
     const { dictionary_id, dict_db } = get_pieces()
-    const entry_id = randomUUID()
-
-    await dict_db.entries.insert({ id: entry_id, lexeme })
-    await dict_db.senses.insert({ id: randomUUID(), entry_id })
-
-    goto(`/${dictionary_id}/entry/${entry_id}`)
+    const entry = await dict_db.writes.insert_entry({ lexeme })
+    goto(`/${dictionary_id}/entry/${entry.id}`)
   } catch (err) {
     alert(err)
     console.error(err)
@@ -102,7 +67,7 @@ export async function delete_entry(entry_id?: string) {
 export async function insert_sense(entry_id: string) {
   try {
     const { dict_db } = get_pieces()
-    await dict_db.senses.insert({ id: randomUUID(), entry_id })
+    await dict_db.senses.insert({ entry_id })
   } catch (err) {
     alert(err)
     console.error(err)
@@ -125,11 +90,7 @@ export async function insert_sentence({ sentence, sense_id }: {
 }) {
   try {
     const { dict_db } = get_pieces()
-    const new_sentence = { id: randomUUID(), ...sentence }
-    await dict_db.sentences.insert(new_sentence)
-    await dict_db.senses_in_sentences.insert({ sentence_id: new_sentence.id, sense_id })
-
-    return new_sentence
+    return await dict_db.writes.insert_sentence({ sentence, sense_id })
   } catch (err) {
     alert(err)
     console.error(err)
@@ -162,15 +123,15 @@ export async function delete_sentence(sentence_id: string) {
 export async function insert_audio({
   storage_path,
   entry_id,
+  speaker_id,
 }: {
   storage_path: string
   entry_id: string
+  speaker_id?: string
 }) {
   try {
     const { dict_db } = get_pieces()
-    const audio = { id: randomUUID(), entry_id, storage_path }
-    await dict_db.audio.insert(audio)
-    return audio
+    return await dict_db.writes.insert_audio({ audio: { storage_path, entry_id }, speaker_id })
   } catch (err) {
     alert(err)
     console.error(err)
@@ -201,8 +162,7 @@ export async function delete_audio(audio_id: string) {
 export async function insert_speaker(speaker: DictInsertType<'speakers'>) {
   try {
     const { dict_db } = get_pieces()
-    const new_speaker = { id: randomUUID(), ...speaker }
-    await dict_db.speakers.insert(new_speaker)
+    const [new_speaker] = await dict_db.speakers.insert(speaker)
     return new_speaker
   } catch (err) {
     alert(err)
@@ -223,19 +183,12 @@ export async function assign_speaker({
 }) {
   try {
     const { dict_db } = get_pieces()
-    if (media === 'audio') {
-      if (remove) {
-        await unlink_junction({ dict_db, table: 'audio_speakers', where: 'audio_id = ? AND speaker_id = ?', params: [media_id, speaker_id] })
-      } else {
-        await link_junction({ dict_db, table: 'audio_speakers', where: 'audio_id = ? AND speaker_id = ?', params: [media_id, speaker_id], insert_row: { audio_id: media_id, speaker_id } })
-      }
-    } else if (media === 'video') {
-      if (remove) {
-        await unlink_junction({ dict_db, table: 'video_speakers', where: 'video_id = ? AND speaker_id = ?', params: [media_id, speaker_id] })
-      } else {
-        await link_junction({ dict_db, table: 'video_speakers', where: 'video_id = ? AND speaker_id = ?', params: [media_id, speaker_id], insert_row: { video_id: media_id, speaker_id } })
-      }
-    }
+    const table = media === 'audio' ? 'audio_speakers' as const : 'video_speakers' as const
+    const key = media === 'audio' ? { audio_id: media_id, speaker_id } : { video_id: media_id, speaker_id }
+    if (remove)
+      await dict_db.writes.unlink_junction({ table, key })
+    else
+      await dict_db.writes.link_junction({ table, key })
   } catch (err) {
     alert(err)
     console.error(err)
@@ -245,8 +198,7 @@ export async function assign_speaker({
 export async function insert_tag({ name }: { name: string }) {
   try {
     const { dict_db } = get_pieces()
-    const tag = { id: randomUUID(), name }
-    await dict_db.tags.insert(tag)
+    const [tag] = await dict_db.tags.insert({ name })
     return tag
   } catch (err) {
     alert(err)
@@ -265,11 +217,11 @@ export async function assign_tag({
 }) {
   try {
     const { dict_db } = get_pieces()
-    if (remove) {
-      await unlink_junction({ dict_db, table: 'entry_tags', where: 'entry_id = ? AND tag_id = ?', params: [entry_id, tag_id] })
-    } else {
-      await link_junction({ dict_db, table: 'entry_tags', where: 'entry_id = ? AND tag_id = ?', params: [entry_id, tag_id], insert_row: { entry_id, tag_id } })
-    }
+    const key = { entry_id, tag_id }
+    if (remove)
+      await dict_db.writes.unlink_junction({ table: 'entry_tags', key })
+    else
+      await dict_db.writes.link_junction({ table: 'entry_tags', key })
   } catch (err) {
     alert(err)
     console.error(err)
@@ -279,8 +231,7 @@ export async function assign_tag({
 export async function insert_dialect({ name }: { name: MultiString }) {
   try {
     const { dict_db } = get_pieces()
-    const dialect = { id: randomUUID(), name }
-    await dict_db.dialects.insert(dialect)
+    const [dialect] = await dict_db.dialects.insert({ name })
     return dialect
   } catch (err) {
     alert(err)
@@ -299,11 +250,11 @@ export async function assign_dialect({
 }) {
   try {
     const { dict_db } = get_pieces()
-    if (remove) {
-      await unlink_junction({ dict_db, table: 'entry_dialects', where: 'entry_id = ? AND dialect_id = ?', params: [entry_id, dialect_id] })
-    } else {
-      await link_junction({ dict_db, table: 'entry_dialects', where: 'entry_id = ? AND dialect_id = ?', params: [entry_id, dialect_id], insert_row: { entry_id, dialect_id } })
-    }
+    const key = { entry_id, dialect_id }
+    if (remove)
+      await dict_db.writes.unlink_junction({ table: 'entry_dialects', key })
+    else
+      await dict_db.writes.link_junction({ table: 'entry_dialects', key })
   } catch (err) {
     alert(err)
     console.error(err)
@@ -319,10 +270,7 @@ export async function insert_photo({
 }) {
   try {
     const { dict_db } = get_pieces()
-    const new_photo = { id: randomUUID(), ...photo }
-    await dict_db.photos.insert(new_photo)
-    await dict_db.sense_photos.insert({ photo_id: new_photo.id, sense_id })
-    return new_photo
+    return await dict_db.writes.insert_photo({ photo, sense_id })
   } catch (err) {
     alert(err)
     console.error(err)
@@ -353,16 +301,15 @@ export async function delete_photo(photo_id: string) {
 export async function insert_video({
   video,
   sense_id,
+  speaker_id,
 }: {
   video: DictInsertType<'videos'>
   sense_id: string
+  speaker_id?: string
 }) {
   try {
     const { dict_db } = get_pieces()
-    const new_video = { id: randomUUID(), ...video }
-    await dict_db.videos.insert(new_video)
-    await dict_db.sense_videos.insert({ video_id: new_video.id, sense_id })
-    return new_video
+    return await dict_db.writes.insert_video({ video, sense_id, speaker_id })
   } catch (err) {
     alert(err)
     console.error(err)

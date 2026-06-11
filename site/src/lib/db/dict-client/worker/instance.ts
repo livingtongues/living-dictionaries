@@ -19,6 +19,8 @@ export interface AuthHeaders {
 export type DbRequest
   = | { type: 'query', sql: string, params?: unknown[] }
     | { type: 'exec', sql: string, params?: unknown[], affected_tables?: string[], deleted_rows?: { table_name: string, id: string }[] }
+  /** Atomic multi-statement write — dispatched to a `dict-writes.ts` orchestrator inside BEGIN/COMMIT. */
+    | { type: 'dict_write', op: string, args: Record<string, unknown> }
     | { type: 'sync_now' }
   /** Promote the leader's engine to editor-push (idempotent) + refresh auth. */
     | { type: 'set_role', has_editor_role: boolean, auth: AuthHeaders }

@@ -1,5 +1,5 @@
 import { get } from 'svelte/store'
-import { assign_speaker, insert_audio, insert_photo, insert_video } from '$lib/db/dict-client/operations'
+import { insert_audio, insert_photo, insert_video } from '$lib/db/dict-client/operations'
 import { page } from '$app/stores'
 import { upload_image } from '$lib/components/image/upload-image'
 import { upload_audio } from '$lib/components/audio/upload-audio'
@@ -23,8 +23,8 @@ export function addAudio({ entry_id, speaker_id, file }: { entry_id: string, spe
   const status = upload_audio({ file, folder: `${dictionary.id}/audio/${entry_id}` })
   const unsubscribe = status.subscribe(async ({ storage_path }) => {
     if (storage_path) {
-      const audio = await insert_audio({ storage_path, entry_id })
-      await assign_speaker({ speaker_id, media: 'audio', media_id: audio.id })
+      // ONE atomic dict_write: audio row + speaker junction commit together.
+      await insert_audio({ storage_path, entry_id, speaker_id })
       unsubscribe()
     }
   })
@@ -36,8 +36,8 @@ export function uploadVideo({ sense_id, speaker_id, file }: { sense_id: string, 
   const status = upload_video({ file, folder: `${dictionary.id}/videos/${sense_id}` })
   const unsubscribe = status.subscribe(async ({ storage_path }) => {
     if (storage_path) {
-      const data = await insert_video({ video: { storage_path }, sense_id })
-      await assign_speaker({ speaker_id, media: 'video', media_id: data.id })
+      // ONE atomic dict_write: video + sense junction + speaker junction.
+      await insert_video({ video: { storage_path }, sense_id, speaker_id })
       unsubscribe()
     }
   })

@@ -76,14 +76,18 @@ rollback-mode R2 artifacts, but isn't required for correctness thanks to fix #3.
 
 ## Other decisions worth remembering
 
-- **Op-mutex is load-bearing.** `dict-instance.ts` serializes every `exec` RPC AND the sync
-  engine's apply-transaction through one mutex (`DictSyncEngine`'s new `serialize` option), so a
-  UI write can never land mid-`BEGIN/COMMIT` of a sync txn (SQLite txns are per-connection — it'd
-  silently enrol and roll back). The network round-trip stays outside the lock. Reads don't lock.
-- **Whole-op atomicity is NOT gained yet.** `operations.ts` still runs main-thread, issuing several
-  `exec` RPCs per logical write. Each is mutex-serialized but the group isn't atomic — identical to
-  the pre-OPFS behavior. Moving `operations.ts` worker-side behind a `dict_write` op is a flagged
-  follow-up, not part of parity.
+- **Op-mutex is load-bearing.** `dict-instance.ts` serializes every `exec` RPC, every `dict_write`
+  op, AND the sync engine's apply-transaction through one mutex (`DictSyncEngine`'s `serialize`
+  option), so a UI write can never land mid-`BEGIN/COMMIT` of a sync txn (SQLite txns are
+  per-connection — it'd silently enrol and roll back). The network round-trip stays outside the
+  lock. Reads don't lock.
+- **Whole-op atomicity (gained 2026-06-11).** Multi-table logical writes (entry+sense,
+  sentence/media+junction, junction link/unlink, batch inserts/upserts) are ONE `dict_write` RPC;
+  the leader runs the matching `dict-writes.ts` orchestrator inside `BEGIN/COMMIT` under the
+  op-mutex. This also killed the old SAVEPOINT-batch race (main-thread SAVEPOINT/RELEASE spanned
+  several `exec` RPCs; a sync apply could interleave and error). Insert/upsert stamping lives
+  worker-side now; `DictLiveDb.writes` is the typed main-thread facade (house `admin-writes.ts`
+  pattern).
 - **MemoryVFS fallback kept** (`memory-connection.ts`) for runtimes without OPFS SAH (pre-iOS-17):
   migrations from scratch + pull-since-null, re-fetched every boot. `LeaderMeta.persistent` carries
   this to the main-thread shim's `is_opfs_backed`.
