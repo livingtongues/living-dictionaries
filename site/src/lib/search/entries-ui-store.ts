@@ -1,7 +1,7 @@
 import { get, writable } from 'svelte/store'
 import type { Readable } from 'svelte/store'
 import type { EntryData, Tables } from '$lib/types'
-import type { DictConnection } from '$lib/db/dict-client/dict-connection'
+import type { DictConnection } from '$lib/db/dict-client/worker-connection'
 import type { DictLiveDb } from '$lib/db/dict-client/dict-live-db.svelte'
 import { init_entries, reset_caches, search_entries } from '$lib/search'
 import { read_dict_bundle } from '$lib/search/read-dict-bundle'

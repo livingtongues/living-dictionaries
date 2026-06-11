@@ -1,4 +1,5 @@
 import type { RequestHandler } from './$types'
+import Database from 'better-sqlite3'
 import { gzipSync } from 'node:zlib'
 import { unlink } from 'node:fs/promises'
 import { existsSync, readFileSync } from 'node:fs'
@@ -42,6 +43,17 @@ export const GET: RequestHandler = async (event) => {
     await dict_db.backup(temp_path)
     if (!existsSync(temp_path))
       error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Snapshot file missing after backup')
+
+    // `backup()` preserves the source's WAL-mode header (writer/read version 2);
+    // the browser's single-file OPFS sync-access-handle VFS can only open a
+    // rollback-journal file (version 1). Flip it to DELETE so the bytes are
+    // OPFS-openable (else the client falls back to MemoryVFS + re-downloads).
+    const temp_db = new Database(temp_path)
+    try {
+      temp_db.pragma('journal_mode = DELETE')
+    } finally {
+      temp_db.close()
+    }
 
     const bytes = readFileSync(temp_path)
     const gzipped = new Uint8Array(gzipSync(bytes))

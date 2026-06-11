@@ -1,5 +1,5 @@
 import type { SqliteConnection } from './connection'
-import { extract_table_name } from '$lib/db/dict-client/dict-connection'
+import { extract_table_name } from '$lib/db/dict-client/worker-connection'
 
 /**
  * Browser-side counterpart to `site/sqlite-proxy/`. Connects to the dev proxy's
@@ -16,7 +16,7 @@ import { extract_table_name } from '$lib/db/dict-client/dict-connection'
  *
  * Write-aware: a write statement (INSERT/UPDATE/DELETE — detected via
  * `extract_table_name`) runs through `connection.execute()` rather than
- * `.query()`. For a `DictConnection` that fires the SharedWorker's
+ * `.query()`. For a `DictConnection` that fires the leader worker's
  * `tables_changed` broadcast so open tabs live-update. Main-thread connections
  * (the admin shared.db) don't broadcast, so an optional `notify(table)` callback
  * (= `live_db.notify_table`) refreshes that tab's reactive stores.

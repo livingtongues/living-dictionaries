@@ -1,4 +1,4 @@
-import type { AuthHeaders } from './rpc-types'
+import type { AuthHeaders } from './worker/instance'
 import { r2_dict_snapshot_key } from '$lib/constants'
 
 /**
@@ -33,9 +33,34 @@ export interface FetchedSnapshot {
 }
 
 export async function fetch_dict_snapshot(options: FetchSnapshotOptions): Promise<FetchedSnapshot> {
-  if (options.has_editor_role)
-    return await fetch_from_vps(options)
-  return await fetch_from_r2(options)
+  const fetched = options.has_editor_role
+    ? await fetch_from_vps(options)
+    : await fetch_from_r2(options)
+  normalize_snapshot_header(fetched.bytes)
+  return fetched
+}
+
+/**
+ * The browser's single-file OPFS sync-access-handle VFS can only open a
+ * rollback-journal database (header writer/read version = 1). A snapshot built
+ * via better-sqlite3 `backup()` from a WAL-mode source carries WAL versions (2)
+ * even though the bytes are a complete single-file copy with NO `-wal` sidecar —
+ * so the WAL flag is cosmetic and SQLite would treat the WAL as empty. Flip the
+ * two header version bytes to 1 in place, which is exactly the header state
+ * `PRAGMA journal_mode = DELETE` produces. Without this, OPFS open fails
+ * (SQLITE_CANTOPEN) and the client falls back to MemoryVFS + re-downloads every
+ * boot. Belt-and-braces alongside the server-side `journal_mode = DELETE` fix —
+ * covers legacy snapshots built before that landed.
+ */
+function normalize_snapshot_header(bytes: Uint8Array): void {
+  // Offset 0: "SQLite format 3\0"; offsets 18/19: file format write/read version.
+  if (bytes.length < 20)
+    return
+  const is_sqlite = bytes[0] === 0x53 && bytes[1] === 0x51 && bytes[2] === 0x4C && bytes[3] === 0x69 // "SQLi"
+  if (!is_sqlite)
+    return
+  if (bytes[18] === 2) bytes[18] = 1
+  if (bytes[19] === 2) bytes[19] = 1
 }
 
 async function fetch_from_vps({ dict_id, auth, signal }: FetchSnapshotOptions): Promise<FetchedSnapshot> {
@@ -44,8 +69,8 @@ async function fetch_from_vps({ dict_id, auth, signal }: FetchSnapshotOptions): 
     headers.Authorization = `Bearer ${auth.bearer}`
 
   // Browser flow: the `session` cookie auto-attaches to same-origin fetch from
-  // the SharedWorker. `credentials: 'include'` is belt-and-braces — some
-  // hosting setups proxy the SharedWorker through a different origin.
+  // the leader worker. `credentials: 'include'` is belt-and-braces — some
+  // hosting setups proxy the worker through a different origin.
   const response = await fetch(`/api/dictionary/${dict_id}/db`, { headers, credentials: 'include', signal })
   if (!response.ok) {
     const detail = await response.text().catch(() => '')

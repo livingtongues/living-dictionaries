@@ -93,4 +93,19 @@ describe(sweep_dirty_dictionaries, () => {
     expect(command.input.ContentType).toBe('application/octet-stream')
     expect(command.input.Body).toBeInstanceOf(Uint8Array)
   })
+
+  test('prunes tombstones older than the snapshot-expiry window from the source db', async () => {
+    insert_dict({ id: 'd1', updated_at: '2026-01-01T00:00:00.000Z', snapshot_uploaded_at: null })
+    const dict_db = dict_dbs.get('d1')
+    dict_db.exec(`CREATE TABLE deletes (table_name TEXT NOT NULL, id TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY (table_name, id))`)
+    const ancient = '2020-01-01T00:00:00.000Z'
+    const fresh = new Date().toISOString()
+    dict_db.prepare(`INSERT INTO deletes (table_name, id, updated_at) VALUES ('entries', 'old', ?)`).run(ancient)
+    dict_db.prepare(`INSERT INTO deletes (table_name, id, updated_at) VALUES ('entries', 'recent', ?)`).run(fresh)
+
+    await sweep_dirty_dictionaries()
+
+    const remaining = dict_db.prepare(`SELECT id FROM deletes`).all() as { id: string }[]
+    expect(remaining).toEqual([{ id: 'recent' }])
+  })
 })

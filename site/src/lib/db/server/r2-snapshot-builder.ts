@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { gzipSync } from 'node:zlib'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { r2_dict_snapshot_key, R2_SNAPSHOT_INTERVAL_MS } from '$lib/constants'
+import { r2_dict_snapshot_key, R2_SNAPSHOT_INTERVAL_MS, SNAPSHOT_EXPIRED_DAYS } from '$lib/constants'
 import { get_r2_snapshot_client } from '$lib/r2/snapshot-client'
 import { get_dictionary_db } from './dictionary-db'
 import { get_shared_db } from './shared-db'
@@ -105,6 +105,19 @@ export async function sweep_dirty_dictionaries() {
 
 export async function build_and_upload_snapshot(dict_id: string) {
   const dict_db = get_dictionary_db(dict_id)
+
+  // Prune tombstones older than the snapshot-expiry window from the SOURCE db.
+  // A client whose cursor predates them gets 410 `snapshot_expired` (full
+  // refetch) anyway, so they can never be needed for a pull again — without
+  // pruning, the deletes log grows forever. (DELETE on `deletes` is inert:
+  // the cascade trigger is AFTER INSERT only, and no lmod trigger watches it.)
+  const cutoff = new Date(Date.now() - SNAPSHOT_EXPIRED_DAYS * 24 * 60 * 60 * 1000).toISOString()
+  const source_has_deletes = dict_db.prepare(
+    `SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'deletes'`,
+  ).get()
+  if (source_has_deletes)
+    dict_db.prepare(`DELETE FROM deletes WHERE updated_at < ?`).run(cutoff)
+
   const temp_path = join(tmpdir(), `snapshot-${dict_id}-${crypto.randomUUID()}.db`)
   try {
     await dict_db.backup(temp_path)
@@ -123,6 +136,13 @@ export async function build_and_upload_snapshot(dict_id: string) {
       ).get()
       if (has_deletes)
         temp_db.exec('DELETE FROM deletes')
+
+      // `backup()` preserves the source's WAL-mode header (writer/read version 2);
+      // the browser's single-file OPFS sync-access-handle VFS can only open a
+      // rollback-journal file (version 1). Flip it to DELETE so the header is
+      // OPFS-openable — without this, every client falls back to MemoryVFS and
+      // re-downloads every boot.
+      temp_db.pragma('journal_mode = DELETE')
     } finally {
       temp_db.close()
     }

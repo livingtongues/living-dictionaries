@@ -103,7 +103,7 @@ function open_dictionary_db(dict_id: string): Database.Database {
   // Self-identify + maintain schema_version. dict_id is set on first open;
   // subsequent reopens leave it alone (no-op via INSERT OR IGNORE).
   db.prepare(`INSERT OR IGNORE INTO db_metadata (key, value) VALUES (?, ?)`).run('dictionary_id', dict_id)
-  db.prepare(`INSERT OR REPLACE INTO db_metadata (key, value) VALUES (?, ?)`).run('schema_version', LATEST_DICT_MIGRATION)
+  db.prepare(`INSERT INTO db_metadata (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run('schema_version', LATEST_DICT_MIGRATION)
 
   // Push the version into shared.db so the snapshot builder can target only
   // up-to-date dicts. Best-effort; failure here doesn't block the open.
@@ -165,7 +165,7 @@ export function open_dictionary_db_in_memory(dict_id: string): Database.Database
   db.pragma('foreign_keys = ON')
   run_sql_migrations({ db, migration_files })
   db.prepare(`INSERT OR IGNORE INTO db_metadata (key, value) VALUES (?, ?)`).run('dictionary_id', dict_id)
-  db.prepare(`INSERT OR REPLACE INTO db_metadata (key, value) VALUES (?, ?)`).run('schema_version', LATEST_DICT_MIGRATION)
+  db.prepare(`INSERT INTO db_metadata (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run('schema_version', LATEST_DICT_MIGRATION)
   return db
 }
 

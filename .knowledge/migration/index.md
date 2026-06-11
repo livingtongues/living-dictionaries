@@ -45,6 +45,13 @@ staging is live; remaining production cutover: `.issues/cutover.md`.
   SharedWorker (round-trip still works via sync-from-null); the "everyone opens wa-sqlite" snapshot
   decision (the page's original "no R2" framing is superseded — R2 dict snapshots are now live);
   the self-sufficient seed; how to debug SharedWorker fetch/console (invisible to puppeteer).
+- [opfs-leader-worker-dict-db.md](./opfs-leader-worker-dict-db.md) — the dict DB moved from the
+  SharedWorker-MemoryVFS path (m4-write-sync) to house's **OPFS-in-a-leader-elected-dedicated-worker**
+  topology (real persistence — no re-download every boot). LD-specific `dict_id`-only keying
+  (viewer+editor share one OPFS file, capability promoted via `set_role`); the load-bearing op-mutex;
+  and **the WAL-mode snapshot-header gotcha** (`.backup()` keeps version-2 WAL header → the single-file
+  SAH VFS can't open it → 3 fixes: server `journal_mode=DELETE` in the R2 cron + editor endpoint, and
+  client `normalize_snapshot_header` for legacy snapshots). Verification harnesses + cutover op note.
 - [m4-real-auth.md](./m4-real-auth.md) — M4 auth: porting the example's `AuthUser`/`ssr_user`/
   `dict_roles` model (full port) with two pragmatic LD adaptations (plain `page.data.admin` mirror;
   plain role booleans wrapped in `readable()` only for the search store); the legacy `getSession`
