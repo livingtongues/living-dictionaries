@@ -230,4 +230,33 @@ describe(dispatch_dict_write, () => {
   test('throws a coded error for an unknown op', async () => {
     await expect(run_atomic('explode', {})).rejects.toThrow('unknown dict_write op explode')
   })
+
+  // The at-least-once hand-off edge: an op the old leader applied (then died
+  // before responding) gets re-sent to the new leader. Client-stamped ids make
+  // the re-application collide on the PK and roll back the WHOLE group loudly —
+  // no silent duplicate (the facade always stamps; these mirror its payloads).
+  test('re-sent insert_entry (same client-stamped id) collides loudly, no duplicate', async () => {
+    const args = { user_id, lexeme: { default: 'dup' }, entry_id: crypto.randomUUID() }
+    await run_atomic('insert_entry', args)
+    await expect(run_atomic('insert_entry', args)).rejects.toThrow()
+    expect(count('SELECT COUNT(*) c FROM entries')).toBe(1)
+    expect(count('SELECT COUNT(*) c FROM senses')).toBe(1)
+  })
+
+  test('re-sent insert_photo (same client-stamped id) collides loudly, no duplicate', async () => {
+    const entry_id = await seed_entry()
+    const sense = db.prepare('SELECT id FROM senses WHERE entry_id = ?').get(entry_id) as { id: string }
+    const args = { user_id, photo: { id: crypto.randomUUID(), storage_path: 'p/a.jpg', serving_url: 'https://img' }, sense_id: sense.id }
+    await run_atomic('insert_photo', args)
+    await expect(run_atomic('insert_photo', args)).rejects.toThrow()
+    expect(count('SELECT COUNT(*) c FROM photos')).toBe(1)
+    expect(count('SELECT COUNT(*) c FROM sense_photos')).toBe(1)
+  })
+
+  test('re-sent insert_rows (same client-stamped ids) collides loudly, no duplicates', async () => {
+    const args = { user_id, table: 'tags', rows: [{ id: crypto.randomUUID(), name: 'a' }, { id: crypto.randomUUID(), name: 'b' }] }
+    await run_atomic('insert_rows', args)
+    await expect(run_atomic('insert_rows', args)).rejects.toThrow()
+    expect(count('SELECT COUNT(*) c FROM tags')).toBe(2)
+  })
 })

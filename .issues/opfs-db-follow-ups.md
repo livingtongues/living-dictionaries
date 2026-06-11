@@ -59,7 +59,11 @@ Verified: 392 vitest ✓ · tsc 0 · eslint 0 · svelte-check 0 errors · e2e sm
   pending changes / discard & reset" buttons calling the `reset` RPC). Needs product thought.
 - [ ] ⇄ **At-least-once exec across a REAL leader hand-off** — old leader dies after applying but
   before responding → new leader re-applies the re-sent exec. Plain INSERTs surface a UNIQUE error;
-  UPDATEs idempotent. Accepted; revisit with op idempotency keys if it ever bites.
+  UPDATEs idempotent. Accepted; revisit with op idempotency keys (persisted in-DB, same-txn) if it
+  ever bites. *2026-06-11: the `dict_write` refactor briefly made insert-shaped ops fail-SILENT
+  here (worker-generated ids → re-application created a fresh duplicate); fixed by client-stamping
+  the primary row's id in the `DictLiveDb.writes` facade + `#insert`, restoring fail-loud parity.
+  Unit tests cover the re-application collision.*
 - ✅ **Move `operations.ts` worker-side as an atomic `dict_write` op** — DONE 2026-06-11 (see
   `.issues/dict-write-atomic-ops.md`): `dict-writes.ts` orchestrators run inside BEGIN/COMMIT under
   the op-mutex; `.insert()`/`.upsert()` also route through it, deleting the SAVEPOINT batches
