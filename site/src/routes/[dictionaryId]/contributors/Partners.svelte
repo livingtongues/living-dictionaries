@@ -40,18 +40,18 @@
   }
 </script>
 
-<h3 class="font-semibold text-lg mb-1 mt-3">
+<h3 class="section-heading">
   {$page.data.t('partnership.title')}
 </h3>
 
 <div>
   {#if !hideLivingTonguesLogo}
-    <div class="py-3 flex flex-wrap items-center">
-      <div class="text-sm leading-5 font-medium text-gray-900">
+    <div class="partner-row">
+      <div class="partner-name">
         Living Tongues Institute for Endangered Languages
       </div>
       {#if admin}
-        <div class="w-1"></div>
+        <div style="width: 0.25rem"></div>
         <Button
           color="red"
           size="sm"
@@ -61,9 +61,9 @@
           <i class="fas fa-times"></i></Button>
       {/if}
     </div>
-    <div class="max-w-[400px]">
+    <div style="max-width: 400px">
       <img
-        class="h-full w-full object-cover"
+        style="height: 100%; width: 100%; object-fit: cover"
         alt="Living Tongues Institute for Endangered Languages"
         src={LIVING_TONGUES_LOGO} />
     </div>
@@ -74,12 +74,12 @@
       }}>Show Living Tongues Logo</Button>
   {/if}
   {#each partners as partner (partner.id)}
-    <div class="py-3 flex flex-wrap items-center">
-      <div class="text-sm leading-5 font-medium text-gray-900">
+    <div class="partner-row">
+      <div class="partner-name">
         {partner.name}
       </div>
       {#if can_edit}
-        <div class="w-1"></div>
+        <div style="width: 0.25rem"></div>
         <Button
           color="red"
           size="sm"
@@ -95,7 +95,7 @@
       {/if}
     </div>
     {#if partner.photo}
-      <div class="max-w-400px">
+      <div style="max-width: 400px">
         <Image
           {can_edit}
           width={400}
@@ -105,16 +105,56 @@
       </div>
     {:else}
       {#if can_edit}
-        <div class="max-w-400px hover:bg-gray-100 h-100px flex flex-col">
+        <div class="add-logo-tile">
           <AddImage border upload_image={file => add_partner_image(partner.id, file)} />
         </div>
       {/if}
     {/if}
   {/each}
   {#if can_edit}
-    <Button class="mt-2" onclick={ask_partner_name} form="filled">
+    <Button class="add-partner-button" onclick={ask_partner_name} form="filled">
       <i class="far fa-pencil"></i>
       {$page.data.t('partnership.button')}
     </Button>
   {/if}
 </div>
+
+<style>
+  .section-heading {
+    font-weight: 600;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    margin-bottom: 0.25rem;
+    margin-top: 0.75rem;
+  }
+
+  .partner-row {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .partner-name {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: var(--color); /* ≈ gray-900 */
+  }
+
+  .add-logo-tile {
+    max-width: 400px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .add-logo-tile:hover {
+    background-color: var(--surface); /* ≈ gray-100 */
+  }
+
+  div :global(.add-partner-button) {
+    margin-top: 0.5rem;
+  }
+</style>

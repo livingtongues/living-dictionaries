@@ -8,28 +8,9 @@ select {
   print-color-adjust: exact;
 }
 
-/* Use Doulos SIL if IPA contexts if ever needed */
-html {
-  font-family: 
-  "Segoe UI", /* This does not show up in Mac Chrome, but it does on Windows and is nice - keep it  */
-  Arial, /* Is on Mac Chrome and it is correct, but the font in general, while it works, is not too pleasing. */ 
-  "Noto Sans", 
-  "Noto Sans Wancho", /* Noto Sans fonts are in place to catch missing glyphs that other fonts don't provide - we aren't presently loading these, but just provide a reference if a user happens to have them. They are a useful font-family to specifically load in future if coming across missing glyph issues */
-  sans-serif, /* Fallback. On Mac Chrome displays Helvetica - Diacritis are in the right spot horizontally but they stack vertically on top of things like a dotted i instead of replacing the dot */
-  
-  /* Emoji catch-alls */
-  "Apple Color Emoji", 
-  "Segoe UI Emoji", 
-  "Segoe UI Symbol", 
-  "Noto Color Emoji"; 
-}
-/* Problematic Mac Chrome fonts */
-/* ui-sans-serif, this tries to use the font used by the browser's default UI sans-serif font, which for Mac Chrome is .SF NS - the font which causes diacritics display issues */
-/* system-ui, same problem as ui-sans-serif */
-/* -apple-system, same problem ui-sans-serif */
-/* BlinkMacSystemFont, same problem ui-sans-serif */
-/* "Helvetica Neue", After removing the above fonts which default to Mac Chrome's SF NS, then Mac Chrome shows this and it also shows diacritics wrong */
-
+/* The app font stack lives ONLY in theme.css (--font-sans, applied on body) — the
+   per-font diacritics rationale moved there too. (A duplicate html-level rule was
+   removed 2026-06-12; body covers all rendered content.) */
 
 [dir='rtl'] .rtl-x-flip {
   transform: scale(-1, 1);
@@ -57,12 +38,14 @@ html {
   }
 
   body ::-webkit-scrollbar-thumb {
-    background: hsl(240, 26%, 91%);
+    /* legacy hsl(240, 26%, 91%) on #ffffff — now derived so dark mode works (house's recipe) */
+    background: color-mix(in srgb, var(--background), var(--color) 10%);
     border-radius: 1rem;
-    border: 0.25rem solid #ffffff;
+    border: 0.25rem solid var(--background);
   }
 
   body ::-webkit-scrollbar-thumb:hover {
-    background: hsl(240, 9%, 71%);
+    /* legacy hsl(240, 9%, 71%) */
+    background: color-mix(in srgb, var(--background), var(--color) 30%);
   }
 }

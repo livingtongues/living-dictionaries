@@ -1,8 +1,9 @@
 /* Load the Tailwind-style reset into a low-priority cascade layer so that author/library
-   styles (UnoCSS utilities + component `<style>` blocks, all unlayered) always win over it,
-   regardless of stylesheet load order. Without this, equal-specificity ties — e.g. the reset's
-   `[type=button]{background-color:transparent}` vs svelte-pieces' modal backdrop
+   styles (global theme/button/form CSS + component `<style>` blocks, all unlayered) always win
+   over it, regardless of stylesheet load order. Without this, equal-specificity ties — e.g. the
+   reset's `[type=button]{background-color:transparent}` vs svelte-pieces' modal backdrop
    `.sp-8i1hz2{background:#000}` — resolve by source order, which is non-deterministic in dev and
-   was making modal overlays render transparent. `@unocss/svelte-scoped` avoided this by injecting
-   the reset first in <head>; the cascade layer is the robust equivalent for the universal plugin. */
-@import '@unocss/reset/tailwind.css' layer(reset);
+   was making modal overlays render transparent.
+   `./reset-tailwind.css` is the verbatim copy of `@unocss/reset/tailwind.css` kept when UnoCSS
+   was dropped (2026-06-12) so element defaults stayed byte-identical. */
+@import './reset-tailwind.css' layer(reset);

@@ -4,6 +4,8 @@
   import type { DictionaryView } from '$lib/types'
   import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
+  import IconCarbonSearch from '~icons/carbon/search'
+  import IconLaTimes from '~icons/la/times'
 
   interface Props {
     dictionaries?: DictionaryView[]
@@ -37,33 +39,30 @@
 
 <ShowHide>
   {#snippet children({ show, toggle })}
-    <Button form="filled" class="text-lg! font-semibold!" onclick={toggle}><span class="i-carbon-search text-2xl"></span> {$page.data.t('home.find_dictionary')}</Button>
-    <div class="border-b mt-2 lt-md:hidden"></div>
-    <div class="mb-2"></div>
+    <Button form="filled" class="find-button" onclick={toggle}><IconCarbonSearch class="icon-inline" style="font-size: 1.5rem" /> {$page.data.t('home.find_dictionary')}</Button>
+    <div class="search-divider"></div>
+    <div style="margin-bottom: 0.5rem"></div>
 
     {#if show}
       <Modal on:close={toggle} show_x={false}>
-        <div class="relative text-xl mb-2">
-          <div
-            class="absolute inset-y-0 left-0 pl-5 flex items-center
-              pointer-events-none text-gray-500">
-            <span class="i-carbon-search"></span>
+        <div class="search-box">
+          <div class="search-icon">
+            <IconCarbonSearch class="icon-inline" />
           </div>
           <input
             type="text"
             use:autofocus
             bind:value={searchString}
-            class="form-input w-full pl-10 pr-8 py-1 rounded-lg
-              text-gray-900 placeholder-gray-500 border-gray-600! shadow"
+            class="form-input dark-border"
             placeholder={$page.data.t('home.find_dictionary')} />
-          <button type="button" onclick={toggle} class="absolute inset-y-0 right-0 px-4 flex items-center focus:outline-none">
-            <span class="i-la-times text-gray-400"></span>
+          <button type="button" onclick={toggle} class="clear-button">
+            <IconLaTimes class="icon-inline" style="color: color-mix(in srgb, var(--color) 45%, var(--background))" />
           </button>
         </div>
-        <div class="flex flex-col">
+        <div class="results">
           {#each filteredDictionaries as dictionary, i (dictionary.id)}
             <Button
-              class="mb-1 text-left {i === 0 && 'bg-gray-200'}"
+              class="result-button {i === 0 ? 'first-result' : ''}"
               color="black"
               form="simple"
               onclick={() => setCurrentDictionary(dictionary)}>
@@ -82,3 +81,84 @@
       setCurrentDictionary(filteredDictionaries[0])
     }
   }} />
+
+<style>
+  :global(.find-button) {
+    font-size: 1.125rem !important;
+    line-height: 1.75rem !important;
+    font-weight: 600 !important;
+  }
+
+  .search-divider {
+    border-bottom: 1px solid var(--border-color);
+    margin-top: 0.5rem;
+  }
+
+  @media (max-width: 767.9px) {
+    .search-divider {
+      display: none;
+    }
+  }
+
+  .search-box {
+    position: relative;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .search-icon {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    padding-left: 1.25rem;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+    color: var(--color-secondary); /* ≈ gray-500 */
+  }
+
+  /* placeholder color comes from the forms preflight (gray-500) */
+  .search-box input {
+    width: 100%;
+    padding: 0.25rem 2rem 0.25rem 2.5rem;
+    border-radius: 0.5rem;
+    color: var(--color);
+    --un-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow */
+    box-shadow: var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);
+  }
+
+  .search-box input.dark-border {
+    border-color: color-mix(in srgb, var(--background), var(--color) 75%) !important; /* ≈ gray-600, was border-gray-600! */
+  }
+
+  .clear-button {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .clear-button:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  .results {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .results :global(.result-button) {
+    margin-bottom: 0.25rem;
+    text-align: left;
+  }
+
+  .results :global(.first-result) {
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
+  }
+</style>

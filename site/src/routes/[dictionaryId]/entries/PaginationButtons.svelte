@@ -1,4 +1,9 @@
 <script lang="ts">
+  import IconFa6SolidAnglesLeft from '~icons/fa6-solid/angles-left'
+  import IconFa6SolidAngleLeft from '~icons/fa6-solid/angle-left'
+  import IconFa6SolidAngleRight from '~icons/fa6-solid/angle-right'
+  import IconFa6SolidAnglesRight from '~icons/fa6-solid/angles-right'
+
   interface Props {
     pages: number
     current_page: number
@@ -33,23 +38,23 @@
   const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
 </script>
 
-<div class="flex items-center max-w-full grow-1">
+<div class="pagination-row">
   {#if current_page > 2}
     <button
       type="button"
-      class="hidden sm:block"
+      class="edge-button"
       onclick={() => go_to_page(1)}>
-      <span class="i-fa6-solid-angles-left rtl-x-flip"></span></button>
+      <IconFa6SolidAnglesLeft class="icon-inline rtl-x-flip" /></button>
   {/if}
 
   {#if current_page > 1}
     <button
       type="button"
       onclick={() => go_to_page(current_page - 1)}>
-      <span class="i-fa6-solid-angle-left rtl-x-flip"></span></button>
+      <IconFa6SolidAngleLeft class="icon-inline rtl-x-flip" /></button>
   {/if}
 
-  <div class="overflow-x-auto flex no-scrollbar shadow">
+  <div class="pages-scroll no-scrollbar">
     {#each { length: pages } as _, index (index)}
       {@const current = index + 1 === current_page}
       <button
@@ -64,15 +69,15 @@
     <button
       type="button"
       onclick={() => go_to_page(current_page + 1)}>
-      <span class="i-fa6-solid-angle-right rtl-x-flip"></span></button>
+      <IconFa6SolidAngleRight class="icon-inline rtl-x-flip" /></button>
   {/if}
 
   {#if current_page < pages - 1}
     <button
       type="button"
-      class="hidden sm:block"
+      class="edge-button"
       onclick={() => go_to_page(pages)}>
-      <span class="i-fa6-solid-angles-right rtl-x-flip"></span></button>
+      <IconFa6SolidAnglesRight class="icon-inline rtl-x-flip" /></button>
   {/if}
 
   {@render children?.()}
@@ -92,14 +97,64 @@
   }} />
 
 <style>
+  .pagination-row {
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+    flex-grow: 1;
+  }
+
+  .edge-button {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .edge-button {
+      display: block;
+    }
+  }
+
+  .pages-scroll {
+    overflow-x: auto;
+    display: flex;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow */
+  }
+
   button {
-    --at-apply: rounded py-2 px-3 text-sm leading-5 font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:text-gray-800 focus:outline-none transition ease-in-out duration-150;
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: var(--color-secondary); /* ≈ gray-500 */
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
   }
+
+  button:hover {
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+    background-color: var(--surface); /* ≈ gray-100 */
+  }
+
+  button:focus {
+    color: var(--color); /* ≈ gray-800 */
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
   .current {
-    --at-apply: bg-blue-100 text-blue-700 focus:bg-blue-200 focus:text-blue-800;
+    background-color: rgb(219 234 254); /* blue-100 */
+    color: rgb(29 78 216); /* blue-700 */
   }
-  span {
-    --at-apply: -mt-1;
+
+  .current:focus {
+    background-color: rgb(191 219 254); /* blue-200 */
+    color: rgb(30 64 175); /* blue-800 */
+  }
+
+  button :global(.icon-inline) {
+    margin-top: -0.25rem;
   }
 
   .no-scrollbar::-webkit-scrollbar {

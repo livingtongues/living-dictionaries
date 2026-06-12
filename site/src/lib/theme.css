@@ -6,22 +6,27 @@ layout components — Modal, Slideover, Toasts, CopyButton, RichTextEditor,
 BadgeArray, UserMenu, SyncStatus — resolve their `var(--…)` everywhere, not only
 under /admin).
 
-THIS FILE IS PLAIN CSS (no UnoCSS). It is one of the pieces staged for the eventual
-UnoCSS → vanilla-CSS migration. We KEEP UnoCSS for now (dropping it is too big a
-visual shift to do at once); see `archive/css/reset.css` for the plain reset that
-replaces uno's reset when that day comes.
+UnoCSS was fully removed 2026-06-12 — the whole app is scoped CSS + this global
+theme layer (see `.issues/drop-unocss.md` for the conversion log).
 
 DARK MODE — currently LIGHT-FORCED site-wide:
-  The legacy main pages are not dark-ready, so we do NOT auto-switch on the OS
-  preference. The explicit `.dark` / `.light` class selectors below are kept ACTIVE
-  (so svelte-look previews and a future admin dark-toggle can opt in by putting
-  `.dark` on <html>/<body>/a wrapper). The `@media (prefers-color-scheme: dark)`
-  block is COMMENTED OUT — nothing is lost; uncomment it (per-section or globally)
-  once those pages are audited for dark mode.
+  Components are dark-ready (theme vars only, post-uno-conversion), but the OS
+  auto-switch stays off until the dark audit is done. The explicit `.dark` /
+  `.light` class selectors below are kept ACTIVE (svelte-look previews and a
+  future toggle opt in by putting `.dark` on <html>/<body>/a wrapper). The
+  `@media (prefers-color-scheme: dark)` block is COMMENTED OUT — the flip plan
+  lives in `.issues/dark-mode-flip.md`.
 
-LD avoids system-ui / -apple-system / BlinkMacSystemFont / Helvetica Neue /
-ui-sans-serif on purpose: Mac Chrome's .SF NS renders diacritics incorrectly
-(stacks them on a dotted-i instead of replacing the dot). Stack mirrors global.css.
+FONT STACK (--font-sans below is the ONLY definition — a duplicate html-level rule in
+global.css was removed 2026-06-12). LD avoids system-ui / -apple-system /
+BlinkMacSystemFont / Helvetica Neue / ui-sans-serif on purpose: Mac Chrome's .SF NS
+renders diacritics incorrectly (stacks them on a dotted-i instead of replacing the dot),
+and Helvetica Neue has the same problem. Per-font notes:
+  - "Segoe UI": absent on Mac, nice on Windows — keep it first.
+  - Arial: what Mac Chrome lands on; correct diacritics, if not too pleasing.
+  - "Noto Sans" / "Noto Sans Wancho": glyph-coverage catch-alls (not loaded by us; used
+    if the user happens to have them — load specifically if missing-glyph issues arise).
+  - sans-serif fallback, then the emoji catch-all families.
 */
 
 :root {

@@ -49,7 +49,7 @@
 
   {#each entry.senses || [] as sense, index (sense.id)}
     <div></div>
-    {#if entry.senses.length > 1}<span class="text-sm">{index + 1}.</span>{/if}
+    {#if entry.senses.length > 1}<span class="sense-index">{index + 1}.</span>{/if}
     {#if selectedFields.parts_of_speech && sense.parts_of_speech}<i>{add_periods_and_comma_separate_parts_of_speech(sense.parts_of_speech)}</i>{/if}
     {#if selectedFields.gloss && sense.glosses}
       <span>
@@ -66,7 +66,7 @@
       {#if semantic_domains.length}
         <div>
           {#if showLabels}
-            <span class="italic text-[80%]">
+            <span class="field-label">
               {$page.data.t('entry_field.semantic_domains')}:
             </span>
           {/if}
@@ -78,7 +78,7 @@
     {#if selectedFields.noun_class && sense.noun_class}
       <div>
         {#if showLabels}
-          <span class="italic text-[80%]">{$page.data.t('entry_field.noun_class')}: </span>
+          <span class="field-label">{$page.data.t('entry_field.noun_class')}: </span>
         {/if}
         {sense.noun_class}
       </div>
@@ -87,7 +87,7 @@
     {#if selectedFields.plural_form && sense.plural_form}
       <div>
         {#if showLabels}
-          <span class="italic text-[80%]">{$page.data.t('entry_field.plural_form')}: </span>
+          <span class="field-label">{$page.data.t('entry_field.plural_form')}: </span>
         {/if}
         {sense.plural_form?.default}
       </div>
@@ -96,7 +96,7 @@
     {#if selectedFields.variant && sense.variant}
       <div>
         {#if showLabels}
-          <span class="italic text-[80%]">{$page.data.t('entry_field.variant')}: </span>
+          <span class="field-label">{$page.data.t('entry_field.variant')}: </span>
         {/if}
         {sense.variant?.default}
       </div>
@@ -113,7 +113,7 @@
   {#if selectedFields.custom_tags && entry.tags?.length}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('print.tags')}:</span>
+        <span class="field-label">{$page.data.t('print.tags')}:</span>
       {/if}
       {entry.tags.map(tag => tag.name).join(', ')}
     </div>
@@ -122,7 +122,7 @@
   {#if selectedFields.notes && entry.main.notes}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('entry_field.notes')}:</span>
+        <span class="field-label">{$page.data.t('entry_field.notes')}:</span>
       {/if}
       {@html sanitize(entry.main.notes.default)}
     </div>
@@ -131,7 +131,7 @@
   {#if selectedFields.linguistic_history && entry.main.linguistic_history}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('entry_field.linguistic_history')}:</span>
+        <span class="field-label">{$page.data.t('entry_field.linguistic_history')}:</span>
       {/if}
       {entry.main.linguistic_history.default}
     </div>
@@ -140,7 +140,7 @@
   {#if selectedFields.dialects && entry.dialects?.length}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t(`entry_field.dialects`)}:</span>
+        <span class="field-label">{$page.data.t(`entry_field.dialects`)}:</span>
       {/if}
       {entry.dialects.map(dialect => dialect.name.default).join(', ')}
     </div>
@@ -149,7 +149,7 @@
   {#if selectedFields.interlinearization && entry.main.interlinearization}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t(`entry_field.interlinearization`)}:</span>
+        <span class="field-label">{$page.data.t(`entry_field.interlinearization`)}:</span>
       {/if}
       {entry.main.interlinearization}
     </div>
@@ -158,7 +158,7 @@
   {#if selectedFields.morphology && entry.main.morphology}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t(`entry_field.morphology`)}:</span>
+        <span class="field-label">{$page.data.t(`entry_field.morphology`)}:</span>
       {/if}
       {entry.main.morphology}
     </div>
@@ -167,7 +167,7 @@
   {#if selectedFields.sources && entry.main.sources}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('entry_field.sources')}: </span>
+        <span class="field-label">{$page.data.t('entry_field.sources')}: </span>
       {/if}
       {entry.main.sources.join(', ')}
     </div>
@@ -176,7 +176,7 @@
   {#if selectedFields.speaker && first_audio?.speakers?.[0].name}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('entry_field.speaker')}: </span>
+        <span class="field-label">{$page.data.t('entry_field.speaker')}: </span>
       {/if}
       {first_audio.speakers[0].name}
     </div>
@@ -186,7 +186,7 @@
 {#if selectedFields.photo && first_photo}
   <!-- max-height keeps tall images from spilling onto 2nd page when printing single column w/ images at 100% width; -->
   <img
-    class="block mb-1 mt-1px"
+    class="entry-photo"
     style="width:{imagePercent}%; max-height: 100vh;"
     src={image_src(first_photo.serving_url, 's0')}
     alt={entry.main.lexeme.default} />
@@ -199,3 +199,21 @@
       value={`livingdictionaries.app/${dictionary.id}/entry/${entry.id}`} />
   {/await}
 {/if}
+
+<style>
+  .sense-index {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .field-label {
+    font-style: italic;
+    font-size: 80%;
+  }
+
+  .entry-photo {
+    display: block;
+    margin-bottom: 0.25rem;
+    margin-top: 1px;
+  }
+</style>

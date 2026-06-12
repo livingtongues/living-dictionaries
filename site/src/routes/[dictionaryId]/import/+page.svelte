@@ -6,36 +6,34 @@
   const { dictionary } = $derived(data)
 </script>
 
-<div class="max-w-screen-md ml-4">
-  <div class="p-2">
-    <h3
-      class="mb-6 text-3xl leading-8 font-bold tracking-tight text-gray-900
-        sm:text-4xl sm:leading-10">
+<div style="max-width: 768px; margin-left: 1rem">
+  <div style="padding: 0.5rem">
+    <h3 class="import-heading">
       {$page.data.t('import_page.import')}: {dictionary.name}
     </h3>
 
-    <p class="mb-3">
+    <p style="margin-bottom: 0.75rem">
       {$page.data.t('import_page.instructions_1')}
     </p>
-    <ol class="py-3 px-5">
-      <li class="list-decimal mb-3">{$page.data.t('import_page.instructions_2')}</li>
-      <li class="list-decimal mb-3">{$page.data.t('import_page.instructions_3')}</li>
+    <ol style="padding: 0.75rem 1.25rem">
+      <li class="import-step">{$page.data.t('import_page.instructions_2')}</li>
+      <li class="import-step">{$page.data.t('import_page.instructions_3')}</li>
     </ol>
-    <p class="mb-3">
+    <p style="margin-bottom: 0.75rem">
       {$page.data.t('import_page.instructions_4')}
     </p>
   </div>
-  <div class="flex justify-between">
+  <div style="display: flex; justify-content: space-between">
     <Button form="filled" type="button" target="_blank" href="https://docs.google.com/spreadsheets/d/1Bqy1q_XZzlZLDM_glTxQ9gw0Pb5JEUssqQFtINxbwzY/edit#gid=1392642957">
       {$page.data.t('import_page.template_link')}
     </Button>
     <ShowHide>
       {#snippet children({ show, toggle })}
         <Button onclick={toggle}>
-          <span class="lg:inline">
+          <span>
             <i class="far fa-comment"></i>
           </span>
-          <span class="ml-1 sm:inline">
+          <span style="margin-left: 0.25rem">
             {$page.data.t('header.contact_us')}
           </span>
         </Button>
@@ -49,3 +47,26 @@
   </div>
   <!-- <p class="m-10 text-xl font-semibold">{$page.data.t('import_page.no_imports')}</p> -->
 </div>
+
+<style>
+  .import-heading {
+    margin-bottom: 1.5rem;
+    font-size: 1.875rem;
+    line-height: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--color); /* ≈ gray-900 */
+  }
+
+  @media (min-width: 640px) {
+    .import-heading {
+      font-size: 2.25rem;
+      line-height: 2.5rem;
+    }
+  }
+
+  .import-step {
+    list-style-type: decimal;
+    margin-bottom: 0.75rem;
+  }
+</style>

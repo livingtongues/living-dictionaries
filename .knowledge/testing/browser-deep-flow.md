@@ -84,6 +84,9 @@ drives the actual store in-page via `globalThis.__ld_dict_connections.<dict>.{co
    asserts persistence, then restores it to `haʔ` (mutate-then-save the live row + poll the server file
    until the sync lands). The phonetic-edit step is value-agnostic (targets the visible modal input, not
    the literal `haʔ`) so it's idempotent even if a prior crashed run left the field edited.
+6. **`dict-sync.mjs` (`test:sync`) is NOT net-zero** — it leaves `e_ja.phonetic = haʔ-SYNC-…` behind
+   (restore to `haʔ` manually after running). Its output also block-buffers (no incremental logs until
+   exit) — don't assume it's hung.
 
 ## Dev-server / fixture gotchas (livedb-scalar-field-migration, 2026-06-06b)
 - **OTP `send-code` rate limit is DISABLED in dev + e2e** (`expose_otp = dev || E2E_EXPOSE_OTP`) — the

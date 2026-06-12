@@ -4,6 +4,7 @@
   import { Button, Form } from '$lib/svelte-pieces'
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
   import { page } from '$app/stores'
+  import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
 
   interface Props {
     value?: string
@@ -125,7 +126,7 @@
 
 <Form onsubmit={save}>
   {#snippet children({ loading })}
-    <div class="rounded-md shadow-sm">
+    <div class="field-editor">
       {#if field === 'notes'}
         {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
           <Keyman fixed target=".ck-editor__editable_inline" canChooseKeyboard position="bottom">
@@ -141,7 +142,7 @@
             use:autofocus
             bind:value
             class:sompeng={isSompeng}
-            class="form-input block w-full pr-16" />
+            class="form-input keyboard-input" />
         </Keyman>
       {:else if field === 'local_orthography' || field === 'lexeme' || field === 'linguistic_history'}
         <Keyman fixed canChooseKeyboard>
@@ -153,18 +154,18 @@
             use:autofocus
             bind:value
             class:sompeng={isSompeng}
-            class="form-input block w-full pr-16" />
+            class="form-input keyboard-input" />
         </Keyman>
       {:else if field === 'phonetic'}
         {#await import('$lib/components/keyboards/ipa/IpaKeyboard.svelte') then { default: IpaKeyboard }}
-          <div class="mt-2">
+          <div style="margin-top: 0.5rem">
             <IpaKeyboard on_ipa_change={new_value => value = new_value}>
               <input
                 dir="ltr"
                 type="text"
                 use:autofocus
                 bind:value
-                class="form-input block w-full" />
+                class="form-input plain-input" />
             </IpaKeyboard>
           </div>
         {/await}
@@ -175,13 +176,13 @@
           type="text"
           use:autofocus
           bind:value
-          class="form-input block w-full" />
+          class="form-input plain-input" />
       {/if}
 
       {#if field === 'interlinearization'}
-        <div class="mt-3 text-sm hidden md:block"></div>
+        <div class="interlinear-gap"></div>
         <Button
-          class="mt-1"
+          class="edit-helper-button"
           size="sm"
           form="simple"
           onclick={() => (value = smallCapsSelection(inputEl))}>Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
@@ -189,12 +190,12 @@
 
       {#if field === 'scientific_names'}
         <Button
-          class="mt-1"
+          class="edit-helper-button"
           size="sm"
           form="simple"
           onclick={() => (value = italicizeSelection(inputEl))}><i>Italicize</i> selection</Button>
         {#if value.includes('<i>')}
-          <div class="tw-prose mt-2 p-1 shadow bg-gray-200">
+          <div class="tw-prose italic-preview">
             {@html sanitize(value)}
           </div>
         {/if}
@@ -205,11 +206,11 @@
       <Button disabled={loading} onclick={on_close} form="simple" color="black">
         {$page.data.t('misc.cancel')}
       </Button>
-      <div class="w-1"></div>
+      <div style="width: 0.25rem"></div>
       {#if addingLexeme}
         <Button {loading} type="submit" form="filled">
           {$page.data.t('misc.next')}
-          <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-.5"></span>
+          <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.125rem" />
         </Button>
       {:else}
         <Button {loading} type="submit" form="filled">
@@ -221,7 +222,49 @@
 </Form>
 
 <style>
-  :global(.ck-editor__editable_inline) {
-    --at-apply: md:min-h-50vh;
+  @media (min-width: 768px) {
+    :global(.ck-editor__editable_inline) {
+      min-height: 50vh;
+    }
+  }
+
+  .field-editor {
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
+  }
+
+  .field-editor :global(.keyboard-input) {
+    display: block;
+    width: 100%;
+    padding-right: 4rem;
+  }
+
+  .field-editor :global(.plain-input) {
+    display: block;
+    width: 100%;
+  }
+
+  .interlinear-gap {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .interlinear-gap {
+      display: block;
+    }
+  }
+
+  .field-editor :global(.edit-helper-button) {
+    margin-top: 0.25rem;
+  }
+
+  .italic-preview {
+    margin-top: 0.5rem;
+    padding: 0.25rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow */
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
   }
 </style>

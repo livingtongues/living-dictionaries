@@ -31,22 +31,21 @@
   showWidth="md"
   open={show_mobile_filters}
   {on_close}>
-  <section
-    class="md:w-52 md:sticky md:top-24 h-100vh h-100dvh! md:max-h-[calc(100vh-107px)] print:hidden p-4 pl-3 md:p-0 flex flex-col">
+  <section class="filters">
     {#if result_facets}
-      <header class="flex items-center justify-between space-x-3 mb-3 pl-1">
-        <h2 class="text-lg leading-7 font-medium text-gray-900">
+      <header class="filters-header">
+        <h2>
           {$page.data.t('entry.filters')}
         </h2>
         <ClearFilters {search_params} />
-        <Button onclick={on_close} size="sm" form="filled" class="md:hidden">
+        <Button onclick={on_close} size="sm" form="filled" class="view-entries-button">
           {$page.data.t('entry.view_entries')}
         </Button>
       </header>
-      <div class="relative flex-1 overflow-y-auto overflow-x-clip pl-1">
-        <h4 class="text-sm font-semibold uppercase text-gray-700">Typo Tolerance</h4>
+      <div class="filter-scroll">
+        <h4>Typo Tolerance</h4>
         <input
-          class="w-full"
+          style="width: 100%"
           type="range"
           value={$search_params.tolerance || 0}
           oninput={(e) => {
@@ -59,7 +58,7 @@
           step="1"
           list="tickmarks" />
 
-        <datalist class="flex text-xs w-full px-.25 justify-between -mt-1" id="tickmarks">
+        <datalist class="tickmarks" id="tickmarks">
           <option value="0" label="0"></option>
           <option value="1" label="1"></option>
           <option value="2" label="2"></option>
@@ -68,7 +67,7 @@
           <option value="5" label="5"></option>
         </datalist>
 
-        <hr class="my-2" />
+        <hr class="tolerance-divider" />
 
         {#if result_facets._parts_of_speech.count}
           <FilterList
@@ -241,5 +240,87 @@
     align-items: center;
     width: 1em;
     height: 1em;
+  }
+
+  .filters {
+    height: 100vh;
+    height: 100dvh; /* (was h-100vh + h-100dvh! — dvh wins where supported) */
+    padding: 1rem;
+    padding-left: 0.75rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (min-width: 768px) {
+    .filters {
+      width: 13rem;
+      position: sticky;
+      top: 6rem;
+      height: 100vh;
+      height: 100dvh;
+      max-height: calc(100vh - 107px);
+      padding: 0;
+    }
+
+    .filters :global(.view-entries-button) {
+      display: none !important;
+    }
+  }
+
+  @media print {
+    .filters {
+      display: none;
+    }
+  }
+
+  .filters-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding-left: 0.25rem;
+  }
+
+  .filters-header > :global(:not([hidden]) ~ :not([hidden])) {
+    margin-left: 0.75rem; /* space-x-3 */
+  }
+
+  h2 {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 500;
+    color: var(--color); /* ≈ gray-900 */
+  }
+
+  .filter-scroll {
+    position: relative;
+    flex: 1 1 0%;
+    overflow-y: auto;
+    overflow-x: clip;
+    padding-left: 0.25rem;
+  }
+
+  h4 {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+  }
+
+  .tickmarks {
+    display: flex;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    width: 100%;
+    padding-left: 0.0625rem;
+    padding-right: 0.0625rem;
+    justify-content: space-between;
+    margin-top: -0.25rem;
+  }
+
+  .tolerance-divider {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
   }
 </style>

@@ -58,7 +58,7 @@
   <input
     type="file"
     accept="audio/*"
-    class="hidden"
+    style="display: none"
     oninput={(e) => {
       // @ts-ignore
       handleAudio(e.target.files)
@@ -72,13 +72,44 @@
 
 <style>
   label {
-    --at-apply: flex justify-center items-center px-3 py-2 border font-medium
-  cursor-pointer focus:outline-none border-green-300
-  focus:ring focus:ring-green-300 active:bg-green-200 transition ease-in-out
-  duration-150 rounded hover:bg-green-100 text-green-700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-width: 1px;
+    font-weight: 500;
+    cursor: pointer;
+    border-color: rgb(134 239 172); /* green-300 */
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+    border-radius: 0.25rem;
+    color: rgb(21 128 61); /* green-700 */
+  }
+
+  label:hover {
+    background-color: rgb(220 252 231); /* green-100 */
+  }
+
+  label:active {
+    background-color: rgb(187 247 208); /* green-200 */
+  }
+
+  label:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    --un-ring-width: 3px;
+    --un-ring-offset-shadow: var(--un-ring-inset) 0 0 0 var(--un-ring-offset-width) var(--un-ring-offset-color);
+    --un-ring-shadow: var(--un-ring-inset) 0 0 0 calc(var(--un-ring-width) + var(--un-ring-offset-width)) var(--un-ring-color);
+    box-shadow: var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);
+    --un-ring-opacity: 1;
+    --un-ring-color: rgb(134 239 172 / var(--un-ring-opacity)); /* focus:ring-green-300 */
   }
 
   .dragging {
-    --at-apply: bg-green-200 border-green-300 text-green-800 border-dashed;
+    background-color: rgb(187 247 208); /* green-200 */
+    border-color: rgb(134 239 172); /* green-300 */
+    color: rgb(22 101 52); /* green-800 */
+    border-style: dashed;
   }
 </style>

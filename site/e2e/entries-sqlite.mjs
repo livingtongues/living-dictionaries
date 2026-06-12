@@ -55,7 +55,7 @@ async function main() {
   browser = await launch()
   const page = await browser.newPage()
   const errors = []
-  const ignore = /mapbox|cache\.livingdictionaries|Error loading cached index|status of 403/i
+  const ignore = /mapbox|cache\.livingdictionaries|Error loading cached index|status of 403|identity provider|FedCM|GSI_LOGGER/i
   page.on('pageerror', err => { if (!ignore.test(err.message)) errors.push(err.message) })
   page.on('console', msg => { if (msg.type() === 'error' && !ignore.test(msg.text())) errors.push(`console: ${msg.text()}`) })
 

@@ -267,14 +267,14 @@ async function main() {
 
   // ── C: operations.ts (dbOperations) over $app/state — add/delete sense via UI ─
   await page.evaluate(() => {
-    const add = [...document.querySelectorAll('button')].find(b => b.offsetParent !== null && b.innerHTML.includes('i-system-uicons-versions'))
+    const add = [...document.querySelectorAll('button.add-sense-button')].find(b => b.offsetParent !== null)
     if (!add) throw new Error('Add Sense button not found')
     add.click()
   })
   await page.waitForFunction(() => document.body.innerText.includes('Sense 2'), { timeout: 10000 })
   assert((await dbq(page, 'SELECT count(*) c FROM senses WHERE entry_id = ?', ['e_ja']))[0].c >= 2, 'insert_sense (dbOperations) did not add a sense')
   await page.evaluate(() => {
-    const dels = [...document.querySelectorAll('button')].filter(b => b.offsetParent !== null && b.innerHTML.includes('i-fa-solid-times'))
+    const dels = [...document.querySelectorAll('button.delete-sense-button')].filter(b => b.offsetParent !== null)
     dels[dels.length - 1].click()
   })
   await page.waitForFunction(() => !document.body.innerText.includes('Sense 2'), { timeout: 10000 })

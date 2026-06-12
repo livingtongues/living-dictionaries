@@ -16,8 +16,8 @@
 <ShowHide>
   {#snippet children({ show, set, toggle })}
     <div
-      class:cursor-pointer={can_edit}
-      class="h-full"
+      class:editable={can_edit}
+      class="speaker-cell"
       style="padding: 0.1em 0.25em"
       onclick={() => set(can_edit)}>
       {speaker_name}
@@ -31,3 +31,13 @@
     {/if}
   {/snippet}
 </ShowHide>
+
+<style>
+  .speaker-cell {
+    height: 100%;
+  }
+
+  .editable {
+    cursor: pointer;
+  }
+</style>

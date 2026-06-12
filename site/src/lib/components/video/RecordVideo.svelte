@@ -30,13 +30,13 @@
         }}>
         {#snippet children({ start, pause, stop, recordingTime, state })}
           {#if state === 'inactive'}
-            <Button onclick={start} color="red" class="w-full h-24 mt-1">
+            <Button onclick={start} color="red" class="record-full record-tall record-spaced">
               {page.data.t('audio.tap_to_record')}
             </Button>
 
             {#if microphones.length > 1 && selectedMicrophone}
               <select
-                class="p-1 text-sm max-w-full mt-1"
+                class="device-select"
                 value={selectedMicrophone.deviceId}
                 onchange={e =>
                   // @ts-ignore
@@ -50,7 +50,7 @@
             {/if}
             {#if cameras.length > 1 && selectedCamera}
               <select
-                class="p-1 text-sm max-w-full mt-1"
+                class="device-select"
                 value={selectedCamera.deviceId}
                 onchange={e =>
                   // @ts-ignore
@@ -70,11 +70,11 @@
                 videoBlob = await stop()
               }}
               color="red"
-              class="w-full h-24 mt-1">
-              <div class="font-semibold font-mono text-2xl">{recordingTime}s</div>
+              class="record-full record-tall record-spaced">
+              <div class="recording-time">{recordingTime}s</div>
               {page.data.t('audio.stop_recording')}
             </Button>
-            <Button class="w-full mt-1" color="black" onclick={pause}>{state === 'recording' ? 'Pause' : 'Unpause'}</Button>
+            <Button class="record-full record-spaced" color="black" onclick={pause}>{state === 'recording' ? 'Pause' : 'Unpause'}</Button>
           {/if}
         {/snippet}
       </Recorder>
@@ -82,12 +82,12 @@
     {/snippet}
     {#snippet denied()}
       <div>
-        <div class="text-red-500">
+        <div class="denied-note">
           <!-- audio.undo_permission_denied_explanation needs split -->
           Permission to access media was denied.
         </div>
         <Button
-          class="mt-2"
+          class="record-spaced-2"
           form="filled"
           href="https://www.google.com/search?q=How+do+I+enable+microphone+access"
           target="_blank"
@@ -97,12 +97,12 @@
 
     {#snippet dismissed()}
       <div>
-        <div class="text-red-500">
+        <div class="denied-note">
           If you previously dismissed the browser's request, please reload and click 'Yes' when your
           browser asks for permission.
         </div>
         <div>
-          <Button form="filled" class="mt-2" onclick={() => location.reload()}>{page.data.t('audio.reload')}</Button>
+          <Button form="filled" class="record-spaced-2" onclick={() => location.reload()}>{page.data.t('audio.reload')}</Button>
         </div>
       </div>
     {/snippet}
@@ -116,3 +116,40 @@
     videoBlob = undefined
   } })}
 {/if}
+
+<style>
+  :global(.record-full) {
+    width: 100%;
+  }
+
+  :global(.record-tall) {
+    height: 6rem;
+  }
+
+  :global(.record-spaced) {
+    margin-top: 0.25rem;
+  }
+
+  :global(.record-spaced-2) {
+    margin-top: 0.5rem;
+  }
+
+  .device-select {
+    padding: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    max-width: 100%;
+    margin-top: 0.25rem;
+  }
+
+  .recording-time {
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .denied-note {
+    color: rgb(239 68 68); /* red-500 */
+  }
+</style>

@@ -31,17 +31,62 @@
 
 {#if can_edit}
   {#await import('./AddEntry.svelte') then { default: AddEntry }}
-    <AddEntry {add_entry} class="text-nowrap sticky bottom-3 z-10 !md:hidden !print:hidden" />
+    <AddEntry {add_entry} class="add-entry-floating" />
   {/await}
 {/if}
 
-<nav class="md:sticky md:bottom-0 bg-white pt-2 pb-1 flex items-center print:hidden">
+<nav>
   <PaginationButtons pages={number_of_pages} current_page={page_from_url || 1} {go_to_page}>
     {#if can_edit}
-      <div class="w-3 mr-auto"></div>
+      <div style="width: 0.75rem; margin-right: auto"></div>
       {#await import('./AddEntry.svelte') then { default: AddEntry }}
-        <AddEntry {add_entry} class="text-nowrap hidden md:block" />
+        <AddEntry {add_entry} class="add-entry-inline" />
       {/await}
     {/if}
   </PaginationButtons>
 </nav>
+
+<style>
+  /* AddEntry renders these classes on its own root (no wrapper here to scope under) */
+  :global(.add-entry-floating) {
+    text-wrap: nowrap;
+    position: sticky;
+    bottom: 0.75rem;
+    z-index: 10;
+  }
+
+  :global(.add-entry-inline) {
+    text-wrap: nowrap;
+    display: none;
+  }
+
+  nav {
+    background-color: var(--background);
+    padding-top: 0.5rem;
+    padding-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+  }
+
+  @media (min-width: 768px) {
+    nav {
+      position: sticky;
+      bottom: 0;
+    }
+
+    :global(.add-entry-floating) {
+      display: none !important;
+    }
+
+    :global(.add-entry-inline) {
+      display: block;
+    }
+  }
+
+  @media print {
+    nav,
+    :global(.add-entry-floating) {
+      display: none !important;
+    }
+  }
+</style>

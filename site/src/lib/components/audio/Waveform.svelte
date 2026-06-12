@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
   import { Button } from '$lib/svelte-pieces'
+  import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
 
   interface Props {
     audioUrl?: string
@@ -52,16 +53,22 @@
   })
 </script>
 
-<div class="flex items-center" style="direction: ltr;">
+<div style="display: flex; align-items: center; direction: ltr;">
   <Button
-    class="mr-2"
+    class="waveform-play-button"
     color={playing ? 'green' : 'primary'}
     form="filled"
     onclick={startStop}>
-    <span class="i-material-symbols-hearing my-1" style="width: 2em; height: 2em;"></span>
+    <IconMaterialSymbolsHearing class="icon-inline" style="margin-top: 0.25rem; margin-bottom: 0.25rem; width: 2em; height: 2em;" />
   </Button>
-  <div class="flex-grow" bind:this={waveform}></div>
+  <div style="flex-grow: 1" bind:this={waveform}></div>
 </div>
+
+<style>
+  :global(.waveform-play-button) {
+    margin-right: 0.5rem;
+  }
+</style>
 
 <!-- wavesurfer.playPause(); -->
 

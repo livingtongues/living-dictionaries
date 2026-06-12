@@ -4,6 +4,9 @@
   import type { DictionaryView, IPoint } from '$lib/types'
   import { Button, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
+  import IconCarbonSearch from '~icons/carbon/search'
+  import IconLaTimes from '~icons/la/times'
+  import IconFa6SolidChevronLeft from '~icons/fa6-solid/chevron-left'
 
   interface Props {
     dictionaries?: DictionaryView[]
@@ -75,32 +78,29 @@
 
 <!-- To Consider: for longer dictionaries on mobile, if we want to make the map still show when showing dictionary details, we need to add a media query (less than md) which sets this div's max-height: 75vh and adds overflow-y-auto -->
 
-<div class="flex flex-col sm:w-72">
+<div class="search-root">
   {#if !currentDictionary}
-    <div class="relative text-xl mt-2 sm:mb-2">
-      <div
-        class="absolute inset-y-0 left-0 pl-5 flex items-center
-          pointer-events-none text-gray-500">
-        <span class="i-carbon-search"></span>
+    <div class="search-box">
+      <div class="search-icon">
+        <IconCarbonSearch class="icon-inline" />
       </div>
       <input
         type="text"
         bind:value={searchString}
-        class="form-input w-full pl-10 pr-8 py-1 rounded-lg
-          text-gray-900 placeholder-gray-500 shadow"
+        class="form-input"
         placeholder={$page.data.t('home.find_dictionary')}
         onfocus={() => (searchFocused = true)}
         onblur={delayedSearchClose} />
       {#if searchString || searchFocused}
-        <button type="button" onclick={() => (searchString = '')} class="absolute inset-y-0 right-0 px-4 flex items-center focus:outline-none">
-          <span class="i-la-times text-gray-400"></span>
+        <button type="button" onclick={() => (searchString = '')} class="clear-button">
+          <IconLaTimes class="icon-inline" style="color: color-mix(in srgb, var(--color) 45%, var(--background))" />
         </button>
       {/if}
     </div>
 
     <div onclick={keepSearchOpen}>
       {#if searchString}
-        <div class="text-sm text-gray-500 px-3 my-1">
+        <div class="result-count">
           <i> {filteredDictionaries.length}/{dictionaries.length} </i>
         </div>
       {/if}
@@ -141,22 +141,20 @@
         </button>
       {/each} -->
       {#if !filteredDictionaries.length}
-        <div class="p-3">
+        <div style="padding: 0.75rem">
           <i> {$page.data.t('home.no_results')} </i>
         </div>
       {/if}
     </div>
 
-    <div
-      class="flex flex-wrap sm:flex-col overflow-y-auto
-        overflow-x-hidden px-2 pb-2">
+    <div class="dict-buttons">
       <ShowHide>
         {#snippet children({ show, toggle })}
           {#if !searchFocused && my_dictionaries}
             {#each my_dictionaries as dictionary, i (dictionary.id)}
               {#if show || i < 3}
                 <Button
-                  class="mb-1 mr-1"
+                  class="dict-button"
                   color="black"
                   onclick={() => setCurrentDictionary(dictionary)}>
                   {dictionary?.name}
@@ -177,13 +175,13 @@
       </ShowHide>
     </div>
   {:else}
-    <div class="p-2 flex flex-col flex-1">
+    <div class="selected-pane">
       <button
         type="button"
-        class="flex flex-start items-center px-2 py-2 -mx-1 rounded hover:bg-gray-200"
+        class="back-button"
         onclick={clearDictionary}>
-        <span class="i-fa6-solid-chevron-left rtl-x-flip"></span>
-        <div class="w-1"></div>
+        <IconFa6SolidChevronLeft class="icon-inline rtl-x-flip" />
+        <div style="width: 0.25rem"></div>
         {$page.data.t('misc.back')}
       </button>
       {#await import('./SelectedDict.svelte') then { default: SelectedDict }}
@@ -192,3 +190,111 @@
     </div>
   {/if}
 </div>
+
+<style>
+  .search-root {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .search-box {
+    position: relative;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    margin-top: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .search-root {
+      width: 18rem;
+    }
+
+    .search-box {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .search-icon {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    padding-left: 1.25rem;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+    color: var(--color-secondary); /* ≈ gray-500 */
+  }
+
+  /* placeholder color comes from the forms preflight (gray-500) */
+  .search-box input {
+    width: 100%;
+    padding: 0.25rem 2rem 0.25rem 2.5rem;
+    border-radius: 0.5rem;
+    color: var(--color);
+    --un-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow */
+    box-shadow: var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);
+  }
+
+  .clear-button {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .clear-button:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  .result-count {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--color-secondary); /* ≈ gray-500 */
+    padding: 0 0.75rem;
+    margin: 0.25rem 0;
+  }
+
+  .dict-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 0.5rem 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .dict-buttons {
+      flex-direction: column;
+    }
+  }
+
+  .dict-buttons :global(.dict-button) {
+    margin-bottom: 0.25rem;
+    margin-right: 0.25rem;
+  }
+
+  .selected-pane {
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0%;
+  }
+
+  .back-button {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+    border-radius: 0.25rem;
+  }
+
+  .back-button:hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
+  }
+</style>

@@ -1,6 +1,10 @@
 <script lang="ts">
   import { page } from '$app/stores'
   import type { View } from '$lib/search/types'
+  import IconFaSolidList from '~icons/fa-solid/list'
+  import IconFaTable from '~icons/fa/table'
+  import IconIcOutlineImage from '~icons/ic/outline-image'
+  import IconFaPrint from '~icons/fa/print'
 
   interface Props {
     view: View
@@ -10,44 +14,44 @@
   let { view = $bindable(), can_print = false }: Props = $props()
 </script>
 
-<div class="flex text-gray-600 font-medium text-sm">
+<div class="switcher">
   <button
     type="button"
     onclick={() => view = null}
     class:active={!view}>
-    <span class="i-fa-solid-list -mt-1"></span>
-    <span class="hidden md:inline">
+    <IconFaSolidList class="icon-inline" style="margin-top: -0.25rem" />
+    <span class="view-label">
       {$page.data.t('entry.list')}
     </span>
   </button>
-  <div class="hidden md:block w-1"></div>
+  <div class="view-gap"></div>
   <button
     type="button"
     onclick={() => view = 'table'}
     class:active={view === 'table'}>
-    <span class="i-fa-table -mt-1"></span>
-    <span class="hidden md:inline">
+    <IconFaTable class="icon-inline" style="margin-top: -0.25rem" />
+    <span class="view-label">
       {$page.data.t('entry.table')}
     </span>
   </button>
-  <div class="hidden md:block w-1"></div>
+  <div class="view-gap"></div>
   <button
     type="button"
     onclick={() => view = 'gallery'}
     class:active={view === 'gallery'}>
-    <span class="i-ic-outline-image -mt-1 text-lg"></span>
-    <span class="hidden md:inline">
+    <IconIcOutlineImage class="icon-inline" style="margin-top: -0.25rem; font-size: 1.125rem" />
+    <span class="view-label">
       {$page.data.t('entry.gallery')}
     </span>
   </button>
   {#if can_print}
-    <div class="hidden md:block w-1"></div>
+    <div class="view-gap"></div>
     <button
       type="button"
       onclick={() => view = 'print'}
       class:active={view === 'print'}>
-      <span class="i-fa-print -mt-1"></span>
-      <span class="hidden md:inline">
+      <IconFaPrint class="icon-inline" style="margin-top: -0.25rem" />
+      <span class="view-label">
         {$page.data.t('entry.print')}
       </span>
     </button>
@@ -55,10 +59,44 @@
 </div>
 
 <style>
-  button {
-    --at-apply: hover:bg-gray-100 px-2 py-2 rounded;
+  .switcher {
+    display: flex;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    font-weight: 500;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
+
+  button {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+  }
+
+  button:hover {
+    background-color: var(--surface); /* ≈ gray-100 */
+  }
+
   .active {
-    --at-apply: bg-gray-200 border;
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
+    border: 1px solid var(--border-color);
+  }
+
+  .view-label,
+  .view-gap {
+    display: none;
+  }
+
+  .view-gap {
+    width: 0.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .view-label {
+      display: inline;
+    }
+
+    .view-gap {
+      display: block;
+    }
   }
 </style>

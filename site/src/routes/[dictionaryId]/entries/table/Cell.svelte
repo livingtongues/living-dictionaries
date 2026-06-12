@@ -16,6 +16,8 @@
   import Image from '$lib/components/image/Image.svelte'
   import type { DbOperations } from '$lib/dbOperations'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
+  import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
+  import IconIcOutlineCameraAlt from '~icons/ic/outline-camera-alt'
 
   interface Props {
     column: IColumn
@@ -51,9 +53,9 @@
 
 <div
   class:sompeng={column.display === 'Sompeng'}
-  class="h-full w-full flex cell">
+  class="cell">
   {#if column.field === 'audio'}
-    <Audio class="h-full text-sm" context="table" {can_edit} sound_file={entry.audios?.[0] || null} {entry} />
+    <Audio class="table-audio-cell" context="table" {can_edit} sound_file={entry.audios?.[0] || null} {entry} />
   {:else if column.field === 'photo'}
     {#if first_photo}
       <Image
@@ -68,12 +70,12 @@
       <!-- <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col"> -->
       <ShowHide>
         {#snippet children({ show, toggle })}
-          <div class="text-gray-600 text-center cursor-pointer" onclick={toggle}>
-            <span class="hidden md:inline">
-              <span class="i-ic-outline-cloud-upload text-2xl"></span>
+          <div class="photo-upload" onclick={toggle}>
+            <span class="desktop-only">
+              <IconIcOutlineCloudUpload class="icon-inline" style="font-size: 1.5rem" />
             </span>
-            <span class="md:hidden">
-              <span class="i-ic-outline-camera-alt text-xl"></span>
+            <span class="mobile-only">
+              <IconIcOutlineCameraAlt class="icon-inline" style="font-size: 1.25rem" />
             </span>
           </div>
 
@@ -176,7 +178,7 @@
             })
           }} />
       {:else}
-        <div onclick={() => alert('First add example sentence.')} class="h-full"></div>
+        <div onclick={() => alert('First add example sentence.')} style="height: 100%"></div>
       {/if}
     {/if}
   {:else if column.field === 'scientific_names'}
@@ -270,6 +272,38 @@
   /* .hide-scrollbar::-webkit-scrollbar {
     display: none;
   } */
+
+  .cell {
+    height: 100%;
+    width: 100%;
+    display: flex;
+  }
+
+  .cell :global(.table-audio-cell) {
+    height: 100%;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .photo-upload {
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .desktop-only {
+      display: inline;
+    }
+
+    .mobile-only {
+      display: none;
+    }
+  }
 
   :global(.cell > *) {
     flex: 1;

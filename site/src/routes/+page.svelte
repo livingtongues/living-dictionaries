@@ -17,6 +17,9 @@
   import { browser } from '$app/environment'
   import MyDictionaries from '$lib/components/home/MyDictionaries.svelte'
   import SearchDictionaries from '$lib/components/home/SearchDictionaries.svelte'
+  import IconFa6SolidChevronLeft from '~icons/fa6-solid/chevron-left'
+  import IconFaSolidList from '~icons/fa-solid/list'
+  import IconFaSolidPlus from '~icons/fa-solid/plus'
 
   interface Props {
     data: PageData
@@ -67,8 +70,8 @@
 
 <Header />
 
-<div class="flex flex-col md:flex-row">
-  <div class="md:w-72 px-2 flex flex-col">
+<div class="home-layout">
+  <div class="sidebar">
     {#if !selectedDictionary}
       <SearchDictionaries
         {dictionaries}
@@ -78,10 +81,10 @@
           my_dictionaries={$my_dictionaries}
           {setCurrentDictionary} />
       {:else}
-        <div class="lt-md:hidden flex flex-col">
+        <div class="featured">
           {#each featured_dictionaries as dictionary (dictionary.id)}
             <Button
-              class="mb-1"
+              class="featured-button"
               color="black"
               onclick={() => setCurrentDictionary(dictionary)}>
               {dictionary.name}
@@ -92,10 +95,10 @@
     {:else}
       <button
         type="button"
-        class="flex flex-start items-center px-2 py-2 -mx-1 rounded hover:bg-gray-200"
+        class="back-button"
         onclick={() => (selectedDictionaryId = null)}>
-        <span class="i-fa6-solid-chevron-left rtl-x-flip"></span>
-        <div class="w-1"></div>
+        <IconFa6SolidChevronLeft class="icon-inline rtl-x-flip" />
+        <div style="width: 0.25rem"></div>
         {$page.data.t('misc.back')}
       </button>
       {#await import('$lib/components/home/SelectedDict.svelte') then { default: SelectedDict }}
@@ -103,7 +106,7 @@
       {/await}
     {/if}
   </div>
-  <div class="relative h-50vh md:h-70vh md:flex-grow">
+  <div class="map-wrap">
     <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2} options={{ projection: 'globe' }} lat={+user_latitude} lng={+user_longitude}>
       {#if selectedDictionary?.coordinates}
         {#if selectedDictionary.coordinates.points}
@@ -125,7 +128,7 @@
         <ShowHide>
           {#snippet children({ show, toggle })}
             <CustomControl position="bottom-right">
-              <button type="button" class="whitespace-nowrap w-90px! px-2" onclick={toggle}>Toggle Private</button>
+              <button type="button" class="toggle-private" onclick={toggle}>Toggle Private</button>
             </CustomControl>
 
             {#if show && private_dictionaries.length}
@@ -150,35 +153,139 @@
   </div>
 </div>
 
-<!-- <div class="border-t border-gray-200"></div> -->
-<div class="w-full bg-gray-200 text-center">
+<div class="cta-band">
 
-  <div class="m-auto py-6 px-6 sm:px-8 text-2xl font-semibold text-center max-w-6xl">
+  <div class="banner-text">
     {$page.data.t('home.main_banner')}
   </div>
 
-  <div class="text-center">
+  <div style="text-align: center">
     <Button
       href="/dictionaries"
       color="black"
       size="lg"
-      class="mb-7">
-      <span class="i-fa-solid-list -mt-1"></span>
+      class="list-button">
+      <IconFaSolidList class="icon-inline" style="margin-top: -0.25rem" />
       {$page.data.t('home.list_of_dictionaries')}
     </Button>
   </div>
 </div>
 
-<div class="border-t border-gray-200"></div>
+<div class="divider"></div>
 
-<div class="text-center px-3 py-8">
+<div class="create-cta">
   <Button href="/create-dictionary" size="lg" color="black" form="filled">
-    <span class="i-fa-solid-plus -mt-1.25"></span>
+    <IconFaSolidPlus class="icon-inline" style="margin-top: -0.3125rem" />
     {$page.data.t('create.create_new_dictionary')}
   </Button>
 </div>
 
 <Footer />
+
+<style>
+  .home-layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .featured {
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (max-width: 767.9px) {
+    .featured {
+      display: none;
+    }
+  }
+
+  .featured :global(.featured-button) {
+    margin-bottom: 0.25rem;
+  }
+
+  .back-button {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+    border-radius: 0.25rem;
+  }
+
+  .back-button:hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
+  }
+
+  .map-wrap {
+    position: relative;
+    height: 50vh;
+  }
+
+  @media (min-width: 768px) {
+    .home-layout {
+      flex-direction: row;
+    }
+
+    .sidebar {
+      width: 18rem;
+    }
+
+    .map-wrap {
+      height: 70vh;
+      flex-grow: 1;
+    }
+  }
+
+  .map-wrap :global(.toggle-private) {
+    white-space: nowrap;
+    width: 90px !important;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .cta-band {
+    width: 100%;
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
+    text-align: center;
+  }
+
+  .banner-text {
+    margin: auto;
+    padding: 1.5rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 600;
+    text-align: center;
+    max-width: 72rem;
+  }
+
+  @media (min-width: 640px) {
+    .banner-text {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  .cta-band :global(.list-button) {
+    margin-bottom: 1.75rem;
+  }
+
+  .divider {
+    border-top: 1px solid var(--border-color); /* ≈ gray-200 */
+  }
+
+  .create-cta {
+    text-align: center;
+    padding: 2rem 0.75rem;
+  }
+</style>
 
 <SeoMetaTags
   title={$page.data.t('misc.LD')}

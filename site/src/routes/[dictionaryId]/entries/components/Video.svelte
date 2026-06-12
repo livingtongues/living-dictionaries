@@ -2,6 +2,7 @@
   import type { EntryData } from '$lib/types'
   import { ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
+  import IconBiCameraVideo from '~icons/bi/camera-video'
 
   interface Props {
     lexeme: string
@@ -16,11 +17,10 @@
 <ShowHide>
   {#snippet children({ show, toggle })}
     <div
-      class="{klass} hover:bg-gray-200 flex flex-col items-center
-        justify-center cursor-pointer select-none text-gray-800"
+      class="{klass} video-action"
       onclick={toggle}>
-      <span class="i-bi-camera-video text-xl mt-1"></span>
-      <div class="text-sm">
+      <IconBiCameraVideo class="icon-inline" style="font-size: 1.25rem; margin-top: 0.25rem" />
+      <div class="view-label">
         {$page.data.t('video.view')}
       </div>
     </div>
@@ -35,3 +35,24 @@
     {/if}
   {/snippet}
 </ShowHide>
+
+<style>
+  .video-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    color: var(--color); /* ≈ gray-800 */
+  }
+
+  .video-action:hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
+  }
+
+  .view-label {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+</style>

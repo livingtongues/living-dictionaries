@@ -6,6 +6,10 @@
   import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import { image_src } from '$lib/helpers/media'
+  import IconGgSpinner from '~icons/gg/spinner'
+  import IconTablerAi from '~icons/tabler/ai'
+  import IconFaSolidTimes from '~icons/fa-solid/times'
+  import IconFaTrashO from '~icons/fa/trash-o'
 
   interface Props {
     title: string
@@ -67,9 +71,9 @@
   }} />
 
 {#if !viewing}
-  <div class="h-full w-full relative">
+  <div class="image-wrap">
     <img
-      class="h-full w-full object-cover cursor-pointer"
+      class="thumb"
       onclick={load}
       in:receive|local={{ key }}
       out:send|local={{ key }}
@@ -82,9 +86,9 @@
         ? `h${height}`
         : 's0')} />
     {#if loading}
-      <span class="i-gg-spinner animate-spin absolute bottom-1 right-1 text-white"></span>
+      <IconGgSpinner class="icon-inline spinner" />
     {:else if photographer === 'AI'}
-      <span class="i-tabler:ai text-white absolute bottom-1 left-1 {page_context === 'gallery' ? 'text-6xl' : 'text-2xl'}"></span>
+      <IconTablerAi class="icon-inline ai-badge" style="font-size: {page_context === 'gallery' ? '3.75rem' : '1.5rem'}" />
     {/if}
   </div>
 {/if}
@@ -92,36 +96,32 @@
 {#if viewing}
   <div
     onclick={() => viewing = false}
-    class="fixed inset-0 md:p-3 flex flex-col items-center justify-center"
+    class="viewer"
     in:receive={{ key }}
     out:send={{ key }}
     style="background: rgba(0, 0, 0, 0.85); z-index: 51; will-change: transform;">
-    <div class="h-full flex flex-col justify-center">
-      <div
-        class="font-semibold text-white p-4 flex justify-between items-center
-          absolute top-0 inset-x-0 bg-opacity-25 bg-black">
+    <div class="viewer-inner">
+      <div class="viewer-header">
         <span onclick={stopPropagation(bubble('click'))}>{title}</span>
-        <span class="i-fa-solid-times p-3 cursor-pointer opacity-75 hover:opacity-100"></span>
+        <IconFaSolidTimes class="icon-inline viewer-close" style="font-size: 2.5rem" />
       </div>
       {#if photographer === 'AI'}
-        <div class="absolute bottom-1 left-10 text-white z-10">
-          <span class="i-tabler:ai text-7xl"></span>
-          <span class="align-sub text-xl">generated</span>
+        <div class="ai-fullscreen">
+          <IconTablerAi class="icon-inline" style="font-size: 4.5rem" />
+          <span style="vertical-align: sub; font-size: 1.25rem; line-height: 1.75rem">generated</span>
         </div>
       {/if}
-      <img class="object-contain max-h-full" alt="Image of {title}" src={fullscreenSource} />
+      <img class="full-img" alt="Image of {title}" src={fullscreenSource} />
       {#if photo_source}
-        <div class="text-white flex justify-between">
+        <div class="caption-row">
           <span>{photo_source}</span>
           {#if photographer !== 'AI'}<span>{photographer}</span>{/if}
         </div>
       {/if}
       {#if can_edit}
-        <div
-          class="p-4 flex justify-between
-            items-center absolute bottom-0 inset-x-0 bg-opacity-25 bg-black">
+        <div class="viewer-footer">
           <Button
-            class="ml-auto"
+            class="image-delete-button"
             color="red"
             form="filled"
             onclick={async (e) => {
@@ -131,7 +131,7 @@
                 await on_delete_image()
               }
             }}>
-            <span class="i-fa-trash-o" style="margin: -1px 0 2px;"></span>
+            <IconFaTrashO class="icon-inline" style="margin: -1px 0 2px;" />
             {$page.data.t('misc.delete')}
           </Button>
         </div>
@@ -139,3 +139,123 @@
     </div>
   </div>
 {/if}
+
+<style>
+  .image-wrap {
+    height: 100%;
+    width: 100%;
+    position: relative;
+  }
+
+  .thumb {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    cursor: pointer;
+  }
+
+  .image-wrap :global(.spinner) {
+    position: absolute;
+    bottom: 0.25rem;
+    right: 0.25rem;
+    color: #fff;
+    animation: image-spin 1s linear infinite;
+  }
+
+  @keyframes image-spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .image-wrap :global(.ai-badge) {
+    color: #fff;
+    position: absolute;
+    bottom: 0.25rem;
+    left: 0.25rem;
+  }
+
+  .viewer {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) {
+    .viewer {
+      padding: 0.75rem;
+    }
+  }
+
+  .viewer-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .viewer-header {
+    font-weight: 600;
+    color: #fff;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: rgb(0 0 0 / 0.25);
+  }
+
+  .viewer-header :global(.viewer-close) {
+    cursor: pointer;
+    opacity: 0.75;
+  }
+
+  .viewer-header :global(.viewer-close:hover) {
+    opacity: 1;
+  }
+
+  .ai-fullscreen {
+    position: absolute;
+    bottom: 0.25rem;
+    left: 2.5rem;
+    color: #fff;
+    z-index: 10;
+  }
+
+  .full-img {
+    object-fit: contain;
+    max-height: 100%;
+  }
+
+  .caption-row {
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .viewer-footer {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgb(0 0 0 / 0.25);
+  }
+
+  .viewer-footer :global(.image-delete-button) {
+    margin-left: auto;
+  }
+</style>

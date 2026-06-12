@@ -9,6 +9,9 @@
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import type { DbOperations } from '$lib/dbOperations'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
+  import IconSystemUiconsVersions from '~icons/system-uicons/versions'
+  import IconFaSolidTimes from '~icons/fa-solid/times'
+  import IconFaSolidPlus from '~icons/fa-solid/plus'
 
   interface Props {
     entry: EntryData
@@ -45,7 +48,7 @@
   }
 </script>
 
-<div class="flex flex-col md:grid mb-3 media-on-right-grid grid-gap-2">
+<div class="media-on-right-grid">
   <div dir="ltr" style="grid-area: title;">
     <EntryField
       value={fields?.lexeme?.default}
@@ -62,7 +65,7 @@
     <EntryMedia {dictionary} {entry} {can_edit} {dbOperations} />
   </div>
 
-  <div class="flex flex-col grow" style="grid-area: content;">
+  <div class="content-col" style="grid-area: content;">
     {#each dictionary.orthographies || [] as orthography, index (index)}
       {@const orthography_field = `lo${index + 1}`}
       <EntryField
@@ -87,22 +90,22 @@
         <Sense {sense} glossLanguages={dictionary.gloss_languages} {can_edit} />
 
         {#if can_edit}
-          <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600 text-start!" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><span class="i-system-uicons-versions text-xl"></span> {$page.data.t('sense.add')}</Button>
+          <Button class="add-sense-button" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><IconSystemUiconsVersions class="icon-inline" style="font-size: 1.25rem" /> {$page.data.t('sense.add')}</Button>
         {/if}
       {:else}
-        <div class="p-2 hover:bg-gray-50 rounded">
-          <div class="font-semibold mb-2 flex">
-            <div class="font-semibold">
+        <div class="sense-block">
+          <div class="sense-header">
+            <div>
               {$page.data.t('sense.sense')} {index + 1}
             </div>
-            <div class="mx-auto"></div>
+            <div style="margin-left: auto; margin-right: auto"></div>
             {#if can_edit}
-              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.delete_sense(sense.id)}><span class="i-fa-solid-times -mt-1"></span></Button>
-              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><span class="i-fa-solid-plus -mt-1"></span></Button>
+              <Button class="sense-action-button delete-sense-button" size="sm" form="menu" onclick={async () => await dbOperations.delete_sense(sense.id)}><IconFaSolidTimes class="icon-inline" style="margin-top: -0.25rem" /></Button>
+              <Button class="sense-action-button insert-sense-button" size="sm" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" /></Button>
             {/if}
           </div>
 
-          <div class="flex flex-col border-s-2 ps-3 ms-1">
+          <div class="sense-indent">
             <Sense {sense} glossLanguages={dictionary.gloss_languages} {can_edit} />
           </div>
         </div>
@@ -110,24 +113,24 @@
     {/each}
 
     {#if entry.dialects?.length || can_edit}
-      <div class="md:px-2" class:order-2={!entry.dialects?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.dialects')}</div>
+      <div class="side-section" class:at-end={!entry.dialects?.length}>
+        <div class="section-label">{$page.data.t('entry_field.dialects')}</div>
         <EntryDialect
           entry_id={entry.id}
           {can_edit}
           dialects={entry.dialects || []} />
-        <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
+        <div class="dashed-divider"></div>
       </div>
     {/if}
 
     {#if entry.tags?.length || can_edit}
-      <div class="md:px-2" class:order-2={!entry.tags?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.custom_tags')}</div>
+      <div class="side-section" class:at-end={!entry.tags?.length}>
+        <div class="section-label">{$page.data.t('entry_field.custom_tags')}</div>
         <EntryTag
           entry_id={entry.id}
           {can_edit}
           tags={entry.tags || []} />
-        <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
+        <div class="dashed-divider"></div>
       </div>
     {/if}
 
@@ -167,13 +170,13 @@
       on_update={new_value => save_entry({ linguistic_history: { default: new_value } })} />
 
     {#if fields?.sources?.length || can_edit}
-      <div class="md:px-2" class:order-2={!fields?.sources?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.sources')}</div>
+      <div class="side-section" class:at-end={!fields?.sources?.length}>
+        <div class="section-label">{$page.data.t('entry_field.sources')}</div>
         <EntrySource
           {can_edit}
           value={fields?.sources}
           on_update={new_value => save_entry({ sources: new_value })} />
-        <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
+        <div class="dashed-divider"></div>
       </div>
     {/if}
 
@@ -197,5 +200,88 @@
         'title media'
         'content media'
         'here_to_push_title_and_content_up media';
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 0.75rem;
+      gap: 0.5rem;
     }
+
+  @media (min-width: 768px) {
+    .media-on-right-grid {
+      display: grid;
+    }
+  }
+
+  .content-col {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .content-col :global(.add-sense-button) {
+    text-align: start !important;
+    padding: 0.5rem !important;
+    margin-bottom: 0.5rem;
+    border-radius: 0.25rem;
+    order: 2;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+  }
+
+  .content-col :global(.add-sense-button:hover) {
+    background-color: var(--surface) !important; /* ≈ gray-100 */
+  }
+
+  .sense-block {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+  }
+
+  .sense-block:hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 2%); /* ≈ gray-50 */
+  }
+
+  .sense-header {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: flex;
+  }
+
+  .sense-header :global(.sense-action-button) {
+    color: var(--color-secondary) !important; /* ≈ gray-500 */
+  }
+
+  .sense-indent {
+    display: flex;
+    flex-direction: column;
+    border-inline-start-width: 2px;
+    padding-inline-start: 0.75rem;
+    margin-inline-start: 0.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .side-section {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  }
+
+  .at-end {
+    order: 2;
+  }
+
+  .section-label {
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--color-secondary); /* ≈ gray-500 */
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .dashed-divider {
+    border-bottom-width: 2px;
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+    border-style: dashed;
+  }
 </style>

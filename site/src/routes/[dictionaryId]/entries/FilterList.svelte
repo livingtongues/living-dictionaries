@@ -5,6 +5,8 @@
   import { page } from '$app/stores'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import type { FilterListKeys, QueryParams } from '$lib/search/types'
+  import IconFa6SolidChevronUp from '~icons/fa6-solid/chevron-up'
+  import IconFa6SolidChevronDown from '~icons/fa6-solid/chevron-down'
 
   interface Props {
     search_params: QueryParamStore<QueryParams>
@@ -42,15 +44,13 @@
 </script>
 
 {#if !search_value && count <= max_show}
-  <h4 class="text-sm font-semibold uppercase text-gray-700">{label}</h4>
+  <h4>{label}</h4>
 {:else}
-  <div
-    class="mb-2 relative rounded-md
-      shadow-sm">
+  <div class="search-wrap">
     <input
       type="search"
       placeholder="{$page.data.t('about.search')} {label}"
-      class="form-input block w-full text-sm md:text-xs md:leading-5 transition py-1 px-3"
+      class="form-input"
       bind:value={search_value} />
   </div>
 {/if}
@@ -63,7 +63,7 @@
           {@const cleaned_item = item.replace(' ', '')}
           {@const id = `${search_param_key}_${cleaned_item}`}
           {@const checked = $search_params[search_param_key]?.includes(item)}
-          <li class="flex my-1 items-center" transition:slide>
+          <li transition:slide>
             <input
               {id}
               type="checkbox"
@@ -74,10 +74,10 @@
                 else
                   add_filter(item)
               }} />
-            <div class="w-2 shrink-0"></div>
-            <label for={id} class="block text-sm text-gray-900 max-w-85%" style="overflow-wrap: break-word;">
+            <div style="width: 0.5rem; flex-shrink: 0"></div>
+            <label for={id} style="overflow-wrap: break-word;">
               {make_item_readable(item, keys_to_values)}
-              <span class="text-xs text-gray-600"> ({item_count}) </span>
+              <span class="item-count"> ({item_count}) </span>
             </label>
           </li>
         {/if}
@@ -85,12 +85,12 @@
     </ul>
 
     {#if Object.keys(filtered_values).length > max_show}
-      <button type="button" class="p-1 mb-1 ml-1 text-xs text-gray-600" onclick={toggle}>
+      <button type="button" class="show-more" onclick={toggle}>
         {#if show}
-          <span class="i-fa6-solid-chevron-up"></span>
+          <IconFa6SolidChevronUp class="icon-inline" />
           {$page.data.t('entry.show_less')}
         {:else}
-          <span class="i-fa6-solid-chevron-down -mt-1"></span>
+          <IconFa6SolidChevronDown class="icon-inline" style="margin-top: -0.25rem" />
           {$page.data.t('entry.show_more')}
         {/if}
       </button>
@@ -98,4 +98,69 @@
   {/snippet}
 </ShowHide>
 
-<div class="mb-3"></div>
+<div style="margin-bottom: 0.75rem"></div>
+
+<style>
+  h4 {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+  }
+
+  .search-wrap {
+    margin-bottom: 0.5rem;
+    position: relative;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
+  }
+
+  .search-wrap input {
+    display: block;
+    width: 100%;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+    padding: 0.25rem 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .search-wrap input {
+      font-size: 0.75rem;
+      line-height: 1.25rem;
+    }
+  }
+
+  li {
+    display: flex;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    align-items: center;
+  }
+
+  label {
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--color); /* ≈ gray-900 */
+    max-width: 85%;
+  }
+
+  .item-count {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+  }
+
+  .show-more {
+    padding: 0.25rem;
+    margin-bottom: 0.25rem;
+    margin-left: 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+  }
+</style>

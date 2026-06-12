@@ -77,12 +77,10 @@
     </span>
   {/snippet}
   <form onsubmit={preventDefault(update)}>
-    <div class="flex flex-wrap items-center mb-2">
-      <div class="flex flex-grow">
-        <div class="relative">
-          <div
-            class="absolute inset-y-0 flex items-center text-sm text-gray-500
-              uppercase left-0 pl-2 pointer-events-none">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; margin-bottom: 0.5rem">
+      <div style="display: flex; flex-grow: 1">
+        <div style="position: relative">
+          <div class="coord-prefix">
             Lat
           </div>
           <input
@@ -92,15 +90,13 @@
             max="90"
             min="-90"
             bind:value={lat}
-            class="w-32 pl-10 pr-3 py-2 form-input"
+            class="form-input lat-input"
             placeholder={$page.data.t('dictionary.latitude')} />
         </div>
-        <div class="w-1"></div>
+        <div style="width: 0.25rem"></div>
 
-        <div class="relative">
-          <div
-            class="absolute inset-y-0 flex items-center text-sm text-gray-500
-              uppercase left-0 pl-2 pointer-events-none">
+        <div style="position: relative">
+          <div class="coord-prefix">
             Lng
           </div>
           <input
@@ -110,7 +106,7 @@
             max="180"
             min="-180"
             bind:value={lng}
-            class="w-32 md:w-36 pl-10 pr-3 py-2 form-input"
+            class="form-input lng-input"
             placeholder={$page.data.t('dictionary.longitude')} />
         </div>
       </div>
@@ -155,3 +151,32 @@
     </div>
   </form>
 </Modal>
+
+<style>
+  .coord-prefix {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--color-secondary); /* ≈ gray-500 */
+    text-transform: uppercase;
+    left: 0;
+    padding-left: 0.5rem;
+    pointer-events: none;
+  }
+
+  .lat-input,
+  .lng-input {
+    width: 8rem;
+    padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .lng-input {
+      width: 9rem;
+    }
+  }
+</style>

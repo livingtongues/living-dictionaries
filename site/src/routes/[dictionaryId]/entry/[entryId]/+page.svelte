@@ -25,11 +25,11 @@
 </script>
 
 <div
-  class:pt-1={!shallow}
-  class:!-top-6={shallow}
-  class="flex justify-between items-center mb-3 sticky  top-0 z-30 bg-white">
+  class:padded={!shallow}
+  class:raised={shallow}
+  class="action-bar">
   <Button
-    class="!px-2"
+    class="entry-back-button"
     color="black"
     form="simple"
     onclick={() => {
@@ -57,16 +57,16 @@
           history.back()
         }}>
 
-        <span class="hidden md:inline">
+        <span class="delete-label">
           {$page.data.t('misc.delete')}
         </span>
-        <i class="fas fa-trash ml-1"></i>
+        <i class="fas fa-trash icon-gap"></i>
       </Button>
     {/if}
     {#if !shallow}
-      <Button class="inline-flex! items-center" form="simple" onclick={() => share(dictionary.id, entry)}>
+      <Button class="entry-share-button" form="simple" onclick={() => share(dictionary.id, entry)}>
         <span>{$page.data.t('misc.share')}</span>
-        <div class="w-2"></div>
+        <div style="width: 0.5rem"></div>
         <i class="fas fa-share-square rtl-x-flip"></i>
       </Button>
     {/if}
@@ -78,6 +78,51 @@
   {dictionary}
   can_edit={can_edit}
   {dbOperations} />
+
+<style>
+  .action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background-color: var(--background);
+  }
+
+  .padded {
+    padding-top: 0.25rem;
+  }
+
+  .raised {
+    top: -1.5rem; /* was !-top-6 — pulls the bar up inside the entry overlay modal */
+  }
+
+  .action-bar :global(.entry-back-button) {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  .delete-label {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .delete-label {
+      display: inline;
+    }
+  }
+
+  .icon-gap {
+    margin-left: 0.25rem;
+  }
+
+  .action-bar :global(.entry-share-button) {
+    display: inline-flex !important;
+    align-items: center;
+  }
+</style>
 
 <SeoMetaTags
   norobots={!dictionary.public}

@@ -2,6 +2,9 @@
   import type { QueryParamStore } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import type { QueryParams } from '$lib/search/types'
+  import IconCarbonSearch from '~icons/carbon/search'
+  import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
+  import IconMaterialSymbolsFilterAlt from '~icons/material-symbols/filter-alt'
 
   interface Props {
     on_show_filter_menu: () => void
@@ -12,15 +15,13 @@
   const { on_show_filter_menu, search_params, index_ready = false }: Props = $props()
 </script>
 
-<div class="flex flex-grow rounded-md shadow-sm">
-  <div class="relative flex-grow focus-within:z-10">
-    <div
-      class="absolute inset-y-0 left-0 pl-3 flex items-center
-        pointer-events-none">
+<div class="search-wrap">
+  <div class="input-wrap">
+    <div class="search-icon">
       {#if index_ready}
-        <span class="i-carbon-search text-gray-500"></span>
+        <IconCarbonSearch class="icon-inline" style="color: var(--color-secondary)" />
       {:else}
-        <span class="i-svg-spinners-3-dots-fade align--4px"></span>
+        <IconSvgSpinners3DotsFade class="icon-inline" style="vertical-align: -4px" />
       {/if}
     </div>
     <input
@@ -32,18 +33,116 @@
         }
       }}
       placeholder={$page.data.t('entry.search_entries')}
-      class="form-input text-sm w-full pl-10 pr-3 py-2 rounded-none ltr:!rounded-l-md rtl:!rounded-r-md md:!rounded-r-md md:!rounded-l-md" />
+      class="form-input" />
   </div>
   <button
     type="button"
     onclick={on_show_filter_menu}
-    class="-ml-px relative flex items-center px-3 py-2 ltr:rounded-r-md rtl:rounded-l-md border
-      border-gray-300 text-sm leading-5 bg-gray-50 text-gray-900
-      focus:border-blue-300
-      focus:z-10 transition ease-in-out duration-150 md:hidden">
-    <span class="i-material-symbols-filter-alt text-gray-400"></span>
-    <span class="ml-2 hidden sm:inline">
+    class="filter-button">
+    <IconMaterialSymbolsFilterAlt class="icon-inline" style="color: color-mix(in srgb, var(--color) 45%, var(--background))" />
+    <span class="filter-label">
       {$page.data.t('entry.filters')}
     </span>
   </button>
 </div>
+
+<style>
+  .search-wrap {
+    display: flex;
+    flex-grow: 1;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
+  }
+
+  .input-wrap {
+    position: relative;
+    flex-grow: 1;
+  }
+
+  .input-wrap:focus-within {
+    z-index: 10;
+  }
+
+  .search-icon {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    padding-left: 0.75rem;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .input-wrap input {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    width: 100%;
+    padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+    border-radius: 0;
+  }
+
+  :global([dir='ltr']) .input-wrap input {
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+  }
+
+  :global([dir='rtl']) .input-wrap input {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+  }
+
+  @media (min-width: 768px) {
+    .input-wrap input {
+      border-radius: 0.375rem;
+    }
+  }
+
+  .filter-button {
+    margin-left: -1px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    background-color: color-mix(in srgb, var(--background), var(--color) 2%); /* ≈ gray-50 */
+    color: var(--color); /* ≈ gray-900 */
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  :global([dir='ltr']) .filter-button {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+  }
+
+  :global([dir='rtl']) .filter-button {
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+  }
+
+  .filter-button:focus {
+    border-color: rgb(147 197 253); /* blue-300 */
+    z-index: 10;
+  }
+
+  @media (min-width: 768px) {
+    .filter-button {
+      display: none;
+    }
+  }
+
+  .filter-label {
+    margin-left: 0.5rem;
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .filter-label {
+      display: inline;
+    }
+  }
+</style>

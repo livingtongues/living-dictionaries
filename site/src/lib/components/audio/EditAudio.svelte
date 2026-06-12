@@ -10,6 +10,7 @@
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
+  import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
 
   interface Props {
     on_close: () => void
@@ -67,7 +68,7 @@
 
 <Modal on:close={on_close}>
   {#snippet heading()}
-    <span> <span class="i-material-symbols-hearing text-lg text-sm"></span> {entry.main.lexeme.default} </span>
+    <span> <IconMaterialSymbolsHearing class="icon-inline" style="font-size: 0.875rem" /> {entry.main.lexeme.default} </span>
   {/snippet}
 
   <SelectSpeaker
@@ -76,7 +77,7 @@
     {select_speaker}>
     {#snippet children({ speaker_id })}
       {#if sound_file}
-        <div class="px-1">
+        <div style="padding-left: 0.25rem; padding-right: 0.25rem">
           <Waveform audioUrl={url_from_storage_path(sound_file.storage_path)} />
         </div>
       {:else if speaker_id}
@@ -86,7 +87,7 @@
           {:else}
             <Waveform {audioBlob} />
           {/if}
-          <div class="mb-3"></div>
+          <div style="margin-bottom: 0.75rem"></div>
           {#if !upload_triggered && (file || audioBlob)}
             {@const upload_status = startUpload(speaker_id)}
             {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
@@ -94,8 +95,8 @@
             {/await}
           {/if}
         {:else}
-          <div class="flex flex-col">
-            <div class="mb-2">
+          <div style="display: flex; flex-direction: column">
+            <div style="margin-bottom: 0.5rem">
               <RecordAudio bind:audioBlob bind:permissionGranted={readyToRecord} />
             </div>
             {#if !readyToRecord}
@@ -111,16 +112,16 @@
     {#if sound_file}
       {#if auth_user.admin_level > 1}
         <JSON obj={sound_file} />
-        <div class="w-1"></div>
+        <div style="width: 0.25rem"></div>
       {/if}
 
       <Button
         href={url_from_storage_path(sound_file.storage_path)}
         target="_blank">
         <i class="fas fa-download"></i>
-        <span class="hidden sm:inline">{$page.data.t('misc.download')}</span>
+        <span class="wide-only">{$page.data.t('misc.download')}</span>
       </Button>
-      <div class="w-1"></div>
+      <div style="width: 0.25rem"></div>
 
       <Button
         onclick={async () => {
@@ -130,9 +131,9 @@
         }}
         color="red">
         <i class="far fa-trash-alt"></i>&nbsp;
-        <span class="hidden sm:inline">{$page.data.t('misc.delete')}</span>
+        <span class="wide-only">{$page.data.t('misc.delete')}</span>
       </Button>
-      <div class="w-1"></div>
+      <div style="width: 0.25rem"></div>
     {/if}
 
     <Button onclick={on_close} color="black">
@@ -140,3 +141,15 @@
     </Button>
   </div>
 </Modal>
+
+<style>
+  .wide-only {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .wide-only {
+      display: inline;
+    }
+  }
+</style>

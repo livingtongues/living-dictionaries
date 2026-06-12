@@ -1,4 +1,5 @@
 <script lang="ts">
+  import IconHeroiconsBackspace20Solid from '~icons/heroicons/backspace-20-solid'
   import vowelTrapezoid from './vowel-trapezoid.gif'
   import { Button } from '$lib/svelte-pieces'
 
@@ -39,13 +40,13 @@
   }
 </script>
 
-<div bind:this={wrapperEl} class="w-full relative">
+<div bind:this={wrapperEl} style="width: 100%; position: relative">
   {@render children?.()}
 </div>
 
-<div class="flex overflow-x-auto md:flex-wrap whitespace-nowrap mb-1">
-  <Button form="menu" color="black" class="!pt-0 !pb-1 !px-2 !text-lg" onclick={backSpace}>
-    <span class="i-heroicons:backspace-20-solid"></span>
+<div class="key-tabs">
+  <Button form="menu" color="black" class="backspace-button" onclick={backSpace}>
+    <IconHeroiconsBackspace20Solid class="icon-inline" />
   </Button>
   <Button
     form="menu"
@@ -84,7 +85,7 @@
     onclick={() => (activeTable = 'coarticulated')}>Co-Articulated Consonants</Button>
 </div>
 
-<div class="overflow-x-auto" onclick={addSelectedLetter}>
+<div style="overflow-x: auto" onclick={addSelectedLetter}>
   {#if activeTable === 'consonants'}
     <table cellspacing="0"><tbody>
       <tr class="consonant-header">
@@ -905,5 +906,24 @@
     font-size: 11px;
     text-align: center;
     line-height: 100%;
+  }
+
+  .key-tabs {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    margin-bottom: 0.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .key-tabs {
+      flex-wrap: wrap;
+    }
+  }
+
+  .key-tabs :global(.backspace-button) {
+    padding: 0 0.5rem 0.25rem !important;
+    font-size: 1.125rem !important;
+    line-height: 1.75rem !important;
   }
 </style>

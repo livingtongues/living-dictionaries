@@ -1,4 +1,5 @@
 <script lang="ts">
+  import IconFaTrashO from '~icons/fa/trash-o'
   import { preventDefault } from 'svelte/legacy'
 
   import { createEventDispatcher, onMount } from 'svelte'
@@ -113,7 +114,7 @@
                     form="simple"
                     size="sm"
                     color="red"
-                    onclick={() => remove(point)}><span class="i-fa-trash-o"></span></Button>
+                    onclick={() => remove(point)}><IconFaTrashO class="icon-inline" /></Button>
                 </Popup>
               </Marker>
             {/each}

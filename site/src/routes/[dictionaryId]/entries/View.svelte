@@ -42,7 +42,7 @@
         {dbOperations} />
 
       {#if $page.state.entry_id === entry.id}
-        <Modal noscroll class="sm:max-w-95vw xl:max-w-1100px" on_close={() => history.back()} show_x={false}>
+        <Modal noscroll class="entry-overlay-modal" on_close={() => history.back()} show_x={false}>
           <EntryPage
             data={{
               ...page_data,
@@ -72,3 +72,19 @@
       can_edit={can_edit} />
   {/if}
 {/if}
+
+<style>
+  /* The Modal portals to body, so these can't be ancestor-scoped; the extra `div`
+     keeps them above the modal panel's own max-width (was `sm:max-w-95vw xl:max-w-1100px`). */
+  @media (min-width: 640px) {
+    :global(div.entry-overlay-modal) {
+      max-width: 95vw;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    :global(div.entry-overlay-modal) {
+      max-width: 1100px;
+    }
+  }
+</style>

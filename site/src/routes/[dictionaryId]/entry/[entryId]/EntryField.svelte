@@ -2,6 +2,7 @@
   import type { EntryFieldValue } from '$lib/types'
   import sanitize from 'xss'
   import { ShowHide } from '$lib/svelte-pieces'
+  import IconFa6SolidPencil from '~icons/fa6-solid/pencil'
 
   interface Props {
     value: string
@@ -20,20 +21,18 @@
   <ShowHide>
     {#snippet children({ show, set, toggle })}
       <div
-        class="md:px-2 rounded {klass}"
+        class="field-block {klass}"
         onclick={() => set(can_edit)}
-        class:hover:bg-gray-100={can_edit}
-        class:cursor-pointer={can_edit}
-        class:order-2={!value}>
+        class:editable={can_edit}
+        class:at-end={!value}>
         {#if field !== 'lexeme'}
-          <div class="text-xs text-gray-500 mt-1">{display}</div>
+          <div class="field-label">{display}</div>
         {/if}
         <div
           class:sompeng={display === 'Sompeng'}
-          class:font-bold={field === 'lexeme'}
-          class:text-4xl={field === 'lexeme'}
-          class:border-b-2={field !== 'lexeme'}
-          class="border-dashed pb-1 mb-2">
+          class:headword={field === 'lexeme'}
+          class:underlined={field !== 'lexeme'}
+          class="field-value">
           {#if value}
             <div dir="ltr">
               {#if field === 'notes' || value.includes('<i>')}
@@ -48,7 +47,7 @@
                 {value}
               {/if}
             </div>
-          {:else}<span class="i-fa6-solid-pencil opacity-40 text-sm"></span>{/if}
+          {:else}<IconFa6SolidPencil class="icon-inline" style="opacity: 0.4; font-size: 0.875rem" />{/if}
         </div>
       </div>
       {#if show}
@@ -59,3 +58,51 @@
     {/snippet}
   </ShowHide>
 {/if}
+
+<style>
+  .field-block {
+    border-radius: 0.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .field-block {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  }
+
+  .editable {
+    cursor: pointer;
+  }
+
+  .editable:hover {
+    background-color: var(--surface); /* ≈ gray-100 */
+  }
+
+  .at-end {
+    order: 2;
+  }
+
+  .field-label {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--color-secondary); /* ≈ gray-500 */
+    margin-top: 0.25rem;
+  }
+
+  .field-value {
+    border-style: dashed;
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .headword {
+    font-weight: 700;
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
+  .underlined {
+    border-bottom-width: 2px;
+  }
+</style>

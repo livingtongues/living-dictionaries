@@ -7,6 +7,7 @@
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
+  import IconSystemUiconsVersions from '~icons/system-uicons/versions'
 
   interface Props {
     sense: EntryData['senses'][0]
@@ -64,26 +65,26 @@
 {/if}
 
 {#if sense_fields?.parts_of_speech?.length || can_edit}
-  <div class="md:px-2" class:order-2={!sense_fields?.parts_of_speech?.length}>
-    <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.parts_of_speech')}</div>
+  <div class="side-section" class:at-end={!sense_fields?.parts_of_speech?.length}>
+    <div class="section-label">{$page.data.t('entry_field.parts_of_speech')}</div>
     <EntryPartOfSpeech
       value={sense_fields?.parts_of_speech}
       {can_edit}
       on_update={new_value => save_sense({ parts_of_speech: new_value })} />
-    <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
+    <div class="dashed-divider"></div>
   </div>
 {/if}
 
 {#if hasSemanticDomain || can_edit}
-  <div class="md:px-2" class:order-2={!hasSemanticDomain}>
-    <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.semantic_domains')}</div>
+  <div class="side-section" class:at-end={!hasSemanticDomain}>
+    <div class="section-label">{$page.data.t('entry_field.semantic_domains')}</div>
     <EntrySemanticDomains
       {can_edit}
       semantic_domain_keys={sense_fields?.semantic_domains}
       write_in_semantic_domains={sense_fields?.write_in_semantic_domains}
       on_update={new_value => save_sense({ semantic_domains: new_value })}
       on_update_write_in={new_value => save_sense({ write_in_semantic_domains: new_value })} />
-    <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
+    <div class="dashed-divider"></div>
   </div>
 {/if}
 
@@ -105,9 +106,9 @@
 {#if can_edit && sense.sentences?.length}
   <button
     type="button"
-    class="text-start p-2 mb-2 rounded hover:bg-gray-100 text-gray-600"
+    class="add-sentence"
     onclick={() => dbOperations.insert_sentence({ sentence: {}, sense_id: sense.id })}>
-    <span class="i-system-uicons-versions text-xl"></span> {$page.data.t('sentence.add')}
+    <IconSystemUiconsVersions class="icon-inline" style="font-size: 1.25rem" /> {$page.data.t('sentence.add')}
   </button>
 {/if}
 
@@ -126,3 +127,44 @@
     display={$page.data.t('entry_field.variant')}
     on_update={new_value => save_sense({ variant: { ...sense_row?.variant, default: new_value } })} />
 {/if}
+
+<style>
+  @media (min-width: 768px) {
+    .side-section {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  }
+
+  .at-end {
+    order: 2;
+  }
+
+  .section-label {
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--color-secondary); /* ≈ gray-500 */
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .dashed-divider {
+    border-bottom-width: 2px;
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+    border-style: dashed;
+  }
+
+  .add-sentence {
+    text-align: start;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.25rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+  }
+
+  .add-sentence:hover {
+    background-color: var(--surface); /* ≈ gray-100 */
+  }
+</style>

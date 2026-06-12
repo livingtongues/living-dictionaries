@@ -37,87 +37,87 @@
       on_speaker_added(speaker.id)
     }}>
     {#snippet children({ loading })}
-      <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
+      <label for="name" class="field-label">
         {$page.data.t('speakers.name')}
       </label>
-      <div class="mt-1 rounded-md shadow-sm">
+      <div class="input-wrap">
         <input
           id="name"
           type="text"
           required
           bind:value={displayName}
-          class="form-input block w-full" />
+          class="form-input full-input" />
       </div>
 
-      <label for="birthplace" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
+      <label for="birthplace" class="field-label">
         {$page.data.t('speakers.birthplace')}
       </label>
-      <div class="mt-1 rounded-md shadow-sm">
+      <div class="input-wrap">
         <input
           id="birthplace"
           type="text"
           required
           bind:value={birthplace}
-          class="form-input block w-full" />
+          class="form-input full-input" />
       </div>
 
-      <label for="age" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
+      <label for="age" class="field-label">
         {$page.data.t('speakers.age_range')}
       </label>
-      <div class="mt-1 rounded-md shadow-sm">
-        <select id="age" bind:value={decade} class="form-input block w-full">
+      <div class="input-wrap">
+        <select id="age" bind:value={decade} class="form-input full-input">
           {#each Object.entries(decades) as [value, label] (value)}
             <option {value}>{label}</option>
           {/each}
         </select>
       </div>
 
-      <div class="font-medium text-sm text-gray-700 mt-4">
+      <div class="field-label">
         {$page.data.t('speakers.gender')}
       </div>
-      <div class="flex">
-        <div class="mt-2 flex items-center">
+      <div style="display: flex">
+        <div class="radio-row">
           <input id="male" type="radio" bind:group={gender} value="m" />
-          <div class="w-2"></div>
+          <div style="width: 0.5rem"></div>
           <label for="male">
-            <span class="block text-sm leading-5 font-medium text-gray-700">
+            <span class="radio-label">
               {$page.data.t('speakers.male')}
             </span>
           </label>
         </div>
-        <div class="w-3"></div>
-        <div class="mt-2 flex items-center">
+        <div style="width: 0.75rem"></div>
+        <div class="radio-row">
           <input id="female" type="radio" bind:group={gender} value="f" />
-          <div class="w-2"></div>
+          <div style="width: 0.5rem"></div>
           <label for="female">
-            <span class="block text-sm leading-5 font-medium text-gray-700">
+            <span class="radio-label">
               {$page.data.t('speakers.female')}
             </span>
           </label>
         </div>
-        <div class="w-3"></div>
-        <div class="mt-2 flex items-center">
+        <div style="width: 0.75rem"></div>
+        <div class="radio-row">
           <input id="other" type="radio" bind:group={gender} value="o" />
-          <div class="w-2"></div>
+          <div style="width: 0.5rem"></div>
           <label for="other">
-            <span class="block text-sm leading-5 font-medium text-gray-700">
+            <span class="radio-label">
               {$page.data.t('speakers.other')}
             </span>
           </label>
         </div>
       </div>
 
-      <div class="flex items-center mt-6">
+      <div class="agree-row">
         <input id="agree" type="checkbox" required bind:checked={agreeToBeOnline} />
-        <div class="w-2"></div>
-        <label for="agree" class="block text-sm leading-5 text-gray-900">
+        <div style="width: 0.5rem"></div>
+        <label for="agree" class="agree-label">
           {$page.data.t('speakers.speaker_agrees')}
         </label>
       </div>
 
       <!-- TODO: "The speaker is me" checkbox -->
 
-      <div class="modal-footer space-x-1">
+      <div class="modal-footer">
         <Button disabled={loading} onclick={on_close} form="simple" color="black">
           {$page.data.t('misc.cancel')}
         </Button>
@@ -128,3 +128,52 @@
     {/snippet}
   </Form>
 </Modal>
+
+<style>
+  .field-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+    margin-top: 1rem;
+  }
+
+  .input-wrap {
+    margin-top: 0.25rem;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
+  }
+
+  .input-wrap :global(.full-input) {
+    display: block;
+    width: 100%;
+  }
+
+  .radio-row {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .radio-label {
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+  }
+
+  .agree-row {
+    display: flex;
+    align-items: center;
+    margin-top: 1.5rem;
+  }
+
+  .agree-label {
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--color); /* ≈ gray-900 */
+  }
+</style>

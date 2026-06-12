@@ -11,6 +11,7 @@
   import { ADDED_FEATURE_ID_PREFIX } from '../../utils/randomId'
   import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
   import { PUBLIC_mapboxAccessToken } from '$env/static/public'
+  import IconFaSolidGlobeAsia from '~icons/fa-solid/globe-asia'
 
   interface Props {
     map?: Map
@@ -189,8 +190,8 @@
   {#if ready}
     {@render children?.({ map })}
   {:else}
-    <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-      <span class="i-fa-solid-globe-asia text-6xl text-gray-300 animate-pulse"></span>
+    <div class="map-placeholder">
+      <IconFaSolidGlobeAsia class="icon-inline globe-pulse" />
     </div>
   {/if}
 </div>
@@ -200,5 +201,29 @@
     width: 100%;
     height: 100%;
     position: relative;
+  }
+
+  .map-placeholder {
+    background-color: var(--surface); /* ≈ gray-100 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .map-placeholder :global(.globe-pulse) {
+    font-size: 3.75rem;
+    color: color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
+    animation: map-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes map-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.5;
+    }
   }
 </style>

@@ -7,7 +7,7 @@ description: UI design guidelines (CSS, icons, theme) and svelte-look component 
 
 This skill covers two areas: **UI design/styling** and **svelte-look stories for visual verification**.
 
-Note that this design system is already implemented in the /admin route and is the target for the rest of the site to move towards but we're not there yet. When making requested UI edits follow these guidelines. Cutover gotcha — UnoCSS utilities need `csr`.** Global UnoCSS puts utilities in `virtual:uno.css` (imported once in the app layout, not per-component), so they're absent from default **SSR** screenshots.
+The whole site uses this design system (UnoCSS was fully removed 2026-06-12 — everything is scoped CSS + the global theme layer). When making requested UI edits follow these guidelines. SSR screenshots see all styles — `csr: true` is only needed for `onMount`/browser-API components or interactions.
 
 # Part 1: UI Design System
 
@@ -104,7 +104,7 @@ Size is controlled via `font-size` (icons are `1em` square). For spacing next to
 
 ## Buttons
 
-Global button classes live in `learn-from/src/lib/buttons.css` (imported in `+layout.svelte`, and listed in `svelte-look.config.ts:css_files` so they apply in stories). Keep these class names verbatim in markup — they're not generated, they're real global CSS. Combine one **variant** class with one **size** class.
+Global button classes live in `site/src/lib/buttons.css` (imported in `+layout.svelte`, and listed in `svelte-look.config.ts:css_files` so they apply in stories). Keep these class names verbatim in markup — they're not generated, they're real global CSS. Combine one **variant** class with one **size** class.
 
 ### Variants
 
@@ -142,17 +142,11 @@ The button classes are `inline-flex` but set **no gap**. For an icon next to a l
 
 ### When you need async-spinner behavior
 
-Use `$lib/svelte-pieces/HeadlessButton.svelte` — it wraps an `<a>` or `<button>`, runs the onclick async (showing a spinner icon), and toast.errors on throw. Compose the `btn-*` classes on the `class` prop:
-
-```svelte
-<HeadlessButton class="btn btn-default" onclick={async () => { await save() }}>
-  Save
-</HeadlessButton>
-```
+LD has no `HeadlessButton` (that's tutor's — porting it is logged in `.issues/ui-skill-alignment.md`). Use the legacy `$lib/svelte-pieces/ui/Button.svelte`: it runs `onclick` async with a built-in `loading` spinner (and its own `form`/`size`/`color` styling — compose extra classes via its `class` prop).
 
 ### Other globals in `buttons.css`
 
-`buttons.css` also ships a couple of non-button helpers carried over during the migration: `.view` (centered `max-width: 80rem` page-content wrapper) and the `animate-spin` / `animate-pulse` keyframe classes.
+`buttons.css` also ships the global `animate-spin` keyframe class (used by the admin loading spinners) and the disabled rule below.
 
 ### Disabled State
 
@@ -202,15 +196,14 @@ The content IS the interface — avoid input chrome. Style placeholders with `--
 
 ## Reusable design components
 
-These can be found in `site/src/lib/svelte-pieces` and should be used instead of building new ones where possible. Available today and more can be found in tutor:
+These can be found in `site/src/lib/svelte-pieces` and should be used instead of building new ones where possible. What LD actually ships today (more — HeadlessButton, bay/ snippet portals — live in tutor and can be ported when needed):
 - `Modal.svelte` — escape-to-close, focus-trap, backdrop-click, portal-mounted
-- `Toasts.svelte` + `toast.svelte.ts` — see `TOAST_API.md` for the full API
-- `HeadlessButton.svelte` — async spinner + error toast
+- `Toasts.svelte` + `toast.svelte.ts`
 - `ShowHide.svelte` — render-prop helper with `{ show, toggle, set }`
-- `bay/` — snippet portal system (declare `<Portal name="header" />` in layout, render content into it from anywhere with `<Pod to="header">…</Pod>`)
 - `Slideover.svelte` — side panel (portal-mounted, focus-trap, fade+fly transitions, optional title snippet)
-- `RichTextEditor.svelte`, `CopyButton.svelte`
-- Actions: `clickoutside.ts`, `portal.ts`, `trapFocus.ts`, `focus-on-mount.ts`
+- `RichTextEditor.svelte`, `CopyButton.svelte`, `persisted-state.svelte.ts`
+- Actions: `actions/clickoutside`, `actions/longpress`, `actions/portal`, `trapFocus.ts`
+- Legacy `ui/` (vendored sp-\* compiled styles — prefer the root pieces above; modernization is logged in `.issues/ui-skill-alignment.md`): `Button.svelte` (async spinner), `Modal.svelte`, `Badge.svelte`, `ResponsiveTable.svelte`, `ResponsiveSlideover.svelte`, `Slideover.svelte`
 
 ---
 
@@ -353,7 +346,7 @@ interface PageStory<TComponent extends Component<any>> extends StoryMeta {
 
 ## Shared Mocks File
 
-Project-wide defaults for page data, contexts, and flavors live in `learn-from/src/lib/mocks/svelte-look-mocks.ts`:
+Project-wide defaults for page data, contexts, and flavors can live in a `svelte-look-mocks.ts` file (LD doesn't ship one yet — create it at `site/src/lib/mocks/svelte-look-mocks.ts` if stories start needing shared defaults). Example shape:
 
 ```ts
 import type { Flavor, MockedContext } from 'svelte-look'
@@ -383,8 +376,8 @@ Resolution order (later overrides earlier):
 
 ## Screenshot clipping
 
-Screenshots are clipped to the viewport by default. Use `--full-page` on the CLI to capture the full scrollable content. **Match the viewport width to the breakpoint you want to verify** — a 480px-wide story shows the mobile layout even if you meant to check the `@media (min-width: 640px)` styles. Page stories default to the `page_viewports` set in `svelte-look.config.ts` (house uses `480×720`).
+Screenshots are clipped to the viewport by default. Use `--full-page` on the CLI to capture the full scrollable content. **Match the viewport width to the breakpoint you want to verify** — a 480px-wide story shows the mobile layout even if you meant to check the `@media (min-width: 640px)` styles. Page stories default to the `page_viewports` set in `svelte-look.config.ts` (LD uses `480×720`).
 
 ## Flavors
 
-Flavors let you render every story with different `page_data` variants. The flavor's `page_data` is shallow-merged on top of the layout-level `page_data` before story-level and shared_meta merges happen. House ships three auth flavors — `default` (logged-out), `signed_in` (non-admin customer), and `signed_in_admin` (admin) — so stories can render each access level. A component with 2 stories will have N images: 2 stories × N flavors × 2 themes (light/dark).
+Flavors let you render every story with different `page_data` variants. The flavor's `page_data` is shallow-merged on top of the layout-level `page_data` before story-level and shared_meta merges happen. LD has no flavors configured yet (house ships three auth flavors — `default` logged-out, `signed_in`, `signed_in_admin` — as a reference if we add them). A component with 2 stories will have N images: 2 stories × N flavors × themes (LD is currently light-only: `dark_mode: false` in `svelte-look.config.ts` until `.issues/dark-mode-flip.md` lands).

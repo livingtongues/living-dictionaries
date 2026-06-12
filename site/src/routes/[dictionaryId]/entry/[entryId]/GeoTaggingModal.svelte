@@ -13,6 +13,9 @@
   import CoordinatesModal from '$lib/components/maps/CoordinatesModal.svelte'
   import RegionModal from '$lib/components/maps/RegionModal.svelte'
   import Region from '$lib/components/maps/mapbox/map/Region.svelte'
+  import IconOcticonPencil from '~icons/octicon/pencil'
+  import IconMdiMapMarkerPlus from '~icons/mdi/map-marker-plus'
+  import IconMdiMapMarkerPath from '~icons/mdi/map-marker-path'
 
   interface Props {
     coordinates: Coordinates
@@ -67,7 +70,7 @@
 </script>
 
 <Modal on:close={on_close} noscroll>
-  <div class="h-sm">
+  <div style="height: 24rem">
     <Map pointsToFit={flattenCoordinates(coordinates)} {lng} {lat} zoom={6}>
       <NavigationControl />
       {#each coordinates?.points || [] as point, index (point)}
@@ -78,7 +81,7 @@
             <ShowHide>
               {#snippet children({ show, toggle })}
                 <Button form="simple" size="sm" onclick={toggle}>
-                  <span class="i-octicon-pencil"></span>
+                  <IconOcticonPencil class="icon-inline" />
                 </Button>
                 {#if show}
                   <CoordinatesModal
@@ -112,7 +115,7 @@
           <ShowHide>
             {#snippet children({ show, toggle })}
               <Button form="simple" size="sm" onclick={toggle}>
-                <span class="i-octicon-pencil"></span>
+                <IconOcticonPencil class="icon-inline" />
               </Button>
               {#if show}
                 <RegionModal
@@ -137,12 +140,12 @@
 
       <ToggleStyle />
     </Map>
-    <div class="mt-1">
+    <div style="margin-top: 0.25rem">
       {#if mounted}
         <InitableShowHide show={addPoint}>
           {#snippet children({ show, toggle })}
             <Button onclick={toggle} color="black" size="sm">
-              <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;"></span>
+              <IconMdiMapMarkerPlus class="icon-inline" style="margin-right: 0.25rem; margin-top: -3px;" />
               {$page.data.t('create.select_coordinates')}
             </Button>
             {#if show}
@@ -163,7 +166,7 @@
         <InitableShowHide show={addRegion}>
           {#snippet children({ show, toggle })}
             <Button onclick={toggle} color="black" size="sm">
-              <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;"></span>
+              <IconMdiMapMarkerPath class="icon-inline" style="margin-right: 0.25rem; margin-top: -2px;" />
               {$page.data.t('create.select_region')}
             </Button>
             {#if show}

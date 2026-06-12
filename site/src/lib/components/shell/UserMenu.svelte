@@ -40,9 +40,9 @@
 </script>
 
 {#if user}
-  <div class="px-4 py-2 text-xs font-semibold text-gray-600">{user.name || user.email}</div>
+  <div class="user-name">{user.name || user.email}</div>
   {#if user.name}
-    <div class="px-4 py-2 -mt-3 text-xs text-gray-600 border-b">{user.email}</div>
+    <div class="user-email">{user.email}</div>
   {/if}
 
   {#if auth_user.is_admin}
@@ -53,21 +53,21 @@
   {/if}
 
   {#if auth_user.real_is_admin}
-    <div class="px-4 pt-2 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+    <div class="view-as-heading">
       View as
     </div>
     {#each personas as persona (persona.key)}
       <button
         type="button"
-        class="flex w-full items-center justify-between"
+        class="persona-button"
         onclick={() => select(persona)}>
         <span>{persona.label}</span>
         {#if is_active_persona({ persona, preview: auth_user.preview, real_admin_level: auth_user.real_admin_level })}
-          <i class="fas fa-check text-purple-600"></i>
+          <i class="fas fa-check active-check"></i>
         {/if}
       </button>
     {/each}
-    <div class="my-1 border-t"></div>
+    <div class="divider"></div>
   {/if}
 
   <a href="/account" onclick={close}>{t('account.account_settings')}</a>
@@ -79,3 +79,48 @@
     </button>
   {/if}
 {/if}
+
+<style>
+  .user-name {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--color) 75%, var(--background));
+  }
+
+  .user-email {
+    padding: 0.5rem 1rem;
+    margin-top: -0.75rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background));
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .view-as-heading {
+    padding: 0.5rem 1rem 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: color-mix(in srgb, var(--color) 45%, var(--background));
+  }
+
+  .persona-button {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .active-check {
+    color: #9333ea; /* purple-600 — carried over from the house port; restyle to var(--primary) is a logged post-parity improvement */
+  }
+
+  .divider {
+    margin: 0.25rem 0;
+    border-top: 1px solid var(--border-color);
+  }
+</style>

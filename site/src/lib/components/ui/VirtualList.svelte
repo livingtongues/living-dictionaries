@@ -116,7 +116,6 @@
 </script>
 
 <svelte-virtual-list-viewport
-  class="mr-3"
   bind:this={viewport}
   bind:offsetHeight={viewport_height}
   onscroll={handle_scroll}
@@ -138,6 +137,7 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     display: block;
+    margin-right: 0.75rem;
   }
   svelte-virtual-list-contents,
   svelte-virtual-list-row {

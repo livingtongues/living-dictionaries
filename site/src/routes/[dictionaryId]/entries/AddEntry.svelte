@@ -3,6 +3,7 @@
   import { page } from '$app/stores'
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte'
   import type { DbOperations } from '$lib/dbOperations'
+  import IconFaSolidPlus from '~icons/fa-solid/plus'
 
   interface Props {
     add_entry: DbOperations['insert_entry']
@@ -18,9 +19,9 @@
 
 <ShowHide>
   {#snippet children({ show, toggle })}
-    <Button class="text-nowrap {props.class}" form="filled" onclick={toggle} disabled={!online}>
+    <Button class="add-entry-button {props.class}" form="filled" onclick={toggle} disabled={!online}>
       {#if online}
-        <span class="i-fa-solid-plus -mt-1"></span>
+        <IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" />
       {:else}
         Return online to
       {/if}
@@ -40,3 +41,10 @@
     {/if}
   {/snippet}
 </ShowHide>
+
+<style>
+  /* on the Button's element (rendered inside the Button component) */
+  :global(.add-entry-button) {
+    text-wrap: nowrap;
+  }
+</style>

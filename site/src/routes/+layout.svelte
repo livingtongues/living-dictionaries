@@ -1,8 +1,11 @@
 <script lang="ts">
   import './reset.css'
-  import 'virtual:uno.css'
+  import '$lib/uno-preflights.css'
+  import '$lib/typography.css'
   import '$lib/theme.css'
   import '$lib/buttons.css'
+  import '$lib/forms.css'
+  import '$lib/icons.css'
   import './global.css'
   import LoadingIndicator from './LoadingIndicator.svelte'
   import Toasts from '$lib/svelte-pieces/Toasts.svelte'

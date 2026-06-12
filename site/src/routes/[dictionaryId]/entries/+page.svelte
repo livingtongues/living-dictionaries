@@ -12,6 +12,7 @@
   import { page } from '$app/stores'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { browser } from '$app/environment'
+  import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
 
   const { data } = $props()
 
@@ -66,18 +67,16 @@
 
 <ShowHide>
   {#snippet children({ show: show_mobile_filters, toggle })}
-    <div
-      class="flex mb-1 items-center sticky top-0 md:top-12 pt-2 md:pt-0 pb-1
-        bg-white z-20 print:hidden">
+    <div class="search-bar">
 
       <SearchInput {search_params} index_ready={true} on_show_filter_menu={toggle} />
-      <div class="w-1"></div>
+      <div style="width: 0.25rem"></div>
       <SwitchView bind:view={$search_params.view} can_print={!!dictionary.print_access || can_edit} />
     </div>
 
-    <div class="flex">
-      <div class="flex-grow w-0 relative">
-        <div class="print:hidden italic text-xs text-gray-500 mb-1 flex">
+    <div style="display: flex">
+      <div class="results-pane">
+        <div class="results-meta">
           {#if typeof search_results_count !== 'undefined'}
             {#if search_results_count > 0}
               {$page.data.t('dictionary.entries')}: {current_page_index * entries_per_page + 1}-{Math.min((current_page_index + 1) * entries_per_page, search_results_count)} /
@@ -89,7 +88,7 @@
               {entries_length}
             {/if}
             {#if can_edit}
-              <div class="grow"></div>
+              <div style="flex-grow: 1"></div>
               <Button
                 type="button"
                 size="sm"
@@ -102,7 +101,7 @@
             {/if}
           {/if}
           {#if $loading}
-            <span class="i-svg-spinners-3-dots-fade align--4px md:hidden" title="Ensuring all entries are up to date"></span>
+            <span class="loading-spinner" title="Ensuring all entries are up to date"><IconSvgSpinners3DotsFade class="icon-inline" style="vertical-align: -4px" /></span>
           {/if}
         </div>
         <!-- {#if $entries_error}
@@ -111,11 +110,69 @@
         <View entries={page_entries} page_data={data} />
         <Pagination bind:page_from_url={$search_params.page} {number_of_pages} can_edit={can_edit} add_entry={dbOperations.insert_entry} />
       </div>
-      <div class="hidden md:block w-2 flex-shrink-0 print:hidden"></div>
+      <div class="filters-gap"></div>
       <EntryFilters {search_params} {show_mobile_filters} on_close={toggle} {result_facets} />
     </div>
   {/snippet}
 </ShowHide>
+
+<style>
+  .search-bar {
+    display: flex;
+    margin-bottom: 0.25rem;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    padding-top: 0.5rem;
+    padding-bottom: 0.25rem;
+    background-color: var(--background);
+    z-index: 20;
+  }
+
+  .results-pane {
+    flex-grow: 1;
+    width: 0;
+    position: relative;
+  }
+
+  .results-meta {
+    font-style: italic;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--color-secondary); /* ≈ gray-500 */
+    margin-bottom: 0.25rem;
+    display: flex;
+  }
+
+  .filters-gap {
+    display: none;
+    width: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 768px) {
+    .search-bar {
+      top: 3rem;
+      padding-top: 0;
+    }
+
+    .loading-spinner {
+      display: none;
+    }
+
+    .filters-gap {
+      display: block;
+    }
+  }
+
+  @media print {
+    .search-bar,
+    .results-meta,
+    .filters-gap {
+      display: none;
+    }
+  }
+</style>
 
 <SeoMetaTags
   norobots={!dictionary.public}

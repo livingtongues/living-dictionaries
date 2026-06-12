@@ -1,4 +1,6 @@
 <script lang="ts">
+  import IconCarbonCaretDown from '~icons/carbon/caret-down'
+  import IconCarbonCaretUp from '~icons/carbon/caret-up'
   import { run } from 'svelte/legacy'
 
   import { slide } from 'svelte/transition'
@@ -21,22 +23,42 @@
 <style>
   .center-h4 {
     transition: margin-left 0.2s ease-in-out;
+    margin-bottom: 0.75rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .guide-card {
+    width: 83.3333333333%;
+    margin-left: 1.75rem;
+    margin-bottom: 0.75rem;
+    border: 2px solid rgb(226 232 240); /* slate-200 */
+    padding: 0.75rem;
+    padding-left: 2rem;
+    color: var(--color-secondary); /* ≈ gray-500 (text-gray-5) */
+    border-radius: 0.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .guide-card {
+      max-width: 550px;
+    }
   }
 </style>
 
-<div class="w-5/6 sm:max-w-[550px] ml-7 mb-3 border-2 border-slate-200 p-3 pl-8 text-gray-5 rounded">
-  <div class="flex justify-between" bind:this={parentElement}>
-    <h4 class="mb-3 text-lg center-h4" bind:this={h4Element} style={`margin-left: ${hide_questions ? centerMargin : '0px'}`}>{$page.data.t('misc.guidance')}</h4>
-    <button onclick={() => hide_questions = !hide_questions} type="button" class="h-0">
+<div class="guide-card">
+  <div style="display: flex; justify-content: space-between" bind:this={parentElement}>
+    <h4 class="center-h4" bind:this={h4Element} style={`margin-left: ${hide_questions ? centerMargin : '0px'}`}>{$page.data.t('misc.guidance')}</h4>
+    <button onclick={() => hide_questions = !hide_questions} type="button" style="height: 0">
       {#if hide_questions}
-        <span class="i-carbon-caret-down opacity-50 text-2xl"></span>
+        <IconCarbonCaretDown class="icon-inline" style="opacity: 0.5; font-size: 1.5rem" />
       {:else}
-        <span class="i-carbon-caret-up opacity-50 text-2xl"></span>
+        <IconCarbonCaretUp class="icon-inline" style="opacity: 0.5; font-size: 1.5rem" />
       {/if}
     </button>
   </div>
   {#if !hide_questions}
-    <ul class="list-disc" transition:slide={{ duration: 300 }}>
+    <ul style="list-style-type: disc" transition:slide={{ duration: 300 }}>
       <li>{$page.data.t('about.question_1')}</li>
       <li>{$page.data.t('about.question_2')}</li>
       <li>{$page.data.t('about.question_3')}</li>

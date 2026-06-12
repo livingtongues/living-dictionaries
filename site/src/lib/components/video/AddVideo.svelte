@@ -9,6 +9,7 @@
   import RecordVideo from '$lib/components/video/RecordVideo.svelte'
   import VideoThirdParty from '$lib/components/video/VideoThirdParty.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
+  import IconUilMicrophone from '~icons/uil/microphone'
 
   const { dbOperations } = $derived($page.data)
 
@@ -36,7 +37,7 @@
 
 <Modal on:close={on_close}>
   {#snippet heading()}
-    <span> <i class="far fa-film-alt text-sm"></i> {entry.main.lexeme.default} </span>
+    <span> <i class="far fa-film-alt heading-icon"></i> {entry.main.lexeme.default} </span>
   {/snippet}
 
   <SelectSpeaker>
@@ -47,7 +48,7 @@
           <Button onclick={() => hosted_video = null} color="black">
             {$page.data.t('misc.cancel')}
           </Button>
-          <div class="w-1"></div>
+          <div style="width: 0.25rem"></div>
           <Button
             onclick={async () => {
               const data = await dbOperations.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video } })
@@ -72,8 +73,8 @@
                 {/snippet}
               </SelectVideo>
 
-              <Button onclick={toggle} class="mt-4 !py-4 w-full" color="red" type="button">
-                <span class="i-uil-microphone"></span>
+              <Button onclick={toggle} class="record-video-button" color="red" type="button">
+                <IconUilMicrophone class="icon-inline" />
                 {$page.data.t('video.prepare_to_record_video')}
               </Button>
             {:else}
@@ -87,7 +88,7 @@
                         <div class="modal-footer">
                           <Button onclick={reset} color="red"><i class="far fa-trash-alt"></i>
                             {$page.data.t('misc.delete')}</Button>
-                          <div class="w-1"></div>
+                          <div style="width: 0.25rem"></div>
                           <Button onclick={toggle} color="green" form="filled"><i class="fas fa-upload"></i> {$page.data.t('misc.upload')}</Button>
                         </div>
                       {:else if !upload_triggered}
@@ -113,3 +114,17 @@
     {/snippet}
   </SelectSpeaker>
 </Modal>
+
+<style>
+  .heading-icon {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  :global(.record-video-button) {
+    margin-top: 1rem;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    width: 100%;
+  }
+</style>

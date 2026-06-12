@@ -14,18 +14,18 @@
   const write_in_collaborators = $derived(dictionary.write_in_collaborators ?? [])
 </script>
 
-<p class="mb-2">
+<p style="margin-bottom: 0.5rem">
   <i>{$page.data.t('contributors.manager_contributor_distinction')}</i>
 </p>
 
-<h3 class="font-semibold text-lg mb-1 mt-3">
+<h3 class="section-heading">
   {$page.data.t('contributors.managers')}
 </h3>
 
-<div class="divide-y divide-gray-200">
+<div class="person-list">
   {#each managers as manager (manager.user_id)}
-    <div class="py-3">
-      <div class="text-sm leading-5 font-medium text-gray-900">
+    <div style="padding-top: 0.75rem; padding-bottom: 0.75rem">
+      <div class="person-name">
         {#if manager.full_name}
           {manager.full_name}
         {:else}
@@ -36,7 +36,7 @@
   {/each}
   {#if is_manager}
     {#each manager_invites as invite (invite.id)}
-      <div class="my-1">
+      <div style="margin-top: 0.25rem; margin-bottom: 0.25rem">
         <ContributorInvitationStatus
           admin={auth_user.admin_level > 0}
           {invite}
@@ -56,14 +56,14 @@
   </Button>
 {/if}
 
-<hr class="my-4" />
-<h3 class="font-semibold text-lg mb-1 mt-3">
+<hr style="margin-top: 1rem; margin-bottom: 1rem" />
+<h3 class="section-heading">
   {$page.data.t('dictionary.contributors')}
 </h3>
-<div class="divide-y divide-gray-200">
+<div class="person-list">
   {#each contributors as contributor (contributor.user_id)}
-    <div class="py-3 flex flex-wrap items-center">
-      <div class="text-sm leading-5 font-medium text-gray-900">
+    <div class="person-row">
+      <div class="person-name">
         {#if contributor.full_name}
           {contributor.full_name}
         {:else}
@@ -71,7 +71,7 @@
         {/if}
       </div>
       {#if is_manager}
-        <div class="w-1"></div>
+        <div style="width: 0.25rem"></div>
         <Button
           onclick={editor_edits.removeContributor(contributor.id)}
           color="red"
@@ -84,7 +84,7 @@
   {/each}
   {#if is_manager}
     {#each contributor_invites as invite (invite.id)}
-      <div class="my-1">
+      <div style="margin-top: 0.25rem; margin-bottom: 0.25rem">
         <ContributorInvitationStatus
           admin={auth_user.admin_level > 0}
           {invite}
@@ -115,18 +115,18 @@
   {/if}
 </div>
 
-<hr class="my-4" />
-<h3 class="font-semibold text-lg mb-1 mt-3">
+<hr style="margin-top: 1rem; margin-bottom: 1rem" />
+<h3 class="section-heading">
   {$page.data.t('contributors.other_contributors')}
 </h3>
-<div class="divide-y divide-gray-200">
+<div class="person-list">
   {#each write_in_collaborators as collaborator (collaborator)}
-    <div class="py-3 flex flex-wrap items-center">
-      <div class="text-sm leading-5 font-medium text-gray-900">
+    <div class="person-row">
+      <div class="person-name">
         {collaborator}
       </div>
       {#if is_manager}
-        <div class="w-1"></div>
+        <div style="width: 0.25rem"></div>
         <Button
           color="red"
           size="sm"
@@ -149,58 +149,58 @@
 {/if}
 
 {#if !dictionary.con_language_description}
-  <hr class="my-4" />
+  <hr style="margin-top: 1rem; margin-bottom: 1rem" />
   <Partners {partners} can_edit={is_manager} hideLivingTonguesLogo={!!dictionary.hide_living_tongues_logo} admin={auth_user.admin_level} {...data.partner_edits} />
 
   <!-- Not using contributors.request_to_add_manager -->
 
-  <hr class="my-4" />
+  <hr style="margin-top: 1rem; margin-bottom: 1rem" />
 
   {#if dictionary.id !== 'onondaga'}
-    <h3 class="font-semibold mb-1 mt-3">
+    <h3 class="team-heading">
       {$page.data.t('contributors.LD_team')}
     </h3>
-    <div class="mb-4">
+    <div style="margin-bottom: 1rem">
       Gregory D. S. Anderson -
-      <span class="text-sm">
+      <span class="role-note">
         {$page.data.t('contributors.LD_founder')}
       </span>
       <br />
       K. David Harrison -
-      <span class="text-sm">
+      <span class="role-note">
         {$page.data.t('contributors.LD_founder')}
       </span>
       <br />
       Anna Luisa Daigneault -
-      <span class="text-sm">
+      <span class="role-note">
         {$page.data.t('contributors.coordinator_editor')}
       </span>
       <br />
       Jacob Bowdoin -
-      <span class="text-sm">
+      <span class="role-note">
         {$page.data.t('contributors.developer_designer')}
       </span>
       <br />
       Diego Córdova Nieto -
-      <span class="text-sm">
+      <span class="role-note">
         {$page.data.t('contributors.developer_designer')}
       </span>
       <br />
     </div>
   {/if}
 
-  <hr class="my-3" />
-  <p class="mb-3 text-sm">
+  <hr style="margin-top: 0.75rem; margin-bottom: 0.75rem" />
+  <p class="rights-note">
     {$page.data.t('contributors.all_rights_reserved_permission')}
   </p>
 
-  <h3 class="font-semibold">
+  <h3 style="font-weight: 600">
     {$page.data.t('contributors.how_to_cite_academics')}
   </h3>
 
   <CitationComponent isManager={is_manager} {dictionary} {partners} citation={dictionary.citation} update_citation={data.update_citation} />
 
-  <div class="mb-12"></div>
+  <div style="margin-bottom: 3rem"></div>
 {/if}
 
 <SeoMetaTags
@@ -209,3 +209,49 @@
   dictionaryName={dictionary.name}
   description="Learn about the people who are building and managing this Living Dictionary."
   keywords="Contributors, Managers, Writers, Editors, Dictionary builders, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary, Print a dictionary" />
+
+<style>
+  .section-heading {
+    font-weight: 600;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    margin-bottom: 0.25rem;
+    margin-top: 0.75rem;
+  }
+
+  .person-list > :global(:not([hidden]) ~ :not([hidden])) {
+    border-top-width: 1px; /* divide-y divide-gray-200 (the reset default border color is #e5e7eb = gray-200) */
+  }
+
+  .person-name {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: var(--color); /* ≈ gray-900 */
+  }
+
+  .person-row {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .team-heading {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    margin-top: 0.75rem;
+  }
+
+  .role-note {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .rights-note {
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+</style>

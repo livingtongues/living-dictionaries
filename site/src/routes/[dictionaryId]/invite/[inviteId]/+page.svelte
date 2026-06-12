@@ -1,4 +1,5 @@
 <script lang="ts">
+  import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
   import { Button, ShowHide } from '$lib/svelte-pieces'
   import { api_dictionaries_id_invites_accept } from '$api/dictionaries/[id]/invites/[invite_id]/accept/_call'
   import { invalidateAll } from '$app/navigation'
@@ -20,35 +21,35 @@
 </script>
 
 {#if invite?.status === 'sent'}
-  <p class="font-semibold mb-2">
+  <p style="font-weight: 600; margin-bottom: 0.5rem">
     {$page.data.t('invite.invited_by')}: {invite.inviter_email}
   </p>
-  <p class="font-semibold mb-2">
+  <p style="font-weight: 600; margin-bottom: 0.5rem">
     {$page.data.t('invite.role')}: {invite.role}
   </p>
   {#if user}
     {#if is_manager}
-      <p class="mb-2">
+      <p style="margin-bottom: 0.5rem">
         You are already a manager.
       </p>
       <Button href={`/${dictionary.id}/entries`}>
         {$page.data.t('dictionary.entries')}
-        <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1"></span>
+        <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.25rem" />
       </Button>
     {:else if is_contributor && invite.role === 'contributor'}
-      <p class="mb-2">
+      <p style="margin-bottom: 0.5rem">
         You are already a contributor.
       </p>
       <Button href={`/${dictionary.id}/entries`}>
         {$page.data.t('dictionary.entries')}
-        <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1"></span>
+        <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.25rem" />
       </Button>
     {:else}
       <Button form="filled" onclick={accept_invite}>{$page.data.t('invite.accept_invitation')}</Button>
 
-      <div class="mt-2 text-sm text-gray-600">
+      <div class="terms-note">
         {$page.data.t('terms.agree_by_submit')}
-        <a href="/terms" class="underline" target="_blank">
+        <a href="/terms" style="text-decoration-line: underline" target="_blank">
           {$page.data.t('dictionary.terms_of_use')}
         </a>
         .
@@ -59,7 +60,7 @@
       {#snippet children({ show, toggle })}
         <Button form="text" onclick={toggle}>
           <i class="far fa-sign-in"></i>
-          <span class="ml-1">
+          <span style="margin-left: 0.25rem">
             {$page.data.t('header.login')}
           </span>
         </Button>
@@ -72,13 +73,13 @@
     </ShowHide>
   {/if}
 {:else if invite?.status === 'claimed'}
-  <p class="font-semibold mb-2">
+  <p style="font-weight: 600; margin-bottom: 0.5rem">
     {$page.data.t('invite.invitation_claimed')}
   </p>
 
   <Button href={`/${dictionary.id}/entries`}>
     {$page.data.t('dictionary.entries')}
-    <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1"></span>
+    <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.25rem" />
   </Button>
 {:else if !user}
   {$page.data.t('header.please_create_account')}
@@ -94,7 +95,16 @@
     {/snippet}
   </ShowHide>
 {:else}
-  <p class="font-semibold">
+  <p style="font-weight: 600">
     {$page.data.t('invite.invalid_invitation')}
   </p>
 {/if}
+
+<style>
+  .terms-note {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+  }
+</style>

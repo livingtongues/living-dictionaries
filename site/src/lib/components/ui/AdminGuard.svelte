@@ -12,5 +12,5 @@
 {#if auth_user.is_admin}
   {@render children?.()}
 {:else}
-  <div class="p-3">Not logged in as admin.</div>
+  <div style="padding: 0.75rem">Not logged in as admin.</div>
 {/if}

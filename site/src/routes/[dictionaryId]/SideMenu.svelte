@@ -1,6 +1,15 @@
 <script lang="ts">
   import type { Tables } from '$lib/types'
   import { page } from '$app/stores'
+  import IconFaSolidList from '~icons/fa-solid/list'
+  import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
+  import IconFa6SolidFileLines from '~icons/fa6-solid/file-lines'
+  import IconFa6SolidCircleInfo from '~icons/fa6-solid/circle-info'
+  import IconTablerTextGrammar from '~icons/tabler/text-grammar'
+  import IconFa6SolidUsers from '~icons/fa6-solid/users'
+  import IconFa6SolidGear from '~icons/fa6-solid/gear'
+  import IconFa6SolidFileImport from '~icons/fa6-solid/file-import'
+  import IconFa6SolidFileExport from '~icons/fa6-solid/file-export'
 
   interface Props {
     dictionary: Tables<'dictionaries'>
@@ -19,11 +28,11 @@
   }: Props = $props()
 </script>
 
-<div class="md:hidden">
-  <a href="/" class="block p-3 text-lg font-semibold mb-3 border-b">
+<div class="mobile-heading">
+  <a href="/" class="ld-home-link">
     {$page.data.t('misc.LD')}
   </a>
-  <h5 class="font-semibold uppercase tracking-wide mx-3 mb-2">
+  <h5>
     {dictionary.name}
   </h5>
 </div>
@@ -31,18 +40,16 @@
   <a
     class:active={$page.url.pathname.match(/entry|entries/)}
     href={`/${dictionary.url}/entries`}>
-    <span class="i-fa-solid-list"></span>
-    <span class="font-medium mx-2">
+    <IconFaSolidList class="icon-inline" />
+    <span class="item-label">
       {$page.data.t('dictionary.entries')}
     </span>
-    <span class="flex-grow"></span>
+    <span style="flex-grow: 1"></span>
     {#if is_manager && loading}
-      <span class="i-svg-spinners-3-dots-fade align--4px mx-1"></span>
+      <IconSvgSpinners3DotsFade class="icon-inline" style="vertical-align: -4px; margin-left: 0.25rem; margin-right: 0.25rem" />
     {/if}
     {#if entry_count}
-      <span
-        class="inline-block py-1 px-2 leading-none text-xs font-semibold
-          text-gray-700 bg-gray-300 rounded-full">
+      <span class="count-pill">
         {new Intl.NumberFormat().format(entry_count)}
       </span>
     {/if}
@@ -51,8 +58,8 @@
     <a
       href={`/${dictionary.url}/synopsis`}
       class:active={$page.url.pathname.includes('synopsis')}>
-      <span class="i-fa6-solid-file-lines"></span>
-      <span class="font-medium mx-2">
+      <IconFa6SolidFileLines class="icon-inline" />
+      <span class="item-label">
         {$page.data.t('synopsis.name')}
       </span>
     </a>
@@ -60,24 +67,24 @@
   <a
     href={`/${dictionary.url}/about`}
     class:active={$page.url.pathname.includes('about')}>
-    <span class="i-fa6-solid-circle-info mx-.25"></span>
-    <span class="font-medium mx-2">
+    <IconFa6SolidCircleInfo class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
+    <span class="item-label">
       {$page.data.t('header.about')}
     </span>
   </a>
   <a
     href={`/${dictionary.url}/grammar`}
     class:active={$page.url.pathname.includes('grammar')}>
-    <span class="i-tabler-text-grammar text-lg"></span>
-    <span class="font-medium mx-2">
+    <IconTablerTextGrammar class="icon-inline" style="font-size: 1.125rem" />
+    <span class="item-label">
       {$page.data.t('dictionary.grammar')}
     </span>
   </a>
   <a
     href={`/${dictionary.url}/contributors`}
     class:active={$page.url.pathname.includes('contributors')}>
-    <span class="i-fa6-solid-users text-lg"></span>
-    <span class="font-medium mx-2">
+    <IconFa6SolidUsers class="icon-inline" style="font-size: 1.125rem" />
+    <span class="item-label">
       {$page.data.t('dictionary.contributors')}
     </span>
   </a>
@@ -85,8 +92,8 @@
     <a
       href={`/${dictionary.url}/settings`}
       class:active={$page.url.pathname.includes('settings')}>
-      <span class="i-fa6-solid-gear mx-.5"></span>
-      <span class="font-medium mx-2">
+      <IconFa6SolidGear class="icon-inline" style="margin-left: 0.125rem; margin-right: 0.125rem" />
+      <span class="item-label">
         {$page.data.t('misc.settings')}
       </span>
     </a>
@@ -94,8 +101,8 @@
       <a
         href={`/${dictionary.url}/import`}
         class:active={$page.url.pathname.includes('import')}>
-        <span class="i-fa6-solid-file-import mx-.5"></span>
-        <span class="font-medium mx-2">
+        <IconFa6SolidFileImport class="icon-inline" style="margin-left: 0.125rem; margin-right: 0.125rem" />
+        <span class="item-label">
           {$page.data.t('import_page.import')}
         </span>
       </a>
@@ -103,15 +110,15 @@
     <a
       href={`/${dictionary.url}/export`}
       class:active={$page.url.pathname.includes('export')}>
-      <span class="i-fa6-solid-file-export ml-1"></span>
-      <span class="font-medium mx-2">
+      <IconFa6SolidFileExport class="icon-inline" style="margin-left: 0.25rem" />
+      <span class="item-label">
         {$page.data.t('misc.export')}
       </span>
     </a>
   {/if}
 </div>
 
-<div class="mt-auto"></div>
+<div style="margin-top: auto"></div>
 
 <a href="/terms" target="_blank" class="link">
   {$page.data.t('dictionary.terms_of_use')}
@@ -119,19 +126,97 @@
 <a href="https://www.youtube.com/static?template=terms" target="_blank" rel="noopener noreferrer" class="link">
   {$page.data.t('dictionary.youtube_terms')}
 </a>
-<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="link mb-3">
+<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="link last-link">
   {$page.data.t('dictionary.google_terms')}
 </a>
 
 <style>
+  .mobile-heading {
+    display: block;
+  }
+
+  @media (min-width: 768px) {
+    .mobile-heading {
+      display: none;
+    }
+  }
+
+  .ld-home-link {
+    display: block;
+    padding: 0.75rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  h5 {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    margin-left: 0.75rem;
+    margin-right: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .item-label {
+    font-weight: 500;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+  }
+
+  .count-pill {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+    background-color: color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
+    border-radius: 9999px;
+  }
+
   a:not(.link) {
-    --at-apply: text-gray-600 hover:bg-gray-200 px-3 py-2 flex items-center md:rounded-lg mb-2;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
   }
+
+  a:not(.link):hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
+  }
+
+  @media (min-width: 768px) {
+    a:not(.link) {
+      border-radius: 0.5rem;
+    }
+  }
+
   .active {
-    --at-apply: bg-gray-200 text-gray-900;
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
+    color: var(--color); /* ≈ gray-900 */
   }
+
   .link {
-    --at-apply: block text-sm pl-3 font-medium text-gray-700 hover:underline py-1;
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    padding-left: 0.75rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
     font-size: 0.78em;
+  }
+
+  .link:hover {
+    text-decoration-line: underline;
+  }
+
+  .last-link {
+    margin-bottom: 0.75rem;
   }
 </style>

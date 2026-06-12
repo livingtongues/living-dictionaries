@@ -2,6 +2,7 @@
   import type { Tables } from '$lib/types'
   import EntryField from './EntryField.svelte'
   import { page } from '$app/stores'
+  import IconSystemUiconsTrash from '~icons/system-uicons/trash'
 
   interface Props {
     glossingLanguages: string[]
@@ -22,14 +23,14 @@
   const writing_systems = ['default']
 </script>
 
-<div class:order-2={!sentence.id} class="flex flex-col">
+<div class:at-end={!sentence.id} class="sentence-col">
   {#if can_edit && sentence.id}
     <button
       type="button"
-      class="self-end text-gray-400 hover:text-red-500"
+      class="delete-sentence"
       title={$page.data.t('sentence.delete')}
       onclick={() => dbOperations.delete_sentence(sentence.id)}>
-      <span class="i-system-uicons-trash text-xl"></span>
+      <IconSystemUiconsTrash class="icon-inline" style="font-size: 1.25rem" />
     </button>
   {/if}
 
@@ -74,3 +75,23 @@
     {/each}
   {/if}
 </div>
+
+<style>
+  .sentence-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .at-end {
+    order: 2;
+  }
+
+  .delete-sentence {
+    align-self: flex-end;
+    color: color-mix(in srgb, var(--color) 45%, var(--background)); /* ≈ gray-400 */
+  }
+
+  .delete-sentence:hover {
+    color: rgb(239 68 68); /* red-500 */
+  }
+</style>

@@ -19,7 +19,7 @@
 </script>
 
 <div style="max-width: 700px">
-  <h3 class="text-xl font-semibold mb-4">{$page.data.t('misc.settings')}</h3>
+  <h3 class="settings-heading">{$page.data.t('misc.settings')}</h3>
 
   <EditString
     value={dictionary.name}
@@ -29,7 +29,7 @@
     id="name"
     save={async name => await updateDictionary({ name })}
     display={$page.data.t('settings.edit_dict_name')} />
-  <div class="mb-5"></div>
+  <div style="margin-bottom: 1.25rem"></div>
 
   {#if !dictionary.con_language_description}
     <EditString
@@ -37,14 +37,14 @@
       id="iso6393"
       save={async iso_639_3 => await updateDictionary({ iso_639_3 })}
       display="ISO 639-3" />
-    <div class="mb-5"></div>
+    <div style="margin-bottom: 1.25rem"></div>
 
     <EditString
       value={dictionary.glottocode}
       id="glottocode"
       save={async glottocode => await updateDictionary({ glottocode })}
       display="Glottocode" />
-    <div class="mb-5"></div>
+    <div style="margin-bottom: 1.25rem"></div>
   {/if}
 
   <EditableGlossesField
@@ -53,12 +53,12 @@
     selectedLanguages={dictionary.gloss_languages}
     add_language={async languageId => await updateDictionary({ gloss_languages: [...dictionary.gloss_languages, languageId] })}
     remove_language={async languageId => await remove_gloss_language(languageId)} />
-  <div class="mb-5"></div>
+  <div style="margin-bottom: 1.25rem"></div>
 
   <EditableAlternateNames
     alternateNames={dictionary.alternate_names}
     on_update={async new_value => await updateDictionary({ alternate_names: new_value })} />
-  <div class="mb-5"></div>
+  <div style="margin-bottom: 1.25rem"></div>
 
   {#if !dictionary.con_language_description}
     <WhereSpoken
@@ -71,7 +71,7 @@
         points: dictionary.coordinates?.points,
         regions,
       } })} />
-    <div class="mb-5"></div>
+    <div style="margin-bottom: 1.25rem"></div>
 
     <EditString
       value={dictionary.location}
@@ -79,9 +79,9 @@
       id="location"
       save={async location => await updateDictionary({ location })}
       display={$page.data.t('dictionary.location')} />
-    <div class="mb-5"></div>
+    <div style="margin-bottom: 1.25rem"></div>
 
-    <div class="text-sm font-medium text-gray-700 mb-2">
+    <div class="section-label">
       {$page.data.t('settings.featured_image')}
     </div>
     {#if dictionary.featured_image}
@@ -92,17 +92,17 @@
         gcs={dictionary.featured_image.serving_url}
         on_delete_image={async () => await updateDictionary({ featured_image: null })} />
     {:else}
-      <div class="hover:bg-gray-100 min-h-150px flex flex-col">
+      <div class="image-tile">
         <AddImage border upload_image={add_featured_image} />
       </div>
     {/if}
-    <div class="mb-5"></div>
+    <div style="margin-bottom: 1.25rem"></div>
   {/if}
 
   <PrintAccessCheckbox
     checked={!!dictionary.print_access}
     on:changed={async ({ detail: { checked } }) => await updateDictionary({ print_access: checked ? 1 : 0 })} />
-  <div class="mb-5"></div>
+  <div style="margin-bottom: 1.25rem"></div>
 
   {#if !dictionary.con_language_description}
     <PublicCheckbox
@@ -122,14 +122,14 @@
         }
         dictionary.public = 0
       }} />
-    <div class="mb-5"></div>
+    <div style="margin-bottom: 1.25rem"></div>
   {/if}
 
   {#if is_manager}
     <div>
       <ShowHide>
         {#snippet children({ show, toggle })}
-          <Button onclick={toggle} class="mb-5" color="red">
+          <Button onclick={toggle} class="delete-dict-button" color="red">
             {$page.data.t('misc.delete')}:
             {$page.data.t('header.contact_us')}
           </Button>
@@ -144,7 +144,7 @@
   {/if}
 
   {#if auth_user.admin_level > 1}
-    <div class="mt-5">
+    <div style="margin-top: 1.25rem">
       <JSON obj={dictionary} />
     </div>
   {/if}
@@ -156,3 +156,34 @@
   dictionaryName={dictionary.name}
   description="Under Settings, dictionary managers can edit the dictionary\'s parameters such as its name, ISO 639-3 Code, Glottocode, translation languages, alternate names, geo-coordinates, and other information. They can also toggle on or off the ability to make the dictionary public, and the ability to make the dictionary printable to viewers."
   keywords="Settings, Parameters, ISO 639-3, Glottocde, glossing languages, alternate names, GPS, language medata, public dictionary, private dictionary, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />
+
+<style>
+  .settings-heading {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .section-label {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+    margin-bottom: 0.5rem;
+  }
+
+  .image-tile {
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .image-tile:hover {
+    background-color: var(--surface); /* ≈ gray-100 */
+  }
+
+  :global(.delete-dict-button) {
+    margin-bottom: 1.25rem;
+  }
+</style>

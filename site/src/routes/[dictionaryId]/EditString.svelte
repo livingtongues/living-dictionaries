@@ -25,10 +25,10 @@
 
 <Form onsubmit={async () => await save(value.trim())}>
   {#snippet children({ loading })}
-    <label for={id} class="text-sm font-medium text-gray-700 mb-2">
+    <label for={id}>
       {display}
     </label>
-    <div class="flex">
+    <div class="input-row">
       <input
         {id}
         type="text"
@@ -39,12 +39,34 @@
         {maxlength}
         {required}
         bind:value
-        class="form-input w-full"
+        class="form-input"
         placeholder={display} />
-      <div class="w-1"></div>
-      <Button class="shrink-0" {loading} type="submit">
+      <div style="width: 0.25rem"></div>
+      <Button class="save-button" {loading} type="submit">
         {$page.data.t('misc.save')}
       </Button>
     </div>
   {/snippet}
 </Form>
+
+<style>
+  label {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+    margin-bottom: 0.5rem;
+  }
+
+  .input-row {
+    display: flex;
+  }
+
+  .input-row .form-input {
+    width: 100%;
+  }
+
+  .input-row :global(.save-button) {
+    flex-shrink: 0;
+  }
+</style>
