@@ -5,6 +5,8 @@
   import { onMount } from 'svelte'
   import type { SelectOption } from './select-options.interface'
   import { clickoutside } from '$lib/svelte-pieces'
+  import IconLaTimes from '~icons/la/times'
+  import IconCarbonCaretDown from '~icons/carbon/caret-down'
 
   interface Props {
     selectedOptions: Record<string, SelectOption>
@@ -109,22 +111,18 @@
   }}>
   <div class="tokens" class:showOptions onclick={() => setShowOptions(true)}>
     {#each Object.values(selectedOptions) as option (option.value)}
-      <div
-        class="items-center flex rounded-lg px-2 py-1 whitespace-nowrap
-          text-sm font-medium leading-4 bg-blue-100 text-blue-800 mr-2 my-1">
+      <div class="token">
         <span>{option.name}</span>
         <div
           onclick={stopPropagation(() => remove(option.value))}
-          class="cursor-pointer justify-center items-center flex
-            bg-blue-300 hover:bg-blue-400 rounded-full h-4 w-4 ml-1"
+          class="remove-token"
           title="Remove {option.name}">
-          <span class="i-la-times"></span>
+          <IconLaTimes class="icon-inline" />
         </div>
       </div>
     {/each}
     <div class="actions">
       <input
-        class="border-none m-0 p-0 outline-none w-full"
         autocomplete="off"
         bind:value={inputValue}
         bind:this={input}
@@ -132,7 +130,7 @@
         onfocus={() => setShowOptions(true)}
         onblur={addWriteInIfApplicable}
         placeholder={Object.keys(selectedOptions).length ? '' : placeholder} />
-      <span class="i-carbon-caret-down opacity-50"></span>
+      <IconCarbonCaretDown class="icon-inline" style="opacity: 0.5" />
     </div>
   </div>
 
@@ -191,6 +189,47 @@
     display: flex;
     flex: 1;
     min-width: 3rem;
+  }
+
+  .token {
+    align-items: center;
+    display: flex;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1rem;
+    background-color: rgb(219 234 254); /* blue-100 */
+    color: rgb(30 64 175); /* blue-800 */
+    margin-right: 0.5rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .remove-token {
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    background-color: rgb(147 197 253); /* blue-300 */
+    border-radius: 9999px;
+    height: 1rem;
+    width: 1rem;
+    margin-left: 0.25rem;
+  }
+
+  .remove-token:hover {
+    background-color: rgb(96 165 250); /* blue-400 */
+  }
+
+  .actions input {
+    border-style: none;
+    margin: 0;
+    padding: 0;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    width: 100%;
   }
 
   .options {

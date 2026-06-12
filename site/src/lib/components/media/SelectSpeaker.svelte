@@ -5,6 +5,7 @@
 <script lang="ts">
   import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
+  import IconFaSolidPlus from '~icons/fa-solid/plus'
 
   interface Props {
     select_speaker?: (speaker_id: string) => Promise<void>
@@ -28,19 +29,16 @@
 </script>
 
 {#if !speaker_id}
-  <div class="text-sm font-medium leading-5 text-gray-600 mb-2">
+  <div class="select-prompt">
     {$page.data.t('audio.select_speaker')}
   </div>
 {/if}
 
 {#if !$speakers?.length}
-  <Button onclick={() => speaker_id = addSpeaker} form="filled"><span class="i-fa-solid-plus -mt-1"></span> {$page.data.t('misc.add')}</Button>
+  <Button onclick={() => speaker_id = addSpeaker} form="filled"><IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" /> {$page.data.t('misc.add')}</Button>
 {:else}
-  <div class="flex rounded-md shadow-sm mb-4">
-    <label
-      for="speaker"
-      class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
-        border-gray-300 bg-gray-50 text-gray-500">
+  <div class="speaker-row">
+    <label for="speaker">
       {$page.data.t('entry_field.speaker')}
     </label>
     <select
@@ -53,7 +51,7 @@
           select_speaker?.(speaker_id)
         }
       }}
-      class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input hover:outline-blue-600">
+      class="form-input speaker-select">
       {#if !speaker_id}
         <option></option>
       {/if}
@@ -82,3 +80,61 @@
 {:else if speaker_id}
   {@render children?.({ speaker_id })}
 {/if}
+
+<style>
+  .select-prompt {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    margin-bottom: 0.5rem;
+  }
+
+  .speaker-row {
+    display: flex;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
+    margin-bottom: 1rem;
+  }
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
+    background-color: color-mix(in srgb, var(--background), var(--color) 2%); /* ≈ gray-50 */
+    color: var(--color-secondary); /* ≈ gray-500 */
+  }
+
+  :global([dir='ltr']) label {
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+  }
+
+  :global([dir='rtl']) label {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+  }
+
+  .speaker-select {
+    display: block;
+    width: 100%;
+    padding-left: 0.75rem;
+    border-radius: 0 !important;
+  }
+
+  :global([dir='ltr']) .speaker-select {
+    border-top-right-radius: 0.375rem !important;
+    border-bottom-right-radius: 0.375rem !important;
+  }
+
+  :global([dir='rtl']) .speaker-select {
+    border-top-left-radius: 0.375rem !important;
+    border-bottom-left-radius: 0.375rem !important;
+  }
+
+  .speaker-select:hover {
+    outline-color: rgb(37 99 235); /* blue-600 (hover:outline-blue-600 — sets color only, no outline width) */
+  }
+</style>

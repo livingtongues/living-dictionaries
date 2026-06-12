@@ -4,7 +4,6 @@ import { AuthUser } from '$lib/auth/user.svelte'
 
 export const shared_meta: StoryMeta = {
   viewports: [{ width: 320, height: 480 }],
-  csr: true,
 }
 
 const t = ((key: string) => key) as never

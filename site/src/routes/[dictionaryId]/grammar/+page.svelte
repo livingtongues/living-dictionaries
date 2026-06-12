@@ -12,34 +12,34 @@
 </script>
 
 <div class="grammar">
-  <h3 class="text-xl font-semibold mb-3">
+  <h3 class="grammar-heading">
     {$page.data.t('dictionary.grammar')}
   </h3>
 
   {#if is_manager}
     {#if editing}
-      <Button class="mb-2" onclick={() => (editing = false)}>{$page.data.t('misc.cancel')}</Button>
+      <Button class="grammar-action" onclick={() => (editing = false)}>{$page.data.t('misc.cancel')}</Button>
       <Button
-        class="mb-2"
+        class="grammar-action"
         form="filled"
         onclick={async () => {
           await update_grammar(updated)
           editing = false
         }}>{$page.data.t('misc.save')}</Button>
     {:else}
-      <Button class="mb-2" onclick={() => (editing = true)}>{$page.data.t('misc.edit')}</Button>
+      <Button class="grammar-action" onclick={() => (editing = true)}>{$page.data.t('misc.edit')}</Button>
     {/if}
   {/if}
 
-  <div class="flex">
+  <div style="display: flex">
     {#if editing}
-      <div class="max-w-screen-md tw-prose prose-lg">
+      <div class="tw-prose" style="max-width: 768px">
         {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
           <ClassicCustomized html={dictionary.grammar} on:update={({ detail }) => (updated = detail)} />
         {/await}
       </div>
     {/if}
-    <div class="tw-prose prose-lg max-w-screen-md {editing && 'hidden md:block mt-14 ml-3'}">
+    <div class="tw-prose grammar-content" class:editing>
       {#if updated || dictionary.grammar}
         {@html sanitize(updated || dictionary.grammar)}
       {:else}
@@ -63,5 +63,32 @@
 
   :global(.grammar figure) {
     margin: 0;
+  }
+
+  .grammar-heading {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+
+  .grammar :global(.grammar-action) {
+    margin-bottom: 0.5rem;
+  }
+
+  .grammar-content {
+    max-width: 768px;
+  }
+
+  .grammar-content.editing {
+    display: none;
+    margin-top: 3.5rem;
+    margin-left: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .grammar-content.editing {
+      display: block;
+    }
   }
 </style>

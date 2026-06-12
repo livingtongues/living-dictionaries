@@ -12,7 +12,7 @@
 
 <svelte:window bind:innerWidth={window_width} />
 
-<section class="flex justify-center">
+<section style="display: flex; justify-content: center">
   {#if hosted_video.type === 'youtube'}
     <iframe
       id="player"

@@ -16,7 +16,7 @@
   <div>
     {#each locales as [bcp, name] (bcp)}
       <Button
-        class="mr-1 mb-1 !normal-case"
+        class="locale-button"
         color="black"
         form={$page.data.locale.includes(bcp) ? 'filled' : 'simple'}
         onclick={() => changeLocale(bcp)}>
@@ -26,7 +26,7 @@
     {#if auth_user.is_admin}
       {#each unpublishedLocales as [bcp, name] (bcp)}
         <Button
-          class="mr-1 mb-1 !normal-case"
+          class="locale-button"
           color="black"
           form={$page.data.locale.includes(bcp) ? 'filled' : 'simple'}
           onclick={() => changeLocale(bcp)}>
@@ -37,3 +37,11 @@
     {/if}
   </div>
 </Modal>
+
+<style>
+  div :global(.locale-button) {
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+    text-transform: none !important;
+  }
+</style>

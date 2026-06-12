@@ -29,9 +29,9 @@
 <ShowHide>
   {#snippet children({ show, toggle, set })}
     <div
-      class:cursor-pointer={can_edit}
+      class:editable={can_edit}
       class:italic={field === 'scientific_names' && !value?.includes('<i>')}
-      class="h-full"
+      class="textbox-cell"
       style="padding: 0.1em 0.25em"
       onclick={() => set(can_edit)}>
       {@html sanitizedHtml}
@@ -51,3 +51,17 @@
     {/if}
   {/snippet}
 </ShowHide>
+
+<style>
+  .textbox-cell {
+    height: 100%;
+  }
+
+  .editable {
+    cursor: pointer;
+  }
+
+  .italic {
+    font-style: italic;
+  }
+</style>

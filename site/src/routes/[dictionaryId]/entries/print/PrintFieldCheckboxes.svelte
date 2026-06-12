@@ -46,20 +46,36 @@
 </script>
 
 {#each fieldsThatExist as field (field)}
-  <div class="flex items-center mr-3 mb-1">
+  <div class="checkbox-row">
     <input id={field} type="checkbox" bind:checked={$preferredPrintFields[field]} />
-    <label class="ml-1 text-sm text-gray-700" for={field}>{$page.data.t(`entry_field.${field}`)}</label>
+    <label for={field}>{$page.data.t(`entry_field.${field}`)}</label>
   </div>
 {/each}
 
 {#if showingFieldsWithLabels}
-  <div class="flex items-center mr-3 mb-1">
+  <div class="checkbox-row">
     <input id="showLabels" type="checkbox" bind:checked={$showLabels} />
-    <label class="ml-1 text-sm text-gray-700" for="showLabels">{$page.data.t('print.labels')}</label>
+    <label for="showLabels">{$page.data.t('print.labels')}</label>
   </div>
 {/if}
 
-<div class="flex items-center mr-3 mb-1">
+<div class="checkbox-row">
   <input id="showLabels" type="checkbox" bind:checked={$showQrCode} />
-  <label class="ml-1 text-sm text-gray-700" for="showLabels">{$page.data.t('print.qr_code')}</label>
+  <label for="showLabels">{$page.data.t('print.qr_code')}</label>
 </div>
+
+<style>
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    margin-right: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  label {
+    margin-left: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+  }
+</style>

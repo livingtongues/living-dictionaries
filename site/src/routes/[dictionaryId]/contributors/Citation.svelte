@@ -36,24 +36,24 @@
       }
     }}>
     {#snippet children({ loading })}
-      <label for="names" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
+      <label for="names">
         {$page.data.t('contributors.how_to_cite_instructions')}
       </label>
-      <div class="mt-1 flex">
+      <div style="margin-top: 0.25rem; display: flex">
         <input
           dir="ltr"
           id="names"
           placeholder="Anderson, Gregory D. S."
           type="text"
-          class="form-input w-full"
+          class="form-input citation-input"
           value={citation || ''}
           oninput={(e) => {
             // @ts-expect-error
             value = e.target.value.trim()
             unsaved = value !== citation
           }} />
-        <div class="w-1"></div>
-        <Button class="shrink-0" {loading} type="submit">
+        <div style="width: 0.25rem"></div>
+        <Button class="citation-save-button" {loading} type="submit">
           {$page.data.t('misc.save')}
         </Button>
       </div>
@@ -61,6 +61,29 @@
   </Form>
 {/if}
 
-<div dir="ltr" class:text-orange={unsaved}>
+<div dir="ltr" class:unsaved>
   {build_citation({ t: $page.data.t, dictionary, custom_citation: value || citation, partners })}
 </div>
+
+<style>
+  label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+    margin-top: 1rem;
+  }
+
+  .citation-input {
+    width: 100%;
+  }
+
+  :global(.citation-save-button) {
+    flex-shrink: 0;
+  }
+
+  .unsaved {
+    color: rgb(251 146 60); /* orange (uno text-orange = orange-400) */
+  }
+</style>

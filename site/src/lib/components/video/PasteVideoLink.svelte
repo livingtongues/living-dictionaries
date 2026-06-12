@@ -23,24 +23,46 @@
   }
 </script>
 
-<form class="mb-4" onsubmit={preventDefault(handle)}>
-  <label for="vURL" class="block text-sm font-medium leading-5 text-gray-700 mb-2">
+<form style="margin-bottom: 1rem" onsubmit={preventDefault(handle)}>
+  <label for="vURL">
     <i class="far fa-link"></i>
     {$page.data.t('video.video_url')}
   </label>
-  <div class="flex">
-    <div class="rounded-md shadow-sm flex-grow">
+  <div style="display: flex">
+    <div class="input-shadow-wrap">
       <input
         id="vURL"
         type="url"
         placeholder="Paste YouTube or Vimeo link"
         required
         bind:value={url}
-        class="form-input block w-full" />
+        class="form-input" />
     </div>
-    <div class="w-1"></div>
+    <div style="width: 0.25rem"></div>
     <Button type="submit" form={url ? 'filled' : 'outline'}>
       {$page.data.t('misc.add')}
     </Button>
   </div>
 </form>
+
+<style>
+  label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+    margin-bottom: 0.5rem;
+  }
+
+  .input-shadow-wrap {
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
+    flex-grow: 1;
+  }
+
+  .input-shadow-wrap input {
+    display: block;
+    width: 100%;
+  }
+</style>

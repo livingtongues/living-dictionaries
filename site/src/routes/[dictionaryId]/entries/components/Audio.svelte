@@ -35,6 +35,8 @@
   import { longpress, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
+  import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
+  import IconUilMicrophone from '~icons/uil/microphone'
 
   interface Props {
     entry: EntryData
@@ -60,9 +62,8 @@
     {#if sound_file}
       {@const updated_within_last_5_minutes = sound_file.updated_at && can_edit && new Date(sound_file.updated_at).getTime() > minutes_ago_in_ms(5)}
       <div
-        class:border-b-2={updated_within_last_5_minutes}
-        class="{klass} hover:bg-gray-200 flex flex-col items-center
-          justify-center cursor-pointer select-none border-green-300"
+        class:recently-updated={updated_within_last_5_minutes}
+        class="{klass} audio-action has-audio"
         title={$page.data.t('audio.listen')}
         use:longpress={800}
         onlongpress={() => initAudio()}
@@ -73,17 +74,15 @@
             initAudio()
         }}>
         {#if context === 'list'}
-          <span class:text-blue-700={playing} class="i-material-symbols-hearing text-xl mt-1"></span>
-          <div class="text-xs text-center line-clamp-1 w-full" style="overflow-wrap: break-word;">
+          <IconMaterialSymbolsHearing class="icon-inline {playing ? 'playing-color' : ''}" style="font-size: 1.25rem; margin-top: 0.25rem" />
+          <div class="listen-label">
             {$page.data.t('audio.listen')}
           </div>
         {:else if context === 'table'}
-          <span class:text-blue-700={playing} class="i-material-symbols-hearing text-lg mt-1"></span>
+          <IconMaterialSymbolsHearing class="icon-inline {playing ? 'playing-color' : ''}" style="font-size: 1.125rem; margin-top: 0.25rem" />
         {:else if context === 'entry'}
-          <span
-            class:text-blue-700={playing}
-            class="i-material-symbols-hearing text-lg mb-1"></span>
-          <div class="text-center text-xs">
+          <IconMaterialSymbolsHearing class="icon-inline {playing ? 'playing-color' : ''}" style="font-size: 1.125rem; margin-bottom: 0.25rem" />
+          <div class="entry-label">
             {$page.data.t('audio.listen')}
             {#if can_edit}
               +
@@ -94,12 +93,11 @@
       </div>
     {:else if can_edit}
       <div
-        class="{klass} hover:bg-gray-300 flex flex-col items-center
-          justify-center cursor-pointer select-none"
+        class="{klass} audio-action add-audio"
         onclick={toggle}>
-        <span class="i-uil-microphone text-lg m-1" class:text-blue-800={context === 'list' || context === 'table'}></span>
+        <IconUilMicrophone class="icon-inline {context === 'list' || context === 'table' ? 'mic-color' : ''}" style="font-size: 1.125rem; margin: 0.25rem" />
         {#if context === 'entry'}
-          <div class="text-xs">
+          <div style="font-size: 0.75rem; line-height: 1rem">
             {$page.data.t('audio.add_audio')}
           </div>
         {/if}
@@ -113,3 +111,56 @@
     {/if}
   {/snippet}
 </ShowHide>
+
+<style>
+  .audio-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .has-audio {
+    border-color: rgb(134 239 172); /* green-300 */
+  }
+
+  .has-audio:hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
+  }
+
+  .recently-updated {
+    border-bottom-width: 2px;
+  }
+
+  .add-audio:hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
+  }
+
+  .audio-action :global(.playing-color) {
+    color: rgb(29 78 216); /* blue-700 */
+  }
+
+  .audio-action :global(.mic-color) {
+    color: rgb(30 64 175); /* blue-800 */
+  }
+
+  .listen-label {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    text-align: center;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    width: 100%;
+    overflow-wrap: break-word;
+  }
+
+  .entry-label {
+    text-align: center;
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+</style>

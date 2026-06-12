@@ -23,12 +23,12 @@
 
 <Header />
 
-<div class="p-4 bg-white relative z-20 border-t">
-  <h2 class="text-xl sm:text-4xl font-bold mb-3">
+<div class="error-panel">
+  <h2>
     {page.data.t('error.run_into_error')}
   </h2>
 
-  <p class="mb-3">
+  <p class="explain">
     {page.data.t('error.error_recorded')}
 
     <b>
@@ -47,7 +47,7 @@
     {/snippet}
   </ShowHide>
 
-  <p class="text-gray-600 text-sm mt-6">
+  <p class="error-detail">
     {page.data.t('misc.error')}:
     {page.status}
     -
@@ -55,10 +55,45 @@
   </p>
 
   {#if dev && page.error.message}
-    <div class="w-full overflow-x-auto">
+    <div style="width: 100%; overflow-x: auto">
       <pre>{JSON.stringify(page.error, null, 2)}</pre>
     </div>
   {/if}
 </div>
 
 <Footer />
+
+<style>
+  .error-panel {
+    padding: 1rem;
+    background-color: var(--background);
+    position: relative;
+    z-index: 20;
+    border-top: 1px solid var(--border-color);
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    h2 {
+      font-size: 2.25rem;
+      line-height: 2.5rem;
+    }
+  }
+
+  .explain {
+    margin-bottom: 0.75rem;
+  }
+
+  .error-detail {
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-top: 1.5rem;
+  }
+</style>

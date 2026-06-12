@@ -6,6 +6,8 @@
   import VideoThirdParty from './VideoThirdParty.svelte'
   import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
+  import IconFaSolidTimes from '~icons/fa-solid/times'
+  import IconFaTrashO from '~icons/fa/trash-o'
 
   const { dbOperations, url_from_storage_path } = $derived($page.data)
 
@@ -26,14 +28,12 @@
 
 <div
   onclick={on_close}
-  class="fixed inset-0 md:p-3 flex flex-col items-center justify-center"
+  class="viewer"
   style="background: rgba(0, 0, 0, 0.85); z-index: 51; will-change: transform;">
-  <div class="h-full flex flex-col justify-center">
-    <div
-      class="font-semibold text-white p-4 flex justify-between items-center
-        absolute top-0 inset-x-0 bg-opacity-25 bg-black">
+  <div class="viewer-inner">
+    <div class="viewer-header">
       <span onclick={stopPropagation(bubble('click'))}>{lexeme}</span>
-      <span class="i-fa-solid-times p-3 cursor-pointer"></span>
+      <IconFaSolidTimes class="icon-inline viewer-close" style="font-size: 2.5rem" />
     </div>
     {#if video.storage_path}
       <video
@@ -47,24 +47,80 @@
       <VideoThirdParty hosted_video={video.hosted_elsewhere} />
     {/if}
     {#if can_edit}
-      <div
-        class="p-4 flex justify-between
-          items-center absolute bottom-0 inset-x-0 bg-opacity-25 bg-black">
+      <div class="viewer-footer">
         <Button
-          class="ml-auto"
+          class="video-delete-button"
           color="red"
           form="filled"
           onclick={async () => {
             const confirmation = confirm($page.data.t('entry.delete_video'))
             if (confirmation) await dbOperations.delete_video(video.id)
           }}>
-          <span class="i-fa-trash-o" style="margin: -1px 0 2px;"></span>
+          <IconFaTrashO class="icon-inline" style="margin: -1px 0 2px;" />
           {$page.data.t('misc.delete')}
         </Button>
       </div>
     {/if}
   </div>
 </div>
+
+<style>
+  .viewer {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) {
+    .viewer {
+      padding: 0.75rem;
+    }
+  }
+
+  .viewer-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .viewer-header {
+    font-weight: 600;
+    color: #fff;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: rgb(0 0 0 / 0.25);
+  }
+
+  .viewer-header :global(.viewer-close) {
+    cursor: pointer;
+  }
+
+  .viewer-footer {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgb(0 0 0 / 0.25);
+  }
+
+  .viewer-footer :global(.video-delete-button) {
+    margin-left: auto;
+  }
+</style>
 
 <!-- {#if !video.youtubeId && !video.vimeoId}
         <Button

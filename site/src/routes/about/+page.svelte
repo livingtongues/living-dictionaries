@@ -10,28 +10,24 @@
   {page.data.t('about.about_LD')}
 </Header>
 
-<div class="max-w-screen-md mx-auto p-3">
-  <h3
-    class="mb-6 text-3xl leading-8 font-bold tracking-tight text-gray-900
-      sm:text-4xl sm:leading-10">
+<div class="page-column">
+  <h3 class="page-title">
     {page.data.t('about.about_LD')}
   </h3>
 
-  <p class="mb-3">
+  <p class="spaced">
     {page.data.t('about.online_tool')}
   </p>
-  <p class="mb-3">
+  <p class="spaced">
     {page.data.t('about.promote_connectivity')}
   </p>
-  <p class="mb-3">
+  <p class="spaced">
     {page.data.t('about.td_beginnings')}
   </p>
 
   <hr style="margin: 40px 0;" />
 
-  <h4
-    class="text-2xl leading-8 font-bold text-gray-900 tracking-tight
-      sm:text-3xl sm:leading-9 mb-2">
+  <h4 class="section-title">
     {page.data.t('about.current_features')}
   </h4>
   <p>
@@ -61,9 +57,7 @@
     {page.data.t('about.export_data')}
   </p>
 
-  <h4
-    class="text-2xl leading-8 font-bold text-gray-900 tracking-tight
-      sm:text-3xl sm:leading-9 mb-2 mt-3">
+  <h4 class="section-title" style="margin-top: 0.75rem">
     {page.data.t('about.dev_roadmap')}
   </h4>
   <p>
@@ -79,56 +73,51 @@
   <hr style="margin: 40px 0;" />
 
   <img
-    class="mb-4"
+    class="figure"
     alt="man in front of alphabet and storyboard drawing"
     loading="lazy"
     src="https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w900"
     srcset="https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w300 300w, https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w600 600w, https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w1200 1200w" />
 
-  <h3
-    class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
-      sm:text-3xl sm:leading-9">
+  <h3 class="section-title" style="margin-bottom: 0.75rem">
     {page.data.t('about.why_document')}
   </h3>
-  <p class="mb-3">
+  <p class="spaced">
     {page.data.t('about.language_is_history')}
   </p>
-  <p class="mb-3">
+  <p class="spaced">
     {page.data.t('about.important_to_document')}
   </p>
 
   <img
-    class="mb-4"
+    class="figure"
     alt="Recording language data"
     loading="lazy"
     src="https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w900"
     srcset="https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w300 300w, https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w600 600w, https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w1200 1200w" />
 
-  <h3
-    class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
-      sm:text-3xl sm:leading-9">
+  <h3 class="section-title" style="margin-bottom: 0.75rem">
     {page.data.t('about.what_is_LT')}
   </h3>
-  <p class="mb-3">
+  <p class="spaced">
     {page.data.t('about.leading_research')}
   </p>
-  <p class="mb-3">
+  <p class="spaced">
     {page.data.t('about.two_decades_experience')}
   </p>
 
   <img
-    class="mt-3 mb-4"
+    class="figure"
+    style="margin-top: 0.75rem"
     alt="Recording plant words"
     loading="lazy"
     src="https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w900"
     srcset="https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w300 300w, https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w600 600w, https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w1200 1200w" />
 
-  <h3
-    class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
-      sm:text-3xl sm:leading-9">
+  <h3 class="section-title" style="margin-bottom: 0.75rem">
     {page.data.t('about.translators')}
   </h3>
-  <ul class="mb-3">
+  <ul class="spaced">
     <li>
       <b>{page.data.t('gl.as')}</b>: Palash Nath, Luke Horo, Kapil Medhi, Dr. Seuji
       Sharma, Dr. Gitanjali Bezbaruah, Biren Baruah, Khagendra Nath Medhi, Pranab Sharma, Dhanmani
@@ -179,12 +168,10 @@
     <li><b>{page.data.t('gl.id')}</b>: Yustinus Ghanggo Ate</li>
   </ul>
 
-  <h3
-    class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
-      sm:text-3xl sm:leading-9">
+  <h3 class="section-title" style="margin-bottom: 0.75rem">
     {page.data.t('about.interns')} (Living Tongues Institute)
   </h3>
-  <p class="mb-3">
+  <p class="spaced">
     Ashlie Devenney, Thorin Engeseth, Ariel Rabkin-Meyer, Ella Hannon, Cassie Gritton, Peyton A.
     Nesler, Emilie Erbland, Kyra O’Connell, Louis Fillman, Liam Marshall-Butler, Shuangqi (Joy) Wu,
     Catherine Huang, Molly Cutler, Luke Strom, Sydney Louchard, Alexis O'Connor, Cassidy Parong,
@@ -195,17 +182,15 @@
     Aarushi Asthana, Akano Johnson, Selena Syrett.
   </p>
 
-  <h3
-    class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
-      sm:text-3xl sm:leading-9">
+  <h3 class="section-title" style="margin-bottom: 0.75rem">
     {page.data.t('about.help_us_launch_more')}
   </h3>
-  <p class="mb-3">
+  <p class="spaced">
     {page.data.t('about.with_your_help')}
   </p>
   <Button
     form="filled"
-    class="w-full my-3"
+    class="donate-button"
     target="_blank"
     href="https://www.paypal.com/donate?hosted_button_id=QCELFXU8ZGTVC"
     rel="noopener">
@@ -226,5 +211,58 @@
     display: block;
     width: 100%;
     height: auto;
+  }
+
+  .page-column {
+    max-width: 768px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0.75rem;
+  }
+
+  .page-title {
+    margin-bottom: 1.5rem;
+    font-size: 1.875rem;
+    line-height: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--color); /* ≈ gray-900 */
+  }
+
+  @media (min-width: 640px) {
+    .page-title {
+      font-size: 2.25rem;
+      line-height: 2.5rem;
+    }
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+    color: var(--color); /* ≈ gray-900 */
+    letter-spacing: -0.025em;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .section-title {
+      font-size: 1.875rem;
+      line-height: 2.25rem;
+    }
+  }
+
+  .spaced {
+    margin-bottom: 0.75rem;
+  }
+
+  .figure {
+    margin-bottom: 1rem;
+  }
+
+  .page-column :global(.donate-button) {
+    width: 100%;
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
   }
 </style>

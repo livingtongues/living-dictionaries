@@ -1,14 +1,10 @@
 /*
-ARCHIVED — not imported anywhere. Kept here for the eventual UnoCSS → vanilla-CSS
-migration. We KEEP UnoCSS for now (its reset lives in `src/routes/reset.css` as
-`@import '@unocss/reset/tailwind.css' layer(reset)`). When we drop the uno plugin,
-swap that import for this verbatim copy of the uno reset so element defaults stay
-identical (theme.css + buttons.css are already plain CSS and ready). From the
-example repo's `lib/reset.css`.
-
-Original note: copied verbatim from @unocss/reset/tailwind.css for visual parity
-during the UnoCSS → plain-CSS migration. If we want a leaner reset later, we can
-prune this in a follow-up.
+ARCHIVED — the example repo's variant of `@unocss/reset/tailwind.css`, kept for
+reference. NOTE: when UnoCSS was dropped (2026-06-12, .issues/drop-unocss.md) LD
+adopted the STOCK reset verbatim at `site/src/routes/reset-tailwind.css` instead of
+this file — this variant carries two example-repo tweaks LD deliberately skipped for
+pixel parity: body font-smoothing (antialiased) and `svg { display: inline-block }`
+(LD handles icon display via the `.icon-inline` class in `site/src/lib/icons.css`).
 */
 
 /*

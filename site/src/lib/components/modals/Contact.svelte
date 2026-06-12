@@ -1,4 +1,5 @@
 <script lang="ts">
+  import IconFluentLearningApp24Regular from '~icons/fluent/learning-app-24-regular'
   import { run } from 'svelte/legacy'
 
   import { createEventDispatcher } from 'svelte'
@@ -80,27 +81,27 @@
   }))
 </script>
 
-<Modal on:close class="bg-gray-100">
+<Modal on:close class="contact-modal">
   {#snippet heading()}
     <span>
       <i class="far fa-question-circle"></i>
     </span>
   {/snippet}
-  <div class="flex flex-col mb-5">
+  <div style="display: flex; flex-direction: column; margin-bottom: 1.25rem">
     <Button
       onclick={() => {
         goto('/tutorials')
         close()
       }}
-      class="mb-2">
-      <span class="i-fluent-learning-app-24-regular -mt-2px"></span>
+      class="tutorials-button">
+      <IconFluentLearningApp24Regular class="icon-inline" style="margin-top: -2px" />
       {$page.data.t('header.tutorials')}
     </Button>
     <Button
       href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
       target="_blank">
       <i class="far fa-question-circle"></i>
-      <span class="ml-1">
+      <span style="margin-left: 0.25rem">
         FAQ
         <!-- {$page.data.t('header.faq')} -->
       </span>
@@ -108,9 +109,9 @@
   </div>
 
   {#if !dictionary?.con_language_description}
-    <hr class="my-5" />
+    <hr style="margin-top: 1.25rem; margin-bottom: 1.25rem" />
 
-    <h2 class="text-xl mb-3">
+    <h2 class="contact-heading">
       <i class="far fa-comment"></i>
       {$page.data.t('header.contact_us')}
     </h2>
@@ -118,15 +119,15 @@
     {#if !status}
       <Form onsubmit={send}>
         {#snippet children({ loading })}
-          <div class="my-2">
-            <select class="w-full" required bind:value={subject}>
+          <div style="margin-top: 0.5rem; margin-bottom: 0.5rem">
+            <select style="width: 100%" required bind:value={subject}>
               <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
               {#each filteredSubjects as [key, value] (key)}
                 <option value={key}>{$page.data.t(value)}</option>
               {/each}
             </select>
           </div>
-          <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
+          <label class="message-label" for="message">
             {$page.data.t('contact.what_is_your_question')}
           </label>
           <textarea
@@ -135,28 +136,28 @@
             rows="4"
             maxlength="1000"
             bind:value={message}
-            class="form-input bg-white w-full"
+            class="form-input white-input"
             placeholder={`${$page.data.t('contact.enter_message')}...`}></textarea>
-          <div class="flex text-xs">
-            <div class="text-gray-500 ml-auto">{message.length}/1000</div>
+          <div class="counter-row">
+            <div class="counter">{message.length}/1000</div>
           </div>
 
           {#if !user}
-            <div class="mt-3">
-              <label class="block uppercase text-gray-700 text-xs font-bold mb-2" for="email">
+            <div style="margin-top: 0.75rem">
+              <label class="email-label" for="email">
                 {$page.data.t('contact.your_email_address')}
               </label>
               <input
                 type="email"
                 required
                 bind:value={email}
-                class="form-input bg-white w-full"
+                class="form-input white-input"
                 placeholder={$page.data.t('contact.email')}
                 style="direction: ltr" />
             </div>
           {/if}
 
-          <div class="mt-5">
+          <div style="margin-top: 1.25rem">
             <Button {loading} form="filled" type="submit">
               {$page.data.t('contact.send_message')}
             </Button>
@@ -167,7 +168,7 @@
         {/snippet}
       </Form>
     {:else if status === 'success'}
-      <h4 class="text-lg mt-3 mb-4">
+      <h4 class="success-heading">
         <i class="fas fa-check"></i>
         {$page.data.t('contact.message_sent')}
       </h4>
@@ -177,12 +178,78 @@
         </Button>
       </div>
     {:else if status === 'fail'}
-      <h4 class="text-xl mt-1 mb-4">
+      <h4 class="fail-heading">
         {$page.data.t('contact.message_failed')}
-        <a class="underline ml-1" href="mailto:dictionaries@livingtongues.org">
+        <a style="text-decoration-line: underline; margin-left: 0.25rem" href="mailto:dictionaries@livingtongues.org">
           dictionaries@livingtongues.org
         </a>
       </h4>
     {/if}
   {/if}
 </Modal>
+
+<style>
+  /* the Modal portals to body — needs the extra `div` to outrank the panel's own bg */
+  :global(div.contact-modal) {
+    background-color: var(--surface) !important; /* ≈ gray-100 */
+  }
+
+  :global(.tutorials-button) {
+    margin-bottom: 0.5rem;
+  }
+
+  .contact-heading {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .message-label {
+    display: block;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .white-input {
+    background-color: var(--background); /* the modal bg is surface-gray; inputs stay white */
+    width: 100%;
+  }
+
+  .counter-row {
+    display: flex;
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .counter {
+    color: var(--color-secondary); /* ≈ gray-500 */
+    margin-left: auto;
+  }
+
+  .email-label {
+    display: block;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .success-heading {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .fail-heading {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+  }
+</style>

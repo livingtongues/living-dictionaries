@@ -23,14 +23,36 @@
   })
 </script>
 
-<div class="flex items-center my-2" transition:slide>
+<div class="facet-row" transition:slide>
   <input
     {id}
     type="checkbox"
     bind:checked />
-  <div class="w-2"></div>
-  <label for={id} class="block text-sm text-gray-900">
+  <div style="width: 0.5rem"></div>
+  <label for={id}>
     {label}
-    <span class="text-xs text-gray-600"> ({count}) </span>
+    <span class="facet-count"> ({count}) </span>
   </label>
 </div>
+
+<style>
+  .facet-row {
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--color); /* ≈ gray-900 */
+  }
+
+  .facet-count {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+  }
+</style>

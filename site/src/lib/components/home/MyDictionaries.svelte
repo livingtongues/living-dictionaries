@@ -12,13 +12,13 @@
 </script>
 
 {#if my_dictionaries?.length}
-  <div class="flex lt-md:flex-wrap md:flex-col overflow-y-auto overflow-x-hidden mb-1 md:max-h-70vh">
+  <div class="my-dicts">
     <ShowHide>
       {#snippet children({ show, toggle })}
         {#each my_dictionaries as dictionary, i (dictionary.id)}
           {#if show || i < 3}
             <Button
-              class="mb-1 lt-md:mr-1"
+              class="my-dict-button"
               color="black"
               onclick={() => setCurrentDictionary(dictionary)}>
               {dictionary?.name}
@@ -36,3 +36,33 @@
     </ShowHide>
   </div>
 {/if}
+
+<style>
+  .my-dicts {
+    display: flex;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-bottom: 0.25rem;
+  }
+
+  .my-dicts :global(.my-dict-button) {
+    margin-bottom: 0.25rem;
+  }
+
+  @media (max-width: 767.9px) {
+    .my-dicts {
+      flex-wrap: wrap;
+    }
+
+    .my-dicts :global(.my-dict-button) {
+      margin-right: 0.25rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .my-dicts {
+      flex-direction: column;
+      max-height: 70vh;
+    }
+  }
+</style>

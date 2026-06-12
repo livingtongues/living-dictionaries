@@ -14,7 +14,7 @@
 
 <Header>{$page.data.t('home.list_of_dictionaries')}</Header>
 
-<div class="p-3 sticky top-0 relative z-2 h-92vh flex flex-col bg-white">
+<div class="dict-list-panel">
   <div>
     <Button
       form="filled"
@@ -25,19 +25,19 @@
           filtered_dictionaries.map(prepareDictionaryForCsv),
           'living-dictionaries-list',
         )}>
-      <i class="fas fa-download mr-1"></i>
+      <i class="fas fa-download icon-gap-right"></i>
       {$page.data.t('misc.download')}
       (.csv)
     </Button>
     {#if auth_user.is_admin}
       <Button href="/admin/dictionaries" color="black">
-        <i class="far fa-pencil mr-1"></i>
+        <i class="far fa-pencil icon-gap-right"></i>
         Edit
-        <i class="far fa-key fa-sm ml-1"></i>
+        <i class="far fa-key fa-sm icon-gap-left"></i>
       </Button>
     {/if}
   </div>
-  <ResponsiveTable stickyColumn stickyHeading class="my-1">
+  <ResponsiveTable stickyColumn stickyHeading class="dict-table">
     <thead>
       <tr>
         <th>
@@ -62,13 +62,13 @@
       {@const first_latitude = coordinates?.points?.[0]?.coordinates.latitude}
       {@const first_longitude = coordinates?.points?.[0]?.coordinates.longitude}
       <tr>
-        <td class="font-semibold">
+        <td class="name-cell">
           {name}
         </td>
         <td>
           {metadata?.url?.startsWith('http://talkingdictionary') ? '' : entry_count}
         </td>
-        <td class="underline">
+        <td class="url-cell">
           {#if metadata?.url}
             <a href={metadata.url} target="_blank" rel="noreferrer">{metadata.url}</a>
           {:else}
@@ -84,10 +84,10 @@
         <td>
           {location || ''}
         </td>
-        <td class="whitespace-nowrap">
+        <td class="nowrap-cell">
           {first_latitude ? `${first_latitude}° ${first_latitude < 0 ? 'S' : 'N'}` : ''}
         </td>
-        <td class="whitespace-nowrap">
+        <td class="nowrap-cell">
           {first_longitude ? `${first_longitude}° ${first_longitude < 0 ? 'W' : 'E'}` : ''}
         </td>
       </tr>
@@ -103,7 +103,48 @@
   keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder" />
 
 <style>
+  .dict-list-panel {
+    padding: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: 92vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background);
+  }
+
+  .dict-list-panel :global(.icon-gap-right) {
+    margin-right: 0.25rem;
+  }
+
+  .dict-list-panel :global(.icon-gap-left) {
+    margin-left: 0.25rem;
+  }
+
+  .dict-list-panel :global(.dict-table) {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .name-cell {
+    font-weight: 600;
+  }
+
+  .url-cell {
+    text-decoration-line: underline;
+  }
+
+  .nowrap-cell {
+    white-space: nowrap;
+  }
+
   thead th {
-    --at-apply: text-xs font-semibold text-gray-600 uppercase tracking-wider;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 </style>

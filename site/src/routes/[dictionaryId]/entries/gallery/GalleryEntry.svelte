@@ -25,9 +25,9 @@
 </script>
 
 {#if first_photo}
-  <div class="flex flex-col relative rounded max-w-[500px]">
-    <div class="bg-gray-300 shadow">
-      <div class="aspect-square overflow-hidden">
+  <div class="gallery-card">
+    <div class="photo-card">
+      <div class="photo-frame">
         <Image
           square={480}
           title={entry.main.lexeme.default}
@@ -38,14 +38,49 @@
           {can_edit}
           on_delete_image={async () => await dbOperations.delete_photo(first_photo.id)} />
       </div>
-      <a href="/{dictionary.url}/entry/{entry.id}" style="background: #f3f3f3;" class="block p-[10px] h-60px">
-        <div class="font-semibold">
+      <a href="/{dictionary.url}/entry/{entry.id}" style="background: #f3f3f3;" class="caption">
+        <div style="font-weight: 600">
           {entry.main.lexeme.default}
         </div>
-        <div class="text-xs line-clamp-1">
+        <div class="gloss">
           {glosses[0] || ''}
         </div>
       </a>
     </div>
   </div>
 {/if}
+
+<style>
+  .gallery-card {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border-radius: 0.25rem;
+    max-width: 500px;
+  }
+
+  .photo-card {
+    background-color: color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow */
+  }
+
+  .photo-frame {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .caption {
+    display: block;
+    padding: 10px;
+    height: 60px;
+  }
+
+  .gloss {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+</style>

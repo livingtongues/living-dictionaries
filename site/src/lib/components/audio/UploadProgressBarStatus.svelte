@@ -11,38 +11,32 @@
 </script>
 
 {#if $upload_status.error}
-  <span
-    class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
-      text-red-600 bg-red-200">
+  <span class="status-pill error-pill">
     {$page.data.t('misc.error')}: {$upload_status.error}
   </span>
 {:else if $upload_status.progress === 100}
-  <span
-    class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
-      text-green-600 bg-green-200">
+  <span class="status-pill success-pill">
     <i class="far fa-check"></i>
     {$page.data.t('upload.success')}
   </span>
 {:else}
-  <div class="relative pt-1">
-    <div class="flex mb-2 items-center justify-between">
+  <div style="position: relative; padding-top: 0.25rem">
+    <div class="progress-header">
       <div>
-        <span
-          class="text-xs font-semibold inline-block py-1 px-2 uppercase
-            rounded-full text-blue-600 bg-blue-200">
+        <span class="status-pill uploading-pill">
           {$page.data.t('upload.uploading')}
         </span>
       </div>
-      <div class="text-right">
-        <span class="text-xs font-semibold inline-block text-blue-600">
+      <div style="text-align: right">
+        <span class="progress-percent">
           {$upload_status.progress}%
         </span>
       </div>
     </div>
-    <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
+    <div class="progress-track">
       <div
         style="width:{$upload_status.progress}%"
-        class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500 smooth-width-transition"></div>
+        class="progress-bar smooth-width-transition"></div>
     </div>
   </div>
 {/if}
@@ -50,5 +44,67 @@
 <style>
   .smooth-width-transition {
     transition: width 0.5s ease;
+  }
+
+  .status-pill {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    text-transform: uppercase;
+    border-radius: 9999px;
+  }
+
+  .error-pill {
+    color: rgb(220 38 38); /* red-600 */
+    background-color: rgb(254 202 202); /* red-200 */
+  }
+
+  .success-pill {
+    color: rgb(22 163 74); /* green-600 */
+    background-color: rgb(187 247 208); /* green-200 */
+  }
+
+  .uploading-pill {
+    color: rgb(37 99 235); /* blue-600 */
+    background-color: rgb(191 219 254); /* blue-200 */
+  }
+
+  .progress-header {
+    display: flex;
+    margin-bottom: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .progress-percent {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    display: inline-block;
+    color: rgb(37 99 235); /* blue-600 */
+  }
+
+  .progress-track {
+    overflow: hidden;
+    height: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    display: flex;
+    border-radius: 0.25rem;
+    background-color: rgb(191 219 254); /* blue-200 */
+  }
+
+  .progress-bar {
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    white-space: nowrap;
+    color: #fff;
+    justify-content: center;
+    background-color: rgb(59 130 246); /* blue-500 */
   }
 </style>

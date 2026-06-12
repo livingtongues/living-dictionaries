@@ -5,8 +5,9 @@ These were never UnoCSS shortcuts in this repo — `.btn` / `.btn-ghost` / etc. 
 referenced in shared components (BadgeArray, Modal, Slideover, SyncStatus, UserMenu)
 but undefined outside /admin, so they rendered unstyled. This defines them site-wide.
 
-Plain CSS, no UnoCSS — another piece staged for the eventual uno → vanilla migration.
 All variants resolve theme colors via `var(--…)` from theme.css (light/dark aware).
+UnoCSS was fully dropped 2026-06-12; further `.btn-*` adoption across the app is
+logged in .issues/ui-skill-alignment.md.
 
 Usage:
   <button class="btn btn-default">Default</button>
@@ -25,7 +26,8 @@ Usage:
   border-radius: 9999px;
   border-width: 1px;
   color: var(--color);
-  transition: all 300ms;
+  /* var so prefers-reduced-motion (theme.css sets --transition-time: 0s) is honored */
+  transition: all var(--transition-time, 300ms);
 }
 
 .btn:active,
@@ -105,4 +107,17 @@ button:disabled,
 .disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Spinner — uno's presetUno used to generate .animate-spin on demand; the 2026-06-12 flip
+   dropped it, silently breaking the admin loading spinners (AssigneeDropdown, admin/sync,
+   reply-composer). Restored here (same recipe house keeps in its buttons.css). */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }

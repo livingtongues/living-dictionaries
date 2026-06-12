@@ -63,7 +63,7 @@
 <img
   bind:this={imageEl}
   onclick={handle_click}
-  class="h-full w-full object-cover cursor-pointer"
+  style="height: 100%; width: 100%; object-fit: cover; cursor: pointer"
   alt=""
   {src} />
 

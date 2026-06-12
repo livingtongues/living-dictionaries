@@ -20,25 +20,73 @@
   const percentage = $derived(Math.floor($tweenedProgress * 100))
 </script>
 
-<div class="relative pt-1">
-  <div class="flex mb-2 items-center justify-between">
+<div style="position: relative; padding-top: 0.25rem">
+  <div class="progress-header">
     <div>
-      <span
-        class="text-xs font-semibold inline-block py-1 px-2 uppercase
-          rounded-full text-blue-600 bg-blue-200">
+      <span class="downloading-pill">
         {$page.data.t('misc.downloading')}
       </span>
     </div>
-    <div class="text-right">
-      <span class="text-xs font-semibold inline-block text-blue-600">
+    <div style="text-align: right">
+      <span class="progress-percent">
         {percentage}%
       </span>
     </div>
   </div>
-  <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
+  <div class="progress-track">
     <div
       style="width:{percentage}%"
-      class="shadow-none flex flex-col text-center whitespace-nowrap
-        text-white justify-center bg-blue-500"></div>
+      class="progress-bar"></div>
   </div>
 </div>
+
+<style>
+  .progress-header {
+    display: flex;
+    margin-bottom: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .downloading-pill {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    text-transform: uppercase;
+    border-radius: 9999px;
+    color: rgb(37 99 235); /* blue-600 */
+    background-color: rgb(191 219 254); /* blue-200 */
+  }
+
+  .progress-percent {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    display: inline-block;
+    color: rgb(37 99 235); /* blue-600 */
+  }
+
+  .progress-track {
+    overflow: hidden;
+    height: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    display: flex;
+    border-radius: 0.25rem;
+    background-color: rgb(191 219 254); /* blue-200 */
+  }
+
+  .progress-bar {
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    white-space: nowrap;
+    color: #fff;
+    justify-content: center;
+    background-color: rgb(59 130 246); /* blue-500 */
+  }
+</style>

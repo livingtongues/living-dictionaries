@@ -309,7 +309,8 @@
   },
   "terms": {
     "agree_by_submit": "By submitting this form, you agree to our",
-    "agreement_to_terms": "Agreement to Terms"
+    "agreement_to_terms": "Agreement to Terms",
+    "privacy_policy": "Privacy Policy"
   },
   "upload": {
     "error": "Unsupported File Type",

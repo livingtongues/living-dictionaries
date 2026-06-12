@@ -35,19 +35,16 @@
 </script>
 
 <div
-  class="shadow rounded flex-1 mb-1 border border-gray-400 whitespace-nowrap
-    overflow-auto relative"
+  class="table-wrap"
   style="height: calc(100vh - 189px);">
-  <table class="relative"><tbody>
-    <tr class="text-left">
+  <table><tbody>
+    <tr class="header-row">
       {#each columns as column, i (i)}
         <th
           onclick={() => {
             selectedColumn = column
           }}
-          class:z-10={column.sticky}
-          class="cursor-pointer bg-gray-100 top-0 sticky z-1
-            hover:bg-gray-200 active:bg-gray-300 text-xs font-semibold"
+          class:sticky-col={column.sticky}
           style="{column.sticky
             ? `left:${getLeftValue(i)}px; --border-right-width: 3px;`
             : ''} --col-width: {column.width}px;">
@@ -60,8 +57,9 @@
       <tr class="row-hover">
         {#each columns as column, i (i)}
           <td
-            class:bg-green-100!={updated_within_last_5_minutes}
-            class="{column.sticky ? 'sticky bg-white z-1' : ''} {isFirefox ? '' : 'h-0'}"
+            class:recently-updated={updated_within_last_5_minutes}
+            class:sticky-cell={column.sticky}
+            class:zero-height={!isFirefox}
             style="{column.sticky
               ? `left:${getLeftValue(i)}px; --border-right-width: 3px;`
               : ''} --col-width: {entry.main.sources ? 'auto' : `${column.width}px`};">
@@ -88,16 +86,66 @@
 {/if}
 
 <style>
+  .table-wrap {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow */
+    border-radius: 0.25rem;
+    flex: 1 1 0%;
+    margin-bottom: 0.25rem;
+    border: 1px solid color-mix(in srgb, var(--background), var(--color) 38%); /* ≈ gray-400 */
+    white-space: nowrap;
+    overflow: auto;
+    position: relative;
+  }
+
   table {
     --col-width: 100px;
     --border-right-width: 1px;
     border-collapse: separate; /* Don't collapse to keep sticky borders in place on scroll */
     border-spacing: 0;
+    position: relative;
+  }
+
+  .header-row {
+    text-align: left;
   }
 
   th {
     border-bottom-width: 3px;
     padding: 0.125em 0.25em;
+    cursor: pointer;
+    background-color: var(--surface); /* ≈ gray-100 */
+    top: 0;
+    position: sticky;
+    z-index: 1;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+  }
+
+  th:hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
+  }
+
+  th:active {
+    background-color: color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
+  }
+
+  th.sticky-col {
+    z-index: 10;
+  }
+
+  .sticky-cell {
+    position: sticky;
+    background-color: var(--background);
+    z-index: 1;
+  }
+
+  .zero-height {
+    height: 0;
+  }
+
+  td.recently-updated {
+    background-color: rgb(220 252 231) !important; /* bg-green-100! (still loses to .row-hover:hover td below, same as uno) */
   }
 
   td {

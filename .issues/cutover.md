@@ -83,7 +83,8 @@ the live schema). `scripts/` is NOT a workspace member — install with
 3b. **One-time R2 snapshot sweep** (OPFS op note, 2026-06-10): rebuild every dict's R2 snapshot from
    the freshly-seeded VPS data — clear `dictionaries.snapshot_uploaded_at` (or loop
    `force_rebuild_snapshot`) so the cron re-uploads all. This (a) replaces any artifact a LOCAL dev
-   sweep ever pushed to the prod bucket (see `.issues/opfs-db-follow-ups.md` P0), and (b) replaces
+   sweep ever pushed to the prod bucket (the dev-pushes-to-prod-R2 foot-gun, since mitigated by
+   flipping `R2_SNAPSHOT_BUILDER_ENABLED` off in local `site/.env`), and (b) replaces
    legacy WAL-header snapshots with clean rollback-mode ones (clients tolerate WAL via
    `normalize_snapshot_header`, but clean artifacts are smaller and don't lean on the client shim).
 4. **DNS swap:** point `livingdictionaries.app` from the old Vercel/Supabase app → the VPS
@@ -108,6 +109,5 @@ the live schema). `scripts/` is NOT a workspace member — install with
 ---
 
 ## When this is done
-Once production cutover lands and the deferred backlog is triaged, delete both this file and the
-thin `cross-project-orchestration.md` pointer; the durable conventions already live in
-`.knowledge/migration/shared-stack-conventions.md`.
+Once production cutover lands and the deferred backlog is triaged, delete this file; the durable
+conventions already live in `.knowledge/migration/shared-stack-conventions.md`.

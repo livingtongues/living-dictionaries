@@ -11,6 +11,7 @@
   import { page } from '$app/stores'
   import type { QueryParams } from '$lib/search/types'
   import { api_dictionaries_partners_get } from '$api/dictionaries/[id]/partners/_call'
+  import IconFaPrint from '~icons/fa/print'
 
   interface Props {
     search_params: QueryParamStore<QueryParams>
@@ -48,75 +49,75 @@
 </script>
 
 {#if dictionary.print_access || can_edit}
-  <div class="print:hidden bg-white md:sticky z-1 md:top-22 py-3">
-    <div class="flex flex-wrap mb-1">
-      <Button class="mb-1 mr-2" form="filled" type="button" onclick={() => window.print()}>
-        <span class="i-fa-print -mt-1"></span>
+  <div class="print-toolbar">
+    <div class="controls-row">
+      <Button class="print-button" form="filled" type="button" onclick={() => window.print()}>
+        <IconFaPrint class="icon-inline" style="margin-top: -0.25rem" />
         {$page.data.t('entry.print')}
       </Button>
 
-      <div class="mb-1 mr-2">
-        <label class="font-medium text-gray-700" for="maxEntries">{$page.data.t('print.max_entries')}</label>
+      <div class="control">
+        <label for="maxEntries">{$page.data.t('print.max_entries')}</label>
         <input
-          class="form-input text-sm w-17"
+          class="form-input number-input"
           id="maxEntries"
           type="number"
           min="1"
           max={can_edit ? 1000000 : visitor_max_entries}
           bind:value={$search_params.entries_per_page} />
       </div>
-      <div class="mb-1 mr-2">
-        <label class="font-medium text-gray-700" for="columnCount">{$page.data.t('print.columns')}</label>
+      <div class="control">
+        <label for="columnCount">{$page.data.t('print.columns')}</label>
         <input
-          class="form-input text-sm w-17"
+          class="form-input number-input"
           id="columnCount"
           type="number"
           min="1"
           max="10"
           bind:value={$columnCount} />
       </div>
-      <div class="mb-1 mr-2">
-        <label class="font-medium text-gray-700" for="headwordSize">{$page.data.t('print.headword_size')} (pt)</label>
+      <div class="control">
+        <label for="headwordSize">{$page.data.t('print.headword_size')} (pt)</label>
         <input
-          class="form-input text-sm w-17"
+          class="form-input number-input"
           id="headwordSize"
           type="number"
           min="6"
           max="30"
           bind:value={$headwordSize} />
       </div>
-      <div class="mb-1 mr-2">
-        <label class="font-medium text-gray-700" for="fontSize">{$page.data.t('print.font_size')} (pt)</label>
+      <div class="control">
+        <label for="fontSize">{$page.data.t('print.font_size')} (pt)</label>
         <input
-          class="form-input text-sm w-15"
+          class="form-input number-input narrow"
           id="fontSize"
           type="number"
           min="6"
           max="24"
           bind:value={$fontSize} />
       </div>
-      <div class="mb-1 mr-2">
-        <label class="font-medium text-gray-700" for="imageSize">{$page.data.t('misc.images')}:</label>
+      <div class="control">
+        <label for="imageSize">{$page.data.t('misc.images')}:</label>
         <input
-          class="form-input text-sm w-17"
+          class="form-input number-input"
           id="imageSize"
           type="number"
           min="1"
           max="100"
-          bind:value={$imagePercent} /><span class="font-medium text-gray-700">%</span>
+          bind:value={$imagePercent} /><span class="percent-label">%</span>
       </div>
       <PrintFieldCheckboxes {entries} {preferredPrintFields} {showLabels} {showQrCode} />
     </div>
   </div>
 
-  <div class="hidden print:block text-2xl mb-5">
+  <div class="print-title">
     {dictionary.name}
     {$page.data.t('misc.LD_singular')}
   </div>
 
-  <div class="flex print:block overflow-x-hidden">
+  <div class="print-layout">
     <div
-      class="print-columns pr-4 print:pr-9 max-w-full flex-grow"
+      class="print-columns"
       style="--column-count: {$columnCount}">
       {#each entries as entry (entry.id)}
         <PrintEntry
@@ -132,7 +133,7 @@
     </div>
     <div
       dir="ltr"
-      class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
+      class="citation"
       style="writing-mode: tb; min-width: 0;">
       {build_citation({ t: $page.data.t, dictionary, custom_citation: truncateAuthors(dictionary.citation), partners })}
     </div>
@@ -142,11 +143,103 @@
 {/if}
 
 <style>
+  .print-toolbar {
+    background-color: var(--background);
+    z-index: 1;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .print-toolbar {
+      position: sticky;
+      top: 5.5rem;
+    }
+  }
+
+  .controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 0.25rem;
+  }
+
+  .controls-row :global(.print-button) {
+    margin-bottom: 0.25rem;
+    margin-right: 0.5rem;
+  }
+
+  .control {
+    margin-bottom: 0.25rem;
+    margin-right: 0.5rem;
+  }
+
+  .control label,
+  .percent-label {
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+  }
+
+  .number-input {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    width: 4.25rem; /* w-17 */
+  }
+
+  .number-input.narrow {
+    width: 3.75rem; /* w-15 */
+  }
+
+  .print-title {
+    display: none;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .print-layout {
+    display: flex;
+    overflow-x: hidden;
+  }
+
   .print-columns {
     /* column-width: var(--column-width); */
     /* column-gap: 2em; << default is 1em */
     column-count: var(--column-count);
     overflow-wrap: break-word;
+    padding-right: 1rem;
+    max-width: 100%;
+    flex-grow: 1;
+  }
+
+  .citation {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+
+  @media print {
+    .print-toolbar {
+      display: none;
+    }
+
+    .print-title {
+      display: block;
+    }
+
+    .print-layout {
+      display: block;
+    }
+
+    .print-columns {
+      padding-right: 2.25rem;
+    }
+
+    .citation {
+      position: fixed;
+      text-align: center;
+    }
   }
   /* https://medium.com/@Idan_Co/the-ultimate-print-html-template-with-header-footer-568f415f6d2a */
 </style>

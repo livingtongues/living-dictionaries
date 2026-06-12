@@ -93,11 +93,11 @@ Use: ${conlang_use.trim()}`
     })
   }}>
   {#snippet children({ loading })}
-    <div class="flex-col justify-center p-4 max-w-md mx-auto">
-      <label for="name" class="block text-xl font-medium text-gray-700">
+    <div class="create-form">
+      <label for="name" class="label-xl">
         {$page.data.t('dictionary.name_of_language')}*
       </label>
-      <div class="mt-2 rounded-md shadow-sm">
+      <div class="input-shadow-wrap" style="margin-top: 0.5rem">
         <input
           id="name"
           type="text"
@@ -109,27 +109,25 @@ Use: ${conlang_use.trim()}`
           maxlength="100"
           required
           bind:value={name}
-          class="form-input w-full" />
+          class="form-input" />
       </div>
-      <div class="text-xs text-gray-600 mt-1">
+      <div class="hint">
         {$page.data.t('create.name_clarification')}
       </div>
-      <div class="mb-6"></div>
+      <div class="spacer"></div>
 
       {#if name.length > 2}
         {#if dev}
-          <Button type="submit" class="mb-5 w-full" color="red">
+          <Button type="submit" class="dev-button" color="red">
             Dev: Add Test Dictionary Immediately
           </Button>
         {/if}
-        <div class="flex justify-between items-center" style="direction: ltr">
-          <label for="url" class="text-sm font-medium text-gray-700"> URL </label>
+        <div class="url-label-row" style="direction: ltr">
+          <label for="url" class="label-sm"> URL </label>
         </div>
 
-        <div class="mt-1 flex rounded-md shadow-sm" style="direction: ltr">
-          <span
-            class="inline-flex items-center px-2 rounded-l-md border border-r-0
-              border-gray-300 bg-gray-50 text-gray-500 text-sm">
+        <div class="url-row" style="direction: ltr">
+          <span class="url-prefix">
             livingdictionaries.app/
           </span>
           <input
@@ -142,26 +140,25 @@ Use: ${conlang_use.trim()}`
             autocomplete="off"
             autocorrect="off"
             spellcheck={false}
-            class="form-input flex-1 block w-full px-2 sm:px-3 py-2 rounded-none
-              rounded-r-md sm:text-sm border"
+            class="form-input url-input"
             placeholder="url" />
         </div>
-        <div class="text-xs text-gray-600 mt-1">
+        <div class="hint">
           {$page.data.t('create.permanent_url_msg')}
           {$page.data.t('create.only_letters_numbers')}
         </div>
         {#if urlToUse.length >= data.MIN_URL_LENGTH && !isUniqueURL}
-          <div class="text-xs text-red-600 mt-1">
+          <div class="url-error">
             {$page.data.t('create.choose_different_url')}
           </div>
         {/if}
-        <div class="mb-6"></div>
+        <div class="spacer"></div>
 
-        <div class="mb-2 text-sm font-medium text-gray-700">
+        <div class="label-sm stack-label">
           {$page.data.t('create.conlang_question')}
         </div>
 
-        <label class="block">
+        <label class="radio-label">
           <input
             type="radio"
             name="conlang"
@@ -171,7 +168,7 @@ Use: ${conlang_use.trim()}`
           {$page.data.t('misc.assertion')}
         </label>
 
-        <label class="block">
+        <label class="radio-label">
           <input
             type="radio"
             name="conlang"
@@ -179,23 +176,23 @@ Use: ${conlang_use.trim()}`
             value={false} />
           {$page.data.t('misc.negation')}
         </label>
-        <div class="mb-6"></div>
+        <div class="spacer"></div>
 
         {#if !conlang}
-          <div class="mb-3 font-semibold">
+          <div class="conlang-warning">
             {$page.data.t('create.conlang_warning')}
           </div>
-          <div class="mb-6"></div>
+          <div class="spacer"></div>
         {/if}
 
         {#if conlang === true}
-          <div class="mb-3 font-italic">
+          <div class="conlang-info">
             {$page.data.t('create.conlang_info_1')}
           </div>
-          <div class="mb-3 font-italic">
+          <div class="conlang-info">
             {$page.data.t('create.conlang_info_2')}
           </div>
-          <div class="mb-6"></div>
+          <div class="spacer"></div>
           <div>
             <input type="checkbox" id="agreement" name="agreement" required />
             <label for="agreement">{$page.data.t('create.agree_above')}</label>
@@ -208,9 +205,9 @@ Use: ${conlang_use.trim()}`
             <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" required />
             <label for="non-commercialAgreement">{$page.data.t('create.agree_for_non-commercial')}</label>
           </div>
-          <div class="mb-6"></div>
+          <div class="spacer"></div>
 
-          <label class="block mb-2 text-sm font-medium text-gray-700" for="conlangInfo">
+          <label class="label-sm stack-label" for="conlangInfo">
             {$page.data.t('create.source_question')}
           </label>
           <textarea
@@ -220,13 +217,13 @@ Use: ${conlang_use.trim()}`
             minlength="100"
             maxlength="2500"
             bind:value={conlang_source}
-            class="form-input w-full"></textarea>
-          <div class="flex text-xs">
-            <div class="text-gray-500 ml-auto">{conlang_source.length}/2500</div>
+            class="form-input"></textarea>
+          <div class="counter-row">
+            <div class="counter">{conlang_source.length}/2500</div>
           </div>
-          <div class="mb-6"></div>
+          <div class="spacer"></div>
 
-          <label class="block mb-2 text-sm font-medium text-gray-700" for="conlangUse">
+          <label class="label-sm stack-label" for="conlangUse">
             {$page.data.t('create.use_question')}
           </label>
           <textarea
@@ -236,11 +233,11 @@ Use: ${conlang_use.trim()}`
             minlength="100"
             maxlength="2500"
             bind:value={conlang_use}
-            class="form-input w-full"></textarea>
-          <div class="flex text-xs">
-            <div class="text-gray-500 ml-auto">{conlang_use.length}/2500</div>
+            class="form-input"></textarea>
+          <div class="counter-row">
+            <div class="counter">{conlang_use.length}/2500</div>
           </div>
-          <div class="mb-6"></div>
+          <div class="spacer"></div>
         {/if}
 
         {#if conlang != null}
@@ -256,18 +253,18 @@ Use: ${conlang_use.trim()}`
               gloss_languages.delete(languageId)
               gloss_languages = gloss_languages
             }} />
-          <div class="mb-6"></div>
+          <div class="spacer"></div>
 
           <EditableAlternateNames
             alternateNames={alternate_names}
             on_update={new_value => alternate_names = new_value} />
-          <div class="mb-6"></div>
+          <div class="spacer"></div>
 
-          <!-- <div class="mb-2 text-sm font-medium text-gray-700">
+          <!-- <div class="label-sm stack-label">
             {$page.data.t('create.language_used_by_community')}*
           </div>
 
-          <label class="block">
+          <label class="radio-label">
             <input
               type="radio"
               name="languageUsedByCommunity"
@@ -277,7 +274,7 @@ Use: ${conlang_use.trim()}`
             {$page.data.t('misc.assertion')}
           </label>
 
-          <label class="block">
+          <label class="radio-label">
             <input
               type="radio"
               name="languageUsedByCommunity"
@@ -285,7 +282,7 @@ Use: ${conlang_use.trim()}`
               value={false} />
             {$page.data.t('misc.negation')}
           </label>
-          <div class="mb-6" /> -->
+          <div class="spacer" /> -->
         {/if}
 
         {#if conlang === false}
@@ -293,21 +290,21 @@ Use: ${conlang_use.trim()}`
             dictionary={{ coordinates: { points, regions } }}
             on_update_points={new_points => points = new_points}
             on_update_regions={new_regions => regions = new_regions} />
-          <div class="mb-6"></div>
+          <div class="spacer"></div>
 
-          <div class="flex">
-            <div class="w-1/2">
-              <label for="isocode" class="block text-sm font-medium text-gray-700">
+          <div style="display: flex">
+            <div style="width: 50%">
+              <label for="isocode" class="label-sm" style="display: block">
                 ISO 639-3
                 <a
                   href="https://en.wikipedia.org/wiki/ISO_639-3"
                   target="_blank"
                   rel="noreferrer"
-                  class="text-gray-600 hover:text-gray:800">
+                  class="info-link">
                   <i class="far fa-info-circle"></i>
                 </a>
               </label>
-              <div class="mt-1 rounded-md shadow-sm">
+              <div class="input-shadow-wrap" style="margin-top: 0.25rem">
                 <input
                   id="isocode"
                   type="text"
@@ -317,22 +314,22 @@ Use: ${conlang_use.trim()}`
                   minlength="3"
                   maxlength="30"
                   bind:value={iso_639_3}
-                  class="form-input w-full" />
+                  class="form-input" />
               </div>
             </div>
-            <div class="w-1"></div>
-            <div class="w-1/2">
-              <label for="glottocode" class="block text-sm font-medium text-gray-700">
+            <div style="width: 0.25rem"></div>
+            <div style="width: 50%">
+              <label for="glottocode" class="label-sm" style="display: block">
                 Glottocode
                 <a
                   href="https://en.wikipedia.org/wiki/Glottolog"
                   target="_blank"
                   rel="noreferrer"
-                  class="text-gray-600 hover:text-gray:800">
+                  class="info-link">
                   <i class="far fa-info-circle"></i>
                 </a>
               </label>
-              <div class="mt-1 rounded-md shadow-sm">
+              <div class="input-shadow-wrap" style="margin-top: 0.25rem">
                 <input
                   id="glottocode"
                   type="text"
@@ -342,16 +339,16 @@ Use: ${conlang_use.trim()}`
                   minlength="3"
                   maxlength="30"
                   bind:value={glottocode}
-                  class="form-input w-full" />
+                  class="form-input" />
               </div>
             </div>
           </div>
-          <div class="mb-6"></div>
+          <div class="spacer"></div>
 
-          <div class="mb-2 text-sm font-medium text-gray-700">
+          <div class="label-sm stack-label">
             {$page.data.t('create.community_permission')}*
           </div>
-          <label class="block">
+          <label class="radio-label">
             <input
               type="radio"
               name="communityPermission"
@@ -361,7 +358,7 @@ Use: ${conlang_use.trim()}`
             {$page.data.t('misc.assertion')}
           </label>
 
-          <label class="block">
+          <label class="radio-label">
             <input
               type="radio"
               name="communityPermission"
@@ -370,7 +367,7 @@ Use: ${conlang_use.trim()}`
             {$page.data.t('misc.negation')}
           </label>
 
-          <label class="block">
+          <label class="radio-label">
             <input
               type="radio"
               name="communityPermission"
@@ -378,9 +375,9 @@ Use: ${conlang_use.trim()}`
               value="unknown" />
             {$page.data.t('create.uncertainty')}
           </label>
-          <div class="mb-6"></div>
+          <div class="spacer"></div>
 
-          <label class="block mb-2 text-sm font-medium text-gray-700" for="authorConnection">
+          <label class="label-sm stack-label" for="authorConnection">
             {$page.data.t('create.author_connection')}*
           </label>
           <textarea
@@ -390,11 +387,11 @@ Use: ${conlang_use.trim()}`
             minlength="100"
             maxlength="2500"
             bind:value={author_connection}
-            class="form-input w-full"></textarea>
-          <div class="flex text-xs">
-            <div class="text-gray-500 ml-auto">{author_connection.length}/2500</div>
+            class="form-input"></textarea>
+          <div class="counter-row">
+            <div class="counter">{author_connection.length}/2500</div>
           </div>
-          <div class="mb-6"></div>
+          <div class="spacer"></div>
 
           <div>
             <input type="checkbox" id="citeAgreement" name="citeAgreement" required />
@@ -404,18 +401,18 @@ Use: ${conlang_use.trim()}`
             <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" required />
             <label for="non-commercialAgreement">{$page.data.t('create.agree_for_non-commercial')}</label>
           </div>
-          <div class="mb-6"></div>
+          <div class="spacer"></div>
         {/if}
 
-        <Button type="submit" class="w-full" form="filled" {loading}>
+        <Button type="submit" class="submit-button" form="filled" {loading}>
           {$page.data.t('create.create_dictionary')}
         </Button>
 
-        <div class="mt-2 text-sm text-gray-600">
+        <div class="terms-note">
           {$page.data.t('terms.agree_by_submit')}
-          <a href="/terms" class="underline" target="_blank">{$page.data.t('dictionary.terms_of_use')}</a>.
+          <a href="/terms" style="text-decoration-line: underline" target="_blank">{$page.data.t('dictionary.terms_of_use')}</a>.
         </div>
-        <div class="mb-6"></div>
+        <div class="spacer"></div>
       {/if}
     </div>
   {/snippet}
@@ -437,3 +434,153 @@ Use: ${conlang_use.trim()}`
   title={$page.data.t('create.create_new_dictionary')}
   description="Build a new Living Dictionary in a few short steps. Create a title and set the URL, and then configure the settings. Living Dictionaries are comprehensive, free, online technological tools integrating audio, images and video."
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />
+
+<style>
+  .create-form {
+    flex-direction: column; /* (was flex-col without display:flex — inert, kept for parity) */
+    justify-content: center;
+    padding: 1rem;
+    max-width: 28rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .label-xl {
+    display: block;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+  }
+
+  .label-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+  }
+
+  .stack-label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .input-shadow-wrap {
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
+  }
+
+  .create-form .form-input {
+    width: 100%;
+  }
+
+  .hint {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    margin-top: 0.25rem;
+  }
+
+  .spacer {
+    margin-bottom: 1.5rem;
+  }
+
+  .create-form :global(.dev-button) {
+    margin-bottom: 1.25rem;
+    width: 100%;
+  }
+
+  .url-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .url-row {
+    margin-top: 0.25rem;
+    display: flex;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
+  }
+
+  .url-prefix {
+    display: inline-flex;
+    align-items: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+    border: 1px solid color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
+    border-right: 0;
+    background-color: color-mix(in srgb, var(--background), var(--color) 2%); /* ≈ gray-50 */
+    color: var(--color-secondary); /* ≈ gray-500 */
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .create-form .url-input {
+    flex: 1 1 0%;
+    display: block;
+    padding: 0.5rem;
+    border-radius: 0;
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+    border-width: 1px;
+  }
+
+  @media (min-width: 640px) {
+    .create-form .url-input {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+  }
+
+  .url-error {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--danger); /* ≈ red-600 */
+    margin-top: 0.25rem;
+  }
+
+  .radio-label {
+    display: block;
+  }
+
+  .conlang-warning {
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+
+  .conlang-info {
+    margin-bottom: 0.75rem;
+    font-style: italic;
+  }
+
+  .counter-row {
+    display: flex;
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .counter {
+    color: var(--color-secondary); /* ≈ gray-500 */
+    margin-left: auto;
+  }
+
+  .info-link {
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 (the old hover:text-gray:800 was a typo that generated nothing) */
+  }
+
+  .create-form :global(.submit-button) {
+    width: 100%;
+  }
+
+  .terms-note {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+  }
+</style>

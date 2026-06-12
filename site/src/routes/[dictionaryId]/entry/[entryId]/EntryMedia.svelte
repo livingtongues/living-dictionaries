@@ -8,6 +8,11 @@
   import Image from '$lib/components/image/Image.svelte'
   import { page } from '$app/stores'
   import type { DbOperations } from '$lib/dbOperations'
+  import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
+  import IconIcOutlineCameraAlt from '~icons/ic/outline-camera-alt'
+  import IconBiCameraVideo from '~icons/bi/camera-video'
+  import IconMdiMapMarkerPlus from '~icons/mdi/map-marker-plus'
+  import IconMdiMapMarkerPath from '~icons/mdi/map-marker-path'
 
   interface Props {
     entry: EntryData
@@ -31,20 +36,20 @@
   const dict_db = $derived($page.data.dict_db)
 </script>
 
-<div class="flex flex-col">
+<div class="media-col">
   {#if entry.audios?.length > 0 || can_edit}
     {#await import('../../entries/components/Audio.svelte') then { default: Audio }}
       {#if entry.audios?.length > 0}
         {#each entry.audios as sound_file (sound_file.id)}
-          <Audio {entry} {sound_file} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+          <Audio {entry} {sound_file} {can_edit} context="entry" class="entry-audio-tile" />
         {/each}
       {/if}
-      <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+      <Audio {entry} {can_edit} context="entry" class="entry-audio-tile" />
     {/await}
   {/if}
   {#each photos as photo (photo.id)}
     <div
-      class="w-full overflow-hidden rounded relative mb-2"
+      class="photo-frame"
       style="height: 25vh;">
       <Image
         width={400}
@@ -59,18 +64,15 @@
   {#if can_edit}
     <ShowHide>
       {#snippet children({ show, toggle })}
-        <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col" onclick={toggle}>
-          <div
-            class="text-gray-600
-              h-full grow-1 flex flex-col items-center justify-center
-              cursor-pointer">
-            <span class="hidden md:inline">
-              <span class="i-ic-outline-cloud-upload text-2xl"></span>
+        <div class="photo-upload-tile" onclick={toggle}>
+          <div class="photo-upload-inner">
+            <span class="desktop-only">
+              <IconIcOutlineCloudUpload class="icon-inline" style="font-size: 1.5rem" />
             </span>
-            <span class="md:hidden">
-              <span class="i-ic-outline-camera-alt text-xl"></span>
+            <span class="mobile-only">
+              <IconIcOutlineCameraAlt class="icon-inline" style="font-size: 1.25rem" />
             </span>
-            <div class="text-xs">
+            <div class="tile-label">
               {$page.data.t('entry_field.photo')}
             </div>
           </div>
@@ -85,9 +87,9 @@
   {/if}
 
   {#each videos as video (video.id)}
-    <div class="w-full overflow-hidden rounded relative mb-2">
+    <div class="video-frame">
       <Video
-        class="bg-gray-100 p-3 border-r-2"
+        class="entry-video-tile"
         lexeme={entry.main.lexeme.default}
         {video}
         {can_edit} />
@@ -98,11 +100,10 @@
       {#snippet children({ show, toggle })}
         <button
           type="button"
-          class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-            justify-center cursor-pointer p-6 mb-2"
+          class="add-tile"
           onclick={toggle}>
-          <span class="i-bi-camera-video text-xl"></span>
-          <span class="text-xs">
+          <IconBiCameraVideo class="icon-inline" style="font-size: 1.25rem" />
+          <span class="tile-label">
             {$page.data.t('video.add_video')}
           </span>
         </button>
@@ -119,7 +120,7 @@
     {#snippet children({ show, toggle, set })}
       {#if entry?.main.coordinates?.points?.length || entry?.main.coordinates?.regions?.length}
         <div
-          class="rounded overflow-hidden cursor-pointer"
+          class="map-frame"
           onclick={() => set(can_edit)}>
           <MapboxStatic
             points={entry.main.coordinates.points}
@@ -129,20 +130,18 @@
         <button
           onclick={() => set('point')}
           type="button"
-          class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-            justify-center cursor-pointer p-6 mb-2">
-          <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;"></span>
-          <span class="text-xs">
+          class="add-tile">
+          <IconMdiMapMarkerPlus class="icon-inline" style="margin-right: 0.25rem; margin-top: -3px;" />
+          <span class="tile-label">
             {$page.data.t('create.select_coordinates')}
           </span>
         </button>
         <button
           onclick={() => set('region')}
           type="button"
-          class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-            justify-center cursor-pointer p-6 mb-2">
-          <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;"></span>
-          <span class="text-xs">
+          class="add-tile">
+          <IconMdiMapMarkerPath class="icon-inline" style="margin-right: 0.25rem; margin-top: -2px;" />
+          <span class="tile-label">
             {$page.data.t('create.select_region')}
           </span>
         </button>
@@ -159,3 +158,106 @@
     {/snippet}
   </InitableShowHide>
 </div>
+
+<style>
+  .media-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .media-col :global(.entry-audio-tile) {
+    height: 5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.375rem;
+    background-color: var(--surface); /* ≈ gray-100 */
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .photo-frame {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 0.25rem;
+    position: relative;
+    margin-bottom: 0.5rem;
+  }
+
+  .photo-upload-tile {
+    height: 5rem;
+    background-color: var(--surface); /* ≈ gray-100 */
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .photo-upload-tile:hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
+  }
+
+  .photo-upload-inner {
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    height: 100%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .desktop-only {
+      display: inline;
+    }
+
+    .mobile-only {
+      display: none;
+    }
+  }
+
+  .tile-label {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .video-frame {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 0.25rem;
+    position: relative;
+    margin-bottom: 0.5rem;
+  }
+
+  .media-col :global(.entry-video-tile) {
+    background-color: var(--surface); /* ≈ gray-100 */
+    padding: 0.75rem;
+    border-right-width: 2px;
+  }
+
+  .add-tile {
+    border-radius: 0.25rem;
+    background-color: var(--surface); /* ≈ gray-100 */
+    border-right-width: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .add-tile:hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
+  }
+
+  .map-frame {
+    border-radius: 0.25rem;
+    overflow: hidden;
+    cursor: pointer;
+  }
+</style>

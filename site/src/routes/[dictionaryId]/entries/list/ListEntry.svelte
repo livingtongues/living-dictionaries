@@ -9,6 +9,10 @@
   import { minutes_ago_in_ms } from '$lib/helpers/time'
   import { page } from '$app/stores'
   import type { DbOperations } from '$lib/dbOperations'
+  import IconBiCameraVideo from '~icons/bi/camera-video'
+  import IconFluentImageStack20Regular from '~icons/fluent/image-stack-20-regular'
+  import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
+  import IconIcOutlineCameraAlt from '~icons/ic/outline-camera-alt'
 
   interface Props {
     entry: EntryData
@@ -41,32 +45,32 @@
 
 <div
   dir="ltr"
-  class:border-b-2={updated_within_last_5_minutes}
-  class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
+  class:recently-updated={updated_within_last_5_minutes}
+  class="entry-row"
   style="margin-right: 2px;">
   {#if entry.audios?.[0] || can_edit}
-    <Audio class="bg-gray-100 py-1.5 px-1 min-w-55px w-55px" {entry} sound_file={entry.audios?.[0] || null} {can_edit} context="list" />
+    <Audio class="list-audio-cell" {entry} sound_file={entry.audios?.[0] || null} {can_edit} context="list" />
   {/if}
   <a
     href="/{dictionary.url}/entry/{entry.id}"
     onclick={on_click}
-    class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200">
+    class="entry-link">
     <div>
-      <span class="font-semibold text-gray-900 mr-1">{entry.main.lexeme.default}</span>
+      <span class="lexeme">{entry.main.lexeme.default}</span>
       {#if entry.main.phonetic}
-        <span class="mr-1 hidden sm:inline">[{entry.main.phonetic}]</span>
+        <span class="phonetic">[{entry.main.phonetic}]</span>
       {/if}
 
       {#if dictionary.id !== 'garifuna'}
         {#each Object.entries(entry.main.lexeme) as [key, value] (key)}
           {#if key !== 'default'}
-            <i class="mr-1" class:sompeng={dictionary.id === 'sora' && key === 'lo2'}>{value}</i>
+            <i class="spaced" class:sompeng={dictionary.id === 'sora' && key === 'lo2'}>{value}</i>
           {/if}
         {/each}
       {/if}
     </div>
-    <div class="flex flex-wrap items-center justify-end -mb-1">
-      <div class="text-xs text-gray-600 mr-auto mb-1">
+    <div class="meta-row">
+      <div class="gloss-block">
         {#if first_sense.parts_of_speech}
           {#each first_sense.parts_of_speech as pos (pos)}
             <i>{$page.data.t({ dynamicKey: `psAbbrev.${pos}`, fallback: pos })}, </i>
@@ -88,18 +92,18 @@
           {/if}
         {/if}
 
-        {#if entry.dialects?.length}<p class="text-xs">
-          <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.map(({ name }) => name.default).join(', ')}</i>
+        {#if entry.dialects?.length}<p>
+          <i class="spaced">{$page.data.t('entry_field.dialects')}: {entry.dialects.map(({ name }) => name.default).join(', ')}</i>
         </p>{/if}
 
         {#if dictionary.id === 'jewish-neo-aramaic'}
-          {#if entry.dialects}<p class="text-xs">
-            <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.map(({ name }) => name.default).join(', ')}</i>
+          {#if entry.dialects}<p>
+            <i class="spaced">{$page.data.t('entry_field.dialects')}: {entry.dialects.map(({ name }) => name.default).join(', ')}</i>
           </p>{/if}
           {#each first_sense.sentences || [] as sentence (sentence.id)}
             {#each Object.entries(sentence.text) as [bcp, content] (bcp)}
               <p>
-                <span class="font-semibold">
+                <span style="font-weight: 600">
                   {#if bcp !== 'vn'}
                     {$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}
                   {/if}
@@ -111,22 +115,20 @@
         {/if}
 
         {#if first_sense.plural_form}
-          <p class="text-xs">
+          <p>
             {$page.data.t('entry_field.plural_form')}: {first_sense.plural_form.default}
           </p>
         {/if}
       </div>
 
       {#if first_sense.write_in_semantic_domains}
-        <span class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1">
+        <span class="sd-chip">
           <i>{first_sense.write_in_semantic_domains.join(', ')}</i>
         </span>
       {/if}
 
       {#each first_sense.semantic_domains || [] as domain (domain)}
-        <span
-          class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1
-            mb-1">
+        <span class="sd-chip" style="margin-bottom: 0.25rem">
           {$page.data.t({ dynamicKey: `sd.${domain}`, fallback: domain })}
         </span>
       {/each}
@@ -135,7 +137,7 @@
   {#if !dictionary.con_language_description}
     {#if first_video}
       <Video
-        class="bg-gray-100 p-1.5 border-r-2"
+        class="list-video-cell"
         lexeme={entry.main.lexeme.default}
         video={first_video}
         {can_edit} />
@@ -144,10 +146,9 @@
         {#snippet children({ show, toggle })}
           <button
             type="button"
-            class="media-block bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-              justify-center cursor-pointer p-2 text-lg"
+            class="media-block add-video"
             onclick={toggle}>
-            <span class="i-bi-camera-video text-2xl mt-1  text-blue-800"></span>
+            <IconBiCameraVideo class="icon-inline" style="font-size: 1.5rem; margin-top: 0.25rem; color: rgb(30 64 175)" />
           </button>
           {#if show}
             {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
@@ -164,7 +165,7 @@
     {#snippet children({ show, toggle })}
       {#if first_sense.photos?.length}
         {@const [first_photo] = first_sense.photos}
-        <div class="media-block bg-gray-300 relative">
+        <div class="media-block photo-block">
           <Image
             square={128}
             title={entry.main.lexeme.default}
@@ -174,20 +175,20 @@
             {can_edit}
             on_delete_image={() => dbOperations.delete_photo(first_photo.id)} />
           {#if first_sense.photos.length > 1}
-            <span class="i-fluent-image-stack-20-regular text-white absolute bottom-1 right-1 text-xl"></span>
+            <IconFluentImageStack20Regular class="icon-inline photo-stack-icon" />
           {/if}
         </div>
       {:else if can_edit}
         <div
-          class="w-12 bg-gray-100 flex flex-col text-gray-600 items-center justify-center cursor-pointer"
+          class="upload-block"
           onclick={toggle}>
-          <span class="hidden md:inline">
-            <span class="i-ic-outline-cloud-upload text-2xl"></span>
+          <span class="desktop-only">
+            <IconIcOutlineCloudUpload class="icon-inline" style="font-size: 1.5rem" />
           </span>
-          <span class="md:hidden">
-            <span class="i-ic-outline-camera-alt text-xl"></span>
+          <span class="mobile-only">
+            <IconIcOutlineCameraAlt class="icon-inline" style="font-size: 1.25rem" />
           </span>
-          <div class="text-xs">
+          <div style="font-size: 0.75rem; line-height: 1rem">
             {$page.data.t('entry_field.photo')}
           </div>
         </div>
@@ -206,5 +207,148 @@
     flex: 0 0 64px;
     width: 64px;
     min-height: 64px;
+  }
+
+  .entry-row {
+    display: flex;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow */
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    align-items: stretch;
+    border-color: rgb(134 239 172); /* green-300 */
+  }
+
+  .recently-updated {
+    border-bottom-width: 2px;
+  }
+
+  .entry-row :global(.list-audio-cell) {
+    background-color: var(--surface); /* ≈ gray-100 */
+    padding: 0.375rem 0.25rem;
+    min-width: 55px;
+    width: 55px;
+  }
+
+  .entry-link {
+    padding: 0.5rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .entry-link:hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
+  }
+
+  .lexeme {
+    font-weight: 600;
+    color: var(--color); /* ≈ gray-900 */
+    margin-right: 0.25rem;
+  }
+
+  .phonetic {
+    margin-right: 0.25rem;
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .phonetic {
+      display: inline;
+    }
+  }
+
+  .spaced {
+    margin-right: 0.25rem;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: -0.25rem;
+  }
+
+  .gloss-block {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    margin-right: auto;
+    margin-bottom: 0.25rem;
+  }
+
+  .sd-chip {
+    padding: 0.25rem 0.5rem;
+    line-height: 1.25;
+    font-size: 0.75rem;
+    background-color: var(--surface); /* ≈ gray-100 */
+    border-radius: 0.25rem;
+    margin-left: 0.25rem;
+  }
+
+  .entry-row :global(.list-video-cell) {
+    background-color: var(--surface); /* ≈ gray-100 */
+    padding: 0.375rem;
+    border-right-width: 2px;
+  }
+
+  .add-video {
+    background-color: var(--surface); /* ≈ gray-100 */
+    border-right-width: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0.5rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .add-video:hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
+  }
+
+  .photo-block {
+    background-color: color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
+    position: relative;
+  }
+
+  .photo-block :global(.photo-stack-icon) {
+    color: #fff;
+    position: absolute;
+    bottom: 0.25rem;
+    right: 0.25rem;
+    font-size: 1.25rem;
+  }
+
+  .upload-block {
+    width: 3rem;
+    background-color: var(--surface); /* ≈ gray-100 */
+    display: flex;
+    flex-direction: column;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .desktop-only {
+      display: inline;
+    }
+
+    .mobile-only {
+      display: none;
+    }
   }
 </style>

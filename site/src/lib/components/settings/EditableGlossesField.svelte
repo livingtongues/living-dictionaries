@@ -33,7 +33,7 @@
     .filter(e => !selectedLanguages.includes(e.bcp)))
 </script>
 
-<div class="text-sm font-medium text-gray-700 mb-1">
+<div class="section-title">
   {$page.data.t('create.gloss_dictionary_in')}
 </div>
 
@@ -66,7 +66,7 @@
                 }}
                 color="green"
                 form="simple"
-                class="w-full !text-left">
+                class="language-option">
                 {language.vernacularName || $page.data.t({ dynamicKey: `gl.${language.bcp}`, fallback: language.bcp })}
                 {#if language.vernacularAlternate}
                   {language.vernacularAlternate}
@@ -86,7 +86,29 @@
   {/snippet}
 </ShowHide>
 
-<div class="text-xs text-gray-600 mt-1">
+<div class="hint">
   {$page.data.t('create.gloss_dictionary_clarification')}
   {$page.data.t('settings.unable_to_delete')}
 </div>
+
+<style>
+  .section-title {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+    margin-bottom: 0.25rem;
+  }
+
+  :global(.language-option) {
+    width: 100%;
+    text-align: left !important;
+  }
+
+  .hint {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    margin-top: 0.25rem;
+  }
+</style>

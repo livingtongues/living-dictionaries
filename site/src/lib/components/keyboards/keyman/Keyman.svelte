@@ -6,6 +6,9 @@
 </script>
 
 <script lang="ts">
+  import IconPhGlobe from '~icons/ph/globe'
+  import IconMdiKeyboard from '~icons/mdi/keyboard'
+  import IconMdiKeyboardOffOutline from '~icons/mdi/keyboard-off-outline'
   import { run } from 'svelte/legacy'
 
   import './keyman.css'
@@ -129,33 +132,33 @@
 
 <ShowHide>
   {#snippet children({ show: showKeyboardOptions, toggle })}
-    <div bind:this={wrapperEl} class="w-full relative" class:sompeng={currentBcp === 'srb-sora'}>
+    <div bind:this={wrapperEl} class="keyman-wrap" class:sompeng={currentBcp === 'srb-sora'}>
       {@render children_render?.()}
 
       {#if kmw}
         <div
-          class:top-0.75={position === 'top'}
-          class:bottom-0.75={position === 'bottom'}
-          class="absolute right-0.5 z-1 flex">
+          class:at-top={position === 'top'}
+          class:at-bottom={position === 'bottom'}
+          class="keyboard-buttons">
           {#if (show || !bcp) && canChooseKeyboard}
             <button
-              class="hover:text-black p-2 flex items-center bg-white rounded"
+              class="keyboard-toggle"
               type="button"
               onclick={toggle}
               title="Select Keyboard">
-              <span class="i-ph-globe"></span>
+              <IconPhGlobe class="icon-inline" />
             </button>
           {/if}
           {#if glossLanguage?.showKeyboard}
             <button
-              class="hover:text-black p-2 flex items-center bg-white rounded"
+              class="keyboard-toggle"
               type="button"
               onclick={() => (show = !show)}
               title={show ? 'Keyboard active' : 'Keyboard inactive'}>
               {#if show}
-                <span class="i-mdi-keyboard"></span>
+                <IconMdiKeyboard class="icon-inline" />
               {:else}
-                <span class="i-mdi-keyboard-off-outline"></span>
+                <IconMdiKeyboardOffOutline class="icon-inline" />
               {/if}
             </button>
           {/if}
@@ -185,3 +188,37 @@
     {/if}
   {/snippet}
 </ShowHide>
+
+<style>
+  .keyman-wrap {
+    width: 100%;
+    position: relative;
+  }
+
+  .keyboard-buttons {
+    position: absolute;
+    right: 0.125rem;
+    z-index: 1;
+    display: flex;
+  }
+
+  .at-top {
+    top: 0.1875rem;
+  }
+
+  .at-bottom {
+    bottom: 0.1875rem;
+  }
+
+  .keyboard-toggle {
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    background-color: var(--background);
+    border-radius: 0.25rem;
+  }
+
+  .keyboard-toggle:hover {
+    color: #000;
+  }
+</style>

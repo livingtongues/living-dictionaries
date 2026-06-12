@@ -4,7 +4,6 @@ import { AuthUser } from '$lib/auth/user.svelte'
 
 export const shared_meta: StoryMeta = {
   viewports: [{ width: 640, height: 240 }],
-  csr: true,
 }
 
 function admin_user({ preview_level }: { preview_level: number }) {

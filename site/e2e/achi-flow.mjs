@@ -188,8 +188,8 @@ async function main() {
 
   // 4 — add a sense
   await page.evaluate(() => {
-    const add = [...document.querySelectorAll('button')]
-      .find(b => b.offsetParent !== null && b.innerHTML.includes('i-system-uicons-versions'))
+    const add = [...document.querySelectorAll('button.add-sense-button')]
+      .find(b => b.offsetParent !== null)
     if (!add) throw new Error('Add Sense button not found')
     add.click()
   })
@@ -199,8 +199,8 @@ async function main() {
 
   // 5 — delete the newly-added sense (the last ✕)
   await page.evaluate(() => {
-    const deletes = [...document.querySelectorAll('button')]
-      .filter(b => b.offsetParent !== null && b.innerHTML.includes('i-fa-solid-times'))
+    const deletes = [...document.querySelectorAll('button.delete-sense-button')]
+      .filter(b => b.offsetParent !== null)
     if (!deletes.length) throw new Error('delete-sense (✕) button not found')
     deletes[deletes.length - 1].click()
   })

@@ -12,6 +12,7 @@
   import { env as public_env } from '$env/dynamic/public'
   import { api_auth_email_send_code } from '$api/auth/email/send-code/_call'
   import { api_auth_email_verify } from '$api/auth/email/verify/_call'
+  import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
 
   interface Props {
     context?: 'force'
@@ -87,47 +88,86 @@
   {#snippet heading()}
     <span>{$page.data.t('header.login')}
       {#if submitting_code}
-        <span class="i-svg-spinners-3-dots-fade align--4px"></span>
+        <IconSvgSpinners3DotsFade class="icon-inline" style="vertical-align: -4px" />
       {/if}
     </span>
   {/snippet}
   {#if context === 'force'}
-    <h4 class="text-green-700 mb-4">
+    <h4 class="create-account-nudge">
       {$page.data.t('header.please_create_account')}
     </h4>
   {/if}
 
   {#if !sixDigitCodeSent}
     {#if can_google_authenticate}
-      <div class="mb-3" bind:this={button_parent}></div>
+      <div class="google-button" bind:this={button_parent}></div>
 
-      <div class="mb-3 text-gray-500/80 text-sm font-semibold">
+      <div class="or-divider">
         {$page.data.t('misc.disjunctive').toUpperCase()}
       </div>
     {/if}
     <Form onsubmit={sendCode}>
       {#snippet children({ loading })}
-        <div class="flex">
+        <div class="send-row">
           <input
             type="email"
             use:autofocus
             placeholder={$page.data.t('contact.email')}
-            class="border border-gray-400 p-2 rounded w-full"
+            class="text-input"
             required
             bind:value={email} />
-          <Button class="text-nowrap ml-1" {loading} form="filled" type="submit">{$page.data.t('account.send_code')}</Button>
+          <Button class="send-code-button" {loading} form="filled" type="submit">{$page.data.t('account.send_code')}</Button>
         </div>
       {/snippet}
     </Form>
   {:else}
-    <div class="mb-2">
+    <div class="code-sent-note">
       {$page.data.t('account.enter_6_digit_code_sent_to')}: {email}
     </div>
     <input
       type="text"
       placeholder="_ _ _ _ _ _"
-      class="border border-gray-400 p-2 rounded w-full"
+      class="text-input"
       maxlength="6"
       bind:value={sixDigitCode} />
   {/if}
 </Modal>
+
+<style>
+  .create-account-nudge {
+    color: rgb(21 128 61); /* green-700 */
+    margin-bottom: 1rem;
+  }
+
+  .google-button {
+    margin-bottom: 0.75rem;
+  }
+
+  .or-divider {
+    margin-bottom: 0.75rem;
+    color: rgb(107 114 128 / 0.8); /* gray-500/80 — visibly lighter than var(--color-secondary); kept literal for parity */
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+  }
+
+  .send-row {
+    display: flex;
+  }
+
+  .text-input {
+    border: 1px solid color-mix(in srgb, var(--background), var(--color) 38%); /* ≈ gray-400 */
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    width: 100%;
+  }
+
+  .send-row :global(.send-code-button) {
+    text-wrap: nowrap;
+    margin-left: 0.25rem;
+  }
+
+  .code-sent-note {
+    margin-bottom: 0.5rem;
+  }
+</style>

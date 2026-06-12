@@ -10,6 +10,9 @@
   import CoordinatesModal from '$lib/components/maps/CoordinatesModal.svelte'
   import RegionModal from '$lib/components/maps/RegionModal.svelte'
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
+  import IconOcticonPencil from '~icons/octicon/pencil'
+  import IconMdiMapMarkerPlus from '~icons/mdi/map-marker-plus'
+  import IconMdiMapMarkerPath from '~icons/mdi/map-marker-path'
 
   interface Props {
     on_update_points: (points: IPoint[]) => void
@@ -31,15 +34,15 @@
   let mapClickCoordinates: LngLat = $state()
 </script>
 
-<div class="text-sm font-medium text-gray-700 mb-2">
+<div class="section-title">
   {$page.data.t('create.where_spoken')}
 </div>
 
 {#if first_longitude}
-  <div class="text-xs text-gray-600 mb-2">
+  <div class="hint">
     {$page.data.t('create.map_instructions')}
   </div>
-  <div class="h-240px">
+  <div style="height: 240px">
     <Map
       lng={first_longitude}
       lat={first_latitude}
@@ -63,7 +66,7 @@
             <ShowHide>
               {#snippet children({ show, toggle })}
                 <Button form="simple" size="sm" onclick={toggle}>
-                  <span class="i-octicon-pencil"></span>
+                  <IconOcticonPencil class="icon-inline" />
                   {#if index === 0}
                     {$page.data.t('create.primary_coordinate')}
                   {/if}
@@ -98,7 +101,7 @@
           <ShowHide>
             {#snippet children({ show, toggle })}
               <Button form="simple" size="sm" onclick={toggle}>
-                <span class="i-octicon-pencil"></span>
+                <IconOcticonPencil class="icon-inline" />
               </Button>
               {#if show}
                 <RegionModal
@@ -124,14 +127,14 @@
   </div>
 {/if}
 
-<div class="mt-1">
+<div style="margin-top: 0.25rem">
   <ShowHide>
     {#snippet children({ show, toggle })}
       <Button
         onclick={toggle}
         color={first_longitude ? 'black' : 'primary'}
         size={first_longitude ? 'sm' : 'md'}>
-        <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;"></span>
+        <IconMdiMapMarkerPlus class="icon-inline" style="margin-right: 0.25rem; margin-top: -3px;" />
         {$page.data.t('create.select_coordinates')}
       </Button>
       {#if show}
@@ -147,7 +150,7 @@
     <ShowHide>
       {#snippet children({ show, toggle })}
         <Button onclick={toggle} color="black" size="sm">
-          <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;"></span>
+          <IconMdiMapMarkerPath class="icon-inline" style="margin-right: 0.25rem; margin-top: -2px;" />
           {$page.data.t('create.select_region')}
         </Button>
         {#if show}
@@ -164,3 +167,20 @@
     </ShowHide>
   {/if}
 </div>
+
+<style>
+  .section-title {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
+    margin-bottom: 0.5rem;
+  }
+
+  .hint {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    margin-bottom: 0.5rem;
+  }
+</style>

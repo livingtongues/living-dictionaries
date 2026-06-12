@@ -58,10 +58,12 @@ async function main() {
   browser = await launch()
   const page = await browser.newPage()
   const errors = []
-  // Known-unrelated to the catalog conversion: Mapbox tiles (403, no WebGL/token in headless)
-  // and the entries worker's CDN cache fetch (403, cache.livingdictionaries.app) which only fires
-  // on the entries route (still stub/CDN until Phase B). Filter so the assertion reflects catalog health.
-  const ignore = /mapbox|cache\.livingdictionaries|Error loading cached index|status of 403/i
+  // Known-unrelated to the catalog conversion: Mapbox tiles (403, no WebGL/token in headless),
+  // the entries worker's CDN cache fetch (403, cache.livingdictionaries.app) which only fires
+  // on the entries route (still stub/CDN until Phase B), and Google One Tap GSI noise (FedCM
+  // unavailable in headless → "Not signed in with the identity provider"). Filter so the
+  // assertion reflects catalog health.
+  const ignore = /mapbox|cache\.livingdictionaries|Error loading cached index|status of 403|identity provider|FedCM|GSI_LOGGER/i
   const note = (text) => { if (!ignore.test(text)) errors.push(text) }
   page.on('pageerror', err => note(err.message))
   page.on('console', msg => { if (msg.type() === 'error') note(`console: ${msg.text()}`) })

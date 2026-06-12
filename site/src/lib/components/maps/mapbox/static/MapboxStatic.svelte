@@ -55,14 +55,29 @@
       <img alt="Map" {src} />
     {:else}
       {#await response.json() then body}
-        <div style="width: {highDef ? (width * 2) : width}px; height: {highDef ? height * 2 : height}px;" class="bg-gray-200 flex items-center justify-center max-w-full max-h-full text-red-600">
+        <div style="width: {highDef ? (width * 2) : width}px; height: {highDef ? height * 2 : height}px;" class="static-placeholder error-text">
           Error code {response.status}: {body.message}
         </div>
       {/await}
     {/if}
   {:catch error}
-    <div style="width: {highDef ? (width * 2) : width}px; height: {highDef ? height * 2 : height}px;" class="bg-gray-200 flex items-center justify-center max-w-full max-h-full">
+    <div style="width: {highDef ? (width * 2) : width}px; height: {highDef ? height * 2 : height}px;" class="static-placeholder">
       Error {error}
     </div>
   {/await}
 {/if}
+
+<style>
+  .static-placeholder {
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .error-text {
+    color: rgb(220 38 38); /* red-600 */
+  }
+</style>

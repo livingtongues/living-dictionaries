@@ -9,10 +9,10 @@
   {page.data.t('header.tutorials')}
 </Header>
 
-<div class="max-w-screen-md mx-auto p-3">
-  <h2 class="font-semibold">Project overview</h2>
+<div class="video-column">
+  <h2 style="font-weight: 600">Project overview</h2>
   <iframe
-    class="video mb-3"
+    class="video"
     src="https://www.youtube.com/embed/fkD-p5Kgefw?si=Q1uKakhwGiicfibB"
     title="Project overview"
     frameborder="0"
@@ -20,10 +20,10 @@
     allowfullscreen></iframe>
 </div>
 
-<div class="max-w-screen-md mx-auto p-3">
-  <h2 class="font-semibold">English tutorials</h2>
+<div class="video-column">
+  <h2 style="font-weight: 600">English tutorials</h2>
   <iframe
-    class="video mb-3"
+    class="video"
     src="https://www.youtube.com/embed/d8neBgRsTrI"
     title="Tutorial 1 - How to create an account and a new Living Dictionary"
     frameborder="0"
@@ -31,7 +31,7 @@
     allowfullscreen></iframe>
 
   <iframe
-    class="video mb-3"
+    class="video"
     src="https://www.youtube.com/embed/4PRGtToFhgo"
     title="Tutorial 2 - How to Add and Edit Entries in a Living Dictionary"
     frameborder="0"
@@ -39,10 +39,10 @@
     allowfullscreen></iframe>
 </div>
 
-<div class="max-w-screen-md mx-auto p-3">
-  <h2 class="font-semibold">Tutoriales en español</h2>
+<div class="video-column">
+  <h2 style="font-weight: 600">Tutoriales en español</h2>
   <iframe
-    class="video mb-3"
+    class="video"
     src="https://www.youtube.com/embed/Mm2-LwKySn8"
     title="Seminario 1 - Como iniciar una cuenta y crear un Diccionario Vivo"
     frameborder="0"
@@ -50,7 +50,7 @@
     allowfullscreen></iframe>
 
   <iframe
-    class="video mb-3"
+    class="video"
     src="https://www.youtube.com/embed/opQtwmxEFGc"
     title="Seminario 2 - Como agregar y editar entradas en un Diccionario Vivo"
     frameborder="0"
@@ -70,5 +70,13 @@
   .video {
     aspect-ratio: 16 / 9;
     width: 100%;
+    margin-bottom: 0.75rem;
+  }
+
+  .video-column {
+    max-width: 768px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0.75rem;
   }
 </style>

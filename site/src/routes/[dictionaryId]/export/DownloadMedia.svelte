@@ -98,10 +98,19 @@
 </div>
 
 {#if errors.length}
-  <div class="mt-4 text-red-600 text-sm">
-    <div class="font-semibold">Errors:</div>
+  <div class="errors-block">
+    <div style="font-weight: 600">Errors:</div>
     {#each errors as error (error)}
-      <div class="mb-3">{error}</div>
+      <div style="margin-bottom: 0.75rem">{error}</div>
     {/each}
   </div>
 {/if}
+
+<style>
+  .errors-block {
+    margin-top: 1rem;
+    color: rgb(220 38 38); /* red-600 */
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+</style>

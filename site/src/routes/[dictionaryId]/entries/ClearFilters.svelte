@@ -15,5 +15,14 @@
 </script>
 
 {#if filtered}
-  <button type="button" class="text-xs text-gray-600 p-1" onclick={clear_filters}><i class="far fa-undo fa-sm"></i> Clear</button>
+  <button type="button" onclick={clear_filters}><i class="far fa-undo fa-sm"></i> Clear</button>
 {/if}
+
+<style>
+  button {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    padding: 0.25rem;
+  }
+</style>

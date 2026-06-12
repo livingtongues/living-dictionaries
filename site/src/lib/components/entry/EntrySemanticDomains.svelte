@@ -5,6 +5,8 @@
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
   import { page } from '$app/stores'
   import { semanticDomains } from '$lib/mappings/semantic-domains'
+  import IconFaSolidTimes from '~icons/fa-solid/times'
+  import IconFaSolidPlus from '~icons/fa-solid/plus'
 
   interface Props {
     semantic_domain_keys: string[]
@@ -48,27 +50,57 @@
   {#snippet additional()}
 
     {#each write_in_semantic_domains || [] as domain (domain)}
-      <div class="px-2 py-1 leading-tight text-xs bg-blue-100 rounded mb-1 whitespace-nowrap flex items-center">
+      <div class="write-in-chip">
         <i>{domain}</i>
         {#if can_edit}
           <button
             type="button"
-            class="cursor-pointer justify-center items-center flex opacity-50 hover:opacity-100 rounded-full h-4 w-4 ml-1"
+            class="remove-write-in"
             title="Remove"
             onclick={stopPropagation(() => deleteWriteIn(domain))}>
-            <span class="i-fa-solid-times"></span>
+            <IconFaSolidTimes class="icon-inline" />
           </button>
         {/if}
       </div>
-      <div class="w-1"></div>
+      <div style="width: 0.25rem"></div>
     {/each}
 
   {/snippet}
   {#snippet plus()}
 
     {#if can_edit && show_plus && !(semantic_domain_keys?.length || write_in_semantic_domains?.length)}
-      <span class="i-fa-solid-plus opacity-40 my-1"></span>
+      <IconFaSolidPlus class="icon-inline" style="opacity: 0.4; margin-top: 0.25rem; margin-bottom: 0.25rem" />
     {/if}
 
   {/snippet}
 </ModalEditableArray>
+
+<style>
+  .write-in-chip {
+    padding: 0.25rem 0.5rem;
+    line-height: 1.25;
+    font-size: 0.75rem;
+    background-color: rgb(219 234 254); /* blue-100 */
+    border-radius: 0.25rem;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+  }
+
+  .remove-write-in {
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    opacity: 0.5;
+    border-radius: 9999px;
+    height: 1rem;
+    width: 1rem;
+    margin-left: 0.25rem;
+  }
+
+  .remove-write-in:hover {
+    opacity: 1;
+  }
+</style>

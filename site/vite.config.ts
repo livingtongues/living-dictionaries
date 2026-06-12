@@ -2,7 +2,6 @@ import { readFileSync } from 'node:fs'
 import { sveltekit } from '@sveltejs/kit/vite'
 import { defineConfig } from 'vite'
 import type { Plugin, UserConfig } from 'vite'
-import UnoCSS from 'unocss/vite'
 import Icons from 'unplugin-icons/vite'
 import { sqlite_proxy } from './sqlite-proxy/vite-plugin'
 
@@ -21,9 +20,7 @@ async function load_svelte_look() {
 export default defineConfig(async (): Promise<UserConfig> => ({
   plugins: [
     await load_svelte_look(),
-    UnoCSS(),
-    // `~icons/<collection>/<name>` → Svelte component (used by the ported /admin section).
-    // Coexists with UnoCSS presetIcons (`class="i-*"`); both read @iconify/json.
+    // `~icons/<collection>/<name>` → Svelte component (all icons site-wide; reads @iconify/json)
     Icons({ compiler: 'svelte' }),
     sveltekit(),
     rawFonts(['.ttf']),

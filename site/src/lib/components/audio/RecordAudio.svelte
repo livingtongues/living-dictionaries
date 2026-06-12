@@ -3,6 +3,7 @@
   import type { Options, StereoAudioRecorder } from 'recordrtc'
   import { page } from '$app/stores'
   import { Button } from '$lib/svelte-pieces'
+  import IconUilMicrophone from '~icons/uil/microphone'
 
   interface Props {
     audioBlob?: Blob
@@ -109,10 +110,10 @@
       </div>
 
       <div>
-        <Button class="mt-1" size="sm" onclick={() => location.reload()}>{$page.data.t('audio.reload')}</Button>
+        <Button class="record-spaced" size="sm" onclick={() => location.reload()}>{$page.data.t('audio.reload')}</Button>
         <Button
           size="sm"
-          class="mt-1"
+          class="record-spaced"
           form="simple"
           color="green"
           href="https://www.google.com/search?q=How+do+I+enable+microphone+access"
@@ -120,21 +121,21 @@
           rel="noopener">{$page.data.t('audio.learn_more')}</Button>
       </div>
     {:else}
-      <Button onclick={checkAudioPermissions} class="w-full">
-        <span class="i-uil-microphone"></span>
+      <Button onclick={checkAudioPermissions} class="record-full">
+        <IconUilMicrophone class="icon-inline" />
         {$page.data.t('audio.prepare_to_record')}
       </Button>
     {/if}
   {:else if !recorder}
-    <Button onclick={record} color="red" class="w-full h-24">
+    <Button onclick={record} color="red" class="record-full record-tall">
       {$page.data.t('audio.tap_to_record')}
     </Button>
-    <div class="text-gray-600 text-center text-xs mt-2">
+    <div class="record-hint">
       ({$page.data.t('audio.tapToStopRecording')})
     </div>
   {:else}
-    <Button onclick={stop} color="red" class="w-full h-24">
-      <div class="font-semibold font-mono text-2xl">{recordingTime}s</div>
+    <Button onclick={stop} color="red" class="record-full record-tall">
+      <div class="recording-time">{recordingTime}s</div>
       {$page.data.t('audio.stop_recording')}
     </Button>
   {/if}
@@ -144,3 +145,32 @@
     <audio src={URL.createObjectURL(audioBlob)} controls />
   </div> -->
 {/if}
+
+<style>
+  :global(.record-spaced) {
+    margin-top: 0.25rem;
+  }
+
+  :global(.record-full) {
+    width: 100%;
+  }
+
+  :global(.record-tall) {
+    height: 6rem;
+  }
+
+  .record-hint {
+    color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
+    text-align: center;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .recording-time {
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+</style>
