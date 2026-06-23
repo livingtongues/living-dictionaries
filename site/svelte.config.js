@@ -13,6 +13,12 @@ const config = {
     alias: {
       $api: 'src/routes/api',
     },
+    // Poll `_app/version.json` every 60s so long-lived open tabs detect a new
+    // deploy and the root +layout shows a non-blocking "reload" toast. The
+    // service worker handles asset freshness; this closes the idle-pinned-tab
+    // gap (a tab the user never navigates would otherwise keep running old code,
+    // since the SW only update-checks on navigation).
+    version: { pollInterval: 60_000 },
   },
 
   compilerOptions: {
