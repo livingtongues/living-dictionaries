@@ -1,9 +1,10 @@
 <script lang="ts">
   import EntryDisplay from './EntryDisplay.svelte'
   import { seo_description } from './seo_description'
-  import { Button, JSON } from '$lib/svelte-pieces'
+  import { Button, JSON, Modal } from '$lib/svelte-pieces'
   import { share } from '$lib/helpers/share'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import ChangeHistory from '$lib/components/history/ChangeHistory.svelte'
   import { page } from '$app/stores'
   import { dev } from '$app/environment'
 
@@ -15,8 +16,11 @@
     dictionary,
     auth_user,
     can_edit,
+    is_editor_or_above,
     dbOperations,
   } = $derived(data)
+
+  let show_history = $state(false)
 
   // Prefer the live read-model row (reactive to edits + sync) once the bundle
   // has loaded it; until then fall back to the SSR/cold-fetched entry so a
@@ -70,8 +74,26 @@
         <i class="fas fa-share-square rtl-x-flip"></i>
       </Button>
     {/if}
+    {#if is_editor_or_above}
+      <Button class="entry-history-button" form="simple" onclick={() => (show_history = true)}>
+        <span>History</span>
+        <div style="width: 0.5rem"></div>
+        <i class="fas fa-history"></i>
+      </Button>
+    {/if}
   </div>
 </div>
+
+{#if show_history}
+  <Modal class="entry-history-modal" on_close={() => (show_history = false)}>
+    {#snippet heading()}History{/snippet}
+    <ChangeHistory
+      dictionary_id={dictionary.id}
+      owner_type="entry"
+      owner_id={entry.id}
+      empty_label="No changes recorded for this entry yet." />
+  </Modal>
+{/if}
 
 <EntryDisplay
   {entry}
