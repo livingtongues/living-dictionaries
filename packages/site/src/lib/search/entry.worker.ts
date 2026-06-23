@@ -9,6 +9,7 @@ import { cached_data_table, cached_join_table } from '$lib/supabase/cached-data'
 
 const log = false
 let supabase: Supabase | undefined
+let init_generation = 0
 
 let dictionary_id: string
 let admin: number
@@ -300,6 +301,21 @@ const operations = {
   },
 }
 
+function reset_grouping_maps() {
+  for (const k of Object.keys(entry_id_to_tags)) delete entry_id_to_tags[k]
+  for (const k of Object.keys(entry_id_to_dialects)) delete entry_id_to_dialects[k]
+  for (const k of Object.keys(entry_id_to_senses)) delete entry_id_to_senses[k]
+  for (const k of Object.keys(sense_id_to_sentences)) delete sense_id_to_sentences[k]
+  for (const k of Object.keys(sense_id_to_photos)) delete sense_id_to_photos[k]
+  for (const k of Object.keys(video_id_to_speakers)) delete video_id_to_speakers[k]
+  for (const k of Object.keys(sense_id_to_videos)) delete sense_id_to_videos[k]
+  for (const k of Object.keys(audio_id_to_speakers)) delete audio_id_to_speakers[k]
+  for (const k of Object.keys(entry_id_to_audios)) delete entry_id_to_audios[k]
+  for (const k of Object.keys(sentence_id_to_sense_ids)) delete sentence_id_to_sense_ids[k]
+  for (const k of Object.keys(photo_id_to_sense_ids)) delete photo_id_to_sense_ids[k]
+  for (const k of Object.keys(video_id_to_sense_ids)) delete video_id_to_sense_ids[k]
+}
+
 async function process_and_update_entry(entry: Tables<'entries'>) {
   const entry_data = process_entry(entry)
   await upsert_entry_data({ [entry.id]: entry_data })
@@ -340,6 +356,8 @@ export async function init_entries(
   set_loading: (loading: boolean) => Promise<void>,
   _mark_search_index_updated: () => Promise<void>,
 ) {
+  const current_gen = ++init_generation
+  reset_grouping_maps()
   upsert_entry_data = _upsert_entry_data
   delete_entry = _delete_entry
   set_speakers = _set_speakers
@@ -351,6 +369,7 @@ export async function init_entries(
   const { can_edit, PUBLIC_SUPABASE_API_URL, PUBLIC_SUPABASE_ANON_KEY } = options
 
   const cached = await load_cache(dictionary_id)
+  if (current_gen !== init_generation) return
   if (cached) {
     const filtered_cached = cached.map((entry) => {
       if (entry.tags) {
@@ -365,6 +384,7 @@ export async function init_entries(
     await create_index(filtered_cached, dictionary_id)
     mark_search_index_updated()
     console.info('can search using cached entries_data')
+    if (current_gen !== init_generation) return
   }
 
   if (!supabase) {
@@ -375,6 +395,7 @@ export async function init_entries(
     const tags_promise = cached_data_table({ table: 'tags', include: ['name'], dictionary_id, supabase, log })
     const dialects_promise = cached_data_table({ table: 'dialects', include: ['name'], dictionary_id, supabase, log });
     ([tags, dialects] = await Promise.all([tags_promise, dialects_promise]))
+    if (current_gen !== init_generation) return
     set_tags(Object.values(tags))
     set_dialects(Object.values(dialects))
 
@@ -435,6 +456,7 @@ export async function init_entries(
     sense_videos_promise,
     senses_in_sentences_promise,
   ]))
+  if (current_gen !== init_generation) return
 
   for (const entry_tag of Object.values(entry_tags)) {
     if (!entry_id_to_tags[entry_tag.entry_id]) entry_id_to_tags[entry_tag.entry_id] = []
