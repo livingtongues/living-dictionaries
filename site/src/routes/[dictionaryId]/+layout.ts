@@ -56,6 +56,9 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
     const is_manager = role === 'admin' || role === 'manager'
     const is_contributor = role === 'admin' || role === 'contributor'
     const can_edit = is_manager || is_contributor || role === 'editor'
+    // Change-history visibility: editor rank or above (manager/admin), NOT bare
+    // contributors. Mirrors the server gate `verify_auth_dict_role(…, 'editor')`.
+    const is_editor_or_above = role === 'admin' || role === 'manager' || role === 'editor'
 
     const default_entries_per_page = 20
 
@@ -137,6 +140,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       dictionary,
       is_manager,
       is_contributor,
+      is_editor_or_above,
       can_edit,
       dict_db,
       connection,

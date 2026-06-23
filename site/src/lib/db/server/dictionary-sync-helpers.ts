@@ -1,8 +1,11 @@
 import type Database from 'better-sqlite3'
 import type { Table } from 'drizzle-orm'
-import { DICT_JSON_COLUMNS, parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
+import type { HistoryEvent } from './dictionary-history-db'
+import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import * as dict_schema from '$lib/db/schemas/dictionary'
 import { getTableColumns } from 'drizzle-orm'
+import { build_delta, build_snapshot, resolve_owners } from './dictionary-history-capture'
+import { record_history } from './dictionary-history-db'
 
 /**
  * Names of all syncable tables in a dictionary.db. One sector per spec
@@ -88,13 +91,23 @@ export function is_dict_syncable_table(table: string): table is DictSyncableTabl
  *
  * This function is push+pull in one atomic round-trip.
  */
-export function process_dict_changes({ db, request, user_id, is_editor }: {
+export function process_dict_changes({ db, request, user_id, is_editor, history_db }: {
   db: Database.Database
   request: DictChangesRequest
   user_id: string
   /** Whether the caller has push permission (editor / manager / admin). */
   is_editor: boolean
+  /**
+   * Separate per-dict history db. When provided, recorded change events are
+   * appended AFTER the main-db commit (best-effort — see dictionary-history-db).
+   * Omitted in unit tests that don't assert history.
+   */
+  history_db?: Database.Database
 }): DictChangesResponse {
+  // Server receive time — one stamp shared by every event in this push batch.
+  const history_at = new Date().toISOString()
+  const history_events: HistoryEvent[] = []
+
   db.pragma('defer_foreign_keys = ON')
   db.exec('BEGIN IMMEDIATE')
   try {
@@ -103,6 +116,20 @@ export function process_dict_changes({ db, request, user_id, is_editor }: {
       for (const { table_name, id } of request.deletes) {
         if (!is_dict_syncable_table(table_name))
           continue
+        // Capture the pre-delete image + owners BEFORE the cascade wipes it.
+        const image = db.prepare(`SELECT * FROM "${table_name}" WHERE id = ?`).get(id) as Record<string, unknown> | undefined
+        if (image) {
+          history_events.push({
+            table_name,
+            row_id: id,
+            op: 'delete',
+            user_id,
+            at: history_at,
+            snapshot: build_snapshot(table_name, image),
+            delta: null,
+            owners: resolve_owners(db, table_name, image),
+          })
+        }
         db.prepare(
           `INSERT OR REPLACE INTO deletes (table_name, id, updated_at)
            VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
@@ -116,8 +143,11 @@ export function process_dict_changes({ db, request, user_id, is_editor }: {
         const rows = request.dirty_rows[table_name]
         if (!rows?.length)
           continue
-        for (const row of rows)
-          merge_dict_row({ db, table_name, row, user_id })
+        for (const row of rows) {
+          const event = merge_dict_row({ db, table_name, row, user_id, at: history_at })
+          if (event)
+            history_events.push(event)
+        }
       }
     }
 
@@ -171,6 +201,17 @@ export function process_dict_changes({ db, request, user_id, is_editor }: {
     response.new_synced_up_to = lmod?.value ?? (request.synced_up_to ?? new Date(0).toISOString())
 
     db.exec('COMMIT')
+
+    // Append history AFTER the main-db commit. Best-effort: a failure here
+    // (or a crash in this window) must never roll back or 500 the real edit.
+    if (history_db && history_events.length) {
+      try {
+        record_history(history_db, history_events)
+      } catch (err) {
+        console.warn('Could not record change history:', err)
+      }
+    }
+
     return response
   } catch (error) {
     db.exec('ROLLBACK')
@@ -178,25 +219,31 @@ export function process_dict_changes({ db, request, user_id, is_editor }: {
   }
 }
 
-function merge_dict_row({ db, table_name, row, user_id }: {
+function merge_dict_row({ db, table_name, row, user_id, at }: {
   db: Database.Database
   table_name: DictSyncableTable
   row: Record<string, unknown>
   user_id: string
-}) {
+  /** Batch history timestamp; when set, returns a HistoryEvent to record. */
+  at?: string
+}): HistoryEvent | null {
   const row_id = row.id as string
   if (!row_id)
-    return
+    return null
 
-  // Last-write-wins by `updated_at` (Story B.4).
+  // Full existing row: needed for the LWW check AND the history delta.
   const existing = db.prepare(
-    `SELECT updated_at FROM "${table_name}" WHERE id = ?`,
-  ).get(row_id) as { updated_at: string } | undefined
+    `SELECT * FROM "${table_name}" WHERE id = ?`,
+  ).get(row_id) as Record<string, unknown> | undefined
 
-  if (existing && (row.updated_at as string) && existing.updated_at > (row.updated_at as string)) {
+  if (existing && (row.updated_at as string) && (existing.updated_at as string) > (row.updated_at as string)) {
     // Server wins — caller will see this row come back in the pull stage.
-    return
+    // Nothing changed, so no history.
+    return null
   }
+
+  const op: 'insert' | 'update' = existing ? 'update' : 'insert'
+  const delta = at ? build_delta(table_name, existing, row) : null
 
   // Stamp updated_by_user_id with the authenticated caller (server is the
   // authority on this). created_by_user_id is preserved if the row already
@@ -225,6 +272,24 @@ function merge_dict_row({ db, table_name, row, user_id }: {
      VALUES (${placeholders})
      ON CONFLICT(id) DO UPDATE SET ${update_set}`,
   ).run(...values)
+
+  if (!at)
+    return null
+  // Record genuine changes only: inserts always; updates only when a content
+  // column actually changed (an updated_at-only re-push yields a null delta).
+  if (op === 'update' && !delta)
+    return null
+  const after = db.prepare(`SELECT * FROM "${table_name}" WHERE id = ?`).get(row_id) as Record<string, unknown>
+  return {
+    table_name,
+    row_id,
+    op,
+    user_id,
+    at,
+    snapshot: build_snapshot(table_name, after),
+    delta,
+    owners: resolve_owners(db, table_name, after),
+  }
 }
 
 /** Strip the `.sql` extension for tolerant comparison of migration names. */

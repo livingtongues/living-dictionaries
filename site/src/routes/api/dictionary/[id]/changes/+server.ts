@@ -5,6 +5,7 @@ import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes, SNAPSHOT_EXPIRED_DAYS } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_dictionary_db, LATEST_DICT_MIGRATION, read_last_modified_at } from '$lib/db/server/dictionary-db'
+import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { process_dict_changes, strip_sql_ext } from '$lib/db/server/dictionary-sync-helpers'
 import { error, json } from '@sveltejs/kit'
@@ -83,12 +84,14 @@ export const POST: RequestHandler = async (event) => {
       error(ResponseCodes.GONE, 'snapshot_expired')
   }
 
-  // Process.
+  // Process. Editor pushes also record change history into the separate
+  // per-dict history db (best-effort, appended after the main-db commit).
   const response = process_dict_changes({
     db: dict_db,
     request: body,
     user_id,
     is_editor,
+    history_db: is_editor && has_push ? get_dictionary_history_db(dict_id) : undefined,
   })
 
   // Mirror to shared.db.dictionaries.updated_at + snapshot_uploaded_at gate
