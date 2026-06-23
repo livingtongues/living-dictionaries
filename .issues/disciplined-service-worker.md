@@ -25,15 +25,16 @@ app's** zombie SW (it `delete_old_caches()` wipes the legacy `cache-*` / `offlin
 - `/api/*` + cross-origin → **network-only**, never cached.
 - activate → `delete_old_caches()` (also wipes the legacy Vercel caches) + `skipWaiting` + `claim`.
 
-## Tasks
-- [ ] Add `site/src/service-worker.ts` (disciplined, ported from house, no bibles).
-- [ ] `site/svelte.config.js`: `kit.version = { pollInterval: 60_000 }`.
-- [ ] `site/src/routes/+layout.svelte`: `updated.current` → non-blocking "reload" toast (LD Toasts),
-      never a forced reload (protects in-progress edits).
-- [ ] Verify: `pnpm check` + `pnpm lint` + `pnpm test`; prod build emits `/service-worker.js`;
-      registration resolves to root scope on a deep route.
-- [ ] Confirm no e2e `pageerror` regressions (SW registration succeeds on 2.63, so the old
-      `ServiceWorker|service-worker.js` filter stays unneeded).
+## Tasks — ✅ DONE (commit `ea207019`, pushed to `svelte-5-migration`)
+- ✅ Added `site/src/service-worker.ts` (disciplined, ported from house, no bibles).
+- ✅ `site/svelte.config.js`: `kit.version = { pollInterval: 60_000 }`.
+- ✅ `site/src/routes/+layout.svelte`: `updated.current` → non-blocking "reload" toast (LD Toasts),
+      never a forced reload.
+- ✅ Verified: svelte-check 0 errors, eslint clean, 438 tests pass, prod build emits
+      `build/client/service-worker.js` (15.8 KB) + `_app/version.json`.
+- ✅ Registration resolves to root on deep routes (kit 2.63 parity with house). No e2e SW-filter
+      needed (registration succeeds, no `pageerror`).
+- ✅ Knowledge: `.knowledge/migration/service-worker-cutover.md` (+ index).
 
 ## Notes
 - LD's `toast` API is byte-identical to house's (`toast(msg, { action, dismiss_label })`).

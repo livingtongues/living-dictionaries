@@ -77,3 +77,9 @@ staging is live; remaining production cutover: `.issues/cutover.md`.
   needing a CSS cascade layer (else modal overlays go transparent from an equal-specificity tie);
   why svelte-pieces' pre-compiled CSS is unaffected; grep-based CSS parity checks; and using a
   headless browser on `node build`/throwaway `vite dev` to debug dev-only CSS.
+- [service-worker-cutover.md](./service-worker-cutover.md) — re-adding a disciplined network-first
+  SW (after media-upload dropped it): why a fresh `/service-worker.js` is the **cutover kill** for
+  the old Vercel zombie SW (a 404 doesn't unregister; `activate` wipes the legacy caches); the
+  deep-link 404 registration bug being a **pre-2.63 quirk** that's gone on kit 2.63 (no
+  `kit.paths.relative` change needed); and why network-first + `version.pollInterval` toast, never
+  cache-first/SWR. Shared shape with house.
