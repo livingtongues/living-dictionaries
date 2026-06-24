@@ -4,6 +4,9 @@ import { readable } from 'svelte/store'
 import type { LayoutLoad } from './$types'
 import type { DictConnection } from '$lib/db/dict-client/worker-connection'
 import type { DictLiveDb } from '$lib/db/dict-client/dict-live-db.svelte'
+import type { TranslateFunction } from '$lib/i18n/types'
+import type { ReloadGuard } from '$lib/db/client/client-behind-recovery'
+import { CLIENT_BEHIND_GUARD_KEY, decide_client_behind_recovery } from '$lib/db/client/client-behind-recovery'
 import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
 import { dbOperations, DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
 import { url_from_storage_path } from '$lib/helpers/media'
@@ -87,17 +90,30 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
         globals.__ld_dict_connections[dictionary_id] = cached
 
         // Surface sync-fatal sentinels (these otherwise die silently in the
-        // worker): schema_outdated = this bundle is older than the server's
-        // schema; snapshot_expired = cursor > 60 days behind (the worker
-        // auto-resets viewers/clean editors — the toast matters for editors
-        // with un-pushed writes). Once per connection lifetime.
-        let sentinel_toasted = false
+        // worker). Both arrive on EVERY tab via the BroadcastChannel.
+        //   schema_outdated  = this bundle is older than the server's schema.
+        //     The sync engine lives in ONE per-dict leader worker, so reloading
+        //     a single tab just makes it a follower of the still-alive stale
+        //     leader (the "reload doesn't help" loop). Auto-reload ALL tabs to
+        //     evict that leader so a fresh one boots on the new bundle. Guarded
+        //     to one reload per window; if it recurs we fall back to a toast.
+        //   snapshot_expired = cursor > 60 days behind. The worker auto-resets
+        //     viewers/clean editors in place; the toast matters for editors with
+        //     un-pushed writes (do NOT auto-reload — that's not a stale bundle).
+        let schema_recovery_handled = false
+        let snapshot_toasted = false
         conn.subscribe_broadcasts((broadcast) => {
-          if (sentinel_toasted || (broadcast.type !== 'schema_outdated' && broadcast.type !== 'snapshot_expired'))
+          if (broadcast.type === 'schema_outdated') {
+            if (schema_recovery_handled)
+              return
+            schema_recovery_handled = true
+            recover_from_schema_outdated({ t })
             return
-          sentinel_toasted = true
-          const message = broadcast.type === 'schema_outdated' ? t('misc.app_update_needed') : t('misc.local_data_expired')
-          toast(message, { action: { label: t('misc.reload'), callback: () => location.reload() }, dismiss_label: t('misc.close') })
+          }
+          if (broadcast.type === 'snapshot_expired' && !snapshot_toasted) {
+            snapshot_toasted = true
+            toast(t('misc.local_data_expired'), { action: { label: t('misc.reload'), callback: () => location.reload() }, dismiss_label: t('misc.close') })
+          }
         })
 
         // Dev-only: expose this dict.db to the SQL proxy under a composite
@@ -161,4 +177,27 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
   } catch (err) {
     error(ResponseCodes.INTERNAL_SERVER_ERROR, err)
   }
+}
+
+/**
+ * Auto-reload to escape a `schema_outdated` block (a stale per-dict leader
+ * worker pinning an old bundle), or fall back to a manual-reload toast if we
+ * already tried recently (see `client-behind-recovery`).
+ */
+function recover_from_schema_outdated({ t }: { t: TranslateFunction }): void {
+  let stored: ReloadGuard | null = null
+  try {
+    const raw = sessionStorage.getItem(CLIENT_BEHIND_GUARD_KEY)
+    if (raw)
+      stored = JSON.parse(raw) as ReloadGuard
+  } catch { /* sessionStorage unavailable or malformed — treat as no prior reload */ }
+
+  const decision = decide_client_behind_recovery({ stored, now: Date.now() })
+  if (decision.action === 'reload') {
+    try { sessionStorage.setItem(CLIENT_BEHIND_GUARD_KEY, JSON.stringify(decision.next)) } catch { /* ignore */ }
+    location.reload()
+    return
+  }
+
+  toast(t('misc.app_update_needed'), { action: { label: t('misc.reload'), callback: () => location.reload() }, dismiss_label: t('misc.close') })
 }

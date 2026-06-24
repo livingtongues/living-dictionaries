@@ -6,6 +6,7 @@ import { browser, dev } from '$app/environment'
 import { get_admin_db } from '$lib/db/client/db'
 import { live_share } from '$lib/db/client/live-share.svelte'
 import { Sync } from '$lib/db/sync/engine.svelte.js'
+import { toast } from '$lib/svelte-pieces/toast.svelte'
 import { error } from '@sveltejs/kit'
 
 interface AdminLayoutGlobals {
@@ -13,7 +14,7 @@ interface AdminLayoutGlobals {
 }
 
 export const load: LayoutLoad = async ({ parent }) => {
-  const { auth_user } = await parent()
+  const { auth_user, t: translate } = await parent()
 
   // Source of truth = SSR-resolved user from the session cookie (set in root
   // `+layout.server.ts`). No session → render the admin shell's signed-out
@@ -43,6 +44,12 @@ export const load: LayoutLoad = async ({ parent }) => {
   live_db_ref = live_db
 
   if (!sync) {
+    // admin.db sync runs on THIS tab's main thread (per-tab, not a shared leader
+    // worker), so a single manual reload genuinely picks up the new bundle. We
+    // deliberately do NOT auto-reload (unlike the dict path): an admin may have
+    // un-committed in-progress edits, and a surprise reload would lose them.
+    // Surface a manual toast once and let them reload when ready.
+    let client_behind_toasted = false
     sync = new Sync({
       connection,
       user_id: auth_user.user.id,
@@ -53,7 +60,13 @@ export const load: LayoutLoad = async ({ parent }) => {
           live_db_ref.notify_table(table)
       },
       on_client_behind: () => {
-        console.warn('Sync blocked: client bundle is behind. Reload to update.')
+        if (client_behind_toasted)
+          return
+        client_behind_toasted = true
+        toast(translate('misc.app_update_needed'), {
+          action: { label: translate('misc.reload'), callback: () => location.reload() },
+          dismiss_label: translate('misc.close'),
+        })
       },
     })
     globals.__ld_admin_sync = sync
