@@ -11,7 +11,10 @@ get_shared_db()
 // in-process, backs up + gzips + PUTs each changed dict to the public R2
 // snapshots bucket (viewers read from there). Gated by R2_SNAPSHOT_BUILDER_ENABLED
 // so only the designated builder node runs it (no-op in dev / web nodes).
-if (env.R2_SNAPSHOT_BUILDER_ENABLED === 'true')
+// Also skipped on blue-green standby containers (IS_STANDBY=true) — only the
+// primary runs singleton background jobs. See vps-setup
+// .issues/blue-green-fleet-rollout.md.
+if (env.R2_SNAPSHOT_BUILDER_ENABLED === 'true' && env.IS_STANDBY !== 'true')
   start_r2_snapshot_builder()
 
 /** @type {import('@sveltejs/kit').Handle} */
