@@ -87,14 +87,84 @@ the live schema). `scripts/` is NOT a workspace member — install with
    flipping `R2_SNAPSHOT_BUILDER_ENABLED` off in local `site/.env`), and (b) replaces
    legacy WAL-header snapshots with clean rollback-mode ones (clients tolerate WAL via
    `normalize_snapshot_header`, but clean artifacts are smaller and don't lean on the client shim).
-4. **DNS swap:** point `livingdictionaries.app` from the old Vercel/Supabase app → the VPS
-   (Caddy already serves `new.livingdictionaries.app`; cutover repoints the apex/`www`).
+4. **DNS swap + domain flip:** point `livingdictionaries.app` from the old Vercel/Supabase app → the
+   VPS, and flip `living.conf` `DOMAIN=new.livingdictionaries.app` → `livingdictionaries.app` so Caddy
+   serves the apex. **This single flip has four easy-to-miss tails — see the "Cutover-day operational
+   gotchas" section below** (Caddy inode, GitHub deploy webhook, ORIGIN env, CF email worker). Do them
+   or prod deploys + inbound email + absolute URLs silently break.
 5. **Verify** production boots + renders globe / catalog / a dict's entries on the real dataset.
 6. **Post-cutover cleanup:**
    - Delete `scripts/supabase-cutover/` and the legacy `scripts/types/` Supabase types +
      `config-supabase.ts` once nothing reads Supabase.
    - Port the remaining Supabase-reading tools in `scripts/` (e.g. cloudflare cache, FLEx import)
      onto SQLite, or retire them.
+
+---
+
+## ⚠️ Cutover-day operational gotchas (learned from the house 2026-06-23 cutover)
+
+House did this exact `new.<domain>` → apex flip on 2026-06-23 (record:
+`~/code/house/.knowledge/migrations/2026-firebase-to-vps.md`). Several non-obvious tails bit us — LD's
+stack is byte-for-byte the same shape, so all of these apply. Walk them at the DNS-swap moment (§4).
+
+1. **GitHub deploy webhook still POSTs to the dead `new.` host → deploys silently stop.**
+   `vps-setup/setup/07-setup-webhook.sh` registered the GitHub Payload URL as `https://$DOMAIN/hooks/deploy`,
+   and `$DOMAIN` was `new.livingdictionaries.app` at setup. The moment Caddy flips to the apex, GitHub
+   keeps POSTing to `https://new.livingdictionaries.app/hooks/deploy` → 525, the listener never fires,
+   and `git push` no longer deploys (prod keeps running the old image; nothing alerts).
+   **Fix (Jacob, GitHub — the `j-dev-agent` App token lacks `admin:repo_hook`, so an agent CANNOT do it):**
+   repo `livingtongues/living-dictionaries` → Settings → Webhooks → edit the deploy webhook → Payload
+   URL → `https://livingdictionaries.app/hooks/deploy` → Save → Redeliver the latest push to confirm.
+
+2. **CF email worker (`ld-email`) relays inbound mail to the dead `new.` host → inbound email silently dropped.**
+   `cf-worker/src/index.ts` POSTs every parsed email to `${env.LD_VPS_URL}/api/messages/email-inbound`,
+   and `cf-worker/wrangler.jsonc` has `LD_VPS_URL = "https://new.livingdictionaries.app"`. `vars` are
+   baked at deploy time, so the live worker keeps the dead URL until redeployed.
+   **Fix:** set `LD_VPS_URL` → `https://livingdictionaries.app` in `wrangler.jsonc`, then **redeploy**
+   `cd cf-worker && pnpm install && pnpm deploy` (needs CF Workers creds; the mustang agent box has no
+   wrangler auth → Jacob, or a Workers-scoped token). Verify by emailing e.g. `support@livingdictionaries.app`
+   and confirming a new `message_threads` row lands. (This is the same bug house shipped — found in the
+   house post-cutover audit; check `cf-worker` for any *other* hardcoded `new.` URLs/comments too.)
+
+3. **`ORIGIN` env still on the dead `new.` host.** adapter-node uses `ORIGIN` for absolute-URL
+   generation (email links, OAuth callbacks) + SvelteKit's CSRF origin check. The running house
+   container had `ORIGIN=https://new.hvsb.app`. Flip it in the canonical
+   `~/code/vps-setup/secrets-decrypted/sveltekit-living.env` → `ORIGIN=https://livingdictionaries.app`
+   → re-encrypt → `bin/sync living --env-only` → **recreate the container** (`docker compose up -d` —
+   env_file changes only apply on recreate, not reload). Verify `docker exec sveltekit printenv ORIGIN`.
+
+4. **Caddy single-file bind-mount inode gotcha — `reload` loads the STALE config.** `bin/sync living`
+   rsyncs the regenerated Caddyfile, but the container mounts it as a single-file bind
+   (`:/etc/caddy/Caddyfile:ro`); rsync swaps the host file's **inode**, so the container keeps serving
+   the OLD inode and `caddy reload` validates + re-loads the stale `new.`-only config (very confusing:
+   apex TLS "internal error" while `new.` still serves). **Fix:** `ssh living "cd /opt/hosting/caddy &&
+   docker compose up -d --force-recreate caddy"` — NOT `caddy reload`. (Also in
+   `~/code/vps-setup/.knowledge/operations/deploy-fixes.md`.)
+
+5. **`www` → apex redirect needs a CF *Dynamic Redirect* rule — a SEPARATE token permission from Config Rules.**
+   Add a redirect rule `www.livingdictionaries.app/* → https://livingdictionaries.app/$1` (301,
+   preserve path+query) and flip `www` DNS → CNAME apex, proxied. The CF API token needs
+   **`Zone · Dynamic Redirect · Edit`** — the "Config Rules covers the `http_request_dynamic_redirect`
+   phase" hint is **WRONG** (they're distinct permission groups; house burned time on this). Dashboard
+   (Rules → Redirect Rules → the "Redirect from WWW to root" template) is the quick path if the token
+   lacks it.
+
+6. **Optional, but house did it: pre-arm a CF cache rule** (Cache Everything on `/` when no `session=`
+   cookie, host ∈ {apex, www}) before the flip so orange-cloud auto-activates it, + a deploy-time
+   `CLOUDFLARE_PURGE_URL` (apex, not `new.`). Verify `cf-cache-status: MISS→HIT` for anon + `DYNAMIC`
+   bypass for logged-in after the flip.
+
+### Seeding/data safety at the swap (house's atomic-swap discipline)
+- **Don't blind-overwrite live VPS data.** House built the migrated DB on a *pulled copy* and did a
+  pre-swap re-pull/diff to catch anything that changed during the work window (only ephemeral
+  `client_logs` had — so the whole-file swap was safe). LD's §3 rsync-seed is a fresh overwrite: do it
+  inside a freeze window, and if the VPS already has live `message_threads`/`messages`/admin edits
+  (e.g. from the CF email worker or contact form since migration started), **diff before overwriting**
+  so you don't clobber real inbound.
+- **Gitignore the migration artifacts (PII).** House nearly committed a 66 MB migrated `shared.db` +
+  Stripe audit logs with customer emails because the working dirs weren't ignored. LD's `/.data/` is
+  ignored ✅ — but before any `git add -A` during cutover, confirm no Supabase dump / migrated DB / CSV
+  with user PII landed *outside* `/.data/` (e.g. under `scripts/`).
 
 ---
 

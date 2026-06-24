@@ -71,6 +71,11 @@ staging is live; remaining production cutover: `.issues/cutover.md`.
   row, unscoped cross-sector `DELETE FROM deletes`). All three are prevented by LD's architecture
   (loading-gate + cold-open `sync_now`; dict.db has no `users` FK; single-sector engine) — records the
   invariants to keep true so they stay prevented.
+- [client-behind-recovery.md](./client-behind-recovery.md) — why a `schema_outdated`/`CLIENT_BEHIND`
+  block survives a single tab's reload on **dict.db** (the per-dict leader worker pins the old bundle)
+  but not on **admin.db** (per-tab engine); the coordinated guarded auto-reload fix for dict +
+  deliberate manual-toast (no auto-reload) for admin to protect un-saved edits. `client-behind-recovery.ts`
+  is byte-identical to house's.
 - [unocss-svelte-scoped-to-universal.md](./unocss-svelte-scoped-to-universal.md) — M2a plugin
   swap: the svelte-scoped defaults the universal plugin drops (directives transformer +
   Svelte `class:` extraction) and how to restore them; `@unocss/reset` becoming a direct dep AND
