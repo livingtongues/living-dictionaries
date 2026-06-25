@@ -5,7 +5,7 @@
  * about independently:
  *   1. `is_junction_table` / `is_system_table` — heuristics for filter toggles.
  *   2. `build_graph` — turn a `SchemaInfo` + filter options into the
- *      `{ nodes, edges }` shape xyflow consumes, with dagre auto-layout applied.
+ *      `{ nodes, edges }` the canvas renders, with dagre auto-layout applied.
  *
  * Saved drag positions (passed in via `saved_positions`) win over dagre's
  * computed layout — so a user's tidied arrangement survives reloads.
@@ -386,7 +386,7 @@ export function build_graph(schema: SchemaInfo, options: BuildGraphOptions): Bui
   const nodes: GraphNode[] = visible_tables.map((table) => {
     const dagre_node = dagre_graph.node(table.name)
     const size = estimate_size(table)
-    // dagre returns the center of the box; xyflow wants the top-left.
+    // dagre returns the center of the box; the canvas positions by top-left.
     const computed_x = dagre_node.x - size.width / 2
     const computed_y = dagre_node.y - size.height / 2
     const saved = saved_positions[table.name]

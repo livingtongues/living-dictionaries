@@ -1,26 +1,24 @@
 <script lang="ts">
   /**
-   * Custom xyflow node that renders a SQLite table as a compact card.
+   * Renders a SQLite table as a compact card. Positioned + made interactive by
+   * the parent `schema-graph.svelte` canvas (we no longer depend on xyflow).
    */
-  import type { NodeProps } from '@xyflow/svelte'
+  import type { TableInfo } from '$lib/db/introspect'
   import IconMdiFingerprint from '~icons/mdi/fingerprint'
   import IconMdiKey from '~icons/mdi/key'
   import IconMdiLinkVariant from '~icons/mdi/link-variant'
   import IconMdiTable from '~icons/mdi/table'
-  import { Handle, Position } from '@xyflow/svelte'
-  import type { GraphNodeData } from './build-graph.js'
+  import type { TableKind } from './build-graph.js'
 
-  type Props = NodeProps & { data: GraphNodeData, selected?: boolean }
-  const { data, selected = false }: Props = $props()
-
-  const table = $derived(data.table)
-  const kind = $derived(data.kind)
+  interface Props {
+    table: TableInfo
+    kind: TableKind
+    selected?: boolean
+  }
+  const { table, kind, selected = false }: Props = $props()
 </script>
 
-<div class="table-node" class:selected style="width: 260px;">
-  <Handle type="target" position={Position.Right} class="hidden-handle" />
-  <Handle type="source" position={Position.Left} class="hidden-handle" />
-
+<div class="table-node" class:selected data-node-name={table.name}>
   <header class="node-header">
     <IconMdiTable style="color: var(--primary); font-size: 0.875rem; flex-shrink: 0" />
     <span class="node-name" title={table.name}>{table.name}</span>
@@ -57,6 +55,7 @@
 
 <style>
   .table-node {
+    width: 100%;
     background: var(--surface);
     border: 1px solid var(--border-color);
     border-radius: 0.375rem;
@@ -68,10 +67,6 @@
   .table-node.selected {
     border-color: var(--primary);
     box-shadow: 0 0 0 2px var(--primary);
-  }
-  :global(.hidden-handle) {
-    opacity: 0 !important;
-    pointer-events: none !important;
   }
   .node-header {
     display: flex;

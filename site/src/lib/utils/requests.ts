@@ -15,6 +15,9 @@ type Return<ExpectedResponse> = {
 export async function post_request<T extends Record<string, any>, ExpectedResponse extends Record<string, any>>(route: string, data: T, options?: {
   headers?: RequestInit['headers']
   signal?: AbortSignal
+  // Set false on background polls so a transient network failure during a
+  // redeploy doesn't spam the console (the poll retries on its next interval).
+  log_errors?: boolean
 }): Promise<Return<ExpectedResponse>> {
   try {
     const response = await fetch(route, {
@@ -25,7 +28,8 @@ export async function post_request<T extends Record<string, any>, ExpectedRespon
     })
     return handle_response<ExpectedResponse>(response)
   } catch (err) {
-    console.error(`[post_request] Network error for ${route}:`, err)
+    if (options?.log_errors !== false)
+      console.error(`[post_request] Network error for ${route}:`, err)
     const is_timeout = (err as Error).name === 'TimeoutError' || (err as Error).name === 'AbortError'
     const message = is_timeout
       ? 'Request timed out - please check your connection and try again'
@@ -39,6 +43,9 @@ export async function get_request<ExpectedResponse extends Record<string, any>>(
   // direct-handler + HTML-inlining optimization (no real HTTP round-trip on SSR,
   // no refetch on hydration). Defaults to the global `fetch`.
   fetch?: typeof fetch
+  // Set false on background polls so a transient network failure during a
+  // redeploy doesn't spam the console (the poll retries on its next interval).
+  log_errors?: boolean
 }): Promise<Return<ExpectedResponse>> {
   const fetcher = options?.fetch ?? fetch
   try {
@@ -47,7 +54,8 @@ export async function get_request<ExpectedResponse extends Record<string, any>>(
     })
     return handle_response<ExpectedResponse>(response)
   } catch (err) {
-    console.error(`[get_request] Network error for ${route}:`, err)
+    if (options?.log_errors !== false)
+      console.error(`[get_request] Network error for ${route}:`, err)
     return { data: null, error: { status: 0, message: `Network error: ${(err as Error).message}` } }
   }
 }

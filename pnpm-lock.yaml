@@ -92,9 +92,6 @@ importers:
       '@tiptap/starter-kit':
         specifier: ^3.26.0
         version: 3.26.0
-      '@xyflow/svelte':
-        specifier: ^1.5.2
-        version: 1.6.0(svelte@5.56.2(@typescript-eslint/types@8.60.1))
       better-sqlite3:
         specifier: ^12.8.0
         version: 12.10.0
@@ -1332,11 +1329,6 @@ packages:
     peerDependencies:
       eslint: ^9.0.0 || ^10.0.0
 
-  '@svelte-put/shortcut@4.1.0':
-    resolution: {integrity: sha512-wImNEIkbxAIWFqlfuhcbC+jRPDeRa/uJGIXHMEVVD+jqL9xCwWNnkGQJ6Qb2XVszuRLHlb8SGZDL3Io/h3vs8w==}
-    peerDependencies:
-      svelte: ^5.1.0
-
   '@sveltejs/acorn-typescript@1.0.10':
     resolution: {integrity: sha512-4WfKk68eTih+MiJD4fSbxN7E8kVBmTMPWHUPYjvl2N0rMs53YLTT8/YjKU5Dtnz5LqDjl7LEw4U7lXR2W3J5WA==}
     peerDependencies:
@@ -2389,14 +2381,6 @@ packages:
 
   '@vitest/utils@4.1.8':
     resolution: {integrity: sha512-uOJamYALNhfJ6iolExyQM40yIQwDqYnkKtQ5VCiSe17E33H0aQ/u+1GlRuz4LZBk6Mm3sg90G9hEbmEt37C1Zg==}
-
-  '@xyflow/svelte@1.6.0':
-    resolution: {integrity: sha512-msCT95OqTThh7gWhdFJ03Qzhc0Q8QYfA8K03M4I+KTtHdvatoTuRo9ofkFHJDbMfS243y+fOs5TCvU9T1kEUUA==}
-    peerDependencies:
-      svelte: ^5.25.0
-
-  '@xyflow/system@0.0.77':
-    resolution: {integrity: sha512-qCDCMCQAAgUu8yHnhloHG9F5mwPX5E+Wl8McpYIOPSSXfzFJJoZcwOcsDiAjitVKIg2de1WmJbCHfpcvxprsgg==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -5642,10 +5626,6 @@ snapshots:
       estraverse: 5.3.0
       picomatch: 4.0.4
 
-  '@svelte-put/shortcut@4.1.0(svelte@5.56.2(@typescript-eslint/types@8.60.1))':
-    dependencies:
-      svelte: 5.56.2(@typescript-eslint/types@8.60.1)
-
   '@sveltejs/acorn-typescript@1.0.10(acorn@8.16.0)':
     dependencies:
       acorn: 8.16.0
@@ -7358,24 +7338,6 @@ snapshots:
       '@vitest/pretty-format': 4.1.8
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
-
-  '@xyflow/svelte@1.6.0(svelte@5.56.2(@typescript-eslint/types@8.60.1))':
-    dependencies:
-      '@svelte-put/shortcut': 4.1.0(svelte@5.56.2(@typescript-eslint/types@8.60.1))
-      '@xyflow/system': 0.0.77
-      svelte: 5.56.2(@typescript-eslint/types@8.60.1)
-
-  '@xyflow/system@0.0.77':
-    dependencies:
-      '@types/d3-drag': 3.0.7
-      '@types/d3-interpolate': 3.0.4
-      '@types/d3-selection': 3.0.11
-      '@types/d3-transition': 3.0.9
-      '@types/d3-zoom': 3.0.8
-      d3-drag: 3.0.0
-      d3-interpolate: 3.0.1
-      d3-selection: 3.0.0
-      d3-zoom: 3.0.0
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:

@@ -14,6 +14,9 @@ production cutover is `.issues/cutover.md`, and the durable cross-project conven
   `live_share` / `sqlite-query.sh` stack for querying the live browser DBs.
 - [domain/](./domain/index.md) — app-domain knowledge: related-entries model, media serving
   URLs (GCS + lh3 magic URLs), the dictionary import process.
+- [admin/](./admin/index.md) — the `/admin` super-admin area: the house feature port
+  (schema-graph canvas, server-authoritative team chat, ntfy dashboard, message triage) and
+  which files stay near-identical to `house`.
 
 ## Pointers to the reference repo
 The **target** architecture (SQLite shared.db + per-dict dict.db, wa-sqlite/better-sqlite3,

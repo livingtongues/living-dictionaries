@@ -8,7 +8,7 @@ function c(name: string, opts: Partial<Col> = {}): Col {
 
 /**
  * Living-Dictionaries-flavored mock schema for visual stories of the schema
- * viewer's two render paths (cards + graph). Mirrors the real dictionary-db
+ * viewer's graph. Mirrors the real dictionary-db
  * shape closely enough to exercise: FKs/edges, a junction table (`sense_photos`),
  * a unique column, a partial index, a system table (`migrations`), a view, and a
  * trigger.

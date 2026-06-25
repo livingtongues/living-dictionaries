@@ -48,5 +48,6 @@ Authoritative shapes: `site/src/lib/types/` (Drizzle-derived) and the schemas in
 `/` (Mapbox globe of dictionaries) · `/about` · `/tutorials` · `/dictionaries` · `/account` ·
 `/create-dictionary` · `/[dictionaryId]/*` (entries list, entry detail, settings, about,
 contributors, grammar, history, export, import, invite) · `/admin/*` (local-first super-admin:
-schema graph, users, dictionaries, messages, sync) · `/og` (share image) · `/terms` · `/setlocale`.
+dashboard + ntfy onboarding, messages incl. unmatched→match, users, team chat, dictionaries,
+analytics, schema graph, sync) · `/og` (share image) · `/terms` · `/setlocale`.
 
