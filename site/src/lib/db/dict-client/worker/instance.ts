@@ -70,6 +70,10 @@ export interface InstanceOptions {
 export interface WorkerInitMessage {
   channel_name: string
   instance_options: InstanceOptions
+  /** Boot-watchdog cap; the host times the factory out past this (default `BOOT_TIMEOUT_MS`). */
+  boot_timeout_ms?: number
+  /** Synthetic boot fault for the wedge harness (`boot-recovery.ts`); unset in prod. */
+  boot_fault?: 'hang' | 'throw'
 }
 
 /**

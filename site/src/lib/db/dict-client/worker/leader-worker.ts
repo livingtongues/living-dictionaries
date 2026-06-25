@@ -12,6 +12,7 @@
 import type { DbInstance, WorkerInitMessage } from './instance'
 import { create_transport_server } from './transport'
 import type { TransportServer } from './transport'
+import { apply_boot_fault, BOOT_TIMEOUT_MS, with_boot_timeout } from './boot-recovery'
 
 let booted = false
 
@@ -40,11 +41,24 @@ async function boot(init: WorkerInitMessage): Promise<void> {
   try {
     const { create_dict_instance } = await import('../dict-instance')
     const factory = create_dict_instance(init.instance_options)
-    instance = await factory({ emit_event: event => server.broadcast(event) })
+    // Watchdog: a factory that HANGS (never resolves) — a slow/locked OPFS handle
+    // — would otherwise wedge the origin forever (never `ready`, never
+    // `boot_failed`). Time the open out so the catch posts `boot_failed` and the
+    // spawning tab can retry / resign. The synthetic `boot_fault` (no-op in prod)
+    // runs INSIDE the timed region so a `hang` exercises the watchdog like a real
+    // stuck factory.
+    const open = apply_boot_fault(init.boot_fault).then(() => factory({ emit_event: event => server.broadcast(event) }))
+    instance = await with_boot_timeout(open, init.boot_timeout_ms ?? BOOT_TIMEOUT_MS)
     server.announce_ready()
   } catch (err) {
     console.error('[leader-worker] boot failed:', err)
-    // Leave the server up so `get_meta`/errors are still answerable; clients will
-    // surface the failure via timed-out / errored requests.
+    // We never announced `ready`, so no tab can see this leader — yet the tab that
+    // spawned us still holds the `navigator.locks` lock for its lifetime. If we
+    // just sat here, that lock is never freed, so NO other tab can be promoted to
+    // retry, and every tab's RPCs time out forever as "no leader responded" (a
+    // permanent origin-wide wedge). Tear down our channel and tell the spawning
+    // tab to retry/resign so a fresh leader can boot (or callers fall back).
+    server.destroy()
+    self.postMessage({ type: 'boot_failed', message: (err as Error)?.message ?? 'unknown' })
   }
 }
