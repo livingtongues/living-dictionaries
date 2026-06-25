@@ -1,5 +1,5 @@
 ---
-every: 0 21 * * *
+every: 30 21 * * *
 runs_on: mustang
 ---
 
