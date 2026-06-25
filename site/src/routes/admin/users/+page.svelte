@@ -247,7 +247,10 @@
 
   async function toggle_unsubscribed(user_id: string) {
     if (!db) return
-    const live = db.users.id(user_id)
+    // The list renders from `users_query` (a full-table query store), so flip
+    // the row that's actually on screen — the per-id `db.users.id()` store
+    // isn't subscribed on this page, so its rows would be empty here.
+    const live = users_query?.rows.find(row => row.id === user_id)
     if (!live) return
     const next = !live.unsubscribed_from_emails
     const previous = live.unsubscribed_from_emails

@@ -118,6 +118,14 @@ class LiveDbImpl {
       id(key: RowKey<T>): RowType<T> | undefined {
         if (key === undefined || key === null)
           return undefined
+        // Imperative read outside any reactive context (e.g. an event handler):
+        // read the store's current rows directly. A `$derived` here would be an
+        // *unowned* derived, and the `store.rows` getter — seeing
+        // `$effect.tracking()` is true mid-computation — would try to create its
+        // subscription `$effect` inside it → `effect_in_unowned_derived`. (The
+        // store must already be subscribed elsewhere for #rows to be populated.)
+        if (!$effect.tracking())
+          return self.#get_row_by_key(table_name, key).rows[0] as RowType<T> | undefined
         // svelte-ignore state_referenced_locally
         const rows = $derived(self.#get_row_by_key(table_name, key).rows)
         return rows[0] as RowType<T> | undefined

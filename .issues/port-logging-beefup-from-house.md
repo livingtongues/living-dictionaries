@@ -18,7 +18,17 @@ leader-worker) is **identical to house**, so this is a near-1:1 port (the easies
   `geo/distance.ts`; `insert-client-log.ts` (geo+source); `/api/log/+server.ts` (geo + source +
   trusted-server); `log-server-event.ts`. Committed locally (NOT pushed — holding to avoid premature
   new.livingdictionaries.app deploy until the port is further along).
-- ⏳ Remaining: E (retention/rollup), D (capability), C (remote-log depth), B (perf), F (dashboard + charts port).
+- ✅ **Slice 2 — retention + forever rollup (E) DONE & verified** (5 tests, check 0 errors):
+  migration `20260625b_log_daily_metrics.sql`; `shared.ts` `log_daily_metrics` def; `log-archive-db.ts`
+  (geo+source cols); `log-retention-cron.ts` (rollup_day w/ geo:<area>, archive, prune; living route
+  buckets in `normalize_route`; self-gates IS_STANDBY + LOG_RETENTION_ENABLED); wired in `hooks.server.ts`.
+  ⚠️ Needs `LOG_RETENTION_ENABLED=true` in living prod env (primary node) to actually run.
+- ⏳ Remaining: D (capability), C (remote-log depth), B (perf), F (dashboard + charts port).
+
+## DEFERRED — nightly log-review horse-cron (Poly + Living)
+Jacob: another agent is moving horse cron jobs into a `.cron/` folder per repo. AFTER that settles,
+set up a **nightly log-review run** (the `log-and-fix` review) in BOTH Poly (tutor) and Living so an
+agent scans `client_logs` each night. Do this LAST. (House already has its log-review flow.)
 
 ## What living already has (base error pipeline)
 `remote-log.ts` (417 lines, older), `insert-client-log.ts` (has rate-limit; NO `source`/`geo`),

@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/private'
+import { start_log_retention_cron_once } from '$lib/db/server/log-retention-cron'
 import { start_r2_snapshot_builder } from '$lib/db/server/r2-snapshot-builder'
 import { get_shared_db } from '$lib/db/server/shared-db'
 
@@ -16,6 +17,10 @@ get_shared_db()
 // .issues/blue-green-fleet-rollout.md.
 if (env.R2_SNAPSHOT_BUILDER_ENABLED === 'true' && env.IS_STANDBY !== 'true')
   start_r2_snapshot_builder()
+
+// Two-tier client_logs retention + the forever log_daily_metrics rollup. Self-gates
+// on IS_STANDBY + LOG_RETENTION_ENABLED so only the primary cron node runs it.
+start_log_retention_cron_once()
 
 /** @type {import('@sveltejs/kit').Handle} */
 export function handle({ event, resolve }) {
