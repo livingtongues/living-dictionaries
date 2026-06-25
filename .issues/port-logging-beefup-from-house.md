@@ -21,8 +21,8 @@ leader-worker) is **identical to house**, so this is a near-1:1 port (the easies
 - ✅ **Slice 2 — retention + forever rollup (E) DONE & verified** (5 tests, check 0 errors):
   migration `20260625b_log_daily_metrics.sql`; `shared.ts` `log_daily_metrics` def; `log-archive-db.ts`
   (geo+source cols); `log-retention-cron.ts` (rollup_day w/ geo:<area>, archive, prune; living route
-  buckets in `normalize_route`; self-gates IS_STANDBY + LOG_RETENTION_ENABLED); wired in `hooks.server.ts`.
-  ⚠️ Needs `LOG_RETENTION_ENABLED=true` in living prod env (primary node) to actually run.
+  buckets in `normalize_route`; gated IS_STANDBY + dev/build only — no enable flag, always runs on the
+  active node); wired in `hooks.server.ts`. (2026-06-25: `LOG_RETENTION_ENABLED` removed fleet-wide.)
 - ✅ **Slice 3+4 — client telemetry depth + capability + perf (C+D+B) DONE & verified** (37 telemetry
   tests, check 0 errors): `db-capabilities.ts` (dict-client/worker, copy-paste from house); `parse-user-agent.ts`;
   `log-events.ts` (living vocab); `remote-log.ts` replaced with house's rich version (session_id,
@@ -37,8 +37,8 @@ leader-worker) is **identical to house**, so this is a near-1:1 port (the easies
   convention (admin parent is a universal `+layout.ts`, so NO `+page.server.ts` — `/api/admin/analytics`
   GET gated by `is_admin`, `_call.ts`, universal `+page.ts` load). `/admin/analytics` route + stories.
 - 🎉 **LIVING PORT COMPLETE (A–G).** Remaining: push to `svelte-5-migration` (deploy new.*), then verify
-  geo flows on new.livingdictionaries.app. Then repeat for tutor. ⚠️ `LOG_RETENTION_ENABLED=true` env
-  needed on living's primary node for the rollup cron.
+  geo flows on new.livingdictionaries.app. Then repeat for tutor. (Retention cron now runs with no env
+  flag — only IS_STANDBY/dev-gated.)
 
 ## DEFERRED — nightly log-review horse-cron (Poly + Living)
 Jacob: another agent is moving horse cron jobs into a `.cron/` folder per repo. AFTER that settles,
