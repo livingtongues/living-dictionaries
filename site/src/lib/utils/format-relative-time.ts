@@ -21,6 +21,17 @@
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+/**
+ * Compact date label for chart tooltips/axes from a 'YYYY-MM-DD' or 'YYYY-MM'
+ * string: "Mar 7, 2020" (full) or "Mar 2020" (month-only). Parses the string
+ * parts directly (no timezone shift), unlike the Date-based helpers above.
+ */
+export function format_point_date(iso: string): string {
+  const [year, month, day] = iso.split('-').map(Number)
+  const name = MONTHS[(month || 1) - 1]
+  return day ? `${name} ${day}, ${year}` : `${name} ${year}`
+}
+
 export function format_relative_time(iso: string | Date | null | undefined): string {
   if (!iso)
     return ''

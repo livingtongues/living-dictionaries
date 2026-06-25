@@ -98,6 +98,15 @@ importers:
       better-sqlite3:
         specifier: ^12.8.0
         version: 12.10.0
+      d3-array:
+        specifier: ^3.2.4
+        version: 3.2.4
+      d3-scale:
+        specifier: ^4.0.2
+        version: 4.0.2
+      d3-shape:
+        specifier: ^3.2.0
+        version: 3.2.0
       dagre:
         specifier: ^0.8.5
         version: 0.8.5
@@ -168,12 +177,21 @@ importers:
       '@types/d3':
         specifier: ^7.4.3
         version: 7.4.3
+      '@types/d3-array':
+        specifier: ^3.2.2
+        version: 3.2.2
       '@types/d3-dsv':
         specifier: ^3.0.7
         version: 3.0.7
       '@types/d3-geo':
         specifier: ^3.1.0
         version: 3.1.0
+      '@types/d3-scale':
+        specifier: ^4.0.9
+        version: 4.0.9
+      '@types/d3-shape':
+        specifier: ^3.1.8
+        version: 3.1.8
       '@types/dagre':
         specifier: ^0.7.54
         version: 0.7.54
@@ -2620,8 +2638,8 @@ packages:
   d3-array@1.2.4:
     resolution: {integrity: sha512-KHW6M86R+FUPYGb3R5XiYjXPq7VzwxZ22buHhAEVG5ztoEcZZMLov530mmccaqA1GghZArjQV46fuc8kUqhhHw==}
 
-  d3-array@3.2.0:
-    resolution: {integrity: sha512-3yXFQo0oG3QCxbF06rMPFyGRMGJNS7NvsV1+2joOjbBE+9xvWQ8+GcMJAjRCzw06zQ3/arXeJgbPYcjUCuC+3g==}
+  d3-array@3.2.4:
+    resolution: {integrity: sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==}
     engines: {node: '>=12'}
 
   d3-axis@3.0.0:
@@ -7582,7 +7600,7 @@ snapshots:
 
   d3-array@1.2.4: {}
 
-  d3-array@3.2.0:
+  d3-array@3.2.4:
     dependencies:
       internmap: 2.0.3
 
@@ -7604,7 +7622,7 @@ snapshots:
 
   d3-contour@4.0.2:
     dependencies:
-      d3-array: 3.2.0
+      d3-array: 3.2.4
 
   d3-delaunay@6.0.4:
     dependencies:
@@ -7643,7 +7661,7 @@ snapshots:
 
   d3-geo@3.1.1:
     dependencies:
-      d3-array: 3.2.0
+      d3-array: 3.2.4
 
   d3-hierarchy@3.1.2: {}
 
@@ -7666,7 +7684,7 @@ snapshots:
 
   d3-scale@4.0.2:
     dependencies:
-      d3-array: 3.2.0
+      d3-array: 3.2.4
       d3-format: 3.1.2
       d3-interpolate: 3.0.1
       d3-time: 3.1.0
@@ -7684,7 +7702,7 @@ snapshots:
 
   d3-time@3.1.0:
     dependencies:
-      d3-array: 3.2.0
+      d3-array: 3.2.4
 
   d3-timer@3.0.1: {}
 
@@ -7709,7 +7727,7 @@ snapshots:
 
   d3@7.9.0:
     dependencies:
-      d3-array: 3.2.0
+      d3-array: 3.2.4
       d3-axis: 3.0.0
       d3-brush: 3.0.0
       d3-chord: 3.0.1

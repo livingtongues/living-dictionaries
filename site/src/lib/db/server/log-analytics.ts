@@ -1,0 +1,367 @@
+import type Database from 'better-sqlite3'
+import { is_below_db_worker_capability, is_bot_user_agent, parse_user_agent } from '$lib/debug/parse-user-agent'
+import { distance_bucket, DISTANCE_BUCKETS, distance_to_origin_km } from '$lib/geo/distance'
+import { geo_key } from '$lib/server/geo-from-request'
+import { normalize_route } from './log-retention-cron'
+import { get_shared_db } from './shared-db'
+
+/**
+ * Live, server-side analytics for `/admin/analytics`. Reads `client_logs`
+ * (hot window) AND the forever `log_daily_metrics` rollup, merging them PER DAY
+ * with live taking precedence — so a day still in hot storage is always fresh,
+ * an archived day falls back to its rollup, and dev (where the cron never runs,
+ * so nothing is archived) shows everything live. NOT synced local-first; this is
+ * operator data queried from the server like the rest of the admin DB ops.
+ */
+
+const ERROR_LEVELS_SQL = `('error','unhandled_rejection','crash')`
+/** Infra/telemetry plumbing excluded from the "top events" list so real analytics events surface. */
+const INFRA_EVENTS = new Set(['heartbeat', 'navigation', 'perf', 'session_start', 'visibility_visible', 'visibility_hidden', 'uptime_probe'])
+const TOP_LIMIT = 12
+const RECENT_ERRORS_LIMIT = 20
+
+/** Timing metrics surfaced on the performance panel, in display order. */
+const PERF_METRICS = ['page_load', 'search'] as const
+
+export interface DailyPoint { day: string, sessions: number, users: number, errors: number, logs: number }
+export interface PerfSummary { name: string, count: number, p50: number | null, p90: number | null, p95: number | null, max: number | null }
+export interface PerfDailyPoint { day: string, metrics: Record<string, { p50: number, p95: number, count: number }> }
+/** Per-bucket TTFB (page_load `responseStart`) distribution. */
+export interface GeoLatency { label: string, count: number, p50: number | null, p95: number | null }
+export interface GeoAnalytics {
+  /** Sessions with a known location (hot + cold merged). */
+  located_sessions: number
+  /** Top areas (`US-CA` / `US`) by sessions — forever-rollup-backed for cold days. */
+  areas: { key: string, country: string, sessions: number }[]
+  /** Real-user TTFB split by country (hot window — page_load `responseStart`). */
+  ttfb_by_country: GeoLatency[]
+  /** Real-user TTFB split by distance to the Boston origin (hot window). */
+  ttfb_by_distance: GeoLatency[]
+}
+export interface LogAnalytics {
+  window_days: number
+  generated_at: string
+  daily: DailyPoint[]
+  totals: { sessions: number, errors: number, logs: number, unique_users: number }
+  top_routes: { route: string, count: number }[]
+  top_events: { event: string, count: number }[]
+  by_source: { source: string, logs: number, errors: number }[]
+  recent_errors: { id: string, received_at: string, level: string, message: string, url: string | null, user_id: string | null, source: string | null }[]
+  /** Per-session browser breakdown (hot window only — UA isn't in the rollup). */
+  browsers: { label: string, os: string, sessions: number, below_capability: boolean }[]
+  /** Local-DB capability: how many (human) sessions can't run the leader-worker DB. */
+  capability: { total_sessions: number, below_capability_sessions: number, bot_sessions: number, db_tiers: { tier: string, sessions: number }[] }
+  /** Client `perf` timings (hot window only — percentiles aren't in the rollup). */
+  performance: { summary: PerfSummary[], daily: PerfDailyPoint[] }
+  /** Approximate geography from CF edge headers — areas + geo-split TTFB. */
+  geo: GeoAnalytics
+}
+
+/** Nearest-rank percentile of an UNSORTED numeric array; null when empty. */
+function percentile(values: number[], pct: number): number | null {
+  if (!values.length)
+    return null
+  const sorted = [...values].sort((first, second) => first - second)
+  const rank = Math.ceil((pct / 100) * sorted.length)
+  return sorted[Math.min(Math.max(rank, 1), sorted.length) - 1]
+}
+
+function day_string(date: Date): string {
+  return date.toISOString().slice(0, 10)
+}
+
+function bump(map: Map<string, number>, key: string, by = 1): void {
+  map.set(key, (map.get(key) ?? 0) + by)
+}
+
+export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now = new Date() }: {
+  shared_db?: Database.Database
+  days?: number
+  now?: Date
+} = {}): LogAnalytics {
+  const window_start = new Date(now.getTime() - (days - 1) * 86_400_000)
+  const window_start_day = day_string(window_start)
+  const window_start_iso = `${window_start_day}T00:00:00.000Z`
+
+  // --- Live (hot) daily scalars, combined across sources. ---
+  const live_daily = shared_db.prepare(`
+    SELECT substr(received_at, 1, 10) day,
+           COUNT(*) logs,
+           SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL} THEN 1 ELSE 0 END) errors,
+           COUNT(DISTINCT user_id) users,
+           COUNT(DISTINCT json_extract(context, '$.session_id')) sessions
+    FROM client_logs WHERE received_at >= ?
+    GROUP BY day
+  `).all(window_start_iso) as DailyPoint[]
+  const live_by_day = new Map(live_daily.map(point => [point.day, point]))
+
+  // --- Rollup rows for the window (used only for days with NO live rows). ---
+  const rollup_rows = shared_db.prepare(`
+    SELECT day, metric, source, value FROM log_daily_metrics WHERE day >= ?
+  `).all(window_start_day) as { day: string, metric: string, source: string, value: number }[]
+  const rollup_by_day = new Map<string, DailyPoint>()
+  for (const row of rollup_rows) {
+    if (live_by_day.has(row.day))
+      continue // live wins for this day
+    let point = rollup_by_day.get(row.day)
+    if (!point) {
+      point = { day: row.day, sessions: 0, users: 0, errors: 0, logs: 0 }
+      rollup_by_day.set(row.day, point)
+    }
+    if (row.metric === 'sessions') point.sessions += row.value
+    else if (row.metric === 'users') point.users += row.value
+    else if (row.metric === 'errors') point.errors += row.value
+    else if (row.metric === 'logs') point.logs += row.value
+  }
+
+  // --- Merge into a zero-filled ascending daily series. ---
+  const daily: DailyPoint[] = []
+  for (let offset = days - 1; offset >= 0; offset--) {
+    const day = day_string(new Date(now.getTime() - offset * 86_400_000))
+    daily.push(live_by_day.get(day) ?? rollup_by_day.get(day) ?? { day, sessions: 0, users: 0, errors: 0, logs: 0 })
+  }
+
+  // --- Top events: live (hot) + rollup (cold days only), infra excluded. ---
+  const event_counts = new Map<string, number>()
+  for (const row of shared_db.prepare(`
+    SELECT message event, COUNT(*) count FROM client_logs
+    WHERE received_at >= ? AND level = 'info' GROUP BY message
+  `).all(window_start_iso) as { event: string, count: number }[]) {
+    if (!INFRA_EVENTS.has(row.event))
+      bump(event_counts, row.event, row.count)
+  }
+  // --- Top routes: live nav (normalized) + rollup nav (cold). ---
+  const route_counts = new Map<string, number>()
+  for (const row of shared_db.prepare(`
+    SELECT json_extract(context, '$.to') to_path, COUNT(*) count FROM client_logs
+    WHERE received_at >= ? AND message = 'navigation' GROUP BY to_path
+  `).all(window_start_iso) as { to_path: string | null, count: number }[]) {
+    bump(route_counts, normalize_route(row.to_path), row.count)
+  }
+  // --- Geo areas: per-area (`US-CA` / `US`) distinct sessions, hot (session_rows
+  // below) + cold (rollup `geo:` metrics). Counts ALL sessions (incl. bots) to
+  // stay consistent with the forever rollup + the global sessions metric. ---
+  const area_counts = new Map<string, { country: string, sessions: number }>()
+  // --- Source split: live + rollup (cold). ---
+  const source_logs = new Map<string, number>()
+  const source_errors = new Map<string, number>()
+  for (const row of shared_db.prepare(`
+    SELECT coalesce(source, 'client') source, COUNT(*) logs,
+           SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL} THEN 1 ELSE 0 END) errors
+    FROM client_logs WHERE received_at >= ? GROUP BY source
+  `).all(window_start_iso) as { source: string, logs: number, errors: number }[]) {
+    bump(source_logs, row.source, row.logs)
+    bump(source_errors, row.source, row.errors)
+  }
+
+  for (const row of rollup_rows) {
+    if (live_by_day.has(row.day))
+      continue // cold days only
+    if (row.metric.startsWith('event:')) {
+      const event = row.metric.slice('event:'.length)
+      if (!INFRA_EVENTS.has(event))
+        bump(event_counts, event, row.value)
+    } else if (row.metric.startsWith('nav:')) {
+      bump(route_counts, row.metric.slice('nav:'.length), row.value)
+    } else if (row.metric.startsWith('geo:')) {
+      const key = row.metric.slice('geo:'.length)
+      const area = area_counts.get(key) ?? { country: key.split('-')[0], sessions: 0 }
+      area.sessions += row.value
+      area_counts.set(key, area)
+    } else if (row.metric === 'logs') {
+      bump(source_logs, row.source, row.value)
+    } else if (row.metric === 'errors') {
+      bump(source_errors, row.source, row.value)
+    }
+  }
+
+  const to_sorted = (map: Map<string, number>, key: 'route' | 'event') =>
+    [...map.entries()]
+      .map(([name, count]) => ({ [key]: name, count }) as { route?: string, event?: string, count: number })
+      .sort((a, b) => b.count - a.count)
+      .slice(0, TOP_LIMIT)
+
+  const by_source_keys = new Set([...source_logs.keys(), ...source_errors.keys()])
+  const by_source = [...by_source_keys].map(source => ({
+    source,
+    logs: source_logs.get(source) ?? 0,
+    errors: source_errors.get(source) ?? 0,
+  })).sort((a, b) => b.logs - a.logs)
+
+  const recent_errors = shared_db.prepare(`
+    SELECT id, received_at, level, message, url, user_id, source FROM client_logs
+    WHERE level IN ${ERROR_LEVELS_SQL} ORDER BY received_at DESC LIMIT ${RECENT_ERRORS_LIMIT}
+  `).all() as LogAnalytics['recent_errors']
+
+  const unique_users = (shared_db.prepare(`
+    SELECT COUNT(DISTINCT user_id) count FROM client_logs WHERE received_at >= ? AND user_id IS NOT NULL
+  `).get(window_start_iso) as { count: number }).count
+
+  // --- Browser / capability breakdown, per session (hot window only — neither
+  // the raw user_agent nor the session_start db_tier is in the rollup). One row
+  // per session: the user_agent + the db_tier we now stamp on session_start. ---
+  const session_rows = shared_db.prepare(`
+    SELECT json_extract(context, '$.session_id') sid,
+           MAX(user_agent) user_agent,
+           MAX(json_extract(context, '$.db_tier')) db_tier,
+           MAX(country) country,
+           MAX(region) region
+    FROM client_logs
+    WHERE received_at >= ? AND json_extract(context, '$.session_id') IS NOT NULL
+    GROUP BY sid
+  `).all(window_start_iso) as { sid: string, user_agent: string | null, db_tier: string | null, country: string | null, region: string | null }[]
+
+  const browser_counts = new Map<string, { sessions: number, below: boolean, os: string }>()
+  const tier_counts = new Map<string, number>()
+  let below_capability_sessions = 0
+  let bot_sessions = 0
+  for (const row of session_rows) {
+    const area_key = geo_key({ country: row.country, region: row.region })
+    if (area_key && row.country) {
+      const area = area_counts.get(area_key) ?? { country: row.country, sessions: 0 }
+      area.sessions++
+      area_counts.set(area_key, area)
+    }
+    // Bots (Applebot/Googlebot/GPTBot/…) have no OPFS, never convert, and skew the
+    // human browser mix — count them but keep them OUT of the breakdown. An
+    // Applebot has_opfs:false row is exactly what sent a prior review chasing a
+    // phantom "old Safari user".
+    if (is_bot_user_agent(row.user_agent)) {
+      bot_sessions++
+      continue
+    }
+    const parsed = parse_user_agent(row.user_agent)
+    const below = is_below_db_worker_capability(parsed)
+    if (below)
+      below_capability_sessions++
+    const label = parsed.major !== null ? `${parsed.browser} ${parsed.major}` : parsed.browser
+    const entry = browser_counts.get(label) ?? { sessions: 0, below, os: parsed.os }
+    entry.sessions++
+    browser_counts.set(label, entry)
+    // Prefer the logged db_tier (new sessions); else infer from UA capability.
+    bump(tier_counts, row.db_tier ?? (below ? 'idb-main/floor (inferred)' : 'unknown (legacy)'))
+  }
+  const browsers = [...browser_counts.entries()]
+    .map(([label, value]) => ({ label, os: value.os, sessions: value.sessions, below_capability: value.below }))
+    .sort((a, b) => b.sessions - a.sessions)
+    .slice(0, TOP_LIMIT)
+  const db_tiers = [...tier_counts.entries()]
+    .map(([tier, sessions]) => ({ tier, sessions }))
+    .sort((a, b) => b.sessions - a.sessions)
+
+  // --- Performance: client `perf` timings, hot window only (the rollup keeps
+  // event counts, not duration distributions). `web_vital` rows carry `value`
+  // not `duration_ms`, so the NOT NULL filter drops them from the timing mix. ---
+  const perf_rows = shared_db.prepare(`
+    SELECT substr(received_at, 1, 10) day,
+           json_extract(context, '$.name') name,
+           json_extract(context, '$.duration_ms') duration_ms
+    FROM client_logs
+    WHERE received_at >= ? AND message = 'perf'
+      AND json_extract(context, '$.duration_ms') IS NOT NULL
+  `).all(window_start_iso) as { day: string, name: string | null, duration_ms: number }[]
+
+  const perf_all = new Map<string, number[]>()
+  const perf_by_day = new Map<string, Map<string, number[]>>()
+  for (const row of perf_rows) {
+    if (!row.name)
+      continue
+    if (!perf_all.has(row.name))
+      perf_all.set(row.name, [])
+    perf_all.get(row.name)?.push(row.duration_ms)
+    let day_map = perf_by_day.get(row.day)
+    if (!day_map) {
+      day_map = new Map()
+      perf_by_day.set(row.day, day_map)
+    }
+    if (!day_map.has(row.name))
+      day_map.set(row.name, [])
+    day_map.get(row.name)?.push(row.duration_ms)
+  }
+
+  // Stable display order: known metrics first, then any extras seen.
+  const perf_names = [...PERF_METRICS, ...[...perf_all.keys()].filter(name => !PERF_METRICS.includes(name as typeof PERF_METRICS[number]))]
+  const perf_summary: PerfSummary[] = perf_names.map((name) => {
+    const values = perf_all.get(name) ?? []
+    return { name, count: values.length, p50: percentile(values, 50), p90: percentile(values, 90), p95: percentile(values, 95), max: values.length ? Math.max(...values) : null }
+  })
+  const perf_daily: PerfDailyPoint[] = daily.map((point) => {
+    const day_map = perf_by_day.get(point.day)
+    const metrics: PerfDailyPoint['metrics'] = {}
+    if (day_map) {
+      for (const [name, values] of day_map) {
+        metrics[name] = { p50: percentile(values, 50) ?? 0, p95: percentile(values, 95) ?? 0, count: values.length }
+      }
+    }
+    return { day: point.day, metrics }
+  })
+
+  // --- Geo-split real-user TTFB (hot window). Uses the page_load perf row's
+  // `responseStart` (context.ttfb) — the distance-sensitive server round-trip —
+  // grouped by country and by distance to the Boston origin. ---
+  const ttfb_rows = shared_db.prepare(`
+    SELECT json_extract(context, '$.ttfb') ttfb, country, latitude, longitude
+    FROM client_logs
+    WHERE received_at >= ? AND message = 'perf'
+      AND json_extract(context, '$.name') = 'page_load'
+      AND json_extract(context, '$.ttfb') IS NOT NULL
+  `).all(window_start_iso) as { ttfb: number, country: string | null, latitude: number | null, longitude: number | null }[]
+
+  const ttfb_by_country_values = new Map<string, number[]>()
+  const ttfb_by_distance_values = new Map<string, number[]>()
+  for (const row of ttfb_rows) {
+    if (typeof row.ttfb !== 'number')
+      continue
+    if (row.country) {
+      if (!ttfb_by_country_values.has(row.country))
+        ttfb_by_country_values.set(row.country, [])
+      ttfb_by_country_values.get(row.country)?.push(row.ttfb)
+    }
+    const km = distance_to_origin_km({ latitude: row.latitude, longitude: row.longitude })
+    if (km !== null) {
+      if (!ttfb_by_distance_values.has(distance_bucket(km)))
+        ttfb_by_distance_values.set(distance_bucket(km), [])
+      ttfb_by_distance_values.get(distance_bucket(km))?.push(row.ttfb)
+    }
+  }
+
+  const ttfb_by_country: GeoLatency[] = [...ttfb_by_country_values.entries()]
+    .map(([label, values]) => ({ label, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95) }))
+    .sort((first, second) => second.count - first.count)
+    .slice(0, TOP_LIMIT)
+  // Distance buckets stay in ascending geographic order (not sorted by count) so
+  // the latency-rises-with-distance shape reads top-to-bottom.
+  const ttfb_by_distance: GeoLatency[] = DISTANCE_BUCKETS
+    .filter(bucket => ttfb_by_distance_values.has(bucket))
+    .map((bucket) => {
+      const values = ttfb_by_distance_values.get(bucket) ?? []
+      return { label: bucket, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95) }
+    })
+
+  const areas = [...area_counts.entries()]
+    .map(([key, value]) => ({ key, country: value.country, sessions: value.sessions }))
+    .sort((first, second) => second.sessions - first.sessions)
+    .slice(0, TOP_LIMIT)
+  const located_sessions = [...area_counts.values()].reduce((sum, area) => sum + area.sessions, 0)
+  const geo: GeoAnalytics = { located_sessions, areas, ttfb_by_country, ttfb_by_distance }
+
+  return {
+    window_days: days,
+    generated_at: now.toISOString(),
+    daily,
+    totals: {
+      sessions: daily.reduce((sum, point) => sum + point.sessions, 0),
+      errors: daily.reduce((sum, point) => sum + point.errors, 0),
+      logs: daily.reduce((sum, point) => sum + point.logs, 0),
+      unique_users,
+    },
+    top_routes: to_sorted(route_counts, 'route') as { route: string, count: number }[],
+    top_events: to_sorted(event_counts, 'event') as { event: string, count: number }[],
+    by_source,
+    recent_errors,
+    browsers,
+    capability: { total_sessions: session_rows.length - bot_sessions, below_capability_sessions, bot_sessions, db_tiers },
+    performance: { summary: perf_summary, daily: perf_daily },
+    geo,
+  }
+}

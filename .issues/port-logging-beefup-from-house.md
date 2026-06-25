@@ -30,7 +30,15 @@ leader-worker) is **identical to house**, so this is a near-1:1 port (the easies
   livingdictionaries.app build_target); `remote-log.test.ts`; `perf.ts` (nav timing + web-vitals);
   `web-vitals` + `happy-dom` deps; `$api` alias added to vitest.config; wired init_web_vitals +
   report_initial_load + afterNavigate→log_navigation in `+layout.svelte`.
-- ⏳ Remaining: F (dashboard: log-analytics + insights + /admin/analytics + port house `$lib/charts/*`).
+- ✅ **Slice 5 — analytics dashboard (F) DONE & verified** (analytics+insights tests, check 0 errors):
+  ported house `$lib/charts/{Bar,Combo,Line}.svelte` (+ d3-array/scale/shape deps); `log-analytics.ts`
+  (PERF_METRICS = page_load/search, geo areas + TTFB-by-distance); `insights.ts`; `format_number`/
+  `format_pct` (constants) + `format_point_date` (format-relative-time). Page uses living's API+_call
+  convention (admin parent is a universal `+layout.ts`, so NO `+page.server.ts` — `/api/admin/analytics`
+  GET gated by `is_admin`, `_call.ts`, universal `+page.ts` load). `/admin/analytics` route + stories.
+- 🎉 **LIVING PORT COMPLETE (A–G).** Remaining: push to `svelte-5-migration` (deploy new.*), then verify
+  geo flows on new.livingdictionaries.app. Then repeat for tutor. ⚠️ `LOG_RETENTION_ENABLED=true` env
+  needed on living's primary node for the rollup cron.
 
 ## DEFERRED — nightly log-review horse-cron (Poly + Living)
 Jacob: another agent is moving horse cron jobs into a `.cron/` folder per repo. AFTER that settles,

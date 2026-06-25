@@ -1,0 +1,156 @@
+import type { LogAnalytics } from '$lib/db/server/log-analytics'
+import type { PageStory, StoryMeta } from 'svelte-look'
+import type Component from './+page.svelte'
+
+export const shared_meta: StoryMeta = {
+  viewports: [{ width: 1000, height: 1500 }],
+  csr: true,
+}
+
+function build_daily(days: number): LogAnalytics['daily'] {
+  const end = new Date('2026-06-23T00:00:00.000Z')
+  const out: LogAnalytics['daily'] = []
+  for (let offset = days - 1; offset >= 0; offset--) {
+    const day = new Date(end.getTime() - offset * 86_400_000).toISOString().slice(0, 10)
+    // A rising trend with a couple of error spikes + a quiet stretch.
+    const base = Math.round(40 + (days - offset) * 6 + Math.sin(offset) * 25)
+    const logs = Math.max(0, base)
+    const errors = offset === 4 ? 14 : offset === 11 ? 6 : offset % 7 === 0 ? 2 : 0
+    out.push({
+      day,
+      logs,
+      errors,
+      sessions: Math.round(logs / 12),
+      users: Math.round(logs / 20),
+    })
+  }
+  return out
+}
+
+function build_perf(days: number): LogAnalytics['performance'] {
+  const end = new Date('2026-06-23T00:00:00.000Z')
+  const daily: LogAnalytics['performance']['daily'] = []
+  for (let offset = days - 1; offset >= 0; offset--) {
+    const day = new Date(end.getTime() - offset * 86_400_000).toISOString().slice(0, 10)
+    const wobble = Math.sin(offset / 2) * 250
+    daily.push({
+      day,
+      metrics: {
+        page_load: { p50: Math.round(1100 + wobble), p95: Math.round(4200 + wobble * 2), count: 40 + (offset % 9) },
+        viewer_boot: { p50: Math.round(1200 + wobble * 1.5), p95: Math.round(6400 + wobble * 3), count: 6 + (offset % 4) },
+      },
+    })
+  }
+  return {
+    summary: [
+      { name: 'page_load', count: 1240, p50: 1197, p90: 3344, p95: 4537, max: 14652 },
+      { name: 'viewer_boot', count: 188, p50: 1184, p90: 4688, p95: 6493, max: 7687 },
+      { name: 'search', count: 0, p50: null, p90: null, p95: null, max: null },
+    ],
+    daily,
+  }
+}
+
+const analytics: LogAnalytics = {
+  window_days: 30,
+  generated_at: '2026-06-23T13:04:00.000Z',
+  daily: build_daily(30),
+  performance: build_perf(30),
+  totals: { sessions: 188, errors: 24, logs: 2417, unique_users: 73 },
+  top_routes: [
+    { route: 'search', count: 642 },
+    { route: 'home', count: 511 },
+    { route: 'reader:chapter', count: 388 },
+    { route: 'reader:doc', count: 214 },
+    { route: 'reader:image', count: 142 },
+    { route: 'account', count: 96 },
+    { route: 'reader:video', count: 61 },
+    { route: 'dr-house', count: 33 },
+  ],
+  top_events: [
+    { event: 'search_performed', count: 421 },
+    { event: 'chapter_opened', count: 388 },
+    { event: 'media_opened', count: 417 },
+    { event: 'checkout_started', count: 12 },
+  ],
+  by_source: [
+    { source: 'client', logs: 2298, errors: 19 },
+    { source: 'server', logs: 119, errors: 5 },
+  ],
+  recent_errors: [
+    { id: 'e1', received_at: '2026-06-23T11:58:02.000Z', level: 'error', message: 'Cannot read properties of undefined (reading \'split\')', url: 'https://hvsb.app/search?media_prod[query]=jesus', user_id: 'O2ZnBNcz', source: 'client' },
+    // Same millisecond + same message as the next row: this duplicate pair is exactly what
+    // crashed the page when the each-block keyed on `received_at + message` instead of `id`.
+    { id: 'e2', received_at: '2026-06-23T10:41:15.000Z', level: 'error', message: 'stripe_webhook_reconcile_failed: invoice.paid', url: null, user_id: 'u-1820', source: 'server' },
+    { id: 'e3', received_at: '2026-06-23T10:41:15.000Z', level: 'error', message: 'stripe_webhook_reconcile_failed: invoice.paid', url: null, user_id: 'u-1820', source: 'server' },
+    { id: 'e4', received_at: '2026-06-23T09:12:44.000Z', level: 'unhandled_rejection', message: 'NetworkError when attempting to fetch resource', url: 'https://hvsb.app/WEB/GEN/1/doc/abc123', user_id: null, source: 'client' },
+    { id: 'e5', received_at: '2026-06-22T22:03:09.000Z', level: 'error', message: 'snapshot_cron_sweep_failed', url: null, user_id: null, source: 'server' },
+    { id: 'e6', received_at: '2026-06-22T18:55:31.000Z', level: 'crash', message: 'ResizeObserver loop completed with undelivered notifications', url: 'https://hvsb.app/account', user_id: 'u-77', source: 'client' },
+  ],
+  browsers: [
+    { label: 'Chrome 148', os: 'Linux', sessions: 83, below_capability: false },
+    { label: 'Safari 17', os: 'macOS', sessions: 64, below_capability: false },
+    { label: 'Chrome 149', os: 'Android', sessions: 27, below_capability: false },
+    { label: 'Safari 14', os: 'macOS', sessions: 3, below_capability: true },
+  ],
+  capability: {
+    total_sessions: 177,
+    below_capability_sessions: 3,
+    bot_sessions: 105,
+    db_tiers: [
+      { tier: 'opfs-worker', sessions: 171 },
+      { tier: 'idb-main/floor (inferred)', sessions: 3 },
+      { tier: 'unknown (legacy)', sessions: 3 },
+    ],
+  },
+  geo: {
+    located_sessions: 174,
+    areas: [
+      { key: 'US-CA', country: 'US', sessions: 41 },
+      { key: 'US-NY', country: 'US', sessions: 28 },
+      { key: 'US-TX', country: 'US', sessions: 19 },
+      { key: 'US-MA', country: 'US', sessions: 17 },
+      { key: 'GB-ENG', country: 'GB', sessions: 14 },
+      { key: 'US-FL', country: 'US', sessions: 11 },
+      { key: 'CA-ON', country: 'CA', sessions: 9 },
+      { key: 'AU-NSW', country: 'AU', sessions: 6 },
+    ],
+    // Latency rises with distance from the Boston origin.
+    ttfb_by_country: [
+      { label: 'US', count: 612, p50: 118, p95: 402 },
+      { label: 'GB', count: 88, p50: 173, p95: 511 },
+      { label: 'CA', count: 41, p50: 96, p95: 318 },
+      { label: 'AU', count: 22, p50: 287, p95: 690 },
+    ],
+    ttfb_by_distance: [
+      { label: '< 500 km', count: 196, p50: 71, p95: 214 },
+      { label: '500–2,000 km', count: 264, p50: 109, p95: 356 },
+      { label: '2,000–5,000 km', count: 188, p50: 158, p95: 489 },
+      { label: '5,000–10,000 km', count: 92, p50: 214, p95: 612 },
+      { label: '> 10,000 km', count: 35, p50: 301, p95: 742 },
+    ],
+  },
+}
+
+export const Default: PageStory<typeof Component> = {
+  props: { analytics } as never,
+}
+
+const empty_analytics: LogAnalytics = {
+  window_days: 30,
+  generated_at: '2026-06-23T13:04:00.000Z',
+  daily: build_daily(30).map(point => ({ ...point, logs: 0, errors: 0, sessions: 0, users: 0 })),
+  totals: { sessions: 0, errors: 0, logs: 0, unique_users: 0 },
+  top_routes: [],
+  top_events: [],
+  by_source: [],
+  recent_errors: [],
+  browsers: [],
+  capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, db_tiers: [] },
+  performance: { summary: [], daily: [] },
+  geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [] },
+}
+
+export const Empty: PageStory<typeof Component> = {
+  props: { analytics: empty_analytics } as never,
+}
