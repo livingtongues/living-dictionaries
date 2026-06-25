@@ -1,5 +1,20 @@
 export const DICTIONARIES_WITH_VARIANTS = ['babanki', 'torwali', 'ksingmul', 'tutelo-saponi', 'tseltal', 'namtrik-de-totoro', 'werikyana', 'woleaia', 'guwar', 'sugtstun-test', 'yaruro-colombiano', 'rusitene']
 
+/** Format a count with thousands separators: 1240 → "1,240". */
+export function format_number(value: number): string {
+  return value.toLocaleString('en-US')
+}
+
+/**
+ * Format a fraction as a percentage: 0.123 → "12.3%". `signed` prefixes a `+` on
+ * non-negative values (for growth deltas). `digits` controls decimal places.
+ */
+export function format_pct(fraction: number, { signed = false, digits = 1 }: { signed?: boolean, digits?: number } = {}): string {
+  const pct = fraction * 100
+  const sign = signed && pct >= 0 ? '+' : ''
+  return `${sign}${pct.toFixed(digits)}%`
+}
+
 // localStorage key prefix for the per-user browser admin wa-sqlite DB id (admin sync engine).
 export const ADMIN_DB_ID_FOR_USER_PREFIX = 'admin_db_id_for_user_'
 
