@@ -38,6 +38,9 @@ export interface DictConnection extends SqliteConnection {
   sync_now: () => Promise<void>
   /** OPFS-backed? (false = MemoryVFS fallback in the leader worker.) */
   readonly is_opfs_backed: boolean
+  /** True when a leader has announced itself (`client.meta() !== null`) — lets the
+   *  live-query retry split a wedged-leader timeout (no leader) from a slow query. */
+  has_leader: () => boolean
 }
 
 export function create_dict_worker_connection({ client, dict_id }: { client: DbClient, dict_id: string }): DictConnection {
@@ -45,6 +48,10 @@ export function create_dict_worker_connection({ client, dict_id }: { client: DbC
     dict_id,
     get is_opfs_backed(): boolean {
       return client.meta()?.persistent ?? false
+    },
+
+    has_leader(): boolean {
+      return client.meta() !== null
     },
 
     query<T>(sql: string, params?: unknown[]): Promise<T[]> {
