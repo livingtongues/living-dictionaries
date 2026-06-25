@@ -23,7 +23,14 @@ leader-worker) is **identical to house**, so this is a near-1:1 port (the easies
   (geo+source cols); `log-retention-cron.ts` (rollup_day w/ geo:<area>, archive, prune; living route
   buckets in `normalize_route`; self-gates IS_STANDBY + LOG_RETENTION_ENABLED); wired in `hooks.server.ts`.
   ⚠️ Needs `LOG_RETENTION_ENABLED=true` in living prod env (primary node) to actually run.
-- ⏳ Remaining: D (capability), C (remote-log depth), B (perf), F (dashboard + charts port).
+- ✅ **Slice 3+4 — client telemetry depth + capability + perf (C+D+B) DONE & verified** (37 telemetry
+  tests, check 0 errors): `db-capabilities.ts` (dict-client/worker, copy-paste from house); `parse-user-agent.ts`;
+  `log-events.ts` (living vocab); `remote-log.ts` replaced with house's rich version (session_id,
+  breadcrumbs+click, track/track_timing/track_web_vital, heartbeat, noise filter, db-caps in session_start,
+  livingdictionaries.app build_target); `remote-log.test.ts`; `perf.ts` (nav timing + web-vitals);
+  `web-vitals` + `happy-dom` deps; `$api` alias added to vitest.config; wired init_web_vitals +
+  report_initial_load + afterNavigate→log_navigation in `+layout.svelte`.
+- ⏳ Remaining: F (dashboard: log-analytics + insights + /admin/analytics + port house `$lib/charts/*`).
 
 ## DEFERRED — nightly log-review horse-cron (Poly + Living)
 Jacob: another agent is moving horse cron jobs into a `.cron/` folder per repo. AFTER that settles,

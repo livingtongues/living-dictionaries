@@ -11,9 +11,11 @@
   import Toasts from '$lib/svelte-pieces/Toasts.svelte'
   import ViewAsBanner from '$lib/components/shell/ViewAsBanner.svelte'
   import { onMount } from 'svelte'
+  import { afterNavigate, beforeNavigate } from '$app/navigation'
   import { navigating, page, updated } from '$app/state'
   import { browser } from '$app/environment'
-  import { init_remote_logging } from '$lib/debug/remote-log'
+  import { init_remote_logging, log_navigation } from '$lib/debug/remote-log'
+  import { init_web_vitals, report_initial_load_when_ready } from '$lib/debug/perf'
   import { toast } from '$lib/svelte-pieces/toast.svelte'
 
   interface Props {
@@ -24,6 +26,32 @@
 
   onMount(() => {
     init_remote_logging()
+    init_web_vitals()
+    report_initial_load_when_ready()
+  })
+
+  // Wall-clock start of a client-side navigation; afterNavigate reads it back to
+  // compute perceived nav duration. Reset after each measure so a cancelled nav
+  // can't leak a stale start into the next one.
+  let nav_started_at = 0
+  beforeNavigate(() => {
+    nav_started_at = performance.now()
+  })
+
+  // Feeds route history into client_logs (`navigation` events) and the breadcrumb
+  // trail attached to every error. Folds nav duration into the same event.
+  afterNavigate((nav) => {
+    try {
+      const to_path = nav?.to?.url?.pathname ?? null
+      const from_path = nav?.from?.url?.pathname ?? null
+      if (!to_path)
+        return
+      const duration_ms = nav_started_at ? performance.now() - nav_started_at : null
+      nav_started_at = 0
+      log_navigation({ to: to_path, from: from_path, duration_ms })
+    } catch {
+    // Never let logging break navigation.
+    }
   })
 
   // When the version poll (kit.version.pollInterval) detects a new deploy,
