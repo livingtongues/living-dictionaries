@@ -1,4 +1,5 @@
 <script lang="ts">
+  import IconMdiAccountSearch from '~icons/mdi/account-search'
   import IconMdiArrowRight from '~icons/mdi/arrow-right'
   import MessagesTable from '$lib/admin/MessagesTable.svelte'
 
@@ -24,7 +25,11 @@
   {current_user_id}
   on_assigned={async () => { await data.sync?.sync() }}>
   {#snippet header_trailing()}
-    <a href="/admin/messages/resolved" class="header-trail-link">
+    <a href="/admin/messages/unmatched" class="header-trail-link">
+      <IconMdiAccountSearch />
+      Unmatched
+    </a>
+    <a href="/admin/messages/resolved" class="header-trail-link spaced">
       Resolved
       <IconMdiArrowRight />
     </a>
@@ -42,5 +47,8 @@
   }
   .header-trail-link:hover {
     color: var(--color);
+  }
+  .header-trail-link.spaced {
+    margin-left: 1rem;
   }
 </style>

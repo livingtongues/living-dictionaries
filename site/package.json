@@ -29,7 +29,6 @@
     "@tiptap/extension-placeholder": "^3.26.0",
     "@tiptap/pm": "^3.26.0",
     "@tiptap/starter-kit": "^3.26.0",
-    "@xyflow/svelte": "^1.5.2",
     "better-sqlite3": "^12.8.0",
     "d3-array": "^3.2.4",
     "d3-scale": "^4.0.2",

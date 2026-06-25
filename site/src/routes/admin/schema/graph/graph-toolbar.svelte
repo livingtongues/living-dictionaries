@@ -1,7 +1,7 @@
 <script lang="ts">
   /**
-   * Filter + reset controls for the schema graph. Sits as an absolute-positioned
-   * `<Panel>` in the top-right of the xyflow canvas.
+   * Filter + reset controls for the schema graph. Rendered in an
+   * absolute-positioned panel at the top-right of the canvas.
    */
   import IconMdiEye from '~icons/mdi/eye'
   import IconMdiRefresh from '~icons/mdi/refresh'
@@ -11,6 +11,7 @@
     hide_system: boolean
     hidden_count: number
     visible_count: number
+    trigger_count: number
     on_toggle_junctions: () => void
     on_toggle_system: () => void
     on_show_all: () => void
@@ -22,6 +23,7 @@
     hide_system,
     hidden_count,
     visible_count,
+    trigger_count,
     on_toggle_junctions,
     on_toggle_system,
     on_show_all,
@@ -41,6 +43,9 @@
   <hr class="divider" />
   <div class="count-line">
     {visible_count} visible{#if hidden_count > 0}, {hidden_count} hidden{/if}
+  </div>
+  <div class="count-line">
+    {trigger_count} {trigger_count === 1 ? 'trigger' : 'triggers'}
   </div>
   <div class="action-row">
     <button type="button" class="btn-ghost btn-sm" onclick={on_show_all} disabled={hidden_count === 0}>

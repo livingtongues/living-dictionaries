@@ -71,6 +71,13 @@ export const users = sqliteTable('users', {
    * `update_last_visit` flag (see `lib/db/sync/last-visit-ping.ts`).
    */
   last_visit_at: text(),
+  /**
+   * Per-admin notification channel: 'email' (default) or 'ntfy'. Governs every
+   * TARGETED admin ping (message assignment + Team chat). Flipped via
+   * /api/admin/set-notify-channel; read server-side by `notify_admin`. Only
+   * meaningful for admins (non-admins are never pinged).
+   */
+  notify_channel: text({ enum: ['email', 'ntfy'] }).notNull().default('email'),
   created_at: text().notNull(),
   updated_at: text().notNull(),
 })

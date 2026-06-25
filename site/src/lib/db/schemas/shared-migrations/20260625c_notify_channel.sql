@@ -1,0 +1,24 @@
+------------------------------------------------------------------
+-- users.notify_channel: per-admin choice of WHERE their admin
+-- notifications are delivered.
+--
+--   'email' (default) — a short email with a deep link to the admin
+--                       backend. The safe default until an admin sets
+--                       up ntfy on their phone.
+--   'ntfy'            — instant push to the admin's private ntfy topic
+--                       (from $lib/admins.ts).
+--
+-- Unified preference: it governs every TARGETED admin ping (the
+-- message-assignment ping + the Team chat ping). The broadcast
+-- `notify_admins` (new-inbound) stays ntfy-only for now to avoid emailing
+-- the whole team on every customer message.
+--
+-- `users` rides down to every admin client via the download-only directory
+-- sync (server SELECT *), so the column reaches every admin client
+-- automatically — no sync-config change. Only meaningful for admins;
+-- harmless 'email' default for everyone else (non-admins are never pinged).
+-- Admins flip it themselves via /api/admin/set-notify-channel; it is read
+-- server-side when a ping is sent.
+------------------------------------------------------------------
+
+ALTER TABLE users ADD COLUMN notify_channel TEXT NOT NULL DEFAULT 'email';

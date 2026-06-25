@@ -1,6 +1,7 @@
 <script lang="ts">
   import { beforeNavigate, goto, invalidateAll } from '$app/navigation'
   import { page } from '$app/state'
+  import { chat_store } from '$lib/admin/chat/chat-store.svelte'
   import LoginModal from '$lib/components/LoginModal.svelte'
   import SyncStatus from '$lib/db/sync/SyncStatus.svelte'
   import ShowHide from '$lib/svelte-pieces/ShowHide.svelte'
@@ -14,6 +15,7 @@
   const nav_links = [
     { href: '/admin/messages', label: 'Messages' },
     { href: '/admin/users', label: 'Users' },
+    { href: '/admin/team', label: 'Team' },
     { href: '/admin/dictionaries', label: 'Dictionaries' },
     { href: '/admin/sync', label: 'Sync' },
     { href: '/admin/schema', label: 'Schema' },
@@ -55,6 +57,13 @@
   beforeNavigate(() => {
     void data.sync?.sync_if_needed()
   })
+
+  // App-wide chat background poll: keeps presence + the Team unread badge live
+  // across the whole admin area (the Team page adds the faster per-room poll).
+  onMount(() => {
+    chat_store.start_background()
+    return () => chat_store.stop_background()
+  })
 </script>
 
 <svelte:head>
@@ -90,6 +99,9 @@
           {#each nav_links as link (link.href)}
             <a href={link.href} class={['nav-link', { active: is_active(link.href) }]}>
               {link.label}
+              {#if link.href === '/admin/team' && chat_store.total_unread > 0}
+                <span class="nav-badge">{chat_store.total_unread}</span>
+              {/if}
             </a>
           {/each}
         </nav>
@@ -165,6 +177,24 @@
     color: var(--primary);
     font-weight: 600;
     background: color-mix(in srgb, var(--primary), transparent 88%);
+  }
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+  .nav-badge {
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    padding: 0 0.3rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .header-right {
     margin-left: auto;

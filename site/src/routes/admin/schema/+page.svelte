@@ -1,19 +1,18 @@
 <script lang="ts">
   import type { SchemaInfo } from '$lib/db/introspect'
   import type { Component } from 'svelte'
-  import IconMdiBookAlphabet from '~icons/mdi/book-alphabet'
   import IconMdiArrowLeft from '~icons/mdi/arrow-left'
+  import IconMdiBookAlphabet from '~icons/mdi/book-alphabet'
   import IconMdiContentPaste from '~icons/mdi/content-paste'
-  import IconMdiGraphOutline from '~icons/mdi/graph-outline'
   import IconMdiLoading from '~icons/mdi/loading'
   import IconMdiServer from '~icons/mdi/server'
   import IconMdiShieldAccountOutline from '~icons/mdi/shield-account-outline'
-  import IconMdiViewList from '~icons/mdi/view-list'
   import { api_admin_schema } from '$api/admin/schema/_call'
   import { browser } from '$app/environment'
-  import { onMount, tick } from 'svelte'
+  import { goto } from '$app/navigation'
+  import { page } from '$app/state'
+  import { onMount } from 'svelte'
   import PastePane from './paste-pane.svelte'
-  import SchemaCards from './schema-cards.svelte'
   import { introspect_admin_local_db } from './local-db-source.svelte.js'
 
   let { data } = $props()
@@ -21,10 +20,7 @@
   type SourceTab = 'shared' | 'dictionary' | 'admin' | 'paste'
   let active_tab = $state<SourceTab>('shared')
 
-  type ViewMode = 'graph' | 'cards'
-  let view_mode = $state<ViewMode>('graph')
-
-  interface SchemaGraphProps { schema: SchemaInfo, on_node_jump?: (table_name: string) => void }
+  interface SchemaGraphProps { schema: SchemaInfo }
   let SchemaGraph = $state<Component<SchemaGraphProps> | null>(null)
   let graph_loading = $state(false)
   function load_graph() {
@@ -36,11 +32,6 @@
     }).finally(() => {
       graph_loading = false
     })
-  }
-
-  function show_graph() {
-    view_mode = 'graph'
-    load_graph()
   }
 
   // Per-source lazily-loaded schema. Paste lives separately (it can be re-pasted).
@@ -58,7 +49,19 @@
     return sources[active_tab].schema
   })
 
+  // The graph's focused view lives in `?table=`; a focus must never leak across
+  // sources, so switching the source tab drops it.
+  function clear_focus() {
+    if (!browser || !page.url.searchParams.has('table'))
+      return
+    const url = new URL(page.url)
+    url.searchParams.delete('table')
+    void goto(url, { keepFocus: true, noScroll: true, replaceState: true })
+  }
+
   async function activate(tab: SourceTab) {
+    if (tab !== active_tab)
+      clear_focus()
     active_tab = tab
     if (tab === 'paste' || !browser)
       return
@@ -88,16 +91,8 @@
 
   onMount(() => {
     void activate('shared')
-    if (view_mode === 'graph')
-      load_graph()
+    load_graph()
   })
-
-  async function on_node_jump(table_name: string) {
-    view_mode = 'cards'
-    await tick()
-    const element = document.getElementById(`table-${table_name}`)
-    if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 </script>
 
 <svelte:head>
@@ -130,14 +125,6 @@
         <IconMdiContentPaste style="margin-right: 0.25rem" />Paste SQL
       </button>
     </div>
-    <div class="view-tabs">
-      <button type="button" class={['view-tab', { active: view_mode === 'graph' }]} onclick={show_graph}>
-        <IconMdiGraphOutline style="margin-right: 0.25rem" />Graph
-      </button>
-      <button type="button" class={['view-tab', { active: view_mode === 'cards' }]} onclick={() => view_mode = 'cards'}>
-        <IconMdiViewList style="margin-right: 0.25rem" />Cards
-      </button>
-    </div>
   </div>
 
   {#if active_tab === 'paste' && !pasted_schema}
@@ -158,21 +145,17 @@
         </button>
       </div>
     {/if}
-    {#if view_mode === 'graph'}
-      <div class="graph-frame">
-        {#if SchemaGraph}
-          <SchemaGraph schema={current_schema} {on_node_jump} />
-        {:else if graph_loading}
-          <div class="graph-loading">
-            <IconMdiLoading class="spin" style="margin-right: 0.5rem" />Loading graph…
-          </div>
-        {:else}
-          <div class="graph-loading">Initializing…</div>
-        {/if}
-      </div>
-    {:else}
-      <SchemaCards schema={current_schema} />
-    {/if}
+    <div class="graph-frame">
+      {#if SchemaGraph}
+        <SchemaGraph schema={current_schema} />
+      {:else if graph_loading}
+        <div class="graph-loading">
+          <IconMdiLoading class="spin" style="margin-right: 0.5rem" />Loading graph…
+        </div>
+      {:else}
+        <div class="graph-loading">Initializing…</div>
+      {/if}
+    </div>
   {/if}
 </div>
 
@@ -238,34 +221,6 @@
   .tab.active {
     background: var(--primary);
     color: var(--on-primary);
-    font-weight: 500;
-  }
-
-  .view-tabs {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    border-radius: 0.375rem;
-    border: 1px solid var(--border-color);
-    padding: 0.125rem;
-  }
-  .view-tab {
-    padding: 0.375rem 0.75rem;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    transition: background-color 0.15s, color 0.15s;
-    border: none;
-    cursor: pointer;
-    background: transparent;
-    color: var(--color-secondary);
-  }
-  .view-tab:hover {
-    background: var(--surface);
-  }
-  .view-tab.active {
-    background: var(--surface);
-    color: var(--color);
     font-weight: 500;
   }
 

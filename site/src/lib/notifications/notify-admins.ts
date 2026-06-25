@@ -1,4 +1,54 @@
+import type { Admin } from '$lib/admins'
 import { ADMINS } from '$lib/admins'
+import { send_email } from '$lib/email/send-email'
+
+type NotifyChannel = 'email' | 'ntfy'
+
+/**
+ * Read an admin's chosen notification channel from shared.db. Defaults to
+ * 'email' (the column default) when the row is missing; falls back to 'email'
+ * on any DB error so a ping is still attempted on a real channel. Lazily
+ * `import`s the server DB so this module stays importable in non-server bundles.
+ */
+async function resolve_channel(email: string): Promise<NotifyChannel> {
+  try {
+    const { get_shared_db } = await import('$lib/db/server/shared-db')
+    const row = get_shared_db()
+      .prepare('SELECT notify_channel FROM users WHERE email = ?')
+      .get(email) as { notify_channel?: string } | undefined
+    return row?.notify_channel === 'ntfy' ? 'ntfy' : 'email'
+  } catch (err) {
+    console.warn('notify_admins: notify_channel lookup failed, defaulting to email:', (err as Error).message)
+    return 'email'
+  }
+}
+
+interface EmailPingExtras {
+  /** Rich inner HTML for the email body (e.g. team-chat author header + message). Falls back to `body`. */
+  email_html?: string
+  /** Plain-text mirror for the email. Falls back to `body` (+ link). */
+  email_text?: string
+  /** Email-specific subject. Falls back to `subject`. */
+  email_subject?: string
+}
+
+async function send_ping_email({ admin, subject, body, link, email_html, email_text, email_subject }: { admin: Admin } & NotifyAdminsParams & EmailPingExtras): Promise<void> {
+  const shell = (inner: string) => `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#1a1a1a">${inner}</div>`
+  const link_html = link
+    ? `<p style="margin:16px 0 0"><a href="${link}" style="display:inline-block;padding:8px 16px;border-radius:6px;background:#178871;color:#fff;text-decoration:none;font-weight:600">Open in the admin</a></p>`
+    : ''
+  const html = shell(email_html ?? `<p style="margin:0">${body}</p>${link_html}`)
+  const text = email_text ?? (link ? `${body}\n\n${link}` : body)
+  try {
+    await send_email({
+      to: [{ email: admin.email, name: admin.name }],
+      subject: email_subject ?? subject,
+      body: { html, text },
+    })
+  } catch (err) {
+    console.warn(`notify_admins: email ping to ${admin.email} failed (non-fatal):`, (err as Error).message)
+  }
+}
 
 /**
  * Fire-and-forget push notification to every admin's phone via ntfy.sh.
@@ -40,19 +90,24 @@ export async function notify_admins({ subject, body, link }: NotifyAdminsParams)
 }
 
 /**
- * Push to a single admin by email — used for thread-assignment pings so only
- * the responsible admin's phone buzzes (not the whole team).
+ * Notify a single admin by email — used for TARGETED pings (thread assignment,
+ * Team chat) so only the responsible admin is reached, not the whole team.
+ * Honors the admin's chosen `notify_channel`: 'ntfy' push or 'email'.
  *
  * Silently no-ops when `email` isn't in the admin allow-list. Caller doesn't
  * need to pre-filter; safe to call with any user_id-derived email.
  */
-export async function notify_admin({ email, subject, body, link }: { email: string | null | undefined } & NotifyAdminsParams): Promise<void> {
+export async function notify_admin({ email, subject, body, link, email_html, email_text, email_subject }: { email: string | null | undefined } & NotifyAdminsParams & EmailPingExtras): Promise<void> {
   if (process.env.NTFY_DISABLED === '1' || !email)
     return
   const admin = ADMINS.find(a => a.email === email)
   if (!admin)
     return
-  await notify_one({ topic: admin.ntfy_topic, subject, body, link })
+  const channel = await resolve_channel(admin.email)
+  if (channel === 'ntfy')
+    await notify_one({ topic: admin.ntfy_topic, subject, body, link })
+  else
+    await send_ping_email({ admin, subject, body, link, email_html, email_text, email_subject })
 }
 
 async function notify_one({ topic, subject, body, link }: { topic: string } & NotifyAdminsParams): Promise<void> {
