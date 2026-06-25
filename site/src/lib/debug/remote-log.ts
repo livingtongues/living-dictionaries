@@ -1,6 +1,7 @@
 import type { ClientLogPayload } from '$lib/server/insert-client-log'
-import { version } from '$app/environment'
 import { api_log, send_log_beacon } from '$api/log/_call'
+import { version } from '$app/environment'
+import { detect_db_capabilities, resolve_db_tier } from '$lib/db/dict-client/worker/db-capabilities'
 
 /**
  * Client-side error capture + remote-log shipper. Initialized once from
@@ -21,9 +22,7 @@ import { api_log, send_log_beacon } from '$api/log/_call'
  * NEVER throws. Logging-of-logging is a recursion trap, so `console.error` is
  * patched with a flag to short-circuit while we're flushing.
  *
- * This is LD's homegrown telemetry — there is NO Sentry / LogRocket / Vercel
- * analytics / Google Analytics in the new site. Logs land server-side in
- * `shared.db.client_logs` only.
+ * Ported from tutor/site/src/lib/debug/remote-log.ts.
  */
 
 const STORAGE_KEY = 'debug_log_pending'
@@ -31,6 +30,31 @@ const FLUSH_INTERVAL_MS = 5000
 const HEARTBEAT_INTERVAL_MS = 30_000
 const MAX_BUFFER = 50
 const MAX_BREADCRUMBS = 20
+const MAX_BREADCRUMB_LABEL = 80
+
+/**
+ * Substring patterns for log messages that are pure noise — they get dropped at
+ * `push()` (the single chokepoint all four channels funnel through) so they never
+ * buffer, ship, or pollute the error channel. Each was confirmed as high-volume,
+ * zero-diagnostic-value noise in a `log-and-fix` review:
+ *  - `ResizeObserver loop…`     — benign browser layout warning (147×/day).
+ *  - `[GSI_LOGGER]`             — Google One Tap / FedCM abort + network noise.
+ *  - `Sync already in progress` — benign leader-race guard; a second surface beat
+ *                                 us to `ensure_initial_sync`, reactive stores fill anyway.
+ * NOT filtered: `RPC timed out (no leader responded)` — low-volume but a real
+ * signal of a leader-election stall under multi-tab load; keep it visible.
+ */
+const NOISE_MESSAGE_PATTERNS = [
+  'ResizeObserver loop',
+  '[GSI_LOGGER]',
+  'Sync already in progress',
+]
+
+function is_noise_message(message: string | undefined | null): boolean {
+  if (!message)
+    return false
+  return NOISE_MESSAGE_PATTERNS.some(pattern => message.includes(pattern))
+}
 
 interface InternalEntry extends ClientLogPayload {
   /** Internal id only — server assigns its own; useful for de-dupe in buffer. */
@@ -43,6 +67,13 @@ let original_console_error: typeof console.error | null = null
 let in_console_error_patch = false
 let flush_timer: ReturnType<typeof setInterval> | null = null
 let heartbeat_timer: ReturnType<typeof setInterval> | null = null
+/** Window listeners we registered, tracked so `_reset_for_tests` can remove them. */
+let registered_listeners: { type: string, handler: EventListener, options?: AddEventListenerOptions | boolean }[] = []
+
+function on_window(type: string, handler: EventListener, options?: AddEventListenerOptions | boolean): void {
+  window.addEventListener(type, handler, options)
+  registered_listeners.push({ type, handler, options })
+}
 /**
  * Fresh per `init_remote_logging()` call. Stamped on every log via `enrich()`
  * so the agent can group-by `context.session_id` to find all messages from
@@ -51,9 +82,36 @@ let heartbeat_timer: ReturnType<typeof setInterval> | null = null
 let session_id = ''
 let session_started_at_ms = 0
 
+/** House is a web app today; a native client would override `platform` via the payload. */
+function get_platform(): 'web' | 'ios' | 'android' {
+  return 'web'
+}
+
+/**
+ * Build / runtime target. Honors an explicit `VITE_TARGET` if a build ever sets
+ * one (none today — the site is web-only); otherwise derives the deploy environment
+ * from the hostname so the log review can separate real-user prod traffic from
+ * local/preview test noise:
+ *  - `livingdictionaries.app` / `*.livingdictionaries.app` → `'production'`
+ *    (covers the `new.` subdomain we run pre-cutover)
+ *  - `localhost` / `127.*` / `::1`    → `'development'`
+ *  - anything else                    → `'preview'`
+ */
 function get_build_target(): string | null {
   try {
-    return (import.meta.env.VITE_TARGET as string | undefined) ?? null
+    const explicit = (import.meta.env.VITE_TARGET as string | undefined) ?? null
+    if (explicit)
+      return explicit
+    if (typeof window === 'undefined')
+      return null
+    const host = window.location?.hostname ?? ''
+    if (!host)
+      return null
+    if (host === 'localhost' || host.startsWith('127.') || host === '::1' || host === '0.0.0.0')
+      return 'development'
+    if (host === 'livingdictionaries.app' || host.endsWith('.livingdictionaries.app'))
+      return 'production'
+    return 'preview'
   } catch {
     return null
   }
@@ -72,6 +130,26 @@ function safe_user_agent(): string | null {
     return typeof navigator !== 'undefined' ? navigator.userAgent ?? null : null
   } catch {
     return null
+  }
+}
+
+/**
+ * Flatten the local-first DB capability flags + the resolved tier for the
+ * `session_start` context. Never throws (detection is all guarded probes).
+ */
+function db_capabilities_for_log(): Record<string, unknown> {
+  try {
+    const caps = detect_db_capabilities()
+    return {
+      has_opfs: caps.has_opfs,
+      has_web_locks: caps.has_web_locks,
+      has_broadcast_channel: caps.has_broadcast_channel,
+      has_worker: caps.has_worker,
+      has_indexed_db: caps.has_indexed_db,
+      db_tier: resolve_db_tier(caps) ?? 'ssr-floor',
+    }
+  } catch {
+    return {}
   }
 }
 
@@ -124,6 +202,7 @@ function enrich(entry: ClientLogPayload): InternalEntry {
     client_time: entry.client_time ?? new Date().toISOString(),
     url: entry.url ?? safe_url(),
     user_agent: entry.user_agent ?? safe_user_agent(),
+    platform: entry.platform ?? get_platform(),
     app_version: entry.app_version ?? version ?? null,
     build_target: entry.build_target ?? get_build_target(),
     context: {
@@ -167,6 +246,8 @@ function write_pending(entries: InternalEntry[]): void {
 
 function push(entry: ClientLogPayload): void {
   if (!initialized)
+    return
+  if (is_noise_message(entry.message))
     return
   const pending = read_pending()
   pending.push(enrich(entry))
@@ -226,17 +307,58 @@ export function add_breadcrumb({ type, value }: { type: string, value: string })
     breadcrumbs = breadcrumbs.slice(-MAX_BREADCRUMBS)
 }
 
+/**
+ * Describe a clicked element for a breadcrumb. Walks up to the nearest
+ * actionable ancestor (link / button / role=button / explicit `data-breadcrumb`)
+ * and labels it by `data-breadcrumb` → `aria-label` → trimmed text → `href` →
+ * tag. Returns null for clicks on inert chrome so we don't record noise.
+ */
+function describe_click_target(target: EventTarget | null): string | null {
+  if (!(target instanceof Element))
+    return null
+  const el = target.closest('a, button, [role="button"], [data-breadcrumb]')
+  if (!el)
+    return null
+  const label
+    = el.getAttribute('data-breadcrumb')
+      || el.getAttribute('aria-label')
+      || (el.textContent ?? '').replace(/\s+/g, ' ').trim()
+      || el.getAttribute('href')
+      || el.tagName.toLowerCase()
+  return label ? label.slice(0, MAX_BREADCRUMB_LABEL) : null
+}
+
 /** Explicit logging — preferred over `console.error` when wired intentionally. */
 export function log_event(entry: ClientLogPayload): void {
   push(entry)
 }
 
 /**
+ * Analytics event (the GA half). `event` MUST come from the stable vocabulary in
+ * `$lib/debug/log-events.ts` — it is stored as the row `message` (same shape as
+ * `navigation`/`perf`/`heartbeat`) so the daily `log_daily_metrics` rollup can
+ * group on it; free-form strings don't aggregate. Structured fields go under
+ * `props`. Info level. Also drops an `event` breadcrumb so the action shows up in
+ * the trail of any later error.
+ */
+export function track({ event, props }: { event: string, props?: Record<string, unknown> }): void {
+  if (!initialized)
+    return
+  add_breadcrumb({ type: 'event', value: event })
+  push({
+    level: 'info',
+    message: event,
+    context: { ...(props ?? {}) },
+  })
+}
+
+/**
  * Track a route change as a breadcrumb AND emit a low-cost `info` log so we
  * have wall-clock route history in `client_logs`. Call from `+layout.svelte`'s
- * `afterNavigate` (when one is wired).
+ * `afterNavigate`. `duration_ms` (when known — client-side navs measured from
+ * `beforeNavigate`) folds into the same event so we don't double the row count.
  */
-export function log_navigation({ to, from }: { to: string, from?: string | null }): void {
+export function log_navigation({ to, from, duration_ms }: { to: string, from?: string | null, duration_ms?: number | null }): void {
   if (!initialized)
     return
   add_breadcrumb({ type: 'route', value: to })
@@ -248,6 +370,47 @@ export function log_navigation({ to, from }: { to: string, from?: string | null 
       elapsed_seconds,
       from: from ?? null,
       to,
+      ...(typeof duration_ms === 'number' ? { duration_ms: Math.round(duration_ms) } : {}),
+    },
+  })
+}
+
+/**
+ * Emit a performance timing as a `perf` info event. The `name` is a stable
+ * label (`page_load` | `search` | `viewer_boot` | …) the A3 log review groups on
+ * — `context.duration_ms` carries the value, plus any extra fields.
+ */
+export function track_timing({ name, duration_ms, context }: { name: string, duration_ms: number, context?: Record<string, unknown> }): void {
+  if (!initialized)
+    return
+  push({
+    level: 'info',
+    message: 'perf',
+    context: {
+      name,
+      duration_ms: Math.round(duration_ms),
+      ...(context ?? {}),
+    },
+  })
+}
+
+/**
+ * Emit a Web Vital (LCP / INP / CLS / FCP / TTFB). Shares the `perf` channel
+ * under `context.name = 'web_vital'`. `value` is rounded to 3 decimals so CLS
+ * (unitless, e.g. 0.052) keeps precision while ms metrics round cleanly.
+ */
+export function track_web_vital({ metric, value, rating, navigation_type }: { metric: string, value: number, rating?: string, navigation_type?: string }): void {
+  if (!initialized)
+    return
+  push({
+    level: 'info',
+    message: 'perf',
+    context: {
+      name: 'web_vital',
+      metric,
+      value: Math.round(value * 1000) / 1000,
+      rating: rating ?? null,
+      navigation_type: navigation_type ?? null,
     },
   })
 }
@@ -259,7 +422,8 @@ export async function flush_now(): Promise<void> {
 
 /**
  * Wire global handlers and patch `console.error`. Idempotent — safe to call
- * twice. Call once from `+layout.svelte` `onMount`.
+ * twice. Call once from `+layout.svelte` `onMount` after the auth/region
+ * setup so the enrichment fields are populated.
  */
 export function init_remote_logging(): void {
   if (initialized)
@@ -270,21 +434,22 @@ export function init_remote_logging(): void {
   session_id = crypto.randomUUID()
   session_started_at_ms = Date.now()
 
-  window.addEventListener('error', (event) => {
+  on_window('error', (event) => {
+    const error_event = event as ErrorEvent
     push({
       level: 'error',
-      message: event.message || (event.error as Error)?.message || 'Uncaught error',
-      stack: clamp_stack((event.error as Error)?.stack),
+      message: error_event.message || (error_event.error as Error)?.message || 'Uncaught error',
+      stack: clamp_stack((error_event.error as Error)?.stack),
       context: {
-        filename: event.filename ?? null,
-        lineno: event.lineno ?? null,
-        colno: event.colno ?? null,
+        filename: error_event.filename ?? null,
+        lineno: error_event.lineno ?? null,
+        colno: error_event.colno ?? null,
       },
     })
   })
 
-  window.addEventListener('unhandledrejection', (event) => {
-    const { reason } = event
+  on_window('unhandledrejection', (event) => {
+    const { reason } = event as PromiseRejectionEvent
     const message = reason instanceof Error
       ? reason.message
       : typeof reason === 'string' ? reason : safe_serialize_reason(reason)
@@ -294,6 +459,20 @@ export function init_remote_logging(): void {
       stack: clamp_stack(reason instanceof Error ? reason.stack : null),
     })
   })
+
+  // Global click breadcrumbs. Capture phase so the action is recorded even when
+  // the handler navigates away or stops propagation. Only actionable targets are
+  // recorded, and breadcrumbs live in memory (last MAX_BREADCRUMBS) shipped only
+  // attached to errors — cheap context, never its own log row.
+  on_window('click', (event) => {
+    try {
+      const label = describe_click_target(event.target)
+      if (label)
+        add_breadcrumb({ type: 'click', value: label })
+    } catch {
+      // Never let breadcrumb capture break a click.
+    }
+  }, { capture: true })
 
   // Patch console.error so caught-and-logged errors elsewhere in the app
   // also reach the server. The `in_console_error_patch` flag short-circuits
@@ -336,6 +515,13 @@ export function init_remote_logging(): void {
       memory_mb: get_memory_mb(),
       pathname: safe_pathname(),
       visibility: safe_visibility_state(),
+      // Device fitness for the local-first DB, captured up front so we can see
+      // which tier (opfs-worker / idb-worker / idb-main / SSR-floor) each session
+      // can run — even anonymously, even if the DB later fails to open. This is
+      // how we make the old-Safari / no-OPFS population (e.g. Wayne's Catalina)
+      // VISIBLE instead of eyeballing raw user_agent strings. See
+      // .issues/no-opfs-idb-fallback-tiers.md.
+      ...db_capabilities_for_log(),
     },
   })
 
@@ -361,8 +547,8 @@ export function init_remote_logging(): void {
   }, HEARTBEAT_INTERVAL_MS)
 
   // On hide / navigate-away, send the final batch via beacon (survives page teardown).
-  window.addEventListener('pagehide', flush_via_beacon)
-  window.addEventListener('visibilitychange', () => {
+  on_window('pagehide', flush_via_beacon)
+  on_window('visibilitychange', () => {
     push({
       level: 'info',
       message: `visibility_${document.visibilityState}`,
@@ -405,6 +591,12 @@ export function _reset_for_tests(): void {
     clearInterval(heartbeat_timer)
     heartbeat_timer = null
   }
+  for (const { type, handler, options } of registered_listeners) {
+    try {
+      window.removeEventListener(type, handler, options)
+    } catch {}
+  }
+  registered_listeners = []
   breadcrumbs = []
   initialized = false
   in_console_error_patch = false

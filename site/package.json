@@ -38,7 +38,8 @@
     "mimetext": "^3.0.28",
     "satori": "^0.0.44",
     "satori-html": "^0.3.0",
-    "wa-sqlite": "^1.0.0"
+    "wa-sqlite": "^1.0.0",
+    "web-vitals": "^5.3.0"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.1062.0",
@@ -74,6 +75,7 @@
     "d3-force": "^3.0.0",
     "d3-geo": "^3.1.1",
     "file-saver": "^2.0.5",
+    "happy-dom": "^20.10.6",
     "idb-keyval": "^6.2.5",
     "jszip": "^3.10.1",
     "recordrtc": "^5.6.2",
