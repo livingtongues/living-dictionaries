@@ -4,6 +4,7 @@ import type * as dict_schema from '$lib/db/schemas/dictionary'
 import type { DictWriteOp, DictWriteOutcome, JunctionTable } from './dict-writes'
 import type { DictConnection } from './worker-connection'
 import { TableChangeNotifier } from '$lib/db/client/live/notifier'
+import { compute_retry_decision, log_live_query_failed, log_live_query_recovered, log_live_query_timeout } from '$lib/db/client/live/live-query-retry'
 import { reconcile_rows } from '$lib/db/client/live/reconcile-rows'
 import { DICT_JSON_COLUMNS, parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/server/dictionary-sync-helpers'
@@ -113,6 +114,9 @@ class DictTableStore<T extends Record<string, unknown>> {
   #subscribers = 0
   #unsubscribe: (() => void) | null = null
   #stop_timer: ReturnType<typeof setTimeout> | null = null
+  #retry_timer: ReturnType<typeof setTimeout> | null = null
+  #attempt = 0
+  #failed_at = 0
   #started = false
 
   #connection: DictConnection
@@ -167,17 +171,65 @@ class DictTableStore<T extends Record<string, unknown>> {
 
   async #start() {
     if (this.#stop_timer) { clearTimeout(this.#stop_timer); this.#stop_timer = null }
+    if (this.#retry_timer) { clearTimeout(this.#retry_timer); this.#retry_timer = null }
     this.#started = true
     this.#loading = true
+    this.#attempt = 0
+    this.#failed_at = 0
+    await this.#load_and_subscribe()
+  }
+
+  // Run the query and, on success, subscribe to change notifications. A transient
+  // leader-worker timeout (`RPC timed out (no leader responded)`) retries with
+  // backoff instead of permanently dead-paneling the view. Ported from house —
+  // see `$lib/db/client/live/live-query-retry.ts`.
+  async #load_and_subscribe() {
+    if (!this.#started)
+      return
+    const started_at = Date.now()
     try {
       await this.#refresh()
       this.#loading = false
+      if (this.#failed_at) {
+        log_live_query_recovered({ table: this.#table_name, source: 'dict', attempts: this.#attempt, total_wait_ms: Date.now() - this.#failed_at, had_leader: this.#had_leader() })
+        this.#failed_at = 0
+      }
+      this.#attempt = 0
       this.#unsubscribe = this.#notifier.subscribe(this.#table_name, () => { void this.#refresh() })
     } catch (err) {
-      console.error('DictTableStore start error:', err)
+      this.#on_query_error(err, Date.now() - started_at)
+    }
+  }
+
+  #on_query_error(error: unknown, waited_ms: number) {
+    if (!this.#started)
+      return // stopped (unmounted) while the query was in flight
+    if (this.#subscribers === 0) {
+      this.#loading = false
+      this.#started = false
+      return
+    }
+    const had_leader = this.#had_leader()
+    const { will_retry, delay_ms } = compute_retry_decision({ error, attempt: this.#attempt, has_subscribers: this.#subscribers > 0 })
+    if (will_retry) {
+      if (!this.#failed_at)
+        this.#failed_at = Date.now()
+      log_live_query_timeout({ table: this.#table_name, source: 'dict', waited_ms, attempt: this.#attempt, will_retry: true, had_leader })
+      this.#attempt++
+      // Keep #loading = true so the UI shows a spinner (not an empty panel) while we recover.
+      this.#retry_timer = setTimeout(() => {
+        this.#retry_timer = null
+        void this.#load_and_subscribe()
+      }, delay_ms)
+    } else {
+      log_live_query_failed({ table: this.#table_name, source: 'dict', waited_ms, attempts: this.#attempt, had_leader, code: (error as { code?: string } | null)?.code ?? null })
       this.#loading = false
       this.#started = false
     }
+  }
+
+  #had_leader(): boolean | null {
+    return this.#connection.has_leader?.() ?? null
   }
 
   async #refresh() {
@@ -213,6 +265,7 @@ class DictTableStore<T extends Record<string, unknown>> {
   }
 
   #stop() {
+    if (this.#retry_timer) { clearTimeout(this.#retry_timer); this.#retry_timer = null }
     this.#unsubscribe?.()
     this.#unsubscribe = null
     this.#started = false
