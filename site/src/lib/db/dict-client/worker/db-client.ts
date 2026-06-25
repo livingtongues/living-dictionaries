@@ -19,6 +19,7 @@ import type { DbEvent, DbRequest, InstanceOptions, LeaderMeta, WorkerInitMessage
 import { db_channel_name, db_lock_name } from './instance'
 import { start_leader_election } from './leader-election'
 import type { LeaderElection } from './leader-election'
+import { ensure_persistent_storage } from './persistent-storage'
 import { create_transport_client } from './transport'
 import type { TransportClient } from './transport'
 
@@ -48,7 +49,12 @@ export function create_db_client({ instance_options }: { instance_options: Insta
 
   const election: LeaderElection = start_leader_election({
     lock_name,
-    on_promote: () => { spawn_leader_worker() },
+    on_promote: () => {
+      spawn_leader_worker()
+      // Origin-scoped silent request (never prompts viewers). Editors get the
+      // prompting request in `dict-lifecycle.ts` once their role is known.
+      void ensure_persistent_storage({ allow_prompt: false })
+    },
   })
 
   function spawn_leader_worker(): void {

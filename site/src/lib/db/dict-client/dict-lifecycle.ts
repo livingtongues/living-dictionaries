@@ -2,6 +2,7 @@ import type { AuthHeaders } from './worker/instance'
 import type { DbClient } from './worker/db-client'
 import type { DictConnection } from './worker-connection'
 import { create_db_client } from './worker/db-client'
+import { ensure_persistent_storage } from './worker/persistent-storage'
 import { create_dict_worker_connection } from './worker-connection'
 
 /**
@@ -34,6 +35,13 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
   const { dict_id } = options
   const globals = globalThis as DictClientGlobals
   globals.__ld_dict_clients ??= {}
+
+  // An editor has precious unsynced local writes — request persistent storage so
+  // the browser won't evict them (a one-time Firefox prompt is justified).
+  // Idempotent + origin-scoped; a no-op once granted. Viewers stay on the silent
+  // path in `db-client.ts` and never see a prompt.
+  if (options.has_editor_role)
+    void ensure_persistent_storage({ allow_prompt: true })
 
   let cached = globals.__ld_dict_clients[dict_id]
   if (!cached) {

@@ -5,7 +5,7 @@ import type {
   Orthography,
   UserProviderIdentity,
 } from './shared.types'
-import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 /**
  * Drizzle schema for `shared.db`. Single source of truth for TypeScript types
@@ -281,3 +281,15 @@ export const client_logs = sqliteTable('client_logs', {
   latitude: real(),
   longitude: real(),
 })
+
+/**
+ * Forever rollup of `client_logs` (see `20260625b_log_daily_metrics.sql`). The
+ * nightly log-retention cron aggregates each day before raw rows are archived.
+ * Server-only: read live by `/admin/analytics`, never synced.
+ */
+export const log_daily_metrics = sqliteTable('log_daily_metrics', {
+  day: text().notNull(),
+  metric: text().notNull(),
+  source: text({ enum: ['client', 'server'] }).notNull().default('client'),
+  value: integer().notNull().default(0),
+}, table => [primaryKey({ columns: [table.day, table.metric, table.source] })])

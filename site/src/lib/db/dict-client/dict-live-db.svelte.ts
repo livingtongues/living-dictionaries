@@ -294,6 +294,12 @@ class DictLiveDbImpl {
       get objects(): Record<string, DictRowType<T>> { return self.#get_table_store(table_name).objects as Record<string, DictRowType<T>> },
       id(id: string): DictRowType<T> | undefined {
         if (!id) return undefined
+        // Imperative read outside any reactive context (e.g. an event handler):
+        // read directly. A `$derived` here would be unowned, and the
+        // `store.rows` getter would try to create an `$effect` inside it →
+        // `effect_in_unowned_derived`.
+        if (!$effect.tracking())
+          return self.#get_row_store(table_name, id).rows[0] as DictRowType<T> | undefined
         // svelte-ignore state_referenced_locally
         const rows = $derived(self.#get_row_store(table_name, id).rows)
         return rows[0] as DictRowType<T> | undefined
