@@ -18,8 +18,8 @@ get_shared_db()
 if (env.R2_SNAPSHOT_BUILDER_ENABLED === 'true' && env.IS_STANDBY !== 'true')
   start_r2_snapshot_builder()
 
-// Two-tier client_logs retention + the forever log_daily_metrics rollup. Self-gates
-// on IS_STANDBY + LOG_RETENTION_ENABLED so only the primary cron node runs it.
+// Two-tier client_logs retention + the forever log_daily_metrics rollup. Always
+// runs on the active node — only self-gates on IS_STANDBY + dev/build (no enable flag).
 start_log_retention_cron_once()
 
 /** @type {import('@sveltejs/kit').Handle} */

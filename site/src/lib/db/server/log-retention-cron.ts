@@ -1,4 +1,5 @@
 import type Database from 'better-sqlite3'
+import { building, dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { geo_key } from '$lib/server/geo-from-request'
 import { log_server_event } from '$lib/server/log-server-event'
@@ -16,8 +17,8 @@ import { get_shared_db } from './shared-db'
  *
  * The cron rolls up EVERY distinct day still present in hot storage on each run
  * (cheap — ≤ ~14 days, idempotent) BEFORE archival, so no day is lost even if a
- * run is missed. Env-gated + singleton-guarded like the snapshot cron; runs only
- * on the cron node.
+ * run is missed. Singleton-guarded; always runs on the active node (only
+ * IS_STANDBY + dev/build gated — no enable flag).
  */
 
 const HOT_WINDOW_DAYS = 14
@@ -193,14 +194,15 @@ interface CronState { interval: ReturnType<typeof setInterval>, in_flight: boole
 interface GlobalWithCron { [SINGLETON_KEY]?: CronState }
 
 export function start_log_retention_cron_once(): void {
-  // Blue-green standby containers must never run singleton background jobs —
-  // the active container (no IS_STANDBY) is the sole cron node.
+  // No env flag — log retention always runs on the active node so trends never
+  // silently stop accumulating. Two hardcoded guards only:
+  //   - dev/build: dormant locally (matches the other crons; unit tests cover it).
+  //   - IS_STANDBY: standby containers must never run singleton jobs — the active
+  //     container (no IS_STANDBY) is the sole cron node.
+  if (building || dev)
+    return
   if (env.IS_STANDBY === 'true') {
     console.info('[log-retention] IS_STANDBY — cron disabled on standby container.')
-    return
-  }
-  if (env.LOG_RETENTION_ENABLED !== 'true') {
-    console.info('[log-retention] LOG_RETENTION_ENABLED != "true" — cron disabled.')
     return
   }
   const slot = globalThis as unknown as GlobalWithCron
