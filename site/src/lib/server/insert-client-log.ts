@@ -1,6 +1,8 @@
 import type Database from 'better-sqlite3'
 import type { ClientLogLevel } from '$lib/db/schemas/shared.types'
+import type { RequestGeo } from './geo-from-request'
 import { get_shared_db, open_shared_db } from '$lib/db/server/shared-db'
+import { EMPTY_GEO } from './geo-from-request'
 
 /**
  * One client-side log entry as accepted by `POST /api/log`. Fields beyond
@@ -49,11 +51,17 @@ function clamp(value: string | null | undefined, max: number): string | null {
 export function insert_client_log({
   payload,
   user_id,
+  source = 'client',
+  geo = EMPTY_GEO,
   db = get_shared_db(),
   now = new Date(),
 }: {
   payload: ClientLogPayload
   user_id: string | null
+  /** Where the entry came from. Browser POSTs are `'client'`; server telemetry is `'server'`. */
+  source?: 'client' | 'server'
+  /** Approximate location from CF edge headers (server-side). All-null for server telemetry / dev. */
+  geo?: RequestGeo
   db?: Database.Database
   now?: Date
 }): boolean {
@@ -76,8 +84,9 @@ export function insert_client_log({
     db.prepare(`
       INSERT INTO client_logs (
         id, received_at, client_time, user_id, level, message, stack,
-        url, user_agent, platform, app_version, build_target, context
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        url, user_agent, platform, app_version, build_target, context, source,
+        country, region, city, latitude, longitude
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       received_at,
@@ -92,6 +101,12 @@ export function insert_client_log({
       payload.app_version ?? null,
       payload.build_target ?? null,
       context_json,
+      source,
+      geo.country,
+      geo.region,
+      geo.city,
+      geo.latitude,
+      geo.longitude,
     )
     return true
   } catch (err) {
@@ -187,6 +202,31 @@ if (import.meta.vitest) {
       insert_client_log({ payload: { level: 'crash', message: 'died' }, user_id: 'u-7', db })
       const row = db.prepare('SELECT user_id FROM client_logs').get() as { user_id: string }
       expect(row.user_id).toBe('u-7')
+    })
+
+    test('defaults source to client; honors an explicit server source', () => {
+      const db = open_shared_db(':memory:')
+      insert_client_log({ payload: { level: 'info', message: 'from-browser' }, user_id: null, db })
+      insert_client_log({ payload: { level: 'error', message: 'from-server' }, user_id: null, source: 'server', db })
+      const rows = db.prepare('SELECT message, source FROM client_logs ORDER BY message').all() as { message: string, source: string }[]
+      expect(rows).toEqual([
+        { message: 'from-browser', source: 'client' },
+        { message: 'from-server', source: 'server' },
+      ])
+    })
+
+    test('stamps geo columns when provided, and leaves them null otherwise', () => {
+      const db = open_shared_db(':memory:')
+      insert_client_log({
+        payload: { level: 'info', message: 'session_start' },
+        user_id: null,
+        geo: { country: 'US', region: 'CA', city: 'Los Angeles', latitude: 34.05, longitude: -118.24 },
+        db,
+      })
+      insert_client_log({ payload: { level: 'info', message: 'no-geo' }, user_id: null, db })
+      const rows = db.prepare('SELECT message, country, region, city, latitude, longitude FROM client_logs ORDER BY message').all() as Record<string, unknown>[]
+      expect(rows[0]).toEqual({ message: 'no-geo', country: null, region: null, city: null, latitude: null, longitude: null })
+      expect(rows[1]).toEqual({ message: 'session_start', country: 'US', region: 'CA', city: 'Los Angeles', latitude: 34.05, longitude: -118.24 })
     })
 
     test('stringifies context to JSON in storage', () => {
