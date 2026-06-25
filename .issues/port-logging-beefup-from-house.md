@@ -36,9 +36,15 @@ leader-worker) is **identical to house**, so this is a near-1:1 port (the easies
   `format_pct` (constants) + `format_point_date` (format-relative-time). Page uses living's API+_call
   convention (admin parent is a universal `+layout.ts`, so NO `+page.server.ts` — `/api/admin/analytics`
   GET gated by `is_admin`, `_call.ts`, universal `+page.ts` load). `/admin/analytics` route + stories.
-- 🎉 **LIVING PORT COMPLETE (A–G).** Remaining: push to `svelte-5-migration` (deploy new.*), then verify
-  geo flows on new.livingdictionaries.app. Then repeat for tutor. (Retention cron now runs with no env
-  flag — only IS_STANDBY/dev-gated.)
+- 🎉 **LIVING PORT COMPLETE (A–G) — PUSHED + DEPLOYED + VERIFIED.** On `svelte-5-migration` (deployed to
+  new.livingdictionaries.app). Prod check: geo+source columns present (migration landed) and the
+  retention cron RAN at 06:36 **with no env flag**. `client_logs` is at 0 only because no browser
+  session has hit the fresh build yet — geo populates as you use new.* (it's orange-clouded through CF).
+- ✅ **Daily log-review horse-cron added** (`living-dictionaries/log-review`, `runs_on: mustang`, 21:00) —
+  reviews new.*'s `client_logs`. `.claude/commands/log-and-fix.md` + `.cron/{log-review,index}.md`.
+  Discovered by `horse cron list`. Committed + pushed.
+- ✅ **`LOG_RETENTION_ENABLED` removed fleet-wide (2026-06-25)** — retention always runs on the active
+  node (IS_STANDBY + dev/build gated only). Verified running in prod above.
 
 ## DEFERRED — nightly log-review horse-cron (Poly + Living)
 Jacob: another agent is moving horse cron jobs into a `.cron/` folder per repo. AFTER that settles,
