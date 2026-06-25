@@ -1,7 +1,10 @@
 import type { RequestHandler } from './$types'
 import type { ClientLogPayload } from '$lib/server/insert-client-log'
+import { timingSafeEqual } from 'node:crypto'
+import { env } from '$env/dynamic/private'
 import { verify_jwt } from '$lib/auth/jwt'
 import { ResponseCodes } from '$lib/constants'
+import { geo_from_request } from '$lib/server/geo-from-request'
 import { insert_client_log, rate_limit_allow } from '$lib/server/insert-client-log'
 import { json } from '@sveltejs/kit'
 
@@ -44,11 +47,18 @@ const MAX_BATCH_SIZE = 50
  *  - Malformed entries (missing level/message, unknown level) are dropped.
  */
 export const POST: RequestHandler = async (event) => {
-  const ip = safe_get_client_address(event)
-  if (!rate_limit_allow({ ip })) {
-    return json({ ok: true, accepted: 0, rate_limited: true } satisfies ApiLogResponseBody, {
-      status: ResponseCodes.OK,
-    })
+  // Trusted server-to-server ingestion (e.g. an uptime prober): a valid
+  // X-Log-Source-Secret tags entries `source='server'` AND bypasses the anonymous
+  // per-IP rate limiter — trusted callers shouldn't compete in the client bucket.
+  const source: 'client' | 'server' = is_trusted_server(event) ? 'server' : 'client'
+
+  if (source === 'client') {
+    const ip = safe_get_client_address(event)
+    if (!rate_limit_allow({ ip })) {
+      return json({ ok: true, accepted: 0, rate_limited: true } satisfies ApiLogResponseBody, {
+        status: ResponseCodes.OK,
+      })
+    }
   }
 
   // Optional auth: extract user_id if a valid session is present, else null.
@@ -69,13 +79,35 @@ export const POST: RequestHandler = async (event) => {
     ? body.entries.slice(0, MAX_BATCH_SIZE)
     : extract_single_entry(body)
 
+  // Approximate location from CF edge headers — same for the whole request, so
+  // resolve once and stamp every entry in the batch.
+  const geo = geo_from_request(event.request)
+
   let accepted = 0
   for (const entry of entries) {
-    if (insert_client_log({ payload: entry, user_id }))
+    if (insert_client_log({ payload: entry, user_id, source, geo }))
       accepted++
   }
 
   return json({ ok: true, accepted } satisfies ApiLogResponseBody)
+}
+
+/**
+ * True when the request carries a valid `X-Log-Source-Secret` matching
+ * `UPTIME_PROBE_SECRET`. Constant-time compare; never throws. When the env var
+ * is unset (dev, or any machine without the secret) this is always false, so
+ * the trusted path is inert until the secret is provisioned.
+ */
+function is_trusted_server(event: { request: Request }): boolean {
+  const expected = env.UPTIME_PROBE_SECRET
+  if (!expected)
+    return false
+  const provided = event.request.headers.get('x-log-source-secret')
+  if (!provided)
+    return false
+  const a = Buffer.from(provided)
+  const b = Buffer.from(expected)
+  return a.length === b.length && timingSafeEqual(a, b)
 }
 
 function extract_single_entry(body: ApiLogRequestBody | null): ClientLogPayload[] {

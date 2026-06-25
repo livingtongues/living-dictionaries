@@ -5,7 +5,7 @@ import type {
   Orthography,
   UserProviderIdentity,
 } from './shared.types'
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 /**
  * Drizzle schema for `shared.db`. Single source of truth for TypeScript types
@@ -273,4 +273,11 @@ export const client_logs = sqliteTable('client_logs', {
   app_version: text(),
   build_target: text(),
   context: text(),
+  source: text({ enum: ['client', 'server'] }),
+  /** Approximate location from Cloudflare edge headers, stamped server-side at ingest. NO raw IP. */
+  country: text(),
+  region: text(),
+  city: text(),
+  latitude: real(),
+  longitude: real(),
 })
