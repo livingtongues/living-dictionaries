@@ -654,9 +654,14 @@ export type DictLiveDb = DictLiveDbImpl & DictTableProperties
 export function create_dict_live_db(connection: DictConnection, options: { user_id?: string } = {}): DictLiveDb {
   const instance = new DictLiveDbImpl(connection, options)
   return new Proxy(instance, {
-    get(target, prop, receiver) {
+    get(target, prop) {
       if (prop in target || typeof prop === 'symbol') {
-        const value = Reflect.get(target, prop, receiver)
+        // Resolve with `target` as the receiver (NOT the proxy): getters like
+        // `writes` read private fields (`this.#writes`), and a private-field
+        // brand check throws "Cannot read private member … from an object whose
+        // class did not declare it" when `this` is the proxy. Using `target`
+        // runs getters on the real instance so private state resolves.
+        const value = Reflect.get(target, prop, target)
         return typeof value === 'function' ? value.bind(target) : value
       }
       return target.get_table_accessor(prop as DictTableName)
