@@ -2,6 +2,10 @@ import type Database from 'better-sqlite3'
 import type { RequestHandler } from './$types'
 import { randomUUID } from 'node:crypto'
 import { env } from '$env/dynamic/private'
+import { is_internal_email } from '$lib/admins'
+import { match_notification } from '$lib/agent/auto-resolve/notification-registry'
+import { resolve_notification_thread } from '$lib/agent/auto-resolve/resolve-notification'
+import { fire_agent_email_inbound } from '$lib/agent/email-inbound-hook'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { find_or_create_thread } from '$lib/email/find-or-create-thread'
@@ -155,11 +159,42 @@ export const POST: RequestHandler = async ({ request, url }) => {
     )
   }
 
-  void notify_admins({
-    subject: is_new ? `New email: ${body.subject}` : `Reply: ${body.subject}`,
-    body: `${body.from_name?.trim() || from_email_lower}: ${(body.body_text ?? '').slice(0, 200)}`,
-    link: `${url.origin}/admin/messages/${thread_id}`,
-  })
+  // Auto-resolve routine machine notifications (e.g. mailer-daemon bounces)
+  // deterministically — no ntfy push, no (paid) LLM triage. Sender-gated +
+  // subject-allowlisted so actionable notices still fall through to triage.
+  const notification = match_notification({ from_email: from_email_lower, subject: body.subject })
+  if (notification) {
+    resolve_notification_thread({ db, thread_id, label: notification.label, now })
+    console.info('[auto_resolve]', JSON.stringify({
+      thread_id,
+      sender: notification.sender_id,
+      subject_preview: body.subject.slice(0, 80),
+    }))
+  }
+
+  // Broadcast ntfy push — skip auto-resolved notifications (need no attention)
+  // and mail from US (our own `@livingdictionaries.app` domain / admins) so our
+  // own no-reply/OTP loops don't buzz phones.
+  if (!notification && !is_internal_email(from_email_lower)) {
+    void notify_admins({
+      subject: is_new ? `New email: ${body.subject}` : `Reply: ${body.subject}`,
+      body: `${body.from_name?.trim() || from_email_lower}: ${(body.body_text ?? '').slice(0, 200)}`,
+      link: `${url.origin}/admin/messages/${thread_id}`,
+    })
+  }
+
+  // Inbound-email triage agent hook (fire-and-forget LLM classification).
+  // Skipped for auto-resolved notifications — they're already handled.
+  if (!notification) {
+    fire_agent_email_inbound({
+      thread_id,
+      message_id: message_row_id,
+      is_new_thread: is_new,
+      from_email: from_email_lower,
+      to_email: body.to_email,
+      subject: body.subject,
+    })
+  }
 
   return json({
     ok: true,

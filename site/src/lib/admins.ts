@@ -64,6 +64,28 @@ export function is_admin_at_least(email: string | undefined | null, min_level: A
   return level !== null && level >= min_level
 }
 
+/** Our own outbound domain — mail from here is never customer mail. */
+export const INTERNAL_EMAIL_DOMAIN = 'livingdictionaries.app'
+
+/**
+ * True when an inbound `from_email` is US, not a customer: any
+ * `*@livingdictionaries.app` address (admins' `ld_address`es, `no-reply@`
+ * OTP/system mail that can loop back into the catch-all) OR an admin's own
+ * login email. The triage pipeline skips these — they should never be
+ * classified, pinged, or spam-resolved.
+ */
+export function is_internal_email(email: string | undefined | null): boolean {
+  if (!email)
+    return false
+  const lower = email.trim().toLowerCase()
+  const at = lower.lastIndexOf('@')
+  if (at === -1)
+    return false
+  if (lower.slice(at + 1) === INTERNAL_EMAIL_DOMAIN)
+    return true
+  return ADMINS.some(admin => admin.email.toLowerCase() === lower)
+}
+
 if (import.meta.vitest) {
   test('is_admin true for allow-listed email', () => {
     expect(is_admin('jwrunner7@gmail.com')).toBe(true)
@@ -101,5 +123,14 @@ if (import.meta.vitest) {
     expect(is_admin_at_least('jwrunner7@gmail.com', 2)).toBe(true)
     expect(is_admin_at_least('random@example.com', 1)).toBe(false)
     expect(is_admin_at_least(null, 1)).toBe(false)
+  })
+
+  test('is_internal_email: our domain + admin logins are internal', () => {
+    expect(is_internal_email('no-reply@livingdictionaries.app')).toBe(true)
+    expect(is_internal_email('jacob@livingdictionaries.app')).toBe(true)
+    expect(is_internal_email('JWRunner7@gmail.com')).toBe(true)
+    expect(is_internal_email('reader@gmail.com')).toBe(false)
+    expect(is_internal_email(null)).toBe(false)
+    expect(is_internal_email('garbage')).toBe(false)
   })
 }
