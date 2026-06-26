@@ -6,6 +6,7 @@ import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { find_or_create_auth_user } from '$lib/server/find-or-create-auth-user'
 import { get_user } from '$lib/server/get-user'
+import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
 export interface AuthEmailVerifyRequestBody {
@@ -117,8 +118,12 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
   })
 
   const full_user = get_user({ db, user_id: user.id, cookies })
-  if (!full_user)
+  if (!full_user) {
+    log_server_event({ db, level: 'error', message: 'auth_login_failed', user_id: user.id, context: { method: 'email', reason: 'user_not_found_after_create' } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Failed to load user after creation')
+  }
+
+  log_server_event({ db, level: 'info', message: 'auth_login', user_id: user.id, context: { method: 'email', created } })
 
   return json({
     user: full_user,

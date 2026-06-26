@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types'
 import { verify_auth } from '$lib/auth/verify'
 import { env } from '$env/dynamic/private'
 import { ResponseCodes } from '$lib/constants'
+import { log_server_event } from '$lib/server/log-server-event'
 
 export interface GCSServingUrlRequestBody {
   storage_path: string
@@ -33,6 +34,7 @@ export const POST: RequestHandler = async (event) => {
     return json({ serving_url } satisfies GCSServingUrlResponseBody)
   } catch (err: any) {
     console.error(`Photo processing error when getting serving url: ${err.message}`)
+    log_server_event({ level: 'error', message: 'gcs_serving_url_failed', error: err, context: { storage_path } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, `Photo processing error when getting serving url: ${err.message}`)
   }
 }

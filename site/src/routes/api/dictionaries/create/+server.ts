@@ -3,6 +3,7 @@ import type { DictionaryCoordinates } from '$lib/db/schemas/shared.types'
 import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { log_server_event } from '$lib/server/log-server-event'
 import { send_dictionary_emails } from '$api/email/new_dictionary/dictionary-emails'
 import { error, json } from '@sveltejs/kit'
 
@@ -99,14 +100,18 @@ export const POST: RequestHandler = async (event) => {
     create()
   } catch (err) {
     console.error(`Error creating dictionary: ${(err as Error).message}`)
+    log_server_event({ db, level: 'error', message: 'dictionary_create_failed', error: err, user_id, context: { dictionary_id: id } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Could not create dictionary')
   }
+
+  log_server_event({ db, level: 'info', message: 'dictionary_created', user_id, context: { dictionary_id: id, gloss_languages: body.gloss_languages } })
 
   const saved_dictionary = db.prepare('SELECT * FROM dictionaries WHERE id = ?').get(id) as Record<string, any>
   try {
     await send_dictionary_emails(saved_dictionary as any, email ?? '')
   } catch (err) {
     console.error(`Dictionary created but emails failed: ${(err as Error).message}`)
+    log_server_event({ db, level: 'warn', message: 'dictionary_create_email_failed', error: err, user_id, context: { dictionary_id: id } })
   }
 
   return json({ id } satisfies DictionariesCreateResponseBody)

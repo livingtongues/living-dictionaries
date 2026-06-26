@@ -1,7 +1,10 @@
 import type Database from 'better-sqlite3'
+import { version } from '$app/environment'
+import { ALL_TRACKED_EVENTS } from '$lib/debug/log-events'
 import { is_below_db_worker_capability, is_bot_user_agent, parse_user_agent } from '$lib/debug/parse-user-agent'
 import { distance_bucket, DISTANCE_BUCKETS, distance_to_origin_km } from '$lib/geo/distance'
 import { geo_key } from '$lib/server/geo-from-request'
+import { get_log_archive_db } from './log-archive-db'
 import { normalize_route } from './log-retention-cron'
 import { get_shared_db } from './shared-db'
 
@@ -38,6 +41,60 @@ export interface GeoAnalytics {
   /** Real-user TTFB split by distance to the Boston origin (hot window). */
   ttfb_by_distance: GeoLatency[]
 }
+/** Errors split by build version so deploy-tail noise on stale tabs is legible vs real errors. */
+export interface ErrorsByVersion {
+  /** The live deployed build id (`$app/environment` version); null if unknown. */
+  current_version: string | null
+  /** Total errors in the hot window (the split denominator — app_version isn't in the rollup). */
+  total: number
+  /** Errors emitted by the current build. */
+  current: number
+  /** Errors emitted by any non-current (stale) build. */
+  stale: number
+  /** stale ÷ total; null when there are no hot-window errors. */
+  stale_pct: number | null
+  /** Per-version error counts, highest first. */
+  versions: { version: string | null, errors: number, is_current: boolean }[]
+}
+/**
+ * Ingestion liveness — answers "is the pipeline broken, or just no traffic?" at a
+ * glance. The 2026-06-25 review burned 20 minutes resolving exactly this ambiguity.
+ */
+export interface PipelineHealth {
+  /** Newest `received_at` across ALL hot rows (any level/source); null if empty. */
+  last_log_at: string | null
+  /** Newest `session_start` row — proof a real browser session shipped logs. */
+  last_session_start_at: string | null
+  /** Newest server-sourced row — proof server-side logging is wired + flowing. */
+  last_server_log_at: string | null
+  /** `db_metadata.log_retention_ran_at` — the retention cron's last run. */
+  retention_ran_at: string | null
+  /** Total hot rows in `shared.db.client_logs` right now. */
+  hot_rows: number
+  /** Total cold rows archived in `logs-archive.db`. */
+  archived_rows: number
+}
+/** Self-instrumentation: which declared analytics events have actually been seen. */
+export interface EventCoverage {
+  /** Event name + whether it's been seen in the window + lifetime count. */
+  events: { event: string, seen: boolean, count: number }[]
+  /** Count of declared events never seen in the window — the blind spots. */
+  never_emitted: number
+}
+/**
+ * Leader-worker DB health — the dominant REAL client error class (shared OPFS
+ * leader-worker harness). Healthy = timeouts paired with recoveries, ~0 failed.
+ */
+export interface LeaderHealth {
+  timeouts: number
+  recovered: number
+  /** Retries exhausted — the panel genuinely couldn't load. The real signal. */
+  failed: number
+  /** `had_leader:false` failures — a boot/election fault (wedged leader). */
+  failed_no_leader: number
+  /** Per-source (admin/viewer/dict) failed counts. */
+  failed_by_source: { source: string, count: number }[]
+}
 export interface LogAnalytics {
   window_days: number
   generated_at: string
@@ -55,6 +112,14 @@ export interface LogAnalytics {
   performance: { summary: PerfSummary[], daily: PerfDailyPoint[] }
   /** Approximate geography from CF edge headers — areas + geo-split TTFB. */
   geo: GeoAnalytics
+  /** Errors split by current vs stale build version (hot window only). */
+  errors_by_version: ErrorsByVersion
+  /** Ingestion liveness — broken vs no-traffic at a glance. */
+  pipeline: PipelineHealth
+  /** Declared analytics events vs what's actually been seen. */
+  event_coverage: EventCoverage
+  /** Leader-worker DB health (live_query_* family). */
+  leader_health: LeaderHealth
 }
 
 /** Nearest-rank percentile of an UNSORTED numeric array; null when empty. */
@@ -74,10 +139,12 @@ function bump(map: Map<string, number>, key: string, by = 1): void {
   map.set(key, (map.get(key) ?? 0) + by)
 }
 
-export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now = new Date() }: {
+export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now = new Date(), current_app_version = version }: {
   shared_db?: Database.Database
   days?: number
   now?: Date
+  /** The live deployed build id; errors on any other build count as "stale". */
+  current_app_version?: string | null
 } = {}): LogAnalytics {
   const window_start = new Date(now.getTime() - (days - 1) * 86_400_000)
   const window_start_day = day_string(window_start)
@@ -345,6 +412,82 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   const located_sessions = [...area_counts.values()].reduce((sum, area) => sum + area.sessions, 0)
   const geo: GeoAnalytics = { located_sessions, areas, ttfb_by_country, ttfb_by_distance }
 
+  // --- Errors by build version (hot window only — app_version isn't in the
+  // rollup). Splits error volume into the live deployed build vs any stale build
+  // so deploy-tail noise on not-yet-refreshed tabs is legible vs real errors. ---
+  const version_error_rows = shared_db.prepare(`
+    SELECT app_version version, COUNT(*) errors FROM client_logs
+    WHERE received_at >= ? AND level IN ${ERROR_LEVELS_SQL}
+    GROUP BY app_version
+  `).all(window_start_iso) as { version: string | null, errors: number }[]
+  let version_current_errors = 0
+  let version_stale_errors = 0
+  const error_versions = version_error_rows
+    .map((row) => {
+      const is_current = current_app_version != null && row.version === current_app_version
+      if (is_current)
+        version_current_errors += row.errors
+      else
+        version_stale_errors += row.errors
+      return { version: row.version, errors: row.errors, is_current }
+    })
+    .sort((first, second) => second.errors - first.errors)
+  const version_total_errors = version_current_errors + version_stale_errors
+  const errors_by_version: ErrorsByVersion = {
+    current_version: current_app_version ?? null,
+    total: version_total_errors,
+    current: version_current_errors,
+    stale: version_stale_errors,
+    stale_pct: version_total_errors > 0 ? version_stale_errors / version_total_errors : null,
+    versions: error_versions,
+  }
+
+  // --- Pipeline health: ingestion liveness. Broken vs no-traffic at a glance. ---
+  const last_log_at = (shared_db.prepare(`SELECT MAX(received_at) v FROM client_logs`).get() as { v: string | null }).v
+  const last_session_start_at = (shared_db.prepare(`SELECT MAX(received_at) v FROM client_logs WHERE message = 'session_start'`).get() as { v: string | null }).v
+  const last_server_log_at = (shared_db.prepare(`SELECT MAX(received_at) v FROM client_logs WHERE source = 'server'`).get() as { v: string | null }).v
+  const retention_ran_at = (shared_db.prepare(`SELECT value FROM db_metadata WHERE key = 'log_retention_ran_at'`).get() as { value: string } | undefined)?.value ?? null
+  const hot_rows = (shared_db.prepare(`SELECT COUNT(*) n FROM client_logs`).get() as { n: number }).n
+  let archived_rows: number
+  try {
+    archived_rows = (get_log_archive_db().prepare(`SELECT COUNT(*) n FROM client_logs`).get() as { n: number }).n
+  } catch {
+    archived_rows = 0
+  }
+  const pipeline: PipelineHealth = { last_log_at, last_session_start_at, last_server_log_at, retention_ran_at, hot_rows, archived_rows }
+
+  // --- Event coverage: declared analytics events vs what's actually been seen.
+  // `event_counts` already holds the per-event hot+cold counts (infra excluded). ---
+  const coverage_events = ALL_TRACKED_EVENTS.map((event) => {
+    const count = event_counts.get(event) ?? 0
+    return { event, seen: count > 0, count }
+  })
+  const event_coverage: EventCoverage = {
+    events: coverage_events,
+    never_emitted: coverage_events.filter(entry => !entry.seen).length,
+  }
+
+  // --- Leader-worker health: the live_query_* family (hot window). ---
+  const leader_count = (message: string) => (shared_db.prepare(
+    `SELECT COUNT(*) n FROM client_logs WHERE received_at >= ? AND message = ?`,
+  ).get(window_start_iso, message) as { n: number }).n
+  const failed_no_leader = (shared_db.prepare(`
+    SELECT COUNT(*) n FROM client_logs
+    WHERE received_at >= ? AND message = 'live_query_failed' AND json_extract(context, '$.had_leader') = 0
+  `).get(window_start_iso) as { n: number }).n
+  const failed_by_source = shared_db.prepare(`
+    SELECT coalesce(json_extract(context, '$.source'), 'unknown') source, COUNT(*) count
+    FROM client_logs WHERE received_at >= ? AND message = 'live_query_failed'
+    GROUP BY source ORDER BY count DESC
+  `).all(window_start_iso) as { source: string, count: number }[]
+  const leader_health: LeaderHealth = {
+    timeouts: leader_count('live_query_timeout'),
+    recovered: leader_count('live_query_recovered'),
+    failed: leader_count('live_query_failed'),
+    failed_no_leader,
+    failed_by_source,
+  }
+
   return {
     window_days: days,
     generated_at: now.toISOString(),
@@ -363,5 +506,9 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     capability: { total_sessions: session_rows.length - bot_sessions, below_capability_sessions, bot_sessions, db_tiers },
     performance: { summary: perf_summary, daily: perf_daily },
     geo,
+    errors_by_version,
+    pipeline,
+    event_coverage,
+    leader_health,
   }
 }

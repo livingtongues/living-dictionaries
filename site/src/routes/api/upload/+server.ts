@@ -5,6 +5,7 @@ import type { RequestHandler } from './$types'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
 import { gcs_is_configured, get_gcs } from '$lib/server/gcloud'
+import { log_server_event } from '$lib/server/log-server-event'
 
 export interface UploadRequestBody {
   folder: string
@@ -76,6 +77,7 @@ export const POST: RequestHandler = async (event) => {
     return json({ presigned_upload_url, bucket, object_key, item_id } satisfies UploadResponseBody)
   } catch (err) {
     console.error(`Error creating upload URL: ${err.message}`)
+    log_server_event({ level: 'error', message: 'upload_presign_failed', error: err, context: { dictionary_id, folder, file_type } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error creating upload URL: ${err.message}`)
   }
 }

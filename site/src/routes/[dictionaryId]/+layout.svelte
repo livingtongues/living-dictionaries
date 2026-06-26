@@ -3,6 +3,8 @@
   import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
+  import { track } from '$lib/debug/remote-log'
+  import { DICTIONARY_OPENED } from '$lib/debug/log-events'
   import './custom-fonts.css'
 
   const { data, children } = $props()
@@ -10,6 +12,18 @@
   const { loading } = $derived(entries_data)
 
   const children_render = $derived(children)
+
+  // One `dictionary_opened` per dict the user enters (re-fires when navigating to
+  // a different dictionary, since the id in the effect changes). Untracked props
+  // keep it keyed solely on the id so unrelated catalog edits don't re-emit.
+  let last_opened_dict_id = ''
+  $effect(() => {
+    const { id } = dictionary
+    if (id && id !== last_opened_dict_id) {
+      last_opened_dict_id = id
+      track({ event: DICTIONARY_OPENED, props: { dictionary_id: id, public: dictionary.public } })
+    }
+  })
 </script>
 
 <ShowHide>

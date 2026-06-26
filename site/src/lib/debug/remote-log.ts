@@ -531,8 +531,14 @@ export function init_remote_logging(): void {
   }, FLUSH_INTERVAL_MS)
 
   // Periodic heartbeat. Each tick we know the session was still alive at
-  // `elapsed_seconds`.
+  // `elapsed_seconds`. SKIP the tick while the tab is hidden — backgrounded
+  // admin tabs left open are the dominant source of log volume, and the
+  // `visibility_hidden`/`visibility_visible` events already bracket the gap so
+  // session-span is preserved. A heartbeat = "alive AND visible". (Ported from
+  // house's log-volume buildout.)
   heartbeat_timer = setInterval(() => {
+    if (safe_visibility_state() === 'hidden')
+      return
     const elapsed_seconds = Math.round((Date.now() - session_started_at_ms) / 1000)
     push({
       level: 'info',

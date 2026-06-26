@@ -19,3 +19,17 @@ export const ENTRY_OPENED = 'entry_opened'
 
 /** Audio for an entry/sentence was played. props: dictionary_id, audio_id. */
 export const AUDIO_PLAYED = 'audio_played'
+
+/**
+ * Every analytics event the app is SUPPOSED to emit. The dashboard's
+ * self-instrumentation panel compares this list against what's actually been
+ * seen in `client_logs`, flagging any "defined but never emitted" event — the
+ * exact blind spot the 2026-06-25 log review caught (all four defined, none
+ * wired up). Add a new event constant above AND to this list.
+ */
+export const ALL_TRACKED_EVENTS = [
+  SEARCH_PERFORMED,
+  DICTIONARY_OPENED,
+  ENTRY_OPENED,
+  AUDIO_PLAYED,
+] as const
