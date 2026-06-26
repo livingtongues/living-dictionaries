@@ -33,6 +33,23 @@ Client-only file (not the byte-identical worker harness). Volume win + keeps hea
 ### Part 6 — Commit + push
 ### Part 7 — Live E2E on new.livingdictionaries.app (viewer + editor + create dict) → read logs back
 
+### Part 7 — Live E2E findings (the logging paid off immediately)
+Headless puppeteer (`site/tools/e2e/logging-smoke.mjs`, OTP read from VPS shared.db) exercised the
+live subdomain as admin + anonymous. Server logs (`auth_login`, `dictionary_created`) + the new
+dashboard shape confirmed deployed. Then it surfaced bugs:
+
+- ✅ **CRITICAL (pre-existing, fixed): better-sqlite3 leaked into the client bundle** → every
+  dictionary open crashed with minified `i is not a function` (`[dictionaryId]` layout chunk). Root
+  cause: `dict-live-db.svelte.ts` / `dict-sync-engine.ts` / `dict-writes.ts` (client) VALUE-imported
+  `DICT_SYNCABLE_TABLES` from `$lib/db/server/dictionary-sync-helpers`, which pulls better-sqlite3 via
+  the history-capture chain. Nobody hit it because the new VPS had 0 dictionaries until this test.
+  FIX: moved the constant to client-safe `$lib/db/dict-syncable-tables.ts`; verified the built client
+  bundle has 0 chunks containing `cppdb`/native `bindings`.
+- ✅ **gloss_languages.join crash in the new-dictionary email** — create passed the raw row (JSON
+  strings) to the email composer (expects arrays). FIX: `parse_row` before `send_dictionary_emails`.
+- ✅ **Logging gap: layout load failures shipped as bare "Internal Error" (empty stack)** — added
+  `console.error(err)` in the `[dictionaryId]/+layout.ts` catch so the real stack reaches telemetry.
+
 ## Notes / learnings
 - track signature: `track({ event, props })`; `track_timing({ name, duration_ms, context? })`;
   `log_event({ level, message, context })`; server: `log_server_event({ level, message, error?, context })`.

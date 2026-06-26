@@ -1,46 +1,19 @@
 import type Database from 'better-sqlite3'
 import type { Table } from 'drizzle-orm'
 import type { HistoryEvent } from './dictionary-history-db'
+import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import * as dict_schema from '$lib/db/schemas/dictionary'
 import { getTableColumns } from 'drizzle-orm'
+import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
 import { build_delta, build_snapshot, resolve_owners } from './dictionary-history-capture'
 import { record_history } from './dictionary-history-db'
 
-/**
- * Names of all syncable tables in a dictionary.db. One sector per spec
- * (Q-shared.3 in port-db-sync-architecture.md) — every push/pull processes
- * all 18 tables in this order.
- *
- * Order is FK-safe (parents before children):
- *   entries, texts → senses → senses_in_sentences
- *   sentences (references texts; also referenced by senses_in_sentences)
- *   speakers, audio, videos, photos (top-level media; audio/videos reference texts)
- *   then junctions
- */
-export const DICT_SYNCABLE_TABLES = [
-  'entries',
-  'texts',
-  'sentences',
-  'senses',
-  'senses_in_sentences',
-  'speakers',
-  'audio',
-  'audio_speakers',
-  'videos',
-  'video_speakers',
-  'sense_videos',
-  'sentence_videos',
-  'photos',
-  'sense_photos',
-  'sentence_photos',
-  'dialects',
-  'entry_dialects',
-  'tags',
-  'entry_tags',
-] as const
-
-export type DictSyncableTable = typeof DICT_SYNCABLE_TABLES[number]
+// The table list + its type now live in a client-safe module (no better-sqlite3)
+// so the browser dict-client can import the VALUE without dragging native server
+// code into its bundle. Re-exported here for back-compat with server importers.
+export type { DictSyncableTable }
+export { DICT_SYNCABLE_TABLES }
 
 const VALID_COLUMNS: Record<DictSyncableTable, Set<string>> = Object.fromEntries(
   DICT_SYNCABLE_TABLES.map(name => [

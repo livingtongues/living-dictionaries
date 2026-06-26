@@ -1,6 +1,6 @@
 import type { MultiString } from '$lib/types'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
-import { DICT_SYNCABLE_TABLES } from '$lib/db/server/dictionary-sync-helpers'
+import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
 
 /**
  * Worker-side atomic write orchestrators — LD's mirror of house's

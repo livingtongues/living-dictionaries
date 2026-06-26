@@ -7,7 +7,7 @@ import { TableChangeNotifier } from '$lib/db/client/live/notifier'
 import { compute_retry_decision, log_live_query_failed, log_live_query_recovered, log_live_query_timeout } from '$lib/db/client/live/live-query-retry'
 import { reconcile_rows } from '$lib/db/client/live/reconcile-rows'
 import { DICT_JSON_COLUMNS, parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
-import { DICT_SYNCABLE_TABLES } from '$lib/db/server/dictionary-sync-helpers'
+import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
 import { tick } from 'svelte'
 
 /**
