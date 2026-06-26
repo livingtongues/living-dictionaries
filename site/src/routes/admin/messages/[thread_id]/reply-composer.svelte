@@ -15,11 +15,12 @@
   interface Props {
     thread_id: string
     sync: Sync | null
+    /** Two-way bound so the AI-triage "Use draft" button can prefill the editor. */
+    body_html?: string
   }
 
-  let { thread_id, sync }: Props = $props()
+  let { thread_id, sync, body_html = $bindable('') }: Props = $props()
 
-  let body_html = $state('')
   const body_text = $derived(html_to_text(body_html))
   let staged = $state<{ file: File }[]>([])
   let sending = $state(false)

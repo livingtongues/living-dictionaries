@@ -4,6 +4,7 @@ import { dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { languages_7000_address } from '$api/email/addresses'
 import { send_email } from '$api/email/send-email'
+import { fire_agent_email_inbound } from '$lib/agent/email-inbound-hook'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { notify_admins } from '$lib/notifications/notify-admins'
@@ -110,6 +111,18 @@ export const POST: RequestHandler = async ({ request, url: request_url }) => {
     subject: subject ? `New contact: ${subject}` : 'New contact form message',
     body: `${name?.trim() || email}: ${message.slice(0, 200)}`,
     link: `${request_url.origin}/admin/messages/${thread_id}`,
+  })
+
+  // Fire-and-forget LLM triage (classify + auto-assign + draft). Never blocks
+  // the form response; run_triage swallows its own errors. to_email is null for
+  // contact-form submissions (no inbound alias).
+  fire_agent_email_inbound({
+    thread_id,
+    message_id: message_row_id,
+    is_new_thread: true,
+    from_email: email,
+    to_email: null,
+    subject: subject ?? '(contact form)',
   })
 
   // Targeted submissions still email the people who must personally act and

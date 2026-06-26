@@ -227,6 +227,20 @@ export const message_threads = sqliteTable('message_threads', {
   assigned_at: text(),
   assigned_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),
   to_email: text(),
+  /**
+   * AI triage (`20260625e_triage.sql`, `$lib/agent/triage/*`). Written
+   * server-side by the agent system user after an inbound email is classified;
+   * read live by the triage panel. `triage_verdict` is 'spam' | 'human' (LLM)
+   * or 'notification' (auto-resolver marker the LLM never emits). `triage_*`
+   * stay NULL until the env-gated pipeline runs.
+   */
+  triage_verdict: text({ enum: ['spam', 'human', 'notification'] }),
+  triage_category: text({ enum: ['technical', 'content', 'account', 'partnership', 'other'] }),
+  triage_confidence: text({ enum: ['high', 'low'] }),
+  triage_summary: text(),
+  triage_advice: text(),
+  triage_draft_reply: text(),
+  triage_at: text(),
 })
 
 export const messages = sqliteTable('messages', {

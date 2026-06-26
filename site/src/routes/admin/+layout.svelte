@@ -19,6 +19,7 @@
     { href: '/admin/dictionaries', label: 'Dictionaries' },
     { href: '/admin/sync', label: 'Sync' },
     { href: '/admin/schema', label: 'Schema' },
+    { href: '/admin/triage-examples', label: 'Triage' },
   ]
   function is_active(href: string): boolean {
     return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`)

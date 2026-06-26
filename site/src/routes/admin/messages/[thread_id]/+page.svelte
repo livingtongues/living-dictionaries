@@ -18,8 +18,10 @@
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
   import HtmlBodyIframe from './html-body-iframe.svelte'
   import ReplyComposer from './reply-composer.svelte'
+  import TriagePanel from './triage-panel.svelte'
 
   let { data } = $props()
+  let draft_html = $state('')
   const db = $derived(data.db)
   const thread_id = $derived(page.params.thread_id)
   const current_user_id = $derived(data.auth_user.user?.id)
@@ -221,6 +223,8 @@
     {/if}
   </header>
 
+  <TriagePanel thread={thread} onusedraft={(html) => { draft_html = html }} />
+
   <ol class="message-list">
     {#each messages as message (message.id)}
       <li class="message-card">
@@ -278,7 +282,7 @@
   </ol>
 
   {#if !thread.resolved_at}
-    <ReplyComposer {thread_id} sync={data.sync} />
+    <ReplyComposer {thread_id} sync={data.sync} bind:body_html={draft_html} />
   {/if}
 {/if}
 
