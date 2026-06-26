@@ -31,6 +31,7 @@
     "eslint-plugin-svelte": "^3.19.0",
     "eslint-plugin-svelte-stylistic": "github:jacob-8/eslint-plugin-svelte-stylistic",
     "eslint-plugin-unicorn": "^64.0.0",
+    "happy-dom": "^20.10.6",
     "jsonc-eslint-parser": "^3.1.0",
     "start-server-and-test": "^2.0.5",
     "svelte": "^5.56.2",
