@@ -572,17 +572,13 @@ $lib/db/
   don't store URLs in the DB.
 - **Drizzle migrations are NOT used** — only the raw SQL files. Don't run
   `drizzle-kit generate`; it would emit untracked migrations.
-- **Inspect the live browser DBs** with the `sqlite-query` skill (LD proxy on
-  ports 4050/4051 — admin shared.db + per-dict dict.db). For the deployed VPS,
-  `.claude/commands/prod-db.md`. Live introspection UI at `/admin/schema`.
+- **Inspect the deployed db** use `.claude/commands/prod-db.md`. Live introspection UI at `/admin/schema`.
 
 ## Cross-references
 
 - API-endpoint patterns (auth + tests): `.claude/skills/api-endpoint/SKILL.md`
-- Query the live browser DBs: `.claude/skills/sqlite-query/SKILL.md`
 - Per-dict write/sync deep-dive: `.knowledge/migration/m4-write-sync.md`
 - Per-dict read layer (bundle → Orama → EntryData): `.knowledge/migration/m4-sqlite-read-layer.md`
 - Sync invariants: `.knowledge/migration/dict-sync-invariants.md`
 - Build/deploy + lockfile discipline: `.knowledge/migration/build-and-deploy-gotchas.md`
-- LiveDb-adoption rollout plan: `.issues/livedb-adoption-and-db-skill.md`
 - Related-entries model: `.knowledge/domain/related-entries-model.md`

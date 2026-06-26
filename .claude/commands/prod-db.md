@@ -8,8 +8,7 @@ Use this when reading or modifying production data on the living VPS. The
 database is live — **always confirm what will be affected before destructive
 operations**.
 
-> **PRE-CUTOVER NOTE.** Until cutover (`.issues/cutover-runbook.md`), old prod
-> is Supabase, not the VPS. This command targets the new VPS once it's serving.
+> **PRE-CUTOVER NOTE.** Until cutover (`.issues/cutover-runbook.md`), old prod is Supabase, not the VPS. This command targets the new VPS once it's serving.
 
 ## Infrastructure
 
