@@ -117,14 +117,34 @@ the VPS `shared.db`. Patterns that work:
   fired (e.g. `dictionary_opened`, `search_performed`, server `auth_login`/`dictionary_created`),
   and per-dict DBs at `/data/dictionaries/<id>.db` for entry writes.
 
-### GOTCHA: the entry-add lexeme modal can't be driven headless (Keyman keyboard)
-The add-entry lexeme input (`EditField.svelte`) is attached to the **Keyman** keyboard, which
-intercepts keystrokes. Injecting input via CDP — `elementHandle.type`, `page.keyboard.press`, OR
-even a `page.evaluate` that sets `.value` + dispatches an `input` event — **blocks the page main
-thread**, and the next CDP command dies with `Runtime.callFunctionOn timed out` (180s
-protocolTimeout). The modal itself renders correctly (dump it with a plain `evaluate` BEFORE
-touching the input). NOTE: also, the entries **search box shares `class="form-input"`** and is
-first in the DOM, so scope the modal input as `form input.form-input` (the search box isn't in a
-`<form>`). Net: the editor entry-WRITE + `/changes` push path needs a real (non-headless) browser
-or local-dev devtools to verify end-to-end; everything else (dict open, snapshot bootstrap, Orama
-search, viewer boot, all analytics/server events) verifies fine headless.
+### The entry-add WRITE path DOES verify headless — the "hang" was an `alert()`, not Keyman
+An earlier note here blamed the **Keyman** keyboard for blocking the page main thread on entry-add.
+That was wrong. The real chain (diagnosed 2026-06-26 by probing each CDP step with a short
+`protocolTimeout`): opening the modal and setting the lexeme value are both fine; the hang triggers
+**only on clicking submit**, because `operations.ts insert_entry`'s `catch` calls **`alert(err)`**,
+and an **unhandled native dialog blocks the page indefinitely under puppeteer** (every subsequent
+`page.evaluate` then dies with `Runtime.callFunctionOn timed out`). It looks like a main-thread
+freeze but isn't — screenshots (compositor path) still render; only main-thread RPC blocks.
+
+- **ALWAYS register `page.on('dialog', d => { capture d.message(); d.dismiss() })`** in any flow that
+  can hit an editor error path — and **`d.message()` hands you the actual error text**. That's how
+  the underlying bug was caught: `TypeError: Cannot read private member #writes …`.
+- **Underlying bug (fixed):** `create_dict_live_db` wraps the instance in a `Proxy` whose `get` trap
+  did `Reflect.get(target, prop, receiver)` with the **proxy** as receiver, so the `get writes()`
+  getter's `this.#writes` private-field brand check threw → EVERY `.writes` op (insert_entry,
+  sentences, media, junctions) failed. Fix: resolve with `target` as the receiver. Regression test:
+  `dict-live-db-proxy.test.ts`.
+- With the dialog handler in place, the editor write verifies fine **headless** on local dev AND the
+  live subdomain: modal save → OPFS write → `/changes` push → server `/data/dictionaries/<id>.db`
+  row, with `entry_opened` + server `dict_changes_pushed` telemetry. See
+  `site/tools/e2e/local-create-entry.mjs` and `subdomain-create-entry.mjs`.
+- **Set the value, don't type it:** `save()` reads `inputEl.value` directly, so set it via the native
+  setter (`Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el, v)`) +
+  dispatch `input`, then click `form button[type="submit"]`. The entries **search box also uses
+  `class="form-input"`** and is first in the DOM, so scope the modal input as `form input.form-input`
+  (the search box isn't in a `<form>`).
+- **Headful-under-Xvfb is available** if ever needed (`apt install xvfb`; `xvfb-run -a -s "-screen 0
+  1280x900x24" node script.mjs` with `launch({ headless: false })`), but it's slower and **WebGL
+  fails** without a GPU (the home-globe page errors; entries pages are fine). Headless + a dialog
+  handler is the better path — reach for headful only for input pipelines headless genuinely can't
+  drive.
