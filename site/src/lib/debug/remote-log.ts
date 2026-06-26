@@ -62,6 +62,14 @@ interface InternalEntry extends ClientLogPayload {
 }
 
 let initialized = false
+/**
+ * Events emitted BEFORE `init_remote_logging()` runs (e.g. a `track()` from a
+ * child-layout `$effect` that fires before the root layout's `onMount` inits the
+ * logger — the case for a user landing directly on a deep link). Held in memory
+ * and replayed through `push()` on init so the first `dictionary_opened` /
+ * `entry_opened` of a fresh page load isn't silently dropped.
+ */
+let pre_init_buffer: ClientLogPayload[] = []
 let breadcrumbs: { time: string, type: string, value: string }[] = []
 let original_console_error: typeof console.error | null = null
 let in_console_error_patch = false
@@ -245,10 +253,15 @@ function write_pending(entries: InternalEntry[]): void {
 }
 
 function push(entry: ClientLogPayload): void {
-  if (!initialized)
-    return
   if (is_noise_message(entry.message))
     return
+  if (!initialized) {
+    // Buffer until init replays these (capped — drop oldest on overflow).
+    pre_init_buffer.push(entry)
+    if (pre_init_buffer.length > MAX_BUFFER)
+      pre_init_buffer = pre_init_buffer.slice(-MAX_BUFFER)
+    return
+  }
   const pending = read_pending()
   pending.push(enrich(entry))
   write_pending(pending)
@@ -342,8 +355,6 @@ export function log_event(entry: ClientLogPayload): void {
  * the trail of any later error.
  */
 export function track({ event, props }: { event: string, props?: Record<string, unknown> }): void {
-  if (!initialized)
-    return
   add_breadcrumb({ type: 'event', value: event })
   push({
     level: 'info',
@@ -433,6 +444,14 @@ export function init_remote_logging(): void {
   initialized = true
   session_id = crypto.randomUUID()
   session_started_at_ms = Date.now()
+
+  // Replay anything emitted before init (now that session enrichment is ready).
+  if (pre_init_buffer.length) {
+    const buffered = pre_init_buffer
+    pre_init_buffer = []
+    for (const entry of buffered)
+      push(entry)
+  }
 
   on_window('error', (event) => {
     const error_event = event as ErrorEvent
@@ -604,6 +623,7 @@ export function _reset_for_tests(): void {
   }
   registered_listeners = []
   breadcrumbs = []
+  pre_init_buffer = []
   initialized = false
   in_console_error_patch = false
   session_id = ''

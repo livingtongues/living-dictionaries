@@ -81,7 +81,7 @@ try {
 
   // 5. Open the dictionary entries page — boots the OPFS leader worker (client: dictionary_opened).
   await page.goto(`${BASE}/${DICT_ID}/entries`, { waitUntil: 'networkidle2' }).catch(() => {})
-  await sleep(4000) // worker election + DB open
+  const add_button_appeared = await page.waitForSelector('.add-entry-button', { timeout: 25000 }).then(() => true).catch(() => false)
   report.steps.dict_opened = await page.evaluate(() => {
     const btn = document.querySelector('.add-entry-button')
     return { url: location.pathname, has_add_button: !!btn, add_disabled: btn?.disabled ?? null, body_snippet: document.body.innerText.replace(/\s+/g, ' ').slice(0, 180) }
@@ -90,12 +90,14 @@ try {
 
   // 6. Add an entry via the UI (OPFS write + /changes push).
   const add_clicked = await page.evaluate(() => {
-    const btn = document.querySelector('.add-entry-button')
+    const btn = [...document.querySelectorAll('.add-entry-button')].find(b => !b.disabled && b.offsetParent !== null) || document.querySelector('.add-entry-button')
     if (!btn || btn.disabled) return false
     btn.click()
     return true
   })
-  await sleep(800)
+  report.steps.add_button_appeared = add_button_appeared
+  await page.waitForSelector('input.form-input', { timeout: 8000 }).catch(() => {})
+  await sleep(500)
   await page.evaluate((lex) => {
     const input = document.querySelector('input.form-input')
     if (input) { input.value = lex; input.dispatchEvent(new Event('input', { bubbles: true })) }
