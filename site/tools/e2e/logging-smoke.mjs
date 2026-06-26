@@ -88,31 +88,34 @@ try {
   })
   await shot('2-dict-opened')
 
-  // 6. Add an entry via the UI (OPFS write + /changes push).
+  // 6. Add an entry with NATIVE interactions (OPFS write + /changes push).
+  report.steps.add_button_appeared = add_button_appeared
   const add_clicked = await page.evaluate(() => {
-    const btn = [...document.querySelectorAll('.add-entry-button')].find(b => !b.disabled && b.offsetParent !== null) || document.querySelector('.add-entry-button')
-    if (!btn || btn.disabled) return false
+    const btn = [...document.querySelectorAll('.add-entry-button')].find(b => !b.disabled && b.offsetParent !== null)
+    if (!btn) return false
     btn.click()
     return true
   })
-  report.steps.add_button_appeared = add_button_appeared
-  await page.waitForSelector('input.form-input', { timeout: 8000 }).catch(() => {})
-  await sleep(500)
-  await page.evaluate((lex) => {
-    const input = document.querySelector('input.form-input')
-    if (input) { input.value = lex; input.dispatchEvent(new Event('input', { bubbles: true })) }
-  }, LEXEME)
-  await sleep(300)
-  // Submit the modal form.
-  await page.evaluate(() => {
-    const input = document.querySelector('input.form-input')
-    const form = input?.closest('form')
-    if (form) form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
-  })
-  await sleep(4000) // local write + sync round-trip
-  report.steps.add_entry = { add_clicked, ...await page.evaluate(lex => ({
+  // The modal input is the only one inside a <form> (the search box ALSO uses
+  // .form-input but isn't in a form), so scope to `form input.form-input`.
+  const input_handle = await page.waitForSelector('form input.form-input', { visible: true, timeout: 8000 }).catch(() => null)
+  let typed_value = null
+  let submit_clicked = false
+  if (input_handle) {
+    await input_handle.click({ clickCount: 3 })
+    await input_handle.type(LEXEME, { delay: 25 })
+    await sleep(200)
+    typed_value = await page.evaluate(() => document.querySelector('form input.form-input')?.value ?? null)
+    submit_clicked = await page.evaluate(() => {
+      const btn = document.querySelector('form button[type="submit"]')
+      if (!btn) return false
+      btn.click()
+      return true
+    })
+  }
+  await sleep(6000) // local OPFS write + /changes round-trip
+  report.steps.add_entry = { add_clicked, modal_opened: !!input_handle, typed_value, submit_clicked, ...await page.evaluate(lex => ({
     lexeme_visible: document.body.innerText.includes(lex),
-    entry_count_text: document.querySelector('.add-entry-button')?.textContent?.trim()?.slice(0, 40),
   }), LEXEME) }
   await shot('3-entry-added')
 

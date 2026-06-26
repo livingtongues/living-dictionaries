@@ -49,6 +49,23 @@ dashboard shape confirmed deployed. Then it surfaced bugs:
   strings) to the email composer (expects arrays). FIX: `parse_row` before `send_dictionary_emails`.
 - ✅ **Logging gap: layout load failures shipped as bare "Internal Error" (empty stack)** — added
   `console.error(err)` in the `[dictionaryId]/+layout.ts` catch so the real stack reaches telemetry.
+- ✅ **Pre-init analytics race** — child-layout `track()` fired before root `init_remote_logging`;
+  `push()` now buffers pre-init events and replays them on init (deep-link landings keep their first
+  `dictionary_opened`).
+
+### Final verification (live, post-fixes)
+Confirmed in prod `client_logs` after re-running the smoke: `dictionary_opened` (14×),
+`search_performed` (4×), server `auth_login` + `dictionary_created`, **zero errors/crashes**; dict
+opens cleanly for editor + anonymous; dashboard `event_coverage` live-shows 2/4 events seen; built
+client bundle has **0** chunks with `cppdb`/native bindings.
+
+### ⚠️ Not auto-verified: editor entry WRITE + `/changes` push
+The add-entry lexeme modal uses the **Keyman** keyboard, which intercepts CDP keystrokes and blocks
+the page main thread headless (`Runtime.callFunctionOn timed out`) — so the OPFS write + sync-push
+path couldn't be driven by puppeteer. The modal renders correctly and the leader-worker write is
+async (so it shouldn't freeze a real user). **Needs a real-browser / local-dev check** to fully
+close the loop (`entry_opened` + server `dict_changes_pushed` were therefore never exercised). See
+`.knowledge/testing/browser-deep-flow.md`.
 
 ## Notes / learnings
 - track signature: `track({ event, props })`; `track_timing({ name, duration_ms, context? })`;

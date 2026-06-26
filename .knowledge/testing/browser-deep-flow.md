@@ -102,3 +102,29 @@ drives the actual store in-page via `globalThis.__ld_dict_connections.<dict>.{co
   the set-aside `.data/dictionaries.old-soft-delete-schema/achi.db` using the per-file copy logic in
   `scripts/migrate-dict-dbs-hard-delete.mjs` (stop the dev server first — better-sqlite3 holds the file
   open; then restart). That backup is the only source for the achi fixture (it's not in git).
+
+## Exercising the LIVE subdomain + reading telemetry back (log-and-fix loop)
+`site/tools/e2e/*.mjs` (eslint-ignored via `site/tools/**`) drive `new.livingdictionaries.app`
+with headless puppeteer-core to generate real `client_logs` telemetry, then we read it back from
+the VPS `shared.db`. Patterns that work:
+- **Admin login headless in PROD** (send-code does NOT return the OTP inline outside dev): POST
+  `/api/auth/email/send-code` from the page, then read the freshest code straight from the VPS DB
+  via `execFileSync('ssh',['living','docker exec -i sveltekit_blue node'],{input: <better-sqlite3 query on email_codes>})`, then POST `/api/auth/email/verify` → sets the httpOnly cookie in the jar.
+- **Verify a deploy is live** before asserting behavior: poll `/_app/version.json` until the
+  `version` flips, and/or `ssh living 'git -C /opt/hosting/sveltekit/code rev-parse --short HEAD'`.
+  Confirm a server change shipped by GETting `/api/admin/analytics` and checking the new field shape.
+- **Read telemetry back**: query `shared.db.client_logs` grouped by `message` to confirm events
+  fired (e.g. `dictionary_opened`, `search_performed`, server `auth_login`/`dictionary_created`),
+  and per-dict DBs at `/data/dictionaries/<id>.db` for entry writes.
+
+### GOTCHA: the entry-add lexeme modal can't be driven headless (Keyman keyboard)
+The add-entry lexeme input (`EditField.svelte`) is attached to the **Keyman** keyboard, which
+intercepts keystrokes. Injecting input via CDP — `elementHandle.type`, `page.keyboard.press`, OR
+even a `page.evaluate` that sets `.value` + dispatches an `input` event — **blocks the page main
+thread**, and the next CDP command dies with `Runtime.callFunctionOn timed out` (180s
+protocolTimeout). The modal itself renders correctly (dump it with a plain `evaluate` BEFORE
+touching the input). NOTE: also, the entries **search box shares `class="form-input"`** and is
+first in the DOM, so scope the modal input as `form input.form-input` (the search box isn't in a
+`<form>`). Net: the editor entry-WRITE + `/changes` push path needs a real (non-headless) browser
+or local-dev devtools to verify end-to-end; everything else (dict open, snapshot bootstrap, Orama
+search, viewer boot, all analytics/server events) verifies fine headless.

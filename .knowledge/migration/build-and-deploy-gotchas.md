@@ -62,3 +62,25 @@ eslint-ignored in `eslint.config.js`.
 `PORT=3073 node build &` then `curl --retry … --retry-connrefused http://localhost:3073/…`) —
 use it to catch SSR-render 500s the static gates miss. (The *dev* server `:3041` is Jacob's
 and not sandbox-reachable; agent has no WebGL, so Mapbox tiles still need Jacob's eyeball.)
+
+## Server-only module leaking into a CLIENT chunk (better-sqlite3 → "i is not a function")
+A browser module **value**-importing anything from `$lib/db/server/*` (even a tiny const)
+drags the whole transitive server graph — including **better-sqlite3** + its native
+`bindings` — into that route's client chunk. The bundled native code runs in the browser and
+throws a minified `i is not a function` (the `require`/native-binding shim isn't callable),
+caught by the route's load `try/catch` → SvelteKit renders the error page. `import type` is
+fine (erased); only **value** imports leak.
+
+Real instance (2026-06-26): `dict-live-db.svelte.ts` / `dict-sync-engine.ts` / `dict-writes.ts`
+value-imported `DICT_SYNCABLE_TABLES` from `$lib/db/server/dictionary-sync-helpers` (which pulls
+better-sqlite3 via the `dictionary-history-*` chain) → **every dictionary open crashed**. It went
+unnoticed because the new VPS had 0 dictionaries until an E2E created+opened the first one. Fix:
+keep shared client/server constants in a **client-safe module with no imports**
+(`$lib/db/dict-syncable-tables.ts`); the server helper re-exports for back-compat.
+
+Detect: after `pnpm build`, the client bundle must be clean —
+`grep -rl "cppdb\|build/Release" .svelte-kit/output/client/_app/immutable/ | wc -l` → **0**.
+Guard against regressions by grepping client dirs for value-imports of server modules:
+`grep -rn "from '\$lib/db/server/\|from '\$lib/server/" src/lib/db/dict-client src/lib/db/client --include=*.ts --include=*.svelte | grep -v "import type"` → should be empty.
+A load `try/catch` that does `error(500, err)` should also `console.error(err)` first, or the
+real stack never reaches telemetry (the crash logs as a bare "Internal Error", empty stack).
