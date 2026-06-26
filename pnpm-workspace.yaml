@@ -1,0 +1,5 @@
+packages:
+  - 'packages/*'
+  - e2e
+  - '!packages/ids-import'
+  - '!packages/functions'

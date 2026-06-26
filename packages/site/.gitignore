@@ -1,0 +1,9 @@
+/build
+.vercel
+/.svelte-kit*
+vite.config.ts*
+
+**/e2e/snapshots/*
+test-results
+playwright-report
+/playwright/.cache/

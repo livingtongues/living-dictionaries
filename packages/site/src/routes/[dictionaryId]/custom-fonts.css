@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Wancho&display=swap');
+
+@font-face {
+  font-family: 'sompeng';
+  src: url('/fonts/Sompeng-Code200365k.ttf') format('truetype');
+}
+
+.sompeng {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji', 'sompeng';
+  font-weight: normal;
+  font-style: normal;
+}

@@ -1,0 +1,42 @@
+{
+  "extends": "./.svelte-kit/tsconfig.json",
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": [
+      "es2021",
+      "WebWorker",
+      "DOM"
+    ],
+    "baseUrl": ".",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    // defining paths here and adding baseUrl for Playwright to work
+    "paths": {
+      "$lib": [
+        "./src/lib"
+      ],
+      "$lib/*": [
+        "./src/lib/*"
+      ],
+      "$api": [
+        "./src/routes/api"
+      ],
+      "$api/*": [
+        "./src/routes/api/*"
+      ]
+    },
+    "resolveJsonModule": true,
+    "types": [
+      "vitest/globals",
+      "vitest/importMeta",
+      "google-one-tap"
+    ],
+    "allowJs": true,
+    "checkJs": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "ignoreDeprecations": "5.0",
+    "skipLibCheck": true
+  }
+}

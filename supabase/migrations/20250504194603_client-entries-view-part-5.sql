@@ -1,0 +1,10 @@
+ALTER TABLE senses ALTER COLUMN dictionary_id SET NOT NULL;
+ALTER TABLE audio_speakers ALTER COLUMN dictionary_id SET NOT NULL;
+ALTER TABLE video_speakers ALTER COLUMN dictionary_id SET NOT NULL;
+ALTER TABLE entry_tags ALTER COLUMN dictionary_id SET NOT NULL;
+ALTER TABLE entry_dialects ALTER COLUMN dictionary_id SET NOT NULL;
+ALTER TABLE sense_photos ALTER COLUMN dictionary_id SET NOT NULL;
+ALTER TABLE sense_videos ALTER COLUMN dictionary_id SET NOT NULL;
+ALTER TABLE senses_in_sentences ALTER COLUMN dictionary_id SET NOT NULL;
+ALTER TABLE sentence_photos ALTER COLUMN dictionary_id SET NOT NULL;
+ALTER TABLE sentence_videos ALTER COLUMN dictionary_id SET NOT NULL;

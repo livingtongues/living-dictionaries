@@ -1,0 +1,1 @@
+ALTER TABLE media_to_delete ENABLE ROW LEVEL SECURITY;

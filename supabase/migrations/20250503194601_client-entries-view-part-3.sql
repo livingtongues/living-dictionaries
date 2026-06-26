@@ -1,0 +1,19 @@
+CREATE INDEX IF NOT EXISTS idx_entries_dictionary_id_updated_at ON entries (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_senses_dictionary_id_updated_at ON senses (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_audio_dictionary_id_updated_at ON audio (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_speakers_dictionary_id_updated_at ON speakers (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_tags_dictionary_id_updated_at ON tags (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_dialects_dictionary_id_updated_at ON dialects (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_photos_dictionary_id_updated_at ON photos (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_videos_dictionary_id_updated_at ON videos (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_sentences_dictionary_id_updated_at ON sentences (dictionary_id, updated_at);
+
+CREATE INDEX IF NOT EXISTS idx_audio_speakers_dictionary_id_created_at ON audio_speakers (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_video_speakers_dictionary_id_created_at ON video_speakers (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_entry_tags_dictionary_id_created_at ON entry_tags (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_entry_dialects_dictionary_id_created_at ON entry_dialects (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_sense_photos_dictionary_id_created_at ON sense_photos (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_sense_videos_dictionary_id_created_at ON sense_videos (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_senses_in_sentences_dictionary_id_created_at ON senses_in_sentences (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_sentence_photos_dictionary_id_created_at ON sentence_photos (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_sentence_videos_dictionary_id_created_at ON sentence_videos (dictionary_id, created_at);

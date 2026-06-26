@@ -1,0 +1,71 @@
+/* .desktop .kmw-keyboard-chinese,
+.desktop .kmw-keyboard-japanese,
+.desktop .kmw-keyboard-european {
+  visibility: hidden;
+  margin-top: 5px;
+} */
+:root {
+  --kmw-osk-pos: absolute;
+}
+
+.desktop.kmw-osk-frame {
+  position: var(--kmw-osk-pos) !important;
+  /* when using keyboard inside a fixed context like a modal, use fixed instead of absolute positioning on keyboard to keep it with fixed input, otherwise it will match page scroll height, InputWrapper.svelte will update root property if fixed prop is true */
+}
+
+.desktop .kmw-osk-inner-frame {
+  border: solid 1px rgb(68, 68, 68) !important;
+  background-color: rgb(68, 68, 68) !important;
+  border-radius: 5px;
+  top: 3px;
+  position: absolute;
+}
+
+/* .desktop .kmw-footer {
+  display: none;
+} */
+
+.desktop .kmw-footer-caption {
+  display: none;
+}
+
+.desktop .kmw-title-bar>* {
+  display: none;
+}
+
+.desktop .kmw-title-bar {
+  /* height: 6px; */
+  /* background-color: rgb(68, 68, 68) !important; */
+  width: 1px;
+  visibility: hidden;
+}
+
+.desktop .kmw-key-layer-group {
+  z-index: 10001;
+}
+
+.desktop .kmw-key:hover {
+  background: #dcdcdc;
+}
+
+.desktop .kmw-osk-static {
+  border: none !important;
+}
+
+.desktop #Help_Keyboard_chinese>div {
+  border-color: rgb(84, 110, 122) !important;
+}
+
+.keymanweb-input {
+  font-size: 1rem !important;
+}
+
+.keymanweb-input:focus {
+  /* remove default orange box */
+  outline: none;
+}
+
+.keymanweb-input>div {
+  /* remove added top-shadow */
+  background-color: unset !important;
+}

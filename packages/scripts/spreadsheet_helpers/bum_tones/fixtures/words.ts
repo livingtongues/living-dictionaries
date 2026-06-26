@@ -1,0 +1,15 @@
+export const test_words = [
+  'aba',
+  'abah',
+  'abam',
+  'abaŋ',
+  'abehi',
+  'abɛn',
+  'abəh',
+  'abəh',
+  'abi',
+  'abin',
+  'abɔŋ',
+  'abɔŋ',
+  'abuk',
+];

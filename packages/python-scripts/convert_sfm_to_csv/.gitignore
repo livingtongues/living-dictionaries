@@ -1,0 +1,7 @@
+__pycache__/
+.pytest_cache/
+venv/
+myenv/
+*.csv
+!test_sheet.csv
+tester.py
