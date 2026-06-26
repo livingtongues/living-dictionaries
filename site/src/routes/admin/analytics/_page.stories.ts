@@ -68,10 +68,10 @@ const analytics: LogAnalytics = {
     { route: 'dr-house', count: 33 },
   ],
   top_events: [
+    { event: 'entry_opened', count: 932 },
     { event: 'search_performed', count: 421 },
-    { event: 'chapter_opened', count: 388 },
-    { event: 'media_opened', count: 417 },
-    { event: 'checkout_started', count: 12 },
+    { event: 'dictionary_opened', count: 188 },
+    { event: 'audio_played', count: 64 },
   ],
   by_source: [
     { source: 'client', logs: 2298, errors: 19 },
@@ -130,6 +130,41 @@ const analytics: LogAnalytics = {
       { label: '> 10,000 km', count: 35, p50: 301, p95: 742 },
     ],
   },
+  errors_by_version: {
+    current_version: '1719300000123',
+    total: 24,
+    current: 4,
+    stale: 20,
+    stale_pct: 20 / 24,
+    versions: [
+      { version: '1719200000111', errors: 20, is_current: false },
+      { version: '1719300000123', errors: 4, is_current: true },
+    ],
+  },
+  pipeline: {
+    last_log_at: new Date(Date.now() - 3 * 60_000).toISOString(),
+    last_session_start_at: new Date(Date.now() - 9 * 60_000).toISOString(),
+    last_server_log_at: new Date(Date.now() - 14 * 60_000).toISOString(),
+    retention_ran_at: new Date(Date.now() - 5 * 3600_000).toISOString(),
+    hot_rows: 2417,
+    archived_rows: 18342,
+  },
+  event_coverage: {
+    events: [
+      { event: 'search_performed', seen: true, count: 421 },
+      { event: 'dictionary_opened', seen: true, count: 188 },
+      { event: 'entry_opened', seen: true, count: 932 },
+      { event: 'audio_played', seen: false, count: 0 },
+    ],
+    never_emitted: 1,
+  },
+  leader_health: {
+    timeouts: 12,
+    recovered: 11,
+    failed: 1,
+    failed_no_leader: 1,
+    failed_by_source: [{ source: 'viewer', count: 1 }],
+  },
 }
 
 export const Default: PageStory<typeof Component> = {
@@ -149,6 +184,18 @@ const empty_analytics: LogAnalytics = {
   capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, db_tiers: [] },
   performance: { summary: [], daily: [] },
   geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [] },
+  errors_by_version: { current_version: '1719300000123', total: 0, current: 0, stale: 0, stale_pct: null, versions: [] },
+  pipeline: { last_log_at: null, last_session_start_at: null, last_server_log_at: null, retention_ran_at: null, hot_rows: 0, archived_rows: 0 },
+  event_coverage: {
+    events: [
+      { event: 'search_performed', seen: false, count: 0 },
+      { event: 'dictionary_opened', seen: false, count: 0 },
+      { event: 'entry_opened', seen: false, count: 0 },
+      { event: 'audio_played', seen: false, count: 0 },
+    ],
+    never_emitted: 4,
+  },
+  leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [] },
 }
 
 export const Empty: PageStory<typeof Component> = {

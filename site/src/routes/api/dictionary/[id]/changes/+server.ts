@@ -8,6 +8,7 @@ import { get_dictionary_db, LATEST_DICT_MIGRATION, read_last_modified_at } from 
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { process_dict_changes, strip_sql_ext } from '$lib/db/server/dictionary-sync-helpers'
+import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
 export type { DictChangesRequest, DictChangesResponse }
@@ -86,13 +87,24 @@ export const POST: RequestHandler = async (event) => {
 
   // Process. Editor pushes also record change history into the separate
   // per-dict history db (best-effort, appended after the main-db commit).
-  const response = process_dict_changes({
-    db: dict_db,
-    request: body,
-    user_id,
-    is_editor,
-    history_db: is_editor && has_push ? get_dictionary_history_db(dict_id) : undefined,
-  })
+  let response: DictChangesResponse
+  try {
+    response = process_dict_changes({
+      db: dict_db,
+      request: body,
+      user_id,
+      is_editor,
+      history_db: is_editor && has_push ? get_dictionary_history_db(dict_id) : undefined,
+    })
+  } catch (err) {
+    log_server_event({ level: 'error', message: 'dict_changes_failed', error: err, user_id: user_id || null, context: { dictionary_id: dict_id, is_editor, has_push } })
+    throw err
+  }
+
+  if (has_push) {
+    const dirty_count = Object.values(body.dirty_rows ?? {}).reduce((sum, rows) => sum + (rows?.length ?? 0), 0)
+    log_server_event({ level: 'info', message: 'dict_changes_pushed', user_id: user_id || null, context: { dictionary_id: dict_id, dirty_rows: dirty_count, deletes: body.deletes?.length ?? 0 } })
+  }
 
   // Mirror to shared.db.dictionaries.updated_at + snapshot_uploaded_at gate
   // (Q5 cross-DB cascade). Only when an editor actually pushed something.
@@ -104,6 +116,7 @@ export const POST: RequestHandler = async (event) => {
       ).run(response.new_synced_up_to, dict_id)
     } catch (err) {
       console.warn(`Could not mirror updated_at for ${dict_id}:`, err)
+      log_server_event({ level: 'warn', message: 'dict_changes_mirror_failed', error: err, user_id: user_id || null, context: { dictionary_id: dict_id } })
     }
   }
 

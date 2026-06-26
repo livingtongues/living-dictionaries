@@ -9,6 +9,7 @@ import { fire_agent_email_inbound } from '$lib/agent/email-inbound-hook'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { find_or_create_thread } from '$lib/email/find-or-create-thread'
+import { log_server_event } from '$lib/server/log-server-event'
 import { notify_admins } from '$lib/notifications/notify-admins'
 import { error, json } from '@sveltejs/kit'
 
@@ -123,17 +124,22 @@ export const POST: RequestHandler = async ({ request, url }) => {
   const now = new Date().toISOString()
   const received_at_iso = body.received_at
 
-  insert_inbound({
-    db,
-    thread_id,
-    is_new,
-    message_row_id,
-    matching_user_id: matching_user?.id ?? null,
-    body,
-    from_email_lower,
-    received_at_iso,
-    now,
-  })
+  try {
+    insert_inbound({
+      db,
+      thread_id,
+      is_new,
+      message_row_id,
+      matching_user_id: matching_user?.id ?? null,
+      body,
+      from_email_lower,
+      received_at_iso,
+      now,
+    })
+  } catch (err) {
+    log_server_event({ db, level: 'error', message: 'email_inbound_insert_failed', error: err, context: { thread_id, from_email: from_email_lower, is_new } })
+    throw err
+  }
 
   // Insert one message_attachments row per attachment the worker uploaded to
   // R2. The worker's attachment_id IS the R2 object key, so we store it on
@@ -195,6 +201,8 @@ export const POST: RequestHandler = async ({ request, url }) => {
       subject: body.subject,
     })
   }
+
+  log_server_event({ db, level: 'info', message: 'email_inbound_received', user_id: matching_user?.id ?? null, context: { thread_id, is_new, attachments: body.attachments.length, auto_resolved: !!notification, to_email: body.to_email } })
 
   return json({
     ok: true,

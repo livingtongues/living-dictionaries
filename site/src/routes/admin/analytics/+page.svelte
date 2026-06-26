@@ -67,6 +67,35 @@
   }
   const area_bars = $derived(geo.areas.map(area => ({ label: `${country_flag(area.country)} ${area.key}`, value: area.sessions })))
 
+  const pipeline = $derived(analytics.pipeline)
+  const errors_by_version = $derived(analytics.errors_by_version)
+  const event_coverage = $derived(analytics.event_coverage)
+  const leader = $derived(analytics.leader_health)
+  // Build ids are long; show a short trailing slice for readability.
+  function short_version(version: string | null): string {
+    if (!version)
+      return 'unknown'
+    return version.length > 10 ? `…${version.slice(-8)}` : version
+  }
+  function ago(iso: string | null): string {
+    if (!iso)
+      return 'never'
+    const ms = Date.now() - new Date(iso).getTime()
+    if (Number.isNaN(ms))
+      return 'never'
+    const mins = Math.round(ms / 60000)
+    if (mins < 1)
+      return 'just now'
+    if (mins < 60)
+      return `${mins}m ago`
+    const hours = Math.round(mins / 60)
+    if (hours < 48)
+      return `${hours}h ago`
+    return `${Math.round(hours / 24)}d ago`
+  }
+  // Ingestion verdict: distinguishes a broken pipe from a quiet one.
+  const ingestion_recent = $derived(!!pipeline.last_log_at && Date.now() - new Date(pipeline.last_log_at).getTime() < 24 * 3600_000)
+
   const error_suffix = $derived(insights.error_rate != null ? `, ${format_pct(insights.error_rate)} error rate` : '')
   const headline = $derived(
     `${format_number(totals.logs)} logs from ${format_number(totals.unique_users)} users across ${format_number(totals.sessions)} sessions over the last ${analytics.window_days} days${error_suffix}.`,
@@ -92,6 +121,25 @@
     <h1>Analytics</h1>
     <span class="sub">last {analytics.window_days} days · generated {short_time(analytics.generated_at)}</span>
   </header>
+
+  <section class="pipeline" class:warn={!ingestion_recent}>
+    <div class="pipeline-verdict">
+      <span class="dot" class:ok={ingestion_recent} class:idle={!ingestion_recent}></span>
+      {#if ingestion_recent}
+        Pipeline live — last log {ago(pipeline.last_log_at)}
+      {:else if pipeline.last_log_at}
+        No ingestion in 24h — last log {ago(pipeline.last_log_at)} (broken, or no traffic?)
+      {:else}
+        No telemetry ever received — awaiting first traffic
+      {/if}
+    </div>
+    <div class="pipeline-stats">
+      <span><b>{format_number(pipeline.hot_rows)}</b> hot · <b>{format_number(pipeline.archived_rows)}</b> archived</span>
+      <span>session_start {ago(pipeline.last_session_start_at)}</span>
+      <span>server log {ago(pipeline.last_server_log_at)}</span>
+      <span>retention {ago(pipeline.retention_ran_at)}</span>
+    </div>
+  </section>
 
   <section class="cards">
     {#each [['Sessions', analytics.totals.sessions], ['Unique users', analytics.totals.unique_users], ['Errors', analytics.totals.errors], ['Log rows', analytics.totals.logs]] as [label, value] (label)}
@@ -157,6 +205,66 @@
     {/if}
   </section>
 
+  <div class="grid">
+    <section class="panel">
+      <h2>Errors by build version <span class="hint">current vs stale bundle · hot window</span></h2>
+      {#if errors_by_version.total === 0}
+        <p class="muted">No errors in the hot window. 🎉</p>
+      {:else}
+        <div class="ver-split">
+          <div class="ver-stat">
+            <div class="ver-value" class:danger={(errors_by_version.stale_pct ?? 0) > 0.5}>{errors_by_version.stale_pct != null ? format_pct(errors_by_version.stale_pct) : '—'}</div>
+            <div class="ver-label">Errors from a stale bundle</div>
+            <div class="ver-sub">{format_number(errors_by_version.stale)} of {format_number(errors_by_version.total)} on a non-current build</div>
+          </div>
+          <div class="ver-stat">
+            <div class="ver-value">{format_number(errors_by_version.current)}</div>
+            <div class="ver-label">Current-build errors</div>
+            <div class="ver-sub">build {short_version(errors_by_version.current_version)}</div>
+          </div>
+        </div>
+        <table class="src-table">
+          <thead><tr><th>Build</th><th>Errors</th></tr></thead>
+          <tbody>
+            {#each errors_by_version.versions as row (row.version)}
+              <tr><td>{short_version(row.version)}{row.is_current ? ' (current)' : ''}</td><td class:danger={!row.is_current}>{format_number(row.errors)}</td></tr>
+            {/each}
+          </tbody>
+        </table>
+      {/if}
+    </section>
+
+    <section class="panel">
+      <h2>Leader-worker DB health <span class="hint">live_query_* · hot window</span></h2>
+      <div class="ver-split">
+        <div class="ver-stat">
+          <div class="ver-value" class:danger={leader.failed > 0}>{format_number(leader.failed)}</div>
+          <div class="ver-label">Failed loads</div>
+          <div class="ver-sub">{format_number(leader.failed_no_leader)} with no leader (wedged)</div>
+        </div>
+        <div class="ver-stat">
+          <div class="ver-value">{format_number(leader.timeouts)}</div>
+          <div class="ver-label">Timeouts</div>
+          <div class="ver-sub">{format_number(leader.recovered)} recovered</div>
+        </div>
+      </div>
+      {#if leader.failed > 0}
+        <table class="src-table">
+          <thead><tr><th>Failed by source</th><th>Count</th></tr></thead>
+          <tbody>
+            {#each leader.failed_by_source as row (row.source)}
+              <tr><td>{row.source}</td><td class="danger">{format_number(row.count)}</td></tr>
+            {/each}
+          </tbody>
+        </table>
+      {:else if leader.timeouts === 0}
+        <p class="muted">No leader-worker query stalls. 🎉</p>
+      {:else}
+        <p class="muted">Timeouts present but all recovered — healthy self-heal signature.</p>
+      {/if}
+    </section>
+  </div>
+
   <section class="panel">
     <h2>Performance <span class="hint">client timings · p50 / p95 · hot window only</span></h2>
     {#if perf_has_data}
@@ -216,6 +324,8 @@
                 {/each}
               </tbody>
             </table>
+          {:else if geo.located_sessions > 0}
+            <p class="cap-warn">⚠️ {format_number(geo.located_sessions)} located sessions but no coordinates — the Cloudflare “Add visitor location headers” managed transform appears OFF. Enable it to get region/city + the distance-to-Boston TTFB split.</p>
           {:else}
             <p class="muted">No coordinates yet — needs the CF location-headers transform.</p>
           {/if}
@@ -256,6 +366,25 @@
       {/if}
     </section>
   </div>
+
+  <section class="panel">
+    <h2>Event coverage <span class="hint">declared analytics events vs seen · self-instrumentation</span></h2>
+    {#if event_coverage.never_emitted > 0}
+      <p class="cap-warn">⚠️ {event_coverage.never_emitted} of {event_coverage.events.length} declared events have NOT been seen this window — either no one hit that path, or the event isn't wired up.</p>
+    {/if}
+    <table class="src-table">
+      <thead><tr><th>Event</th><th>Status</th><th>Count</th></tr></thead>
+      <tbody>
+        {#each event_coverage.events as row (row.event)}
+          <tr>
+            <td class="mono">{row.event}</td>
+            <td>{row.seen ? '✅ seen' : '⚪ never'}</td>
+            <td class:muted={!row.seen}>{format_number(row.count)}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </section>
 
   <section class="panel">
     <h2>By source</h2>
@@ -346,6 +475,72 @@
   .sub {
     color: var(--color-secondary);
     font-size: 0.8125rem;
+  }
+  .pipeline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--success, #16a34a);
+    border-radius: 0.625rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+  .pipeline.warn {
+    border-left-color: var(--warning, #d97706);
+  }
+  .pipeline-verdict {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+  }
+  .pipeline .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .pipeline .dot.ok {
+    background: var(--success, #16a34a);
+  }
+  .pipeline .dot.idle {
+    background: var(--warning, #d97706);
+  }
+  .pipeline-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    color: var(--color-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .ver-split {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .ver-stat {
+    flex: 1;
+  }
+  .ver-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .ver-value.danger {
+    color: var(--danger);
+  }
+  .ver-label {
+    font-size: 0.8125rem;
+    margin-top: 0.125rem;
+  }
+  .ver-sub {
+    color: var(--color-secondary);
+    font-size: 0.75rem;
   }
   .cards {
     display: grid;

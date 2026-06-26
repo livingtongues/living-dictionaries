@@ -12,6 +12,8 @@
   import { page } from '$app/stores'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { browser } from '$app/environment'
+  import { track, track_timing } from '$lib/debug/remote-log'
+  import { SEARCH_PERFORMED } from '$lib/debug/log-events'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
 
   const { data } = $props()
@@ -25,6 +27,19 @@
 
   let search_inited_ms: number
 
+  // `search()` re-runs on every keystroke/page change; debounce the analytics
+  // emission to the settled query so we log "what people searched for" + the
+  // result count + the timing once per query, not once per character.
+  const SEARCH_TRACK_DEBOUNCE_MS = 1200
+  let search_track_timer: ReturnType<typeof setTimeout> | null = null
+  function track_search_performed({ query, result_count, duration_ms }: { query: string, result_count: number, duration_ms: number }) {
+    if (search_track_timer) clearTimeout(search_track_timer)
+    search_track_timer = setTimeout(() => {
+      track({ event: SEARCH_PERFORMED, props: { dictionary_id: dictionary.id, query: query.slice(0, 80), query_len: query.length, result_count, zero_results: result_count === 0 } })
+      track_timing({ name: 'search', duration_ms, context: { result_count } })
+    }, SEARCH_TRACK_DEBOUNCE_MS)
+  }
+
   async function search(query_params: QueryParams, page_index: number) {
     try {
       const time = Date.now()
@@ -34,8 +49,10 @@
       result_facets = facets
       search_results_count = count
       search_time = formatted
-      console.info({ facets, hits, count })
       _hits = hits
+      const query = (query_params.query || '').trim()
+      if (query)
+        track_search_performed({ query, result_count: count, duration_ms: Date.now() - time })
     } catch (err) {
       console.error(err)
     }

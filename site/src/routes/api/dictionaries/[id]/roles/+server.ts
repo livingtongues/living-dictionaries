@@ -2,6 +2,7 @@ import type { RequestHandler } from './$types'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
 /**
@@ -129,6 +130,7 @@ export const POST: RequestHandler = async (event) => {
         dirty              = 1,
         updated_at         = excluded.updated_at
     `).run(role_id, dict_id, target_user.id, role, auth.user_id, now, now)
+    log_server_event({ db, level: 'info', message: 'dictionary_role_granted', user_id: auth.user_id, context: { dictionary_id: dict_id, target_user_id: target_user.id, role } })
     return json({ result: 'role_created', role_id } satisfies DictionariesIdRolesPostResponseBody)
   }
 
@@ -139,5 +141,6 @@ export const POST: RequestHandler = async (event) => {
       (id, dictionary_id, inviter_user_id, inviter_email, target_email, role, status, dirty, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, 'queued', 1, ?, ?)
   `).run(invite_id, dict_id, auth.user_id, auth.email, target_email, role, now, now)
+  log_server_event({ db, level: 'info', message: 'dictionary_invite_created', user_id: auth.user_id, context: { dictionary_id: dict_id, role } })
   return json({ result: 'invite_created', invite_id } satisfies DictionariesIdRolesPostResponseBody)
 }

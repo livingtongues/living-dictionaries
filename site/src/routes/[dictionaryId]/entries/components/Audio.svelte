@@ -35,6 +35,8 @@
   import { longpress, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
+  import { track } from '$lib/debug/remote-log'
+  import { AUDIO_PLAYED } from '$lib/debug/log-events'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import IconUilMicrophone from '~icons/uil/microphone'
 
@@ -51,6 +53,7 @@
   const url_from_storage_path = $derived($page.data.url_from_storage_path)
 
   function initAudio() {
+    track({ event: AUDIO_PLAYED, props: { dictionary_id: $page.params.dictionaryId, entry_id: entry.id, audio_id: sound_file?.id, context } })
     playAudio(url_from_storage_path(sound_file.storage_path))
   }
 

@@ -5,6 +5,8 @@
   import { share } from '$lib/helpers/share'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import ChangeHistory from '$lib/components/history/ChangeHistory.svelte'
+  import { track } from '$lib/debug/remote-log'
+  import { ENTRY_OPENED } from '$lib/debug/log-events'
   import { page } from '$app/stores'
   import { dev } from '$app/environment'
 
@@ -21,6 +23,16 @@
   } = $derived(data)
 
   let show_history = $state(false)
+
+  // One `entry_opened` per entry viewed (re-fires on navigation to another entry).
+  let last_opened_entry_id = ''
+  $effect(() => {
+    const entry_id = $page.params.entryId
+    if (entry_id && entry_id !== last_opened_entry_id) {
+      last_opened_entry_id = entry_id
+      track({ event: ENTRY_OPENED, props: { dictionary_id: dictionary.id, entry_id } })
+    }
+  })
 
   // Prefer the live read-model row (reactive to edits + sync) once the bundle
   // has loaded it; until then fall back to the SSR/cold-fetched entry so a
