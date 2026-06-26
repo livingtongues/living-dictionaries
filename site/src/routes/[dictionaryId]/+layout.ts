@@ -175,6 +175,11 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       search_index_updated: entries_ui.search_index_updated,
     }
   } catch (err) {
+    // Surface the REAL error + stack to the telemetry pipeline (console.error is
+    // patched by remote-log). Without this the load failure ships as a bare
+    // "Internal Error" crash with an empty stack — which is exactly what hid a
+    // server-module-in-client-bundle leak that crashed every dictionary open.
+    console.error('dictionary layout load failed', err)
     error(ResponseCodes.INTERNAL_SERVER_ERROR, err)
   }
 }

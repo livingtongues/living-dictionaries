@@ -1,12 +1,12 @@
 import type {
   DictChangesRequest,
   DictChangesResponse,
-  DictSyncableTable,
 } from '$lib/db/server/dictionary-sync-helpers'
+import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
 import type { AuthHeaders } from './worker/instance'
 import { ResponseCodes } from '$lib/constants'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
-import { DICT_SYNCABLE_TABLES } from '$lib/db/server/dictionary-sync-helpers'
+import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
 import { LATEST_DICT_MIGRATION } from './dict-migrations-bundle'
 
 /** The slice of the worker's connection the engine needs (reads + writes). */

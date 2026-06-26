@@ -3,6 +3,7 @@ import type { DictionaryCoordinates } from '$lib/db/schemas/shared.types'
 import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { parse_row } from '$lib/db/schemas/json-columns'
 import { log_server_event } from '$lib/server/log-server-event'
 import { send_dictionary_emails } from '$api/email/new_dictionary/dictionary-emails'
 import { error, json } from '@sveltejs/kit'
@@ -106,7 +107,10 @@ export const POST: RequestHandler = async (event) => {
 
   log_server_event({ db, level: 'info', message: 'dictionary_created', user_id, context: { dictionary_id: id, gloss_languages: body.gloss_languages } })
 
-  const saved_dictionary = db.prepare('SELECT * FROM dictionaries WHERE id = ?').get(id) as Record<string, any>
+  // Hydrate JSON columns (gloss_languages, alternate_names, coordinates) — the
+  // raw row stores them as strings, but the email composer expects arrays/objects
+  // (`gloss_languages.join(...)` threw on the unparsed string).
+  const saved_dictionary = parse_row('dictionaries', db.prepare('SELECT * FROM dictionaries WHERE id = ?').get(id) as Record<string, unknown>)
   try {
     await send_dictionary_emails(saved_dictionary as any, email ?? '')
   } catch (err) {
