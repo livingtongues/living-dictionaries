@@ -1,6 +1,6 @@
 ---
 name: database
-description: SQLite Database guidelines for admin's shared.db + per-dict dictionaries/<id>.db (content), wa-sqlite in browsers + better-sqlite3 on the VPS, sync engines, schema, migrations, queries, and live reactive UI data.
+description: SQLite Database skill for LD's admin shared.db + per-dict dictionaries/<id>.db (content) — how to WRITE DB/sync/schema/migration code AND how to READ/query the live local and production VPS databases (user/dictionary lookups, schema state, edits). wa-sqlite in browsers + better-sqlite3 on the VPS, sync engines, schema, migrations, queries, live reactive UI data.
 ---
 
 ## Guidelines
@@ -158,6 +158,78 @@ import { stringify_row } from '$lib/db/schemas/json-columns'
 const row = stringify_row(users, { id, email, name, providers: [...], ... })
 db.prepare('INSERT INTO users (...) VALUES (...)').run(row.id, row.email, ...)
 ```
+
+## Querying / modifying the production VPS DBs (ops)
+
+Reading or editing the **live** DBs on the `living` VPS — user lookups, dictionary inspection,
+schema/migration state, thread fixes, deletions. The DB is live: **always run a read-only query to
+confirm what you're targeting before any destructive op.**
+
+> **Pre-cutover:** until cutover, the apex `livingdictionaries.app` is still Supabase, not the VPS.
+> This targets the new VPS serving `new.livingdictionaries.app`. Production rows are light until real
+> traffic lands there.
+
+**Locations** (both DB classes; container path is what you use inside `docker exec`):
+
+| | Host | Container (`DATA_DIR=/data`) |
+|---|---|---|
+| `shared.db` | `/opt/hosting/data/shared.db` | `/data/shared.db` |
+| per-dict | `/opt/hosting/data/dictionaries/<id>.db` | `/data/dictionaries/<id>.db` |
+| attachments | `/opt/hosting/data/files/<message_id>/<attachment_id>/<filename>` | — |
+
+`sqlite3` is NOT on the VPS host — query through the app container. The VPS runs **blue/green** (since
+2026-06-24): exec into the **primary `sveltekit_blue`** (`sveltekit_green` is the standby and shares
+the same `/data` mount, so either works for read-only queries — there is **no** plain `sveltekit`
+container). Escaping inside `docker exec` is brutal, so write the query to a local temp `.js` and pipe
+it through stdin (open `{ readonly: true }` unless you intend to write):
+
+```bash
+cat > /tmp/q.js <<'EOF'
+const db = require('better-sqlite3')('/data/shared.db', { readonly: true })
+console.log(JSON.stringify(db.prepare('SELECT id, email, name, admin_level, created_at FROM users WHERE email = ?').all('someone@gmail.com'), null, 2))
+EOF
+ssh living 'docker exec -i sveltekit_blue node' < /tmp/q.js
+```
+
+Per-dict DBs use the same pattern with `/data/dictionaries/<id>.db` (e.g.
+`SELECT COUNT(*) FROM entries`, `SELECT * FROM entries WHERE id = ?`). Compose any other lookup from
+the schema (`shared.ts` / `dictionary.ts`); the catalog ↔ per-dict split is described at the top of
+this skill.
+
+### Safety rules
+
+1. **Confirm before destructive ops** — read-only query first; echo back id, email/name, what gets
+   changed, and the row count.
+2. **Express deletes as tombstones**, not raw `DELETE`: `INSERT INTO deletes (table_name, id) VALUES
+   (?, ?)` fires `process_delete_cascade` (trigger DELETEs + FK-cascades children) so peers + the
+   snapshot builder drop the row on next sync too. Set `dirty = 1` + bump `updated_at` on any
+   `shared.db` edit so admin clients pick it up.
+3. **Never** raw `DELETE`/`UPDATE` without a `WHERE`, never `DROP TABLE` without per-command
+   confirmation, never touch `users` unless explicitly told to delete an account.
+4. **Per-dict writes propagate via the R2 snapshot, not sync** — a VPS edit won't show in editors'
+   browsers until the next builder run (~30 min) or a manual rebuild
+   (`bin/build-all-snapshots.ts --dict-id=<id>`). Say so when the lag applies.
+5. **Schema changes** belong in a migration file (deploy → `hooks.server.ts` applies on boot), not
+   ad-hoc SQL. If you must run one live, stop **both** app containers first (`docker stop
+   sveltekit_blue sveltekit_green`) to avoid WAL corruption — under blue/green both have the DB open.
+6. **Back up before destructive `shared.db` / high-value per-dict ops** — see `backup-vps-db.md` for
+   the online-backup → R2 pattern; quick ad-hoc:
+   `ssh living 'sudo cp /opt/hosting/data/shared.db /opt/hosting/data/shared.db.bak-$(date -u +%Y%m%d-%H%M%S)'`.
+
+### Pulling a DB copy to local
+
+```bash
+ssh living 'sudo cp /opt/hosting/data/shared.db /tmp/shared.db && sudo chown $USER:$USER /tmp/shared.db'
+scp living:/tmp/shared.db /tmp/living-shared.db   # WAL mode allows readers; per-dict: swap the path
+```
+
+For a hot-consistent copy under write load, use the online backup API (`backup-vps-db.md`).
+
+### Related ops
+
+- **Logs** (`client_logs` errors/sessions/telemetry): the **check-logs** skill.
+- **Server/Caddy/Docker/deploy/env**: `.claude/commands/debug-vps.md`.
+- **Backup → R2** before destructive changes: `.claude/commands/backup-vps-db.md`.
 
 ## Client-side reactive data (LiveDb / DictLiveDb)
 
@@ -572,7 +644,7 @@ $lib/db/
   don't store URLs in the DB.
 - **Drizzle migrations are NOT used** — only the raw SQL files. Don't run
   `drizzle-kit generate`; it would emit untracked migrations.
-- **Inspect the deployed db** use `.claude/commands/prod-db.md`. Live introspection UI at `/admin/schema`.
+- **Inspect the deployed VPS db** — see **"Querying / modifying the production VPS DBs"** above. Live introspection UI at `/admin/schema`.
 
 ## Cross-references
 

@@ -55,7 +55,9 @@ the stable event name (`log-events.ts`: `search_performed`, `dictionary_opened`,
 
 ## Querying prod — SSH + `docker exec`, read-only
 
-`sqlite3` is NOT on the VPS host. Query through the `sveltekit` container via `better-sqlite3`.
+`sqlite3` is NOT on the VPS host. Query through the primary **`sveltekit_blue`** container via
+`better-sqlite3` (the VPS runs blue/green since 2026-06-24 — no plain `sveltekit` container; `_green`
+is the standby sharing the same `/data` mount, fine for read-only queries too).
 
 - **Container DB path: `/data/shared.db`** (`DATA_DIR=/data`). Always open `{ readonly: true }`.
 - **Escaping:** write the query to a local temp `.js` and pipe it through stdin:
@@ -67,10 +69,11 @@ const since = new Date(Date.now() - 24*60*60*1000).toISOString()
 // ...query...
 console.log(JSON.stringify(rows, null, 2))
 EOF
-ssh living 'docker exec -i sveltekit node' < /tmp/lq.js
+ssh living 'docker exec -i sveltekit_blue node' < /tmp/lq.js
 ```
 
-(See `prod-db.md` for the canonical pattern + safety rules, `debug-vps.md` for server/deploy issues.)
+(See the **database** skill's production-VPS section for the canonical pattern + safety rules,
+`debug-vps.md` for server/deploy issues.)
 
 ---
 
@@ -200,7 +203,6 @@ query — drift means a bug to file. The reusable chart lib is `$lib/charts/` (B
 
 ## Related
 
-- `prod-db.md` — canonical SSH + `docker exec` DB pattern + safety rules
+- **database** skill (`.claude/skills/database/SKILL.md`) — canonical SSH + `docker exec` DB pattern + safety rules
 - `debug-vps.md` — server/Caddy/deploy/env issues
-- `scan-and-fix-errors.md` — the error-only precursor to this command (Phase A1 alone)
-- `.knowledge/architecture/client-logs.md` — pipeline + schema reference
+- **check-logs** skill (`.claude/skills/check-logs/SKILL.md`) — the error-only triage flow (Phase A1 alone) + the `client_logs` pipeline/schema reference

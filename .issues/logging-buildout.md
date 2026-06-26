@@ -59,17 +59,23 @@ Confirmed in prod `client_logs` after re-running the smoke: `dictionary_opened` 
 opens cleanly for editor + anonymous; dashboard `event_coverage` live-shows 2/4 events seen; built
 client bundle has **0** chunks with `cppdb`/native bindings.
 
-### ⚠️ Not auto-verified: editor entry WRITE + `/changes` push
-The add-entry lexeme modal uses the **Keyman** keyboard, which intercepts CDP keystrokes and blocks
-the page main thread headless (`Runtime.callFunctionOn timed out`) — so the OPFS write + sync-push
-path couldn't be driven by puppeteer. The modal renders correctly and the leader-worker write is
-async (so it shouldn't freeze a real user). **Needs a real-browser / local-dev check** to fully
-close the loop (`entry_opened` + server `dict_changes_pushed` were therefore never exercised). See
-`.knowledge/testing/browser-deep-flow.md`.
+### ✅ RESOLVED 2026-06-26: editor entry WRITE + `/changes` push verified — and a cutover blocker fixed
+The "Keyman blocks the main thread" theory was WRONG. Probing each CDP step showed the hang fires
+only on submit, because `insert_entry`'s `catch` `alert()`'d a thrown write error and the unhandled
+dialog blocked puppeteer. `d.message()` surfaced the real bug: `create_dict_live_db`'s Proxy `get`
+trap used the proxy as the `Reflect.get` receiver, so the `get writes()` getter's `this.#writes`
+private-field brand check threw → **every `.writes` op (entries, sentences, media, junctions) was
+broken on the new stack**. Fixed (`Reflect.get(target, prop, target)`, commit `b21c6894`) + regression
+test. Verified end-to-end headless on local dev AND the live subdomain (entry lands in the server
+per-dict DB; `entry_opened` + server `dict_changes_pushed` fire). Full write-up:
+`.issues/entry-write-proxy-bug.md`; corrected gotcha in `.knowledge/testing/browser-deep-flow.md`.
 
 ## Notes / learnings
 - track signature: `track({ event, props })`; `track_timing({ name, duration_ms, context? })`;
   `log_event({ level, message, context })`; server: `log_server_event({ level, message, error?, context })`.
 - live_query_* events already wired in `dict-live-db.svelte.ts` (source:'dict').
 - Container is `sveltekit_blue` (blue/green), DB at `/data/shared.db` readonly.
-- prod-db.md is STALE (says container `sveltekit` + `/workspace/site/.data/...`).
+- ~~prod-db.md is STALE (says container `sveltekit` + `/workspace/site/.data/...`).~~ ✅ RESOLVED
+  2026-06-26: prod-db.md folded into the **database** skill (correct `/data/shared.db` +
+  `sveltekit_blue` blue/green container), command deleted. See
+  `.issues/check-logs-skill-and-prod-db-fold.md`.

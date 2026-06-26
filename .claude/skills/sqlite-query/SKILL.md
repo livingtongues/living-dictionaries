@@ -158,5 +158,5 @@ directly — the files live under `site/.data/` in dev (`shared.db` + `dictionar
 node -e 'const db=require("better-sqlite3")("/home/jacob/code/living-dictionaries/site/.data/shared.db",{readonly:true});console.log(db.prepare("SELECT count(*) FROM dictionaries").get())'
 ```
 
-For the live VPS, snapshot first (`VACUUM INTO`) then query the snapshot — see the `prod-db` /
-`backup-vps-db` commands.
+For the live VPS, query the server copies directly (or snapshot first) — see the **database** skill's
+"Querying / modifying the production VPS DBs" section and the `backup-vps-db` command.
