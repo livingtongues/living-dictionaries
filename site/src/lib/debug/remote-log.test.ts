@@ -192,6 +192,18 @@ describe('remote-log buffer + flush', () => {
     expect(crumbs.some(crumb => crumb.type === 'event' && crumb.value === 'search_performed')).toBeTruthy()
   })
 
+  test('track BEFORE init is buffered and replayed once init runs (deep-link race)', async () => {
+    const module = await import('./remote-log')
+    // Emitted before init — e.g. a child-layout $effect that beats the root onMount.
+    module.track({ event: 'dictionary_opened', props: { dictionary_id: 'pre-init-dict' } })
+    module.init_remote_logging()
+    await module.flush_now()
+
+    const event = find_sent_entry('dictionary_opened')
+    expect(event?.level).toBe('info')
+    expect((event?.context as { dictionary_id: string }).dictionary_id).toBe('pre-init-dict')
+  })
+
   test('track_timing emits a perf event with rounded duration + extra context', async () => {
     const module = await import('./remote-log')
     module.init_remote_logging()
