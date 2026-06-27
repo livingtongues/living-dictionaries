@@ -1,4 +1,5 @@
 import type Database from 'better-sqlite3'
+import type { DeviceType } from '$lib/debug/parse-user-agent'
 import { version } from '$app/environment'
 import { ALL_TRACKED_EVENTS } from '$lib/debug/log-events'
 import { is_below_db_worker_capability, is_bot_user_agent, parse_user_agent } from '$lib/debug/parse-user-agent'
@@ -157,10 +158,24 @@ export interface LogAnalytics {
   by_source: { source: string, logs: number, errors: number }[]
   /** Grouped error classes (message + stack head), real errors first, known-noise sunk. Always ALL rows. */
   error_clusters: ErrorCluster[]
-  /** Per-session browser breakdown (hot window only — UA isn't in the rollup). */
-  browsers: { label: string, os: string, sessions: number, below_capability: boolean }[]
-  /** Local-DB capability: how many (human) sessions can't run the leader-worker DB. */
-  capability: { total_sessions: number, below_capability_sessions: number, bot_sessions: number, db_tiers: { tier: string, sessions: number }[] }
+  /**
+   * Per-session device / OS / browser breakdown + local-DB capability (hot window
+   * only — neither the raw UA nor the session_start db_tier is in the rollup). All
+   * counts are HUMAN sessions; bots are tallied separately in `bot_sessions`.
+   */
+  capability: {
+    total_sessions: number
+    below_capability_sessions: number
+    bot_sessions: number
+    /** Coarse form factor split, sorted desc. */
+    devices: { device: DeviceType, sessions: number }[]
+    /** OS mix with per-OS version sub-buckets (for the nested donut), sorted desc. */
+    os: { os: string, sessions: number, versions: { version: string, sessions: number }[] }[]
+    /** Browser-family mix (Chrome / Safari / …), sorted desc. */
+    browsers: { browser: string, sessions: number }[]
+    /** Local-DB engine tier the session actually ran (logged-only). */
+    db_tiers: { tier: string, sessions: number }[]
+  }
   /** Client `perf` timings (hot window only — percentiles aren't in the rollup). */
   performance: { summary: PerfSummary[], daily: PerfDailyPoint[] }
   /** Core Web Vitals distribution (hot window, human sessions only). Empty array when none landed yet. */
@@ -360,9 +375,9 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     SELECT COUNT(DISTINCT user_id) count FROM client_logs WHERE received_at >= ? AND user_id IS NOT NULL AND ${audience_filter}
   `).get(window_start_iso) as { count: number }).count
 
-  // --- Browser / capability breakdown, per session (hot window only — neither
-  // the raw user_agent nor the session_start db_tier is in the rollup). One row
-  // per session: the user_agent + the db_tier we now stamp on session_start. ---
+  // --- Device / OS / browser + capability breakdown, per session (hot window only
+  // — neither the raw user_agent nor the session_start db_tier is in the rollup).
+  // One row per session: the user_agent + the db_tier we now stamp on session_start. ---
   const session_rows = shared_db.prepare(`
     SELECT json_extract(context, '$.session_id') sid,
            MAX(user_agent) user_agent,
@@ -374,7 +389,10 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     GROUP BY sid
   `).all(window_start_iso) as { sid: string, user_agent: string | null, db_tier: string | null, country: string | null, region: string | null }[]
 
-  const browser_counts = new Map<string, { sessions: number, below: boolean, os: string }>()
+  const device_counts = new Map<DeviceType, number>()
+  // OS → { sessions, version → sessions }. Nested for the sunburst donut.
+  const os_counts = new Map<string, { sessions: number, versions: Map<string, number> }>()
+  const browser_counts = new Map<string, number>()
   const tier_counts = new Map<string, number>()
   let below_capability_sessions = 0
   let bot_sessions = 0
@@ -391,9 +409,8 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
       }
     }
     // Bots (Applebot/Googlebot/GPTBot/headless e2e/…) have no OPFS, never convert,
-    // and skew the human browser mix — count them separately but keep them OUT of
-    // the breakdown. The browser/capability panel stays human-only regardless of
-    // the audience toggle.
+    // and skew the human device/OS/browser mix — count them separately but keep
+    // them OUT of the breakdown. This panel stays human-only regardless of toggle.
     if (is_bot) {
       bot_sessions++
       continue
@@ -402,15 +419,32 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     const below = is_below_db_worker_capability(parsed)
     if (below)
       below_capability_sessions++
-    const label = parsed.major !== null ? `${parsed.browser} ${parsed.major}` : parsed.browser
-    const entry = browser_counts.get(label) ?? { sessions: 0, below, os: parsed.os }
-    entry.sessions++
-    browser_counts.set(label, entry)
-    // Prefer the logged db_tier (new sessions); else infer from UA capability.
-    bump(tier_counts, row.db_tier ?? (below ? 'idb-main/floor (inferred)' : 'unknown (legacy)'))
+    device_counts.set(parsed.device, (device_counts.get(parsed.device) ?? 0) + 1)
+    const os_entry = os_counts.get(parsed.os) ?? { sessions: 0, versions: new Map<string, number>() }
+    os_entry.sessions++
+    bump(os_entry.versions, parsed.os_version ?? 'unknown')
+    os_counts.set(parsed.os, os_entry)
+    bump(browser_counts, parsed.browser)
+    // Only count the engine tier we actually LOGGED on session_start. Sessions from
+    // before that logging existed (db_tier null) are dropped rather than bucketed as
+    // a misleading "unknown (legacy)" — they age out of the hot window anyway.
+    if (row.db_tier)
+      bump(tier_counts, row.db_tier)
   }
+  const devices = [...device_counts.entries()]
+    .map(([device, sessions]) => ({ device, sessions }))
+    .sort((a, b) => b.sessions - a.sessions)
+  const os = [...os_counts.entries()]
+    .map(([name, value]) => ({
+      os: name,
+      sessions: value.sessions,
+      versions: [...value.versions.entries()]
+        .map(([version, sessions]) => ({ version, sessions }))
+        .sort((a, b) => b.sessions - a.sessions),
+    }))
+    .sort((a, b) => b.sessions - a.sessions)
   const browsers = [...browser_counts.entries()]
-    .map(([label, value]) => ({ label, os: value.os, sessions: value.sessions, below_capability: value.below }))
+    .map(([browser, sessions]) => ({ browser, sessions }))
     .sort((a, b) => b.sessions - a.sessions)
     .slice(0, TOP_LIMIT)
   const db_tiers = [...tier_counts.entries()]
@@ -631,8 +665,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     top_events: to_sorted(event_counts, 'event') as { event: string, count: number }[],
     by_source,
     error_clusters,
-    browsers,
-    capability: { total_sessions: session_rows.length - bot_sessions, below_capability_sessions, bot_sessions, db_tiers },
+    capability: { total_sessions: session_rows.length - bot_sessions, below_capability_sessions, bot_sessions, devices, os, browsers, db_tiers },
     performance: { summary: perf_summary, daily: perf_daily },
     web_vitals,
     geo,
