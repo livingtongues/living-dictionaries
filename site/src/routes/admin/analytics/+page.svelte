@@ -57,6 +57,26 @@
     return PERF_LABELS[name] ?? name
   }
 
+  // --- Core Web Vitals. p75 is the threshold Google grades on. CLS is unitless. ---
+  const web_vitals = $derived(analytics.web_vitals)
+  // Standard CWV thresholds: [good ≤, poor >] — value between is "needs improvement".
+  const VITAL_THRESHOLDS: Record<string, [number, number]> = { LCP: [2500, 4000], INP: [200, 500], CLS: [0.1, 0.25], FCP: [1800, 3000], TTFB: [800, 1800] }
+  function format_vital(metric: string, value: number | null): string {
+    if (value == null)
+      return '—'
+    return metric === 'CLS' ? value.toFixed(3) : format_ms(value)
+  }
+  function vital_color(metric: string, p75: number | null): string | undefined {
+    const threshold = VITAL_THRESHOLDS[metric]
+    if (!threshold || p75 == null)
+      return undefined
+    if (p75 <= threshold[0])
+      return 'var(--ok, #16a34a)'
+    if (p75 > threshold[1])
+      return 'var(--danger)'
+    return 'var(--warn, #d97706)'
+  }
+
   const geo = $derived(analytics.geo)
   const has_geo = $derived(geo.areas.length > 0 || geo.ttfb_by_country.length > 0 || geo.ttfb_by_distance.length > 0)
   // Country code → flag emoji (regional-indicator pair). Non-ISO sentinels (XX/T1) fall back to a globe.
@@ -298,6 +318,27 @@
       </div>
     {:else}
       <p class="muted">No performance timings in window yet. Page-load, viewer-boot, and search timings appear here.</p>
+    {/if}
+  </section>
+
+  <section class="panel">
+    <h2>Core Web Vitals <span class="hint">p75 · graded · hot window · human sessions</span></h2>
+    {#if web_vitals.length}
+      <div class="perf-summary">
+        {#each web_vitals as vital (vital.metric)}
+          <div class="perf-stat">
+            <div class="perf-name">{vital.metric}</div>
+            <div class="perf-nums">
+              <span style:color={vital_color(vital.metric, vital.p75)}><b>{format_vital(vital.metric, vital.p75)}</b> p75</span>
+              <span class="muted-inline">{format_vital(vital.metric, vital.p50)} p50 · {format_vital(vital.metric, vital.p95)} p95 · n={format_number(vital.count)}</span>
+            </div>
+          </div>
+        {/each}
+      </div>
+    {:else if totals.sessions > 0}
+      <p class="muted">No Web Vitals landed despite {format_number(totals.sessions)} human session{totals.sessions === 1 ? '' : 's'}. FCP/TTFB report on load; LCP/INP/CLS only finalize on real interaction or page-hide — so short or automated sessions may never flush them. If this stays empty under genuine traffic, verify <code>init_web_vitals()</code>.</p>
+    {:else}
+      <p class="muted">No Web Vitals in window yet. LCP, INP, CLS, FCP and TTFB appear here once real sessions land.</p>
     {/if}
   </section>
 

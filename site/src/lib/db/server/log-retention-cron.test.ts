@@ -19,7 +19,7 @@ afterEach(() => {
   archive_db.close()
 })
 
-function add_log({ day = '2026-06-01', time = '12:00:00', level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, geo }: {
+function add_log({ day = '2026-06-01', time = '12:00:00', level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, user_agent = null, geo }: {
   day?: string
   time?: string
   level?: 'error' | 'warn' | 'info' | 'unhandled_rejection' | 'crash'
@@ -27,10 +27,11 @@ function add_log({ day = '2026-06-01', time = '12:00:00', level = 'info', messag
   source?: 'client' | 'server'
   user_id?: string | null
   context?: Record<string, unknown> | null
+  user_agent?: string | null
   geo?: RequestGeo
 }): void {
   insert_client_log({
-    payload: { level, message, context },
+    payload: { level, message, context, user_agent },
     user_id,
     source,
     ...(geo ? { geo } : {}),
@@ -91,6 +92,25 @@ describe(rollup_day, () => {
     rollup_day({ day: '2026-06-01', shared_db })
     rollup_day({ day: '2026-06-01', shared_db })
     expect(metric('2026-06-01', 'logs')).toBe(1)
+  })
+
+  test('excludes bot/headless rows so the forever rollup is human-only (server rows kept)', () => {
+    const HEADLESS = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/148.0.0.0 Safari/537.36'
+    // Human session.
+    add_log({ message: 'session_start', user_id: 'human', context: { session_id: 'h1' }, user_agent: 'Mozilla/5.0 Chrome/148' })
+    add_log({ message: 'search_performed', user_id: 'human', context: { session_id: 'h1' }, user_agent: 'Mozilla/5.0 Chrome/148' })
+    // Bot session — must not contribute to any human metric.
+    add_log({ message: 'session_start', context: { session_id: 'b1' }, user_agent: HEADLESS })
+    add_log({ message: 'search_performed', context: { session_id: 'b1' }, user_agent: HEADLESS })
+    // Server row (NULL user_agent) — kept.
+    add_log({ message: 'auth_login', source: 'server' })
+
+    rollup_day({ day: '2026-06-01', shared_db })
+    expect(metric('2026-06-01', 'sessions')).toBe(1) // only the human session
+    expect(metric('2026-06-01', 'users')).toBe(1)
+    expect(metric('2026-06-01', 'event:search_performed')).toBe(1)
+    expect(metric('2026-06-01', 'logs')).toBe(2) // 2 human rows; 2 bot rows dropped
+    expect(metric('2026-06-01', 'logs', 'server')).toBe(1) // server row kept
   })
 })
 

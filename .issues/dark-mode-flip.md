@@ -1,12 +1,16 @@
 # Turn on dark mode (system preference + user toggle)
 
-The final phase of the 2026-06-12 uno-drop conversion (`.issues/drop-unocss.md`). **Every
+The final phase of the 2026-06-12 uno-drop conversion. **Every
 component is already dark-ready**: the whole tree was converted to theme vars only (the
 gray scale maps to `var(--color)` / `var(--color-secondary)` / `color-mix` recipes — no
 hardcoded grays remain in components). The `.dark` / `.light` class selectors in
 `theme.css` are already ACTIVE (svelte-look uses them); only the system auto-switch is
 commented out and there is no user toggle yet. The leftovers are all in the GLOBAL css
 layer (captured-verbatim uno output) — see audit hotspots.
+
+> Verify with the whole-app screenshot sweep `site/e2e/uno-parity-shots.mjs` (light vs dark
+> baselines) — the false-diff gotchas (dev-server AA drift, the `pnpm check` reload storm,
+> blocked avatars, Mapbox/embed flake) live in `.knowledge/testing/browser-deep-flow.md`.
 
 Sibling issue with the same playbook: house `.issues/dark-mode-flip.md`.
 

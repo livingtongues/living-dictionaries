@@ -1,6 +1,7 @@
 import type Database from 'better-sqlite3'
 import { building, dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
+import { is_bot_user_agent } from '$lib/debug/parse-user-agent'
 import { geo_key } from '$lib/server/geo-from-request'
 import { log_server_event } from '$lib/server/log-server-event'
 import { CLIENT_LOG_COLUMNS, get_log_archive_db } from './log-archive-db'
@@ -48,7 +49,7 @@ export function normalize_route(pathname: string | null | undefined): string {
   return `dictionary:${sub}`
 }
 
-interface AccumRow { source: string, level: string, message: string, user_id: string | null, context: string | null, country: string | null, region: string | null }
+interface AccumRow { source: string, level: string, message: string, user_id: string | null, context: string | null, country: string | null, region: string | null, user_agent: string | null }
 
 /**
  * Aggregate one UTC day's `client_logs` into `log_daily_metrics`. Idempotent:
@@ -57,7 +58,7 @@ interface AccumRow { source: string, level: string, message: string, user_id: st
  */
 export function rollup_day({ day, shared_db = get_shared_db() }: { day: string, shared_db?: Database.Database }): { metrics_written: number } {
   const rows = shared_db.prepare(`
-    SELECT coalesce(source,'client') source, level, message, user_id, context, country, region
+    SELECT coalesce(source,'client') source, level, message, user_id, context, country, region, user_agent
     FROM client_logs WHERE substr(received_at, 1, 10) = ?
   `).all(day) as AccumRow[]
 
@@ -84,6 +85,12 @@ export function rollup_day({ day, shared_db = get_shared_db() }: { day: string, 
   const bump = (map: Map<string, number>, key: string): void => { map.set(key, (map.get(key) ?? 0) + 1) }
 
   for (const row of rows) {
+    // Skip bot / headless-automation rows entirely so the FOREVER rollup (the
+    // cold-tier trend source) is human-only — consistent with the hot reader's
+    // `HUMAN_ROWS_SQL` filter, so a day doesn't jump when it ages out of hot
+    // storage. Server rows carry no user_agent (NULL) and are kept.
+    if (is_bot_user_agent(row.user_agent))
+      continue
     const bucket = bucket_for(row.source)
     bucket.logs++
     if (ERROR_LEVELS.has(row.level))

@@ -10,6 +10,7 @@
   import { getTimeZoneLongitude } from '../../utils/getTimeZoneLongitude'
   import { ADDED_FEATURE_ID_PREFIX } from '../../utils/randomId'
   import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
+  import { log_event } from '$lib/debug/remote-log'
   import { PUBLIC_mapboxAccessToken } from '$env/static/public'
   import IconFaSolidGlobeAsia from '~icons/fa-solid/globe-asia'
 
@@ -109,13 +110,27 @@
     }
 
     window.mapboxgl.accessToken = accessToken
-    map = new window.mapboxgl.Map({
-      ...options,
-      container,
-      style,
-      center,
-      zoom,
-    })
+    try {
+      map = new window.mapboxgl.Map({
+        ...options,
+        container,
+        style,
+        center,
+        zoom,
+      })
+    } catch (err) {
+      // Mapbox throws synchronously from `new Map()` when WebGL can't initialize
+      // (disabled / unsupported / GPU blocklist). That means the user genuinely
+      // cannot see the map, so log ONE clean error instead of letting the raw
+      // Mapbox-internal stack bubble to the global handler as undiagnosable noise.
+      // No fallback UI by design — the placeholder below just stays put.
+      log_event({
+        level: 'error',
+        message: 'Map failed to load (WebGL unavailable)',
+        context: { reason: err instanceof Error ? err.message : String(err) },
+      })
+      return
+    }
     mapbox = window.mapboxgl
     queue.start(map)
 

@@ -23,12 +23,37 @@ const INFRA_EVENTS = new Set(['heartbeat', 'navigation', 'perf', 'session_start'
 const TOP_LIMIT = 12
 const RECENT_ERRORS_LIMIT = 20
 
+/**
+ * Drop bot / headless-automation client rows from USAGE metrics (sessions,
+ * events, routes, geo, RUM timings) so the test harness + crawlers don't inflate
+ * "real people using the app". Server rows carry no `user_agent` (NULL) and are
+ * always kept. Uses the registered `is_bot_ua` SQLite fn (below) so the SAME
+ * `is_bot_user_agent` regex governs both the SQL aggregates here and the
+ * per-session capability split + the cold rollup — keeping all three consistent.
+ * Diagnostics (recent_errors / errors_by_version / leader_health) are NOT
+ * filtered: a bot hitting a real error is still a real signal about that build.
+ */
+const HUMAN_ROWS_SQL = `(user_agent IS NULL OR is_bot_ua(user_agent) = 0)`
+
+/** Register `is_bot_ua(user_agent)` once per connection (better-sqlite3 throws on a duplicate name). */
+const is_bot_ua_registered = new WeakSet<Database.Database>()
+function ensure_is_bot_ua(db: Database.Database): void {
+  if (is_bot_ua_registered.has(db))
+    return
+  db.function('is_bot_ua', { deterministic: true }, (ua: unknown) => (is_bot_user_agent(typeof ua === 'string' ? ua : null) ? 1 : 0))
+  is_bot_ua_registered.add(db)
+}
+
 /** Timing metrics surfaced on the performance panel, in display order. */
 const PERF_METRICS = ['page_load', 'search'] as const
+/** Core Web Vitals surfaced on the dashboard, in display order (the canonical CWV trio first). */
+const WEB_VITAL_METRICS = ['LCP', 'INP', 'CLS', 'FCP', 'TTFB'] as const
 
 export interface DailyPoint { day: string, sessions: number, users: number, errors: number, logs: number }
 export interface PerfSummary { name: string, count: number, p50: number | null, p90: number | null, p95: number | null, max: number | null }
 export interface PerfDailyPoint { day: string, metrics: Record<string, { p50: number, p95: number, count: number }> }
+/** Core Web Vitals distribution (LCP/INP/CLS/FCP/TTFB); `value` is ms except CLS (unitless). p75 is the CWV threshold metric. */
+export interface WebVitalSummary { metric: string, count: number, p50: number | null, p75: number | null, p95: number | null }
 /** Per-bucket TTFB (page_load `responseStart`) distribution. */
 export interface GeoLatency { label: string, count: number, p50: number | null, p95: number | null }
 export interface GeoAnalytics {
@@ -110,6 +135,8 @@ export interface LogAnalytics {
   capability: { total_sessions: number, below_capability_sessions: number, bot_sessions: number, db_tiers: { tier: string, sessions: number }[] }
   /** Client `perf` timings (hot window only — percentiles aren't in the rollup). */
   performance: { summary: PerfSummary[], daily: PerfDailyPoint[] }
+  /** Core Web Vitals distribution (hot window, human sessions only). Empty array when none landed yet. */
+  web_vitals: WebVitalSummary[]
   /** Approximate geography from CF edge headers — areas + geo-split TTFB. */
   geo: GeoAnalytics
   /** Errors split by current vs stale build version (hot window only). */
@@ -146,18 +173,20 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   /** The live deployed build id; errors on any other build count as "stale". */
   current_app_version?: string | null
 } = {}): LogAnalytics {
+  ensure_is_bot_ua(shared_db)
   const window_start = new Date(now.getTime() - (days - 1) * 86_400_000)
   const window_start_day = day_string(window_start)
   const window_start_iso = `${window_start_day}T00:00:00.000Z`
 
-  // --- Live (hot) daily scalars, combined across sources. ---
+  // --- Live (hot) daily scalars, combined across sources. Bot/headless rows
+  // excluded so the sessions/users/logs/errors trend reflects real people. ---
   const live_daily = shared_db.prepare(`
     SELECT substr(received_at, 1, 10) day,
            COUNT(*) logs,
            SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL} THEN 1 ELSE 0 END) errors,
            COUNT(DISTINCT user_id) users,
            COUNT(DISTINCT json_extract(context, '$.session_id')) sessions
-    FROM client_logs WHERE received_at >= ?
+    FROM client_logs WHERE received_at >= ? AND ${HUMAN_ROWS_SQL}
     GROUP BY day
   `).all(window_start_iso) as DailyPoint[]
   const live_by_day = new Map(live_daily.map(point => [point.day, point]))
@@ -192,7 +221,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   const event_counts = new Map<string, number>()
   for (const row of shared_db.prepare(`
     SELECT message event, COUNT(*) count FROM client_logs
-    WHERE received_at >= ? AND level = 'info' GROUP BY message
+    WHERE received_at >= ? AND level = 'info' AND ${HUMAN_ROWS_SQL} GROUP BY message
   `).all(window_start_iso) as { event: string, count: number }[]) {
     if (!INFRA_EVENTS.has(row.event))
       bump(event_counts, row.event, row.count)
@@ -201,21 +230,22 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   const route_counts = new Map<string, number>()
   for (const row of shared_db.prepare(`
     SELECT json_extract(context, '$.to') to_path, COUNT(*) count FROM client_logs
-    WHERE received_at >= ? AND message = 'navigation' GROUP BY to_path
+    WHERE received_at >= ? AND message = 'navigation' AND ${HUMAN_ROWS_SQL} GROUP BY to_path
   `).all(window_start_iso) as { to_path: string | null, count: number }[]) {
     bump(route_counts, normalize_route(row.to_path), row.count)
   }
-  // --- Geo areas: per-area (`US-CA` / `US`) distinct sessions, hot (session_rows
-  // below) + cold (rollup `geo:` metrics). Counts ALL sessions (incl. bots) to
-  // stay consistent with the forever rollup + the global sessions metric. ---
+  // --- Geo areas: per-area (`US-CA` / `US`) distinct HUMAN sessions, hot
+  // (session_rows below, bots skipped there) + cold (rollup `geo:` metrics, now
+  // bot-free at rollup time). Consistent human-only counts across both tiers. ---
   const area_counts = new Map<string, { country: string, sessions: number }>()
-  // --- Source split: live + rollup (cold). ---
+  // --- Source split: live + rollup (cold). Bot client rows excluded; server
+  // rows (NULL UA) kept. ---
   const source_logs = new Map<string, number>()
   const source_errors = new Map<string, number>()
   for (const row of shared_db.prepare(`
     SELECT coalesce(source, 'client') source, COUNT(*) logs,
            SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL} THEN 1 ELSE 0 END) errors
-    FROM client_logs WHERE received_at >= ? GROUP BY source
+    FROM client_logs WHERE received_at >= ? AND ${HUMAN_ROWS_SQL} GROUP BY source
   `).all(window_start_iso) as { source: string, logs: number, errors: number }[]) {
     bump(source_logs, row.source, row.logs)
     bump(source_errors, row.source, row.errors)
@@ -261,7 +291,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   `).all() as LogAnalytics['recent_errors']
 
   const unique_users = (shared_db.prepare(`
-    SELECT COUNT(DISTINCT user_id) count FROM client_logs WHERE received_at >= ? AND user_id IS NOT NULL
+    SELECT COUNT(DISTINCT user_id) count FROM client_logs WHERE received_at >= ? AND user_id IS NOT NULL AND ${HUMAN_ROWS_SQL}
   `).get(window_start_iso) as { count: number }).count
 
   // --- Browser / capability breakdown, per session (hot window only — neither
@@ -283,19 +313,20 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   let below_capability_sessions = 0
   let bot_sessions = 0
   for (const row of session_rows) {
+    // Bots (Applebot/Googlebot/GPTBot/headless e2e/…) have no OPFS, never convert,
+    // and skew the human browser mix AND the geo areas — count them separately but
+    // keep them OUT of both the breakdown and the located-areas tally. An Applebot
+    // has_opfs:false row is exactly what sent a prior review chasing a phantom "old
+    // Safari user". (Bot check FIRST so bot sessions don't inflate geo areas.)
+    if (is_bot_user_agent(row.user_agent)) {
+      bot_sessions++
+      continue
+    }
     const area_key = geo_key({ country: row.country, region: row.region })
     if (area_key && row.country) {
       const area = area_counts.get(area_key) ?? { country: row.country, sessions: 0 }
       area.sessions++
       area_counts.set(area_key, area)
-    }
-    // Bots (Applebot/Googlebot/GPTBot/…) have no OPFS, never convert, and skew the
-    // human browser mix — count them but keep them OUT of the breakdown. An
-    // Applebot has_opfs:false row is exactly what sent a prior review chasing a
-    // phantom "old Safari user".
-    if (is_bot_user_agent(row.user_agent)) {
-      bot_sessions++
-      continue
     }
     const parsed = parse_user_agent(row.user_agent)
     const below = is_below_db_worker_capability(parsed)
@@ -324,7 +355,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
            json_extract(context, '$.name') name,
            json_extract(context, '$.duration_ms') duration_ms
     FROM client_logs
-    WHERE received_at >= ? AND message = 'perf'
+    WHERE received_at >= ? AND message = 'perf' AND ${HUMAN_ROWS_SQL}
       AND json_extract(context, '$.duration_ms') IS NOT NULL
   `).all(window_start_iso) as { day: string, name: string | null, duration_ms: number }[]
 
@@ -363,13 +394,40 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     return { day: point.day, metrics }
   })
 
+  // --- Core Web Vitals (hot window, human sessions). `web_vital` perf rows carry
+  // `value` (ms, or unitless for CLS) not `duration_ms`, so they're aggregated
+  // separately from the timing mix above. p75 is the canonical CWV threshold. ---
+  const web_vital_rows = shared_db.prepare(`
+    SELECT json_extract(context, '$.metric') metric, json_extract(context, '$.value') value
+    FROM client_logs
+    WHERE received_at >= ? AND message = 'perf' AND ${HUMAN_ROWS_SQL}
+      AND json_extract(context, '$.name') = 'web_vital'
+      AND json_extract(context, '$.value') IS NOT NULL
+  `).all(window_start_iso) as { metric: string | null, value: number }[]
+  const web_vital_values = new Map<string, number[]>()
+  for (const row of web_vital_rows) {
+    if (!row.metric || typeof row.value !== 'number')
+      continue
+    if (!web_vital_values.has(row.metric))
+      web_vital_values.set(row.metric, [])
+    web_vital_values.get(row.metric)?.push(row.value)
+  }
+  // Known CWV first (stable order), then any extras seen.
+  const web_vital_names = [...WEB_VITAL_METRICS, ...[...web_vital_values.keys()].filter(name => !WEB_VITAL_METRICS.includes(name as typeof WEB_VITAL_METRICS[number]))]
+  const web_vitals: WebVitalSummary[] = web_vital_names
+    .filter(name => web_vital_values.has(name))
+    .map((name) => {
+      const values = web_vital_values.get(name) ?? []
+      return { metric: name, count: values.length, p50: percentile(values, 50), p75: percentile(values, 75), p95: percentile(values, 95) }
+    })
+
   // --- Geo-split real-user TTFB (hot window). Uses the page_load perf row's
   // `responseStart` (context.ttfb) — the distance-sensitive server round-trip —
   // grouped by country and by distance to the Boston origin. ---
   const ttfb_rows = shared_db.prepare(`
     SELECT json_extract(context, '$.ttfb') ttfb, country, latitude, longitude
     FROM client_logs
-    WHERE received_at >= ? AND message = 'perf'
+    WHERE received_at >= ? AND message = 'perf' AND ${HUMAN_ROWS_SQL}
       AND json_extract(context, '$.name') = 'page_load'
       AND json_extract(context, '$.ttfb') IS NOT NULL
   `).all(window_start_iso) as { ttfb: number, country: string | null, latitude: number | null, longitude: number | null }[]
@@ -505,6 +563,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     browsers,
     capability: { total_sessions: session_rows.length - bot_sessions, below_capability_sessions, bot_sessions, db_tiers },
     performance: { summary: perf_summary, daily: perf_daily },
+    web_vitals,
     geo,
     errors_by_version,
     pipeline,

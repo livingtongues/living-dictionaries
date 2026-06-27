@@ -32,12 +32,18 @@ export interface Admin {
    */
   ld_address: string
   level: AdminLevel
+  /**
+   * Off-duty admins keep admin + chat ACCESS but are skipped by broadcast inbound
+   * notifications (`notify_admins`) and chat gentle re-pings. Absent = on duty.
+   * (They're also left out of the AI-triage routing map, so nothing auto-assigns to them.)
+   */
+  notify?: boolean
 }
 
 export const ADMINS: readonly Admin[] = [
   { email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', ntfy_topic: 'living_pings', ld_address: 'jacob@livingdictionaries.app', level: 2 },
   { email: 'diego@livingtongues.org', name: 'Diego Mariscal', ntfy_topic: 'living_pings_diego', ld_address: 'diego@livingdictionaries.app', level: 2 },
-  { email: 'dictionaries@livingtongues.org', name: 'Anna Luisa Daigneault', ntfy_topic: 'living_pings_anna', ld_address: 'annaluisa@livingdictionaries.app', level: 1 },
+  { email: 'dictionaries@livingtongues.org', name: 'Anna Luisa Daigneault', ntfy_topic: 'living_pings_anna', ld_address: 'annaluisa@livingdictionaries.app', level: 1, notify: false },
   { email: 'livingtongues@gmail.com', name: 'Dr. Greg Anderson', ntfy_topic: 'living_pings_greg', ld_address: 'greg@livingdictionaries.app', level: 1 },
 ]
 

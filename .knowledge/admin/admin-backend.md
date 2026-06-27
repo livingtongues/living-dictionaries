@@ -44,15 +44,16 @@ TARGETED pings (message assignment + team chat) land. `notify_admin` (in `notify
 upgraded to house's version) reads it server-side. The column **rides to admin clients via the
 existing download-only directory sync** (`VALID_COLUMNS` is auto-derived from the drizzle schema,
 so no sync-config change was needed) and is flipped via `/api/admin/set-notify-channel`. The
-broadcast `notify_admins` (new-inbound) stays ntfy-only.
+broadcast `notify_admins` (new-inbound) stays ntfy-only, and **skips off-duty admins**
+(`admins.ts` `Admin.notify === false`) — they keep admin + chat access but get no broadcast pings or
+chat re-pings (Anna, from 2026-06-27).
 
 ## Message triage (matching, not AI)
 `/admin/messages/unmatched` + `/api/admin/match-thread-to-user` (ports of house) let an admin
 point a `from_user_id IS NULL` thread at the right user — stamps `from_user_id`, backfills NULL
 customer messages, and inserts an `email_aliases` row (`source='inbound-match'`) so future mail
-auto-resolves. The **AI triage pipeline** (LLM classification of inbound) is deliberately NOT
-ported — it's planned separately in `.issues/ai-triage-pipeline.md` (needs LLM provider/key +
-LD routing decisions).
+auto-resolves. The **AI triage pipeline** (LLM classification of inbound) was subsequently built
+(`42099efa`, env-gated on `XAI_API_KEY`) — see `ai-triage-pipeline.md`.
 
 ## Shared-infra additions made during the port
 - `ResponseCodes.PAYLOAD_TOO_LARGE = 413` (`lib/constants.ts`).

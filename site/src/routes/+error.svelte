@@ -9,10 +9,15 @@
 
   onMount(() => {
     init_remote_logging()
+    // Map the HTTP status to a severity so expected gates don't read as crashes:
+    // 5xx = crash (a real failure), 401/403 = warn (auth gate, e.g. an anon user
+    // hitting /admin/*), 404 = info, anything else = error.
+    const { status } = page
+    const level = status >= 500 ? 'crash' : (status === 401 || status === 403) ? 'warn' : status === 404 ? 'info' : 'error'
     log_event({
-      level: 'crash',
+      level,
       message: page.error?.message || 'Error page shown',
-      context: { status: page.status, url: page.url?.href },
+      context: { status, url: page.url?.href },
     })
   })
 </script>

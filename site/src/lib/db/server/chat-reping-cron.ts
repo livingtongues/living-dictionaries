@@ -10,6 +10,7 @@
  */
 import type Database from 'better-sqlite3'
 import { env } from '$env/dynamic/private'
+import { get_admin } from '$lib/admins'
 import { notify_admin } from '$lib/notifications/notify-admins'
 import { ensure_my_chat_setup, get_room, online_user_ids, post_message } from '$lib/server/chat/chat-db'
 import { ROOM_ALL_ADMINS, ROOM_NAMES } from '$lib/server/chat/constants'
@@ -51,6 +52,9 @@ export async function sweep_chat_repings({ db = get_shared_db(), base_url = SITE
 
   for (const candidate of candidates) {
     if (!candidate.email || online.has(candidate.user_id))
+      continue
+    // Off-duty admins keep chat access but get no gentle re-pings.
+    if (get_admin(candidate.email)?.notify === false)
       continue
     const has_unread = db.prepare(`
       SELECT 1 FROM chat_messages

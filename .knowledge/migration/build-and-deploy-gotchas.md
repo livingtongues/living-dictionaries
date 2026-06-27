@@ -56,6 +56,23 @@ type … from 'kitbook'` is fine (erased); `.variants.ts`/`.stories` kitbook imp
 the prod route graph. The vendored file keeps its blanket `/* eslint-disable */`, so it's
 eslint-ignored in `eslint.config.js`.
 
+## Cold bring-up on mustang (no `.data`, no deps out of the box)
+mustang starts with **no `site/.data` and no installed deps** (tuf has some local dbs; we don't
+depend on them, and **poly is never touched**). To get a green verify loop from scratch:
+1. `pnpm install` (root) — compiles native `better-sqlite3`.
+2. **`pnpm exec svelte-kit sync`** in `site/` — generates `.svelte-kit/tsconfig.json`. **Without it
+   every vitest file fails `[TSCONFIG_ERROR] Tsconfig not found`** (`site/tsconfig.json` extends the
+   generated one). This is the gotcha that blocks a cold test run; `pnpm check` runs it for you, a
+   bare `pnpm exec vitest run` does not.
+- Server-side tests isolate state in a temp `DATA_DIR` (`get_dictionaries_dir()` reads
+  `process.env.DATA_DIR || '.data'`) via `mkdtempSync` + `afterAll` cleanup — they need no seeded dbs.
+- `node build` (and the e2e harnesses) need the `$env/static/*` vars at **build** time. mustang has
+  a gitignored `site/.env` with dev/dummy values; if it's missing you can either recreate it or pass
+  the vars inline as process env on the build command (dummy values are fine — e2e uses
+  `E2E_EXPOSE_OTP`, so no real email is sent).
+- **The Bash tool refuses to read/write `.env*`** (sensitive-file guard) — `ls`/`cat`/`echo >` on
+  `site/.env` is blocked. Use the **Edit/Write tool** to inspect or modify it instead.
+
 ## Local verify loop (no Supabase, no dev server)
 `pnpm --filter=site check` (0 errors / 62 warnings baseline) · `… test --run` · `… build` +
 `node build` boot. **The production `node build` server IS curl-able from the sandbox** (e.g.
