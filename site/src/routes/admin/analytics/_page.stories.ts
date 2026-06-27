@@ -52,6 +52,7 @@ function build_perf(days: number): LogAnalytics['performance'] {
 }
 
 const analytics: LogAnalytics = {
+  audience: 'humans',
   window_days: 30,
   generated_at: '2026-06-23T13:04:00.000Z',
   daily: build_daily(30),
@@ -84,15 +85,10 @@ const analytics: LogAnalytics = {
     { source: 'client', logs: 2298, errors: 19 },
     { source: 'server', logs: 119, errors: 5 },
   ],
-  recent_errors: [
-    { id: 'e1', received_at: '2026-06-23T11:58:02.000Z', level: 'error', message: 'Cannot read properties of undefined (reading \'split\')', url: 'https://hvsb.app/search?media_prod[query]=jesus', user_id: 'O2ZnBNcz', source: 'client' },
-    // Same millisecond + same message as the next row: this duplicate pair is exactly what
-    // crashed the page when the each-block keyed on `received_at + message` instead of `id`.
-    { id: 'e2', received_at: '2026-06-23T10:41:15.000Z', level: 'error', message: 'stripe_webhook_reconcile_failed: invoice.paid', url: null, user_id: 'u-1820', source: 'server' },
-    { id: 'e3', received_at: '2026-06-23T10:41:15.000Z', level: 'error', message: 'stripe_webhook_reconcile_failed: invoice.paid', url: null, user_id: 'u-1820', source: 'server' },
-    { id: 'e4', received_at: '2026-06-23T09:12:44.000Z', level: 'unhandled_rejection', message: 'NetworkError when attempting to fetch resource', url: 'https://hvsb.app/WEB/GEN/1/doc/abc123', user_id: null, source: 'client' },
-    { id: 'e5', received_at: '2026-06-22T22:03:09.000Z', level: 'error', message: 'snapshot_cron_sweep_failed', url: null, user_id: null, source: 'server' },
-    { id: 'e6', received_at: '2026-06-22T18:55:31.000Z', level: 'crash', message: 'ResizeObserver loop completed with undelivered notifications', url: 'https://hvsb.app/account', user_id: 'u-77', source: 'client' },
+  error_clusters: [
+    { message: 'Cannot read properties of undefined (reading \'split\')', stack_head: 'at parseQuery (search.ts:42)', level: 'error', count: 18, users: 3, first_seen: '2026-06-23T08:10:00.000Z', last_seen: '2026-06-23T11:58:02.000Z', sources: 'client', platforms: 'web', is_noise: false },
+    { message: 'entry_save_failed: conflict', stack_head: '', level: 'error', count: 9, users: 2, first_seen: '2026-06-22T20:00:00.000Z', last_seen: '2026-06-23T10:41:15.000Z', sources: 'server', platforms: 'web', is_noise: false },
+    { message: '[post_request] Network error for /api/log', stack_head: '', level: 'error', count: 47, users: 1, first_seen: '2026-06-22T19:00:00.000Z', last_seen: '2026-06-23T09:12:44.000Z', sources: 'client', platforms: 'web', is_noise: true },
   ],
   browsers: [
     { label: 'Chrome 148', os: 'Linux', sessions: 83, below_capability: false },
@@ -178,7 +174,12 @@ export const Default: PageStory<typeof Component> = {
   props: { analytics } as never,
 }
 
+export const Bots: PageStory<typeof Component> = {
+  props: { analytics: { ...analytics, audience: 'bots', totals: { sessions: 402, errors: 24, logs: 1760, unique_users: 0 } } } as never,
+}
+
 const empty_analytics: LogAnalytics = {
+  audience: 'humans',
   window_days: 30,
   generated_at: '2026-06-23T13:04:00.000Z',
   daily: build_daily(30).map(point => ({ ...point, logs: 0, errors: 0, sessions: 0, users: 0 })),
@@ -186,7 +187,7 @@ const empty_analytics: LogAnalytics = {
   top_routes: [],
   top_events: [],
   by_source: [],
-  recent_errors: [],
+  error_clusters: [],
   browsers: [],
   capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, db_tiers: [] },
   performance: { summary: [], daily: [] },

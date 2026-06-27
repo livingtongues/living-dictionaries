@@ -90,6 +90,7 @@
   const pipeline = $derived(analytics.pipeline)
   const errors_by_version = $derived(analytics.errors_by_version)
   const event_coverage = $derived(analytics.event_coverage)
+  const clusters = $derived(analytics.error_clusters)
   const leader = $derived(analytics.leader_health)
   // Build ids are long; show a short trailing slice for readability.
   function short_version(version: string | null): string {
@@ -140,7 +141,15 @@
   <header class="head">
     <h1>Analytics</h1>
     <span class="sub">last {analytics.window_days} days · generated {short_time(analytics.generated_at)}</span>
+    <div class="audience-toggle" role="group" aria-label="Audience filter">
+      <a class="seg" class:active={analytics.audience === 'humans'} href="?audience=humans" data-sveltekit-noscroll>🧑 Humans</a>
+      <a class="seg" class:active={analytics.audience === 'bots'} href="?audience=bots" data-sveltekit-noscroll>🤖 Bots</a>
+    </div>
   </header>
+
+  {#if analytics.audience === 'bots'}
+    <p class="audience-note">🤖 Showing <b>bot / crawler / AI-agent</b> traffic — usage, routes, events, geo and timings below are bot-only. Diagnostics (errors, build, leader, clusters) always show everyone.</p>
+  {/if}
 
   <section class="pipeline" class:warn={!ingestion_recent}>
     <div class="pipeline-verdict">
@@ -472,19 +481,21 @@
   </section>
 
   <section class="panel">
-    <h2>Recent errors</h2>
-    {#if analytics.recent_errors.length === 0}
+    <h2>Error clusters <span class="hint">grouped by message + stack · hot window · all traffic · known-noise sunk</span></h2>
+    {#if clusters.length === 0}
       <p class="muted">No errors recorded. 🎉</p>
     {:else}
       <table class="err-table">
-        <thead><tr><th>When</th><th>Lvl</th><th>Src</th><th>Message</th></tr></thead>
+        <thead><tr><th>#</th><th>Lvl</th><th>Src</th><th>Users</th><th>Last</th><th>Message</th></tr></thead>
         <tbody>
-          {#each analytics.recent_errors as row (row.id)}
-            <tr>
-              <td class="nowrap mono">{short_time(row.received_at)}</td>
+          {#each clusters as row (row.message + row.stack_head)}
+            <tr class:noise={row.is_noise}>
+              <td class="nowrap">{format_number(row.count)}</td>
               <td class="lvl">{row.level}</td>
-              <td>{row.source ?? 'client'}</td>
-              <td class="msg" title={row.url ?? ''}>{row.message}</td>
+              <td>{row.sources}</td>
+              <td>{format_number(row.users)}</td>
+              <td class="nowrap mono">{short_time(row.last_seen)}</td>
+              <td class="msg" title={row.stack_head}>{row.is_noise ? '⚪ ' : ''}{row.message}</td>
             </tr>
           {/each}
         </tbody>
@@ -516,6 +527,39 @@
   .sub {
     color: var(--color-secondary);
     font-size: 0.8125rem;
+  }
+  .audience-toggle {
+    margin-left: auto;
+    display: inline-flex;
+    border: 1px solid var(--border-color, rgba(127, 127, 127, 0.25));
+    border-radius: 0.5rem;
+    overflow: hidden;
+    align-self: center;
+  }
+  .audience-toggle .seg {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-secondary);
+    text-decoration: none;
+    background: var(--surface);
+  }
+  .audience-toggle .seg + .seg {
+    border-left: 1px solid var(--border-color, rgba(127, 127, 127, 0.25));
+  }
+  .audience-toggle .seg.active {
+    background: var(--primary);
+    color: #fff;
+  }
+  .audience-note {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    font-size: 0.85rem;
+  }
+  tr.noise {
+    opacity: 0.55;
   }
   .pipeline {
     display: flex;

@@ -16,16 +16,17 @@ blind. You are also my advisor on how to improve this command + our logging.
 > branch (the apex `livingdictionaries.app` is still the old Vercel app — not this). Review the VPS
 > `client_logs`; until heavy real traffic lands on `new.*` the volume is light.
 
-## Three phases, one report
+## Four phases, one report
 
 | Phase | What | Output |
 |---|---|---|
 | **A — Inspect** | Read the logs on the server; triage + summarize (errors / usage / perf+geo / health) | Findings + action items |
 | **B — Scour** | Walk the codebase for important paths that *should* log but don't (informed by A) | Prioritized coverage suggestions |
 | **C — Sharpen** | Look at `/admin/analytics` with fresh eyes given the now-larger dataset | ≥1 concrete improvement proposal |
+| **D — Cross-pollinate** | End step: borrow recent dashboard wins from the sibling apps (house + tutor) | Ported backlog items |
 
-All three write into a single dated report: **`.cron/log-reviews/YYYY-MM-DD.md`**, then a short chat
-summary. B and C are read-and-recommend — they propose, they don't build.
+All four write into a single dated report: **`.cron/log-reviews/YYYY-MM-DD.md`**, then a short chat
+summary. B, C and D are read-and-recommend — they propose, they don't build.
 
 ## Default scope
 
@@ -164,6 +165,38 @@ query — drift means a bug to file. The reusable chart lib is `$lib/charts/` (B
 
 ---
 
+## Phase D — Cross-pollinate across the three apps (end step)
+
+LD, **house** (`~/code/house`) and **tutor** (`~/code/tutor`) share the same analytics architecture —
+`client_logs` + the `log_daily_metrics` rollup, `log-analytics.ts`, `/admin/analytics`, and the
+`$lib/charts/` lib — so a dashboard improvement built in one almost always ports to the others. This
+end step is what keeps the three reviews *compounding* instead of drifting apart.
+
+As the **final step each run**, read the other two apps' recent dashboard work and decide what to
+borrow:
+
+1. Their last few **`.cron/log-reviews/*.md`** (focus on the Phase C / dashboard sections) — what did
+   they just sharpen?
+2. Their **`.issues/future/dashboard-improvements.md`** backlog — both the *shipped* ✅ items and the
+   *open* proposals.
+3. If a backlog entry is too terse to judge, skim their **`site/src/lib/db/server/log-analytics.ts`**
+   + analytics `+page.svelte` to see the actual panel/metric they built.
+
+For each improvement the siblings recently shipped or proposed, judge **"does it fit LD?"** Skip the
+clearly-inapplicable — e.g. tutor's RN **Mobile-health / memory-OOM** panel and house's
+**/admin/revenue** dashboard (LD is web-only with no payments). For the ones that fit, **append them
+to `.issues/future/dashboard-improvements.md`** tagged `ported from <app>`, and note them in the
+report's §6. Read-and-recommend — **build nothing here.**
+
+Symmetry: if LD *just shipped* a panel the siblings lack, call it out in the report so the house +
+tutor reviews pick it up next run — their reviews read LD's backlog/reports the same way. (LD is
+currently the furthest-along dashboard; recent LD-only wins worth flagging for the siblings: the
+**bot/headless exclusion across *all* usage+geo metrics**, the **Core Web Vitals** panel, and the
+**pipeline-liveness + event-coverage** strips. A standing thing to borrow back: tutor's
+**error-cluster + known-noise** classification, which LD's raw `recent_errors` still lacks.)
+
+---
+
 ## Output
 
 1. **Write `.cron/log-reviews/YYYY-MM-DD.md`** (create the folder if missing):
@@ -189,8 +222,9 @@ query — drift means a bug to file. The reusable chart lib is `$lib/charts/` (B
 ## 5. Coverage gaps (Phase B)
 <prioritized: path → event → level → fields → why>
 
-## 6. Dashboard improvements (Phase C)
-<≥1 concrete proposal for /admin/analytics; link the backlog items you'd prioritize>
+## 6. Dashboard improvements (Phase C + D)
+<≥1 concrete proposal for /admin/analytics; link the backlog items you'd prioritize. Then Phase D:
+sibling-app (house/tutor) wins worth borrowing + any LD win the siblings should take.>
 
 ## Recommendations / action items
 - [ ] <each as a checkbox; link new .issues/ files>

@@ -22,6 +22,7 @@ export const GET: RequestHandler = async (event) => {
   if (!is_admin(auth.email))
     error(ResponseCodes.FORBIDDEN, 'Admin only')
 
-  const analytics = get_log_analytics({ shared_db: get_shared_db(), days: 30 })
+  const audience = event.url.searchParams.get('audience') === 'bots' ? 'bots' : 'humans'
+  const analytics = get_log_analytics({ shared_db: get_shared_db(), days: 30, audience })
   return json({ analytics } satisfies AdminAnalyticsResponseBody)
 }
