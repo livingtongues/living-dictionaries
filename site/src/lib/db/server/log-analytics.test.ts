@@ -111,23 +111,33 @@ describe(get_log_analytics, () => {
     expect(clusters[clusters.length - 1]).toMatchObject({ is_noise: true })
   })
 
-  test('browser breakdown excludes bots and flags below-capability sessions', () => {
+  test('device / OS / browser breakdown excludes bots and flags below-capability sessions', () => {
     const SAFARI17 = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15'
     const SAFARI14 = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Safari/605.1.15'
+    const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1'
+    const ANDROID = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Mobile Safari/537.36'
     const APPLEBOT = `${SAFARI17} (Applebot/0.1; +http://www.apple.com/go/applebot)`
     add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's1', db_tier: 'opfs-worker' }, user_agent: SAFARI17 })
     add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's2' }, user_agent: SAFARI14 })
+    add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's4' }, user_agent: IPHONE })
+    add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's5' }, user_agent: ANDROID })
     add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's3' }, user_agent: APPLEBOT })
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const { capability } = get_log_analytics({ shared_db: db, days: 30, now: NOW })
 
-    expect(analytics.capability.bot_sessions).toBe(1)
-    expect(analytics.capability.total_sessions).toBe(2) // bots excluded from human total
-    expect(analytics.capability.below_capability_sessions).toBe(1) // Safari 14 < 15.4
-    // The Applebot session (parses as Safari 17) must NOT inflate the Safari 17 bucket.
-    expect(analytics.browsers.find(browser => browser.label === 'Safari 17')?.sessions).toBe(1)
-    expect(analytics.browsers.find(browser => browser.label === 'Safari 14')?.below_capability).toBeTruthy()
-    expect(analytics.capability.db_tiers.find(tier => tier.tier === 'opfs-worker')?.sessions).toBe(1)
+    expect(capability.bot_sessions).toBe(1)
+    expect(capability.total_sessions).toBe(4) // bots excluded from human total
+    expect(capability.below_capability_sessions).toBe(1) // Safari 14 < 15.4
+    // Device split: 2 desktop (macOS Safari) + 2 mobile (iPhone + Android phone).
+    expect(capability.devices.find(row => row.device === 'desktop')?.sessions).toBe(2)
+    expect(capability.devices.find(row => row.device === 'mobile')?.sessions).toBe(2)
+    // OS nested versions: iOS 18 sub-bucket present; Applebot must NOT inflate macOS.
+    expect(capability.os.find(row => row.os === 'macOS')?.sessions).toBe(2)
+    expect(capability.os.find(row => row.os === 'iOS')?.versions).toEqual([{ version: '18', sessions: 1 }])
+    // Browser families (Applebot excluded): Safari = 3 (2 macOS + 1 iPhone), Chrome = 1.
+    expect(capability.browsers.find(row => row.browser === 'Safari')?.sessions).toBe(3)
+    expect(capability.browsers.find(row => row.browser === 'Chrome')?.sessions).toBe(1)
+    expect(capability.db_tiers.find(tier => tier.tier === 'opfs-worker')?.sessions).toBe(1)
   })
 
   test('excludes bot/headless sessions from usage, events, geo + perf (kept only in capability.bot_sessions)', () => {

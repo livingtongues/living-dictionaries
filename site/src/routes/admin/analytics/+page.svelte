@@ -1,9 +1,13 @@
 <script lang="ts">
   import type { PageData } from './$types'
   import { log_insights } from '$lib/analytics/insights'
+  import type { DonutDatum } from '$lib/charts/DonutChart.svelte'
+  import type { Segment } from '$lib/charts/SegmentedBar.svelte'
   import BarChart from '$lib/charts/BarChart.svelte'
   import ComboChart from '$lib/charts/ComboChart.svelte'
+  import DonutChart from '$lib/charts/DonutChart.svelte'
   import LineChart from '$lib/charts/LineChart.svelte'
+  import SegmentedBar from '$lib/charts/SegmentedBar.svelte'
   import { format_number, format_pct } from '$lib/constants'
 
   interface Props {
@@ -26,13 +30,53 @@
   const error_points = $derived(daily.map(point => ({ date: point.day, value: point.errors })))
   const route_bars = $derived(analytics.top_routes.map(row => ({ label: row.route, value: row.count })))
   const event_bars = $derived(analytics.top_events.map(row => ({ label: row.event, value: row.count, color: USERS_COLOR })))
-  const browser_bars = $derived(analytics.browsers.map(row => ({
-    label: row.os && row.os !== 'Other' ? `${row.label} · ${row.os}` : row.label,
-    value: row.sessions,
-    color: row.below_capability ? 'var(--danger)' : undefined,
-  })))
   const capability = $derived(analytics.capability)
   const below_pct = $derived(capability.total_sessions > 0 ? capability.below_capability_sessions / capability.total_sessions : 0)
+
+  // --- Device / OS / browser / local-DB visuals. Semantic palettes per axis. ---
+  const DEVICE_META: Record<string, { label: string, color: string, icon?: string }> = {
+    desktop: { label: 'Desktop', color: '#7c3aed', icon: '🖥️' },
+    mobile: { label: 'Mobile', color: '#06b6d4', icon: '📱' },
+    tablet: { label: 'Tablet', color: '#f59e0b' },
+  }
+  const OS_COLORS: Record<string, string> = {
+    Windows: '#7c3aed', macOS: '#10b981', iOS: '#f59e0b', iPadOS: '#8b5cf6',
+    Android: '#06b6d4', ChromeOS: '#ec4899', Linux: '#64748b', Other: '#94a3b8',
+  }
+  const BROWSER_COLORS: Record<string, string> = {
+    'Chrome': '#7c3aed', 'Safari': '#06b6d4', 'Edge': '#10b981', 'Firefox': '#f59e0b',
+    'Samsung Internet': '#ec4899', 'Opera': '#ef4444', 'Other': '#94a3b8',
+  }
+  function db_tier_color(tier: string): string {
+    if (tier.startsWith('opfs'))
+      return '#10b981'
+    if (tier.startsWith('idb'))
+      return '#f59e0b'
+    return '#94a3b8'
+  }
+
+  const device_segments = $derived<Segment[]>(capability.devices.map(row => ({
+    label: DEVICE_META[row.device]?.label ?? row.device,
+    value: row.sessions,
+    color: DEVICE_META[row.device]?.color ?? '#94a3b8',
+    icon: DEVICE_META[row.device]?.icon,
+  })))
+  const os_rings = $derived<DonutDatum[]>(capability.os.map(row => ({
+    label: row.os,
+    value: row.sessions,
+    color: OS_COLORS[row.os] ?? '#94a3b8',
+    children: row.versions.map(version => ({ label: version.version, value: version.sessions })),
+  })))
+  const browser_rings = $derived<DonutDatum[]>(capability.browsers.map(row => ({
+    label: row.browser,
+    value: row.sessions,
+    color: BROWSER_COLORS[row.browser] ?? '#94a3b8',
+  })))
+  const db_tier_segments = $derived<Segment[]>(capability.db_tiers.map(row => ({
+    label: row.tier,
+    value: row.sessions,
+    color: db_tier_color(row.tier),
+  })))
 
   const perf = $derived(analytics.performance)
   const perf_has_data = $derived(perf.summary.some(metric => metric.count > 0))
@@ -451,33 +495,34 @@
   </section>
 
   <section class="panel">
-    <h2>Browsers &amp; device capability <span class="hint">human sessions, last {analytics.window_days}d{capability.bot_sessions > 0 ? ` · ${format_number(capability.bot_sessions)} bot sessions excluded` : ''}</span></h2>
-    {#if capability.below_capability_sessions > 0}
-      <p class="cap-warn">
-        ⚠️ {format_number(capability.below_capability_sessions)} of {format_number(capability.total_sessions)} sessions ({format_pct(below_pct)}) are on a browser that can't run the local-first DB worker (Safari &lt; 15.4) — they fall back to main-thread IndexedDB or SSR.
-      </p>
+    <h2>Browsers &amp; devices <span class="hint">human sessions, last {analytics.window_days}d{capability.bot_sessions > 0 ? ` · ${format_number(capability.bot_sessions)} bot sessions excluded` : ''}</span></h2>
+    {#if capability.total_sessions === 0}
+      <p class="muted">No human sessions in window.</p>
+    {:else}
+      {#if capability.below_capability_sessions > 0}
+        <p class="cap-warn">
+          ⚠️ {format_number(capability.below_capability_sessions)} of {format_number(capability.total_sessions)} sessions ({format_pct(below_pct)}) are on a browser that can't run the local-first DB worker (Safari &lt; 15.4) — they fall back to main-thread IndexedDB or SSR.
+        </p>
+      {/if}
+      <div class="dev-block">
+        <div class="block-h">Device</div>
+        <SegmentedBar segments={device_segments} format={format_number} />
+      </div>
+      <div class="grid dev-grid">
+        <div class="dev-block">
+          <div class="block-h">Operating systems <span class="hint">versions in legend</span></div>
+          <DonutChart data={os_rings} nested={false} center_value={format_number(capability.total_sessions)} center_label="sessions" format={format_number} />
+        </div>
+        <div class="dev-block">
+          <div class="block-h">Browsers <span class="hint">by family</span></div>
+          <DonutChart data={browser_rings} format={format_number} />
+        </div>
+      </div>
+      <div class="dev-block">
+        <div class="block-h">Local-DB engine <span class="hint">storage tier the session actually ran</span></div>
+        <SegmentedBar segments={db_tier_segments} format={format_number} />
+      </div>
     {/if}
-    <div class="grid">
-      <div>
-        {#if browser_bars.length}
-          <BarChart data={browser_bars} format={format_number} label_width={150} />
-        {:else}
-          <p class="muted">No sessions in window.</p>
-        {/if}
-      </div>
-      <div>
-        <table class="src-table">
-          <thead><tr><th>Local-DB tier</th><th>Sessions</th></tr></thead>
-          <tbody>
-            {#each capability.db_tiers as row (row.tier)}
-              <tr><td>{row.tier}</td><td>{format_number(row.sessions)}</td></tr>
-            {:else}
-              <tr><td colspan="2" class="muted">No sessions in window.</td></tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-    </div>
   </section>
 
   <section class="panel">
@@ -776,6 +821,30 @@
     background: color-mix(in srgb, var(--danger) 10%, transparent);
     color: var(--danger);
     font-size: 0.8125rem;
+  }
+  .dev-block + .dev-block,
+  .dev-grid {
+    margin-top: 1.1rem;
+  }
+  .dev-grid {
+    align-items: start;
+  }
+  .block-h {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-secondary);
+    margin-bottom: 0.55rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .block-h .hint {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
   }
   .lvl { text-transform: uppercase; font-size: 0.6875rem; color: var(--danger); }
   .msg { word-break: break-word; }
