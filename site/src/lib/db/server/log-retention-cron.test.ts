@@ -94,23 +94,28 @@ describe(rollup_day, () => {
     expect(metric('2026-06-01', 'logs')).toBe(1)
   })
 
-  test('excludes bot/headless rows so the forever rollup is human-only (server rows kept)', () => {
+  test('splits bot/headless rows into a parallel bot: namespace (human metrics unaffected; server rows kept)', () => {
     const HEADLESS = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/148.0.0.0 Safari/537.36'
     // Human session.
     add_log({ message: 'session_start', user_id: 'human', context: { session_id: 'h1' }, user_agent: 'Mozilla/5.0 Chrome/148' })
     add_log({ message: 'search_performed', user_id: 'human', context: { session_id: 'h1' }, user_agent: 'Mozilla/5.0 Chrome/148' })
-    // Bot session — must not contribute to any human metric.
+    // Bot session — contributes only to the `bot:` namespace, never the human metrics.
     add_log({ message: 'session_start', context: { session_id: 'b1' }, user_agent: HEADLESS })
     add_log({ message: 'search_performed', context: { session_id: 'b1' }, user_agent: HEADLESS })
-    // Server row (NULL user_agent) — kept.
+    // Server row (NULL user_agent) — kept as human/plain.
     add_log({ message: 'auth_login', source: 'server' })
 
     rollup_day({ day: '2026-06-01', shared_db })
+    // Human (plain) metrics exclude bots.
     expect(metric('2026-06-01', 'sessions')).toBe(1) // only the human session
     expect(metric('2026-06-01', 'users')).toBe(1)
     expect(metric('2026-06-01', 'event:search_performed')).toBe(1)
-    expect(metric('2026-06-01', 'logs')).toBe(2) // 2 human rows; 2 bot rows dropped
+    expect(metric('2026-06-01', 'logs')).toBe(2) // 2 human rows
     expect(metric('2026-06-01', 'logs', 'server')).toBe(1) // server row kept
+    // Bots are preserved under the `bot:` namespace (so the Bots toggle works on cold days).
+    expect(metric('2026-06-01', 'bot:sessions')).toBe(1)
+    expect(metric('2026-06-01', 'bot:event:search_performed')).toBe(1)
+    expect(metric('2026-06-01', 'bot:logs')).toBe(2)
   })
 })
 

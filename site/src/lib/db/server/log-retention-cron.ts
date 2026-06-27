@@ -73,25 +73,27 @@ export function rollup_day({ day, shared_db = get_shared_db() }: { day: string, 
     /** Distinct sessions per area key (`US-CA` / `US`). Forever "which areas have users". */
     geo: Map<string, Set<string>>
   }
+  const make_bucket = (): Bucket => ({ sessions: new Set(), users: new Set(), logs: 0, errors: 0, levels: new Map(), events: new Map(), navs: new Map(), geo: new Map() })
   const by_source = new Map<string, Bucket>()
   const bucket_for = (source: string): Bucket => {
     let bucket = by_source.get(source)
     if (!bucket) {
-      bucket = { sessions: new Set(), users: new Set(), logs: 0, errors: 0, levels: new Map(), events: new Map(), navs: new Map(), geo: new Map() }
+      bucket = make_bucket()
       by_source.set(source, bucket)
     }
     return bucket
   }
+  // Bots (crawlers / headless automation) go into a SEPARATE bucket emitted under
+  // a `bot:` metric namespace, so /admin/analytics can toggle Humans (plain
+  // metrics) vs Bots (`bot:` metrics) across the FULL window — including archived
+  // days where the raw UA is gone. Bots are always a client row (server rows carry
+  // no UA), so the bot bucket has no per-source split. Human metrics keep the
+  // plain keys, so a day's human trend doesn't jump when it ages out of hot storage.
+  const bot_bucket = make_bucket()
   const bump = (map: Map<string, number>, key: string): void => { map.set(key, (map.get(key) ?? 0) + 1) }
 
   for (const row of rows) {
-    // Skip bot / headless-automation rows entirely so the FOREVER rollup (the
-    // cold-tier trend source) is human-only — consistent with the hot reader's
-    // `HUMAN_ROWS_SQL` filter, so a day doesn't jump when it ages out of hot
-    // storage. Server rows carry no user_agent (NULL) and are kept.
-    if (is_bot_user_agent(row.user_agent))
-      continue
-    const bucket = bucket_for(row.source)
+    const bucket = is_bot_user_agent(row.user_agent) ? bot_bucket : bucket_for(row.source)
     bucket.logs++
     if (ERROR_LEVELS.has(row.level))
       bucket.errors++
@@ -120,20 +122,25 @@ export function rollup_day({ day, shared_db = get_shared_db() }: { day: string, 
   }
 
   const metrics: { metric: string, source: string, value: number }[] = []
-  for (const [source, bucket] of by_source) {
-    metrics.push({ metric: 'sessions', source, value: bucket.sessions.size })
-    metrics.push({ metric: 'users', source, value: bucket.users.size })
-    metrics.push({ metric: 'logs', source, value: bucket.logs })
-    metrics.push({ metric: 'errors', source, value: bucket.errors })
+  // `prefix` is '' for human/server buckets, 'bot:' for the bot bucket.
+  const emit = (bucket: Bucket, source: string, prefix: string): void => {
+    metrics.push({ metric: `${prefix}sessions`, source, value: bucket.sessions.size })
+    metrics.push({ metric: `${prefix}users`, source, value: bucket.users.size })
+    metrics.push({ metric: `${prefix}logs`, source, value: bucket.logs })
+    metrics.push({ metric: `${prefix}errors`, source, value: bucket.errors })
     for (const [level, value] of bucket.levels)
-      metrics.push({ metric: `level:${level}`, source, value })
+      metrics.push({ metric: `${prefix}level:${level}`, source, value })
     for (const [event, value] of bucket.events)
-      metrics.push({ metric: `event:${event}`, source, value })
+      metrics.push({ metric: `${prefix}event:${event}`, source, value })
     for (const [route, value] of bucket.navs)
-      metrics.push({ metric: `nav:${route}`, source, value })
+      metrics.push({ metric: `${prefix}nav:${route}`, source, value })
     for (const [area, sessions] of bucket.geo)
-      metrics.push({ metric: `geo:${area}`, source, value: sessions.size })
+      metrics.push({ metric: `${prefix}geo:${area}`, source, value: sessions.size })
   }
+  for (const [source, bucket] of by_source)
+    emit(bucket, source, '')
+  if (bot_bucket.logs > 0)
+    emit(bot_bucket, 'client', 'bot:')
 
   const upsert = shared_db.prepare(`
     INSERT INTO log_daily_metrics (day, metric, source, value) VALUES (?, ?, ?, ?)

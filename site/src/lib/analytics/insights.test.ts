@@ -15,6 +15,7 @@ function make_daily(sessions_per_day: number[]): Daily {
 
 function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
   return {
+    audience: 'humans',
     window_days: 30,
     generated_at: '2026-06-24T00:00:00.000Z',
     daily: [],
@@ -22,7 +23,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     top_routes: [],
     top_events: [],
     by_source: [],
-    recent_errors: [],
+    error_clusters: [],
     browsers: [],
     capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, db_tiers: [] },
     performance: { summary: [], daily: [] },

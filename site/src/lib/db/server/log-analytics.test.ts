@@ -72,7 +72,7 @@ describe(get_log_analytics, () => {
     expect(analytics.top_routes.find(route => route.route === 'dictionary:entry')?.count).toBe(1)
   })
 
-  test('splits client vs server source and lists recent errors', () => {
+  test('splits client vs server source and clusters errors', () => {
     add_log({ day: '2026-06-30', level: 'error', message: 'client-err' })
     add_log({ day: '2026-06-30', level: 'error', message: 'server-err', source: 'server' })
 
@@ -80,7 +80,35 @@ describe(get_log_analytics, () => {
 
     expect(analytics.by_source.find(s => s.source === 'client')?.errors).toBe(1)
     expect(analytics.by_source.find(s => s.source === 'server')?.errors).toBe(1)
-    expect(analytics.recent_errors.map(e => e.message).sort()).toEqual(['client-err', 'server-err'])
+    expect(analytics.error_clusters.map(e => e.message).sort()).toEqual(['client-err', 'server-err'])
+  })
+
+  test('audience toggle filters usage to humans (default) or bots', () => {
+    const BOT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+    const HUMAN = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15'
+    add_log({ day: '2026-06-30', message: 'session_start', user_agent: HUMAN, context: { session_id: 'hs' } })
+    add_log({ day: '2026-06-30', message: 'session_start', user_agent: BOT, context: { session_id: 'bs1' } })
+    add_log({ day: '2026-06-30', message: 'session_start', user_agent: BOT, context: { session_id: 'bs2' } })
+
+    const humans = get_log_analytics({ shared_db: db, days: 30, now: NOW, audience: 'humans' })
+    expect(humans.audience).toBe('humans')
+    expect(humans.totals.sessions).toBe(1)
+
+    const bots = get_log_analytics({ shared_db: db, days: 30, now: NOW, audience: 'bots' })
+    expect(bots.audience).toBe('bots')
+    expect(bots.totals.sessions).toBe(2)
+  })
+
+  test('clusters repeated errors, tags + sinks known-noise', () => {
+    for (let i = 0; i < 5; i++)
+      add_log({ day: '2026-06-30', level: 'error', message: 'boom', user_id: `u${i}` })
+    for (let i = 0; i < 30; i++)
+      add_log({ day: '2026-06-30', level: 'error', message: '[post_request] Network error for /api/log' })
+
+    const clusters = get_log_analytics({ shared_db: db, days: 30, now: NOW }).error_clusters
+    expect(clusters.find(c => c.message === 'boom')).toMatchObject({ count: 5, users: 5, is_noise: false })
+    expect(clusters[0].message).toBe('boom')
+    expect(clusters[clusters.length - 1]).toMatchObject({ is_noise: true })
   })
 
   test('browser breakdown excludes bots and flags below-capability sessions', () => {
