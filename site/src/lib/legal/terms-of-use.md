@@ -116,7 +116,7 @@ We reserve the right, but not the obligation, to monitor the Site for violations
 
 ## Privacy Policy
 
-We care about data privacy and security. Please review our [Privacy Policy](https://livingtongues.org/privacy-policy/). By using the Site, you agree to be bound by that Privacy Policy, which is incorporated into these Terms.
+We care about data privacy and security. Please review our [Privacy Policy](/privacy-policy). By using the Site, you agree to be bound by that Privacy Policy, which is incorporated into these Terms.
 
 Please be advised that the Site is hosted in the United States. If you access the Site from the European Union, Asia, or any other region with laws or requirements governing personal data collection, use, or disclosure that differ from United States law, then through your continued use of the Site you are transferring your data to the United States and consent to your data being transferred to and processed in the United States.
 

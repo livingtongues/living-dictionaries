@@ -56,6 +56,13 @@ const analytics: LogAnalytics = {
   generated_at: '2026-06-23T13:04:00.000Z',
   daily: build_daily(30),
   performance: build_perf(30),
+  web_vitals: [
+    { metric: 'LCP', count: 142, p50: 1820, p75: 2410, p95: 3900 },
+    { metric: 'INP', count: 88, p50: 110, p75: 180, p95: 420 },
+    { metric: 'CLS', count: 142, p50: 0.02, p75: 0.06, p95: 0.21 },
+    { metric: 'FCP', count: 156, p50: 1120, p75: 1680, p95: 2700 },
+    { metric: 'TTFB', count: 156, p50: 320, p75: 540, p95: 1190 },
+  ],
   totals: { sessions: 188, errors: 24, logs: 2417, unique_users: 73 },
   top_routes: [
     { route: 'search', count: 642 },
@@ -183,6 +190,7 @@ const empty_analytics: LogAnalytics = {
   browsers: [],
   capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, db_tiers: [] },
   performance: { summary: [], daily: [] },
+  web_vitals: [],
   geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [] },
   errors_by_version: { current_version: '1719300000123', total: 0, current: 0, stale: 0, stale_pct: null, versions: [] },
   pipeline: { last_log_at: null, last_session_start_at: null, last_server_log_at: null, retention_ran_at: null, hot_rows: 0, archived_rows: 0 },

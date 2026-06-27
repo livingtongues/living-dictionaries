@@ -102,6 +102,43 @@ describe(get_log_analytics, () => {
     expect(analytics.capability.db_tiers.find(tier => tier.tier === 'opfs-worker')?.sessions).toBe(1)
   })
 
+  test('excludes bot/headless sessions from usage, events, geo + perf (kept only in capability.bot_sessions)', () => {
+    const HUMAN = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36'
+    const HEADLESS = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/148.0.0.0 Safari/537.36'
+    const la: RequestGeo = { country: 'US', region: 'CA', city: 'Los Angeles', latitude: 34.05, longitude: -118.24 }
+    // Human session: search + nav + page_load.
+    add_log({ day: '2026-06-30', message: 'session_start', user_id: 'human', context: { session_id: 'h1' }, user_agent: HUMAN, geo: la })
+    add_log({ day: '2026-06-30', message: 'search_performed', user_id: 'human', context: { session_id: 'h1' }, user_agent: HUMAN })
+    add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 'h1', to: '/dictionaries' }, user_agent: HUMAN })
+    add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 'h1', name: 'page_load', duration_ms: 500, ttfb: 100 }, user_agent: HUMAN, geo: la })
+    add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 'h1', name: 'web_vital', metric: 'LCP', value: 1800 }, user_agent: HUMAN })
+    // Headless bot session: identical activity, must NOT count toward usage.
+    add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 'b1' }, user_agent: HEADLESS, geo: la })
+    add_log({ day: '2026-06-30', message: 'search_performed', context: { session_id: 'b1' }, user_agent: HEADLESS })
+    add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 'b1', to: '/dictionaries' }, user_agent: HEADLESS })
+    add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 'b1', name: 'page_load', duration_ms: 9000, ttfb: 9000 }, user_agent: HEADLESS, geo: la })
+    add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 'b1', name: 'web_vital', metric: 'LCP', value: 9999 }, user_agent: HEADLESS })
+    // Server row carries no user_agent (NULL) → always kept.
+    add_log({ day: '2026-06-30', source: 'server', message: 'auth_login' })
+
+    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const today = analytics.daily[analytics.daily.length - 1]
+    expect(today?.sessions).toBe(1) // only the human session
+    expect(today?.users).toBe(1)
+    expect(analytics.totals.unique_users).toBe(1)
+    expect(analytics.top_events.find(event => event.event === 'search_performed')?.count).toBe(1)
+    expect(analytics.top_routes.find(route => route.route === 'dictionaries')?.count).toBe(1)
+    expect(analytics.geo.located_sessions).toBe(1)
+    // perf + web vitals reflect only the human sample (bot's 9000 excluded).
+    expect(analytics.performance.summary.find(metric => metric.name === 'page_load')).toMatchObject({ count: 1, p50: 500 })
+    expect(analytics.web_vitals.find(vital => vital.metric === 'LCP')).toMatchObject({ count: 1, p50: 1800 })
+    // The bot is still visible — counted separately, kept out of the human total.
+    expect(analytics.capability.bot_sessions).toBe(1)
+    expect(analytics.capability.total_sessions).toBe(1)
+    // Server-sourced rows are NOT treated as bots.
+    expect(analytics.by_source.find(source => source.source === 'server')?.logs).toBe(1)
+  })
+
   test('aggregates perf timings into per-metric percentiles, dropping web_vitals', () => {
     // page_load: 5 samples 100..500 → p50 = 300, p95 = 500, max 500.
     for (const ms of [100, 200, 300, 400, 500])

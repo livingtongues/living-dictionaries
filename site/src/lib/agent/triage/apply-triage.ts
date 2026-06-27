@@ -150,9 +150,9 @@ if (import.meta.vitest) {
     expect(d.assignee?.name).toBe('Diego Mariscal')
   })
 
-  test('high-confidence account → Anna', () => {
+  test('high-confidence account → Jacob (Anna is off-duty)', () => {
     const d = decide_actions({ ...base, category: 'account', confidence: 'high' })
-    expect(d.assignee?.name).toBe('Anna Luisa Daigneault')
+    expect(d.assignee?.name).toBe('Jacob Bowdoin')
   })
 
   test('low confidence → Jacob review', () => {

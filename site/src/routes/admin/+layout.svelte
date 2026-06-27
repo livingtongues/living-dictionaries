@@ -20,6 +20,7 @@
     { href: '/admin/sync', label: 'Sync' },
     { href: '/admin/schema', label: 'Schema' },
     { href: '/admin/triage-examples', label: 'Triage' },
+    { href: '/admin/legal-review', label: 'Legal' },
   ]
   function is_active(href: string): boolean {
     return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`)

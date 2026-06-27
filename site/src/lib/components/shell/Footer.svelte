@@ -16,6 +16,10 @@
   <span class="nowrap">{$page.data.t('footer.entries')}: <b>{new Intl.NumberFormat().format(public_entries_count)}</b>,</span>
   <span>{$page.data.t('footer.LD_project')} <a href="https://livingtongues.org/" target="_blank" class="lt-link">Living Tongues Institute for Endangered Languages.</a>
   </span>
+  <span class="nowrap legal-links">
+    <a href="/terms" class="lt-link">{$page.data.t('dictionary.terms_of_use')}</a>
+    <a href="/privacy-policy" class="lt-link">{$page.data.t('terms.privacy_policy')}</a>
+  </span>
   <a href="https://www.facebook.com/living.tongues" target="_blank" class="social social-first"><IconMageFacebookSquare class="icon-inline" /></a>
   <a href="https://www.instagram.com/livingtongues" target="_blank" class="social"><IconF7LogoInstagram class="icon-inline" /></a>
 </footer>
@@ -49,6 +53,10 @@
 
   .lt-link {
     text-decoration-line: underline;
+  }
+
+  .legal-links a + a {
+    margin-left: 0.5rem;
   }
 
   .lt-link:hover,

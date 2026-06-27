@@ -25,10 +25,12 @@ The **domain** files are deliberately LD-specific and do NOT track house: `const
 - **Categories** (`technical`, `content`, `account`, `partnership`, `other`) and the verdict
   (`spam`|`human`) are model-emitted; `notification` is an auto-resolver-only marker the LLM never
   emits.
-- **Routing is single-admin** (no junction table — Jacob rejected multi-assign): technical/other →
-  Jacob, content/partnership → Diego, account → Anna, fallback (low-confidence + spam) → Jacob.
-  `CATEGORY_ROUTING` in `routing.ts` is the single source of truth; `RoutingLegend.svelte` renders
-  from it.
+- **Routing is single-admin** (no junction table — Jacob rejected multi-assign): technical/account/other
+  → Jacob, content/partnership → Diego, fallback (low-confidence + spam) → Jacob. `CATEGORY_ROUTING` in
+  `routing.ts` is the single source of truth; `RoutingLegend.svelte` renders from it.
+- **Off-duty admins** (`admins.ts` `Admin.notify === false`, e.g. Anna from 2026-06-27) keep admin +
+  chat ACCESS but are excluded from broadcast `notify_admins`, chat gentle re-pings, and the triage
+  routing map (account moved Anna→Jacob). They can still be assigned manually.
 - **Draft withholding**: `normalize_result` nulls the draft for `spam` AND `partnership`
   (relationship-sensitive — an admin writes it personally). House withheld `theology` instead.
 - **`notification-registry`** is seeded minimal (mailer-daemon/postmaster bounces) — LD has no

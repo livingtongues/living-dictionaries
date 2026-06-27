@@ -76,11 +76,13 @@ export interface NotifyAdminsParams {
 }
 
 export async function notify_admins({ subject, body, link }: NotifyAdminsParams): Promise<void> {
-  if (process.env.NTFY_DISABLED === '1' || ADMINS.length === 0)
+  // Off-duty admins (`notify: false`) keep access but aren't broadcast-pinged.
+  const on_duty = ADMINS.filter(admin => admin.notify !== false)
+  if (process.env.NTFY_DISABLED === '1' || on_duty.length === 0)
     return
 
   await Promise.allSettled(
-    ADMINS.map(admin => notify_one({
+    on_duty.map(admin => notify_one({
       topic: admin.ntfy_topic,
       subject,
       body,

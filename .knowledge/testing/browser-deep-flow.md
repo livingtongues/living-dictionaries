@@ -148,3 +148,20 @@ freeze but isn't — screenshots (compositor path) still render; only main-threa
   fails** without a GPU (the home-globe page errors; entries pages are fine). Headless + a dialog
   handler is the better path — reach for headful only for input pipelines headless genuinely can't
   drive.
+
+## Whole-app visual-parity screenshots (`e2e/uno-parity-shots.mjs`)
+`site/e2e/uno-parity-shots.mjs` screenshots ~23 main routes against the dev server (:3041). Despite
+the `uno-` name it's the **kept harness for ANY whole-app visual refactor** — the dark-mode flip, the
+svelte-ui restyle, etc.: `node e2e/uno-parity-shots.mjs <out_dir> [name-prefix,…]`, diff with
+`compare -metric AE -fuzz 2% baseline/x.png after/x.png diff/x.png`. Sources of false diffs (learned in
+the 2026-06-12 uno drop):
+- **Restarting the dev server subtly shifts text antialiasing across the whole page** (fuzz-2% diffs
+  everywhere) — capture baseline AND "after" against the **same** running server instance; if a route
+  you didn't touch also drifts, it's AA ghosting, not your change.
+- **`pnpm check` runs `svelte-kit sync`, which triggers a full-reload storm that hangs concurrent
+  puppeteer `goto`s** — never run a check and the screenshot sweep in parallel.
+- **Block `googleusercontent.com`** (avatars intermittently `ERR_BLOCKED_BY_ORB`) for determinism.
+- **Mapbox tiles / YouTube + Vimeo embeds / firebase images flake** — eyeball those regions; the pixel
+  diff there is noise.
+- **Select e2e elements by semantic class / aria-label, never by icon class** — the old `i-*` selectors
+  broke the instant icons were swapped; use `.add-sense-button` / `.delete-sense-button` etc.

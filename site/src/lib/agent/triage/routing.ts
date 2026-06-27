@@ -13,12 +13,13 @@ import { ADMINS } from '$lib/admins'
  */
 const JACOB = 'jwrunner7@gmail.com'
 const DIEGO = 'diego@livingtongues.org'
-const ANNA = 'dictionaries@livingtongues.org'
 
+// Anna is off-duty (admins.ts `notify: false`) — account moved to Jacob (login/access
+// issues are technical-adjacent, and he's the technical + other + fallback owner).
 export const CATEGORY_ROUTING: Record<TriageCategory, string> = {
   technical: JACOB,
   content: DIEGO,
-  account: ANNA,
+  account: JACOB,
   partnership: DIEGO,
   other: JACOB,
 }
@@ -44,12 +45,18 @@ if (import.meta.vitest) {
     }
   })
 
-  test('technical/other → Jacob, content/partnership → Diego, account → Anna', () => {
+  test('technical/account/other → Jacob, content/partnership → Diego', () => {
     expect(route_admin_for_category('technical')?.name).toBe('Jacob Bowdoin')
     expect(route_admin_for_category('content')?.name).toBe('Diego Mariscal')
-    expect(route_admin_for_category('account')?.name).toBe('Anna Luisa Daigneault')
+    expect(route_admin_for_category('account')?.name).toBe('Jacob Bowdoin')
     expect(route_admin_for_category('partnership')?.name).toBe('Diego Mariscal')
     expect(route_admin_for_category('other')?.name).toBe('Jacob Bowdoin')
+  })
+
+  test('no category routes to an off-duty admin', () => {
+    const off_duty_emails = ADMINS.filter(a => a.notify === false).map(a => a.email)
+    for (const email of Object.values(CATEGORY_ROUTING))
+      expect(off_duty_emails).not.toContain(email)
   })
 
   test('fallback admin is Jacob', () => {

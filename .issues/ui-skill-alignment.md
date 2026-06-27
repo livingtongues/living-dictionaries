@@ -1,6 +1,6 @@
 # Align LD's UI with the svelte-ui skill (post-uno restyle)
 
-The 2026-06-12 uno drop (`.issues/drop-unocss.md`) was a **pixel-parity port** — the
+The 2026-06-12 uno drop was a **pixel-parity port** — the
 legacy look was deliberately retained. This issue is the deliberate-restyle follow-up:
 move the app to the design system described in `.claude/skills/svelte-ui/SKILL.md`
 (minimal chrome, surface-based hierarchy, `.btn-*` buttons, mdi icons, invisible inputs)
@@ -15,9 +15,20 @@ Sibling: house's equivalent is `~/code/house/.issues/future/post-parity-styling-
 
 - 25 files of `<i class="fas fa-x">` / `<i class="far fa-x">` → identical-glyph
   `~icons/fa-solid/*` / `~icons/fa-regular/*` components (same `@iconify/json` source —
-  exact same SVGs; this is the proven presetIcons-swap method from the uno drop, see
-  drop-unocss.md "Icons" lessons: `.icon-inline` shim semantics, `:global` for class
-  props into components, two-components-`{#if}` for conditional icons).
+  exact same SVGs; the proven presetIcons-swap method from the uno drop).
+- **Icon-swap mechanics** (inlined from the retired drop-unocss.md so they aren't lost):
+  - `i-<set>-<name>` → `import IconX from '~icons/<set>/<name>'`; colon form
+    (`i-tabler:ai`) → slash after the set (`~icons/tabler/ai`).
+  - **`.icon-inline` shim must mirror presetIcons exactly**: `display:inline-block` (the reset
+    blocks bare `svg`), `height:1em; width:auto` (width:auto preserves aspect — fa-solid icons are
+    ~0.88em wide; forcing 1em stretches them), `vertical-align:middle`. unplugin-icons SVGs are
+    1.2em-square with NO vertical-align, so add `vertical-align:middle` where screenshots drift.
+  - **Class props passed INTO components** (svelte-pieces Button/Modal/Menu, AddEntry…) can't be
+    svelte-scoped → `:global(.semantic-name)` under an ancestor scope; for **PORTALED** components
+    (Modal/Menu) ancestor scoping fails too → bare `:global(div.unique-name)` element-qualified to
+    outrank the component's own styles.
+  - **Conditional icons** (`class:i-x={cond}` toggles, icon classes referenced in `.ts` files) →
+    the two-components-with-`{#if}` pattern.
 - Then delete the `kit.fontawesome.com` script from `src/app.html` — removes a
   third-party blocking script (perf win) + the FOUC of font-glyph icons.
 - Was explicitly deferred by Jacob during the parity pass; greenlit as follow-up.

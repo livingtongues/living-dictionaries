@@ -26,6 +26,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     browsers: [],
     capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, db_tiers: [] },
     performance: { summary: [], daily: [] },
+    web_vitals: [],
     geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [] },
     errors_by_version: { current_version: null, total: 0, current: 0, stale: 0, stale_pct: null, versions: [] },
     pipeline: { last_log_at: null, last_session_start_at: null, last_server_log_at: null, retention_ran_at: null, hot_rows: 0, archived_rows: 0 },

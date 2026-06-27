@@ -123,6 +123,9 @@
 <a href="/terms" target="_blank" class="link">
   {$page.data.t('dictionary.terms_of_use')}
 </a>
+<a href="/privacy-policy" target="_blank" class="link">
+  {$page.data.t('terms.privacy_policy')}
+</a>
 <a href="https://www.youtube.com/static?template=terms" target="_blank" rel="noopener noreferrer" class="link">
   {$page.data.t('dictionary.youtube_terms')}
 </a>
