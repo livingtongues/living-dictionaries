@@ -19,6 +19,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     window_days: 30,
     generated_at: '2026-06-24T00:00:00.000Z',
     daily: [],
+    deploys: [],
     totals: { sessions: 0, errors: 0, logs: 0, unique_users: 0 },
     top_routes: [],
     top_events: [],

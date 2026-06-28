@@ -1,6 +1,7 @@
 ---
-every: 30 21 * * *
+every: 30 22 * * *
 runs_on: mustang
+notify: none
 ---
 
-Read and fully execute .claude/commands/log-and-fix.md — follow it exactly end to end.
+Do .claude/commands/log-and-fix.md

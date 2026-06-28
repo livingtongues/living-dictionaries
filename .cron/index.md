@@ -30,7 +30,7 @@ a repo job by editing its file and committing; `horse cron run <id>` still trigg
 
 | id | source | schedule | runs | output |
 |---|---|---|---|---|
-| `living-dictionaries/log-review` | `.cron/log-review.md` (repo, `runs_on: mustang`) | `every: 30 21 * * *` (daily 21:30 — staggered 30m after house) | `.claude/commands/log-and-fix.md` end-to-end | `.cron/log-reviews/YYYY-MM-DD.md` + chat summary |
+| `living-dictionaries/log-review` | `.cron/log-review.md` (repo, `runs_on: mustang`) | `every: 30 22 * * *` (daily 22:30 UTC = 06:30 SGT) | `.claude/commands/log-and-fix.md` end-to-end | `.cron/log-reviews/YYYY-MM-DD.md` + chat summary |
 
 > The `log-and-fix` *command* lives at `.claude/commands/log-and-fix.md` (slash menu + the cron read
 > it there) — it is NOT a cron definition. `log-review.md` just invokes it.

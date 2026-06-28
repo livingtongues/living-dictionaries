@@ -60,7 +60,9 @@ const PERF_METRICS = ['page_load', 'search'] as const
 const WEB_VITAL_METRICS = ['LCP', 'INP', 'CLS', 'FCP', 'TTFB'] as const
 
 export interface DailyPoint { day: string, sessions: number, users: number, errors: number, logs: number }
-export interface PerfSummary { name: string, count: number, p50: number | null, p90: number | null, p95: number | null, max: number | null }
+/** A distinct deployed build seen in the window (`app_version` = build epoch ms), for timeline markers. */
+export interface Deploy { day: string, version: string, first_seen: string, sessions: number }
+export interface PerfSummary { name: string, count: number, p50: number | null, p90: number | null, p95: number | null, max: number | null, slowest: { duration_ms: number, route: string } | null }
 export interface PerfDailyPoint { day: string, metrics: Record<string, { p50: number, p95: number, count: number }> }
 /** Core Web Vitals distribution (LCP/INP/CLS/FCP/TTFB); `value` is ms except CLS (unitless). p75 is the CWV threshold metric. */
 export interface WebVitalSummary { metric: string, count: number, p50: number | null, p75: number | null, p95: number | null }
@@ -152,6 +154,8 @@ export interface LogAnalytics {
   window_days: number
   generated_at: string
   daily: DailyPoint[]
+  /** Distinct builds seen in the window (first-seen day per `app_version`) — timeline deploy markers. */
+  deploys: Deploy[]
   totals: { sessions: number, errors: number, logs: number, unique_users: number }
   top_routes: { route: string, count: number }[]
   top_events: { event: string, count: number }[]
@@ -190,6 +194,36 @@ export interface LogAnalytics {
   event_coverage: EventCoverage
   /** Leader-worker DB health (live_query_* family). */
   leader_health: LeaderHealth
+}
+
+/** Strip a full URL down to its pathname (+ search) for display; falls back to the raw value. */
+function url_route(url: string | null | undefined): string {
+  if (!url)
+    return '?'
+  try {
+    const parsed = new URL(url)
+    return parsed.pathname + parsed.search
+  } catch {
+    return url
+  }
+}
+
+if (import.meta.vitest) {
+  describe(url_route, () => {
+    it('strips origin to pathname + search', () => {
+      expect(url_route('https://new.livingdictionaries.app/example/entries?q=cat')).toBe('/example/entries?q=cat')
+    })
+    it('returns pathname for a bare path url', () => {
+      expect(url_route('https://new.livingdictionaries.app/about')).toBe('/about')
+    })
+    it('falls back to the raw value for a non-url', () => {
+      expect(url_route('not a url')).toBe('not a url')
+    })
+    it('returns ? for null/empty', () => {
+      expect(url_route(null)).toBe('?')
+      expect(url_route(undefined)).toBe('?')
+    })
+  })
 }
 
 /** Nearest-rank percentile of an UNSORTED numeric array; null when empty. */
@@ -454,23 +488,30 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   // --- Performance: client `perf` timings, hot window only (the rollup keeps
   // event counts, not duration distributions). `web_vital` rows carry `value`
   // not `duration_ms`, so the NOT NULL filter drops them from the timing mix. ---
+  // `duration_ms > 0` drops bfcache/instant-nav loads that record as 0ms (and any
+  // negatives) — they're not real timings and drag the p50 down.
   const perf_rows = shared_db.prepare(`
     SELECT substr(received_at, 1, 10) day,
            json_extract(context, '$.name') name,
-           json_extract(context, '$.duration_ms') duration_ms
+           json_extract(context, '$.duration_ms') duration_ms,
+           url
     FROM client_logs
     WHERE received_at >= ? AND message = 'perf' AND ${audience_filter}
-      AND json_extract(context, '$.duration_ms') IS NOT NULL
-  `).all(window_start_iso) as { day: string, name: string | null, duration_ms: number }[]
+      AND json_extract(context, '$.duration_ms') > 0
+  `).all(window_start_iso) as { day: string, name: string | null, duration_ms: number, url: string | null }[]
 
   const perf_all = new Map<string, number[]>()
   const perf_by_day = new Map<string, Map<string, number[]>>()
+  const perf_slowest = new Map<string, { duration_ms: number, route: string }>()
   for (const row of perf_rows) {
     if (!row.name)
       continue
     if (!perf_all.has(row.name))
       perf_all.set(row.name, [])
     perf_all.get(row.name)?.push(row.duration_ms)
+    const prev = perf_slowest.get(row.name)
+    if (!prev || row.duration_ms > prev.duration_ms)
+      perf_slowest.set(row.name, { duration_ms: row.duration_ms, route: url_route(row.url) })
     let day_map = perf_by_day.get(row.day)
     if (!day_map) {
       day_map = new Map()
@@ -485,7 +526,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   const perf_names = [...PERF_METRICS, ...[...perf_all.keys()].filter(name => !PERF_METRICS.includes(name as typeof PERF_METRICS[number]))]
   const perf_summary: PerfSummary[] = perf_names.map((name) => {
     const values = perf_all.get(name) ?? []
-    return { name, count: values.length, p50: percentile(values, 50), p90: percentile(values, 90), p95: percentile(values, 95), max: values.length ? Math.max(...values) : null }
+    return { name, count: values.length, p50: percentile(values, 50), p90: percentile(values, 90), p95: percentile(values, 95), max: values.length ? Math.max(...values) : null, slowest: perf_slowest.get(name) ?? null }
   })
   const perf_daily: PerfDailyPoint[] = daily.map((point) => {
     const day_map = perf_by_day.get(point.day)
@@ -604,6 +645,18 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     versions: error_versions,
   }
 
+  // --- Deploys: distinct builds seen in the window (app_version = build epoch ms),
+  // first-seen day each, for timeline markers ("which deploy caused this spike?").
+  // Human rows only so it lines up with the (bot-excluded) traffic/error charts. ---
+  const deploys = (shared_db.prepare(`
+    SELECT app_version version, MIN(received_at) first_seen,
+           COUNT(DISTINCT json_extract(context, '$.session_id')) sessions
+    FROM client_logs
+    WHERE received_at >= ? AND app_version IS NOT NULL AND ${audience_filter}
+    GROUP BY app_version ORDER BY first_seen
+  `).all(window_start_iso) as { version: string, first_seen: string, sessions: number }[])
+    .map(row => ({ ...row, day: row.first_seen.slice(0, 10) }))
+
   // --- Pipeline health: ingestion liveness. Broken vs no-traffic at a glance. ---
   const last_log_at = (shared_db.prepare(`SELECT MAX(received_at) v FROM client_logs`).get() as { v: string | null }).v
   const last_session_start_at = (shared_db.prepare(`SELECT MAX(received_at) v FROM client_logs WHERE message = 'session_start'`).get() as { v: string | null }).v
@@ -655,6 +708,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     window_days: days,
     generated_at: now.toISOString(),
     daily,
+    deploys,
     totals: {
       sessions: daily.reduce((sum, point) => sum + point.sessions, 0),
       errors: daily.reduce((sum, point) => sum + point.errors, 0),

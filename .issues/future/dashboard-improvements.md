@@ -21,6 +21,14 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   human-only), p75 graded vs CWV thresholds, with a "no vitals despite N human sessions /
   headless-only" empty-state hint.
 
+## Shipped (2026-06-28, `.issues/log-review-recommendations-2026-06-27.md`)
+- ✅ **Deploy/version annotation markers on the daily timeline** — `log-analytics.ts` `deploys`
+  (first-seen day per `app_version`, hot window, human rows); page maps to chart `events` (chip
+  `⬆ HH:MM` + note with version/first-seen/sessions) on the Traffic ComboChart + Errors LineChart.
+- ✅ **`page_load` percentile hygiene** — perf query filters `duration_ms > 0` (drops bfcache/instant
+  0ms loads); `PerfSummary.slowest = { duration_ms, route }` (new `url_route` helper, inline-tested);
+  perf panel shows a "slowest Ns · /route" row per metric.
+
 ## Open proposals
 - **Real session-duration distribution** (median/p90 from heartbeat span) + **events/session**,
   augmenting/replacing the proxy "Logs / session" engagement metric (had to compute the
@@ -39,16 +47,19 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
 *Added 2026-06-27 (Phase D — first cross-repo read). LD is currently the furthest-along dashboard, so
 the borrow list is short.*
 
-- **Error-cluster + known-noise classification on the errors panel** *(ported from tutor)* — LD's
-  `recent_errors` is still **raw recent rows** (bot-excluded, but un-grouped). tutor clusters by
-  `message` + `substr(stack,1,200)` with n/users/first/last and tags a `KNOWN_NOISE_PATTERNS` set
-  (seed: `Network error for /api/log`) into a separate bucket excluded from the headline error count.
-  Makes the error metric trustworthy + stops re-deriving the noise split each review. **Top borrow.**
-- **Error-audience real-user verdict card** *(ported from house)* — house's `error_audience` shows a
-  `real_user / anonymous / bot` split + a "0 real-user errors → all noise" verdict line. LD already
-  bot-excludes *usage* but its error **diagnostics intentionally keep all rows**; a small real-user-vs-
-  bot verdict on errors would still add a glance. Lower value than the cluster panel above (LD's
-  human-only usage already covers most of the intent). 
+- ✅ **Error-cluster + known-noise classification on the errors panel** *(ported from tutor — SHIPPED
+  2026-06-27, commit b10f813e)* — `error_clusters` now groups by `message` + `substr(stack,1,200)`
+  with n/users/first/last and tags `KNOWN_NOISE_PATTERNS` (`Network error for /api/log`, `Failed to
+  fetch dynamically imported module`) via `is_noise`, excluded from the headline error count.
+- **Error-audience real-user verdict card** *(ported from house — LOW for LD)* — house's
+  `error_audience` shows a `real_user / anonymous / bot` split + a "0 real-user errors → all noise"
+  verdict. LD's shipped `error_clusters` + `is_noise` + human-only usage already cover most of the
+  intent; keep as low-priority.
+- **"Expected response (401/403/404)" bucket** *(ported from house, filed 2026-06-27 — MOSTLY COVERED
+  on LD)* — house adds an `expected` bucket to `error_audience` so prefetch/permission gates aren't
+  counted as real-user errors. **LD already handles this at the source:** `+error.svelte` demotes
+  401/403→warn and 404→info, so expected gates never reach the `error/crash` levels feeding
+  `error_clusters`. Only revisit if LD later builds an `error_audience` panel.
 
 *LD wins the siblings should borrow (flag in their reviews):* the **bot/headless exclusion across all
 usage+geo metrics** (house only de-bots errors so far; tutor not at all), the **Core Web Vitals**
@@ -60,5 +71,7 @@ house's **/admin/revenue** dashboard (no payments).
 ## Sourced from
 - `.cron/log-reviews/2026-06-25.md` (first run / zero-data baseline)
 - `.cron/log-reviews/2026-06-26.md` (first real-data run; ~91% synthetic/headless)
-- Phase D cross-repo read 2026-06-27 (house `error_audience`/`errors_by_version`; tutor
-  `error_clusters`/`KNOWN_NOISE`).
+- `.cron/log-reviews/2026-06-27.md` (idle day; deploy-markers + page_load-hygiene proposals; tutor
+  error-cluster borrow shipped)
+- Phase D cross-repo read 2026-06-27 (house `error_audience`/`errors_by_version`/expected-bucket;
+  tutor `error_clusters`/`KNOWN_NOISE`).
