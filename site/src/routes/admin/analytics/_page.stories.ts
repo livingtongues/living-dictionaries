@@ -43,9 +43,9 @@ function build_perf(days: number): LogAnalytics['performance'] {
   }
   return {
     summary: [
-      { name: 'page_load', count: 1240, p50: 1197, p90: 3344, p95: 4537, max: 14652 },
-      { name: 'viewer_boot', count: 188, p50: 1184, p90: 4688, p95: 6493, max: 7687 },
-      { name: 'search', count: 0, p50: null, p90: null, p95: null, max: null },
+      { name: 'page_load', count: 1240, p50: 1197, p90: 3344, p95: 4537, max: 14652, slowest: { duration_ms: 14652, route: '/example-dict/entries' } },
+      { name: 'viewer_boot', count: 188, p50: 1184, p90: 4688, p95: 6493, max: 7687, slowest: { duration_ms: 7687, route: '/example-dict' } },
+      { name: 'search', count: 0, p50: null, p90: null, p95: null, max: null, slowest: null },
     ],
     daily,
   }
@@ -56,6 +56,10 @@ const analytics: LogAnalytics = {
   window_days: 30,
   generated_at: '2026-06-23T13:04:00.000Z',
   daily: build_daily(30),
+  deploys: [
+    { day: '2026-06-21', version: '1782200000000', first_seen: '2026-06-21T09:14:00.000Z', sessions: 88 },
+    { day: '2026-06-26', version: '1782464965691', first_seen: '2026-06-26T01:05:00.000Z', sessions: 44 },
+  ],
   performance: build_perf(30),
   web_vitals: [
     { metric: 'LCP', count: 142, p50: 1820, p75: 2410, p95: 3900 },
@@ -196,6 +200,7 @@ const empty_analytics: LogAnalytics = {
   window_days: 30,
   generated_at: '2026-06-23T13:04:00.000Z',
   daily: build_daily(30).map(point => ({ ...point, logs: 0, errors: 0, sessions: 0, users: 0 })),
+  deploys: [],
   totals: { sessions: 0, errors: 0, logs: 0, unique_users: 0 },
   top_routes: [],
   top_events: [],

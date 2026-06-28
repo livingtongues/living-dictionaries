@@ -21,17 +21,6 @@
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-/**
- * Compact date label for chart tooltips/axes from a 'YYYY-MM-DD' or 'YYYY-MM'
- * string: "Mar 7, 2020" (full) or "Mar 2020" (month-only). Parses the string
- * parts directly (no timezone shift), unlike the Date-based helpers above.
- */
-export function format_point_date(iso: string): string {
-  const [year, month, day] = iso.split('-').map(Number)
-  const name = MONTHS[(month || 1) - 1]
-  return day ? `${name} ${day}, ${year}` : `${name} ${year}`
-}
-
 export function format_relative_time(iso: string | Date | null | undefined): string {
   if (!iso)
     return ''
@@ -83,6 +72,17 @@ export function format_date(iso: string | Date | null | undefined): string {
     return ''
   const date = iso instanceof Date ? iso : new Date(iso)
   return date.toLocaleDateString()
+}
+
+/**
+ * Compact date label for chart tooltips/axes from a 'YYYY-MM-DD' or 'YYYY-MM'
+ * string: "Mar 7, 2020" (full) or "Mar 2020" (month-only). Parses the string
+ * parts directly (no timezone shift), unlike the Date-based helpers above.
+ */
+export function format_point_date(iso: string): string {
+  const [year, month, day] = iso.split('-').map(Number)
+  const name = MONTHS[(month || 1) - 1]
+  return day ? `${name} ${day}, ${year}` : `${name} ${year}`
 }
 
 if (import.meta.vitest) {
@@ -171,6 +171,15 @@ if (import.meta.vitest) {
 
     test('empty input → empty string', () => {
       expect(format_date(undefined)).toBe('')
+    })
+  })
+
+  describe(format_point_date, () => {
+    test('full date from YYYY-MM-DD', () => {
+      expect(format_point_date('2020-03-07')).toBe('Mar 7, 2020')
+    })
+    test('month-only from YYYY-MM', () => {
+      expect(format_point_date('2020-03')).toBe('Mar 2020')
     })
   })
 }

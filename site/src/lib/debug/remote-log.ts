@@ -41,6 +41,12 @@ const MAX_BREADCRUMB_LABEL = 80
  *  - `[GSI_LOGGER]`             — Google One Tap / FedCM abort + network noise.
  *  - `Sync already in progress` — benign leader-race guard; a second surface beat
  *                                 us to `ensure_initial_sync`, reactive stores fill anyway.
+ *  - `Failed to initialize WebGL` — Mapbox-internal async WebGL-context failure on
+ *                                 the homepage globe (GPU blocklist / disabled). The
+ *                                 user's environment, not our bug; `Map.svelte` already
+ *                                 logs one clean `Map failed to load (WebGL unavailable)`
+ *                                 for the synchronous case + keeps a placeholder, so this
+ *                                 raw async stack is undiagnosable noise.
  * NOT filtered: `RPC timed out (no leader responded)` — low-volume but a real
  * signal of a leader-election stall under multi-tab load; keep it visible.
  */
@@ -48,6 +54,7 @@ const NOISE_MESSAGE_PATTERNS = [
   'ResizeObserver loop',
   '[GSI_LOGGER]',
   'Sync already in progress',
+  'Failed to initialize WebGL',
 ]
 
 function is_noise_message(message: string | undefined | null): boolean {

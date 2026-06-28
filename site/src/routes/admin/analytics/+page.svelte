@@ -9,6 +9,7 @@
   import LineChart from '$lib/charts/LineChart.svelte'
   import SegmentedBar from '$lib/charts/SegmentedBar.svelte'
   import { format_number, format_pct } from '$lib/constants'
+  import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
 
   interface Props {
     data: PageData
@@ -28,6 +29,23 @@
     { label: 'Users', color: USERS_COLOR, points: daily.map(point => ({ date: point.day, value: point.users })) },
   ])
   const error_points = $derived(daily.map(point => ({ date: point.day, value: point.errors })))
+  // Deploy markers for the traffic + error timelines: a vertical chip per build
+  // (app_version = build epoch ms), so a spike pins to the deploy that caused it.
+  // Chip shows a friendly "5 minutes ago"; note shows the exact local times.
+  function deploy_build_time(version: string): string {
+    const ms = Number(version)
+    return Number.isFinite(ms) && ms > 1e12 ? format_date_time(new Date(ms)) : version
+  }
+  const deploy_events = $derived(analytics.deploys.map(d => ({
+    date: d.day,
+    label: `⬆ ${format_relative_time(d.first_seen)}`,
+    color: 'var(--color-secondary)',
+    note: { title: 'Deploy', items: [
+      { label: 'first seen', text: format_date_time(d.first_seen) },
+      { label: 'build', text: deploy_build_time(d.version) },
+      { label: 'sessions', text: format_number(d.sessions) },
+    ] },
+  })))
   const route_bars = $derived(analytics.top_routes.map(row => ({ label: row.route, value: row.count })))
   const event_bars = $derived(analytics.top_events.map(row => ({ label: row.event, value: row.count, color: USERS_COLOR })))
   const capability = $derived(analytics.capability)
@@ -263,7 +281,7 @@
   <section class="panel">
     <h2>Traffic <span class="hint">sessions vs unique users</span></h2>
     {#if has_traffic}
-      <ComboChart series={traffic_series} height={200} value_format={format_number} />
+      <ComboChart series={traffic_series} events={deploy_events} height={200} value_format={format_number} />
     {:else}
       <p class="muted">No sessions logged yet.</p>
     {/if}
@@ -272,7 +290,7 @@
   <section class="panel">
     <h2>Errors per day</h2>
     {#if totals.errors > 0}
-      <LineChart series={error_points} area color="var(--danger)" height={200} y_format={format_number} tip_format={format_number} />
+      <LineChart series={error_points} events={deploy_events} area color="var(--danger)" height={200} y_format={format_number} tip_format={format_number} />
     {:else}
       <p class="muted">No errors recorded. 🎉</p>
     {/if}
@@ -351,6 +369,11 @@
                 <span><b>{format_ms(metric.p95 ?? 0)}</b> p95</span>
                 <span class="muted-inline">{format_ms(metric.max ?? 0)} max · n={format_number(metric.count)}</span>
               </div>
+              {#if metric.slowest}
+                <div class="perf-slowest" title={metric.slowest.route}>
+                  slowest {format_ms(metric.slowest.duration_ms)} · <span class="perf-route">{metric.slowest.route}</span>
+                </div>
+              {/if}
             </div>
           {/if}
         {/each}
@@ -803,6 +826,21 @@
   }
   .perf-nums b { font-size: 1rem; }
   .muted-inline { color: var(--color-secondary); font-size: 0.72rem; align-self: center; }
+  .perf-slowest {
+    margin-top: 0.3rem;
+    font-size: 0.7rem;
+    color: var(--color-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .perf-route {
+    display: inline-block;
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+    font-family: ui-monospace, monospace;
+  }
   .perf-h3 {
     font-size: 0.8125rem;
     font-weight: 600;

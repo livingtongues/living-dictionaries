@@ -12,6 +12,14 @@ blind. You are also my advisor on how to improve this command + our logging.
 > **This command NEVER edits code.** Read-only investigation + recommendations. Everything actionable
 > becomes an action item in the dated report or a new `.issues/` file — safe to run unattended.
 >
+> **⚠️ Verify every recommendation against the CURRENT code before you write it down.** This review
+> repeatedly proposes things that are *already implemented*, which erodes trust in the whole report.
+> Before any candidate becomes an action item (Phase B coverage gaps, Phase C dashboard features,
+> Phase D sibling borrows), grep/read the actual source — the `log-analytics.ts` reader, the
+> `/admin/analytics` page, `remote-log.ts`, the server hooks (`hooks.server.ts`), and whatever
+> component/route the item touches — and confirm it isn't already done. If it already exists, do NOT
+> list it as an open action item: either drop it or record it as `✅ already in code (verified)`.
+>
 > **Deploy target:** the new VPS app serves `new.livingdictionaries.app` from the `svelte-5-migration`
 > branch (the apex `livingdictionaries.app` is still the old Vercel app — not this). Review the VPS
 > `client_logs`; until heavy real traffic lands on `new.*` the volume is light.
