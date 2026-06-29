@@ -87,6 +87,65 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     },
   }
 
+  const EntryWriteResult = {
+    type: 'object',
+    properties: {
+      external_id: { type: 'string', description: 'Echoed from your input, for id-mapping.' },
+      status: { type: 'string', enum: ['created', 'updated', 'failed'] },
+      entry_id: { type: 'string', description: 'The created entry id (absent on failure).' },
+      sense_ids: { type: 'array', items: { type: 'string' } },
+      error: { type: 'string', description: 'Why this item failed (absent on success).' },
+    },
+  }
+
+  const EntriesWriteResponse = {
+    type: 'object',
+    properties: {
+      created: { type: 'integer' },
+      updated: { type: 'integer' },
+      failed: { type: 'integer' },
+      results: { type: 'array', items: { $ref: '#/components/schemas/EntryWriteResult' }, description: 'One per input entry, in order.' },
+    },
+  }
+
+  const EntrySummary = {
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      lexeme: { $ref: '#/components/schemas/MultiString' },
+      phonetic: { type: 'string', nullable: true },
+      elicitation_id: { type: 'string', nullable: true },
+      updated_at: { type: 'string', format: 'date-time' },
+    },
+  }
+
+  const EntriesListResponse = {
+    type: 'object',
+    properties: {
+      entries: { type: 'array', items: { $ref: '#/components/schemas/EntrySummary' } },
+      has_more: { type: 'boolean', description: 'True when more rows exist past this page — bump `offset`.' },
+    },
+  }
+
+  const post_entries_example = {
+    import_id: 'swahili-pdf-2026',
+    entries: [
+      {
+        external_id: 'p12-mbwa',
+        lexeme: 'mbwa',
+        phonetic: 'ˈᵐbwa',
+        dialects: ['Coastal'],
+        senses: [
+          {
+            glosses: { en: 'dog', sw: 'mbwa' },
+            parts_of_speech: ['n'],
+            example_sentences: [{ text: 'Mbwa wangu ni mkubwa', translation: { en: 'My dog is big' } }],
+          },
+        ],
+      },
+    ],
+  }
+
   const dict_id_param = {
     name: 'id',
     in: 'path',
@@ -102,13 +161,29 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       title: 'Living Dictionaries Write API',
       version: '1.0.0',
       description: [
-        'Programmatic, bulk-capable write access to a single Living Dictionary — an agent can do anything a human editor can.',
+        'Programmatic, bulk-capable read/write access to a SINGLE Living Dictionary — an agent can do anything a human editor can (add/edit/delete entries with senses, glosses, example sentences, dialects, tags, speakers).',
         '',
-        '**Auth:** every request carries `Authorization: Bearer ldk_…` (an API key minted in the dictionary\'s Settings, scoped to ONE dictionary). The key acts with its role (default `manager`); writes require `editor`+.',
+        '## Auth',
+        'Every request carries `Authorization: Bearer ldk_…` — an API key a dictionary manager mints in the dictionary\'s Settings. A key is scoped to ONE dictionary and acts with a role (default `manager`); reads need `contributor`+, writes need `editor`+. A key for dictionary A cannot touch dictionary B (403).',
         '',
-        '**Multilingual fields** accept a plain string (→ `{ "default": … }`) or a `{ locale: text }` map. Call `GET /api/v1/dictionaries/{id}` first to learn the dictionary\'s valid `gloss_languages`.',
+        '## The dictionary id',
+        'Every path needs `{id}` — the id (or url-slug) of the dictionary your key is scoped to. Whoever gave you the key tells you the id (it is also the `<id>` in the dictionary\'s web URL `…/<id>`). Confirm it with `GET /api/v1/dictionaries/{id}`; a wrong id for your key returns 403/404.',
         '',
-        '**Bulk + idempotency:** `POST …/entries` takes up to 1000 entries; each is applied atomically and reported in `results` (best-effort — one bad row doesn\'t abort the batch). Pass `external_id` per entry to map your ids to created `entry_id`s, and/or an `import_id` to tag the whole batch. Re-check existing data via the list endpoint (filter by `elicitation_id`).',
+        '## Multilingual fields (IMPORTANT)',
+        'Headwords/glosses/translations/notes are multilingual. Every such field accepts EITHER a plain string (stored under the `default` writing system) OR a `{ "<locale>": "text" }` map. Use `default` for the vernacular (the language being documented) and gloss-language codes (e.g. `en`, `es`, `fr`) for glosses & translations. **Call `GET /api/v1/dictionaries/{id}` first to read the dictionary\'s valid `gloss_languages`** and key your glosses by those codes. Full Unicode (IPA, diacritics, non-Latin scripts) is supported and stored verbatim — never transliterate or strip diacritics.',
+        '',
+        '## Recommended import workflow',
+        '1. `GET /api/v1/dictionaries/{id}` → note `gloss_languages` (which locale codes to use) + `entry_count`.',
+        '2. (Optional, for resumable/idempotent imports) `GET /api/v1/dictionaries/{id}/entries?elicitation_id=…` to check whether a source entry already exists before creating it. Store each source id in the entry\'s `elicitation_id` so you can look it up later.',
+        '3. `POST /api/v1/dictionaries/{id}/entries` with `{ "entries": [ … ], "import_id": "my-import-2026" }` in batches of ≤1000. Give each entry an `external_id` (your own id) — the response maps it to the created `entry_id`. The whole batch shares an `import_id`, which tags every entry with a private tag of that name so you can find/clean the batch later.',
+        '4. Read the per-item `results` array. Each item is `{ external_id?, status: "created"|"failed", entry_id?, sense_ids?, error? }`. Failures are isolated — fix and re-POST only the failed ones (a duplicate-safe re-run uses the `elicitation_id` check from step 2).',
+        '5. Spot-verify with `GET /api/v1/dictionaries/{id}/entries/{entryId}` (returns the full nested entry).',
+        '',
+        '## Data model',
+        'An **entry** is a headword (`lexeme`) plus metadata and one or more **senses**. A **sense** is one meaning: its `glosses` (short translations keyed by gloss-language), an optional longer `definition`, `parts_of_speech`, `semantic_domains`, and `example_sentences`. An **example sentence** has vernacular `text` + `translation`(s). `dialects` and `tags` are entry-level labels (referenced by name; created automatically if new). If you omit `senses`, one empty sense is created.',
+        '',
+        '## Edits & deletes',
+        '`PATCH …/entries/{entryId}` field-merges: provided fields overwrite, omitted ones stay. `senses` upsert by `id` (include the sense `id` to edit it, omit it to add a new sense); example sentences are appended; `dialects`/`tags` are added (never removed) by this call. `DELETE …/entries/{entryId}` removes the entry and its senses.',
       ].join('\n'),
     },
     servers: [{ url: origin }],
@@ -134,23 +209,26 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
             { name: 'limit', in: 'query', schema: { type: 'integer', default: 100, maximum: 500 } },
             { name: 'offset', in: 'query', schema: { type: 'integer', default: 0 } },
           ],
-          responses: { 200: { description: '{ entries: EntrySummary[], has_more: boolean }' } },
+          responses: { 200: { description: 'Entry summaries + pagination', content: { 'application/json': { schema: { $ref: '#/components/schemas/EntriesListResponse' } } } } },
         },
         post: {
           summary: 'Create entries (bulk)',
-          description: 'Body: a single entry, a bare array, or `{ entries: EntryInput[], import_id? }`. Max 1000/request.',
+          description: 'Body: a single entry, a bare array, or `{ entries: EntryInput[], import_id? }`. Max 1000/request. Per-item best-effort — read `results` for per-entry outcomes.',
           parameters: [dict_id_param],
           requestBody: {
             required: true,
-            content: { 'application/json': { schema: {
-              oneOf: [
-                { $ref: '#/components/schemas/EntryInput' },
-                { type: 'array', items: { $ref: '#/components/schemas/EntryInput' } },
-                { type: 'object', properties: { entries: { type: 'array', items: { $ref: '#/components/schemas/EntryInput' } }, import_id: { type: 'string' } }, required: ['entries'] },
-              ],
-            } } },
+            content: { 'application/json': {
+              schema: {
+                oneOf: [
+                  { $ref: '#/components/schemas/EntryInput' },
+                  { type: 'array', items: { $ref: '#/components/schemas/EntryInput' } },
+                  { type: 'object', properties: { entries: { type: 'array', items: { $ref: '#/components/schemas/EntryInput' } }, import_id: { type: 'string' } }, required: ['entries'] },
+                ],
+              },
+              example: post_entries_example,
+            } },
           },
-          responses: { 200: { description: '{ created, updated, failed, results: [{ external_id?, status, entry_id?, sense_ids?, error? }] }' }, 400: { description: 'Bad input' }, 401: {}, 403: {} },
+          responses: { 200: { description: 'Per-item write report', content: { 'application/json': { schema: { $ref: '#/components/schemas/EntriesWriteResponse' } } } }, 400: { description: 'Bad input' }, 401: { description: 'Missing/invalid key' }, 403: { description: 'Insufficient role or wrong dictionary' } },
         },
       },
       '/api/v1/dictionaries/{id}/entries/{entryId}': {
@@ -192,6 +270,10 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         EntryInput,
         SensePatch,
         EntryPatch,
+        EntryWriteResult,
+        EntriesWriteResponse,
+        EntrySummary,
+        EntriesListResponse,
       },
     },
   }

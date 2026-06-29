@@ -36,7 +36,16 @@ export const GET: RequestHandler = (event) => {
   <pre>${origin}/api/v1/openapi.json</pre>
 
   <h2>Auth</h2>
-  <p>Every request: <code>Authorization: Bearer ldk_…</code>. The key is scoped to one dictionary; writes need <code>editor</code>+.</p>
+  <p>Every request: <code>Authorization: Bearer ldk_…</code>. The key is scoped to one dictionary; writes need <code>editor</code>+. The <code>&lt;DICTIONARY_ID&gt;</code> in the paths is the id of that dictionary (the <code>&lt;id&gt;</code> in its web URL) — whoever gave you the key tells you which.</p>
+
+  <h2>Import workflow</h2>
+  <ol>
+    <li><code>GET /api/v1/dictionaries/&lt;id&gt;</code> → read <code>gloss_languages</code> (which locale codes to key glosses by).</li>
+    <li>Optionally <code>GET …/entries?elicitation_id=…</code> to dedupe before creating.</li>
+    <li><code>POST …/entries</code> with <code>{ entries: [...], import_id }</code> in batches of ≤1000; read the per-item <code>results</code>.</li>
+    <li>Spot-check with <code>GET …/entries/&lt;entryId&gt;</code>.</li>
+  </ol>
+  <p>Multilingual fields take a plain string or a <code>{ locale: text }</code> map; use <code>default</code> for the vernacular and gloss-language codes for glosses/translations. Full Unicode/IPA is stored verbatim.</p>
 
   <h2>Quickstart</h2>
   <pre>curl -s ${origin}/api/v1/dictionaries/&lt;DICTIONARY_ID&gt; \\
