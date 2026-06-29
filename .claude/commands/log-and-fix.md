@@ -240,7 +240,7 @@ currently the furthest-along dashboard; recent LD-only wins worth flagging for t
 
 ## Output
 
-1. **Write `.cron/log-reviews/YYYY-MM-DD.md`** (create the folder if missing):
+1. **Write `.cron/log-reviews/YYYY-MM-DD.md`** (create the folder if missing). **If a digest already exists for today** (a manual + scheduled run, or a catch-up re-run after downtime), **append a new `# Log review — YYYY-MM-DD (run N · HH:MM UTC)` section rather than overwriting it** — never clobber an earlier run's memory:
 
 ```markdown
 # Log review — YYYY-MM-DD (new.livingdictionaries.app · window: last 24h)
