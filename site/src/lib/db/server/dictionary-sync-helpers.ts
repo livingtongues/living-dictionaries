@@ -192,7 +192,12 @@ export function process_dict_changes({ db, request, user_id, is_editor, history_
   }
 }
 
-function merge_dict_row({ db, table_name, row, user_id, at }: {
+/**
+ * Upsert one row into a syncable dict table with LWW + audit stamping, the same
+ * way a pushed editor row lands. Exported so the `/api/v1` write API applies
+ * rows through the EXACT path a browser push uses (history-aware via `at`).
+ */
+export function merge_dict_row({ db, table_name, row, user_id, at }: {
   db: Database.Database
   table_name: DictSyncableTable
   row: Record<string, unknown>

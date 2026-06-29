@@ -304,6 +304,32 @@ export const client_logs = sqliteTable('client_logs', {
 })
 
 /**
+ * Per-dictionary API keys for the agent-friendly `/api/v1` write API
+ * (see `20260629_api_keys.sql`). Server-only — the raw token is shown once on
+ * creation and only its sha-256 hash is stored, so this table is absent from
+ * `SYNCABLE_TABLE_NAMES` and has no `dirty` column (never reaches a browser).
+ */
+export const api_keys = sqliteTable('api_keys', {
+  id: text().primaryKey(),
+  dictionary_id: text().notNull().references(() => dictionaries.id, { onDelete: 'cascade' }),
+  /** sha-256 hex of the raw token. The token itself is never stored. */
+  token_hash: text().notNull().unique(),
+  /** Leading chars for display, e.g. `ldk_a1b2c3`. */
+  token_prefix: text().notNull(),
+  /** Trailing 4 chars for display. */
+  last_four: text().notNull(),
+  label: text().notNull(),
+  role: text({ enum: ['manager', 'editor', 'contributor'] }).notNull().default('manager'),
+  /** The human who minted the key; API writes are attributed to them. */
+  created_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),
+  created_at: text().notNull(),
+  /** Throttled (~once/minute) last-use stamp. */
+  last_used_at: text(),
+  /** Soft kill-switch — verify rejects when non-null. */
+  revoked_at: text(),
+})
+
+/**
  * Forever rollup of `client_logs` (see `20260625b_log_daily_metrics.sql`). The
  * nightly log-retention cron aggregates each day before raw rows are archived.
  * Server-only: read live by `/admin/analytics`, never synced.
