@@ -4,11 +4,20 @@
  * mail clients without HTML support (or scanners stripping HTML) still get a
  * legible message.
  *
- * Not a general-purpose sanitizer — assumes input is already
- * TipTap-generated HTML (no scripts, no exotic constructs).
+ * Not a general-purpose sanitizer, but it IS fed untrusted inbound email HTML on
+ * the notification + triage paths (marketing/phishing senders ship full HTML
+ * documents), so it strips `<style>`/`<script>`/`<head>` blocks and comments up
+ * front — otherwise their raw CSS/JS text content would leak through the
+ * tag-stripping pass into ntfy snippets and the classifier context.
  */
 export function html_to_text(html: string): string {
   return html
+    // Drop blocks whose TEXT CONTENT would otherwise survive tag-stripping
+    // (CSS rules, scripts, Outlook conditional comments, <head> meta/title).
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '')
     // Block-level tags become double newlines so paragraphs separate visually.
     .replace(/<\/(p|div|h[1-6]|blockquote|li)>/gi, '\n\n')
     // <br> → single newline
@@ -88,6 +97,20 @@ if (import.meta.vitest) {
 
     it('returns empty string for the empty-paragraph editor state', () => {
       expect(html_to_text('<p></p>')).toBe('')
+    })
+
+    it('strips <style> blocks (untrusted inbound HTML) instead of leaking CSS', () => {
+      expect(html_to_text('<style>.a{color:red} @media(max-width:600px){.b{display:none}}</style><p>Hi there</p>'))
+        .toBe('Hi there')
+    })
+
+    it('strips <script> blocks instead of leaking JS', () => {
+      expect(html_to_text('<script>var x = 1; alert(x)</script><p>Body</p>')).toBe('Body')
+    })
+
+    it('strips <head> contents and HTML comments', () => {
+      expect(html_to_text('<head><title>Promo</title></head><!--[if mso]>junk<![endif]--><p>Real body</p>'))
+        .toBe('Real body')
     })
 
     it('preserves heading text as a separate paragraph', () => {
