@@ -121,6 +121,39 @@ heartbeats per `session_id`), top routes (`message='navigation'`, `json_extract(
 the `dictionaries`/`about`/`account`/… buckets), top analytics events (`search_performed`,
 `dictionary_opened`, `entry_opened`, `audio_played`), platform/version split. Call out surprises.
 
+**Who's doing what — name the admins, keep everyone else generic.** Join `client_logs.user_id` →
+`users.email` and split the active population in two:
+
+- **Admins (named) — the part Jacob most wants in the brief.** Resolve each active user against the
+  allow-list (`site/src/lib/admins.ts` `ADMINS`, email→name; level via
+  `site/src/lib/server/resolve-admin-level.ts`) and paint a one-line narrative per admin who was on:
+  *when* + for *how long*, *which admin/manager tools* they used (entry edits, audio/photo uploads,
+  dictionary settings, import, messages), and anything notable — errors hit, an unusually long editing
+  session, or a first appearance after a gap. Cover the whole LD team (everyone in `ADMINS`: Jacob,
+  Diego, …).
+- **Everyone else (generic / aggregate) — never named.** Dictionary contributors and public visitors
+  stay anonymous: counts (new vs returning), top routes / feature events, and *anonymous* notable
+  sessions. Do NOT identify individual non-admin users.
+
+```js
+// Per-user activity for the 24h window; tag admins by email, aggregate the rest.
+const db = require('better-sqlite3')('/data/shared.db', { readonly: true })
+const since = new Date(Date.now() - 24*60*60*1000).toISOString()
+const rows = db.prepare(`
+  SELECT cl.user_id, u.email,
+         COUNT(*) events,
+         COUNT(DISTINCT json_extract(cl.context,'$.session_id')) sessions,
+         MIN(cl.received_at) first_seen, MAX(cl.received_at) last_seen,
+         GROUP_CONCAT(DISTINCT json_extract(cl.context,'$.to')) routes
+  FROM client_logs cl LEFT JOIN users u ON u.id = cl.user_id
+  WHERE cl.received_at >= ? AND cl.user_id IS NOT NULL
+  GROUP BY cl.user_id ORDER BY events DESC
+`).all(since)
+// Narrate rows whose email is in ADMINS (site/src/lib/admins.ts) BY NAME; summarize the rest in
+// aggregate only (never name a non-admin).
+console.log(JSON.stringify(rows, null, 2))
+```
+
 ### A3. Performance & geography
 
 - **Perf:** where `message='perf'` (carries `context.name` + `context.duration_ms`, plus web vitals
@@ -219,7 +252,9 @@ currently the furthest-along dashboard; recent LD-only wins worth flagging for t
 <clusters by severity, each with root-cause hypothesis + action item>
 
 ## 2. Usage & engagement
-<sessions/users 24h·7d·30d, durations, top routes/events, surprises>
+<sessions/users 24h·7d·30d, durations, top routes/events, surprises.
+**Who's doing what:** a named line per active ADMIN (when, how long, which admin/manager tools,
+anything notable) + a generic/anonymous picture of everyone else — never name individual non-admins.>
 
 ## 3. Performance & geography
 <timings where logged; geo areas + TTFB-by-distance; capability mix; slow-path gaps for Phase B>
@@ -241,7 +276,10 @@ sibling-app (house/tutor) wins worth borrowing + any LD win the siblings should 
 <daily counts table or sparkline data>
 ```
 
-2. **Chat summary** — TL;DR + the single most important action, and confirm the report path.
+2. **Chat summary (this IS the overnight brief Jacob reads — make it carry the human picture)** —
+   TL;DR + the single most important action + a **Who's doing what** readout: a line per active admin
+   *by name* (what each was up to), then one or two lines of aggregate, **unnamed** activity for
+   everyone else. Confirm the report path.
 
 ## Related
 
