@@ -7,6 +7,7 @@ import { TableChangeNotifier } from '$lib/db/client/live/notifier'
 import { compute_retry_decision, log_live_query_failed, log_live_query_recovered, log_live_query_timeout } from '$lib/db/client/live/live-query-retry'
 import { reconcile_rows } from '$lib/db/client/live/reconcile-rows'
 import { DICT_JSON_COLUMNS, parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
+import { save_changed_dict_columns } from './dict-save-row'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
 import { log_warning } from '$lib/debug/remote-log'
 import { tick } from 'svelte'
@@ -500,44 +501,16 @@ class DictLiveDbImpl {
         log_warning({ message: 'DictLiveDb save: row missing id', context: { table } })
         return
       }
-      // Skip columns that should never be hand-set on save:
-      //   - PK & creation provenance are immutable post-insert
-      //   - dirty + updated_at are appended below explicitly so a row that
-      //     was previously cleaned (`dirty = NULL`) flips back to dirty=1
-      const exclude = new Set([
-        'id',
-        'created_at',
-        'created_by_user_id',
-        'dirty',
-        'updated_at',
-        // appended explicitly below so each save re-stamps the current editor
-        // rather than re-writing the row's loaded (previous-editor) value
-        'updated_by_user_id',
-        '_save',
-        '_delete',
-        '_reset',
-      ])
-      const columns = Object.keys(row).filter(c => !exclude.has(c))
-      const stringified = stringify_dict_row(table, { ...row })
-
-      const clauses: string[] = []
-      const params: unknown[] = []
-      for (const col of columns) {
-        clauses.push(`"${col}" = ?`)
-        params.push(stringified[col])
-      }
-      clauses.push('"dirty" = 1')
-      clauses.push('"updated_at" = ?')
-      params.push(new Date().toISOString())
-      if (is_dict_syncable(table) && this.#user_id) {
-        clauses.push('"updated_by_user_id" = ?')
-        params.push(this.#user_id)
-      }
-      params.push(row.id)
-
       try {
-        await this.#connection.execute(`UPDATE "${table}" SET ${clauses.join(', ')} WHERE id = ?`, params)
-        this.#notifier.notify(table)
+        const { wrote } = await save_changed_dict_columns({
+          connection: this.#connection,
+          table,
+          row,
+          is_syncable: is_dict_syncable(table),
+          user_id: this.#user_id,
+        })
+        if (wrote)
+          this.#notifier.notify(table)
       } catch (err) {
         console.error('DictLiveDb save error:', err)
         throw err

@@ -15,6 +15,7 @@ import { parse_row, stringify_row } from '$lib/db/schemas/json-columns'
 import { is_syncable_table } from '$lib/db/sync/types'
 import { log_warning } from '$lib/debug/remote-log'
 import { TableChangeNotifier } from './notifier'
+import { save_changed_columns } from './save-row'
 import { TableStore } from './table-store.svelte.js'
 
 /**
@@ -193,35 +194,26 @@ class LiveDbImpl {
     return store
   }
 
+  /**
+   * Create a save callback for a given table. Persists ONLY the columns the
+   * caller mutated (diffed against the DB) and, for syncable tables, auto-stamps
+   * `dirty = 1` + `updated_at` so a plain `mutate → _save()` actually uploads.
+   * Logic lives in `save_changed_columns` so it's unit-testable without runes.
+   */
   #create_save_callback(table_name: TableName): (row: Record<string, unknown>) => Promise<void> {
     return async (row: Record<string, unknown>) => {
-      const keys = primary_keys_for(table_name)
-      for (const k of keys) {
-        if (row[k] === undefined || row[k] === null) {
-          log_warning({ message: `LiveDb save: row missing primary key "${k}"`, context: { table_name } })
-          return
-        }
-      }
-
-      const exclude_columns = new Set<string>(['created_at', '_save', '_delete', '_reset', ...keys])
-      const columns = Object.keys(row).filter(col => !exclude_columns.has(col))
-
-      const where = row_where(table_name, row)
-      const row_to_write = stringify_row(table_name, { ...row })
-      const params: unknown[] = columns.map((col) => {
-        if (col === 'updated_at')
-          return new Date().toISOString()
-        return row_to_write[col]
-      })
-      params.push(...where.params)
-
-      const set_clauses = columns.map(col => `"${col}" = ?`).join(', ')
-      const sql = `UPDATE "${table_name}" SET ${set_clauses} WHERE ${where.sql}`
-
       try {
-        await this.#connection.execute(sql, params)
-        this.#notifier.notify(table_name)
-        this.#fire_dirty(table_name)
+        const { wrote } = await save_changed_columns({
+          connection: this.#connection,
+          table_name,
+          row,
+          primary_keys: primary_keys_for(table_name),
+          is_syncable: is_syncable_table(table_name),
+        })
+        if (wrote) {
+          this.#notifier.notify(table_name)
+          this.#fire_dirty(table_name)
+        }
       } catch (error) {
         console.error('LiveDb save error:', error)
         throw error
