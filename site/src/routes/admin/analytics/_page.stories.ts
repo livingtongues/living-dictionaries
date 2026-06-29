@@ -48,6 +48,13 @@ function build_perf(days: number): LogAnalytics['performance'] {
       { name: 'search', count: 0, p50: null, p90: null, p95: null, max: null, slowest: null },
     ],
     daily,
+    by_route: [
+      { route: 'dictionary:entry', count: 612, p50: 1340, p95: 5210, max: 14652 },
+      { route: 'dictionary:entries', count: 388, p50: 1180, p95: 4120, max: 9870 },
+      { route: 'home', count: 142, p50: 980, p95: 3010, max: 6200 },
+      { route: 'about', count: 64, p50: 420, p95: 1180, max: 2200 },
+      { route: 'account', count: 34, p50: 510, p95: 1620, max: 3100 },
+    ],
   }
 }
 
@@ -207,7 +214,7 @@ const empty_analytics: LogAnalytics = {
   by_source: [],
   error_clusters: [],
   capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, devices: [], os: [], browsers: [], db_tiers: [] },
-  performance: { summary: [], daily: [] },
+  performance: { summary: [], daily: [], by_route: [] },
   web_vitals: [],
   geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [] },
   errors_by_version: { current_version: '1719300000123', total: 0, current: 0, stale: 0, stale_pct: null, versions: [] },

@@ -11,6 +11,7 @@
   import { ADDED_FEATURE_ID_PREFIX } from '../../utils/randomId'
   import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
   import { log_event } from '$lib/debug/remote-log'
+  import { page } from '$app/state'
   import { PUBLIC_mapboxAccessToken } from '$env/static/public'
   import IconFaSolidGlobeAsia from '~icons/fa-solid/globe-asia'
 
@@ -48,6 +49,10 @@
   let mapbox: typeof import('mapbox-gl')
   const queue = new EventQueue()
   let ready = $state(false)
+  // Set when `new mapboxgl.Map()` throws synchronously because WebGL can't init
+  // (disabled / unsupported / GPU blocklist) — switches the placeholder to a
+  // graceful "map unavailable" message instead of an endless pulse.
+  let webgl_failed = $state(false)
 
   setContext(mapKey, {
     getMap: () => map,
@@ -121,11 +126,15 @@
     } catch (err) {
       // Mapbox throws synchronously from `new Map()` when WebGL can't initialize
       // (disabled / unsupported / GPU blocklist). That means the user genuinely
-      // cannot see the map, so log ONE clean error instead of letting the raw
+      // cannot see the map, so log ONE clean message instead of letting the raw
       // Mapbox-internal stack bubble to the global handler as undiagnosable noise.
-      // No fallback UI by design — the placeholder below just stays put.
+      // `warn`, not `error` — it's the user's GPU/browser, not an app fault — and
+      // `classify-error` folds "WebGL unavailable" into known-noise so it never
+      // counts as a real error on the dashboard. The placeholder shows a graceful
+      // fallback message instead of pulsing forever.
+      webgl_failed = true
       log_event({
-        level: 'error',
+        level: 'warn',
         message: 'Map failed to load (WebGL unavailable)',
         context: { reason: err instanceof Error ? err.message : String(err) },
       })
@@ -204,6 +213,11 @@
 <div bind:this={container}>
   {#if ready}
     {@render children?.({ map })}
+  {:else if webgl_failed}
+    <div class="map-placeholder map-unavailable">
+      <IconFaSolidGlobeAsia class="icon-inline globe-static" />
+      <p>{page.data.t('map.webgl_unavailable')}</p>
+    </div>
   {:else}
     <div class="map-placeholder">
       <IconFaSolidGlobeAsia class="icon-inline globe-pulse" />
@@ -223,6 +237,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .map-unavailable {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .map-unavailable p {
+    max-width: 22rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: color-mix(in srgb, var(--color) 70%, var(--background));
+  }
+
+  .map-unavailable :global(.globe-static) {
+    font-size: 3.75rem;
+    color: color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
   }
 
   .map-placeholder :global(.globe-pulse) {

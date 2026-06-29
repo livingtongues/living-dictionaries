@@ -225,6 +225,9 @@
     "error_recorded": "The error has been recorded and we will be looking into it.",
     "please_explain": "Can you please send us a short note to explain what happened?"
   },
+  "map": {
+    "webgl_unavailable": "The interactive map can't load because your browser or device doesn't support WebGL."
+  },
   "header": {
     "select_language": "Select Language",
     "please_create_account": "Please create an account",

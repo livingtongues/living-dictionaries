@@ -210,6 +210,26 @@ function clamp_stack(stack: string | undefined | null): string | null {
   return stack.length > 8000 ? stack.slice(0, 8000) : stack
 }
 
+/**
+ * `navigator.webdriver` is `true` under Playwright/Selenium/other automation —
+ * the reliable "this is a bot" signal a user-agent regex CANNOT catch (headed
+ * Playwright reports a plain Chrome UA). Stamped on EVERY row's context (only
+ * when true, to keep context lean) so the analytics human/bot filter can exclude
+ * a whole automated session per-row, not just its `session_start`. Cached — it's
+ * a stable per-page property. Guarded: never throws.
+ */
+let webdriver_cached: boolean | null = null
+function is_webdriver(): boolean {
+  if (webdriver_cached === null) {
+    try {
+      webdriver_cached = typeof navigator !== 'undefined' && navigator.webdriver === true
+    } catch {
+      webdriver_cached = false
+    }
+  }
+  return webdriver_cached
+}
+
 function enrich(entry: ClientLogPayload): InternalEntry {
   return {
     _id: crypto.randomUUID(),
@@ -224,6 +244,7 @@ function enrich(entry: ClientLogPayload): InternalEntry {
       ...(entry.context ?? {}),
       session_id,
       breadcrumbs: breadcrumbs.slice(-MAX_BREADCRUMBS),
+      ...(is_webdriver() ? { webdriver: true } : {}),
     },
   }
 }
