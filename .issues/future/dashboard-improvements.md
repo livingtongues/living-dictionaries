@@ -29,7 +29,22 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   0ms loads); `PerfSummary.slowest = { duration_ms, route }` (new `url_route` helper, inline-tested);
   perf panel shows a "slowest Ns · /route" row per metric.
 
+## Shipped (2026-06-29, `.issues/log-review-followups-2026-06-29.md`)
+- ✅ **`navigator.webdriver`-based automation exclusion (M1)** — `remote-log.ts` `enrich()` stamps
+  `context.webdriver:true` on every row of an automated session; `log-analytics.ts` folds
+  `coalesce(json_extract(context,'$.webdriver'),0)=1` into the audience filter (per-row) + the
+  per-session bot check (capability/geo). Headed Playwright/Selenium now lands in Bots regardless of
+  UA. **Cross-repo TODO: port to tutor.**
+- ✅ **Per-route p95 performance (L2)** — `performance.by_route` groups page_load timings by
+  normalized route (slowest p95 first); "Page load by route" table on the Performance panel.
+- ✅ **`classify-error.ts` consolidation (M2)** — shared error-classification module; ingestion
+  (`+error.svelte`) + analytics (`is_noise`) both route through it.
+- ✅ **No-WebGL globe fallback + noise filter (L6)** — graceful fallback message + `warn`-level log
+  folded into `KNOWN_NOISE_PATTERNS`.
+
 ## Open proposals
+- **Error-per-use by feature** *(ported from house, 2026-06-28 — LOW until real traffic)* — errors
+  normalized by the matching usage event, to rank what's breaking relative to how much it's used.
 - **Real session-duration distribution** (median/p90 from heartbeat span) + **events/session**,
   augmenting/replacing the proxy "Logs / session" engagement metric (had to compute the
   2198s-vs-~10s spread by hand in the 06-26 review).
@@ -73,5 +88,7 @@ house's **/admin/revenue** dashboard (no payments).
 - `.cron/log-reviews/2026-06-26.md` (first real-data run; ~91% synthetic/headless)
 - `.cron/log-reviews/2026-06-27.md` (idle day; deploy-markers + page_load-hygiene proposals; tutor
   error-cluster borrow shipped)
+- `.cron/log-reviews/2026-06-28.md` (fully idle; deploy-markers + page_load-hygiene ships verified;
+  `navigator.webdriver` automation-exclusion finding; house per-route-p95 + error-per-use borrows)
 - Phase D cross-repo read 2026-06-27 (house `error_audience`/`errors_by_version`/expected-bucket;
   tutor `error_clusters`/`KNOWN_NOISE`).

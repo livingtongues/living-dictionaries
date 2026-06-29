@@ -1,6 +1,7 @@
 import type Database from 'better-sqlite3'
 import type { DeviceType } from '$lib/debug/parse-user-agent'
 import { version } from '$app/environment'
+import { is_expected_error_response, is_known_noise } from '$lib/debug/classify-error'
 import { ALL_TRACKED_EVENTS } from '$lib/debug/log-events'
 import { is_below_db_worker_capability, is_bot_user_agent, parse_user_agent } from '$lib/debug/parse-user-agent'
 import { distance_bucket, DISTANCE_BUCKETS, distance_to_origin_km } from '$lib/geo/distance'
@@ -23,15 +24,7 @@ const ERROR_LEVELS_SQL = `('error','unhandled_rejection','crash')`
 const INFRA_EVENTS = new Set(['heartbeat', 'navigation', 'perf', 'session_start', 'visibility_visible', 'visibility_hidden', 'uptime_probe'])
 const TOP_LIMIT = 12
 const ERROR_CLUSTER_LIMIT = 25
-
-/**
- * Known-benign error classes folded out of the real-error headline. Seed: the
- * `/api/log` flush endpoint failing on sleep/redeploy and self-logging.
- */
-const KNOWN_NOISE_PATTERNS = ['Network error for /api/log', 'Failed to fetch dynamically imported module']
-function is_known_noise(message: string): boolean {
-  return KNOWN_NOISE_PATTERNS.some(pattern => message.includes(pattern))
-}
+const ROUTE_PERF_LIMIT = 12
 
 /**
  * The global Humans/Bots toggle. Usage/engagement/geo/perf panels re-filter by
@@ -64,6 +57,8 @@ export interface DailyPoint { day: string, sessions: number, users: number, erro
 export interface Deploy { day: string, version: string, first_seen: string, sessions: number }
 export interface PerfSummary { name: string, count: number, p50: number | null, p90: number | null, p95: number | null, max: number | null, slowest: { duration_ms: number, route: string } | null }
 export interface PerfDailyPoint { day: string, metrics: Record<string, { p50: number, p95: number, count: number }> }
+/** Per-route `page_load` timing (hot window) — slowest routes (by p95) first. */
+export interface RoutePerf { route: string, count: number, p50: number | null, p95: number | null, max: number | null }
 /** Core Web Vitals distribution (LCP/INP/CLS/FCP/TTFB); `value` is ms except CLS (unitless). p75 is the CWV threshold metric. */
 export interface WebVitalSummary { metric: string, count: number, p50: number | null, p75: number | null, p95: number | null }
 /** Per-bucket TTFB (page_load `responseStart`) distribution. */
@@ -181,7 +176,7 @@ export interface LogAnalytics {
     db_tiers: { tier: string, sessions: number }[]
   }
   /** Client `perf` timings (hot window only — percentiles aren't in the rollup). */
-  performance: { summary: PerfSummary[], daily: PerfDailyPoint[] }
+  performance: { summary: PerfSummary[], daily: PerfDailyPoint[], by_route: RoutePerf[] }
   /** Core Web Vitals distribution (hot window, human sessions only). Empty array when none landed yet. */
   web_vitals: WebVitalSummary[]
   /** Approximate geography from CF edge headers — areas + geo-split TTFB. */
@@ -258,10 +253,16 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   const window_start_iso = `${window_start_day}T00:00:00.000Z`
 
   // Audience filter for hot rows; the cold rollup is read from the matching
-  // metric namespace (`''` for humans, `'bot:'` for bots).
+  // metric namespace (`''` for humans, `'bot:'` for bots). A row is a bot when
+  // its UA matches the crawler/headless regex OR `context.webdriver` is set
+  // (headed Playwright/Selenium — a plain Chrome UA the regex can't catch; M1).
+  // `webdriver` is stamped on every row of an automated session, so the per-row
+  // check excludes the whole session. Server rows (NULL UA, no webdriver) stay
+  // human.
+  const is_bot_row = `(is_bot_ua(user_agent) = 1 OR coalesce(json_extract(context, '$.webdriver'), 0) = 1)`
   const audience_filter = audience === 'bots'
-    ? `(user_agent IS NOT NULL AND is_bot_ua(user_agent) = 1)`
-    : `(user_agent IS NULL OR is_bot_ua(user_agent) = 0)`
+    ? `(user_agent IS NOT NULL AND ${is_bot_row})`
+    : `(NOT ${is_bot_row})`
   // Map a stored rollup metric → the metric for THIS audience, or null to skip.
   const rollup_metric = (metric: string): string | null => {
     const is_bot_metric = metric.startsWith('bot:')
@@ -270,8 +271,100 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     return is_bot_metric ? null : metric
   }
 
-  // --- Live (hot) daily scalars, combined across sources. Bot/headless rows
-  // excluded so the sessions/users/logs/errors trend reflects real people. ---
+  // The daily series + the usage breakdowns both consume the same `log_daily_metrics`
+  // rollup rows, so `build_daily_series` reads them ONCE and hands them on (keeps the
+  // query count identical to the old inline form).
+  const { daily, rollup_rows, live_by_day } = build_daily_series({ shared_db, window_start_iso, window_start_day, audience_filter, rollup_metric, days, now })
+  // `area_counts` is seeded from the cold `geo:` rollup here, then the hot session
+  // loop in `build_capability` mutates it further — so it's threaded through both.
+  const { event_counts, top_events, top_routes, by_source, area_counts } = build_usage_and_areas({ shared_db, window_start_iso, audience_filter, rollup_rows, live_by_day, rollup_metric })
+
+  const error_clusters = build_error_clusters({ shared_db, window_start_iso })
+
+  const unique_users = (shared_db.prepare(`
+    SELECT COUNT(DISTINCT user_id) count FROM client_logs WHERE received_at >= ? AND user_id IS NOT NULL AND ${audience_filter}
+  `).get(window_start_iso) as { count: number }).count
+
+  // Device / OS / browser + capability breakdown (mutates `area_counts` with the
+  // hot per-session area tally — see the threading note above).
+  const capability = build_capability({ shared_db, window_start_iso, audience, area_counts })
+
+  const performance = build_performance({ shared_db, window_start_iso, audience_filter, daily })
+  const web_vitals = build_web_vitals({ shared_db, window_start_iso, audience_filter })
+  const { ttfb_by_country, ttfb_by_distance } = build_ttfb_latency({ shared_db, window_start_iso, audience_filter })
+  const geo = build_geo_areas({ area_counts, ttfb_by_country, ttfb_by_distance })
+
+  const errors_by_version = build_errors_by_version({ shared_db, window_start_iso, current_app_version })
+  const deploys = build_deploys({ shared_db, window_start_iso, audience_filter })
+  const pipeline = build_pipeline_health({ shared_db })
+
+  // --- Event coverage: declared analytics events vs what's actually been seen.
+  // `event_counts` already holds the per-event hot+cold counts (infra excluded). ---
+  const coverage_events = ALL_TRACKED_EVENTS.map((event) => {
+    const count = event_counts.get(event) ?? 0
+    return { event, seen: count > 0, count }
+  })
+  const event_coverage: EventCoverage = {
+    events: coverage_events,
+    never_emitted: coverage_events.filter(entry => !entry.seen).length,
+  }
+
+  const leader_health = build_leader_health({ shared_db, window_start_iso })
+
+  return {
+    audience,
+    window_days: days,
+    generated_at: now.toISOString(),
+    daily,
+    deploys,
+    totals: {
+      sessions: daily.reduce((sum, point) => sum + point.sessions, 0),
+      errors: daily.reduce((sum, point) => sum + point.errors, 0),
+      logs: daily.reduce((sum, point) => sum + point.logs, 0),
+      unique_users,
+    },
+    top_routes,
+    top_events,
+    by_source,
+    error_clusters,
+    capability,
+    performance,
+    web_vitals,
+    geo,
+    errors_by_version,
+    pipeline,
+    event_coverage,
+    leader_health,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Section builders. Each owns ONE panel's read + shaping (same SQL/behavior as
+// the inline blocks they replaced). The daily/usage/capability/geo trio is
+// coupled: `build_daily_series` reads the rollup rows ONCE and passes them to
+// `build_usage_and_areas`, which seeds the `area_counts` map that
+// `build_capability` then mutates with the hot per-session tally before
+// `build_geo_areas` finalizes it. See `.issues/log-review-followups-2026-06-29.md` (N3).
+// ---------------------------------------------------------------------------
+
+interface RollupRow { day: string, metric: string, source: string, value: number }
+
+/**
+ * Zero-filled ascending daily series (sessions/users/errors/logs), live hot rows
+ * taking precedence per day with the `log_daily_metrics` rollup filling archived
+ * (cold) days. Returns the raw rollup rows + the per-day live index so the usage
+ * builder can reuse them without a second query.
+ */
+function build_daily_series({ shared_db, window_start_iso, window_start_day, audience_filter, rollup_metric, days, now }: {
+  shared_db: Database.Database
+  window_start_iso: string
+  window_start_day: string
+  audience_filter: string
+  rollup_metric: (metric: string) => string | null
+  days: number
+  now: Date
+}): { daily: DailyPoint[], rollup_rows: RollupRow[], live_by_day: Map<string, DailyPoint> } {
+  // Bot/headless rows excluded so the sessions/users/logs/errors trend reflects real people.
   const live_daily = shared_db.prepare(`
     SELECT substr(received_at, 1, 10) day,
            COUNT(*) logs,
@@ -283,10 +376,9 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   `).all(window_start_iso) as DailyPoint[]
   const live_by_day = new Map(live_daily.map(point => [point.day, point]))
 
-  // --- Rollup rows for the window (used only for days with NO live rows). ---
   const rollup_rows = shared_db.prepare(`
     SELECT day, metric, source, value FROM log_daily_metrics WHERE day >= ?
-  `).all(window_start_day) as { day: string, metric: string, source: string, value: number }[]
+  `).all(window_start_day) as RollupRow[]
   const rollup_by_day = new Map<string, DailyPoint>()
   for (const row of rollup_rows) {
     if (live_by_day.has(row.day))
@@ -305,14 +397,34 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     else if (metric === 'logs') point.logs += row.value
   }
 
-  // --- Merge into a zero-filled ascending daily series. ---
   const daily: DailyPoint[] = []
   for (let offset = days - 1; offset >= 0; offset--) {
     const day = day_string(new Date(now.getTime() - offset * 86_400_000))
     daily.push(live_by_day.get(day) ?? rollup_by_day.get(day) ?? { day, sessions: 0, users: 0, errors: 0, logs: 0 })
   }
+  return { daily, rollup_rows, live_by_day }
+}
 
-  // --- Top events: live (hot) + rollup (cold days only), infra excluded. ---
+/**
+ * Top events (infra excluded), top routes (normalized), source split, and the
+ * cold-day geo area seed — all live hot rows + the rollup (cold days only).
+ * Returns the still-mutable `area_counts` map (hot per-session areas are added
+ * later by `build_capability`) plus `event_counts` for the coverage panel.
+ */
+function build_usage_and_areas({ shared_db, window_start_iso, audience_filter, rollup_rows, live_by_day, rollup_metric }: {
+  shared_db: Database.Database
+  window_start_iso: string
+  audience_filter: string
+  rollup_rows: RollupRow[]
+  live_by_day: Map<string, DailyPoint>
+  rollup_metric: (metric: string) => string | null
+}): {
+  event_counts: Map<string, number>
+  top_events: { event: string, count: number }[]
+  top_routes: { route: string, count: number }[]
+  by_source: { source: string, logs: number, errors: number }[]
+  area_counts: Map<string, { country: string, sessions: number }>
+} {
   const event_counts = new Map<string, number>()
   for (const row of shared_db.prepare(`
     SELECT message event, COUNT(*) count FROM client_logs
@@ -321,7 +433,6 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     if (!INFRA_EVENTS.has(row.event))
       bump(event_counts, row.event, row.count)
   }
-  // --- Top routes: live nav (normalized) + rollup nav (cold). ---
   const route_counts = new Map<string, number>()
   for (const row of shared_db.prepare(`
     SELECT json_extract(context, '$.to') to_path, COUNT(*) count FROM client_logs
@@ -329,12 +440,10 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   `).all(window_start_iso) as { to_path: string | null, count: number }[]) {
     bump(route_counts, normalize_route(row.to_path), row.count)
   }
-  // --- Geo areas: per-area (`US-CA` / `US`) distinct HUMAN sessions, hot
-  // (session_rows below, bots skipped there) + cold (rollup `geo:` metrics, now
-  // bot-free at rollup time). Consistent human-only counts across both tiers. ---
+  // Geo areas: per-area distinct HUMAN sessions, cold (rollup `geo:` metrics,
+  // bot-free at rollup time) here + hot (the session loop) later.
   const area_counts = new Map<string, { country: string, sessions: number }>()
-  // --- Source split: live + rollup (cold). Bot client rows excluded; server
-  // rows (NULL UA) kept. ---
+  // Source split: bot client rows excluded; server rows (NULL UA) kept.
   const source_logs = new Map<string, number>()
   const source_errors = new Map<string, number>()
   for (const row of shared_db.prepare(`
@@ -383,45 +492,38 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     errors: source_errors.get(source) ?? 0,
   })).sort((a, b) => b.logs - a.logs)
 
-  // --- Error clusters: group by message + stack head so one user hitting an
-  // error 50× is one row. `is_noise` folds known-benign classes out of the
-  // real-error headline. Always ALL rows (a bot's real error still matters). ---
-  const error_clusters = (shared_db.prepare(`
-    SELECT message,
-           substr(coalesce(stack, ''), 1, 200) stack_head,
-           MAX(level) level,
-           COUNT(*) count,
-           COUNT(DISTINCT user_id) users,
-           MIN(received_at) first_seen,
-           MAX(received_at) last_seen,
-           group_concat(DISTINCT coalesce(source, 'client')) sources,
-           group_concat(DISTINCT coalesce(platform, 'web')) platforms
-    FROM client_logs
-    WHERE level IN ${ERROR_LEVELS_SQL} AND received_at >= ?
-    GROUP BY message, stack_head
-    ORDER BY count DESC, last_seen DESC
-    LIMIT ${ERROR_CLUSTER_LIMIT}
-  `).all(window_start_iso) as Omit<ErrorCluster, 'is_noise'>[])
-    .map(row => ({ ...row, is_noise: is_known_noise(row.message) }))
-    .sort((first, second) => Number(first.is_noise) - Number(second.is_noise) || second.count - first.count)
+  return {
+    event_counts,
+    top_events: to_sorted(event_counts, 'event') as { event: string, count: number }[],
+    top_routes: to_sorted(route_counts, 'route') as { route: string, count: number }[],
+    by_source,
+    area_counts,
+  }
+}
 
-  const unique_users = (shared_db.prepare(`
-    SELECT COUNT(DISTINCT user_id) count FROM client_logs WHERE received_at >= ? AND user_id IS NOT NULL AND ${audience_filter}
-  `).get(window_start_iso) as { count: number }).count
-
-  // --- Device / OS / browser + capability breakdown, per session (hot window only
-  // — neither the raw user_agent nor the session_start db_tier is in the rollup).
-  // One row per session: the user_agent + the db_tier we now stamp on session_start. ---
+/**
+ * Per-session device / OS / browser + local-DB capability breakdown (hot window
+ * only — neither the raw user_agent nor the session_start db_tier is in the
+ * rollup). Bots/automation counted separately + kept OUT of the human breakdown.
+ * SIDE EFFECT: adds the hot per-session area tally into `area_counts`.
+ */
+function build_capability({ shared_db, window_start_iso, audience, area_counts }: {
+  shared_db: Database.Database
+  window_start_iso: string
+  audience: Audience
+  area_counts: Map<string, { country: string, sessions: number }>
+}): LogAnalytics['capability'] {
   const session_rows = shared_db.prepare(`
     SELECT json_extract(context, '$.session_id') sid,
            MAX(user_agent) user_agent,
            MAX(json_extract(context, '$.db_tier')) db_tier,
            MAX(country) country,
-           MAX(region) region
+           MAX(region) region,
+           MAX(coalesce(json_extract(context, '$.webdriver'), 0)) webdriver
     FROM client_logs
     WHERE received_at >= ? AND json_extract(context, '$.session_id') IS NOT NULL
     GROUP BY sid
-  `).all(window_start_iso) as { sid: string, user_agent: string | null, db_tier: string | null, country: string | null, region: string | null }[]
+  `).all(window_start_iso) as { sid: string, user_agent: string | null, db_tier: string | null, country: string | null, region: string | null, webdriver: number }[]
 
   const device_counts = new Map<DeviceType, number>()
   // OS → { sessions, version → sessions }. Nested for the sunburst donut.
@@ -431,7 +533,9 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   let below_capability_sessions = 0
   let bot_sessions = 0
   for (const row of session_rows) {
-    const is_bot = is_bot_user_agent(row.user_agent)
+    // Bot when the UA matches the crawler/headless regex OR the session is
+    // automated (`navigator.webdriver` — headed Playwright/Selenium; M1).
+    const is_bot = is_bot_user_agent(row.user_agent) || row.webdriver === 1
     // Geo areas follow the active audience (humans by default, bots when toggled)
     // — bot check FIRST so bot sessions don't leak into the human area tally.
     if ((audience === 'bots') === is_bot) {
@@ -485,11 +589,56 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     .map(([tier, sessions]) => ({ tier, sessions }))
     .sort((a, b) => b.sessions - a.sessions)
 
-  // --- Performance: client `perf` timings, hot window only (the rollup keeps
-  // event counts, not duration distributions). `web_vital` rows carry `value`
-  // not `duration_ms`, so the NOT NULL filter drops them from the timing mix. ---
-  // `duration_ms > 0` drops bfcache/instant-nav loads that record as 0ms (and any
-  // negatives) — they're not real timings and drag the p50 down.
+  return { total_sessions: session_rows.length - bot_sessions, below_capability_sessions, bot_sessions, devices, os, browsers, db_tiers }
+}
+
+/** Finalize geo: rank the (now fully-populated) area tally + attach the TTFB splits. */
+function build_geo_areas({ area_counts, ttfb_by_country, ttfb_by_distance }: {
+  area_counts: Map<string, { country: string, sessions: number }>
+  ttfb_by_country: GeoLatency[]
+  ttfb_by_distance: GeoLatency[]
+}): GeoAnalytics {
+  const areas = [...area_counts.entries()]
+    .map(([key, value]) => ({ key, country: value.country, sessions: value.sessions }))
+    .sort((first, second) => second.sessions - first.sessions)
+    .slice(0, TOP_LIMIT)
+  const located_sessions = [...area_counts.values()].reduce((sum, area) => sum + area.sessions, 0)
+  return { located_sessions, areas, ttfb_by_country, ttfb_by_distance }
+}
+
+/**
+ * Grouped error classes (message + stack head), real errors first, known-noise +
+ * expected-response rows sunk. Always ALL rows — a bot's real error still matters.
+ */
+function build_error_clusters({ shared_db, window_start_iso }: { shared_db: Database.Database, window_start_iso: string }): ErrorCluster[] {
+  return (shared_db.prepare(`
+    SELECT message,
+           substr(coalesce(stack, ''), 1, 200) stack_head,
+           MAX(level) level,
+           COUNT(*) count,
+           COUNT(DISTINCT user_id) users,
+           MIN(received_at) first_seen,
+           MAX(received_at) last_seen,
+           group_concat(DISTINCT coalesce(source, 'client')) sources,
+           group_concat(DISTINCT coalesce(platform, 'web')) platforms
+    FROM client_logs
+    WHERE level IN ${ERROR_LEVELS_SQL} AND received_at >= ?
+    GROUP BY message, stack_head
+    ORDER BY count DESC, last_seen DESC
+    LIMIT ${ERROR_CLUSTER_LIMIT}
+  `).all(window_start_iso) as Omit<ErrorCluster, 'is_noise'>[])
+    .map(row => ({ ...row, is_noise: is_known_noise(row.message) || is_expected_error_response(row.message) }))
+    .sort((first, second) => Number(first.is_noise) - Number(second.is_noise) || second.count - first.count)
+}
+
+/**
+ * Client `perf` timings, hot window only (the rollup keeps event counts, not
+ * duration distributions). `web_vital` rows carry `value` not `duration_ms`, so
+ * the `duration_ms > 0` filter drops them from the timing mix (and drops
+ * bfcache/instant-nav 0ms loads + negatives that drag the p50 down). Includes
+ * the per-route page-load split (slowest p95 first).
+ */
+function build_performance({ shared_db, window_start_iso, audience_filter, daily }: { shared_db: Database.Database, window_start_iso: string, audience_filter: string, daily: DailyPoint[] }): { summary: PerfSummary[], daily: PerfDailyPoint[], by_route: RoutePerf[] } {
   const perf_rows = shared_db.prepare(`
     SELECT substr(received_at, 1, 10) day,
            json_extract(context, '$.name') name,
@@ -524,11 +673,11 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
 
   // Stable display order: known metrics first, then any extras seen.
   const perf_names = [...PERF_METRICS, ...[...perf_all.keys()].filter(name => !PERF_METRICS.includes(name as typeof PERF_METRICS[number]))]
-  const perf_summary: PerfSummary[] = perf_names.map((name) => {
+  const summary: PerfSummary[] = perf_names.map((name) => {
     const values = perf_all.get(name) ?? []
     return { name, count: values.length, p50: percentile(values, 50), p90: percentile(values, 90), p95: percentile(values, 95), max: values.length ? Math.max(...values) : null, slowest: perf_slowest.get(name) ?? null }
   })
-  const perf_daily: PerfDailyPoint[] = daily.map((point) => {
+  const daily_perf: PerfDailyPoint[] = daily.map((point) => {
     const day_map = perf_by_day.get(point.day)
     const metrics: PerfDailyPoint['metrics'] = {}
     if (day_map) {
@@ -539,9 +688,32 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     return { day: point.day, metrics }
   })
 
-  // --- Core Web Vitals (hot window, human sessions). `web_vital` perf rows carry
-  // `value` (ms, or unitless for CLS) not `duration_ms`, so they're aggregated
-  // separately from the timing mix above. p75 is the canonical CWV threshold. ---
+  // Per-route page-load timings: group page_load samples by normalized route
+  // (same buckets as the routes panel) so the slowest routes are legible (L2).
+  const route_perf_values = new Map<string, number[]>()
+  for (const row of perf_rows) {
+    if (row.name !== 'page_load' || !row.url)
+      continue
+    // `url_route` → pathname+search; strip the query so `?q=…` doesn't fragment routes.
+    const route = normalize_route(url_route(row.url).split('?')[0])
+    if (!route_perf_values.has(route))
+      route_perf_values.set(route, [])
+    route_perf_values.get(route)?.push(row.duration_ms)
+  }
+  const by_route: RoutePerf[] = [...route_perf_values.entries()]
+    .map(([route, values]) => ({ route, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95), max: Math.max(...values) }))
+    .sort((first, second) => (second.p95 ?? 0) - (first.p95 ?? 0))
+    .slice(0, ROUTE_PERF_LIMIT)
+
+  return { summary, daily: daily_perf, by_route }
+}
+
+/**
+ * Core Web Vitals (hot window). `web_vital` perf rows carry `value` (ms, or
+ * unitless for CLS) not `duration_ms`, aggregated separately from the timing mix.
+ * p75 is the canonical CWV threshold.
+ */
+function build_web_vitals({ shared_db, window_start_iso, audience_filter }: { shared_db: Database.Database, window_start_iso: string, audience_filter: string }): WebVitalSummary[] {
   const web_vital_rows = shared_db.prepare(`
     SELECT json_extract(context, '$.metric') metric, json_extract(context, '$.value') value
     FROM client_logs
@@ -559,16 +731,20 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   }
   // Known CWV first (stable order), then any extras seen.
   const web_vital_names = [...WEB_VITAL_METRICS, ...[...web_vital_values.keys()].filter(name => !WEB_VITAL_METRICS.includes(name as typeof WEB_VITAL_METRICS[number]))]
-  const web_vitals: WebVitalSummary[] = web_vital_names
+  return web_vital_names
     .filter(name => web_vital_values.has(name))
     .map((name) => {
       const values = web_vital_values.get(name) ?? []
       return { metric: name, count: values.length, p50: percentile(values, 50), p75: percentile(values, 75), p95: percentile(values, 95) }
     })
+}
 
-  // --- Geo-split real-user TTFB (hot window). Uses the page_load perf row's
-  // `responseStart` (context.ttfb) — the distance-sensitive server round-trip —
-  // grouped by country and by distance to the Boston origin. ---
+/**
+ * Geo-split real-user TTFB (hot window). Uses the page_load perf row's
+ * `responseStart` (context.ttfb) — the distance-sensitive server round-trip —
+ * grouped by country and by distance to the Boston origin.
+ */
+function build_ttfb_latency({ shared_db, window_start_iso, audience_filter }: { shared_db: Database.Database, window_start_iso: string, audience_filter: string }): { ttfb_by_country: GeoLatency[], ttfb_by_distance: GeoLatency[] } {
   const ttfb_rows = shared_db.prepare(`
     SELECT json_extract(context, '$.ttfb') ttfb, country, latitude, longitude
     FROM client_logs
@@ -607,17 +783,15 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
       const values = ttfb_by_distance_values.get(bucket) ?? []
       return { label: bucket, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95) }
     })
+  return { ttfb_by_country, ttfb_by_distance }
+}
 
-  const areas = [...area_counts.entries()]
-    .map(([key, value]) => ({ key, country: value.country, sessions: value.sessions }))
-    .sort((first, second) => second.sessions - first.sessions)
-    .slice(0, TOP_LIMIT)
-  const located_sessions = [...area_counts.values()].reduce((sum, area) => sum + area.sessions, 0)
-  const geo: GeoAnalytics = { located_sessions, areas, ttfb_by_country, ttfb_by_distance }
-
-  // --- Errors by build version (hot window only — app_version isn't in the
-  // rollup). Splits error volume into the live deployed build vs any stale build
-  // so deploy-tail noise on not-yet-refreshed tabs is legible vs real errors. ---
+/**
+ * Errors split by build version (hot window only — app_version isn't in the
+ * rollup). Live deployed build vs any stale build, so deploy-tail noise on
+ * not-yet-refreshed tabs is legible vs real errors.
+ */
+function build_errors_by_version({ shared_db, window_start_iso, current_app_version }: { shared_db: Database.Database, window_start_iso: string, current_app_version: string | null }): ErrorsByVersion {
   const version_error_rows = shared_db.prepare(`
     SELECT app_version version, COUNT(*) errors FROM client_logs
     WHERE received_at >= ? AND level IN ${ERROR_LEVELS_SQL}
@@ -636,7 +810,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     })
     .sort((first, second) => second.errors - first.errors)
   const version_total_errors = version_current_errors + version_stale_errors
-  const errors_by_version: ErrorsByVersion = {
+  return {
     current_version: current_app_version ?? null,
     total: version_total_errors,
     current: version_current_errors,
@@ -644,11 +818,15 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     stale_pct: version_total_errors > 0 ? version_stale_errors / version_total_errors : null,
     versions: error_versions,
   }
+}
 
-  // --- Deploys: distinct builds seen in the window (app_version = build epoch ms),
-  // first-seen day each, for timeline markers ("which deploy caused this spike?").
-  // Human rows only so it lines up with the (bot-excluded) traffic/error charts. ---
-  const deploys = (shared_db.prepare(`
+/**
+ * Distinct builds seen in the window (app_version = build epoch ms), first-seen
+ * day each, for timeline markers ("which deploy caused this spike?"). Human rows
+ * only so it lines up with the (bot-excluded) traffic/error charts.
+ */
+function build_deploys({ shared_db, window_start_iso, audience_filter }: { shared_db: Database.Database, window_start_iso: string, audience_filter: string }): Deploy[] {
+  return (shared_db.prepare(`
     SELECT app_version version, MIN(received_at) first_seen,
            COUNT(DISTINCT json_extract(context, '$.session_id')) sessions
     FROM client_logs
@@ -656,8 +834,10 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     GROUP BY app_version ORDER BY first_seen
   `).all(window_start_iso) as { version: string, first_seen: string, sessions: number }[])
     .map(row => ({ ...row, day: row.first_seen.slice(0, 10) }))
+}
 
-  // --- Pipeline health: ingestion liveness. Broken vs no-traffic at a glance. ---
+/** Ingestion liveness — broken vs no-traffic at a glance (all-time, not windowed). */
+function build_pipeline_health({ shared_db }: { shared_db: Database.Database }): PipelineHealth {
   const last_log_at = (shared_db.prepare(`SELECT MAX(received_at) v FROM client_logs`).get() as { v: string | null }).v
   const last_session_start_at = (shared_db.prepare(`SELECT MAX(received_at) v FROM client_logs WHERE message = 'session_start'`).get() as { v: string | null }).v
   const last_server_log_at = (shared_db.prepare(`SELECT MAX(received_at) v FROM client_logs WHERE source = 'server'`).get() as { v: string | null }).v
@@ -669,20 +849,11 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   } catch {
     archived_rows = 0
   }
-  const pipeline: PipelineHealth = { last_log_at, last_session_start_at, last_server_log_at, retention_ran_at, hot_rows, archived_rows }
+  return { last_log_at, last_session_start_at, last_server_log_at, retention_ran_at, hot_rows, archived_rows }
+}
 
-  // --- Event coverage: declared analytics events vs what's actually been seen.
-  // `event_counts` already holds the per-event hot+cold counts (infra excluded). ---
-  const coverage_events = ALL_TRACKED_EVENTS.map((event) => {
-    const count = event_counts.get(event) ?? 0
-    return { event, seen: count > 0, count }
-  })
-  const event_coverage: EventCoverage = {
-    events: coverage_events,
-    never_emitted: coverage_events.filter(entry => !entry.seen).length,
-  }
-
-  // --- Leader-worker health: the live_query_* family (hot window). ---
+/** Leader-worker DB health: the live_query_* family (hot window). */
+function build_leader_health({ shared_db, window_start_iso }: { shared_db: Database.Database, window_start_iso: string }): LeaderHealth {
   const leader_count = (message: string) => (shared_db.prepare(
     `SELECT COUNT(*) n FROM client_logs WHERE received_at >= ? AND message = ?`,
   ).get(window_start_iso, message) as { n: number }).n
@@ -695,37 +866,11 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     FROM client_logs WHERE received_at >= ? AND message = 'live_query_failed'
     GROUP BY source ORDER BY count DESC
   `).all(window_start_iso) as { source: string, count: number }[]
-  const leader_health: LeaderHealth = {
+  return {
     timeouts: leader_count('live_query_timeout'),
     recovered: leader_count('live_query_recovered'),
     failed: leader_count('live_query_failed'),
     failed_no_leader,
     failed_by_source,
-  }
-
-  return {
-    audience,
-    window_days: days,
-    generated_at: now.toISOString(),
-    daily,
-    deploys,
-    totals: {
-      sessions: daily.reduce((sum, point) => sum + point.sessions, 0),
-      errors: daily.reduce((sum, point) => sum + point.errors, 0),
-      logs: daily.reduce((sum, point) => sum + point.logs, 0),
-      unique_users,
-    },
-    top_routes: to_sorted(route_counts, 'route') as { route: string, count: number }[],
-    top_events: to_sorted(event_counts, 'event') as { event: string, count: number }[],
-    by_source,
-    error_clusters,
-    capability: { total_sessions: session_rows.length - bot_sessions, below_capability_sessions, bot_sessions, devices, os, browsers, db_tiers },
-    performance: { summary: perf_summary, daily: perf_daily },
-    web_vitals,
-    geo,
-    errors_by_version,
-    pipeline,
-    event_coverage,
-    leader_health,
   }
 }

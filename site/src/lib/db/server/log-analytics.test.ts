@@ -99,6 +99,28 @@ describe(get_log_analytics, () => {
     expect(bots.totals.sessions).toBe(2)
   })
 
+  test('excludes navigator.webdriver (headed Playwright) sessions from humans even with a plain Chrome UA', () => {
+    // Headed Playwright reports a real Chrome UA — the bot regex can't catch it;
+    // the `context.webdriver` flag is the signal (M1).
+    const HEADED_PLAYWRIGHT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36'
+    const REAL_HUMAN = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15'
+    add_log({ day: '2026-06-30', message: 'session_start', user_id: 'human', context: { session_id: 'real' }, user_agent: REAL_HUMAN })
+    add_log({ day: '2026-06-30', message: 'search_performed', user_id: 'human', context: { session_id: 'real' }, user_agent: REAL_HUMAN })
+    // Automated session: every row carries webdriver:true (remote-log stamps it on all rows).
+    add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 'auto', webdriver: true }, user_agent: HEADED_PLAYWRIGHT })
+    add_log({ day: '2026-06-30', message: 'search_performed', context: { session_id: 'auto', webdriver: true }, user_agent: HEADED_PLAYWRIGHT })
+
+    const humans = get_log_analytics({ shared_db: db, days: 30, now: NOW, audience: 'humans' })
+    expect(humans.totals.sessions).toBe(1) // only the real human
+    expect(humans.top_events.find(event => event.event === 'search_performed')?.count).toBe(1)
+    // The automated session is bucketed as a bot, kept out of the human total.
+    expect(humans.capability.bot_sessions).toBe(1)
+    expect(humans.capability.total_sessions).toBe(1)
+
+    const bots = get_log_analytics({ shared_db: db, days: 30, now: NOW, audience: 'bots' })
+    expect(bots.totals.sessions).toBe(1) // the webdriver session shows under bots
+  })
+
   test('clusters repeated errors, tags + sinks known-noise', () => {
     for (let i = 0; i < 5; i++)
       add_log({ day: '2026-06-30', level: 'error', message: 'boom', user_id: `u${i}` })
@@ -200,6 +222,25 @@ describe(get_log_analytics, () => {
     const latest = analytics.performance.daily[analytics.performance.daily.length - 1]
     expect(latest?.day).toBe('2026-06-30')
     expect(latest?.metrics.page_load).toEqual({ p50: 300, p95: 500, count: 5 })
+  })
+
+  test('groups page-load timings per route, slowest p95 first (L2)', () => {
+    const base = 'https://new.livingdictionaries.app'
+    const now = new Date('2026-06-30T10:00:00Z')
+    const perf = (duration_ms: number, url: string) =>
+      insert_client_log({ payload: { level: 'info', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms }, url }, user_id: null, db, now })
+    // /about: fast (100, 200) → p95 200. Search params must NOT fragment the route.
+    perf(100, `${base}/about`)
+    perf(200, `${base}/about?x=1`)
+    // /[dict]/entries/[id]: slow (1000, 2000) → p95 2000, normalized to dictionary:entry.
+    perf(1000, `${base}/my-dict/entries/abc`)
+    perf(2000, `${base}/my-dict/entries/def`)
+
+    const { by_route } = get_log_analytics({ shared_db: db, days: 30, now: NOW }).performance
+    // Slowest route (by p95) first.
+    expect(by_route[0]).toMatchObject({ route: 'dictionary:entry', count: 2, p95: 2000 })
+    const about = by_route.find(row => row.route === 'about')
+    expect(about).toMatchObject({ count: 2, p95: 200 }) // /about + /about?x=1 collapse to one route
   })
 
   test('builds geo areas (hot + cold rollup) and geo-splits TTFB by country + distance', () => {

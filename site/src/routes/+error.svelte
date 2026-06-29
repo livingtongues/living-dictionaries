@@ -6,14 +6,14 @@
   import Footer from '$lib/components/shell/Footer.svelte'
   import { dev } from '$app/environment'
   import { init_remote_logging, log_event } from '$lib/debug/remote-log'
+  import { http_status_to_log_level } from '$lib/debug/classify-error'
 
   onMount(() => {
     init_remote_logging()
-    // Map the HTTP status to a severity so expected gates don't read as crashes:
-    // 5xx = crash (a real failure), 401/403 = warn (auth gate, e.g. an anon user
-    // hitting /admin/*), 404 = info, anything else = error.
+    // Map the HTTP status to a severity so expected gates don't read as crashes
+    // (shared with the analytics side via `classify-error`).
     const { status } = page
-    const level = status >= 500 ? 'crash' : (status === 401 || status === 403) ? 'warn' : status === 404 ? 'info' : 'error'
+    const level = http_status_to_log_level(status)
     log_event({
       level,
       message: page.error?.message || 'Error page shown',

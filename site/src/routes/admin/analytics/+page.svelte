@@ -392,6 +392,25 @@
           </div>
         {/if}
       </div>
+      {#if perf.by_route.length}
+        <h3 class="perf-h3">Page load by route <span class="hint">slowest p95 first · ms</span></h3>
+        <table class="route-perf">
+          <thead>
+            <tr><th>Route</th><th>p50</th><th>p95</th><th>max</th><th>n</th></tr>
+          </thead>
+          <tbody>
+            {#each perf.by_route as row (row.route)}
+              <tr>
+                <td class="perf-route">{row.route}</td>
+                <td>{format_ms(row.p50 ?? 0)}</td>
+                <td><b>{format_ms(row.p95 ?? 0)}</b></td>
+                <td class="muted-inline">{format_ms(row.max ?? 0)}</td>
+                <td class="muted-inline">{format_number(row.count)}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      {/if}
     {:else}
       <p class="muted">No performance timings in window yet. Page-load, viewer-boot, and search timings appear here.</p>
     {/if}
@@ -841,6 +860,13 @@
     vertical-align: bottom;
     font-family: ui-monospace, monospace;
   }
+  .route-perf {
+    max-width: 34rem;
+    margin-top: 0.5rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .route-perf td:not(.perf-route) { text-align: right; }
+  .route-perf th:not(:first-child) { text-align: right; }
   .perf-h3 {
     font-size: 0.8125rem;
     font-weight: 600;
