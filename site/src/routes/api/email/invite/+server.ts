@@ -1,10 +1,12 @@
 import { error, json } from '@sveltejs/kit'
-import { getAdminRecipients } from '../addresses'
 import { send_email } from '../send-email'
 import type { RequestHandler } from './$types'
+import { is_admin } from '$lib/admins'
 import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { format_invite_notification } from '$lib/server/chat/notification-messages'
+import { post_system_notification } from '$lib/server/chat/system-notifier'
 
 export interface InviteRequestBody {
   dictionary_id: string
@@ -61,29 +63,24 @@ https://livingtongues.org (Living Tongues Homepage)
 https://livingdictionaries.app (Living Dictionaries website)`,
     })
 
-    const adminRecipients = getAdminRecipients(inviter_email)
-    if (!adminRecipients.find(({ email }) => email === inviter_email)) {
-      await send_email({
-        to: adminRecipients,
-        reply_to: { email: inviter_email },
-        subject: `${inviter_name_or_email} has invited ${target_email} to contribute to the ${dictionary.name} Living Dictionary`,
-        type: 'text/plain',
-        body: `Hello Admins,
-    ${inviter_name_or_email} has invited ${target_email} to work on the ${dictionary.name} Living Dictionary as a ${roleMessage}.
-
-    Dictionary URL: https://livingdictionaries.app/${dictionary_id}
-
-    If you have any questions for ${inviter_name_or_email}, just reply to this email.
-
-    Thanks,
-    Our automatic function
-
-    https://livingdictionaries.app`,
-      })
-    }
-
     db.prepare(`UPDATE invites SET status = 'sent', dirty = 1, updated_at = ? WHERE id = ?`)
       .run(new Date().toISOString(), invite_id)
+
+    // Post into the admin Notifications room (+ ping admins by their channel).
+    // An admin sending the invite logs the event but doesn't ping the team.
+    void post_system_notification({
+      db,
+      content: format_invite_notification({
+        actor: inviter_name_or_email,
+        target_email: target_email.trim().toLowerCase(),
+        role,
+        dictionary_name: dictionary.name,
+        dictionary_id,
+        base_url: event.url.origin,
+      }),
+      base_url: event.url.origin,
+      suppress_ping: is_admin(inviter_email),
+    }).catch(err => console.error('invite notification failed:', (err as Error).message))
 
     return json('success')
   } catch (err) {

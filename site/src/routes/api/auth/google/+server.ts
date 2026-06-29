@@ -8,6 +8,9 @@ import { get_shared_db } from '$lib/db/server/shared-db'
 import { find_or_create_auth_user } from '$lib/server/find-or-create-auth-user'
 import { get_user } from '$lib/server/get-user'
 import { log_server_event } from '$lib/server/log-server-event'
+import { is_admin } from '$lib/admins'
+import { format_new_user_notification } from '$lib/server/chat/notification-messages'
+import { post_system_notification } from '$lib/server/chat/system-notifier'
 import { error, json } from '@sveltejs/kit'
 
 export interface AuthGoogleRequestBody {
@@ -19,7 +22,7 @@ export interface AuthGoogleResponseBody {
   user: AuthUserData
 }
 
-export const POST: RequestHandler = async ({ request, cookies }) => {
+export const POST: RequestHandler = async ({ request, cookies, url }) => {
   const { id_token } = await request.json() as AuthGoogleRequestBody
   if (!id_token)
     error(ResponseCodes.BAD_REQUEST, 'id_token is required')
@@ -64,8 +67,16 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
       user.id,
     )
   }
-  // M4-auth: welcome email on first sign-up deferred (see verify endpoint).
-  void created
+  // New signup → post into the admin Notifications room (+ ping admins by their
+  // channel). An admin's own first login logs the event but doesn't ping the team.
+  if (created) {
+    void post_system_notification({
+      db,
+      content: format_new_user_notification({ actor: user.name || user.email || 'A new user', email: user.email }),
+      base_url: url.origin,
+      suppress_ping: is_admin(user.email),
+    }).catch(err => console.error('new-user notification failed:', (err as Error).message))
+  }
 
   const token = await sign_jwt({
     sub: user.id,

@@ -7,7 +7,7 @@
 
 import { linkify_html } from '$lib/utils/linkify-html'
 
-function escape_html(value: string): string {
+export function escape_html(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 

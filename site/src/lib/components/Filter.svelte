@@ -1,4 +1,5 @@
 <script lang="ts" generics="T">
+  import { filter_items } from './filter-items'
 
   interface Props {
     // type T = $$Generic
@@ -17,10 +18,7 @@
 
   let value = $state('')
 
-  const filteredItems = $derived(items.filter((item: T) => {
-    const itemStr = JSON.stringify(item)
-    return itemStr.toLowerCase().includes(value.toLowerCase())
-  }))
+  const filteredItems = $derived(filter_items({ items, query: value }))
 
   function autofocus(node: HTMLInputElement) {
     setTimeout(() => node.focus(), 15)

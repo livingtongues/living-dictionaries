@@ -7,6 +7,7 @@ import {
   ROOM_ALL_ADMINS,
   ROOM_ANNA_GREG_JACOB,
   ROOM_DIEGO_ANNA_GREG,
+  ROOM_NOTIFICATIONS,
 } from '$lib/admin/chat/rooms'
 
 export {
@@ -14,6 +15,9 @@ export {
   ROOM_ANNA_GREG_JACOB,
   ROOM_DIEGO_ANNA_GREG,
   ROOM_NAMES,
+  ROOM_NOTIFICATIONS,
+  SYSTEM_USER_ID,
+  SYSTEM_USER_NAME,
 } from '$lib/admin/chat/rooms'
 
 /**
@@ -29,6 +33,7 @@ export interface FixedChannel {
 
 export const FIXED_CHANNELS: readonly FixedChannel[] = [
   { id: ROOM_ALL_ADMINS, members: 'all' },
+  { id: ROOM_NOTIFICATIONS, members: 'all' },
   { id: ROOM_ANNA_GREG_JACOB, members: ['dictionaries@livingtongues.org', 'livingtongues@gmail.com', 'jwrunner7@gmail.com'] },
   { id: ROOM_DIEGO_ANNA_GREG, members: ['diego@livingtongues.org', 'dictionaries@livingtongues.org', 'livingtongues@gmail.com'] },
 ]

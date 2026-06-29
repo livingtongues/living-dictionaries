@@ -7,6 +7,9 @@ import { get_shared_db } from '$lib/db/server/shared-db'
 import { find_or_create_auth_user } from '$lib/server/find-or-create-auth-user'
 import { get_user } from '$lib/server/get-user'
 import { log_server_event } from '$lib/server/log-server-event'
+import { is_admin } from '$lib/admins'
+import { format_new_user_notification } from '$lib/server/chat/notification-messages'
+import { post_system_notification } from '$lib/server/chat/system-notifier'
 import { error, json } from '@sveltejs/kit'
 
 export interface AuthEmailVerifyRequestBody {
@@ -58,7 +61,7 @@ function clear_failed_attempts(email: string) {
   failed_attempts.delete(email)
 }
 
-export const POST: RequestHandler = async ({ request, cookies }) => {
+export const POST: RequestHandler = async ({ request, cookies, url }) => {
   const { email: raw_email, code } = await request.json() as AuthEmailVerifyRequestBody
   if (!raw_email || !code)
     error(ResponseCodes.BAD_REQUEST, 'Email and code are required')
@@ -96,9 +99,16 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     new_user: { email },
   })
 
-  // M4-auth: welcome email + admin notification deferred (LD already has
-  // `/api/email/new_user`; wire it back in a later phase). `created` unused for now.
-  void created
+  // New signup → post into the admin Notifications room (+ ping admins by their
+  // channel). An admin's own first login logs the event but doesn't ping the team.
+  if (created) {
+    void post_system_notification({
+      db,
+      content: format_new_user_notification({ actor: user.name || user.email || 'A new user', email: user.email }),
+      base_url: url.origin,
+      suppress_ping: is_admin(user.email),
+    }).catch(err => console.error('new-user notification failed:', (err as Error).message))
+  }
 
   const token = await sign_jwt({ sub: user.id, email: user.email ?? undefined, name: user.name ?? undefined })
 

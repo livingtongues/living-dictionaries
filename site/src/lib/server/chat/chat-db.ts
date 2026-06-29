@@ -18,6 +18,7 @@ import {
   ROOM_ANNA_GREG_JACOB,
   ROOM_DIEGO_ANNA_GREG,
   ROOM_NAMES,
+  ROOM_NOTIFICATIONS,
 } from './constants'
 
 export type ChatRoomKind = 'channel' | 'dm'
@@ -317,14 +318,14 @@ if (import.meta.vitest) {
       const db = fresh_db()
       ensure_my_chat_setup({ db, user_id: 'u-jacob', email: 'jwrunner7@gmail.com' })
       const ids = list_my_rooms({ db, user_id: 'u-jacob' }).map(room => room.id).sort()
-      expect(ids).toEqual([ROOM_ALL_ADMINS, ROOM_ANNA_GREG_JACOB].sort())
+      expect(ids).toEqual([ROOM_ALL_ADMINS, ROOM_NOTIFICATIONS, ROOM_ANNA_GREG_JACOB].sort())
     })
 
     it('puts Diego in all-admins + diego-anna-greg but NOT anna-greg-jacob', () => {
       const db = fresh_db()
       ensure_my_chat_setup({ db, user_id: 'u-diego', email: 'diego@livingtongues.org' })
       const ids = list_my_rooms({ db, user_id: 'u-diego' }).map(room => room.id).sort()
-      expect(ids).toEqual([ROOM_ALL_ADMINS, ROOM_DIEGO_ANNA_GREG].sort())
+      expect(ids).toEqual([ROOM_ALL_ADMINS, ROOM_NOTIFICATIONS, ROOM_DIEGO_ANNA_GREG].sort())
     })
   })
 
