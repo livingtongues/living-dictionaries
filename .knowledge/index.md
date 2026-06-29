@@ -17,6 +17,8 @@ production cutover is `.issues/cutover.md`, and the durable cross-project conven
 - [admin/](./admin/index.md) — the `/admin` super-admin area: the house feature port
   (schema-graph canvas, server-authoritative team chat, ntfy dashboard, message triage) and
   which files stay near-identical to `house`.
+- [api/](./api/index.md) — public/programmatic APIs: the agent-friendly `/api/v1` bulk
+  write API + per-dictionary API keys (reuses the human `merge_dict_row` write path).
 
 ## Pointers to the reference repo
 The **target** architecture (SQLite shared.db + per-dict dict.db, wa-sqlite/better-sqlite3,
