@@ -3,7 +3,12 @@ import type { ApiLogRequestBody, ApiLogResponseBody } from './+server'
 import { post_request } from '$lib/utils/requests'
 
 export async function api_log(body: ApiLogRequestBody) {
-  return await post_request<ApiLogRequestBody, ApiLogResponseBody>('/api/log', body)
+  // `log_errors: false` — the shipper's own transport failure must not flow back
+  // through the patched `console.error` (it would re-buffer as an error log and
+  // re-ship). The localStorage buffer already retries the batch on the next flush.
+  // Common trigger: a hard `window.location.replace` (e.g. create-dictionary) tears
+  // the page down mid-flush, so the in-flight fetch aborts → `Failed to fetch`.
+  return await post_request<ApiLogRequestBody, ApiLogResponseBody>('/api/log', body, { log_errors: false })
 }
 
 /**
