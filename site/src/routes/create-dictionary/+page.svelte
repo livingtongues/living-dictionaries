@@ -24,7 +24,7 @@
   let modal: 'auth' = $state(null)
 
   let name = $state('')
-  let gloss_languages = $state(new Set(['en']))
+  let gloss_languages: string[] = $state(['en'])
   let alternate_names: string[] = $state([])
   let points: IPoint[] = $state([])
   let regions: IRegion[] = $state([])
@@ -78,7 +78,7 @@
       id: urlToUse,
       url: urlToUse,
       name: name.trim().replace(/^./, name[0].toUpperCase()),
-      gloss_languages: Array.from(gloss_languages),
+      gloss_languages,
       alternate_names,
       coordinates: points || regions ? { points, regions } : null,
       iso_639_3: iso_639_3.trim(),
@@ -244,14 +244,13 @@ Use: ${conlang_use.trim()}`
           <EditableGlossesField
             minimum={1}
             availableLanguages={glossingLanguages}
-            selectedLanguages={Array.from(gloss_languages)}
+            selectedLanguages={gloss_languages}
             add_language={(languageId) => {
-              gloss_languages.add(languageId)
-              gloss_languages = gloss_languages
+              if (!gloss_languages.includes(languageId))
+                gloss_languages = [...gloss_languages, languageId]
             }}
             remove_language={(languageId) => {
-              gloss_languages.delete(languageId)
-              gloss_languages = gloss_languages
+              gloss_languages = gloss_languages.filter(id => id !== languageId)
             }} />
           <div class="spacer"></div>
 

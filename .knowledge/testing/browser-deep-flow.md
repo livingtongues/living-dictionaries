@@ -165,3 +165,20 @@ the 2026-06-12 uno drop):
   diff there is noise.
 - **Select e2e elements by semantic class / aria-label, never by icon class** — the old `i-*` selectors
   broke the instant icons were swapped; use `.add-sense-button` / `.delete-sense-button` etc.
+
+## Role-gated flows: don't log in as an admin (it masks the path)
+`jwrunner7@gmail.com` — the email the existing harnesses authenticate as — is a **LEVEL-2 site
+admin** (`$lib/admins.ts`). In `[dictionaryId]/+layout.ts`, `is_site_admin` short-circuits `role` to
+`'admin'`, so a site admin always has `can_edit=true` regardless of `dictionary_roles`. To genuinely
+test a **dictionary-role** path (manager/editor/contributor gating), log in as a **fresh
+`@example.com` user** — not in the allow-list, so its `can_edit` hinges entirely on the real grant.
+Dev sign-up is open: `POST /api/auth/email/send-code` returns the OTP inline, `…/verify` creates the
+user. Example: `site/tools/e2e/create-dict-soft-nav.mjs` (the create-dictionary soft-`goto`
+regression) uses a fresh user to prove a brand-new NON-admin manager can immediately edit.
+
+## Detecting soft (client-side `goto`) vs hard (full reload) navigation
+Two reliable signals captured before the nav and re-read after: (1) set a `window.__probe` value —
+it **survives a soft nav, is wiped by a hard reload**; (2) `page.evaluateOnNewDocument(() =>
+window.__doc_loads = (window.__doc_loads||0)+1)` increments per real document load — **unchanged**
+across a soft nav, **+1** on a hard reload. Puppeteer's `framenavigated` fires for BOTH, so it can't
+distinguish them — use the probe + doc-load counter instead.

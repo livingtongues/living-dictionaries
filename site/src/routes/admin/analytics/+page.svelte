@@ -8,6 +8,7 @@
   import DonutChart from '$lib/charts/DonutChart.svelte'
   import LineChart from '$lib/charts/LineChart.svelte'
   import SegmentedBar from '$lib/charts/SegmentedBar.svelte'
+  import VitalBar from '$lib/charts/VitalBar.svelte'
   import { format_number, format_pct } from '$lib/constants'
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
 
@@ -119,25 +120,9 @@
     return PERF_LABELS[name] ?? name
   }
 
-  // --- Core Web Vitals. p75 is the threshold Google grades on. CLS is unitless. ---
+  // --- Core Web Vitals. Each metric renders as a graded VitalBar (p75 vs Google
+  // thresholds); metric metadata + thresholds live in that component. ---
   const web_vitals = $derived(analytics.web_vitals)
-  // Standard CWV thresholds: [good ≤, poor >] — value between is "needs improvement".
-  const VITAL_THRESHOLDS: Record<string, [number, number]> = { LCP: [2500, 4000], INP: [200, 500], CLS: [0.1, 0.25], FCP: [1800, 3000], TTFB: [800, 1800] }
-  function format_vital(metric: string, value: number | null): string {
-    if (value == null)
-      return '—'
-    return metric === 'CLS' ? value.toFixed(3) : format_ms(value)
-  }
-  function vital_color(metric: string, p75: number | null): string | undefined {
-    const threshold = VITAL_THRESHOLDS[metric]
-    if (!threshold || p75 == null)
-      return undefined
-    if (p75 <= threshold[0])
-      return 'var(--ok, #16a34a)'
-    if (p75 > threshold[1])
-      return 'var(--danger)'
-    return 'var(--warn, #d97706)'
-  }
 
   const geo = $derived(analytics.geo)
   const has_geo = $derived(geo.areas.length > 0 || geo.ttfb_by_country.length > 0 || geo.ttfb_by_distance.length > 0)
@@ -281,7 +266,7 @@
   <section class="panel">
     <h2>Traffic <span class="hint">sessions vs unique users</span></h2>
     {#if has_traffic}
-      <ComboChart series={traffic_series} events={deploy_events} height={200} value_format={format_number} />
+      <ComboChart series={traffic_series} events={deploy_events} event_icon="⬆" height={200} value_format={format_number} />
     {:else}
       <p class="muted">No sessions logged yet.</p>
     {/if}
@@ -290,7 +275,7 @@
   <section class="panel">
     <h2>Errors per day</h2>
     {#if totals.errors > 0}
-      <LineChart series={error_points} events={deploy_events} area color="var(--danger)" height={200} y_format={format_number} tip_format={format_number} />
+      <LineChart series={error_points} events={deploy_events} event_icon="⬆" area color="var(--danger)" height={200} y_format={format_number} tip_format={format_number} />
     {:else}
       <p class="muted">No errors recorded. 🎉</p>
     {/if}
@@ -417,17 +402,11 @@
   </section>
 
   <section class="panel">
-    <h2>Core Web Vitals <span class="hint">p75 · graded · hot window · human sessions</span></h2>
+    <h2>Core Web Vitals <span class="hint">graded on the typical (75th-percentile) visit · recent traffic · real people, bots excluded</span></h2>
     {#if web_vitals.length}
-      <div class="perf-summary">
+      <div class="vitals">
         {#each web_vitals as vital (vital.metric)}
-          <div class="perf-stat">
-            <div class="perf-name">{vital.metric}</div>
-            <div class="perf-nums">
-              <span style:color={vital_color(vital.metric, vital.p75)}><b>{format_vital(vital.metric, vital.p75)}</b> p75</span>
-              <span class="muted-inline">{format_vital(vital.metric, vital.p50)} p50 · {format_vital(vital.metric, vital.p95)} p95 · n={format_number(vital.count)}</span>
-            </div>
-          </div>
+          <VitalBar {vital} />
         {/each}
       </div>
     {:else if totals.sessions > 0}
@@ -824,6 +803,11 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
     margin-bottom: 1rem;
+  }
+  .vitals {
+    display: grid;
+    gap: 0.6rem;
+    max-width: 680px;
   }
   .perf-stat {
     border: 1px solid var(--border-color);

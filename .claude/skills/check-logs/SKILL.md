@@ -12,8 +12,11 @@ with them (chasing a bug, reconstructing a session, confirming an event fired).
 
 `client_logs` holds **both** sides:
 - **Browser logs** (`source = 'client'`) — uncaught `window.error`, `unhandledrejection`, patched
-  `console.error`, plus explicit `log_event()` / `track()` / `track_timing()` / heartbeats /
-  `session_start` (carries `db_tier` capability telemetry) / `visibility_*` / `navigation`.
+  `console.error` (level `error`), plus explicit `log_event()` / `log_warning()` (level `warn`) /
+  `track()` / `track_timing()` / heartbeats / `session_start` (carries `db_tier` capability
+  telemetry) / `visibility_*` / `navigation`. **`console.warn` is deliberately NOT captured** — most
+  warns are operational/3rd-party noise; only `warn` rows shipped via the explicit `log_warning()`
+  (e.g. data-integrity "row missing primary key") or the i18n missing-key hook reach `client_logs`.
 - **Server telemetry** (`source = 'server'`) — anything routed through `log_server_event(...)`
   (API failures, sync errors, cron outcomes). These would otherwise vanish into ephemeral
   `docker logs`. NULL `source` = legacy client rows.

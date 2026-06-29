@@ -1,18 +1,20 @@
 <script lang="ts">
   // Multi-series time chart (D3 scales + path generators, Svelte renders SVG).
-  // Overlays several series on one axis + vertical key-event markers, with a
-  // snapping hover tooltip that interpolates each series' on-line value at the
-  // snapped date and shows labeled "gap" rows (differences between series).
+  // Overlays several series on one axis + a clustered key-event rail (deploys), with a
+  // snapping hover tooltip that interpolates each series' on-line value at the snapped
+  // date and shows labeled "gap" rows (differences between series).
   // Ported from the finances dashboard engine, adapted to house theme vars.
   import { extent, max } from 'd3-array'
   import { scaleLinear, scaleTime } from 'd3-scale'
   import { curveMonotoneX, area as d3area, line as d3line } from 'd3-shape'
   import { format_point_date } from '$lib/utils/format-relative-time'
+  import { cluster_events } from './cluster-events'
+  import EventRail from './EventRail.svelte'
 
   interface Pt { date: string, value: number }
   interface Series { label: string, color: string, points: Pt[], area?: boolean }
   interface NoteItem { label: string, text: string, color?: string }
-  interface Evt { date: string, label: string, color?: string, note?: { title: string, items: NoteItem[] } }
+  interface Evt { date: string, label: string, color?: string, current?: boolean, note?: { title: string, items: NoteItem[] } }
   interface Gap { label: string, from: number, to: number }
 
   interface Props {
@@ -20,6 +22,8 @@
     events?: Evt[]
     height?: number
     gaps?: Gap[]
+    /** Glyph for the deploy rail ticks (🚀 in house/tutor, ⬆ in LD). */
+    event_icon?: string
     /** Tooltip + axis value formatter. */
     value_format?: (value: number) => string
   }
@@ -28,13 +32,16 @@
     events = [],
     height = 320,
     gaps = [],
+    event_icon = '🚀',
     value_format = (value: number) => String(Math.round(value)),
   }: Props = $props()
 
   const W = 860
-  const m = { t: 42, r: 18, b: 26, l: 58 }
+  const m = { r: 18, b: 26, l: 58 }
   const iw = W - m.l - m.r
-  const ih = $derived(height - m.t - m.b)
+  // Fixed top band: holds the clustered deploy rail (no more growing chip lanes).
+  const mt = $derived(events.length ? 30 : 14)
+  const ih = $derived(height - mt - m.b)
 
   function to_date(value: string): Date {
     const parts = value.split('-').map(Number)
@@ -56,6 +63,15 @@
   const xs = $derived(scaleTime().domain(extent(all_dates) as [Date, Date]).range([0, iw]))
   const y_max = $derived(max(prepared.flatMap(s => s.pts.map(p => p.value))) ?? 1)
   const ys = $derived(scaleLinear().domain([0, y_max * 1.06]).range([ih, 0]).nice())
+
+  // Cluster deploy markers so a burst collapses to one tick instead of a pile.
+  const EVENT_GAP = 28
+  const event_clusters = $derived(
+    cluster_events({ points: evts.map(e => ({ item: e, x: xs(e.d) })), min_gap: EVENT_GAP }),
+  )
+  const rail_clusters = $derived(
+    event_clusters.map(c => ({ left_pct: ((m.l + c.x) / W) * 100, items: c.items })),
+  )
 
   const line_path = (pts: { date: Date, value: number }[]) =>
     d3line<{ date: Date, value: number }>()
@@ -105,21 +121,12 @@
   let svg_el: SVGSVGElement
   let hover = $state<{ ix: number, raw: string, items: HoverItem[], gaps: { label: string, value: number }[] } | null>(null)
 
-  let hover_note = $state<number | null>(null)
-  let pinned_note = $state<number | null>(null)
-  const active_note = $derived(pinned_note != null ? pinned_note : hover_note)
-  function toggle_note(i: number) {
-    pinned_note = pinned_note === i ? null : i
-  }
-  let chip_w = $state<number[]>([])
-  let chip_h = $state<number[]>([])
-
   function on_move(event: PointerEvent) {
     if (!svg_el)
       return
     const rect = svg_el.getBoundingClientRect()
     const ix = ((event.clientX - rect.left) / rect.width) * W - m.l
-    const iy = ((event.clientY - rect.top) / rect.height) * height - m.t
+    const iy = ((event.clientY - rect.top) / rect.height) * height - mt
     if (ix < -6 || ix > iw + 6 || iy < 0 || iy > ih) {
       hover = null
       return
@@ -176,7 +183,7 @@
     role="img"
     onpointermove={on_move}
     onpointerleave={() => (hover = null)}>
-    <g transform={`translate(${m.l},${m.t})`}>
+    <g transform={`translate(${m.l},${mt})`}>
       {#each yticks as t (t)}
         <line x1={0} x2={iw} y1={ys(t)} y2={ys(t)} stroke="var(--border-color)" stroke-opacity="0.7" />
         <text x={-10} y={ys(t) + 4} text-anchor="end" font-size="14" fill="var(--color-secondary)">{value_format(t)}</text>
@@ -185,39 +192,17 @@
         <text x={xs(t)} y={ih + 19} text-anchor="middle" font-size="14" fill="var(--color-secondary)">{tick_label(t)}</text>
       {/each}
 
-      {#each evts as e, i (e.label)}
-        {@const x = xs(e.d)}
-        {@const c = e.color ?? 'var(--color-secondary)'}
-        <line x1={x} x2={x} y1={-10} y2={ih} stroke={c} stroke-width="1" stroke-dasharray="3 3" stroke-opacity="0.65" />
-        <foreignObject
-          x={Math.min(Math.max(x, 0), iw - (chip_w[i] ?? 80))}
-          y={-9 - (chip_h[i] ?? 18)}
-          width="180"
-          height="44"
-          style="overflow:visible;pointer-events:none">
-          <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-          <div
-            class={e.note ? 'chip has-note' : 'chip'}
-            bind:clientWidth={chip_w[i]}
-            bind:clientHeight={chip_h[i]}
-            style:color={c}
-            role={e.note ? 'button' : undefined}
-            tabindex={e.note ? 0 : undefined}
-            onpointerenter={e.note ? () => (hover_note = i) : undefined}
-            onpointerleave={e.note ? () => (hover_note = null) : undefined}
-            onclick={e.note ? () => toggle_note(i) : undefined}
-            onkeydown={e.note
-              ? (ev) => {
-                if (ev.key === 'Enter' || ev.key === ' ') {
-                  ev.preventDefault()
-                  toggle_note(i)
-                }
-              }
-              : undefined}>
-            <span>{e.label}</span>
-            {#if e.note}<span class="chip-q">?</span>{/if}
-          </div>
-        </foreignObject>
+      {#each event_clusters as cluster, i (i)}
+        {@const current = cluster.items.some(it => it.current)}
+        <line
+          x1={cluster.x}
+          x2={cluster.x}
+          y1={6 - mt}
+          y2={ih}
+          stroke={current ? 'var(--primary)' : 'var(--color-secondary)'}
+          stroke-width="1"
+          stroke-dasharray="3 3"
+          stroke-opacity={current ? 0.6 : 0.4} />
       {/each}
 
       {#each prepared as s (s.label)}
@@ -233,6 +218,10 @@
       {/if}
     </g>
   </svg>
+
+  {#if rail_clusters.length}
+    <EventRail clusters={rail_clusters} icon={event_icon} />
+  {/if}
 
   {#if hover}
     <div class="tip" style:left={`${tip_left}%`} style:transform={tip_shift}>
@@ -253,24 +242,6 @@
       {/each}
     </div>
   {/if}
-
-  {#if active_note != null}
-    {@const e = evts[active_note]}
-    {#if e?.note}
-      {@const nx = ((m.l + xs(e.d)) / W) * 100}
-      <div
-        class="note"
-        style:left={`${nx}%`}
-        style:transform={nx > 62 ? 'translateX(-92%)' : nx < 24 ? 'translateX(-8%)' : 'translateX(-50%)'}>
-        <div class="note-title">{e.note.title}</div>
-        {#each e.note.items as it (it.label)}
-          <div class="note-row">
-            <span class="note-label" style:color={it.color ?? 'var(--color)'}>{it.label}</span><span class="note-text">{it.text}</span>
-          </div>
-        {/each}
-      </div>
-    {/if}
-  {/if}
 </div>
 
 <style>
@@ -278,60 +249,6 @@
   .item { display: inline-flex; align-items: center; gap: 0.35rem; }
   .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
   .wrap { position: relative; }
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    box-sizing: border-box;
-    width: max-content;
-    max-width: 132px;
-    padding: 2px 8px;
-    font-family: inherit;
-    font-size: 10.5px;
-    line-height: 1.18;
-    border-radius: 9px;
-    border: 1px solid color-mix(in srgb, currentColor 50%, transparent);
-    background: color-mix(in srgb, currentColor 16%, transparent);
-    white-space: normal;
-    overflow-wrap: anywhere;
-    pointer-events: auto;
-  }
-  .chip-q {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: none;
-    width: 13px;
-    height: 13px;
-    border-radius: 50%;
-    font-size: 9px;
-    font-weight: 700;
-    background: color-mix(in srgb, currentColor 25%, transparent);
-  }
-  .chip.has-note { cursor: pointer; }
-  .chip.has-note:hover,
-  .chip.has-note:focus-visible {
-    background: color-mix(in srgb, currentColor 30%, transparent);
-    outline: none;
-  }
-  .note {
-    position: absolute;
-    top: 30px;
-    max-width: 320px;
-    pointer-events: none;
-    background: var(--surface);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-    padding: 0.6rem 0.7rem;
-    font-size: 0.76rem;
-    line-height: 1.38;
-    z-index: 3;
-  }
-  .note-title { font-weight: 800; font-size: 0.84rem; margin-bottom: 0.35rem; }
-  .note-row + .note-row { margin-top: 0.32rem; }
-  .note-label { font-weight: 700; margin-right: 0.4rem; }
-  .note-text { color: var(--color-secondary); }
   .tip {
     position: absolute;
     top: 34px;

@@ -30,6 +30,39 @@ export interface TranslateOptions {
   fallback?: string
 }
 
+export interface MissingTranslation {
+  key: string
+  locale: string
+  fallback?: string
+}
+
+/**
+ * Injected reporter for a genuinely-missing key (no English base). Wired up
+ * client-side in `+layout.svelte` onMount so it ships to `client_logs`; left null
+ * on the server and in tests. Dependency-injected (not a direct import of the
+ * logger) to keep this leaf module free of the telemetry stack and to guarantee
+ * we only ship from the browser.
+ */
+let on_missing_translation: ((info: MissingTranslation) => void) | null = null
+export function set_missing_translation_handler(handler: ((info: MissingTranslation) => void) | null): void {
+  on_missing_translation = handler
+}
+
+/**
+ * Dedupe so a re-rendering list (which calls `t()` for the same key hundreds of
+ * times) reports each unique missing key only ONCE per page session — both to the
+ * dev console and to telemetry. Keyed by `locale:key`.
+ */
+const reported_missing = new Set<string>()
+function report_missing_translation({ key, locale, fallback }: MissingTranslation): void {
+  const dedupe_key = `${locale}:${key}`
+  if (reported_missing.has(dedupe_key))
+    return
+  reported_missing.add(dedupe_key)
+  console.warn(`i18n: missing translation key "${key}"${fallback ? ` — using fallback "${fallback}"` : ''}`)
+  on_missing_translation?.({ key, locale, fallback })
+}
+
 export async function getTranslator(locale: LocaleCode) {
   if (!loadedTranslations[locale]) {
     loadedTranslations[locale] = {
@@ -59,14 +92,16 @@ export async function getTranslator(locale: LocaleCode) {
     const localeResult = loadedTranslations[locale][section]?.[item]
     if (localeResult)
       return interpolate(localeResult, options?.values)
-    console.warn(`Missing ${locale} translation for ${key}`)
 
-    const englishResult = loadedTranslations.en[section][item]
+    // A missing translation in a non-English locale is normal — human translators
+    // fill those in over time and we silently fall back to English. Only warn when
+    // the English base ALSO lacks the key, which is a real bug (a typo in code, a
+    // removed string, or a bad dynamicKey) worth turning into an action item.
+    const englishResult = loadedTranslations.en[section]?.[item]
     if (englishResult)
       return interpolate(englishResult, options?.values)
-    // const error = `Missing English for: ${key}`
 
-    // console.error(error)
+    report_missing_translation({ key, locale, fallback: options?.fallback })
     return options?.fallback || key
   }
 }
@@ -87,6 +122,31 @@ if (import.meta.vitest) {
     test('only splits on first period when there are two', () => {
       const [section, item] = splitByFirstPeriod('ps.pr.n')
       expect([section, item]).toEqual(['ps', 'pr.n'])
+    })
+  })
+
+  describe(getTranslator, () => {
+    test('reports a fully-missing key (no English base) once per unique key', async () => {
+      const reported: string[] = []
+      set_missing_translation_handler(info => reported.push(info.key))
+      const t = await getTranslator('en')
+
+      // `gl.zz-not-a-real-language` exists in neither the active locale nor English.
+      expect(t({ dynamicKey: 'gl.zz-not-a-real-language', fallback: 'fb' })).toBe('fb')
+      t({ dynamicKey: 'gl.zz-not-a-real-language' }) // repeat → deduped, no second report
+
+      expect(reported).toEqual(['gl.zz-not-a-real-language'])
+      set_missing_translation_handler(null)
+    })
+
+    test('does NOT report when an English fallback exists', async () => {
+      const reported: string[] = []
+      set_missing_translation_handler(info => reported.push(info.key))
+      const t = await getTranslator('en')
+
+      expect(t('misc.add')).toBeTruthy() // real key present in English base
+      expect(reported).toEqual([])
+      set_missing_translation_handler(null)
     })
   })
 }

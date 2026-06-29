@@ -1,16 +1,18 @@
 <script lang="ts">
-  // Single-series time chart. D3 does the math (scales + path generators);
-  // Svelte renders the SVG. Ported from the finances dashboard engine and
-  // adapted to house theme vars. Features: area fill, snapping hover tooltip,
-  // and optional vertical key-event markers (lane-stacked label chips + notes).
+  // Single-series time chart. D3 does the math (scales + path generators); Svelte
+  // renders the SVG. Ported from the finances dashboard engine and adapted to house
+  // theme vars. Features: area fill, snapping hover tooltip, and an optional clustered
+  // key-event rail (deploys) along the top band.
   import { extent, max, min } from 'd3-array'
   import { scaleLinear, scaleTime } from 'd3-scale'
   import { curveMonotoneX, area as d3area, line as d3line } from 'd3-shape'
   import { format_point_date } from '$lib/utils/format-relative-time'
+  import { cluster_events } from './cluster-events'
+  import EventRail from './EventRail.svelte'
 
   interface Pt { date: string, value: number }
   interface NoteItem { label: string, text: string, color?: string }
-  interface Evt { date: string, label: string, color?: string, note?: { title: string, items: NoteItem[] } }
+  interface Evt { date: string, label: string, color?: string, current?: boolean, note?: { title: string, items: NoteItem[] } }
 
   interface Props {
     series: Pt[]
@@ -18,6 +20,8 @@
     height?: number
     color?: string
     area?: boolean
+    /** Glyph for the deploy rail ticks (🚀 in house/tutor, ⬆ in LD). */
+    event_icon?: string
     /** Y-axis tick label formatter. */
     y_format?: (value: number) => string
     /** Tooltip value formatter. */
@@ -31,6 +35,7 @@
     height = 240,
     color = 'var(--primary)',
     area = false,
+    event_icon = '🚀',
     y_format = (value: number) => String(Math.round(value)),
     tip_format = (value: number) => String(Math.round(value)),
     domain = null,
@@ -63,26 +68,8 @@
     return span_days <= 400 ? `${MONTHS[date.getMonth()]} '${String(date.getFullYear()).slice(2)}` : String(date.getFullYear())
   }
 
-  // measured chip box sizes (HTML-in-foreignObject auto-sizes to its text — we read
-  // the rendered width/height back to clamp chips in-bounds and stack them into lanes).
-  let chip_w = $state<number[]>([])
-  let chip_h = $state<number[]>([])
-  const EV_GAP = 8
-  // Greedy lane assignment so overlapping event chips don't collide.
-  const ev_layout = $derived.by(() => {
-    const order = evts.map((_, i) => i).sort((a, b) => xs(evts[a].d) - xs(evts[b].d))
-    const lane_right: number[] = []
-    const lane = Array.from({ length: evts.length }, () => 0)
-    for (const i of order) {
-      const left = Math.min(Math.max(xs(evts[i].d), 0), iw - (chip_w[i] ?? 80))
-      let slot = 0
-      while (slot < lane_right.length && left < lane_right[slot] + EV_GAP) slot++
-      lane[i] = slot
-      lane_right[slot] = left + (chip_w[i] ?? 80)
-    }
-    return { lane, lanes: Math.max(1, lane_right.length) }
-  })
-  const mt = $derived(events.length ? 14 + ev_layout.lanes * 22 : 12)
+  // Fixed top band: holds the clustered deploy rail (no more growing chip lanes).
+  const mt = $derived(events.length ? 30 : 12)
   const ih = $derived(height - mt - m.b)
   const ys = $derived(
     scaleLinear()
@@ -94,6 +81,16 @@
       .range([ih, 0])
       .nice(),
   )
+
+  // Cluster deploy markers so a burst collapses to one tick instead of a pile.
+  const EVENT_GAP = 28
+  const event_clusters = $derived(
+    cluster_events({ points: evts.map(e => ({ item: e, x: xs(e.d) })), min_gap: EVENT_GAP }),
+  )
+  const rail_clusters = $derived(
+    event_clusters.map(c => ({ left_pct: ((m.l + c.x) / W) * 100, items: c.items })),
+  )
+
   const line_path = $derived(
     d3line<{ date: Date, value: number }>()
       .x(d => xs(d.date))
@@ -114,13 +111,6 @@
 
   let svg_el: SVGSVGElement
   let hover = $state<{ ix: number, cy: number, raw: string, value: number } | null>(null)
-
-  let hover_note = $state<number | null>(null)
-  let pinned_note = $state<number | null>(null)
-  const active_note = $derived(pinned_note != null ? pinned_note : hover_note)
-  function toggle_note(i: number) {
-    pinned_note = pinned_note === i ? null : i
-  }
 
   function on_move(event: PointerEvent) {
     if (!svg_el || pts.length === 0)
@@ -166,40 +156,17 @@
         <text x={xs(t)} y={ih + 19} text-anchor="middle" font-size="13" fill="var(--color-secondary)">{tick_label(t)}</text>
       {/each}
 
-      {#each evts as e, i (i)}
-        {@const x = xs(e.d)}
-        {@const c = e.color ?? 'var(--color-secondary)'}
-        {@const off = ev_layout.lane[i] * ((chip_h[i] ?? 18) + EV_GAP)}
-        <line x1={x} x2={x} y1={-6 - off} y2={ih} stroke={c} stroke-width="1" stroke-dasharray="3 3" stroke-opacity="0.65" />
-        <foreignObject
-          x={Math.min(Math.max(x, 0), iw - (chip_w[i] ?? 80))}
-          y={-7 - (chip_h[i] ?? 18) - off}
-          width="180"
-          height="44"
-          style="overflow:visible;pointer-events:none">
-          <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-          <div
-            class={e.note ? 'chip has-note' : 'chip'}
-            bind:clientWidth={chip_w[i]}
-            bind:clientHeight={chip_h[i]}
-            style:color={c}
-            role={e.note ? 'button' : undefined}
-            tabindex={e.note ? 0 : undefined}
-            onpointerenter={e.note ? () => (hover_note = i) : undefined}
-            onpointerleave={e.note ? () => (hover_note = null) : undefined}
-            onclick={e.note ? () => toggle_note(i) : undefined}
-            onkeydown={e.note
-              ? (ev) => {
-                if (ev.key === 'Enter' || ev.key === ' ') {
-                  ev.preventDefault()
-                  toggle_note(i)
-                }
-              }
-              : undefined}>
-            <span>{e.label}</span>
-            {#if e.note}<span class="chip-q">?</span>{/if}
-          </div>
-        </foreignObject>
+      {#each event_clusters as cluster, i (i)}
+        {@const current = cluster.items.some(it => it.current)}
+        <line
+          x1={cluster.x}
+          x2={cluster.x}
+          y1={6 - mt}
+          y2={ih}
+          stroke={current ? 'var(--primary)' : 'var(--color-secondary)'}
+          stroke-width="1"
+          stroke-dasharray="3 3"
+          stroke-opacity={current ? 0.6 : 0.4} />
       {/each}
 
       {#if area_path}<path d={area_path} fill={color} fill-opacity="0.12" />{/if}
@@ -215,6 +182,10 @@
     </g>
   </svg>
 
+  {#if rail_clusters.length}
+    <EventRail clusters={rail_clusters} icon={event_icon} />
+  {/if}
+
   {#if hover}
     <div class="tip" style:left={`${tip_left}%`} style:top={`${events.length ? 30 : 6}px`} style:transform={tip_shift}>
       <div class="tip-date">{format_point_date(hover.raw)}</div>
@@ -224,82 +195,10 @@
       </div>
     </div>
   {/if}
-
-  {#if active_note != null}
-    {@const e = evts[active_note]}
-    {#if e?.note}
-      {@const nx = ((m.l + xs(e.d)) / W) * 100}
-      <div
-        class="note"
-        style:left={`${nx}%`}
-        style:transform={nx > 62 ? 'translateX(-92%)' : nx < 24 ? 'translateX(-8%)' : 'translateX(-50%)'}>
-        <div class="note-title">{e.note.title}</div>
-        {#each e.note.items as it (it.label)}
-          <div class="note-row">
-            <span class="note-label" style:color={it.color ?? 'var(--color)'}>{it.label}</span><span class="note-text">{it.text}</span>
-          </div>
-        {/each}
-      </div>
-    {/if}
-  {/if}
 </div>
 
 <style>
   .wrap { position: relative; }
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    box-sizing: border-box;
-    width: max-content;
-    max-width: 132px;
-    padding: 2px 8px;
-    font-family: inherit;
-    font-size: 10.5px;
-    line-height: 1.18;
-    border-radius: 9px;
-    border: 1px solid color-mix(in srgb, currentColor 50%, transparent);
-    background: color-mix(in srgb, currentColor 16%, transparent);
-    white-space: normal;
-    overflow-wrap: anywhere;
-    pointer-events: auto;
-  }
-  .chip-q {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: none;
-    width: 13px;
-    height: 13px;
-    border-radius: 50%;
-    font-size: 9px;
-    font-weight: 700;
-    background: color-mix(in srgb, currentColor 25%, transparent);
-  }
-  .chip.has-note { cursor: pointer; }
-  .chip.has-note:hover,
-  .chip.has-note:focus-visible {
-    background: color-mix(in srgb, currentColor 30%, transparent);
-    outline: none;
-  }
-  .note {
-    position: absolute;
-    top: 28px;
-    max-width: 320px;
-    pointer-events: none;
-    background: var(--surface);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-    padding: 0.6rem 0.7rem;
-    font-size: 0.76rem;
-    line-height: 1.38;
-    z-index: 3;
-  }
-  .note-title { font-weight: 800; font-size: 0.84rem; margin-bottom: 0.35rem; }
-  .note-row + .note-row { margin-top: 0.32rem; }
-  .note-label { font-weight: 700; margin-right: 0.4rem; }
-  .note-text { color: var(--color-secondary); }
   .tip {
     position: absolute;
     pointer-events: none;

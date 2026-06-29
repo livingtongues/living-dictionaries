@@ -14,8 +14,9 @@
   import { afterNavigate, beforeNavigate } from '$app/navigation'
   import { navigating, page, updated } from '$app/state'
   import { browser } from '$app/environment'
-  import { init_remote_logging, log_navigation } from '$lib/debug/remote-log'
+  import { init_remote_logging, log_event, log_navigation } from '$lib/debug/remote-log'
   import { init_web_vitals, report_initial_load_when_ready } from '$lib/debug/perf'
+  import { set_missing_translation_handler } from '$lib/i18n'
   import { toast } from '$lib/svelte-pieces/toast.svelte'
 
   interface Props {
@@ -26,6 +27,12 @@
 
   onMount(() => {
     init_remote_logging()
+    // Ship genuinely-missing i18n keys (no English base) to client_logs as an
+    // actionable `warn`. i18n already console.warns for dev, so this only ships —
+    // log_event (not log_warning) avoids a duplicate console line. Deduped per
+    // unique key inside i18n.
+    set_missing_translation_handler(({ key, locale, fallback }) =>
+      log_event({ level: 'warn', message: `i18n missing key: ${key}`, context: { i18n_key: key, locale, fallback: fallback ?? null } }))
     init_web_vitals()
     report_initial_load_when_ready()
   })

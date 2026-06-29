@@ -271,6 +271,25 @@ describe('remote-log buffer + flush', () => {
     expect(forwarded?.level).toBe('error')
   })
 
+  test('log_warning ships at warn level', async () => {
+    const module = await import('./remote-log')
+    module.init_remote_logging()
+    module.log_warning({ message: 'actionable warning', context: { table_name: 'entries' } })
+    await module.flush_now()
+
+    const shipped = find_sent_entry('actionable warning')
+    expect(shipped?.level).toBe('warn')
+  })
+
+  test('a bare console.warn is NOT captured (deliberately not patched)', async () => {
+    const module = await import('./remote-log')
+    module.init_remote_logging()
+    console.warn('uncaptured noise warning')
+    await module.flush_now()
+
+    expect(find_sent_entry('uncaptured noise warning')).toBeUndefined()
+  })
+
   test('caps localStorage buffer at MAX_BUFFER (drops oldest)', async () => {
     const module = await import('./remote-log')
     module.init_remote_logging()
