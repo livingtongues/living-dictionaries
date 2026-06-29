@@ -9,6 +9,7 @@ import type { AdminDirectoryEntry } from '$lib/server/chat/api'
 import type { RoomSummary } from '$lib/server/chat/chat-db'
 import { api_admin_chat_heartbeat } from '$api/admin/chat/heartbeat/_call'
 import { api_admin_chat_rooms } from '$api/admin/chat/rooms/_call'
+import { SYSTEM_USER_ID, SYSTEM_USER_NAME } from './rooms'
 
 const BACKGROUND_POLL_MS = 20_000
 
@@ -39,6 +40,8 @@ class ChatStore {
   }
 
   name_for(user_id: string): string {
+    if (user_id === SYSTEM_USER_ID)
+      return SYSTEM_USER_NAME
     return this.admins.find(admin => admin.user_id === user_id)?.name ?? 'Unknown'
   }
 

@@ -5,7 +5,10 @@ import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { parse_row } from '$lib/db/schemas/json-columns'
 import { log_server_event } from '$lib/server/log-server-event'
-import { send_dictionary_emails } from '$api/email/new_dictionary/dictionary-emails'
+import { send_new_dictionary_creator_email } from '$api/email/new_dictionary/dictionary-emails'
+import { post_system_notification } from '$lib/server/chat/system-notifier'
+import { format_new_dictionary_notification } from '$lib/server/chat/notification-messages'
+import { is_admin } from '$lib/admins'
 import { error, json } from '@sveltejs/kit'
 
 /**
@@ -39,7 +42,7 @@ const MIN_URL_LENGTH = 3
 const ID_PATTERN = /^[a-z0-9-]+$/
 
 export const POST: RequestHandler = async (event) => {
-  const { user_id, email } = await verify_auth(event)
+  const { user_id, email, name: actor_name } = await verify_auth(event)
 
   const body = await event.request.json() as DictionariesCreateRequestBody
 
@@ -112,11 +115,26 @@ export const POST: RequestHandler = async (event) => {
   // (`gloss_languages.join(...)` threw on the unparsed string).
   const saved_dictionary = parse_row('dictionaries', db.prepare('SELECT * FROM dictionaries WHERE id = ?').get(id) as Record<string, unknown>)
   try {
-    await send_dictionary_emails(saved_dictionary as any, email ?? '')
+    await send_new_dictionary_creator_email(saved_dictionary as any, email ?? '')
   } catch (err) {
     console.error(`Dictionary created but emails failed: ${(err as Error).message}`)
     log_server_event({ db, level: 'warn', message: 'dictionary_create_email_failed', error: err, user_id, context: { dictionary_id: id } })
   }
+
+  // Post into the admin Notifications room (+ ping admins by their channel).
+  // An admin creating their own dictionary still logs the event but doesn't
+  // ping the team — they already got their own confirmation email above.
+  void post_system_notification({
+    db,
+    content: format_new_dictionary_notification({
+      dictionary_name: name,
+      dictionary_id: id,
+      actor: actor_name || email || 'Someone',
+      base_url: event.url.origin,
+    }),
+    base_url: event.url.origin,
+    suppress_ping: is_admin(email),
+  }).catch(err => console.error('new-dictionary notification failed:', (err as Error).message))
 
   return json({ id } satisfies DictionariesCreateResponseBody)
 }

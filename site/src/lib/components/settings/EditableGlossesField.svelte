@@ -29,6 +29,7 @@
     .map(e => ({
       bcp: e[0],
       ...e[1],
+      localizedName: $page.data.t({ dynamicKey: `gl.${e[0]}`, fallback: e[0] }),
     }))
     .filter(e => !selectedLanguages.includes(e.bcp)))
 </script>
