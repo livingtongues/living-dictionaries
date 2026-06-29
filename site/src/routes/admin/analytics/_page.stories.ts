@@ -63,17 +63,26 @@ const analytics: LogAnalytics = {
   window_days: 30,
   generated_at: '2026-06-23T13:04:00.000Z',
   daily: build_daily(30),
+  // A realistic deploy burst — two spread + six across the last two days — so the
+  // clustered rail (vs the old pileup) is exercised on the page.
   deploys: [
-    { day: '2026-06-21', version: '1782200000000', first_seen: '2026-06-21T09:14:00.000Z', sessions: 88 },
-    { day: '2026-06-26', version: '1782464965691', first_seen: '2026-06-26T01:05:00.000Z', sessions: 44 },
+    { day: '2026-06-12', version: '1782010000000', first_seen: '2026-06-12T09:14:00.000Z', sessions: 70 },
+    { day: '2026-06-19', version: '1782090000000', first_seen: '2026-06-19T14:31:00.000Z', sessions: 95 },
+    { day: '2026-06-22', version: '1782180000000', first_seen: '2026-06-22T01:18:00.000Z', sessions: 40 },
+    { day: '2026-06-22', version: '1782182000000', first_seen: '2026-06-22T02:51:00.000Z', sessions: 38 },
+    { day: '2026-06-22', version: '1782184000000', first_seen: '2026-06-22T03:44:00.000Z', sessions: 30 },
+    { day: '2026-06-23', version: '1782270000000', first_seen: '2026-06-23T05:45:00.000Z', sessions: 25 },
+    { day: '2026-06-23', version: '1782290000000', first_seen: '2026-06-23T08:55:00.000Z', sessions: 20 },
+    { day: '2026-06-23', version: '1782300000000', first_seen: '2026-06-23T11:20:00.000Z', sessions: 18 },
   ],
   performance: build_perf(30),
+  // Mirrors the production screenshot: LCP/INP/CLS green, FCP/TTFB amber.
   web_vitals: [
-    { metric: 'LCP', count: 142, p50: 1820, p75: 2410, p95: 3900 },
-    { metric: 'INP', count: 88, p50: 110, p75: 180, p95: 420 },
-    { metric: 'CLS', count: 142, p50: 0.02, p75: 0.06, p95: 0.21 },
-    { metric: 'FCP', count: 156, p50: 1120, p75: 1680, p95: 2700 },
-    { metric: 'TTFB', count: 156, p50: 320, p75: 540, p95: 1190 },
+    { metric: 'LCP', count: 316, p50: 984, p75: 2100, p95: 8800 },
+    { metric: 'INP', count: 216, p50: 48, p75: 88, p95: 248 },
+    { metric: 'CLS', count: 218, p50: 0.001, p75: 0.012, p95: 0.262 },
+    { metric: 'FCP', count: 406, p50: 852, p75: 1840, p95: 4200 },
+    { metric: 'TTFB', count: 561, p50: 451, p75: 860, p95: 2300 },
   ],
   totals: { sessions: 188, errors: 24, logs: 2417, unique_users: 73 },
   top_routes: [

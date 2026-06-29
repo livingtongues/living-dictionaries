@@ -1,4 +1,5 @@
 import type { PageLoad } from './$types'
+import { goto } from '$app/navigation'
 import { pruneObject } from '$lib/helpers/prune'
 import { api_dictionaries_create } from '$api/dictionaries/create/_call'
 import type { DictionariesCreateRequestBody } from '$api/dictionaries/create/+server'
@@ -14,7 +15,7 @@ export const load = (({ parent }) => {
   }
 
   async function create_dictionary(dictionary: DictionariesCreateRequestBody) {
-    const { t, ssr_user } = await parent()
+    const { t, ssr_user, dict_roles } = await parent()
     if (!ssr_user) return alert('Please login first') // this should never fire as should be caught in page
 
     if (dictionary.id.length < MIN_URL_LENGTH) {
@@ -34,7 +35,22 @@ export const load = (({ parent }) => {
       if (error || !data)
         throw new Error(error?.message || 'Could not create dictionary')
 
-      window.location.replace(`/${data.id}/entries`)
+      // The creating user is now this dictionary's manager. A warm dict_roles
+      // cache won't include the fresh grant (refresh_if_stale skips a <1h-old
+      // cache), so refresh it BEFORE navigating — otherwise the [dictionaryId]
+      // layout computes can_edit=false and opens the dict pull-only (the new
+      // manager couldn't add entries until a later refresh).
+      await dict_roles.refresh()
+
+      // Soft client-side navigation (was window.location.replace) keeps the
+      // local-first runtime alive — the per-dict leader worker, sync engine, and
+      // continuous log session — instead of a full page reboot. The brand-new
+      // dict has no R2 snapshot yet; dict-instance boot treats that as non-fatal
+      // (empty OPFS DB, sync backfills) and the server dictionaries/<id>.db is
+      // created on demand on the first editor snapshot/changes request.
+      // invalidateAll re-runs the layout loads so the new catalog row + role take
+      // effect; replaceState so Back doesn't return to this form.
+      await goto(`/${data.id}/entries`, { invalidateAll: true, replaceState: true })
     } catch (err) {
       alert(`${t('misc.error')}: ${err}`)
     }

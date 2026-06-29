@@ -13,6 +13,7 @@ import type {
 } from './types'
 import { parse_row, stringify_row } from '$lib/db/schemas/json-columns'
 import { is_syncable_table } from '$lib/db/sync/types'
+import { log_warning } from '$lib/debug/remote-log'
 import { TableChangeNotifier } from './notifier'
 import { TableStore } from './table-store.svelte.js'
 
@@ -197,7 +198,7 @@ class LiveDbImpl {
       const keys = primary_keys_for(table_name)
       for (const k of keys) {
         if (row[k] === undefined || row[k] === null) {
-          console.warn(`LiveDb save: row missing primary key "${k}"`)
+          log_warning({ message: `LiveDb save: row missing primary key "${k}"`, context: { table_name } })
           return
         }
       }
@@ -251,7 +252,7 @@ class LiveDbImpl {
       const keys = primary_keys_for(table_name)
       for (const k of keys) {
         if (row[k] === undefined || row[k] === null) {
-          console.warn(`LiveDb reset: row missing primary key "${k}"`)
+          log_warning({ message: `LiveDb reset: row missing primary key "${k}"`, context: { table_name } })
           return
         }
       }

@@ -8,6 +8,7 @@ import { compute_retry_decision, log_live_query_failed, log_live_query_recovered
 import { reconcile_rows } from '$lib/db/client/live/reconcile-rows'
 import { DICT_JSON_COLUMNS, parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
+import { log_warning } from '$lib/debug/remote-log'
 import { tick } from 'svelte'
 
 /**
@@ -496,7 +497,7 @@ class DictLiveDbImpl {
   #save_cb(table: string) {
     return async (row: Record<string, unknown>) => {
       if (!row.id) {
-        console.warn('DictLiveDb save: row missing id')
+        log_warning({ message: 'DictLiveDb save: row missing id', context: { table } })
         return
       }
       // Skip columns that should never be hand-set on save:

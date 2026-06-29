@@ -11,7 +11,12 @@ import { detect_db_capabilities, resolve_db_tier } from '$lib/db/dict-client/wor
  *  1. `window.error`                  — uncaught synchronous errors
  *  2. `window.unhandledrejection`     — uncaught rejected promises
  *  3. `console.error`                 — explicit error logging in app code
- *  4. `log_event(...)`                — explicit calls (info / warn / crash)
+ *  4. `log_event(...)` / `log_warning(...)` — explicit calls (info / warn / crash)
+ *
+ * NOTE: `console.warn` is deliberately NOT patched. Most browser warnings are
+ * operational / 3rd-party noise (sync retries, snapshot-fail on every new dict,
+ * deprecations, private-mode localStorage). Shipping a warning to telemetry is an
+ * explicit, curated decision — call `log_warning(...)` for the ones we can action.
  *
  * Buffers in localStorage (so an offline client doesn't lose logs),
  * flushes every FLUSH_INTERVAL_MS, and on `pagehide` / `visibilitychange:hidden`
@@ -372,6 +377,18 @@ function describe_click_target(target: EventTarget | null): string | null {
 /** Explicit logging — preferred over `console.error` when wired intentionally. */
 export function log_event(entry: ClientLogPayload): void {
   push(entry)
+}
+
+/**
+ * Ship an ACTIONABLE warning to `client_logs` at `warn` level — the deliberate,
+ * curated alternative to a bare `console.warn` (which is intentionally NOT
+ * auto-captured; see the header note). Use this only for warnings WE can act on
+ * (data-integrity, missing-key, etc.), not operational/3rd-party churn. Mirrors to
+ * the dev `console.warn` so local debugging is unchanged.
+ */
+export function log_warning({ message, context }: { message: string, context?: Record<string, unknown> }): void {
+  console.warn(message, context ?? '')
+  push({ level: 'warn', message, context: context ?? null })
 }
 
 /**
