@@ -1,8 +1,13 @@
 import type Database from 'better-sqlite3'
 import type { RequestGeo } from '$lib/server/geo-from-request'
+import { mkdtempSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import process from 'node:process'
 import { insert_client_log } from '$lib/server/insert-client-log'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { get_log_analytics } from './log-analytics'
+import { _reset_log_archive_db_for_tests } from './log-archive-db'
 import { open_shared_db } from './shared-db'
 
 let db: Database.Database
@@ -280,5 +285,793 @@ describe(get_log_analytics, () => {
     const cold = analytics.daily.find(point => point.day === '2026-06-05')
     expect(cold).toEqual({ day: '2026-06-05', sessions: 7, users: 0, errors: 3, logs: 42 })
     expect(analytics.totals.logs).toBe(42)
+  })
+
+  // Whole-object drift guard for the section-builder refactor (kept parallel with
+  // tutor): seed a fixture that touches EVERY section, then pin the FULL
+  // LogAnalytics object so any change a field-specific test doesn't watch is
+  // caught. `archived_rows` reads a real file via get_log_archive_db(), so point
+  // DATA_DIR at a fresh temp dir (→ empty archive → deterministic 0).
+  test('full-object output snapshot (refactor drift guard)', () => {
+    const MAC_SAFARI = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15'
+    const OLD_SAFARI = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Safari/605.1.15'
+    const GOOGLEBOT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+    const base = 'https://new.livingdictionaries.app'
+    const la: RequestGeo = { country: 'US', region: 'CA', city: 'Los Angeles', latitude: 34.05, longitude: -118.24 }
+    const ny: RequestGeo = { country: 'US', region: 'NY', city: 'New York', latitude: 40.71, longitude: -74.01 }
+    // Direct insert for app_version-bearing rows (the leaner add_log doesn't forward it).
+    const add_versioned = ({ day, message, level = 'info', app_version, context, user_agent }: { day: string, message: string, level?: 'error' | 'info', app_version: string, context?: Record<string, unknown>, user_agent?: string }) =>
+      insert_client_log({ payload: { level, message, context: context ?? null, app_version, user_agent: user_agent ?? null }, user_id: null, source: 'client', db, now: new Date(`${day}T10:00:00.000Z`) })
+
+    const prev_data_dir = process.env.DATA_DIR
+    process.env.DATA_DIR = mkdtempSync(join(tmpdir(), 'log-analytics-snap-'))
+    _reset_log_archive_db_for_tests()
+    try {
+      // Usage: human sessions w/ geo + db_tier, a bot, a webdriver automation session.
+      add_log({ day: '2026-06-30', message: 'session_start', user_id: 'u1', context: { session_id: 's1', db_tier: 'opfs-worker', webdriver: false }, user_agent: MAC_SAFARI, geo: la })
+      add_log({ day: '2026-06-30', message: 'session_start', user_id: 'u2', context: { session_id: 's2', webdriver: false }, user_agent: OLD_SAFARI, geo: ny })
+      add_log({ day: '2026-06-29', message: 'session_start', user_id: 'u3', context: { session_id: 's3', webdriver: false }, user_agent: MAC_SAFARI, geo: la })
+      add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 'b1', webdriver: false }, user_agent: GOOGLEBOT })
+      add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 'wd1', webdriver: true }, user_agent: MAC_SAFARI })
+      add_log({ day: '2026-06-30', message: 'search_performed', context: { session_id: 'wd1', webdriver: true }, user_agent: MAC_SAFARI })
+
+      // Events + routes (info rows, infra excluded).
+      add_log({ day: '2026-06-30', message: 'search_performed', user_id: 'u1', context: { session_id: 's1', webdriver: false } })
+      add_log({ day: '2026-06-30', message: 'search_performed', user_id: 'u2', context: { session_id: 's2', webdriver: false } })
+      add_log({ day: '2026-06-30', message: 'entry_opened', user_id: 'u1', context: { session_id: 's1', webdriver: false } })
+      add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's1', to: '/dictionaries', webdriver: false } })
+      add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's1', to: '/my-dict/entries/abc', webdriver: false } })
+
+      // Errors: a real crash (clustered), a known-noise class, an expected-4xx; client + server.
+      for (let i = 0; i < 3; i++)
+        add_log({ day: '2026-06-30', level: 'crash', message: 'boom', user_id: 'u1', context: { session_id: 's1', webdriver: false } })
+      for (let i = 0; i < 5; i++)
+        add_log({ day: '2026-06-30', level: 'error', message: '[post_request] Network error for /api/log', context: { webdriver: false } })
+      add_log({ day: '2026-06-30', level: 'error', message: 'Not found: /api/entries/abc', context: { webdriver: false } })
+      add_log({ day: '2026-06-30', level: 'error', message: 'server-err', source: 'server' })
+
+      // Build versions: deploys (human session_start w/ app_version) + errors_by_version.
+      add_versioned({ day: '2026-06-29', message: 'session_start', app_version: '1717000000000', context: { session_id: 's3', webdriver: false }, user_agent: MAC_SAFARI })
+      add_versioned({ day: '2026-06-30', message: 'session_start', app_version: 'v-cur', context: { session_id: 's1', webdriver: false }, user_agent: MAC_SAFARI })
+      add_versioned({ day: '2026-06-30', level: 'error', message: 'versioned-boom', app_version: 'v-cur', context: { webdriver: false } })
+      add_versioned({ day: '2026-06-30', level: 'error', message: 'stale-boom', app_version: 'v-old', context: { webdriver: false } })
+
+      // Performance: page_load (per-route grouping via url), an extra metric, web_vital, ttfb.
+      insert_client_log({ payload: { level: 'info', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms: 500, ttfb: 60 }, url: `${base}/about` }, user_id: null, source: 'client', db, now: new Date('2026-06-30T10:00:00.000Z') })
+      insert_client_log({ payload: { level: 'info', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms: 1400, ttfb: 220 }, url: `${base}/my-dict/entries/abc` }, user_id: null, source: 'client', db, now: new Date('2026-06-30T10:00:00.000Z') })
+      add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'viewer_boot', duration_ms: 1234, webdriver: false } })
+      for (const value of [1000, 1500, 2000, 2500, 3000])
+        add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'web_vital', metric: 'LCP', value, webdriver: false } })
+      // Geo ttfb coords (page_load with country/coords): NY near, LA far from Boston origin.
+      add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's2', name: 'page_load', duration_ms: 800, ttfb: 70 }, geo: ny })
+      add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms: 1500, ttfb: 240 }, geo: la })
+
+      // Leader-worker DB health: timeouts paired with recoveries + a real failure.
+      add_log({ day: '2026-06-30', message: 'live_query_timeout', context: { session_id: 's1' } })
+      add_log({ day: '2026-06-30', message: 'live_query_recovered', context: { session_id: 's1' } })
+      add_log({ day: '2026-06-30', level: 'error', message: 'live_query_failed', context: { session_id: 's1', had_leader: 0, source: 'viewer' } })
+
+      // A cold (archived) day with only rollup rows, incl a geo bucket + an event.
+      db.prepare(`INSERT INTO log_daily_metrics (day, metric, source, value) VALUES ('2026-06-05', 'logs', 'client', 42), ('2026-06-05', 'sessions', 'client', 7), ('2026-06-05', 'errors', 'client', 3), ('2026-06-05', 'geo:US-CA', 'client', 5), ('2026-06-05', 'event:search_performed', 'client', 9), ('2026-06-05', 'nav:about', 'client', 4)`).run()
+
+      const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW, current_app_version: 'v-cur' })
+      expect(analytics).toMatchInlineSnapshot(`
+        {
+          "audience": "humans",
+          "by_source": [
+            {
+              "errors": 15,
+              "logs": 76,
+              "source": "client",
+            },
+            {
+              "errors": 1,
+              "logs": 1,
+              "source": "server",
+            },
+          ],
+          "capability": {
+            "below_capability_sessions": 1,
+            "bot_sessions": 2,
+            "browsers": [
+              {
+                "browser": "Safari",
+                "sessions": 3,
+              },
+            ],
+            "db_tiers": [
+              {
+                "sessions": 1,
+                "tier": "opfs-worker",
+              },
+            ],
+            "devices": [
+              {
+                "device": "desktop",
+                "sessions": 3,
+              },
+            ],
+            "os": [
+              {
+                "os": "macOS",
+                "sessions": 3,
+                "versions": [
+                  {
+                    "sessions": 3,
+                    "version": "10.15",
+                  },
+                ],
+              },
+            ],
+            "total_sessions": 3,
+          },
+          "daily": [
+            {
+              "day": "2026-06-01",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-02",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-03",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-04",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-05",
+              "errors": 3,
+              "logs": 42,
+              "sessions": 7,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-06",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-07",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-08",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-09",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-10",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-11",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-12",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-13",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-14",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-15",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-16",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-17",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-18",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-19",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-20",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-21",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-22",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-23",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-24",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-25",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-26",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-27",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-28",
+              "errors": 0,
+              "logs": 0,
+              "sessions": 0,
+              "users": 0,
+            },
+            {
+              "day": "2026-06-29",
+              "errors": 0,
+              "logs": 2,
+              "sessions": 1,
+              "users": 1,
+            },
+            {
+              "day": "2026-06-30",
+              "errors": 13,
+              "logs": 33,
+              "sessions": 2,
+              "users": 2,
+            },
+          ],
+          "deploys": [
+            {
+              "day": "2026-06-29",
+              "first_seen": "2026-06-29T10:00:00.000Z",
+              "sessions": 1,
+              "version": "1717000000000",
+            },
+            {
+              "day": "2026-06-30",
+              "first_seen": "2026-06-30T10:00:00.000Z",
+              "sessions": 1,
+              "version": "v-cur",
+            },
+            {
+              "day": "2026-06-30",
+              "first_seen": "2026-06-30T10:00:00.000Z",
+              "sessions": 0,
+              "version": "v-old",
+            },
+          ],
+          "error_clusters": [
+            {
+              "count": 3,
+              "first_seen": "2026-06-30T10:00:00.000Z",
+              "is_noise": false,
+              "last_seen": "2026-06-30T10:00:00.000Z",
+              "level": "crash",
+              "message": "boom",
+              "platforms": "web",
+              "sources": "client",
+              "stack_head": "",
+              "users": 1,
+            },
+            {
+              "count": 1,
+              "first_seen": "2026-06-30T10:00:00.000Z",
+              "is_noise": false,
+              "last_seen": "2026-06-30T10:00:00.000Z",
+              "level": "error",
+              "message": "versioned-boom",
+              "platforms": "web",
+              "sources": "client",
+              "stack_head": "",
+              "users": 0,
+            },
+            {
+              "count": 1,
+              "first_seen": "2026-06-30T10:00:00.000Z",
+              "is_noise": false,
+              "last_seen": "2026-06-30T10:00:00.000Z",
+              "level": "error",
+              "message": "stale-boom",
+              "platforms": "web",
+              "sources": "client",
+              "stack_head": "",
+              "users": 0,
+            },
+            {
+              "count": 1,
+              "first_seen": "2026-06-30T10:00:00.000Z",
+              "is_noise": false,
+              "last_seen": "2026-06-30T10:00:00.000Z",
+              "level": "error",
+              "message": "server-err",
+              "platforms": "web",
+              "sources": "server",
+              "stack_head": "",
+              "users": 0,
+            },
+            {
+              "count": 1,
+              "first_seen": "2026-06-30T10:00:00.000Z",
+              "is_noise": false,
+              "last_seen": "2026-06-30T10:00:00.000Z",
+              "level": "error",
+              "message": "live_query_failed",
+              "platforms": "web",
+              "sources": "client",
+              "stack_head": "",
+              "users": 0,
+            },
+            {
+              "count": 5,
+              "first_seen": "2026-06-30T10:00:00.000Z",
+              "is_noise": true,
+              "last_seen": "2026-06-30T10:00:00.000Z",
+              "level": "error",
+              "message": "[post_request] Network error for /api/log",
+              "platforms": "web",
+              "sources": "client",
+              "stack_head": "",
+              "users": 0,
+            },
+            {
+              "count": 1,
+              "first_seen": "2026-06-30T10:00:00.000Z",
+              "is_noise": true,
+              "last_seen": "2026-06-30T10:00:00.000Z",
+              "level": "error",
+              "message": "Not found: /api/entries/abc",
+              "platforms": "web",
+              "sources": "client",
+              "stack_head": "",
+              "users": 0,
+            },
+          ],
+          "errors_by_version": {
+            "current": 1,
+            "current_version": "v-cur",
+            "stale": 12,
+            "stale_pct": 0.9230769230769231,
+            "total": 13,
+            "versions": [
+              {
+                "errors": 11,
+                "is_current": false,
+                "version": null,
+              },
+              {
+                "errors": 1,
+                "is_current": true,
+                "version": "v-cur",
+              },
+              {
+                "errors": 1,
+                "is_current": false,
+                "version": "v-old",
+              },
+            ],
+          },
+          "event_coverage": {
+            "events": [
+              {
+                "count": 11,
+                "event": "search_performed",
+                "seen": true,
+              },
+              {
+                "count": 0,
+                "event": "dictionary_opened",
+                "seen": false,
+              },
+              {
+                "count": 1,
+                "event": "entry_opened",
+                "seen": true,
+              },
+              {
+                "count": 0,
+                "event": "audio_played",
+                "seen": false,
+              },
+            ],
+            "never_emitted": 2,
+          },
+          "generated_at": "2026-06-30T12:00:00.000Z",
+          "geo": {
+            "areas": [
+              {
+                "country": "US",
+                "key": "US-CA",
+                "sessions": 7,
+              },
+              {
+                "country": "US",
+                "key": "US-NY",
+                "sessions": 1,
+              },
+            ],
+            "located_sessions": 8,
+            "ttfb_by_country": [
+              {
+                "count": 2,
+                "label": "US",
+                "p50": 70,
+                "p95": 240,
+              },
+            ],
+            "ttfb_by_distance": [
+              {
+                "count": 1,
+                "label": "< 500 km",
+                "p50": 70,
+                "p95": 70,
+              },
+              {
+                "count": 1,
+                "label": "2,000–5,000 km",
+                "p50": 240,
+                "p95": 240,
+              },
+            ],
+          },
+          "leader_health": {
+            "failed": 1,
+            "failed_by_source": [
+              {
+                "count": 1,
+                "source": "viewer",
+              },
+            ],
+            "failed_no_leader": 1,
+            "recovered": 1,
+            "timeouts": 1,
+          },
+          "performance": {
+            "by_route": [
+              {
+                "count": 1,
+                "max": 1400,
+                "p50": 1400,
+                "p95": 1400,
+                "route": "dictionary:entry",
+              },
+              {
+                "count": 1,
+                "max": 500,
+                "p50": 500,
+                "p95": 500,
+                "route": "about",
+              },
+            ],
+            "daily": [
+              {
+                "day": "2026-06-01",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-02",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-03",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-04",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-05",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-06",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-07",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-08",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-09",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-10",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-11",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-12",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-13",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-14",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-15",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-16",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-17",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-18",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-19",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-20",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-21",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-22",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-23",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-24",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-25",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-26",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-27",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-28",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-29",
+                "metrics": {},
+              },
+              {
+                "day": "2026-06-30",
+                "metrics": {
+                  "page_load": {
+                    "count": 4,
+                    "p50": 800,
+                    "p95": 1500,
+                  },
+                  "viewer_boot": {
+                    "count": 1,
+                    "p50": 1234,
+                    "p95": 1234,
+                  },
+                },
+              },
+            ],
+            "summary": [
+              {
+                "count": 4,
+                "max": 1500,
+                "name": "page_load",
+                "p50": 800,
+                "p90": 1500,
+                "p95": 1500,
+                "slowest": {
+                  "duration_ms": 1500,
+                  "route": "?",
+                },
+              },
+              {
+                "count": 0,
+                "max": null,
+                "name": "search",
+                "p50": null,
+                "p90": null,
+                "p95": null,
+                "slowest": null,
+              },
+              {
+                "count": 1,
+                "max": 1234,
+                "name": "viewer_boot",
+                "p50": 1234,
+                "p90": 1234,
+                "p95": 1234,
+                "slowest": {
+                  "duration_ms": 1234,
+                  "route": "?",
+                },
+              },
+            ],
+          },
+          "pipeline": {
+            "archived_rows": 0,
+            "hot_rows": 38,
+            "last_log_at": "2026-06-30T10:00:00.000Z",
+            "last_server_log_at": "2026-06-30T10:00:00.000Z",
+            "last_session_start_at": "2026-06-30T10:00:00.000Z",
+            "retention_ran_at": null,
+          },
+          "top_events": [
+            {
+              "count": 11,
+              "event": "search_performed",
+            },
+            {
+              "count": 1,
+              "event": "entry_opened",
+            },
+            {
+              "count": 1,
+              "event": "live_query_recovered",
+            },
+            {
+              "count": 1,
+              "event": "live_query_timeout",
+            },
+          ],
+          "top_routes": [
+            {
+              "count": 4,
+              "route": "about",
+            },
+            {
+              "count": 1,
+              "route": "dictionaries",
+            },
+            {
+              "count": 1,
+              "route": "dictionary:entry",
+            },
+          ],
+          "totals": {
+            "errors": 16,
+            "logs": 77,
+            "sessions": 10,
+            "unique_users": 3,
+          },
+          "web_vitals": [
+            {
+              "count": 5,
+              "metric": "LCP",
+              "p50": 2000,
+              "p75": 2500,
+              "p95": 3000,
+            },
+          ],
+          "window_days": 30,
+        }
+      `)
+    } finally {
+      _reset_log_archive_db_for_tests()
+      if (prev_data_dir === undefined)
+        delete process.env.DATA_DIR
+      else
+        process.env.DATA_DIR = prev_data_dir
+    }
   })
 })
