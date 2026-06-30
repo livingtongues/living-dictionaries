@@ -273,6 +273,38 @@ export function merge_dict_row({ db, table_name, row, user_id, at, api_key_id }:
   }
 }
 
+/**
+ * Hard-delete ONE row via a `deletes` tombstone — the write-side mirror of
+ * `merge_dict_row`. Inserting the tombstone fires `process_delete_cascade`
+ * (DELETEs the row; FK `ON DELETE CASCADE` sweeps its children/junctions) and
+ * bumps `last_modified_at`, exactly like an editor delete, so peers converge via
+ * `/changes`. Returns a `delete` HistoryEvent to record (when `at` is given), or
+ * `{ deleted: false }` when the row was already gone. Capture the before-image +
+ * owners BEFORE the tombstone (the row is gone right after).
+ */
+export function delete_dict_row({ db, table_name, id, user_id, at, api_key_id }: {
+  db: Database.Database
+  table_name: DictSyncableTable
+  id: string
+  user_id: string
+  /** History timestamp; when set, returns a HistoryEvent to record. */
+  at?: string
+  /** Acting agent's API key id (v1 API key path); null/omitted for human edits. */
+  api_key_id?: string | null
+}): { deleted: boolean, event: HistoryEvent | null } {
+  const image = db.prepare(`SELECT * FROM "${table_name}" WHERE id = ?`).get(id) as Record<string, unknown> | undefined
+  if (!image)
+    return { deleted: false, event: null }
+  const owners = resolve_owners(db, table_name, image)
+  db.prepare(
+    `INSERT OR REPLACE INTO deletes (table_name, id, updated_at) VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+  ).run(table_name, id)
+  const event: HistoryEvent | null = at
+    ? { table_name, row_id: id, op: 'delete', user_id, at, snapshot: build_snapshot(table_name, image), delta: null, api_key_id: api_key_id ?? null, owners }
+    : null
+  return { deleted: true, event }
+}
+
 /** Strip the `.sql` extension for tolerant comparison of migration names. */
 export function strip_sql_ext(name: string): string {
   return name.replace(/\.sql$/, '')

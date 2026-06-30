@@ -88,6 +88,15 @@ export interface EntryPatch {
   senses?: SensePatch[]
 }
 
+/**
+ * Field-merge an existing example sentence (`PATCH …/sentences/{id}`). Provided
+ * fields overwrite (string → `{ default: … }`); omitted ones stay.
+ */
+export interface SentencePatch {
+  text?: MultiString | string
+  translation?: MultiString | string
+}
+
 export interface EntryWriteResult {
   external_id?: string
   status: 'created' | 'updated' | 'failed'

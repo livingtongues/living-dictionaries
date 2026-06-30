@@ -40,12 +40,32 @@ export const GET: RequestHandler = (event) => {
 
   <h2>Import workflow</h2>
   <ol>
-    <li><code>GET /api/v1/dictionaries/&lt;id&gt;</code> → read <code>gloss_languages</code> (which locale codes to key glosses by).</li>
+    <li><code>GET /api/v1/dictionaries/&lt;id&gt;</code> → read <code>gloss_languages</code> (which locale codes to key glosses by). <span class="muted">Don't trust <code>entry_count</code> to verify an import — it's eventually-consistent and lags; paginate <code>/entries</code> for a live count.</span></li>
     <li>Optionally <code>GET …/entries?elicitation_id=…</code> to dedupe before creating.</li>
     <li><code>POST …/entries</code> with <code>{ entries: [...], import_id }</code> in batches of ≤1000; read the per-item <code>results</code>.</li>
-    <li>Spot-check with <code>GET …/entries/&lt;entryId&gt;</code>.</li>
+    <li>Spot-check with <code>GET …/entries/&lt;entryId&gt;</code>. <span class="muted">Read shape ≠ write shape: top-level scalars come back under <code>entry.main</code>, and <code>example_sentences</code> come back as <code>sentences</code>.</span></li>
   </ol>
   <p>Multilingual fields take a plain string or a <code>{ locale: text }</code> map; use <code>default</code> for the vernacular and gloss-language codes for glosses/translations. Full Unicode/IPA is stored verbatim.</p>
+  <p class="muted">v1 covers entries/senses/example-sentences/speakers/tags/dialects — not media. Any standard HTTP client works; a descriptive <code>User-Agent</code> is good practice.</p>
+
+  <h2>Editing &amp; cleanup</h2>
+  <p>Field-merge a whole entry with <code>PATCH …/entries/&lt;entryId&gt;</code>, or fix ONE row by its id (read ids from <code>GET …/entries/&lt;entryId&gt;</code>):</p>
+  <ul>
+    <li><code>PATCH</code>/<code>DELETE …/sentences/&lt;id&gt;</code> — edit or remove a single example sentence (the OCR-typo fix).</li>
+    <li><code>DELETE …/senses/&lt;id&gt;</code> — remove one sense (not the entry's last).</li>
+    <li><code>PATCH</code>/<code>DELETE …/tags/&lt;id&gt;</code> &amp; <code>…/dialects/&lt;id&gt;</code> — rename (affects every entry) or delete globally.</li>
+    <li><code>DELETE …/entries/&lt;entryId&gt;/tags/&lt;id&gt;</code> (or <code>/dialects/&lt;id&gt;</code>) — unlink one from a single entry, keeping it elsewhere.</li>
+  </ul>
+
+  <h2>Importing from a PDF / scanned dictionary</h2>
+  <p class="muted">Tool-agnostic outline — pick current tools, they change fast.</p>
+  <ol>
+    <li><strong>Pages → images</strong> at ~300 dpi (e.g. PyMuPDF / pdftoppm).</li>
+    <li><strong>OCR with a layout-aware vision-language model</strong> — a document-parsing VLM handles multi-column dictionaries well; pick a current one. For sensitive/endangered-language data, run OCR <strong>locally</strong>. Where glyphs/diacritics look wrong, fall back to inspecting the image directly.</li>
+    <li><strong>Structure</strong> the text into the entry shape: identify headwords (often numbered homographs; in many orthographies short/monosyllabic), separate the vernacular phrase from the gloss, and attach usages as <code>example_sentences</code>.</li>
+    <li><strong>Respect orthography</strong> — validate tokens against the language's spelling rules; never transliterate or "clean up" diacritics. Flag low-confidence OCR as a private tag (e.g. <code>needs-review</code>) instead of inventing data.</li>
+    <li><strong>Import idempotently</strong>: stable <code>elicitation_id</code> per source entry, <code>import_id</code> for the run, batches ≤1000, read per-item <code>results</code>, re-send only failures, dedupe via <code>?elicitation_id=</code> (or paginate <code>/entries</code>). Spot-check with <code>GET …/entries/&lt;entryId&gt;</code>.</li>
+  </ol>
 
   <h2>Quickstart</h2>
   <pre>curl -s ${origin}/api/v1/dictionaries/&lt;DICTIONARY_ID&gt; \\

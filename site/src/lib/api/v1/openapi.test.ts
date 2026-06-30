@@ -1,4 +1,4 @@
-import type { EntryInput, EntryPatch, SenseInput, SentenceInput } from './entry-input'
+import type { EntryInput, EntryPatch, SenseInput, SentenceInput, SentencePatch } from './entry-input'
 import { describe, expect, test } from 'vitest'
 import { build_openapi_spec } from './openapi'
 
@@ -32,6 +32,9 @@ const SENSE_INPUT_KEYS: Record<keyof SenseInput, true> = {
 const SENTENCE_INPUT_KEYS: Record<keyof SentenceInput, true> = {
   text: true, translation: true,
 }
+const SENTENCE_PATCH_KEYS: Record<keyof SentencePatch, true> = {
+  text: true, translation: true,
+}
 const ENTRY_PATCH_KEYS: Record<keyof EntryPatch, true> = {
   lexeme: true, phonetic: true, interlinearization: true, morphology: true, notes: true,
   linguistic_history: true, sources: true, scientific_names: true, elicitation_id: true,
@@ -47,6 +50,7 @@ describe(build_openapi_spec, () => {
     expect(property_keys('EntryInput')).toEqual(expected(ENTRY_INPUT_KEYS))
     expect(property_keys('SenseInput')).toEqual(expected(SENSE_INPUT_KEYS))
     expect(property_keys('SentenceInput')).toEqual(expected(SENTENCE_INPUT_KEYS))
+    expect(property_keys('SentencePatch')).toEqual(expected(SENTENCE_PATCH_KEYS))
     expect(property_keys('EntryPatch')).toEqual(expected(ENTRY_PATCH_KEYS))
   })
 
@@ -69,9 +73,15 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}': ['get'],
       '/api/v1/dictionaries/{id}/entries': ['get', 'post'],
       '/api/v1/dictionaries/{id}/entries/{entryId}': ['delete', 'get', 'patch'],
+      '/api/v1/dictionaries/{id}/entries/{entryId}/tags/{tagId}': ['delete'],
+      '/api/v1/dictionaries/{id}/entries/{entryId}/dialects/{dialectId}': ['delete'],
+      '/api/v1/dictionaries/{id}/sentences/{sentenceId}': ['delete', 'patch'],
+      '/api/v1/dictionaries/{id}/senses/{senseId}': ['delete'],
       '/api/v1/dictionaries/{id}/speakers': ['get', 'post'],
       '/api/v1/dictionaries/{id}/tags': ['get', 'post'],
+      '/api/v1/dictionaries/{id}/tags/{tagId}': ['delete', 'patch'],
       '/api/v1/dictionaries/{id}/dialects': ['get', 'post'],
+      '/api/v1/dictionaries/{id}/dialects/{dialectId}': ['delete', 'patch'],
     })
   })
 

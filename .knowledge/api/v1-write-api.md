@@ -60,6 +60,40 @@ importer's batch-tag idempotency trick). Idempotency is otherwise agent-managed:
 the response returns `external_id → entry_id`, and the list endpoint filters by
 `elicitation_id` for dedupe.
 
+## Surgical edit/delete + unlink endpoints
+
+Beyond the entry-level `PATCH`/`DELETE`, there are dedicated single-row routes so an
+agent can fix ONE OCR typo without re-importing (Jacob approved the **full set**
+2026-06-30): `PATCH`/`DELETE …/sentences/{id}`, `DELETE …/senses/{id}`,
+`PATCH`/`DELETE …/tags/{id}` & `…/dialects/{id}`, and
+`DELETE …/entries/{entryId}/tags/{id}` (+ `/dialects/{id}`) for entry-scoped unlink.
+Flat-by-id URLs were chosen over deep nesting — the ids come straight off the entry
+READ shape (`senses[].id`, `senses[].sentences[].id`, `tags[].id`, `dialects[].id`).
+
+Design decisions (mirror the human path, like the rest of v1):
+- **`delete_dict_row`** (`dictionary-sync-helpers.ts`) is the new write-side sibling of
+  `merge_dict_row`: capture before-image + owners, insert the `deletes` tombstone (fires
+  `process_delete_cascade`), return a `delete` HistoryEvent. `apply_entry_delete` was
+  refactored onto it; `run_tombstone_delete` (`v1-entry-write.ts`) wraps it in the v1
+  txn + history + cursor and is shared by every delete/unlink helper.
+- **Global delete vs. entry-scoped unlink are different rows.** Deleting a tag/dialect
+  tombstones the `tags`/`dialects` row → FK cascade sweeps every `entry_tags`/`entry_dialects`
+  junction (unlinks everywhere). Unlinking from ONE entry tombstones just that JUNCTION row
+  (the tag/dialect survives). Tag rename + dialect rename guard against name collisions
+  (reuse `name_key` + `list_tags`/`list_dialects`).
+- **Sense delete refuses an entry's LAST sense** (throws → 400 "delete the entry instead")
+  so an entry always keeps ≥1 sense, matching the UI's new-entry shape.
+- Sentence PATCH echoes back the updated sentence (`{ sentence }`); tag/dialect PATCH echo
+  `{ tag }`/`{ dialect }` — friendlier than a second GET for the agent to verify its edit.
+
+## `entry_count` is intentionally NOT maintained on write
+
+After a bulk import `GET /dictionaries/{id}.entry_count` lags (it's eventually-consistent).
+We **decided NOT to update it eagerly** (Jacob, 2026-06-30): editors get live counts from
+the dictionary's **search-tool totals**, so an eager counter would be redundant work on the
+hot write path. Docs tell agents to paginate `/entries` for a live count instead. Don't
+re-propose maintaining `entry_count`.
+
 ## Gotchas worth keeping
 
 - **`+server.ts` may only export HTTP-method handlers** (+ `_`-prefixed). A non-handler
@@ -67,11 +101,12 @@ the response returns `external_id → entry_id`, and the list endpoint filters b
   request time — invisible to unit tests (they import handlers directly) and to
   `lint`/`check`. Always live-smoke a new endpoint over HTTP. Put shared constants in a
   lib module, not the route file. (Type/interface exports are fine — erased.)
-- **Entry delete leaves standalone sentences.** The `deletes` tombstone → cascade
-  removes the entry, its senses, and the `senses_in_sentences` junction (FK ON DELETE
-  CASCADE), but `sentences` rows have no FK to a sense, so they survive (they can
-  belong to a text / other senses). This matches the existing human-delete behavior —
-  don't "fix" it without deciding orphan policy globally.
+- **Entry/sense delete leaves standalone sentences.** The `deletes` tombstone → cascade
+  removes the entry/sense and the `senses_in_sentences` junction (FK ON DELETE CASCADE),
+  but `sentences` rows have no FK to a sense, so they survive (they can belong to a text /
+  other senses). This matches the existing human-delete behavior — don't "fix" it without
+  deciding orphan policy globally. (To delete the sentence itself, use `DELETE …/sentences/{id}`,
+  which tombstones the `sentences` row and cascades ITS junctions.)
 - Reads (`GET …`) are key/session gated at `contributor`; writes at `editor`.
   Read endpoints pass `admin_level: 1` to `build_entry_data` so a dict-scoped caller
   sees their own private content (incl. the private import tag).
@@ -83,7 +118,12 @@ the response returns `external_id → entry_id`, and the list endpoint filters b
   `$lib/components/settings/ApiKeys.svelte`.
 - Auth gate: `$lib/auth/verify-dict-api-access.ts`.
 - Write engine: `$lib/db/server/v1-entry-write.ts` (`apply_entry_writes` /
-  `apply_entry_update` / `apply_entry_delete`) + `v1-sub-resources.ts`.
+  `apply_entry_update` / `apply_entry_delete` / `apply_sentence_update` /
+  `apply_sentence_delete` / `apply_sense_delete` / `run_tombstone_delete`) +
+  `v1-sub-resources.ts` (`apply_tag_update`/`apply_tag_delete`/`apply_dialect_update`/
+  `apply_dialect_delete`/`unlink_entry_tag`/`unlink_entry_dialect`). Tombstone primitive:
+  `delete_dict_row` in `dictionary-sync-helpers.ts`.
 - Input shapes/helpers: `$lib/api/v1/entry-input.ts`. Spec: `$lib/api/v1/openapi.ts`.
-- Routes: `routes/api/v1/**` (entries CRUD, speakers/tags/dialects, dict meta,
-  `openapi.json`, landing).
+- Routes: `routes/api/v1/**` (entries CRUD + `…/sentences/{id}`, `…/senses/{id}`,
+  `…/tags/{id}`, `…/dialects/{id}`, `…/entries/{entryId}/tags|dialects/{id}`,
+  speakers/tags/dialects collections, dict meta, `openapi.json`, landing).

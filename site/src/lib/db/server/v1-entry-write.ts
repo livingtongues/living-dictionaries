@@ -1,14 +1,13 @@
 import type Database from 'better-sqlite3'
 import type { HistoryEvent } from './dictionary-history-db'
 import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
-import type { EntriesWriteResponseBody, EntryInput, EntryPatch, EntryWriteResult, SenseInput, SentenceInput } from '$lib/api/v1/entry-input'
+import type { EntriesWriteResponseBody, EntryInput, EntryPatch, EntryWriteResult, SenseInput, SentenceInput, SentencePatch } from '$lib/api/v1/entry-input'
 import type { MultiString } from '$lib/types'
 import { to_multistring, to_string_array } from '$lib/api/v1/entry-input'
 import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { read_last_modified_at } from './dictionary-db'
-import { build_snapshot, resolve_owners } from './dictionary-history-capture'
 import { record_history } from './dictionary-history-db'
-import { merge_dict_row } from './dictionary-sync-helpers'
+import { delete_dict_row, merge_dict_row } from './dictionary-sync-helpers'
 
 /**
  * Server-side bulk write for the `/api/v1` entries API.
@@ -487,7 +486,51 @@ export function apply_entry_update({ db, history_db, entry_id, patch, user_id, a
   }
 }
 
-// ── Delete ──────────────────────────────────────────────────────────────────
+// ── Delete (shared tombstone runner) ──────────────────────────────────────────
+
+export interface SingleWriteResult {
+  found: boolean
+  new_synced_up_to: string | null
+}
+
+/**
+ * Tombstone-delete ONE row in its own transaction (the v1 write path's wrapper
+ * around {@link delete_dict_row}): captures the before-image + owners, fires the
+ * cascade, advances the cursor, and records the `delete` history event. Returns
+ * `found: false` (no commit) when the row is already gone. Used by every v1
+ * delete/unlink endpoint so they all behave like a human editor delete.
+ */
+export function run_tombstone_delete({ db, history_db, table_name, id, user_id, api_key_id }: {
+  db: Database.Database
+  history_db?: Database.Database
+  table_name: DictSyncableTable
+  id: string
+  user_id: string
+  api_key_id?: string | null
+}): SingleWriteResult {
+  const now = new Date().toISOString()
+  db.exec('BEGIN IMMEDIATE')
+  try {
+    const { deleted, event } = delete_dict_row({ db, table_name, id, user_id, at: now, api_key_id })
+    if (!deleted) {
+      db.exec('ROLLBACK')
+      return { found: false, new_synced_up_to: read_last_modified_at(db) }
+    }
+    const new_synced_up_to = read_last_modified_at(db)
+    db.exec('COMMIT')
+    if (history_db && event) {
+      try {
+        record_history(history_db, [event])
+      } catch (err) {
+        console.warn(`Could not record v1 ${table_name} delete history:`, err)
+      }
+    }
+    return { found: true, new_synced_up_to }
+  } catch (err) {
+    db.exec('ROLLBACK')
+    throw err
+  }
+}
 
 /**
  * Hard-delete an entry via a `deletes` tombstone — fires `process_delete_cascade`
@@ -503,40 +546,121 @@ export function apply_entry_delete({ db, history_db, entry_id, user_id, api_key_
   /** Acting agent's API key id (when written via an `ldk_` key); null for human edits. */
   api_key_id?: string | null
 }): SingleEntryWriteResult {
-  const image = db.prepare(`SELECT * FROM entries WHERE id = ?`).get(entry_id) as Record<string, unknown> | undefined
-  if (!image)
-    return { found: false, entry_id, new_synced_up_to: read_last_modified_at(db) }
+  const { found, new_synced_up_to } = run_tombstone_delete({ db, history_db, table_name: 'entries', id: entry_id, user_id, api_key_id })
+  return { found, entry_id, new_synced_up_to }
+}
+
+// ── Sentence update / delete ──────────────────────────────────────────────────
+
+export interface SentenceRecord {
+  id: string
+  text: MultiString | null
+  translation: MultiString | null
+  text_id: string | null
+  sort_key: string | null
+  ends_paragraph: number | null
+  updated_at: string
+}
+
+/** Read one example sentence in the public READ shape (or `undefined` if gone). */
+export function read_sentence_record(db: Database.Database, sentence_id: string): SentenceRecord | undefined {
+  const row = read_parsed_row({ db, table: 'sentences', id: sentence_id })
+  if (!row)
+    return undefined
+  return {
+    id: row.id as string,
+    text: (row.text as MultiString) ?? null,
+    translation: (row.translation as MultiString) ?? null,
+    text_id: (row.text_id as string) ?? null,
+    sort_key: (row.sort_key as string) ?? null,
+    ends_paragraph: (row.ends_paragraph as number) ?? null,
+    updated_at: row.updated_at as string,
+  }
+}
+
+/**
+ * Field-merge an example sentence (`PATCH …/sentences/{id}`): provided `text` /
+ * `translation` overwrite, omitted ones stay. Returns `found: false` if the
+ * sentence id doesn't exist.
+ */
+export function apply_sentence_update({ db, history_db, sentence_id, patch, user_id, api_key_id }: {
+  db: Database.Database
+  history_db?: Database.Database
+  sentence_id: string
+  patch: SentencePatch
+  user_id: string
+  api_key_id?: string | null
+}): SingleWriteResult {
+  const existing = read_parsed_row({ db, table: 'sentences', id: sentence_id })
+  if (!existing)
+    return { found: false, new_synced_up_to: read_last_modified_at(db) }
 
   const now = new Date().toISOString()
+  const source = patch as Record<string, unknown>
+  const row: Record<string, unknown> = { ...existing, updated_at: now }
+  delete row.updated_by_user_id
+  let changed = false
+  if ('text' in source) {
+    row.text = to_multistring(patch.text) ?? null
+    changed = true
+  }
+  if ('translation' in source) {
+    row.translation = to_multistring(patch.translation) ?? null
+    changed = true
+  }
+  if (!changed)
+    return { found: true, new_synced_up_to: read_last_modified_at(db) }
+
   db.exec('BEGIN IMMEDIATE')
   try {
-    const owners = resolve_owners(db, 'entries', image)
-    db.prepare(
-      `INSERT OR REPLACE INTO deletes (table_name, id, updated_at) VALUES ('entries', ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
-    ).run(entry_id)
+    const event = merge_dict_row({ db, table_name: 'sentences', row, user_id, at: now, api_key_id })
     const new_synced_up_to = read_last_modified_at(db)
     db.exec('COMMIT')
-
-    if (history_db) {
+    if (history_db && event) {
       try {
-        record_history(history_db, [{
-          table_name: 'entries',
-          row_id: entry_id,
-          op: 'delete',
-          user_id,
-          at: now,
-          snapshot: build_snapshot('entries', image),
-          delta: null,
-          api_key_id: api_key_id ?? null,
-          owners,
-        }])
+        record_history(history_db, [event])
       } catch (err) {
-        console.warn('Could not record v1 delete history:', err)
+        console.warn('Could not record v1 sentence update history:', err)
       }
     }
-    return { found: true, entry_id, new_synced_up_to }
+    return { found: true, new_synced_up_to }
   } catch (err) {
     db.exec('ROLLBACK')
     throw err
   }
+}
+
+/** Delete one example sentence (the FK cascade sweeps its `senses_in_sentences` junctions). */
+export function apply_sentence_delete({ db, history_db, sentence_id, user_id, api_key_id }: {
+  db: Database.Database
+  history_db?: Database.Database
+  sentence_id: string
+  user_id: string
+  api_key_id?: string | null
+}): SingleWriteResult {
+  return run_tombstone_delete({ db, history_db, table_name: 'sentences', id: sentence_id, user_id, api_key_id })
+}
+
+// ── Sense delete ──────────────────────────────────────────────────────────────
+
+/**
+ * Delete one sense (the FK cascade sweeps its `senses_in_sentences` junctions +
+ * media links). Refuses to delete an entry's LAST sense — an entry must keep at
+ * least one — throwing so the route can 400 ("delete the entry instead").
+ * Returns `found: false` if the sense id doesn't exist.
+ */
+export function apply_sense_delete({ db, history_db, sense_id, user_id, api_key_id }: {
+  db: Database.Database
+  history_db?: Database.Database
+  sense_id: string
+  user_id: string
+  api_key_id?: string | null
+}): SingleWriteResult {
+  const sense = db.prepare(`SELECT entry_id FROM senses WHERE id = ?`).get(sense_id) as { entry_id: string } | undefined
+  if (!sense)
+    return { found: false, new_synced_up_to: read_last_modified_at(db) }
+  const sibling_count = (db.prepare(`SELECT COUNT(*) AS c FROM senses WHERE entry_id = ?`).get(sense.entry_id) as { c: number }).c
+  if (sibling_count <= 1)
+    throw new Error('cannot delete the only sense of an entry; delete the entry instead')
+  return run_tombstone_delete({ db, history_db, table_name: 'senses', id: sense_id, user_id, api_key_id })
 }
