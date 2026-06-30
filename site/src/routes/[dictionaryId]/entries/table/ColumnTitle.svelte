@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { i18nEntryFieldKey, IColumn } from '$lib/types'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import IconIcOutlineImage from '~icons/ic/outline-image'
 
@@ -17,15 +17,15 @@
 <span class:icon-row={!verbose}>
   {#if column.field === 'audio'}
     <IconMaterialSymbolsHearing class="icon-inline" style="font-size: 1.125rem; margin-left: auto; margin-right: auto" />
-    {#if verbose}{$page.data.t('entry_field.audio')}{/if}
+    {#if verbose}{page.data.t('entry_field.audio')}{/if}
   {:else if column.field === 'photo'}
     <IconIcOutlineImage class="icon-inline" style="font-size: 1.25rem; margin-left: auto; margin-right: auto" />
-    {#if verbose}{$page.data.t('entry.image')}{/if}
+    {#if verbose}{page.data.t('entry.image')}{/if}
     <!-- {:else if column.field === 'checked'} ✓ -->
   {:else if ['gloss', 'example_sentence', 'local_orthography'].includes(column.field)}
-    <span style="text-transform: capitalize" title={column.explanation}> {column.display || $page.data.t(i18nKey)} </span>
+    <span style="text-transform: capitalize" title={column.explanation}> {column.display || page.data.t(i18nKey)} </span>
   {:else}
-    {$page.data.t(i18nKey)}
+    {page.data.t(i18nKey)}
   {/if}
 </span>
 

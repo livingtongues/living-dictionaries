@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { DictionaryView } from '$lib/types'
   import { Button, ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     my_dictionaries?: DictionaryView[]
@@ -29,7 +29,7 @@
           <Button
             form="simple"
             onclick={toggle}>
-            {$page.data.t('home.show_all_my_dictionaries')}
+            {page.data.t('home.show_all_my_dictionaries')}
           </Button>
         {/if}
       {/snippet}

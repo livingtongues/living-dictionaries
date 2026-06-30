@@ -4,7 +4,7 @@
   import InitableShowHide from './InitableShowHide.svelte'
   import { flattenCoordinates } from './flattenCoordinates'
   import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
   import ToggleStyle from '$lib/components/maps/mapbox/controls/ToggleStyle.svelte'
@@ -146,7 +146,7 @@
           {#snippet children({ show, toggle })}
             <Button onclick={toggle} color="black" size="sm">
               <IconMdiMapMarkerPlus class="icon-inline" style="margin-right: 0.25rem; margin-top: -3px;" />
-              {$page.data.t('create.select_coordinates')}
+              {page.data.t('create.select_coordinates')}
             </Button>
             {#if show}
               <CoordinatesModal
@@ -167,7 +167,7 @@
           {#snippet children({ show, toggle })}
             <Button onclick={toggle} color="black" size="sm">
               <IconMdiMapMarkerPath class="icon-inline" style="margin-right: 0.25rem; margin-top: -2px;" />
-              {$page.data.t('create.select_region')}
+              {page.data.t('create.select_region')}
             </Button>
             {#if show}
               <RegionModal
@@ -187,7 +187,7 @@
 
   <div class="modal-footer">
     <Button onclick={on_close} form="simple" color="black">
-      {$page.data.t('misc.close')}
+      {page.data.t('misc.close')}
     </Button>
   </div>
 </Modal>

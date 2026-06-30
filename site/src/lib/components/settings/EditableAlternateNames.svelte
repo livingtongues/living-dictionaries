@@ -1,6 +1,6 @@
 <script lang="ts">
   import { BadgeArray } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     alternateNames: string[]
@@ -11,14 +11,14 @@
 </script>
 
 <div class="section-title">
-  {$page.data.t('create.alternate_names')}
+  {page.data.t('create.alternate_names')}
 </div>
 
 <BadgeArray
   strings={alternateNames}
   canEdit
-  promptMessage={$page.data.t('create.enter_alternate_name')}
-  addMessage={$page.data.t('misc.add')}
+  promptMessage={page.data.t('create.enter_alternate_name')}
+  addMessage={page.data.t('misc.add')}
   on_valueupdated={value => on_update(value)} />
 
 <style>

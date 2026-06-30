@@ -47,4 +47,18 @@ controls). Hide the sidebar Export link when entry_count === 0.
 ## Knowledge written
 - `.knowledge/testing/svelte-look-page-stories.md` (the `$app/stores`-can't-SSR gotcha, `mock_t`,
   store-valued page data, CSV crash traps, tween timing).
+
+## Follow-up: app-wide `$app/stores` → `$app/state` migration ✅
+Jacob asked to clean up the deprecated `$app/stores` everywhere. Scope was clean:
+- 84 files imported `{ page }` (ONLY page — no `navigating`/`updated`/`getStores` anywhere).
+- Classification: 75 runes `.svelte` (safe mechanical), 8 `.ts` helpers (`get(page)`), 1 `.js` store.
+- **75 `.svelte`**: `from '$app/stores'`→`'$app/state'`, `$page`→`page` (all runes-mode → reactivity
+  equivalent; verified no local-`page` collisions, diffs purely page-related).
+- **8 `.ts`** (vernacularName, media, inviteHelper, share, upload-image/video/audio, setUpColumns):
+  `const {data} = get(page)` → `= page` (browser-only helpers; `get(page)` on `$app/stores` already
+  only worked browser/component-init, so equivalent), dropped now-unused `get` import.
+- **1 `.js` LEFT on `$app/stores` deliberately**: `svelte-pieces/stores/query-param-store.js` — its
+  writable `start` notifier needs imperative `page.subscribe(...)` outside any component/effect;
+  `$app/state` has no `.subscribe`. Commented in-file explaining why.
+- Verify: `pnpm check` 0 errors, `pnpm test` 766 pass, `pnpm eslint` 0 errors.
 </content>

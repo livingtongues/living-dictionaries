@@ -4,7 +4,7 @@
   const bubble = createBubbler()
   import { crossfade, scale } from 'svelte/transition'
   import { Button } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { image_src } from '$lib/helpers/media'
   import IconGgSpinner from '~icons/gg/spinner'
   import IconTablerAi from '~icons/tabler/ai'
@@ -125,14 +125,14 @@
             color="red"
             form="filled"
             onclick={async (e) => {
-              const confirmation = confirm($page.data.t('entry.delete_image'))
+              const confirmation = confirm(page.data.t('entry.delete_image'))
               if (confirmation) {
                 e.stopPropagation()
                 await on_delete_image()
               }
             }}>
             <IconFaTrashO class="icon-inline" style="margin: -1px 0 2px;" />
-            {$page.data.t('misc.delete')}
+            {page.data.t('misc.delete')}
           </Button>
         </div>
       {/if}

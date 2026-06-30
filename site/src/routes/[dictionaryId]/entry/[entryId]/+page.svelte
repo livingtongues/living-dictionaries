@@ -7,7 +7,7 @@
   import ChangeHistory from '$lib/components/history/ChangeHistory.svelte'
   import { track } from '$lib/debug/remote-log'
   import { ENTRY_OPENED } from '$lib/debug/log-events'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { dev } from '$app/environment'
 
   const { data } = $props()
@@ -27,7 +27,7 @@
   // One `entry_opened` per entry viewed (re-fires on navigation to another entry).
   let last_opened_entry_id = ''
   $effect(() => {
-    const entry_id = $page.params.entryId
+    const entry_id = page.params.entryId
     if (entry_id && entry_id !== last_opened_entry_id) {
       last_opened_entry_id = entry_id
       track({ event: ENTRY_OPENED, props: { dictionary_id: dictionary.id, entry_id } })
@@ -56,7 +56,7 @@
       }
     }}>
     <i class="fas fa-arrow-left rtl-x-flip"></i>
-    {$page.data.t('misc.back')}
+    {page.data.t('misc.back')}
   </Button>
 
   <div>
@@ -68,20 +68,20 @@
         color="red"
         form="simple"
         onclick={async () => {
-          const confirmation = confirm($page.data.t('entry.delete_entry'))
+          const confirmation = confirm(page.data.t('entry.delete_entry'))
           if (confirmation) await dbOperations.delete_entry()
           history.back()
         }}>
 
         <span class="delete-label">
-          {$page.data.t('misc.delete')}
+          {page.data.t('misc.delete')}
         </span>
         <i class="fas fa-trash icon-gap"></i>
       </Button>
     {/if}
     {#if !shallow}
       <Button class="entry-share-button" form="simple" onclick={() => share(dictionary.id, entry)}>
-        <span>{$page.data.t('misc.share')}</span>
+        <span>{page.data.t('misc.share')}</span>
         <div style="width: 0.5rem"></div>
         <i class="fas fa-share-square rtl-x-flip"></i>
       </Button>
@@ -162,7 +162,7 @@
   norobots={!dictionary.public}
   generate_og_image
   imageTitle={entry.main.lexeme.default}
-  imageDescription={seo_description({ entry, gloss_languages: dictionary.gloss_languages, t: $page.data.t })}
+  imageDescription={seo_description({ entry, gloss_languages: dictionary.gloss_languages, t: page.data.t })}
   dictionaryName={dictionary.name}
   lng={dictionary.coordinates?.points?.[0]?.coordinates.longitude}
   lat={dictionary.coordinates?.points?.[0]?.coordinates.latitude}

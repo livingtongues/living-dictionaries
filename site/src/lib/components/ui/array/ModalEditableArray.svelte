@@ -4,7 +4,7 @@
   import MultiSelect from './MultiSelect.svelte'
   import type { SelectOption } from './select-options.interface'
   import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
 
   interface Props {
@@ -99,11 +99,11 @@
               }}
               form="simple"
               color="black">
-              {$page.data.t('misc.cancel')}
+              {page.data.t('misc.cancel')}
             </Button>
 
             <Button type="submit" form="filled">
-              {$page.data.t('misc.save')}
+              {page.data.t('misc.save')}
             </Button>
           </div>
         </form>

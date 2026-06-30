@@ -3,7 +3,7 @@
 
   import type { DictionaryView, IPoint } from '$lib/types'
   import { Button, ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconCarbonSearch from '~icons/carbon/search'
   import IconLaTimes from '~icons/la/times'
   import IconFa6SolidChevronLeft from '~icons/fa6-solid/chevron-left'
@@ -88,7 +88,7 @@
         type="text"
         bind:value={searchString}
         class="form-input"
-        placeholder={$page.data.t('home.find_dictionary')}
+        placeholder={page.data.t('home.find_dictionary')}
         onfocus={() => (searchFocused = true)}
         onblur={delayedSearchClose} />
       {#if searchString || searchFocused}
@@ -107,7 +107,7 @@
 
       {#if !searchString && my_dictionaries?.length}
         <!-- <div class="text-sm font-semibold px-3 my-1">
-          {$page.data.t('home.my_dictionaries')}
+          {page.data.t('home.my_dictionaries')}
         </div> -->
         <!-- {#each my_dictionaries as dictionary}
           <button
@@ -122,7 +122,7 @@
         {/each} -->
         <!-- <hr class="my-2" />
         <div class="text-sm font-semibold px-3 my-1">
-          {$page.data.t('home.public_dictionaries')}
+          {page.data.t('home.public_dictionaries')}
           {#if admin}
             (+ Private)
           {/if}
@@ -142,7 +142,7 @@
       {/each} -->
       {#if !filteredDictionaries.length}
         <div style="padding: 0.75rem">
-          <i> {$page.data.t('home.no_results')} </i>
+          <i> {page.data.t('home.no_results')} </i>
         </div>
       {/if}
     </div>
@@ -166,7 +166,7 @@
                 type="button"
                 class="sm:hidden rounded px-3 py-2 bg-white mt-2"
                 on:click={toggle}>
-                {$page.data.t('home.show_all_my_dictionaries')}
+                {page.data.t('home.show_all_my_dictionaries')}
               </button>
               <div class="w-2 sm:hidden" />
             {/if} -->
@@ -182,7 +182,7 @@
         onclick={clearDictionary}>
         <IconFa6SolidChevronLeft class="icon-inline rtl-x-flip" />
         <div style="width: 0.25rem"></div>
-        {$page.data.t('misc.back')}
+        {page.data.t('misc.back')}
       </button>
       {#await import('./SelectedDict.svelte') then { default: SelectedDict }}
         <SelectedDict dictionary={currentDictionary} />

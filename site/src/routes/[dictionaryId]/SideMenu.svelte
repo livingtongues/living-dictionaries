@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Tables } from '$lib/types'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconFaSolidList from '~icons/fa-solid/list'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
   import IconFa6SolidFileLines from '~icons/fa6-solid/file-lines'
@@ -33,7 +33,7 @@
 
 <div class="mobile-heading">
   <a href="/" class="ld-home-link">
-    {$page.data.t('misc.LD')}
+    {page.data.t('misc.LD')}
   </a>
   <h5>
     {dictionary.name}
@@ -41,11 +41,11 @@
 </div>
 <div onclick={on_close}>
   <a
-    class:active={$page.url.pathname.match(/entry|entries/)}
+    class:active={page.url.pathname.match(/entry|entries/)}
     href={`/${dictionary.url}/entries`}>
     <IconFaSolidList class="icon-inline" />
     <span class="item-label">
-      {$page.data.t('dictionary.entries')}
+      {page.data.t('dictionary.entries')}
     </span>
     <span style="flex-grow: 1"></span>
     {#if is_manager && loading}
@@ -60,51 +60,51 @@
   {#if !is_manager}
     <a
       href={`/${dictionary.url}/synopsis`}
-      class:active={$page.url.pathname.includes('synopsis')}>
+      class:active={page.url.pathname.includes('synopsis')}>
       <IconFa6SolidFileLines class="icon-inline" />
       <span class="item-label">
-        {$page.data.t('synopsis.name')}
+        {page.data.t('synopsis.name')}
       </span>
     </a>
   {/if}
   <a
     href={`/${dictionary.url}/about`}
-    class:active={$page.url.pathname.includes('about')}>
+    class:active={page.url.pathname.includes('about')}>
     <IconFa6SolidCircleInfo class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
     <span class="item-label">
-      {$page.data.t('header.about')}
+      {page.data.t('header.about')}
     </span>
   </a>
   <a
     href={`/${dictionary.url}/grammar`}
-    class:active={$page.url.pathname.includes('grammar')}>
+    class:active={page.url.pathname.includes('grammar')}>
     <IconTablerTextGrammar class="icon-inline" style="font-size: 1.125rem" />
     <span class="item-label">
-      {$page.data.t('dictionary.grammar')}
+      {page.data.t('dictionary.grammar')}
     </span>
   </a>
   <a
     href={`/${dictionary.url}/contributors`}
-    class:active={$page.url.pathname.includes('contributors')}>
+    class:active={page.url.pathname.includes('contributors')}>
     <IconFa6SolidUsers class="icon-inline" style="font-size: 1.125rem" />
     <span class="item-label">
-      {$page.data.t('dictionary.contributors')}
+      {page.data.t('dictionary.contributors')}
     </span>
   </a>
   {#if is_manager}
     <a
       href={`/${dictionary.url}/settings`}
-      class:active={$page.url.pathname.includes('settings')}>
+      class:active={page.url.pathname.includes('settings')}>
       <IconFa6SolidGear class="icon-inline" style="margin-left: 0.125rem; margin-right: 0.125rem" />
       <span class="item-label">
-        {$page.data.t('misc.settings')}
+        {page.data.t('misc.settings')}
       </span>
     </a>
   {/if}
   {#if is_editor_or_above}
     <a
       href={`/${dictionary.url}/agents`}
-      class:active={$page.url.pathname.includes('agents')}>
+      class:active={page.url.pathname.includes('agents')}>
       <IconFa6SolidRobot class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
       <span class="item-label">
         Agents
@@ -115,20 +115,20 @@
     {#if !dictionary.con_language_description}
       <a
         href={`/${dictionary.url}/import`}
-        class:active={$page.url.pathname.includes('import')}>
+        class:active={page.url.pathname.includes('import')}>
         <IconFa6SolidFileImport class="icon-inline" style="margin-left: 0.125rem; margin-right: 0.125rem" />
         <span class="item-label">
-          {$page.data.t('import_page.import')}
+          {page.data.t('import_page.import')}
         </span>
       </a>
     {/if}
     {#if entry_count}
       <a
         href={`/${dictionary.url}/export`}
-        class:active={$page.url.pathname.includes('export')}>
+        class:active={page.url.pathname.includes('export')}>
         <IconFa6SolidFileExport class="icon-inline" style="margin-left: 0.25rem" />
         <span class="item-label">
-          {$page.data.t('misc.export')}
+          {page.data.t('misc.export')}
         </span>
       </a>
     {/if}
@@ -138,16 +138,16 @@
 <div style="margin-top: auto"></div>
 
 <a href="/terms" target="_blank" class="link">
-  {$page.data.t('dictionary.terms_of_use')}
+  {page.data.t('dictionary.terms_of_use')}
 </a>
 <a href="/privacy-policy" target="_blank" class="link">
-  {$page.data.t('terms.privacy_policy')}
+  {page.data.t('terms.privacy_policy')}
 </a>
 <a href="https://www.youtube.com/static?template=terms" target="_blank" rel="noopener noreferrer" class="link">
-  {$page.data.t('dictionary.youtube_terms')}
+  {page.data.t('dictionary.youtube_terms')}
 </a>
 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="link last-link">
-  {$page.data.t('dictionary.google_terms')}
+  {page.data.t('dictionary.google_terms')}
 </a>
 
 <style>

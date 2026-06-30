@@ -2,10 +2,10 @@
   import { onMount } from 'svelte'
   import { Button, Menu, ShowHide } from '$lib/svelte-pieces'
   import { display_one_tap_popover } from '$lib/auth/google-one-tap'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import UserMenu from './UserMenu.svelte'
 
-  const { auth_user } = $derived($page.data)
+  const { auth_user } = $derived(page.data)
   const user = $derived(auth_user.user)
   let show_menu = $state(false)
   function toggle_menu() {
@@ -54,7 +54,7 @@
       <Button form="text" onclick={toggle}>
         <i class="far fa-sign-in"></i>
         <span class="login-label">
-          {$page.data.t('header.login')}
+          {page.data.t('header.login')}
         </span>
       </Button>
       {#if show}

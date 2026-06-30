@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import type { View } from '$lib/search/types'
   import IconFaSolidList from '~icons/fa-solid/list'
   import IconFaTable from '~icons/fa/table'
@@ -21,7 +21,7 @@
     class:active={!view}>
     <IconFaSolidList class="icon-inline" style="margin-top: -0.25rem" />
     <span class="view-label">
-      {$page.data.t('entry.list')}
+      {page.data.t('entry.list')}
     </span>
   </button>
   <div class="view-gap"></div>
@@ -31,7 +31,7 @@
     class:active={view === 'table'}>
     <IconFaTable class="icon-inline" style="margin-top: -0.25rem" />
     <span class="view-label">
-      {$page.data.t('entry.table')}
+      {page.data.t('entry.table')}
     </span>
   </button>
   <div class="view-gap"></div>
@@ -41,7 +41,7 @@
     class:active={view === 'gallery'}>
     <IconIcOutlineImage class="icon-inline" style="margin-top: -0.25rem; font-size: 1.125rem" />
     <span class="view-label">
-      {$page.data.t('entry.gallery')}
+      {page.data.t('entry.gallery')}
     </span>
   </button>
   {#if can_print}
@@ -52,7 +52,7 @@
       class:active={view === 'print'}>
       <IconFaPrint class="icon-inline" style="margin-top: -0.25rem" />
       <span class="view-label">
-        {$page.data.t('entry.print')}
+        {page.data.t('entry.print')}
       </span>
     </button>
   {/if}

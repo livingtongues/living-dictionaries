@@ -5,13 +5,13 @@
   import PasteVideoLink from './PasteVideoLink.svelte'
   import type { VideoUploadStatus } from './upload-video'
   import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import RecordVideo from '$lib/components/video/RecordVideo.svelte'
   import VideoThirdParty from '$lib/components/video/VideoThirdParty.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
   import IconUilMicrophone from '~icons/uil/microphone'
 
-  const { dbOperations } = $derived($page.data)
+  const { dbOperations } = $derived(page.data)
 
   interface Props {
     on_close: () => void
@@ -46,7 +46,7 @@
         <VideoThirdParty {hosted_video} />
         <div class="modal-footer">
           <Button onclick={() => hosted_video = null} color="black">
-            {$page.data.t('misc.cancel')}
+            {page.data.t('misc.cancel')}
           </Button>
           <div style="width: 0.25rem"></div>
           <Button
@@ -56,7 +56,7 @@
               on_close()
             }}
             form="filled">
-            {$page.data.t('misc.save')}
+            {page.data.t('misc.save')}
           </Button>
         </div>
       {:else if speaker_id}
@@ -75,7 +75,7 @@
 
               <Button onclick={toggle} class="record-video-button" color="red" type="button">
                 <IconUilMicrophone class="icon-inline" />
-                {$page.data.t('video.prepare_to_record_video')}
+                {page.data.t('video.prepare_to_record_video')}
               </Button>
             {:else}
               <RecordVideo>
@@ -87,9 +87,9 @@
                       {#if !show}
                         <div class="modal-footer">
                           <Button onclick={reset} color="red"><i class="far fa-trash-alt"></i>
-                            {$page.data.t('misc.delete')}</Button>
+                            {page.data.t('misc.delete')}</Button>
                           <div style="width: 0.25rem"></div>
-                          <Button onclick={toggle} color="green" form="filled"><i class="fas fa-upload"></i> {$page.data.t('misc.upload')}</Button>
+                          <Button onclick={toggle} color="green" form="filled"><i class="fas fa-upload"></i> {page.data.t('misc.upload')}</Button>
                         </div>
                       {:else if !upload_triggered}
                         {@const upload_status = startUpload(videoBlob, speaker_id)}
@@ -107,7 +107,7 @@
       {:else}
         <div class="modal-footer">
           <Button onclick={close} color="black">
-            {$page.data.t('misc.cancel')}
+            {page.data.t('misc.cancel')}
           </Button>
         </div>
       {/if}

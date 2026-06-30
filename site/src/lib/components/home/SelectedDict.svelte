@@ -2,7 +2,7 @@
   import type { DictionaryView } from '$lib/types'
   import sanitize from 'xss'
   import { Button } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
 
   interface Props {
@@ -43,13 +43,13 @@
   {#if dictionary.gloss_languages}
     <div class="meta-row">
       <i class="far fa-info-circle fa-fw"></i>
-      {dictionary.gloss_languages.map(bcp => $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })).join(', ')}
+      {dictionary.gloss_languages.map(bcp => page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })).join(', ')}
     </div>
   {/if}
 
   {#if dictionary.entry_count}
     <span class="stat-chip">
-      {$page.data.t('dictionary.entries')}:&nbsp;
+      {page.data.t('dictionary.entries')}:&nbsp;
       <b>{dictionary.entry_count}</b>
     </span>
   {/if}
@@ -71,19 +71,19 @@
 
   {#if dictionary.metadata?.url}
     <Button target="_blank" class="open-button" form="filled" color="black" href={dictionary.metadata.url}>
-      {$page.data.t('home.open_dictionary')}
+      {page.data.t('home.open_dictionary')}
     </Button>
   {:else}
     <div class="about-blurb inline-children-elements">
       {@html sanitize(truncateString(about, 200))}
       {#if about.length > 200}
         <a class="read-more" href={`${dictionary.url}/about`}>
-          {$page.data.t('home.read_more')}
+          {page.data.t('home.read_more')}
         </a>
       {/if}
     </div>
     <Button class="open-button" form="filled" color="black" href={dictionary.url}>
-      {$page.data.t('home.open_dictionary')}
+      {page.data.t('home.open_dictionary')}
       <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.25rem" />
     </Button>
   {/if}

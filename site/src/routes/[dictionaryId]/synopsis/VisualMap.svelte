@@ -3,7 +3,7 @@
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import Marker from '$lib/components/maps/mapbox/map/Marker.svelte'
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     coordinates: Tables<'dictionaries'>['coordinates']
@@ -13,7 +13,7 @@
 </script>
 
 {#if coordinates?.points?.[0]}
-  <div class="section-label" style="margin-bottom: 0.25rem">{$page.data.t('misc.map')}</div>
+  <div class="section-label" style="margin-bottom: 0.25rem">{page.data.t('misc.map')}</div>
   <div style="height: 240px">
     <Map
       lat={coordinates.points[0].coordinates.latitude}

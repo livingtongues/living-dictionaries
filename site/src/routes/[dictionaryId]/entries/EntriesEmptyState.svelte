@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Tables } from '$lib/types'
   import type { DbOperations } from '$lib/dbOperations'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import AddEntry from './AddEntry.svelte'
   import IconFa6SolidBookOpen from '~icons/fa6-solid/book-open'
   import IconFa6SolidRobot from '~icons/fa6-solid/robot'

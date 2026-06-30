@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { QueryParamStore } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import type { QueryParams } from '$lib/search/types'
   import IconCarbonSearch from '~icons/carbon/search'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
@@ -32,7 +32,7 @@
           $search_params.page = 1
         }
       }}
-      placeholder={$page.data.t('entry.search_entries')}
+      placeholder={page.data.t('entry.search_entries')}
       class="form-input" />
   </div>
   <button
@@ -41,7 +41,7 @@
     class="filter-button">
     <IconMaterialSymbolsFilterAlt class="icon-inline" style="color: color-mix(in srgb, var(--color) 45%, var(--background))" />
     <span class="filter-label">
-      {$page.data.t('entry.filters')}
+      {page.data.t('entry.filters')}
     </span>
   </button>
 </div>

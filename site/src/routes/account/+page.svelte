@@ -2,7 +2,7 @@
   import IconIcOutlineMail from '~icons/ic/outline-mail'
   import EditString from '../[dictionaryId]/EditString.svelte'
   import { Button } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
 
   const { data } = $props()
@@ -18,11 +18,11 @@
 
 <svelte:head>
   <title>
-    {$page.data.t('account.account_settings')}
+    {page.data.t('account.account_settings')}
   </title>
 </svelte:head>
 
-<Header>{$page.data.t('account.account_settings')}</Header>
+<Header>{page.data.t('account.account_settings')}</Header>
 
 <div style="max-width: 768px; margin-left: auto; margin-right: auto; padding: 0.75rem">
   {#if user}
@@ -36,13 +36,13 @@
       required
       id="name"
       save={async name => await update_name(name)}
-      display={$page.data.t('account.your_name')} />
+      display={page.data.t('account.your_name')} />
     <div style="margin-top: 0.75rem; font-size: 1.125rem; line-height: 1.75rem">
       <IconIcOutlineMail class="icon-inline" style="vertical-align: -4px" />
       {user.email}</div>
     <div style="margin-top: 0.75rem">
       <Button
-        onclick={() => data.auth_user.logout()}>{$page.data.t('account.log_out')}</Button>
+        onclick={() => data.auth_user.logout()}>{page.data.t('account.log_out')}</Button>
     </div>
   {:else}
     Not logged in

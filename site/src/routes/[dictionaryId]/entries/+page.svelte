@@ -10,7 +10,7 @@
   import EntriesEmptyState from './EntriesEmptyState.svelte'
   import { ShowHide } from '$lib/svelte-pieces'
   import type { QueryParams } from '$lib/search/types'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { browser } from '$app/environment'
   import { track, track_timing } from '$lib/debug/remote-log'
@@ -100,11 +100,11 @@
           <div class="results-meta">
             {#if typeof search_results_count !== 'undefined'}
               {#if search_results_count > 0}
-                {$page.data.t('dictionary.entries')}: {current_page_index * entries_per_page + 1}-{Math.min((current_page_index + 1) * entries_per_page, search_results_count)} /
+                {page.data.t('dictionary.entries')}: {current_page_index * entries_per_page + 1}-{Math.min((current_page_index + 1) * entries_per_page, search_results_count)} /
                 {search_results_count}
                 ({search_time.includes('μs') ? '<1ms' : search_time})
               {:else}
-                {$page.data.t('dictionary.entries')}:
+                {page.data.t('dictionary.entries')}:
                 0 /
                 {entries_length}
               {/if}

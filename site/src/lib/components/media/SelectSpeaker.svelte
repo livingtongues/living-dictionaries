@@ -4,7 +4,7 @@
 
 <script lang="ts">
   import { Button } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
 
   interface Props {
@@ -15,7 +15,7 @@
 
   const { select_speaker = undefined, initialSpeakerId = undefined, children }: Props = $props()
 
-  const { speakers } = $derived($page.data)
+  const { speakers } = $derived(page.data)
 
   const addSpeaker = 'AddSpeaker'
   // Must be $state (not $derived) so `bind:value` on the speaker <select> can write to it —
@@ -30,16 +30,16 @@
 
 {#if !speaker_id}
   <div class="select-prompt">
-    {$page.data.t('audio.select_speaker')}
+    {page.data.t('audio.select_speaker')}
   </div>
 {/if}
 
 {#if !$speakers?.length}
-  <Button onclick={() => speaker_id = addSpeaker} form="filled"><IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" /> {$page.data.t('misc.add')}</Button>
+  <Button onclick={() => speaker_id = addSpeaker} form="filled"><IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" /> {page.data.t('misc.add')}</Button>
 {:else}
   <div class="speaker-row">
     <label for="speaker">
-      {$page.data.t('entry_field.speaker')}
+      {page.data.t('entry_field.speaker')}
     </label>
     <select
       use:autofocus
@@ -62,7 +62,7 @@
       {/each}
       <option value={addSpeaker}>
         +
-        {$page.data.t('misc.add')}
+        {page.data.t('misc.add')}
       </option>
     </select>
   </div>

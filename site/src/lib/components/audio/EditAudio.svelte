@@ -5,7 +5,7 @@
   import type { EntryData } from '$lib/types'
   import type { AudioVideoUploadStatus } from './upload-audio'
   import { Button, JSON, Modal } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Waveform from '$lib/components/audio/Waveform.svelte'
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte'
@@ -21,7 +21,7 @@
   const { on_close, entry, sound_file }: Props = $props()
 
   let upload_triggered = $state(false)
-  const { auth_user, dbOperations, url_from_storage_path } = $derived($page.data)
+  const { auth_user, dbOperations, url_from_storage_path } = $derived(page.data)
   // Must match RecordAudio's $bindable fallbacks (permissionGranted = false, audioBlob = null):
   // binding an `undefined` $state to a prop with a non-undefined fallback throws Svelte's
   // `props_invalid_value` at runtime, which crashed the audio editor (no record/upload UI showed).
@@ -119,25 +119,25 @@
         href={url_from_storage_path(sound_file.storage_path)}
         target="_blank">
         <i class="fas fa-download"></i>
-        <span class="wide-only">{$page.data.t('misc.download')}</span>
+        <span class="wide-only">{page.data.t('misc.download')}</span>
       </Button>
       <div style="width: 0.25rem"></div>
 
       <Button
         onclick={async () => {
-          const confirmation = confirm($page.data.t('entry.delete_audio'))
+          const confirmation = confirm(page.data.t('entry.delete_audio'))
           if (confirmation) await dbOperations.delete_audio(sound_file.id)
           on_close()
         }}
         color="red">
         <i class="far fa-trash-alt"></i>&nbsp;
-        <span class="wide-only">{$page.data.t('misc.delete')}</span>
+        <span class="wide-only">{page.data.t('misc.delete')}</span>
       </Button>
       <div style="width: 0.25rem"></div>
     {/if}
 
     <Button onclick={on_close} color="black">
-      {$page.data.t('misc.close')}
+      {page.data.t('misc.close')}
     </Button>
   </div>
 </Modal>

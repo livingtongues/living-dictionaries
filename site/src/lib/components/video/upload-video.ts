@@ -1,6 +1,6 @@
-import { get, writable } from 'svelte/store'
+import { writable } from 'svelte/store'
 import type { Readable } from 'svelte/store'
-import { page } from '$app/stores'
+import { page } from '$app/state'
 import { api_upload } from '$api/upload/_call'
 
 export interface VideoUploadStatus {
@@ -24,7 +24,7 @@ export function upload_video({
     const is_blob = file instanceof Blob && !(file instanceof File)
     const [extension] = file.type.split('/')[1].split(';') // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
     const file_name = is_blob ? `video.${extension}` : file.name
-    const { data: { dictionary } } = get(page)
+    const { data: { dictionary } } = page
     const { data: { presigned_upload_url, object_key }, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name, file_type: file.type })
     if (error) {
       console.error(error)

@@ -6,7 +6,7 @@
   import { ShowHide } from '$lib/svelte-pieces'
   import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
   import Image from '$lib/components/image/Image.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import type { DbOperations } from '$lib/dbOperations'
   import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
   import IconIcOutlineCameraAlt from '~icons/ic/outline-camera-alt'
@@ -33,7 +33,7 @@
 
   // Coordinates persist straight to the live `dict_db` entries row (auto-stamps
   // editor + dirty); the Orama watcher reflects it back into the read-model.
-  const dict_db = $derived($page.data.dict_db)
+  const dict_db = $derived(page.data.dict_db)
 </script>
 
 <div class="media-col">
@@ -73,7 +73,7 @@
               <IconIcOutlineCameraAlt class="icon-inline" style="font-size: 1.25rem" />
             </span>
             <div class="tile-label">
-              {$page.data.t('entry_field.photo')}
+              {page.data.t('entry_field.photo')}
             </div>
           </div>
           {#if show}
@@ -104,7 +104,7 @@
           onclick={toggle}>
           <IconBiCameraVideo class="icon-inline" style="font-size: 1.25rem" />
           <span class="tile-label">
-            {$page.data.t('video.add_video')}
+            {page.data.t('video.add_video')}
           </span>
         </button>
         {#if show}
@@ -133,7 +133,7 @@
           class="add-tile">
           <IconMdiMapMarkerPlus class="icon-inline" style="margin-right: 0.25rem; margin-top: -3px;" />
           <span class="tile-label">
-            {$page.data.t('create.select_coordinates')}
+            {page.data.t('create.select_coordinates')}
           </span>
         </button>
         <button
@@ -142,7 +142,7 @@
           class="add-tile">
           <IconMdiMapMarkerPath class="icon-inline" style="margin-right: 0.25rem; margin-top: -2px;" />
           <span class="tile-label">
-            {$page.data.t('create.select_region')}
+            {page.data.t('create.select_region')}
           </span>
         </button>
       {/if}
