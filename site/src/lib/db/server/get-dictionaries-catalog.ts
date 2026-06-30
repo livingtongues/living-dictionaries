@@ -1,5 +1,6 @@
 import type Database from 'better-sqlite3'
 import type { DictionaryView } from '$lib/types'
+import { parse_row } from '$lib/db/schemas/json-columns'
 import { query_all } from './typed-query'
 
 /**
@@ -64,6 +65,7 @@ export function load_dictionaries_for_user({ db, user_id }: { db: Database.Datab
   `).all(user_id) as Record<string, any>[]
   return rows.map((row) => {
     const { dictionary_role, ...dictionary } = row
+    parse_row('dictionaries', dictionary)
     return { ...project_to_dictionary_view(dictionary), role: dictionary_role }
   })
 }
