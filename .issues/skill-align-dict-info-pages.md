@@ -57,8 +57,13 @@ Jacob asked to clean up the deprecated `$app/stores` everywhere. Scope was clean
 - **8 `.ts`** (vernacularName, media, inviteHelper, share, upload-image/video/audio, setUpColumns):
   `const {data} = get(page)` → `= page` (browser-only helpers; `get(page)` on `$app/stores` already
   only worked browser/component-init, so equivalent), dropped now-unused `get` import.
-- **1 `.js` LEFT on `$app/stores` deliberately**: `svelte-pieces/stores/query-param-store.js` — its
-  writable `start` notifier needs imperative `page.subscribe(...)` outside any component/effect;
-  `$app/state` has no `.subscribe`. Commented in-file explaining why.
+- **query-param-store** (was the last hold-out): migrated too. Renamed `.js` → `.svelte.js` (runes
+  module) + paired `.d.ts` → `.svelte.d.ts`; replaced `page.subscribe(...)` with `$effect.root`
+  (the rune for "effects outside the component init phase", per the svelte skill + tutor's
+  `persisted-root-state.svelte.ts`) reading `$app/state`'s reactive `page.url`. Synchronous
+  first-read preserves the old sync-on-subscribe initial value; the effect's own first run dedupes
+  via `current_params_value`. SSR-safe: the compiler turns `$effect.root()` into a noop on the
+  server (`compiler/.../server/visitors/CallExpression.js`), so only the sync read runs during SSR —
+  same as the old store. Updated stale `$app/stores` mention in `media-url.ts`.
+- **Result: ZERO `$app/stores` imports remain in src** (only doc-comment mentions).
 - Verify: `pnpm check` 0 errors, `pnpm test` 766 pass, `pnpm eslint` 0 errors.
-</content>

@@ -1,6 +1,6 @@
 /**
  * Pure media URL builders. Split from `media.ts` so they're unit-testable
- * without pulling in `$app/stores` (via the dict-client `operations` import that
+ * without pulling in `$app/state` (via the dict-client `operations` import that
  * the upload helpers need).
  *
  * Dev media mock (no GCS bucket on dev): uploaded bytes live in the local
