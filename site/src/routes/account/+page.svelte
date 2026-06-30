@@ -4,15 +4,20 @@
   import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
+  import { api_auth_update_profile } from '$api/auth/update-profile/_call'
 
   const { data } = $props()
   const user = $derived(data.auth_user.user)
 
   let broken_avatar_image = $state(false)
 
-  function update_name(_full_name: string) {
-    // M4-write: profile name update lands with the write/sync milestone.
-    alert('Saving profile changes will be enabled soon.')
+  async function update_name(full_name: string) {
+    const { data: updated_user, error } = await api_auth_update_profile({ name: full_name })
+    if (error) {
+      alert(`${page.data.t('misc.error')}: ${error.message}`)
+      return
+    }
+    data.auth_user.set_session({ user: updated_user })
   }
 </script>
 

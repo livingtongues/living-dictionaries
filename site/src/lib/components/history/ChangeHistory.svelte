@@ -104,7 +104,7 @@
 
 <style>
   .history-error {
-    color: #dc2626;
+    color: var(--danger);
     font-size: 14px;
     padding: 12px 4px;
   }
@@ -124,15 +124,15 @@
     border-radius: 7px;
     font-size: 13px;
     font-weight: 600;
-    color: var(--color-grey-600, #6b7280);
+    color: var(--color-secondary);
     cursor: pointer;
   }
   .actor-tab:hover {
-    color: var(--color, #111827);
+    color: var(--color);
   }
   .actor-tab.active {
-    background: var(--surface, #fff);
-    color: var(--color, #111827);
+    background: var(--surface);
+    color: var(--color);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   }
 </style>

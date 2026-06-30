@@ -24,6 +24,11 @@
   const entriesWithImages = $derived(formattedEntries.filter(entry => (entry as Record<string, string>)?.photoSource))
   const entriesWithAudio = $derived(formattedEntries.filter(entry => entry?.soundSource))
   const has_entries = $derived(formattedEntries.length > 0)
+
+  $effect(() => {
+    if (!entriesWithImages.length) includeImages = false
+    if (!entriesWithAudio.length) includeAudio = false
+  })
 </script>
 
 <h3 class="export-heading">{page.data.t('misc.export')}</h3>
@@ -38,34 +43,30 @@
         {page.data.t('export.csv_data')}
       </div>
 
-      <div class="media-option" class:unavailable={!entriesWithImages.length}>
-        <input
-          disabled={!entriesWithImages.length}
-          id="images"
-          type="checkbox"
-          bind:checked={includeImages} />
-        <label for="images" class="option-label">
-          {page.data.t('misc.images')} ({entriesWithImages.length})</label>
-      </div>
       {#if !ready}
         <p class="checking-note">{page.data.t('export.checking_images')}</p>
-      {:else if !entriesWithImages.length}
-        <p class="missing-note">{page.data.t('export.no_images')}</p>
+      {:else if entriesWithImages.length}
+        <div class="media-option">
+          <input
+            id="images"
+            type="checkbox"
+            bind:checked={includeImages} />
+          <label for="images" class="option-label">
+            {page.data.t('misc.images')} ({entriesWithImages.length})</label>
+        </div>
       {/if}
 
-      <div class="media-option" class:unavailable={!entriesWithAudio.length}>
-        <input
-          disabled={!entriesWithAudio.length}
-          id="audio"
-          type="checkbox"
-          bind:checked={includeAudio} />
-        <label for="audio" class="option-label">
-          {page.data.t('entry_field.audio')} ({entriesWithAudio.length})</label>
-      </div>
       {#if !ready}
         <p class="checking-note">{page.data.t('export.checking_audios')}</p>
-      {:else if !entriesWithAudio.length}
-        <p class="missing-note">{page.data.t('export.no_audios')}</p>
+      {:else if entriesWithAudio.length}
+        <div class="media-option">
+          <input
+            id="audio"
+            type="checkbox"
+            bind:checked={includeAudio} />
+          <label for="audio" class="option-label">
+            {page.data.t('entry_field.audio')} ({entriesWithAudio.length})</label>
+        </div>
       {/if}
     </div>
 
@@ -156,11 +157,6 @@
     margin-top: 0.5rem;
   }
 
-  .unavailable {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
   .option-label {
     margin-left: 0.5rem;
     margin-right: 0.5rem;
@@ -175,12 +171,5 @@
     font-style: italic;
     color: var(--warning);
     padding: 0.5rem;
-  }
-
-  .missing-note {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    color: var(--danger);
-    padding: 0.5rem 0.75rem;
   }
 </style>

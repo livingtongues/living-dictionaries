@@ -25,6 +25,11 @@ const populated = entries_store({
   e3: { id: 'e3', main: { lexeme: { default: 'tepetl' } }, senses: [{ glosses: { en: 'mountain' } }] },
 })
 
+const without_media = entries_store({
+  e1: { id: 'e1', main: { lexeme: { default: 'atl' } }, senses: [{ glosses: { en: 'water' } }] },
+  e2: { id: 'e2', main: { lexeme: { default: 'tletl' } }, senses: [{ glosses: { en: 'fire' } }] },
+})
+
 const shared_props = {
   dictionary,
   url_from_storage_path: (path: string) => `https://lh3.example/${path}`,
@@ -37,6 +42,10 @@ export const ManagerWithMedia: PageStory<typeof Component> = {
 
 export const ManagerEmpty: PageStory<typeof Component> = {
   props: { ...(shared_props as object), is_manager: true, entries_data: entries_store({}) } as never,
+}
+
+export const ManagerWithoutMedia: PageStory<typeof Component> = {
+  props: { ...(shared_props as object), is_manager: true, entries_data: without_media } as never,
 }
 
 export const NotManager: PageStory<typeof Component> = {
