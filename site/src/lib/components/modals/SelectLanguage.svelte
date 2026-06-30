@@ -1,15 +1,15 @@
 <script lang="ts">
   import { Button, Modal } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/changeLocale'
 
-  const { auth_user } = $derived($page.data)
+  const { auth_user } = $derived(page.data)
 </script>
 
 <Modal on:close>
   {#snippet heading()}
     <span>
-      {$page.data.t('header.select_language')}
+      {page.data.t('header.select_language')}
     </span>
   {/snippet}
 
@@ -18,7 +18,7 @@
       <Button
         class="locale-button"
         color="black"
-        form={$page.data.locale.includes(bcp) ? 'filled' : 'simple'}
+        form={page.data.locale.includes(bcp) ? 'filled' : 'simple'}
         onclick={() => changeLocale(bcp)}>
         {name}
       </Button>
@@ -28,7 +28,7 @@
         <Button
           class="locale-button"
           color="black"
-          form={$page.data.locale.includes(bcp) ? 'filled' : 'simple'}
+          form={page.data.locale.includes(bcp) ? 'filled' : 'simple'}
           onclick={() => changeLocale(bcp)}>
           {name}
           <i class="far fa-key"></i>

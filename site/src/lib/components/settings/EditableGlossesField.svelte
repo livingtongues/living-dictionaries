@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IGlossLanguages } from '$lib/types'
   import { BadgeArrayEmit, Button, Modal, ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
 
   interface Props {
@@ -22,20 +22,20 @@
 
   const activeGlossingBcps = $derived(Array.isArray(selectedLanguages)
     ? selectedLanguages.map(bcp =>
-      $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: availableLanguages[bcp].vernacularName }),
+      page.data.t({ dynamicKey: `gl.${bcp}`, fallback: availableLanguages[bcp].vernacularName }),
     )
     : [])
   const remainingGlossingLanguagesAsArray = $derived(Object.entries(availableLanguages)
     .map(e => ({
       bcp: e[0],
       ...e[1],
-      localizedName: $page.data.t({ dynamicKey: `gl.${e[0]}`, fallback: e[0] }),
+      localizedName: page.data.t({ dynamicKey: `gl.${e[0]}`, fallback: e[0] }),
     }))
     .filter(e => !selectedLanguages.includes(e.bcp)))
 </script>
 
 <div class="section-title">
-  {$page.data.t('create.gloss_dictionary_in')}
+  {page.data.t('create.gloss_dictionary_in')}
 </div>
 
 <ShowHide>
@@ -44,20 +44,20 @@
       strings={activeGlossingBcps}
       {minimum}
       canEdit
-      addMessage={$page.data.t('misc.add')}
+      addMessage={page.data.t('misc.add')}
       on_itemremoved={({ index }) => remove_language(selectedLanguages[index])}
       on_additem={toggle} />
     {#if show}
       <Modal on:close={toggle}>
         {#snippet heading()}
           <span>
-            {$page.data.t('create.gloss_dictionary_in')}
+            {page.data.t('create.gloss_dictionary_in')}
           </span>
         {/snippet}
         <Filter
           items={remainingGlossingLanguagesAsArray}
 
-          placeholder={$page.data.t('about.search')}>
+          placeholder={page.data.t('about.search')}>
           {#snippet children({ filteredItems: filteredLanguages })}
             {#each filteredLanguages as language (language.bcp)}
               <Button
@@ -68,12 +68,12 @@
                 color="green"
                 form="simple"
                 class="language-option">
-                {language.vernacularName || $page.data.t({ dynamicKey: `gl.${language.bcp}`, fallback: language.bcp })}
+                {language.vernacularName || page.data.t({ dynamicKey: `gl.${language.bcp}`, fallback: language.bcp })}
                 {#if language.vernacularAlternate}
                   {language.vernacularAlternate}
                 {/if}
                 {#if language.vernacularName}
-                  <small>({$page.data.t({ dynamicKey: `gl.${language.bcp}`, fallback: language.bcp })})</small>
+                  <small>({page.data.t({ dynamicKey: `gl.${language.bcp}`, fallback: language.bcp })})</small>
                 {/if}
               </Button>
             {/each}
@@ -88,8 +88,8 @@
 </ShowHide>
 
 <div class="hint">
-  {$page.data.t('create.gloss_dictionary_clarification')}
-  {$page.data.t('settings.unable_to_delete')}
+  {page.data.t('create.gloss_dictionary_clarification')}
+  {page.data.t('settings.unable_to_delete')}
 </div>
 
 <style>

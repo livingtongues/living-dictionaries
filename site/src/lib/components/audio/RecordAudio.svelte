@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import type { Options, StereoAudioRecorder } from 'recordrtc'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { Button } from '$lib/svelte-pieces'
   import IconUilMicrophone from '~icons/uil/microphone'
 
@@ -32,7 +32,7 @@
       permissionGranted = true
       setTimeout(turnOffMic, 60)
     } catch (err) {
-      alert(`${$page.data.t('misc.error')}: ${err}`)
+      alert(`${page.data.t('misc.error')}: ${err}`)
     }
   }
 
@@ -85,7 +85,7 @@
         // @ts-ignore
         (err) => {
           turnOffMic()
-          alert(`${$page.data.t('misc.error')}: ${err}`)
+          alert(`${page.data.t('misc.error')}: ${err}`)
         },
       )
     }
@@ -106,11 +106,11 @@
   {#if !permissionGranted}
     {#if permissionDenied && RecordRTC}
       <div>
-        {$page.data.t('audio.undo_permission_denied_explanation')}
+        {page.data.t('audio.undo_permission_denied_explanation')}
       </div>
 
       <div>
-        <Button class="record-spaced" size="sm" onclick={() => location.reload()}>{$page.data.t('audio.reload')}</Button>
+        <Button class="record-spaced" size="sm" onclick={() => location.reload()}>{page.data.t('audio.reload')}</Button>
         <Button
           size="sm"
           class="record-spaced"
@@ -118,25 +118,25 @@
           color="green"
           href="https://www.google.com/search?q=How+do+I+enable+microphone+access"
           target="_blank"
-          rel="noopener">{$page.data.t('audio.learn_more')}</Button>
+          rel="noopener">{page.data.t('audio.learn_more')}</Button>
       </div>
     {:else}
       <Button onclick={checkAudioPermissions} class="record-full">
         <IconUilMicrophone class="icon-inline" />
-        {$page.data.t('audio.prepare_to_record')}
+        {page.data.t('audio.prepare_to_record')}
       </Button>
     {/if}
   {:else if !recorder}
     <Button onclick={record} color="red" class="record-full record-tall">
-      {$page.data.t('audio.tap_to_record')}
+      {page.data.t('audio.tap_to_record')}
     </Button>
     <div class="record-hint">
-      ({$page.data.t('audio.tapToStopRecording')})
+      ({page.data.t('audio.tapToStopRecording')})
     </div>
   {:else}
     <Button onclick={stop} color="red" class="record-full record-tall">
       <div class="recording-time">{recordingTime}s</div>
-      {$page.data.t('audio.stop_recording')}
+      {page.data.t('audio.stop_recording')}
     </Button>
   {/if}
 

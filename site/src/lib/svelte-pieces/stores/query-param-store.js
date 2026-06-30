@@ -1,6 +1,10 @@
 import { writable } from 'svelte/store'
 import { cleanObject } from './clean-object'
 import { goto } from '$app/navigation'
+// Deliberately on the deprecated `$app/stores`: this is a custom store factory whose
+// writable `start` notifier needs to imperatively `page.subscribe(...)` to URL changes,
+// outside any component/effect context. `$app/state`'s rune-based `page` exposes no
+// `.subscribe`, so it can't replace this without a component to host an `$effect`.
 import { page } from '$app/stores'
 
 function stringify(value, cleanFalseValues) {

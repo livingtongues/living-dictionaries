@@ -5,7 +5,7 @@
   import type { IColumn } from '$lib/types'
   import ColumnTitle from './ColumnTitle.svelte'
   import { Slideover } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconFa6SolidChevronUp from '~icons/fa6-solid/chevron-up'
   import IconFa6SolidChevronDown from '~icons/fa6-solid/chevron-down'
   import IconTeenyiconsThumbtackSolid from '~icons/teenyicons/thumbtack-solid'
@@ -18,7 +18,7 @@
   }
 
   const { selectedColumn }: Props = $props()
-  const { preferred_table_columns } = $derived($page.data)
+  const { preferred_table_columns } = $derived(page.data)
 
   let selectedColumnElement: HTMLElement = $state()
   let widthToDisplay: string = $state()
@@ -51,7 +51,7 @@
 
 <Slideover on:close>
   {#snippet title()}
-    <span>{$page.data.t('column.adjust_columns')}</span>
+    <span>{page.data.t('column.adjust_columns')}</span>
   {/snippet}
 
   <ul>
@@ -131,7 +131,7 @@
     transition:fade
     class="width-toast">
     <div class="width-bubble">
-      {$page.data.t('column.width')}:
+      {page.data.t('column.width')}:
       {widthToDisplay}
     </div>
   </div>

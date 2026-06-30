@@ -8,7 +8,7 @@
   import Textbox from './cells/Textbox.svelte'
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte'
   import { ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
@@ -42,7 +42,7 @@
   // row subscription. The audit columns + dirty are auto-stamped; the Orama
   // watcher reflects the write back into the read-model. (Sentences/photos stay
   // on `dbOperations` — multi-table.)
-  const dict_db = $derived($page.data.dict_db)
+  const dict_db = $derived(page.data.dict_db)
   function update_entry(update: TablesUpdate<'entries'>) {
     dict_db?.entries.update({ ...update, id: entry.id })
   }
@@ -148,7 +148,7 @@
       <Textbox
         field={column.field}
         value={sentence?.text?.default}
-        display={$page.data.t('entry_field.example_sentence')}
+        display={page.data.t('entry_field.example_sentence')}
         on_update={async (new_value) => {
           if (!sentence?.id) {
             await dbOperations.insert_sentence({
@@ -167,7 +167,7 @@
         <Textbox
           field={column.field}
           value={sentence?.translation?.[column.bcp]}
-          display="{$page.data.t({ dynamicKey: `gl.${column.bcp}`, fallback: column.bcp })}: {$page.data.t('entry_field.example_sentence')}"
+          display="{page.data.t({ dynamicKey: `gl.${column.bcp}`, fallback: column.bcp })}: {page.data.t('entry_field.example_sentence')}"
           on_update={async (new_value) => {
             await dbOperations.update_sentence({
               translation: {
@@ -185,7 +185,7 @@
     <Textbox
       field={column.field}
       value={entry.main.scientific_names?.[0]}
-      display={$page.data.t('entry_field.scientific_names')}
+      display={page.data.t('entry_field.scientific_names')}
       on_update={(new_value) => {
         entry.main.scientific_names = [new_value]
         update_entry({ scientific_names: entry.main.scientific_names })
@@ -204,7 +204,7 @@
     <Textbox
       field={column.field}
       value={entry.main.lexeme.default}
-      display={$page.data.t('entry_field.lexeme')}
+      display={page.data.t('entry_field.lexeme')}
       on_update={(new_value) => {
         if (new_value) {
           entry.main.lexeme.default = new_value
@@ -215,7 +215,7 @@
     <Textbox
       field={column.field}
       value={entry.main.notes?.default}
-      display={$page.data.t('entry_field.notes')}
+      display={page.data.t('entry_field.notes')}
       on_update={(new_value) => {
         if (new_value) {
           entry.main.notes = { default: new_value }
@@ -226,7 +226,7 @@
     <Textbox
       field={column.field}
       value={entry.main.linguistic_history?.default}
-      display={$page.data.t('entry_field.linguistic_history')}
+      display={page.data.t('entry_field.linguistic_history')}
       on_update={(new_value) => {
         if (new_value) {
           entry.main.linguistic_history = { default: new_value }
@@ -237,7 +237,7 @@
     <Textbox
       field={column.field}
       value={entry.main[column.field]}
-      display={$page.data.t(`entry_field.${column.field}`)}
+      display={page.data.t(`entry_field.${column.field}`)}
       on_update={(new_value) => {
         entry.main[column.field] = new_value
         update_entry({ [column.field]: new_value })
@@ -246,7 +246,7 @@
     <Textbox
       field={column.field}
       value={sense?.noun_class}
-      display={$page.data.t(`entry_field.${column.field}`)}
+      display={page.data.t(`entry_field.${column.field}`)}
       on_update={(new_value) => {
         sense.noun_class = new_value
         update_sense({ noun_class: new_value })
@@ -255,7 +255,7 @@
     <Textbox
       field={column.field}
       value={sense?.plural_form?.default}
-      display={$page.data.t(`entry_field.${column.field}`)}
+      display={page.data.t(`entry_field.${column.field}`)}
       on_update={(new_value) => {
         sense.plural_form = { default: new_value }
         update_sense({ plural_form: sense?.plural_form })

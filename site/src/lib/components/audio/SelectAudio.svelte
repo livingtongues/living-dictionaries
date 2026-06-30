@@ -1,7 +1,7 @@
 <script lang="ts">
   import { preventDefault } from 'svelte/legacy'
 
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   const unsupported_audio_formats = [
     'audio/aiff',
@@ -32,7 +32,7 @@
 
     // Client-side validation: Must be audio and smaller than 100MB.
     if (fileToCheck.type.split('/')[0] !== 'audio')
-      return alert(`${$page.data.t('upload.error')}`)
+      return alert(`${page.data.t('upload.error')}`)
 
     if (unsupported_audio_formats.includes(fileToCheck.type)
       || unsupported_audio_extensions.some(ext => fileToCheck.name.endsWith(ext))) {
@@ -42,7 +42,7 @@
     // Must be smaller than 100MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > 104857600) {
       return alert(
-        `${$page.data.t('upload.file_must_be_smaller')} 100MB`,
+        `${page.data.t('upload.file_must_be_smaller')} 100MB`,
       )
     }
 
@@ -66,8 +66,8 @@
 
   <i class="far fa-upload"></i>&nbsp;
   {dragging
-    ? $page.data.t('upload.drop_to_upload')
-    : $page.data.t('upload.select_audio_file')}
+    ? page.data.t('upload.drop_to_upload')
+    : page.data.t('upload.select_audio_file')}
 </label>
 
 <style>

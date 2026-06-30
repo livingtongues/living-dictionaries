@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     checked: boolean
@@ -22,11 +22,11 @@
       dispatch('changed', { checked: e.target.checked })
     }} />
   <label for="public" class="checkbox-label">
-    {$page.data.t('create.print_access')}
+    {page.data.t('create.print_access')}
   </label>
 </div>
 <div class="hint">
-  ({$page.data.t('settings.print_access_meaning')})
+  ({page.data.t('settings.print_access_meaning')})
 </div>
 
 <style>

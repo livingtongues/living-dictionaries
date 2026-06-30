@@ -6,7 +6,7 @@
   import { Button, Form, Modal } from '$lib/svelte-pieces'
   import { display_one_tap_button } from '$lib/auth/google-one-tap'
   import { get_auth_user } from '$lib/auth/user.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { invalidateAll } from '$app/navigation'
   import { dev } from '$app/environment'
   import { env as public_env } from '$env/dynamic/public'
@@ -86,7 +86,7 @@
 
 <Modal on:close={on_close}>
   {#snippet heading()}
-    <span>{$page.data.t('header.login')}
+    <span>{page.data.t('header.login')}
       {#if submitting_code}
         <IconSvgSpinners3DotsFade class="icon-inline" style="vertical-align: -4px" />
       {/if}
@@ -94,7 +94,7 @@
   {/snippet}
   {#if context === 'force'}
     <h4 class="create-account-nudge">
-      {$page.data.t('header.please_create_account')}
+      {page.data.t('header.please_create_account')}
     </h4>
   {/if}
 
@@ -103,7 +103,7 @@
       <div class="google-button" bind:this={button_parent}></div>
 
       <div class="or-divider">
-        {$page.data.t('misc.disjunctive').toUpperCase()}
+        {page.data.t('misc.disjunctive').toUpperCase()}
       </div>
     {/if}
     <Form onsubmit={sendCode}>
@@ -112,17 +112,17 @@
           <input
             type="email"
             use:autofocus
-            placeholder={$page.data.t('contact.email')}
+            placeholder={page.data.t('contact.email')}
             class="text-input"
             required
             bind:value={email} />
-          <Button class="send-code-button" {loading} form="filled" type="submit">{$page.data.t('account.send_code')}</Button>
+          <Button class="send-code-button" {loading} form="filled" type="submit">{page.data.t('account.send_code')}</Button>
         </div>
       {/snippet}
     </Form>
   {:else}
     <div class="code-sent-note">
-      {$page.data.t('account.enter_6_digit_code_sent_to')}: {email}
+      {page.data.t('account.enter_6_digit_code_sent_to')}: {email}
     </div>
     <input
       type="text"

@@ -3,7 +3,7 @@
 
   import type { DictionaryView } from '$lib/types'
   import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconCarbonSearch from '~icons/carbon/search'
   import IconLaTimes from '~icons/la/times'
 
@@ -39,7 +39,7 @@
 
 <ShowHide>
   {#snippet children({ show, toggle })}
-    <Button form="filled" class="find-button" onclick={toggle}><IconCarbonSearch class="icon-inline" style="font-size: 1.5rem" /> {$page.data.t('home.find_dictionary')}</Button>
+    <Button form="filled" class="find-button" onclick={toggle}><IconCarbonSearch class="icon-inline" style="font-size: 1.5rem" /> {page.data.t('home.find_dictionary')}</Button>
     <div class="search-divider"></div>
     <div style="margin-bottom: 0.5rem"></div>
 
@@ -54,7 +54,7 @@
             use:autofocus
             bind:value={searchString}
             class="form-input dark-border"
-            placeholder={$page.data.t('home.find_dictionary')} />
+            placeholder={page.data.t('home.find_dictionary')} />
           <button type="button" onclick={toggle} class="clear-button">
             <IconLaTimes class="icon-inline" style="color: color-mix(in srgb, var(--color) 45%, var(--background))" />
           </button>

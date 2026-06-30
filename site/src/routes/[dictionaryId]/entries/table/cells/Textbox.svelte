@@ -2,7 +2,7 @@
   import type { EntryFieldValue } from '$lib/types'
   import sanitize from 'xss'
   import { ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     value: string
@@ -21,7 +21,7 @@
     display,
     on_update,
   }: Props = $props()
-  const { can_edit } = $derived($page.data)
+  const { can_edit } = $derived(page.data)
 
   const sanitizedHtml = $derived(sanitize(htmlValue || value) || '')
 </script>

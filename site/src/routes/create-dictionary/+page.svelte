@@ -5,7 +5,7 @@
   import { onMount } from 'svelte'
   import { convertToFriendlyUrl } from './convertToFriendlyUrl'
   import { Button, Form } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import Footer from '$lib/components/shell/Footer.svelte'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
@@ -67,7 +67,7 @@
   })
 </script>
 
-<Header>{$page.data.t('create.create_new_dictionary')}</Header>
+<Header>{page.data.t('create.create_new_dictionary')}</Header>
 
 <Form
 
@@ -95,7 +95,7 @@ Use: ${conlang_use.trim()}`
   {#snippet children({ loading })}
     <div class="create-form">
       <label for="name" class="label-xl">
-        {$page.data.t('dictionary.name_of_language')}*
+        {page.data.t('dictionary.name_of_language')}*
       </label>
       <div class="input-shadow-wrap" style="margin-top: 0.5rem">
         <input
@@ -112,7 +112,7 @@ Use: ${conlang_use.trim()}`
           class="form-input" />
       </div>
       <div class="hint">
-        {$page.data.t('create.name_clarification')}
+        {page.data.t('create.name_clarification')}
       </div>
       <div class="spacer"></div>
 
@@ -144,18 +144,18 @@ Use: ${conlang_use.trim()}`
             placeholder="url" />
         </div>
         <div class="hint">
-          {$page.data.t('create.permanent_url_msg')}
-          {$page.data.t('create.only_letters_numbers')}
+          {page.data.t('create.permanent_url_msg')}
+          {page.data.t('create.only_letters_numbers')}
         </div>
         {#if urlToUse.length >= data.MIN_URL_LENGTH && !isUniqueURL}
           <div class="url-error">
-            {$page.data.t('create.choose_different_url')}
+            {page.data.t('create.choose_different_url')}
           </div>
         {/if}
         <div class="spacer"></div>
 
         <div class="label-sm stack-label">
-          {$page.data.t('create.conlang_question')}
+          {page.data.t('create.conlang_question')}
         </div>
 
         <label class="radio-label">
@@ -165,7 +165,7 @@ Use: ${conlang_use.trim()}`
             bind:group={conlang}
             value={true}
             required />
-          {$page.data.t('misc.assertion')}
+          {page.data.t('misc.assertion')}
         </label>
 
         <label class="radio-label">
@@ -174,41 +174,41 @@ Use: ${conlang_use.trim()}`
             name="conlang"
             bind:group={conlang}
             value={false} />
-          {$page.data.t('misc.negation')}
+          {page.data.t('misc.negation')}
         </label>
         <div class="spacer"></div>
 
         {#if !conlang}
           <div class="conlang-warning">
-            {$page.data.t('create.conlang_warning')}
+            {page.data.t('create.conlang_warning')}
           </div>
           <div class="spacer"></div>
         {/if}
 
         {#if conlang === true}
           <div class="conlang-info">
-            {$page.data.t('create.conlang_info_1')}
+            {page.data.t('create.conlang_info_1')}
           </div>
           <div class="conlang-info">
-            {$page.data.t('create.conlang_info_2')}
+            {page.data.t('create.conlang_info_2')}
           </div>
           <div class="spacer"></div>
           <div>
             <input type="checkbox" id="agreement" name="agreement" required />
-            <label for="agreement">{$page.data.t('create.agree_above')}</label>
+            <label for="agreement">{page.data.t('create.agree_above')}</label>
           </div>
           <div>
             <input type="checkbox" id="citeAgreement" name="citeAgreement" required />
-            <label for="citeAgreement">{$page.data.t('create.agree_to_cite')}</label>
+            <label for="citeAgreement">{page.data.t('create.agree_to_cite')}</label>
           </div>
           <div>
             <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" required />
-            <label for="non-commercialAgreement">{$page.data.t('create.agree_for_non-commercial')}</label>
+            <label for="non-commercialAgreement">{page.data.t('create.agree_for_non-commercial')}</label>
           </div>
           <div class="spacer"></div>
 
           <label class="label-sm stack-label" for="conlangInfo">
-            {$page.data.t('create.source_question')}
+            {page.data.t('create.source_question')}
           </label>
           <textarea
             name="conlangInfo"
@@ -224,7 +224,7 @@ Use: ${conlang_use.trim()}`
           <div class="spacer"></div>
 
           <label class="label-sm stack-label" for="conlangUse">
-            {$page.data.t('create.use_question')}
+            {page.data.t('create.use_question')}
           </label>
           <textarea
             name="conlangUse"
@@ -260,7 +260,7 @@ Use: ${conlang_use.trim()}`
           <div class="spacer"></div>
 
           <!-- <div class="label-sm stack-label">
-            {$page.data.t('create.language_used_by_community')}*
+            {page.data.t('create.language_used_by_community')}*
           </div>
 
           <label class="radio-label">
@@ -270,7 +270,7 @@ Use: ${conlang_use.trim()}`
               bind:group={language_used_by_community}
               value={true}
               required />
-            {$page.data.t('misc.assertion')}
+            {page.data.t('misc.assertion')}
           </label>
 
           <label class="radio-label">
@@ -279,7 +279,7 @@ Use: ${conlang_use.trim()}`
               name="languageUsedByCommunity"
               bind:group={language_used_by_community}
               value={false} />
-            {$page.data.t('misc.negation')}
+            {page.data.t('misc.negation')}
           </label>
           <div class="spacer" /> -->
         {/if}
@@ -345,7 +345,7 @@ Use: ${conlang_use.trim()}`
           <div class="spacer"></div>
 
           <div class="label-sm stack-label">
-            {$page.data.t('create.community_permission')}*
+            {page.data.t('create.community_permission')}*
           </div>
           <label class="radio-label">
             <input
@@ -354,7 +354,7 @@ Use: ${conlang_use.trim()}`
               bind:group={community_permission}
               value="yes"
               required />
-            {$page.data.t('misc.assertion')}
+            {page.data.t('misc.assertion')}
           </label>
 
           <label class="radio-label">
@@ -363,7 +363,7 @@ Use: ${conlang_use.trim()}`
               name="communityPermission"
               bind:group={community_permission}
               value="no" />
-            {$page.data.t('misc.negation')}
+            {page.data.t('misc.negation')}
           </label>
 
           <label class="radio-label">
@@ -372,12 +372,12 @@ Use: ${conlang_use.trim()}`
               name="communityPermission"
               bind:group={community_permission}
               value="unknown" />
-            {$page.data.t('create.uncertainty')}
+            {page.data.t('create.uncertainty')}
           </label>
           <div class="spacer"></div>
 
           <label class="label-sm stack-label" for="authorConnection">
-            {$page.data.t('create.author_connection')}*
+            {page.data.t('create.author_connection')}*
           </label>
           <textarea
             name="authorConnection"
@@ -394,22 +394,22 @@ Use: ${conlang_use.trim()}`
 
           <div>
             <input type="checkbox" id="citeAgreement" name="citeAgreement" required />
-            <label for="citeAgreement">{$page.data.t('create.agree_to_cite')}</label>
+            <label for="citeAgreement">{page.data.t('create.agree_to_cite')}</label>
           </div>
           <div>
             <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" required />
-            <label for="non-commercialAgreement">{$page.data.t('create.agree_for_non-commercial')}</label>
+            <label for="non-commercialAgreement">{page.data.t('create.agree_for_non-commercial')}</label>
           </div>
           <div class="spacer"></div>
         {/if}
 
         <Button type="submit" class="submit-button" form="filled" {loading}>
-          {$page.data.t('create.create_dictionary')}
+          {page.data.t('create.create_dictionary')}
         </Button>
 
         <div class="terms-note">
-          {$page.data.t('terms.agree_by_submit')}
-          <a href="/terms" style="text-decoration-line: underline" target="_blank">{$page.data.t('dictionary.terms_of_use')}</a>.
+          {page.data.t('terms.agree_by_submit')}
+          <a href="/terms" style="text-decoration-line: underline" target="_blank">{page.data.t('dictionary.terms_of_use')}</a>.
         </div>
         <div class="spacer"></div>
       {/if}
@@ -430,7 +430,7 @@ Use: ${conlang_use.trim()}`
 <Footer />
 
 <SeoMetaTags
-  title={$page.data.t('create.create_new_dictionary')}
+  title={page.data.t('create.create_new_dictionary')}
   description="Build a new Living Dictionary in a few short steps. Create a title and set the URL, and then configure the settings. Living Dictionaries are comprehensive, free, online technological tools integrating audio, images and video."
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />
 

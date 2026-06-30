@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconMageFacebookSquare from '~icons/mage/facebook-square'
   import IconF7LogoInstagram from '~icons/f7/logo-instagram'
 
-  const { dictionaries } = $derived($page.data)
+  const { dictionaries } = $derived(page.data)
   const public_dictionaries = $derived($dictionaries?.filter(dictionary => dictionary.public).length || 0)
 
   const public_entries_count = 254813
@@ -11,14 +11,14 @@
 
 <footer>
   {#if public_dictionaries}
-    <span class="nowrap">{$page.data.t('footer.public_LD')}: <b>{public_dictionaries}</b>,</span>
+    <span class="nowrap">{page.data.t('footer.public_LD')}: <b>{public_dictionaries}</b>,</span>
   {/if}
-  <span class="nowrap">{$page.data.t('footer.entries')}: <b>{new Intl.NumberFormat().format(public_entries_count)}</b>,</span>
-  <span>{$page.data.t('footer.LD_project')} <a href="https://livingtongues.org/" target="_blank" class="lt-link">Living Tongues Institute for Endangered Languages.</a>
+  <span class="nowrap">{page.data.t('footer.entries')}: <b>{new Intl.NumberFormat().format(public_entries_count)}</b>,</span>
+  <span>{page.data.t('footer.LD_project')} <a href="https://livingtongues.org/" target="_blank" class="lt-link">Living Tongues Institute for Endangered Languages.</a>
   </span>
   <span class="nowrap legal-links">
-    <a href="/terms" class="lt-link">{$page.data.t('dictionary.terms_of_use')}</a>
-    <a href="/privacy-policy" class="lt-link">{$page.data.t('terms.privacy_policy')}</a>
+    <a href="/terms" class="lt-link">{page.data.t('dictionary.terms_of_use')}</a>
+    <a href="/privacy-policy" class="lt-link">{page.data.t('terms.privacy_policy')}</a>
   </span>
   <a href="https://www.facebook.com/living.tongues" target="_blank" class="social social-first"><IconMageFacebookSquare class="icon-inline" /></a>
   <a href="https://www.instagram.com/livingtongues" target="_blank" class="social"><IconF7LogoInstagram class="icon-inline" /></a>

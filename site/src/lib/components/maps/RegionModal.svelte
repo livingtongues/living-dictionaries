@@ -17,7 +17,7 @@
   import { randomColor } from './utils/randomColor'
   import Popup from './mapbox/map/Popup.svelte'
   import { Button, Modal, ReactiveSet } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     initialCenter?: LngLatFull
@@ -82,7 +82,7 @@
     <Modal on:close noscroll>
       {#snippet heading()}
         <span>
-          {$page.data.t('create.select_region')}
+          {page.data.t('create.select_region')}
         </span>
       {/snippet}
       <form onsubmit={preventDefault(() => update(points))}>
@@ -97,7 +97,7 @@
             <NavigationControl />
             <Geocoder
               options={{ marker: false }}
-              placeholder={$page.data.t('about.search')}
+              placeholder={page.data.t('about.search')}
               on:result={e => handleGeocoderResult(e, add)}
               on:error={e => console.error(e.detail)} />
             {#each Array.from(points) as point (point)}
@@ -152,13 +152,13 @@
 
         <div class="modal-footer">
           <Button onclick={() => dispatch('close')} form="simple" color="black">
-            {$page.data.t('misc.cancel')}
+            {page.data.t('misc.cancel')}
           </Button>
           <Button onclick={removeRegion} form="simple" color="red">
-            {$page.data.t('misc.remove')}
+            {page.data.t('misc.remove')}
           </Button>
           <Button type="submit" form="filled" disabled={size < 3}>
-            {$page.data.t('misc.save')}
+            {page.data.t('misc.save')}
           </Button>
         </div>
       </form>

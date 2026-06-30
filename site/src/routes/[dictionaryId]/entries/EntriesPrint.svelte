@@ -8,7 +8,7 @@
   import { truncateAuthors } from './print/truncateAuthors'
   import { Button, createPersistedStore } from '$lib/svelte-pieces'
   import type { QueryParamStore } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import type { QueryParams } from '$lib/search/types'
   import { api_dictionaries_partners_get } from '$api/dictionaries/[id]/partners/_call'
   import IconFaPrint from '~icons/fa/print'
@@ -53,11 +53,11 @@
     <div class="controls-row">
       <Button class="print-button" form="filled" type="button" onclick={() => window.print()}>
         <IconFaPrint class="icon-inline" style="margin-top: -0.25rem" />
-        {$page.data.t('entry.print')}
+        {page.data.t('entry.print')}
       </Button>
 
       <div class="control">
-        <label for="maxEntries">{$page.data.t('print.max_entries')}</label>
+        <label for="maxEntries">{page.data.t('print.max_entries')}</label>
         <input
           class="form-input number-input"
           id="maxEntries"
@@ -67,7 +67,7 @@
           bind:value={$search_params.entries_per_page} />
       </div>
       <div class="control">
-        <label for="columnCount">{$page.data.t('print.columns')}</label>
+        <label for="columnCount">{page.data.t('print.columns')}</label>
         <input
           class="form-input number-input"
           id="columnCount"
@@ -77,7 +77,7 @@
           bind:value={$columnCount} />
       </div>
       <div class="control">
-        <label for="headwordSize">{$page.data.t('print.headword_size')} (pt)</label>
+        <label for="headwordSize">{page.data.t('print.headword_size')} (pt)</label>
         <input
           class="form-input number-input"
           id="headwordSize"
@@ -87,7 +87,7 @@
           bind:value={$headwordSize} />
       </div>
       <div class="control">
-        <label for="fontSize">{$page.data.t('print.font_size')} (pt)</label>
+        <label for="fontSize">{page.data.t('print.font_size')} (pt)</label>
         <input
           class="form-input number-input narrow"
           id="fontSize"
@@ -97,7 +97,7 @@
           bind:value={$fontSize} />
       </div>
       <div class="control">
-        <label for="imageSize">{$page.data.t('misc.images')}:</label>
+        <label for="imageSize">{page.data.t('misc.images')}:</label>
         <input
           class="form-input number-input"
           id="imageSize"
@@ -112,7 +112,7 @@
 
   <div class="print-title">
     {dictionary.name}
-    {$page.data.t('misc.LD_singular')}
+    {page.data.t('misc.LD_singular')}
   </div>
 
   <div class="print-layout">
@@ -135,7 +135,7 @@
       dir="ltr"
       class="citation"
       style="writing-mode: tb; min-width: 0;">
-      {build_citation({ t: $page.data.t, dictionary, custom_citation: truncateAuthors(dictionary.citation), partners })}
+      {build_citation({ t: page.data.t, dictionary, custom_citation: truncateAuthors(dictionary.citation), partners })}
     </div>
   </div>
 {:else}

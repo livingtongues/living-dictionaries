@@ -5,7 +5,7 @@
   import { onMount } from 'svelte'
   import type { PageData } from './$types'
   import { Button, ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import ToggleStyle from '$lib/components/maps/mapbox/controls/ToggleStyle.svelte'
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
@@ -99,7 +99,7 @@
         onclick={() => (selectedDictionaryId = null)}>
         <IconFa6SolidChevronLeft class="icon-inline rtl-x-flip" />
         <div style="width: 0.25rem"></div>
-        {$page.data.t('misc.back')}
+        {page.data.t('misc.back')}
       </button>
       {#await import('$lib/components/home/SelectedDict.svelte') then { default: SelectedDict }}
         <SelectedDict dictionary={selectedDictionary} />
@@ -156,7 +156,7 @@
 <div class="cta-band">
 
   <div class="banner-text">
-    {$page.data.t('home.main_banner')}
+    {page.data.t('home.main_banner')}
   </div>
 
   <div style="text-align: center">
@@ -166,7 +166,7 @@
       size="lg"
       class="list-button">
       <IconFaSolidList class="icon-inline" style="margin-top: -0.25rem" />
-      {$page.data.t('home.list_of_dictionaries')}
+      {page.data.t('home.list_of_dictionaries')}
     </Button>
   </div>
 </div>
@@ -176,7 +176,7 @@
 <div class="create-cta">
   <Button href="/create-dictionary" size="lg" color="black" form="filled">
     <IconFaSolidPlus class="icon-inline" style="margin-top: -0.3125rem" />
-    {$page.data.t('create.create_new_dictionary')}
+    {page.data.t('create.create_new_dictionary')}
   </Button>
 </div>
 
@@ -288,6 +288,6 @@
 </style>
 
 <SeoMetaTags
-  title={$page.data.t('misc.LD')}
+  title={page.data.t('misc.LD')}
   description="Living Dictionaries are language documentation tools that support endangered and under-represented languages. This online platform was created by Living Tongues Institute for Endangered Languages as a free multimedia resource for community activists and linguists who want to build digital dictionaries and phrasebooks."
   keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Dictionary with audio, dictionary with pronunciations, dictionary with speakers, dictionaries that you can edit" />

@@ -1,6 +1,5 @@
 import type { IColumn, Tables } from '$lib/types'
-import { get } from 'svelte/store'
-import { page } from '$app/stores'
+import { page } from '$app/state'
 import { vernacularName } from '$lib/helpers/vernacularName'
 import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
 import { browser } from '$app/environment'
@@ -10,7 +9,7 @@ export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionarie
 
   const glossIndex = cols.findIndex(col => col.field === 'gloss')
   if (browser && glossIndex >= 0) {
-    const { data } = get(page)
+    const { data } = page
     const glossColumns: IColumn[] = []
     dictionary.gloss_languages.forEach((bcp) => {
       glossColumns.push({
@@ -27,7 +26,7 @@ export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionarie
 
   const exampleSentenceIndex = cols.findIndex(col => col.field === 'example_sentence')
   if (browser && exampleSentenceIndex >= 0) {
-    const { data } = get(page)
+    const { data } = page
     const exampleSentenceColumns: IColumn[] = [
       {
         field: 'example_sentence',

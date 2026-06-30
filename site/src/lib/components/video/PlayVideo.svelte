@@ -5,11 +5,11 @@
   import type { EntryData } from '$lib/types'
   import VideoThirdParty from './VideoThirdParty.svelte'
   import { Button } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconFaSolidTimes from '~icons/fa-solid/times'
   import IconFaTrashO from '~icons/fa/trash-o'
 
-  const { dbOperations, url_from_storage_path } = $derived($page.data)
+  const { dbOperations, url_from_storage_path } = $derived(page.data)
 
   interface Props {
     lexeme: string
@@ -53,11 +53,11 @@
           color="red"
           form="filled"
           onclick={async () => {
-            const confirmation = confirm($page.data.t('entry.delete_video'))
+            const confirmation = confirm(page.data.t('entry.delete_video'))
             if (confirmation) await dbOperations.delete_video(video.id)
           }}>
           <IconFaTrashO class="icon-inline" style="margin: -1px 0 2px;" />
-          {$page.data.t('misc.delete')}
+          {page.data.t('misc.delete')}
         </Button>
       </div>
     {/if}
@@ -128,7 +128,7 @@
           target="_blank">
           <i class="fas fa-download" />
           <span class="hidden sm:inline"
-            >{$page.data.t('misc.download', {
+            >{page.data.t('misc.download', {
               default: 'Download',
             })}</span>
         </Button>

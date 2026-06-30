@@ -1,12 +1,11 @@
-import { get } from 'svelte/store'
-import { page } from '$app/stores'
+import { page } from '$app/state'
 import { api_dictionary_invite } from '$api/email/invite/_call'
 
 export async function inviteHelper(
   role: 'manager' | 'contributor',
   dictionary_id: string,
 ) {
-  const { data: { t } } = get(page)
+  const { data: { t } } = page
 
   const target_email = prompt(`${t('contact.email')}?`)
   if (!target_email) return

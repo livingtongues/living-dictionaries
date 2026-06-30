@@ -2,7 +2,7 @@
   import type { EntryData, Tables } from '$lib/types'
   import EntryField from './EntryField.svelte'
   import EntrySentence from './EntrySentence.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
@@ -17,13 +17,13 @@
 
   const { sense, glossLanguages, can_edit = false }: Props = $props()
 
-  const dictionary = $derived($page.data.dictionary)
-  const dbOperations = $derived($page.data.dbOperations)
+  const dictionary = $derived(page.data.dictionary)
+  const dbOperations = $derived(page.data.dbOperations)
 
   // Scalar sense fields render + save off the live `dict_db` senses row (mutate,
   // then `_save()` — auto-stamps editor + dirty); the Orama watcher reflects each
   // save back into the read-model. Sentences stay on `dbOperations` (multi-table).
-  const dict_db = $derived($page.data.dict_db)
+  const dict_db = $derived(page.data.dict_db)
   const sense_row = $derived(dict_db?.senses.id(sense.id))
   // Display values prefer the live row, falling back to the read-model `sense`
   // so the sense renders server-side / during the cold window before the live
@@ -46,7 +46,7 @@
     field="gloss"
     {bcp}
     {can_edit}
-    display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${$page.data.t('entry_field.gloss')}`}
+    display={`${page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${page.data.t('entry_field.gloss')}`}
     on_update={(new_value) => {
       save_sense({ glosses: { ...sense_row?.glosses, [bcp]: new_value } })
     }} />
@@ -66,7 +66,7 @@
 
 {#if sense_fields?.parts_of_speech?.length || can_edit}
   <div class="side-section" class:at-end={!sense_fields?.parts_of_speech?.length}>
-    <div class="section-label">{$page.data.t('entry_field.parts_of_speech')}</div>
+    <div class="section-label">{page.data.t('entry_field.parts_of_speech')}</div>
     <EntryPartOfSpeech
       value={sense_fields?.parts_of_speech}
       {can_edit}
@@ -77,7 +77,7 @@
 
 {#if hasSemanticDomain || can_edit}
   <div class="side-section" class:at-end={!hasSemanticDomain}>
-    <div class="section-label">{$page.data.t('entry_field.semantic_domains')}</div>
+    <div class="section-label">{page.data.t('entry_field.semantic_domains')}</div>
     <EntrySemanticDomains
       {can_edit}
       semantic_domain_keys={sense_fields?.semantic_domains}
@@ -92,7 +92,7 @@
   value={sense_fields?.noun_class}
   field="noun_class"
   {can_edit}
-  display={$page.data.t('entry_field.noun_class')}
+  display={page.data.t('entry_field.noun_class')}
   on_update={new_value => save_sense({ noun_class: new_value })} />
 
 {#if sense.sentences?.length}
@@ -108,7 +108,7 @@
     type="button"
     class="add-sentence"
     onclick={() => dbOperations.insert_sentence({ sentence: {}, sense_id: sense.id })}>
-    <IconSystemUiconsVersions class="icon-inline" style="font-size: 1.25rem" /> {$page.data.t('sentence.add')}
+    <IconSystemUiconsVersions class="icon-inline" style="font-size: 1.25rem" /> {page.data.t('sentence.add')}
   </button>
 {/if}
 
@@ -116,7 +116,7 @@
   value={sense_fields?.plural_form?.default}
   field="plural_form"
   {can_edit}
-  display={$page.data.t('entry_field.plural_form')}
+  display={page.data.t('entry_field.plural_form')}
   on_update={new_value => save_sense({ plural_form: { default: new_value } })} />
 
 {#if DICTIONARIES_WITH_VARIANTS.includes(dictionary.id)}
@@ -124,7 +124,7 @@
     value={sense_fields?.variant?.default}
     field="variant"
     {can_edit}
-    display={$page.data.t('entry_field.variant')}
+    display={page.data.t('entry_field.variant')}
     on_update={new_value => save_sense({ variant: { ...sense_row?.variant, default: new_value } })} />
 {/if}
 

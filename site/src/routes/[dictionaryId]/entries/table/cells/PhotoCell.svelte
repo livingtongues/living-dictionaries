@@ -1,8 +1,8 @@
 <script lang="ts">
   import { browser } from '$app/environment'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
-  const { can_edit } = $derived($page.data)
+  const { can_edit } = $derived(page.data)
 
   const { column, row } = $props()
 </script>

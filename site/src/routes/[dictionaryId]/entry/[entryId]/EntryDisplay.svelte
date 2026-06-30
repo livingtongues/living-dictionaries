@@ -4,7 +4,7 @@
   import EntryMedia from './EntryMedia.svelte'
   import Sense from './Sense.svelte'
   import { Button } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import type { DbOperations } from '$lib/dbOperations'
@@ -33,7 +33,7 @@
   // list/gallery/table/SEO surfaces use. Multi-table concerns (senses, media,
   // dialects, tags) stay on `dbOperations`/the read-model for now. See
   // `.issues/livedb-scalar-field-migration.md`.
-  const dict_db = $derived($page.data.dict_db)
+  const dict_db = $derived(page.data.dict_db)
   const entry_row = $derived(dict_db?.entries.id(entry.id))
   // Display values prefer the live row, but fall back to the read-model
   // (`entry.main`) so the entry renders server-side / during the cold window
@@ -54,7 +54,7 @@
       value={fields?.lexeme?.default}
       field="lexeme"
       {can_edit}
-      display={$page.data.t('entry_field.lexeme')}
+      display={page.data.t('entry_field.lexeme')}
       on_update={(new_value) => {
         if (new_value)
           save_entry({ lexeme: { ...entry_row?.lexeme, default: new_value } })
@@ -82,7 +82,7 @@
       value={fields?.phonetic}
       field="phonetic"
       {can_edit}
-      display={$page.data.t('entry_field.phonetic')}
+      display={page.data.t('entry_field.phonetic')}
       on_update={new_value => save_entry({ phonetic: new_value })} />
 
     {#each entry.senses || [] as sense, index (sense.id)}
@@ -90,13 +90,13 @@
         <Sense {sense} glossLanguages={dictionary.gloss_languages} {can_edit} />
 
         {#if can_edit}
-          <Button class="add-sense-button" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><IconSystemUiconsVersions class="icon-inline" style="font-size: 1.25rem" /> {$page.data.t('sense.add')}</Button>
+          <Button class="add-sense-button" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><IconSystemUiconsVersions class="icon-inline" style="font-size: 1.25rem" /> {page.data.t('sense.add')}</Button>
         {/if}
       {:else}
         <div class="sense-block">
           <div class="sense-header">
             <div>
-              {$page.data.t('sense.sense')} {index + 1}
+              {page.data.t('sense.sense')} {index + 1}
             </div>
             <div style="margin-left: auto; margin-right: auto"></div>
             {#if can_edit}
@@ -114,7 +114,7 @@
 
     {#if entry.dialects?.length || can_edit}
       <div class="side-section" class:at-end={!entry.dialects?.length}>
-        <div class="section-label">{$page.data.t('entry_field.dialects')}</div>
+        <div class="section-label">{page.data.t('entry_field.dialects')}</div>
         <EntryDialect
           entry_id={entry.id}
           {can_edit}
@@ -125,7 +125,7 @@
 
     {#if entry.tags?.length || can_edit}
       <div class="side-section" class:at-end={!entry.tags?.length}>
-        <div class="section-label">{$page.data.t('entry_field.custom_tags')}</div>
+        <div class="section-label">{page.data.t('entry_field.custom_tags')}</div>
         <EntryTag
           entry_id={entry.id}
           {can_edit}
@@ -138,40 +138,40 @@
       value={fields?.scientific_names?.[0]}
       field="scientific_names"
       {can_edit}
-      display={$page.data.t('entry_field.scientific_names')}
+      display={page.data.t('entry_field.scientific_names')}
       on_update={new_value => save_entry({ scientific_names: [new_value] })} />
 
     <EntryField
       value={fields?.morphology}
       field="morphology"
       {can_edit}
-      display={$page.data.t('entry_field.morphology')}
+      display={page.data.t('entry_field.morphology')}
       on_update={new_value => save_entry({ morphology: new_value })} />
 
     <EntryField
       value={fields?.interlinearization}
       field="interlinearization"
       {can_edit}
-      display={$page.data.t('entry_field.interlinearization')}
+      display={page.data.t('entry_field.interlinearization')}
       on_update={new_value => save_entry({ interlinearization: new_value })} />
 
     <EntryField
       value={fields?.notes?.default}
       field="notes"
       {can_edit}
-      display={$page.data.t('entry_field.notes')}
+      display={page.data.t('entry_field.notes')}
       on_update={new_value => save_entry({ notes: { default: new_value } })} />
 
     <EntryField
       value={fields?.linguistic_history?.default}
       field="linguistic_history"
       {can_edit}
-      display={$page.data.t('entry_field.linguistic_history')}
+      display={page.data.t('entry_field.linguistic_history')}
       on_update={new_value => save_entry({ linguistic_history: { default: new_value } })} />
 
     {#if fields?.sources?.length || can_edit}
       <div class="side-section" class:at-end={!fields?.sources?.length}>
-        <div class="section-label">{$page.data.t('entry_field.sources')}</div>
+        <div class="section-label">{page.data.t('entry_field.sources')}</div>
         <EntrySource
           {can_edit}
           value={fields?.sources}

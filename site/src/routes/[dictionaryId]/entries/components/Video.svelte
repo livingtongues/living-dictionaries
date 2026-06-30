@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { EntryData } from '$lib/types'
   import { ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconBiCameraVideo from '~icons/bi/camera-video'
 
   interface Props {
@@ -21,7 +21,7 @@
       onclick={toggle}>
       <IconBiCameraVideo class="icon-inline" style="font-size: 1.25rem; margin-top: 0.25rem" />
       <div class="view-label">
-        {$page.data.t('video.view')}
+        {page.data.t('video.view')}
       </div>
     </div>
     {#if show}

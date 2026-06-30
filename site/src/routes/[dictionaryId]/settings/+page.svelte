@@ -1,7 +1,7 @@
 <script lang="ts">
   import EditString from '../EditString.svelte'
   import { Button, JSON, ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
   import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
@@ -19,7 +19,7 @@
 </script>
 
 <div style="max-width: 700px">
-  <h3 class="settings-heading">{$page.data.t('misc.settings')}</h3>
+  <h3 class="settings-heading">{page.data.t('misc.settings')}</h3>
 
   <EditString
     value={dictionary.name}
@@ -28,7 +28,7 @@
     required
     id="name"
     save={async name => await updateDictionary({ name })}
-    display={$page.data.t('settings.edit_dict_name')} />
+    display={page.data.t('settings.edit_dict_name')} />
   <div style="margin-bottom: 1.25rem"></div>
 
   {#if !dictionary.con_language_description}
@@ -78,11 +78,11 @@
       maxlength={100}
       id="location"
       save={async location => await updateDictionary({ location })}
-      display={$page.data.t('dictionary.location')} />
+      display={page.data.t('dictionary.location')} />
     <div style="margin-bottom: 1.25rem"></div>
 
     <div class="section-label">
-      {$page.data.t('settings.featured_image')}
+      {page.data.t('settings.featured_image')}
     </div>
     {#if dictionary.featured_image}
       <Image
@@ -114,11 +114,11 @@
           await updateDictionary({ public: 1 })
           dictionary.public = 1
         } else if (about_is_too_short()) {
-          alert($page.data.t('about.message'))
+          alert(page.data.t('about.message'))
           goto(`/${dictionary.id}/about`)
         } else {
-          const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
-          if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
+          const communityAllowsOnline = confirm(page.data.t('settings.community_permission'))
+          if (communityAllowsOnline) alert(page.data.t('header.contact_us'))
         }
         dictionary.public = 0
       }} />
@@ -132,8 +132,8 @@
       <ShowHide>
         {#snippet children({ show, toggle })}
           <Button onclick={toggle} class="delete-dict-button" color="red">
-            {$page.data.t('settings.delete_dictionary')}:
-            {$page.data.t('header.contact_us')}
+            {page.data.t('settings.delete_dictionary')}:
+            {page.data.t('header.contact_us')}
           </Button>
           {#if show}
             {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
@@ -154,7 +154,7 @@
 
 <SeoMetaTags
   norobots={!dictionary.public}
-  title={$page.data.t('misc.settings')}
+  title={page.data.t('misc.settings')}
   dictionaryName={dictionary.name}
   description="Under Settings, dictionary managers can edit the dictionary\'s parameters such as its name, ISO 639-3 Code, Glottocode, translation languages, alternate names, geo-coordinates, and other information. They can also toggle on or off the ability to make the dictionary public, and the ability to make the dictionary printable to viewers."
   keywords="Settings, Parameters, ISO 639-3, Glottocde, glossing languages, alternate names, GPS, language medata, public dictionary, private dictionary, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { BadgeArray } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
 
   interface Props {
@@ -17,14 +17,14 @@
     class="remove-button-mb"
     strings={value || []}
     canEdit={can_edit}
-    promptMessage={$page.data.t('entry_field.sources')}
+    promptMessage={page.data.t('entry_field.sources')}
     addMessage=""
     on_valueupdated={value => on_update(value)}>
     {#snippet add({ add })}
 
       <button type="button" onclick={add} class="add-source">
         <IconFaSolidPlus class="icon-inline" style="margin-bottom: 0.25rem" />
-        {$page.data.t('misc.add')}
+        {page.data.t('misc.add')}
       </button>
 
     {/snippet}

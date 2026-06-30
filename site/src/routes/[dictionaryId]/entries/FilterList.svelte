@@ -2,7 +2,7 @@
   import { slide } from 'svelte/transition'
   import { ShowHide } from '$lib/svelte-pieces'
   import type { QueryParamStore } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import type { FilterListKeys, QueryParams } from '$lib/search/types'
   import IconFa6SolidChevronUp from '~icons/fa6-solid/chevron-up'
@@ -49,7 +49,7 @@
   <div class="search-wrap">
     <input
       type="search"
-      placeholder="{$page.data.t('about.search')} {label}"
+      placeholder="{page.data.t('about.search')} {label}"
       class="form-input"
       bind:value={search_value} />
   </div>
@@ -88,10 +88,10 @@
       <button type="button" class="show-more" onclick={toggle}>
         {#if show}
           <IconFa6SolidChevronUp class="icon-inline" />
-          {$page.data.t('entry.show_less')}
+          {page.data.t('entry.show_less')}
         {:else}
           <IconFa6SolidChevronDown class="icon-inline" style="margin-top: -0.25rem" />
-          {$page.data.t('entry.show_more')}
+          {page.data.t('entry.show_more')}
         {/if}
       </button>
     {/if}

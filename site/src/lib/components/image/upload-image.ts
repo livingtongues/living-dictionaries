@@ -1,8 +1,8 @@
-import { get, writable } from 'svelte/store'
+import { writable } from 'svelte/store'
 import type { Readable } from 'svelte/store'
 import { api_gcs_serving_url } from '$api/gcs_serving_url/_call'
 import { api_upload } from '$api/upload/_call'
-import { page } from '$app/stores'
+import { page } from '$app/state'
 import { DEV_LOCAL_PREFIX } from '$lib/helpers/media'
 
 export interface ImageUploadStatus {
@@ -26,7 +26,7 @@ export function upload_image({
   const { set, subscribe } = writable<ImageUploadStatus>({ progress: 0, preview_url });
 
   (async () => {
-    const { data: { dictionary } } = get(page)
+    const { data: { dictionary } } = page
     const { data: { presigned_upload_url, bucket, object_key, dev_mock }, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name: file.name, file_type: file.type })
     if (error) {
       console.error(error)

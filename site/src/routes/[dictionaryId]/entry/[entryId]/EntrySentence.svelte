@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Tables } from '$lib/types'
   import EntryField from './EntryField.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconSystemUiconsTrash from '~icons/system-uicons/trash'
 
   interface Props {
@@ -18,7 +18,7 @@
     sense_id,
   }: Props = $props()
 
-  const { dbOperations } = $derived($page.data)
+  const { dbOperations } = $derived(page.data)
 
   const writing_systems = ['default']
 </script>
@@ -28,7 +28,7 @@
     <button
       type="button"
       class="delete-sentence"
-      title={$page.data.t('sentence.delete')}
+      title={page.data.t('sentence.delete')}
       onclick={() => dbOperations.delete_sentence(sentence.id)}>
       <IconSystemUiconsTrash class="icon-inline" style="font-size: 1.25rem" />
     </button>
@@ -39,7 +39,7 @@
       value={sentence.text?.[orthography]}
       field="example_sentence"
       {can_edit}
-      display={$page.data.t('entry_field.example_sentence')}
+      display={page.data.t('entry_field.example_sentence')}
       on_update={(new_value) => {
         if (!sentence.id) {
           dbOperations.insert_sentence({
@@ -62,7 +62,7 @@
         field="example_sentence"
         {bcp}
         {can_edit}
-        display="{$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: {$page.data.t('entry_field.example_sentence')}"
+        display="{page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: {page.data.t('entry_field.example_sentence')}"
         on_update={(new_value) => {
           dbOperations.update_sentence({
             translation: {

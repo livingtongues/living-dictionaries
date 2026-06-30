@@ -2,7 +2,7 @@
   import type { EntryData, Tables } from '$lib/types'
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/helpers/glosses'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     entry: EntryData
@@ -12,12 +12,12 @@
 
   const { entry, can_edit = false, dictionary }: Props = $props()
 
-  const { dbOperations } = $derived($page.data)
+  const { dbOperations } = $derived(page.data)
 
   const glosses = $derived(order_glosses({
     glosses: entry.senses?.[0]?.glosses,
     dictionary_gloss_languages: dictionary.gloss_languages,
-    t: $page.data.t,
+    t: page.data.t,
     label: true,
   }))
 

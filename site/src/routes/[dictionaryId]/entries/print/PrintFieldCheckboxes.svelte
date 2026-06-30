@@ -3,7 +3,7 @@
   import type { EntryData, IPrintFields } from '$lib/types'
 
   import type { createPersistedStore } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     entries: EntryData[]
@@ -48,20 +48,20 @@
 {#each fieldsThatExist as field (field)}
   <div class="checkbox-row">
     <input id={field} type="checkbox" bind:checked={$preferredPrintFields[field]} />
-    <label for={field}>{$page.data.t(`entry_field.${field}`)}</label>
+    <label for={field}>{page.data.t(`entry_field.${field}`)}</label>
   </div>
 {/each}
 
 {#if showingFieldsWithLabels}
   <div class="checkbox-row">
     <input id="showLabels" type="checkbox" bind:checked={$showLabels} />
-    <label for="showLabels">{$page.data.t('print.labels')}</label>
+    <label for="showLabels">{page.data.t('print.labels')}</label>
   </div>
 {/if}
 
 <div class="checkbox-row">
   <input id="showLabels" type="checkbox" bind:checked={$showQrCode} />
-  <label for="showLabels">{$page.data.t('print.qr_code')}</label>
+  <label for="showLabels">{page.data.t('print.qr_code')}</label>
 </div>
 
 <style>

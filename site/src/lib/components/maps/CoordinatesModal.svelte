@@ -10,7 +10,7 @@
   import NavigationControl from './mapbox/controls/NavigationControl.svelte'
   import { setMarker } from './utils/setCoordinatesToMarker'
   import { Button, Modal } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     initialCenter?: LngLatFull
@@ -73,7 +73,7 @@
 <Modal on:close noscroll>
   {#snippet heading()}
     <span>
-      {$page.data.t('create.select_coordinates')}
+      {page.data.t('create.select_coordinates')}
     </span>
   {/snippet}
   <form onsubmit={preventDefault(update)}>
@@ -91,7 +91,7 @@
             min="-90"
             bind:value={lat}
             class="form-input lat-input"
-            placeholder={$page.data.t('dictionary.latitude')} />
+            placeholder={page.data.t('dictionary.latitude')} />
         </div>
         <div style="width: 0.25rem"></div>
 
@@ -107,7 +107,7 @@
             min="-180"
             bind:value={lng}
             class="form-input lng-input"
-            placeholder={$page.data.t('dictionary.longitude')} />
+            placeholder={page.data.t('dictionary.longitude')} />
         </div>
       </div>
     </div>
@@ -122,7 +122,7 @@
         <NavigationControl />
         <Geocoder
           options={{ marker: false }}
-          placeholder={$page.data.t('about.search')}
+          placeholder={page.data.t('about.search')}
           on:result={handleGeocoderResult}
           on:error={e => console.error(e.detail)} />
         {#if lng && lat}
@@ -138,15 +138,15 @@
 
     <div class="modal-footer">
       <Button onclick={() => dispatch('close')} form="simple" color="black">
-        {$page.data.t('misc.cancel')}
+        {page.data.t('misc.cancel')}
       </Button>
       {#if canRemove}
         <Button onclick={remove} form="simple" color="red">
-          {$page.data.t('misc.remove')}
+          {page.data.t('misc.remove')}
         </Button>
       {/if}
       <Button type="submit" form="filled">
-        {$page.data.t('misc.save')}
+        {page.data.t('misc.save')}
       </Button>
     </div>
   </form>

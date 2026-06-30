@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     checked: boolean
@@ -21,11 +21,11 @@
       dispatch('changed', { checked: e.target.checked })
     }} />
   <label for="public" class="checkbox-label">
-    {$page.data.t('create.visible_to_public')}
+    {page.data.t('create.visible_to_public')}
   </label>
 </div>
 <div class="hint">
-  ({$page.data.t('settings.public_private_meaning')})
+  ({page.data.t('settings.public_private_meaning')})
 </div>
 
 <style>

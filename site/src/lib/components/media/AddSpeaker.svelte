@@ -2,7 +2,7 @@
   import type { Tables } from '$lib/types'
   import { decades } from './ages'
   import { Button, Form, Modal } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     on_close: () => void
@@ -10,7 +10,7 @@
   }
 
   const { on_close, on_speaker_added }: Props = $props()
-  const { dbOperations } = $derived($page.data)
+  const { dbOperations } = $derived(page.data)
 
   let displayName = $state('')
   let birthplace = $state('')
@@ -21,7 +21,7 @@
 
 <Modal on:close={on_close}>
   {#snippet heading()}
-    <span>{$page.data.t('speakers.add_new_speaker')}
+    <span>{page.data.t('speakers.add_new_speaker')}
     </span>
   {/snippet}
 
@@ -38,7 +38,7 @@
     }}>
     {#snippet children({ loading })}
       <label for="name" class="field-label">
-        {$page.data.t('speakers.name')}
+        {page.data.t('speakers.name')}
       </label>
       <div class="input-wrap">
         <input
@@ -50,7 +50,7 @@
       </div>
 
       <label for="birthplace" class="field-label">
-        {$page.data.t('speakers.birthplace')}
+        {page.data.t('speakers.birthplace')}
       </label>
       <div class="input-wrap">
         <input
@@ -62,7 +62,7 @@
       </div>
 
       <label for="age" class="field-label">
-        {$page.data.t('speakers.age_range')}
+        {page.data.t('speakers.age_range')}
       </label>
       <div class="input-wrap">
         <select id="age" bind:value={decade} class="form-input full-input">
@@ -73,7 +73,7 @@
       </div>
 
       <div class="field-label">
-        {$page.data.t('speakers.gender')}
+        {page.data.t('speakers.gender')}
       </div>
       <div style="display: flex">
         <div class="radio-row">
@@ -81,7 +81,7 @@
           <div style="width: 0.5rem"></div>
           <label for="male">
             <span class="radio-label">
-              {$page.data.t('speakers.male')}
+              {page.data.t('speakers.male')}
             </span>
           </label>
         </div>
@@ -91,7 +91,7 @@
           <div style="width: 0.5rem"></div>
           <label for="female">
             <span class="radio-label">
-              {$page.data.t('speakers.female')}
+              {page.data.t('speakers.female')}
             </span>
           </label>
         </div>
@@ -101,7 +101,7 @@
           <div style="width: 0.5rem"></div>
           <label for="other">
             <span class="radio-label">
-              {$page.data.t('speakers.other')}
+              {page.data.t('speakers.other')}
             </span>
           </label>
         </div>
@@ -111,7 +111,7 @@
         <input id="agree" type="checkbox" required bind:checked={agreeToBeOnline} />
         <div style="width: 0.5rem"></div>
         <label for="agree" class="agree-label">
-          {$page.data.t('speakers.speaker_agrees')}
+          {page.data.t('speakers.speaker_agrees')}
         </label>
       </div>
 
@@ -119,10 +119,10 @@
 
       <div class="modal-footer">
         <Button disabled={loading} onclick={on_close} form="simple" color="black">
-          {$page.data.t('misc.cancel')}
+          {page.data.t('misc.cancel')}
         </Button>
         <Button type="submit" form="filled" {loading}>
-          {$page.data.t('misc.save')}
+          {page.data.t('misc.save')}
         </Button>
       </div>
     {/snippet}

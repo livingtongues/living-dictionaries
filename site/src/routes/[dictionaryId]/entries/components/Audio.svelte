@@ -33,7 +33,7 @@
 <script lang="ts">
   import type { EntryData } from '$lib/types'
   import { longpress, ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
   import { track } from '$lib/debug/remote-log'
   import { AUDIO_PLAYED } from '$lib/debug/log-events'
@@ -50,10 +50,10 @@
 
   const { entry, context, sound_file = undefined, can_edit = false, class: klass = '' }: Props = $props()
 
-  const url_from_storage_path = $derived($page.data.url_from_storage_path)
+  const url_from_storage_path = $derived(page.data.url_from_storage_path)
 
   function initAudio() {
-    track({ event: AUDIO_PLAYED, props: { dictionary_id: $page.params.dictionaryId, entry_id: entry.id, audio_id: sound_file?.id, context } })
+    track({ event: AUDIO_PLAYED, props: { dictionary_id: page.params.dictionaryId, entry_id: entry.id, audio_id: sound_file?.id, context } })
     playAudio(url_from_storage_path(sound_file.storage_path))
   }
 
@@ -67,7 +67,7 @@
       <div
         class:recently-updated={updated_within_last_5_minutes}
         class="{klass} audio-action has-audio"
-        title={$page.data.t('audio.listen')}
+        title={page.data.t('audio.listen')}
         use:longpress={800}
         onlongpress={() => initAudio()}
         onclick={() => {
@@ -79,17 +79,17 @@
         {#if context === 'list'}
           <IconMaterialSymbolsHearing class="icon-inline {playing ? 'playing-color' : ''}" style="font-size: 1.25rem; margin-top: 0.25rem" />
           <div class="listen-label">
-            {$page.data.t('audio.listen')}
+            {page.data.t('audio.listen')}
           </div>
         {:else if context === 'table'}
           <IconMaterialSymbolsHearing class="icon-inline {playing ? 'playing-color' : ''}" style="font-size: 1.125rem; margin-top: 0.25rem" />
         {:else if context === 'entry'}
           <IconMaterialSymbolsHearing class="icon-inline {playing ? 'playing-color' : ''}" style="font-size: 1.125rem; margin-bottom: 0.25rem" />
           <div class="entry-label">
-            {$page.data.t('audio.listen')}
+            {page.data.t('audio.listen')}
             {#if can_edit}
               +
-              {$page.data.t('audio.edit_audio')}
+              {page.data.t('audio.edit_audio')}
             {/if}
           </div>
         {/if}
@@ -101,7 +101,7 @@
         <IconUilMicrophone class="icon-inline {context === 'list' || context === 'table' ? 'mic-color' : ''}" style="font-size: 1.125rem; margin: 0.25rem" />
         {#if context === 'entry'}
           <div style="font-size: 0.75rem; line-height: 1rem">
-            {$page.data.t('audio.add_audio')}
+            {page.data.t('audio.add_audio')}
           </div>
         {/if}
       </div>

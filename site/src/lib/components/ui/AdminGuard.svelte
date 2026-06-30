@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     children?: import('svelte').Snippet
   }
 
   const { children }: Props = $props()
-  const { auth_user } = $derived($page.data)
+  const { auth_user } = $derived(page.data)
 </script>
 
 {#if auth_user.is_admin}

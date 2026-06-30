@@ -3,7 +3,7 @@
   import type { EntryFieldValue } from '$lib/types'
   import { Button, Form } from '$lib/svelte-pieces'
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
 
   interface Props {
@@ -204,17 +204,17 @@
 
     <div class="modal-footer">
       <Button disabled={loading} onclick={on_close} form="simple" color="black">
-        {$page.data.t('misc.cancel')}
+        {page.data.t('misc.cancel')}
       </Button>
       <div style="width: 0.25rem"></div>
       {#if addingLexeme}
         <Button {loading} type="submit" form="filled">
-          {$page.data.t('misc.next')}
+          {page.data.t('misc.next')}
           <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.125rem" />
         </Button>
       {:else}
         <Button {loading} type="submit" form="filled">
-          {$page.data.t('misc.save')}
+          {page.data.t('misc.save')}
         </Button>
       {/if}
     </div>
