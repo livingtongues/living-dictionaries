@@ -92,17 +92,35 @@ describe(GET, () => {
     expect(data.keys).toHaveLength(1)
     expect(data.keys[0]).not.toHaveProperty('token_hash')
   })
+
+  test('an editor may list keys (read-only Agents page)', async () => {
+    await POST(event({ method: 'POST', token: await manager_token(), body: { label: 'k1' } }))
+    const res = await GET(event({ method: 'GET', token: await editor_token() }))
+    expect((await res.json()).keys).toHaveLength(1)
+  })
 })
 
 describe(DELETE, () => {
-  test('manager deletes a key', async () => {
+  test('manager revokes a key — row retained for history, dropped from the active list', async () => {
     const created = await (await POST(event({ method: 'POST', token: await manager_token(), body: { label: 'k' } }))).json()
     const res = await DELETE(event({ method: 'DELETE', token: await manager_token(), key_id: created.key.id }))
-    expect((await res.json()).result).toBe('deleted')
-    expect(db.prepare(`SELECT COUNT(*) c FROM api_keys`).get()).toMatchObject({ c: 0 })
+    expect((await res.json()).result).toBe('revoked')
+    // Row retained (revoke, not delete) with revoked_at set.
+    expect(db.prepare(`SELECT COUNT(*) c FROM api_keys`).get()).toMatchObject({ c: 1 })
+    const row = db.prepare(`SELECT revoked_at FROM api_keys WHERE id = ?`).get(created.key.id) as { revoked_at: string | null }
+    expect(row.revoked_at).toBeTruthy()
+    // No longer in the active list.
+    const list = await (await GET(event({ method: 'GET', token: await manager_token() }))).json()
+    expect(list.keys).toHaveLength(0)
   })
 
-  test('404 deleting an unknown key', async () => {
+  test('403 for an editor (revoke is manager-gated)', async () => {
+    const created = await (await POST(event({ method: 'POST', token: await manager_token(), body: { label: 'k' } }))).json()
+    await expect(DELETE(event({ method: 'DELETE', token: await editor_token(), key_id: created.key.id })))
+      .rejects.toMatchObject({ status: 403 })
+  })
+
+  test('404 revoking an unknown key', async () => {
     await expect(DELETE(event({ method: 'DELETE', token: await manager_token(), key_id: 'nope' })))
       .rejects.toMatchObject({ status: 404 })
   })

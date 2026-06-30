@@ -95,7 +95,11 @@ export function create_api_key({ db, dictionary_id, label, role = 'manager', cre
   return { record, token: minted.token }
 }
 
-/** List a dictionary's keys (display fields only — never the hash). */
+/**
+ * List a dictionary's ACTIVE keys (display fields only — never the hash).
+ * Revoked keys are retained in the table for history attribution but excluded
+ * here, so they never surface in any UI.
+ */
 export function list_api_keys({ db, dictionary_id }: {
   db: Database.Database
   dictionary_id: string
@@ -104,12 +108,50 @@ export function list_api_keys({ db, dictionary_id }: {
     SELECT id, dictionary_id, token_prefix, last_four, label, role,
            created_by_user_id, created_at, last_used_at, revoked_at
     FROM api_keys
-    WHERE dictionary_id = ?
+    WHERE dictionary_id = ? AND revoked_at IS NULL
     ORDER BY created_at DESC
   `).all(dictionary_id) as ApiKeyRecord[]
 }
 
-/** Hard-delete a key scoped to a dictionary. Returns whether a row was removed. */
+/**
+ * Resolve a set of key ids to their display label + creator — for the change
+ * history timeline. Includes REVOKED keys (the whole point of revoke-not-delete:
+ * a past agent edit always resolves to a label + responsible human).
+ */
+export function resolve_api_keys({ db, key_ids }: {
+  db: Database.Database
+  key_ids: string[]
+}): Record<string, { id: string, label: string, created_by_user_id: string | null }> {
+  const out: Record<string, { id: string, label: string, created_by_user_id: string | null }> = {}
+  const ids = [...new Set(key_ids.filter(Boolean))]
+  if (!ids.length)
+    return out
+  const rows = db.prepare(
+    `SELECT id, label, created_by_user_id FROM api_keys WHERE id IN (${ids.map(() => '?').join(',')})`,
+  ).all(...ids) as { id: string, label: string, created_by_user_id: string | null }[]
+  for (const row of rows)
+    out[row.id] = row
+  return out
+}
+
+/**
+ * Revoke a key scoped to a dictionary (soft kill-switch). The row is RETAINED
+ * forever so its id keeps resolving in change history; `verify_api_key` rejects
+ * a revoked token. Returns whether an active key was revoked.
+ */
+export function revoke_api_key({ db, dictionary_id, key_id }: {
+  db: Database.Database
+  dictionary_id: string
+  key_id: string
+}): boolean {
+  const info = db.prepare(
+    `UPDATE api_keys SET revoked_at = ? WHERE id = ? AND dictionary_id = ? AND revoked_at IS NULL`,
+  ).run(new Date().toISOString(), key_id, dictionary_id)
+  return info.changes > 0
+}
+
+/** Hard-delete a key scoped to a dictionary. Returns whether a row was removed.
+ *  Reserved for admin teardown / tests — normal removal goes through `revoke_api_key`. */
 export function delete_api_key({ db, dictionary_id, key_id }: {
   db: Database.Database
   dictionary_id: string

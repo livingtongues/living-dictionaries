@@ -109,7 +109,6 @@ try {
   await sleep(1500)
   report.steps.can_edit = await page.evaluate(() => ({
     add_entry_button_count: document.querySelectorAll('.add-entry-button').length,
-    reset_cache_present: document.body.innerText.includes('Reset Cache'),
   }))
   // Probe: did merely opening the dict (editor snapshot fetch via GET /db) already
   // create the server dictionaries/<id>.db, BEFORE any edit?

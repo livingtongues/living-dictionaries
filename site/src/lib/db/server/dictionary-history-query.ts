@@ -1,11 +1,14 @@
 import type Database from 'better-sqlite3'
+import { resolve_api_keys } from '$lib/api-keys/api-key'
 
 /**
  * Read side of the change-history log. Pure over two better-sqlite3 handles
- * (the per-dict history db + shared.db for user names) so it's unit-testable
- * with in-memory dbs; the `GET /api/dictionary/[id]/history` route only adds
- * the auth gate on top.
+ * (the per-dict history db + shared.db for user names + agent key labels) so
+ * it's unit-testable with in-memory dbs; the `GET /api/dictionary/[id]/history`
+ * route only adds the auth gate on top.
  */
+
+export type HistoryActor = 'all' | 'humans' | 'agents'
 
 export interface HistoryQueryOptions {
   /** Owner-scoped timeline. Omit (or pass feed=true) for the dict-wide feed. */
@@ -16,6 +19,8 @@ export interface HistoryQueryOptions {
   before?: number
   /** Page size (clamped 1..200, default 50). */
   limit?: number
+  /** Filter by who acted: humans (no key), agents (api_key_id set), or all. */
+  actor?: HistoryActor
 }
 
 export interface HistoryChange {
@@ -27,11 +32,21 @@ export interface HistoryChange {
   at: string
   snapshot: Record<string, unknown> | null
   delta: Record<string, unknown> | null
+  /** The acting agent's API key id; null = a human edited directly. */
+  api_key_id: string | null
+}
+
+export interface HistoryApiKey {
+  id: string
+  label: string
+  created_by_user_id: string | null
 }
 
 export interface HistoryQueryResult {
   changes: HistoryChange[]
   users: Record<string, { id: string, name: string | null, email: string | null }>
+  /** Agent (API key) labels for changes carrying an api_key_id. */
+  api_keys: Record<string, HistoryApiKey>
   /** Pass back as `before` to fetch the next (older) page; null when exhausted. */
   cursor: number | null
 }
@@ -52,6 +67,10 @@ export function query_history(
     where.push('o.owner_type = ?', 'o.owner_id = ?')
     params.push(opts.owner_type!, opts.owner_id!)
   }
+  if (opts.actor === 'agents')
+    where.push('c.api_key_id IS NOT NULL')
+  else if (opts.actor === 'humans')
+    where.push('c.api_key_id IS NULL')
   if (opts.before !== undefined && !Number.isNaN(opts.before)) {
     where.push('c.rowid < ?')
     params.push(opts.before)
@@ -60,7 +79,7 @@ export function query_history(
 
   // Fetch one extra row to detect a next page without a trailing empty request.
   const fetched = history_db.prepare(
-    `SELECT c.rowid AS rowid, c.id, c.table_name, c.row_id, c.op, c.user_id, c.at, c.snapshot, c.delta
+    `SELECT c.rowid AS rowid, c.id, c.table_name, c.row_id, c.op, c.user_id, c.at, c.snapshot, c.delta, c.api_key_id
        ${from} ${where_sql}
        ORDER BY c.rowid DESC
        LIMIT ?`,
@@ -78,13 +97,21 @@ export function query_history(
     at: r.at,
     snapshot: safe_parse(r.snapshot),
     delta: safe_parse(r.delta),
+    api_key_id: r.api_key_id ?? null,
   }))
 
   const cursor = has_more ? raw[raw.length - 1].rowid : null
 
-  // Resolve editor display names from shared.db.
+  // Resolve agent key labels (incl. revoked) from shared.db.
+  const api_keys = resolve_api_keys({ db: shared_db, key_ids: raw.map(r => r.api_key_id ?? '') })
+
+  // Resolve editor display names from shared.db — both the change authors and
+  // the agents' creators (so "🤖 Foo · on behalf of <human>" always resolves).
   const users: HistoryQueryResult['users'] = {}
-  const ids = [...new Set(raw.map(r => r.user_id).filter(Boolean))]
+  const ids = [...new Set([
+    ...raw.map(r => r.user_id),
+    ...Object.values(api_keys).map(k => k.created_by_user_id ?? ''),
+  ].filter(Boolean))]
   if (ids.length) {
     const rows = shared_db.prepare(
       `SELECT id, name, email FROM users WHERE id IN (${ids.map(() => '?').join(',')})`,
@@ -93,7 +120,7 @@ export function query_history(
       users[u.id] = u
   }
 
-  return { changes, users, cursor }
+  return { changes, users, api_keys, cursor }
 }
 
 function safe_parse(value: string | null): Record<string, unknown> | null {

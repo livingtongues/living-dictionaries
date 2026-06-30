@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { open_shared_db } from '$lib/db/server/shared-db'
-import { create_api_key, delete_api_key, generate_api_key, hash_api_key, list_api_keys, verify_api_key } from './api-key'
+import { create_api_key, delete_api_key, generate_api_key, hash_api_key, list_api_keys, resolve_api_keys, revoke_api_key, verify_api_key } from './api-key'
 
 let db: ReturnType<typeof open_shared_db>
 
@@ -91,5 +91,37 @@ describe(delete_api_key, () => {
     const { record } = create_api_key({ db, dictionary_id: 'dict-1', label: 'k', created_by_user_id: 'user-1' })
     expect(delete_api_key({ db, dictionary_id: 'other-dict', key_id: record.id })).toBeFalsy()
     expect(list_api_keys({ db, dictionary_id: 'dict-1' })).toHaveLength(1)
+  })
+})
+
+describe(revoke_api_key, () => {
+  test('revokes a key: token stops working + drops out of the active list, but the row is retained', () => {
+    const { record, token } = create_api_key({ db, dictionary_id: 'dict-1', label: 'k', created_by_user_id: 'user-1' })
+    expect(revoke_api_key({ db, dictionary_id: 'dict-1', key_id: record.id })).toBeTruthy()
+    expect(verify_api_key({ db, token })).toBeNull()
+    expect(list_api_keys({ db, dictionary_id: 'dict-1' })).toHaveLength(0)
+    // Row retained so history can still resolve the agent.
+    const row = db.prepare(`SELECT id, revoked_at FROM api_keys WHERE id = ?`).get(record.id) as { id: string, revoked_at: string | null }
+    expect(row.id).toBe(record.id)
+    expect(row.revoked_at).toBeTruthy()
+  })
+
+  test('a second revoke is a no-op (returns false)', () => {
+    const { record } = create_api_key({ db, dictionary_id: 'dict-1', label: 'k', created_by_user_id: 'user-1' })
+    expect(revoke_api_key({ db, dictionary_id: 'dict-1', key_id: record.id })).toBeTruthy()
+    expect(revoke_api_key({ db, dictionary_id: 'dict-1', key_id: record.id })).toBeFalsy()
+  })
+})
+
+describe(resolve_api_keys, () => {
+  test('resolves ids to label + creator, including revoked keys', () => {
+    const { record } = create_api_key({ db, dictionary_id: 'dict-1', label: 'Dictionary agent', created_by_user_id: 'user-1' })
+    revoke_api_key({ db, dictionary_id: 'dict-1', key_id: record.id })
+    const resolved = resolve_api_keys({ db, key_ids: [record.id, ''] })
+    expect(resolved[record.id]).toEqual({ id: record.id, label: 'Dictionary agent', created_by_user_id: 'user-1' })
+  })
+
+  test('returns an empty map for no ids', () => {
+    expect(resolve_api_keys({ db, key_ids: [] })).toEqual({})
   })
 })

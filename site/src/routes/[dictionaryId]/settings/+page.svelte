@@ -7,7 +7,6 @@
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
   import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte' // only used here - perhaps colocate
   import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte' // only used here - perhaps colocate
-  import ApiKeys from '$lib/components/settings/ApiKeys.svelte'
   import { glossingLanguages } from '$lib/glosses/glossing-languages'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Image from '$lib/components/image/Image.svelte'
@@ -128,13 +127,12 @@
 
   {#if is_manager}
     <hr class="settings-divider" />
-    <ApiKeys dictionary_id={dictionary.id} />
 
     <div>
       <ShowHide>
         {#snippet children({ show, toggle })}
           <Button onclick={toggle} class="delete-dict-button" color="red">
-            {$page.data.t('misc.delete')}:
+            {$page.data.t('settings.delete_dictionary')}:
             {$page.data.t('header.contact_us')}
           </Button>
           {#if show}

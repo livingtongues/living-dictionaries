@@ -8,6 +8,7 @@
   import IconTablerTextGrammar from '~icons/tabler/text-grammar'
   import IconFa6SolidUsers from '~icons/fa6-solid/users'
   import IconFa6SolidGear from '~icons/fa6-solid/gear'
+  import IconFa6SolidRobot from '~icons/fa6-solid/robot'
   import IconFa6SolidFileImport from '~icons/fa6-solid/file-import'
   import IconFa6SolidFileExport from '~icons/fa6-solid/file-export'
 
@@ -16,6 +17,7 @@
     entry_count: number
     on_close: () => void
     is_manager: boolean
+    is_editor_or_above: boolean
     loading: boolean
   }
 
@@ -24,6 +26,7 @@
     entry_count,
     on_close,
     is_manager,
+    is_editor_or_above,
     loading,
   }: Props = $props()
 </script>
@@ -97,6 +100,18 @@
         {$page.data.t('misc.settings')}
       </span>
     </a>
+  {/if}
+  {#if is_editor_or_above}
+    <a
+      href={`/${dictionary.url}/agents`}
+      class:active={$page.url.pathname.includes('agents')}>
+      <IconFa6SolidRobot class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
+      <span class="item-label">
+        Agents
+      </span>
+    </a>
+  {/if}
+  {#if is_manager}
     {#if !dictionary.con_language_description}
       <a
         href={`/${dictionary.url}/import`}

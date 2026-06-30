@@ -1,6 +1,5 @@
 import { expose } from 'comlink'
 import type { EntryData, Tables } from '$lib/types'
-import { clear } from 'idb-keyval'
 import { _search_entries, create_index, update_index_entry } from './orama.worker'
 import { should_include_tag } from '$lib/helpers/tag-visibility'
 import { assemble_entry_data } from './assemble-entry-data'
@@ -586,7 +585,6 @@ function key_by_pair(rows: any[], field_1: string, field_2: string): Record<stri
 export const api = {
   init_entries,
   apply_rows,
-  reset_caches: clear,
   search_entries: _search_entries,
 }
 

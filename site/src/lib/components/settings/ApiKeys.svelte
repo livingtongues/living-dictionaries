@@ -3,9 +3,10 @@
   import { Button } from '$lib/svelte-pieces'
   import type { ApiKeyRecord, ApiKeyRole } from '$lib/api-keys/api-key'
   import { api_create_api_key, api_list_api_keys } from '$api/dictionaries/[id]/api-keys/_call'
-  import { api_delete_api_key } from '$api/dictionaries/[id]/api-keys/[key_id]/_call'
+  import { api_revoke_api_key } from '$api/dictionaries/[id]/api-keys/[key_id]/_call'
 
-  const { dictionary_id }: { dictionary_id: string } = $props()
+  // `can_manage` (managers) gates minting + revoking; editors get a read-only list.
+  const { dictionary_id, can_manage = true }: { dictionary_id: string, can_manage?: boolean } = $props()
 
   let keys = $state<ApiKeyRecord[]>([])
   let loading = $state(true)
@@ -55,10 +56,10 @@
     copied = true
   }
 
-  async function remove(key: ApiKeyRecord) {
-    if (!confirm(`Delete API key "${key.label}"? Any agent using it will immediately lose access.`))
+  async function revoke(key: ApiKeyRecord) {
+    if (!confirm(`Revoke API key "${key.label}"? Any agent using it will immediately lose access.`))
       return
-    const { error } = await api_delete_api_key({ dictionary_id, key_id: key.id })
+    const { error } = await api_revoke_api_key({ dictionary_id, key_id: key.id })
     if (error)
       error_message = error.message
     else
@@ -91,14 +92,26 @@
     </div>
   {/if}
 
-  <div class="create-row">
-    <input class="form-input" bind:value={label} placeholder="Label (e.g. Import agent)" maxlength="80" />
-    <select class="form-input role-select" bind:value={role}>
-      <option value="manager">manager</option>
-      <option value="editor">editor</option>
-    </select>
-    <Button onclick={create} loading={creating} form="fill" color="primary">Create key</Button>
-  </div>
+  {#if can_manage}
+    <div class="create-row">
+      <label class="field field-grow">
+        <span class="field-label">Label</span>
+        <input class="form-input" bind:value={label} placeholder="Dictionary agent" maxlength="80" />
+      </label>
+      <label class="field">
+        <span class="field-label">Role</span>
+        <select class="form-input role-select" bind:value={role}>
+          <option value="manager">manager</option>
+          <option value="editor">editor</option>
+        </select>
+      </label>
+      <Button onclick={create} loading={creating} form="fill" color="primary">Create key</Button>
+    </div>
+
+    <p class="role-hint">
+      <strong>Editor</strong> keys can add &amp; edit content; <strong>manager</strong> keys have full access — pick the least an agent needs.
+    </p>
+  {/if}
 
   {#if error_message}
     <p class="error">{error_message}</p>
@@ -106,9 +119,7 @@
 
   {#if loading}
     <p class="muted">Loading…</p>
-  {:else if keys.length === 0}
-    <p class="muted">No API keys yet.</p>
-  {:else}
+  {:else if keys.length > 0}
     <ul class="key-list">
       {#each keys as key (key.id)}
         <li class="key-row">
@@ -116,10 +127,14 @@
           <span class="key-label">{key.label}</span>
           <span class="key-role">{key.role}</span>
           <span class="muted key-used">{format_when(key.last_used_at)}</span>
-          <Button onclick={() => remove(key)} form="simple" color="red" size="sm">Delete</Button>
+          {#if can_manage}
+            <Button onclick={() => revoke(key)} form="simple" color="red" size="sm">Revoke</Button>
+          {/if}
         </li>
       {/each}
     </ul>
+  {:else}
+    <p class="muted">No agent keys yet.</p>
   {/if}
 </div>
 
@@ -135,17 +150,34 @@
   .create-row {
     display: flex;
     gap: 0.5rem;
-    align-items: center;
+    align-items: flex-end;
     flex-wrap: wrap;
     margin-bottom: 0.5rem;
   }
-  .create-row .form-input {
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .field-grow {
     flex: 1 1 auto;
     min-width: 160px;
   }
+  .field-label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color) 70%, var(--background));
+  }
+  .field .form-input {
+    width: 100%;
+  }
   .role-select {
-    flex: 0 0 auto;
     min-width: 110px;
+  }
+  .role-hint {
+    font-size: 0.78rem;
+    color: color-mix(in srgb, var(--color) 60%, var(--background));
+    margin: 0 0 0.5rem;
   }
   .token-reveal {
     background: color-mix(in srgb, var(--primary, #2563eb) 8%, var(--background));
