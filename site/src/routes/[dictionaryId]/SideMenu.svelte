@@ -9,6 +9,7 @@
   import IconFa6SolidUsers from '~icons/fa6-solid/users'
   import IconFa6SolidGear from '~icons/fa6-solid/gear'
   import IconFa6SolidRobot from '~icons/fa6-solid/robot'
+  import IconFa6SolidClockRotateLeft from '~icons/fa6-solid/clock-rotate-left'
   import IconFa6SolidFileImport from '~icons/fa6-solid/file-import'
   import IconFa6SolidFileExport from '~icons/fa6-solid/file-export'
 
@@ -108,6 +109,14 @@
       <IconFa6SolidRobot class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
       <span class="item-label">
         Agents
+      </span>
+    </a>
+    <a
+      href={`/${dictionary.url}/history`}
+      class:active={page.url.pathname.includes('history')}>
+      <IconFa6SolidClockRotateLeft class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
+      <span class="item-label">
+        {page.data.t('history.history')}
       </span>
     </a>
   {/if}

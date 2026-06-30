@@ -149,7 +149,7 @@ src/routes/api/foo/bar/
 └── server.test.ts    # Tests against +server.ts
 ```
 
-### Canonical test pattern (mirrors `api/me/profile/server.test.ts`)
+### Canonical test pattern (mirrors `api/auth/update-profile/server.test.ts`)
 
 ```ts
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
@@ -254,7 +254,7 @@ expect(big_payload).toMatchFileSnapshot('./snapshots/response.json')
 
 ## Reference: existing endpoints to model off
 
-- `src/routes/api/me/profile/` — simplest auth+update pattern (shared.db row update)
+- `src/routes/api/auth/update-profile/` — simplest auth+update pattern (shared.db row update)
 - `src/routes/api/dictionaries/create/` — auth + insert + uniqueness conflict (`409`)
 - `src/routes/api/dictionaries/[id]/roles/` — dict-role-gated, manages `dictionary_roles`
 - `src/routes/api/dictionary/[id]/db/` — per-dict push (write to dict.db, `verify_auth_dict_role`)
