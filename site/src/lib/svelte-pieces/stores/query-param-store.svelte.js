@@ -1,11 +1,7 @@
 import { writable } from 'svelte/store'
 import { cleanObject } from './clean-object'
 import { goto } from '$app/navigation'
-// Deliberately on the deprecated `$app/stores`: this is a custom store factory whose
-// writable `start` notifier needs to imperatively `page.subscribe(...)` to URL changes,
-// outside any component/effect context. `$app/state`'s rune-based `page` exposes no
-// `.subscribe`, so it can't replace this without a component to host an `$effect`.
-import { page } from '$app/stores'
+import { page } from '$app/state'
 
 function stringify(value, cleanFalseValues) {
   if (typeof value === 'undefined' || value === null || value === '')
@@ -75,34 +71,45 @@ export function createQueryParamStore(options) {
   }
   let firstUrlCheck = true
   let current_params_value
+  const handle_search_params = (searchParams) => {
+    let value = searchParams.get(key)
+    if (current_params_value && value === current_params_value) {
+      if (log)
+        console.info('query params are same value, skipping set')
+      return // don't emit store change if page navigation happened with same query params
+    }
+    current_params_value = value
+    // Set store value from url - skipped on first load
+    if (!firstUrlCheck)
+      return setStoreValue(value)
+    firstUrlCheck = false
+    // 1st Priority: check url query param for value
+    if (value !== undefined && value !== null && value !== '')
+      return setStoreValue(value)
+    if (typeof window === 'undefined')
+      return
+    // 2nd Priority: check localStorage/sessionStorage for value
+    if (persist) {
+      value = JSON.parse(storage.getItem(storageKey))
+      if (log)
+        console.info({ [`${storageKey}_from_cache`]: value })
+    }
+    if (value)
+      return setQueryParam(value)
+  }
   const start = () => {
-    const unsubscribe_from_page_store = page.subscribe(({ url: { searchParams } }) => {
-      let value = searchParams.get(key)
-      if (current_params_value && value === current_params_value) {
-        if (log)
-          console.info('query params are same value, skipping set')
-        return // don't emit store change if page navigation happened with same query params
-      }
-      current_params_value = value
-      // Set store value from url - skipped on first load
-      if (!firstUrlCheck)
-        return setStoreValue(value)
-      firstUrlCheck = false
-      // 1st Priority: check url query param for value
-      if (value !== undefined && value !== null && value !== '')
-        return setStoreValue(value)
-      if (typeof window === 'undefined')
-        return
-      // 2nd Priority: check localStorage/sessionStorage for value
-      if (persist) {
-        value = JSON.parse(storage.getItem(storageKey))
-        if (log)
-          console.info({ [`${storageKey}_from_cache`]: value })
-      }
-      if (value)
-        return setQueryParam(value)
+    // Replaces the old deprecated `$app/stores` `page.subscribe(...)`. `$app/state`'s `page`
+    // is rune-reactive but has no `.subscribe`, so we read it inside an `$effect.root` —
+    // the rune that "allows for the creation of effects outside of the component
+    // initialisation phase" — to track URL changes from this store factory. The synchronous
+    // first read preserves the old sync-on-subscribe behaviour (correct value on initial
+    // render); the effect's own initial run dedupes against `current_params_value`.
+    handle_search_params(page.url.searchParams)
+    return $effect.root(() => {
+      $effect(() => {
+        handle_search_params(page.url.searchParams)
+      })
     })
-    return () => unsubscribe_from_page_store()
   }
   // 3rd Priority: use startWith if no query param in url nor storage value found
   const store = writable(startWith, start)
