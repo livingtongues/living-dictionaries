@@ -15,8 +15,14 @@ type Return<ExpectedResponse> = {
 export async function post_request<T extends Record<string, any>, ExpectedResponse extends Record<string, any>>(route: string, data: T, options?: {
   headers?: RequestInit['headers']
   signal?: AbortSignal
-  // Set false on background polls so a transient network failure during a
-  // redeploy doesn't spam the console (the poll retries on its next interval).
+  /**
+   * Emit a `console.error` on network failure. Default `true`. Set `false` for
+   * the remote-log shipper's own POST to `/api/log` — otherwise a transient
+   * transport failure (e.g. the socket dropped mid-flight by a Docker redeploy)
+   * both spams the console AND, because `console.error` is patched to ship logs,
+   * gets re-buffered as a self-referential error row that re-ships on the next
+   * flush. The buffer already retries the batch, so the failure isn't lost.
+   */
   log_errors?: boolean
 }): Promise<Return<ExpectedResponse>> {
   try {
@@ -39,18 +45,29 @@ export async function post_request<T extends Record<string, any>, ExpectedRespon
 }
 
 export async function get_request<ExpectedResponse extends Record<string, any>>(route: string, options?: {
-  // Pass a SvelteKit load's injected `fetch` so server-side loads keep the
-  // direct-handler + HTML-inlining optimization (no real HTTP round-trip on SSR,
-  // no refetch on hydration). Defaults to the global `fetch`.
+  /**
+   * Custom fetch — pass a SvelteKit universal-load `fetch` so SSR calls run
+   * in-process and forward the incoming request's cookies (auth). Defaults to
+   * the global `fetch`.
+   */
   fetch?: typeof fetch
-  // Set false on background polls so a transient network failure during a
-  // redeploy doesn't spam the console (the poll retries on its next interval).
+  headers?: RequestInit['headers']
+  signal?: AbortSignal
+  /**
+   * Emit a `console.error` on network failure. Default `true`. Set `false` for
+   * chatty pollers (e.g. the team-chat rooms/messages polls) whose transient
+   * transport failures during a Docker redeploy would otherwise spam the
+   * console AND, because `console.error` is patched to ship logs, re-ship as
+   * self-referential error rows. The poller retries on its next interval, so
+   * the failure isn't lost. Mirrors `post_request`'s `log_errors`.
+   */
   log_errors?: boolean
 }): Promise<Return<ExpectedResponse>> {
-  const fetcher = options?.fetch ?? fetch
+  const fetch_fn = options?.fetch ?? fetch
   try {
-    const response = await fetcher(route, {
-      headers: get_default_headers(),
+    const response = await fetch_fn(route, {
+      headers: { ...get_default_headers(), ...options?.headers },
+      signal: options?.signal,
     })
     return handle_response<ExpectedResponse>(response)
   } catch (err) {
@@ -82,9 +99,9 @@ async function handle_response<ExpectedResponse extends Record<string, any>>(res
  * JSON `{ message }` shape. This happens when the request never reached our
  * SvelteKit origin — e.g. Cloudflare/Caddy serving an HTML error page
  * (502/503/521/522/524) while the origin is momentarily unreachable during a
- * redeploy, or a request the edge timed out. Dumping that raw HTML (a full
- * `<!DOCTYPE html>…` Cloudflare page) into an `alert`/toast is useless, so
- * collapse it to a concise, actionable line. Genuine short plain-text bodies
+ * blue/green redeploy, or a request the edge timed out. Dumping that raw HTML
+ * (a full `<!DOCTYPE html>…` Cloudflare page) into an `alert`/toast is useless,
+ * so collapse it to a concise, actionable line. Genuine short plain-text bodies
  * are passed through (capped) since they may carry a real message.
  */
 function friendly_non_json_error({ status, text_body }: { status: number, text_body: string }): string {
