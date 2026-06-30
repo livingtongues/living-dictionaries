@@ -19,6 +19,18 @@ describe(post_request, () => {
     expect(console_error).toHaveBeenCalledTimes(1)
   })
 
+  test('suppresses the console.error when log_errors is false', async () => {
+    globalThis.fetch = vi.fn(() => Promise.reject(new TypeError('Failed to fetch'))) as unknown as typeof fetch
+    const console_error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    const { data, error } = await post_request('/api/whatever', { a: 1 }, { log_errors: false })
+
+    // Still returns the error so the caller (the log shipper) keeps its buffer to retry.
+    expect(data).toBe(null)
+    expect(error).toEqual({ status: 0, message: 'Network error: Failed to fetch' })
+    expect(console_error).not.toHaveBeenCalled()
+  })
+
   test('surfaces the JSON `message` field on a structured error response', async () => {
     globalThis.fetch = vi.fn(() => Promise.resolve(
       new Response(JSON.stringify({ message: 'not allowed' }), { status: 403 }),
