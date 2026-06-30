@@ -9,6 +9,7 @@
   import { ENTRY_OPENED } from '$lib/debug/log-events'
   import { page } from '$app/state'
   import { dev } from '$app/environment'
+  import IconMdiHistory from '~icons/mdi/history'
 
   const { data } = $props()
   const {
@@ -87,11 +88,14 @@
       </Button>
     {/if}
     {#if is_editor_or_above}
-      <Button class="entry-history-button" form="simple" onclick={() => (show_history = true)}>
-        <span>History</span>
-        <div style="width: 0.5rem"></div>
-        <i class="fas fa-history"></i>
-      </Button>
+      <button
+        type="button"
+        class="btn-ghost entry-history-button"
+        title={page.data.t('history.history')}
+        aria-label={page.data.t('history.history')}
+        onclick={() => (show_history = true)}>
+        <IconMdiHistory />
+      </button>
     {/if}
   </div>
 </div>
@@ -155,6 +159,15 @@
   .action-bar :global(.entry-share-button) {
     display: inline-flex !important;
     align-items: center;
+  }
+
+  .entry-history-button {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    color: var(--primary);
+    font-size: 1.375rem;
+    vertical-align: middle;
   }
 </style>
 
