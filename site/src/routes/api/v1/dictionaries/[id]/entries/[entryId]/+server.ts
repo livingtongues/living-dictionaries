@@ -1,14 +1,12 @@
 import type { RequestHandler } from './$types'
 import type { EntryData } from '$lib/types'
 import type { EntryPatch } from '$lib/api/v1/entry-input'
-import { verify_dict_api_access } from '$lib/auth/verify-dict-api-access'
 import { ResponseCodes } from '$lib/constants'
 import { build_entry_data } from '$lib/db/server/build-entry-data'
-import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
-import { get_shared_db } from '$lib/db/server/shared-db'
 import { apply_entry_delete, apply_entry_update } from '$lib/db/server/v1-entry-write'
+import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
@@ -20,17 +18,6 @@ export interface V1EntryDeleteResponseBody {
   result: 'deleted'
 }
 
-/** Mirror the dict cursor to shared.db so the catalog/snapshot builder see the edit. */
-function mirror_updated_at(dict_id: string, cursor: string | null) {
-  if (!cursor)
-    return
-  try {
-    get_shared_db().prepare(`UPDATE dictionaries SET updated_at = ? WHERE id = ?`).run(cursor, dict_id)
-  } catch (err) {
-    console.warn(`Could not mirror updated_at for ${dict_id}:`, err)
-  }
-}
-
 /**
  * GET /api/v1/dictionaries/[id]/entries/[entryId]
  *
@@ -40,10 +27,7 @@ function mirror_updated_at(dict_id: string, cursor: string | null) {
  * private content.
  */
 export const GET: RequestHandler = async (event) => {
-  const dictionary = get_dictionary_by_url_or_id(event.params.id)
-  if (!dictionary)
-    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-  await verify_dict_api_access(event, dictionary.id, 'contributor')
+  const { dictionary } = await load_v1_dictionary_context({ event, role: 'contributor' })
 
   const entry_id = event.params.entryId
   if (!entry_id)
@@ -64,10 +48,7 @@ export const GET: RequestHandler = async (event) => {
  * `dialects`/`tags` are additive links. Returns the updated nested entry.
  */
 export const PATCH: RequestHandler = async (event) => {
-  const dictionary = get_dictionary_by_url_or_id(event.params.id)
-  if (!dictionary)
-    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-  const access = await verify_dict_api_access(event, dictionary.id, 'editor')
+  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
 
   const entry_id = event.params.entryId
   if (!entry_id)
@@ -85,7 +66,7 @@ export const PATCH: RequestHandler = async (event) => {
   if (!result.found)
     error(ResponseCodes.NOT_FOUND, 'entry not found')
 
-  mirror_updated_at(dictionary.id, result.new_synced_up_to)
+  mirror_dictionary_cursor({ dict_id: dictionary.id, cursor: result.new_synced_up_to })
   log_server_event({ level: 'info', message: 'v1_entry_updated', user_id: access.user_id, context: { dictionary_id: dictionary.id, entry_id, via: access.via } })
 
   const entry = build_entry_data({ db, entry_id, admin_level: 1 })
@@ -101,10 +82,7 @@ export const PATCH: RequestHandler = async (event) => {
  * exactly like an editor delete.
  */
 export const DELETE: RequestHandler = async (event) => {
-  const dictionary = get_dictionary_by_url_or_id(event.params.id)
-  if (!dictionary)
-    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-  const access = await verify_dict_api_access(event, dictionary.id, 'editor')
+  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
 
   const entry_id = event.params.entryId
   if (!entry_id)
@@ -114,7 +92,7 @@ export const DELETE: RequestHandler = async (event) => {
   if (!result.found)
     error(ResponseCodes.NOT_FOUND, 'entry not found')
 
-  mirror_updated_at(dictionary.id, result.new_synced_up_to)
+  mirror_dictionary_cursor({ dict_id: dictionary.id, cursor: result.new_synced_up_to })
   log_server_event({ level: 'info', message: 'v1_entry_deleted', user_id: access.user_id, context: { dictionary_id: dictionary.id, entry_id, via: access.via } })
 
   return json({ result: 'deleted' } satisfies V1EntryDeleteResponseBody)

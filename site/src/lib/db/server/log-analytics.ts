@@ -4,6 +4,7 @@ import { version } from '$app/environment'
 import { is_expected_error_response, is_known_noise } from '$lib/debug/classify-error'
 import { ALL_TRACKED_EVENTS } from '$lib/debug/log-events'
 import { is_below_db_worker_capability, is_bot_user_agent, parse_user_agent } from '$lib/debug/parse-user-agent'
+import { SYNCABLE_TABLE_NAMES } from '$lib/db/sync/types'
 import { distance_bucket, DISTANCE_BUCKETS, distance_to_origin_km } from '$lib/geo/distance'
 import { geo_key } from '$lib/server/geo-from-request'
 import { get_log_archive_db } from './log-archive-db'
@@ -105,6 +106,13 @@ export interface PipelineHealth {
   hot_rows: number
   /** Total cold rows archived in `logs-archive.db`. */
   archived_rows: number
+  /**
+   * Syncable tables declared in `SYNCABLE_TABLE_NAMES` but ABSENT from
+   * `shared.db` — schema drift from an in-place-edited/consolidated migration
+   * that never re-ran (the `dictionary_partners` incident). Non-empty = admin
+   * sync is 500-ing (or skip-logging) on these; ship a backfill migration.
+   */
+  missing_syncable_tables: string[]
 }
 /** Self-instrumentation: which declared analytics events have actually been seen. */
 export interface EventCoverage {
@@ -126,6 +134,16 @@ export interface LeaderHealth {
   failed_no_leader: number
   /** Per-source (admin/viewer/dict) failed counts. */
   failed_by_source: { source: string, count: number }[]
+  /**
+   * Failed-query `context.code` histogram. Distinguishes a corrupt/NOTADB local
+   * DB (self-heals on a wipe-and-refetch) from a wedged-leader `timeout`/RPC
+   * fault. `unknown` = code wasn't captured.
+   */
+  failed_by_code: { code: string, count: number }[]
+  /** Failures emitted by the CURRENT deployed build — a live regression. */
+  failed_current: number
+  /** Failures from any stale (cached) build — usually self-heals on reload/update. */
+  failed_stale: number
 }
 /** A grouped error class (message + stack head), with span + reach + a known-noise flag. */
 export interface ErrorCluster {
@@ -309,7 +327,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     never_emitted: coverage_events.filter(entry => !entry.seen).length,
   }
 
-  const leader_health = build_leader_health({ shared_db, window_start_iso })
+  const leader_health = build_leader_health({ shared_db, window_start_iso, current_app_version })
 
   return {
     audience,
@@ -849,11 +867,16 @@ function build_pipeline_health({ shared_db }: { shared_db: Database.Database }):
   } catch {
     archived_rows = 0
   }
-  return { last_log_at, last_session_start_at, last_server_log_at, retention_ran_at, hot_rows, archived_rows }
+  const existing_tables = new Set(
+    (shared_db.prepare(`SELECT name FROM sqlite_master WHERE type='table'`).all() as { name: string }[])
+      .map(row => row.name),
+  )
+  const missing_syncable_tables = SYNCABLE_TABLE_NAMES.filter(name => !existing_tables.has(name))
+  return { last_log_at, last_session_start_at, last_server_log_at, retention_ran_at, hot_rows, archived_rows, missing_syncable_tables }
 }
 
 /** Leader-worker DB health: the live_query_* family (hot window). */
-function build_leader_health({ shared_db, window_start_iso }: { shared_db: Database.Database, window_start_iso: string }): LeaderHealth {
+function build_leader_health({ shared_db, window_start_iso, current_app_version }: { shared_db: Database.Database, window_start_iso: string, current_app_version: string }): LeaderHealth {
   const leader_count = (message: string) => (shared_db.prepare(
     `SELECT COUNT(*) n FROM client_logs WHERE received_at >= ? AND message = ?`,
   ).get(window_start_iso, message) as { n: number }).n
@@ -866,11 +889,24 @@ function build_leader_health({ shared_db, window_start_iso }: { shared_db: Datab
     FROM client_logs WHERE received_at >= ? AND message = 'live_query_failed'
     GROUP BY source ORDER BY count DESC
   `).all(window_start_iso) as { source: string, count: number }[]
+  const failed_by_code = shared_db.prepare(`
+    SELECT coalesce(json_extract(context, '$.code'), 'unknown') code, COUNT(*) count
+    FROM client_logs WHERE received_at >= ? AND message = 'live_query_failed'
+    GROUP BY code ORDER BY count DESC
+  `).all(window_start_iso) as { code: string, count: number }[]
+  const failed_current = (shared_db.prepare(`
+    SELECT COUNT(*) n FROM client_logs
+    WHERE received_at >= ? AND message = 'live_query_failed' AND app_version = ?
+  `).get(window_start_iso, current_app_version) as { n: number }).n
+  const failed = leader_count('live_query_failed')
   return {
     timeouts: leader_count('live_query_timeout'),
     recovered: leader_count('live_query_recovered'),
-    failed: leader_count('live_query_failed'),
+    failed,
     failed_no_leader,
     failed_by_source,
+    failed_by_code,
+    failed_current,
+    failed_stale: failed - failed_current,
   }
 }

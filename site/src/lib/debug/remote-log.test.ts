@@ -371,4 +371,26 @@ describe('remote-log buffer + flush', () => {
       vi.useRealTimers()
     }
   })
+
+  test('heartbeat pauses after the idle timeout and resumes on user activity', async () => {
+    vi.useFakeTimers()
+    try {
+      const module = await import('./remote-log')
+      module.init_remote_logging()
+
+      // 6 min of zero interaction: ticks fire only through the 5-min idle window
+      // (30s..300s = 10), then pause.
+      vi.advanceTimersByTime(6 * 60_000)
+      await module.flush_now()
+      expect(all_sent_entries().filter(entry => entry.message === 'heartbeat')).toHaveLength(10)
+
+      // A user interaction resets the idle clock — heartbeats resume.
+      window.dispatchEvent(new Event('pointerdown'))
+      vi.advanceTimersByTime(60_000) // two more ticks
+      await module.flush_now()
+      expect(all_sent_entries().filter(entry => entry.message === 'heartbeat')).toHaveLength(12)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })

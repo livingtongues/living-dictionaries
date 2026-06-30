@@ -184,6 +184,7 @@ const analytics: LogAnalytics = {
     retention_ran_at: new Date(Date.now() - 5 * 3600_000).toISOString(),
     hot_rows: 2417,
     archived_rows: 18342,
+    missing_syncable_tables: [],
   },
   event_coverage: {
     events: [
@@ -197,9 +198,12 @@ const analytics: LogAnalytics = {
   leader_health: {
     timeouts: 12,
     recovered: 11,
-    failed: 1,
+    failed: 3,
     failed_no_leader: 1,
-    failed_by_source: [{ source: 'viewer', count: 1 }],
+    failed_by_source: [{ source: 'viewer', count: 2 }, { source: 'dict', count: 1 }],
+    failed_by_code: [{ code: 'NOTADB', count: 2 }, { code: 'timeout', count: 1 }],
+    failed_current: 1,
+    failed_stale: 2,
   },
 }
 
@@ -209,6 +213,10 @@ export const Default: PageStory<typeof Component> = {
 
 export const Bots: PageStory<typeof Component> = {
   props: { analytics: { ...analytics, audience: 'bots', totals: { sessions: 402, errors: 24, logs: 1760, unique_users: 0 } } } as never,
+}
+
+export const SchemaDrift: PageStory<typeof Component> = {
+  props: { analytics: { ...analytics, pipeline: { ...analytics.pipeline, missing_syncable_tables: ['dictionary_partners'] } } } as never,
 }
 
 const empty_analytics: LogAnalytics = {
@@ -227,7 +235,7 @@ const empty_analytics: LogAnalytics = {
   web_vitals: [],
   geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [] },
   errors_by_version: { current_version: '1719300000123', total: 0, current: 0, stale: 0, stale_pct: null, versions: [] },
-  pipeline: { last_log_at: null, last_session_start_at: null, last_server_log_at: null, retention_ran_at: null, hot_rows: 0, archived_rows: 0 },
+  pipeline: { last_log_at: null, last_session_start_at: null, last_server_log_at: null, retention_ran_at: null, hot_rows: 0, archived_rows: 0, missing_syncable_tables: [] },
   event_coverage: {
     events: [
       { event: 'search_performed', seen: false, count: 0 },
@@ -237,7 +245,7 @@ const empty_analytics: LogAnalytics = {
     ],
     never_emitted: 4,
   },
-  leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [] },
+  leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [], failed_by_code: [], failed_current: 0, failed_stale: 0 },
 }
 
 export const Empty: PageStory<typeof Component> = {

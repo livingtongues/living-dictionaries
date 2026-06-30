@@ -43,11 +43,32 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   folded into `KNOWN_NOISE_PATTERNS`.
 
 ## Open proposals
+- **★ Schema-drift guard on the pipeline-health strip** *(filed 2026-06-29 — NEXT-TO-BUILD, grounded
+  in a real P1).* Today's review caught a live `crash`: `/api/admin-sync` 500'd with `no such table:
+  dictionary_partners` because the prod `shared.db` never got that table (the initial migration was
+  consolidated *after* it was applied → see `.issues/missing-dictionary-partners-table-prod.md`). The
+  dashboard would have pre-empted it: in `log-analytics.ts`, intersect `SELECT name FROM sqlite_master`
+  with `SYNCABLE_TABLE_NAMES` and render any missing table in red on the health strip ("⚠ schema drift:
+  `<table>` missing"). Cheap, and turns a user-hit 500 into a proactive ops signal. Extend to per-dict
+  DBs once that's wired.
+- **Leader-worker failures by SQLite result `code` + current-vs-stale build** *(ported from house,
+  2026-06-29).* LD's leader-worker health panel (shipped 06-26) shows only timeout/recovered/failed +
+  had_leader/source. Add a `code` histogram (label SQLite codes — 11=CORRUPT, 26=NOTADB…) and an
+  `app_version` current-vs-stale split on the *failed* bucket, to distinguish "corruption on a stale
+  build (self-heals on update)" from "RPC timeouts on the current build (a real regression)". Data is
+  already in `context.code` + `app_version`.
+- **Intent→shown success event** *(ported from house/tutor, 2026-06-29 — LOW until reader traffic).*
+  Pair each open-intent event (`entry_opened` / `dictionary_opened`) with a "rendered" success event so
+  analytics can measure the intent→shown gap and rank silently-degraded reads (live-query failures that
+  open but never populate). Fits LD's event vocab; revisit when real contributor/visitor traffic lands.
 - **Error-per-use by feature** *(ported from house, 2026-06-28 — LOW until real traffic)* — errors
   normalized by the matching usage event, to rank what's breaking relative to how much it's used.
 - **Real session-duration distribution** (median/p90 from heartbeat span) + **events/session**,
   augmenting/replacing the proxy "Logs / session" engagement metric (had to compute the
-  2198s-vs-~10s spread by hand in the 06-26 review).
+  2198s-vs-~10s spread by hand in the 06-26 review). **Sharpened 2026-06-29:** make it
+  **visibility-aware** — a single idle tab today emitted ~1,200 heartbeats over 11 h and would read as
+  668 min of "engagement". Either gate heartbeats on `document.visibilityState` in `remote-log.ts`, or
+  compute duration as the **active (visible) span** only.
 - **True unique-visitor counts via a cookieless `visitor_hash`** (lifted from the retired
   `analytics-pipeline.md` — the one idea the house-port analytics didn't carry over). The shipped
   dashboard counts **sessions** (`session_id`), not long-lived visitors. To add real uniques:
@@ -90,5 +111,7 @@ house's **/admin/revenue** dashboard (no payments).
   error-cluster borrow shipped)
 - `.cron/log-reviews/2026-06-28.md` (fully idle; deploy-markers + page_load-hygiene ships verified;
   `navigator.webdriver` automation-exclusion finding; house per-route-p95 + error-per-use borrows)
+- `.cron/log-reviews/2026-06-29.md` (FIRST real-traffic day; caught the `dictionary_partners` P1
+  schema-drift crash; schema-drift-guard + visibility-aware-duration + house leader-health-code borrows)
 - Phase D cross-repo read 2026-06-27 (house `error_audience`/`errors_by_version`/expected-bucket;
   tutor `error_clusters`/`KNOWN_NOISE`).

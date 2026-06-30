@@ -5,6 +5,7 @@ import { is_admin } from '$lib/admins'
 import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { log_server_event } from '$lib/server/log-server-event'
 import { format_invite_notification } from '$lib/server/chat/notification-messages'
 import { post_system_notification } from '$lib/server/chat/system-notifier'
 
@@ -87,6 +88,7 @@ https://livingdictionaries.app (Living Dictionaries website)`,
     if (err && typeof err === 'object' && 'status' in err)
       throw err
     console.error(`Error with email send request: ${(err as Error).message}`)
+    log_server_event({ level: 'error', message: 'invite_email_failed', error: err, user_id, context: { inviter_email } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error with email send request: ${(err as Error).message}`)
   }
 }

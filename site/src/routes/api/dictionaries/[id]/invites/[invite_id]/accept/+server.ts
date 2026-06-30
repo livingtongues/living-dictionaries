@@ -2,6 +2,7 @@ import type { RequestHandler } from './$types'
 import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
 /**
@@ -58,6 +59,7 @@ export const POST: RequestHandler = async (event) => {
       .run(now, invite_id)
   } catch (err) {
     console.error(`Error accepting invite: ${(err as Error).message}`)
+    log_server_event({ db, level: 'error', message: 'invite_accept_failed', error: err, user_id, context: { dictionary_id: dict_id, invite_id } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Could not accept invite')
   }
 

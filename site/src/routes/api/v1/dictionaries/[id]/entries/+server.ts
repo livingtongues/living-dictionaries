@@ -2,13 +2,11 @@ import type { RequestHandler } from './$types'
 import type { MultiString } from '$lib/types'
 import type { EntriesWriteResponseBody, EntryInput } from '$lib/api/v1/entry-input'
 import { DEFAULT_LIST_LIMIT, MAX_ENTRIES_PER_REQUEST, MAX_LIST_LIMIT } from '$lib/api/v1/entry-input'
-import { verify_dict_api_access } from '$lib/auth/verify-dict-api-access'
 import { ResponseCodes } from '$lib/constants'
-import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
-import { get_shared_db } from '$lib/db/server/shared-db'
 import { apply_entry_writes } from '$lib/db/server/v1-entry-write'
+import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
@@ -37,10 +35,7 @@ export interface EntriesListResponseBody {
  * agent can page incrementally.
  */
 export const GET: RequestHandler = async (event) => {
-  const dictionary = get_dictionary_by_url_or_id(event.params.id)
-  if (!dictionary)
-    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-  await verify_dict_api_access(event, dictionary.id, 'contributor')
+  const { dictionary } = await load_v1_dictionary_context({ event, role: 'contributor' })
 
   const params = event.url.searchParams
   const where: string[] = []
@@ -97,11 +92,7 @@ export const GET: RequestHandler = async (event) => {
  * `{ created, updated, failed, results }`.
  */
 export const POST: RequestHandler = async (event) => {
-  const dictionary = get_dictionary_by_url_or_id(event.params.id)
-  if (!dictionary)
-    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-
-  const access = await verify_dict_api_access(event, dictionary.id, 'editor')
+  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
 
   const body = await event.request.json() as unknown
   const { entries, import_id } = normalize_body(body)
@@ -126,14 +117,7 @@ export const POST: RequestHandler = async (event) => {
 
   // Mirror the dict cursor to shared.db (same as the /changes push) so the
   // snapshot builder + admin catalog see the dictionary as freshly modified.
-  if (report.new_synced_up_to) {
-    try {
-      get_shared_db().prepare(`UPDATE dictionaries SET updated_at = ? WHERE id = ?`)
-        .run(report.new_synced_up_to, dictionary.id)
-    } catch (err) {
-      console.warn(`Could not mirror updated_at for ${dictionary.id}:`, err)
-    }
-  }
+  mirror_dictionary_cursor({ dict_id: dictionary.id, cursor: report.new_synced_up_to })
 
   log_server_event({ level: 'info', message: 'v1_entries_written', user_id: access.user_id, context: { dictionary_id: dictionary.id, via: access.via, created: report.created, updated: report.updated, failed: report.failed } })
 

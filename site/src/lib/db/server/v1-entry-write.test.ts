@@ -1,7 +1,8 @@
 import type Database from 'better-sqlite3'
-import { afterEach, beforeEach, describe, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { open_dictionary_db_in_memory } from './dictionary-db'
 import { open_dictionary_history_db_in_memory } from './dictionary-history-db'
+import * as sync_helpers from './dictionary-sync-helpers'
 import { apply_entry_delete, apply_entry_update, apply_entry_writes } from './v1-entry-write'
 
 let db: Database.Database
@@ -122,6 +123,33 @@ describe(apply_entry_writes, () => {
     apply_entry_writes({ db, history_db, user_id: 'u1', entries: [{ lexeme: 'hist', senses: [{ glosses: { en: 'history' } }] }] })
     const entry_inserts = history_db.prepare(`SELECT COUNT(*) AS c FROM changes WHERE table_name = 'entries' AND op = 'insert'`).get() as { c: number }
     expect(entry_inserts.c).toBe(1)
+  })
+
+  // Regression (N1): when the entry row commits but a LATER row in the same item
+  // throws, `ROLLBACK TO v1_item` undoes the DB rows — the item's staged history
+  // events must be discarded too, not recorded as phantom `changes`.
+  test('discards staged history for an item whose later row fails after the entry merged', () => {
+    const real_merge = sync_helpers.merge_dict_row
+    let merge_calls = 0
+    const spy = vi.spyOn(sync_helpers, 'merge_dict_row').mockImplementation((args) => {
+      merge_calls++
+      if (merge_calls === 2) // 1 = entries row (committed), 2 = senses row → fail mid-item
+        throw new Error('forced failure on the second row')
+      return real_merge(args)
+    })
+
+    try {
+      const report = apply_entry_writes({ db, history_db, user_id: 'u1', entries: [{ lexeme: 'doomed', senses: [{ glosses: { en: 'x' } }] }] })
+
+      expect(report).toMatchObject({ created: 0, failed: 1 })
+      // The entry row was rolled back with the savepoint.
+      expect(count('entries')).toBe(0)
+      // And NO phantom history was recorded for the never-committed item.
+      const changes = history_db.prepare(`SELECT COUNT(*) AS c FROM changes`).get() as { c: number }
+      expect(changes.c).toBe(0)
+    } finally {
+      spy.mockRestore()
+    }
   })
 })
 

@@ -5,6 +5,7 @@ import { stringify_row } from '$lib/db/schemas/json-columns'
 import * as schema from '$lib/db/schemas/shared'
 import { CLIENT_BEHIND, SERVER_BEHIND, SyncVersionError } from '$lib/db/sync/errors'
 import { is_readonly_table, is_syncable_table, SYNCABLE_TABLE_NAMES } from '$lib/db/sync/types'
+import { log_server_event } from '$lib/server/log-server-event'
 import { getTableColumns } from 'drizzle-orm'
 import { latest_shared_migration_name } from './shared-db'
 import { query_all, query_one } from './typed-query'
@@ -61,6 +62,13 @@ export function process_sync({ db, request, user_id, server_latest_migration = l
     })
   }
 
+  // A syncable table can be absent on a DB provisioned before a migration that
+  // added it (see the `dictionary_partners` consolidation-drift incident). Skip
+  // + log such tables rather than letting a `no such table` throw 500 the whole
+  // round trip. Computed once, BEFORE the transaction, so the warn isn't lost to
+  // a later rollback.
+  const tables = present_syncable_tables({ db, user_id })
+
   db.pragma('defer_foreign_keys = ON')
   db.exec('BEGIN IMMEDIATE')
 
@@ -84,7 +92,7 @@ export function process_sync({ db, request, user_id, server_latest_migration = l
     }
 
     // Process incoming dirty rows.
-    for (const table_name of SYNCABLE_TABLE_NAMES) {
+    for (const table_name of tables) {
       if (is_readonly_table(table_name))
         continue
       const rows = request.dirty_rows[table_name]
@@ -103,7 +111,7 @@ export function process_sync({ db, request, user_id, server_latest_migration = l
     }
 
     // Fetch server changes since watermark.
-    for (const table_name of SYNCABLE_TABLE_NAMES) {
+    for (const table_name of tables) {
       const rows = fetch_changes({ db, table_name, synced_up_to: request.synced_up_to })
 
       // Exclude rows we just merged from the client (they'd show up as "changes" otherwise).
@@ -125,7 +133,7 @@ export function process_sync({ db, request, user_id, server_latest_migration = l
     // Fetch server-side deletes since watermark. Skip ones where the row was
     // since re-added (rare).
     if (request.synced_up_to) {
-      for (const table_name of SYNCABLE_TABLE_NAMES) {
+      for (const table_name of tables) {
         const deletes = db.prepare(
           `SELECT table_name, id FROM deletes WHERE table_name = ? AND updated_at > ?`,
         ).all(table_name, request.synced_up_to) as { table_name: string, id: string }[]
@@ -138,7 +146,7 @@ export function process_sync({ db, request, user_id, server_latest_migration = l
       }
     }
 
-    response.new_synced_up_to = compute_max_updated_at({ db, tables: SYNCABLE_TABLE_NAMES })
+    response.new_synced_up_to = compute_max_updated_at({ db, tables })
 
     db.exec('COMMIT')
     return response
@@ -146,6 +154,35 @@ export function process_sync({ db, request, user_id, server_latest_migration = l
     db.exec('ROLLBACK')
     throw error
   }
+}
+
+/**
+ * The subset of `SYNCABLE_TABLE_NAMES` that actually exists in this DB. A table
+ * can be absent when the DB was provisioned before the migration that added it
+ * (e.g. an in-place-edited / consolidated migration that never re-ran — the
+ * `dictionary_partners` incident). Logs a `warn` listing any missing tables so
+ * the drift is visible in `client_logs` (`source='server'`) instead of 500-ing
+ * every admin sync. Call BEFORE opening the write transaction.
+ */
+function present_syncable_tables({ db, user_id }: {
+  db: Database.Database
+  user_id?: string
+}): readonly SyncableTableName[] {
+  const existing = new Set(
+    (db.prepare(`SELECT name FROM sqlite_master WHERE type='table'`).all() as { name: string }[])
+      .map(row => row.name),
+  )
+  const missing = SYNCABLE_TABLE_NAMES.filter(name => !existing.has(name))
+  if (missing.length === 0)
+    return SYNCABLE_TABLE_NAMES
+  log_server_event({
+    db,
+    level: 'warn',
+    message: 'sync_missing_syncable_table',
+    user_id: user_id ?? null,
+    context: { missing_tables: missing },
+  })
+  return SYNCABLE_TABLE_NAMES.filter(name => existing.has(name))
 }
 
 function fetch_changes<K extends SyncableTableName>({ db, table_name, synced_up_to }: {

@@ -33,6 +33,13 @@ import { detect_db_capabilities, resolve_db_tier } from '$lib/db/dict-client/wor
 const STORAGE_KEY = 'debug_log_pending'
 const FLUSH_INTERVAL_MS = 5000
 const HEARTBEAT_INTERVAL_MS = 30_000
+/**
+ * A visible tab left untouched this long stops counting as engagement: heartbeats
+ * pause until the next user interaction. Caps the "left a tab open all day" case
+ * (e.g. an 11h idle-but-focused session = ~1,200 phantom heartbeats) that
+ * visibility-gating alone misses. Any pointer/key/scroll/visibility-return resets it.
+ */
+const IDLE_TIMEOUT_MS = 5 * 60_000
 const MAX_BUFFER = 50
 const MAX_BREADCRUMBS = 20
 const MAX_BREADCRUMB_LABEL = 80
@@ -101,6 +108,8 @@ function on_window(type: string, handler: EventListener, options?: AddEventListe
  */
 let session_id = ''
 let session_started_at_ms = 0
+/** Epoch ms of the last real user interaction — drives the heartbeat idle gate. */
+let last_activity_at_ms = 0
 
 /** House is a web app today; a native client would override `platform` via the payload. */
 function get_platform(): 'web' | 'ios' | 'android' {
@@ -594,14 +603,23 @@ export function init_remote_logging(): void {
     void flush()
   }, FLUSH_INTERVAL_MS)
 
+  // Track real user interaction so an idle-but-visible tab stops emitting
+  // heartbeats (see IDLE_TIMEOUT_MS). Passive listeners; any one resets the clock.
+  last_activity_at_ms = Date.now()
+  const mark_activity: EventListener = () => { last_activity_at_ms = Date.now() }
+  for (const activity_event of ['pointerdown', 'keydown', 'scroll', 'pointermove'])
+    on_window(activity_event, mark_activity, { passive: true })
+
   // Periodic heartbeat. Each tick we know the session was still alive at
-  // `elapsed_seconds`. SKIP the tick while the tab is hidden — backgrounded
-  // admin tabs left open are the dominant source of log volume, and the
-  // `visibility_hidden`/`visibility_visible` events already bracket the gap so
-  // session-span is preserved. A heartbeat = "alive AND visible". (Ported from
-  // house's log-volume buildout.)
+  // `elapsed_seconds`. SKIP the tick while the tab is hidden OR idle —
+  // backgrounded/untouched admin tabs left open are the dominant source of log
+  // volume, and the `visibility_hidden`/`visibility_visible` events already
+  // bracket the gap so session-span is preserved. A heartbeat = "alive AND
+  // visible AND engaged". (Ported from house's log-volume buildout.)
   heartbeat_timer = setInterval(() => {
     if (safe_visibility_state() === 'hidden')
+      return
+    if (Date.now() - last_activity_at_ms > IDLE_TIMEOUT_MS)
       return
     const elapsed_seconds = Math.round((Date.now() - session_started_at_ms) / 1000)
     push({
@@ -629,6 +647,8 @@ export function init_remote_logging(): void {
     })
     if (document.visibilityState === 'hidden')
       flush_via_beacon()
+    else
+      last_activity_at_ms = Date.now()
   })
 
   // Try a flush right away — picks up offline-buffered entries from a prior crash.
@@ -673,6 +693,7 @@ export function _reset_for_tests(): void {
   in_console_error_patch = false
   session_id = ''
   session_started_at_ms = 0
+  last_activity_at_ms = 0
   flush_chain = Promise.resolve()
   try {
     localStorage.removeItem(STORAGE_KEY)

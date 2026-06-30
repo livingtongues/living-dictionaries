@@ -180,6 +180,14 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
     // "Internal Error" crash with an empty stack — which is exactly what hid a
     // server-module-in-client-bundle leak that crashed every dictionary open.
     console.error('dictionary layout load failed', err)
+    // On the SERVER (first-paint SSR), rethrow the RAW error so `handleError`
+    // (hooks.server.ts) captures the real cause + stack into server telemetry
+    // (`source='server'`). `error()` wraps it in an HttpError, which SvelteKit
+    // treats as "expected" and does NOT pass to handleError — so the cause would
+    // otherwise vanish into rotated `docker logs`. In the browser, console.error
+    // is patched by remote-log, so the 500 page below is enough.
+    if (!browser)
+      throw err instanceof Error ? err : new Error(String(err))
     error(ResponseCodes.INTERNAL_SERVER_ERROR, err)
   }
 }
