@@ -1,8 +1,8 @@
 <script lang="ts">
   import sanitize from 'xss'
   import UserGuide from './UserGuide.svelte'
-  import { Button } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { HeadlessButton } from '$lib/svelte-pieces'
+  import { page } from '$app/state'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
   const { data } = $props()
@@ -14,22 +14,23 @@
 
 <div class="about">
   <h3 class="about-heading">
-    {$page.data.t('header.about')}
+    {page.data.t('header.about')}
   </h3>
 
   {#if is_manager}
-    {#if editing}
-      <Button class="about-action" onclick={() => (editing = false)}>{$page.data.t('misc.cancel')}</Button>
-      <Button
-        class="about-action"
-        form="filled"
-        onclick={async () => {
-          await update_about(updated)
-          editing = false
-        }}>{$page.data.t('misc.save')}</Button>
-    {:else}
-      <Button class="about-action" onclick={() => (editing = true)}>{$page.data.t('misc.edit')}</Button>
-    {/if}
+    <div class="actions">
+      {#if editing}
+        <button type="button" class="btn btn-default" onclick={() => (editing = false)}>{page.data.t('misc.cancel')}</button>
+        <HeadlessButton
+          class="btn-primary btn-default"
+          onclick={async () => {
+            await update_about(updated)
+            editing = false
+          }}>{page.data.t('misc.save')}</HeadlessButton>
+      {:else}
+        <button type="button" class="btn btn-default" onclick={() => (editing = true)}>{page.data.t('misc.edit')}</button>
+      {/if}
+    </div>
   {/if}
 
   {#if is_manager || is_contributor || auth_user.admin_level > 1}
@@ -47,7 +48,7 @@
       {#if updated || dictionary.about}
         {@html sanitize(updated || dictionary.about)}
       {:else}
-        <i>{$page.data.t('dictionary.no_info_yet')}</i>
+        <i>{page.data.t('dictionary.no_info_yet')}</i>
       {/if}
     </div>
   </div>
@@ -55,7 +56,7 @@
 
 <SeoMetaTags
   norobots={!dictionary.public}
-  title={$page.data.t('header.about')}
+  title={page.data.t('header.about')}
   dictionaryName={dictionary.name}
   description="Learn about the background and creation of this Living Dictionary."
   keywords="About this dictionary, background, creation, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />
@@ -68,8 +69,10 @@
     margin-bottom: 0.75rem;
   }
 
-  .about :global(.about-action) {
-    margin-bottom: 0.5rem;
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
   }
 
   .about-content {

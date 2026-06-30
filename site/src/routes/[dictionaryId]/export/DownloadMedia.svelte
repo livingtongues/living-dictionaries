@@ -109,7 +109,7 @@
 <style>
   .errors-block {
     margin-top: 1rem;
-    color: rgb(220 38 38); /* red-600 */
+    color: var(--danger);
     font-size: 0.875rem;
     line-height: 1.25rem;
   }

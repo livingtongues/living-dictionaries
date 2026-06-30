@@ -1,9 +1,7 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   import { tweened } from 'svelte/motion'
   import { cubicOut } from 'svelte/easing'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     progress?: number
@@ -14,7 +12,7 @@
     duration: 2000,
     easing: cubicOut,
   })
-  run(() => {
+  $effect(() => {
     tweenedProgress.set(progress)
   })
   const percentage = $derived(Math.floor($tweenedProgress * 100))
@@ -24,7 +22,7 @@
   <div class="progress-header">
     <div>
       <span class="downloading-pill">
-        {$page.data.t('misc.downloading')}
+        {page.data.t('misc.downloading')}
       </span>
     </div>
     <div style="text-align: right">
@@ -56,8 +54,8 @@
     padding: 0.25rem 0.5rem;
     text-transform: uppercase;
     border-radius: 9999px;
-    color: rgb(37 99 235); /* blue-600 */
-    background-color: rgb(191 219 254); /* blue-200 */
+    color: var(--primary);
+    background-color: color-mix(in srgb, var(--primary) 18%, var(--background));
   }
 
   .progress-percent {
@@ -65,7 +63,7 @@
     line-height: 1rem;
     font-weight: 600;
     display: inline-block;
-    color: rgb(37 99 235); /* blue-600 */
+    color: var(--primary);
   }
 
   .progress-track {
@@ -76,7 +74,7 @@
     line-height: 1rem;
     display: flex;
     border-radius: 0.25rem;
-    background-color: rgb(191 219 254); /* blue-200 */
+    background-color: color-mix(in srgb, var(--primary) 18%, var(--background));
   }
 
   .progress-bar {
@@ -85,8 +83,8 @@
     flex-direction: column;
     text-align: center;
     white-space: nowrap;
-    color: #fff;
+    color: var(--on-primary);
     justify-content: center;
-    background-color: rgb(59 130 246); /* blue-500 */
+    background-color: var(--primary);
   }
 </style>

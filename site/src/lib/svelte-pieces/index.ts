@@ -2,6 +2,7 @@
 // CSS the Svelte 5 build rejects). UI components from house's already-ported set; the rest
 // copied from svelte-pieces source (legacy syntax still runs in Svelte 5; runes migration is M2c).
 export { default as Button } from './ui/Button.svelte'
+export { default as HeadlessButton } from './HeadlessButton.svelte'
 export { default as Badge } from './ui/Badge.svelte'
 export { default as Modal } from './ui/Modal.svelte'
 export { default as ResponsiveTable } from './ui/ResponsiveTable.svelte'

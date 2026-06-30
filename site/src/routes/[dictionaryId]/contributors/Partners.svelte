@@ -1,8 +1,10 @@
 <script lang="ts">
   import type { Readable } from 'svelte/store'
+  import IconMdiClose from '~icons/mdi/close'
+  import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
   import type { PartnerWithPhoto } from '$lib/types'
-  import { Button } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { HeadlessButton } from '$lib/svelte-pieces'
+  import { page } from '$app/state'
   import Image from '$lib/components/image/Image.svelte'
   import AddImage from '$lib/components/image/AddImage.svelte'
 
@@ -34,14 +36,14 @@
     = 'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FLiving_Tongues_Logo_transparent%20300dpi.png?alt=media'
 
   async function ask_partner_name() {
-    const name = prompt($page.data.t('partnership.name'))?.trim()
+    const name = prompt(page.data.t('partnership.name'))?.trim()
     if (name)
       await add_partner_name(name)
   }
 </script>
 
 <h3 class="section-heading">
-  {$page.data.t('partnership.title')}
+  {page.data.t('partnership.title')}
 </h3>
 
 <div>
@@ -51,14 +53,14 @@
         Living Tongues Institute for Endangered Languages
       </div>
       {#if admin}
-        <div style="width: 0.25rem"></div>
-        <Button
-          color="red"
-          size="sm"
+        <div style="flex-grow: 1"></div>
+        <HeadlessButton
+          class="btn-ghost btn-sm delete-button"
+          style="gap: 0.25rem"
           onclick={async () => {
             await hide_living_tongues_logo(true)
-          }}>{$page.data.t('misc.delete')}
-          <i class="fas fa-times"></i></Button>
+          }}>{page.data.t('misc.delete')}
+          <IconMdiClose /></HeadlessButton>
       {/if}
     </div>
     <div style="max-width: 400px">
@@ -68,10 +70,12 @@
         src={LIVING_TONGUES_LOGO} />
     </div>
   {:else if admin}
-    <Button
+    <button
+      type="button"
+      class="btn btn-default"
       onclick={async () => {
         await hide_living_tongues_logo(false)
-      }}>Show Living Tongues Logo</Button>
+      }}>Show Living Tongues Logo</button>
   {/if}
   {#each partners as partner (partner.id)}
     <div class="partner-row">
@@ -79,19 +83,19 @@
         {partner.name}
       </div>
       {#if can_edit}
-        <div style="width: 0.25rem"></div>
-        <Button
-          color="red"
-          size="sm"
+        <div style="flex-grow: 1"></div>
+        <HeadlessButton
+          class="btn-ghost btn-sm delete-button"
+          style="gap: 0.25rem"
           onclick={async () => {
-            if (confirm(`${$page.data.t('misc.delete')}?`)) {
+            if (confirm(`${page.data.t('misc.delete')}?`)) {
               if (partner.photo) {
                 await delete_partner_image({ photo_id: partner.photo.id, partner_id: partner.id })
               }
               await delete_partner(partner.id)
             }
-          }}>{$page.data.t('misc.delete')}
-          <i class="fas fa-times"></i></Button>
+          }}>{page.data.t('misc.delete')}
+          <IconMdiClose /></HeadlessButton>
       {/if}
     </div>
     {#if partner.photo}
@@ -112,10 +116,10 @@
     {/if}
   {/each}
   {#if can_edit}
-    <Button class="add-partner-button" onclick={ask_partner_name} form="filled">
-      <i class="far fa-pencil"></i>
-      {$page.data.t('partnership.button')}
-    </Button>
+    <HeadlessButton class="btn-primary btn-default add-partner-button" onclick={ask_partner_name} style="gap: 0.4rem">
+      <IconMdiPencilOutline />
+      {page.data.t('partnership.button')}
+    </HeadlessButton>
   {/if}
 </div>
 
@@ -126,6 +130,10 @@
     line-height: 1.75rem;
     margin-bottom: 0.25rem;
     margin-top: 0.75rem;
+  }
+
+  :global(.delete-button) {
+    color: var(--danger);
   }
 
   .partner-row {

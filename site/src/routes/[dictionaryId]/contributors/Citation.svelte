@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { PartnerWithPhoto, Tables } from '$lib/types'
   import { build_citation } from './build-citation'
-  import { Button, Form } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { Form, HeadlessButton } from '$lib/svelte-pieces'
+  import { page } from '$app/state'
 
   interface Props {
     dictionary: Tables<'dictionaries'>
@@ -37,9 +37,9 @@
     }}>
     {#snippet children({ loading })}
       <label for="names">
-        {$page.data.t('contributors.how_to_cite_instructions')}
+        {page.data.t('contributors.how_to_cite_instructions')}
       </label>
-      <div style="margin-top: 0.25rem; display: flex">
+      <div style="margin-top: 0.25rem; display: flex; gap: 0.5rem">
         <input
           dir="ltr"
           id="names"
@@ -52,17 +52,16 @@
             value = e.target.value.trim()
             unsaved = value !== citation
           }} />
-        <div style="width: 0.25rem"></div>
-        <Button class="citation-save-button" {loading} type="submit">
-          {$page.data.t('misc.save')}
-        </Button>
+        <HeadlessButton class="btn-primary btn-default citation-save-button" {loading} type="submit">
+          {page.data.t('misc.save')}
+        </HeadlessButton>
       </div>
     {/snippet}
   </Form>
 {/if}
 
 <div dir="ltr" class:unsaved>
-  {build_citation({ t: $page.data.t, dictionary, custom_citation: value || citation, partners })}
+  {build_citation({ t: page.data.t, dictionary, custom_citation: value || citation, partners })}
 </div>
 
 <style>
@@ -84,6 +83,6 @@
   }
 
   .unsaved {
-    color: rgb(251 146 60); /* orange (uno text-orange = orange-400) */
+    color: var(--warning);
   }
 </style>
