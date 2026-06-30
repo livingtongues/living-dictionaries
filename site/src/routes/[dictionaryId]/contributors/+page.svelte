@@ -1,10 +1,13 @@
 <script lang="ts">
+  import IconMdiEmailOutline from '~icons/mdi/email-outline'
+  import IconMdiClose from '~icons/mdi/close'
+  import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
   import CitationComponent from './Citation.svelte'
   import Partners from './Partners.svelte'
-  import { Button, ShowHide } from '$lib/svelte-pieces'
+  import { HeadlessButton, ShowHide } from '$lib/svelte-pieces'
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   const { data } = $props()
   const { dictionary, is_manager, is_contributor, auth_user, editor_edits, managers, contributors, partners } = $derived(data)
@@ -14,17 +17,17 @@
   const write_in_collaborators = $derived(dictionary.write_in_collaborators ?? [])
 </script>
 
-<p style="margin-bottom: 0.5rem">
-  <i>{$page.data.t('contributors.manager_contributor_distinction')}</i>
+<p class="intro">
+  <i>{page.data.t('contributors.manager_contributor_distinction')}</i>
 </p>
 
 <h3 class="section-heading">
-  {$page.data.t('contributors.managers')}
+  {page.data.t('contributors.managers')}
 </h3>
 
 <div class="person-list">
   {#each managers as manager (manager.user_id)}
-    <div style="padding-top: 0.75rem; padding-bottom: 0.75rem">
+    <div class="person-row">
       <div class="person-name">
         {#if manager.full_name}
           {manager.full_name}
@@ -42,7 +45,7 @@
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
           {#snippet prefix()}
-            <i>{$page.data.t('contributors.invitation_sent')}:</i>
+            <i>{page.data.t('contributors.invitation_sent')}:</i>
           {/snippet}
         </ContributorInvitationStatus>
       </div>
@@ -50,15 +53,14 @@
   {/if}
 </div>
 {#if is_manager}
-  <Button onclick={editor_edits.inviteHelper('manager')} form="filled">
-    <i class="far fa-envelope"></i>
-    {$page.data.t('contributors.invite_manager')}
-  </Button>
+  <HeadlessButton onclick={editor_edits.inviteHelper('manager')} class="btn-primary btn-default" style="gap: 0.4rem">
+    <IconMdiEmailOutline />
+    {page.data.t('contributors.invite_manager')}
+  </HeadlessButton>
 {/if}
 
-<hr style="margin-top: 1rem; margin-bottom: 1rem" />
 <h3 class="section-heading">
-  {$page.data.t('dictionary.contributors')}
+  {page.data.t('dictionary.contributors')}
 </h3>
 <div class="person-list">
   {#each contributors as contributor (contributor.user_id)}
@@ -71,14 +73,14 @@
         {/if}
       </div>
       {#if is_manager}
-        <div style="width: 0.25rem"></div>
-        <Button
+        <div style="flex-grow: 1"></div>
+        <HeadlessButton
           onclick={editor_edits.removeContributor(contributor.id)}
-          color="red"
-          size="sm">
-          {$page.data.t('misc.delete')}
-          <i class="fas fa-times"></i>
-        </Button>
+          class="btn-ghost btn-sm delete-button"
+          style="gap: 0.25rem">
+          {page.data.t('misc.delete')}
+          <IconMdiClose />
+        </HeadlessButton>
       {/if}
     </div>
   {/each}
@@ -90,21 +92,21 @@
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
           {#snippet prefix()}
-            <i>{$page.data.t('contributors.invitation_sent')}:</i>
+            <i>{page.data.t('contributors.invitation_sent')}:</i>
           {/snippet}
         </ContributorInvitationStatus>
       </div>
     {/each}
-    <Button onclick={editor_edits.inviteHelper('contributor')} form="filled">
-      <i class="far fa-envelope"></i>
-      {$page.data.t('contributors.invite_contributors')}
-    </Button>
+    <HeadlessButton onclick={editor_edits.inviteHelper('contributor')} class="btn-primary btn-default" style="gap: 0.4rem">
+      <IconMdiEmailOutline />
+      {page.data.t('contributors.invite_contributors')}
+    </HeadlessButton>
   {:else if !is_contributor}
     <ShowHide>
       {#snippet children({ show, toggle })}
-        <Button onclick={toggle} form="filled">
-          {$page.data.t('contributors.request_access')}
-        </Button>
+        <button type="button" class="btn-primary btn-default" onclick={toggle}>
+          {page.data.t('contributors.request_access')}
+        </button>
         {#if show}
           {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
             <Contact subject="request_access" on:close={toggle} />
@@ -115,9 +117,8 @@
   {/if}
 </div>
 
-<hr style="margin-top: 1rem; margin-bottom: 1rem" />
 <h3 class="section-heading">
-  {$page.data.t('contributors.other_contributors')}
+  {page.data.t('contributors.other_contributors')}
 </h3>
 <div class="person-list">
   {#each write_in_collaborators as collaborator (collaborator)}
@@ -126,76 +127,72 @@
         {collaborator}
       </div>
       {#if is_manager}
-        <div style="width: 0.25rem"></div>
-        <Button
-          color="red"
-          size="sm"
-          onclick={editor_edits.removeWriteInCollaborator(write_in_collaborators, collaborator)}>{$page.data.t('misc.delete')}
-          <i class="fas fa-times"></i></Button>
+        <div style="flex-grow: 1"></div>
+        <HeadlessButton
+          class="btn-ghost btn-sm delete-button"
+          style="gap: 0.25rem"
+          onclick={editor_edits.removeWriteInCollaborator(write_in_collaborators, collaborator)}>{page.data.t('misc.delete')}
+          <IconMdiClose /></HeadlessButton>
       {/if}
     </div>
   {/each}
 </div>
 
-<!-- <div class="text-gray-600 mb-2 text-sm">
-  ({$page.data.t('contributors.speakers_other_collaborators')})
-</div> -->
-
 {#if is_manager}
-  <Button onclick={async () => await editor_edits.writeInCollaborator(write_in_collaborators)} form="filled">
-    <i class="far fa-pencil"></i>
-    {$page.data.t('contributors.write_in_contributor')}
-  </Button>
+  <HeadlessButton onclick={async () => await editor_edits.writeInCollaborator(write_in_collaborators)} class="btn-primary btn-default" style="gap: 0.4rem">
+    <IconMdiPencilOutline />
+    {page.data.t('contributors.write_in_contributor')}
+  </HeadlessButton>
 {/if}
 
 {#if !dictionary.con_language_description}
-  <hr style="margin-top: 1rem; margin-bottom: 1rem" />
+  <hr class="section-divider" />
   <Partners {partners} can_edit={is_manager} hideLivingTonguesLogo={!!dictionary.hide_living_tongues_logo} admin={auth_user.admin_level} {...data.partner_edits} />
 
   <!-- Not using contributors.request_to_add_manager -->
 
-  <hr style="margin-top: 1rem; margin-bottom: 1rem" />
+  <hr class="section-divider" />
 
   {#if dictionary.id !== 'onondaga'}
     <h3 class="team-heading">
-      {$page.data.t('contributors.LD_team')}
+      {page.data.t('contributors.LD_team')}
     </h3>
     <div style="margin-bottom: 1rem">
       Gregory D. S. Anderson -
       <span class="role-note">
-        {$page.data.t('contributors.LD_founder')}
+        {page.data.t('contributors.LD_founder')}
       </span>
       <br />
       K. David Harrison -
       <span class="role-note">
-        {$page.data.t('contributors.LD_founder')}
+        {page.data.t('contributors.LD_founder')}
       </span>
       <br />
       Anna Luisa Daigneault -
       <span class="role-note">
-        {$page.data.t('contributors.coordinator_editor')}
+        {page.data.t('contributors.coordinator_editor')}
       </span>
       <br />
       Jacob Bowdoin -
       <span class="role-note">
-        {$page.data.t('contributors.developer_designer')}
+        {page.data.t('contributors.developer_designer')}
       </span>
       <br />
       Diego Córdova Nieto -
       <span class="role-note">
-        {$page.data.t('contributors.developer_designer')}
+        {page.data.t('contributors.developer_designer')}
       </span>
       <br />
     </div>
   {/if}
 
-  <hr style="margin-top: 0.75rem; margin-bottom: 0.75rem" />
+  <hr class="section-divider" />
   <p class="rights-note">
-    {$page.data.t('contributors.all_rights_reserved_permission')}
+    {page.data.t('contributors.all_rights_reserved_permission')}
   </p>
 
-  <h3 style="font-weight: 600">
-    {$page.data.t('contributors.how_to_cite_academics')}
+  <h3 class="cite-heading">
+    {page.data.t('contributors.how_to_cite_academics')}
   </h3>
 
   <CitationComponent isManager={is_manager} {dictionary} {partners} citation={dictionary.citation} update_citation={data.update_citation} />
@@ -205,53 +202,75 @@
 
 <SeoMetaTags
   norobots={!dictionary.public}
-  title={$page.data.t('dictionary.contributors')}
+  title={page.data.t('dictionary.contributors')}
   dictionaryName={dictionary.name}
   description="Learn about the people who are building and managing this Living Dictionary."
   keywords="Contributors, Managers, Writers, Editors, Dictionary builders, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary, Print a dictionary" />
 
 <style>
+  .intro {
+    margin-bottom: 0.5rem;
+    color: var(--color-secondary);
+  }
+
   .section-heading {
     font-weight: 600;
     font-size: 1.125rem;
     line-height: 1.75rem;
     margin-bottom: 0.25rem;
-    margin-top: 0.75rem;
+    margin-top: 2rem;
   }
 
   .person-list > :global(:not([hidden]) ~ :not([hidden])) {
-    border-top-width: 1px; /* divide-y divide-gray-200 (the reset default border color is #e5e7eb = gray-200) */
+    border-top: 1px solid var(--border-color);
   }
 
   .person-name {
     font-size: 0.875rem;
     line-height: 1.25rem;
     font-weight: 500;
-    color: var(--color); /* ≈ gray-900 */
+    color: var(--color);
   }
 
   .person-row {
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
   }
 
+  :global(.delete-button) {
+    color: var(--danger);
+  }
+
+  .section-divider {
+    margin: 2rem 0;
+    border: none;
+    border-top: 1px solid var(--border-color);
+  }
+
   .team-heading {
     font-weight: 600;
-    margin-bottom: 0.25rem;
-    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+    margin-top: 2rem;
   }
 
   .role-note {
     font-size: 0.875rem;
     line-height: 1.25rem;
+    color: var(--color-secondary);
   }
 
   .rights-note {
     margin-bottom: 0.75rem;
     font-size: 0.875rem;
     line-height: 1.25rem;
+    color: var(--color-secondary);
+  }
+
+  .cite-heading {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
   }
 </style>

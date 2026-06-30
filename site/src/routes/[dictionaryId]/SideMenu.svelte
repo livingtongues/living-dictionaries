@@ -122,14 +122,16 @@
         </span>
       </a>
     {/if}
-    <a
-      href={`/${dictionary.url}/export`}
-      class:active={$page.url.pathname.includes('export')}>
-      <IconFa6SolidFileExport class="icon-inline" style="margin-left: 0.25rem" />
-      <span class="item-label">
-        {$page.data.t('misc.export')}
-      </span>
-    </a>
+    {#if entry_count}
+      <a
+        href={`/${dictionary.url}/export`}
+        class:active={$page.url.pathname.includes('export')}>
+        <IconFa6SolidFileExport class="icon-inline" style="margin-left: 0.25rem" />
+        <span class="item-label">
+          {$page.data.t('misc.export')}
+        </span>
+      </a>
+    {/if}
   {/if}
 </div>
 

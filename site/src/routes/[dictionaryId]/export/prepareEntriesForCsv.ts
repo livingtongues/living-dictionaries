@@ -1,12 +1,11 @@
 import type { EntryData, Tables } from '$lib/types'
-import { get } from 'svelte/store'
+import type { TranslateFunction } from '$lib/i18n/types'
 import { friendlyName } from './friendlyName'
 import { get_orthography_headers, get_sense_headers } from './assignHeadersForCsv'
 import { display_speaker_gender, format_orthographies, format_senses } from './assignFormattedEntryValuesForCsv'
 import { stripHTMLTags } from './stripHTMLTags'
 import { decades } from '$lib/components/media/ages'
 import { translate_part_of_speech, translate_part_of_speech_abbreviation, translate_semantic_domain_keys } from '$lib/transformers/translate_keys_to_current_language'
-import { page } from '$app/stores'
 
 export enum StandardEntryCSVFields {
   ID = 'Entry Id',
@@ -30,17 +29,19 @@ export type EntryForCSVKeys = keyof typeof StandardEntryCSVFields
 
 export type EntryForCSV = Partial<Record<EntryForCSVKeys, string>>
 
-export function translate_entries({ entries }: { entries: EntryData[] }) {
-  const $page = get(page)
-
+export function translate_entries({ entries, t, url_from_storage_path }: {
+  entries: EntryData[]
+  t: TranslateFunction
+  url_from_storage_path: (path: string) => string
+}) {
   return entries.map((entry) => {
     const senses = (entry.senses || []).map(sense => ({
       ...sense,
-      parts_of_speech: sense.parts_of_speech?.map(pos => translate_part_of_speech(pos, $page.data.t)),
-      parts_of_speech_abbreviations: sense.parts_of_speech?.map(pos => translate_part_of_speech_abbreviation(pos, $page.data.t)),
-      semantic_domains: sense.semantic_domains?.map(domain => translate_semantic_domain_keys(domain, $page.data.t)),
+      parts_of_speech: sense.parts_of_speech?.map(pos => translate_part_of_speech(pos, t)),
+      parts_of_speech_abbreviations: sense.parts_of_speech?.map(pos => translate_part_of_speech_abbreviation(pos, t)),
+      semantic_domains: sense.semantic_domains?.map(domain => translate_semantic_domain_keys(domain, t)),
       photo_urls: (sense.photos || []).map(({ storage_path }) => {
-        return $page.data.url_from_storage_path(storage_path)
+        return url_from_storage_path(storage_path)
       }),
     }))
 
