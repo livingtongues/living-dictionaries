@@ -252,14 +252,21 @@ export function apply_entry_writes({ db, history_db, entries, user_id, import_id
 
     for (const entry of entries) {
       db.exec('SAVEPOINT v1_item')
+      // Buffer this item's history events locally — only merge them into the
+      // shared list AFTER the item commits (RELEASE). A later-row failure does
+      // `ROLLBACK TO v1_item`, undoing the item's DB rows; staging straight into
+      // `history_events` would leave phantom change rows for an entry that never
+      // committed (the earlier rows' events outlive the rollback).
+      const item_history: HistoryEvent[] = []
       try {
         const built = build_entry({ entry, now, dialect_map, tag_map, import_tag_id })
         for (const { table_name, row } of built.ordered_rows) {
           const event = merge_dict_row({ db, table_name, row, user_id, at: history_at })
           if (event)
-            history_events.push(event)
+            item_history.push(event)
         }
         db.exec('RELEASE v1_item')
+        history_events.push(...item_history)
         for (const [key, id] of built.new_dialects)
           dialect_map.set(key, id)
         for (const [key, id] of built.new_tags)
@@ -269,6 +276,7 @@ export function apply_entry_writes({ db, history_db, entries, user_id, import_id
       } catch (err) {
         db.exec('ROLLBACK TO v1_item')
         db.exec('RELEASE v1_item')
+        // item_history is discarded with the rolled-back rows.
         results.push({ external_id: entry.external_id, status: 'failed', error: (err as Error).message })
         failed++
       }

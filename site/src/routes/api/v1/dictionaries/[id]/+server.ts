@@ -1,9 +1,7 @@
 import type { RequestHandler } from './$types'
 import type { DictionaryCoordinates, Orthography } from '$lib/db/schemas/shared.types'
-import { verify_dict_api_access } from '$lib/auth/verify-dict-api-access'
-import { ResponseCodes } from '$lib/constants'
-import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
-import { error, json } from '@sveltejs/kit'
+import { load_v1_dictionary_context } from '$lib/db/server/v1-route-context'
+import { json } from '@sveltejs/kit'
 
 export interface V1DictionaryResponseBody {
   id: string
@@ -28,10 +26,7 @@ export interface V1DictionaryResponseBody {
  * session gated (contributor+).
  */
 export const GET: RequestHandler = async (event) => {
-  const dictionary = get_dictionary_by_url_or_id(event.params.id)
-  if (!dictionary)
-    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-  await verify_dict_api_access(event, dictionary.id, 'contributor')
+  const { dictionary } = await load_v1_dictionary_context({ event, role: 'contributor' })
 
   return json({
     id: dictionary.id,

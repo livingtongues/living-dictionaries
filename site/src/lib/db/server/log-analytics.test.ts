@@ -346,10 +346,13 @@ describe(get_log_analytics, () => {
       add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's2', name: 'page_load', duration_ms: 800, ttfb: 70 }, geo: ny })
       add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms: 1500, ttfb: 240 }, geo: la })
 
-      // Leader-worker DB health: timeouts paired with recoveries + a real failure.
+      // Leader-worker DB health: timeouts paired with recoveries + real failures.
+      // Two failures: one on a STALE build (no leader, NOTADB) + one on the CURRENT
+      // build (timeout) — exercises failed_by_code + the current/stale split.
       add_log({ day: '2026-06-30', message: 'live_query_timeout', context: { session_id: 's1' } })
       add_log({ day: '2026-06-30', message: 'live_query_recovered', context: { session_id: 's1' } })
-      add_log({ day: '2026-06-30', level: 'error', message: 'live_query_failed', context: { session_id: 's1', had_leader: 0, source: 'viewer' } })
+      add_versioned({ day: '2026-06-30', level: 'error', message: 'live_query_failed', app_version: 'v-old', context: { session_id: 's1', had_leader: 0, source: 'viewer', code: 'NOTADB' } })
+      add_versioned({ day: '2026-06-30', level: 'error', message: 'live_query_failed', app_version: 'v-cur', context: { session_id: 's2', had_leader: 1, source: 'dict', code: 'timeout' } })
 
       // A cold (archived) day with only rollup rows, incl a geo bucket + an event.
       db.prepare(`INSERT INTO log_daily_metrics (day, metric, source, value) VALUES ('2026-06-05', 'logs', 'client', 42), ('2026-06-05', 'sessions', 'client', 7), ('2026-06-05', 'errors', 'client', 3), ('2026-06-05', 'geo:US-CA', 'client', 5), ('2026-06-05', 'event:search_performed', 'client', 9), ('2026-06-05', 'nav:about', 'client', 4)`).run()
@@ -360,8 +363,8 @@ describe(get_log_analytics, () => {
           "audience": "humans",
           "by_source": [
             {
-              "errors": 15,
-              "logs": 76,
+              "errors": 16,
+              "logs": 77,
               "source": "client",
             },
             {
@@ -611,8 +614,8 @@ describe(get_log_analytics, () => {
             },
             {
               "day": "2026-06-30",
-              "errors": 13,
-              "logs": 33,
+              "errors": 14,
+              "logs": 34,
               "sessions": 2,
               "users": 2,
             },
@@ -627,13 +630,13 @@ describe(get_log_analytics, () => {
             {
               "day": "2026-06-30",
               "first_seen": "2026-06-30T10:00:00.000Z",
-              "sessions": 1,
+              "sessions": 2,
               "version": "v-cur",
             },
             {
               "day": "2026-06-30",
               "first_seen": "2026-06-30T10:00:00.000Z",
-              "sessions": 0,
+              "sessions": 1,
               "version": "v-old",
             },
           ],
@@ -649,6 +652,18 @@ describe(get_log_analytics, () => {
               "sources": "client",
               "stack_head": "",
               "users": 1,
+            },
+            {
+              "count": 2,
+              "first_seen": "2026-06-30T10:00:00.000Z",
+              "is_noise": false,
+              "last_seen": "2026-06-30T10:00:00.000Z",
+              "level": "error",
+              "message": "live_query_failed",
+              "platforms": "web",
+              "sources": "client",
+              "stack_head": "",
+              "users": 0,
             },
             {
               "count": 1,
@@ -687,18 +702,6 @@ describe(get_log_analytics, () => {
               "users": 0,
             },
             {
-              "count": 1,
-              "first_seen": "2026-06-30T10:00:00.000Z",
-              "is_noise": false,
-              "last_seen": "2026-06-30T10:00:00.000Z",
-              "level": "error",
-              "message": "live_query_failed",
-              "platforms": "web",
-              "sources": "client",
-              "stack_head": "",
-              "users": 0,
-            },
-            {
               "count": 5,
               "first_seen": "2026-06-30T10:00:00.000Z",
               "is_noise": true,
@@ -724,24 +727,24 @@ describe(get_log_analytics, () => {
             },
           ],
           "errors_by_version": {
-            "current": 1,
+            "current": 2,
             "current_version": "v-cur",
             "stale": 12,
-            "stale_pct": 0.9230769230769231,
-            "total": 13,
+            "stale_pct": 0.8571428571428571,
+            "total": 14,
             "versions": [
               {
-                "errors": 11,
+                "errors": 10,
                 "is_current": false,
                 "version": null,
               },
               {
-                "errors": 1,
+                "errors": 2,
                 "is_current": true,
                 "version": "v-cur",
               },
               {
-                "errors": 1,
+                "errors": 2,
                 "is_current": false,
                 "version": "v-old",
               },
@@ -811,14 +814,26 @@ describe(get_log_analytics, () => {
             ],
           },
           "leader_health": {
-            "failed": 1,
+            "failed": 2,
+            "failed_by_code": [
+              {
+                "code": "timeout",
+                "count": 1,
+              },
+              {
+                "code": "NOTADB",
+                "count": 1,
+              },
+            ],
             "failed_by_source": [
               {
-                "count": 1,
+                "count": 2,
                 "source": "viewer",
               },
             ],
+            "failed_current": 1,
             "failed_no_leader": 1,
+            "failed_stale": 1,
             "recovered": 1,
             "timeouts": 1,
           },
@@ -1010,10 +1025,11 @@ describe(get_log_analytics, () => {
           },
           "pipeline": {
             "archived_rows": 0,
-            "hot_rows": 38,
+            "hot_rows": 39,
             "last_log_at": "2026-06-30T10:00:00.000Z",
             "last_server_log_at": "2026-06-30T10:00:00.000Z",
             "last_session_start_at": "2026-06-30T10:00:00.000Z",
+            "missing_syncable_tables": [],
             "retention_ran_at": null,
           },
           "top_events": [
@@ -1049,8 +1065,8 @@ describe(get_log_analytics, () => {
             },
           ],
           "totals": {
-            "errors": 16,
-            "logs": 77,
+            "errors": 17,
+            "logs": 78,
             "sessions": 10,
             "unique_users": 3,
           },

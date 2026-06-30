@@ -30,9 +30,9 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     web_vitals: [],
     geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [] },
     errors_by_version: { current_version: null, total: 0, current: 0, stale: 0, stale_pct: null, versions: [] },
-    pipeline: { last_log_at: null, last_session_start_at: null, last_server_log_at: null, retention_ran_at: null, hot_rows: 0, archived_rows: 0 },
+    pipeline: { last_log_at: null, last_session_start_at: null, last_server_log_at: null, retention_ran_at: null, hot_rows: 0, archived_rows: 0, missing_syncable_tables: [] },
     event_coverage: { events: [], never_emitted: 0 },
-    leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [] },
+    leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [], failed_by_code: [], failed_current: 0, failed_stale: 0 },
     ...overrides,
   }
 }

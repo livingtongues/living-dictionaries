@@ -101,3 +101,29 @@ Guard against regressions by grepping client dirs for value-imports of server mo
 `grep -rn "from '\$lib/db/server/\|from '\$lib/server/" src/lib/db/dict-client src/lib/db/client --include=*.ts --include=*.svelte | grep -v "import type"` → should be empty.
 A load `try/catch` that does `error(500, err)` should also `console.error(err)` first, or the
 real stack never reaches telemetry (the crash logs as a bare "Internal Error", empty stack).
+
+## Never edit an already-applied migration to ADD schema — ship a new dated one
+Migrations run **once per filename** (tracked in the `migrations` table; `run-sql-migrations.ts`).
+If you later edit/consolidate an *already-applied* migration to add a table/index/trigger, every DB
+provisioned before the edit **never re-runs it** — the new DDL silently never executes there. New/dev
+DBs look fine (they apply the edited file from scratch), masking the drift.
+
+Symptom seen 2026-06-29 (`.issues/missing-dictionary-partners-table-prod.md`): prod `shared.db` was
+missing `dictionary_partners` even though the consolidated `20260525_initial.sql` `CREATE`s it and the
+`migrations` table marked it applied — because the table was folded into the initial file *after* prod
+had already applied the pre-consolidation set (the live `migrations` table still listed a since-deleted
+`20260526_messages.sql`). Since the table is in `SYNCABLE_TABLE_NAMES`, every admin-sync pull reaching
+`fetch_changes` for it 500'd (`no such table`). Tell-tale: live `sqlite_master` lacks an object the
+"applied" migration claims to create; the live `migrations` list contains names not in the repo.
+
+Rules:
+- **Fix forward with a NEW dated migration** that's idempotent (`CREATE TABLE IF NOT EXISTS` +
+  `DROP/CREATE TRIGGER`) — a no-op on healthy DBs, a backfill on drifted ones. Don't hand-mutate prod
+  (keeps the `migrations` table honest; the runner records it on deploy).
+- **Audit the WHOLE consolidation**, not just the reported object: diff live `sqlite_master`
+  (tables + triggers) against what the consolidated initial expects — the same drift can drop the
+  `process_delete_cascade` trigger arm, indexes, etc.
+- **Harden the reader:** `process_sync` now skips + `log_server_event`s a missing syncable table
+  (`present_syncable_tables`) instead of 500-ing the whole sync, and `/admin/analytics` flags
+  `pipeline.missing_syncable_tables` (intersect `SYNCABLE_TABLE_NAMES` vs `sqlite_master`). Both run on
+  every admin sync / dashboard load, so future drift surfaces loudly instead of as a user-hit crash.

@@ -198,6 +198,17 @@
     <p class="audience-note">🤖 Showing <b>bot / crawler / AI-agent</b> traffic — usage, routes, events, geo and timings below are bot-only. Diagnostics (errors, build, leader, clusters) always show everyone.</p>
   {/if}
 
+  {#if pipeline.missing_syncable_tables.length}
+    <section class="schema-drift">
+      <span class="dot danger"></span>
+      <span>
+        <b>Schema drift</b> — {pipeline.missing_syncable_tables.length} syncable
+        {pipeline.missing_syncable_tables.length === 1 ? 'table is' : 'tables are'} missing from shared.db:
+        <code>{pipeline.missing_syncable_tables.join(', ')}</code>. Admin sync skip-logs these; ship a backfill migration.
+      </span>
+    </section>
+  {/if}
+
   <section class="pipeline" class:warn={!ingestion_recent}>
     <div class="pipeline-verdict">
       <span class="dot" class:ok={ingestion_recent} class:idle={!ingestion_recent}></span>
@@ -317,6 +328,12 @@
           <div class="ver-value" class:danger={leader.failed > 0}>{format_number(leader.failed)}</div>
           <div class="ver-label">Failed loads</div>
           <div class="ver-sub">{format_number(leader.failed_no_leader)} with no leader (wedged)</div>
+          {#if leader.failed > 0}
+            <div class="ver-sub">
+              <span class:danger={leader.failed_current > 0}>{format_number(leader.failed_current)} on current build</span>
+              · {format_number(leader.failed_stale)} stale
+            </div>
+          {/if}
         </div>
         <div class="ver-stat">
           <div class="ver-value">{format_number(leader.timeouts)}</div>
@@ -325,14 +342,24 @@
         </div>
       </div>
       {#if leader.failed > 0}
-        <table class="src-table">
-          <thead><tr><th>Failed by source</th><th>Count</th></tr></thead>
-          <tbody>
-            {#each leader.failed_by_source as row (row.source)}
-              <tr><td>{row.source}</td><td class="danger">{format_number(row.count)}</td></tr>
-            {/each}
-          </tbody>
-        </table>
+        <div class="grid">
+          <table class="src-table">
+            <thead><tr><th>Failed by source</th><th>Count</th></tr></thead>
+            <tbody>
+              {#each leader.failed_by_source as row (row.source)}
+                <tr><td>{row.source}</td><td class="danger">{format_number(row.count)}</td></tr>
+              {/each}
+            </tbody>
+          </table>
+          <table class="src-table">
+            <thead><tr><th>Failed by code</th><th>Count</th></tr></thead>
+            <tbody>
+              {#each leader.failed_by_code as row (row.code)}
+                <tr><td>{row.code}</td><td class="danger">{format_number(row.count)}</td></tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
       {:else if leader.timeouts === 0}
         <p class="muted">No leader-worker query stalls. 🎉</p>
       {:else}
@@ -642,6 +669,29 @@
   }
   .pipeline.warn {
     border-left-color: var(--warning, #d97706);
+  }
+  .schema-drift {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    border: 1px solid var(--danger);
+    border-left: 3px solid var(--danger);
+    border-radius: 0.625rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+  .schema-drift .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .schema-drift .dot.danger {
+    background: var(--danger);
+  }
+  .schema-drift code {
+    font-weight: 600;
   }
   .pipeline-verdict {
     display: flex;

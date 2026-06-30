@@ -3,6 +3,7 @@ import type { PartnerWithPhoto } from '$lib/types'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
 /**
@@ -145,6 +146,7 @@ export const POST: RequestHandler = async (event) => {
     if (err && typeof err === 'object' && 'status' in err)
       throw err
     console.error(`Error updating dictionary partners: ${(err as Error).message}`)
+    log_server_event({ db, level: 'error', message: 'dictionary_partners_update_failed', error: err, context: { dictionary_id: dict_id, action: body.action } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Could not update partners')
   }
 }

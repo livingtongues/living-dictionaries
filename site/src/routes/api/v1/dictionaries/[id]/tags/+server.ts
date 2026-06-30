@@ -1,11 +1,9 @@
 import type { RequestHandler } from './$types'
 import type { TagRecord } from '$lib/db/server/v1-sub-resources'
-import { verify_dict_api_access } from '$lib/auth/verify-dict-api-access'
 import { ResponseCodes } from '$lib/constants'
-import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
-import { get_shared_db } from '$lib/db/server/shared-db'
+import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
 import { find_or_create_tag, list_tags } from '$lib/db/server/v1-sub-resources'
 import { error, json } from '@sveltejs/kit'
 
@@ -24,18 +22,12 @@ export interface V1TagPostResponseBody {
 }
 
 export const GET: RequestHandler = async (event) => {
-  const dictionary = get_dictionary_by_url_or_id(event.params.id)
-  if (!dictionary)
-    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-  await verify_dict_api_access(event, dictionary.id, 'contributor')
+  const { dictionary } = await load_v1_dictionary_context({ event, role: 'contributor' })
   return json({ tags: list_tags(get_dictionary_db(dictionary.id)) } satisfies V1TagsGetResponseBody)
 }
 
 export const POST: RequestHandler = async (event) => {
-  const dictionary = get_dictionary_by_url_or_id(event.params.id)
-  if (!dictionary)
-    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-  const access = await verify_dict_api_access(event, dictionary.id, 'editor')
+  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
 
   const body = await event.request.json() as V1TagPostRequestBody
   let result
@@ -44,12 +36,7 @@ export const POST: RequestHandler = async (event) => {
   } catch (err) {
     error(ResponseCodes.BAD_REQUEST, (err as Error).message)
   }
-  if (result.created && result.cursor) {
-    try {
-      get_shared_db().prepare(`UPDATE dictionaries SET updated_at = ? WHERE id = ?`).run(result.cursor, dictionary.id)
-    } catch (err) {
-      console.warn(`Could not mirror updated_at for ${dictionary.id}:`, err)
-    }
-  }
+  if (result.created)
+    mirror_dictionary_cursor({ dict_id: dictionary.id, cursor: result.cursor })
   return json({ tag: result.tag, created: result.created } satisfies V1TagPostResponseBody)
 }

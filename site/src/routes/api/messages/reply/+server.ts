@@ -10,6 +10,7 @@ import { support_address } from '$lib/email/addresses'
 import { is_blocked_recipient } from '$lib/email/loop-protection'
 import { send_raw_email } from '$lib/email/send-raw-email'
 import { put_attachment } from '$lib/r2/put-attachment'
+import { log_server_event } from '$lib/server/log-server-event'
 import MessageReply from '../../email/components/MessageReply.svelte'
 import { render_component_to_html } from '../../email/render-component-to-html'
 import { error, json } from '@sveltejs/kit'
@@ -212,6 +213,7 @@ export const POST: RequestHandler = async (event) => {
       WHERE id = ?
     `).run(delivery_error, new Date().toISOString(), message_row_id)
     console.error('Reply send failed for thread', thread.id, 'by admin', name ?? email, ':', delivery_error)
+    log_server_event({ db, level: 'error', message: 'message_reply_send_failed', error: send_error, context: { thread_id: thread.id, message_id: message_row_id, admin: name ?? email } })
     return json({
       ok: true,
       message_id: message_row_id,

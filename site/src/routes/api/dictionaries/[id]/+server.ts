@@ -5,6 +5,7 @@ import { r2_dict_snapshot_key, ResponseCodes } from '$lib/constants'
 import { delete_dictionary_db_file } from '$lib/db/server/dictionary-db'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { delete_object } from '$lib/r2/delete-object'
+import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
 /**
@@ -77,6 +78,7 @@ export const DELETE: RequestHandler = async (event) => {
     db_files_removed = delete_dictionary_db_file(dict_id).length
   } catch (err) {
     console.error(`[delete dictionary ${dict_id}] db file removal failed:`, err)
+    log_server_event({ db, level: 'warn', message: 'dictionary_db_file_removal_failed', error: err, context: { dictionary_id: dict_id } })
   }
 
   // 3. R2 snapshot (idempotent; missing key is fine).
@@ -84,6 +86,7 @@ export const DELETE: RequestHandler = async (event) => {
     await delete_object({ key: r2_dict_snapshot_key(dict_id) })
   } catch (err) {
     console.error(`[delete dictionary ${dict_id}] R2 snapshot removal failed:`, err)
+    log_server_event({ db, level: 'warn', message: 'dictionary_r2_snapshot_removal_failed', error: err, context: { dictionary_id: dict_id } })
   }
 
   return json({
