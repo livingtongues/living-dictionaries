@@ -59,7 +59,7 @@ export const PATCH: RequestHandler = async (event) => {
 
   let result
   try {
-    result = apply_entry_update({ db, history_db: get_dictionary_history_db(dictionary.id), entry_id, patch, user_id: access.user_id })
+    result = apply_entry_update({ db, history_db: get_dictionary_history_db(dictionary.id), entry_id, patch, user_id: access.user_id, api_key_id: access.key_id ?? null })
   } catch (err) {
     error(ResponseCodes.BAD_REQUEST, (err as Error).message)
   }
@@ -88,7 +88,7 @@ export const DELETE: RequestHandler = async (event) => {
   if (!entry_id)
     error(ResponseCodes.BAD_REQUEST, 'Missing entry id')
 
-  const result = apply_entry_delete({ db: get_dictionary_db(dictionary.id), history_db: get_dictionary_history_db(dictionary.id), entry_id, user_id: access.user_id })
+  const result = apply_entry_delete({ db: get_dictionary_db(dictionary.id), history_db: get_dictionary_history_db(dictionary.id), entry_id, user_id: access.user_id, api_key_id: access.key_id ?? null })
   if (!result.found)
     error(ResponseCodes.NOT_FOUND, 'entry not found')
 

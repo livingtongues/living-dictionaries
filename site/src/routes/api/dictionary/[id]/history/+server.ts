@@ -39,7 +39,10 @@ export const GET: RequestHandler = async (event) => {
 
   // No edits recorded yet → empty timeline (don't create the file on a read).
   if (!existsSync(history_db_path(dict_id)))
-    return json({ changes: [], users: {}, cursor: null })
+    return json({ changes: [], users: {}, api_keys: {}, cursor: null })
+
+  const actor_raw = params.get('actor')
+  const actor = actor_raw === 'agents' || actor_raw === 'humans' ? actor_raw : undefined
 
   const result = query_history(get_dictionary_history_db(dict_id), get_shared_db(), {
     owner_type: params.get('owner_type') ?? undefined,
@@ -47,6 +50,7 @@ export const GET: RequestHandler = async (event) => {
     feed: params.get('feed') === '1' || params.get('feed') === 'true',
     before: before_raw ? Number(before_raw) : undefined,
     limit: limit_raw ? Number(limit_raw) : undefined,
+    actor,
   })
 
   return json(result)

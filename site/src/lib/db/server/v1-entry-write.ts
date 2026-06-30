@@ -202,7 +202,7 @@ function build_entry({ entry, now, dialect_map, tag_map, import_tag_id }: {
 }
 
 /** Find-or-create a private tag for the import batch label. */
-function ensure_import_tag({ db, import_id, tag_map, now, history_events, user_id, history_at }: {
+function ensure_import_tag({ db, import_id, tag_map, now, history_events, user_id, history_at, api_key_id }: {
   db: Database.Database
   import_id: string
   tag_map: Map<string, string>
@@ -210,12 +210,13 @@ function ensure_import_tag({ db, import_id, tag_map, now, history_events, user_i
   history_events: HistoryEvent[]
   user_id: string
   history_at: string
+  api_key_id?: string | null
 }): string {
   const existing = tag_map.get(name_key(import_id))
   if (existing)
     return existing
   const id = crypto.randomUUID()
-  const event = merge_dict_row({ db, table_name: 'tags', row: prune({ id, name: import_id.trim(), private: 1, created_at: now, updated_at: now }), user_id, at: history_at })
+  const event = merge_dict_row({ db, table_name: 'tags', row: prune({ id, name: import_id.trim(), private: 1, created_at: now, updated_at: now }), user_id, at: history_at, api_key_id })
   if (event)
     history_events.push(event)
   tag_map.set(name_key(import_id), id)
@@ -227,12 +228,14 @@ export interface ApplyEntryWritesResult extends EntriesWriteResponseBody {
   new_synced_up_to: string | null
 }
 
-export function apply_entry_writes({ db, history_db, entries, user_id, import_id }: {
+export function apply_entry_writes({ db, history_db, entries, user_id, import_id, api_key_id }: {
   db: Database.Database
   history_db?: Database.Database
   entries: EntryInput[]
   user_id: string
   import_id?: string
+  /** Acting agent's API key id (when written via an `ldk_` key); null for human edits. */
+  api_key_id?: string | null
 }): ApplyEntryWritesResult {
   const now = new Date().toISOString()
   const history_at = now
@@ -247,7 +250,7 @@ export function apply_entry_writes({ db, history_db, entries, user_id, import_id
   db.exec('BEGIN IMMEDIATE')
   try {
     const import_tag_id = import_id
-      ? ensure_import_tag({ db, import_id, tag_map, now, history_events, user_id, history_at })
+      ? ensure_import_tag({ db, import_id, tag_map, now, history_events, user_id, history_at, api_key_id })
       : undefined
 
     for (const entry of entries) {
@@ -261,7 +264,7 @@ export function apply_entry_writes({ db, history_db, entries, user_id, import_id
       try {
         const built = build_entry({ entry, now, dialect_map, tag_map, import_tag_id })
         for (const { table_name, row } of built.ordered_rows) {
-          const event = merge_dict_row({ db, table_name, row, user_id, at: history_at })
+          const event = merge_dict_row({ db, table_name, row, user_id, at: history_at, api_key_id })
           if (event)
             item_history.push(event)
         }
@@ -390,12 +393,14 @@ export interface SingleEntryWriteResult {
  * example sentences without an id are appended. `dialects`/`tags` are additive
  * links (found-or-created, deduped). Returns `found: false` if the entry is gone.
  */
-export function apply_entry_update({ db, history_db, entry_id, patch, user_id }: {
+export function apply_entry_update({ db, history_db, entry_id, patch, user_id, api_key_id }: {
   db: Database.Database
   history_db?: Database.Database
   entry_id: string
   patch: EntryPatch
   user_id: string
+  /** Acting agent's API key id (when written via an `ldk_` key); null for human edits. */
+  api_key_id?: string | null
 }): SingleEntryWriteResult {
   const existing_entry = read_parsed_row({ db, table: 'entries', id: entry_id })
   if (!existing_entry)
@@ -406,7 +411,7 @@ export function apply_entry_update({ db, history_db, entry_id, patch, user_id }:
   const dialect_map = load_dialect_map(db)
   const tag_map = load_tag_map(db)
   const push = (table_name: DictSyncableTable, row: Record<string, unknown>) => {
-    const event = merge_dict_row({ db, table_name, row, user_id, at: now })
+    const event = merge_dict_row({ db, table_name, row, user_id, at: now, api_key_id })
     if (event)
       history_events.push(event)
   }
@@ -490,11 +495,13 @@ export function apply_entry_update({ db, history_db, entry_id, patch, user_id }:
  * cursor, and is logged to peers exactly like an editor's delete. Records a
  * `delete` history event for the entry. Returns `found: false` if already gone.
  */
-export function apply_entry_delete({ db, history_db, entry_id, user_id }: {
+export function apply_entry_delete({ db, history_db, entry_id, user_id, api_key_id }: {
   db: Database.Database
   history_db?: Database.Database
   entry_id: string
   user_id: string
+  /** Acting agent's API key id (when written via an `ldk_` key); null for human edits. */
+  api_key_id?: string | null
 }): SingleEntryWriteResult {
   const image = db.prepare(`SELECT * FROM entries WHERE id = ?`).get(entry_id) as Record<string, unknown> | undefined
   if (!image)
@@ -520,6 +527,7 @@ export function apply_entry_delete({ db, history_db, entry_id, user_id }: {
           at: now,
           snapshot: build_snapshot('entries', image),
           delta: null,
+          api_key_id: api_key_id ?? null,
           owners,
         }])
       } catch (err) {

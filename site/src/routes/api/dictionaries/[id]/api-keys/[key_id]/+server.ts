@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types'
-import { delete_api_key } from '$lib/api-keys/api-key'
+import { revoke_api_key } from '$lib/api-keys/api-key'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
@@ -8,9 +8,13 @@ import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
 export interface DictionariesIdApiKeysKeyIdDeleteResponseBody {
-  result: 'deleted'
+  result: 'revoked'
 }
 
+/**
+ * Revoke (not hard-delete) an API key. The row is retained so its id keeps
+ * resolving in change history; the token stops working immediately. Manager-gated.
+ */
 export const DELETE: RequestHandler = async (event) => {
   const dictionary = get_dictionary_by_url_or_id(event.params.id)
   if (!dictionary)
@@ -21,10 +25,10 @@ export const DELETE: RequestHandler = async (event) => {
   if (!key_id)
     error(ResponseCodes.BAD_REQUEST, 'Missing key id')
 
-  const removed = delete_api_key({ db: get_shared_db(), dictionary_id: dictionary.id, key_id })
-  if (!removed)
+  const revoked = revoke_api_key({ db: get_shared_db(), dictionary_id: dictionary.id, key_id })
+  if (!revoked)
     error(ResponseCodes.NOT_FOUND, 'API key not found')
 
-  log_server_event({ level: 'info', message: 'api_key_deleted', user_id: auth.user_id, context: { dictionary_id: dictionary.id, key_id } })
-  return json({ result: 'deleted' } satisfies DictionariesIdApiKeysKeyIdDeleteResponseBody)
+  log_server_event({ level: 'info', message: 'api_key_revoked', user_id: auth.user_id, context: { dictionary_id: dictionary.id, key_id } })
+  return json({ result: 'revoked' } satisfies DictionariesIdApiKeysKeyIdDeleteResponseBody)
 }

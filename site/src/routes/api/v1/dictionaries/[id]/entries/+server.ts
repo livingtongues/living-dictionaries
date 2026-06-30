@@ -109,6 +109,7 @@ export const POST: RequestHandler = async (event) => {
       entries,
       user_id: access.user_id,
       import_id,
+      api_key_id: access.key_id ?? null,
     })
   } catch (err) {
     log_server_event({ level: 'error', message: 'v1_entries_write_failed', error: err, user_id: access.user_id, context: { dictionary_id: dictionary.id, via: access.via } })

@@ -2,7 +2,7 @@ import type Database from 'better-sqlite3'
 import type { DictChangesRequest } from './dictionary-sync-helpers'
 import SqliteDatabase from 'better-sqlite3'
 import { open_dictionary_db_in_memory } from './dictionary-db'
-import { open_dictionary_history_db_in_memory } from './dictionary-history-db'
+import { open_dictionary_history_db_in_memory, record_history } from './dictionary-history-db'
 import { build_delta, build_snapshot, resolve_owners } from './dictionary-history-capture'
 import { query_history } from './dictionary-history-query'
 import { process_dict_changes } from './dictionary-sync-helpers'
@@ -365,5 +365,41 @@ describe('query_history (read side)', () => {
 
   test('unknown owner → empty', () => {
     expect(query_history(hdb, sdb, { owner_type: 'entry', owner_id: 'nope' }).changes).toEqual([])
+  })
+})
+
+// ── Layer 2c: agent (API key) attribution ────────────────────────────────────
+
+describe('query_history — agent attribution', () => {
+  let hdb: Database.Database
+  let sdb: Database.Database
+  beforeEach(() => {
+    hdb = open_dictionary_history_db_in_memory()
+    sdb = new SqliteDatabase(':memory:')
+    sdb.exec('CREATE TABLE users (id TEXT PRIMARY KEY, name TEXT, email TEXT)')
+    sdb.exec('CREATE TABLE api_keys (id TEXT PRIMARY KEY, label TEXT, created_by_user_id TEXT, revoked_at TEXT)')
+    sdb.prepare('INSERT INTO users (id, name, email) VALUES (?, ?, ?)').run('u1', 'Ada', 'ada@x.org')
+    // A REVOKED key still resolves (revoke-not-delete invariant).
+    sdb.prepare('INSERT INTO api_keys (id, label, created_by_user_id, revoked_at) VALUES (?, ?, ?, ?)').run('key-1', 'Dictionary agent', 'u1', '2026-02-01T00:00:00.000Z')
+    record_history(hdb, [
+      { table_name: 'entries', row_id: 'e1', op: 'insert', user_id: 'u1', at: '2026-01-01T00:00:00.000Z', snapshot: { id: 'e1' }, delta: null, owners: [{ type: 'entry', id: 'e1' }] },
+      { table_name: 'entries', row_id: 'e2', op: 'insert', user_id: 'u1', at: '2026-01-02T00:00:00.000Z', snapshot: { id: 'e2' }, delta: null, api_key_id: 'key-1', owners: [{ type: 'entry', id: 'e2' }] },
+    ])
+  })
+  afterEach(() => { hdb.close(); sdb.close() })
+
+  test('feed resolves the (revoked) agent label + keeps the responsible human; api_key_id only on the agent row', () => {
+    const res = query_history(hdb, sdb, { feed: true })
+    expect(res.changes).toHaveLength(2)
+    const agent_change = res.changes.find(c => c.api_key_id)!
+    expect(agent_change.api_key_id).toBe('key-1')
+    expect(res.api_keys['key-1']).toEqual({ id: 'key-1', label: 'Dictionary agent', created_by_user_id: 'u1' })
+    expect(res.users.u1.name).toBe('Ada')
+    expect(res.changes.find(c => c.row_id === 'e1')!.api_key_id).toBeNull()
+  })
+
+  test('actor filter splits agents vs humans', () => {
+    expect(query_history(hdb, sdb, { feed: true, actor: 'agents' }).changes.map(c => c.row_id)).toEqual(['e2'])
+    expect(query_history(hdb, sdb, { feed: true, actor: 'humans' }).changes.map(c => c.row_id)).toEqual(['e1'])
   })
 })

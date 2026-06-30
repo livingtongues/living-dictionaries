@@ -8,7 +8,7 @@
   import './custom-fonts.css'
 
   const { data, children } = $props()
-  const { dictionary, is_manager, entries_data } = $derived(data)
+  const { dictionary, is_manager, is_editor_or_above, entries_data } = $derived(data)
   const { loading } = $derived(entries_data)
 
   const children_render = $derived(children)
@@ -56,7 +56,7 @@
         on_close={() => set(false)}
         open={show}>
         <div class="side-panel">
-          <SideMenu {dictionary} is_manager={is_manager} entry_count={Object.keys($entries_data).length} on_close={() => set(false)} loading={$loading} />
+          <SideMenu {dictionary} is_manager={is_manager} is_editor_or_above={is_editor_or_above} entry_count={Object.keys($entries_data).length} on_close={() => set(false)} loading={$loading} />
           <hr />
           <Button form="menu" class="side-close-button" onclick={toggle}>
             <i class="far fa-times fa-lg fa-fw"></i>

@@ -107,6 +107,8 @@ export interface HistoryEvent {
   snapshot: Record<string, unknown>
   /** Update-only column diff `{col:{old,new}}`; null for insert/delete. */
   delta: Record<string, { old?: unknown, new?: unknown }> | null
+  /** The acting agent's API key id (shared.db.api_keys.id); null = a human edited directly. */
+  api_key_id?: string | null
   owners: HistoryOwner[]
 }
 
@@ -119,8 +121,8 @@ export function record_history(db: Database.Database, events: HistoryEvent[]) {
   if (!events.length)
     return
   const insert_change = db.prepare(
-    `INSERT INTO changes (id, table_name, row_id, op, user_id, at, snapshot, delta)
-     VALUES (@id, @table_name, @row_id, @op, @user_id, @at, @snapshot, @delta)`,
+    `INSERT INTO changes (id, table_name, row_id, op, user_id, at, snapshot, delta, api_key_id)
+     VALUES (@id, @table_name, @row_id, @op, @user_id, @at, @snapshot, @delta, @api_key_id)`,
   )
   const insert_owner = db.prepare(
     `INSERT OR IGNORE INTO change_owners (change_id, owner_type, owner_id)
@@ -138,6 +140,7 @@ export function record_history(db: Database.Database, events: HistoryEvent[]) {
         at: event.at,
         snapshot: JSON.stringify(event.snapshot),
         delta: event.delta ? JSON.stringify(event.delta) : null,
+        api_key_id: event.api_key_id ?? null,
       })
       for (const owner of event.owners)
         insert_owner.run(id, owner.type, owner.id)

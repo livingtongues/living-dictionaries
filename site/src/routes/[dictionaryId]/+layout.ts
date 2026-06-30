@@ -170,7 +170,6 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       speakers: entries_ui.speakers,
       tags: entries_ui.tags,
       dialects: entries_ui.dialects,
-      reset_caches: entries_ui.reset_caches,
       search_entries: entries_ui.search_entries,
       search_index_updated: entries_ui.search_index_updated,
     }

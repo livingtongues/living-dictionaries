@@ -197,13 +197,15 @@ export function process_dict_changes({ db, request, user_id, is_editor, history_
  * way a pushed editor row lands. Exported so the `/api/v1` write API applies
  * rows through the EXACT path a browser push uses (history-aware via `at`).
  */
-export function merge_dict_row({ db, table_name, row, user_id, at }: {
+export function merge_dict_row({ db, table_name, row, user_id, at, api_key_id }: {
   db: Database.Database
   table_name: DictSyncableTable
   row: Record<string, unknown>
   user_id: string
   /** Batch history timestamp; when set, returns a HistoryEvent to record. */
   at?: string
+  /** Acting agent's API key id (v1 API key path); null/omitted for human edits. */
+  api_key_id?: string | null
 }): HistoryEvent | null {
   const row_id = row.id as string
   if (!row_id)
@@ -266,6 +268,7 @@ export function merge_dict_row({ db, table_name, row, user_id, at }: {
     at,
     snapshot: build_snapshot(table_name, after),
     delta,
+    api_key_id: api_key_id ?? null,
     owners: resolve_owners(db, table_name, after),
   }
 }

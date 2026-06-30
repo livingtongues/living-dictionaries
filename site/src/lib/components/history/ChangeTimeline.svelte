@@ -1,17 +1,19 @@
 <script lang="ts">
-  import type { HistoryChange, HistoryUser } from './types'
+  import type { HistoryApiKey, HistoryChange, HistoryUser } from './types'
   import { day_key, field_label, format_at, format_value, summarize_snapshot, table_label, user_display } from './format'
+  import IconRobot from '~icons/fa6-solid/robot'
 
   interface Props {
     changes: HistoryChange[]
     users: Record<string, HistoryUser>
+    api_keys?: Record<string, HistoryApiKey>
     loading?: boolean
     has_more?: boolean
     onloadmore?: () => void
     empty_label?: string
   }
 
-  const { changes, users, loading = false, has_more = false, onloadmore, empty_label = 'No changes recorded yet.' }: Props = $props()
+  const { changes, users, api_keys = {}, loading = false, has_more = false, onloadmore, empty_label = 'No changes recorded yet.' }: Props = $props()
 
   const OP_META = {
     insert: { label: 'added', class: 'op-insert' },
@@ -53,11 +55,20 @@
     <div class="day">{group.day}</div>
     {#each group.items as change (change.id)}
       {@const op = OP_META[change.op]}
+      {@const agent = change.api_key_id ? api_keys[change.api_key_id] : undefined}
       <div class="change">
         <div class="meta">
           <span class="badge {op.class}">{op.label}</span>
           <span class="kind">{table_label(change.table_name)}</span>
-          <span class="who">{user_display(users[change.user_id], change.user_id)}</span>
+          {#if change.api_key_id}
+            <span class="who agent" title="Edited by an agent on behalf of {user_display(users[change.user_id], change.user_id)}">
+              <IconRobot class="icon-inline agent-icon" />
+              {agent?.label ?? 'Agent'}
+              <span class="on-behalf">· {user_display(users[change.user_id], change.user_id)}</span>
+            </span>
+          {:else}
+            <span class="who">{user_display(users[change.user_id], change.user_id)}</span>
+          {/if}
           <span class="when" title={change.at}>{format_at(change.at)}</span>
         </div>
 
@@ -146,6 +157,24 @@
   }
   .who {
     color: var(--color-grey-700, #374151);
+  }
+  .who.agent {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+    color: #0e7490;
+    background: rgba(6, 182, 212, 0.12);
+    border-radius: 999px;
+    padding: 1px 9px 1px 7px;
+  }
+  .agent :global(.agent-icon) {
+    font-size: 11px;
+    opacity: 0.85;
+  }
+  .on-behalf {
+    font-weight: 400;
+    color: var(--color-grey-600, #6b7280);
   }
   .when {
     margin-left: auto;

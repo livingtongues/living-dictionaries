@@ -7,7 +7,8 @@
   import EntryFilters from './EntryFilters.svelte'
   import SearchInput from './SearchInput.svelte'
   import View from './View.svelte'
-  import { Button, ShowHide } from '$lib/svelte-pieces'
+  import EntriesEmptyState from './EntriesEmptyState.svelte'
+  import { ShowHide } from '$lib/svelte-pieces'
   import type { QueryParams } from '$lib/search/types'
   import { page } from '$app/stores'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
@@ -57,9 +58,9 @@
       console.error(err)
     }
   }
-  let { entries_data, auth_user, search_entries, default_entries_per_page, search_params, dictionary, can_edit, dbOperations, reset_caches, search_index_updated } = $derived(data)
+  let { entries_data, auth_user, search_entries, default_entries_per_page, search_params, dictionary, can_edit, is_manager, dbOperations, search_index_updated } = $derived(data)
   const { loading } = $derived(entries_data)
-  const entries_length = $derived(Object.keys(entries_data).length)
+  const entries_length = $derived(Object.keys($entries_data).length)
   const current_page_index = $derived($search_params.page - 1 || 0)
   let entries_per_page = $derived($search_params.entries_per_page || default_entries_per_page)
   const number_of_pages = $derived((() => {
@@ -84,52 +85,44 @@
 
 <ShowHide>
   {#snippet children({ show: show_mobile_filters, toggle })}
-    <div class="search-bar">
+    {#if entries_length === 0 && !$loading}
+      <EntriesEmptyState {dictionary} {can_edit} {is_manager} add_entry={dbOperations.insert_entry} />
+    {:else}
+      <div class="search-bar">
 
-      <SearchInput {search_params} index_ready={true} on_show_filter_menu={toggle} />
-      <div style="width: 0.25rem"></div>
-      <SwitchView bind:view={$search_params.view} can_print={!!dictionary.print_access || can_edit} />
-    </div>
+        <SearchInput {search_params} index_ready={true} on_show_filter_menu={toggle} />
+        <div style="width: 0.25rem"></div>
+        <SwitchView bind:view={$search_params.view} can_print={!!dictionary.print_access || can_edit} />
+      </div>
 
-    <div style="display: flex">
-      <div class="results-pane">
-        <div class="results-meta">
-          {#if typeof search_results_count !== 'undefined'}
-            {#if search_results_count > 0}
-              {$page.data.t('dictionary.entries')}: {current_page_index * entries_per_page + 1}-{Math.min((current_page_index + 1) * entries_per_page, search_results_count)} /
-              {search_results_count}
-              ({search_time.includes('μs') ? '<1ms' : search_time})
-            {:else}
-              {$page.data.t('dictionary.entries')}:
-              0 /
-              {entries_length}
+      <div style="display: flex">
+        <div class="results-pane">
+          <div class="results-meta">
+            {#if typeof search_results_count !== 'undefined'}
+              {#if search_results_count > 0}
+                {$page.data.t('dictionary.entries')}: {current_page_index * entries_per_page + 1}-{Math.min((current_page_index + 1) * entries_per_page, search_results_count)} /
+                {search_results_count}
+                ({search_time.includes('μs') ? '<1ms' : search_time})
+              {:else}
+                {$page.data.t('dictionary.entries')}:
+                0 /
+                {entries_length}
+              {/if}
             {/if}
-            {#if can_edit}
-              <div style="flex-grow: 1"></div>
-              <Button
-                type="button"
-                size="sm"
-                form="simple"
-                title="Use if some entries are not showing up. Sometimes if you go in and out of internet service while loading entries, some will fail to load."
-                onclick={async () => {
-                  await reset_caches()
-                  location.reload()
-                }}>Reset Cache</Button>
+            {#if $loading}
+              <span class="loading-spinner" title="Ensuring all entries are up to date"><IconSvgSpinners3DotsFade class="icon-inline" style="vertical-align: -4px" /></span>
             {/if}
-          {/if}
-          {#if $loading}
-            <span class="loading-spinner" title="Ensuring all entries are up to date"><IconSvgSpinners3DotsFade class="icon-inline" style="vertical-align: -4px" /></span>
-          {/if}
-        </div>
-        <!-- {#if $entries_error}
+          </div>
+          <!-- {#if $entries_error}
           <div class="text-red text-sm">Entries loading error: {$entries_error} (reload page if results are not working properly.)</div>
         {/if} -->
-        <View entries={page_entries} page_data={data} />
-        <Pagination bind:page_from_url={$search_params.page} {number_of_pages} can_edit={can_edit} add_entry={dbOperations.insert_entry} />
+          <View entries={page_entries} page_data={data} />
+          <Pagination bind:page_from_url={$search_params.page} {number_of_pages} can_edit={can_edit} add_entry={dbOperations.insert_entry} />
+        </div>
+        <div class="filters-gap"></div>
+        <EntryFilters {search_params} {show_mobile_filters} on_close={toggle} {result_facets} />
       </div>
-      <div class="filters-gap"></div>
-      <EntryFilters {search_params} {show_mobile_filters} on_close={toggle} {result_facets} />
-    </div>
+    {/if}
   {/snippet}
 </ShowHide>
 

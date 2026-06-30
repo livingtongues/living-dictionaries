@@ -8,11 +8,6 @@ export async function search_entries(options: SearchEntriesOptions) {
   return api.search_entries(options)
 }
 
-export async function reset_caches() {
-  const { api } = await import('./expose-entry-worker')
-  return api.reset_caches()
-}
-
 export async function apply_rows(
   changes: Record<string, Record<string, unknown>[]>,
   deletes?: { table_name: string, id: string }[],
