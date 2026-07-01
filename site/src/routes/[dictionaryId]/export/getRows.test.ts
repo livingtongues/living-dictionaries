@@ -13,9 +13,9 @@ import { format_orthographies } from './assignFormattedEntryValuesForCsv'
 describe(get_orthography_headers, () => {
   test('assigns alternate orthography headrers if any exists', () => {
     const orthographies: Orthography[] = [
-      { bcp: '', name: 'native-1' },
-      { bcp: '', name: 'native-2' },
-      { bcp: '', name: 'native-3' },
+      { code: 'nat1', name: 'native-1' },
+      { code: 'nat2', name: 'native-2' },
+      { code: 'nat3', name: 'native-3' },
     ]
     expect(get_orthography_headers(orthographies)).toEqual({
       'localOrthography': 'native-1',
@@ -36,10 +36,10 @@ describe(get_orthography_headers, () => {
 describe(format_orthographies, () => {
   test('assigns formatted alterante orthographies', () => {
     const orthographies: Orthography[] = [
-      { bcp: '', name: 'native-1' },
-      { bcp: '', name: 'native-2' },
+      { code: 'heb', name: 'native-1' },
+      { code: 'tib', name: 'native-2' },
     ]
-    const lexeme = { default: 'foo', lo1: 'פו', lo2: 'ཕུ།' }
+    const lexeme = { default: 'foo', heb: 'פו', tib: 'ཕུ།' }
     expect(format_orthographies(orthographies, lexeme)).toEqual(
       {
         'localOrthography': 'פו',

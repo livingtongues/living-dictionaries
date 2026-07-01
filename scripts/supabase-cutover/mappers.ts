@@ -30,6 +30,58 @@ export function to_int(value: unknown): number | null {
   return value ? 1 : 0
 }
 
+/** Collapse a legacy MultiString name → a plain string (`default` else first value). */
+function collapse_multistring(name: unknown): string {
+  if (typeof name === 'string') return name
+  if (name && typeof name === 'object') {
+    const map = name as Record<string, string>
+    return map.default || Object.values(map).find(Boolean) || ''
+  }
+  return ''
+}
+
+/**
+ * Map legacy orthographies (`{ bcp, name: MultiString }[]`, positional lexeme keys
+ * `lo1`/`lo2`/…) to the new registry (`{ code, name, bcp? }[]`) plus the
+ * `lo{n} → code` key-rewrite map applied to every entry `lexeme` + sentence `text`.
+ *
+ * `code` prefers the BCP tag; falls back to a slug of the name, then `orth{n}`.
+ * Codes are de-duped (a repeated code gets `-2`, `-3`, …). These are the ALTERNATE
+ * orthographies only — the primary headword stays keyed `default` and is untouched.
+ */
+export function map_orthographies(legacy: Row[] | null | undefined): {
+  orthographies: Row[] | null
+  lo_to_code: Record<string, string>
+} {
+  const lo_to_code: Record<string, string> = {}
+  if (!legacy?.length) return { orthographies: null, lo_to_code }
+
+  const used = new Set<string>(['default'])
+  const orthographies = legacy.map((orthography, index) => {
+    const bcp = typeof orthography.bcp === 'string' ? orthography.bcp.trim() : ''
+    const name = collapse_multistring(orthography.name)
+    let code = bcp || slugify(name) || `orth${index + 1}`
+    if (used.has(code)) {
+      let suffix = 2
+      while (used.has(`${code}-${suffix}`)) suffix++
+      code = `${code}-${suffix}`
+    }
+    used.add(code)
+    lo_to_code[`lo${index + 1}`] = code
+    return bcp ? { code, name, bcp } : { code, name }
+  })
+  return { orthographies, lo_to_code }
+}
+
+/** Rename `lo{n}` keys in a lexeme/text MultiString to their orthography `code`. */
+export function rewrite_orthography_keys(multistring: Row | null | undefined, lo_to_code: Record<string, string>): Row | null | undefined {
+  if (!multistring || typeof multistring !== 'object') return multistring
+  const rewritten: Row = {}
+  for (const [key, value] of Object.entries(multistring))
+    rewritten[lo_to_code[key] ?? key] = value
+  return rewritten
+}
+
 /** Audit fields shared by every content/catalog table. */
 function audit(source: Row): Row {
   return {
@@ -153,7 +205,7 @@ export function map_dictionary({ dict, info, entry_count }: {
     print_access: to_int(dict.print_access),
     metadata: dict.metadata ?? null,
     entry_count,
-    orthographies: dict.orthographies ?? null,
+    orthographies: map_orthographies(dict.orthographies).orthographies,
     featured_image: dict.featured_image ?? null,
     author_connection: dict.author_connection ?? null,
     community_permission: dict.community_permission ?? null,

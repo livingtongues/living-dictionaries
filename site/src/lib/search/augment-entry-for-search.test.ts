@@ -10,6 +10,7 @@ describe(augment_entry_for_search, () => {
         "_dialects": [],
         "_glosses": [],
         "_lexeme": [],
+        "_orthographies": [],
         "_other": [],
         "_parts_of_speech": [],
         "_semantic_domains": [],

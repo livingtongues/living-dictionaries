@@ -191,7 +191,7 @@
         update_entry({ scientific_names: entry.main.scientific_names })
       }} />
   {:else if column.field === 'local_orthography'}
-    {@const orthography_field = `lo${column.orthography_index}`}
+    {@const orthography_field = column.orthography_code}
     <Textbox
       field={column.field}
       value={entry.main.lexeme[orthography_field]}

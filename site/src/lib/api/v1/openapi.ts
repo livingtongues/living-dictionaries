@@ -5,6 +5,8 @@
  * (not generated) so the prose is agent-oriented.
  */
 
+import { RELATIONSHIP_TYPES } from '$lib/constants'
+
 export function build_openapi_spec({ origin }: { origin: string }): Record<string, unknown> {
   const MultiString = {
     type: 'object',
@@ -100,6 +102,18 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       dialects: StringOrStringArray,
       tags: StringOrStringArray,
       senses: { type: 'array', items: { $ref: '#/components/schemas/SensePatch' } },
+    },
+  }
+
+  const OrthographyInput = {
+    type: 'object',
+    required: ['code'],
+    description: 'An alternate writing system. Its `code` is the immutable key each entry\'s `lexeme` (and each sentence\'s `text`) stores this spelling under.',
+    properties: {
+      code: { type: 'string', description: 'Immutable key. Prefer a BCP-47 tag (e.g. `sat-Olck`) — if it matches a Keyman-supported writing system it wires up a keyboard automatically; otherwise a custom slug (letters/numbers/hyphens). `default` (the primary headword) and `lo{n}` are reserved.' },
+      name: { type: 'string', description: 'Editable display label.' },
+      bcp: { type: 'string', description: 'BCP-47 tag driving the Keyman keyboard. Defaults to `code` when `code` is a known writing system.' },
+      notes: { type: 'string' },
     },
   }
 
@@ -251,7 +265,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const SenseFull = {
     type: 'object',
-    description: 'A stored sense (read shape). Mirrors `SenseInput` plus a server-assigned `id`; example sentences come back under `sentences` (not `example_sentences`). Media arrays are read-only and present only when media exists (v1 has no media write endpoints).',
+    description: 'A stored sense (read shape). Mirrors `SenseInput` plus a server-assigned `id`; example sentences come back under `sentences` (not `example_sentences`). Media arrays (`photos`/`videos`) are read-only here — write them via `POST …/senses/{senseId}/photos` / `…/videos`.',
     properties: {
       id: { type: 'string' },
       glosses: { $ref: '#/components/schemas/MultiString' },
@@ -263,8 +277,8 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       plural_form: { ...MultiString, nullable: true },
       variant: { ...MultiString, nullable: true },
       sentences: { type: 'array', items: { $ref: '#/components/schemas/SentenceFull' }, description: 'The sense\'s example sentences. Present only when sentences exist. (Input field name is `example_sentences`.)' },
-      photos: { type: 'array', items: { type: 'object' }, description: 'Read-only; present only when present. No v1 write endpoint.' },
-      videos: { type: 'array', items: { type: 'object' }, description: 'Read-only; present only when present. No v1 write endpoint.' },
+      photos: { type: 'array', items: { $ref: '#/components/schemas/PhotoMedia' }, description: 'Present only when photos exist. Write via `POST …/senses/{senseId}/photos`.' },
+      videos: { type: 'array', items: { $ref: '#/components/schemas/VideoMedia' }, description: 'Present only when videos exist. Write via `POST …/senses/{senseId}/videos`.' },
       updated_at: { type: 'string', format: 'date-time' },
       created_at: { type: 'string', format: 'date-time' },
     },
@@ -296,7 +310,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       senses: { type: 'array', items: { $ref: '#/components/schemas/SenseFull' } },
       tags: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, private: { type: 'boolean', nullable: true }, updated_at: { type: 'string', format: 'date-time' } } }, description: 'Entry-level tags (includes the `import_id` private tag from a bulk import). Present only when tags exist.' },
       dialects: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, updated_at: { type: 'string', format: 'date-time' } } }, description: 'Present only when dialects exist.' },
-      audios: { type: 'array', items: { type: 'object' }, description: 'Read-only; present only when audio exists. No v1 write endpoint.' },
+      audios: { type: 'array', items: { $ref: '#/components/schemas/AudioMedia' }, description: 'Present only when audio exists. Write via `POST …/entries/{entryId}/audio`.' },
       updated_at: { type: 'string', format: 'date-time' },
     },
   }
@@ -340,6 +354,196 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   const tag_id_param = { name: 'tagId', in: 'path', required: true, schema: { type: 'string' } }
   const dialect_id_param = { name: 'dialectId', in: 'path', required: true, schema: { type: 'string' } }
   const source_id_param = { name: 'sourceId', in: 'path', required: true, schema: { type: 'string' } }
+  const orthography_code_param = { name: 'code', in: 'path', required: true, schema: { type: 'string' }, description: 'The orthography\'s immutable code (a BCP-47 tag, a custom slug, or `default` for the primary).' }
+  const text_id_param = { name: 'textId', in: 'path', required: true, schema: { type: 'string' } }
+  const audio_id_param = { name: 'audioId', in: 'path', required: true, schema: { type: 'string' } }
+  const photo_id_param = { name: 'photoId', in: 'path', required: true, schema: { type: 'string' } }
+  const video_id_param = { name: 'videoId', in: 'path', required: true, schema: { type: 'string' } }
+  const relationship_id_param = { name: 'relationshipId', in: 'path', required: true, schema: { type: 'string' } }
+
+  // ── Media (audio / photos / videos) ──────────────────────────────────
+  const HostedElsewhere = {
+    type: 'object',
+    required: ['type', 'video_id'],
+    description: 'A video hosted on YouTube/Vimeo — no bytes are stored. Alternatively send a raw `hosted_url` (a watch/share URL) and the server parses it into this shape.',
+    properties: {
+      type: { type: 'string', enum: ['youtube', 'vimeo'] },
+      video_id: { type: 'string', description: 'Provider id (YouTube watch id / Vimeo numeric id).' },
+      start_at_seconds: { type: 'integer', nullable: true },
+    },
+  }
+  const SpeakerBrief = { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' } } }
+  const AudioMedia = {
+    type: 'object',
+    description: 'A stored audio recording (the pronunciation/utterance). Attaches to an entry, sentence, or text.',
+    properties: {
+      id: { type: 'string' },
+      storage_path: { type: 'string' },
+      source: { type: 'string', nullable: true },
+      entry_id: { type: 'string', nullable: true },
+      sentence_id: { type: 'string', nullable: true },
+      text_id: { type: 'string', nullable: true },
+      speakers: { type: 'array', items: { $ref: '#/components/schemas/SpeakerBrief' }, description: 'Present only when a speaker is attached.' },
+      created_at: { type: 'string', format: 'date-time' },
+      updated_at: { type: 'string', format: 'date-time' },
+    },
+  }
+  const PhotoMedia = {
+    type: 'object',
+    description: 'A stored photo. Attaches to a sense or a sentence. `source` + `photographer` are the attribution shown under the image (there is no separate caption field).',
+    properties: {
+      id: { type: 'string' },
+      storage_path: { type: 'string' },
+      serving_url: { type: 'string', description: 'lh3 image-serving hash (generated server-side).' },
+      source: { type: 'string', nullable: true },
+      photographer: { type: 'string', nullable: true },
+      created_at: { type: 'string', format: 'date-time' },
+      updated_at: { type: 'string', format: 'date-time' },
+    },
+  }
+  const VideoMedia = {
+    type: 'object',
+    description: 'A stored or hosted video. Attaches to a sense, sentence, or text. Either `storage_path` (uploaded bytes) OR `hosted_elsewhere` (YouTube/Vimeo) is set.',
+    properties: {
+      id: { type: 'string' },
+      storage_path: { type: 'string', nullable: true },
+      hosted_elsewhere: { ...HostedElsewhere, nullable: true },
+      source: { type: 'string', nullable: true },
+      videographer: { type: 'string', nullable: true },
+      text_id: { type: 'string', nullable: true },
+      speakers: { type: 'array', items: { $ref: '#/components/schemas/SpeakerBrief' }, description: 'Present only when a speaker is attached.' },
+      created_at: { type: 'string', format: 'date-time' },
+      updated_at: { type: 'string', format: 'date-time' },
+    },
+  }
+
+  const media_id_prop = { type: 'string', format: 'uuid', description: 'Optional client-generated UUID — the idempotency key. A re-POST of an existing id is a safe no-op (returns the existing media, `created: false`).' }
+  const media_replace_prop = { type: 'boolean', description: 'Remove existing media of THIS medium on THIS owner first, then add — e.g. to keep exactly one pronunciation per headword across re-runs.' }
+  const file_prop = { type: 'string', format: 'binary', description: 'The media file bytes.' }
+  const url_prop = { type: 'string', description: 'A public http(s) URL the server fetches instead of an uploaded file (size-capped, see Limits).' }
+
+  // Two accepted content types per attach: multipart file upload OR JSON (url / hosted link).
+  function media_request_body({ multipart_props, json_props, multipart_required, json_required }: { multipart_props: Record<string, unknown>, json_props: Record<string, unknown>, multipart_required?: string[], json_required?: string[] }) {
+    return {
+      required: true,
+      content: {
+        'multipart/form-data': { schema: { type: 'object', required: multipart_required, properties: multipart_props } },
+        'application/json': { schema: { type: 'object', required: json_required, properties: json_props } },
+      },
+    }
+  }
+
+  const audio_request_body = media_request_body({
+    multipart_required: ['file'],
+    multipart_props: { file: file_prop, speaker_id: { type: 'string' }, source: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+    json_required: ['url'],
+    json_props: { url: url_prop, speaker_id: { type: 'string', description: 'Optional — must be an existing speaker id (create via `POST …/speakers`).' }, source: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+  })
+  const photo_request_body = media_request_body({
+    multipart_required: ['file'],
+    multipart_props: { file: file_prop, source: { type: 'string' }, photographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+    json_required: ['url'],
+    json_props: { url: url_prop, source: { type: 'string', description: 'Attribution/description shown under the photo.' }, photographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+  })
+  const video_request_body = media_request_body({
+    multipart_props: { file: file_prop, hosted_url: { type: 'string', description: 'A YouTube/Vimeo watch URL (parsed to `hosted_elsewhere`) — use instead of a file for hosted video.' }, speaker_id: { type: 'string' }, source: { type: 'string' }, videographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+    json_props: { url: url_prop, hosted_url: { type: 'string', description: 'A YouTube/Vimeo watch URL — parsed to `hosted_elsewhere`.' }, hosted_elsewhere: { ...HostedElsewhere, description: 'Structured hosted-video link (alternative to `hosted_url`). Provide exactly one of `url` / `hosted_url` / `hosted_elsewhere`.' }, speaker_id: { type: 'string' }, source: { type: 'string' }, videographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+  })
+
+  const RelationshipCustomType = {
+    type: 'object',
+    required: ['name'],
+    properties: {
+      name: { ...StringOrMultiString, description: 'Display label the dictionary creator authors (their language).' },
+      inverse_name: { ...StringOrMultiString, description: 'Label shown from the `to` side for a DIRECTED custom type. Omit for symmetric.' },
+      symmetric: { type: 'boolean', description: 'Defaults true unless an `inverse_name` is given.' },
+    },
+  }
+  const RelationshipInput = {
+    type: 'object',
+    required: ['from_entry_id', 'to_entry_id'],
+    description: 'A typed relationship between two entries (optionally narrowed to senses). Provide exactly one of `type` (global slug) or `custom_type`.',
+    properties: {
+      from_entry_id: { type: 'string' },
+      from_sense_id: { type: 'string', description: 'Optional — narrows the `from` side to one sense (must belong to `from_entry_id`).' },
+      to_entry_id: { type: 'string' },
+      to_sense_id: { type: 'string', description: 'Optional — narrows the `to` side to one sense (must belong to `to_entry_id`).' },
+      type: { type: 'string', enum: Object.keys(RELATIONSHIP_TYPES), description: 'A global relationship-type slug. Provide THIS or `custom_type`.' },
+      custom_type: { ...RelationshipCustomType, description: 'A per-dictionary custom type — found-or-created (deduped by name). Provide THIS or `type`.' },
+      note: StringOrMultiString,
+      sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist (create via `POST …/sources`).' },
+    },
+  }
+  const RelationshipView = {
+    type: 'object',
+    description: 'One relationship as seen FROM a given entry: `direction`, and the label (`label_key` for globals / `name` for custom) already reflect the side being shown. `related` is the OTHER endpoint.',
+    properties: {
+      id: { type: 'string' },
+      type: { type: 'string', description: 'Global slug, or the custom type id when `custom` is true.' },
+      custom: { type: 'boolean' },
+      symmetric: { type: 'boolean' },
+      direction: { type: 'string', enum: ['forward', 'inverse'] },
+      label_key: { type: 'string', description: 'Globals only: i18n key `relationship_type.<slug>` for the side being viewed.' },
+      name: { $ref: '#/components/schemas/MultiString', description: 'Custom types only: the label for the side being viewed.' },
+      related: { type: 'object', properties: { entry_id: { type: 'string' }, sense_id: { type: 'string' }, lexeme: { $ref: '#/components/schemas/MultiString' } } },
+      note: { $ref: '#/components/schemas/MultiString' },
+      sources: { type: 'array', items: { type: 'string' } },
+    },
+  }
+
+  const MEDIA_RESPONSE = {
+    audio: { key: 'audio', schema: 'AudioMedia' },
+    photo: { key: 'photo', schema: 'PhotoMedia' },
+    video: { key: 'video', schema: 'VideoMedia' },
+  } as const
+
+  function media_attach_op({ summary, description, owner_params, request_body, medium }: { summary: string, description: string, owner_params: unknown[], request_body: unknown, medium: keyof typeof MEDIA_RESPONSE }) {
+    const { key, schema } = MEDIA_RESPONSE[medium]
+    return {
+      post: {
+        summary,
+        description,
+        parameters: [dict_id_param, ...owner_params],
+        requestBody: request_body,
+        responses: {
+          200: { description: `{ ${key}, created }`, content: { 'application/json': { schema: { type: 'object', properties: { [key]: { $ref: `#/components/schemas/${schema}` }, created: { type: 'boolean', description: 'false = idempotent no-op (the supplied `id` already existed).' } } } } } },
+          400: { description: 'Bad input (no file/url, bad speaker, bad hosted link)' },
+          404: { description: 'Owner not found' },
+          413: { description: 'File exceeds the upload size limit' },
+          503: { description: 'Media storage not configured on the server' },
+        },
+      },
+    }
+  }
+  function media_delete_op({ owner_label, owner_params, media_id_p, medium }: { owner_label: string, owner_params: unknown[], media_id_p: unknown, medium: keyof typeof MEDIA_RESPONSE }) {
+    return {
+      delete: {
+        summary: `Delete a ${medium} from this ${owner_label}`,
+        description: `Removes the ${medium} (FK cascade sweeps its links + speaker junctions). Verifies the ${medium} is linked to THIS ${owner_label}.`,
+        parameters: [dict_id_param, ...owner_params, media_id_p],
+        responses: { 200: { description: "{ result: 'deleted' }" }, 404: { description: `${medium} not linked to this ${owner_label}` } },
+      },
+    }
+  }
+
+  const media_paths = {
+    '/api/v1/dictionaries/{id}/entries/{entryId}/audio': media_attach_op({ summary: 'Attach audio to an entry', description: 'Upload a pronunciation recording for the headword (multipart `file` or JSON `url`), optionally with a `speaker_id`. Use `replace: true` for one-audio-per-headword imports.', owner_params: [entry_id_param], request_body: audio_request_body, medium: 'audio' }),
+    '/api/v1/dictionaries/{id}/entries/{entryId}/audio/{audioId}': media_delete_op({ owner_label: 'entry', owner_params: [entry_id_param], media_id_p: audio_id_param, medium: 'audio' }),
+    '/api/v1/dictionaries/{id}/senses/{senseId}/photos': media_attach_op({ summary: 'Attach a photo to a sense', description: 'Upload an illustrative photo for the sense (multipart `file` or JSON `url`), optionally with `source`/`photographer` (shown as the caption).', owner_params: [sense_id_param], request_body: photo_request_body, medium: 'photo' }),
+    '/api/v1/dictionaries/{id}/senses/{senseId}/photos/{photoId}': media_delete_op({ owner_label: 'sense', owner_params: [sense_id_param], media_id_p: photo_id_param, medium: 'photo' }),
+    '/api/v1/dictionaries/{id}/senses/{senseId}/videos': media_attach_op({ summary: 'Attach a video to a sense', description: 'Upload a video (`file`/`url`) OR link a hosted one (`hosted_url`/`hosted_elsewhere`), optionally with `speaker_id`.', owner_params: [sense_id_param], request_body: video_request_body, medium: 'video' }),
+    '/api/v1/dictionaries/{id}/senses/{senseId}/videos/{videoId}': media_delete_op({ owner_label: 'sense', owner_params: [sense_id_param], media_id_p: video_id_param, medium: 'video' }),
+    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio': media_attach_op({ summary: 'Attach audio to a sentence', description: 'Upload audio for an example/text sentence (`file`/`url`), optionally with `speaker_id`.', owner_params: [sentence_id_param], request_body: audio_request_body, medium: 'audio' }),
+    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio/{audioId}': media_delete_op({ owner_label: 'sentence', owner_params: [sentence_id_param], media_id_p: audio_id_param, medium: 'audio' }),
+    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/photos': media_attach_op({ summary: 'Attach a photo to a sentence', description: 'Upload a photo for a sentence (`file`/`url`), optionally with `source`/`photographer`.', owner_params: [sentence_id_param], request_body: photo_request_body, medium: 'photo' }),
+    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/photos/{photoId}': media_delete_op({ owner_label: 'sentence', owner_params: [sentence_id_param], media_id_p: photo_id_param, medium: 'photo' }),
+    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/videos': media_attach_op({ summary: 'Attach a video to a sentence', description: 'Upload (`file`/`url`) or link (`hosted_url`/`hosted_elsewhere`) a video for a sentence.', owner_params: [sentence_id_param], request_body: video_request_body, medium: 'video' }),
+    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/videos/{videoId}': media_delete_op({ owner_label: 'sentence', owner_params: [sentence_id_param], media_id_p: video_id_param, medium: 'video' }),
+    '/api/v1/dictionaries/{id}/texts/{textId}/audio': media_attach_op({ summary: 'Attach audio to a text', description: 'Upload audio for a whole text/passage (`file`/`url`), optionally with `speaker_id`.', owner_params: [text_id_param], request_body: audio_request_body, medium: 'audio' }),
+    '/api/v1/dictionaries/{id}/texts/{textId}/audio/{audioId}': media_delete_op({ owner_label: 'text', owner_params: [text_id_param], media_id_p: audio_id_param, medium: 'audio' }),
+    '/api/v1/dictionaries/{id}/texts/{textId}/videos': media_attach_op({ summary: 'Attach a video to a text', description: 'Upload (`file`/`url`) or link (`hosted_url`/`hosted_elsewhere`) a video for a text.', owner_params: [text_id_param], request_body: video_request_body, medium: 'video' }),
+    '/api/v1/dictionaries/{id}/texts/{textId}/videos/{videoId}': media_delete_op({ owner_label: 'text', owner_params: [text_id_param], media_id_p: video_id_param, medium: 'video' }),
+  }
 
   return {
     openapi: '3.1.0',
@@ -376,10 +580,18 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '- `DELETE …/entries/{entryId}/tags/{tagId}` / `…/entries/{entryId}/dialects/{dialectId}` — unlink ONE tag/dialect from ONE entry (it survives on other entries).',
         '',
         '## Scope (v1)',
-        'v1 covers entries, senses, example sentences, **texts** (connected passages with ordered sentences), speakers, tags, dialects, and sources. It does **not** cover media (audio, photos, video) — there are no media write endpoints. Media may appear (read-only) in the entry READ shape if it was added through the web app, but text-only imports never need to touch it.',
+        'v1 covers entries, senses, example sentences, **texts** (connected passages with ordered sentences), speakers, tags, dialects, sources, and **media** (audio, photos, video). Text-only imports never need to touch media.',
+        '',
+        '## Media (audio / photos / videos)',
+        'Attach media with ONE call that uploads + links it: `POST` the bytes as multipart `file`, OR JSON `{ "url": "https://…" }` (the server fetches it). Each returns the created media object (with its `id`) and `created`.',
+        '- **audio** → an entry (headword pronunciation), a sentence, or a text: `POST …/entries/{entryId}/audio`, `…/sentences/{sentenceId}/audio`, `…/texts/{textId}/audio`. Optional `speaker_id` (must be an existing speaker — create via `POST …/speakers`).',
+        '- **photos** → a sense or a sentence: `POST …/senses/{senseId}/photos`, `…/sentences/{sentenceId}/photos`. Optional `source`/`photographer` (shown as the on-image caption).',
+        '- **videos** → a sense, sentence, or text: `POST …/senses/{senseId}/videos`, etc. Upload bytes OR link a hosted video via `hosted_url` (a YouTube/Vimeo watch URL) — preferred for large video, which would exceed the upload cap. Optional `speaker_id`.',
+        'Idempotency + replace: send your own `id` (UUID) so a re-POST is a no-op; send `replace: true` to first remove existing media of that type on that owner (e.g. exactly one pronunciation per headword). Remove media with `DELETE …/{audioId|photoId|videoId}`.',
+        'Typical import: create the entry (get its `id` + `sense_ids`), then `POST …/entries/{entryId}/audio` with the pronunciation and `POST …/senses/{senseId}/photos` with the illustrative photo.',
         '',
         '## Limits',
-        'Batch ≤1000 entries per request AND keep each request body under ~16MB — split larger imports. Writes are per-item best-effort (read `results`).',
+        'Batch ≤1000 entries per request AND keep each request body under ~16MB — split larger imports. A single media upload (file or fetched url) is capped separately (~25MB); for larger video use a `hosted_url` link instead. Writes are per-item best-effort (read `results`).',
         '',
         '## Feedback (agents welcome)',
         'If you hit a wall — a field you need that doesn\'t exist, a bug, or an awkward workflow — `POST /api/v1/dictionaries/{id}/feedback` with `{ "message": "…" }`. It reaches the Living Dictionaries team directly (read OR write keys). After sending, relay the response\'s `relay_to_human` sentence to your human so they know what you asked for; if we adopt it we notify them directly.',
@@ -391,6 +603,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     servers: [{ url: origin }],
     security: [{ bearerAuth: [] }],
     paths: {
+      ...media_paths,
       '/api/v1/dictionaries/{id}': {
         get: {
           summary: 'Dictionary metadata',
@@ -435,7 +648,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         },
       },
       '/api/v1/dictionaries/{id}/entries/{entryId}': {
-        get: { summary: 'Read one entry (full nested)', description: 'Returns the full nested entry (the READ shape — see `EntryResponse`). NOTE the input→output asymmetry: scalars you POST at the top level are read back under `entry.main`; `senses[].example_sentences` are read back as `senses[].sentences`.', parameters: [dict_id_param, entry_id_param], responses: { 200: { description: 'The full nested entry', content: { 'application/json': { schema: { $ref: '#/components/schemas/EntryResponse' } } } }, 404: { description: 'Not found' } } },
+        get: { summary: 'Read one entry (full nested)', description: 'Returns the full nested entry (the READ shape — see `EntryResponse`). NOTE the input→output asymmetry: scalars you POST at the top level are read back under `entry.main`; `senses[].example_sentences` are read back as `senses[].sentences`. Pass `?include=relationships` to also attach `entry.relationships` (see `RelationshipView`).', parameters: [dict_id_param, entry_id_param, { name: 'include', in: 'query', schema: { type: 'string', enum: ['relationships'] }, description: 'Pass `relationships` to attach this entry\'s typed relationships as `entry.relationships`.' }], responses: { 200: { description: 'The full nested entry', content: { 'application/json': { schema: { $ref: '#/components/schemas/EntryResponse' } } } }, 404: { description: 'Not found' } } },
         patch: {
           summary: 'Update an entry (field-merge)',
           description: 'Field-merge: provided fields overwrite, omitted ones stay. `senses` upsert by `id` (no id → create a new sense); example sentences are APPENDED; `dialects`/`tags` are additive links (this call never removes them). For surgical single-row edits/deletes — one sentence, sense, tag, or dialect — use the dedicated `…/sentences/{id}`, `…/senses/{id}`, `…/tags/{id}`, `…/dialects/{id}` routes (see "Edits & deletes"). Returns the updated entry in the READ shape (`EntryResponse`).',
@@ -447,6 +660,24 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       },
       '/api/v1/dictionaries/{id}/entries/{entryId}/tags/{tagId}': {
         delete: { summary: 'Unlink a tag from this entry', description: 'Removes ONE tag from ONE entry; the tag (and its links to other entries) survives. To delete the tag everywhere use `DELETE …/tags/{tagId}`.', parameters: [dict_id_param, entry_id_param, tag_id_param], responses: { 200: { description: "{ result: 'unlinked' }" }, 404: { description: 'Tag not linked to this entry' } } },
+      },
+      '/api/v1/dictionaries/{id}/relationships': {
+        get: {
+          summary: 'List an entry\'s relationships',
+          description: 'Every relationship touching `entry_id` (both directions), shaped from that entry\'s viewpoint (`direction` + inverse label already resolved). Read access.',
+          parameters: [dict_id_param, { name: 'entry_id', in: 'query', required: true, schema: { type: 'string' }, description: 'The entry to list relationships for.' }],
+          responses: { 200: { description: '{ relationships: RelationshipView[] }', content: { 'application/json': { schema: { type: 'object', properties: { relationships: { type: 'array', items: { $ref: '#/components/schemas/RelationshipView' } } } } } } }, 400: { description: 'Missing entry_id' } },
+        },
+        post: {
+          summary: 'Create a relationship',
+          description: 'Link two entries (optionally narrowed to senses) with a global or custom type. Idempotent: an identical relationship returns the existing row with `created: false` (symmetric types also dedupe the reverse direction). Editor+.',
+          parameters: [dict_id_param],
+          requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/RelationshipInput' } } } },
+          responses: { 200: { description: '{ relationship, created }', content: { 'application/json': { schema: { type: 'object', properties: { relationship: { $ref: '#/components/schemas/RelationshipView' }, created: { type: 'boolean', description: 'false = idempotent no-op (an identical relationship already existed).' } } } } } }, 400: { description: 'Bad input (missing/duplicate type, unknown entry/sense/source, self-link)' } },
+        },
+      },
+      '/api/v1/dictionaries/{id}/relationships/{relationshipId}': {
+        delete: { summary: 'Delete a relationship', description: 'Removes ONE relationship by id (tombstone → cascade). Editor+.', parameters: [dict_id_param, relationship_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: { description: 'Relationship not found' } } },
       },
       '/api/v1/dictionaries/{id}/entries/{entryId}/dialects/{dialectId}': {
         delete: { summary: 'Unlink a dialect from this entry', description: 'Removes ONE dialect from ONE entry; the dialect survives globally. To delete it everywhere use `DELETE …/dialects/{dialectId}`.', parameters: [dict_id_param, entry_id_param, dialect_id_param], responses: { 200: { description: "{ result: 'unlinked' }" }, 404: { description: 'Dialect not linked to this entry' } } },
@@ -519,6 +750,15 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         patch: { summary: 'Rename a dialect', description: 'Renames the dialect (plain string or locale map). Affects EVERY entry it is on. Returns `{ dialect }`.', parameters: [dict_id_param, dialect_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { name: StringOrMultiString } } } } }, responses: { 200: { description: '{ dialect }' }, 400: { description: 'Name collides with another dialect' }, 404: {} } },
         delete: { summary: 'Delete a dialect (globally)', description: 'Deletes the dialect and unlinks it from every entry. To remove it from just one entry use `DELETE …/entries/{entryId}/dialects/{dialectId}`.', parameters: [dict_id_param, dialect_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
       },
+      '/api/v1/dictionaries/{id}/orthographies': {
+        get: { summary: 'List orthographies', description: 'The dictionary\'s ALTERNATE writing systems (the primary headword, keyed `default`, is implicit and excluded), each with `used_by` counts of entries/sentences that store text under it.', parameters: [dict_id_param], responses: { 200: { description: '{ orthographies }' } } },
+        post: { summary: 'Add an orthography', description: 'Registers an alternate writing system. `code` is required, unique, and immutable; a `code` that is a known writing system auto-wires its Keyman keyboard. After creating it, write each spelling under that `code` key inside an entry\'s `lexeme` (or a sentence\'s `text`).', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/OrthographyInput' } } } }, responses: { 200: { description: '{ orthography }' }, 400: { description: 'Reserved/duplicate/invalid code' } } },
+        put: { summary: 'Reorder orthographies', description: 'Sets the display order of the alternate orthographies. Send `{ order: [code, …] }` listing every alternate code exactly once.', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['order'], properties: { order: { type: 'array', items: { type: 'string' } } } } } } }, responses: { 200: { description: '{ orthographies }' }, 400: { description: 'Order must list every alternate code exactly once' } } },
+      },
+      '/api/v1/dictionaries/{id}/orthographies/{code}': {
+        patch: { summary: 'Relabel an orthography', description: 'Edits `name` / `bcp` / `notes` (the `code` itself never changes). Works on the primary too — PATCH `default` to label the main headword + attach a keyboard.', parameters: [dict_id_param, orthography_code_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string' }, bcp: { type: 'string', nullable: true }, notes: { type: 'string', nullable: true } } } } } }, responses: { 200: { description: '{ orthography }' }, 400: { description: 'Not found' } } },
+        delete: { summary: 'Delete an orthography', description: 'Removes an alternate orthography. Refused while any entry/sentence still stores text under its `code` (clear those first). The primary `default` cannot be deleted.', parameters: [dict_id_param, orthography_code_param], responses: { 200: { description: '{ deleted, was_using }' }, 400: { description: 'In use, primary, or not found' } } },
+      },
       '/api/v1/dictionaries/{id}/sources': {
         get: { summary: 'List sources', description: 'The dictionary\'s citation registry, each with `used_by` reference counts.', parameters: [dict_id_param], responses: { 200: { description: '{ sources }' } } },
         post: { summary: 'Create a source', description: 'Adds a citation record. `slug` is required and must be unique. Entries/sentences reference sources by slug, so create sources here BEFORE citing them on a write (an unknown slug rejects the write).', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/SourceInput' } } } }, responses: { 200: { description: '{ source }' }, 400: { description: 'Missing/duplicate slug or invalid type' } } },
@@ -540,6 +780,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         SensePatch,
         SentencePatch,
         EntryPatch,
+        OrthographyInput,
         SourceInput,
         EntryWriteResult,
         EntriesWriteResponse,
@@ -556,6 +797,14 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         TextSentenceFull,
         TextFull,
         TextPatch,
+        HostedElsewhere,
+        SpeakerBrief,
+        AudioMedia,
+        PhotoMedia,
+        VideoMedia,
+        RelationshipCustomType,
+        RelationshipInput,
+        RelationshipView,
       },
     },
   }

@@ -41,6 +41,30 @@ export const MINIMUM_ABOUT_LENGTH = 200
 export const SOURCE_TYPES = ['dictionary', 'wordlist', 'fieldwork', 'manuscript', 'other'] as const
 export type SourceType = typeof SOURCE_TYPES[number]
 
+/**
+ * Controlled global vocabulary for `entry_relationships.type`. Labels (and the
+ * inverse-side label of directed types) are i18n keys `relationship_type.<slug>`
+ * — never hard-code display text here. `symmetric` types read the same from
+ * either endpoint; directed types show `inverse_slug`'s label from the `to` side.
+ * Per-dictionary CUSTOM types live in the `relationship_types` table instead.
+ *
+ * Deliberately small to start (all symmetric); expand as needed. Future directed
+ * additions (documented, not yet enabled): hypernym↔hyponym, holonym↔meronym,
+ * classifier_of↔classified_by, derived_from↔root_of, borrowed_from↔loaned_to.
+ */
+export const RELATIONSHIP_TYPES = {
+  synonym: { symmetric: true, inverse_slug: 'synonym' },
+  antonym: { symmetric: true, inverse_slug: 'antonym' },
+  cognate: { symmetric: true, inverse_slug: 'cognate' },
+  dialectal_variant: { symmetric: true, inverse_slug: 'dialectal_variant' },
+} as const satisfies Record<string, { symmetric: boolean, inverse_slug: string }>
+
+export type GlobalRelationshipType = keyof typeof RELATIONSHIP_TYPES
+
+export function is_global_relationship_type(value: unknown): value is GlobalRelationshipType {
+  return typeof value === 'string' && Object.prototype.hasOwnProperty.call(RELATIONSHIP_TYPES, value)
+}
+
 /** Per-dictionary OPFS file path prefix (rooted in OPFS) for the wa-sqlite browser DB. */
 export const DICT_DB_OPFS_PREFIX = 'dictionaries/'
 
@@ -57,6 +81,12 @@ export const SNAPSHOT_EXPIRED_DAYS = 60
 
 /** Total OPFS budget for viewer-only dict.db files (editor dicts are exempt). */
 export const VIEWER_OPFS_BUDGET_BYTES = 200 * 1024 * 1024
+
+/** Max bytes accepted for a v1 media upload (multipart file or fetched-from-url). Large videos should use `hosted_elsewhere` links instead. */
+export const MAX_MEDIA_UPLOAD_BYTES = 25 * 1024 * 1024
+
+/** Timeout for the server-side fetch of a media `url` supplied to a v1 media endpoint. */
+export const MEDIA_FETCH_TIMEOUT_MS = 30_000
 
 export const ACCESS_TOKEN_COOKIE_NAME = 'sb-access-token'
 export const REFRESH_TOKEN_COOKIE_NAME = 'sb-refresh-token'

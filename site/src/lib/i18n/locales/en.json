@@ -446,5 +446,12 @@
   "sentence": {
     "add": "Add sentence",
     "delete": "Delete sentence"
+  },
+  "relationship_type": {
+    "related_entries": "Related entries",
+    "synonym": "Synonym",
+    "antonym": "Antonym",
+    "cognate": "Cognate",
+    "dialectal_variant": "Dialectal variant"
   }
 }

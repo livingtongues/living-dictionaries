@@ -296,6 +296,51 @@ export const entry_tags = sqliteTable('entry_tags', {
 })
 
 /**
+ * Per-dictionary registry of CUSTOM relationship types (found-or-created, like
+ * `tags`). Global types live in `constants.ts` `RELATIONSHIP_TYPES` and are
+ * referenced by slug; a custom type is referenced by `entry_relationships.custom_type_id`.
+ */
+export const relationship_types = sqliteTable('relationship_types', {
+  id: text().primaryKey(),
+  name: text({ mode: 'json' }).$type<MultiString>().notNull(),
+  /** Directed custom types only — label shown from the `to` side. NULL for symmetric. */
+  inverse_name: text({ mode: 'json' }).$type<MultiString>(),
+  /** 1 = symmetric (same label both ways); NULL/0 = directed. */
+  symmetric: integer(),
+  dirty: integer(),
+  created_by_user_id: text().notNull(),
+  created_at: text().notNull(),
+  updated_by_user_id: text().notNull(),
+  updated_at: text().notNull(),
+})
+
+/**
+ * Typed relationship between two entries (optionally narrowed to senses), within
+ * one dictionary. `from_*`/`to_*` are directional; symmetric types are stored in a
+ * canonical endpoint order (see `v1-relationship-write.ts`) and read identically
+ * from either side. Exactly one of `type` (global slug) / `custom_type_id` is set.
+ * Both entry FKs `ON DELETE CASCADE`, so deleting either endpoint removes the link.
+ */
+export const entry_relationships = sqliteTable('entry_relationships', {
+  id: text().primaryKey(),
+  from_entry_id: text().notNull().references(() => entries.id, { onDelete: 'cascade' }),
+  from_sense_id: text().references(() => senses.id, { onDelete: 'cascade' }),
+  to_entry_id: text().notNull().references(() => entries.id, { onDelete: 'cascade' }),
+  to_sense_id: text().references(() => senses.id, { onDelete: 'cascade' }),
+  /** Global relationship-type slug (see `RELATIONSHIP_TYPES`). NULL when `custom_type_id` is set. */
+  type: text(),
+  custom_type_id: text().references(() => relationship_types.id, { onDelete: 'cascade' }),
+  note: text({ mode: 'json' }).$type<MultiString>(),
+  /** Array of `sources.slug` refs (no FK — validated on write). */
+  sources: text({ mode: 'json' }).$type<string[]>(),
+  dirty: integer(),
+  created_by_user_id: text().notNull(),
+  created_at: text().notNull(),
+  updated_by_user_id: text().notNull(),
+  updated_at: text().notNull(),
+})
+
+/**
  * Per-dictionary citation registry. `entries`/`sentences`/`texts` reference rows
  * here by `slug` (array-of-slug columns, NOT a junction). No FK enforces those
  * refs, so writes validate the slug exists and source deletion is refused while

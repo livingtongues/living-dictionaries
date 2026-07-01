@@ -193,8 +193,14 @@ export function resolve_owners(db: Database.Database, table_name: string, row: R
     case 'entry_tags':
       push_owner(out, seen, 'entry', row.entry_id)
       break
-    // photos, speakers, dialects, tags → no owners (recorded, but not attributed
-    // to any prince; shared-entity renames deliberately do not fan out).
+    case 'entry_relationships':
+      // A relationship belongs to BOTH endpoints — history fans out to each entry.
+      push_owner(out, seen, 'entry', row.from_entry_id)
+      push_owner(out, seen, 'entry', row.to_entry_id)
+      break
+    // photos, speakers, dialects, tags, sources, relationship_types → no owners
+    // (recorded, but not attributed to any prince; shared-entity renames
+    // deliberately do not fan out).
     default:
       break
   }

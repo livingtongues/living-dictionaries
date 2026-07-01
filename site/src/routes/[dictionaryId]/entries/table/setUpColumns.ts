@@ -1,6 +1,7 @@
 import type { IColumn, Tables } from '$lib/types'
 import { page } from '$app/state'
 import { vernacularName } from '$lib/helpers/vernacularName'
+import { get_orthographies } from '$lib/helpers/orthographies'
 import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
 import { browser } from '$app/environment'
 
@@ -51,15 +52,14 @@ export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionarie
   const orthographyIndex = cols.findIndex(({ field }) => field === 'local_orthography')
   if (orthographyIndex >= 0) {
     const alternateOrthographyColumns: IColumn[] = []
-    if (dictionary.orthographies) {
-      for (const [index, orthography] of dictionary.orthographies.entries()) {
-        alternateOrthographyColumns.push({
-          field: 'local_orthography',
-          width: 170,
-          display: orthography.name,
-          orthography_index: index + 1,
-        })
-      }
+    for (const orthography of get_orthographies(dictionary).alternates) {
+      alternateOrthographyColumns.push({
+        field: 'local_orthography',
+        width: 170,
+        display: orthography.name,
+        orthography_code: orthography.code,
+        bcp: orthography.bcp,
+      })
     }
     cols.splice(orthographyIndex, 1, ...alternateOrthographyColumns)
   }

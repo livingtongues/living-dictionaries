@@ -8,6 +8,6 @@ export interface IColumn {
 
   display?: string // for gloss, exampleSentences and alternateOrthographies added later
   explanation?: string // e.g. show vernacular language title on hover instead of current language title for that particular gloss language
-  orthography_index?: number
+  orthography_code?: string // the alternate orthography's immutable lexeme key
   bcp?: string
 }

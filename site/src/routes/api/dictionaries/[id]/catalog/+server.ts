@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
+import { validate_orthographies_array } from '$lib/db/server/orthographies'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
@@ -47,6 +48,14 @@ export const POST: RequestHandler = async (event) => {
   for (const key of keys) {
     if (!ALLOWED_FIELDS.has(key))
       error(ResponseCodes.BAD_REQUEST, `Field not updatable: ${key}`)
+  }
+
+  if ('orthographies' in body) {
+    try {
+      validate_orthographies_array(body.orthographies)
+    } catch (err) {
+      error(ResponseCodes.BAD_REQUEST, (err as Error).message)
+    }
   }
 
   const db = get_shared_db()

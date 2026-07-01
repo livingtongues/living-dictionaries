@@ -1,9 +1,9 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import process from 'node:process'
 import { error, redirect } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
 import { ResponseCodes } from '$lib/constants'
+import { dev_media_dir } from '$lib/server/dev-media-dir'
 
 /**
  * DEV-ONLY local media store. With no GCS bucket on dev, `/api/upload` hands the
@@ -15,13 +15,9 @@ import { ResponseCodes } from '$lib/constants'
  * the `import.meta.env.DEV` guard; never creates `dev-media/` in prod.
  */
 
-function media_dir(): string {
-  return join(process.env.DATA_DIR || '.data', 'dev-media')
-}
-
 /** Reject path traversal; keep within dev-media/. */
 function safe_join(path: string): string {
-  const root = media_dir()
+  const root = dev_media_dir()
   const full = join(root, path)
   if (!full.startsWith(`${root}/`) && full !== root)
     error(ResponseCodes.BAD_REQUEST, 'Invalid path')

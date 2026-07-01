@@ -2,6 +2,7 @@
   import type { Tables } from '$lib/types'
   import EntryField from './EntryField.svelte'
   import { page } from '$app/state'
+  import { get_orthographies } from '$lib/helpers/orthographies'
   import IconSystemUiconsTrash from '~icons/system-uicons/trash'
 
   interface Props {
@@ -20,7 +21,7 @@
 
   const { dbOperations } = $derived(page.data)
 
-  const writing_systems = ['default']
+  const orthographies = $derived(get_orthographies(page.data.dictionary ?? {}))
 </script>
 
 <div class:at-end={!sentence.id} class="sentence-col">
@@ -34,21 +35,24 @@
     </button>
   {/if}
 
-  {#each writing_systems as orthography (orthography)}
+  {#each orthographies.all as orthography (orthography.code)}
     <EntryField
-      value={sentence.text?.[orthography]}
+      value={sentence.text?.[orthography.code]}
       field="example_sentence"
       {can_edit}
-      display={page.data.t('entry_field.example_sentence')}
+      bcp={orthography.bcp}
+      display={orthography.primary
+        ? page.data.t('entry_field.example_sentence')
+        : `${orthography.name}: ${page.data.t('entry_field.example_sentence')}`}
       on_update={(new_value) => {
         if (!sentence.id) {
           dbOperations.insert_sentence({
-            sentence: { text: { [orthography]: new_value } },
+            sentence: { text: { [orthography.code]: new_value } },
             sense_id,
           })
         } else {
           dbOperations.update_sentence({
-            text: { [orthography]: new_value },
+            text: { ...(sentence.text || {}), [orthography.code]: new_value },
             id: sentence.id,
           })
         }

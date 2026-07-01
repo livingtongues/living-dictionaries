@@ -1,17 +1,19 @@
 import type { RequestHandler } from './$types'
 import type { EntryData } from '$lib/types'
 import type { EntryPatch } from '$lib/api/v1/entry-input'
+import type { RelationshipView } from '$lib/api/v1/relationship-input'
 import { ResponseCodes } from '$lib/constants'
 import { build_entry_data } from '$lib/db/server/build-entry-data'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
 import { apply_entry_delete, apply_entry_update } from '$lib/db/server/v1-entry-write'
+import { list_relationships_for_entry } from '$lib/db/server/v1-relationship-write'
 import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
 export interface V1EntryResponseBody {
-  entry: EntryData
+  entry: EntryData & { relationships?: RelationshipView[] }
 }
 
 export interface V1EntryDeleteResponseBody {
@@ -33,11 +35,17 @@ export const GET: RequestHandler = async (event) => {
   if (!entry_id)
     error(ResponseCodes.BAD_REQUEST, 'Missing entry id')
 
-  const entry = build_entry_data({ db: get_dictionary_db(dictionary.id), entry_id, admin_level: 1 })
+  const db = get_dictionary_db(dictionary.id)
+  const entry = build_entry_data({ db, entry_id, admin_level: 1 })
   if (!entry)
     error(ResponseCodes.NOT_FOUND, 'entry not found')
 
-  return json({ entry } satisfies V1EntryResponseBody)
+  const include = (event.url.searchParams.get('include') ?? '').split(',').map(part => part.trim())
+  const with_relationships: EntryData & { relationships?: RelationshipView[] } = include.includes('relationships')
+    ? { ...entry, relationships: list_relationships_for_entry(db, entry_id) }
+    : entry
+
+  return json({ entry: with_relationships } satisfies V1EntryResponseBody)
 }
 
 /**

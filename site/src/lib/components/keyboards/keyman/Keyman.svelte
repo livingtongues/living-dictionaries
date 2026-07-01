@@ -13,6 +13,8 @@
 
   import './keyman.css'
   import { onDestroy, onMount, tick } from 'svelte'
+  import type { KeymanWritingSystems } from './writing-systems'
+  import { keyboard_for_bcp, load_keyman_writing_systems } from './writing-systems'
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages'
   import { Button, loadScriptOnce, Modal, ShowHide } from '$lib/svelte-pieces'
   import { browser } from '$app/environment'
@@ -46,7 +48,13 @@
   let wrapperEl: HTMLDivElement = $state()
   let inputEl: HTMLInputElement | HTMLTextAreaElement = $state()
 
+  let keyman_writing_systems: KeymanWritingSystems = $state()
+
   onMount(async () => {
+    load_keyman_writing_systems().then((systems) => {
+      keyman_writing_systems = systems
+    })
+
     await loadScriptOnce(`https://s.keyman.com/kmw/engine/${version}/keymanweb.js`)
 
     await keyman.init({
@@ -96,9 +104,13 @@
   let selectedBcp: string = $state()
   const currentBcp = $derived(selectedBcp || bcp)
   const glossLanguage = $derived(glossingLanguages[currentBcp] || additionalKeyboards[currentBcp])
-  const internalName = $derived(glossLanguage?.internalName)
-  const keyboardBcp = $derived(glossLanguage?.useKeyboard ? glossLanguage.useKeyboard : currentBcp)
+  const resolvedKeyboard = $derived(keyboard_for_bcp(currentBcp, keyman_writing_systems))
+  const internalName = $derived(resolvedKeyboard?.internalName)
+  const keyboardBcp = $derived(resolvedKeyboard?.keyboardBcp || currentBcp)
   const keyboardId = $derived(`${internalName}@${keyboardBcp}`)
+  // Curated gloss languages keep their explicit `showKeyboard` flag; a bcp resolved
+  // only via the full Keyman set shows the keyboard toggle whenever a keyboard exists.
+  const showKeyboardButton = $derived(glossLanguage ? !!glossLanguage.showKeyboard : !!internalName)
 
   run(() => {
     if (kmw && show && internalName) {
@@ -149,7 +161,7 @@
               <IconPhGlobe class="icon-inline" />
             </button>
           {/if}
-          {#if glossLanguage?.showKeyboard}
+          {#if showKeyboardButton}
             <button
               class="keyboard-toggle"
               type="button"

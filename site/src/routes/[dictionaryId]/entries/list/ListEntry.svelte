@@ -64,7 +64,7 @@
       {#if dictionary.id !== 'garifuna'}
         {#each Object.entries(entry.main.lexeme) as [key, value] (key)}
           {#if key !== 'default'}
-            <i class="spaced" class:sompeng={dictionary.id === 'sora' && key === 'lo2'}>{value}</i>
+            <i class="spaced" class:sompeng={dictionary.id === 'sora' && key === 'srb-sora'}>{value}</i>
           {/if}
         {/each}
       {/if}
