@@ -22,6 +22,14 @@ export const Create: Story<typeof Component> = {
   props: { source: null, on_close: () => {} },
 }
 
+export const CreateWithAbbreviation: Story<typeof Component> = {
+  csr: true,
+  props: {
+    on_close: () => {},
+    source: { abbreviation: 'Jones 1999', citation: 'Jones, Alex. 1999. Example Language Dictionary.' } as any,
+  },
+}
+
 export const Edit: Story<typeof Component> = {
   props: {
     on_close: () => {},

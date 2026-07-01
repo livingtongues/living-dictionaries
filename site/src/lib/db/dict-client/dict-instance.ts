@@ -60,7 +60,16 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
      */
     async function drop_in_snapshot(): Promise<void> {
       try {
-        const fetched = await fetch_dict_snapshot({ dict_id, has_editor_role, auth })
+        context.report_progress?.('snapshot_fetch')
+        const fetched = await fetch_dict_snapshot({
+          dict_id,
+          has_editor_role,
+          auth,
+          // Per-chunk tick keeps the idle boot watchdog alive so a slow-but-
+          // progressing download is never false-timed-out on a poor connection;
+          // a dead connection (no bytes for the idle window) still trips it.
+          on_progress: () => context.report_progress?.('snapshot_fetch'),
+        })
         await write_opfs_db_file({ path, bytes: fetched.bytes })
         console.info(`[dict-instance] ${dict_id} fetched fresh snapshot from ${fetched.source} (${fetched.bytes.length} bytes)`)
       } catch (err) {
@@ -82,8 +91,10 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
             console.info(`[dict-instance] ${dict_id} opening existing OPFS file (no fetch)`)
           else
             await drop_in_snapshot()
+          context.report_progress?.('opfs_open')
           const { connection: opened } = await open_opfs_connection({ path, foreign_keys: true })
           try {
+            context.report_progress?.('migrate')
             await ensure_migrations({ dict_id, connection: opened })
             await ensure_metadata({ dict_id, connection: opened })
             return opened
@@ -102,6 +113,7 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
     }
 
     async function open_and_wire(): Promise<void> {
+      context.report_progress?.('probe')
       if (await opfs_is_available()) {
         connection = await open_opfs_prepared()
         is_opfs_backed = true
@@ -110,10 +122,12 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
         // scratch and the sync engine backfills via pull-since-null.
         connection = await open_memory_connection({ foreign_keys: true })
         is_opfs_backed = false
+        context.report_progress?.('migrate')
         await ensure_migrations({ dict_id, connection })
         await ensure_metadata({ dict_id, connection })
       }
 
+      context.report_progress?.('engine_start')
       engine = new DictSyncEngine({
         dict_id,
         connection,

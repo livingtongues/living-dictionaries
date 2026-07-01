@@ -75,6 +75,14 @@ staging is live; remaining production cutover: `.issues/cutover.md`.
   row, unscoped cross-sector `DELETE FROM deletes`). All three are prevented by LD's architecture
   (loading-gate + cold-open `sync_now`; dict.db has no `users` FK; single-sector engine) — records the
   invariants to keep true so they stay prevented.
+- [leader-worker-boot-robustness.md](./leader-worker-boot-robustness.md) — **the boot must never put a
+  snapshot download under a fixed wall-clock cap** (the 2026-07-01 `river` `leader boot timed out after
+  12000ms` incident). The idle/no-progress boot watchdog (`create_boot_watchdog` + `report_progress` +
+  streaming `fetch-snapshot`) so a slow-but-progressing download never false-times-out; single-tab
+  auto-recovery via `leader-election.reacquire()` + capped re-election backoff (a lone tab used to
+  dead-end forever); the `on_boot_failed` → `leader_boot_failed` telemetry (worker boot errors are
+  otherwise invisible); the cross-app safety matrix (house/tutor already safe); and the 413 body-limit
+  fix. All harness changes mirrored into house the same day.
 - [client-behind-recovery.md](./client-behind-recovery.md) — why a `schema_outdated`/`CLIENT_BEHIND`
   block survives a single tab's reload on **dict.db** (the per-dict leader worker pins the old bundle)
   but not on **admin.db** (per-tab engine); the coordinated guarded auto-reload fix for dict +

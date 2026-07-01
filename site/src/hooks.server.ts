@@ -37,9 +37,39 @@ start_log_retention_cron_once()
 // is a no-op under NTFY_DISABLED so dev stays quiet.
 start_chat_reping_cron_once()
 
+/**
+ * Adapter-node enforces `BODY_SIZE_LIMIT` by THROWING mid-body-read, which
+ * surfaces as an opaque 500 `crash` in telemetry (e.g. a 17 MB body POSTed to
+ * `/api/auth/email/send-code`). Pre-check the `content-length` here — identical
+ * to adapter-node's own check — and return a clean 413 instead, so an oversized
+ * body is a client error, not a fake server crash. We deliberately keep the 16 M
+ * limit; this only changes the SHAPE of the rejection.
+ */
+const BODY_SIZE_LIMIT_BYTES = parse_byte_size(env.BODY_SIZE_LIMIT)
+
 /** @type {import('@sveltejs/kit').Handle} */
 export function handle({ event, resolve }) {
+  if (BODY_SIZE_LIMIT_BYTES !== null) {
+    const content_length = Number(event.request.headers.get('content-length'))
+    if (Number.isFinite(content_length) && content_length > BODY_SIZE_LIMIT_BYTES) {
+      return new Response(`Payload too large: ${content_length} bytes exceeds the ${BODY_SIZE_LIMIT_BYTES}-byte limit.`, {
+        status: 413,
+        headers: { 'content-type': 'text/plain' },
+      })
+    }
+  }
   return resolve(event)
+}
+
+/** Parse an adapter-node BODY_SIZE_LIMIT ("512K" / "16M" / "1G" / a raw byte count). Returns null when unset/`Infinity`. */
+function parse_byte_size(raw: string | undefined): number | null {
+  if (!raw || raw === 'Infinity')
+    return null
+  const match = /^(?<num>\d+)(?<unit>[KMG]?)$/i.exec(raw.trim())
+  if (!match?.groups)
+    return null
+  const exponent = { K: 1, M: 2, G: 3 }[match.groups.unit.toUpperCase()] ?? 0
+  return Number(match.groups.num) * 1024 ** exponent
 }
 
 /**
