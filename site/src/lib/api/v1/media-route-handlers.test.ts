@@ -51,8 +51,13 @@ afterEach(() => {
   history_db.close()
 })
 
+// Real MP3 (frame-sync) / JPEG magic bytes so the server-side media validation
+// (validate-media-bytes.ts) recognizes them as genuine audio / image.
+const MP3_BYTES = new Uint8Array([0xFF, 0xFB, 0x90, 0x00])
+const JPEG_BYTES = new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10])
+
 function audio_file() {
-  return new File([new Uint8Array([1, 2, 3])], 'rec.mp3', { type: 'audio/mpeg' })
+  return new File([MP3_BYTES], 'rec.mp3', { type: 'audio/mpeg' })
 }
 
 function attach({ cell, params, fields, file, key = write_key }: { cell: Parameters<typeof make_media_attach_handler>[0], params: Record<string, string>, fields?: Record<string, string>, file?: File | null, key?: string }) {
@@ -85,11 +90,24 @@ describe(make_media_attach_handler, () => {
   })
 
   test('audio→entry: JSON url fetches bytes server-side', async () => {
-    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(new Uint8Array([1, 2, 3]), { headers: { 'content-type': 'audio/mpeg', 'content-length': '3' } }))))
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(MP3_BYTES, { headers: { 'content-type': 'audio/mpeg', 'content-length': '4' } }))))
     const res = await attach_json({ cell: 'audio:entry', params: { entryId: 'e1' }, body: { url: 'https://example.com/sound.mp3' } })
     expect(res.status).toBe(200)
     expect((await res.json()).audio.storage_path).toBeTruthy()
     expect(store_media_bytes).toHaveBeenCalledTimes(1)
+  })
+
+  test('415 when a fetched url returns an HTML error page instead of audio', async () => {
+    const html = new TextEncoder().encode('<!DOCTYPE html><html><body>404 Not Found</body></html>')
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(html, { headers: { 'content-type': 'text/html' } }))))
+    await expect(attach_json({ cell: 'audio:entry', params: { entryId: 'e1' }, body: { url: 'https://example.com/missing.mp3' } })).rejects.toMatchObject({ status: 415 })
+    expect(store_media_bytes).not.toHaveBeenCalled()
+  })
+
+  test('415 when a multipart file is not real media of this type', async () => {
+    const text = new File([new TextEncoder().encode('this is not audio')], 'rec.mp3', { type: 'audio/mpeg' })
+    await expect(attach({ cell: 'audio:entry', params: { entryId: 'e1' }, file: text })).rejects.toMatchObject({ status: 415 })
+    expect(store_media_bytes).not.toHaveBeenCalled()
   })
 
   test('replace:true removes prior audio on the entry', async () => {
@@ -125,7 +143,7 @@ describe(make_media_attach_handler, () => {
   })
 
   test('photo→sense: multipart upload generates a serving_url + links the junction', async () => {
-    const res = await attach({ cell: 'photo:sense', params: { senseId: 's1' }, fields: { photographer: 'Sam' }, file: new File([new Uint8Array([9])], 'pic.jpg', { type: 'image/jpeg' }) })
+    const res = await attach({ cell: 'photo:sense', params: { senseId: 's1' }, fields: { photographer: 'Sam' }, file: new File([JPEG_BYTES], 'pic.jpg', { type: 'image/jpeg' }) })
     const body = await res.json()
     expect(body.photo.serving_url).toBe('mockservinghash')
     expect(body.photo.photographer).toBe('Sam')

@@ -175,6 +175,33 @@ re-propose maintaining `entry_count`.
   bulk POST. Set to `16M` (docker-compose `environment:` locally; the prod value must be added to
   `sveltekit-living.env` in vps-setup). Docs advertise a ~16MB ceiling.
 
+## Media uploads: CSRF carve-out + content validation (2026-07-01)
+
+Two things an agent bulk-using the media endpoints hit, both non-obvious from one file:
+
+- **The multipart-upload 403 was SvelteKit's CSRF guard, not ours.** SvelteKit forbids any
+  form-content-type POST (`multipart/form-data`, `x-www-form-urlencoded`, `text/plain`,
+  `x-sveltekit-formdata`) whose `Origin` header ≠ the site origin — **including requests with
+  NO `Origin` header, which is exactly what a server-side API client sends**. It runs inside
+  `internal_respond` **BEFORE** the `handle` hook (so you can't exempt a route while it's on) and
+  is **`!DEV`-gated** (only bites in production — invisible in local dev). JSON `{url}` uploads
+  were unaffected (not a form content type). Fix: disable it globally in `svelte.config.js`
+  (`csrf: { trustedOrigins: ['*'] }` — `checkOrigin` is deprecated in kit 2.63; and
+  `trustedOrigins` can't whitelist the no-Origin case anyway) and **re-implement it in
+  `hooks.server.ts`** via `is_cross_origin_form_forbidden` (`$lib/server/csrf.ts`), which
+  faithfully mirrors SvelteKit's check with ONE carve-out: exempt `/api/v1/*` requests carrying an
+  `Authorization` header. Safe because browsers never auto-attach `Authorization` and cross-origin
+  JS can't set it on a simple form POST without a CORS preflight → a Bearer request is provably not
+  a forged cookie-riding submission. Every cookie-authed form POST keeps full protection.
+
+- **Media bytes are content-validated server-side before storage** (`validate-media-bytes.ts`),
+  on BOTH the multipart `file` and the fetched `{url}` paths, so a URL that returns an HTML "not
+  found" page at HTTP 200 can't be saved AS audio. Hybrid: magic-byte sniff positively rejects
+  HTML/XML/SVG/JSON/PDF/plain-text and cross-category media (image→audio), AND the declared
+  content-type's category must not conflict — but `application/octet-stream` / unlabeled types are
+  treated as unknown (magic sniff is the backstop) so obscure-but-valid audio isn't false-rejected.
+  Rejection → `415` (`ResponseCodes.UNSUPPORTED_MEDIA_TYPE`).
+
 ## Where things live
 
 - Keys: `$lib/api-keys/api-key.ts` + `shared-migrations/20260629_api_keys.sql` +

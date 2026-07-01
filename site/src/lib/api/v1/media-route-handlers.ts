@@ -1,6 +1,7 @@
 import type { MediaCellKey, MediaFieldInput } from '$lib/db/server/v1-media-write'
 import type { HostedVideo } from '$lib/types'
 import type { RequestHandler } from '@sveltejs/kit'
+import type { MediaCategory } from './validate-media-bytes'
 import { parse_hosted_video_url } from '$lib/components/video/parse-hosted-video-url'
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
@@ -11,6 +12,7 @@ import { MediaStorageNotConfiguredError, resolve_photo_serving_url, store_media_
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 import { parse_media_request } from './media-request'
+import { validate_media_bytes } from './validate-media-bytes'
 
 /**
  * Factories that turn a {@link MediaCellKey} into the POST (attach) and DELETE
@@ -32,6 +34,18 @@ function truthy(value: unknown): boolean {
 /** Owner label for error messages (e.g. `audio:entry` → `entry`). */
 function owner_label(cell_key: MediaCellKey): string {
   return cell_key.split(':')[1]
+}
+
+/** Map a storage medium to the top-level content category the bytes must be. */
+function medium_category(medium: 'audio' | 'photo' | 'video'): MediaCategory {
+  return medium === 'photo' ? 'image' : medium
+}
+
+/** Reject uploaded bytes (multipart file OR fetched url) that aren't real media of this medium. */
+function assert_media_bytes({ medium, bytes, declared_type }: { medium: 'audio' | 'photo' | 'video', bytes: Uint8Array, declared_type: string | null }): void {
+  const check = validate_media_bytes({ category: medium_category(medium), declared_type, bytes })
+  if (!check.ok)
+    error(ResponseCodes.UNSUPPORTED_MEDIA_TYPE, check.reason ?? 'Unsupported media type')
 }
 
 function validate_hosted(value: unknown): HostedVideo {
@@ -119,6 +133,7 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
       if (hosted) {
         media_fields.hosted_elsewhere = hosted
       } else if (parsed.bytes) {
+        assert_media_bytes({ medium: cell.medium, bytes: parsed.bytes, declared_type: parsed.file_type })
         const stored = await store_bytes({ folder: `${dictionary.id}/${cell.folder}/${owner_id}`, file_name: parsed.file_name ?? 'upload', file_type: parsed.file_type ?? 'application/octet-stream', bytes: parsed.bytes })
         media_fields.storage_path = stored.storage_path
       } else {
@@ -128,6 +143,7 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
     } else {
       if (!parsed.bytes)
         error(ResponseCodes.BAD_REQUEST, 'Provide a file (multipart) or a url')
+      assert_media_bytes({ medium: cell.medium, bytes: parsed.bytes, declared_type: parsed.file_type })
       const stored = await store_bytes({ folder: `${dictionary.id}/${cell.folder}/${owner_id}`, file_name: parsed.file_name ?? 'upload', file_type: parsed.file_type ?? 'application/octet-stream', bytes: parsed.bytes })
       media_fields.storage_path = stored.storage_path
       if (cell.medium === 'photo') {

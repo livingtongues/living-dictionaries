@@ -452,6 +452,16 @@
     "synonym": "Synonym",
     "antonym": "Antonym",
     "cognate": "Cognate",
-    "dialectal_variant": "Dialectal variant"
+    "dialectal_variant": "Dialectal variant",
+    "see_also": "See also",
+    "spelling_variant": "Spelling variant",
+    "hypernym": "Broader than",
+    "hyponym": "Narrower than",
+    "holonym": "Has part",
+    "meronym": "Part of",
+    "derived_from": "Derived from",
+    "root_of": "Root of",
+    "borrowed_from": "Borrowed from",
+    "loaned_to": "Loaned to"
   }
 }

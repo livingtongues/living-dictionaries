@@ -13,6 +13,14 @@ const config = {
     alias: {
       $api: 'src/routes/api',
     },
+    // Disable SvelteKit's built-in cross-origin form CSRF guard so we can
+    // re-implement it in hooks.server.ts with a carve-out for token-authenticated
+    // `/api/v1/*` uploads (see src/lib/server/csrf.ts). The built-in runs before
+    // the handle hook and 403s every form POST lacking a matching Origin header —
+    // which server-side API clients (curl/Python) never send. `trustedOrigins:
+    // ['*']` is the non-deprecated way to turn it off; our hook re-adds protection
+    // for every cookie-authed form post.
+    csrf: { trustedOrigins: ['*'] },
     // Poll `_app/version.json` every 60s so long-lived open tabs detect a new
     // deploy and the root +layout shows a non-blocking "reload" toast. The
     // service worker handles asset freshness; this closes the idle-pinned-tab

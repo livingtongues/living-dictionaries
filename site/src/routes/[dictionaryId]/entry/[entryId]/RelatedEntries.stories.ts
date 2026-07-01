@@ -11,6 +11,16 @@ function t(key: string | { dynamicKey?: string, fallback?: string }): string {
     'relationship_type.antonym': 'Antonym',
     'relationship_type.cognate': 'Cognate',
     'relationship_type.dialectal_variant': 'Dialectal variant',
+    'relationship_type.see_also': 'See also',
+    'relationship_type.spelling_variant': 'Spelling variant',
+    'relationship_type.hypernym': 'Broader than',
+    'relationship_type.hyponym': 'Narrower than',
+    'relationship_type.holonym': 'Has part',
+    'relationship_type.meronym': 'Part of',
+    'relationship_type.derived_from': 'Derived from',
+    'relationship_type.root_of': 'Root of',
+    'relationship_type.borrowed_from': 'Borrowed from',
+    'relationship_type.loaned_to': 'Loaned to',
   }
   return labels[key] || key
 }
@@ -27,6 +37,13 @@ const dict_db = {
         { id: 'r1', from_entry_id: 'dog', to_entry_id: 'perro', type: 'cognate' },
         { id: 'r2', from_entry_id: 'dog', to_entry_id: 'hund', type: 'cognate' },
         { id: 'r3', from_entry_id: 'dogg', to_entry_id: 'dog', type: 'dialectal_variant' },
+        // Directed global, inverse side: canonical stored { animal → dog, hypernym };
+        // from dog's viewpoint the inverse label 'hyponym' renders ("Narrower than").
+        { id: 'r6', from_entry_id: 'animal', to_entry_id: 'dog', type: 'hypernym' },
+        // Directed global, forward side: dog is the whole ("Has part").
+        { id: 'r7', from_entry_id: 'dog', to_entry_id: 'tail', type: 'holonym' },
+        // Symmetric global.
+        { id: 'r8', from_entry_id: 'dog', to_entry_id: 'wolf', type: 'see_also' },
         { id: 'r4', from_entry_id: 'dog', to_entry_id: 'canine', custom_type_id: 'ct1', note: { default: 'informal register' } },
         { id: 'r5', from_entry_id: 'puppy', to_entry_id: 'dog', custom_type_id: 'ct2' },
       ],
@@ -40,6 +57,9 @@ const dict_db = {
       dogg: { lexeme: { default: 'dogg' } },
       canine: { lexeme: { default: 'canine' } },
       puppy: { lexeme: { default: 'puppy' } },
+      animal: { lexeme: { default: 'animal' } },
+      tail: { lexeme: { default: 'tail' } },
+      wolf: { lexeme: { default: 'wolf' } },
     },
   },
   relationship_types: {

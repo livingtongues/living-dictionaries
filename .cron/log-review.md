@@ -1,5 +1,5 @@
 ---
-every: 30 22 * * *
+every: 54 18 * * *
 runs_on: mustang
 notify: none
 ---

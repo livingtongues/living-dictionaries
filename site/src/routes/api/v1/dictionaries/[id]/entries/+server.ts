@@ -41,8 +41,9 @@ export interface EntriesListResponseBody {
  * GET /api/v1/dictionaries/[id]/entries
  *
  * List/filter entry summaries — for idempotency/dedupe + verification + bulk
- * export. Filters (query params): `elicitation_id` (exact), `lexeme` (substring),
- * `updated_since` (ISO, exclusive), `limit` (≤500), `offset`. Ordered by
+ * export. Filters (query params): `elicitation_id` (exact), `lexeme` (substring, or
+ * exact across locales with `match=exact`), `updated_since` (ISO, exclusive),
+ * `limit` (≤500), `offset`. Ordered by
  * `updated_at ASC` so an agent can page incrementally. Pass `?include=senses` to
  * attach each entry's senses (glosses/definition/POS/domains) in ONE batched
  * query — turns a whole-dictionary read from N+1 into a single paged sweep.
@@ -61,8 +62,14 @@ export const GET: RequestHandler = async (event) => {
   }
   const lexeme = params.get('lexeme')
   if (lexeme) {
-    where.push('lexeme LIKE ?')
-    args.push(`%${lexeme}%`)
+    if (params.get('match') === 'exact') {
+      // Exact (case-sensitive) match against any locale's spelling in the MultiString.
+      where.push('EXISTS (SELECT 1 FROM json_each(entries.lexeme) WHERE json_each.value = ?)')
+      args.push(lexeme)
+    } else {
+      where.push('lexeme LIKE ?')
+      args.push(`%${lexeme}%`)
+    }
   }
   const updated_since = params.get('updated_since')
   if (updated_since) {

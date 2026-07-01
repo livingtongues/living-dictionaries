@@ -273,7 +273,13 @@ interface RelationshipView {
 ## Deferred / future
 
 - Cross-dictionary relationships (separate design once this proves out).
-- Directed global types (hypernym/hyponym, meronym/holonym, derived_from, borrowed_from, …).
+- ✅ Directed global types (2026-07-01, agent API feedback) — added `see_also` + `spelling_variant`
+  (symmetric) and `hypernym`/`hyponym`, `holonym`/`meronym`, `derived_from`/`root_of`,
+  `borrowed_from`/`loaned_to` (directed). Both members of each directed pair are POST-able; the
+  inverse alias is canonicalized to its partner + endpoints flipped on write (`RELATIONSHIP_TYPES`
+  gains an optional `canonical` field; `resolve_relationship_type` returns `flip`). Plain-English
+  relational labels in `en.json`. openapi enum + `TranslationKeys` update automatically. Tests +
+  story extended. See `.knowledge/domain/related-entries-model.md`.
 - In-app editing UI (create/remove relationships).
 - Relationships in EntryData/Orama → list/gallery/print/table + search + SSR parity.
 - Custom-type management endpoints (rename/list/delete) — parallels tags if wanted.
