@@ -12,7 +12,7 @@
 import type { DbInstance, WorkerInitMessage } from './instance'
 import { create_transport_server } from './transport'
 import type { TransportServer } from './transport'
-import { apply_boot_fault, BOOT_TIMEOUT_MS, with_boot_timeout } from './boot-recovery'
+import { apply_boot_fault, BOOT_IDLE_TIMEOUT_MS, create_boot_watchdog } from './boot-recovery'
 
 let booted = false
 
@@ -38,17 +38,26 @@ async function boot(init: WorkerInitMessage): Promise<void> {
     get_meta: () => instance?.meta() ?? { persistent: false, schema_version: '', has_editor_role: false },
   })
 
+  // Idle boot watchdog: a factory that HANGS (never resolves) — a slow/locked OPFS
+  // handle, a dead network — would otherwise wedge the origin forever (never
+  // `ready`, never `boot_failed`). But a fixed cap would also kill a legitimately
+  // slow snapshot download on a poor connection. So the factory reports progress
+  // (per stage + per downloaded chunk) via `report_progress`, which `tick()`s the
+  // watchdog; it fires ONLY after a true stall (no progress for the idle window).
+  // `last_stage` rides the `boot_failed` message so a stall points at the phase.
+  const watchdog = create_boot_watchdog({ idle_ms: init.boot_timeout_ms ?? BOOT_IDLE_TIMEOUT_MS })
+  let last_stage = 'init'
+
   try {
     const { create_dict_instance } = await import('../dict-instance')
     const factory = create_dict_instance(init.instance_options)
-    // Watchdog: a factory that HANGS (never resolves) — a slow/locked OPFS handle
-    // — would otherwise wedge the origin forever (never `ready`, never
-    // `boot_failed`). Time the open out so the catch posts `boot_failed` and the
-    // spawning tab can retry / resign. The synthetic `boot_fault` (no-op in prod)
-    // runs INSIDE the timed region so a `hang` exercises the watchdog like a real
-    // stuck factory.
-    const open = apply_boot_fault(init.boot_fault).then(() => factory({ emit_event: event => server.broadcast(event) }))
-    instance = await with_boot_timeout(open, init.boot_timeout_ms ?? BOOT_TIMEOUT_MS)
+    // The synthetic `boot_fault` (no-op in prod) runs INSIDE the guarded region so a
+    // `hang` (which reports no progress) trips the watchdog like a real stuck factory.
+    const open = apply_boot_fault(init.boot_fault).then(() => factory({
+      emit_event: event => server.broadcast(event),
+      report_progress: (stage) => { last_stage = stage; watchdog.tick() },
+    }))
+    instance = await watchdog.guard(open)
     server.announce_ready()
   } catch (err) {
     console.error('[leader-worker] boot failed:', err)
@@ -59,6 +68,6 @@ async function boot(init: WorkerInitMessage): Promise<void> {
     // permanent origin-wide wedge). Tear down our channel and tell the spawning
     // tab to retry/resign so a fresh leader can boot (or callers fall back).
     server.destroy()
-    self.postMessage({ type: 'boot_failed', message: (err as Error)?.message ?? 'unknown' })
+    self.postMessage({ type: 'boot_failed', message: (err as Error)?.message ?? 'unknown', last_stage })
   }
 }

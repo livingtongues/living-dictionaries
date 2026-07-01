@@ -4,6 +4,7 @@ import type { DictConnection } from './worker-connection'
 import { create_db_client } from './worker/db-client'
 import { ensure_persistent_storage } from './worker/persistent-storage'
 import { create_dict_worker_connection } from './worker-connection'
+import { log_event } from '$lib/debug/remote-log'
 
 /**
  * Main-thread lifecycle for the per-dict leader-worker DB. `open_dict` runs the
@@ -47,6 +48,16 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
   if (!cached) {
     const client = create_db_client({
       instance_options: { dict_id, has_editor_role: options.has_editor_role, auth: options.auth },
+      // Worker-internal boot failures never reach the main-thread console.error
+      // patch, so this is our only telemetry window. `last_stage` points the stall
+      // at the exact boot phase (a slow `snapshot_fetch` vs a stuck `opfs_open`).
+      on_boot_failed: ({ message, last_stage, attempt, will_retry }) => {
+        log_event({
+          level: will_retry ? 'warn' : 'error',
+          message: 'leader_boot_failed',
+          context: { dict_id, boot_message: message, last_stage, attempt, will_retry },
+        })
+      },
     })
     cached = { client, has_editor_role: options.has_editor_role, auth: options.auth }
     globals.__ld_dict_clients[dict_id] = cached

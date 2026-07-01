@@ -23,6 +23,13 @@ export interface FetchSnapshotOptions {
   /** Override the R2 base URL (defaults to production). */
   r2_base_url?: string
   signal?: AbortSignal
+  /**
+   * Fired as each response chunk streams in (with the byte count so far). The
+   * boot watchdog ticks on this so a slow-but-progressing download over a poor
+   * connection is never false-timed-out — only a truly stalled transfer (no
+   * bytes for the idle window) trips it.
+   */
+  on_progress?: (received_bytes: number) => void
 }
 
 export interface FetchedSnapshot {
@@ -63,7 +70,7 @@ function normalize_snapshot_header(bytes: Uint8Array): void {
   if (bytes[19] === 2) bytes[19] = 1
 }
 
-async function fetch_from_vps({ dict_id, auth, signal }: FetchSnapshotOptions): Promise<FetchedSnapshot> {
+async function fetch_from_vps({ dict_id, auth, signal, on_progress }: FetchSnapshotOptions): Promise<FetchedSnapshot> {
   const headers: Record<string, string> = {}
   if (auth.bearer)
     headers.Authorization = `Bearer ${auth.bearer}`
@@ -77,11 +84,11 @@ async function fetch_from_vps({ dict_id, auth, signal }: FetchSnapshotOptions): 
     throw new Error(`VPS snapshot fetch failed (${response.status}): ${detail.slice(0, 200)}`)
   }
   // The endpoint sets Content-Encoding: gzip; fetch transparently decodes it.
-  const buffer = await response.arrayBuffer()
-  return { bytes: new Uint8Array(buffer), source: 'vps' }
+  const bytes = await read_body_with_progress(response, on_progress)
+  return { bytes, source: 'vps' }
 }
 
-async function fetch_from_r2({ dict_id, r2_base_url, signal }: FetchSnapshotOptions): Promise<FetchedSnapshot> {
+async function fetch_from_r2({ dict_id, r2_base_url, signal, on_progress }: FetchSnapshotOptions): Promise<FetchedSnapshot> {
   const base = r2_base_url || R2_SNAPSHOT_BASE_URL
   const url = `${base}/${r2_dict_snapshot_key(dict_id)}`
   const response = await fetch(url, { signal })
@@ -90,6 +97,38 @@ async function fetch_from_r2({ dict_id, r2_base_url, signal }: FetchSnapshotOpti
     throw new Error(`R2 snapshot fetch failed (${response.status}): ${detail.slice(0, 200)}`)
   }
   // R2 sets Content-Encoding: gzip; fetch transparently decodes.
-  const buffer = await response.arrayBuffer()
-  return { bytes: new Uint8Array(buffer), source: 'r2' }
+  const bytes = await read_body_with_progress(response, on_progress)
+  return { bytes, source: 'r2' }
+}
+
+/**
+ * Drain the response body into one Uint8Array, ticking `on_progress` per chunk
+ * so the idle boot watchdog stays alive during a long-but-progressing download.
+ * `response.body` yields already-content-decoded bytes (fetch handles gzip), so
+ * this is byte-for-byte equivalent to `arrayBuffer()` — just observable. Falls
+ * back to a single buffered read when streaming isn't available.
+ */
+async function read_body_with_progress(response: Response, on_progress?: (received_bytes: number) => void): Promise<Uint8Array> {
+  if (!response.body)
+    return new Uint8Array(await response.arrayBuffer())
+
+  const reader = response.body.getReader()
+  const chunks: Uint8Array[] = []
+  let received = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done)
+      break
+    chunks.push(value)
+    received += value.length
+    on_progress?.(received)
+  }
+
+  const bytes = new Uint8Array(received)
+  let offset = 0
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset)
+    offset += chunk.length
+  }
+  return bytes
 }

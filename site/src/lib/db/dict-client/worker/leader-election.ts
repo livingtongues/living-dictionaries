@@ -18,6 +18,12 @@ export interface LeaderElection {
   readonly is_leader: boolean
   /** Voluntarily give up leadership (e.g. on teardown). */
   resign: () => void
+  /**
+   * Re-enter the election after a `resign()` (auto-recovery from a boot failure).
+   * A no-op while already leading or a request is in flight — so it's safe to
+   * call repeatedly on a backoff. When granted, `on_promote` fires again.
+   */
+  reacquire: () => void
 }
 
 export interface StartElectionOptions {
@@ -34,28 +40,38 @@ export interface StartElectionOptions {
 export function start_leader_election({ lock_name, on_promote }: StartElectionOptions): LeaderElection {
   const state = { is_leader: false }
   let release_lock: (() => void) | null = null
+  let requesting = false
 
   if (typeof navigator === 'undefined' || !navigator.locks) {
     // No Web Locks (very old browser / SSR). Degrade to "always leader" so a
     // single tab still works; multi-tab safety is then best-effort.
     state.is_leader = true
     void on_promote()
-    return { get is_leader() { return state.is_leader }, resign() { /* noop */ } }
+    return { get is_leader() { return state.is_leader }, resign() { /* noop */ }, reacquire() { /* already leader */ } }
   }
 
   // The promise returned to `request` stays pending while we hold the lock; the
   // lock is released when it resolves (via `resign`) or the context is destroyed.
-  void navigator.locks.request(lock_name, { mode: 'exclusive' }, () =>
-    new Promise<void>((resolve) => {
-      release_lock = resolve
-      state.is_leader = true
-      void on_promote()
-    }),
-  ).catch((err) => {
-    // AbortError on resign is expected; anything else is worth surfacing.
-    if ((err as Error)?.name !== 'AbortError')
-      console.error('[leader-election] lock request failed:', err)
-  })
+  function request_lock(): void {
+    if (requesting || state.is_leader)
+      return
+    requesting = true
+    void navigator.locks.request(lock_name, { mode: 'exclusive' }, () =>
+      new Promise<void>((resolve) => {
+        requesting = false
+        release_lock = resolve
+        state.is_leader = true
+        void on_promote()
+      }),
+    ).catch((err) => {
+      requesting = false
+      // AbortError on resign is expected; anything else is worth surfacing.
+      if ((err as Error)?.name !== 'AbortError')
+        console.error('[leader-election] lock request failed:', err)
+    })
+  }
+
+  request_lock()
 
   return {
     get is_leader() { return state.is_leader },
@@ -63,6 +79,9 @@ export function start_leader_election({ lock_name, on_promote }: StartElectionOp
       state.is_leader = false
       release_lock?.()
       release_lock = null
+    },
+    reacquire() {
+      request_lock()
     },
   }
 }

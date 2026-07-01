@@ -311,7 +311,7 @@
     "license": "License",
     "type": "Type",
     "slug": "Slug (stable id)",
-    "slug_hint": "Referenced by entries. Avoid changing once in use.",
+    "slug_hint": "Referenced by entries.",
     "slug_required": "A slug is required (add an abbreviation or citation).",
     "used_by": "Used by",
     "empty": "No sources yet. Add the printed dictionaries and wordlists this dictionary cites.",

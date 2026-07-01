@@ -112,11 +112,13 @@
       </label>
     </div>
 
-    <label>
-      <span>{page.data.t({ dynamicKey: 'source.slug', fallback: 'Slug (stable id)' })}</span>
-      <input class="form-input" bind:value={slug} oninput={() => (slug_touched = true)} placeholder="smith-2020" />
-      <small>{page.data.t({ dynamicKey: 'source.slug_hint', fallback: 'Referenced by entries. Avoid changing once in use.' })}</small>
-    </label>
+    {#if !is_edit}
+      <label>
+        <span>{page.data.t({ dynamicKey: 'source.slug', fallback: 'Slug (stable id)' })}</span>
+        <input class="form-input" bind:value={slug} oninput={() => (slug_touched = true)} placeholder="smith-2020" />
+        <small>{page.data.t({ dynamicKey: 'source.slug_hint', fallback: 'Referenced by entries.' })}</small>
+      </label>
+    {/if}
 
     <div class="modal-footer">
       <Button onclick={on_close} form="simple" color="black">{page.data.t('misc.cancel')}</Button>
@@ -130,7 +132,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    min-width: min(90vw, 30rem);
   }
   label {
     display: flex;

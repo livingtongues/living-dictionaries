@@ -50,6 +50,15 @@ export interface LeaderMeta {
 
 export interface InstanceContext {
   emit_event: (event: DbEvent) => void
+  /**
+   * Boot progress tick. Resets the idle boot watchdog (so a slow-but-progressing
+   * snapshot download never false-times-out) AND records `stage` as the
+   * last-reached boot phase, which the host attaches to `boot_failed` telemetry
+   * so a stall points at the exact phase (`snapshot_fetch`, `opfs_open`, …).
+   * A harmless no-op once the instance has booted. Optional so non-LD hosts /
+   * tests can omit it.
+   */
+  report_progress?: (stage: string) => void
 }
 
 /** A live DB instance owned by the leader worker. */
@@ -70,10 +79,21 @@ export interface InstanceOptions {
 export interface WorkerInitMessage {
   channel_name: string
   instance_options: InstanceOptions
-  /** Boot-watchdog cap; the host times the factory out past this (default `BOOT_TIMEOUT_MS`). */
+  /** Boot-watchdog idle cap; the host trips the factory after this long with no progress (default `BOOT_IDLE_TIMEOUT_MS`). */
   boot_timeout_ms?: number
   /** Synthetic boot fault for the wedge harness (`boot-recovery.ts`); unset in prod. */
   boot_fault?: 'hang' | 'throw'
+}
+
+/** Surfaced to the main-thread `on_boot_failed` hook so the app can log a `boot_failed` to telemetry. */
+export interface BootFailure {
+  message: string
+  /** Last boot phase the worker reported before it failed (`snapshot_fetch`, `opfs_open`, …). */
+  last_stage?: string
+  /** 0-based attempt index that failed. */
+  attempt: number
+  /** Whether the spawning tab will retry its own boot (vs. resign leadership). */
+  will_retry: boolean
 }
 
 /**
