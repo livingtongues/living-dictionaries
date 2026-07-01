@@ -11,6 +11,7 @@ import {
   DICT_JSON_COLS,
   map_audio,
   map_dialect,
+  build_dict_sources,
   map_dictionary,
   map_dictionary_partner,
   map_dictionary_role,
@@ -179,9 +180,15 @@ async function migrate_dict_content({ client, data_dir, dict, shared }: {
           }
         }
       }
+      if (table === 'entries') {
+        // Convert each entry's free-text `sources` into a per-dict registry +
+        // slug refs BEFORE inserting the (rewritten) entry rows.
+        const source_rows = build_dict_sources({ entry_rows: rows, user_id: dict.created_by || rows[0]?.created_by_user_id || 'cutover' })
+        counts.sources = insert_rows({ db, table: 'sources', rows: source_rows })
+      }
       counts[table] = insert_rows({ db, table, rows, json_cols: config.json })
     }
-    set_last_modified_to_max({ db, tables: [...read.DICT_CONTENT_TABLES] })
+    set_last_modified_to_max({ db, tables: [...read.DICT_CONTENT_TABLES, 'sources'] })
   } finally {
     db.pragma('foreign_keys = ON')
     const violations = db.pragma('foreign_key_check') as unknown[]

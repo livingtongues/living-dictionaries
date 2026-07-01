@@ -19,6 +19,8 @@ export interface SentenceInput {
   text?: MultiString | string
   /** Translation(s), keyed by gloss-language code. */
   translation?: MultiString | string
+  /** `sources.slug` refs — each must already exist (create via POST …/sources first). */
+  sources?: string[] | string
 }
 
 export interface SenseInput {
@@ -45,6 +47,7 @@ export interface EntryInput {
   morphology?: string
   notes?: MultiString | string
   linguistic_history?: MultiString | string
+  /** `sources.slug` refs — each must already exist (create via POST …/sources first). */
   sources?: string[] | string
   scientific_names?: string[] | string
   /** Source-side stable id (linguistic elicitation id) — also handy for dedupe lookups. */
@@ -95,6 +98,8 @@ export interface EntryPatch {
 export interface SentencePatch {
   text?: MultiString | string
   translation?: MultiString | string
+  /** `sources.slug` refs — each must already exist. */
+  sources?: string[] | string
 }
 
 export interface EntryWriteResult {

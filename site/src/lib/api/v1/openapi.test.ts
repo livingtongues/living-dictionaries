@@ -30,10 +30,10 @@ const SENSE_INPUT_KEYS: Record<keyof SenseInput, true> = {
   write_in_semantic_domains: true, noun_class: true, plural_form: true, variant: true, example_sentences: true,
 }
 const SENTENCE_INPUT_KEYS: Record<keyof SentenceInput, true> = {
-  text: true, translation: true,
+  text: true, translation: true, sources: true,
 }
 const SENTENCE_PATCH_KEYS: Record<keyof SentencePatch, true> = {
-  text: true, translation: true,
+  text: true, translation: true, sources: true,
 }
 const ENTRY_PATCH_KEYS: Record<keyof EntryPatch, true> = {
   lexeme: true, phonetic: true, interlinearization: true, morphology: true, notes: true,
@@ -82,6 +82,8 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}/tags/{tagId}': ['delete', 'patch'],
       '/api/v1/dictionaries/{id}/dialects': ['get', 'post'],
       '/api/v1/dictionaries/{id}/dialects/{dialectId}': ['delete', 'patch'],
+      '/api/v1/dictionaries/{id}/sources': ['get', 'post'],
+      '/api/v1/dictionaries/{id}/sources/{sourceId}': ['delete', 'patch'],
     })
   })
 

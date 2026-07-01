@@ -23,7 +23,8 @@
     result_facets,
   }: Props = $props()
 
-  const { tags, dialects, speakers } = $derived(page.data)
+  const { tags, dialects, speakers, sources } = $derived(page.data)
+  const source_labels = $derived(Object.fromEntries(($sources || []).map(source => [source.slug, source.abbreviation || source.citation || source.slug])))
 </script>
 
 <ResponsiveSlideover
@@ -69,6 +70,14 @@
 
         <hr class="tolerance-divider" />
 
+        {#if result_facets._sources?.count}
+          <FilterList
+            {search_params}
+            search_param_key="sources"
+            values={result_facets._sources.values}
+            keys_to_values={source_labels}
+            label={page.data.t('entry_field.sources')} />
+        {/if}
         {#if result_facets._parts_of_speech.count}
           <FilterList
             {search_params}

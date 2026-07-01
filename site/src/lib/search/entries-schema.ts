@@ -6,9 +6,10 @@ export const entries_index_schema = {
   _lexeme: 'string[]', // all orthographies as they are and a simplified version (diacritics stripped and ipa characters replaced with common keyboard characters to make easier to type)
   _glosses: 'string[]', // includes all glosses for all senses
   // _sentences: 'string[]', // includes all sentences in all languages for all senses
-  _other: 'string[]', // phonetic, notes, scientific_names, sources, interlinearization,morphology, plural_form, sentences
+  _other: 'string[]', // phonetic, notes, scientific_names, interlinearization,morphology, plural_form, sentences
 
   // Filters
+  _sources: 'string[]', // source slugs (facet-only; labels resolved from page.data.sources)
   _tags: 'string[]', // underscored
   _dialects: 'string[]', // underscored
   _parts_of_speech: 'string[]', // augmented

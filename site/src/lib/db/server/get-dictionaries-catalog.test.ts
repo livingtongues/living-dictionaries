@@ -29,9 +29,9 @@ function insert_dictionary({ id, public: is_public }: { id: string, public: bool
 
 describe(load_dictionaries_for_user, () => {
   test('parses JSON columns (gloss_languages etc.) so the homepage can .map() them', () => {
-    insert_dictionary({ id: 'river', public: false })
+    insert_dictionary({ id: 'demo', public: false })
     db.prepare(`INSERT INTO users (id, email) VALUES (?, ?)`).run('u1', 'eatb4running@gmail.com')
-    db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role) VALUES (?, ?, ?, ?)`).run('r1', 'river', 'u1', 'manager')
+    db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role) VALUES (?, ?, ?, ?)`).run('r1', 'demo', 'u1', 'manager')
 
     const [dictionary] = load_dictionaries_for_user({ db, user_id: 'u1' })
 

@@ -43,6 +43,74 @@ function audit(source: Row): Row {
 }
 
 // ---------------------------------------------------------------------------
+// Sources: free-text → per-dict registry + slug refs
+// ---------------------------------------------------------------------------
+
+/** Mirror of site `$lib/helpers/slugify` (scripts is a separate workspace — can't import $lib). */
+function slugify(input: string): string {
+  return (input || '')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+/**
+ * Build the per-dict `sources` registry from the free-text `sources` strings on
+ * already-mapped entry rows, and REWRITE each entry's `sources` array in place
+ * to reference slugs. One registry row per distinct string (`slug =
+ * slugify(string)`, suffixed on collision; `citation = the original string`).
+ * Sentences/texts had no Supabase sources, so only entries feed this.
+ */
+export function build_dict_sources({ entry_rows, user_id }: { entry_rows: Row[], user_id: string }): Row[] {
+  const slug_by_string = new Map<string, string>()
+  const taken = new Set<string>()
+  const source_rows: Row[] = []
+  const now = new Date().toISOString()
+
+  for (const entry of entry_rows) {
+    const list: unknown[] = Array.isArray(entry.sources) ? entry.sources : []
+    const slugs: string[] = []
+    for (const raw of list) {
+      const text = String(raw ?? '').trim()
+      if (!text)
+        continue
+      let slug = slug_by_string.get(text)
+      if (!slug) {
+        const base = slugify(text) || 'source'
+        slug = base
+        let n = 2
+        while (taken.has(slug))
+          slug = `${base}-${n++}`
+        taken.add(slug)
+        slug_by_string.set(text, slug)
+        source_rows.push({
+          id: crypto.randomUUID(),
+          slug,
+          citation: text,
+          abbreviation: null,
+          author: null,
+          year: null,
+          url: null,
+          license: null,
+          type: null,
+          dirty: null,
+          created_by_user_id: user_id,
+          created_at: now,
+          updated_by_user_id: user_id,
+          updated_at: now,
+        })
+      }
+      if (!slugs.includes(slug))
+        slugs.push(slug)
+    }
+    entry.sources = slugs.length ? slugs : null
+  }
+  return source_rows
+}
+
+// ---------------------------------------------------------------------------
 // shared.db
 // ---------------------------------------------------------------------------
 

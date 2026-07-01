@@ -56,13 +56,15 @@ if (import.meta.vitest) {
   test('DICT_JSON_COLUMNS covers core dict tables', () => {
     expect(DICT_JSON_COLUMNS.entries).toEqual(['lexeme', 'notes', 'linguistic_history', 'sources', 'scientific_names', 'coordinates', 'unsupported_fields'])
     expect(DICT_JSON_COLUMNS.senses).toEqual(['definition', 'glosses', 'parts_of_speech', 'semantic_domains', 'write_in_semantic_domains', 'plural_form', 'variant'])
-    expect(DICT_JSON_COLUMNS.sentences).toEqual(['text', 'translation'])
+    expect(DICT_JSON_COLUMNS.sentences).toEqual(['text', 'translation', 'sources'])
+    expect(DICT_JSON_COLUMNS.texts).toEqual(['title', 'sources'])
     expect(DICT_JSON_COLUMNS.dialects).toEqual(['name'])
     expect(DICT_JSON_COLUMNS.videos).toEqual(['hosted_elsewhere'])
     expect(DICT_JSON_COLUMNS.audio).toEqual([])
     expect(DICT_JSON_COLUMNS.photos).toEqual([])
     expect(DICT_JSON_COLUMNS.tags).toEqual([])
     expect(DICT_JSON_COLUMNS.entry_tags).toEqual([])
+    expect(DICT_JSON_COLUMNS.sources).toEqual([])
   })
 
   test('parse_dict_row + stringify_dict_row round trip', () => {

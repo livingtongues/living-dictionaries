@@ -136,8 +136,6 @@
         </li>
       {/each}
     </ul>
-  {:else}
-    <p class="muted">No agent keys yet.</p>
   {/if}
 </div>
 

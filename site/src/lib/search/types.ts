@@ -7,6 +7,7 @@ export interface QueryParams {
   view?: View
   tolerance?: number
   // Array facets
+  sources?: string[]
   tags?: string[]
   dialects?: string[]
   parts_of_speech?: string[]
@@ -33,7 +34,7 @@ export interface QueryParams {
   no_semantic_domain?: boolean
 }
 
-type ArrayFilters = 'tags' | 'dialects' | 'parts_of_speech' | 'semantic_domains' | 'speakers'
+type ArrayFilters = 'sources' | 'tags' | 'dialects' | 'parts_of_speech' | 'semantic_domains' | 'speakers'
 export type FilterListKeys = ArrayFilters & keyof QueryParams
 
 // type StoreValue<T> = T extends { subscribe: (run: (value: infer R) => void) => Unsubscriber } ? R : never

@@ -15,17 +15,12 @@
     </div>
     <div>
       <h3 class="agents-heading">Agents</h3>
-      <p class="agents-sub">Let an AI agent read &amp; write this dictionary on your behalf.</p>
+      <p class="agents-sub">Let an AI agent read & write this dictionary on your behalf.</p>
     </div>
   </div>
 
   {#if is_editor_or_above}
     <div class="explainer">
-      <p>
-        An agent can do anything a read &amp; write key allows — add and edit entries, senses,
-        glosses, example sentences, dialects and tags — in bulk, programmatically. Create an API key
-        below, then hand your agent this prompt:
-      </p>
       <AgentPrompt dictionary_id={dictionary.id} />
       <p class="muted-note">
         Every change an agent makes is recorded in this dictionary's

@@ -74,6 +74,8 @@ export const entries = sqliteTable('entries', {
 export const texts = sqliteTable('texts', {
   id: text().primaryKey(),
   title: text({ mode: 'json' }).$type<MultiString>().notNull(),
+  /** Array of `sources.slug` refs (no FK — validated on write, integrity-swept on source delete). */
+  sources: text({ mode: 'json' }).$type<string[]>(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -108,6 +110,8 @@ export const sentences = sqliteTable('sentences', {
   sort_key: text(),
   /** 1 = a paragraph break follows this sentence (replaces the legacy id-array's paragraph markers). */
   ends_paragraph: integer(),
+  /** Array of `sources.slug` refs (no FK — validated on write, integrity-swept on source delete). */
+  sources: text({ mode: 'json' }).$type<string[]>(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -284,6 +288,34 @@ export const entry_tags = sqliteTable('entry_tags', {
   id: text().primaryKey(),
   entry_id: text().notNull().references(() => entries.id, { onDelete: 'cascade' }),
   tag_id: text().notNull().references(() => tags.id, { onDelete: 'cascade' }),
+  dirty: integer(),
+  created_by_user_id: text().notNull(),
+  created_at: text().notNull(),
+  updated_by_user_id: text().notNull(),
+  updated_at: text().notNull(),
+})
+
+/**
+ * Per-dictionary citation registry. `entries`/`sentences`/`texts` reference rows
+ * here by `slug` (array-of-slug columns, NOT a junction). No FK enforces those
+ * refs, so writes validate the slug exists and source deletion is refused while
+ * referenced (strip-from-all-then-delete is the only removal path).
+ */
+export const sources = sqliteTable('sources', {
+  id: text().primaryKey(),
+  /** Stable id referenced by entry/sentence/text `sources` arrays. UNIQUE per dict. */
+  slug: text().notNull(),
+  /** Full display citation. */
+  citation: text(),
+  /** Short label for badges + the search facet. */
+  abbreviation: text(),
+  author: text(),
+  /** TEXT (not INTEGER) to allow ranges like "1979–1985". */
+  year: text(),
+  url: text(),
+  license: text(),
+  /** One of SOURCE_TYPES in constants.ts: dictionary/wordlist/fieldwork/manuscript/other. */
+  type: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),

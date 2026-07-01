@@ -28,6 +28,7 @@ export async function init_entries(options: InitEntryWorkerOptions) {
     proxy(options.set_speakers as (speakers: Tables<'speakers'>[]) => Promise<void>),
     proxy(options.set_tags as (tags: Tables<'tags'>[]) => Promise<void>),
     proxy(options.set_dialects as (dialects: Tables<'dialects'>[]) => Promise<void>),
+    proxy(options.set_sources as (sources: Tables<'sources'>[]) => Promise<void>),
     proxy(options.set_loading as (loading: boolean) => Promise<void>),
     proxy(options.mark_search_index_updated as () => Promise<void>),
   )

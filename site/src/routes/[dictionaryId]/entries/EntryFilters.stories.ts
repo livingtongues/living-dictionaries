@@ -46,7 +46,7 @@ function bool_facet({ has, lacks }: { has?: number, lacks?: number }) {
 
 export const shared_meta: StoryMeta = {
   viewports: [{ width: 800, height: 820 }],
-  page_data: { t, tags: [], dialects: [], speakers: [] },
+  page_data: { t, tags: [], dialects: [], speakers: [], sources: writable([]) },
 }
 
 // Reproduces the reported bug scenario: 4524 entries, all lacking every field

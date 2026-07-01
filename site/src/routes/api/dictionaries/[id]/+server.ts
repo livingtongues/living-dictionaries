@@ -3,6 +3,7 @@ import { is_admin } from '$lib/admins'
 import { verify_auth } from '$lib/auth/verify'
 import { r2_dict_snapshot_key, ResponseCodes } from '$lib/constants'
 import { delete_dictionary_db_file } from '$lib/db/server/dictionary-db'
+import { delete_dictionary_history_db_file } from '$lib/db/server/dictionary-history-db'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { delete_object } from '$lib/r2/delete-object'
 import { log_server_event } from '$lib/server/log-server-event'
@@ -17,7 +18,9 @@ import { error, json } from '@sveltejs/kit'
  *      (dictionary_roles / invites / dictionary_partners) and the dictionary
  *      itself. The cascade trigger removes the live rows; admin clients pull the
  *      tombstones on next sync and drop their local copies.
- *   2. Delete the per-dict SQLite file (+ -wal/-shm).
+ *   2. Delete the per-dict SQLite file (+ -wal/-shm) AND the server-only
+ *      `<id>.history.db` (+ sidecars) — else a recreated dict reusing the same
+ *      id would surface the previous dict's orphaned change history.
  *   3. Delete the R2 snapshot object `dictionaries/{id}.db.gz`.
  *
  * NOTE: orphaned-media harvest is DEFERRED — media blobs live on legacy GCS
@@ -72,13 +75,19 @@ export const DELETE: RequestHandler = async (event) => {
   })
   tombstone_children()
 
-  // 2. Per-dict SQLite file.
+  // 2. Per-dict SQLite file + the server-only history file (both + -wal/-shm).
   let db_files_removed = 0
   try {
     db_files_removed = delete_dictionary_db_file(dict_id).length
   } catch (err) {
     console.error(`[delete dictionary ${dict_id}] db file removal failed:`, err)
     log_server_event({ db, level: 'warn', message: 'dictionary_db_file_removal_failed', error: err, context: { dictionary_id: dict_id } })
+  }
+  try {
+    db_files_removed += delete_dictionary_history_db_file(dict_id).length
+  } catch (err) {
+    console.error(`[delete dictionary ${dict_id}] history db file removal failed:`, err)
+    log_server_event({ db, level: 'warn', message: 'dictionary_history_db_file_removal_failed', error: err, context: { dictionary_id: dict_id } })
   }
 
   // 3. R2 snapshot (idempotent; missing key is fine).

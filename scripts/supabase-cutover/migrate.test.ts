@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 import { insert_rows, set_last_modified_to_max } from './db-insert'
 import {
+  build_dict_sources,
   build_sentence_order,
   DICT_JSON_COLS,
   map_audio,
@@ -73,6 +74,32 @@ describe('mapper transforms', () => {
   test('map_user falls back to an email provider when no identities', () => {
     const out = map_user({ auth_user: { id: 'u1', email: 'a@b.com', created_at: new Date() }, providers: [] })
     expect(out.providers).toEqual([{ provider: 'email', provider_id: 'a@b.com' }])
+  })
+
+  test('build_dict_sources: distinct strings → registry rows + slug refs', () => {
+    const citation = 'Smith, Jane. 2020. Example Language Dictionary.'
+    const entries = [
+      { id: 'e1', sources: [citation], created_by_user_id: 'u1' },
+      { id: 'e2', sources: [citation, 'Lee 1998'], created_by_user_id: 'u1' },
+      { id: 'e3', sources: null, created_by_user_id: 'u1' },
+    ]
+    const source_rows = build_dict_sources({ entry_rows: entries, user_id: 'u1' })
+    // one registry row per distinct string
+    expect(source_rows).toHaveLength(2)
+    const primary = source_rows.find(s => s.citation === citation)!
+    expect(primary.slug).toBe('smith-jane-2020-example-language-dictionary')
+    expect(primary.created_by_user_id).toBe('u1')
+    // entries rewritten to slugs
+    expect(entries[0].sources).toEqual([primary.slug])
+    expect(entries[1].sources).toEqual([primary.slug, 'lee-1998'])
+    expect(entries[2].sources).toBeNull()
+  })
+
+  test('build_dict_sources: suffixes colliding slugs', () => {
+    const entries = [{ id: 'e1', sources: ['A/B', 'A B'], created_by_user_id: 'u1' }]
+    const rows = build_dict_sources({ entry_rows: entries, user_id: 'u1' })
+    expect(rows.map(r => r.slug)).toEqual(['a-b', 'a-b-2'])
+    expect(entries[0].sources).toEqual(['a-b', 'a-b-2'])
   })
 
   test('map_dictionary merges dictionary_info + converts booleans', () => {

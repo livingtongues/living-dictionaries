@@ -37,4 +37,4 @@ When a dictionary has **0 entries** (genuinely empty, not a search-miss), show a
 
 ## Verification notes
 - svelte-look `ChangeTimeline/EntryTimeline` shows "🤖 Dictionary agent · Ada Researcher" pill on the agent row, plain names elsewhere.
-- River (the dict that triggered this) is genuinely empty → empty state will show the "Add your first entry" + manager agent CTA.
+- The dict that triggered this is genuinely empty → empty state will show the "Add your first entry" + manager agent CTA.

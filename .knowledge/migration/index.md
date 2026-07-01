@@ -4,6 +4,10 @@ Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. The migra
 staging is live; remaining production cutover: `.issues/cutover.md`.
 
 ## Pages
+- [adding-a-syncable-dict-table.md](./adding-a-syncable-dict-table.md) — the ~7-place checklist for
+  adding a new per-dict table/column: the new-migration rule, the `process_delete_cascade`
+  DROP+re-CREATE gotcha (SQLite has no ALTER TRIGGER), the search-feed wiring order, and how the
+  cutover auto-picks up the DDL. Distilled from the `sources` registry work.
 - [shared-stack-conventions.md](./shared-stack-conventions.md) — the durable LD ↔ house contract:
   orchestration norms, the stack/architecture decisions (keep UnoCSS, numeric roles rejected,
   native deps in `dependencies`), the sync-engine invariants, the R2/media boundary, and
