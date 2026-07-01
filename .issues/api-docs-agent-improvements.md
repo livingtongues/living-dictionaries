@@ -57,8 +57,7 @@ Keep it BRIEF and tool-agnostic (tech changes fast) — just point agents the ri
 > **Importing from a PDF / scanned dictionary**
 > 1. **Pages → images** at ~300 dpi (e.g. PyMuPDF/pdftoppm).
 > 2. **OCR with a layout-aware vision-language model** (a DeepSeek-OCR-style document-parsing VLM
->    handles multi-column dictionaries well; pick a current one — they change fast). For
->    sensitive/endangered-language data, run OCR **locally**. Where glyphs/diacritics look wrong on a
+>    handles multi-column dictionaries well; pick a current one — they change fast). Where glyphs/diacritics look wrong on a
 >    page, fall back to direct image inspection.
 > 3. **Structure** the text into the entry shape: identify headwords (often numbered homographs;
 >    in many orthographies they're short/monosyllabic), separate the vernacular phrase from the

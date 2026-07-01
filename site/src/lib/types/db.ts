@@ -36,6 +36,7 @@ interface TableModels {
   entry_dialects: typeof dict.entry_dialects
   tags: typeof dict.tags
   entry_tags: typeof dict.entry_tags
+  sources: typeof dict.sources
 }
 
 export type Tables<T extends keyof TableModels | 'dictionaries_view'>

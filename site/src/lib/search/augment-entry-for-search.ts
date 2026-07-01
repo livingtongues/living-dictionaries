@@ -25,7 +25,10 @@ export function augment_entry_for_search(entry: EntryData) {
   )
   const plural_forms = senses.flatMap(sense => Object.values(sense.plural_form || {}).filter(Boolean))
 
-  const _other: string[] = [entry.main.phonetic, Object.values(entry.main.notes || {}), Object.values(entry.main.linguistic_history || {}), entry.main.scientific_names, entry.main.sources, entry.main.interlinearization, entry.main.morphology, plural_forms, entry.main.elicitation_id, sentences].flat().filter(Boolean)
+  // Sources are facet-only (`_sources` below) — their citation text is deliberately NOT in `_other`.
+  const _other: string[] = [entry.main.phonetic, Object.values(entry.main.notes || {}), Object.values(entry.main.linguistic_history || {}), entry.main.scientific_names, entry.main.interlinearization, entry.main.morphology, plural_forms, entry.main.elicitation_id, sentences].flat().filter(Boolean)
+
+  const _sources = (entry.main.sources || []).filter(Boolean)
 
   return {
     id: entry.id,
@@ -34,6 +37,7 @@ export function augment_entry_for_search(entry: EntryData) {
     _other,
     ...(entry.main.elicitation_id ? { _elicitation_id: entry.main.elicitation_id } : {}),
     // Filters
+    _sources,
     _tags,
     _dialects,
     _speakers,

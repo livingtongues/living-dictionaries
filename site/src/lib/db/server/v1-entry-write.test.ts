@@ -4,6 +4,7 @@ import { open_dictionary_db_in_memory } from './dictionary-db'
 import { open_dictionary_history_db_in_memory } from './dictionary-history-db'
 import * as sync_helpers from './dictionary-sync-helpers'
 import { apply_entry_delete, apply_entry_update, apply_entry_writes } from './v1-entry-write'
+import { create_source } from './v1-sources'
 
 let db: Database.Database
 let history_db: Database.Database
@@ -150,6 +151,35 @@ describe(apply_entry_writes, () => {
     } finally {
       spy.mockRestore()
     }
+  })
+})
+
+describe('strict source-slug validation', () => {
+  test('rejects an entry citing an unknown source slug (reported in failed)', () => {
+    const report = apply_entry_writes({ db, history_db, user_id: 'u1', entries: [{ lexeme: 'x', sources: ['smith-2020'] }] })
+    expect(report).toMatchObject({ created: 0, failed: 1 })
+    expect(report.results[0].error).toMatch(/unknown source slug 'smith-2020'/)
+    expect(count('entries')).toBe(0)
+  })
+
+  test('accepts a known slug and stores it on the entry', () => {
+    create_source({ db, user_id: 'u1', input: { slug: 'smith-2020', citation: 'Smith 2020.' } })
+    const report = apply_entry_writes({ db, history_db, user_id: 'u1', entries: [{ lexeme: 'x', sources: ['smith-2020'] }] })
+    expect(report).toMatchObject({ created: 1, failed: 0 })
+    const entry = db.prepare(`SELECT sources FROM entries WHERE id = ?`).get(report.results[0].entry_id) as { sources: string }
+    expect(JSON.parse(entry.sources)).toEqual(['smith-2020'])
+  })
+
+  test('PATCH rejects an unknown source slug', () => {
+    const report = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'x' }] })
+    const entry_id = report.results[0].entry_id as string
+    expect(() => apply_entry_update({ db, entry_id, patch: { sources: ['ghost'] }, user_id: 'u1' })).toThrow(/unknown source slug 'ghost'/)
+  })
+
+  test('sentence write rejects an unknown source slug', () => {
+    const report = apply_entry_writes({ db, history_db, user_id: 'u1', entries: [{ lexeme: 'x', senses: [{ glosses: { en: 'y' }, example_sentences: [{ text: 'hi', sources: ['ghost'] }] }] }] })
+    expect(report).toMatchObject({ created: 0, failed: 1 })
+    expect(report.results[0].error).toMatch(/unknown source slug 'ghost'/)
   })
 })
 

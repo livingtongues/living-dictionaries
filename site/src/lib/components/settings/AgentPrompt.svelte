@@ -4,14 +4,14 @@
 
   const { dictionary_id }: { dictionary_id: string } = $props()
 
-  const prompt = $derived(`You can read and write my Living Dictionary through its HTTP API.
+  const prompt = $derived(`You can access and help me with my Living Dictionary through its API.
 
 - API base: ${page.url.origin}/api/v1
 - Full reference (fetch this first): ${page.url.origin}/api/v1/openapi.json
 - Dictionary id: ${dictionary_id}
 - Auth: add the header \`Authorization: Bearer <YOUR_API_KEY>\` to every request (I'll give you the key separately).
 
-Read the reference, then help me add and edit entries, senses, glosses, example sentences, dialects and tags.`)
+Read the reference to help me with the tasks I give you.`)
 
   let copied = $state(false)
 
@@ -24,7 +24,7 @@ Read the reference, then help me add and edit entries, senses, glosses, example 
 
 <div class="agent-prompt">
   <div class="prompt-head">
-    <span class="prompt-title">Hand your agent this prompt</span>
+    <span class="prompt-title">Create an API key then hand your agent this prompt</span>
     <Button onclick={copy} form="fill" color="primary" size="sm">{copied ? 'Copied ✓' : 'Copy'}</Button>
   </div>
   <pre class="prompt-body">{prompt}</pre>

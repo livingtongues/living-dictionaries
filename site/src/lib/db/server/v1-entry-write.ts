@@ -8,6 +8,7 @@ import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { read_last_modified_at } from './dictionary-db'
 import { record_history } from './dictionary-history-db'
 import { delete_dict_row, merge_dict_row } from './dictionary-sync-helpers'
+import { assert_known_source_slugs, load_source_slug_set } from './source-slugs'
 
 /**
  * Server-side bulk write for the `/api/v1` entries API.
@@ -80,19 +81,21 @@ function load_tag_map(db: Database.Database): Map<string, string> {
   return map
 }
 
-function build_sentence_rows({ sentence, sense_id, now }: { sentence: SentenceInput, sense_id: string, now: string }): BuiltRow[] | null {
+function build_sentence_rows({ sentence, sense_id, now, source_slug_set }: { sentence: SentenceInput, sense_id: string, now: string, source_slug_set: Set<string> }): BuiltRow[] | null {
   const text = to_multistring(sentence.text)
   const translation = to_multistring(sentence.translation)
-  if (!text && !translation)
+  const sources = to_string_array(sentence.sources)
+  if (!text && !translation && !sources)
     return null
+  assert_known_source_slugs(sources, source_slug_set)
   const sentence_id = crypto.randomUUID()
   return [
-    { table_name: 'sentences', row: prune({ id: sentence_id, text, translation, created_at: now, updated_at: now }) },
+    { table_name: 'sentences', row: prune({ id: sentence_id, text, translation, sources, created_at: now, updated_at: now }) },
     { table_name: 'senses_in_sentences', row: prune({ id: crypto.randomUUID(), sense_id, sentence_id, created_at: now, updated_at: now }) },
   ]
 }
 
-function build_sense_rows({ sense, entry_id, now }: { sense: SenseInput, entry_id: string, now: string }): { sense_id: string, rows: BuiltRow[] } {
+function build_sense_rows({ sense, entry_id, now, source_slug_set }: { sense: SenseInput, entry_id: string, now: string, source_slug_set: Set<string> }): { sense_id: string, rows: BuiltRow[] } {
   const sense_id = crypto.randomUUID()
   const rows: BuiltRow[] = [{
     table_name: 'senses',
@@ -112,23 +115,27 @@ function build_sense_rows({ sense, entry_id, now }: { sense: SenseInput, entry_i
     }),
   }]
   for (const sentence of sense.example_sentences ?? []) {
-    const sentence_rows = build_sentence_rows({ sentence, sense_id, now })
+    const sentence_rows = build_sentence_rows({ sentence, sense_id, now, source_slug_set })
     if (sentence_rows)
       rows.push(...sentence_rows)
   }
   return { sense_id, rows }
 }
 
-function build_entry({ entry, now, dialect_map, tag_map, import_tag_id }: {
+function build_entry({ entry, now, dialect_map, tag_map, source_slug_set, import_tag_id }: {
   entry: EntryInput
   now: string
   dialect_map: Map<string, string>
   tag_map: Map<string, string>
+  source_slug_set: Set<string>
   import_tag_id?: string
 }): BuiltEntry {
   const lexeme = to_multistring(entry.lexeme)
   if (!lexeme)
     throw new Error('lexeme is required')
+
+  const entry_sources = to_string_array(entry.sources)
+  assert_known_source_slugs(entry_sources, source_slug_set)
 
   const entry_id = crypto.randomUUID()
   const ordered_rows: BuiltRow[] = []
@@ -172,7 +179,7 @@ function build_entry({ entry, now, dialect_map, tag_map, import_tag_id }: {
       morphology: entry.morphology?.trim() || undefined,
       notes: to_multistring(entry.notes),
       linguistic_history: to_multistring(entry.linguistic_history),
-      sources: to_string_array(entry.sources),
+      sources: entry_sources,
       scientific_names: to_string_array(entry.scientific_names),
       elicitation_id: entry.elicitation_id?.trim() || undefined,
       created_at: now,
@@ -192,7 +199,7 @@ function build_entry({ entry, now, dialect_map, tag_map, import_tag_id }: {
   const senses = entry.senses?.length ? entry.senses : [{}]
   const sense_ids: string[] = []
   for (const sense of senses) {
-    const { sense_id, rows } = build_sense_rows({ sense, entry_id, now })
+    const { sense_id, rows } = build_sense_rows({ sense, entry_id, now, source_slug_set })
     sense_ids.push(sense_id)
     ordered_rows.push(...rows)
   }
@@ -241,6 +248,7 @@ export function apply_entry_writes({ db, history_db, entries, user_id, import_id
   const history_events: HistoryEvent[] = []
   const dialect_map = load_dialect_map(db)
   const tag_map = load_tag_map(db)
+  const source_slug_set = load_source_slug_set(db)
 
   const results: EntryWriteResult[] = []
   let created = 0
@@ -261,7 +269,7 @@ export function apply_entry_writes({ db, history_db, entries, user_id, import_id
       // committed (the earlier rows' events outlive the rollback).
       const item_history: HistoryEvent[] = []
       try {
-        const built = build_entry({ entry, now, dialect_map, tag_map, import_tag_id })
+        const built = build_entry({ entry, now, dialect_map, tag_map, source_slug_set, import_tag_id })
         for (const { table_name, row } of built.ordered_rows) {
           const event = merge_dict_row({ db, table_name, row, user_id, at: history_at, api_key_id })
           if (event)
@@ -321,7 +329,7 @@ function read_parsed_row({ db, table, id }: { db: Database.Database, table: stri
  * `merge_dict_row` (which does INSERT…ON CONFLICT, so it needs every NOT NULL
  * column). Returns `null` when the patch touches no entry-level field.
  */
-function build_entry_patch_row({ existing, patch, now }: { existing: Record<string, unknown>, patch: EntryPatch, now: string }): Record<string, unknown> | null {
+function build_entry_patch_row({ existing, patch, now, source_slug_set }: { existing: Record<string, unknown>, patch: EntryPatch, now: string, source_slug_set: Set<string> }): Record<string, unknown> | null {
   const source = patch as Record<string, unknown>
   const row: Record<string, unknown> = { ...existing, updated_at: now }
   delete row.updated_by_user_id // let merge_dict_row re-stamp the current editor
@@ -347,7 +355,10 @@ function build_entry_patch_row({ existing, patch, now }: { existing: Record<stri
   }
   for (const field of ENTRY_PATCH_ARRAY_FIELDS) {
     if (field in source) {
-      row[field] = to_string_array(source[field]) ?? null
+      const value = to_string_array(source[field]) ?? null
+      if (field === 'sources')
+        assert_known_source_slugs(value ?? undefined, source_slug_set)
+      row[field] = value
       changed = true
     }
   }
@@ -409,6 +420,7 @@ export function apply_entry_update({ db, history_db, entry_id, patch, user_id, a
   const history_events: HistoryEvent[] = []
   const dialect_map = load_dialect_map(db)
   const tag_map = load_tag_map(db)
+  const source_slug_set = load_source_slug_set(db)
   const push = (table_name: DictSyncableTable, row: Record<string, unknown>) => {
     const event = merge_dict_row({ db, table_name, row, user_id, at: now, api_key_id })
     if (event)
@@ -417,7 +429,7 @@ export function apply_entry_update({ db, history_db, entry_id, patch, user_id, a
 
   db.exec('BEGIN IMMEDIATE')
   try {
-    const entry_row = build_entry_patch_row({ existing: existing_entry, patch, now })
+    const entry_row = build_entry_patch_row({ existing: existing_entry, patch, now, source_slug_set })
     if (entry_row)
       push('entries', entry_row)
 
@@ -430,11 +442,11 @@ export function apply_entry_update({ db, history_db, entry_id, patch, user_id, a
         if (sense_row)
           push('senses', sense_row)
         for (const sentence of sense.example_sentences ?? []) {
-          for (const built of build_sentence_rows({ sentence, sense_id: sense.id, now }) ?? [])
+          for (const built of build_sentence_rows({ sentence, sense_id: sense.id, now, source_slug_set }) ?? [])
             push(built.table_name, built.row)
         }
       } else {
-        const built = build_sense_rows({ sense, entry_id, now })
+        const built = build_sense_rows({ sense, entry_id, now, source_slug_set })
         for (const row of built.rows)
           push(row.table_name, row.row)
       }
@@ -556,6 +568,7 @@ export interface SentenceRecord {
   id: string
   text: MultiString | null
   translation: MultiString | null
+  sources: string[] | null
   text_id: string | null
   sort_key: string | null
   ends_paragraph: number | null
@@ -571,6 +584,7 @@ export function read_sentence_record(db: Database.Database, sentence_id: string)
     id: row.id as string,
     text: (row.text as MultiString) ?? null,
     translation: (row.translation as MultiString) ?? null,
+    sources: (row.sources as string[]) ?? null,
     text_id: (row.text_id as string) ?? null,
     sort_key: (row.sort_key as string) ?? null,
     ends_paragraph: (row.ends_paragraph as number) ?? null,
@@ -606,6 +620,12 @@ export function apply_sentence_update({ db, history_db, sentence_id, patch, user
   }
   if ('translation' in source) {
     row.translation = to_multistring(patch.translation) ?? null
+    changed = true
+  }
+  if ('sources' in source) {
+    const sources = to_string_array(patch.sources) ?? null
+    assert_known_source_slugs(sources ?? undefined, load_source_slug_set(db))
+    row.sources = sources
     changed = true
   }
   if (!changed)

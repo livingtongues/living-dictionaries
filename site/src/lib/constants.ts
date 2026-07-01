@@ -37,6 +37,10 @@ export enum ResponseCodes {
 
 export const MINIMUM_ABOUT_LENGTH = 200
 
+/** Allowed values for a `sources.type` (the citation kind). */
+export const SOURCE_TYPES = ['dictionary', 'wordlist', 'fieldwork', 'manuscript', 'other'] as const
+export type SourceType = typeof SOURCE_TYPES[number]
+
 /** Per-dictionary OPFS file path prefix (rooted in OPFS) for the wa-sqlite browser DB. */
 export const DICT_DB_OPFS_PREFIX = 'dictionaries/'
 

@@ -13,6 +13,7 @@ describe(augment_entry_for_search, () => {
         "_other": [],
         "_parts_of_speech": [],
         "_semantic_domains": [],
+        "_sources": [],
         "_speakers": [],
         "_tags": [],
         "has_audio": false,

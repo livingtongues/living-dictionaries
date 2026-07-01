@@ -12,6 +12,7 @@
   import IconFa6SolidClockRotateLeft from '~icons/fa6-solid/clock-rotate-left'
   import IconFa6SolidFileImport from '~icons/fa6-solid/file-import'
   import IconFa6SolidFileExport from '~icons/fa6-solid/file-export'
+  import IconFa6SolidBook from '~icons/fa6-solid/book'
 
   interface Props {
     dictionary: Tables<'dictionaries'>
@@ -117,6 +118,14 @@
       <IconFa6SolidClockRotateLeft class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
       <span class="item-label">
         {page.data.t('history.history')}
+      </span>
+    </a>
+    <a
+      href={`/${dictionary.url}/sources`}
+      class:active={page.url.pathname.includes('sources')}>
+      <IconFa6SolidBook class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
+      <span class="item-label">
+        {page.data.t('entry_field.sources')}
       </span>
     </a>
   {/if}

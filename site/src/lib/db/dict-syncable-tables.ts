@@ -38,6 +38,7 @@ export const DICT_SYNCABLE_TABLES = [
   'entry_dialects',
   'tags',
   'entry_tags',
+  'sources',
 ] as const
 
 export type DictSyncableTable = typeof DICT_SYNCABLE_TABLES[number]

@@ -13,6 +13,7 @@ let delete_entry: (entry_id: string) => Promise<void>
 let set_speakers: (speakers: Tables<'speakers'>[]) => Promise<void>
 let set_tags: (tags: Tables<'tags'>[]) => Promise<void>
 let set_dialects: (dialects: Tables<'dialects'>[]) => Promise<void>
+let set_sources: (sources: Tables<'sources'>[]) => Promise<void>
 let mark_search_index_updated: () => Promise<void>
 
 let entries: Record<string, Tables<'entries'>>
@@ -24,6 +25,7 @@ let tags: Record<string, Tables<'tags'>>
 let entry_tags: Record<string, Tables<'entry_tags'>>
 let dialects: Record<string, Tables<'dialects'>>
 let entry_dialects: Record<string, Tables<'entry_dialects'>>
+let sources: Record<string, Tables<'sources'>>
 let photos: Record<string, Tables<'photos'>>
 let sense_photos: Record<string, Tables<'sense_photos'>>
 let videos: Record<string, Tables<'videos'>>
@@ -69,7 +71,7 @@ function reset_grouping_maps() {
 // `api.X` double-write from operations.ts.
 
 const SYNC_TABLE_ORDER = [
-  'entries', 'senses', 'speakers', 'tags', 'dialects', 'audio', 'photos', 'videos', 'sentences',
+  'entries', 'senses', 'speakers', 'tags', 'dialects', 'sources', 'audio', 'photos', 'videos', 'sentences',
   'audio_speakers', 'entry_tags', 'entry_dialects', 'sense_photos', 'video_speakers', 'sense_videos', 'senses_in_sentences',
 ] as const
 
@@ -259,6 +261,15 @@ function apply_one(table: string, row: Record<string, any>): string[] {
       }
       return affected
     }
+    case 'sources': {
+      // Facet-only registry: slugs live on the entry column, so a source edit
+      // never re-indexes entries — it just refreshes the label list for the UI
+      // (facet chips + badges + picker resolve slug→citation from page.data.sources).
+      if (is_deleted) delete sources[row.id]
+      else sources[row.id] = { ...sources[row.id], ...row }
+      set_sources(Object.values(sources))
+      return []
+    }
     case 'audio_speakers': {
       const key = `${row.audio_id}_${row.speaker_id}`
       if (is_deleted) delete audio_speakers[key]
@@ -343,6 +354,7 @@ function find_row_by_id(table: string, id: string): Record<string, any> | undefi
     case 'speakers': return speakers[id]
     case 'tags': return tags[id]
     case 'dialects': return dialects[id]
+    case 'sources': return sources[id]
     case 'audio_speakers': return Object.values(audio_speakers).find(row => row.id === id)
     case 'entry_tags': return Object.values(entry_tags).find(row => row.id === id)
     case 'entry_dialects': return Object.values(entry_dialects).find(row => row.id === id)
@@ -420,6 +432,7 @@ export interface InitEntryWorkerOptions {
   set_speakers: (speakers: Tables<'speakers'>[]) => void
   set_tags: (tags: Tables<'tags'>[]) => void
   set_dialects: (dialects: Tables<'dialects'>[]) => void
+  set_sources: (sources: Tables<'sources'>[]) => void
   set_loading: (loading: boolean) => void
   mark_search_index_updated: () => void
 }
@@ -437,6 +450,7 @@ export async function init_entries(
   _set_speakers: (speakers: Tables<'speakers'>[]) => Promise<void>,
   _set_tags: (tags: Tables<'tags'>[]) => Promise<void>,
   _set_dialects: (dialects: Tables<'dialects'>[]) => Promise<void>,
+  _set_sources: (sources: Tables<'sources'>[]) => Promise<void>,
   set_loading: (loading: boolean) => Promise<void>,
   _mark_search_index_updated: () => Promise<void>,
 ) {
@@ -445,6 +459,7 @@ export async function init_entries(
   set_speakers = _set_speakers
   set_tags = _set_tags
   set_dialects = _set_dialects
+  set_sources = _set_sources
   mark_search_index_updated = _mark_search_index_updated
 
   ;({ dictionary_id, admin } = options)
@@ -458,6 +473,7 @@ export async function init_entries(
   speakers = key_by_id(bundle.speakers)
   tags = key_by_id(bundle.tags)
   dialects = key_by_id(bundle.dialects)
+  sources = key_by_id(bundle.sources)
   photos = key_by_id(bundle.photos)
   videos = key_by_id(bundle.videos)
   sentences = key_by_id(bundle.sentences)
@@ -542,6 +558,7 @@ export async function init_entries(
   set_entries_data(processed_data)
   set_tags(Object.values(tags))
   set_dialects(Object.values(dialects))
+  set_sources(Object.values(sources))
   set_speakers(Object.values(speakers))
 
   await create_index(Object.values(processed_data), dictionary_id)

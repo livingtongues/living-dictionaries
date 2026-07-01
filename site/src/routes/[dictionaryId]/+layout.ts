@@ -54,8 +54,11 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
     // house's accepted search-bound-once gap; see .issues/view-as-persona-preview.md.
     const { admin_level } = auth_user
     const is_site_admin = admin_level >= 1
+    // `dict_roles` is a browser-only localStorage cache (empty during SSR), so
+    // fall back to `ssr_role` (resolved from shared.db in +layout.server.ts) —
+    // otherwise a hard load of an editor-gated page 403s until client hydration.
     const role_grant = dict_roles.roles.find(grant => grant.dictionary_id === dictionary_id)?.role
-    const role = is_site_admin ? 'admin' : (role_grant ?? null)
+    const role = is_site_admin ? 'admin' : (role_grant ?? data.ssr_role ?? null)
     const is_manager = role === 'admin' || role === 'manager'
     const is_contributor = role === 'admin' || role === 'contributor'
     const can_edit = is_manager || is_contributor || role === 'editor'
@@ -170,6 +173,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       speakers: entries_ui.speakers,
       tags: entries_ui.tags,
       dialects: entries_ui.dialects,
+      sources: entries_ui.sources,
       search_entries: entries_ui.search_entries,
       search_index_updated: entries_ui.search_index_updated,
     }

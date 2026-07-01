@@ -23,9 +23,10 @@ import { goto } from '$app/navigation'
 // edits mutate the live row + `_save()`.
 
 function get_pieces() {
-  const { dictionary, dict_db, auth_user, entries_data } = page.data as unknown as {
+  const { dictionary, dict_db, connection, auth_user, entries_data } = page.data as unknown as {
     dictionary: { id: string }
     dict_db: DictLiveDb | null
+    connection: { query: <T>(sql: string, params?: unknown[]) => Promise<T[]> } | null
     auth_user: { user: { id: string } | null }
     entries_data: { loading: Writable<boolean> }
   }
@@ -40,7 +41,7 @@ function get_pieces() {
     throw new Error('You must be signed in to edit')
 
   const entry_id_from_page = page.params.entryId || (page.state as { entry_id?: string }).entry_id
-  return { dictionary_id: dictionary.id, entry_id_from_page, dict_db }
+  return { dictionary_id: dictionary.id, entry_id_from_page, dict_db, connection }
 }
 
 export async function insert_entry(lexeme: MultiString) {
@@ -222,6 +223,57 @@ export async function assign_tag({
       await dict_db.writes.unlink_junction({ table: 'entry_tags', key })
     else
       await dict_db.writes.link_junction({ table: 'entry_tags', key })
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+export async function insert_source(source: DictInsertType<'sources'>) {
+  try {
+    const { dict_db } = get_pieces()
+    const [row] = await dict_db.sources.insert(source)
+    return row
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+export async function update_source(source: DictUpdateType<'sources'>) {
+  try {
+    const { dict_db } = get_pieces()
+    await dict_db.sources.update(source)
+    return source
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+/**
+ * Strip a source slug from every entry/sentence/text that references it, then
+ * delete the source row. Mirrors the server's `remove_source_from_all` +
+ * `apply_source_delete` — the only path that removes an in-use source (no
+ * dangling slugs left behind).
+ */
+export async function remove_source_and_delete({ source_id, slug }: { source_id: string, slug: string }) {
+  try {
+    const { dict_db, connection } = get_pieces()
+    if (!connection)
+      throw new Error('Editing database is not ready yet')
+    for (const table of ['entries', 'sentences', 'texts'] as const) {
+      const rows = await connection.query<{ id: string, sources: string | null }>(
+        `SELECT id, sources FROM "${table}" WHERE sources IS NOT NULL AND EXISTS (SELECT 1 FROM json_each("${table}".sources) WHERE value = ?)`,
+        [slug],
+      )
+      for (const row of rows) {
+        const current = JSON.parse(row.sources ?? '[]') as string[]
+        const next = current.filter(existing_slug => existing_slug !== slug)
+        await dict_db[table].update({ id: row.id, sources: next.length ? next : null } as never)
+      }
+    }
+    await dict_db.sources.delete(source_id)
   } catch (err) {
     alert(err)
     console.error(err)

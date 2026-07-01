@@ -22,6 +22,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     properties: {
       text: { ...StringOrMultiString, description: 'The sentence in the vernacular.' },
       translation: { ...StringOrMultiString, description: 'Translation(s), keyed by gloss-language code.' },
+      sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist (create via `POST …/sources`).' },
     },
   }
 
@@ -46,16 +47,16 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     required: ['lexeme'],
     description: 'A dictionary entry (headword) with nested senses.',
     properties: {
-      external_id: { type: 'string', description: 'Your own reference id, echoed back in the response for id-mapping/idempotency. Not stored.' },
+      external_id: { type: 'string', description: 'Your own source id, echoed back in `results` for id-mapping. NOT stored server-side — keep a local ledger of external_id→entry_id for idempotent/resumable imports. This is the recommended idempotency key.' },
       lexeme: { ...StringOrMultiString, description: 'The headword. Required.' },
       phonetic: { type: 'string' },
       interlinearization: { type: 'string' },
       morphology: { type: 'string' },
       notes: StringOrMultiString,
       linguistic_history: StringOrMultiString,
-      sources: StringOrStringArray,
+      sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist in this dictionary\'s registry (create via `POST …/sources`); an unknown slug rejects the write.' },
       scientific_names: StringOrStringArray,
-      elicitation_id: { type: 'string', description: 'Source-side stable id (also queryable via the list endpoint for dedupe).' },
+      elicitation_id: { type: 'string', description: 'Source-side stable id for word-list/elicitation ordering. Persisted and queryable via `?elicitation_id=`; use it as a server-recoverable dedupe key ONLY if your source id is genuinely elicitation data — for generic import bookkeeping use `external_id` + a local ledger instead.' },
       dialects: { ...StringOrStringArray, description: 'Dialect names — found-or-created on this dictionary.' },
       tags: { ...StringOrStringArray, description: 'Tag names — found-or-created.' },
       senses: { type: 'array', items: { $ref: '#/components/schemas/SenseInput' }, description: 'Defaults to one empty sense if omitted.' },
@@ -74,6 +75,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     properties: {
       text: { ...StringOrMultiString, description: 'The sentence in the vernacular.' },
       translation: { ...StringOrMultiString, description: 'Translation(s), keyed by gloss-language code.' },
+      sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist (create via `POST …/sources`).' },
     },
   }
 
@@ -87,12 +89,28 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       morphology: { type: 'string' },
       notes: StringOrMultiString,
       linguistic_history: StringOrMultiString,
-      sources: StringOrStringArray,
+      sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist (create via `POST …/sources`). Replaces the entry\'s current source list.' },
       scientific_names: StringOrStringArray,
       elicitation_id: { type: 'string' },
       dialects: StringOrStringArray,
       tags: StringOrStringArray,
       senses: { type: 'array', items: { $ref: '#/components/schemas/SensePatch' } },
+    },
+  }
+
+  const SourceInput = {
+    type: 'object',
+    required: ['slug'],
+    description: 'A citation record in the dictionary\'s source registry. Entries/sentences reference it by `slug`.',
+    properties: {
+      slug: { type: 'string', description: 'Stable id referenced by entries/sentences. Unique per dictionary.' },
+      citation: { type: 'string', description: 'Full display citation.' },
+      abbreviation: { type: 'string', description: 'Short label shown in badges + the search facet.' },
+      author: { type: 'string' },
+      year: { type: 'string', description: 'Text (allows ranges like "1979–1985").' },
+      url: { type: 'string' },
+      license: { type: 'string' },
+      type: { type: 'string', enum: ['dictionary', 'wordlist', 'fieldwork', 'manuscript', 'other'] },
     },
   }
 
@@ -132,7 +150,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     type: 'object',
     properties: {
       entries: { type: 'array', items: { $ref: '#/components/schemas/EntrySummary' } },
-      has_more: { type: 'boolean', description: 'True when more rows exist past this page — bump `offset` by `limit` and re-request. Default order is `updated_at` ASC, so paginating to the end gives you every entry (handy for building a one-shot `elicitation_id` set for dedupe instead of one `?elicitation_id=` query per entry).' },
+      has_more: { type: 'boolean', description: 'True when more rows exist past this page — bump `offset` by `limit` and re-request. Default order is `updated_at` ASC, so paginating to the end gives you every entry (handy for a live count or verifying an import).' },
     },
   }
 
@@ -247,6 +265,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   const sense_id_param = { name: 'senseId', in: 'path', required: true, schema: { type: 'string' } }
   const tag_id_param = { name: 'tagId', in: 'path', required: true, schema: { type: 'string' } }
   const dialect_id_param = { name: 'dialectId', in: 'path', required: true, schema: { type: 'string' } }
+  const source_id_param = { name: 'sourceId', in: 'path', required: true, schema: { type: 'string' } }
 
   return {
     openapi: '3.1.0',
@@ -267,10 +286,9 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '',
         '## Recommended import workflow',
         '1. `GET /api/v1/dictionaries/{id}` → note `gloss_languages` (which locale codes to use). `entry_count` is updated asynchronously and lags — **do not use it to verify a fresh import** (it can read 0 right after a bulk POST). For a live count, paginate `/entries` instead.',
-        '2. (Optional, for resumable/idempotent imports) `GET /api/v1/dictionaries/{id}/entries?elicitation_id=…` to check whether a source entry already exists before creating it. Store each source id in the entry\'s `elicitation_id` so you can look it up later.',
-        '3. `POST /api/v1/dictionaries/{id}/entries` with `{ "entries": [ … ], "import_id": "my-import-2026" }` in batches of ≤1000. Give each entry an `external_id` (your own id) — the response maps it to the created `entry_id`. The whole batch shares an `import_id`, which tags every entry with a private tag of that name so you can find/clean the batch later.',
-        '4. Read the per-item `results` array. Each item is `{ external_id?, status: "created"|"failed", entry_id?, sense_ids?, error? }`. Failures are isolated — fix and re-POST only the failed ones (a duplicate-safe re-run uses the `elicitation_id` check from step 2).',
-        '5. Spot-verify with `GET /api/v1/dictionaries/{id}/entries/{entryId}` (returns the full nested entry — the READ shape). Heads-up on the input→output asymmetry: top-level scalars you POST come back nested under `entry.main`, and `senses[].example_sentences` come back as `senses[].sentences`. See the `EntryResponse` schema.',
+        '2. `POST /api/v1/dictionaries/{id}/entries` with `{ "entries": [ … ], "import_id": "my-import-2026" }` in batches of ≤1000. Give each entry an `external_id` (your own source id) — the response echoes it back mapped to the created `entry_id`. The whole batch shares an `import_id`, which tags every entry with a private tag of that name so you can find/clean the batch later.',
+        '3. Read the per-item `results` array. Each item is `{ external_id?, status: "created"|"failed", entry_id?, sense_ids?, error? }`. **Record the `external_id`→`entry_id` map in a local ledger** — that ledger is what makes re-runs idempotent/resumable (skip what you already recorded, re-POST only failures). `external_id` is echoed but not stored server-side, so keep the ledger.',
+        '4. Spot-verify with `GET /api/v1/dictionaries/{id}/entries/{entryId}` (returns the full nested entry — the READ shape). Heads-up on the input→output asymmetry: top-level scalars you POST come back nested under `entry.main`, and `senses[].example_sentences` come back as `senses[].sentences`. See the `EntryResponse` schema. (`elicitation_id` is for word-list/elicitation ordering; it is persisted and queryable via `?elicitation_id=`, so use it as a server-recoverable dedupe key only if your source id is genuinely elicitation data — otherwise the `external_id` + ledger approach above is preferred.)',
         '',
         '## Data model',
         'An **entry** is a headword (`lexeme`) plus metadata and one or more **senses**. A **sense** is one meaning: its `glosses` (short translations keyed by gloss-language), an optional longer `definition`, `parts_of_speech`, `semantic_domains`, and `example_sentences`. An **example sentence** has vernacular `text` + `translation`(s). `dialects` and `tags` are entry-level labels (referenced by name; created automatically if new). If you omit `senses`, one empty sense is created.',
@@ -304,7 +322,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       '/api/v1/dictionaries/{id}/entries': {
         get: {
           summary: 'List/filter entries',
-          description: 'Entry summaries for dedupe/verification. Ordered by `updated_at` ASC. Paginated via `limit` (default 100, max 500) + `offset`; `has_more` tells you when to fetch the next page. Paginating to the end is the cheapest way to build a full `elicitation_id` set for bulk dedupe.',
+          description: 'Entry summaries for verification / live counts. Ordered by `updated_at` ASC. Paginated via `limit` (default 100, max 500) + `offset`; `has_more` tells you when to fetch the next page. (For idempotent imports, prefer a local `external_id`→`entry_id` ledger over paginating for dedupe.)',
           parameters: [
             dict_id_param,
             { name: 'elicitation_id', in: 'query', schema: { type: 'string' }, description: 'Exact match.' },
@@ -390,6 +408,14 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         patch: { summary: 'Rename a dialect', description: 'Renames the dialect (plain string or locale map). Affects EVERY entry it is on. Returns `{ dialect }`.', parameters: [dict_id_param, dialect_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { name: StringOrMultiString } } } } }, responses: { 200: { description: '{ dialect }' }, 400: { description: 'Name collides with another dialect' }, 404: {} } },
         delete: { summary: 'Delete a dialect (globally)', description: 'Deletes the dialect and unlinks it from every entry. To remove it from just one entry use `DELETE …/entries/{entryId}/dialects/{dialectId}`.', parameters: [dict_id_param, dialect_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
       },
+      '/api/v1/dictionaries/{id}/sources': {
+        get: { summary: 'List sources', description: 'The dictionary\'s citation registry, each with `used_by` reference counts.', parameters: [dict_id_param], responses: { 200: { description: '{ sources }' } } },
+        post: { summary: 'Create a source', description: 'Adds a citation record. `slug` is required and must be unique. Entries/sentences reference sources by slug, so create sources here BEFORE citing them on a write (an unknown slug rejects the write).', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/SourceInput' } } } }, responses: { 200: { description: '{ source }' }, 400: { description: 'Missing/duplicate slug or invalid type' } } },
+      },
+      '/api/v1/dictionaries/{id}/sources/{sourceId}': {
+        patch: { summary: 'Edit source metadata', description: 'Field-merges citation metadata (and optionally renames the `slug`). Avoid renaming a slug that is already in use — the rename does not rewrite referencing rows.', parameters: [dict_id_param, source_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/SourceInput' } } } }, responses: { 200: { description: '{ source }' }, 400: { description: 'Slug collision or invalid type' }, 404: {} } },
+        delete: { summary: 'Delete a source', description: 'Refuses with 409 while the source is still referenced. Pass `?remove_from_all=true` to strip the slug from every referencing entry/sentence/text first and then delete.', parameters: [dict_id_param, source_id_param, { name: 'remove_from_all', in: 'query', required: false, schema: { type: 'boolean' } }], responses: { 200: { description: "{ result: 'deleted', removed_from }" }, 409: { description: 'Still referenced (retry with remove_from_all)' }, 404: {} } },
+      },
     },
     components: {
       securitySchemes: {
@@ -403,6 +429,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         SensePatch,
         SentencePatch,
         EntryPatch,
+        SourceInput,
         EntryWriteResult,
         EntriesWriteResponse,
         EntrySummary,

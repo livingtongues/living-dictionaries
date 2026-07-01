@@ -30,6 +30,7 @@ export function create_entries_ui_store({
   const speakers = writable<Tables<'speakers'>[]>([])
   const tags = writable<Tables<'tags'>[]>([])
   const dialects = writable<Tables<'dialects'>[]>([])
+  const sources = writable<Tables<'sources'>[]>([])
   const search_index_updated = writable(false)
   const loading = writable(true)
 
@@ -61,6 +62,9 @@ export function create_entries_ui_store({
   function set_dialects(_dialects: Tables<'dialects'>[]) {
     dialects.set(_dialects)
   }
+  function set_sources(_sources: Tables<'sources'>[]) {
+    sources.set(_sources)
+  }
 
   function set_loading(_loading: boolean) {
     loading.set(_loading)
@@ -88,6 +92,7 @@ export function create_entries_ui_store({
           set_speakers,
           set_tags,
           set_dialects,
+          set_sources,
           set_loading,
           mark_search_index_updated,
         })
@@ -122,6 +127,7 @@ export function create_entries_ui_store({
     speakers,
     tags,
     dialects,
+    sources,
     search_entries,
     loading,
     search_index_updated,
