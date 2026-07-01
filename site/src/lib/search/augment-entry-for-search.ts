@@ -18,6 +18,10 @@ export function augment_entry_for_search(entry: EntryData) {
     .map(([_, lexeme]) => lexeme)
     .filter(Boolean)
 
+  const _orthographies = Object.entries(entry.main.lexeme || {})
+    .filter(([key, value]) => key !== 'default' && Boolean(value))
+    .map(([key]) => key)
+
   const _glosses = senses.flatMap(sense => Object.values(sense.glosses || {}).filter(Boolean))
 
   const sentences = senses.flatMap(sense =>
@@ -37,6 +41,7 @@ export function augment_entry_for_search(entry: EntryData) {
     _other,
     ...(entry.main.elicitation_id ? { _elicitation_id: entry.main.elicitation_id } : {}),
     // Filters
+    _orthographies,
     _sources,
     _tags,
     _dialects,

@@ -55,3 +55,11 @@ dictionaries, analytics, schema graph, sync, triage-examples, legal-review) · `
 Inbound email is AI-triaged by `$lib/agent/*` (xAI Grok, env-gated on `XAI_API_KEY`; classifies →
 auto-assigns/auto-resolves → drafts a reply). See `.knowledge/admin/ai-triage-pipeline.md`.
 
+## Human/agent editing parity (a direction we're walking toward)
+The agent-facing `/api/v1` write API (per-dict API keys, `openapi.json`, `$lib/db/server/v1-*`) and
+the human editing UI should reach **full feature parity** — anything a human can edit, an agent can
+edit, and vice-versa, ideally through the same validated server helpers. We don't need it all at
+once; when adding an editing feature, add (or plan) both surfaces and prefer routing them through one
+shared server module (e.g. orthographies: `$lib/db/server/orthographies.ts` backs both the v1
+endpoints and the settings-page catalog write).
+

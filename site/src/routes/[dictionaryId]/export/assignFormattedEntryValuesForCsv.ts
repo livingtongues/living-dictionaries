@@ -13,8 +13,8 @@ export function display_speaker_gender(speaker_gender: string): string {
 export function format_orthographies(orthographies: Orthography[], lexeme: MultiString) {
   const formatted_data: EntryForCSV = {}
   if (orthographies?.length) {
-    orthographies.forEach((_, index) => {
-      formatted_data[`${index > 0 ? `localOrthography.${index + 1}` : 'localOrthography'}`] = lexeme[`lo${index + 1}`]
+    orthographies.forEach((orthography, index) => {
+      formatted_data[`${index > 0 ? `localOrthography.${index + 1}` : 'localOrthography'}`] = lexeme?.[orthography.code]
     })
   }
   return formatted_data

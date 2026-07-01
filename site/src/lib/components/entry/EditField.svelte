@@ -145,7 +145,7 @@
             class="form-input keyboard-input" />
         </Keyman>
       {:else if field === 'local_orthography' || field === 'lexeme' || field === 'linguistic_history'}
-        <Keyman fixed canChooseKeyboard>
+        <Keyman fixed {bcp} canChooseKeyboard>
           <input
             bind:this={inputEl}
             dir="ltr"

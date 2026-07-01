@@ -3,7 +3,9 @@
   import { Button, JSON, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/state'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
+  import EditableOrthographies from '$lib/components/settings/EditableOrthographies.svelte'
   import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
+  import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
   import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte' // only used here - perhaps colocate
   import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte' // only used here - perhaps colocate
@@ -53,6 +55,23 @@
     selectedLanguages={dictionary.gloss_languages}
     add_language={async languageId => await updateDictionary({ gloss_languages: [...dictionary.gloss_languages, languageId] })}
     remove_language={async languageId => await remove_gloss_language(languageId)} />
+  <div style="margin-bottom: 1.25rem"></div>
+
+  <ShowHide>
+    {#snippet children({ show, toggle })}
+      <button type="button" class="collapsible-header" onclick={toggle}>
+        <IconFa6SolidChevronRight class="icon-inline chevron {show ? 'open' : ''}" style="font-size: 0.75rem" />
+        {page.data.t('entry_field.local_orthography')}
+      </button>
+      {#if show}
+        <div class="collapsible-body">
+          <EditableOrthographies
+            {dictionary}
+            on_update={async orthographies => await updateDictionary({ orthographies })} />
+        </div>
+      {/if}
+    {/snippet}
+  </ShowHide>
   <div style="margin-bottom: 1.25rem"></div>
 
   <EditableAlternateNames
@@ -173,6 +192,27 @@
     font-weight: 500;
     color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
     margin-bottom: 0.5rem;
+  }
+
+  .collapsible-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color) 85%, var(--background));
+  }
+
+  .collapsible-header :global(.chevron) {
+    transition: transform 0.15s ease;
+  }
+
+  .collapsible-header :global(.chevron.open) {
+    transform: rotate(90deg);
+  }
+
+  .collapsible-body {
+    margin-top: 0.5rem;
   }
 
   .image-tile {

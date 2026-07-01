@@ -1,6 +1,7 @@
 import type { EntryData, Tables } from '$lib/types'
 import type { TranslateFunction } from '$lib/i18n/types'
 import { friendlyName } from './friendlyName'
+import { get_orthographies } from '$lib/helpers/orthographies'
 import { get_orthography_headers, get_sense_headers } from './assignHeadersForCsv'
 import { display_speaker_gender, format_orthographies, format_senses } from './assignFormattedEntryValuesForCsv'
 import { stripHTMLTags } from './stripHTMLTags'
@@ -58,7 +59,7 @@ export function getCsvHeaders(entries: ReturnType<typeof translate_entries>, { o
 
   return {
     ...headers,
-    ...get_orthography_headers(orthographies),
+    ...get_orthography_headers(get_orthographies({ orthographies }).alternates),
     ...get_sense_headers(entries, dictionary_id),
   }
 }
@@ -91,7 +92,7 @@ export function formatCsvEntries(
 
     return {
       ...formatted_entry,
-      ...format_orthographies(orthographies, entry?.main?.lexeme),
+      ...format_orthographies(get_orthographies({ orthographies }).alternates, entry?.main?.lexeme),
       ...format_senses(entry, dictionary_id),
     }
   })

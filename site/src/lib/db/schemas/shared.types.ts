@@ -34,15 +34,36 @@ export interface DictionaryCoordinates {
   regions?: { coordinates: { longitude: number, latitude: number }[], label?: string, color?: string }[]
 }
 
-/** Per-dictionary orthography entry — a BCP-47 key or a custom label. */
+/**
+ * Per-dictionary orthography (writing system) entry. The registry is an ordered
+ * list; each entry's `code` is the IMMUTABLE key its text lives under in the
+ * `lexeme` / sentence `text` MultiString blobs.
+ *
+ * The primary/canonical headword is always registry slot 0 with `code: 'default'`
+ * and `primary: true` — pinned first, non-deletable, and guaranteed present so the
+ * app-wide `lexeme.default` accessor never breaks (it may be synthesized for dicts
+ * that have never configured a primary label). Alternate orthographies follow and
+ * carry a BCP-47 `code` (which also drives the Keyman keyboard) or a custom slug.
+ */
 export interface Orthography {
-  /** Display name shown in the UI. */
+  /**
+   * Immutable storage key in the lexeme/text MultiString. `'default'` for the
+   * primary; a BCP-47 tag (e.g. `tlh-Latn`) or a custom slug for alternates.
+   * Never changes once set (renaming edits `name`, not `code`).
+   */
+  code: string
+  /** Editable display label shown in the UI. Empty → a generic fallback label. */
   name: string
-  /** Optional BCP-47 tag this orthography maps to (e.g. `tlh-Latn`). */
+  /** Optional BCP-47 tag driving the Keyman keyboard (equals `code` for bcp-keyed alternates). */
   bcp?: string
   /** Optional notes from the editor. */
   notes?: string
+  /** True only for the pinned slot-0 primary (whose `code` is always `'default'`). */
+  primary?: boolean
 }
+
+/** Reserved primary/canonical headword code — always present, pinned, non-deletable. */
+export const PRIMARY_ORTHOGRAPHY_CODE = 'default'
 
 /** Featured image blob on dictionary catalog rows. */
 export interface FeaturedImage {

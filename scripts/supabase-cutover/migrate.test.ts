@@ -14,15 +14,58 @@ import {
   map_entry,
   map_invite,
   map_junction,
+  map_orthographies,
   map_sense,
   map_sentence,
   map_text,
   map_user,
+  rewrite_orthography_keys,
   SHARED_JSON_COLS,
   to_int,
   to_iso,
 } from './mappers'
 import { open_dict_db, open_shared_db } from './open-sqlite'
+
+describe('orthography mapping', () => {
+  test('maps legacy orthographies to coded registry + lo→code map', () => {
+    const { orthographies, lo_to_code } = map_orthographies([
+      { bcp: 'sat-Latn', name: { default: 'Latin' } },
+      { bcp: 'sat-Olck', name: { default: 'Ol Chiki' } },
+    ])
+    expect(orthographies).toEqual([
+      { code: 'sat-Latn', name: 'Latin', bcp: 'sat-Latn' },
+      { code: 'sat-Olck', name: 'Ol Chiki', bcp: 'sat-Olck' },
+    ])
+    expect(lo_to_code).toEqual({ lo1: 'sat-Latn', lo2: 'sat-Olck' })
+  })
+
+  test('falls back to a name slug when there is no bcp, and de-dupes codes', () => {
+    const { orthographies, lo_to_code } = map_orthographies([
+      { bcp: '', name: { default: 'Village Spelling' } },
+      { bcp: '', name: 'Village Spelling' },
+    ])
+    expect(orthographies).toEqual([
+      { code: 'village-spelling', name: 'Village Spelling' },
+      { code: 'village-spelling-2', name: 'Village Spelling' },
+    ])
+    expect(lo_to_code).toEqual({ lo1: 'village-spelling', lo2: 'village-spelling-2' })
+  })
+
+  test('null/empty legacy → null registry', () => {
+    expect(map_orthographies(null)).toEqual({ orthographies: null, lo_to_code: {} })
+    expect(map_orthographies([])).toEqual({ orthographies: null, lo_to_code: {} })
+  })
+
+  test('rewrites lexeme/text keys, leaving default + unknown keys intact', () => {
+    const lo_to_code = { lo1: 'sat-Latn', lo2: 'sat-Olck' }
+    expect(rewrite_orthography_keys({ default: 'foo', lo1: 'bar', lo2: 'baz' }, lo_to_code)).toEqual({
+      default: 'foo',
+      'sat-Latn': 'bar',
+      'sat-Olck': 'baz',
+    })
+    expect(rewrite_orthography_keys(null, lo_to_code)).toBe(null)
+  })
+})
 
 describe('primitive transforms', () => {
   test('to_iso handles Date, string, null', () => {

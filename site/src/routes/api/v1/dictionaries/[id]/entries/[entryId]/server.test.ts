@@ -4,6 +4,7 @@ import { create_api_key } from '$lib/api-keys/api-key'
 import { open_dictionary_db_in_memory } from '$lib/db/server/dictionary-db'
 import { open_dictionary_history_db_in_memory } from '$lib/db/server/dictionary-history-db'
 import { open_shared_db } from '$lib/db/server/shared-db'
+import { apply_relationship_create } from '$lib/db/server/v1-relationship-write'
 import { apply_entry_writes } from '$lib/db/server/v1-entry-write'
 import { DELETE, GET, PATCH } from './+server'
 
@@ -38,12 +39,13 @@ afterEach(() => {
   history_db.close()
 })
 
-function get_call({ api_key, id }: { api_key?: string, id: string }) {
+function get_call({ api_key, id, include }: { api_key?: string, id: string, include?: string }) {
   const headers: Record<string, string> = {}
   if (api_key)
     headers.Authorization = `Bearer ${api_key}`
-  const request = new Request(`http://localhost/api/v1/dictionaries/dict-1/entries/${id}`, { method: 'GET', headers })
-  return GET({ request, cookies: { get: () => undefined }, params: { id: 'dict-1', entryId: id } } as never)
+  const url = `http://localhost/api/v1/dictionaries/dict-1/entries/${id}${include ? `?include=${include}` : ''}`
+  const request = new Request(url, { method: 'GET', headers })
+  return GET({ request, cookies: { get: () => undefined }, params: { id: 'dict-1', entryId: id }, url: new URL(url) } as never)
 }
 
 function patch_call({ api_key, id, body }: { api_key?: string, id: string, body: unknown }) {
@@ -78,6 +80,19 @@ describe(GET, () => {
     expect(entry.main.lexeme).toEqual({ default: 'mbwa' })
     expect(entry.senses[0].glosses).toEqual({ en: 'dog' })
     expect(entry.senses[0].sentences[0].text).toEqual({ default: 'Mbwa wangu' })
+    expect(entry.relationships).toBeUndefined()
+  })
+
+  test('include=relationships expands the entry with its relationships', async () => {
+    const { results } = apply_entry_writes({ db: dict_db, user_id: 'u1', entries: [{ lexeme: 'perro' }] })
+    const perro_id = results[0].entry_id as string
+    apply_relationship_create({ db: dict_db, input: { from_entry_id: entry_id, to_entry_id: perro_id, type: 'cognate' }, user_id: 'u1' })
+
+    const res = await get_call({ api_key: api_token, id: entry_id, include: 'relationships' })
+    const { entry } = await res.json()
+    expect(entry.relationships).toHaveLength(1)
+    expect(entry.relationships[0].type).toBe('cognate')
+    expect(entry.relationships[0].related.entry_id).toBe(perro_id)
   })
 })
 

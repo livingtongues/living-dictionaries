@@ -7,6 +7,9 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
 ## Pages
 - [related-entries-model.md](./related-entries-model.md) — why related entries use flat
   parent/child/sibling references instead of nested sub-entries, and the per-type editing rules.
+- [orthographies-model.md](./orthographies-model.md) — the alternate-writing-system registry:
+  immutable `code` keys, why `lexeme.default` stays the primary, the Keyman dataset (and the live-API
+  subset gotcha), custom-code rules, and human/agent parity.
 - [media-serving-urls.md](./media-serving-urls.md) — how GCS storage paths become image/audio
   URLs, and the App Engine Images `lh3` magic-URL resize/crop spec the photo pipeline depends on.
 - [dictionary-import-process.md](./dictionary-import-process.md) — the human + script process for

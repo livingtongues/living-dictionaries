@@ -18,6 +18,7 @@ import {
   map_entry,
   map_invite,
   map_junction,
+  map_orthographies,
   map_photo,
   map_sense,
   map_sentence,
@@ -26,6 +27,7 @@ import {
   map_text,
   map_user,
   map_video,
+  rewrite_orthography_keys,
   SHARED_JSON_COLS,
 } from './mappers'
 import { LATEST_DICT_MIGRATION, open_dict_db, open_shared_db } from './open-sqlite'
@@ -159,6 +161,8 @@ async function migrate_dict_content({ client, data_dir, dict, shared }: {
   const db = open_dict_db({ data_dir, dict_id: dict.id, rebuild: true })
   db.pragma('foreign_keys = OFF') // source data is already FK-valid; speeds bulk insert + dodges orphan-ordering issues
   const counts: Record<string, number> = {}
+  // Positional `lo{n}` lexeme/text keys → the new immutable orthography `code`.
+  const { lo_to_code } = map_orthographies(dict.orthographies)
   // texts (read before sentences) yields per-sentence order derived from the
   // legacy id-array; applied to sentence rows as sort_key + ends_paragraph.
   let sentence_order = new Map<string, { sort_key: string, ends_paragraph: number | null }>()
@@ -171,6 +175,14 @@ async function migrate_dict_content({ client, data_dir, dict, shared }: {
       const rows = config.junction
         ? source_rows.map(row => map_junction(row, config.junction!))
         : source_rows.map(row => config.map!(row))
+      if (table === 'entries') {
+        for (const row of rows)
+          row.lexeme = rewrite_orthography_keys(row.lexeme, lo_to_code)
+      }
+      if (table === 'sentences') {
+        for (const row of rows)
+          row.text = rewrite_orthography_keys(row.text, lo_to_code)
+      }
       if (table === 'sentences') {
         for (const row of rows) {
           const order = sentence_order.get(row.id)

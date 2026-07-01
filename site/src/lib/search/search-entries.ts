@@ -51,6 +51,9 @@ export async function search_entries({ query_params, entries_per_page, page_inde
     // threshold: 0.8,
     ...query_params.query ? { } : { sortBy },
     facets: { // to generate applicable filters options in the side menu
+      _orthographies: {
+        limit: 50,
+      },
       _sources: {
         limit: 50,
       },
@@ -107,6 +110,7 @@ export async function search_entries({ query_params, entries_per_page, page_inde
       },
     },
     where: { // to actually filter
+      ...query_params.orthographies ? { _orthographies: query_params.orthographies } : {},
       ...query_params.sources ? { _sources: query_params.sources } : {},
       ...query_params.dialects ? { _dialects: query_params.dialects } : {},
       ...query_params.tags ? { _tags: query_params.tags } : {},

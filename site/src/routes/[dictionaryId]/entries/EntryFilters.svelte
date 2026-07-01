@@ -8,12 +8,14 @@
   import type { QueryParams } from '$lib/search/types'
   import { page } from '$app/state'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
+  import { get_orthographies } from '$lib/helpers/orthographies'
 
   interface Props {
     search_params: QueryParamStore<QueryParams>
     show_mobile_filters?: boolean
     on_close: () => void
     result_facets: FacetResult
+    total?: number
   }
 
   const {
@@ -21,10 +23,16 @@
     show_mobile_filters = false,
     on_close,
     result_facets,
+    total,
   }: Props = $props()
 
-  const { tags, dialects, speakers, sources } = $derived(page.data)
+  const { tags, dialects, speakers, sources, dictionary } = $derived(page.data)
   const source_labels = $derived(Object.fromEntries(($sources || []).map(source => [source.slug, source.abbreviation || source.citation || source.slug])))
+  const orthography_labels = $derived(Object.fromEntries(get_orthographies(dictionary ?? {}).alternates.map(orthography => [orthography.code, orthography.name || orthography.code])))
+  // Hide moot values: a code present on EVERY result (count === total) tells you nothing.
+  const orthography_values = $derived(Object.fromEntries(
+    Object.entries(result_facets?._orthographies?.values ?? {}).filter(([, count]) => count !== total),
+  ))
 </script>
 
 <ResponsiveSlideover
@@ -70,6 +78,14 @@
 
         <hr class="tolerance-divider" />
 
+        {#if Object.keys(orthography_values).length}
+          <FilterList
+            {search_params}
+            search_param_key="orthographies"
+            values={orthography_values}
+            keys_to_values={orthography_labels}
+            label={page.data.t('entry_field.local_orthography')} />
+        {/if}
         {#if result_facets._sources?.count}
           <FilterList
             {search_params}

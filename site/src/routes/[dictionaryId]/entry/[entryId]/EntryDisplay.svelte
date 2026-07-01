@@ -2,12 +2,14 @@
   import type { EntryData, Tables } from '$lib/types'
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
+  import RelatedEntries from './RelatedEntries.svelte'
   import Sense from './Sense.svelte'
   import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/state'
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import type { DbOperations } from '$lib/dbOperations'
+  import { get_orthographies } from '$lib/helpers/orthographies'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
   import IconSystemUiconsVersions from '~icons/system-uicons/versions'
   import IconFaSolidTimes from '~icons/fa-solid/times'
@@ -40,6 +42,7 @@
   // before the live dict.db opens. `entry.main` shares the entries row's scalar
   // field names, so the swap to `entry_row` once it arrives is seamless.
   const fields = $derived(entry_row ?? entry.main)
+  const orthographies = $derived(get_orthographies(dictionary))
 
   async function save_entry(patch: Partial<NonNullable<typeof entry_row>>) {
     if (!entry_row) return
@@ -55,6 +58,7 @@
       field="lexeme"
       {can_edit}
       display={page.data.t('entry_field.lexeme')}
+      bcp={orthographies.primary.bcp}
       on_update={(new_value) => {
         if (new_value)
           save_entry({ lexeme: { ...entry_row?.lexeme, default: new_value } })
@@ -66,15 +70,15 @@
   </div>
 
   <div class="content-col" style="grid-area: content;">
-    {#each dictionary.orthographies || [] as orthography, index (index)}
-      {@const orthography_field = `lo${index + 1}`}
+    {#each orthographies.alternates as orthography (orthography.code)}
       <EntryField
-        value={fields?.lexeme?.[orthography_field]}
+        value={fields?.lexeme?.[orthography.code]}
         field="local_orthography"
         {can_edit}
         display={orthography.name}
+        bcp={orthography.bcp}
         on_update={(new_value) => {
-          save_entry({ lexeme: { ...entry_row?.lexeme, [orthography_field]: new_value } })
+          save_entry({ lexeme: { ...entry_row?.lexeme, [orthography.code]: new_value } })
         }} />
     {/each}
 
@@ -188,6 +192,8 @@
         display="ID"
         on_update={new_value => save_entry({ elicitation_id: new_value })} />
     {/if}
+
+    <RelatedEntries entry_id={entry.id} />
 
     <!-- <div class="grow-1 order-last"></div> -->
   </div>
