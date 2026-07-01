@@ -30,6 +30,7 @@ export enum ResponseCodes {
   TOO_MANY_REQUESTS = 429,
   FORBIDDEN = 403,
   PAYLOAD_TOO_LARGE = 413,
+  UNSUPPORTED_MEDIA_TYPE = 415,
   CONFLICT = 409,
   GONE = 410,
   SERVICE_UNAVAILABLE = 503,
@@ -48,16 +49,31 @@ export type SourceType = typeof SOURCE_TYPES[number]
  * either endpoint; directed types show `inverse_slug`'s label from the `to` side.
  * Per-dictionary CUSTOM types live in the `relationship_types` table instead.
  *
- * Deliberately small to start (all symmetric); expand as needed. Future directed
- * additions (documented, not yet enabled): hypernym↔hyponym, holonym↔meronym,
- * classifier_of↔classified_by, derived_from↔root_of, borrowed_from↔loaned_to.
+ * A directed pair exposes BOTH member slugs as valid POST types (so an agent can
+ * author in whichever direction reads naturally), but is CANONICALIZED on write:
+ * the `canonical`-tagged member is rewritten to its partner slug with its endpoints
+ * flipped, so reversed duplicates collapse and every stored row uses one slug per
+ * concept-pair (clean faceting). Only the canonical members are ever stored.
  */
 export const RELATIONSHIP_TYPES = {
+  // Symmetric — same label from either endpoint.
   synonym: { symmetric: true, inverse_slug: 'synonym' },
   antonym: { symmetric: true, inverse_slug: 'antonym' },
   cognate: { symmetric: true, inverse_slug: 'cognate' },
   dialectal_variant: { symmetric: true, inverse_slug: 'dialectal_variant' },
-} as const satisfies Record<string, { symmetric: boolean, inverse_slug: string }>
+  see_also: { symmetric: true, inverse_slug: 'see_also' },
+  spelling_variant: { symmetric: true, inverse_slug: 'spelling_variant' },
+  // Directed — canonical members (stored as-is; `from` plays the named role).
+  hypernym: { symmetric: false, inverse_slug: 'hyponym' },
+  holonym: { symmetric: false, inverse_slug: 'meronym' },
+  derived_from: { symmetric: false, inverse_slug: 'root_of' },
+  borrowed_from: { symmetric: false, inverse_slug: 'loaned_to' },
+  // Directed — inverse aliases (canonicalized to `canonical` + flipped on write).
+  hyponym: { symmetric: false, inverse_slug: 'hypernym', canonical: 'hypernym' },
+  meronym: { symmetric: false, inverse_slug: 'holonym', canonical: 'holonym' },
+  root_of: { symmetric: false, inverse_slug: 'derived_from', canonical: 'derived_from' },
+  loaned_to: { symmetric: false, inverse_slug: 'borrowed_from', canonical: 'borrowed_from' },
+} as const satisfies Record<string, { symmetric: boolean, inverse_slug: string, canonical?: string }>
 
 export type GlobalRelationshipType = keyof typeof RELATIONSHIP_TYPES
 

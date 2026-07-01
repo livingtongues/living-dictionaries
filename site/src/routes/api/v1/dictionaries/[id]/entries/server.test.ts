@@ -156,6 +156,23 @@ describe(GET, () => {
     expect(filtered.entries[0].elicitation_id).toBe('B2')
   })
 
+  test('filters by lexeme substring (default) and exact match', async () => {
+    await call({ api_key: api_token, body: { entries: [
+      { lexeme: 'mbwa' },
+      { lexeme: 'mbwana' },
+    ] } })
+
+    const substring = await (await get_call({ api_key: api_token, query: '?lexeme=mbwa' })).json()
+    expect(substring.entries).toHaveLength(2)
+
+    const exact = await (await get_call({ api_key: api_token, query: '?lexeme=mbwa&match=exact' })).json()
+    expect(exact.entries).toHaveLength(1)
+    expect(JSON.parse(JSON.stringify(exact.entries[0].lexeme))).toEqual({ default: 'mbwa' })
+
+    const exact_miss = await (await get_call({ api_key: api_token, query: '?lexeme=mbw&match=exact' })).json()
+    expect(exact_miss.entries).toHaveLength(0)
+  })
+
   test('paginates with limit/offset + has_more', async () => {
     await call({ api_key: api_token, body: { entries: [{ lexeme: 'a' }, { lexeme: 'b' }, { lexeme: 'c' }] } })
     const page = await (await get_call({ api_key: api_token, query: '?limit=2' })).json()

@@ -1,11 +1,14 @@
 import type { HandleServerError } from '@sveltejs/kit'
+import { dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { start_chat_reping_cron_once } from '$lib/db/server/chat-reping-cron'
 import { start_log_retention_cron_once } from '$lib/db/server/log-retention-cron'
 import { start_r2_snapshot_builder } from '$lib/db/server/r2-snapshot-builder'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { ensure_all_admins_in_team_chat } from '$lib/server/chat/ensure-team-membership'
+import { is_cross_origin_form_forbidden } from '$lib/server/csrf'
 import { log_server_event } from '$lib/server/log-server-event'
+import { json } from '@sveltejs/kit'
 
 // Force shared.db open + SQL migrations at server boot rather than lazily on the
 // first request (avoids a fresh container racing a migration inside a live
@@ -49,6 +52,16 @@ const BODY_SIZE_LIMIT_BYTES = parse_byte_size(env.BODY_SIZE_LIMIT)
 
 /** @type {import('@sveltejs/kit').Handle} */
 export function handle({ event, resolve }) {
+  // CSRF: SvelteKit's built-in guard is disabled in svelte.config.js so we can
+  // exempt token-authed /api/v1 uploads. Re-apply it here (prod only, matching
+  // SvelteKit — cross-origin dev tooling stays unblocked) for every other request.
+  if (!dev && is_cross_origin_form_forbidden(event)) {
+    const message = `Cross-site ${event.request.method} form submissions are forbidden`
+    if (event.request.headers.get('accept') === 'application/json')
+      return json({ message }, { status: 403 })
+    return new Response(message, { status: 403, headers: { 'content-type': 'text/plain' } })
+  }
+
   if (BODY_SIZE_LIMIT_BYTES !== null) {
     const content_length = Number(event.request.headers.get('content-length'))
     if (Number.isFinite(content_length) && content_length > BODY_SIZE_LIMIT_BYTES) {

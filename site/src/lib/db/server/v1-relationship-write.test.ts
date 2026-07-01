@@ -85,6 +85,47 @@ describe(apply_relationship_create, () => {
     expect(relationship_count()).toBe(1)
   })
 
+  test('directed global: canonical member stores as-is and flips its label by side', () => {
+    insert_entry('animal', { default: 'animal' })
+    // animal is the broader term (hypernym) of dog.
+    const { relationship } = apply_relationship_create({ db, input: { from_entry_id: 'animal', to_entry_id: 'dog', type: 'hypernym' }, user_id: 'u1' })
+    expect(relationship.type).toBe('hypernym')
+    expect(relationship.symmetric).toBeFalsy()
+    expect(relationship.label_key).toBe('relationship_type.hypernym')
+
+    const stored = db.prepare(`SELECT from_entry_id, to_entry_id, type FROM entry_relationships WHERE id = ?`).get(relationship.id) as { from_entry_id: string, to_entry_id: string, type: string }
+    expect(stored).toEqual({ from_entry_id: 'animal', to_entry_id: 'dog', type: 'hypernym' })
+
+    // From dog's viewpoint: inverse side shows the hyponym label.
+    const from_dog = list_relationships_for_entry(db, 'dog')
+    expect(from_dog[0].direction).toBe('inverse')
+    expect(from_dog[0].label_key).toBe('relationship_type.hyponym')
+    expect(from_dog[0].related.entry_id).toBe('animal')
+  })
+
+  test('directed global: inverse alias is canonicalized (stored slug + flipped endpoints)', () => {
+    insert_entry('animal', { default: 'animal' })
+    // Author from the specific word: dog is a hyponym (narrower) of animal.
+    const { relationship } = apply_relationship_create({ db, input: { from_entry_id: 'dog', to_entry_id: 'animal', type: 'hyponym' }, user_id: 'u1' })
+    // Stored canonicalized to hypernym with endpoints flipped (animal → dog).
+    const stored = db.prepare(`SELECT from_entry_id, to_entry_id, type FROM entry_relationships WHERE id = ?`).get(relationship.id) as { from_entry_id: string, to_entry_id: string, type: string }
+    expect(stored).toEqual({ from_entry_id: 'animal', to_entry_id: 'dog', type: 'hypernym' })
+
+    // The POSTer's viewpoint (dog) still reads naturally as the narrower term.
+    expect(relationship.direction).toBe('inverse')
+    expect(relationship.label_key).toBe('relationship_type.hyponym')
+    expect(relationship.related.entry_id).toBe('animal')
+  })
+
+  test('directed global: canonical + reverse-alias dedupe to one row', () => {
+    insert_entry('animal', { default: 'animal' })
+    const canonical = apply_relationship_create({ db, input: { from_entry_id: 'animal', to_entry_id: 'dog', type: 'hypernym' }, user_id: 'u1' })
+    const alias = apply_relationship_create({ db, input: { from_entry_id: 'dog', to_entry_id: 'animal', type: 'hyponym' }, user_id: 'u1' })
+    expect(alias.created).toBeFalsy()
+    expect(alias.relationship.id).toBe(canonical.relationship.id)
+    expect(relationship_count()).toBe(1)
+  })
+
   test('rejects an unknown global type', () => {
     expect(() => apply_relationship_create({ db, input: { from_entry_id: 'dog', to_entry_id: 'perro', type: 'nonsense' }, user_id: 'u1' })).toThrow(/unknown relationship type/)
   })

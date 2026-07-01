@@ -29,13 +29,30 @@ and dedupe trivial. This also matches the requested POST shape.
 
 ### One row, derived inverse (not two materialized rows)
 A relationship is stored ONCE. The other entry sees it by querying `to_entry_id = X` too. Global
-types carry `{ symmetric, inverse_slug }`; the view renders the forward label when you're on the
-`from` side and the inverse label from the `to` side. **Symmetric** types (the entire initial
-global set: `synonym`, `antonym`, `cognate`, `dialectal_variant`) read identically from both sides,
-so their stored endpoint order is **canonicalized** (sorted by entry_id, sense_id) — this makes
-A→B and B→A dedupe to one row, and means `direction` is not meaningful for symmetric types. Global
-type labels (+ inverse labels) are i18n keys `relationship_type.<slug>`; custom-type labels are
-literal MultiStrings the dictionary creator authors.
+types carry `{ symmetric, inverse_slug, canonical? }`; the view renders the forward label when
+you're on the `from` side and the inverse label from the `to` side. **Symmetric** types
+(`synonym`, `antonym`, `cognate`, `dialectal_variant`, `see_also`, `spelling_variant`) read
+identically from both sides, so their stored endpoint order is **canonicalized** (sorted by
+entry_id, sense_id) — this makes A→B and B→A dedupe to one row, and means `direction` is not
+meaningful for symmetric types. Global type labels (+ inverse labels) are i18n keys
+`relationship_type.<slug>`; custom-type labels are literal MultiStrings the dictionary creator
+authors.
+
+### Directed globals + inverse-alias canonicalization
+The directed globals are **pairs**: `hypernym`/`hyponym` (broader/narrower), `holonym`/`meronym`
+(whole/part), `derived_from`/`root_of`, `borrowed_from`/`loaned_to`. **Both** members of a pair are
+valid POST `type`s (an agent can author in whichever direction reads naturally), but the pair is
+**canonicalized on write**: the inverse-alias member (`hyponym`, `meronym`, `root_of`, `loaned_to`,
+tagged with `canonical` in `RELATIONSHIP_TYPES`) is rewritten to its canonical partner with its
+endpoints **flipped** (`resolve_relationship_type` returns `flip: true`; the flip happens before the
+symmetric sort in `apply_relationship_create`). So every stored row uses ONE slug per concept-pair
+(clean faceting) and reversed duplicates (`hypernym` A→B vs `hyponym` B→A) dedupe to one row. The
+POSTer still gets a view from their original `from` viewpoint, so it reads naturally (posting
+`hyponym` returns `direction: 'inverse'`, `label_key: relationship_type.hyponym`). Canonical
+convention: for the stored slug, `from` plays the named role (`from` is the hypernym/holonym/derived
+word/borrowed word). English labels are plain relational phrases ("Broader than"/"Narrower than",
+"Has part"/"Part of", "Derived from"/"Root of", "Borrowed from"/"Loaned to") — the slug stays
+technical for the API/faceting.
 
 ### Custom types = found-or-created, like tags
 `relationship_types` (per-dict) mirrors the tags/dialects pattern: deduped by name, carries a
