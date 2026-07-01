@@ -12,12 +12,23 @@ import { error, json } from '@sveltejs/kit'
 
 export type { EntriesWriteResponseBody }
 
+/** A sense's meaning fields — attached to list rows when `?include=senses`. */
+export interface SenseSummary {
+  id: string
+  glosses: MultiString | null
+  definition: MultiString | null
+  parts_of_speech: string[] | null
+  semantic_domains: string[] | null
+}
+
 export interface EntrySummary {
   id: string
   lexeme: MultiString
   phonetic: string | null
   elicitation_id: string | null
   updated_at: string
+  /** Present only when the caller passes `?include=senses`. */
+  senses?: SenseSummary[]
 }
 
 export interface EntriesListResponseBody {
@@ -29,13 +40,15 @@ export interface EntriesListResponseBody {
 /**
  * GET /api/v1/dictionaries/[id]/entries
  *
- * List/filter entry summaries — for idempotency/dedupe + verification. Filters
- * (query params): `elicitation_id` (exact), `lexeme` (substring), `updated_since`
- * (ISO, exclusive), `limit` (≤500), `offset`. Ordered by `updated_at ASC` so an
- * agent can page incrementally.
+ * List/filter entry summaries — for idempotency/dedupe + verification + bulk
+ * export. Filters (query params): `elicitation_id` (exact), `lexeme` (substring),
+ * `updated_since` (ISO, exclusive), `limit` (≤500), `offset`. Ordered by
+ * `updated_at ASC` so an agent can page incrementally. Pass `?include=senses` to
+ * attach each entry's senses (glosses/definition/POS/domains) in ONE batched
+ * query — turns a whole-dictionary read from N+1 into a single paged sweep.
  */
 export const GET: RequestHandler = async (event) => {
-  const { dictionary } = await load_v1_dictionary_context({ event, role: 'contributor' })
+  const { dictionary } = await load_v1_dictionary_context({ event, access: 'read' })
 
   const params = event.url.searchParams
   const where: string[] = []
@@ -60,6 +73,7 @@ export const GET: RequestHandler = async (event) => {
   const limit = Math.min(Math.max(Number(params.get('limit')) || DEFAULT_LIST_LIMIT, 1), MAX_LIST_LIMIT)
   const offset = Math.max(Number(params.get('offset')) || 0, 0)
   const where_sql = where.length ? `WHERE ${where.join(' AND ')}` : ''
+  const include_senses = (params.get('include') ?? '').split(',').map(s => s.trim()).includes('senses')
 
   const db = get_dictionary_db(dictionary.id)
   const rows = db.prepare(
@@ -68,14 +82,43 @@ export const GET: RequestHandler = async (event) => {
   ).all(...args, limit + 1, offset) as { id: string, lexeme: string, phonetic: string | null, elicitation_id: string | null, updated_at: string }[]
 
   const has_more = rows.length > limit
-  const entries: EntrySummary[] = rows.slice(0, limit).map(row => ({
+  const page = rows.slice(0, limit)
+
+  const senses_by_entry = include_senses ? load_senses_for_entries(db, page.map(row => row.id)) : undefined
+
+  const entries: EntrySummary[] = page.map(row => ({
     id: row.id,
     lexeme: JSON.parse(row.lexeme) as MultiString,
     phonetic: row.phonetic,
     elicitation_id: row.elicitation_id,
     updated_at: row.updated_at,
+    ...(senses_by_entry ? { senses: senses_by_entry.get(row.id) ?? [] } : {}),
   }))
   return json({ entries, has_more } satisfies EntriesListResponseBody)
+}
+
+/** Batch-load senses for a page of entries in one query, grouped by entry id. */
+function load_senses_for_entries(db: ReturnType<typeof get_dictionary_db>, entry_ids: string[]): Map<string, SenseSummary[]> {
+  const grouped = new Map<string, SenseSummary[]>()
+  if (!entry_ids.length)
+    return grouped
+  const placeholders = entry_ids.map(() => '?').join(',')
+  const rows = db.prepare(
+    `SELECT id, entry_id, glosses, definition, parts_of_speech, semantic_domains
+     FROM senses WHERE entry_id IN (${placeholders}) ORDER BY created_at ASC`,
+  ).all(...entry_ids) as { id: string, entry_id: string, glosses: string | null, definition: string | null, parts_of_speech: string | null, semantic_domains: string | null }[]
+  for (const row of rows) {
+    const list = grouped.get(row.entry_id) ?? []
+    list.push({
+      id: row.id,
+      glosses: row.glosses ? JSON.parse(row.glosses) as MultiString : null,
+      definition: row.definition ? JSON.parse(row.definition) as MultiString : null,
+      parts_of_speech: row.parts_of_speech ? JSON.parse(row.parts_of_speech) as string[] : null,
+      semantic_domains: row.semantic_domains ? JSON.parse(row.semantic_domains) as string[] : null,
+    })
+    grouped.set(row.entry_id, list)
+  }
+  return grouped
 }
 
 /**
@@ -92,7 +135,7 @@ export const GET: RequestHandler = async (event) => {
  * `{ created, updated, failed, results }`.
  */
 export const POST: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const body = await event.request.json() as unknown
   const { entries, import_id } = normalize_body(body)
@@ -120,10 +163,10 @@ export const POST: RequestHandler = async (event) => {
   // snapshot builder + admin catalog see the dictionary as freshly modified.
   mirror_dictionary_cursor({ dict_id: dictionary.id, cursor: report.new_synced_up_to })
 
-  log_server_event({ level: 'info', message: 'v1_entries_written', user_id: access.user_id, context: { dictionary_id: dictionary.id, via: access.via, created: report.created, updated: report.updated, failed: report.failed } })
+  log_server_event({ level: 'info', message: 'v1_entries_written', user_id: access.user_id, context: { dictionary_id: dictionary.id, via: access.via, created: report.created, skipped: report.skipped, updated: report.updated, failed: report.failed } })
 
-  const { created, updated, failed, results } = report
-  return json({ created, updated, failed, results } satisfies EntriesWriteResponseBody)
+  const { created, skipped, updated, failed, results } = report
+  return json({ created, skipped, updated, failed, results } satisfies EntriesWriteResponseBody)
 }
 
 function normalize_body(body: unknown): { entries: EntryInput[], import_id?: string } {

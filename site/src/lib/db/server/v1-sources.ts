@@ -3,6 +3,7 @@ import type { HistoryEvent } from './dictionary-history-db'
 import type { SingleWriteResult } from './v1-entry-write'
 import type { SourceType } from '$lib/constants'
 import { SOURCE_TYPES } from '$lib/constants'
+import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { read_last_modified_at } from './dictionary-db'
 import { record_history } from './dictionary-history-db'
 import { merge_dict_row } from './dictionary-sync-helpers'
@@ -194,7 +195,9 @@ export function remove_source_from_all({ db, history_db, slug, user_id, api_key_
     for (const raw of rows) {
       const current = JSON.parse((raw.sources as string) ?? '[]') as string[]
       const next = current.filter(existing_slug => existing_slug !== slug)
-      const row: Record<string, unknown> = { ...raw, sources: next.length ? next : null, updated_at: now }
+      // Parse the row's OTHER JSON columns first — merge_dict_row re-stringifies,
+      // so passing raw JSON strings back would double-encode lexeme/notes/etc.
+      const row: Record<string, unknown> = { ...parse_dict_row(table, raw), sources: next.length ? next : null, updated_at: now }
       delete row.updated_by_user_id
       const event = merge_dict_row({ db, table_name: table, row, user_id, at: now, api_key_id })
       if (event)

@@ -24,7 +24,7 @@ export interface V1SentenceDeleteResponseBody {
  * single-sentence edit (e.g. fixing an OCR typo). Editor+.
  */
 export const PATCH: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const sentence_id = event.params.sentenceId
   if (!sentence_id)
@@ -57,7 +57,7 @@ export const PATCH: RequestHandler = async (event) => {
  * Delete one example sentence (FK cascade sweeps its sense junctions). Editor+.
  */
 export const DELETE: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const sentence_id = event.params.sentenceId
   if (!sentence_id)

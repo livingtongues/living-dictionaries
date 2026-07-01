@@ -30,7 +30,6 @@ describe(apply_entry_writes, () => {
       history_db,
       user_id: 'u1',
       entries: [{
-        external_id: 'ext-1',
         lexeme: 'mbwa',
         phonetic: 'mˈbwa',
         senses: [{
@@ -41,8 +40,8 @@ describe(apply_entry_writes, () => {
       }],
     })
 
-    expect(report).toMatchObject({ created: 1, failed: 0, updated: 0 })
-    expect(report.results[0]).toMatchObject({ external_id: 'ext-1', status: 'created' })
+    expect(report).toMatchObject({ created: 1, skipped: 0, failed: 0, updated: 0 })
+    expect(report.results[0]).toMatchObject({ status: 'created' })
     expect(report.results[0].entry_id).toBeTruthy()
     expect(report.results[0].sense_ids).toHaveLength(1)
 

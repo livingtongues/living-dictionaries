@@ -30,7 +30,7 @@ export interface V1SourceDeleteResponseBody {
 
 /** PATCH /api/v1/dictionaries/[id]/sources/[sourceId] — edit citation metadata. Editor+. */
 export const PATCH: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const source_id = event.params.sourceId
   if (!source_id)
@@ -65,7 +65,7 @@ export const PATCH: RequestHandler = async (event) => {
  * entry/sentence/text first and then deletes.
  */
 export const DELETE: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const source_id = event.params.sourceId
   if (!source_id)

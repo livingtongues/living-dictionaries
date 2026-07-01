@@ -50,6 +50,8 @@ export function list_speakers(db: Database.Database): SpeakerRecord[] {
   return db.prepare(`SELECT id, name, decade, gender, birthplace FROM speakers ORDER BY name`).all() as SpeakerRecord[]
 }
 
+const SPEAKER_GENDERS = new Set(['m', 'f', 'o'])
+
 export function create_speaker({ db, history_db, user_id, api_key_id, input }: {
   db: Database.Database
   history_db?: Database.Database
@@ -60,6 +62,10 @@ export function create_speaker({ db, history_db, user_id, api_key_id, input }: {
   const name = (input.name || '').trim()
   if (!name)
     throw new Error('speaker name is required')
+  if (input.gender !== undefined && input.gender !== null && !SPEAKER_GENDERS.has(input.gender))
+    throw new Error(`invalid gender '${input.gender}'; expected one of m, f, o`)
+  if (input.decade !== undefined && input.decade !== null && (typeof input.decade !== 'number' || !Number.isInteger(input.decade)))
+    throw new Error('decade must be an integer (e.g. 1980)')
   const id = crypto.randomUUID()
   const { cursor, event } = insert_row({ db, table: 'speakers', user_id, api_key_id, row: {
     id,

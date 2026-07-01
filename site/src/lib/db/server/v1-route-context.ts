@@ -1,4 +1,4 @@
-import type { DictApiAccess } from '$lib/auth/verify-dict-api-access'
+import type { ApiAccess, DictApiAccess } from '$lib/auth/verify-dict-api-access'
 import type { DictionaryRow } from './get-dictionary'
 import type { Cookies } from '@sveltejs/kit'
 import { verify_dict_api_access } from '$lib/auth/verify-dict-api-access'
@@ -7,24 +7,24 @@ import { error } from '@sveltejs/kit'
 import { get_dictionary_by_url_or_id } from './get-dictionary'
 import { get_shared_db } from './shared-db'
 
-type V1Role = 'contributor' | 'editor' | 'manager'
-
 /**
  * Resolve + auth-gate a `/api/v1/dictionaries/[id]/*` request in one step — the
  * boilerplate every v1 route head repeated: resolve the url-slug-or-id to the
- * canonical dictionary (404 if absent), then verify the caller holds at least
- * `role` (API key OR session). Returns the dictionary row + the access
- * descriptor (`user_id` / `via` for audit + telemetry).
+ * canonical dictionary (404 if absent), then verify the caller holds the
+ * required `access` (API key scope OR — for a logged-in human — the mapped
+ * dictionary role). Returns the dictionary row + the access descriptor
+ * (`user_id` / `via` / `key_id` for audit + telemetry). `access` defaults to
+ * `write` so an un-annotated route fails closed.
  */
-export async function load_v1_dictionary_context({ event, role }: {
+export async function load_v1_dictionary_context({ event, access }: {
   event: { request: Request, cookies?: Pick<Cookies, 'get'>, params: Partial<Record<string, string>> }
-  role: V1Role
+  access: ApiAccess
 }): Promise<{ dictionary: DictionaryRow, access: DictApiAccess }> {
   const dictionary = get_dictionary_by_url_or_id(event.params.id ?? '')
   if (!dictionary)
     error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-  const access = await verify_dict_api_access(event, dictionary.id, role)
-  return { dictionary, access }
+  const resolved = await verify_dict_api_access(event, dictionary.id, access)
+  return { dictionary, access: resolved }
 }
 
 /**

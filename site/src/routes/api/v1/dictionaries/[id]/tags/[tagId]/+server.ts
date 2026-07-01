@@ -28,7 +28,7 @@ export interface V1TagDeleteResponseBody {
  * Editor+.
  */
 export const PATCH: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const tag_id = event.params.tagId
   if (!tag_id)
@@ -61,7 +61,7 @@ export const PATCH: RequestHandler = async (event) => {
  * Delete a tag globally — the FK cascade unlinks it from every entry. Editor+.
  */
 export const DELETE: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const tag_id = event.params.tagId
   if (!tag_id)

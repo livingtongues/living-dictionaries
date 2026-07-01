@@ -45,24 +45,68 @@ This kept the write API schema-stable (no snapshot-version churn).
   API writes are attributed to the key's **creator** (`created_by_user_id`) so history/
   audit name a real human; if that user was deleted, a `apikey:<id>` sentinel keeps
   dict.db's NOT NULL audit columns satisfied.
-- `verify_dict_api_access(event, dict_id, min_role)` is the gate for `/api/v1/*`: an
-  `Authorization: Bearer ldk_…` key (hash lookup + dict-scope match + `API_KEY_RANK`
-  where `read`→contributor-rank, `write`→editor-rank vs `min_role`) OR a normal
-  session/JWT via `verify_auth_dict_role`. Detects an LD key by the `ldk_` prefix; a
-  JWT bearer falls through to the session path (which keeps the contributor/editor/
-  manager vocab, since `dictionary_roles` is unchanged).
+- `verify_dict_api_access(event, dict_id, access)` is the gate for `/api/v1/*`, where
+  `access` is the API's OWN vocabulary **`'read' | 'write'`** — NOT a dict role. An
+  `Authorization: Bearer ldk_…` key is checked by its scope DIRECTLY (`read` endpoints
+  accept read|write keys; `write` requires a write key — `key_scope_allows`), with zero
+  contributor/editor language. A JWT bearer falls through to the session path, the ONE
+  place `access` maps onto a human role (`ACCESS_TO_HUMAN_ROLE`: read⇒contributor+,
+  write⇒editor+) via `verify_auth_dict_role`.
+- **Why the read/write ↔ contributor/editor decoupling** (Jacob flagged the old conflation
+  2026-07-01): the earlier code fused key scopes onto the dict-role RANK NUMBERS
+  (`API_KEY_RANK` read→1/write→2) so one `min_role` arg could gate both paths. That read
+  like an equivalence ("a read key IS a contributor") that doesn't exist and dragged a human
+  concept into a key-only decision. Now the two systems are independent axes that meet only
+  at the endpoint's declared `access`. Keys still can't reach manager actions (minting/
+  revoking keys is session-manager-only), so nothing was lost.
 
 ## Bulk semantics
 
 `POST …/entries` accepts a single entry, a bare array, or `{ entries, import_id }`
 (≤1000). One outer transaction; **each entry is a SAVEPOINT** → per-item best-effort
-(`{ created, updated, failed, results }`). Dialects/tags are found-or-created and
+(`{ created, skipped, updated, failed, results }`). Dialects/tags are found-or-created and
 deduped by case-insensitive name; a new dialect/tag created inside a failed item is
 rolled back with it (merged into the shared name→id map only on the item's success).
 `import_id` → a private batch tag attached to every entry (mirrors the legacy CSV
-importer's batch-tag idempotency trick). Idempotency is otherwise agent-managed:
-the response returns `external_id → entry_id`, and the list endpoint filters by
-`elicitation_id` for dedupe.
+importer's batch-tag idempotency trick).
+
+## Idempotency = client-supplied `id` (NOT a stored external_id)
+
+Decided 2026-07-01 (Jacob): the agent generates a **UUID v4** and sends it as the entry's
+`id`. That reuses the existing PRIMARY KEY (zero extra storage — no `external_id` column
+bloating dict.db + every R2 snapshot + every browser copy), the agent inherently owns the
+map (it picked the id), and it can `PATCH …/entries/{id}` immediately without a discovery
+round-trip. **`external_id` was dropped** (an unknown `external_id` field is silently ignored).
+Guardrails baked in:
+- **Skip, don't clobber.** `resolve_client_id` validates the UUID (bad → item `failed`); if the
+  id already exists the whole item is SKIPPED (`status: 'exists'`), because `merge_dict_row` is
+  an LWW upsert that would otherwise overwrite a different logical entry. Editing is PATCH's job.
+- `id` is optional (omit → server mints one). Senses/sentences/texts accept a client `id` too.
+
+## Texts (connected passages) — added 2026-07-01
+
+Full CRUD at `…/texts` + `…/texts/{textId}` (`v1-texts.ts`). A **text** is `texts.title` +
+ORDERED child `sentences` (each `text_id`-linked, `sort_key` fractional index, optional
+`ends_paragraph`). Unlike an entry's example sentence, a text-sentence is standalone (**no
+`senses_in_sentences` junction**). Ordering uses `$lib/api/v1/fractional-index.ts`
+`key_between` (canonical dgreensp midpoint over base-36 fractions — outputs never carry a
+trailing zero, the invariant that keeps the recursion terminating; an earlier hand-rolled
+midpoint infinite-looped). Create assigns `initial_keys(n)`; PATCH appends after the max key
+and reorders by reassigning `initial_keys` to a given id order. **Text DELETE also tombstones
+its sentences** (the FK is SET NULL, which would otherwise orphan them). Single text-sentence
+edits reuse `PATCH …/sentences/{id}` (now also handles `ends_paragraph`).
+
+## Agent feedback → a support message (not a log)
+
+`POST …/feedback` (access `read`, so read keys too) lets an agent tell the LD team what it
+needs. Decided 2026-07-01 (Jacob): it must be SEEN FAST, so it lands as an UNRESOLVED
+`message_threads` row (`source: 'agent_feedback'`) assigned to `FEEDBACK_OWNER_EMAIL`
+(jwrunner7@gmail.com), NOT in `client_logs` (which the log-and-fix run would bury). The key
+creator is snapshotted as the sender so a reply reaches the human. The response includes a
+`relay_to_human` sentence the agent should surface. Anti-flood (`agent-feedback.ts`): in-memory
+per-key limit 3/hr + 10/day (429, non-blocking), and past 10 OPEN feedback threads a key's new
+feedback folds into its newest thread instead of spawning more. `url` on the thread stores
+`agent-feedback:<key_id>` to group a key's threads.
 
 ## Surgical edit/delete + unlink endpoints
 
@@ -111,11 +155,25 @@ re-propose maintaining `entry_count`.
   other senses). This matches the existing human-delete behavior — don't "fix" it without
   deciding orphan policy globally. (To delete the sentence itself, use `DELETE …/sentences/{id}`,
   which tombstones the `sentences` row and cascades ITS junctions.)
-- Reads (`GET …`) are key/session gated at `contributor`; writes at `editor` (the
-  endpoint `min_role` stays in the dict-role vocab for the session path; an API key's
-  `read`/`write` maps onto those ranks). Read endpoints pass `admin_level: 1` to
-  `build_entry_data` so a dict-scoped caller sees their own private content (incl. the
-  private import tag).
+- Reads (`GET …`) require `access: 'read'`; writes `access: 'write'` (see the decoupling
+  note under API keys). Read endpoints pass `admin_level: 1` to `build_entry_data` so a
+  dict-scoped caller sees their own private content (incl. the private import tag) — note
+  this means EVERY key (even read-only) sees private content; there is no "public-only" read
+  key yet (considered + deferred 2026-07-01).
+- **JSON double-encoding when re-merging RAW rows.** `stringify_dict_row` (inside
+  `merge_dict_row`) calls `JSON.stringify` UNCONDITIONALLY on JSON columns — so feeding it a
+  row read straight from `SELECT *` (where `lexeme`/`notes`/`title`/… are already JSON strings)
+  double-encodes them. ALWAYS `parse_dict_row(...)` a raw row before spreading it back into a
+  merge. This was a live bug in `remove_source_from_all` (source delete corrupted every
+  referencing entry's lexeme/notes) — fixed 2026-07-01, regression-tested in
+  `sources/server.test.ts`. The `read_parsed_row` helper already does this for the entry/sense/
+  sentence PATCH paths.
+- The `entries` list `?include=senses` attaches each entry's senses (glosses/definition/POS/
+  domains) via ONE batched `WHERE entry_id IN (…)` query — the efficient bulk-read/export path
+  (default off keeps the list cheap). Reader keys otherwise had to N+1 `GET …/entries/{id}`.
+- **Request body limit.** adapter-node defaults `BODY_SIZE_LIMIT=512K`, far under a ≤1000-entry
+  bulk POST. Set to `16M` (docker-compose `environment:` locally; the prod value must be added to
+  `sveltekit-living.env` in vps-setup). Docs advertise a ~16MB ceiling.
 
 ## Where things live
 
@@ -130,7 +188,12 @@ re-propose maintaining `entry_count`.
   `v1-sub-resources.ts` (`apply_tag_update`/`apply_tag_delete`/`apply_dialect_update`/
   `apply_dialect_delete`/`unlink_entry_tag`/`unlink_entry_dialect`). Tombstone primitive:
   `delete_dict_row` in `dictionary-sync-helpers.ts`.
-- Input shapes/helpers: `$lib/api/v1/entry-input.ts`. Spec: `$lib/api/v1/openapi.ts`.
-- Routes: `routes/api/v1/**` (entries CRUD + `…/sentences/{id}`, `…/senses/{id}`,
-  `…/tags/{id}`, `…/dialects/{id}`, `…/entries/{entryId}/tags|dialects/{id}`,
-  speakers/tags/dialects collections, dict meta, `openapi.json`, landing).
+- Texts engine: `$lib/db/server/v1-texts.ts`; ordering `$lib/api/v1/fractional-index.ts`.
+- Feedback: `$lib/server/agent-feedback.ts` (limiter + `submit_agent_feedback`) →
+  `routes/api/v1/dictionaries/[id]/feedback/+server.ts`.
+- Input shapes/helpers: `$lib/api/v1/entry-input.ts` (`resolve_client_id`, `is_uuid`,
+  `to_multistring`, `to_string_array`). Spec: `$lib/api/v1/openapi.ts` (+ `openapi.test.ts`
+  compile-time key inventory that fails if the TS shapes drift from the published schema).
+- Routes: `routes/api/v1/**` (entries CRUD + `…/sentences/{id}`, `…/senses/{id}`, `…/texts`(+`/{textId}`),
+  `…/feedback`, `…/tags/{id}`, `…/dialects/{id}`, `…/entries/{entryId}/tags|dialects/{id}`,
+  speakers/tags/dialects/sources collections, dict meta, `openapi.json`, landing).

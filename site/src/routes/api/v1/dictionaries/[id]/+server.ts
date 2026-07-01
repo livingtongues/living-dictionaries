@@ -26,7 +26,7 @@ export interface V1DictionaryResponseBody {
  * session gated (contributor+).
  */
 export const GET: RequestHandler = async (event) => {
-  const { dictionary } = await load_v1_dictionary_context({ event, role: 'contributor' })
+  const { dictionary } = await load_v1_dictionary_context({ event, access: 'read' })
 
   return json({
     id: dictionary.id,

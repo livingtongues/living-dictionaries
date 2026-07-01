@@ -18,7 +18,7 @@ export interface V1EntryTagUnlinkResponseBody {
  * survives — use `DELETE …/tags/{tagId}` to remove the tag globally. Editor+.
  */
 export const DELETE: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const entry_id = event.params.entryId
   const tag_id = event.params.tagId

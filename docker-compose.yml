@@ -18,6 +18,10 @@ services:
     env_file: .env
     environment:
       DATA_DIR: /data
+      # adapter-node caps request bodies at 512K by default, which is far too
+      # small for v1 bulk imports (≤1000 entries/request). Raise to 16M.
+      # PROD parity: this must also be set in the VPS env — see vps-setup.
+      BODY_SIZE_LIMIT: 16M
     ports:
       - "127.0.0.1:3050:3000"
     volumes:

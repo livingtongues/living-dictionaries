@@ -27,7 +27,7 @@ export interface V1DialectDeleteResponseBody {
  * Rename a dialect (string or locale map) — affects every entry it's on. Editor+.
  */
 export const PATCH: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const dialect_id = event.params.dialectId
   if (!dialect_id)
@@ -60,7 +60,7 @@ export const PATCH: RequestHandler = async (event) => {
  * Delete a dialect globally — the FK cascade unlinks it from every entry. Editor+.
  */
 export const DELETE: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const dialect_id = event.params.dialectId
   if (!dialect_id)
