@@ -15,6 +15,16 @@ import { stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
  * differs from the DB (diffed via `stringify_dict_row` so JSON columns compare
  * by content), so a save never clobbers a column another writer/sync just
  * changed. Extracted so it's unit-testable without the Svelte reactive layer.
+ *
+ * INTENTIONAL CROSS-REPO DIFFERENCE (do NOT "unify" with tutor/house or with
+ * LD's own admin `client/live/save-row.ts`): the admin/tutor/house core treats a
+ * no-op save as a no-op — nothing changed → `wrote: false`, no `dirty`/`updated_at`
+ * churn. The dict core deliberately does the OPPOSITE: an editor calling `_save()`
+ * on a dictionary row is a meaningful authorship act that must ALWAYS re-attribute
+ * (`updated_by_user_id`) and re-dirty the row so it re-enters the history/attribution
+ * + sync pipeline, because per-dict content carries editor provenance that catalog/
+ * admin rows don't. The extra dirty write per save is the accepted cost of correct
+ * attribution. This divergence is asserted in `dict-save-row.test.ts`.
  */
 export async function save_changed_dict_columns(options: {
   connection: Pick<DictConnection, 'query' | 'execute'>

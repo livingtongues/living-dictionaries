@@ -319,7 +319,7 @@ export const api_keys = sqliteTable('api_keys', {
   /** Trailing 4 chars for display. */
   last_four: text().notNull(),
   label: text().notNull(),
-  role: text({ enum: ['manager', 'editor', 'contributor'] }).notNull().default('manager'),
+  role: text({ enum: ['read', 'write'] }).notNull().default('write'),
   /** The human who minted the key; API writes are attributed to them. */
   created_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),
   created_at: text().notNull(),

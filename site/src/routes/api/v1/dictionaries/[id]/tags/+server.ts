@@ -32,7 +32,7 @@ export const POST: RequestHandler = async (event) => {
   const body = await event.request.json() as V1TagPostRequestBody
   let result
   try {
-    result = find_or_create_tag({ db: get_dictionary_db(dictionary.id), history_db: get_dictionary_history_db(dictionary.id), user_id: access.user_id, name: body.name, is_private: body.private })
+    result = find_or_create_tag({ db: get_dictionary_db(dictionary.id), history_db: get_dictionary_history_db(dictionary.id), user_id: access.user_id, api_key_id: access.key_id ?? null, name: body.name, is_private: body.private })
   } catch (err) {
     error(ResponseCodes.BAD_REQUEST, (err as Error).message)
   }

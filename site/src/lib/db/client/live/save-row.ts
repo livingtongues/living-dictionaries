@@ -20,6 +20,14 @@ import { stringify_row } from '$lib/db/schemas/json-columns'
  * value — the persisted JSON columns are already stored strings, so we must NOT
  * stringify them again. Round-trips are canonical, so an unmutated JSON column
  * won't false-positive.
+ *
+ * INTENTIONAL CROSS-REPO DIFFERENCE: this admin/catalog core (shared in spirit
+ * with tutor/house) treats a no-op save as a no-op — no changed columns →
+ * `wrote: false`, so a spurious `_save()` never churns `dirty`/`updated_at`.
+ * The per-dict sibling `dict-client/dict-save-row.ts` deliberately does the
+ * opposite (ALWAYS re-dirties + re-attributes) because dict-content edits carry
+ * editor provenance that must flow through the history pipeline. Keep the two
+ * distinct — see that file's header for the rationale.
  */
 export async function save_changed_columns(options: {
   connection: SqliteConnection

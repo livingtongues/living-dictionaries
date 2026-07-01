@@ -110,6 +110,15 @@ console.log(JSON.stringify(rows, null, 2))
 `json_extract(context,'$.session_id')` ORDER BY received_at to reconstruct breadcrumbs + routes.
 **Investigate** in the codebase (grep the message + symbols). **Recommend a fix — do NOT apply it.**
 
+> **⚠️ Before recommending (or applying) ANY fix, check whether it's ALREADY FIXED.** Jacob creates and
+> fixes many bugs during the day, so a logged error's root cause may already be patched by the time the
+> review runs. Take the error's **timestamp / `app_version`** (the version is a build epoch-ms —
+> `new Date(Number(app_version))`) and check `git log` since then: `git log --oneline -S <symbol> -- <path>`,
+> read the offending code as it stands NOW, and confirm the crash still reproduces / the code is still
+> unguarded. If a commit already resolves it (the message/diff matches the crash), **note it as
+> `✅ already fixed (commit <sha>, verified)` and SKIP the fix** — don't propose redundant defense-in-depth
+> unless there's a distinct reason. This applies equally when acting on an approved fix from a prior report.
+
 **Severity rubric:** 🔴 P1 = `crash` / many distinct users / blocks a core flow (dictionary/entry/
 search/audio/auth). 🟠 P2 = recurring `error`, single feature, has a workaround. 🟡 P3 = low-freq /
 one user / cosmetic. ⚪ noise = expected/3rd-party/transient — name it so it filters next run.

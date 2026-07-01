@@ -78,6 +78,11 @@ describe(save_changed_dict_columns, () => {
     expect(saved.dirty).toBe(1)
   })
 
+  // INTENTIONAL CROSS-REPO DIFFERENCE (see dict-save-row.ts header): the admin
+  // core `client/live/save-row.ts` (and tutor/house) returns `wrote: false` on a
+  // no-op save. The dict core deliberately does the OPPOSITE — a no-content-change
+  // `_save()` still re-dirties + re-attributes so the editor's authorship re-enters
+  // the history/sync pipeline. This test pins that divergence; do NOT "unify" them.
   test('no content change STILL re-dirties + re-attributes (dict semantic: flips a cleaned row back)', async () => {
     insert_entry({ dirty: null })
     const row = await load()

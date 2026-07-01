@@ -39,14 +39,18 @@ This kept the write API schema-stable (no snapshot-version churn).
 - Only the **sha-256 hash** is stored; the raw `ldk_<base64url(32B)>` token is shown
   ONCE on create. `verify_api_key` looks up by hash, rejects revoked, throttles the
   `last_used_at` write to ~once/minute.
-- A key is scoped to ONE dictionary and carries a role (default `manager`). API
-  writes are attributed to the key's **creator** (`created_by_user_id`) so history/
+- A key is scoped to ONE dictionary and carries a **`read` or `write`** access level
+  (default `write`) — deliberately NOT the dict-role vocabulary (contributor/editor/
+  manager), since the v1 API can't change settings so "manager" would be meaningless.
+  API writes are attributed to the key's **creator** (`created_by_user_id`) so history/
   audit name a real human; if that user was deleted, a `apikey:<id>` sentinel keeps
   dict.db's NOT NULL audit columns satisfied.
 - `verify_dict_api_access(event, dict_id, min_role)` is the gate for `/api/v1/*`: an
-  `Authorization: Bearer ldk_…` key (hash lookup + dict-scope match + role rank) OR
-  a normal session/JWT via `verify_auth_dict_role`. Detects an LD key by the `ldk_`
-  prefix; a JWT bearer falls through to the session path.
+  `Authorization: Bearer ldk_…` key (hash lookup + dict-scope match + `API_KEY_RANK`
+  where `read`→contributor-rank, `write`→editor-rank vs `min_role`) OR a normal
+  session/JWT via `verify_auth_dict_role`. Detects an LD key by the `ldk_` prefix; a
+  JWT bearer falls through to the session path (which keeps the contributor/editor/
+  manager vocab, since `dictionary_roles` is unchanged).
 
 ## Bulk semantics
 
@@ -107,15 +111,18 @@ re-propose maintaining `entry_count`.
   other senses). This matches the existing human-delete behavior — don't "fix" it without
   deciding orphan policy globally. (To delete the sentence itself, use `DELETE …/sentences/{id}`,
   which tombstones the `sentences` row and cascades ITS junctions.)
-- Reads (`GET …`) are key/session gated at `contributor`; writes at `editor`.
-  Read endpoints pass `admin_level: 1` to `build_entry_data` so a dict-scoped caller
-  sees their own private content (incl. the private import tag).
+- Reads (`GET …`) are key/session gated at `contributor`; writes at `editor` (the
+  endpoint `min_role` stays in the dict-role vocab for the session path; an API key's
+  `read`/`write` maps onto those ranks). Read endpoints pass `admin_level: 1` to
+  `build_entry_data` so a dict-scoped caller sees their own private content (incl. the
+  private import tag).
 
 ## Where things live
 
 - Keys: `$lib/api-keys/api-key.ts` + `shared-migrations/20260629_api_keys.sql` +
-  `routes/api/dictionaries/[id]/api-keys/*` (manager-gated CRUD) + the Settings panel
-  `$lib/components/settings/ApiKeys.svelte`.
+  `routes/api/dictionaries/[id]/api-keys/*` (manager-gated CRUD) + the Agents-page
+  panel `$lib/components/settings/ApiKeys.svelte` (+ `AgentPrompt.svelte`, a
+  copyable "hand this to your agent" prompt).
 - Auth gate: `$lib/auth/verify-dict-api-access.ts`.
 - Write engine: `$lib/db/server/v1-entry-write.ts` (`apply_entry_writes` /
   `apply_entry_update` / `apply_entry_delete` / `apply_sentence_update` /

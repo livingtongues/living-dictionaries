@@ -11,7 +11,7 @@
   let keys = $state<ApiKeyRecord[]>([])
   let loading = $state(true)
   let label = $state('')
-  let role = $state<ApiKeyRole>('manager')
+  let role = $state<ApiKeyRole>('write')
   let creating = $state(false)
   let new_token = $state('')
   let copied = $state(false)
@@ -71,14 +71,17 @@
       return 'never used'
     return `last used ${new Date(iso).toLocaleDateString()}`
   }
+
+  function role_label(key_role: ApiKeyRole): string {
+    return key_role === 'read' ? 'Read only' : 'Read & write'
+  }
 </script>
 
 <div class="api-keys">
   <div class="section-label">API keys</div>
   <p class="hint">
     Programmatic access for agents &amp; scripts — a key can do anything you can on
-    <strong>this dictionary</strong>, in bulk. Paste a key into your agent and point it at
-    <a href="/api/v1" target="_blank" rel="noopener">/api/v1</a>.
+    <strong>this dictionary</strong>, in bulk. Give each key the least access an agent needs.
   </p>
 
   {#if new_token}
@@ -99,17 +102,17 @@
         <input class="form-input" bind:value={label} placeholder="Dictionary agent" maxlength="80" />
       </label>
       <label class="field">
-        <span class="field-label">Role</span>
+        <span class="field-label">Access</span>
         <select class="form-input role-select" bind:value={role}>
-          <option value="manager">manager</option>
-          <option value="editor">editor</option>
+          <option value="write">Read &amp; write</option>
+          <option value="read">Read only</option>
         </select>
       </label>
       <Button onclick={create} loading={creating} form="fill" color="primary">Create key</Button>
     </div>
 
     <p class="role-hint">
-      <strong>Editor</strong> keys can add &amp; edit content; <strong>manager</strong> keys have full access — pick the least an agent needs.
+      <strong>Read &amp; write</strong> keys can add &amp; edit content; <strong>read only</strong> keys can only fetch — pick the least an agent needs.
     </p>
   {/if}
 
@@ -125,7 +128,7 @@
         <li class="key-row">
           <code class="key-id">{key.token_prefix}…{key.last_four}</code>
           <span class="key-label">{key.label}</span>
-          <span class="key-role">{key.role}</span>
+          <span class="key-role">{role_label(key.role)}</span>
           <span class="muted key-used">{format_when(key.last_used_at)}</span>
           {#if can_manage}
             <Button onclick={() => revoke(key)} form="simple" color="red" size="sm">Revoke</Button>
@@ -172,7 +175,7 @@
     width: 100%;
   }
   .role-select {
-    min-width: 110px;
+    min-width: 150px;
   }
   .role-hint {
     font-size: 0.78rem;

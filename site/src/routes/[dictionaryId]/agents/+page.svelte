@@ -1,4 +1,5 @@
 <script lang="ts">
+  import AgentPrompt from '$lib/components/settings/AgentPrompt.svelte'
   import ApiKeys from '$lib/components/settings/ApiKeys.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import IconFa6SolidRobot from '~icons/fa6-solid/robot'
@@ -21,15 +22,15 @@
   {#if is_editor_or_above}
     <div class="explainer">
       <p>
-        An agent can do anything an editor can — add and edit entries, senses, glosses, example
-        sentences, dialects and tags — in bulk, programmatically. Create an API key below, paste it
-        into your agent, and point it at
-        <a href="/api/v1" target="_blank" rel="noopener">the Living Dictionaries API</a>.
+        An agent can do anything a read &amp; write key allows — add and edit entries, senses,
+        glosses, example sentences, dialects and tags — in bulk, programmatically. Create an API key
+        below, then hand your agent this prompt:
       </p>
+      <AgentPrompt dictionary_id={dictionary.id} />
       <p class="muted-note">
         Every change an agent makes is recorded in this dictionary's
         <a href={`/${dictionary.url}/history`}>History</a> — attributed to the agent and to the
-        manager whose key it used.
+        person whose key it used.
       </p>
     </div>
 

@@ -123,7 +123,7 @@
             count={result_facets.has_sentence.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.example_sentence')}`} />
         {/if}
-        {#if result_facets.has_sentence?.values.false}
+        {#if result_facets.has_sentence?.values.false && result_facets.has_sentence?.values.true}
           <ToggleFacet
             bind:checked={$search_params.no_sentence}
             count={result_facets.has_sentence.values.false}
@@ -136,7 +136,7 @@
               count={result_facets.has_image.values.true}
               label={`${page.data.t('entry.has_exists')} ${page.data.t('entry.image')}`} />
           {/if}
-          {#if result_facets.has_image?.values.false}
+          {#if result_facets.has_image?.values.false && result_facets.has_image?.values.true}
             <ToggleFacet
               bind:checked={$search_params.no_image}
               count={result_facets.has_image.values.false}
@@ -149,7 +149,7 @@
             count={result_facets.has_audio.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.audio')}`} />
         {/if}
-        {#if result_facets.has_audio?.values.false}
+        {#if result_facets.has_audio?.values.false && result_facets.has_audio?.values.true}
           <ToggleFacet
             bind:checked={$search_params.no_audio}
             count={result_facets.has_audio.values.false}
@@ -174,7 +174,7 @@
             count={result_facets.has_speaker.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.speaker')}`} />
         {/if}
-        {#if result_facets.has_speaker?.values.false}
+        {#if result_facets.has_speaker?.values.false && result_facets.has_speaker?.values.true}
           <ToggleFacet
             bind:checked={$search_params.no_speaker}
             count={result_facets.has_speaker.values.false}
@@ -186,7 +186,7 @@
             count={result_facets.has_noun_class.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.noun_class')}`} />
         {/if}
-        {#if result_facets.has_noun_class?.values.false}
+        {#if result_facets.has_noun_class?.values.false && result_facets.has_noun_class?.values.true}
           <ToggleFacet
             bind:checked={$search_params.no_noun_class}
             count={result_facets.has_noun_class.values.false}
@@ -198,7 +198,7 @@
             count={result_facets.has_plural_form.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.plural_form')}`} />
         {/if}
-        {#if result_facets.has_plural_form?.values.false}
+        {#if result_facets.has_plural_form?.values.false && result_facets.has_plural_form?.values.true}
           <ToggleFacet
             bind:checked={$search_params.no_plural_form}
             count={result_facets.has_plural_form.values.false}
@@ -210,7 +210,7 @@
             count={result_facets.has_part_of_speech.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.parts_of_speech')}`} />
         {/if}
-        {#if result_facets.has_part_of_speech?.values.false}
+        {#if result_facets.has_part_of_speech?.values.false && result_facets.has_part_of_speech?.values.true}
           <ToggleFacet
             bind:checked={$search_params.no_part_of_speech}
             count={result_facets.has_part_of_speech.values.false}
@@ -222,7 +222,7 @@
             count={result_facets.has_semantic_domain.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.semantic_domains')}`} />
         {/if}
-        {#if result_facets.has_semantic_domain?.values.false}
+        {#if result_facets.has_semantic_domain?.values.false && result_facets.has_semantic_domain?.values.true}
           <ToggleFacet
             bind:checked={$search_params.no_semantic_domain}
             count={result_facets.has_semantic_domain.values.false}

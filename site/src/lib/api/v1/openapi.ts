@@ -257,7 +257,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         'Programmatic, bulk-capable read/write access to a SINGLE Living Dictionary — an agent can do anything a human editor can (add/edit/delete entries with senses, glosses, example sentences, dialects, tags, speakers).',
         '',
         '## Auth',
-        'Every request carries `Authorization: Bearer ldk_…` — an API key a dictionary manager mints in the dictionary\'s Settings. A key is scoped to ONE dictionary and acts with a role (default `manager`); reads need `contributor`+, writes need `editor`+. A key for dictionary A cannot touch dictionary B (403).',
+        'Every request carries `Authorization: Bearer ldk_…` — an API key minted on the dictionary\'s Agents page. A key is scoped to ONE dictionary and grants either **read** or **read & write** access (read & write is the default; a read key can only `GET`). A key for dictionary A cannot touch dictionary B (403).',
         '',
         '## The dictionary id',
         'Every path needs `{id}` — the id (or url-slug) of the dictionary your key is scoped to. Whoever gave you the key tells you the id (it is also the `<id>` in the dictionary\'s web URL `…/<id>`). Confirm it with `GET /api/v1/dictionaries/{id}`; a wrong id for your key returns 403/404.',

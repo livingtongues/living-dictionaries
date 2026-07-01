@@ -33,7 +33,7 @@ export const POST: RequestHandler = async (event) => {
   const input = await event.request.json() as V1SpeakerPostRequestBody
   let result
   try {
-    result = create_speaker({ db: get_dictionary_db(dictionary.id), history_db: get_dictionary_history_db(dictionary.id), user_id: access.user_id, input })
+    result = create_speaker({ db: get_dictionary_db(dictionary.id), history_db: get_dictionary_history_db(dictionary.id), user_id: access.user_id, api_key_id: access.key_id ?? null, input })
   } catch (err) {
     error(ResponseCodes.BAD_REQUEST, (err as Error).message)
   }

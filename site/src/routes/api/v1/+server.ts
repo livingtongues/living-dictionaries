@@ -32,11 +32,11 @@ export const GET: RequestHandler = (event) => {
   <p>Programmatic, bulk-capable access to <strong>one dictionary</strong> — an agent can do anything a human editor can.</p>
 
   <h2>Point your agent here</h2>
-  <p>Give your agent your API key (minted in the dictionary's Settings) and this spec URL — it will read the full reference itself:</p>
+  <p>Give your agent your API key (minted on the dictionary's Agents page) and this spec URL — it will read the full reference itself:</p>
   <pre>${origin}/api/v1/openapi.json</pre>
 
   <h2>Auth</h2>
-  <p>Every request: <code>Authorization: Bearer ldk_…</code>. The key is scoped to one dictionary; writes need <code>editor</code>+. The <code>&lt;DICTIONARY_ID&gt;</code> in the paths is the id of that dictionary (the <code>&lt;id&gt;</code> in its web URL) — whoever gave you the key tells you which.</p>
+  <p>Every request: <code>Authorization: Bearer ldk_…</code>. The key is scoped to one dictionary and is either <strong>read</strong> or <strong>read &amp; write</strong> — writes need a read &amp; write key. The <code>&lt;DICTIONARY_ID&gt;</code> in the paths is the id of that dictionary (the <code>&lt;id&gt;</code> in its web URL) — whoever gave you the key tells you which.</p>
 
   <h2>Import workflow</h2>
   <ol>

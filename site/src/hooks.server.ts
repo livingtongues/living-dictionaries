@@ -56,8 +56,13 @@ export function handle({ event, resolve }) {
  * swallows its own errors).
  */
 export const handleError: HandleServerError = ({ error, event, status, message }) => {
+  // A client that disconnects mid-request surfaces here as a Node HTTP
+  // `abortIncoming` error (`message === 'aborted'`) at status 500 — a benign
+  // socket close, NOT a server crash. Keep it at `info` so it stays visible for
+  // debugging without inflating the crash count.
+  const is_client_abort = error instanceof Error && error.message === 'aborted'
   // 4xx (expected: missing route, auth gate) are not crashes; 5xx are.
-  const level = status >= 500 ? 'crash' : status === 404 ? 'info' : 'warn'
+  const level = is_client_abort ? 'info' : status >= 500 ? 'crash' : status === 404 ? 'info' : 'warn'
   log_server_event({
     level,
     message: error instanceof Error ? error.message : message,

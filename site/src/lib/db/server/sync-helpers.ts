@@ -39,6 +39,16 @@ const PRIMARY_KEY: Record<SyncableTableName, string> = {
  * LD uses one sector (per Q-shared.3), so this is simpler than house's
  * 3-sector design: iterate `SYNCABLE_TABLE_NAMES` in order, accept dirty rows
  * + tombstones, then return rows updated since the client's watermark.
+ *
+ * WATERMARK VOCABULARY — this file's `synced_up_to` / `new_synced_up_to` is the
+ * **admin_catalog_cursor**: an admin client's high-water mark over `shared.db`'s
+ * catalog + messaging tables, computed as `MAX(updated_at)` across
+ * `SYNCABLE_TABLE_NAMES` (`compute_max_updated_at`). It is a DIFFERENT cursor
+ * from the per-dict content watermark in `dictionary-sync-helpers.ts`
+ * (`dict_content_cursor`, keyed off that dict.db's `db_metadata.last_modified_at`)
+ * and from the `catalog_updated_at_mirror` that `v1-route-context.ts` writes onto
+ * `shared.db.dictionaries.updated_at`. All three ride the column name `updated_at`
+ * but live on different DBs / propagation paths — keep them straight.
  */
 export function process_sync({ db, request, user_id, server_latest_migration = latest_shared_migration_name }: {
   db: Database.Database

@@ -56,11 +56,20 @@ export function is_dict_syncable_table(table: string): table is DictSyncableTabl
  * Conflict resolution: last-write-wins by `updated_at` (Story B.4).
  * Returns the post-write `db_metadata.last_modified_at` as the new cursor.
  *
+ * WATERMARK VOCABULARY — this file's `synced_up_to` / `new_synced_up_to` is the
+ * **dict_content_cursor**: a browser client's high-water mark over ONE
+ * `dictionaries/{id}.db`'s content, tracked via that dict.db's
+ * `db_metadata.last_modified_at`. It is NOT the `admin_catalog_cursor` of
+ * `sync-helpers.ts` (which watermarks `shared.db`), and it is the value the
+ * caller then mirrors onto `shared.db.dictionaries.updated_at` as the
+ * `catalog_updated_at_mirror` (see `v1-route-context.ts` / the bullet below).
+ *
  * The caller (endpoint handler) is responsible for:
  *   - migration version handshake (`schema_outdated` / `server_outdated`)
  *   - snapshot_expired check (cursor > 60 days behind)
  *   - role lookup (verify the user can write)
  *   - mirroring `last_modified_at` to `shared.db.dictionaries.updated_at`
+ *     (the `catalog_updated_at_mirror`)
  *
  * This function is push+pull in one atomic round-trip.
  */

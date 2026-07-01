@@ -43,6 +43,17 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   folded into `KNOWN_NOISE_PATTERNS`.
 
 ## Open proposals
+- **★ Geo-split Core Web Vitals (TTFB/LCP by region or distance-to-origin bucket)** *(filed 2026-06-30 —
+  grounded in a real geo tax).* The shipped CWV panel aggregates p50/p75/p95 per metric across **all**
+  geos, hiding that on 06-30 **64/65 sessions were Malaysia → Boston origin**, paying ~997ms page-load
+  TTFB (vs 563ms US) and dragging LCP to ~2.8s (needs-improvement). Add a TTFB/LCP breakdown by
+  `country`/`region` (or near/mid/far distance-to-Boston buckets, reusing the existing haversine),
+  human-only, so the far-region tax is a standing signal instead of a hand-run query. LD-first; flag for
+  house (also Boston-hosted).
+- **Deploy-day errors fold** *(ported from house · 2026-06-30).* Tag errors from a **stale `app_version`**
+  and/or **within N min of a deploy marker** so post-deploy stale-bundle spikes auto-explain instead of
+  needing manual triage. LD already renders deploy markers on the timeline (shipped 06-28) and saw ~16
+  app_versions in 7d, so this is the natural next layer; data is in `app_version` vs current build.
 - **★ Schema-drift guard on the pipeline-health strip** *(filed 2026-06-29 — NEXT-TO-BUILD, grounded
   in a real P1).* Today's review caught a live `crash`: `/api/admin-sync` 500'd with `no such table:
   dictionary_partners` because the prod `shared.db` never got that table (the initial migration was
@@ -113,5 +124,8 @@ house's **/admin/revenue** dashboard (no payments).
   `navigator.webdriver` automation-exclusion finding; house per-route-p95 + error-per-use borrows)
 - `.cron/log-reviews/2026-06-29.md` (FIRST real-traffic day; caught the `dictionary_partners` P1
   schema-drift crash; schema-drift-guard + visibility-aware-duration + house leader-health-code borrows)
+- `.cron/log-reviews/2026-06-30.md` (sustained real-contributor traffic from Malaysia; geo-split-CWV
+  proposal from the far-region TTFB tax; house deploy-day-errors-fold borrow; gloss_languages homepage
+  guard + `aborted` noise-fold action items)
 - Phase D cross-repo read 2026-06-27 (house `error_audience`/`errors_by_version`/expected-bucket;
   tutor `error_clusters`/`KNOWN_NOISE`).
