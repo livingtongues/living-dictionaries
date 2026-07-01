@@ -13,6 +13,13 @@ import { get_shared_db } from './shared-db'
 /**
  * Per-dictionary snapshot builder cron.
  *
+ * WATERMARK VOCABULARY — the `dictionaries.updated_at` this reads is the
+ * **catalog_updated_at_mirror** (written by `v1-route-context.ts`
+ * `mirror_dictionary_cursor` from a per-dict `dict_content_cursor`), NOT an
+ * admin/browser sync cursor. `snapshot_uploaded_at` is this builder's own
+ * per-dict high-water mark; a dict re-snapshots whenever the mirror runs ahead
+ * of it.
+ *
  * Every `R2_SNAPSHOT_INTERVAL_MS`:
  *   1. Query `dictionaries WHERE updated_at > COALESCE(snapshot_uploaded_at, '1970')`
  *   2. For each: `db.backup()` → gzip → R2 PutObject to fixed key

@@ -72,10 +72,10 @@ describe(POST, () => {
   })
 
   test('manager mints a key; token returned once, hash stored', async () => {
-    const res = await POST(event({ method: 'POST', token: await manager_token(), body: { label: 'My agent', role: 'editor' } }))
+    const res = await POST(event({ method: 'POST', token: await manager_token(), body: { label: 'My agent', role: 'read' } }))
     const data = await res.json()
     expect(data.token.startsWith('ldk_')).toBeTruthy()
-    expect(data.key.role).toBe('editor')
+    expect(data.key.role).toBe('read')
     const stored = db.prepare(`SELECT token_hash FROM api_keys WHERE id = ?`).get(data.key.id) as { token_hash: string }
     expect(stored.token_hash).toBeTruthy()
     // The raw token is never persisted — there is no `token` column.

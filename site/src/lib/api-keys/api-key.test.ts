@@ -40,7 +40,7 @@ describe(create_api_key, () => {
   test('persists a key and returns the one-time token; hash is not exposed in listing', () => {
     const { record, token } = create_api_key({ db, dictionary_id: 'dict-1', label: 'My agent', created_by_user_id: 'user-1' })
     expect(token.startsWith('ldk_')).toBeTruthy()
-    expect(record.role).toBe('manager')
+    expect(record.role).toBe('write')
 
     const listed = list_api_keys({ db, dictionary_id: 'dict-1' })
     expect(listed).toHaveLength(1)
@@ -52,9 +52,9 @@ describe(create_api_key, () => {
 
 describe(verify_api_key, () => {
   test('resolves a valid token to its dictionary + role + creator', () => {
-    const { token } = create_api_key({ db, dictionary_id: 'dict-1', label: 'k', role: 'editor', created_by_user_id: 'user-1' })
+    const { token } = create_api_key({ db, dictionary_id: 'dict-1', label: 'k', role: 'read', created_by_user_id: 'user-1' })
     const verified = verify_api_key({ db, token })
-    expect(verified).toMatchObject({ dictionary_id: 'dict-1', role: 'editor', created_by_user_id: 'user-1' })
+    expect(verified).toMatchObject({ dictionary_id: 'dict-1', role: 'read', created_by_user_id: 'user-1' })
   })
 
   test('rejects an unknown token', () => {

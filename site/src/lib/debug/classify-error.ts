@@ -11,14 +11,18 @@ import type { ClientLogLevel } from '$lib/db/schemas/shared.types'
 /**
  * Known-benign error classes folded out of the real-error headline on the
  * dashboard. Seeds: the `/api/log` flush endpoint failing on sleep/redeploy and
- * self-logging; a chunk 404 after a redeploy; and the no-WebGL globe failure
- * (the user's GPU/browser can't do WebGL — nothing we can fix, not a crash).
+ * self-logging; a chunk 404 after a redeploy; the no-WebGL globe failure
+ * (the user's GPU/browser can't do WebGL — nothing we can fix, not a crash);
+ * and the Node HTTP `abortIncoming` socket close (`aborted`) when a client
+ * disconnects mid-request (also demoted to `info` at the source in
+ * `hooks.server.ts`, so this mainly catches legacy rows).
  */
 export const KNOWN_NOISE_PATTERNS = [
   'Network error for /api/log',
   'Failed to fetch dynamically imported module',
   'WebGL unavailable',
   'Failed to initialize WebGL',
+  'aborted',
 ]
 
 export function is_known_noise(message: string): boolean {
@@ -89,6 +93,9 @@ if (import.meta.vitest) {
     it('flags the no-WebGL globe failures', () => {
       expect(is_known_noise('Map failed to load (WebGL unavailable)')).toBe(true)
       expect(is_known_noise('Failed to initialize WebGL')).toBe(true)
+    })
+    it('flags the server client-disconnect socket abort', () => {
+      expect(is_known_noise('aborted')).toBe(true)
     })
     it('does NOT flag a genuine fault', () => {
       expect(is_known_noise("Cannot read properties of undefined (reading 'x')")).toBe(false)

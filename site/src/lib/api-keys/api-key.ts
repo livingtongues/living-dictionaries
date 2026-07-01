@@ -6,8 +6,9 @@ import { createHash, randomBytes } from 'node:crypto'
  *
  * Server-only (better-sqlite3 against shared.db). The raw token is shown ONCE
  * on creation; we store only its sha-256 hash. A key is scoped to one
- * dictionary and acts with a fixed role (default 'manager'); writes made with
- * it are attributed to `created_by_user_id` (the human who minted it).
+ * dictionary and grants either 'read' or 'read & write' access (default
+ * 'write'); writes made with it are attributed to `created_by_user_id` (the
+ * human who minted it).
  *
  * Token shape: `ldk_<43-char base64url of 32 random bytes>`. The `ldk_` prefix
  * lets the auth layer detect an API key vs a JWT at a glance.
@@ -15,7 +16,7 @@ import { createHash, randomBytes } from 'node:crypto'
 
 export const API_KEY_PREFIX = 'ldk_'
 
-export type ApiKeyRole = 'manager' | 'editor' | 'contributor'
+export type ApiKeyRole = 'read' | 'write'
 
 export interface MintedApiKey {
   /** The full raw token — returned to the caller ONCE, never stored. */
@@ -64,7 +65,7 @@ export function generate_api_key(): MintedApiKey {
 }
 
 /** Insert a new key. Returns the record PLUS the one-time raw token. */
-export function create_api_key({ db, dictionary_id, label, role = 'manager', created_by_user_id }: {
+export function create_api_key({ db, dictionary_id, label, role = 'write', created_by_user_id }: {
   db: Database.Database
   dictionary_id: string
   label: string

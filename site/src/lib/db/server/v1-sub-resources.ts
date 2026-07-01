@@ -20,9 +20,9 @@ function name_key(name: string): string {
   return name.trim().toLowerCase()
 }
 
-function insert_row({ db, table, row, user_id }: { db: Database.Database, table: DictSyncableTable, row: Record<string, unknown>, user_id: string }): { cursor: string | null, event: HistoryEvent | null } {
+function insert_row({ db, table, row, user_id, api_key_id }: { db: Database.Database, table: DictSyncableTable, row: Record<string, unknown>, user_id: string, api_key_id?: string | null }): { cursor: string | null, event: HistoryEvent | null } {
   const now = new Date().toISOString()
-  const event = merge_dict_row({ db, table_name: table, row: { ...row, created_at: now, updated_at: now }, user_id, at: now })
+  const event = merge_dict_row({ db, table_name: table, row: { ...row, created_at: now, updated_at: now }, user_id, at: now, api_key_id })
   return { cursor: read_last_modified_at(db), event }
 }
 
@@ -50,17 +50,18 @@ export function list_speakers(db: Database.Database): SpeakerRecord[] {
   return db.prepare(`SELECT id, name, decade, gender, birthplace FROM speakers ORDER BY name`).all() as SpeakerRecord[]
 }
 
-export function create_speaker({ db, history_db, user_id, input }: {
+export function create_speaker({ db, history_db, user_id, api_key_id, input }: {
   db: Database.Database
   history_db?: Database.Database
   user_id: string
+  api_key_id?: string | null
   input: { name: string, decade?: number, gender?: 'm' | 'f' | 'o', birthplace?: string }
 }): { speaker: SpeakerRecord, cursor: string | null } {
   const name = (input.name || '').trim()
   if (!name)
     throw new Error('speaker name is required')
   const id = crypto.randomUUID()
-  const { cursor, event } = insert_row({ db, table: 'speakers', user_id, row: {
+  const { cursor, event } = insert_row({ db, table: 'speakers', user_id, api_key_id, row: {
     id,
     name,
     decade: input.decade ?? null,
@@ -79,10 +80,11 @@ export function list_tags(db: Database.Database): TagRecord[] {
   return db.prepare(`SELECT id, name, private FROM tags ORDER BY name`).all() as TagRecord[]
 }
 
-export function find_or_create_tag({ db, history_db, user_id, name, is_private }: {
+export function find_or_create_tag({ db, history_db, user_id, api_key_id, name, is_private }: {
   db: Database.Database
   history_db?: Database.Database
   user_id: string
+  api_key_id?: string | null
   name: string
   is_private?: boolean
 }): { tag: TagRecord, created: boolean, cursor: string | null } {
@@ -94,7 +96,7 @@ export function find_or_create_tag({ db, history_db, user_id, name, is_private }
     return { tag: existing, created: false, cursor: read_last_modified_at(db) }
   const id = crypto.randomUUID()
   const tag: TagRecord = { id, name: trimmed, private: is_private ? 1 : null }
-  const { cursor, event } = insert_row({ db, table: 'tags', user_id, row: { id, name: trimmed, private: tag.private } })
+  const { cursor, event } = insert_row({ db, table: 'tags', user_id, api_key_id, row: { id, name: trimmed, private: tag.private } })
   commit_history(history_db, event)
   return { tag, created: true, cursor }
 }
@@ -108,10 +110,11 @@ export function list_dialects(db: Database.Database): DialectRecord[] {
   return rows.map(row => parse_dict_row('dialects', row) as unknown as DialectRecord)
 }
 
-export function find_or_create_dialect({ db, history_db, user_id, name }: {
+export function find_or_create_dialect({ db, history_db, user_id, api_key_id, name }: {
   db: Database.Database
   history_db?: Database.Database
   user_id: string
+  api_key_id?: string | null
   name: string
 }): { dialect: DialectRecord, created: boolean, cursor: string | null } {
   const trimmed = (name || '').trim()
@@ -122,7 +125,7 @@ export function find_or_create_dialect({ db, history_db, user_id, name }: {
     return { dialect: existing, created: false, cursor: read_last_modified_at(db) }
   const id = crypto.randomUUID()
   const dialect: DialectRecord = { id, name: { default: trimmed } }
-  const { cursor, event } = insert_row({ db, table: 'dialects', user_id, row: { id, name: dialect.name } })
+  const { cursor, event } = insert_row({ db, table: 'dialects', user_id, api_key_id, row: { id, name: dialect.name } })
   commit_history(history_db, event)
   return { dialect, created: true, cursor }
 }

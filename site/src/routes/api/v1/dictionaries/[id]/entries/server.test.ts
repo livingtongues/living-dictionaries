@@ -34,7 +34,7 @@ beforeEach(() => {
   shared_db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
     .run('r-edt', 'dict-1', 'edt-1', 'editor', '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')
 
-  api_token = create_api_key({ db: shared_db, dictionary_id: 'dict-1', label: 'agent', role: 'manager', created_by_user_id: 'edt-1' }).token
+  api_token = create_api_key({ db: shared_db, dictionary_id: 'dict-1', label: 'agent', role: 'write', created_by_user_id: 'edt-1' }).token
 })
 
 afterEach(() => {
@@ -64,6 +64,11 @@ describe(POST, () => {
   test('403 when the API key is scoped to another dictionary', async () => {
     const other = create_api_key({ db: shared_db, dictionary_id: 'dict-2', label: 'k', created_by_user_id: 'edt-1' }).token
     await expect(call({ api_key: other, body: { lexeme: 'x' } })).rejects.toMatchObject({ status: 403 })
+  })
+
+  test('403 when a read-only API key attempts a write', async () => {
+    const read_key = create_api_key({ db: shared_db, dictionary_id: 'dict-1', label: 'ro', role: 'read', created_by_user_id: 'edt-1' }).token
+    await expect(call({ api_key: read_key, body: { entries: [{ lexeme: 'x', senses: [{ glosses: { en: 'y' } }] }] } })).rejects.toMatchObject({ status: 403 })
   })
 
   test('400 when no entries are provided', async () => {

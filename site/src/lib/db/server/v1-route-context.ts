@@ -31,6 +31,14 @@ export async function load_v1_dictionary_context({ event, role }: {
  * Mirror a dict.db write cursor onto `shared.db.dictionaries.updated_at` so the
  * catalog list + the R2 snapshot builder notice the edit. Best-effort: a mirror
  * failure must NOT fail the write that already committed to dict.db.
+ *
+ * WATERMARK VOCABULARY — `cursor` here is the **dict_content_cursor** produced by
+ * `process_dict_changes` / the v1 write helpers (a per-dict `db_metadata.last_modified_at`).
+ * Copying it onto `shared.db.dictionaries.updated_at` produces the
+ * **catalog_updated_at_mirror**: the shared.db column that both the catalog-list
+ * `admin_catalog_cursor` sync (`sync-helpers.ts`) and the snapshot builder
+ * (`r2-snapshot-builder.ts`, `updated_at > snapshot_uploaded_at`) read. It is a
+ * mirror, not an independent watermark — don't confuse it with either sync cursor.
  */
 export function mirror_dictionary_cursor({ dict_id, cursor }: { dict_id: string, cursor: string | null }): void {
   if (!cursor)

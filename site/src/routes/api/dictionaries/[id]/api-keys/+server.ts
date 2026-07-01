@@ -15,7 +15,7 @@ import { error, json } from '@sveltejs/kit'
  * available.
  */
 
-const VALID_ROLES = new Set<ApiKeyRole>(['manager', 'editor', 'contributor'])
+const VALID_ROLES = new Set<ApiKeyRole>(['read', 'write'])
 
 export interface DictionariesIdApiKeysGetResponseBody {
   keys: ApiKeyRecord[]
@@ -53,7 +53,7 @@ export const POST: RequestHandler = async (event) => {
   const label = (body.label || '').trim()
   if (!label)
     error(ResponseCodes.BAD_REQUEST, 'label required')
-  const role = body.role ?? 'manager'
+  const role = body.role ?? 'write'
   if (!VALID_ROLES.has(role))
     error(ResponseCodes.BAD_REQUEST, `invalid role: ${role}`)
 

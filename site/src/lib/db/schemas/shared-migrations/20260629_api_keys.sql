@@ -1,10 +1,10 @@
 ------------------------------------------------------------------
 -- Per-dictionary API keys for the agent-friendly /api/v1 write API.
 --
--- A dictionary manager mints a key in Settings; it grants programmatic write
--- access (default 'manager') scoped to THAT ONE dictionary. Pasted into an
--- agent, the key lets it do any edit a human editor could, in bulk, via
--- /api/v1/dictionaries/:id/*.
+-- A dictionary manager mints a key on the Agents page; it grants programmatic
+-- 'read' or 'read & write' access (default 'write') scoped to THAT ONE
+-- dictionary. Pasted into an agent, a write key lets it do any edit a human
+-- editor could, in bulk, via /api/v1/dictionaries/:id/*.
 --
 -- SERVER-ONLY (like email_codes / client_logs / chat): the raw token is shown
 -- ONCE on creation and only its sha-256 hash is stored. Hashes must never reach
@@ -26,7 +26,7 @@ CREATE TABLE api_keys (
   token_prefix TEXT NOT NULL,         -- leading chars for display, e.g. 'ldk_a1b2c3'
   last_four TEXT NOT NULL,            -- trailing 4 chars for display
   label TEXT NOT NULL,               -- human-given name for the key
-  role TEXT NOT NULL DEFAULT 'manager', -- 'manager' | 'editor' | 'contributor'
+  role TEXT NOT NULL DEFAULT 'write', -- 'read' | 'write'
   created_by_user_id TEXT REFERENCES users (id) ON DELETE SET NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   last_used_at TEXT,

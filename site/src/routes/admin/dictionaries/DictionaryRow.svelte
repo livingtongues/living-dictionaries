@@ -208,7 +208,7 @@
       <button type="button" class="btn btn-default" onclick={() => show_delete = false}>Cancel</button>
       <button
         type="button"
-        class="btn delete-confirm"
+        class="btn btn-default delete-confirm"
         disabled={typed_id !== dictionary.id || deleting}
         onclick={confirm_delete}>
         {deleting ? 'Deleting…' : 'Delete forever'}
