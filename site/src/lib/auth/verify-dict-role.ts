@@ -7,6 +7,8 @@ import { verify_auth } from './verify'
 
 const ROLE_RANK = { contributor: 1, editor: 2, manager: 3 } as const
 type Role = keyof typeof ROLE_RANK
+/** The human per-dictionary roles, weakest → strongest. */
+export type DictRole = Role
 
 /**
  * Verify the caller has at least `min_role` on the given dictionary.

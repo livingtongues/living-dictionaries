@@ -15,6 +15,9 @@ export const MAX_LIST_LIMIT = 500
  */
 
 export interface SentenceInput {
+  /** Optional client-generated UUID. Supply it so you know the id up front (for
+   *  later edits) and so a re-POST is idempotent. Omit → the server mints one. */
+  id?: string
   /** Example sentence in the vernacular. string → `{ default: … }`. */
   text?: MultiString | string
   /** Translation(s), keyed by gloss-language code. */
@@ -24,6 +27,8 @@ export interface SentenceInput {
 }
 
 export interface SenseInput {
+  /** Optional client-generated UUID (see EntryInput.id). Omit → server mints one. */
+  id?: string
   /** Glosses keyed by gloss-language code, e.g. `{ en: "water" }`. */
   glosses?: MultiString | string
   /** Full definition(s), keyed by language. */
@@ -38,8 +43,14 @@ export interface SenseInput {
 }
 
 export interface EntryInput {
-  /** Optional caller reference echoed back in the report for id-mapping/idempotency. */
-  external_id?: string
+  /**
+   * Optional client-generated UUID (v4). This is the idempotency key: supply
+   * your own id and a re-POST of the same entry is a safe no-op (`status:
+   * 'exists'`) instead of a duplicate, and you already know the id for later
+   * `PATCH …/entries/{id}` edits — no server round-trip to discover it. Omit →
+   * the server mints one. Must be a valid UUID if provided.
+   */
+  id?: string
   /** The headword. Required. string → `{ default: … }`. */
   lexeme: MultiString | string
   phonetic?: string
@@ -71,6 +82,26 @@ export interface SensePatch extends SenseInput {
   id?: string
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** True for a canonical RFC-4122 UUID string. */
+export function is_uuid(value: unknown): value is string {
+  return typeof value === 'string' && UUID_RE.test(value)
+}
+
+/**
+ * Resolve a caller-supplied `id`: return it if a valid UUID, mint a fresh one if
+ * absent, or throw on a malformed id (so the item is reported failed with a
+ * clear message rather than silently getting a random id).
+ */
+export function resolve_client_id(id: unknown, { field = 'id' }: { field?: string } = {}): string {
+  if (id === undefined || id === null || id === '')
+    return crypto.randomUUID()
+  if (!is_uuid(id))
+    throw new Error(`${field} must be a valid UUID (v4) if provided`)
+  return id
+}
+
 /**
  * Partial entry update. Provided scalar/JSON fields are merged (others untouched).
  * `dialects`/`tags` are ADDITIVE links (found-or-created, deduped). `senses` are
@@ -100,11 +131,19 @@ export interface SentencePatch {
   translation?: MultiString | string
   /** `sources.slug` refs — each must already exist. */
   sources?: string[] | string
+  /** For a text-sentence: 1/true → a paragraph break follows it; 0/false → none. */
+  ends_paragraph?: boolean | number
 }
 
 export interface EntryWriteResult {
-  external_id?: string
-  status: 'created' | 'updated' | 'failed'
+  /**
+   * `created` — a new entry was written. `exists` — an entry with the
+   * client-supplied `id` was already present, so this item was skipped
+   * (idempotent no-op; use PATCH to edit). `updated` — reserved for the PATCH
+   * path. `failed` — see `error`.
+   */
+  status: 'created' | 'exists' | 'updated' | 'failed'
+  /** The entry id (the client-supplied one when given). Absent only on a pre-id failure. */
   entry_id?: string
   sense_ids?: string[]
   error?: string
@@ -112,6 +151,8 @@ export interface EntryWriteResult {
 
 export interface EntriesWriteResponseBody {
   created: number
+  /** Items skipped because their client-supplied `id` already existed. */
+  skipped: number
   updated: number
   failed: number
   results: EntryWriteResult[]

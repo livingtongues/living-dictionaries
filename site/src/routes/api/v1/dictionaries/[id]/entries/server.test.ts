@@ -76,11 +76,11 @@ describe(POST, () => {
   })
 
   test('API key happy path creates an entry and mirrors updated_at', async () => {
-    const res = await call({ api_key: api_token, body: { entries: [{ external_id: 'e1', lexeme: 'mbwa', senses: [{ glosses: { en: 'dog' } }] }] } })
+    const res = await call({ api_key: api_token, body: { entries: [{ lexeme: 'mbwa', senses: [{ glosses: { en: 'dog' } }] }] } })
     expect(res.status).toBe(200)
     const data = await res.json()
-    expect(data).toMatchObject({ created: 1, failed: 0 })
-    expect(data.results[0]).toMatchObject({ external_id: 'e1', status: 'created' })
+    expect(data).toMatchObject({ created: 1, skipped: 0, failed: 0 })
+    expect(data.results[0]).toMatchObject({ status: 'created' })
 
     const entry = dict_db.prepare(`SELECT * FROM entries WHERE id = ?`).get(data.results[0].entry_id) as Record<string, string>
     expect(JSON.parse(entry.lexeme)).toEqual({ default: 'mbwa' })
@@ -102,6 +102,27 @@ describe(POST, () => {
     const data = await res.json()
     expect(data).toMatchObject({ created: 1, failed: 1 })
     expect(data.results[1].status).toBe('failed')
+  })
+
+  test('client-supplied id is used and a re-POST is an idempotent no-op', async () => {
+    const id = crypto.randomUUID()
+    const first = await (await call({ api_key: api_token, body: { entries: [{ id, lexeme: 'mbwa' }] } })).json()
+    expect(first).toMatchObject({ created: 1, skipped: 0 })
+    expect(first.results[0].entry_id).toBe(id)
+
+    const again = await (await call({ api_key: api_token, body: { entries: [{ id, lexeme: 'CHANGED' }] } })).json()
+    expect(again).toMatchObject({ created: 0, skipped: 1 })
+    expect(again.results[0]).toMatchObject({ status: 'exists', entry_id: id })
+
+    // The existing row was NOT clobbered (skip, not upsert).
+    const row = dict_db.prepare(`SELECT lexeme FROM entries WHERE id = ?`).get(id) as { lexeme: string }
+    expect(JSON.parse(row.lexeme)).toEqual({ default: 'mbwa' })
+  })
+
+  test('rejects a malformed client id as a failed item', async () => {
+    const data = await (await call({ api_key: api_token, body: { entries: [{ id: 'not-a-uuid', lexeme: 'x' }] } })).json()
+    expect(data).toMatchObject({ created: 0, failed: 1 })
+    expect(data.results[0].error).toMatch(/uuid/i)
   })
 })
 
@@ -140,5 +161,25 @@ describe(GET, () => {
     const page = await (await get_call({ api_key: api_token, query: '?limit=2' })).json()
     expect(page.entries).toHaveLength(2)
     expect(page.has_more).toBeTruthy()
+  })
+
+  test('?include=senses attaches senses; omitted by default', async () => {
+    await call({ api_key: api_token, body: { entries: [{ lexeme: 'mbwa', senses: [{ glosses: { en: 'dog' }, parts_of_speech: 'n' }] }] } })
+
+    const plain = await (await get_call({ api_key: api_token })).json()
+    expect(plain.entries[0].senses).toBeUndefined()
+
+    const withSenses = await (await get_call({ api_key: api_token, query: '?include=senses' })).json()
+    expect(withSenses.entries[0].senses).toHaveLength(1)
+    expect(withSenses.entries[0].senses[0].glosses).toEqual({ en: 'dog' })
+    expect(withSenses.entries[0].senses[0].parts_of_speech).toEqual(['n'])
+  })
+
+  test('a read-only key can read the list', async () => {
+    const read_key = create_api_key({ db: shared_db, dictionary_id: 'dict-1', label: 'ro', role: 'read', created_by_user_id: 'edt-1' }).token
+    await call({ api_key: api_token, body: { entries: [{ lexeme: 'readable' }] } })
+    const res = await get_call({ api_key: read_key })
+    expect(res.status).toBe(200)
+    expect((await res.json()).entries).toHaveLength(1)
   })
 })

@@ -3,7 +3,7 @@ import type { HistoryEvent } from './dictionary-history-db'
 import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
 import type { EntriesWriteResponseBody, EntryInput, EntryPatch, EntryWriteResult, SenseInput, SentenceInput, SentencePatch } from '$lib/api/v1/entry-input'
 import type { MultiString } from '$lib/types'
-import { to_multistring, to_string_array } from '$lib/api/v1/entry-input'
+import { resolve_client_id, to_multistring, to_string_array } from '$lib/api/v1/entry-input'
 import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { read_last_modified_at } from './dictionary-db'
 import { record_history } from './dictionary-history-db'
@@ -88,7 +88,7 @@ function build_sentence_rows({ sentence, sense_id, now, source_slug_set }: { sen
   if (!text && !translation && !sources)
     return null
   assert_known_source_slugs(sources, source_slug_set)
-  const sentence_id = crypto.randomUUID()
+  const sentence_id = resolve_client_id(sentence.id, { field: 'sentence id' })
   return [
     { table_name: 'sentences', row: prune({ id: sentence_id, text, translation, sources, created_at: now, updated_at: now }) },
     { table_name: 'senses_in_sentences', row: prune({ id: crypto.randomUUID(), sense_id, sentence_id, created_at: now, updated_at: now }) },
@@ -96,7 +96,7 @@ function build_sentence_rows({ sentence, sense_id, now, source_slug_set }: { sen
 }
 
 function build_sense_rows({ sense, entry_id, now, source_slug_set }: { sense: SenseInput, entry_id: string, now: string, source_slug_set: Set<string> }): { sense_id: string, rows: BuiltRow[] } {
-  const sense_id = crypto.randomUUID()
+  const sense_id = resolve_client_id(sense.id, { field: 'sense id' })
   const rows: BuiltRow[] = [{
     table_name: 'senses',
     row: prune({
@@ -122,8 +122,10 @@ function build_sense_rows({ sense, entry_id, now, source_slug_set }: { sense: Se
   return { sense_id, rows }
 }
 
-function build_entry({ entry, now, dialect_map, tag_map, source_slug_set, import_tag_id }: {
+function build_entry({ entry, entry_id, now, dialect_map, tag_map, source_slug_set, import_tag_id }: {
   entry: EntryInput
+  /** Pre-resolved (validated / minted) entry id — see resolve_client_id. */
+  entry_id: string
   now: string
   dialect_map: Map<string, string>
   tag_map: Map<string, string>
@@ -137,7 +139,6 @@ function build_entry({ entry, now, dialect_map, tag_map, source_slug_set, import
   const entry_sources = to_string_array(entry.sources)
   assert_known_source_slugs(entry_sources, source_slug_set)
 
-  const entry_id = crypto.randomUUID()
   const ordered_rows: BuiltRow[] = []
   const new_dialects = new Map<string, string>()
   const new_tags = new Map<string, string>()
@@ -252,6 +253,7 @@ export function apply_entry_writes({ db, history_db, entries, user_id, import_id
 
   const results: EntryWriteResult[] = []
   let created = 0
+  let skipped = 0
   let failed = 0
 
   db.exec('BEGIN IMMEDIATE')
@@ -269,7 +271,18 @@ export function apply_entry_writes({ db, history_db, entries, user_id, import_id
       // committed (the earlier rows' events outlive the rollback).
       const item_history: HistoryEvent[] = []
       try {
-        const built = build_entry({ entry, now, dialect_map, tag_map, source_slug_set, import_tag_id })
+        // Resolve/validate the client-supplied id BEFORE touching the DB.
+        const entry_id = resolve_client_id(entry.id, { field: 'entry id' })
+        // Idempotency: a client-supplied id that already exists → skip the whole
+        // item (a safe no-op re-POST). We never clobber an existing entry here —
+        // that's what PATCH is for.
+        if (entry.id && entry_exists(db, entry_id)) {
+          db.exec('RELEASE v1_item')
+          results.push({ status: 'exists', entry_id })
+          skipped++
+          continue
+        }
+        const built = build_entry({ entry, entry_id, now, dialect_map, tag_map, source_slug_set, import_tag_id })
         for (const { table_name, row } of built.ordered_rows) {
           const event = merge_dict_row({ db, table_name, row, user_id, at: history_at, api_key_id })
           if (event)
@@ -281,13 +294,13 @@ export function apply_entry_writes({ db, history_db, entries, user_id, import_id
           dialect_map.set(key, id)
         for (const [key, id] of built.new_tags)
           tag_map.set(key, id)
-        results.push({ external_id: entry.external_id, status: 'created', entry_id: built.entry_id, sense_ids: built.sense_ids })
+        results.push({ status: 'created', entry_id: built.entry_id, sense_ids: built.sense_ids })
         created++
       } catch (err) {
         db.exec('ROLLBACK TO v1_item')
         db.exec('RELEASE v1_item')
         // item_history is discarded with the rolled-back rows.
-        results.push({ external_id: entry.external_id, status: 'failed', error: (err as Error).message })
+        results.push({ status: 'failed', error: (err as Error).message })
         failed++
       }
     }
@@ -303,11 +316,15 @@ export function apply_entry_writes({ db, history_db, entries, user_id, import_id
       }
     }
 
-    return { created, updated: 0, failed, results, new_synced_up_to }
+    return { created, skipped, updated: 0, failed, results, new_synced_up_to }
   } catch (err) {
     db.exec('ROLLBACK')
     throw err
   }
+}
+
+function entry_exists(db: Database.Database, entry_id: string): boolean {
+  return !!db.prepare(`SELECT 1 FROM entries WHERE id = ?`).get(entry_id)
 }
 
 // ── Update (PATCH) ──────────────────────────────────────────────────────────
@@ -626,6 +643,10 @@ export function apply_sentence_update({ db, history_db, sentence_id, patch, user
     const sources = to_string_array(patch.sources) ?? null
     assert_known_source_slugs(sources ?? undefined, load_source_slug_set(db))
     row.sources = sources
+    changed = true
+  }
+  if ('ends_paragraph' in source) {
+    row.ends_paragraph = patch.ends_paragraph ? 1 : null
     changed = true
   }
   if (!changed)

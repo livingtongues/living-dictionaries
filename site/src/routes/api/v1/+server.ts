@@ -41,12 +41,13 @@ export const GET: RequestHandler = (event) => {
   <h2>Import workflow</h2>
   <ol>
     <li><code>GET /api/v1/dictionaries/&lt;id&gt;</code> → read <code>gloss_languages</code> (which locale codes to key glosses by). <span class="muted">Don't trust <code>entry_count</code> to verify an import — it's eventually-consistent and lags; paginate <code>/entries</code> for a live count.</span></li>
-    <li>Give each entry an <code>external_id</code> (your own source id) — it's echoed back in <code>results</code> for id-mapping. Record those <code>external_id</code>→<code>entry_id</code> results in a local ledger so re-runs are idempotent (skip what's recorded, re-send only failures).</li>
-    <li><code>POST …/entries</code> with <code>{ entries: [...], import_id }</code> in batches of ≤1000; read the per-item <code>results</code>.</li>
-    <li>Spot-check with <code>GET …/entries/&lt;entryId&gt;</code>. <span class="muted">Read shape ≠ write shape: top-level scalars come back under <code>entry.main</code>, and <code>example_sentences</code> come back as <code>sentences</code>.</span></li>
+    <li>Generate a UUID (v4) yourself for each entry and send it as <code>id</code> — that's your idempotency key: you know it up front (record it against your source id), you use it for later <code>PATCH …/entries/&lt;id&gt;</code> edits, and re-POSTing the same <code>id</code> is a safe no-op (<code>status: "exists"</code>).</li>
+    <li><code>POST …/entries</code> with <code>{ entries: [...], import_id }</code> in batches of ≤1000 (and ≤~16MB/request); read the per-item <code>results</code> and re-send only <code>failed</code>.</li>
+    <li>Spot-check with <code>GET …/entries/&lt;entryId&gt;</code>, or bulk-read with <code>GET …/entries?include=senses</code>. <span class="muted">Read shape ≠ write shape: top-level scalars come back under <code>entry.main</code>, and <code>example_sentences</code> come back as <code>sentences</code>.</span></li>
   </ol>
   <p>Multilingual fields take a plain string or a <code>{ locale: text }</code> map; use <code>default</code> for the vernacular and gloss-language codes for glosses/translations. Full Unicode/IPA is stored verbatim.</p>
-  <p class="muted">v1 covers entries/senses/example-sentences/speakers/tags/dialects — not media. Any standard HTTP client works; a descriptive <code>User-Agent</code> is good practice.</p>
+  <p class="muted">v1 covers entries/senses/example-sentences/<strong>texts</strong>/speakers/tags/dialects/sources — not media. Any standard HTTP client works; a descriptive <code>User-Agent</code> is good practice.</p>
+  <p class="muted">Stuck or need something we don't offer? <code>POST …/feedback</code> with <code>{ message }</code> — it reaches the LD team directly (read or write keys); then relay the response's note to your human.</p>
 
   <h2>Editing &amp; cleanup</h2>
   <p>Field-merge a whole entry with <code>PATCH …/entries/&lt;entryId&gt;</code>, or fix ONE row by its id (read ids from <code>GET …/entries/&lt;entryId&gt;</code>):</p>
@@ -64,7 +65,7 @@ export const GET: RequestHandler = (event) => {
     <li><strong>OCR with a layout-aware vision-language model</strong> — a document-parsing VLM handles multi-column dictionaries well; pick a current one. Where glyphs/diacritics look wrong, fall back to inspecting the image directly.</li>
     <li><strong>Structure</strong> the text into the entry shape: identify headwords (often numbered homographs; in many orthographies short/monosyllabic), separate the vernacular phrase from the gloss, and attach usages as <code>example_sentences</code>.</li>
     <li><strong>Respect orthography</strong> — validate tokens against the language's spelling rules; never transliterate or "clean up" diacritics. Flag low-confidence OCR as a private tag (e.g. <code>needs-review</code>) instead of inventing data.</li>
-    <li><strong>Import idempotently</strong>: give each source entry a stable <code>external_id</code> and keep a local results ledger (dedupe/resume by it); <code>import_id</code> tags the run; batches ≤1000; read per-item <code>results</code>, re-send only failures. Spot-check with <code>GET …/entries/&lt;entryId&gt;</code>. <span class="muted"><code>elicitation_id</code> is for word-list/elicitation ordering — persisted &amp; queryable via <code>?elicitation_id=</code>, so use it for dedupe only if your source id is genuinely elicitation data.</span></li>
+    <li><strong>Import idempotently</strong>: generate a UUID <code>id</code> per source entry and record it against your source id (dedupe/resume by it — re-POSTing an existing <code>id</code> is a no-op); <code>import_id</code> tags the run; batches ≤1000; read per-item <code>results</code>, re-send only failures. Spot-check with <code>GET …/entries/&lt;entryId&gt;</code>. <span class="muted"><code>elicitation_id</code> is for word-list/elicitation ordering — persisted &amp; queryable via <code>?elicitation_id=</code>, so use it for dedupe only if your source id is genuinely elicitation data.</span></li>
   </ol>
 
   <h2>Quickstart</h2>

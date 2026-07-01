@@ -27,7 +27,7 @@ export interface V1EntryDeleteResponseBody {
  * private content.
  */
 export const GET: RequestHandler = async (event) => {
-  const { dictionary } = await load_v1_dictionary_context({ event, role: 'contributor' })
+  const { dictionary } = await load_v1_dictionary_context({ event, access: 'read' })
 
   const entry_id = event.params.entryId
   if (!entry_id)
@@ -48,7 +48,7 @@ export const GET: RequestHandler = async (event) => {
  * `dialects`/`tags` are additive links. Returns the updated nested entry.
  */
 export const PATCH: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const entry_id = event.params.entryId
   if (!entry_id)
@@ -82,7 +82,7 @@ export const PATCH: RequestHandler = async (event) => {
  * exactly like an editor delete.
  */
 export const DELETE: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const entry_id = event.params.entryId
   if (!entry_id)

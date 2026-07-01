@@ -34,7 +34,7 @@ export interface V1SourcePostResponseBody {
 
 /** GET /api/v1/dictionaries/[id]/sources — list the citation registry + usage counts. */
 export const GET: RequestHandler = async (event) => {
-  const { dictionary } = await load_v1_dictionary_context({ event, role: 'contributor' })
+  const { dictionary } = await load_v1_dictionary_context({ event, access: 'read' })
   const db = get_dictionary_db(dictionary.id)
   const sources = list_sources(db).map(source => ({ ...source, used_by: count_source_references(db, source.slug) }))
   return json({ sources } satisfies V1SourcesGetResponseBody)
@@ -42,7 +42,7 @@ export const GET: RequestHandler = async (event) => {
 
 /** POST /api/v1/dictionaries/[id]/sources — create a citation record. Editor+. */
 export const POST: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const body = await event.request.json() as V1SourcePostRequestBody
   let result

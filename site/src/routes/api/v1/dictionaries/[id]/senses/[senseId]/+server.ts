@@ -18,7 +18,7 @@ export interface V1SenseDeleteResponseBody {
  * delete an entry's only sense (400) — delete the entry instead. Editor+.
  */
 export const DELETE: RequestHandler = async (event) => {
-  const { dictionary, access } = await load_v1_dictionary_context({ event, role: 'editor' })
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
 
   const sense_id = event.params.senseId
   if (!sense_id)

@@ -21,19 +21,19 @@ function property_keys(name: string): string[] {
  * can't silently drift from the TS request shapes the server actually accepts.
  */
 const ENTRY_INPUT_KEYS: Record<keyof EntryInput, true> = {
-  external_id: true, lexeme: true, phonetic: true, interlinearization: true, morphology: true,
+  id: true, lexeme: true, phonetic: true, interlinearization: true, morphology: true,
   notes: true, linguistic_history: true, sources: true, scientific_names: true, elicitation_id: true,
   dialects: true, tags: true, senses: true,
 }
 const SENSE_INPUT_KEYS: Record<keyof SenseInput, true> = {
-  glosses: true, definition: true, parts_of_speech: true, semantic_domains: true,
+  id: true, glosses: true, definition: true, parts_of_speech: true, semantic_domains: true,
   write_in_semantic_domains: true, noun_class: true, plural_form: true, variant: true, example_sentences: true,
 }
 const SENTENCE_INPUT_KEYS: Record<keyof SentenceInput, true> = {
-  text: true, translation: true, sources: true,
+  id: true, text: true, translation: true, sources: true,
 }
 const SENTENCE_PATCH_KEYS: Record<keyof SentencePatch, true> = {
-  text: true, translation: true, sources: true,
+  text: true, translation: true, sources: true, ends_paragraph: true,
 }
 const ENTRY_PATCH_KEYS: Record<keyof EntryPatch, true> = {
   lexeme: true, phonetic: true, interlinearization: true, morphology: true, notes: true,
@@ -77,6 +77,9 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}/entries/{entryId}/dialects/{dialectId}': ['delete'],
       '/api/v1/dictionaries/{id}/sentences/{sentenceId}': ['delete', 'patch'],
       '/api/v1/dictionaries/{id}/senses/{senseId}': ['delete'],
+      '/api/v1/dictionaries/{id}/texts': ['get', 'post'],
+      '/api/v1/dictionaries/{id}/texts/{textId}': ['delete', 'get', 'patch'],
+      '/api/v1/dictionaries/{id}/feedback': ['post'],
       '/api/v1/dictionaries/{id}/speakers': ['get', 'post'],
       '/api/v1/dictionaries/{id}/tags': ['get', 'post'],
       '/api/v1/dictionaries/{id}/tags/{tagId}': ['delete', 'patch'],
