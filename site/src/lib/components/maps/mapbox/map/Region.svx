@@ -4,8 +4,7 @@
   import type { IRegion } from '$lib/types';
   import Region from './Region.svelte';
   import Map from './Map.svelte';
-  import { points } from '@turf/helpers';
-  import center from '@turf/center';
+  import { centerOfCoordinates } from '../../utils/centerOfCoordinates';
 
   const region: IRegion = {
     coordinates: [
@@ -17,10 +16,7 @@
     color: 'red', // overridden by color passed into region
   };
 
-  const features = points(
-    region.coordinates.map(({ longitude, latitude }) => [longitude, latitude])
-  );
-  const [lng, lat] = center(features).geometry.coordinates;
+  const [lng, lat] = centerOfCoordinates(region.coordinates);
 </script>
 
 
