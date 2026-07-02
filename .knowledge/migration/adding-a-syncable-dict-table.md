@@ -36,6 +36,19 @@ the delete-cascade trigger needs a **DROP + re-CREATE** because SQLite has no `A
 `v1-*.test.ts` that seeds the new table proves the migration (table + columns + triggers) works
 without a browser. The `dictionary-json-columns.ts` inline test guards the JSON-column registry.
 
+## The stale-draft trap (bit us on `20260701b_entry_relationships`)
+"Never edit an already-applied migration" includes **your own migration while you develop it**: the
+dev server applies + records the file on first dict open, so anything you add to that same file
+afterwards silently never runs (the runner skips it by name). Symptom found 2026-07-02: the dev
+DB's `process_delete_cascade` trigger was still the pre-draft version — relationship deletes
+tombstoned into `deletes` but the row survived, and because the client retry is `INSERT OR IGNORE
+INTO deletes`, the trigger never re-fired → **permanently undeletable rows**. Fix pattern
+(`20260702_relationship_delete_cascade_repair.sql`): a new migration that (a) re-declares the final
+trigger byte-identically (idempotent on healthy DBs) and (b) **sweeps rows that already have
+tombstones** (`DELETE FROM <t> WHERE id IN (SELECT id FROM deletes WHERE table_name='<t>')`) —
+without the sweep, stale-window rows stay undeletable forever. While iterating locally, either
+bump the migration filename on each edit or delete the `migrations` row + revert the DDL by hand.
+
 ## sources-specific note (facet-not-junction)
 `sources` is a registry table but entries/sentences/texts reference it by a **slug array column**,
 NOT a junction — so the worker needs NO grouping map for it. The slugs are already on the entry doc;

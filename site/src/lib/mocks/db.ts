@@ -54,6 +54,8 @@ export const logDbOperations: DbOperations = {
   assign_tag: log_args,
   insert_dialect: log_args,
   assign_dialect: log_args,
+  insert_relationship: log_args,
+  delete_relationship: log_args,
   insert_source: log_args,
   update_source: log_args,
   remove_source_and_delete: log_args,

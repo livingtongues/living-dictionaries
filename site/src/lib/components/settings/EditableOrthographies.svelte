@@ -118,7 +118,7 @@
 </script>
 
 <div class="section-title">{page.data.t('entry_field.local_orthography')}</div>
-<div class="hint">The primary headword is always first. Add alternate writing systems for the same words.</div>
+<div class="hint">The primary headword is always first. Add more writing systems for the same words.</div>
 
 <div class="ortho-list">
   <div class="ortho-row primary-row">

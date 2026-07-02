@@ -23,6 +23,7 @@ function t(key: string | { dynamicKey?: string, fallback?: string }): string {
     'entry_field.plural_form': 'Plural form',
     'entry_field.parts_of_speech': 'Part of Speech',
     'entry_field.semantic_domains': 'Semantic Domain',
+    'entry_field.local_orthography': 'Orthographies',
   }
   return labels[key] || key
 }
@@ -87,6 +88,51 @@ export const MixedFields: Story<typeof Component> = {
       has_plural_form: bool_facet({ has: 400, lacks: 4124 }),
       has_part_of_speech: bool_facet({ has: 2000, lacks: 2524 }),
       has_semantic_domain: bool_facet({ has: 1500, lacks: 3024 }),
+    } as any,
+  },
+}
+
+const river_dictionary = {
+  id: 'river',
+  url: 'river',
+  name: 'River',
+  orthographies: [
+    { code: 'default', name: 'RPA', primary: true },
+    { code: 'ipa', name: 'IPA' },
+  ],
+} as any
+
+// /river-like dictionary: the primary ("RPA") is named AND only 95% of results
+// have it populated, so it should join IPA as a filter option — previously the
+// facet list only ever showed alternates and silently dropped the primary.
+export const OrthographyFacetIncludesNamedPartialDefault: Story<typeof Component> = {
+  page_data: { dictionary: river_dictionary },
+  props: {
+    search_params: writable({}) as any,
+    on_close: () => {},
+    total: 400,
+    result_facets: {
+      ...array_facets,
+      _orthographies: { count: 2, values: { default: 380, ipa: 120 } },
+      has_sentence: bool_facet({ has: 400 }),
+    } as any,
+  },
+}
+
+// Selecting the "IPA" checkbox filters results down to just the entries that
+// have it, so on the next search 100% of the (now smaller) result set carries
+// it — the moot-value hiding must not also hide the checkbox the user just
+// checked, or "Clear filters" becomes the only way back.
+export const SelectedOrthographyStaysVisibleAtFullCount: Story<typeof Component> = {
+  page_data: { dictionary: river_dictionary },
+  props: {
+    search_params: writable({ orthographies: ['ipa'] }) as any,
+    on_close: () => {},
+    total: 120,
+    result_facets: {
+      ...array_facets,
+      _orthographies: { count: 1, values: { ipa: 120 } },
+      has_sentence: bool_facet({ has: 120 }),
     } as any,
   },
 }

@@ -62,9 +62,17 @@ its relationships.
 ## Surfaces
 - **Write API** (agent-facing, API-key): `POST/GET /api/v1/dictionaries/{id}/relationships`,
   `DELETE …/relationships/{id}`, and `GET …/entries/{id}?include=relationships`.
-- **Read display** (no in-app editing yet): `RelatedEntries.svelte` on the entry detail page
-  reads the live `dict_db` and renders jump-links + the localized type label, grouped near the
-  bottom. List/gallery/print/table + Orama search and an editing UI are deliberate follow-ups.
+- **Human editing UI** (2026-07-02, `.issues/related-entries-editing-ui.md`): local-first —
+  `RelatedEntries.svelte` (± per-row × / add button for `can_edit`, ? help modal for everyone)
+  + `AddRelatedEntryModal.svelte` (Orama entry search → type picker incl. existing custom types →
+  preview sentence → optional note). Writes go through `dbOperations.insert_relationship` /
+  `delete_relationship`, which share the canonicalization rules with the server via the pure
+  `$lib/db/relationship-canonicalize.ts` module (flip + symmetric sort; dedupe queried against the
+  natural key before insert). In-UI custom-type creation and sense narrowing are deliberate
+  follow-ups (API already supports both).
+- **Read display**: `RelatedEntries.svelte` on the entry detail page reads the live `dict_db` and
+  renders jump-links + the localized type label. List/gallery/print/table + Orama search
+  visibility of relationships are deliberate follow-ups.
 
 ## Cross-dictionary is intentionally OUT of scope
 Each dictionary is its own SQLite file (no cross-file FK / cascade / snapshot). Cross-dict linking
