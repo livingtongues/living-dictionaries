@@ -62,6 +62,11 @@ export const GET: RequestHandler = async (event) => {
         'content-type': 'application/octet-stream',
         'content-encoding': 'gzip',
         'cache-control': 'no-store',
+        // UNCOMPRESSED byte length, so the client can render an accurate boot
+        // download progress bar: `fetch` transparently gunzips the body, so the
+        // received byte count is uncompressed and `Content-Length` (compressed)
+        // can't be compared against it. Same-origin, so `fetch` exposes it.
+        'x-db-bytes': String(bytes.length),
       },
     })
   } finally {

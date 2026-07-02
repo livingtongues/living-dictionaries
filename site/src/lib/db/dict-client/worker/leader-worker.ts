@@ -55,7 +55,14 @@ async function boot(init: WorkerInitMessage): Promise<void> {
     // `hang` (which reports no progress) trips the watchdog like a real stuck factory.
     const open = apply_boot_fault(init.boot_fault).then(() => factory({
       emit_event: event => server.broadcast(event),
-      report_progress: (stage) => { last_stage = stage; watchdog.tick() },
+      report_progress: (stage, detail) => {
+        last_stage = stage
+        watchdog.tick()
+        // Forward to the spawning tab's main thread so it can render a boot
+        // download progress bar (only the leader tab spawns a worker → only it
+        // sees these; followers just wait on `ready`). Best-effort/telemetry-ish.
+        self.postMessage({ type: 'boot_progress', stage, detail })
+      },
     }))
     instance = await watchdog.guard(open)
     server.announce_ready()

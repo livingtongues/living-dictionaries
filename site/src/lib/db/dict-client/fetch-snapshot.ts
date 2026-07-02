@@ -24,12 +24,15 @@ export interface FetchSnapshotOptions {
   r2_base_url?: string
   signal?: AbortSignal
   /**
-   * Fired as each response chunk streams in (with the byte count so far). The
-   * boot watchdog ticks on this so a slow-but-progressing download over a poor
-   * connection is never false-timed-out — only a truly stalled transfer (no
-   * bytes for the idle window) trips it.
+   * Fired as each response chunk streams in, with the uncompressed byte count so
+   * far and (when the source advertises it via `x-db-bytes` — the VPS editor
+   * path does; public R2 does not) the uncompressed total. Two jobs: it ticks
+   * the boot watchdog (so a slow-but-progressing download over a poor connection
+   * is never false-timed-out — only a truly stalled transfer trips it), and it
+   * feeds the boot download progress bar. `total_bytes` is undefined when the
+   * source didn't advertise it → the UI shows an indeterminate/streaming bar.
    */
-  on_progress?: (received_bytes: number) => void
+  on_progress?: (progress: { received_bytes: number, total_bytes?: number }) => void
 }
 
 export interface FetchedSnapshot {
@@ -88,6 +91,15 @@ async function fetch_from_vps({ dict_id, auth, signal, on_progress }: FetchSnaps
   return { bytes, source: 'vps' }
 }
 
+/** Uncompressed snapshot size the source advertised via `x-db-bytes`, if any. */
+function read_total_bytes(response: Response): number | undefined {
+  const header = response.headers.get('x-db-bytes')
+  if (!header)
+    return undefined
+  const total = Number(header)
+  return Number.isFinite(total) && total > 0 ? total : undefined
+}
+
 async function fetch_from_r2({ dict_id, r2_base_url, signal, on_progress }: FetchSnapshotOptions): Promise<FetchedSnapshot> {
   const base = r2_base_url || R2_SNAPSHOT_BASE_URL
   const url = `${base}/${r2_dict_snapshot_key(dict_id)}`
@@ -103,14 +115,20 @@ async function fetch_from_r2({ dict_id, r2_base_url, signal, on_progress }: Fetc
 
 /**
  * Drain the response body into one Uint8Array, ticking `on_progress` per chunk
- * so the idle boot watchdog stays alive during a long-but-progressing download.
- * `response.body` yields already-content-decoded bytes (fetch handles gzip), so
- * this is byte-for-byte equivalent to `arrayBuffer()` — just observable. Falls
+ * so the idle boot watchdog stays alive during a long-but-progressing download
+ * (and feeding the boot progress bar). `response.body` yields already-content-
+ * decoded bytes (fetch handles gzip), so this is byte-for-byte equivalent to
+ * `arrayBuffer()` — just observable. `total_bytes` (from `x-db-bytes`) is
+ * forwarded on every tick so the UI can render a determinate percentage. Falls
  * back to a single buffered read when streaming isn't available.
  */
-async function read_body_with_progress(response: Response, on_progress?: (received_bytes: number) => void): Promise<Uint8Array> {
-  if (!response.body)
-    return new Uint8Array(await response.arrayBuffer())
+async function read_body_with_progress(response: Response, on_progress?: FetchSnapshotOptions['on_progress']): Promise<Uint8Array> {
+  const total_bytes = read_total_bytes(response)
+  if (!response.body) {
+    const buffered = new Uint8Array(await response.arrayBuffer())
+    on_progress?.({ received_bytes: buffered.length, total_bytes })
+    return buffered
+  }
 
   const reader = response.body.getReader()
   const chunks: Uint8Array[] = []
@@ -121,7 +139,7 @@ async function read_body_with_progress(response: Response, on_progress?: (receiv
       break
     chunks.push(value)
     received += value.length
-    on_progress?.(received)
+    on_progress?.({ received_bytes: received, total_bytes })
   }
 
   const bytes = new Uint8Array(received)

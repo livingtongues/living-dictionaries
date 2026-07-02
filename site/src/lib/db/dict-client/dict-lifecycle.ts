@@ -4,6 +4,7 @@ import type { DictConnection } from './worker-connection'
 import { create_db_client } from './worker/db-client'
 import { ensure_persistent_storage } from './worker/persistent-storage'
 import { create_dict_worker_connection } from './worker-connection'
+import { end_dict_boot_progress, report_dict_boot_progress } from './dict-boot-progress.svelte'
 import { log_event } from '$lib/debug/remote-log'
 
 /**
@@ -58,6 +59,9 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
           context: { dict_id, boot_message: message, last_stage, attempt, will_retry },
         })
       },
+      // Feed the boot download progress bar (root-layout `DictBootProgress`). Only
+      // a cold boot that actually downloads a snapshot activates it (see the store).
+      on_boot_progress: ({ stage, detail }) => report_dict_boot_progress({ dict_id, stage, detail }),
     })
     cached = { client, has_editor_role: options.has_editor_role, auth: options.auth }
     globals.__ld_dict_clients[dict_id] = cached
@@ -77,6 +81,8 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
   }
 
   await cached.client.ready()
+  // Leader is ready — the snapshot is in OPFS and open, so drop the boot bar.
+  end_dict_boot_progress(dict_id)
   if (cached.has_editor_role)
     await cached.client.request({ type: 'set_role', has_editor_role: true, auth: cached.auth })
 

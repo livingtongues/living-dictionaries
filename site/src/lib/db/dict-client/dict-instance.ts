@@ -18,6 +18,14 @@ import { DICT_DB_OPFS_PREFIX } from '$lib/constants'
  * editor tab connects — viewer + editor share one OPFS file, so house's
  * two-instance split does not apply.
  *
+ * Boot strategy — `BLOCKING_SNAPSHOT_BOOT_WITH_IDLE_WATCHDOG` (see the named
+ * constant below): the leader BLOCKS boot while it fetches → opens → migrates the
+ * dict snapshot (the `+layout.ts` load `await`s `open_dict`), and each download
+ * chunk + each boot phase `report_progress`-ticks the idle watchdog so a
+ * slow-but-progressing download is never false-timed-out — only a TRUE stall (no
+ * bytes/phase change for the idle window) trips it. Contrast house, which is
+ * naming its `progressive_snapshot_boot` (render-then-fill) side in its own repo.
+ *
  * Boot: snapshot drop-in (viewer → public R2, editor → VPS) if the OPFS file
  * is missing → open with the held-SAH VFS (FK ON) → migrations → sync engine.
  * Falls back to MemoryVFS where OPFS sync-access-handles don't exist
@@ -31,6 +39,15 @@ import { DICT_DB_OPFS_PREFIX } from '$lib/constants'
  * inside `BEGIN/COMMIT` under the lock (see `../dict-writes.ts`), so the
  * group is atomic and can never interleave with a sync apply-transaction.
  */
+
+/**
+ * The explicit name of LD's dict-DB boot strategy: the leader worker blocks the
+ * app's dict load while fetching + opening + migrating the snapshot, kept alive
+ * by per-chunk/per-phase idle-watchdog ticks (vs a fixed timeout that would kill
+ * a slow-but-live download). Surfaced for docs/telemetry so the strategy is
+ * greppable rather than implicit in the boot flow.
+ */
+export const BOOT_STRATEGY = 'blocking_snapshot_boot_with_idle_watchdog'
 
 export function create_dict_instance(options: InstanceOptions): InstanceFactory {
   return async (context: InstanceContext): Promise<DbInstance> => {
@@ -66,9 +83,10 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
           has_editor_role,
           auth,
           // Per-chunk tick keeps the idle boot watchdog alive so a slow-but-
-          // progressing download is never false-timed-out on a poor connection;
-          // a dead connection (no bytes for the idle window) still trips it.
-          on_progress: () => context.report_progress?.('snapshot_fetch'),
+          // progressing download is never false-timed-out on a poor connection
+          // (a dead connection — no bytes for the idle window — still trips it),
+          // AND feeds the boot download progress bar with the byte counts.
+          on_progress: ({ received_bytes, total_bytes }) => context.report_progress?.('snapshot_fetch', { received_bytes, total_bytes }),
         })
         await write_opfs_db_file({ path, bytes: fetched.bytes })
         console.info(`[dict-instance] ${dict_id} fetched fresh snapshot from ${fetched.source} (${fetched.bytes.length} bytes)`)

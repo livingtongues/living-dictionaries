@@ -8,6 +8,8 @@
   import '$lib/icons.css'
   import './global.css'
   import LoadingIndicator from './LoadingIndicator.svelte'
+  import DictBootProgress from './DictBootProgress.svelte'
+  import { dict_boot_progress } from '$lib/db/dict-client/dict-boot-progress.svelte'
   import Toasts from '$lib/svelte-pieces/Toasts.svelte'
   import ViewAsBanner from '$lib/components/shell/ViewAsBanner.svelte'
   import { onMount } from 'svelte'
@@ -78,9 +80,12 @@
 </script>
 
 {#if browser}
-  {#if navigating?.to}
+  <!-- Real byte-level dict-boot download bar takes precedence over the generic
+       faux-progress nav indicator while a cold dictionary snapshot downloads. -->
+  {#if navigating?.to && !dict_boot_progress.active}
     <LoadingIndicator />
   {/if}
+  <DictBootProgress />
 {/if}
 
 <Toasts />

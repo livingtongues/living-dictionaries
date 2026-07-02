@@ -48,6 +48,17 @@ export interface LeaderMeta {
   has_editor_role: boolean
 }
 
+/**
+ * Optional byte-level detail on a `snapshot_fetch` progress tick, forwarded to
+ * the main thread so the boot UI can render a download progress bar.
+ * `total_bytes` is absent when the source didn't advertise it (public R2) →
+ * indeterminate bar.
+ */
+export interface BootProgressDetail {
+  received_bytes?: number
+  total_bytes?: number
+}
+
 export interface InstanceContext {
   emit_event: (event: DbEvent) => void
   /**
@@ -55,10 +66,11 @@ export interface InstanceContext {
    * snapshot download never false-times-out) AND records `stage` as the
    * last-reached boot phase, which the host attaches to `boot_failed` telemetry
    * so a stall points at the exact phase (`snapshot_fetch`, `opfs_open`, …).
-   * A harmless no-op once the instance has booted. Optional so non-LD hosts /
-   * tests can omit it.
+   * The optional `detail` carries byte counts during `snapshot_fetch` for the
+   * boot download progress bar. A harmless no-op once the instance has booted.
+   * Optional so non-LD hosts / tests can omit it.
    */
-  report_progress?: (stage: string) => void
+  report_progress?: (stage: string, detail?: BootProgressDetail) => void
 }
 
 /** A live DB instance owned by the leader worker. */

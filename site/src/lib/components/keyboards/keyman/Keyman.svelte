@@ -77,12 +77,19 @@
   })
 
   async function targetInput() {
+    // `wrapperEl` can be null if the entry dialog is torn down while Keyman's
+    // async init is still resolving (onMount → loadScriptOnce → init → here).
+    // Touching `.querySelector`/`.firstElementChild` on null was a recurring
+    // `firstElementChild`-on-null unhandled_rejection in production.
+    if (!wrapperEl)
+      return
+
     if (target) {
       inputEl = wrapperEl.querySelector(target)
       if (!inputEl) await waitForCKEditorToInitAndBeTargeted()
     }
 
-    if (!inputEl)
+    if (!inputEl && wrapperEl)
       inputEl = wrapperEl.firstElementChild as HTMLInputElement | HTMLTextAreaElement
   }
 
@@ -92,8 +99,8 @@
       const MAX_ATTEMPTS = 10
       const interval = setInterval(() => {
         attempts++
-        inputEl = wrapperEl.querySelector(target)
-        if (inputEl || attempts > MAX_ATTEMPTS) {
+        inputEl = wrapperEl?.querySelector(target)
+        if (inputEl || !wrapperEl || attempts > MAX_ATTEMPTS) {
           clearInterval(interval)
           resolve
         }

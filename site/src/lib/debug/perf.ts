@@ -25,6 +25,11 @@ export function report_initial_load(): void {
     const entry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
     if (!entry)
       return
+    // A tab opened/loaded in the background inflates loadEventEnd with throttled
+    // background time — not the user-perceived load. Skip the timing when hidden
+    // so the page_load distribution stays honest (mirrors the content_ready guard).
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden')
+      return
     initial_load_reported = true
     track_timing({
       name: 'page_load',

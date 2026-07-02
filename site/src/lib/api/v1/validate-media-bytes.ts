@@ -19,6 +19,13 @@ export interface SniffResult {
   kind: SniffKind
   /** Present when `kind === 'media'` and the container reveals its category. */
   category?: MediaCategory
+  /**
+   * Present when `kind === 'media'` but the container is category-AMBIGUOUS
+   * (Ogg / Matroska-WebM / bare RIFF — all audio-or-video, NEVER image). Names
+   * the container so a rejection reason can be specific, and lets the image
+   * endpoint reject it (no image is delivered in one of these).
+   */
+  container?: string
 }
 
 export interface MediaValidation {
@@ -74,7 +81,7 @@ export function sniff_media_magic(bytes: Uint8Array): SniffResult | null {
       return { kind: 'media', category: 'audio' }
     if (ascii_at(bytes, 8, 'AVI '))
       return { kind: 'media', category: 'video' }
-    return { kind: 'media' }
+    return { kind: 'media', container: 'RIFF' }
   }
   // Audio
   if (ascii_at(bytes, 0, 'ID3'))
@@ -87,13 +94,13 @@ export function sniff_media_magic(bytes: Uint8Array): SniffResult | null {
     return { kind: 'media', category: 'audio' } // AIFF
   // OGG can carry audio (Vorbis/Opus/FLAC) or video (Theora) — ambiguous.
   if (ascii_at(bytes, 0, 'OggS'))
-    return { kind: 'media' }
+    return { kind: 'media', container: 'Ogg' }
   // ISO-BMFF (MP4 / MOV / M4A): 'ftyp' box at byte 4.
   if (ascii_at(bytes, 4, 'ftyp'))
     return { kind: 'media', category: ftyp_category(bytes) }
   // Matroska / WebM — ambiguous (usually video, can be audio-only).
   if (bytes_at(bytes, [0x1A, 0x45, 0xDF, 0xA3]))
-    return { kind: 'media' }
+    return { kind: 'media', container: 'Matroska/WebM' }
   return null
 }
 
@@ -197,6 +204,15 @@ export function validate_media_bytes({ category, declared_type, bytes }: {
   }
   if (sniff.kind === 'media' && sniff.category && sniff.category !== category) {
     return { ok: false, reason: `The provided data is ${sniff.category}, but this endpoint expects ${category}.` }
+  }
+  // A category-AMBIGUOUS media container (Ogg / Matroska-WebM / bare RIFF) is
+  // always audio-or-video, never an image — so it must NOT pass the image
+  // endpoint even under a generic declared type (`application/octet-stream`),
+  // which was letting a WebM/Ogg be stored as a photo. Audio/video endpoints
+  // keep accepting these (they genuinely can't be disambiguated by magic bytes).
+  if (category === 'image' && sniff.kind === 'media' && !sniff.category) {
+    const container = sniff.container ? `a ${sniff.container} container` : 'an audio/video container'
+    return { ok: false, reason: `The provided data is ${container}, which is audio/video, not an image.` }
   }
   if (declared_type_conflicts({ declared_type, category })) {
     return { ok: false, reason: `The content-type "${declared_type}" is not ${category}.` }
