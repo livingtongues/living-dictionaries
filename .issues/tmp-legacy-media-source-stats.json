@@ -1,0 +1,166 @@
+{
+  "audio": {
+    "total": 142492,
+    "with_source": 605,
+    "distinct_sources": 14,
+    "top_15": [
+      {
+        "source": "Yafeth Warijo",
+        "count": 298
+      },
+      {
+        "source": "javier domingo",
+        "count": 226
+      },
+      {
+        "source": "Marvin Richardson",
+        "count": 27
+      },
+      {
+        "source": "victoria ",
+        "count": 20
+      },
+      {
+        "source": "Ciriaco Alavez Bautista",
+        "count": 11
+      },
+      {
+        "source": "Daniel Bögre Udell",
+        "count": 7
+      },
+      {
+        "source": "Matthew Richardson",
+        "count": 7
+      },
+      {
+        "source": "Alex Larkin",
+        "count": 2
+      },
+      {
+        "source": "Risuin ",
+        "count": 2
+      },
+      {
+        "source": "Ciriaco ALAVEZ BAUTISTA",
+        "count": 1
+      },
+      {
+        "source": "Jacqueline ",
+        "count": 1
+      },
+      {
+        "source": "Luke",
+        "count": 1
+      },
+      {
+        "source": "Matthew Windsor",
+        "count": 1
+      },
+      {
+        "source": "felix odeli",
+        "count": 1
+      }
+    ],
+    "fully_unattributed_no_speaker_no_source": 4079,
+    "top_5_dicts_by_distinct_source": [
+      {
+        "dictionary_id": "zapoteco-serrano",
+        "distinct_sources": 2,
+        "rows_with_source": 12
+      },
+      {
+        "dictionary_id": "tutelo-saponi",
+        "distinct_sources": 2,
+        "rows_with_source": 34
+      },
+      {
+        "dictionary_id": "QAThAUaCXUaJVLwZeXEz",
+        "distinct_sources": 1,
+        "rows_with_source": 1
+      },
+      {
+        "dictionary_id": "frases-en-quechua",
+        "distinct_sources": 1,
+        "rows_with_source": 3
+      },
+      {
+        "dictionary_id": "TzgbJBjSo1Pn2GLMsG61",
+        "distinct_sources": 1,
+        "rows_with_source": 1
+      }
+    ]
+  },
+  "videos": {
+    "total": 435,
+    "with_source": 0,
+    "distinct_sources": 0,
+    "top_15": []
+  },
+  "photos": {
+    "total": 21643,
+    "with_source": 9468,
+    "distinct_sources": 592,
+    "top_15": [
+      {
+        "source": "Manuel Aguilera",
+        "count": 1259
+      },
+      {
+        "source": "Alex Manuel Martínez Aguilera",
+        "count": 1129
+      },
+      {
+        "source": "John Gulzari",
+        "count": 910
+      },
+      {
+        "source": "Ukhengching Marma",
+        "count": 384
+      },
+      {
+        "source": "Dr. Arul Dayanand",
+        "count": 350
+      },
+      {
+        "source": "Méthodes Bulebe Hangi",
+        "count": 268
+      },
+      {
+        "source": "Touhuni Hala Puopua",
+        "count": 247
+      },
+      {
+        "source": "elquintoroble",
+        "count": 244
+      },
+      {
+        "source": "mokgadi flora maredi",
+        "count": 231
+      },
+      {
+        "source": "Introducción a los jeroglifos mayas (2025). Wayeb. https://www.wayeb.org/resourc",
+        "count": 206
+      },
+      {
+        "source": "Iván Alejandro Díaz Acevedo",
+        "count": 163
+      },
+      {
+        "source": "Belle",
+        "count": 160
+      },
+      {
+        "source": "Wale Ogunyale",
+        "count": 155
+      },
+      {
+        "source": "Peter Constantine",
+        "count": 120
+      },
+      {
+        "source": "Opino Gomango",
+        "count": 115
+      }
+    ]
+  }
+}
