@@ -27,7 +27,7 @@ const site_dir = join(dir, '..')
 const port = process.env.HISTORY_PORT || '3102'
 const base = `http://localhost:${port}`
 const DICT = 'histtest'
-const MIGRATION = '20260606_initial.sql'
+const MIGRATION = '20260702_initial.sql'
 
 const data_dir = mkdtempSync(join(tmpdir(), 'ld-history-'))
 const shared_db_path = join(data_dir, 'shared.db')
@@ -199,6 +199,12 @@ async function main() {
   ok(rows.length === 2, 'two change rows (entry + sense insert)')
   ok(rows.every(r => r.op === 'insert'), 'both are inserts')
   ok(rows.every(r => r.user_id === USERS.manager.id), 'recorded user = authenticated manager')
+  {
+    const db = open_ro(shared_db_path)
+    const { entry_count } = db.prepare('SELECT entry_count FROM dictionaries WHERE id = ?').get(DICT)
+    db.close()
+    ok(entry_count === 1, 'catalog entry_count recounted to 1 after the push')
+  }
 
   console.log('\n— step 3: manager edits entry phonetic')
   await push(manager, { entries: [entry('e1', '2026-01-02T00:00:00.000Z', USERS.manager.id, { phonetic: 'ˈwɔːtər' })] })

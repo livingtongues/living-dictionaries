@@ -1,10 +1,11 @@
 <script lang="ts">
   import { preventDefault } from 'svelte/legacy'
   import { Button, Modal } from '$lib/svelte-pieces'
+  import type { SourceType } from '$lib/constants'
+  import type { Tables } from '$lib/types'
   import { page } from '$app/state'
   import { SOURCE_TYPES } from '$lib/constants'
   import { slugify } from '$lib/helpers/slugify'
-  import type { Tables } from '$lib/types'
 
   interface Props {
     /** Existing source to edit, or `null`/undefined to create a new one. */
@@ -27,7 +28,7 @@
   let year = $state(seed.year ?? '')
   let url = $state(seed.url ?? '')
   let license = $state(seed.license ?? '')
-  let type = $state(seed.type ?? '')
+  let type = $state<SourceType | ''>(seed.type ?? '')
   let saving = $state(false)
 
   // Auto-fill the slug from the abbreviation (fallback citation) until the user edits it directly.
