@@ -188,9 +188,8 @@
       setCenter(pointsToFit[0])
       return
     }
-    const { bbox, lineString } = await import('@turf/turf')
-    const line = lineString(pointsToFit)
-    const box = bbox(line) as LngLatBoundsLike
+    const { bboxOfCoordinates } = await import('../../utils/bboxOfCoordinates')
+    const box = bboxOfCoordinates(pointsToFit) as LngLatBoundsLike
     map.fitBounds(box, {
       padding: { top: 10, bottom: 10, left: 10, right: 10 },
       maxZoom: 6,

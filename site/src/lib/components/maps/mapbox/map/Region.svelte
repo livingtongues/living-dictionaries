@@ -1,11 +1,10 @@
 <script lang="ts">
   import type { IRegion } from '$lib/types'
   import { getContext } from 'svelte'
-  import { points } from '@turf/helpers'
-  import center from '@turf/center'
   import { mapKey } from '../context'
   import type { MapKeyContext } from '../context'
   import { polygonFeatureCoordinates } from '../../utils/polygonFromCoordinates'
+  import { centerOfCoordinates } from '../../utils/centerOfCoordinates'
   import GeoJSONSource from '../sources/GeoJSONSource.svelte'
   import PopupOfMap from './PopupOfMap.svelte'
   import Layer from './Layer.svelte'
@@ -22,9 +21,7 @@
 
   const { region, color = undefined, children }: Props = $props()
 
-  const coordinatesArray
-    = $derived(region?.coordinates.map(({ longitude, latitude }) => [longitude, latitude]) || [])
-  const [lng, lat] = $derived(center(points(coordinatesArray)).geometry.coordinates)
+  const [lng, lat] = $derived(centerOfCoordinates(region?.coordinates || []))
 
   const children_render = $derived(children)
 </script>

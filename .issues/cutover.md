@@ -71,8 +71,31 @@ The migration script is **in-repo** at `scripts/supabase-cutover/` (`migrate.tes
 the live schema). `scripts/` is NOT a workspace member — install with
 `pnpm install --ignore-workspace` inside `scripts/`.
 
+0. **Precondition — CKEditor→Tiptap editor swap is deployed** (`.issues/ckeditor-to-tiptap.md`
+   Phase 1): the app must already read/write markdown for `about` / `grammar` / entry `notes`
+   before migrated (converted) data lands. If the swap isn't live, STOP.
 1. **Dry-run the migration** (needs Supabase creds): `pnpm -C scripts migrate-to-sqlite:dry`
    (`tsx supabase-cutover/migrate.ts -e prod --dry --limit 20`).
+2a. **Rich-text content audit + HTML→markdown conversion** (decided 2026-07-02 — markdown storage,
+   all three fields; plan: `.issues/ckeditor-to-tiptap.md`). This step must be THOROUGH — it is the
+   only content audit we do (we deliberately skipped pre-cutover Supabase reads):
+   - **Audit pass** (read-only, before converting): scan ALL `dictionary_info.about`,
+     `dictionary_info.grammar`, and every locale value of `entries.notes` for tag / inline-style /
+     attribute / class frequency (`<u>`, `text-align`, small-caps spans, `<figure>`, tables, data
+     URIs, iframes, nested lists, anything exotic). Emit a frequency report + example row IDs per
+     finding. Record the report in the cutover run log.
+   - **Decide per finding**: extend the Tiptap extension set (e.g. add `SmallCaps` if real content
+     uses it) vs accept the documented drop (text-align, underline — house precedent). Update
+     `site/src/lib/markdown/extensions.ts` accordingly BEFORE converting, since the converter uses
+     the same extension set.
+   - **Convert in the mappers** (`scripts/supabase-cutover/mappers.ts`): `about` + `grammar`
+     (~line 216) and each `notes` locale value (`map_entry`, ~line 282) through
+     `html_to_markdown()` (ported house converter; runs under happy-dom — see house
+     `site/src/lib/markdown/backfill/` for the server-side pattern).
+   - **Verify conversion**: for every converted value, render the markdown back
+     (`render_markdown_to_html`) and compare normalized text content vs the original HTML's text
+     content — any mismatch beyond whitespace gets flagged with row ID + before/after for eyeball
+     review. Spot-check the largest N about/grammar pages visually on staging.
 2. **Run the full migration:** `pnpm -C scripts migrate-to-sqlite` → produces real `shared.db` +
    per-dict `dictionaries/{id}.db`. Then `pnpm -C scripts verify-migration`.
    - Reconciliations vs this schema and gotchas are in
@@ -92,7 +115,10 @@ the live schema). `scripts/` is NOT a workspace member — install with
    serves the apex. **This single flip has four easy-to-miss tails — see the "Cutover-day operational
    gotchas" section below** (Caddy inode, GitHub deploy webhook, ORIGIN env, CF email worker). Do them
    or prod deploys + inbound email + absolute URLs silently break.
-5. **Verify** production boots + renders globe / catalog / a dict's entries on the real dataset.
+5. **Verify** production boots + renders globe / catalog / a dict's entries on the real dataset —
+   including converted rich text: several dictionaries' about + grammar pages and entries with
+   notes render correctly from markdown (compare against the old app side-by-side while it's
+   still reachable).
 6. **Post-cutover cleanup:**
    - Delete `scripts/supabase-cutover/` and the legacy `scripts/types/` Supabase types +
      `config-supabase.ts` once nothing reads Supabase.

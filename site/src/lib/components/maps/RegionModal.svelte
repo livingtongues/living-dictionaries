@@ -4,8 +4,6 @@
 
   import { createEventDispatcher, onMount } from 'svelte'
   import type { IRegion, LngLatFull } from '$lib/types'
-  import { points } from '@turf/helpers'
-  import center from '@turf/center'
   import Map from './mapbox/map/Map.svelte'
   import Geocoder from './mapbox/geocoder/Geocoder.svelte'
   import Marker from './mapbox/map/Marker.svelte'
@@ -13,6 +11,7 @@
   import NavigationControl from './mapbox/controls/NavigationControl.svelte'
   import GeoJSONSource from './mapbox/sources/GeoJSONSource.svelte'
   import { polygonFeatureCoordinates } from './utils/polygonFromCoordinates'
+  import { centerOfCoordinates } from './utils/centerOfCoordinates'
   import Layer from './mapbox/map/Layer.svelte'
   import { randomColor } from './utils/randomColor'
   import Popup from './mapbox/map/Popup.svelte'
@@ -33,12 +32,7 @@
 
   onMount(() => {
     if (region) {
-      const features = points(
-        region.coordinates.map(({ longitude, latitude }) => [longitude, latitude]),
-      )
-      const c = center(features)
-      if (c?.geometry?.coordinates)
-        [centerLng, centerLat] = c.geometry.coordinates
+      [centerLng, centerLat] = centerOfCoordinates(region.coordinates)
     } else if (initialCenter) {
       ({ longitude: centerLng, latitude: centerLat } = initialCenter)
     } else if (navigator.geolocation) {
