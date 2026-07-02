@@ -54,8 +54,10 @@ and Helvetica Neue has the same problem. Per-font notes:
   --transition-time: 0.325s;
 
   /* default border color for the tailwind reset (elements that set border-width/style
-     without a color) — ≈ gray-200 in light (parity), subtle in dark. Resolved lazily,
-     so it tracks whichever mode vars are active at the element. */
+     without a color) — ≈ gray-200 in light (parity), subtle in dark. NOTE: var() in
+     custom props substitutes EAGERLY at the declaring element, so the .dark block
+     re-declares this — a :root-only definition freezes the light mix under a forced
+     body.dark (house probe 2026-07-02). */
   --un-default-border-color: color-mix(in srgb, var(--color) 11%, var(--background));
 
   --font-sans: "Segoe UI", Arial, "Noto Sans", "Noto Sans Wancho", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -104,6 +106,9 @@ body.dark {
   --warning: var(--dark-warning);
   --success: var(--dark-success);
   --invert-in-light: none;
+  /* re-declared here (not just :root) — var() in custom props substitutes EAGERLY at the
+     declaring element, so a forced body.dark must recompute the mix with dark vars */
+  --un-default-border-color: color-mix(in srgb, var(--color) 11%, var(--background));
   color-scheme: dark;
   background-color: var(--background);
   color: var(--color);

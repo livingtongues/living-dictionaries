@@ -16,10 +16,14 @@ function build_daily(days: number): LogAnalytics['daily'] {
     const base = Math.round(40 + (days - offset) * 6 + Math.sin(offset) * 25)
     const logs = Math.max(0, base)
     const errors = offset === 4 ? 14 : offset === 11 ? 6 : offset % 7 === 0 ? 2 : 0
+    // The offset===4 spike is mostly deploy-day stale-chunk noise (only 3 real
+    // faults) — exercises the real-vs-noise split on the errors line.
+    const real_errors = offset === 4 ? 3 : errors
     out.push({
       day,
       logs,
       errors,
+      real_errors,
       sessions: Math.round(logs / 12),
       users: Math.round(logs / 20),
     })
@@ -84,7 +88,7 @@ const analytics: LogAnalytics = {
     { metric: 'FCP', count: 406, p50: 852, p75: 1840, p95: 4200 },
     { metric: 'TTFB', count: 561, p50: 451, p75: 860, p95: 2300 },
   ],
-  totals: { sessions: 188, errors: 24, logs: 2417, unique_users: 73 },
+  totals: { sessions: 188, errors: 24, real_errors: 13, logs: 2417, unique_users: 73 },
   top_routes: [
     { route: 'search', count: 642 },
     { route: 'home', count: 511 },
@@ -212,7 +216,7 @@ export const Default: PageStory<typeof Component> = {
 }
 
 export const Bots: PageStory<typeof Component> = {
-  props: { analytics: { ...analytics, audience: 'bots', totals: { sessions: 402, errors: 24, logs: 1760, unique_users: 0 } } } as never,
+  props: { analytics: { ...analytics, audience: 'bots', totals: { sessions: 402, errors: 24, real_errors: 13, logs: 1760, unique_users: 0 } } } as never,
 }
 
 export const SchemaDrift: PageStory<typeof Component> = {
@@ -223,9 +227,9 @@ const empty_analytics: LogAnalytics = {
   audience: 'humans',
   window_days: 30,
   generated_at: '2026-06-23T13:04:00.000Z',
-  daily: build_daily(30).map(point => ({ ...point, logs: 0, errors: 0, sessions: 0, users: 0 })),
+  daily: build_daily(30).map(point => ({ ...point, logs: 0, errors: 0, real_errors: 0, sessions: 0, users: 0 })),
   deploys: [],
-  totals: { sessions: 0, errors: 0, logs: 0, unique_users: 0 },
+  totals: { sessions: 0, errors: 0, real_errors: 0, logs: 0, unique_users: 0 },
   top_routes: [],
   top_events: [],
   by_source: [],

@@ -9,6 +9,7 @@ function make_daily(sessions_per_day: number[]): Daily {
     sessions,
     users: 0,
     errors: 0,
+    real_errors: 0,
     logs: 0,
   }))
 }
@@ -20,7 +21,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     generated_at: '2026-06-24T00:00:00.000Z',
     daily: [],
     deploys: [],
-    totals: { sessions: 0, errors: 0, logs: 0, unique_users: 0 },
+    totals: { sessions: 0, errors: 0, real_errors: 0, logs: 0, unique_users: 0 },
     top_routes: [],
     top_events: [],
     by_source: [],
@@ -38,11 +39,12 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
 }
 
 describe(log_insights, () => {
-  test('computes rates and depth from totals', () => {
+  test('computes rates and depth from totals (error_rate uses real_errors, not raw errors)', () => {
     const result = log_insights({
-      analytics: make_analytics({ totals: { logs: 2000, errors: 20, sessions: 200, unique_users: 80 }, window_days: 10 }),
+      // 20 raw error rows but only 10 real faults (10 known-noise) → rate is 10/2000.
+      analytics: make_analytics({ totals: { logs: 2000, errors: 20, real_errors: 10, sessions: 200, unique_users: 80 }, window_days: 10 }),
     })
-    expect(result.error_rate).toBe(0.01)
+    expect(result.error_rate).toBe(0.005)
     expect(result.sessions_per_day).toBe(20)
     expect(result.logs_per_session).toBe(10)
   })

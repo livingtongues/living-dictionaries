@@ -41,6 +41,15 @@ export function classify_sync_failure(error: unknown): SyncFailureKind {
     return 'snapshot_expired'
   if (code === 'unauthorized' || code === 'role_revoked')
     return 'auth'
+  // Edge/gateway 5xx during a deploy swap (Cloudflare 520–527, 502 Bad Gateway,
+  // 504 Gateway Timeout) arrive as a transient HTML interstitial — the origin was
+  // briefly unreachable, NOT a real app fault. Treat as `network` (warn +
+  // throttled) so a redeploy blip doesn't ship a burst of `error` rows. 503 is
+  // left to the `server_outdated` code path above; a bare 500 from our own
+  // endpoint stays `other` (a real fault worth surfacing).
+  const status = (error as { status?: unknown } | null | undefined)?.status
+  if (typeof status === 'number' && (status === 502 || status === 504 || (status >= 520 && status <= 527)))
+    return 'network'
   const message = (error as { message?: unknown } | null | undefined)?.message
   if (typeof message === 'string') {
     if (/not a database|disk image is malformed|file is not a database|\bcorrupt/i.test(message))
@@ -48,6 +57,10 @@ export function classify_sync_failure(error: unknown): SyncFailureKind {
     // post_request collapses fetch rejections to these prefixes; the dict
     // engine's raw fetch rejects with the browser-native messages.
     if (/^Network error:|^Request timed out|Failed to fetch|NetworkError|Load failed/i.test(message))
+      return 'network'
+    // Fallback for paths that lost the numeric `status` (e.g. main-thread
+    // admin engine): match the Cloudflare/edge 5xx interstitial body itself.
+    if (/web server is returning|error code 5\d\d/i.test(message))
       return 'network'
   }
   return 'other'
@@ -91,6 +104,20 @@ if (import.meta.vitest) {
     test('classifies transport failures as network', () => {
       expect(classify_sync_failure(new TypeError('Failed to fetch'))).toBe('network')
       expect(classify_sync_failure(new Error('Network error: Load failed'))).toBe('network')
+    })
+    test('classifies edge/gateway 5xx (deploy-swap interstitials) as network by status', () => {
+      const cf_520 = Object.assign(new Error('<!DOCTYPE html>… 520: Web server is returning an unknown error'), { status: 520 })
+      expect(classify_sync_failure(cf_520)).toBe('network')
+      expect(classify_sync_failure(Object.assign(new Error('x'), { status: 502 }))).toBe('network')
+      expect(classify_sync_failure(Object.assign(new Error('x'), { status: 504 }))).toBe('network')
+      expect(classify_sync_failure(Object.assign(new Error('x'), { status: 527 }))).toBe('network')
+    })
+    test('matches the CF interstitial body when status is absent', () => {
+      expect(classify_sync_failure(new Error('livingdictionaries.app | 520: Web server is returning an unknown error'))).toBe('network')
+      expect(classify_sync_failure(new Error('<html>… Error code 522 …</html>'))).toBe('network')
+    })
+    test('a bare app 500 stays other (a real fault worth surfacing)', () => {
+      expect(classify_sync_failure(Object.assign(new Error('Internal Error'), { status: 500 }))).toBe('other')
     })
     test('everything else is other', () => {
       expect(classify_sync_failure(new Error('FOREIGN KEY constraint failed'))).toBe('other')

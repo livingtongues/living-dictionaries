@@ -108,6 +108,25 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   non-correlatable across LD/tutor/house), **NOT daily-rotated** (a visitor stays one id across days),
   **GDPR explicitly a non-concern** (no cookie/consent banner). Accepted tradeoffs: phone+laptop = 2
   visitors; NAT + same UA can collide. Good enough for traffic stats.
+- ✅ **Split real vs noise in the daily-error series** *(filed + SHIPPED 2026-07-02 — grounded in a
+  live false spike).* On 07-02 one contributor caught two back-to-back deploys and logged **99
+  stale-chunk `Failed to fetch dynamically imported module`** rows (`KNOWN_NOISE_PATTERNS`) + 8 real,
+  so the day would have rendered **~107** and looked like a regression. **Shipped:** registered an
+  `is_noise_msg(message)` SQLite fn (mirrors `is_bot_ua`) reusing `is_known_noise ||
+  is_expected_error_response`; `DailyPoint`/`totals` gained `real_errors` (live query folds noise;
+  cold rollup days fall back to raw `errors`); the errors line + "Errors" tile + `error_rate` insight
+  now show **real faults** with a "+N noise" annotation and a "N known-noise rows excluded" subtitle.
+  The **LD instance of the cross-repo "noise vs real" theme** (tutor filed the same 07-01; house
+  shipped it). Pairs with the shipped Phase-B classify fix for edge-5xx interstitials (deploy-swap
+  520s → `network`/`warn`) so they never inflate the real count either.
+- **Server faults / schema-drift strip** *(ported from house · 2026-07-02 — house explicitly flagged
+  for LD).* Isolate `source='server' AND level IN ('error','crash')` clustered by `context.route`,
+  newest-first with count + last-seen, and highlight `SqliteError`/`no such table`/`no such column`
+  as the schema-drift class — a "these are always real, fix now" board separate from the mixed client
+  stream. Grounded in LD's own history (the `dictionary_partners` schema-drift 500) and today's
+  deploy-swap `Internal Error` 500s, which sat undifferentiated among client noise. `log-analytics.ts`
+  already reads `source`; overlaps the existing **schema-drift guard on the health strip** item above
+  (build them together). LD-fit confirmed; also on tutor's radar.
 
 ## Cross-pollination from sibling apps (house + tutor)
 *Added 2026-06-27 (Phase D — first cross-repo read). LD is currently the furthest-along dashboard, so

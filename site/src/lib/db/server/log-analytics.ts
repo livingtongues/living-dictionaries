@@ -48,12 +48,33 @@ function ensure_is_bot_ua(db: Database.Database): void {
   is_bot_ua_registered.add(db)
 }
 
+/**
+ * Register `is_noise_msg(message)` — 1 when a logged error is a KNOWN-benign
+ * class (stale-chunk 404s after a deploy, WebGL-unavailable, socket aborts, …)
+ * or an EXPECTED HTTP response (401/403/404 gates), 0 for a real fault. Same
+ * predicate the error-cluster panel uses per-row, so the daily "real errors"
+ * line and the cluster `is_noise` flag agree. Lets a deploy-day stale-chunk
+ * burst stop masquerading as a regression on the trend line.
+ */
+const is_noise_msg_registered = new WeakSet<Database.Database>()
+function ensure_is_noise_msg(db: Database.Database): void {
+  if (is_noise_msg_registered.has(db))
+    return
+  db.function('is_noise_msg', { deterministic: true }, (message: unknown) => {
+    const text = typeof message === 'string' ? message : null
+    if (!text)
+      return 0
+    return (is_known_noise(text) || is_expected_error_response(text)) ? 1 : 0
+  })
+  is_noise_msg_registered.add(db)
+}
+
 /** Timing metrics surfaced on the performance panel, in display order. */
 const PERF_METRICS = ['page_load', 'search'] as const
 /** Core Web Vitals surfaced on the dashboard, in display order (the canonical CWV trio first). */
 const WEB_VITAL_METRICS = ['LCP', 'INP', 'CLS', 'FCP', 'TTFB'] as const
 
-export interface DailyPoint { day: string, sessions: number, users: number, errors: number, logs: number }
+export interface DailyPoint { day: string, sessions: number, users: number, errors: number, real_errors: number, logs: number }
 /** A distinct deployed build seen in the window (`app_version` = build epoch ms), for timeline markers. */
 export interface Deploy { day: string, version: string, first_seen: string, sessions: number }
 export interface PerfSummary { name: string, count: number, p50: number | null, p90: number | null, p95: number | null, max: number | null, slowest: { duration_ms: number, route: string } | null }
@@ -169,7 +190,7 @@ export interface LogAnalytics {
   daily: DailyPoint[]
   /** Distinct builds seen in the window (first-seen day per `app_version`) — timeline deploy markers. */
   deploys: Deploy[]
-  totals: { sessions: number, errors: number, logs: number, unique_users: number }
+  totals: { sessions: number, errors: number, real_errors: number, logs: number, unique_users: number }
   top_routes: { route: string, count: number }[]
   top_events: { event: string, count: number }[]
   by_source: { source: string, logs: number, errors: number }[]
@@ -266,6 +287,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   audience?: Audience
 } = {}): LogAnalytics {
   ensure_is_bot_ua(shared_db)
+  ensure_is_noise_msg(shared_db)
   const window_start = new Date(now.getTime() - (days - 1) * 86_400_000)
   const window_start_day = day_string(window_start)
   const window_start_iso = `${window_start_day}T00:00:00.000Z`
@@ -338,6 +360,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     totals: {
       sessions: daily.reduce((sum, point) => sum + point.sessions, 0),
       errors: daily.reduce((sum, point) => sum + point.errors, 0),
+      real_errors: daily.reduce((sum, point) => sum + point.real_errors, 0),
       logs: daily.reduce((sum, point) => sum + point.logs, 0),
       unique_users,
     },
@@ -383,10 +406,13 @@ function build_daily_series({ shared_db, window_start_iso, window_start_day, aud
   now: Date
 }): { daily: DailyPoint[], rollup_rows: RollupRow[], live_by_day: Map<string, DailyPoint> } {
   // Bot/headless rows excluded so the sessions/users/logs/errors trend reflects real people.
+  // `real_errors` drops known-noise / expected-response rows (stale-chunk 404s after a deploy,
+  // auth gates, …) so a redeploy stale-bundle burst doesn't read as a regression on the line.
   const live_daily = shared_db.prepare(`
     SELECT substr(received_at, 1, 10) day,
            COUNT(*) logs,
            SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL} THEN 1 ELSE 0 END) errors,
+           SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL} AND is_noise_msg(message) = 0 THEN 1 ELSE 0 END) real_errors,
            COUNT(DISTINCT user_id) users,
            COUNT(DISTINCT json_extract(context, '$.session_id')) sessions
     FROM client_logs WHERE received_at >= ? AND ${audience_filter}
@@ -406,19 +432,24 @@ function build_daily_series({ shared_db, window_start_iso, window_start_day, aud
       continue // wrong audience namespace
     let point = rollup_by_day.get(row.day)
     if (!point) {
-      point = { day: row.day, sessions: 0, users: 0, errors: 0, logs: 0 }
+      point = { day: row.day, sessions: 0, users: 0, errors: 0, real_errors: 0, logs: 0 }
       rollup_by_day.set(row.day, point)
     }
     if (metric === 'sessions') point.sessions += row.value
     else if (metric === 'users') point.users += row.value
-    else if (metric === 'errors') point.errors += row.value
-    else if (metric === 'logs') point.logs += row.value
+    // Archived days predate the split — no `real_errors` rollup metric exists, so
+    // cold days fall back to the raw error count (they're older than the hot
+    // window where a deploy burst would mislead).
+    else if (metric === 'errors') {
+      point.errors += row.value
+      point.real_errors += row.value
+    } else if (metric === 'logs') point.logs += row.value
   }
 
   const daily: DailyPoint[] = []
   for (let offset = days - 1; offset >= 0; offset--) {
     const day = day_string(new Date(now.getTime() - offset * 86_400_000))
-    daily.push(live_by_day.get(day) ?? rollup_by_day.get(day) ?? { day, sessions: 0, users: 0, errors: 0, logs: 0 })
+    daily.push(live_by_day.get(day) ?? rollup_by_day.get(day) ?? { day, sessions: 0, users: 0, errors: 0, real_errors: 0, logs: 0 })
   }
   return { daily, rollup_rows, live_by_day }
 }
