@@ -83,6 +83,35 @@ export function upsert_rows({ db, table, rows, json_cols = [] }: {
 }
 
 /**
+ * Delete rows whose FK parent is absent (their parent was soft-deleted in
+ * Supabase and therefore not migrated). Iterates because pruning can cascade
+ * (e.g. a sense under a deleted entry, then that sense's junction rows).
+ * Works with `foreign_keys` ON or OFF (`foreign_key_check` is an explicit
+ * scan). Returns per-table pruned counts.
+ */
+export function prune_orphans(db: Database.Database): Record<string, number> {
+  const pruned: Record<string, number> = {}
+  for (let pass = 0; pass < 10; pass++) {
+    const violations = db.pragma('foreign_key_check') as { table: string, rowid: number | bigint }[]
+    if (violations.length === 0)
+      break
+    const by_table = new Map<string, (number | bigint)[]>()
+    for (const violation of violations) {
+      if (!by_table.has(violation.table))
+        by_table.set(violation.table, [])
+      by_table.get(violation.table)!.push(violation.rowid)
+    }
+    for (const [table, rowids] of by_table) {
+      const stmt = db.prepare(`DELETE FROM ${table} WHERE rowid = ?`)
+      for (const rowid of rowids)
+        stmt.run(rowid)
+      pruned[table] = (pruned[table] ?? 0) + rowids.length
+    }
+  }
+  return pruned
+}
+
+/**
  * Set `db_metadata.last_modified_at` to the max `updated_at` across all content
  * tables — a stable sync cursor (vs. the trigger's "now", which would churn on
  * every rebuild). No-op if the db has no content.

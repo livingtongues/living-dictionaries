@@ -1,4 +1,5 @@
 import MarkdownIt from 'markdown-it'
+import { configure_pandoc_spans } from './markdown-it-pandoc-spans'
 
 /**
  * Rich-text markdown → HTML for reader views (about/grammar pages, entry
@@ -10,8 +11,10 @@ import MarkdownIt from 'markdown-it'
 let renderer: MarkdownIt | null = null
 
 function get_renderer(): MarkdownIt {
-  if (!renderer)
+  if (!renderer) {
     renderer = new MarkdownIt({ html: true, linkify: false, breaks: false })
+    configure_pandoc_spans(renderer) // `[text]{.smallcaps}` → <span class="smallcaps">
+  }
   return renderer
 }
 

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import sanitize from 'xss'
   import { HeadlessButton } from '$lib/svelte-pieces'
   import { page } from '$app/state'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { looks_like_html, rich_text_display_html } from '$lib/markdown/html-era-shim'
   import { render_markdown_to_html } from '$lib/markdown/render'
+  import { sanitize_rich_text as sanitize } from '$lib/markdown/sanitize-rich-text'
 
   const { data } = $props()
   const { is_manager, dictionary, update_grammar } = $derived(data)

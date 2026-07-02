@@ -1,11 +1,14 @@
 import type Database from 'better-sqlite3'
 import type { PoolClient } from 'pg'
 import type { Row } from './mappers'
+import type { ConversionMismatch } from './richtext'
+import { appendFileSync, existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { postgres } from '../config-supabase'
-import { insert_rows, set_last_modified_to_max, upsert_rows } from './db-insert'
+import { insert_rows, prune_orphans, set_last_modified_to_max, upsert_rows } from './db-insert'
+import { create_logger } from './logger'
 import {
   build_sentence_order,
   DICT_JSON_COLS,
@@ -33,6 +36,8 @@ import {
 } from './mappers'
 import { LATEST_DICT_MIGRATION, open_dict_db, open_shared_db } from './open-sqlite'
 import * as read from './read'
+import { merge_user_row, plan_user_identity, read_existing_users, remap_rows_user_ids } from './remap'
+import { convert_multistring, convert_value, create_conversion_stats, total_conversions } from './richtext'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const DEFAULT_DATA_DIR = resolve(here, '../../../site/.data')
@@ -68,7 +73,75 @@ const CONTENT_CONFIG: Record<string, { map?: (row: Row) => Row, json?: string[],
   entry_tags: { junction: ['entry_id', 'tag_id'] },
 }
 
-async function migrate_users({ client, shared }: { client: PoolClient, shared: Database.Database }): Promise<Set<string>> {
+// ---------------------------------------------------------------------------
+// Manifest — the run's durable record: per-dict counts, synthesized rows,
+// conversion stats, timings. Enables `--skip-existing` resume and lets
+// verify.ts account for rows the migration legitimately ADDS (audio-source
+// resolution). Written atomically after every dict.
+// ---------------------------------------------------------------------------
+
+interface DictManifest {
+  counts: Record<string, number>
+  synthesized: { speakers: number, audio_speakers: number, sources: number }
+  /** rows removed post-insert because their (soft-deleted) parent wasn't migrated */
+  pruned: Record<string, number>
+  conversion: { converted: number, passed_through: number, emptied: number, mismatches: number }
+  ms: number
+  finished_at: string
+}
+
+interface Manifest {
+  started_at: string
+  finished_at?: string
+  argv: string[]
+  identity?: {
+    matched_prod_users: { email: string, supabase_id: string, prod_id: string }[]
+    supabase_dupes: { email: string, winner_id: string, loser_ids: string[] }[]
+    remapped_ids: number
+  }
+  shared?: {
+    users: number
+    dictionaries: number
+    dictionary_roles: number
+    dictionary_partners: number
+    invites: number
+    conversion: { converted: number, passed_through: number, emptied: number, mismatches: number }
+  }
+  dicts: Record<string, DictManifest>
+}
+
+function manifest_path(data_dir: string) {
+  return join(data_dir, 'migration-manifest.json')
+}
+
+function load_manifest(data_dir: string): Manifest | null {
+  const path = manifest_path(data_dir)
+  if (!existsSync(path))
+    return null
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+function write_manifest(data_dir: string, manifest: Manifest) {
+  const path = manifest_path(data_dir)
+  writeFileSync(`${path}.tmp`, JSON.stringify(manifest, null, 1))
+  renameSync(`${path}.tmp`, path)
+}
+
+function record_mismatches(data_dir: string, dict_id: string, mismatches: ConversionMismatch[]) {
+  if (mismatches.length === 0)
+    return
+  const path = join(data_dir, 'richtext-mismatches.jsonl')
+  const lines = mismatches.map(mismatch => JSON.stringify({ dict_id, ...mismatch })).join('\n')
+  appendFileSync(path, `${lines}\n`)
+}
+
+// ---------------------------------------------------------------------------
+
+async function migrate_users({ client, shared, skip_writes = false }: { client: PoolClient, shared: Database.Database, skip_writes?: boolean }) {
   const [auth_users, profiles, user_data, identities] = await Promise.all([
     read.read_auth_users(client),
     read.read_profiles(client),
@@ -78,32 +151,76 @@ async function migrate_users({ client, shared }: { client: PoolClient, shared: D
   const profile_by_id = new Map(profiles.map(profile => [profile.id, profile]))
   const user_data_by_id = new Map(user_data.map(data => [data.id, data]))
 
-  const rows = auth_users.map(auth_user => map_user({
-    auth_user,
-    profile: profile_by_id.get(auth_user.id),
-    user_data: user_data_by_id.get(auth_user.id),
-    providers: identities.get(auth_user.id) ?? [],
-  }))
+  const existing_users = read_existing_users(shared)
+  const existing_by_id = new Map(existing_users.map(user => [String(user.id), user]))
+  const plan = plan_user_identity({ auth_users, existing_users })
+  const final_id = (id: string) => plan.remap.get(id) ?? id
+
+  // Resume pass: the shared phase already ran — only the (deterministic)
+  // identity plan is needed for content remapping.
+  if (skip_writes)
+    return { user_count: 0, plan, skipped: true }
+
+  // One row per FINAL id: dupe-losers fold their providers into the winner.
+  const group_by_final = new Map<string, Row[]>()
+  for (const auth_user of auth_users) {
+    const key = final_id(String(auth_user.id))
+    if (!group_by_final.has(key))
+      group_by_final.set(key, [])
+    group_by_final.get(key)!.push(auth_user)
+  }
+
+  const rows: Row[] = []
+  for (const [id, group] of group_by_final) {
+    // Winner = the group member whose id maps to (or is) the final id, else most recent.
+    const winner = group.find(user => String(user.id) === id) ?? group[0]
+    const providers = group.flatMap(user => identities.get(user.id) ?? [])
+    const deduped: { provider: string, provider_id: string }[] = []
+    const seen = new Set<string>()
+    for (const provider of providers) {
+      const key = `${provider.provider} ${provider.provider_id}`
+      if (!seen.has(key)) {
+        seen.add(key)
+        deduped.push(provider)
+      }
+    }
+    let row = map_user({
+      auth_user: winner,
+      profile: profile_by_id.get(winner.id),
+      user_data: user_data_by_id.get(winner.id),
+      providers: deduped,
+    })
+    row.id = id
+    const existing = existing_by_id.get(id)
+    if (existing)
+      row = merge_user_row({ mapped: row, existing })
+    rows.push(row)
+  }
+
   upsert_rows({ db: shared, table: 'users', rows, json_cols: SHARED_JSON_COLS.users })
-  console.info(`  users: ${rows.length}`)
-  return new Set(rows.map(row => row.id))
+  return { user_count: rows.length, plan, skipped: false }
 }
 
-async function migrate_catalog({ client, shared, dicts, valid_user_ids }: {
+async function migrate_catalog({ client, shared, dicts, plan, data_dir }: {
   client: PoolClient
   shared: Database.Database
   dicts: Row[]
-  valid_user_ids: Set<string>
+  plan: { remap: Map<string, string>, final_user_ids: Set<string> }
+  data_dir: string
 }) {
   const dict_ids = new Set(dicts.map(dict => dict.id))
   const info_by_id = new Map((await read.read_dictionary_info(client)).map(info => [info.id, info]))
   const entry_counts = await read.read_all_entry_counts(client)
-  const nullify_missing = (user_id: any) => (user_id && valid_user_ids.has(user_id) ? user_id : null)
+  const final_id = (id: string) => plan.remap.get(id) ?? id
+  const nullify_missing = (user_id: any) => (user_id && plan.final_user_ids.has(final_id(user_id)) ? final_id(user_id) : null)
+  const conversion = create_conversion_stats()
 
-  // dictionaries
+  // dictionaries — about/grammar HTML→markdown happens here (info is merged in)
   const dict_rows: Row[] = []
   for (const dict of dicts) {
     const row = map_dictionary({ dict, info: info_by_id.get(dict.id), entry_count: entry_counts.get(dict.id) ?? 0 })
+    row.about = convert_value({ value: row.about, where: `${dict.id}.about`, stats: conversion })
+    row.grammar = convert_value({ value: row.grammar, where: `${dict.id}.grammar`, stats: conversion })
     row.created_by_user_id = nullify_missing(row.created_by_user_id)
     row.updated_by_user_id = nullify_missing(row.updated_by_user_id)
     // Mark schema-current so the server's startup migration sweep
@@ -114,19 +231,18 @@ async function migrate_catalog({ client, shared, dicts, valid_user_ids }: {
     dict_rows.push(row)
   }
   upsert_rows({ db: shared, table: 'dictionaries', rows: dict_rows, json_cols: SHARED_JSON_COLS.dictionaries })
-  console.info(`  dictionaries: ${dict_rows.length}`)
 
   // roles — delete-then-insert scoped to migrated dicts (synthetic UUID PK)
   const roles = (await read.read_dictionary_roles(client))
-    .filter(role => dict_ids.has(role.dictionary_id) && valid_user_ids.has(role.user_id))
+    .filter(role => dict_ids.has(role.dictionary_id) && plan.final_user_ids.has(final_id(role.user_id)))
     .map((role) => {
       const row = map_dictionary_role(role)
+      row.user_id = final_id(row.user_id)
       row.invited_by_user_id = nullify_missing(row.invited_by_user_id)
       return row
     })
   delete_for_dicts({ db: shared, table: 'dictionary_roles', dict_ids })
-  insert_rows({ db: shared, table: 'dictionary_roles', rows: roles })
-  console.info(`  dictionary_roles: ${roles.length}`)
+  insert_rows({ db: shared, table: 'dictionary_roles', rows: dedupe_roles(roles) })
 
   // partners — denormalize the logo, fetching only the referenced photos
   const all_partners = (await read.read_dictionary_partners(client)).filter(partner => dict_ids.has(partner.dictionary_id))
@@ -136,14 +252,41 @@ async function migrate_catalog({ client, shared, dicts, valid_user_ids }: {
     .map(partner => map_dictionary_partner({ partner, photo: partner.photo_id ? photos_by_id.get(partner.photo_id) : undefined }))
   delete_for_dicts({ db: shared, table: 'dictionary_partners', dict_ids })
   insert_rows({ db: shared, table: 'dictionary_partners', rows: partners })
-  console.info(`  dictionary_partners: ${partners.length}`)
 
   // invites — upsert by id
   const invites = (await read.read_invites(client))
-    .filter(invite => dict_ids.has(invite.dictionary_id) && valid_user_ids.has(invite.created_by))
-    .map(map_invite)
+    .filter(invite => dict_ids.has(invite.dictionary_id) && plan.final_user_ids.has(final_id(invite.created_by)))
+    .map((invite) => {
+      const row = map_invite(invite)
+      row.inviter_user_id = final_id(row.inviter_user_id)
+      return row
+    })
   upsert_rows({ db: shared, table: 'invites', rows: invites })
-  console.info(`  invites: ${invites.length}`)
+
+  record_mismatches(data_dir, '_catalog', conversion.mismatches)
+  return {
+    dictionaries: dict_rows.length,
+    dictionary_roles: roles.length,
+    dictionary_partners: partners.length,
+    invites: invites.length,
+    conversion: { converted: conversion.converted, passed_through: conversion.passed_through, emptied: conversion.emptied, mismatches: conversion.mismatches.length },
+  }
+}
+
+/**
+ * The remap can fold two Supabase accounts into one user, turning distinct
+ * (dictionary_id, user_id, role) rows into duplicates that would violate the
+ * natural-key UNIQUE. Keep the earliest.
+ */
+function dedupe_roles(roles: Row[]): Row[] {
+  const seen = new Map<string, Row>()
+  for (const role of roles) {
+    const key = `${role.dictionary_id} ${role.user_id} ${role.role}`
+    const kept = seen.get(key)
+    if (!kept || String(role.created_at) < String(kept.created_at))
+      seen.set(key, role)
+  }
+  return [...seen.values()]
 }
 
 function delete_for_dicts({ db, table, dict_ids }: { db: Database.Database, table: string, dict_ids: Set<string> }) {
@@ -153,15 +296,25 @@ function delete_for_dicts({ db, table, dict_ids }: { db: Database.Database, tabl
   db.prepare(`DELETE FROM ${table} WHERE dictionary_id IN (${placeholders})`).run(...dict_ids)
 }
 
-async function migrate_dict_content({ client, data_dir, dict, shared }: {
+/** Below this many (live) entries a dict's tables are read via single SELECTs, not cursors. */
+const SIMPLE_READ_ENTRY_LIMIT = 500
+
+async function migrate_dict_content({ client, data_dir, dict, shared, remap, entry_count_hint }: {
   client: PoolClient
   data_dir: string
   dict: Row
   shared: Database.Database
-}) {
+  remap: Map<string, string>
+  entry_count_hint: number
+}): Promise<DictManifest> {
+  const started = Date.now()
+  const final_creator = remap.get(dict.created_by) ?? dict.created_by
   const db = open_dict_db({ data_dir, dict_id: dict.id, rebuild: true })
   db.pragma('foreign_keys = OFF') // source data is already FK-valid; speeds bulk insert + dodges orphan-ordering issues
   const counts: Record<string, number> = {}
+  const synthesized = { speakers: 0, audio_speakers: 0, sources: 0 }
+  let pruned: Record<string, number> = {}
+  const conversion = create_conversion_stats()
   // Positional `lo{n}` lexeme/text keys → the new immutable orthography `code`.
   const { lo_to_code } = map_orthographies(dict.orthographies)
   // texts (read before sentences) yields per-sentence order derived from the
@@ -176,24 +329,25 @@ async function migrate_dict_content({ client, data_dir, dict, shared }: {
   let buffered_speakers: Row[] = []
   let buffered_audio: Row[] = []
   try {
+    const simple = entry_count_hint < SIMPLE_READ_ENTRY_LIMIT
     for (const table of read.DICT_CONTENT_TABLES) {
       const config = CONTENT_CONFIG[table]
-      const source_rows = await read.read_dict_table(client, table, dict.id)
+      const source_rows = await read.read_dict_table(client, table, dict.id, { simple })
       if (table === 'texts')
         sentence_order = build_sentence_order(source_rows)
       const rows = config.junction
         ? source_rows.map(row => map_junction(row, config.junction!))
         : source_rows.map(row => config.map!(row))
+      remap_rows_user_ids(rows, remap)
       if (table === 'entries') {
-        for (const row of rows)
+        for (const row of rows) {
           row.lexeme = rewrite_orthography_keys(row.lexeme, lo_to_code)
-      }
-      if (table === 'sentences') {
-        for (const row of rows)
-          row.text = rewrite_orthography_keys(row.text, lo_to_code)
+          row.notes = convert_multistring({ value: row.notes, where: `${row.id}.notes`, stats: conversion })
+        }
       }
       if (table === 'sentences') {
         for (const row of rows) {
+          row.text = rewrite_orthography_keys(row.text, lo_to_code)
           const order = sentence_order.get(row.id)
           if (order) {
             row.sort_key = order.sort_key
@@ -204,10 +358,10 @@ async function migrate_dict_content({ client, data_dir, dict, shared }: {
       if (table === 'entries') {
         // Convert each entry's free-text `sources` into a per-dict registry +
         // slug refs BEFORE inserting the (rewritten) entry rows.
-        const source_rows = build_dict_sources({ entry_rows: rows, user_id: dict.created_by || rows[0]?.created_by_user_id || 'cutover' })
+        const source_rows = build_dict_sources({ entry_rows: rows, user_id: final_creator || rows[0]?.created_by_user_id || 'cutover' })
         for (const source_row of source_rows)
           registry_slugs.add(source_row.slug)
-        counts.sources = insert_rows({ db, table: 'sources', rows: source_rows })
+        counts.sources = insert_rows({ db, table: 'sources', rows: remap_rows_user_ids(source_rows, remap) })
       }
       if (table === 'speakers') {
         buffered_speakers = rows
@@ -223,30 +377,70 @@ async function migrate_dict_content({ client, data_dir, dict, shared }: {
           speaker_rows: buffered_speakers,
           junction_rows: rows,
           existing_slugs: registry_slugs,
-          user_id: dict.created_by || 'cutover',
+          user_id: final_creator || 'cutover',
         })
-        counts.speakers = insert_rows({ db, table: 'speakers', rows: [...buffered_speakers, ...resolution.new_speakers] })
+        synthesized.speakers = resolution.new_speakers.length
+        synthesized.audio_speakers = resolution.new_audio_speakers.length
+        synthesized.sources = resolution.new_sources.length
+        counts.speakers = insert_rows({ db, table: 'speakers', rows: remap_rows_user_ids([...buffered_speakers, ...resolution.new_speakers], remap) })
         counts.audio = insert_rows({ db, table: 'audio', rows: buffered_audio })
-        counts.sources = (counts.sources ?? 0) + insert_rows({ db, table: 'sources', rows: resolution.new_sources })
-        counts[table] = insert_rows({ db, table, rows: [...rows, ...resolution.new_audio_speakers] })
+        counts.sources = (counts.sources ?? 0) + insert_rows({ db, table: 'sources', rows: remap_rows_user_ids(resolution.new_sources, remap) })
+        counts[table] = insert_rows({ db, table, rows: remap_rows_user_ids([...rows, ...resolution.new_audio_speakers], remap) })
         continue
       }
       counts[table] = insert_rows({ db, table, rows, json_cols: config.json })
     }
+    // Live children of soft-deleted parents (we skip tombstones at read time)
+    // now dangle — prune them. The old app never showed them anyway (every
+    // query filtered `deleted IS NULL` on the parent).
+    pruned = prune_orphans(db)
     set_last_modified_to_max({ db, tables: [...read.DICT_CONTENT_TABLES, 'sources'] })
+    counts.entries_final = (db.prepare(`SELECT COUNT(*) AS count FROM entries`).get() as { count: number }).count
   } finally {
     db.pragma('foreign_keys = ON')
     const violations = db.pragma('foreign_key_check') as unknown[]
     if (violations.length)
-      console.warn(`  ⚠️ ${dict.id}: ${violations.length} FK violations (orphan refs in source)`)
+      process.stderr.write(`  ⚠️ ${dict.id}: ${violations.length} FK violations survived pruning\n`)
     db.close()
   }
 
+  const entry_count = counts.entries_final ?? 0
+  delete counts.entries_final
   shared.prepare(`UPDATE dictionaries SET dict_db_schema_version = ?, entry_count = ? WHERE id = ?`)
-    .run(LATEST_DICT_MIGRATION, counts.entries ?? 0, dict.id)
+    .run(LATEST_DICT_MIGRATION, entry_count, dict.id)
 
-  const total = Object.values(counts).reduce((sum, count) => sum + count, 0)
-  console.info(`  ✓ ${dict.id}: ${counts.entries ?? 0} entries, ${total} content rows`)
+  record_mismatches(data_dir, dict.id, conversion.mismatches)
+  return {
+    counts,
+    synthesized,
+    pruned,
+    conversion: { converted: conversion.converted, passed_through: conversion.passed_through, emptied: conversion.emptied, mismatches: conversion.mismatches.length },
+    ms: Date.now() - started,
+    finished_at: new Date().toISOString(),
+  }
+}
+
+async function run_content_pool({ dicts, concurrency, worker, should_stop }: {
+  dicts: Row[]
+  concurrency: number
+  worker: (dict: Row) => Promise<void>
+  /** Checked before picking the NEXT dict — in-flight dicts always finish. */
+  should_stop: () => boolean
+}): Promise<{ stopped_early: boolean }> {
+  let next = 0
+  let stopped_early = false
+  const runners = Array.from({ length: Math.max(1, concurrency) }, async () => {
+    while (next < dicts.length) {
+      if (should_stop()) {
+        stopped_early = true
+        return
+      }
+      const dict = dicts[next++]
+      await worker(dict)
+    }
+  })
+  await Promise.all(runners)
+  return { stopped_early }
 }
 
 async function main() {
@@ -255,51 +449,127 @@ async function main() {
   const limit_raw = get_flag('--limit')
   const limit = limit_raw ? Number(limit_raw) : undefined
   const dry = has_flag('--dry')
+  const shared_only = has_flag('--shared-only')
+  const skip_existing = has_flag('--skip-existing')
+  const since = get_flag('--since')
+  const concurrency = Number(get_flag('--concurrency', '4'))
   // Full catalog for ALL dicts, content only for this subset (comma-separated ids).
   const content_dicts_raw = get_flag('--content-dicts')
   const content_subset = content_dicts_raw ? new Set(content_dicts_raw.split(',').map(id => id.trim())) : null
 
+  const log = create_logger(join(data_dir, 'migration-run.log'))
   const client = await postgres.get_db_connection()
   const started = Date.now()
+  const started_at = new Date().toISOString()
   try {
-    // Catalog scope: all dicts when --content-dicts is set, else the filtered scope.
-    const catalog_dicts = content_subset
+    // Catalog scope: all dicts unless --dict-id/--limit narrow it.
+    const catalog_dicts = (content_subset || since || shared_only)
       ? await read.read_dictionaries(client, {})
       : await read.read_dictionaries(client, { dict_id, limit })
-    const content_dicts = content_subset
-      ? catalog_dicts.filter(dict => content_subset.has(dict.id))
-      : catalog_dicts
 
-    console.info(`\nMigrating Supabase → SQLite`)
-    console.info(`  data_dir: ${data_dir}`)
-    console.info(`  catalog: ${catalog_dicts.length} dicts · content: ${content_dicts.length} dicts${dry ? ' (dry run)' : ''}\n`)
+    const previous = skip_existing ? load_manifest(data_dir) : null
+    const changed_ids = since ? await read.read_changed_dict_ids(client, since) : null
+
+    let content_dicts = catalog_dicts
+    if (content_subset)
+      content_dicts = content_dicts.filter(dict => content_subset.has(dict.id))
+    if (changed_ids)
+      content_dicts = content_dicts.filter(dict => changed_ids.has(dict.id))
+    if (shared_only)
+      content_dicts = []
+    if (previous)
+      content_dicts = content_dicts.filter(dict => !previous.dicts[dict.id]?.finished_at)
+
+    log(`Migrating Supabase → SQLite`)
+    log(`  data_dir: ${data_dir}`)
+    log(`  catalog: ${catalog_dicts.length} dicts · content: ${content_dicts.length} dicts`
+      + `${since ? ` (delta since ${since})` : ''}${shared_only ? ' (shared only)' : ''}`
+      + `${previous ? ` (resume: ${Object.keys(previous.dicts).length} already done)` : ''}${dry ? ' (dry run)' : ''}`)
 
     if (dry) {
-      console.info(`Would migrate content for ${content_dicts.length} dictionaries:`)
-      for (const dict of content_dicts) {
-        const entry_count = await read.count_entries(client, dict.id)
-        console.info(`  ${dict.id} — "${dict.name}" — ${entry_count} entries`)
-      }
+      const entry_counts = await read.read_all_entry_counts(client)
+      for (const dict of content_dicts)
+        log(`  ${dict.id} — "${dict.name}" — ${entry_counts.get(dict.id) ?? 0} entries`)
+      log(`Dry run — nothing written.`)
       return
     }
 
+    const manifest: Manifest = previous ?? { started_at, argv: process.argv.slice(2), dicts: {} }
+
     const shared = open_shared_db(data_dir)
-    console.info('shared.db:')
-    const valid_user_ids = await migrate_users({ client, shared })
-    await migrate_catalog({ client, shared, dicts: catalog_dicts, valid_user_ids })
+    // The remap plan is needed for content even when the shared phase is
+    // skipped on a resume pass — identity planning is cheap and idempotent.
+    log('shared.db:')
+    const { user_count, plan, skipped: shared_skipped } = await migrate_users({ client, shared, skip_writes: Boolean(previous?.shared) })
+    if (shared_skipped) {
+      log('  shared phase already recorded in manifest — skipped (resume pass)')
+    } else {
+      log(`  users: ${user_count} (remapped ids: ${plan.remap.size}, matched prod users: ${plan.report.matched_prod_users.length}, supabase dupes: ${plan.report.supabase_dupes.length})`)
+      for (const match of plan.report.matched_prod_users)
+        log(`    prod-id wins: ${match.email} ${match.supabase_id} → ${match.prod_id}`)
+      for (const dupe of plan.report.supabase_dupes)
+        log(`    supabase dupe: ${dupe.email} losers [${dupe.loser_ids.join(', ')}] → ${dupe.winner_id}`)
 
-    console.info(`\ndictionaries/ (${content_dicts.length} files):`)
-    for (const dict of content_dicts)
-      await migrate_dict_content({ client, data_dir, dict, shared })
+      const shared_counts = await migrate_catalog({ client, shared, dicts: catalog_dicts, plan, data_dir })
+      log(`  dictionaries: ${shared_counts.dictionaries} · roles: ${shared_counts.dictionary_roles} · partners: ${shared_counts.dictionary_partners} · invites: ${shared_counts.invites}`)
+      log(`  about/grammar conversion: ${JSON.stringify(shared_counts.conversion)}`)
 
+      manifest.identity = { ...plan.report, remapped_ids: plan.remap.size }
+      manifest.shared = { users: user_count, ...shared_counts }
+      write_manifest(data_dir, manifest)
+    }
+
+    let stopped_early = false
+    if (content_dicts.length) {
+      const conversion_budget = Number(get_flag('--conversion-budget', '3500'))
+      const entry_counts = await read.read_all_entry_counts(client)
+      log(`\ndictionaries/ (${content_dicts.length} files, concurrency ${concurrency}, conversion budget ${conversion_budget}):`)
+      let done = 0
+      const pool_result = await run_content_pool({
+        dicts: content_dicts,
+        concurrency,
+        should_stop: () => total_conversions() >= conversion_budget,
+        worker: async (dict) => {
+          const worker_client = await postgres.get_db_connection()
+          try {
+            const result = await migrate_dict_content({ client: worker_client, data_dir, dict, shared, remap: plan.remap, entry_count_hint: entry_counts.get(dict.id) ?? 0 })
+            manifest.dicts[dict.id] = result
+            done++
+            const total_rows = Object.values(result.counts).reduce((sum, count) => sum + count, 0)
+            log(`  ✓ [${done}/${content_dicts.length}] ${dict.id}: ${result.counts.entries ?? 0} entries, ${total_rows} rows, ${(result.ms / 1000).toFixed(1)}s`)
+            write_manifest(data_dir, manifest)
+          } catch (error) {
+            log(`  ✗ ${dict.id} FAILED: ${(error as Error).message}`)
+            throw error
+          } finally {
+            worker_client.release()
+          }
+        },
+      })
+      stopped_early = pool_result.stopped_early
+    }
+
+    if (stopped_early) {
+      write_manifest(data_dir, manifest)
+      shared.close()
+      // Tiptap/ProseMirror retain heap per conversion (see richtext.ts) — end
+      // the pass BEFORE the heap dies. The caller loops with --skip-existing.
+      log(`\n⏸ pass ended at conversion budget (${total_conversions()} conversions) — rerun with --skip-existing to continue`)
+      process.exitCode = 75 // EX_TEMPFAIL — "more to do"
+      return
+    }
+
+    manifest.finished_at = new Date().toISOString()
+    write_manifest(data_dir, manifest)
     shared.close()
-    console.info(`\n✓ Done in ${((Date.now() - started) / 1000).toFixed(1)}s`)
+    log(`\n✓ Done in ${((Date.now() - started) / 1000).toFixed(1)}s`)
   } finally {
     client.release()
+    await postgres.end()
   }
 }
 
-main().then(() => process.exit(0)).catch((error) => {
+main().catch((error) => {
   console.error(error)
-  process.exit(1)
+  process.exitCode = 1
 })
