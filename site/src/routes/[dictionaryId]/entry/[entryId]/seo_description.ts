@@ -1,18 +1,23 @@
-import type { EntryData } from '$lib/types'
+import type { EntryData, Orthography } from '$lib/types'
 import type { DeepPartial } from '$lib/helpers/deep-partial'
 import { order_glosses } from '$lib/helpers/glosses'
 import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
 import { remove_italic_tags } from '$lib/helpers/remove_italic_tags'
 import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
+import { get_headword } from '$lib/helpers/orthographies'
 import type { TranslateFunction } from '$lib/i18n/types'
 
-export function seo_description({ entry, gloss_languages, t }: {
+export function seo_description({ entry, gloss_languages, orthographies, t }: {
   entry: DeepPartial<EntryData>
   gloss_languages: string[]
+  orthographies?: Orthography[] | null
   t: TranslateFunction
 },
 ) {
-  const local_orthographies = get_local_orthographies(entry.main?.lexeme).join(', ')
+  // When the headword was promoted from an alternate (no `default` value), skip that
+  // alternate here — it already leads as the imageTitle/og:image:alt prefix.
+  const headword = get_headword({ lexeme: entry.main?.lexeme, orthographies })
+  const local_orthographies = get_local_orthographies(entry.main?.lexeme, { exclude_code: headword.code }).join(', ')
   const phonetic = entry.main?.phonetic && `[${entry.main.phonetic}]`
   const parts_of_speech = add_periods_and_comma_separate_parts_of_speech(entry.senses?.[0]?.parts_of_speech) // TODO: use all senses and use parts of speech abbrevs for current language once routing allows for that
 

@@ -19,7 +19,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   const StringOrMultiString = { oneOf: [{ type: 'string' }, { $ref: '#/components/schemas/MultiString' }] }
   const StringOrStringArray = { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] }
 
-  const client_id_prop = { type: 'string', format: 'uuid', description: 'Optional client-generated UUID (v4). Supply it to know the id up front (for later edits) and to make writes idempotent — re-sending the same id is a safe no-op. Omit → the server mints one.' }
+  const client_id_prop = { type: 'string', format: 'uuid', description: 'Optional client-generated UUID (any version — deterministic uuid5 ids work well). Supply it to know the id up front (for later edits) and to make writes idempotent — re-sending the same id is a safe no-op. Omit → the server mints one.' }
 
   const SentenceInput = {
     type: 'object',
@@ -54,7 +54,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     required: ['lexeme'],
     description: 'A dictionary entry (headword) with nested senses.',
     properties: {
-      id: { type: 'string', format: 'uuid', description: 'Optional client-generated UUID (v4) — THE idempotency key. Generate it yourself and a re-POST of the same entry is a safe no-op (`status: "exists"`) instead of a duplicate, and you already know the id for later `PATCH …/entries/{id}` edits (no round-trip to discover it). Omit → the server mints one. Must be a valid UUID if provided.' },
+      id: { type: 'string', format: 'uuid', description: 'Optional client-generated UUID (any version — deterministic uuid5 ids work well) — THE idempotency key. Generate it yourself and a re-POST of the same entry is a safe no-op (`status: "exists"`) instead of a duplicate, and you already know the id for later `PATCH …/entries/{id}` edits (no round-trip to discover it). Omit → the server mints one. Must be a valid UUID if provided.' },
       lexeme: { ...StringOrMultiString, description: 'The headword. Required.' },
       phonetic: { type: 'string' },
       interlinearization: { type: 'string' },
@@ -72,7 +72,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const SensePatch = {
     allOf: [{ $ref: '#/components/schemas/SenseInput' }],
-    description: 'A sense within a PATCH. With `id` → field-merge that existing sense; without `id` → create a new sense. Example sentences are appended.',
+    description: 'A sense within a PATCH — a true upsert by client id. With an `id` already on this entry → field-merge that sense; with an unknown `id` (or none) → create the sense WITH that id (deterministic import ids keep addressing the same sense across re-syncs). An `id` belonging to a different entry is a 400. Example sentences upsert by id (existing links are not duplicated); without an id they are appended.',
     properties: { id: { type: 'string' } },
   }
 
@@ -89,7 +89,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const EntryPatch = {
     type: 'object',
-    description: 'Partial entry update. Provided fields overwrite; omitted ones are untouched. `dialects`/`tags` are ADDITIVE links. `senses` upsert by id.',
+    description: 'Partial entry update. Provided fields overwrite; omitted ones are untouched. `dialects`/`tags` are ADDITIVE links. `senses` upsert by client id (unknown id → created with that id — see SensePatch).',
     properties: {
       lexeme: StringOrMultiString,
       phonetic: { type: 'string' },
@@ -578,7 +578,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         'An **entry** is a headword (`lexeme`) plus metadata and one or more **senses**. A **sense** is one meaning: its `glosses` (short translations keyed by gloss-language), an optional longer `definition`, `parts_of_speech`, `semantic_domains`, and `example_sentences`. `parts_of_speech` values should come from the supported abbreviation list in the `SenseInput` schema (abbrevs and full English names are matched case-insensitively and stored as the canonical lowercase abbrev, e.g. "N"/"Noun" → "n"; anything else is stored verbatim). An **example sentence** has vernacular `text` + `translation`(s). `dialects` and `tags` are entry-level labels (referenced by name; created automatically if new). If you omit `senses`, one empty sense is created. A **text** is a separate object: a connected passage/story (`title`) with its own ORDERED list of sentences (each with optional paragraph breaks) — use the `…/texts` endpoints for those; they are independent of entries.',
         '',
         '## Edits & deletes',
-        '`PATCH …/entries/{entryId}` field-merges the entry: provided fields overwrite, omitted ones stay. `senses` upsert by `id` (include the sense `id` to edit it, omit it to add a new sense); example sentences are appended; `dialects`/`tags` are added (never removed) by this call. `DELETE …/entries/{entryId}` removes the entry and its senses.',
+        '`PATCH …/entries/{entryId}` field-merges the entry: provided fields overwrite, omitted ones stay. `senses` are a true upsert by client `id`: an id already on the entry → field-merge that sense; an unknown id (or none) → create the sense WITH that id, so deterministic import ids (e.g. uuid5 of a stable external key) keep addressing the same sense across re-syncs. Example sentences upsert by id too (re-sent links are not duplicated); `dialects`/`tags` are added (never removed) by this call. `DELETE …/entries/{entryId}` removes the entry and its senses.',
         'For surgical, single-row fixes (e.g. correcting ONE OCR typo) read the ids from the entry READ shape (`senses[].id`, `senses[].sentences[].id`, `tags[].id`, `dialects[].id`) and use the dedicated routes:',
         '- `PATCH …/sentences/{sentenceId}` — edit one example sentence\'s `text`/`translation`; `DELETE …/sentences/{sentenceId}` removes it.',
         '- `DELETE …/senses/{senseId}` — delete one sense (refused for an entry\'s LAST sense → delete the entry instead).',
@@ -659,7 +659,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         get: { summary: 'Read one entry (full nested)', description: 'Returns the full nested entry (the READ shape — see `EntryResponse`). NOTE the input→output asymmetry: scalars you POST at the top level are read back under `entry.main`; `senses[].example_sentences` are read back as `senses[].sentences`. Pass `?include=relationships` to also attach `entry.relationships` (see `RelationshipView`).', parameters: [dict_id_param, entry_id_param, { name: 'include', in: 'query', schema: { type: 'string', enum: ['relationships'] }, description: 'Pass `relationships` to attach this entry\'s typed relationships as `entry.relationships`.' }], responses: { 200: { description: 'The full nested entry', content: { 'application/json': { schema: { $ref: '#/components/schemas/EntryResponse' } } } }, 404: { description: 'Not found' } } },
         patch: {
           summary: 'Update an entry (field-merge)',
-          description: 'Field-merge: provided fields overwrite, omitted ones stay. `senses` upsert by `id` (no id → create a new sense); example sentences are APPENDED; `dialects`/`tags` are additive links (this call never removes them). For surgical single-row edits/deletes — one sentence, sense, tag, or dialect — use the dedicated `…/sentences/{id}`, `…/senses/{id}`, `…/tags/{id}`, `…/dialects/{id}` routes (see "Edits & deletes"). Returns the updated entry in the READ shape (`EntryResponse`).',
+          description: 'Field-merge: provided fields overwrite, omitted ones stay. `senses` are a true upsert by client `id` (id on this entry → field-merge; unknown id or none → create the sense WITH that id; an id on a different entry → 400); example sentences upsert by id (no duplicate links) / append without one; `dialects`/`tags` are additive links (this call never removes them). For surgical single-row edits/deletes — one sentence, sense, tag, or dialect — use the dedicated `…/sentences/{id}`, `…/senses/{id}`, `…/tags/{id}`, `…/dialects/{id}` routes (see "Edits & deletes"). Returns the updated entry in the READ shape (`EntryResponse`).',
           parameters: [dict_id_param, entry_id_param],
           requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/EntryPatch' } } } },
           responses: { 200: { description: 'The updated nested entry', content: { 'application/json': { schema: { $ref: '#/components/schemas/EntryResponse' } } } }, 400: {}, 404: {} },

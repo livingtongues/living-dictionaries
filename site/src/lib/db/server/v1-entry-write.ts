@@ -426,9 +426,13 @@ export interface SingleEntryWriteResult {
 
 /**
  * Field-merge an existing entry (PATCH). Provided entry/sense scalar+JSON fields
- * overwrite; omitted ones are untouched. `senses` upsert by id (no id → create);
- * example sentences without an id are appended. `dialects`/`tags` are additive
- * links (found-or-created, deduped). Returns `found: false` if the entry is gone.
+ * overwrite; omitted ones are untouched. `senses` are a true upsert by client id:
+ * an id already on this entry → field-merge; an unknown id (or none) → create the
+ * sense WITH that id, so deterministic import ids keep addressing the same sense
+ * across re-syncs. An id that belongs to a DIFFERENT entry throws. Example
+ * sentences upsert by id too (existing junction links are not duplicated).
+ * `dialects`/`tags` are additive links (found-or-created, deduped). Returns
+ * `found: false` if the entry is gone.
  */
 export function apply_entry_update({ db, history_db, entry_id, patch, user_id, api_key_id }: {
   db: Database.Database
@@ -460,22 +464,44 @@ export function apply_entry_update({ db, history_db, entry_id, patch, user_id, a
     if (entry_row)
       push('entries', entry_row)
 
+    // Make deterministic-id re-PATCHes idempotent: an already-linked sentence is
+    // not re-linked, and a re-sent sentence field-merges onto the existing row
+    // (merge_dict_row needs the full row — the partial insert image would trip
+    // NOT NULL on created_by_user_id).
+    const junction_exists = db.prepare(`SELECT 1 FROM senses_in_sentences WHERE sense_id = ? AND sentence_id = ?`)
+    const push_built_rows = (rows: BuiltRow[]) => {
+      for (const { table_name, row } of rows) {
+        if (table_name === 'senses_in_sentences' && junction_exists.get(row.sense_id, row.sentence_id))
+          continue
+        if (table_name === 'sentences') {
+          const existing_sentence = read_parsed_row({ db, table: 'sentences', id: row.id as string })
+          if (existing_sentence) {
+            const merged: Record<string, unknown> = { ...existing_sentence, ...row, created_at: existing_sentence.created_at, updated_at: now }
+            delete merged.updated_by_user_id // let merge_dict_row re-stamp the current editor
+            push('sentences', merged)
+            continue
+          }
+        }
+        push(table_name, row)
+      }
+    }
+
     for (const sense of patch.senses ?? []) {
-      if (sense.id) {
-        const existing_sense = read_parsed_row({ db, table: 'senses', id: sense.id })
-        if (!existing_sense || existing_sense.entry_id !== entry_id)
-          throw new Error(`sense ${sense.id} not found on this entry`)
+      const sense_id = sense.id ? resolve_client_id(sense.id, { field: 'sense id' }) : undefined
+      const existing_sense = sense_id ? read_parsed_row({ db, table: 'senses', id: sense_id }) : undefined
+      if (existing_sense) {
+        if (existing_sense.entry_id !== entry_id)
+          throw new Error(`sense ${sense_id} belongs to a different entry`)
         const sense_row = build_sense_patch_row({ existing: existing_sense, sense, now })
         if (sense_row)
           push('senses', sense_row)
-        for (const sentence of sense.example_sentences ?? []) {
-          for (const built of build_sentence_rows({ sentence, sense_id: sense.id, now, source_slug_set }) ?? [])
-            push(built.table_name, built.row)
-        }
+        for (const sentence of sense.example_sentences ?? [])
+          push_built_rows(build_sentence_rows({ sentence, sense_id, now, source_slug_set }) ?? [])
       } else {
+        // Upsert-by-client-id: unknown (or absent) sense id → create the sense,
+        // honoring the caller's id (build_sense_rows re-resolves sense.id).
         const built = build_sense_rows({ sense, entry_id, now, source_slug_set })
-        for (const row of built.rows)
-          push(row.table_name, row.row)
+        push_built_rows(built.rows)
       }
     }
 

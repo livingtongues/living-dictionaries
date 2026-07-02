@@ -98,6 +98,14 @@ the live schema). `scripts/` is NOT a workspace member — install with
      review. Spot-check the largest N about/grammar pages visually on staging.
 2. **Run the full migration:** `pnpm -C scripts migrate-to-sqlite` → produces real `shared.db` +
    per-dict `dictionaries/{id}.db`. Then `pnpm -C scripts verify-migration`.
+   - **Legacy positional `lo1`–`lo5` orthography keys are ELIMINATED during the run** — the
+     mappers build the new orthography registry (`{ code, name, bcp? }[]`) from each dict's legacy
+     `{ bcp, name }[]` and rewrite every entry `lexeme` + sentence `text` key `lo{n}` → its real
+     orthography `code` (`map_orthographies` + `rewrite_orthography_keys` in `mappers.ts`).
+     Post-cutover NO `lo{n}` keys should survive — spot-check with a
+     `SELECT lexeme FROM entries WHERE lexeme LIKE '%"lo1"%'` style sweep across dict DBs (matters
+     doubly since 2026-07-02: the `get_headword` display fallback only consults REGISTERED
+     orthography codes, so an unrewritten `lo{n}` value would be invisible as a fallback headword).
    - Reconciliations vs this schema and gotchas are in
      `.knowledge/migration/pulling-supabase-data-locally.md` (ALTER `linguistic_history`;
      `process.exit` truncates piped stdout; media files aren't pulled — they stay on GCS).

@@ -1,9 +1,9 @@
 import type { MultiString } from '$lib/types'
 
-export function get_local_orthographies(lexeme: MultiString): string[] {
+export function get_local_orthographies(lexeme: MultiString, { exclude_code }: { exclude_code?: string } = {}): string[] {
   if (!lexeme) return []
   return Object.entries(lexeme)
-    .filter(([key]) => key !== 'default')
+    .filter(([key]) => key !== 'default' && key !== exclude_code)
     .map(([, value]) => value)
     .filter(Boolean)
 }
@@ -35,6 +35,14 @@ if (import.meta.vitest) {
         lo4: null,
       }
       expect(get_local_orthographies(lexeme)).toEqual(['さよなら', '안녕'])
+    })
+
+    test('excludes a promoted-headword code', () => {
+      const lexeme: MultiString = {
+        lo1: 'foo',
+        lo2: 'bar',
+      }
+      expect(get_local_orthographies(lexeme, { exclude_code: 'lo1' })).toEqual(['bar'])
     })
   })
 }

@@ -47,11 +47,12 @@ export interface SenseInput {
 
 export interface EntryInput {
   /**
-   * Optional client-generated UUID (v4). This is the idempotency key: supply
-   * your own id and a re-POST of the same entry is a safe no-op (`status:
-   * 'exists'`) instead of a duplicate, and you already know the id for later
-   * `PATCH …/entries/{id}` edits — no server round-trip to discover it. Omit →
-   * the server mints one. Must be a valid UUID if provided.
+   * Optional client-generated UUID (any version — deterministic uuid5 ids work
+   * well). This is the idempotency key: supply your own id and a re-POST of the
+   * same entry is a safe no-op (`status: 'exists'`) instead of a duplicate, and
+   * you already know the id for later `PATCH …/entries/{id}` edits — no server
+   * round-trip to discover it. Omit → the server mints one. Must be a valid
+   * UUID if provided.
    */
   id?: string
   /** The headword. Required. string → `{ default: … }`. */
@@ -80,7 +81,12 @@ export interface EntriesWriteRequestBody {
   import_id?: string
 }
 
-/** A sense within a PATCH: with `id` → field-merge that sense; without → create a new one. */
+/**
+ * A sense within a PATCH — a true upsert by client id: an `id` already on the
+ * entry → field-merge that sense; an unknown `id` (or none) → create the sense
+ * WITH that id (deterministic import ids keep addressing the same sense across
+ * re-syncs). An `id` belonging to a different entry is a 400.
+ */
 export interface SensePatch extends SenseInput {
   id?: string
 }
@@ -101,14 +107,15 @@ export function resolve_client_id(id: unknown, { field = 'id' }: { field?: strin
   if (id === undefined || id === null || id === '')
     return crypto.randomUUID()
   if (!is_uuid(id))
-    throw new Error(`${field} must be a valid UUID (v4) if provided`)
+    throw new Error(`${field} must be a valid UUID if provided`)
   return id
 }
 
 /**
  * Partial entry update. Provided scalar/JSON fields are merged (others untouched).
  * `dialects`/`tags` are ADDITIVE links (found-or-created, deduped). `senses` are
- * upserted by `id`; example sentences without an id are appended.
+ * upserted by client `id` (unknown id → created with that id — see SensePatch);
+ * example sentences upsert by id / append without one.
  */
 export interface EntryPatch {
   lexeme?: MultiString | string

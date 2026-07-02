@@ -10,6 +10,7 @@
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
+  import { get_headword } from '$lib/helpers/orthographies'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
 
   interface Props {
@@ -22,6 +23,7 @@
 
   let upload_triggered = $state(false)
   const { auth_user, dbOperations, url_from_storage_path } = $derived(page.data)
+  const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: page.data.dictionary?.orthographies }))
   // Must match RecordAudio's $bindable fallbacks (permissionGranted = false, audioBlob = null):
   // binding an `undefined` $state to a prop with a non-undefined fallback throws Svelte's
   // `props_invalid_value` at runtime, which crashed the audio editor (no record/upload UI showed).
@@ -76,7 +78,7 @@
 
 <Modal on:close={on_close}>
   {#snippet heading()}
-    <span> <IconMaterialSymbolsHearing class="icon-inline" style="font-size: 0.875rem" /> {entry.main.lexeme.default} </span>
+    <span> <IconMaterialSymbolsHearing class="icon-inline" style="font-size: 0.875rem" /> {headword.value} </span>
   {/snippet}
 
   <SelectSpeaker

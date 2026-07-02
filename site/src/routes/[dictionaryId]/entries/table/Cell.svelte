@@ -8,6 +8,7 @@
   import Textbox from './cells/Textbox.svelte'
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte'
   import { ShowHide } from '$lib/svelte-pieces'
+  import { get_headword } from '$lib/helpers/orthographies'
   import { page } from '$app/state'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
@@ -35,6 +36,8 @@
 
   const sense = $derived(entry.senses?.[0])
   const first_photo = $derived(entry.senses?.[0]?.photos?.[0])
+  // Display-only headword fallback (photo title); the editable lexeme cell below stays on raw `default`.
+  const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: page.data.dictionary?.orthographies }))
 
   // Table cells DISPLAY from the read-model (and optimistically mutate it for
   // instant feedback), but persist scalar edits straight to the live `dict_db`
@@ -60,7 +63,7 @@
     {#if first_photo}
       <Image
         square={60}
-        title={entry.main.lexeme.default}
+        title={headword.value}
         gcs={first_photo.serving_url}
         photo_source={first_photo.source}
         photographer={first_photo.photographer}

@@ -6,6 +6,7 @@
   import { ShowHide } from '$lib/svelte-pieces'
   import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
   import Image from '$lib/components/image/Image.svelte'
+  import { get_headword } from '$lib/helpers/orthographies'
   import { page } from '$app/state'
   import type { DbOperations } from '$lib/dbOperations'
   import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
@@ -30,6 +31,7 @@
 
   const photos = $derived(entry?.senses?.map(({ photos }) => photos).filter(Boolean).flat())
   const videos = $derived(entry?.senses?.map(({ videos }) => videos).filter(Boolean).flat())
+  const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary.orthographies }))
 
   // Coordinates persist straight to the live `dict_db` entries row (auto-stamps
   // editor + dirty); the Orama watcher reflects it back into the read-model.
@@ -53,7 +55,7 @@
       style="height: 25vh;">
       <Image
         width={400}
-        title={entry.main.lexeme.default}
+        title={headword.value}
         gcs={photo.serving_url}
         photo_source={photo.source}
         photographer={photo.photographer}
@@ -90,7 +92,7 @@
     <div class="video-frame">
       <Video
         class="entry-video-tile"
-        lexeme={entry.main.lexeme.default}
+        lexeme={headword.value}
         {video}
         {can_edit} />
     </div>

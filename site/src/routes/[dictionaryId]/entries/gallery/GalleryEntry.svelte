@@ -2,6 +2,7 @@
   import type { EntryData, Tables } from '$lib/types'
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/helpers/glosses'
+  import { get_headword } from '$lib/helpers/orthographies'
   import { page } from '$app/state'
 
   interface Props {
@@ -22,6 +23,7 @@
   }))
 
   const first_photo = $derived(entry.senses?.[0]?.photos?.[0])
+  const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary.orthographies }))
 </script>
 
 {#if first_photo}
@@ -30,7 +32,7 @@
       <div class="photo-frame">
         <Image
           square={480}
-          title={entry.main.lexeme.default}
+          title={headword.value}
           gcs={first_photo.serving_url}
           photo_source={first_photo.source}
           photographer={first_photo.photographer}
@@ -40,7 +42,7 @@
       </div>
       <a href="/{dictionary.url}/entry/{entry.id}" style="background: #f3f3f3;" class="caption">
         <div style="font-weight: 600">
-          {entry.main.lexeme.default}
+          {headword.value}
         </div>
         <div class="gloss">
           {glosses[0] || ''}

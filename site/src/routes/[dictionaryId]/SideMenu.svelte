@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { Tables } from '$lib/types'
+  import type { DictSyncStatus } from '$lib/db/dict-client/dict-sync-status.svelte'
+  import DictSyncStatusButton from '$lib/db/dict-client/DictSyncStatus.svelte'
   import { page } from '$app/state'
   import IconFaSolidList from '~icons/fa-solid/list'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
@@ -21,6 +23,8 @@
     is_manager: boolean
     is_editor_or_above: boolean
     loading: boolean
+    can_edit: boolean
+    dict_sync_status: DictSyncStatus | null
   }
 
   const {
@@ -30,6 +34,8 @@
     is_manager,
     is_editor_or_above,
     loading,
+    can_edit,
+    dict_sync_status,
   }: Props = $props()
 </script>
 
@@ -42,23 +48,26 @@
   </h5>
 </div>
 <div onclick={on_close}>
-  <a
-    class:active={page.url.pathname.match(/entry|entries/)}
-    href={`/${dictionary.url}/entries`}>
-    <IconFaSolidList class="icon-inline" />
-    <span class="item-label">
-      {page.data.t('dictionary.entries')}
-    </span>
+  <div class="nav-row" class:active={page.url.pathname.match(/entry|entries/)}>
+    <a class="entries-link" href={`/${dictionary.url}/entries`}>
+      <IconFaSolidList class="icon-inline" />
+      <span class="item-label">
+        {page.data.t('dictionary.entries')}
+      </span>
+    </a>
     <span style="flex-grow: 1"></span>
     {#if is_manager && loading}
       <IconSvgSpinners3DotsFade class="icon-inline" style="vertical-align: -4px; margin-left: 0.25rem; margin-right: 0.25rem" />
+    {/if}
+    {#if can_edit && dict_sync_status}
+      <DictSyncStatusButton sync_status={dict_sync_status} />
     {/if}
     {#if entry_count}
       <span class="count-pill">
         {new Intl.NumberFormat().format(entry_count)}
       </span>
     {/if}
-  </a>
+  </div>
   {#if !is_manager}
     <a
       href={`/${dictionary.url}/synopsis`}
@@ -215,7 +224,8 @@
     border-radius: 9999px;
   }
 
-  a:not(.link) {
+  a:not(.link),
+  .nav-row {
     color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
     padding: 0.5rem 0.75rem;
     display: flex;
@@ -223,12 +233,24 @@
     margin-bottom: 0.5rem;
   }
 
-  a:not(.link):hover {
+  a:not(.link):hover,
+  .nav-row:hover {
     background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
   }
 
+  /* The Entries row is a div (not an `<a>`) so the sync button can sit next to
+     the nav link without nesting a `<button>` inside an `<a>` (invalid HTML).
+     `.entries-link` carries just the icon + label, no padding of its own. */
+  .entries-link {
+    display: flex;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+  }
+
   @media (min-width: 768px) {
-    a:not(.link) {
+    a:not(.link),
+    .nav-row {
       border-radius: 0.5rem;
     }
   }

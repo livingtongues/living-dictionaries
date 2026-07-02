@@ -1,10 +1,11 @@
 import type { EntryData } from '$lib/types'
 import { page } from '$app/state'
+import { get_headword } from '$lib/helpers/orthographies'
 
 export async function share(dictionaryId: string, entry: EntryData) {
-  const { data: { t } } = page
+  const { data: { t, dictionary } } = page
   const title = `${dictionaryId} ${t('misc.LD_singular')}`
-  const text = `${entry.main.lexeme.default}`
+  const text = get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary?.orthographies }).value
   const url = `https://livingdictionaries.app/${dictionaryId}/entry/${entry.id}`
 
   if (navigator.share) {
