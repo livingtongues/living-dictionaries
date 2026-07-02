@@ -101,6 +101,14 @@ the live schema). `scripts/` is NOT a workspace member — install with
    - Reconciliations vs this schema and gotchas are in
      `.knowledge/migration/pulling-supabase-data-locally.md` (ALTER `linguistic_history`;
      `process.exit` truncates piped stdout; media files aren't pulled — they stay on GCS).
+   - **Legacy `audio.source` free text auto-resolves** during the run (2026-07-02: audio/video
+     `source` is now a STRICT `sources.slug` registry ref; the 14 distinct legacy values are all
+     person names). `resolve_audio_source_names` in `mappers.ts` converts each per the 3-rule
+     mapping in `.issues/media-attribution-speaker-or-source.md` (match speaker → link; no links →
+     create speaker; linked-to-others → registry citation). Spot-check afterwards: Bahasa Lani
+     should gain a `Yafeth Warijo` speaker with 298 links; Tehuelche audio sources go NULL
+     (redundant with existing links). videos/photos untouched (0 legacy video sources; photo
+     source stays free-text caption).
 3. **Seed the VPS:** `rsync` the migrated `.data/` (`shared.db` + all dict DBs) →
    `living:/opt/hosting/data/`. First boot self-migrates an empty catalog if absent.
 3b. **One-time R2 snapshot sweep** (OPFS op note, 2026-06-10): rebuild every dict's R2 snapshot from

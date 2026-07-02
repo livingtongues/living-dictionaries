@@ -84,6 +84,19 @@ describe(apply_entry_writes, () => {
     expect(count('entries')).toBe(2)
   })
 
+  test('normalizes parts_of_speech to canonical lowercase abbrevs, deduped; unknown values pass through', () => {
+    const report = apply_entry_writes({
+      db,
+      user_id: 'u1',
+      entries: [{
+        lexeme: 'mbwa',
+        senses: [{ parts_of_speech: ['N', 'Noun', 'CONJ', 'sustantivo poseido'] }],
+      }],
+    })
+    const sense = db.prepare(`SELECT * FROM senses WHERE entry_id = ?`).get(report.results[0].entry_id) as Record<string, string>
+    expect(JSON.parse(sense.parts_of_speech)).toEqual(['n', 'conj', 'sustantivo poseido'])
+  })
+
   test('deduplicates dialects + tags by name across entries', () => {
     apply_entry_writes({
       db,
@@ -213,6 +226,13 @@ describe(apply_entry_update, () => {
     expect(senses).toHaveLength(2)
     expect(JSON.parse(senses[0].glosses)).toEqual({ en: 'hound' })
     expect(JSON.parse(senses[0].parts_of_speech)).toEqual(['n'])
+  })
+
+  test('normalizes parts_of_speech in a sense patch', () => {
+    const { entry_id, sense_id } = seed_entry()
+    apply_entry_update({ db, entry_id, patch: { senses: [{ id: sense_id, parts_of_speech: ['V', 'Verb', 'OBJ'] }] }, user_id: 'u1' })
+    const sense = db.prepare(`SELECT * FROM senses WHERE id = ?`).get(sense_id) as Record<string, string>
+    expect(JSON.parse(sense.parts_of_speech)).toEqual(['v', 'obj'])
   })
 
   test('appends an example sentence to an existing sense', () => {

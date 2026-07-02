@@ -89,6 +89,7 @@ export const partsOfSpeech: PartOfSpeech[] = [
   { enAbbrev: 'relpro', enName: 'relative pronoun' },
   { enAbbrev: 'vd', enName: 'ditransitive verb' },
   { enAbbrev: 'va', enName: 'ambitransitive' },
+  { enAbbrev: 'obj', enName: 'object marker' },
   // { unofficial: true, enAbbrev: 'interr.pro', enName: 'interrogative pronoun' },
   // { unofficial: true, enAbbrev: 'cop', enName: 'copula' },
   // { unofficial: true, enAbbrev: 'imp.verb', enName: 'imperative verb' },
@@ -97,6 +98,43 @@ export const partsOfSpeech: PartOfSpeech[] = [
   // { unofficial: true, enAbbrev: 'rel.n', enName: 'relational noun' },
   // { unofficial: true, enAbbrev: 'v.n', enName: 'verbal noun' },
 ]
+
+const canonical_abbrev_lookup = new Map<string, string>()
+for (const { enAbbrev, enName } of partsOfSpeech) {
+  canonical_abbrev_lookup.set(enAbbrev.toLowerCase(), enAbbrev)
+  const name_lookup_key = enName.toLowerCase()
+  if (!canonical_abbrev_lookup.has(name_lookup_key))
+    canonical_abbrev_lookup.set(name_lookup_key, enAbbrev)
+}
+
+/**
+ * Map a part-of-speech value to its canonical lowercase abbreviation —
+ * case-insensitive on both the abbreviation (`N` → `n`) and the full English
+ * name (`Noun` → `n`). Unrecognized values pass through trimmed and unchanged
+ * (dictionaries may use language-specific categories, e.g. the Mayan Spanish
+ * phrases below).
+ */
+export function normalize_part_of_speech(value: string): string {
+  const trimmed = value.trim()
+  return canonical_abbrev_lookup.get(trimmed.toLowerCase()) ?? trimmed
+}
+
+if (import.meta.vitest) {
+  describe(normalize_part_of_speech, () => {
+    test('maps abbreviations case-insensitively', () => {
+      expect(normalize_part_of_speech('N')).toBe('n')
+      expect(normalize_part_of_speech('CONJ')).toBe('conj')
+      expect(normalize_part_of_speech('v')).toBe('v')
+    })
+    test('maps full English names to the abbreviation', () => {
+      expect(normalize_part_of_speech('Noun')).toBe('n')
+      expect(normalize_part_of_speech('question marker')).toBe('q')
+    })
+    test('passes unknown values through trimmed', () => {
+      expect(normalize_part_of_speech(' sustantivo poseido ')).toBe('sustantivo poseido')
+    })
+  })
+}
 
 export const mayanPOS = [
   'sustantivo generalmente no poseido',

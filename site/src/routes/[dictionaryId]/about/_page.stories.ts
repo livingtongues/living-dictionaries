@@ -11,7 +11,7 @@ const dictionary = {
   url: 'demo',
   name: 'Nahuatl',
   public: true,
-  about: '<p>The Nahuatl Living Dictionary documents the speech of the highland communities, gathered over field seasons with elder speakers.</p>',
+  about: '## Our story\n\nThe **Nahuatl** Living Dictionary documents the speech of the highland communities, gathered over field seasons with *elder speakers*.\n\n- Recordings from three villages\n- Reviewed by community managers',
 }
 
 const shared_props = {
@@ -31,4 +31,9 @@ export const ManagerWithContent: PageStory<typeof Component> = {
 
 export const ManagerEmpty: PageStory<typeof Component> = {
   props: { ...(shared_props as object), is_manager: true, dictionary: { ...dictionary, about: '' } } as never,
+}
+
+// Pre-cutover rows still hold CKEditor HTML — pins the html-era read shim.
+export const HtmlEraContent: PageStory<typeof Component> = {
+  props: { ...(shared_props as object), is_manager: false, dictionary: { ...dictionary, about: '<h2>Our story</h2><p>The <strong>Nahuatl</strong> Living Dictionary documents the speech of the highland communities.</p>' } } as never,
 }

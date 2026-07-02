@@ -2,22 +2,14 @@
   import AgentPrompt from '$lib/components/settings/AgentPrompt.svelte'
   import ApiKeys from '$lib/components/settings/ApiKeys.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import IconFa6SolidRobot from '~icons/fa6-solid/robot'
 
   const { data } = $props()
   const { dictionary, is_manager, is_editor_or_above } = $derived(data)
 </script>
 
 <div class="agents-page">
-  <div class="page-head">
-    <div class="head-icon">
-      <IconFa6SolidRobot class="icon-inline" style="font-size: 1.25rem" />
-    </div>
-    <div>
-      <h3 class="agents-heading">Agents</h3>
-      <p class="agents-sub">Let an AI agent read & write this dictionary on your behalf.</p>
-    </div>
-  </div>
+  <h3 class="agents-heading">Agents</h3>
+  <p class="agents-sub">Let an AI agent read & write this dictionary on your behalf.</p>
 
   {#if is_editor_or_above}
     <div class="explainer">
@@ -50,34 +42,16 @@
 <style>
   .agents-page {
     max-width: 768px;
-    padding: 12px 16px 64px;
-  }
-  .page-head {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 8px 0 12px;
-  }
-  .head-icon {
-    width: 2.5rem;
-    height: 2.5rem;
-    flex-shrink: 0;
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: color-mix(in srgb, var(--background), var(--color) 8%);
-    color: var(--color-secondary);
   }
   .agents-heading {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
   }
   .agents-sub {
-    color: var(--color-secondary, #6b7280);
-    font-size: 14px;
-    margin: 2px 0 0;
+    color: var(--color-secondary);
+    margin: 0 0 1rem;
   }
   .explainer {
     font-size: 0.9rem;

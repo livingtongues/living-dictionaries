@@ -4,6 +4,7 @@ import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
 import type { EntriesWriteResponseBody, EntryInput, EntryPatch, EntryWriteResult, SenseInput, SentenceInput, SentencePatch } from '$lib/api/v1/entry-input'
 import type { MultiString } from '$lib/types'
 import { resolve_client_id, to_multistring, to_string_array } from '$lib/api/v1/entry-input'
+import { normalize_part_of_speech } from '$lib/mappings/parts-of-speech'
 import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { read_last_modified_at } from './dictionary-db'
 import { record_history } from './dictionary-history-db'
@@ -51,6 +52,15 @@ function prune(row: Record<string, unknown>): Record<string, unknown> {
 
 function name_key(name: string): string {
   return name.trim().toLowerCase()
+}
+
+/** Canonicalize + dedupe a POS list (`["N", "Noun"]` → `["n"]`); unknown values pass through. */
+function to_parts_of_speech(value: unknown): string[] | undefined {
+  const list = to_string_array(value)
+  if (!list)
+    return undefined
+  const normalized = [...new Set(list.map(normalize_part_of_speech))]
+  return normalized.length ? normalized : undefined
 }
 
 function load_dialect_map(db: Database.Database): Map<string, string> {
@@ -104,7 +114,7 @@ function build_sense_rows({ sense, entry_id, now, source_slug_set }: { sense: Se
       entry_id,
       glosses: to_multistring(sense.glosses),
       definition: to_multistring(sense.definition),
-      parts_of_speech: to_string_array(sense.parts_of_speech),
+      parts_of_speech: to_parts_of_speech(sense.parts_of_speech),
       semantic_domains: to_string_array(sense.semantic_domains),
       write_in_semantic_domains: to_string_array(sense.write_in_semantic_domains),
       noun_class: sense.noun_class?.trim() || undefined,
@@ -401,7 +411,7 @@ function build_sense_patch_row({ existing, sense, now }: { existing: Record<stri
   }
   for (const field of SENSE_PATCH_ARRAY_FIELDS) {
     if (field in source) {
-      row[field] = to_string_array(source[field]) ?? null
+      row[field] = (field === 'parts_of_speech' ? to_parts_of_speech(source[field]) : to_string_array(source[field])) ?? null
       changed = true
     }
   }

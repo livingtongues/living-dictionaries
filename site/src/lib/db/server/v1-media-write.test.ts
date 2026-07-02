@@ -9,7 +9,7 @@ let db: Database.Database
 const USER = 'edt-1'
 const NOW = '2026-01-01T00:00:00.000Z'
 
-function seed(table: 'entries' | 'senses' | 'sentences' | 'texts' | 'speakers', row: Record<string, unknown>) {
+function seed(table: 'entries' | 'senses' | 'sentences' | 'texts' | 'speakers' | 'sources', row: Record<string, unknown>) {
   merge_dict_row({ db, table_name: table, row: { created_at: NOW, updated_at: NOW, ...row }, user_id: USER })
 }
 
@@ -20,20 +20,23 @@ beforeEach(() => {
   seed('sentences', { id: 'sent1', text: { default: 'a sentence' } })
   seed('texts', { id: 't1', title: { default: 'a story' } })
   seed('speakers', { id: 'sp1', name: 'Ana' })
+  seed('sources', { id: 'src1', slug: 'field-2026', citation: 'Fieldwork 2026' })
 })
 
 afterEach(() => db.close())
 
-/** Owner id + medium-specific input fields for each cell. */
+/** Owner id + medium-specific input fields for each cell. Audio/video carry a
+ * registry source slug (the speaker-less attribution path); photo `source` is
+ * free-text caption and photos need no attribution. */
 const CELL_FIXTURES: Record<MediaCellKey, { owner_id: string, fields: MediaFieldInput }> = {
   'audio:entry': { owner_id: 'e1', fields: { storage_path: 'a.mp3', source: 'field-2026' } },
-  'audio:sentence': { owner_id: 'sent1', fields: { storage_path: 'a.mp3' } },
-  'audio:text': { owner_id: 't1', fields: { storage_path: 'a.mp3' } },
-  'photo:sense': { owner_id: 's1', fields: { storage_path: 'p.jpg', serving_url: 'hash', photographer: 'Sam' } },
+  'audio:sentence': { owner_id: 'sent1', fields: { storage_path: 'a.mp3', source: 'field-2026' } },
+  'audio:text': { owner_id: 't1', fields: { storage_path: 'a.mp3', source: 'field-2026' } },
+  'photo:sense': { owner_id: 's1', fields: { storage_path: 'p.jpg', serving_url: 'hash', photographer: 'Sam', source: 'a free-text caption' } },
   'photo:sentence': { owner_id: 'sent1', fields: { storage_path: 'p.jpg', serving_url: 'hash' } },
-  'video:sense': { owner_id: 's1', fields: { hosted_elsewhere: { type: 'youtube', video_id: 'abc' } } },
-  'video:sentence': { owner_id: 'sent1', fields: { storage_path: 'v.mp4' } },
-  'video:text': { owner_id: 't1', fields: { hosted_elsewhere: { type: 'vimeo', video_id: '123' } } },
+  'video:sense': { owner_id: 's1', fields: { hosted_elsewhere: { type: 'youtube', video_id: 'abc' }, source: 'field-2026' } },
+  'video:sentence': { owner_id: 'sent1', fields: { storage_path: 'v.mp4', source: 'field-2026' } },
+  'video:text': { owner_id: 't1', fields: { hosted_elsewhere: { type: 'vimeo', video_id: '123' }, source: 'field-2026' } },
 }
 
 describe(attach_media, () => {
@@ -87,18 +90,45 @@ describe(attach_media, () => {
   })
 
   test('idempotent: re-attaching the same media id is a no-op', () => {
-    const first = attach_media({ db, cell_key: 'audio:entry', owner_id: 'e1', media_id: 'aud-fixed', fields: { storage_path: 'a.mp3' }, user_id: USER })
+    const first = attach_media({ db, cell_key: 'audio:entry', owner_id: 'e1', media_id: 'aud-fixed', fields: { storage_path: 'a.mp3', source: 'field-2026' }, user_id: USER })
     expect(first.created).toBeTruthy()
-    const second = attach_media({ db, cell_key: 'audio:entry', owner_id: 'e1', media_id: 'aud-fixed', fields: { storage_path: 'other.mp3' }, user_id: USER })
+    const second = attach_media({ db, cell_key: 'audio:entry', owner_id: 'e1', media_id: 'aud-fixed', fields: { storage_path: 'other.mp3', source: 'field-2026' }, user_id: USER })
     expect(second.created).toBeFalsy()
     expect(db.prepare(`SELECT COUNT(*) AS c FROM audio WHERE entry_id = ?`).get('e1')).toEqual({ c: 1 })
   })
 
   test('replace: removes existing media of the medium on the owner first', () => {
-    attach_media({ db, cell_key: 'audio:entry', owner_id: 'e1', fields: { storage_path: 'first.mp3' }, user_id: USER })
-    attach_media({ db, cell_key: 'audio:entry', owner_id: 'e1', fields: { storage_path: 'second.mp3' }, replace: true, user_id: USER })
+    attach_media({ db, cell_key: 'audio:entry', owner_id: 'e1', fields: { storage_path: 'first.mp3', source: 'field-2026' }, user_id: USER })
+    attach_media({ db, cell_key: 'audio:entry', owner_id: 'e1', fields: { storage_path: 'second.mp3', source: 'field-2026' }, replace: true, user_id: USER })
     const rows = db.prepare(`SELECT storage_path FROM audio WHERE entry_id = ?`).all('e1')
     expect(rows).toEqual([{ storage_path: 'second.mp3' }])
+  })
+
+  test('audio without speaker or source is rejected (attribution rule)', () => {
+    expect(() => attach_media({ db, cell_key: 'audio:entry', owner_id: 'e1', fields: { storage_path: 'a.mp3' }, user_id: USER }))
+      .toThrow('requires attribution')
+  })
+
+  test('video without speaker or source is rejected (attribution rule)', () => {
+    expect(() => attach_media({ db, cell_key: 'video:sense', owner_id: 's1', fields: { hosted_elsewhere: { type: 'youtube', video_id: 'abc' } }, user_id: USER }))
+      .toThrow('requires attribution')
+  })
+
+  test('audio with an unknown source slug is rejected (strict registry)', () => {
+    expect(() => attach_media({ db, cell_key: 'audio:entry', owner_id: 'e1', fields: { storage_path: 'a.mp3', source: 'no-such-slug' }, user_id: USER }))
+      .toThrow(`unknown source slug 'no-such-slug'`)
+  })
+
+  test('audio with a speaker but no source passes the attribution rule', () => {
+    const result = attach_media({ db, cell_key: 'audio:entry', owner_id: 'e1', fields: { storage_path: 'a.mp3' }, speaker_id: 'sp1', user_id: USER })
+    expect(result.created).toBeTruthy()
+    expect(result.media.source).toBeNull()
+  })
+
+  test('photo needs no attribution and its free-text source is stored verbatim', () => {
+    const result = attach_media({ db, cell_key: 'photo:sense', owner_id: 's1', fields: { storage_path: 'p.jpg', serving_url: 'h', source: 'any prose caption' }, user_id: USER })
+    expect(result.created).toBeTruthy()
+    expect(result.media.source).toBe('any prose caption')
   })
 })
 

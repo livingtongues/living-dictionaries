@@ -125,7 +125,7 @@
       class:active={page.url.pathname.includes('sources')}>
       <IconFa6SolidBook class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
       <span class="item-label">
-        {page.data.t('entry_field.sources')}
+        {page.data.t({ dynamicKey: 'source.sources', fallback: 'Sources' })}
       </span>
     </a>
   {/if}

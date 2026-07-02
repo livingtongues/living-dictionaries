@@ -3,6 +3,9 @@
   import type { EntryFieldValue } from '$lib/types'
   import { Button, Form } from '$lib/svelte-pieces'
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
+  import MarkdownEditor from '$lib/markdown/MarkdownEditor.svelte'
+  import { html_to_markdown } from '$lib/markdown/html-to-markdown'
+  import { looks_like_html } from '$lib/markdown/html-era-shim'
   import { page } from '$app/state'
   import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
 
@@ -28,6 +31,13 @@
 
   let inputEl: HTMLInputElement = $state()
 
+  // HTML-era shim (pre-cutover rows store CKEditor HTML): convert on read so the
+  // editor gets markdown and a save naturally persists markdown. This component
+  // only mounts client-side (inside the click-opened EditFieldModal), so the
+  // DOM-needing conversion is safe here. DELETE after the Supabase cutover.
+  if (field === 'notes' && looks_like_html(value))
+    value = html_to_markdown(value)
+
   async function save() {
     value = inputEl?.value || value // IpaKeyboard modifies input's value from outside this component so the bound value here doesn't update. This is hacky and the alternative is to emit events from the IpaKeyboard rather than bind to any neighboring element. This makes the adding and backspacing functions potentially needing to be applied in every context where the IPA keyboard is used. Until we know more how the IPA keyboard will be used, this line here is sufficient.
     await on_update(value.trim())
@@ -36,23 +46,6 @@
 
   function autofocus(node: HTMLInputElement) {
     setTimeout(() => node.focus(), 5)
-  }
-
-  const editorConfig = {
-    toolbar: [
-      // 'heading',
-      // '|',
-      'bold',
-      'italic',
-      'underline',
-      'smallCaps',
-      'link',
-      'bulletedList',
-      'numberedList',
-      'blockQuote',
-      'undo',
-      'redo',
-    ],
   }
 
   const pairs = {
@@ -128,11 +121,9 @@
   {#snippet children({ loading })}
     <div class="field-editor">
       {#if field === 'notes'}
-        {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-          <Keyman fixed target=".ck-editor__editable_inline" canChooseKeyboard position="bottom">
-            <ClassicCustomized {editorConfig} html={value} on:update={({ detail }) => (value = detail)} />
-          </Keyman>
-        {/await}
+        <Keyman fixed target=".ProseMirror" canChooseKeyboard position="bottom">
+          <MarkdownEditor preset="minimal" bind:value />
+        </Keyman>
       {:else if field === 'gloss' || field === 'example_sentence'}
         <Keyman fixed {bcp}>
           <input
@@ -223,7 +214,7 @@
 
 <style>
   @media (min-width: 768px) {
-    :global(.ck-editor__editable_inline) {
+    .field-editor :global(.ProseMirror) {
       min-height: 50vh;
     }
   }

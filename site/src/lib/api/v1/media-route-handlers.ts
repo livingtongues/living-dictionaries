@@ -1,12 +1,14 @@
 import type { MediaCellKey, MediaFieldInput } from '$lib/db/server/v1-media-write'
 import type { HostedVideo } from '$lib/types'
 import type { RequestHandler } from '@sveltejs/kit'
+import type DatabaseType from 'better-sqlite3'
 import type { MediaCategory } from './validate-media-bytes'
 import { parse_hosted_video_url } from '$lib/components/video/parse-hosted-video-url'
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
-import { attach_media, delete_media, MEDIA_CELLS, read_media_record } from '$lib/db/server/v1-media-write'
+import { attach_media, delete_media, MEDIA_CELLS, media_requires_attribution, read_media_record } from '$lib/db/server/v1-media-write'
+import { load_source_slug_set } from '$lib/db/server/source-slugs'
 import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
 import { MediaStorageNotConfiguredError, resolve_photo_serving_url, store_media_bytes } from '$lib/server/media-storage'
 import { log_server_event } from '$lib/server/log-server-event'
@@ -39,6 +41,32 @@ function owner_label(cell_key: MediaCellKey): string {
 /** Map a storage medium to the top-level content category the bytes must be. */
 function medium_category(medium: 'audio' | 'photo' | 'video'): MediaCategory {
   return medium === 'photo' ? 'image' : medium
+}
+
+const INLINE_LIST_CAP = 20
+
+/** `speakers not found` 400 that lists the dictionary's speakers when few enough to inline. */
+function unknown_speaker_message({ db, dict_id, speaker_id }: { db: DatabaseType.Database, dict_id: string, speaker_id: string }): string {
+  const speakers = db.prepare(`SELECT id, name FROM speakers ORDER BY name`).all() as { id: string, name: string }[]
+  const base = `speaker '${speaker_id}' not found.`
+  if (!speakers.length)
+    return `${base} This dictionary has no speakers yet — create one via POST /api/v1/dictionaries/${dict_id}/speakers.`
+  if (speakers.length <= INLINE_LIST_CAP)
+    return `${base} Existing speakers: ${speakers.map(speaker => `${speaker.name} (${speaker.id})`).join(', ')}. Or create one via POST /api/v1/dictionaries/${dict_id}/speakers.`
+  return `${base} List them via GET /api/v1/dictionaries/${dict_id}/speakers or create one via POST.`
+}
+
+function unknown_source_message({ known, dict_id, source }: { known: Set<string>, dict_id: string, source: string }): string {
+  const base = `unknown source slug '${source}'; create it via POST /api/v1/dictionaries/${dict_id}/sources first.`
+  if (known.size > 0 && known.size <= INLINE_LIST_CAP)
+    return `${base} Existing source slugs: ${[...known].sort().join(', ')}.`
+  if (known.size > INLINE_LIST_CAP)
+    return `${base} List them via GET /api/v1/dictionaries/${dict_id}/sources.`
+  return base
+}
+
+function missing_attribution_message({ medium, dict_id }: { medium: 'audio' | 'video', dict_id: string }): string {
+  return `${medium} requires attribution: provide speaker_id (an existing speaker — GET/POST /api/v1/dictionaries/${dict_id}/speakers) and/or source (a sources-registry slug — GET/POST /api/v1/dictionaries/${dict_id}/sources).`
 }
 
 /** Reject uploaded bytes (multipart file OR fetched url) that aren't real media of this medium. */
@@ -123,10 +151,21 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
       if (!cell.speaker)
         error(ResponseCodes.BAD_REQUEST, `${cell.medium} media does not support a speaker`)
       if (!db.prepare(`SELECT 1 FROM speakers WHERE id = ?`).get(speaker_id))
-        error(ResponseCodes.BAD_REQUEST, 'speaker not found')
+        error(ResponseCodes.BAD_REQUEST, unknown_speaker_message({ db, dict_id: dictionary.id, speaker_id }))
     }
 
-    const media_fields: MediaFieldInput = { source: str(fields.source) ?? null }
+    const source = str(fields.source)
+    if (media_requires_attribution(cell)) {
+      if (!speaker_id && !source)
+        error(ResponseCodes.BAD_REQUEST, missing_attribution_message({ medium: cell.medium as 'audio' | 'video', dict_id: dictionary.id }))
+      if (source) {
+        const known = load_source_slug_set(db)
+        if (!known.has(source))
+          error(ResponseCodes.BAD_REQUEST, unknown_source_message({ known, dict_id: dictionary.id, source }))
+      }
+    }
+
+    const media_fields: MediaFieldInput = { source: source ?? null }
 
     if (cell.medium === 'video') {
       const hosted = resolve_hosted(fields)

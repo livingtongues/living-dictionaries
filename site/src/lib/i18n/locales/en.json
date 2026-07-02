@@ -319,7 +319,12 @@
     "type_wordlist": "Wordlist",
     "type_fieldwork": "Fieldwork",
     "type_manuscript": "Manuscript",
-    "type_other": "Other"
+    "type_other": "Other",
+    "sources": "Sources",
+    "cite_instead": "Speaker unknown? Cite a source instead",
+    "select_source": "Source of this recording",
+    "choose_speaker_instead": "Know the speaker? Choose a speaker instead",
+    "source": "Source"
   },
   "speakers": {
     "add_new_speaker": "Add New Speaker",

@@ -1,7 +1,11 @@
 # Pre-existing: Keyman/IPA keyboard `firstElementChild` race on fast edit-modal open/close
 
-**Status:** FLAGGED (pre-existing, not introduced by the livedb scalar-field migration). Medium —
-involves the Keyman + CKEditor keyboard lifecycle; needs care. Awaiting Jacob's call on priority.
+**Status:** ✅ RESOLVED 2026-07-02 as part of the CKEditor→Tiptap migration
+(`.issues/ckeditor-to-tiptap.md`). Keyman.svelte now: fixes the `resolve` → `resolve()` bug, adds a
+`destroyed` teardown flag (async onMount bails after unmount), clears the target-poll interval on
+destroy, and the Tiptap `MarkdownEditor` mounts synchronously (static imports) so the
+`.ProseMirror` target exists on the first query — the poll is now only a safety net. Verified by
+the `test:markdown` e2e (Keyman Assamese typing into the notes editor).
 
 ## Symptom
 Opening an entry/sense edit field modal and closing it quickly throws an uncaught

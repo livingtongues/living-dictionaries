@@ -6,6 +6,7 @@
  */
 
 import { RELATIONSHIP_TYPES } from '$lib/constants'
+import { partsOfSpeech } from '$lib/mappings/parts-of-speech'
 
 export function build_openapi_spec({ origin }: { origin: string }): Record<string, unknown> {
   const MultiString = {
@@ -38,7 +39,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       id: client_id_prop,
       glosses: { ...StringOrMultiString, description: 'Short glosses keyed by gloss-language code.' },
       definition: { ...StringOrMultiString, description: 'Longer definition(s).' },
-      parts_of_speech: { ...StringOrStringArray, description: 'POS abbreviation(s), e.g. "n", "v".' },
+      parts_of_speech: { ...StringOrStringArray, description: `POS abbreviation(s). Send the abbreviation or its full English name — both are matched case-insensitively and stored as the canonical lowercase abbreviation ("N" / "Noun" → "n"). Values outside this list are stored verbatim, so only use custom values for genuinely language-specific categories. Supported: ${partsOfSpeech.map(({ enAbbrev, enName }) => `${enAbbrev} (${enName})`).join(', ')}.` },
       semantic_domains: { ...StringOrStringArray, description: 'Semantic domain keys.' },
       write_in_semantic_domains: { ...StringOrStringArray, description: 'Free-text semantic domains.' },
       noun_class: { type: 'string' },
@@ -58,7 +59,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       phonetic: { type: 'string' },
       interlinearization: { type: 'string' },
       morphology: { type: 'string' },
-      notes: StringOrMultiString,
+      notes: { ...StringOrMultiString, description: 'Rich text stored as MARKDOWN (headings/bold/lists/links) — write markdown, not HTML.' },
       linguistic_history: StringOrMultiString,
       sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist in this dictionary\'s registry (create via `POST …/sources`); an unknown slug rejects the write.' },
       scientific_names: StringOrStringArray,
@@ -94,7 +95,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       phonetic: { type: 'string' },
       interlinearization: { type: 'string' },
       morphology: { type: 'string' },
-      notes: StringOrMultiString,
+      notes: { ...StringOrMultiString, description: 'Rich text stored as MARKDOWN (headings/bold/lists/links) — write markdown, not HTML.' },
       linguistic_history: StringOrMultiString,
       sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist (create via `POST …/sources`). Replaces the entry\'s current source list.' },
       scientific_names: StringOrStringArray,
@@ -292,7 +293,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       phonetic: { type: 'string', nullable: true },
       interlinearization: { type: 'string', nullable: true },
       morphology: { type: 'string', nullable: true },
-      notes: { ...MultiString, nullable: true },
+      notes: { ...MultiString, nullable: true, description: 'Rich text as MARKDOWN.' },
       linguistic_history: { ...MultiString, nullable: true },
       sources: { type: 'array', items: { type: 'string' }, nullable: true },
       scientific_names: { type: 'array', items: { type: 'string' }, nullable: true },
@@ -375,11 +376,11 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   const SpeakerBrief = { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' } } }
   const AudioMedia = {
     type: 'object',
-    description: 'A stored audio recording (the pronunciation/utterance). Attaches to an entry, sentence, or text.',
+    description: 'A stored audio recording (the pronunciation/utterance). Attaches to an entry, sentence, or text. Requires attribution: a speaker and/or a registry `source`.',
     properties: {
       id: { type: 'string' },
       storage_path: { type: 'string' },
-      source: { type: 'string', nullable: true },
+      source: { type: 'string', nullable: true, description: 'A sources-registry slug (see `GET …/sources`) — the speaker-less attribution path.' },
       entry_id: { type: 'string', nullable: true },
       sentence_id: { type: 'string', nullable: true },
       text_id: { type: 'string', nullable: true },
@@ -390,12 +391,12 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   }
   const PhotoMedia = {
     type: 'object',
-    description: 'A stored photo. Attaches to a sense or a sentence. `source` + `photographer` are the attribution shown under the image (there is no separate caption field).',
+    description: 'A stored photo. Attaches to a sense or a sentence. `source` + `photographer` are the free-text attribution shown under the image (there is no separate caption field; unlike audio/video, a photo `source` is NOT a registry slug).',
     properties: {
       id: { type: 'string' },
       storage_path: { type: 'string' },
       serving_url: { type: 'string', description: 'lh3 image-serving hash (generated server-side).' },
-      source: { type: 'string', nullable: true },
+      source: { type: 'string', nullable: true, description: 'Free-text attribution/caption prose.' },
       photographer: { type: 'string', nullable: true },
       created_at: { type: 'string', format: 'date-time' },
       updated_at: { type: 'string', format: 'date-time' },
@@ -403,12 +404,12 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   }
   const VideoMedia = {
     type: 'object',
-    description: 'A stored or hosted video. Attaches to a sense, sentence, or text. Either `storage_path` (uploaded bytes) OR `hosted_elsewhere` (YouTube/Vimeo) is set.',
+    description: 'A stored or hosted video. Attaches to a sense, sentence, or text. Either `storage_path` (uploaded bytes) OR `hosted_elsewhere` (YouTube/Vimeo) is set. Requires attribution: a speaker and/or a registry `source`.',
     properties: {
       id: { type: 'string' },
       storage_path: { type: 'string', nullable: true },
       hosted_elsewhere: { ...HostedElsewhere, nullable: true },
-      source: { type: 'string', nullable: true },
+      source: { type: 'string', nullable: true, description: 'A sources-registry slug (see `GET …/sources`) — the speaker-less attribution path.' },
       videographer: { type: 'string', nullable: true },
       text_id: { type: 'string', nullable: true },
       speakers: { type: 'array', items: { $ref: '#/components/schemas/SpeakerBrief' }, description: 'Present only when a speaker is attached.' },
@@ -433,21 +434,25 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     }
   }
 
+  // Audio + video MUST carry attribution: speaker_id and/or source (a registry slug). Photos are exempt (their source is free-text caption).
+  const attributed_speaker_prop = { type: 'string', description: 'An existing speaker id (list via `GET …/speakers`, create via `POST …/speakers`). REQUIRED unless `source` is provided.' }
+  const attributed_source_prop = { type: 'string', description: 'A sources-registry slug — must already exist (list via `GET …/sources`, create via `POST …/sources`). REQUIRED unless `speaker_id` is provided.' }
+
   const audio_request_body = media_request_body({
     multipart_required: ['file'],
-    multipart_props: { file: file_prop, speaker_id: { type: 'string' }, source: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+    multipart_props: { file: file_prop, speaker_id: attributed_speaker_prop, source: attributed_source_prop, id: media_id_prop, replace: media_replace_prop },
     json_required: ['url'],
-    json_props: { url: url_prop, speaker_id: { type: 'string', description: 'Optional — must be an existing speaker id (create via `POST …/speakers`).' }, source: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+    json_props: { url: url_prop, speaker_id: attributed_speaker_prop, source: attributed_source_prop, id: media_id_prop, replace: media_replace_prop },
   })
   const photo_request_body = media_request_body({
     multipart_required: ['file'],
     multipart_props: { file: file_prop, source: { type: 'string' }, photographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
     json_required: ['url'],
-    json_props: { url: url_prop, source: { type: 'string', description: 'Attribution/description shown under the photo.' }, photographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+    json_props: { url: url_prop, source: { type: 'string', description: 'Free-text attribution/description shown under the photo (NOT a registry slug).' }, photographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
   })
   const video_request_body = media_request_body({
-    multipart_props: { file: file_prop, hosted_url: { type: 'string', description: 'A YouTube/Vimeo watch URL (parsed to `hosted_elsewhere`) — use instead of a file for hosted video.' }, speaker_id: { type: 'string' }, source: { type: 'string' }, videographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
-    json_props: { url: url_prop, hosted_url: { type: 'string', description: 'A YouTube/Vimeo watch URL — parsed to `hosted_elsewhere`.' }, hosted_elsewhere: { ...HostedElsewhere, description: 'Structured hosted-video link (alternative to `hosted_url`). Provide exactly one of `url` / `hosted_url` / `hosted_elsewhere`.' }, speaker_id: { type: 'string' }, source: { type: 'string' }, videographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+    multipart_props: { file: file_prop, hosted_url: { type: 'string', description: 'A YouTube/Vimeo watch URL (parsed to `hosted_elsewhere`) — use instead of a file for hosted video.' }, speaker_id: attributed_speaker_prop, source: attributed_source_prop, videographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+    json_props: { url: url_prop, hosted_url: { type: 'string', description: 'A YouTube/Vimeo watch URL — parsed to `hosted_elsewhere`.' }, hosted_elsewhere: { ...HostedElsewhere, description: 'Structured hosted-video link (alternative to `hosted_url`). Provide exactly one of `url` / `hosted_url` / `hosted_elsewhere`.' }, speaker_id: attributed_speaker_prop, source: attributed_source_prop, videographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
   })
 
   const RelationshipCustomType = {
@@ -507,7 +512,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         requestBody: request_body,
         responses: {
           200: { description: `{ ${key}, created }`, content: { 'application/json': { schema: { type: 'object', properties: { [key]: { $ref: `#/components/schemas/${schema}` }, created: { type: 'boolean', description: 'false = idempotent no-op (the supplied `id` already existed).' } } } } } },
-          400: { description: 'Bad input (no file/url, bad speaker, bad hosted link)' },
+          400: { description: 'Bad input (no file/url, missing attribution — audio/video need speaker_id and/or source, unknown speaker, unknown source slug, bad hosted link)' },
           404: { description: 'Owner not found' },
           413: { description: 'File exceeds the upload size limit' },
           415: { description: 'The uploaded/fetched bytes are not valid media of this type (e.g. a `url` that returned an HTML error page)' },
@@ -528,21 +533,21 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   }
 
   const media_paths = {
-    '/api/v1/dictionaries/{id}/entries/{entryId}/audio': media_attach_op({ summary: 'Attach audio to an entry', description: 'Upload a pronunciation recording for the headword (multipart `file` or JSON `url`), optionally with a `speaker_id`. Use `replace: true` for one-audio-per-headword imports.', owner_params: [entry_id_param], request_body: audio_request_body, medium: 'audio' }),
+    '/api/v1/dictionaries/{id}/entries/{entryId}/audio': media_attach_op({ summary: 'Attach audio to an entry', description: 'Upload a pronunciation recording for the headword (multipart `file` or JSON `url`). Attribution required: `speaker_id` and/or `source` (a registry slug). Use `replace: true` for one-audio-per-headword imports.', owner_params: [entry_id_param], request_body: audio_request_body, medium: 'audio' }),
     '/api/v1/dictionaries/{id}/entries/{entryId}/audio/{audioId}': media_delete_op({ owner_label: 'entry', owner_params: [entry_id_param], media_id_p: audio_id_param, medium: 'audio' }),
     '/api/v1/dictionaries/{id}/senses/{senseId}/photos': media_attach_op({ summary: 'Attach a photo to a sense', description: 'Upload an illustrative photo for the sense (multipart `file` or JSON `url`), optionally with `source`/`photographer` (shown as the caption).', owner_params: [sense_id_param], request_body: photo_request_body, medium: 'photo' }),
     '/api/v1/dictionaries/{id}/senses/{senseId}/photos/{photoId}': media_delete_op({ owner_label: 'sense', owner_params: [sense_id_param], media_id_p: photo_id_param, medium: 'photo' }),
-    '/api/v1/dictionaries/{id}/senses/{senseId}/videos': media_attach_op({ summary: 'Attach a video to a sense', description: 'Upload a video (`file`/`url`) OR link a hosted one (`hosted_url`/`hosted_elsewhere`), optionally with `speaker_id`.', owner_params: [sense_id_param], request_body: video_request_body, medium: 'video' }),
+    '/api/v1/dictionaries/{id}/senses/{senseId}/videos': media_attach_op({ summary: 'Attach a video to a sense', description: 'Upload a video (`file`/`url`) OR link a hosted one (`hosted_url`/`hosted_elsewhere`). Attribution required: `speaker_id` and/or `source` (a registry slug).', owner_params: [sense_id_param], request_body: video_request_body, medium: 'video' }),
     '/api/v1/dictionaries/{id}/senses/{senseId}/videos/{videoId}': media_delete_op({ owner_label: 'sense', owner_params: [sense_id_param], media_id_p: video_id_param, medium: 'video' }),
-    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio': media_attach_op({ summary: 'Attach audio to a sentence', description: 'Upload audio for an example/text sentence (`file`/`url`), optionally with `speaker_id`.', owner_params: [sentence_id_param], request_body: audio_request_body, medium: 'audio' }),
+    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio': media_attach_op({ summary: 'Attach audio to a sentence', description: 'Upload audio for an example/text sentence (`file`/`url`). Attribution required: `speaker_id` and/or `source`.', owner_params: [sentence_id_param], request_body: audio_request_body, medium: 'audio' }),
     '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio/{audioId}': media_delete_op({ owner_label: 'sentence', owner_params: [sentence_id_param], media_id_p: audio_id_param, medium: 'audio' }),
     '/api/v1/dictionaries/{id}/sentences/{sentenceId}/photos': media_attach_op({ summary: 'Attach a photo to a sentence', description: 'Upload a photo for a sentence (`file`/`url`), optionally with `source`/`photographer`.', owner_params: [sentence_id_param], request_body: photo_request_body, medium: 'photo' }),
     '/api/v1/dictionaries/{id}/sentences/{sentenceId}/photos/{photoId}': media_delete_op({ owner_label: 'sentence', owner_params: [sentence_id_param], media_id_p: photo_id_param, medium: 'photo' }),
-    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/videos': media_attach_op({ summary: 'Attach a video to a sentence', description: 'Upload (`file`/`url`) or link (`hosted_url`/`hosted_elsewhere`) a video for a sentence.', owner_params: [sentence_id_param], request_body: video_request_body, medium: 'video' }),
+    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/videos': media_attach_op({ summary: 'Attach a video to a sentence', description: 'Upload (`file`/`url`) or link (`hosted_url`/`hosted_elsewhere`) a video for a sentence. Attribution required: `speaker_id` and/or `source`.', owner_params: [sentence_id_param], request_body: video_request_body, medium: 'video' }),
     '/api/v1/dictionaries/{id}/sentences/{sentenceId}/videos/{videoId}': media_delete_op({ owner_label: 'sentence', owner_params: [sentence_id_param], media_id_p: video_id_param, medium: 'video' }),
-    '/api/v1/dictionaries/{id}/texts/{textId}/audio': media_attach_op({ summary: 'Attach audio to a text', description: 'Upload audio for a whole text/passage (`file`/`url`), optionally with `speaker_id`.', owner_params: [text_id_param], request_body: audio_request_body, medium: 'audio' }),
+    '/api/v1/dictionaries/{id}/texts/{textId}/audio': media_attach_op({ summary: 'Attach audio to a text', description: 'Upload audio for a whole text/passage (`file`/`url`). Attribution required: `speaker_id` and/or `source`.', owner_params: [text_id_param], request_body: audio_request_body, medium: 'audio' }),
     '/api/v1/dictionaries/{id}/texts/{textId}/audio/{audioId}': media_delete_op({ owner_label: 'text', owner_params: [text_id_param], media_id_p: audio_id_param, medium: 'audio' }),
-    '/api/v1/dictionaries/{id}/texts/{textId}/videos': media_attach_op({ summary: 'Attach a video to a text', description: 'Upload (`file`/`url`) or link (`hosted_url`/`hosted_elsewhere`) a video for a text.', owner_params: [text_id_param], request_body: video_request_body, medium: 'video' }),
+    '/api/v1/dictionaries/{id}/texts/{textId}/videos': media_attach_op({ summary: 'Attach a video to a text', description: 'Upload (`file`/`url`) or link (`hosted_url`/`hosted_elsewhere`) a video for a text. Attribution required: `speaker_id` and/or `source`.', owner_params: [text_id_param], request_body: video_request_body, medium: 'video' }),
     '/api/v1/dictionaries/{id}/texts/{textId}/videos/{videoId}': media_delete_op({ owner_label: 'text', owner_params: [text_id_param], media_id_p: video_id_param, medium: 'video' }),
   }
 
@@ -570,7 +575,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '4. Spot-verify with `GET /api/v1/dictionaries/{id}/entries/{entryId}` (returns the full nested entry — the READ shape), or bulk-read with `GET /api/v1/dictionaries/{id}/entries?include=senses`. Heads-up on the input→output asymmetry: top-level scalars you POST come back nested under `entry.main`, and `senses[].example_sentences` come back as `senses[].sentences`. See the `EntryResponse` schema. (`elicitation_id` is for word-list/elicitation ordering; it is persisted and queryable via `?elicitation_id=`, so use it for dedupe only if your source id is genuinely elicitation data — otherwise use your own `id` as above.)',
         '',
         '## Data model',
-        'An **entry** is a headword (`lexeme`) plus metadata and one or more **senses**. A **sense** is one meaning: its `glosses` (short translations keyed by gloss-language), an optional longer `definition`, `parts_of_speech`, `semantic_domains`, and `example_sentences`. An **example sentence** has vernacular `text` + `translation`(s). `dialects` and `tags` are entry-level labels (referenced by name; created automatically if new). If you omit `senses`, one empty sense is created. A **text** is a separate object: a connected passage/story (`title`) with its own ORDERED list of sentences (each with optional paragraph breaks) — use the `…/texts` endpoints for those; they are independent of entries.',
+        'An **entry** is a headword (`lexeme`) plus metadata and one or more **senses**. A **sense** is one meaning: its `glosses` (short translations keyed by gloss-language), an optional longer `definition`, `parts_of_speech`, `semantic_domains`, and `example_sentences`. `parts_of_speech` values should come from the supported abbreviation list in the `SenseInput` schema (abbrevs and full English names are matched case-insensitively and stored as the canonical lowercase abbrev, e.g. "N"/"Noun" → "n"; anything else is stored verbatim). An **example sentence** has vernacular `text` + `translation`(s). `dialects` and `tags` are entry-level labels (referenced by name; created automatically if new). If you omit `senses`, one empty sense is created. A **text** is a separate object: a connected passage/story (`title`) with its own ORDERED list of sentences (each with optional paragraph breaks) — use the `…/texts` endpoints for those; they are independent of entries.',
         '',
         '## Edits & deletes',
         '`PATCH …/entries/{entryId}` field-merges the entry: provided fields overwrite, omitted ones stay. `senses` upsert by `id` (include the sense `id` to edit it, omit it to add a new sense); example sentences are appended; `dialects`/`tags` are added (never removed) by this call. `DELETE …/entries/{entryId}` removes the entry and its senses.',
@@ -585,9 +590,10 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '',
         '## Media (audio / photos / videos)',
         'Attach media with ONE call that uploads + links it: `POST` the bytes as multipart `file`, OR JSON `{ "url": "https://…" }` (the server fetches it). Each returns the created media object (with its `id`) and `created`.',
-        '- **audio** → an entry (headword pronunciation), a sentence, or a text: `POST …/entries/{entryId}/audio`, `…/sentences/{sentenceId}/audio`, `…/texts/{textId}/audio`. Optional `speaker_id` (must be an existing speaker — create via `POST …/speakers`).',
-        '- **photos** → a sense or a sentence: `POST …/senses/{senseId}/photos`, `…/sentences/{sentenceId}/photos`. Optional `source`/`photographer` (shown as the on-image caption).',
-        '- **videos** → a sense, sentence, or text: `POST …/senses/{senseId}/videos`, etc. Upload bytes OR link a hosted video via `hosted_url` (a YouTube/Vimeo watch URL) — preferred for large video, which would exceed the upload cap. Optional `speaker_id`.',
+        '**Audio and video require attribution**: `speaker_id` (an existing speaker — create via `POST …/speakers`) and/or `source` (a sources-registry slug — create via `POST …/sources`, same strict create-first rule as entry sources). Use a speaker when you know who is speaking; use a source when the recording comes from a website/archive/publication. NEVER invent a placeholder speaker to satisfy this — speakers are real people (with birth decade/gender/birthplace shown on the contributors page); provenance belongs in a source.',
+        '- **audio** → an entry (headword pronunciation), a sentence, or a text: `POST …/entries/{entryId}/audio`, `…/sentences/{sentenceId}/audio`, `…/texts/{textId}/audio`.',
+        '- **photos** → a sense or a sentence: `POST …/senses/{senseId}/photos`, `…/sentences/{sentenceId}/photos`. Optional free-text `source`/`photographer` (shown as the on-image caption — for photos this is NOT a registry slug).',
+        '- **videos** → a sense, sentence, or text: `POST …/senses/{senseId}/videos`, etc. Upload bytes OR link a hosted video via `hosted_url` (a YouTube/Vimeo watch URL) — preferred for large video, which would exceed the upload cap.',
         'Idempotency + replace: send your own `id` (UUID) so a re-POST is a no-op; send `replace: true` to first remove existing media of that type on that owner (e.g. exactly one pronunciation per headword). Remove media with `DELETE …/{audioId|photoId|videoId}`.',
         'Typical import: create the entry (get its `id` + `sense_ids`), then `POST …/entries/{entryId}/audio` with the pronunciation and `POST …/senses/{senseId}/photos` with the illustrative photo.',
         '',

@@ -38,12 +38,14 @@
   })
 
   const initial_speaker_id = $derived(sound_file?.speakers?.[0].id)
+  const initial_source_slug = $derived(sound_file?.source ?? undefined)
 
-  function startUpload(speaker_id: string): Readable<AudioVideoUploadStatus> {
+  function startUpload({ speaker_id, source_slug }: { speaker_id?: string, source_slug?: string }): Readable<AudioVideoUploadStatus> {
     const uploadStore = dbOperations.addAudio({
       file: file || audioBlob,
       entry_id: entry.id,
       speaker_id,
+      source: source_slug,
     })
 
     const unsubscribe = uploadStore.subscribe((status) => {
@@ -64,6 +66,12 @@
       await dbOperations.assign_speaker({ speaker_id: initial_speaker_id, media: 'audio', media_id: sound_file.id, remove: true })
     await dbOperations.assign_speaker({ speaker_id: new_speaker_id, media: 'audio', media_id: sound_file.id })
   }
+
+  async function select_source(new_source_slug: string) {
+    if (!sound_file) return
+    if (sound_file.source === new_source_slug) return
+    await dbOperations.update_audio({ id: sound_file.id, source: new_source_slug })
+  }
 </script>
 
 <Modal on:close={on_close}>
@@ -73,14 +81,15 @@
 
   <SelectSpeaker
     initialSpeakerId={initial_speaker_id}
-
-    {select_speaker}>
-    {#snippet children({ speaker_id })}
+    {initial_source_slug}
+    {select_speaker}
+    {select_source}>
+    {#snippet children({ speaker_id, source_slug })}
       {#if sound_file}
         <div style="padding-left: 0.25rem; padding-right: 0.25rem">
           <Waveform audioUrl={url_from_storage_path(sound_file.storage_path)} />
         </div>
-      {:else if speaker_id}
+      {:else if speaker_id || source_slug}
         {#if file || audioBlob}
           {#if file}
             <Waveform audioUrl={URL.createObjectURL(file)} />
@@ -89,7 +98,7 @@
           {/if}
           <div style="margin-bottom: 0.75rem"></div>
           {#if !upload_triggered && (file || audioBlob)}
-            {@const upload_status = startUpload(speaker_id)}
+            {@const upload_status = startUpload({ speaker_id, source_slug })}
             {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
               <UploadProgressBarStatus {upload_status} />
             {/await}

@@ -17,8 +17,10 @@ import {
   map_orthographies,
   map_sense,
   map_sentence,
+  map_speaker,
   map_text,
   map_user,
+  resolve_audio_source_names,
   rewrite_orthography_keys,
   SHARED_JSON_COLS,
   to_int,
@@ -156,6 +158,76 @@ describe('mapper transforms', () => {
     expect(out.about).toBe('About text')
     expect(out.write_in_collaborators).toEqual(['Jo'])
     expect(out.entry_count).toBe(5)
+  })
+})
+
+describe(resolve_audio_source_names, () => {
+  function audio_row({ id, source, created_by = 'u1' }: { id: string, source: string | null, created_by?: string }) {
+    return map_audio({ id, entry_id: 'e1', storage_path: `${id}.mp3`, source, created_by, created_at: new Date('2024-01-01T00:00:00Z') })
+  }
+  const speaker_ana = { id: 'sp-ana', name: 'Ana Marija' }
+
+  test('rule 1: name matches an in-dict speaker → links missing rows, NULLs source', () => {
+    const audio_rows = [audio_row({ id: 'a1', source: 'ana marija ' }), audio_row({ id: 'a2', source: 'Ana Marija' })]
+    const junction_rows = [map_junction({ audio_id: 'a2', speaker_id: 'sp-ana', created_by: 'u1', created_at: new Date() }, ['audio_id', 'speaker_id'])]
+    const resolution = resolve_audio_source_names({ audio_rows, speaker_rows: [speaker_ana], junction_rows, existing_slugs: new Set(), user_id: 'u1' })
+    expect(resolution.new_speakers).toHaveLength(0)
+    expect(resolution.new_sources).toHaveLength(0)
+    // only a1 needs the link — a2 already has it
+    expect(resolution.new_audio_speakers).toHaveLength(1)
+    expect(resolution.new_audio_speakers[0].audio_id).toBe('a1')
+    expect(resolution.new_audio_speakers[0].speaker_id).toBe('sp-ana')
+    expect(audio_rows[0].source).toBeNull()
+    expect(audio_rows[1].source).toBeNull()
+  })
+
+  test('rule 2: no match + all rows speaker-less → creates ONE speaker, links all, collapses case variants', () => {
+    const audio_rows = [
+      audio_row({ id: 'a1', source: 'Yafeth Warijo' }),
+      audio_row({ id: 'a2', source: 'Yafeth Warijo' }),
+      audio_row({ id: 'a3', source: 'YAFETH WARIJO' }),
+    ]
+    const resolution = resolve_audio_source_names({ audio_rows, speaker_rows: [], junction_rows: [], existing_slugs: new Set(), user_id: 'u1' })
+    expect(resolution.new_speakers).toHaveLength(1)
+    expect(resolution.new_speakers[0].name).toBe('Yafeth Warijo') // most frequent variant wins
+    expect(resolution.new_sources).toHaveLength(0)
+    expect(resolution.new_audio_speakers).toHaveLength(3)
+    for (const row of audio_rows)
+      expect(row.source).toBeNull()
+  })
+
+  test('rule 3: rows linked to OTHER speakers → registry citation, source rewritten to slug', () => {
+    const audio_rows = [audio_row({ id: 'a1', source: 'Daniel Bögre Udell' }), audio_row({ id: 'a2', source: 'Daniel Bögre Udell' })]
+    const junction_rows = [map_junction({ audio_id: 'a1', speaker_id: 'sp-other', created_by: 'u1', created_at: new Date() }, ['audio_id', 'speaker_id'])]
+    const existing_slugs = new Set(['daniel-bogre-udell'])
+    const resolution = resolve_audio_source_names({ audio_rows, speaker_rows: [{ id: 'sp-other', name: 'Someone Else' }], junction_rows, existing_slugs, user_id: 'u1' })
+    expect(resolution.new_speakers).toHaveLength(0)
+    expect(resolution.new_audio_speakers).toHaveLength(0)
+    expect(resolution.new_sources).toHaveLength(1)
+    expect(resolution.new_sources[0].slug).toBe('daniel-bogre-udell-2') // collision-suffixed against entry sources
+    expect(resolution.new_sources[0].citation).toBe('Daniel Bögre Udell')
+    expect(audio_rows[0].source).toBe('daniel-bogre-udell-2')
+    expect(audio_rows[1].source).toBe('daniel-bogre-udell-2')
+  })
+
+  test('ignores deleted rows and rows without a source', () => {
+    const deleted = audio_row({ id: 'a1', source: 'Ghost Person' })
+    deleted.deleted = '2024-01-01T00:00:00.000Z'
+    const audio_rows = [deleted, audio_row({ id: 'a2', source: null })]
+    const resolution = resolve_audio_source_names({ audio_rows, speaker_rows: [], junction_rows: [], existing_slugs: new Set(), user_id: 'u1' })
+    expect(resolution.new_speakers).toHaveLength(0)
+    expect(resolution.new_sources).toHaveLength(0)
+    expect(resolution.new_audio_speakers).toHaveLength(0)
+    expect(deleted.source).toBe('Ghost Person')
+  })
+
+  test('synthesized rows share the column set of mapped rows (batch-insert safe)', () => {
+    const audio_rows = [audio_row({ id: 'a1', source: 'New Person' })]
+    const resolution = resolve_audio_source_names({ audio_rows, speaker_rows: [], junction_rows: [], existing_slugs: new Set(), user_id: 'u1' })
+    const mapped_speaker = map_speaker({ id: 'sp1', name: 'X', created_by: 'u1', created_at: new Date() })
+    expect(Object.keys(resolution.new_speakers[0]).sort()).toEqual(Object.keys(mapped_speaker).sort())
+    const mapped_junction = map_junction({ audio_id: 'a', speaker_id: 'b', created_by: 'u1', created_at: new Date() }, ['audio_id', 'speaker_id'])
+    expect(Object.keys(resolution.new_audio_speakers[0]).sort()).toEqual(Object.keys(mapped_junction).sort())
   })
 })
 

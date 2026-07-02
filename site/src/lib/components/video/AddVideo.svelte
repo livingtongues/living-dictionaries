@@ -23,8 +23,8 @@
   let hosted_video: HostedVideo = $state()
   let upload_triggered = $state(false)
 
-  function startUpload(file: File | Blob, speaker_id: string): Readable<VideoUploadStatus> {
-    const uploadStore = dbOperations.uploadVideo({ file, sense_id: entry.senses[0].id, speaker_id })
+  function startUpload({ file, speaker_id, source_slug }: { file: File | Blob, speaker_id?: string, source_slug?: string }): Readable<VideoUploadStatus> {
+    const uploadStore = dbOperations.uploadVideo({ file, sense_id: entry.senses[0].id, speaker_id, source: source_slug })
     const unsubscribe = uploadStore.subscribe((status) => {
       if (status?.progress === 100) {
         upload_triggered = true
@@ -32,6 +32,13 @@
       }
     })
     return uploadStore
+  }
+
+  async function save_hosted({ speaker_id, source_slug }: { speaker_id?: string, source_slug?: string }) {
+    const data = await dbOperations.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video, ...(source_slug ? { source: source_slug } : {}) } })
+    if (speaker_id)
+      await dbOperations.assign_speaker({ speaker_id, media: 'video', media_id: data.id })
+    on_close()
   }
 </script>
 
@@ -41,7 +48,7 @@
   {/snippet}
 
   <SelectSpeaker>
-    {#snippet children({ speaker_id })}
+    {#snippet children({ speaker_id, source_slug })}
       {#if hosted_video}
         <VideoThirdParty {hosted_video} />
         <div class="modal-footer">
@@ -50,23 +57,19 @@
           </Button>
           <div style="width: 0.25rem"></div>
           <Button
-            onclick={async () => {
-              const data = await dbOperations.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video } })
-              await dbOperations.assign_speaker({ speaker_id, media: 'video', media_id: data.id })
-              on_close()
-            }}
+            onclick={() => save_hosted({ speaker_id, source_slug })}
             form="filled">
             {page.data.t('misc.save')}
           </Button>
         </div>
-      {:else if speaker_id}
+      {:else if speaker_id || source_slug}
         <ShowHide>
           {#snippet children({ show: record, toggle })}
             {#if !record && !upload_triggered}
               <PasteVideoLink on_pasted_valid_url={video_info => hosted_video = video_info} />
               <SelectVideo>
                 {#snippet children({ file })}
-                  {@const upload_status = startUpload(file, speaker_id)}
+                  {@const upload_status = startUpload({ file, speaker_id, source_slug })}
                   {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
                     <UploadProgressBarStatus {upload_status} />
                   {/await}
@@ -92,7 +95,7 @@
                           <Button onclick={toggle} color="green" form="filled"><i class="fas fa-upload"></i> {page.data.t('misc.upload')}</Button>
                         </div>
                       {:else if !upload_triggered}
-                        {@const upload_status = startUpload(videoBlob, speaker_id)}
+                        {@const upload_status = startUpload({ file: videoBlob, speaker_id, source_slug })}
                         {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
                           <UploadProgressBarStatus {upload_status} />
                         {/await}

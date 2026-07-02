@@ -13,7 +13,8 @@
   let editing = $state<Tables<'sources'> | null | undefined>(undefined) // undefined = closed, null = create
   let usage = $state<Record<string, number>>({})
 
-  // Total reference count per slug across entries + sentences + texts (local wa-sqlite).
+  // Total reference count per slug across entries + sentences + texts (slug
+  // arrays) + audio + videos (scalar slug columns) — local wa-sqlite.
   $effect(() => {
     const _ = $sources // re-run when the registry changes
     if (!connection) return
@@ -24,6 +25,10 @@
         SELECT value FROM sentences CROSS JOIN json_each(sentences.sources) WHERE sentences.sources IS NOT NULL
         UNION ALL
         SELECT value FROM texts CROSS JOIN json_each(texts.sources) WHERE texts.sources IS NOT NULL
+        UNION ALL
+        SELECT source AS value FROM audio WHERE source IS NOT NULL
+        UNION ALL
+        SELECT source AS value FROM videos WHERE source IS NOT NULL
       ) GROUP BY value`)
       .then((rows) => { usage = Object.fromEntries(rows.map(row => [row.slug, row.c])) })
       .catch(err => console.error('source usage query failed', err))
@@ -44,62 +49,66 @@
   }
 </script>
 
-<svelte:head><title>{t('entry_field.sources')}</title></svelte:head>
+<svelte:head><title>{t({ dynamicKey: 'source.sources', fallback: 'Sources' })}</title></svelte:head>
 
-<main class="tw-prose" style="max-width: 60rem; margin: 0 auto; padding: 1rem;">
-  <div class="header">
-    <h2>{t('entry_field.sources')}</h2>
-    {#if can_edit}
-      <Button form="filled" onclick={() => (editing = null)}>
-        <IconFaSolidPlus class="icon-inline" />
-        {t({ dynamicKey: 'source.create', fallback: 'Add source' })}
-      </Button>
-    {/if}
-  </div>
-
-  {#if !$sources?.length}
-    <p class="empty">{t({ dynamicKey: 'source.empty', fallback: 'No sources yet. Add the printed dictionaries and wordlists this dictionary cites.' })}</p>
-  {:else}
-    <table>
-      <thead>
-        <tr>
-          <th>{t({ dynamicKey: 'source.abbreviation', fallback: 'Abbreviation' })}</th>
-          <th>{t({ dynamicKey: 'source.citation', fallback: 'Citation' })}</th>
-          <th>{t({ dynamicKey: 'source.type', fallback: 'Type' })}</th>
-          <th class="num">{t({ dynamicKey: 'source.used_by', fallback: 'Used by' })}</th>
-          {#if can_edit}<th></th>{/if}
-        </tr>
-      </thead>
-      <tbody>
-        {#each $sources as source (source.id)}
-          <tr>
-            <td>{source.abbreviation || source.slug}</td>
-            <td class="citation">{source.citation || ''}</td>
-            <td>{source.type ? t({ dynamicKey: `source.type_${source.type}`, fallback: source.type }) : ''}</td>
-            <td class="num">{usage[source.slug] || 0}</td>
-            {#if can_edit}
-              <td class="actions">
-                <button type="button" title={t('misc.edit')} onclick={() => (editing = source)}><IconFaSolidPen class="icon-inline" /></button>
-                <button type="button" class="danger" title={t('misc.delete')} onclick={() => delete_source(source)}><IconFaSolidTrash class="icon-inline" /></button>
-              </td>
-            {/if}
-          </tr>
-        {/each}
-      </tbody>
-    </table>
+<div class="header">
+  <h3 class="sources-heading">{t({ dynamicKey: 'source.sources', fallback: 'Sources' })}</h3>
+  {#if can_edit}
+    <Button form="filled" onclick={() => (editing = null)}>
+      <IconFaSolidPlus class="icon-inline" />
+      {t({ dynamicKey: 'source.create', fallback: 'Add source' })}
+    </Button>
   {/if}
-</main>
+</div>
+
+{#if !$sources?.length}
+  <p class="empty">{t({ dynamicKey: 'source.empty', fallback: 'No sources yet. Add the printed dictionaries and wordlists this dictionary cites.' })}</p>
+{:else}
+  <table>
+    <thead>
+      <tr>
+        <th>{t({ dynamicKey: 'source.abbreviation', fallback: 'Abbreviation' })}</th>
+        <th>{t({ dynamicKey: 'source.citation', fallback: 'Citation' })}</th>
+        <th>{t({ dynamicKey: 'source.type', fallback: 'Type' })}</th>
+        <th class="num">{t({ dynamicKey: 'source.used_by', fallback: 'Used by' })}</th>
+        {#if can_edit}<th></th>{/if}
+      </tr>
+    </thead>
+    <tbody>
+      {#each $sources as source (source.id)}
+        <tr>
+          <td>{source.abbreviation || source.slug}</td>
+          <td class="citation">{source.citation || ''}</td>
+          <td>{source.type ? t({ dynamicKey: `source.type_${source.type}`, fallback: source.type }) : ''}</td>
+          <td class="num">{usage[source.slug] || 0}</td>
+          {#if can_edit}
+            <td class="actions">
+              <button type="button" title={t('misc.edit')} onclick={() => (editing = source)}><IconFaSolidPen class="icon-inline" /></button>
+              <button type="button" class="danger" title={t('misc.delete')} onclick={() => delete_source(source)}><IconFaSolidTrash class="icon-inline" /></button>
+            </td>
+          {/if}
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+{/if}
 
 {#if editing !== undefined}
   <EditSource source={editing} on_close={() => (editing = undefined)} />
 {/if}
 
 <style>
+  .sources-heading {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+  }
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
+    margin-bottom: 1rem;
   }
   .empty {
     opacity: 0.6;

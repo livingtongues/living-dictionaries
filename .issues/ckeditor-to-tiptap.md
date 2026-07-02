@@ -59,7 +59,62 @@ New deps (site): `tiptap-markdown`, `@tiptap/html`, `@tiptap/extension-image`, `
 
 ## Work plan
 
-### Phase 1 — editor swap on `svelte-5-migration` (do now, ships before cutover)
+### Phase 1 — editor swap on `svelte-5-migration` (✅ DONE 2026-07-02)
+
+Working checklist (details in numbered plan below):
+- ✅ `site/src/lib/markdown/`: extensions.ts, MarkdownEditor.svelte (+stories), render.ts,
+      html-to-markdown.ts, html-era-shim.ts, markdown-roundtrip.test.ts (16 tests)
+- ✅ Swap about/+page.svelte + grammar/+page.svelte (edit → markdown, display → render+shim;
+      kept the original `updated || dictionary.x` display semantics — the layout `dictionary`
+      stays cached after save, `updated` is what shows the fresh content)
+- ✅ Swap EditField.svelte notes branch + retarget Keyman to `.ProseMirror`; fixed Keyman
+      `resolve()` bug + teardown flag + interval cleanup (closes `.issues/keyman-keyboard-mount-race.md`)
+- ✅ Other notes render sites: EntryField.svelte, PrintEntry.svelte, prepareEntriesForCsv.ts
+      (table Cell.svelte edits raw value in a Textbox — fine as markdown, no change)
+- ✅ Removed CKEditor.svelte + ClassicCustomized.svelte + 2 ckeditor deps + `.ck-*` CSS;
+      added tiptap-markdown 0.9, @tiptap/html, @tiptap/extension-image, markdown-it 14
+      (+@types dev). All @tiptap/* aligned at ^3.27.1. Audit: 2 crit + ~15 high → **0 crit, 5 high**
+      (remaining are unrelated dep chains).
+- ✅ openapi.ts: `notes` documented as MARKDOWN on EntryInput/EntryPatch/EntryMain; Keyman.md examples
+- ✅ Verified: unit tests green (1020), svelte-check/lint clean on all touched files, svelte-look
+      screenshots (editor presets, about/grammar all stories incl. HtmlEraContent), and a NEW e2e
+      `pnpm -F site test:markdown` (e2e/markdown-editor-flow.mjs) — full PASS: html-era shim render →
+      Edit converts to markdown (underline dropped) → Save persists markdown → notes modal Tiptap →
+      **Keyman Assamese mapped physical keys into ProseMirror (typed কুকুরা)** → markdown notes
+      render rich + sync to server dict db.
+
+Lessons / discoveries (2026-07-02 execution):
+- **Tiptap Image defaults `allowBase64: false`** — silently DROPS data-URI images. We enable it so
+  legacy pasted-in-CKEditor base64 images survive conversion. markdown-it's link validator still
+  restricts data URIs to png/jpeg/gif/webp (svg data URIs won't render).
+- **ProseMirror fires a blur transaction synchronously during editor teardown**, inside Svelte's
+  template/derived context → a bare `tick++` in `onTransaction` throws `state_unsafe_mutation`
+  when the editor unmounts (e.g. Save closes the edit pane). Fixed with a destroying flag +
+  `queueMicrotask` defer. Checked house's `LibraryEditor.svelte` — already carries the identical
+  `queueMicrotask` + `isDestroyed` guard (commit `6755d94`, same day, house's own CKEditor→Tiptap
+  migration) — no porting needed.
+- **Bare local `node build` can't hydrate dict routes**: no snapshot source (no R2 env, and the
+  dev-vps snapshot fallback is dev-only) → the dict layout's client load hangs → ALL interactivity
+  on dict pages dead (root layout buttons included). Cost an hour of debugging; documented in
+  site/e2e/E2E.md. e2e flows that click around dict routes must target `vite dev`.
+- Keyman OSK renders as a collapsed gray box in headless Chromium (pre-existing KMW quirk) — verify
+  the keyboard pipeline via PHYSICAL keystrokes (kmw maps latin keys → script chars) instead of
+  clicking OSK keys.
+
+Implementation decisions made during execution:
+- Presets: `document` (about/grammar: H1–3, bold/italic/link, lists/quote/hr, image-by-URL
+  prompt, undo/redo) vs `minimal` (notes: bold/italic/link, lists/quote, undo/redo). Underline +
+  alignment + smallCaps buttons deliberately dropped (smallCaps pending cutover audit).
+- MarkdownEditor uses STATIC tiptap imports (unlike house's dynamic) — code-splitting still happens
+  because every usage site dynamic-imports the component itself; static means the editor mounts
+  synchronously in onMount, so child-mounts-before-parent ordering hands Keyman a ready
+  `.ProseMirror` target.
+- Read-time shim renders HTML-era content AS HTML (no DOM-needing conversion in SSR);
+  `html_to_markdown` only runs client-side at edit-open time.
+- markdown-it (not the existing `marked` dep) for rendering — matches house + tiptap-markdown's
+  internal parser for byte-stable round-trips.
+
+#### Original plan
 1. Port the markdown module (`site/src/lib/markdown/`: extensions, MarkdownEditor.svelte, render,
    html-to-markdown + roundtrip tests). `pnpm -F site test` green.
 2. Swap the three usage sites to `MarkdownEditor`:

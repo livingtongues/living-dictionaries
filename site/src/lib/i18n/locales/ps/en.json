@@ -87,6 +87,7 @@
     "reflpro": "reflexive pronoun",
     "relpro": "relative pronoun",
     "vd": "ditransitive verb",
-    "va": "ambitransitive"
+    "va": "ambitransitive",
+    "obj": "object marker"
   }
 }

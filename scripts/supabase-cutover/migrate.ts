@@ -12,6 +12,7 @@ import {
   map_audio,
   map_dialect,
   build_dict_sources,
+  resolve_audio_source_names,
   map_dictionary,
   map_dictionary_partner,
   map_dictionary_role,
@@ -166,6 +167,14 @@ async function migrate_dict_content({ client, data_dir, dict, shared }: {
   // texts (read before sentences) yields per-sentence order derived from the
   // legacy id-array; applied to sentence rows as sort_key + ends_paragraph.
   let sentence_order = new Map<string, { sort_key: string, ends_paragraph: number | null }>()
+  // Slugs taken by the entry-sources registry — audio-source resolution
+  // dedupes against them. speakers + audio are BUFFERED (not inserted at their
+  // loop position) until audio_speakers is read, because the legacy free-text
+  // `audio.source` person-names resolve into speaker links / new speakers /
+  // registry citations (see resolve_audio_source_names).
+  const registry_slugs = new Set<string>()
+  let buffered_speakers: Row[] = []
+  let buffered_audio: Row[] = []
   try {
     for (const table of read.DICT_CONTENT_TABLES) {
       const config = CONTENT_CONFIG[table]
@@ -196,7 +205,31 @@ async function migrate_dict_content({ client, data_dir, dict, shared }: {
         // Convert each entry's free-text `sources` into a per-dict registry +
         // slug refs BEFORE inserting the (rewritten) entry rows.
         const source_rows = build_dict_sources({ entry_rows: rows, user_id: dict.created_by || rows[0]?.created_by_user_id || 'cutover' })
+        for (const source_row of source_rows)
+          registry_slugs.add(source_row.slug)
         counts.sources = insert_rows({ db, table: 'sources', rows: source_rows })
+      }
+      if (table === 'speakers') {
+        buffered_speakers = rows
+        continue
+      }
+      if (table === 'audio') {
+        buffered_audio = rows
+        continue
+      }
+      if (table === 'audio_speakers') {
+        const resolution = resolve_audio_source_names({
+          audio_rows: buffered_audio,
+          speaker_rows: buffered_speakers,
+          junction_rows: rows,
+          existing_slugs: registry_slugs,
+          user_id: dict.created_by || 'cutover',
+        })
+        counts.speakers = insert_rows({ db, table: 'speakers', rows: [...buffered_speakers, ...resolution.new_speakers] })
+        counts.audio = insert_rows({ db, table: 'audio', rows: buffered_audio })
+        counts.sources = (counts.sources ?? 0) + insert_rows({ db, table: 'sources', rows: resolution.new_sources })
+        counts[table] = insert_rows({ db, table, rows: [...rows, ...resolution.new_audio_speakers] })
+        continue
       }
       counts[table] = insert_rows({ db, table, rows, json_cols: config.json })
     }

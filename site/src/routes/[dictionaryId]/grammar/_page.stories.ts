@@ -11,7 +11,7 @@ const dictionary = {
   url: 'demo',
   name: 'Nahuatl',
   public: true,
-  grammar: '<h3>Word order</h3><p>Nahuatl is a polysynthetic language; verbs carry subject, object, and tense affixes, so a single word can express a full clause.</p>',
+  grammar: '### Word order\n\nNahuatl is a *polysynthetic* language; verbs carry subject, object, and tense affixes, so a single word can express a full clause.',
 }
 
 export const Viewer: PageStory<typeof Component> = {
@@ -24,4 +24,9 @@ export const ManagerWithContent: PageStory<typeof Component> = {
 
 export const ManagerEmpty: PageStory<typeof Component> = {
   props: { dictionary: { ...dictionary, grammar: '' }, is_manager: true, update_grammar: async () => {} } as never,
+}
+
+// Pre-cutover rows still hold CKEditor HTML — pins the html-era read shim.
+export const HtmlEraContent: PageStory<typeof Component> = {
+  props: { dictionary: { ...dictionary, grammar: '<h3>Word order</h3><p>Nahuatl is a <i>polysynthetic</i> language; verbs carry subject, object, and tense affixes.</p>' }, is_manager: false, update_grammar: async () => {} } as never,
 }

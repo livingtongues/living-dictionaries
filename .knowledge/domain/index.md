@@ -17,3 +17,9 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
 - [change-history.md](./change-history.md) — the server-side per-dict audit log (entry/text/sentence
   edit timelines): where capture hooks in, the separate `{id}.history.db` + owners-index shape, how it
   survives schema drift, the entry≠text attribution boundary, and the red-phase correctness bugs.
+- [parts-of-speech-i18n.md](./parts-of-speech-i18n.md) — canonical lowercase POS abbrevs + v1
+  normalization, the river data repair, and the gotcha that `ps/psAbbrev/gl/sd` locale files are
+  regenerated from a Google Sheet (hand-edits need a sheet row too).
+- [media-attribution.md](./media-attribution.md) — why audio/video require speaker AND/OR a strict
+  `sources.slug` registry ref (never fake speakers), why photo `source` stays free-text caption,
+  the legacy-data evidence, the cutover 3-rule name resolution, and the river prod backfill record.

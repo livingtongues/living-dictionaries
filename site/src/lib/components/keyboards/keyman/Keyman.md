@@ -1,4 +1,4 @@
-Keyman will accept an element (documentQuerySelector usable string or element itself) and if none is given then it will attach to the first child element it finds inside its slot. The slot method is used in the first two examples, and the target method is used for the CKEditor example because it's input component is nested multiple layers deep.
+Keyman will accept an element (documentQuerySelector usable string or element itself) and if none is given then it will attach to the first child element it finds inside its slot. The slot method is used in the first two examples, and the target method is used for the rich-text editor (Tiptap `MarkdownEditor`, target `.ProseMirror`) because its contenteditable is nested multiple layers deep.
 
 ### Useful Links
 
@@ -27,18 +27,18 @@ buttonAtTop: true
 </Keyman>
 <pre class="pl-3">{paragraph}</pre>
 
-CKEditor
+Rich text (Tiptap MarkdownEditor)
 <div class="w-full">
-  <Keyman bcp="as" target=".ck-editor__editable_inline" position="bottom">
-    <ClassicCustomized {html} on:update={({ detail }) => (html = detail)} />
+  <Keyman bcp="as" target=".ProseMirror" position="bottom">
+    <MarkdownEditor preset="minimal" bind:value={markdown} />
   </Keyman>
-  <pre class="pl-3">{html}</pre>
+  <pre class="pl-3">{markdown}</pre>
 </div>
 
-CKEditor - no language - can choose
+Rich text - no language - can choose
 <div class="w-full">
-  <Keyman canChooseKeyboard target=".ck-editor__editable_inline" position="bottom">
-    <ClassicCustomized {html} on:update={({ detail }) => (html = detail)} />
+  <Keyman canChooseKeyboard target=".ProseMirror" position="bottom">
+    <MarkdownEditor preset="minimal" bind:value={markdown} />
   </Keyman>
-  <pre class="pl-3">{html}</pre>
+  <pre class="pl-3">{markdown}</pre>
 </div> -->
