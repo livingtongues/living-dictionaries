@@ -4,6 +4,12 @@ Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. The migra
 staging is live; remaining production cutover: `.issues/cutover.md`.
 
 ## Pages
+- [supabase-cutover-conversions.md](./supabase-cutover-conversions.md) — full-corpus cutover
+  rehearsal findings (2,229 dicts pushed live 2026-07-02): the two silent-data-loss bugs
+  (`<`-prefix `looks_like_html` misfire, undeclared `lo{n}` orthographies), the Tiptap
+  per-conversion heap leak → disposable-child isolation, rich-text audit decisions
+  (tables/underline/smallcaps), schema-drift converge, the hard-delete/orphan-prune model, and the
+  prod-id-wins identity merge + blue/green push procedure.
 - [migration-squash-2026-07-02.md](./migration-squash-2026-07-02.md) — the pre-cutover squash of
   all three migration sets into single idempotent `20260702_initial.sql` files: the re-run-by-name
   convergence mechanism, the prunable Convergence sections, the ALTER-order column-position gotcha,

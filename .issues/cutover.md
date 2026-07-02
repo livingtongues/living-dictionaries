@@ -260,7 +260,41 @@ done
 
 ---
 
-## Rehearsal run log (Phase A, live notes)
+## Rehearsal run log (Phase A) — ✅ COMPLETE & LIVE (2026-07-02)
 
-- 2026-07-02: recon + audit done; creds staged on mustang via tuf horse hop; prod state captured
-  (river active, last api write 10:35Z). Script upgrades in progress.
+- Recon + audit; creds staged on mustang via tuf horse hop; prod state captured.
+- Script upgrades (A1): identity remap, isolated-child rich-text conversion, audit/verify/validate/
+  converge tools, manifest + resume. Fixed: `linguistic_history` drop, deleted-dict resurrection,
+  hard-delete orphan pruning, `record-logs` stdout hijack, `<`-prefix content loss, undeclared
+  `lo{n}` orthographies, Tiptap per-call heap leak (→ recycled child process).
+- Rich-text audit (A3): 47,825 HTML values. underline 1,039 (→ `[…]{.underline}` lossless span,
+  Jacob wanted the count), text-align 646 (dropped), **tables 317 (→ TableKit raw-HTML, approved)**,
+  smallcaps 50 (→ `[…]{.smallcaps}`), oembed 5 (→ links). markdown-tables-as-real-GFM = future issue.
+- Full migration (A4): **2,229 dicts / 546,196 entries / 556,211 senses / 142,493 audio /
+  21,643 photos / 18,552 sources** (+8 synthesized speakers, 539 audio-source links). 5,327 users,
+  3,021 roles, 104 partners, 1,526 invites. 47,828 rich-text conversions. Data dir 1.6 GB.
+  Prod-id-wins identity: 3 matched (Diego/Greg/Jacob remapped), 0 supabase dupes.
+- Verify (A5): `validate-sqlite` → **all 2,229 pass every invariant** (FK, no lo{n}/HTML residue,
+  source-slug integrity, entry_count parity). Conversion mismatches: 0 errors/crashes, **0 data loss**
+  (letter-multiset check); the rest are markdown-escape backslashes + list-marker text-extraction
+  artifacts (render-identical) + `**`/`*` emphasis next to non-Latin scripts (minor cosmetic —
+  markdown-it flanking limitation, candidate for a future `markdown-it-cjk` tweak).
+- **Push to living (A6): DONE.** Living had ~zero drift since the 16:00 pull (river last-written
+  10:35, 0 messages, same client_logs). Backup `shared.db.bak-precutover-20260702-234622` +
+  `shared.db.old-river-only`. rsync 1.6 GB dicts (additive, river.db untouched) → stop both
+  blue/green → swap shared.db + clear stale wal/shm → start. **healthz 200, river 200, migrated
+  dicts 200, 0 server errors.** river preserved (8,693 entries, api_key, Jake's manager role, chat).
+- Post-push (A7): snapshot builder auto-sweeping all 2,229 (26 done at check, ~30-min cycles).
+  SSR-verified converted content renders: tables (lao-ba 4 tables/202 cells, dogon paradigm),
+  headings, bold/italic, smallcaps/underline spans.
+  - ⏳ **Jacob TODO:** clear site data for `new.livingdictionaries.app` once (admin wa-sqlite sync
+    cursors are ahead of migrated rows' historical `updated_at` → full user/dict lists need a fresh
+    origin). Then eyeball: globe (WebGL — agent can't), a big/small/orthography-heavy dict, converted
+    about/grammar/notes, media, admin sync.
+
+### Known cosmetic follow-ups (non-blocking)
+- `**bold**`/`*italic*` immediately adjacent to CJK/Devanagari/Arabic may render as literal
+  asterisks (markdown-it doesn't treat non-Latin as emphasis-flanking). No data loss. Fix later
+  with a flanking plugin if it bothers real pages.
+- Live-editing race: `ewdébe` showed a 4-row parity delta at verify time (actively edited during
+  the window) — exactly the class Phase B's `--since` delta re-migrates.
