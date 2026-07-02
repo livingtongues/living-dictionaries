@@ -83,6 +83,46 @@ export function rewrite_orthography_keys(multistring: Row | null | undefined, lo
 }
 
 /**
+ * Some dictionaries carry native-script alternate spellings keyed `lo{n}` in
+ * their lexemes/sentence-texts but never declared an `orthographies` array
+ * (prod 2026-07-02: 6 dicts, e.g. malapulaya 388 entries with `lo1` Malayalam
+ * script, Latin in `default`). With no registry entry the key can't be
+ * rewritten and — worse — the `get_headword` fallback only consults REGISTERED
+ * orthography codes, so the native spelling becomes invisible. This scans the
+ * ALREADY-mapped rows for `lo{n}` keys not covered by `lo_to_code` and
+ * synthesizes a registry entry per uncovered index (`code = orth{n}`,
+ * `name = "Orthography {n}"`), extending the map in place and returning the
+ * new registry rows to append to the dict's catalog `orthographies`.
+ */
+export function synthesize_missing_orthographies({ rows, key, lo_to_code, existing }: {
+  rows: Row[]
+  key: string
+  lo_to_code: Record<string, string>
+  existing: Row[] | null
+}): Row[] {
+  const used_codes = new Set<string>((existing ?? []).map(orthography => orthography.code))
+  const synthesized: Row[] = []
+  for (const row of rows) {
+    const multistring = row[key]
+    if (!multistring || typeof multistring !== 'object')
+      continue
+    for (const map_key of Object.keys(multistring)) {
+      const match = /^lo(\d+)$/.exec(map_key)
+      if (!match || lo_to_code[map_key])
+        continue
+      let code = `orth${match[1]}`
+      let suffix = 2
+      while (used_codes.has(code))
+        code = `orth${match[1]}-${suffix++}`
+      used_codes.add(code)
+      lo_to_code[map_key] = code
+      synthesized.push({ code, name: `Orthography ${match[1]}` })
+    }
+  }
+  return synthesized
+}
+
+/**
  * Audit fields shared by every content/catalog table. The new dict schema has
  * NO `deleted` column (hard-delete + `deletes` tombstone log) — soft-deleted
  * Supabase rows are filtered out at READ time (`read_dict_table`), never

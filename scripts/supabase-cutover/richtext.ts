@@ -1,5 +1,10 @@
 import type { Row } from './mappers'
+import { create_conversion_stats } from './conversion-stats'
+import type { ConversionMismatch, ConversionStats } from './conversion-stats'
 import { refresh_dom, register_dom } from './register-dom'
+
+export { create_conversion_stats }
+export type { ConversionMismatch, ConversionStats }
 
 register_dom() // must precede the site markdown imports (tiptap touches DOM globals at import time)
 
@@ -22,38 +27,7 @@ import { render_markdown_to_html } from '../../site/src/lib/markdown/render'
  * they're collected (with ids + before/after) for eyeball review.
  */
 
-export interface ConversionStats {
-  converted: number
-  passed_through: number
-  emptied: number
-  mismatches: ConversionMismatch[]
-}
-
-export interface ConversionMismatch {
-  where: string
-  original_html: string
-  markdown: string
-  original_text: string
-  roundtrip_text: string
-}
-
-export function create_conversion_stats(): ConversionStats {
-  return { converted: 0, passed_through: 0, emptied: 0, mismatches: [] }
-}
-
 let conversions_since_refresh = 0
-let total = 0
-
-/**
- * Process-lifetime conversion count. Tiptap/ProseMirror retain ~0.3–0.75MB per
- * html_to_markdown call regardless of DOM impl (measured happy-dom AND jsdom,
- * 2026-07-02 — GC-proof references somewhere in Editor/generateJSON). migrate.ts
- * uses this to end a pass BEFORE the heap dies; the outer loop resumes with
- * `--skip-existing`.
- */
-export function total_conversions(): number {
-  return total
-}
 
 /** Convert one value if it's HTML-era; verify; record stats. Returns the stored value (null for empty). */
 export function convert_value({ value, where, stats }: { value: unknown, where: string, stats: ConversionStats }): string | null {
@@ -82,7 +56,6 @@ export function convert_value({ value, where, stats }: { value: unknown, where: 
 
   const markdown = html_to_markdown(prepared)
   stats.converted++
-  total++
   if (!markdown.trim()) {
     // HTML that converts to nothing (e.g. `<p>&nbsp;</p>`) → store null, but
     // flag it if the original actually had text content.
@@ -98,12 +71,17 @@ export function convert_value({ value, where, stats }: { value: unknown, where: 
   const original_text = normalized_text_of_html(text)
   const roundtrip_text = normalized_text_of_html(render_markdown_to_html(markdown))
   if (original_text !== roundtrip_text) {
+    // Store context AROUND the first divergence — a clipped prefix hides it.
+    let divergence = 0
+    while (divergence < original_text.length && original_text[divergence] === roundtrip_text[divergence])
+      divergence++
+    const window_start = Math.max(0, divergence - 60)
     stats.mismatches.push({
       where,
       original_html: clip(text),
       markdown: clip(markdown),
-      original_text: clip(original_text),
-      roundtrip_text: clip(roundtrip_text),
+      original_text: `…${original_text.slice(window_start, divergence + 120)}`,
+      roundtrip_text: `…${roundtrip_text.slice(window_start, divergence + 120)}`,
     })
   }
   return markdown

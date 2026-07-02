@@ -60,10 +60,14 @@ function main() {
   )
 
   // shared.db checks
-  const html_about = count(shared, `SELECT COUNT(*) AS count FROM dictionaries WHERE TRIM(COALESCE(about, '')) LIKE '<%'`)
+  // Leading `<table`/`<span` is legitimate raw-HTML in our markdown model.
+  const html_residue_clause = (col: string) => `TRIM(COALESCE(${col}, '')) LIKE '<%'
+    AND TRIM(COALESCE(${col}, '')) NOT LIKE '<table%'
+    AND TRIM(COALESCE(${col}, '')) NOT LIKE '<span%'`
+  const html_about = count(shared, `SELECT COUNT(*) AS count FROM dictionaries WHERE ${html_residue_clause('about')}`)
   if (html_about)
     problems.push({ dict_id: '_shared', check: 'html-residue', detail: `${html_about} dictionaries.about still HTML` })
-  const html_grammar = count(shared, `SELECT COUNT(*) AS count FROM dictionaries WHERE TRIM(COALESCE(grammar, '')) LIKE '<%'`)
+  const html_grammar = count(shared, `SELECT COUNT(*) AS count FROM dictionaries WHERE ${html_residue_clause('grammar')}`)
   if (html_grammar)
     problems.push({ dict_id: '_shared', check: 'html-residue', detail: `${html_grammar} dictionaries.grammar still HTML` })
   const dupe_emails = shared.prepare(
@@ -94,8 +98,16 @@ function main() {
       if (lo_text)
         problems.push({ dict_id, check: 'lo-residue', detail: `${lo_text} sentences.text with lo{n} keys` })
 
-      // MultiString values that still start with '<' → unconverted HTML.
-      const html_notes = count(db, `SELECT COUNT(*) AS count FROM entries WHERE notes GLOB '*:"<*'`)
+      // MultiString values that still start with a block HTML TAG → unconverted
+      // HTML. The tag must open with `<`+letter (so `<< pa` citation markers and
+      // `< Odia` etymology chains — legit plain text — are NOT flagged). NOT
+      // residue: tables + smallcaps/underline spans (legit raw-HTML in our
+      // markdown model) and `<https://…>` markdown autolinks.
+      const html_notes = count(db, `SELECT COUNT(*) AS count FROM entries
+        WHERE notes GLOB '*:"<[a-zA-Z]*'
+          AND notes NOT GLOB '*:"<table*'
+          AND notes NOT GLOB '*:"<span*'
+          AND notes NOT GLOB '*:"<http*'`)
       if (html_notes)
         problems.push({ dict_id, check: 'html-residue', detail: `${html_notes} entries.notes still HTML` })
 
