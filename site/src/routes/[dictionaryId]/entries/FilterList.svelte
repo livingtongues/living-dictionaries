@@ -50,7 +50,6 @@
     <input
       type="search"
       placeholder="{page.data.t('about.search')} {label}"
-      class="form-input"
       bind:value={search_value} />
   </div>
 {/if}

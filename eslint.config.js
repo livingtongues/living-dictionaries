@@ -35,6 +35,7 @@ export default tseslint.config(
   {
     ignores: [
       '**/.svelte-kit/**',
+      '**/.data/**', // local dev DATA_DIR (generated DBs + migration manifests)
       '**/build/**',
       '**/.vercel/**',
       '**/coverage/**',

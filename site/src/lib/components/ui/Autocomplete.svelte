@@ -61,7 +61,6 @@
     type="search"
     {placeholder}
     onfocus={() => (active = true)}
-    class="form-input"
     bind:value={search} />
   <ul class:hidden={!active}>
     {#each results as result (result)}
@@ -83,24 +82,13 @@
     width: 14rem;
   }
 
-  /* Base input chrome + focus ring come from the presetForms preflights + the global
-     `.form-input` class (forms.css); `focus:shadow-outline-blue` was a dead tailwind-v1
-     class that generated nothing. */
+  /* base input chrome + focus ring come from the global forms.css element styles */
   input {
     display: block;
-    border-width: 1px;
-    border-radius: 0.25rem;
     width: 100%;
     font-size: 0.875rem;
     line-height: 1.25rem;
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 150ms;
     padding: 0.25rem 0.75rem;
-  }
-
-  input:focus {
-    border-color: rgb(147 197 253); /* blue-300 */
   }
 
   @media (min-width: 768px) {

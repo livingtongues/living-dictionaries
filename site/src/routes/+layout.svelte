@@ -20,6 +20,7 @@
   import { init_web_vitals, report_initial_load_when_ready } from '$lib/debug/perf'
   import { set_missing_translation_handler } from '$lib/i18n'
   import { toast } from '$lib/svelte-pieces/toast.svelte'
+  import { init_color_scheme } from '$lib/dark-mode'
 
   interface Props {
     children?: import('svelte').Snippet
@@ -28,6 +29,7 @@
   const { children }: Props = $props()
 
   onMount(() => {
+    init_color_scheme()
     init_remote_logging()
     // Ship genuinely-missing i18n keys (no English base) to client_logs as an
     // actionable `warn`. i18n already console.warns for dev, so this only ships —

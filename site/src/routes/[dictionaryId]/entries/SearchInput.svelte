@@ -32,8 +32,7 @@
           $search_params.page = 1
         }
       }}
-      placeholder={page.data.t('entry.search_entries')}
-      class="form-input" />
+      placeholder={page.data.t('entry.search_entries')} />
   </div>
   <button
     type="button"

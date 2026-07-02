@@ -136,7 +136,9 @@
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
     line-height: 1.25;
-    background-color: rgb(219 234 254); /* blue-100 */
+    /* ≈ blue-100 in light; readable tint in dark (matches BadgeArray) */
+    background-color: color-mix(in srgb, transparent, var(--primary) 14%);
+    color: var(--color);
     border-radius: 0.25rem;
     margin-bottom: 0.25rem;
   }

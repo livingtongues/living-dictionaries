@@ -27,7 +27,7 @@
         <img
           alt="logo"
           src="/images/LD_logo_white.svg"
-          style="height: 30px; width: 30px; filter: invert(100%); margin-left: 0.5rem; margin-right: 0.5rem;" />
+          style="height: 30px; width: 30px; filter: var(--invert-in-light); margin-left: 0.5rem; margin-right: 0.5rem;" />
         {page.data.t('misc.LD')}
         {#if mode === 'development'}
           <span class="dev-badge">(dev)</span>
@@ -206,7 +206,7 @@
   }
 
   .brand-link:hover {
-    color: #000;
+    color: var(--color);
   }
 
   .dev-badge {

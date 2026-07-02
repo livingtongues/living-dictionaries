@@ -72,17 +72,17 @@
   <form onsubmit={preventDefault(save)}>
     <label>
       <span>{page.data.t({ dynamicKey: 'source.citation', fallback: 'Citation' })}</span>
-      <textarea class="form-input" rows="2" bind:value={citation} placeholder="Smith, Jane. 2020. Example Language Dictionary. City: Example University Press."></textarea>
+      <textarea rows="2" bind:value={citation} placeholder="Smith, Jane. 2020. Example Language Dictionary. City: Example University Press."></textarea>
     </label>
 
     <div class="row">
       <label>
         <span>{page.data.t({ dynamicKey: 'source.abbreviation', fallback: 'Abbreviation' })}</span>
-        <input class="form-input" bind:value={abbreviation} placeholder="Smith 2020" />
+        <input bind:value={abbreviation} placeholder="Smith 2020" />
       </label>
       <label>
         <span>{page.data.t({ dynamicKey: 'source.type', fallback: 'Type' })}</span>
-        <select class="form-input" bind:value={type}>
+        <select bind:value={type}>
           <option value="">—</option>
           {#each SOURCE_TYPES as source_type (source_type)}
             <option value={source_type}>{page.data.t({ dynamicKey: `source.type_${source_type}`, fallback: source_type })}</option>
@@ -94,29 +94,29 @@
     <div class="row">
       <label>
         <span>{page.data.t({ dynamicKey: 'source.author', fallback: 'Author' })}</span>
-        <input class="form-input" bind:value={author} />
+        <input bind:value={author} />
       </label>
       <label>
         <span>{page.data.t({ dynamicKey: 'source.year', fallback: 'Year' })}</span>
-        <input class="form-input" bind:value={year} placeholder="1979" />
+        <input bind:value={year} placeholder="1979" />
       </label>
     </div>
 
     <div class="row">
       <label>
         <span>{page.data.t({ dynamicKey: 'source.url', fallback: 'URL' })}</span>
-        <input class="form-input" type="url" bind:value={url} />
+        <input type="url" bind:value={url} />
       </label>
       <label>
         <span>{page.data.t({ dynamicKey: 'source.license', fallback: 'License' })}</span>
-        <input class="form-input" bind:value={license} />
+        <input bind:value={license} />
       </label>
     </div>
 
     {#if !is_edit}
       <label>
         <span>{page.data.t({ dynamicKey: 'source.slug', fallback: 'Slug (stable id)' })}</span>
-        <input class="form-input" bind:value={slug} oninput={() => (slug_touched = true)} placeholder="smith-2020" />
+        <input bind:value={slug} oninput={() => (slug_touched = true)} placeholder="smith-2020" />
         <small>{page.data.t({ dynamicKey: 'source.slug_hint', fallback: 'Referenced by entries.' })}</small>
       </label>
     {/if}

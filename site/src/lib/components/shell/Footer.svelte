@@ -2,6 +2,7 @@
   import { page } from '$app/state'
   import IconMageFacebookSquare from '~icons/mage/facebook-square'
   import IconF7LogoInstagram from '~icons/f7/logo-instagram'
+  import ColorSchemeToggle from './ColorSchemeToggle.svelte'
 
   const { dictionaries } = $derived(page.data)
   const public_dictionaries = $derived($dictionaries?.filter(dictionary => dictionary.public).length || 0)
@@ -22,6 +23,7 @@
   </span>
   <a href="https://www.facebook.com/living.tongues" target="_blank" class="social social-first"><IconMageFacebookSquare class="icon-inline" /></a>
   <a href="https://www.instagram.com/livingtongues" target="_blank" class="social"><IconF7LogoInstagram class="icon-inline" /></a>
+  <span class="scheme-toggle"><ColorSchemeToggle compact /></span>
 </footer>
 
 <style>
@@ -61,7 +63,18 @@
 
   .lt-link:hover,
   .social:hover {
-    color: #1d4ed8; /* blue-700, was hover:text-blue-700 */
+    color: var(--primary);
+  }
+
+  .scheme-toggle :global(button) {
+    padding: 0.25rem;
+    margin: -0.25rem 0;
+    font-size: 1.05rem;
+    color: var(--color-secondary);
+  }
+
+  .scheme-toggle :global(button:hover) {
+    color: var(--color);
   }
 
   .social {

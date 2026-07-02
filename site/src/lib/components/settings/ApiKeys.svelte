@@ -99,11 +99,11 @@
     <div class="create-row">
       <label class="field field-grow">
         <span class="field-label">Label</span>
-        <input class="form-input" bind:value={label} placeholder="Dictionary agent" maxlength="80" />
+        <input bind:value={label} placeholder="Dictionary agent" maxlength="80" />
       </label>
       <label class="field">
         <span class="field-label">Access</span>
-        <select class="form-input role-select" bind:value={role}>
+        <select class="role-select" bind:value={role}>
           <option value="write">Read &amp; write</option>
           <option value="read">Read only</option>
         </select>
@@ -169,7 +169,8 @@
     font-weight: 500;
     color: color-mix(in srgb, var(--color) 70%, var(--background));
   }
-  .field .form-input {
+  .field input,
+  .field select {
     width: 100%;
   }
   .role-select {

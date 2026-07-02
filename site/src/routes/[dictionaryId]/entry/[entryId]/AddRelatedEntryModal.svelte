@@ -144,7 +144,7 @@
     </div>
 
     <label class="field-label" for="relationship-type-select">{t('relationship_type.relationship')}</label>
-    <select id="relationship-type-select" class="form-input" bind:value={selected_type}>
+    <select id="relationship-type-select" bind:value={selected_type}>
       <option value="" disabled>{t('relationship_type.relationship')}…</option>
       {#each global_slugs as slug (slug)}
         <option value={slug}>{t(`relationship_type.${slug}` as TranslationKeys)}</option>
@@ -167,7 +167,7 @@
     {/if}
 
     <label class="field-label" for="relationship-note-input">{t('entry_field.notes')}</label>
-    <input id="relationship-note-input" type="text" class="form-input" bind:value={note} />
+    <input id="relationship-note-input" type="text" bind:value={note} />
 
     <div class="actions">
       <button type="button" class="btn btn-default" onclick={on_close}>{t('misc.cancel')}</button>
@@ -275,8 +275,8 @@
     margin-bottom: 0.25rem;
   }
 
-  select.form-input,
-  input.form-input {
+  select,
+  input {
     width: 100%;
     margin-bottom: 0.75rem;
   }

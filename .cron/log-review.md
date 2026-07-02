@@ -1,8 +1,8 @@
 ---
-every: 18 19 * * *
+every: 31 22 * * *
 runs_on: mustang
 provider: claude
-model: claude-sonnet-6
+model: claude-opus-4-8
 notify: none
 ---
 

@@ -35,8 +35,7 @@
         type="url"
         placeholder="Paste YouTube or Vimeo link"
         required
-        bind:value={url}
-        class="form-input" />
+        bind:value={url} />
     </div>
     <div style="width: 0.25rem"></div>
     <Button type="submit" form={url ? 'filled' : 'outline'}>

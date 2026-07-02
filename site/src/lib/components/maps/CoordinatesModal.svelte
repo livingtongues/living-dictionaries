@@ -90,7 +90,7 @@
             max="90"
             min="-90"
             bind:value={lat}
-            class="form-input lat-input"
+            class="lat-input"
             placeholder={page.data.t('dictionary.latitude')} />
         </div>
         <div style="width: 0.25rem"></div>
@@ -106,7 +106,7 @@
             max="180"
             min="-180"
             bind:value={lng}
-            class="form-input lng-input"
+            class="lng-input"
             placeholder={page.data.t('dictionary.longitude')} />
         </div>
       </div>

@@ -69,7 +69,7 @@
     minlength="100"
     maxlength="2500"
     bind:value={photo_source}
-    class="form-input full-width"></textarea>
+    class="full-width"></textarea>
   <div class="counter-row">
     <div class="counter">{photo_source?.length || 0}/2500</div>
   </div>
@@ -91,7 +91,7 @@
       minlength="0"
       maxlength="2500"
       bind:value={photographer}
-      class="form-input full-width"></textarea>
+      class="full-width"></textarea>
   {/if}
 
   <div style="margin-bottom: 1.5rem"></div>

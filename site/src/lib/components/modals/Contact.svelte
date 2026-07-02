@@ -136,7 +136,7 @@
             rows="4"
             maxlength="1000"
             bind:value={message}
-            class="form-input white-input"
+            class="white-input"
             placeholder={`${page.data.t('contact.enter_message')}...`}></textarea>
           <div class="counter-row">
             <div class="counter">{message.length}/1000</div>
@@ -151,7 +151,7 @@
                 type="email"
                 required
                 bind:value={email}
-                class="form-input white-input"
+                class="white-input"
                 placeholder={page.data.t('contact.email')}
                 style="direction: ltr" />
             </div>

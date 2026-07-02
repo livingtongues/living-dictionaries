@@ -92,7 +92,7 @@
 
   .home-link:hover,
   .dict-link:hover {
-    color: #000;
+    color: var(--color);
   }
 
   .home-gap {
