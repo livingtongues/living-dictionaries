@@ -4,6 +4,10 @@ Distilled from the `sources` registry addition (`.issues/sources-model.md`). A n
 content table doesn't "just work" from the Drizzle schema — it must be registered in ~7 places, and
 the delete-cascade trigger needs a **DROP + re-CREATE** because SQLite has no `ALTER TRIGGER`.
 
+> Historical filenames cited below (`20260701b_entry_relationships`, the `20260702_…repair`)
+> were folded into the single `20260702_initial.sql` by the pre-cutover squash
+> (see `migration-squash-2026-07-02.md`) — the patterns they illustrate still apply verbatim.
+
 ## The checklist (in order)
 1. **Drizzle schema** — add the `sqliteTable(...)` in `src/lib/db/schemas/dictionary.ts`.
 2. **New dated migration** in `dictionary-migrations/` (NEVER edit an already-applied one — the

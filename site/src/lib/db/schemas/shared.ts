@@ -123,7 +123,7 @@ export const dictionaries = sqliteTable('dictionaries', {
   public: integer(),
   print_access: integer(),
   metadata: text({ mode: 'json' }).$type<DictionaryCatalogMetadata>(),
-  /** Maintained by `/api/dictionary/[id]/changes` push endpoint + daily heal cron. */
+  /** Recounted by `mirror_dictionary_cursor` on every dict write (editor push + v1 API); stamped once by the cutover import. */
   entry_count: integer().notNull().default(0),
   orthographies: text({ mode: 'json' }).$type<Orthography[]>(),
   featured_image: text({ mode: 'json' }).$type<FeaturedImage>(),

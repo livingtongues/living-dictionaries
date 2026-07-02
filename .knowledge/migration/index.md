@@ -4,6 +4,11 @@ Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. The migra
 staging is live; remaining production cutover: `.issues/cutover.md`.
 
 ## Pages
+- [migration-squash-2026-07-02.md](./migration-squash-2026-07-02.md) — the pre-cutover squash of
+  all three migration sets into single idempotent `20260702_initial.sql` files: the re-run-by-name
+  convergence mechanism, the prunable Convergence sections, the ALTER-order column-position gotcha,
+  the audit-driven index decisions (junction UNIQUE-leading-column rule, the two `deletes` indexes
+  differing on purpose), and `entry_count`'s single `mirror_dictionary_cursor` chokepoint.
 - [adding-a-syncable-dict-table.md](./adding-a-syncable-dict-table.md) — the ~7-place checklist for
   adding a new per-dict table/column: the new-migration rule, the `process_delete_cascade`
   DROP+re-CREATE gotcha (SQLite has no ALTER TRIGGER), the search-feed wiring order, and how the

@@ -6,8 +6,8 @@ import { ResponseCodes, SNAPSHOT_EXPIRED_DAYS } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_dictionary_db, LATEST_DICT_MIGRATION, read_last_modified_at } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
-import { get_shared_db } from '$lib/db/server/shared-db'
 import { process_dict_changes, strip_sql_ext } from '$lib/db/server/dictionary-sync-helpers'
+import { mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
@@ -106,19 +106,11 @@ export const POST: RequestHandler = async (event) => {
     log_server_event({ level: 'info', message: 'dict_changes_pushed', user_id: user_id || null, context: { dictionary_id: dict_id, dirty_rows: dirty_count, deletes: body.deletes?.length ?? 0 } })
   }
 
-  // Mirror to shared.db.dictionaries.updated_at + snapshot_uploaded_at gate
-  // (Q5 cross-DB cascade). Only when an editor actually pushed something.
-  if (is_editor && response.new_synced_up_to !== body.synced_up_to) {
-    try {
-      const shared = get_shared_db()
-      shared.prepare(
-        `UPDATE dictionaries SET updated_at = ? WHERE id = ?`,
-      ).run(response.new_synced_up_to, dict_id)
-    } catch (err) {
-      console.warn(`Could not mirror updated_at for ${dict_id}:`, err)
-      log_server_event({ level: 'warn', message: 'dict_changes_mirror_failed', error: err, user_id: user_id || null, context: { dictionary_id: dict_id } })
-    }
-  }
+  // Mirror to shared.db.dictionaries.updated_at + refresh entry_count +
+  // snapshot_uploaded_at gate (Q5 cross-DB cascade). Only when an editor
+  // actually pushed something.
+  if (is_editor && response.new_synced_up_to !== body.synced_up_to)
+    mirror_dictionary_cursor({ dict_id, cursor: response.new_synced_up_to })
 
   return json(response)
 }

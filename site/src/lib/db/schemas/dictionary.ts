@@ -1,5 +1,6 @@
 import type { DictionaryCoordinates } from './shared.types'
 import type { HostedElsewhere, MultiString } from './dictionary.types'
+import { SOURCE_TYPES } from '$lib/constants'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 /**
@@ -362,8 +363,8 @@ export const sources = sqliteTable('sources', {
   year: text(),
   url: text(),
   license: text(),
-  /** One of SOURCE_TYPES in constants.ts: dictionary/wordlist/fieldwork/manuscript/other. */
-  type: text(),
+  /** The citation kind: dictionary/wordlist/fieldwork/manuscript/other. */
+  type: text({ enum: SOURCE_TYPES }),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
