@@ -108,8 +108,7 @@ Use: ${conlang_use.trim()}`
           minlength={data.MIN_URL_LENGTH}
           maxlength="100"
           required
-          bind:value={name}
-          class="form-input" />
+          bind:value={name} />
       </div>
       <div class="hint">
         {page.data.t('create.name_clarification')}
@@ -140,7 +139,7 @@ Use: ${conlang_use.trim()}`
             autocomplete="off"
             autocorrect="off"
             spellcheck={false}
-            class="form-input url-input"
+            class="url-input"
             placeholder="url" />
         </div>
         <div class="hint">
@@ -216,8 +215,7 @@ Use: ${conlang_use.trim()}`
             rows="5"
             minlength="100"
             maxlength="2500"
-            bind:value={conlang_source}
-            class="form-input"></textarea>
+            bind:value={conlang_source}></textarea>
           <div class="counter-row">
             <div class="counter">{conlang_source.length}/2500</div>
           </div>
@@ -232,8 +230,7 @@ Use: ${conlang_use.trim()}`
             rows="5"
             minlength="100"
             maxlength="2500"
-            bind:value={conlang_use}
-            class="form-input"></textarea>
+            bind:value={conlang_use}></textarea>
           <div class="counter-row">
             <div class="counter">{conlang_use.length}/2500</div>
           </div>
@@ -312,8 +309,7 @@ Use: ${conlang_use.trim()}`
                   spellcheck={false}
                   minlength="3"
                   maxlength="30"
-                  bind:value={iso_639_3}
-                  class="form-input" />
+                  bind:value={iso_639_3} />
               </div>
             </div>
             <div style="width: 0.25rem"></div>
@@ -337,8 +333,7 @@ Use: ${conlang_use.trim()}`
                   spellcheck={false}
                   minlength="3"
                   maxlength="30"
-                  bind:value={glottocode}
-                  class="form-input" />
+                  bind:value={glottocode} />
               </div>
             </div>
           </div>
@@ -385,8 +380,7 @@ Use: ${conlang_use.trim()}`
             rows="5"
             minlength="100"
             maxlength="2500"
-            bind:value={author_connection}
-            class="form-input"></textarea>
+            bind:value={author_connection}></textarea>
           <div class="counter-row">
             <div class="counter">{author_connection.length}/2500</div>
           </div>
@@ -469,7 +463,8 @@ Use: ${conlang_use.trim()}`
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
   }
 
-  .create-form .form-input {
+  .create-form input,
+  .create-form select {
     width: 100%;
   }
 

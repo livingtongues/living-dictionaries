@@ -63,7 +63,7 @@
           <IconMdiClose /></HeadlessButton>
       {/if}
     </div>
-    <div style="max-width: 400px">
+    <div class="logo-matte" style="max-width: 400px">
       <img
         style="height: 100%; width: 100%; object-fit: cover"
         alt="Living Tongues Institute for Endangered Languages"
@@ -99,7 +99,7 @@
       {/if}
     </div>
     {#if partner.photo}
-      <div style="max-width: 400px">
+      <div class="logo-matte" style="max-width: 400px">
         <Image
           {can_edit}
           width={400}
@@ -130,6 +130,12 @@
     line-height: 1.75rem;
     margin-bottom: 0.25rem;
     margin-top: 0.75rem;
+  }
+
+  /* partner logos are designed for white — matte keeps them readable in dark
+     (invisible in light: white on white) */
+  .logo-matte {
+    background: white;
   }
 
   :global(.delete-button) {

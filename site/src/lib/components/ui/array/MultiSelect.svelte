@@ -152,13 +152,13 @@
 
 <style>
   .multiselect {
-    background-color: white;
-    border-bottom: 2px dashed #afafaf;
+    background-color: var(--background);
+    border-bottom: 2px dashed color-mix(in srgb, var(--color) 31%, transparent);
     position: relative;
     z-index: 1;
   }
   .multiselect:hover {
-    border-bottom-color: hsl(0, 0%, 50%);
+    border-bottom-color: color-mix(in srgb, var(--color) 50%, transparent);
   }
 
   .tokens {
@@ -246,7 +246,7 @@
     width: 100%;
   }
   li {
-    background-color: white;
+    background-color: var(--background);
     cursor: pointer;
     padding: 0.5rem;
   }
@@ -255,7 +255,7 @@
     border-bottom-right-radius: 0.2rem;
   }
   li:not(.selected):hover {
-    background-color: hsl(214, 17%, 92%);
+    background-color: color-mix(in srgb, var(--background), var(--color) 8%);
   }
   li.selected {
     background-color: hsl(232, 54%, 41%);
@@ -266,7 +266,7 @@
     color: white;
   }
   li.active {
-    background-color: hsl(214, 17%, 88%);
+    background-color: color-mix(in srgb, var(--background), var(--color) 12%);
   }
   li.selected.active,
   li.selected:hover {

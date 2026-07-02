@@ -53,7 +53,7 @@
             type="text"
             use:autofocus
             bind:value={searchString}
-            class="form-input dark-border"
+            class="dark-border"
             placeholder={page.data.t('home.find_dictionary')} />
           <button type="button" onclick={toggle} class="clear-button">
             <IconLaTimes class="icon-inline" style="color: color-mix(in srgb, var(--color) 45%, var(--background))" />

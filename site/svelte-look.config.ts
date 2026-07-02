@@ -21,6 +21,5 @@ export default define_config({
     { width: 480, height: 720 },
   ],
 
-  // Living Dictionaries is a light-only app.
-  dark_mode: false,
+  dark_mode: true,
 })

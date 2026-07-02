@@ -59,7 +59,7 @@
       <div class="control">
         <label for="maxEntries">{page.data.t('print.max_entries')}</label>
         <input
-          class="form-input number-input"
+          class="number-input"
           id="maxEntries"
           type="number"
           min="1"
@@ -69,7 +69,7 @@
       <div class="control">
         <label for="columnCount">{page.data.t('print.columns')}</label>
         <input
-          class="form-input number-input"
+          class="number-input"
           id="columnCount"
           type="number"
           min="1"
@@ -79,7 +79,7 @@
       <div class="control">
         <label for="headwordSize">{page.data.t('print.headword_size')} (pt)</label>
         <input
-          class="form-input number-input"
+          class="number-input"
           id="headwordSize"
           type="number"
           min="6"
@@ -89,7 +89,7 @@
       <div class="control">
         <label for="fontSize">{page.data.t('print.font_size')} (pt)</label>
         <input
-          class="form-input number-input narrow"
+          class="number-input narrow"
           id="fontSize"
           type="number"
           min="6"
@@ -99,7 +99,7 @@
       <div class="control">
         <label for="imageSize">{page.data.t('misc.images')}:</label>
         <input
-          class="form-input number-input"
+          class="number-input"
           id="imageSize"
           type="number"
           min="1"

@@ -43,21 +43,82 @@ Three cooperating pieces, copied from `~/code/tutor/site`:
      natural home. Signed-out visitors just follow their OS preference — fine. Could add
      to `/account` later.
 
-## Runbook
+## Runbook (2026-07-02 session — Jacob approved scope)
 
-1. [ ] Port `src/lib/dark-mode.ts` from tutor + `init_color_scheme()` in root layout onMount.
-2. [ ] Cycle button in `UserMenu.svelte`.
-3. [ ] Uncomment the `prefers-color-scheme` block in `theme.css`; update its header comment.
-4. [ ] Fix the global-layer literals (audit hotspots below).
-5. [ ] `svelte-look.config.ts` → `dark_mode: true` (drop the "light-only app" comment);
-   audit the ~13 stories in dark.
-6. [ ] Browser audit on :3041 with devtools `prefers-color-scheme: dark` emulation — walk
-   home globe / dictionaries / entries (list/table/gallery), entry detail + editor modals,
-   about/contributors/settings/import/export, account, admin.
-7. [ ] Dark screenshot sweep: reuse `site/e2e/uno-parity-shots.mjs` (23 routes) — add a
-   dark flag that calls
-   `page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'dark' }])`.
-8. [ ] `pnpm check` + `pnpm test` + `pnpm lint`.
+Scope decisions from Jacob:
+- Full flip runbook, AND full skill restyle of forms/typography while in there (not just
+  theme-var repointing) — "make them look good and be very usable".
+- Toggle in UserMenu (signed-in) AND a signed-out-reachable spot → Footer.
+- Verify: svelte-look dark audit of all stories + uno-parity-shots.mjs dark sweep; fix
+  everything ugly found.
+
+1. ✅ Port `src/lib/dark-mode.ts` from tutor + `init_color_scheme()` in root layout onMount.
+2. ✅ Cycle button: shared `ColorSchemeToggle.svelte` (mdi icons + `icon-inline` shim — bare
+   svg is display:block per the reset!) in `UserMenu.svelte` + compact in `Footer.svelte`.
+   i18n keys `misc.appearance/theme_system/theme_light/theme_dark`. Verified with puppeteer:
+   cycles system→light→dark, body class + localStorage persist across reload.
+3. ✅ theme.css: media block uncommented; `@media print` force-light block added (kept LAST —
+   source order beats the tied selectors); body text = mode-aware gray-800 port (see 6a).
+4. ✅ forms.css rewritten (skill-styled, element-level, theme vars; NATIVE checkbox/radio via
+   accent-color; select arrow data-URI mode-neutral #888). `.form-input` rules deleted +
+   class stripped from all call sites (scoped `.form-input` overrides repointed at elements).
+   uno-preflights.css now ONLY the `--un-*` var-init block.
+5. ✅ typography.css rewritten readable on theme vars (another session added `.smallcaps` —
+   kept). Verified via MarkdownEditor + about stories.
+6. ✅ Global/component literals:
+   - a. **`<body class="text-gray-800">` in app.html was the big one** — a literal gray-800
+     body color killed dark text site-wide. Removed; theme.css `body, body.light, body.dark`
+     now carries `color-mix(in srgb, var(--color) 88%, var(--background))` (the body.X legs
+     beat the `.light`/`.dark` block color).
+   - b. global.css: select rule merged into forms.css; global `hr { border-color:
+     var(--border-color) }` (reset leaves hr currentColor → glaring white in dark).
+   - c. Header logo: `--invert-in-light` theme var (invert(100%) light / none dark) — added
+     to all four theme blocks; `#000` hovers → var(--color) (Header, dict layout, Keyman).
+   - d. Footer hover `#1d4ed8` → var(--primary); vendored Menu.svelte → background/surface
+     vars + border; MultiSelect surfaces/hovers → vars (blue chips kept, self-contained);
+     IpaKeyboard contained as light widget (`.ipa-charts` forces light text + white tables).
+   - e. Partner logos: `.logo-matte` white backing (logos designed for white; invisible in light).
+7. ✅ Vendored sp-*: Modal/Slideover/ResponsiveSlideover/ResponsiveTable/data-JSON neutral
+   surfaces+texts+borders → theme vars (perl bulk over the minified styles). Button.svelte:
+   primary/red/orange/green mapped onto --primary/--danger/--warning/--success (outline text
+   was literal blue-700 etc — dim on dark), filled hovers via color-mix, black/white/menu/
+   text/link/active neutrals onto color-mix recipes. Toasts + Badge already fine.
+8. ✅ `svelte-look.config.ts` → `dark_mode: true`; audited UserMenu, EditSource, ApiKeys,
+   MarkdownEditor, SideMenu stories in dark (48 story files exist now, not ~13).
+9. ✅ Dark sweep: DARK=1 flag added to uno-parity-shots.mjs; full light + dark sweeps
+   clean (all 23 routes, /tmp/dark-flip/final-{light,dark}). The blocking xss CJS
+   named-import in the cutover session's `sanitize-rich-text.ts` was default-imported
+   (dev SSR 500s on entries/about/grammar) — coordinated with session 0a470dbe.
+   Fixes that came out of the sweep:
+   - Entry detail dashed field dividers were the tailwind reset's literal `#e5e7eb`
+     default border → theme.css sets `--un-default-border-color` to a mode-aware mix
+     (reset supports the var; ≈ gray-200 in light, subtle in dark).
+   - ModalEditableArray chips (PoS etc): blue-100 literal + inherited text → primary-tint
+     mix + var(--color) (matches BadgeArray; white-on-blue-100 was unreadable in dark).
+   - EntriesTable: `#ccc` cell borders, green-100 recently-updated, gray row-hover → mixes.
+   - Toggle verified with puppeteer (cycle + persistence + forced-dark screenshot);
+     Contact modal, table/gallery/print views probed with click-scripts — all good.
+   Local data note: `.data` had only test dicts — re-seeded achi via
+   `scripts: npx tsx supabase-cutover/migrate.ts -e prod --dict-id achi --data-dir <site/.data>`
+   (its DEFAULT_DATA_DIR resolves to ~/code/site/.data — wrong, always pass --data-dir);
+   sweep entry id updated e_abaj → 06Tmb3jM1atoGNQvlxIY.
+10. ✅ `pnpm test` (1048 passed) + `pnpm lint` (after adding `**/.data/**` to eslint ignores)
+    + `pnpm check` (the 2 errors were the xss typing in the other session's file, since
+    fixed there). Jacob will run final checks himself.
+
+## Docs updated
+- AGENTS.md styling bullet (dark live, forms.css element styles, .form-input gone).
+- svelte-ui SKILL.md (dark_mode true; HeadlessButton exists — the "no HeadlessButton"
+  claim was already stale).
+- otter WEB.md shared-conventions styling paragraph (LD dark live; house still pending).
+
+## Follow-ups (logged, not blocking)
+- `.issues/ui-skill-alignment.md` phase 4 is largely DONE by this flip (forms.css +
+  typography.css rewritten, uno-preflights trimmed to the --un-* block); phases 1-3/5
+  (FA kit swap, mdi unification, .btn-* adoption, minimal-chrome restyle) remain.
+- Admin ntfy onboarding inner card stays white-ish in dark (readable, just bright) — polish.
+- Gallery view unverified with photos (seeded achi has no photo rows in dev).
+- Mapbox stays light-styled inside dark UI (accepted for v1; ToggleStyle exists).
 
 ## Audit hotspots (logged during the uno conversion)
 

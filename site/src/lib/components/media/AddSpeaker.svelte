@@ -46,7 +46,7 @@
           type="text"
           required
           bind:value={displayName}
-          class="form-input full-input" />
+          class="full-input" />
       </div>
 
       <label for="birthplace" class="field-label">
@@ -58,14 +58,14 @@
           type="text"
           required
           bind:value={birthplace}
-          class="form-input full-input" />
+          class="full-input" />
       </div>
 
       <label for="age" class="field-label">
         {page.data.t('speakers.age_range')}
       </label>
       <div class="input-wrap">
-        <select id="age" bind:value={decade} class="form-input full-input">
+        <select id="age" bind:value={decade} class="full-input">
           {#each Object.entries(decades) as [value, label] (value)}
             <option {value}>{label}</option>
           {/each}

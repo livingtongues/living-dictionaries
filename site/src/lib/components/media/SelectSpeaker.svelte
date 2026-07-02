@@ -61,7 +61,7 @@
             select_source?.(source_slug)
           }
         }}
-        class="form-input speaker-select">
+        class="speaker-select">
         {#if !source_slug}
           <option></option>
         {/if}
@@ -105,7 +105,7 @@
             select_speaker?.(speaker_id)
           }
         }}
-        class="form-input speaker-select">
+        class="speaker-select">
         {#if !speaker_id}
           <option></option>
         {/if}

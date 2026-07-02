@@ -5,6 +5,9 @@
 //
 //   node e2e/uno-parity-shots.mjs <out_dir> [only_prefix[,only_prefix2…]]
 //
+// DARK=1 emulates `prefers-color-scheme: dark` for a dark-mode sweep
+// (.issues/dark-mode-flip.md).
+//
 // Run once before converting a phase (e.g. → /tmp/uno-parity/before) and once after
 // (→ /tmp/uno-parity/after-1), then diff with ImageMagick:
 //   compare -metric AE before/x.png after-1/x.png diff/x.png
@@ -39,8 +42,8 @@ const shots = [
   { name: 'entries-table', url: '/achi/entries?view=table', wait: 5000, login: true },
   { name: 'entries-gallery', url: '/achi/entries?view=gallery', wait: 5000, login: true },
   { name: 'entries-print', url: '/achi/entries?view=print', wait: 5000, login: true },
-  { name: 'entry-detail', url: '/achi/entry/e_abaj', wait: 4500, login: true },
-  { name: 'entry-detail-narrow', url: '/achi/entry/e_abaj', wait: 4500, width: 480, login: true },
+  { name: 'entry-detail', url: '/achi/entry/06Tmb3jM1atoGNQvlxIY', wait: 4500, login: true },
+  { name: 'entry-detail-narrow', url: '/achi/entry/06Tmb3jM1atoGNQvlxIY', wait: 4500, width: 480, login: true },
   { name: 'dict-about', url: '/achi/about', wait: 3000, login: true },
   { name: 'dict-contributors', url: '/achi/contributors', wait: 3000, login: true },
   { name: 'dict-settings', url: '/achi/settings', wait: 3500, login: true },
@@ -69,6 +72,8 @@ async function main() {
   await mkdir(out, { recursive: true })
   const browser = await launch()
   const page = await browser.newPage()
+  if (process.env.DARK)
+    await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'dark' }])
   const errors = []
   page.on('pageerror', event => errors.push(event.message.split('\n')[0]))
   // Google avatars intermittently ERR_BLOCKED_BY_ORB in headless — block them outright so

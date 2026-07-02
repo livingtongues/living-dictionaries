@@ -1,26 +1,133 @@
 /*
-Global `.form-input` class — plain-CSS replacement for the UnoCSS `form-input`
-shortcut (`border-gray-300 rounded-md focus:border-blue-300 focus:ring
-focus:ring-blue-200 focus:ring-opacity-50`), captured verbatim from uno's generated
-output (`archive/css/uno-generated-dev-dump.css`) with the `--un-ring-*` variables
-resolved to their concrete values (the zero-width ring-offset and transparent
-`--un-shadow` legs are visual no-ops and were dropped).
+Global form element styling (skill-styled 2026-07-02, replacing the uno presetForms
+preflights that lived in uno-preflights.css and the `.form-input` parity class —
+see .issues/dark-mode-flip.md + .issues/ui-skill-alignment.md phase 4).
 
-UnoCSS was dropped 2026-06-12 — this file is now the only definition. The base input
-chrome (border, padding) comes from presetForms' element preflights, kept verbatim in
-uno-preflights.css per .issues/drop-unocss.md.
-
-NOTE: colors are literal (gray-300 / blue-300 / blue-200) for pixel parity with the
-uno shortcut. Mapping them onto theme vars is part of .issues/dark-mode-flip.md;
-restyling to skill standards is in .issues/ui-skill-alignment.md.
+Everything rides on theme vars so dark mode works. Element-level selectors keep the
+same low specificity as the old preflights, so scoped component overrides still win.
+Checkboxes/radios are NATIVE (accent-color) — the browser handles dark contrast.
 */
 
-.form-input {
-  border-color: rgb(209 213 219);
-  border-radius: 0.375rem;
+[type='text'],
+input:where(:not([type])),
+[type='email'],
+[type='url'],
+[type='password'],
+[type='number'],
+[type='date'],
+[type='datetime-local'],
+[type='month'],
+[type='search'],
+[type='tel'],
+[type='time'],
+[type='week'],
+[multiple],
+textarea,
+select {
+  appearance: none;
+  background-color: var(--background);
+  color: var(--color);
+  border: 1px solid color-mix(in srgb, var(--color) 25%, transparent);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  transition: border-color 150ms, box-shadow 150ms;
 }
 
-.form-input:focus {
-  border-color: rgb(147 197 253);
-  box-shadow: 0 0 0 3px rgb(191 219 254 / 0.5);
+[type='text']:focus,
+input:where(:not([type])):focus,
+[type='email']:focus,
+[type='url']:focus,
+[type='password']:focus,
+[type='number']:focus,
+[type='date']:focus,
+[type='datetime-local']:focus,
+[type='month']:focus,
+[type='search']:focus,
+[type='tel']:focus,
+[type='time']:focus,
+[type='week']:focus,
+[multiple]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-secondary);
+  opacity: 1;
+}
+
+/* dropdown arrow: mode-neutral #888 (CSS vars can't reach into data-URIs) */
+select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23888888' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+[multiple] {
+  background-image: initial;
+  background-position: initial;
+  background-repeat: unset;
+  background-size: initial;
+  padding-right: 0.75rem;
+  print-color-adjust: unset;
+}
+
+::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+::-webkit-date-and-time-value {
+  min-height: 1.5em;
+  text-align: inherit;
+}
+
+::-webkit-datetime-edit {
+  display: inline-flex;
+}
+
+::-webkit-datetime-edit,
+::-webkit-datetime-edit-year-field,
+::-webkit-datetime-edit-month-field,
+::-webkit-datetime-edit-day-field,
+::-webkit-datetime-edit-hour-field,
+::-webkit-datetime-edit-minute-field,
+::-webkit-datetime-edit-second-field,
+::-webkit-datetime-edit-millisecond-field,
+::-webkit-datetime-edit-meridiem-field {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+[type='checkbox'],
+[type='radio'] {
+  height: 1rem;
+  width: 1rem;
+  flex-shrink: 0;
+  vertical-align: middle;
+  accent-color: var(--primary);
+  print-color-adjust: exact;
+}
+
+[type='file'] {
+  background: unset;
+  border-color: inherit;
+  border-width: 0;
+  border-radius: 0;
+  padding: 0;
+  font-size: unset;
+  line-height: inherit;
+}
+
+[type='file']:focus {
+  outline: 1px solid ButtonText, 1px auto -webkit-focus-ring-color;
 }

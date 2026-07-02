@@ -145,17 +145,17 @@
   }
 
   td.recently-updated {
-    background-color: rgb(220 252 231) !important; /* bg-green-100! (still loses to .row-hover:hover td below, same as uno) */
+    background-color: color-mix(in srgb, var(--background), var(--success) 22%) !important; /* ≈ green-100 in light (still loses to .row-hover:hover td below, same as uno) */
   }
 
   td {
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid color-mix(in srgb, var(--background), var(--color) 20%);
     padding: 0;
   }
 
   td,
   th {
-    border-right: var(--border-right-width) solid #ccc;
+    border-right: var(--border-right-width) solid color-mix(in srgb, var(--background), var(--color) 20%);
     overflow: hidden;
     width: var(--col-width);
     min-width: var(--col-width);
@@ -163,6 +163,6 @@
   }
 
   .row-hover:hover td {
-    background-color: rgba(244, 245, 247, 1) !important;
+    background-color: color-mix(in srgb, var(--background), var(--color) 5%) !important;
   }
 </style>

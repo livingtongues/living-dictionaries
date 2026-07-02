@@ -39,7 +39,6 @@
         {maxlength}
         {required}
         bind:value
-        class="form-input"
         placeholder={display} />
       <div style="width: 0.25rem"></div>
       <Button class="save-button" {loading} type="submit">
@@ -62,7 +61,7 @@
     display: flex;
   }
 
-  .input-row .form-input {
+  .input-row input {
     width: 100%;
   }
 

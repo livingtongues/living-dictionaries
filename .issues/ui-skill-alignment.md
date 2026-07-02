@@ -53,7 +53,14 @@ Sibling: house's equivalent is `~/code/house/.issues/future/post-parity-styling-
 - Also migrate usages of the vendored legacy `sp-*` svelte-pieces `Button` toward
   HeadlessButton + `.btn-*` (feeds phase 4's shim removal).
 
-## 4. Retire the uno-era captured-CSS shims
+## 4. Retire the uno-era captured-CSS shims — ✅ MOSTLY DONE (2026-07-02 dark flip)
+
+Done during the dark-mode flip: forms.css rewritten skill-styled on theme vars (element-level,
+`.form-input` class deleted + stripped from call sites, native checkbox/radio via accent-color);
+typography.css rewritten readable on theme vars; uno-preflights.css trimmed to ONLY the `--un-*`
+var-init block; global.css select rule merged into forms.css. HeadlessButton is ported and in use.
+Remaining below: the `--un-*` var-init block itself (blocked on modernizing the vendored sp-*
+pieces) and the icons.css shim.
 
 End-state: the global layer is just reset + theme + buttons + a small skill-styled forms/
 typography layer — no verbatim uno dumps.

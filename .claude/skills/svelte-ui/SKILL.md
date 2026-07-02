@@ -142,7 +142,7 @@ The button classes are `inline-flex` but set **no gap**. For an icon next to a l
 
 ### When you need async-spinner behavior
 
-LD has no `HeadlessButton` (that's tutor's — porting it is logged in `.issues/ui-skill-alignment.md`). Use the legacy `$lib/svelte-pieces/ui/Button.svelte`: it runs `onclick` async with a built-in `loading` spinner (and its own `form`/`size`/`color` styling — compose extra classes via its `class` prop).
+Use `$lib/svelte-pieces/HeadlessButton.svelte` (ported from tutor): it runs `onclick` async with a built-in `loading` spinner and no styling of its own — compose `btn-*` classes via its `class` prop. The legacy `$lib/svelte-pieces/ui/Button.svelte` (own `form`/`size`/`color` styling) still has many call sites but is being migrated away.
 
 ### Other globals in `buttons.css`
 
@@ -196,7 +196,8 @@ The content IS the interface — avoid input chrome. Style placeholders with `--
 
 ## Reusable design components
 
-These can be found in `site/src/lib/svelte-pieces` and should be used instead of building new ones where possible. What LD actually ships today (more — HeadlessButton, bay/ snippet portals — live in tutor and can be ported when needed):
+These can be found in `site/src/lib/svelte-pieces` and should be used instead of building new ones where possible. What LD actually ships today (more — bay/ snippet portals — live in tutor and can be ported when needed):
+- `HeadlessButton.svelte` — async onclick + loading spinner, unstyled (compose `.btn-*`)
 - `Modal.svelte` — escape-to-close, focus-trap, backdrop-click, portal-mounted
 - `Toasts.svelte` + `toast.svelte.ts`
 - `ShowHide.svelte` — render-prop helper with `{ show, toggle, set }`
@@ -380,4 +381,4 @@ Screenshots are clipped to the viewport by default. Use `--full-page` on the CLI
 
 ## Flavors
 
-Flavors let you render every story with different `page_data` variants. The flavor's `page_data` is shallow-merged on top of the layout-level `page_data` before story-level and shared_meta merges happen. LD has no flavors configured yet (house ships three auth flavors — `default` logged-out, `signed_in`, `signed_in_admin` — as a reference if we add them). A component with 2 stories will have N images: 2 stories × N flavors × themes (LD is currently light-only: `dark_mode: false` in `svelte-look.config.ts` until `.issues/dark-mode-flip.md` lands).
+Flavors let you render every story with different `page_data` variants. The flavor's `page_data` is shallow-merged on top of the layout-level `page_data` before story-level and shared_meta merges happen. LD has no flavors configured yet (house ships three auth flavors — `default` logged-out, `signed_in`, `signed_in_admin` — as a reference if we add them). A component with 2 stories will have N images: 2 stories × N flavors × themes (LD renders light AND dark — `dark_mode: true` since the 2026-07-02 dark flip; always eyeball both).

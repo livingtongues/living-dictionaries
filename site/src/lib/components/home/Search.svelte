@@ -87,7 +87,6 @@
       <input
         type="text"
         bind:value={searchString}
-        class="form-input"
         placeholder={page.data.t('home.find_dictionary')}
         onfocus={() => (searchFocused = true)}
         onblur={delayedSearchClose} />

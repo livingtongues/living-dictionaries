@@ -294,6 +294,10 @@
     "required": "required",
     "optional": "optional",
     "reload": "Reload",
+    "appearance": "Appearance",
+    "theme_system": "System",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
     "app_update_needed": "A new version of the app is needed to keep syncing this dictionary. Please reload the page.",
     "local_data_expired": "This dictionary's offline data is too old to sync and must be refreshed."
   },

@@ -1,16 +1,14 @@
-select {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1.5em 1.5em;
-  padding-right: 2.5rem;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
+/* select styling (incl. the dropdown-arrow data-URI) lives in forms.css with the
+   rest of the form element styles (consolidated 2026-07-02, dark-mode flip) */
 
 /* The app font stack lives ONLY in theme.css (--font-sans, applied on body) — the
    per-font diacritics rationale moved there too. (A duplicate html-level rule was
    removed 2026-06-12; body covers all rendered content.) */
+
+/* the reset leaves hr color:inherit (= currentColor) — glaring in dark; keep dividers subtle */
+hr {
+  border-color: var(--border-color);
+}
 
 [dir='rtl'] .rtl-x-flip {
   transform: scale(-1, 1);

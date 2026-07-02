@@ -85,7 +85,7 @@
     onclick={() => (activeTable = 'coarticulated')}>Co-Articulated Consonants</Button>
 </div>
 
-<div style="overflow-x: auto" onclick={addSelectedLetter}>
+<div class="ipa-charts" style="overflow-x: auto" onclick={addSelectedLetter}>
   {#if activeTable === 'consonants'}
     <table cellspacing="0"><tbody>
       <tr class="consonant-header">
@@ -771,6 +771,16 @@
 </div>
 
 <style>
+  /* The IPA charts are a deliberately light-designed widget (pastel place/manner
+     tints are literals) — force light text/surface so dark mode stays readable. */
+  .ipa-charts {
+    color: hsl(240, 11%, 7%);
+  }
+
+  .ipa-charts table {
+    background-color: white;
+  }
+
   .b1 {
     border: 1px solid #aaa;
   }

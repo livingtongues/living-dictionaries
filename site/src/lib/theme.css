@@ -9,13 +9,12 @@ under /admin).
 UnoCSS was fully removed 2026-06-12 — the whole app is scoped CSS + this global
 theme layer (see `.issues/drop-unocss.md` for the conversion log).
 
-DARK MODE — currently LIGHT-FORCED site-wide:
-  Components are dark-ready (theme vars only, post-uno-conversion), but the OS
-  auto-switch stays off until the dark audit is done. The explicit `.dark` /
-  `.light` class selectors below are kept ACTIVE (svelte-look previews and a
-  future toggle opt in by putting `.dark` on <html>/<body>/a wrapper). The
-  `@media (prefers-color-scheme: dark)` block is COMMENTED OUT — the flip plan
-  lives in `.issues/dark-mode-flip.md`.
+DARK MODE — live (flipped 2026-07-02, see `.issues/dark-mode-flip.md`):
+  System preference via the `@media (prefers-color-scheme: dark)` block below;
+  a user override puts `.dark` / `.light` on <body> (`$lib/dark-mode.ts`,
+  localStorage `color_scheme`, cycled by ColorSchemeToggle). The body class
+  wins over the html-level media-query vars by element proximity. Print is
+  force-lighted at the end of this file.
 
 FONT STACK (--font-sans below is the ONLY definition — a duplicate html-level rule in
 global.css was removed 2026-06-12). LD avoids system-ui / -apple-system /
@@ -54,12 +53,23 @@ and Helvetica Neue has the same problem. Per-font notes:
 
   --transition-time: 0.325s;
 
+  /* default border color for the tailwind reset (elements that set border-width/style
+     without a color) — ≈ gray-200 in light (parity), subtle in dark. Resolved lazily,
+     so it tracks whichever mode vars are active at the element. */
+  --un-default-border-color: color-mix(in srgb, var(--color) 11%, var(--background));
+
   --font-sans: "Segoe UI", Arial, "Noto Sans", "Noto Sans Wancho", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-body {
+/* body.light/.dark legs outrank the .light/.dark blocks below so the forced-scheme
+   body class gets the same softened text as the system-scheme path */
+body,
+body.light,
+body.dark {
   font-family: var(--font-sans);
+  /* mode-aware port of the legacy `text-gray-800` body text (was a literal in app.html) */
+  color: color-mix(in srgb, var(--color) 88%, var(--background));
 }
 
 /* Light: default and forced (self or ancestor .light) */
@@ -75,6 +85,7 @@ body {
   --danger: var(--light-danger);
   --warning: var(--light-warning);
   --success: var(--light-success);
+  --invert-in-light: invert(100%);
   color-scheme: light;
   background-color: var(--background);
   color: var(--color);
@@ -92,16 +103,13 @@ body {
   --danger: var(--dark-danger);
   --warning: var(--dark-warning);
   --success: var(--dark-success);
+  --invert-in-light: none;
   color-scheme: dark;
   background-color: var(--background);
   color: var(--color);
 }
 
-/*
-Dark: system preference — DISABLED while the main site is light-only (see header).
-To follow the OS dark preference again, uncomment this block (or scope its selector
-to a dark-ready section, e.g. `.admin-root:not(.light)`).
-
+/* Dark: system preference (a forced body class overrides via proximity) */
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
     --primary: var(--dark-primary);
@@ -114,15 +122,39 @@ to a dark-ready section, e.g. `.admin-root:not(.light)`).
     --danger: var(--dark-danger);
     --warning: var(--dark-warning);
     --success: var(--dark-success);
+    --invert-in-light: none;
     color-scheme: dark;
     background-color: var(--background);
     color: var(--color);
   }
 }
-*/
 
 @media (prefers-reduced-motion: reduce) {
   :root {
     --transition-time: 0s;
+  }
+}
+
+/* PRINT STAYS LIGHT — a dark-mode user must never print a dark page (entries print
+   view). `:root:not(.light)` ties the system-dark block and `.dark` ties the forced
+   class; both lose to these same-specificity rules by source order (keep this last). */
+@media print {
+  :root,
+  :root:not(.light),
+  .dark {
+    --primary: var(--light-primary);
+    --on-primary: var(--light-on-primary);
+    --background: var(--light-background);
+    --surface: var(--light-surface);
+    --border-color: var(--light-border-color);
+    --color: var(--light-color);
+    --color-secondary: var(--light-color-secondary);
+    --danger: var(--light-danger);
+    --warning: var(--light-warning);
+    --success: var(--light-success);
+    --invert-in-light: invert(100%);
+    color-scheme: light;
+    background-color: var(--background);
+    color: var(--color);
   }
 }

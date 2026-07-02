@@ -133,7 +133,7 @@
             use:autofocus
             bind:value
             class:sompeng={isSompeng}
-            class="form-input keyboard-input" />
+            class="keyboard-input" />
         </Keyman>
       {:else if field === 'local_orthography' || field === 'lexeme' || field === 'linguistic_history'}
         <Keyman fixed {bcp} canChooseKeyboard>
@@ -145,7 +145,7 @@
             use:autofocus
             bind:value
             class:sompeng={isSompeng}
-            class="form-input keyboard-input" />
+            class="keyboard-input" />
         </Keyman>
       {:else if field === 'phonetic'}
         {#await import('$lib/components/keyboards/ipa/IpaKeyboard.svelte') then { default: IpaKeyboard }}
@@ -156,7 +156,7 @@
                 type="text"
                 use:autofocus
                 bind:value
-                class="form-input plain-input" />
+                class="plain-input" />
             </IpaKeyboard>
           </div>
         {/await}
@@ -167,7 +167,7 @@
           type="text"
           use:autofocus
           bind:value
-          class="form-input plain-input" />
+          class="plain-input" />
       {/if}
 
       {#if field === 'interlinearization'}

@@ -6,6 +6,7 @@
   import { build_personas, is_active_persona } from '$lib/auth/view-as'
   import { api_dev_admin_level } from '$api/auth/dev-admin-level/_call'
   import { mode } from '$lib/mode'
+  import ColorSchemeToggle from './ColorSchemeToggle.svelte'
 
   interface Props {
     /** Close the dropdown — called after navigations / sign out (persona switches keep it open). */
@@ -71,6 +72,7 @@
   {/if}
 
   <a href="/account" onclick={close}>{t('account.account_settings')}</a>
+  <ColorSchemeToggle />
   <button type="button" onclick={() => { close(); auth_user.logout() }}>{t('account.log_out')}</button>
 
   {#if dev || mode === 'development'}

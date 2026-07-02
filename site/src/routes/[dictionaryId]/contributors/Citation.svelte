@@ -45,7 +45,7 @@
           id="names"
           placeholder="Anderson, Gregory D. S."
           type="text"
-          class="form-input citation-input"
+          class="citation-input"
           value={citation || ''}
           oninput={(e) => {
             // @ts-expect-error

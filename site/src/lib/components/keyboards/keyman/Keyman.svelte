@@ -249,6 +249,6 @@
   }
 
   .keyboard-toggle:hover {
-    color: #000;
+    color: var(--color);
   }
 </style>
