@@ -15,7 +15,7 @@
  * tabs use it to re-assert `set_role` on a new leader that may have booted
  * viewer-mode (see `dict-lifecycle.ts`).
  */
-import type { BootFailure, DbEvent, DbRequest, InstanceOptions, LeaderMeta, WorkerInitMessage } from './instance'
+import type { BootFailure, BootProgressDetail, DbEvent, DbRequest, InstanceOptions, LeaderMeta, WorkerInitMessage } from './instance'
 import { db_channel_name, db_lock_name } from './instance'
 import { start_leader_election } from './leader-election'
 import type { LeaderElection } from './leader-election'
@@ -37,7 +37,7 @@ export interface DbClient {
   destroy: () => void
 }
 
-export function create_db_client({ instance_options, on_boot_failed }: {
+export function create_db_client({ instance_options, on_boot_failed, on_boot_progress }: {
   instance_options: InstanceOptions
   /**
    * Fired on the main thread every time a spawned leader worker posts
@@ -46,6 +46,13 @@ export function create_db_client({ instance_options, on_boot_failed }: {
    * this is the ONLY window into boot failures. Kept generic (no app imports).
    */
   on_boot_failed?: (info: BootFailure) => void
+  /**
+   * Fired as the spawned leader worker progresses through boot phases (per
+   * `snapshot_fetch` download chunk it carries byte counts). Only THIS tab's
+   * leader worker reports — followers reach a ready leader and never spawn one.
+   * The app wires this to a boot download progress bar.
+   */
+  on_boot_progress?: (info: { stage: string, detail?: BootProgressDetail }) => void
 }): DbClient {
   const { dict_id } = instance_options
   const channel_name = db_channel_name(dict_id)
@@ -97,7 +104,11 @@ export function create_db_client({ instance_options, on_boot_failed }: {
     // our own boot a few times (covers a transient stall + self-heals a SINGLE tab
     // with no other waiter to promote); once the budget is spent, RESIGN so the
     // browser can promote another tab (or, if none, callers fall back).
-    spawned.onmessage = (event: MessageEvent<{ type?: string, message?: string, last_stage?: string }>) => {
+    spawned.onmessage = (event: MessageEvent<{ type?: string, message?: string, last_stage?: string, stage?: string, detail?: BootProgressDetail }>) => {
+      if (event.data?.type === 'boot_progress') {
+        on_boot_progress?.({ stage: event.data.stage ?? '', detail: event.data.detail })
+        return
+      }
       if (event.data?.type !== 'boot_failed')
         return
       spawned.terminate()

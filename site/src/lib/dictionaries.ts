@@ -37,7 +37,12 @@ export function create_my_dictionaries_store({ user_id }: { user_id: string | un
     (async () => {
       const response = await fetch('/api/me/dictionaries')
       if (!response.ok) {
-        console.error(`Could not load my dictionaries: ${response.status}`)
+        // A 401 here is EXPECTED, not a fault: the client thinks it's signed in
+        // (there's a `user_id`) but the `session` cookie has since expired
+        // server-side. Don't ship it as an `error` row (console.error is patched
+        // by remote-log) — it's a benign auth gate. Other statuses are real.
+        if (response.status !== 401)
+          console.error(`Could not load my dictionaries: ${response.status}`)
         return
       }
       const { dictionaries } = await response.json() as { dictionaries: DictionaryWithRoles[] }

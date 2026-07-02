@@ -21,6 +21,7 @@ const FLAC = ascii('fLaC', [0x00, 0x00, 0x00, 0x22])
 const MP4 = bytes(0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6F, 0x6D) // ftyp isom
 const M4A = bytes(0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70, 0x4D, 0x34, 0x41, 0x20) // ftyp M4A
 const WEBM = bytes(0x1A, 0x45, 0xDF, 0xA3, 0, 0, 0, 0)
+const OGG = ascii('OggS', [0x00, 0x02, 0x00, 0x00])
 
 const HTML = ascii('<!DOCTYPE html><html><head><title>404 Not Found</title>')
 const HTML_BARE = ascii('<html lang="en"><body>nope</body></html>')
@@ -43,8 +44,9 @@ describe(sniff_bytes, () => {
     expect(sniff_bytes(M4A)).toEqual({ kind: 'media', category: 'audio' })
   })
 
-  test('flags Matroska/WebM as media without a resolvable category', () => {
-    expect(sniff_bytes(WEBM)).toEqual({ kind: 'media' })
+  test('flags category-ambiguous containers as media, naming the container', () => {
+    expect(sniff_bytes(WEBM)).toEqual({ kind: 'media', container: 'Matroska/WebM' })
+    expect(sniff_bytes(OGG)).toEqual({ kind: 'media', container: 'Ogg' })
   })
 
   test('identifies non-media text formats', () => {
@@ -98,5 +100,35 @@ describe(validate_media_bytes, () => {
 
   test('rejects empty bytes', () => {
     expect(validate_media_bytes({ category: 'image', declared_type: 'image/png', bytes: new Uint8Array() }).ok).toBeFalsy()
+  })
+
+  // Ambiguous audio/video containers (Ogg, Matroska/WebM) carry no resolvable
+  // category, so before the fix an octet-stream body slipped past the image
+  // endpoint and a WebM/Ogg could be stored AS a photo. They must be rejected on
+  // the image endpoint but still accepted on audio/video (can't disambiguate).
+  describe('ambiguous container × endpoint matrix (Ogg / WebM)', () => {
+    test('image endpoint REJECTS a WebM/Ogg under a generic octet-stream type (the reported bug)', () => {
+      expect(validate_media_bytes({ category: 'image', declared_type: 'application/octet-stream', bytes: WEBM }).ok).toBeFalsy()
+      expect(validate_media_bytes({ category: 'image', declared_type: 'application/octet-stream', bytes: OGG }).ok).toBeFalsy()
+    })
+
+    test('image endpoint REJECTS a WebM/Ogg even with no declared type', () => {
+      expect(validate_media_bytes({ category: 'image', declared_type: null, bytes: WEBM }).ok).toBeFalsy()
+      expect(validate_media_bytes({ category: 'image', declared_type: undefined, bytes: OGG }).ok).toBeFalsy()
+    })
+
+    test('image rejection names the container', () => {
+      expect(validate_media_bytes({ category: 'image', declared_type: 'application/octet-stream', bytes: WEBM }))
+        .toMatchObject({ reason: expect.stringContaining('Matroska/WebM') })
+      expect(validate_media_bytes({ category: 'image', declared_type: 'application/octet-stream', bytes: OGG }))
+        .toMatchObject({ reason: expect.stringContaining('Ogg') })
+    })
+
+    test('audio + video endpoints ACCEPT the same ambiguous containers', () => {
+      expect(validate_media_bytes({ category: 'audio', declared_type: 'application/octet-stream', bytes: WEBM })).toEqual({ ok: true })
+      expect(validate_media_bytes({ category: 'video', declared_type: 'application/octet-stream', bytes: WEBM })).toEqual({ ok: true })
+      expect(validate_media_bytes({ category: 'audio', declared_type: 'application/octet-stream', bytes: OGG })).toEqual({ ok: true })
+      expect(validate_media_bytes({ category: 'video', declared_type: 'application/octet-stream', bytes: OGG })).toEqual({ ok: true })
+    })
   })
 })

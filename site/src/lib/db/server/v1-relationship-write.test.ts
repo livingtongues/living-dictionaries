@@ -1,4 +1,5 @@
 import type Database from 'better-sqlite3'
+import { readFileSync } from 'node:fs'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { open_dictionary_db_in_memory } from './dictionary-db'
 import { open_dictionary_history_db_in_memory } from './dictionary-history-db'
@@ -231,5 +232,12 @@ describe('api_key_id attribution', () => {
     const { relationship } = apply_relationship_create({ db, history_db, input: { from_entry_id: 'dog', to_entry_id: 'perro', type: 'cognate' }, user_id: 'u1', api_key_id: 'key-1' })
     const row = history_db.prepare(`SELECT api_key_id FROM changes WHERE table_name = 'entry_relationships' AND row_id = ? LIMIT 1`).get(relationship.id) as { api_key_id: string | null } | undefined
     expect(row?.api_key_id).toBe('key-1')
+  })
+})
+
+describe('source file has no raw NUL byte', () => {
+  test('endpoint_key uses an escaped separator, not a raw NUL (keeps the file text, not binary)', () => {
+    const source = readFileSync(new URL('./v1-relationship-write.ts', import.meta.url))
+    expect(source).not.toContain(0x00)
   })
 })

@@ -54,6 +54,25 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   and/or **within N min of a deploy marker** so post-deploy stale-bundle spikes auto-explain instead of
   needing manual triage. LD already renders deploy markers on the timeline (shipped 06-28) and saw ~16
   app_versions in 7d, so this is the natural next layer; data is in `app_version` vs current build.
+- **★ API-v1 activity panel** *(filed 2026-07-01 — grounded in the biggest live volume signal).* The
+  server-emitted `v1_*` events (`v1_media_attached`, `v1_entry_updated/deleted`, `v1_entries_written`,
+  `v1_sentence_updated`, `v1_media_deleted`, `v1_feedback_received`) are the **single largest volume +
+  richest activity signal** right now — on 07-01, 2,089 of 2,729 rows were server rows, ~3,500 v1 rows
+  in 7d from one contributor's `api_key` pass on `river` (1,780 media attach + 856 del + 853 upd) — yet
+  they're **invisible on the dashboard** (not in `ALL_TRACKED_EVENTS`; untouched by `log-analytics.ts`).
+  Had to hand-count "who edited what via the API." Build a panel grouping `v1_*` by **type**
+  (attach/update/delete/write), **dictionary** (`context.dictionary_id`), and **channel**
+  (`context.via`), with error-vs-success + a per-day trend. Directly serves the **human/agent
+  editing-parity** direction (AGENTS.md) — makes agent edits as legible as human ones. Precursor: add
+  the stable `v1_*` names to a server-event vocab so the coverage panel can track them.
+- **Capability/frequency-based de-bot (not UA-based)** *(ported from house · 2026-07-01 — LOW until
+  crawler traffic lands).* house (Nth confirmation on 07-01) sees a plausible-Chrome crawler
+  `is_bot_user_agent` can't catch, spawning thousands of single-hit sessions that inflate the human
+  `sessions` line; their fix excludes sessions that **never heartbeat / never reach wa-sqlite
+  capability** + a "one UA with N× single-hit sessions" heuristic, then layers a cookieless
+  `visitor_hash` (already on LD's backlog below). **house explicitly flagged this for LD** (also
+  Boston/Cloudflare). LD isn't crawler-inflated yet (traffic is one real contributor + Jacob), so LOW —
+  but the right defensive port; pairs with the `visitor_hash` item.
 - **★ Schema-drift guard on the pipeline-health strip** *(filed 2026-06-29 — NEXT-TO-BUILD, grounded
   in a real P1).* Today's review caught a live `crash`: `/api/admin-sync` 500'd with `no such table:
   dictionary_partners` because the prod `shared.db` never got that table (the initial migration was

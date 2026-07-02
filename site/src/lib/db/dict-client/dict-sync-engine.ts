@@ -8,6 +8,7 @@ import { ResponseCodes } from '$lib/constants'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
 import { LATEST_DICT_MIGRATION } from './dict-migrations-bundle'
+import { report_dict_sync_failure } from './report-dict-sync-failure'
 
 /** The slice of the worker's connection the engine needs (reads + writes). */
 export interface EngineConnection {
@@ -141,6 +142,10 @@ export class DictSyncEngine {
       return response
     } catch (err) {
       this.#last_error = (err as Error).message
+      // Ship to client_logs from the worker (single chokepoint for interval,
+      // post-write, and RPC syncs) — the shipper classifies, skips pure-offline
+      // failures, and throttles repeats. See report-dict-sync-failure.ts.
+      report_dict_sync_failure({ dict_id: this.#dict_id, error: err })
       throw err
     } finally {
       this.#in_flight = false

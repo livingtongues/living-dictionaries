@@ -8,6 +8,7 @@ import { online } from 'svelte/reactivity/window'
 import { ClientBehindError, ServerBehindError } from './errors'
 import { SyncHistory } from './history.svelte.js'
 import { record_last_visit_ping, should_ping_last_visit } from './last-visit-ping'
+import { report_sync_failure } from './report-sync-failure'
 import { is_readonly_table, SYNCABLE_TABLE_NAMES } from './types'
 
 export type SyncPostFn = (body: SyncRequest) => Promise<{ data: SyncResponse | null, error: { status: number, message: string } | null }>
@@ -152,6 +153,7 @@ export class Sync {
 
     const needs_visit_ping = should_ping_last_visit({ user_id: this.#user_id })
 
+    let sync_error: unknown = null
     try {
       await this.#sync_once({ result, update_last_visit: needs_visit_ping })
       if (needs_visit_ping)
@@ -173,12 +175,15 @@ export class Sync {
       } else {
         this.#log({ level: 'error', phase: 'sync', message: `Sync failed: ${result.error}` })
       }
+      sync_error = error
     } finally {
       result.duration_ms = Date.now() - started_at.getTime()
       this.last_sync_result = result
       this.is_syncing = false
       this.#last_sync_finished_at = Date.now()
       this.history.save_report({ result, log_entries: this.log_entries, started_at })
+      if (!result.success)
+        report_sync_failure({ engine: 'admin', error: sync_error, result, log_entries: this.log_entries })
     }
 
     return result

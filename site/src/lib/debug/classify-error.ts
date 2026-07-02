@@ -15,7 +15,9 @@ import type { ClientLogLevel } from '$lib/db/schemas/shared.types'
  * (the user's GPU/browser can't do WebGL — nothing we can fix, not a crash);
  * and the Node HTTP `abortIncoming` socket close (`aborted`) when a client
  * disconnects mid-request (also demoted to `info` at the source in
- * `hooks.server.ts`, so this mainly catches legacy rows).
+ * `hooks.server.ts`, so this mainly catches legacy rows); and adapter-node's
+ * oversized-body rejection (`Content-length … exceeds limit of … bytes`) — a
+ * scanner/abuse probe POSTing a giant body is correctly rejected, not a fault.
  */
 export const KNOWN_NOISE_PATTERNS = [
   'Network error for /api/log',
@@ -23,6 +25,7 @@ export const KNOWN_NOISE_PATTERNS = [
   'WebGL unavailable',
   'Failed to initialize WebGL',
   'aborted',
+  'exceeds limit of',
 ]
 
 export function is_known_noise(message: string): boolean {
@@ -96,6 +99,9 @@ if (import.meta.vitest) {
     })
     it('flags the server client-disconnect socket abort', () => {
       expect(is_known_noise('aborted')).toBe(true)
+    })
+    it('flags adapter-node oversized-body rejections', () => {
+      expect(is_known_noise('Content-length of 17000012 exceeds limit of 16777216 bytes.')).toBe(true)
     })
     it('does NOT flag a genuine fault', () => {
       expect(is_known_noise("Cannot read properties of undefined (reading 'x')")).toBe(false)
