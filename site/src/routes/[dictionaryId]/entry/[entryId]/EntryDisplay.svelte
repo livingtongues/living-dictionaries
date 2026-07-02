@@ -193,7 +193,7 @@
         on_update={new_value => save_entry({ elicitation_id: new_value })} />
     {/if}
 
-    <RelatedEntries entry_id={entry.id} />
+    <RelatedEntries entry_id={entry.id} {can_edit} />
 
     <!-- <div class="grow-1 order-last"></div> -->
   </div>

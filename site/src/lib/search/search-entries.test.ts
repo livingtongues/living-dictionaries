@@ -94,7 +94,9 @@ describe(search_entries, () => {
               "_lexeme": [
                 "esotman taki",
               ],
-              "_orthographies": [],
+              "_orthographies": [
+                "default",
+              ],
               "_other": [],
               "_parts_of_speech": [],
               "_semantic_domains": [],
@@ -119,7 +121,7 @@ describe(search_entries, () => {
             "_dialects": 0,
             "_glosses": 1,
             "_lexeme": 9,
-            "_orthographies": 0,
+            "_orthographies": 1,
             "_other": 0,
             "_parts_of_speech": 0,
             "_semantic_domains": 0,
@@ -135,7 +137,9 @@ describe(search_entries, () => {
             "_lexeme": {
               "1": 9,
             },
-            "_orthographies": {},
+            "_orthographies": {
+              "1": 1,
+            },
             "_other": {},
             "_parts_of_speech": {},
             "_semantic_domains": {},
@@ -163,7 +167,11 @@ describe(search_entries, () => {
                 "tman": 0.1111111111111111,
               },
             },
-            "_orthographies": {},
+            "_orthographies": {
+              "1": {
+                "default": 1,
+              },
+            },
             "_other": {},
             "_parts_of_speech": {},
             "_semantic_domains": {},
@@ -380,7 +388,21 @@ describe(search_entries, () => {
             "_orthographies": {
               "isArray": true,
               "node": {
-                "c": [],
+                "c": [
+                  [
+                    "d",
+                    {
+                      "c": [],
+                      "d": [
+                        1,
+                      ],
+                      "e": true,
+                      "k": "d",
+                      "s": "default",
+                      "w": "default",
+                    },
+                  ],
+                ],
                 "d": [],
                 "e": false,
                 "k": "",
@@ -611,7 +633,9 @@ describe(search_entries, () => {
               "taki": 1,
               "tman": 1,
             },
-            "_orthographies": {},
+            "_orthographies": {
+              "default": 1,
+            },
             "_other": {},
             "_parts_of_speech": {},
             "_semantic_domains": {},

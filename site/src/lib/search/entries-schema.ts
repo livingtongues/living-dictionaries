@@ -9,7 +9,7 @@ export const entries_index_schema = {
   _other: 'string[]', // phonetic, notes, scientific_names, interlinearization,morphology, plural_form, sentences
 
   // Filters
-  _orthographies: 'string[]', // alternate orthography codes the entry stores lexeme text under (excludes the always-present `default`)
+  _orthographies: 'string[]', // orthography codes the entry stores populated lexeme text under, including `default` when set
   _sources: 'string[]', // source slugs (facet-only; labels resolved from page.data.sources)
   _tags: 'string[]', // underscored
   _dialects: 'string[]', // underscored

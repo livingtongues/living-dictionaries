@@ -5,6 +5,7 @@ import type { CustomRelationshipTypeInput, RelationshipInput, RelationshipTypeRe
 import type { MultiString } from '$lib/types'
 import { to_multistring, to_string_array } from '$lib/api/v1/entry-input'
 import { is_global_relationship_type, RELATIONSHIP_TYPES } from '$lib/constants'
+import { canonicalize_relationship_endpoints, resolve_global_relationship_type } from '$lib/db/relationship-canonicalize'
 import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { read_last_modified_at } from './dictionary-db'
 import { record_history } from './dictionary-history-db'
@@ -97,16 +98,6 @@ export function find_or_create_relationship_type({ db, history_db, input, user_i
 }
 
 // ── Read (assemble views) ─────────────────────────────────────────────────────
-
-// Separator for the endpoint sort-key used ONLY to canonicalize symmetric
-// endpoint order (A↔B) before dedupe — never persisted. Written as the escaped
-// `\0` (NUL), NOT a raw NUL byte: a raw NUL in the source makes git + ripgrep
-// classify this whole file as binary (breaking grep/blame/diff navigability).
-const ENDPOINT_KEY_SEPARATOR = '\0'
-
-function endpoint_key(entry_id: string, sense_id: string | null | undefined): string {
-  return `${entry_id}${ENDPOINT_KEY_SEPARATOR}${sense_id ?? ''}`
-}
 
 /** Shape one relationship row as seen FROM `viewpoint_entry_id`. */
 function build_relationship_view({ db, row, viewpoint_entry_id, type_cache, lexeme_cache }: {
@@ -203,9 +194,7 @@ function resolve_relationship_type({ db, history_db, input, user_id, api_key_id 
     const { type } = find_or_create_relationship_type({ db, history_db, input: input.custom_type, user_id, api_key_id })
     return { custom_type_id: type.id, symmetric: type.symmetric, flip: false }
   }
-  const global = RELATIONSHIP_TYPES[input.type as keyof typeof RELATIONSHIP_TYPES]
-  const canonical = 'canonical' in global ? global.canonical : undefined
-  return { type: canonical ?? input.type, symmetric: global.symmetric, flip: !!canonical }
+  return resolve_global_relationship_type(input.type as keyof typeof RELATIONSHIP_TYPES)
 }
 
 export function apply_relationship_create({ db, history_db, input, user_id, api_key_id }: {
@@ -254,15 +243,14 @@ export function apply_relationship_create({ db, history_db, input, user_id, api_
     const history_events: HistoryEvent[] = []
     const { type, custom_type_id, symmetric, flip } = resolve_relationship_type({ db, history_db, input, user_id, api_key_id })
 
-    let from = { entry_id: from_entry_id, sense_id: from_sense_id }
-    let to = { entry_id: to_entry_id, sense_id: to_sense_id }
-    // A directed inverse-alias (e.g. hyponym→hypernym) flips endpoints so the
-    // stored slug's `from` always plays the canonical role.
-    if (flip)
-      [from, to] = [to, from]
-    // Canonicalize endpoint order for symmetric types so A→B and B→A collapse.
-    if (symmetric && endpoint_key(from.entry_id, from.sense_id) > endpoint_key(to.entry_id, to.sense_id))
-      [from, to] = [to, from]
+    // Inverse-alias flip (e.g. hyponym→hypernym) + symmetric endpoint sort so
+    // A→B and B→A collapse — shared with the browser editing UI.
+    const { from, to } = canonicalize_relationship_endpoints({
+      from: { entry_id: from_entry_id, sense_id: from_sense_id },
+      to: { entry_id: to_entry_id, sense_id: to_sense_id },
+      symmetric,
+      flip,
+    })
 
     // Dedupe against the natural key (COALESCE mirrors the unique index).
     const existing = db.prepare(

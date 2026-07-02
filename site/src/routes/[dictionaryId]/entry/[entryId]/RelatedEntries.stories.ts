@@ -7,6 +7,9 @@ function t(key: string | { dynamicKey?: string, fallback?: string }): string {
     return key.fallback || key.dynamicKey || ''
   const labels: Record<string, string> = {
     'relationship_type.related_entries': 'Related entries',
+    'relationship_type.add': 'Add related entry',
+    'relationship_type.remove_confirm': 'Remove this link between entries?',
+    'misc.remove': 'Remove',
     'relationship_type.synonym': 'Synonym',
     'relationship_type.antonym': 'Antonym',
     'relationship_type.cognate': 'Cognate',
@@ -78,4 +81,22 @@ export const shared_meta: StoryMeta = {
 
 export const WithRelationships: Story<typeof Component> = {
   props: { entry_id: 'dog' },
+}
+
+export const Editor: Story<typeof Component> = {
+  props: { entry_id: 'dog', can_edit: true },
+  viewports: [{ width: 420, height: 320 }],
+}
+
+/** No relationships yet — editors still see the section with the add button. */
+export const EmptyEditor: Story<typeof Component> = {
+  props: { entry_id: 'wolf', can_edit: true },
+  viewports: [{ width: 420, height: 120 }],
+  page_data: {
+    t,
+    dict_db: {
+      ...dict_db,
+      entry_relationships: { query: () => ({ rows: [] }) },
+    },
+  },
 }

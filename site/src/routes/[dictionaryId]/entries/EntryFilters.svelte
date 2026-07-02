@@ -28,10 +28,22 @@
 
   const { tags, dialects, speakers, sources, dictionary } = $derived(page.data)
   const source_labels = $derived(Object.fromEntries(($sources || []).map(source => [source.slug, source.abbreviation || source.citation || source.slug])))
-  const orthography_labels = $derived(Object.fromEntries(get_orthographies(dictionary ?? {}).alternates.map(orthography => [orthography.code, orthography.name || orthography.code])))
-  // Hide moot values: a code present on EVERY result (count === total) tells you nothing.
+  // The primary/default orthography only appears as a filter option once it's been given a
+  // name in settings — an unnamed 'default' would otherwise show as that raw, meaningless code.
+  const orthography_labels = $derived.by(() => {
+    const { primary, alternates } = get_orthographies(dictionary ?? {})
+    return Object.fromEntries([
+      ...(primary.name ? [[primary.code, primary.name]] : []),
+      ...alternates.map(orthography => [orthography.code, orthography.name || orthography.code]),
+    ])
+  })
+  // Hide moot values: a code present on EVERY result (count === total) tells you nothing —
+  // UNLESS it's the filter currently applied, in which case hiding it would also hide its
+  // own checkbox (the only way back would be "Clear filters").
   const orthography_values = $derived(Object.fromEntries(
-    Object.entries(result_facets?._orthographies?.values ?? {}).filter(([, count]) => count !== total),
+    Object.entries(result_facets?._orthographies?.values ?? {})
+      .filter(([key]) => key in orthography_labels)
+      .filter(([key, count]) => count !== total || $search_params.orthographies?.includes(key)),
   ))
 </script>
 

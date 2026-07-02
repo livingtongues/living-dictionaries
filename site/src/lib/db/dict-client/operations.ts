@@ -2,6 +2,8 @@ import { get } from 'svelte/store'
 import type { Writable } from 'svelte/store'
 import type { MultiString } from '$lib/types'
 import type { DictInsertType, DictLiveDb, DictUpdateType } from '$lib/db/dict-client/dict-live-db.svelte'
+import type { GlobalRelationshipType } from '$lib/constants'
+import { canonicalize_relationship_endpoints, resolve_global_relationship_type } from '$lib/db/relationship-canonicalize'
 import { page } from '$app/state'
 import { goto } from '$app/navigation'
 
@@ -284,6 +286,84 @@ export async function remove_source_and_delete({ source_id, slug }: { source_id:
         await dict_db[table].update({ id: row.id, source: null } as never)
     }
     await dict_db.sources.delete(source_id)
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+/**
+ * Local-first counterpart of the server's `apply_relationship_create` (v1 API):
+ * same canonicalization (inverse-alias flip + symmetric endpoint sort via the
+ * shared `relationship-canonicalize` module) and the same natural-key dedupe,
+ * so both surfaces store identical rows. Entry-level only (no sense narrowing
+ * in the UI yet — the API supports it).
+ */
+export async function insert_relationship({ from_entry_id, to_entry_id, type, custom_type_id, note }: {
+  from_entry_id: string
+  to_entry_id: string
+  /** A global relationship-type slug. Provide THIS or `custom_type_id`. */
+  type?: GlobalRelationshipType
+  /** An EXISTING `relationship_types` row id. Provide THIS or `type`. */
+  custom_type_id?: string
+  note?: MultiString
+}) {
+  try {
+    const { dict_db, connection } = get_pieces()
+    if (!connection)
+      throw new Error('Editing database is not ready yet')
+    if (from_entry_id === to_entry_id)
+      throw new Error('Cannot relate an entry to itself')
+
+    let symmetric = false
+    let flip = false
+    let stored_type: string | undefined
+    if (type) {
+      ({ type: stored_type, symmetric, flip } = resolve_global_relationship_type(type))
+    } else if (custom_type_id) {
+      const [type_row] = await connection.query<{ symmetric: number | null }>(`SELECT symmetric FROM relationship_types WHERE id = ?`, [custom_type_id])
+      if (!type_row)
+        throw new Error('Unknown relationship type')
+      symmetric = !!type_row.symmetric
+    } else {
+      throw new Error('A relationship type is required')
+    }
+
+    const { from, to } = canonicalize_relationship_endpoints({
+      from: { entry_id: from_entry_id, sense_id: null },
+      to: { entry_id: to_entry_id, sense_id: null },
+      symmetric,
+      flip,
+    })
+
+    const [existing] = await connection.query<{ id: string }>(
+      `SELECT id FROM entry_relationships
+        WHERE from_entry_id = ? AND COALESCE(from_sense_id,'') = ''
+          AND to_entry_id = ? AND COALESCE(to_sense_id,'') = ''
+          AND COALESCE(type,'') = ? AND COALESCE(custom_type_id,'') = ?`,
+      [from.entry_id, to.entry_id, stored_type ?? '', custom_type_id ?? ''],
+    )
+    if (existing)
+      return existing
+
+    const [relationship] = await dict_db.entry_relationships.insert({
+      from_entry_id: from.entry_id,
+      to_entry_id: to.entry_id,
+      ...(stored_type ? { type: stored_type } : {}),
+      ...(custom_type_id ? { custom_type_id } : {}),
+      ...(note ? { note } : {}),
+    })
+    return relationship
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+export async function delete_relationship(relationship_id: string) {
+  try {
+    const { dict_db } = get_pieces()
+    await dict_db.entry_relationships.delete(relationship_id)
   } catch (err) {
     alert(err)
     console.error(err)
