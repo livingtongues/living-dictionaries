@@ -67,16 +67,31 @@ converge prod (living VPS) migration tables to match, and audit the schema befor
    - real-DB test: new initials applied over copies of local .data shared/dict/history
      DBs — applied clean, indexes converged, row counts unchanged, FK check clean
    - vitest 1043 passed; svelte-check 0 errors; eslint clean on touched files
-7. ⏳ build + test:history e2e (running)
-8. Commit + push svelte-5-migration → webhook deploy → verify boot
-9. Prod converge (script ready at /tmp/converge-migrations.js on mustang):
-   backups → deploy applies shared.db → anonymous POST /api/dictionary/river/changes
-   to lazy-open+migrate river.db → run converge script (rewrites migrations tables,
-   history row-swap is safe because old/new schema identical, stamps
-   dict_db_schema_version + entry_count + updated_at bump → cron rebuilds R2 snapshot
-   with clean migrations table) → verify
-10. Local .data converge (same rewrite)
-11. Knowledge note + summary
+7. ✅ build + test:history e2e — 33 assertions PASS (incl. new entry_count assertion).
+   NOTE: the e2e script lingers after PASS (server child keeps event loop alive) —
+   piped through `| tail` it looks hung; the PASS is in the buffered output.
+8. ✅ Committed 5497c415 + pushed svelte-5-migration → webhook deploy verified
+   (polled prod migrations table until 20260702_initial.sql appeared)
+9. ✅ Prod converge (2026-07-02 ~11:21 UTC):
+   - backups: *.bak-squash-20260702-111915 (shared.db, river.db, river.history.db)
+   - anonymous POST /changes lazy-opened river.db → applied initial + index changes
+   - converge script: all 3 migrations tables → single 20260702_initial.sql row
+     (ghost 20260526_messages.sql gone); river indexes verified (new partials present,
+     composite deletes idx + _from gone); dict_db_schema_version stamped;
+     entry_count backfilled to 8693; updated_at bumped → snapshot rebuild queued
+   - shared.db: 3 redundant indexes confirmed dropped; healthz 200; zero
+     server-side errors in client_logs in the surrounding 40-min window
+10. ✅ Local .data converge — all shared/dict/history DBs on the single row.
+    GOTCHA FOUND: history DBs stuck mid-chain (initial applied, 20260630 ALTER not)
+    fail the squashed initial at `idx_changes_api_key` (CREATE TABLE no-ops so the
+    column is missing, then the index references it). Healed locally by ALTERing the
+    column first. Prod river.history had both old migrations → unaffected. Same class
+    of risk exists for any long-dormant browser DB (mid-chain OPFS/IDB) — accepted:
+    Jacob clears his client, tells Greg; domain changes at cutover anyway.
+11. ✅ Knowledge: .knowledge/migration/migration-squash-2026-07-02.md (+ index entry,
+    + staleness note in adding-a-syncable-dict-table.md)
+
+## Status: DONE (pending snapshot-rebuild confirmation poll)
    - `shared-migrations/20260702_initial.sql` (fold: initial + client_logs geo cols +
      log_daily_metrics + notify_channel + chat + triage cols + agent seed + api_keys —
      dictionary_partners backfill is subsumed)
