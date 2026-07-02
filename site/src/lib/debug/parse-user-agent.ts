@@ -120,7 +120,7 @@ function detect_os_version({ ua, os }: { ua: string, os: string }): string | nul
  * the human-facing browser/capability breakdown. Substring match on the common
  * tokens — cheap and good enough; UA bot-spoofing isn't a threat model here.
  */
-const BOT_PATTERN = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|embedly|quora link preview|pinterest|whatsapp|telegrambot|headless|lighthouse|pagespeed|gptbot|chatgpt|claude|ccbot|perplexity|applebot|googlebot|yandex|baidu|duckduck|semrush|ahrefs|petalbot|dataforseo|python-requests|axios|curl|wget|node-fetch|go-http/i
+const BOT_PATTERN = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|embedly|quora link preview|pinterest|whatsapp|telegrambot|headless|lighthouse|pagespeed|gptbot|chatgpt|claude|ccbot|perplexity|applebot|googlebot|googleother|yandex|baidu|duckduck|semrush|ahrefs|petalbot|dataforseo|python-requests|axios|curl|wget|node-fetch|go-http/i
 
 export function is_bot_user_agent(ua: string | null | undefined): boolean {
   if (!ua)
@@ -217,6 +217,9 @@ if (import.meta.vitest) {
     it('flags Googlebot + GPTBot', () => {
       expect(is_bot_user_agent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')).toBe(true)
       expect(is_bot_user_agent('Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; GPTBot/1.0; +https://openai.com/gptbot')).toBe(true)
+    })
+    it('flags GoogleOther (the "GoogleOther" crawler has no "bot" token)', () => {
+      expect(is_bot_user_agent('Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.7827.200 Mobile Safari/537.36 (compatible; GoogleOther)')).toBe(true)
     })
     it('does NOT flag a real Safari user', () => {
       expect(is_bot_user_agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15')).toBe(false)

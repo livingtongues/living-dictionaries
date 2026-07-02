@@ -163,3 +163,13 @@ Scope decisions from Jacob:
   `site/src/lib/{forms,uno-preflights,typography}.css`,
   `site/src/lib/components/shell/UserMenu.svelte` (toggle home),
   `site/svelte-look.config.ts` (`dark_mode`), `site/e2e/uno-parity-shots.mjs` (sweep).
+
+## Post-flip fix from the house session (2026-07-02)
+
+`--un-default-border-color` was declared ONLY in the `:root, .light` block with a
+comment claiming lazy resolution. var() inside unregistered custom properties
+substitutes EAGERLY at the declaring element, so a **toggle-forced dark under a
+light OS** (body.dark, :root still light) inherited the light-computed gray-200
+mix — light borders on dark pages. System-dark was unaffected (:root itself
+recomputes). Fixed by re-declaring the mix inside the `.dark` block; comment
+corrected. Verified empirically in house with a computed-style probe.

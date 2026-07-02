@@ -8,7 +8,9 @@
 import type { LogAnalytics } from '$lib/db/server/log-analytics'
 
 export interface LogInsights {
-  /** errors ÷ logs, as a fraction; null when there are no logs. */
+  /** real faults ÷ logs, as a fraction; null when there are no logs. Uses
+   * `real_errors` (known-noise / expected-response rows folded out) so a
+   * deploy-day stale-chunk burst doesn't spike the rate. */
   error_rate: number | null
   /** Average sessions per day across the window; null when the window is empty. */
   sessions_per_day: number | null
@@ -23,7 +25,7 @@ export interface LogInsights {
 export function log_insights({ analytics }: { analytics: LogAnalytics }): LogInsights {
   const { totals, daily, window_days } = analytics
 
-  const error_rate = totals.logs > 0 ? totals.errors / totals.logs : null
+  const error_rate = totals.logs > 0 ? totals.real_errors / totals.logs : null
   const sessions_per_day = window_days > 0 ? totals.sessions / window_days : null
   const logs_per_session = totals.sessions > 0 ? totals.logs / totals.sessions : null
 

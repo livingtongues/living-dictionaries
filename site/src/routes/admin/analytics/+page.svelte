@@ -29,7 +29,10 @@
     { label: 'Sessions', color: 'var(--primary)', points: daily.map(point => ({ date: point.day, value: point.sessions })) },
     { label: 'Users', color: USERS_COLOR, points: daily.map(point => ({ date: point.day, value: point.users })) },
   ])
-  const error_points = $derived(daily.map(point => ({ date: point.day, value: point.errors })))
+  // Plot REAL faults (known-noise + expected-response rows folded out), so a
+  // deploy-day stale-chunk burst doesn't read as a regression on the line.
+  const error_points = $derived(daily.map(point => ({ date: point.day, value: point.real_errors })))
+  const noise_errors = $derived(totals.errors - totals.real_errors)
   // Deploy markers for the traffic + error timelines: a vertical chip per build
   // (app_version = build epoch ms), so a spike pins to the deploy that caused it.
   // Chip shows a friendly "5 minutes ago"; note shows the exact local times.
@@ -229,10 +232,10 @@
   </section>
 
   <section class="cards">
-    {#each [['Sessions', analytics.totals.sessions], ['Unique users', analytics.totals.unique_users], ['Errors', analytics.totals.errors], ['Log rows', analytics.totals.logs]] as [label, value] (label)}
+    {#each [['Sessions', analytics.totals.sessions], ['Unique users', analytics.totals.unique_users], ['Errors', analytics.totals.real_errors], ['Log rows', analytics.totals.logs]] as [label, value] (label)}
       <div class="card">
         <div class="value" class:danger={label === 'Errors' && Number(value) > 0}>{format_number(Number(value))}</div>
-        <div class="label">{label}</div>
+        <div class="label">{label}{#if label === 'Errors' && noise_errors > 0}<span class="hint"> +{format_number(noise_errors)} noise</span>{/if}</div>
       </div>
     {/each}
   </section>
@@ -248,7 +251,7 @@
     <div class="insight">
       <div class="insight-value" class:danger={(insights.error_rate ?? 0) > 0}>{insights.error_rate != null ? format_pct(insights.error_rate) : '—'}</div>
       <div class="insight-label">Error rate</div>
-      <div class="insight-sub">errors ÷ logs</div>
+      <div class="insight-sub">real faults ÷ logs</div>
     </div>
     <div class="insight">
       <div class="insight-value">{one_decimal(insights.sessions_per_day)}</div>
@@ -284,9 +287,11 @@
   </section>
 
   <section class="panel">
-    <h2>Errors per day</h2>
-    {#if totals.errors > 0}
+    <h2>Errors per day <span class="hint">real faults{#if noise_errors > 0} · {format_number(noise_errors)} known-noise rows excluded (stale-chunk / gated / deploy){/if}</span></h2>
+    {#if totals.real_errors > 0}
       <LineChart series={error_points} events={deploy_events} event_icon="⬆" area color="var(--danger)" height={200} y_format={format_number} tip_format={format_number} />
+    {:else if totals.errors > 0}
+      <p class="muted">No real faults — all {format_number(totals.errors)} error-level rows are known-noise (stale-chunk / gated / deploy). 🎉</p>
     {:else}
       <p class="muted">No errors recorded. 🎉</p>
     {/if}

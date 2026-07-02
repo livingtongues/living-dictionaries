@@ -48,15 +48,30 @@ describe(get_log_analytics, () => {
     const prev_day = analytics.daily[analytics.daily.length - 2]
     expect(last_day?.day).toBe('2026-06-30')
     expect(last_day?.errors).toBe(1)
+    expect(last_day?.real_errors).toBe(1) // 'boom' is a genuine fault, not known-noise
     expect(last_day?.sessions).toBe(1)
     expect(prev_day?.day).toBe('2026-06-29')
     expect(prev_day?.users).toBe(1)
     // A day with no logs is present and zeroed.
-    expect(analytics.daily[0]).toEqual({ day: '2026-06-01', sessions: 0, users: 0, errors: 0, logs: 0 })
+    expect(analytics.daily[0]).toEqual({ day: '2026-06-01', sessions: 0, users: 0, errors: 0, real_errors: 0, logs: 0 })
 
     expect(analytics.totals.logs).toBe(4)
     expect(analytics.totals.errors).toBe(1)
+    expect(analytics.totals.real_errors).toBe(1)
     expect(analytics.totals.unique_users).toBe(2)
+  })
+
+  test('daily real_errors folds out known-noise + expected-response rows, raw errors keeps them', () => {
+    add_log({ day: '2026-06-30', level: 'error', message: 'boom', context: { session_id: 's1' } })
+    add_log({ day: '2026-06-30', level: 'error', message: 'Failed to fetch dynamically imported module: /_app/x.js', context: { session_id: 's1' } })
+    add_log({ day: '2026-06-30', level: 'crash', message: 'Not found: /river/feedback', context: { session_id: 's1' } })
+
+    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const last_day = analytics.daily[analytics.daily.length - 1]
+    expect(last_day?.errors).toBe(3) // raw count keeps the stale-chunk + 404 rows
+    expect(last_day?.real_errors).toBe(1) // only 'boom' is a genuine fault
+    expect(analytics.totals.errors).toBe(3)
+    expect(analytics.totals.real_errors).toBe(1)
   })
 
   test('surfaces analytics events (infra excluded) and normalized route buckets', () => {
@@ -283,7 +298,8 @@ describe(get_log_analytics, () => {
 
     const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
     const cold = analytics.daily.find(point => point.day === '2026-06-05')
-    expect(cold).toEqual({ day: '2026-06-05', sessions: 7, users: 0, errors: 3, logs: 42 })
+    // Archived days predate the split, so real_errors falls back to the raw error count.
+    expect(cold).toEqual({ day: '2026-06-05', sessions: 7, users: 0, errors: 3, real_errors: 3, logs: 42 })
     expect(analytics.totals.logs).toBe(42)
   })
 
@@ -413,6 +429,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-01",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -420,6 +437,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-02",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -427,6 +445,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-03",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -434,6 +453,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-04",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -441,6 +461,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-05",
               "errors": 3,
               "logs": 42,
+              "real_errors": 3,
               "sessions": 7,
               "users": 0,
             },
@@ -448,6 +469,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-06",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -455,6 +477,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-07",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -462,6 +485,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-08",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -469,6 +493,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-09",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -476,6 +501,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-10",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -483,6 +509,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-11",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -490,6 +517,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-12",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -497,6 +525,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-13",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -504,6 +533,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-14",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -511,6 +541,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-15",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -518,6 +549,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-16",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -525,6 +557,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-17",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -532,6 +565,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-18",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -539,6 +573,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-19",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -546,6 +581,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-20",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -553,6 +589,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-21",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -560,6 +597,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-22",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -567,6 +605,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-23",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -574,6 +613,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-24",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -581,6 +621,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-25",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -588,6 +629,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-26",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -595,6 +637,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-27",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -602,6 +645,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-28",
               "errors": 0,
               "logs": 0,
+              "real_errors": 0,
               "sessions": 0,
               "users": 0,
             },
@@ -609,6 +653,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-29",
               "errors": 0,
               "logs": 2,
+              "real_errors": 0,
               "sessions": 1,
               "users": 1,
             },
@@ -616,6 +661,7 @@ describe(get_log_analytics, () => {
               "day": "2026-06-30",
               "errors": 14,
               "logs": 34,
+              "real_errors": 8,
               "sessions": 2,
               "users": 2,
             },
@@ -1067,6 +1113,7 @@ describe(get_log_analytics, () => {
           "totals": {
             "errors": 17,
             "logs": 78,
+            "real_errors": 11,
             "sessions": 10,
             "unique_users": 3,
           },
