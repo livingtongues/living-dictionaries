@@ -6,6 +6,7 @@
   import { ShowHide } from '$lib/svelte-pieces'
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/helpers/glosses'
+  import { get_headword } from '$lib/helpers/orthographies'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
   import { page } from '$app/state'
   import type { DbOperations } from '$lib/dbOperations'
@@ -41,6 +42,7 @@
 
   const first_sense = $derived(entry.senses?.[0] || {} as EntryData['senses'][0])
   const first_video = $derived(first_sense.videos?.[0])
+  const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary.orthographies }))
 </script>
 
 <div
@@ -56,14 +58,14 @@
     onclick={on_click}
     class="entry-link">
     <div>
-      <span class="lexeme">{entry.main.lexeme.default}</span>
+      <span class="lexeme">{headword.value}</span>
       {#if entry.main.phonetic}
         <span class="phonetic">[{entry.main.phonetic}]</span>
       {/if}
 
       {#if dictionary.id !== 'garifuna'}
         {#each Object.entries(entry.main.lexeme) as [key, value] (key)}
-          {#if key !== 'default'}
+          {#if key !== 'default' && key !== headword.code}
             <i class="spaced" class:sompeng={dictionary.id === 'sora' && key === 'srb-sora'}>{value}</i>
           {/if}
         {/each}
@@ -138,7 +140,7 @@
     {#if first_video}
       <Video
         class="list-video-cell"
-        lexeme={entry.main.lexeme.default}
+        lexeme={headword.value}
         video={first_video}
         {can_edit} />
     {:else if can_edit}
@@ -168,7 +170,7 @@
         <div class="media-block photo-block">
           <Image
             square={128}
-            title={entry.main.lexeme.default}
+            title={headword.value}
             gcs={first_photo.serving_url}
             photo_source={first_photo.source}
             photographer={first_photo.photographer}

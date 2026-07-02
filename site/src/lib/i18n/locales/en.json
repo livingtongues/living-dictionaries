@@ -160,6 +160,14 @@
     "google_terms": "Google terms",
     "full_title": "{dictionary_name} Living Dictionary"
   },
+  "sync": {
+    "syncing": "Syncing…",
+    "synced": "Synced",
+    "error": "Sync error — tap to retry",
+    "offline": "Offline — will sync when back online",
+    "idle": "Tap to sync",
+    "tap_failed": "Sync failed: {message}"
+  },
   "entry": {
     "view_entries": "View Entries",
     "signed_in_as_manager": "You must be signed in as a manager of this dictionary to make changes.",

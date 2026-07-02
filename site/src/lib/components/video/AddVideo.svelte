@@ -9,6 +9,7 @@
   import RecordVideo from '$lib/components/video/RecordVideo.svelte'
   import VideoThirdParty from '$lib/components/video/VideoThirdParty.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
+  import { get_headword } from '$lib/helpers/orthographies'
   import IconUilMicrophone from '~icons/uil/microphone'
 
   const { dbOperations } = $derived(page.data)
@@ -22,6 +23,7 @@
 
   let hosted_video: HostedVideo = $state()
   let upload_triggered = $state(false)
+  const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: page.data.dictionary?.orthographies }))
 
   function startUpload({ file, speaker_id, source_slug }: { file: File | Blob, speaker_id?: string, source_slug?: string }): Readable<VideoUploadStatus> {
     const uploadStore = dbOperations.uploadVideo({ file, sense_id: entry.senses[0].id, speaker_id, source: source_slug })
@@ -44,7 +46,7 @@
 
 <Modal on:close={on_close}>
   {#snippet heading()}
-    <span> <i class="far fa-film-alt heading-icon"></i> {entry.main.lexeme.default} </span>
+    <span> <i class="far fa-film-alt heading-icon"></i> {headword.value} </span>
   {/snippet}
 
   <SelectSpeaker>

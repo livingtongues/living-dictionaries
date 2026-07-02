@@ -11,6 +11,7 @@ import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
 import { dbOperations, DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
 import { url_from_storage_path } from '$lib/helpers/media'
 import { create_dict_live_db } from '$lib/db/dict-client/dict-live-db.svelte'
+import { DictSyncStatus } from '$lib/db/dict-client/dict-sync-status.svelte'
 import { open_dict } from '$lib/db/dict-client/dict-lifecycle'
 import { live_share } from '$lib/db/client/live-share.svelte'
 import { toast } from '$lib/svelte-pieces/toast.svelte'
@@ -21,7 +22,7 @@ import { invalidate } from '$app/navigation'
 import { create_entries_ui_store } from '$lib/search/entries-ui-store'
 
 interface DictLayoutGlobals {
-  __ld_dict_connections?: Record<string, { connection: DictConnection, dict_db: DictLiveDb }>
+  __ld_dict_connections?: Record<string, { connection: DictConnection, dict_db: DictLiveDb, sync_status: DictSyncStatus }>
 }
 
 export const load: LayoutLoad = async ({ parent, depends, data }) => {
@@ -74,6 +75,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
     // to it. Cached per dict_id on globalThis to survive layout invalidation.
     let connection: DictConnection | null = null
     let dict_db: DictLiveDb | null = null
+    let dict_sync_status: DictSyncStatus | null = null
     if (browser) {
       const globals = globalThis as DictLayoutGlobals
       globals.__ld_dict_connections ??= {}
@@ -89,7 +91,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
         const initial_sync = conn.sync_now().catch(err => console.error('initial dict sync failed', err))
         if (!conn.is_opfs_backed)
           await initial_sync
-        cached = { connection: conn, dict_db: create_dict_live_db(conn, { user_id: auth_user.user?.id }) }
+        cached = { connection: conn, dict_db: create_dict_live_db(conn, { user_id: auth_user.user?.id }), sync_status: new DictSyncStatus(conn) }
         globals.__ld_dict_connections[dictionary_id] = cached
 
         // Surface sync-fatal sentinels (these otherwise die silently in the
@@ -136,7 +138,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
         void open_dict({ dict_id: dictionary_id, has_editor_role: true, auth: {} })
           .catch(err => console.warn('editor capability re-assert failed (retried next load)', err))
       }
-      ;({ connection, dict_db } = cached)
+      ;({ connection, dict_db, sync_status: dict_sync_status } = cached)
       // The dict_db is cached on globalThis and survives layout invalidation, so
       // refresh who gets audit-stamped on writes after a login/logout while a
       // dict is open (this load re-runs on auth changes via invalidateAll).
@@ -163,6 +165,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       can_edit,
       dict_db,
       connection,
+      dict_sync_status,
       about_is_too_short,
       update_dictionary,
       url_from_storage_path: (path: string) => url_from_storage_path(path, PUBLIC_STORAGE_BUCKET),

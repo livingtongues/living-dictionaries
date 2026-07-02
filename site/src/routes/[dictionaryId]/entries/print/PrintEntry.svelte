@@ -8,6 +8,7 @@
   import { order_example_sentences, order_glosses } from '$lib/helpers/glosses'
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
+  import { get_headword } from '$lib/helpers/orthographies'
   import { image_src } from '$lib/helpers/media'
   import { rich_text_display_html } from '$lib/markdown/html-era-shim'
 
@@ -35,13 +36,14 @@
 
   const first_photo = $derived(entry.senses?.[0]?.photos?.[0])
   const first_audio = $derived(entry.audios?.[0])
+  const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary.orthographies }))
 </script>
 
 <div style="font-size: {fontSize}pt;">
-  <b style="font-size: {headwordSize}pt;">{entry.main.lexeme.default}</b>
+  <b style="font-size: {headwordSize}pt;">{headword.value}</b>
 
   {#if selectedFields.local_orthography}
-    <b>{get_local_orthographies(entry.main.lexeme).join(', ')}</b>
+    <b>{get_local_orthographies(entry.main.lexeme, { exclude_code: headword.code }).join(', ')}</b>
   {/if}
 
   {#if selectedFields.phonetic && entry.main.phonetic}
@@ -190,7 +192,7 @@
     class="entry-photo"
     style="width:{imagePercent}%; max-height: 100vh;"
     src={image_src(first_photo.serving_url, 's0')}
-    alt={entry.main.lexeme.default} />
+    alt={headword.value} />
 {/if}
 
 {#if showQrCode}

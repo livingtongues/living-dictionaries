@@ -85,6 +85,23 @@ describe('seo_description', () => {
     const result = seo_description({ entry: { main: { lexeme: { default: 'foo' } } }, gloss_languages, t })
     expect(result).toEqual('')
   })
+
+  test('skips the alternate promoted to headword when default is absent', () => {
+    const entry: DeepPartial<EntryData> = {
+      main: {
+        lexeme: { 'x-first': 'promoted form', 'x-second': 'other form' },
+      },
+      senses: [{
+        glosses: { en: 'test' },
+      }],
+    }
+    const orthographies = [
+      { code: 'x-first', name: 'First' },
+      { code: 'x-second', name: 'Second' },
+    ]
+    const result = seo_description({ entry, gloss_languages: ['en'], orthographies, t })
+    expect(result).toEqual('other form, English: test')
+  })
 })
 
 // describe('removeLineBreaks', () => {

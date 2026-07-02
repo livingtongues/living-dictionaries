@@ -1,7 +1,7 @@
 import type { EntryData, Tables } from '$lib/types'
 import type { TranslateFunction } from '$lib/i18n/types'
 import { friendlyName } from './friendlyName'
-import { get_orthographies } from '$lib/helpers/orthographies'
+import { get_headword, get_orthographies } from '$lib/helpers/orthographies'
 import { get_orthography_headers, get_sense_headers } from './assignHeadersForCsv'
 import { display_speaker_gender, format_orthographies, format_senses } from './assignFormattedEntryValuesForCsv'
 import { stripHTMLTags } from './stripHTMLTags'
@@ -75,7 +75,9 @@ export function formatCsvEntries(
 
     const formatted_entry: EntryForCSV = {
       ID: entry.id,
-      lexeme: entry.main.lexeme?.default,
+      // Falls back to the first populated alternate orthography when `default` is absent;
+      // the alternate's own localOrthography column stays faithful (value in both is honest).
+      lexeme: get_headword({ lexeme: entry.main.lexeme, orthographies }).value,
       phonetic: entry.main?.phonetic,
       interlinearization: entry.main?.interlinearization,
       morphology: entry.main?.morphology,

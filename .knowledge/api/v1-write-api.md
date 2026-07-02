@@ -82,6 +82,16 @@ Guardrails baked in:
   id already exists the whole item is SKIPPED (`status: 'exists'`), because `merge_dict_row` is
   an LWW upsert that would otherwise overwrite a different logical entry. Editing is PATCH's job.
 - `id` is optional (omit → server mints one). Senses/sentences/texts accept a client `id` too.
+- **Any UUID version is accepted** (`is_uuid` doesn't check the version nibble) — deterministic
+  uuid5-of-external-key ids are an explicitly supported import pattern. Docs no longer say "(v4)".
+- **PATCH senses are a TRUE upsert by client id** (2026-07-02, from agent feedback): an unknown
+  sense id → create the sense WITH that id (so deterministic ids keep addressing the same sense
+  across re-syncs); an id on a DIFFERENT entry → 400 (the only remaining guard — prevents
+  cross-entry sense theft). Before this, an unknown id 400'd ("not found on this entry") while the
+  docs already promised upsert. Same fix made deterministic-id re-PATCHes idempotent: an
+  already-linked `senses_in_sentences` pair is skipped, and a re-sent sentence row is overlaid
+  onto the existing parsed row before `merge_dict_row` (the partial insert image otherwise trips
+  `NOT NULL created_by_user_id` — SQLite checks NOT NULL before ON CONFLICT diverts to UPDATE).
 
 ## Texts (connected passages) — added 2026-07-01
 

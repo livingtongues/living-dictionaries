@@ -3,6 +3,7 @@
   import { seo_description } from './seo_description'
   import { Button, JSON, Modal } from '$lib/svelte-pieces'
   import { share } from '$lib/helpers/share'
+  import { get_headword } from '$lib/helpers/orthographies'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import ChangeHistory from '$lib/components/history/ChangeHistory.svelte'
   import { track } from '$lib/debug/remote-log'
@@ -39,6 +40,7 @@
   // has loaded it; until then fall back to the SSR/cold-fetched entry so a
   // shared link paints real content immediately.
   const entry = $derived($derived_entry ?? entry_from_page)
+  const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary.orthographies }))
 </script>
 
 <div
@@ -174,8 +176,8 @@
 <SeoMetaTags
   norobots={!dictionary.public}
   generate_og_image
-  imageTitle={entry.main.lexeme.default}
-  imageDescription={seo_description({ entry, gloss_languages: dictionary.gloss_languages, t: page.data.t })}
+  imageTitle={headword.value}
+  imageDescription={seo_description({ entry, gloss_languages: dictionary.gloss_languages, orthographies: dictionary.orthographies, t: page.data.t })}
   dictionaryName={dictionary.name}
   lng={dictionary.coordinates?.points?.[0]?.coordinates.longitude}
   lat={dictionary.coordinates?.points?.[0]?.coordinates.latitude}

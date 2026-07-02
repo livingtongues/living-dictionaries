@@ -52,7 +52,8 @@ export const GET: RequestHandler = async (event) => {
  * PATCH /api/v1/dictionaries/[id]/entries/[entryId]
  *
  * Field-merge an entry: provided entry/sense fields overwrite, omitted stay.
- * `senses` upsert by id (no id → create); example sentences are appended;
+ * `senses` are a true upsert by client id (unknown id → create WITH that id;
+ * an id on another entry → 400); example sentences upsert by id / append;
  * `dialects`/`tags` are additive links. Returns the updated nested entry.
  */
 export const PATCH: RequestHandler = async (event) => {

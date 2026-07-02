@@ -252,10 +252,44 @@ describe(apply_entry_update, () => {
     expect(count('entry_tags')).toBe(1)
   })
 
-  test('throws when a sense id does not belong to the entry', () => {
+  test('upserts a sense by unknown client id: creates it WITH that id (deterministic import ids)', () => {
     const { entry_id } = seed_entry()
-    expect(() => apply_entry_update({ db, entry_id, patch: { senses: [{ id: 'foreign', glosses: { en: 'x' } }] }, user_id: 'u1' }))
-      .toThrow(/not found on this entry/)
+    const deterministic_id = crypto.randomUUID()
+    apply_entry_update({ db, entry_id, patch: { senses: [{ id: deterministic_id, glosses: { en: 'puppy' } }] }, user_id: 'u1' })
+    const sense = db.prepare(`SELECT * FROM senses WHERE id = ?`).get(deterministic_id) as Record<string, string>
+    expect(sense.entry_id).toBe(entry_id)
+    expect(JSON.parse(sense.glosses)).toEqual({ en: 'puppy' })
+
+    // Re-PATCH with the same id → field-merge, not a duplicate or an error.
+    apply_entry_update({ db, entry_id, patch: { senses: [{ id: deterministic_id, glosses: { en: 'pup' } }] }, user_id: 'u1' })
+    expect(count('senses')).toBe(2) // the seeded sense + the upserted one
+    const merged = db.prepare(`SELECT glosses FROM senses WHERE id = ?`).get(deterministic_id) as { glosses: string }
+    expect(JSON.parse(merged.glosses)).toEqual({ en: 'pup' })
+  })
+
+  test('a deterministic-id re-PATCH with sentences is idempotent (no duplicate links)', () => {
+    const { entry_id } = seed_entry()
+    const sense_id = crypto.randomUUID()
+    const sentence_id = crypto.randomUUID()
+    const patch = { senses: [{ id: sense_id, glosses: { en: 'puppy' }, example_sentences: [{ id: sentence_id, text: 'Mbwa mdogo', translation: { en: 'Small dog' } }] }] }
+    apply_entry_update({ db, entry_id, patch, user_id: 'u1' })
+    apply_entry_update({ db, entry_id, patch, user_id: 'u1' })
+    expect(count('sentences')).toBe(1)
+    expect(count('senses_in_sentences')).toBe(1)
+  })
+
+  test('throws when a sense id belongs to a different entry', () => {
+    const { sense_id } = seed_entry()
+    const other = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'paka' }] })
+    const other_entry_id = other.results[0].entry_id as string
+    expect(() => apply_entry_update({ db, entry_id: other_entry_id, patch: { senses: [{ id: sense_id, glosses: { en: 'x' } }] }, user_id: 'u1' }))
+      .toThrow(/belongs to a different entry/)
+  })
+
+  test('throws on a malformed sense id', () => {
+    const { entry_id } = seed_entry()
+    expect(() => apply_entry_update({ db, entry_id, patch: { senses: [{ id: 'not-a-uuid', glosses: { en: 'x' } }] }, user_id: 'u1' }))
+      .toThrow(/sense id must be a valid UUID/)
   })
 })
 
