@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
-import { insert_rows, set_last_modified_to_max } from './db-insert'
+import { insert_rows, prune_orphans, set_last_modified_to_max } from './db-insert'
 import {
   build_dict_sources,
   build_sentence_order,
@@ -27,6 +27,7 @@ import {
   to_iso,
 } from './mappers'
 import { open_dict_db, open_shared_db } from './open-sqlite'
+import { merge_user_row, plan_user_identity, remap_row_user_ids } from './remap'
 
 describe('orthography mapping', () => {
   test('maps legacy orthographies to coded registry + lo→code map', () => {
@@ -90,6 +91,7 @@ describe('mapper transforms', () => {
       id: 'e1',
       dictionary_id: 'd1',
       lexeme: { en: 'hello' },
+      linguistic_history: { en: 'from Proto-X *helo' },
       created_by: 'u1',
       created_at: new Date('2024-01-01T00:00:00Z'),
       updated_by: 'u2',
@@ -100,6 +102,8 @@ describe('mapper transforms', () => {
     expect(out).not.toHaveProperty('created_by')
     expect(out.created_by_user_id).toBe('u1')
     expect(out.updated_by_user_id).toBe('u2')
+    expect(out.linguistic_history).toEqual({ en: 'from Proto-X *helo' })
+    expect(DICT_JSON_COLS.entries).toContain('linguistic_history')
     expect(out.created_at).toBe('2024-01-01T00:00:00.000Z')
     expect(out.dirty).toBeNull()
   })
@@ -231,6 +235,68 @@ describe(resolve_audio_source_names, () => {
   })
 })
 
+describe(plan_user_identity, () => {
+  const prod_jacob: Record<string, any> = { id: 'prod-jacob', email: 'jacob@x.com', name: 'Jacob Bowdoin', avatar_url: null, preferred_locale: 'en', last_visit_at: '2026-07-01T00:00:00.000Z', created_at: '2026-06-20T00:00:00.000Z', updated_at: '2026-07-01T00:00:00.000Z', providers: '[{"provider":"google","provider_id":"g-new"}]', unsubscribed_from_emails: null }
+
+  test('prod id wins for a matching email (NOCASE); refs remap', () => {
+    const plan = plan_user_identity({
+      auth_users: [{ id: 'sb-jacob', email: 'Jacob@X.com', created_at: '2020-01-01', last_sign_in_at: '2026-01-01' }],
+      existing_users: [prod_jacob],
+    })
+    expect(plan.remap.get('sb-jacob')).toBe('prod-jacob')
+    expect(plan.final_user_ids.has('prod-jacob')).toBe(true)
+    expect(plan.final_user_ids.has('sb-jacob')).toBe(false)
+    expect(plan.report.matched_prod_users).toEqual([{ email: 'jacob@x.com', supabase_id: 'sb-jacob', prod_id: 'prod-jacob' }])
+
+    const row = remap_row_user_ids({ created_by_user_id: 'sb-jacob', updated_by_user_id: 'other', user_id: 'sb-jacob' }, plan.remap)
+    expect(row.created_by_user_id).toBe('prod-jacob')
+    expect(row.user_id).toBe('prod-jacob')
+    expect(row.updated_by_user_id).toBe('other')
+  })
+
+  test('duplicate supabase emails consolidate to the most recent sign-in', () => {
+    const plan = plan_user_identity({
+      auth_users: [
+        { id: 'sb-old', email: 'a@b.com', created_at: '2019-01-01', last_sign_in_at: '2020-01-01' },
+        { id: 'sb-new', email: 'A@b.com', created_at: '2021-01-01', last_sign_in_at: '2025-01-01' },
+      ],
+      existing_users: [],
+    })
+    expect(plan.remap.get('sb-old')).toBe('sb-new')
+    expect(plan.remap.has('sb-new')).toBe(false)
+    expect(plan.report.supabase_dupes).toEqual([{ email: 'a@b.com', winner_id: 'sb-new', loser_ids: ['sb-old'] }])
+  })
+
+  test('prod-only users (agent/system) stay valid refs; emailless supabase users keep their id', () => {
+    const plan = plan_user_identity({
+      auth_users: [{ id: 'sb-noemail', email: null, created_at: '2020-01-01' }],
+      existing_users: [{ id: 'system', email: null }, { id: 'agent-1', email: 'agent@livingdictionaries.app' }],
+    })
+    expect(plan.remap.size).toBe(0)
+    expect(plan.final_user_ids.has('system')).toBe(true)
+    expect(plan.final_user_ids.has('agent-1')).toBe(true)
+    expect(plan.final_user_ids.has('sb-noemail')).toBe(true)
+  })
+
+  test('merge_user_row: prod fields win; supabase contributes age + providers union', () => {
+    const mapped = map_user({
+      auth_user: { id: 'sb-jacob', email: 'jacob@x.com', created_at: new Date('2020-01-01T00:00:00Z'), updated_at: new Date('2024-01-01T00:00:00Z'), raw_user_meta_data: { full_name: 'J Old Name' } },
+      providers: [{ provider: 'google', provider_id: 'g-old' }],
+    })
+    mapped.id = 'prod-jacob'
+    const merged = merge_user_row({ mapped, existing: prod_jacob })
+    expect(merged.id).toBe('prod-jacob')
+    expect(merged.name).toBe('Jacob Bowdoin')
+    expect(merged.preferred_locale).toBe('en')
+    expect(merged.last_visit_at).toBe('2026-07-01T00:00:00.000Z')
+    expect(merged.created_at).toBe('2020-01-01T00:00:00.000Z') // true account age
+    expect(merged.providers).toEqual([
+      { provider: 'google', provider_id: 'g-new' },
+      { provider: 'google', provider_id: 'g-old' },
+    ])
+  })
+})
+
 describe('end-to-end: migrations run + rows insert + JSON round-trips', () => {
   let data_dir: string
 
@@ -264,7 +330,9 @@ describe('end-to-end: migrations run + rows insert + JSON round-trips', () => {
       map_invite({ id: 'i1', dictionary_id: 'd1', created_by: 'u1', inviter_email: 'a@b.com', target_email: 'c@d.com', role: 'contributor', status: 'sent', created_at: new Date('2024-01-01T00:00:00Z') }),
     ] })
 
-    expect((db.prepare('SELECT COUNT(*) c FROM users').get() as any).c).toBe(1)
+    // the squashed shared initial seeds the singleton agent user → Alice + agent
+    expect((db.prepare('SELECT COUNT(*) c FROM users').get() as any).c).toBe(2)
+    expect((db.prepare(`SELECT email FROM users WHERE id = 'u1'`).get() as any).email).toBe('a@b.com')
     expect((db.prepare('SELECT COUNT(*) c FROM dictionaries').get() as any).c).toBe(1)
     expect((db.prepare('SELECT COUNT(*) c FROM dictionary_roles').get() as any).c).toBe(1)
     expect((db.prepare('SELECT COUNT(*) c FROM dictionary_partners').get() as any).c).toBe(1)
@@ -336,6 +404,36 @@ describe('end-to-end: migrations run + rows insert + JSON round-trips', () => {
     const lmod = db.prepare(`SELECT value FROM db_metadata WHERE key = 'last_modified_at'`).get() as any
     expect(lmod.value).toBe('2024-01-02T00:00:00.000Z')
     db.close()
+  })
+})
+
+describe(prune_orphans, () => {
+  test('cascading removal of rows whose soft-deleted parent was not migrated', () => {
+    const data_dir = mkdtempSync(join(tmpdir(), 'ld-prune-test-'))
+    const db = open_dict_db({ data_dir, dict_id: 'p1', rebuild: true })
+    db.pragma('foreign_keys = OFF')
+    const base = { created_by: 'u1', created_at: new Date('2024-01-01T00:00:00Z'), deleted: null }
+    insert_rows({ db, table: 'entries', json_cols: DICT_JSON_COLS.entries, rows: [map_entry({ id: 'e-live', lexeme: { en: 'ok' }, ...base })] })
+    // sense under a NON-migrated (soft-deleted) entry + its junction row
+    insert_rows({ db, table: 'senses', json_cols: DICT_JSON_COLS.senses, rows: [
+      map_sense({ id: 'se-live', entry_id: 'e-live', ...base }),
+      map_sense({ id: 'se-orphan', entry_id: 'e-deleted', ...base }),
+    ] })
+    insert_rows({ db, table: 'sentences', json_cols: DICT_JSON_COLS.sentences, rows: [map_sentence({ id: 'x1', text: { en: 'hi' }, ...base })] })
+    insert_rows({ db, table: 'senses_in_sentences', rows: [
+      map_junction({ sense_id: 'se-orphan', sentence_id: 'x1', ...base }, ['sense_id', 'sentence_id']),
+      map_junction({ sense_id: 'se-live', sentence_id: 'x1', ...base }, ['sense_id', 'sentence_id']),
+    ] })
+
+    const pruned = prune_orphans(db)
+    expect(pruned.senses).toBe(1)
+    expect(pruned.senses_in_sentences).toBe(1)
+    db.pragma('foreign_keys = ON')
+    expect(db.pragma('foreign_key_check')).toHaveLength(0)
+    expect((db.prepare('SELECT COUNT(*) c FROM senses').get() as any).c).toBe(1)
+    expect((db.prepare('SELECT COUNT(*) c FROM senses_in_sentences').get() as any).c).toBe(1)
+    db.close()
+    rmSync(data_dir, { recursive: true, force: true })
   })
 })
 

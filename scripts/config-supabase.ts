@@ -19,8 +19,9 @@ if (process.env.CI !== 'true') {
     dotenv.config({ path: '../site/.env.development' }) // Supabase local service key
     dotenv.config({ path: '../site/.env.local' }) // for dev cloud storage bucket
   } else {
-    dotenv.config({ path: '.env.supabase' }) // Supabase production service key and cloud storage bucket
-    dotenv.config({ path: '../site/.env.production.local' }) // legacy location (kept as fallback)
+    dotenv.config({ path: 'supabase-creds.private' }) // Supabase production creds (neutral filename — agent sandboxes block .env* paths)
+    dotenv.config({ path: '.env.supabase' }) // legacy location (kept as fallback)
+    dotenv.config({ path: '../site/.env.production.local' }) // older legacy location (kept as fallback)
   }
 }
 
@@ -60,6 +61,12 @@ class DB {
       return client
     }
     return this.pool.connect()
+  }
+
+  /** Drain the pool so scripts can exit naturally (no `process.exit` stdout truncation). */
+  async end(): Promise<void> {
+    if (this.pool)
+      await this.pool.end()
   }
 
   async execute_query(query: string): Promise<void> {

@@ -82,10 +82,14 @@ export function rewrite_orthography_keys(multistring: Row | null | undefined, lo
   return rewritten
 }
 
-/** Audit fields shared by every content/catalog table. */
+/**
+ * Audit fields shared by every content/catalog table. The new dict schema has
+ * NO `deleted` column (hard-delete + `deletes` tombstone log) — soft-deleted
+ * Supabase rows are filtered out at READ time (`read_dict_table`), never
+ * migrated.
+ */
 function audit(source: Row): Row {
   return {
-    deleted: to_iso(source.deleted),
     dirty: null,
     created_by_user_id: source.created_by,
     created_at: to_iso(source.created_at),
@@ -422,6 +426,7 @@ export function map_entry(entry: Row): Row {
     interlinearization: entry.interlinearization ?? null,
     morphology: entry.morphology ?? null,
     notes: entry.notes ?? null,
+    linguistic_history: entry.linguistic_history ?? null,
     sources: entry.sources ?? null,
     scientific_names: entry.scientific_names ?? null,
     coordinates: entry.coordinates ?? null,
@@ -586,7 +591,7 @@ export function map_junction(source: Row, columns: string[]): Row {
 // ---------------------------------------------------------------------------
 
 export const DICT_JSON_COLS: Record<string, string[]> = {
-  entries: ['lexeme', 'notes', 'sources', 'scientific_names', 'coordinates', 'unsupported_fields'],
+  entries: ['lexeme', 'notes', 'linguistic_history', 'sources', 'scientific_names', 'coordinates', 'unsupported_fields'],
   texts: ['title'],
   senses: ['definition', 'glosses', 'parts_of_speech', 'semantic_domains', 'write_in_semantic_domains', 'plural_form', 'variant'],
   sentences: ['text', 'translation'],

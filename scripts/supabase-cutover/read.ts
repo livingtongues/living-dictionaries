@@ -47,14 +47,23 @@ const DICT_TABLE_SET = new Set<string>(DICT_CONTENT_TABLES)
  * Works for every table including junctions (no `id`/keyset column needed).
  * Table name is allowlisted (it's interpolated, not a bind param).
  */
-export async function read_dict_table(client: PoolClient, table: string, dict_id: string, { batch = 2000 }: { batch?: number } = {}): Promise<Row[]> {
+export async function read_dict_table(client: PoolClient, table: string, dict_id: string, { batch = 2000, simple = false }: { batch?: number, simple?: boolean } = {}): Promise<Row[]> {
   if (!DICT_TABLE_SET.has(table))
     throw new Error(`Refusing to read non-allowlisted table: ${table}`)
+
+  // Fast path for small dicts: ONE round-trip instead of the cursor dance's
+  // five (BEGIN/DECLARE/FETCH/CLOSE/COMMIT × 19 tables ≈ 17s of pooler RTTs
+  // per dict, measured 2026-07-02 — most of the catalog is tiny).
+  if (simple)
+    return query(client, `SELECT * FROM ${table} WHERE dictionary_id = $1 AND deleted IS NULL`, [dict_id])
 
   const all: Row[] = []
   await client.query('BEGIN')
   try {
-    await client.query(`DECLARE mig_cur NO SCROLL CURSOR FOR SELECT * FROM ${table} WHERE dictionary_id = $1`, [dict_id])
+    // deleted IS NULL: the new dict schema hard-deletes (no `deleted` column) —
+    // Supabase tombstones are simply not migrated. Live children orphaned by a
+    // deleted parent are pruned post-insert (see migrate.ts prune_orphans).
+    await client.query(`DECLARE mig_cur NO SCROLL CURSOR FOR SELECT * FROM ${table} WHERE dictionary_id = $1 AND deleted IS NULL`, [dict_id])
     while (true) {
       const rows = await query(client, `FETCH ${batch} FROM mig_cur`)
       all.push(...rows)
@@ -90,12 +99,40 @@ export async function count_dict_table(client: PoolClient, table: string, dict_i
 
 // --- shared.db sources -----------------------------------------------------
 
+/**
+ * Live (non-deleted) dictionaries only — the new catalog has NO `deleted`
+ * column, so migrating a tombstoned dict would resurrect it. (Prod has 0
+ * deleted dicts today; this is a hard rail, not a data need.)
+ */
 export function read_dictionaries(client: PoolClient, { dict_id, limit }: { dict_id?: string, limit?: number }): Promise<Row[]> {
   if (dict_id)
-    return query(client, `SELECT * FROM dictionaries WHERE id = $1`, [dict_id])
+    return query(client, `SELECT * FROM dictionaries WHERE id = $1 AND deleted IS NULL`, [dict_id])
   if (limit)
-    return query(client, `SELECT * FROM dictionaries ORDER BY id LIMIT $1`, [limit])
-  return query(client, `SELECT * FROM dictionaries ORDER BY id`)
+    return query(client, `SELECT * FROM dictionaries WHERE deleted IS NULL ORDER BY id LIMIT $1`, [limit])
+  return query(client, `SELECT * FROM dictionaries WHERE deleted IS NULL ORDER BY id`)
+}
+
+/**
+ * Dictionary ids whose CONTENT may have changed since `since` — powers the
+ * Phase-B delta re-run. `update_dictionary_updated_at` triggers bump
+ * `dictionaries.updated_at` for almost every content table; the three tables
+ * WITHOUT a trigger (verified in supabase/summarized-migrations.sql: texts,
+ * sentence_photos, sentence_videos) are scanned directly. Junction tables have
+ * no `updated_at` — creation and soft-deletion are the only mutations.
+ */
+export async function read_changed_dict_ids(client: PoolClient, since: string): Promise<Set<string>> {
+  const [from_dicts, from_texts, from_sentence_photos, from_sentence_videos] = await Promise.all([
+    query<{ id: string }>(client, `SELECT id FROM dictionaries WHERE deleted IS NULL AND updated_at > $1`, [since]),
+    query<{ dictionary_id: string }>(client, `SELECT DISTINCT dictionary_id FROM texts WHERE updated_at > $1 OR deleted > $1`, [since]),
+    query<{ dictionary_id: string }>(client, `SELECT DISTINCT dictionary_id FROM sentence_photos WHERE created_at > $1 OR deleted > $1`, [since]),
+    query<{ dictionary_id: string }>(client, `SELECT DISTINCT dictionary_id FROM sentence_videos WHERE created_at > $1 OR deleted > $1`, [since]),
+  ])
+  const ids = new Set<string>(from_dicts.map(row => row.id))
+  for (const rows of [from_texts, from_sentence_photos, from_sentence_videos]) {
+    for (const row of rows)
+      ids.add((row as Row).dictionary_id)
+  }
+  return ids
 }
 
 export const read_dictionary_info = (client: PoolClient) => query(client, `SELECT * FROM dictionary_info`)
@@ -110,7 +147,7 @@ export function read_photos_by_ids(client: PoolClient, ids: string[]): Promise<R
   return query(client, `SELECT id, storage_path, serving_url FROM photos WHERE id = ANY($1)`, [ids])
 }
 
-export const read_auth_users = (client: PoolClient) => query(client, `SELECT id, email, created_at, updated_at, raw_user_meta_data FROM auth.users`)
+export const read_auth_users = (client: PoolClient) => query(client, `SELECT id, email, created_at, updated_at, last_sign_in_at, raw_user_meta_data FROM auth.users`)
 export const read_profiles = (client: PoolClient) => query(client, `SELECT id, email, full_name, avatar_url FROM profiles_view`)
 export const read_user_data = (client: PoolClient) => query(client, `SELECT * FROM user_data`)
 

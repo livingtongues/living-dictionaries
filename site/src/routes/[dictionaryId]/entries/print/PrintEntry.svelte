@@ -11,6 +11,7 @@
   import { get_headword } from '$lib/helpers/orthographies'
   import { image_src } from '$lib/helpers/media'
   import { rich_text_display_html } from '$lib/markdown/html-era-shim'
+  import { sanitize_rich_text } from '$lib/markdown/sanitize-rich-text'
 
   interface Props {
     entry: EntryData
@@ -127,7 +128,7 @@
       {#if showLabels}
         <span class="field-label">{page.data.t('entry_field.notes')}:</span>
       {/if}
-      {@html sanitize(rich_text_display_html(entry.main.notes.default))}
+      {@html sanitize_rich_text(rich_text_display_html(entry.main.notes.default))}
     </div>
   {/if}
 

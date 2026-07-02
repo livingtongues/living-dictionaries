@@ -25,10 +25,30 @@ describe(html_to_markdown, () => {
     expect(md).toContain('- object')
   })
 
-  test('drops underline but keeps the link (legacy CKEditor underlined link text)', () => {
-    const md = html_to_markdown('<p>See <a href="https://livingdictionaries.app/tutorials"><u>the tutorials</u></a> first.</p>')
-    expect(md).toContain('[the tutorials](https://livingdictionaries.app/tutorials)')
-    expect(md).not.toContain('<u>')
+  test('legacy <u> converts to the lossless [text]{.underline} span', () => {
+    // single-letter phoneme highlighting (iipay-aa pattern) — mid-word span
+    const md = html_to_markdown('<p>like English "e" in "m<u>e</u>n".</p>')
+    expect(md).toBe('like English "e" in "m[e]{.underline}n".')
+    expect(render_markdown_to_html(md)).toContain('m<span class="underline">e</span>n')
+    expect(markdown_through_editor(md)).toBe(md)
+  })
+
+  test('run-in heading pattern <strong><u>label:</u></strong> keeps both marks', () => {
+    const md = html_to_markdown('<p><strong><u>Sinónimos:</u></strong> vivienda, la;</p>')
+    expect(md).toContain('[Sinónimos:]{.underline}')
+    expect(md).toContain('**')
+    const html = render_markdown_to_html(md)
+    expect(html).toContain('<span class="underline">Sinónimos:</span>')
+    expect(html).toContain('<strong>')
+  })
+
+  test('IDS boilerplate: italic+underline inside a link loses no text', () => {
+    const source = '<p>imported from <a href="http://ids.clld.org/"><i><u>The</u></i><u> </u><i><u>Intercontinental Dictionary Series</u></i></a> (IDS) in 2023.</p>'
+    const md = html_to_markdown(source)
+    const html = render_markdown_to_html(md)
+    const text_of = (value: string) => value.replace(/<[^>]+>/g, '').replace(/\s+/g, '')
+    expect(text_of(html)).toBe(text_of(source))
+    expect(md).toContain('](http://ids.clld.org/)')
   })
 
   test('drops text-align (CKEditor alignment plugin) leaving clean prose', () => {
@@ -55,6 +75,32 @@ describe(html_to_markdown, () => {
   test('returns empty for blank input', () => {
     expect(html_to_markdown('')).toBe('')
     expect(html_to_markdown('   ')).toBe('')
+  })
+
+  test('CKEditor table survives as cleaned raw HTML inside markdown', () => {
+    const md = html_to_markdown('<figure class="table"><table><tbody><tr><td>ni-</td><td>1sg</td></tr><tr><td>ti-</td><td>2sg</td></tr></tbody></table></figure>')
+    expect(md).toContain('<table')
+    expect(md).toContain('ni-')
+    expect(md).not.toContain('colgroup')
+    expect(md).not.toContain('min-width')
+    const html = render_markdown_to_html(md)
+    expect(html).toContain('<table')
+    expect(html).toContain('2sg')
+    expect(markdown_through_editor(md)).toBe(md)
+  })
+
+  test('table with real colspan keeps it', () => {
+    const md = html_to_markdown('<table><tbody><tr><td colspan="2">Paradigm</td></tr><tr><td>a</td><td>b</td></tr></tbody></table>')
+    expect(md).toContain('colspan="2"')
+  })
+
+  test('CKEditor small-caps span → pandoc span, renders back to span.smallcaps', () => {
+    const md = html_to_markdown('<p>The <span style="font-variant:small-caps">Dogon</span> language.</p>')
+    expect(md).toBe('The [Dogon]{.smallcaps} language.')
+    const html = render_markdown_to_html(md)
+    expect(html).toContain('<span class="smallcaps">Dogon</span>')
+    // and it round-trips through the editor byte-stable
+    expect(markdown_through_editor(md)).toBe(md)
   })
 
   test('converted markdown reloaded into the editor is byte-stable (no first-save churn)', () => {
