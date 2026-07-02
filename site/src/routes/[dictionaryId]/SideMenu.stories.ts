@@ -4,7 +4,9 @@ import type { DictSyncStatus } from '$lib/db/dict-client/dict-sync-status.svelte
 import { mock_t } from '$lib/mocks/mock-t'
 
 export const shared_meta: StoryMeta = {
-  viewports: [{ width: 224, height: 560 }],
+  // 176px matches the real sidebar's narrowest width (`.side-panel` is 11rem at the
+  // `md` breakpoint, 12rem from `lg` up) — the tightest case for the entry count pill.
+  viewports: [{ width: 176, height: 560 }],
   page_data: { t: mock_t, url: new URL('http://localhost/demo/entries') },
 }
 
@@ -70,4 +72,12 @@ export const SyncStatusOffline: Story<typeof Component> = {
 
 export const SyncStatusIdle: Story<typeof Component> = {
   props: { ...shared_props, is_manager: true, is_editor_or_above: true, dict_sync_status: mock_sync_status({}) },
+}
+
+export const LargeEntryCount: Story<typeof Component> = {
+  props: { ...shared_props, entry_count: 99_000, is_manager: true, is_editor_or_above: true },
+}
+
+export const ExtraLargeEntryCount: Story<typeof Component> = {
+  props: { ...shared_props, entry_count: 999_999, is_manager: true, is_editor_or_above: true },
 }
