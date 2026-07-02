@@ -152,9 +152,21 @@ scanned → **47,825 HTML values / 77,038 plain / 28 empty**.
 ### A4. Full migration (record start time — it's Phase B's `--since`!)
 ```bash
 cd ~/code/living-dictionaries/scripts
-pnpm migrate-to-sqlite --data-dir ~/ld-cutover/data   # full catalog + all content
+# self-healing pass loop (see below for why):
+while :; do
+  NODE_OPTIONS=--max-old-space-size=5120 ./node_modules/.bin/tsx supabase-cutover/migrate.ts \
+    -e prod --data-dir ~/ld-cutover/data --concurrency 4 --conversion-budget 1500 --skip-existing
+  rc=$?; [ $rc -eq 0 ] && break; [ $rc -ne 75 ] && <abort-if-no-manifest-progress>
+done
 ```
-- [ ] Completes; manifest written; note wall time + dataset size
+- Phase-B `--since` marker: **2026-07-02T16:24:36Z** (`~/ld-cutover/migration-since-marker.txt`)
+- ⚠️ LESSONS (2026-07-02): Tiptap/ProseMirror leak ~0.3–0.75MB heap per `html_to_markdown`
+  call (GC-proof, happy-dom AND jsdom) → migrate ends each pass at a CONVERSION BUDGET
+  (count + bytes) with exit 75 and resumes via `--skip-existing` + the manifest; the loop
+  also tolerates an OOM crash as long as the pass made progress (in-flight dicts rebuild
+  idempotently). Pooler RTTs dominate small dicts → `SIMPLE_READ_ENTRY_LIMIT` single-SELECT
+  fast path (17.5s → 3.5s per small dict).
+- [ ] Completes; manifest written; note wall time + dataset size (~1.4 GB + indexes)
 
 ### A5. Verify
 - [ ] `pnpm verify-migration --data-dir ~/ld-cutover/data` (count parity, manifest-aware)

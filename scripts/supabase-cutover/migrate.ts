@@ -33,11 +33,13 @@ import {
   map_video,
   rewrite_orthography_keys,
   SHARED_JSON_COLS,
+  synthesize_missing_orthographies,
 } from './mappers'
 import { LATEST_DICT_MIGRATION, open_dict_db, open_shared_db } from './open-sqlite'
 import * as read from './read'
 import { merge_user_row, plan_user_identity, read_existing_users, remap_rows_user_ids } from './remap'
-import { convert_multistring, convert_value, create_conversion_stats, total_conversions } from './richtext'
+import { create_conversion_stats } from './conversion-stats'
+import { convert_multistring_isolated, convert_value_isolated, shutdown_conversion_pool } from './richtext-pool'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const DEFAULT_DATA_DIR = resolve(here, '../../../site/.data')
@@ -219,8 +221,8 @@ async function migrate_catalog({ client, shared, dicts, plan, data_dir }: {
   const dict_rows: Row[] = []
   for (const dict of dicts) {
     const row = map_dictionary({ dict, info: info_by_id.get(dict.id), entry_count: entry_counts.get(dict.id) ?? 0 })
-    row.about = convert_value({ value: row.about, where: `${dict.id}.about`, stats: conversion })
-    row.grammar = convert_value({ value: row.grammar, where: `${dict.id}.grammar`, stats: conversion })
+    row.about = await convert_value_isolated({ value: row.about, where: `${dict.id}.about`, stats: conversion })
+    row.grammar = await convert_value_isolated({ value: row.grammar, where: `${dict.id}.grammar`, stats: conversion })
     row.created_by_user_id = nullify_missing(row.created_by_user_id)
     row.updated_by_user_id = nullify_missing(row.updated_by_user_id)
     // Mark schema-current so the server's startup migration sweep
@@ -316,7 +318,10 @@ async function migrate_dict_content({ client, data_dir, dict, shared, remap, ent
   let pruned: Record<string, number> = {}
   const conversion = create_conversion_stats()
   // Positional `lo{n}` lexeme/text keys → the new immutable orthography `code`.
-  const { lo_to_code } = map_orthographies(dict.orthographies)
+  const { orthographies: declared_orthographies, lo_to_code } = map_orthographies(dict.orthographies)
+  // lo{n} keys used in content but NOT declared in the dict's orthographies
+  // get a synthesized registry entry (see synthesize_missing_orthographies).
+  const extra_orthographies: Row[] = []
   // texts (read before sentences) yields per-sentence order derived from the
   // legacy id-array; applied to sentence rows as sort_key + ends_paragraph.
   let sentence_order = new Map<string, { sort_key: string, ends_paragraph: number | null }>()
@@ -340,12 +345,15 @@ async function migrate_dict_content({ client, data_dir, dict, shared, remap, ent
         : source_rows.map(row => config.map!(row))
       remap_rows_user_ids(rows, remap)
       if (table === 'entries') {
+        extra_orthographies.push(...synthesize_missing_orthographies({ rows, key: 'lexeme', lo_to_code, existing: declared_orthographies ? [...declared_orthographies, ...extra_orthographies] : extra_orthographies }))
         for (const row of rows) {
           row.lexeme = rewrite_orthography_keys(row.lexeme, lo_to_code)
-          row.notes = convert_multistring({ value: row.notes, where: `${row.id}.notes`, stats: conversion })
+          if (row.notes)
+            row.notes = await convert_multistring_isolated({ value: row.notes, where: `${row.id}.notes`, stats: conversion })
         }
       }
       if (table === 'sentences') {
+        extra_orthographies.push(...synthesize_missing_orthographies({ rows, key: 'text', lo_to_code, existing: declared_orthographies ? [...declared_orthographies, ...extra_orthographies] : extra_orthographies }))
         for (const row of rows) {
           row.text = rewrite_orthography_keys(row.text, lo_to_code)
           const order = sentence_order.get(row.id)
@@ -409,6 +417,13 @@ async function migrate_dict_content({ client, data_dir, dict, shared, remap, ent
   shared.prepare(`UPDATE dictionaries SET dict_db_schema_version = ?, entry_count = ? WHERE id = ?`)
     .run(LATEST_DICT_MIGRATION, entry_count, dict.id)
 
+  // Persist any orthographies synthesized from undeclared `lo{n}` content keys
+  // into the catalog so the headword fallback + settings page see them.
+  if (extra_orthographies.length) {
+    const merged = [...(declared_orthographies ?? []), ...extra_orthographies]
+    shared.prepare(`UPDATE dictionaries SET orthographies = ? WHERE id = ?`).run(JSON.stringify(merged), dict.id)
+  }
+
   record_mismatches(data_dir, dict.id, conversion.mismatches)
   return {
     counts,
@@ -420,27 +435,19 @@ async function migrate_dict_content({ client, data_dir, dict, shared, remap, ent
   }
 }
 
-async function run_content_pool({ dicts, concurrency, worker, should_stop }: {
+async function run_content_pool({ dicts, concurrency, worker }: {
   dicts: Row[]
   concurrency: number
   worker: (dict: Row) => Promise<void>
-  /** Checked before picking the NEXT dict — in-flight dicts always finish. */
-  should_stop: () => boolean
-}): Promise<{ stopped_early: boolean }> {
+}): Promise<void> {
   let next = 0
-  let stopped_early = false
   const runners = Array.from({ length: Math.max(1, concurrency) }, async () => {
     while (next < dicts.length) {
-      if (should_stop()) {
-        stopped_early = true
-        return
-      }
       const dict = dicts[next++]
       await worker(dict)
     }
   })
   await Promise.all(runners)
-  return { stopped_early }
 }
 
 async function main() {
@@ -519,16 +526,13 @@ async function main() {
       write_manifest(data_dir, manifest)
     }
 
-    let stopped_early = false
     if (content_dicts.length) {
-      const conversion_budget = Number(get_flag('--conversion-budget', '3500'))
       const entry_counts = await read.read_all_entry_counts(client)
-      log(`\ndictionaries/ (${content_dicts.length} files, concurrency ${concurrency}, conversion budget ${conversion_budget}):`)
+      log(`\ndictionaries/ (${content_dicts.length} files, concurrency ${concurrency}):`)
       let done = 0
-      const pool_result = await run_content_pool({
+      await run_content_pool({
         dicts: content_dicts,
         concurrency,
-        should_stop: () => total_conversions() >= conversion_budget,
         worker: async (dict) => {
           const worker_client = await postgres.get_db_connection()
           try {
@@ -546,17 +550,6 @@ async function main() {
           }
         },
       })
-      stopped_early = pool_result.stopped_early
-    }
-
-    if (stopped_early) {
-      write_manifest(data_dir, manifest)
-      shared.close()
-      // Tiptap/ProseMirror retain heap per conversion (see richtext.ts) — end
-      // the pass BEFORE the heap dies. The caller loops with --skip-existing.
-      log(`\n⏸ pass ended at conversion budget (${total_conversions()} conversions) — rerun with --skip-existing to continue`)
-      process.exitCode = 75 // EX_TEMPFAIL — "more to do"
-      return
     }
 
     manifest.finished_at = new Date().toISOString()
@@ -564,6 +557,7 @@ async function main() {
     shared.close()
     log(`\n✓ Done in ${((Date.now() - started) / 1000).toFixed(1)}s`)
   } finally {
+    shutdown_conversion_pool()
     client.release()
     await postgres.end()
   }

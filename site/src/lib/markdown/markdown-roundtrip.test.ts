@@ -143,6 +143,24 @@ describe(looks_like_html, () => {
     expect(looks_like_html('plain notes')).toBeFalsy()
     expect(looks_like_html('')).toBeFalsy()
   })
+
+  test('text that merely STARTS with `<` is not HTML (regression: `<<` ate content at cutover)', () => {
+    expect(looks_like_html('<< pa')).toBeFalsy() // linguistics citation marker
+    expect(looks_like_html('<3 this word')).toBeFalsy()
+    expect(looks_like_html('< 5 items')).toBeFalsy()
+    expect(looks_like_html('<https://youtu.be/x>')).toBeFalsy() // markdown autolink
+    // real tags still detected
+    expect(looks_like_html('<div>x</div>')).toBeTruthy()
+    expect(looks_like_html('<!-- c -->')).toBeTruthy()
+    expect(looks_like_html('</p>')).toBeTruthy()
+  })
+})
+
+describe('display of `<<`-prefixed content (cutover regression)', () => {
+  test('a `<< word` note is preserved as plain text, not eaten by the HTML parser', () => {
+    // via the display shim (renders markdown, since it is NOT html)
+    expect(rich_text_display_html('<< pa')).toContain('&lt;&lt; pa')
+  })
 })
 
 describe(rich_text_display_html, () => {

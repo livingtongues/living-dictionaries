@@ -23,6 +23,7 @@ import {
   resolve_audio_source_names,
   rewrite_orthography_keys,
   SHARED_JSON_COLS,
+  synthesize_missing_orthographies,
   to_int,
   to_iso,
 } from './mappers'
@@ -67,6 +68,32 @@ describe('orthography mapping', () => {
       'sat-Olck': 'baz',
     })
     expect(rewrite_orthography_keys(null, lo_to_code)).toBe(null)
+  })
+
+  test('synthesize_missing_orthographies: undeclared lo{n} content keys → registry entries', () => {
+    const lo_to_code: Record<string, string> = {} // dict declared NO orthographies
+    const rows = [
+      { lexeme: { default: 'macca', lo1: 'മച്ചൻ' } },
+      { lexeme: { default: 'tati', lo1: 'താത്തി' } },
+      { lexeme: { default: 'x', lo2: 'y' } },
+    ]
+    const synthesized = synthesize_missing_orthographies({ rows, key: 'lexeme', lo_to_code, existing: null })
+    expect(synthesized).toEqual([
+      { code: 'orth1', name: 'Orthography 1' },
+      { code: 'orth2', name: 'Orthography 2' },
+    ])
+    expect(lo_to_code).toEqual({ lo1: 'orth1', lo2: 'orth2' })
+    // now the rewrite lands on real codes
+    expect(rewrite_orthography_keys(rows[0].lexeme, lo_to_code)).toEqual({ default: 'macca', orth1: 'മച്ചൻ' })
+  })
+
+  test('synthesize_missing_orthographies: leaves declared lo{n} alone, avoids code collision', () => {
+    const lo_to_code: Record<string, string> = { lo1: 'sat-Latn' } // lo1 declared
+    const rows = [{ lexeme: { default: 'a', lo1: 'declared', lo2: 'undeclared' } }]
+    const synthesized = synthesize_missing_orthographies({ rows, key: 'lexeme', lo_to_code, existing: [{ code: 'sat-Latn', name: 'Latin' }, { code: 'orth2', name: 'x' }] })
+    // lo1 untouched; lo2 synthesized but orth2 taken → orth2-2
+    expect(synthesized).toEqual([{ code: 'orth2-2', name: 'Orthography 2' }])
+    expect(lo_to_code).toEqual({ lo1: 'sat-Latn', lo2: 'orth2-2' })
   })
 })
 
