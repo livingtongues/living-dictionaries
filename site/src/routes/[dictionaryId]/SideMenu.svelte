@@ -214,17 +214,25 @@
   }
 
   .count-pill {
+    flex-shrink: 0;
     display: inline-block;
-    padding: 0.25rem 0.5rem;
-    line-height: 1;
-    font-size: 0.75rem;
+    padding: 0.125rem 0.375rem;
+    line-height: 1.4;
+    font-size: 0.6875rem;
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
     color: color-mix(in srgb, var(--color) 85%, var(--background)); /* ≈ gray-700 */
     background-color: color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
     border-radius: 9999px;
   }
 
-  a:not(.link),
+  /* `:not(.entries-link)` keeps this rule's padding/margin off the Entries row's
+     inner link — it must stay unpadded (see `.entries-link` below) since it lives
+     nested inside `.nav-row`, which already carries this same padding. Without the
+     exclusion, a:not(.link) still matches `.entries-link` (higher specificity than
+     the lone `.entries-link` class rule) and its padding/margin stack on top of
+     `.nav-row`'s, roughly doubling the row's height. */
+  a:not(.link):not(.entries-link),
   .nav-row {
     color: color-mix(in srgb, var(--color) 75%, var(--background)); /* ≈ gray-600 */
     padding: 0.5rem 0.75rem;
@@ -233,19 +241,34 @@
     margin-bottom: 0.5rem;
   }
 
-  a:not(.link):hover,
+  a:not(.link):not(.entries-link):hover,
   .nav-row:hover {
     background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
   }
 
   /* The Entries row is a div (not an `<a>`) so the sync button can sit next to
      the nav link without nesting a `<button>` inside an `<a>` (invalid HTML).
-     `.entries-link` carries just the icon + label, no padding of its own. */
+     `.entries-link` carries just the icon + label, no padding/margin of its own —
+     `.nav-row` already supplies that padding for the whole row. It also needs to
+     shrink (and its label truncate) before the sync button/count pill do, so a
+     large entry count never pushes the pill past the sidebar's edge. */
   .entries-link {
     display: flex;
     align-items: center;
+    min-width: 0;
+    flex-shrink: 1;
     color: inherit;
     text-decoration: none;
+  }
+
+  .entries-link .item-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    /* The flex spacer right after `.entries-link` already provides breathing room
+       before the sync button/count pill, so this trailing margin would just be
+       reclaimable dead space — drop it to buy the label more room before eliding. */
+    margin-right: 0;
   }
 
   @media (min-width: 768px) {

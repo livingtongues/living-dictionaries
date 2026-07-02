@@ -48,15 +48,15 @@
   aria-label={label}
   onclick={on_click}>
   {#if status === 'syncing'}
-    <IconMdiCloudSyncOutline class="sync-icon syncing" />
+    <IconMdiCloudSyncOutline class="icon-inline sync-icon syncing" />
   {:else if status === 'synced'}
-    <IconMdiCloudCheckOutline class="sync-icon" />
+    <IconMdiCloudCheckOutline class="icon-inline sync-icon" />
   {:else if status === 'error'}
-    <IconMdiCloudAlertOutline class="sync-icon" style="color: var(--danger)" />
+    <IconMdiCloudAlertOutline class="icon-inline sync-icon" style="color: var(--danger)" />
   {:else if status === 'offline'}
-    <IconMdiCloudOffOutline class="sync-icon" />
+    <IconMdiCloudOffOutline class="icon-inline sync-icon" />
   {:else}
-    <IconMdiCloudOutline class="sync-icon" />
+    <IconMdiCloudOutline class="icon-inline sync-icon" />
   {/if}
 </button>
 
@@ -64,7 +64,16 @@
   .sync-button {
     display: flex;
     align-items: center;
-    padding: 0.25rem;
+    justify-content: center;
+    flex-shrink: 0;
+    /* Fixed 24px square (box-sizing includes the .btn-ghost 1px border) so this
+       button's height matches the row's text line-height exactly — otherwise the
+       Entries row (the only nav row with a button in it) ends up a couple pixels
+       taller than every other row and no longer lines up with them. */
+    box-sizing: border-box;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
     margin-right: 0.25rem;
     border-radius: 0.375rem;
   }
