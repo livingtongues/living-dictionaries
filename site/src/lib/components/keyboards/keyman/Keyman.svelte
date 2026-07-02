@@ -49,6 +49,8 @@
   let inputEl: HTMLInputElement | HTMLTextAreaElement = $state()
 
   let keyman_writing_systems: KeymanWritingSystems = $state()
+  let destroyed = false
+  let target_poll: ReturnType<typeof setInterval>
 
   onMount(async () => {
     load_keyman_writing_systems().then((systems) => {
@@ -60,9 +62,13 @@
     await keyman.init({
       attachType: 'manual',
     })
+    if (destroyed)
+      return
     kmw = keyman
 
     await targetInput()
+    if (destroyed)
+      return
 
     const root = document.documentElement
     if (fixed) root.style.setProperty('--kmw-osk-pos', 'fixed')
@@ -70,6 +76,8 @@
 
   onDestroy(() => {
     if (browser) {
+      destroyed = true
+      clearInterval(target_poll)
       const root = document.documentElement
       root.style.setProperty('--kmw-osk-pos', 'absolute')
       kmw?.detachFromControl(inputEl)
@@ -86,25 +94,28 @@
 
     if (target) {
       inputEl = wrapperEl.querySelector(target)
-      if (!inputEl) await waitForCKEditorToInitAndBeTargeted()
+      // The Tiptap notes editor mounts synchronously before this parent's
+      // onMount, so the target normally exists on the first query — this poll
+      // is a safety net for any async-mounted target.
+      if (!inputEl) await wait_for_target_to_mount()
     }
 
     if (!inputEl && wrapperEl)
       inputEl = wrapperEl.firstElementChild as HTMLInputElement | HTMLTextAreaElement
   }
 
-  function waitForCKEditorToInitAndBeTargeted() {
-    return new Promise((resolve) => {
+  function wait_for_target_to_mount() {
+    return new Promise<void>((resolve) => {
       let attempts = 0
       const MAX_ATTEMPTS = 10
-      const interval = setInterval(() => {
+      target_poll = setInterval(() => {
         attempts++
         inputEl = wrapperEl?.querySelector(target)
-        if (inputEl || !wrapperEl || attempts > MAX_ATTEMPTS) {
-          clearInterval(interval)
-          resolve
+        if (inputEl || !wrapperEl || destroyed || attempts > MAX_ATTEMPTS) {
+          clearInterval(target_poll)
+          resolve()
         }
-      }, 500) as unknown as number
+      }, 500)
     })
   }
 

@@ -150,6 +150,7 @@ export const audio = sqliteTable('audio', {
   sentence_id: text().references(() => sentences.id, { onDelete: 'cascade' }),
   text_id: text().references(() => texts.id, { onDelete: 'cascade' }),
   storage_path: text().notNull(),
+  /** A `sources.slug` registry ref (no FK — validated on write, NULLed on source delete). Speaker-less audio must carry one (write-time rule). */
   source: text(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
@@ -173,6 +174,7 @@ export const videos = sqliteTable('videos', {
   id: text().primaryKey(),
   storage_path: text(),
   hosted_elsewhere: text({ mode: 'json' }).$type<HostedElsewhere>(),
+  /** A `sources.slug` registry ref (no FK — validated on write, NULLed on source delete). Speaker-less video must carry one (write-time rule). */
   source: text(),
   videographer: text(),
   text_id: text().references(() => texts.id, { onDelete: 'cascade' }),
@@ -220,6 +222,7 @@ export const photos = sqliteTable('photos', {
   id: text().primaryKey(),
   storage_path: text().notNull(),
   serving_url: text().notNull(),
+  /** Free-text caption/attribution prose shown under the photo — NOT a registry ref (unlike audio/videos.source). */
   source: text(),
   photographer: text(),
   dirty: integer(),

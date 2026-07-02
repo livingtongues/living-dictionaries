@@ -9,6 +9,7 @@
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
   import { image_src } from '$lib/helpers/media'
+  import { rich_text_display_html } from '$lib/markdown/html-era-shim'
 
   interface Props {
     entry: EntryData
@@ -124,7 +125,7 @@
       {#if showLabels}
         <span class="field-label">{page.data.t('entry_field.notes')}:</span>
       {/if}
-      {@html sanitize(entry.main.notes.default)}
+      {@html sanitize(rich_text_display_html(entry.main.notes.default))}
     </div>
   {/if}
 

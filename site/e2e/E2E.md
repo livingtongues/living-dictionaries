@@ -37,6 +37,16 @@ sense → assert the original survives. Since M4 the 13 achi entries are read fr
   entries-worker CDN-cache 403) so the pageerror assertion reflects the conversion, not ambient noise.
 - Needs `site/.data` seeded (shared.db + per-dict dbs from the example; `VACUUM INTO` for clean copies).
 
+## Markdown editor flow
+- `test:markdown` (`markdown-editor-flow.mjs`, dict `local-mquh8w6n`) — the CKEditor→Tiptap
+  migration regression: HTML-era `about` renders through the read shim → Edit converts to
+  markdown in the Tiptap editor (underline dropped) → Save persists MARKDOWN → notes modal
+  mounts Tiptap → **Keyman** (Assamese) maps physical keystrokes into the ProseMirror →
+  markdown notes render rich + sync to the server dict db.
+- Boots `vite dev`, NOT `node build`: a bare local prod server has no snapshot source for dict
+  DBs (no R2 env, no dev-vps fallback), so **dict-route client layout loads hang and those pages
+  never hydrate** — anything clicking around a dict route locally must run against dev.
+
 ## Authoring more flows — the workflow
 1. **Explore** with the `browser-tools` skill (interactive CDP on `:9222`) to discover selectors.
 2. **Codify** the deep/repeatable path here as a puppeteer-core script with real `waitForFunction`

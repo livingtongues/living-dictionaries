@@ -33,6 +33,9 @@ export interface SenseInput {
   glosses?: MultiString | string
   /** Full definition(s), keyed by language. */
   definition?: MultiString | string
+  /** POS abbreviation(s) from `$lib/mappings/parts-of-speech` (e.g. `n`, `v`). Abbrevs and
+   *  full English names are matched case-insensitively and stored as the canonical lowercase
+   *  abbrev; unrecognized values are stored verbatim (language-specific categories allowed). */
   parts_of_speech?: string[] | string
   semantic_domains?: string[] | string
   write_in_semantic_domains?: string[] | string

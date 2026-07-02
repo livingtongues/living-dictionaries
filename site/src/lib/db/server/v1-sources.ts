@@ -14,7 +14,8 @@ export { assert_known_source_slugs, load_source_slug_set } from './source-slugs'
 
 /**
  * `/api/v1` sources sub-resource: the per-dict citation registry referenced by
- * `entries`/`sentences`/`texts` `sources` slug arrays. Writes go through
+ * `entries`/`sentences`/`texts` `sources` slug arrays and by the scalar
+ * `audio.source`/`videos.source` slug columns. Writes go through
  * `merge_dict_row` (same path + history as a browser push). Unlike tags/dialects
  * (found-or-created on entry write), sources are STRICT — an entry/sentence write
  * rejects an unknown slug, so sources must be created here first. A source can't
@@ -24,6 +25,10 @@ export { assert_known_source_slugs, load_source_slug_set } from './source-slugs'
 /** Tables carrying a `sources` slug-array column. */
 const REFERENCING_TABLES = ['entries', 'sentences', 'texts'] as const
 type ReferencingTable = typeof REFERENCING_TABLES[number]
+
+/** Media tables carrying a scalar `source` slug column (photos excluded — theirs is free-text caption). */
+const MEDIA_REFERENCING_TABLES = ['audio', 'videos'] as const
+type MediaReferencingTable = typeof MEDIA_REFERENCING_TABLES[number]
 
 export interface SourceRecord {
   id: string
@@ -37,7 +42,7 @@ export interface SourceRecord {
   type: string | null
 }
 
-export interface SourceReferenceCounts { entries: number, sentences: number, texts: number }
+export interface SourceReferenceCounts { entries: number, sentences: number, texts: number, audio: number, videos: number }
 
 const SOURCE_COLUMNS = `id, slug, citation, abbreviation, author, year, url, license, type`
 
@@ -56,16 +61,23 @@ function count_in_table(db: Database.Database, table: ReferencingTable, slug: st
   return row.c
 }
 
+function count_in_media_table(db: Database.Database, table: MediaReferencingTable, slug: string): number {
+  const row = db.prepare(`SELECT COUNT(*) AS c FROM "${table}" WHERE source = ?`).get(slug) as { c: number }
+  return row.c
+}
+
 export function count_source_references(db: Database.Database, slug: string): SourceReferenceCounts {
   return {
     entries: count_in_table(db, 'entries', slug),
     sentences: count_in_table(db, 'sentences', slug),
     texts: count_in_table(db, 'texts', slug),
+    audio: count_in_media_table(db, 'audio', slug),
+    videos: count_in_media_table(db, 'videos', slug),
   }
 }
 
 function total_references(counts: SourceReferenceCounts): number {
-  return counts.entries + counts.sentences + counts.texts
+  return counts.entries + counts.sentences + counts.texts + counts.audio + counts.videos
 }
 
 function commit_history(history_db: Database.Database | undefined, event: HistoryEvent | null) {
@@ -178,7 +190,12 @@ export function apply_source_update({ db, history_db, source_id, patch, user_id,
   return { found: true, new_synced_up_to: read_last_modified_at(db) }
 }
 
-/** Strip a slug from every referencing entry/sentence/text `sources` array. */
+/**
+ * Strip a slug from every referencing entry/sentence/text `sources` array AND
+ * NULL it on referencing audio/videos rows. NOTE: an audio/video row whose only
+ * attribution was this source becomes unattributed — legal (the
+ * speaker-or-source rule is write-time only), same status as legacy rows.
+ */
 export function remove_source_from_all({ db, history_db, slug, user_id, api_key_id }: {
   db: Database.Database
   history_db?: Database.Database
@@ -198,6 +215,16 @@ export function remove_source_from_all({ db, history_db, slug, user_id, api_key_
       // Parse the row's OTHER JSON columns first — merge_dict_row re-stringifies,
       // so passing raw JSON strings back would double-encode lexeme/notes/etc.
       const row: Record<string, unknown> = { ...parse_dict_row(table, raw), sources: next.length ? next : null, updated_at: now }
+      delete row.updated_by_user_id
+      const event = merge_dict_row({ db, table_name: table, row, user_id, at: now, api_key_id })
+      if (event)
+        events.push(event)
+    }
+  }
+  for (const table of MEDIA_REFERENCING_TABLES) {
+    const rows = db.prepare(`SELECT * FROM "${table}" WHERE source = ?`).all(slug) as Record<string, unknown>[]
+    for (const raw of rows) {
+      const row: Record<string, unknown> = { ...parse_dict_row(table, raw), source: null, updated_at: now }
       delete row.updated_by_user_id
       const event = merge_dict_row({ db, table_name: table, row, user_id, at: now, api_key_id })
       if (event)
@@ -231,6 +258,6 @@ export function apply_source_delete({ db, history_db, source_id, user_id, api_ke
     return { found: false, new_synced_up_to: read_last_modified_at(db) }
   const counts = count_source_references(db, existing.slug)
   if (total_references(counts) > 0)
-    throw new Error(`source '${existing.slug}' is still used by ${counts.entries} entries, ${counts.sentences} sentences, ${counts.texts} texts; remove those references first`)
+    throw new Error(`source '${existing.slug}' is still used by ${counts.entries} entries, ${counts.sentences} sentences, ${counts.texts} texts, ${counts.audio} audio, ${counts.videos} videos; remove those references first`)
   return run_tombstone_delete({ db, history_db, table_name: 'sources', id: source_id, user_id, api_key_id })
 }

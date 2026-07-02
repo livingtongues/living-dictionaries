@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { open_dictionary_db_in_memory } from './dictionary-db'
 import { open_dictionary_history_db_in_memory } from './dictionary-history-db'
 import { apply_entry_writes } from './v1-entry-write'
+import { attach_media } from './v1-media-write'
 import { apply_source_delete, apply_source_update, count_source_references, create_source, list_sources, remove_source_from_all } from './v1-sources'
 
 let db: Database.Database
@@ -64,7 +65,15 @@ describe(count_source_references, () => {
   test('counts entries citing the slug', () => {
     create_source({ db, user_id: 'u1', input: { slug: 'h' } })
     apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'a', sources: ['h'] }, { lexeme: 'b', sources: ['h'] }, { lexeme: 'c' }] })
-    expect(count_source_references(db, 'h')).toEqual({ entries: 2, sentences: 0, texts: 0 })
+    expect(count_source_references(db, 'h')).toEqual({ entries: 2, sentences: 0, texts: 0, audio: 0, videos: 0 })
+  })
+
+  test('counts audio/video rows whose scalar source is the slug', () => {
+    create_source({ db, user_id: 'u1', input: { slug: 'h' } })
+    apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'a' }] })
+    const entry = db.prepare(`SELECT id FROM entries`).get() as { id: string }
+    attach_media({ db, cell_key: 'audio:entry', owner_id: entry.id, fields: { storage_path: 'a.mp3', source: 'h' }, user_id: 'u1' })
+    expect(count_source_references(db, 'h')).toEqual({ entries: 0, sentences: 0, texts: 0, audio: 1, videos: 0 })
   })
 })
 
@@ -80,11 +89,24 @@ describe(apply_source_delete, () => {
     const { source } = create_source({ db, user_id: 'u1', input: { slug: 'h' } })
     apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'a', sources: ['h'] }] })
     remove_source_from_all({ db, history_db, slug: 'h', user_id: 'u1' })
-    expect(count_source_references(db, 'h')).toEqual({ entries: 0, sentences: 0, texts: 0 })
+    expect(count_source_references(db, 'h')).toEqual({ entries: 0, sentences: 0, texts: 0, audio: 0, videos: 0 })
     const entry = db.prepare(`SELECT sources FROM entries`).get() as { sources: string | null }
     expect(entry.sources).toBeNull()
     const result = apply_source_delete({ db, history_db, source_id: source.id, user_id: 'u1' })
     expect(result.found).toBeTruthy()
+    expect(count('sources')).toBe(0)
+  })
+
+  test('refuses while an audio row references it; remove_source_from_all NULLs the media ref', () => {
+    const { source } = create_source({ db, user_id: 'u1', input: { slug: 'h' } })
+    apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'a' }] })
+    const entry = db.prepare(`SELECT id FROM entries`).get() as { id: string }
+    attach_media({ db, cell_key: 'audio:entry', owner_id: entry.id, fields: { storage_path: 'a.mp3', source: 'h' }, user_id: 'u1' })
+    expect(() => apply_source_delete({ db, source_id: source.id, user_id: 'u1' })).toThrow(/1 audio/)
+    remove_source_from_all({ db, history_db, slug: 'h', user_id: 'u1' })
+    const audio = db.prepare(`SELECT source, dirty FROM audio`).get() as { source: string | null, dirty: number | null }
+    expect(audio.source).toBeNull()
+    expect(apply_source_delete({ db, history_db, source_id: source.id, user_id: 'u1' }).found).toBeTruthy()
     expect(count('sources')).toBe(0)
   })
 

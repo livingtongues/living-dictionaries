@@ -42,6 +42,7 @@ beforeEach(() => {
   merge_dict_row({ db: dict_db, table_name: 'entries', row: { id: 'e1', lexeme: { default: 'mbwa' }, created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
   merge_dict_row({ db: dict_db, table_name: 'senses', row: { id: 's1', entry_id: 'e1', created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
   merge_dict_row({ db: dict_db, table_name: 'speakers', row: { id: 'sp1', name: 'Ana', created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
+  merge_dict_row({ db: dict_db, table_name: 'sources', row: { id: 'src1', slug: 'field-2026', citation: 'Fieldwork 2026', created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
 })
 
 afterEach(() => {
@@ -91,7 +92,7 @@ describe(make_media_attach_handler, () => {
 
   test('audio→entry: JSON url fetches bytes server-side', async () => {
     vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(MP3_BYTES, { headers: { 'content-type': 'audio/mpeg', 'content-length': '4' } }))))
-    const res = await attach_json({ cell: 'audio:entry', params: { entryId: 'e1' }, body: { url: 'https://example.com/sound.mp3' } })
+    const res = await attach_json({ cell: 'audio:entry', params: { entryId: 'e1' }, body: { url: 'https://example.com/sound.mp3', speaker_id: 'sp1' } })
     expect(res.status).toBe(200)
     expect((await res.json()).audio.storage_path).toBeTruthy()
     expect(store_media_bytes).toHaveBeenCalledTimes(1)
@@ -100,29 +101,46 @@ describe(make_media_attach_handler, () => {
   test('415 when a fetched url returns an HTML error page instead of audio', async () => {
     const html = new TextEncoder().encode('<!DOCTYPE html><html><body>404 Not Found</body></html>')
     vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(html, { headers: { 'content-type': 'text/html' } }))))
-    await expect(attach_json({ cell: 'audio:entry', params: { entryId: 'e1' }, body: { url: 'https://example.com/missing.mp3' } })).rejects.toMatchObject({ status: 415 })
+    await expect(attach_json({ cell: 'audio:entry', params: { entryId: 'e1' }, body: { url: 'https://example.com/missing.mp3', speaker_id: 'sp1' } })).rejects.toMatchObject({ status: 415 })
     expect(store_media_bytes).not.toHaveBeenCalled()
   })
 
   test('415 when a multipart file is not real media of this type', async () => {
     const text = new File([new TextEncoder().encode('this is not audio')], 'rec.mp3', { type: 'audio/mpeg' })
-    await expect(attach({ cell: 'audio:entry', params: { entryId: 'e1' }, file: text })).rejects.toMatchObject({ status: 415 })
+    await expect(attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { speaker_id: 'sp1' }, file: text })).rejects.toMatchObject({ status: 415 })
     expect(store_media_bytes).not.toHaveBeenCalled()
   })
 
   test('replace:true removes prior audio on the entry', async () => {
-    await attach({ cell: 'audio:entry', params: { entryId: 'e1' } })
-    await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { replace: 'true' } })
+    await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { speaker_id: 'sp1' } })
+    await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { speaker_id: 'sp1', replace: 'true' } })
     expect(dict_db.prepare(`SELECT COUNT(*) AS c FROM audio WHERE entry_id = ?`).get('e1')).toEqual({ c: 1 })
   })
 
   test('idempotent id: re-POST is a no-op and does NOT re-upload', async () => {
-    const first = await (await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { id: 'aud-1' } })).json()
+    const first = await (await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { id: 'aud-1', speaker_id: 'sp1' } })).json()
     expect(first.created).toBeTruthy()
-    const second = await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { id: 'aud-1' } })
+    const second = await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { id: 'aud-1', speaker_id: 'sp1' } })
     expect((await second.json()).created).toBeFalsy()
     expect(store_media_bytes).toHaveBeenCalledTimes(1)
     expect(dict_db.prepare(`SELECT COUNT(*) AS c FROM audio`).get()).toEqual({ c: 1 })
+  })
+
+  test('400 with actionable guidance when audio has neither speaker_id nor source', async () => {
+    const err = await Promise.resolve(attach({ cell: 'audio:entry', params: { entryId: 'e1' } })).catch(caught => caught)
+    expect(err.status).toBe(400)
+    expect(err.body.message).toContain('requires attribution')
+    expect(err.body.message).toContain('/api/v1/dictionaries/dict-1/speakers')
+    expect(err.body.message).toContain('/api/v1/dictionaries/dict-1/sources')
+    expect(store_media_bytes).not.toHaveBeenCalled()
+  })
+
+  test('400 for an unknown source slug lists the existing slugs', async () => {
+    const err = await Promise.resolve(attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { source: 'nope' } })).catch(caught => caught)
+    expect(err.status).toBe(400)
+    expect(err.body.message).toContain(`unknown source slug 'nope'`)
+    expect(err.body.message).toContain('field-2026')
+    expect(store_media_bytes).not.toHaveBeenCalled()
   })
 
   test('404 for an unknown owner (no upload attempted)', async () => {
@@ -130,8 +148,11 @@ describe(make_media_attach_handler, () => {
     expect(store_media_bytes).not.toHaveBeenCalled()
   })
 
-  test('400 for an unknown speaker', async () => {
-    await expect(attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { speaker_id: 'ghost' } })).rejects.toMatchObject({ status: 400 })
+  test('400 for an unknown speaker lists the existing speakers', async () => {
+    const err = await Promise.resolve(attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { speaker_id: 'ghost' } })).catch(caught => caught)
+    expect(err.status).toBe(400)
+    expect(err.body.message).toContain(`speaker 'ghost' not found`)
+    expect(err.body.message).toContain('Ana (sp1)')
   })
 
   test('400 when neither file nor url is provided', async () => {
@@ -152,16 +173,26 @@ describe(make_media_attach_handler, () => {
   })
 
   test('video→sense: hosted_url (multipart, no file) is parsed to hosted_elsewhere', async () => {
-    const res = await attach({ cell: 'video:sense', params: { senseId: 's1' }, fields: { hosted_url: 'https://www.youtube.com/watch?v=GrsknWZpr-k' }, file: null })
+    const res = await attach({ cell: 'video:sense', params: { senseId: 's1' }, fields: { hosted_url: 'https://www.youtube.com/watch?v=GrsknWZpr-k', source: 'field-2026' }, file: null })
     const body = await res.json()
     expect(body.video.hosted_elsewhere).toEqual({ type: 'youtube', video_id: 'GrsknWZpr-k' })
+    expect(body.video.source).toBe('field-2026')
     expect(store_media_bytes).not.toHaveBeenCalled()
     expect(dict_db.prepare(`SELECT 1 FROM sense_videos WHERE sense_id = ? AND video_id = ?`).get('s1', body.video.id)).toBeTruthy()
   })
 
   test('video→sense: structured hosted_elsewhere via JSON', async () => {
-    const res = await attach_json({ cell: 'video:sense', params: { senseId: 's1' }, body: { hosted_elsewhere: { type: 'vimeo', video_id: '239862299' } } })
+    const res = await attach_json({ cell: 'video:sense', params: { senseId: 's1' }, body: { hosted_elsewhere: { type: 'vimeo', video_id: '239862299' }, speaker_id: 'sp1' } })
     expect((await res.json()).video.hosted_elsewhere).toEqual({ type: 'vimeo', video_id: '239862299' })
+  })
+
+  test('400 when a video has neither speaker_id nor source', async () => {
+    await expect(attach_json({ cell: 'video:sense', params: { senseId: 's1' }, body: { hosted_elsewhere: { type: 'vimeo', video_id: '239862299' } } })).rejects.toMatchObject({ status: 400 })
+  })
+
+  test('photo needs no attribution (source stays free-text caption)', async () => {
+    const res = await attach({ cell: 'photo:sense', params: { senseId: 's1' }, fields: { source: 'any prose, not a slug' }, file: new File([JPEG_BYTES], 'pic.jpg', { type: 'image/jpeg' }) })
+    expect((await res.json()).photo.source).toBe('any prose, not a slug')
   })
 })
 
@@ -173,14 +204,14 @@ describe(make_media_delete_handler, () => {
   }
 
   test('deletes an attached audio', async () => {
-    const created = await (await attach({ cell: 'audio:entry', params: { entryId: 'e1' } })).json()
+    const created = await (await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { speaker_id: 'sp1' } })).json()
     const res = await del({ cell: 'audio:entry', params: { entryId: 'e1', audioId: created.audio.id } })
     expect((await res.json()).result).toBe('deleted')
     expect(dict_db.prepare(`SELECT 1 FROM audio WHERE id = ?`).get(created.audio.id)).toBeUndefined()
   })
 
   test('404 when the media is not linked to the owner', async () => {
-    const created = await (await attach({ cell: 'audio:entry', params: { entryId: 'e1' } })).json()
+    const created = await (await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { speaker_id: 'sp1' } })).json()
     await expect(del({ cell: 'audio:entry', params: { entryId: 'ghost', audioId: created.audio.id } })).rejects.toMatchObject({ status: 404 })
   })
 })

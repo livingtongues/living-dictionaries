@@ -7,6 +7,7 @@ import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { read_last_modified_at } from './dictionary-db'
 import { record_history } from './dictionary-history-db'
 import { delete_dict_row, merge_dict_row } from './dictionary-sync-helpers'
+import { load_source_slug_set } from './source-slugs'
 import { run_tombstone_delete } from './v1-entry-write'
 
 /**
@@ -57,6 +58,7 @@ export const MEDIA_CELLS: Record<MediaCellKey, MediaCellConfig> = {
 export interface MediaFieldInput {
   storage_path?: string | null
   serving_url?: string
+  /** Audio/video: a `sources.slug` registry ref (strict). Photos: free-text caption/attribution. */
   source?: string | null
   photographer?: string | null
   videographer?: string | null
@@ -159,6 +161,15 @@ export function read_media_record({ db, cell_key, media_id }: { db: Database.Dat
   return record
 }
 
+/**
+ * Audio + video must carry attribution: a speaker and/or a sources-registry
+ * slug in `source`. Photos are exempt — their `source` is free-text
+ * caption/attribution prose, not a registry ref.
+ */
+export function media_requires_attribution(cell: MediaCellConfig): boolean {
+  return cell.medium !== 'photo'
+}
+
 function commit_history(history_db: Database.Database | undefined, events: HistoryEvent[]): void {
   if (history_db && events.length) {
     try {
@@ -174,8 +185,9 @@ function commit_history(history_db: Database.Database | undefined, events: Histo
  * optional speaker junction) in ONE transaction. `media_id` makes it idempotent
  * (a re-POST of an existing id is a no-op, `created: false`); `replace` first
  * tombstones every existing media of this medium on this owner. Returns
- * `found: false` when the owner id doesn't exist. Throws on a missing speaker or
- * an unsupported speaker (route → 400).
+ * `found: false` when the owner id doesn't exist. Throws on a missing speaker,
+ * an unsupported speaker, missing attribution (audio/video need `speaker_id`
+ * and/or a registry `source` slug), or an unknown source slug (route → 400).
  */
 export function attach_media({ db, history_db, cell_key, owner_id, media_id, fields, speaker_id, replace, user_id, api_key_id }: {
   db: Database.Database
@@ -202,6 +214,13 @@ export function attach_media({ db, history_db, cell_key, owner_id, media_id, fie
       throw new Error(`${cell.medium} media does not support a speaker`)
     if (!db.prepare(`SELECT 1 FROM speakers WHERE id = ?`).get(speaker_id))
       throw new Error('speaker not found')
+  }
+
+  if (media_requires_attribution(cell)) {
+    if (!speaker_id && !fields.source)
+      throw new Error(`${cell.medium} requires attribution: provide speaker_id and/or source (a sources-registry slug)`)
+    if (fields.source && !load_source_slug_set(db).has(fields.source))
+      throw new Error(`unknown source slug '${fields.source}'; create it via POST /dictionaries/{id}/sources first`)
   }
 
   const new_media_id = media_id ?? crypto.randomUUID()

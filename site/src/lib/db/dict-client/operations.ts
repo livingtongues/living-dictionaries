@@ -125,14 +125,17 @@ export async function insert_audio({
   storage_path,
   entry_id,
   speaker_id,
+  source,
 }: {
   storage_path: string
   entry_id: string
   speaker_id?: string
+  /** A `sources.slug` registry ref — the speaker-less attribution path. */
+  source?: string
 }) {
   try {
     const { dict_db } = get_pieces()
-    return await dict_db.writes.insert_audio({ audio: { storage_path, entry_id }, speaker_id })
+    return await dict_db.writes.insert_audio({ audio: { storage_path, entry_id, ...(source ? { source } : {}) }, speaker_id })
   } catch (err) {
     alert(err)
     console.error(err)
@@ -252,10 +255,12 @@ export async function update_source(source: DictUpdateType<'sources'>) {
 }
 
 /**
- * Strip a source slug from every entry/sentence/text that references it, then
- * delete the source row. Mirrors the server's `remove_source_from_all` +
- * `apply_source_delete` — the only path that removes an in-use source (no
- * dangling slugs left behind).
+ * Strip a source slug from every entry/sentence/text that references it, NULL
+ * it on referencing audio/videos rows, then delete the source row. Mirrors the
+ * server's `remove_source_from_all` + `apply_source_delete` — the only path
+ * that removes an in-use source (no dangling slugs left behind). An
+ * audio/video whose only attribution was this source becomes unattributed —
+ * legal (the speaker-or-source rule is write-time only).
  */
 export async function remove_source_and_delete({ source_id, slug }: { source_id: string, slug: string }) {
   try {
@@ -272,6 +277,11 @@ export async function remove_source_and_delete({ source_id, slug }: { source_id:
         const next = current.filter(existing_slug => existing_slug !== slug)
         await dict_db[table].update({ id: row.id, sources: next.length ? next : null } as never)
       }
+    }
+    for (const table of ['audio', 'videos'] as const) {
+      const rows = await connection.query<{ id: string }>(`SELECT id FROM "${table}" WHERE source = ?`, [slug])
+      for (const row of rows)
+        await dict_db[table].update({ id: row.id, source: null } as never)
     }
     await dict_db.sources.delete(source_id)
   } catch (err) {

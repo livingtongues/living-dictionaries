@@ -46,7 +46,7 @@ export const GET: RequestHandler = (event) => {
     <li>Spot-check with <code>GET …/entries/&lt;entryId&gt;</code>, or bulk-read with <code>GET …/entries?include=senses</code>. <span class="muted">Read shape ≠ write shape: top-level scalars come back under <code>entry.main</code>, and <code>example_sentences</code> come back as <code>sentences</code>.</span></li>
   </ol>
   <p>Multilingual fields take a plain string or a <code>{ locale: text }</code> map; use <code>default</code> for the vernacular and gloss-language codes for glosses/translations. Full Unicode/IPA is stored verbatim.</p>
-  <p class="muted">v1 covers entries/senses/example-sentences/<strong>texts</strong>/speakers/tags/dialects/sources — not media. Any standard HTTP client works; a descriptive <code>User-Agent</code> is good practice.</p>
+  <p class="muted">v1 covers entries/senses/example-sentences/<strong>texts</strong>/speakers/tags/dialects/sources and media (audio/photos/videos). Audio &amp; video require attribution: <code>speaker_id</code> and/or <code>source</code> (a sources-registry slug — create-first, like entry sources). Any standard HTTP client works; a descriptive <code>User-Agent</code> is good practice.</p>
   <p class="muted">Stuck or need something we don't offer? <code>POST …/feedback</code> with <code>{ message }</code> — it reaches the LD team directly (read or write keys); then relay the response's note to your human.</p>
 
   <h2>Editing &amp; cleanup</h2>

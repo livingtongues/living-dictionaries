@@ -19,7 +19,8 @@ if (process.env.CI !== 'true') {
     dotenv.config({ path: '../site/.env.development' }) // Supabase local service key
     dotenv.config({ path: '../site/.env.local' }) // for dev cloud storage bucket
   } else {
-    dotenv.config({ path: '../site/.env.production.local' }) // Supabase production service key and cloud storage bucket
+    dotenv.config({ path: '.env.supabase' }) // Supabase production service key and cloud storage bucket
+    dotenv.config({ path: '../site/.env.production.local' }) // legacy location (kept as fallback)
   }
 }
 

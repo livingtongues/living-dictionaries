@@ -1,5 +1,6 @@
 <script module lang="ts">
   let last_selected_speaker_id: string
+  let last_selected_source_slug: string
 </script>
 
 <script lang="ts">
@@ -9,63 +10,123 @@
 
   interface Props {
     select_speaker?: (speaker_id: string) => Promise<void>
+    /** Re-attribute existing media to a source (a `sources.slug`). */
+    select_source?: (source_slug: string) => Promise<void>
     initialSpeakerId?: string
+    initial_source_slug?: string
     children?: import('svelte').Snippet<[any]>
   }
 
-  const { select_speaker = undefined, initialSpeakerId = undefined, children }: Props = $props()
+  const { select_speaker = undefined, select_source = undefined, initialSpeakerId = undefined, initial_source_slug = undefined, children }: Props = $props()
 
-  const { speakers } = $derived(page.data)
+  const { speakers, sources } = $derived(page.data)
 
   const addSpeaker = 'AddSpeaker'
+  const addSource = 'AddSource'
   // Must be $state (not $derived) so `bind:value` on the speaker <select> can write to it —
   // a $derived is not writable, which silently broke speaker selection (and thus audio/video
   // upload). Initialized once from the prop, matching the pre-runes `let` semantics.
-  let speaker_id = $state(initialSpeakerId || last_selected_speaker_id)
+  // Falls back to '' (never undefined) — an undefined bind:value lets the browser's own
+  // selection win at CSR mount, which could land on the "+ Add" option and pop the modal.
+  let speaker_id = $state(initialSpeakerId || (initial_source_slug ? '' : last_selected_speaker_id) || '')
+  let source_slug = $state(initial_source_slug || '')
+  // The speaker-less attribution path: cite a sources-registry entry instead.
+  let citing_source = $state(!!initial_source_slug && !initialSpeakerId)
 
   function autofocus(node: HTMLSelectElement) {
     setTimeout(() => node.focus(), 5)
   }
 </script>
 
-{#if !speaker_id}
-  <div class="select-prompt">
-    {page.data.t('audio.select_speaker')}
-  </div>
-{/if}
+{#if citing_source}
+  {#if !source_slug}
+    <div class="select-prompt">
+      {page.data.t({ dynamicKey: 'source.select_source', fallback: 'Source of this recording' })}
+    </div>
+  {/if}
 
-{#if !$speakers?.length}
-  <Button onclick={() => speaker_id = addSpeaker} form="filled"><IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" /> {page.data.t('misc.add')}</Button>
-{:else}
-  <div class="speaker-row">
-    <label for="speaker">
-      {page.data.t('entry_field.speaker')}
-    </label>
-    <select
-      use:autofocus
-      bind:value={speaker_id}
-      onchange={() => {
-        // Currently means you can't remove a speaker
-        if (speaker_id && speaker_id !== addSpeaker) {
-          last_selected_speaker_id = speaker_id
-          select_speaker?.(speaker_id)
-        }
-      }}
-      class="form-input speaker-select">
-      {#if !speaker_id}
-        <option></option>
-      {/if}
-      {#each $speakers as speaker (speaker.id)}
-        <option value={speaker.id}>
-          {speaker.name}
+  {#if !$sources?.length}
+    <Button onclick={() => source_slug = addSource} form="filled"><IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" /> {page.data.t('misc.add')}</Button>
+  {:else}
+    <div class="speaker-row">
+      <label for="source">
+        {page.data.t({ dynamicKey: 'source.source', fallback: 'Source' })}
+      </label>
+      <select
+        use:autofocus
+        bind:value={source_slug}
+        onchange={() => {
+          if (source_slug && source_slug !== addSource) {
+            last_selected_source_slug = source_slug
+            select_source?.(source_slug)
+          }
+        }}
+        class="form-input speaker-select">
+        {#if !source_slug}
+          <option></option>
+        {/if}
+        {#each $sources as source (source.id)}
+          <option value={source.slug}>
+            {source.abbreviation || source.citation || source.slug}
+          </option>
+        {/each}
+        <option value={addSource}>
+          +
+          {page.data.t('misc.add')}
         </option>
-      {/each}
-      <option value={addSpeaker}>
-        +
-        {page.data.t('misc.add')}
-      </option>
-    </select>
-  </div>
+      </select>
+    </div>
+  {/if}
+
+  <button type="button" class="switch-mode" onclick={() => { citing_source = false; source_slug = '' }}>
+    {page.data.t({ dynamicKey: 'source.choose_speaker_instead', fallback: 'Know the speaker? Choose a speaker instead' })}
+  </button>
+{:else}
+  {#if !speaker_id}
+    <div class="select-prompt">
+      {page.data.t('audio.select_speaker')}
+    </div>
+  {/if}
+
+  {#if !$speakers?.length}
+    <Button onclick={() => speaker_id = addSpeaker} form="filled"><IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" /> {page.data.t('misc.add')}</Button>
+  {:else}
+    <div class="speaker-row">
+      <label for="speaker">
+        {page.data.t('entry_field.speaker')}
+      </label>
+      <select
+        use:autofocus
+        bind:value={speaker_id}
+        onchange={() => {
+          // Currently means you can't remove a speaker
+          if (speaker_id && speaker_id !== addSpeaker) {
+            last_selected_speaker_id = speaker_id
+            select_speaker?.(speaker_id)
+          }
+        }}
+        class="form-input speaker-select">
+        {#if !speaker_id}
+          <option></option>
+        {/if}
+        {#each $speakers as speaker (speaker.id)}
+          <option value={speaker.id}>
+            {speaker.name}
+          </option>
+        {/each}
+        <option value={addSpeaker}>
+          +
+          {page.data.t('misc.add')}
+        </option>
+      </select>
+    </div>
+  {/if}
+
+  {#if !speaker_id}
+    <button type="button" class="switch-mode" onclick={() => { citing_source = true; speaker_id = ''; source_slug = source_slug || last_selected_source_slug || '' }}>
+      {page.data.t({ dynamicKey: 'source.cite_instead', fallback: 'Speaker unknown? Cite a source instead' })}
+    </button>
+  {/if}
 {/if}
 
 {#if speaker_id === addSpeaker}
@@ -77,8 +138,20 @@
         select_speaker?.(new_speaker_id)
       }} />
   {/await}
+{:else if source_slug === addSource}
+  {#await import('$lib/components/sources/EditSource.svelte') then { default: EditSource }}
+    <EditSource
+      on_close={() => { if (source_slug === addSource) source_slug = '' }}
+      on_saved={({ slug }) => {
+        source_slug = slug
+        last_selected_source_slug = slug
+        select_source?.(slug)
+      }} />
+  {/await}
 {:else if speaker_id}
-  {@render children?.({ speaker_id })}
+  {@render children?.({ speaker_id, source_slug: undefined })}
+{:else if citing_source && source_slug}
+  {@render children?.({ speaker_id: undefined, source_slug })}
 {/if}
 
 <style>
@@ -136,5 +209,18 @@
 
   .speaker-select:hover {
     outline-color: rgb(37 99 235); /* blue-600 (hover:outline-blue-600 — sets color only, no outline width) */
+  }
+
+  .switch-mode {
+    display: block;
+    font-size: 0.8125rem;
+    color: rgb(37 99 235); /* blue-600 */
+    margin-bottom: 1rem;
+    padding: 0;
+    text-align: start;
+  }
+
+  .switch-mode:hover {
+    text-decoration: underline;
   }
 </style>

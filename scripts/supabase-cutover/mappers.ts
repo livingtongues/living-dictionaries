@@ -163,6 +163,148 @@ export function build_dict_sources({ entry_rows, user_id }: { entry_rows: Row[],
 }
 
 // ---------------------------------------------------------------------------
+// Legacy audio.source person-names → speaker links / registry citations
+// ---------------------------------------------------------------------------
+
+export interface AudioSourceResolution {
+  new_speakers: Row[]
+  new_audio_speakers: Row[]
+  new_sources: Row[]
+}
+
+/**
+ * Legacy `audio.source` free-text is ALWAYS a person name (verified across prod
+ * 2026-07-02: 14 distinct values / 605 rows, e.g. 'Yafeth Warijo' ×298,
+ * 'javier domingo' ×226 — see `.issues/media-attribution-speaker-or-source.md`).
+ * The new model treats `audio.source` as a STRICT `sources.slug` registry ref,
+ * so free text must resolve. Per (dict, trimmed case-folded name) group:
+ *
+ *  1. A speaker with that name exists in the dict → ensure an `audio_speakers`
+ *     link on every row (insert missing), NULL the source (now redundant).
+ *  2. No matching speaker AND every row in the group is speaker-less → the name
+ *     IS presumed the speaker (person recorded themselves / was recorded):
+ *     CREATE the speaker, link all rows, NULL the source. Trim/case variants
+ *     collapse to one speaker (most frequent raw variant wins the display name).
+ *  3. Else (some rows already link to OTHER speakers → the name is the
+ *     recorder/contributor, not the speaker): keep it as attribution — create a
+ *     sources-registry citation row (slug = slugify(name), citation = name) and
+ *     rewrite `audio.source` to the slug.
+ *
+ * MUTATES the passed audio rows' `source`; returns rows to insert. Synthesized
+ * rows go through map_speaker/map_junction so their column sets match the
+ * mapped rows they're batch-inserted with. Rows marked `deleted` are ignored.
+ */
+export function resolve_audio_source_names({ audio_rows, speaker_rows, junction_rows, existing_slugs, user_id }: {
+  audio_rows: Row[]
+  speaker_rows: Row[]
+  junction_rows: Row[]
+  /** Slugs already taken by the entry-sources registry (collision-avoidance). */
+  existing_slugs: Set<string>
+  user_id: string
+}): AudioSourceResolution {
+  const fold = (name: string) => name.trim().toLowerCase()
+  const now = new Date().toISOString()
+  const resolution: AudioSourceResolution = { new_speakers: [], new_audio_speakers: [], new_sources: [] }
+
+  const speaker_by_fold = new Map<string, Row>()
+  for (const speaker of speaker_rows) {
+    const key = fold(String(speaker.name ?? ''))
+    if (key && !speaker_by_fold.has(key))
+      speaker_by_fold.set(key, speaker)
+  }
+
+  const links_by_audio = new Map<string, Set<string>>()
+  for (const junction of junction_rows) {
+    if (!links_by_audio.has(junction.audio_id))
+      links_by_audio.set(junction.audio_id, new Set())
+    links_by_audio.get(junction.audio_id)!.add(junction.speaker_id)
+  }
+
+  const groups = new Map<string, { variants: Map<string, number>, rows: Row[] }>()
+  for (const row of audio_rows) {
+    if (row.deleted)
+      continue
+    const raw = typeof row.source === 'string' ? row.source.trim() : ''
+    if (!raw)
+      continue
+    const key = fold(raw)
+    if (!groups.has(key))
+      groups.set(key, { variants: new Map(), rows: [] })
+    const group = groups.get(key)!
+    group.variants.set(raw, (group.variants.get(raw) ?? 0) + 1)
+    group.rows.push(row)
+  }
+
+  const link = ({ audio_row, speaker_id }: { audio_row: Row, speaker_id: string }) => {
+    const linked = links_by_audio.get(audio_row.id)
+    if (linked?.has(speaker_id))
+      return
+    resolution.new_audio_speakers.push(map_junction(
+      { audio_id: audio_row.id, speaker_id, created_by: audio_row.created_by_user_id ?? user_id, created_at: now },
+      ['audio_id', 'speaker_id'],
+    ))
+  }
+
+  for (const [key, group] of groups) {
+    const display = [...group.variants.entries()].sort((a, b) => b[1] - a[1])[0][0]
+    const matched_speaker = speaker_by_fold.get(key)
+
+    if (matched_speaker) {
+      for (const row of group.rows) {
+        link({ audio_row: row, speaker_id: matched_speaker.id })
+        row.source = null
+      }
+      continue
+    }
+
+    const any_row_linked = group.rows.some(row => (links_by_audio.get(row.id)?.size ?? 0) > 0)
+    if (!any_row_linked) {
+      const speaker = map_speaker({
+        id: crypto.randomUUID(),
+        name: display,
+        created_by: group.rows[0].created_by_user_id ?? user_id,
+        created_at: now,
+      })
+      resolution.new_speakers.push(speaker)
+      speaker_by_fold.set(key, speaker)
+      for (const row of group.rows) {
+        link({ audio_row: row, speaker_id: speaker.id })
+        row.source = null
+      }
+      continue
+    }
+
+    // Recorder/contributor semantics → registry citation, same shape as build_dict_sources rows.
+    const base = slugify(display) || 'source'
+    let slug = base
+    let suffix = 2
+    while (existing_slugs.has(slug))
+      slug = `${base}-${suffix++}`
+    existing_slugs.add(slug)
+    resolution.new_sources.push({
+      id: crypto.randomUUID(),
+      slug,
+      citation: display,
+      abbreviation: null,
+      author: null,
+      year: null,
+      url: null,
+      license: null,
+      type: null,
+      dirty: null,
+      created_by_user_id: user_id,
+      created_at: now,
+      updated_by_user_id: user_id,
+      updated_at: now,
+    })
+    for (const row of group.rows)
+      row.source = slug
+  }
+
+  return resolution
+}
+
+// ---------------------------------------------------------------------------
 // shared.db
 // ---------------------------------------------------------------------------
 

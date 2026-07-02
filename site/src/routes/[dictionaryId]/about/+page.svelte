@@ -4,12 +4,26 @@
   import { HeadlessButton } from '$lib/svelte-pieces'
   import { page } from '$app/state'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import { looks_like_html, rich_text_display_html } from '$lib/markdown/html-era-shim'
+  import { render_markdown_to_html } from '$lib/markdown/render'
 
   const { data } = $props()
   const { is_manager, is_contributor, dictionary, update_about, auth_user } = $derived(data)
   let updated = $state('')
 
   let editing = $state(false)
+
+  async function start_editing() {
+    if (looks_like_html(dictionary.about)) {
+      // HTML-era row (pre-cutover): convert on read so the editor gets markdown
+      // and a save naturally persists markdown. Client-only (needs a DOM).
+      const { html_to_markdown } = await import('$lib/markdown/html-to-markdown')
+      updated = html_to_markdown(dictionary.about)
+    } else {
+      updated = dictionary.about || ''
+    }
+    editing = true
+  }
 </script>
 
 <div class="about">
@@ -28,7 +42,7 @@
             editing = false
           }}>{page.data.t('misc.save')}</HeadlessButton>
       {:else}
-        <button type="button" class="btn btn-default" onclick={() => (editing = true)}>{page.data.t('misc.edit')}</button>
+        <button type="button" class="btn btn-default" onclick={start_editing}>{page.data.t('misc.edit')}</button>
       {/if}
     </div>
   {/if}
@@ -38,15 +52,17 @@
   {/if}
   <div style="display: flex">
     {#if editing}
-      <div class="tw-prose" style="max-width: 768px">
-        {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-          <ClassicCustomized html={dictionary.about} on:update={({ detail }) => (updated = detail)} />
+      <div style="flex: 1; max-width: 768px">
+        {#await import('$lib/markdown/MarkdownEditor.svelte') then { default: MarkdownEditor }}
+          <MarkdownEditor bind:value={updated} />
         {/await}
       </div>
     {/if}
     <div class="tw-prose about-content" class:editing>
-      {#if updated || dictionary.about}
-        {@html sanitize(updated || dictionary.about)}
+      {#if updated}
+        {@html sanitize(render_markdown_to_html(updated))}
+      {:else if dictionary.about}
+        {@html sanitize(rich_text_display_html(dictionary.about))}
       {:else}
         <i>{page.data.t('dictionary.no_info_yet')}</i>
       {/if}
