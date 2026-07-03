@@ -255,8 +255,9 @@ would have pointed at the dead subdomain post-flip). All other notification path
        errors/crashes post-flip**; delta-dict R2 snapshots 200. Old app still on Vercel for
        side-by-side. Remaining Jacob checks: email support@ → `message_threads` row (inbound
        worker), `bin/secrets-encrypt`.
-6. [ ] Grace watch: check-logs sweeps at +1h / +1d (scheduled via horse cron on mustang — one-time
-       jobs pointing at this file)
+6. [ ] Grace watch: check-logs sweeps scheduled via horse cron on mustang — `c-4b69da` (+1h,
+       2026-07-03 04:15Z) and `c-04dfff` (+1d, 2026-07-04 03:00Z); the +1d session marks this
+       step done if clean
 
 ### ⚠️ Cutover-day operational tails (from house's 2026-06-23 flip — all apply)
 
