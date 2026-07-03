@@ -32,10 +32,6 @@ with them (chasing a bug, reconstructing a session, confirming an event fired).
 | **Local dev** | `site/.data/shared.db` | `better-sqlite3` one-liner (below) |
 | **Production** | container `/data/shared.db` (host `/opt/hosting/data/shared.db`) | `ssh living` → `docker exec` (below) |
 
-> **Pre-cutover:** the new VPS serves `new.livingdictionaries.app` off `svelte-5-migration`; the apex
-> `livingdictionaries.app` is still the old Vercel/Supabase app. Production `client_logs` only fills
-> as real traffic lands on `new.*`. Until then, dev is where the rows are.
-
 Always open `{ readonly: true }` — never write `client_logs`.
 
 ## Columns

@@ -8,9 +8,6 @@ Uses SQLite's **online backup API** (via better-sqlite3 inside the running prima
 `sveltekit_blue` container) so backups are consistent with zero downtime — the app
 keeps running while the backup happens.
 
-> **PRE-CUTOVER NOTE.** Until cutover, prod is Supabase, not the VPS. Use
-> Supabase's PITR for old-site backups. This command is for the new VPS.
-
 ## Canonical script (preferred)
 
 `~/code/vps-setup/bin/backup-vps-db` now supports **`living`** alongside

@@ -20,9 +20,8 @@ blind. You are also my advisor on how to improve this command + our logging.
 > component/route the item touches — and confirm it isn't already done. If it already exists, do NOT
 > list it as an open action item: either drop it or record it as `✅ already in code (verified)`.
 >
-> **Deploy target:** the new VPS app serves `new.livingdictionaries.app` from the `svelte-5-migration`
-> branch (the apex `livingdictionaries.app` is still the old Vercel app — not this). Review the VPS
-> `client_logs`; until heavy real traffic lands on `new.*` the volume is light.
+> **Deploy target:** the `living` VPS serves the apex `livingdictionaries.app` from `main`
+> (cutover completed 2026-07). Review the VPS `client_logs`.
 
 ## Four phases, one report
 

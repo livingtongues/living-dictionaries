@@ -6,7 +6,7 @@ include: [WEB.md]
 
 A language-documentation web app served at `livingdictionaries.app` for communities to build a dictionary of **entries** (words/phrases), **sentences**, and **texts** that can have audio, photos, and video. 
 
-This repo is transitioning to SQLite from Supabase, to a VPS from Vercel and is currently served at `new.livingdictionaries.app` with a soon to come production data and hosting cutover to replace the old app. It's committed on and deployed from the **`svelte-5-migration`** branch until cutover.
+The app runs on SQLite + a VPS (migrated from Supabase + Vercel; production cutover completed 2026-07). It's committed on and deployed from **`main`** — a push to `main` triggers the VPS deploy webhook.
 
 Note that `~/code/living-dictionaries-example` is an earlier abandoned "all-at-once" port, kept **read-only** as a parts-bin. Peek across the fence for patterns / copy self-contained modules; never bulk-import its infrastructure. It may be completely picked apart by now but there may still be a few scraps remaining left to learn from.
 

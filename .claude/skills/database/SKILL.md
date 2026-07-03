@@ -165,10 +165,6 @@ Reading or editing the **live** DBs on the `living` VPS — user lookups, dictio
 schema/migration state, thread fixes, deletions. The DB is live: **always run a read-only query to
 confirm what you're targeting before any destructive op.**
 
-> **Pre-cutover:** until cutover, the apex `livingdictionaries.app` is still Supabase, not the VPS.
-> This targets the new VPS serving `new.livingdictionaries.app`. Production rows are light until real
-> traffic lands there.
-
 **Locations** (both DB classes; container path is what you use inside `docker exec`):
 
 | | Host | Container (`DATA_DIR=/data`) |

@@ -4,23 +4,18 @@ description: Debug and hot-patch the production VPS (living, hosting livingdicti
 
 # Living Dictionaries VPS Debug
 
-> **PRE-CUTOVER NOTE.** Until the `living` VPS is actually deployed
-> (`future/deploy-new-site-to-living-vps.md`), most of these commands have
-> nothing to talk to. Old prod still lives on Vercel + Supabase; this command
-> documents the operational sequence for the new VPS once it's up.
-
 ## Infrastructure
 
 | | Living (Hostinger) |
 |---|---|
 | **SSH alias** | `living` |
-| **Domain** | `new.livingdictionaries.app` (will flip to apex `livingdictionaries.app` at cutover) |
+| **Domain** | apex `livingdictionaries.app` (cutover completed 2026-07; `new.*` still resolves) |
 | **Front door** | Cloudflare → VPS Caddy (`lb_policy first` + `/healthz` active checks) → `sveltekit_blue:3000` (primary) / `sveltekit_green:3000` (standby) |
 | **Containers** | **Blue/green** (since 2026-06-24): `sveltekit_blue` (primary, host :3001) + `sveltekit_green` (standby, host :3002, `IS_STANDBY=true` → runs no singleton crons). Node alpine, shared image `sveltekit-app:current`, run `node build`. **No plain `sveltekit` container** — use `sveltekit_blue` for any exec/logs. |
 | **Reverse proxy** | `caddy` container on the `web` Docker network |
 | **Compose project** | `/opt/hosting/sveltekit` (holds `docker-compose.yml` + the generated `deploy.sh`) |
 | **VPS env** | `/opt/hosting/sveltekit/.env` (manually maintained — edit + recreate BOTH containers, see "Env var change"). Canonical contents documented in `.issues/cutover-runbook.md` "Environment" section. |
-| **Repo on VPS** | `/opt/hosting/sveltekit/code/` (cloned via deploy webhook on push to the configured branch — currently `svelte-5-migration`, flips to `main` at cutover) |
+| **Repo on VPS** | `/opt/hosting/sveltekit/code/` (cloned via deploy webhook on push to `main`) |
 | **Data volume** | `/opt/hosting/data` (host) ↔ `/data` (container, `DATA_DIR=/data`) — both containers mount it. `shared.db` + per-dict `dictionaries/<id>.db` files live here. |
 | **Setup scripts** | `~/code/vps-setup` (Dockerfiles, Caddyfiles, env templates, deploy hooks, `setup/machines/living.conf`) |
 
