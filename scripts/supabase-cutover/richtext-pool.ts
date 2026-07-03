@@ -26,6 +26,15 @@ const CHILD_SCRIPT = join(here, 'richtext-child.ts')
 const RECYCLE_CONVERSIONS = 1000
 const RECYCLE_BYTES = 3_000_000
 
+/**
+ * JSON.stringify legally leaves U+2028/U+2029 unescaped, but readline treats
+ * them as line breaks → the peer receives a truncated JSON line and dies
+ * (bit us: boienen-old-buhi-langua.grammar, 9× U+2028). Escape for NDJSON.
+ */
+export function to_ndjson_line(value: unknown): string {
+  return `${JSON.stringify(value).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')}\n`
+}
+
 interface ChildResponse {
   id: number
   result: unknown
@@ -93,7 +102,7 @@ async function request_raw(payload: { kind: 'value' | 'multistring', value: unkn
     }
     reader.on('line', on_line)
     active_child.on('exit', on_exit)
-    active_child.stdin!.write(`${JSON.stringify({ id, ...payload })}\n`)
+    active_child.stdin!.write(to_ndjson_line({ id, ...payload }))
   })
 }
 
