@@ -239,17 +239,24 @@ would have pointed at the dead subdomain post-flip). All other notification path
        - Snapshot-preservation fix confirmed end-to-end: builder logged "7 need fresh → Uploaded
          7/7" on boot; the other 2,224 uploaded flags survived the upsert.
 3. [x] Snapshot sweep for the 7 delta dicts: done (7/7, seconds after boot)
-4. [ ] **DNS swap + domain flip** — Jacob repointed the GitHub webhook → apex ✅ (deploys are DEAD
-       until DNS flips — the hook now hits Vercel; deploy manually over ssh if needed pre-flip).
-       Done in repos: `living.conf` DOMAIN→apex + Caddy `new.`→apex redirect block (bin/sync),
-       cf-worker `LD_VPS_URL`→apex. Remaining (tuf agent — CF token in tmux living-dictionaries:2):
-       ORIGIN→apex in secrets + `bin/sync living` + container recreate + caddy force-recreate;
-       CF DNS apex→VPS origin (copy `new.` record's target, proxied), `www` CNAME + Dynamic
-       Redirect; deploy cf-worker. Jacob: email support@ to test inbound; next push tests webhook.
-5. [ ] Verify prod on the apex; old app kept reachable read-only for comparison until confident.
-       Confirm `client_logs` fills with apex traffic (telemetry confirmed alive post-swap: 22,607 →
-       22,816 rows during the rehearsal window).
-6. [ ] Grace watch: check-logs sweeps at +1h / +1d
+4. [x] **DNS swap + domain flip DONE (2026-07-03 ~02:50Z, tuf agent session 9ad96248).**
+       - Apex A → 72.61.6.252 proxied ON (**rollback: was A 76.76.21.21 Vercel, unproxied**)
+       - ORIGIN→apex in secrets-decrypted (Jacob re-encrypts), `bin/sync living`, caddy auto-recreated
+         on Caddyfile change, blue+green force-recreated with new ORIGIN, healthz 200
+       - Caddy serves apex + `new.`→apex 301 (path+query preserved, verified)
+       - ld-email worker deployed with apex `LD_VPS_URL`
+       - GitHub webhook → apex (Jacob); confirmed working by the post-flip push deploy
+       - `www`: CNAME set; **Jacob handling the www→apex redirect rule properly at the CF edge**
+         (525 until then — CF proxies www to origin which has no www host). CF token gaps found:
+         `Zone · Dynamic Redirect · Edit`, `Zone · Zone Settings · Read`.
+5. [x] Verified on the apex: healthz/SSR 200; `/service-worker.js` 200 (the shipped SW is the kill
+       for the old Vercel SW per `.knowledge/migration/service-worker-cutover.md`); real user
+       traffic landing in `client_logs` incl. delta dicts (ewdebe/orich searches); **zero
+       errors/crashes post-flip**; delta-dict R2 snapshots 200. Old app still on Vercel for
+       side-by-side. Remaining Jacob checks: email support@ → `message_threads` row (inbound
+       worker), `bin/secrets-encrypt`.
+6. [ ] Grace watch: check-logs sweeps at +1h / +1d (scheduled via horse cron on mustang — one-time
+       jobs pointing at this file)
 
 ### ⚠️ Cutover-day operational tails (from house's 2026-06-23 flip — all apply)
 
