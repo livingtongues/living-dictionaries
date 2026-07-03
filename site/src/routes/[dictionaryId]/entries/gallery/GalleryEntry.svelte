@@ -40,8 +40,8 @@
           {can_edit}
           on_delete_image={async () => await dbOperations.delete_photo(first_photo.id)} />
       </div>
-      <a href="/{dictionary.url}/entry/{entry.id}" style="background: #f3f3f3;" class="caption">
-        <div style="font-weight: 600">
+      <a href="/{dictionary.url}/entry/{entry.id}" class="caption">
+        <div class="headword">
           {headword.value}
         </div>
         <div class="gloss">
@@ -62,8 +62,11 @@
   }
 
   .photo-card {
+    position: relative;
     background-color: color-mix(in srgb, var(--background), var(--color) 18%); /* ≈ gray-300 */
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow */
+    border-radius: 0.25rem;
+    overflow: hidden;
   }
 
   .photo-frame {
@@ -73,13 +76,23 @@
 
   .caption {
     display: block;
-    padding: 10px;
-    height: 60px;
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 1.8rem 10px 8px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0));
+    color: #fff;
+  }
+
+  .headword {
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   }
 
   .gloss {
     font-size: 0.75rem;
     line-height: 1rem;
+    opacity: 0.92;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
