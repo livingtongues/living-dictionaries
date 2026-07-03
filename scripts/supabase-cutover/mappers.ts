@@ -403,7 +403,9 @@ export function map_dictionary({ dict, info, entry_count }: {
     citation: info?.citation ?? null,
     grammar: info?.grammar ?? null,
     write_in_collaborators: info?.write_in_collaborators ?? null,
-    snapshot_uploaded_at: null,
+    // snapshot_uploaded_at deliberately OMITTED: new rows default NULL (builder
+    // sweeps them); on a delta re-run the upsert preserves prod's value so only
+    // content-rebuilt dicts (nulled in migrate.ts) get fresh snapshots.
     dict_db_schema_version: null,
     created_at: to_iso(dict.created_at),
     created_by_user_id: dict.created_by ?? null,

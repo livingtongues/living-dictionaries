@@ -3,9 +3,26 @@
 
 <head>
 	<meta charset="utf-8" />
+	<script>
+		// Pre-paint color-scheme override — keep in sync with $lib/dark-mode.ts.
+		// Reading localStorage here (before first paint) avoids the flash of the
+		// wrong theme for users who forced a scheme opposite their OS. The class
+		// goes on <html> so the canvas/overscroll, root scrollbar, and theme.css's
+		// `:root:not(.light)` media exclusion all see the override.
+		try {
+			var color_scheme = localStorage.getItem('color_scheme')
+			if (color_scheme === 'light' || color_scheme === 'dark')
+				document.documentElement.classList.add(color_scheme)
+		}
+		catch (_) { }
+	</script>
 	<link rel='icon' type='image/png' href='%sveltekit.assets%/icons/favicon-32x32_adjusted.png'>
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<meta name='theme-color' content='#546e7a'>
+	<!-- Browser-chrome color per scheme (matches theme.css --background; #101014 = hsl(240,11%,7%)).
+	     Media-scoped metas follow the OS scheme — a forced in-app override keeps the OS-matched
+	     chrome, which is the standard tradeoff. -->
+	<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+	<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#101014">
 	<link rel='manifest' href='%sveltekit.assets%/manifest.json'>
 	<meta name="application-name" content="Living Dictionaries">
 

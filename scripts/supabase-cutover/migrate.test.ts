@@ -377,7 +377,7 @@ describe('end-to-end: migrations run + rows insert + JSON round-trips', () => {
   test('dict.db: entries, texts, senses, sentences (text_id), audio (text_id), junctions', () => {
     const db = open_dict_db({ data_dir, dict_id: 'd1', rebuild: true })
 
-    const base = { dictionary_id: 'd1', created_by: 'u1', created_at: new Date('2024-01-01T00:00:00Z'), updated_by: 'u1', updated_at: new Date('2024-01-02T00:00:00Z'), deleted: null }
+    const base = { dictionary_id: 'd1', created_by: 'u1', created_at: new Date('2024-01-01T00:00:00Z'), updated_by: 'u1', updated_at: new Date('2024-01-02T00:00:00Z'), deleted: null as string | null }
 
     insert_rows({ db, table: 'entries', json_cols: DICT_JSON_COLS.entries, rows: [
       map_entry({ id: 'e1', lexeme: { en: 'hello', es: 'hola' }, sources: ['book'], notes: { en: 'a note' }, ...base }),
@@ -439,7 +439,7 @@ describe(prune_orphans, () => {
     const data_dir = mkdtempSync(join(tmpdir(), 'ld-prune-test-'))
     const db = open_dict_db({ data_dir, dict_id: 'p1', rebuild: true })
     db.pragma('foreign_keys = OFF')
-    const base = { created_by: 'u1', created_at: new Date('2024-01-01T00:00:00Z'), deleted: null }
+    const base = { created_by: 'u1', created_at: new Date('2024-01-01T00:00:00Z'), deleted: null as string | null }
     insert_rows({ db, table: 'entries', json_cols: DICT_JSON_COLS.entries, rows: [map_entry({ id: 'e-live', lexeme: { en: 'ok' }, ...base })] })
     // sense under a NON-migrated (soft-deleted) entry + its junction row
     insert_rows({ db, table: 'senses', json_cols: DICT_JSON_COLS.senses, rows: [
