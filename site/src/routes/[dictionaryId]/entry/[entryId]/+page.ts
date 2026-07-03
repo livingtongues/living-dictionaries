@@ -71,10 +71,15 @@ export async function load({ params: { entryId: entry_id }, parent, fetch }) {
   if (!get(entries_data.loading)) {
     if (get(entries_data)[entry_id])
       return { derived_entry, shallow: false }
+    // Local-first: a just-written entry reaches the read-model in well under a
+    // second — trust the local feed before burning a server round-trip (which
+    // also makes offline add-word fully self-sufficient).
+    if (await wait_for_local_entry(1500))
+      return { derived_entry, shallow: false }
     const entry = await fetch_entry()
     if (entry)
       return { entry_from_page: entry, derived_entry, shallow: false }
-    if (await wait_for_local_entry(4000))
+    if (await wait_for_local_entry(3000))
       return { derived_entry, shallow: false }
     error(ResponseCodes.NOT_FOUND, 'Entry not found')
   }
