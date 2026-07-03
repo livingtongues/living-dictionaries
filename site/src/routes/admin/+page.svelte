@@ -14,6 +14,7 @@
   import IconMdiMessageTextOutline from '~icons/mdi/message-text-outline'
   import IconMdiMonitor from '~icons/mdi/monitor'
   import IconMdiOpenInNew from '~icons/mdi/open-in-new'
+  import IconMdiRobotOutline from '~icons/mdi/robot-outline'
   import IconMdiTableCog from '~icons/mdi/table-cog'
   import NotifyChannelToggle from '$lib/admin/notify-channel-toggle.svelte'
   import { get_admin } from '$lib/admins'
@@ -54,6 +55,7 @@
     { href: '/admin/analytics', title: 'Analytics', body: 'Session & navigation activity, top routes and events, and recent client / server errors from the logs.', cta: 'Open', icon: IconMdiChartLine, accent: 'var(--primary)' },
     { href: '/admin/schema', title: 'Schema', body: 'Browse the wa-sqlite + server schema — tables, columns, foreign keys, and the relationship graph.', cta: 'Open', icon: IconMdiTableCog, accent: 'var(--success)' },
     { href: '/admin/sync', title: 'Sync', body: 'Live sync-engine dashboard — cursors, watermarks, dirty rows, and per-table push / pull history.', cta: 'Open', icon: IconMdiCloudSync, accent: 'var(--warning)' },
+    { href: '/admin/api-docs', title: 'Agent API', body: 'A human-readable view of the live /api/v1/openapi.json spec — exactly what agents read to self-configure their reads & writes.', cta: 'Open', icon: IconMdiRobotOutline, accent: 'var(--primary)' },
   ]
 
   interface DeviceStep {
