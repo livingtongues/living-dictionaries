@@ -49,7 +49,7 @@
 
       <div class="terms-note">
         {page.data.t('terms.agree_by_submit')}
-        <a href="/terms" style="text-decoration-line: underline" target="_blank">
+        <a href="/terms" style="text-decoration-line: underline">
           {page.data.t('dictionary.terms_of_use')}
         </a>
         .
