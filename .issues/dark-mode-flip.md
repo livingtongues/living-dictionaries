@@ -173,3 +173,23 @@ light OS** (body.dark, :root still light) inherited the light-computed gray-200
 mix — light borders on dark pages. System-dark was unaffected (:root itself
 recomputes). Fixed by re-declaring the mix inside the `.dark` block; comment
 corrected. Verified empirically in house with a computed-style probe.
+
+## Refinement: override class moved to `<html>` + pre-paint script (2026-07-03)
+
+The nightly review found the body-class override leaves the ROOT element on the OS
+scheme: dark canvas overscroll + a dark root scrollbar framing a forced-light page
+(and vice versa) — plus the already-known hydration flash. One move fixes both:
+
+- `$lib/dark-mode.ts` now targets `document.documentElement` (file stays
+  byte-identical with tutor's — fix landed in both).
+- `app.html` gained a pre-paint inline `<script>` reading `localStorage.color_scheme`
+  and applying the class before first render (keep it in sync with dark-mode.ts).
+- No CSS changes needed: `.light`/`.dark` are bare class selectors, and
+  `:root:not(.light)` naturally excludes `html.light`. The
+  `body, body.light, body.dark` legs were collapsed to plain `body` (body never
+  carries the class anymore). The `.dark` `--un-default-border-color` re-declaration
+  stays — still needed when `.dark` sits on a non-root wrapper (svelte-look flavors).
+- Also fixed while in here: stale `#546e7a` theme-color (app.html meta + manifest) →
+  media-scoped `#ffffff` / `#101014` metas matching `--background`.
+
+House porters: copy the html-class version, not the body-class one.

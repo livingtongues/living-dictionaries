@@ -550,6 +550,11 @@ async function main() {
           }
         },
       })
+      // Rebuilt dict dbs need fresh R2 snapshots; untouched dicts keep whatever
+      // snapshot state prod already has (map_dictionary omits the column).
+      const clear_snapshot = shared.prepare('UPDATE dictionaries SET snapshot_uploaded_at = NULL WHERE id = ?')
+      for (const dict of content_dicts)
+        clear_snapshot.run(dict.id)
     }
 
     manifest.finished_at = new Date().toISOString()

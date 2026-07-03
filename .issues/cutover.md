@@ -203,14 +203,39 @@ done
 
 ## Phase B — real cutover (day+ later)
 
+**2026-07-03 pre-B audit fixes (already committed/tested):** ① `map_dictionary` no longer emits
+`snapshot_uploaded_at` and `migrate.ts` NULLs it only for content-rebuilt dicts — the delta upsert
+now PRESERVES prod's snapshot state instead of nulling all 2,229 (which would have forced a full
+multi-hour re-sweep before the flip). ② `chat-reping-cron.ts` `SITE_URL` + `apply-triage.ts`
+`PUBLIC_BASE_URL` now derive from `env.ORIGIN` (were hardcoded `new.` — ntfy/triage deep links
+would have pointed at the dead subdomain post-flip). All other notification paths already use
+`event.url.origin`.
+
+⚠️ **Delta-run flag rules (footguns):**
+- Do **NOT** pass `--skip-existing` — it filters out any changed dict already recorded in the
+  manifest (line ~488), silently skipping the whole delta. First rename the Phase-A manifest
+  (`mv migration-manifest.json migration-manifest-phaseA.json`) so the run writes a fresh delta
+  manifest and `verify.ts` scopes to exactly the delta dicts.
+- The old `--conversion-budget`/exit-75 self-healing loop is GONE — child recycling is internal
+  to `richtext-pool.ts` now. A single plain invocation suffices:
+  `tsx supabase-cutover/migrate.ts -e prod --data-dir ~/ld-cutover/data --since 2026-07-02T16:24:36Z --concurrency 4`
+- Dicts DELETED in Supabase between A and B are NOT propagated (delta reads live rows only).
+  Check once: `SELECT id, name FROM dictionaries WHERE deleted > '2026-07-02T16:24:36Z'` against
+  Supabase; hand-remove any hits from the VPS catalog + `dictionaries/` (expected: zero).
+
 1. [ ] Announce/freeze: no old-app edits during the window (or accept the delta re-run catches
        everything up to the moment of the final delta)
-2. [ ] Delta + push: repeat A6 with `--since <A4-start>` for content (changed-dict detection incl.
-       texts/sentence_photos/sentence_videos supplements) — rebuilds only changed dict dbs
-3. [ ] Snapshot sweep for the delta-rebuilt dicts (auto via `snapshot_uploaded_at`)
+2. [ ] Delta + push: repeat A6 (fresh shared.db pull → `converge-shared-drift.ts` → delta run per
+       the flag rules above → rsync up, `river.*` excluded, no `--delete`, clear stale wal/shm) —
+       changed-dict detection incl. texts/sentence_photos/sentence_videos supplements; rebuilds
+       only changed dict dbs
+3. [ ] Snapshot sweep for the delta-rebuilt dicts only (auto via `snapshot_uploaded_at` — wait for
+       it BEFORE the flip so nobody restores a stale R2 snapshot of a changed dict)
 4. [ ] **DNS swap + domain flip** — point `livingdictionaries.app` → the VPS; flip `living.conf`
        `DOMAIN` → apex; `bin/sync living`. Then walk ALL the operational tails below.
-5. [ ] Verify prod on the apex; old app kept reachable read-only for comparison until confident
+5. [ ] Verify prod on the apex; old app kept reachable read-only for comparison until confident.
+       Confirm `client_logs` fills with apex traffic (zero rows landed post-swap during the
+       rehearsal window — expected with no browsing, but verify telemetry is alive).
 6. [ ] Grace watch: check-logs sweeps at +1h / +1d
 
 ### ⚠️ Cutover-day operational tails (from house's 2026-06-23 flip — all apply)

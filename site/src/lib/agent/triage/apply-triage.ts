@@ -1,11 +1,12 @@
 import type Database from 'better-sqlite3'
 import type { TriageResult } from './types'
 import type { Admin } from '$lib/admins'
+import { env } from '$env/dynamic/private'
 import { notify_admin } from '$lib/notifications/notify-admins'
 import { AGENT_USER_ID } from './constants'
 import { fallback_admin, route_admin_for_category } from './routing'
 
-const PUBLIC_BASE_URL = 'https://new.livingdictionaries.app'
+const PUBLIC_BASE_URL = env.ORIGIN || 'https://new.livingdictionaries.app'
 
 export type TriageAction = 'spam_resolved' | 'auto_assigned' | 'low_confidence_review'
 

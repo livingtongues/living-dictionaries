@@ -19,8 +19,8 @@ import { get_shared_db, open_shared_db } from './shared-db'
 
 const REPING_AFTER_MS = 24 * 60 * 60 * 1000 // ~1 day unread → one gentle nudge
 const CHECK_INTERVAL_MS = 60 * 60 * 1000 // hourly sweep
-/** Deep-link base for the cron (no request context). Prod is the only place it runs. */
-const SITE_URL = 'https://new.livingdictionaries.app'
+/** Deep-link base for the cron (no request context). Tracks the deployed domain via ORIGIN. */
+const SITE_URL = env.ORIGIN || 'https://new.livingdictionaries.app'
 
 interface RepingCandidate {
   room_id: string

@@ -11,10 +11,13 @@ theme layer (see `.issues/drop-unocss.md` for the conversion log).
 
 DARK MODE — live (flipped 2026-07-02, see `.issues/dark-mode-flip.md`):
   System preference via the `@media (prefers-color-scheme: dark)` block below;
-  a user override puts `.dark` / `.light` on <body> (`$lib/dark-mode.ts`,
-  localStorage `color_scheme`, cycled by ColorSchemeToggle). The body class
-  wins over the html-level media-query vars by element proximity. Print is
-  force-lighted at the end of this file.
+  a user override puts `.dark` / `.light` on <html> (`$lib/dark-mode.ts`, applied
+  pre-paint by the inline script in app.html, localStorage `color_scheme`, cycled
+  by ColorSchemeToggle — moved from <body> 2026-07-03 so the canvas/overscroll,
+  root scrollbar, and the `:root:not(.light)` media exclusion see the override
+  too). `html.light` defeats the dark media block via `:not(.light)`; `html.dark`
+  matches the `.dark` block directly. Print is force-lighted at the end of this
+  file.
 
 FONT STACK (--font-sans below is the ONLY definition — a duplicate html-level rule in
 global.css was removed 2026-06-12). LD avoids system-ui / -apple-system /
@@ -56,19 +59,17 @@ and Helvetica Neue has the same problem. Per-font notes:
   /* default border color for the tailwind reset (elements that set border-width/style
      without a color) — ≈ gray-200 in light (parity), subtle in dark. NOTE: var() in
      custom props substitutes EAGERLY at the declaring element, so the .dark block
-     re-declares this — a :root-only definition freezes the light mix under a forced
-     body.dark (house probe 2026-07-02). */
+     re-declares this — a :root-only definition freezes the light mix when `.dark`
+     sits on a non-root wrapper (svelte-look flavors; house probe 2026-07-02). */
   --un-default-border-color: color-mix(in srgb, var(--color) 11%, var(--background));
 
   --font-sans: "Segoe UI", Arial, "Noto Sans", "Noto Sans Wancho", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* body.light/.dark legs outrank the .light/.dark blocks below so the forced-scheme
-   body class gets the same softened text as the system-scheme path */
-body,
-body.light,
-body.dark {
+/* body's own `color` beats the html-level `color: var(--color)` in every mode
+   (override classes live on <html>, so body itself is never .light/.dark) */
+body {
   font-family: var(--font-sans);
   /* mode-aware port of the legacy `text-gray-800` body text (was a literal in app.html) */
   color: color-mix(in srgb, var(--color) 88%, var(--background));
@@ -93,7 +94,8 @@ body.dark {
   color: var(--color);
 }
 
-/* Dark: forced via an explicit `.dark` class (kept active for svelte-look + future admin toggle) */
+/* Dark: forced via an explicit `.dark` class — on <html> for the user override
+   ($lib/dark-mode.ts), or on a wrapper for svelte-look dark flavors */
 .dark {
   --primary: var(--dark-primary);
   --on-primary: var(--dark-on-primary);
@@ -107,14 +109,14 @@ body.dark {
   --success: var(--dark-success);
   --invert-in-light: none;
   /* re-declared here (not just :root) — var() in custom props substitutes EAGERLY at the
-     declaring element, so a forced body.dark must recompute the mix with dark vars */
+     declaring element, so a `.dark` on a non-root wrapper must recompute the mix here */
   --un-default-border-color: color-mix(in srgb, var(--color) 11%, var(--background));
   color-scheme: dark;
   background-color: var(--background);
   color: var(--color);
 }
 
-/* Dark: system preference (a forced body class overrides via proximity) */
+/* Dark: system preference — `:not(.light)` is what lets a forced `html.light` win */
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
     --primary: var(--dark-primary);
