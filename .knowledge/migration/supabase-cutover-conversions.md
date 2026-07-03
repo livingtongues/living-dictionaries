@@ -88,3 +88,27 @@ the pull (check river's last-write, message/chat counts, client_logs count). Blu
 (never `--delete`; `river.*` isn't in the migrated dir so it's untouched). Checkpoint
 (`wal_checkpoint(TRUNCATE)`) every migrated DB first so the `.db` is self-contained. On restart the
 snapshot builder auto-rebuilds all dicts (their `snapshot_uploaded_at` is NULL).
+
+## Phase-B delta learnings (2026-07-03, the real cutover)
+
+- **U+2028/U+2029 break NDJSON protocols.** `JSON.stringify` legally leaves LINE/PARAGRAPH
+  SEPARATOR unescaped, and node `readline` splits lines on U+2028 (at least on v24.16) — the
+  richtext child received a truncated JSON line and died, twice, on the one grammar containing
+  U+2028. Fix: `to_ndjson_line()` escapes both, both directions of the pipe. If any agent builds
+  another line-delimited JSON protocol, reuse this.
+- **A paragraph that is entirely `{…}` is eaten at render** by markdown-it-attrs' end-of-block
+  rule (`allowedAttributes` filters application, not consumption). One migrated value patched
+  (brace-escaped); the live-editor bug is `.issues/markdown-brace-paragraph-loss.md`. house has
+  the same pandoc-spans setup → same latent bug.
+- **`snapshot_uploaded_at` must survive the catalog upsert.** `map_dictionary` deliberately omits
+  the column; `migrate.ts` NULLs it only for content-rebuilt dicts. Confirmed end-to-end: the
+  Phase-B boot logged "7 need fresh → Uploaded 7/7" instead of resweeping all 2,229.
+- **Delta flag rules:** never `--skip-existing` on a `--since` delta (the manifest filter skips
+  the changed dicts); rename the previous manifest first so `verify.ts` scopes to the delta. The
+  old `--conversion-budget`/exit-75 loop is gone — child recycling is internal to richtext-pool.
+- **Deleted-dicts gap:** the delta reads live rows only; dicts deleted in Supabase between runs
+  must be checked by hand (`WHERE deleted > <since>` — was zero).
+- **verify.ts summary via console.log** — record-logs (imported by config-supabase) hijacks
+  console.info to file-only; a "silent" verify actually passed.
+- **DNS-flip rollback record:** apex was `A 76.76.21.21` (Vercel), DNS-only; now `A 72.61.6.252`
+  proxied. CF token gaps for agents: `Zone · Dynamic Redirect · Edit`, `Zone · Zone Settings · Read`.
