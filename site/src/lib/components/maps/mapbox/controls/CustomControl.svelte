@@ -21,7 +21,13 @@
       onAdd(_map) {
         return el
       },
-      onRemove() { /* no cleanup needed */ },
+      // Mapbox moves `el` into its control container (outside Svelte's anchor range),
+      // so Svelte teardown can't reach it — the IControl contract makes onRemove
+      // responsible for detaching the element.
+      onRemove() {
+        // eslint-disable-next-line svelte/no-dom-manipulating -- mapbox reparents `el`; Svelte teardown can't reach it
+        el.remove()
+      },
     }
     map.addControl(customControl, position)
     return () => {

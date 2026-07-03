@@ -19,6 +19,7 @@
     { href: '/admin/dictionaries', label: 'Dictionaries' },
     { href: '/admin/sync', label: 'Sync' },
     { href: '/admin/schema', label: 'Schema' },
+    { href: '/admin/api-docs', label: 'Agent API' },
     { href: '/admin/triage-examples', label: 'Triage' },
     { href: '/admin/legal-review', label: 'Legal' },
   ]
