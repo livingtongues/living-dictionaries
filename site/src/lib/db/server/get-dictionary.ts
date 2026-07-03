@@ -17,17 +17,26 @@ export type DictionaryRow = InferSelectModel<typeof dictionaries>
 export function get_dictionary_by_url_or_id(url_or_id: string): DictionaryRow | null {
   const db = get_shared_db()
 
-  const by_url = db
-    .prepare('SELECT * FROM dictionaries WHERE url = ?')
-    .get(url_or_id) as Record<string, unknown> | undefined
-  if (by_url)
-    return parse_row('dictionaries', by_url) as DictionaryRow
+  // Legacy non-ASCII ids exist in both Unicode normalization forms — links in
+  // the wild may be NFC while some stored rows are NFD. SQLite compares bytes,
+  // so try the candidate in each form.
+  const candidates = [...new Set([url_or_id, url_or_id.normalize('NFC'), url_or_id.normalize('NFD')])]
 
-  const by_id = db
-    .prepare('SELECT * FROM dictionaries WHERE id = ?')
-    .get(url_or_id) as Record<string, unknown> | undefined
-  if (by_id)
-    return parse_row('dictionaries', by_id) as DictionaryRow
+  for (const candidate of candidates) {
+    const by_url = db
+      .prepare('SELECT * FROM dictionaries WHERE url = ?')
+      .get(candidate) as Record<string, unknown> | undefined
+    if (by_url)
+      return parse_row('dictionaries', by_url) as DictionaryRow
+  }
+
+  for (const candidate of candidates) {
+    const by_id = db
+      .prepare('SELECT * FROM dictionaries WHERE id = ?')
+      .get(candidate) as Record<string, unknown> | undefined
+    if (by_id)
+      return parse_row('dictionaries', by_id) as DictionaryRow
+  }
 
   return null
 }

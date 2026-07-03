@@ -55,11 +55,17 @@ const slug_taken = db.prepare('SELECT id FROM dictionaries WHERE (url = ? OR id 
 // dirty = 1 + updated_at bump so admin clients pull the change on next sync
 const update_url = db.prepare(`UPDATE dictionaries SET url = ?, updated_at = ?, dirty = 1 WHERE id = ?`)
 
+// DB ids may be NFC or NFD normalized — match on NFC-normalized form, then
+// UPDATE by the exact stored id bytes.
+const all_ids = db.prepare('SELECT id FROM dictionaries').all().map(row => row.id)
+const stored_id_by_nfc = new Map(all_ids.map(id => [id.normalize('NFC'), id]))
+
 let updated = 0
 let skipped = 0
 const apply = db.transaction(() => {
-  for (const [id, slug] of Object.entries(new_urls)) {
+  for (const [script_id, slug] of Object.entries(new_urls)) {
     if (!SLUG_PATTERN.test(slug)) throw new Error(`invalid slug ${slug}`)
+    const id = stored_id_by_nfc.get(script_id.normalize('NFC')) ?? script_id
     const dict = get_dict.get(id)
     if (!dict) {
       console.log(`SKIP (no such dict here): ${id}`)
