@@ -45,8 +45,7 @@ export async function load({ params: { entryId: entry_id }, parent, fetch }) {
   function wait_for_local_entry(timeout_ms: number): Promise<boolean> {
     return new Promise((resolve) => {
       let settled = false
-      let unsubscribe = () => {}
-      let timer: ReturnType<typeof setTimeout>
+      let unsubscribe = () => undefined
       function settle(found: boolean) {
         if (settled) return
         settled = true
@@ -56,7 +55,7 @@ export async function load({ params: { entryId: entry_id }, parent, fetch }) {
         queueMicrotask(() => unsubscribe())
         resolve(found)
       }
-      timer = setTimeout(() => settle(false), timeout_ms)
+      const timer = setTimeout(() => settle(false), timeout_ms)
       unsubscribe = entries_data.subscribe(($entries_data) => {
         if ($entries_data[entry_id])
           settle(true)

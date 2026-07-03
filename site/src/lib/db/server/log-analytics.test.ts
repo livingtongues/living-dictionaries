@@ -818,8 +818,18 @@ describe(get_log_analytics, () => {
                 "event": "audio_played",
                 "seen": false,
               },
+              {
+                "count": 0,
+                "event": "entry_created",
+                "seen": false,
+              },
+              {
+                "count": 0,
+                "event": "entry_deleted",
+                "seen": false,
+              },
             ],
-            "never_emitted": 2,
+            "never_emitted": 4,
           },
           "generated_at": "2026-06-30T12:00:00.000Z",
           "geo": {

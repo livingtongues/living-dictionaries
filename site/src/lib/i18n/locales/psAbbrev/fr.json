@@ -82,12 +82,12 @@
     "def": "art. déf.",
     "indf": "art. indéf.",
     "indfpro": "pr. indéf.",
-    "pers": "",
-    "poss": "",
-    "reflpro": "",
-    "relpro": "",
-    "vd": "",
-    "va": "",
-    "obj": ""
+    "pers": "pr. pers.",
+    "poss": "pr. poss.",
+    "reflpro": "pr. réfl.",
+    "relpro": "pr. rel.",
+    "vd": "v. ditr.",
+    "va": "v. ambitr.",
+    "obj": "obj."
   }
 }

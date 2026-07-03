@@ -82,12 +82,12 @@
     "def": "kata sandang pasti",
     "indf": "kata sandang tidak pasti",
     "indfpro": "kata ganti nama tak tentu",
-    "pers": "",
-    "poss": "",
-    "reflpro": "",
-    "relpro": "",
-    "vd": "",
-    "va": "",
-    "obj": ""
+    "pers": "kata ganti nama diri",
+    "poss": "kata ganti nama milik",
+    "reflpro": "kata ganti nama refleksif",
+    "relpro": "kata ganti nama relatif",
+    "vd": "kata kerja dwitransitif",
+    "va": "kata kerja ambitransitif",
+    "obj": "penanda objek"
   }
 }
