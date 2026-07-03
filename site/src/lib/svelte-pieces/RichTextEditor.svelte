@@ -12,6 +12,7 @@
   import IconMdiRedo from '~icons/mdi/redo'
   import IconMdiUndo from '~icons/mdi/undo'
   import { onDestroy, onMount } from 'svelte'
+  import { should_autolink } from './should-autolink'
 
   type ToolbarPreset = 'email' | 'document' | 'none'
 
@@ -37,6 +38,12 @@
      * "submit" in every composer that uses this.
      */
     on_keydown?: (event: KeyboardEvent) => void
+    /**
+     * Clipboard paste — fires before ProseMirror handles the paste. Call
+     * `event.preventDefault()` when the image is consumed as an attachment
+     * instead of inline content.
+     */
+    on_paste?: (event: ClipboardEvent) => void
     /** Extra classes on the outer wrapper. */
     class?: string
     /** Focus the editor after mount. */
@@ -50,6 +57,7 @@
     disabled = false,
     toolbar = 'email',
     on_keydown,
+    on_paste,
     class: classes = '',
     autofocus = false,
   }: Props = $props()
@@ -100,6 +108,10 @@
             codeBlock: toolbar === 'email' ? false : undefined,
             horizontalRule: toolbar === 'email' ? false : undefined,
             blockquote: toolbar === 'email' ? false : undefined,
+            // Don't let linkify autolink bare filenames/version strings — `.zip`,
+            // `.mov`, `.app`, etc. are real gTLDs, so `foo-2026.zip` was becoming
+            // `http://foo-2026.zip`. Only explicit URLs / `www.` hosts autolink.
+            link: { shouldAutoLink: should_autolink },
           }),
           Placeholder.configure({ placeholder }),
         ],
@@ -128,6 +140,10 @@
             on_keydown?.(event)
             // If the consumer called preventDefault, also stop ProseMirror's
             // own handling (default Ctrl+Enter → hardBreak, etc.).
+            return event.defaultPrevented
+          },
+          handlePaste: (_view, event) => {
+            on_paste?.(event)
             return event.defaultPrevented
           },
         },
@@ -364,6 +380,14 @@
 
   :global(.rich-text-editor .ProseMirror p) {
     margin: 0;
+  }
+
+  /* Consecutive paragraphs get a full email-style gap (matches the 14px the
+     sent email uses in `text_to_safe_html`) so multi-paragraph bodies — e.g. a
+     triage "Use draft" reply — read as distinct paragraphs, not one tight block.
+     The compact 0.5rem above still governs paragraph↔list/heading spacing. */
+  :global(.rich-text-editor .ProseMirror p + p) {
+    margin-top: 1em;
   }
 
   :global(.rich-text-editor .ProseMirror ul) {

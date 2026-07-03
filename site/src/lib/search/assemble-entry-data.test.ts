@@ -103,6 +103,9 @@ describe(assemble_entry_data, () => {
     expect(level_1.tags?.map(t => t.id)).toEqual(['t-public', 't-private'])
 
     const level_2 = assemble_entry_data(base_input({ tags, admin_level: 2 }))
-    expect(level_2.tags?.map(t => t.id)).toEqual(['t-public', 't-private', 't-v4'])
+    expect(level_2.tags?.map(t => t.id)).toEqual(['t-public', 't-private'])
+
+    const level_3 = assemble_entry_data(base_input({ tags, admin_level: 3 }))
+    expect(level_3.tags?.map(t => t.id)).toEqual(['t-public', 't-private', 't-v4'])
   })
 })

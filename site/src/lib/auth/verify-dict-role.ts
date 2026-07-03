@@ -1,7 +1,7 @@
 import type { Cookies } from '@sveltejs/kit'
-import { resolve_admin_level } from '$lib/server/resolve-admin-level'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { get_effective_admin_level } from '$lib/server/effective-admin-level'
 import { error } from '@sveltejs/kit'
 import { verify_auth } from './verify'
 
@@ -13,25 +13,25 @@ export type DictRole = Role
 /**
  * Verify the caller has at least `min_role` on the given dictionary.
  *
- * Site admins (`admin_level >= 1`) bypass the per-dict role check entirely.
- * The fresh DB lookup on every push ensures revocations are immediate
- * (per Story B.5 — JWTs would let revoked editors keep pushing for up to
- * 30 days until their token expires).
+ * Site admins + super managers (`admin_level >= 1`) bypass the per-dict role
+ * check entirely. The fresh DB lookup on every push ensures revocations are
+ * immediate (per Story B.5 — JWTs would let revoked editors keep pushing for
+ * up to 30 days until their token expires).
  *
- * `admin_level` is derived per-request from `get_admin_level(email)` against
- * the `$lib/admins.ts` allow-list rather than baked into the JWT. Adding /
- * removing an admin doesn't require rotating JWTs.
+ * `admin_level` is derived per-request: the `$lib/admins.ts` allow-list by
+ * email (levels 2/3) plus the user's `users.roles` row (super_manager →
+ * level 1) — never baked into the JWT, so granting/revoking is immediate.
  */
 export async function verify_auth_dict_role(event: {
   request: Request
   cookies?: Pick<Cookies, 'get'>
 }, dict_id: string, min_role: Role = 'editor'): Promise<{ user_id: string, email: string | undefined, name: string | undefined, admin_level: number, role: Role | 'admin' }> {
   const auth = await verify_auth(event)
-  const admin_level = resolve_admin_level({ email: auth.email, cookies: event.cookies }) ?? 0
+  const db = get_shared_db()
+  const admin_level = get_effective_admin_level({ db, user_id: auth.user_id, email: auth.email, cookies: event.cookies })
   if (admin_level >= 1)
     return { ...auth, admin_level, role: 'admin' }
 
-  const db = get_shared_db()
   const row = db.prepare(
     `SELECT role FROM dictionary_roles
      WHERE dictionary_id = ? AND user_id = ?

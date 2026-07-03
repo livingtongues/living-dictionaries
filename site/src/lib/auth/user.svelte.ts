@@ -27,14 +27,14 @@ export class AuthUser {
    */
   preview = $state<PreviewState | null>(null)
 
-  /** The real allow-list admin flag, ignoring any active preview — gates the "View as" picker itself. */
+  /** The real admin-club flag (level >= 2), ignoring any active preview — gates the "View as" picker itself. */
   get real_is_admin(): boolean {
     return !!this.user?.is_admin
   }
 
   /** The real numeric admin tier, ignoring any active preview. Caps how far down a preview can step. */
   get real_admin_level(): number {
-    return this.user?.is_admin ? (this.user.admin_level ?? 1) : 0
+    return this.user?.admin_level ?? 0
   }
 
   get previewing(): boolean {
@@ -46,18 +46,43 @@ export class AuthUser {
     return this.preview ? persona_label(this.preview) : null
   }
 
-  /** Site-admin gate (computed server-side from the `$lib/admins` allow-list), preview-aware. */
+  /** Admin-club gate (level >= 2, computed server-side; super managers are NOT admins), preview-aware. */
   get is_admin(): boolean {
     if (this.preview)
-      return this.preview.admin_level >= 1
+      return this.preview.admin_level >= 2
     return this.real_is_admin
   }
 
-  /** Numeric admin tier: 0 = not an admin, else `admin_level` (1 | 2). Preview-aware; for `>= 1` checks. */
+  /** Effective numeric admin tier 0-3 (1 = Super Manager). Preview-aware; for `>= 1` checks. */
   get admin_level(): number {
     if (this.preview)
       return this.preview.admin_level
     return this.real_admin_level
+  }
+
+  /**
+   * Member of >= 1 chat room — gates the /chat entry points (UserMenu link,
+   * unread poll). Membership isn't level-based, but "View as Visitor" hides it
+   * for preview fidelity.
+   */
+  get is_chat_member(): boolean {
+    if (this.preview && this.preview.admin_level === 0)
+      return false
+    return !!this.user?.is_chat_member
+  }
+
+  /**
+   * Locales this user may translate — gates the /translate entry points
+   * (UserMenu link). Like chat membership, hidden when previewing as Visitor.
+   */
+  get translator_locales(): string[] {
+    if (this.preview && this.preview.admin_level === 0)
+      return []
+    return this.user?.translator_locales ?? []
+  }
+
+  get is_translator(): boolean {
+    return this.translator_locales.length > 0
   }
 
   /**

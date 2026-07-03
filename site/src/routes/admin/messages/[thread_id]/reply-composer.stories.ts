@@ -9,6 +9,7 @@ export const shared_meta: StoryMeta = {
 export const Empty: Story<typeof Component> = {
   props: {
     thread_id: 'demo-thread-1',
+    db: null,
     sync: null,
   },
 }

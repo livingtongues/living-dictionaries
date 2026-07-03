@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "Paramètres",
+    "your_name": "",
     "log_out": "Se déconnecter",
     "send_code": "Envoyer le code",
     "enter_6_digit_code_sent_to": "Saisissez le code à 6 chiffres envoyé à"
@@ -159,6 +160,14 @@
     "google_terms": "Termes de Google",
     "full_title": "Dictionnaire vivant {dictionary_name}"
   },
+  "sync": {
+    "syncing": "",
+    "synced": "",
+    "error": "",
+    "offline": "",
+    "idle": "",
+    "tap_failed": ""
+  },
   "entry": {
     "view_entries": "Voir les données",
     "signed_in_as_manager": "Vous devez être manager de ce dictionnaire pour y apporter des modifications.",
@@ -224,6 +233,9 @@
     "error_recorded": "L'erreur a été enregistrée et nous allons mener une enquête.",
     "please_explain": "Veuillez nous envoyer un court message expliquant ce qui s'est passé."
   },
+  "map": {
+    "webgl_unavailable": ""
+  },
   "header": {
     "select_language": "Sélectionnez une langue",
     "please_create_account": "Veuillez créer un compte",
@@ -280,7 +292,14 @@
     "transmitter": "Cordialement, l'équipe des Dictionnaires Vivants",
     "disjunctive": "ou",
     "required": "requis",
-    "optional": "facultatif"
+    "optional": "facultatif",
+    "reload": "",
+    "appearance": "",
+    "theme_system": "",
+    "theme_light": "",
+    "theme_dark": "",
+    "app_update_needed": "",
+    "local_data_expired": ""
   },
   "settings": {
     "community_permission": "La communauté linguistique permet-elle à cette langue d'être en ligne ?",
@@ -290,7 +309,34 @@
     "optional_data_fields": "Champs de données facultatifs",
     "unable_to_delete": "Remarque : vous ne pourrez pas supprimer ces langues de glossage ultérieurement.",
     "print_access_meaning": "Cela permet au public de télécharger et d'imprimer ce dictionnaire vivant au format PDF.",
-    "featured_image": "Image en vedette"
+    "featured_image": "Image en vedette",
+    "delete_dictionary": ""
+  },
+  "source": {
+    "create": "",
+    "edit": "",
+    "citation": "",
+    "abbreviation": "",
+    "author": "",
+    "year": "",
+    "url": "",
+    "license": "",
+    "type": "",
+    "slug": "",
+    "slug_hint": "",
+    "slug_required": "",
+    "used_by": "",
+    "empty": "",
+    "type_dictionary": "",
+    "type_wordlist": "",
+    "type_fieldwork": "",
+    "type_manuscript": "",
+    "type_other": "",
+    "sources": "",
+    "cite_instead": "",
+    "select_source": "",
+    "choose_speaker_instead": "",
+    "source": ""
   },
   "speakers": {
     "add_new_speaker": "Ajouter un nouveau locuteur",
@@ -305,7 +351,8 @@
   },
   "terms": {
     "agree_by_submit": "En soumettant ce formulaire, vous acceptez nos",
-    "agreement_to_terms": "Accepter les conditions"
+    "agreement_to_terms": "Accepter les conditions",
+    "privacy_policy": ""
   },
   "upload": {
     "error": "Ce type de fichier n'est pas supporté",
@@ -416,5 +463,43 @@
   "sentence": {
     "add": "Ajouter une phrase",
     "delete": "Supprimer la phrase"
+  },
+  "relationship_type": {
+    "related_entries": "",
+    "synonym": "",
+    "antonym": "",
+    "cognate": "",
+    "dialectal_variant": "",
+    "see_also": "",
+    "spelling_variant": "",
+    "hypernym": "",
+    "hyponym": "",
+    "holonym": "",
+    "meronym": "",
+    "derived_from": "",
+    "root_of": "",
+    "borrowed_from": "",
+    "loaned_to": "",
+    "synonym_description": "",
+    "antonym_description": "",
+    "cognate_description": "",
+    "dialectal_variant_description": "",
+    "see_also_description": "",
+    "spelling_variant_description": "",
+    "hypernym_description": "",
+    "hyponym_description": "",
+    "holonym_description": "",
+    "meronym_description": "",
+    "derived_from_description": "",
+    "root_of_description": "",
+    "borrowed_from_description": "",
+    "loaned_to_description": "",
+    "add": "",
+    "choose_entry": "",
+    "relationship": "",
+    "no_matches": "",
+    "remove_confirm": "",
+    "help_intro": "",
+    "custom_types_note": ""
   }
 }

@@ -124,7 +124,7 @@
           {/await}
         {/if}
       {/if}
-      {#if auth_user.is_admin}
+      {#if auth_user.admin_level >= 1}
         <ShowHide>
           {#snippet children({ show, toggle })}
             <CustomControl position="bottom-right">

@@ -7,7 +7,7 @@ description: UI design guidelines (CSS, icons, theme) and svelte-look component 
 
 This skill covers two areas: **UI design/styling** and **svelte-look stories for visual verification**.
 
-The whole site uses this design system (UnoCSS was fully removed 2026-06-12 — everything is scoped CSS + the global theme layer). When making requested UI edits follow these guidelines. SSR screenshots see all styles — `csr: true` is only needed for `onMount`/browser-API components or interactions.
+The whole site uses this design system — everything is scoped CSS + the global theme layer. When making requested UI edits follow these guidelines. SSR screenshots see all styles — `csr: true` is only needed for `onMount`/browser-API components or interactions.
 
 # Part 1: UI Design System
 
@@ -381,4 +381,4 @@ Screenshots are clipped to the viewport by default. Use `--full-page` on the CLI
 
 ## Flavors
 
-Flavors let you render every story with different `page_data` variants. The flavor's `page_data` is shallow-merged on top of the layout-level `page_data` before story-level and shared_meta merges happen. LD has no flavors configured yet (house ships three auth flavors — `default` logged-out, `signed_in`, `signed_in_admin` — as a reference if we add them). A component with 2 stories will have N images: 2 stories × N flavors × themes (LD renders light AND dark — `dark_mode: true` since the 2026-07-02 dark flip; always eyeball both).
+Flavors let you render every story with different `page_data` variants. The flavor's `page_data` is shallow-merged on top of the layout-level `page_data` before story-level and shared_meta merges happen. LD has no flavors configured yet (house ships nine auth/subscription flavors — `logged_out`, `customer`, `trialing`, `subscriber`, `canceling`, `editor`, `contributor`, `admin`, `admin_previewing_visitor` — as a reference if we add them). A component with 2 stories will have N images: 2 stories × N flavors × themes (LD renders light AND dark — `dark_mode: true` since the 2026-07-02 dark flip; always eyeball both).

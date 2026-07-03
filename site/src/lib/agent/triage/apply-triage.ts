@@ -148,7 +148,7 @@ if (import.meta.vitest) {
 
   test('high-confidence content → Diego', () => {
     const d = decide_actions({ ...base, category: 'content', confidence: 'high' })
-    expect(d.assignee?.name).toBe('Diego Mariscal')
+    expect(d.assignee?.name).toBe('Diego Córdova')
   })
 
   test('high-confidence account → Jacob (Anna is off-duty)', () => {

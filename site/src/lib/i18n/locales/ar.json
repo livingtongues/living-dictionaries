@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "إعدادات الحساب",
+    "your_name": "",
     "log_out": "تسجيل الخروج",
     "send_code": "إرسال الرمز",
     "enter_6_digit_code_sent_to": "أدخل الرمز المكون من 6 أرقام الذي تم إرساله إلى"
@@ -159,6 +160,14 @@
     "google_terms": "مصطلحات جوجل",
     "full_title": "القاموس الحي {dictionary_name}"
   },
+  "sync": {
+    "syncing": "",
+    "synced": "",
+    "error": "",
+    "offline": "",
+    "idle": "",
+    "tap_failed": ""
+  },
   "entry": {
     "view_entries": "مشاهدة المدخلات",
     "signed_in_as_manager": "يجدر بكم تسجيل الدخول بصفتكم مدراء هذا المشروع لتتمكنوا من إحداث التغييرات",
@@ -224,6 +233,9 @@
     "error_recorded": "سُجّل الخطأ وسننظر فيه.",
     "please_explain": "هل من الممكن أن تُرسلوا لنا ملاحظةً صغيرةً موضّحين فيها ما حدث؟"
   },
+  "map": {
+    "webgl_unavailable": ""
+  },
   "header": {
     "select_language": "اختار اللغة",
     "please_create_account": "يُرجى إنشاء حساب",
@@ -280,7 +292,14 @@
     "transmitter": "مع خالص التقدير، فريق قواميس ليفينغ",
     "disjunctive": "أو",
     "required": "مطلوب",
-    "optional": "خياري"
+    "optional": "خياري",
+    "reload": "",
+    "appearance": "",
+    "theme_system": "",
+    "theme_light": "",
+    "theme_dark": "",
+    "app_update_needed": "",
+    "local_data_expired": ""
   },
   "settings": {
     "community_permission": "هل يسمح المجتمع خطاب بأن تكون هذه اللغة على الانترنت؟",
@@ -290,7 +309,34 @@
     "optional_data_fields": "حقول بيانات اختيارية",
     "unable_to_delete": "ملاحظة: لن تتمكن من حذف لغات الشرح هذه لاحقًا.",
     "print_access_meaning": "هذا يمنح الجمهور القدرة على تنزيل وطباعة هذا القاموس الحي كـ .pdf",
-    "featured_image": "الصورة الرئيسية"
+    "featured_image": "الصورة الرئيسية",
+    "delete_dictionary": ""
+  },
+  "source": {
+    "create": "",
+    "edit": "",
+    "citation": "",
+    "abbreviation": "",
+    "author": "",
+    "year": "",
+    "url": "",
+    "license": "",
+    "type": "",
+    "slug": "",
+    "slug_hint": "",
+    "slug_required": "",
+    "used_by": "",
+    "empty": "",
+    "type_dictionary": "",
+    "type_wordlist": "",
+    "type_fieldwork": "",
+    "type_manuscript": "",
+    "type_other": "",
+    "sources": "",
+    "cite_instead": "",
+    "select_source": "",
+    "choose_speaker_instead": "",
+    "source": ""
   },
   "speakers": {
     "add_new_speaker": "إضافة متحدث جديد",
@@ -305,7 +351,8 @@
   },
   "terms": {
     "agree_by_submit": "من خلال تقديم هذا النموذج، فإنك توافق على",
-    "agreement_to_terms": "الموافقة على الشروط"
+    "agreement_to_terms": "الموافقة على الشروط",
+    "privacy_policy": ""
   },
   "upload": {
     "error": "نوع ملف غير مدعوم",
@@ -416,5 +463,43 @@
   "sentence": {
     "add": "أضف جملة",
     "delete": "حذف الجملة"
+  },
+  "relationship_type": {
+    "related_entries": "",
+    "synonym": "",
+    "antonym": "",
+    "cognate": "",
+    "dialectal_variant": "",
+    "see_also": "",
+    "spelling_variant": "",
+    "hypernym": "",
+    "hyponym": "",
+    "holonym": "",
+    "meronym": "",
+    "derived_from": "",
+    "root_of": "",
+    "borrowed_from": "",
+    "loaned_to": "",
+    "synonym_description": "",
+    "antonym_description": "",
+    "cognate_description": "",
+    "dialectal_variant_description": "",
+    "see_also_description": "",
+    "spelling_variant_description": "",
+    "hypernym_description": "",
+    "hyponym_description": "",
+    "holonym_description": "",
+    "meronym_description": "",
+    "derived_from_description": "",
+    "root_of_description": "",
+    "borrowed_from_description": "",
+    "loaned_to_description": "",
+    "add": "",
+    "choose_entry": "",
+    "relationship": "",
+    "no_matches": "",
+    "remove_confirm": "",
+    "help_intro": "",
+    "custom_types_note": ""
   }
 }

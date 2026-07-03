@@ -1,24 +1,25 @@
 /**
- * Server-authoritative data layer for the admin team chat. All chat tables live
+ * Server-authoritative data layer for the chat (/chat). All chat tables live
  * in `shared.db` and are reached ONLY through these helpers + the
- * `/api/admin/chat/*` endpoints (never a sync sector) so per-room privacy holds.
+ * `/api/chat/*` endpoints (never a sync sector) so per-room privacy holds.
  *
- * Membership is built lazily: `ensure_my_chat_setup` runs on every chat API hit
- * and joins the caller to every FIXED_CHANNELS room they belong to, so rooms
- * fill in as admins log in. Raw better-sqlite3 statements — chat has no JSON
- * columns, so the auto-parse driver isn't needed.
+ * Channels are DB-managed rows: admins (level >= 2) create channels and manage
+ * their members in the UI; rooms flagged `admin_room` are only manageable by
+ * super admins (level 3). The two system rooms (`all-admins`,
+ * `notifications`) are seeded + admin-joined at boot by
+ * `ensure_all_admins_in_team_chat`. Raw better-sqlite3 statements — chat has
+ * no JSON columns, so the auto-parse driver isn't needed.
  */
 import type Database from 'better-sqlite3'
+import type { EffectiveAdminLevel } from '$lib/admins'
+// default-import: 'xss' is CJS — named imports break Vite dev SSR (see sanitize-rich-text.ts)
+import xss from 'xss'
 import { open_shared_db } from '$lib/db/server/shared-db'
 import {
-  FIXED_CHANNELS,
   MESSAGE_PAGE_LIMIT,
   PRESENCE_WINDOW_MS,
-  ROOM_ALL_ADMINS,
-  ROOM_ANNA_GREG_JACOB,
-  ROOM_DIEGO_ANNA_GREG,
-  ROOM_NAMES,
-  ROOM_NOTIFICATIONS,
+  SYSTEM_ROOM_IDS,
+  SYSTEM_USER_ID,
 } from './constants'
 
 export type ChatRoomKind = 'channel' | 'dm'
@@ -27,6 +28,8 @@ export interface ChatRoom {
   id: string
   kind: ChatRoomKind
   name: string | null
+  created_by_user_id: string | null
+  admin_room: number
   created_at: string
   updated_at: string
 }
@@ -61,11 +64,22 @@ export interface RoomSummary {
   id: string
   kind: ChatRoomKind
   name: string | null
+  admin_room: boolean
+  /** Whether the CALLER may rename/delete/manage members (level-based; see can_manage_room). */
+  can_manage: boolean
   updated_at: string
   unread: number
   last_message: ChatMessageRow | null
   member_ids: string[]
   online_member_ids: string[]
+}
+
+/** One person in the caller's chat directory (anyone sharing a room, self included). */
+export interface ChatDirectoryEntry {
+  user_id: string
+  name: string | null
+  email: string | null
+  online: boolean
 }
 
 export class ChatError extends Error {
@@ -80,21 +94,130 @@ function now_iso(): string {
   return new Date().toISOString()
 }
 
+/**
+ * Chat bodies render via `{@html}` in every member's browser, and members now
+ * include non-admin partners — sanitize at the write boundary so stored HTML
+ * is always safe regardless of what a client sends.
+ */
+function sanitize_body_html(body_html: string): string {
+  return xss(body_html)
+}
+
 /** Deterministic DM room id — the two user ids sorted so order never matters. */
 export function dm_room_id(user_a: string, user_b: string): string {
   return `dm:${[user_a, user_b].sort().join(':')}`
 }
 
-/** Upsert the fixed channel rooms + ensure the caller's memberships per FIXED_CHANNELS. */
-export function ensure_my_chat_setup({ db, user_id, email }: { db: Database.Database, user_id: string, email: string | undefined }): void {
+/**
+ * Manage gate for a room: channels only; admin rooms need a super admin
+ * (level 3), regular channels an admin (level >= 2). Membership is checked
+ * separately (non-members can't even see the room).
+ */
+export function can_manage_room({ room, admin_level }: { room: Pick<ChatRoom, 'kind' | 'admin_room'>, admin_level: EffectiveAdminLevel }): boolean {
+  if (room.kind !== 'channel')
+    return false
+  if (room.admin_room)
+    return admin_level >= 3
+  return admin_level >= 2
+}
+
+/** Create a channel; the creator is auto-joined. Returns the new room. */
+export function create_channel({ db, name, created_by_user_id, admin_room = false }: {
+  db: Database.Database
+  name: string
+  created_by_user_id: string
+  admin_room?: boolean
+}): ChatRoom {
+  const trimmed = name.trim()
+  if (!trimmed)
+    throw new ChatError('Channel name is required', 400)
+  const id = crypto.randomUUID()
   const ts = now_iso()
-  const upsert_room = db.prepare('INSERT INTO chat_rooms (id, kind, name, created_at, updated_at) VALUES (?, \'channel\', ?, ?, ?) ON CONFLICT(id) DO NOTHING')
-  const add_member = db.prepare('INSERT INTO chat_room_members (room_id, user_id, created_at) VALUES (?, ?, ?) ON CONFLICT(room_id, user_id) DO NOTHING')
-  for (const channel of FIXED_CHANNELS) {
-    upsert_room.run(channel.id, ROOM_NAMES[channel.id], ts, ts)
-    if (channel.members === 'all' || (email && channel.members.includes(email)))
-      add_member.run(channel.id, user_id, ts)
-  }
+  db.prepare('INSERT INTO chat_rooms (id, kind, name, created_by_user_id, admin_room, created_at, updated_at) VALUES (?, \'channel\', ?, ?, ?, ?, ?)')
+    .run(id, trimmed, created_by_user_id, admin_room ? 1 : 0, ts, ts)
+  db.prepare('INSERT INTO chat_room_members (room_id, user_id, created_at) VALUES (?, ?, ?)').run(id, created_by_user_id, ts)
+  return get_room({ db, room_id: id }) as ChatRoom
+}
+
+export function rename_room({ db, room_id, name }: { db: Database.Database, room_id: string, name: string }): ChatRoom {
+  const trimmed = name.trim()
+  if (!trimmed)
+    throw new ChatError('Channel name is required', 400)
+  const room = get_room({ db, room_id })
+  if (!room)
+    throw new ChatError('Room not found', 404)
+  if (room.kind !== 'channel')
+    throw new ChatError('Only channels can be renamed', 400)
+  db.prepare('UPDATE chat_rooms SET name = ?, updated_at = ? WHERE id = ?').run(trimmed, now_iso(), room_id)
+  return get_room({ db, room_id }) as ChatRoom
+}
+
+/**
+ * Hard-delete a channel: messages, attachments rows, memberships, the room.
+ * Returns the deleted attachments' R2 storage keys so the caller can clean up
+ * the blobs (best-effort, after responding). System rooms are refused.
+ */
+export function delete_room({ db, room_id }: { db: Database.Database, room_id: string }): { storage_keys: string[] } {
+  const room = get_room({ db, room_id })
+  if (!room)
+    throw new ChatError('Room not found', 404)
+  if (room.kind !== 'channel')
+    throw new ChatError('Only channels can be deleted', 400)
+  if ((SYSTEM_ROOM_IDS as readonly string[]).includes(room_id))
+    throw new ChatError('System rooms cannot be deleted', 400)
+  const storage_keys = (db.prepare('SELECT a.storage_key FROM chat_attachments a JOIN chat_messages m ON m.id = a.message_id WHERE m.room_id = ?')
+    .all(room_id) as { storage_key: string }[]).map(row => row.storage_key)
+  db.prepare('DELETE FROM chat_attachments WHERE message_id IN (SELECT id FROM chat_messages WHERE room_id = ?)').run(room_id)
+  db.prepare('DELETE FROM chat_messages WHERE room_id = ?').run(room_id)
+  db.prepare('DELETE FROM chat_room_members WHERE room_id = ?').run(room_id)
+  db.prepare('DELETE FROM chat_rooms WHERE id = ?').run(room_id)
+  return { storage_keys }
+}
+
+/** Add a registered user to a room (idempotent). */
+export function add_room_member({ db, room_id, user_id }: { db: Database.Database, room_id: string, user_id: string }): void {
+  if (!get_room({ db, room_id }))
+    throw new ChatError('Room not found', 404)
+  const user = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id)
+  if (!user)
+    throw new ChatError('User not found', 404)
+  db.prepare('INSERT INTO chat_room_members (room_id, user_id, created_at) VALUES (?, ?, ?) ON CONFLICT(room_id, user_id) DO NOTHING')
+    .run(room_id, user_id, now_iso())
+}
+
+export function remove_room_member({ db, room_id, user_id }: { db: Database.Database, room_id: string, user_id: string }): void {
+  // The System bot must stay in its room or platform-event posts start 403ing.
+  if (user_id === SYSTEM_USER_ID)
+    throw new ChatError('The System bot cannot be removed', 400)
+  db.prepare('DELETE FROM chat_room_members WHERE room_id = ? AND user_id = ?').run(room_id, user_id)
+}
+
+/** The /chat access gate: does this user belong to at least one room? */
+export function has_any_membership({ db, user_id }: { db: Database.Database, user_id: string }): boolean {
+  return !!db.prepare('SELECT 1 FROM chat_room_members WHERE user_id = ? LIMIT 1').get(user_id)
+}
+
+/** Do two users share at least one room? (DM permission rule.) */
+export function shares_room({ db, user_id, other_user_id }: { db: Database.Database, user_id: string, other_user_id: string }): boolean {
+  return !!db.prepare('SELECT 1 FROM chat_room_members a JOIN chat_room_members b ON b.room_id = a.room_id WHERE a.user_id = ? AND b.user_id = ? LIMIT 1')
+    .get(user_id, other_user_id)
+}
+
+/**
+ * Everyone who shares a room with the caller (self included, System excluded),
+ * with presence — the name-resolution directory + DM picker source. Members of
+ * your channels are the only people you can see/DM.
+ */
+export function list_chat_directory({ db, user_id }: { db: Database.Database, user_id: string }): ChatDirectoryEntry[] {
+  const rows = db.prepare(`SELECT DISTINCT u.id AS user_id, u.name, u.email
+    FROM chat_room_members mine
+    JOIN chat_room_members them ON them.room_id = mine.room_id
+    JOIN users u ON u.id = them.user_id
+    WHERE mine.user_id = ? AND them.user_id != ?
+    ORDER BY u.name IS NULL, u.name COLLATE NOCASE, u.email`)
+    .all(user_id, SYSTEM_USER_ID) as { user_id: string, name: string | null, email: string | null }[]
+  const online = online_user_ids({ db })
+  return rows.map(row => ({ ...row, online: online.has(row.user_id) }))
 }
 
 /** Create a DM room between two users (idempotent) + ensure both memberships. */
@@ -151,7 +274,7 @@ export function post_message({ db, room_id, user_id, body_html, body_text, clien
   const id = crypto.randomUUID()
   const ts = now_iso()
   db.prepare('INSERT INTO chat_messages (id, room_id, author_user_id, body_html, body_text, client_message_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-    .run(id, room_id, user_id, body_html, body_text, client_message_id ?? null, ts, ts)
+    .run(id, room_id, user_id, sanitize_body_html(body_html), body_text, client_message_id ?? null, ts, ts)
   db.prepare('UPDATE chat_rooms SET updated_at = ? WHERE id = ?').run(ts, room_id)
   db.prepare('UPDATE chat_room_members SET last_read_at = ? WHERE room_id = ? AND user_id = ?').run(ts, room_id, user_id)
   return db.prepare('SELECT * FROM chat_messages WHERE id = ?').get(id) as ChatMessageRow
@@ -250,7 +373,7 @@ export function online_user_ids({ db, window_ms = PRESENCE_WINDOW_MS }: { db: Da
   return new Set(rows.map(row => row.user_id))
 }
 
-export function list_my_rooms({ db, user_id }: { db: Database.Database, user_id: string }): RoomSummary[] {
+export function list_my_rooms({ db, user_id, admin_level = 0 }: { db: Database.Database, user_id: string, admin_level?: EffectiveAdminLevel }): RoomSummary[] {
   const rooms = db.prepare('SELECT r.* FROM chat_rooms r JOIN chat_room_members m ON m.room_id = r.id WHERE m.user_id = ? ORDER BY r.updated_at DESC')
     .all(user_id) as ChatRoom[]
   const online = online_user_ids({ db })
@@ -268,6 +391,8 @@ export function list_my_rooms({ db, user_id }: { db: Database.Database, user_id:
       id: room.id,
       kind: room.kind,
       name: room.name,
+      admin_room: !!room.admin_room,
+      can_manage: can_manage_room({ room, admin_level }),
       updated_at: room.updated_at,
       unread,
       last_message: last_message ?? null,
@@ -296,7 +421,7 @@ export function edit_message({ db, message_id, user_id, body_html, body_text }: 
   require_own_message({ db, message_id, user_id })
   const ts = now_iso()
   db.prepare('UPDATE chat_messages SET body_html = ?, body_text = ?, edited_at = ?, updated_at = ? WHERE id = ?')
-    .run(body_html, body_text, ts, ts, message_id)
+    .run(sanitize_body_html(body_html), body_text, ts, ts, message_id)
   return db.prepare('SELECT * FROM chat_messages WHERE id = ?').get(message_id) as ChatMessageRow
 }
 
@@ -313,61 +438,217 @@ if (import.meta.vitest) {
     return open_shared_db(':memory:')
   }
 
-  describe(ensure_my_chat_setup, () => {
-    it('joins all-admins for every admin + only the named channels they belong to', () => {
+  function seed_user(db: Database.Database, user_id: string, email: string | null, name = 'Someone') {
+    const now = new Date().toISOString()
+    db.prepare('INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, \'[]\', ?, ?)')
+      .run(user_id, email, name, now, now)
+  }
+
+  /** A channel with the given members; first member is the creator. */
+  function seed_channel(db: Database.Database, name: string, member_ids: string[]) {
+    const room = create_channel({ db, name, created_by_user_id: member_ids[0] })
+    for (const member_id of member_ids.slice(1))
+      add_room_member({ db, room_id: room.id, user_id: member_id })
+    return room
+  }
+
+  describe(create_channel, () => {
+    it('creates a channel and auto-joins the creator', () => {
       const db = fresh_db()
-      ensure_my_chat_setup({ db, user_id: 'u-jacob', email: 'jwrunner7@gmail.com' })
-      const ids = list_my_rooms({ db, user_id: 'u-jacob' }).map(room => room.id).sort()
-      expect(ids).toEqual([ROOM_ALL_ADMINS, ROOM_NOTIFICATIONS, ROOM_ANNA_GREG_JACOB].sort())
+      seed_user(db, 'u-jacob', 'jacob@example.com')
+      const room = create_channel({ db, name: '  Partners  ', created_by_user_id: 'u-jacob' })
+      expect(room.name).toBe('Partners')
+      expect(room.kind).toBe('channel')
+      expect(room.admin_room).toBe(0)
+      expect(is_member({ db, room_id: room.id, user_id: 'u-jacob' })).toBe(true)
     })
 
-    it('puts Diego in all-admins + diego-anna-greg but NOT anna-greg-jacob', () => {
+    it('rejects an empty name and supports the admin_room flag', () => {
       const db = fresh_db()
-      ensure_my_chat_setup({ db, user_id: 'u-diego', email: 'diego@livingtongues.org' })
-      const ids = list_my_rooms({ db, user_id: 'u-diego' }).map(room => room.id).sort()
-      expect(ids).toEqual([ROOM_ALL_ADMINS, ROOM_NOTIFICATIONS, ROOM_DIEGO_ANNA_GREG].sort())
+      seed_user(db, 'u-jacob', 'jacob@example.com')
+      expect(() => create_channel({ db, name: '   ', created_by_user_id: 'u-jacob' })).toThrow(ChatError)
+      const admin_room = create_channel({ db, name: 'Admins only', created_by_user_id: 'u-jacob', admin_room: true })
+      expect(admin_room.admin_room).toBe(1)
+    })
+  })
+
+  describe(can_manage_room, () => {
+    it('levels: 2 manages regular channels, 3 required for admin rooms, DMs never', () => {
+      expect(can_manage_room({ room: { kind: 'channel', admin_room: 0 }, admin_level: 2 })).toBe(true)
+      expect(can_manage_room({ room: { kind: 'channel', admin_room: 0 }, admin_level: 1 })).toBe(false)
+      expect(can_manage_room({ room: { kind: 'channel', admin_room: 1 }, admin_level: 2 })).toBe(false)
+      expect(can_manage_room({ room: { kind: 'channel', admin_room: 1 }, admin_level: 3 })).toBe(true)
+      expect(can_manage_room({ room: { kind: 'dm', admin_room: 0 }, admin_level: 3 })).toBe(false)
+    })
+  })
+
+  describe(add_room_member, () => {
+    it('adds a registered user idempotently; unknown user/room 404', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      const room = seed_channel(db, 'General', ['u-a'])
+      add_room_member({ db, room_id: room.id, user_id: 'u-b' })
+      add_room_member({ db, room_id: room.id, user_id: 'u-b' })
+      expect(is_member({ db, room_id: room.id, user_id: 'u-b' })).toBe(true)
+      expect(() => add_room_member({ db, room_id: room.id, user_id: 'u-ghost' })).toThrow(ChatError)
+      expect(() => add_room_member({ db, room_id: 'no-room', user_id: 'u-b' })).toThrow(ChatError)
+    })
+  })
+
+  describe(remove_room_member, () => {
+    it('removes a member but refuses to remove the System bot', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      const room = seed_channel(db, 'General', ['u-a', 'u-b'])
+      remove_room_member({ db, room_id: room.id, user_id: 'u-b' })
+      expect(is_member({ db, room_id: room.id, user_id: 'u-b' })).toBe(false)
+      expect(() => remove_room_member({ db, room_id: room.id, user_id: SYSTEM_USER_ID })).toThrow(ChatError)
+    })
+  })
+
+  describe(rename_room, () => {
+    it('renames a channel and validates input', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      const room = seed_channel(db, 'Old name', ['u-a'])
+      expect(rename_room({ db, room_id: room.id, name: 'New name' }).name).toBe('New name')
+      expect(() => rename_room({ db, room_id: room.id, name: ' ' })).toThrow(ChatError)
+      expect(() => rename_room({ db, room_id: 'nope', name: 'x' })).toThrow(ChatError)
+    })
+  })
+
+  describe(delete_room, () => {
+    it('removes room + messages + attachment rows and returns storage keys', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      const room = seed_channel(db, 'Doomed', ['u-a'])
+      const message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '', body_text: '', allow_empty: true })
+      add_chat_attachment({ db, message_id: message.id, user_id: 'u-a', storage_key: 'key-1', filename: 'f.png', mimetype: 'image/png', size_bytes: 1 })
+      const { storage_keys } = delete_room({ db, room_id: room.id })
+      expect(storage_keys).toEqual(['key-1'])
+      expect(get_room({ db, room_id: room.id })).toBeUndefined()
+      expect(db.prepare('SELECT COUNT(*) AS c FROM chat_messages WHERE room_id = ?').get(room.id)).toEqual({ c: 0 })
+      expect(db.prepare('SELECT COUNT(*) AS c FROM chat_room_members WHERE room_id = ?').get(room.id)).toEqual({ c: 0 })
+    })
+
+    it('refuses system rooms and DMs', () => {
+      const db = fresh_db()
+      // 'all-admins' is seeded by the squashed migration.
+      expect(() => delete_room({ db, room_id: 'all-admins' })).toThrow(ChatError)
+      const dm = ensure_dm({ db, user_id: 'u-a', other_user_id: 'u-b' })
+      expect(() => delete_room({ db, room_id: dm })).toThrow(ChatError)
+    })
+  })
+
+  describe(list_chat_directory, () => {
+    it('returns everyone sharing a room (self included), not strangers or System', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com', 'Alice')
+      seed_user(db, 'u-b', 'b@example.com', 'Bob')
+      seed_user(db, 'u-c', 'c@example.com', 'Carol')
+      seed_user(db, SYSTEM_USER_ID, null, 'System')
+      const room = seed_channel(db, 'General', ['u-a', 'u-b'])
+      add_room_member({ db, room_id: room.id, user_id: SYSTEM_USER_ID })
+      seed_channel(db, 'Elsewhere', ['u-c'])
+      const ids = list_chat_directory({ db, user_id: 'u-a' }).map(entry => entry.user_id).sort()
+      expect(ids).toEqual(['u-a', 'u-b'])
+    })
+  })
+
+  describe(shares_room, () => {
+    it('true only for users with a common room', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      seed_user(db, 'u-c', 'c@example.com')
+      seed_channel(db, 'General', ['u-a', 'u-b'])
+      expect(shares_room({ db, user_id: 'u-a', other_user_id: 'u-b' })).toBe(true)
+      expect(shares_room({ db, user_id: 'u-a', other_user_id: 'u-c' })).toBe(false)
+    })
+  })
+
+  describe(has_any_membership, () => {
+    it('flips once the user joins any room', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      expect(has_any_membership({ db, user_id: 'u-a' })).toBe(false)
+      seed_channel(db, 'General', ['u-a'])
+      expect(has_any_membership({ db, user_id: 'u-a' })).toBe(true)
     })
   })
 
   describe(post_message, () => {
     it('is idempotent on client_message_id', () => {
       const db = fresh_db()
-      ensure_my_chat_setup({ db, user_id: 'u-jacob', email: 'jwrunner7@gmail.com' })
-      const first = post_message({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob', body_html: '<p>hi</p>', body_text: 'hi', client_message_id: 'c1' })
-      const again = post_message({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob', body_html: '<p>hi</p>', body_text: 'hi', client_message_id: 'c1' })
+      seed_user(db, 'u-a', 'a@example.com')
+      const room = seed_channel(db, 'General', ['u-a'])
+      const first = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>hi</p>', body_text: 'hi', client_message_id: 'c1' })
+      const again = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>hi</p>', body_text: 'hi', client_message_id: 'c1' })
       expect(again.id).toBe(first.id)
-      expect(get_room_messages({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob' })).toHaveLength(1)
+      expect(get_room_messages({ db, room_id: room.id, user_id: 'u-a' })).toHaveLength(1)
     })
 
     it('rejects a non-member', () => {
       const db = fresh_db()
-      ensure_my_chat_setup({ db, user_id: 'u-diego', email: 'diego@livingtongues.org' })
-      expect(() => post_message({ db, room_id: ROOM_ANNA_GREG_JACOB, user_id: 'u-diego', body_html: '<p>x</p>', body_text: 'x' })).toThrow(ChatError)
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      const room = seed_channel(db, 'General', ['u-a'])
+      expect(() => post_message({ db, room_id: room.id, user_id: 'u-b', body_html: '<p>x</p>', body_text: 'x' })).toThrow(ChatError)
     })
 
     it('allows an attachment-only (empty body) message when allow_empty', () => {
       const db = fresh_db()
-      ensure_my_chat_setup({ db, user_id: 'u-jacob', email: 'jwrunner7@gmail.com' })
-      const message = post_message({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob', body_html: '', body_text: '', allow_empty: true })
+      seed_user(db, 'u-a', 'a@example.com')
+      const room = seed_channel(db, 'General', ['u-a'])
+      const message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '', body_text: '', allow_empty: true })
       expect(message.id).toBeTruthy()
-      expect(() => post_message({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob', body_html: '', body_text: '' })).toThrow(ChatError)
+      expect(() => post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '', body_text: '' })).toThrow(ChatError)
+    })
+
+    it('sanitizes stored HTML (members include non-admin partners)', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      const room = seed_channel(db, 'General', ['u-a'])
+      const message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p onclick="steal()">hi</p><script>alert(1)</script>', body_text: 'hi' })
+      expect(message.body_html).not.toContain('<script>')
+      expect(message.body_html).not.toContain('onclick')
+      expect(message.body_html).toContain('<p>hi</p>')
+      const edited = edit_message({ db, message_id: message.id, user_id: 'u-a', body_html: '<img src=x onerror=alert(1)>', body_text: 'x' })
+      expect(edited.body_html).not.toContain('onerror')
     })
   })
 
   describe(list_my_rooms, () => {
     it('counts unread from others but not my own messages, and clears on read', () => {
       const db = fresh_db()
-      ensure_my_chat_setup({ db, user_id: 'u-jacob', email: 'jwrunner7@gmail.com' })
-      ensure_my_chat_setup({ db, user_id: 'u-diego', email: 'diego@livingtongues.org' })
-      post_message({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob', body_html: '<p>1</p>', body_text: '1' })
-      post_message({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob', body_html: '<p>2</p>', body_text: '2' })
-      const diego_room = list_my_rooms({ db, user_id: 'u-diego' }).find(room => room.id === ROOM_ALL_ADMINS)
-      expect(diego_room?.unread).toBe(2)
-      const jacob_room = list_my_rooms({ db, user_id: 'u-jacob' }).find(room => room.id === ROOM_ALL_ADMINS)
-      expect(jacob_room?.unread).toBe(0)
-      mark_read({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-diego' })
-      const after_read = list_my_rooms({ db, user_id: 'u-diego' }).find(room => room.id === ROOM_ALL_ADMINS)
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      const room = seed_channel(db, 'General', ['u-a', 'u-b'])
+      post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>1</p>', body_text: '1' })
+      post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>2</p>', body_text: '2' })
+      const b_room = list_my_rooms({ db, user_id: 'u-b' }).find(summary => summary.id === room.id)
+      expect(b_room?.unread).toBe(2)
+      const a_room = list_my_rooms({ db, user_id: 'u-a' }).find(summary => summary.id === room.id)
+      expect(a_room?.unread).toBe(0)
+      mark_read({ db, room_id: room.id, user_id: 'u-b' })
+      const after_read = list_my_rooms({ db, user_id: 'u-b' }).find(summary => summary.id === room.id)
       expect(after_read?.unread).toBe(0)
+    })
+
+    it('computes can_manage per caller level (admin room vs regular)', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      const regular = seed_channel(db, 'Regular', ['u-a'])
+      const admin_room = create_channel({ db, name: 'Admin room', created_by_user_id: 'u-a', admin_room: true })
+      const as_admin = list_my_rooms({ db, user_id: 'u-a', admin_level: 2 })
+      expect(as_admin.find(summary => summary.id === regular.id)?.can_manage).toBe(true)
+      expect(as_admin.find(summary => summary.id === admin_room.id)?.can_manage).toBe(false)
+      const as_super = list_my_rooms({ db, user_id: 'u-a', admin_level: 3 })
+      expect(as_super.find(summary => summary.id === admin_room.id)?.can_manage).toBe(true)
+      const as_member = list_my_rooms({ db, user_id: 'u-a' })
+      expect(as_member.find(summary => summary.id === regular.id)?.can_manage).toBe(false)
     })
   })
 
@@ -385,54 +666,59 @@ if (import.meta.vitest) {
   describe(add_chat_attachment, () => {
     it('links an attachment to an own message and hydrates it on read', () => {
       const db = fresh_db()
-      ensure_my_chat_setup({ db, user_id: 'u-jacob', email: 'jwrunner7@gmail.com' })
-      const message = post_message({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob', body_html: '', body_text: '', allow_empty: true })
-      add_chat_attachment({ db, message_id: message.id, user_id: 'u-jacob', storage_key: 'key-1', filename: 'shot.png', mimetype: 'image/png', size_bytes: 1234 })
-      const [loaded] = get_room_messages({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob' })
+      seed_user(db, 'u-a', 'a@example.com')
+      const room = seed_channel(db, 'General', ['u-a'])
+      const message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '', body_text: '', allow_empty: true })
+      add_chat_attachment({ db, message_id: message.id, user_id: 'u-a', storage_key: 'key-1', filename: 'shot.png', mimetype: 'image/png', size_bytes: 1234 })
+      const [loaded] = get_room_messages({ db, room_id: room.id, user_id: 'u-a' })
       expect(loaded.attachments).toHaveLength(1)
       expect(loaded.attachments[0].filename).toBe('shot.png')
     })
 
     it('refuses to attach to someone else\'s message', () => {
       const db = fresh_db()
-      ensure_my_chat_setup({ db, user_id: 'u-jacob', email: 'jwrunner7@gmail.com' })
-      ensure_my_chat_setup({ db, user_id: 'u-diego', email: 'diego@livingtongues.org' })
-      const message = post_message({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob', body_html: '<p>x</p>', body_text: 'x' })
-      expect(() => add_chat_attachment({ db, message_id: message.id, user_id: 'u-diego', storage_key: 'k', filename: 'f', mimetype: null, size_bytes: null })).toThrow(ChatError)
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      const room = seed_channel(db, 'General', ['u-a', 'u-b'])
+      const message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>x</p>', body_text: 'x' })
+      expect(() => add_chat_attachment({ db, message_id: message.id, user_id: 'u-b', storage_key: 'k', filename: 'f', mimetype: null, size_bytes: null })).toThrow(ChatError)
     })
   })
 
   describe(get_chat_attachment_for_serve, () => {
     it('returns serve metadata to a room member and blocks non-members', () => {
       const db = fresh_db()
-      ensure_my_chat_setup({ db, user_id: 'u-jacob', email: 'jwrunner7@gmail.com' })
-      ensure_my_chat_setup({ db, user_id: 'u-diego', email: 'diego@livingtongues.org' })
-      const message = post_message({ db, room_id: ROOM_ANNA_GREG_JACOB, user_id: 'u-jacob', body_html: '<p>x</p>', body_text: 'x' })
-      const attachment = add_chat_attachment({ db, message_id: message.id, user_id: 'u-jacob', storage_key: 'key-9', filename: 'doc.pdf', mimetype: 'application/pdf', size_bytes: 9 })
-      const serve = get_chat_attachment_for_serve({ db, attachment_id: attachment.id, user_id: 'u-jacob' })
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      const room = seed_channel(db, 'Private', ['u-a'])
+      const message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>x</p>', body_text: 'x' })
+      const attachment = add_chat_attachment({ db, message_id: message.id, user_id: 'u-a', storage_key: 'key-9', filename: 'doc.pdf', mimetype: 'application/pdf', size_bytes: 9 })
+      const serve = get_chat_attachment_for_serve({ db, attachment_id: attachment.id, user_id: 'u-a' })
       expect(serve.storage_key).toBe('key-9')
-      expect(() => get_chat_attachment_for_serve({ db, attachment_id: attachment.id, user_id: 'u-diego' })).toThrow(ChatError)
+      expect(() => get_chat_attachment_for_serve({ db, attachment_id: attachment.id, user_id: 'u-b' })).toThrow(ChatError)
     })
   })
 
   describe(delete_message, () => {
     it('scrubs content and drops it from unread counts', () => {
       const db = fresh_db()
-      ensure_my_chat_setup({ db, user_id: 'u-jacob', email: 'jwrunner7@gmail.com' })
-      ensure_my_chat_setup({ db, user_id: 'u-diego', email: 'diego@livingtongues.org' })
-      const message = post_message({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob', body_html: '<p>secret</p>', body_text: 'secret' })
-      delete_message({ db, message_id: message.id, user_id: 'u-jacob' })
-      const diego_room = list_my_rooms({ db, user_id: 'u-diego' }).find(room => room.id === ROOM_ALL_ADMINS)
-      expect(diego_room?.unread).toBe(0)
-      expect(diego_room?.last_message).toBeNull()
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      const room = seed_channel(db, 'General', ['u-a', 'u-b'])
+      const message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>secret</p>', body_text: 'secret' })
+      delete_message({ db, message_id: message.id, user_id: 'u-a' })
+      const b_room = list_my_rooms({ db, user_id: 'u-b' }).find(summary => summary.id === room.id)
+      expect(b_room?.unread).toBe(0)
+      expect(b_room?.last_message).toBeNull()
     })
 
     it('refuses to delete someone else\'s message', () => {
       const db = fresh_db()
-      ensure_my_chat_setup({ db, user_id: 'u-jacob', email: 'jwrunner7@gmail.com' })
-      ensure_my_chat_setup({ db, user_id: 'u-diego', email: 'diego@livingtongues.org' })
-      const message = post_message({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob', body_html: '<p>mine</p>', body_text: 'mine' })
-      expect(() => delete_message({ db, message_id: message.id, user_id: 'u-diego' })).toThrow(ChatError)
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      const room = seed_channel(db, 'General', ['u-a', 'u-b'])
+      const message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>mine</p>', body_text: 'mine' })
+      expect(() => delete_message({ db, message_id: message.id, user_id: 'u-b' })).toThrow(ChatError)
     })
   })
 }

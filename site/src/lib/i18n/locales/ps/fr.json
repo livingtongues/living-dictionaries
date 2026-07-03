@@ -87,6 +87,7 @@
     "reflpro": "pronom réfléchi",
     "relpro": "pronom relatif",
     "vd": "verbe ditransitif",
-    "va": "ambbitransitif"
+    "va": "ambbitransitif",
+    "obj": ""
   }
 }

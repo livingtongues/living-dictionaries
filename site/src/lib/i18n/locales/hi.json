@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "अकाउंट सेटिंग",
+    "your_name": "",
     "log_out": "लॉग आउट",
     "send_code": "कोड भेजें",
     "enter_6_digit_code_sent_to": "भेजे गए 6 अंकों का कोड दर्ज करें"
@@ -159,6 +160,14 @@
     "google_terms": "गूगल की शर्तें",
     "full_title": "{dictionary_name} लिविंग शब्दकोश"
   },
+  "sync": {
+    "syncing": "",
+    "synced": "",
+    "error": "",
+    "offline": "",
+    "idle": "",
+    "tap_failed": ""
+  },
   "entry": {
     "view_entries": "प्रविष्टियां देखें",
     "signed_in_as_manager": "शब्दकोश में परिवर्तन करने के लिए प्रबंधक के रूप में प्रवेश करें।",
@@ -224,6 +233,9 @@
     "error_recorded": "त्रुटि दर्ज की गई है और हम इसकी जांच करेंगे।",
     "please_explain": "क्या आप हमें त्रुटि को समझाने के लिए छोटा सन्देश भेज सकते हैं?"
   },
+  "map": {
+    "webgl_unavailable": ""
+  },
   "header": {
     "select_language": "भाषा का चयन करें",
     "please_create_account": "कृपया खाता खोलें",
@@ -280,7 +292,14 @@
     "transmitter": "सादर, लिविंग डिक्शनरीज़ टीम",
     "disjunctive": "या",
     "required": "आवश्यक",
-    "optional": "वैकल्पिक"
+    "optional": "वैकल्पिक",
+    "reload": "",
+    "appearance": "",
+    "theme_system": "",
+    "theme_light": "",
+    "theme_dark": "",
+    "app_update_needed": "",
+    "local_data_expired": ""
   },
   "settings": {
     "community_permission": "क्या आपका समुदाय इस भाषा को ऑनलाइन होने की अनुमति देता है?",
@@ -290,7 +309,34 @@
     "optional_data_fields": "प्रविष्टियों के लिए वैकल्पिक क्षेत्र",
     "unable_to_delete": "टिप्पणी : आप बाद में सेटिंगज़ के अंतर्गत भाषांश के लिए चयनित की गई भाषायें नहीं हटा पाएंगे।",
     "print_access_meaning": "यह जनता को .pdf के रूप में इस लिविंग डिक्शनरी को डाउनलोड करने और प्रिंट करने की क्षमता देता है",
-    "featured_image": "फीचर्ड चित्र"
+    "featured_image": "फीचर्ड चित्र",
+    "delete_dictionary": ""
+  },
+  "source": {
+    "create": "",
+    "edit": "",
+    "citation": "",
+    "abbreviation": "",
+    "author": "",
+    "year": "",
+    "url": "",
+    "license": "",
+    "type": "",
+    "slug": "",
+    "slug_hint": "",
+    "slug_required": "",
+    "used_by": "",
+    "empty": "",
+    "type_dictionary": "",
+    "type_wordlist": "",
+    "type_fieldwork": "",
+    "type_manuscript": "",
+    "type_other": "",
+    "sources": "",
+    "cite_instead": "",
+    "select_source": "",
+    "choose_speaker_instead": "",
+    "source": ""
   },
   "speakers": {
     "add_new_speaker": "नया वक्ता जोड़ें",
@@ -305,7 +351,8 @@
   },
   "terms": {
     "agree_by_submit": "इस फॉर्म को जमा करके आप सहमत होगें",
-    "agreement_to_terms": "हमारे समझौते के शर्तों से"
+    "agreement_to_terms": "हमारे समझौते के शर्तों से",
+    "privacy_policy": ""
   },
   "upload": {
     "error": "अमान्य प्रकार का फाइल ",
@@ -416,5 +463,43 @@
   "sentence": {
     "add": "वाक्य जोड़ें",
     "delete": "वाक्य हटाएँ"
+  },
+  "relationship_type": {
+    "related_entries": "",
+    "synonym": "",
+    "antonym": "",
+    "cognate": "",
+    "dialectal_variant": "",
+    "see_also": "",
+    "spelling_variant": "",
+    "hypernym": "",
+    "hyponym": "",
+    "holonym": "",
+    "meronym": "",
+    "derived_from": "",
+    "root_of": "",
+    "borrowed_from": "",
+    "loaned_to": "",
+    "synonym_description": "",
+    "antonym_description": "",
+    "cognate_description": "",
+    "dialectal_variant_description": "",
+    "see_also_description": "",
+    "spelling_variant_description": "",
+    "hypernym_description": "",
+    "hyponym_description": "",
+    "holonym_description": "",
+    "meronym_description": "",
+    "derived_from_description": "",
+    "root_of_description": "",
+    "borrowed_from_description": "",
+    "loaned_to_description": "",
+    "add": "",
+    "choose_entry": "",
+    "relationship": "",
+    "no_matches": "",
+    "remove_confirm": "",
+    "help_intro": "",
+    "custom_types_note": ""
   }
 }

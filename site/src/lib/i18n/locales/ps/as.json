@@ -87,6 +87,7 @@
     "reflpro": "আত্মবাচক সৰ্বনাম",
     "relpro": "আপেক্ষিক সৰ্বনাম",
     "vd": "দ্বিসকৰ্মক ক্ৰিয়া",
-    "va": "ambitransitive"
+    "va": "ambitransitive",
+    "obj": ""
   }
 }

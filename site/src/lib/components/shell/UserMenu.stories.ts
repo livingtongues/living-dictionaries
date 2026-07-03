@@ -18,7 +18,9 @@ function admin_user({ preview_level }: { preview_level?: number } = {}) {
       avatar_url: null,
       created_at: '2024-01-15T00:00:00Z',
       is_admin: true,
-      admin_level: 2,
+      admin_level: 3,
+      is_chat_member: true,
+      translator_locales: [],
       preferred_locale: null,
       unsubscribed_from_emails: false,
     },
@@ -28,7 +30,7 @@ function admin_user({ preview_level }: { preview_level?: number } = {}) {
   return auth_user
 }
 
-/** A real level-2 admin sees the full ladder; the top rung (their real level) is checked. */
+/** A real level-3 super admin sees the full ladder; the top rung (their real level) is checked. */
 export const AdminLadder: Story<typeof Component> = {
   props: { close: () => {} },
   page_data: { auth_user: admin_user(), t },

@@ -6,11 +6,12 @@
   import IconMdiMagnify from '~icons/mdi/magnify'
   import IconMdiMenuDown from '~icons/mdi/menu-down'
   import IconMdiMenuUp from '~icons/mdi/menu-up'
+  import type { EffectiveAdminLevel } from '$lib/admins'
   import AdminBadge from '$lib/admin/AdminBadge.svelte'
   import DictionaryPickerModal from '$lib/admin/DictionaryPickerModal.svelte'
-  import { get_admin_level } from '$lib/admins'
+  import { get_admin_level, has_super_manager_role } from '$lib/admins'
   import { download_as_csv } from '$lib/utils/csv'
-  import { format_date } from '$lib/utils/format-relative-time'
+  import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
   import { score_record } from '$lib/utils/fuzzy-score'
   import { api_admin_user_unsubscribe } from '../../api/admin/users/[id]/unsubscribe/_call'
   import { api_dictionaries_id_roles_post } from '../../api/dictionaries/[id]/roles/_call'
@@ -20,7 +21,7 @@
   let { data } = $props()
   const db = $derived(data.db)
 
-  type UserFilter = 'all' | 'active_30' | 'unsubscribed' | 'with_roles'
+  type UserFilter = 'all' | 'admins' | 'active_30' | 'unsubscribed' | 'with_roles'
   type SortKey = 'name' | 'email' | 'roles' | 'threads' | 'last_msg' | 'last_visit' | 'joined' | 'unsub'
 
   const users_query = $derived(db?.users.query({ order_by: 'COALESCE(updated_at, created_at) DESC', limit: 9999 }))
@@ -91,15 +92,21 @@
     return map
   })
 
+  /** Allow-list tier (2/3) first; else the DB-granted super_manager tier (1). */
+  function admin_level_of(user: { email: string | null, roles: string[] | null }): EffectiveAdminLevel | null {
+    return get_admin_level(user.email) ?? (has_super_manager_role(user.roles) ? 1 : null)
+  }
+
   const summary = $derived.by(() => {
-    let unsubscribed = 0; let active_30 = 0; let with_roles = 0
+    let unsubscribed = 0; let active_30 = 0; let with_roles = 0; let admins = 0
     for (const user of users_query?.rows ?? []) {
       if (user.unsubscribed_from_emails) unsubscribed += 1
       if (is_active_last_30_days(user.last_visit_at)) active_30 += 1
       if ((roles_by_user_id.get(user.id)?.total ?? 0) > 0) with_roles += 1
+      if (admin_level_of(user) !== null) admins += 1
     }
     const total = users_query?.rows.length ?? 0
-    return { total, unsubscribed, active_30, with_roles }
+    return { total, unsubscribed, active_30, with_roles, admins }
   })
 
   let search = $state('')
@@ -120,6 +127,7 @@
   interface FilterPill { key: UserFilter, label: string, count: number }
   const filter_pills = $derived<FilterPill[]>([
     { key: 'all', label: 'all', count: summary.total },
+    { key: 'admins', label: 'admins', count: summary.admins },
     { key: 'active_30', label: 'active last 30 days', count: summary.active_30 },
     { key: 'with_roles', label: 'with dictionary roles', count: summary.with_roles },
     { key: 'unsubscribed', label: 'unsubscribed', count: summary.unsubscribed },
@@ -130,6 +138,7 @@
     name: string | null
     email: string | null
     unsubscribed: boolean
+    admin_level: EffectiveAdminLevel | null
     aliases: string[]
     roles: RoleCounts
     thread_count: number
@@ -148,10 +157,12 @@
       const stats = thread_stats_by_user_id.get(user.id)
       const roles = roles_by_user_id.get(user.id) ?? { manager: 0, editor: 0, contributor: 0, total: 0 }
       const is_unsub = !!user.unsubscribed_from_emails
+      const admin_level = admin_level_of(user)
 
       if (user_filter === 'unsubscribed' && !is_unsub) continue
       if (user_filter === 'active_30' && !is_active_last_30_days(user.last_visit_at)) continue
       if (user_filter === 'with_roles' && roles.total === 0) continue
+      if (user_filter === 'admins' && admin_level === null) continue
 
       let score = 0
       if (search_active) {
@@ -169,6 +180,7 @@
           name: user.name,
           email: user.email,
           unsubscribed: is_unsub,
+          admin_level,
           aliases,
           roles,
           thread_count: stats?.count ?? 0,
@@ -370,7 +382,7 @@
       </thead>
       <tbody>
         {#each rendered_rows as row (row.id)}
-          {@const row_admin_level = get_admin_level(row.email)}
+          {@const row_admin_level = row.admin_level}
           {@const user_roles = role_rows_by_user_id.get(row.id) ?? []}
           <tr class="user-row">
             <td class="td td-name">
@@ -430,14 +442,14 @@
                 <span class="dim">—</span>
               {/if}
             </td>
-            <td class="td align-right nowrap meta-small">
-              {format_date(row.last_msg_at)}
+            <td class="td align-right nowrap meta-small" title={format_date_time(row.last_msg_at)}>
+              {format_relative_time(row.last_msg_at)}
             </td>
-            <td class="td align-right nowrap meta-small">
-              {format_date(row.last_visit_at)}
+            <td class="td align-right nowrap meta-small" title={format_date_time(row.last_visit_at)}>
+              {format_relative_time(row.last_visit_at)}
             </td>
-            <td class="td align-right nowrap meta-small">
-              {format_date(row.joined)}
+            <td class="td align-right nowrap meta-small" title={format_date_time(row.joined)}>
+              {format_relative_time(row.joined)}
             </td>
             <td class="td nowrap">
               <button

@@ -47,9 +47,9 @@ if (import.meta.vitest) {
 
   test('technical/account/other → Jacob, content/partnership → Diego', () => {
     expect(route_admin_for_category('technical')?.name).toBe('Jacob Bowdoin')
-    expect(route_admin_for_category('content')?.name).toBe('Diego Mariscal')
+    expect(route_admin_for_category('content')?.name).toBe('Diego Córdova')
     expect(route_admin_for_category('account')?.name).toBe('Jacob Bowdoin')
-    expect(route_admin_for_category('partnership')?.name).toBe('Diego Mariscal')
+    expect(route_admin_for_category('partnership')?.name).toBe('Diego Córdova')
     expect(route_admin_for_category('other')?.name).toBe('Jacob Bowdoin')
   })
 

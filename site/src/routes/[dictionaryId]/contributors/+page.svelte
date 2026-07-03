@@ -147,7 +147,7 @@
 
 {#if !dictionary.con_language_description}
   <hr class="section-divider" />
-  <Partners {partners} can_edit={is_manager} hideLivingTonguesLogo={!!dictionary.hide_living_tongues_logo} admin={auth_user.admin_level} {...data.partner_edits} />
+  <Partners {partners} can_edit={is_manager} hideLivingTonguesLogo={!!dictionary.hide_living_tongues_logo} admin={auth_user.admin_level >= 2 ? auth_user.admin_level : 0} {...data.partner_edits} />
 
   <!-- Not using contributors.request_to_add_manager -->
 

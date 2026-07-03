@@ -19,29 +19,44 @@ junction/derived heuristics) was already the house-compatible version in LD.
   admin.db / paste) vs house's 3, because LD has per-dictionary DBs. The Cards view was dropped
   (Q1: graph-only). Focus lives in `?table=` (browser-back exits focus); switching source clears it.
 
-## Team chat — server-authoritative, NOT synced
-`lib/server/chat/*`, `lib/admin/chat/*`, `routes/api/admin/chat/*`, `routes/admin/team/+page.svelte`,
-`lib/db/server/chat-reping-cron.ts` are ports of house's team chat. Most files are **verbatim or
-near-verbatim** — keep in sync with house.
+## Chat (/chat) — server-authoritative, NOT synced, membership-based
+`lib/server/chat/*`, `lib/chat/*`, `routes/api/chat/*`, `routes/chat/+page.svelte`,
+`lib/db/server/chat-reping-cron.ts`. Originally a port of house's admin team chat; **2026-07-03 it
+moved OUT of /admin to the standalone `/chat`** so non-admin members (super managers, partners) can
+participate — LD has diverged from house here (house's is still admins-only under /admin).
 
-Key design facts (the migration `20260625d_chat.sql` header says most of this):
+Key design facts:
 - Chat tables (`chat_rooms`, `chat_room_members`, `chat_messages`, `chat_attachments`,
   `admin_presence`) are **server-only**: created-but-empty on admin clients, have **no `dirty`
   column**, and are **absent from `SYNCABLE_TABLE_NAMES`** → the sync engine never touches them.
-  Privacy: DMs + private named channels must never land in a non-member's local wa-sqlite DB.
-  Served only through the membership-filtered `/api/admin/chat/*` endpoints + a 5s poll.
-- **LD room model (Jacob's Q2 choice)** — defined in `lib/server/chat/constants.ts` `FIXED_CHANNELS`:
-  `all-admins` (every admin) + two fixed-membership named channels "Anna, Greg & Jacob" and
-  "Diego, Anna & Greg" + 1:1 DMs. (House had `all-admins` + a `leadership` room — LD does not.)
-  Membership joins lazily on any chat-API hit (`ensure_my_chat_setup`) and eagerly at boot
-  (`ensure_all_admins_in_team_chat`, wired in `hooks.server.ts`).
+  Privacy: DMs + private channels must never land in a non-member's local wa-sqlite DB.
+  Served only through the membership-filtered `/api/chat/*` endpoints + a 5s poll.
+- **Access gate = member of ≥1 room** (`gate_chat`), NOT an admin-level check. Page entry rides on
+  `AuthUserData.is_chat_member` (SSR, no extra nav round-trip); endpoints re-check fresh.
+- **All channels are DB rows** (FIXED_CHANNELS is gone — Jacob 2026-07-03: "cleaner in the long
+  run"). Admins (≥2) create/rename/delete channels + add/remove members in the /chat UI;
+  `chat_rooms.admin_room = 1` rooms (the four originals) are manageable **only by super admins
+  (level 3)**. The two SYSTEM rooms (`all-admins`, `notifications`) are boot-seeded
+  (`ensure_all_admins_in_team_chat`) with every allow-list admin and can never be deleted;
+  `notifications` stays admins-only (platform telemetry — don't add partners).
+- **Directory = people who share a room with you** (`list_chat_directory`), which also scopes who
+  you may DM (`shares_room` enforced server-side). Names resolve from `users.name` → email.
+- **Non-admin members always get EMAIL pings** (`notify_chat_member`); allow-list admins keep their
+  ntfy/email `notify_channel` pref. Same one-ping-per-unread-batch policy + 1-day gentle reping
+  cron for everyone. Message `body_html` is **sanitized server-side with `xss`** at post/edit —
+  required now that non-admins author messages rendered via `{@html}`.
+- Presence heartbeat runs only on /chat + inside /admin; the rooms/unread poll runs site-wide for
+  members (root layout → avatar dot + UserMenu badge). A member browsing elsewhere still gets
+  email pings — deliberate.
+- `/admin/team` 301-redirects to `/chat` (old deep links in emails keep working).
 - The four byte-identical harness files house/LD warns about (db worker) are unrelated to chat;
   chat is its own server-authoritative layer.
 
 ## notify_channel + targeted pings
 `users.notify_channel` ('email' | 'ntfy', migration `20260625c`) lets each admin choose where
-TARGETED pings (message assignment + team chat) land. `notify_admin` (in `notify-admins.ts`,
-upgraded to house's version) reads it server-side. The column **rides to admin clients via the
+TARGETED pings (message assignment + chat) land. `notify_admin` (in `notify-admins.ts`,
+upgraded to house's version) reads it server-side; `notify_chat_member` wraps it for chat so
+non-admin members fall through to plain email. The column **rides to admin clients via the
 existing download-only directory sync** (`VALID_COLUMNS` is auto-derived from the drizzle schema,
 so no sync-config change was needed) and is flipped via `/api/admin/set-notify-channel`. The
 broadcast `notify_admins` (new-inbound) stays ntfy-only, and **skips off-duty admins**
@@ -54,6 +69,17 @@ point a `from_user_id IS NULL` thread at the right user — stamps `from_user_id
 customer messages, and inserts an `email_aliases` row (`source='inbound-match'`) so future mail
 auto-resolves. The **AI triage pipeline** (LLM classification of inbound) was subsequently built
 (`42099efa`, env-gated on `XAI_API_KEY`) — see `ai-triage-pipeline.md`.
+
+## Compose email (2026-07-03 port)
+`lib/admin/messages/{compose-email-modal,compose-recipients,recipient-input,cc-bcc-fields}.svelte`,
+`resolve-compose-recipient.ts`, `/api/messages/compose`, and the supporting utils
+(`parse-email-list`, `is-image-mimetype`, `paste-image-from-clipboard`, `StagedImageThumb`,
+`RichTextEditor` incl. `should-autolink`) are **near-verbatim from house** — keep in sync. LD
+divergences: `ld_address` instead of `hvsb_address`, `@livingdictionaries.app` Message-IDs,
+svelte-pieces live at `lib/svelte-pieces/*` (no `ui/` subfolder for Modal/RichTextEditor), and
+the set-name endpoint is `/api/admin/users/[id]/name` (LD's nested convention) vs house's flat
+`/api/admin/set-name`. `messages.cc/bcc` columns were added in `20260703a_message_cc_bcc.sql`
+(mirrors house's `20260624a`).
 
 ## Shared-infra additions made during the port
 - `ResponseCodes.PAYLOAD_TOO_LARGE = 413` (`lib/constants.ts`).

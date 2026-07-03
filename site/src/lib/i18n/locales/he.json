@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "הגדרות חשבון",
+    "your_name": "",
     "log_out": "להתנתק",
     "send_code": "שלח קוד",
     "enter_6_digit_code_sent_to": "הזן את הקוד בן 6 הספרות שנשלח אל"
@@ -159,6 +160,14 @@
     "google_terms": "מונחי גוגל",
     "full_title": "מילון חי {dictionary_name}"
   },
+  "sync": {
+    "syncing": "",
+    "synced": "",
+    "error": "",
+    "offline": "",
+    "idle": "",
+    "tap_failed": ""
+  },
   "entry": {
     "view_entries": "צפייה בערכים",
     "signed_in_as_manager": "אנא התחברו כמנהלים כדי לבצע שינוי זה.",
@@ -224,6 +233,9 @@
     "error_recorded": "השגיאה נשלחה אלינו והאירוע ייבדק.",
     "please_explain": "האם תוכלו בבקשה לתאר בקצרה את פרטי האירוע?"
   },
+  "map": {
+    "webgl_unavailable": ""
+  },
   "header": {
     "select_language": "בחירת שפה",
     "please_create_account": "אנא צרו חשבון",
@@ -280,7 +292,14 @@
     "transmitter": "בברכה, צוות מילונים חיים",
     "disjunctive": "אוֹ",
     "required": "דָרוּשׁ",
-    "optional": "אופציונלי"
+    "optional": "אופציונלי",
+    "reload": "",
+    "appearance": "",
+    "theme_system": "",
+    "theme_light": "",
+    "theme_dark": "",
+    "app_update_needed": "",
+    "local_data_expired": ""
   },
   "settings": {
     "community_permission": "האם הקהילה דוברת השפה מאשרת את קיומה באינטרנט (בממשק זה)?",
@@ -290,7 +309,34 @@
     "optional_data_fields": "שדות מידע אופציונליים (לא חובה)",
     "unable_to_delete": "הערה: לא תוכל למחוק את שפות ההברקות הללו בהמשך.",
     "print_access_meaning": "זה נותן לציבור את היכולת להוריד ולהדפיס את המילון החי הזה כקובץ PDF.",
-    "featured_image": "תמונה מוצגת"
+    "featured_image": "תמונה מוצגת",
+    "delete_dictionary": ""
+  },
+  "source": {
+    "create": "",
+    "edit": "",
+    "citation": "",
+    "abbreviation": "",
+    "author": "",
+    "year": "",
+    "url": "",
+    "license": "",
+    "type": "",
+    "slug": "",
+    "slug_hint": "",
+    "slug_required": "",
+    "used_by": "",
+    "empty": "",
+    "type_dictionary": "",
+    "type_wordlist": "",
+    "type_fieldwork": "",
+    "type_manuscript": "",
+    "type_other": "",
+    "sources": "",
+    "cite_instead": "",
+    "select_source": "",
+    "choose_speaker_instead": "",
+    "source": ""
   },
   "speakers": {
     "add_new_speaker": "הוספת דובר/ת",
@@ -305,7 +351,8 @@
   },
   "terms": {
     "agree_by_submit": "בשליחת טופס זה את/ה מסכימ/ה ל:",
-    "agreement_to_terms": " הסכמה לתנאים"
+    "agreement_to_terms": " הסכמה לתנאים",
+    "privacy_policy": ""
   },
   "upload": {
     "error": "סוג קובץ לא נתמך",
@@ -416,5 +463,43 @@
   "sentence": {
     "add": "הוסף משפט",
     "delete": "מחיקת משפט"
+  },
+  "relationship_type": {
+    "related_entries": "",
+    "synonym": "",
+    "antonym": "",
+    "cognate": "",
+    "dialectal_variant": "",
+    "see_also": "",
+    "spelling_variant": "",
+    "hypernym": "",
+    "hyponym": "",
+    "holonym": "",
+    "meronym": "",
+    "derived_from": "",
+    "root_of": "",
+    "borrowed_from": "",
+    "loaned_to": "",
+    "synonym_description": "",
+    "antonym_description": "",
+    "cognate_description": "",
+    "dialectal_variant_description": "",
+    "see_also_description": "",
+    "spelling_variant_description": "",
+    "hypernym_description": "",
+    "hyponym_description": "",
+    "holonym_description": "",
+    "meronym_description": "",
+    "derived_from_description": "",
+    "root_of_description": "",
+    "borrowed_from_description": "",
+    "loaned_to_description": "",
+    "add": "",
+    "choose_entry": "",
+    "relationship": "",
+    "no_matches": "",
+    "remove_confirm": "",
+    "help_intro": "",
+    "custom_types_note": ""
   }
 }

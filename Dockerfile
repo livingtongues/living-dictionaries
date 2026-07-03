@@ -26,6 +26,12 @@ COPY site/ site/
 # the build context by deploy.sh). Supplies `$env/static/*` vars baked at build time.
 COPY .env site/.env
 
+# Bake the latest DB-backed translations into the build: the image build can't
+# see /data, but the OLD container is still serving — fetch its /api/i18n/export
+# and overwrite the locale files. Never fails the build (falls back to the
+# committed seed files with a loud warning).
+RUN node site/scripts/fetch-baked-i18n.mjs
+
 RUN pnpm --filter=site build
 
 

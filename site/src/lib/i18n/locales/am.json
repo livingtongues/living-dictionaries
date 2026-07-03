@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "መለያ ማደራጃ",
+    "your_name": "",
     "log_out": "ውጣ",
     "send_code": "ኮድ ላክ",
     "enter_6_digit_code_sent_to": "የተላከውን ባለ 6-አሃዝ ኮድ ያስገቡ"
@@ -159,6 +160,14 @@
     "google_terms": "የጉግል ውሎች",
     "full_title": "{dictionary_name} ሕያው መዝገበ"
   },
+  "sync": {
+    "syncing": "",
+    "synced": "",
+    "error": "",
+    "offline": "",
+    "idle": "",
+    "tap_failed": ""
+  },
   "entry": {
     "view_entries": "ይመልከቱ ግቤቶችን",
     "signed_in_as_manager": "እንድታደርገው ለውጦች ይህን መዝገበ አስተዳዳሪ ሆነው መግባት አለብዎት.",
@@ -224,6 +233,9 @@
     "error_recorded": "የ ስህተት ተመዝግቧል ተደርጓል እና እኛ ወደ በመመልከት ይሆናል.",
     "please_explain": "ከእኛ ምን እንደተከሰተ ለማብራራት አንድ አጭር ማስታወሻ መላክ እባክዎ ትችላለህ?"
   },
+  "map": {
+    "webgl_unavailable": ""
+  },
   "header": {
     "select_language": "ቋንቋ ይምረጡ",
     "please_create_account": "አንድ መለያ ይፍጠሩ",
@@ -280,7 +292,14 @@
     "transmitter": "ከሰላምታ ጋር፣ የሊቪንግ ዲክሽነሪዎች ቡድን",
     "disjunctive": "ወይም",
     "required": "ያስፈልጋል",
-    "optional": "አማራጭ"
+    "optional": "አማራጭ",
+    "reload": "",
+    "appearance": "",
+    "theme_system": "",
+    "theme_light": "",
+    "theme_dark": "",
+    "app_update_needed": "",
+    "local_data_expired": ""
   },
   "settings": {
     "community_permission": "የንግግር ማህበረሰብ በዚህ ቋንቋ መስመር ላይ መሆን ያስችላቸዋል?",
@@ -290,7 +309,34 @@
     "optional_data_fields": "አስገዳጅ ያልሆነ የውሂብ መስኮች",
     "unable_to_delete": "ማሳሰቢያ፡ እነዚህን የሚያብረቀርቁ ቋንቋዎች በኋላ ላይ መሰረዝ አይችሉም።",
     "print_access_meaning": "ይህ ለሕዝብ ይህንን ሕያው መዝገበ-ቃላት እንደ .PDF የማውረድ እና የማተም ችሎታ ይሰጣል።",
-    "featured_image": "ተለይቶ የቀረበ ምስል"
+    "featured_image": "ተለይቶ የቀረበ ምስል",
+    "delete_dictionary": ""
+  },
+  "source": {
+    "create": "",
+    "edit": "",
+    "citation": "",
+    "abbreviation": "",
+    "author": "",
+    "year": "",
+    "url": "",
+    "license": "",
+    "type": "",
+    "slug": "",
+    "slug_hint": "",
+    "slug_required": "",
+    "used_by": "",
+    "empty": "",
+    "type_dictionary": "",
+    "type_wordlist": "",
+    "type_fieldwork": "",
+    "type_manuscript": "",
+    "type_other": "",
+    "sources": "",
+    "cite_instead": "",
+    "select_source": "",
+    "choose_speaker_instead": "",
+    "source": ""
   },
   "speakers": {
     "add_new_speaker": "አዲስ ማጉያ ያክሉ",
@@ -305,7 +351,8 @@
   },
   "terms": {
     "agree_by_submit": "ይህን ቅጽ በማስገባት, ተስማምተዋል የእኛን",
-    "agreement_to_terms": "ውል ስምምነት"
+    "agreement_to_terms": "ውል ስምምነት",
+    "privacy_policy": ""
   },
   "upload": {
     "error": "የማይደገፍ የፋይል አይነት",
@@ -416,5 +463,43 @@
   "sentence": {
     "add": "ዓረፍተ ነገር ያክሉ",
     "delete": "ዓረፍተ ነገር ሰርዝ"
+  },
+  "relationship_type": {
+    "related_entries": "",
+    "synonym": "",
+    "antonym": "",
+    "cognate": "",
+    "dialectal_variant": "",
+    "see_also": "",
+    "spelling_variant": "",
+    "hypernym": "",
+    "hyponym": "",
+    "holonym": "",
+    "meronym": "",
+    "derived_from": "",
+    "root_of": "",
+    "borrowed_from": "",
+    "loaned_to": "",
+    "synonym_description": "",
+    "antonym_description": "",
+    "cognate_description": "",
+    "dialectal_variant_description": "",
+    "see_also_description": "",
+    "spelling_variant_description": "",
+    "hypernym_description": "",
+    "hyponym_description": "",
+    "holonym_description": "",
+    "meronym_description": "",
+    "derived_from_description": "",
+    "root_of_description": "",
+    "borrowed_from_description": "",
+    "loaned_to_description": "",
+    "add": "",
+    "choose_entry": "",
+    "relationship": "",
+    "no_matches": "",
+    "remove_confirm": "",
+    "help_intro": "",
+    "custom_types_note": ""
   }
 }

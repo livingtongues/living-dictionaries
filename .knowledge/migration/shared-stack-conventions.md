@@ -30,9 +30,14 @@ outlives the migration plan.
   (`better-sqlite3`, etc.) MUST live in `dependencies`, not `devDependencies` — adapter-node
   externalizes `dependencies` and bundles `devDependencies`, so a native module in devDeps breaks
   the build.
-- **Auth = Email-OTP + JWT + SQLite `users` + allow-lists. Permissions stay NUMERIC** — the
-  named-roles migration was designed and **REJECTED by Jacob; don't re-propose.** LD: `AdminLevel`
-  + dev `dev_admin_level` cookie. house: `level` 1/2/3 + `is_editor`.
+- **Auth = Email-OTP + JWT + SQLite `users` + allow-lists. Permissions stay NUMERIC** — the full
+  named-roles migration was designed and **REJECTED by Jacob; don't re-propose.** LD (2026-07-03):
+  effective levels 0-3 — 3 Super Admin / 2 Admin hardcoded (`AdminLevel = 2 | 3` in
+  `$lib/admins.ts`), 1 Super Manager granted via the `users.roles` JSON column (`SITE_ROLES`,
+  toggleable from /admin/users/[id]; dictionary-manager powers on every dict, NO /admin access —
+  a DB write can never escalate into the admin club) + dev `dev_admin_level` cookie (0-3).
+  house: `level` 1/2/3 + `is_editor`. The `users.roles` array is the sanctioned escape hatch for
+  future orthogonal grants (e.g. `super_editor`) — extend it before reaching for role tables.
 - **wa-sqlite local-first sync engine** (browser DB + SharedWorker + bidirectional `/changes` sync)
   is the shared write/sync substrate. **Sync-engine invariants to keep:**
   - clear `dirty` ONLY by **pushed row id** (NOT blanket `WHERE dirty=1` — junction rows silently

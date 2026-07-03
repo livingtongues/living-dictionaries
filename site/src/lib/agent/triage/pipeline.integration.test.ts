@@ -31,7 +31,7 @@ function seed_db(): Database.Database {
       id TEXT PRIMARY KEY, thread_id TEXT, author_kind TEXT, body_text TEXT, body_html TEXT, created_at TEXT);
   `)
   db.prepare('INSERT INTO users VALUES (?,?,?,?)').run(AGENT_USER_ID, 'agent@livingdictionaries.app', 'LD Triage', 'email')
-  db.prepare('INSERT INTO users VALUES (?,?,?,?)').run(DIEGO_USER_ID, 'diego@livingtongues.org', 'Diego Mariscal', 'email')
+  db.prepare('INSERT INTO users VALUES (?,?,?,?)').run(DIEGO_USER_ID, 'diego@livingtongues.org', 'Diego Córdova', 'email')
   db.prepare('INSERT INTO users VALUES (?,?,?,?)').run('cust-1', 'maria@example.com', 'Maria', 'email')
   db.prepare('INSERT INTO dictionaries (id, url, name, entry_count, public, updated_at) VALUES (?,?,?,?,?,?)')
     .run('dict1', 'nuxalk', 'Nuxalk', 412, 1, '2026-06-20T00:00:00.000Z')

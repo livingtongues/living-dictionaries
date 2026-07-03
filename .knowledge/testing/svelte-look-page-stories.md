@@ -36,3 +36,13 @@ filters pick them up.
 ## Tween/animation timing
 `tweened` bars (Progress) render at their START value in a fresh SSR/CSR shot. To screenshot a
 filled bar, set `csr: true` and `await` ~ the tween duration in `interactions` before the shot.
+
+## Layout stories can't pass a `children` snippet — make the layout's render optional
+For page/layout components, svelte-look folds **all** story `props` into `data`
+(`props = { data: { ...page_data, ...props } }` in both the SSR path and the CSR
+vite-loader). So a `+layout.svelte` story can never deliver a top-level `children`
+snippet — `createRawSnippet` in props just lands as `data.children` and the layout's
+`{@render children()}` dies with "children is not a function" at render time.
+Fix: write the layout as `{@render children?.()}` (harmless in the real app — SvelteKit
+always provides it) and give stories no children at all. Applied to
+`routes/admin/+layout.svelte` (2026-07-03); same constraint applies in house.

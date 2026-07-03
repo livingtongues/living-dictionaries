@@ -63,7 +63,7 @@
   </Button>
 
   <div>
-    {#if dev || auth_user.admin_level > 1}
+    {#if dev || auth_user.admin_level >= 3}
       <JSON obj={entry} />
     {/if}
     {#if can_edit}

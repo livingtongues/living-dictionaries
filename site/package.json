@@ -11,6 +11,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --threshold error --diagnostic-sources js,svelte",
     "test": "vitest",
     "seed:achi-fixture": "tsx scripts/seed-achi-fixture.ts",
+    "i18n:refresh": "node scripts/fetch-baked-i18n.mjs",
     "test:db": "node e2e/db-ops-flow.mjs",
     "test:flow": "node e2e/achi-flow.mjs",
     "test:sync": "node e2e/dict-sync.mjs",

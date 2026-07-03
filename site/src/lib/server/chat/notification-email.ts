@@ -42,10 +42,10 @@ export function build_chat_notification_email({ author_name, room_name, body_htm
     `<div style="font-weight:700;margin:0 0 4px">${author}</div>`,
     `<div style="font-size:15px;line-height:1.5;color:#1a1a1a">${linkify_html(body_html)}</div>`,
     `</div>`,
-    `<p style="margin:0"><a href="${link}" style="display:inline-block;padding:9px 18px;border-radius:6px;background:#178871;color:#fff;text-decoration:none;font-weight:600">Open the team chat</a></p>`,
+    `<p style="margin:0"><a href="${link}" style="display:inline-block;padding:9px 18px;border-radius:6px;background:#178871;color:#fff;text-decoration:none;font-weight:600">Open the chat</a></p>`,
   ].join('')
 
-  const text = `${context}\n\n${author_name}:\n${body_text}\n\nOpen the team chat: ${link}`
+  const text = `${context}\n\n${author_name}:\n${body_text}\n\nOpen the chat: ${link}`
 
   return { subject, html, text }
 }

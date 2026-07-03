@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "একাওন্টৰ সংহতিসমূহ",
+    "your_name": "",
     "log_out": "লগ আউট কৰক",
     "send_code": "",
     "enter_6_digit_code_sent_to": ""
@@ -159,6 +160,14 @@
     "google_terms": "গুগ'লৰ চৰ্তাৱলী ",
     "full_title": "{dictionary_name} জীৱন্ত অভিধান/লিভিং দিক্সনেৰী"
   },
+  "sync": {
+    "syncing": "",
+    "synced": "",
+    "error": "",
+    "offline": "",
+    "idle": "",
+    "tap_failed": ""
+  },
   "entry": {
     "view_entries": "প্ৰবিষ্টিসমূহ দৰ্শন কৰক",
     "signed_in_as_manager": "পৰিৱৰ্তন কৰিবলৈ আপোনি এই অভিধানখনৰ মেনেজাৰ/ব্যৱস্থাপক হিচাপে ছাইন ইন কৰিব লাগিব।",
@@ -224,6 +233,9 @@
     "error_recorded": "ত্ৰুটিটো ৰেকৰ্ড কৰা/টুকি ৰখা হৈছে আৰু আমি ইয়াক বিচাৰি উলিয়াব চেষ্টা কৰিম।",
     "please_explain": "কি ঘটিছিল বুজাবলৈ আপুনি অনুগ্ৰহ কৰি আমালৈ এটা চমু টোকা প্ৰেৰণ কৰিব পাৰিবনে?"
   },
+  "map": {
+    "webgl_unavailable": ""
+  },
   "header": {
     "select_language": "ভাষা নিৰ্বাচন কৰক",
     "please_create_account": "অনুগ্ৰহ কৰি এটা একাউণ্ট সৃষ্টি কৰক",
@@ -280,7 +292,14 @@
     "transmitter": "",
     "disjunctive": "",
     "required": "",
-    "optional": ""
+    "optional": "",
+    "reload": "",
+    "appearance": "",
+    "theme_system": "",
+    "theme_light": "",
+    "theme_dark": "",
+    "app_update_needed": "",
+    "local_data_expired": ""
   },
   "settings": {
     "community_permission": "ভাষণ সম্প্ৰদায়ে এই ভাষাটো অনলাইন/ইণ্টাৰনেটত উপলব্ধ হ'বলৈ অনুমতি দিয়ে নেকি?",
@@ -290,7 +309,34 @@
     "optional_data_fields": "বৈকল্পিক ডাটা/তথ্য ফিল্ডসমূহ/ক্ষেত্ৰসমূহ",
     "unable_to_delete": "",
     "print_access_meaning": "",
-    "featured_image": ""
+    "featured_image": "",
+    "delete_dictionary": ""
+  },
+  "source": {
+    "create": "",
+    "edit": "",
+    "citation": "",
+    "abbreviation": "",
+    "author": "",
+    "year": "",
+    "url": "",
+    "license": "",
+    "type": "",
+    "slug": "",
+    "slug_hint": "",
+    "slug_required": "",
+    "used_by": "",
+    "empty": "",
+    "type_dictionary": "",
+    "type_wordlist": "",
+    "type_fieldwork": "",
+    "type_manuscript": "",
+    "type_other": "",
+    "sources": "",
+    "cite_instead": "",
+    "select_source": "",
+    "choose_speaker_instead": "",
+    "source": ""
   },
   "speakers": {
     "add_new_speaker": "নতুন বক্তা যোগ কৰক",
@@ -305,7 +351,8 @@
   },
   "terms": {
     "agree_by_submit": "এই প্ৰপত্ৰ দাখিল কৰি আপুনি আমাৰ সৈতে সন্মত হৈছে",
-    "agreement_to_terms": "চৰ্তাৱলীৰ সৈতে চুক্তি"
+    "agreement_to_terms": "চৰ্তাৱলীৰ সৈতে চুক্তি",
+    "privacy_policy": ""
   },
   "upload": {
     "error": "অসমৰ্থিত ফাইলৰ ধৰণ",
@@ -416,5 +463,43 @@
   "sentence": {
     "add": "",
     "delete": ""
+  },
+  "relationship_type": {
+    "related_entries": "",
+    "synonym": "",
+    "antonym": "",
+    "cognate": "",
+    "dialectal_variant": "",
+    "see_also": "",
+    "spelling_variant": "",
+    "hypernym": "",
+    "hyponym": "",
+    "holonym": "",
+    "meronym": "",
+    "derived_from": "",
+    "root_of": "",
+    "borrowed_from": "",
+    "loaned_to": "",
+    "synonym_description": "",
+    "antonym_description": "",
+    "cognate_description": "",
+    "dialectal_variant_description": "",
+    "see_also_description": "",
+    "spelling_variant_description": "",
+    "hypernym_description": "",
+    "hyponym_description": "",
+    "holonym_description": "",
+    "meronym_description": "",
+    "derived_from_description": "",
+    "root_of_description": "",
+    "borrowed_from_description": "",
+    "loaned_to_description": "",
+    "add": "",
+    "choose_entry": "",
+    "relationship": "",
+    "no_matches": "",
+    "remove_confirm": "",
+    "help_intro": "",
+    "custom_types_note": ""
   }
 }

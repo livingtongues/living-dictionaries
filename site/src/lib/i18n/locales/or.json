@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "ଖାତା ସେଟିଂ",
+    "your_name": "",
     "log_out": "ପ୍ରସ୍ଥାନ କର",
     "send_code": "କୋଡ୍ ପଠାନ୍ତୁ",
     "enter_6_digit_code_sent_to": "ପଠାଯାଇଥିବା 6-ଅଙ୍କ ବିଶିଷ୍ଟ କୋଡ୍ ଲେଖନ୍ତୁ"
@@ -159,6 +160,14 @@
     "google_terms": "Google ସର୍ତ୍ତାବଳୀ",
     "full_title": "{dictionary_name} ଜୀବନ୍ତ Dictionary"
   },
+  "sync": {
+    "syncing": "",
+    "synced": "",
+    "error": "",
+    "offline": "",
+    "idle": "",
+    "tap_failed": ""
+  },
   "entry": {
     "view_entries": "ଦର୍ଶନ ଭରଣଗୁଡ଼ିକୁ",
     "signed_in_as_manager": "ଆପଣ ଏହି ଅଭିଧାନ ପରିବର୍ତ୍ତନଗୁଡିକ କୁ ର ଏକ ପରିଚାଳକ ପରି ସାଇନ୍ ଉଚିତ।",
@@ -224,6 +233,9 @@
     "error_recorded": "ତୃଟି ରେକର୍ଡ ଏବଂ କରାଯାଇଛି ଆମେ ଏହା ଭିତରକୁ ଖୋଜୁଥିବା ହେବ।",
     "please_explain": "ଦୟାକରି ଆପଣ ଆମ୍ଭକୁ ଘଟିଥିଲା ​​ତାହା ବୁଝାଇ ପାଇଁ ଅଳ୍ପ ନୋଟ୍ ପ୍ରେରଣ କରିପାରିବେ?"
   },
+  "map": {
+    "webgl_unavailable": ""
+  },
   "header": {
     "select_language": "ଚୟନ ଭାଷା",
     "please_create_account": "ଏକ ଖାତା ସୃଷ୍ଟି ଦୟାକରି",
@@ -280,7 +292,14 @@
     "transmitter": "ସାଦର, ଲିଭିଙ୍ଗ୍ ଡିକ୍ସନାରୀ ଦଳ",
     "disjunctive": "କିମ୍ବା",
     "required": "ଆବଶ୍ୟକ",
-    "optional": "ଇଚ୍ଛାଧୀନ"
+    "optional": "ଇଚ୍ଛାଧୀନ",
+    "reload": "",
+    "appearance": "",
+    "theme_system": "",
+    "theme_light": "",
+    "theme_dark": "",
+    "app_update_needed": "",
+    "local_data_expired": ""
   },
   "settings": {
     "community_permission": "ବକ୍ତବ୍ୟ ସମ୍ପ୍ରଦାୟ ଏହି ଭାଷା ଅନଲାଇନ୍ ଅନୁମତି କରେ?",
@@ -290,7 +309,34 @@
     "optional_data_fields": "ବୈକଳ୍ପିକ ଡାଟା Fields",
     "unable_to_delete": "ଟିପ୍ପଣୀ: ଆପଣ ପରେ ଏହି ଗ୍ଲୋସିଂ ଭାଷାଗୁଡ଼ିକୁ ଡିଲିଟ୍ କରିପାରିବେ ନାହିଁ।",
     "print_access_meaning": "ଏହା ଜନସାଧାରଣଙ୍କୁ ଏହି ଜୀବନ୍ତ ଅଭିଧାନକୁ .PDF ଭାବରେ ଡାଉନଲୋଡ୍ ଏବଂ ପ୍ରିଣ୍ଟ କରିବାର କ୍ଷମତା ପ୍ରଦାନ କରେ।",
-    "featured_image": "ବୈଶିଷ୍ଟ୍ୟପୂର୍ଣ୍ଣ ପ୍ରତିଛବି"
+    "featured_image": "ବୈଶିଷ୍ଟ୍ୟପୂର୍ଣ୍ଣ ପ୍ରତିଛବି",
+    "delete_dictionary": ""
+  },
+  "source": {
+    "create": "",
+    "edit": "",
+    "citation": "",
+    "abbreviation": "",
+    "author": "",
+    "year": "",
+    "url": "",
+    "license": "",
+    "type": "",
+    "slug": "",
+    "slug_hint": "",
+    "slug_required": "",
+    "used_by": "",
+    "empty": "",
+    "type_dictionary": "",
+    "type_wordlist": "",
+    "type_fieldwork": "",
+    "type_manuscript": "",
+    "type_other": "",
+    "sources": "",
+    "cite_instead": "",
+    "select_source": "",
+    "choose_speaker_instead": "",
+    "source": ""
   },
   "speakers": {
     "add_new_speaker": "ନୂତନ ବକ୍ତା ଯୋଡନ୍ତୁ",
@@ -305,7 +351,8 @@
   },
   "terms": {
     "agree_by_submit": "ଏହି ଫର୍ମ ଉପସ୍ଥାପନ କରି, ଆପଣ ରାଜି ଆମ୍ଭର",
-    "agreement_to_terms": "ସର୍ତ୍ତାବଳୀକୁ ଚୁକ୍ତି"
+    "agreement_to_terms": "ସର୍ତ୍ତାବଳୀକୁ ଚୁକ୍ତି",
+    "privacy_policy": ""
   },
   "upload": {
     "error": "ଅସମର୍ଥିତ ଫାଇଲ ପ୍ରକାର",
@@ -416,5 +463,43 @@
   "sentence": {
     "add": "ବାକ୍ୟ ଯୋଡନ୍ତୁ",
     "delete": "ବାକ୍ୟ ବିଲୋପ କରନ୍ତୁ"
+  },
+  "relationship_type": {
+    "related_entries": "",
+    "synonym": "",
+    "antonym": "",
+    "cognate": "",
+    "dialectal_variant": "",
+    "see_also": "",
+    "spelling_variant": "",
+    "hypernym": "",
+    "hyponym": "",
+    "holonym": "",
+    "meronym": "",
+    "derived_from": "",
+    "root_of": "",
+    "borrowed_from": "",
+    "loaned_to": "",
+    "synonym_description": "",
+    "antonym_description": "",
+    "cognate_description": "",
+    "dialectal_variant_description": "",
+    "see_also_description": "",
+    "spelling_variant_description": "",
+    "hypernym_description": "",
+    "hyponym_description": "",
+    "holonym_description": "",
+    "meronym_description": "",
+    "derived_from_description": "",
+    "root_of_description": "",
+    "borrowed_from_description": "",
+    "loaned_to_description": "",
+    "add": "",
+    "choose_entry": "",
+    "relationship": "",
+    "no_matches": "",
+    "remove_confirm": "",
+    "help_intro": "",
+    "custom_types_note": ""
   }
 }

@@ -258,6 +258,16 @@
             {/if}
           {/if}
         </div>
+        {#if message.cc || message.bcc}
+          <div class="recipients-line">
+            {#if message.cc}
+              <span><span class="rcpt-label">cc</span> {message.cc}</span>
+            {/if}
+            {#if message.bcc}
+              <span><span class="rcpt-label">bcc</span> {message.bcc}</span>
+            {/if}
+          </div>
+        {/if}
         {#if message.body_text?.trim()}
           <div class="message-body">{message.body_text}</div>
         {:else if message.body_html}
@@ -282,7 +292,7 @@
   </ol>
 
   {#if !thread.resolved_at}
-    <ReplyComposer {thread_id} sync={data.sync} bind:body_html={draft_html} />
+    <ReplyComposer {thread_id} {db} sync={data.sync} bind:body_html={draft_html} />
   {/if}
 {/if}
 
@@ -434,6 +444,21 @@
   }
   .delete-failed-btn:hover {
     color: var(--danger);
+  }
+
+  .recipients-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    font-size: 0.75rem;
+    color: var(--color-secondary);
+    margin-bottom: 0.5rem;
+  }
+  .rcpt-label {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    opacity: 0.75;
   }
 
   .message-body {

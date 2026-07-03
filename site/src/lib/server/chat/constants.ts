@@ -1,44 +1,22 @@
 /**
- * Room ids + display names are client-safe and live in `$lib/admin/chat/rooms`
- * (the Team page imports them too); re-exported here so server code has one
+ * Room/system identifiers are client-safe and live in `$lib/chat/constants`
+ * (the /chat page imports them too); re-exported here so server code has one
  * import site. The rest below is server-only.
+ *
+ * Channels are DB-managed `chat_rooms` rows (see chat-db.ts `create_channel`
+ * etc.) — there is no fixed channel list in source anymore. The two system
+ * rooms (`all-admins`, `notifications`) are seeded + admin-joined at boot by
+ * `ensure_all_admins_in_team_chat`.
  */
-import {
-  ROOM_ALL_ADMINS,
-  ROOM_ANNA_GREG_JACOB,
-  ROOM_DIEGO_ANNA_GREG,
-  ROOM_NOTIFICATIONS,
-} from '$lib/admin/chat/rooms'
-
 export {
   ROOM_ALL_ADMINS,
-  ROOM_ANNA_GREG_JACOB,
-  ROOM_DIEGO_ANNA_GREG,
-  ROOM_NAMES,
   ROOM_NOTIFICATIONS,
+  SYSTEM_ROOM_IDS,
   SYSTEM_USER_ID,
   SYSTEM_USER_NAME,
-} from '$lib/admin/chat/rooms'
+} from '$lib/chat/constants'
 
-/**
- * FIXED-membership channel rooms. `members: 'all'` = every allow-listed admin;
- * otherwise an explicit email list (emails mirror `$lib/admins.ts`). Upserted +
- * joined lazily by `ensure_my_chat_setup` on every chat-API hit, and eagerly at
- * boot by `ensure_all_admins_in_team_chat`.
- */
-export interface FixedChannel {
-  id: string
-  members: 'all' | readonly string[]
-}
-
-export const FIXED_CHANNELS: readonly FixedChannel[] = [
-  { id: ROOM_ALL_ADMINS, members: 'all' },
-  { id: ROOM_NOTIFICATIONS, members: 'all' },
-  { id: ROOM_ANNA_GREG_JACOB, members: ['dictionaries@livingtongues.org', 'livingtongues@gmail.com', 'jwrunner7@gmail.com'] },
-  { id: ROOM_DIEGO_ANNA_GREG, members: ['diego@livingtongues.org', 'dictionaries@livingtongues.org', 'livingtongues@gmail.com'] },
-]
-
-/** An admin counts as "online" (→ suppress external ping) if seen within this window. */
+/** A member counts as "online" (→ suppress external ping) if seen within this window. */
 export const PRESENCE_WINDOW_MS = 60_000
 
 /** Newest-first page size for the message list / poll. */

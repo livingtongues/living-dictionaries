@@ -33,6 +33,18 @@ export enum UnpublishedLocales {
 
 export type UnpublishedLocaleCode = keyof typeof UnpublishedLocales
 
+/** Every locale a translator can work on: published + unpublished, minus English (the code-owned source). */
+export type TranslatableLocale = Exclude<LocaleCode | UnpublishedLocaleCode, 'en'>
+
+export const TRANSLATABLE_LOCALES = [
+  ...Object.keys(Locales).filter(locale => locale !== 'en'),
+  ...Object.keys(UnpublishedLocales),
+] as TranslatableLocale[]
+
+export function get_locale_display_name(locale: string): string {
+  return (Locales as Record<string, string>)[locale] || (UnpublishedLocales as Record<string, string>)[locale] || locale
+}
+
 export function findSupportedLocaleFromAcceptedLanguages(acceptedLanguageHeader: string | null) {
   const locales = acceptedLanguageHeader
     ?.split(',')

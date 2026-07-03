@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "Configuración",
+    "your_name": "",
     "log_out": "Cerrar sesión",
     "send_code": "Enviar código",
     "enter_6_digit_code_sent_to": "Introduzca el código de 6 dígitos enviado a"
@@ -159,6 +160,14 @@
     "google_terms": "Términos de Google",
     "full_title": "Diccionario Vivo {dictionary_name}"
   },
+  "sync": {
+    "syncing": "",
+    "synced": "",
+    "error": "",
+    "offline": "",
+    "idle": "",
+    "tap_failed": ""
+  },
   "entry": {
     "view_entries": "Ver las entradas",
     "signed_in_as_manager": "Usted debe ser un administrador de este diccionario para modificarlo.",
@@ -224,6 +233,9 @@
     "error_recorded": "El error ha sido registrado y lo investigaremos.",
     "please_explain": "Por favor, envíenos un mensaje corto explicando lo que pasó."
   },
+  "map": {
+    "webgl_unavailable": ""
+  },
   "header": {
     "select_language": "Seleccione un idioma",
     "please_create_account": "Por favor, crear una cuenta",
@@ -280,7 +292,14 @@
     "transmitter": "Atentamente, el equipo de Living Dictionaries",
     "disjunctive": "o",
     "required": "obligatorio",
-    "optional": "opcional"
+    "optional": "opcional",
+    "reload": "",
+    "appearance": "",
+    "theme_system": "",
+    "theme_light": "",
+    "theme_dark": "",
+    "app_update_needed": "",
+    "local_data_expired": ""
   },
   "settings": {
     "community_permission": "¿Permite la comunidad lingüística que este idioma esté en línea?",
@@ -290,7 +309,34 @@
     "optional_data_fields": "Campos de datos opcionales",
     "unable_to_delete": "Nota: no podrá eliminar las glosas de estas lenguas más tarde",
     "print_access_meaning": "Esto le da al público la capacidad de descargar e imprimir este diccionario vivo como un .pdf",
-    "featured_image": "Imagen principal"
+    "featured_image": "Imagen principal",
+    "delete_dictionary": ""
+  },
+  "source": {
+    "create": "",
+    "edit": "",
+    "citation": "",
+    "abbreviation": "",
+    "author": "",
+    "year": "",
+    "url": "",
+    "license": "",
+    "type": "",
+    "slug": "",
+    "slug_hint": "",
+    "slug_required": "",
+    "used_by": "",
+    "empty": "",
+    "type_dictionary": "",
+    "type_wordlist": "",
+    "type_fieldwork": "",
+    "type_manuscript": "",
+    "type_other": "",
+    "sources": "",
+    "cite_instead": "",
+    "select_source": "",
+    "choose_speaker_instead": "",
+    "source": ""
   },
   "speakers": {
     "add_new_speaker": "Agregar un nuevo hablante",
@@ -305,7 +351,8 @@
   },
   "terms": {
     "agree_by_submit": "Al enviar este formulario, usted está de acuerdo con nuestros",
-    "agreement_to_terms": "Aceptar las condiciones de uso"
+    "agreement_to_terms": "Aceptar las condiciones de uso",
+    "privacy_policy": ""
   },
   "upload": {
     "error": "Este tipo de archivo no es compatible.",
@@ -416,5 +463,43 @@
   "sentence": {
     "add": "Agregar oración",
     "delete": "Eliminar oración"
+  },
+  "relationship_type": {
+    "related_entries": "",
+    "synonym": "",
+    "antonym": "",
+    "cognate": "",
+    "dialectal_variant": "",
+    "see_also": "",
+    "spelling_variant": "",
+    "hypernym": "",
+    "hyponym": "",
+    "holonym": "",
+    "meronym": "",
+    "derived_from": "",
+    "root_of": "",
+    "borrowed_from": "",
+    "loaned_to": "",
+    "synonym_description": "",
+    "antonym_description": "",
+    "cognate_description": "",
+    "dialectal_variant_description": "",
+    "see_also_description": "",
+    "spelling_variant_description": "",
+    "hypernym_description": "",
+    "hyponym_description": "",
+    "holonym_description": "",
+    "meronym_description": "",
+    "derived_from_description": "",
+    "root_of_description": "",
+    "borrowed_from_description": "",
+    "loaned_to_description": "",
+    "add": "",
+    "choose_entry": "",
+    "relationship": "",
+    "no_matches": "",
+    "remove_confirm": "",
+    "help_intro": "",
+    "custom_types_note": ""
   }
 }

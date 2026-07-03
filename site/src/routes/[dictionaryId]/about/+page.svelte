@@ -47,7 +47,7 @@
     </div>
   {/if}
 
-  {#if is_manager || is_contributor || auth_user.admin_level > 1}
+  {#if is_manager || is_contributor || auth_user.admin_level >= 3}
     <UserGuide />
   {/if}
   <div style="display: flex">

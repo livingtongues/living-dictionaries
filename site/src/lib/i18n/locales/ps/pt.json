@@ -87,6 +87,7 @@
     "reflpro": "pronome reflexivo",
     "relpro": "pronome relativo",
     "vd": "verbo ditransitivo",
-    "va": "ambitransitivo"
+    "va": "ambitransitivo",
+    "obj": ""
   }
 }

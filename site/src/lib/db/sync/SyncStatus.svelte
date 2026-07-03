@@ -26,45 +26,30 @@
   })
 </script>
 
-<div class="sync-status">
+<!-- Bare status icon — nests inside the admin "Sync" nav tab (which links to
+     /admin/sync); the tab supplies the label, click target + layout. -->
+<span class="sync-status">
   {#if status === 'syncing'}
-    <a href="/sync" class="btn-ghost sync-link" aria-label="Syncing">
-      <IconMdiCloudSyncOutline class="sync-icon syncing" />
-    </a>
+    <IconMdiCloudSyncOutline class="syncing" aria-label="Syncing" />
   {:else if status === 'synced'}
-    <a href="/sync" class="btn-ghost sync-link" aria-label="Synced">
-      <IconMdiCloudCheckOutline class="sync-icon" />
-    </a>
+    <IconMdiCloudCheckOutline aria-label="Synced" />
   {:else if status === 'error'}
-    <a href="/sync" class="btn-ghost sync-link" aria-label="Sync error">
-      <IconMdiCloudAlertOutline class="sync-icon" style="color: var(--danger)" />
-    </a>
+    <IconMdiCloudAlertOutline aria-label="Sync error" style="color: var(--danger)" />
   {:else if status === 'offline'}
-    <a href="/sync" class="btn-ghost sync-link" aria-label="Offline">
-      <IconMdiCloudOffOutline class="sync-icon" />
-    </a>
+    <IconMdiCloudOffOutline aria-label="Offline" />
   {:else}
-    <a href="/sync" class="btn-ghost sync-link" aria-label="Sync status">
-      <IconMdiCloudOutline class="sync-icon" />
-    </a>
+    <IconMdiCloudOutline aria-label="Sync status" />
   {/if}
-</div>
+</span>
 
 <style>
   .sync-status {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-  }
-
-  .sync-link {
-    padding: 0.5rem;
-  }
-
-  .sync-icon {
     font-size: 1.125rem;
   }
 
-  .sync-icon.syncing {
+  .sync-status :global(.syncing) {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 

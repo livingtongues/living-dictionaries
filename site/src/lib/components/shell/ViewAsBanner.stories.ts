@@ -16,7 +16,9 @@ function admin_user({ preview_level }: { preview_level: number }) {
       avatar_url: null,
       created_at: '2024-01-15T00:00:00Z',
       is_admin: true,
-      admin_level: 2,
+      admin_level: 3,
+      is_chat_member: true,
+      translator_locales: [],
       preferred_locale: null,
       unsubscribed_from_emails: false,
     },
@@ -30,7 +32,7 @@ export const PreviewingVisitor: Story<typeof Component> = {
   page_data: { auth_user: admin_user({ preview_level: 0 }) },
 }
 
-/** The pill shown while previewing as a lower admin tier. */
-export const PreviewingAdminLevel1: Story<typeof Component> = {
+/** The pill shown while previewing as a lower tier (Super Manager). */
+export const PreviewingSuperManager: Story<typeof Component> = {
   page_data: { auth_user: admin_user({ preview_level: 1 }) },
 }

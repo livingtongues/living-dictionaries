@@ -11,9 +11,8 @@
 import type Database from 'better-sqlite3'
 import { env } from '$env/dynamic/private'
 import { get_admin } from '$lib/admins'
-import { notify_admin } from '$lib/notifications/notify-admins'
-import { ensure_my_chat_setup, get_room, online_user_ids, post_message } from '$lib/server/chat/chat-db'
-import { ROOM_ALL_ADMINS, ROOM_NAMES } from '$lib/server/chat/constants'
+import { notify_user } from '$lib/notifications/notify-admins'
+import { get_room, online_user_ids, post_message } from '$lib/server/chat/chat-db'
 import { log_server_event } from '$lib/server/log-server-event'
 import { get_shared_db, open_shared_db } from './shared-db'
 
@@ -27,6 +26,7 @@ interface RepingCandidate {
   user_id: string
   last_read_at: string | null
   email: string | null
+  name: string | null
 }
 
 /** One sweep pass. Exported for tests + a future "force" button. Returns # re-pinged. */
@@ -37,7 +37,7 @@ export async function sweep_chat_repings({ db = get_shared_db(), base_url = SITE
 } = {}): Promise<number> {
   const cutoff = new Date(now.getTime() - REPING_AFTER_MS).toISOString()
   const candidates = db.prepare(`
-    SELECT m.room_id, m.user_id, m.last_read_at, u.email
+    SELECT m.room_id, m.user_id, m.last_read_at, u.email, u.name
     FROM chat_room_members m
     LEFT JOIN users u ON u.id = m.user_id
     WHERE m.last_notified_at IS NOT NULL
@@ -66,11 +66,11 @@ export async function sweep_chat_repings({ db = get_shared_db(), base_url = SITE
       continue
 
     const room = get_room({ db, room_id: candidate.room_id })
-    const room_name = room?.name ?? ROOM_NAMES[candidate.room_id] ?? 'Team chat'
+    const room_name = room?.name ?? 'the chat'
     const subject = room?.kind === 'dm' ? 'Still unread: a direct message' : `Still unread in ${room_name}`
     const body = room?.kind === 'dm' ? 'You still have an unread direct message.' : `You still have unread messages in ${room_name}.`
-    const link = `${base_url}/admin/team?room=${encodeURIComponent(candidate.room_id)}`
-    await notify_admin({ email: candidate.email, subject, body, link })
+    const link = `${base_url}/chat?room=${encodeURIComponent(candidate.room_id)}`
+    await notify_user({ email: candidate.email, name: candidate.name, subject, body, link })
     stamp.run(now.toISOString(), candidate.room_id, candidate.user_id)
     sent++
   }
@@ -123,23 +123,26 @@ function run_guarded(state: CronState): void {
 }
 
 if (import.meta.vitest) {
+  const { create_channel, add_room_member } = await import('$lib/server/chat/chat-db')
+
   function seed() {
     const db = open_shared_db(':memory:')
     const ts = new Date().toISOString()
+    // One admin + one non-admin partner member (repings must reach both).
     db.prepare('INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)')
       .run('u-jacob', 'jwrunner7@gmail.com', 'Jacob', '[]', ts, ts)
     db.prepare('INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)')
-      .run('u-diego', 'diego@livingtongues.org', 'Diego', '[]', ts, ts)
-    ensure_my_chat_setup({ db, user_id: 'u-jacob', email: 'jwrunner7@gmail.com' })
-    ensure_my_chat_setup({ db, user_id: 'u-diego', email: 'diego@livingtongues.org' })
-    return db
+      .run('u-partner', 'partner@example.com', 'Pat Partner', '[]', ts, ts)
+    const room = create_channel({ db, name: 'Project room', created_by_user_id: 'u-jacob' })
+    add_room_member({ db, room_id: room.id, user_id: 'u-partner' })
+    return { db, room_id: room.id }
   }
 
-  function set_notified(db: ReturnType<typeof open_shared_db>, user_id: string, iso: string) {
-    db.prepare('UPDATE chat_room_members SET last_notified_at = ? WHERE room_id = ? AND user_id = ?').run(iso, ROOM_ALL_ADMINS, user_id)
+  function set_notified(db: ReturnType<typeof open_shared_db>, room_id: string, user_id: string, iso: string) {
+    db.prepare('UPDATE chat_room_members SET last_notified_at = ? WHERE room_id = ? AND user_id = ?').run(iso, room_id, user_id)
   }
-  function reping_at(db: ReturnType<typeof open_shared_db>, user_id: string): string | null {
-    return (db.prepare('SELECT gentle_reping_at FROM chat_room_members WHERE room_id = ? AND user_id = ?').get(ROOM_ALL_ADMINS, user_id) as { gentle_reping_at: string | null }).gentle_reping_at
+  function reping_at(db: ReturnType<typeof open_shared_db>, room_id: string, user_id: string): string | null {
+    return (db.prepare('SELECT gentle_reping_at FROM chat_room_members WHERE room_id = ? AND user_id = ?').get(room_id, user_id) as { gentle_reping_at: string | null }).gentle_reping_at
   }
 
   describe(sweep_chat_repings, () => {
@@ -147,23 +150,23 @@ if (import.meta.vitest) {
     beforeEach(() => { process.env.NTFY_DISABLED = '1' })
     afterEach(() => { process.env.NTFY_DISABLED = original })
 
-    it('re-pings a member unread for >1 day, exactly once', async () => {
-      const db = seed()
-      post_message({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob', body_html: '<p>hi</p>', body_text: 'hi' })
-      set_notified(db, 'u-diego', new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()) // pinged 2 days ago
+    it('re-pings a non-admin member unread for >1 day, exactly once', async () => {
+      const { db, room_id } = seed()
+      post_message({ db, room_id, user_id: 'u-jacob', body_html: '<p>hi</p>', body_text: 'hi' })
+      set_notified(db, room_id, 'u-partner', new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()) // pinged 2 days ago
 
       const first = await sweep_chat_repings({ db })
       expect(first).toBe(1)
-      expect(reping_at(db, 'u-diego')).not.toBeNull()
+      expect(reping_at(db, room_id, 'u-partner')).not.toBeNull()
 
       const second = await sweep_chat_repings({ db }) // gentle_reping_at now set → no repeat
       expect(second).toBe(0)
     })
 
     it('does NOT re-ping when the ping is recent (<1 day)', async () => {
-      const db = seed()
-      post_message({ db, room_id: ROOM_ALL_ADMINS, user_id: 'u-jacob', body_html: '<p>hi</p>', body_text: 'hi' })
-      set_notified(db, 'u-diego', new Date(Date.now() - 60 * 60 * 1000).toISOString()) // 1h ago
+      const { db, room_id } = seed()
+      post_message({ db, room_id, user_id: 'u-jacob', body_html: '<p>hi</p>', body_text: 'hi' })
+      set_notified(db, room_id, 'u-partner', new Date(Date.now() - 60 * 60 * 1000).toISOString()) // 1h ago
       expect(await sweep_chat_repings({ db })).toBe(0)
     })
   })

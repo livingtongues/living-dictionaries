@@ -164,7 +164,7 @@
     </div>
   {/if}
 
-  {#if auth_user.admin_level > 1}
+  {#if auth_user.admin_level >= 3}
     <div style="margin-top: 1.25rem">
       <JSON obj={dictionary} />
     </div>

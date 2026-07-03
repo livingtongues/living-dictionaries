@@ -11,6 +11,8 @@ import type { RowType } from '$lib/db/client/live/types'
  *   - email_codes      (OTP secrets, short-lived)
  *   - email_aliases    (mail-routing plumbing, server is sole writer)
  *   - client_logs      (high-volume; admins query via dedicated endpoint)
+ *   - i18n_keys / i18n_translations / translator_languages
+ *                      (translator backend; reached only via /api/translate/*)
  */
 export type SyncableTableName
   = | 'users'

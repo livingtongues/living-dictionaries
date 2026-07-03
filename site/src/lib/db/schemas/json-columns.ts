@@ -79,7 +79,7 @@ if (import.meta.vitest) {
   })
 
   test('JSON_COLUMNS pins the current JSON-mode column list', () => {
-    expect(JSON_COLUMNS.users).toEqual(['providers'])
+    expect(JSON_COLUMNS.users).toEqual(['providers', 'roles'])
     expect(JSON_COLUMNS.email_codes).toEqual([])
     expect(JSON_COLUMNS.email_aliases).toEqual([])
     expect(JSON_COLUMNS.dictionaries).toEqual(['alternate_names', 'gloss_languages', 'coordinates', 'metadata', 'orthographies', 'featured_image', 'write_in_collaborators'])

@@ -7,6 +7,7 @@ import { start_r2_snapshot_builder } from '$lib/db/server/r2-snapshot-builder'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { ensure_all_admins_in_team_chat } from '$lib/server/chat/ensure-team-membership'
 import { is_cross_origin_form_forbidden } from '$lib/server/csrf'
+import { boot_i18n_catalog } from '$lib/server/i18n/boot'
 import { log_server_event } from '$lib/server/log-server-event'
 import { json } from '@sveltejs/kit'
 
@@ -20,6 +21,10 @@ get_shared_db()
 // they've ever opened the chat. Idempotent (ON CONFLICT DO NOTHING) — safe on
 // every boot + both blue/green containers.
 ensure_all_admins_in_team_chat()
+
+// Mirror the code's English i18n catalog into `i18n_keys` (new/changed/removed
+// keys) and, on a virgin DB, seed translations from the committed locale files.
+boot_i18n_catalog()
 
 // Per-dictionary `dictionaries/{id}.db.gz` snapshot builder. Sweeps every 30 min
 // in-process, backs up + gzips + PUTs each changed dict to the public R2

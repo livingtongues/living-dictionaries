@@ -2,19 +2,26 @@
   import IconMdiAccountQuestion from '~icons/mdi/account-question'
   import IconMdiArrowLeft from '~icons/mdi/arrow-left'
   import IconMdiAt from '~icons/mdi/at'
+  import IconMdiEmailPlusOutline from '~icons/mdi/email-plus-outline'
   import IconMdiBookOpenPageVariantOutline from '~icons/mdi/book-open-page-variant-outline'
   import IconMdiCheckDecagram from '~icons/mdi/check-decagram'
   import IconMdiEmailOffOutline from '~icons/mdi/email-off-outline'
   import IconMdiForumOutline from '~icons/mdi/forum-outline'
   import IconMdiTrashCanOutline from '~icons/mdi/trash-can-outline'
   import IconMdiPlus from '~icons/mdi/plus'
+  import { goto } from '$app/navigation'
   import { page } from '$app/state'
   import AdminBadge from '$lib/admin/AdminBadge.svelte'
   import DictionaryPickerModal from '$lib/admin/DictionaryPickerModal.svelte'
-  import { get_admin_level } from '$lib/admins'
+  import TranslatorLanguagesCard from '$lib/admin/TranslatorLanguagesCard.svelte'
+  import ComposeEmailModal from '$lib/admin/messages/compose-email-modal.svelte'
+  import { get_admin, get_admin_level, has_super_manager_role } from '$lib/admins'
+  import { support_address } from '$lib/email/addresses'
   import CopyButton from '$lib/svelte-pieces/CopyButton.svelte'
   import { use_admin_back } from '$lib/utils/admin-back.svelte'
-  import { format_date, format_relative_time } from '$lib/utils/format-relative-time'
+  import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
+  import { api_admin_user_name } from '../../../api/admin/users/[id]/name/_call'
+  import { api_admin_user_roles } from '../../../api/admin/users/[id]/roles/_call'
   import { api_admin_user_unsubscribe } from '../../../api/admin/users/[id]/unsubscribe/_call'
   import { api_dictionaries_id_roles_post } from '../../../api/dictionaries/[id]/roles/_call'
 
@@ -22,7 +29,9 @@
   const db = $derived(data.db)
   const user_id = $derived(page.params.user_id)
   const user = $derived(db?.users.id(user_id))
-  const target_admin_level = $derived(user ? get_admin_level(user.email) : null)
+  const is_super_manager = $derived(has_super_manager_role(user?.roles))
+  // Allow-list tier (2/3) first; else the DB-granted super_manager tier (1).
+  const target_admin_level = $derived(user ? (get_admin_level(user.email) ?? (is_super_manager ? 1 : null)) : null)
 
   const back = use_admin_back({
     fallback: { label: 'All users', url: '/admin/users' },
@@ -109,6 +118,59 @@
     await data.sync?.sync()
   }
 
+  const outbound_from = $derived.by(() => {
+    const admin = get_admin(data.auth_user?.user?.email)
+    return admin
+      ? { email: admin.ld_address, name: admin.name }
+      : { email: support_address.email, name: support_address.name ?? 'Support' }
+  })
+
+  let compose_open = $state(false)
+
+  async function on_compose_sent(thread_id: string) {
+    compose_open = false
+    await data.sync?.sync()
+    await goto(`/admin/messages/${thread_id}`)
+  }
+
+  async function edit_name() {
+    if (!user)
+      return
+    const input = prompt('Edit name', user.name ?? '')
+    if (input === null)
+      return
+    const next = input.trim() || null
+    if (next === (user.name ?? null))
+      return
+    // Optimistic in-memory update; `users` is download-only on admin clients,
+    // so persistence goes through the admin endpoint (not live-db `_save()`).
+    const previous = user.name
+    user.name = next
+    const { error } = await api_admin_user_name(user.id, { name: input })
+    if (error) {
+      user.name = previous
+      alert(`Could not update name: ${error.message}`)
+      return
+    }
+    await data.sync?.sync()
+  }
+
+  async function toggle_super_manager() {
+    if (!user) return
+    const next = !has_super_manager_role(user.roles)
+    const previous = user.roles
+    // Optimistic in-memory update; `users` is download-only on admin clients,
+    // so persistence goes through the admin endpoint (not live-db `_save()`).
+    user.roles = next ? ['super_manager'] : null
+    const { error } = await api_admin_user_roles(user_id, { roles: next ? ['super_manager'] : [] })
+    if (error) {
+      user.roles = previous
+      alert(`Could not update roles: ${error.message}`)
+      return
+    }
+    await data.sync?.sync()
+  }
+
   async function toggle_unsubscribed() {
     if (!user) return
     const next = !user.unsubscribed_from_emails
@@ -139,7 +201,9 @@
 {:else}
   <header class="user-header">
     <h1 class="user-title">
-      <span>{user.name || user.email || '(no name)'}</span>
+      <button type="button" class="name-edit" title="Click to edit name" onclick={edit_name}>
+        {user.name || user.email || '(no name)'}
+      </button>
       {#if target_admin_level !== null}
         <AdminBadge level={target_admin_level} size="lg" />
       {/if}
@@ -151,11 +215,11 @@
       {/if}
       {#if user.last_visit_at}
         <span>·</span>
-        <span>last visit {format_date(user.last_visit_at)}</span>
+        <span title={format_date_time(user.last_visit_at)}>last visit {format_relative_time(user.last_visit_at)}</span>
       {/if}
       {#if user.created_at}
         <span>·</span>
-        <span>joined {format_date(user.created_at)}</span>
+        <span title={format_date_time(user.created_at)}>joined {format_relative_time(user.created_at)}</span>
       {/if}
       {#if user.unsubscribed_from_emails}
         <span>·</span>
@@ -163,14 +227,39 @@
       {/if}
     </div>
     <div class="header-actions">
+      {#if user.email}
+        <button type="button" onclick={() => (compose_open = true)} class="btn-outline btn-sm">
+          <IconMdiEmailPlusOutline style="margin-right: 0.25rem" />
+          Compose email
+        </button>
+      {/if}
       <button
         type="button"
         onclick={toggle_unsubscribed}
         class="btn-outline btn-sm">
         {user.unsubscribed_from_emails ? 'Re-subscribe to emails' : 'Mark unsubscribed'}
       </button>
+      {#if get_admin_level(user.email) === null}
+        <button
+          type="button"
+          onclick={toggle_super_manager}
+          title="Super managers get dictionary-manager powers on every dictionary (no admin panel access)"
+          class="btn-outline btn-sm">
+          {is_super_manager ? 'Remove Super Manager' : 'Make Super Manager'}
+        </button>
+      {/if}
     </div>
   </header>
+
+  {#if compose_open && user.email}
+    <ComposeEmailModal
+      {db}
+      from_email={outbound_from.email}
+      from_name={outbound_from.name}
+      preset_user={{ id: user_id, email: user.email, name: user.name ?? null }}
+      on_close={() => (compose_open = false)}
+      on_sent={on_compose_sent} />
+  {/if}
 
   <div class="info-grid">
     <section class="card">
@@ -245,6 +334,8 @@
         {/if}
       </ul>
     </section>
+
+    <TranslatorLanguagesCard {user_id} />
   </div>
 
   <section class="card threads-card">
@@ -315,6 +406,25 @@
     align-items: center;
     gap: 0.5rem;
     flex-wrap: wrap;
+  }
+  .name-edit {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    transition: color 0.15s;
+  }
+  .name-edit:hover {
+    color: var(--primary);
+  }
+  .name-edit:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
   }
   .user-meta {
     margin-top: 0.5rem;

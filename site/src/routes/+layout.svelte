@@ -21,6 +21,7 @@
   import { set_missing_translation_handler } from '$lib/i18n'
   import { toast } from '$lib/svelte-pieces/toast.svelte'
   import { init_color_scheme } from '$lib/dark-mode'
+  import { chat_store } from '$lib/chat/chat-store.svelte'
 
   interface Props {
     children?: import('svelte').Snippet
@@ -39,6 +40,14 @@
       log_event({ level: 'warn', message: `i18n missing key: ${key}`, context: { i18n_key: key, locale, fallback: fallback ?? null } }))
     init_web_vitals()
     report_initial_load_when_ready()
+  })
+
+  // Chat members get the app-wide unread poll (avatar dot + UserMenu badge).
+  // No presence heartbeat here — that only runs on /chat and inside /admin, so
+  // members browsing the rest of the site still receive external pings.
+  $effect(() => {
+    if (browser && page.data.auth_user?.is_chat_member)
+      chat_store.start_rooms_poll()
   })
 
   // Wall-clock start of a client-side navigation; afterNavigate reads it back to

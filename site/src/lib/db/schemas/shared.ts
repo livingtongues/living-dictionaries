@@ -5,6 +5,7 @@ import type {
   Orthography,
   UserProviderIdentity,
 } from './shared.types'
+import type { SiteRole } from '$lib/admins'
 import { integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 /**
@@ -53,6 +54,13 @@ export const users = sqliteTable('users', {
    * a user logs in with a new provider sharing the same verified email.
    */
   providers: text({ mode: 'json' }).$type<UserProviderIdentity[]>().notNull(),
+  /**
+   * Site-wide DB-grantable roles (see `SITE_ROLES` in `$lib/admins.ts`).
+   * `'super_manager'` grants effective admin level 1 — dictionary-manager
+   * powers on every dictionary, no /admin access. NULL = no roles. Levels
+   * 2/3 come from the hardcoded allow-list, never from this column.
+   */
+  roles: text({ mode: 'json' }).$type<SiteRole[]>(),
   /**
    * ISO 8601 timestamp of when the user unsubscribed from non-transactional
    * email. NULL = they're still subscribed. UI surfaces a boolean via
@@ -254,6 +262,10 @@ export const messages = sqliteTable('messages', {
   in_reply_to: text(),
   email_references: text(),
   raw_headers: text(),
+  /** Comma-joined Cc list on outbound admin messages (display-only). */
+  cc: text(),
+  /** Comma-joined Bcc list on outbound admin messages (display-only). */
+  bcc: text(),
   dirty: integer(),
   created_at: text().notNull(),
   updated_at: text().notNull(),

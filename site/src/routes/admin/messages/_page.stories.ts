@@ -53,7 +53,7 @@ const db = {
 
 export const Inbox: PageStory<typeof Component> = {
   props: {
-    auth_user: { user: { id: 'admin-1', email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', is_admin: true, admin_level: 2 }, token: 'fake', logout: () => {} },
+    auth_user: { user: { id: 'admin-1', email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', is_admin: true, admin_level: 3 }, token: 'fake', logout: () => {} },
     sync: null,
     db,
   } as never,

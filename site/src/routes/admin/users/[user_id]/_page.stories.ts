@@ -19,7 +19,7 @@ function make_table<T extends Row>(rows: T[], id_key = 'id') {
 }
 
 const users = [
-  { id: 'user-1', email: 'maria@example.com', name: 'Maria Lopez', unsubscribed_from_emails: null, last_visit_at: '2026-05-20T09:00:00Z', created_at: '2025-03-02T00:00:00Z', updated_at: '2026-05-20T09:00:00Z', _save: async () => {} },
+  { id: 'user-1', email: 'maria@example.com', name: 'Maria Lopez', roles: null, unsubscribed_from_emails: null, last_visit_at: '2026-05-20T09:00:00Z', created_at: '2025-03-02T00:00:00Z', updated_at: '2026-05-20T09:00:00Z', _save: async () => {} },
 ]
 
 const roles = [
@@ -52,8 +52,26 @@ const db = {
 
 export const Detail: PageStory<typeof Component> = {
   props: {
-    auth_user: { user: { id: 'admin-1', email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', is_admin: true, admin_level: 2 }, token: 'fake', logout: () => {} },
+    auth_user: { user: { id: 'admin-1', email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', is_admin: true, admin_level: 3 }, token: 'fake', logout: () => {} },
     sync: null,
     db,
+  } as never,
+}
+
+const super_manager_users = [
+  { ...users[0], roles: ['super_manager'] },
+]
+
+const super_manager_db = {
+  ...db,
+  users: { ...make_table(super_manager_users, 'id'), id: (key: string) => super_manager_users.find(user => user.id === key) },
+}
+
+/** A DB-granted super manager: slate badge in the header + "Remove Super Manager" action. */
+export const SuperManagerDetail: PageStory<typeof Component> = {
+  props: {
+    auth_user: { user: { id: 'admin-1', email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', is_admin: true, admin_level: 3 }, token: 'fake', logout: () => {} },
+    sync: null,
+    db: super_manager_db,
   } as never,
 }

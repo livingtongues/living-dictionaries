@@ -87,6 +87,7 @@
     "reflpro": "kata ganti yang mencerminkan",
     "relpro": "kata ganti relatif",
     "vd": "kata kerja ditransitif",
-    "va": "Ambitransitif"
+    "va": "Ambitransitif",
+    "obj": ""
   }
 }

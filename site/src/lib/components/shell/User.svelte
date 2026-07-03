@@ -3,6 +3,7 @@
   import { Button, Menu, ShowHide } from '$lib/svelte-pieces'
   import { display_one_tap_popover } from '$lib/auth/google-one-tap'
   import { page } from '$app/state'
+  import { chat_store } from '$lib/chat/chat-store.svelte'
   import UserMenu from './UserMenu.svelte'
 
   const { auth_user } = $derived(page.data)
@@ -41,6 +42,10 @@
           {(user.name || user.email)[0]}
         </div>
       {/if}
+      {#if auth_user.is_chat_member && chat_store.total_unread > 0}
+        <!-- Unread-chat dot: subtle app-wide hint; the UserMenu link carries the count. -->
+        <span class="unread-dot" title="Unread chat messages"></span>
+      {/if}
     </button>
     {#if show_menu}
       <Menu portalTarget="#direction" class="user-menu-position" onclickoutside={toggle_menu}>
@@ -74,6 +79,18 @@
 
   .avatar-button {
     padding: 0.25rem 0.75rem;
+    position: relative;
+  }
+
+  .unread-dot {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.55rem;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid var(--background);
   }
 
   .avatar {

@@ -1,4 +1,3 @@
-import type { Admin } from '$lib/admins'
 import { ADMINS } from '$lib/admins'
 import { send_email } from '$lib/email/send-email'
 
@@ -32,21 +31,21 @@ interface EmailPingExtras {
   email_subject?: string
 }
 
-async function send_ping_email({ admin, subject, body, link, email_html, email_text, email_subject }: { admin: Admin } & NotifyAdminsParams & EmailPingExtras): Promise<void> {
+async function send_ping_email({ email, name, subject, body, link, email_html, email_text, email_subject }: { email: string, name: string } & NotifyAdminsParams & EmailPingExtras): Promise<void> {
   const shell = (inner: string) => `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#1a1a1a">${inner}</div>`
   const link_html = link
-    ? `<p style="margin:16px 0 0"><a href="${link}" style="display:inline-block;padding:8px 16px;border-radius:6px;background:#178871;color:#fff;text-decoration:none;font-weight:600">Open in the admin</a></p>`
+    ? `<p style="margin:16px 0 0"><a href="${link}" style="display:inline-block;padding:8px 16px;border-radius:6px;background:#178871;color:#fff;text-decoration:none;font-weight:600">Open in Living Dictionaries</a></p>`
     : ''
   const html = shell(email_html ?? `<p style="margin:0">${body}</p>${link_html}`)
   const text = email_text ?? (link ? `${body}\n\n${link}` : body)
   try {
     await send_email({
-      to: [{ email: admin.email, name: admin.name }],
+      to: [{ email, name }],
       subject: email_subject ?? subject,
       body: { html, text },
     })
   } catch (err) {
-    console.warn(`notify_admins: email ping to ${admin.email} failed (non-fatal):`, (err as Error).message)
+    console.warn(`notify_admins: email ping to ${email} failed (non-fatal):`, (err as Error).message)
   }
 }
 
@@ -109,7 +108,24 @@ export async function notify_admin({ email, subject, body, link, email_html, ema
   if (channel === 'ntfy')
     await notify_one({ topic: admin.ntfy_topic, subject, body, link })
   else
-    await send_ping_email({ admin, subject, body, link, email_html, email_text, email_subject })
+    await send_ping_email({ email: admin.email, name: admin.name, subject, body, link, email_html, email_text, email_subject })
+}
+
+/**
+ * Ping any user (chat members, translators, …). Allow-listed admins go through
+ * `notify_admin` (their chosen ntfy/email channel); everyone else (partners,
+ * super managers, translators) always gets EMAIL — Jacob's call: non-admins
+ * need no notify setup. These pings are transactional, so the newsletter
+ * unsubscribe flag is ignored.
+ */
+export async function notify_user({ email, name, subject, body, link, email_html, email_text, email_subject }: { email: string | null | undefined, name?: string | null } & NotifyAdminsParams & EmailPingExtras): Promise<void> {
+  if (process.env.NTFY_DISABLED === '1' || !email)
+    return
+  if (ADMINS.some(admin => admin.email === email)) {
+    await notify_admin({ email, subject, body, link, email_html, email_text, email_subject })
+    return
+  }
+  await send_ping_email({ email, name: name || email, subject, body, link, email_html, email_text, email_subject })
 }
 
 async function notify_one({ topic, subject, body, link }: { topic: string } & NotifyAdminsParams): Promise<void> {

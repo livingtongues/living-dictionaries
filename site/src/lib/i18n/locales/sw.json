@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "Mipangilio ya Akaunti",
+    "your_name": "",
     "log_out": "Toka",
     "send_code": "Tuma Nambari",
     "enter_6_digit_code_sent_to": "Ingiza msimbo wa tarakimu 6 uliotumwa kwa"
@@ -159,6 +160,14 @@
     "google_terms": "Masharti ya Google",
     "full_title": "{dictionary_name} Kamusi Hai"
   },
+  "sync": {
+    "syncing": "",
+    "synced": "",
+    "error": "",
+    "offline": "",
+    "idle": "",
+    "tap_failed": ""
+  },
   "entry": {
     "view_entries": "Tazama Maingizo",
     "signed_in_as_manager": "Lazima uingie katika akaunti kama msimamizi wa kamusi hii ili ufanye mabadiliko.",
@@ -224,6 +233,9 @@
     "error_recorded": "Hitilafu imerekodiwa na tutaishughulikia.",
     "please_explain": "Samahani, unaweza kututumia maelezo mafupi kuhusu kilichotokea"
   },
+  "map": {
+    "webgl_unavailable": ""
+  },
   "header": {
     "select_language": "Chagua Lugha",
     "please_create_account": "Tafadhali fungua akaunti",
@@ -280,7 +292,14 @@
     "transmitter": "Kwa dhati, timu ya Living Dictionary",
     "disjunctive": "au",
     "required": "inahitajika",
-    "optional": "hiari"
+    "optional": "hiari",
+    "reload": "",
+    "appearance": "",
+    "theme_system": "",
+    "theme_light": "",
+    "theme_dark": "",
+    "app_update_needed": "",
+    "local_data_expired": ""
   },
   "settings": {
     "community_permission": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni?",
@@ -290,7 +309,34 @@
     "optional_data_fields": "Sehemu za Taarifa Mbadala",
     "unable_to_delete": "Kumbuka: hutaweza kufuta lugha hizi za kung'arisha baadaye.",
     "print_access_meaning": "Hii inawapa umma uwezo wa kupakua na kuchapisha Kamusi hii ya Hai kama .PDF",
-    "featured_image": "Picha Iliyoangaziwa"
+    "featured_image": "Picha Iliyoangaziwa",
+    "delete_dictionary": ""
+  },
+  "source": {
+    "create": "",
+    "edit": "",
+    "citation": "",
+    "abbreviation": "",
+    "author": "",
+    "year": "",
+    "url": "",
+    "license": "",
+    "type": "",
+    "slug": "",
+    "slug_hint": "",
+    "slug_required": "",
+    "used_by": "",
+    "empty": "",
+    "type_dictionary": "",
+    "type_wordlist": "",
+    "type_fieldwork": "",
+    "type_manuscript": "",
+    "type_other": "",
+    "sources": "",
+    "cite_instead": "",
+    "select_source": "",
+    "choose_speaker_instead": "",
+    "source": ""
   },
   "speakers": {
     "add_new_speaker": "Ongeza Mzungumzaji Mpya",
@@ -305,7 +351,8 @@
   },
   "terms": {
     "agree_by_submit": "Kwa kutuma hii fomu, umekubaliana na kanuni zetu",
-    "agreement_to_terms": "Makubaliano ya Kanuni"
+    "agreement_to_terms": "Makubaliano ya Kanuni",
+    "privacy_policy": ""
   },
   "upload": {
     "error": "Jalada lisilokubalika",
@@ -416,5 +463,43 @@
   "sentence": {
     "add": "Ongeza sentensi",
     "delete": "Futa sentensi"
+  },
+  "relationship_type": {
+    "related_entries": "",
+    "synonym": "",
+    "antonym": "",
+    "cognate": "",
+    "dialectal_variant": "",
+    "see_also": "",
+    "spelling_variant": "",
+    "hypernym": "",
+    "hyponym": "",
+    "holonym": "",
+    "meronym": "",
+    "derived_from": "",
+    "root_of": "",
+    "borrowed_from": "",
+    "loaned_to": "",
+    "synonym_description": "",
+    "antonym_description": "",
+    "cognate_description": "",
+    "dialectal_variant_description": "",
+    "see_also_description": "",
+    "spelling_variant_description": "",
+    "hypernym_description": "",
+    "hyponym_description": "",
+    "holonym_description": "",
+    "meronym_description": "",
+    "derived_from_description": "",
+    "root_of_description": "",
+    "borrowed_from_description": "",
+    "loaned_to_description": "",
+    "add": "",
+    "choose_entry": "",
+    "relationship": "",
+    "no_matches": "",
+    "remove_confirm": "",
+    "help_intro": "",
+    "custom_types_note": ""
   }
 }

@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "帐号设定",
+    "your_name": "",
     "log_out": "退出",
     "send_code": "发送代码",
     "enter_6_digit_code_sent_to": "请输入发送到您的邮箱的 6 位验证码。"
@@ -159,6 +160,14 @@
     "google_terms": "Google 术语",
     "full_title": "{dictionary_name} 活字典"
   },
+  "sync": {
+    "syncing": "",
+    "synced": "",
+    "error": "",
+    "offline": "",
+    "idle": "",
+    "tap_failed": ""
+  },
   "entry": {
     "view_entries": "查看词条",
     "signed_in_as_manager": "您必须用管理员身份登录本字典来进行更改。",
@@ -224,6 +233,9 @@
     "error_recorded": "该错误已被记录，我们将会试图修复它。",
     "please_explain": "请您给我们一个简短的说明，以解释发生了什么？"
   },
+  "map": {
+    "webgl_unavailable": ""
+  },
   "header": {
     "select_language": "选择语言",
     "please_create_account": "请创建一个帐户",
@@ -280,7 +292,14 @@
     "transmitter": "此致，Living Dictionaries团队",
     "disjunctive": "或者",
     "required": "必需的",
-    "optional": "选修的"
+    "optional": "选修的",
+    "reload": "",
+    "appearance": "",
+    "theme_system": "",
+    "theme_light": "",
+    "theme_dark": "",
+    "app_update_needed": "",
+    "local_data_expired": ""
   },
   "settings": {
     "community_permission": "此语言的语言社区允许这种语言通过网络传播吗？",
@@ -290,7 +309,34 @@
     "optional_data_fields": "可选的数据字段",
     "unable_to_delete": "注意：您将无法删除这些语言标注",
     "print_access_meaning": "这使得公众能够下载并打印这本《活词典》的PDF版本。",
-    "featured_image": "特色图片"
+    "featured_image": "特色图片",
+    "delete_dictionary": ""
+  },
+  "source": {
+    "create": "",
+    "edit": "",
+    "citation": "",
+    "abbreviation": "",
+    "author": "",
+    "year": "",
+    "url": "",
+    "license": "",
+    "type": "",
+    "slug": "",
+    "slug_hint": "",
+    "slug_required": "",
+    "used_by": "",
+    "empty": "",
+    "type_dictionary": "",
+    "type_wordlist": "",
+    "type_fieldwork": "",
+    "type_manuscript": "",
+    "type_other": "",
+    "sources": "",
+    "cite_instead": "",
+    "select_source": "",
+    "choose_speaker_instead": "",
+    "source": ""
   },
   "speakers": {
     "add_new_speaker": "添加新的母语者",
@@ -305,7 +351,8 @@
   },
   "terms": {
     "agree_by_submit": "提交此表格，代表您同意我们的",
-    "agreement_to_terms": "协议条款"
+    "agreement_to_terms": "协议条款",
+    "privacy_policy": ""
   },
   "upload": {
     "error": "不支持该文件类型",
@@ -416,5 +463,43 @@
   "sentence": {
     "add": "添加句子",
     "delete": "删除句子"
+  },
+  "relationship_type": {
+    "related_entries": "",
+    "synonym": "",
+    "antonym": "",
+    "cognate": "",
+    "dialectal_variant": "",
+    "see_also": "",
+    "spelling_variant": "",
+    "hypernym": "",
+    "hyponym": "",
+    "holonym": "",
+    "meronym": "",
+    "derived_from": "",
+    "root_of": "",
+    "borrowed_from": "",
+    "loaned_to": "",
+    "synonym_description": "",
+    "antonym_description": "",
+    "cognate_description": "",
+    "dialectal_variant_description": "",
+    "see_also_description": "",
+    "spelling_variant_description": "",
+    "hypernym_description": "",
+    "hyponym_description": "",
+    "holonym_description": "",
+    "meronym_description": "",
+    "derived_from_description": "",
+    "root_of_description": "",
+    "borrowed_from_description": "",
+    "loaned_to_description": "",
+    "add": "",
+    "choose_entry": "",
+    "relationship": "",
+    "no_matches": "",
+    "remove_confirm": "",
+    "help_intro": "",
+    "custom_types_note": ""
   }
 }

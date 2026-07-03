@@ -5,6 +5,7 @@
   import { invalidateAll } from '$app/navigation'
   import { build_personas, is_active_persona } from '$lib/auth/view-as'
   import { api_dev_admin_level } from '$api/auth/dev-admin-level/_call'
+  import { chat_store } from '$lib/chat/chat-store.svelte'
   import { mode } from '$lib/mode'
   import ColorSchemeToggle from './ColorSchemeToggle.svelte'
 
@@ -28,9 +29,9 @@
   }
 
   async function set_dev_admin_role() {
-    const input = prompt('Enter 0, 1, or 2')
+    const input = prompt('Enter 0 (regular), 1 (super manager), 2 (admin), or 3 (super admin)')
     const level = input === null ? null : +input
-    if (level !== 0 && level !== 1 && level !== 2)
+    if (level !== 0 && level !== 1 && level !== 2 && level !== 3)
       return
     const { error } = await api_dev_admin_level({ level })
     if (error)
@@ -50,6 +51,24 @@
     <a href="/admin" onclick={close}>
       Admin Panel
       <i class="fas fa-key"></i>
+    </a>
+  {/if}
+
+  {#if auth_user.is_chat_member}
+    <a href="/chat" onclick={close}>
+      Chat
+      {#if chat_store.total_unread > 0}
+        <span class="chat-badge">{chat_store.total_unread}</span>
+      {:else}
+        <i class="far fa-comments"></i>
+      {/if}
+    </a>
+  {/if}
+
+  {#if auth_user.is_translator}
+    <a href="/translate" onclick={close}>
+      Translate
+      <i class="fas fa-language"></i>
     </a>
   {/if}
 
@@ -98,6 +117,20 @@
     line-height: 1rem;
     color: color-mix(in srgb, var(--color) 75%, var(--background));
     border-bottom: 1px solid var(--border-color);
+  }
+
+  .chat-badge {
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    padding: 0 0.3rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .view-as-heading {

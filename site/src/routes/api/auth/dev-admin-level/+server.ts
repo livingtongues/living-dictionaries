@@ -5,13 +5,13 @@ import { DEV_ADMIN_LEVEL_COOKIE } from '$lib/server/resolve-admin-level'
 import { error, json } from '@sveltejs/kit'
 
 export interface DevAdminLevelRequestBody {
-  /** 0 clears the override (back to allow-list); 1 or 2 force that level. `null` also clears. */
-  level: 0 | 1 | 2 | null
+  /** 0 clears the override (back to allow-list + roles); 1, 2 or 3 force that level. `null` also clears. */
+  level: 0 | 1 | 2 | 3 | null
 }
 
 export interface DevAdminLevelResponseBody {
   result: 'success'
-  level: 0 | 1 | 2 | null
+  level: 0 | 1 | 2 | 3 | null
 }
 
 /**
@@ -27,7 +27,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
   const { level } = await request.json() as DevAdminLevelRequestBody
 
-  if (level === 1 || level === 2) {
+  if (level === 1 || level === 2 || level === 3) {
     cookies.set(DEV_ADMIN_LEVEL_COOKIE, String(level), {
       path: '/',
       httpOnly: true,

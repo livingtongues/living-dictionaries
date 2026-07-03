@@ -36,7 +36,7 @@ Fetches full documentation for one or more sections. Accepts titles (e.g., "$sta
 ## Analyze Svelte Code
 
 ```bash
-/home/jacob/code/living-dictionaries/.claude/skills/svelte/svelte-fix.js new-site/src/lib/Welcome.svelte
+/home/jacob/code/living-dictionaries/.claude/skills/svelte/svelte-fix.js site/src/lib/export/Progress.svelte
 ```
 
 Analyzes a Svelte component file and returns issues and suggestions. Always use this after writing Svelte code to catch problems.

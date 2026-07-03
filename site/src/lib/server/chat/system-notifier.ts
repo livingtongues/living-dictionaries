@@ -17,16 +17,18 @@ import type { SystemNotificationContent } from './notification-messages'
 import { build_chat_notification_email } from './notification-email'
 import { ping_room_members } from './chat-notify'
 import { post_message } from './chat-db'
-import { ROOM_NAMES, ROOM_NOTIFICATIONS, SYSTEM_USER_NAME } from './constants'
-import { SYSTEM_USER_ID } from '$lib/admin/chat/rooms'
+import { ROOM_NOTIFICATIONS, SYSTEM_USER_NAME } from './constants'
+import { SYSTEM_USER_ID } from '$lib/chat/constants'
+
+const NOTIFICATIONS_ROOM_NAME = 'Notifications'
 
 /** Idempotently ensure the System bot user + Notifications room + its membership. */
 function ensure_system_notifier(db: Database.Database): void {
   const now = new Date().toISOString()
   db.prepare('INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, NULL, ?, \'[]\', ?, ?) ON CONFLICT(id) DO NOTHING')
     .run(SYSTEM_USER_ID, SYSTEM_USER_NAME, now, now)
-  db.prepare('INSERT INTO chat_rooms (id, kind, name, created_at, updated_at) VALUES (?, \'channel\', ?, ?, ?) ON CONFLICT(id) DO NOTHING')
-    .run(ROOM_NOTIFICATIONS, ROOM_NAMES[ROOM_NOTIFICATIONS], now, now)
+  db.prepare('INSERT INTO chat_rooms (id, kind, name, admin_room, created_at, updated_at) VALUES (?, \'channel\', ?, 1, ?, ?) ON CONFLICT(id) DO NOTHING')
+    .run(ROOM_NOTIFICATIONS, NOTIFICATIONS_ROOM_NAME, now, now)
   db.prepare('INSERT INTO chat_room_members (room_id, user_id, created_at) VALUES (?, ?, ?) ON CONFLICT(room_id, user_id) DO NOTHING')
     .run(ROOM_NOTIFICATIONS, SYSTEM_USER_ID, now)
 }
@@ -50,10 +52,10 @@ export async function post_system_notification({ db, content, base_url, suppress
   if (suppress_ping)
     return
 
-  const link = `${base_url}/admin/team?room=${encodeURIComponent(ROOM_NOTIFICATIONS)}`
+  const link = `${base_url}/chat?room=${encodeURIComponent(ROOM_NOTIFICATIONS)}`
   const email = build_chat_notification_email({
     author_name: SYSTEM_USER_NAME,
-    room_name: ROOM_NAMES[ROOM_NOTIFICATIONS],
+    room_name: NOTIFICATIONS_ROOM_NAME,
     body_html: content.body_html,
     body_text: content.body_text,
     link,

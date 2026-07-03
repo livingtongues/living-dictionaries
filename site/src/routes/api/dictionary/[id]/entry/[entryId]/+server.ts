@@ -1,12 +1,13 @@
 import type { RequestHandler } from './$types'
 import type { EntryData } from '$lib/types'
 import { error, json } from '@sveltejs/kit'
-import { get_admin_level } from '$lib/admins'
 import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
 import { build_entry_data } from '$lib/db/server/build-entry-data'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
+import { get_shared_db } from '$lib/db/server/shared-db'
+import { get_effective_admin_level } from '$lib/server/effective-admin-level'
 
 export interface DictionaryEntryResponseBody {
   entry: EntryData | null
@@ -39,8 +40,8 @@ export const GET: RequestHandler = async (event) => {
 
   let admin_level = 0
   try {
-    const { email } = await verify_auth(event)
-    admin_level = get_admin_level(email) ?? 0
+    const { user_id, email } = await verify_auth(event)
+    admin_level = get_effective_admin_level({ db: get_shared_db(), user_id, email, cookies: event.cookies })
   } catch {
     /* anonymous reader — public tags only */
   }

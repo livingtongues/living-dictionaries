@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "Pengaturan Akun",
+    "your_name": "",
     "log_out": "Keluar",
     "send_code": "Kirim Kode",
     "enter_6_digit_code_sent_to": "Masukkan kode 6 digit yang dikirimkan ke"
@@ -159,6 +160,14 @@
     "google_terms": "Istilah Google",
     "full_title": "{dictionary_name} Kamus Hidup"
   },
+  "sync": {
+    "syncing": "",
+    "synced": "",
+    "error": "",
+    "offline": "",
+    "idle": "",
+    "tap_failed": ""
+  },
   "entry": {
     "view_entries": "Lihat Entri",
     "signed_in_as_manager": "Anda harus masuk sebagai pengelola kamus ini untuk membuat perubahan",
@@ -224,6 +233,9 @@
     "error_recorded": "Kesalahan telah dicatat dan kami akan memeriksanya",
     "please_explain": "Dapatkah anda kirimkan catatan singkat yang menjelaskan apa yang terjadi "
   },
+  "map": {
+    "webgl_unavailable": ""
+  },
   "header": {
     "select_language": "Pilih Bahasa",
     "please_create_account": "Silakan buat sebuah akun baru",
@@ -280,7 +292,14 @@
     "transmitter": "Hormat kami, tim Living Dictionarys",
     "disjunctive": "atau",
     "required": "diperlukan",
-    "optional": "opsional"
+    "optional": "opsional",
+    "reload": "",
+    "appearance": "",
+    "theme_system": "",
+    "theme_light": "",
+    "theme_dark": "",
+    "app_update_needed": "",
+    "local_data_expired": ""
   },
   "settings": {
     "community_permission": "Apakah komunitas penutur bahasa mengijinkan bahasa ini online?",
@@ -290,7 +309,34 @@
     "optional_data_fields": "Opsional Bidang Data",
     "unable_to_delete": "CATATAN: Anda tidak akan dapat menghapus bahasa -bahasa yang memoles ini nanti.",
     "print_access_meaning": "Hal ini memberikan kemampuan kepada masyarakat untuk mengunduh dan mencetak Kamus Hidup ini sebagai file .PDF.",
-    "featured_image": "Gambar Unggulan"
+    "featured_image": "Gambar Unggulan",
+    "delete_dictionary": ""
+  },
+  "source": {
+    "create": "",
+    "edit": "",
+    "citation": "",
+    "abbreviation": "",
+    "author": "",
+    "year": "",
+    "url": "",
+    "license": "",
+    "type": "",
+    "slug": "",
+    "slug_hint": "",
+    "slug_required": "",
+    "used_by": "",
+    "empty": "",
+    "type_dictionary": "",
+    "type_wordlist": "",
+    "type_fieldwork": "",
+    "type_manuscript": "",
+    "type_other": "",
+    "sources": "",
+    "cite_instead": "",
+    "select_source": "",
+    "choose_speaker_instead": "",
+    "source": ""
   },
   "speakers": {
     "add_new_speaker": "Bidang Data Bersifat Pilihan ",
@@ -305,7 +351,8 @@
   },
   "terms": {
     "agree_by_submit": "Dengan mengirimkan formulir ini, anda setuju dengan",
-    "agreement_to_terms": "Persyaratan Persetujuan"
+    "agreement_to_terms": "Persyaratan Persetujuan",
+    "privacy_policy": ""
   },
   "upload": {
     "error": "Tipe File Tidak Didukung",
@@ -416,5 +463,43 @@
   "sentence": {
     "add": "Tambahkan kalimat",
     "delete": "Hapus kalimat"
+  },
+  "relationship_type": {
+    "related_entries": "",
+    "synonym": "",
+    "antonym": "",
+    "cognate": "",
+    "dialectal_variant": "",
+    "see_also": "",
+    "spelling_variant": "",
+    "hypernym": "",
+    "hyponym": "",
+    "holonym": "",
+    "meronym": "",
+    "derived_from": "",
+    "root_of": "",
+    "borrowed_from": "",
+    "loaned_to": "",
+    "synonym_description": "",
+    "antonym_description": "",
+    "cognate_description": "",
+    "dialectal_variant_description": "",
+    "see_also_description": "",
+    "spelling_variant_description": "",
+    "hypernym_description": "",
+    "hyponym_description": "",
+    "holonym_description": "",
+    "meronym_description": "",
+    "derived_from_description": "",
+    "root_of_description": "",
+    "borrowed_from_description": "",
+    "loaned_to_description": "",
+    "add": "",
+    "choose_entry": "",
+    "relationship": "",
+    "no_matches": "",
+    "remove_confirm": "",
+    "help_intro": "",
+    "custom_types_note": ""
   }
 }

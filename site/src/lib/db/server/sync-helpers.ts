@@ -306,7 +306,7 @@ if (import.meta.vitest) {
 
   describe('VALID_COLUMNS', () => {
     test('users columns', () => {
-      expect(VALID_COLUMNS.users).toEqual(new Set(['id', 'email', 'name', 'avatar_url', 'providers', 'unsubscribed_from_emails', 'preferred_locale', 'last_visit_at', 'notify_channel', 'created_at', 'updated_at']))
+      expect(VALID_COLUMNS.users).toEqual(new Set(['id', 'email', 'name', 'avatar_url', 'providers', 'roles', 'unsubscribed_from_emails', 'preferred_locale', 'last_visit_at', 'notify_channel', 'created_at', 'updated_at']))
     })
     test('dictionaries columns include catalog + bookkeeping', () => {
       expect(VALID_COLUMNS.dictionaries.has('id')).toBe(true)

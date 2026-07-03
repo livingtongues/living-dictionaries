@@ -67,6 +67,7 @@
   },
   "account": {
     "account_settings": "অ্যাকাউন্ট সেটিংস",
+    "your_name": "",
     "log_out": "প্রস্থান",
     "send_code": "কোড পাঠান",
     "enter_6_digit_code_sent_to": "পাঠানো ৬-সংখ্যার কোডটি প্রবেশ করান"
@@ -159,6 +160,14 @@
     "google_terms": "গুগলের পরিভাষা",
     "full_title": "{dictionary_name} জীবন্ত অভিধান"
   },
+  "sync": {
+    "syncing": "",
+    "synced": "",
+    "error": "",
+    "offline": "",
+    "idle": "",
+    "tap_failed": ""
+  },
   "entry": {
     "view_entries": "এন্ট্রি দেখুন",
     "signed_in_as_manager": "পরিবর্তনগুলি করতে আপনাকে অবশ্যই এই অভিধানের পরিচালক হিসাবে সাইন ইন করতে হবে।",
@@ -224,6 +233,9 @@
     "error_recorded": "ভ্রান্তিটি রেকর্ড করা হয়েছে এবং আমরা এটি সমাধান করার চেষ্টা করব।",
     "please_explain": "কী হয়েছে তা বোঝাতে দয়া করে আমাদের একটি সংক্ষিপ্ত টিকা পাঠাতে পারেন কি?"
   },
+  "map": {
+    "webgl_unavailable": ""
+  },
   "header": {
     "select_language": "ভাষা নির্বাচন করুন",
     "please_create_account": "দয়া করে একটি অ্যাকাউন্ট তৈরি করুন",
@@ -280,7 +292,14 @@
     "transmitter": "শুভেচ্ছান্তে, লিভিং ডিকশনারিজ টিম",
     "disjunctive": "অথবা",
     "required": "প্রয়োজনীয়",
-    "optional": "ঐচ্ছিক"
+    "optional": "ঐচ্ছিক",
+    "reload": "",
+    "appearance": "",
+    "theme_system": "",
+    "theme_light": "",
+    "theme_dark": "",
+    "app_update_needed": "",
+    "local_data_expired": ""
   },
   "settings": {
     "community_permission": "বক্তৃতা সম্প্রদায় কী এই ভাষাটিকে অনলাইনে থাকতে দেয়?",
@@ -290,7 +309,34 @@
     "optional_data_fields": "ঐচ্ছিক তথ্য ক্ষেত্র",
     "unable_to_delete": "দ্রষ্টব্য: আপনি পরবর্তীতে এই টীকা ভাষাগুলো মুছে ফেলতে পারবেন না।",
     "print_access_meaning": "এর মাধ্যমে জনসাধারণ এই জীবন্ত অভিধানটি .PDF ফাইল হিসেবে ডাউনলোড ও প্রিন্ট করতে পারবেন।",
-    "featured_image": "বৈশিষ্ট্যযুক্ত ছবি"
+    "featured_image": "বৈশিষ্ট্যযুক্ত ছবি",
+    "delete_dictionary": ""
+  },
+  "source": {
+    "create": "",
+    "edit": "",
+    "citation": "",
+    "abbreviation": "",
+    "author": "",
+    "year": "",
+    "url": "",
+    "license": "",
+    "type": "",
+    "slug": "",
+    "slug_hint": "",
+    "slug_required": "",
+    "used_by": "",
+    "empty": "",
+    "type_dictionary": "",
+    "type_wordlist": "",
+    "type_fieldwork": "",
+    "type_manuscript": "",
+    "type_other": "",
+    "sources": "",
+    "cite_instead": "",
+    "select_source": "",
+    "choose_speaker_instead": "",
+    "source": ""
   },
   "speakers": {
     "add_new_speaker": "নতুন বক্তা যুক্ত করুন",
@@ -305,7 +351,8 @@
   },
   "terms": {
     "agree_by_submit": "এই ফর্মটি জমা দিয়ে, আপনি আমাদের সাথে সম্মত হন",
-    "agreement_to_terms": "শর্তাবলীর চুক্তি"
+    "agreement_to_terms": "শর্তাবলীর চুক্তি",
+    "privacy_policy": ""
   },
   "upload": {
     "error": "অসমর্থিত ফাইল",
@@ -416,5 +463,43 @@
   "sentence": {
     "add": "বাক্য যোগ করুন",
     "delete": "বাক্যটি মুছে ফেলুন"
+  },
+  "relationship_type": {
+    "related_entries": "",
+    "synonym": "",
+    "antonym": "",
+    "cognate": "",
+    "dialectal_variant": "",
+    "see_also": "",
+    "spelling_variant": "",
+    "hypernym": "",
+    "hyponym": "",
+    "holonym": "",
+    "meronym": "",
+    "derived_from": "",
+    "root_of": "",
+    "borrowed_from": "",
+    "loaned_to": "",
+    "synonym_description": "",
+    "antonym_description": "",
+    "cognate_description": "",
+    "dialectal_variant_description": "",
+    "see_also_description": "",
+    "spelling_variant_description": "",
+    "hypernym_description": "",
+    "hyponym_description": "",
+    "holonym_description": "",
+    "meronym_description": "",
+    "derived_from_description": "",
+    "root_of_description": "",
+    "borrowed_from_description": "",
+    "loaned_to_description": "",
+    "add": "",
+    "choose_entry": "",
+    "relationship": "",
+    "no_matches": "",
+    "remove_confirm": "",
+    "help_intro": "",
+    "custom_types_note": ""
   }
 }

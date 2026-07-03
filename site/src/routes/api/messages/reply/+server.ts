@@ -9,6 +9,7 @@ import { get_shared_db } from '$lib/db/server/shared-db'
 import { support_address } from '$lib/email/addresses'
 import { is_blocked_recipient } from '$lib/email/loop-protection'
 import { send_raw_email } from '$lib/email/send-raw-email'
+import { assert_optional_recipients_allowed } from '$lib/admin/messages/resolve-compose-recipient'
 import { put_attachment } from '$lib/r2/put-attachment'
 import { log_server_event } from '$lib/server/log-server-event'
 import MessageReply from '../../email/components/MessageReply.svelte'
@@ -78,6 +79,9 @@ export const POST: RequestHandler = async (event) => {
 
   if (is_blocked_recipient(thread.from_email))
     error(ResponseCodes.BAD_REQUEST, `Refusing to send to blocked recipient: ${thread.from_email}`)
+
+  assert_optional_recipients_allowed(body.cc)
+  assert_optional_recipients_allowed(body.bcc)
 
   const prior_message_ids = db.prepare(
     `SELECT message_id FROM messages
@@ -274,10 +278,10 @@ function insert_outbound_pending({
     INSERT INTO messages (
       id, thread_id, author_user_id, author_kind,
       body_text, body_html,
-      message_id, in_reply_to, email_references,
+      message_id, in_reply_to, email_references, cc, bcc,
       delivery_status,
       created_at, updated_at
-    ) VALUES (?, ?, ?, 'admin', ?, ?, ?, ?, ?, 'pending', ?, ?)
+    ) VALUES (?, ?, ?, 'admin', ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
   `).run(
     message_row_id,
     thread_id,
@@ -287,6 +291,8 @@ function insert_outbound_pending({
     rfc_message_id,
     in_reply_to,
     references.length > 0 ? references.join(' ') : null,
+    body.cc?.length ? body.cc.join(', ') : null,
+    body.bcc?.length ? body.bcc.join(', ') : null,
     now,
     now,
   )

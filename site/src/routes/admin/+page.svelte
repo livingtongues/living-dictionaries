@@ -16,6 +16,7 @@
   import IconMdiOpenInNew from '~icons/mdi/open-in-new'
   import IconMdiRobotOutline from '~icons/mdi/robot-outline'
   import IconMdiTableCog from '~icons/mdi/table-cog'
+  import IconMdiTranslate from '~icons/mdi/translate'
   import NotifyChannelToggle from '$lib/admin/notify-channel-toggle.svelte'
   import { get_admin } from '$lib/admins'
 
@@ -50,7 +51,8 @@
   const boxes: NavBox[] = [
     { href: '/admin/messages', title: 'Messages', body: 'Inbound support & feedback email threads. Reply via SES, assign to an admin, match unknown senders, mark resolved.', cta: 'Open inbox', icon: IconMdiMessageTextOutline, accent: 'var(--primary)' },
     { href: '/admin/users', title: 'Users', body: 'Registered users with their dictionaries, email aliases, thread history, and unsubscribe state.', cta: 'Browse', icon: IconMdiAccountMultipleOutline, accent: 'var(--success)' },
-    { href: '/admin/team', title: 'Team', body: 'Chat with the other admins — shared channels + 1:1 DMs, with a phone/email ping when a message is waiting for you.', cta: 'Open chat', icon: IconMdiForumOutline, accent: 'var(--primary)' },
+    { href: '/chat', title: 'Chat', body: 'Channels + 1:1 DMs with admins, super managers, and partners — with a phone/email ping when a message is waiting for you.', cta: 'Open chat', icon: IconMdiForumOutline, accent: 'var(--primary)' },
+    { href: '/translate', title: 'Translations', body: 'DB-backed interface translations — per-language progress, review flags on AI or changed-English values, and a button to email translators their pending work.', cta: 'Open dashboard', icon: IconMdiTranslate, accent: 'var(--warning)' },
     { href: '/admin/dictionaries', title: 'Dictionaries', body: 'Every dictionary on the platform — visibility, entry counts, partners, and per-dictionary roles.', cta: 'Browse', icon: IconMdiBookOpenPageVariantOutline, accent: 'var(--success)' },
     { href: '/admin/analytics', title: 'Analytics', body: 'Session & navigation activity, top routes and events, and recent client / server errors from the logs.', cta: 'Open', icon: IconMdiChartLine, accent: 'var(--primary)' },
     { href: '/admin/schema', title: 'Schema', body: 'Browse the wa-sqlite + server schema — tables, columns, foreign keys, and the relationship graph.', cta: 'Open', icon: IconMdiTableCog, accent: 'var(--success)' },

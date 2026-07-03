@@ -1,6 +1,9 @@
 <script lang="ts">
   import type { MessagesReplyAttachment } from '../../../api/messages/reply/+server'
+  import type { LiveDb } from '$lib/db/client/live/live-db.svelte'
+  import type { Recipient } from '$lib/admin/messages/recipient-input.svelte'
   import type { Sync } from '$lib/db/sync/engine.svelte.js'
+  import CcBccFields from '$lib/admin/messages/cc-bcc-fields.svelte'
   import IconMdiAlertCircle from '~icons/mdi/alert-circle'
   import IconMdiClose from '~icons/mdi/close'
   import IconMdiLoading from '~icons/mdi/loading'
@@ -14,14 +17,17 @@
 
   interface Props {
     thread_id: string
+    db: LiveDb | null | undefined
     sync: Sync | null
     /** Two-way bound so the AI-triage "Use draft" button can prefill the editor. */
     body_html?: string
   }
 
-  let { thread_id, sync, body_html = $bindable('') }: Props = $props()
+  let { thread_id, db, sync, body_html = $bindable('') }: Props = $props()
 
   const body_text = $derived(html_to_text(body_html))
+  let cc_recipients = $state<Recipient[]>([])
+  let bcc_recipients = $state<Recipient[]>([])
   let staged = $state<{ file: File }[]>([])
   let sending = $state(false)
   let error: string | null = $state(null)
@@ -55,10 +61,15 @@
       return
     }
 
+    const cc_emails = cc_recipients.map(recipient => recipient.email)
+    const bcc_emails = bcc_recipients.map(recipient => recipient.email)
+
     const { data, error: api_error } = await api_messages_reply({
       thread_id,
       body_text,
       body_html,
+      cc: cc_emails.length > 0 ? cc_emails : undefined,
+      bcc: bcc_emails.length > 0 ? bcc_emails : undefined,
       attachments,
     })
 
@@ -70,16 +81,21 @@
     if (data.delivery_status === 'failed') {
       error = data.delivery_error || 'SES rejected the send. The message is saved as failed — retry from the dashboard.'
       last_send_at = now
-      body_html = ''
-      staged = []
+      reset_fields()
       void sync?.sync().catch(() => undefined)
       return
     }
 
     last_send_at = now
+    reset_fields()
+    void sync?.sync().catch(() => undefined)
+  }
+
+  function reset_fields() {
     body_html = ''
     staged = []
-    void sync?.sync().catch(() => undefined)
+    cc_recipients = []
+    bcc_recipients = []
   }
 
   function read_file_as_base64(file: File): Promise<string> {
@@ -120,6 +136,8 @@
   <h2 class="composer-heading">
     <IconMdiReply style="margin-right: 0.25rem" />Reply to thread
   </h2>
+
+  <CcBccFields {db} bind:cc_recipients bind:bcc_recipients disabled={sending} />
 
   <RichTextEditor
     bind:value={body_html}

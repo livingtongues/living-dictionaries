@@ -18,7 +18,6 @@
     "import-dictionary:dev:dry": "tsx import/import.ts --id example-v4",
     "import-dictionary:dev:live": "tsx import/import.ts --id example-v4 --live",
     "import-dictionary:prod:live": "tsx import/import.ts --id example-v4 -e prod --live",
-    "update-locales": "tsx locales/update-locales.ts",
     "create-entry-caches": "tsx create-entry-caches/add-to-cloudflare.ts -e prod",
     "delete-dictionary-media": "tsx delete-dictionary-media/index.ts -e prod",
     "migrate-to-sqlite:dry": "tsx supabase-cutover/migrate.ts -e prod --dry --limit 20",

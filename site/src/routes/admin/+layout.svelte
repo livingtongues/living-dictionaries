@@ -1,36 +1,48 @@
 <script lang="ts">
-  import { beforeNavigate, goto, invalidateAll } from '$app/navigation'
+  import type { Component } from 'svelte'
+  import { beforeNavigate } from '$app/navigation'
   import { page } from '$app/state'
-  import { chat_store } from '$lib/admin/chat/chat-store.svelte'
+  import { chat_store } from '$lib/chat/chat-store.svelte'
   import LoginModal from '$lib/components/LoginModal.svelte'
+  import User from '$lib/components/shell/User.svelte'
   import SyncStatus from '$lib/db/sync/SyncStatus.svelte'
   import ShowHide from '$lib/svelte-pieces/ShowHide.svelte'
-  import UserMenu from '$lib/layout/UserMenu.svelte'
   import { onMount } from 'svelte'
+  import IconMdiAccountMultipleOutline from '~icons/mdi/account-multiple-outline'
+  import IconMdiApi from '~icons/mdi/api'
   import IconMdiArrowLeft from '~icons/mdi/arrow-left'
+  import IconMdiBookMultipleOutline from '~icons/mdi/book-multiple-outline'
+  import IconMdiChartLine from '~icons/mdi/chart-line'
+  import IconMdiCloudSync from '~icons/mdi/cloud-sync'
+  import IconMdiForumOutline from '~icons/mdi/forum-outline'
+  import IconMdiMessageTextOutline from '~icons/mdi/message-text-outline'
+  import IconMdiRobotOutline from '~icons/mdi/robot-outline'
+  import IconMdiScaleBalance from '~icons/mdi/scale-balance'
   import IconMdiShieldAccount from '~icons/mdi/shield-account'
+  import IconMdiTableCog from '~icons/mdi/table-cog'
 
   let { children, data } = $props()
 
-  const nav_links = [
-    { href: '/admin/messages', label: 'Messages' },
-    { href: '/admin/users', label: 'Users' },
-    { href: '/admin/team', label: 'Team' },
-    { href: '/admin/dictionaries', label: 'Dictionaries' },
-    { href: '/admin/sync', label: 'Sync' },
-    { href: '/admin/schema', label: 'Schema' },
-    { href: '/admin/api-docs', label: 'Agent API' },
-    { href: '/admin/triage-examples', label: 'Triage' },
-    { href: '/admin/legal-review', label: 'Legal' },
+  interface NavLink { href: string, label: string, icon: Component, compact?: boolean }
+  const nav_links: NavLink[] = [
+    { href: '/admin/messages', label: 'Messages', icon: IconMdiMessageTextOutline },
+    { href: '/admin/users', label: 'Users', icon: IconMdiAccountMultipleOutline, compact: true },
+    // Chat lives OUTSIDE /admin (membership-based — partners + super managers
+    // join too), but admins keep this entry point + unread badge.
+    { href: '/chat', label: 'Chat', icon: IconMdiForumOutline },
+    { href: '/admin/dictionaries', label: 'Dictionaries', icon: IconMdiBookMultipleOutline },
+    // Dev tools — `compact` renders them icon-only on desktop (labels still
+    // hide on mobile, where every link is icon-only anyway).
+    { href: '/admin/analytics', label: 'Analytics', icon: IconMdiChartLine, compact: true },
+    { href: '/admin/schema', label: 'Schema', icon: IconMdiTableCog, compact: true },
+    { href: '/admin/api-docs', label: 'API', icon: IconMdiApi, compact: true },
+    { href: '/admin/triage-examples', label: 'Triage', icon: IconMdiRobotOutline, compact: true },
+    { href: '/admin/legal-review', label: 'Legal', icon: IconMdiScaleBalance, compact: true },
+    // Sync last — icon-only (SyncStatus widget), always visible.
+    { href: '/admin/sync', label: 'Sync', icon: IconMdiCloudSync },
   ]
   function is_active(href: string): boolean {
     return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`)
-  }
-
-  async function sign_out() {
-    await data.auth_user.logout()
-    await invalidateAll()
-    await goto('/')
   }
 
   onMount(() => {
@@ -61,11 +73,12 @@
     void data.sync?.sync_if_needed()
   })
 
-  // App-wide chat background poll: keeps presence + the Team unread badge live
-  // across the whole admin area (the Team page adds the faster per-room poll).
+  // Admin-area chat loops: the unread badge poll + the presence heartbeat
+  // (being anywhere in /admin counts as online — the Chat nav badge is visible).
   onMount(() => {
-    chat_store.start_background()
-    return () => chat_store.stop_background()
+    chat_store.start_rooms_poll()
+    chat_store.start_presence()
+    return () => chat_store.stop_presence()
   })
 </script>
 
@@ -94,31 +107,36 @@
         <a href="/" class="back-link" title="Back to site">
           <IconMdiArrowLeft style="font-size: 1.25rem" />
         </a>
-        <a href="/admin" class="brand-link">
+        <a href="/admin" class="brand-link" title="Admin">
           <IconMdiShieldAccount style="font-size: 1.25rem; color: var(--primary)" />
-          Admin
+          <span class="brand-label">Admin</span>
         </a>
         <nav class="admin-nav">
           {#each nav_links as link (link.href)}
-            <a href={link.href} class={['nav-link', { active: is_active(link.href) }]}>
-              {link.label}
-              {#if link.href === '/admin/team' && chat_store.total_unread > 0}
+            {@const Icon = link.icon}
+            {@const is_sync = link.href === '/admin/sync' && !!data.sync}
+            <a href={link.href} title={link.label} aria-label={link.label} class={['nav-link', { active: is_active(link.href), compact: link.compact || is_sync }]}>
+              {#if is_sync}
+                <SyncStatus sync={data.sync} />
+              {:else}
+                <Icon style="font-size: 1.15rem; flex-shrink: 0" />
+                <span class="nav-label">{link.label}</span>
+              {/if}
+              {#if link.href === '/chat' && chat_store.total_unread > 0}
                 <span class="nav-badge">{chat_store.total_unread}</span>
               {/if}
             </a>
           {/each}
         </nav>
         <div class="header-right">
-          {#if data.sync}
-            <SyncStatus sync={data.sync} />
-          {/if}
-          <UserMenu auth_user={data.auth_user} {sign_out} />
+          <User />
         </div>
       </div>
     </header>
 
     <main class="page-main">
-      {@render children()}
+      <!-- optional-chained so svelte-look layout stories (which can't pass snippets) still render -->
+      {@render children?.()}
     </main>
   </div>
 {/if}
@@ -164,8 +182,19 @@
     align-items: center;
     gap: 0.25rem;
     font-size: 0.875rem;
+    /* More links than house — let the nav scroll on narrow screens instead of
+       clipping Sync + the user avatar off the edge. */
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
   .nav-link {
+    flex-shrink: 0;
+  }
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
     padding: 0.25rem 0.625rem;
     border-radius: 0.375rem;
     text-decoration: none;
@@ -181,10 +210,25 @@
     font-weight: 600;
     background: color-mix(in srgb, var(--primary), transparent 88%);
   }
-  .nav-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
+  /* Dev-tool links are icon-only on desktop (label hidden) to keep the nav tidy. */
+  .nav-link.compact {
+    padding: 0.25rem 0.4rem;
+  }
+  .nav-link.compact .nav-label {
+    display: none;
+  }
+  /* Mobile: drop ALL text labels → an icon-only header that fits a phone. */
+  @media (max-width: 768px) {
+    .header-row {
+      gap: 0.6rem;
+    }
+    .nav-label,
+    .brand-label {
+      display: none;
+    }
+    .nav-link {
+      padding: 0.25rem 0.4rem;
+    }
   }
   .nav-badge {
     background: var(--primary);

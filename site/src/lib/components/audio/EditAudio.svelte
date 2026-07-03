@@ -121,7 +121,7 @@
 
   <div class="modal-footer">
     {#if sound_file}
-      {#if auth_user.admin_level > 1}
+      {#if auth_user.admin_level >= 3}
         <JSON obj={sound_file} />
         <div style="width: 0.25rem"></div>
       {/if}
