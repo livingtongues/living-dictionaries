@@ -70,8 +70,13 @@ All verified conflict-free against the live catalog 2026-07-03 (the 4 noted conf
 - ✅ One-off script `scripts/one-off/2026-07-03-friendly-dict-urls.cjs` (.cjs — scripts/ is
       `type: module`; runs via `ssh living 'docker exec -i sveltekit_blue node' < script`, DRY=1
       env for preview, DATA_DIR override for local)
-- [ ] After deploy: back up shared.db, run the script on the VPS, curl-check the 11 previously-500
-      dicts + a few canonical 301s; watch client_logs
+- ✅ Deployed + data applied 2026-07-03 ~13:00Z: shared.db backed up (`bak-20260703-125623`),
+  script ran 31/31 (GOTCHA: 3 ids stored NFD vs script's NFC — script + the server resolver
+  now normalize; resolver fix in `903f3276`). Verified live: all 11 legacy ids 301→200,
+  15 new slugs 200, Firebase-id links 301 to new slugs, conflict-neighbor dicts untouched,
+  legacy /entries/list chains resolve, zero error rows post-deploy.
+
+DONE — remaining follow-ups: none. Safe to delete after a quiet day.
 
 ## Verification done (2026-07-03, mustang, local dev server)
 

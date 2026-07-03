@@ -145,6 +145,11 @@ spots: per-dict DB sync (`lib/db/dict-client/`), the leader/worker boot, entries
   production-VPS section).
 - **Known noise filtered at the source** (won't appear): `ResizeObserver loop`, `[GSI_LOGGER]`,
   `Sync already in progress` — see `NOISE_MESSAGE_PATTERNS` in `remote-log.ts`.
+- **Editing-health signals** (added 2026-07-03 after the Trey/orich hunt): `entry_created` /
+  `entry_deleted` (info, dict+entry ids), `write_blocked` (warn — an edit was refused:
+  `not_signed_in` / `no_dict_db` / `still_loading`), `dirty_rows_stuck` (warn, from the dict
+  worker — unpushed local writes surviving two 5-min watchdog checks; THE signal that a user's
+  work isn't reaching the server), and `sync_failed` context now carries the HTTP `status`.
 
 ## Beyond client_logs
 

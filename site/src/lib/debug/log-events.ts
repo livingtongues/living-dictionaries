@@ -20,6 +20,12 @@ export const ENTRY_OPENED = 'entry_opened'
 /** Audio for an entry/sentence was played. props: dictionary_id, audio_id. */
 export const AUDIO_PLAYED = 'audio_played'
 
+/** A new entry was created via the editing UI. props: dictionary_id, entry_id. */
+export const ENTRY_CREATED = 'entry_created'
+
+/** An entry was deleted via the editing UI. props: dictionary_id, entry_id. */
+export const ENTRY_DELETED = 'entry_deleted'
+
 /**
  * Every analytics event the app is SUPPOSED to emit. The dashboard's
  * self-instrumentation panel compares this list against what's actually been
@@ -32,4 +38,6 @@ export const ALL_TRACKED_EVENTS = [
   DICTIONARY_OPENED,
   ENTRY_OPENED,
   AUDIO_PLAYED,
+  ENTRY_CREATED,
+  ENTRY_DELETED,
 ] as const

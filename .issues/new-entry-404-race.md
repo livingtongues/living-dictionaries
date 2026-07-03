@@ -29,5 +29,9 @@ read-model to deliver the entry; only 404 if neither source produces it. Fixes a
   `wait_for_local_entry` subscribes to `entries_data` with timeout; only then 404
 - ✅ Local browser verification (headless puppeteer): create dict → Add Entry → headword renders
   on `/entry/{uuid}`, zero alerts/pageerrors
-- [ ] Post-deploy: watch `Entry not found` rate in prod client_logs (should drop to ~0 for
-      logged-in editors; anonymous `entry/list` hits fixed by the redirectId view-name fix)
+- ✅ Deployed 2026-07-03 ~13:00Z (+ follow-up `6a14ff98` local-first ordering: read-model wait
+  1.5s BEFORE server fetch — add-word now zero-network / fully offline). Zero error rows since
+  deploy. Jacob replying to the reporter. Watch `Entry not found` rate over the next day if
+  curious — expect ~0 for logged-in editors.
+
+RESOLVED — safe to delete after the rate confirms.

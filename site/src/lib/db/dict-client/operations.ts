@@ -6,6 +6,8 @@ import type { GlobalRelationshipType } from '$lib/constants'
 import { canonicalize_relationship_endpoints, resolve_global_relationship_type } from '$lib/db/relationship-canonicalize'
 import { page } from '$app/state'
 import { goto } from '$app/navigation'
+import { log_warning, track } from '$lib/debug/remote-log'
+import { ENTRY_CREATED, ENTRY_DELETED } from '$lib/debug/log-events'
 
 // vps-migration M4 write/sync: persistence is the browser wa-sqlite per-dict DB
 // (`dict_db`). Single-row ops go through the `dict_db` table accessors; the
@@ -32,15 +34,22 @@ function get_pieces() {
     auth_user: { user: { id: string } | null }
     entries_data: { loading: Writable<boolean> }
   }
+  // write_blocked: a user tried to edit but the app refused — the "user thinks
+  // they're editing but nothing persists" class (post-cutover logged-out
+  // editors, broken worker boot). Queryable ahead of the generic error rows.
+  function blocked(reason: string): Error {
+    log_warning({ message: 'write_blocked', context: { reason, dictionary_id: dictionary?.id, signed_in: Boolean(auth_user?.user?.id) } })
+    return new Error(reason === 'not_signed_in' ? 'You must be signed in to edit' : reason === 'no_dict_db' ? 'Editing database is not ready yet' : 'db operations not ready yet')
+  }
   const loading = get(entries_data.loading)
   if (loading) {
     alert('Wait until loading spinner stops to make edits.')
-    throw new Error('db operations not ready yet')
+    throw blocked('still_loading')
   }
   if (!dict_db)
-    throw new Error('Editing database is not ready yet')
+    throw blocked('no_dict_db')
   if (!auth_user.user?.id)
-    throw new Error('You must be signed in to edit')
+    throw blocked('not_signed_in')
 
   const entry_id_from_page = page.params.entryId || (page.state as { entry_id?: string }).entry_id
   return { dictionary_id: dictionary.id, dictionary_url: dictionary.url, entry_id_from_page, dict_db, connection }
@@ -48,8 +57,9 @@ function get_pieces() {
 
 export async function insert_entry(lexeme: MultiString) {
   try {
-    const { dictionary_url, dict_db } = get_pieces()
+    const { dictionary_id, dictionary_url, dict_db } = get_pieces()
     const entry = await dict_db.writes.insert_entry({ lexeme })
+    track({ event: ENTRY_CREATED, props: { dictionary_id, entry_id: entry.id } })
     goto(`/${dictionary_url}/entry/${entry.id}`)
   } catch (err) {
     alert(err)
@@ -59,8 +69,10 @@ export async function insert_entry(lexeme: MultiString) {
 
 export async function delete_entry(entry_id?: string) {
   try {
-    const { entry_id_from_page, dict_db } = get_pieces()
-    await dict_db.entries.delete(entry_id || entry_id_from_page)
+    const { dictionary_id, entry_id_from_page, dict_db } = get_pieces()
+    const deleted_id = entry_id || entry_id_from_page
+    await dict_db.entries.delete(deleted_id)
+    track({ event: ENTRY_DELETED, props: { dictionary_id, entry_id: deleted_id } })
   } catch (err) {
     alert(err)
     console.error(err)

@@ -62,7 +62,49 @@ export function report_dict_sync_failure({ dict_id, error }: {
           dict_id,
           kind,
           error: message,
+          status: typeof (error as { status?: unknown })?.status === 'number' ? (error as { status: number }).status : undefined,
         },
+      }],
+    })
+  } catch {
+    // Never let telemetry break the sync path.
+  }
+}
+
+/**
+ * Ship a "dirty rows aren't draining" warning — pending local writes observed
+ * across consecutive watchdog checks (see `DictSyncEngine` stuck-dirty
+ * watchdog). This is the durable early-warning for the "user keeps editing
+ * but nothing reaches the server" class (auth silently broken, a table the
+ * push loop misses, engine wedged) that per-attempt `sync_failed` rows can
+ * miss. Throttled to one row per `STUCK_DIRTY_THROTTLE_MS`.
+ */
+export const STUCK_DIRTY_THROTTLE_MS = 30 * 60 * 1000
+let stuck_last_shipped_at = 0
+
+export function report_dict_stuck_dirty({ dict_id, dirty_rows, deletes, last_sync_at, last_error }: {
+  dict_id: string
+  dirty_rows: number
+  deletes: number
+  last_sync_at: string | null
+  last_error: string | null
+}): void {
+  try {
+    if (is_offline())
+      return
+    const now = Date.now()
+    if (now - stuck_last_shipped_at < STUCK_DIRTY_THROTTLE_MS)
+      return
+    stuck_last_shipped_at = now
+    void api_log({
+      entries: [{
+        level: 'warn',
+        message: 'dirty_rows_stuck',
+        client_time: new Date().toISOString(),
+        user_agent: safe_user_agent(),
+        platform: 'web',
+        app_version: version ?? null,
+        context: { worker: true, engine: 'dict', dict_id, dirty_rows, deletes, last_sync_at, last_error },
       }],
     })
   } catch {
@@ -73,4 +115,5 @@ export function report_dict_sync_failure({ dict_id, error }: {
 /** Test-only. */
 export function _reset_dict_failure_throttle_for_tests(): void {
   last_shipped = null
+  stuck_last_shipped_at = 0
 }

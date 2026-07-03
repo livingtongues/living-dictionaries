@@ -8,7 +8,7 @@ import { ResponseCodes } from '$lib/constants'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
 import { LATEST_DICT_MIGRATION } from './dict-migrations-bundle'
-import { report_dict_sync_failure } from './report-dict-sync-failure'
+import { report_dict_stuck_dirty, report_dict_sync_failure } from './report-dict-sync-failure'
 
 /** The slice of the worker's connection the engine needs (reads + writes). */
 export interface EngineConnection {
@@ -38,6 +38,8 @@ export interface EngineConnection {
  */
 
 export const DICT_SYNC_INTERVAL_MS = 30 * 1000
+/** Stuck-dirty watchdog cadence — pending writes seen at two consecutive checks ship a warn. */
+export const STUCK_DIRTY_CHECK_MS = 5 * 60 * 1000
 
 export interface SyncEngineOptions {
   dict_id: string
@@ -72,6 +74,8 @@ export class DictSyncEngine {
   #on_status?: (status: { is_syncing: boolean, last_error: string | null, last_sync_at: string | null }) => void
 
   #timer: ReturnType<typeof setInterval> | null = null
+  #stuck_timer: ReturnType<typeof setInterval> | null = null
+  #pending_at_last_check = false
   #in_flight = false
   #last_error: string | null = null
   #last_sync_at: string | null = null
@@ -92,6 +96,7 @@ export class DictSyncEngine {
     if (this.#timer || this.#stopped)
       return
     this.#timer = setInterval(() => { void this.sync_if_needed() }, DICT_SYNC_INTERVAL_MS)
+    this.#stuck_timer = setInterval(() => { this.check_stuck_dirty().catch(() => { /* telemetry only */ }) }, STUCK_DIRTY_CHECK_MS)
   }
 
   stop() {
@@ -100,6 +105,41 @@ export class DictSyncEngine {
       clearInterval(this.#timer)
       this.#timer = null
     }
+    if (this.#stuck_timer) {
+      clearInterval(this.#stuck_timer)
+      this.#stuck_timer = null
+    }
+  }
+
+  /**
+   * Watchdog: local writes that survive two consecutive checks (~5 min apart)
+   * aren't draining — the sync loop is wedged, auth is silently broken, or a
+   * table never gets pushed. Counts regardless of editor role: dirty rows held
+   * by a NON-editor (role/login lost after writing) are the most dangerous
+   * variant. Per-attempt failures ship separately (`sync_failed`); this is the
+   * durable "user's work is stuck" signal.
+   */
+  async check_stuck_dirty(): Promise<void> {
+    if (this.#stopped)
+      return
+    let dirty_rows = 0
+    for (const table of DICT_SYNCABLE_TABLES) {
+      const rows = await this.#connection.query<{ c: number }>(`SELECT COUNT(*) AS c FROM "${table}" WHERE dirty = 1`)
+      dirty_rows += rows[0]?.c ?? 0
+    }
+    const delete_rows = await this.#connection.query<{ c: number }>(`SELECT COUNT(*) AS c FROM deletes`)
+    const deletes = delete_rows[0]?.c ?? 0
+    const pending = dirty_rows + deletes > 0
+    if (pending && this.#pending_at_last_check) {
+      report_dict_stuck_dirty({
+        dict_id: this.#dict_id,
+        dirty_rows,
+        deletes,
+        last_sync_at: this.#last_sync_at,
+        last_error: this.#last_error,
+      })
+    }
+    this.#pending_at_last_check = pending
   }
 
   set_role(has_editor_role: boolean) {
