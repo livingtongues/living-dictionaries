@@ -246,15 +246,16 @@ would have pointed at the dead subdomain post-flip). All other notification path
        - Caddy serves apex + `new.`→apex 301 (path+query preserved, verified)
        - ld-email worker deployed with apex `LD_VPS_URL`
        - GitHub webhook → apex (Jacob); confirmed working by the post-flip push deploy
-       - `www`: CNAME set; **Jacob handling the www→apex redirect rule properly at the CF edge**
-         (525 until then — CF proxies www to origin which has no www host). CF token gaps found:
-         `Zone · Dynamic Redirect · Edit`, `Zone · Zone Settings · Read`.
+       - `www`: DONE (Jacob/tuf) — 301 → apex with path+query preserved at the CF edge; SSL mode
+         confirmed Full. CF token gaps found for future agent work: `Zone · Dynamic Redirect ·
+         Edit`, `Zone · Zone Settings · Read`.
 5. [x] Verified on the apex: healthz/SSR 200; `/service-worker.js` 200 (the shipped SW is the kill
        for the old Vercel SW per `.knowledge/migration/service-worker-cutover.md`); real user
        traffic landing in `client_logs` incl. delta dicts (ewdebe/orich searches); **zero
        errors/crashes post-flip**; delta-dict R2 snapshots 200. Old app still on Vercel for
-       side-by-side. Remaining Jacob checks: email support@ → `message_threads` row (inbound
-       worker), `bin/secrets-encrypt`.
+       side-by-side. Deploy webhook verified by a live push→blue/green deploy. Inbound email
+       verified end-to-end (SES → CF routing → ld-email → apex ingest → thread
+       `222a3678`, 02:59Z). Remaining Jacob item: `bin/secrets-encrypt` on tuf.
 6. [ ] Grace watch: check-logs sweeps scheduled via horse cron on mustang — `c-4b69da` (+1h,
        2026-07-03 04:15Z) and `c-04dfff` (+1d, 2026-07-04 03:00Z); the +1d session marks this
        step done if clean
