@@ -223,19 +223,32 @@ would have pointed at the dead subdomain post-flip). All other notification path
   Check once: `SELECT id, name FROM dictionaries WHERE deleted > '2026-07-02T16:24:36Z'` against
   Supabase; hand-remove any hits from the VPS catalog + `dictionaries/` (expected: zero).
 
-1. [ ] Announce/freeze: no old-app edits during the window (or accept the delta re-run catches
-       everything up to the moment of the final delta)
-2. [ ] Delta + push: repeat A6 (fresh shared.db pull → `converge-shared-drift.ts` → delta run per
-       the flag rules above → rsync up, `river.*` excluded, no `--delete`, clear stale wal/shm) —
-       changed-dict detection incl. texts/sentence_photos/sentence_videos supplements; rebuilds
-       only changed dict dbs
-3. [ ] Snapshot sweep for the delta-rebuilt dicts only (auto via `snapshot_uploaded_at` — wait for
-       it BEFORE the flip so nobody restores a stale R2 snapshot of a changed dict)
-4. [ ] **DNS swap + domain flip** — point `livingdictionaries.app` → the VPS; flip `living.conf`
-       `DOMAIN` → apex; `bin/sync living`. Then walk ALL the operational tails below.
+1. [x] Freeze: Jacob revoked INSERT/UPDATE/DELETE from anon+authenticated on all Supabase public
+       tables (2026-07-03) — old app is read-only, delta fully deterministic
+2. [x] **Delta + push DONE (2026-07-03 ~02:30Z).** Fresh pull (WAL folded, zero drift) → delta =
+       **7 dicts** (incl. new `teste`; catalog now 2,231 with river) in 84s → pushed, containers up,
+       healthz 200, river byte-identical. Verified: `verify` 7/7 count parity, `validate-sqlite`
+       2,230/2,230 invariants. Supabase deleted-dicts check: zero.
+       - **NEW BUG found+fixed:** U+2028 LINE SEPARATOR in content splits the NDJSON protocol line
+         (node readline treats it as a newline) → richtext child died twice on
+         `boienen-old-buhi-langua.grammar`. Fixed via `to_ndjson_line` escaping both directions.
+       - **NEW mismatch class:** a paragraph that is entirely `{…}` is eaten at render by
+         markdown-it-attrs' end-of-block rule — one affected value, stored brace-escaped
+         (roundtrip-verified clean). Live-editor bug filed: `.issues/markdown-brace-paragraph-loss.md`.
+       - `verify.ts` summary was invisible (record-logs console.info hijack) → console.log.
+       - Snapshot-preservation fix confirmed end-to-end: builder logged "7 need fresh → Uploaded
+         7/7" on boot; the other 2,224 uploaded flags survived the upsert.
+3. [x] Snapshot sweep for the 7 delta dicts: done (7/7, seconds after boot)
+4. [ ] **DNS swap + domain flip** — Jacob repointed the GitHub webhook → apex ✅ (deploys are DEAD
+       until DNS flips — the hook now hits Vercel; deploy manually over ssh if needed pre-flip).
+       Done in repos: `living.conf` DOMAIN→apex + Caddy `new.`→apex redirect block (bin/sync),
+       cf-worker `LD_VPS_URL`→apex. Remaining (tuf agent — CF token in tmux living-dictionaries:2):
+       ORIGIN→apex in secrets + `bin/sync living` + container recreate + caddy force-recreate;
+       CF DNS apex→VPS origin (copy `new.` record's target, proxied), `www` CNAME + Dynamic
+       Redirect; deploy cf-worker. Jacob: email support@ to test inbound; next push tests webhook.
 5. [ ] Verify prod on the apex; old app kept reachable read-only for comparison until confident.
-       Confirm `client_logs` fills with apex traffic (zero rows landed post-swap during the
-       rehearsal window — expected with no browsing, but verify telemetry is alive).
+       Confirm `client_logs` fills with apex traffic (telemetry confirmed alive post-swap: 22,607 →
+       22,816 rows during the rehearsal window).
 6. [ ] Grace watch: check-logs sweeps at +1h / +1d
 
 ### ⚠️ Cutover-day operational tails (from house's 2026-06-23 flip — all apply)

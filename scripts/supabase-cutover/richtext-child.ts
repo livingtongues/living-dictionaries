@@ -1,6 +1,7 @@
 import process from 'node:process'
 import readline from 'node:readline'
 import { convert_multistring, convert_value, create_conversion_stats } from './richtext'
+import { to_ndjson_line } from './richtext-pool'
 
 /**
  * Conversion child process (see richtext-pool.ts). Tiptap/ProseMirror retain
@@ -28,13 +29,13 @@ rl.on('line', (line) => {
   } catch (thrown) {
     error = (thrown as Error).message
   }
-  process.stdout.write(`${JSON.stringify({
+  process.stdout.write(to_ndjson_line({
     id: request.id,
     result,
     error,
     stats: { converted: stats.converted, passed_through: stats.passed_through, emptied: stats.emptied },
     mismatches: stats.mismatches,
-  })}\n`)
+  }))
 })
 
 rl.on('close', () => process.exit(0))

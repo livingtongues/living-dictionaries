@@ -99,7 +99,8 @@ async function main() {
       }
     }
 
-    console.info(`\nchecked ${checked}/${dict_ids.length} dicts — ${total_mismatches === 0 ? '✓ all counts match' : `✗ ${total_mismatches} table mismatches`}`)
+    // console.log, NOT console.info — record-logs.ts (imported via config-supabase) hijacks info to file-only
+    console.log(`\nchecked ${checked}/${dict_ids.length} dicts — ${total_mismatches === 0 ? '✓ all counts match' : `✗ ${total_mismatches} table mismatches`}`)
   } finally {
     client.release()
     await postgres.end()

@@ -4,7 +4,7 @@
   // *@livingdictionaries.app (catch-all). Parses MIME, uploads each
   // attachment to R2 via the `ATTACHMENTS` binding (livingdictionaries-attachments),
   // then POSTs metadata-only JSON to
-  //   https://new.livingdictionaries.app/api/messages/email-inbound
+  //   https://livingdictionaries.app/api/messages/email-inbound
   // with the INTERNAL_INGEST_SECRET header.
   //
   // Outbound is handled by the VPS via AWS SES (Workers Free plan; no
@@ -16,7 +16,7 @@
   "compatibility_date": "2026-05-26",
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
-    "LD_VPS_URL": "https://new.livingdictionaries.app"
+    "LD_VPS_URL": "https://livingdictionaries.app"
   },
   // INTERNAL_INGEST_SECRET set via `wrangler secret put INTERNAL_INGEST_SECRET`
   // (must match the value at /opt/hosting/sveltekit/.env on the living VPS).
