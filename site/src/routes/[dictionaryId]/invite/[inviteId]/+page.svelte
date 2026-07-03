@@ -32,7 +32,7 @@
       <p style="margin-bottom: 0.5rem">
         You are already a manager.
       </p>
-      <Button href={`/${dictionary.id}/entries`}>
+      <Button href={`/${dictionary.url}/entries`}>
         {page.data.t('dictionary.entries')}
         <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.25rem" />
       </Button>
@@ -40,7 +40,7 @@
       <p style="margin-bottom: 0.5rem">
         You are already a contributor.
       </p>
-      <Button href={`/${dictionary.id}/entries`}>
+      <Button href={`/${dictionary.url}/entries`}>
         {page.data.t('dictionary.entries')}
         <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.25rem" />
       </Button>
@@ -77,7 +77,7 @@
     {page.data.t('invite.invitation_claimed')}
   </p>
 
-  <Button href={`/${dictionary.id}/entries`}>
+  <Button href={`/${dictionary.url}/entries`}>
     {page.data.t('dictionary.entries')}
     <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.25rem" />
   </Button>

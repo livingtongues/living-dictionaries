@@ -43,7 +43,7 @@
         if (response.ok) {
           const blob = await response.blob()
           // @ts-ignore
-          zip.folder(`${dictionary.id}_Images/`).file(entry?.photoFile, blob, { binary: true })
+          zip.folder(`${dictionary.url}_Images/`).file(entry?.photoFile, blob, { binary: true })
         } else {
           errors = [
             ...errors,
@@ -63,7 +63,7 @@
         const response = await fetch(sound_file_path)
         if (response.ok) {
           const blob = await response.blob()
-          zip.folder(`${dictionary.id}_Audio/`).file(entry.soundFile, blob, { binary: true })
+          zip.folder(`${dictionary.url}_Audio/`).file(entry.soundFile, blob, { binary: true })
         } else {
           errors = [
             ...errors,
@@ -79,11 +79,11 @@
     const csv = objectsToCsvByHeaders(entryHeaders, finalizedEntries)
     const csvBlob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' })
 
-    zip.file(`${dictionary.id}.csv`, csvBlob)
+    zip.file(`${dictionary.url}.csv`, csvBlob)
 
     const blob = await zip.generateAsync({ type: 'blob' })
     if (destroyed) return
-    downloadBlob(blob, dictionary.id, '.zip')
+    downloadBlob(blob, dictionary.url, '.zip')
     if (!errors.length)
       dispatch('completed')
   })

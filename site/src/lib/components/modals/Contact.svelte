@@ -18,7 +18,7 @@
     if (about_is_too_short()) {
       close()
       alert(page.data.t('about.message'))
-      goto(`/${dictionary.id}/about`)
+      goto(`/${dictionary.url}/about`)
     }
   }
 

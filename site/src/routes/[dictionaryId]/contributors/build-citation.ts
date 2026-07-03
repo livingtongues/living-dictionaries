@@ -25,13 +25,13 @@ export function build_citation({ t, dictionary, custom_citation, partners }: {
   if (all_partners.length)
     citation += `${all_partners.join(', ')}. `
 
-  const url = `https://livingdictionaries.app/${dictionary.id}`
+  const url = `https://livingdictionaries.app/${dictionary.url}`
   return citation + url
 }
 
 if (import.meta.vitest) {
   const t = (key: TranslationKeys, { values: { dictionary_name } }: TranslateOptions) => `${dictionary_name} Living Dictionary`
-  const dictionary = { id: 'traba', name: 'Trabajar' } as Tables<'dictionaries'>
+  const dictionary = { id: 'traba', url: 'traba', name: 'Trabajar' } as Tables<'dictionaries'>
 
   describe(build_citation, () => {
     test('default', () => {

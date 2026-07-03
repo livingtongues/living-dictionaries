@@ -26,7 +26,7 @@ import { goto } from '$app/navigation'
 
 function get_pieces() {
   const { dictionary, dict_db, connection, auth_user, entries_data } = page.data as unknown as {
-    dictionary: { id: string }
+    dictionary: { id: string, url: string }
     dict_db: DictLiveDb | null
     connection: { query: <T>(sql: string, params?: unknown[]) => Promise<T[]> } | null
     auth_user: { user: { id: string } | null }
@@ -43,14 +43,14 @@ function get_pieces() {
     throw new Error('You must be signed in to edit')
 
   const entry_id_from_page = page.params.entryId || (page.state as { entry_id?: string }).entry_id
-  return { dictionary_id: dictionary.id, entry_id_from_page, dict_db, connection }
+  return { dictionary_id: dictionary.id, dictionary_url: dictionary.url, entry_id_from_page, dict_db, connection }
 }
 
 export async function insert_entry(lexeme: MultiString) {
   try {
-    const { dictionary_id, dict_db } = get_pieces()
+    const { dictionary_url, dict_db } = get_pieces()
     const entry = await dict_db.writes.insert_entry({ lexeme })
-    goto(`/${dictionary_id}/entry/${entry.id}`)
+    goto(`/${dictionary_url}/entry/${entry.id}`)
   } catch (err) {
     alert(err)
     console.error(err)

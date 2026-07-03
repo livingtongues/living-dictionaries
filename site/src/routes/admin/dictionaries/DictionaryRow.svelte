@@ -97,7 +97,7 @@
 </script>
 
 <td class="index-cell">
-  <a href="/{dictionary.id}" target="_blank" class="index-link">{index + 1}</a>
+  <a href="/{dictionary.url}" target="_blank" class="index-link">{index + 1}</a>
 </td>
 <td class="edit-cell"><DictionaryFieldEdit {dictionary} field="name" /></td>
 <td>
@@ -106,7 +106,7 @@
   </button>
 </td>
 <td class="num-cell">
-  <a href="/{dictionary.id}" target="_blank" class="entry-link">{(dictionary.entry_count ?? 0).toLocaleString()}</a>
+  <a href="/{dictionary.url}" target="_blank" class="entry-link">{(dictionary.entry_count ?? 0).toLocaleString()}</a>
 </td>
 <td>
   <RoleCell dictionary_id={dictionary.id} role="manager" editors={managers} invites={manager_invites} {users} {on_change} />

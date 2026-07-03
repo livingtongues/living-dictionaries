@@ -134,7 +134,7 @@
           dictionary.public = 1
         } else if (about_is_too_short()) {
           alert(page.data.t('about.message'))
-          goto(`/${dictionary.id}/about`)
+          goto(`/${dictionary.url}/about`)
         } else {
           const communityAllowsOnline = confirm(page.data.t('settings.community_permission'))
           if (communityAllowsOnline) alert(page.data.t('header.contact_us'))

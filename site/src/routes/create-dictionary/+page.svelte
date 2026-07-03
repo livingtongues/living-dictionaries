@@ -51,7 +51,7 @@
     return isUniqueURL
   }
 
-  function handleUrlKeyup(e: Event) {
+  function handle_url_input(e: Event) {
     const newCustomUrl = (e.target as HTMLInputElement).value
     if (customUrl !== newCustomUrl)
       customUrl = convertToFriendlyUrl(newCustomUrl, MAX_URL_LENGTH)
@@ -132,7 +132,7 @@ Use: ${conlang_use.trim()}`
           <input
             id="url"
             value={customUrl || urlFromName}
-            onkeyup={handleUrlKeyup}
+            oninput={handle_url_input}
             required
             minlength={data.MIN_URL_LENGTH}
             maxlength={MAX_URL_LENGTH}

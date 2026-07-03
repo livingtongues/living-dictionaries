@@ -36,16 +36,47 @@ export async function load({ params: { entryId: entry_id }, parent, fetch }) {
 
   const derived_entry = derived([entries_data], ([$entries_data]) => $entries_data[entry_id] ?? null)
 
+  // A just-written entry exists in the local wa-sqlite DB before the
+  // orama-watcher feeds it into the read-model AND before the sync engine
+  // pushes it to the server — so "absent from the store + absent from the
+  // server" can be a race, not a missing entry (add-new-headword → goto hit
+  // this constantly). Give the watcher a bounded window to deliver the row
+  // before 404ing.
+  function wait_for_local_entry(timeout_ms: number): Promise<boolean> {
+    return new Promise((resolve) => {
+      let settled = false
+      let unsubscribe = () => {}
+      let timer: ReturnType<typeof setTimeout>
+      function settle(found: boolean) {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        // subscribe fires synchronously on registration — unsubscribe isn't
+        // assigned yet on that first call, hence the microtask.
+        queueMicrotask(() => unsubscribe())
+        resolve(found)
+      }
+      timer = setTimeout(() => settle(false), timeout_ms)
+      unsubscribe = entries_data.subscribe(($entries_data) => {
+        if ($entries_data[entry_id])
+          settle(true)
+      })
+    })
+  }
+
   // Warm: the bundle has finished loading (+layout.ts awaits sync before the
   // store is built, and `loading` flips false only after the full bundle is
-  // assembled — so an absent entry here is genuinely missing).
+  // assembled) — an absent entry is either just-created (see above) or
+  // genuinely missing.
   if (!get(entries_data.loading)) {
     if (get(entries_data)[entry_id])
       return { derived_entry, shallow: false }
     const entry = await fetch_entry()
-    if (!entry)
-      error(ResponseCodes.NOT_FOUND, 'Entry not found')
-    return { entry_from_page: entry, shallow: false }
+    if (entry)
+      return { entry_from_page: entry, derived_entry, shallow: false }
+    if (await wait_for_local_entry(4000))
+      return { derived_entry, shallow: false }
+    error(ResponseCodes.NOT_FOUND, 'Entry not found')
   }
 
   // Cold window: paint the server entry now (reused from the SSR HTML on

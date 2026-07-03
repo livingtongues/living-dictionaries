@@ -200,7 +200,7 @@
   {#await tick() then _}
     <QrCode
       pixelsPerModule={2}
-      value={`livingdictionaries.app/${dictionary.id}/entry/${entry.id}`} />
+      value={`livingdictionaries.app/${dictionary.url}/entry/${entry.id}`} />
   {/await}
 {/if}
 
