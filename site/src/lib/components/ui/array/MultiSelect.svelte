@@ -4,7 +4,7 @@
   import { fly } from 'svelte/transition'
   import { onMount } from 'svelte'
   import type { SelectOption } from './select-options.interface'
-  import { clickoutside } from '$lib/svelte-pieces'
+  import { clickoutside } from '$lib/utils/clickoutside'
   import IconLaTimes from '~icons/la/times'
   import IconCarbonCaretDown from '~icons/carbon/caret-down'
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { RowType } from '$lib/db/client/live/types'
   import IconMdiMagnify from '~icons/mdi/magnify'
-  import Modal from '$lib/svelte-pieces/Modal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { score_record } from '$lib/utils/fuzzy-score'
 
   interface Props {

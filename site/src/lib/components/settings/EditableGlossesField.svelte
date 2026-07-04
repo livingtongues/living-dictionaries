@@ -1,6 +1,9 @@
 <script lang="ts">
   import type { IGlossLanguages } from '$lib/types'
-  import { BadgeArrayEmit, Button, Modal, ShowHide } from '$lib/svelte-pieces'
+  import BadgeArrayEmit from '$lib/components/ui/BadgeArrayEmit.svelte'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
 

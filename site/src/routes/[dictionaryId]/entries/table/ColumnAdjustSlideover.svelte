@@ -4,7 +4,7 @@
   import { fade } from 'svelte/transition'
   import type { IColumn } from '$lib/types'
   import ColumnTitle from './ColumnTitle.svelte'
-  import { Slideover } from '$lib/svelte-pieces'
+  import Slideover from '$lib/components/ui/Slideover.svelte'
   import { page } from '$app/state'
   import IconFa6SolidChevronUp from '~icons/fa6-solid/chevron-up'
   import IconFa6SolidChevronDown from '~icons/fa6-solid/chevron-down'

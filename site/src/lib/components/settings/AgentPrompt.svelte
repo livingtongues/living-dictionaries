@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state'
-  import { Button } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
 
   const { dictionary_id }: { dictionary_id: string } = $props()
 

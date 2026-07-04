@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { QueryParamStore } from '$lib/svelte-pieces'
+  import type { QueryParamStore } from '$lib/state/query-param-state.svelte'
   import { page } from '$app/state'
   import type { QueryParams } from '$lib/search/types'
   import IconCarbonSearch from '~icons/carbon/search'

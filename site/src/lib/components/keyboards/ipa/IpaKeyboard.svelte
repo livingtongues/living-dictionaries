@@ -1,7 +1,7 @@
 <script lang="ts">
   import IconHeroiconsBackspace20Solid from '~icons/heroicons/backspace-20-solid'
   import vowelTrapezoid from './vowel-trapezoid.gif'
-  import { Button } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
 
   interface Props {
     on_ipa_change: (new_value: string) => void

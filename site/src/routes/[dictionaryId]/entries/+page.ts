@@ -1,4 +1,4 @@
-import { createQueryParamStore } from '$lib/svelte-pieces'
+import { createQueryParamStore } from '$lib/state/query-param-state.svelte'
 import type { QueryParams } from '$lib/search/types'
 
 export function load() {

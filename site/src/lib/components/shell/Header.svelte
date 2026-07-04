@@ -1,6 +1,8 @@
 <script lang="ts">
   import User from './User.svelte'
-  import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import ResponsiveSlideover from '$lib/components/ui/ResponsiveSlideover.svelte'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { page } from '$app/state'
   import { mode } from '$lib/mode'
   import IconFluentLearningApp24Regular from '~icons/fluent/learning-app-24-regular'

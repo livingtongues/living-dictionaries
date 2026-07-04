@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BadgeArray } from '$lib/svelte-pieces'
+  import BadgeArray from '$lib/components/ui/BadgeArray.svelte'
   import { page } from '$app/state'
 
   interface Props {

@@ -1,6 +1,8 @@
 <script lang="ts">
   import SideMenu from './SideMenu.svelte'
-  import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import ResponsiveSlideover from '$lib/components/ui/ResponsiveSlideover.svelte'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import { track } from '$lib/debug/remote-log'

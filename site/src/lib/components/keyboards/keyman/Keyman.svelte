@@ -16,7 +16,10 @@
   import type { KeymanWritingSystems } from './writing-systems'
   import { keyboard_for_bcp, load_keyman_writing_systems } from './writing-systems'
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages'
-  import { Button, loadScriptOnce, Modal, ShowHide } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import { loadScriptOnce } from '$lib/utils/load-once'
   import { browser } from '$app/environment'
 
   interface Props {

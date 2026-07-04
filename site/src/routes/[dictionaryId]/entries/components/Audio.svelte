@@ -32,9 +32,10 @@
 
 <script lang="ts">
   import type { EntryData } from '$lib/types'
-  import { longpress, ShowHide } from '$lib/svelte-pieces'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import { longpress } from '$lib/utils/longpress'
   import { page } from '$app/state'
-  import { minutes_ago_in_ms } from '$lib/helpers/time'
+  import { minutes_ago_in_ms } from '$lib/utils/time'
   import { track } from '$lib/debug/remote-log'
   import { AUDIO_PLAYED } from '$lib/debug/log-events'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'

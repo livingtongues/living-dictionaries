@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { DictionaryView } from '$lib/types'
   import sanitize from 'xss'
-  import { Button } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
   import { page } from '$app/state'
   import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
 

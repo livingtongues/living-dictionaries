@@ -3,7 +3,7 @@
   import IconMdiMapMarkerOutline from '~icons/mdi/map-marker-outline'
   import IconMdiMapMarkerPlusOutline from '~icons/mdi/map-marker-plus-outline'
   import BadgeArray from '$lib/components/entry/BadgeArray.svelte'
-  import Modal from '$lib/svelte-pieces/Modal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { format_date } from '$lib/utils/format-relative-time'
   import { api_dictionaries_id_delete } from '../../api/dictionaries/[id]/_call'
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte'

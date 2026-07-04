@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { HeadlessButton } from '$lib/svelte-pieces'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { looks_like_html, rich_text_display_html } from '$lib/markdown/html-era-shim'

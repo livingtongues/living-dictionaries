@@ -5,7 +5,7 @@ import type { CredentialResponse } from 'google-one-tap'
 import { api_auth_google } from '$api/auth/google/_call.js'
 import { invalidateAll } from '$app/navigation'
 import { env as public_env } from '$env/dynamic/public'
-import { toast } from '$lib/svelte-pieces/toast.svelte'
+import { toast } from '$lib/state/toast.svelte'
 import { load_script_once } from './load-script-once'
 import { get_auth_user } from './user.svelte.js'
 

@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { env } from '$env/dynamic/private'
-import { DEV_LOCAL_PREFIX } from '$lib/helpers/media-url'
+import { DEV_LOCAL_PREFIX } from '$lib/utils/media-url'
 import { dev_media_dir } from './dev-media-dir'
 import { gcs_is_configured, get_gcs } from './gcloud'
 

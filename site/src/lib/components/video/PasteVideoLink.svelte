@@ -3,7 +3,7 @@
 
   import type { HostedVideo } from '$lib/types'
   import { parse_hosted_video_url } from './parse-hosted-video-url'
-  import { Button } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
   import { page } from '$app/state'
 
   let url: string = $state()

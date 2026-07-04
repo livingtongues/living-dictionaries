@@ -17,7 +17,7 @@
   import ComposeEmailModal from '$lib/admin/messages/compose-email-modal.svelte'
   import { get_admin, get_admin_level, has_super_manager_role } from '$lib/admins'
   import { support_address } from '$lib/email/addresses'
-  import CopyButton from '$lib/svelte-pieces/CopyButton.svelte'
+  import CopyButton from '$lib/components/ui/CopyButton.svelte'
   import { use_admin_back } from '$lib/utils/admin-back.svelte'
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
   import { api_admin_user_name } from '../../../api/admin/users/[id]/name/_call'

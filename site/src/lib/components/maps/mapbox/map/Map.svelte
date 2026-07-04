@@ -9,7 +9,7 @@
   import { bindEvents } from '../event-bindings'
   import { getTimeZoneLongitude } from '../../utils/getTimeZoneLongitude'
   import { ADDED_FEATURE_ID_PREFIX } from '../../utils/randomId'
-  import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
+  import { loadScriptOnce, loadStylesOnce } from '$lib/utils/load-once'
   import { log_event } from '$lib/debug/remote-log'
   import { page } from '$app/state'
   import { PUBLIC_mapboxAccessToken } from '$env/static/public'

@@ -4,7 +4,7 @@ import { search_entries } from './search-entries'
 import { entries_index_schema } from './entries-schema'
 import { augment_entry_for_search } from './augment-entry-for-search'
 import { createMultilingualTokenizer } from './multilingual-tokenizer'
-import type { DeepPartial } from '$lib/helpers/deep-partial'
+import type { DeepPartial } from '$lib/utils/deep-partial'
 
 function search(entries: DeepPartial<EntryData>[], query: string) {
   const index = create({

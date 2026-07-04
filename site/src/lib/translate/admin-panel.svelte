@@ -1,7 +1,7 @@
 <script lang="ts">
   import { api_translate_notify } from '$api/translate/notify/_call'
   import { get_locale_display_name } from '$lib/i18n/locales'
-  import { toast } from '$lib/svelte-pieces/toast.svelte'
+  import { toast } from '$lib/state/toast.svelte'
   import { translate_store } from './translate-store.svelte'
   import IconMdiBellOutline from '~icons/mdi/bell-outline'
 

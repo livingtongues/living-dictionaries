@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
   import type { RowType } from '$lib/db/client/live/types'
   import IconMdiAccountSearch from '~icons/mdi/account-search'
   import IconMdiClose from '~icons/mdi/close'
@@ -15,13 +16,23 @@
   import { score_record } from '$lib/utils/fuzzy-score'
   import { api_admin_user_unsubscribe } from '../../api/admin/users/[id]/unsubscribe/_call'
   import { api_dictionaries_id_roles_post } from '../../api/dictionaries/[id]/roles/_call'
+  import { api_translate_summary } from '../../api/translate/summary/_call'
 
   type DictionaryRole = 'manager' | 'editor' | 'contributor'
 
   let { data } = $props()
   const db = $derived(data.db)
 
-  type UserFilter = 'all' | 'admins' | 'active_30' | 'unsubscribed' | 'with_roles'
+  // `translator_languages` is server-only (never synced to admin clients), so the
+  // translator roster comes from the admin-only /translate summary endpoint.
+  let translator_user_ids = $state<Set<string>>(new Set())
+  onMount(async () => {
+    const { data: summary } = await api_translate_summary()
+    if (summary)
+      translator_user_ids = new Set(summary.translators.map(translator => translator.user_id))
+  })
+
+  type UserFilter = 'all' | 'admins' | 'active_30' | 'unsubscribed' | 'with_roles' | 'translators'
   type SortKey = 'name' | 'email' | 'roles' | 'threads' | 'last_msg' | 'last_visit' | 'joined' | 'unsub'
 
   const users_query = $derived(db?.users.query({ order_by: 'COALESCE(updated_at, created_at) DESC', limit: 9999 }))
@@ -130,6 +141,7 @@
     { key: 'admins', label: 'admins', count: summary.admins },
     { key: 'active_30', label: 'active last 30 days', count: summary.active_30 },
     { key: 'with_roles', label: 'with dictionary roles', count: summary.with_roles },
+    { key: 'translators', label: 'translators', count: translator_user_ids.size },
     { key: 'unsubscribed', label: 'unsubscribed', count: summary.unsubscribed },
   ])
 
@@ -163,6 +175,7 @@
       if (user_filter === 'active_30' && !is_active_last_30_days(user.last_visit_at)) continue
       if (user_filter === 'with_roles' && roles.total === 0) continue
       if (user_filter === 'admins' && admin_level === null) continue
+      if (user_filter === 'translators' && !translator_user_ids.has(user.id)) continue
 
       let score = 0
       if (search_active) {
@@ -457,7 +470,7 @@
                 onclick={() => toggle_unsubscribed(row.id)}
                 title={row.unsubscribed ? 'Click to re-subscribe' : 'Mark unsubscribed from emails'}
                 class={['unsub-btn', { unsubscribed: row.unsubscribed }]}>
-                {row.unsubscribed ? 'unsubscribed' : 'subscribe'}
+                {row.unsubscribed ? 'unsubscribed' : 'unsubscribe'}
               </button>
             </td>
           </tr>

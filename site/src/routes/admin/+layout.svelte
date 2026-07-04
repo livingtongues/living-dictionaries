@@ -6,7 +6,7 @@
   import LoginModal from '$lib/components/LoginModal.svelte'
   import User from '$lib/components/shell/User.svelte'
   import SyncStatus from '$lib/db/sync/SyncStatus.svelte'
-  import ShowHide from '$lib/svelte-pieces/ShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { onMount } from 'svelte'
   import IconMdiAccountMultipleOutline from '~icons/mdi/account-multiple-outline'
   import IconMdiApi from '~icons/mdi/api'
@@ -15,6 +15,7 @@
   import IconMdiChartLine from '~icons/mdi/chart-line'
   import IconMdiCloudSync from '~icons/mdi/cloud-sync'
   import IconMdiForumOutline from '~icons/mdi/forum-outline'
+  import IconMdiImageMultipleOutline from '~icons/mdi/image-multiple-outline'
   import IconMdiMessageTextOutline from '~icons/mdi/message-text-outline'
   import IconMdiRobotOutline from '~icons/mdi/robot-outline'
   import IconMdiScaleBalance from '~icons/mdi/scale-balance'
@@ -38,6 +39,7 @@
     { href: '/admin/api-docs', label: 'API', icon: IconMdiApi, compact: true },
     { href: '/admin/triage-examples', label: 'Triage', icon: IconMdiRobotOutline, compact: true },
     { href: '/admin/legal-review', label: 'Legal', icon: IconMdiScaleBalance, compact: true },
+    { href: '/admin/featured-words', label: 'Featured', icon: IconMdiImageMultipleOutline, compact: true },
     // Sync last — icon-only (SyncStatus widget), always visible.
     { href: '/admin/sync', label: 'Sync', icon: IconMdiCloudSync },
   ]

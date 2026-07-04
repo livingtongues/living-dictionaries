@@ -2,7 +2,7 @@
   import type { DictSyncStatus } from './dict-sync-status.svelte.js'
   import { pick_dict_sync_status } from './dict-sync-status.svelte.js'
   import { page } from '$app/state'
-  import { toast } from '$lib/svelte-pieces/toast.svelte'
+  import { toast } from '$lib/state/toast.svelte'
   import IconMdiCloudAlertOutline from '~icons/mdi/cloud-alert-outline'
   import IconMdiCloudCheckOutline from '~icons/mdi/cloud-check-outline'
   import IconMdiCloudOffOutline from '~icons/mdi/cloud-off-outline'

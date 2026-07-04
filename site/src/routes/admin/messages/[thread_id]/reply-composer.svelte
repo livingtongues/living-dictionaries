@@ -10,7 +10,7 @@
   import IconMdiPaperclip from '~icons/mdi/paperclip'
   import IconMdiReply from '~icons/mdi/reply'
   import IconMdiSend from '~icons/mdi/send'
-  import RichTextEditor from '$lib/svelte-pieces/RichTextEditor.svelte'
+  import RichTextEditor from '$lib/components/ui/RichTextEditor.svelte'
   import { format_bytes } from '$lib/utils/format-bytes'
   import { html_to_text } from '$lib/utils/html-to-text'
   import { api_messages_reply } from '../../../api/messages/reply/_call'

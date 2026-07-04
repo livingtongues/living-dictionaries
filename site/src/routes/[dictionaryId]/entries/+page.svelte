@@ -8,7 +8,7 @@
   import SearchInput from './SearchInput.svelte'
   import View from './View.svelte'
   import EntriesEmptyState from './EntriesEmptyState.svelte'
-  import { ShowHide } from '$lib/svelte-pieces'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import type { QueryParams } from '$lib/search/types'
   import { page } from '$app/state'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'

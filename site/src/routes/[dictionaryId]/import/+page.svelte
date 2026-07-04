@@ -1,7 +1,7 @@
 <script lang="ts">
   import IconMdiMessageOutline from '~icons/mdi/message-outline'
   import IconFa6SolidRobot from '~icons/fa6-solid/robot'
-  import { ShowHide } from '$lib/svelte-pieces'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { page } from '$app/state'
 
   const { data } = $props()

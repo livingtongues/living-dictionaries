@@ -57,6 +57,10 @@ export default tseslint.config(
       // Vendored third-party
       '**/lib/lz/lz-string.ts',
 
+      // Generated map label datasets (site/scripts/build-map-data.mjs) — minified JSON
+      'site/static/map-data/**',
+      'site/src/lib/components/home-v2/map/data/**',
+
       // Root-level non-source
       'FLEx.model.ts',
     ],

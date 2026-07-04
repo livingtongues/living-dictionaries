@@ -10,7 +10,7 @@
   import LoadingIndicator from './LoadingIndicator.svelte'
   import DictBootProgress from './DictBootProgress.svelte'
   import { dict_boot_progress } from '$lib/db/dict-client/dict-boot-progress.svelte'
-  import Toasts from '$lib/svelte-pieces/Toasts.svelte'
+  import Toasts from '$lib/components/ui/Toasts.svelte'
   import ViewAsBanner from '$lib/components/shell/ViewAsBanner.svelte'
   import { onMount } from 'svelte'
   import { afterNavigate, beforeNavigate } from '$app/navigation'
@@ -19,8 +19,8 @@
   import { init_remote_logging, log_event, log_navigation } from '$lib/debug/remote-log'
   import { init_web_vitals, report_initial_load_when_ready } from '$lib/debug/perf'
   import { set_missing_translation_handler } from '$lib/i18n'
-  import { toast } from '$lib/svelte-pieces/toast.svelte'
-  import { init_color_scheme } from '$lib/dark-mode'
+  import { toast } from '$lib/state/toast.svelte'
+  import { init_color_scheme } from '$lib/state/dark-mode'
   import { chat_store } from '$lib/chat/chat-store.svelte'
 
   interface Props {

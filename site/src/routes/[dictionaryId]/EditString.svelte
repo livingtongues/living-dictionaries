@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Button, Form } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Form from '$lib/components/ui/Form.svelte'
   import { page } from '$app/state'
 
   interface Props {

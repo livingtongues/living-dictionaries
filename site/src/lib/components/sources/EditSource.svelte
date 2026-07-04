@@ -1,11 +1,12 @@
 <script lang="ts">
   import { preventDefault } from 'svelte/legacy'
-  import { Button, Modal } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
   import type { SourceType } from '$lib/constants'
   import type { Tables } from '$lib/types'
   import { page } from '$app/state'
   import { SOURCE_TYPES } from '$lib/constants'
-  import { slugify } from '$lib/helpers/slugify'
+  import { slugify } from '$lib/utils/slugify'
 
   interface Props {
     /** Existing source to edit, or `null`/undefined to create a new one. */

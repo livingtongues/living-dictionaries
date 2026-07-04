@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TranslationKeys } from '$lib/i18n/types'
   import { page } from '$app/state'
-  import Modal from '$lib/svelte-pieces/Modal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { RELATIONSHIP_TYPES } from '$lib/constants'
 
   interface Props {

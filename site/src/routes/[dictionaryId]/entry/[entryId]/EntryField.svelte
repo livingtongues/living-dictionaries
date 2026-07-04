@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { EntryFieldValue } from '$lib/types'
   import sanitize from 'xss'
-  import { ShowHide } from '$lib/svelte-pieces'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { rich_text_display_html } from '$lib/markdown/html-era-shim'
   import { sanitize_rich_text } from '$lib/markdown/sanitize-rich-text'
   import IconFa6SolidPencil from '~icons/fa6-solid/pencil'

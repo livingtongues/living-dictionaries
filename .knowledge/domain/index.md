@@ -23,3 +23,6 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
 - [media-attribution.md](./media-attribution.md) — why audio/video require speaker AND/OR a strict
   `sources.slug` registry ref (never fake speakers), why photo `source` stays free-text caption,
   the legacy-data evidence, the cutover 3-rule name resolution, and the river prod backfill record.
+- [homepage-v2.md](./homepage-v2.md) — the `/home-preview` rebuild: why canvas+d3 Equal Earth beat
+  Mapbox/MapLibre/protomaps, SSR-SVG first paint, the featured_entries curation pipeline + build-time
+  bake, and the preload/scrollLeft gotchas.

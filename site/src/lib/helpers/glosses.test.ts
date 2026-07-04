@@ -1,6 +1,6 @@
 import type { Tables } from '$lib/types'
 import { order_entry_and_dictionary_gloss_languages, order_example_sentences, order_glosses } from './glosses'
-import { remove_italic_tags } from './remove_italic_tags'
+import { remove_italic_tags } from '$lib/utils/remove-italic-tags'
 import { english_translate } from '$lib/i18n'
 
 describe(order_glosses, () => {

@@ -2,7 +2,7 @@
   import type { EntryData, MultiString } from '$lib/types'
   import type { TranslationKeys } from '$lib/i18n/types'
   import { page } from '$app/state'
-  import Modal from '$lib/svelte-pieces/Modal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { RELATIONSHIP_TYPES } from '$lib/constants'
   import type { GlobalRelationshipType } from '$lib/constants'
   import IconMdiMagnify from '~icons/mdi/magnify'

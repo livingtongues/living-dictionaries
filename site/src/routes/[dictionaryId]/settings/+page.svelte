@@ -1,6 +1,8 @@
 <script lang="ts">
   import EditString from '../EditString.svelte'
-  import { Button, JSON, ShowHide } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import JSON from '$lib/components/ui/JSON.svelte'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { page } from '$app/state'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
   import EditableOrthographies from '$lib/components/settings/EditableOrthographies.svelte'

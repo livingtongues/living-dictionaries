@@ -1,7 +1,9 @@
 <script lang="ts">
   import type { Tables } from '$lib/types'
   import { decades } from './ages'
-  import { Button, Form, Modal } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Form from '$lib/components/ui/Form.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
   import { page } from '$app/state'
 
   interface Props {

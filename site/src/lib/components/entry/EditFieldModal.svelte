@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { EntryFieldValue } from '$lib/types'
   import EditField from './EditField.svelte'
-  import { Modal } from '$lib/svelte-pieces'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
 
   interface Props {
     display: string

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ChatMessageWithAttachments } from '$lib/server/chat/chat-db'
-  import RichTextEditor from '$lib/svelte-pieces/RichTextEditor.svelte'
+  import RichTextEditor from '$lib/components/ui/RichTextEditor.svelte'
   import { html_to_text } from '$lib/utils/html-to-text'
   import { linkify_html } from '$lib/utils/linkify-html'
   import IconMdiCheck from '~icons/mdi/check'

@@ -12,7 +12,7 @@
   import IconMdiLoading from '~icons/mdi/loading'
   import IconMdiRefresh from '~icons/mdi/refresh'
   import { delete_admin_db_and_reload, reset_sync_metadata } from '$lib/db/client/db'
-  import { toast } from '$lib/svelte-pieces/toast.svelte.js'
+  import { toast } from '$lib/state/toast.svelte.js'
   import { format_relative_time } from '$lib/utils/format-relative-time'
   import { tick } from 'svelte'
   import { SvelteSet } from 'svelte/reactivity'

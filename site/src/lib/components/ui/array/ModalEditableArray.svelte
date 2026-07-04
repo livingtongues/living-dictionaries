@@ -3,7 +3,9 @@
 
   import MultiSelect from './MultiSelect.svelte'
   import type { SelectOption } from './select-options.interface'
-  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { page } from '$app/state'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
 

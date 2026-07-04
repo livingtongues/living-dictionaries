@@ -6,7 +6,7 @@
   import Header from '$lib/components/shell/Header.svelte'
   import LoginModal from '$lib/components/LoginModal.svelte'
   import { get_locale_display_name } from '$lib/i18n/locales'
-  import ShowHide from '$lib/svelte-pieces/ShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import AdminPanel from '$lib/translate/admin-panel.svelte'
   import { FILTER_LABELS, section_label, TRANSLATE_FILTERS } from '$lib/translate/constants'
   import TranslateRow from '$lib/translate/translate-row.svelte'

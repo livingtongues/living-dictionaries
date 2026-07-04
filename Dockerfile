@@ -32,6 +32,10 @@ COPY .env site/.env
 # committed seed files with a loud warning).
 RUN node site/scripts/fetch-baked-i18n.mjs
 
+# Bake the latest homepage stats + approved featured word cards the same way
+# (fetch from the still-serving old container; never fails the build).
+RUN node site/scripts/fetch-homepage-baked.mjs
+
 RUN pnpm --filter=site build
 
 

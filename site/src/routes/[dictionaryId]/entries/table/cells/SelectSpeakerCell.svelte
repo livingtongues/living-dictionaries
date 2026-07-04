@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { EntryData } from '$lib/types'
-  import { ShowHide } from '$lib/svelte-pieces'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { page } from '$app/state'
 
   interface Props {

@@ -19,7 +19,7 @@
   import { browser } from '$app/environment'
   import { goto } from '$app/navigation'
   import { page } from '$app/state'
-  import { PersistedState } from '$lib/svelte-pieces/persisted-state.svelte.js'
+  import { PersistedState } from '$lib/state/persisted-state.svelte.js'
   import { untrack } from 'svelte'
   import { SvelteSet } from 'svelte/reactivity'
   import { build_focused_graph, build_graph } from './build-graph.js'

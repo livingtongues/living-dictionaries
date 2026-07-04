@@ -1,5 +1,5 @@
 import type { EntryData } from '$lib/types'
-import type { DeepPartial } from '$lib/helpers/deep-partial'
+import type { DeepPartial } from '$lib/utils/deep-partial'
 
 export function friendlyName(entry: DeepPartial<EntryData>, path: string) {
   if (path) {

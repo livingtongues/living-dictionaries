@@ -1,5 +1,5 @@
 import { readable, writable } from 'svelte/store'
-import { sleep } from '$lib/helpers/sleep'
+import { sleep } from '$lib/utils/sleep'
 import type { DbOperations } from '$lib/dbOperations'
 import type { AudioVideoUploadStatus } from '$lib/components/audio/upload-audio'
 

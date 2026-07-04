@@ -2,7 +2,7 @@
   import { StandardPrintFields } from '$lib/types'
   import type { EntryData, IPrintFields } from '$lib/types'
 
-  import type { createPersistedStore } from '$lib/svelte-pieces'
+  import type { createPersistedStore } from '$lib/state/persisted-store'
   import { page } from '$app/state'
 
   interface Props {

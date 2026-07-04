@@ -4,7 +4,8 @@
   import type { IPoint, IRegion } from '$lib/types'
   import { onMount } from 'svelte'
   import { convertToFriendlyUrl } from './convertToFriendlyUrl'
-  import { Button, Form } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Form from '$lib/components/ui/Form.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import Footer from '$lib/components/shell/Footer.svelte'
@@ -13,7 +14,7 @@
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
   import { glossingLanguages } from '$lib/glosses/glossing-languages'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { debounce } from '$lib/helpers/debounce'
+  import { debounce } from '$lib/utils/debounce'
   import { browser, dev } from '$app/environment'
 
   const { data } = $props()

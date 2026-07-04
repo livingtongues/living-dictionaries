@@ -4,7 +4,7 @@ import { api_translate_approve } from '$api/translate/approve/_call'
 import { api_translate_data } from '$api/translate/data/_call'
 import { api_translate_save } from '$api/translate/save/_call'
 import { api_translate_summary } from '$api/translate/summary/_call'
-import { toast } from '$lib/svelte-pieces/toast.svelte'
+import { toast } from '$lib/state/toast.svelte'
 
 /**
  * Reactive state for /translate (chat-store pattern: a singleton the page

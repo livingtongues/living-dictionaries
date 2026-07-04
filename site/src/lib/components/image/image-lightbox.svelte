@@ -2,7 +2,7 @@
   import IconMdiClose from '~icons/mdi/close'
   import { onMount } from 'svelte'
   import { fade } from 'svelte/transition'
-  import { portal } from '$lib/svelte-pieces/portal'
+  import { portal } from '$lib/utils/portal'
 
   interface Props {
     src: string

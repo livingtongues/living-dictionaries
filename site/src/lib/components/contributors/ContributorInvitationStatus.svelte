@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Button } from '$lib/svelte-pieces'
-  import { supabase_date_to_friendly } from '$lib/helpers/time'
+  import Button from '$lib/components/ui/Button.svelte'
+  import { supabase_date_to_friendly } from '$lib/utils/time'
   import IconFaSolidTimes from '~icons/fa-solid/times'
   import IconFaKey from '~icons/fa/key'
 

@@ -4,7 +4,7 @@
   import EntryMedia from './EntryMedia.svelte'
   import RelatedEntries from './RelatedEntries.svelte'
   import Sense from './Sense.svelte'
-  import { Button } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
   import { page } from '$app/state'
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'

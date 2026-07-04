@@ -9,6 +9,8 @@ import { error, json } from '@sveltejs/kit'
 export interface AuthUpdateProfileRequestBody {
   /** New display name. Omit to leave unchanged. */
   name?: string
+  /** Newsletter opt-out. `true` unsubscribes, `false` re-subscribes. Omit to leave unchanged. */
+  unsubscribed_from_emails?: boolean
 }
 
 export type AuthUpdateProfileResponseBody = AuthUserData
@@ -38,6 +40,14 @@ export const POST: RequestHandler = async (event) => {
       error(ResponseCodes.BAD_REQUEST, 'Name must not contain control characters')
     sets.push('name = ?')
     values.push(trimmed)
+  }
+
+  if (body.unsubscribed_from_emails !== undefined) {
+    if (typeof body.unsubscribed_from_emails !== 'boolean')
+      error(ResponseCodes.BAD_REQUEST, 'unsubscribed_from_emails must be a boolean')
+    sets.push('unsubscribed_from_emails = ?')
+    // Column stores the opt-out timestamp (non-null = unsubscribed); NULL = subscribed.
+    values.push(body.unsubscribed_from_emails ? new Date().toISOString() : null)
   }
 
   if (sets.length === 0)

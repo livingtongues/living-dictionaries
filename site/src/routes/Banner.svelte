@@ -1,5 +1,6 @@
 <script lang='ts'>
-  import { Button, ShowHide } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { page } from '$app/state'
   import IconFaSolidTimes from '~icons/fa-solid/times'
 </script>

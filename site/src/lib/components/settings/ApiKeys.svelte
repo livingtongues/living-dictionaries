@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { Button } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
   import type { ApiKeyRecord, ApiKeyRole } from '$lib/api-keys/api-key'
   import { api_create_api_key, api_list_api_keys } from '$api/dictionaries/[id]/api-keys/_call'
   import { api_revoke_api_key } from '$api/dictionaries/[id]/api-keys/[key_id]/_call'

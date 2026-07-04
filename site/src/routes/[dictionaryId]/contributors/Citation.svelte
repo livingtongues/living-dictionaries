@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { PartnerWithPhoto, Tables } from '$lib/types'
   import { build_citation } from './build-citation'
-  import { Form, HeadlessButton } from '$lib/svelte-pieces'
+  import Form from '$lib/components/ui/Form.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
 
   interface Props {

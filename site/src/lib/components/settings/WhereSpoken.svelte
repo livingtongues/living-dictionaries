@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { DictionaryView, IPoint, IRegion } from '$lib/types'
   import type { LngLat } from 'mapbox-gl'
-  import { Button, ShowHide } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { page } from '$app/state'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import Marker from '$lib/components/maps/mapbox/map/Marker.svelte'

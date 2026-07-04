@@ -11,7 +11,7 @@ theme layer (see `.issues/drop-unocss.md` for the conversion log).
 
 DARK MODE — live (flipped 2026-07-02, see `.issues/dark-mode-flip.md`):
   System preference via the `@media (prefers-color-scheme: dark)` block below;
-  a user override puts `.dark` / `.light` on <html> (`$lib/dark-mode.ts`, applied
+  a user override puts `.dark` / `.light` on <html> (`$lib/state/dark-mode.ts`, applied
   pre-paint by the inline script in app.html, localStorage `color_scheme`, cycled
   by ColorSchemeToggle — moved from <body> 2026-07-03 so the canvas/overscroll,
   root scrollbar, and the `:root:not(.light)` media exclusion see the override
@@ -95,7 +95,7 @@ body {
 }
 
 /* Dark: forced via an explicit `.dark` class — on <html> for the user override
-   ($lib/dark-mode.ts), or on a wrapper for svelte-look dark flavors */
+   ($lib/state/dark-mode.ts), or on a wrapper for svelte-look dark flavors */
 .dark {
   --primary: var(--dark-primary);
   --on-primary: var(--dark-on-primary);

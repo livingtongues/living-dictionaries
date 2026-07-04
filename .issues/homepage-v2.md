@@ -136,20 +136,54 @@ Admin surface is **server-authoritative via API** (like /translate), NOT LiveDb 
 
 1. ✅ Interview + prod validation queries
 2. ✅ Plan written
-3. ⬜ `build-map-data.mjs` + generate + commit `static/map-data/*` (countries/admin1/cities labels)
-4. ⬜ SSR map module + `/home-preview` scaffold: hero search, SSR SVG, stats band (seed JSON),
-   section placeholders, stories
-5. ⬜ Canvas map: transform zoom/pan, dots + clustering, labels w/ collision, 50m swap,
-   preview popover, theme reactivity
-6. ⬜ `featured_entries` migration + shared.ts + admin API + tests + /admin/featured-words page + nav link
-7. ⬜ `/api/homepage/export` + `_call` + tests + `fetch-homepage-baked.mjs` + Dockerfile RUN line
-8. ⬜ Seed: harvest ~24 real candidates from prod (public data) into committed seed JSON so dev/
-   stories show real cards
-9. ⬜ Word strip: cards, audio, drift, viewport coupling, connection lines + pulse
-10. ⬜ Features grid, agent-API diagram, CTA band, i18n keys, SEO tags
-11. ⬜ Polish passes: mobile, dark, RTL sanity, reduced-motion
-12. ⬜ `.claude/commands/curate-featured-words.md`
-13. ⬜ Full verification suite + screenshots + summary for Jacob
+3. ✅ `build-map-data.mjs` + generated (`static/map-data/admin1.json` 127KB + `cities.json` 33KB lazy;
+   `map/data/country-labels.json` 5KB bundled)
+4. ✅ SSR map module + `/home-preview` scaffold: hero search (reuses `score_record` + diacritic fold),
+   SSR SVG (land + MultiPoint dots, cached land path), StatsBand w/ count-up, FeaturesGrid, CtaBand
+5. ✅ Canvas map: Path2D screen-space transform zoom/pan (cooperative gestures: ctrl+wheel /
+   2-finger), grid-bin clustering w/ count badges + cluster-click-zooms-in, dict/country/admin1/city
+   labels w/ greedy collision (dict labels win), 50m lazy swap at k>2.5, popover, theme swatch
+   system (hidden divs → getComputedStyle → canvas colors, MutationObserver re-read). VERIFIED in
+   headless browser: search ranking, zoom labels, dark mode, no page errors. Local dev DB seeded
+   with the 221 prod public catalog rows (FK-nulled user refs).
+6. ✅ `featured_entries` migration (`20260704_featured_entries.sql`, server-only table — NO Drizzle
+   entry, following the chat/i18n convention) + `$lib/db/server/featured-entries.ts` + admin API
+   (`/api/admin/featured-entries` GET/POST + tests) + `/admin/featured-words` review page (tabs,
+   photo, inline audio, approve/reject/reset) + admin nav link. Verified in browser w/ real OTP auth.
+7. ✅ `/api/homepage/export` (public; stats via ~15s per-dict scan, process-cached) + `_call` +
+   tests + `scripts/fetch-homepage-baked.mjs` + Dockerfile RUN line (i18n-bake pattern)
+8. ✅ Seed: harvested 6 samples × 72 candidate dicts from prod, picked 38 balanced, vision-checked
+   the contact sheet, kept 26 (14 en / 12 other-gloss) → committed `homepage-baked.json` + local
+   dev featured_entries rows (approved). Rejected: watermarked stock, literal color squares,
+   clipart, mismatches, Wancho tofu-font lexeme.
+9. ✅ Word strip: WordCards (shuffle/visit, rAF drift w/ FLOAT accumulator — scrollLeft rounds to
+   ints and stalls sub-pixel steps, pause on hover/touch/focus/audio/hidden, seamless loop via
+   doubled track, viewport bbox filter debounced 400ms w/ ≥8-card fallback, shared Audio element)
+   + HeroUnit (bezier connection lines overlay via rAF + project_point + card anchors; faded
+   light-dark red, strong on hover/play, dot pulse). GOTCHA fixed: card links MUST have
+   `data-sveltekit-preload-data="tap"` — hover-preload starts downloading the whole dict DB.
+10. ✅ FeaturesGrid, AgentApiDiagram (CSS-animated flow pulses, key badges, doc pile), CtaBand,
+    ~45 EN i18n keys under `home_v2.*`, SeoMetaTags
+11. ✅ Mobile (56vw map height), dark (canvas swatch re-read works), reduced-motion (drift/pulse/
+    count-up all gated). RTL: logical margins used; deep RTL pass deferred to go-live.
+12. ✅ `.claude/commands/curate-featured-words.md`
+13. ✅ pnpm check 0 errors · lint clean · 1222 tests pass (12 new) · headless browser passes:
+    search ranking, cluster-zoom, popover, labels, dark, drift, hover lines, admin review flow
+
+## Verification evidence (2026-07-04 session)
+Screenshots in /tmp on mustang: final-light-full.png, final-dark-full.png, final-mobile-dark.png,
+strip-hover.png (strong line + pulse), interact-zoomed.png (labels), admin-featured-approved.png.
+
+## Follow-ups / open items for Jacob
+- **videos stat = 435** — looks weak next to the others ("400+ videos"). Keep, or drop to 5 stats?
+- **Prod migration not yet deployed** — `featured_entries` table + endpoints go live on next push
+  to main; then run `/curate-featured-words` for the first big batch (target 100–200 approved).
+  The 26 seed cards are ALREADY baked into the committed JSON, so the strip works on deploy.
+- **Go-live swap** (separate task): move `/home-preview` → `/`, delete Mapbox homepage components,
+  `/globe` route + `$lib/components/globe/` (keep `globe/data/*.json` topojson — home-v2 imports it).
+- Search: my_dictionaries chips render only when signed in; Enter opens top result directly.
+- Non-Latin lexemes (Devanagari etc.) render tofu in HEADLESS screenshots only (missing fonts on
+  mustang) — real devices are fine; Wancho-script was excluded because real devices lack that font.
 
 ## Notes / gotchas
 - d3 + topojson-client are devDependencies (pure JS — fine, adapter-node bundles them; only

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Button, ResponsiveTable } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import Footer from '$lib/components/shell/Footer.svelte'

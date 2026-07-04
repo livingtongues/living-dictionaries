@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Button, Modal } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
   import { page } from '$app/state'
   import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/changeLocale'
 

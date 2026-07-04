@@ -3,7 +3,7 @@
   import IconMdiClose from '~icons/mdi/close'
   import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
   import type { PartnerWithPhoto } from '$lib/types'
-  import { HeadlessButton } from '$lib/svelte-pieces'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
   import Image from '$lib/components/image/Image.svelte'
   import AddImage from '$lib/components/image/AddImage.svelte'

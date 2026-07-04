@@ -2,7 +2,7 @@
   import { onMount } from 'svelte'
   import type { Options, StereoAudioRecorder } from 'recordrtc'
   import { page } from '$app/state'
-  import { Button } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
   import IconUilMicrophone from '~icons/uil/microphone'
 
   interface Props {

@@ -4,7 +4,7 @@
   const bubble = createBubbler()
   import type { EntryData } from '$lib/types'
   import VideoThirdParty from './VideoThirdParty.svelte'
-  import { Button } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
   import { page } from '$app/state'
   import IconFaSolidTimes from '~icons/fa-solid/times'
   import IconFaTrashO from '~icons/fa/trash-o'

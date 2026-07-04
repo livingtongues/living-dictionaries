@@ -1,6 +1,6 @@
 import type { LayoutLoad } from './$types'
 import { browser } from '$app/environment'
-import { createPersistedStore } from '$lib/svelte-pieces'
+import { createPersistedStore } from '$lib/state/persisted-store'
 import { getSupportedLocale } from '$lib/i18n/locales'
 import { getTranslator } from '$lib/i18n'
 import { defaultColumns } from '$lib/stores/columns'

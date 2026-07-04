@@ -3,7 +3,7 @@
 
   const bubble = createBubbler()
   import { crossfade, scale } from 'svelte/transition'
-  import { Button } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
   import { page } from '$app/state'
   import { image_src } from '$lib/helpers/media'
   import IconGgSpinner from '~icons/gg/spinner'

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { QueryParamStore } from '$lib/svelte-pieces'
+  import type { QueryParamStore } from '$lib/state/query-param-state.svelte'
   import type { QueryParams } from '$lib/search/types'
 
   interface Props {

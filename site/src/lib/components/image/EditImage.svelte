@@ -3,7 +3,8 @@
 
   import { get } from 'svelte/store'
   import { apply_button_label } from './image-store'
-  import { Button, Modal } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
   import { page } from '$app/state'
   import AddImage from '$lib/components/image/AddImage.svelte'
 

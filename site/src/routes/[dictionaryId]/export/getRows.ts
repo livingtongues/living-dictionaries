@@ -1,7 +1,7 @@
 import type { EntryData, MultiString } from '$lib/types'
 import type { EntryForCSV, translate_entries } from './prepareEntriesForCsv'
 import { friendlyName } from './friendlyName'
-import type { DeepPartial } from '$lib/helpers/deep-partial'
+import type { DeepPartial } from '$lib/utils/deep-partial'
 import { glossingLanguages } from '$lib/glosses/glossing-languages'
 
 interface ExportMetaData {

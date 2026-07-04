@@ -3,7 +3,9 @@
   import { run } from 'svelte/legacy'
 
   import { createEventDispatcher } from 'svelte'
-  import { Button, Form, Modal } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Form from '$lib/components/ui/Form.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
   import { page } from '$app/state'
   import { goto } from '$app/navigation'
   import { api_contact } from '$api/contact/_call'

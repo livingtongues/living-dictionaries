@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { DictionaryView } from '$lib/types'
-  import { Button, ShowHide } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { page } from '$app/state'
 
   interface Props {

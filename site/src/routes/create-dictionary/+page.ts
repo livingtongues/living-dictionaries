@@ -1,6 +1,6 @@
 import type { PageLoad } from './$types'
 import { goto } from '$app/navigation'
-import { pruneObject } from '$lib/helpers/prune'
+import { pruneObject } from '$lib/utils/prune'
 import { api_dictionaries_create } from '$api/dictionaries/create/_call'
 import type { DictionariesCreateRequestBody } from '$api/dictionaries/create/+server'
 import { api_dictionaries_id_exists } from '$api/dictionaries/[id]/_call'

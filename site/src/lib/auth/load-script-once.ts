@@ -6,8 +6,8 @@
  * Idempotent: subsequent calls for the same URL resolve immediately without
  * inserting a duplicate tag.
  *
- * Minimal inline copy; the full version lives in svelte-pieces and will land
- * via L9 — at which point this file goes away in favor of the import.
+ * Minimal inline copy; the full version lives in `$lib/utils/load-once` and
+ * will land via L9 — at which point this file goes away in favor of the import.
  */
 
 function load_script(url: string) {

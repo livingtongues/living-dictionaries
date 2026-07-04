@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { Button, Menu, ShowHide } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Menu from '$lib/components/ui/Menu.svelte'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { display_one_tap_popover } from '$lib/auth/google-one-tap'
   import { page } from '$app/state'
   import { chat_store } from '$lib/chat/chat-store.svelte'

@@ -2,7 +2,9 @@
   import { run } from 'svelte/legacy'
 
   import type { DictionaryView } from '$lib/types'
-  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
   import { page } from '$app/state'
   import IconCarbonSearch from '~icons/carbon/search'
   import IconLaTimes from '~icons/la/times'

@@ -45,4 +45,4 @@ export function uploadVideo({ sense_id, speaker_id, source, file }: { sense_id: 
   return status
 }
 
-export { DEV_LOCAL_PREFIX, image_src, url_from_storage_path } from './media-url'
+export { DEV_LOCAL_PREFIX, image_src, url_from_storage_path } from '$lib/utils/media-url'

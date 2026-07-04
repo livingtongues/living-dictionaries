@@ -1,8 +1,8 @@
 <script lang="ts">
   import { MAX_CHAT_ATTACHMENT_BYTES, MAX_CHAT_ATTACHMENTS_PER_MESSAGE } from '$lib/chat/constants'
   import ImageLightbox from '$lib/components/image/image-lightbox.svelte'
-  import RichTextEditor from '$lib/svelte-pieces/RichTextEditor.svelte'
-  import StagedImageThumb from '$lib/svelte-pieces/StagedImageThumb.svelte'
+  import RichTextEditor from '$lib/components/ui/RichTextEditor.svelte'
+  import StagedImageThumb from '$lib/components/ui/StagedImageThumb.svelte'
   import { html_to_text } from '$lib/utils/html-to-text'
   import { paste_image_from_clipboard } from '$lib/utils/paste-image-from-clipboard'
   import { onDestroy } from 'svelte'

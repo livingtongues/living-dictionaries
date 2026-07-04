@@ -2,8 +2,10 @@
   import { run } from 'svelte/legacy'
 
   import { onMount } from 'svelte'
-  import { toast } from '$lib/svelte-pieces/toast.svelte'
-  import { Button, Form, Modal } from '$lib/svelte-pieces'
+  import { toast } from '$lib/state/toast.svelte'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Form from '$lib/components/ui/Form.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
   import { display_one_tap_button } from '$lib/auth/google-one-tap'
   import { get_auth_user } from '$lib/auth/user.svelte'
   import { page } from '$app/state'

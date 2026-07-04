@@ -12,7 +12,7 @@
   import { goto } from '$app/navigation'
   import { page } from '$app/state'
   import AssigneeDropdown from '$lib/admin/AssigneeDropdown.svelte'
-  import CopyButton from '$lib/svelte-pieces/CopyButton.svelte'
+  import CopyButton from '$lib/components/ui/CopyButton.svelte'
   import { use_admin_back } from '$lib/utils/admin-back.svelte'
   import { format_bytes } from '$lib/utils/format-bytes'
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'

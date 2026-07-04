@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
   import { page } from '$app/state'
   import type { Tables } from '$lib/types'
   import EditSource from '$lib/components/sources/EditSource.svelte'

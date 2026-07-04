@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { Orthography, Tables } from '$lib/types'
   import type { KeymanWritingSystems } from '$lib/components/keyboards/keyman/writing-systems'
-  import { Button, Modal } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
   import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
   import { get_orthographies } from '$lib/helpers/orthographies'

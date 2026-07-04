@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { ColorScheme } from '$lib/dark-mode'
+  import type { ColorScheme } from '$lib/state/dark-mode'
   import { onMount } from 'svelte'
   import { page } from '$app/state'
-  import { get_color_scheme, set_color_scheme } from '$lib/dark-mode'
+  import { get_color_scheme, set_color_scheme } from '$lib/state/dark-mode'
   import IconMdiBrightnessAuto from '~icons/mdi/brightness-auto'
   import IconMdiWhiteBalanceSunny from '~icons/mdi/white-balance-sunny'
   import IconMdiWeatherNight from '~icons/mdi/weather-night'

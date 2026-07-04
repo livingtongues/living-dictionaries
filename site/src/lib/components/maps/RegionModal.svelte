@@ -15,7 +15,9 @@
   import Layer from './mapbox/map/Layer.svelte'
   import { randomColor } from './utils/randomColor'
   import Popup from './mapbox/map/Popup.svelte'
-  import { Button, Modal, ReactiveSet } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import ReactiveSet from '$lib/components/ui/ReactiveSet.svelte'
   import { page } from '$app/state'
 
   interface Props {

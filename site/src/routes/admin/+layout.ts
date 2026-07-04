@@ -6,7 +6,7 @@ import { browser, dev } from '$app/environment'
 import { get_admin_db } from '$lib/db/client/db'
 import { live_share } from '$lib/db/client/live-share.svelte'
 import { Sync } from '$lib/db/sync/engine.svelte.js'
-import { toast } from '$lib/svelte-pieces/toast.svelte'
+import { toast } from '$lib/state/toast.svelte'
 import { error } from '@sveltejs/kit'
 
 interface AdminLayoutGlobals {

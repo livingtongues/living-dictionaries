@@ -91,6 +91,24 @@ describe(POST, () => {
     expect(name_in_db()).toBe('Jake')
   })
 
+  function unsubscribed_in_db() {
+    return (db.prepare('SELECT unsubscribed_from_emails FROM users WHERE id = ?').get('user-1') as { unsubscribed_from_emails: string | null }).unsubscribed_from_emails
+  }
+
+  test('unsubscribes and re-subscribes from the newsletter', async () => {
+    await call({ token: await token(), body: { unsubscribed_from_emails: true } })
+    expect(unsubscribed_in_db()).not.toBe(null)
+    const response = await call({ token: await token(), body: { unsubscribed_from_emails: false } })
+    const data = await response.json()
+    expect(data.unsubscribed_from_emails).toBeFalsy()
+    expect(unsubscribed_in_db()).toBe(null)
+  })
+
+  test('400 on non-boolean unsubscribed_from_emails', async () => {
+    await expect(call({ token: await token(), body: { unsubscribed_from_emails: 'yes' } }))
+      .rejects.toMatchObject({ status: 400 })
+  })
+
   test('bumps updated_at so admin mirrors pull the change', async () => {
     await call({ token: await token(), body: { name: 'Jake' } })
     const { updated_at } = db.prepare('SELECT updated_at FROM users WHERE id = ?').get('user-1') as { updated_at: string }

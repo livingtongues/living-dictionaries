@@ -10,7 +10,7 @@
   import RoomMembersPopover from '$lib/chat/room-members-popover.svelte'
   import Header from '$lib/components/shell/Header.svelte'
   import LoginModal from '$lib/components/LoginModal.svelte'
-  import ShowHide from '$lib/svelte-pieces/ShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { api_chat_delete } from '$api/chat/delete/_call'
   import { api_chat_dm } from '$api/chat/dm/_call'
   import { api_chat_edit } from '$api/chat/edit/_call'

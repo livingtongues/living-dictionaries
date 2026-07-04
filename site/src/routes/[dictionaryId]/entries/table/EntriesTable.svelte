@@ -3,7 +3,7 @@
   import ColumnTitle from './ColumnTitle.svelte'
   import Cell from './Cell.svelte'
   import { setUpColumns } from './setUpColumns'
-  import { minutes_ago_in_ms } from '$lib/helpers/time'
+  import { minutes_ago_in_ms } from '$lib/utils/time'
   import { browser } from '$app/environment'
   import type { DbOperations } from '$lib/dbOperations'
 

@@ -9,7 +9,8 @@
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte'
   import NavigationControl from './mapbox/controls/NavigationControl.svelte'
   import { setMarker } from './utils/setCoordinatesToMarker'
-  import { Button, Modal } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Modal from '$lib/components/ui/LegacyModal.svelte'
   import { page } from '$app/state'
 
   interface Props {

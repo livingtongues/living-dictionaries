@@ -1,6 +1,6 @@
 import type { EntryData } from '$lib/types'
 import { seo_description } from './seo_description'
-import type { DeepPartial } from '$lib/helpers/deep-partial'
+import type { DeepPartial } from '$lib/utils/deep-partial'
 import { english_translate } from '$lib/i18n'
 
 describe('seo_description', () => {

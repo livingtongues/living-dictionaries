@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
-  import { Button } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
 
   interface Props {

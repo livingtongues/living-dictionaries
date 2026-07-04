@@ -6,7 +6,7 @@
   import { mapKey } from '../context'
   import type { MapKeyContext } from '../context'
   import { bindEvents } from '../event-bindings'
-  import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
+  import { loadScriptOnce, loadStylesOnce } from '$lib/utils/load-once'
 
   const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
   const map = getMap()

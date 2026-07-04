@@ -1,7 +1,8 @@
 <script lang="ts">
   import sanitize from 'xss'
   import type { EntryFieldValue } from '$lib/types'
-  import { Button, Form } from '$lib/svelte-pieces'
+  import Button from '$lib/components/ui/Button.svelte'
+  import Form from '$lib/components/ui/Form.svelte'
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
   import MarkdownEditor from '$lib/markdown/MarkdownEditor.svelte'
   import { html_to_markdown } from '$lib/markdown/html-to-markdown'

@@ -8,7 +8,7 @@
   import GeoJSONSource from '../sources/GeoJSONSource.svelte'
   import PopupOfMap from './PopupOfMap.svelte'
   import Layer from './Layer.svelte'
-  import { ShowHide } from '$lib/svelte-pieces'
+  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
 
   const { getMap } = getContext<MapKeyContext>(mapKey)
   const map = getMap()
