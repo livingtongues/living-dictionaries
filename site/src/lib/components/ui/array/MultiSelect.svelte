@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { preventDefault, run, stopPropagation } from 'svelte/legacy'
-
   import { fly } from 'svelte/transition'
   import { onMount } from 'svelte'
   import type { SelectOption } from './select-options.interface'
@@ -93,11 +91,11 @@
   let filtered = $derived(options.filter(o =>
     inputValue ? o.name.toLowerCase().includes(inputValue.trim().toLowerCase()) : o,
   ))
-  run(() => {
+  $effect(() => {
     if ((activeOption && !filtered.includes(activeOption)) || (!activeOption && inputValue))
       [activeOption] = filtered
   })
-  run(() => {
+  $effect(() => {
     if (!showOptions && inputValue) setShowOptions(true)
   })
 </script>
@@ -114,7 +112,7 @@
       <div class="token">
         <span>{option.name}</span>
         <div
-          onclick={stopPropagation(() => remove(option.value))}
+          onclick={(e) => { e.stopPropagation(); remove(option.value) }}
           class="remove-token"
           title="Remove {option.name}">
           <IconLaTimes class="icon-inline" />
@@ -142,7 +140,7 @@
         <li
           class:selected={selectedOptions[option.value]}
           class:active={activeOption === option}
-          onclick={preventDefault(() => selectOption(option))}>
+          onclick={(e) => { e.preventDefault(); selectOption(option) }}>
           {option.name}
         </li>
       {/each}

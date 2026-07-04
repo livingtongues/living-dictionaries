@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   // from https://github.com/beyonk-adventures/svelte-mapbox
-  import { createEventDispatcher, onDestroy, onMount, setContext, tick } from 'svelte'
+  import { onDestroy, onMount, setContext, tick } from 'svelte'
   import type { ErrorEvent, EventData, LngLat, LngLatBoundsLike, LngLatLike, Map, MapboxOptions } from 'mapbox-gl'
   import { mapKey } from '../context'
   import { EventQueue } from '../queue'
@@ -26,6 +24,12 @@
     lng?: number
     lat?: number
     pointsToFit?: number[][]
+    on_ready?: () => void
+    on_dragend?: (center: LngLat) => void
+    on_moveend?: (center: LngLat) => void
+    on_click?: (lng_lat: LngLat) => void
+    on_zoomend?: (zoom: number) => void
+    on_error?: (error: ErrorEvent & EventData) => void
     children?: import('svelte').Snippet<[any]>
   }
 
@@ -40,10 +44,16 @@
     lng = undefined,
     lat = undefined,
     pointsToFit = undefined,
+    on_ready,
+    on_dragend,
+    on_moveend,
+    on_click,
+    on_zoomend,
+    on_error,
     children,
   }: Props = $props()
 
-  let center: LngLatLike = $state()
+  const center: LngLatLike = $derived(lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10])
 
   let container: HTMLDivElement = $state()
   let mapbox: typeof import('mapbox-gl')
@@ -59,19 +69,10 @@
     getMapbox: () => mapbox,
   })
 
-  const dispatch = createEventDispatcher<{
-    ready: null
-    dragend: LngLat
-    moveend: LngLat
-    click: LngLat
-    zoomend: number
-    error: ErrorEvent & EventData
-  }>()
-
   // More events at https://docs.mapbox.com/mapbox-gl-js/api/map/#map-events
   const handlers: Record<string, any> = {
-    dragend: () => dispatch('dragend', map.getCenter()),
-    moveend: () => dispatch('moveend', map.getCenter()),
+    dragend: () => on_dragend?.(map.getCenter()),
+    moveend: () => on_moveend?.(map.getCenter()),
     click: (e) => {
       if (
         map
@@ -79,27 +80,15 @@
           .filter(f => f.source.startsWith(ADDED_FEATURE_ID_PREFIX))
           .length === 0
       ) {
-        dispatch('click', e.lngLat)
+        on_click?.(e.lngLat)
       }
     },
-    zoomend: () => dispatch('zoomend', map.getZoom()),
-    error: (e: ErrorEvent & EventData) => dispatch('error', e),
+    zoomend: () => on_zoomend?.(map.getZoom()),
+    error: (e: ErrorEvent & EventData) => on_error?.(e),
     load: () => {
-      // map.fitBounds(
-      //   [
-      //     [-180, -90], // Southwest corner
-      //     [180, 90], // Northeast corner
-      //   ],
-      //   {
-      //     // padding: 0, // Optional padding
-      //     animate: false // Disable animation for smoother transition
-      //   }
-      // );
-      // map.setCenter(center);
-      dispatch('ready');
-      (ready = true)
+      on_ready?.()
+      ready = true
     },
-  // drag: () => dispatch('drag', map.getCenter()),
   }
   let unbind: () => void
 
@@ -195,16 +184,13 @@
       maxZoom: 6,
     })
   }
-  run(() => {
-    center = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10]
-  })
-  run(() => {
+  $effect(() => {
     if (zoom) setZoom(zoom)
   })
-  run(() => {
+  $effect(() => {
     if (center) setCenter(center)
   })
-  run(() => {
+  $effect(() => {
     if (pointsToFit?.length) fitPoints()
   })
 </script>

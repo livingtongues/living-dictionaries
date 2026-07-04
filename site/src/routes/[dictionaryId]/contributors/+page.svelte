@@ -5,7 +5,7 @@
   import CitationComponent from './Citation.svelte'
   import Partners from './Partners.svelte'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { page } from '$app/state'
@@ -110,7 +110,7 @@
         </button>
         {#if show}
           {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-            <Contact subject="request_access" on:close={toggle} />
+            <Contact subject="request_access" on_close={toggle} />
           {/await}
         {/if}
       {/snippet}

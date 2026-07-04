@@ -2,8 +2,8 @@
   import type { IGlossLanguages } from '$lib/types'
   import BadgeArrayEmit from '$lib/components/ui/BadgeArrayEmit.svelte'
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
 
@@ -51,7 +51,7 @@
       on_itemremoved={({ index }) => remove_language(selectedLanguages[index])}
       on_additem={toggle} />
     {#if show}
-      <Modal on:close={toggle}>
+      <Modal on_close={toggle}>
         {#snippet heading()}
           <span>
             {page.data.t('create.gloss_dictionary_in')}

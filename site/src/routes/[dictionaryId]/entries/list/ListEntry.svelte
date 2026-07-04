@@ -3,7 +3,7 @@
   import sanitize from 'xss'
   import Audio from '../components/Audio.svelte'
   import Video from '../components/Video.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/helpers/glosses'
   import { get_headword } from '$lib/helpers/orthographies'

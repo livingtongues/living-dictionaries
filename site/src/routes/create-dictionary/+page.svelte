@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   import type { IPoint, IRegion } from '$lib/types'
   import { onMount } from 'svelte'
   import { convertToFriendlyUrl } from './convertToFriendlyUrl'
@@ -43,7 +41,7 @@
   let isUniqueURL = $state(true)
 
   const debouncedCheckIfUniqueUrl = debounce(checkIfUniqueUrl, 500)
-  run(() => {
+  $effect(() => {
     if (urlToUse.length >= data.MIN_URL_LENGTH) debouncedCheckIfUniqueUrl(urlToUse)
   })
 

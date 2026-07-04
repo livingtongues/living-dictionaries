@@ -13,9 +13,7 @@
 </script>
 
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
-  import { createEventDispatcher, getContext, onMount, setContext } from 'svelte'
+  import { getContext, onMount, setContext } from 'svelte'
   import type { LngLat, Marker, MarkerOptions } from 'mapbox-gl'
   import { mapKey, markerKey } from '../context'
   import type { MapKeyContext, MarkerKeyContext } from '../context'
@@ -30,6 +28,7 @@
     color?: 'blue' | 'black'
     options?: MarkerOptions
     draggable?: boolean
+    on_dragend?: (coordinates: LngLat) => void
     pin?: import('svelte').Snippet<[any]>
     children?: import('svelte').Snippet<[any]>
   }
@@ -40,6 +39,7 @@
     color = 'black',
     options = {},
     draggable = false,
+    on_dragend,
     pin,
     children,
   }: Props = $props()
@@ -52,11 +52,9 @@
     getMarker: () => marker,
   })
 
-  run(() => {
+  $effect(() => {
     marker?.setLngLat({ lng, lat })
   })
-
-  const dispatch = createEventDispatcher<{ dragend: LngLat }>()
 
   function handleClick(e) {
     e.stopPropagation()
@@ -67,7 +65,7 @@
   function handleDragEnd() {
     markerEl.removeEventListener('click', handleClick)
     const coordinates = marker.getLngLat()
-    dispatch('dragend', coordinates);
+    on_dragend?.(coordinates);
     ({ lat, lng } = coordinates)
   }
 

@@ -1,7 +1,4 @@
 <script lang="ts">
-  import { createBubbler, stopPropagation } from 'svelte/legacy'
-
-  const bubble = createBubbler()
   import type { EntryData } from '$lib/types'
   import VideoThirdParty from './VideoThirdParty.svelte'
   import Button from '$lib/components/ui/Button.svelte'
@@ -32,7 +29,7 @@
   style="background: rgba(0, 0, 0, 0.85); z-index: 51; will-change: transform;">
   <div class="viewer-inner">
     <div class="viewer-header">
-      <span onclick={stopPropagation(bubble('click'))}>{lexeme}</span>
+      <span onclick={e => e.stopPropagation()}>{lexeme}</span>
       <IconFaSolidTimes class="icon-inline viewer-close" style="font-size: 2.5rem" />
     </div>
     {#if video.storage_path}

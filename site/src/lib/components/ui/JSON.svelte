@@ -1,5 +1,5 @@
 <script lang="ts"> import Button from './Button.svelte'
-  import ShowHide from './LegacyShowHide.svelte'
+  import ShowHide from './ShowHide.svelte'
 
   const { obj } = $props()
   function string_and_colorize(obj2) {

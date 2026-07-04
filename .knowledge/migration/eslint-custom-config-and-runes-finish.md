@@ -4,6 +4,13 @@ How LD got `pnpm lint` to 0 errors and re-enabled the pre-commit hook, between M
 The config itself is self-documenting in `eslint.config.js`; this page records the decisions
 and the non-obvious gotchas.
 
+> **2026-07-04 — the runes migration is now FULLY complete.** A final sweep eliminated everything
+> this page describes as "left legacy": Legacy Modal/ShowHide twins deleted, all
+> `createEventDispatcher` + `on:` component events → callback props, all `svelte/legacy` shims
+> (`run`/`preventDefault`/`stopPropagation`/`createBubbler`) gone. Rule of thumb from that sweep:
+> `run(pure assignment)` → `$derived` (SSR renders the value; `$effect` would leave it empty
+> server-side), `run(side effect)` → `$effect`.
+
 ## Decision: fully custom flat config (not antfu)
 `@antfu/eslint-config@2` pins `eslint-plugin-svelte@2.43`, whose `svelte/indent` **stack-overflows
 on Svelte 5 runes**. We did NOT try to override antfu — instead we **ported the hand-written flat

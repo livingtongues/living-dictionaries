@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   import { getContext, onDestroy, setContext } from 'svelte'
   import type { VectorSource, VectorSourceImpl } from 'mapbox-gl'
   import { mapKey, sourceKey } from '../context.js'
@@ -47,7 +45,7 @@
       addSource()
   }
 
-  run(() => {
+  $effect(() => {
     const source = map.getSource(id) as VectorSourceImpl
     if (source) {
       source.setUrl(url)

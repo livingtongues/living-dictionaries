@@ -38,9 +38,8 @@
       {side}
       {widthRem}
       {maxWidthPercentage}
-      on:close={on_close}>
+      {on_close}>
       {@render children?.()}
-      <!-- <slot name="mobile" /> -->
     </Slideover>
   </div>
 {/if}

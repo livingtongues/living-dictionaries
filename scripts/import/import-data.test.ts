@@ -1,6 +1,6 @@
 /* eslint-disable require-await */
 import { readFileSync } from 'node:fs'
-import { admin_supabase, anon_supabase, diego_ld_user_id, postgres, test_dictionary_id } from '../config-supabase'
+import { admin_supabase, anon_supabase, diego_ld_user_id, postgres, test_dictionary_id } from '../supabase/config-supabase'
 import { reset_local_db } from '../reset-local-db'
 import { import_data as _import_data } from './import-data'
 import { parseCSVFrom } from './parse-csv'

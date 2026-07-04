@@ -1,9 +1,16 @@
 # Migration knowledge
 
-Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. The migration is done +
-staging is live; remaining production cutover: `.issues/cutover.md`.
+Gotchas/decisions for evolving LD off Vercel+Supabase onto VPS+SQLite. **The production cutover is
+DONE** (DNS flipped 2026-07-03, +1d grace watch clean 2026-07-04) — see
+`production-cutover-record.md`. Remaining legacy-surface teardown: `.issues/post-cutover-teardown.md`.
 
 ## Pages
+- [production-cutover-record.md](./production-cutover-record.md) — the final record of THE flip:
+  the merge-into-existing-prod shape (prod-id-wins identity), the Phase-A rehearsal → Phase-B delta,
+  the DNS/domain flip mechanics + the reusable operational-tails checklist (webhook, ld-email,
+  Caddy inode, CF token gaps, snapshot preservation), the bugs real traffic surfaced (U+2028 NDJSON
+  split, non-ASCII slug redirect crash, brace-paragraph loss), the +1d grace-watch health snapshot,
+  and where the legacy `/scripts` surface + HTML shim went.
 - [supabase-cutover-conversions.md](./supabase-cutover-conversions.md) — full-corpus cutover
   rehearsal findings (2,229 dicts pushed live 2026-07-02): the two silent-data-loss bugs
   (`<`-prefix `looks_like_html` misfire, undeclared `lo{n}` orthographies), the Tiptap
@@ -32,12 +39,6 @@ staging is live; remaining production cutover: `.issues/cutover.md`.
 - [build-and-deploy-gotchas.md](./build-and-deploy-gotchas.md) — pnpm lockfile discipline,
   the adapter-node swap fallout (deps/devDeps bucketing, rollup bump, `@types/node` dedup),
   and the local-build/boot loop.
-- [svelte-5-runes-migration.md](./svelte-5-runes-migration.md) — M2c: running the runes codemod
-  headlessly (the interactive CLI hangs; per-file Node driver + 30s timeout), the hand-fixes it
-  can't do (`@migration-task`, `ComponentProps<typeof X>`, `$page.`→`page.` markup gap, email
-  `svelte/server` render port, legacy-slot↔runes-snippet interop / Slideover conversion), why
-  `bind:value={item.member}` is NOT `each_item_invalid_assignment`, driving warnings down via
-  `compilerOptions.warningFilter`, runtime regression verification, and why eslint isn't a gate yet.
 - [eslint-custom-config-and-runes-finish.md](./eslint-custom-config-and-runes-finish.md) — LD-A2:
   replacing antfu with the example's hand-written flat config (eslint 10 / svelte-plugin 3); why
   `lint:fix` churns ~125 files harmlessly; finishing the runes migration of the legacy stragglers to

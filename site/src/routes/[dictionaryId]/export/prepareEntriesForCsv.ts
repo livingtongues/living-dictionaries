@@ -5,7 +5,7 @@ import { get_headword, get_orthographies } from '$lib/helpers/orthographies'
 import { get_orthography_headers, get_sense_headers } from './assignHeadersForCsv'
 import { display_speaker_gender, format_orthographies, format_senses } from './assignFormattedEntryValuesForCsv'
 import { stripHTMLTags } from './stripHTMLTags'
-import { rich_text_display_html } from '$lib/markdown/html-era-shim'
+import { render_markdown_to_html } from '$lib/markdown/render'
 import { decades } from '$lib/components/media/ages'
 import { translate_part_of_speech, translate_part_of_speech_abbreviation, translate_semantic_domain_keys } from '$lib/transformers/translate_keys_to_current_language'
 
@@ -83,7 +83,7 @@ export function formatCsvEntries(
       morphology: entry.main?.morphology,
       dialects: entry.dialects?.join(', '),
       // markdown renders to HTML first so BOTH eras strip to plain text for CSV
-      notes: stripHTMLTags(rich_text_display_html(entry.main.notes?.default)),
+      notes: stripHTMLTags(render_markdown_to_html(entry.main.notes?.default)),
       linguistic_history: entry.main.linguistic_history?.default,
       source: entry.main.sources?.join(' | '),
       soundSource: entry.audios ? url_from_storage_path(entry.audios?.[0]?.storage_path) : null,

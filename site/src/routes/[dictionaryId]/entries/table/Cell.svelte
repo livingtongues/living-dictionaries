@@ -7,7 +7,7 @@
   import Audio from '../components/Audio.svelte'
   import Textbox from './cells/Textbox.svelte'
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { get_headword } from '$lib/helpers/orthographies'
   import { page } from '$app/state'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'

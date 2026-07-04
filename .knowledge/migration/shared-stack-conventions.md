@@ -57,7 +57,7 @@ outlives the migration plan.
   `$env/dynamic/private` (runtime, NOT preflight-gated).
 - **Deploy = vps-setup GitHub webhook, NOT GitHub Actions.** There is no GH Actions deploy workflow
   in any LD branch — only CI (lint/check/test/lighthouse). The deploy mechanism + the env-var
-  contract are documented in `.issues/cutover.md`.
+  contract are documented in [production-cutover-record.md](./production-cutover-record.md).
 
 ## house status (its open work lives in house's own `.issues/`)
 house (`repo-restructure`) is **deployed live on `new.hvsb.app`** (staging): auth + customer reader

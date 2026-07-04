@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import Button from '$lib/components/ui/Button.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import Footer from '$lib/components/shell/Footer.svelte'
@@ -47,7 +47,7 @@
       <Button form="filled" onclick={toggle}>{page.data.t('header.contact_us')}</Button>
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          <Contact subject="report_problem" on:close={toggle} />
+          <Contact subject="report_problem" on_close={toggle} />
         {/await}
       {/if}
     {/snippet}

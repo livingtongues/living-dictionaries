@@ -2,7 +2,7 @@
   import EditString from '../EditString.svelte'
   import Button from '$lib/components/ui/Button.svelte'
   import JSON from '$lib/components/ui/JSON.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
   import EditableOrthographies from '$lib/components/settings/EditableOrthographies.svelte'
@@ -122,13 +122,13 @@
 
   <PrintAccessCheckbox
     checked={!!dictionary.print_access}
-    on:changed={async ({ detail: { checked } }) => await updateDictionary({ print_access: checked ? 1 : 0 })} />
+    on_changed={async ({ checked }) => await updateDictionary({ print_access: checked ? 1 : 0 })} />
   <div style="margin-bottom: 1.25rem"></div>
 
   {#if !dictionary.con_language_description}
     <PublicCheckbox
       checked={!!dictionary.public}
-      on:changed={async ({ detail: { checked } }) => {
+      on_changed={async ({ checked }) => {
         if (!checked) {
           await updateDictionary({ public: 0 })
         } else if (auth_user.is_admin) {
@@ -158,7 +158,7 @@
           </Button>
           {#if show}
             {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-              <Contact subject="delete_dictionary" on:close={toggle} />
+              <Contact subject="delete_dictionary" on_close={toggle} />
             {/await}
           {/if}
         {/snippet}

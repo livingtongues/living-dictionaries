@@ -183,9 +183,9 @@
     <CoordinatesModal
       lat={point?.latitude}
       lng={point?.longitude}
-      on:update={({ detail }) => set_coordinates(detail)}
-      on:remove={remove_coordinates}
-      on:close={() => show_coordinates = false} />
+      on_update={coordinates => set_coordinates(coordinates)}
+      on_remove={remove_coordinates}
+      on_close={() => show_coordinates = false} />
   {/await}
 {/if}
 

@@ -1,8 +1,6 @@
 <script lang="ts">
   import IconFaTrashO from '~icons/fa/trash-o'
-  import { preventDefault } from 'svelte/legacy'
-
-  import { createEventDispatcher, onMount } from 'svelte'
+  import { onMount } from 'svelte'
   import type { IRegion, LngLatFull } from '$lib/types'
   import Map from './mapbox/map/Map.svelte'
   import Geocoder from './mapbox/geocoder/Geocoder.svelte'
@@ -16,17 +14,20 @@
   import { randomColor } from './utils/randomColor'
   import Popup from './mapbox/map/Popup.svelte'
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import ReactiveSet from '$lib/components/ui/ReactiveSet.svelte'
   import { page } from '$app/state'
 
   interface Props {
     initialCenter?: LngLatFull
     region: IRegion
+    on_update: (region: IRegion) => void
+    on_remove?: () => void
+    on_close: () => void
     children?: import('svelte').Snippet
   }
 
-  const { initialCenter = undefined, region, children }: Props = $props()
+  const { initialCenter = undefined, region, on_update, on_remove, on_close, children }: Props = $props()
   const zoom = region ? 4 : 3
 
   let centerLng: number = $state()
@@ -45,27 +46,22 @@
     }
   })
 
-  function handleGeocoderResult({ detail }, add) {
-    if (detail?.user_coordinates?.[0]) {
+  function handleGeocoderResult(result, add) {
+    if (result?.user_coordinates?.[0]) {
       add({
-        longitude: detail.user_coordinates[0],
-        latitude: detail.user_coordinates[1],
+        longitude: result.user_coordinates[0],
+        latitude: result.user_coordinates[1],
       })
-    } else { add({ longitude: detail.center[0], latitude: detail.center[1] }) }
+    } else { add({ longitude: result.center[0], latitude: result.center[1] }) }
   }
 
-  const dispatch = createEventDispatcher<{
-    update: IRegion
-    remove: boolean
-    close: boolean
-  }>()
   function update(coordinates: IRegion['coordinates']) {
-    dispatch('update', { coordinates })
-    dispatch('close')
+    on_update({ coordinates })
+    on_close()
   }
   function removeRegion() {
-    dispatch('remove')
-    dispatch('close')
+    on_remove?.()
+    on_close()
   }
 
   const children_render = $derived(children)
@@ -75,31 +71,31 @@
   input={region?.coordinates || []}>
   {#snippet children({ value, add, size, remove })}
     {@const points = value as LngLatFull[]}
-    <Modal on:close noscroll>
+    <Modal {on_close} noscroll>
       {#snippet heading()}
         <span>
           {page.data.t('create.select_region')}
         </span>
       {/snippet}
-      <form onsubmit={preventDefault(() => update(points))}>
+      <form onsubmit={(e) => { e.preventDefault(); update(points) }}>
         <div style="height: 50vh;">
           <Map
             lng={centerLng}
             lat={centerLat}
             {zoom}
-            on:click={({ detail: { lng, lat } }) =>
+            on_click={({ lng, lat }) =>
               add({ longitude: lng, latitude: lat })}>
             {@render children_render?.()}
             <NavigationControl />
             <Geocoder
               options={{ marker: false }}
               placeholder={page.data.t('about.search')}
-              on:result={e => handleGeocoderResult(e, add)}
-              on:error={e => console.error(e.detail)} />
+              on_result={result => handleGeocoderResult(result, add)}
+              on_error={error => console.error(error)} />
             {#each Array.from(points) as point (point)}
               <Marker
                 draggable
-                on:dragend={({ detail: { lng, lat } }) => {
+                on_dragend={({ lng, lat }) => {
                   remove(point)
                   add({ longitude: lng, latitude: lat })
                 }}
@@ -147,7 +143,7 @@
         </div>
 
         <div class="modal-footer">
-          <Button onclick={() => dispatch('close')} form="simple" color="black">
+          <Button onclick={on_close} form="simple" color="black">
             {page.data.t('misc.cancel')}
           </Button>
           <Button onclick={removeRegion} form="simple" color="red">

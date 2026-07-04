@@ -1,11 +1,9 @@
 <script lang="ts">
-  import { preventDefault, run } from 'svelte/legacy'
-
   import MultiSelect from './MultiSelect.svelte'
   import type { SelectOption } from './select-options.interface'
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
 
@@ -44,7 +42,8 @@
       return accumlator
     }, {})
   }
-  run(() => {
+  prepareSelected(values, options) // seed once at init (SSR-visible); modal close re-seeds explicitly
+  $effect(() => {
     prepareSelected(values, options)
   })
 
@@ -76,7 +75,7 @@
     {#if show}
       <Modal
         noscroll
-        on:close={() => {
+        on_close={() => {
           prepareSelected(values, options)
           toggle()
         }}>
@@ -85,10 +84,11 @@
         {/snippet}
 
         <form
-          onsubmit={preventDefault(() => {
+          onsubmit={(e) => {
+            e.preventDefault()
             on_update(Object.keys(selectedOptions))
             toggle()
-          })}>
+          }}>
           <MultiSelect bind:selectedOptions {options} {placeholder} {canWriteIn} />
           <div style="min-height: 50vh"></div>
 

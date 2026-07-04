@@ -1,11 +1,9 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   import type { DictionaryView } from '$lib/types'
   import { onMount } from 'svelte'
   import type { PageData } from './$types'
   import Button from '$lib/components/ui/Button.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import ToggleStyle from '$lib/components/maps/mapbox/controls/ToggleStyle.svelte'
@@ -37,19 +35,15 @@
   })
 
   let selectedDictionaryId: string = $state()
-  let selectedDictionary: DictionaryView = $state()
   const dictionaries = $derived([...public_dictionaries, ...private_dictionaries, ...$my_dictionaries])
-  run(() => {
-    if (selectedDictionaryId)
-      selectedDictionary = dictionaries.find(d => d.id === selectedDictionaryId)
-    else
-      selectedDictionary = null
-  })
+  const selectedDictionary: DictionaryView = $derived(
+    selectedDictionaryId ? dictionaries.find(d => d.id === selectedDictionaryId) : null,
+  )
 
   const featured_dict_names = ['Achi', 'GtaɁ', 'Gutob', 'Kihunde', 'Sora']
   const featured_dictionaries = $derived(public_dictionaries.filter(d => featured_dict_names.includes(d.name)))
 
-  run(() => {
+  $effect(() => {
     if (browser && auth_user.admin_level >= 1) {
       get_private_dictionaries().then(_dictionaries => private_dictionaries = _dictionaries)
     } else {

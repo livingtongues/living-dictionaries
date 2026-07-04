@@ -2,7 +2,6 @@
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { looks_like_html, rich_text_display_html } from '$lib/markdown/html-era-shim'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text as sanitize } from '$lib/markdown/sanitize-rich-text'
 
@@ -12,15 +11,8 @@
 
   let editing = $state(false)
 
-  async function start_editing() {
-    if (looks_like_html(dictionary.grammar)) {
-      // HTML-era row (pre-cutover): convert on read so the editor gets markdown
-      // and a save naturally persists markdown. Client-only (needs a DOM).
-      const { html_to_markdown } = await import('$lib/markdown/html-to-markdown')
-      updated = html_to_markdown(dictionary.grammar)
-    } else {
-      updated = dictionary.grammar || ''
-    }
+  function start_editing() {
+    updated = dictionary.grammar || ''
     editing = true
   }
 </script>
@@ -58,7 +50,7 @@
       {#if updated}
         {@html sanitize(render_markdown_to_html(updated))}
       {:else if dictionary.grammar}
-        {@html sanitize(rich_text_display_html(dictionary.grammar))}
+        {@html sanitize(render_markdown_to_html(dictionary.grammar))}
       {:else}
         <i>{page.data.t('dictionary.no_info_yet')}</i>
       {/if}

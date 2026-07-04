@@ -8,7 +8,7 @@
   import GeoJSONSource from '../sources/GeoJSONSource.svelte'
   import PopupOfMap from './PopupOfMap.svelte'
   import Layer from './Layer.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
 
   const { getMap } = getContext<MapKeyContext>(mapKey)
   const map = getMap()
@@ -45,9 +45,9 @@
             'fill-opacity': 0.5,
           },
         }}
-        on:click={toggle}
-        on:mouseenter={() => children && (map.getCanvas().style.cursor = 'pointer')}
-        on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
+        on_click={toggle}
+        on_mouseenter={() => children && (map.getCanvas().style.cursor = 'pointer')}
+        on_mouseleave={() => (map.getCanvas().style.cursor = '')} />
       <Layer
         options={{
           type: 'line',

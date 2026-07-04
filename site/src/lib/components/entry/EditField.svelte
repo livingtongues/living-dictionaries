@@ -5,8 +5,6 @@
   import Form from '$lib/components/ui/Form.svelte'
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
   import MarkdownEditor from '$lib/markdown/MarkdownEditor.svelte'
-  import { html_to_markdown } from '$lib/markdown/html-to-markdown'
-  import { looks_like_html } from '$lib/markdown/html-era-shim'
   import { page } from '$app/state'
   import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
 
@@ -31,13 +29,6 @@
   }: Props = $props()
 
   let inputEl: HTMLInputElement = $state()
-
-  // HTML-era shim (pre-cutover rows store CKEditor HTML): convert on read so the
-  // editor gets markdown and a save naturally persists markdown. This component
-  // only mounts client-side (inside the click-opened EditFieldModal), so the
-  // DOM-needing conversion is safe here. DELETE after the Supabase cutover.
-  if (field === 'notes' && looks_like_html(value))
-    value = html_to_markdown(value)
 
   async function save() {
     value = inputEl?.value || value // IpaKeyboard modifies input's value from outside this component so the bound value here doesn't update. This is hacky and the alternative is to emit events from the IpaKeyboard rather than bind to any neighboring element. This makes the adding and backspacing functions potentially needing to be applied in every context where the IPA keyboard is used. Until we know more how the IPA keyboard will be used, this line here is sufficient.

@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { EntryFieldValue } from '$lib/types'
   import sanitize from 'xss'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
-  import { rich_text_display_html } from '$lib/markdown/html-era-shim'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
+  import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text } from '$lib/markdown/sanitize-rich-text'
   import IconFa6SolidPencil from '~icons/fa6-solid/pencil'
 
@@ -39,7 +39,7 @@
             <div dir="ltr">
               {#if field === 'notes'}
                 <span class="tw-prose">
-                  {@html sanitize_rich_text(rich_text_display_html(value))}
+                  {@html sanitize_rich_text(render_markdown_to_html(value))}
                 </span>
               {:else if value.includes('<i>')}
                 <span class="tw-prose">

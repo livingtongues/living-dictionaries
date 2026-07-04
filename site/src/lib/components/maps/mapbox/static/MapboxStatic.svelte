@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   // https://docs.mapbox.com/api/maps/static-images
   // https://stackoverflow.com/questions/69287390/request-static-image-from-mapbox-with-polygon-via-url // use decodeURIComponent to read example
 
@@ -35,17 +33,13 @@
   const urlPrefix = $derived(`https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${urlFriendlyGeoJson})`)
   const urlSuffix = $derived(`${width}x${height}${highDef ? '@2x' : ''}?logo=false&access_token=${accessToken}`)
 
-  let src = $state('')
   const isSinglePoint = $derived(points?.length === 1 && !regions?.length)
-  run(() => {
+  const src = $derived.by(() => {
     if (isSinglePoint) {
-      const [{ coordinates: firstPoint }] = points
-      const { longitude } = firstPoint
-      const { latitude } = firstPoint
-      src = `${urlPrefix}/${longitude},${latitude},${singlePointZoom}/${urlSuffix}`
-    } else {
-      src = `${urlPrefix}/auto/${urlSuffix}`
+      const [{ coordinates: { longitude, latitude } }] = points
+      return `${urlPrefix}/${longitude},${latitude},${singlePointZoom}/${urlSuffix}`
     }
+    return `${urlPrefix}/auto/${urlSuffix}`
   })
 </script>
 

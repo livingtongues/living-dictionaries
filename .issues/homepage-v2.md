@@ -176,9 +176,25 @@ strip-hover.png (strong line + pulse), interact-zoomed.png (labels), admin-featu
 
 ## Follow-ups / open items for Jacob
 - **videos stat = 435** — looks weak next to the others ("400+ videos"). Keep, or drop to 5 stats?
-- **Prod migration not yet deployed** — `featured_entries` table + endpoints go live on next push
-  to main; then run `/curate-featured-words` for the first big batch (target 100–200 approved).
-  The 26 seed cards are ALREADY baked into the committed JSON, so the strip works on deploy.
+- **Prod migration now deployed** — `featured_entries` table confirmed live on prod (2026-07-04,
+  started empty). The 26 seed cards are ALREADY baked into the committed JSON, so the strip works
+  regardless of DB approval state — **but the next deploy's bake (`/api/homepage/export`) will
+  overwrite that committed JSON with whatever is `approved` in prod at build time.** Since 0 cards
+  are approved yet, **deploying before Jacob approves a batch at /admin/featured-words will wipe
+  the word strip** (empty `featured_entries` in the export). Approve a batch before the next push
+  to main touches homepage code.
+- **Batch #2 curated 2026-07-04** — harvested fresh prod candidates (72 dicts, 441 samples after
+  excluding seed entries), picked 40 across Americas/Africa/S.Asia/Pacific/Middle East/Europe
+  (previous seed batch had zero Europe/Middle East representation), vision-checked via contact
+  sheet, rejected 6 (aewa woodpecker + iquito tapir = clipart illustrations, batsi-kop-tsotsil-tsot
+  tortilla = line-art icon, bugun flying squirrel = stretched hide not a live photo, yokoim
+  necklace = ambiguous woven-mat photo, tepehua-de-huehuetla plum = boring branches/power-lines
+  with no visible fruit). Spot-checked all 34 kept audio URLs return 200. Inserted 34 rows as
+  `status='suggested'` on prod (`agent_note: "balanced batch #2..."`). Gloss language mix: 12 en /
+  8 es / 4 hi / 2 sw / 1 each pt/fr/he/el/my/vi/haw/id.
+  **Awaiting Jacob's review at /admin/featured-words** (listen to audio there, approve/reject).
+  Prod total after this batch: 34 suggested, 0 approved — still short of the 100–200 approved
+  target; run `/curate-featured-words` again for more batches once these are triaged.
 - **Go-live swap** (separate task): move `/home-preview` → `/`, delete Mapbox homepage components,
   `/globe` route + `$lib/components/globe/` (keep `globe/data/*.json` topojson — home-v2 imports it).
 - Search: my_dictionaries chips render only when signed in; Enter opens top result directly.

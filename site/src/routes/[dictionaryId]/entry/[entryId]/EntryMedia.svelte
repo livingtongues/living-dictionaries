@@ -3,7 +3,7 @@
   import Video from '../../entries/components/Video.svelte'
   import GeoTaggingModal from './GeoTaggingModal.svelte'
   import InitableShowHide from './InitableShowHide.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
   import Image from '$lib/components/image/Image.svelte'
   import { get_headword } from '$lib/helpers/orthographies'

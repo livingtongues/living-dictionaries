@@ -1,12 +1,10 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   import type { Readable } from 'svelte/store'
   import type { EntryData } from '$lib/types'
   import type { AudioVideoUploadStatus } from './upload-audio'
   import Button from '$lib/components/ui/Button.svelte'
   import JSON from '$lib/components/ui/JSON.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
   import Waveform from '$lib/components/audio/Waveform.svelte'
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
@@ -34,7 +32,7 @@
   let file: File = $state()
   let audioBlob: Blob = $state(null)
 
-  run(() => {
+  $effect(() => {
     if (sound_file) {
       file = undefined
       audioBlob = null
@@ -78,7 +76,7 @@
   }
 </script>
 
-<Modal on:close={on_close}>
+<Modal on_close={on_close}>
   {#snippet heading()}
     <span> <IconMaterialSymbolsHearing class="icon-inline" style="font-size: 0.875rem" /> {headword.value} </span>
   {/snippet}

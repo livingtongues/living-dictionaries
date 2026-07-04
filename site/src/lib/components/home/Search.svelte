@@ -1,9 +1,7 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   import type { DictionaryView, IPoint } from '$lib/types'
   import Button from '$lib/components/ui/Button.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import IconCarbonSearch from '~icons/carbon/search'
   import IconLaTimes from '~icons/la/times'
@@ -23,36 +21,27 @@
     on_selected_dictionary_point,
   }: Props = $props()
 
-  let currentDictionary: DictionaryView = $state()
-
-  run(() => {
-    if (selectedDictionaryId) {
-      currentDictionary = dictionaries.find((dictionary) => {
-        return selectedDictionaryId === dictionary.id
-      })
-    } else {
-      currentDictionary = null
-    }
-  })
+  const currentDictionary: DictionaryView = $derived(
+    selectedDictionaryId
+      ? dictionaries.find(dictionary => selectedDictionaryId === dictionary.id)
+      : null,
+  )
 
   let searchFocused = $state(false)
   let searchString = $state('')
 
-  let filteredDictionaries: DictionaryView[] = $state([])
-  run(() => {
-    filteredDictionaries = dictionaries
-      .filter((dictionary) => {
-        return Object.keys(dictionary).some((k) => {
-          return (
-            typeof dictionary[k] === 'string'
-            && dictionary[k].toLowerCase().includes(searchString.toLowerCase())
-          )
-        })
+  const filteredDictionaries: DictionaryView[] = $derived(dictionaries
+    .filter((dictionary) => {
+      return Object.keys(dictionary).some((k) => {
+        return (
+          typeof dictionary[k] === 'string'
+          && dictionary[k].toLowerCase().includes(searchString.toLowerCase())
+        )
       })
-      .reduce((acc, dictionary) => {
-        return acc.find(e => e.id === dictionary.id) ? [...acc] : [...acc, dictionary]
-      }, [])
-  })
+    })
+    .reduce((acc, dictionary) => {
+      return acc.find(e => e.id === dictionary.id) ? [...acc] : [...acc, dictionary]
+    }, []))
 
   let searchBlurTimeout
   function delayedSearchClose() {
@@ -161,15 +150,6 @@
                 </Button>
               {/if}
             {/each}
-            <!-- {#if my_dictionaries.length > 3 && !show}
-              <button
-                type="button"
-                class="sm:hidden rounded px-3 py-2 bg-white mt-2"
-                on:click={toggle}>
-                {page.data.t('home.show_all_my_dictionaries')}
-              </button>
-              <div class="w-2 sm:hidden" />
-            {/if} -->
           {/if}
         {/snippet}
       </ShowHide>

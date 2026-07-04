@@ -32,7 +32,7 @@
 
 <script lang="ts">
   import type { EntryData } from '$lib/types'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { longpress } from '$lib/utils/longpress'
   import { page } from '$app/state'
   import { minutes_ago_in_ms } from '$lib/utils/time'

@@ -15,9 +15,10 @@
 
   interface Props {
     selectedColumn: IColumn
+    on_close: () => void
   }
 
-  const { selectedColumn }: Props = $props()
+  const { selectedColumn, on_close }: Props = $props()
   const { preferred_table_columns } = $derived(page.data)
 
   let selectedColumnElement: HTMLElement = $state()
@@ -49,7 +50,7 @@
   }
 </script>
 
-<Slideover on:close>
+<Slideover {on_close}>
   {#snippet title()}
     <span>{page.data.t('column.adjust_columns')}</span>
   {/snippet}

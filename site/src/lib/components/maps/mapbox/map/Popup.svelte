@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { getContext, onMount } from 'svelte'
   import type { Marker, Popup, PopupOptions } from 'mapbox-gl'
@@ -59,7 +57,7 @@
     }
   })
 
-  run(() => {
+  $effect(() => {
     if (popup) {
       if (open !== popup.isOpen())
         marker.togglePopup()

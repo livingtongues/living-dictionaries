@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import * as fs from 'node:fs'
 
 import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { GCLOUD_MEDIA_BUCKET_S3, storage_bucket } from '../config-supabase'
+import { GCLOUD_MEDIA_BUCKET_S3, storage_bucket } from '../supabase/config-supabase'
 import { getImageServingUrl } from './getImageServingUrl'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))

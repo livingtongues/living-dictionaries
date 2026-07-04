@@ -7,7 +7,7 @@
   import type { PageData as EntriesPageData } from './$types'
   import EntriesGallery from './EntriesGallery.svelte'
   import EntriesPrint from './EntriesPrint.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { pushState } from '$app/navigation'
   import { page } from '$app/state'
 

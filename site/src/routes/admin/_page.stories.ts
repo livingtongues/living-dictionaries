@@ -8,7 +8,7 @@ export const shared_meta: StoryMeta = {
 // db/sync null → NotifyChannelToggle defaults to 'email'; the ntfy hero shows
 // the signed-in admin's topic from the allow-list (jwrunner7@gmail.com).
 const data = {
-  auth_user: { user: { id: 'admin-1', email: 'jwrunner7@gmail.com', name: 'Jacob' } },
+  auth_user: { user: { id: 'admin-1', email: 'jwrunner7@gmail.com', name: 'Jacob' }, admin_level: 3 },
   db: null,
   sync: null,
 }

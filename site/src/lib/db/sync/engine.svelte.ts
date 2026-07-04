@@ -39,7 +39,7 @@ export class Sync {
   watermark = $state<string | null>(null)
   blocked_by_client_behind = $state(false)
   #last_sync_finished_at = 0
-  // eslint-disable-next-line no-unused-private-class-members
+
   #auto_flush_timer: ReturnType<typeof setTimeout> | null = null
 
   #connection: SqliteConnection

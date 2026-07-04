@@ -1,10 +1,8 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   import { get } from 'svelte/store'
   import { apply_button_label } from './image-store'
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
   import AddImage from '$lib/components/image/AddImage.svelte'
 
@@ -42,7 +40,7 @@
     return status
   }
 
-  run(() => {
+  $effect(() => {
     if (ai_image) {
       photographer = 'AI'
     } else {
@@ -50,7 +48,7 @@
     }
   })
 
-  run(() => {
+  $effect(() => {
     if (photo_source?.length >= 10 && rights) {
       apply_button_label.set({ ready_to_upload: true })
     } else {
@@ -59,7 +57,7 @@
   })
 </script>
 
-<Modal on:close={on_close}>
+<Modal on_close={on_close}>
   <label class="field-label" for="photo_source">
     {page.data.t('entry.source', { values: { media: page.data.t('entry_field.photo') } })} <i class="hint-text">{page.data.t('entry.source_message', { values: { media: page.data.t('entry.this_image') } })}</i> (<span class="required-text">{page.data.t('misc.required')}</span>)
   </label>

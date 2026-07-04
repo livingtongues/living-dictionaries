@@ -1,13 +1,19 @@
 <script lang="ts">
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
   import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/changeLocale'
+
+  interface Props {
+    on_close: () => void
+  }
+
+  const { on_close }: Props = $props()
 
   const { auth_user } = $derived(page.data)
 </script>
 
-<Modal on:close>
+<Modal {on_close}>
   {#snippet heading()}
     <span>
       {page.data.t('header.select_language')}

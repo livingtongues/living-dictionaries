@@ -5,8 +5,8 @@
   import PasteVideoLink from './PasteVideoLink.svelte'
   import type { VideoUploadStatus } from './upload-video'
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import RecordVideo from '$lib/components/video/RecordVideo.svelte'
   import VideoThirdParty from '$lib/components/video/VideoThirdParty.svelte'
@@ -46,7 +46,7 @@
   }
 </script>
 
-<Modal on:close={on_close}>
+<Modal on_close={on_close}>
   {#snippet heading()}
     <span> <i class="far fa-film-alt heading-icon"></i> {headword.value} </span>
   {/snippet}

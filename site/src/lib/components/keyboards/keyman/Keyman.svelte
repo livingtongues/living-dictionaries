@@ -9,16 +9,14 @@
   import IconPhGlobe from '~icons/ph/globe'
   import IconMdiKeyboard from '~icons/mdi/keyboard'
   import IconMdiKeyboardOffOutline from '~icons/mdi/keyboard-off-outline'
-  import { run } from 'svelte/legacy'
-
   import './keyman.css'
   import { onDestroy, onMount, tick } from 'svelte'
   import type { KeymanWritingSystems } from './writing-systems'
   import { keyboard_for_bcp, load_keyman_writing_systems } from './writing-systems'
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages'
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { loadScriptOnce } from '$lib/utils/load-once'
   import { browser } from '$app/environment'
 
@@ -133,7 +131,7 @@
   // only via the full Keyman set shows the keyboard toggle whenever a keyboard exists.
   const showKeyboardButton = $derived(glossLanguage ? !!glossLanguage.showKeyboard : !!internalName)
 
-  run(() => {
+  $effect(() => {
     if (kmw && show && internalName) {
       (async () => {
         await kmw.addKeyboards(keyboardId)
@@ -153,7 +151,7 @@
     }
   })
 
-  run(() => {
+  $effect(() => {
     if (show)
       inputEl?.classList.remove('kmw-disabled')
     else
@@ -200,7 +198,7 @@
     </div>
 
     {#if showKeyboardOptions}
-      <Modal on:close={toggle} noscroll>
+      <Modal on_close={toggle} noscroll>
         {#snippet heading()}
           <span>Select Keyboard</span>
         {/snippet}

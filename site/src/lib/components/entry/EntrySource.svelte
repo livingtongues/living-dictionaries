@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { preventDefault } from 'svelte/legacy'
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import MultiSelect from '$lib/components/ui/array/MultiSelect.svelte'
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
@@ -49,12 +48,12 @@
     </div>
 
     {#if show}
-      <Modal noscroll on:close={toggle}>
+      <Modal noscroll on_close={toggle}>
         {#snippet heading()}
           <span>{page.data.t('entry_field.sources')}</span>
         {/snippet}
 
-        <form onsubmit={preventDefault(() => { on_update(Object.keys(selectedOptions)); toggle() })}>
+        <form onsubmit={(e) => { e.preventDefault(); on_update(Object.keys(selectedOptions)); toggle() }}>
           <MultiSelect bind:selectedOptions {options} placeholder={page.data.t('entry_field.sources')} />
 
           <button type="button" class="create-new" onclick={() => (creating = true)}>

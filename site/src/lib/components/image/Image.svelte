@@ -1,7 +1,4 @@
 <script lang="ts">
-  import { createBubbler, stopPropagation } from 'svelte/legacy'
-
-  const bubble = createBubbler()
   import { crossfade, scale } from 'svelte/transition'
   import Button from '$lib/components/ui/Button.svelte'
   import { page } from '$app/state'
@@ -102,7 +99,7 @@
     style="background: rgba(0, 0, 0, 0.85); z-index: 51; will-change: transform;">
     <div class="viewer-inner">
       <div class="viewer-header">
-        <span onclick={stopPropagation(bubble('click'))}>{title}</span>
+        <span onclick={e => e.stopPropagation()}>{title}</span>
         <IconFaSolidTimes class="icon-inline viewer-close" style="font-size: 2.5rem" />
       </div>
       {#if photographer === 'AI'}

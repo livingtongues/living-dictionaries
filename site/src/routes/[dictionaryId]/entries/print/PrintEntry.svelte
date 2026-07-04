@@ -10,7 +10,7 @@
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
   import { get_headword } from '$lib/helpers/orthographies'
   import { image_src } from '$lib/helpers/media'
-  import { rich_text_display_html } from '$lib/markdown/html-era-shim'
+  import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text } from '$lib/markdown/sanitize-rich-text'
 
   interface Props {
@@ -128,7 +128,7 @@
       {#if showLabels}
         <span class="field-label">{page.data.t('entry_field.notes')}:</span>
       {/if}
-      {@html sanitize_rich_text(rich_text_display_html(entry.main.notes.default))}
+      {@html sanitize_rich_text(render_markdown_to_html(entry.main.notes.default))}
     </div>
   {/if}
 

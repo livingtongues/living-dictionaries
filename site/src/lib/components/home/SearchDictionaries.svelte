@@ -1,10 +1,8 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   import type { DictionaryView } from '$lib/types'
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import IconCarbonSearch from '~icons/carbon/search'
   import IconLaTimes from '~icons/la/times'
@@ -18,21 +16,18 @@
 
   let searchString = $state('')
 
-  let filteredDictionaries: DictionaryView[] = $state([])
-  run(() => {
-    filteredDictionaries = dictionaries
-      .filter((dictionary) => {
-        return Object.keys(dictionary).some((k) => {
-          return (
-            typeof dictionary[k] === 'string'
-            && dictionary[k].toLowerCase().includes(searchString.toLowerCase())
-          )
-        })
+  const filteredDictionaries: DictionaryView[] = $derived(dictionaries
+    .filter((dictionary) => {
+      return Object.keys(dictionary).some((k) => {
+        return (
+          typeof dictionary[k] === 'string'
+          && dictionary[k].toLowerCase().includes(searchString.toLowerCase())
+        )
       })
-      .reduce((acc, dictionary) => {
-        return acc.find(e => e.id === dictionary.id) ? [...acc] : [...acc, dictionary]
-      }, [])
-  })
+    })
+    .reduce((acc, dictionary) => {
+      return acc.find(e => e.id === dictionary.id) ? [...acc] : [...acc, dictionary]
+    }, []))
 
   function autofocus(node: HTMLInputElement) {
     setTimeout(() => node.focus(), 5)
@@ -46,7 +41,7 @@
     <div style="margin-bottom: 0.5rem"></div>
 
     {#if show}
-      <Modal on:close={toggle} show_x={false}>
+      <Modal on_close={toggle} show_x={false}>
         <div class="search-box">
           <div class="search-icon">
             <IconCarbonSearch class="icon-inline" />

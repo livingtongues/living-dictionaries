@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { preventDefault } from 'svelte/legacy'
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import type { SourceType } from '$lib/constants'
   import type { Tables } from '$lib/types'
   import { page } from '$app/state'
@@ -65,12 +64,12 @@
   }
 </script>
 
-<Modal on:close={on_close}>
+<Modal on_close={on_close}>
   {#snippet heading()}
     <span>{is_edit ? page.data.t({ dynamicKey: 'source.edit', fallback: 'Edit source' }) : page.data.t({ dynamicKey: 'source.create', fallback: 'Add source' })}</span>
   {/snippet}
 
-  <form onsubmit={preventDefault(save)}>
+  <form onsubmit={(e) => { e.preventDefault(); save() }}>
     <label>
       <span>{page.data.t({ dynamicKey: 'source.citation', fallback: 'Citation' })}</span>
       <textarea rows="2" bind:value={citation} placeholder="Smith, Jane. 2020. Example Language Dictionary. City: Example University Press."></textarea>

@@ -2,7 +2,7 @@
   import type { Orthography, Tables } from '$lib/types'
   import type { KeymanWritingSystems } from '$lib/components/keyboards/keyman/writing-systems'
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
   import { get_orthographies } from '$lib/helpers/orthographies'
@@ -160,7 +160,7 @@
 <Button form="menu" size="sm" onclick={() => open_picker('new')}>+ {page.data.t('misc.add')}</Button>
 
 {#if picker_target}
-  <Modal on:close={() => (picker_target = null)}>
+  <Modal on_close={() => (picker_target = null)}>
     {#snippet heading()}
       <span>{picker_target === 'primary' ? 'Primary writing system' : 'Add a writing system'}</span>
     {/snippet}

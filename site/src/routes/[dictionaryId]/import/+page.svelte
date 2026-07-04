@@ -1,7 +1,7 @@
 <script lang="ts">
   import IconMdiMessageOutline from '~icons/mdi/message-outline'
   import IconFa6SolidRobot from '~icons/fa6-solid/robot'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
 
   const { data } = $props()
@@ -45,7 +45,7 @@
         </button>
         {#if show}
           {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-            <Contact subject="import_data" on:close={toggle} />
+            <Contact subject="import_data" on_close={toggle} />
           {/await}
         {/if}
       {/snippet}

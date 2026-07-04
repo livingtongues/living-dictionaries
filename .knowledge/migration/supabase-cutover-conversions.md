@@ -1,8 +1,9 @@
 # Supabase → SQLite cutover: data conversions & rehearsal findings
 
 Durable gotchas from the full-corpus cutover rehearsal (2026-07-02, all 2,229 dicts / 546k
-entries pushed live to the `living` VPS). The runbook + step-by-step is `.issues/cutover.md`; the
-migrator is `scripts/supabase-cutover/`. This page records the non-obvious things the rehearsal
+entries pushed live to the `living` VPS). The flip record is
+[production-cutover-record.md](./production-cutover-record.md); the migrator is
+`scripts/supabase/cutover/`. This page records the non-obvious things the rehearsal
 taught that aren't visible from reading the code.
 
 ## The two silent-data-loss bugs the rehearsal caught (fixed)

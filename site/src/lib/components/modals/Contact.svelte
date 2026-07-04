@@ -1,24 +1,22 @@
 <script lang="ts">
   import IconFluentLearningApp24Regular from '~icons/fluent/learning-app-24-regular'
-  import { run } from 'svelte/legacy'
-
-  import { createEventDispatcher } from 'svelte'
   import Button from '$lib/components/ui/Button.svelte'
   import Form from '$lib/components/ui/Form.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
   import { goto } from '$app/navigation'
   import { api_contact } from '$api/contact/_call'
 
   interface Props {
     subject?: Subjects
+    on_close: () => void
   }
 
-  let { subject = $bindable(undefined) }: Props = $props()
+  let { subject = $bindable(undefined), on_close }: Props = $props()
 
   function warn_if_about_too_short() {
     if (about_is_too_short()) {
-      close()
+      on_close()
       alert(page.data.t('about.message'))
       goto(`/${dictionary.url}/about`)
     }
@@ -37,12 +35,6 @@
   type Subjects = keyof typeof subjects
   type SubjectValues = typeof subjects[Subjects]
   const typedSubjects = Object.entries(subjects) as [Subjects, SubjectValues][]
-
-  const dispatch = createEventDispatcher<{ close: boolean }>()
-
-  function close() {
-    dispatch('close')
-  }
 
   let message = $state('')
   let email = $state('')
@@ -72,7 +64,7 @@
   }
   let { dictionary, auth_user, about_is_too_short } = $derived(page.data)
   const user = $derived(auth_user.user)
-  run(() => {
+  $effect(() => {
     if (dictionary && subject === 'public_dictionary') warn_if_about_too_short()
   })
   const filteredSubjects = $derived(typedSubjects.filter((subjects) => {
@@ -83,7 +75,7 @@
   }))
 </script>
 
-<Modal on:close class="contact-modal">
+<Modal {on_close} class="contact-modal">
   {#snippet heading()}
     <span>
       <i class="far fa-question-circle"></i>
@@ -93,7 +85,7 @@
     <Button
       onclick={() => {
         goto('/tutorials')
-        close()
+        on_close()
       }}
       class="tutorials-button">
       <IconFluentLearningApp24Regular class="icon-inline" style="margin-top: -2px" />
@@ -163,7 +155,7 @@
             <Button {loading} form="filled" type="submit">
               {page.data.t('contact.send_message')}
             </Button>
-            <Button disabled={loading} onclick={close} form="simple" color="black">
+            <Button disabled={loading} onclick={on_close} form="simple" color="black">
               {page.data.t('misc.cancel')}
             </Button>
           </div>
@@ -175,7 +167,7 @@
         {page.data.t('contact.message_sent')}
       </h4>
       <div>
-        <Button onclick={close} color="black">
+        <Button onclick={on_close} color="black">
           {page.data.t('misc.close')}
         </Button>
       </div>

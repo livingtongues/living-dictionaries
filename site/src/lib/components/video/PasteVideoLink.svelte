@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { preventDefault } from 'svelte/legacy'
-
   import type { HostedVideo } from '$lib/types'
   import { parse_hosted_video_url } from './parse-hosted-video-url'
   import Button from '$lib/components/ui/Button.svelte'
@@ -23,7 +21,7 @@
   }
 </script>
 
-<form style="margin-bottom: 1rem" onsubmit={preventDefault(handle)}>
+<form style="margin-bottom: 1rem" onsubmit={(e) => { e.preventDefault(); handle() }}>
   <label for="vURL">
     <i class="far fa-link"></i>
     {page.data.t('video.video_url')}

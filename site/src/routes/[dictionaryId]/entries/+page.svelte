@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   import type { FacetResult } from '@orama/orama'
   import Pagination from './Pagination.svelte'
   import SwitchView from './SwitchView.svelte'
@@ -8,7 +6,7 @@
   import SearchInput from './SearchInput.svelte'
   import View from './View.svelte'
   import EntriesEmptyState from './EntriesEmptyState.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import type { QueryParams } from '$lib/search/types'
   import { page } from '$app/state'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
@@ -68,7 +66,7 @@
     if (!count) return 0
     return Math.ceil(count / entries_per_page)
   })())
-  run(() => {
+  $effect(() => {
     if (browser || $search_index_updated) {
       search($search_params, current_page_index)
     }

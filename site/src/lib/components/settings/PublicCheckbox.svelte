@@ -1,14 +1,12 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
   import { page } from '$app/state'
 
   interface Props {
     checked: boolean
+    on_changed: (options: { checked: boolean }) => void
   }
 
-  const { checked }: Props = $props()
-
-  const dispatch = createEventDispatcher<{ changed: { checked: boolean } }>()
+  const { checked, on_changed }: Props = $props()
 </script>
 
 <div style="display: flex; align-items: center">
@@ -18,7 +16,7 @@
     {checked}
     onchange={(e) => {
       // @ts-ignore
-      dispatch('changed', { checked: e.target.checked })
+      on_changed({ checked: e.target.checked })
     }} />
   <label for="public" class="checkbox-label">
     {page.data.t('create.visible_to_public')}

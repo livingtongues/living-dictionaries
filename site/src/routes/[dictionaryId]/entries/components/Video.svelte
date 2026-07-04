@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { EntryData } from '$lib/types'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import IconBiCameraVideo from '~icons/bi/camera-video'
 

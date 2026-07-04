@@ -3,7 +3,7 @@
   import { seo_description } from './seo_description'
   import Button from '$lib/components/ui/Button.svelte'
   import JSON from '$lib/components/ui/JSON.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { share } from '$lib/utils/share'
   import { get_headword } from '$lib/helpers/orthographies'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'

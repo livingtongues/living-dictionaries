@@ -165,3 +165,23 @@ Harness files touched (mirror LD↔house): `boot-recovery.ts`, `leader-worker.ts
 - Did NOT raise BODY_SIZE_LIMIT (Jacob: leave 16M).
 - Visual boot-download feedback = parked follow-up issue.
 - house `on_boot_failed`→remote-log app wiring left optional (hook is present; re-election benefits house automatically).
+
+---
+
+## Post-cutover production observation (2026-07-04 grace-watch, +1d after DNS flip)
+
+`leader_boot_failed` is a low ongoing trickle on the live apex — **22 rows in the first ~24h**,
+mostly anonymous visitors across many dicts. Breakdown by `last_stage :: boot_message`:
+
+- **16× `opfs_open :: sqlite3_open_v2`** (12 `will_retry=true`, 4 final) — the dominant cluster.
+  Self-healing in the majority (re-election recovers). Consistent with the held-SAH /
+  `SQLITE_CANTOPEN` + multi-tab-contention class this issue already covers.
+- **2× `opfs_open :: leader boot stalled — no progress for 20000ms`** — the 20s watchdog firing
+  (the hang class; the shipped re-election recovers it).
+- **3× dynamic-import module fetch failures** (`opfs_open`/`init`) — stale hashed chunks after a
+  deploy while a tab was open; benign/expected.
+- **1× `snapshot_fetch` stall.**
+
+Telemetry is adequate (`boot_message` + `last_stage` pinpoint the phase). No new work required now —
+just confirming the shipped recovery is holding under real traffic. Revisit only if the
+`sqlite3_open_v2` final-failure count (currently 4/24h) climbs.

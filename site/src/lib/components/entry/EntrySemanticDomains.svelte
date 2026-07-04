@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { stopPropagation } from 'svelte/legacy'
-
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
   import { page } from '$app/state'
@@ -57,7 +55,7 @@
             type="button"
             class="remove-write-in"
             title="Remove"
-            onclick={stopPropagation(() => deleteWriteIn(domain))}>
+            onclick={(e) => { e.stopPropagation(); deleteWriteIn(domain) }}>
             <IconFaSolidTimes class="icon-inline" />
           </button>
         {/if}

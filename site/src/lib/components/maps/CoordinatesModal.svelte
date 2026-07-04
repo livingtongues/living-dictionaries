@@ -1,7 +1,5 @@
 <script lang="ts">
-  import { preventDefault } from 'svelte/legacy'
-
-  import { createEventDispatcher, onMount } from 'svelte'
+  import { onMount } from 'svelte'
   import type { LngLatFull } from '$lib/types'
   import Map from './mapbox/map/Map.svelte'
   import Geocoder from './mapbox/geocoder/Geocoder.svelte'
@@ -10,7 +8,7 @@
   import NavigationControl from './mapbox/controls/NavigationControl.svelte'
   import { setMarker } from './utils/setCoordinatesToMarker'
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
 
   interface Props {
@@ -18,6 +16,9 @@
     lng?: number
     lat?: number
     canRemove?: boolean
+    on_update: (coordinates: { lat: number, lng: number }) => void
+    on_remove?: () => void
+    on_close: () => void
     children?: import('svelte').Snippet
   }
 
@@ -26,6 +27,9 @@
     lng = $bindable(undefined),
     lat = $bindable(undefined),
     canRemove = true,
+    on_update,
+    on_remove,
+    on_close,
     children,
   }: Props = $props()
 
@@ -46,38 +50,30 @@
     }
   })
 
-  function handleGeocoderResult({ detail }) {
-    if (detail?.user_coordinates?.[0])
-      setMarker(detail.user_coordinates[0], detail.user_coordinates[1])
+  function handleGeocoderResult(result) {
+    if (result?.user_coordinates?.[0])
+      setMarker(result.user_coordinates[0], result.user_coordinates[1])
     else
-      setMarker(detail.center[0], detail.center[1])
+      setMarker(result.center[0], result.center[1])
   }
 
-  const dispatch = createEventDispatcher<{
-    update: { lat: number, lng: number }
-    remove: boolean
-    close: boolean
-  }>()
   function update() {
-    dispatch('update', {
-      lat,
-      lng,
-    })
-    dispatch('close')
+    on_update({ lat, lng })
+    on_close()
   }
   function remove() {
-    dispatch('remove')
-    dispatch('close')
+    on_remove?.()
+    on_close()
   }
 </script>
 
-<Modal on:close noscroll>
+<Modal {on_close} noscroll>
   {#snippet heading()}
     <span>
       {page.data.t('create.select_coordinates')}
     </span>
   {/snippet}
-  <form onsubmit={preventDefault(update)}>
+  <form onsubmit={(e) => { e.preventDefault(); update() }}>
     <div style="display: flex; flex-wrap: wrap; align-items: center; margin-bottom: 0.5rem">
       <div style="display: flex; flex-grow: 1">
         <div style="position: relative">
@@ -118,18 +114,18 @@
         lng={centerLng}
         lat={centerLat}
         {zoom}
-        on:click={({ detail }) => ({ lng, lat } = setMarker(detail.lng, detail.lat))}>
+        on_click={lng_lat => ({ lng, lat } = setMarker(lng_lat.lng, lng_lat.lat))}>
         {@render children?.()}
         <NavigationControl />
         <Geocoder
           options={{ marker: false }}
           placeholder={page.data.t('about.search')}
-          on:result={handleGeocoderResult}
-          on:error={e => console.error(e.detail)} />
+          on_result={handleGeocoderResult}
+          on_error={error => console.error(error)} />
         {#if lng && lat}
           <Marker
             draggable
-            on:dragend={({ detail }) => ({ lng, lat } = setMarker(detail.lng, detail.lat))}
+            on_dragend={coordinates => ({ lng, lat } = setMarker(coordinates.lng, coordinates.lat))}
             {lng}
             {lat} />
         {/if}
@@ -138,7 +134,7 @@
     </div>
 
     <div class="modal-footer">
-      <Button onclick={() => dispatch('close')} form="simple" color="black">
+      <Button onclick={on_close} form="simple" color="black">
         {page.data.t('misc.cancel')}
       </Button>
       {#if canRemove}

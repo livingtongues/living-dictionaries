@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { EntryFieldValue } from '$lib/types'
   import sanitize from 'xss'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
 
   interface Props {

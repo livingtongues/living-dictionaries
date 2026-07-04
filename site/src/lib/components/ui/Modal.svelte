@@ -67,10 +67,10 @@
     aria-labelledby="modal-headline"
     bind:this={modal}>
     <div class="modal-body">
-      {#if heading}
+      {#if heading || show_x}
         <div class="modal-heading-row">
           <h3 class="modal-heading" id="modal-headline">
-            {@render heading()}
+            {@render heading?.()}
           </h3>
           {#if show_x}
             <button

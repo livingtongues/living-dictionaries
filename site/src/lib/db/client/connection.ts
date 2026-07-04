@@ -36,9 +36,9 @@ export async function create_sqlite_connection(db_name: string): Promise<SqliteC
   const { IDBBatchAtomicVFS } = await import('wa-sqlite/src/examples/IDBBatchAtomicVFS.js')
 
   // wa-sqlite exposes factory and constructor APIs that start with uppercase letters; suppress new-cap.
-  // eslint-disable-next-line new-cap
+
   const module = await SQLiteESMFactory()
-  // eslint-disable-next-line new-cap
+
   const sqlite3 = SQLite.Factory(module)
 
   const idb_name = `wa-sqlite-${db_name}`

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { preventDefault } from 'svelte/legacy'
-
   import { page } from '$app/state'
 
   interface Props {
@@ -36,9 +34,9 @@
 {:else}
   <label
     class:dragging
-    ondrop={preventDefault((e: DragEvent) => checkVideo(e.dataTransfer.files))}
-    ondragover={preventDefault(() => (dragging = true))}
-    ondragleave={preventDefault(() => (dragging = false))}>
+    ondrop={(e: DragEvent) => { e.preventDefault(); checkVideo(e.dataTransfer.files) }}
+    ondragover={(e) => { e.preventDefault(); dragging = true }}
+    ondragleave={(e) => { e.preventDefault(); dragging = false }}>
     <input
       type="file"
       accept="video/*"

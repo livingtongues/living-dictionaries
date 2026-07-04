@@ -142,7 +142,7 @@ The button classes are `inline-flex` but set **no gap**. For an icon next to a l
 
 ### When you need async-spinner behavior
 
-Use `$lib/svelte-pieces/HeadlessButton.svelte` (ported from tutor): it runs `onclick` async with a built-in `loading` spinner and no styling of its own — compose `btn-*` classes via its `class` prop. The legacy `$lib/svelte-pieces/ui/Button.svelte` (own `form`/`size`/`color` styling) still has many call sites but is being migrated away.
+Use `$lib/components/ui/HeadlessButton.svelte` (ported from tutor): it runs `onclick` async with a built-in `loading` spinner and no styling of its own — compose `btn-*` classes via its `class` prop. The legacy `$lib/components/ui/Button.svelte` (own `form`/`size`/`color` styling) still has many call sites but is being migrated away.
 
 ### Other globals in `buttons.css`
 
@@ -196,15 +196,15 @@ The content IS the interface — avoid input chrome. Style placeholders with `--
 
 ## Reusable design components
 
-These can be found in `site/src/lib/svelte-pieces` and should be used instead of building new ones where possible. What LD actually ships today (more — bay/ snippet portals — live in tutor and can be ported when needed):
+These live in `site/src/lib/components/ui/` and should be used instead of building new ones where possible (more — bay/ snippet portals — live in tutor and can be ported when needed):
 - `HeadlessButton.svelte` — async onclick + loading spinner, unstyled (compose `.btn-*`)
-- `Modal.svelte` — escape-to-close, focus-trap, backdrop-click, portal-mounted
-- `Toasts.svelte` + `toast.svelte.ts`
+- `Modal.svelte` — escape-to-close, focus-trap, backdrop-click, portal-mounted, `on_close` callback, optional `heading` snippet + `show_x`
+- `Toasts.svelte` + `$lib/state/toast.svelte.ts`
 - `ShowHide.svelte` — render-prop helper with `{ show, toggle, set }`
-- `Slideover.svelte` — side panel (portal-mounted, focus-trap, fade+fly transitions, optional title snippet)
-- `RichTextEditor.svelte`, `CopyButton.svelte`, `persisted-state.svelte.ts`
-- Actions: `actions/clickoutside`, `actions/longpress`, `actions/portal`, `trapFocus.ts`
-- Legacy `ui/` (vendored sp-\* compiled styles — prefer the root pieces above; modernization is logged in `.issues/ui-skill-alignment.md`): `Button.svelte` (async spinner), `Modal.svelte`, `Badge.svelte`, `ResponsiveTable.svelte`, `ResponsiveSlideover.svelte`, `Slideover.svelte`
+- `Slideover.svelte` / `ResponsiveSlideover.svelte` — side panel (portal-mounted, focus-trap, fade+fly transitions, optional title snippet, `on_close` callback)
+- `RichTextEditor.svelte`, `CopyButton.svelte`, `Badge.svelte`, `ResponsiveTable.svelte`, `$lib/state/persisted-state.svelte.ts`
+- DOM helpers in `$lib/utils/`: `clickoutside`, `longpress`, `portal`, `trap-focus`
+- `Button.svelte` (own `form`/`size`/`color` styling, vendored sp-\* compiled styles) is legacy — prefer HeadlessButton + `.btn-*` for new work (modernization is logged in `.issues/ui-skill-alignment.md`)
 
 ---
 

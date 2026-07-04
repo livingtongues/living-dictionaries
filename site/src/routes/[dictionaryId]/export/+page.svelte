@@ -3,7 +3,7 @@
   import DownloadMedia from './DownloadMedia.svelte'
   import { formatCsvEntries, getCsvHeaders, translate_entries } from './prepareEntriesForCsv'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Progress from '$lib/export/Progress.svelte'
   import { page } from '$app/state'
@@ -91,7 +91,7 @@
               finalizedEntries={formattedEntries}
               entriesWithImages={includeImages ? entriesWithImages : []}
               entriesWithAudio={includeAudio ? entriesWithAudio : []}
-              on:completed={toggle}>
+              on_completed={toggle}>
               {#snippet children({ progress })}
                 <Progress {progress} />
                 {#if progress < 1}

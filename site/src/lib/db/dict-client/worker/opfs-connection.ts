@@ -67,9 +67,8 @@ function get_sqlite3(): Promise<SqliteApi> {
     const { default: SQLiteESMFactory } = await import('wa-sqlite/dist/wa-sqlite-async.mjs')
     const SQLite = await import('wa-sqlite')
 
-    // eslint-disable-next-line new-cap
     const module = await SQLiteESMFactory()
-    // eslint-disable-next-line new-cap
+
     const sqlite3 = SQLite.Factory(module) as unknown as SqliteApi
     sqlite3.vfs_register(new OpfsSingleOwnerVFS(VFS_NAME) as unknown, false)
     return sqlite3

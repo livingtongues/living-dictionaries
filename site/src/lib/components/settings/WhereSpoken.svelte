@@ -2,7 +2,7 @@
   import type { DictionaryView, IPoint, IRegion } from '$lib/types'
   import type { LngLat } from 'mapbox-gl'
   import Button from '$lib/components/ui/Button.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import Marker from '$lib/components/maps/mapbox/map/Marker.svelte'
@@ -26,7 +26,7 @@
   const first_longitude = $derived(dictionary.coordinates?.points?.[0]?.coordinates?.longitude)
   const first_latitude = $derived(dictionary.coordinates?.points?.[0]?.coordinates?.latitude)
 
-  function addCoordinates({ detail: { lng, lat } }: { detail: { lng: number, lat: number } }) {
+  function addCoordinates({ lng, lat }: { lng: number, lat: number }) {
     const point: IPoint = { coordinates: { longitude: lng, latitude: lat } }
     const points = (dictionary.coordinates?.points && [...dictionary.coordinates.points, point]) || [point]
     on_update_points(points)
@@ -47,14 +47,14 @@
     <Map
       lng={first_longitude}
       lat={first_latitude}
-      on:click={({ detail }) => (mapClickCoordinates = detail)}>
+      on_click={lng_lat => (mapClickCoordinates = lng_lat)}>
       <NavigationControl />
       {#if mapClickCoordinates}
         <CoordinatesModal
           lng={+mapClickCoordinates.lng.toFixed(4)}
           lat={+mapClickCoordinates.lat.toFixed(4)}
-          on:update={addCoordinates}
-          on:close={() => (mapClickCoordinates = null)}>
+          on_update={addCoordinates}
+          on_close={() => (mapClickCoordinates = null)}>
         </CoordinatesModal>
       {/if}
 
@@ -76,19 +76,19 @@
                   <CoordinatesModal
                     lng={point.coordinates.longitude}
                     lat={point.coordinates.latitude}
-                    on:update={({ detail }) => {
+                    on_update={({ lng, lat }) => {
                       const { points } = dictionary.coordinates
                       points[index] = {
-                        coordinates: { longitude: detail.lng, latitude: detail.lat },
+                        coordinates: { longitude: lng, latitude: lat },
                       }
                       on_update_points(points)
                     }}
-                    on:remove={() => {
+                    on_remove={() => {
                       const { points } = dictionary.coordinates
                       points.splice(index, 1)
                       on_update_points(points)
                     }}
-                    on:close={toggle}>
+                    on_close={toggle}>
                   </CoordinatesModal>
                 {/if}
               {/snippet}
@@ -107,17 +107,17 @@
               {#if show}
                 <RegionModal
                   {region}
-                  on:update={({ detail }) => {
+                  on_update={(updated_region) => {
                     const { regions } = dictionary.coordinates
-                    regions[index] = detail
+                    regions[index] = updated_region
                     on_update_regions(regions)
                   }}
-                  on:remove={() => {
+                  on_remove={() => {
                     const { regions } = dictionary.coordinates
                     regions.splice(index, 1)
                     on_update_regions(regions)
                   }}
-                  on:close={toggle}>
+                  on_close={toggle}>
                 </RegionModal>
               {/if}
             {/snippet}
@@ -141,8 +141,8 @@
       {#if show}
         <CoordinatesModal
           initialCenter={{ ...(first_longitude && { longitude: first_longitude, latitude: first_latitude }) }}
-          on:update={addCoordinates}
-          on:close={toggle} />
+          on_update={addCoordinates}
+          on_close={toggle} />
       {/if}
     {/snippet}
   </ShowHide>
@@ -158,11 +158,11 @@
           <RegionModal
             initialCenter={{ longitude: first_longitude, latitude: first_latitude }}
             region={null}
-            on:update={({ detail }) => {
-              const regions = (dictionary.coordinates.regions && [...dictionary.coordinates.regions, detail]) || [detail]
+            on_update={(new_region) => {
+              const regions = (dictionary.coordinates.regions && [...dictionary.coordinates.regions, new_region]) || [new_region]
               on_update_regions(regions)
             }}
-            on:close={toggle} />
+            on_close={toggle} />
         {/if}
       {/snippet}
     </ShowHide>

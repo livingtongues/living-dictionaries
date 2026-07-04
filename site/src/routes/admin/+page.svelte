@@ -11,6 +11,7 @@
   import IconMdiCloudSync from '~icons/mdi/cloud-sync'
   import IconMdiContentCopy from '~icons/mdi/content-copy'
   import IconMdiForumOutline from '~icons/mdi/forum-outline'
+  import IconMdiImageMultipleOutline from '~icons/mdi/image-multiple-outline'
   import IconMdiMessageTextOutline from '~icons/mdi/message-text-outline'
   import IconMdiMonitor from '~icons/mdi/monitor'
   import IconMdiOpenInNew from '~icons/mdi/open-in-new'
@@ -23,6 +24,7 @@
   let { data } = $props()
 
   const user = $derived(data.auth_user.user)
+  const admin_level = $derived(data.auth_user.admin_level)
   const admin = $derived(get_admin(user?.email))
   const topic = $derived(admin?.ntfy_topic ?? null)
   const ntfy_url = $derived(topic ? `https://ntfy.sh/${topic}` : null)
@@ -47,18 +49,22 @@
     cta: string
     icon: Component
     accent: string
+    /** Hide below this admin tier — currently only the dev-facing Analytics/Schema cards. */
+    min_level?: number
   }
-  const boxes: NavBox[] = [
+  const all_boxes: NavBox[] = [
     { href: '/admin/messages', title: 'Messages', body: 'Inbound support & feedback email threads. Reply via SES, assign to an admin, match unknown senders, mark resolved.', cta: 'Open inbox', icon: IconMdiMessageTextOutline, accent: 'var(--primary)' },
     { href: '/admin/users', title: 'Users', body: 'Registered users with their dictionaries, email aliases, thread history, and unsubscribe state.', cta: 'Browse', icon: IconMdiAccountMultipleOutline, accent: 'var(--success)' },
     { href: '/chat', title: 'Chat', body: 'Channels + 1:1 DMs with admins, super managers, and partners — with a phone/email ping when a message is waiting for you.', cta: 'Open chat', icon: IconMdiForumOutline, accent: 'var(--primary)' },
     { href: '/translate', title: 'Translations', body: 'DB-backed interface translations — per-language progress, review flags on AI or changed-English values, and a button to email translators their pending work.', cta: 'Open dashboard', icon: IconMdiTranslate, accent: 'var(--warning)' },
     { href: '/admin/dictionaries', title: 'Dictionaries', body: 'Every dictionary on the platform — visibility, entry counts, partners, and per-dictionary roles.', cta: 'Browse', icon: IconMdiBookOpenPageVariantOutline, accent: 'var(--success)' },
-    { href: '/admin/analytics', title: 'Analytics', body: 'Session & navigation activity, top routes and events, and recent client / server errors from the logs.', cta: 'Open', icon: IconMdiChartLine, accent: 'var(--primary)' },
-    { href: '/admin/schema', title: 'Schema', body: 'Browse the wa-sqlite + server schema — tables, columns, foreign keys, and the relationship graph.', cta: 'Open', icon: IconMdiTableCog, accent: 'var(--success)' },
+    { href: '/admin/featured-words', title: 'Featured', body: 'Curate the homepage featured-word rotation — pick entries, preview cards, and reorder.', cta: 'Open', icon: IconMdiImageMultipleOutline, accent: 'var(--success)' },
+    { href: '/admin/analytics', title: 'Analytics', body: 'Session & navigation activity, top routes and events, and recent client / server errors from the logs.', cta: 'Open', icon: IconMdiChartLine, accent: 'var(--primary)', min_level: 3 },
+    { href: '/admin/schema', title: 'Schema', body: 'Browse the wa-sqlite + server schema — tables, columns, foreign keys, and the relationship graph.', cta: 'Open', icon: IconMdiTableCog, accent: 'var(--success)', min_level: 3 },
     { href: '/admin/sync', title: 'Sync', body: 'Live sync-engine dashboard — cursors, watermarks, dirty rows, and per-table push / pull history.', cta: 'Open', icon: IconMdiCloudSync, accent: 'var(--warning)' },
     { href: '/admin/api-docs', title: 'Agent API', body: 'A human-readable view of the live /api/v1/openapi.json spec — exactly what agents read to self-configure their reads & writes.', cta: 'Open', icon: IconMdiRobotOutline, accent: 'var(--primary)' },
   ]
+  const boxes = $derived(all_boxes.filter(box => !box.min_level || admin_level >= box.min_level))
 
   interface DeviceStep {
     title: string

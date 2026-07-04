@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
-  import { createEventDispatcher, getContext, onDestroy } from 'svelte'
+  import { getContext, onDestroy } from 'svelte'
   import type {
     AnyLayer,
     MapLayerEventType,
@@ -25,6 +23,19 @@
     minzoom?: number // 0-24
     maxzoom?: number // 0-24
     beforeLayerId?: string // see https://docs.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/ to create a FindFirstSymbolLayer component.
+    on_click?: (e: MapLayerMouseEvent) => void
+    on_dblclick?: (e: MapLayerMouseEvent) => void
+    on_mousedown?: (e: MapLayerMouseEvent) => void
+    on_mouseup?: (e: MapLayerMouseEvent) => void
+    on_mousemove?: (e: MapLayerMouseEvent) => void
+    on_mouseenter?: (e: MapLayerMouseEvent) => void
+    on_mouseleave?: (e: MapLayerMouseEvent) => void
+    on_mouseover?: (e: MapLayerMouseEvent) => void
+    on_mouseout?: (e: MapLayerMouseEvent) => void
+    on_contextmenu?: (e: MapLayerMouseEvent) => void
+    on_touchstart?: (e: MapLayerTouchEvent) => void
+    on_touchend?: (e: MapLayerTouchEvent) => void
+    on_touchcancel?: (e: MapLayerTouchEvent) => void
   }
 
   const {
@@ -39,6 +50,7 @@
     minzoom = undefined,
     maxzoom = undefined,
     beforeLayerId = undefined,
+    ...callbacks
   }: Props = $props()
 
   function addLayer() {
@@ -50,21 +62,6 @@
   }
 
   // Cf https://docs.mapbox.com/mapbox-gl-js/api/#map#on
-  const dispatch = createEventDispatcher<{
-    click: MapLayerMouseEvent
-    dblclick: MapLayerMouseEvent
-    mousedown: MapLayerMouseEvent
-    mouseup: MapLayerMouseEvent
-    mousemove: MapLayerMouseEvent
-    mouseenter: MapLayerMouseEvent
-    mouseleave: MapLayerMouseEvent
-    mouseover: MapLayerMouseEvent
-    mouseout: MapLayerMouseEvent
-    contextmenu: MapLayerMouseEvent
-    touchstart: MapLayerTouchEvent
-    touchend: MapLayerTouchEvent
-    touchcancel: MapLayerTouchEvent
-  }>()
   const eventNames = [
     'click',
     'dblclick',
@@ -84,7 +81,7 @@
   const handlers: [keyof MapLayerEventType, (e: any) => any][] = eventNames.map((eventName) => {
     return [
       eventName as keyof MapLayerEventType,
-      e => dispatch(eventName as keyof MapLayerEventType, e),
+      e => callbacks[`on_${eventName}`]?.(e),
     ]
   })
 
@@ -92,7 +89,7 @@
   // and source is not defined when the first one occurs, then re-create the layer
   const handleStyledata = () => !map.getLayer(id) && map.getSource(sourceId) && addLayer()
 
-  run(() => {
+  $effect(() => {
     const layer = map.getLayer(id)
     if (layer) {
       map.setLayerZoomRange(id, minzoom || 0, maxzoom || 24)

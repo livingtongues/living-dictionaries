@@ -24,8 +24,10 @@
 
   let { children, data } = $props()
 
-  interface NavLink { href: string, label: string, icon: Component, compact?: boolean }
-  const nav_links: NavLink[] = [
+  const admin_level = $derived(data.auth_user.admin_level)
+
+  interface NavLink { href: string, label: string, icon: Component, compact?: boolean, min_level?: number }
+  const all_nav_links: NavLink[] = [
     { href: '/admin/messages', label: 'Messages', icon: IconMdiMessageTextOutline },
     { href: '/admin/users', label: 'Users', icon: IconMdiAccountMultipleOutline, compact: true },
     // Chat lives OUTSIDE /admin (membership-based — partners + super managers
@@ -33,9 +35,10 @@
     { href: '/chat', label: 'Chat', icon: IconMdiForumOutline },
     { href: '/admin/dictionaries', label: 'Dictionaries', icon: IconMdiBookMultipleOutline },
     // Dev tools — `compact` renders them icon-only on desktop (labels still
-    // hide on mobile, where every link is icon-only anyway).
-    { href: '/admin/analytics', label: 'Analytics', icon: IconMdiChartLine, compact: true },
-    { href: '/admin/schema', label: 'Schema', icon: IconMdiTableCog, compact: true },
+    // hide on mobile, where every link is icon-only anyway). Analytics + Schema
+    // are Super Admin only (level 3) — raw log/db internals.
+    { href: '/admin/analytics', label: 'Analytics', icon: IconMdiChartLine, compact: true, min_level: 3 },
+    { href: '/admin/schema', label: 'Schema', icon: IconMdiTableCog, compact: true, min_level: 3 },
     { href: '/admin/api-docs', label: 'API', icon: IconMdiApi, compact: true },
     { href: '/admin/triage-examples', label: 'Triage', icon: IconMdiRobotOutline, compact: true },
     { href: '/admin/legal-review', label: 'Legal', icon: IconMdiScaleBalance, compact: true },
@@ -43,6 +46,8 @@
     // Sync last — icon-only (SyncStatus widget), always visible.
     { href: '/admin/sync', label: 'Sync', icon: IconMdiCloudSync },
   ]
+  const nav_links = $derived(all_nav_links.filter(link => !link.min_level || admin_level >= link.min_level))
+
   function is_active(href: string): boolean {
     return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`)
   }

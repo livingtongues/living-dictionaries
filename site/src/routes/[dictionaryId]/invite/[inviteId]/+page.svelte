@@ -1,7 +1,7 @@
 <script lang="ts">
   import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
   import Button from '$lib/components/ui/Button.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { api_dictionaries_id_invites_accept } from '$api/dictionaries/[id]/invites/[invite_id]/accept/_call'
   import { invalidateAll } from '$app/navigation'
   import { page } from '$app/state'

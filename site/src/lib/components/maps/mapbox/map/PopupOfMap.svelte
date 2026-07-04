@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy'
-
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { getContext, onMount } from 'svelte'
   import type { Popup, PopupOptions } from 'mapbox-gl'
@@ -38,7 +36,7 @@
   let popup: Popup = $state()
   let container: HTMLDivElement = $state()
 
-  run(() => {
+  $effect(() => {
     popup?.setLngLat({ lng, lat })
   })
 
@@ -60,7 +58,7 @@
     }
   })
 
-  run(() => {
+  $effect(() => {
     if (popup) {
       if (open)
         popup.addTo(map)

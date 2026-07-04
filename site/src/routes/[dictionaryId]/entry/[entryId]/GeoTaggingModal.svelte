@@ -4,8 +4,8 @@
   import InitableShowHide from './InitableShowHide.svelte'
   import { flattenCoordinates } from './flattenCoordinates'
   import Button from '$lib/components/ui/Button.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
@@ -71,7 +71,7 @@
   })
 </script>
 
-<Modal on:close={on_close} noscroll>
+<Modal on_close={on_close} noscroll>
   <div style="height: 24rem">
     <Map pointsToFit={flattenCoordinates(coordinates)} {lng} {lat} zoom={6}>
       <NavigationControl />
@@ -89,22 +89,22 @@
                   <CoordinatesModal
                     lng={point.coordinates.longitude}
                     lat={point.coordinates.latitude}
-                    on:update={({ detail }) => {
+                    on_update={({ lng: new_lng, lat: new_lat }) => {
                       const { points } = coordinates
                       points[index] = {
                         coordinates: {
-                          longitude: detail.lng,
-                          latitude: detail.lat,
+                          longitude: new_lng,
+                          latitude: new_lat,
                         },
                       }
                       savePoints(points)
                     }}
-                    on:remove={() => {
+                    on_remove={() => {
                       const { points } = coordinates
                       points.splice(index, 1)
                       savePoints(points)
                     }}
-                    on:close={toggle} />
+                    on_close={toggle} />
                 {/if}
               {/snippet}
             </ShowHide>
@@ -123,17 +123,17 @@
                 <RegionModal
                   initialCenter={initialCenter}
                   {region}
-                  on:update={({ detail }) => {
+                  on_update={(updated_region) => {
                     const { regions } = coordinates
-                    regions[index] = detail
+                    regions[index] = updated_region
                     saveRegions(regions)
                   }}
-                  on:remove={() => {
+                  on_remove={() => {
                     const { regions } = coordinates
                     regions.splice(index, 1)
                     saveRegions(regions)
                   }}
-                  on:close={toggle} />
+                  on_close={toggle} />
               {/if}
             {/snippet}
           </ShowHide>
@@ -153,14 +153,14 @@
             {#if show}
               <CoordinatesModal
                 {initialCenter}
-                on:update={({ detail }) => {
+                on_update={({ lng: new_lng, lat: new_lat }) => {
                   const newPoint = {
-                    coordinates: { longitude: detail.lng, latitude: detail.lat },
+                    coordinates: { longitude: new_lng, latitude: new_lat },
                   }
                   const points = [...(coordinates?.points || []), newPoint]
                   savePoints(points)
                 }}
-                on:close={toggle} />
+                on_close={toggle} />
             {/if}
           {/snippet}
         </InitableShowHide>
@@ -175,11 +175,11 @@
               <RegionModal
                 initialCenter={initialCenter}
                 region={null}
-                on:update={({ detail }) => {
-                  const regions = [...(coordinates?.regions || []), detail]
+                on_update={(new_region) => {
+                  const regions = [...(coordinates?.regions || []), new_region]
                   saveRegions(regions)
                 }}
-                on:close={toggle} />
+                on_close={toggle} />
             {/if}
           {/snippet}
         </InitableShowHide>

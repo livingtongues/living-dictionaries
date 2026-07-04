@@ -2,7 +2,6 @@
 import { Editor } from '@tiptap/core'
 import { html_to_markdown } from './html-to-markdown'
 import { render_markdown_to_html } from './render'
-import { looks_like_html, rich_text_display_html } from './html-era-shim'
 import { create_markdown_extensions, get_editor_markdown } from './extensions'
 
 /** Round-trip a markdown string through the editor (parse → serialize). */
@@ -129,52 +128,8 @@ describe(render_markdown_to_html, () => {
     const md2 = html_to_markdown(render_markdown_to_html(md1))
     expect(md2).toBe(md1)
   })
-})
 
-describe(looks_like_html, () => {
-  test('CKEditor-era content is detected', () => {
-    expect(looks_like_html('<p>hi</p>')).toBeTruthy()
-    expect(looks_like_html('  <h2>Grammar</h2>')).toBeTruthy()
-    expect(looks_like_html('<figure class="image"><img src="x"></figure>')).toBeTruthy()
-  })
-
-  test('markdown is not', () => {
-    expect(looks_like_html('## Grammar\n\n**bold**')).toBeFalsy()
-    expect(looks_like_html('plain notes')).toBeFalsy()
-    expect(looks_like_html('')).toBeFalsy()
-  })
-
-  test('text that merely STARTS with `<` is not HTML (regression: `<<` ate content at cutover)', () => {
-    expect(looks_like_html('<< pa')).toBeFalsy() // linguistics citation marker
-    expect(looks_like_html('<3 this word')).toBeFalsy()
-    expect(looks_like_html('< 5 items')).toBeFalsy()
-    expect(looks_like_html('<https://youtu.be/x>')).toBeFalsy() // markdown autolink
-    // real tags still detected
-    expect(looks_like_html('<div>x</div>')).toBeTruthy()
-    expect(looks_like_html('<!-- c -->')).toBeTruthy()
-    expect(looks_like_html('</p>')).toBeTruthy()
-  })
-})
-
-describe('display of `<<`-prefixed content (cutover regression)', () => {
-  test('a `<< word` note is preserved as plain text, not eaten by the HTML parser', () => {
-    // via the display shim (renders markdown, since it is NOT html)
-    expect(rich_text_display_html('<< pa')).toContain('&lt;&lt; pa')
-  })
-})
-
-describe(rich_text_display_html, () => {
-  test('HTML-era content passes through untouched', () => {
-    expect(rich_text_display_html('<p>legacy <strong>about</strong></p>')).toBe('<p>legacy <strong>about</strong></p>')
-  })
-
-  test('markdown renders to HTML', () => {
-    expect(rich_text_display_html('**bold** note')).toContain('<strong>bold</strong>')
-  })
-
-  test('empty values render empty', () => {
-    expect(rich_text_display_html('')).toBe('')
-    expect(rich_text_display_html(undefined)).toBe('')
-    expect(rich_text_display_html(null)).toBe('')
+  test('a `<< word` note is preserved as escaped text, not eaten by the HTML parser', () => {
+    expect(render_markdown_to_html('<< pa')).toContain('&lt;&lt; pa')
   })
 })

@@ -3,7 +3,7 @@
   import { decades } from './ages'
   import Button from '$lib/components/ui/Button.svelte'
   import Form from '$lib/components/ui/Form.svelte'
-  import Modal from '$lib/components/ui/LegacyModal.svelte'
+  import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
 
   interface Props {
@@ -21,7 +21,7 @@
   let agreeToBeOnline = $state(true)
 </script>
 
-<Modal on:close={on_close}>
+<Modal on_close={on_close}>
   {#snippet heading()}
     <span>{page.data.t('speakers.add_new_speaker')}
     </span>

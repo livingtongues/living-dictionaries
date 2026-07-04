@@ -2,7 +2,7 @@
   import User from './User.svelte'
   import Button from '$lib/components/ui/Button.svelte'
   import ResponsiveSlideover from '$lib/components/ui/ResponsiveSlideover.svelte'
-  import ShowHide from '$lib/components/ui/LegacyShowHide.svelte'
+  import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import { mode } from '$lib/mode'
   import IconFluentLearningApp24Regular from '~icons/fluent/learning-app-24-regular'
@@ -82,7 +82,7 @@
         </Button>
         {#if show}
           {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-            <Contact on:close={toggle} />
+            <Contact on_close={toggle} />
           {/await}
         {/if}
       {/snippet}
@@ -98,7 +98,7 @@
         </Button>
         {#if show}
           {#await import('$lib/components/modals/SelectLanguage.svelte') then { default: SelectLanguage }}
-            <SelectLanguage on:close={toggle} />
+            <SelectLanguage on_close={toggle} />
           {/await}
         {/if}
       {/snippet}
