@@ -9,7 +9,7 @@
 
 <div class="agents-page">
   <h3 class="agents-heading">Agents</h3>
-  <p class="agents-sub">Let an AI agent read & write this dictionary on your behalf.</p>
+  <p class="agents-sub">Use your AI Agent to read & write this dictionary on your behalf. This is for those who know how to use an agent harness like Claude Code, Codex, Grok Code, Pi, OpenCode, Claude Cowork, GitHub Copilot, etc...</p>
 
   {#if is_editor_or_above}
     <div class="explainer">
