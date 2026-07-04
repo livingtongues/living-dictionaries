@@ -73,6 +73,7 @@ https://livingdictionaries.app (Living Dictionaries website)`,
       db,
       content: format_invite_notification({
         actor: inviter_name_or_email,
+        actor_user_id: user_id,
         target_email: target_email.trim().toLowerCase(),
         role,
         dictionary_name: dictionary.name,

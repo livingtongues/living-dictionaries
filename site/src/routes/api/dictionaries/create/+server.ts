@@ -130,6 +130,7 @@ export const POST: RequestHandler = async (event) => {
       dictionary_name: name,
       dictionary_id: id,
       actor: actor_name || email || 'Someone',
+      actor_user_id: user_id,
       base_url: event.url.origin,
     }),
     base_url: event.url.origin,

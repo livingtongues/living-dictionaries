@@ -1,7 +1,7 @@
 <script> import { createEventDispatcher, onMount } from 'svelte'
   import { fade, fly } from 'svelte/transition'
-  import { portal } from '../actions/portal'
-  import { trapFocus } from './trapFocus'
+  import { portal } from '../portal'
+  import { trapFocus } from '../trapFocus'
 
   const {
     zIndex = 60,

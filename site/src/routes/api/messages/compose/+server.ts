@@ -203,10 +203,24 @@ async function send_to_one({ db, admin_user_id, admin_email, admin_name, recipie
   const rfc_message_id = `<${randomUUID()}@livingdictionaries.app>`
   const now = new Date().toISOString()
 
+  // Upload attachments to R2 BEFORE inserting the durable thread. A `put_attachment`
+  // failure here must not strand a `delivery_status='pending'` thread with no email
+  // sent and no failed status for retry — so on upload failure we record a
+  // per-recipient failure with NO thread (same shape as the resolve/blocked path
+  // above), leaving zero orphan rows.
+  let prepared_attachments: PreparedAttachment[]
+  try {
+    prepared_attachments = await upload_attachments({ attachments: decoded_attachments })
+  } catch (err) {
+    const delivery_error = `attachment upload failed: ${(err as Error).message}`
+    console.error('Compose attachment upload failed for', recipient.email, 'by admin', admin_name ?? admin_email, ':', delivery_error)
+    return { thread_id: null, message_id: null, rfc_message_id: null, recipient_email: recipient.email, recipient_name: recipient.name, delivery_status: 'failed', delivery_error }
+  }
+
   // Insert thread + pending message BEFORE sending so a crash or sync mid-send
   // never loses the attempt. delivery_status flips after the SES result.
   insert_thread_with_pending_message({ db, thread_id, message_row_id, admin_user_id, recipient, subject, body, rfc_message_id, now })
-  await persist_attachments({ db, message_row_id, attachments: decoded_attachments, now })
+  insert_attachment_rows({ db, message_row_id, prepared: prepared_attachments, now })
 
   try {
     await send_raw_email({
@@ -301,21 +315,36 @@ function insert_thread_with_pending_message({ db, thread_id, message_row_id, adm
   insert()
 }
 
-async function persist_attachments({ db, message_row_id, attachments, now }: {
-  db: Database.Database
-  message_row_id: string
+/** An attachment already uploaded to R2, awaiting its `message_attachments` row. */
+interface PreparedAttachment {
+  attachment_id: string
+  att: MessagesComposeAttachment & { buffer: Buffer }
+}
+
+/**
+ * Upload every attachment to R2, returning the prepared rows. Called BEFORE the
+ * thread/message insert so an R2 failure throws with nothing yet written to the
+ * DB (no orphan pending thread). `storage_key === attachment_id` (the R2 key).
+ */
+function upload_attachments({ attachments }: {
   attachments: (MessagesComposeAttachment & { buffer: Buffer })[]
-  now: string
-}): Promise<void> {
-  // Upload to R2 first — failures throw before any DB row is written.
-  const prepared = await Promise.all(
+}): Promise<PreparedAttachment[]> {
+  return Promise.all(
     attachments.map(async (att) => {
       const attachment_id = randomUUID()
       await put_attachment({ attachment_id, content: att.buffer, mimetype: att.mimetype })
       return { attachment_id, att }
     }),
   )
+}
 
+/** Insert the `message_attachments` rows for already-uploaded attachments. */
+function insert_attachment_rows({ db, message_row_id, prepared, now }: {
+  db: Database.Database
+  message_row_id: string
+  prepared: PreparedAttachment[]
+  now: string
+}): void {
   const insert = db.prepare(`
     INSERT INTO message_attachments (
       id, message_id, filename, mimetype, size_bytes,

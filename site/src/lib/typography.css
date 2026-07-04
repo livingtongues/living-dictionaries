@@ -4,6 +4,13 @@ pages, entry notes, markdown previews — 5 call sites). Rewritten 2026-07-02 fr
 verbatim presetTypography dump onto theme vars so dark mode works (spacing scale kept
 from the original; the `not-tw-prose` escape-hatch guards had zero usages and were
 dropped). See .issues/dark-mode-flip.md + .issues/ui-skill-alignment.md phase 4.
+
+Converged toward house's `article-prose.css` model (2026-07-04): link :hover +
+underline-offset, overflow-wrap: break-word, explicit em italic, cross-browser
+smallcaps. The `:where()` (specificity-0) structure + em-based spacing scale are
+kept deliberately — a plain-selector rewrite would risk regressions across the 5
+live call sites for no user-visible gain, and low specificity keeps call sites
+easy to override.
 */
 
 .tw-prose {
@@ -11,6 +18,9 @@ dropped). See .issues/dark-mode-flip.md + .issues/ui-skill-alignment.md phase 4.
   max-width: 65ch;
   font-size: 1rem;
   line-height: 1.75;
+  /* Long unbroken tokens (URLs, agglutinative words common in these languages)
+     wrap instead of overflowing — matches house's article-prose. */
+  overflow-wrap: break-word;
 }
 
 .tw-prose :where(p) {
@@ -21,12 +31,21 @@ dropped). See .issues/dark-mode-flip.md + .issues/ui-skill-alignment.md phase 4.
 .tw-prose :where(a) {
   color: var(--primary);
   text-decoration: underline;
+  text-underline-offset: 2px;
   font-weight: 500;
+}
+
+.tw-prose :where(a):hover {
+  color: color-mix(in srgb, var(--primary) 75%, var(--color));
 }
 
 .tw-prose :where(strong) {
   color: inherit;
   font-weight: 600;
+}
+
+.tw-prose :where(em) {
+  font-style: italic;
 }
 
 .tw-prose :where(h1) {
@@ -267,6 +286,7 @@ dropped). See .issues/dark-mode-flip.md + .issues/ui-skill-alignment.md phase 4.
 /* SmallCaps mark (markdown `[text]{.smallcaps}` → span.smallcaps) — legacy
    CKEditor small-caps content converted at the Supabase cutover. */
 .tw-prose :where(.smallcaps) {
+  font-variant-caps: small-caps;
   font-variant: small-caps;
 }
 

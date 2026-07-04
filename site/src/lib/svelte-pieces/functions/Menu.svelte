@@ -1,6 +1,6 @@
 <script>
   import { fly } from 'svelte/transition'
-  import { portal } from '../actions/portal'
+  import { portal } from '../portal'
   import { clickoutside } from '../actions/clickoutside'
 
   let { portalTarget = undefined, onclickoutside = undefined, class: klass = '', children } = $props()

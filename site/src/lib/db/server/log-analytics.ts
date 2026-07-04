@@ -141,6 +141,34 @@ export interface PipelineHealth {
    */
   missing_syncable_tables: string[]
 }
+/** One server-emitted fault class (`source='server'`, error-level), clustered by route + message. */
+export interface ServerFaultCluster {
+  /** `context.route` (SvelteKit route id), falling back to `context.pathname`; null for route-less faults (crons, webhooks, presigned callbacks). */
+  route: string | null
+  message: string
+  count: number
+  first_seen: string
+  last_seen: string
+  /** Distinct HTTP statuses seen (`context.status`), e.g. `500`; null when none carried one. */
+  statuses: string | null
+  /** SqliteError / `no such column|table` — the post-migration schema-drift class; fix-now. */
+  is_schema_drift: boolean
+}
+/**
+ * Server-side faults isolated from the client error soup. Unlike client errors
+ * (stale bundles, cross-origin scripts, scanners) a `source='server'` error is
+ * almost always a real, current-code regression. The schema-drift flag makes a
+ * dropped-column/table regression (the `dictionary_partners` class, and the
+ * onondaga corrupt-snapshot / redirect-500 faults) impossible to miss after a
+ * deploy. LD server rows often carry the drift text in `stack` (the `message` is
+ * a stable label like `dictionary_create_failed`), so drift is matched against
+ * message + stack head.
+ */
+export interface ServerFaults {
+  total: number
+  schema_drift_count: number
+  clusters: ServerFaultCluster[]
+}
 /** Self-instrumentation: which declared analytics events have actually been seen. */
 export interface EventCoverage {
   /** Event name + whether it's been seen in the window + lifetime count. */
@@ -235,6 +263,8 @@ export interface LogAnalytics {
   errors_by_version: ErrorsByVersion
   /** Ingestion liveness — broken vs no-traffic at a glance. */
   pipeline: PipelineHealth
+  /** Server-emitted faults (`source='server'`, error-level), schema-drift flagged — the "fix now" set. */
+  server_faults: ServerFaults
   /** Declared analytics events vs what's actually been seen. */
   event_coverage: EventCoverage
   /** Leader-worker DB health (live_query_* family). */
@@ -372,6 +402,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   const errors_by_version = build_errors_by_version({ shared_db, window_start_iso, current_app_version })
   const deploys = build_deploys({ shared_db, window_start_iso, audience_filter })
   const pipeline = build_pipeline_health({ shared_db })
+  const server_faults = build_server_faults({ shared_db, window_start_iso })
 
   // --- Event coverage: declared analytics events vs what's actually been seen.
   // `event_counts` already holds the per-event hot+cold counts (infra excluded). ---
@@ -411,6 +442,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     geo,
     errors_by_version,
     pipeline,
+    server_faults,
     event_coverage,
     leader_health,
     api_v1,
@@ -743,6 +775,40 @@ function build_error_clusters({ shared_db, window_start_iso }: { shared_db: Data
   `).all(window_start_iso) as Omit<ErrorCluster, 'is_noise'>[])
     .map(row => ({ ...row, is_noise: is_known_noise(row.message) || is_expected_error_response(row.message) }))
     .sort((first, second) => Number(first.is_noise) - Number(second.is_noise) || second.count - first.count)
+}
+
+/** The dropped-column/table + SqliteError class — a post-migration regression signature. */
+const SCHEMA_DRIFT_PATTERN = /no such (?:column|table)|has no column named|sqliteerror/i
+
+/**
+ * Server-emitted faults (`source='server'`, error-level) clustered by route +
+ * message. Server rows carry no user_agent, so this is audience-independent —
+ * always shown. Everything here is a real current-code fault; schema-drift
+ * (SqliteError / `no such column|table`) is flagged so a column-drop regression
+ * screams post-deploy. LD labels its server errors (`dictionary_create_failed`,
+ * `gcs_serving_url_failed`, …) so the raw SqliteError text usually lives in the
+ * `stack`, not the `message` — drift is matched against message + stack head.
+ */
+function build_server_faults({ shared_db, window_start_iso }: { shared_db: Database.Database, window_start_iso: string }): ServerFaults {
+  const clusters = (shared_db.prepare(`
+    SELECT coalesce(json_extract(context, '$.route'), json_extract(context, '$.pathname')) route,
+           message,
+           substr(coalesce(stack, ''), 1, 300) stack_head,
+           COUNT(*) count,
+           MIN(received_at) first_seen,
+           MAX(received_at) last_seen,
+           group_concat(DISTINCT json_extract(context, '$.status')) statuses
+    FROM client_logs
+    WHERE received_at >= ? AND source = 'server' AND level IN ${ERROR_LEVELS_SQL}
+    GROUP BY route, message
+    ORDER BY last_seen DESC, count DESC
+  `).all(window_start_iso) as (Omit<ServerFaultCluster, 'is_schema_drift'> & { stack_head: string })[])
+    .map(({ stack_head, ...row }) => ({ ...row, is_schema_drift: SCHEMA_DRIFT_PATTERN.test(`${row.message} ${stack_head}`) }))
+  return {
+    total: clusters.reduce((sum, cluster) => sum + cluster.count, 0),
+    schema_drift_count: clusters.filter(cluster => cluster.is_schema_drift).reduce((sum, cluster) => sum + cluster.count, 0),
+    clusters,
+  }
 }
 
 /**

@@ -193,6 +193,15 @@ const analytics: LogAnalytics = {
     archived_rows: 18342,
     missing_syncable_tables: [],
   },
+  server_faults: {
+    total: 9,
+    schema_drift_count: 3,
+    clusters: [
+      { route: '/api/dictionaries/create', message: 'dictionary_create_failed', count: 4, first_seen: new Date(Date.now() - 20 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 40 * 60_000).toISOString(), statuses: '500', is_schema_drift: false },
+      { route: '/[dictionaryId]/entries', message: 'admin_sync_failed', count: 3, first_seen: new Date(Date.now() - 6 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 12 * 60_000).toISOString(), statuses: '500', is_schema_drift: true },
+      { route: null, message: 'gcs_serving_url_failed', count: 2, first_seen: new Date(Date.now() - 3 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 90 * 60_000).toISOString(), statuses: null, is_schema_drift: false },
+    ],
+  },
   event_coverage: {
     events: [
       { event: 'search_performed', seen: true, count: 421 },
@@ -270,6 +279,7 @@ const empty_analytics: LogAnalytics = {
   geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [] },
   errors_by_version: { current_version: '1719300000123', total: 0, current: 0, stale: 0, stale_pct: null, versions: [] },
   pipeline: { last_log_at: null, last_session_start_at: null, last_server_log_at: null, retention_ran_at: null, hot_rows: 0, archived_rows: 0, missing_syncable_tables: [] },
+  server_faults: { total: 0, schema_drift_count: 0, clusters: [] },
   event_coverage: {
     events: [
       { event: 'search_performed', seen: false, count: 0 },

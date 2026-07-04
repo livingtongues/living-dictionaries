@@ -154,6 +154,25 @@ re-propose maintaining `entry_count`.
 
 ## Gotchas worth keeping
 
+- **`import_id` creates its batch tag even for an EMPTY batch.** `apply_entry_writes`
+  (`v1-entry-write.ts`) calls `ensure_import_tag` INSIDE the outer `BEGIN IMMEDIATE`, BEFORE the
+  per-entry loop, guarded only by `import_id` being truthy — not by `entries.length`. So a
+  `POST …/entries { entries: [], import_id: 'run-42' }` still find-or-creates the private `run-42`
+  tag (a real `tags` row + a change-history event) with nothing pointing at it. This is
+  deliberate-enough (the tag find-or-create is idempotent, so a later non-empty batch with the same
+  `import_id` just reuses it), but agents doing a dry-run / probe POST should know an empty batch is
+  NOT side-effect-free. Don't "fix" by moving the call into the loop without deciding whether a
+  zero-entry import should register its batch label.
+- **`sentence_order` is an ALL-OR-NOTHING reorder — a partial list interleaves unpredictably.**
+  `apply_text_update`'s reorder branch (`v1-texts.ts`) validates every id belongs to the text (a
+  foreign id → throws, whole PATCH rolls back), then assigns `initial_keys(sentence_order.length)`
+  — a FRESH evenly-spaced key sequence generated from the base of the keyspace — to ONLY the listed
+  sentences. Sentences omitted from `sentence_order` keep their OLD `sort_key`, so they can land
+  before/after/among the reordered set depending on how their stale keys compare to the freshly
+  minted ones (it does NOT preserve their relative position or splice them in). To reorder reliably,
+  pass the COMPLETE ordered list of every sentence id in the text. (`append_sentences` in the same
+  PATCH is applied first and does key-after-max correctly; only the partial-`sentence_order` case is
+  the trap.)
 - **`+server.ts` may only export HTTP-method handlers** (+ `_`-prefixed). A non-handler
   *value* export (we hit it with batch-size constants) throws "Invalid export …" at
   request time — invisible to unit tests (they import handlers directly) and to

@@ -72,7 +72,7 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
   if (created) {
     void post_system_notification({
       db,
-      content: format_new_user_notification({ actor: user.name || user.email || 'A new user', email: user.email }),
+      content: format_new_user_notification({ actor: user.name || user.email || 'A new user', email: user.email, user_id: user.id, base_url: url.origin }),
       base_url: url.origin,
       suppress_ping: is_admin(user.email),
     }).catch(err => console.error('new-user notification failed:', (err as Error).message))

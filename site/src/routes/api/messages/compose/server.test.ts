@@ -223,6 +223,29 @@ describe(POST, () => {
     expect(sent.attachments[0].filename).toBe('doc.pdf')
   })
 
+  test('attachment upload failure → per-recipient failure with no orphan pending thread/message', async () => {
+    seed_user()
+    put_attachment_mock.mockReset().mockRejectedValueOnce(new Error('R2 down'))
+    const content_b64 = Buffer.from('PDF BYTES').toString('base64')
+    const response = await call({
+      recipients: [{ user_id: 'user-1' }],
+      subject: 'Doc',
+      body_text: 'see attached',
+      attachments: [{ filename: 'doc.pdf', mimetype: 'application/pdf', content_b64 }],
+    }, { token: await admin_token() })
+    expect(response.status).toBe(200)
+    const data = await response.json()
+    expect(data.results[0].delivery_status).toBe('failed')
+    expect(data.results[0].thread_id).toBeNull()
+    expect(data.results[0].message_id).toBeNull()
+    expect(data.results[0].delivery_error).toContain('R2 down')
+    // No email attempted, and nothing stranded in the DB.
+    expect(send_raw_email_mock).not.toHaveBeenCalled()
+    expect((db.prepare(`SELECT COUNT(*) n FROM messages WHERE delivery_status = 'pending'`).get() as { n: number }).n).toBe(0)
+    expect((db.prepare('SELECT COUNT(*) n FROM message_threads').get() as { n: number }).n).toBe(0)
+    expect((db.prepare('SELECT COUNT(*) n FROM message_attachments').get() as { n: number }).n).toBe(0)
+  })
+
   test('records delivery_status=failed (and does not throw) when SES rejects', async () => {
     seed_user()
     send_raw_email_mock.mockRejectedValueOnce(new Error('SES throttled'))

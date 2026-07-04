@@ -166,6 +166,7 @@
   const area_bars = $derived(geo.areas.map(area => ({ label: `${country_flag(area.country)} ${area.key}`, value: area.sessions })))
 
   const pipeline = $derived(analytics.pipeline)
+  const server_faults = $derived(analytics.server_faults)
   const errors_by_version = $derived(analytics.errors_by_version)
   const event_coverage = $derived(analytics.event_coverage)
   const clusters = $derived(analytics.error_clusters)
@@ -330,6 +331,40 @@
       {/if}
     {:else}
       <p class="muted">No errors recorded. 🎉</p>
+    {/if}
+  </section>
+
+  <section class="panel">
+    <h2>Server faults <span class="hint">source=server · error-level · fix-now set · hot window</span></h2>
+    {#if server_faults.total === 0}
+      <p class="muted">No server-side faults in the hot window. 🎉</p>
+    {:else}
+      <div class="ver-split">
+        <div class="ver-stat">
+          <div class="ver-value danger">{format_number(server_faults.total)}</div>
+          <div class="ver-label">Server faults</div>
+          <div class="ver-sub">{server_faults.clusters.length} distinct {server_faults.clusters.length === 1 ? 'class' : 'classes'}</div>
+        </div>
+        <div class="ver-stat">
+          <div class="ver-value" class:danger={server_faults.schema_drift_count > 0}>{format_number(server_faults.schema_drift_count)}</div>
+          <div class="ver-label">Schema-drift faults</div>
+          <div class="ver-sub">SqliteError / dropped column · ship a migration</div>
+        </div>
+      </div>
+      <table class="src-table">
+        <thead><tr><th>Route</th><th>Fault</th><th>Status</th><th>Last seen</th><th>Count</th></tr></thead>
+        <tbody>
+          {#each server_faults.clusters as cluster (`${cluster.route}|${cluster.message}`)}
+            <tr class:drift-row={cluster.is_schema_drift}>
+              <td>{cluster.route ?? '—'}</td>
+              <td>{#if cluster.is_schema_drift}<span class="drift-tag" title="Schema drift — post-migration regression">drift</span> {/if}{cluster.message}</td>
+              <td>{cluster.statuses ?? '—'}</td>
+              <td>{ago(cluster.last_seen)}</td>
+              <td class="danger">{format_number(cluster.count)}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
     {/if}
   </section>
 
@@ -841,6 +876,21 @@
   .card .value.danger,
   td.danger {
     color: var(--danger);
+  }
+  .drift-row td {
+    background: color-mix(in srgb, var(--danger) 8%, transparent);
+  }
+  .drift-tag {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: 0.25rem;
+    padding: 0 0.25rem;
+    vertical-align: middle;
   }
   .card .label {
     color: var(--color-secondary);

@@ -1,8 +1,8 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte'
   import { fade } from 'svelte/transition'
-  import { portal } from '../actions/portal'
-  import { trapFocus } from './trapFocus'
+  import { portal } from '../portal'
+  import { trapFocus } from '../trapFocus'
 
   /**
    * @type {{

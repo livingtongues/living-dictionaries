@@ -21,7 +21,7 @@ afterEach(() => {
   db.close()
 })
 
-function add_log({ day, level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, user_agent = null, app_version = null, geo }: {
+function add_log({ day, level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, user_agent = null, app_version = null, stack = null, geo }: {
   day: string
   level?: 'error' | 'warn' | 'info' | 'unhandled_rejection' | 'crash'
   message?: string
@@ -30,9 +30,10 @@ function add_log({ day, level = 'info', message = 'heartbeat', source = 'client'
   context?: Record<string, unknown> | null
   user_agent?: string | null
   app_version?: string | null
+  stack?: string | null
   geo?: RequestGeo
 }): void {
-  insert_client_log({ payload: { level, message, context, user_agent, app_version }, user_id, source, ...(geo ? { geo } : {}), db, now: new Date(`${day}T10:00:00.000Z`) })
+  insert_client_log({ payload: { level, message, context, user_agent, app_version, stack }, user_id, source, ...(geo ? { geo } : {}), db, now: new Date(`${day}T10:00:00.000Z`) })
 }
 
 describe(get_log_analytics, () => {
@@ -129,6 +130,33 @@ describe(get_log_analytics, () => {
       { via: 'api_key', count: 4 },
       { via: 'session', count: 1 },
     ])
+  })
+
+  test('server_faults clusters server error rows by route+message and flags schema drift', () => {
+    // Two occurrences of the same labelled fault, one carrying a status.
+    add_log({ day: '2026-06-30', source: 'server', level: 'error', message: 'dictionary_create_failed', context: { route: '/api/dictionaries/create', status: 500 } })
+    add_log({ day: '2026-06-30', source: 'server', level: 'error', message: 'dictionary_create_failed', context: { route: '/api/dictionaries/create', status: 500 } })
+    // Schema-drift: the SqliteError text lives in the STACK, not the label.
+    add_log({ day: '2026-06-30', source: 'server', level: 'error', message: 'admin_sync_failed', stack: 'SqliteError: no such column: dictionary_partners.role\n  at ...' })
+    // Drift signalled by the message alone still counts.
+    add_log({ day: '2026-06-29', source: 'server', level: 'crash', message: 'no such table: orthographies' })
+    // Warn-level server rows and client errors must NOT appear.
+    add_log({ day: '2026-06-30', source: 'server', level: 'warn', message: 'sync_missing_syncable_table' })
+    add_log({ day: '2026-06-30', source: 'client', level: 'error', message: 'no such column: x', context: { session_id: 's1' } })
+
+    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    expect(analytics.server_faults.total).toBe(4)
+    expect(analytics.server_faults.schema_drift_count).toBe(2)
+    expect(analytics.server_faults.clusters).toHaveLength(3)
+
+    const create = analytics.server_faults.clusters.find(cluster => cluster.message === 'dictionary_create_failed')
+    expect(create?.route).toBe('/api/dictionaries/create')
+    expect(create?.count).toBe(2)
+    expect(create?.statuses).toBe('500')
+    expect(create?.is_schema_drift).toBeFalsy()
+
+    expect(analytics.server_faults.clusters.find(cluster => cluster.message === 'admin_sync_failed')?.is_schema_drift).toBeTruthy()
+    expect(analytics.server_faults.clusters.find(cluster => cluster.message === 'no such table: orthographies')?.is_schema_drift).toBeTruthy()
   })
 
   test('surfaces analytics events (infra excluded) and normalized route buckets', () => {
@@ -1183,6 +1211,21 @@ describe(get_log_analytics, () => {
             "last_session_start_at": "2026-06-30T10:00:00.000Z",
             "missing_syncable_tables": [],
             "retention_ran_at": null,
+          },
+          "server_faults": {
+            "clusters": [
+              {
+                "count": 1,
+                "first_seen": "2026-06-30T10:00:00.000Z",
+                "is_schema_drift": false,
+                "last_seen": "2026-06-30T10:00:00.000Z",
+                "message": "server-err",
+                "route": null,
+                "statuses": null,
+              },
+            ],
+            "schema_drift_count": 0,
+            "total": 1,
           },
           "top_events": [
             {
