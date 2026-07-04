@@ -44,6 +44,6 @@
     <IconMdiWeatherNight class="icon-inline" />
   {/if}
   {#if !compact}
-    {page.data.t('misc.appearance')}: {scheme_label}
+    {scheme_label}
   {/if}
 </button>

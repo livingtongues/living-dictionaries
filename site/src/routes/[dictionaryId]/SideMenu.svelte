@@ -4,6 +4,8 @@
   import DictSyncStatusButton from '$lib/db/dict-client/DictSyncStatus.svelte'
   import { page } from '$app/state'
   import IconFaSolidList from '~icons/fa-solid/list'
+  import IconFa6SolidHouse from '~icons/fa6-solid/house'
+  import IconFa6SolidUserShield from '~icons/fa6-solid/user-shield'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
   import IconFa6SolidFileLines from '~icons/fa6-solid/file-lines'
   import IconFa6SolidCircleInfo from '~icons/fa6-solid/circle-info'
@@ -48,6 +50,19 @@
   </h5>
 </div>
 <div onclick={on_close}>
+  <!-- Admin-3 preview while the dictionary home is iterated on (the shield marks
+       the gate) — it eventually replaces the /entries redirect as the dict root. -->
+  {#if page.data.auth_user?.admin_level >= 3}
+    <a
+      href={`/${dictionary.url}/home`}
+      class:active={page.url.pathname.endsWith('/home')}>
+      <IconFa6SolidHouse class="icon-inline" />
+      <span class="item-label">
+        {page.data.t('dict_home.home')}
+      </span>
+      <IconFa6SolidUserShield class="icon-inline admin-gate-icon" />
+    </a>
+  {/if}
   <div class="nav-row" class:active={page.url.pathname.match(/entry|entries/)}>
     <a class="entries-link" href={`/${dictionary.url}/entries`}>
       <IconFaSolidList class="icon-inline" />
@@ -211,6 +226,13 @@
     font-weight: 500;
     margin-left: 0.5rem;
     margin-right: 0.5rem;
+  }
+
+  /* Marks an admin-level-3-gated item (see the dict-home preview link). */
+  :global(.admin-gate-icon) {
+    font-size: 0.6875rem;
+    opacity: 0.45;
+    margin-inline-start: auto;
   }
 
   .count-pill {

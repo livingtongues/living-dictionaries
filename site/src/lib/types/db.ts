@@ -37,6 +37,7 @@ interface TableModels {
   tags: typeof dict.tags
   entry_tags: typeof dict.entry_tags
   sources: typeof dict.sources
+  featured_entries: typeof dict.featured_entries
 }
 
 export type Tables<T extends keyof TableModels | 'dictionaries_view'>

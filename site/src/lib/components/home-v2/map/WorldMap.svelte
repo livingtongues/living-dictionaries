@@ -43,6 +43,7 @@
   let canvas_ready = $state(false)
   let hint: 'wheel' | 'touch' | null = $state(null)
   let hover_dot = $state(false)
+  let hover_tip = $state<{ x: number, y: number, count: number, dict: MapDict } | null>(null)
   let selected_dict: MapDict | null = $state(null)
   let popover_position = $state({ x: 0, y: 0, above: true })
 
@@ -455,7 +456,19 @@
 
   function on_pointermove(event: PointerEvent) {
     const rect = canvas.getBoundingClientRect()
-    hover_dot = !!find_cluster(event.clientX - rect.left, event.clientY - rect.top)
+    const cluster = find_cluster(event.clientX - rect.left, event.clientY - rect.top)
+    hover_dot = !!cluster
+    if (!cluster) {
+      hover_tip = null
+      return
+    }
+    const [top] = [...cluster.items].sort((a, b) => b.entry_count - a.entry_count)
+    // the click popover already covers this dictionary
+    if (cluster.count === 1 && selected_dict?.id === top.id) {
+      hover_tip = null
+      return
+    }
+    hover_tip = { x: Math.max(80, Math.min(width - 80, cluster.x)), y: cluster.y, count: cluster.count, dict: top }
   }
 
   function on_touchmove(event: TouchEvent) {
@@ -494,6 +507,7 @@
       })
       .on('zoom', (event) => {
         ({ transform } = event)
+        hover_tip = null
         schedule_draw()
       })
     select(canvas).call(zoom_behavior)
@@ -553,6 +567,7 @@
     class={{ 'hover-dot': hover_dot }}
     onclick={on_click}
     onpointermove={on_pointermove}
+    onpointerleave={() => { hover_dot = false; hover_tip = null }}
     ontouchmove={on_touchmove}
     onwheel={on_wheel}></canvas>
 
@@ -565,6 +580,17 @@
     <button type="button" class="btn control" onclick={() => zoom_by(1 / 1.7)} aria-label={t('home_v2.zoom_out')}><IconMdiMinus /></button>
     <button type="button" class="btn control" onclick={() => reset_view()} aria-label={t('home_v2.reset_view')}><IconMdiArrowCollapseAll /></button>
   </div>
+
+  {#if hover_tip}
+    <div class={['tooltip', { below: hover_tip.y < 60 }]} style="left: {hover_tip.x}px; top: {hover_tip.y}px">
+      {#if hover_tip.count === 1}
+        <span class="tooltip-name">{hover_tip.dict.name}</span>
+        <span class="tooltip-detail">{hover_tip.dict.entry_count.toLocaleString(page.data.locale || 'en')} {t('home_v2.entries')}</span>
+      {:else}
+        <span class="tooltip-detail">{t('home_v2.map_cluster_tooltip', { values: { count: String(hover_tip.count) } })}</span>
+      {/if}
+    </div>
+  {/if}
 
   {#if selected_dict}
     <div
@@ -667,6 +693,37 @@
   .control {
     padding: 0.5rem;
     box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
+  }
+
+  .tooltip {
+    position: absolute;
+    transform: translate(-50%, calc(-100% - 12px));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 15rem;
+    padding: 0.3125rem 0.625rem;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 14px rgb(0 0 0 / 0.18);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 15;
+  }
+
+  .tooltip.below {
+    transform: translate(-50%, 12px);
+  }
+
+  .tooltip-name {
+    font-weight: 700;
+    font-size: 0.8125rem;
+  }
+
+  .tooltip-detail {
+    font-size: 0.75rem;
+    color: var(--color-secondary);
   }
 
   .popover {

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import Button from '$lib/components/ui/Button.svelte'
-  import Menu from '$lib/components/ui/Menu.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
+  import Slideover from '$lib/components/ui/Slideover.svelte'
   import { display_one_tap_popover } from '$lib/auth/google-one-tap'
   import { page } from '$app/state'
   import { chat_store } from '$lib/chat/chat-store.svelte'
@@ -11,13 +11,6 @@
   const { auth_user } = $derived(page.data)
   const user = $derived(auth_user.user)
   let show_menu = $state(false)
-  function toggle_menu() {
-    const state = show_menu
-    setTimeout(() => {
-      if (state === show_menu)
-        show_menu = !state
-    }, 1)
-  }
 
   onMount(() => {
     if (location.origin.includes('vercel.app'))
@@ -35,7 +28,7 @@
 
 {#if user}
   <div class="user-wrap">
-    <button class="avatar-button" type="button" onclick={toggle_menu}>
+    <button class="avatar-button" type="button" onclick={() => (show_menu = true)}>
       {#if user.avatar_url && !broken_avatar_image}
         <img
           class="avatar"
@@ -53,9 +46,12 @@
       {/if}
     </button>
     {#if show_menu}
-      <Menu portalTarget="#direction" class="user-menu-position" onclickoutside={toggle_menu}>
+      <Slideover
+        side={page.data.t('page.direction') === 'ltr' ? 'right' : 'left'}
+        widthRem={18}
+        on_close={() => (show_menu = false)}>
         <UserMenu close={() => (show_menu = false)} />
-      </Menu>
+      </Slideover>
     {/if}
   </div>
 {:else}
@@ -115,17 +111,6 @@
 
   .avatar-fallback:hover {
     background-color: color-mix(in srgb, var(--background), var(--color) 10%);
-  }
-
-  /* The Menu portals to #direction (outside this subtree), so the positioning class
-     can't be ancestor-scoped (was `right-2 rtl:left-2 top-11` on the class prop). */
-  :global(.user-menu-position) {
-    right: 0.5rem;
-    top: 2.75rem;
-  }
-
-  :global([dir='rtl'] .user-menu-position) {
-    left: 0.5rem;
   }
 
   .login-label {

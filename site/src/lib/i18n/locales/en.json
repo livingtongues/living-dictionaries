@@ -68,6 +68,9 @@
   "account": {
     "account_settings": "Account Settings",
     "your_name": "Your Name",
+    "add_to_home_screen": "Add to Home Screen",
+    "add_to_home_screen_ios_instructions": "Tap the Share icon, then \"Add to Home Screen\"",
+    "got_it": "Got it",
     "log_out": "Log Out",
     "send_code": "Send Code",
     "enter_6_digit_code_sent_to": "Enter the 6-digit code sent to",
@@ -267,6 +270,7 @@
     "headline": "Living Dictionaries for living languages",
     "subline": "Free, collaborative, multimedia dictionaries built by communities speaking endangered and under-represented languages.",
     "entries": "entries",
+    "map_cluster_tooltip": "{count} dictionaries — click to zoom",
     "map_hint_wheel": "Use Ctrl + scroll to zoom the map",
     "map_hint_touch": "Use two fingers to move the map",
     "zoom_in": "Zoom in",
@@ -305,7 +309,8 @@
     "api_ld_sub": "structured, validated, safely stored",
     "api_output_apps": "Language learning apps",
     "api_output_print": "Print-ready PDFs",
-    "cta_heading": "Start documenting your language today"
+    "cta_heading": "Start documenting your language today",
+    "open_entry": "Open entry"
   },
   "misc": {
     "settings": "Settings",
@@ -549,5 +554,31 @@
     "remove_confirm": "Remove this link between entries?",
     "help_intro": "Entries can be linked to other entries in this dictionary to show how words relate to each other. Each link has a type describing the relationship:",
     "custom_types_note": "A dictionary can also define its own custom relationship types."
+  },
+  "dict_home": {
+    "home": "Home",
+    "search_placeholder": "Search this dictionary",
+    "featured_entries": "Featured entries",
+    "featured_hint_editor": "Star your favorite entries to feature them here.",
+    "unstar": "Remove from featured",
+    "move_left": "Move left",
+    "move_right": "Move right",
+    "stat_entries": "entries",
+    "stat_with_audio": "with audio",
+    "stat_with_photos": "with photos",
+    "stat_with_video": "with video",
+    "stat_speakers": "speakers",
+    "recently_added": "Recently added",
+    "map_soon": "Map coming soon",
+    "add_location": "Add a location",
+    "read_more": "Read more",
+    "how_to_cite": "How to cite",
+    "nudge_heading": "Make this page shine",
+    "nudge_star": "Star 4–8 favorite entries to feature them here",
+    "nudge_location": "Add coordinates so your language appears on the map",
+    "nudge_image": "Add a featured image in Settings",
+    "nudge_about": "Write an About section",
+    "feature_entry": "Feature this entry",
+    "unfeature_entry": "Remove from featured entries"
   }
 }

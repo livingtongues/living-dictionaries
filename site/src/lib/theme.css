@@ -61,7 +61,7 @@ and Helvetica Neue has the same problem. Per-font notes:
      custom props substitutes EAGERLY at the declaring element, so the .dark block
      re-declares this — a :root-only definition freezes the light mix when `.dark`
      sits on a non-root wrapper (svelte-look flavors; house probe 2026-07-02). */
-  --un-default-border-color: color-mix(in srgb, var(--color) 11%, var(--background));
+  --default-border-color: color-mix(in srgb, var(--color) 11%, var(--background));
 
   --font-sans: "Segoe UI", Arial, "Noto Sans", "Noto Sans Wancho", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -110,7 +110,7 @@ body {
   --invert-in-light: none;
   /* re-declared here (not just :root) — var() in custom props substitutes EAGERLY at the
      declaring element, so a `.dark` on a non-root wrapper must recompute the mix here */
-  --un-default-border-color: color-mix(in srgb, var(--color) 11%, var(--background));
+  --default-border-color: color-mix(in srgb, var(--color) 11%, var(--background));
   color-scheme: dark;
   background-color: var(--background);
   color: var(--color);

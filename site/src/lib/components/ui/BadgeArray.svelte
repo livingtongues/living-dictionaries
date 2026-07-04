@@ -1,4 +1,5 @@
 <script>
+  import IconFaSolidPlus from '~icons/fa-solid/plus'
   import Button from './Button.svelte'
   import Badge from './Badge.svelte'
   import DetectUrl from './DetectUrl.svelte'
@@ -28,19 +29,19 @@
   }
 </script>
 
-<div class="sp-7m9ebd {klass}">
+<div class="badges {klass}">
   {#if canEdit}
     {#each list as string, index (index)}
       <DetectUrl {string}>
         {#snippet children({ display, href })}
           <Badge
             {href}
-            class="sp-zzrqc1"
+            class="badge-item"
             target="_blank"
             onx={() => removeAt(index)}>
             {display}
           </Badge>
-          <div class="sp-snu3dl"></div>
+          <div class="badge-gap"></div>
         {/snippet}
       </DetectUrl>
     {/each}
@@ -48,11 +49,11 @@
       {@render add({ add: addItem })}
     {:else}
       <Button
-        class="sp-zzrqc1"
+        class="badge-item"
         onclick={addItem}
         color="orange"
         size="sm">
-        <span class="sp-bznewy"></span>
+        <IconFaSolidPlus class="icon-inline" />
         {addMessage}
       </Button>
     {/if}
@@ -60,14 +61,28 @@
     {#each list as string, index (index)}
       <DetectUrl {string}>
         {#snippet children({ display, href })}
-          <Badge class="sp-zzrqc1" {href} target="_blank">
+          <Badge class="badge-item" {href} target="_blank">
             {display}
           </Badge>
-          <div class="sp-snu3dl"></div>
+          <div class="badge-gap"></div>
         {/snippet}
       </DetectUrl>
     {/each}
   {/if}
 </div>
 
-<style>:global(.sp-bznewy){--un-icon:url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 448 512' display='inline-block' vertical-align='middle' width='1em' height='1em' xmlns='http://www.w3.org/2000/svg' %3E%3Cpath fill='currentColor' d='M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32'/%3E%3C/svg%3E");-webkit-mask:var(--un-icon) no-repeat;mask:var(--un-icon) no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;background-color:currentColor;color:inherit;display:inline-block;vertical-align:middle;width:1em;height:1em;}:global(.sp-zzrqc1){margin-bottom:0.25rem;}:global(.sp-snu3dl){width:0.25rem;}:global(.sp-7m9ebd){display:flex;flex-wrap:wrap;}</style>
+<style>
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  /* applied to child Badge/Button components */
+  :global(.badge-item) {
+    margin-bottom: 0.25rem;
+  }
+
+  .badge-gap {
+    width: 0.25rem;
+  }
+</style>

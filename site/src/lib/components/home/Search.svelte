@@ -212,8 +212,7 @@
     padding: 0.25rem 2rem 0.25rem 2.5rem;
     border-radius: 0.5rem;
     color: var(--color);
-    --un-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow */
-    box-shadow: var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   }
 
   .clear-button {

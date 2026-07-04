@@ -65,11 +65,13 @@ pieces) and the icons.css shim.
 End-state: the global layer is just reset + theme + buttons + a small skill-styled forms/
 typography layer — no verbatim uno dumps.
 
-- **`uno-preflights.css`** — the `--un-*` var-init block exists ONLY because the vendored
-  legacy `sp-*` svelte-pieces styles (Button/Modal/Menu…) compose
-  `var(--un-ring-*)`/`var(--un-shadow)`. Modernize/replace those vendored components
-  (port the current svelte-pieces from tutor), then delete the var-init block. The forms
-  element preflights in the same file fold into a skill-styled forms layer.
+- **`uno-preflights.css`** — ✅ DELETED (2026-07-04, `.issues/drop-uno-preflights.md`): every
+  component referencing `var(--un-…)` was rewritten to plain scoped CSS with identical computed
+  values (Slideover, ResponsiveSlideover, JSON, Badge×3, Search×2, ImageDropZone, SelectAudio/Video;
+  screenshot-verified pixel parity); `--un-default-border-color` renamed `--default-border-color`
+  across all three repos. `ui/Menu.svelte` deleted earlier the same day (orphaned by the user-menu
+  slideover). Note: `ui/Button.svelte`'s compiled styles are self-contained (no `--un-` vars) and
+  remain — see `.issues/button-retirement.md`.
 - **`forms.css`** (`.form-input`, 16 call sites) — restyle inputs per the skill
   ("the content IS the interface": minimal chrome, transparent where possible,
   `::placeholder` in `--color-secondary`), or at minimum theme-var the existing class

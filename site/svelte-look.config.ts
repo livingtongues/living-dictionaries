@@ -7,7 +7,6 @@ export default define_config({
   // have no competing unlayered import order issues).
   css_files: [
     'src/routes/reset-tailwind.css',
-    'src/lib/uno-preflights.css',
     'src/lib/typography.css',
     'src/lib/theme.css',
     'src/lib/buttons.css',

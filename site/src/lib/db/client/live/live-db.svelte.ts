@@ -14,6 +14,7 @@ import type {
 import { parse_row, stringify_row } from '$lib/db/schemas/json-columns'
 import { is_syncable_table } from '$lib/db/sync/types'
 import { log_warning } from '$lib/debug/remote-log'
+import { construct_outside_reaction } from './construct-outside-reaction.svelte'
 import { TableChangeNotifier } from './notifier'
 import { save_changed_columns } from './save-row'
 import { TableStore } from './table-store.svelte.js'
@@ -120,17 +121,13 @@ class LiveDbImpl {
       id(key: RowKey<T>): RowType<T> | undefined {
         if (key === undefined || key === null)
           return undefined
-        // Imperative read outside any reactive context (e.g. an event handler):
-        // read the store's current rows directly. A `$derived` here would be an
-        // *unowned* derived, and the `store.rows` getter — seeing
-        // `$effect.tracking()` is true mid-computation — would try to create its
-        // subscription `$effect` inside it → `effect_in_unowned_derived`. (The
-        // store must already be subscribed elsewhere for #rows to be populated.)
-        if (!$effect.tracking())
-          return self.#get_row_by_key(table_name, key).rows[0] as RowType<T> | undefined
-        // svelte-ignore state_referenced_locally
-        const rows = $derived(self.#get_row_by_key(table_name, key).rows)
-        return rows[0] as RowType<T> | undefined
+        // Direct read: in a tracked context the deps flow straight to the row
+        // store's signals (constructed outside the reaction, so they register);
+        // in an event handler `#track` no-ops. A nested `$derived` here would
+        // itself be "own state" of the calling reaction (push_reaction_value
+        // covers deriveds too) and freeze the caller — see
+        // construct-outside-reaction.svelte.ts.
+        return self.#get_row_by_key(table_name, key).rows[0] as RowType<T> | undefined
       },
 
       async find(key: RowKey<T>): Promise<RowType<T> | undefined> {
@@ -174,10 +171,15 @@ class LiveDbImpl {
     }
   }
 
+  // All three store getters construct via `construct_outside_reaction`: a store
+  // lazily created INSIDE a consuming `$derived`/effect would have its `$state`
+  // swallowed by that reaction's `current_sources` dep-skip, silently freezing
+  // the consumer forever (.issues/dict-table-accessor-rows-reactivity.md +
+  // repo-root reactivity-poc/).
   #get_or_create_table_store<T extends TableName>(table_name: T): TableStore<Record<string, unknown>> {
     let store = this.#table_stores.get(table_name)
     if (!store) {
-      store = new TableStore({
+      store = construct_outside_reaction(() => new TableStore({
         connection: this.#connection,
         notifier: this.#notifier,
         table_name,
@@ -188,7 +190,7 @@ class LiveDbImpl {
         on_save: this.#create_save_callback(table_name),
         on_delete: this.#create_delete_callback(table_name),
         on_reset: this.#create_reset_callback(table_name),
-      })
+      }))
       this.#table_stores.set(table_name, store)
     }
     return store
@@ -275,7 +277,7 @@ class LiveDbImpl {
     let store = this.#row_stores.get(store_key)
 
     if (!store) {
-      store = new TableStore({
+      store = construct_outside_reaction(() => new TableStore({
         connection: this.#connection,
         notifier: this.#notifier,
         table_name,
@@ -286,7 +288,7 @@ class LiveDbImpl {
         on_save: this.#create_save_callback(table_name),
         on_delete: this.#create_delete_callback(table_name),
         on_reset: this.#create_reset_callback(table_name),
-      })
+      }))
       this.#row_stores.set(store_key, store)
     }
     return store
@@ -300,7 +302,7 @@ class LiveDbImpl {
     let store = this.#query_stores.get(query_key)
 
     if (!store) {
-      store = new TableStore({
+      store = construct_outside_reaction(() => new TableStore({
         connection: this.#connection,
         notifier: this.#notifier,
         table_name,
@@ -311,7 +313,7 @@ class LiveDbImpl {
         on_save: this.#create_save_callback(table_name),
         on_delete: this.#create_delete_callback(table_name),
         on_reset: this.#create_reset_callback(table_name),
-      })
+      }))
       this.#query_stores.set(query_key, store)
     }
 

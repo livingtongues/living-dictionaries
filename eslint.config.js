@@ -53,6 +53,7 @@ export default tseslint.config(
       'site/e2e/**',
       'tools/**', // standalone e2e/bench harness scripts (mirrors house's ignore)
       'site/tools/**', // ad-hoc e2e/diagnostic harness scripts
+      'reactivity-poc/**', // standalone bug-reproduction sandbox (own lockfile, deliberately mimics site store patterns)
 
       // Vendored third-party
       '**/lib/lz/lz-string.ts',

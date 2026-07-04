@@ -5,6 +5,7 @@
   import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { image_src, url_from_storage_path } from '$lib/utils/media-url'
   import { bbox_contains } from './map/view-helpers'
+  import FeaturedEntryModal from './FeaturedEntryModal.svelte'
   import IconMdiPlay from '~icons/mdi/play'
   import IconMdiPause from '~icons/mdi/pause'
 
@@ -140,29 +141,50 @@
     touch_resume_timeout = setTimeout(() => paused = false, 4000)
   }
 
+  // A plain left-click opens the quick-look modal instead of navigating —
+  // entering a dictionary kicks off its whole snapshot download, which most
+  // curious homepage clicks don't intend. Modified/middle clicks keep the
+  // default open-in-new-tab behavior.
+  let modal_card = $state<FeaturedCard | null>(null)
+  function open_card_modal(event: MouseEvent, card: FeaturedCard) {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)
+      return
+    event.preventDefault()
+    audio_element?.pause()
+    playing_id = null
+    modal_card = card
+    on_active_dict?.(card.dict_id)
+  }
+
   /**
    * Anchor points (viewport coords) of the cards currently visible in the
    * scroller — the hero line overlay draws from these to the map dots.
    */
-  export function get_visible_card_anchors(): { card: FeaturedCard, x: number, y: number, strong: boolean }[] {
+  export function get_visible_card_anchors(): { card: FeaturedCard, x: number, y: number, index: number, offset_cards: number, active: boolean }[] {
     if (!scroller)
       return []
     const scroller_rect = scroller.getBoundingClientRect()
+    const strip_center = scroller_rect.left + scroller_rect.width / 2
     const anchors = []
     for (const child of scroller.children) {
       const element = child as HTMLElement
       const rect = element.getBoundingClientRect()
       if (rect.right < scroller_rect.left + 10 || rect.left > scroller_rect.right - 10)
         continue
-      const card = looped[Number(element.dataset.index)]
+      const index = Number(element.dataset.index)
+      const card = looped[index]
       if (!card || card.lng === null || card.lat === null)
         continue
       const { id } = card
+      const card_center = rect.left + rect.width / 2
       anchors.push({
         card,
-        x: rect.left + rect.width / 2,
-        y: rect.top + 6,
-        strong: hovered_id === id || playing_id === id,
+        x: card_center,
+        y: rect.top,
+        index,
+        // signed distance from the strip midpoint, in card widths (gap included)
+        offset_cards: (card_center - strip_center) / (rect.width + 12),
+        active: hovered_id === id || playing_id === id,
       })
     }
     return anchors
@@ -185,6 +207,7 @@
       class="card"
       data-index={index}
       href="/{card.dict_url}/entry/{card.entry_id}"
+      onclick={event => open_card_modal(event, card)}
       onpointerenter={() => set_active(card.id)}
       onpointerleave={() => set_active(null)}
       onfocus={() => set_active(card.id)}
@@ -209,12 +232,17 @@
   {/each}
 </div>
 
+{#if modal_card}
+  <FeaturedEntryModal card={modal_card} on_close={() => { modal_card = null; on_active_dict?.(null) }} />
+{/if}
+
 <style>
   .strip {
     display: flex;
     gap: 0.75rem;
     overflow-x: auto;
-    padding: 0.875rem 0.25rem 0.375rem;
+    width: 100%;
+    padding: 0.875rem 0 0.375rem;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }

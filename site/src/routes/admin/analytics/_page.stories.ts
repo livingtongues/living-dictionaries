@@ -248,6 +248,18 @@ const analytics: LogAnalytics = {
       { via: 'session', count: 310 },
     ],
   },
+  missing_i18n_keys: {
+    total: 875,
+    distinct_keys: 237,
+    sessions: 91,
+    keys: [
+      { key: 'sd.animal', sessions: 14, count: 41, locales: 'es' },
+      { key: 'ps.verbo', sessions: 12, count: 33, locales: 'es' },
+      { key: 'sd.people', sessions: 11, count: 22, locales: 'es' },
+      { key: 'psAbbrev.sufijo verbal', sessions: 9, count: 18, locales: 'es' },
+      { key: 'sd.fish', sessions: 7, count: 14, locales: 'es,pt' },
+    ],
+  },
 }
 
 export const Default: PageStory<typeof Component> = {
@@ -291,6 +303,7 @@ const empty_analytics: LogAnalytics = {
   },
   leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [], failed_by_code: [], failed_current: 0, failed_stale: 0 },
   api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
+  missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
 }
 
 export const Empty: PageStory<typeof Component> = {

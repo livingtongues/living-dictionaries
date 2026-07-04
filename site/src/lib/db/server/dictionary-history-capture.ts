@@ -191,6 +191,7 @@ export function resolve_owners(db: Database.Database, table_name: string, row: R
     }
     case 'entry_dialects':
     case 'entry_tags':
+    case 'featured_entries':
       push_owner(out, seen, 'entry', row.entry_id)
       break
     case 'entry_relationships':

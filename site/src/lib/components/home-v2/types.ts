@@ -12,12 +12,19 @@ export interface MapDict {
   alternate_names: string[]
 }
 
+/** Example-sentence snapshot for the card modal (MultiStrings keyed by locale). */
+export interface FeaturedExampleSentence {
+  text: Record<string, string> | null
+  translation: Record<string, string> | null
+}
+
 /** A curated word card (approved `featured_entries` row) as baked into the homepage bundle. */
 export interface FeaturedCard {
   id: string
   dict_id: string
   dict_url: string
   dict_name: string
+  dict_location?: string | null
   entry_id: string
   lexeme: string
   gloss: string | null
@@ -26,6 +33,11 @@ export interface FeaturedCard {
   audio_storage_path: string
   lng: number | null
   lat: number | null
+  // Modal snapshot fields (nullable — pre-pivot rows lack them until backfill)
+  phonetic?: string | null
+  glosses?: Record<string, string> | null
+  speaker_name?: string | null
+  example_sentence?: FeaturedExampleSentence | null
 }
 
 export interface HomepageStats {

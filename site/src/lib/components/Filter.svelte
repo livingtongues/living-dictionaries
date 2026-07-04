@@ -56,7 +56,6 @@
   }
 
   input:focus {
-    --un-ring-color: rgb(147 197 253); /* focus:ring-blue-300 — ring geometry from the forms preflight */
     border-color: rgb(147 197 253);
   }
 </style>

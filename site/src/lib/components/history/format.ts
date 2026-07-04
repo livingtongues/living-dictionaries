@@ -27,6 +27,7 @@ const TABLE_LABELS: Record<string, string> = {
   entry_dialects: 'Dialect',
   tags: 'Tag',
   entry_tags: 'Tag',
+  featured_entries: 'Featured entry',
 }
 
 const FIELD_LABELS: Record<string, string> = {

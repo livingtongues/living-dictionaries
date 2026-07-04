@@ -271,6 +271,26 @@ export interface LogAnalytics {
   leader_health: LeaderHealth
   /** Agent/API write activity — the server-emitted `v1_*` events (hot window only). */
   api_v1: ApiV1Activity
+  /** Top missing i18n keys — the live translation-gap worklist (hot window, human). */
+  missing_i18n_keys: MissingI18nKeys
+}
+
+/**
+ * Missing-translation telemetry. Each `i18n missing key: …` row is a `warn` the
+ * client emits ONCE per unique key per page session (`i18n/index.ts`
+ * `report_missing_translation`), so this is a clean, low-cardinality
+ * translation-gap signal — a live worklist for `/translate`, not error noise.
+ * Hot window only (these warn rows aren't in the rollup).
+ */
+export interface MissingI18nKeys {
+  /** Total missing-key warn rows in the window. */
+  total: number
+  /** Distinct keys with no translation. */
+  distinct_keys: number
+  /** Distinct sessions that hit at least one missing key. */
+  sessions: number
+  /** Top keys by distinct sessions (then row count). */
+  keys: { key: string, sessions: number, count: number, locales: string }[]
 }
 
 /**
@@ -417,6 +437,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
 
   const leader_health = build_leader_health({ shared_db, window_start_iso, current_app_version })
   const api_v1 = build_api_v1_activity({ shared_db, window_start_iso })
+  const missing_i18n_keys = build_missing_i18n_keys({ shared_db, window_start_iso, audience_filter })
 
   return {
     audience,
@@ -446,6 +467,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     event_coverage,
     leader_health,
     api_v1,
+    missing_i18n_keys,
   }
 }
 
@@ -809,6 +831,29 @@ function build_server_faults({ shared_db, window_start_iso }: { shared_db: Datab
     schema_drift_count: clusters.filter(cluster => cluster.is_schema_drift).reduce((sum, cluster) => sum + cluster.count, 0),
     clusters,
   }
+}
+
+/** Missing-translation warn rows → a ranked, deduped translation-gap worklist. */
+const MISSING_I18N_KEY_SQL = `coalesce(json_extract(context, '$.i18n_key'), replace(message, 'i18n missing key: ', ''))`
+function build_missing_i18n_keys({ shared_db, window_start_iso, audience_filter }: { shared_db: Database.Database, window_start_iso: string, audience_filter: string }): MissingI18nKeys {
+  const where = `received_at >= ? AND message LIKE 'i18n missing key:%' AND ${audience_filter}`
+  const summary = shared_db.prepare(`
+    SELECT COUNT(*) total,
+           COUNT(DISTINCT ${MISSING_I18N_KEY_SQL}) distinct_keys,
+           COUNT(DISTINCT json_extract(context, '$.session_id')) sessions
+    FROM client_logs WHERE ${where}
+  `).get(window_start_iso) as { total: number, distinct_keys: number, sessions: number }
+  const keys = shared_db.prepare(`
+    SELECT ${MISSING_I18N_KEY_SQL} key,
+           COUNT(*) count,
+           COUNT(DISTINCT json_extract(context, '$.session_id')) sessions,
+           group_concat(DISTINCT json_extract(context, '$.locale')) locales
+    FROM client_logs WHERE ${where}
+    GROUP BY key
+    ORDER BY sessions DESC, count DESC
+    LIMIT 25
+  `).all(window_start_iso) as { key: string, count: number, sessions: number, locales: string }[]
+  return { total: summary.total, distinct_keys: summary.distinct_keys, sessions: summary.sessions, keys }
 }
 
 /**

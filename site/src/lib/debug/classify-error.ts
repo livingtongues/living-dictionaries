@@ -32,6 +32,12 @@ export const KNOWN_NOISE_PATTERNS = [
   // breadcrumbs located a recording-flow correlation on 2026-07-03) but fold
   // them out of the real-error headline.
   'Script error.',
+  // Safari surfaces a failed resource/network load as a bare `Event` (no Error
+  // object) → serialized to `{"isTrusted":true}`, or its generic fetch failure
+  // `Load failed`. Both are opaque transient network/resource blips with no
+  // actionable stack (observed 2026-07-04 during sign-in on flaky connections).
+  '{"isTrusted":true}',
+  'Load failed',
 ]
 
 export function is_known_noise(message: string): boolean {
@@ -111,6 +117,10 @@ if (import.meta.vitest) {
     })
     it('flags the masked cross-origin Script error.', () => {
       expect(is_known_noise('Script error.')).toBe(true)
+    })
+    it('flags Safari bare-Event / generic network-load failures', () => {
+      expect(is_known_noise('{"isTrusted":true}')).toBe(true)
+      expect(is_known_noise('Load failed')).toBe(true)
     })
     it('does NOT flag a genuine fault', () => {
       expect(is_known_noise("Cannot read properties of undefined (reading 'x')")).toBe(false)

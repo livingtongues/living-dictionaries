@@ -41,6 +41,7 @@ export const DICT_SYNCABLE_TABLES = [
   'sources',
   'relationship_types',
   'entry_relationships',
+  'featured_entries',
 ] as const
 
 export type DictSyncableTable = typeof DICT_SYNCABLE_TABLES[number]

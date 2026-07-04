@@ -6,6 +6,7 @@ import type {
   UserProviderIdentity,
 } from './shared.types'
 import type { SiteRole } from '$lib/admins'
+import { DICTIONARY_BUCKETS } from '$lib/constants'
 import { integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 /**
@@ -129,6 +130,17 @@ export const dictionaries = sqliteTable('dictionaries', {
   glottocode: text(),
   /** Public listing visibility. NULL/0 = unlisted-but-URL-reachable, 1 = listed. */
   public: integer(),
+  /**
+   * Admin-curated bucket (see `DICTIONARY_BUCKETS`): serve ('public'/'unlisted'/
+   * 'secure') vs tolerate ('conlang'/'glossary') vs 'delete' (queued teardown).
+   * NULL = unclassified. Not auto-coupled to `public` — /admin surfaces mismatches.
+   */
+  bucket: text({ enum: DICTIONARY_BUCKETS }),
+  /**
+   * First time the dictionary went public. Trigger-stamped on first publish
+   * (`stamp_dictionary_public_at`); NULL for pre-2026-07 publishes (history unknown).
+   */
+  public_at: text(),
   print_access: integer(),
   metadata: text({ mode: 'json' }).$type<DictionaryCatalogMetadata>(),
   /** Recounted by `mirror_dictionary_cursor` on every dict write (editor push + v1 API); stamped once by the cutover import. */

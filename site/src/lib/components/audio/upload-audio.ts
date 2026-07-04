@@ -25,13 +25,17 @@ export function upload_audio({
     const [,extension] = file.type.split('/')
     const file_name = is_blob ? `audio.${extension}` : file.name
     const { data: { dictionary } } = page
-    const { data: { presigned_upload_url, object_key }, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name, file_type: file.type })
-    if (error) {
+    // Destructure `data` ONLY after the error guard: `api_upload` returns
+    // `{ data: null, error }` on any failure, so reading `data.presigned_upload_url`
+    // eagerly would throw "Cannot destructure … from null" and swallow the real
+    // error message (observed 2026-07-04 mid-record).
+    const { data, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name, file_type: file.type })
+    if (error || !data) {
       console.error(error)
-      set({ progress: 0, error: error.message })
+      set({ progress: 0, error: error?.message ?? 'Upload failed.' })
     } else {
-      await upload_file(file, presigned_upload_url)
-      set({ progress: 100, storage_path: object_key })
+      await upload_file(file, data.presigned_upload_url)
+      set({ progress: 100, storage_path: data.object_key })
       on_success?.()
     }
   })()

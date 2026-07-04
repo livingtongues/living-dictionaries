@@ -56,4 +56,28 @@ describe(GET, () => {
     })
     expect(typeof body.generated_at).toBe('string')
   })
+
+  test('modal snapshot fields ride along (JSON columns parsed, catalog location joined)', async () => {
+    db.prepare(`
+      UPDATE featured_entries SET
+        phonetic = 'tsʼi.kin',
+        glosses = ?,
+        speaker_name = 'Manuel',
+        example_sentence = ?
+      WHERE id = 'fe1'`).run(
+      JSON.stringify({ en: 'bird', es: 'pájaro' }),
+      JSON.stringify({ text: { default: 'Tzʼikin chikop' }, translation: { en: 'The bird flies' } }),
+    )
+    db.prepare(`UPDATE dictionaries SET location = 'Guatemala' WHERE id = 'achi'`).run()
+
+    const response = await GET({ request: new Request('http://localhost/api/homepage/export') } as Parameters<typeof GET>[0])
+    const body = await response.json()
+    expect(body.featured_entries[0]).toMatchObject({
+      phonetic: 'tsʼi.kin',
+      glosses: { en: 'bird', es: 'pájaro' },
+      speaker_name: 'Manuel',
+      example_sentence: { text: { default: 'Tzʼikin chikop' }, translation: { en: 'The bird flies' } },
+      dict_location: 'Guatemala',
+    })
+  })
 })

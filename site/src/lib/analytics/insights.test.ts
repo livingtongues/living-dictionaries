@@ -37,6 +37,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     event_coverage: { events: [], never_emitted: 0 },
     leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [], failed_by_code: [], failed_current: 0, failed_stale: 0 },
     api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
+    missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
     ...overrides,
   }
 }

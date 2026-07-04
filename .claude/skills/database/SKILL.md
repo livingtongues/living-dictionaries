@@ -292,6 +292,15 @@ accessor has the same API with the differences noted in the callout at the end.
 {/each}
 ```
 
+> ✅ FIXED (2026-07-04): this pattern used to silently freeze when the consuming `$derived` was
+> the FIRST reader (svelte excludes signals created during a reaction's run from its deps —
+> `current_sources` — and the lazily-created store's `$state` fell into that trap). Store
+> creation is now hoisted via `construct_outside_reaction`
+> (`$lib/db/client/live/construct-outside-reaction.svelte.ts`) in both LiveDb and DictLiveDb,
+> so bare `.rows` in a `$derived` is safe. If you build a NEW lazily-created reactive store,
+> use the same helper — repro + mechanism: repo-root `reactivity-poc/` and
+> `.issues/dict-table-accessor-rows-reactivity.md`.
+
 **All rows keyed by id (O(1) lookup):**
 ```svelte
 <script lang="ts">

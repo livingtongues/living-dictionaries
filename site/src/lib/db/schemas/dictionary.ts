@@ -345,6 +345,23 @@ export const entry_relationships = sqliteTable('entry_relationships', {
 })
 
 /**
+ * Editor-curated favorites shown on the dictionary home page, ordered by
+ * `sort_key` (fractional index, same scheme as `sentences.sort_key`). One row
+ * per entry (UNIQUE natural key). NOT shared.db's `featured_entries` (the
+ * admin-curated global homepage showcase) — this table is dict-scoped + synced.
+ */
+export const featured_entries = sqliteTable('featured_entries', {
+  id: text().primaryKey(),
+  entry_id: text().notNull().references(() => entries.id, { onDelete: 'cascade' }),
+  sort_key: text().notNull(),
+  dirty: integer(),
+  created_by_user_id: text().notNull(),
+  created_at: text().notNull(),
+  updated_by_user_id: text().notNull(),
+  updated_at: text().notNull(),
+})
+
+/**
  * Per-dictionary citation registry. `entries`/`sentences`/`texts` reference rows
  * here by `slug` (array-of-slug columns, NOT a junction). No FK enforces those
  * refs, so writes validate the slug exists and source deletion is refused while

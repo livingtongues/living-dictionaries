@@ -1,6 +1,5 @@
 <script lang="ts">
   import './reset.css'
-  import '$lib/uno-preflights.css'
   import '$lib/typography.css'
   import '$lib/theme.css'
   import '$lib/buttons.css'
@@ -21,6 +20,7 @@
   import { set_missing_translation_handler } from '$lib/i18n'
   import { toast } from '$lib/state/toast.svelte'
   import { init_color_scheme } from '$lib/state/dark-mode'
+  import { init_pwa_install } from '$lib/state/pwa-install.svelte'
   import { chat_store } from '$lib/chat/chat-store.svelte'
 
   interface Props {
@@ -31,6 +31,7 @@
 
   onMount(() => {
     init_color_scheme()
+    init_pwa_install()
     init_remote_logging()
     // Ship genuinely-missing i18n keys (no English base) to client_logs as an
     // actionable `warn`. i18n already console.warns for dev, so this only ships —

@@ -27,11 +27,13 @@ export function upload_image({
 
   (async () => {
     const { data: { dictionary } } = page
-    const { data: { presigned_upload_url, bucket, object_key, dev_mock }, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name: file.name, file_type: file.type })
-    if (error) {
+    // Destructure `data` ONLY after the error guard — see upload-audio.ts.
+    const { data: upload, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name: file.name, file_type: file.type })
+    if (error || !upload) {
       console.error(error)
-      set({ preview_url, progress: 0, error: error.message })
+      set({ preview_url, progress: 0, error: error?.message ?? 'Upload failed.' })
     } else {
+      const { presigned_upload_url, bucket, object_key, dev_mock } = upload
       await upload_file(file, presigned_upload_url)
 
       // Dev media mock: bytes were stored locally; skip the (unconfigured)

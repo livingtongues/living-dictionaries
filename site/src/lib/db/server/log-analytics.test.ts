@@ -238,6 +238,25 @@ describe(get_log_analytics, () => {
     expect(clusters[clusters.length - 1]).toMatchObject({ is_noise: true })
   })
 
+  test('missing i18n keys: ranks by distinct sessions, dedupes keys, excludes bots', () => {
+    const BOT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+    // `sd.animal` hit in two sessions (3 rows) → outranks `ps.verbo` (1 session, 1 row).
+    add_log({ day: '2026-06-30', level: 'warn', message: 'i18n missing key: sd.animal', context: { session_id: 's1', i18n_key: 'sd.animal', locale: 'es' } })
+    add_log({ day: '2026-06-30', level: 'warn', message: 'i18n missing key: sd.animal', context: { session_id: 's1', i18n_key: 'sd.animal', locale: 'es' } })
+    add_log({ day: '2026-06-29', level: 'warn', message: 'i18n missing key: sd.animal', context: { session_id: 's2', i18n_key: 'sd.animal', locale: 'pt' } })
+    add_log({ day: '2026-06-30', level: 'warn', message: 'i18n missing key: ps.verbo', context: { session_id: 's1', i18n_key: 'ps.verbo', locale: 'es' } })
+    // A bot session must be excluded from the human worklist.
+    add_log({ day: '2026-06-30', level: 'warn', message: 'i18n missing key: sd.fish', context: { session_id: 'b1', i18n_key: 'sd.fish', locale: 'es' }, user_agent: BOT })
+
+    const { missing_i18n_keys } = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    expect(missing_i18n_keys.distinct_keys).toBe(2) // bot's sd.fish excluded
+    expect(missing_i18n_keys.total).toBe(4)
+    expect(missing_i18n_keys.sessions).toBe(2)
+    expect(missing_i18n_keys.keys[0]).toMatchObject({ key: 'sd.animal', sessions: 2, count: 3 })
+    expect(missing_i18n_keys.keys[1]).toMatchObject({ key: 'ps.verbo', sessions: 1, count: 1 })
+    expect(missing_i18n_keys.keys.find(row => row.key === 'sd.fish')).toBeUndefined()
+  })
+
   test('device / OS / browser breakdown excludes bots and flags below-capability sessions', () => {
     const SAFARI17 = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15'
     const SAFARI14 = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Safari/605.1.15'
@@ -1016,6 +1035,12 @@ describe(get_log_analytics, () => {
             "failed_stale": 1,
             "recovered": 1,
             "timeouts": 1,
+          },
+          "missing_i18n_keys": {
+            "distinct_keys": 0,
+            "keys": [],
+            "sessions": 0,
+            "total": 0,
           },
           "performance": {
             "by_route": [

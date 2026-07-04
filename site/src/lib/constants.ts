@@ -43,6 +43,15 @@ export const SOURCE_TYPES = ['dictionary', 'wordlist', 'fieldwork', 'manuscript'
 export type SourceType = typeof SOURCE_TYPES[number]
 
 /**
+ * Admin-curated classification of every dictionary (`dictionaries.bucket`) —
+ * who we serve ('public'/'unlisted'/'secure') vs what we tolerate
+ * ('conlang'/'glossary' — media storage to be disabled) vs 'delete' (queued
+ * for teardown). NULL = unclassified/new. See `.issues/dictionary-buckets-cleanup.md`.
+ */
+export const DICTIONARY_BUCKETS = ['public', 'unlisted', 'secure', 'conlang', 'glossary', 'delete'] as const
+export type DictionaryBucket = typeof DICTIONARY_BUCKETS[number]
+
+/**
  * Controlled global vocabulary for `entry_relationships.type`. Labels (and the
  * inverse-side label of directed types) are i18n keys `relationship_type.<slug>`
  * — never hard-code display text here. `symmetric` types read the same from

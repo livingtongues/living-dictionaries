@@ -35,8 +35,20 @@ outputs are committed; eslint-ignored as generated).
 
 - `shared.db.featured_entries` is **server-only** (like chat/i18n tables — API-reached, never a
   sync sector). Snapshot columns by design; curation re-runs refresh them.
+- **Bucket pivot (2026-07-04)**: the table is now the shared candidate BUCKET with a `source`
+  column — `'agent'` (curate-command harvests, fill goal ~5/public dict) and `'editor_star'`
+  (per-dict starred entries swept from the server dict DBs by the curate command;
+  `starred_at` = the dict-db star `created_at`, MAX per dict acts as the sweep watermark).
+  Editor stars are a signal, never an automatic homepage placement. NOT the same table as the
+  dict.db `featured_entries` (per-dict, synced, feeds `/{dict}/home`).
+- **Card modal**: clicking a homepage word card opens `FeaturedEntryModal` (photo, phonetic,
+  ALL glosses, speaker name, example sentence, dict + entry links) instead of navigating —
+  navigation would kick off that dictionary's snapshot download. Modal fields are snapshot
+  columns baked with the card; pre-pivot rows (26-card seed) have them NULL and degrade
+  gracefully until the next curation backfill.
 - Curation: `.claude/commands/curate-featured-words.md` (agent harvests prod per-dict DBs →
-  vision-checks lh3 thumbs → inserts `suggested`); Jacob approves at `/admin/featured-words`;
+  vision-checks lh3 thumbs → inserts `suggested`); Jacob approves at `/admin/featured-words`
+  (source badges distinguish agent vs editor-star rows);
   **approved cards + stats ship via build-time bake** (`/api/homepage/export` →
   `scripts/fetch-homepage-baked.mjs` in the Dockerfile, i18n-bake pattern; committed seed =
   `src/lib/data/homepage-baked.json`). Deliberately NOT runtime-fetched — homepage speed wins,

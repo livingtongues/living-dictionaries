@@ -189,6 +189,81 @@ describe('dictionary.db push + pull', () => {
     db.close()
   })
 
+  test('FK-orphan push: skips the dangling child, lands the rest, reports it', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    const now = new Date().toISOString()
+
+    // One valid entry + one orphaned sense (entry_id points at a row that does
+    // not exist) in the SAME batch. Under defer_foreign_keys the orphan would
+    // trip at COMMIT and roll back BOTH; the recovery path must skip only the
+    // orphan and still land the good entry.
+    const response = process_dict_changes({
+      db,
+      request: {
+        synced_up_to: null,
+        dirty_rows: {
+          entries: [{
+            id: 'good_entry',
+            lexeme: { en: 'lands' },
+            phonetic: null,
+            interlinearization: null,
+            morphology: null,
+            notes: null,
+            sources: null,
+            scientific_names: null,
+            coordinates: null,
+            unsupported_fields: null,
+            elicitation_id: null,
+            dirty: 1,
+            created_by_user_id: 'editor',
+            created_at: now,
+            updated_by_user_id: 'editor',
+            updated_at: now,
+          }],
+          senses: [{
+            id: 'orphan_sense',
+            entry_id: 'missing_entry',
+            definition: null,
+            glosses: { en: 'orphan' },
+            parts_of_speech: null,
+            semantic_domains: null,
+            write_in_semantic_domains: null,
+            noun_class: null,
+            plural_form: null,
+            variant: null,
+            dirty: 1,
+            created_by_user_id: 'editor',
+            created_at: now,
+            updated_by_user_id: 'editor',
+            updated_at: now,
+          }],
+        },
+        deletes: [],
+        latest_dict_migration: '20260606_initial.sql',
+      },
+      user_id: 'editor',
+      is_editor: true,
+    })
+
+    // Good row landed; orphan did not; the batch did NOT 500.
+    expect(db.prepare('SELECT id FROM entries WHERE id = ?').get('good_entry')).toBeTruthy()
+    expect(db.prepare('SELECT id FROM senses WHERE id = ?').get('orphan_sense')).toBeUndefined()
+    expect(response.skipped_orphans).toEqual([{ table_name: 'senses', id: 'orphan_sense', parent_table: 'entries' }])
+    db.close()
+  })
+
+  test('non-FK errors still throw (recovery path is FK-only)', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    db.close() // Operating on a closed db throws a non-FK SqliteError.
+
+    expect(() => process_dict_changes({
+      db,
+      request: { synced_up_to: null, dirty_rows: {}, deletes: [], latest_dict_migration: '20260606_initial.sql' },
+      user_id: 'editor',
+      is_editor: true,
+    })).toThrow()
+  })
+
   test('last-write-wins conflict resolution', () => {
     const db = open_dictionary_db_in_memory('test_dict')
     const t1 = '2026-05-25T10:00:00.000Z'

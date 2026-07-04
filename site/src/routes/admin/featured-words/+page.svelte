@@ -112,6 +112,12 @@
             <a class="dict-link" href="/{row.dict_id}/entry/{row.entry_id}" target="_blank" rel="noreferrer">
               {row.dict_name} <IconMdiOpenInNew style="font-size: 0.75rem" />
             </a>
+            <div class="meta-row">
+              <span class={['source-badge', { editor: row.source === 'editor_star' }]}>{row.source === 'editor_star' ? 'editor star' : 'agent'}</span>
+              {#if row.phonetic}<span>[{row.phonetic}]</span>{/if}
+              {#if row.speaker_name}<span>🗣 {row.speaker_name}</span>{/if}
+              {#if row.example_sentence}<span title="Has an example sentence">💬</span>{/if}
+            </div>
             {#if row.agent_note}
               <p class="note">{row.agent_note}</p>
             {/if}
@@ -284,6 +290,27 @@
     font-size: 0.8125rem;
     color: var(--primary);
     text-decoration: none;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--color-secondary);
+  }
+
+  .source-badge {
+    padding: 0.0625rem 0.4375rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color) 10%, transparent);
+    font-weight: 600;
+  }
+
+  .source-badge.editor {
+    background: color-mix(in srgb, var(--warning) 22%, transparent);
   }
 
   .note {

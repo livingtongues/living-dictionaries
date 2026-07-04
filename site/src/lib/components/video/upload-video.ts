@@ -25,14 +25,15 @@ export function upload_video({
     const [extension] = file.type.split('/')[1].split(';') // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
     const file_name = is_blob ? `video.${extension}` : file.name
     const { data: { dictionary } } = page
-    const { data: { presigned_upload_url, object_key }, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name, file_type: file.type })
-    if (error) {
+    // Destructure `data` ONLY after the error guard — see upload-audio.ts.
+    const { data, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name, file_type: file.type })
+    if (error || !data) {
       console.error(error)
-      set({ progress: 0, error: error.message })
+      set({ progress: 0, error: error?.message ?? 'Upload failed.' })
     } else {
-      await upload_file(file, presigned_upload_url)
+      await upload_file(file, data.presigned_upload_url)
 
-      set({ progress: 100, storage_path: object_key })
+      set({ progress: 100, storage_path: data.object_key })
       on_success?.()
     }
   })()

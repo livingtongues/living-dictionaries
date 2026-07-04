@@ -127,14 +127,23 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   The **LD instance of the cross-repo "noise vs real" theme** (tutor filed the same 07-01; house
   shipped it). Pairs with the shipped Phase-B classify fix for edge-5xx interstitials (deploy-swap
   520s → `network`/`warn`) so they never inflate the real count either.
-- **Server faults / schema-drift strip** *(ported from house · 2026-07-02 — house explicitly flagged
-  for LD).* Isolate `source='server' AND level IN ('error','crash')` clustered by `context.route`,
-  newest-first with count + last-seen, and highlight `SqliteError`/`no such table`/`no such column`
-  as the schema-drift class — a "these are always real, fix now" board separate from the mixed client
-  stream. Grounded in LD's own history (the `dictionary_partners` schema-drift 500) and today's
-  deploy-swap `Internal Error` 500s, which sat undifferentiated among client noise. `log-analytics.ts`
-  already reads `source`; overlaps the existing **schema-drift guard on the health strip** item above
-  (build them together). LD-fit confirmed; also on tutor's radar.
+- ✅ **Server faults / schema-drift strip** *(ported from house · 2026-07-02; SHIPPED 2026-07-04,
+  commit `eb26cc1b`).* `build_server_faults` → `ServerFaults` (clusters of `source='server' AND
+  level IN ('error','crash')` grouped by `context.route`, newest-first with count + last-seen;
+  `SCHEMA_DRIFT_PATTERN` tags the `SqliteError`/`no such table|column` class with a `drift` badge +
+  a `schema_drift_count`) + a "Server faults" panel on `/admin/analytics` (`+page.svelte:337`). First
+  real catch: the 07-04 `FOREIGN KEY constraint failed` 500 on `/api/dictionary/rhenic/changes`
+  (surfaces as a `SqliteError` cluster, correctly untagged since it's not schema-drift).
+- ✅ **★ Top missing i18n keys panel** *(filed + SHIPPED 2026-07-04).* `build_missing_i18n_keys`
+  (`log-analytics.ts` → `MissingI18nKeys`: total / distinct_keys / sessions + top-25 keys by distinct
+  sessions, human-only, hot window; keyed on `context.i18n_key` with a message-suffix fallback for
+  older rows) + a "Missing translations" panel on `/admin/analytics` (stat pair + a
+  Key/Locales/Sessions/Rows worklist table linking to `/translate`). Grounded in 07-04: **~875 warn
+  rows across 237 distinct keys in 91 sessions**, previously invisible; the reporter already fires once
+  per unique key per page session (`i18n/index.ts`), so it's a clean low-cardinality signal. Most keys
+  are `sd.*` / `ps.*` / `psAbbrev.*` (Spanish-glossing dicts hitting untranslated semantic-domain /
+  part-of-speech labels). Story + reader test added; verified light + dark. LD-first (LD keeps i18n in
+  the DB); low-fit for house/tutor.
 
 ## Cross-pollination from sibling apps (house + tutor)
 *Added 2026-06-27 (Phase D — first cross-repo read). LD is currently the furthest-along dashboard, so
@@ -173,5 +182,10 @@ house's **/admin/revenue** dashboard (no payments).
 - `.cron/log-reviews/2026-06-30.md` (sustained real-contributor traffic from Malaysia; geo-split-CWV
   proposal from the far-region TTFB tax; house deploy-day-errors-fold borrow; gloss_languages homepage
   guard + `aborted` noise-fold action items)
+- `.cron/log-reviews/2026-07-02.md` (real-vs-noise daily-error split shipped; server-faults borrow reaffirmed)
+- `.cron/log-reviews/2026-07-03.md` (first big real-traffic day; API-v1 panel + deploy-day fold +
+  top-routes-by-session all SHIPPED; top-routes-by-session proposal grounded in the milang self-nav loop)
+- `.cron/log-reviews/2026-07-04.md` (quiet day, all 07-03 fixes verified live; Server-faults panel
+  SHIPPED; "Top missing i18n keys" panel proposal from 237 distinct missing keys/day)
 - Phase D cross-repo read 2026-06-27 (house `error_audience`/`errors_by_version`/expected-bucket;
   tutor `error_clusters`/`KNOWN_NOISE`).

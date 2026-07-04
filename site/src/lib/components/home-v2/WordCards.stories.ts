@@ -14,6 +14,13 @@ export const Strip: Story<typeof Component> = {
   },
 }
 
+export const WideStrip: Story<typeof Component> = {
+  viewports: [{ width: 1920, height: 220 }],
+  props: {
+    cards: story_cards,
+  },
+}
+
 export const MobileStrip: Story<typeof Component> = {
   viewports: [{ width: 390, height: 190 }],
   props: {

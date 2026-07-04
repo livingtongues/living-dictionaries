@@ -37,6 +37,21 @@ export interface DictChangesResponse {
   new_synced_up_to: string
   changes: Partial<Record<DictSyncableTable, Record<string, unknown>[]>>
   deletes: { table_name: string, id: string }[]
+  /**
+   * Pushed dirty rows that were skipped because they violate a foreign key —
+   * an orphaned child whose server-side parent no longer exists (its parent was
+   * deleted by another editor). Present only on the rare FK-recovery path so
+   * one dangling row can't 500 (and poison) a client's entire sync. The client
+   * converges when the parent's tombstone arrives via pull.
+   */
+  skipped_orphans?: SkippedOrphan[]
+}
+
+export interface SkippedOrphan {
+  table_name: string
+  id: string
+  /** The referenced parent table whose row is missing. */
+  parent_table: string
 }
 
 export interface DictSyncErrors {
@@ -72,8 +87,16 @@ export function is_dict_syncable_table(table: string): table is DictSyncableTabl
  *     (the `catalog_updated_at_mirror`)
  *
  * This function is push+pull in one atomic round-trip.
+ *
+ * Wraps `apply_dict_changes` with a foreign-key recovery path: because the batch
+ * runs under `defer_foreign_keys=ON`, a single orphaned child row (its parent
+ * was deleted by another editor) trips the constraint at COMMIT and rolls back
+ * the WHOLE push — which would otherwise 500 (and poison) every subsequent sync
+ * from that client until they refetch. Instead we identify the orphaned pushed
+ * rows, skip them, retry, and report them in `skipped_orphans`. Observed once
+ * 2026-07-04 on `rhenic`.
  */
-export function process_dict_changes({ db, request, user_id, is_editor, history_db }: {
+export function process_dict_changes(params: {
   db: Database.Database
   request: DictChangesRequest
   user_id: string
@@ -85,6 +108,103 @@ export function process_dict_changes({ db, request, user_id, is_editor, history_
    * Omitted in unit tests that don't assert history.
    */
   history_db?: Database.Database
+}): DictChangesResponse {
+  try {
+    return apply_dict_changes(params)
+  } catch (error) {
+    if (!params.is_editor || !is_foreign_key_error(error))
+      throw error
+    // Recovery is best-effort: if probing/retrying itself throws, surface the
+    // ORIGINAL FK error so we never mask the real fault or change behaviour.
+    try {
+      const orphans = identify_orphan_push_rows(params)
+      if (!orphans.length)
+        throw error // FK violation not attributable to a pushed row — surface it.
+      const skip_keys = new Set(orphans.map(orphan => `${orphan.table_name}::${orphan.id}`))
+      const response = apply_dict_changes({ ...params, skip_keys })
+      response.skipped_orphans = orphans
+      return response
+    } catch {
+      throw error
+    }
+  }
+}
+
+/** better-sqlite3 throws `SqliteError` with this code on a FK-constraint failure. */
+function is_foreign_key_error(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null | undefined)?.code
+  if (code === 'SQLITE_CONSTRAINT_FOREIGNKEY')
+    return true
+  const message = (error as { message?: unknown } | null | undefined)?.message
+  return typeof message === 'string' && /FOREIGN KEY constraint failed/i.test(message)
+}
+
+/**
+ * Re-apply the push in a throwaway transaction, ask SQLite which rows dangle
+ * (`PRAGMA foreign_key_check`), and return the orphans that came from THIS
+ * push's dirty rows. Never commits — pure diagnosis. Only runs on the rare
+ * FK-recovery path, so the happy path pays nothing.
+ */
+function identify_orphan_push_rows({ db, request, user_id }: {
+  db: Database.Database
+  request: DictChangesRequest
+  user_id: string
+}): SkippedOrphan[] {
+  const pushed = new Set<string>()
+  if (request.dirty_rows) {
+    for (const table_name of DICT_SYNCABLE_TABLES) {
+      for (const row of request.dirty_rows[table_name] ?? [])
+        pushed.add(`${table_name}::${(row as { id: string }).id}`)
+    }
+  }
+  if (!pushed.size)
+    return []
+
+  db.pragma('defer_foreign_keys = ON')
+  db.exec('BEGIN IMMEDIATE')
+  try {
+    if (request.deletes?.length) {
+      for (const { table_name, id } of request.deletes) {
+        if (!is_dict_syncable_table(table_name))
+          continue
+        db.prepare(
+          `INSERT OR REPLACE INTO deletes (table_name, id, updated_at)
+           VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+        ).run(table_name, id)
+      }
+    }
+    for (const table_name of DICT_SYNCABLE_TABLES) {
+      for (const row of request.dirty_rows?.[table_name] ?? [])
+        merge_dict_row({ db, table_name, row, user_id })
+    }
+    const violations = db.pragma('foreign_key_check') as { table: string, rowid: number, parent: string, fkid: number }[]
+    const orphans: SkippedOrphan[] = []
+    const seen = new Set<string>()
+    for (const violation of violations) {
+      const found = db.prepare(`SELECT id FROM "${violation.table}" WHERE rowid = ?`).get(violation.rowid) as { id?: string } | undefined
+      const id = found?.id
+      if (!id)
+        continue
+      const key = `${violation.table}::${id}`
+      if (!pushed.has(key) || seen.has(key))
+        continue
+      seen.add(key)
+      orphans.push({ table_name: violation.table, id, parent_table: violation.parent })
+    }
+    return orphans
+  } finally {
+    db.exec('ROLLBACK') // Diagnosis only — never keep these writes.
+  }
+}
+
+function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_keys }: {
+  db: Database.Database
+  request: DictChangesRequest
+  user_id: string
+  is_editor: boolean
+  history_db?: Database.Database
+  /** Pushed `${table}::${id}` keys to skip merging (FK-orphan recovery). */
+  skip_keys?: ReadonlySet<string>
 }): DictChangesResponse {
   // Server receive time — one stamp shared by every event in this push batch.
   const history_at = new Date().toISOString()
@@ -126,6 +246,8 @@ export function process_dict_changes({ db, request, user_id, is_editor, history_
         if (!rows?.length)
           continue
         for (const row of rows) {
+          if (skip_keys?.has(`${table_name}::${(row as { id: string }).id}`))
+            continue // FK-orphan: skip so it can't poison the whole batch.
           const event = merge_dict_row({ db, table_name, row, user_id, at: history_at })
           if (event)
             history_events.push(event)
@@ -143,8 +265,12 @@ export function process_dict_changes({ db, request, user_id, is_editor, history_
     const uploaded_keys = new Set<string>()
     if (request.dirty_rows) {
       for (const table_name of DICT_SYNCABLE_TABLES) {
-        for (const row of request.dirty_rows[table_name] ?? [])
-          uploaded_keys.add(`${table_name}::${(row as { id: string }).id}`)
+        for (const row of request.dirty_rows[table_name] ?? []) {
+          const key = `${table_name}::${(row as { id: string }).id}`
+          if (skip_keys?.has(key))
+            continue // Not written server-side, so don't filter it from the pull.
+          uploaded_keys.add(key)
+        }
       }
     }
 

@@ -195,6 +195,34 @@ strip-hover.png (strong line + pulse), interact-zoomed.png (labels), admin-featu
   **Awaiting Jacob's review at /admin/featured-words** (listen to audio there, approve/reject).
   Prod total after this batch: 34 suggested, 0 approved — still short of the 100–200 approved
   target; run `/curate-featured-words` again for more batches once these are triaged.
+- **Compatibility check vs the `.issues/dictionary-home.md` curation pivot (2026-07-04, verified
+  post-session)** — confirmed the pivot migration (`20260704a_featured_entries_pivot_and_dictionary_buckets.sql`, adds
+  `source`/`phonetic`/`glosses`/`speaker_name`/`example_sentence`/`starred_at`) is **NOT yet
+  deployed to prod** (prod `featured_entries` still has the old 18-column shape as of this check).
+  The 34 batch-#2 rows are unaffected and forward-compatible: `source` has a `NOT NULL DEFAULT
+  'agent'` so they'll be correctly tagged (not `editor_star`) the instant the migration runs — no
+  action needed there. They'll show up in the revamped /admin/featured-words alongside the 26 seed
+  rows once deployed. The only gap is the same one already logged for the 26 seed rows: the new
+  modal snapshot columns will land NULL (degraded modal) until backfilled.
+  **Pre-harvested the backfill data for all 34 rows already** (phonetic 14/34, full `glosses` map
+  34/34, `speaker_name` 34/34, `example_sentence` 6/34 — matches real data sparsity, not a bug),
+  cached at `/tmp/modal-backfill.json` on mustang. Re-harvestable anytime (source dict DBs don't
+  change) with:
+  ```js
+  // per row: { id, dict_id, entry_id } from shared.db → per-dict SELECT
+  SELECT e.phonetic, s.glosses,
+    (SELECT sp.name FROM audio_speakers aspk JOIN speakers sp ON sp.id = aspk.speaker_id
+     WHERE aspk.audio_id = :audio_id LIMIT 1) AS speaker_name,
+    (SELECT json_object('text', json(st.text), 'translation', json(st.translation))
+     FROM senses_in_sentences sis JOIN sentences st ON st.id = sis.sentence_id
+     WHERE sis.sense_id = :sense_id AND st.text IS NOT NULL LIMIT 1) AS example_sentence
+  FROM entries e JOIN senses s ON s.entry_id = e.id WHERE e.id = :entry_id AND s.id = :sense_id
+  ```
+  **Once the pivot deploys**, run one combined backfill pass for BOTH the 26 pre-pivot seed rows
+  AND these 34 batch-#2 rows (`UPDATE featured_entries SET phonetic=?, glosses=?, speaker_name=?,
+  example_sentence=? WHERE id=?`) — no need to treat them separately, and no re-vision-check
+  needed (same photos/audio already vetted). This is a prod write — confirm with Jacob before
+  running, per the dictionary-home issue's own note about the 26.
 - **Go-live swap** (separate task): move `/home-preview` → `/`, delete Mapbox homepage components,
   `/globe` route + `$lib/components/globe/` (keep `globe/data/*.json` topojson — home-v2 imports it).
 - Search: my_dictionaries chips render only when signed in; Enter opens top result directly.

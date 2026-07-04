@@ -171,6 +171,7 @@
   const event_coverage = $derived(analytics.event_coverage)
   const clusters = $derived(analytics.error_clusters)
   const leader = $derived(analytics.leader_health)
+  const missing_i18n = $derived(analytics.missing_i18n_keys)
   // Build ids are long; show a short trailing slice for readability.
   function short_version(version: string | null): string {
     if (!version)
@@ -619,6 +620,38 @@
         <div class="block-h">Auth channel <span class="hint">context.via</span></div>
         <SegmentedBar segments={api_v1_via_segments} format={format_number} />
       </div>
+    {/if}
+  </section>
+
+  <section class="panel">
+    <h2>Missing translations <span class="hint">i18n gap worklist · human sessions · hot window</span></h2>
+    {#if missing_i18n.total === 0}
+      <p class="muted">No missing translation keys in the hot window. 🎉</p>
+    {:else}
+      <div class="ver-split">
+        <div class="ver-stat">
+          <div class="ver-value">{format_number(missing_i18n.distinct_keys)}</div>
+          <div class="ver-label">Missing keys</div>
+          <div class="ver-sub">{format_number(missing_i18n.total)} rows · {format_number(missing_i18n.sessions)} sessions</div>
+        </div>
+        <div class="ver-stat">
+          <div class="ver-label">Fill at <a href="/translate">/translate</a></div>
+          <div class="ver-sub">one row per key per session — a live translation-gap worklist</div>
+        </div>
+      </div>
+      <table class="src-table">
+        <thead><tr><th>Key</th><th>Locales</th><th>Sessions</th><th>Rows</th></tr></thead>
+        <tbody>
+          {#each missing_i18n.keys as row (row.key)}
+            <tr>
+              <td><code>{row.key}</code></td>
+              <td>{row.locales ?? '—'}</td>
+              <td>{format_number(row.sessions)}</td>
+              <td>{format_number(row.count)}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
     {/if}
   </section>
 

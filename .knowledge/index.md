@@ -19,6 +19,9 @@ are `migration/shared-stack-conventions.md`.
   which files stay near-identical to `house`.
 - [api/](./api/index.md) — public/programmatic APIs: the agent-friendly `/api/v1` bulk
   write API + per-dictionary API keys (reuses the human `merge_dict_row` write path).
+- [svelte/](./svelte/index.md) — Svelte 5 runtime-internals gotchas: the
+  `current_sources` dependency-exclusion rule that freezes lazily-created stores
+  (why `construct_outside_reaction` exists).
 
 ## Pointers to the reference repo
 The **target** architecture (SQLite shared.db + per-dict dict.db, wa-sqlite/better-sqlite3,

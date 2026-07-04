@@ -86,12 +86,7 @@
   label:focus {
     outline: 2px solid transparent;
     outline-offset: 2px;
-    --un-ring-width: 3px;
-    --un-ring-offset-shadow: var(--un-ring-inset) 0 0 0 var(--un-ring-offset-width) var(--un-ring-offset-color);
-    --un-ring-shadow: var(--un-ring-inset) 0 0 0 calc(var(--un-ring-width) + var(--un-ring-offset-width)) var(--un-ring-color);
-    box-shadow: var(--un-ring-offset-shadow), var(--un-ring-shadow), var(--un-shadow);
-    --un-ring-opacity: 1;
-    --un-ring-color: rgb(134 239 172 / var(--un-ring-opacity)); /* focus:ring-green-300 */
+    box-shadow: 0 0 0 3px rgb(134 239 172); /* focus ring, green-300 */
   }
 
   .dragging {

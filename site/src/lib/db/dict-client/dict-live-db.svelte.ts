@@ -3,6 +3,7 @@ import type { MultiString } from '$lib/types'
 import type * as dict_schema from '$lib/db/schemas/dictionary'
 import type { DictWriteOp, DictWriteOutcome, JunctionTable } from './dict-writes'
 import type { DictConnection } from './worker-connection'
+import { construct_outside_reaction } from '$lib/db/client/live/construct-outside-reaction.svelte'
 import { TableChangeNotifier } from '$lib/db/client/live/notifier'
 import { compute_retry_decision, log_live_query_failed, log_live_query_recovered, log_live_query_timeout } from '$lib/db/client/live/live-query-retry'
 import { reconcile_rows } from '$lib/db/client/live/reconcile-rows'
@@ -349,15 +350,13 @@ class DictLiveDbImpl {
       get objects(): Record<string, DictRowType<T>> { return self.#get_table_store(table_name).objects as Record<string, DictRowType<T>> },
       id(id: string): DictRowType<T> | undefined {
         if (!id) return undefined
-        // Imperative read outside any reactive context (e.g. an event handler):
-        // read directly. A `$derived` here would be unowned, and the
-        // `store.rows` getter would try to create an `$effect` inside it →
-        // `effect_in_unowned_derived`.
-        if (!$effect.tracking())
-          return self.#get_row_store(table_name, id).rows[0] as DictRowType<T> | undefined
-        // svelte-ignore state_referenced_locally
-        const rows = $derived(self.#get_row_store(table_name, id).rows)
-        return rows[0] as DictRowType<T> | undefined
+        // Direct read: in a tracked context the deps flow straight to the row
+        // store's signals (constructed outside the reaction, so they register);
+        // in an event handler `#track` no-ops. A nested `$derived` here would
+        // itself be "own state" of the calling reaction (push_reaction_value
+        // covers deriveds too) and freeze the caller — see
+        // construct-outside-reaction.svelte.ts.
+        return self.#get_row_store(table_name, id).rows[0] as DictRowType<T> | undefined
       },
       async find(id: string): Promise<DictRowType<T> | undefined> {
         if (!id) return undefined
@@ -387,10 +386,15 @@ class DictLiveDbImpl {
     }
   }
 
+  // All three store getters construct via `construct_outside_reaction`: a store
+  // lazily created INSIDE a consuming `$derived`/effect would have its `$state`
+  // swallowed by that reaction's `current_sources` dep-skip, silently freezing
+  // the consumer forever (.issues/dict-table-accessor-rows-reactivity.md +
+  // repo-root reactivity-poc/).
   #get_table_store(table_name: string): DictTableStore<Record<string, unknown>> {
     let store = this.#table_stores.get(table_name)
     if (!store) {
-      store = new DictTableStore({
+      store = construct_outside_reaction(() => new DictTableStore({
         connection: this.#connection,
         notifier: this.#notifier,
         table_name,
@@ -399,7 +403,7 @@ class DictLiveDbImpl {
         on_save: this.#save_cb(table_name),
         on_delete: this.#delete_cb(table_name),
         on_reset: this.#reset_cb(table_name),
-      })
+      }))
       this.#table_stores.set(table_name, store)
     }
     return store
@@ -409,7 +413,7 @@ class DictLiveDbImpl {
     const key = `${table_name}:${id}`
     let store = this.#row_stores.get(key)
     if (!store) {
-      store = new DictTableStore({
+      store = construct_outside_reaction(() => new DictTableStore({
         connection: this.#connection,
         notifier: this.#notifier,
         table_name,
@@ -418,7 +422,7 @@ class DictLiveDbImpl {
         on_save: this.#save_cb(table_name),
         on_delete: this.#delete_cb(table_name),
         on_reset: this.#reset_cb(table_name),
-      })
+      }))
       this.#row_stores.set(key, store)
     }
     return store
@@ -434,7 +438,7 @@ class DictLiveDbImpl {
     const key = JSON.stringify({ sql, params })
     let store = this.#query_stores.get(key)
     if (!store) {
-      store = new DictTableStore({
+      store = construct_outside_reaction(() => new DictTableStore({
         connection: this.#connection,
         notifier: this.#notifier,
         table_name,
@@ -443,7 +447,7 @@ class DictLiveDbImpl {
         on_save: this.#save_cb(table_name),
         on_delete: this.#delete_cb(table_name),
         on_reset: this.#reset_cb(table_name),
-      })
+      }))
       this.#query_stores.set(key, store)
     }
     return {

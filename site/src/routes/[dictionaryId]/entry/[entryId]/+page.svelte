@@ -12,7 +12,10 @@
   import { ENTRY_OPENED } from '$lib/debug/log-events'
   import { page } from '$app/state'
   import { dev } from '$app/environment'
+  import { key_between } from '$lib/api/v1/fractional-index'
   import IconMdiHistory from '~icons/mdi/history'
+  import IconMdiStar from '~icons/mdi/star'
+  import IconMdiStarOutline from '~icons/mdi/star-outline'
 
   const { data } = $props()
   const {
@@ -24,6 +27,7 @@
     can_edit,
     is_editor_or_above,
     dbOperations,
+    dict_db,
   } = $derived(data)
 
   let show_history = $state(false)
@@ -43,6 +47,23 @@
   // shared link paints real content immediately.
   const entry = $derived($derived_entry ?? entry_from_page)
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary.orthographies }))
+
+  // Featured-entry star (editor+): a `featured_entries` row = starred. Rows sync
+  // like any other dict content and feed the dictionary home's featured strip.
+  // (This bare-rows read is the pattern that exposed the lazily-created-store
+  // freeze — fixed via construct_outside_reaction in dict-live-db; see
+  // .issues/dict-table-accessor-rows-reactivity.md.)
+  const star_row = $derived(dict_db?.featured_entries.rows.find(row => row.entry_id === entry.id))
+  async function toggle_star() {
+    if (!dict_db)
+      return
+    if (star_row) {
+      await dict_db.featured_entries.delete(star_row.id)
+      return
+    }
+    const [last] = await dict_db.featured_entries.query({ order_by: 'sort_key DESC', limit: 1 }).snapshot()
+    await dict_db.featured_entries.insert({ entry_id: entry.id, sort_key: key_between(last?.sort_key ?? null, null) })
+  }
 </script>
 
 <div
@@ -90,6 +111,17 @@
         <div style="width: 0.5rem"></div>
         <i class="fas fa-share-square rtl-x-flip"></i>
       </Button>
+    {/if}
+    {#if is_editor_or_above && dict_db}
+      <button
+        type="button"
+        class="btn-ghost entry-star-button"
+        class:starred={!!star_row}
+        title={page.data.t(star_row ? 'dict_home.unfeature_entry' : 'dict_home.feature_entry')}
+        aria-label={page.data.t(star_row ? 'dict_home.unfeature_entry' : 'dict_home.feature_entry')}
+        onclick={toggle_star}>
+        {#if star_row}<IconMdiStar />{:else}<IconMdiStarOutline />{/if}
+      </button>
     {/if}
     {#if is_editor_or_above}
       <button
@@ -165,13 +197,22 @@
     align-items: center;
   }
 
-  .entry-history-button {
+  .entry-history-button,
+  .entry-star-button {
     width: 2.25rem;
     height: 2.25rem;
     padding: 0;
     color: var(--primary);
     font-size: 1.375rem;
     vertical-align: middle;
+  }
+
+  .entry-star-button {
+    color: var(--color-secondary);
+  }
+
+  .entry-star-button.starred {
+    color: var(--warning);
   }
 </style>
 

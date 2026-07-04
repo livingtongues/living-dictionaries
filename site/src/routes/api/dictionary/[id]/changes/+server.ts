@@ -106,6 +106,13 @@ export const POST: RequestHandler = async (event) => {
     log_server_event({ level: 'info', message: 'dict_changes_pushed', user_id: user_id || null, context: { dictionary_id: dict_id, dirty_rows: dirty_count, deletes: body.deletes?.length ?? 0 } })
   }
 
+  // A dangling child row (its parent was deleted by another editor) was skipped
+  // so it couldn't 500 the whole batch. Log which rows/parents so a recurring
+  // poison-pill is diagnosable instead of an opaque `FOREIGN KEY constraint failed`.
+  if (response.skipped_orphans?.length) {
+    log_server_event({ level: 'warn', message: 'dict_changes_orphans_skipped', user_id: user_id || null, context: { dictionary_id: dict_id, orphans: response.skipped_orphans } })
+  }
+
   // Mirror to shared.db.dictionaries.updated_at + refresh entry_count +
   // snapshot_uploaded_at gate (Q5 cross-DB cascade). Only when an editor
   // actually pushed something.

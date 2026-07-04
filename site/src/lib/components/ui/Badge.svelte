@@ -16,16 +16,16 @@
   <a {href} {target} rel="noopener noreferrer" data-sveltekit-prefetch class:active class="{klass} {size} {color}">
     {@render children?.()}
     {#if onx}
-      <span class="sp-7gktzh"></span>
+      <span class="x-gap"></span>
       <button type="button" onclick={(event) => { event.preventDefault(); onx(event) }} class="badge-x">
-        <svg class="sp-toedj4" stroke="currentColor" fill="none" viewBox="0 0 8 8">
+        <svg class="x-icon" stroke="currentColor" fill="none" viewBox="0 0 8 8">
           <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
         </svg>
       </button>
     {:else if target === '_blank'}
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="sp-tvsgvk"
+        class="external-icon"
         viewBox="0 0 20 20"
         fill="currentColor">
         <path
@@ -39,9 +39,9 @@
   <button type="button" {onclick} class:active class="{klass} {size} {color}">
     {@render children?.()}
     {#if onx}
-      <span class="sp-7gktzh"></span>
+      <span class="x-gap"></span>
       <button type="button" onclick={(event) => { event.stopPropagation(); onx(event) }} class="badge-x">
-        <svg class="sp-toedj4" stroke="currentColor" fill="none" viewBox="0 0 8 8">
+        <svg class="x-icon" stroke="currentColor" fill="none" viewBox="0 0 8 8">
           <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
         </svg>
       </button>
@@ -51,9 +51,9 @@
   <div class:active class="{klass} {size} {color}">
     {@render children?.()}
     {#if onx}
-      <span class="sp-7gktzh"></span>
+      <span class="x-gap"></span>
       <button type="button" onclick={onx} class="badge-x">
-        <svg class="sp-toedj4" stroke="currentColor" fill="none" viewBox="0 0 8 8">
+        <svg class="x-icon" stroke="currentColor" fill="none" viewBox="0 0 8 8">
           <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
         </svg>
       </button>
@@ -61,39 +61,135 @@
   </div>
 {/if}
 
-<style>:global(.sp-tvsgvk){margin-left:0.25rem;display:inline;height:1rem;width:1rem;}:global(.sp-7gktzh){width:0.5rem;}:global(.sp-toedj4){height:0.5rem;width:0.5rem;}
+<style>
+  .external-icon {
+    margin-left: 0.25rem;
+    display: inline;
+    height: 1rem;
+    width: 1rem;
+  }
+
+  .x-gap {
+    width: 0.5rem;
+  }
+
+  .x-icon {
+    height: 0.5rem;
+    width: 0.5rem;
+  }
+
   a,
   button:not(.badge-x),
   div {
-    display:inline-flex;align-items:center;border-radius:0.375rem;padding-top:0.25rem;padding-bottom:0.25rem;padding-left:0.5rem;padding-right:0.5rem;font-size:0.75rem;line-height:1rem;font-weight:500;
-    --un-bg-opacity:1;background-color:rgb(219 234 254 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(30 64 175 / var(--un-text-opacity));
+    display: inline-flex;
+    align-items: center;
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 500;
+    background-color: rgb(219 234 254); /* blue-100 */
+    color: rgb(30 64 175); /* blue-800 */
   }
+
   .red {
-    --un-bg-opacity:1;background-color:rgb(254 226 226 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(153 27 27 / var(--un-text-opacity));
+    background-color: rgb(254 226 226);
+    color: rgb(153 27 27);
   }
+
   .orange {
-    --un-bg-opacity:1;background-color:rgb(255 237 213 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(154 52 18 / var(--un-text-opacity));
+    background-color: rgb(255 237 213);
+    color: rgb(154 52 18);
   }
+
   .green {
-    --un-bg-opacity:1;background-color:rgb(220 252 231 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(22 101 52 / var(--un-text-opacity));
+    background-color: rgb(220 252 231);
+    color: rgb(22 101 52);
   }
+
   .gray {
-    --un-bg-opacity:1;background-color:rgb(243 244 246 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(31 41 55 / var(--un-text-opacity));
+    background-color: rgb(243 244 246);
+    color: rgb(31 41 55);
   }
+
   .badge-x {
-    --un-text-opacity:1;color:rgb(96 165 250 / var(--un-text-opacity));
-    margin-left:-0.25rem;margin-right:-0.25rem;height:1rem;width:1rem;display:inline-flex;flex-shrink:0;align-items:center;justify-content:center;border-radius:9999px;
-  }.badge-x:hover{--un-bg-opacity:1;background-color:rgb(191 219 254 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(59 130 246 / var(--un-text-opacity));}.badge-x:focus{--un-bg-opacity:1;background-color:rgb(59 130 246 / var(--un-bg-opacity));}.badge-x:focus{--un-text-opacity:1;color:rgb(255 255 255 / var(--un-text-opacity));outline:2px solid transparent;outline-offset:2px;}
+    color: rgb(96 165 250);
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+    height: 1rem;
+    width: 1rem;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+  }
+
+  .badge-x:hover {
+    background-color: rgb(191 219 254);
+    color: rgb(59 130 246);
+  }
+
+  .badge-x:focus {
+    background-color: rgb(59 130 246);
+    color: rgb(255 255 255);
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
   .red .badge-x {
-    --un-text-opacity:1;color:rgb(248 113 113 / var(--un-text-opacity));
-  }.red .badge-x:hover{--un-bg-opacity:1;background-color:rgb(254 202 202 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(239 68 68 / var(--un-text-opacity));}.red .badge-x:focus{--un-bg-opacity:1;background-color:rgb(239 68 68 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(255 255 255 / var(--un-text-opacity));}
+    color: rgb(248 113 113);
+  }
+
+  .red .badge-x:hover {
+    background-color: rgb(254 202 202);
+    color: rgb(239 68 68);
+  }
+
+  .red .badge-x:focus {
+    background-color: rgb(239 68 68);
+    color: rgb(255 255 255);
+  }
+
   .orange .badge-x {
-    --un-text-opacity:1;color:rgb(251 146 60 / var(--un-text-opacity));
-  }.orange .badge-x:hover{--un-bg-opacity:1;background-color:rgb(254 215 170 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(249 115 22 / var(--un-text-opacity));}.orange .badge-x:focus{--un-bg-opacity:1;background-color:rgb(249 115 22 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(255 255 255 / var(--un-text-opacity));}
+    color: rgb(251 146 60);
+  }
+
+  .orange .badge-x:hover {
+    background-color: rgb(254 215 170);
+    color: rgb(249 115 22);
+  }
+
+  .orange .badge-x:focus {
+    background-color: rgb(249 115 22);
+    color: rgb(255 255 255);
+  }
+
   .green .badge-x {
-    --un-text-opacity:1;color:rgb(74 222 128 / var(--un-text-opacity));
-  }.green .badge-x:hover{--un-bg-opacity:1;background-color:rgb(187 247 208 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(34 197 94 / var(--un-text-opacity));}.green .badge-x:focus{--un-bg-opacity:1;background-color:rgb(34 197 94 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(255 255 255 / var(--un-text-opacity));}
+    color: rgb(74 222 128);
+  }
+
+  .green .badge-x:hover {
+    background-color: rgb(187 247 208);
+    color: rgb(34 197 94);
+  }
+
+  .green .badge-x:focus {
+    background-color: rgb(34 197 94);
+    color: rgb(255 255 255);
+  }
+
   .gray .badge-x {
-    --un-text-opacity:1;color:rgb(156 163 175 / var(--un-text-opacity));
-  }.gray .badge-x:hover{--un-bg-opacity:1;background-color:rgb(229 231 235 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(107 114 128 / var(--un-text-opacity));}.gray .badge-x:focus{--un-bg-opacity:1;background-color:rgb(107 114 128 / var(--un-bg-opacity));--un-text-opacity:1;color:rgb(255 255 255 / var(--un-text-opacity));}
+    color: rgb(156 163 175);
+  }
+
+  .gray .badge-x:hover {
+    background-color: rgb(229 231 235);
+    color: rgb(107 114 128);
+  }
+
+  .gray .badge-x:focus {
+    background-color: rgb(107 114 128);
+    color: rgb(255 255 255);
+  }
 </style>
