@@ -104,6 +104,9 @@ labels, screenshot it headless (browser-tools skill), and **look at it**. Reject
 - literal color squares, broken/blank images
 - image-word mismatches, boring/unclear photos
 - lexemes in scripts most devices lack fonts for (e.g. Wancho 𞋃𞋜 → tofu boxes)
+- human faces
+
+Jacob will check audio on the admin review page: `https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/<url-encoded storage_path>?alt=media`
 
 ## Step 5 — insert as 'suggested' on prod
 
