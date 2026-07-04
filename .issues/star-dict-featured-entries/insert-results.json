@@ -1,0 +1,1150 @@
+[
+  {
+    "id": "shauki",
+    "name": "Shauki",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "gutob",
+    "name": "Gutob",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "hazaragi",
+    "name": "Hazaragi Language",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "kihunde",
+    "name": "Kihunde",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "nukuoro",
+    "name": "Nukuoro",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "gta",
+    "name": "GtaɁ",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "apatani",
+    "name": "Apatani",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "matukar",
+    "name": "Matukar",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "werikyana",
+    "name": "Werikyana Tiriyó Prtgês Inglês",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "sengwer",
+    "name": "Sengwer",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "boienen-old-buhi-langua",
+    "name": "Boie'nen (Old Buhi Language)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "birhor",
+    "name": "Birhor",
+    "requested": 5,
+    "inserted": 5,
+    "existing_before": 0
+  },
+  {
+    "id": "kapingamarangi",
+    "name": "Kapingamarangi",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "kihehe",
+    "name": "Kihehe",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "babanki",
+    "name": "Babanki (Kejom)",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "owe",
+    "name": "Owé (a dialect of Yoruba)",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "san-sebastian-del-monte-m",
+    "name": "San Sebastián del Monte Mixtec (Tò’on Ndà’vi)",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "garifuna",
+    "name": "Garifuna",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "sora",
+    "name": "Sora",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "olukumi",
+    "name": "Olùkùmi",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "ishir-chamacoco",
+    "name": "Ɨshɨr (Chamacoco)",
+    "requested": 5,
+    "inserted": 5,
+    "existing_before": 0
+  },
+  {
+    "id": "kalanga",
+    "name": "Kalanga",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "chikunda",
+    "name": "Chikunda",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "mahasuvi",
+    "name": "Mahasuvi",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "mokilese",
+    "name": "Mokilese",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "northern-michif",
+    "name": "Northern Michif",
+    "requested": 4,
+    "inserted": 4,
+    "existing_before": 0
+  },
+  {
+    "id": "pingelapese",
+    "name": "Pingelapese",
+    "requested": 5,
+    "inserted": 5,
+    "existing_before": 0
+  },
+  {
+    "id": "haryanvi",
+    "name": "Haryanvi",
+    "requested": 4,
+    "inserted": 4,
+    "existing_before": 0
+  },
+  {
+    "id": "angika",
+    "name": "Angika",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "cinyungwe",
+    "name": "Cinyungwe",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "yokoim",
+    "name": "Yokoim",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "mam",
+    "name": "Mam",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "shona",
+    "name": "Shona",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "eyak",
+    "name": "dAXunhyuuga'",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "iquito",
+    "name": "Iquito",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "panim",
+    "name": "Panim",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "sepedi-living-dictionary",
+    "name": "Segagešo Living Dictionary",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "opata",
+    "name": "Opata",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "jewish-neo-aramaic",
+    "name": "Jewish Neo-Aramaic",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "sakapulteko",
+    "name": "Sakapulteko",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "kaqchikel",
+    "name": "Kaqchikel",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "qanjobal",
+    "name": "Txolilal Q’anej Yul Koq’anjob’al (Qʼanjobʼal)",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "chalchiteko",
+    "name": "Chalchiteko",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "louisiana-creole",
+    "name": "Louisiana Creole (Kouri-Vini)",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "kharia",
+    "name": "Kharia",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "ese-ejja",
+    "name": "Ese Ejja",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "malapulaya",
+    "name": "Malapulaya",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "taiengdictionary",
+    "name": "Tai-Eng-Thai-Viet",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "jaRhn6MAZim4Blvr1iEv",
+    "name": "Bahasa Lani",
+    "requested": 2,
+    "inserted": 2,
+    "existing_before": 0
+  },
+  {
+    "id": "oron",
+    "name": "Oro",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "qeqchi",
+    "name": "Q'eqchi'",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "arvanitika",
+    "name": "Arvanitika",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "poqomam",
+    "name": "Poqomam",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "johari",
+    "name": "Johari",
+    "requested": 3,
+    "inserted": 0,
+    "existing_before": 3
+  },
+  {
+    "id": "kiche",
+    "name": "K'iche'",
+    "requested": 2,
+    "inserted": 2,
+    "existing_before": 0
+  },
+  {
+    "id": "itza",
+    "name": "Itza",
+    "requested": 4,
+    "inserted": 4,
+    "existing_before": 0
+  },
+  {
+    "id": "uspanteko",
+    "name": "Uspanteko",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "yanesha",
+    "name": "Yanesha'",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "gaidhlig-uisge-dhearg",
+    "name": "Gàedhlig Uisge Dhearg",
+    "requested": 2,
+    "inserted": 2,
+    "existing_before": 0
+  },
+  {
+    "id": "san-francisco-yatee-zapo",
+    "name": "San Francisco Yateé Zapotec",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "tuun-javi-ixpantepec-ni",
+    "name": "Tu'un Javi (Ixpantepec Nieves Mixtec)",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "siriono",
+    "name": "Sirionó",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "wakhi",
+    "name": "Wakhi",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "houma-uma",
+    "name": "Houma (Uma')",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "badhani1",
+    "name": "Badhani",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "aewa",
+    "name": "Aewa",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "zapoteco-de-la-sierra-n",
+    "name": "Zapoteco de la sierra norte, San Juan Bautista Atepec, Oaxaca",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "south-african-gujarati",
+    "name": "South African Gujarati",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "woleaia",
+    "name": "Woleaian",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "lugbara",
+    "name": "Lugbara",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "quechuaboliviano",
+    "name": "Quechua del sur de Bolivia",
+    "requested": 4,
+    "inserted": 4,
+    "existing_before": 0
+  },
+  {
+    "id": "dompo",
+    "name": "Dompo",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "movima",
+    "name": "Movima",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "tepehua-de-huehuetla",
+    "name": "Tepehua de Huehuetla",
+    "requested": 6,
+    "inserted": 6,
+    "existing_before": 0
+  },
+  {
+    "id": "chittagonian",
+    "name": "Chittagonian",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "balti",
+    "name": "Balti",
+    "requested": 2,
+    "inserted": 2,
+    "existing_before": 0
+  },
+  {
+    "id": "atlas-vivo-de-mayunmarka",
+    "name": "Atlas Vivo de Mayunmarka (Quechua Ayacucho)",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "ngaju",
+    "name": "Ngaju",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "batsi-kop-tsotsil-tsot",
+    "name": "Tsotsil",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "sibe",
+    "name": "Manchu",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "tutelo-saponi",
+    "name": "Tutelo-Saponi Monacan",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "tiv",
+    "name": "Tiv",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "akateko",
+    "name": "Akateko",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "muthuvan",
+    "name": "Muthuvan",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "laz",
+    "name": "Laz",
+    "requested": 2,
+    "inserted": 0,
+    "existing_before": 2
+  },
+  {
+    "id": "torwali",
+    "name": "Torwali English Urdu Dictionary",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "remo",
+    "name": "Remo",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "iipay-aa",
+    "name": "'Iipay Aa",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "nasa-yuwe-páez",
+    "name": "Nasa yuwe (Páez)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "ho",
+    "name": "Ho",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "poqomchi",
+    "name": "Poqomchi' Tusq’orik",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "bum",
+    "name": "Bum",
+    "requested": 1,
+    "inserted": 1,
+    "existing_before": 0
+  },
+  {
+    "id": "namtrik-de-totoro",
+    "name": "Namtrik de Totoró",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "xyzyl",
+    "name": "Хызыл",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "monkox-besiro-chiquitano",
+    "name": "Monkox Besɨro (Chiquitano)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "upper-tanana",
+    "name": "Upper Tanana (Nee’aanèegn’)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "subi",
+    "name": "Subi",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "inupiaq",
+    "name": "Iñupiaq",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "temboka",
+    "name": "Temboka (a dialect of Melpa)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "ndau",
+    "name": "Ndau",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "a-fala",
+    "name": "A fala",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "judeo-kashani",
+    "name": "Judeo-Kashani",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "nambya",
+    "name": "Nambya",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "kibembe",
+    "name": "Kibembe",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "gwichin",
+    "name": "Gwich'in (Dinjii Zhuh K'yaa)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "daan-davi",
+    "name": "Da'an Davi",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "namolukese",
+    "name": "Namolukese (a dialect of Mortlockese)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "kholosi",
+    "name": "Kholosi",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "pohnpeian",
+    "name": "Pohnpeian",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "kosraean",
+    "name": "Kosraean",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "badaga",
+    "name": "Badaga",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "lungie",
+    "name": "Lung'Ie",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "achi",
+    "name": "Achi",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "tzutujil",
+    "name": "Tzʼutujil",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "tektiteko",
+    "name": "Tektiteko",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "santali",
+    "name": "Santali",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "ixil",
+    "name": "Ixil",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "ndebele",
+    "name": "Ndebele",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "kera-mundari",
+    "name": "KeraɁ Mundari",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "yapese",
+    "name": "Yapese",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "tehriyali",
+    "name": "Tehriyali",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "chorti",
+    "name": "Ch'orti'",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "brezhoneg",
+    "name": "Brezhoneg",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "kidawida",
+    "name": "Kidaw'ida",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "moba",
+    "name": "Mọ̀bà",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "chuj",
+    "name": "Chuj",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "mišär-tatar",
+    "name": "Mišär tatar",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "mazahua",
+    "name": "Mazahua",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "bugun",
+    "name": "Bugun",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "80CcDQ4DRyiYSPIWZ9Hy",
+    "name": "Diccionario de lengua Tehuelche (aonekko 'a'ien)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "naxi",
+    "name": "Naxi",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "mopan",
+    "name": "Mopan",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "háusi-kúta",
+    "name": "Háusi kúta (Yahgan language)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "quechua-chanka",
+    "name": "Quechua chanka",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "tjwao",
+    "name": "Tjwao",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "ngəmba",
+    "name": "Ngemba",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "pipil",
+    "name": "Pipil (nahuat)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "kipsigis",
+    "name": "Kipsigis",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "judeo-iraqi-arabic",
+    "name": "Judeo-Iraqi Arabic",
+    "requested": 2,
+    "inserted": 2,
+    "existing_before": 0
+  },
+  {
+    "id": "weri",
+    "name": "Weri",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "ngabere",
+    "name": "Ngäbere (Guaymí)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "arayeke-taino",
+    "name": "AraYeke Taino",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "kuman",
+    "name": "Kuman",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "khoikhoi",
+    "name": "Khoikhoi",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "wahgi-waghi",
+    "name": "Wahgi (Waghi)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "aren-aiome",
+    "name": "Aren (Aiome)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "idio-titan",
+    "name": "Idio Titan",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "naasioi",
+    "name": "Naasioi",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "muyuw-woodlark",
+    "name": "Muyuw (Woodlark)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "tsesungun",
+    "name": "Tsesungun",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "nalik",
+    "name": "Nalik",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "gaedhealg-thir-eoghain",
+    "name": "Gaedhealg Thír Eoghain",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "korku",
+    "name": "Korku",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "tuscarora",
+    "name": "Tuscarora",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "miahuatec-zapotec",
+    "name": "Miahuatec Zapotec (San Bartolomé Loxicha)",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "alu-kurumba",
+    "name": "Alu Kurumba",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "bezhta",
+    "name": "Bezhta",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "saliba",
+    "name": "Sáliba",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "mapudungun",
+    "name": "Mapudungun",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "mehri",
+    "name": "Mehri",
+    "requested": 2,
+    "inserted": 2,
+    "existing_before": 0
+  },
+  {
+    "id": "igbo",
+    "name": "Igbo",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "zapoteco-serrano",
+    "name": "Zapoteco serrano",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "uitoto",
+    "name": "Uitoto",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  },
+  {
+    "id": "baleswari-odia",
+    "name": "Baleswari Odia",
+    "requested": 3,
+    "inserted": 3,
+    "existing_before": 0
+  }
+]

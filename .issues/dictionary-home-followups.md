@@ -69,7 +69,12 @@ lazily CREATED inside that derived's first evaluation.
 ## Progress
 
 - ✅ v1 featured-entries module + routes + tests (10) + openapi (+ manifest test updated)
-- ⏸ prod backfill STAGED, blocked on deploy: prod shared.db has 34 `suggested` rows (0 approved —
+- ✅ APPLIED TO PROD 2026-07-04: after deploy, ran combined finalize (`/tmp/fe-finalize.js`) in
+  `sveltekit_blue`: inserted the 26 committed seed rows (status=approved, source=agent), flipped the
+  34 batch-#2 `suggested` rows → approved, and modal-backfilled all 60 (glosses+speaker 60/60,
+  example 10/60, phonetic 26/60). `/api/homepage/export` now returns 60 approved. Next deploy's bake
+  regenerates homepage-baked.json from these 60. shared.db backed up (`shared.db.bak-20260704-101058`).
+- ⏸ (superseded by the line above) prod backfill was STAGED, blocked on deploy: prod shared.db had 34 `suggested` rows (0 approved —
   the "26 approved" are local dev `seed-*` rows, zero id overlap with prod) and NO pivot columns
   yet (pivot migration `20260704a` is uncommitted). Script `/tmp/fe-backfill.js` (copy below):
   re-harvests modal fields per row from `/data/dictionaries/<id>.db` + UPDATEs in place;

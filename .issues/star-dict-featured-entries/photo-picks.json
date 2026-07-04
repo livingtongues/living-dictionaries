@@ -1,0 +1,2298 @@
+[
+  {
+    "id": "shauki",
+    "name": "Shauki",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "14pEyTV4zGnbfdrLcgAB",
+        "lexeme": "बरफवाल तेंदुआ/बाग",
+        "gloss": "wild animals; snow leopard"
+      },
+      {
+        "entry_id": "0b1lwAPXtv8G44D66IYk",
+        "lexeme": "भ्यकौन",
+        "gloss": "wild animals, frog"
+      },
+      {
+        "entry_id": "2cewIJ1wlGTsIdrNvy02",
+        "lexeme": "पाढा (न- एक हिरन)",
+        "gloss": "Wild animals; hog-deer"
+      },
+      {
+        "entry_id": "11HbSxZ8jwbRrpxj6aqS",
+        "lexeme": "तौमोक तिपरि",
+        "gloss": "utensils (metal), copper kettle"
+      },
+      {
+        "entry_id": "0948a7e0-2b38-4f28-99e0-af3a17a4bff3",
+        "lexeme": "चमकु; चोमकु",
+        "gloss": "small cylindrical cotton bag"
+      },
+      {
+        "entry_id": "37Sz5998TrablHfdBuFR",
+        "lexeme": "छिच्यु",
+        "gloss": "Cottage industry artifacts; spindle"
+      }
+    ]
+  },
+  {
+    "id": "gutob",
+    "name": "Gutob",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "2ojk0OxozkKnaov9pbsZ",
+        "lexeme": "lablaʔ",
+        "gloss": "butterfly"
+      },
+      {
+        "entry_id": "4PaKjdmbCDyMiNKh6LLU",
+        "lexeme": "aʤuɖaɽi ʤeta",
+        "gloss": "large stone grinder used for dal, maize, etc."
+      },
+      {
+        "entry_id": "4zd1v6kOoQDOCfRIRfxo",
+        "lexeme": "ninoŋkila(ʔ)",
+        "gloss": "yoke"
+      },
+      {
+        "entry_id": "2SD08fpq47lFMh03SMWZ",
+        "lexeme": "olna(ʔ)",
+        "gloss": "hook"
+      },
+      {
+        "entry_id": "3GgoS5SICmrO3nPVaImK",
+        "lexeme": "murɖi(ʔ)",
+        "gloss": "storage basket"
+      },
+      {
+        "entry_id": "BJXIYsWFA8Es7n5psc1K",
+        "lexeme": "karsali",
+        "gloss": "hairy fig (ficus hispida)"
+      }
+    ]
+  },
+  {
+    "id": "hazaragi",
+    "name": "Hazaragi Language",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "Xup0RjtfbztxaTDXs11a",
+        "lexeme": "Aa'sal",
+        "gloss": "honey"
+      },
+      {
+        "entry_id": "Rh7K1fFAYoge4ER5gJM1",
+        "lexeme": "Aahin+gar",
+        "gloss": "Black smith"
+      },
+      {
+        "entry_id": "cyvuEZWxSqPQvKRJxUXs",
+        "lexeme": "Alwa",
+        "gloss": "Halwa"
+      },
+      {
+        "entry_id": "TKkX6e1NYLpAj696wX0G",
+        "lexeme": "ather",
+        "gloss": "Perfume"
+      },
+      {
+        "entry_id": "wVratOpqLKC90BLsF17p",
+        "lexeme": "Aaghil",
+        "gloss": "A Hamlet"
+      },
+      {
+        "entry_id": "fB0eTXDeNyW2j7apnbhQ",
+        "lexeme": "Aachagh",
+        "gloss": "Tree branch"
+      }
+    ]
+  },
+  {
+    "id": "kihunde",
+    "name": "Kihunde",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "dttsd0KGP3lD0rGdGmM7",
+        "lexeme": "Nyakatama",
+        "gloss": "Léopard"
+      },
+      {
+        "entry_id": "XTkgGQfnRrGrxu7KVFDe",
+        "lexeme": "Tukutuku",
+        "gloss": "Moto"
+      },
+      {
+        "entry_id": "YelLp11TqPRZnv2vxeD9",
+        "lexeme": "teête / mateête",
+        "gloss": "courge"
+      },
+      {
+        "entry_id": "V5BoluEow4ufADxwMvVk",
+        "lexeme": "fí",
+        "gloss": "poisson"
+      },
+      {
+        "entry_id": "AR6TE8vFQ2z5N5gUxc2s",
+        "lexeme": "kahanda /  tuhanda",
+        "gloss": "Flutter à corne, trompette, téléphone"
+      },
+      {
+        "entry_id": "Ce1JtisrBtNcIPtLbsN8",
+        "lexeme": "ngulube",
+        "gloss": "porc, viande de porc"
+      }
+    ]
+  },
+  {
+    "id": "nukuoro",
+    "name": "Nukuoro",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "94ZGUuBgNLQzgh5TZobi",
+        "lexeme": "buu-ili",
+        "gloss": "type of shell (Triton's trumpet)"
+      },
+      {
+        "entry_id": "TyTS8hSbvYfJCO2Mr0Ur",
+        "lexeme": "adu",
+        "gloss": "fish sp.: skipjack tuna"
+      },
+      {
+        "entry_id": "HLfv12YSw5Pff0pCZf8g",
+        "lexeme": "balu-udu",
+        "gloss": "fish sp.: snapper"
+      },
+      {
+        "entry_id": "DwYzA3fTdjhYLNtLrNFq",
+        "lexeme": "tibidibi",
+        "gloss": "ball woven from coconut palm, used for sport"
+      },
+      {
+        "entry_id": "ZB2it0vqTK2Pt2KGW8yP",
+        "lexeme": "duai",
+        "gloss": "bench fitted with a tool to grate coconuts"
+      },
+      {
+        "entry_id": "d6vdpi8kVU7k17VJfkE8",
+        "lexeme": "daagoli",
+        "gloss": "plant sp.: swamp taro (cyrtosperma merkusii)"
+      }
+    ]
+  },
+  {
+    "id": "gta",
+    "name": "GtaɁ",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "0yztba7GEOa8RX6rnMvI",
+        "lexeme": "iŋkʰiʔdi",
+        "gloss": "hydrophylax malabaricus"
+      },
+      {
+        "entry_id": "0I8lngP370XfFEn1VRtZ",
+        "lexeme": "tʃi+hɽæʔ=tǝnǝ nlaʔ-pog",
+        "gloss": "Charaxes bernardus, tawny rajah butterfly"
+      },
+      {
+        "entry_id": "0886ihHhQ7YptC6X8V95",
+        "lexeme": "kabrahela",
+        "gloss": "Spotted Deer"
+      },
+      {
+        "entry_id": "0R9dunUwXjm7ELi1aIYo",
+        "lexeme": "õsrali",
+        "gloss": "Bar headed goose"
+      },
+      {
+        "entry_id": "0jFWzH5eamLD03iWc5ir",
+        "lexeme": "buʈuhaʔ",
+        "gloss": "horse mackerel"
+      },
+      {
+        "entry_id": "07dZMntLXZsGB1rs06Ii",
+        "lexeme": "kʰoɽesulacʰucʰuiɽe",
+        "gloss": "Syzygium cumini"
+      }
+    ]
+  },
+  {
+    "id": "apatani",
+    "name": "Apatani",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "2zo0LMIFXnBvl64PpFVb",
+        "lexeme": "kekuru",
+        "gloss": "bulbul; nightingale"
+      },
+      {
+        "entry_id": "08jW6kNXzIy6VPBiKjW7",
+        "lexeme": "leyu",
+        "gloss": "a small path leading to a village"
+      },
+      {
+        "entry_id": "2CkL4kY1l5RjDjnUE9N6",
+        "lexeme": "tado' tasañ",
+        "gloss": "a variety of yellow beads"
+      },
+      {
+        "entry_id": "3Vs9p0eT7MSfyGvuDFD0",
+        "lexeme": "baciñ",
+        "gloss": "box myrtle (Myrica esculenta/Myrica nagi)"
+      },
+      {
+        "entry_id": "0RxeKFFHLumNF6BHpUnd",
+        "lexeme": "lwha'",
+        "gloss": "small cane basket"
+      },
+      {
+        "entry_id": "33ltAAIXOW9T6KsZkioQ",
+        "lexeme": "yo badè",
+        "gloss": "ceiling rack for storing meat"
+      }
+    ]
+  },
+  {
+    "id": "matukar",
+    "name": "Matukar",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "rVy3NnMv5UE1ldUvmis9",
+        "lexeme": "wag",
+        "gloss": "canoe"
+      },
+      {
+        "entry_id": "aobRKkf5XWY3eMjHjDUJ",
+        "lexeme": "dawa",
+        "gloss": "spear for fishing"
+      },
+      {
+        "entry_id": "gt1tsJazFKGZOrrEsHUs",
+        "lexeme": "yad",
+        "gloss": "outrigger cross boom, part of a canoe"
+      },
+      {
+        "entry_id": "iYRACDFqYMsXqKObRmxL",
+        "lexeme": "sam",
+        "gloss": "float or outrigger, part of a canoe"
+      },
+      {
+        "entry_id": "GLwkDN5ec6XVnPDfI0y9",
+        "lexeme": "sal",
+        "gloss": "bench, seating area of canoe"
+      },
+      {
+        "entry_id": "oW0wOQjjR7VvXXAxJeSa",
+        "lexeme": "dom",
+        "gloss": "connecting pegs to outrigger, part of a canoe"
+      }
+    ]
+  },
+  {
+    "id": "werikyana",
+    "name": "Werikyana Tiriyó Prtgês Inglês",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "Fdp2DzkbcZuEyjKPnYQm",
+        "lexeme": "Pewu",
+        "gloss": "galo da serra/passaro"
+      },
+      {
+        "entry_id": "wXstpmB1gV5dQSBo94CH",
+        "lexeme": "watwa",
+        "gloss": "jacaré"
+      },
+      {
+        "entry_id": "4GS3cfdwupVVeFdsNT41",
+        "lexeme": "wetu",
+        "gloss": "woodpecker (sp)"
+      },
+      {
+        "entry_id": "3f9cd28f-2134-48f8-a370-2be441c31a97",
+        "lexeme": "txiwiyuru",
+        "gloss": "indian head ginger"
+      },
+      {
+        "entry_id": "xXJOJc8KWriRnRayOEJ7",
+        "lexeme": "pïrotxi'katono",
+        "gloss": "banana (sp?)"
+      },
+      {
+        "entry_id": "zOoM47a5yAYjcAzoDPEd",
+        "lexeme": "ahayi",
+        "gloss": "custard apple"
+      }
+    ]
+  },
+  {
+    "id": "sengwer",
+    "name": "Sengwer",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "02WaQoomP0nl8HWsw8vp",
+        "lexeme": "kimeeng’wa",
+        "gloss": "firefly (Lampyridae)"
+      },
+      {
+        "entry_id": "2yMrW1f26jR5AReD2bAc",
+        "lexeme": "chuuyna",
+        "gloss": "Umbrella thorn"
+      },
+      {
+        "entry_id": "1giIb8oLO6PQgJzL4TmW",
+        "lexeme": "chēēlēēlmoo",
+        "gloss": "European pied flycatcher"
+      },
+      {
+        "entry_id": "3ETQRAqprojlLSTFJQum",
+        "lexeme": "kēēchiiryo",
+        "gloss": "sheep"
+      },
+      {
+        "entry_id": "0awqqAsxyrzElR4UajgR",
+        "lexeme": "mōōsōōng’nyoo",
+        "gloss": "sorghum"
+      },
+      {
+        "entry_id": "1pOZdyMYgqdgEj8C4ewS",
+        "lexeme": "tōōm",
+        "gloss": "bushpig"
+      }
+    ]
+  },
+  {
+    "id": "boienen-old-buhi-langua",
+    "name": "Boie'nen (Old Buhi Language)",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "hDADjJOJPY7metKRoiYm",
+        "lexeme": "agaken",
+        "gloss": "piglet"
+      },
+      {
+        "entry_id": "0a1de81d-e91c-4d66-8814-f2588a4bcc98",
+        "lexeme": "attas",
+        "gloss": "climbing perch"
+      },
+      {
+        "entry_id": "VrTknNxqev9B6HqcZmdW",
+        "lexeme": "agin",
+        "gloss": "child, offspring"
+      }
+    ]
+  },
+  {
+    "id": "birhor",
+    "name": "Birhor",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "4Ipv6Cdjf6HuHC2SSf2b",
+        "lexeme": "tut",
+        "gloss": "1. mulberry, Morus indica L.  2. berry"
+      },
+      {
+        "entry_id": "sqTpa5acEI6dkJV7C8LU",
+        "lexeme": "mat",
+        "gloss": "Bambusa bambos (L.) Voss"
+      },
+      {
+        "entry_id": "1WHapX0E84z6m3mif0wa",
+        "lexeme": "omonnaʔ",
+        "gloss": "1. sprout (n.)   2. seedling   3. offshoot"
+      },
+      {
+        "entry_id": "1oaeTEBu6NxKVvlxGvF5",
+        "lexeme": "dʰanija",
+        "gloss": "coriander, Coriandrum sativum L."
+      },
+      {
+        "entry_id": "3dAPQlAnMbdO4NkbuxBc",
+        "lexeme": "munga daru",
+        "gloss": "Moringa oleifera Lam."
+      }
+    ]
+  },
+  {
+    "id": "kapingamarangi",
+    "name": "Kapingamarangi",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "1XyFH9cDEgvseOXC8tIS",
+        "lexeme": "lagau duduia",
+        "gloss": "tree"
+      },
+      {
+        "entry_id": "531DvgbwvRv4e5PEnew4",
+        "lexeme": "mangha",
+        "gloss": "branch"
+      },
+      {
+        "entry_id": "2ydLnEbQwG1FJ7zG26eR",
+        "lexeme": "langi",
+        "gloss": "sky"
+      },
+      {
+        "entry_id": "25xHQjlwQI2SAzICoGqR",
+        "lexeme": "lehu",
+        "gloss": "lime"
+      },
+      {
+        "entry_id": "5lG83OiaVXSDobnoNNUd",
+        "lexeme": "heleheu",
+        "gloss": "pandanus fruit"
+      },
+      {
+        "entry_id": "5SDYacBHskrfcM5hf50o",
+        "lexeme": "madapua",
+        "gloss": "pond"
+      }
+    ]
+  },
+  {
+    "id": "kihehe",
+    "name": "Kihehe",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "3cLBAmcT1cXv1ZeWbKK1",
+        "lexeme": "nzogolo",
+        "gloss": "rooster"
+      },
+      {
+        "entry_id": "4stWI69BPchiGbNHwUvS",
+        "lexeme": "litoondwe",
+        "gloss": "squash"
+      },
+      {
+        "entry_id": "0h9uEbBbTJXCPLfGSKOY",
+        "lexeme": "lipindigeesi",
+        "gloss": "peach"
+      },
+      {
+        "entry_id": "3iqcaHdHd89wzrc9pjdF",
+        "lexeme": "lumwino",
+        "gloss": "berry"
+      },
+      {
+        "entry_id": "6F9nxmCsabKJBSHxsLy5",
+        "lexeme": "livafi",
+        "gloss": "hairy caterpillar"
+      },
+      {
+        "entry_id": "7wRSmIjJKsMpIp9qKdVV",
+        "lexeme": "kisaande",
+        "gloss": "barn"
+      }
+    ]
+  },
+  {
+    "id": "babanki",
+    "name": "Babanki (Kejom)",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "A0DttX7lwsV5ZH5PPP4P",
+        "lexeme": "kəmfùŋ",
+        "gloss": "beettle"
+      },
+      {
+        "entry_id": "29r5AyBA5aGUREI21D7p",
+        "lexeme": "àdzòŋ",
+        "gloss": "plum"
+      },
+      {
+        "entry_id": "EUHVvVWKjeWR6I5cLQly",
+        "lexeme": "fəngwòlè",
+        "gloss": "mango"
+      },
+      {
+        "entry_id": "BrPDoMk36ffdqznii5mT",
+        "lexeme": "kətʉ kə əngòm",
+        "gloss": "regime (of banana, plantain)"
+      },
+      {
+        "entry_id": "1ZISKzln4vy84Yy3JhbY",
+        "lexeme": "kəfo kə zhɨ kə",
+        "gloss": "food"
+      },
+      {
+        "entry_id": "8JyMEMOaXNSwsedfgMFO",
+        "lexeme": "kəbònə̀",
+        "gloss": "calabash, bowl"
+      }
+    ]
+  },
+  {
+    "id": "owe",
+    "name": "Owé (a dialect of Yoruba)",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "wsLAVBjIh5vNoLVjK7eT",
+        "lexeme": "ẹ̀gẹ̀dẹ̀ wẹrẹ",
+        "gloss": "banana"
+      }
+    ]
+  },
+  {
+    "id": "san-sebastian-del-monte-m",
+    "name": "San Sebastián del Monte Mixtec (Tò’on Ndà’vi)",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "8Rl4sx33obHRu7YL5td4",
+        "lexeme": "ita ndìkandì",
+        "gloss": "sunflower"
+      },
+      {
+        "entry_id": "0E0nlrVL23uRFlll7wKc",
+        "lexeme": "ndivà'yí",
+        "gloss": "coyote"
+      },
+      {
+        "entry_id": "7XtLEJMhPIqq2mifh88w",
+        "lexeme": "tìna",
+        "gloss": "dog"
+      },
+      {
+        "entry_id": "0gOI3K538tSKKfSNx1IC",
+        "lexeme": "ñì'in",
+        "gloss": "chick"
+      },
+      {
+        "entry_id": "2NTkSQQ6X6KQOgOR5QTl",
+        "lexeme": "tìyòkó",
+        "gloss": "black vulture"
+      },
+      {
+        "entry_id": "6nl28W95Mp5G3YxzDj5y",
+        "lexeme": "tìkòlàskó",
+        "gloss": "crab"
+      }
+    ]
+  },
+  {
+    "id": "garifuna",
+    "name": "Garifuna",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "5jpwxoDeg2OoGcfcbbDX",
+        "lexeme": "barána",
+        "gloss": "sea; ocean"
+      },
+      {
+        "entry_id": "BWNTQifhQimjuM21iRRN",
+        "lexeme": "sísira",
+        "gloss": "rattle (for music), shaka, maraca"
+      },
+      {
+        "entry_id": "CtgtCnh5eJXmMctNyMD2",
+        "lexeme": "cherígi",
+        "gloss": "grapefruit"
+      },
+      {
+        "entry_id": "DJMDyFPrbMwM4MO1fWUS",
+        "lexeme": "fanídira",
+        "gloss": "flag"
+      },
+      {
+        "entry_id": "Agy8l3Ao45MFdKNm6UQj",
+        "lexeme": "haláü",
+        "gloss": "chair"
+      },
+      {
+        "entry_id": "PHPrlrtOQh7HPElxN1Mv",
+        "lexeme": "kaléra",
+        "gloss": "ladder"
+      }
+    ]
+  },
+  {
+    "id": "sora",
+    "name": "Sora",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "8Va7icoImi5B4bCAQqoq",
+        "lexeme": "arsi",
+        "gloss": "black faced monkey"
+      },
+      {
+        "entry_id": "ByeRmrYPVY1Hzz95CrQo",
+        "lexeme": "kupa per",
+        "gloss": "grasshopper"
+      },
+      {
+        "entry_id": "21WBYtvgoFSwAunCjjI0",
+        "lexeme": "kumme'",
+        "gloss": "goat"
+      },
+      {
+        "entry_id": "EK8VLV50TZqHWtHl80Ym",
+        "lexeme": "taŋlijenji",
+        "gloss": "cows"
+      },
+      {
+        "entry_id": "0YRlIBQt7hSJh7aUMzwh",
+        "lexeme": "lolo",
+        "gloss": "swidden cultivation"
+      },
+      {
+        "entry_id": "OO7jsAeYBNy5RhFN1VRJ",
+        "lexeme": "kənso'",
+        "gloss": "dog"
+      }
+    ]
+  },
+  {
+    "id": "olukumi",
+    "name": "Olùkùmi",
+    "tier": "photo_only_fallback",
+    "chosen": [
+      {
+        "entry_id": "2ahi22dGHPrOWaFWDYXB",
+        "lexeme": "ázá",
+        "gloss": "dog"
+      },
+      {
+        "entry_id": "3IBLoyUpveOzLSJIlnzL",
+        "lexeme": "àkèré",
+        "gloss": "frog, toad"
+      },
+      {
+        "entry_id": "0f3bo0Wj31ZUSwVitomU",
+        "lexeme": "oromẹ gwere",
+        "gloss": "lime"
+      },
+      {
+        "entry_id": "2Qm7Kn6LzYftdSUinwq8",
+        "lexeme": "ẹ̀dọ̀n",
+        "gloss": "axe"
+      },
+      {
+        "entry_id": "0rdX2U9gPMHNT7TVbB4L",
+        "lexeme": "aghọ̀hẹ̀",
+        "gloss": "shoe"
+      },
+      {
+        "entry_id": "0pk5xgOkMBAQl1jsv0gq",
+        "lexeme": "ẹfun",
+        "gloss": "chalk"
+      }
+    ]
+  },
+  {
+    "id": "ishir-chamacoco",
+    "name": "Ɨshɨr (Chamacoco)",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "ArZZbKuTrJGzQuZijqaV",
+        "lexeme": "hmeyto",
+        "gloss": "Amazonian motmot"
+      },
+      {
+        "entry_id": "OShdGAFORtiab7vIkKKU",
+        "lexeme": "tho",
+        "gloss": "black-collared hawk or other hawks"
+      },
+      {
+        "entry_id": "CeWRGZZwnAiIUvzk72Nf",
+        "lexeme": "yokomta",
+        "gloss": "ball armadillo"
+      },
+      {
+        "entry_id": "h6goTyzxSErrLMPnk2FL",
+        "lexeme": "pem",
+        "gloss": "common gallinule or spot-flanked gallinule"
+      },
+      {
+        "entry_id": "XoNRuLJ2Ez1Uzf69oe4P",
+        "lexeme": "tow",
+        "gloss": "black-collard hawk; Busarellus nigricollis"
+      }
+    ]
+  },
+  {
+    "id": "kalanga",
+    "name": "Kalanga",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "bYJxaUxfc5Ym3xg1tdov",
+        "lexeme": "Zilawa",
+        "gloss": "Kudu"
+      }
+    ]
+  },
+  {
+    "id": "chikunda",
+    "name": "Chikunda",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "2J16Srmt5pEugJZXBRWW",
+        "lexeme": "ng'ombe",
+        "gloss": "cow"
+      },
+      {
+        "entry_id": "032k6t2m8ji9TsD4aby2",
+        "lexeme": "ngoma",
+        "gloss": "drum"
+      },
+      {
+        "entry_id": "68gh2h93iKybWlwlMt2D",
+        "lexeme": "mbaula",
+        "gloss": "charcoal stove"
+      },
+      {
+        "entry_id": "1YOLUNsD3N4dNClFr9Gc",
+        "lexeme": "bonongwe",
+        "gloss": "thurnberg's amaranthus"
+      },
+      {
+        "entry_id": "1uGvucAoHnksOOJkIsAx",
+        "lexeme": "ntsekese",
+        "gloss": "Hen"
+      },
+      {
+        "entry_id": "1fLputT5pBhiNIMIlAqt",
+        "lexeme": "chongololo",
+        "gloss": "millipede"
+      }
+    ]
+  },
+  {
+    "id": "mahasuvi",
+    "name": "Mahasuvi",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "pszJqsRsKsurODBJcCIX",
+        "lexeme": "कूकरी",
+        "gloss": "Bitch"
+      }
+    ]
+  },
+  {
+    "id": "mokilese",
+    "name": "Mokilese",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "8V9pVchEFVjn4M3mp64n",
+        "lexeme": "pohp",
+        "gloss": "clown triggerfish"
+      },
+      {
+        "entry_id": "j8akX8dNgtQLSMhkUSsj",
+        "lexeme": "nambwo",
+        "gloss": "pennant bannerfish"
+      },
+      {
+        "entry_id": "4uxgwTKSnSxvRWaeyAa4",
+        "lexeme": "elmoan",
+        "gloss": "mangrove crab"
+      },
+      {
+        "entry_id": "fU3QFYnVWGpUy6TqNG7S",
+        "lexeme": "soasoak",
+        "gloss": "gecko"
+      },
+      {
+        "entry_id": "TCcLT5cx22zt45c7GeyJ",
+        "lexeme": "moai",
+        "gloss": "breadfruit tree"
+      },
+      {
+        "entry_id": "ehhZJ6Ubl5YSzSnnYCol",
+        "lexeme": "pwu",
+        "gloss": "betel nut"
+      }
+    ]
+  },
+  {
+    "id": "northern-michif",
+    "name": "Northern Michif",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "0HpjUyWcMMgWVTYGqNCv",
+        "lexeme": "onîmihitowak",
+        "gloss": "Northern Lights"
+      },
+      {
+        "entry_id": "05nDdG4KWFdMLGb4AMbl",
+        "lexeme": "osiķiyâsîs",
+        "gloss": "salamander"
+      },
+      {
+        "entry_id": "0YRNvFWsUEeItTpl7JRQ",
+        "lexeme": "sîpiyâķanî",
+        "gloss": "Wash the dishes."
+      },
+      {
+        "entry_id": "0aGEPFxKDtd3N75p6jXd",
+        "lexeme": "kanâtan cî l’ tarrshőň?`",
+        "gloss": "Is the dish towel clean?"
+      }
+    ]
+  },
+  {
+    "id": "pingelapese",
+    "name": "Pingelapese",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "QTTxv2KfvhSvrVQXTpqt",
+        "lexeme": "mei",
+        "gloss": "breadfruit"
+      },
+      {
+        "entry_id": "WDDGvF1HmAE361pLnFLs",
+        "lexeme": "irip",
+        "gloss": "fan"
+      },
+      {
+        "entry_id": "7zscrOIDSkmeISOUT9im",
+        "lexeme": "ni",
+        "gloss": "coconut tree"
+      },
+      {
+        "entry_id": "NY2nYXIS2BuiklWkj3TJ",
+        "lexeme": "ahl",
+        "gloss": "road"
+      },
+      {
+        "entry_id": "UWqWYaFrRaTQ1WOB2vCe",
+        "lexeme": "padil",
+        "gloss": "paddle"
+      }
+    ]
+  },
+  {
+    "id": "haryanvi",
+    "name": "Haryanvi",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "WOiG2C0umHLCzY2te77G",
+        "lexeme": "गरंडफांक",
+        "gloss": "Kingfisher"
+      },
+      {
+        "entry_id": "LiMa2S6ey6ZoQuVE710t",
+        "lexeme": "अंजळ",
+        "gloss": "Food & Water, one meal at a time."
+      },
+      {
+        "entry_id": "3PyDPYNZjQwqJIdLX0MA",
+        "lexeme": "सामणूं",
+        "gloss": "Crop of kharif"
+      },
+      {
+        "entry_id": "dJP7rNrLGWhWhimLJm1v",
+        "lexeme": "अझण",
+        "gloss": "she-goat"
+      }
+    ]
+  },
+  {
+    "id": "angika",
+    "name": "Angika",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "yvFOHTCl4qk7x9bunzkX",
+        "lexeme": "बाएल",
+        "gloss": "Corncob"
+      },
+      {
+        "entry_id": "KSGtOeRI6ND7joiu2lcV",
+        "lexeme": "ताखा",
+        "gloss": "सामान रखने के लिए दीवार में बनी जगह"
+      },
+      {
+        "entry_id": "uyKA4kVjx1KA8WDv7Fhi",
+        "lexeme": "लुत्ती",
+        "gloss": "spark"
+      },
+      {
+        "entry_id": "FzDic6MIwZuYwjCYPmsV",
+        "lexeme": "खोंटा",
+        "gloss": "big, black ant"
+      },
+      {
+        "entry_id": "A2vYb9WvrCdtzYyW5t2N",
+        "lexeme": "हथकलडोमनी",
+        "gloss": "a tool to close the door"
+      },
+      {
+        "entry_id": "oRTf6yhr4D53rVit89dm",
+        "lexeme": "सजिया",
+        "gloss": "flower basket"
+      }
+    ]
+  },
+  {
+    "id": "cinyungwe",
+    "name": "Cinyungwe",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "4uDdqA6txHDLKXAbdTGK",
+        "lexeme": "ngoma",
+        "gloss": "drums"
+      },
+      {
+        "entry_id": "6Wg7ZMDmRqW3Et1zJumz",
+        "lexeme": "mwadiya",
+        "gloss": "boats"
+      },
+      {
+        "entry_id": "6RbYaMAivbplfOwQfJ6M",
+        "lexeme": "yadyo",
+        "gloss": "garlic"
+      },
+      {
+        "entry_id": "5a2eNgu2n9QbFrtyFZKl",
+        "lexeme": "dumvu",
+        "gloss": "type of grass"
+      },
+      {
+        "entry_id": "8T1Dt0R1JiH8sGfAPpYs",
+        "lexeme": "ng'ombe",
+        "gloss": "cow"
+      },
+      {
+        "entry_id": "4Rp9noM0BEbgAMZonWhu",
+        "lexeme": "nkkuyu",
+        "gloss": "figs"
+      }
+    ]
+  },
+  {
+    "id": "yokoim",
+    "name": "Yokoim",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "5LEACDmVmibm5rz7CEVy",
+        "lexeme": "usapi",
+        "gloss": "flame of the forest flower"
+      },
+      {
+        "entry_id": "7Hf9zyj5fUzOz7HcsUOk",
+        "lexeme": "sumbun",
+        "gloss": "cloud or sky (pl. clouds)"
+      },
+      {
+        "entry_id": "C2w4in9Wgu9dDdV7AUXK",
+        "lexeme": "sandambɨnmɨndɨs sɨndi",
+        "gloss": "spider web"
+      },
+      {
+        "entry_id": "4vb30wjmzBBkSpbwpg1R",
+        "lexeme": "nʤɨŋgi klibaj",
+        "gloss": "two small fish baskets"
+      },
+      {
+        "entry_id": "08L9WpX3im3vVnvBguNy",
+        "lexeme": "apman",
+        "gloss": "roof posts"
+      },
+      {
+        "entry_id": "BApoZjC7EFrgrOhCGdpH",
+        "lexeme": "ʧanʤɨlɨma",
+        "gloss": "flame of the forest flower"
+      }
+    ]
+  },
+  {
+    "id": "mam",
+    "name": "Mam",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "0oyJtOHk4H4t1lgYVNQp",
+        "lexeme": "tz'awin",
+        "gloss": "sand"
+      }
+    ]
+  },
+  {
+    "id": "shona",
+    "name": "Shona",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "ckCQ313mRYQO4jLwrPaK",
+        "lexeme": "dongo",
+        "gloss": "abandoned home"
+      }
+    ]
+  },
+  {
+    "id": "eyak",
+    "name": "dAXunhyuuga'",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "3Si3qfoxkKDjjTWGkQVe",
+        "lexeme": "sahs",
+        "gloss": "sea otter"
+      },
+      {
+        "entry_id": "vS3G0NhfEsgxPC3v4ILR",
+        "lexeme": "cha’ch’",
+        "gloss": "red salmon, sockeye"
+      },
+      {
+        "entry_id": "PiSVMaLQgjcFclKW8Ldn",
+        "lexeme": "q’ee’shk’",
+        "gloss": "Stellar's jay, \"bluejay\""
+      },
+      {
+        "entry_id": "itwjM2gG4Txs59ICVdhp",
+        "lexeme": "dlaach’e’",
+        "gloss": "yellowey rockfish, \"red snapper\""
+      },
+      {
+        "entry_id": "2w1yfculhJRgMhmgEG8m",
+        "lexeme": "GALAtsitl’Xa’ yaan’Lt’ahL",
+        "gloss": "fireweed"
+      },
+      {
+        "entry_id": "kHPlyqVB6wu3IpWhXiVF",
+        "lexeme": "AnAXAnAG",
+        "gloss": "Alaganik"
+      }
+    ]
+  },
+  {
+    "id": "iquito",
+    "name": "Iquito",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "2St0guydat7vgM8rRNm9",
+        "lexeme": "kurɨ́ɨ̀sì",
+        "gloss": "monk saki monkey"
+      },
+      {
+        "entry_id": "0S8UiWtONyjUrEZFt9K4",
+        "lexeme": "jimɨɨti iriáàkù",
+        "gloss": "neotropical pygmy squirrel"
+      },
+      {
+        "entry_id": "1xfS3AegEbHuq5Hg9lgF",
+        "lexeme": "nɨsikárììyɨ",
+        "gloss": "coral snake"
+      },
+      {
+        "entry_id": "2wYj5tPv7GRo6856cvIw",
+        "lexeme": "takina",
+        "gloss": "lake, oxbow lake"
+      },
+      {
+        "entry_id": "0kwIqgkEg0Fm5YBiliGl",
+        "lexeme": "panakaja",
+        "gloss": "1. dew, 2. mist, fog"
+      },
+      {
+        "entry_id": "115TDXgFtgC5Zkq5eo2f",
+        "lexeme": "miyɨ́ɨ́kɨ̀ɨ̀ri",
+        "gloss": "sábalo grande"
+      }
+    ]
+  },
+  {
+    "id": "panim",
+    "name": "Panim",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "w071jEhGw9yvdrqCxKXL",
+        "lexeme": "zɔl",
+        "gloss": "bilum (PNG woven bag)"
+      }
+    ]
+  },
+  {
+    "id": "sepedi-living-dictionary",
+    "name": "Segagešo Living Dictionary",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "0rRJsv4q1akFU0KpiiRK",
+        "lexeme": "khomo",
+        "gloss": "cow"
+      },
+      {
+        "entry_id": "HIGdg6qMhNwAsJFBGQZP",
+        "lexeme": "sego, mokgopu",
+        "gloss": "calabash"
+      },
+      {
+        "entry_id": "9Ijgvzpg5WHGjXo8OOuE",
+        "lexeme": "khobe",
+        "gloss": "fish"
+      },
+      {
+        "entry_id": "7HaRflV2BlwX22mcnGFl",
+        "lexeme": "ala",
+        "gloss": "make a bed"
+      },
+      {
+        "entry_id": "Ctbfzp4U4fB8ubXjCbYv",
+        "lexeme": "ala",
+        "gloss": "spread (a table cloth)"
+      },
+      {
+        "entry_id": "QnyLO0KvPTgWUnwg4dTJ",
+        "lexeme": "moropa",
+        "gloss": "drum"
+      }
+    ]
+  },
+  {
+    "id": "opata",
+    "name": "Opata",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "KLh1fR1GWFwqVQiPARTy",
+        "lexeme": "Äguït",
+        "gloss": "Moon"
+      }
+    ]
+  },
+  {
+    "id": "jewish-neo-aramaic",
+    "name": "Jewish Neo-Aramaic",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "pvSQl9HgewGbqNzlSmLx",
+        "lexeme": "אַרמוֹניֵה",
+        "gloss": "pomegranates"
+      },
+      {
+        "entry_id": "HhGaOzsiT0agiF9NGFw1",
+        "lexeme": "אוֹטָאק",
+        "gloss": "room"
+      },
+      {
+        "entry_id": "7oKdMtNNLZ7AH1gr6JxF",
+        "lexeme": "אָזִיַאת",
+        "gloss": "mourning"
+      }
+    ]
+  },
+  {
+    "id": "sakapulteko",
+    "name": "Sakapulteko",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "AJ1ocQJexNcIV2GqAWe6",
+        "lexeme": "Ploow",
+        "gloss": "sea"
+      },
+      {
+        "entry_id": "AOeJPXukSqYKsYnvIITb",
+        "lexeme": "Chooy",
+        "gloss": "lake"
+      },
+      {
+        "entry_id": "27H524snmFLMgWTOoAGH",
+        "lexeme": "B'or",
+        "gloss": "donkey"
+      },
+      {
+        "entry_id": "ADI9oRAGKg5lfq3RwMwH",
+        "lexeme": "Seb'",
+        "gloss": "smoke"
+      },
+      {
+        "entry_id": "9BcsemwyQB3GxGWyxCJ8",
+        "lexeme": "Smaal chee'",
+        "gloss": "moss"
+      },
+      {
+        "entry_id": "CRTZuPzDrVOSNPd4HtXy",
+        "lexeme": "K'ajiil",
+        "gloss": "dust"
+      }
+    ]
+  },
+  {
+    "id": "kaqchikel",
+    "name": "Kaqchikel",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "1dUXBOScQUSVFEHKuLiC",
+        "lexeme": "Mes",
+        "gloss": "cat"
+      },
+      {
+        "entry_id": "9lKezi9kbcMA8hBuYUw0",
+        "lexeme": "Jiq'ob'äl",
+        "gloss": "fruit"
+      },
+      {
+        "entry_id": "2N1rR1JD53pCaNUp2iiu",
+        "lexeme": "Nanïk",
+        "gloss": "a lot"
+      },
+      {
+        "entry_id": "JvNxXB6aTEQkiV2LH0NV",
+        "lexeme": "Ib'oy",
+        "gloss": "armadillo"
+      },
+      {
+        "entry_id": "LMuRQ88Vpe7AESuAfTKD",
+        "lexeme": "Tz'ikïn",
+        "gloss": "bird"
+      },
+      {
+        "entry_id": "28GFCUk5VKWtpQmr5UCc",
+        "lexeme": "Q'ij",
+        "gloss": "day"
+      }
+    ]
+  },
+  {
+    "id": "qanjobal",
+    "name": "Txolilal Q’anej Yul Koq’anjob’al (Qʼanjobʼal)",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "1CBieogtRWBQlzWjheb9",
+        "lexeme": "Satkan",
+        "gloss": "sky"
+      },
+      {
+        "entry_id": "2aEEiMxdtmIRfbPSKxbh",
+        "lexeme": "Witz",
+        "gloss": "mountain"
+      },
+      {
+        "entry_id": "7nuuzhBVvKZ98FaFa3fg",
+        "lexeme": "Kaq",
+        "gloss": "hot"
+      },
+      {
+        "entry_id": "4oeLJ9FBurNP5pWF2o8j",
+        "lexeme": "Kaqyin",
+        "gloss": "red"
+      },
+      {
+        "entry_id": "5Kcg3Uk5xsDZSI9ncabl",
+        "lexeme": "Nojnaq",
+        "gloss": "full"
+      },
+      {
+        "entry_id": "3kf7vUYbM2mh6V923xaH",
+        "lexeme": "Joqan",
+        "gloss": "long"
+      }
+    ]
+  },
+  {
+    "id": "chalchiteko",
+    "name": "Chalchiteko",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "CxvoZK99RMlHvQwhRrMi",
+        "lexeme": "Wikojb'il",
+        "gloss": "world"
+      },
+      {
+        "entry_id": "RmUMbrnhw0Nqnttmcl2b",
+        "lexeme": "Slup",
+        "gloss": "butterfly"
+      },
+      {
+        "entry_id": "G8QFTqxk1RqjBvaUFUlL",
+        "lexeme": "Tx'i'",
+        "gloss": "dog"
+      },
+      {
+        "entry_id": "QAgALKtEyO6lZZvQ1AuB",
+        "lexeme": "Tx'i'x",
+        "gloss": "thorn"
+      },
+      {
+        "entry_id": "EwZQ9iV8IvvYgIY9UFxK",
+        "lexeme": "Ky'ajol",
+        "gloss": "son"
+      },
+      {
+        "entry_id": "9yaq18wSRx2MgRHx5Llm",
+        "lexeme": "Txuki'n",
+        "gloss": "hunt"
+      }
+    ]
+  },
+  {
+    "id": "louisiana-creole",
+    "name": "Louisiana Creole (Kouri-Vini)",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "GHieQIUC3JtQPZVA4XR3",
+        "lexeme": "friskata",
+        "gloss": "banana shrub"
+      }
+    ]
+  },
+  {
+    "id": "kharia",
+    "name": "Kharia",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "81IIRhbRnTM1I01eLIJK",
+        "lexeme": "किड़ो'",
+        "gloss": "tiger"
+      },
+      {
+        "entry_id": "0Y90rMm5JenQlgsdFJDw",
+        "lexeme": "केंडो'ड",
+        "gloss": "frog"
+      },
+      {
+        "entry_id": "EBV246E7XQ0pHDmyFprE",
+        "lexeme": "नरियर दारू",
+        "gloss": "coconut tree"
+      },
+      {
+        "entry_id": "5Kg9EKfbjORecyVDpNxN",
+        "lexeme": "कौवा'",
+        "gloss": "crow"
+      },
+      {
+        "entry_id": "4W1TiM4lqPhW3Ei0VLyV",
+        "lexeme": "उ'ड",
+        "gloss": "mushroom"
+      },
+      {
+        "entry_id": "E8OlQJlUSs4jaX6QP97V",
+        "lexeme": "बेंडी",
+        "gloss": "spider"
+      }
+    ]
+  },
+  {
+    "id": "ese-ejja",
+    "name": "Ese Ejja",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "Nbm8zfpvgytKkrS5cLPO",
+        "lexeme": "dijjidijji",
+        "gloss": "Azara's night monkey"
+      },
+      {
+        "entry_id": "8rEgFriXUI93FKKYhCEU",
+        "lexeme": "aná",
+        "gloss": "giant anteater"
+      },
+      {
+        "entry_id": "XEodHa6qaTwM63pWJHUF",
+        "lexeme": "dokwéi ibia",
+        "gloss": "cougar"
+      },
+      {
+        "entry_id": "Yb38Zi9uJkOoEQiEv6lO",
+        "lexeme": "apo'e",
+        "gloss": "anatto, achiote"
+      },
+      {
+        "entry_id": "8NVX0dRBtHCyqfBVX89r",
+        "lexeme": "daki'ái",
+        "gloss": "yellow-footed tortoise"
+      },
+      {
+        "entry_id": "0pNwNIoAhoU0p4WYt0FR",
+        "lexeme": "do",
+        "gloss": "black howler"
+      }
+    ]
+  },
+  {
+    "id": "malapulaya",
+    "name": "Malapulaya",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "2yCDhpPLcFeFGNJ59j1A",
+        "lexeme": "naccattiṛo",
+        "gloss": "Star"
+      },
+      {
+        "entry_id": "0kf3qszrx8NFOiqw0GTa",
+        "lexeme": "eṟuma",
+        "gloss": "Buffalo"
+      },
+      {
+        "entry_id": "2ld2wXoLIh2fGKAaWJHL",
+        "lexeme": "kāttu",
+        "gloss": "Wind"
+      },
+      {
+        "entry_id": "0aJGvZYLfphEDa5Li90C",
+        "lexeme": "cāya",
+        "gloss": "Tea"
+      },
+      {
+        "entry_id": "0MKHVjgaXpoe3xIxzYxN",
+        "lexeme": "paṉi tuli",
+        "gloss": "Dew"
+      },
+      {
+        "entry_id": "2NODG4Eb1yr9cJIpNtCC",
+        "lexeme": "eṟaku",
+        "gloss": "Feather"
+      }
+    ]
+  },
+  {
+    "id": "taiengdictionary",
+    "name": "Tai-Eng-Thai-Viet",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "ZCEmVHI6eKNS7UsVssFQ",
+        "lexeme": "boor",
+        "gloss": "butterfly"
+      },
+      {
+        "entry_id": "DXZC1Z14YUqAxxh3MNYk",
+        "lexeme": "piij",
+        "gloss": "dragonflies"
+      },
+      {
+        "entry_id": "0oGDMD4469El1trHq5cW",
+        "lexeme": "haai phaair",
+        "gloss": "sneakers"
+      }
+    ]
+  },
+  {
+    "id": "jaRhn6MAZim4Blvr1iEv",
+    "name": "Bahasa Lani",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "yt9ja7ymh9xgba5i",
+        "lexeme": "yawi",
+        "gloss": "the bird of paradise"
+      },
+      {
+        "entry_id": "fekxbqmzsacktsy0",
+        "lexeme": "iringgame",
+        "gloss": "grass"
+      }
+    ]
+  },
+  {
+    "id": "oron",
+    "name": "Oro",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "EkXvFdnLaEyJlaOvweVK",
+        "lexeme": "ábá",
+        "gloss": "dog"
+      },
+      {
+        "entry_id": "f7TkeNWBcHyiLlTZphp9",
+        "lexeme": "édìm",
+        "gloss": "rain"
+      },
+      {
+        "entry_id": "d2X0ZJHTVOrNKxIRJl0L",
+        "lexeme": "íláñ",
+        "gloss": "louse"
+      }
+    ]
+  },
+  {
+    "id": "qeqchi",
+    "name": "Q'eqchi'",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "H3mi0arWgzg1vuu9EGwT",
+        "lexeme": "Palaw",
+        "gloss": "sea"
+      },
+      {
+        "entry_id": "0swyTU3zVI8D5Zq6dhyr",
+        "lexeme": "Choql",
+        "gloss": "cloud"
+      },
+      {
+        "entry_id": "CIzvW341xp7phcI50Peg",
+        "lexeme": "K'oopopo'",
+        "gloss": "frog"
+      },
+      {
+        "entry_id": "AyTR2YZVwQaPK7p8DtDh",
+        "lexeme": "Ki'il q'een",
+        "gloss": "fruit"
+      },
+      {
+        "entry_id": "BhJ8qgNtOuwvVVjIeOV8",
+        "lexeme": "Pek",
+        "gloss": "stone"
+      },
+      {
+        "entry_id": "8TODjW7obaATDTwDwnSj",
+        "lexeme": "K'ehok",
+        "gloss": "give"
+      }
+    ]
+  },
+  {
+    "id": "arvanitika",
+    "name": "Arvanitika",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "2O4y4yVJIilaTwu4vyAf",
+        "lexeme": "hamotcheládh",
+        "gloss": "tawny pipit"
+      },
+      {
+        "entry_id": "39OU8GDxNJdRyTwiUp0X",
+        "lexeme": "kjefalá",
+        "gloss": "shrike; butcherbird"
+      },
+      {
+        "entry_id": "9YCakYV23Zh4DYQ0eenY",
+        "lexeme": "ríghan",
+        "gloss": "oregano"
+      },
+      {
+        "entry_id": "4hw9ZJoL3VcvFzDFV143",
+        "lexeme": "kafkalíthrë",
+        "gloss": "Mediterranean hartwort"
+      },
+      {
+        "entry_id": "2MzkUsJPtKJrdroa9E6f",
+        "lexeme": "ngórtsije (also ngortsiá)",
+        "gloss": "wild pear"
+      },
+      {
+        "entry_id": "BKVARtulAv6lGmbKZMSx",
+        "lexeme": "kalamár",
+        "gloss": "squid; calamari"
+      }
+    ]
+  },
+  {
+    "id": "poqomam",
+    "name": "Poqomam",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "nhWL5JQluCaLnkIV1HXJ",
+        "lexeme": "ihtz'ub'",
+        "gloss": "flower"
+      },
+      {
+        "entry_id": "AdpYHSe45BDikxzsIlpJ",
+        "lexeme": "imul",
+        "gloss": "rabbit"
+      },
+      {
+        "entry_id": "7iWyGAPPSoschcx2IRCY",
+        "lexeme": "teew",
+        "gloss": "wind"
+      },
+      {
+        "entry_id": "HqlCPkyLuikSasuKHQTN",
+        "lexeme": "ism",
+        "gloss": "hair"
+      },
+      {
+        "entry_id": "9neovysCmCovNh9mEm0m",
+        "lexeme": "wach yuub'",
+        "gloss": "back"
+      },
+      {
+        "entry_id": "9cchZxeqjR35uzkoxW7O",
+        "lexeme": "atz'am",
+        "gloss": "salt"
+      }
+    ]
+  },
+  {
+    "id": "johari",
+    "name": "Johari",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "cdyHPJ6mr0uxppapnBZL",
+        "lexeme": "चनैरीहार",
+        "gloss": "Jewellery"
+      },
+      {
+        "entry_id": "kSGHKSHMbKItO1wv4yUc",
+        "lexeme": "अतरदॉन",
+        "gloss": "चांदी का एक आभूषण जिसे महिलाएं पहनती हैं"
+      },
+      {
+        "entry_id": "ILlNkrhd6QVdcmHng90f",
+        "lexeme": "शेंक",
+        "gloss": "Snow boots"
+      }
+    ]
+  },
+  {
+    "id": "kiche",
+    "name": "K'iche'",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "6uNtl9wtSMkc9m4xjRPO",
+        "lexeme": "aqanaj",
+        "gloss": "foot"
+      },
+      {
+        "entry_id": "Oq4xIPnhT7ABd51j4K0X",
+        "lexeme": "kaj",
+        "gloss": "sky"
+      }
+    ]
+  },
+  {
+    "id": "itza",
+    "name": "Itza",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "6GuXiMDrEggyy2CghK5E",
+        "lexeme": "K'aak'",
+        "gloss": "fire"
+      },
+      {
+        "entry_id": "83wvjN1s2nBCyusue96q",
+        "lexeme": "Naj",
+        "gloss": "house/shelter"
+      },
+      {
+        "entry_id": "5iTUbAX8kYncZnd5tr7C",
+        "lexeme": "B'äk'",
+        "gloss": "meat"
+      },
+      {
+        "entry_id": "9LGqDeuqRlVMwXSywhDv",
+        "lexeme": "B'ak",
+        "gloss": "bone"
+      }
+    ]
+  },
+  {
+    "id": "uspanteko",
+    "name": "Uspanteko",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "dvwJYLO9LXVwbaXy4AIZ",
+        "lexeme": "q'iij",
+        "gloss": "sun"
+      },
+      {
+        "entry_id": "Czun9RO9PKXzYZX0aRy2",
+        "lexeme": "kutz'ii'j",
+        "gloss": "flower"
+      },
+      {
+        "entry_id": "GYkHemI7Tg5rR6g7o8TD",
+        "lexeme": "choo",
+        "gloss": "lake"
+      },
+      {
+        "entry_id": "GG36B7RJ27cJAmfcl0aW",
+        "lexeme": "palow",
+        "gloss": "sea"
+      },
+      {
+        "entry_id": "WIK4Vj4pGQ6vV7hUwPrm",
+        "lexeme": "aq'aab'",
+        "gloss": "night"
+      },
+      {
+        "entry_id": "cuHykTsApymucW4cKsWw",
+        "lexeme": "jxaaq",
+        "gloss": "leaf"
+      }
+    ]
+  },
+  {
+    "id": "yanesha",
+    "name": "Yanesha'",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "QfZffLuAfijpspR7Zqpu",
+        "lexeme": "atsné'",
+        "gloss": "sun"
+      },
+      {
+        "entry_id": "DOamdvijBc28RApXAgxR",
+        "lexeme": "ontáp",
+        "gloss": "river"
+      },
+      {
+        "entry_id": "GAOoV16sfhYlr5Fclb2o",
+        "lexeme": "poetsáthmarero",
+        "gloss": "mountain"
+      },
+      {
+        "entry_id": "hHynma7ErRD7CYI7vqaI",
+        "lexeme": "sa'p",
+        "gloss": "lake"
+      },
+      {
+        "entry_id": "czyNfDUxDMHcMD1b7e8Q",
+        "lexeme": "kak",
+        "gloss": "fish"
+      },
+      {
+        "entry_id": "71mznXimGiJ3aW8safFq",
+        "lexeme": "ochék",
+        "gloss": "dog"
+      }
+    ]
+  },
+  {
+    "id": "gaidhlig-uisge-dhearg",
+    "name": "Gàedhlig Uisge Dhearg",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "X9PYOY6CChRY5BqRELU5",
+        "lexeme": "Uisge Dhearg",
+        "gloss": "Red River, Red Water"
+      },
+      {
+        "entry_id": "oW3Pvey0NDAA00drUMAt",
+        "lexeme": "Bánnoc",
+        "gloss": "Bannock"
+      }
+    ]
+  },
+  {
+    "id": "san-francisco-yatee-zapo",
+    "name": "San Francisco Yateé Zapotec",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "V12nPFk7efqZxLfCNQSO",
+        "lexeme": "labada",
+        "gloss": "green pods of acacia tree"
+      }
+    ]
+  },
+  {
+    "id": "tuun-javi-ixpantepec-ni",
+    "name": "Tu'un Javi (Ixpantepec Nieves Mixtec)",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "W7BHqjKEn31o1XIBZmrN",
+        "lexeme": "ityia",
+        "gloss": "grass"
+      }
+    ]
+  },
+  {
+    "id": "siriono",
+    "name": "Sirionó",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "Q6wyuUgKSlll6CnHuBXb",
+        "lexeme": "ngira chibaeä",
+        "gloss": "Greater Rhea"
+      },
+      {
+        "entry_id": "GGJTzdmfUWVgMPxfnPep",
+        "lexeme": "urubu",
+        "gloss": "Black Vulture"
+      },
+      {
+        "entry_id": "PcWa92oXwFMy2F5kBdzb",
+        "lexeme": "kɨrɨ̈nde ɨshɨ achu",
+        "gloss": "Blue-and-yellow Macaw"
+      },
+      {
+        "entry_id": "BWs1xzR91AIzmkqTQZ6u",
+        "lexeme": "nguarɨ shɨ̈ eshɨ̈ ɨ kuɨ",
+        "gloss": "Roseate Spoonbill"
+      },
+      {
+        "entry_id": "0kGIEpfcCqXYXusy6k8F",
+        "lexeme": "nyekerea",
+        "gloss": "Tropical Screech Owl"
+      },
+      {
+        "entry_id": "ShM34L17diueR0P9yBms",
+        "lexeme": "yei",
+        "gloss": "Muscovy Duck"
+      }
+    ]
+  },
+  {
+    "id": "wakhi",
+    "name": "Wakhi",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "4028528b-8b96-44b0-a205-f0232f0a4131",
+        "lexeme": "Mʉlʉng",
+        "gloss": "Middle"
+      },
+      {
+        "entry_id": "j3kOU35mTeMucJFQeF38",
+        "lexeme": "Iṣ̌mayiṣ̌",
+        "gloss": "Buffalo"
+      },
+      {
+        "entry_id": "Bb4DE80wmWjnhXNJRzYC",
+        "lexeme": "Boi",
+        "gloss": "Cave"
+      }
+    ]
+  },
+  {
+    "id": "houma-uma",
+    "name": "Houma (Uma')",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "1Hz0zE5Z2XdFIMbhpCOH",
+        "lexeme": "pakãle'",
+        "gloss": "flower"
+      },
+      {
+        "entry_id": "2ObWiaAIlMp4WHQryXFk",
+        "lexeme": "pakét",
+        "gloss": "turkey"
+      },
+      {
+        "entry_id": "2uEtGUvSmE7lLRSn0RQa",
+        "lexeme": "lukse'",
+        "gloss": "turtle"
+      },
+      {
+        "entry_id": "26tw1RpuPdAT6gVfPHDU",
+        "lexeme": "palaska'",
+        "gloss": "bread"
+      },
+      {
+        "entry_id": "4IHWV6k28jdPsdsbHoJM",
+        "lexeme": "ahe'",
+        "gloss": "potato"
+      },
+      {
+        "entry_id": "6gbNpNuUgVrGBgMy0hN7",
+        "lexeme": "ulessutceh",
+        "gloss": "to write"
+      }
+    ]
+  },
+  {
+    "id": "badhani1",
+    "name": "Badhani",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "2LcDALrMNhN3c5dPkm2X",
+        "lexeme": "कसार",
+        "gloss": "Traditional dish of Flour and Ghee"
+      }
+    ]
+  },
+  {
+    "id": "aewa",
+    "name": "Aewa",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "2Cz8oanykC2USD83aSYU",
+        "lexeme": "ũjũrṹã",
+        "gloss": "eagle"
+      },
+      {
+        "entry_id": "06fTqBCkfXcEyiwNk4rg",
+        "lexeme": "atári",
+        "gloss": "papaya"
+      },
+      {
+        "entry_id": "20Mxjs1JlulcxEaIVcov",
+        "lexeme": "ashlúku",
+        "gloss": "woolly monkey"
+      },
+      {
+        "entry_id": "1WPRAUwTwjmw46FCYZFf",
+        "lexeme": "amjála",
+        "gloss": "caiman"
+      },
+      {
+        "entry_id": "2YQv6J6hRU5niYn0MCsl",
+        "lexeme": "a'ílu",
+        "gloss": "tayra"
+      },
+      {
+        "entry_id": "88B7Y0Iko1sWYwel5B0C",
+        "lexeme": "kwɨríri",
+        "gloss": "monk saki"
+      }
+    ]
+  },
+  {
+    "id": "zapoteco-de-la-sierra-n",
+    "name": "Zapoteco de la sierra norte, San Juan Bautista Atepec, Oaxaca",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "219mAxq6VtsiTDJMPg8Z",
+        "lexeme": "loo xata",
+        "gloss": "jaguar"
+      },
+      {
+        "entry_id": "4neGzXnpmkf1vyfDYr9W",
+        "lexeme": "beda",
+        "gloss": "fox"
+      },
+      {
+        "entry_id": "36sc7jai0OUVpluqlAON",
+        "lexeme": "biati",
+        "gloss": "magpie - jay"
+      },
+      {
+        "entry_id": "7a61d82b-7d37-42a9-a4f4-43934795cd09",
+        "lexeme": "binni",
+        "gloss": "Ave"
+      },
+      {
+        "entry_id": "3XXM0QIp1V0EEBtpsUM6",
+        "lexeme": "begu",
+        "gloss": "tourtle"
+      },
+      {
+        "entry_id": "7TOCiufqtIXfjfmpyX8R",
+        "lexeme": "bet'a ya'a",
+        "gloss": "rainbow"
+      }
+    ]
+  },
+  {
+    "id": "south-african-gujarati",
+    "name": "South African Gujarati",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "16e55820-e613-4834-8ed3-f5528534ccc8",
+        "lexeme": "ghər",
+        "gloss": "house, home"
+      },
+      {
+        "entry_id": "1b79bf93-7e12-495b-a815-4c6d1694c6bf",
+        "lexeme": "dudh",
+        "gloss": "milk"
+      },
+      {
+        "entry_id": "8ecad5b7-402d-44af-989f-5708e9bb97a5",
+        "lexeme": "pani",
+        "gloss": "water"
+      },
+      {
+        "entry_id": "678bdc19-9a0c-4ddb-8c7d-d5d76de6a45d",
+        "lexeme": "jar",
+        "gloss": "tree"
+      },
+      {
+        "entry_id": "11070fd9-08f3-4a64-bbf8-138dcb76be28",
+        "lexeme": "ruhani",
+        "gloss": "soul"
+      },
+      {
+        "entry_id": "709ca0b3-5df9-403b-939a-7456441d63fb",
+        "lexeme": "chopri",
+        "gloss": "book"
+      }
+    ]
+  },
+  {
+    "id": "woleaia",
+    "name": "Woleaian",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "0fade015-d920-47d3-9d2f-158cb3d9c2cc",
+        "lexeme": "metaw",
+        "gloss": "ocean"
+      },
+      {
+        "entry_id": "00645d71-4dc4-4d84-8df8-9b01b8fecf67",
+        "lexeme": "pworoote",
+        "gloss": "canoe"
+      },
+      {
+        "entry_id": "1dd82478-9bf4-4378-af6a-f8c154d472dc",
+        "lexeme": "shoasemaliu",
+        "gloss": "small outrigger paddling canoe"
+      },
+      {
+        "entry_id": "1ab2c239-8bba-4093-9e90-83c607846e05",
+        "lexeme": "taame",
+        "gloss": "outrigger float"
+      },
+      {
+        "entry_id": "0b4ac55a-40f4-4be3-b0e3-95115a953871",
+        "lexeme": "gammise",
+        "gloss": "paint"
+      },
+      {
+        "entry_id": "89b43a61-55d4-4803-8919-30ba913a2e80",
+        "lexeme": "gapile",
+        "gloss": "keel"
+      }
+    ]
+  },
+  {
+    "id": "lugbara",
+    "name": "Lugbara",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "539b9bff-525a-4fd4-9c48-b27f929fd98a",
+        "lexeme": "yikuru",
+        "gloss": "waterfalls"
+      }
+    ]
+  },
+  {
+    "id": "quechuaboliviano",
+    "name": "Quechua del sur de Bolivia",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "9oj4c9GUgsrHdExupQHt",
+        "lexeme": "pili",
+        "gloss": "duck"
+      },
+      {
+        "entry_id": "2UrLJneJyNfP4YXil7u5",
+        "lexeme": "allay",
+        "gloss": "Dig"
+      },
+      {
+        "entry_id": "FSz27yFIONJCgB4HMle9",
+        "lexeme": "juk'ucha",
+        "gloss": "mouse"
+      },
+      {
+        "entry_id": "FtYzTxMEJlqS2N224qEN",
+        "lexeme": "phisu",
+        "gloss": "coin"
+      }
+    ]
+  },
+  {
+    "id": "dompo",
+    "name": "Dompo",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "ThSlgc4Hc1Loj0te0i18",
+        "lexeme": "kùnù",
+        "gloss": "hyena"
+      },
+      {
+        "entry_id": "Ueeao8SamscWWGYLgu1m",
+        "lexeme": "chápó",
+        "gloss": "squirrel"
+      },
+      {
+        "entry_id": "2S9mjpvE29aXf2NhTMSK",
+        "lexeme": "làmbrɛ̀",
+        "gloss": "lizard"
+      },
+      {
+        "entry_id": "OhFTHo2Z2AZtZDKUr9hp",
+        "lexeme": "ŋglà",
+        "gloss": "crab"
+      },
+      {
+        "entry_id": "6apr9Ay8YTFiYB0YZ9x2",
+        "lexeme": "wɛ̀ bíbrì",
+        "gloss": "spitting cobra"
+      },
+      {
+        "entry_id": "ACbFizh19sYIkZhHTImR",
+        "lexeme": "kánáá",
+        "gloss": "scorpion"
+      }
+    ]
+  },
+  {
+    "id": "movima",
+    "name": "Movima",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "oSx3T1x3GS8WDSZb3Yil",
+        "lexeme": "no:nopa",
+        "gloss": "sloth"
+      },
+      {
+        "entry_id": "BIq6GNIc0mYjHaLmG4Z8",
+        "lexeme": "tinno",
+        "gloss": "sun"
+      },
+      {
+        "entry_id": "IBbDG18BNveAd4KrtIfb",
+        "lexeme": "bana:maj",
+        "gloss": "giant anteater"
+      },
+      {
+        "entry_id": "DmoAx33AjlTPqUgbHufj",
+        "lexeme": "so:no",
+        "gloss": "turtle"
+      },
+      {
+        "entry_id": "V0kiz8Oc1Cd0l5gKsvlK",
+        "lexeme": "yejcho",
+        "gloss": "moon, month"
+      },
+      {
+        "entry_id": "9mZJJhkpKkOAAj7E8hwJ",
+        "lexeme": "china:ⱡa",
+        "gloss": "manioc"
+      }
+    ]
+  },
+  {
+    "id": "tepehua-de-huehuetla",
+    "name": "Tepehua de Huehuetla",
+    "tier": "both_full",
+    "chosen": [
+      {
+        "entry_id": "Ib8eL8YxPf62b3HOFM5t",
+        "lexeme": "asibik",
+        "gloss": "guava"
+      },
+      {
+        "entry_id": "33apzfjc454MKK8JxMpE",
+        "lexeme": "mubay",
+        "gloss": "Mexican honeysuckle"
+      },
+      {
+        "entry_id": "380Gf54d4TT44GopI5MW",
+        "lexeme": "s'otut",
+        "gloss": "spiked spiralflag ginger"
+      },
+      {
+        "entry_id": "H61THevcZ9SANJ4RIM5u",
+        "lexeme": "ismilh",
+        "gloss": "purslane"
+      },
+      {
+        "entry_id": "JYoIcJyexawNKMjFFXGi",
+        "lexeme": "atanchili'",
+        "gloss": "creeping woodsorrel"
+      },
+      {
+        "entry_id": "KucqClxBEfnoeRAgmwzw",
+        "lexeme": "talhana ach'itin",
+        "gloss": "pigeonberry"
+      }
+    ]
+  },
+  {
+    "id": "chittagonian",
+    "name": "Chittagonian",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "V8hTiTukAmOhrS8b13pr",
+        "lexeme": "হাট্টা বায়ুন",
+        "gloss": "Tomato"
+      }
+    ]
+  },
+  {
+    "id": "balti",
+    "name": "Balti",
+    "tier": "photo_only_fallback",
+    "chosen": [
+      {
+        "entry_id": "DDVqe5Ui1VenFoYI5g0X",
+        "lexeme": "Kha",
+        "gloss": "Snow"
+      },
+      {
+        "entry_id": "dvgSm51M06tpqehuU8v4",
+        "lexeme": "Mindoq",
+        "gloss": "Flower"
+      }
+    ]
+  },
+  {
+    "id": "atlas-vivo-de-mayunmarka",
+    "name": "Atlas Vivo de Mayunmarka (Quechua Ayacucho)",
+    "tier": "both_partial",
+    "chosen": [
+      {
+        "entry_id": "932nPuYw4y7FMS5j0RxL",
+        "lexeme": "ukumari",
+        "gloss": "spectacled bear"
+      }
+    ]
+  },
+  {
+    "id": "ngaju",
+    "name": "Ngaju",
+    "tier": "photo_only",
+    "chosen": [
+      {
+        "entry_id": "NIwn4SdqWhRvH0TZ1s8p",
+        "lexeme": "tanteluh",
+        "gloss": "egg"
+      },
+      {
+        "entry_id": "d75CIUqegKf7PZJUTnRF",
+        "lexeme": "klakai",
+        "gloss": "fern"
+      },
+      {
+        "entry_id": "4kymABCQA3NCU9SaR0fq",
+        "lexeme": "pusa",
+        "gloss": "cat"
+      }
+    ]
+  }
+]

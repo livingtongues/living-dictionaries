@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { RowType } from '$lib/db/client/live/types'
+  import type { DictionaryBucket } from '$lib/constants'
+  import { DICTIONARY_BUCKETS } from '$lib/constants'
   import IconMdiMapMarkerOutline from '~icons/mdi/map-marker-outline'
   import IconMdiMapMarkerPlusOutline from '~icons/mdi/map-marker-plus-outline'
   import BadgeArray from '$lib/components/entry/BadgeArray.svelte'
@@ -18,7 +20,6 @@
 
   interface Props {
     index: number
-    is_public: boolean
     dictionary: RowType<'dictionaries'>
     managers: Editor[]
     contributors: Editor[]
@@ -30,7 +31,6 @@
 
   let {
     index,
-    is_public,
     dictionary,
     managers,
     contributors,
@@ -54,10 +54,18 @@
     await dictionary._save()
   }
 
-  async function toggle_conlang() {
-    if (!confirm('Toggle conlang status?'))
+  async function set_bucket(event: Event) {
+    const { value } = event.currentTarget as HTMLSelectElement
+    dictionary.bucket = (value || null) as DictionaryBucket | null
+    await dictionary._save()
+    await on_change()
+  }
+
+  async function save_conlang_description(event: Event) {
+    const next = (event.currentTarget as HTMLTextAreaElement).value.trim() || null
+    if (dictionary.con_language_description === next)
       return
-    dictionary.con_language_description = dictionary.con_language_description === 'YES' ? null : 'YES'
+    dictionary.con_language_description = next
     await dictionary._save()
   }
 
@@ -104,6 +112,18 @@
   <button type="button" class={['pill-btn', dictionary.public ? 'is-public' : 'is-private']} onclick={toggle_public}>
     {dictionary.public ? 'Public' : 'Private'}
   </button>
+</td>
+<td>
+  <select
+    class={['bucket-select', dictionary.bucket ?? 'unclassified']}
+    value={dictionary.bucket ?? ''}
+    onchange={set_bucket}
+    aria-label="Bucket">
+    <option value="">unclassified</option>
+    {#each DICTIONARY_BUCKETS as bucket (bucket)}
+      <option value={bucket}>{bucket}</option>
+    {/each}
+  </select>
 </td>
 <td class="num-cell">
   <a href="/{dictionary.url}" target="_blank" class="entry-link">{(dictionary.entry_count ?? 0).toLocaleString()}</a>
@@ -163,15 +183,15 @@
   <div class="clamp" title={dictionary.author_connection ?? ''}>{dictionary.author_connection || '—'}</div>
 </td>
 <td class="text-cell">
-  <div class="clamp" title={dictionary.con_language_description ?? ''}>{dictionary.con_language_description || '—'}</div>
-</td>
-<td>
-  {#if !is_public}
-    <button type="button" class={['pill-btn', dictionary.con_language_description === 'YES' ? 'is-public' : 'is-private']} onclick={toggle_conlang}>
-      {dictionary.con_language_description === 'YES' ? 'YES' : 'NO'}
-    </button>
+  {#if dictionary.bucket === 'conlang'}
+    <textarea
+      class="conlang-edit"
+      rows="3"
+      placeholder="Conlang description"
+      value={dictionary.con_language_description ?? ''}
+      onchange={save_conlang_description}></textarea>
   {:else}
-    <span class="dim">—</span>
+    <div class="clamp locked" title="Editable only when the dictionary is bucketed as a conlang">{dictionary.con_language_description || '—'}</div>
   {/if}
 </td>
 <td>
@@ -265,6 +285,45 @@
   .pill-btn.is-private {
     background: color-mix(in srgb, var(--warning), transparent 85%);
     color: var(--warning);
+  }
+  .bucket-select {
+    padding: 0.125rem 0.375rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    background: var(--background);
+    color: var(--color);
+    cursor: pointer;
+  }
+  .bucket-select:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  .bucket-select.public { color: var(--success); }
+  .bucket-select.unlisted { color: var(--primary); }
+  .bucket-select.conlang { color: var(--warning); }
+  .bucket-select.glossary { color: color-mix(in srgb, var(--warning) 55%, var(--danger)); }
+  .bucket-select.delete { color: var(--danger); }
+  .bucket-select.unclassified { color: var(--color-secondary); }
+  .conlang-edit {
+    width: 100%;
+    min-width: 12rem;
+    padding: 0.25rem 0.375rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-color);
+    background: var(--background);
+    font-size: 0.8125rem;
+    color: var(--color);
+    resize: vertical;
+    font-family: inherit;
+  }
+  .conlang-edit:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  .clamp.locked {
+    color: var(--color-secondary);
   }
   .coord-btn {
     display: inline-flex;

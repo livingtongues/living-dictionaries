@@ -22,6 +22,7 @@ const dictionaries = [
     id: 'dict-1',
     name: 'Nahuatl of Tlaxcala',
     public: 1,
+    bucket: 'public',
     entry_count: 1842,
     iso_639_3: 'nhn',
     glottocode: 'cent2132',
@@ -40,6 +41,7 @@ const dictionaries = [
     id: 'dict-2',
     name: 'Mixtec of Oaxaca',
     public: 1,
+    bucket: 'public',
     entry_count: 530,
     iso_639_3: 'mig',
     glottocode: 'mixt1427',
@@ -54,6 +56,7 @@ const dictionaries = [
     id: 'dict-3',
     name: 'Quechua Highlands',
     public: null,
+    bucket: 'unlisted',
     entry_count: 12,
     created_at: '2026-05-01T00:00:00Z',
     updated_at: '2026-05-01T00:00:00Z',
@@ -62,7 +65,8 @@ const dictionaries = [
     id: 'dict-4',
     name: 'Esperanto Test Lexicon',
     public: null,
-    con_language_description: 'YES',
+    bucket: 'conlang',
+    con_language_description: 'Source: Invented for a novel.\n\nUse: A small hobbyist community.',
     entry_count: 88,
     created_at: '2025-11-20T00:00:00Z',
     updated_at: '2026-02-01T00:00:00Z',
@@ -85,16 +89,26 @@ const invites = [
 ]
 
 const db = {
-  dictionaries: { ...make_table(dictionaries, 'id'), query: () => ({ rows: dictionaries, loading: false }) },
+  dictionaries: { ...make_table(dictionaries, 'id'), query: () => ({ rows: dictionaries, loading: false }), update: async () => {} },
   dictionary_roles: { ...make_table(roles, 'id'), query: () => ({ rows: roles, loading: false }) },
   invites: { ...make_table(invites, 'id'), query: () => ({ rows: invites, loading: false }) },
   users: make_table(users, 'id'),
 }
 
+const shared_props = {
+  auth_user: { user: { id: 'admin-1', email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', is_admin: true, admin_level: 3 }, token: 'fake', logout: () => {} },
+  sync: null,
+  db,
+} as never
+
 export const Catalog: PageStory<typeof Component> = {
-  props: {
-    auth_user: { user: { id: 'admin-1', email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', is_admin: true, admin_level: 3 }, token: 'fake', logout: () => {} },
-    sync: null,
-    db,
-  } as never,
+  props: shared_props,
+}
+
+export const ConlangTab: PageStory<typeof Component> = {
+  props: shared_props,
+  csr: true,
+  interactions: async (page) => {
+    await page.click('button.filter-pill.conlang')
+  },
 }

@@ -7,6 +7,7 @@
   import IconMdiMenuUp from '~icons/mdi/menu-up'
   import { goto } from '$app/navigation'
   import { page } from '$app/state'
+  import type { DictionaryBucket } from '$lib/constants'
   import { download_as_csv } from '$lib/utils/csv'
   import { format_date } from '$lib/utils/format-relative-time'
   import { score_record } from '$lib/utils/fuzzy-score'
@@ -15,7 +16,7 @@
   let { data } = $props()
   const db = $derived(data.db)
 
-  type Filter = 'public' | 'private' | 'other'
+  type Filter = DictionaryBucket | 'unclassified'
   type SortKey = 'name' | 'public' | 'entry_count' | 'managers' | 'contributors' | 'iso_639_3' | 'glottocode' | 'location' | 'created_at' | 'updated_at'
 
   interface Editor { role_id: string, user_id: string, name: string, email: string | null }
@@ -57,21 +58,24 @@
   })
 
   function dict_filter(dict: RowType<'dictionaries'>): Filter {
-    if (dict.public) return 'public'
-    if (dict.con_language_description) return 'other'
-    return 'private'
+    return dict.bucket ?? 'unclassified'
   }
 
   const counts = $derived.by(() => {
-    const tally = { public: 0, private: 0, other: 0 }
+    const tally: Record<Filter, number> = { public: 0, unlisted: 0, secure: 0, conlang: 0, glossary: 0, delete: 0, unclassified: 0 }
     for (const dict of dicts_query?.rows ?? [])
       tally[dict_filter(dict)] += 1
     return tally
   })
 
-  const active_filter = $derived(((page.url.searchParams.get('filter') as Filter) ?? 'public'))
+  let active_filter = $state<Filter>((page.url.searchParams.get('filter') as Filter) ?? 'public')
   function set_filter(filter: Filter) {
-    void goto(`?filter=${filter}`, { keepFocus: true, noScroll: true, replaceState: true })
+    active_filter = filter
+    try {
+      void goto(`?filter=${filter}`, { keepFocus: true, noScroll: true, replaceState: true })
+    } catch {
+    // svelte-look story harness has no router
+    }
   }
 
   let search = $state('')
@@ -172,11 +176,14 @@
     setTimeout(() => node.focus(), 15)
   }
 
-  interface Pill { key: Filter, label: string }
-  const pills: Pill[] = [
+  const pills: { key: Filter, label: string }[] = [
     { key: 'public', label: 'public' },
-    { key: 'private', label: 'private' },
-    { key: 'other', label: 'other (conlang)' },
+    { key: 'unlisted', label: 'unlisted' },
+    { key: 'conlang', label: 'conlang' },
+    { key: 'glossary', label: 'glossary' },
+    { key: 'delete', label: 'delete' },
+    { key: 'secure', label: 'secure' },
+    { key: 'unclassified', label: 'unclassified' },
   ]
 
   interface Col { key?: SortKey, label: string, align?: 'right' }
@@ -184,6 +191,7 @@
     { label: '#' },
     { key: 'name', label: 'Name' },
     { key: 'public', label: 'Visibility' },
+    { label: 'Bucket' },
     { key: 'entry_count', label: 'Entries', align: 'right' },
     { key: 'managers', label: 'Managers' },
     { key: 'contributors', label: 'Contributors' },
@@ -200,7 +208,6 @@
     { label: 'Community permission' },
     { label: 'Author connection' },
     { label: 'Conlang description' },
-    { label: 'Conlang' },
     { label: 'Delete' },
   ]
 </script>
@@ -209,10 +216,12 @@
   <h1 class="page-title">Dictionaries</h1>
   <div class="filter-pills">
     {#each pills as pill (pill.key)}
-      <button type="button" onclick={() => set_filter(pill.key)} class={['filter-pill', { active: active_filter === pill.key }]}>
-        {pill.label}
-        <span class={['filter-count', { active: active_filter === pill.key }]}>{counts[pill.key].toLocaleString()}</span>
-      </button>
+      {#if !['secure', 'unclassified'].includes(pill.key) || counts[pill.key] > 0}
+        <button type="button" onclick={() => set_filter(pill.key)} class={['filter-pill', pill.key, { active: active_filter === pill.key }]}>
+          {pill.label}
+          <span class={['filter-count', { active: active_filter === pill.key }]}>{counts[pill.key].toLocaleString()}</span>
+        </button>
+      {/if}
     {/each}
   </div>
   <button type="button" onclick={download_csv} disabled={filtered.length === 0} class="btn btn-default csv-btn">
@@ -269,7 +278,6 @@
           <tr class="dict-row">
             <DictionaryRow
               {index}
-              is_public={active_filter === 'public'}
               dictionary={dict}
               managers={roles.managers}
               contributors={roles.contributors}
@@ -324,6 +332,9 @@
     background: var(--primary);
     color: var(--on-primary);
     border-color: transparent;
+  }
+  .filter-pill.active.delete {
+    background: var(--danger);
   }
   .filter-count {
     display: inline-flex;

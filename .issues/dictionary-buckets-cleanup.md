@@ -73,9 +73,31 @@ and (c) know who we actually serve.
    `?bucket=` (goto try/caught — story harness has no router).
 6. ✅ Side-quest issues: `.issues/sandbox-playground-dictionaries.md` +
    `.issues/admin-media-storage-dashboard.md`.
-7. Ask Jacob → commit/push (deploy migration + UI) → run backfill (steps in apply script header)
-   → he reviews in /admin/buckets.
-8. LATER SESSION: execute delete bucket (backup tarball → R2 first, then batch-drive the
+7. ✅ APPLIED TO PROD 2026-07-04: migration deployed, `apply-assignments.js` ran in `sveltekit_blue`
+   → all 2,232 classified (public 221 · unlisted 396 · conlang 696 · glossary 269 · delete 650),
+   0 skipped/missing. shared.db backed up first (`shared.db.bak-20260704-101058`). Jacob reviews in
+   /admin/buckets.
+8. ✅ CONLANG-FIELD CLEANUP (prod, 2026-07-04): for the 210 kept-bucket (public/unlisted/glossary)
+   non-conlang dicts carrying a `con_language_description`, NULLed the field (it's a *flag* that
+   hides ISO/location/public and excludes the dict from the "real private" catalog in
+   `get-dictionaries-catalog.ts` — a stale denial mis-handles a real dict). Where the text held
+   real substance (175 of 210), appended it to `author_connection` as
+   `Author also said about this dictionary: <verbatim>` (admin-only field; existing content kept,
+   idempotent via label check). 35 bare denials ("No."/"YES"/"not a conlang") dropped. The 222
+   **delete**-bucket dicts were SKIPPED (torn down soon) and the 696 **conlang** dicts untouched.
+   Script `/tmp/conlang-cleanup.js` (FE_WRITE=1 to apply); backup `shared.db.bak-preconlang-*`.
+   Jacob's decisions: Q1 = author_connection append; Q2 = skip delete bucket.
+9. ✅ ADMIN UI (2026-07-04): `/admin/dictionaries` now filters by the 5 buckets (public/unlisted/
+   conlang/glossary/delete, + secure/unclassified pills only when non-empty) off `dict.bucket`;
+   a single **Bucket** column (`<select>`, color-coded) shows + changes the bucket via
+   `dictionary._save()`; the old public/private + conlang YES/NO filter and the conlang toggle
+   column are gone. The **Conlang description** column is now an editable `<textarea>` ONLY when
+   `dictionary.bucket === 'conlang'` (else read-only) — "impossible to type into the conlang field
+   unless it is a conlang". Create page verified: conlang Source/Use fields already gated behind
+   `conlang === true` (no change needed). `active_filter` switched to local `$state` (matches the
+   /admin/buckets pattern; story harness has no router). Stories + svelte-look verified light/dark
+   incl. the ConlangTab interaction; check 0 errors, lint clean, 1245 tests pass.
+10. LATER SESSION: execute delete bucket (backup tarball → R2 first, then batch-drive the
    existing teardown endpoint `DELETE /api/dictionaries/[id]`; GCS orphan sweep comes with the
    storage story).
 

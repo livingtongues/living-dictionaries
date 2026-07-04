@@ -1,0 +1,2652 @@
+[
+  {
+    "id": "torwali",
+    "name": "Torwali English Urdu Dictionary",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "AkE7TSGPHIf8VrWKu4ZO",
+        "lexeme": "آ",
+        "gloss": "I",
+        "duration": 5.717333,
+        "mean_volume": -25.6,
+        "max_volume": -2.9,
+        "score": 9.5
+      },
+      {
+        "entry_id": "LOy4veCV5bYb82eKAudS",
+        "lexeme": "آݜو",
+        "gloss": "walnut",
+        "duration": 7.594667,
+        "mean_volume": -28.4,
+        "max_volume": -2.5,
+        "score": 6.5
+      },
+      {
+        "entry_id": "Ey4v2rmlynw57MXVTGlp",
+        "lexeme": "اَ",
+        "gloss": "Sheep",
+        "duration": 5.973333,
+        "mean_volume": -33.2,
+        "max_volume": -7.7,
+        "score": 6
+      }
+    ]
+  },
+  {
+    "id": "remo",
+    "name": "Remo",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0FDeoZfoAtsbpj2r9jok",
+        "lexeme": "nomaskar",
+        "gloss": "Hello",
+        "duration": 1.175563,
+        "mean_volume": -15.7,
+        "max_volume": -1.5,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0RbgumOU8d2VHxwWE1n4",
+        "lexeme": "gitiŋ ẽ lemoʔgəta",
+        "gloss": "They have slept.",
+        "duration": 2.246563,
+        "mean_volume": -15.7,
+        "max_volume": -1.3,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0U9hJnwARHZ8ZYKPCqzC",
+        "lexeme": "no aniŋ ʤulo unt ano",
+        "gloss": "You will have seen me.",
+        "duration": 2.455563,
+        "mean_volume": -13.9,
+        "max_volume": -1.7,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "iipay-aa",
+    "name": "'Iipay Aa",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "00lgpWjzk1utr2nmOjeY",
+        "lexeme": "haach wehuum",
+        "gloss": "waves, the water has waves",
+        "duration": 1.872,
+        "mean_volume": -25.5,
+        "max_volume": -8.7,
+        "score": 8
+      },
+      {
+        "entry_id": "01LVu2ZymblqiHUXy3Bk",
+        "lexeme": "'ehtaay",
+        "gloss": "crow",
+        "duration": 0.912,
+        "mean_volume": -20.6,
+        "max_volume": -5.5,
+        "score": 8
+      },
+      {
+        "entry_id": "01cef706-8f73-4ddc-9da9-5efe52e7adb0",
+        "lexeme": "uunyaay",
+        "gloss": "his daughter-in-law",
+        "duration": 2.328,
+        "mean_volume": -25.2,
+        "max_volume": -10.7,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "nasa-yuwe-páez",
+    "name": "Nasa yuwe (Páez)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "1NTfzf6FBBbXitFrrLxg",
+        "lexeme": "shita",
+        "gloss": "armadillo",
+        "duration": 4.519184,
+        "mean_volume": -20.6,
+        "max_volume": -1,
+        "score": 9
+      },
+      {
+        "entry_id": "017W5GlsCHuaste2SLtB",
+        "lexeme": "jũ'na cuscjẽ",
+        "gloss": "antenoche",
+        "duration": 4.440816,
+        "mean_volume": -25.7,
+        "max_volume": -6.4,
+        "score": 8
+      },
+      {
+        "entry_id": "01lAv1Eyttv4TuyLAwDv",
+        "lexeme": "fiy yũu-",
+        "gloss": "portarse mal",
+        "duration": 4.231837,
+        "mean_volume": -24,
+        "max_volume": -7.6,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "ho",
+    "name": "Ho",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "04Z7CrTLLr2ida9V01AE",
+        "lexeme": "suːiʔ",
+        "gloss": "whistle using fingers",
+        "duration": 1.619625,
+        "mean_volume": -23.8,
+        "max_volume": -1,
+        "score": 8.5
+      },
+      {
+        "entry_id": "029peOOePRBROia04VqX",
+        "lexeme": "majom",
+        "gloss": "blood",
+        "duration": 0.836,
+        "mean_volume": -15.9,
+        "max_volume": -0.1,
+        "score": 5.5
+      },
+      {
+        "entry_id": "02dqHUQBdZfQUwGlccbm",
+        "lexeme": "cirgel, cirgal",
+        "gloss": "feel (passively), be aware of something",
+        "duration": 0.862125,
+        "mean_volume": -15,
+        "max_volume": 0,
+        "score": 5.5
+      }
+    ]
+  },
+  {
+    "id": "poqomchi",
+    "name": "Poqomchi' Tusq’orik",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0MgYgDzIKeya3GJXGiXK",
+        "lexeme": "Waqiib'",
+        "gloss": "six",
+        "duration": 1.697959,
+        "mean_volume": -22.3,
+        "max_volume": -3.7,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0qlcb1EuXzUL3LBQQA7L",
+        "lexeme": "Piich'",
+        "gloss": "woodpecker",
+        "duration": 1.436735,
+        "mean_volume": -18.8,
+        "max_volume": -2.2,
+        "score": 8.5
+      },
+      {
+        "entry_id": "031A7vosxuGL1kXoZH4c",
+        "lexeme": "hoyoj",
+        "gloss": "bite",
+        "duration": 1.436735,
+        "mean_volume": -13.2,
+        "max_volume": -0.1,
+        "score": 6.5
+      }
+    ]
+  },
+  {
+    "id": "bum",
+    "name": "Bum",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "25w2oX8VjuWNq8AU27yG",
+        "lexeme": "àduŋ",
+        "gloss": "lizard",
+        "duration": 6.058667,
+        "mean_volume": -17.7,
+        "max_volume": 0,
+        "score": 3.5
+      }
+    ]
+  },
+  {
+    "id": "namtrik-de-totoro",
+    "name": "Namtrik de Totoró",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "046e1032-7786-43f1-88a6-231f8269004d",
+        "lexeme": "Srutror",
+        "gloss": "me corté",
+        "duration": 4.778667,
+        "mean_volume": -29.8,
+        "max_volume": -12.6,
+        "score": 9.5
+      },
+      {
+        "entry_id": "068185d8-6dfa-4ca9-a5cd-cf3a698f2901",
+        "lexeme": "ɨkɨrɨ",
+        "gloss": "guarango",
+        "duration": 3.242667,
+        "mean_volume": -22.1,
+        "max_volume": -3.3,
+        "score": 9.5
+      },
+      {
+        "entry_id": "09mnT5bs3qE890xxGna5",
+        "lexeme": "pura patik",
+        "gloss": "maíz tostado (pringa pata)",
+        "duration": 4.437333,
+        "mean_volume": -22.9,
+        "max_volume": -2,
+        "score": 9.5
+      }
+    ]
+  },
+  {
+    "id": "xyzyl",
+    "name": "Хызыл",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0OzmPk2VR4PnBdtfUbAx",
+        "lexeme": "темер",
+        "gloss": "iron, metal",
+        "duration": 0.75755,
+        "mean_volume": -17,
+        "max_volume": -1.6,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0SEYkXEpzIsRElK8DHxx",
+        "lexeme": "секпен",
+        "gloss": "Xyzyl traditional coat",
+        "duration": 1.071,
+        "mean_volume": -19.5,
+        "max_volume": -2.2,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0gIpEjSXok9l5MSNO8W3",
+        "lexeme": "шира тартпахан",
+        "gloss": "cracked, dried out",
+        "duration": 1.59345,
+        "mean_volume": -16.7,
+        "max_volume": -1.5,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "monkox-besiro-chiquitano",
+    "name": "Monkox Besɨro (Chiquitano)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0farUWEfDXKGrhuJuOMH",
+        "lexeme": "ikixh",
+        "gloss": "feather",
+        "duration": 2.324898,
+        "mean_volume": -25.4,
+        "max_volume": -5.1,
+        "score": 8
+      },
+      {
+        "entry_id": "0qFbJBhIs6dYBdSnWDQF",
+        "lexeme": "napes",
+        "gloss": "sky",
+        "duration": 2.76898,
+        "mean_volume": -24.4,
+        "max_volume": -3.4,
+        "score": 8
+      },
+      {
+        "entry_id": "1JsMhln5I4TtWveb3Irh",
+        "lexeme": "tomoentox",
+        "gloss": "rope",
+        "duration": 2.037551,
+        "mean_volume": -18.6,
+        "max_volume": -1.9,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "upper-tanana",
+    "name": "Upper Tanana (Nee’aanèegn’)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "003b32b3-c928-4bc2-863b-d6afb16ab89b",
+        "lexeme": "Łą̂y èh łèech'àk hǫ̀ǫł̲įį.",
+        "gloss": "It is really muddy.",
+        "duration": 2.063673,
+        "mean_volume": -18.7,
+        "max_volume": -4.2,
+        "score": 8
+      },
+      {
+        "entry_id": "00ab909a-35f7-4781-98d5-e84ea57d437b",
+        "lexeme": "Ddhał ts'ą̀' ìhhaał.",
+        "gloss": "I am going to the mountain.",
+        "duration": 1.828571,
+        "mean_volume": -20.3,
+        "max_volume": -1,
+        "score": 8
+      },
+      {
+        "entry_id": "0129cd2d-d97b-4aae-b28f-8df1e2396786",
+        "lexeme": "Jin ch'ah shx̲ù'.",
+        "gloss": "This is my tooth.",
+        "duration": 1.697959,
+        "mean_volume": -20.2,
+        "max_volume": -4.1,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "subi",
+    "name": "Subi",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0048ef25-7c84-40ab-a4f3-3a051d4195bc",
+        "lexeme": "kurugha",
+        "gloss": "from",
+        "duration": 0.878027,
+        "mean_volume": -16.9,
+        "max_volume": -8.4,
+        "score": 8.5
+      },
+      {
+        "entry_id": "00664fe7-1e9d-4123-9c2e-90e4e2e7c85e",
+        "lexeme": "ina",
+        "gloss": "four",
+        "duration": 0.84254,
+        "mean_volume": -17.1,
+        "max_volume": -6.8,
+        "score": 8.5
+      },
+      {
+        "entry_id": "00bf2dce-73de-494c-8d9f-2255123eaabe",
+        "lexeme": "omuhandisi",
+        "gloss": "writer",
+        "duration": 1.162358,
+        "mean_volume": -17.6,
+        "max_volume": -8.2,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "inupiaq",
+    "name": "Iñupiaq",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "045Hy0rECHdKxPig1pcW",
+        "lexeme": "Saigu una isuqtuq.",
+        "gloss": "This tea is brewed strong.",
+        "duration": 2.507755,
+        "mean_volume": -17.1,
+        "max_volume": -3.9,
+        "score": 8
+      },
+      {
+        "entry_id": "06cOZ2oF5CJC7yDd7jto",
+        "lexeme": "Niġġiuŋ.",
+        "gloss": "Eat it.",
+        "duration": 1.28,
+        "mean_volume": -20.9,
+        "max_volume": -4.6,
+        "score": 8
+      },
+      {
+        "entry_id": "091k99Gr9AyVEIhfYCDf",
+        "lexeme": "Supman mauŋaqpich?",
+        "gloss": "Why did you come here?",
+        "duration": 2.533878,
+        "mean_volume": -18.9,
+        "max_volume": -2.6,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "temboka",
+    "name": "Temboka (a dialect of Melpa)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "00DUqc5VlfdlpP7zGMB9",
+        "lexeme": "Lgeh kut kola",
+        "gloss": "Toilet",
+        "duration": 3.072,
+        "mean_volume": -28.6,
+        "max_volume": -7,
+        "score": 8
+      },
+      {
+        "entry_id": "03Eh4bCJzsHCxhQtC87g",
+        "lexeme": "Temb",
+        "gloss": "(I will) do",
+        "duration": 1.706667,
+        "mean_volume": -20.8,
+        "max_volume": -3.6,
+        "score": 8
+      },
+      {
+        "entry_id": "0AHh87akTmRIzBlo1fxO",
+        "lexeme": "Gelem",
+        "gloss": "mucus",
+        "duration": 3.498667,
+        "mean_volume": -23.4,
+        "max_volume": -3.4,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "ndau",
+    "name": "Ndau",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "032f61ea-6da8-48e2-beb5-95f974620e4d",
+        "lexeme": "tuka",
+        "gloss": "scold, insult",
+        "duration": 0.505601,
+        "mean_volume": -27.8,
+        "max_volume": -12.3,
+        "score": 8.5
+      },
+      {
+        "entry_id": "2ULzKCFOO3fj04pH4tbZ",
+        "lexeme": "iwa",
+        "gloss": "fall",
+        "duration": 0.58805,
+        "mean_volume": -30,
+        "max_volume": -16.6,
+        "score": 8.5
+      },
+      {
+        "entry_id": "6iETzywZMPNuHZqsb2a1",
+        "lexeme": "bizo",
+        "gloss": "name",
+        "duration": 0.924286,
+        "mean_volume": -21.2,
+        "max_volume": -9.1,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "a-fala",
+    "name": "A fala",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0085f810-529f-4ae4-a795-b8cc50ef7940",
+        "lexeme": "pentágonu",
+        "gloss": "pentágono",
+        "duration": 3.62,
+        "mean_volume": -29,
+        "max_volume": -9.2,
+        "score": 8
+      },
+      {
+        "entry_id": "00c87404-d129-447a-b7a8-3656c244e2f8",
+        "lexeme": "revolución",
+        "gloss": "revolución",
+        "duration": 1.144989,
+        "mean_volume": -20.3,
+        "max_volume": -4.7,
+        "score": 8
+      },
+      {
+        "entry_id": "0303f247-2912-4381-b003-ae061101f694",
+        "lexeme": "pesu",
+        "gloss": "peso",
+        "duration": 2.44,
+        "mean_volume": -29.5,
+        "max_volume": -10.3,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "judeo-kashani",
+    "name": "Judeo-Kashani",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0RSLy5zUPfGRGifU4Am3",
+        "lexeme": "mi",
+        "gloss": "hair",
+        "duration": 0.72,
+        "mean_volume": -14.6,
+        "max_volume": -2.3,
+        "score": 8
+      },
+      {
+        "entry_id": "0Z86OGrJjyoenyMv1v3F",
+        "lexeme": "khideh hesāb",
+        "gloss": "a little amount due/unsettled business",
+        "duration": 1.2,
+        "mean_volume": -18.6,
+        "max_volume": -3.6,
+        "score": 8
+      },
+      {
+        "entry_id": "0v7SziJ5oR9feaiPtoFZ",
+        "lexeme": "oshnijeh",
+        "gloss": "sneeze",
+        "duration": 1.224,
+        "mean_volume": -16.8,
+        "max_volume": -2.7,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "nambya",
+    "name": "Nambya",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "JegL6KFYy1mmTrwui5et",
+        "lexeme": "ani",
+        "gloss": "who?",
+        "duration": 4.667029,
+        "mean_volume": -24.3,
+        "max_volume": -1.1,
+        "score": 8
+      },
+      {
+        "entry_id": "LYixJvtzuIilpcowr44k",
+        "lexeme": "musalezubuya",
+        "gloss": "goodbye",
+        "duration": 5.874399,
+        "mean_volume": -26,
+        "max_volume": -9.1,
+        "score": 8
+      },
+      {
+        "entry_id": "YkQpRNSaEestiwBTAcva",
+        "lexeme": "pya",
+        "gloss": "burned; new; burn",
+        "duration": 4.875986,
+        "mean_volume": -28.1,
+        "max_volume": -8,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "kibembe",
+    "name": "Kibembe",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "00403d67-3532-46c2-98e2-7bcdc1d5b2bd",
+        "lexeme": "hama cane",
+        "gloss": "my hammers",
+        "duration": 3.471375,
+        "mean_volume": -21.6,
+        "max_volume": -5.1,
+        "score": 8.5
+      },
+      {
+        "entry_id": "04e41ba6-b58a-4f08-ac31-a93a93c262d5",
+        "lexeme": "ekyoko",
+        "gloss": "bed-wetter",
+        "duration": 2.821208,
+        "mean_volume": -24,
+        "max_volume": -5.1,
+        "score": 8.5
+      },
+      {
+        "entry_id": "07778e66-4d76-4266-987e-47f0bda2f07f",
+        "lexeme": "tabelaka",
+        "gloss": "to never crush",
+        "duration": 3.842896,
+        "mean_volume": -24.4,
+        "max_volume": -5.1,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "gwichin",
+    "name": "Gwich'in (Dinjii Zhuh K'yaa)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "03d34ee5-4eeb-457a-bad2-3ac976252a79",
+        "lexeme": "Aahà', dzaa natł'at.",
+        "gloss": "Yes, here's the cranberries.",
+        "duration": 1.201814,
+        "mean_volume": -18.2,
+        "max_volume": -1.2,
+        "score": 8
+      },
+      {
+        "entry_id": "0b8a5c6f-0eb9-4ec0-b3b6-46bb9ae3d739",
+        "lexeme": "Aahà', oondak tr'ahoo'oo.",
+        "gloss": "Yes, let's go up.",
+        "duration": 1.462857,
+        "mean_volume": -18.1,
+        "max_volume": -1,
+        "score": 8
+      },
+      {
+        "entry_id": "110bb0cd-7d25-4bac-bbce-dd4a3409633f",
+        "lexeme": "Drin łyâa shrôonchy'aa.",
+        "gloss": "It's a beautiful day.",
+        "duration": 1.619592,
+        "mean_volume": -14.7,
+        "max_volume": -1,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "daan-davi",
+    "name": "Da'an Davi",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "00c839cc-fbca-4e4e-90ff-2edc9e5e2d21",
+        "lexeme": "kuè'è nìì",
+        "gloss": "anemia",
+        "duration": 4.982948,
+        "mean_volume": -24,
+        "max_volume": -8,
+        "score": 9
+      },
+      {
+        "entry_id": "02cfd15e-114f-4414-a93d-5884ec4a5cb6",
+        "lexeme": "kanaa ini",
+        "gloss": "silly, dumb",
+        "duration": 4.913878,
+        "mean_volume": -29.1,
+        "max_volume": -8.9,
+        "score": 9
+      },
+      {
+        "entry_id": "049ac0c0-f4b4-4fce-b9b7-d5caddb242c9",
+        "lexeme": "idà",
+        "gloss": "warp",
+        "duration": 4.27093,
+        "mean_volume": -29.5,
+        "max_volume": -12.4,
+        "score": 9
+      }
+    ]
+  },
+  {
+    "id": "namolukese",
+    "name": "Namolukese (a dialect of Mortlockese)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0HK8lKvyyUECchquT5nB",
+        "lexeme": "maker",
+        "gloss": "head",
+        "duration": 0.705306,
+        "mean_volume": -27.5,
+        "max_volume": -7.3,
+        "score": 8
+      },
+      {
+        "entry_id": "0TedfpGbLy5iaN4Tletv",
+        "lexeme": "naikat",
+        "gloss": "child",
+        "duration": 2.507755,
+        "mean_volume": -29.3,
+        "max_volume": -12.6,
+        "score": 8
+      },
+      {
+        "entry_id": "0csOv5mtNOM6ldQ1OfEk",
+        "lexeme": "peche",
+        "gloss": "thigh",
+        "duration": 2.35102,
+        "mean_volume": -28.7,
+        "max_volume": -11.7,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "kholosi",
+    "name": "Kholosi",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0JGzVZ7SxqkHmPmYl9bB",
+        "lexeme": "motor",
+        "gloss": "car",
+        "duration": 1.136848,
+        "mean_volume": -28,
+        "max_volume": -11.4,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0jvc42ffyspqzvqKvJ4x",
+        "lexeme": "nimur",
+        "gloss": "lemon",
+        "duration": 1.333583,
+        "mean_volume": -28.3,
+        "max_volume": -12.6,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0lMelhxljKJ1h1FlgYv1",
+        "lexeme": "konjen",
+        "gloss": "to want",
+        "duration": 1.370884,
+        "mean_volume": -29.9,
+        "max_volume": -13.4,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "pohnpeian",
+    "name": "Pohnpeian",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "1uSScATcDgQ74tFz3pol",
+        "lexeme": "ansoun lemwlemwur",
+        "gloss": "winter",
+        "duration": 1.410612,
+        "mean_volume": -23.2,
+        "max_volume": -5.2,
+        "score": 8
+      },
+      {
+        "entry_id": "4fDGJhG7QVdSZUMU6ihJ",
+        "lexeme": "koatoau",
+        "gloss": "rain",
+        "duration": 1.828571,
+        "mean_volume": -22.4,
+        "max_volume": -5.6,
+        "score": 8
+      },
+      {
+        "entry_id": "8W9YV1U586aopxaVId2j",
+        "lexeme": "mwangas",
+        "gloss": "coconut, ripe",
+        "duration": 1.776327,
+        "mean_volume": -22.1,
+        "max_volume": -6,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "kosraean",
+    "name": "Kosraean",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0CUQ4iczFGrCHBVaKKKI",
+        "lexeme": "yot",
+        "gloss": "rock",
+        "duration": 1.07102,
+        "mean_volume": -19.8,
+        "max_volume": -3.8,
+        "score": 8
+      },
+      {
+        "entry_id": "2FD5cYH8G2aFVF3sSdbB",
+        "lexeme": "kulun sahk",
+        "gloss": "bark",
+        "duration": 1.619592,
+        "mean_volume": -19.4,
+        "max_volume": -2.6,
+        "score": 8
+      },
+      {
+        "entry_id": "4GADo9FouuNXk9AVKlk3",
+        "lexeme": "sahrom",
+        "gloss": "lightning",
+        "duration": 0.992653,
+        "mean_volume": -19,
+        "max_volume": -2.3,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "badaga",
+    "name": "Badaga",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "09RLpE1mTXKG58WQJ2fv",
+        "lexeme": "izhŭnūru",
+        "gloss": "seven hundred",
+        "duration": 1.160998,
+        "mean_volume": -22.6,
+        "max_volume": -7.7,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0FBd9djl4QB6rtV0aT75",
+        "lexeme": "haṇṇu",
+        "gloss": "fruit",
+        "duration": 1.044898,
+        "mean_volume": -20.4,
+        "max_volume": -3.7,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0LvlCVlJ1FpPuqMiyKQF",
+        "lexeme": "ettĕ",
+        "gloss": "how",
+        "duration": 1.091338,
+        "mean_volume": -21,
+        "max_volume": -5.2,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "lungie",
+    "name": "Lung'Ie",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "00657992-33de-47e6-ab7b-8820c6d07693",
+        "lexeme": "okori",
+        "gloss": "larva",
+        "duration": 1.227755,
+        "mean_volume": -28.6,
+        "max_volume": -12.6,
+        "score": 8.5
+      },
+      {
+        "entry_id": "00f750bc-67f9-4cdb-8be5-d2c50e0a9bda",
+        "lexeme": "rarara",
+        "gloss": "ideophone of vêmê (red)",
+        "duration": 1.462857,
+        "mean_volume": -23.4,
+        "max_volume": -5.9,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0113aac6-84e7-48a6-8125-a4a250045b85",
+        "lexeme": "Bon",
+        "gloss": "Good",
+        "duration": 0.897029,
+        "mean_volume": -23.9,
+        "max_volume": -3.6,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "achi",
+    "name": "Achi",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "07ZRolJHDKL3YZfSWOmC",
+        "lexeme": "Juyub'",
+        "gloss": "mountain",
+        "duration": 3.761633,
+        "mean_volume": -26.5,
+        "max_volume": -5.8,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0H8dFVTiPmAX3NV4xUB6",
+        "lexeme": "Chirimiy",
+        "gloss": "a type of oboe",
+        "duration": 3.709388,
+        "mean_volume": -21.3,
+        "max_volume": -5.2,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0W9ZHXNOdqbKN95Ps2Hh",
+        "lexeme": "Kaaj",
+        "gloss": "sky",
+        "duration": 3.761633,
+        "mean_volume": -26.4,
+        "max_volume": -1.9,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "tzutujil",
+    "name": "Tzʼutujil",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "06ASKY1ZnnugPIvQRrFK",
+        "lexeme": "ruxaaq",
+        "gloss": "leaf",
+        "duration": 1.802449,
+        "mean_volume": -24.6,
+        "max_volume": -5.9,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0B5Q17fQ3mxIe0S24e7M",
+        "lexeme": "junlajuuj",
+        "gloss": "eleven",
+        "duration": 2.507755,
+        "mean_volume": -24.8,
+        "max_volume": -8.9,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0IjOCpkwUKosKITRGWCW",
+        "lexeme": "chayooj",
+        "gloss": "cut",
+        "duration": 2.272653,
+        "mean_volume": -22.2,
+        "max_volume": -5.4,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "tektiteko",
+    "name": "Tektiteko",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "1ZKsdB0u35QS04suBEoK",
+        "lexeme": "Kyiy",
+        "gloss": "fish",
+        "duration": 1.253878,
+        "mean_volume": -21.3,
+        "max_volume": -3.7,
+        "score": 8.5
+      },
+      {
+        "entry_id": "3MHov42QwBcHLMaJRtCd",
+        "lexeme": "Kyaq'iq'",
+        "gloss": "wind",
+        "duration": 1.38449,
+        "mean_volume": -22.4,
+        "max_volume": -1.6,
+        "score": 8.5
+      },
+      {
+        "entry_id": "3jRLtMzQHUAmmWn3vNA0",
+        "lexeme": "Witzj",
+        "gloss": "eye",
+        "duration": 1.515102,
+        "mean_volume": -21.3,
+        "max_volume": -4.5,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "santali",
+    "name": "Santali",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "02XgJ2i1Y39D1LLeXDB1",
+        "lexeme": "pũt'",
+        "gloss": "white",
+        "duration": 0.966531,
+        "mean_volume": -26.9,
+        "max_volume": -8.9,
+        "score": 8
+      },
+      {
+        "entry_id": "02eH6SvMpMzNzLCl1EF2",
+        "lexeme": "sɛreɲ",
+        "gloss": "song",
+        "duration": 0.940408,
+        "mean_volume": -28.9,
+        "max_volume": -12.1,
+        "score": 8
+      },
+      {
+        "entry_id": "0BP107VRvblFwivbPH0U",
+        "lexeme": "sənəc'",
+        "gloss": "mucus",
+        "duration": 0.809796,
+        "mean_volume": -25.1,
+        "max_volume": -12.2,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "ixil",
+    "name": "Ixil",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0098gzLkZh78meqe5D3F",
+        "lexeme": "Sutz'",
+        "gloss": "cloud",
+        "duration": 2.925714,
+        "mean_volume": -26.7,
+        "max_volume": -6.9,
+        "score": 9.5
+      },
+      {
+        "entry_id": "0hdz6N7gnDRcFzzyjkuz",
+        "lexeme": "tz'u'kin",
+        "gloss": "smooth",
+        "duration": 2.272653,
+        "mean_volume": -27.7,
+        "max_volume": -9.9,
+        "score": 9.5
+      },
+      {
+        "entry_id": "1UN8KKYlM6OZ1Ww8OAER",
+        "lexeme": "Atzva'ltzi' vet techb'u txay",
+        "gloss": "he ate fish",
+        "duration": 3.996735,
+        "mean_volume": -21,
+        "max_volume": -3,
+        "score": 9.5
+      }
+    ]
+  },
+  {
+    "id": "ndebele",
+    "name": "Ndebele",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "1zYUgM89GPknGtydFW68",
+        "lexeme": "lokhuya",
+        "gloss": "that",
+        "duration": 1.123265,
+        "mean_volume": -18.7,
+        "max_volume": -2.7,
+        "score": 8
+      },
+      {
+        "entry_id": "ARgiZ9Pid1D7Rg9mw96r",
+        "lexeme": "kuyini",
+        "gloss": "what?",
+        "duration": 1.28,
+        "mean_volume": -17.3,
+        "max_volume": -2.1,
+        "score": 8
+      },
+      {
+        "entry_id": "CbfabFg75U7fLGe93Yje",
+        "lexeme": "konke",
+        "gloss": "all (of a number)",
+        "duration": 1.227755,
+        "mean_volume": -18.3,
+        "max_volume": -2.9,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "kera-mundari",
+    "name": "KeraɁ Mundari",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0C4lLF3RU95pwya2xGsg",
+        "lexeme": "kacwa",
+        "gloss": "turtle",
+        "duration": 1.410612,
+        "mean_volume": -27.3,
+        "max_volume": -8.2,
+        "score": 8
+      },
+      {
+        "entry_id": "0g9tDyJ3g7IEBORLZ2sg",
+        "lexeme": "johar",
+        "gloss": "hello",
+        "duration": 0.966531,
+        "mean_volume": -25.2,
+        "max_volume": -5.5,
+        "score": 8
+      },
+      {
+        "entry_id": "0lwxLuZXoXIZCu0J4kWN",
+        "lexeme": "paicmi",
+        "gloss": "south",
+        "duration": 1.149388,
+        "mean_volume": -27.8,
+        "max_volume": -10.6,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "yapese",
+    "name": "Yapese",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "08g8Kcl8g8VtuaLfmyga",
+        "lexeme": "ya'n",
+        "gloss": "sand",
+        "duration": 0.914286,
+        "mean_volume": -18.8,
+        "max_volume": -2.6,
+        "score": 8
+      },
+      {
+        "entry_id": "21JPpYmd5FtmWRvDHKKd",
+        "lexeme": "dai",
+        "gloss": "ocean, sea",
+        "duration": 1.697959,
+        "mean_volume": -22.6,
+        "max_volume": -5.5,
+        "score": 8
+      },
+      {
+        "entry_id": "2GlMLWorG9FoCp8U9MaI",
+        "lexeme": "gai yuch",
+        "gloss": "crocodile",
+        "duration": 1.07102,
+        "mean_volume": -17.8,
+        "max_volume": -3.1,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "tehriyali",
+    "name": "Tehriyali",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0PFNlMAdEAfSbM1cAxnp",
+        "lexeme": "गैणी",
+        "gloss": "Sky",
+        "duration": 1.962667,
+        "mean_volume": -22.6,
+        "max_volume": -2.7,
+        "score": 8
+      },
+      {
+        "entry_id": "0V6AfllvuZsNUiRN7KFb",
+        "lexeme": "गेंड्कु",
+        "gloss": "Wood log",
+        "duration": 1.536,
+        "mean_volume": -19.1,
+        "max_volume": -1,
+        "score": 8
+      },
+      {
+        "entry_id": "0qsnhdOyato3ujBrpqe2",
+        "lexeme": "समीन",
+        "gloss": "Patient person",
+        "duration": 1.024,
+        "mean_volume": -15.1,
+        "max_volume": -1.1,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "chorti",
+    "name": "Ch'orti'",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "2y0eYXKTR9Zgt4wGv7Y3",
+        "lexeme": "Nuk'",
+        "gloss": "neck",
+        "duration": 2.925714,
+        "mean_volume": -24.7,
+        "max_volume": -1.7,
+        "score": 8.5
+      },
+      {
+        "entry_id": "1GpR8VWWm22bRYgRf8oh",
+        "lexeme": "Akb'ar",
+        "gloss": "night",
+        "duration": 4.179592,
+        "mean_volume": -30.1,
+        "max_volume": -2.8,
+        "score": 6.5
+      },
+      {
+        "entry_id": "3GqwstFfHUhzBdiFq7UM",
+        "lexeme": "Mut",
+        "gloss": "bird",
+        "duration": 3.657143,
+        "mean_volume": -21.2,
+        "max_volume": -0.1,
+        "score": 6.5
+      }
+    ]
+  },
+  {
+    "id": "brezhoneg",
+    "name": "Brezhoneg",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0InJQs2KuRkv8kz3Xg6p",
+        "lexeme": "yar / ar yar / ar yer",
+        "gloss": "chicken",
+        "duration": 3.045313,
+        "mean_volume": -23.9,
+        "max_volume": -6,
+        "score": 8
+      },
+      {
+        "entry_id": "0M8BcmXlfybU7bSF5Bg3",
+        "lexeme": "beg / ar beg / ar begoù",
+        "gloss": "mouth",
+        "duration": 2.794521,
+        "mean_volume": -26.2,
+        "max_volume": -6,
+        "score": 8
+      },
+      {
+        "entry_id": "0gp2wMREARt7Ej5enTGb",
+        "lexeme": "toull / an toull / an toulloù",
+        "gloss": "hole",
+        "duration": 1.83875,
+        "mean_volume": -25.9,
+        "max_volume": -10.6,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "kidawida",
+    "name": "Kidaw'ida",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "Mtdp8ZjlV0Sqlq7wYkLc",
+        "lexeme": "Vua",
+        "gloss": "Rain",
+        "duration": 1.877333,
+        "mean_volume": -20.8,
+        "max_volume": -2.3,
+        "score": 9
+      },
+      {
+        "entry_id": "letympc0snD4s5wFVmmX",
+        "lexeme": "Choo",
+        "gloss": "Come",
+        "duration": 2.218667,
+        "mean_volume": -23.6,
+        "max_volume": -3.6,
+        "score": 9
+      },
+      {
+        "entry_id": "Abczjxt9LPygZolcgTGD",
+        "lexeme": "Inya",
+        "gloss": "Four",
+        "duration": 1.536,
+        "mean_volume": -22.9,
+        "max_volume": -5.3,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "moba",
+    "name": "Mọ̀bà",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "01ee9f43-ffbc-4485-aab0-f89e71ff7ea6",
+        "lexeme": "ogóòjì",
+        "gloss": "forty",
+        "duration": 1.450667,
+        "mean_volume": -20.3,
+        "max_volume": -3.2,
+        "score": 8
+      },
+      {
+        "entry_id": "07b77411-f44b-4c63-a9e6-2df8228e0823",
+        "lexeme": "okòó",
+        "gloss": "twenty",
+        "duration": 1.706667,
+        "mean_volume": -27.3,
+        "max_volume": -10,
+        "score": 8
+      },
+      {
+        "entry_id": "08f272b1-e07f-4a91-b817-4c602bec904d",
+        "lexeme": "adìye̩",
+        "gloss": "chicken",
+        "duration": 1.792,
+        "mean_volume": -29.6,
+        "max_volume": -9.8,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "chuj",
+    "name": "Chuj",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "1ISdRGa6xfORSaAiB7Kl",
+        "lexeme": "Unnab'il",
+        "gloss": "son",
+        "duration": 3.056327,
+        "mean_volume": -24.6,
+        "max_volume": -5.1,
+        "score": 8.5
+      },
+      {
+        "entry_id": "1j0fjcf3ZNtVebEVodKW",
+        "lexeme": "Tzpuki",
+        "gloss": "spill",
+        "duration": 2.45551,
+        "mean_volume": -25.2,
+        "max_volume": -6.7,
+        "score": 8.5
+      },
+      {
+        "entry_id": "1zWjA1EpxEGhaRIGWysD",
+        "lexeme": "Tzmali",
+        "gloss": "swell",
+        "duration": 2.45551,
+        "mean_volume": -23.6,
+        "max_volume": -6.9,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "mišär-tatar",
+    "name": "Mišär tatar",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "1gWc5bywz03xVHCLRMqi",
+        "lexeme": "Altõ",
+        "gloss": "Six",
+        "duration": 2.321995,
+        "mean_volume": -27,
+        "max_volume": -4.3,
+        "score": 8
+      },
+      {
+        "entry_id": "3obdCCUVuX2LQQ4JHWkv",
+        "lexeme": "Akõl",
+        "gloss": "Wisdom",
+        "duration": 2.229116,
+        "mean_volume": -27,
+        "max_volume": -2,
+        "score": 8
+      },
+      {
+        "entry_id": "9AAQtAzfpC4QTnlwU3YP",
+        "lexeme": "Alma",
+        "gloss": "Apple",
+        "duration": 2.972154,
+        "mean_volume": -29.7,
+        "max_volume": -7.8,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "mazahua",
+    "name": "Mazahua",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0m73K56kDZToH73Y5EF3",
+        "lexeme": "tr'ezi",
+        "gloss": "axe",
+        "duration": 1.227755,
+        "mean_volume": -20.5,
+        "max_volume": -8.3,
+        "score": 8
+      },
+      {
+        "entry_id": "1bmZz1cc34FoHZjxl714",
+        "lexeme": "kjürga",
+        "gloss": "liver",
+        "duration": 1.645714,
+        "mean_volume": -23.4,
+        "max_volume": -8.7,
+        "score": 8
+      },
+      {
+        "entry_id": "2aKuNR1foIYdyTMXIet0",
+        "lexeme": "tr'eje",
+        "gloss": "mountain",
+        "duration": 1.436735,
+        "mean_volume": -22.6,
+        "max_volume": -4.3,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "bugun",
+    "name": "Bugun",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0B3kFIRJujVnwZMT3Hkf",
+        "lexeme": "hɑbɛʔn",
+        "gloss": "snowflake/falling snow",
+        "duration": 0.78365,
+        "mean_volume": -19.4,
+        "max_volume": -2.7,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0kJSUd1nT7Im1E5Jj1O7",
+        "lexeme": "ɸwɛʔ",
+        "gloss": "bird",
+        "duration": 0.73145,
+        "mean_volume": -19.8,
+        "max_volume": -2,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0mNCNCFb8Fp9AmWjxtXE",
+        "lexeme": "ɻiji",
+        "gloss": "tongue",
+        "duration": 0.65305,
+        "mean_volume": -14.9,
+        "max_volume": -1.6,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "80CcDQ4DRyiYSPIWZ9Hy",
+    "name": "Diccionario de lengua Tehuelche (aonekko 'a'ien)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0TYQFijKXreNufDckoOb",
+        "lexeme": "e eeu sh pekk",
+        "gloss": "I am at home",
+        "duration": 1.692,
+        "mean_volume": -18.8,
+        "max_volume": -3,
+        "score": 8.5
+      },
+      {
+        "entry_id": "3PKJA0gNuYJlxoCyBuz7",
+        "lexeme": "tchott",
+        "gloss": "duck",
+        "duration": 0.696,
+        "mean_volume": -18.5,
+        "max_volume": -1,
+        "score": 8.5
+      },
+      {
+        "entry_id": "7Pil8bg9St1TwOFNWkz5",
+        "lexeme": "mauerrshkk jeen ain",
+        "gloss": "Entry forbidden",
+        "duration": 2.016,
+        "mean_volume": -19.4,
+        "max_volume": -3.4,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "naxi",
+    "name": "Naxi",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "1VNVU5ckZr5ng7RzjWMn",
+        "lexeme": "wa",
+        "gloss": "five",
+        "duration": 1.26,
+        "mean_volume": -22.7,
+        "max_volume": -5,
+        "score": 8.5
+      },
+      {
+        "entry_id": "1hSt1pjqDYAybAB03bsc",
+        "lexeme": "neumve",
+        "gloss": "dandelion",
+        "duration": 1.123265,
+        "mean_volume": -29.9,
+        "max_volume": -16.1,
+        "score": 8
+      },
+      {
+        "entry_id": "7prtI9n6EO5T4Td6oEIr",
+        "lexeme": "meimei",
+        "gloss": "younger sister",
+        "duration": 0.966531,
+        "mean_volume": -28.2,
+        "max_volume": -14.6,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "mopan",
+    "name": "Mopan",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "6JbSSeewiHTZYmDDoK06",
+        "lexeme": "Kal",
+        "gloss": "neck",
+        "duration": 3.239184,
+        "mean_volume": -23.5,
+        "max_volume": -3.3,
+        "score": 8.5
+      },
+      {
+        "entry_id": "7nJs5w01DQQ4YzHLZNKv",
+        "lexeme": "K'in",
+        "gloss": "day",
+        "duration": 3.604898,
+        "mean_volume": -22.3,
+        "max_volume": -1.7,
+        "score": 8.5
+      },
+      {
+        "entry_id": "04L2om6iEYoFAN3A6Nlq",
+        "lexeme": "Pek'",
+        "gloss": "dog",
+        "duration": 3.526531,
+        "mean_volume": -17.1,
+        "max_volume": 0,
+        "score": 5.5
+      }
+    ]
+  },
+  {
+    "id": "háusi-kúta",
+    "name": "Háusi kúta (Yahgan language)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0XDVnNwe0GuNxoWLPdaS",
+        "lexeme": "aköpi",
+        "gloss": "Cold",
+        "duration": 1.65,
+        "mean_volume": -26.1,
+        "max_volume": -4.7,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0uGFwCilGmC3QCiyqNMT",
+        "lexeme": "haian",
+        "gloss": "We",
+        "duration": 1.344,
+        "mean_volume": -24.2,
+        "max_volume": -4,
+        "score": 8.5
+      },
+      {
+        "entry_id": "19OYS3HfAnf35h5EhlNu",
+        "lexeme": "shatapöna",
+        "gloss": "To face",
+        "duration": 1.856,
+        "mean_volume": -28.5,
+        "max_volume": -9.3,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "quechua-chanka",
+    "name": "Quechua chanka",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "46yC7ZfOTWBfpOoF3eUI",
+        "lexeme": "akchiy",
+        "gloss": "alumbrar",
+        "duration": 0.966531,
+        "mean_volume": -28.1,
+        "max_volume": -5,
+        "score": 9
+      },
+      {
+        "entry_id": "04ms6MyxD4UHidLsethy",
+        "lexeme": "mawka",
+        "gloss": "old",
+        "duration": 1.044898,
+        "mean_volume": -22.9,
+        "max_volume": -7.2,
+        "score": 8
+      },
+      {
+        "entry_id": "0I8zQVn81l1sCju3pDcX",
+        "lexeme": "qara",
+        "gloss": "skin",
+        "duration": 0.888163,
+        "mean_volume": -23.6,
+        "max_volume": -1.8,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "tjwao",
+    "name": "Tjwao",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0GjobzDF0ntNpEfAZH70",
+        "lexeme": "dam",
+        "gloss": "tongue (anatomical)",
+        "duration": 0.783673,
+        "mean_volume": -16.6,
+        "max_volume": -5.7,
+        "score": 8
+      },
+      {
+        "entry_id": "1Lv1gd4Yduwa6u8oRXV0",
+        "lexeme": "nawoo",
+        "gloss": "what?",
+        "duration": 2.037551,
+        "mean_volume": -17.6,
+        "max_volume": -5.5,
+        "score": 8
+      },
+      {
+        "entry_id": "23OwTfSjtCA56aVvYWdP",
+        "lexeme": "dzwaa",
+        "gloss": "ash(es)",
+        "duration": 1.227755,
+        "mean_volume": -18.9,
+        "max_volume": -5,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "ngəmba",
+    "name": "Ngemba",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "ETDhf5Kk32W98OeSFvoT",
+        "lexeme": "lɔ́ŋ",
+        "gloss": "neck",
+        "duration": 4.949333,
+        "mean_volume": -19.2,
+        "max_volume": -1.2,
+        "score": 9.5
+      },
+      {
+        "entry_id": "0IzyuJim0PkF8shwGM7k",
+        "lexeme": "pà'à",
+        "gloss": "house; building",
+        "duration": 5.461333,
+        "mean_volume": -22.4,
+        "max_volume": -1.8,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0UN7p1haVfEogoR7CCAB",
+        "lexeme": "nəsɔŋ",
+        "gloss": "teeth",
+        "duration": 5.376,
+        "mean_volume": -24.4,
+        "max_volume": -2,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "pipil",
+    "name": "Pipil (nahuat)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "06YexOfUCgTMdxJ5fQOB",
+        "lexeme": "tutunik",
+        "gloss": "hot",
+        "duration": 1.436735,
+        "mean_volume": -25,
+        "max_volume": -7.8,
+        "score": 8
+      },
+      {
+        "entry_id": "1IcH4wHR25nyR7NklOie",
+        "lexeme": "ume",
+        "gloss": "two",
+        "duration": 1.17551,
+        "mean_volume": -25.3,
+        "max_volume": -12.5,
+        "score": 8
+      },
+      {
+        "entry_id": "1LtgVMxJi40y3qkONNrl",
+        "lexeme": "lamal",
+        "gloss": "sea",
+        "duration": 1.253878,
+        "mean_volume": -19.2,
+        "max_volume": -7.9,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "kipsigis",
+    "name": "Kipsigis",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "56T9EWyf270K1JX4SwIb",
+        "lexeme": "oiyo",
+        "gloss": "Sorry.",
+        "duration": 1.26,
+        "mean_volume": -27.4,
+        "max_volume": -10,
+        "score": 9.5
+      },
+      {
+        "entry_id": "07T0DIqv8Q68fAwL7KLL",
+        "lexeme": "-in",
+        "gloss": "you.sg",
+        "duration": 0.684,
+        "mean_volume": -24.3,
+        "max_volume": -10.7,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0RYJezFvEkEkSuKtfeVW",
+        "lexeme": "iyoonyun",
+        "gloss": "mother (for older woman)",
+        "duration": 0.828,
+        "mean_volume": -26.5,
+        "max_volume": -10.8,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "judeo-iraqi-arabic",
+    "name": "Judeo-Iraqi Arabic",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "jPIQ6GaAS8zxKcEHLDQn",
+        "lexeme": "ziyyāġa",
+        "gloss": "Pilgrimage, lit. Visit",
+        "duration": 3.328,
+        "mean_volume": -23.3,
+        "max_volume": -4.3,
+        "score": 8
+      },
+      {
+        "entry_id": "mqxBWdO3to6POqSj9EUr",
+        "lexeme": "taqrīban",
+        "gloss": "approximately, almost",
+        "duration": 3.242667,
+        "mean_volume": -21.9,
+        "max_volume": -4.2,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "weri",
+    "name": "Weri",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0U72pKoHBykoxziC6xb7",
+        "lexeme": "jádwí",
+        "gloss": "know",
+        "duration": 1.410612,
+        "mean_volume": -21.2,
+        "max_volume": -5.3,
+        "score": 8.5
+      },
+      {
+        "entry_id": "2MmpYpz5EtGacwYiKfRW",
+        "lexeme": "es",
+        "gloss": "fire",
+        "duration": 1.462857,
+        "mean_volume": -20.3,
+        "max_volume": -4.6,
+        "score": 8.5
+      },
+      {
+        "entry_id": "2YyRtS1XYdG1JNEyqOu7",
+        "lexeme": "ʃúmɛn",
+        "gloss": "tail",
+        "duration": 1.462857,
+        "mean_volume": -18.9,
+        "max_volume": -5.7,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "ngabere",
+    "name": "Ngäbere (Guaymí)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "01m008sPpPIaS0OLSfQg",
+        "lexeme": "netde",
+        "gloss": "here",
+        "duration": 4.597551,
+        "mean_volume": -17.1,
+        "max_volume": -0.1,
+        "score": 5.5
+      },
+      {
+        "entry_id": "0JWBUDfD357ALCHtP53M",
+        "lexeme": "jume",
+        "gloss": "meek",
+        "duration": 2.821224,
+        "mean_volume": -14.6,
+        "max_volume": -0.3,
+        "score": 5.5
+      },
+      {
+        "entry_id": "0kADUIEB2gzn6ytFvvaF",
+        "lexeme": "tatda",
+        "gloss": "father",
+        "duration": 2.586122,
+        "mean_volume": -15.6,
+        "max_volume": -0.1,
+        "score": 5.5
+      }
+    ]
+  },
+  {
+    "id": "arayeke-taino",
+    "name": "AraYeke Taino",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "1zv9jYD6qmNmSZHi0t2u",
+        "lexeme": "liren",
+        "gloss": "fruit",
+        "duration": 2.218667,
+        "mean_volume": -28.3,
+        "max_volume": -4.6,
+        "score": 8.5
+      },
+      {
+        "entry_id": "2oet8XjqIM0aEDlDzNvQ",
+        "lexeme": "Yaguasa",
+        "gloss": "duck",
+        "duration": 2.816,
+        "mean_volume": -21.6,
+        "max_volume": -2,
+        "score": 8.5
+      },
+      {
+        "entry_id": "3QfFSQslLVyRcj617l1I",
+        "lexeme": "Guakamaio",
+        "gloss": "macaw",
+        "duration": 2.730667,
+        "mean_volume": -29.1,
+        "max_volume": -8.2,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "kuman",
+    "name": "Kuman",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "1rUgHnLwk6WEdH1z3Pjb",
+        "lexeme": "suwo",
+        "gloss": "two",
+        "duration": 0.835918,
+        "mean_volume": -26.8,
+        "max_volume": -11.6,
+        "score": 8.5
+      },
+      {
+        "entry_id": "39enyUXc4WpKmuPVELWL",
+        "lexeme": "kama",
+        "gloss": "black",
+        "duration": 1.018776,
+        "mean_volume": -22.8,
+        "max_volume": -4.8,
+        "score": 8.5
+      },
+      {
+        "entry_id": "4qKp224DxfOcBrdRbwIw",
+        "lexeme": "dra, drano",
+        "gloss": "mouth",
+        "duration": 0.731429,
+        "mean_volume": -21.5,
+        "max_volume": -5.7,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "khoikhoi",
+    "name": "Khoikhoi",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0InbFzCpLOXdNZgm66bX",
+        "lexeme": "hoa",
+        "gloss": "all",
+        "duration": 4.693333,
+        "mean_volume": -21.6,
+        "max_volume": -1.1,
+        "score": 8
+      },
+      {
+        "entry_id": "4oKXhkka9XMiqQjKzNIN",
+        "lexeme": "dīb",
+        "gloss": "act",
+        "duration": 4.864,
+        "mean_volume": -26.5,
+        "max_volume": -5.3,
+        "score": 8
+      },
+      {
+        "entry_id": "9QoJnZbH0QjkOfmKOZHl",
+        "lexeme": "a",
+        "gloss": "yes",
+        "duration": 4.778667,
+        "mean_volume": -21.2,
+        "max_volume": -2.3,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "wahgi-waghi",
+    "name": "Wahgi (Waghi)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0eJvzYvYyEzKcIItI2k2",
+        "lexeme": "dop",
+        "gloss": "fire",
+        "duration": 1.28,
+        "mean_volume": -20.2,
+        "max_volume": -2.7,
+        "score": 8
+      },
+      {
+        "entry_id": "0nxGd2BOS8G5DmRipa42",
+        "lexeme": "gosmung",
+        "gloss": "knee",
+        "duration": 1.097143,
+        "mean_volume": -19.5,
+        "max_volume": -2.9,
+        "score": 8
+      },
+      {
+        "entry_id": "0uYiO4uKizNlTUWz5ozg",
+        "lexeme": "nol angel",
+        "gloss": "swim",
+        "duration": 1.253878,
+        "mean_volume": -19.9,
+        "max_volume": -1.2,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "aren-aiome",
+    "name": "Aren (Aiome)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0i3ncpvEYTqKIBhUk8HB",
+        "lexeme": "sinet",
+        "gloss": "face",
+        "duration": 0.966531,
+        "mean_volume": -26.7,
+        "max_volume": -11.2,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0zUqCZUOBueqJcG3HdlI",
+        "lexeme": "ingel arom",
+        "gloss": "dry season",
+        "duration": 1.38449,
+        "mean_volume": -28.9,
+        "max_volume": -14.5,
+        "score": 8.5
+      },
+      {
+        "entry_id": "2JznRZPKVUSEnNeEoDYA",
+        "lexeme": "feeneng",
+        "gloss": "rain",
+        "duration": 0.783673,
+        "mean_volume": -23,
+        "max_volume": -9.7,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "idio-titan",
+    "name": "Idio Titan",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0QybGi8U7z6RiIfOIrji",
+        "lexeme": "ngon, ngom",
+        "gloss": "nose",
+        "duration": 1.28,
+        "mean_volume": -25.6,
+        "max_volume": -13,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0VcDLhnIEaIoJ7XW6Jgw",
+        "lexeme": "puwen",
+        "gloss": "short",
+        "duration": 1.48898,
+        "mean_volume": -22.8,
+        "max_volume": -8.6,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0fVF5vHyHWbzlRMM2tLj",
+        "lexeme": "mumwan",
+        "gloss": "bad",
+        "duration": 1.332245,
+        "mean_volume": -25.3,
+        "max_volume": -11.7,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "naasioi",
+    "name": "Naasioi",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0TjVLN74pseCWuj9bYUS",
+        "lexeme": "po'ko",
+        "gloss": "come",
+        "duration": 0.835918,
+        "mean_volume": -24.6,
+        "max_volume": -5.8,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0sBcP4HPWzJs9oBiBQSs",
+        "lexeme": "mokomoko anta nii'",
+        "gloss": "round",
+        "duration": 1.985306,
+        "mean_volume": -23.4,
+        "max_volume": -8.8,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0t4jyb3NXickz5zJYkFY",
+        "lexeme": "make'",
+        "gloss": "bone",
+        "duration": 1.018776,
+        "mean_volume": -25,
+        "max_volume": -9,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "muyuw-woodlark",
+    "name": "Muyuw (Woodlark)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0IvyBSbTrxgrFNk2MYHc",
+        "lexeme": "yeg",
+        "gloss": "name",
+        "duration": 0.862041,
+        "mean_volume": -29,
+        "max_volume": -13.8,
+        "score": 8.5
+      },
+      {
+        "entry_id": "4vnDK3dPxma74Dfc7GIC",
+        "lexeme": "bwein,",
+        "gloss": "good",
+        "duration": 0.835918,
+        "mean_volume": -25.7,
+        "max_volume": -11.1,
+        "score": 8.5
+      },
+      {
+        "entry_id": "5ZB4FhFBfjTL1pinLkg2",
+        "lexeme": "kabnubun",
+        "gloss": "nose",
+        "duration": 1.802449,
+        "mean_volume": -28,
+        "max_volume": -10,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "tsesungun",
+    "name": "Tsesungun",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0vTO2wTyZZk5f14ggHm2",
+        "lexeme": "müpüwe",
+        "gloss": "wing",
+        "duration": 1.28,
+        "mean_volume": -19.5,
+        "max_volume": -7.4,
+        "score": 8
+      },
+      {
+        "entry_id": "1Th9VrQXgGhrFsrXmszz",
+        "lexeme": "mawüsam",
+        "gloss": "mountain",
+        "duration": 1.38449,
+        "mean_volume": -21.3,
+        "max_volume": -5.8,
+        "score": 8
+      },
+      {
+        "entry_id": "1sgQ8GxgHjHTsuOev948",
+        "lexeme": "mapu",
+        "gloss": "earth",
+        "duration": 1.07102,
+        "mean_volume": -19.4,
+        "max_volume": -6.2,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "nalik",
+    "name": "Nalik",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "01tq5RE8hAJpssiZPq9V",
+        "lexeme": "bere",
+        "gloss": "pig",
+        "duration": 0.966531,
+        "mean_volume": -26.2,
+        "max_volume": -10.3,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0Ig18tzUXYs1Nas4qO8q",
+        "lexeme": "pìat",
+        "gloss": "say",
+        "duration": 0.574694,
+        "mean_volume": -25.9,
+        "max_volume": -9.3,
+        "score": 8.5
+      },
+      {
+        "entry_id": "0gLt5kGyjAaSXiS3EW3N",
+        "lexeme": "aras",
+        "gloss": "sea",
+        "duration": 0.914286,
+        "mean_volume": -25.3,
+        "max_volume": -7.9,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "gaedhealg-thir-eoghain",
+    "name": "Gaedhealg Thír Eoghain",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "0U6NthNsti3a5PYkGQAV",
+        "lexeme": "C' ainm",
+        "gloss": "what name",
+        "duration": 6.997333,
+        "mean_volume": -28.9,
+        "max_volume": -5.5,
+        "score": 6
+      },
+      {
+        "entry_id": "6dEL5qgdoir3yXYW04FV",
+        "lexeme": "An t-ainm",
+        "gloss": "the name",
+        "duration": 7.168,
+        "mean_volume": -29.5,
+        "max_volume": -5.9,
+        "score": 6
+      },
+      {
+        "entry_id": "ANdfJm36v0pgzeIL2zht",
+        "lexeme": "Ainm",
+        "gloss": "name",
+        "duration": 5.12,
+        "mean_volume": -31.7,
+        "max_volume": -9.1,
+        "score": 6
+      }
+    ]
+  },
+  {
+    "id": "korku",
+    "name": "Korku",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "1UndcY2sutUXQhAVonDu",
+        "lexeme": "capʰad",
+        "gloss": "chew",
+        "duration": 0.940408,
+        "mean_volume": -26,
+        "max_volume": -7.6,
+        "score": 8
+      },
+      {
+        "entry_id": "2FdjNdJIdfHp35rpXp1D",
+        "lexeme": "gitiɟ",
+        "gloss": "go to sleep",
+        "duration": 1.17551,
+        "mean_volume": -26.1,
+        "max_volume": -9.2,
+        "score": 8
+      },
+      {
+        "entry_id": "3383TepGyCICus036LSF",
+        "lexeme": "karke",
+        "gloss": "bury",
+        "duration": 0.992653,
+        "mean_volume": -25.5,
+        "max_volume": -6.8,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "tuscarora",
+    "name": "Tuscarora",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "CzKX4sSMka0wSwgUXlqH",
+        "lexeme": "sawętéˀ",
+        "gloss": "nothing",
+        "duration": 1.450667,
+        "mean_volume": -26.8,
+        "max_volume": -6.7,
+        "score": 8
+      },
+      {
+        "entry_id": "JPKt0wLw6hchgKReR7xZ",
+        "lexeme": "čhęˀ",
+        "gloss": "just now; very recently",
+        "duration": 1.536,
+        "mean_volume": -29,
+        "max_volume": -9.3,
+        "score": 8
+      },
+      {
+        "entry_id": "KIKgZex2Y9K54TDLcTLz",
+        "lexeme": "hení·kę·",
+        "gloss": "that; that one",
+        "duration": 2.645333,
+        "mean_volume": -27.9,
+        "max_volume": -7.3,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "miahuatec-zapotec",
+    "name": "Miahuatec Zapotec (San Bartolomé Loxicha)",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "4AfqoshD30Jyx1P7b963",
+        "lexeme": "xa’nle’n",
+        "gloss": "belly",
+        "duration": 0.783673,
+        "mean_volume": -23.7,
+        "max_volume": -4.6,
+        "score": 8
+      },
+      {
+        "entry_id": "4JlEsGYOermYDN2RbZ6C",
+        "lexeme": "xíb",
+        "gloss": "knee",
+        "duration": 0.626939,
+        "mean_volume": -22,
+        "max_volume": -7.2,
+        "score": 8
+      },
+      {
+        "entry_id": "8PqTRJI7gG9XDEQia0i6",
+        "lexeme": "gué",
+        "gloss": "stone",
+        "duration": 0.888163,
+        "mean_volume": -21.7,
+        "max_volume": -8.2,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "alu-kurumba",
+    "name": "Alu Kurumba",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "2jghq8XOZvAjOKjsfRgD",
+        "lexeme": "koḍalu",
+        "gloss": "intestines",
+        "duration": 1.462857,
+        "mean_volume": -20.3,
+        "max_volume": -4.8,
+        "score": 8.5
+      },
+      {
+        "entry_id": "47dITuvUfWEuoRwJIEPq",
+        "lexeme": "neḍuvu",
+        "gloss": "waist",
+        "duration": 1.439637,
+        "mean_volume": -21.9,
+        "max_volume": -5,
+        "score": 8.5
+      },
+      {
+        "entry_id": "4galv1yC9wfkBRVLH1mb",
+        "lexeme": "kondi",
+        "gloss": "armpit",
+        "duration": 1.300317,
+        "mean_volume": -20.1,
+        "max_volume": -6,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "bezhta",
+    "name": "Bezhta",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "1JuauYR2OiJFgWvTlSIE",
+        "lexeme": "мисо",
+        "gloss": "sand",
+        "duration": 3.072,
+        "mean_volume": -20.3,
+        "max_volume": -1.8,
+        "score": 8.5
+      },
+      {
+        "entry_id": "gDsIM5wGAKGUzQktczpk",
+        "lexeme": "кид",
+        "gloss": "daughter, girl",
+        "duration": 1.877333,
+        "mean_volume": -20.3,
+        "max_volume": -1.2,
+        "score": 8.5
+      },
+      {
+        "entry_id": "uXlLufIZwU5gnnPIqs5r",
+        "lexeme": "бизо",
+        "gloss": "mountain",
+        "duration": 2.56,
+        "mean_volume": -18,
+        "max_volume": -1.5,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "saliba",
+    "name": "Sáliba",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "60IPkudkiTQhpFhfbtr5",
+        "lexeme": "chumacha [cumaca]",
+        "gloss": "Name",
+        "duration": 1.776327,
+        "mean_volume": -19.8,
+        "max_volume": -2,
+        "score": 8
+      },
+      {
+        "entry_id": "6QEHgB58nEveDbeYlbgh",
+        "lexeme": "chẽxunee [cẽnxunẽẽ]",
+        "gloss": "Daughter",
+        "duration": 1.697959,
+        "mean_volume": -19.7,
+        "max_volume": -1.9,
+        "score": 8
+      },
+      {
+        "entry_id": "Jv4caGvsp8AAxBqgHRdm",
+        "lexeme": "chẽdinee [cẽndinẽẽ]",
+        "gloss": "Son",
+        "duration": 1.776327,
+        "mean_volume": -19.6,
+        "max_volume": -1.3,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "mapudungun",
+    "name": "Mapudungun",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "2sLTfN5qBSunjwnZ96c7",
+        "lexeme": "küwü",
+        "gloss": "hand",
+        "duration": 1.854694,
+        "mean_volume": -19.2,
+        "max_volume": -6.2,
+        "score": 8
+      },
+      {
+        "entry_id": "4MvQ197gctnTsI0IIPzf",
+        "lexeme": "pel-l",
+        "gloss": "neck",
+        "duration": 1.697959,
+        "mean_volume": -21.4,
+        "max_volume": -4.6,
+        "score": 8
+      },
+      {
+        "entry_id": "66Jrxbl95ZOuxsySFiNe",
+        "lexeme": "luku",
+        "gloss": "knee",
+        "duration": 1.854694,
+        "mean_volume": -19.4,
+        "max_volume": -5.8,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "mehri",
+    "name": "Mehri",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "f59s7FKL8ae2q0OcKGda",
+        "lexeme": "حرميت",
+        "gloss": "woman",
+        "duration": 4.864,
+        "mean_volume": -28.6,
+        "max_volume": -6.6,
+        "score": 9
+      },
+      {
+        "entry_id": "gnFtA75M0KiThIavTmSr",
+        "lexeme": "غيج",
+        "gloss": "Man",
+        "duration": 6.656,
+        "mean_volume": -38.6,
+        "max_volume": -12.3,
+        "score": 5
+      }
+    ]
+  },
+  {
+    "id": "igbo",
+    "name": "Igbo",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "5iaR6gbTVzMyQKoSkqlT",
+        "lexeme": "Kee kwanụ?",
+        "gloss": "How are you?",
+        "duration": 1.201667,
+        "mean_volume": -18.2,
+        "max_volume": -6.5,
+        "score": 8
+      },
+      {
+        "entry_id": "7QSzCDFSpp0tpNgx0kmW",
+        "lexeme": "Daalụ",
+        "gloss": "Welcome",
+        "duration": 1.044833,
+        "mean_volume": -19.3,
+        "max_volume": -4.3,
+        "score": 8
+      },
+      {
+        "entry_id": "9la3NR2ac7056HBxmrj9",
+        "lexeme": "Olee otu i mere?",
+        "gloss": "How are you?",
+        "duration": 2.089833,
+        "mean_volume": -19.6,
+        "max_volume": -8.1,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "zapoteco-serrano",
+    "name": "Zapoteco serrano",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "4ctfrZvbRnQh7utYIj6A",
+        "lexeme": "inda",
+        "gloss": "water",
+        "duration": 2.816,
+        "mean_volume": -26.1,
+        "max_volume": -8.3,
+        "score": 8.5
+      },
+      {
+        "entry_id": "8qCxTzPYvBbtrxJ3Negv",
+        "lexeme": "ettse'",
+        "gloss": "thorn",
+        "duration": 2.56,
+        "mean_volume": -28.3,
+        "max_volume": -6.7,
+        "score": 8.5
+      },
+      {
+        "entry_id": "9sw4nHHzNFMu6E7R1EGj",
+        "lexeme": "bia",
+        "gloss": "sky",
+        "duration": 1.621333,
+        "mean_volume": -23,
+        "max_volume": -3.5,
+        "score": 8.5
+      }
+    ]
+  },
+  {
+    "id": "uitoto",
+    "name": "Uitoto",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "9zPhhWHJkiNTRKGXzFhP",
+        "lexeme": "urue",
+        "gloss": "baby",
+        "duration": 1.20175,
+        "mean_volume": -20.4,
+        "max_volume": -6.4,
+        "score": 8
+      },
+      {
+        "entry_id": "EeTYoVUdecP1Bak7nlai",
+        "lexeme": "jɨgɨ",
+        "gloss": "egg",
+        "duration": 1.541224,
+        "mean_volume": -25,
+        "max_volume": -7.1,
+        "score": 8
+      },
+      {
+        "entry_id": "RWyP753ZXmaY7ZSBeabz",
+        "lexeme": "rɨño",
+        "gloss": "woman",
+        "duration": 1.410612,
+        "mean_volume": -23,
+        "max_volume": -7.4,
+        "score": 8
+      }
+    ]
+  },
+  {
+    "id": "baleswari-odia",
+    "name": "Baleswari Odia",
+    "tier": "audio_only",
+    "chosen": [
+      {
+        "entry_id": "IHaAVdGmOQrEXPsqhJiR",
+        "lexeme": "bɑːɭɔ",
+        "gloss": "hair",
+        "duration": 0.545875,
+        "mean_volume": -20.9,
+        "max_volume": -6.2,
+        "score": 9.5
+      },
+      {
+        "entry_id": "PQVSnpz2eV5HYyDglI6W",
+        "lexeme": "kis̪ɔ",
+        "gloss": "what",
+        "duration": 1.128798,
+        "mean_volume": -19.7,
+        "max_volume": -2.5,
+        "score": 9.5
+      },
+      {
+        "entry_id": "sIM9777lZIN70eKIomRZ",
+        "lexeme": "ken̪e",
+        "gloss": "why",
+        "duration": 1.053333,
+        "mean_volume": -20.3,
+        "max_volume": -1.7,
+        "score": 9.5
+      }
+    ]
+  }
+]
