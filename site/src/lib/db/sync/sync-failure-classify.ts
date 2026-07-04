@@ -17,14 +17,31 @@ export type SyncFailureKind
     | 'network'
     | 'auth'
     | 'snapshot_expired'
+    | 'storage_lost'
     | 'other'
 
 /** Suppress repeat-identical throttled-kind rows (same kind+message) within this window. */
 export const SYNC_FAILURE_THROTTLE_MS = 10 * 60 * 1000
 
-const WARN_KINDS: ReadonlySet<SyncFailureKind> = new Set(['client_behind', 'server_behind', 'network', 'auth', 'snapshot_expired'])
+const WARN_KINDS: ReadonlySet<SyncFailureKind> = new Set(['client_behind', 'server_behind', 'network', 'auth', 'snapshot_expired', 'storage_lost'])
 /** Kinds subject to repeat-suppression (auto-retrying flows); hard failures always ship. */
-const THROTTLED_KINDS: ReadonlySet<SyncFailureKind> = new Set(['network', 'server_behind', 'auth', 'snapshot_expired'])
+const THROTTLED_KINDS: ReadonlySet<SyncFailureKind> = new Set(['network', 'server_behind', 'auth', 'snapshot_expired', 'storage_lost'])
+
+/**
+ * The browser closed our held OPFS sync-access-handle out from under the leader
+ * worker (observed 2026-07-03: a backgrounded tab's worker woke with a dead
+ * handle and hot-looped `AccessHandle is closed` every 30s for 80 min). Chrome
+ * throws `InvalidStateError: The access handle was already closed`; wa-sqlite/
+ * WebKit surface `AccessHandle is closed`. The dict instance self-heals by
+ * reopening the connection in place (`dict-instance.ts`), so telemetry-wise
+ * this is a benign lifecycle event: warn + throttled.
+ */
+export function is_storage_lost_error(error: unknown): boolean {
+  const message = (error as { message?: unknown } | null | undefined)?.message
+  if (typeof message !== 'string')
+    return false
+  return /access ?handle[^.]*closed|database connection is closing/i.test(message)
+}
 
 export function classify_sync_failure(error: unknown): SyncFailureKind {
   if (error instanceof ClientBehindError)
@@ -50,6 +67,8 @@ export function classify_sync_failure(error: unknown): SyncFailureKind {
   const status = (error as { status?: unknown } | null | undefined)?.status
   if (typeof status === 'number' && (status === 502 || status === 504 || (status >= 520 && status <= 527)))
     return 'network'
+  if (is_storage_lost_error(error))
+    return 'storage_lost'
   const message = (error as { message?: unknown } | null | undefined)?.message
   if (typeof message === 'string') {
     if (/not a database|disk image is malformed|file is not a database|\bcorrupt/i.test(message))
@@ -119,6 +138,11 @@ if (import.meta.vitest) {
     test('a bare app 500 stays other (a real fault worth surfacing)', () => {
       expect(classify_sync_failure(Object.assign(new Error('Internal Error'), { status: 500 }))).toBe('other')
     })
+    test('classifies a browser-closed OPFS access handle as storage_lost', () => {
+      expect(classify_sync_failure(new Error('AccessHandle is closed'))).toBe('storage_lost')
+      expect(classify_sync_failure(new Error('The access handle was already closed.'))).toBe('storage_lost')
+      expect(classify_sync_failure(new Error('The database connection is closing.'))).toBe('storage_lost')
+    })
     test('everything else is other', () => {
       expect(classify_sync_failure(new Error('FOREIGN KEY constraint failed'))).toBe('other')
       expect(classify_sync_failure(null)).toBe('other')
@@ -132,6 +156,7 @@ if (import.meta.vitest) {
       expect(sync_failure_level('network')).toBe('warn')
       expect(sync_failure_level('auth')).toBe('warn')
       expect(sync_failure_level('snapshot_expired')).toBe('warn')
+      expect(sync_failure_level('storage_lost')).toBe('warn')
       expect(sync_failure_level('corruption')).toBe('error')
       expect(sync_failure_level('other')).toBe('error')
     })
@@ -145,6 +170,9 @@ if (import.meta.vitest) {
     })
     test('suppresses a repeat network failure inside the window', () => {
       expect(should_ship_failure({ kind: 'network', message: 'x', last: { key: 'network:x', at: now - 1 }, now })).toBe(false)
+    })
+    test('suppresses a repeat storage_lost failure inside the window (no 30s hot-loop rows)', () => {
+      expect(should_ship_failure({ kind: 'storage_lost', message: 'AccessHandle is closed', last: { key: 'storage_lost:AccessHandle is closed', at: now - 1 }, now })).toBe(false)
     })
     test('ships again after the window / for a different message', () => {
       expect(should_ship_failure({ kind: 'network', message: 'x', last: { key: 'network:x', at: now - SYNC_FAILURE_THROTTLE_MS }, now })).toBe(true)

@@ -10,6 +10,7 @@ function make_daily(sessions_per_day: number[]): Daily {
     users: 0,
     errors: 0,
     real_errors: 0,
+    stale_errors: 0,
     logs: 0,
   }))
 }
@@ -21,7 +22,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     generated_at: '2026-06-24T00:00:00.000Z',
     daily: [],
     deploys: [],
-    totals: { sessions: 0, errors: 0, real_errors: 0, logs: 0, unique_users: 0 },
+    totals: { sessions: 0, errors: 0, real_errors: 0, stale_errors: 0, logs: 0, unique_users: 0 },
     top_routes: [],
     top_events: [],
     by_source: [],
@@ -34,6 +35,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     pipeline: { last_log_at: null, last_session_start_at: null, last_server_log_at: null, retention_ran_at: null, hot_rows: 0, archived_rows: 0, missing_syncable_tables: [] },
     event_coverage: { events: [], never_emitted: 0 },
     leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [], failed_by_code: [], failed_current: 0, failed_stale: 0 },
+    api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
     ...overrides,
   }
 }
@@ -42,7 +44,7 @@ describe(log_insights, () => {
   test('computes rates and depth from totals (error_rate uses real_errors, not raw errors)', () => {
     const result = log_insights({
       // 20 raw error rows but only 10 real faults (10 known-noise) → rate is 10/2000.
-      analytics: make_analytics({ totals: { logs: 2000, errors: 20, real_errors: 10, sessions: 200, unique_users: 80 }, window_days: 10 }),
+      analytics: make_analytics({ totals: { logs: 2000, errors: 20, real_errors: 10, stale_errors: 0, sessions: 200, unique_users: 80 }, window_days: 10 }),
     })
     expect(result.error_rate).toBe(0.005)
     expect(result.sessions_per_day).toBe(20)

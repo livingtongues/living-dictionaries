@@ -172,6 +172,20 @@ describe('remote-log buffer + flush', () => {
     expect((nav?.context as Record<string, unknown>).duration_ms).toBeUndefined()
   })
 
+  test('log_navigation skips same-pathname navigations (query-only churn like search-as-you-type)', async () => {
+    const module = await import('./remote-log')
+    module.init_remote_logging()
+    module.log_navigation({ to: '/milang/entries', from: '/milang/entries' })
+    module.log_event({ level: 'error', message: 'after-self-nav' })
+    await module.flush_now()
+
+    expect(find_sent_entry('navigation')).toBeUndefined()
+    // No route breadcrumb either — 1,869 identical crumbs would evict useful ones.
+    const after = find_sent_entry('after-self-nav')
+    const crumbs = (after?.context as { breadcrumbs: { type: string, value: string }[] }).breadcrumbs
+    expect(crumbs.some(crumb => crumb.type === 'route')).toBeFalsy()
+  })
+
   test('track emits an info event named after the event with props as context + an event breadcrumb', async () => {
     const module = await import('./remote-log')
     module.init_remote_logging()

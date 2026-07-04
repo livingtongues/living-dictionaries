@@ -111,6 +111,11 @@ let session_started_at_ms = 0
 /** Epoch ms of the last real user interaction — drives the heartbeat idle gate. */
 let last_activity_at_ms = 0
 
+/** The current remote-log session id ('' before init) — threaded into worker telemetry (`InstanceOptions.session_id`). */
+export function get_session_id(): string {
+  return session_id
+}
+
 /** House is a web app today; a native client would override `platform` via the payload. */
 function get_platform(): 'web' | 'ios' | 'android' {
   return 'web'
@@ -425,6 +430,12 @@ export function track({ event, props }: { event: string, props?: Record<string, 
  */
 export function log_navigation({ to, from, duration_ms }: { to: string, from?: string | null, duration_ms?: number | null }): void {
   if (!initialized)
+    return
+  // Same-pathname navigations are query-only churn (search-as-you-type `?q=`,
+  // pagination) — one heavy edit session logged 1,869 `/x/entries → /x/entries`
+  // rows (2026-07-03) and drowned real route data. `search_performed` already
+  // covers the search activity; skip both the event and the breadcrumb.
+  if (from === to)
     return
   add_breadcrumb({ type: 'route', value: to })
   const elapsed_seconds = Math.round((Date.now() - session_started_at_ms) / 1000)

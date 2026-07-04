@@ -26,6 +26,12 @@ export const KNOWN_NOISE_PATTERNS = [
   'Failed to initialize WebGL',
   'aborted',
   'exceeds limit of',
+  // The masked cross-origin window.onerror ("Script error." with no filename/
+  // stack) — a third-party script (extension, SDK loaded without CORS) threw.
+  // Zero actionable signal beyond breadcrumbs; keep shipping the rows (the
+  // breadcrumbs located a recording-flow correlation on 2026-07-03) but fold
+  // them out of the real-error headline.
+  'Script error.',
 ]
 
 export function is_known_noise(message: string): boolean {
@@ -102,6 +108,9 @@ if (import.meta.vitest) {
     })
     it('flags adapter-node oversized-body rejections', () => {
       expect(is_known_noise('Content-length of 17000012 exceeds limit of 16777216 bytes.')).toBe(true)
+    })
+    it('flags the masked cross-origin Script error.', () => {
+      expect(is_known_noise('Script error.')).toBe(true)
     })
     it('does NOT flag a genuine fault', () => {
       expect(is_known_noise("Cannot read properties of undefined (reading 'x')")).toBe(false)

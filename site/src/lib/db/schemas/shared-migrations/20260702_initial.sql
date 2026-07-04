@@ -416,7 +416,7 @@ CREATE INDEX IF NOT EXISTS idx_message_attachments_updated_at ON message_attachm
 -- named channel rooms + 1:1 DMs.
 --
 -- SERVER-ONLY tables: chat is server-authoritative and served through the
--- membership-filtered /api/admin/chat/* endpoints + a 5s poll, NOT through a
+-- membership-filtered /api/chat/* endpoints + a 5s poll, NOT through a
 -- wa-sqlite sync sector — DMs and the private named channels must never land in
 -- a non-member's local DB. These tables are created-but-empty on admin clients
 -- (same as email_codes / client_logs); they have no `dirty` column so the sync

@@ -50,11 +50,19 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   `country`/`region` (or near/mid/far distance-to-Boston buckets, reusing the existing haversine),
   human-only, so the far-region tax is a standing signal instead of a hand-run query. LD-first; flag for
   house (also Boston-hosted).
-- **Deploy-day errors fold** *(ported from house · 2026-06-30).* Tag errors from a **stale `app_version`**
-  and/or **within N min of a deploy marker** so post-deploy stale-bundle spikes auto-explain instead of
-  needing manual triage. LD already renders deploy markers on the timeline (shipped 06-28) and saw ~16
-  app_versions in 7d, so this is the natural next layer; data is in `app_version` vs current build.
-- **★ API-v1 activity panel** *(filed 2026-07-01 — grounded in the biggest live volume signal).* The
+- ✅ **Deploy-day errors fold** *(ported from house · 2026-06-30; SHIPPED 2026-07-03).*
+  `DailyPoint.stale_errors` counts error rows from a non-current `app_version` (0 when the current
+  version is unknown / on cold rollup days); Errors tile shows a "N from stale builds" hint and the
+  Errors-per-day chart gains a "From stale builds" overlay line — a deploy-day spike now auto-explains
+  as churn. Grounded in 07-03: 285 errors, ~0 live regression.
+- ✅ **★ Rank "Top routes" by distinct sessions** *(filed + SHIPPED 2026-07-03).* `top_routes` rows carry
+  `sessions` (distinct per normalized route, JS-aggregated so `normalize_route` merges don't
+  double-count); the panel ranks + values by sessions, falling back to raw counts for archived-only
+  windows. Paired with the source-side fix: `log_navigation` now skips `from === to` self-navs
+  (the 1,869-nav search-as-you-type loop).
+- ✅ **★ API-v1 activity panel** *(filed 2026-07-01; SHIPPED 2026-07-03 — "Agent API activity" panel:
+  `build_api_v1_activity` groups server `v1_*` rows by day/event/dictionary/via with a failure split,
+  hot window; stat pair + daily area chart + by-operation/by-dictionary bars + auth-channel bar).* The
   server-emitted `v1_*` events (`v1_media_attached`, `v1_entry_updated/deleted`, `v1_entries_written`,
   `v1_sentence_updated`, `v1_media_deleted`, `v1_feedback_received`) are the **single largest volume +
   richest activity signal** right now — on 07-01, 2,089 of 2,729 rows were server rows, ~3,500 v1 rows

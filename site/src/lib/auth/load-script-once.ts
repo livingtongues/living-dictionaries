@@ -15,6 +15,10 @@ function load_script(url: string) {
     const script = document.createElement('script')
     script.src = url
     script.async = true
+    // Without CORS, errors thrown inside the third-party script reach
+    // window.onerror as the masked "Script error." (no message/stack). GIS
+    // serves `Access-Control-Allow-Origin: *`, so opt in to real errors.
+    script.crossOrigin = 'anonymous'
     script.onload = resolve
     script.onerror = reject
     document.head.appendChild(script)

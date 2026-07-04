@@ -7,6 +7,7 @@ import { dispatch_dict_write } from './dict-writes'
 import { evict_if_over_budget, touch_dict } from './opfs-lru'
 import { fetch_dict_snapshot } from './fetch-snapshot'
 import { open_memory_connection } from './memory-connection'
+import { report_dict_storage_reopened, set_dict_log_session } from './report-dict-sync-failure'
 import { delete_opfs_db_file, open_opfs_connection, opfs_file_exists, write_opfs_db_file } from './worker/opfs-connection'
 import { DICT_DB_OPFS_PREFIX } from '$lib/constants'
 
@@ -54,6 +55,7 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
     const { dict_id } = options
     const path = `${DICT_DB_OPFS_PREFIX}${dict_id}.db`
     let { has_editor_role, auth } = options
+    set_dict_log_session(options.session_id)
 
     let connection: OpfsConnection
     let engine: DictSyncEngine
@@ -61,6 +63,13 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
     // One automatic reset per worker lifetime — prevents a 410→reset→410 loop
     // if the server keeps rejecting the cursor even after a fresh snapshot.
     let auto_reset_attempted = false
+    // Storage-lost self-heal budget (browser closed our held OPFS handle —
+    // observed after tab suspension/system sleep). Capped so a browser that
+    // closes the handle right back doesn't reopen-loop; each reopen keeps the
+    // file (and any dirty rows) in place, unlike reset().
+    let reopen_attempts = 0
+    let reopen_in_flight = false
+    const MAX_REOPEN_ATTEMPTS = 3
 
     // Op-level mutex — serializes every write across exec / the engine's
     // apply-transaction so none enrols in another's SQLite txn.
@@ -161,6 +170,7 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
         on_status: (status) => {
           context.emit_event({ type: 'sync_status', ...status })
         },
+        on_storage_lost: () => { void reopen_after_storage_lost() },
       })
       engine.start()
 
@@ -202,6 +212,39 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
       }
       console.warn(`[dict-instance] ${dict_id} snapshot expired — auto-resetting to a fresh snapshot`)
       await reset().catch(err => console.error(`[dict-instance] ${dict_id} auto-reset failed:`, err))
+    }
+
+    /**
+     * Self-heal a browser-closed OPFS sync-access-handle (`storage_lost` — see
+     * `is_storage_lost_error`): reopen the SAME file in place. Unlike `reset()`
+     * this never deletes the DB, so un-pushed dirty rows survive. Without this
+     * the engine's 30s interval hot-loops against the dead handle forever
+     * (observed 2026-07-03: 112 failures over 80 min from one suspended tab).
+     */
+    async function reopen_after_storage_lost(): Promise<void> {
+      if (reopen_in_flight || !is_opfs_backed)
+        return
+      if (reopen_attempts >= MAX_REOPEN_ATTEMPTS) {
+        // Budget exhausted — stop the loop for good. Tabs' RPCs will fail and
+        // the main-thread boot recovery takes over (respawn/leader hand-off).
+        engine.stop()
+        return
+      }
+      reopen_in_flight = true
+      reopen_attempts += 1
+      try {
+        engine.stop()
+        await op_lock(async () => {
+          await connection.close().catch(() => undefined) // handle already dead
+        })
+        await open_and_wire()
+        report_dict_storage_reopened({ dict_id, attempt: reopen_attempts })
+        console.warn(`[dict-instance] ${dict_id} reopened OPFS connection after a closed access handle (attempt ${reopen_attempts})`)
+      } catch (err) {
+        console.error(`[dict-instance] ${dict_id} reopen after storage_lost failed:`, err)
+      } finally {
+        reopen_in_flight = false
+      }
     }
 
     /** Tear down + recreate the OPFS DB from a fresh snapshot (danger zone). */

@@ -21,7 +21,7 @@ afterEach(() => {
   db.close()
 })
 
-function add_log({ day, level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, user_agent = null, geo }: {
+function add_log({ day, level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, user_agent = null, app_version = null, geo }: {
   day: string
   level?: 'error' | 'warn' | 'info' | 'unhandled_rejection' | 'crash'
   message?: string
@@ -29,9 +29,10 @@ function add_log({ day, level = 'info', message = 'heartbeat', source = 'client'
   user_id?: string | null
   context?: Record<string, unknown> | null
   user_agent?: string | null
+  app_version?: string | null
   geo?: RequestGeo
 }): void {
-  insert_client_log({ payload: { level, message, context, user_agent }, user_id, source, ...(geo ? { geo } : {}), db, now: new Date(`${day}T10:00:00.000Z`) })
+  insert_client_log({ payload: { level, message, context, user_agent, app_version }, user_id, source, ...(geo ? { geo } : {}), db, now: new Date(`${day}T10:00:00.000Z`) })
 }
 
 describe(get_log_analytics, () => {
@@ -53,7 +54,7 @@ describe(get_log_analytics, () => {
     expect(prev_day?.day).toBe('2026-06-29')
     expect(prev_day?.users).toBe(1)
     // A day with no logs is present and zeroed.
-    expect(analytics.daily[0]).toEqual({ day: '2026-06-01', sessions: 0, users: 0, errors: 0, real_errors: 0, logs: 0 })
+    expect(analytics.daily[0]).toEqual({ day: '2026-06-01', sessions: 0, users: 0, errors: 0, real_errors: 0, stale_errors: 0, logs: 0 })
 
     expect(analytics.totals.logs).toBe(4)
     expect(analytics.totals.errors).toBe(1)
@@ -72,6 +73,62 @@ describe(get_log_analytics, () => {
     expect(last_day?.real_errors).toBe(1) // only 'boom' is a genuine fault
     expect(analytics.totals.errors).toBe(3)
     expect(analytics.totals.real_errors).toBe(1)
+  })
+
+  test('daily stale_errors counts errors from non-current builds (deploy-day fold); unknown current version → 0', () => {
+    add_log({ day: '2026-06-30', level: 'error', message: 'boom on old bundle', app_version: 'v-old', context: { session_id: 's1' } })
+    add_log({ day: '2026-06-30', level: 'error', message: 'boom on current', app_version: 'v-cur', context: { session_id: 's1' } })
+    add_log({ day: '2026-06-30', level: 'error', message: 'boom no version', context: { session_id: 's1' } })
+
+    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW, current_app_version: 'v-cur' })
+    const last_day = analytics.daily[analytics.daily.length - 1]
+    expect(last_day?.errors).toBe(3)
+    expect(last_day?.stale_errors).toBe(1) // only the v-old row; version-less rows aren't assumed stale
+    expect(analytics.totals.stale_errors).toBe(1)
+
+    // Without a known current version the fold is off (everything would read stale otherwise).
+    const unknown = get_log_analytics({ shared_db: db, days: 30, now: NOW, current_app_version: null })
+    expect(unknown.totals.stale_errors).toBe(0)
+  })
+
+  test('top_routes ranks by distinct sessions so one loop-heavy session cannot outrank real routes', () => {
+    // One session hammers /milang/entries 50×; three sessions each visit /about once.
+    for (let i = 0; i < 50; i++)
+      add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's-loop', to: '/milang/entries' } })
+    for (const sid of ['s1', 's2', 's3'])
+      add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: sid, to: '/about' } })
+
+    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    expect(analytics.top_routes[0]).toEqual({ route: 'about', count: 3, sessions: 3 })
+    expect(analytics.top_routes[1]).toEqual({ route: 'dictionary:entry', count: 50, sessions: 1 })
+  })
+
+  test('api_v1 panel aggregates server v1_* events by day / event / dictionary / via with a failure split', () => {
+    add_log({ day: '2026-06-30', source: 'server', message: 'v1_entry_updated', context: { dictionary_id: 'river', via: 'api_key' } })
+    add_log({ day: '2026-06-30', source: 'server', message: 'v1_entry_updated', context: { dictionary_id: 'river', via: 'api_key' } })
+    add_log({ day: '2026-06-30', source: 'server', message: 'v1_media_attached', context: { dictionary_id: 'river', via: 'api_key' } })
+    add_log({ day: '2026-06-29', source: 'server', message: 'v1_sentence_updated', context: { dictionary_id: 'galo', via: 'session' } })
+    add_log({ day: '2026-06-30', source: 'server', level: 'error', message: 'v1_feedback_failed', context: { dictionary_id: 'river', via: 'api_key' } })
+    // Non-v1 rows and client rows must not leak in.
+    add_log({ day: '2026-06-30', source: 'server', message: 'auth_login' })
+    add_log({ day: '2026-06-30', source: 'client', message: 'v1_entry_updated', context: { session_id: 's1' } })
+
+    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    expect(analytics.api_v1.total).toBe(5)
+    expect(analytics.api_v1.failures).toBe(1)
+    expect(analytics.api_v1.daily).toEqual([
+      { day: '2026-06-29', count: 1, failures: 0 },
+      { day: '2026-06-30', count: 4, failures: 1 },
+    ])
+    expect(analytics.api_v1.by_event[0]).toEqual({ event: 'v1_entry_updated', count: 2 })
+    expect(analytics.api_v1.by_dictionary).toEqual([
+      { dictionary_id: 'river', count: 4 },
+      { dictionary_id: 'galo', count: 1 },
+    ])
+    expect(analytics.api_v1.by_via).toEqual([
+      { via: 'api_key', count: 4 },
+      { via: 'session', count: 1 },
+    ])
   })
 
   test('surfaces analytics events (infra excluded) and normalized route buckets', () => {
@@ -299,7 +356,8 @@ describe(get_log_analytics, () => {
     const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
     const cold = analytics.daily.find(point => point.day === '2026-06-05')
     // Archived days predate the split, so real_errors falls back to the raw error count.
-    expect(cold).toEqual({ day: '2026-06-05', sessions: 7, users: 0, errors: 3, real_errors: 3, logs: 42 })
+    // stale_errors is hot-only (no app_version in the rollup) → 0 on cold days.
+    expect(cold).toEqual({ day: '2026-06-05', sessions: 7, users: 0, errors: 3, real_errors: 3, stale_errors: 0, logs: 42 })
     expect(analytics.totals.logs).toBe(42)
   })
 
@@ -376,6 +434,14 @@ describe(get_log_analytics, () => {
       const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW, current_app_version: 'v-cur' })
       expect(analytics).toMatchInlineSnapshot(`
         {
+          "api_v1": {
+            "by_dictionary": [],
+            "by_event": [],
+            "by_via": [],
+            "daily": [],
+            "failures": 0,
+            "total": 0,
+          },
           "audience": "humans",
           "by_source": [
             {
@@ -431,6 +497,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -439,6 +506,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -447,6 +515,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -455,6 +524,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -463,6 +533,7 @@ describe(get_log_analytics, () => {
               "logs": 42,
               "real_errors": 3,
               "sessions": 7,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -471,6 +542,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -479,6 +551,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -487,6 +560,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -495,6 +569,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -503,6 +578,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -511,6 +587,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -519,6 +596,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -527,6 +605,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -535,6 +614,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -543,6 +623,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -551,6 +632,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -559,6 +641,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -567,6 +650,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -575,6 +659,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -583,6 +668,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -591,6 +677,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -599,6 +686,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -607,6 +695,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -615,6 +704,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -623,6 +713,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -631,6 +722,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -639,6 +731,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -647,6 +740,7 @@ describe(get_log_analytics, () => {
               "logs": 0,
               "real_errors": 0,
               "sessions": 0,
+              "stale_errors": 0,
               "users": 0,
             },
             {
@@ -655,6 +749,7 @@ describe(get_log_analytics, () => {
               "logs": 2,
               "real_errors": 0,
               "sessions": 1,
+              "stale_errors": 0,
               "users": 1,
             },
             {
@@ -663,6 +758,7 @@ describe(get_log_analytics, () => {
               "logs": 34,
               "real_errors": 8,
               "sessions": 2,
+              "stale_errors": 2,
               "users": 2,
             },
           ],
@@ -1108,16 +1204,19 @@ describe(get_log_analytics, () => {
           ],
           "top_routes": [
             {
-              "count": 4,
-              "route": "about",
-            },
-            {
               "count": 1,
               "route": "dictionaries",
+              "sessions": 1,
             },
             {
               "count": 1,
               "route": "dictionary:entry",
+              "sessions": 1,
+            },
+            {
+              "count": 4,
+              "route": "about",
+              "sessions": 0,
             },
           ],
           "totals": {
@@ -1125,6 +1224,7 @@ describe(get_log_analytics, () => {
             "logs": 78,
             "real_errors": 11,
             "sessions": 10,
+            "stale_errors": 2,
             "unique_users": 3,
           },
           "web_vitals": [

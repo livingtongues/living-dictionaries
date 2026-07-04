@@ -1,11 +1,15 @@
 <script lang="ts">
   import { MAX_CHAT_ATTACHMENT_BYTES, MAX_CHAT_ATTACHMENTS_PER_MESSAGE } from '$lib/chat/constants'
+  import ImageLightbox from '$lib/components/image/image-lightbox.svelte'
   import RichTextEditor from '$lib/svelte-pieces/RichTextEditor.svelte'
+  import StagedImageThumb from '$lib/svelte-pieces/StagedImageThumb.svelte'
   import { html_to_text } from '$lib/utils/html-to-text'
+  import { paste_image_from_clipboard } from '$lib/utils/paste-image-from-clipboard'
+  import { onDestroy } from 'svelte'
   import IconMdiClose from '~icons/mdi/close'
   import IconMdiPaperclip from '~icons/mdi/paperclip'
   import IconMdiSend from '~icons/mdi/send'
-  import { format_bytes } from './attachments'
+  import { format_bytes, is_image_mimetype } from './attachments'
 
   interface Props {
     placeholder?: string
@@ -14,16 +18,35 @@
   }
   let { placeholder = 'Write a message…', sending = false, on_send }: Props = $props()
 
-  let html = $state('')
-  let files = $state<File[]>([])
-  let file_input = $state<HTMLInputElement>()
-  const text = $derived(html_to_text(html).trim())
-  const can_send = $derived((text.length > 0 || files.length > 0) && !sending)
+  interface StagedFile {
+    file: File
+    /** Object URL for image previews; null for non-image files (shown as a chip). */
+    preview_url: string | null
+  }
 
-  function add_files(picked: FileList | null) {
+  let html = $state('')
+  let staged = $state<StagedFile[]>([])
+  let file_input = $state<HTMLInputElement>()
+  let viewer_url = $state<string | null>(null)
+  const text = $derived(html_to_text(html).trim())
+  const can_send = $derived((text.length > 0 || staged.length > 0) && !sending)
+
+  function stage_file(file: File): StagedFile {
+    return {
+      file,
+      preview_url: is_image_mimetype(file.type) ? URL.createObjectURL(file) : null,
+    }
+  }
+
+  function revoke_preview(entry: StagedFile) {
+    if (entry.preview_url)
+      URL.revokeObjectURL(entry.preview_url)
+  }
+
+  function add_files(picked: FileList | File[] | null) {
     if (!picked)
       return
-    const next = [...files]
+    const next = [...staged]
     for (const file of picked) {
       if (file.size > MAX_CHAT_ATTACHMENT_BYTES) {
         alert(`"${file.name}" is too large (max ${format_bytes(MAX_CHAT_ATTACHMENT_BYTES)}).`)
@@ -33,15 +56,24 @@
         alert(`Up to ${MAX_CHAT_ATTACHMENTS_PER_MESSAGE} files per message.`)
         break
       }
-      next.push(file)
+      next.push(stage_file(file))
     }
-    files = next
+    staged = next
     if (file_input)
       file_input.value = ''
   }
 
+  function handle_paste(event: ClipboardEvent) {
+    const file = paste_image_from_clipboard(event)
+    if (file)
+      add_files([file])
+  }
+
   function remove_file(index: number) {
-    files = files.filter((_, i) => i !== index)
+    const entry = staged[index]
+    if (entry)
+      revoke_preview(entry)
+    staged = staged.filter((_, i) => i !== index)
   }
 
   async function submit() {
@@ -49,9 +81,11 @@
       return
     const body_html = html
     const body_text = text
-    const to_send = files
+    const to_send = staged.map(entry => entry.file)
     html = '' // optimistic clear so the composer feels instant
-    files = []
+    for (const entry of staged)
+      revoke_preview(entry)
+    staged = []
     await on_send({ body_html, body_text, files: to_send })
   }
 
@@ -61,21 +95,34 @@
       void submit()
     }
   }
+
+  onDestroy(() => {
+    for (const entry of staged)
+      revoke_preview(entry)
+  })
 </script>
 
 <div class="composer">
-  <RichTextEditor bind:value={html} {placeholder} {on_keydown} toolbar="email" />
+  <RichTextEditor bind:value={html} {placeholder} {on_keydown} on_paste={handle_paste} toolbar="email" />
 
-  {#if files.length}
+  {#if staged.length}
     <div class="chips">
-      {#each files as file, index (index)}
-        <span class="chip">
-          <span class="chip-name">{file.name}</span>
-          <span class="chip-size">{format_bytes(file.size)}</span>
-          <button type="button" class="chip-x" aria-label="Remove" onclick={() => remove_file(index)}><IconMdiClose /></button>
-        </span>
+      {#each staged as entry, index (index)}
+        {#if entry.preview_url}
+          <StagedImageThumb src={entry.preview_url} alt={entry.file.name} on_remove={() => remove_file(index)} on_view={() => { viewer_url = entry.preview_url }} />
+        {:else}
+          <span class="chip">
+            <span class="chip-name">{entry.file.name}</span>
+            <span class="chip-size">{format_bytes(entry.file.size)}</span>
+            <button type="button" class="chip-x" aria-label="Remove" onclick={() => remove_file(index)}><IconMdiClose /></button>
+          </span>
+        {/if}
       {/each}
     </div>
+  {/if}
+
+  {#if viewer_url}
+    <ImageLightbox src={viewer_url} on_close={() => { viewer_url = null }} />
   {/if}
 
   <div class="composer-actions">
@@ -104,7 +151,10 @@
   .chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.375rem;
+    align-items: center;
+    gap: 0.6rem;
+    padding-top: 0.375rem;
+    padding-right: 0.375rem;
   }
   .chip {
     display: inline-flex;

@@ -33,10 +33,16 @@
   /** Known-noise rows (stale-chunk / gated / deploy) folded out of the real-fault headline. */
   const noise_errors = $derived(totals.errors - totals.real_errors)
   // Real faults as the danger area + known noise as a muted line, so a deploy-day
-  // stale-chunk burst is visible without reading as a regression.
+  // stale-chunk burst is visible without reading as a regression. When stale-build
+  // errors exist, an overlay line folds deploy-day churn into the same read
+  // (overlapping set: a stale-build error may be real OR noise — it's a diagnostic
+  // overlay, not a stacked segment).
   const error_series = $derived([
     { label: 'Real errors', color: 'var(--danger)', area: true, points: daily.map(point => ({ date: point.day, value: point.real_errors })) },
     { label: 'Known noise', color: 'var(--text-muted, #94a3b8)', points: daily.map(point => ({ date: point.day, value: point.errors - point.real_errors })) },
+    ...(totals.stale_errors > 0
+      ? [{ label: 'From stale builds', color: 'var(--color-secondary)', points: daily.map(point => ({ date: point.day, value: point.stale_errors })) }]
+      : []),
   ])
   // Deploy markers for the traffic + error timelines: a vertical chip per build
   // (app_version = build epoch ms), so a spike pins to the deploy that caused it.
@@ -55,8 +61,25 @@
       { label: 'sessions', text: format_number(d.sessions) },
     ] },
   })))
-  const route_bars = $derived(analytics.top_routes.map(row => ({ label: row.route, value: row.count })))
+  // Routes ranked/valued by distinct sessions (breadth of use) — raw nav counts
+  // let one loop-heavy session outrank every real route (1,869 same-route navs in
+  // one session, 2026-07-03). Cold-rollup-only windows have no session dimension:
+  // fall back to raw counts for the whole chart so units stay consistent.
+  const routes_have_sessions = $derived(analytics.top_routes.some(row => row.sessions > 0))
+  const route_bars = $derived(analytics.top_routes.map(row => ({ label: row.route, value: routes_have_sessions ? row.sessions : row.count })))
   const event_bars = $derived(analytics.top_events.map(row => ({ label: row.event, value: row.count, color: USERS_COLOR })))
+
+  // --- Agent API (v1) activity — the server-emitted `v1_*` audit rows. ---
+  const api_v1 = $derived(analytics.api_v1)
+  const api_v1_daily_points = $derived(api_v1.daily.map(point => ({ date: point.day, value: point.count })))
+  const api_v1_event_bars = $derived(api_v1.by_event.map(row => ({ label: row.event.replace(/^v1_/, ''), value: row.count })))
+  const api_v1_dict_bars = $derived(api_v1.by_dictionary.map(row => ({ label: row.dictionary_id, value: row.count, color: USERS_COLOR })))
+  const API_VIA_COLORS: Record<string, string> = { api_key: '#7c3aed', session: '#06b6d4' }
+  const api_v1_via_segments = $derived<Segment[]>(api_v1.by_via.map(row => ({
+    label: row.via,
+    value: row.count,
+    color: API_VIA_COLORS[row.via] ?? '#94a3b8',
+  })))
   const capability = $derived(analytics.capability)
   const below_pct = $derived(capability.total_sessions > 0 ? capability.below_capability_sessions / capability.total_sessions : 0)
 
@@ -243,6 +266,8 @@
         <div class="label">
           {label}{#if label === 'Errors' && noise_errors > 0}
             <span class="card-hint">+{format_number(noise_errors)} known-noise</span>
+          {/if}{#if label === 'Errors' && totals.stale_errors > 0}
+            <span class="card-hint">{format_number(totals.stale_errors)} from stale builds</span>
           {/if}
         </div>
       </div>
@@ -296,9 +321,9 @@
   </section>
 
   <section class="panel">
-    <h2>Errors per day <span class="hint">real vs known-noise · ⬆ = deploy</span></h2>
+    <h2>Errors per day <span class="hint">real vs known-noise{totals.stale_errors > 0 ? ' · stale-build overlay' : ''} · ⬆ = deploy</span></h2>
     {#if totals.errors > 0}
-      {#if noise_errors > 0}
+      {#if noise_errors > 0 || totals.stale_errors > 0}
         <ComboChart series={error_series} events={deploy_events} event_icon="⬆" height={200} value_format={format_number} />
       {:else}
         <LineChart series={error_points} events={deploy_events} event_icon="⬆" area color="var(--danger)" height={200} y_format={format_number} tip_format={format_number} />
@@ -507,7 +532,7 @@
 
   <div class="grid">
     <section class="panel">
-      <h2>Top routes</h2>
+      <h2>Top routes <span class="hint">{routes_have_sessions ? 'by distinct sessions' : 'by nav count (archived days only)'}</span></h2>
       {#if route_bars.length}
         <BarChart data={route_bars} format={format_number} label_width={132} />
       {:else}
@@ -524,6 +549,43 @@
       {/if}
     </section>
   </div>
+
+  <section class="panel">
+    <h2>Agent API activity <span class="hint">/api/v1 writes · server v1_* audit rows · hot window</span></h2>
+    {#if api_v1.total === 0}
+      <p class="muted">No /api/v1 activity in the hot window. Agent edits (per-dict API keys) land here.</p>
+    {:else}
+      <div class="ver-split">
+        <div class="ver-stat">
+          <div class="ver-value">{format_number(api_v1.total)}</div>
+          <div class="ver-label">Operations</div>
+          <div class="ver-sub">{format_number(api_v1.by_dictionary.length)} {api_v1.by_dictionary.length === 1 ? 'dictionary' : 'dictionaries'} touched</div>
+        </div>
+        <div class="ver-stat">
+          <div class="ver-value" class:danger={api_v1.failures > 0}>{format_number(api_v1.failures)}</div>
+          <div class="ver-label">Failures</div>
+          <div class="ver-sub">error-level v1 rows</div>
+        </div>
+      </div>
+      {#if api_v1_daily_points.length > 1}
+        <LineChart series={api_v1_daily_points} area color="#7c3aed" height={140} y_format={format_number} tip_format={format_number} />
+      {/if}
+      <div class="grid dev-grid">
+        <div class="dev-block">
+          <div class="block-h">By operation <span class="hint">v1_ prefix dropped</span></div>
+          <BarChart data={api_v1_event_bars} format={format_number} label_width={172} />
+        </div>
+        <div class="dev-block">
+          <div class="block-h">By dictionary</div>
+          <BarChart data={api_v1_dict_bars} format={format_number} label_width={132} />
+        </div>
+      </div>
+      <div class="dev-block">
+        <div class="block-h">Auth channel <span class="hint">context.via</span></div>
+        <SegmentedBar segments={api_v1_via_segments} format={format_number} />
+      </div>
+    {/if}
+  </section>
 
   <section class="panel">
     <h2>Event coverage <span class="hint">declared analytics events vs seen · self-instrumentation</span></h2>

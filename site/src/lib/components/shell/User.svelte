@@ -22,7 +22,10 @@
       return
     if (user)
       return
-    display_one_tap_popover().catch(error => console.error('[google one-tap]', error))
+    // console.warn is DEV-only (not patched into client_logs) — a rejected
+    // one-tap prompt is benign (user dismissed / cookies blocked), and at
+    // console.error it shipped ~29 useless `{isTrusted:true}` error rows/day.
+    display_one_tap_popover().catch(error => console.warn('[google one-tap]', error))
   })
 
   let broken_avatar_image = $state(false)

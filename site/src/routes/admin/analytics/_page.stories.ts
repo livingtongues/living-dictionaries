@@ -17,13 +17,16 @@ function build_daily(days: number): LogAnalytics['daily'] {
     const logs = Math.max(0, base)
     const errors = offset === 4 ? 14 : offset === 11 ? 6 : offset % 7 === 0 ? 2 : 0
     // The offset===4 spike is mostly deploy-day stale-chunk noise (only 3 real
-    // faults) — exercises the real-vs-noise split on the errors line.
+    // faults, 10 of them from stale builds) — exercises both the real-vs-noise
+    // split and the stale-build deploy-day overlay on the errors line.
     const real_errors = offset === 4 ? 3 : errors
+    const stale_errors = offset === 4 ? 10 : 0
     out.push({
       day,
       logs,
       errors,
       real_errors,
+      stale_errors,
       sessions: Math.round(logs / 12),
       users: Math.round(logs / 20),
     })
@@ -88,16 +91,16 @@ const analytics: LogAnalytics = {
     { metric: 'FCP', count: 406, p50: 852, p75: 1840, p95: 4200 },
     { metric: 'TTFB', count: 561, p50: 451, p75: 860, p95: 2300 },
   ],
-  totals: { sessions: 188, errors: 24, real_errors: 13, logs: 2417, unique_users: 73 },
+  totals: { sessions: 188, errors: 24, real_errors: 13, stale_errors: 10, logs: 2417, unique_users: 73 },
   top_routes: [
-    { route: 'search', count: 642 },
-    { route: 'home', count: 511 },
-    { route: 'reader:chapter', count: 388 },
-    { route: 'reader:doc', count: 214 },
-    { route: 'reader:image', count: 142 },
-    { route: 'account', count: 96 },
-    { route: 'reader:video', count: 61 },
-    { route: 'dr-house', count: 33 },
+    { route: 'search', count: 642, sessions: 88 },
+    { route: 'home', count: 511, sessions: 74 },
+    { route: 'reader:chapter', count: 388, sessions: 52 },
+    { route: 'reader:doc', count: 214, sessions: 39 },
+    { route: 'reader:image', count: 142, sessions: 21 },
+    { route: 'account', count: 96, sessions: 17 },
+    { route: 'reader:video', count: 61, sessions: 9 },
+    { route: 'dr-house', count: 33, sessions: 4 },
   ],
   top_events: [
     { event: 'entry_opened', count: 932 },
@@ -209,6 +212,33 @@ const analytics: LogAnalytics = {
     failed_current: 1,
     failed_stale: 2,
   },
+  // A realistic agent pass: one contributor bulk-editing `river` via api_key +
+  // a lighter session-authed pass on `galo`, with a couple of failures.
+  api_v1: {
+    total: 16_990,
+    failures: 7,
+    daily: [
+      { day: '2026-06-20', count: 1240, failures: 0 },
+      { day: '2026-06-21', count: 4310, failures: 2 },
+      { day: '2026-06-22', count: 6890, failures: 5 },
+      { day: '2026-06-23', count: 4550, failures: 0 },
+    ],
+    by_event: [
+      { event: 'v1_entry_updated', count: 8089 },
+      { event: 'v1_media_attached', count: 4737 },
+      { event: 'v1_relationship_created', count: 3305 },
+      { event: 'v1_entry_deleted', count: 859 },
+      { event: 'v1_feedback_failed', count: 7 },
+    ],
+    by_dictionary: [
+      { dictionary_id: 'river', count: 16_680 },
+      { dictionary_id: 'galo', count: 310 },
+    ],
+    by_via: [
+      { via: 'api_key', count: 16_680 },
+      { via: 'session', count: 310 },
+    ],
+  },
 }
 
 export const Default: PageStory<typeof Component> = {
@@ -216,7 +246,7 @@ export const Default: PageStory<typeof Component> = {
 }
 
 export const Bots: PageStory<typeof Component> = {
-  props: { analytics: { ...analytics, audience: 'bots', totals: { sessions: 402, errors: 24, real_errors: 13, logs: 1760, unique_users: 0 } } } as never,
+  props: { analytics: { ...analytics, audience: 'bots', totals: { sessions: 402, errors: 24, real_errors: 13, stale_errors: 10, logs: 1760, unique_users: 0 } } } as never,
 }
 
 export const SchemaDrift: PageStory<typeof Component> = {
@@ -227,9 +257,9 @@ const empty_analytics: LogAnalytics = {
   audience: 'humans',
   window_days: 30,
   generated_at: '2026-06-23T13:04:00.000Z',
-  daily: build_daily(30).map(point => ({ ...point, logs: 0, errors: 0, real_errors: 0, sessions: 0, users: 0 })),
+  daily: build_daily(30).map(point => ({ ...point, logs: 0, errors: 0, real_errors: 0, stale_errors: 0, sessions: 0, users: 0 })),
   deploys: [],
-  totals: { sessions: 0, errors: 0, real_errors: 0, logs: 0, unique_users: 0 },
+  totals: { sessions: 0, errors: 0, real_errors: 0, stale_errors: 0, logs: 0, unique_users: 0 },
   top_routes: [],
   top_events: [],
   by_source: [],
@@ -250,6 +280,7 @@ const empty_analytics: LogAnalytics = {
     never_emitted: 4,
   },
   leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [], failed_by_code: [], failed_current: 0, failed_stale: 0 },
+  api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
 }
 
 export const Empty: PageStory<typeof Component> = {

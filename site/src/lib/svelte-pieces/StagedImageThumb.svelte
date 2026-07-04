@@ -5,13 +5,21 @@
     src: string
     alt?: string
     on_remove: () => void
+    /** When provided, the thumbnail becomes clickable (e.g. open a full-screen viewer). */
+    on_view?: () => void
   }
 
-  let { src, alt = 'Attachment preview', on_remove }: Props = $props()
+  let { src, alt = 'Attachment preview', on_remove, on_view }: Props = $props()
 </script>
 
 <div class="staged-image-thumb">
-  <img {src} {alt} />
+  {#if on_view}
+    <button type="button" class="staged-image-view" onclick={on_view} title="View full screen" aria-label="View full screen">
+      <img {src} {alt} />
+    </button>
+  {:else}
+    <img {src} {alt} />
+  {/if}
   <button type="button" class="staged-image-remove" aria-label="Remove attachment" onclick={on_remove}>
     <IconMdiClose />
   </button>
@@ -30,6 +38,13 @@
     object-fit: cover;
     border-radius: 0.375rem;
     border: 1px solid var(--border-color);
+  }
+  .staged-image-view {
+    display: inline-flex;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: zoom-in;
   }
   .staged-image-remove {
     position: absolute;

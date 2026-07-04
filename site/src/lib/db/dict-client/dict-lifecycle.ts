@@ -5,7 +5,7 @@ import { create_db_client } from './worker/db-client'
 import { ensure_persistent_storage } from './worker/persistent-storage'
 import { create_dict_worker_connection } from './worker-connection'
 import { end_dict_boot_progress, report_dict_boot_progress } from './dict-boot-progress.svelte'
-import { log_event } from '$lib/debug/remote-log'
+import { get_session_id, log_event } from '$lib/debug/remote-log'
 
 /**
  * Main-thread lifecycle for the per-dict leader-worker DB. `open_dict` runs the
@@ -48,7 +48,7 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
   let cached = globals.__ld_dict_clients[dict_id]
   if (!cached) {
     const client = create_db_client({
-      instance_options: { dict_id, has_editor_role: options.has_editor_role, auth: options.auth },
+      instance_options: { dict_id, has_editor_role: options.has_editor_role, auth: options.auth, session_id: get_session_id() || null },
       // Worker-internal boot failures never reach the main-thread console.error
       // patch, so this is our only telemetry window. `last_stage` points the stall
       // at the exact boot phase (a slow `snapshot_fetch` vs a stuck `opfs_open`).

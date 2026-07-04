@@ -7,6 +7,7 @@ import type { AuthHeaders } from './worker/instance'
 import { ResponseCodes } from '$lib/constants'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
+import { is_storage_lost_error } from '$lib/db/sync/sync-failure-classify'
 import { LATEST_DICT_MIGRATION } from './dict-migrations-bundle'
 import { report_dict_stuck_dirty, report_dict_sync_failure } from './report-dict-sync-failure'
 
@@ -61,6 +62,13 @@ export interface SyncEngineOptions {
   on_rows_deleted?: (deletes: { table_name: string, id: string }[]) => void
   /** Fires before/after a sync attempt. */
   on_status?: (status: { is_syncing: boolean, last_error: string | null, last_sync_at: string | null }) => void
+  /**
+   * Fires when a sync fails because the underlying storage handle is gone
+   * (browser closed the held OPFS sync-access-handle — see
+   * `is_storage_lost_error`). The instance reopens the connection in place;
+   * without this the 30s interval hot-loops against a dead handle forever.
+   */
+  on_storage_lost?: () => void
 }
 
 export class DictSyncEngine {
@@ -72,6 +80,7 @@ export class DictSyncEngine {
   #on_tables_changed?: (tables: Set<string>) => void
   #on_rows_deleted?: (deletes: { table_name: string, id: string }[]) => void
   #on_status?: (status: { is_syncing: boolean, last_error: string | null, last_sync_at: string | null }) => void
+  #on_storage_lost?: () => void
 
   #timer: ReturnType<typeof setInterval> | null = null
   #stuck_timer: ReturnType<typeof setInterval> | null = null
@@ -90,6 +99,7 @@ export class DictSyncEngine {
     this.#on_tables_changed = options.on_tables_changed
     this.#on_rows_deleted = options.on_rows_deleted
     this.#on_status = options.on_status
+    this.#on_storage_lost = options.on_storage_lost
   }
 
   start() {
@@ -186,6 +196,11 @@ export class DictSyncEngine {
       // post-write, and RPC syncs) — the shipper classifies, skips pure-offline
       // failures, and throttles repeats. See report-dict-sync-failure.ts.
       report_dict_sync_failure({ dict_id: this.#dict_id, error: err })
+      // Dead OPFS handle: retrying is pointless (every future tick fails the
+      // same way) — hand recovery to the instance, which stops this engine and
+      // reopens the connection in place.
+      if (is_storage_lost_error(err))
+        this.#on_storage_lost?.()
       throw err
     } finally {
       this.#in_flight = false

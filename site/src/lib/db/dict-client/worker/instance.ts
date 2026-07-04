@@ -86,6 +86,8 @@ export interface InstanceOptions {
   dict_id: string
   has_editor_role: boolean
   auth: AuthHeaders
+  /** The spawning tab's remote-log session id — correlates worker telemetry rows with the leader tab's session. */
+  session_id?: string | null
 }
 
 export interface WorkerInitMessage {

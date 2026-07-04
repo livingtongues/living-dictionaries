@@ -74,7 +74,13 @@ const PERF_METRICS = ['page_load', 'search'] as const
 /** Core Web Vitals surfaced on the dashboard, in display order (the canonical CWV trio first). */
 const WEB_VITAL_METRICS = ['LCP', 'INP', 'CLS', 'FCP', 'TTFB'] as const
 
-export interface DailyPoint { day: string, sessions: number, users: number, errors: number, real_errors: number, logs: number }
+/**
+ * `stale_errors` = error-level rows emitted by a NON-current `app_version`
+ * (deploy-day churn: stale tabs failing on old chunks). Hot-window only — cold
+ * rollup days report 0 (app_version isn't in the rollup). The deploy-day fold:
+ * a spike that's mostly stale_errors auto-explains as deploy churn.
+ */
+export interface DailyPoint { day: string, sessions: number, users: number, errors: number, real_errors: number, stale_errors: number, logs: number }
 /** A distinct deployed build seen in the window (`app_version` = build epoch ms), for timeline markers. */
 export interface Deploy { day: string, version: string, first_seen: string, sessions: number }
 export interface PerfSummary { name: string, count: number, p50: number | null, p90: number | null, p95: number | null, max: number | null, slowest: { duration_ms: number, route: string } | null }
@@ -190,8 +196,13 @@ export interface LogAnalytics {
   daily: DailyPoint[]
   /** Distinct builds seen in the window (first-seen day per `app_version`) — timeline deploy markers. */
   deploys: Deploy[]
-  totals: { sessions: number, errors: number, real_errors: number, logs: number, unique_users: number }
-  top_routes: { route: string, count: number }[]
+  totals: { sessions: number, errors: number, real_errors: number, stale_errors: number, logs: number, unique_users: number }
+  /**
+   * Ranked by distinct sessions (hot window), raw nav count as tiebreak/display.
+   * Raw counts alone are misleading: one search-heavy session logged 1,869
+   * same-route navs (2026-07-03) and outranked every real route 4×.
+   */
+  top_routes: { route: string, count: number, sessions: number }[]
   top_events: { event: string, count: number }[]
   by_source: { source: string, logs: number, errors: number }[]
   /** Grouped error classes (message + stack head), real errors first, known-noise sunk. Always ALL rows. */
@@ -228,6 +239,30 @@ export interface LogAnalytics {
   event_coverage: EventCoverage
   /** Leader-worker DB health (live_query_* family). */
   leader_health: LeaderHealth
+  /** Agent/API write activity — the server-emitted `v1_*` events (hot window only). */
+  api_v1: ApiV1Activity
+}
+
+/**
+ * The `/api/v1` write surface (per-dict API keys + session callers) emits one
+ * server `v1_*` row per operation (`v1_entry_updated`, `v1_media_attached`, …)
+ * — the single largest volume signal during an agent pass, previously
+ * invisible on the dashboard. Hot window only (v1 rows aren't in the rollup).
+ * Serves the human/agent editing-parity direction: agent edits should be as
+ * legible as human ones.
+ */
+export interface ApiV1Activity {
+  /** Total v1 operation rows in the hot window. */
+  total: number
+  /** v1 rows at an error level (e.g. `v1_feedback_failed`). */
+  failures: number
+  daily: { day: string, count: number, failures: number }[]
+  /** Per-operation counts (`v1_entry_updated` …), highest first. */
+  by_event: { event: string, count: number }[]
+  /** Which dictionaries the API pass touched (`context.dictionary_id`), highest first. */
+  by_dictionary: { dictionary_id: string, count: number }[]
+  /** Auth channel split (`context.via`: `api_key` vs session), highest first. */
+  by_via: { via: string, count: number }[]
 }
 
 /** Strip a full URL down to its pathname (+ search) for display; falls back to the raw value. */
@@ -314,7 +349,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   // The daily series + the usage breakdowns both consume the same `log_daily_metrics`
   // rollup rows, so `build_daily_series` reads them ONCE and hands them on (keeps the
   // query count identical to the old inline form).
-  const { daily, rollup_rows, live_by_day } = build_daily_series({ shared_db, window_start_iso, window_start_day, audience_filter, rollup_metric, days, now })
+  const { daily, rollup_rows, live_by_day } = build_daily_series({ shared_db, window_start_iso, window_start_day, audience_filter, rollup_metric, days, now, current_app_version })
   // `area_counts` is seeded from the cold `geo:` rollup here, then the hot session
   // loop in `build_capability` mutates it further — so it's threaded through both.
   const { event_counts, top_events, top_routes, by_source, area_counts } = build_usage_and_areas({ shared_db, window_start_iso, audience_filter, rollup_rows, live_by_day, rollup_metric })
@@ -350,6 +385,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   }
 
   const leader_health = build_leader_health({ shared_db, window_start_iso, current_app_version })
+  const api_v1 = build_api_v1_activity({ shared_db, window_start_iso })
 
   return {
     audience,
@@ -361,6 +397,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
       sessions: daily.reduce((sum, point) => sum + point.sessions, 0),
       errors: daily.reduce((sum, point) => sum + point.errors, 0),
       real_errors: daily.reduce((sum, point) => sum + point.real_errors, 0),
+      stale_errors: daily.reduce((sum, point) => sum + point.stale_errors, 0),
       logs: daily.reduce((sum, point) => sum + point.logs, 0),
       unique_users,
     },
@@ -376,6 +413,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     pipeline,
     event_coverage,
     leader_health,
+    api_v1,
   }
 }
 
@@ -396,7 +434,7 @@ interface RollupRow { day: string, metric: string, source: string, value: number
  * (cold) days. Returns the raw rollup rows + the per-day live index so the usage
  * builder can reuse them without a second query.
  */
-function build_daily_series({ shared_db, window_start_iso, window_start_day, audience_filter, rollup_metric, days, now }: {
+function build_daily_series({ shared_db, window_start_iso, window_start_day, audience_filter, rollup_metric, days, now, current_app_version }: {
   shared_db: Database.Database
   window_start_iso: string
   window_start_day: string
@@ -404,20 +442,24 @@ function build_daily_series({ shared_db, window_start_iso, window_start_day, aud
   rollup_metric: (metric: string) => string | null
   days: number
   now: Date
+  current_app_version: string | null
 }): { daily: DailyPoint[], rollup_rows: RollupRow[], live_by_day: Map<string, DailyPoint> } {
   // Bot/headless rows excluded so the sessions/users/logs/errors trend reflects real people.
   // `real_errors` drops known-noise / expected-response rows (stale-chunk 404s after a deploy,
   // auth gates, …) so a redeploy stale-bundle burst doesn't read as a regression on the line.
+  // `stale_errors` (deploy-day fold) counts errors from a non-current app_version — a spike
+  // that's mostly stale auto-explains as deploy churn rather than a live regression.
   const live_daily = shared_db.prepare(`
     SELECT substr(received_at, 1, 10) day,
            COUNT(*) logs,
            SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL} THEN 1 ELSE 0 END) errors,
            SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL} AND is_noise_msg(message) = 0 THEN 1 ELSE 0 END) real_errors,
+           SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL} AND ? IS NOT NULL AND app_version IS NOT NULL AND app_version <> ? THEN 1 ELSE 0 END) stale_errors,
            COUNT(DISTINCT user_id) users,
            COUNT(DISTINCT json_extract(context, '$.session_id')) sessions
     FROM client_logs WHERE received_at >= ? AND ${audience_filter}
     GROUP BY day
-  `).all(window_start_iso) as DailyPoint[]
+  `).all(current_app_version, current_app_version, window_start_iso) as DailyPoint[]
   const live_by_day = new Map(live_daily.map(point => [point.day, point]))
 
   const rollup_rows = shared_db.prepare(`
@@ -432,7 +474,7 @@ function build_daily_series({ shared_db, window_start_iso, window_start_day, aud
       continue // wrong audience namespace
     let point = rollup_by_day.get(row.day)
     if (!point) {
-      point = { day: row.day, sessions: 0, users: 0, errors: 0, real_errors: 0, logs: 0 }
+      point = { day: row.day, sessions: 0, users: 0, errors: 0, real_errors: 0, stale_errors: 0, logs: 0 }
       rollup_by_day.set(row.day, point)
     }
     if (metric === 'sessions') point.sessions += row.value
@@ -449,7 +491,7 @@ function build_daily_series({ shared_db, window_start_iso, window_start_day, aud
   const daily: DailyPoint[] = []
   for (let offset = days - 1; offset >= 0; offset--) {
     const day = day_string(new Date(now.getTime() - offset * 86_400_000))
-    daily.push(live_by_day.get(day) ?? rollup_by_day.get(day) ?? { day, sessions: 0, users: 0, errors: 0, real_errors: 0, logs: 0 })
+    daily.push(live_by_day.get(day) ?? rollup_by_day.get(day) ?? { day, sessions: 0, users: 0, errors: 0, real_errors: 0, stale_errors: 0, logs: 0 })
   }
   return { daily, rollup_rows, live_by_day }
 }
@@ -470,7 +512,7 @@ function build_usage_and_areas({ shared_db, window_start_iso, audience_filter, r
 }): {
   event_counts: Map<string, number>
   top_events: { event: string, count: number }[]
-  top_routes: { route: string, count: number }[]
+  top_routes: { route: string, count: number, sessions: number }[]
   by_source: { source: string, logs: number, errors: number }[]
   area_counts: Map<string, { country: string, sessions: number }>
 } {
@@ -488,6 +530,22 @@ function build_usage_and_areas({ shared_db, window_start_iso, audience_filter, r
     WHERE received_at >= ? AND message = 'navigation' AND ${audience_filter} GROUP BY to_path
   `).all(window_start_iso) as { to_path: string | null, count: number }[]) {
     bump(route_counts, normalize_route(row.to_path), row.count)
+  }
+  // Distinct sessions per normalized route (hot window; the rollup has no session
+  // dimension so cold days contribute raw counts only). Distinct (route, session)
+  // pairs are aggregated in JS because normalize_route merges raw paths — summing
+  // per-path distinct counts would double-count a session that hit both.
+  const route_sessions = new Map<string, Set<string>>()
+  for (const row of shared_db.prepare(`
+    SELECT DISTINCT json_extract(context, '$.to') to_path, json_extract(context, '$.session_id') sid
+    FROM client_logs
+    WHERE received_at >= ? AND message = 'navigation' AND ${audience_filter}
+      AND json_extract(context, '$.session_id') IS NOT NULL
+  `).all(window_start_iso) as { to_path: string | null, sid: string }[]) {
+    const route = normalize_route(row.to_path)
+    if (!route_sessions.has(route))
+      route_sessions.set(route, new Set())
+    route_sessions.get(route)?.add(row.sid)
   }
   // Geo areas: per-area distinct HUMAN sessions, cold (rollup `geo:` metrics,
   // bot-free at rollup time) here + hot (the session loop) later.
@@ -541,10 +599,17 @@ function build_usage_and_areas({ shared_db, window_start_iso, audience_filter, r
     errors: source_errors.get(source) ?? 0,
   })).sort((a, b) => b.logs - a.logs)
 
+  // Routes ranked by distinct sessions (breadth of use), raw count second — one
+  // loop-heavy session can no longer outrank genuinely popular routes.
+  const top_routes = [...route_counts.entries()]
+    .map(([route, count]) => ({ route, count, sessions: route_sessions.get(route)?.size ?? 0 }))
+    .sort((a, b) => b.sessions - a.sessions || b.count - a.count)
+    .slice(0, TOP_LIMIT)
+
   return {
     event_counts,
     top_events: to_sorted(event_counts, 'event') as { event: string, count: number }[],
-    top_routes: to_sorted(route_counts, 'route') as { route: string, count: number }[],
+    top_routes,
     by_source,
     area_counts,
   }
@@ -939,5 +1004,58 @@ function build_leader_health({ shared_db, window_start_iso, current_app_version 
     failed_by_code,
     failed_current,
     failed_stale: failed - failed_current,
+  }
+}
+
+/**
+ * Agent/API write activity — the server-emitted `v1_*` events (one row per
+ * `/api/v1` operation). Hot window only: v1 rows aren't in the daily rollup, so
+ * days older than log retention show nothing (fine — the panel answers "what is
+ * the API doing lately", the audit rows themselves are the archive).
+ */
+function build_api_v1_activity({ shared_db, window_start_iso }: { shared_db: Database.Database, window_start_iso: string }): ApiV1Activity {
+  const rows = shared_db.prepare(`
+    SELECT substr(received_at, 1, 10) day,
+           message event,
+           CASE WHEN level IN ${ERROR_LEVELS_SQL} THEN 1 ELSE 0 END is_failure,
+           json_extract(context, '$.dictionary_id') dictionary_id,
+           json_extract(context, '$.via') via,
+           COUNT(*) count
+    FROM client_logs
+    WHERE received_at >= ? AND source = 'server' AND message LIKE 'v1\\_%' ESCAPE '\\'
+    GROUP BY day, event, is_failure, dictionary_id, via
+  `).all(window_start_iso) as { day: string, event: string, is_failure: 0 | 1, dictionary_id: string | null, via: string | null, count: number }[]
+
+  let total = 0
+  let failures = 0
+  const daily = new Map<string, { day: string, count: number, failures: number }>()
+  const by_event = new Map<string, number>()
+  const by_dictionary = new Map<string, number>()
+  const by_via = new Map<string, number>()
+  for (const row of rows) {
+    total += row.count
+    if (row.is_failure)
+      failures += row.count
+    let day_point = daily.get(row.day)
+    if (!day_point) {
+      day_point = { day: row.day, count: 0, failures: 0 }
+      daily.set(row.day, day_point)
+    }
+    day_point.count += row.count
+    if (row.is_failure)
+      day_point.failures += row.count
+    bump(by_event, row.event, row.count)
+    bump(by_dictionary, row.dictionary_id ?? 'unknown', row.count)
+    bump(by_via, row.via ?? 'unknown', row.count)
+  }
+
+  const desc = (map: Map<string, number>) => [...map.entries()].sort((a, b) => b[1] - a[1])
+  return {
+    total,
+    failures,
+    daily: [...daily.values()].sort((a, b) => a.day.localeCompare(b.day)),
+    by_event: desc(by_event).map(([event, count]) => ({ event, count })),
+    by_dictionary: desc(by_dictionary).map(([dictionary_id, count]) => ({ dictionary_id, count })),
+    by_via: desc(by_via).map(([via, count]) => ({ via, count })),
   }
 }

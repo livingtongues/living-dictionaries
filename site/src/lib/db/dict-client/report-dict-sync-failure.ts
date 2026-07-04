@@ -19,6 +19,18 @@ import { classify_sync_failure, should_ship_failure, sync_failure_level } from '
 
 let last_shipped: { key: string, at: number } | null = null
 
+/**
+ * The spawning tab's remote-log `session_id`, threaded through the worker init
+ * (`InstanceOptions.session_id`) so worker-emitted rows can be correlated with
+ * the leader tab's session in `client_logs` — they otherwise carry no session
+ * at all (the 2026-07-03 review couldn't tie 112 worker rows to any session).
+ */
+let worker_session_id: string | null = null
+
+export function set_dict_log_session(session_id: string | null | undefined): void {
+  worker_session_id = session_id ?? null
+}
+
 function safe_user_agent(): string | null {
   try {
     return typeof navigator !== 'undefined' ? navigator.userAgent ?? null : null
@@ -63,6 +75,7 @@ export function report_dict_sync_failure({ dict_id, error }: {
           kind,
           error: message,
           status: typeof (error as { status?: unknown })?.status === 'number' ? (error as { status: number }).status : undefined,
+          session_id: worker_session_id ?? undefined,
         },
       }],
     })
@@ -104,11 +117,34 @@ export function report_dict_stuck_dirty({ dict_id, dirty_rows, deletes, last_syn
         user_agent: safe_user_agent(),
         platform: 'web',
         app_version: version ?? null,
-        context: { worker: true, engine: 'dict', dict_id, dirty_rows, deletes, last_sync_at, last_error },
+        context: { worker: true, engine: 'dict', dict_id, dirty_rows, deletes, last_sync_at, last_error, session_id: worker_session_id ?? undefined },
       }],
     })
   } catch {
     // Never let telemetry break the sync path.
+  }
+}
+
+/**
+ * Ship a "reopened the OPFS connection after the browser closed our access
+ * handle" marker (`storage_lost` self-heal in `dict-instance.ts`) — the
+ * observability that the recovery path actually ran in the wild.
+ */
+export function report_dict_storage_reopened({ dict_id, attempt }: { dict_id: string, attempt: number }): void {
+  try {
+    void api_log({
+      entries: [{
+        level: 'info',
+        message: 'dict_connection_reopened',
+        client_time: new Date().toISOString(),
+        user_agent: safe_user_agent(),
+        platform: 'web',
+        app_version: version ?? null,
+        context: { worker: true, engine: 'dict', dict_id, attempt, session_id: worker_session_id ?? undefined },
+      }],
+    })
+  } catch {
+    // Never let telemetry break the recovery path.
   }
 }
 

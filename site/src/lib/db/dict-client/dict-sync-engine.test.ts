@@ -72,3 +72,48 @@ describe('DictSyncEngine stuck-dirty watchdog', () => {
     expect(api_log).toHaveBeenCalledTimes(1)
   })
 })
+
+describe('DictSyncEngine storage-lost recovery hook', () => {
+  beforeEach(() => {
+    vi.mocked(api_log).mockClear()
+    _reset_dict_failure_throttle_for_tests()
+  })
+
+  function make_failing_engine({ error, on_storage_lost }: { error: Error, on_storage_lost: () => void }) {
+    const connection: EngineConnection = {
+      query: () => Promise.reject(error),
+      execute: () => Promise.reject(error),
+    }
+    return new DictSyncEngine({
+      dict_id: 'test-dict',
+      connection,
+      has_editor_role: true,
+      get_auth: () => ({}) as never,
+      on_storage_lost,
+    })
+  }
+
+  test('fires on_storage_lost when a sync fails with a closed OPFS access handle', async () => {
+    const on_storage_lost = vi.fn()
+    const engine = make_failing_engine({ error: new Error('AccessHandle is closed'), on_storage_lost })
+    await expect(engine.sync_once()).rejects.toThrow('AccessHandle is closed')
+    expect(on_storage_lost).toHaveBeenCalledTimes(1)
+  })
+
+  test('does NOT fire on_storage_lost for ordinary failures', async () => {
+    const on_storage_lost = vi.fn()
+    const engine = make_failing_engine({ error: new Error('Failed to fetch'), on_storage_lost })
+    await expect(engine.sync_once()).rejects.toThrow('Failed to fetch')
+    expect(on_storage_lost).not.toHaveBeenCalled()
+  })
+
+  test('a closed-handle failure ships as a throttled warn (storage_lost), not an error', async () => {
+    const engine = make_failing_engine({ error: new Error('AccessHandle is closed'), on_storage_lost: () => undefined })
+    await expect(engine.sync_once()).rejects.toThrow()
+    await expect(engine.sync_once()).rejects.toThrow() // repeat inside the throttle window
+    expect(api_log).toHaveBeenCalledTimes(1)
+    const [[payload]] = vi.mocked(api_log).mock.calls
+    expect(payload.entries[0].level).toBe('warn')
+    expect(payload.entries[0].context).toMatchObject({ kind: 'storage_lost', dict_id: 'test-dict' })
+  })
+})
