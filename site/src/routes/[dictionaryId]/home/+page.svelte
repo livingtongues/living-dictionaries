@@ -9,6 +9,8 @@
   import NudgeCard from './NudgeCard.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import CopyButton from '$lib/components/ui/CopyButton.svelte'
+  import Skeleton from '$lib/components/ui/Skeleton.svelte'
+  import { stream_resolve } from '$lib/state/stream-resolve.svelte'
   import { page } from '$app/state'
   import { browser } from '$app/environment'
   import { goto } from '$app/navigation'
@@ -26,9 +28,6 @@
   const { data } = $props()
   const {
     dictionary,
-    ssr_featured,
-    ssr_recent,
-    partners,
     dict_db,
     entries_data,
     speakers,
@@ -38,6 +37,13 @@
     is_manager,
     is_editor_or_above,
   } = $derived(data)
+  // Resolved on SSR/hydration; a pending streamed promise on client-nav (see the
+  // server load) — skeleton strips below cover the pending gap.
+  const home_data = stream_resolve(() => data.home_data)
+  const ssr_featured = $derived(home_data.value?.ssr_featured ?? [])
+  const ssr_recent = $derived(home_data.value?.ssr_recent ?? [])
+  const partners = $derived(home_data.value?.partners ?? [])
+  const home_pending = $derived(home_data.value === undefined)
   const t = $derived(page.data.t)
   const { loading: entries_loading } = $derived(entries_data)
 
@@ -200,6 +206,18 @@
       {/if}
     </div>
   </header>
+
+  {#if home_pending && !live_featured_ready}
+    <!-- Client-nav while home_data streams: shimmer strip mirroring the card grid. -->
+    <section>
+      <Skeleton width="9rem" height="1rem" />
+      <div class="strip" style="margin-top: 0.75rem">
+        {#each Array.from({ length: 5 }, (_, index) => index) as index (index)}
+          <Skeleton width="10.625rem" height="14rem" radius="0.75rem" />
+        {/each}
+      </div>
+    </section>
+  {/if}
 
   {#if featured_cards.length || nudge_star}
     <section>

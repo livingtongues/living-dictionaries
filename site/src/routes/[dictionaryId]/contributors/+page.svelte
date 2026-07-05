@@ -8,15 +8,35 @@
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import Skeleton from '$lib/components/ui/Skeleton.svelte'
+  import { stream_resolve } from '$lib/state/stream-resolve.svelte'
   import { page } from '$app/state'
 
   const { data } = $props()
-  const { dictionary, is_manager, is_contributor, auth_user, editor_edits, managers, contributors, partners } = $derived(data)
+  const { dictionary, is_manager, is_contributor, auth_user, editor_edits } = $derived(data)
 
-  const manager_invites = $derived(data.invites.filter(invite => invite.role === 'manager'))
-  const contributor_invites = $derived(data.invites.filter(invite => invite.role === 'contributor'))
+  // Resolved on SSR/hydration; a pending streamed promise on client-nav. STICKY
+  // across the invalidate('contributors:reload') after each edit, so the lists
+  // never flash back to skeletons mid-session.
+  const contributors_data = stream_resolve(() => data.contributors_data)
+  const managers = $derived(contributors_data.value?.managers ?? [])
+  const contributors = $derived(contributors_data.value?.contributors ?? [])
+  const invites = $derived(contributors_data.value?.invites ?? [])
+  const partners = $derived(contributors_data.value?.partners ?? [])
+  const lists_pending = $derived(contributors_data.value === undefined)
+
+  const manager_invites = $derived(invites.filter(invite => invite.role === 'manager'))
+  const contributor_invites = $derived(invites.filter(invite => invite.role === 'contributor'))
   const write_in_collaborators = $derived(dictionary.write_in_collaborators ?? [])
 </script>
+
+{#snippet person_skeleton_rows()}
+  {#each [0, 1] as index (index)}
+    <div class="person-row">
+      <Skeleton width="{9 + index * 3}rem" height="0.875rem" />
+    </div>
+  {/each}
+{/snippet}
 
 <p class="intro">
   <i>{page.data.t('contributors.manager_contributor_distinction')}</i>
@@ -27,6 +47,9 @@
 </h3>
 
 <div class="person-list">
+  {#if lists_pending}
+    {@render person_skeleton_rows()}
+  {/if}
   {#each managers as manager (manager.user_id)}
     <div class="person-row">
       <div class="person-name">
@@ -64,6 +87,9 @@
   {page.data.t('dictionary.contributors')}
 </h3>
 <div class="person-list">
+  {#if lists_pending}
+    {@render person_skeleton_rows()}
+  {/if}
   {#each contributors as contributor (contributor.user_id)}
     <div class="person-row">
       <div class="person-name">

@@ -2,12 +2,20 @@
   import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
   import Button from '$lib/components/ui/Button.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
+  import Skeleton from '$lib/components/ui/Skeleton.svelte'
   import { api_dictionaries_id_invites_accept } from '$api/dictionaries/[id]/invites/[invite_id]/accept/_call'
   import { invalidateAll } from '$app/navigation'
   import { page } from '$app/state'
+  import { stream_resolve } from '$lib/state/stream-resolve.svelte'
 
   const { data } = $props()
-  const { auth_user, dictionary, is_manager, is_contributor, invite } = $derived(data)
+  const { auth_user, dictionary, is_manager, is_contributor } = $derived(data)
+  // Resolved on SSR/hydration; a pending streamed promise on client-nav. Sticky
+  // through the invalidateAll after accepting. `undefined` = still loading,
+  // `null` = no such invite.
+  const invite_data = stream_resolve(() => data.invite)
+  const invite = $derived(invite_data.value ?? null)
+  const invite_pending = $derived(invite_data.value === undefined)
   const user = $derived(auth_user.user)
 
   async function accept_invite() {
@@ -21,7 +29,10 @@
   }
 </script>
 
-{#if invite?.status === 'sent'}
+{#if invite_pending}
+  <Skeleton width="16rem" height="1rem" />
+  <div style="margin-top: 0.75rem"><Skeleton width="11rem" height="1rem" /></div>
+{:else if invite?.status === 'sent'}
   <p style="font-weight: 600; margin-bottom: 0.5rem">
     {page.data.t('invite.invited_by')}: {invite.inviter_email}
   </p>
