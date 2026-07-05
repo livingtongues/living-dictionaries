@@ -43,30 +43,43 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   folded into `KNOWN_NOISE_PATTERNS`.
 
 ## Open proposals
-- **★ Fresh-viewer boot-health strip** *(filed 2026-07-04 run 2 — grounded in a live P1).* Today a
-  snapshot-cursor regression (the featured-entries sweep advanced every dict's sync cursor 14 months
-  past its snapshot cursor → `snapshot_expired` for all fresh viewers → empty dictionaries; ~40
-  sessions, ~90% non-recovery) was **invisible on the dashboard** and only surfaced via manual VPS
-  spelunking at 22:40. Add a panel aggregating the boot-cascade family (`initial dict sync failed`
-  split by `context.extras` code — esp. `snapshot_expired` — plus `Failed to read dict bundle`,
-  `leader_boot_failed`, `[orama-watcher] delta scan failed`) by day + distinct sessions, with a
-  **first-open non-recovery rate** (booted-then-never-`entry_opened`). A `snapshot_expired` spike is
-  the exact fingerprint of a cursor/snapshot mismatch — this would have flagged it at 12:22 instead of
-  10 hours later. Cheap — mirror the `error_clusters` query. See
-  `.issues/snapshot-cursor-ahead-of-snapshot-2026-07-04.md`.
-- **Synthetic uptime + latency panel** *(ported from house · 2026-07-04).* house shipped an
-  `/admin/health` availability % + fixed-vantage server TTFB p50/p95 panel from external `uptime_probe`
-  server rows — a clean SLO signal without the device/geo confounding of client CWV. **LD has no
-  external uptime monitor**, so this is two-part: (a) stand up a probe POSTing `uptime_probe` server
-  rows, (b) chart availability + TTFB/total p50/p95 daily (LineChart from `$lib/charts`). Higher value
-  now that LD serves the apex with real global traffic. Ref: house `log-analytics.ts` + `health/+page.svelte`.
+- **★★ NEW — "Sync health / stuck client_behind" panel** *(filed 2026-07-05 — grounded in a live,
+  ongoing P2; see `.issues/dict-sync-client-behind-storm-2026-07-05.md`).* Today the per-dict sync
+  engine's `client_behind`/`schema_outdated` retry (triggered by the 03:30 `sentence_tokens_media_timings`
+  dict-migration) drove **9,862 `sync_failed` warn rows — 41.9% of ALL 24h logs** — across 12 users
+  (incl. one of LD's own admins) and 34 dictionaries, continuously for 24h+, and was **completely
+  invisible on both `/admin/analytics` and `/admin/health`**: verified in `log-analytics.ts` —
+  `top_events` only aggregates `level='info'` rows (line ~904) and `error_clusters`/`errors_by_version`
+  only count `ERROR_LEVELS_SQL = ('error','unhandled_rejection','crash')`; `sync_failed` ships at `warn`
+  so it hits neither. Add a small panel: `sync_failed` volume by `context.kind` (client_behind/
+  network/snapshot_expired/storage_lost/…), a distinct-(user,dict) "currently stuck" count, and a
+  age-of-oldest-unresolved-occurrence per kind. Would have surfaced this within the first hour instead
+  of a manual raw-log dig. Cheap — same shape as `error_clusters` but reading `level='warn' AND
+  message='sync_failed'` (currently excluded from every existing panel).
+- **★ Fresh-viewer boot-health strip** *(filed 2026-07-04 run 2 — grounded in a live P1; ✅ SHIPPED
+  2026-07-05, commit `daed5d93` — `BootHealth`/`build_boot_health` + the "Fresh-viewer boot health"
+  panel on `/admin/health`, verified present with failed/recovered/non-recovery-rate/snapshot_expired +
+  by-message + daily trend).* Caught the first real post-ship data point today: the 07-04 P1 cascade is
+  down to a low single-digit/build trickle post-fix. **Refinement still open** (2026-07-05): the
+  `recovered_sessions` proxy (a failed-boot session that later logs `entry_opened`) undercounts real
+  recovery — e.g. a 07-05 `apatani` session hit the boot-cascade, then bounced (`visibility_hidden`
+  ~2.4s later) without ever opening an entry, so it reads as "non-recovered" even though we can't tell
+  whether the entries LIST actually rendered after the retry. See the "Intent→shown success event" item
+  below — this is the concrete case that would benefit from it; consider prioritizing that item to
+  sharpen `non_recovery_pct` specifically.
+- ✅ **Synthetic uptime + latency panel** *(ported from house · 2026-07-04; SHIPPED 2026-07-05,
+  commit `75243995` "Split admin analytics into usage and health dashboards" — `UptimeSummary`/
+  `build_uptime` + the "Synthetic uptime" panel on `/admin/health`, verified: availability % + server
+  TTFB/total p50/p95 daily trend from `uptime_probe` server rows). 2026-07-05 data: 162/162 probes ok
+  (100% availability) — healthy).* house and tutor also independently shipped/are shipping the same
+  panel this week (house 07-04, tutor building) — full convergence across all three apps now.
 - **★ Geo-split Core Web Vitals (TTFB/LCP by region or distance-to-origin bucket)** *(filed 2026-06-30 —
-  grounded in a real geo tax).* The shipped CWV panel aggregates p50/p75/p95 per metric across **all**
-  geos, hiding that on 06-30 **64/65 sessions were Malaysia → Boston origin**, paying ~997ms page-load
-  TTFB (vs 563ms US) and dragging LCP to ~2.8s (needs-improvement). Add a TTFB/LCP breakdown by
-  `country`/`region` (or near/mid/far distance-to-Boston buckets, reusing the existing haversine),
-  human-only, so the far-region tax is a standing signal instead of a hand-run query. LD-first; flag for
-  house (also Boston-hosted).
+  grounded in a real geo tax; **PARTIALLY SHIPPED** — verified 2026-07-05).* The TTFB half is live:
+  `/admin/health` "Latency by geography" panel (`geo.ttfb_by_country` / `geo.ttfb_by_distance`,
+  `build_ttfb_latency`) breaks down TTFB p50/p95 by country AND by distance-to-Boston bucket,
+  human-only. **Still open: the LCP half** — the shipped Core Web Vitals panel (`web_vitals`) remains
+  a single all-geo aggregate; LCP is not yet split by country/distance the way TTFB is. Extend
+  `build_web_vitals` (or a sibling function) to bucket LCP the same way `build_ttfb_latency` does.
 - ✅ **Deploy-day errors fold** *(ported from house · 2026-06-30; SHIPPED 2026-07-03).*
   `DailyPoint.stale_errors` counts error rows from a non-current `app_version` (0 when the current
   version is unknown / on cold rollup days); Errors tile shows a "N from stale builds" hint and the
@@ -187,6 +200,29 @@ panel, and the **pipeline-liveness + event-coverage** strips.
 *Skipped as inapplicable to LD:* tutor's **Mobile-health / memory-OOM** RN panel (web-only) and
 house's **/admin/revenue** dashboard (no payments).
 
+### Cross-pollination update — 2026-07-05 (read house + tutor 07-04 reviews/backlogs)
+- **Convergence: all three apps now have the synthetic-uptime panel.** house shipped it 07-04
+  (`2bd9a66`), LD shipped it 07-05 (`75243995`, independently — not itself a port, but the same idea),
+  tutor is ~90% wired (just needs its prober's ingest path + the panel). Nothing left to port here.
+- **house's "Reader 404s / broken doc-links" panel** (07-04, house `.cron/log-reviews/2026-07-04.md`) —
+  a count + recent-list of structured 404s on dead reader-document links. LD analog would be a "broken
+  public entry/dictionary link" strip (dead shared links 404ing for anon visitors). **LOW** — LD's
+  `+error.svelte` already demotes 404s to `info` (so they're cheap to query but not a source of
+  error-cluster noise today) and no evidence yet of the same "shared link surviving deletion" pattern
+  LD's structure would need (entries are hard-deleted via tombstone, not soft-deleted, so a dead link
+  is rarer than house's doc-renumbering case). Revisit if it recurs.
+- **house's "Distinct-session route ranking" borrow-from-LD** (07-04) confirms LD's top-routes-by-session
+  work (07-03) was worth porting — no new action for LD.
+- **★ LD win to flag back to house + tutor: audit YOUR sync engines for the same "retry-forever +
+  unthrottled" gap.** LD's dict-sync-engine.ts (the newer, simpler per-dict engine) turned out to have
+  NO `blocked_by_client_behind`-equivalent flag at all — unlike LD's own admin engine and house's
+  `worker-engine.ts` (both of which DO gate on a `blocked_by_client_behind` flag before each retry).
+  So this specific bug is NOT known to be shared — but the general lesson (any interval-driven sync
+  retry loop must stop-or-throttle on a classified-fatal error, not just log-and-continue) is worth a
+  quick self-check in both sibling repos' own worker/engine code, especially any per-document or
+  per-entity (not just per-user) sync loop added since the shared `report-sync-failure.ts` policy was
+  set (2026-07-02). See `.issues/dict-sync-client-behind-storm-2026-07-05.md` for the full writeup.
+
 ## Sourced from
 - `.cron/log-reviews/2026-06-25.md` (first run / zero-data baseline)
 - `.cron/log-reviews/2026-06-26.md` (first real-data run; ~91% synthetic/headless)
@@ -203,6 +239,10 @@ house's **/admin/revenue** dashboard (no payments).
 - `.cron/log-reviews/2026-07-03.md` (first big real-traffic day; API-v1 panel + deploy-day fold +
   top-routes-by-session all SHIPPED; top-routes-by-session proposal grounded in the milang self-nav loop)
 - `.cron/log-reviews/2026-07-04.md` (quiet day, all 07-03 fixes verified live; Server-faults panel
-  SHIPPED; "Top missing i18n keys" panel proposal from 237 distinct missing keys/day)
+  SHIPPED; "Top missing i18n keys" panel proposal from 237 distinct missing keys/day; run 2 caught the
+  P1 empty-dictionary snapshot-cursor regression, fixed 2026-07-05 `daed5d93`)
+- `.cron/log-reviews/2026-07-05.md` (P1 fix + boot-health panel verified live; NEW P2 found —
+  dict-engine `client_behind` retry storm, 41.9% of the day's log volume, invisible on both dashboards;
+  uptime panel + partial geo-CWV split verified shipped; convergence check against house/tutor 07-04)
 - Phase D cross-repo read 2026-06-27 (house `error_audience`/`errors_by_version`/expected-bucket;
   tutor `error_clusters`/`KNOWN_NOISE`).

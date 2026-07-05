@@ -19,7 +19,7 @@ import { live_share } from '$lib/db/client/live-share.svelte'
 import { toast } from '$lib/state/toast.svelte'
 import { api_dictionaries_catalog } from '$api/dictionaries/[id]/catalog/_call'
 import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
-import { browser, dev } from '$app/environment'
+import { browser, dev, version } from '$app/environment'
 import { invalidate } from '$app/navigation'
 import { create_entries_ui_store } from '$lib/search/entries-ui-store'
 
@@ -118,7 +118,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
             if (schema_recovery_handled)
               return
             schema_recovery_handled = true
-            recover_from_schema_outdated({ t })
+            recover_from_schema_outdated({ t, dict_id: dictionary_id })
             return
           }
           if (broadcast.type === 'snapshot_expired') {
@@ -216,7 +216,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
  * worker pinning an old bundle), or fall back to a manual-reload toast if we
  * already tried recently (see `client-behind-recovery`).
  */
-function recover_from_schema_outdated({ t }: { t: TranslateFunction }): void {
+function recover_from_schema_outdated({ t, dict_id }: { t: TranslateFunction, dict_id: string }): void {
   let stored: ReloadGuard | null = null
   try {
     const raw = sessionStorage.getItem(CLIENT_BEHIND_GUARD_KEY)
@@ -227,9 +227,19 @@ function recover_from_schema_outdated({ t }: { t: TranslateFunction }): void {
   const decision = decide_client_behind_recovery({ stored, now: Date.now() })
   if (decision.action === 'reload') {
     try { sessionStorage.setItem(CLIENT_BEHIND_GUARD_KEY, JSON.stringify(decision.next)) } catch { /* ignore */ }
+    // Diagnostic for the client_behind storm: this row's `app_version` is the
+    // stale bundle we're reloading AWAY from. If the very next session_start
+    // still carries the SAME version, the reload re-served a stale bundle
+    // (SW/CDN) rather than picking up the deploy — the pagehide beacon flushes
+    // this before the navigation tears the page down.
+    log_event({ level: 'info', message: 'schema_outdated_reload', context: { dict_id } })
     location.reload()
     return
   }
 
+  // Reload guard already fired within the window and it didn't help (stale
+  // SW/CDN, or the bundle is genuinely unavailable) — surface a manual toast
+  // instead of reload-looping. `version` distinguishes this from the reload row.
+  log_event({ level: 'warn', message: 'schema_outdated_reload_gave_up', context: { dict_id, app_version: version } })
   toast(t('misc.app_update_needed'), { action: { label: t('misc.reload'), callback: () => location.reload() }, dismiss_label: t('misc.close') })
 }

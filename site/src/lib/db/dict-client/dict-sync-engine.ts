@@ -7,7 +7,7 @@ import type { AuthHeaders } from './worker/instance'
 import { ResponseCodes } from '$lib/constants'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
-import { is_storage_lost_error } from '$lib/db/sync/sync-failure-classify'
+import { classify_sync_failure, is_storage_lost_error } from '$lib/db/sync/sync-failure-classify'
 import { LATEST_DICT_MIGRATION } from './dict-migrations-bundle'
 import { report_dict_stuck_dirty, report_dict_sync_failure } from './report-dict-sync-failure'
 
@@ -69,6 +69,19 @@ export interface SyncEngineOptions {
    * without this the 30s interval hot-loops against a dead handle forever.
    */
   on_storage_lost?: () => void
+  /**
+   * Fires ONCE when a sync fails because this bundle's dict schema is older
+   * than the server's (`schema_outdated`/`client_behind`, HTTP 409). This is a
+   * permanent-until-reload block — the same 409 recurs on every 30s tick — so
+   * the engine latches a blocked flag (see `sync_if_needed`) to stop hammering
+   * the server (mirrors the admin engine's `blocked_by_client_behind`). The
+   * instance wires this to broadcast `schema_outdated` to every tab so the
+   * main-thread recovery reloads onto a fresh bundle. Before this hook the
+   * interval path never reached `translate_sync_error`, so a tab that went
+   * stale AFTER load retried forever and never broadcast (the client_behind
+   * retry-storm — see `.issues/dict-sync-client-behind-storm-2026-07-05.md`).
+   */
+  on_version_blocked?: () => void
 }
 
 export class DictSyncEngine {
@@ -81,6 +94,7 @@ export class DictSyncEngine {
   #on_rows_deleted?: (deletes: { table_name: string, id: string }[]) => void
   #on_status?: (status: { is_syncing: boolean, last_error: string | null, last_sync_at: string | null }) => void
   #on_storage_lost?: () => void
+  #on_version_blocked?: () => void
 
   #timer: ReturnType<typeof setInterval> | null = null
   #stuck_timer: ReturnType<typeof setInterval> | null = null
@@ -89,6 +103,13 @@ export class DictSyncEngine {
   #last_error: string | null = null
   #last_sync_at: string | null = null
   #stopped = false
+  /**
+   * Latched true after a `schema_outdated` (client_behind) failure — a
+   * permanent-until-reload block. `sync_if_needed` (interval + post-write)
+   * no-ops while set, so a stale tab stops retrying every 30s. Cleared only by
+   * building a fresh engine (reset / storage-lost reopen construct a new one).
+   */
+  #version_blocked = false
 
   constructor(options: SyncEngineOptions) {
     this.#dict_id = options.dict_id
@@ -100,6 +121,12 @@ export class DictSyncEngine {
     this.#on_rows_deleted = options.on_rows_deleted
     this.#on_status = options.on_status
     this.#on_storage_lost = options.on_storage_lost
+    this.#on_version_blocked = options.on_version_blocked
+  }
+
+  /** True once a `schema_outdated` block has latched (see `#version_blocked`). */
+  get is_version_blocked(): boolean {
+    return this.#version_blocked
   }
 
   start() {
@@ -170,7 +197,9 @@ export class DictSyncEngine {
   }
 
   async sync_if_needed(): Promise<void> {
-    if (this.#in_flight || this.#stopped)
+    // A latched schema-outdated block is permanent until the tab reloads onto a
+    // fresh bundle — retrying just re-hits the same 409 every 30s (the storm).
+    if (this.#version_blocked || this.#in_flight || this.#stopped)
       return
     await this.sync_once().catch((err) => {
       console.warn(`[dict-sync] ${this.#dict_id} sync failed:`, err)
@@ -199,8 +228,19 @@ export class DictSyncEngine {
       // Dead OPFS handle: retrying is pointless (every future tick fails the
       // same way) — hand recovery to the instance, which stops this engine and
       // reopens the connection in place.
-      if (is_storage_lost_error(err))
+      if (is_storage_lost_error(err)) {
         this.#on_storage_lost?.()
+      } else if (!this.#version_blocked && classify_sync_failure(err) === 'client_behind') {
+        // Stale bundle (server dict schema is newer, HTTP 409): permanent until
+        // reload. Latch the block so the 30s interval stops hammering, and fire
+        // the recovery hook ONCE so the instance broadcasts `schema_outdated`
+        // (the interval path otherwise never reached `translate_sync_error`, so
+        // a tab that went stale post-load retried forever and never reloaded).
+        // `server_behind` is deliberately NOT latched: it's transient (server
+        // mid-deploy) and self-heals on the next tick, like the admin engine.
+        this.#version_blocked = true
+        this.#on_version_blocked?.()
+      }
       throw err
     } finally {
       this.#in_flight = false

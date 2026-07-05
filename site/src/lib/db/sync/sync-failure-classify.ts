@@ -24,8 +24,18 @@ export type SyncFailureKind
 export const SYNC_FAILURE_THROTTLE_MS = 10 * 60 * 1000
 
 const WARN_KINDS: ReadonlySet<SyncFailureKind> = new Set(['client_behind', 'server_behind', 'network', 'auth', 'snapshot_expired', 'storage_lost'])
-/** Kinds subject to repeat-suppression (auto-retrying flows); hard failures always ship. */
-const THROTTLED_KINDS: ReadonlySet<SyncFailureKind> = new Set(['network', 'server_behind', 'auth', 'snapshot_expired', 'storage_lost'])
+/**
+ * Kinds subject to repeat-suppression (auto-retrying flows); hard failures
+ * always ship. `client_behind` joined this set 2026-07-05: the dict engine's
+ * 30s auto-retry has no blocked-state guard (see `DictSyncEngine`/
+ * `dict-instance.ts`), so an un-reloaded tab used to ship an UNTHROTTLED
+ * `sync_failed` row every 30s forever — one stuck tab drove 9,681 rows (41.9%
+ * of a day's total log volume) before this was caught
+ * (`.issues/dict-sync-client-behind-storm-2026-07-05.md`). Throttling here is
+ * the immediate flood mitigation; the durable fix (stop retrying / actually
+ * recover) is tracked separately in that issue.
+ */
+const THROTTLED_KINDS: ReadonlySet<SyncFailureKind> = new Set(['network', 'server_behind', 'auth', 'snapshot_expired', 'storage_lost', 'client_behind'])
 
 /**
  * The browser closed our held OPFS sync-access-handle out from under the leader
@@ -173,6 +183,9 @@ if (import.meta.vitest) {
     })
     test('suppresses a repeat storage_lost failure inside the window (no 30s hot-loop rows)', () => {
       expect(should_ship_failure({ kind: 'storage_lost', message: 'AccessHandle is closed', last: { key: 'storage_lost:AccessHandle is closed', at: now - 1 }, now })).toBe(false)
+    })
+    test('suppresses a repeat client_behind failure inside the window (2026-07-05 storm fix — no 30s hot-loop rows)', () => {
+      expect(should_ship_failure({ kind: 'client_behind', message: 'schema_outdated', last: { key: 'client_behind:schema_outdated', at: now - 1 }, now })).toBe(false)
     })
     test('ships again after the window / for a different message', () => {
       expect(should_ship_failure({ kind: 'network', message: 'x', last: { key: 'network:x', at: now - SYNC_FAILURE_THROTTLE_MS }, now })).toBe(true)

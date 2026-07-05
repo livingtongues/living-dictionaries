@@ -171,6 +171,13 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
           context.emit_event({ type: 'sync_status', ...status })
         },
         on_storage_lost: () => { void reopen_after_storage_lost() },
+        // Stale bundle: the engine has latched its retry loop (permanent until
+        // reload). Broadcast to EVERY tab so the main-thread recovery reloads
+        // onto a fresh bundle — this reaches the interval path, which used to
+        // retry forever without ever broadcasting (see the client_behind storm
+        // issue). Same broadcast `translate_sync_error` emits for the explicit
+        // sync_now/reset paths; the +layout subscriber dedupes.
+        on_version_blocked: () => { context.emit_event({ type: 'schema_outdated' }) },
       })
       engine.start()
 

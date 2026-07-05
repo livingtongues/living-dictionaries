@@ -122,13 +122,22 @@ export function create_entries_ui_store({
         globals.__ld_orama_watchers[dictionary_id] = create_orama_watcher({ connection: conn, dict_db, initial_watermark: watermark })
       }
     } catch (err) {
-      // Retry ONCE on a torn-down-connection error: a concurrent
-      // snapshot_expired reset closes the leader's OPFS connection mid-query
-      // (SQLITE_MISUSE code 21), which would otherwise leave an EMPTY entry
-      // list even though the snapshot holds every row (2026-07-04 P1). The
-      // reset reopens in place, so a short retry lands on a live connection.
-      if (attempt === 0 && is_transient_connection_error(err)) {
-        await new Promise(resolve => setTimeout(resolve, 300))
+      // Retry on a torn-down-connection error: a concurrent snapshot_expired
+      // reset closes the leader's OPFS connection mid-query (SQLITE_MISUSE
+      // code 21), which would otherwise leave an EMPTY entry list even though
+      // the snapshot holds every row (2026-07-04 P1). The reset reopens in
+      // place, so a short retry usually lands on a live connection.
+      //
+      // A `snapshot_expired` reset is heavier than a normal reconnect (it
+      // deletes the OPFS file, refetches the snapshot over the network, then
+      // reopens) — a single fixed 300ms retry sometimes wasn't enough and
+      // still failed a second time (2 confirmed post-fix instances,
+      // 2026-07-05: `kharia`, `apatani`, both `retried:true` yet still
+      // MISUSE). When we know a snapshot_expired reset is/was in flight for
+      // this dict, allow a second, longer retry.
+      const max_attempts = snapshot_expired_recently(dictionary_id) ? 2 : 1
+      if (attempt < max_attempts && is_transient_connection_error(err)) {
+        await new Promise(resolve => setTimeout(resolve, 300 * (attempt + 1)))
         return load_bundle_with_retry(conn, attempt + 1)
       }
       const code = sqlite_code_of(err)

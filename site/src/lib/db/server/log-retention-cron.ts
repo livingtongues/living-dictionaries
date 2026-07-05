@@ -181,10 +181,13 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
   }
 
   const metrics: { metric: string, source: string, value: number }[] = []
-  // `prefix` is '' for human/server buckets, 'bot:' for the bot bucket.
+  // `prefix` is '' for human/server buckets, 'bot:' for the bot bucket. NOTE: `users`
+  // is emitted ONCE per day (cross-source distinct) below, NOT here per source — a
+  // signed-in user with BOTH browser (client) and server-attributed rows the same day
+  // would otherwise be counted once per source and summed to 2 in the daily line,
+  // disagreeing with the live COUNT(DISTINCT user_id).
   const emit = (bucket: Bucket, source: string, prefix: string): void => {
     metrics.push({ metric: `${prefix}sessions`, source, value: bucket.sessions.size })
-    metrics.push({ metric: `${prefix}users`, source, value: bucket.users.size })
     metrics.push({ metric: `${prefix}logs`, source, value: bucket.logs })
     metrics.push({ metric: `${prefix}errors`, source, value: bucket.errors })
     metrics.push({ metric: `${prefix}real_errors`, source, value: bucket.real_errors })
@@ -199,9 +202,20 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
   }
   for (const [source, bucket] of by_source)
     emit(bucket, source, '')
+  // Cross-source distinct users, emitted once under a canonical `client` source so
+  // build_daily reads a single `users` row (no per-source double count). The reader
+  // sums `users` rollup rows per day, so exactly one row = the right total.
+  const human_users = new Set<string>()
+  for (const bucket of by_source.values()) {
+    for (const user of bucket.users)
+      human_users.add(user)
+  }
+  metrics.push({ metric: 'users', source: 'client', value: human_users.size })
   // Only emit bot metrics when bots were actually seen (keeps quiet days lean).
-  if (bot_bucket.logs > 0)
+  if (bot_bucket.logs > 0) {
     emit(bot_bucket, 'client', 'bot:')
+    metrics.push({ metric: 'bot:users', source: 'client', value: bot_bucket.users.size })
+  }
 
   const upsert = shared_db.prepare(`
     INSERT INTO log_daily_metrics (day, metric, source, value) VALUES (?, ?, ?, ?)

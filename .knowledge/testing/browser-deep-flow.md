@@ -113,7 +113,7 @@ the VPS `shared.db`. Patterns that work:
 - **Verify a deploy is live** before asserting behavior: poll `/_app/version.json` until the
   `version` flips, and/or `ssh living 'git -C /opt/hosting/sveltekit/code rev-parse --short HEAD'`.
   Confirm a server change shipped by GETting `/api/admin/analytics` and checking the new field shape.
-- **Read telemetry back**: query `shared.db.client_logs` grouped by `message` to confirm events
+- **Read telemetry back**: query `logs.db.client_logs` (raw logs split out of shared.db 2026-07-05; rollups stay in shared.db) grouped by `message` to confirm events
   fired (e.g. `dictionary_opened`, `search_performed`, server `auth_login`/`dictionary_created`),
   and per-dict DBs at `/data/dictionaries/<id>.db` for entry writes.
 

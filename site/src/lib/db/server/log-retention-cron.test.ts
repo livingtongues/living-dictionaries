@@ -101,6 +101,19 @@ describe(rollup_day, () => {
     ])
   })
 
+  test('counts a user with both client and server rows once (no cross-source double count)', () => {
+    // Same user appears in a browser session AND a server-attributed row the same day.
+    add_log({ message: 'session_start', user_id: 'u1', context: { session_id: 's1' } })
+    add_log({ level: 'error', message: 'srv boom', user_id: 'u1', source: 'server', context: null })
+
+    rollup_day({ day: '2026-06-01', shared_db, logs_db })
+
+    // Exactly ONE `users` row (canonical `client` source), value 1 — NOT one row per
+    // source summing to 2 in the reader's per-day SUM.
+    const rows = shared_db.prepare(`SELECT source, value FROM log_daily_metrics WHERE day = '2026-06-01' AND metric = 'users'`).all()
+    expect(rows).toEqual([{ source: 'client', value: 1 }])
+  })
+
   test('is idempotent — re-running overwrites, never doubles', () => {
     add_log({ message: 'heartbeat', context: { session_id: 's1' } })
     rollup_day({ day: '2026-06-01', shared_db, logs_db })

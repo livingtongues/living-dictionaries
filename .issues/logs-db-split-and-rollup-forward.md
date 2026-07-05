@@ -55,7 +55,17 @@ content_performance, server_render, version_markers, reader_404s. LD has ONE ana
      healthz 200. Live /api/admin/analytics: 200, cold 70ms / cached 2.9ms / bots 47ms,
      webdriver_sessions=450, leader_health split fixed, pipeline.hot_rows=5721.
 
-## ✅ STATUS: COMPLETE — awaiting Jacob's review. NOT committed (per constraints).
+## ✅ STATUS: SHIPPED — committed (b5bce3e8) + pushed + deployed to prod 2026-07-05.
+
+### Prod post-deploy verification (2026-07-05)
+- healthz 200. Deploy live on `main` @ b5bce3e8.
+- **logs.db**: 89,394 client_logs rows, ingest fresh (latest 12:35Z), session_id populated
+  on 54,274 rows (rest = server rows / legacy w/o session context — expected). 193M.
+- **shared.db**: client_logs table GONE (split ran + VACUUM), down to 12M. Rollups present:
+  log_daily_metrics 2262, log_daily_sessions 1567 (materialized). logs-archive.db 4K (nothing
+  aged yet — expected).
+- **No server errors/warns in 3h post-deploy.** Client errors are baseline noise only
+  (initial dict sync, stale-chunk dynamic-import from cached old builds) — nothing from this change.
 
 ## Deliberate bug fixes (documented)
 - **leader_health GROUP BY shadow**: `... AS source ... GROUP BY source` bound to the real

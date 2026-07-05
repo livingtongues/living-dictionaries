@@ -117,3 +117,87 @@ describe('DictSyncEngine storage-lost recovery hook', () => {
     expect(payload.entries[0].context).toMatchObject({ kind: 'storage_lost', dict_id: 'test-dict' })
   })
 })
+
+describe('DictSyncEngine schema-outdated blocked state', () => {
+  const original_fetch = globalThis.fetch
+
+  beforeEach(() => {
+    vi.mocked(api_log).mockClear()
+    _reset_dict_failure_throttle_for_tests()
+  })
+
+  afterEach(() => {
+    globalThis.fetch = original_fetch
+  })
+
+  /** Connection with no dirty rows / tombstones, so #build_request stays empty and the POST is reached. */
+  const empty_connection: EngineConnection = {
+    query: () => Promise.resolve([]),
+    execute: () => Promise.resolve(),
+  }
+
+  function fake_response({ status, body }: { status: number, body: string }) {
+    return {
+      ok: status >= 200 && status < 300,
+      status,
+      text: () => Promise.resolve(body),
+      json: () => Promise.resolve(JSON.parse(body)),
+    }
+  }
+
+  function make_blockable_engine(on_version_blocked: () => void) {
+    return new DictSyncEngine({
+      dict_id: 'test-dict',
+      connection: empty_connection,
+      has_editor_role: true,
+      get_auth: () => ({}) as never,
+      on_version_blocked,
+    })
+  }
+
+  test('a schema_outdated (409) failure latches the block and fires on_version_blocked once', async () => {
+    const fetch_spy = vi.fn(() => Promise.resolve(fake_response({ status: 409, body: JSON.stringify({ message: 'schema_outdated' }) })))
+    globalThis.fetch = fetch_spy as never
+    const on_version_blocked = vi.fn()
+    const engine = make_blockable_engine(on_version_blocked)
+
+    await expect(engine.sync_once()).rejects.toThrow()
+    expect(on_version_blocked).toHaveBeenCalledTimes(1)
+    expect(engine.is_version_blocked).toBeTruthy()
+    expect(fetch_spy).toHaveBeenCalledTimes(1)
+
+    // The 30s interval / post-write path must now no-op — no more server hits.
+    await engine.sync_if_needed()
+    await engine.sync_if_needed()
+    expect(fetch_spy).toHaveBeenCalledTimes(1)
+    expect(on_version_blocked).toHaveBeenCalledTimes(1)
+  })
+
+  test('a transient network failure does NOT block — the interval keeps retrying', async () => {
+    const fetch_spy = vi.fn(() => Promise.reject(new TypeError('Failed to fetch')))
+    globalThis.fetch = fetch_spy as never
+    const on_version_blocked = vi.fn()
+    const engine = make_blockable_engine(on_version_blocked)
+
+    await expect(engine.sync_once()).rejects.toThrow()
+    expect(on_version_blocked).not.toHaveBeenCalled()
+    expect(engine.is_version_blocked).toBeFalsy()
+
+    await engine.sync_if_needed() // retries (not blocked)
+    expect(fetch_spy).toHaveBeenCalledTimes(2)
+  })
+
+  test('server_outdated (503) does NOT block — it is transient and self-heals', async () => {
+    const fetch_spy = vi.fn(() => Promise.resolve(fake_response({ status: 503, body: JSON.stringify({ message: 'server_outdated' }) })))
+    globalThis.fetch = fetch_spy as never
+    const on_version_blocked = vi.fn()
+    const engine = make_blockable_engine(on_version_blocked)
+
+    await expect(engine.sync_once()).rejects.toThrow()
+    expect(on_version_blocked).not.toHaveBeenCalled()
+    expect(engine.is_version_blocked).toBeFalsy()
+
+    await engine.sync_if_needed() // keeps retrying while the server catches up
+    expect(fetch_spy).toHaveBeenCalledTimes(2)
+  })
+})
