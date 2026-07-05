@@ -172,6 +172,9 @@
   const clusters = $derived(analytics.error_clusters)
   const leader = $derived(analytics.leader_health)
   const missing_i18n = $derived(analytics.missing_i18n_keys)
+  const boot_health = $derived(analytics.boot_health)
+  const boot_non_recovery_pct = $derived(boot_health.non_recovery_pct === null ? null : Math.round(boot_health.non_recovery_pct * 100))
+  const boot_points = $derived(boot_health.daily.map(day => ({ date: day.day, value: day.sessions })))
   // Build ids are long; show a short trailing slice for readability.
   function short_version(version: string | null): string {
     if (!version)
@@ -362,6 +365,48 @@
               <td>{cluster.statuses ?? '—'}</td>
               <td>{ago(cluster.last_seen)}</td>
               <td class="danger">{format_number(cluster.count)}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    {/if}
+  </section>
+
+  <section class="panel">
+    <h2>Fresh-viewer boot health <span class="hint">dict.db boot cascade · empty-dictionary detector · hot window</span></h2>
+    {#if boot_health.failed_sessions === 0}
+      <p class="muted">No boot-cascade failures in the hot window. 🎉 Fresh viewers are opening dictionaries cleanly.</p>
+    {:else}
+      <div class="ver-split">
+        <div class="ver-stat">
+          <div class="ver-value" class:danger={boot_health.failed_sessions > 0}>{format_number(boot_health.failed_sessions)}</div>
+          <div class="ver-label">Failed-boot sessions</div>
+          <div class="ver-sub">{format_number(boot_health.recovered_sessions)} later opened an entry</div>
+        </div>
+        <div class="ver-stat">
+          <div class="ver-value" class:danger={(boot_non_recovery_pct ?? 0) >= 50}>{boot_non_recovery_pct === null ? '—' : `${boot_non_recovery_pct}%`}</div>
+          <div class="ver-label">Non-recovery rate</div>
+          <div class="ver-sub">never rendered any entry after a failed boot</div>
+        </div>
+        <div class="ver-stat">
+          <div class="ver-value" class:danger={boot_health.snapshot_expired_sessions > 0}>{format_number(boot_health.snapshot_expired_sessions)}</div>
+          <div class="ver-label">snapshot_expired</div>
+          <div class="ver-sub">cursor-vs-snapshot regression fingerprint</div>
+        </div>
+      </div>
+      {#if boot_points.length > 1}
+        <LineChart series={boot_points} area color="var(--danger)" height={140} y_format={format_number} tip_format={format_number} />
+      {/if}
+      <table class="src-table">
+        <thead><tr><th>Boot signal</th><th>Code</th><th>Sessions</th><th>Rows</th><th>Last seen</th></tr></thead>
+        <tbody>
+          {#each boot_health.by_message as row (`${row.message}|${row.code}`)}
+            <tr>
+              <td>{row.message}</td>
+              <td>{row.code ?? '—'}</td>
+              <td class:danger={row.sessions > 0}>{format_number(row.sessions)}</td>
+              <td>{format_number(row.count)}</td>
+              <td>{ago(row.last_seen)}</td>
             </tr>
           {/each}
         </tbody>

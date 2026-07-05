@@ -260,6 +260,25 @@ const analytics: LogAnalytics = {
       { key: 'sd.fish', sessions: 7, count: 14, locales: 'es,pt' },
     ],
   },
+  // A snapshot-cursor regression in progress: fresh viewers tripping snapshot_expired,
+  // most never recovering to a rendered entry (the 2026-07-04 P1 fingerprint).
+  boot_health: {
+    failed_sessions: 40,
+    recovered_sessions: 3,
+    non_recovery_pct: 0.925,
+    snapshot_expired_sessions: 34,
+    by_message: [
+      { message: 'initial dict sync failed', code: 'snapshot_expired', sessions: 40, count: 45, last_seen: new Date(Date.now() - 18 * 60_000).toISOString() },
+      { message: 'Failed to read dict bundle from wa-sqlite', code: 'MISUSE', sessions: 21, count: 23, last_seen: new Date(Date.now() - 22 * 60_000).toISOString() },
+      { message: 'leader_boot_failed', code: null, sessions: 5, count: 13, last_seen: new Date(Date.now() - 6 * 3600_000).toISOString() },
+      { message: '[orama-watcher] delta scan failed', code: null, sessions: 5, count: 5, last_seen: new Date(Date.now() - 90 * 60_000).toISOString() },
+    ],
+    daily: [
+      { day: '2026-07-02', sessions: 0 },
+      { day: '2026-07-03', sessions: 5 },
+      { day: '2026-07-04', sessions: 40 },
+    ],
+  },
 }
 
 export const Default: PageStory<typeof Component> = {
@@ -304,6 +323,7 @@ const empty_analytics: LogAnalytics = {
   leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [], failed_by_code: [], failed_current: 0, failed_stale: 0 },
   api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
   missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
+  boot_health: { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] },
 }
 
 export const Empty: PageStory<typeof Component> = {

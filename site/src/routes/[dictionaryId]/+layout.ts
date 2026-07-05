@@ -8,11 +8,13 @@ import type { TranslateFunction } from '$lib/i18n/types'
 import type { ReloadGuard } from '$lib/db/client/client-behind-recovery'
 import { CLIENT_BEHIND_GUARD_KEY, decide_client_behind_recovery } from '$lib/db/client/client-behind-recovery'
 import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
-import { dbOperations, DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
+import { dbOperations, DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/db-operations'
 import { url_from_storage_path } from '$lib/helpers/media'
 import { create_dict_live_db } from '$lib/db/dict-client/dict-live-db.svelte'
 import { DictSyncStatus } from '$lib/db/dict-client/dict-sync-status.svelte'
 import { open_dict } from '$lib/db/dict-client/dict-lifecycle'
+import { mark_snapshot_expired } from '$lib/db/dict-client/snapshot-expired-tracker'
+import { log_event } from '$lib/debug/remote-log'
 import { live_share } from '$lib/db/client/live-share.svelte'
 import { toast } from '$lib/state/toast.svelte'
 import { api_dictionaries_catalog } from '$api/dictionaries/[id]/catalog/_call'
@@ -88,7 +90,11 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
         // `tables_changed`, re-querying every store + the Orama feed). A
         // MemoryVFS fallback boot (pre-iOS-17) starts EMPTY and pull-since-null
         // is its only data source, so it still blocks to avoid an empty flash.
-        const initial_sync = conn.sync_now().catch(err => console.error('initial dict sync failed', err))
+        const initial_sync = conn.sync_now().catch(err => log_event({
+          level: 'error',
+          message: 'initial dict sync failed',
+          context: { dict_id: dictionary_id, code: (err as { code?: string })?.code ?? null, error: (err as Error)?.message ?? String(err) },
+        }))
         if (!conn.is_opfs_backed)
           await initial_sync
         cached = { connection: conn, dict_db: create_dict_live_db(conn, { user_id: auth_user.user?.id }), sync_status: new DictSyncStatus(conn) }
@@ -115,9 +121,14 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
             recover_from_schema_outdated({ t })
             return
           }
-          if (broadcast.type === 'snapshot_expired' && !snapshot_toasted) {
-            snapshot_toasted = true
-            toast(t('misc.local_data_expired'), { action: { label: t('misc.reload'), callback: () => location.reload() }, dismiss_label: t('misc.close') })
+          if (broadcast.type === 'snapshot_expired') {
+            // Proxy for "a reset is in flight" so a concurrent bundle read that
+            // hits SQLITE_MISUSE knows why (see entries-ui-store telemetry).
+            mark_snapshot_expired(dictionary_id)
+            if (!snapshot_toasted) {
+              snapshot_toasted = true
+              toast(t('misc.local_data_expired'), { action: { label: t('misc.reload'), callback: () => location.reload() }, dismiss_label: t('misc.close') })
+            }
           }
         })
 

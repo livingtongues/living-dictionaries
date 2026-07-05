@@ -1,6 +1,6 @@
 import type { Orthography } from '$lib/types'
-import type { EntryForCSV, translate_entries } from './prepareEntriesForCsv'
-import { get_example_sentence, get_glosses, get_image_files, get_noun_class, get_parts_of_speech, get_plural_form, get_semantic_domain, get_variant } from './getRows'
+import type { EntryForCSV, translate_entries } from './prepare-entries-for-csv'
+import { get_example_sentence, get_glosses, get_image_files, get_noun_class, get_parts_of_speech, get_plural_form, get_semantic_domain, get_variant } from './get-rows'
 
 export function get_orthography_headers(orthographies: Orthography[]) {
   const headers: EntryForCSV = {}

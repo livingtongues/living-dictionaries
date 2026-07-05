@@ -273,6 +273,8 @@ export interface LogAnalytics {
   api_v1: ApiV1Activity
   /** Top missing i18n keys — the live translation-gap worklist (hot window, human). */
   missing_i18n_keys: MissingI18nKeys
+  /** Fresh-viewer boot-cascade health — empty-dictionary regression detector (hot window, audience). */
+  boot_health: BootHealth
 }
 
 /**
@@ -291,6 +293,29 @@ export interface MissingI18nKeys {
   sessions: number
   /** Top keys by distinct sessions (then row count). */
   keys: { key: string, sessions: number, count: number, locales: string }[]
+}
+
+/**
+ * Fresh-viewer boot health — the dict.db boot-cascade family
+ * (`initial dict sync failed` / `Failed to read dict bundle` / `leader_boot_failed`
+ * / `[orama-watcher] delta scan failed`). A spike here — especially
+ * `snapshot_expired` — is the fingerprint of a snapshot-cursor regression that
+ * leaves fresh public visitors on an empty dictionary (the 2026-07-04 P1 that
+ * went 10h undetected because nothing surfaced it). Hot window, audience-filtered.
+ */
+export interface BootHealth {
+  /** Distinct sessions that hit any boot-cascade error in the window. */
+  failed_sessions: number
+  /** Of those, sessions that went on to log `entry_opened` (recovered to real content). */
+  recovered_sessions: number
+  /** Share of failed sessions that never recovered, 0–1 (null when none failed). */
+  non_recovery_pct: number | null
+  /** Failed sessions whose cause was a `snapshot_expired` cursor gap — the regression fingerprint. */
+  snapshot_expired_sessions: number
+  /** Per boot-cascade signature: message (+ decoded code for the sync/bundle rows), reach, recency. */
+  by_message: { message: string, code: string | null, sessions: number, count: number, last_seen: string }[]
+  /** Daily distinct failed sessions — the trend line. */
+  daily: { day: string, sessions: number }[]
 }
 
 /**
@@ -438,6 +463,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   const leader_health = build_leader_health({ shared_db, window_start_iso, current_app_version })
   const api_v1 = build_api_v1_activity({ shared_db, window_start_iso })
   const missing_i18n_keys = build_missing_i18n_keys({ shared_db, window_start_iso, audience_filter })
+  const boot_health = build_boot_health({ shared_db, window_start_iso, audience_filter })
 
   return {
     audience,
@@ -468,6 +494,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     leader_health,
     api_v1,
     missing_i18n_keys,
+    boot_health,
   }
 }
 
@@ -854,6 +881,54 @@ function build_missing_i18n_keys({ shared_db, window_start_iso, audience_filter 
     LIMIT 25
   `).all(window_start_iso) as { key: string, count: number, sessions: number, locales: string }[]
   return { total: summary.total, distinct_keys: summary.distinct_keys, sessions: summary.sessions, keys }
+}
+
+/** The dict.db boot-cascade family — a failed fresh-viewer open surfaces as one or more of these. */
+const BOOT_CASCADE_MESSAGES_SQL = `('initial dict sync failed', 'Failed to read dict bundle from wa-sqlite', 'leader_boot_failed', '[orama-watcher] delta scan failed')`
+function build_boot_health({ shared_db, window_start_iso, audience_filter }: { shared_db: Database.Database, window_start_iso: string, audience_filter: string }): BootHealth {
+  const sid = `json_extract(context, '$.session_id')`
+  const where = `received_at >= ? AND message IN ${BOOT_CASCADE_MESSAGES_SQL} AND ${audience_filter}`
+
+  const summary = shared_db.prepare(`
+    SELECT COUNT(DISTINCT ${sid}) failed_sessions,
+           COUNT(DISTINCT CASE WHEN instr(coalesce(context, ''), 'snapshot_expired') > 0 THEN ${sid} END) snapshot_expired_sessions
+    FROM client_logs WHERE ${where}
+  `).get(window_start_iso) as { failed_sessions: number, snapshot_expired_sessions: number }
+
+  // Recovered = a failed session that later logged `entry_opened` (real content rendered).
+  const recovered_sessions = (shared_db.prepare(`
+    SELECT COUNT(DISTINCT ${sid}) n FROM client_logs
+    WHERE received_at >= ? AND message = 'entry_opened' AND ${audience_filter}
+      AND ${sid} IN (SELECT DISTINCT ${sid} FROM client_logs WHERE ${where})
+  `).get(window_start_iso, window_start_iso) as { n: number }).n
+
+  const by_message = shared_db.prepare(`
+    SELECT message,
+           CASE WHEN message IN ('initial dict sync failed', 'Failed to read dict bundle from wa-sqlite')
+                THEN coalesce(json_extract(context, '$.code'), json_extract(context, '$.sqlite_code_name'))
+                ELSE NULL END code,
+           COUNT(DISTINCT ${sid}) sessions,
+           COUNT(*) count,
+           MAX(received_at) last_seen
+    FROM client_logs WHERE ${where}
+    GROUP BY message, code
+    ORDER BY sessions DESC, count DESC
+  `).all(window_start_iso) as { message: string, code: string | null, sessions: number, count: number, last_seen: string }[]
+
+  const daily = shared_db.prepare(`
+    SELECT substr(received_at, 1, 10) day, COUNT(DISTINCT ${sid}) sessions
+    FROM client_logs WHERE ${where}
+    GROUP BY day ORDER BY day
+  `).all(window_start_iso) as { day: string, sessions: number }[]
+
+  return {
+    failed_sessions: summary.failed_sessions,
+    recovered_sessions,
+    non_recovery_pct: summary.failed_sessions ? (summary.failed_sessions - recovered_sessions) / summary.failed_sessions : null,
+    snapshot_expired_sessions: summary.snapshot_expired_sessions,
+    by_message,
+    daily,
+  }
 }
 
 /**

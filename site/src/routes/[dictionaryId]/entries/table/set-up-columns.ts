@@ -1,6 +1,6 @@
 import type { IColumn, Tables } from '$lib/types'
 import { page } from '$app/state'
-import { vernacularName } from '$lib/helpers/vernacularName'
+import { vernacularName } from '$lib/helpers/vernacular-name'
 import { get_orthographies } from '$lib/helpers/orthographies'
 import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
 import { browser } from '$app/environment'

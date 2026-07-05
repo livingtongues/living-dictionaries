@@ -8,6 +8,7 @@ import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { r2_dict_snapshot_key, R2_SNAPSHOT_INTERVAL_MS, SNAPSHOT_EXPIRED_DAYS } from '$lib/constants'
 import { get_r2_snapshot_client } from '$lib/r2/snapshot-client'
 import { get_dictionary_db } from './dictionary-db'
+import { reconcile_dictionary_catalog } from './reconcile-dictionaries'
 import { get_shared_db } from './shared-db'
 
 /**
@@ -56,8 +57,22 @@ export function start_r2_snapshot_builder() {
     in_flight: false,
   }
   slot[SINGLETON_KEY] = state
-  // Kick off an immediate first pass so we don't wait 30 min after boot.
-  void run_once(state)
+  // Heal catalog drift before the first sweep: recount `entry_count` and bump
+  // `updated_at` for any dict whose live cursor ran ahead of the catalog mirror
+  // (a metadata-only write like the featured-stars sweep). That flags them dirty
+  // so the immediate first pass re-snapshots them — otherwise fresh viewers keep
+  // tripping snapshot_expired. Off the synchronous boot path (best-effort).
+  void (async () => {
+    try {
+      const result = reconcile_dictionary_catalog({})
+      if (result.entry_count_fixed || result.cursor_bumped)
+        console.info(`[r2-snapshot-builder] reconcile: ${result.entry_count_fixed} entry_count fixed, ${result.cursor_bumped} cursors bumped (of ${result.checked}).`)
+    } catch (err) {
+      console.error('[r2-snapshot-builder] reconcile failed:', err)
+    }
+    // Kick off an immediate first pass so we don't wait 30 min after boot.
+    await run_once(state)
+  })()
   console.info(`[r2-snapshot-builder] Started — sweeping every ${R2_SNAPSHOT_INTERVAL_MS / 60_000} min.`)
 }
 

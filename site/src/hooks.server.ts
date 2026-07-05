@@ -103,12 +103,23 @@ function parse_byte_size(raw: string | undefined): number | null {
  * Returns the safe shape SvelteKit shows the client; never throws (the logger
  * swallows its own errors).
  */
+/** Pre-refactor route prefixes that stale cached clients still poll → 404 noise, never logged. */
+const STALE_CLIENT_404_PREFIXES = ['/api/admin/chat/']
+export function is_stale_client_404(pathname: string): boolean {
+  return STALE_CLIENT_404_PREFIXES.some(prefix => pathname.startsWith(prefix))
+}
+
 export const handleError: HandleServerError = ({ error, event, status, message }) => {
   // A client that disconnects mid-request surfaces here as a Node HTTP
   // `abortIncoming` error (`message === 'aborted'`) at status 500 — a benign
   // socket close, NOT a server crash. Keep it at `info` so it stays visible for
   // debugging without inflating the crash count.
   const is_client_abort = error instanceof Error && error.message === 'aborted'
+  // Stale cached clients keep polling routes that were renamed/removed (chat
+  // moved to `/api/chat/*`); their 404s are pure noise, not a live fault —
+  // drop them so they don't look like a 404 storm (2026-07-04 review, ~380/day).
+  if (status === 404 && is_stale_client_404(event.url.pathname))
+    return { message }
   // 4xx (expected: missing route, auth gate) are not crashes; 5xx are.
   const level = is_client_abort ? 'info' : status >= 500 ? 'crash' : status === 404 ? 'info' : 'warn'
   log_server_event({

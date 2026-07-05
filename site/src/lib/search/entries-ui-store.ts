@@ -7,6 +7,9 @@ import { init_entries, search_entries } from '$lib/search'
 import { read_dict_bundle } from '$lib/search/read-dict-bundle'
 import { create_orama_watcher } from '$lib/search/orama-watcher'
 import type { OramaWatcher } from '$lib/search/orama-watcher'
+import { decode_sqlite_code, is_transient_connection_error, sqlite_code_of } from '$lib/db/client/sqlite-result-codes'
+import { snapshot_expired_recently } from '$lib/db/dict-client/snapshot-expired-tracker'
+import { log_event } from '$lib/debug/remote-log'
 import { browser } from '$app/environment'
 
 interface OramaWatcherGlobals {
@@ -78,48 +81,70 @@ export function create_entries_ui_store({
   const is_editor = get(can_edit)
   const is_admin = get(admin)
 
-  if (browser && connection) {
-    read_dict_bundle({ connection })
-      .then(async (bundle) => {
-        await init_entries({
-          dictionary_id,
-          can_edit: is_editor,
-          admin: is_admin,
-          bundle,
-          set_entries_data,
-          upsert_entry_data,
-          delete_entry,
-          set_speakers,
-          set_tags,
-          set_dialects,
-          set_sources,
-          set_loading,
-          mark_search_index_updated,
-        })
+  if (browser && connection)
+    void load_bundle_with_retry(connection)
 
-        // P4b: start the watch-based Orama feed once the bulk index is built.
-        // Watermark = newest row already indexed; the watcher reindexes only
-        // rows that change after it (local edits + remote pulls). init_entries
-        // re-runs per navigation, so stop+replace any prior watcher for this
-        // dict to avoid stacked subscribers.
-        if (dict_db) {
-          let watermark = ''
-          for (const rows of Object.values(bundle)) {
-            for (const row of rows) {
-              const updated_at = String((row as { updated_at?: unknown }).updated_at ?? '')
-              if (updated_at > watermark) watermark = updated_at
-            }
+  async function load_bundle_with_retry(conn: DictConnection, attempt = 0): Promise<void> {
+    try {
+      const bundle = await read_dict_bundle({ connection: conn })
+      await init_entries({
+        dictionary_id,
+        can_edit: is_editor,
+        admin: is_admin,
+        bundle,
+        set_entries_data,
+        upsert_entry_data,
+        delete_entry,
+        set_speakers,
+        set_tags,
+        set_dialects,
+        set_sources,
+        set_loading,
+        mark_search_index_updated,
+      })
+
+      // P4b: start the watch-based Orama feed once the bulk index is built.
+      // Watermark = newest row already indexed; the watcher reindexes only
+      // rows that change after it (local edits + remote pulls). init_entries
+      // re-runs per navigation, so stop+replace any prior watcher for this
+      // dict to avoid stacked subscribers.
+      if (dict_db) {
+        let watermark = ''
+        for (const rows of Object.values(bundle)) {
+          for (const row of rows) {
+            const updated_at = String((row as { updated_at?: unknown }).updated_at ?? '')
+            if (updated_at > watermark) watermark = updated_at
           }
-          const globals = globalThis as OramaWatcherGlobals
-          globals.__ld_orama_watchers ??= {}
-          globals.__ld_orama_watchers[dictionary_id]?.stop()
-          globals.__ld_orama_watchers[dictionary_id] = create_orama_watcher({ connection, dict_db, initial_watermark: watermark })
         }
+        const globals = globalThis as OramaWatcherGlobals
+        globals.__ld_orama_watchers ??= {}
+        globals.__ld_orama_watchers[dictionary_id]?.stop()
+        globals.__ld_orama_watchers[dictionary_id] = create_orama_watcher({ connection: conn, dict_db, initial_watermark: watermark })
+      }
+    } catch (err) {
+      // Retry ONCE on a torn-down-connection error: a concurrent
+      // snapshot_expired reset closes the leader's OPFS connection mid-query
+      // (SQLITE_MISUSE code 21), which would otherwise leave an EMPTY entry
+      // list even though the snapshot holds every row (2026-07-04 P1). The
+      // reset reopens in place, so a short retry lands on a live connection.
+      if (attempt === 0 && is_transient_connection_error(err)) {
+        await new Promise(resolve => setTimeout(resolve, 300))
+        return load_bundle_with_retry(conn, attempt + 1)
+      }
+      const code = sqlite_code_of(err)
+      log_event({
+        level: 'error',
+        message: 'Failed to read dict bundle from wa-sqlite',
+        context: {
+          dict_id: dictionary_id,
+          sqlite_code: code,
+          sqlite_code_name: decode_sqlite_code(code),
+          snapshot_expired_recently: snapshot_expired_recently(dictionary_id),
+          retried: attempt > 0,
+        },
       })
-      .catch((err) => {
-        console.error('Failed to read dict bundle from wa-sqlite', err)
-        set_loading(false)
-      })
+      set_loading(false)
+    }
   }
 
   return {

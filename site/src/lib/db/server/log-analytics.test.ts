@@ -63,6 +63,28 @@ describe(get_log_analytics, () => {
     expect(analytics.totals.unique_users).toBe(2)
   })
 
+  test('boot_health clusters the fresh-viewer boot cascade + computes non-recovery', () => {
+    // Session A: failed boot (snapshot_expired) that NEVER opened an entry.
+    add_log({ day: '2026-06-30', level: 'error', message: 'initial dict sync failed', context: { session_id: 'a', code: 'snapshot_expired', dict_id: 'apatani' } })
+    add_log({ day: '2026-06-30', level: 'error', message: 'Failed to read dict bundle from wa-sqlite', context: { session_id: 'a', sqlite_code_name: 'MISUSE', dict_id: 'apatani' } })
+    // Session B: failed boot then recovered (rendered an entry).
+    add_log({ day: '2026-06-30', level: 'error', message: 'initial dict sync failed', context: { session_id: 'b', code: 'snapshot_expired' } })
+    add_log({ day: '2026-06-30', level: 'info', message: 'entry_opened', context: { session_id: 'b' } })
+    // A non-boot error must NOT be counted.
+    add_log({ day: '2026-06-30', level: 'error', message: 'boom', context: { session_id: 'c' } })
+
+    const { boot_health } = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    expect(boot_health.failed_sessions).toBe(2)
+    expect(boot_health.recovered_sessions).toBe(1)
+    expect(boot_health.non_recovery_pct).toBe(0.5)
+    expect(boot_health.snapshot_expired_sessions).toBe(2)
+    const sync_row = boot_health.by_message.find(row => row.message === 'initial dict sync failed')
+    expect(sync_row?.code).toBe('snapshot_expired')
+    expect(sync_row?.sessions).toBe(2)
+    const bundle_row = boot_health.by_message.find(row => row.message === 'Failed to read dict bundle from wa-sqlite')
+    expect(bundle_row?.code).toBe('MISUSE')
+  })
+
   test('daily real_errors folds out known-noise + expected-response rows, raw errors keeps them', () => {
     add_log({ day: '2026-06-30', level: 'error', message: 'boom', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', level: 'error', message: 'Failed to fetch dynamically imported module: /_app/x.js', context: { session_id: 's1' } })
@@ -490,6 +512,14 @@ describe(get_log_analytics, () => {
             "total": 0,
           },
           "audience": "humans",
+          "boot_health": {
+            "by_message": [],
+            "daily": [],
+            "failed_sessions": 0,
+            "non_recovery_pct": null,
+            "recovered_sessions": 0,
+            "snapshot_expired_sessions": 0,
+          },
           "by_source": [
             {
               "errors": 16,

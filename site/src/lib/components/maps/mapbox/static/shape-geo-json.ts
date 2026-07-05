@@ -1,6 +1,6 @@
 import type { IPoint, IRegion } from '$lib/types'
 import type { Feature, FeatureCollection, Point, Polygon } from 'geojson'
-import { sortPoints } from '../../utils/polygonFromCoordinates'
+import { sortPoints } from '../../utils/polygon-from-coordinates'
 // http://geojson.io/ to create GeoJSON easily
 
 export function convertPointsIntoRegion(

@@ -43,6 +43,23 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   folded into `KNOWN_NOISE_PATTERNS`.
 
 ## Open proposals
+- **★ Fresh-viewer boot-health strip** *(filed 2026-07-04 run 2 — grounded in a live P1).* Today a
+  snapshot-cursor regression (the featured-entries sweep advanced every dict's sync cursor 14 months
+  past its snapshot cursor → `snapshot_expired` for all fresh viewers → empty dictionaries; ~40
+  sessions, ~90% non-recovery) was **invisible on the dashboard** and only surfaced via manual VPS
+  spelunking at 22:40. Add a panel aggregating the boot-cascade family (`initial dict sync failed`
+  split by `context.extras` code — esp. `snapshot_expired` — plus `Failed to read dict bundle`,
+  `leader_boot_failed`, `[orama-watcher] delta scan failed`) by day + distinct sessions, with a
+  **first-open non-recovery rate** (booted-then-never-`entry_opened`). A `snapshot_expired` spike is
+  the exact fingerprint of a cursor/snapshot mismatch — this would have flagged it at 12:22 instead of
+  10 hours later. Cheap — mirror the `error_clusters` query. See
+  `.issues/snapshot-cursor-ahead-of-snapshot-2026-07-04.md`.
+- **Synthetic uptime + latency panel** *(ported from house · 2026-07-04).* house shipped an
+  `/admin/health` availability % + fixed-vantage server TTFB p50/p95 panel from external `uptime_probe`
+  server rows — a clean SLO signal without the device/geo confounding of client CWV. **LD has no
+  external uptime monitor**, so this is two-part: (a) stand up a probe POSTing `uptime_probe` server
+  rows, (b) chart availability + TTFB/total p50/p95 daily (LineChart from `$lib/charts`). Higher value
+  now that LD serves the apex with real global traffic. Ref: house `log-analytics.ts` + `health/+page.svelte`.
 - **★ Geo-split Core Web Vitals (TTFB/LCP by region or distance-to-origin bucket)** *(filed 2026-06-30 —
   grounded in a real geo tax).* The shipped CWV panel aggregates p50/p75/p95 per metric across **all**
   geos, hiding that on 06-30 **64/65 sessions were Malaysia → Boston origin**, paying ~997ms page-load

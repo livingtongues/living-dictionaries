@@ -50,15 +50,23 @@
 
   // Featured-entry star (editor+): a `featured_entries` row = starred. Rows sync
   // like any other dict content and feed the dictionary home's featured strip.
-  // (This bare-rows read is the pattern that exposed the lazily-created-store
-  // freeze — fixed via construct_outside_reaction in dict-live-db; see
-  // .issues/dict-table-accessor-rows-reactivity.md.)
-  const star_row = $derived(dict_db?.featured_entries.rows.find(row => row.entry_id === entry.id))
+  // The live `.rows` accessor spins up a tracking `$effect` on read, so it MUST
+  // be read inside an effect — NOT a `$derived`. A `$derived` here recomputed on
+  // every entry edit (it depends on the live `entry`), churning fresh effects
+  // each keystroke → `effect_update_depth_exceeded` (2026-07-04 review). Reading
+  // in an `$effect` and exposing a plain `$state` id keeps the accessor in its
+  // designed context. (This is also the bare-rows read that exposed the
+  // lazily-created-store freeze — see .issues/dict-table-accessor-rows-reactivity.md.)
+  let star_row_id = $state<string | undefined>(undefined)
+  $effect(() => {
+    const entry_id = entry.id
+    star_row_id = dict_db?.featured_entries.rows.find(row => row.entry_id === entry_id)?.id
+  })
   async function toggle_star() {
     if (!dict_db)
       return
-    if (star_row) {
-      await dict_db.featured_entries.delete(star_row.id)
+    if (star_row_id) {
+      await dict_db.featured_entries.delete(star_row_id)
       return
     }
     const [last] = await dict_db.featured_entries.query({ order_by: 'sort_key DESC', limit: 1 }).snapshot()
@@ -116,11 +124,11 @@
       <button
         type="button"
         class="btn-ghost entry-star-button"
-        class:starred={!!star_row}
-        title={page.data.t(star_row ? 'dict_home.unfeature_entry' : 'dict_home.feature_entry')}
-        aria-label={page.data.t(star_row ? 'dict_home.unfeature_entry' : 'dict_home.feature_entry')}
+        class:starred={!!star_row_id}
+        title={page.data.t(star_row_id ? 'dict_home.unfeature_entry' : 'dict_home.feature_entry')}
+        aria-label={page.data.t(star_row_id ? 'dict_home.unfeature_entry' : 'dict_home.feature_entry')}
         onclick={toggle_star}>
-        {#if star_row}<IconMdiStar />{:else}<IconMdiStarOutline />{/if}
+        {#if star_row_id}<IconMdiStar />{:else}<IconMdiStarOutline />{/if}
       </button>
     {/if}
     {#if is_editor_or_above}
