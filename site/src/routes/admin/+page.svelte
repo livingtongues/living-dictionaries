@@ -11,6 +11,7 @@
   import IconMdiCloudSync from '~icons/mdi/cloud-sync'
   import IconMdiContentCopy from '~icons/mdi/content-copy'
   import IconMdiForumOutline from '~icons/mdi/forum-outline'
+  import IconMdiHeartPulse from '~icons/mdi/heart-pulse'
   import IconMdiImageMultipleOutline from '~icons/mdi/image-multiple-outline'
   import IconMdiMessageTextOutline from '~icons/mdi/message-text-outline'
   import IconMdiMonitor from '~icons/mdi/monitor'
@@ -59,7 +60,8 @@
     { href: '/translate', title: 'Translations', body: 'DB-backed interface translations — per-language progress, review flags on AI or changed-English values, and a button to email translators their pending work.', cta: 'Open dashboard', icon: IconMdiTranslate, accent: 'var(--warning)' },
     { href: '/admin/dictionaries', title: 'Dictionaries', body: 'Every dictionary on the platform — visibility, entry counts, partners, and per-dictionary roles.', cta: 'Browse', icon: IconMdiBookOpenPageVariantOutline, accent: 'var(--success)' },
     { href: '/admin/featured-words', title: 'Featured', body: 'Curate the homepage featured-word rotation — pick entries, preview cards, and reorder.', cta: 'Open', icon: IconMdiImageMultipleOutline, accent: 'var(--success)' },
-    { href: '/admin/analytics', title: 'Analytics', body: 'Session & navigation activity, top routes and events, and recent client / server errors from the logs.', cta: 'Open', icon: IconMdiChartLine, accent: 'var(--primary)', min_level: 3 },
+    { href: '/admin/analytics', title: 'Analytics', body: 'Usage — session & navigation activity, top routes and events, geography, agent-API volume, and browser/device mix.', cta: 'Open', icon: IconMdiChartLine, accent: 'var(--primary)', min_level: 3 },
+    { href: '/admin/health', title: 'Site health', body: 'Diagnostics — error clusters & rate, server faults, boot health, build/leader-worker health, performance, synthetic uptime, and web vitals.', cta: 'Open', icon: IconMdiHeartPulse, accent: 'var(--danger)', min_level: 3 },
     { href: '/admin/schema', title: 'Schema', body: 'Browse the wa-sqlite + server schema — tables, columns, foreign keys, and the relationship graph.', cta: 'Open', icon: IconMdiTableCog, accent: 'var(--success)', min_level: 3 },
     { href: '/admin/sync', title: 'Sync', body: 'Live sync-engine dashboard — cursors, watermarks, dirty rows, and per-table push / pull history.', cta: 'Open', icon: IconMdiCloudSync, accent: 'var(--warning)' },
     { href: '/admin/api-docs', title: 'Agent API', body: 'A human-readable view of the live /api/v1/openapi.json spec — exactly what agents read to self-configure their reads & writes.', cta: 'Open', icon: IconMdiRobotOutline, accent: 'var(--primary)' },

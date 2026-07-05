@@ -16,6 +16,7 @@
   import IconMdiCloudSync from '~icons/mdi/cloud-sync'
   import IconMdiFilterVariant from '~icons/mdi/filter-variant'
   import IconMdiForumOutline from '~icons/mdi/forum-outline'
+  import IconMdiHeartPulse from '~icons/mdi/heart-pulse'
   import IconMdiImageMultipleOutline from '~icons/mdi/image-multiple-outline'
   import IconMdiMessageTextOutline from '~icons/mdi/message-text-outline'
   import IconMdiRobotOutline from '~icons/mdi/robot-outline'
@@ -41,6 +42,7 @@
     // hide on mobile, where every link is icon-only anyway). Analytics + Schema
     // are Super Admin only (level 3) — raw log/db internals.
     { href: '/admin/analytics', label: 'Analytics', icon: IconMdiChartLine, compact: true, min_level: 3 },
+    { href: '/admin/health', label: 'Health', icon: IconMdiHeartPulse, compact: true, min_level: 3 },
     { href: '/admin/schema', label: 'Schema', icon: IconMdiTableCog, compact: true, min_level: 3 },
     { href: '/admin/api-docs', label: 'API', icon: IconMdiApi, compact: true },
     { href: '/admin/triage-examples', label: 'Triage', icon: IconMdiRobotOutline, compact: true },

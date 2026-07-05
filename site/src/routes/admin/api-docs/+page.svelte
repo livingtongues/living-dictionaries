@@ -175,7 +175,6 @@
     font-size: 0.875rem;
     color: var(--color-secondary);
     margin-top: 0.25rem;
-    max-width: 52ch;
   }
   .subtitle code,
   .auth-note code {

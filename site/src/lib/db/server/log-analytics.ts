@@ -275,6 +275,29 @@ export interface LogAnalytics {
   missing_i18n_keys: MissingI18nKeys
   /** Fresh-viewer boot-cascade health — empty-dictionary regression detector (hot window, audience). */
   boot_health: BootHealth
+  /** Synthetic external uptime + latency (`uptime_probe`, hot window only). */
+  uptime: UptimeSummary
+}
+
+/** One day of synthetic-probe availability + latency (hot window). */
+export interface UptimeDailyPoint { day: string, probes: number, up: number, ttfb_p50: number | null, ttfb_p95: number | null }
+/**
+ * Synthetic external uptime + latency, from the `uptime_probe` server-log family
+ * (an off-box monitor hits the site every ~5 min and POSTs `{ status, ok, ttfb_ms,
+ * total_ms, vantage }`). A fixed-vantage signal with NONE of the device/geo noise
+ * of the client web-vital TTFB. CAVEAT: a probe can only record when `/api/log`
+ * (same origin) is reachable, so `availability` is the ok-rate of *recorded*
+ * probes — a full outage self-suppresses; the latency trend is the primary value.
+ */
+export interface UptimeSummary {
+  probes: number
+  /** Fraction of probes with `context.ok` truthy (0–1); null when no probe carried an `ok` field. */
+  availability: number | null
+  ttfb: { p50: number | null, p95: number | null }
+  total: { p50: number | null, p95: number | null }
+  /** Distinct `context.vantage` labels seen (probe origins). */
+  vantages: string[]
+  daily: UptimeDailyPoint[]
 }
 
 /**
@@ -464,6 +487,7 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
   const api_v1 = build_api_v1_activity({ shared_db, window_start_iso })
   const missing_i18n_keys = build_missing_i18n_keys({ shared_db, window_start_iso, audience_filter })
   const boot_health = build_boot_health({ shared_db, window_start_iso, audience_filter })
+  const uptime = build_uptime({ shared_db, window_start_iso })
 
   return {
     audience,
@@ -495,6 +519,77 @@ export function get_log_analytics({ shared_db = get_shared_db(), days = 30, now 
     api_v1,
     missing_i18n_keys,
     boot_health,
+    uptime,
+  }
+}
+
+/**
+ * Synthetic uptime + latency from the `uptime_probe` server-log family (hot window).
+ * Server rows carry no user_agent, so this is audience-independent — always shown.
+ * The mustang off-box prober POSTs `{ status, ok, ttfb_ms, total_ms, vantage }` to
+ * `/api/log` (trusted `X-Log-Source-Secret` path → `source='server'`) every few min.
+ */
+function build_uptime({ shared_db, window_start_iso }: { shared_db: Database.Database, window_start_iso: string }): UptimeSummary {
+  const rows = shared_db.prepare(`
+    SELECT substr(received_at, 1, 10)               day,
+           json_extract(context, '$.ttfb_ms')       ttfb_ms,
+           json_extract(context, '$.total_ms')      total_ms,
+           json_extract(context, '$.ok')            ok,
+           json_extract(context, '$.status')        status,
+           json_extract(context, '$.vantage')       vantage
+    FROM client_logs
+    WHERE received_at >= ? AND source = 'server' AND message = 'uptime_probe'
+    ORDER BY received_at
+  `).all(window_start_iso) as { day: string, ttfb_ms: number | null, total_ms: number | null, ok: number | null, status: number | null, vantage: string | null }[]
+
+  const ttfb_values: number[] = []
+  const total_values: number[] = []
+  const vantages = new Set<string>()
+  // Availability is the ok-rate over probes that carried an `ok` field; a probe is
+  // "up" when `ok` is truthy, or (when `ok` is absent) when `status` is 2xx.
+  let ok_denominator = 0
+  let up = 0
+  const by_day = new Map<string, { probes: number, up: number, ttfb: number[] }>()
+  for (const row of rows) {
+    if (typeof row.ttfb_ms === 'number')
+      ttfb_values.push(row.ttfb_ms)
+    if (typeof row.total_ms === 'number')
+      total_values.push(row.total_ms)
+    if (row.vantage)
+      vantages.add(row.vantage)
+    const has_ok_signal = row.ok !== null || row.status !== null
+    const is_up = row.ok === 1 || (row.ok === null && row.status !== null && row.status >= 200 && row.status < 300)
+    if (has_ok_signal) {
+      ok_denominator++
+      if (is_up)
+        up++
+    }
+    const bucket = by_day.get(row.day) ?? { probes: 0, up: 0, ttfb: [] }
+    bucket.probes++
+    if (is_up)
+      bucket.up++
+    if (typeof row.ttfb_ms === 'number')
+      bucket.ttfb.push(row.ttfb_ms)
+    by_day.set(row.day, bucket)
+  }
+
+  const daily: UptimeDailyPoint[] = [...by_day.entries()]
+    .sort(([first], [second]) => first.localeCompare(second))
+    .map(([day, bucket]) => ({
+      day,
+      probes: bucket.probes,
+      up: bucket.up,
+      ttfb_p50: percentile(bucket.ttfb, 50),
+      ttfb_p95: percentile(bucket.ttfb, 95),
+    }))
+
+  return {
+    probes: rows.length,
+    availability: ok_denominator > 0 ? up / ok_denominator : null,
+    ttfb: { p50: percentile(ttfb_values, 50), p95: percentile(ttfb_values, 95) },
+    total: { p50: percentile(total_values, 50), p95: percentile(total_values, 95) },
+    vantages: [...vantages].sort(),
+    daily,
   }
 }
 

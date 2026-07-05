@@ -39,6 +39,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
     missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
     boot_health: { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] },
+    uptime: { probes: 0, availability: null, ttfb: { p50: null, p95: null }, total: { p50: null, p95: null }, vantages: [], daily: [] },
     ...overrides,
   }
 }

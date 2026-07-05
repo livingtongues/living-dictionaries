@@ -15,7 +15,6 @@ easy to override.
 
 .tw-prose {
   color: var(--color);
-  max-width: 65ch;
   font-size: 1rem;
   line-height: 1.75;
   /* Long unbroken tokens (URLs, agglutinative words common in these languages)

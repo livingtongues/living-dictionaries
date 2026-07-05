@@ -161,7 +161,6 @@
   .subtitle {
     color: var(--color-secondary);
     font-size: 0.875rem;
-    max-width: 46rem;
     margin: 0 0 1rem;
   }
 

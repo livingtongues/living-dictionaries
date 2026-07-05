@@ -85,6 +85,20 @@ describe(get_log_analytics, () => {
     expect(bundle_row?.code).toBe('MISUSE')
   })
 
+  test('builds synthetic uptime + latency from uptime_probe server rows', () => {
+    add_log({ day: '2026-06-30', message: 'uptime_probe', source: 'server', context: { ok: true, status: 200, ttfb_ms: 300, total_ms: 500, vantage: 'mustang-my' } })
+    add_log({ day: '2026-06-30', message: 'uptime_probe', source: 'server', context: { ok: true, status: 200, ttfb_ms: 400, total_ms: 700, vantage: 'mustang-my' } })
+    add_log({ day: '2026-06-29', message: 'uptime_probe', source: 'server', context: { ok: false, status: 503, ttfb_ms: 200, total_ms: 300, vantage: 'mustang-my' } })
+
+    const { uptime } = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    expect(uptime.probes).toBe(3)
+    expect(uptime.availability).toBeCloseTo(2 / 3) // 2 ok of 3 probes carrying an ok signal
+    expect(uptime.ttfb.p50).toBe(300)
+    expect(uptime.total.p50).toBe(500)
+    expect(uptime.vantages).toEqual(['mustang-my'])
+    expect(uptime.daily).toHaveLength(2)
+  })
+
   test('daily real_errors folds out known-noise + expected-response rows, raw errors keeps them', () => {
     add_log({ day: '2026-06-30', level: 'error', message: 'boom', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', level: 'error', message: 'Failed to fetch dynamically imported module: /_app/x.js', context: { session_id: 's1' } })
@@ -1324,6 +1338,20 @@ describe(get_log_analytics, () => {
             "sessions": 10,
             "stale_errors": 2,
             "unique_users": 3,
+          },
+          "uptime": {
+            "availability": null,
+            "daily": [],
+            "probes": 0,
+            "total": {
+              "p50": null,
+              "p95": null,
+            },
+            "ttfb": {
+              "p50": null,
+              "p95": null,
+            },
+            "vantages": [],
           },
           "web_vitals": [
             {

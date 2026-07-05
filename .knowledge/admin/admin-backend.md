@@ -87,3 +87,19 @@ the set-name endpoint is `/api/admin/users/[id]/name` (LD's nested convention) v
   `false` on background polls so a transient redeploy network blip doesn't spam the console.
 - Ported pure utils from house: `lib/utils/text-to-html.ts`, `lib/utils/linkify-html.ts`,
   `lib/r2/get-attachment.ts`.
+
+## Admin telemetry split — usage vs health (2026-07-05, mirrors tutor/house)
+`/admin/analytics` (**usage**) and `/admin/health` (**diagnostics**) are two pages that fetch the
+**same** `/api/admin/analytics` endpoint (same `LogAnalytics`) via the same `$api/admin/analytics/_call`
+— each just renders a subset of panels + cross-links to the other. Shared format helpers/palettes live
+in `$lib/analytics/dashboard-format.ts`; the story fixture in `$lib/analytics/mock-analytics.ts`
+(imported by both `_page.stories.ts`). When adding a panel, decide which page it belongs to; the
+server computation stays one function (`get_log_analytics` in `lib/db/server/log-analytics.ts`).
+
+The **Synthetic uptime** panel (health page) is fed by `build_uptime` reading the `uptime_probe`
+server-log family — rows POSTed by an **off-box prober on mustang** (configured in the `vps-setup`
+repo, target `livingdictionaries.app`), NOT by anything in this repo. The ingestion path already
+exists: `/api/log` treats a valid `X-Log-Source-Secret` (= `UPTIME_PROBE_SECRET`) as trusted
+`source='server'`, and `uptime_probe` is in `log-analytics.ts`'s `INFRA_EVENTS`. Until the prober's
+secret is provisioned in prod env the panel just reads "No synthetic probe data" — the code is inert,
+not broken.

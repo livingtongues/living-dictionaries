@@ -287,7 +287,6 @@
     font-size: 0.875rem;
     color: var(--color-secondary);
     margin-bottom: 1.5rem;
-    max-width: 65ch;
   }
   .muted {
     color: var(--color-secondary);
