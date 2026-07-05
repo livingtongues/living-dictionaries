@@ -1,7 +1,7 @@
 <script lang="ts">
   import IconMdiCheck from '~icons/mdi/check'
   import DownloadMedia from './DownloadMedia.svelte'
-  import { formatCsvEntries, getCsvHeaders, translate_entries } from './prepareEntriesForCsv'
+  import { formatCsvEntries, getCsvHeaders, translate_entries } from './prepare-entries-for-csv'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'

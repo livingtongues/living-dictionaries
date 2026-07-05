@@ -1,4 +1,4 @@
-import { downloadBlob } from './downloadBlob'
+import { downloadBlob } from './download-blob'
 
 export function downloadObjectsAsCSV(headers: Record<string, any>, items: Record<string, any>[], title: string) {
   const csv = objectsToCsvByHeaders(headers, items)

@@ -5,10 +5,10 @@ import {
   get_image_files,
   get_parts_of_speech,
   get_semantic_domain,
-} from './getRows'
+} from './get-rows'
 
-import { get_orthography_headers } from './assignHeadersForCsv'
-import { format_orthographies } from './assignFormattedEntryValuesForCsv'
+import { get_orthography_headers } from './assign-headers-for-csv'
+import { format_orthographies } from './assign-formatted-entry-values-for-csv'
 
 describe(get_orthography_headers, () => {
   test('assigns alternate orthography headrers if any exists', () => {

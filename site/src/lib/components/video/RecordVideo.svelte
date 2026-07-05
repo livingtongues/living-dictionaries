@@ -1,7 +1,7 @@
 <script lang="ts">
   import MediaStream from '../record/MediaStream.svelte'
   import Recorder from '../record/Recorder.svelte'
-  import { srcObject } from './srcObject'
+  import { srcObject } from './src-object'
   import Button from '$lib/components/ui/Button.svelte'
   import { page } from '$app/state'
 

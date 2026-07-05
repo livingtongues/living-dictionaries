@@ -3,7 +3,7 @@
   import sanitize from 'xss'
   import { tick } from 'svelte'
   import QrCode from './QrCode.svelte'
-  import { defaultPrintFields } from './printFields'
+  import { defaultPrintFields } from './print-fields'
   import { page } from '$app/state'
   import { order_example_sentences, order_glosses } from '$lib/helpers/glosses'
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'

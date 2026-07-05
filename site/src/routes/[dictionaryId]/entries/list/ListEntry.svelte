@@ -9,7 +9,7 @@
   import { get_headword } from '$lib/helpers/orthographies'
   import { minutes_ago_in_ms } from '$lib/utils/time'
   import { page } from '$app/state'
-  import type { DbOperations } from '$lib/dbOperations'
+  import type { DbOperations } from '$lib/db-operations'
   import IconBiCameraVideo from '~icons/bi/camera-video'
   import IconFluentImageStack20Regular from '~icons/fluent/image-stack-20-regular'
   import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'

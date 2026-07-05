@@ -3,7 +3,7 @@
   import type { DictionaryView } from '$lib/types'
   import GeoJSONSource from '$lib/components/maps/mapbox/sources/GeoJSONSource.svelte'
   import Layer from '$lib/components/maps/mapbox/map/Layer.svelte'
-  import { dictionaryGeoJsonCollection } from '$lib/components/maps/utils/dictionaryGeoJsonCollection'
+  import { dictionaryGeoJsonCollection } from '$lib/components/maps/utils/dictionary-geo-json-collection'
   import { mapKey } from '$lib/components/maps/mapbox/context'
   import type { MapKeyContext } from '$lib/components/maps/mapbox/context'
 

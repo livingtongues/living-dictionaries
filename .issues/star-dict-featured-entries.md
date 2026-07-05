@@ -199,6 +199,34 @@ Run the real `curate-featured-words` command whenever Jacob wants to pull from t
 pile of editor stars into the shared homepage bucket (its Step 2 "sweep editor stars" will pick
 these up automatically via the `starred_at` watermark).
 
+## Homepage sweep pass 1 (2026-07-04) — DONE
+
+Ran the "sweep editor stars" half of `curate-featured-words` against **only** this 601-star
+batch (no fresh `agent` harvest) to take the homepage bucket from 60 → ~200. Mechanics + full
+data trail in `homepage-sweep-01-results.json` + `both-pool-enriched-283.json` +
+`selected-final.json` + `extra-picks-final.json` (all in this folder).
+
+- Of the 601 stars, only entries from `both_full`/`both_partial` tier dicts qualify for the
+  homepage bucket (schema requires **both** `photo_serving_url` AND `audio_storage_path` —
+  `photo_only`/`audio_only` stars were correctly skipped). That's **61 dicts, 283 candidate
+  entries** — enriched (phonetic, full `glosses` map, speaker_name, example_sentence) straight
+  from each `dictionaries/<id>.db`.
+- Filtered out sentence-field "Photo by X / CC BY.../ http://..." photo-credit junk that some
+  dicts store as if it were an example sentence (nulled `example_sentence` for ~16 rows).
+- Selection: new-to-bucket dicts got up to 4 picks, dicts the earlier `agent` harvest had
+  already touched got up to 2, then a top-up pass added ~1 more from ~24 dicts (prioritizing the
+  14 that turned out to exactly duplicate an existing `agent` row) to close the gap to ~200.
+  Capped any single non-English gloss language at 20 (Spanish would've been ~56/133 otherwise)
+  for real variety — final mix ~111 en / 33 es / 15 hi / 7 sw / 6 fr / + 10 more languages.
+- **Fresh vision-check caught 5 bad photos** the original star-curation pass had missed/accepted
+  at thumbnail size (full list + reasons in `homepage-sweep-01-results.json`): a Shutterstock-
+  watermarked stock photo, an old b&w photo of a group of children (human faces), a human-hair
+  closeup with an annotation arrow, a tattooed-forearm closeup mismatched with the gloss "foot",
+  and a painted fish-ID-chart illustration (not a photo). All rejected/swapped for alternates
+  where available.
+- **Final bucket: 198 rows** (60 `agent`/approved + 138 `editor_star`/suggested) across **63
+  distinct dictionaries**. Ready for Jacob's review at **/admin/featured-words**.
+
 ## Remaining steps
 
 1. Work through batch03-15 (contact sheet → vision review → append to `photo-picks.json`).

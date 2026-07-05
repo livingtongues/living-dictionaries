@@ -3,7 +3,7 @@
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte'
-  import type { DbOperations } from '$lib/dbOperations'
+  import type { DbOperations } from '$lib/db-operations'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
 
   interface Props {

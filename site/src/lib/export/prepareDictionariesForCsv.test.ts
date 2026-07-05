@@ -1,5 +1,5 @@
 import type { DictionaryView } from '$lib/types'
-import { prepareDictionaryForCsv } from './prepareDictionariesForCsv'
+import { prepareDictionaryForCsv } from './prepare-dictionaries-for-csv'
 
 const timestamp = new Date('2021-08-02T14:00:00.000Z').toISOString()
 

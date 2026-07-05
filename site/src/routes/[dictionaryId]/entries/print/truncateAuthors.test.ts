@@ -1,4 +1,4 @@
-import { truncateAuthors } from './truncateAuthors'
+import { truncateAuthors } from './truncate-authors'
 
 // pulling examples from https://livingtongues.org/anderson-bibliography/
 // most styles guides only invert the last name to the front for the first author for alphabetical reasons, after that we can rely on commas, 'and', and '&' to split authors.

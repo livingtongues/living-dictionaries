@@ -5,8 +5,8 @@
   import { mapKey } from '../context'
   import { EventQueue } from '../queue'
   import { bindEvents } from '../event-bindings'
-  import { getTimeZoneLongitude } from '../../utils/getTimeZoneLongitude'
-  import { ADDED_FEATURE_ID_PREFIX } from '../../utils/randomId'
+  import { getTimeZoneLongitude } from '../../utils/get-time-zone-longitude'
+  import { ADDED_FEATURE_ID_PREFIX } from '../../utils/random-id'
   import { loadScriptOnce, loadStylesOnce } from '$lib/utils/load-once'
   import { log_event } from '$lib/debug/remote-log'
   import { page } from '$app/state'
@@ -177,7 +177,7 @@
       setCenter(pointsToFit[0])
       return
     }
-    const { bboxOfCoordinates } = await import('../../utils/bboxOfCoordinates')
+    const { bboxOfCoordinates } = await import('../../utils/bbox-of-coordinates')
     const box = bboxOfCoordinates(pointsToFit) as LngLatBoundsLike
     map.fitBounds(box, {
       padding: { top: 10, bottom: 10, left: 10, right: 10 },

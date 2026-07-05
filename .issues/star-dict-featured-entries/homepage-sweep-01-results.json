@@ -1,0 +1,17 @@
+{
+  "pass_1_primary_133": { "requested": 130, "inserted": 116, "skipped_duplicate": 14 },
+  "pass_2_topup_24": { "requested": 24, "inserted": 22, "skipped_duplicate": 2 },
+  "rejected_vision_check": [
+    { "dict_id": "boienen-old-buhi-langua", "entry_id": "0a1de81d-e91c-4d66-8814-f2588a4bcc98", "lexeme": "attas", "reason": "Shutterstock watermarked stock photo" },
+    { "dict_id": "boienen-old-buhi-langua", "entry_id": "VrTknNxqev9B6HqcZmdW", "lexeme": "agin", "reason": "old b&w photo of a group of children (human faces)" },
+    { "dict_id": "poqomam", "entry_id": "HqlCPkyLuikSasuKHQTN", "lexeme": "ism", "reason": "human hair closeup with annotation arrow (body-part closeup)" },
+    { "dict_id": "kiche", "entry_id": "6uNtl9wtSMkc9m4xjRPO", "lexeme": "aqanaj", "reason": "tattooed forearm closeup, mismatched with gloss \"foot\" (body-part closeup + mismatch)" },
+    { "dict_id": "nukuoro", "entry_id": "HLfv12YSw5Pff0pCZf8g", "lexeme": "balu-udu", "reason": "painted fish-ID-chart illustration, not a photo" }
+  ],
+  "final_bucket_state": {
+    "total": 198,
+    "agent_approved": 60,
+    "editor_star_suggested": 138,
+    "distinct_dicts": 63
+  }
+}

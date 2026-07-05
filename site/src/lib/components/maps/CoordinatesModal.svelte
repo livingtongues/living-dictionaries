@@ -6,7 +6,7 @@
   import Marker from './mapbox/map/Marker.svelte'
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte'
   import NavigationControl from './mapbox/controls/NavigationControl.svelte'
-  import { setMarker } from './utils/setCoordinatesToMarker'
+  import { setMarker } from './utils/set-coordinates-to-marker'
   import Button from '$lib/components/ui/Button.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'

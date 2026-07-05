@@ -5,7 +5,7 @@ import { api_dictionaries_id_roles_role_id_delete } from '$api/dictionaries/[id]
 import { api_dictionaries_id_invite_cancel } from '$api/dictionaries/[id]/invites/[invite_id]/_call'
 import { upload_image } from '$lib/components/image/upload-image'
 import { invalidate } from '$app/navigation'
-import { inviteHelper } from '$lib/helpers/inviteHelper'
+import { inviteHelper } from '$lib/helpers/invite-helper'
 
 export const load = (async ({ parent, data }) => {
   const { t, dictionary } = await parent()

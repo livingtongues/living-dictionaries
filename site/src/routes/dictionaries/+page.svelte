@@ -6,7 +6,7 @@
   import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { downloadObjectsAsCSV } from '$lib/export/csv'
-  import { dictionary_headers, prepareDictionaryForCsv } from '$lib/export/prepareDictionariesForCsv'
+  import { dictionary_headers, prepareDictionaryForCsv } from '$lib/export/prepare-dictionaries-for-csv'
 
   const { auth_user, dictionaries } = $derived(page.data)
   const filtered_dictionaries = $derived(auth_user.admin_level >= 1 ? $dictionaries : $dictionaries?.filter(dictionary => dictionary.public))

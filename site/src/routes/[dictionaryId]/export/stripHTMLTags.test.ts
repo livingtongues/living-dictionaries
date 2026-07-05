@@ -1,4 +1,4 @@
-import { stripHTMLTags } from './stripHTMLTags'
+import { stripHTMLTags } from './strip-html-tags'
 
 test('simple text wrapped in HTML tags', () =>
   expect(stripHTMLTags('<strong>test</strong>')).toBe('test'))

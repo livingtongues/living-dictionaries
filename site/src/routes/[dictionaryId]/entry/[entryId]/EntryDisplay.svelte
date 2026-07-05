@@ -8,7 +8,7 @@
   import { page } from '$app/state'
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
-  import type { DbOperations } from '$lib/dbOperations'
+  import type { DbOperations } from '$lib/db-operations'
   import { get_orthographies } from '$lib/helpers/orthographies'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
   import IconSystemUiconsVersions from '~icons/system-uicons/versions'

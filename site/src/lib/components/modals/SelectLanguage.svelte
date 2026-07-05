@@ -2,7 +2,7 @@
   import Button from '$lib/components/ui/Button.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
-  import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/changeLocale'
+  import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/change-locale'
 
   interface Props {
     on_close: () => void

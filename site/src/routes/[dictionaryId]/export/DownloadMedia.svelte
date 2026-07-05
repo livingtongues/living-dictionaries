@@ -2,9 +2,9 @@
   import JSZip from 'jszip'
   import type { Tables } from '$lib/types'
   import { onDestroy, onMount } from 'svelte'
-  import type { EntryForCSV } from './prepareEntriesForCsv'
+  import type { EntryForCSV } from './prepare-entries-for-csv'
   import { objectsToCsvByHeaders } from '$lib/export/csv'
-  import { downloadBlob } from '$lib/export/downloadBlob'
+  import { downloadBlob } from '$lib/export/download-blob'
 
   interface Props {
     dictionary: Tables<'dictionaries'>

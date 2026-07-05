@@ -15,7 +15,7 @@
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import Image from '$lib/components/image/Image.svelte'
-  import type { DbOperations } from '$lib/dbOperations'
+  import type { DbOperations } from '$lib/db-operations'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
   import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
   import IconIcOutlineCameraAlt from '~icons/ic/outline-camera-alt'

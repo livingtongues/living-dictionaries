@@ -3,7 +3,7 @@
   // https://stackoverflow.com/questions/69287390/request-static-image-from-mapbox-with-polygon-via-url // use decodeURIComponent to read example
 
   import type { IPoint, IRegion } from '$lib/types'
-  import { shapeGeoJson } from './shapeGeoJson'
+  import { shapeGeoJson } from './shape-geo-json'
   import { PUBLIC_mapboxAccessToken } from '$env/static/public'
 
   interface Props {

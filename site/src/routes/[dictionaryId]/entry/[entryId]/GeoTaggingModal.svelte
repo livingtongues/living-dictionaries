@@ -2,7 +2,7 @@
   import type { Coordinates, IPoint, IRegion, LngLatFull } from '$lib/types'
   import { onMount } from 'svelte'
   import InitableShowHide from './InitableShowHide.svelte'
-  import { flattenCoordinates } from './flattenCoordinates'
+  import { flattenCoordinates } from './flatten-coordinates'
   import Button from '$lib/components/ui/Button.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'

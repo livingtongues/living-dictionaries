@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import type { PageData } from './$types'
-  import { setLocaleCookie } from '$lib/i18n/changeLocale'
+  import { setLocaleCookie } from '$lib/i18n/change-locale'
   import { getSupportedLocale } from '$lib/i18n/locales'
 
   interface Props {

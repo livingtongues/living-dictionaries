@@ -1,4 +1,4 @@
-import { friendlyName } from './friendlyName'
+import { friendlyName } from './friendly-name'
 
 test('friendlyName returns filename with proper file extensions', () => {
   expect(friendlyName({ id: '1234', senses: [{ glosses: { en: 'food' } }] }, 'e3j3jsi.jpg')).toBe(

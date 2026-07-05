@@ -8,7 +8,7 @@
   import Image from '$lib/components/image/Image.svelte'
   import { get_headword } from '$lib/helpers/orthographies'
   import { page } from '$app/state'
-  import type { DbOperations } from '$lib/dbOperations'
+  import type { DbOperations } from '$lib/db-operations'
   import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
   import IconIcOutlineCameraAlt from '~icons/ic/outline-camera-alt'
   import IconBiCameraVideo from '~icons/bi/camera-video'

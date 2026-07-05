@@ -1,5 +1,5 @@
 import type { Tables } from '$lib/types'
-import newDictionary from '../html/newDictionary'
+import newDictionary from '../html/new-dictionary'
 import { send_email } from '../send-email'
 
 /**

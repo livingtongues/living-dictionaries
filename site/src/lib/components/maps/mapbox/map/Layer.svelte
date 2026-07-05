@@ -9,7 +9,7 @@
   } from 'mapbox-gl'
   import { mapKey, sourceKey } from '../context'
   import type { MapKeyContext, SourceKeyContext } from '../context'
-  import { randomId } from '../../utils/randomId'
+  import { randomId } from '../../utils/random-id'
 
   const { getMap } = getContext<MapKeyContext>(mapKey)
   const map = getMap()

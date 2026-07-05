@@ -1,6 +1,6 @@
 <script lang="ts">
   import PaginationButtons from './PaginationButtons.svelte'
-  import type { DbOperations } from '$lib/dbOperations'
+  import type { DbOperations } from '$lib/db-operations'
 
   interface Props {
     add_entry: DbOperations['insert_entry']

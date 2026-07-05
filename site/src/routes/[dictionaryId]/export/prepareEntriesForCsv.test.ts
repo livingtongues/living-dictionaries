@@ -1,6 +1,6 @@
 import type { EntryData, Tables } from '$lib/types'
 import type { TranslateFunction } from '$lib/i18n/types'
-import { formatCsvEntries, translate_entries } from './prepareEntriesForCsv'
+import { formatCsvEntries, translate_entries } from './prepare-entries-for-csv'
 
 describe(formatCsvEntries, () => {
   const dictionary = {

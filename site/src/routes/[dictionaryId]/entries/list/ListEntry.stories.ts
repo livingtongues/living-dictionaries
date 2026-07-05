@@ -1,7 +1,7 @@
 import type { Story, StoryMeta } from 'svelte-look'
 import type Component from './ListEntry.svelte'
 import type { EntryData, Tables } from '$lib/types'
-import type { DbOperations } from '$lib/dbOperations'
+import type { DbOperations } from '$lib/db-operations'
 import { mock_t } from '$lib/mocks/mock-t'
 
 export const shared_meta: StoryMeta = {

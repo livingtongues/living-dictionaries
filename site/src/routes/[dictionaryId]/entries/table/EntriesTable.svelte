@@ -2,10 +2,10 @@
   import type { EntryData, IColumn, Tables } from '$lib/types'
   import ColumnTitle from './ColumnTitle.svelte'
   import Cell from './Cell.svelte'
-  import { setUpColumns } from './setUpColumns'
+  import { setUpColumns } from './set-up-columns'
   import { minutes_ago_in_ms } from '$lib/utils/time'
   import { browser } from '$app/environment'
-  import type { DbOperations } from '$lib/dbOperations'
+  import type { DbOperations } from '$lib/db-operations'
 
   interface Props {
     entries?: EntryData[]

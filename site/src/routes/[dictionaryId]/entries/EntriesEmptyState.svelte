@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Tables } from '$lib/types'
-  import type { DbOperations } from '$lib/dbOperations'
+  import type { DbOperations } from '$lib/db-operations'
   import { page } from '$app/state'
   import AddEntry from './AddEntry.svelte'
   import IconFa6SolidBookOpen from '~icons/fa6-solid/book-open'

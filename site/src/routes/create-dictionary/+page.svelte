@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IPoint, IRegion } from '$lib/types'
   import { onMount } from 'svelte'
-  import { convertToFriendlyUrl } from './convertToFriendlyUrl'
+  import { convertToFriendlyUrl } from './convert-to-friendly-url'
   import Button from '$lib/components/ui/Button.svelte'
   import Form from '$lib/components/ui/Form.svelte'
   import { page } from '$app/state'

@@ -3,7 +3,7 @@
   import type { GeoJSONSource, GeoJSONSourceOptions, GeoJSONSourceRaw } from 'mapbox-gl'
   import { mapKey, sourceKey } from '../context'
   import type { MapKeyContext, SourceKeyContext } from '../context'
-  import { randomId } from '../../utils/randomId'
+  import { randomId } from '../../utils/random-id'
 
   interface Props {
     // Cf https://docs.mapbox.com/mapbox-gl-js/style-spec/sources/#geojson

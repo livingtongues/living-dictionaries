@@ -1,6 +1,6 @@
 import { readable, writable } from 'svelte/store'
 import { sleep } from '$lib/utils/sleep'
-import type { DbOperations } from '$lib/dbOperations'
+import type { DbOperations } from '$lib/db-operations'
 import type { AudioVideoUploadStatus } from '$lib/components/audio/upload-audio'
 
 const log_args = (args: any) => console.info({ args }) as unknown as Promise<any>
