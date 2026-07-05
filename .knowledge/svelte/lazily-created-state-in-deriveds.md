@@ -45,7 +45,14 @@ node_modules (restart after edits, and beware multiple zombie vite processes ser
 stale transforms), and **pnpm hard-links node_modules into its global store** —
 restore pristine files from the npm tarball afterward or you poison future installs.
 
-## Status across repos
+## Status across repos (all fixed 2026-07-04)
 
-- LD: fixed in both stores (+ `id()` accessors' nested-`$derived` variant removed).
-- house: same store code, NOT yet ported (see `.issues/dict-table-accessor-rows-reactivity.md` follow-up).
+- LD: both stores (`LiveDb` + `DictLiveDb`, 6 creation sites) + `id()` accessors'
+  nested-`$derived` variant removed.
+- house: `LiveDb` (4 sites), `ViewerLiveDb` (3 sites), both `id()`s, plus the lazy
+  `$state` singletons `get_reader_db_store` / `get_viewer_bootstrap`.
+- tutor: site `LiveDb` (4 sites) + `id()`. RN's live-db is runes-free (listener
+  pattern + `useSyncExternalStore`) → immune.
+
+Each repo carries its own copy of `construct-outside-reaction.svelte.ts` in
+`$lib/db/client/live/` with the mechanism documented in its doc comment.

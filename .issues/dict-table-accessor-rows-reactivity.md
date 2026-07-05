@@ -63,7 +63,16 @@ database skill's KNOWN BUG note is replaced with the fixed guidance.
 
 ## Follow-up
 
-- [ ] **house has the same store code** (`LiveDb`, not covered by the worker-harness
-      PARITY manifest) — port `construct-outside-reaction` + the `id()` simplification
-      to house's `$lib/db/client/live/`.
+- ✅ **house has the same store code** — ported 2026-07-04: `construct-outside-reaction`
+      + the `id()` simplification applied to house's `LiveDb` (4 sites), `ViewerLiveDb`
+      (3 sites + `id()`), and the lazy `$state` singletons (`get_reader_db_store`,
+      `get_viewer_bootstrap`). Verified: 245 vitest, check 0 errors, headless reader
+      smoke identical to pre-change baseline.
+- ✅ **tutor too** — same port to `site/.../live/live-db.svelte.ts` (4 sites + `id()`).
+      RN's `table-store.ts` is runes-free (listener pattern) → not affected. 27 live-db
+      vitest pass, check 0 errors. (6 pre-existing failures in tutor's server
+      user-db/day-video tests are unrelated in-flight WIP.)
+- Also re-synced house's `opfs-connection.ts` to LD (pre-existing PARITY drift: LD's
+  2026-07-04 cleanup removed two `eslint-disable new-cap` lines; house lint is fine
+  without them).
 - Knowledge entry: `.knowledge/svelte/lazily-created-state-in-deriveds.md`.
