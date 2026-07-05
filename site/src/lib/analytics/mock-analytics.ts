@@ -144,6 +144,7 @@ export const mock_analytics: LogAnalytics = {
     total_sessions: 177,
     below_capability_sessions: 3,
     bot_sessions: 105,
+    webdriver_sessions: 14,
     devices: [
       { device: 'desktop', sessions: 103 },
       { device: 'mobile', sessions: 60 },
@@ -327,7 +328,7 @@ export const empty_analytics: LogAnalytics = {
   top_events: [],
   by_source: [],
   error_clusters: [],
-  capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, devices: [], os: [], browsers: [], db_tiers: [] },
+  capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, webdriver_sessions: 0, devices: [], os: [], browsers: [], db_tiers: [] },
   performance: { summary: [], daily: [], by_route: [] },
   web_vitals: [],
   geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [] },

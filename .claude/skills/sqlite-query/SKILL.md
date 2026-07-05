@@ -98,7 +98,7 @@ Schema: `site/src/lib/db/schemas/shared.ts`; migrations: `site/src/lib/db/schema
 | `db_metadata` | Key-value (sync watermarks, db_id) |
 | `deletes` | Tombstones for sync |
 | `migrations` | Schema migration tracking |
-| `email_codes`, `client_logs` | Server-only on the live shared.db; created empty on the client — **don't query here** |
+| `email_codes`, `client_logs` | Server-only; created empty on the client — **don't query here**. Server raw `client_logs` live in `logs.db` (split out of shared.db 2026-07-05); rollups `log_daily_metrics`/`log_daily_sessions` stay in shared.db. See the **check-logs** skill. |
 
 ## `dict.db` tables (one dictionary's content)
 

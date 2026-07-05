@@ -1,16 +1,18 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { sign_jwt } from '$lib/auth/jwt'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_logs_db } from '$lib/db/server/logs-db'
 import { _reset_rate_state } from '$lib/server/insert-client-log'
 import { POST } from './+server'
 
-let db: ReturnType<typeof open_shared_db>
+// Raw client logs land in logs.db (split out of shared.db 2026-07-05), so the
+// endpoint's insert_client_log() defaults to get_logs_db() — mock THAT.
+let db: ReturnType<typeof open_logs_db>
 
-vi.mock('$lib/db/server/shared-db', async () => {
-  const actual = await vi.importActual<typeof import('$lib/db/server/shared-db')>('$lib/db/server/shared-db')
+vi.mock('$lib/db/server/logs-db', async () => {
+  const actual = await vi.importActual<typeof import('$lib/db/server/logs-db')>('$lib/db/server/logs-db')
   return {
     ...actual,
-    get_shared_db: () => db,
+    get_logs_db: () => db,
   }
 })
 
@@ -19,7 +21,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  db = open_shared_db(':memory:')
+  db = open_logs_db(':memory:')
   _reset_rate_state()
 })
 

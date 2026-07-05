@@ -319,6 +319,13 @@ export const client_logs = sqliteTable('client_logs', {
   build_target: text(),
   context: text(),
   source: text({ enum: ['client', 'server'] }),
+  /**
+   * `context.session_id` promoted to a REAL column at ingest + backfilled
+   * (migration `20260705_client_logs_session_id`) — filter/group on THIS, never
+   * `json_extract(context,'$.session_id')` (the per-row JSON parse was the bulk
+   * of the old multi-second analytics compute). Also in logs.db + logs-archive.db.
+   */
+  session_id: text(),
   /** Approximate location from Cloudflare edge headers, stamped server-side at ingest. NO raw IP. */
   country: text(),
   region: text(),
@@ -364,3 +371,22 @@ export const log_daily_metrics = sqliteTable('log_daily_metrics', {
   source: text({ enum: ['client', 'server'] }).notNull().default('client'),
   value: integer().notNull().default(0),
 }, table => [primaryKey({ columns: [table.day, table.metric, table.source] })])
+
+/**
+ * Per-day per-session materialization of `client_logs` (migration
+ * `20260705a_log_daily_sessions`). Written by the retention cron alongside
+ * `log_daily_metrics` so the capability / geo panels + UA-frequency bot-session
+ * classification never re-scan raw rows for finalized days. Server-only, never synced.
+ */
+export const log_daily_sessions = sqliteTable('log_daily_sessions', {
+  day: text().notNull(),
+  session_id: text().notNull(),
+  user_agent: text(),
+  heartbeats: integer().notNull().default(0),
+  has_user_id: integer().notNull().default(0),
+  /** 1 when any of the session's rows carried `context.webdriver` (automation). NULL = none. */
+  webdriver: integer(),
+  db_tier: text(),
+  country: text(),
+  region: text(),
+}, table => [primaryKey({ columns: [table.day, table.session_id] })])

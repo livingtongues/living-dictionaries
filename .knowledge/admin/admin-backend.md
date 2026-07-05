@@ -96,6 +96,26 @@ in `$lib/analytics/dashboard-format.ts`; the story fixture in `$lib/analytics/mo
 (imported by both `_page.stories.ts`). When adding a panel, decide which page it belongs to; the
 server computation stays one function (`get_log_analytics` in `lib/db/server/log-analytics.ts`).
 
+### Telemetry storage + rollup-forward (2026-07-05, parity port of house)
+Raw `client_logs` were split OUT of `shared.db` into a server-only **`logs.db`**
+(`$lib/db/server/logs-db.ts`, code-created, boot-time `split_client_logs_from_shared` in
+`hooks.server.ts`; aged rows → `logs-archive.db`). The forever rollups `log_daily_metrics` +
+`log_daily_sessions` stay in `shared.db` so backups/dev-pulls keep dashboard history without the
+raw-log bytes; **neither raw-log file is backed up** (the per-dict R2 snapshot builder never touches
+either shared.db or logs.db, so no exclusion config is needed). `get_log_analytics` is a 3-tier
+reader: shared.db rollups for days ≤ the `log_rollup_finalized_through` watermark, live `logs.db`
+scans for the tail + the full-hot-window forensic panels (errors/perf/boot/i18n/api_v1/leader),
+dev-fallback all-live when the cron never ran. 15-min in-memory cache keyed `days:audience`; the
+`pipeline` liveness panel is always recomputed fresh. `session_id` is a **real column** (promoted
+from `context.session_id` at ingest + backfilled) — the JSON-parse-per-row was the bulk of the old
+multi-second freeze; the temp-set audience filter (`analytics_bot_uas` / `analytics_bot_sessions`)
+replaced the per-row `is_bot_ua` UDF. Bot classification adds `bot-sessions.ts` (UA-frequency
+crawlers: zero-heartbeat anon sessions sharing one plausible-human UA ≥20×/day) — LD prod confirmed
+this pattern reclassifies ~28% of "sessions". Two pre-existing bugs were fixed in the port:
+`rollup_day` now full-day-DELETEs before writing (ghost metrics), and `leader_health` groups on an
+unshadowed `lq_source` alias (a bare `source` alias bound to the real `client_logs.source` COLUMN and
+collapsed the admin/viewer/dict split). Full reference: house `.knowledge/architecture/client-logs.md`.
+
 The **Synthetic uptime** panel (health page) is fed by `build_uptime` reading the `uptime_probe`
 server-log family — rows POSTed by an **off-box prober on mustang** (configured in the `vps-setup`
 repo, target `livingdictionaries.app`), NOT by anything in this repo. The ingestion path already

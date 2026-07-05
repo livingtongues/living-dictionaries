@@ -266,7 +266,7 @@
   </section>
 
   <section class="panel">
-    <h2>Browsers &amp; devices <span class="hint">human sessions, last {analytics.window_days}d{capability.bot_sessions > 0 ? ` · ${format_number(capability.bot_sessions)} bot sessions excluded` : ''}</span></h2>
+    <h2>Browsers &amp; devices <span class="hint">human sessions, last {analytics.window_days}d{capability.bot_sessions > 0 ? ` · ${format_number(capability.bot_sessions)} bot sessions excluded${capability.webdriver_sessions > 0 ? ` (${format_number(capability.webdriver_sessions)} automated)` : ''}` : ''}</span></h2>
     {#if capability.total_sessions === 0}
       <p class="muted">No human sessions in window.</p>
     {:else}

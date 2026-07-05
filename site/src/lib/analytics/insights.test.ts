@@ -27,7 +27,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     top_events: [],
     by_source: [],
     error_clusters: [],
-    capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, devices: [], os: [], browsers: [], db_tiers: [] },
+    capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, webdriver_sessions: 0, devices: [], os: [], browsers: [], db_tiers: [] },
     performance: { summary: [], daily: [], by_route: [] },
     web_vitals: [],
     geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [] },

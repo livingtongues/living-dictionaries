@@ -3,6 +3,7 @@ import { dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { start_chat_reping_cron_once } from '$lib/db/server/chat-reping-cron'
 import { start_log_retention_cron_once } from '$lib/db/server/log-retention-cron'
+import { get_logs_db, split_client_logs_from_shared } from '$lib/db/server/logs-db'
 import { start_r2_snapshot_builder } from '$lib/db/server/r2-snapshot-builder'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { ensure_all_admins_in_team_chat } from '$lib/server/chat/ensure-team-membership'
@@ -15,6 +16,12 @@ import { json } from '@sveltejs/kit'
 // first request (avoids a fresh container racing a migration inside a live
 // request). The handle below stays a pass-through.
 get_shared_db()
+
+// One-time boot migration (2026-07-05): move raw `client_logs` out of shared.db
+// into their own `logs.db` (rollups stay in shared.db so trends + backups keep
+// history without the raw-log bytes). Idempotent + crash-safe — a no-op once the
+// table is gone. Runs in dev too so local + prod share one storage topology.
+split_client_logs_from_shared({ shared_db: get_shared_db(), logs_db: get_logs_db() })
 
 // Make every allow-listed admin a member of the team-chat channels (creating any
 // missing admin user rows), so posting in "All Admins" reaches everyone before

@@ -1,10 +1,10 @@
 ---
-description: Daily read-and-recommend client_logs review for Living Dictionaries. Reads all client/server logs from the VPS shared.db, triages errors, paints the usage/perf/geo/health picture, scours the codebase for missing logging, proposes /admin/analytics improvements, and writes a dated report of action-steps. NEVER edits code.
+description: Daily read-and-recommend client_logs review for Living Dictionaries. Reads all client/server logs from the VPS logs.db (rollups in shared.db), triages errors, paints the usage/perf/geo/health picture, scours the codebase for missing logging, proposes /admin/analytics improvements, and writes a dated report of action-steps. NEVER edits code.
 ---
 
 # Log Review & Coverage Loop (Living Dictionaries)
 
-LD runs **no** third-party analytics or error tracking — `client_logs` in the VPS `shared.db` is the
+LD runs **no** third-party analytics or error tracking — `client_logs` in the VPS `logs.db` is the
 *only* window into what users do and what breaks. This command is our "Google Analytics + Sentry
 without the cruft": read everything logged, make smart decisions from it, and find where we're flying
 blind. You are also my advisor on how to improve this command + our logging.
@@ -48,16 +48,18 @@ summary. B, C and D are read-and-recommend — they propose, they don't build.
 `db_tier` + `db_caps` capability telemetry) + `visibility_*`, and exposes `log_event()` / `track()` /
 `track_timing()` / `track_web_vital()` / `log_navigation()`. Buffered in
 `localStorage.debug_log_pending`, flushed every 5s via `POST /api/log` and on `pagehide` via
-`sendBeacon`. Server `insert_client_log()` writes to `shared.db.client_logs`, stamping `source` +
-approximate Cloudflare geo. The forever `log_daily_metrics(day, metric, source, value)` rollup +
-`/admin/analytics` (admin-gated, `log-analytics.ts`) give the aggregate picture. `client_logs` is
-excluded from `SYNCABLE_TABLE_NAMES` (server-only; clients never read it back).
+`sendBeacon`. Server `insert_client_log()` writes to **`logs.db`.client_logs** (split out of
+shared.db 2026-07-05), stamping `source` + approximate Cloudflare geo. The forever
+`log_daily_metrics(day, metric, source, value)` + `log_daily_sessions` rollups (in **shared.db**) +
+`/admin/analytics` (admin-gated, `log-analytics.ts`, watermark rollup-forward) give the aggregate
+picture. `client_logs` is server-only (never syncs).
 
 Key columns: `received_at` (server ISO, indexed DESC — ORDER BY this), `client_time`, `level`
 (`error|warn|info|unhandled_rejection|crash`), `message`/`stack` (clamped 2k/16k), `url`,
 `user_agent`, `platform`, `app_version`, `build_target`, `source` (`client|server`; NULL legacy =
-client), `user_id` (nullable), `country`/`region`/`city`/`latitude`/`longitude` (CF geo),
-`context` (JSON: `session_id`, `breadcrumbs[]`, `db_tier`, per-event extras). Analytics events store
+client), `user_id` (nullable), **`session_id` (real column since 2026-07-05 — filter/group on this,
+not `json_extract`)**, `country`/`region`/`city`/`latitude`/`longitude` (CF geo),
+`context` (JSON: `breadcrumbs[]`, `db_tier`, `webdriver`, per-event extras). Analytics events store
 the stable event name (`log-events.ts`: `search_performed`, `dictionary_opened`, `entry_opened`,
 `audio_played`) as `message` on an `info` row.
 
@@ -67,12 +69,14 @@ the stable event name (`log-events.ts`: `search_performed`, `dictionary_opened`,
 `better-sqlite3` (the VPS runs blue/green since 2026-06-24 — no plain `sveltekit` container; `_green`
 is the standby sharing the same `/data` mount, fine for read-only queries too).
 
-- **Container DB path: `/data/shared.db`** (`DATA_DIR=/data`). Always open `{ readonly: true }`.
+- **Container DB paths:** raw `client_logs` → **`/data/logs.db`**; rollups (`log_daily_*`) + `users`
+  etc → `/data/shared.db` (`DATA_DIR=/data`). Always open `{ readonly: true }`. To join client_logs
+  against shared.db tables (e.g. `users`), open logs.db and `db.exec("ATTACH '/data/shared.db' AS shared")`.
 - **Escaping:** write the query to a local temp `.js` and pipe it through stdin:
 
 ```bash
 cat > /tmp/lq.js <<'EOF'
-const db = require('better-sqlite3')('/data/shared.db', { readonly: true })
+const db = require('better-sqlite3')('/data/logs.db', { readonly: true })
 const since = new Date(Date.now() - 24*60*60*1000).toISOString()
 // ...query...
 console.log(JSON.stringify(rows, null, 2))
@@ -92,7 +96,7 @@ ssh living 'docker exec -i sveltekit_blue node' < /tmp/lq.js
 **Cluster** so one user hitting an error 50× is one row. Group by `message` + first 200 chars of `stack`:
 
 ```js
-const db = require('better-sqlite3')('/data/shared.db', { readonly: true })
+const db = require('better-sqlite3')('/data/logs.db', { readonly: true })
 const since = new Date(Date.now() - 24*60*60*1000).toISOString()
 const rows = db.prepare(`
   SELECT message, substr(coalesce(stack,''),1,200) stack_head,
@@ -106,7 +110,7 @@ console.log(JSON.stringify(rows, null, 2))
 ```
 
 **Drill** a cluster — pull the most recent full instance, then replay the session by
-`json_extract(context,'$.session_id')` ORDER BY received_at to reconstruct breadcrumbs + routes.
+`session_id` (real column) ORDER BY received_at to reconstruct breadcrumbs + routes.
 **Investigate** in the codebase (grep the message + symbols). **Recommend a fix — do NOT apply it.**
 
 > **⚠️ Before recommending (or applying) ANY fix, check whether it's ALREADY FIXED.** Jacob creates and
@@ -125,7 +129,7 @@ one user / cosmetic. ⚪ noise = expected/3rd-party/transient — name it so it 
 ### A2. Usage & engagement
 
 The GA half. Distinct sessions & users (24h/7d/30d), median & p90 session duration (span of
-heartbeats per `session_id`), top routes (`message='navigation'`, `json_extract(context,'$.to')` →
+heartbeats per `session_id` — real column), top routes (`message='navigation'`, `json_extract(context,'$.to')` →
 the `dictionaries`/`about`/`account`/… buckets), top analytics events (`search_performed`,
 `dictionary_opened`, `entry_opened`, `audio_played`), platform/version split. Call out surprises.
 
@@ -145,15 +149,17 @@ the `dictionaries`/`about`/`account`/… buckets), top analytics events (`search
 
 ```js
 // Per-user activity for the 24h window; tag admins by email, aggregate the rest.
-const db = require('better-sqlite3')('/data/shared.db', { readonly: true })
+// client_logs is in logs.db; users is in shared.db → ATTACH to join across files.
+const db = require('better-sqlite3')('/data/logs.db', { readonly: true })
+db.exec("ATTACH '/data/shared.db' AS shared")
 const since = new Date(Date.now() - 24*60*60*1000).toISOString()
 const rows = db.prepare(`
   SELECT cl.user_id, u.email,
          COUNT(*) events,
-         COUNT(DISTINCT json_extract(cl.context,'$.session_id')) sessions,
+         COUNT(DISTINCT cl.session_id) sessions,
          MIN(cl.received_at) first_seen, MAX(cl.received_at) last_seen,
          GROUP_CONCAT(DISTINCT json_extract(cl.context,'$.to')) routes
-  FROM client_logs cl LEFT JOIN users u ON u.id = cl.user_id
+  FROM client_logs cl LEFT JOIN shared.users u ON u.id = cl.user_id
   WHERE cl.received_at >= ? AND cl.user_id IS NOT NULL
   GROUP BY cl.user_id ORDER BY events DESC
 `).all(since)

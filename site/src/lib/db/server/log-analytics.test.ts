@@ -8,17 +8,24 @@ import { insert_client_log } from '$lib/server/insert-client-log'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { get_log_analytics } from './log-analytics'
 import { _reset_log_archive_db_for_tests } from './log-archive-db'
+import { open_logs_db } from './logs-db'
 import { open_shared_db } from './shared-db'
 
+// `db` = shared.db (rollups + db_metadata); `logs_db` = the hot raw-row store
+// (split out of shared.db 2026-07-05). Raw client_logs go into `logs_db`; the
+// reader scans it. No watermark set → the reader is all-live (dev tier).
 let db: Database.Database
+let logs_db: Database.Database
 const NOW = new Date('2026-06-30T12:00:00.000Z')
 
 beforeEach(() => {
   db = open_shared_db(':memory:')
+  logs_db = open_logs_db(':memory:')
 })
 
 afterEach(() => {
   db.close()
+  logs_db.close()
 })
 
 function add_log({ day, level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, user_agent = null, app_version = null, stack = null, geo }: {
@@ -33,7 +40,7 @@ function add_log({ day, level = 'info', message = 'heartbeat', source = 'client'
   stack?: string | null
   geo?: RequestGeo
 }): void {
-  insert_client_log({ payload: { level, message, context, user_agent, app_version, stack }, user_id, source, ...(geo ? { geo } : {}), db, now: new Date(`${day}T10:00:00.000Z`) })
+  insert_client_log({ payload: { level, message, context, user_agent, app_version, stack }, user_id, source, ...(geo ? { geo } : {}), db: logs_db, now: new Date(`${day}T10:00:00.000Z`) })
 }
 
 describe(get_log_analytics, () => {
@@ -43,7 +50,7 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', level: 'error', message: 'boom', context: { session_id: 's1' } })
     add_log({ day: '2026-06-29', message: 'heartbeat', user_id: 'u2', context: { session_id: 's2' } })
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     expect(analytics.daily).toHaveLength(30)
     const last_day = analytics.daily[analytics.daily.length - 1]
@@ -73,7 +80,7 @@ describe(get_log_analytics, () => {
     // A non-boot error must NOT be counted.
     add_log({ day: '2026-06-30', level: 'error', message: 'boom', context: { session_id: 'c' } })
 
-    const { boot_health } = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const { boot_health } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(boot_health.failed_sessions).toBe(2)
     expect(boot_health.recovered_sessions).toBe(1)
     expect(boot_health.non_recovery_pct).toBe(0.5)
@@ -90,7 +97,7 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', message: 'uptime_probe', source: 'server', context: { ok: true, status: 200, ttfb_ms: 400, total_ms: 700, vantage: 'mustang-my' } })
     add_log({ day: '2026-06-29', message: 'uptime_probe', source: 'server', context: { ok: false, status: 503, ttfb_ms: 200, total_ms: 300, vantage: 'mustang-my' } })
 
-    const { uptime } = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const { uptime } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(uptime.probes).toBe(3)
     expect(uptime.availability).toBeCloseTo(2 / 3) // 2 ok of 3 probes carrying an ok signal
     expect(uptime.ttfb.p50).toBe(300)
@@ -104,7 +111,7 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', level: 'error', message: 'Failed to fetch dynamically imported module: /_app/x.js', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', level: 'crash', message: 'Not found: /river/feedback', context: { session_id: 's1' } })
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     const last_day = analytics.daily[analytics.daily.length - 1]
     expect(last_day?.errors).toBe(3) // raw count keeps the stale-chunk + 404 rows
     expect(last_day?.real_errors).toBe(1) // only 'boom' is a genuine fault
@@ -117,14 +124,14 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', level: 'error', message: 'boom on current', app_version: 'v-cur', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', level: 'error', message: 'boom no version', context: { session_id: 's1' } })
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW, current_app_version: 'v-cur' })
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: 'v-cur' })
     const last_day = analytics.daily[analytics.daily.length - 1]
     expect(last_day?.errors).toBe(3)
     expect(last_day?.stale_errors).toBe(1) // only the v-old row; version-less rows aren't assumed stale
     expect(analytics.totals.stale_errors).toBe(1)
 
     // Without a known current version the fold is off (everything would read stale otherwise).
-    const unknown = get_log_analytics({ shared_db: db, days: 30, now: NOW, current_app_version: null })
+    const unknown = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: null })
     expect(unknown.totals.stale_errors).toBe(0)
   })
 
@@ -135,7 +142,7 @@ describe(get_log_analytics, () => {
     for (const sid of ['s1', 's2', 's3'])
       add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: sid, to: '/about' } })
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(analytics.top_routes[0]).toEqual({ route: 'about', count: 3, sessions: 3 })
     expect(analytics.top_routes[1]).toEqual({ route: 'dictionary:entry', count: 50, sessions: 1 })
   })
@@ -150,7 +157,7 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', source: 'server', message: 'auth_login' })
     add_log({ day: '2026-06-30', source: 'client', message: 'v1_entry_updated', context: { session_id: 's1' } })
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(analytics.api_v1.total).toBe(5)
     expect(analytics.api_v1.failures).toBe(1)
     expect(analytics.api_v1.daily).toEqual([
@@ -180,7 +187,7 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', source: 'server', level: 'warn', message: 'sync_missing_syncable_table' })
     add_log({ day: '2026-06-30', source: 'client', level: 'error', message: 'no such column: x', context: { session_id: 's1' } })
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(analytics.server_faults.total).toBe(4)
     expect(analytics.server_faults.schema_drift_count).toBe(2)
     expect(analytics.server_faults.clusters).toHaveLength(3)
@@ -202,7 +209,7 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's1', to: '/dictionaries' } })
     add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's1', to: '/my-dict/entries/x' } })
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     const search = analytics.top_events.find(event => event.event === 'search_performed')
     expect(search?.count).toBe(2)
@@ -217,7 +224,7 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', level: 'error', message: 'client-err' })
     add_log({ day: '2026-06-30', level: 'error', message: 'server-err', source: 'server' })
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     expect(analytics.by_source.find(s => s.source === 'client')?.errors).toBe(1)
     expect(analytics.by_source.find(s => s.source === 'server')?.errors).toBe(1)
@@ -231,11 +238,11 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', message: 'session_start', user_agent: BOT, context: { session_id: 'bs1' } })
     add_log({ day: '2026-06-30', message: 'session_start', user_agent: BOT, context: { session_id: 'bs2' } })
 
-    const humans = get_log_analytics({ shared_db: db, days: 30, now: NOW, audience: 'humans' })
+    const humans = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, audience: 'humans' })
     expect(humans.audience).toBe('humans')
     expect(humans.totals.sessions).toBe(1)
 
-    const bots = get_log_analytics({ shared_db: db, days: 30, now: NOW, audience: 'bots' })
+    const bots = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, audience: 'bots' })
     expect(bots.audience).toBe('bots')
     expect(bots.totals.sessions).toBe(2)
   })
@@ -251,14 +258,14 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 'auto', webdriver: true }, user_agent: HEADED_PLAYWRIGHT })
     add_log({ day: '2026-06-30', message: 'search_performed', context: { session_id: 'auto', webdriver: true }, user_agent: HEADED_PLAYWRIGHT })
 
-    const humans = get_log_analytics({ shared_db: db, days: 30, now: NOW, audience: 'humans' })
+    const humans = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, audience: 'humans' })
     expect(humans.totals.sessions).toBe(1) // only the real human
     expect(humans.top_events.find(event => event.event === 'search_performed')?.count).toBe(1)
     // The automated session is bucketed as a bot, kept out of the human total.
     expect(humans.capability.bot_sessions).toBe(1)
     expect(humans.capability.total_sessions).toBe(1)
 
-    const bots = get_log_analytics({ shared_db: db, days: 30, now: NOW, audience: 'bots' })
+    const bots = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, audience: 'bots' })
     expect(bots.totals.sessions).toBe(1) // the webdriver session shows under bots
   })
 
@@ -268,7 +275,7 @@ describe(get_log_analytics, () => {
     for (let i = 0; i < 30; i++)
       add_log({ day: '2026-06-30', level: 'error', message: '[post_request] Network error for /api/log' })
 
-    const clusters = get_log_analytics({ shared_db: db, days: 30, now: NOW }).error_clusters
+    const clusters = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW }).error_clusters
     expect(clusters.find(c => c.message === 'boom')).toMatchObject({ count: 5, users: 5, is_noise: false })
     expect(clusters[0].message).toBe('boom')
     expect(clusters[clusters.length - 1]).toMatchObject({ is_noise: true })
@@ -284,7 +291,7 @@ describe(get_log_analytics, () => {
     // A bot session must be excluded from the human worklist.
     add_log({ day: '2026-06-30', level: 'warn', message: 'i18n missing key: sd.fish', context: { session_id: 'b1', i18n_key: 'sd.fish', locale: 'es' }, user_agent: BOT })
 
-    const { missing_i18n_keys } = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const { missing_i18n_keys } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(missing_i18n_keys.distinct_keys).toBe(2) // bot's sd.fish excluded
     expect(missing_i18n_keys.total).toBe(4)
     expect(missing_i18n_keys.sessions).toBe(2)
@@ -305,7 +312,7 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's5' }, user_agent: ANDROID })
     add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's3' }, user_agent: APPLEBOT })
 
-    const { capability } = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const { capability } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     expect(capability.bot_sessions).toBe(1)
     expect(capability.total_sessions).toBe(4) // bots excluded from human total
@@ -341,7 +348,7 @@ describe(get_log_analytics, () => {
     // Server row carries no user_agent (NULL) → always kept.
     add_log({ day: '2026-06-30', source: 'server', message: 'auth_login' })
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     const today = analytics.daily[analytics.daily.length - 1]
     expect(today?.sessions).toBe(1) // only the human session
     expect(today?.users).toBe(1)
@@ -368,7 +375,7 @@ describe(get_log_analytics, () => {
     // web_vital carries `value`, not `duration_ms` — must be excluded from timings.
     add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'web_vital', metric: 'LCP', value: 2.1 } })
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     const page_load = analytics.performance.summary.find(metric => metric.name === 'page_load')
     expect(page_load).toMatchObject({ count: 5, p50: 300, p95: 500, max: 500 })
@@ -388,7 +395,7 @@ describe(get_log_analytics, () => {
     const base = 'https://new.livingdictionaries.app'
     const now = new Date('2026-06-30T10:00:00Z')
     const perf = (duration_ms: number, url: string) =>
-      insert_client_log({ payload: { level: 'info', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms }, url }, user_id: null, db, now })
+      insert_client_log({ payload: { level: 'info', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms }, url }, user_id: null, db: logs_db, now })
     // /about: fast (100, 200) → p95 200. Search params must NOT fragment the route.
     perf(100, `${base}/about`)
     perf(200, `${base}/about?x=1`)
@@ -396,7 +403,7 @@ describe(get_log_analytics, () => {
     perf(1000, `${base}/my-dict/entries/abc`)
     perf(2000, `${base}/my-dict/entries/def`)
 
-    const { by_route } = get_log_analytics({ shared_db: db, days: 30, now: NOW }).performance
+    const { by_route } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW }).performance
     // Slowest route (by p95) first.
     expect(by_route[0]).toMatchObject({ route: 'dictionary:entry', count: 2, p95: 2000 })
     const about = by_route.find(row => row.route === 'about')
@@ -416,7 +423,7 @@ describe(get_log_analytics, () => {
     // A cold (archived) day with only a geo rollup row.
     db.prepare(`INSERT INTO log_daily_metrics (day, metric, source, value) VALUES ('2026-06-05', 'geo:US-CA', 'client', 5)`).run()
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     // Areas merge hot (2 US-CA + 1 US-NY) with the cold rollup (+5 US-CA).
     expect(analytics.geo.areas.find(area => area.key === 'US-CA')).toEqual({ key: 'US-CA', country: 'US', sessions: 7 })
@@ -436,7 +443,7 @@ describe(get_log_analytics, () => {
     // An old day that has only a rollup row (raw logs already archived away).
     db.prepare(`INSERT INTO log_daily_metrics (day, metric, source, value) VALUES ('2026-06-05', 'logs', 'client', 42), ('2026-06-05', 'sessions', 'client', 7), ('2026-06-05', 'errors', 'client', 3)`).run()
 
-    const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW })
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     const cold = analytics.daily.find(point => point.day === '2026-06-05')
     // Archived days predate the split, so real_errors falls back to the raw error count.
     // stale_errors is hot-only (no app_version in the rollup) → 0 on cold days.
@@ -458,7 +465,7 @@ describe(get_log_analytics, () => {
     const ny: RequestGeo = { country: 'US', region: 'NY', city: 'New York', latitude: 40.71, longitude: -74.01 }
     // Direct insert for app_version-bearing rows (the leaner add_log doesn't forward it).
     const add_versioned = ({ day, message, level = 'info', app_version, context, user_agent }: { day: string, message: string, level?: 'error' | 'info', app_version: string, context?: Record<string, unknown>, user_agent?: string }) =>
-      insert_client_log({ payload: { level, message, context: context ?? null, app_version, user_agent: user_agent ?? null }, user_id: null, source: 'client', db, now: new Date(`${day}T10:00:00.000Z`) })
+      insert_client_log({ payload: { level, message, context: context ?? null, app_version, user_agent: user_agent ?? null }, user_id: null, source: 'client', db: logs_db, now: new Date(`${day}T10:00:00.000Z`) })
 
     const prev_data_dir = process.env.DATA_DIR
     process.env.DATA_DIR = mkdtempSync(join(tmpdir(), 'log-analytics-snap-'))
@@ -494,8 +501,8 @@ describe(get_log_analytics, () => {
       add_versioned({ day: '2026-06-30', level: 'error', message: 'stale-boom', app_version: 'v-old', context: { webdriver: false } })
 
       // Performance: page_load (per-route grouping via url), an extra metric, web_vital, ttfb.
-      insert_client_log({ payload: { level: 'info', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms: 500, ttfb: 60 }, url: `${base}/about` }, user_id: null, source: 'client', db, now: new Date('2026-06-30T10:00:00.000Z') })
-      insert_client_log({ payload: { level: 'info', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms: 1400, ttfb: 220 }, url: `${base}/my-dict/entries/abc` }, user_id: null, source: 'client', db, now: new Date('2026-06-30T10:00:00.000Z') })
+      insert_client_log({ payload: { level: 'info', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms: 500, ttfb: 60 }, url: `${base}/about` }, user_id: null, source: 'client', db: logs_db, now: new Date('2026-06-30T10:00:00.000Z') })
+      insert_client_log({ payload: { level: 'info', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms: 1400, ttfb: 220 }, url: `${base}/my-dict/entries/abc` }, user_id: null, source: 'client', db: logs_db, now: new Date('2026-06-30T10:00:00.000Z') })
       add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'viewer_boot', duration_ms: 1234, webdriver: false } })
       for (const value of [1000, 1500, 2000, 2500, 3000])
         add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'web_vital', metric: 'LCP', value, webdriver: false } })
@@ -514,7 +521,7 @@ describe(get_log_analytics, () => {
       // A cold (archived) day with only rollup rows, incl a geo bucket + an event.
       db.prepare(`INSERT INTO log_daily_metrics (day, metric, source, value) VALUES ('2026-06-05', 'logs', 'client', 42), ('2026-06-05', 'sessions', 'client', 7), ('2026-06-05', 'errors', 'client', 3), ('2026-06-05', 'geo:US-CA', 'client', 5), ('2026-06-05', 'event:search_performed', 'client', 9), ('2026-06-05', 'nav:about', 'client', 4)`).run()
 
-      const analytics = get_log_analytics({ shared_db: db, days: 30, now: NOW, current_app_version: 'v-cur' })
+      const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: 'v-cur' })
       expect(analytics).toMatchInlineSnapshot(`
         {
           "api_v1": {
@@ -580,6 +587,7 @@ describe(get_log_analytics, () => {
               },
             ],
             "total_sessions": 3,
+            "webdriver_sessions": 1,
           },
           "daily": [
             {
@@ -1070,8 +1078,12 @@ describe(get_log_analytics, () => {
             ],
             "failed_by_source": [
               {
-                "count": 2,
+                "count": 1,
                 "source": "viewer",
+              },
+              {
+                "count": 1,
+                "source": "dict",
               },
             ],
             "failed_current": 1,

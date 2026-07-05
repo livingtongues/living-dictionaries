@@ -1,14 +1,20 @@
 ---
 name: check-logs
-description: Read the LD client_logs telemetry — browser errors/crashes/sessions AND server-side events — to debug an issue, see what a user did, or verify telemetry. Read this whenever you need to look at the logs for ANY reason, in local dev (site/.data/shared.db) or production (the living VPS).
+description: Read the LD client_logs telemetry — browser errors/crashes/sessions AND server-side events — to debug an issue, see what a user did, or verify telemetry. Read this whenever you need to look at the logs for ANY reason, in local dev (site/.data/logs.db) or production (the living VPS).
 ---
 
 # Check Logs (Living Dictionaries)
 
-LD runs **no** third-party analytics or error tracking. The `client_logs` table in `shared.db` is the
+LD runs **no** third-party analytics or error tracking. The `client_logs` table is the
 **only** structured window into what users do and what breaks — it's our Sentry + Google Analytics in
 one table. Read this skill whenever you need to get into the logs, regardless of what you're doing
 with them (chasing a bug, reconstructing a session, confirming an event fired).
+
+> **Storage (since 2026-07-05):** raw `client_logs` rows live in their OWN file **`logs.db`** —
+> split out of `shared.db` (which was ~bulk log bytes). Aged rows go to `logs-archive.db`
+> (14→60d). The forever rollups (`log_daily_metrics` + the per-day session materialization
+> `log_daily_sessions`) STAY in `shared.db`. So query **`logs.db`** for raw rows below; only the
+> dashboard aggregates read shared.db. Neither raw-log file is backed up (rollups carry history).
 
 `client_logs` holds **both** sides:
 - **Browser logs** (`source = 'client'`) — uncaught `window.error`, `unhandledrejection`, patched
@@ -29,8 +35,8 @@ with them (chasing a bug, reconstructing a session, confirming an event fired).
 
 | Environment | DB file | How to query |
 |---|---|---|
-| **Local dev** | `site/.data/shared.db` | `better-sqlite3` one-liner (below) |
-| **Production** | container `/data/shared.db` (host `/opt/hosting/data/shared.db`) | `ssh living` → `docker exec` (below) |
+| **Local dev** | `site/.data/logs.db` (rollups: `site/.data/shared.db`) | `better-sqlite3` one-liner (below) |
+| **Production** | container `/data/logs.db` (host `/opt/hosting/data/logs.db`); rollups in `/data/shared.db` | `ssh living` → `docker exec` (below) |
 
 Always open `{ readonly: true }` — never write `client_logs`.
 
@@ -46,14 +52,15 @@ Always open `{ readonly: true }` — never write `client_logs`.
 | `url`, `user_agent`, `platform`, `app_version`, `build_target` | enrichment (`build_target`: `production`/`preview`/`development`) |
 | `user_id` | nullable — pre-login crashes preserved (no FK) |
 | `country`/`region`/`city`/`latitude`/`longitude` | approximate Cloudflare-edge geo |
-| `context` | JSON string: `session_id`, `breadcrumbs[]`, `db_tier`, per-event extras |
+| `session_id` | **real column** since 2026-07-05 (promoted from `context.session_id` at ingest + backfilled) — filter/group on THIS, not `json_extract(context,'$.session_id')` |
+| `context` | JSON string: `breadcrumbs[]`, `db_tier`, `webdriver`, per-event extras (session_id also duplicated here on legacy rows) |
 
 ## How to query
 
 **Local dev** — point better-sqlite3 at the dev file:
 
 ```bash
-node -e 'const db=require("/home/jacob/code/living-dictionaries/site/node_modules/better-sqlite3")("/home/jacob/code/living-dictionaries/site/.data/shared.db",{readonly:true});const since=new Date(Date.now()-24*60*60*1000).toISOString();console.log(JSON.stringify(db.prepare(`SELECT level,message,COUNT(*) n FROM client_logs WHERE received_at>=? AND level IN ('"'"'error'"'"','"'"'unhandled_rejection'"'"','"'"'crash'"'"') GROUP BY message ORDER BY n DESC`).all(since),null,2))'
+node -e 'const db=require("/home/jacob/code/living-dictionaries/site/node_modules/better-sqlite3")("/home/jacob/code/living-dictionaries/site/.data/logs.db",{readonly:true});const since=new Date(Date.now()-24*60*60*1000).toISOString();console.log(JSON.stringify(db.prepare(`SELECT level,message,COUNT(*) n FROM client_logs WHERE received_at>=? AND level IN ('"'"'error'"'"','"'"'unhandled_rejection'"'"','"'"'crash'"'"') GROUP BY message ORDER BY n DESC`).all(since),null,2))'
 ```
 
 **Production** — `sqlite3` is NOT on the VPS host; query through the app container. The VPS runs
@@ -64,7 +71,7 @@ temp `.js` and pipe it through stdin:
 
 ```bash
 cat > /tmp/lq.js <<'EOF'
-const db = require('better-sqlite3')('/data/shared.db', { readonly: true })
+const db = require('better-sqlite3')('/data/logs.db', { readonly: true })
 const since = new Date(Date.now() - 24*60*60*1000).toISOString()
 const rows = db.prepare(`...query...`).all(since)
 console.log(JSON.stringify(rows, null, 2))
@@ -72,7 +79,8 @@ EOF
 ssh living 'docker exec -i sveltekit_blue node' < /tmp/lq.js
 ```
 
-(Container DB path is **`/data/shared.db`** — `DATA_DIR=/data`, mount `/opt/hosting/data:/data`.)
+(Container paths: raw rows **`/data/logs.db`**, rollups **`/data/shared.db`** — `DATA_DIR=/data`,
+mount `/opt/hosting/data:/data`.)
 
 ### 1. Cluster the errors
 
@@ -123,7 +131,7 @@ Pull every row from one browser run, in order, to see the sequence that led to t
 
 ```sql
 SELECT received_at, level, message FROM client_logs
-WHERE json_extract(context,'$.session_id') = ?
+WHERE session_id = ?          -- real column since 2026-07-05
 ORDER BY received_at
 ```
 

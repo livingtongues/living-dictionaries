@@ -45,6 +45,18 @@ export function is_known_noise(message: string): boolean {
 }
 
 /**
+ * The combined "not a real fault" predicate for a logged error row: known-benign
+ * noise OR an expected 4xx response. THE shared rule — used by the live analytics
+ * (`is_noise_msg` UDF + error-cluster `is_noise` flag) AND the retention cron's
+ * `real_errors` daily rollup, so hot and rolled-up days always agree.
+ */
+export function is_noise_error_message(message: string | null | undefined): boolean {
+  if (!message)
+    return false
+  return is_known_noise(message) || is_expected_error_response(message)
+}
+
+/**
  * Map an HTTP status to a log severity so EXPECTED gates don't read as crashes:
  * 5xx = crash (a real failure), 401/403 = warn (auth gate, e.g. an anon user
  * hitting `/admin/*`), 404 = info, anything else = error. Used by `+error.svelte`

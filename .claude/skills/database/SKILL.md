@@ -29,7 +29,17 @@ Knowing which database you're touching dictates everything else.
 `message_threads`, `messages`, `message_attachments`.
 
 **Server-only** (not in admin sync): `email_codes`, `email_aliases`,
-`client_logs`, `migrations`, `db_metadata`, `deletes`.
+`client_logs`, `migrations`, `db_metadata`, `deletes`, `log_daily_metrics`,
+`log_daily_sessions`.
+
+> **Telemetry storage (2026-07-05):** raw `client_logs` rows were split OUT of
+> `shared.db` into their own server-only **`logs.db`** (`$lib/db/server/logs-db.ts`,
+> code-created, boot-time `split_client_logs_from_shared`), aging into
+> `logs-archive.db`. The forever rollups (`log_daily_metrics` +
+> `log_daily_sessions`) stay in `shared.db` so backups/dev pulls keep dashboard
+> history without the raw-log bytes; neither raw file is backed up. See the
+> **check-logs** skill. `client_logs` is still created (empty) on admin clients
+> by the migration but never syncs.
 
 > **Non-admins never get a browser shared.db.** A manager editing dictionary
 > settings has no local catalog mirror — those writes go through an **API

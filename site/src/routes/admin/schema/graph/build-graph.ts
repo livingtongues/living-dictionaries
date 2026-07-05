@@ -24,7 +24,9 @@ const SYSTEM_TABLE_NAMES = new Set([
   'migrations',
   'db_metadata',
   'deletes',
-  'client_logs',
+  'client_logs', // now lives in logs.db, not shared.db (2026-07-05 split); kept here for the client-side empty table
+  'log_daily_metrics',
+  'log_daily_sessions',
   'email_codes',
   'email_aliases',
 ])
@@ -589,7 +591,7 @@ if (import.meta.vitest) {
 
   describe(is_system_table, () => {
     it('flags cross-cutting infra tables', () => {
-      for (const name of ['migrations', 'db_metadata', 'deletes', 'client_logs', 'email_codes', 'email_aliases'])
+      for (const name of ['migrations', 'db_metadata', 'deletes', 'client_logs', 'log_daily_metrics', 'log_daily_sessions', 'email_codes', 'email_aliases'])
         expect(is_system_table(name)).toBe(true)
     })
     it('does not flag domain tables', () => {

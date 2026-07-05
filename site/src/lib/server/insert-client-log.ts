@@ -1,7 +1,7 @@
 import type Database from 'better-sqlite3'
 import type { ClientLogLevel } from '$lib/db/schemas/shared.types'
 import type { RequestGeo } from './geo-from-request'
-import { get_shared_db, open_shared_db } from '$lib/db/server/shared-db'
+import { get_logs_db, open_logs_db } from '$lib/db/server/logs-db'
 import { EMPTY_GEO } from './geo-from-request'
 
 /**
@@ -43,17 +43,18 @@ function clamp(value: string | null | undefined, max: number): string | null {
 }
 
 /**
- * Insert one client log into `shared.db`. Returns `true` on success and
- * `false` on any failure (validation or DB) so callers can count accepted
- * vs dropped without try/catch boilerplate. Errors surface to the server
- * console for operator visibility but never re-throw.
+ * Insert one client log into `logs.db` (the hot telemetry store, split out of
+ * shared.db 2026-07-05). Returns `true` on success and `false` on any failure
+ * (validation or DB) so callers can count accepted vs dropped without try/catch
+ * boilerplate. Errors surface to the server console for operator visibility but
+ * never re-throw.
  */
 export function insert_client_log({
   payload,
   user_id,
   source = 'client',
   geo = EMPTY_GEO,
-  db = get_shared_db(),
+  db = get_logs_db(),
   now = new Date(),
 }: {
   payload: ClientLogPayload
@@ -80,13 +81,16 @@ export function insert_client_log({
     const context_json = payload.context
       ? clamp(safe_stringify(payload.context), MAX_CONTEXT_LEN)
       : null
+    // Promote context.session_id to a real column so analytics filters/groups on
+    // it directly (never a per-row json_extract — the old hot-path cost).
+    const session_id = typeof payload.context?.session_id === 'string' ? payload.context.session_id : null
 
     db.prepare(`
       INSERT INTO client_logs (
         id, received_at, client_time, user_id, level, message, stack,
         url, user_agent, platform, app_version, build_target, context, source,
-        country, region, city, latitude, longitude
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        session_id, country, region, city, latitude, longitude
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       received_at,
@@ -102,6 +106,7 @@ export function insert_client_log({
       payload.build_target ?? null,
       context_json,
       source,
+      session_id,
       geo.country,
       geo.region,
       geo.city,
@@ -188,7 +193,7 @@ if (import.meta.vitest) {
   const { describe, test, expect } = import.meta.vitest
   describe(insert_client_log, () => {
     test('inserts a minimal valid payload', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_logs_db(':memory:')
       const ok = insert_client_log({ payload: { level: 'error', message: 'boom' }, user_id: null, db })
       expect(ok).toBe(true)
       const row = db.prepare('SELECT level, message, user_id FROM client_logs').get() as { level: string, message: string, user_id: string | null }
@@ -198,14 +203,14 @@ if (import.meta.vitest) {
     })
 
     test('attributes user_id when provided', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_logs_db(':memory:')
       insert_client_log({ payload: { level: 'crash', message: 'died' }, user_id: 'u-7', db })
       const row = db.prepare('SELECT user_id FROM client_logs').get() as { user_id: string }
       expect(row.user_id).toBe('u-7')
     })
 
     test('defaults source to client; honors an explicit server source', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_logs_db(':memory:')
       insert_client_log({ payload: { level: 'info', message: 'from-browser' }, user_id: null, db })
       insert_client_log({ payload: { level: 'error', message: 'from-server' }, user_id: null, source: 'server', db })
       const rows = db.prepare('SELECT message, source FROM client_logs ORDER BY message').all() as { message: string, source: string }[]
@@ -216,7 +221,7 @@ if (import.meta.vitest) {
     })
 
     test('stamps geo columns when provided, and leaves them null otherwise', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_logs_db(':memory:')
       insert_client_log({
         payload: { level: 'info', message: 'session_start' },
         user_id: null,
@@ -230,7 +235,7 @@ if (import.meta.vitest) {
     })
 
     test('stringifies context to JSON in storage', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_logs_db(':memory:')
       insert_client_log({
         payload: { level: 'error', message: 'x', context: { route: '/admin/messages', breadcrumbs: ['a', 'b'] } },
         user_id: null,
@@ -240,8 +245,19 @@ if (import.meta.vitest) {
       expect(JSON.parse(row.context)).toEqual({ route: '/admin/messages', breadcrumbs: ['a', 'b'] })
     })
 
+    test('promotes context.session_id to the real session_id column', () => {
+      const db = open_logs_db(':memory:')
+      insert_client_log({ payload: { level: 'info', message: 'session_start', context: { session_id: 'sess-9', breadcrumbs: [] } }, user_id: null, db })
+      insert_client_log({ payload: { level: 'info', message: 'no-session', context: { foo: 'bar' } }, user_id: null, db })
+      const rows = db.prepare('SELECT message, session_id FROM client_logs ORDER BY message').all() as { message: string, session_id: string | null }[]
+      expect(rows).toEqual([
+        { message: 'no-session', session_id: null },
+        { message: 'session_start', session_id: 'sess-9' },
+      ])
+    })
+
     test('rejects payloads missing level or message', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_logs_db(':memory:')
       // @ts-expect-error — testing invalid payload
       expect(insert_client_log({ payload: { message: 'no level' }, user_id: null, db })).toBe(false)
       // @ts-expect-error — testing invalid payload
@@ -251,13 +267,13 @@ if (import.meta.vitest) {
     })
 
     test('rejects unknown levels', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_logs_db(':memory:')
       // @ts-expect-error — testing invalid level
       expect(insert_client_log({ payload: { level: 'fatal', message: 'x' }, user_id: null, db })).toBe(false)
     })
 
     test('truncates oversize message and stack', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_logs_db(':memory:')
       const huge_message = 'x'.repeat(MAX_MESSAGE_LEN + 100)
       const huge_stack = 'y'.repeat(MAX_STACK_LEN + 100)
       insert_client_log({
@@ -271,7 +287,7 @@ if (import.meta.vitest) {
     })
 
     test('survives a context object containing a circular reference', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_logs_db(':memory:')
       const cyclic: Record<string, unknown> = { a: 1 }
       cyclic.self = cyclic
       const ok = insert_client_log({
