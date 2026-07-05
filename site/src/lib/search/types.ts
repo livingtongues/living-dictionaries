@@ -1,8 +1,12 @@
 export type View = 'list' | 'table' | 'print' | 'gallery'
 
+/** Which index the unified search box targets. Absent = words (entries). */
+export type SearchScope = 'sentences' | 'texts'
+
 export interface QueryParams {
   page: number
   query: string
+  scope?: SearchScope
   entries_per_page?: number
   view?: View
   tolerance?: number
@@ -33,6 +37,11 @@ export interface QueryParams {
   no_part_of_speech?: boolean
   has_semantic_domain?: boolean
   no_semantic_domain?: boolean
+  // Sentence-scope facets (see corpus-schemas.ts; has_audio/has_image/has_video reused from above)
+  in_text?: boolean
+  standalone?: boolean
+  has_translation?: boolean
+  no_translation?: boolean
 }
 
 type ArrayFilters = 'orthographies' | 'sources' | 'tags' | 'dialects' | 'parts_of_speech' | 'semantic_domains' | 'speakers'

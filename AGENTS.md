@@ -43,7 +43,11 @@ Authoritative shapes: `site/src/lib/types/` (Drizzle-derived) and the schemas in
 
 ## Routes (high level)
 `/` (Mapbox globe of dictionaries) · `/about` · `/tutorials` · `/dictionaries` · `/account` ·
-`/create-dictionary` · `/[dictionaryId]/*` (entries list, entry detail, settings, about,
+`/create-dictionary` · `/[dictionaryId]/*` (entries list — unified search with
+Words·Sentences·Texts scope chips [admin-3 preview; the texts/sentences corpus pipeline, see
+`.issues/texts-sentences-pipeline.md`] — entry detail, sentence detail, `texts` browse +
+`texts/new` paste-to-sentences ingest + `text/[id]` reader [same admin-3 preview, route-guarded
+via `$lib/corpus/corpus-preview-guard.ts` — lift at GA] — settings, about,
 contributors, grammar, history, export, import, invite, and `home` — the dictionary home page:
 starred "featured entries" strip [synced dict.db `featured_entries`, star toggle on entry pages
 for editor+], stats, about/grammar snippets; side-menu-linked for admin 3 only while iterated on,

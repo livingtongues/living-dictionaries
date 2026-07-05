@@ -3,7 +3,7 @@ import type { Readable } from 'svelte/store'
 import type { EntryData, Tables } from '$lib/types'
 import type { DictConnection } from '$lib/db/dict-client/worker-connection'
 import type { DictLiveDb } from '$lib/db/dict-client/dict-live-db.svelte'
-import { init_entries, search_entries } from '$lib/search'
+import { init_entries, search_entries, search_sentences, search_texts } from '$lib/search'
 import { read_dict_bundle } from '$lib/search/read-dict-bundle'
 import { create_orama_watcher } from '$lib/search/orama-watcher'
 import type { OramaWatcher } from '$lib/search/orama-watcher'
@@ -154,6 +154,8 @@ export function create_entries_ui_store({
     dialects,
     sources,
     search_entries,
+    search_sentences,
+    search_texts,
     loading,
     search_index_updated,
   }

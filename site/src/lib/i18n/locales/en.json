@@ -165,7 +165,9 @@
     "entries": "Entries",
     "youtube_terms": "Youtube terms",
     "google_terms": "Google terms",
-    "full_title": "{dictionary_name} Living Dictionary"
+    "full_title": "{dictionary_name} Living Dictionary",
+    "words": "Words",
+    "texts": "Texts"
   },
   "sync": {
     "syncing": "Syncing…",
@@ -515,7 +517,39 @@
   },
   "sentence": {
     "add": "Add sentence",
-    "delete": "Delete sentence"
+    "delete": "Delete sentence",
+    "sentences": "Sentences",
+    "search_sentences": "Search sentences",
+    "in_text": "In a text",
+    "standalone": "Standalone",
+    "translation": "Translation",
+    "part_of_text": "Part of the text",
+    "no_results": "No matching sentences",
+    "none_yet": "No sentences yet",
+    "sentence": "Sentence"
+  },
+  "text": {
+    "text": "Text",
+    "new": "New text",
+    "title": "Title",
+    "untitled": "Untitled text",
+    "paste_body": "Paste or type the text",
+    "detected": "{count} sentences in {paragraphs} paragraphs",
+    "adjust": "Adjust sentences",
+    "back_to_paste": "Back to pasting",
+    "resplit_warning": "Going back re-splits from the pasted text and discards your sentence adjustments. Continue?",
+    "merge_up": "Merge into previous sentence",
+    "paragraph_break": "Paragraph break after this sentence",
+    "remove_sentence": "Remove sentence",
+    "create": "Create text",
+    "delete": "Delete text",
+    "delete_confirm": "Delete this text and all of its sentences?",
+    "append": "Add sentences",
+    "append_hint": "New sentences are added at the end of the text.",
+    "show_translations": "Show translations",
+    "none_yet": "No texts yet",
+    "sentence_count": "{count} sentences",
+    "edit_title": "Edit title"
   },
   "relationship_type": {
     "related_entries": "Related entries",

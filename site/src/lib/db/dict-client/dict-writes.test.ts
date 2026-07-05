@@ -7,6 +7,7 @@ import {
   insert_entry_local,
   insert_rows_local,
   insert_sentence_local,
+  insert_text_local,
   insert_video_local,
   link_junction_local,
   unlink_junction_local,
@@ -97,6 +98,44 @@ describe(insert_sentence_local, () => {
     ).rejects.toThrow()
     expect(count('SELECT COUNT(*) c FROM sentences')).toBe(0)
     expect(count('SELECT COUNT(*) c FROM senses_in_sentences')).toBe(0)
+  })
+})
+
+describe(insert_text_local, () => {
+  test('creates text + ordered sentences with ascending sort_keys and paragraph flags', async () => {
+    const outcome = await run_atomic('insert_text', {
+      user_id,
+      title: { default: 'The mountain story' },
+      sentences: [
+        { text: { default: 'One.' } },
+        { text: { default: 'Two.' }, ends_paragraph: 1 },
+        { text: { default: 'Three.' } },
+      ],
+    })
+    const text = outcome.result as Record<string, unknown>
+
+    expect(outcome.affected_tables).toEqual(['texts', 'sentences'])
+    expect(text.title).toEqual({ default: 'The mountain story' })
+    const rows = db.prepare('SELECT text, sort_key, ends_paragraph, dirty FROM sentences WHERE text_id = ? ORDER BY sort_key ASC').all(text.id) as { text: string, sort_key: string, ends_paragraph: number | null, dirty: number }[]
+    expect(rows.map(row => JSON.parse(row.text).default)).toEqual(['One.', 'Two.', 'Three.'])
+    expect(rows.map(row => row.ends_paragraph)).toEqual([null, 1, null])
+    expect(rows.every(row => row.dirty === 1)).toBeTruthy()
+    const keys = rows.map(row => row.sort_key)
+    expect([...keys].sort()).toEqual(keys)
+    expect(new Set(keys).size).toBe(3)
+  })
+
+  test('a text with no sentences affects only texts', async () => {
+    const outcome = await run_atomic('insert_text', { user_id, title: { default: 'Empty' }, sentences: [] })
+    expect(outcome.affected_tables).toEqual(['texts'])
+  })
+
+  test('re-sent insert_text (same client-stamped id) collides loudly, no duplicate', async () => {
+    const args = { user_id, text_id: crypto.randomUUID(), title: { default: 'Once' }, sentences: [{ text: { default: 'A.' } }] }
+    await run_atomic('insert_text', args)
+    await expect(run_atomic('insert_text', args)).rejects.toThrow()
+    expect(count('SELECT COUNT(*) c FROM texts')).toBe(1)
+    expect(count('SELECT COUNT(*) c FROM sentences')).toBe(1)
   })
 })
 

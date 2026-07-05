@@ -1,6 +1,7 @@
 import type { MultiString } from '$lib/types'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
+import { initial_keys } from '$lib/api/v1/fractional-index'
 
 /**
  * Worker-side atomic write orchestrators — LD's mirror of house's
@@ -201,6 +202,36 @@ export async function insert_sentence_local({ connection, user_id, sentence, sen
   return { result: new_sentence, affected_tables: ['sentences', 'senses_in_sentences'] }
 }
 
+/**
+ * New text + its ordered sentences (fractional sort_keys assigned in array
+ * order) — the local-first mirror of the server's `v1-texts.create_text`.
+ */
+export async function insert_text_local({ connection, user_id, text_id, title, sentences }: {
+  connection: DictWriteConnection
+  user_id?: string
+  /** Client-generated (see the ids note in the header) — worker generates only as a fallback. */
+  text_id?: string
+  title: MultiString
+  sentences: { text: MultiString, ends_paragraph?: number }[]
+}): Promise<DictWriteOutcome<Record<string, unknown>>> {
+  const text = await insert_row({ connection, table: 'texts', row: { id: text_id, title }, user_id })
+  const sort_keys = initial_keys(sentences.length)
+  for (const [index, sentence] of sentences.entries()) {
+    await insert_row({
+      connection,
+      table: 'sentences',
+      row: {
+        text: sentence.text,
+        text_id: text.id,
+        sort_key: sort_keys[index],
+        ...sentence.ends_paragraph ? { ends_paragraph: 1 } : {},
+      },
+      user_id,
+    })
+  }
+  return { result: text, affected_tables: sentences.length ? ['texts', 'sentences'] : ['texts'] }
+}
+
 /** New audio row (+ optional speaker junction in the same transaction). */
 export async function insert_audio_local({ connection, user_id, audio, speaker_id }: {
   connection: DictWriteConnection
@@ -295,6 +326,7 @@ const DICT_WRITE_OPS = {
   upsert_rows: upsert_rows_local,
   insert_entry: insert_entry_local,
   insert_sentence: insert_sentence_local,
+  insert_text: insert_text_local,
   insert_audio: insert_audio_local,
   insert_photo: insert_photo_local,
   insert_video: insert_video_local,

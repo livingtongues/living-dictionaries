@@ -1,8 +1,9 @@
 import { expose } from 'comlink'
 import type { EntryData, Tables } from '$lib/types'
-import { _search_entries, create_index, update_index_entry } from './orama.worker'
+import { _search_entries, _search_sentences, _search_texts, create_corpus_indexes, create_index, update_index_entry, update_index_sentence, update_index_text } from './orama.worker'
 import { should_include_tag } from '$lib/helpers/tag-visibility'
 import { assemble_entry_data } from './assemble-entry-data'
+import { augment_sentence_for_search, augment_text_for_search } from './augment-sentence-for-search'
 
 const log = false
 
@@ -33,6 +34,9 @@ let video_speakers: Record<string, Tables<'video_speakers'>>
 let sense_videos: Record<string, Tables<'sense_videos'>>
 let sentences: Record<string, Tables<'sentences'>>
 let senses_in_sentences: Record<string, Tables<'senses_in_sentences'>>
+let texts: Record<string, Tables<'texts'>>
+let sentence_photos: Record<string, Tables<'sentence_photos'>>
+let sentence_videos: Record<string, Tables<'sentence_videos'>>
 
 let entry_id_to_tags: Record<string, Tables<'tags'>[]> = {}
 let entry_id_to_dialects: Record<string, Tables<'dialects'>[]> = {}
@@ -43,6 +47,9 @@ let video_id_to_speakers: Record<string, Tables<'speakers'>[]> = {}
 let sense_id_to_videos: Record<string, Tables<'videos'>[]> = {}
 let audio_id_to_speakers: Record<string, Tables<'speakers'>[]> = {}
 let entry_id_to_audios: Record<string, Tables<'audio'>[]> = {}
+let sentence_id_to_audios: Record<string, Tables<'audio'>[]> = {}
+let sentence_id_to_photo_joins: Record<string, Tables<'sentence_photos'>[]> = {}
+let sentence_id_to_video_joins: Record<string, Tables<'sentence_videos'>[]> = {}
 
 // The grouping maps above accumulate via .push() across the bulk load. On a long-running
 // dev server init_entries can run more than once (CDN cache pass + dummy-data pass, navigation),
@@ -58,6 +65,9 @@ function reset_grouping_maps() {
   sense_id_to_videos = {}
   audio_id_to_speakers = {}
   entry_id_to_audios = {}
+  sentence_id_to_audios = {}
+  sentence_id_to_photo_joins = {}
+  sentence_id_to_video_joins = {}
 }
 
 // vps-migration M4 write/sync P4b: the watch-based Orama feed. The main-thread
@@ -71,8 +81,8 @@ function reset_grouping_maps() {
 // `api.X` double-write from operations.ts.
 
 const SYNC_TABLE_ORDER = [
-  'entries', 'senses', 'speakers', 'tags', 'dialects', 'sources', 'audio', 'photos', 'videos', 'sentences',
-  'audio_speakers', 'entry_tags', 'entry_dialects', 'sense_photos', 'video_speakers', 'sense_videos', 'senses_in_sentences',
+  'entries', 'texts', 'senses', 'speakers', 'tags', 'dialects', 'sources', 'audio', 'photos', 'videos', 'sentences',
+  'audio_speakers', 'entry_tags', 'entry_dialects', 'sense_photos', 'video_speakers', 'sense_videos', 'senses_in_sentences', 'sentence_photos', 'sentence_videos',
 ] as const
 
 function pair_values<T>(map: Record<string, T>, field: 'audio_id' | 'speaker_id' | 'video_id' | 'entry_id' | 'tag_id' | 'dialect_id' | 'sense_id' | 'photo_id' | 'sentence_id', value: string): T[] {
@@ -150,6 +160,67 @@ function recompute_sense_videos(sense_id: string) {
       }
     })
     .filter(Boolean) as Tables<'videos'>[]
+}
+
+function recompute_sentence_audios(sentence_id: string) {
+  if (!sentence_id) return
+  sentence_id_to_audios[sentence_id] = Object.values(audios).filter(audio => audio.sentence_id === sentence_id)
+}
+
+function recompute_sentence_photo_joins(sentence_id: string) {
+  if (!sentence_id) return
+  sentence_id_to_photo_joins[sentence_id] = pair_values(sentence_photos, 'sentence_id', sentence_id)
+}
+
+function recompute_sentence_video_joins(sentence_id: string) {
+  if (!sentence_id) return
+  sentence_id_to_video_joins[sentence_id] = pair_values(sentence_videos, 'sentence_id', sentence_id)
+}
+
+/** Shape one sentence row into its index doc from the current grouping maps. */
+function process_sentence(sentence: Tables<'sentences'>) {
+  return augment_sentence_for_search(sentence, {
+    audios: sentence_id_to_audios[sentence.id] || [],
+    // Junctions can outlive their media row in these maps (a media hard-delete
+    // arrives as its own tombstone; the cascaded junction deletes may not) —
+    // filter to junctions whose media row still exists.
+    photo_junctions: (sentence_id_to_photo_joins[sentence.id] || []).filter(join => photos[join.photo_id]),
+    video_junctions: (sentence_id_to_video_joins[sentence.id] || []).filter(join => videos[join.video_id]),
+  })
+}
+
+/**
+ * Which sentence/text docs does this changed row affect? Runs BEFORE `apply_one`
+ * mutates the maps so it can see the OLD row state (e.g. an audio moved off a
+ * sentence). The entries side stays in `apply_one`'s return value.
+ */
+function collect_corpus_effects(table: string, row: Record<string, any>): { sentence_ids: string[], text_ids: string[] } {
+  switch (table) {
+    case 'sentences':
+      return { sentence_ids: [row.id], text_ids: [] }
+    case 'texts': {
+      // A text delete flips its sentences to standalone (FK SET NULL happens
+      // silently in SQL — no updated_at bump), so their `in_text` facet changes.
+      const sentence_ids = row.deleted
+        ? Object.values(sentences).filter(sentence => sentence.text_id === row.id).map(sentence => sentence.id)
+        : []
+      return { sentence_ids, text_ids: [row.id] }
+    }
+    case 'audio': {
+      const old_sentence_id = audios[row.id]?.sentence_id
+      const ids = new Set([old_sentence_id, row.sentence_id].filter(Boolean) as string[])
+      return { sentence_ids: [...ids], text_ids: [] }
+    }
+    case 'photos':
+      return { sentence_ids: pair_values(sentence_photos, 'photo_id', row.id).map(join => (join as Tables<'sentence_photos'>).sentence_id), text_ids: [] }
+    case 'videos':
+      return { sentence_ids: pair_values(sentence_videos, 'video_id', row.id).map(join => (join as Tables<'sentence_videos'>).sentence_id), text_ids: [] }
+    case 'sentence_photos':
+    case 'sentence_videos':
+      return { sentence_ids: row.sentence_id ? [row.sentence_id] : [], text_ids: [] }
+    default:
+      return { sentence_ids: [], text_ids: [] }
+  }
 }
 
 /** Upsert (or remove if `deleted`) one changed row and return the entry_id(s) it affects. */
@@ -331,6 +402,31 @@ function apply_one(table: string, row: Record<string, any>): string[] {
       const entry_id = senses[row.sense_id]?.entry_id
       return entry_id ? [entry_id] : []
     }
+    case 'texts': {
+      if (is_deleted) {
+        delete texts[row.id]
+        // Mirror the client DB's FK `ON DELETE SET NULL` (which fires without a
+        // sentence updated_at bump) so re-assembled sentence docs flip to standalone.
+        for (const sentence of Object.values(sentences)) {
+          if (sentence.text_id === row.id) sentence.text_id = null
+        }
+      } else {
+        texts[row.id] = { ...texts[row.id], ...row }
+      }
+      return []
+    }
+    case 'sentence_photos': {
+      const key = `${row.sentence_id}_${row.photo_id}`
+      if (is_deleted) delete sentence_photos[key]
+      else sentence_photos[key] = row as Tables<'sentence_photos'>
+      return []
+    }
+    case 'sentence_videos': {
+      const key = `${row.sentence_id}_${row.video_id}`
+      if (is_deleted) delete sentence_videos[key]
+      else sentence_videos[key] = row as Tables<'sentence_videos'>
+      return []
+    }
     default:
       return []
   }
@@ -351,6 +447,7 @@ function find_row_by_id(table: string, id: string): Record<string, any> | undefi
     case 'photos': return photos[id]
     case 'videos': return videos[id]
     case 'sentences': return sentences[id]
+    case 'texts': return texts[id]
     case 'speakers': return speakers[id]
     case 'tags': return tags[id]
     case 'dialects': return dialects[id]
@@ -362,6 +459,8 @@ function find_row_by_id(table: string, id: string): Record<string, any> | undefi
     case 'video_speakers': return Object.values(video_speakers).find(row => row.id === id)
     case 'sense_videos': return Object.values(sense_videos).find(row => row.id === id)
     case 'senses_in_sentences': return Object.values(senses_in_sentences).find(row => row.id === id)
+    case 'sentence_photos': return Object.values(sentence_photos).find(row => row.id === id)
+    case 'sentence_videos': return Object.values(sentence_videos).find(row => row.id === id)
     default: return undefined
   }
 }
@@ -372,6 +471,16 @@ export async function apply_rows(
 ) {
   const affected_entry_ids = new Set<string>()
   const removed_entry_ids = new Set<string>()
+  const affected_sentence_ids = new Set<string>()
+  const removed_sentence_ids = new Set<string>()
+  const affected_text_ids = new Set<string>()
+  const removed_text_ids = new Set<string>()
+
+  function collect_corpus(table: string, row: Record<string, any>) {
+    const { sentence_ids, text_ids } = collect_corpus_effects(table, row)
+    for (const id of sentence_ids) affected_sentence_ids.add(id)
+    for (const id of text_ids) affected_text_ids.add(id)
+  }
 
   // Upserts. Content rows have no `deleted` column anymore (hard-delete), so
   // `apply_one`'s removal branch is never reached from `changes` — only via the
@@ -380,6 +489,7 @@ export async function apply_rows(
     const rows = changes[table]
     if (!rows?.length) continue
     for (const row of rows) {
+      collect_corpus(table, row)
       for (const entry_id of apply_one(table, row)) {
         if (entry_id) affected_entry_ids.add(entry_id)
       }
@@ -391,6 +501,15 @@ export async function apply_rows(
   for (const { table_name, id } of deletes ?? []) {
     const base = find_row_by_id(table_name, id)
     const row = { ...(base ?? {}), id, deleted: true }
+    collect_corpus(table_name, row)
+    if (table_name === 'sentences') {
+      removed_sentence_ids.add(id)
+      affected_sentence_ids.delete(id)
+    }
+    if (table_name === 'texts') {
+      removed_text_ids.add(id)
+      affected_text_ids.delete(id)
+    }
     if (table_name === 'entries') {
       removed_entry_ids.add(id)
       affected_entry_ids.delete(id)
@@ -410,8 +529,30 @@ export async function apply_rows(
     const entry = entries[entry_id]
     if (entry) await process_and_update_entry(entry)
   }
-  if (affected_entry_ids.size || removed_entry_ids.size)
+
+  // Corpus indexes (sentences + texts).
+  for (const sentence_id of removed_sentence_ids)
+    await update_index_sentence({ doc: null, sentence_id, deleted: true, dictionary_id })
+  for (const sentence_id of affected_sentence_ids) {
+    const sentence = sentences[sentence_id]
+    if (!sentence) continue
+    recompute_sentence_audios(sentence_id)
+    recompute_sentence_photo_joins(sentence_id)
+    recompute_sentence_video_joins(sentence_id)
+    await update_index_sentence({ doc: process_sentence(sentence), sentence_id, deleted: false, dictionary_id })
+  }
+  for (const text_id of removed_text_ids)
+    await update_index_text({ doc: null, text_id, deleted: true, dictionary_id })
+  for (const text_id of affected_text_ids) {
+    const text = texts[text_id]
+    if (text) await update_index_text({ doc: augment_text_for_search(text), text_id, deleted: false, dictionary_id })
+  }
+
+  if (affected_entry_ids.size || removed_entry_ids.size
+    || affected_sentence_ids.size || removed_sentence_ids.size
+    || affected_text_ids.size || removed_text_ids.size) {
     await mark_search_index_updated()
+  }
 }
 
 async function process_and_update_entry(entry: Tables<'entries'>) {
@@ -478,12 +619,15 @@ export async function init_entries(
   videos = key_by_id(bundle.videos)
   sentences = key_by_id(bundle.sentences)
   audio_speakers = key_by_pair(bundle.audio_speakers, 'audio_id', 'speaker_id')
+  texts = key_by_id(bundle.texts ?? [])
   entry_tags = key_by_pair(bundle.entry_tags, 'entry_id', 'tag_id')
   entry_dialects = key_by_pair(bundle.entry_dialects, 'entry_id', 'dialect_id')
   sense_photos = key_by_pair(bundle.sense_photos, 'sense_id', 'photo_id')
   video_speakers = key_by_pair(bundle.video_speakers, 'video_id', 'speaker_id')
   sense_videos = key_by_pair(bundle.sense_videos, 'sense_id', 'video_id')
   senses_in_sentences = key_by_pair(bundle.senses_in_sentences, 'sense_id', 'sentence_id')
+  sentence_photos = key_by_pair(bundle.sentence_photos ?? [], 'sentence_id', 'photo_id')
+  sentence_videos = key_by_pair(bundle.sentence_videos ?? [], 'sentence_id', 'video_id')
 
   reset_grouping_maps()
 
@@ -548,6 +692,20 @@ export async function init_entries(
     }
   }
 
+  for (const audio of Object.values(audios)) {
+    if (!audio.sentence_id) continue
+    if (!sentence_id_to_audios[audio.sentence_id]) sentence_id_to_audios[audio.sentence_id] = []
+    sentence_id_to_audios[audio.sentence_id].push(audio)
+  }
+  for (const join of Object.values(sentence_photos)) {
+    if (!sentence_id_to_photo_joins[join.sentence_id]) sentence_id_to_photo_joins[join.sentence_id] = []
+    sentence_id_to_photo_joins[join.sentence_id].push(join)
+  }
+  for (const join of Object.values(sentence_videos)) {
+    if (!sentence_id_to_video_joins[join.sentence_id]) sentence_id_to_video_joins[join.sentence_id] = []
+    sentence_id_to_video_joins[join.sentence_id].push(join)
+  }
+
   console.time('Process Entries Time')
   const processed_data: Record<string, EntryData> = {}
   for (const entry of Object.values(entries)) {
@@ -564,6 +722,14 @@ export async function init_entries(
   await create_index(Object.values(processed_data), dictionary_id)
   mark_search_index_updated()
   set_loading(false)
+
+  // Corpus indexes build after the entries index so word search is ready first.
+  await create_corpus_indexes({
+    sentence_docs: Object.values(sentences).map(process_sentence),
+    text_docs: Object.values(texts).map(augment_text_for_search),
+    dictionary_id,
+  })
+  mark_search_index_updated()
 }
 
 // Delegates the final shaping to the shared `assemble_entry_data` (also used by
@@ -603,6 +769,8 @@ export const api = {
   init_entries,
   apply_rows,
   search_entries: _search_entries,
+  search_sentences: _search_sentences,
+  search_texts: _search_texts,
 }
 
 expose(api)

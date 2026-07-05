@@ -2,6 +2,10 @@ import type { DefaultTokenizer } from '@orama/orama'
 import { simplify_lexeme_for_search } from './augment-entry-for-search'
 
 const props_that_should_not_be_split = ['_tags', '_dialects', '_speakers']
+// Vernacular-text props (sentence text, text titles) index each word alongside its
+// simplified form (diacritics stripped, IPA→keyboard chars) like `_lexeme` does —
+// but WITHOUT the suffix-portion explosion (sentences would balloon the index).
+const props_with_simplified_forms = ['_text', '_title']
 
 function normalizeToken(this: DefaultTokenizer, prop: string, token: string): string {
   return token
@@ -32,6 +36,11 @@ export function tokenize(input: string, language?: string, prop = '', _withCache
 
     tokens = word_portions
       .map(t => [t, simplify_lexeme_for_search(t)])
+      .flat()
+      .filter(Boolean)
+  } else if (props_with_simplified_forms.includes(prop)) {
+    tokens = words
+      .map(word => [word, simplify_lexeme_for_search(word)])
       .flat()
       .filter(Boolean)
   } else {

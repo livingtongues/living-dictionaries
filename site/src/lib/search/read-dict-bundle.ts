@@ -14,10 +14,10 @@ import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
  * matches across the client bundle path and the server SSR assembler. */
 export const BUNDLE_DROP_COLUMNS = ['dirty', 'created_by_user_id', 'updated_by_user_id'] as const
 const DROP_COLUMNS = BUNDLE_DROP_COLUMNS
-const DATA_TABLES = ['entries', 'senses', 'audio', 'speakers', 'tags', 'dialects', 'sources', 'photos', 'videos', 'sentences'] as const
-const JOIN_TABLES = ['audio_speakers', 'entry_tags', 'entry_dialects', 'sense_photos', 'video_speakers', 'sense_videos', 'senses_in_sentences'] as const
+const DATA_TABLES = ['entries', 'senses', 'audio', 'speakers', 'tags', 'dialects', 'sources', 'photos', 'videos', 'sentences', 'texts'] as const
+const JOIN_TABLES = ['audio_speakers', 'entry_tags', 'entry_dialects', 'sense_photos', 'video_speakers', 'sense_videos', 'senses_in_sentences', 'sentence_photos', 'sentence_videos'] as const
 
-/** The 16 per-dict content tables the Orama worker assembles entries from — the watcher scans these for deltas. */
+/** The per-dict content tables the Orama worker assembles entry/sentence/text docs from — the watcher scans these for deltas. */
 export const WATCHED_TABLES = [...DATA_TABLES, ...JOIN_TABLES] as const
 
 export type EntriesDataBundle = Record<string, Record<string, unknown>[]>

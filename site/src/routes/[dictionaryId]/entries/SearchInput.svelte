@@ -10,9 +10,10 @@
     on_show_filter_menu: () => void
     search_params: QueryParamStore<QueryParams>
     index_ready?: boolean
+    placeholder?: string
   }
 
-  const { on_show_filter_menu, search_params, index_ready = false }: Props = $props()
+  const { on_show_filter_menu, search_params, index_ready = false, placeholder = undefined }: Props = $props()
 </script>
 
 <div class="search-wrap">
@@ -32,7 +33,7 @@
           $search_params.page = 1
         }
       }}
-      placeholder={page.data.t('entry.search_entries')} />
+      placeholder={placeholder ?? page.data.t('entry.search_entries')} />
   </div>
   <button
     type="button"

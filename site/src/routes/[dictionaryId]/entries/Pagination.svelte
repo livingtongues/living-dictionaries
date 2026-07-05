@@ -1,16 +1,17 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte'
   import PaginationButtons from './PaginationButtons.svelte'
-  import type { DbOperations } from '$lib/db-operations'
 
   interface Props {
-    add_entry: DbOperations['insert_entry']
+    /** Scope-adaptive add button (Add entry / Add sentence / …), given the placement class to render with. */
+    add_button?: Snippet<[string]>
     can_edit?: boolean
     page_from_url: number
     number_of_pages: number
   }
 
   let {
-    add_entry,
+    add_button,
     can_edit = false,
     page_from_url = $bindable(),
     number_of_pages,
@@ -27,19 +28,15 @@
   })
 </script>
 
-{#if can_edit}
-  {#await import('./AddEntry.svelte') then { default: AddEntry }}
-    <AddEntry {add_entry} class="add-entry-floating" />
-  {/await}
+{#if can_edit && add_button}
+  {@render add_button('add-entry-floating')}
 {/if}
 
 <nav>
   <PaginationButtons pages={number_of_pages} current_page={page_from_url || 1} {go_to_page}>
-    {#if can_edit}
+    {#if can_edit && add_button}
       <div style="width: 0.75rem; margin-right: auto"></div>
-      {#await import('./AddEntry.svelte') then { default: AddEntry }}
-        <AddEntry {add_entry} class="add-entry-inline" />
-      {/await}
+      {@render add_button('add-entry-inline')}
     {/if}
   </PaginationButtons>
 </nav>

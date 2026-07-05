@@ -1,5 +1,5 @@
 import type { DictionaryCoordinates } from './shared.types'
-import type { HostedElsewhere, MultiString } from './dictionary.types'
+import type { HostedElsewhere, MediaTimings, MultiString, SentenceTokens } from './dictionary.types'
 import { SOURCE_TYPES } from '$lib/constants'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
@@ -113,6 +113,8 @@ export const sentences = sqliteTable('sentences', {
   ends_paragraph: integer(),
   /** Array of `sources.slug` refs (no FK — validated on write, integrity-swept on source delete). */
   sources: text({ mode: 'json' }).$type<string[]>(),
+  /** Per-orthography tokenization + word→entry match state (see `SentenceTokens`). */
+  tokens: text({ mode: 'json' }).$type<SentenceTokens>(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -153,6 +155,8 @@ export const audio = sqliteTable('audio', {
   storage_path: text().notNull(),
   /** A `sources.slug` registry ref (no FK — validated on write, NULLed on source delete). Speaker-less audio must carry one (write-time rule). */
   source: text(),
+  /** Sentence id → compact word-timing string for karaoke playback (see `MediaTimings`). */
+  timings: text({ mode: 'json' }).$type<MediaTimings>(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),
@@ -179,6 +183,8 @@ export const videos = sqliteTable('videos', {
   source: text(),
   videographer: text(),
   text_id: text().references(() => texts.id, { onDelete: 'cascade' }),
+  /** Sentence id → compact word-timing string for karaoke playback (see `MediaTimings`). */
+  timings: text({ mode: 'json' }).$type<MediaTimings>(),
   dirty: integer(),
   created_by_user_id: text().notNull(),
   created_at: text().notNull(),

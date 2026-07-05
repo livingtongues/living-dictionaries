@@ -7,10 +7,14 @@
   }
 
   const { search_params }: Props = $props()
-  const filtered = $derived(!!Object.keys($search_params).filter(key => !['page', 'query', 'view'].includes(key)).length)
+  const filtered = $derived(!!Object.keys($search_params).filter(key => !['page', 'query', 'view', 'scope'].includes(key)).length)
 
   function clear_filters() {
-    search_params.update(({ page, query, view }) => ({ page, query, view }))
+    // update receives the parsed URL param — null when no `?q=` is set.
+    search_params.update((params) => {
+      const { page, query, view, scope } = params ?? {}
+      return { page, query, view, scope }
+    })
   }
 </script>
 

@@ -17,6 +17,7 @@
   import IconFa6SolidFileImport from '~icons/fa6-solid/file-import'
   import IconFa6SolidFileExport from '~icons/fa6-solid/file-export'
   import IconFa6SolidBook from '~icons/fa6-solid/book'
+  import IconFa6SolidScroll from '~icons/fa6-solid/scroll'
 
   interface Props {
     dictionary: Tables<'dictionaries'>
@@ -83,6 +84,25 @@
       </span>
     {/if}
   </div>
+  <!-- Admin-3 preview while the texts pipeline is iterated on (the shield marks
+       the gate) — see .issues/texts-sentences-pipeline.md. -->
+  {#if page.data.auth_user?.admin_level >= 3}
+    {@const texts_count = page.data.dict_db?.texts.rows.length ?? 0}
+    <a
+      href={`/${dictionary.url}/texts`}
+      class:active={page.url.pathname.match(/\/texts?(\/|$)/)}>
+      <IconFa6SolidScroll class="icon-inline" />
+      <span class="item-label">
+        {page.data.t('dictionary.texts')}
+      </span>
+      {#if texts_count}
+        <span class="count-pill" style="margin-inline-start: auto">
+          {new Intl.NumberFormat().format(texts_count)}
+        </span>
+      {/if}
+      <IconFa6SolidUserShield class="icon-inline admin-gate-icon" style={texts_count ? 'margin-inline-start: 0.375rem' : ''} />
+    </a>
+  {/if}
   {#if !is_manager}
     <a
       href={`/${dictionary.url}/synopsis`}

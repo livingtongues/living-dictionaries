@@ -86,6 +86,7 @@ export interface DictQueryAccessor<T extends DictTableName> {
 export interface DictWrites {
   insert_entry: (args: { lexeme: MultiString }) => Promise<DictPlainRowType<'entries'>>
   insert_sentence: (args: { sentence: DictInsertType<'sentences'>, sense_id: string }) => Promise<DictPlainRowType<'sentences'>>
+  insert_text: (args: { title: MultiString, sentences: { text: MultiString, ends_paragraph?: number }[] }) => Promise<DictPlainRowType<'texts'>>
   insert_audio: (args: { audio: DictInsertType<'audio'>, speaker_id?: string }) => Promise<DictPlainRowType<'audio'>>
   insert_photo: (args: { photo: DictInsertType<'photos'>, sense_id: string }) => Promise<DictPlainRowType<'photos'>>
   insert_video: (args: { video: DictInsertType<'videos'>, sense_id: string, speaker_id?: string }) => Promise<DictPlainRowType<'videos'>>
@@ -489,6 +490,7 @@ class DictLiveDbImpl {
       this.#writes = {
         insert_entry: args => write('insert_entry', { entry_id: crypto.randomUUID(), ...args }),
         insert_sentence: args => write('insert_sentence', { ...args, sentence: { id: crypto.randomUUID(), ...args.sentence } }),
+        insert_text: args => write('insert_text', { text_id: crypto.randomUUID(), ...args }),
         insert_audio: args => write('insert_audio', { ...args, audio: { id: crypto.randomUUID(), ...args.audio } }),
         insert_photo: args => write('insert_photo', { ...args, photo: { id: crypto.randomUUID(), ...args.photo } }),
         insert_video: args => write('insert_video', { ...args, video: { id: crypto.randomUUID(), ...args.video } }),

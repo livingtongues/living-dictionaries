@@ -189,6 +189,8 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       dialects: entries_ui.dialects,
       sources: entries_ui.sources,
       search_entries: entries_ui.search_entries,
+      search_sentences: entries_ui.search_sentences,
+      search_texts: entries_ui.search_texts,
       search_index_updated: entries_ui.search_index_updated,
     }
   } catch (err) {

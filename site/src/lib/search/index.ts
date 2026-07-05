@@ -2,10 +2,21 @@ import { proxy } from 'comlink'
 import type { EntryData, Tables } from '$lib/types'
 import type { InitEntryWorkerOptions } from './entry.worker'
 import type { SearchEntriesOptions } from './search-entries'
+import type { SearchCorpusOptions } from './search-corpus'
 
 export async function search_entries(options: SearchEntriesOptions) {
   const { api } = await import('./expose-entry-worker')
   return api.search_entries(options)
+}
+
+export async function search_sentences(options: SearchCorpusOptions & { dictionary_id: string }) {
+  const { api } = await import('./expose-entry-worker')
+  return api.search_sentences(options)
+}
+
+export async function search_texts(options: SearchCorpusOptions & { dictionary_id: string }) {
+  const { api } = await import('./expose-entry-worker')
+  return api.search_texts(options)
 }
 
 export async function apply_rows(
