@@ -1,5 +1,6 @@
 import type { EntryData, Tables } from '$lib/types'
 import { should_include_tag } from '$lib/helpers/tag-visibility'
+import { dedupe_by_id } from '$lib/utils/dedupe-by-id'
 
 type SenseSentences = NonNullable<EntryData['senses'][number]['sentences']>
 type SensePhotos = NonNullable<EntryData['senses'][number]['photos']>
@@ -57,25 +58,36 @@ export function assemble_entry_data(input: AssembleEntryDataInput): EntryData {
     ...main
   } = entry as Tables<'entries'> & Record<string, unknown>
 
-  const senses_with_all = senses.map((sense) => {
+  // De-dupe every id-keyed child array. The entry surfaces render these in
+  // keyed `{#each … (row.id)}` blocks; a single duplicate junction row in a
+  // client's local dict DB otherwise throws `each_key_duplicate` and blanks the
+  // page. Deduping here (the one choke point shared by SSR + the Orama worker)
+  // keeps server- and client-built entries identical. See
+  // `.issues/entry-page-duplicate-key-crash.md`.
+  const senses_with_all = dedupe_by_id(senses).map((sense) => {
     const { entry_id, ...sense_to_include } = sense as Tables<'senses'> & Record<string, unknown>
+    const sentences = sentences_by_sense[sense.id]?.length ? dedupe_by_id(sentences_by_sense[sense.id]) : undefined
+    const photos = photos_by_sense[sense.id]?.length ? dedupe_by_id(photos_by_sense[sense.id]) : undefined
+    const videos = videos_by_sense[sense.id]?.length ? dedupe_by_id(videos_by_sense[sense.id]) : undefined
     return {
       ...sense_to_include,
-      ...(sentences_by_sense[sense.id]?.length ? { sentences: sentences_by_sense[sense.id] } : {}),
-      ...(photos_by_sense[sense.id]?.length ? { photos: photos_by_sense[sense.id] } : {}),
-      ...(videos_by_sense[sense.id]?.length ? { videos: videos_by_sense[sense.id] } : {}),
+      ...(sentences ? { sentences } : {}),
+      ...(photos ? { photos } : {}),
+      ...(videos ? { videos } : {}),
     }
   }) as EntryData['senses']
 
-  const visible_tags = tags.filter(tag => should_include_tag(tag, admin_level))
+  const deduped_audios = dedupe_by_id(audios)
+  const visible_tags = dedupe_by_id(tags).filter(tag => should_include_tag(tag, admin_level))
+  const deduped_dialects = dedupe_by_id(dialects)
 
   return {
     id: id as string,
     main: main as EntryData['main'],
     updated_at: updated_at as string,
     senses: senses_with_all,
-    ...(audios.length ? { audios } : {}),
+    ...(deduped_audios.length ? { audios: deduped_audios } : {}),
     ...(visible_tags.length ? { tags: visible_tags } : {}),
-    ...(dialects.length ? { dialects } : {}),
+    ...(deduped_dialects.length ? { dialects: deduped_dialects } : {}),
   }
 }

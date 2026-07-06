@@ -290,10 +290,14 @@ sibling-app (house/tutor) wins worth borrowing + any LD win the siblings should 
 <daily counts table or sparkline data>
 ```
 
-2. **Chat summary (this IS the overnight brief Jacob reads — make it carry the human picture)** —
-   TL;DR + the single most important action + a **Who's doing what** readout: a line per active admin
-   *by name* (what each was up to), then one or two lines of aggregate, **unnamed** activity for
-   everyone else. Confirm the report path.
+2. **The report FILE is the artifact — follow the shared contract** at
+   `~/code/horse/.cron/report-style.md`: fully self-contained (a reader never opens this session),
+   no unexpanded abbreviations, **MDX + charts encouraged** (this loop sits on rich data — small
+   inline-SVG charts of error/usage/perf trends travel all the way to Jacob's phone via the morning
+   debrief). The **Who's doing what** human picture — a line per active admin *by name*, then one
+   or two lines of aggregate, **unnamed** activity for everyone else — goes IN the report. Chat
+   close-out: a few lines + the report path (the morning debrief and Jacob read the file, not this
+   transcript).
 
 ## Related
 

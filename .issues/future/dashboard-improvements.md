@@ -58,7 +58,20 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   Add: `sync_failed` volume by `context.kind` (client_behind/network/snapshot_expired/storage_lost/…)
   **AND by `app_version` (current vs stale)**, a distinct-(user,dict) "currently stuck" count, and
   age-of-oldest-unresolved per kind. Cheap — same shape as `error_clusters` but reading `level='warn'
-  AND message='sync_failed'` (excluded from every existing panel). **Top build priority.**
+  AND message='sync_failed'`.
+  **✅ SHIPPED 2026-07-06 (commit `24b080b1`) — verified in code.** `build_sync_health` in
+  `log-analytics.ts` (`SyncHealth`: `by_kind` current-vs-stale, `client_behind` split, `stuck_pairs`,
+  `oldest_unresolved_at`, `stuck[]`) + the "Sync health" panel in `admin/health/HealthView.svelte`.
+  LD's stuck-tab key is **`(user, dict_id)`** — more granular than tutor's `engine` key. The 07-06 run
+  confirmed it surfaces the 33%-of-volume storm + names the stuck tabs without a hand query.
+- **Sync health: 7-day `client_behind`-current sparkline** *(NEW 2026-07-06 · verified not present).*
+  The shipped panel is **hot-window only**; a re-emergence of a `client_behind`-on-current-build storm
+  (the "act now, new regression" signal) is only legible while you're actively looking. Add a small
+  7-day daily bucket / sparkline of `client_behind.current` under the three stat cards so a slow
+  re-appearance shows as a trend. `by_kind` already computes the current split — just needs a per-day roll.
+- **"Admin auth-denials" strip on /admin/health** *(ported from house · filed 2026-07-06 · LOW).* House
+  (NEW 07-05, grounded in a real admin lockout) surfaces repeated admin-gate denials on `/admin/health`.
+  LD's numeric-level gating could do the same. LOW until LD observes a denial worth surfacing.
 - **★ Deploy-settling error band** *(ported from tutor · filed 2026-07-05 run 2 — MEDIUM).* tutor
   buckets errors within `DEPLOY_TAIL_MINUTES` of a build's first `session_start` as "deploy settling"
   **even on the current build**, distinguishing expected post-deploy chunk/asset-manifest blips from a

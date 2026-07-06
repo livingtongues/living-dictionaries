@@ -3,9 +3,12 @@
 Home for this repo's recurring/scheduled agent work and the reports it produces — kept out of
 `.issues/` (those are active *plans*, not recurring outputs).
 
-- **`log-review.md`** — the live, committed definition of the daily log-and-fix review (reviews the
-  `new.livingdictionaries.app` VPS `client_logs`).
-- **`log-reviews/`** — dated output of that review (`YYYY-MM-DD.md`), accumulated as history.
+- **`log-reviews/`** — dated output of the daily log-and-fix review (`YYYY-MM-DD.md`; reviews the
+  `new.livingdictionaries.app` VPS `client_logs`), accumulated as history. Since 2026-07-06 the
+  review is **spawned by the horse nightly orchestrator** (`horse/nightly-orchestrate`, tier 1 of
+  `~/code/horse/.cron/fleet.md`) — there is no standalone `living-dictionaries/log-review` cron
+  entry anymore. The playbook is still this repo's `.claude/commands/log-and-fix.md`; reports
+  follow `~/code/horse/.cron/report-style.md`.
 
 ## How crons run
 
@@ -30,7 +33,8 @@ a repo job by editing its file and committing; `horse cron run <id>` still trigg
 
 | id | source | schedule | runs | output |
 |---|---|---|---|---|
-| `living-dictionaries/log-review` | `.cron/log-review.md` (repo, `runs_on: mustang`, `model: claude-opus-4-8`) | `every: 31 22 * * *` (daily 22:31 UTC = 06:31 SGT) | `.claude/commands/log-and-fix.md` end-to-end | `.cron/log-reviews/YYYY-MM-DD.md` + chat summary |
+| `living-dictionaries/invoice-2026-07-24` | `.cron/invoice-2026-07-24.md` (repo, `runs_on: mustang`) | one-time `at: 2026-07-23T23:00` | Living Tongues invoice draft | summary in the Horse chat session |
 
-> The `log-and-fix` *command* lives at `.claude/commands/log-and-fix.md` (slash menu + the cron read
-> it there) — it is NOT a cron definition. `log-review.md` just invokes it.
+> The daily log review is no longer a cron here — the **horse nightly orchestrator** spawns it
+> (see `~/code/horse/.cron/fleet.md`). The `log-and-fix` *command* stays at
+> `.claude/commands/log-and-fix.md`; its output stays in `.cron/log-reviews/`.

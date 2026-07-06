@@ -89,6 +89,24 @@ describe(assemble_entry_data, () => {
     expect(filled.dialects).toHaveLength(1)
   })
 
+  test('de-dupes duplicate child rows by id (guards keyed {#each} against corrupt local junctions)', () => {
+    const sense = { id: 'sense-1', entry_id: 'entry-1', glosses: { en: 'water' } } as any
+    const result = assemble_entry_data(base_input({
+      senses: [sense, { ...sense }],
+      sentences_by_sense: { 'sense-1': [{ id: 'st-1' } as any, { id: 'st-1' } as any, { id: 'st-2' } as any] },
+      photos_by_sense: { 'sense-1': [{ id: 'ph-1' } as any, { id: 'ph-1' } as any] },
+      audios: [{ id: 'a1' } as any, { id: 'a1' } as any],
+      tags: [{ id: 't1', name: 'x', private: 0 } as any, { id: 't1', name: 'x', private: 0 } as any],
+      dialects: [{ id: 'd1' } as any, { id: 'd1' } as any],
+    }))
+    expect(result.senses).toHaveLength(1)
+    expect(result.senses[0].sentences?.map(s => s.id)).toEqual(['st-1', 'st-2'])
+    expect(result.senses[0].photos).toHaveLength(1)
+    expect(result.audios).toHaveLength(1)
+    expect(result.tags).toHaveLength(1)
+    expect(result.dialects).toHaveLength(1)
+  })
+
   test('filters private + v4 tags by admin level', () => {
     const tags = [
       { id: 't-public', name: 'animals', private: 0 },
