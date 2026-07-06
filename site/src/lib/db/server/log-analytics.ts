@@ -39,6 +39,13 @@ const INFRA_EVENTS = new Set(['heartbeat', 'navigation', 'perf', 'session_start'
 const TOP_LIMIT = 12
 const ERROR_CLUSTER_LIMIT = 25
 const ROUTE_PERF_LIMIT = 12
+/**
+ * Errors within this window of their build's first appearance count as post-deploy
+ * "settling" churn (chunk/asset races on a fresh bundle), NOT a standing regression —
+ * so a burst right after a deploy, even on the CURRENT build, auto-explains. Ported
+ * from tutor's deploy-tail fold; LD's `stale_errors` only caught OLD-build churn.
+ */
+const DEPLOY_TAIL_MINUTES = 30
 
 /**
  * The global Humans/Bots toggle. Usage/engagement/geo/perf panels re-filter by
@@ -102,6 +109,10 @@ export interface GeoAnalytics {
   ttfb_by_country: GeoLatency[]
   /** Real-user TTFB split by distance to the Boston origin (hot window). */
   ttfb_by_distance: GeoLatency[]
+  /** Real-user LCP split by country (hot window — the `web_vital` LCP value). */
+  lcp_by_country: GeoLatency[]
+  /** Real-user LCP split by distance to Boston (hot window) — surfaces the far-region cold-snapshot p95 tail. */
+  lcp_by_distance: GeoLatency[]
 }
 /** Errors split by build version so deploy-tail noise on stale tabs is legible vs real errors. */
 export interface ErrorsByVersion {
@@ -115,6 +126,14 @@ export interface ErrorsByVersion {
   stale: number
   /** stale ÷ total; null when there are no hot-window errors. */
   stale_pct: number | null
+  /**
+   * Errors (any build, incl. the current one) that landed within DEPLOY_TAIL_MINUTES
+   * of that build's first appearance — post-deploy settling churn, not a standing bug.
+   * A current-build error spike that's mostly this is a deploy blip, not a regression.
+   */
+  deploy_tail_errors: number
+  /** deploy_tail_errors ÷ total; null when there are no hot-window errors. */
+  deploy_tail_pct: number | null
   /** Per-version error counts, highest first. */
   versions: { version: string | null, errors: number, is_current: boolean }[]
 }
@@ -273,6 +292,8 @@ export interface LogAnalytics {
   event_coverage: EventCoverage
   /** Leader-worker DB health (live_query_* family). */
   leader_health: LeaderHealth
+  /** Sync health — the `sync_failed` family (client_behind storm detector), invisible to every other panel. */
+  sync_health: SyncHealth
   /** Agent/API write activity — the server-emitted `v1_*` events (hot window only). */
   api_v1: ApiV1Activity
   /** Top missing i18n keys — the live translation-gap worklist (hot window, human). */
@@ -343,6 +364,35 @@ export interface BootHealth {
   by_message: { message: string, code: string | null, sessions: number, count: number, last_seen: string }[]
   /** Daily distinct failed sessions — the trend line. */
   daily: { day: string, sessions: number }[]
+}
+
+/**
+ * Sync health — the `sync_failed` warn/error family, which is INVISIBLE to every
+ * other panel (`top_events` reads `level='info'`, `error_clusters`/`errors_by_version`
+ * read only `('error','unhandled_rejection','crash')`, so `warn`-level `sync_failed`
+ * falls through both). This was the single largest thing in the log stream on
+ * 2026-07-05 (9,862 rows / 41.9% of the day — a `client_behind` retry storm from
+ * stale tabs after a dict-schema deploy) yet showed on neither dashboard. Hot
+ * window only (sync_failed isn't in the rollup). Confirms the `f66b209c` fix
+ * (zero storm on the current build) and surfaces the residual stuck old-tabs.
+ */
+export interface SyncHealth {
+  /** Total `sync_failed` rows in the hot window (all kinds). */
+  total: number
+  /** Per-kind volume (client_behind / network / snapshot_expired / …), current-build vs stale split, highest first. */
+  by_kind: { kind: string, count: number, current: number, stale: number }[]
+  /** The `client_behind` storm class specifically: current-build (should be ~0 post-fix) vs stale-build rows. */
+  client_behind: { total: number, current: number, stale: number }
+  /**
+   * Distinct (user, dict) tabs STILL stuck on `client_behind` — a stale-build
+   * client_behind row seen within the recency window (the fix can't reach a
+   * backgrounded tab that never reloads; these are the ones to nudge/reload).
+   */
+  stuck_pairs: number
+  /** Oldest first-seen among currently-stuck tabs (age-of-oldest-unresolved); null when none stuck. */
+  oldest_unresolved_at: string | null
+  /** Per stuck tab — who to nudge / which build to reload, most-recent first. */
+  stuck: { user_id: string | null, dict_id: string | null, app_version: string | null, count: number, first_seen: string, last_seen: string }[]
 }
 
 /**
@@ -586,8 +636,8 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
   const capability = timed('build_capability', () => build_capability({ ctx, area_counts }))
   const performance = timed('build_performance', () => build_performance({ ctx, daily }))
   const web_vitals = timed('build_web_vitals', () => build_web_vitals(ctx))
-  const { ttfb_by_country, ttfb_by_distance } = timed('build_ttfb', () => build_ttfb_latency(ctx))
-  const geo = build_geo_areas({ area_counts, ttfb_by_country, ttfb_by_distance })
+  const { ttfb_by_country, ttfb_by_distance, lcp_by_country, lcp_by_distance } = timed('build_geo_latency', () => build_geo_latency(ctx))
+  const geo = build_geo_areas({ area_counts, ttfb_by_country, ttfb_by_distance, lcp_by_country, lcp_by_distance })
   const errors_by_version = timed('build_errors_by_version', () => build_errors_by_version(ctx))
   const deploys = timed('build_deploys', () => build_deploys(ctx))
   const pipeline = timed('build_pipeline', () => build_pipeline_health({ shared_db, logs_db }))
@@ -603,6 +653,7 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
   }
 
   const leader_health = timed('build_leader_health', () => build_leader_health(ctx))
+  const sync_health = timed('build_sync_health', () => build_sync_health(ctx))
   const api_v1 = timed('build_api_v1', () => build_api_v1_activity(ctx))
   const missing_i18n_keys = timed('build_missing_i18n', () => build_missing_i18n_keys(ctx))
   const boot_health = timed('build_boot_health', () => build_boot_health(ctx))
@@ -635,6 +686,7 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
     server_faults,
     event_coverage,
     leader_health,
+    sync_health,
     api_v1,
     missing_i18n_keys,
     boot_health,
@@ -1078,18 +1130,20 @@ function build_capability({ ctx, area_counts }: {
   return { total_sessions: window_sessions.length - bot_sessions, below_capability_sessions, bot_sessions, webdriver_sessions, devices, os, browsers, db_tiers }
 }
 
-/** Finalize geo: rank the (now fully-populated) area tally + attach the TTFB splits. */
-function build_geo_areas({ area_counts, ttfb_by_country, ttfb_by_distance }: {
+/** Finalize geo: rank the (now fully-populated) area tally + attach the TTFB + LCP splits. */
+function build_geo_areas({ area_counts, ttfb_by_country, ttfb_by_distance, lcp_by_country, lcp_by_distance }: {
   area_counts: Map<string, { country: string, sessions: number }>
   ttfb_by_country: GeoLatency[]
   ttfb_by_distance: GeoLatency[]
+  lcp_by_country: GeoLatency[]
+  lcp_by_distance: GeoLatency[]
 }): GeoAnalytics {
   const areas = [...area_counts.entries()]
     .map(([key, value]) => ({ key, country: value.country, sessions: value.sessions }))
     .sort((first, second) => second.sessions - first.sessions)
     .slice(0, TOP_LIMIT)
   const located_sessions = [...area_counts.values()].reduce((sum, area) => sum + area.sessions, 0)
-  return { located_sessions, areas, ttfb_by_country, ttfb_by_distance }
+  return { located_sessions, areas, ttfb_by_country, ttfb_by_distance, lcp_by_country, lcp_by_distance }
 }
 
 /**
@@ -1330,49 +1384,66 @@ function build_web_vitals(ctx: AnalyticsContext): WebVitalSummary[] {
     })
 }
 
+interface GeoLatencyRow { value: number, country: string | null, latitude: number | null, longitude: number | null }
+
+/** Split a metric's real-user samples into by-country + by-distance-to-Boston latency percentiles. */
+function split_geo_latency(rows: GeoLatencyRow[]): { by_country: GeoLatency[], by_distance: GeoLatency[] } {
+  const by_country_values = new Map<string, number[]>()
+  const by_distance_values = new Map<string, number[]>()
+  for (const row of rows) {
+    if (typeof row.value !== 'number')
+      continue
+    if (row.country) {
+      if (!by_country_values.has(row.country))
+        by_country_values.set(row.country, [])
+      by_country_values.get(row.country)?.push(row.value)
+    }
+    const km = distance_to_origin_km({ latitude: row.latitude, longitude: row.longitude })
+    if (km !== null) {
+      if (!by_distance_values.has(distance_bucket(km)))
+        by_distance_values.set(distance_bucket(km), [])
+      by_distance_values.get(distance_bucket(km))?.push(row.value)
+    }
+  }
+  const by_country: GeoLatency[] = [...by_country_values.entries()]
+    .map(([label, values]) => ({ label, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95) }))
+    .sort((first, second) => second.count - first.count)
+    .slice(0, TOP_LIMIT)
+  const by_distance: GeoLatency[] = DISTANCE_BUCKETS
+    .filter(bucket => by_distance_values.has(bucket))
+    .map((bucket) => {
+      const values = by_distance_values.get(bucket) ?? []
+      return { label: bucket, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95) }
+    })
+  return { by_country, by_distance }
+}
+
 /**
- * Geo-split real-user TTFB (hot window). Uses the page_load perf row's
- * `responseStart` (context.ttfb) — the distance-sensitive server round-trip —
- * grouped by country and by distance to the Boston origin.
+ * Geo-split real-user latency (hot window). TTFB uses the page_load perf row's
+ * `responseStart` (context.ttfb) — the distance-sensitive server round-trip; LCP
+ * uses the `web_vital` LCP value, whose distance p95 tail is the far-region
+ * cold-snapshot path. Both grouped by country + by distance to the Boston origin.
  */
-function build_ttfb_latency(ctx: AnalyticsContext): { ttfb_by_country: GeoLatency[], ttfb_by_distance: GeoLatency[] } {
+function build_geo_latency(ctx: AnalyticsContext): { ttfb_by_country: GeoLatency[], ttfb_by_distance: GeoLatency[], lcp_by_country: GeoLatency[], lcp_by_distance: GeoLatency[] } {
   const ttfb_rows = ctx.logs_db.prepare(`
-    SELECT json_extract(context, '$.ttfb') ttfb, country, latitude, longitude
+    SELECT json_extract(context, '$.ttfb') value, country, latitude, longitude
     FROM client_logs
     WHERE received_at >= ? AND message = 'perf' AND ${ctx.audience_filter}
       AND json_extract(context, '$.name') = 'page_load'
       AND json_extract(context, '$.ttfb') IS NOT NULL
-  `).all(ctx.window_start_iso) as { ttfb: number, country: string | null, latitude: number | null, longitude: number | null }[]
+  `).all(ctx.window_start_iso) as GeoLatencyRow[]
+  const lcp_rows = ctx.logs_db.prepare(`
+    SELECT json_extract(context, '$.value') value, country, latitude, longitude
+    FROM client_logs
+    WHERE received_at >= ? AND message = 'perf' AND ${ctx.audience_filter}
+      AND json_extract(context, '$.name') = 'web_vital'
+      AND json_extract(context, '$.metric') = 'LCP'
+      AND json_extract(context, '$.value') IS NOT NULL
+  `).all(ctx.window_start_iso) as GeoLatencyRow[]
 
-  const ttfb_by_country_values = new Map<string, number[]>()
-  const ttfb_by_distance_values = new Map<string, number[]>()
-  for (const row of ttfb_rows) {
-    if (typeof row.ttfb !== 'number')
-      continue
-    if (row.country) {
-      if (!ttfb_by_country_values.has(row.country))
-        ttfb_by_country_values.set(row.country, [])
-      ttfb_by_country_values.get(row.country)?.push(row.ttfb)
-    }
-    const km = distance_to_origin_km({ latitude: row.latitude, longitude: row.longitude })
-    if (km !== null) {
-      if (!ttfb_by_distance_values.has(distance_bucket(km)))
-        ttfb_by_distance_values.set(distance_bucket(km), [])
-      ttfb_by_distance_values.get(distance_bucket(km))?.push(row.ttfb)
-    }
-  }
-
-  const ttfb_by_country: GeoLatency[] = [...ttfb_by_country_values.entries()]
-    .map(([label, values]) => ({ label, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95) }))
-    .sort((first, second) => second.count - first.count)
-    .slice(0, TOP_LIMIT)
-  const ttfb_by_distance: GeoLatency[] = DISTANCE_BUCKETS
-    .filter(bucket => ttfb_by_distance_values.has(bucket))
-    .map((bucket) => {
-      const values = ttfb_by_distance_values.get(bucket) ?? []
-      return { label: bucket, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95) }
-    })
-  return { ttfb_by_country, ttfb_by_distance }
+  const ttfb = split_geo_latency(ttfb_rows)
+  const lcp = split_geo_latency(lcp_rows)
+  return { ttfb_by_country: ttfb.by_country, ttfb_by_distance: ttfb.by_distance, lcp_by_country: lcp.by_country, lcp_by_distance: lcp.by_distance }
 }
 
 /**
@@ -1399,12 +1470,37 @@ function build_errors_by_version(ctx: AnalyticsContext): ErrorsByVersion {
     })
     .sort((first, second) => second.errors - first.errors)
   const version_total_errors = version_current_errors + version_stale_errors
+
+  // Deploy-tail fold: an error is "settling" if it landed within DEPLOY_TAIL_MINUTES
+  // of its build's first appearance in the window. Isolates post-deploy chunk/asset
+  // races (even on the current build) from standing regressions.
+  const build_first_seen = new Map(
+    (ctx.logs_db.prepare(`
+      SELECT app_version build, MIN(received_at) first_seen FROM client_logs
+      WHERE received_at >= ? AND app_version IS NOT NULL
+      GROUP BY app_version
+    `).all(ctx.window_start_iso) as { build: string, first_seen: string }[])
+      .map(row => [row.build, Date.parse(row.first_seen)] as const),
+  )
+  const tail_error_rows = ctx.logs_db.prepare(`
+    SELECT received_at, app_version build FROM client_logs
+    WHERE received_at >= ? AND level IN ${ERROR_LEVELS_SQL} AND app_version IS NOT NULL
+  `).all(ctx.window_start_iso) as { received_at: string, build: string }[]
+  let deploy_tail_errors = 0
+  for (const row of tail_error_rows) {
+    const first_seen_ms = build_first_seen.get(row.build)
+    if (first_seen_ms != null && Date.parse(row.received_at) - first_seen_ms <= DEPLOY_TAIL_MINUTES * 60_000)
+      deploy_tail_errors++
+  }
+
   return {
     current_version: ctx.current_app_version ?? null,
     total: version_total_errors,
     current: version_current_errors,
     stale: version_stale_errors,
     stale_pct: version_total_errors > 0 ? version_stale_errors / version_total_errors : null,
+    deploy_tail_errors,
+    deploy_tail_pct: version_total_errors > 0 ? deploy_tail_errors / version_total_errors : null,
     versions: error_versions,
   }
 }
@@ -1486,6 +1582,92 @@ function build_leader_health(ctx: AnalyticsContext): LeaderHealth {
     failed_by_code,
     failed_current,
     failed_stale: failed - failed_current,
+  }
+}
+
+/**
+ * A stale-build `client_behind` tab is still "stuck" if it emitted within this
+ * window of now — the dict-engine throttle caps repeat storm rows at one per 10
+ * min, so 45 min tolerates a throttle gap + a backgrounded-tab heartbeat lull
+ * before we stop counting a tab as actively stuck.
+ */
+const SYNC_STUCK_RECENT_MS = 45 * 60 * 1000
+
+/**
+ * Sync health — the `sync_failed` family (hot window). Splits per-kind volume by
+ * current vs stale build and isolates the `client_behind` storm class, then
+ * derives the distinct (user, dict) tabs STILL stuck on a stale build (a fix
+ * can't reach a backgrounded tab that never reloads). See the `SyncHealth` doc.
+ */
+function build_sync_health(ctx: AnalyticsContext): SyncHealth {
+  const { logs_db, window_start_iso, current_app_version, now } = ctx
+  const rows = logs_db.prepare(`
+    SELECT coalesce(json_extract(context, '$.kind'), 'unknown') kind,
+           app_version,
+           user_id,
+           json_extract(context, '$.dict_id') dict_id,
+           received_at
+    FROM client_logs
+    WHERE received_at >= ? AND message = 'sync_failed'
+  `).all(window_start_iso) as { kind: string, app_version: string | null, user_id: string | null, dict_id: string | null, received_at: string }[]
+
+  const is_current = (version: string | null): boolean => current_app_version != null && version === current_app_version
+  const kind_counts = new Map<string, { count: number, current: number, stale: number }>()
+  const client_behind = { total: 0, current: 0, stale: 0 }
+  // (user, dict) tab → aggregate over STALE-build client_behind rows (the residual
+  // a deploy can't reach). A current-build client_behind isn't "stuck" — the fix recovers it.
+  interface StuckAccum { user_id: string | null, dict_id: string | null, app_version: string | null, count: number, first_seen: string, last_seen: string }
+  const stuck_by_tab = new Map<string, StuckAccum>()
+
+  for (const row of rows) {
+    const bucket = kind_counts.get(row.kind) ?? { count: 0, current: 0, stale: 0 }
+    bucket.count++
+    if (is_current(row.app_version))
+      bucket.current++
+    else
+      bucket.stale++
+    kind_counts.set(row.kind, bucket)
+
+    if (row.kind === 'client_behind') {
+      client_behind.total++
+      if (is_current(row.app_version)) {
+        client_behind.current++
+      } else {
+        client_behind.stale++
+        const key = `${row.user_id ?? '∅'}|${row.dict_id ?? '∅'}`
+        const tab = stuck_by_tab.get(key)
+        if (!tab) {
+          stuck_by_tab.set(key, { user_id: row.user_id, dict_id: row.dict_id, app_version: row.app_version, count: 1, first_seen: row.received_at, last_seen: row.received_at })
+        } else {
+          tab.count++
+          if (row.received_at < tab.first_seen)
+            tab.first_seen = row.received_at
+          if (row.received_at > tab.last_seen) {
+            tab.last_seen = row.received_at
+            tab.app_version = row.app_version
+          }
+        }
+      }
+    }
+  }
+
+  const recent_cutoff = now.getTime() - SYNC_STUCK_RECENT_MS
+  const stuck = [...stuck_by_tab.values()]
+    .filter(tab => new Date(tab.last_seen).getTime() >= recent_cutoff)
+    .sort((first, second) => second.last_seen.localeCompare(first.last_seen))
+  const oldest_unresolved_at = stuck.reduce<string | null>((oldest, tab) => (!oldest || tab.first_seen < oldest ? tab.first_seen : oldest), null)
+
+  const by_kind = [...kind_counts.entries()]
+    .map(([kind, value]) => ({ kind, ...value }))
+    .sort((first, second) => second.count - first.count)
+
+  return {
+    total: rows.length,
+    by_kind,
+    client_behind,
+    stuck_pairs: stuck.length,
+    oldest_unresolved_at,
+    stuck,
   }
 }
 

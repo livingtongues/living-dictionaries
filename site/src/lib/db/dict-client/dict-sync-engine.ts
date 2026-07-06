@@ -337,16 +337,17 @@ export class DictSyncEngine {
     await this.#connection.execute('PRAGMA defer_foreign_keys = ON')
     await this.#connection.execute('BEGIN')
     try {
-      for (const table of DICT_SYNCABLE_TABLES) {
-        const rows = response.changes[table]
-        if (!rows?.length)
-          continue
-        for (const row of rows) {
-          await this.#upsert_row({ table, row })
-        }
-        affected.add(table)
-      }
-
+      // Deletes are applied BEFORE upserts (parity with house's 2026-07-05 fix).
+      // Every dict junction table (entry_tags, entry_dialects, sense_photos,
+      // sense_sentences, audio_speakers, …) carries a synthetic-UUID PK PLUS a
+      // natural-key UNIQUE that `#upsert_row`'s `ON CONFLICT(id)` does NOT cover,
+      // and a junction link is replace-all: unlink then re-link the SAME natural
+      // key tombstones the OLD id and inserts a BRAND-NEW id (link_junction_local
+      // no-ops only while a row is present). If one `/changes` window carries both
+      // the delete for the old id and the upsert for the new row, upserting first
+      // re-inserts the natural key while the stale old row is still present →
+      // `UNIQUE constraint failed` → the whole apply rolls back and this dict wedges
+      // into a retry loop. Clearing the delete first frees the natural key.
       for (const { table_name, id } of response.deletes) {
         // Local row may be dirty (we pushed it this round). If so, skip the
         // delete — server already accepted our newer write.
@@ -360,6 +361,16 @@ export class DictSyncEngine {
           affected.add(table_name)
           deleted_rows.push({ table_name, id })
         }
+      }
+
+      for (const table of DICT_SYNCABLE_TABLES) {
+        const rows = response.changes[table]
+        if (!rows?.length)
+          continue
+        for (const row of rows) {
+          await this.#upsert_row({ table, row })
+        }
+        affected.add(table)
       }
 
       // Clear dirty flags ONLY on the rows we actually pushed (keyed by id), not a blanket

@@ -7,12 +7,17 @@ import { render } from 'svelte/server'
 import type { Component } from 'svelte'
 import NotoSans from './notoSans.ttf'
 import { ResponseCodes } from '$lib/constants'
+import { log_server_event } from '$lib/server/log-server-event'
 
 // based on what text is contained in the props, load fonts accordingly
 
-const get_png = withCache(async (html: string, height: number, width: number) => {
-  const markup = toReactNode(html)
-  const svg = await satori(markup, {
+function render_svg({ markup, height, width, load_dynamic }: {
+  markup: ReturnType<typeof toReactNode>
+  height: number
+  width: number
+  load_dynamic: boolean
+}): Promise<string> {
+  return satori(markup, {
     fonts: [
       {
         name: 'Noto+Sans',
@@ -23,8 +28,27 @@ const get_png = withCache(async (html: string, height: number, width: number) =>
     // debug: true,
     height,
     width,
-    loadAdditionalAsset: (...args: string[]) => loadDynamicAsset(...args),
+    // Dynamically-fetched Google fonts (for non-Latin scripts) are parsed INSIDE
+    // satori by @shuding/opentype.js, which throws on some GSUB tables it doesn't
+    // support (e.g. "lookupType: 5 - substFormat: 3 is not yet supported") — the
+    // font FETCH is guarded but the parse is not, so a bad fallback font would
+    // otherwise 500 the whole share image. The get_png caller retries with this
+    // OFF (NotoSans-only) so the OG image still renders (Latin/tofu) rather than break.
+    ...(load_dynamic ? { loadAdditionalAsset: (...args: string[]) => loadDynamicAsset(...args) } : {}),
   })
+}
+
+const get_png = withCache(async (html: string, height: number, width: number) => {
+  const markup = toReactNode(html)
+  let svg: string
+  try {
+    svg = await render_svg({ markup, height, width, load_dynamic: true })
+  } catch (error) {
+    // A dynamic fallback font tripped satori's opentype.js parse — fall back to a
+    // NotoSans-only render (non-Latin glyphs may tofu) so the share image never 500s.
+    log_server_event({ level: 'warn', message: 'og_font_unsupported', error, context: { width, height } })
+    svg = await render_svg({ markup: toReactNode(html), height, width, load_dynamic: false })
+  }
 
   const resvg = new Resvg(svg, {
     fitTo: {

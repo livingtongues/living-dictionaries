@@ -334,6 +334,15 @@ export function reroll_archived_days_once({ shared_db = get_shared_db(), logs_db
  * today), advance the watermark to the last completed day, then archive + prune.
  * To force a re-roll of finalized days (e.g. after changing rollup rules while
  * their raw rows are still hot/archived), delete the watermark row and re-run.
+ *
+ * Every sub-step runs through `step()` so a throw in one (e.g. the one-time
+ * archive heal, or a single malformed day's rollup) is logged (console + a
+ * `log_retention_step_failed` server event tagged with the step name) and
+ * swallowed — the rest of the sweep still runs. Hardening ported from house
+ * (2026-07-05) after a bug in the unconditional, runs-first
+ * `reroll_archived_days_once` heal aborted the ENTIRE sweep (no rollup, no
+ * archive, no prune) every single pass. One brittle sub-step must never take
+ * down the ordinary rollup/archive/prune.
  */
 export function run_log_retention_once({ shared_db = get_shared_db(), logs_db = get_logs_db(), archive_db = get_log_archive_db(), now = new Date() }: {
   shared_db?: Database.Database
@@ -341,29 +350,56 @@ export function run_log_retention_once({ shared_db = get_shared_db(), logs_db = 
   archive_db?: Database.Database
   now?: Date
 } = {}): { days_rolled: number, archived: number, pruned: number } {
-  reroll_archived_days_once({ shared_db, logs_db, archive_db })
+  const step = <T>({ label, fallback, run }: { label: string, fallback: T, run: () => T }): T => {
+    try {
+      return run()
+    } catch (err) {
+      console.error(`[log-retention] step '${label}' failed (continuing sweep):`, err)
+      log_server_event({ level: 'error', message: 'log_retention_step_failed', error: err, context: { step: label }, db: logs_db })
+      return fallback
+    }
+  }
+
+  step({ label: 'reroll_archived_days_once', fallback: undefined, run: () => reroll_archived_days_once({ shared_db, logs_db, archive_db }) })
   const watermark = get_rollup_watermark(shared_db)
-  const days = (logs_db.prepare('SELECT DISTINCT substr(received_at, 1, 10) day FROM client_logs ORDER BY day').all() as { day: string }[])
-    .map(row => row.day)
-    .filter(day => !watermark || day > watermark)
-  for (const day of days)
-    rollup_day({ day, shared_db, logs_db })
+  const days = step({
+    label: 'list_hot_days',
+    fallback: [] as string[],
+    run: () => (logs_db.prepare('SELECT DISTINCT substr(received_at, 1, 10) day FROM client_logs ORDER BY day').all() as { day: string }[])
+      .map(row => row.day)
+      .filter(day => !watermark || day > watermark),
+  })
+  let days_rolled = 0
+  for (const day of days) {
+    step({ label: `rollup_day:${day}`, fallback: undefined, run: () => {
+      rollup_day({ day, shared_db, logs_db })
+      days_rolled++
+    } })
+  }
   // Every day ≤ yesterday is now final: its rows are immutable and were just
   // rolled if any existed (quiet days have nothing to roll) — so the watermark
   // advances to yesterday even when a day had zero rows.
   const yesterday = new Date(now.getTime() - DAY_MS).toISOString().slice(0, 10)
   if (yesterday && (!watermark || yesterday > watermark)) {
-    shared_db.prepare(`
-      INSERT INTO db_metadata (key, value) VALUES (?, ?)
-      ON CONFLICT(key) DO UPDATE SET value = excluded.value
-    `).run(ROLLUP_WATERMARK_KEY, yesterday)
+    step({ label: 'advance_watermark', fallback: undefined, run: () => {
+      shared_db.prepare(`
+        INSERT INTO db_metadata (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value
+      `).run(ROLLUP_WATERMARK_KEY, yesterday)
+    } })
   }
-  const { archived, pruned } = archive_old_logs({ logs_db, archive_db, now })
-  shared_db.prepare(`
-    INSERT INTO db_metadata (key, value) VALUES ('log_retention_ran_at', ?)
-    ON CONFLICT(key) DO UPDATE SET value = excluded.value
-  `).run(now.toISOString())
-  return { days_rolled: days.length, archived, pruned }
+  const { archived, pruned } = step({
+    label: 'archive_old_logs',
+    fallback: { archived: 0, pruned: 0 },
+    run: () => archive_old_logs({ logs_db, archive_db, now }),
+  })
+  step({ label: 'record_ran_at', fallback: undefined, run: () => {
+    shared_db.prepare(`
+      INSERT INTO db_metadata (key, value) VALUES ('log_retention_ran_at', ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    `).run(now.toISOString())
+  } })
+  return { days_rolled, archived, pruned }
 }
 
 const SINGLETON_KEY = Symbol.for('living.log-retention-cron.state')

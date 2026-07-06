@@ -242,22 +242,14 @@ export class Sync {
     await this.#connection.execute('BEGIN')
 
     try {
-      for (const table_name of SYNCABLE_TABLE_NAMES) {
-        const changes = response.changes[table_name]
-        if (!changes?.length)
-          continue
-        for (const row of changes) {
-          if (is_readonly_table(table_name))
-            delete (row as Record<string, unknown>).dirty
-          else
-            (row as { dirty: number | null }).dirty = null
-          await this.#upsert_row(table_name, row)
-        }
-        affected_tables.add(table_name)
-        result.items_downloaded += changes.length
-        this.#log({ level: 'info', phase: 'download', table: table_name, message: 'Downloaded', row_count: changes.length })
-      }
-
+      // Deletes are applied BEFORE upserts (parity with house's 2026-07-05 fix +
+      // the dict engine). `dictionary_roles` is a junction with a synthetic-UUID
+      // PK plus a natural-key UNIQUE (dictionary_id, user_id, role) that
+      // `#upsert_row`'s `ON CONFLICT(id)` does NOT cover; re-adding a removed role
+      // tombstones the old id + inserts a new id for the SAME natural key. A
+      // `/changes` window carrying both the delete and the re-insert would collide
+      // on the natural key (UNIQUE constraint failed → whole sync rolls back) if
+      // upserts ran first. Clearing the delete first frees the natural key.
       let deletes_pulled = 0
       let deletes_skipped = 0
       for (const { table_name, id } of response.deletes) {
@@ -282,6 +274,22 @@ export class Sync {
         this.#log({ level: 'info', phase: 'download', message: 'Pulled deletes', row_count: deletes_pulled })
       if (deletes_skipped > 0)
         this.#log({ level: 'warn', phase: 'download', message: 'Skipped stale deletes (dirty locally)', row_count: deletes_skipped })
+
+      for (const table_name of SYNCABLE_TABLE_NAMES) {
+        const changes = response.changes[table_name]
+        if (!changes?.length)
+          continue
+        for (const row of changes) {
+          if (is_readonly_table(table_name))
+            delete (row as Record<string, unknown>).dirty
+          else
+            (row as { dirty: number | null }).dirty = null
+          await this.#upsert_row(table_name, row)
+        }
+        affected_tables.add(table_name)
+        result.items_downloaded += changes.length
+        this.#log({ level: 'info', phase: 'download', table: table_name, message: 'Downloaded', row_count: changes.length })
+      }
 
       // Clear dirty on uploaded rows.
       for (const table_name of SYNCABLE_TABLE_NAMES) {

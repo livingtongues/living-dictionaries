@@ -1,4 +1,6 @@
-import { vi } from 'vitest'
+import BetterSqlite3 from 'better-sqlite3'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
 import type { EngineConnection } from './dict-sync-engine'
 import { DictSyncEngine } from './dict-sync-engine'
 import { _reset_dict_failure_throttle_for_tests } from './report-dict-sync-failure'
@@ -199,5 +201,75 @@ describe('DictSyncEngine schema-outdated blocked state', () => {
 
     await engine.sync_if_needed() // keeps retrying while the server catches up
     expect(fetch_spy).toHaveBeenCalledTimes(2)
+  })
+})
+
+/**
+ * Live repro (real better-sqlite3, so the constraint actually fires) of the
+ * junction natural-key UNIQUE collision — the PA2 parity audit of house's
+ * 2026-07-05 fix. Every dict junction carries a synthetic-UUID PK + natural-key
+ * UNIQUE the upsert's `ON CONFLICT(id)` doesn't cover, and a link is replace-all
+ * (unlink then re-link the same natural key → old id tombstoned + a BRAND-NEW id
+ * inserted). A `/changes` window carrying BOTH the delete for the old id and the
+ * upsert for the new row must apply the delete FIRST, else the re-insert of the
+ * natural key collides with the still-present old row and wedges the dict sync.
+ */
+describe('DictSyncEngine junction natural-key replace-all apply ordering', () => {
+  let db: BetterSqlite3.Database
+
+  beforeEach(() => {
+    vi.mocked(api_log).mockClear()
+    _reset_dict_failure_throttle_for_tests()
+    db = new BetterSqlite3(':memory:')
+    db.exec('CREATE TABLE db_metadata (key TEXT PRIMARY KEY, value TEXT);')
+    db.exec('CREATE TABLE deletes (table_name TEXT NOT NULL, id TEXT NOT NULL);')
+    for (const table of DICT_SYNCABLE_TABLES) {
+      if (table === 'entry_tags')
+        db.exec(`CREATE TABLE entry_tags (id TEXT PRIMARY KEY, entry_id TEXT NOT NULL, tag_id TEXT NOT NULL, dirty INTEGER, UNIQUE (entry_id, tag_id));`)
+      else
+        db.exec(`CREATE TABLE "${table}" (id TEXT PRIMARY KEY, dirty INTEGER);`)
+    }
+  })
+
+  afterEach(() => {
+    db.close()
+  })
+
+  function real_connection(): EngineConnection {
+    return {
+      query: <T>(sql: string, params: unknown[] = []) => Promise.resolve(db.prepare(sql).all(...(params as never[])) as T[]),
+      execute: (sql: string, params?: unknown[]) => {
+        if (params?.length)
+          db.prepare(sql).run(...(params as never[]))
+        else
+          db.exec(sql)
+        return Promise.resolve()
+      },
+    }
+  }
+
+  test('applies a delete + same-natural-key re-insert without a UNIQUE collision', async () => {
+    // An old junction row already lives locally under an old id (clean, not dirty).
+    db.prepare(`INSERT INTO entry_tags (id, entry_id, tag_id, dirty) VALUES ('old-id', 'e1', 't1', NULL)`).run()
+
+    // The server response for a replace-all re-link: delete the OLD id AND upsert
+    // a BRAND-NEW row for the SAME natural key (e1/t1) in one window.
+    globalThis.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({
+        new_synced_up_to: '2026-07-06T00:00:00.000Z',
+        changes: { entry_tags: [{ id: 'new-id', entry_id: 'e1', tag_id: 't1' }] },
+        deletes: [{ table_name: 'entry_tags', id: 'old-id' }],
+      }),
+    })) as never
+
+    const engine = new DictSyncEngine({ dict_id: 'test-dict', connection: real_connection(), has_editor_role: true, get_auth: () => ({}) as never })
+    await expect(engine.sync_once()).resolves.not.toThrow()
+
+    // Exactly one row for the natural key, now under the NEW id — deletes-first
+    // freed the natural key before the re-insert.
+    const rows = db.prepare(`SELECT id FROM entry_tags WHERE entry_id = 'e1' AND tag_id = 't1'`).all() as { id: string }[]
+    expect(rows).toEqual([{ id: 'new-id' }])
   })
 })

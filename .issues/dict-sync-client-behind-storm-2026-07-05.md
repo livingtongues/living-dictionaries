@@ -1,7 +1,18 @@
 # P2 — dict-engine `client_behind`/`schema_outdated` retries forever + logs unthrottled (40% of a day's log volume)
 
-Found by the 2026-07-05 log review. **Read-only review recommends this; NOT yet fixed.** Currently
-active in prod as of report time (14:50 UTC).
+Found by the 2026-07-05 log review. **✅ FIXED at source 2026-07-05 15:38 UTC — commit `f66b209c`**
+("Stop dict sync client_behind retry storm and fix log rollup user counts"): latches `schema_outdated`
+on the per-dict engine (stops the 30s hammer), broadcasts recovery to all tabs, throttles the
+telemetry, and hardens `snapshot_expired` entry-list retries. **Verified in prod by the 07-05 run-2
+log review: ZERO `client_behind` storm rows on the fixed build (`1783265904035`)** — the only residual
+is from pre-fix bundles on already-stuck backgrounded tabs (no deploy can reach those; they decay as
+the tabs reload/close). Immediate manual mitigation for the persistent ones: reload the stuck tab
+(admin Greg's own tab was the largest residual source). Left open only for the **dashboard** follow-up
+(the "Sync health / stuck client_behind" panel, still in `.issues/future/dashboard-improvements.md`).
+
+---
+
+**Original finding (read-only, before the fix):**
 
 ## Symptom
 

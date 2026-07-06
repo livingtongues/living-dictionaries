@@ -92,6 +92,55 @@ describe(get_log_analytics, () => {
     expect(bundle_row?.code).toBe('MISUSE')
   })
 
+  test('sync_health splits sync_failed by kind + current/stale build and isolates currently-stuck client_behind tabs', () => {
+    // Rows land at T10:00; NOW at T10:30 keeps the same-day ones inside the 45-min stuck window.
+    const now = new Date('2026-06-30T10:30:00.000Z')
+    // A client_behind on the CURRENT build (recovers — NOT stuck).
+    add_log({ day: '2026-06-30', level: 'warn', message: 'sync_failed', user_id: 'u1', app_version: 'CUR', context: { kind: 'client_behind', dict_id: 'd1' } })
+    // A stale-build client_behind tab (u1/d1) firing twice recently → the one stuck tab.
+    add_log({ day: '2026-06-30', level: 'warn', message: 'sync_failed', user_id: 'u1', app_version: 'OLD', context: { kind: 'client_behind', dict_id: 'd1' } })
+    add_log({ day: '2026-06-30', level: 'warn', message: 'sync_failed', user_id: 'u1', app_version: 'OLD', context: { kind: 'client_behind', dict_id: 'd1' } })
+    // A stale-build client_behind from 10 days ago → in-window but NOT currently stuck.
+    add_log({ day: '2026-06-20', level: 'warn', message: 'sync_failed', user_id: 'u2', app_version: 'OLD', context: { kind: 'client_behind', dict_id: 'd2' } })
+    // A different kind on the current build.
+    add_log({ day: '2026-06-30', level: 'warn', message: 'sync_failed', app_version: 'CUR', context: { kind: 'network' } })
+
+    const { sync_health } = get_log_analytics({ shared_db: db, logs_db, days: 30, now, current_app_version: 'CUR' })
+    expect(sync_health.total).toBe(5)
+    expect(sync_health.client_behind).toEqual({ total: 4, current: 1, stale: 3 })
+    expect(sync_health.by_kind[0]).toEqual({ kind: 'client_behind', count: 4, current: 1, stale: 3 })
+    expect(sync_health.by_kind.find(row => row.kind === 'network')).toEqual({ kind: 'network', count: 1, current: 1, stale: 0 })
+    // Only the recent u1/d1 stale tab is "currently stuck"; the 10-day-old u2/d2 tab is not.
+    expect(sync_health.stuck_pairs).toBe(1)
+    expect(sync_health.stuck[0]).toMatchObject({ user_id: 'u1', dict_id: 'd1', app_version: 'OLD', count: 2 })
+    expect(sync_health.oldest_unresolved_at).toBe(sync_health.stuck[0].first_seen)
+  })
+
+  test('errors_by_version folds post-deploy settling churn (errors within 30min of a build first appearing)', () => {
+    // Build B1 first appears 2026-06-29; a same-window error the NEXT day is 24h
+    // later → past the deploy tail, so it's a standing fault, not settling.
+    add_log({ day: '2026-06-29', level: 'error', message: 'chunk load fail', app_version: 'B1', context: { session_id: 's1' } })
+    add_log({ day: '2026-06-30', level: 'error', message: 'chunk load fail', app_version: 'B1', context: { session_id: 's2' } })
+
+    const { errors_by_version } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: 'B1' })
+    expect(errors_by_version.total).toBe(2)
+    // Only the first-day error is within DEPLOY_TAIL_MINUTES of B1's first appearance.
+    expect(errors_by_version.deploy_tail_errors).toBe(1)
+    expect(errors_by_version.deploy_tail_pct).toBe(0.5)
+  })
+
+  test('geo LCP split: LCP web_vitals grouped by country + by distance to Boston', () => {
+    add_log({ day: '2026-06-30', message: 'perf', context: { name: 'web_vital', metric: 'LCP', value: 3400, session_id: 'a' }, geo: { country: 'US', region: 'MA', city: 'Boston', latitude: 42.36, longitude: -71.06 } })
+    add_log({ day: '2026-06-30', message: 'perf', context: { name: 'web_vital', metric: 'LCP', value: 9000, session_id: 'b' }, geo: { country: 'AU', region: null, city: null, latitude: -33.87, longitude: 151.2 } })
+
+    const { geo } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    expect(geo.lcp_by_country.find(row => row.label === 'US')?.p50).toBe(3400)
+    expect(geo.lcp_by_country.find(row => row.label === 'AU')?.p50).toBe(9000)
+    // Boston ≈ 0 km from origin, Sydney ≫ 10,000 km — the far-region cold-snapshot tail.
+    expect(geo.lcp_by_distance.find(row => row.label === '< 500 km')?.p50).toBe(3400)
+    expect(geo.lcp_by_distance.find(row => row.label === '> 10,000 km')?.p50).toBe(9000)
+  })
+
   test('builds synthetic uptime + latency from uptime_probe server rows', () => {
     add_log({ day: '2026-06-30', message: 'uptime_probe', source: 'server', context: { ok: true, status: 200, ttfb_ms: 300, total_ms: 500, vantage: 'mustang-my' } })
     add_log({ day: '2026-06-30', message: 'uptime_probe', source: 'server', context: { ok: true, status: 200, ttfb_ms: 400, total_ms: 700, vantage: 'mustang-my' } })
@@ -970,6 +1019,8 @@ describe(get_log_analytics, () => {
           "errors_by_version": {
             "current": 2,
             "current_version": "v-cur",
+            "deploy_tail_errors": 4,
+            "deploy_tail_pct": 0.2857142857142857,
             "stale": 12,
             "stale_pct": 0.8571428571428571,
             "total": 14,
@@ -1040,6 +1091,8 @@ describe(get_log_analytics, () => {
                 "sessions": 1,
               },
             ],
+            "lcp_by_country": [],
+            "lcp_by_distance": [],
             "located_sessions": 8,
             "ttfb_by_country": [
               {
@@ -1307,6 +1360,18 @@ describe(get_log_analytics, () => {
             ],
             "schema_drift_count": 0,
             "total": 1,
+          },
+          "sync_health": {
+            "by_kind": [],
+            "client_behind": {
+              "current": 0,
+              "stale": 0,
+              "total": 0,
+            },
+            "oldest_unresolved_at": null,
+            "stuck": [],
+            "stuck_pairs": 0,
+            "total": 0,
           },
           "top_events": [
             {

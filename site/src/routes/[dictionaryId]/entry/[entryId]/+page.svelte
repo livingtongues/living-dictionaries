@@ -57,9 +57,20 @@
   // in an `$effect` and exposing a plain `$state` id keeps the accessor in its
   // designed context. (This is also the bare-rows read that exposed the
   // lazily-created-store freeze — see .issues/dict-table-accessor-rows-reactivity.md.)
+  //
+  // CRITICAL: depend on the STABLE route param `page.params.entryId`, NOT the
+  // live `entry` object. `entry` is `$derived($derived_entry ?? …)` and re-emits
+  // a fresh object on every entry-field edit AND on the initial live-row swap-in,
+  // so reading `entry.id` here re-ran this effect on each of those — and each
+  // re-run re-invokes `.rows` → `#track()` spins up ANOTHER nested tracking
+  // effect, subscriber inc/dec churn compounding into `effect_update_depth_exceeded`.
+  // The 2026-07-04 `$derived`→`$effect` move cut it 92% but left this live-`entry`
+  // dependency, which is why it recurred on `/…/entry/*` (2026-07-05 review, LD2).
+  // The route param only changes on real navigation, so the effect now re-runs
+  // exactly when the viewed entry actually changes.
   let star_row_id = $state<string | undefined>(undefined)
   $effect(() => {
-    const entry_id = entry.id
+    const entry_id = page.params.entryId
     star_row_id = dict_db?.featured_entries.rows.find(row => row.entry_id === entry_id)?.id
   })
   async function toggle_star() {

@@ -43,19 +43,34 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   folded into `KNOWN_NOISE_PATTERNS`.
 
 ## Open proposals
-- **★★ NEW — "Sync health / stuck client_behind" panel** *(filed 2026-07-05 — grounded in a live,
-  ongoing P2; see `.issues/dict-sync-client-behind-storm-2026-07-05.md`).* Today the per-dict sync
-  engine's `client_behind`/`schema_outdated` retry (triggered by the 03:30 `sentence_tokens_media_timings`
-  dict-migration) drove **9,862 `sync_failed` warn rows — 41.9% of ALL 24h logs** — across 12 users
-  (incl. one of LD's own admins) and 34 dictionaries, continuously for 24h+, and was **completely
-  invisible on both `/admin/analytics` and `/admin/health`**: verified in `log-analytics.ts` —
-  `top_events` only aggregates `level='info'` rows (line ~904) and `error_clusters`/`errors_by_version`
-  only count `ERROR_LEVELS_SQL = ('error','unhandled_rejection','crash')`; `sync_failed` ships at `warn`
-  so it hits neither. Add a small panel: `sync_failed` volume by `context.kind` (client_behind/
-  network/snapshot_expired/storage_lost/…), a distinct-(user,dict) "currently stuck" count, and a
-  age-of-oldest-unresolved-occurrence per kind. Would have surfaced this within the first hour instead
-  of a manual raw-log dig. Cheap — same shape as `error_clusters` but reading `level='warn' AND
-  message='sync_failed'` (currently excluded from every existing panel).
+- **★★ NEW — "Sync health / stuck client_behind" panel** *(filed 2026-07-05 run 1 — grounded in a live
+  P2; **reaffirmed + doubly-grounded 2026-07-05 run 2** after the source fix `f66b209c` shipped; see
+  `.issues/dict-sync-client-behind-storm-2026-07-05.md`).* Run 1: the per-dict sync engine's
+  `client_behind`/`schema_outdated` retry drove **9,862 `sync_failed` warn rows — 41.9% of ALL 24h
+  logs** across 12 users (incl. an admin) and 34 dictionaries, **completely invisible on both
+  `/admin/analytics` and `/admin/health`** (verified: `top_events` info-only ~line 904;
+  `error_clusters`/`errors_by_version` only count `ERROR_LEVELS_SQL = ('error','unhandled_rejection',
+  'crash')`; `sync_failed` ships at `warn` so it hits neither). **Run 2 update:** the source fix
+  (`f66b209c`, live 15:38 UTC) works — **zero storm rows on the current build** — but 8,170 residual
+  rows persist from ~3 stuck old-tabs (incl. admin Greg's own), still invisible. The panel is now
+  doubly valuable: it would (a) *confirm* a fix by showing current-vs-stale-build `client_behind`
+  volume, and (b) surface the distinct-(user,dict) "currently stuck" tabs so we can nudge a reload.
+  Add: `sync_failed` volume by `context.kind` (client_behind/network/snapshot_expired/storage_lost/…)
+  **AND by `app_version` (current vs stale)**, a distinct-(user,dict) "currently stuck" count, and
+  age-of-oldest-unresolved per kind. Cheap — same shape as `error_clusters` but reading `level='warn'
+  AND message='sync_failed'` (excluded from every existing panel). **Top build priority.**
+- **★ Deploy-settling error band** *(ported from tutor · filed 2026-07-05 run 2 — MEDIUM).* tutor
+  buckets errors within `DEPLOY_TAIL_MINUTES` of a build's first `session_start` as "deploy settling"
+  **even on the current build**, distinguishing expected post-deploy chunk/asset-manifest blips from a
+  genuine regression. LD's `DailyPoint.stale_errors` only catches *old-build* errors; today's
+  current-build `initial dict sync failed`/`effect` blips right after the 15:38 deploy are exactly the
+  case this refines. Extend the errors fold with a settling window keyed on each `app_version`'s
+  first-seen `session_start`. (house is borrowing the same item from tutor.)
+- **Retention-cron staleness warn-styling on the pipeline strip** *(ported from house · filed
+  2026-07-05 run 2 — LOW).* LD's pipeline-health strip *displays* `retention_ran_at` but has no
+  staleness threshold / warn styling — a stuck cron renders as quiet plain text (house had the same gap
+  and added a threshold, e.g. `!ran_at || > ~12h`, folded into the existing warn/drift class). Cheap,
+  display-only, data already computed. LOW — LD's retention is currently fresh.
 - **★ Fresh-viewer boot-health strip** *(filed 2026-07-04 run 2 — grounded in a live P1; ✅ SHIPPED
   2026-07-05, commit `daed5d93` — `BootHealth`/`build_boot_health` + the "Fresh-viewer boot health"
   panel on `/admin/health`, verified present with failed/recovered/non-recovery-rate/snapshot_expired +
@@ -194,8 +209,10 @@ the borrow list is short.*
   `error_clusters`. Only revisit if LD later builds an `error_audience` panel.
 
 *LD wins the siblings should borrow (flag in their reviews):* the **bot/headless exclusion across all
-usage+geo metrics** (house only de-bots errors so far; tutor not at all), the **Core Web Vitals**
-panel, and the **pipeline-liveness + event-coverage** strips.
+usage+geo metrics** (house only de-bots errors so far; tutor not at all) and the **Core Web Vitals**
+panel. *(Correction 2026-07-05 run 2, flagged by house's 07-05 review: the **pipeline-liveness +
+event-coverage** strips are NO LONGER an LD-only win — house has had both live in `HealthView.svelte`
+for a while. Stop listing house as behind on this.)*
 
 *Skipped as inapplicable to LD:* tutor's **Mobile-health / memory-OOM** RN panel (web-only) and
 house's **/admin/revenue** dashboard (no payments).
@@ -241,8 +258,11 @@ house's **/admin/revenue** dashboard (no payments).
 - `.cron/log-reviews/2026-07-04.md` (quiet day, all 07-03 fixes verified live; Server-faults panel
   SHIPPED; "Top missing i18n keys" panel proposal from 237 distinct missing keys/day; run 2 caught the
   P1 empty-dictionary snapshot-cursor regression, fixed 2026-07-05 `daed5d93`)
-- `.cron/log-reviews/2026-07-05.md` (P1 fix + boot-health panel verified live; NEW P2 found —
+- `.cron/log-reviews/2026-07-05.md` (run 1: P1 fix + boot-health panel verified live; NEW P2 found —
   dict-engine `client_behind` retry storm, 41.9% of the day's log volume, invisible on both dashboards;
-  uptime panel + partial geo-CWV split verified shipped; convergence check against house/tutor 07-04)
+  uptime panel + partial geo-CWV split verified shipped; convergence check against house/tutor 07-04.
+  run 2: P2 storm confirmed FIXED at source (`f66b209c`, zero on current build) — residual is old stuck
+  tabs; entry-page `effect_update_depth_exceeded` fix found INCOMPLETE; `/og` `satori()` font-parse 500;
+  deploy-settling band ported from tutor + retention-staleness styling ported from house)
 - Phase D cross-repo read 2026-06-27 (house `error_audience`/`errors_by_version`/expected-bucket;
   tutor `error_clusters`/`KNOWN_NOISE`).

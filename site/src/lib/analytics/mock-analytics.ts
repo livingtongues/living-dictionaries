@@ -196,6 +196,19 @@ export const mock_analytics: LogAnalytics = {
       { label: '5,000–10,000 km', count: 92, p50: 214, p95: 612 },
       { label: '> 10,000 km', count: 35, p50: 301, p95: 742 },
     ],
+    lcp_by_country: [
+      { label: 'US', count: 588, p50: 1620, p95: 3210 },
+      { label: 'GB', count: 82, p50: 2140, p95: 4980 },
+      { label: 'AU', count: 20, p50: 3120, p95: 9800 },
+    ],
+    // The far-region cold-snapshot p95 tail LD6 exists to surface.
+    lcp_by_distance: [
+      { label: '< 500 km', count: 190, p50: 1180, p95: 2410 },
+      { label: '500–2,000 km', count: 255, p50: 1520, p95: 3380 },
+      { label: '2,000–5,000 km', count: 180, p50: 2010, p95: 5220 },
+      { label: '5,000–10,000 km', count: 88, p50: 2860, p95: 9100 },
+      { label: '> 10,000 km', count: 33, p50: 3980, p95: 13350 },
+    ],
   },
   errors_by_version: {
     current_version: '1719300000123',
@@ -203,6 +216,8 @@ export const mock_analytics: LogAnalytics = {
     current: 4,
     stale: 20,
     stale_pct: 20 / 24,
+    deploy_tail_errors: 3,
+    deploy_tail_pct: 3 / 24,
     versions: [
       { version: '1719200000111', errors: 20, is_current: false },
       { version: '1719300000123', errors: 4, is_current: true },
@@ -244,6 +259,25 @@ export const mock_analytics: LogAnalytics = {
     failed_by_code: [{ code: 'NOTADB', count: 2 }, { code: 'timeout', count: 1 }],
     failed_current: 1,
     failed_stale: 2,
+  },
+  // The client_behind storm post-fix: zero on the current build, a residual of a
+  // few stale-build tabs (incl. an admin's own) still stuck until they reload.
+  sync_health: {
+    total: 8260,
+    by_kind: [
+      { kind: 'client_behind', count: 8170, current: 0, stale: 8170 },
+      { kind: 'snapshot_expired', count: 60, current: 12, stale: 48 },
+      { kind: 'network', count: 27, current: 20, stale: 7 },
+      { kind: 'storage_lost', count: 3, current: 3, stale: 0 },
+    ],
+    client_behind: { total: 8170, current: 0, stale: 8170 },
+    stuck_pairs: 3,
+    oldest_unresolved_at: new Date(Date.now() - 36 * 3600_000).toISOString(),
+    stuck: [
+      { user_id: 'greg', dict_id: 'apatani', app_version: '1783096241136', count: 2405, first_seen: new Date(Date.now() - 36 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 4 * 60_000).toISOString() },
+      { user_id: null, dict_id: 'river', app_version: '1783053248757', count: 1746, first_seen: new Date(Date.now() - 30 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 9 * 60_000).toISOString() },
+      { user_id: 'marlene', dict_id: 'zapoteco-de-analco', app_version: '1783172350007', count: 1158, first_seen: new Date(Date.now() - 20 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 15 * 60_000).toISOString() },
+    ],
   },
   // A realistic agent pass: one contributor bulk-editing `river` via api_key +
   // a lighter session-authed pass on `galo`, with a couple of failures.
@@ -331,8 +365,8 @@ export const empty_analytics: LogAnalytics = {
   capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, webdriver_sessions: 0, devices: [], os: [], browsers: [], db_tiers: [] },
   performance: { summary: [], daily: [], by_route: [] },
   web_vitals: [],
-  geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [] },
-  errors_by_version: { current_version: '1719300000123', total: 0, current: 0, stale: 0, stale_pct: null, versions: [] },
+  geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [], lcp_by_country: [], lcp_by_distance: [] },
+  errors_by_version: { current_version: '1719300000123', total: 0, current: 0, stale: 0, stale_pct: null, deploy_tail_errors: 0, deploy_tail_pct: null, versions: [] },
   pipeline: { last_log_at: null, last_session_start_at: null, last_server_log_at: null, retention_ran_at: null, hot_rows: 0, archived_rows: 0, missing_syncable_tables: [] },
   server_faults: { total: 0, schema_drift_count: 0, clusters: [] },
   event_coverage: {
@@ -345,6 +379,7 @@ export const empty_analytics: LogAnalytics = {
     never_emitted: 4,
   },
   leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [], failed_by_code: [], failed_current: 0, failed_stale: 0 },
+  sync_health: { total: 0, by_kind: [], client_behind: { total: 0, current: 0, stale: 0 }, stuck_pairs: 0, oldest_unresolved_at: null, stuck: [] },
   api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
   missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
   boot_health: { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] },

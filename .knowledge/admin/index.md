@@ -7,3 +7,6 @@ Knowledge for the local-first super-admin area (`/admin/*`).
   near-identical-file relationship with `house` that must be kept in sync.
 - [ai-triage-pipeline.md](./ai-triage-pipeline.md) — the LLM inbound-email triage pipeline
   (`$lib/agent/*`): categories, routing, what diverges from house's version, and the env gate.
+- [analytics-telemetry.md](./analytics-telemetry.md) — cross-repo `client_logs` analytics shapes:
+  the three-signal bot classifier (frequency-bot two-signal gate), the `bot:` rollup namespace,
+  and why warn-level `sync_failed` needs its own "Sync health" panel.

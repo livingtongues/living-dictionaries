@@ -1,10 +1,14 @@
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import BetterSqlite3 from 'better-sqlite3'
 import type Database from 'better-sqlite3'
 import type { RequestGeo } from '$lib/server/geo-from-request'
 import { insert_client_log } from '$lib/server/insert-client-log'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { open_log_archive_db } from './log-archive-db'
 import { archive_old_logs, get_rollup_watermark, normalize_route, reroll_archived_days_once, rollup_day, run_log_retention_once } from './log-retention-cron'
-import { open_logs_db } from './logs-db'
+import { CLIENT_LOG_COLUMNS, open_logs_db } from './logs-db'
 import { open_shared_db } from './shared-db'
 
 let shared_db: Database.Database
@@ -212,6 +216,98 @@ describe(run_log_retention_once, () => {
     // Second sweep same day: 2026-06-29 is now ≤ watermark, only "today"+ re-rolls.
     const second = run_log_retention_once({ shared_db, logs_db, archive_db, now })
     expect(second.days_rolled).toBe(0)
+  })
+
+  test('a failure in one sub-step does not abort the rest of the sweep', () => {
+    // Regression for the 2026-07-05 house incident (ported to LD): the runs-first,
+    // unconditional reroll_archived_days_once threw and aborted the ENTIRE sweep —
+    // no rollup, no archive marker — every pass. Simulate a broken archive DB (its
+    // client_logs table is gone) so BOTH the reroll heal and archive_old_logs throw,
+    // and prove the hot-day rollup + run marker still land.
+    const now = new Date('2026-06-30T00:00:00.000Z')
+    add_log({ day: '2026-06-29', message: 'heartbeat', context: { session_id: 's1' } })
+    archive_db.exec('DROP TABLE client_logs') // reroll + archive steps will now throw
+
+    let result: ReturnType<typeof run_log_retention_once> | undefined
+    expect(() => { result = run_log_retention_once({ shared_db, logs_db, archive_db, now }) }).not.toThrow()
+
+    // Archive step failed → its counts fall back to 0, but the sweep continued.
+    expect(result?.archived).toBe(0)
+    // The ordinary hot-day rollup still ran.
+    expect(metric('2026-06-29', 'sessions')).toBe(1)
+    // And the run marker was still recorded (record_ran_at ran after the failures).
+    const marker = shared_db.prepare(`SELECT value FROM db_metadata WHERE key = 'log_retention_ran_at'`).get() as { value: string } | undefined
+    expect(marker?.value).toBe(now.toISOString())
+    // Both failing steps (reroll + archive) logged a server event into logs.db
+    // instead of throwing out of the sweep.
+    const step_failures = logs_db.prepare(`SELECT COUNT(*) n FROM client_logs WHERE message = 'log_retention_step_failed'`).get() as { n: number }
+    expect(step_failures.n).toBe(2)
+  })
+})
+
+describe(open_log_archive_db, () => {
+  test('retrofits ALL columns missing from an old-schema archive file (not just session_id)', () => {
+    // An archive file created before the geo columns (country/region/city/lat/long)
+    // AND before session_id existed. The retention sweep's reroll heal reads those
+    // columns by name against the archive DB — a missing column 500s the whole
+    // sweep (the 2026-07-05 house bug), so open must ALTER-ADD every missing column.
+    const dir = mkdtempSync(join(tmpdir(), 'ld-archive-retrofit-'))
+    const path = join(dir, 'logs-archive.db')
+    try {
+      // Pre-geo, pre-session_id schema — the shape a pre-split archive file had.
+      const old = new BetterSqlite3(path)
+      old.exec(`
+        CREATE TABLE client_logs (
+          id TEXT PRIMARY KEY,
+          received_at TEXT NOT NULL,
+          client_time TEXT,
+          user_id TEXT,
+          level TEXT NOT NULL,
+          message TEXT NOT NULL,
+          stack TEXT,
+          url TEXT,
+          user_agent TEXT,
+          platform TEXT,
+          app_version TEXT,
+          build_target TEXT,
+          context TEXT,
+          source TEXT
+        );
+      `)
+      old.prepare(`INSERT INTO client_logs (id, received_at, level, message) VALUES ('old-1', '2026-06-10T00:00:00.000Z', 'info', 'heartbeat')`).run()
+      old.close()
+
+      const db = open_log_archive_db(path)
+      const columns = (db.prepare(`SELECT name FROM pragma_table_info('client_logs')`).all() as { name: string }[]).map(row => row.name)
+      for (const column of CLIENT_LOG_COLUMNS)
+        expect(columns).toContain(column)
+
+      // The pre-existing row survives, and a rollup that reads the geo columns by
+      // name no longer throws (the exact query reroll_archived_days_once runs).
+      expect(() => rollup_day({ day: '2026-06-10', shared_db, logs_db: db })).not.toThrow()
+      expect((db.prepare('SELECT COUNT(*) n FROM client_logs').get() as { n: number }).n).toBe(1)
+      db.close()
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  test('is a no-op on an already-current archive file (adds nothing, keeps rows)', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ld-archive-current-'))
+    const path = join(dir, 'logs-archive.db')
+    try {
+      const first = open_log_archive_db(path)
+      first.prepare(`INSERT INTO client_logs (id, received_at, level, message, country) VALUES ('c-1', '2026-06-10T00:00:00.000Z', 'info', 'heartbeat', 'US')`).run()
+      first.close()
+
+      const again = open_log_archive_db(path)
+      const columns = (again.prepare(`SELECT name FROM pragma_table_info('client_logs')`).all() as { name: string }[]).map(row => row.name)
+      expect(columns).toHaveLength(CLIENT_LOG_COLUMNS.length)
+      expect((again.prepare(`SELECT country FROM client_logs WHERE id = 'c-1'`).get() as { country: string }).country).toBe('US')
+      again.close()
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
   })
 })
 

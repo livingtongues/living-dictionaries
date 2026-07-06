@@ -64,6 +64,7 @@
 
   const geo = $derived(analytics.geo)
   const has_geo_latency = $derived(geo.ttfb_by_country.length > 0 || geo.ttfb_by_distance.length > 0)
+  const has_lcp_latency = $derived(geo.lcp_by_country.length > 0 || geo.lcp_by_distance.length > 0)
 
   const pipeline = $derived(analytics.pipeline)
   const server_faults = $derived(analytics.server_faults)
@@ -71,12 +72,17 @@
   const event_coverage = $derived(analytics.event_coverage)
   const clusters = $derived(analytics.error_clusters)
   const leader = $derived(analytics.leader_health)
+  const sync_health = $derived(analytics.sync_health)
   const boot_health = $derived(analytics.boot_health)
   const boot_non_recovery_pct = $derived(boot_health.non_recovery_pct === null ? null : Math.round(boot_health.non_recovery_pct * 100))
   const boot_points = $derived(boot_health.daily.map(day => ({ date: day.day, value: day.sessions })))
 
   // Ingestion verdict: distinguishes a broken pipe from a quiet one.
   const ingestion_recent = $derived(!!pipeline.last_log_at && Date.now() - new Date(pipeline.last_log_at).getTime() < 24 * 3600_000)
+  // Retention staleness: the cron sweeps every 6h, so a gap past ~13h (2 missed
+  // sweeps) means it's wedged — a stuck cron silently stops rolling trends forward.
+  const RETENTION_STALE_MS = 13 * 3600_000
+  const retention_stale = $derived(!pipeline.retention_ran_at || Date.now() - new Date(pipeline.retention_ran_at).getTime() > RETENTION_STALE_MS)
 
   const uptime = $derived(analytics.uptime)
   // Healthy when every recorded probe succeeded (or none carried an ok signal).
@@ -137,7 +143,9 @@
       <span><b>{format_number(pipeline.hot_rows)}</b> hot · <b>{format_number(pipeline.archived_rows)}</b> archived</span>
       <span>session_start {ago(pipeline.last_session_start_at)}</span>
       <span>server log {ago(pipeline.last_server_log_at)}</span>
-      <span>retention {ago(pipeline.retention_ran_at)}</span>
+      <span class="retention" class:stale={retention_stale}>
+        {#if retention_stale}⚠️ {/if}retention {ago(pipeline.retention_ran_at)}
+      </span>
     </div>
   </section>
 
@@ -273,6 +281,11 @@
             <div class="ver-label">Current-build errors</div>
             <div class="ver-sub">build {short_version(errors_by_version.current_version)}</div>
           </div>
+          <div class="ver-stat">
+            <div class="ver-value">{errors_by_version.deploy_tail_pct != null ? format_pct(errors_by_version.deploy_tail_pct) : '—'}</div>
+            <div class="ver-label">Deploy-settling</div>
+            <div class="ver-sub">{format_number(errors_by_version.deploy_tail_errors)} within {30}min of a build's first appearance — churn, not a regression</div>
+          </div>
         </div>
         <table class="src-table">
           <thead><tr><th>Build</th><th>Errors</th></tr></thead>
@@ -331,6 +344,63 @@
       {/if}
     </section>
   </div>
+
+  <section class="panel">
+    <h2>Sync health <span class="hint">sync_failed family · client_behind storm detector · warn-level · hot window</span></h2>
+    {#if sync_health.total === 0}
+      <p class="muted">No sync failures in the hot window. 🎉 Every client is in step with the server schema.</p>
+    {:else}
+      <div class="ver-split">
+        <div class="ver-stat">
+          <div class="ver-value" class:danger={sync_health.client_behind.current > 0}>{format_number(sync_health.client_behind.current)}</div>
+          <div class="ver-label">client_behind on current build</div>
+          <div class="ver-sub">should stay ~0 post-fix — a spike = a new retry storm</div>
+        </div>
+        <div class="ver-stat">
+          <div class="ver-value">{format_number(sync_health.client_behind.stale)}</div>
+          <div class="ver-label">client_behind on stale builds</div>
+          <div class="ver-sub">residual from tabs a deploy can't reach (reload to clear)</div>
+        </div>
+        <div class="ver-stat">
+          <div class="ver-value" class:danger={sync_health.stuck_pairs > 0}>{format_number(sync_health.stuck_pairs)}</div>
+          <div class="ver-label">Tabs still stuck</div>
+          <div class="ver-sub">
+            distinct (user, dict){#if sync_health.oldest_unresolved_at} · oldest {ago(sync_health.oldest_unresolved_at)}{/if}
+          </div>
+        </div>
+      </div>
+      <div class="grid">
+        <table class="src-table">
+          <thead><tr><th>Failure kind</th><th>Current</th><th>Stale</th><th>Total</th></tr></thead>
+          <tbody>
+            {#each sync_health.by_kind as row (row.kind)}
+              <tr>
+                <td>{row.kind}</td>
+                <td class:danger={row.kind === 'client_behind' && row.current > 0}>{format_number(row.current)}</td>
+                <td>{format_number(row.stale)}</td>
+                <td><b>{format_number(row.count)}</b></td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+        {#if sync_health.stuck.length}
+          <table class="src-table stuck-table">
+            <thead><tr><th>Stuck tab (user · dict)</th><th>Build</th><th>Last</th><th>Rows</th></tr></thead>
+            <tbody>
+              {#each sync_health.stuck as row (`${row.user_id}|${row.dict_id}`)}
+                <tr>
+                  <td>{row.user_id ?? 'anon'} · {row.dict_id ?? '—'}</td>
+                  <td class="mono">{short_version(row.app_version)}</td>
+                  <td class="nowrap">{ago(row.last_seen)}</td>
+                  <td>{format_number(row.count)}</td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        {/if}
+      </div>
+    {/if}
+  </section>
 
   <section class="panel">
     <h2>Performance <span class="hint">client timings · p50 / p95 · hot window only</span></h2>
@@ -481,6 +551,40 @@
           {/if}
         </div>
       </div>
+      {#if has_lcp_latency}
+        <div class="grid lcp-grid">
+          <div>
+            <h3 class="perf-h3">LCP by distance to Boston <span class="hint">p50 / p95 · far-region cold-snapshot tail</span></h3>
+            {#if geo.lcp_by_distance.length}
+              <table class="src-table">
+                <thead><tr><th>Distance</th><th>p50</th><th>p95</th><th>n</th></tr></thead>
+                <tbody>
+                  {#each geo.lcp_by_distance as row (row.label)}
+                    <tr><td>{row.label}</td><td>{format_ms(row.p50 ?? 0)}</td><td>{format_ms(row.p95 ?? 0)}</td><td>{format_number(row.count)}</td></tr>
+                  {/each}
+                </tbody>
+              </table>
+            {:else}
+              <p class="muted">No coordinates for LCP yet — needs the CF location-headers transform.</p>
+            {/if}
+          </div>
+          <div>
+            <h3 class="perf-h3">LCP by country <span class="hint">p50 / p95</span></h3>
+            {#if geo.lcp_by_country.length}
+              <table class="src-table">
+                <thead><tr><th>Country</th><th>p50</th><th>p95</th><th>n</th></tr></thead>
+                <tbody>
+                  {#each geo.lcp_by_country as row (row.label)}
+                    <tr><td>{country_flag(row.label)} {row.label}</td><td>{format_ms(row.p50 ?? 0)}</td><td>{format_ms(row.p95 ?? 0)}</td><td>{format_number(row.count)}</td></tr>
+                  {/each}
+                </tbody>
+              </table>
+            {:else}
+              <p class="muted">No located LCP samples yet.</p>
+            {/if}
+          </div>
+        </div>
+      {/if}
     {:else}
       <p class="muted">No geo-located TTFB samples in window yet. Country arrives once real traffic lands; the distance-to-Boston split needs the Cloudflare “Add visitor location headers” managed transform enabled.</p>
     {/if}
@@ -670,6 +774,10 @@
     color: var(--color-secondary);
     font-variant-numeric: tabular-nums;
   }
+  .pipeline-stats .retention.stale {
+    color: var(--warning, #d97706);
+    font-weight: 600;
+  }
   .ver-split {
     display: flex;
     gap: 1.5rem;
@@ -791,6 +899,8 @@
     vertical-align: top;
   }
   .src-table { max-width: 22rem; }
+  .stuck-table { max-width: 30rem; }
+  .lcp-grid { margin-top: 1rem; }
   .perf-summary {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

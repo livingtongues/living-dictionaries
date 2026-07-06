@@ -2,7 +2,7 @@ import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
 import process from 'node:process'
 import Database from 'better-sqlite3'
-import { CLIENT_LOGS_TABLE_SQL } from './logs-db'
+import { CLIENT_LOG_COLUMNS, CLIENT_LOGS_TABLE_SQL } from './logs-db'
 
 /**
  * Cold storage for aged-out `client_logs` rows. Kept in a SEPARATE file from
@@ -13,11 +13,18 @@ import { CLIENT_LOGS_TABLE_SQL } from './logs-db'
  *
  * Schema is the `client_logs` table verbatim (shared with logs.db via
  * `CLIENT_LOGS_TABLE_SQL`). No migration runner — created on demand; the
- * `session_id` retrofit below ALTERs any pre-existing archive file.
+ * column retrofit below ALTER-ADDs any column missing from a pre-existing
+ * archive file.
  */
 
 // Re-exported so existing importers keep resolving; the source of truth is logs-db.ts.
 export { CLIENT_LOG_COLUMNS } from './logs-db'
+
+/** Column → its ALTER-ADD type, so a retrofit recreates the exact declared shape. */
+const ARCHIVE_COLUMN_TYPES: Record<string, string> = {
+  latitude: 'REAL',
+  longitude: 'REAL',
+}
 
 let archive_singleton: Database.Database | null = null
 
@@ -39,10 +46,16 @@ export function open_log_archive_db(path: string | ':memory:'): Database.Databas
     ${CLIENT_LOGS_TABLE_SQL}
     CREATE INDEX IF NOT EXISTS idx_archive_client_logs_received_at ON client_logs(received_at DESC);
   `)
-  // Retrofit session_id onto an archive file created before the 2026-07-05 split.
-  const has_session_id = (db.prepare(`SELECT COUNT(*) n FROM pragma_table_info('client_logs') WHERE name = 'session_id'`).get() as { n: number }).n > 0
-  if (!has_session_id)
-    db.exec(`ALTER TABLE client_logs ADD COLUMN session_id TEXT`)
+  // Retrofit EVERY column missing from a pre-split archive file — not just
+  // session_id. An archive created before the geo columns (country/region/city/
+  // latitude/longitude) or session_id would otherwise 500 the whole retention
+  // sweep when reroll_archived_days_once's rollup_day SELECTs those columns by
+  // name ("no such column: country" — the house 2026-07-05 incident).
+  const existing = new Set((db.prepare(`SELECT name FROM pragma_table_info('client_logs')`).all() as { name: string }[]).map(row => row.name))
+  for (const column of CLIENT_LOG_COLUMNS) {
+    if (!existing.has(column))
+      db.exec(`ALTER TABLE client_logs ADD COLUMN ${column} ${ARCHIVE_COLUMN_TYPES[column] ?? 'TEXT'}`)
+  }
   return db
 }
 
