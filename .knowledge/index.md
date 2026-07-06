@@ -5,6 +5,12 @@ Active plans live in `.issues/`. The Supabase/Vercel → SQLite/VPS migration an
 cutover are complete (2026-07; deploys run from `main`); the durable cross-project conventions
 are `migration/shared-stack-conventions.md`.
 
+## Business frame
+- [portfolio-context.md](./portfolio-context.md) — Jacob's actual priorities for Living
+  Dictionaries (winning = the language-documentation flywheel; AI-agent story +
+  texts→sentences→entries pipeline; loop guidance). Read this before deciding what to nudge
+  Jacob about.
+
 ## Categories
 - [migration/](./migration/index.md) — gotchas and decisions for the Vercel/Supabase →
   VPS/SQLite evolution (build/deploy, lockfile discipline, what's deferred).
