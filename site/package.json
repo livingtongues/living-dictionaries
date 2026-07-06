@@ -25,6 +25,7 @@
     "local-svelte-pieces": "link:../../../svelte-pieces"
   },
   "dependencies": {
+    "@mapbox/vector-tile": "^3.0.0",
     "@resvg/resvg-js": "^2.2.0",
     "@tiptap/core": "^3.27.1",
     "@tiptap/extension-image": "^3.27.1",
@@ -46,6 +47,8 @@
     "markdown-it-bracketed-spans": "^1.0.1",
     "marked": "^18.0.5",
     "mimetext": "^3.0.28",
+    "pbf": "^5.1.0",
+    "pmtiles": "^4.4.1",
     "satori": "^0.0.44",
     "satori-html": "^0.3.0",
     "tiptap-markdown": "^0.9.0",
