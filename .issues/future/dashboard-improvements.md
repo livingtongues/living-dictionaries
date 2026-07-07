@@ -42,6 +42,23 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
 - ✅ **No-WebGL globe fallback + noise filter (L6)** — graceful fallback message + `warn`-level log
   folded into `KNOWN_NOISE_PATTERNS`.
 
+## Shipped (2026-07-07, `.issues/dictionary-viewership-and-nav-speed-telemetry.md`)
+- ✅ **Per-dictionary viewership forever rollup + "Top dictionaries by viewers" panel** — new
+  `dictionary_daily_views(day, dictionary_id, sessions, anon_sessions)` in shared.db (server-only,
+  never pruned), filled by `rollup_day()` from `dictionary_opened` (bots excluded, anon = no user_id).
+  `build_top_dictionaries` merges the cold rollup + live tail, joins the catalog for names/urls; panel
+  on `/admin/analytics` (usage) shows 30d/7d/today views + anon share per dict, most-viewed first.
+  Seeds a future public "visits/month" badge (see `.issues/future/dictionary-public-visits-stat.md`).
+  Records the "visits ≠ visitors" caveat (session resets per load; true uniques need `visitor_hash`).
+- ✅ **Client SPA navigation timing surfaced** — `build_performance` now folds the already-logged
+  `navigation.duration_ms` (home→entry etc) into a first-class `navigation` perf metric + a
+  by-destination-route split. NO new logging. Answers "how fast is home→entry."
+- ✅ **LCP-by-landing-route** — `web_vital` LCP rows grouped by route (distinct from the still-open
+  geo-split-LCP item below, which is by country/distance).
+- ✅ **"Speed at a glance" strip on `/admin/health`** — friendly top-of-page cards: page-load p50/p95,
+  in-app navigation p50/p95 (+ 30d p50 micro-sparklines), LCP p75. Plus nav trend chart + nav/LCP
+  by-route tables in the Performance panel.
+
 ## Open proposals
 - **★★ NEW — "Sync health / stuck client_behind" panel** *(filed 2026-07-05 run 1 — grounded in a live
   P2; **reaffirmed + doubly-grounded 2026-07-05 run 2** after the source fix `f66b209c` shipped; see

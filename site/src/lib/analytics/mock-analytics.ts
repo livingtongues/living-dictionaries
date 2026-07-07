@@ -43,6 +43,7 @@ function build_perf(days: number): LogAnalytics['performance'] {
       day,
       metrics: {
         page_load: { p50: Math.round(1100 + wobble), p95: Math.round(4200 + wobble * 2), count: 40 + (offset % 9) },
+        navigation: { p50: Math.round(340 + wobble * 0.4), p95: Math.round(1400 + wobble), count: 120 + (offset % 11) },
         viewer_boot: { p50: Math.round(1200 + wobble * 1.5), p95: Math.round(6400 + wobble * 3), count: 6 + (offset % 4) },
       },
     })
@@ -50,6 +51,7 @@ function build_perf(days: number): LogAnalytics['performance'] {
   return {
     summary: [
       { name: 'page_load', count: 1240, p50: 1197, p90: 3344, p95: 4537, max: 14652, slowest: { duration_ms: 14652, route: '/example-dict/entries' } },
+      { name: 'navigation', count: 3620, p50: 312, p90: 980, p95: 1640, max: 9210, slowest: { duration_ms: 9210, route: '/example-dict/entry/abc' } },
       { name: 'viewer_boot', count: 188, p50: 1184, p90: 4688, p95: 6493, max: 7687, slowest: { duration_ms: 7687, route: '/example-dict' } },
       { name: 'search', count: 0, p50: null, p90: null, p95: null, max: null, slowest: null },
     ],
@@ -60,6 +62,19 @@ function build_perf(days: number): LogAnalytics['performance'] {
       { route: 'home', count: 142, p50: 980, p95: 3010, max: 6200 },
       { route: 'about', count: 64, p50: 420, p95: 1180, max: 2200 },
       { route: 'account', count: 34, p50: 510, p95: 1620, max: 3100 },
+    ],
+    // Client SPA nav timing by destination — the home→entry path leads by volume.
+    nav_by_route: [
+      { route: 'dictionary:entry', count: 1820, p50: 388, p95: 1720, max: 9210 },
+      { route: 'dictionary:entries', count: 940, p50: 296, p95: 1240, max: 5100 },
+      { route: 'home', count: 512, p50: 210, p95: 640, max: 2200 },
+      { route: 'dictionary:settings', count: 188, p50: 340, p95: 980, max: 3100 },
+      { route: 'account', count: 96, p50: 180, p95: 520, max: 1400 },
+    ],
+    lcp_by_route: [
+      { route: 'dictionary:entry', count: 168, p50: 1720, p95: 4980, max: 9800 },
+      { route: 'dictionary:entries', count: 92, p50: 1480, p95: 3810, max: 8200 },
+      { route: 'home', count: 56, p50: 1120, p95: 2610, max: 5200 },
     ],
   }
 }
@@ -306,6 +321,20 @@ export const mock_analytics: LogAnalytics = {
       { via: 'session', count: 310 },
     ],
   },
+  // A handful of star dictionaries pulling real outside traffic + a long tail.
+  top_dictionaries: {
+    distinct_dictionaries: 34,
+    total_30d: 1042,
+    total_7d: 318,
+    total_1d: 47,
+    dictionaries: [
+      { dictionary_id: 'apatani', name: 'Apatani', url: 'apatani', is_public: true, views_30d: 214, anon_30d: 198, views_7d: 61, views_1d: 9 },
+      { dictionary_id: 'river', name: 'River Dweller', url: 'river', is_public: true, views_30d: 168, anon_30d: 121, views_7d: 52, views_1d: 8 },
+      { dictionary_id: 'galo', name: 'Galo', url: 'galo', is_public: true, views_30d: 133, anon_30d: 127, views_7d: 44, views_1d: 6 },
+      { dictionary_id: 'zapoteco-de-analco', name: 'Zapoteco de Analco', url: 'zapoteco-de-analco', is_public: true, views_30d: 96, anon_30d: 74, views_7d: 28, views_1d: 5 },
+      { dictionary_id: 'onondaga', name: 'Onondaga', url: 'onondaga', is_public: false, views_30d: 41, anon_30d: 6, views_7d: 12, views_1d: 2 },
+    ],
+  },
   missing_i18n_keys: {
     total: 875,
     distinct_keys: 237,
@@ -363,7 +392,7 @@ export const empty_analytics: LogAnalytics = {
   by_source: [],
   error_clusters: [],
   capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, webdriver_sessions: 0, devices: [], os: [], browsers: [], db_tiers: [] },
-  performance: { summary: [], daily: [], by_route: [] },
+  performance: { summary: [], daily: [], by_route: [], nav_by_route: [], lcp_by_route: [] },
   web_vitals: [],
   geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [], lcp_by_country: [], lcp_by_distance: [] },
   errors_by_version: { current_version: '1719300000123', total: 0, current: 0, stale: 0, stale_pct: null, deploy_tail_errors: 0, deploy_tail_pct: null, versions: [] },
@@ -381,6 +410,7 @@ export const empty_analytics: LogAnalytics = {
   leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [], failed_by_code: [], failed_current: 0, failed_stale: 0 },
   sync_health: { total: 0, by_kind: [], client_behind: { total: 0, current: 0, stale: 0 }, stuck_pairs: 0, oldest_unresolved_at: null, stuck: [] },
   api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
+  top_dictionaries: { distinct_dictionaries: 0, total_30d: 0, total_7d: 0, total_1d: 0, dictionaries: [] },
   missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
   boot_health: { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] },
   uptime: { probes: 0, availability: null, ttfb: { p50: null, p95: null }, total: { p50: null, p95: null }, vantages: [], daily: [] },

@@ -159,3 +159,18 @@ outputs are committed; eslint-ignored as generated).
 - **Agent/API diagram** ("Turn archives into living data") is **admin-level-3 only** for now
   (still being iterated) — gated in the homepage `+page.svelte` on `auth_user.admin_level >= 3`.
 - 435 total videos — weak next to the other numbers; flagged to Jacob whether to keep showing.
+- **Headless-puppeteer mis-composites the FeaturedEntryFullscreen backdrop over the live map.**
+  The `.backdrop` (`rgb(0 0 0 / 0.9)`, a fixed full-viewport layer) renders **bright / not darkened**
+  in headless Chromium *on the live homepage only* — because the map canvas keeps a perpetual rAF
+  (pulse ring) alive, and headless composites a semi-transparent fixed overlay over that
+  ever-repainting GPU layer wrong (solid-opaque paints fine; alpha is racy). It is **fine on a real
+  GPU browser** and the isolated `FeaturedEntryFullscreen` svelte-look story (no canvas) renders a
+  proper dark backdrop. So: **don't "fix" a non-dark card-lightbox backdrop from a headless
+  screenshot** — verify overlay dimming in the story or a real browser, not against `/`.
+- **Card→fullscreen uses a shared `crossfade` morph** (WordCards owns the `[send, receive]` pair +
+  a per-card `${id}-${index}` key, passed as props into FeaturedEntryFullscreen — mirrors
+  `image/Image.svelte`). The tapped card `<img>` is unmounted (`{#if !(fullscreen_card && key match)}`)
+  so it `send`s out while the viewer image `receive`s in; chrome (backdrop/top-bar/bottom-bar) fades
+  **per-child, NOT on the root** — a root `transition:fade` would hide the 200ms close-morph after
+  its own 150ms. A `gg/spinner` shows on the card after 100ms while the `w1200` preloads; hover +
+  pointerdown warm that image into a plain `Set` cache first (so most taps skip the spinner).

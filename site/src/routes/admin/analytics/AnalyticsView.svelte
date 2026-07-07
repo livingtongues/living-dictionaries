@@ -95,6 +95,9 @@
 
   const missing_i18n = $derived(analytics.missing_i18n_keys)
 
+  // Per-dictionary viewership — forever rollup + live tail (see build_top_dictionaries).
+  const top_dictionaries = $derived(analytics.top_dictionaries)
+
   const headline = $derived(
     `${format_number(totals.logs)} logs from ${format_number(totals.unique_users)} users across ${format_number(totals.sessions)} sessions over the last ${analytics.window_days} days.`,
   )
@@ -186,6 +189,44 @@
       {/if}
     </section>
   </div>
+
+  <section class="panel">
+    <h2>Top dictionaries by viewers <span class="hint">distinct {analytics.audience === 'bots' ? 'bot' : 'human'} sessions (visits) · anonymous ≈ outside public visitors</span></h2>
+    {#if top_dictionaries.dictionaries.length}
+      <div class="ver-split">
+        <div class="ver-stat">
+          <div class="ver-value">{format_number(top_dictionaries.total_30d)}</div>
+          <div class="ver-label">Dictionary views · 30d</div>
+          <div class="ver-sub">{format_number(top_dictionaries.total_7d)} in 7d · {format_number(top_dictionaries.total_1d)} today</div>
+        </div>
+        <div class="ver-stat">
+          <div class="ver-value">{format_number(top_dictionaries.distinct_dictionaries)}</div>
+          <div class="ver-label">Dictionaries viewed</div>
+          <div class="ver-sub">≥ 1 view in the last {analytics.window_days}d</div>
+        </div>
+      </div>
+      <table class="dict-table">
+        <thead><tr><th>Dictionary</th><th>30d</th><th>7d</th><th>Today</th><th>Anon</th></tr></thead>
+        <tbody>
+          {#each top_dictionaries.dictionaries as row (row.dictionary_id)}
+            <tr>
+              <td class="dict-name">
+                {#if row.url}<a href={`/${row.url}`}>{row.name ?? row.url}</a>{:else}{row.name ?? row.dictionary_id}{/if}
+                {#if !row.is_public}<span class="priv" title="Private dictionary">🔒</span>{/if}
+              </td>
+              <td class="num"><b>{format_number(row.views_30d)}</b></td>
+              <td class="num">{format_number(row.views_7d)}</td>
+              <td class="num">{format_number(row.views_1d)}</td>
+              <td class="num anon" title="anonymous (logged-out) share ≈ outside public visitors">{row.views_30d ? format_pct(row.anon_30d / row.views_30d) : '—'}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+      <p class="dict-note">“Views” = distinct browser sessions that opened a dictionary that day, summed over the window (a returning visitor counts once per day) — <b>visits, not unique visitors</b>. Rolled up forever so a public “visits / month” badge can read it later; true monthly uniques await a cookieless visitor id.</p>
+    {:else}
+      <p class="muted">No dictionary views in window yet. Every open of a dictionary (its list or a deep-linked entry) counts here.</p>
+    {/if}
+  </section>
 
   <section class="panel">
     <h2>Geography <span class="hint">approximate · Cloudflare edge · {format_number(geo.located_sessions)} located sessions · TTFB splits on <a href="/admin/health">Site health</a></span></h2>
@@ -486,6 +527,23 @@
     vertical-align: top;
   }
   .src-table { max-width: 22rem; }
+  .dict-table {
+    max-width: 34rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .dict-table .num { text-align: right; white-space: nowrap; }
+  .dict-table th:not(:first-child) { text-align: right; }
+  .dict-name a { color: var(--primary); text-decoration: none; font-weight: 600; }
+  .dict-name a:hover { text-decoration: underline; }
+  .priv { font-size: 0.7rem; margin-left: 0.15rem; }
+  .anon { color: var(--color-secondary); }
+  .dict-note {
+    margin: 0.6rem 0 0;
+    font-size: 0.72rem;
+    color: var(--color-secondary);
+    line-height: 1.45;
+    max-width: 44rem;
+  }
   .cap-warn {
     margin: 0 0 0.75rem;
     padding: 0.5rem 0.75rem;

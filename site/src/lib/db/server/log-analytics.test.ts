@@ -1301,6 +1301,8 @@ describe(get_log_analytics, () => {
                 },
               },
             ],
+            "lcp_by_route": [],
+            "nav_by_route": [],
             "summary": [
               {
                 "count": 4,
@@ -1313,6 +1315,15 @@ describe(get_log_analytics, () => {
                   "duration_ms": 1500,
                   "route": "?",
                 },
+              },
+              {
+                "count": 0,
+                "max": null,
+                "name": "navigation",
+                "p50": null,
+                "p90": null,
+                "p95": null,
+                "slowest": null,
               },
               {
                 "count": 0,
@@ -1372,6 +1383,13 @@ describe(get_log_analytics, () => {
             "stuck": [],
             "stuck_pairs": 0,
             "total": 0,
+          },
+          "top_dictionaries": {
+            "dictionaries": [],
+            "distinct_dictionaries": 0,
+            "total_1d": 0,
+            "total_30d": 0,
+            "total_7d": 0,
           },
           "top_events": [
             {

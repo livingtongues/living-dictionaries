@@ -13,7 +13,7 @@ export function format_ms(ms: number | null): string {
   return ms >= 1000 ? `${(ms / 1000).toFixed(ms >= 10000 ? 0 : 1)}s` : `${Math.round(ms)}ms`
 }
 
-const PERF_LABELS: Record<string, string> = { page_load: 'Page load', search: 'Search', web_vital: 'Web vital', viewer_boot: 'Viewer boot' }
+const PERF_LABELS: Record<string, string> = { page_load: 'Page load', navigation: 'Navigation', search: 'Search', web_vital: 'Web vital', viewer_boot: 'Viewer boot' }
 export function perf_label(name: string): string {
   return PERF_LABELS[name] ?? name
 }

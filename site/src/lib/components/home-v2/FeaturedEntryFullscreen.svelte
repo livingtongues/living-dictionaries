@@ -7,30 +7,35 @@
   import { image_src, url_from_storage_path } from '$lib/utils/media-url'
   import { portal } from '$lib/utils/portal'
   import IconMdiClose from '~icons/mdi/close'
-  import IconMdiPlay from '~icons/mdi/play'
-  import IconMdiPause from '~icons/mdi/pause'
+  import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import IconMdiArrowRight from '~icons/mdi/arrow-right'
+  import IconMdiBookOpenPageVariantOutline from '~icons/mdi/book-open-page-variant-outline'
+
+  type CrossfadeFns = ReturnType<typeof import('svelte/transition').crossfade>
 
   interface Props {
     card: FeaturedCard
+    /** Shared crossfade transition + key so the tapped card image morphs into this viewer. */
+    send: CrossfadeFns[0]
+    receive: CrossfadeFns[1]
+    crossfade_key: string | null
     on_close: () => void
   }
 
-  const { card, on_close }: Props = $props()
+  const { card, send, receive, crossfade_key, on_close }: Props = $props()
   const t = $derived(page.data.t)
 
   let playing = $state(false)
   let audio_element: HTMLAudioElement | null = null
   function toggle_audio(event: MouseEvent) {
     event.stopPropagation()
+    if (!audio_element)
+      return
     if (playing) {
-      audio_element?.pause()
+      audio_element.pause()
       playing = false
       return
     }
-    audio_element = new Audio(url_from_storage_path(card.audio_storage_path, PUBLIC_STORAGE_BUCKET))
-    audio_element.onended = () => playing = false
-    audio_element.onerror = () => playing = false
     playing = true
     void audio_element.play()
   }
@@ -42,6 +47,11 @@
 
   onMount(() => {
     document.body.style.overflow = 'hidden'
+    // Opening the image is very likely followed by a play tap — warm the audio now.
+    audio_element = new Audio(url_from_storage_path(card.audio_storage_path, PUBLIC_STORAGE_BUCKET))
+    audio_element.preload = 'auto'
+    audio_element.onended = () => playing = false
+    audio_element.onerror = () => playing = false
     return () => {
       audio_element?.pause()
       document.body.style.overflow = 'auto'
@@ -53,35 +63,44 @@
 
 <!-- preload=tap on the entry link: hover/eager-preloading it would start pulling
      that whole dictionary's snapshot — which just viewing the photo shouldn't do. -->
-<div use:portal class="fullscreen-root" transition:fade={{ duration: 150 }} data-sveltekit-preload-data="tap">
-  <button type="button" class="backdrop" aria-label={t('misc.cancel')} onclick={close}></button>
+<div use:portal class="fullscreen-root" data-sveltekit-preload-data="tap">
+  <button type="button" class="backdrop" aria-label={t('misc.cancel')} onclick={close} transition:fade={{ duration: 150 }}></button>
 
-  <div class="top-bar">
-    <a class="dict-name" href="/{card.dict_url}">{card.dict_name}</a>
+  <div class="top-bar" transition:fade={{ duration: 150 }}>
+    <a class="dict-name" href="/{card.dict_url}">
+      <IconMdiBookOpenPageVariantOutline class="book-icon" />
+      {card.dict_name}
+    </a>
     <button type="button" class="icon-btn" aria-label={t('misc.cancel')} onclick={close}>
       <IconMdiClose />
     </button>
   </div>
 
-  <img class="image" src={image_src(card.photo_serving_url, 'w1200')} alt={card.lexeme} />
+  <img
+    class="image"
+    src={image_src(card.photo_serving_url, 'w1200')}
+    alt={card.lexeme}
+    in:receive={{ key: crossfade_key }}
+    out:send={{ key: crossfade_key }} />
 
-  <div class="bottom-bar">
-    <div class="word">
-      <span class="lexeme">{card.lexeme}</span>
-      {#if card.gloss}<span class="gloss">{card.gloss}</span>{/if}
-    </div>
-    <div class="actions">
+  <div class="bottom-bar" transition:fade={{ duration: 150 }}>
+    <div class="word-group">
       <button
         type="button"
         class="audio-btn"
+        class:playing
         onclick={toggle_audio}
         aria-label="{playing ? t('misc.pause') : t('misc.play')} {card.lexeme}">
-        {#if playing}<IconMdiPause />{:else}<IconMdiPlay />{/if}
+        <IconMaterialSymbolsHearing />
       </button>
-      <a class="btn-primary btn-default open-entry" href="/{card.dict_url}/entry/{card.entry_id}">
-        {t('home_v2.open_entry')} <IconMdiArrowRight />
+      <a class="word" href="/{card.dict_url}/entry/{card.entry_id}">
+        <span class="lexeme">{card.lexeme}</span>
+        {#if card.gloss}<span class="gloss">{card.gloss}</span>{/if}
       </a>
     </div>
+    <a class="btn-primary btn-default open-entry" href="/{card.dict_url}/entry/{card.entry_id}">
+      {t('home_v2.open_entry')} <IconMdiArrowRight />
+    </a>
   </div>
 </div>
 
@@ -127,14 +146,21 @@
   }
 
   .dict-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-width: 0;
     font-weight: 600;
     font-size: 1rem;
     color: #fff;
     text-decoration: none;
     text-shadow: 0 1px 3px rgb(0 0 0 / 0.6);
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .dict-name :global(.book-icon) {
+    flex-shrink: 0;
+    font-size: 1em;
   }
 
   .dict-name:hover {
@@ -175,8 +201,21 @@
     color: #fff;
   }
 
+  .word-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
   .word {
     min-width: 0;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .word:hover .lexeme {
+    text-decoration: underline;
   }
 
   .lexeme {
@@ -194,30 +233,25 @@
     opacity: 0.9;
   }
 
-  .actions {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-  }
-
   .audio-btn {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 3rem;
+    height: 3rem;
     border: none;
     border-radius: 9999px;
     background: rgb(255 255 255 / 0.24);
     backdrop-filter: blur(4px);
     color: #fff;
-    font-size: 1.375rem;
+    font-size: 1.5rem;
     cursor: pointer;
     transition: background 200ms, transform 75ms;
   }
 
-  .audio-btn:hover {
+  .audio-btn:hover,
+  .audio-btn.playing {
     background: rgb(255 255 255 / 0.42);
   }
 
@@ -226,6 +260,7 @@
   }
 
   .open-entry {
+    flex-shrink: 0;
     gap: 0.375rem;
     white-space: nowrap;
   }

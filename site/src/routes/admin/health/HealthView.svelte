@@ -58,9 +58,32 @@
     ]
   }
   const page_load_series = $derived(perf_series('page_load'))
+  const navigation_series = $derived(perf_series('navigation'))
   const search_series = $derived(perf_series('search'))
 
   const web_vitals = $derived(analytics.web_vitals)
+
+  // "Speed at a glance" — the friendly top-of-page summary of load + nav + paint.
+  const perf_by_name = $derived(new Map(perf.summary.map(metric => [metric.name, metric])))
+  const page_load_metric = $derived(perf_by_name.get('page_load'))
+  const navigation_metric = $derived(perf_by_name.get('navigation'))
+  const lcp_vital = $derived(web_vitals.find(vital => vital.metric === 'LCP'))
+  function perf_p50_points(name: string) {
+    return perf.daily.filter(point => point.metrics[name]?.count).map(point => ({ value: point.metrics[name].p50 }))
+  }
+  const page_load_spark = $derived(perf_p50_points('page_load'))
+  const navigation_spark = $derived(perf_p50_points('navigation'))
+  const speed_has_data = $derived((page_load_metric?.count ?? 0) > 0 || (navigation_metric?.count ?? 0) > 0 || (lcp_vital?.count ?? 0) > 0)
+  // Axis-less micro-sparkline path (normalized to a 120×32 box) for the speed cards.
+  function spark_path(points: { value: number }[], width = 120, height = 30): string {
+    if (points.length < 2)
+      return ''
+    const values = points.map(point => point.value)
+    const low = Math.min(...values)
+    const range = (Math.max(...values) - low) || 1
+    const step = width / (points.length - 1)
+    return points.map((point, index) => `${index === 0 ? 'M' : 'L'}${(index * step).toFixed(1)},${(height - ((point.value - low) / range) * height).toFixed(1)}`).join(' ')
+  }
 
   const geo = $derived(analytics.geo)
   const has_geo_latency = $derived(geo.ttfb_by_country.length > 0 || geo.ttfb_by_distance.length > 0)
@@ -174,6 +197,40 @@
   {:else}
     <p class="headline">{headline}</p>
   {/if}
+
+  <section class="panel speed-panel">
+    <h2>Speed at a glance <span class="hint">how fast people load &amp; move through the site · p50 &quot;typical&quot; · {analytics.audience === 'bots' ? 'bots' : 'real people, bots excluded'}</span></h2>
+    {#if speed_has_data}
+      <div class="speed-grid">
+        <div class="speed-stat">
+          <div class="speed-name">Page load</div>
+          <div class="speed-desc">first / hard load (incl. SSR)</div>
+          <div class="speed-value">{format_ms(page_load_metric?.p50 ?? null)} <span class="speed-unit">typical</span></div>
+          <div class="speed-sub">p95 {format_ms(page_load_metric?.p95 ?? null)} · n={format_number(page_load_metric?.count ?? 0)}</div>
+          {#if page_load_spark.length > 1}
+            <svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none" aria-hidden="true"><path d={spark_path(page_load_spark)} fill="none" stroke="var(--primary)" stroke-width="1.5" vector-effect="non-scaling-stroke" /></svg>
+          {/if}
+        </div>
+        <div class="speed-stat">
+          <div class="speed-name">In-app navigation</div>
+          <div class="speed-desc">home → entry &amp; other SPA moves</div>
+          <div class="speed-value">{format_ms(navigation_metric?.p50 ?? null)} <span class="speed-unit">typical</span></div>
+          <div class="speed-sub">p95 {format_ms(navigation_metric?.p95 ?? null)} · n={format_number(navigation_metric?.count ?? 0)}</div>
+          {#if navigation_spark.length > 1}
+            <svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none" aria-hidden="true"><path d={spark_path(navigation_spark)} fill="none" stroke={USERS_COLOR} stroke-width="1.5" vector-effect="non-scaling-stroke" /></svg>
+          {/if}
+        </div>
+        <div class="speed-stat">
+          <div class="speed-name">Largest paint (LCP)</div>
+          <div class="speed-desc">when the main content is visible</div>
+          <div class="speed-value">{lcp_vital ? format_ms(lcp_vital.p75) : '—'} <span class="speed-unit">p75</span></div>
+          <div class="speed-sub">{lcp_vital ? `p50 ${format_ms(lcp_vital.p50)} · n=${format_number(lcp_vital.count)}` : 'no LCP samples yet'}</div>
+        </div>
+      </div>
+    {:else}
+      <p class="muted">No speed samples in window yet — page-load, in-app navigation, and LCP timings land here once real sessions arrive.</p>
+    {/if}
+  </section>
 
   <section class="panel">
     <h2>Errors per day <span class="hint">real vs known-noise{totals.stale_errors > 0 ? ' · stale-build overlay' : ''} · ⬆ = deploy</span></h2>
@@ -431,6 +488,12 @@
             <ComboChart series={page_load_series} height={180} value_format={format_ms} />
           </div>
         {/if}
+        {#if navigation_series[0].points.length}
+          <div>
+            <h3 class="perf-h3">In-app navigation <span class="hint">ms · SPA nav duration</span></h3>
+            <ComboChart series={navigation_series} height={180} value_format={format_ms} />
+          </div>
+        {/if}
         {#if search_series[0].points.length}
           <div>
             <h3 class="perf-h3">Search <span class="hint">ms</span></h3>
@@ -438,14 +501,52 @@
           </div>
         {/if}
       </div>
-      {#if perf.by_route.length}
-        <h3 class="perf-h3">Page load by route <span class="hint">slowest p95 first · ms</span></h3>
+      <div class="grid route-grid">
+        {#if perf.by_route.length}
+          <div>
+            <h3 class="perf-h3">Page load by route <span class="hint">slowest p95 first · ms</span></h3>
+            <table class="route-perf">
+              <thead><tr><th>Route</th><th>p50</th><th>p95</th><th>max</th><th>n</th></tr></thead>
+              <tbody>
+                {#each perf.by_route as row (row.route)}
+                  <tr>
+                    <td class="perf-route">{row.route}</td>
+                    <td>{format_ms(row.p50 ?? 0)}</td>
+                    <td><b>{format_ms(row.p95 ?? 0)}</b></td>
+                    <td class="muted-inline">{format_ms(row.max ?? 0)}</td>
+                    <td class="muted-inline">{format_number(row.count)}</td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
+        {/if}
+        {#if perf.nav_by_route.length}
+          <div>
+            <h3 class="perf-h3">Navigation by destination <span class="hint">most-travelled first · ms</span></h3>
+            <table class="route-perf">
+              <thead><tr><th>Destination</th><th>p50</th><th>p95</th><th>max</th><th>n</th></tr></thead>
+              <tbody>
+                {#each perf.nav_by_route as row (row.route)}
+                  <tr>
+                    <td class="perf-route">{row.route}</td>
+                    <td>{format_ms(row.p50 ?? 0)}</td>
+                    <td><b>{format_ms(row.p95 ?? 0)}</b></td>
+                    <td class="muted-inline">{format_ms(row.max ?? 0)}</td>
+                    <td class="muted-inline">{format_number(row.count)}</td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
+        {/if}
+      </div>
+      {#if perf.lcp_by_route.length}
+        <h3 class="perf-h3">LCP by landing route <span class="hint">largest contentful paint · most-sampled first · ms</span></h3>
         <table class="route-perf">
-          <thead>
-            <tr><th>Route</th><th>p50</th><th>p95</th><th>max</th><th>n</th></tr>
-          </thead>
+          <thead><tr><th>Route</th><th>p50</th><th>p95</th><th>max</th><th>n</th></tr></thead>
           <tbody>
-            {#each perf.by_route as row (row.route)}
+            {#each perf.lcp_by_route as row (row.route)}
               <tr>
                 <td class="perf-route">{row.route}</td>
                 <td>{format_ms(row.p50 ?? 0)}</td>
@@ -901,6 +1002,56 @@
   .src-table { max-width: 22rem; }
   .stuck-table { max-width: 30rem; }
   .lcp-grid { margin-top: 1rem; }
+  .speed-panel {
+    border-left: 3px solid var(--primary);
+  }
+  .speed-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+  .speed-stat {
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.75rem 0.875rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .speed-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .speed-desc {
+    font-size: 0.7rem;
+    color: var(--color-secondary);
+    margin-bottom: 0.4rem;
+  }
+  .speed-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+  }
+  .speed-unit {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--color-secondary);
+  }
+  .speed-sub {
+    font-size: 0.72rem;
+    color: var(--color-secondary);
+    margin-top: 0.2rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .spark {
+    width: 100%;
+    height: 30px;
+    margin-top: auto;
+    padding-top: 0.5rem;
+    display: block;
+    overflow: visible;
+  }
+  .route-grid { margin-top: 0.5rem; }
   .perf-summary {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1004,5 +1155,6 @@
     .cards { grid-template-columns: repeat(2, 1fr); }
     .grid { grid-template-columns: 1fr; }
     .perf-summary { grid-template-columns: 1fr; }
+    .speed-grid { grid-template-columns: 1fr; }
   }
 </style>

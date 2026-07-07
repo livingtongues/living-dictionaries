@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3'
 import { building, dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { is_noise_error_message } from '$lib/debug/classify-error'
+import { DICTIONARY_OPENED } from '$lib/debug/log-events'
 import { is_bot_user_agent } from '$lib/debug/parse-user-agent'
 import { geo_key } from '$lib/server/geo-from-request'
 import { log_server_event } from '$lib/server/log-server-event'
@@ -151,8 +152,29 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
     return (activity ? is_bot_user_agent(activity.user_agent) : false) || webdriver_sessions.has(session_id) || freq_bot_sessions.has(session_id)
   }
 
+  // Per-dictionary viewership: distinct HUMAN sessions that opened each dict today,
+  // + the anon subset (session with no user_id ≈ outside public visitor). One
+  // `dictionary_opened` fires per dict-open (the [dictionaryId] layout mounts even
+  // on a deep-linked entry), so this counts any entry into the dict. Bots excluded
+  // via the same session_is_bot gate as the metric buckets. Written to the forever
+  // `dictionary_daily_views` table (never pruned) — see the migration.
+  const dict_views = new Map<string, { sessions: Set<string>, anon: Set<string> }>()
   for (const { row, context, session_id } of parsed_rows) {
-    const bucket = (session_id ? session_is_bot(session_id) : is_bot_user_agent(row.user_agent)) ? bot_bucket : bucket_for(row.source)
+    const is_bot = session_id ? session_is_bot(session_id) : is_bot_user_agent(row.user_agent)
+    const bucket = is_bot ? bot_bucket : bucket_for(row.source)
+    if (!is_bot && session_id && row.message === DICTIONARY_OPENED) {
+      const dict_id = typeof context?.dictionary_id === 'string' ? context.dictionary_id : null
+      if (dict_id) {
+        let views = dict_views.get(dict_id)
+        if (!views) {
+          views = { sessions: new Set(), anon: new Set() }
+          dict_views.set(dict_id, views)
+        }
+        views.sessions.add(session_id)
+        if (!session_activity.get(session_id)?.has_user_id)
+          views.anon.add(session_id)
+      }
+    }
     bucket.logs++
     if (ERROR_LEVELS.has(row.level)) {
       bucket.errors++
@@ -228,6 +250,9 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
     INSERT INTO log_daily_sessions (day, session_id, user_agent, heartbeats, has_user_id, webdriver, db_tier, country, region)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `)
+  const insert_dict_view = shared_db.prepare(`
+    INSERT INTO dictionary_daily_views (day, dictionary_id, sessions, anon_sessions) VALUES (?, ?, ?, ?)
+  `)
   const write_all = shared_db.transaction((items: typeof metrics) => {
     // Full-day REPLACE, not merge: without the delete, a metric that no longer
     // exists for the day (e.g. a UA reclassified as a bot) would keep its stale
@@ -251,6 +276,10 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
         session.region,
       )
     }
+    // Full-day REPLACE (same idempotency contract as the metrics/sessions above).
+    shared_db.prepare('DELETE FROM dictionary_daily_views WHERE day = ?').run(day)
+    for (const [dict_id, views] of dict_views)
+      insert_dict_view.run(day, dict_id, views.sessions.size, views.anon.size)
   })
   write_all(metrics)
   return { metrics_written: metrics.length }

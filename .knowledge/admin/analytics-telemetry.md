@@ -46,6 +46,42 @@ it ages out of hot storage. Rolled-up `log_daily_sessions` stores the raw UA + h
 webdriver flag per session so the reader **re-classifies from the materialized row** on finalized
 days — the classification is never frozen into the metric.
 
+## Per-dictionary viewership is a dedicated forever rollup, and it's "visits" not "visitors"
+
+`dictionary_daily_views(day, dictionary_id, sessions, anon_sessions)` (LD-only, 2026-07-07) is a
+tiny FOREVER rollup written by `rollup_day()` from `dictionary_opened` events — one open fires per
+dict entry (the `[dictionaryId]` layout mounts even on a deep-linked entry), so it captures any
+entry into a dict, anonymous public visitors included, bots excluded via the SAME classifier as the
+metric buckets. It seeds the admin "Top dictionaries by viewers" panel and, later, a public
+"visits/month" badge on star dictionaries' home pages.
+
+Two durable decisions that aren't obvious from the code:
+
+- **It lives in shared.db, NOT logs.db — on purpose.** The 2026-07-05 split moved the *raw rows*
+  (disposable, not backed up, archived+pruned) to logs.db; the tiny *aggregates* deliberately stayed
+  in shared.db (durable, backed up, "the rollups carry the history"). A forever public-facing stat is
+  the opposite of throwaway, so it belongs with `log_daily_metrics`/`log_daily_sessions`. Cost is
+  negligible (≤ one small row per dict-with-a-view per day). Server-only (absent from
+  `SYNCABLE_TABLE_NAMES`) → never syncs, sits empty on admin clients like the sibling rollups. The
+  future public number will reach browsers by baking it into the dict catalog/snapshot deliberately,
+  never via this table.
+- **`sessions` summed over a window = VISITS, not unique VISITORS.** A `session_id` resets per
+  page-load, so a returning person is many sessions. Daily-distinct summed over a month is honest
+  "visits/month"; true monthly *uniques* need the backlogged cookieless `visitor_hash`
+  (dashboard-improvements.md). Frame the public stat as visits until that ships. `anon_sessions`
+  (session with no user_id — server-stamps user_id per request, so per-row null == session-level
+  anon) ≈ outside public visitors, the star-dict brag number (a logged-in non-member still counts as
+  a view but not as anon; good-enough approximation, member-exclusion deferred).
+
+## Client SPA navigation timing was logged-but-invisible until 2026-07-07
+
+`log_navigation` has always folded a client-side SPA nav `duration_ms` (beforeNavigate→afterNavigate)
+into the `navigation` event, but `build_performance` only aggregated `perf`-message rows
+(`page_load`/`search`), so home→entry nav speed existed in the data and showed on no panel. The fix
+reads the existing `navigation` rows into a synthetic `navigation` perf metric (+ by-destination-route
+split) — zero new log volume. Pairs with LCP-by-route (grouping `web_vital` LCP rows by landing route).
+The "Speed at a glance" strip on `/admin/health` surfaces page-load + navigation p50/p95 + LCP p75.
+
 ## Warn-level `sync_failed` is invisible to the standard panels (why "Sync health" exists)
 
 A recurring blind-spot class, hit identically by LD + house: `top_events` reads only

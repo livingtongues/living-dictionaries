@@ -3,7 +3,7 @@ import type { DeviceType } from '$lib/debug/parse-user-agent'
 import process from 'node:process'
 import { version } from '$app/environment'
 import { is_expected_error_response, is_known_noise, is_noise_error_message } from '$lib/debug/classify-error'
-import { ALL_TRACKED_EVENTS } from '$lib/debug/log-events'
+import { ALL_TRACKED_EVENTS, DICTIONARY_OPENED } from '$lib/debug/log-events'
 import { is_below_db_worker_capability, is_bot_user_agent, parse_user_agent } from '$lib/debug/parse-user-agent'
 import { SYNCABLE_TABLE_NAMES } from '$lib/db/sync/types'
 import { distance_bucket, DISTANCE_BUCKETS, distance_to_origin_km } from '$lib/geo/distance'
@@ -39,6 +39,7 @@ const INFRA_EVENTS = new Set(['heartbeat', 'navigation', 'perf', 'session_start'
 const TOP_LIMIT = 12
 const ERROR_CLUSTER_LIMIT = 25
 const ROUTE_PERF_LIMIT = 12
+const TOP_DICTIONARIES_LIMIT = 30
 /**
  * Errors within this window of their build's first appearance count as post-deploy
  * "settling" churn (chunk/asset races on a fresh bundle), NOT a standing regression —
@@ -78,8 +79,12 @@ function ensure_is_noise_msg(db: Database.Database): void {
   is_noise_msg_registered.add(db)
 }
 
-/** Timing metrics surfaced on the performance panel, in display order. */
-const PERF_METRICS = ['page_load', 'search'] as const
+/**
+ * Timing metrics surfaced on the performance panel, in display order.
+ * `navigation` is the client-side SPA nav duration (home→entry etc), folded in
+ * from the already-logged `navigation` events — no dedicated perf row.
+ */
+const PERF_METRICS = ['page_load', 'navigation', 'search'] as const
 /** Core Web Vitals surfaced on the dashboard, in display order (the canonical CWV trio first). */
 const WEB_VITAL_METRICS = ['LCP', 'INP', 'CLS', 'FCP', 'TTFB'] as const
 
@@ -277,7 +282,16 @@ export interface LogAnalytics {
     db_tiers: { tier: string, sessions: number }[]
   }
   /** Client `perf` timings (hot window only — percentiles aren't in the rollup). */
-  performance: { summary: PerfSummary[], daily: PerfDailyPoint[], by_route: RoutePerf[] }
+  performance: {
+    summary: PerfSummary[]
+    daily: PerfDailyPoint[]
+    /** Per-route page-load (hard load) timing, slowest p95 first. */
+    by_route: RoutePerf[]
+    /** Per-destination-route client SPA navigation timing (home→entry etc), most-travelled first. */
+    nav_by_route: RoutePerf[]
+    /** Per-landing-route LCP (largest contentful paint), most-sampled first. */
+    lcp_by_route: RoutePerf[]
+  }
   /** Core Web Vitals distribution (hot window, human sessions only). Empty array when none landed yet. */
   web_vitals: WebVitalSummary[]
   /** Approximate geography from CF edge headers — areas + geo-split TTFB. */
@@ -296,6 +310,8 @@ export interface LogAnalytics {
   sync_health: SyncHealth
   /** Agent/API write activity — the server-emitted `v1_*` events (hot window only). */
   api_v1: ApiV1Activity
+  /** Per-dictionary viewership (forever rollup + live tail) — who's being viewed, how much. */
+  top_dictionaries: TopDictionaries
   /** Top missing i18n keys — the live translation-gap worklist (hot window, human). */
   missing_i18n_keys: MissingI18nKeys
   /** Fresh-viewer boot-cascade health — empty-dictionary regression detector (hot window, audience). */
@@ -415,6 +431,43 @@ export interface ApiV1Activity {
   by_dictionary: { dictionary_id: string, count: number }[]
   /** Auth channel split (`context.via`: `api_key` vs session), highest first. */
   by_via: { via: string, count: number }[]
+}
+
+/** One dictionary's viewership over the window — most-viewed first. */
+export interface TopDictionaryRow {
+  dictionary_id: string
+  /** Catalog name (null if the dict was deleted after being viewed). */
+  name: string | null
+  /** Catalog url slug — links the panel row to the live dictionary. */
+  url: string | null
+  is_public: boolean
+  /** Distinct human viewer-sessions summed over the 30d window — "visits" (a session resets per page-load), NOT unique visitors. */
+  views_30d: number
+  /** Anonymous (logged-out) subset of `views_30d` ≈ outside public visitors — the star-dict brag number. */
+  anon_30d: number
+  /** Same, last 7 days. */
+  views_7d: number
+  /** Same, today (live tail). */
+  views_1d: number
+}
+/**
+ * Per-dictionary viewership — the "which dictionaries are being viewed, by how
+ * many" picture, and the raw material for a future public "visits/month" stat on
+ * each dictionary's home page. Merges the forever `dictionary_daily_views` rollup
+ * (finalized days, human-only, never pruned) with a live `dictionary_opened` scan
+ * for days past the watermark. Bots excluded (audience-filtered). CAVEAT: counts
+ * distinct sessions/day summed over the window = visits, not unique visitors —
+ * true monthly uniques await the cookieless `visitor_hash`.
+ */
+export interface TopDictionaries {
+  /** Distinct dictionaries that got ≥1 (audience) view in the window. */
+  distinct_dictionaries: number
+  /** Total viewer-sessions (visits) across all dicts — 30d / 7d / today. */
+  total_30d: number
+  total_7d: number
+  total_1d: number
+  /** Per-dictionary totals, most-viewed first (top N). */
+  dictionaries: TopDictionaryRow[]
 }
 
 /** Strip a full URL down to its pathname (+ search) for display; falls back to the raw value. */
@@ -655,6 +708,7 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
   const leader_health = timed('build_leader_health', () => build_leader_health(ctx))
   const sync_health = timed('build_sync_health', () => build_sync_health(ctx))
   const api_v1 = timed('build_api_v1', () => build_api_v1_activity(ctx))
+  const top_dictionaries = timed('build_top_dictionaries', () => build_top_dictionaries(ctx))
   const missing_i18n_keys = timed('build_missing_i18n', () => build_missing_i18n_keys(ctx))
   const boot_health = timed('build_boot_health', () => build_boot_health(ctx))
   const uptime = timed('build_uptime', () => build_uptime(ctx))
@@ -688,6 +742,7 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
     leader_health,
     sync_health,
     api_v1,
+    top_dictionaries,
     missing_i18n_keys,
     boot_health,
     uptime,
@@ -1289,7 +1344,7 @@ function build_boot_health(ctx: AnalyticsContext): BootHealth {
  * bfcache/instant-nav 0ms loads + negatives that drag the p50 down). Includes the
  * per-route page-load split (slowest p95 first).
  */
-function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: DailyPoint[] }): { summary: PerfSummary[], daily: PerfDailyPoint[], by_route: RoutePerf[] } {
+function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: DailyPoint[] }): { summary: PerfSummary[], daily: PerfDailyPoint[], by_route: RoutePerf[], nav_by_route: RoutePerf[], lcp_by_route: RoutePerf[] } {
   const perf_rows = ctx.logs_db.prepare(`
     SELECT substr(received_at, 1, 10) day,
            json_extract(context, '$.name') name,
@@ -1303,23 +1358,49 @@ function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: Daily
   const perf_all = new Map<string, number[]>()
   const perf_by_day = new Map<string, Map<string, number[]>>()
   const perf_slowest = new Map<string, { duration_ms: number, route: string }>()
+  const record_timing = (name: string, day: string, duration_ms: number, route: string): void => {
+    if (!perf_all.has(name))
+      perf_all.set(name, [])
+    perf_all.get(name)?.push(duration_ms)
+    const prev = perf_slowest.get(name)
+    if (!prev || duration_ms > prev.duration_ms)
+      perf_slowest.set(name, { duration_ms, route })
+    let day_map = perf_by_day.get(day)
+    if (!day_map) {
+      day_map = new Map()
+      perf_by_day.set(day, day_map)
+    }
+    if (!day_map.has(name))
+      day_map.set(name, [])
+    day_map.get(name)?.push(duration_ms)
+  }
   for (const row of perf_rows) {
     if (!row.name)
       continue
-    if (!perf_all.has(row.name))
-      perf_all.set(row.name, [])
-    perf_all.get(row.name)?.push(row.duration_ms)
-    const prev = perf_slowest.get(row.name)
-    if (!prev || row.duration_ms > prev.duration_ms)
-      perf_slowest.set(row.name, { duration_ms: row.duration_ms, route: url_route(row.url) })
-    let day_map = perf_by_day.get(row.day)
-    if (!day_map) {
-      day_map = new Map()
-      perf_by_day.set(row.day, day_map)
-    }
-    if (!day_map.has(row.name))
-      day_map.set(row.name, [])
-    day_map.get(row.name)?.push(row.duration_ms)
+    record_timing(row.name, row.day, row.duration_ms, url_route(row.url))
+  }
+
+  // Client-side SPA navigation timing — pulled from the already-logged
+  // `navigation` events (`duration_ms` measured beforeNavigate→afterNavigate,
+  // `to` = destination). This is the home→entry speed signal, folded into the
+  // same summary/daily as a synthetic `navigation` metric plus a by-route split.
+  // No new logging.
+  const nav_rows = ctx.logs_db.prepare(`
+    SELECT substr(received_at, 1, 10)              day,
+           json_extract(context, '$.duration_ms') duration_ms,
+           json_extract(context, '$.to')          to_path,
+           url
+    FROM client_logs
+    WHERE received_at >= ? AND message = 'navigation' AND ${ctx.audience_filter}
+      AND json_extract(context, '$.duration_ms') > 0
+  `).all(ctx.window_start_iso) as { day: string, duration_ms: number, to_path: string | null, url: string | null }[]
+  const nav_route_values = new Map<string, number[]>()
+  for (const row of nav_rows) {
+    const to_route = normalize_route(typeof row.to_path === 'string' ? row.to_path : (row.url ? url_route(row.url).split('?')[0] : null))
+    record_timing('navigation', row.day, row.duration_ms, to_route)
+    if (!nav_route_values.has(to_route))
+      nav_route_values.set(to_route, [])
+    nav_route_values.get(to_route)?.push(row.duration_ms)
   }
 
   const perf_names = [...PERF_METRICS, ...[...perf_all.keys()].filter(name => !PERF_METRICS.includes(name as typeof PERF_METRICS[number]))]
@@ -1351,7 +1432,37 @@ function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: Daily
     .sort((first, second) => (second.p95 ?? 0) - (first.p95 ?? 0))
     .slice(0, ROUTE_PERF_LIMIT)
 
-  return { summary, daily: daily_perf, by_route }
+  // Navigation by destination route — most-travelled first (the common paths, e.g.
+  // home→dictionary:entry, are what matter; slow ones surface via their p95 column).
+  const nav_by_route: RoutePerf[] = [...nav_route_values.entries()]
+    .map(([route, values]) => ({ route, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95), max: Math.max(...values) }))
+    .sort((first, second) => second.count - first.count)
+    .slice(0, ROUTE_PERF_LIMIT)
+
+  // LCP (largest contentful paint) by landing route — the real "when did they see
+  // content" metric, per route. web_vital rows carry `value` (ms), only on hard loads.
+  const lcp_route_values = new Map<string, number[]>()
+  for (const row of ctx.logs_db.prepare(`
+    SELECT url, json_extract(context, '$.value') value
+    FROM client_logs
+    WHERE received_at >= ? AND message = 'perf' AND ${ctx.audience_filter}
+      AND json_extract(context, '$.name') = 'web_vital'
+      AND json_extract(context, '$.metric') = 'LCP'
+      AND json_extract(context, '$.value') > 0
+  `).all(ctx.window_start_iso) as { url: string | null, value: number }[]) {
+    if (!row.url)
+      continue
+    const route = normalize_route(url_route(row.url).split('?')[0])
+    if (!lcp_route_values.has(route))
+      lcp_route_values.set(route, [])
+    lcp_route_values.get(route)?.push(row.value)
+  }
+  const lcp_by_route: RoutePerf[] = [...lcp_route_values.entries()]
+    .map(([route, values]) => ({ route, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95), max: Math.max(...values) }))
+    .sort((first, second) => second.count - first.count)
+    .slice(0, ROUTE_PERF_LIMIT)
+
+  return { summary, daily: daily_perf, by_route, nav_by_route, lcp_by_route }
 }
 
 /**
@@ -1720,4 +1831,116 @@ function build_api_v1_activity(ctx: AnalyticsContext): ApiV1Activity {
     by_dictionary: desc(by_dictionary).map(([dictionary_id, count]) => ({ dictionary_id, count })),
     by_via: desc(by_via).map(([via, count]) => ({ via, count })),
   }
+}
+
+/**
+ * Per-dictionary viewership (the "who's being viewed, by how many" panel + the
+ * seed for a future public visits/month stat). Merges the forever
+ * `dictionary_daily_views` rollup for finalized days (human-only, written by the
+ * retention cron) with a live `dictionary_opened` scan for days past the
+ * watermark. Both keyed per (dict, day) distinct-session so totals sum the same
+ * way hot and cold. Names/urls join the shared.db `dictionaries` catalog. Bots
+ * follow the audience toggle; the cold table is human-only, so a 'bots' audience
+ * shows only its live tail (acceptable — this is a usage/props panel).
+ */
+function build_top_dictionaries(ctx: AnalyticsContext): TopDictionaries {
+  const { shared_db, logs_db, audience, audience_filter, window_start_day, live_start_day, live_start_iso, now } = ctx
+  const today = day_string(now)
+  const day_7d_start = day_string(new Date(now.getTime() - 6 * 86_400_000))
+
+  // per_dict → per-day {sessions, anon}, merged from cold rollup + live tail.
+  const per_dict = new Map<string, Map<string, { sessions: number, anon: number }>>()
+  const add = (dictionary_id: string, day: string, sessions: number, anon: number): void => {
+    let by_day = per_dict.get(dictionary_id)
+    if (!by_day) {
+      by_day = new Map()
+      per_dict.set(dictionary_id, by_day)
+    }
+    const point = by_day.get(day) ?? { sessions: 0, anon: 0 }
+    point.sessions += sessions
+    point.anon += anon
+    by_day.set(day, point)
+  }
+
+  // Cold rollup — human-only rows for finalized days (skip for the bots audience,
+  // which the table never stored). Wrapped: a pre-migration shared.db has no table.
+  if (audience === 'humans') {
+    try {
+      const cold = shared_db.prepare(`
+        SELECT dictionary_id, day, sessions, anon_sessions
+        FROM dictionary_daily_views
+        WHERE day >= ? AND day < ?
+      `).all(window_start_day, live_start_day) as { dictionary_id: string, day: string, sessions: number, anon_sessions: number }[]
+      for (const row of cold)
+        add(row.dictionary_id, row.day, row.sessions, row.anon_sessions)
+    } catch {
+      // table absent (never migrated) — cold contributes nothing.
+    }
+  }
+
+  // Live tail — distinct human sessions per (dict, day) past the watermark. A
+  // logged-in session carries a server-stamped user_id on every row, so
+  // `user_id IS NULL` on the open row == the session-level anon the rollup stores.
+  const live = logs_db.prepare(`
+    SELECT substr(received_at, 1, 10)                                          day,
+           json_extract(context, '$.dictionary_id')                           dictionary_id,
+           COUNT(DISTINCT session_id)                                          sessions,
+           COUNT(DISTINCT CASE WHEN user_id IS NULL THEN session_id END)       anon
+    FROM client_logs
+    WHERE received_at >= ? AND message = ? AND session_id IS NOT NULL
+      AND json_extract(context, '$.dictionary_id') IS NOT NULL
+      AND ${audience_filter}
+    GROUP BY day, dictionary_id
+  `).all(live_start_iso, DICTIONARY_OPENED) as { day: string, dictionary_id: string, sessions: number, anon: number }[]
+  for (const row of live)
+    add(row.dictionary_id, row.day, row.sessions, row.anon)
+
+  // Fold per-day into windowed totals per dict.
+  interface Totals { views_30d: number, anon_30d: number, views_7d: number, views_1d: number }
+  const totals_by_dict = new Map<string, Totals>()
+  let total_30d = 0
+  let total_7d = 0
+  let total_1d = 0
+  for (const [dictionary_id, by_day] of per_dict) {
+    const totals: Totals = { views_30d: 0, anon_30d: 0, views_7d: 0, views_1d: 0 }
+    for (const [day, point] of by_day) {
+      totals.views_30d += point.sessions
+      totals.anon_30d += point.anon
+      if (day >= day_7d_start)
+        totals.views_7d += point.sessions
+      if (day === today)
+        totals.views_1d += point.sessions
+    }
+    totals_by_dict.set(dictionary_id, totals)
+    total_30d += totals.views_30d
+    total_7d += totals.views_7d
+    total_1d += totals.views_1d
+  }
+
+  // Catalog names/urls for the dicts in play (one IN query).
+  const ids = [...totals_by_dict.keys()]
+  const catalog = new Map<string, { name: string | null, url: string | null, is_public: boolean }>()
+  if (ids.length) {
+    const placeholders = ids.map(() => '?').join(', ')
+    for (const row of shared_db.prepare(`
+      SELECT id, name, url, public FROM dictionaries WHERE id IN (${placeholders})
+    `).all(...ids) as { id: string, name: string | null, url: string | null, public: number | null }[])
+      catalog.set(row.id, { name: row.name, url: row.url, is_public: row.public === 1 })
+  }
+
+  const dictionaries: TopDictionaryRow[] = [...totals_by_dict.entries()]
+    .map(([dictionary_id, totals]) => {
+      const meta = catalog.get(dictionary_id)
+      return {
+        dictionary_id,
+        name: meta?.name ?? null,
+        url: meta?.url ?? null,
+        is_public: meta?.is_public ?? false,
+        ...totals,
+      }
+    })
+    .sort((first, second) => second.views_30d - first.views_30d || second.views_7d - first.views_7d)
+    .slice(0, TOP_DICTIONARIES_LIMIT)
+
+  return { distinct_dictionaries: totals_by_dict.size, total_30d, total_7d, total_1d, dictionaries }
 }

@@ -2,13 +2,19 @@
   import type { FeaturedCard } from './types'
   import type { MapView } from './map/WorldMap.svelte'
   import { onMount } from 'svelte'
+  import { crossfade, scale } from 'svelte/transition'
   import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { page } from '$app/state'
   import { image_src, url_from_storage_path } from '$lib/utils/media-url'
   import { bbox_contains } from './map/view-helpers'
   import FeaturedEntryFullscreen from './FeaturedEntryFullscreen.svelte'
-  import IconMdiPlay from '~icons/mdi/play'
-  import IconMdiPause from '~icons/mdi/pause'
+  import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
+  import IconGgSpinner from '~icons/gg/spinner'
+
+  /** Same size FeaturedEntryFullscreen renders — preload it so the crossfade has the pixels ready. */
+  const FULLSCREEN_SIZE = 'w1200'
+  // Morphs the tapped card image into the fullscreen viewer (shared between the two components).
+  const [send, receive] = crossfade({ duration: 200, fallback: scale })
 
   interface Props {
     cards: FeaturedCard[]
@@ -90,6 +96,8 @@
     audio_element.onerror = finish
     playing_id = card.id
     on_active_dict?.(card.dict_id)
+    // Hitting play often precedes tapping into the fullscreen view — warm its larger image.
+    preload_card(card)
     void audio_element.play()
   }
 
@@ -141,17 +149,55 @@
     touch_resume_timeout = setTimeout(() => paused = false, 4000)
   }
 
+  // Warm the fullscreen-size image ahead of a likely tap (hover on desktop,
+  // pointerdown on touch) so opening is instant and the crossfade has pixels ready.
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- plain preload cache, never drives UI
+  const preloaded = new Set<string>()
+  function preload_card(card: FeaturedCard) {
+    const src = image_src(card.photo_serving_url, FULLSCREEN_SIZE)
+    if (preloaded.has(src))
+      return
+    const img = new Image()
+    img.onload = () => preloaded.add(src)
+    img.src = src
+  }
+
   // A plain left-click opens the fullscreen image viewer instead of navigating —
   // entering a dictionary kicks off its whole snapshot download, which most
   // curious homepage clicks don't intend. Modified/middle clicks keep the
-  // default open-in-new-tab behavior.
+  // default open-in-new-tab behavior. A card-image → viewer crossfade morphs the
+  // tapped thumbnail up to full size; a spinner shows if the full image isn't cached yet.
   let fullscreen_card = $state<FeaturedCard | null>(null)
-  function open_fullscreen(event: MouseEvent, card: FeaturedCard) {
+  let fullscreen_key = $state<string | null>(null)
+  let loading_key = $state<string | null>(null)
+
+  function open_fullscreen(event: MouseEvent, card: FeaturedCard, card_key: string) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)
       return
     event.preventDefault()
     audio_element?.pause()
     playing_id = null
+    const src = image_src(card.photo_serving_url, FULLSCREEN_SIZE)
+    if (preloaded.has(src)) {
+      show_fullscreen(card, card_key)
+      return
+    }
+    const spinner_timeout = setTimeout(() => loading_key = card_key, 100)
+    const img = new Image()
+    const done = () => {
+      clearTimeout(spinner_timeout)
+      preloaded.add(src)
+      if (loading_key === card_key)
+        loading_key = null
+      show_fullscreen(card, card_key)
+    }
+    img.onload = done
+    img.onerror = done
+    img.src = src
+  }
+
+  function show_fullscreen(card: FeaturedCard, card_key: string) {
+    fullscreen_key = card_key
     fullscreen_card = card
     on_active_dict?.(card.dict_id)
   }
@@ -221,16 +267,26 @@
   onfocusin={() => paused = true}
   onfocusout={() => paused = false}>
   {#each looped as card, index (`${card.id}-${index}`)}
+    {@const card_key = `${card.id}-${index}`}
     <a
       class="card"
       data-index={index}
       href="/{card.dict_url}/entry/{card.entry_id}"
-      onclick={event => open_fullscreen(event, card)}
-      onpointerenter={() => set_active(card.id)}
+      onclick={event => open_fullscreen(event, card, card_key)}
+      onpointerenter={() => { set_active(card.id); preload_card(card) }}
+      onpointerdown={() => preload_card(card)}
       onpointerleave={() => set_active(null)}
       onfocus={() => set_active(card.id)}
       onblur={() => set_active(null)}>
-      <img use:fade_in src={image_src(card.photo_serving_url, 's340-p')} alt={card.lexeme} loading={index < 8 ? 'eager' : 'lazy'} />
+      {#if !(fullscreen_card && fullscreen_key === card_key)}
+        <img
+          use:fade_in
+          src={image_src(card.photo_serving_url, 's340-p')}
+          alt={card.lexeme}
+          loading={index < 8 ? 'eager' : 'lazy'}
+          in:receive|local={{ key: card_key }}
+          out:send|local={{ key: card_key }} />
+      {/if}
       <div class="fade"></div>
       <div class="text">
         <div class="dict-name">{card.dict_name}</div>
@@ -239,19 +295,28 @@
           <div class="gloss">{card.gloss}</div>
         {/if}
       </div>
+      {#if loading_key === card_key}
+        <IconGgSpinner class="card-spinner" />
+      {/if}
       <button
         type="button"
         class="play"
+        class:playing={playing_id === card.id}
         onclick={event => toggle_audio(event, card)}
         aria-label="{playing_id === card.id ? t('misc.pause') : t('misc.play')} {card.lexeme}">
-        {#if playing_id === card.id}<IconMdiPause />{:else}<IconMdiPlay />{/if}
+        <IconMaterialSymbolsHearing />
       </button>
     </a>
   {/each}
 </div>
 
 {#if fullscreen_card}
-  <FeaturedEntryFullscreen card={fullscreen_card} on_close={() => { fullscreen_card = null; on_active_dict?.(null) }} />
+  <FeaturedEntryFullscreen
+    card={fullscreen_card}
+    crossfade_key={fullscreen_key}
+    {send}
+    {receive}
+    on_close={() => { fullscreen_card = null; on_active_dict?.(null) }} />
 {/if}
 
 <style>
@@ -371,7 +436,30 @@
     transition: background 200ms, transform 75ms;
   }
 
-  .play:hover {
+  .play :global(svg) {
+    transform: translateX(1.5px);
+  }
+
+  .strip :global(.card-spinner) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin: -0.875rem 0 0 -0.875rem;
+    color: #fff;
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.55));
+    animation: card-spin 1s linear infinite;
+  }
+
+  @keyframes card-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .play:hover,
+  .play.playing {
     background: rgb(255 255 255 / 0.42);
   }
 

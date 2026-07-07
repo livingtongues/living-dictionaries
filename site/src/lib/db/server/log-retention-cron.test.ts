@@ -157,6 +157,37 @@ describe(rollup_day, () => {
     expect(metric('2026-06-01', 'bot:logs')).toBe(2)
   })
 
+  test('rolls up per-dictionary viewership (distinct human sessions + anon subset; bots excluded)', () => {
+    // Dict A: two distinct human sessions — one anon (no user_id), one signed-in.
+    add_log({ message: 'dictionary_opened', context: { session_id: 'anon1', dictionary_id: 'dictA' } })
+    add_log({ message: 'entry_opened', context: { session_id: 'anon1', dictionary_id: 'dictA', entry_id: 'e1' } })
+    add_log({ message: 'dictionary_opened', user_id: 'u1', context: { session_id: 'auth1', dictionary_id: 'dictA' } })
+    // Same anon session opening it again the same day must NOT double-count.
+    add_log({ message: 'dictionary_opened', context: { session_id: 'anon1', dictionary_id: 'dictA' } })
+    // Dict B: one anon human session.
+    add_log({ message: 'dictionary_opened', context: { session_id: 'anon1', dictionary_id: 'dictB' } })
+    // A bot opening dict A must be excluded entirely.
+    const HEADLESS = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/148.0.0.0 Safari/537.36'
+    add_log({ message: 'dictionary_opened', context: { session_id: 'bot1', dictionary_id: 'dictA' }, user_agent: HEADLESS })
+
+    rollup_day({ day: '2026-06-01', shared_db, logs_db })
+
+    const views = shared_db.prepare(`SELECT dictionary_id, sessions, anon_sessions FROM dictionary_daily_views WHERE day = ? ORDER BY dictionary_id`).all('2026-06-01') as { dictionary_id: string, sessions: number, anon_sessions: number }[]
+    expect(views).toEqual([
+      { dictionary_id: 'dictA', sessions: 2, anon_sessions: 1 }, // anon1 + auth1; anon subset = anon1
+      { dictionary_id: 'dictB', sessions: 1, anon_sessions: 1 },
+    ])
+  })
+
+  test('per-dictionary viewership is idempotent (full-day REPLACE, no doubling)', () => {
+    add_log({ message: 'dictionary_opened', context: { session_id: 's1', dictionary_id: 'dictA' } })
+    rollup_day({ day: '2026-06-01', shared_db, logs_db })
+    rollup_day({ day: '2026-06-01', shared_db, logs_db })
+    const row = shared_db.prepare(`SELECT sessions FROM dictionary_daily_views WHERE day = '2026-06-01' AND dictionary_id = 'dictA'`).get() as { sessions: number } | undefined
+    expect(row?.sessions).toBe(1)
+    expect((shared_db.prepare(`SELECT COUNT(*) n FROM dictionary_daily_views WHERE day = '2026-06-01'`).get() as { n: number }).n).toBe(1)
+  })
+
   test('classifies a spoofed-UA UA-frequency crawler cluster as bots even without a bot UA regex match', () => {
     const SPOOF = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15'
     // 25 anonymous, zero-heartbeat sessions on one plausible-human UA in a day = crawler.
