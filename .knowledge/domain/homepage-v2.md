@@ -40,7 +40,7 @@ to reach ~region level, labels (country/state/city) matter as you zoom.
   MultiPoint, not a Polygon — a ring spanning all longitudes at a parallel encloses a pole and d3
   fills it back to full height. `fit_equal_earth` pins `clipExtent` to the fitted bounds so cropped
   land never paints into letterbox, and the hero `.map-frame` height follows the exported
-  `WORLD_ASPECT` (~2.06, `aspect-ratio` capped by 58vh) — big monitors used to letterbox vertically
+  `WORLD_ASPECT` (~2.06, `aspect-ratio` capped by 52vh, width `min(100%, 52vh × aspect)` centered) — big monitors used to letterbox vertically
   and expose Antarctica. Applies to both the SSR SVG and the canvas so they line up.
 - **Land derived, not shipped**: land silhouette = `topojson.merge(countries.geometries)` at both
   resolutions (canvas + SSR) — home-v2 imports the country topojson from

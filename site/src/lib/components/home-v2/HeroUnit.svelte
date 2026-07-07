@@ -182,7 +182,7 @@
 <style>
   .hero-unit {
     position: relative;
-    padding: 0.5rem 0 0;
+    padding: 0.45rem 0 0;
   }
 
   .hero-constrained {
@@ -194,11 +194,14 @@
   .map-frame {
     position: relative;
     /* height follows the trimmed world's aspect — no vertical letterbox where
-       Antarctica would peek in; very short windows cap at 58vh (empty-ocean
-       side bands, which the projection clip keeps land-free) */
+       Antarctica would peek in; very short windows cap at 52vh (empty-ocean
+       side bands, which the projection clip keeps land-free). width shrinks
+       with height so the map stays centered when the cap bites. */
     aspect-ratio: var(--world-aspect);
-    max-height: 58vh;
+    width: min(100%, calc(52vh * var(--world-aspect)));
+    max-height: 52vh;
     min-height: 300px;
+    margin-inline: auto;
     border-radius: 1rem;
     overflow: hidden;
   }

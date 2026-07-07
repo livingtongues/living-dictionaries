@@ -63,7 +63,7 @@
   .hero {
     max-width: 72rem;
     margin: 0 auto;
-    padding: 1.5rem 1rem;
+    padding: 1.5rem 1rem 1.35rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -74,11 +74,11 @@
     font-size: clamp(1.75rem, 4.5vw, 2.75rem);
     font-weight: 800;
     letter-spacing: -0.03em;
-    margin: 0 0 0.625rem;
+    margin: 0 0 0.5625rem;
   }
 
   .subline {
-    margin: 0 0 1.5rem;
+    margin: 0 0 1.35rem;
     font-size: clamp(0.9375rem, 2vw, 1.0625rem);
     line-height: 1.55;
     color: var(--color-secondary);
