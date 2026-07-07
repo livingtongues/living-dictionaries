@@ -4,18 +4,15 @@
   import type { MapColors } from './theme-colors'
   import type { Cluster } from './view-helpers'
   import type { SsrMap } from './ssr-map'
-  import { geoPath, select, zoom, zoomIdentity } from 'd3'
+  import { geoContains, geoPath, select, zoom, zoomIdentity } from 'd3'
   import { onMount } from 'svelte'
   import * as topojson from 'topojson-client'
   import { page } from '$app/state'
   import countries110_topo from '$lib/components/globe/data/countries-110m.json'
-  import land110_topo from '$lib/components/globe/data/land-110m.json'
   import country_labels from './data/country-labels.json'
-  import { fit_equal_earth, MAX_ZOOM } from './projection'
+  import { fit_equal_earth, MAX_ZOOM, MIN_ZOOM } from './projection'
   import { read_map_colors } from './theme-colors'
   import { cluster_points, create_label_placer, view_bbox } from './view-helpers'
-  import IconMdiPlus from '~icons/mdi/plus'
-  import IconMdiMinus from '~icons/mdi/minus'
   import IconMdiArrowCollapseAll from '~icons/mdi/arrow-collapse-all'
   import IconMdiClose from '~icons/mdi/close'
   import IconMdiMapMarker from '~icons/mdi/map-marker'
@@ -41,7 +38,9 @@
   let canvas: HTMLCanvasElement = $state()
   let swatches: HTMLDivElement = $state()
   let canvas_ready = $state(false)
-  let hint: 'wheel' | 'touch' | null = $state(null)
+  let hint: 'touch' | null = $state(null)
+  /** Current zoom scale, mirrored for reactive UI (the reset button hides at full-out). */
+  let zoom_level = $state(MIN_ZOOM)
   let hover_dot = $state(false)
   let hover_tip = $state<{ x: number, y: number, count: number, dict: MapDict } | null>(null)
   let selected_dict: MapDict | null = $state(null)
@@ -56,6 +55,8 @@
   let base_projection: ReturnType<typeof fit_equal_earth> | null = null
   let land_path: Path2D | null = null
   let borders_path: Path2D | null = null
+  /** Country polygons (geographic) for click hit-testing → zoom-to-country. */
+  let country_features: GeoJSON.Feature[] = []
   let base_dots: { x: number, y: number, dict: MapDict }[] = []
   let visible_clusters: Cluster<MapDict>[] = []
   let colors: MapColors | null = null
@@ -109,8 +110,11 @@
       hi_res = null
       load_hi_res()
     }
-    const land = topojson.feature(land110_topo as any, (land110_topo as any).objects.land)
+    // land silhouette merged from the country polygons — saves shipping land-110m
+    const land = topojson.merge(countries110_topo as any, (countries110_topo as any).objects.countries.geometries)
     const borders = topojson.mesh(countries110_topo as any, (countries110_topo as any).objects.countries, (a: any, b: any) => a !== b)
+    if (!country_features.length)
+      country_features = (topojson.feature(countries110_topo as any, (countries110_topo as any).objects.countries) as any).features
     land_path = new Path2D(path(land as any) ?? '')
     borders_path = new Path2D(path(borders as any) ?? '')
     schedule_draw()
@@ -121,12 +125,9 @@
       return
     hi_res_loading = true
     try {
-      const [land50, countries50] = await Promise.all([
-        import('$lib/components/globe/data/land-50m.json').then(module => module.default),
-        import('$lib/components/globe/data/countries-50m.json').then(module => module.default),
-      ])
+      const countries50 = await import('$lib/components/globe/data/countries-50m.json').then(module => module.default)
       const path = geoPath(base_projection).digits(1)
-      const land = topojson.feature(land50 as any, (land50 as any).objects.land)
+      const land = topojson.merge(countries50 as any, (countries50 as any).objects.countries.geometries)
       const borders = topojson.mesh(countries50 as any, (countries50 as any).objects.countries, (a: any, b: any) => a !== b)
       hi_res = {
         land: new Path2D(path(land as any) ?? ''),
@@ -245,10 +246,13 @@
     context.setTransform(dpr, 0, 0, dpr, 0, 0)
     context.clearRect(0, 0, width, height)
 
-    // land + borders (transformed base-space Path2D — no re-projection cost)
+    // land + borders (transformed base-space Path2D — no re-projection cost).
+    // hi-res may be idle-prefetched, but only draw it once zoomed in: the pulse
+    // ring keeps a rAF loop alive at k=1 and 110m is much cheaper per frame
     context.setTransform(dpr * k, 0, 0, dpr * k, dpr * tx, dpr * ty)
-    const active_land = hi_res?.land ?? land_path
-    const active_borders = hi_res?.borders ?? borders_path
+    const use_hi_res = k >= 2.5 && hi_res
+    const active_land = use_hi_res ? hi_res.land : land_path
+    const active_borders = use_hi_res ? hi_res.borders : borders_path
     context.fillStyle = colors.land
     context.fill(active_land)
     if (active_borders) {
@@ -408,7 +412,7 @@
     on_view_change?.({ k, bbox: current_bbox() })
   }
 
-  function flash_hint(kind: 'wheel' | 'touch') {
+  function flash_hint(kind: 'touch') {
     hint = kind
     if (hint_timeout)
       clearTimeout(hint_timeout)
@@ -429,29 +433,87 @@
     return best
   }
 
+  /** Screen point → [lng, lat] through the current transform + base projection. */
+  function invert_screen(x: number, y: number): [number, number] | null {
+    if (!base_projection)
+      return null
+    const inverted = base_projection.invert?.([(x - transform.x) / transform.k, (y - transform.y) / transform.k])
+    return inverted && Number.isFinite(inverted[0]) && Number.isFinite(inverted[1]) ? inverted : null
+  }
+
+  function find_country_at(x: number, y: number): GeoJSON.Feature | null {
+    const point = invert_screen(x, y)
+    if (!point)
+      return null
+    for (const feature of country_features) {
+      if (geoContains(feature as any, point))
+        return feature
+    }
+    return null
+  }
+
+  /** Transform fitting a country's projected bounds (≈ country-level zoom). */
+  function country_transform(feature: GeoJSON.Feature): ZoomTransform {
+    const [[x0, y0], [x1, y1]] = geoPath(base_projection).bounds(feature as any)
+    const box_width = Math.max(x1 - x0, 1)
+    const box_height = Math.max(y1 - y0, 1)
+    const k = Math.max(MIN_ZOOM, Math.min(Math.min(width / box_width, height / box_height) * 0.85, MAX_ZOOM))
+    const center_x = (x0 + x1) / 2
+    const center_y = (y0 + y1) / 2
+    return zoomIdentity
+      .translate(width / 2 - center_x * k, height / 2 - center_y * k)
+      .scale(k)
+  }
+
+  /** Center on a screen point and zoom in a step — the closer-than-country level. */
+  function zoom_toward({ x, y }: { x: number, y: number }) {
+    if (transform.k >= MAX_ZOOM)
+      return
+    const base_x = (x - transform.x) / transform.k
+    const base_y = (y - transform.y) / transform.k
+    const new_k = Math.min(transform.k * 2.2, MAX_ZOOM)
+    const new_transform = zoomIdentity
+      .translate(width / 2 - base_x * new_k, height / 2 - base_y * new_k)
+      .scale(new_k)
+    select(canvas).transition().duration(400).call(zoom_behavior.transform, new_transform)
+  }
+
   function on_click(event: MouseEvent) {
     const rect = canvas.getBoundingClientRect()
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top
     const cluster = find_cluster(x, y)
-    if (!cluster) {
-      selected_dict = null
+
+    // an individual dot → open its popover (unchanged behavior)
+    if (cluster && cluster.count === 1) {
+      const [only] = cluster.items
+      selected_dict = only
+      schedule_draw()
       return
     }
-    if (cluster.count > 1 && transform.k < MAX_ZOOM * 0.7) {
-      // zoom toward the crowd instead of guessing which dot they meant
-      const base_x = (cluster.x - transform.x) / transform.k
-      const base_y = (cluster.y - transform.y) / transform.k
-      const new_k = Math.min(transform.k * 2.2, MAX_ZOOM)
-      const new_transform = zoomIdentity
-        .translate(width / 2 - base_x * new_k, height / 2 - base_y * new_k)
-        .scale(new_k)
-      select(canvas).transition().duration(400).call(zoom_behavior.transform, new_transform)
+
+    // a grouping dot OR a bare country click → zoom to that country
+    selected_dict = null
+    const seed = cluster ? { x: cluster.x, y: cluster.y } : { x, y }
+    const country = base_projection && find_country_at(seed.x, seed.y)
+    if (country) {
+      const new_transform = country_transform(country)
+      // already at (or past) this country's fit — a still-grouped cluster gets a
+      // third, closer zoom level instead of re-fitting the same country
+      if (new_transform.k > transform.k * 1.15) {
+        select(canvas).transition().duration(500).call(zoom_behavior.transform, new_transform)
+        return
+      }
+      if (cluster) {
+        zoom_toward(seed)
+        return
+      }
       return
     }
-    const [top] = [...cluster.items].sort((a, b) => b.entry_count - a.entry_count)
-    selected_dict = top
-    schedule_draw()
+
+    // cluster over water / unmatched border → gentle zoom toward the crowd
+    if (cluster)
+      zoom_toward(seed)
   }
 
   function on_pointermove(event: PointerEvent) {
@@ -476,15 +538,6 @@
       flash_hint('touch')
   }
 
-  function on_wheel(event: WheelEvent) {
-    if (!event.ctrlKey && !event.metaKey)
-      flash_hint('wheel')
-  }
-
-  export function zoom_by(factor: number) {
-    select(canvas).transition().duration(250).call(zoom_behavior.scaleBy, factor)
-  }
-
   export function reset_view() {
     selected_dict = null
     select(canvas).transition().duration(450).call(zoom_behavior.transform, zoomIdentity)
@@ -500,13 +553,14 @@
       .scaleExtent([1, MAX_ZOOM])
       .filter((event: any) => {
         if (event.type === 'wheel')
-          return event.ctrlKey || event.metaKey
+          return false // wheel/scroll zoom disabled — zoom is tap-to-country only
         if (event.type === 'touchstart')
           return (event.touches?.length ?? 0) >= 2
         return !event.button
       })
       .on('zoom', (event) => {
         ({ transform } = event)
+        zoom_level = transform.k
         hover_tip = null
         schedule_draw()
       })
@@ -514,15 +568,26 @@
 
     rebuild_geometry()
 
+    // warm the zoom-tier data (hi-res coastline, admin1 + city labels) once the
+    // browser is idle so a tap never waits — never competes with initial paint
+    const idle = 'requestIdleCallback' in window
+      ? (callback: () => void) => requestIdleCallback(callback, { timeout: 8000 })
+      : (callback: () => void) => setTimeout(callback, 3500)
+    idle(() => {
+      load_hi_res()
+      load_admin1()
+      load_cities()
+    })
+
     const resize_observer = new ResizeObserver(() => rebuild_geometry())
     resize_observer.observe(container)
 
-    // theme flips (body class toggle or system scheme change) recolor the canvas
-    const body_observer = new MutationObserver(() => {
+    // theme flips (the <html> class toggle or a system scheme change) recolor the canvas
+    const html_observer = new MutationObserver(() => {
       colors = read_map_colors(swatches)
       schedule_draw()
     })
-    body_observer.observe(document.body, { attributes: true, attributeFilter: ['class'] })
+    html_observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
     const scheme_query = window.matchMedia('(prefers-color-scheme: dark)')
     const on_scheme_change = () => {
       colors = read_map_colors(swatches)
@@ -532,7 +597,7 @@
 
     return () => {
       resize_observer.disconnect()
-      body_observer.disconnect()
+      html_observer.disconnect()
       scheme_query.removeEventListener('change', on_scheme_change)
       if (hint_timeout)
         clearTimeout(hint_timeout)
@@ -568,18 +633,17 @@
     onclick={on_click}
     onpointermove={on_pointermove}
     onpointerleave={() => { hover_dot = false; hover_tip = null }}
-    ontouchmove={on_touchmove}
-    onwheel={on_wheel}></canvas>
+    ontouchmove={on_touchmove}></canvas>
 
   {#if hint}
-    <div class="hint">{hint === 'wheel' ? t('home_v2.map_hint_wheel') : t('home_v2.map_hint_touch')}</div>
+    <div class="hint">{t('home_v2.map_hint_touch')}</div>
   {/if}
 
-  <div class="controls">
-    <button type="button" class="btn control" onclick={() => zoom_by(1.7)} aria-label={t('home_v2.zoom_in')}><IconMdiPlus /></button>
-    <button type="button" class="btn control" onclick={() => zoom_by(1 / 1.7)} aria-label={t('home_v2.zoom_out')}><IconMdiMinus /></button>
-    <button type="button" class="btn control" onclick={() => reset_view()} aria-label={t('home_v2.reset_view')}><IconMdiArrowCollapseAll /></button>
-  </div>
+  {#if zoom_level > 1.02}
+    <div class="controls">
+      <button type="button" class="btn control" onclick={() => reset_view()} aria-label={t('home_v2.reset_view')}><IconMdiArrowCollapseAll /></button>
+    </div>
+  {/if}
 
   {#if hover_tip}
     <div class={['tooltip', { below: hover_tip.y < 60 }]} style="left: {hover_tip.x}px; top: {hover_tip.y}px">

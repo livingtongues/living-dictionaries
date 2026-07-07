@@ -1,6 +1,6 @@
 import { geoPath } from 'd3-geo'
 import * as topojson from 'topojson-client'
-import land_topo from '$lib/components/globe/data/land-110m.json'
+import countries_topo from '$lib/components/globe/data/countries-110m.json'
 import { fit_equal_earth, natural_height } from './projection'
 
 /**
@@ -29,7 +29,8 @@ export function build_ssr_map({ points }: { points: [number, number][] }): SsrMa
   const path = geoPath(projection).digits(1)
 
   if (!cached_land_d) {
-    const land = topojson.feature(land_topo as any, (land_topo as any).objects.land)
+    // land silhouette merged from the country polygons — saves shipping land-110m
+    const land = topojson.merge(countries_topo as any, (countries_topo as any).objects.countries.geometries)
     cached_land_d = path(land as any) ?? ''
   }
 
@@ -45,7 +46,7 @@ if (import.meta.vitest) {
     const { land_d, dots_d, width, height } = build_ssr_map({ points: [[0, 0], [120, -30]] })
     expect(land_d.length).toBeGreaterThan(10_000)
     expect(width).toBe(960)
-    expect(height).toBe(468)
+    expect(height).toBe(natural_height(960))
     expect((dots_d.match(/M/g) ?? []).length).toBe(2) // one circle (absolute moveto) per dot
   })
 }

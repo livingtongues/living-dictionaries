@@ -9,6 +9,9 @@
 
   const t = $derived(page.data.t)
 
+  const ORG_NAME = 'Living Tongues Institute for Endangered Languages'
+  const ORG_URL = 'https://livingtongues.org/'
+
   type FeatureKey = 'multimedia' | 'glossing' | 'keyboards' | 'collaboration' | 'import' | 'free'
   const features: { key: FeatureKey, icon: typeof IconMdiWaveform, accent: string }[] = [
     { key: 'multimedia', icon: IconMdiWaveform, accent: '#3b82f6' },
@@ -29,7 +32,12 @@
           <feature.icon style="font-size: 1.375rem" />
         </div>
         <h3>{t(`home_v2.feature_${feature.key}_title`)}</h3>
-        <p>{t(`home_v2.feature_${feature.key}_body`)}</p>
+        {#if feature.key === 'free' && t(`home_v2.feature_free_body`).includes(ORG_NAME)}
+          {@const [before, after] = t(`home_v2.feature_free_body`).split(ORG_NAME)}
+          <p>{before}<a href={ORG_URL} target="_blank" rel="noreferrer">{ORG_NAME}</a>{after}</p>
+        {:else}
+          <p>{t(`home_v2.feature_${feature.key}_body`)}</p>
+        {/if}
       </div>
     {/each}
   </div>
@@ -95,5 +103,14 @@
     font-size: 0.875rem;
     line-height: 1.5;
     color: var(--color-secondary);
+  }
+
+  p a {
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  p a:hover {
+    text-decoration: underline;
   }
 </style>

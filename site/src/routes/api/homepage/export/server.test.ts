@@ -44,7 +44,7 @@ describe(GET, () => {
     expect(response.status).toBe(200)
     const body = await response.json()
     // users: 2 = the seeded agent@livingdictionaries.app row (initial migration) + u1
-    expect(body.stats).toEqual({ dictionaries: 2, entries: 200, audio: 0, photos: 0, videos: 0, users: 2 })
+    expect(body.stats).toEqual({ dictionaries: 2, public_dictionaries: 2, entries: 200, audio: 0, photos: 0, videos: 0, users: 2 })
     expect(body.featured_entries).toHaveLength(1)
     expect(body.featured_entries[0]).toMatchObject({
       id: 'fe1',
@@ -55,6 +55,20 @@ describe(GET, () => {
       lat: 15.1,
     })
     expect(typeof body.generated_at).toBe('string')
+  })
+
+  test('dictionaries stat = public + unlisted; public_dictionaries = public only', async () => {
+    const now = '2026-07-01T00:00:00.000Z'
+    // unlisted bucket (public col 0) counts toward the cube but not the footer number
+    db.prepare(`INSERT INTO dictionaries (id, url, name, public, bucket, entry_count, created_at, updated_at) VALUES ('sora', 'sora', 'Sora', 0, 'unlisted', 50, ?, ?)`).run(now, now)
+    // a conlang bucket counts toward neither
+    db.prepare(`INSERT INTO dictionaries (id, url, name, public, bucket, entry_count, created_at, updated_at) VALUES ('klingon', 'klingon', 'Klingon', 0, 'conlang', 999, ?, ?)`).run(now, now)
+    reset_homepage_stats_cache()
+
+    const response = await GET({ request: new Request('http://localhost/api/homepage/export') } as Parameters<typeof GET>[0])
+    const body = await response.json()
+    expect(body.stats.dictionaries).toBe(3) // 2 public + 1 unlisted
+    expect(body.stats.public_dictionaries).toBe(2)
   })
 
   test('modal snapshot fields ride along (JSON columns parsed, catalog location joined)', async () => {

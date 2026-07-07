@@ -11,7 +11,9 @@
   const { stats }: Props = $props()
   const t = $derived(page.data.t)
 
-  const stat_keys: (keyof HomepageStats)[] = ['dictionaries', 'entries', 'audio', 'photos', 'videos', 'users']
+  // public_dictionaries is baked for the footer, not a displayed cube
+  type DisplayStatKey = Exclude<keyof HomepageStats, 'public_dictionaries'>
+  const stat_keys: DisplayStatKey[] = ['dictionaries', 'entries', 'audio', 'photos', 'videos', 'users']
 
   /** 0→1 animation progress; starts at 1 so SSR (and reduced-motion) shows final values. */
   let progress = $state(1)

@@ -5,7 +5,7 @@
   import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { image_src, url_from_storage_path } from '$lib/utils/media-url'
   import { bbox_contains } from './map/view-helpers'
-  import FeaturedEntryModal from './FeaturedEntryModal.svelte'
+  import FeaturedEntryFullscreen from './FeaturedEntryFullscreen.svelte'
   import IconMdiPlay from '~icons/mdi/play'
   import IconMdiPause from '~icons/mdi/pause'
 
@@ -141,18 +141,18 @@
     touch_resume_timeout = setTimeout(() => paused = false, 4000)
   }
 
-  // A plain left-click opens the quick-look modal instead of navigating —
+  // A plain left-click opens the fullscreen image viewer instead of navigating —
   // entering a dictionary kicks off its whole snapshot download, which most
   // curious homepage clicks don't intend. Modified/middle clicks keep the
   // default open-in-new-tab behavior.
-  let modal_card = $state<FeaturedCard | null>(null)
-  function open_card_modal(event: MouseEvent, card: FeaturedCard) {
+  let fullscreen_card = $state<FeaturedCard | null>(null)
+  function open_fullscreen(event: MouseEvent, card: FeaturedCard) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)
       return
     event.preventDefault()
     audio_element?.pause()
     playing_id = null
-    modal_card = card
+    fullscreen_card = card
     on_active_dict?.(card.dict_id)
   }
 
@@ -191,10 +191,12 @@
   }
 </script>
 
-<!-- preload=tap: hover-preloading an entry link would start pulling that dictionary's whole DB -->
+<!-- preload=off: "tap" preloads on MOUSEDOWN, so even opening the fullscreen viewer
+     (which cancels navigation) would start pulling that dictionary's whole DB.
+     Downloads should only start from the fullscreen viewer's own links. -->
 <div
   class="strip"
-  data-sveltekit-preload-data="tap"
+  data-sveltekit-preload-data="off"
   bind:this={scroller}
   onpointerenter={() => paused = true}
   onpointerleave={() => { paused = false; set_active(null) }}
@@ -207,7 +209,7 @@
       class="card"
       data-index={index}
       href="/{card.dict_url}/entry/{card.entry_id}"
-      onclick={event => open_card_modal(event, card)}
+      onclick={event => open_fullscreen(event, card)}
       onpointerenter={() => set_active(card.id)}
       onpointerleave={() => set_active(null)}
       onfocus={() => set_active(card.id)}
@@ -232,8 +234,8 @@
   {/each}
 </div>
 
-{#if modal_card}
-  <FeaturedEntryModal card={modal_card} on_close={() => { modal_card = null; on_active_dict?.(null) }} />
+{#if fullscreen_card}
+  <FeaturedEntryFullscreen card={fullscreen_card} on_close={() => { fullscreen_card = null; on_active_dict?.(null) }} />
 {/if}
 
 <style>

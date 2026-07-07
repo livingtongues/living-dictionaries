@@ -1,20 +1,23 @@
 <script lang="ts">
+  import type { HomepageBaked } from '$lib/components/home-v2/types'
   import { page } from '$app/state'
+  import baked_json from '$lib/data/homepage-baked.json'
+  import { round_stat } from '$lib/components/home-v2/round-stat'
   import IconMageFacebookSquare from '~icons/mage/facebook-square'
   import IconF7LogoInstagram from '~icons/f7/logo-instagram'
   import ColorSchemeToggle from './ColorSchemeToggle.svelte'
 
-  const { dictionaries } = $derived(page.data)
-  const public_dictionaries = $derived($dictionaries?.filter(dictionary => dictionary.public).length || 0)
-
-  const public_entries_count = 254813
+  // Build-time baked (same payload as the homepage cubes) — no per-visitor query.
+  const { stats } = baked_json as HomepageBaked
+  const { public_dictionaries } = stats
+  const entries_display = $derived(round_stat({ value: stats.entries, stat: 'entries', locale: page.data.locale }))
 </script>
 
 <footer>
   {#if public_dictionaries}
     <span class="nowrap">{page.data.t('footer.public_LD')}: <b>{public_dictionaries}</b>,</span>
   {/if}
-  <span class="nowrap">{page.data.t('footer.entries')}: <b>{new Intl.NumberFormat().format(public_entries_count)}</b>,</span>
+  <span class="nowrap">{page.data.t('footer.entries')}: <b>{entries_display}</b>,</span>
   <span>{page.data.t('footer.LD_project')} <a href="https://livingtongues.org/" target="_blank" class="lt-link">Living Tongues Institute for Endangered Languages.</a>
   </span>
   <span class="nowrap legal-links">

@@ -21,14 +21,16 @@
   const { map_dicts, ssr_map, my_dictionaries } = $derived(data)
   const t = $derived(page.data.t)
   const baked = baked_json as HomepageBaked
+  // The "Turn archives into living data" block is still being iterated — admin-3 only for now.
+  const show_agent_diagram = $derived((page.data.auth_user?.admin_level ?? 0) >= 3)
 </script>
 
 <Header />
 
 <main>
   <section class="hero">
-    <h1>{t('home_v2.headline')}</h1>
-    <p class="subline">{t('home_v2.subline')}</p>
+    <h1>Serving Language Communities Around the World</h1>
+    <p class="subline">Collaborative, multimedia dictionaries built by communities speaking endangered and under-represented languages.</p>
     <HeroSearch dicts={map_dicts} />
     {#if $my_dictionaries?.length}
       <div class="my-dicts">
@@ -46,7 +48,9 @@
 
   <FeaturesGrid />
 
-  <AgentApiDiagram />
+  {#if show_agent_diagram}
+    <AgentApiDiagram />
+  {/if}
 
   <CtaBand />
 </main>

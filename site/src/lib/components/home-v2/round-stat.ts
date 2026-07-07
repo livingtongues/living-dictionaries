@@ -1,9 +1,13 @@
 import type { HomepageStats } from './types'
 
-/** Stats floored to tens; everything else floors to hundreds. */
-const TENS_STATS: (keyof HomepageStats)[] = ['dictionaries', 'users']
+/** Users floors to tens; dictionaries is shown exact (+); everything else floors to hundreds. */
+const TENS_STATS: (keyof HomepageStats)[] = ['users']
 
 export function stat_step(stat: keyof HomepageStats): number {
+  // dictionaries is a small, curated count (public + unlisted) — show it exact,
+  // the trailing "+" already nods at gems buried in the conlang/glossary piles.
+  if (stat === 'dictionaries')
+    return 1
   return TENS_STATS.includes(stat) ? 10 : 100
 }
 
@@ -15,9 +19,11 @@ export function round_stat({ value, stat, locale }: { value: number, stat: keyof
 }
 
 if (import.meta.vitest) {
-  test('dictionaries and users floor to tens', () => {
-    expect(round_stat({ value: 2232, stat: 'dictionaries' })).toBe('2,230+')
+  test('users floor to tens', () => {
     expect(round_stat({ value: 5335, stat: 'users' })).toBe('5,330+')
+  })
+  test('dictionaries shown exact with a trailing +', () => {
+    expect(round_stat({ value: 618, stat: 'dictionaries' })).toBe('618+')
   })
   test('content stats floor to hundreds', () => {
     expect(round_stat({ value: 555071, stat: 'entries' })).toBe('555,000+')

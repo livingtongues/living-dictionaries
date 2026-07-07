@@ -16,7 +16,14 @@ export function compute_homepage_stats({ shared_db }: { shared_db: BetterSqlite3
   if (cached)
     return cached
 
-  const dictionaries = (shared_db.prepare('SELECT COUNT(*) AS count FROM dictionaries').get() as { count: number }).count
+  // Cube number: the dictionaries we serve — publicly listed (public col = 1)
+  // plus admin-curated 'unlisted' (real dicts, URL-reachable but not listed).
+  const dictionaries = (shared_db.prepare(
+    `SELECT COUNT(*) AS count FROM dictionaries WHERE public = 1 OR bucket = 'unlisted'`,
+  ).get() as { count: number }).count
+  const public_dictionaries = (shared_db.prepare(
+    'SELECT COUNT(*) AS count FROM dictionaries WHERE public = 1',
+  ).get() as { count: number }).count
   const entries = (shared_db.prepare('SELECT COALESCE(SUM(entry_count), 0) AS sum FROM dictionaries').get() as { sum: number }).sum
   const users = (shared_db.prepare('SELECT COUNT(*) AS count FROM users').get() as { count: number }).count
 
@@ -42,7 +49,7 @@ export function compute_homepage_stats({ shared_db }: { shared_db: BetterSqlite3
     }
   }
 
-  cached = { dictionaries, entries, audio, photos, videos, users }
+  cached = { dictionaries, public_dictionaries, entries, audio, photos, videos, users }
   return cached
 }
 

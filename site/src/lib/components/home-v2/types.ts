@@ -41,7 +41,10 @@ export interface FeaturedCard {
 }
 
 export interface HomepageStats {
+  /** Public + unlisted dictionaries (the ones we serve) — the cube number. */
   dictionaries: number
+  /** Publicly-listed dictionaries only (`public` col = 1) — the footer number. */
+  public_dictionaries: number
   entries: number
   audio: number
   photos: number

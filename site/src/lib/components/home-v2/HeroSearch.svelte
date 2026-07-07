@@ -4,6 +4,7 @@
   import { page } from '$app/state'
   import { score_record } from '$lib/utils/fuzzy-score'
   import IconMdiMagnify from '~icons/mdi/magnify'
+  import IconMdiClose from '~icons/mdi/close'
   import IconMdiBookOpenPageVariantOutline from '~icons/mdi/book-open-page-variant-outline'
 
   interface Props {
@@ -99,6 +100,15 @@
       onfocus={() => focused = true}
       onblur={() => setTimeout(() => focused = false, 150)}
       onkeydown={on_keydown} />
+    {#if query}
+      <button
+        type="button"
+        class="clear"
+        aria-label="Clear"
+        onclick={() => { query = ''; input_element.focus() }}>
+        <IconMdiClose style="font-size: 1.25rem" />
+      </button>
+    {/if}
   </div>
 
   {#if open}
@@ -163,13 +173,32 @@
     box-shadow: none;
   }
 
+  .clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0.25rem;
+    margin-inline-start: 0.25rem;
+    border: none;
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--color-secondary);
+    cursor: pointer;
+  }
+
+  .clear:hover {
+    background: var(--surface);
+    color: var(--color);
+  }
+
   .results {
     position: absolute;
     top: calc(100% + 0.5rem);
     left: 0;
     right: 0;
     z-index: 30;
-    max-height: 24rem;
+    max-height: min(85vh, 40rem);
     overflow-y: auto;
     padding: 0.375rem;
     margin: 0;

@@ -4,6 +4,7 @@
   import type { MapView } from './map/WorldMap.svelte'
   import { onMount } from 'svelte'
   import { page } from '$app/state'
+  import { WORLD_ASPECT } from './map/projection'
   import WordCards from './WordCards.svelte'
   import WorldMap from './map/WorldMap.svelte'
 
@@ -41,19 +42,6 @@
 
   const dict_by_id = $derived(new Map(dicts.map(dict => [dict.id, dict])))
 
-  /** 100% at center → ~70% one card out → ~20% two out → 0 beyond (piecewise linear). */
-  const FALLOFF: [number, number][] = [[0, 1], [1, 0.7], [2, 0.2], [3, 0]]
-  function center_falloff(offset_cards: number): number {
-    const distance = Math.abs(offset_cards)
-    for (let i = 1; i < FALLOFF.length; i++) {
-      const [prev_d, prev_o] = FALLOFF[i - 1]
-      const [next_d, next_o] = FALLOFF[i]
-      if (distance <= next_d)
-        return prev_o + (next_o - prev_o) * (distance - prev_d) / (next_d - prev_d)
-    }
-    return 0
-  }
-
   onMount(() => {
     let raf = 0
     const tick = () => {
@@ -75,6 +63,12 @@
       if (!map_rect)
         return
       const any_active = anchors.some(anchor => anchor.active)
+      // a single line at a time — only the card nearest the strip center (or the
+      // hovered/playing card); neighbors stay mounted at 0 so the fades can run
+      const center_anchor = !any_active && anchors.length
+        ? anchors.reduce((closest, anchor) =>
+          Math.abs(anchor.offset_cards) < Math.abs(closest.offset_cards) ? anchor : closest)
+        : null
       const next: Line[] = []
       // one line per card — the loop duplicates cards, keep the strongest copy
       const strongest_by_card: Record<string, Line> = {}
@@ -84,7 +78,7 @@
           continue
         const opacity = any_active
           ? (anchor.active ? 1 : 0)
-          : center_falloff(anchor.offset_cards)
+          : (anchor === center_anchor ? 1 : 0)
         const x1 = anchor.x - container_rect.left
         const y1 = anchor.y - container_rect.top
         const x2 = point.x + map_rect.left - container_rect.left
@@ -99,12 +93,13 @@
         const half_label = label.length * 3.2 + 8
         const mid_y = (y1 + y2) / 2
         const line: Line = {
-          key: `${anchor.card.id}-${anchor.index}`,
+          // keyed per card (not per loop copy) so a handoff animates the same
+          // element instead of recreating it and skipping the CSS transition
+          key: anchor.card.id,
           dict_id: anchor.card.dict_id,
           d: `M ${x1.toFixed(1)} ${y1.toFixed(1)} C ${x1.toFixed(1)} ${mid_y.toFixed(1)}, ${x2.toFixed(1)} ${mid_y.toFixed(1)}, ${x2.toFixed(1)} ${y2.toFixed(1)}`,
           opacity,
-          // steep remap: neighbors at 0.7 stay label-less; handoff crossfades near center
-          label_opacity: Math.min(Math.max((opacity - 0.75) / 0.25, 0), 1),
+          label_opacity: opacity,
           label,
           label_x: Math.max(half_label, Math.min(container_rect.width - half_label, x2)),
           x1,
@@ -138,7 +133,7 @@
 
 <div class="hero-unit" bind:this={container}>
   <div class="hero-constrained">
-    <div class="map-frame" bind:this={map_frame}>
+    <div class="map-frame" style="--world-aspect: {WORLD_ASPECT}" bind:this={map_frame}>
       <WorldMap
         bind:this={map_component}
         {dicts}
@@ -146,13 +141,6 @@
         highlighted_dict_id={active_dict_id}
         on_view_change={view => map_view = view} />
     </div>
-
-    {#if cards.length}
-      <div class="showcase-heading">
-        <h2>{t('home_v2.showcase_heading')}</h2>
-        <p>{t('home_v2.showcase_subline')}</p>
-      </div>
-    {/if}
   </div>
 
   {#if cards.length}
@@ -169,9 +157,7 @@
           <circle class="line-anchor" cx={line.x1} cy={line.y1} r="4" />
           <circle class="line-end" cx={line.x2} cy={line.y2} r="3.5" />
         </g>
-        {#if line.label_opacity > 0.01}
-          <text class="dot-label" x={line.label_x} y={line.y2 - 10} style="opacity: {line.label_opacity.toFixed(3)}">{line.label}</text>
-        {/if}
+        <text class="dot-label" x={line.label_x} y={line.y2 - 10} style="opacity: {line.label_opacity.toFixed(3)}">{line.label}</text>
       {/each}
     </svg>
   {/if}
@@ -191,14 +177,26 @@
 
   .map-frame {
     position: relative;
-    height: clamp(300px, 42vw, 58vh);
+    /* height follows the trimmed world's aspect — no vertical letterbox where
+       Antarctica would peek in; very short windows cap at 58vh (empty-ocean
+       side bands, which the projection clip keeps land-free) */
+    aspect-ratio: var(--world-aspect);
+    max-height: 58vh;
+    min-height: 300px;
     border-radius: 1rem;
     overflow: hidden;
   }
 
   @media (max-width: 640px) {
+    /* full-bleed to the screen edge on mobile */
+    .hero-constrained {
+      padding: 0;
+    }
+
     .map-frame {
       height: clamp(220px, 56vw, 300px);
+      min-height: 0;
+      border-radius: 0;
     }
   }
 
@@ -232,10 +230,10 @@
     overflow: visible;
   }
 
-  /* opacity is driven per-frame from the card's distance to the strip center;
-     the transition only smooths the hover show/hide jumps (scroll is paused then) */
+  /* opacity flips 0↔1 per-frame as the center/hovered card changes; the CSS
+     transition turns the flip into a short crossfade */
   .line-group {
-    transition: opacity 200ms;
+    transition: opacity 250ms ease;
   }
 
   /* light-dark() rides on theme.css's per-mode color-scheme */
@@ -264,6 +262,6 @@
     stroke-width: 3;
     paint-order: stroke;
     stroke-linejoin: round;
-    transition: opacity 200ms;
+    transition: opacity 250ms ease;
   }
 </style>
