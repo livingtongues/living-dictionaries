@@ -273,6 +273,8 @@
     "subline": "Free, collaborative, multimedia dictionaries built by communities speaking endangered and under-represented languages.",
     "entries": "entries",
     "map_cluster_tooltip": "{count} dictionaries — click to zoom",
+    "recently_viewed": "Recently viewed",
+    "more_count": "+{count} more",
     "map_hint_wheel": "Use Ctrl + scroll to zoom the map",
     "map_hint_touch": "Use two fingers to move the map",
     "zoom_in": "Zoom in",

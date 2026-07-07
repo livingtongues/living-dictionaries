@@ -1,26 +1,775 @@
 {
-  "generated_at": "2026-07-04T02:56:52.850Z",
+  "generated_at": "2026-07-07T03:16:40.542Z",
   "stats": {
-    "dictionaries": 618,
+    "dictionaries": 1588,
     "public_dictionaries": 221,
-    "entries": 555071,
-    "audio": 145691,
-    "photos": 21643,
-    "videos": 435,
-    "users": 5335
+    "entries": 554813,
+    "audio": 145744,
+    "photos": 21491,
+    "videos": 431,
+    "users": 5345
   },
   "featured_entries": [
+    {
+      "id": "cd0ff1a3-c5ce-47aa-86ff-3febca4627c5",
+      "dict_id": "ese-ejja",
+      "dict_url": "ese-ejja",
+      "dict_name": "Ese Ejja",
+      "dict_location": "Bolivia, Peru",
+      "entry_id": "8rEgFriXUI93FKKYhCEU",
+      "lexeme": "aná",
+      "gloss": "oso bandera, oso hormiguero gigante",
+      "gloss_language": "es",
+      "photo_serving_url": "X-jeXquYnxwHOEcVybYrqm8G7-iJfKYFZwjTQaFaxG4w_8iH5ikZvJEShXpgSOCbUWkjiwJ3KbyvxXgAx5f8cEbLiMRl8QWkAw",
+      "audio_storage_path": "audio/ese-ejja/8rEgFriXUI93FKKYhCEU_1617106876872.wav",
+      "phonetic": "a.ˈna",
+      "glosses": {
+        "en": "giant anteater",
+        "es": "oso bandera, oso hormiguero gigante (Myrmecophaga tridactyla)"
+      },
+      "speaker_name": "Alejandro Machuqui",
+      "example_sentence": null,
+      "lng": -66.2978,
+      "lat": -11.2612
+    },
+    {
+      "id": "a5b9add5-e879-4683-a5ac-e0e57bd6127a",
+      "dict_id": "eyak",
+      "dict_url": "eyak",
+      "dict_name": "dAXunhyuuga'",
+      "dict_location": "Alaska, USA",
+      "entry_id": "PiSVMaLQgjcFclKW8Ldn",
+      "lexeme": "q’ee’shk’",
+      "gloss": "Stellar's jay, bluejay",
+      "gloss_language": "en",
+      "photo_serving_url": "0AbGEFnwgvjLFFLCRCGNaOjiBuN5XTFq9kVIgXyaRDCWsHzIHcylTIo0bDMz2jKsVowJBcdEnxJ3N6Mub2Y93v4cDVN-f_O5-oOx",
+      "audio_storage_path": "eyak/audio/PiSVMaLQgjcFclKW8Ldn_1697233575091.mpeg",
+      "phonetic": null,
+      "glosses": {
+        "en": "Stellar's jay, \"bluejay\""
+      },
+      "speaker_name": "Guillaume Leduey",
+      "example_sentence": null,
+      "lng": -145.7589,
+      "lat": 60.5439
+    },
+    {
+      "id": "5ab299dc-a7e8-4e5d-a9c1-9a7b8ad23113",
+      "dict_id": "northern-michif",
+      "dict_url": "northern-michif",
+      "dict_name": "Northern Michif",
+      "dict_location": "Alberta, Canada",
+      "entry_id": "l8oMWZtYa5t8vvyZleak",
+      "lexeme": "môshwa",
+      "gloss": "moose",
+      "gloss_language": "en",
+      "photo_serving_url": "gDwJb9Xu-XCXr2uiWMbhrGn3InQXjNaYRfb-7v8uzDAOhz8XbUc3YyKyPu8ZbznlPyvIpG0XOAWOYhbzod43xYHX4rcto84wDTY",
+      "audio_storage_path": "northern-michif/audio/l8oMWZtYa5t8vvyZleak_1709670808729.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "moose"
+      },
+      "speaker_name": "Sandra Davenport, Métis educator",
+      "example_sentence": null,
+      "lng": -116.4416,
+      "lat": 53.5863
+    },
+    {
+      "id": "a3fffd0f-f61a-4c1e-8d0f-95333eeab3c8",
+      "dict_id": "chalchiteko",
+      "dict_url": "chalchiteko",
+      "dict_name": "Chalchiteko",
+      "dict_location": "Guatemala",
+      "entry_id": "X9iQrDcGg8XHrxfPTmoq",
+      "lexeme": "Umul",
+      "gloss": "conejo",
+      "gloss_language": "es",
+      "photo_serving_url": "G6pb-_zP79lf-aZvbfH8QFzCl7aY2qaO5G4Oc-aUOJ1heNLjROmmIfi7vnhFHikttH6eOVLuvVPkpbbfSGq6Ig",
+      "audio_storage_path": "chalchiteko/audio/local_import/chalchiteko-Pedro-Mart-nez-Vel-squez-06Aug2014-1338-conejo-1580855711689.mp3",
+      "phonetic": "ʔu.'mul",
+      "glosses": {
+        "en": "rabbit",
+        "es": "conejo"
+      },
+      "speaker_name": "Pedro Martínez Velásquez",
+      "example_sentence": null,
+      "lng": -91.312,
+      "lat": 15.342
+    },
+    {
+      "id": "e17326cd-9df2-4bc8-b65b-b020e95b2717",
+      "dict_id": "werikyana",
+      "dict_url": "werikyana",
+      "dict_name": "Werikyana Tiriyó Prtgês Inglês",
+      "dict_location": "Northern Pará, Brazil",
+      "entry_id": "bagJZeGRP0DrHqHcz3LK",
+      "lexeme": "ma’maya",
+      "gloss": "mamão",
+      "gloss_language": "pt",
+      "photo_serving_url": "ZYh-ucc0uxI1UAh03_5fzz4WigPDJO5_Y79D3lIex-hm96DHO_hVxKRyFYsKJekuU6Dvb_UTE538sS0iEOhSXEV3GwJfZAs9Dd4",
+      "audio_storage_path": "werikyana/audio/bagJZeGRP0DrHqHcz3LK/1716507815451.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "papaya",
+        "pt": "mamão",
+        "tri": "mapaya"
+      },
+      "speaker_name": "Saviramaweno katxuyana",
+      "example_sentence": {
+        "text": {
+          "default": "Ma'maya nasï tametxemï tuhotxinemï"
+        },
+        "translation": {
+          "en": "Papaya is edible, and it is tasty",
+          "pt": "Mamão serve para comer, e é gostoso",
+          "tri": "Mapaya nai tënasen tïponyan"
+        }
+      },
+      "lng": -57.3427,
+      "lat": -0.9185
+    },
+    {
+      "id": "a17612ef-4a6a-415b-9c5d-7712f65ad3db",
+      "dict_id": "san-sebastian-del-monte-m",
+      "dict_url": "san-sebastian-del-monte-m",
+      "dict_name": "San Sebastián del Monte Mixtec (Tò’on Ndà’vi)",
+      "dict_location": "Oaxaca, México",
+      "entry_id": "dKHVxtpTtxbpkXCtZuDs",
+      "lexeme": "la'và",
+      "gloss": "rana",
+      "gloss_language": "es",
+      "photo_serving_url": "Uev5ENx6kSoz9pFIEZCAeY3kI9p1vsMpmGxh_brh7kYDS0aUKO3ydYUXePrkLPxFtlE76DxuNKf7a-0M2R-CSNJrdFCP5_r7iJ0",
+      "audio_storage_path": "audio/san-sebastian-del-monte-m/dKHVxtpTtxbpkXCtZuDs_1626993122825.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "frog",
+        "es": "rana"
+      },
+      "speaker_name": "Adrian Davila",
+      "example_sentence": null,
+      "lng": -98.022,
+      "lat": 17.677
+    },
+    {
+      "id": "8e631d76-2467-4e65-bb7d-4d2d9bb4fb46",
+      "dict_id": "zapoteco-de-la-sierra-n",
+      "dict_url": "zapoteco-de-la-sierra-n",
+      "dict_name": "Zapoteco de la sierra norte, San Juan Bautista Atepec, Oaxaca",
+      "dict_location": "San Juan Bautista Atepec, México",
+      "entry_id": "jPYanbxbirfs1wDEPlqL",
+      "lexeme": "bexhe",
+      "gloss": "mapache",
+      "gloss_language": "es",
+      "photo_serving_url": "umEhh0n1GMUarO2gGWEMPgAEZAVxU8utqBSya56U_HWAMxFxi5kp08BG8LxbnGHwvzF03n9eIG2vRGsWbvu08g",
+      "audio_storage_path": "audio/zapoteco-de-la-sierra-n/jPYanbxbirfs1wDEPlqL_1570112144796.mp3",
+      "phonetic": "beɹe",
+      "glosses": {
+        "en": "raccon",
+        "es": "mapache"
+      },
+      "speaker_name": "Rosa Pérez",
+      "example_sentence": null,
+      "lng": null,
+      "lat": null
+    },
+    {
+      "id": "a0db89e5-9bfa-4e48-ba06-0a67dabd7c48",
+      "dict_id": "san-francisco-yatee-zapo",
+      "dict_url": "san-francisco-yatee-zapo",
+      "dict_name": "San Francisco Yateé Zapotec",
+      "dict_location": "San Francisco Yatee, México",
+      "entry_id": "V12nPFk7efqZxLfCNQSO",
+      "lexeme": "labada",
+      "gloss": "huaje",
+      "gloss_language": "es",
+      "photo_serving_url": "gKEN8yPGNnZ0GrElHfBVW2K0Lxpdzi5yA4w9GUMipETo-nJBd19urTlD1QmIHwMuZlHti6Sl_9dRaw6ogiT-aAbaLhrl3rBcuuw",
+      "audio_storage_path": "san-francisco-yatee-zapo/audio/V12nPFk7efqZxLfCNQSO_1695330950857.wav",
+      "phonetic": "làbàdà",
+      "glosses": {
+        "en": "green pods of acacia tree",
+        "es": "huaje"
+      },
+      "speaker_name": "BM",
+      "example_sentence": null,
+      "lng": -96.1649,
+      "lat": 17.3062
+    },
+    {
+      "id": "b7ac66f6-372c-4e46-b1da-476bd8baa318",
+      "dict_id": "dompo",
+      "dict_url": "dompo",
+      "dict_name": "Dompo",
+      "dict_location": "Ghana",
+      "entry_id": "mqaOQKBuV8kP23Qz4bpS",
+      "lexeme": "nyɪ̀nɛ̀ gbɔ̃́ɔ̃́",
+      "gloss": "lion",
+      "gloss_language": "en",
+      "photo_serving_url": "rd3E9hXXECPH7JHi2SN2BOWazyy7nutA2lvcZfnkbardriFnzxz057ebOAeT7AFQnhiVll7bC9HFgujH4_cVGpkmicwSXFVXyA",
+      "audio_storage_path": "dompo/audio/mqaOQKBuV8kP23Qz4bpS_1643727210231.x-wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "lion"
+      },
+      "speaker_name": "Mr. Mila",
+      "example_sentence": null,
+      "lng": -2.435,
+      "lat": 8.118
+    },
+    {
+      "id": "9d42df3d-888d-4ae3-ae30-f62f544653ac",
+      "dict_id": "sengwer",
+      "dict_url": "sengwer",
+      "dict_name": "Sengwer",
+      "dict_location": "Kenya",
+      "entry_id": "VHFj6MsPy0jNHVLYooWK",
+      "lexeme": "kipkinyōs",
+      "gloss": "mhanga",
+      "gloss_language": "sw",
+      "photo_serving_url": "cvX-opcqInvMkk5g4tOlM_sEgMzmyLWS5ZCSxMyiSsCyRime2L5KWyYBrxVua-zBA2gFutEaUc_1UApfoiJ6qsSanv7AkmJaoEo",
+      "audio_storage_path": "sengwer/audio/VHFj6MsPy0jNHVLYooWK_1689761445626.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "aardvark ( Orycteropus afer )",
+        "sw": "mhanga"
+      },
+      "speaker_name": "Irine",
+      "example_sentence": null,
+      "lng": 35.293,
+      "lat": 1.098
+    },
+    {
+      "id": "9b93b1ff-df7c-489e-880c-2c86325318a9",
+      "dict_id": "kihehe",
+      "dict_url": "kihehe",
+      "dict_name": "Kihehe",
+      "dict_location": "Tanzania",
+      "entry_id": "jser6RdmRsSgC0oh9mVn",
+      "lexeme": "mbalavala",
+      "gloss": "kipepeo",
+      "gloss_language": "sw",
+      "photo_serving_url": "VYSj8LwLn7_qRF_DCHHdGY2YOH0emPeU3hgKo9Iw090hAT1t4xizYrkeVEjLOKnGYkawDURjOQhZx3x_zQEaS2hgCRSsFOxGhwo",
+      "audio_storage_path": "kihehe/audio/jser6RdmRsSgC0oh9mVn/1767843144387.wav",
+      "phonetic": "mbalaʋála",
+      "glosses": {
+        "en": "butterfly",
+        "sw": "kipepeo"
+      },
+      "speaker_name": "Richard",
+      "example_sentence": null,
+      "lng": 35.476,
+      "lat": -7.8033
+    },
+    {
+      "id": "c86df941-fe74-48fa-877b-88631a65c6ef",
+      "dict_id": "kalanga",
+      "dict_url": "kalanga",
+      "dict_name": "Kalanga",
+      "dict_location": "Zimbabwe and Botswana",
+      "entry_id": "bYJxaUxfc5Ym3xg1tdov",
+      "lexeme": "Zilawa",
+      "gloss": "Kudu",
+      "gloss_language": "en",
+      "photo_serving_url": "HZ_d97TvdxaauLnHURNsCm-8ilhns9xQ7WzX6yteZyddGl8ZolXtYg4M-wwkgdFYJ_xz70SK-3SYZ47iqMYP3Jps_1EPYWeYJj8",
+      "audio_storage_path": "audio/kalanga/bYJxaUxfc5Ym3xg1tdov_1623793672341.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "Kudu"
+      },
+      "speaker_name": "Difa Dube",
+      "example_sentence": null,
+      "lng": 26.798,
+      "lat": -21.256
+    },
+    {
+      "id": "59894ac7-618c-4b66-b146-7a066c3cf0bb",
+      "dict_id": "babanki",
+      "dict_url": "babanki",
+      "dict_name": "Babanki (Kejom)",
+      "dict_location": "Cameroon",
+      "entry_id": "GhyV0sPsin5gdt6w5iG3",
+      "lexeme": "fəngèm",
+      "gloss": "gong",
+      "gloss_language": "en",
+      "photo_serving_url": "nBFafd-a8w4xvwdMs7DFEAme1hnohASEfnd50EHY01_VgAZhjdkpNnjhyXg3mA7UQgi1wirC-wCdiNDe0ZVxlQ79XTYRttsmHSk",
+      "audio_storage_path": "babanki/audio/GhyV0sPsin5gdt6w5iG3_1669306685551.wav",
+      "phonetic": "fə̀ŋɡɛ̀m",
+      "glosses": {
+        "en": "gong"
+      },
+      "speaker_name": "Pius Akumbu",
+      "example_sentence": null,
+      "lng": 10.315,
+      "lat": 5.978
+    },
+    {
+      "id": "9287b16e-7c21-49f8-9cd9-b40db521c81f",
+      "dict_id": "owe",
+      "dict_url": "owe",
+      "dict_name": "Owé (a dialect of Yoruba)",
+      "dict_location": "Nigeria",
+      "entry_id": "wsLAVBjIh5vNoLVjK7eT",
+      "lexeme": "ẹ̀gẹ̀dẹ̀ wẹrẹ",
+      "gloss": "banana",
+      "gloss_language": "en",
+      "photo_serving_url": "MHLW9euSFyTgHEdScetRdnd40Aeo0NlaVzLayTzHpeR2-x2dOCnm5K4n67FlwWA63uRZ5QBXUi4WRknU47A_HVQz4suwib_YOrI",
+      "audio_storage_path": "audio/owe/wsLAVBjIh5vNoLVjK7eT_1616516614496.wav",
+      "phonetic": "ɛgɛdɛ wɛrɛ",
+      "glosses": {
+        "en": "banana"
+      },
+      "speaker_name": "Bolanle Arokoyo",
+      "example_sentence": null,
+      "lng": 9.3293,
+      "lat": 9.781
+    },
+    {
+      "id": "a939c938-074e-4bdd-b86e-2f17d9da0a28",
+      "dict_id": "kihunde",
+      "dict_url": "kihunde",
+      "dict_name": "Kihunde",
+      "dict_location": "Masisi, Walikale, Rutshuru, Nyiragongo, Kalehe",
+      "entry_id": "gxIcPpK637yOE3ypWzDy",
+      "lexeme": "kaútuútu / hiútuutu",
+      "gloss": "chauve-souris",
+      "gloss_language": "fr",
+      "photo_serving_url": "p5YuouYAmsESMV6nsbDn9-3f2xp4syL-FZopKVKOYFALkZsm_t0AIiCKzdklB3dFEnt_GxnEbSoqxPT9cj8jzqTKFHC7nV6gLGA",
+      "audio_storage_path": "kihunde/audio/gxIcPpK637yOE3ypWzDy_1667151143022.aac",
+      "phonetic": null,
+      "glosses": {
+        "fr": "Chauve souris"
+      },
+      "speaker_name": "Sime Nene Sellah",
+      "example_sentence": null,
+      "lng": 29.225,
+      "lat": -1.667
+    },
+    {
+      "id": "d1c9b7ee-bd4d-4914-b591-17f9916f1ca3",
+      "dict_id": "jewish-neo-aramaic",
+      "dict_url": "jewish-neo-aramaic",
+      "dict_name": "Jewish Neo-Aramaic",
+      "dict_location": "Israel, Iran, Kurdistan, Iraq, Turkey, Azerbaijan, Georgia",
+      "entry_id": "pvSQl9HgewGbqNzlSmLx",
+      "lexeme": "אַרמוֹניֵה",
+      "gloss": "רִימּוֹנִים",
+      "gloss_language": "he",
+      "photo_serving_url": "V1lvHuvWpLoILKYAqUWWnJZug9RJRs0i-tdCSUqqNx0IaynDACt9CsbC8Nli2NIBdu0V-kLGqQ0lhCFjQZWfPA2_qt0YZqZjXw",
+      "audio_storage_path": "jewish-neo-aramaic/audio/pvSQl9HgewGbqNzlSmLx_1648832106546.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "pomegranates",
+        "he": "רִימּוֹנִים"
+      },
+      "speaker_name": "Sam Miller",
+      "example_sentence": {
+        "text": {
+          "default": "אַינֵה אַרמוֹניֵה רָבָא כַמוּצֵלוּ"
+        },
+        "translation": {
+          "en": "These pomegranates are very sour.",
+          "he": "הָרִימּוֹנִים הָאֵלֶּה מְאֹד חֲמוּצִים"
+        }
+      },
+      "lng": 34.847,
+      "lat": 32.116
+    },
+    {
+      "id": "085a2f83-46f4-42be-b89a-1c6de8f8533e",
+      "dict_id": "wakhi",
+      "dict_url": "wakhi",
+      "dict_name": "Wakhi",
+      "dict_location": "Afghanistan, China, Pakistan, Tajikistan",
+      "entry_id": "j3kOU35mTeMucJFQeF38",
+      "lexeme": "Iṣ̌mayiṣ̌",
+      "gloss": "Buffalo",
+      "gloss_language": "en",
+      "photo_serving_url": "VI_wuJiRm0pPdhumfZZAB1FJaFEA8RG2aPCwU2_Erm01M28mQifxJ1XZPL02AXdaUS4hoMFs9VpeFKAvaMVOFw90hlRx8SNbBzrt",
+      "audio_storage_path": "wakhi/audio/j3kOU35mTeMucJFQeF38_1644204681889.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "Buffalo"
+      },
+      "speaker_name": "Noor",
+      "example_sentence": null,
+      "lng": 73.8372,
+      "lat": 36.9155
+    },
+    {
+      "id": "f8e3e0f5-f73a-4aae-9d12-98ca738e2719",
+      "dict_id": "haryanvi",
+      "dict_url": "haryanvi",
+      "dict_name": "Haryanvi",
+      "dict_location": "Jhajjar",
+      "entry_id": "dJP7rNrLGWhWhimLJm1v",
+      "lexeme": "अझण",
+      "gloss": "बकरी",
+      "gloss_language": "hi",
+      "photo_serving_url": "fx3zXTQiXtHcBVUknBsVGFqI8qMKNV_PZXLI980BPxjs2WtQQ0d6OKKGhGRGOBhfp61JsMu38eOojLUMMSMl2L7t83V892sGug",
+      "audio_storage_path": "haryanvi/audio/dJP7rNrLGWhWhimLJm1v_1643716068310.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "she-goat",
+        "hi": "बकरी",
+        "pa": "ਬਕਰੀ"
+      },
+      "speaker_name": "Amit",
+      "example_sentence": {
+        "text": {
+          "default": "पाळी अझणां नैं घांस चरावै सै।"
+        },
+        "translation": {
+          "en": "The goatherd feeds the goats with grass.",
+          "hi": "पशुपालक बकरियों को घास चराता है।",
+          "pa": "ਪਸ਼ੂ ਪਾਲਕ ਬੱਕਰੀਆਂ ਨੂੰ ਘਾਹ ਚਰਾਉਂਦਾ ਹੈ।"
+        }
+      },
+      "lng": 76.299,
+      "lat": 29.325
+    },
+    {
+      "id": "2d9bfb7a-2e1a-4c26-9621-7bdb0042474a",
+      "dict_id": "malapulaya",
+      "dict_url": "malapulaya",
+      "dict_name": "Malapulaya",
+      "dict_location": "Kerala and Karnataka, India",
+      "entry_id": "aCYqWARclq9oXIeLUIFG",
+      "lexeme": "oṭṭakaṁ",
+      "gloss": "ऊंट",
+      "gloss_language": "hi",
+      "photo_serving_url": "dnvFjA4FoUwAHAJYZADPa9zYbA5oPWxmfVT_R-D-Mj_C_Osh_br9usS2820FyT8lz0S9ihco6YwWOip54V0vxTk",
+      "audio_storage_path": "audio/malapulaya/aCYqWARclq9oXIeLUIFG_1602847540135.ogg",
+      "phonetic": "oʈʈə.kəm",
+      "glosses": {
+        "en": "Camel",
+        "hi": "ऊंट",
+        "ta": "ஒட்டகம்",
+        "te": "ఒంటె"
+      },
+      "speaker_name": "Vanitha",
+      "example_sentence": {
+        "text": {
+          "default": "Long-necked giraffes and camels have the same seven neck bones as do short-necked mice and men."
+        },
+        "translation": null
+      },
+      "lng": 76.407,
+      "lat": 10.45
+    },
+    {
+      "id": "22f8f6ae-d582-4782-b4a4-53813ea96346",
+      "dict_id": "htanaw",
+      "dict_url": "htanaw",
+      "dict_name": "Htanaw",
+      "dict_location": "Kalaw, Shan State, Myanmar",
+      "entry_id": "ahLZ7o8UIxRJqFoesNsV",
+      "lexeme": "ဆီနာဟ့်ဗိူအ်းဗိူအ်",
+      "gloss": "ညှပ်ဖိနပ်",
+      "gloss_language": "my",
+      "photo_serving_url": "Mpl-JVsjJyj2AzcDvCdr9u7QZjclkY9JEs__1f4mTCO-Y_umxAk5UlT1pvtc66lSjaUAPFiRn85u-mJcWRvqvuyiqpGhhJPqvqk",
+      "audio_storage_path": "htanaw/audio/ahLZ7o8UIxRJqFoesNsV/1733976179900.wav",
+      "phonetic": "sʰì.náh bou.bòuʔ",
+      "glosses": {
+        "en": "sandals",
+        "my": "ညှပ်ဖိနပ်"
+      },
+      "speaker_name": "Han Tin",
+      "example_sentence": null,
+      "lng": 96.7942,
+      "lat": 20.5792
+    },
+    {
+      "id": "c5140238-ed0a-42ed-95df-097aa9f7d311",
+      "dict_id": "taiengdictionary",
+      "dict_url": "taiengdictionary",
+      "dict_name": "Tai-Eng-Thai-Viet",
+      "dict_location": "Vietnam",
+      "entry_id": "ZCEmVHI6eKNS7UsVssFQ",
+      "lexeme": "boor",
+      "gloss": "bướm / ngài",
+      "gloss_language": "vi",
+      "photo_serving_url": "M1_Q9z-LEj5Zlwsq32_pEQupFZKpZXdwahxyd-faZTDh4qGW4hEN3WUlvr0t3_0KYWoodUS6cR77SdRtYvYX2CFBtcTfdOsmbJ8",
+      "audio_storage_path": "audio/taiengdictionary/ZCEmVHI6eKNS7UsVssFQ_1635484051110.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "butterfly",
+        "vi": "bướm / ngài"
+      },
+      "speaker_name": "Nam Tran",
+      "example_sentence": null,
+      "lng": 107.393,
+      "lat": 21.526
+    },
+    {
+      "id": "c008d27b-4a84-4996-b12e-291be756c628",
+      "dict_id": "kharia",
+      "dict_url": "kharia",
+      "dict_name": "Kharia",
+      "dict_location": "India",
+      "entry_id": "vwa3gvyPrjfjpz1tIT7V",
+      "lexeme": "बारहा",
+      "gloss": "सूअर",
+      "gloss_language": "hi",
+      "photo_serving_url": "123qehYak1DUmDuLPkwopzjKUiutuPB5bGcNQ8E60PvL06M-R5_lnDCVychUtCL3JOqDRdOZoMe1r9Jzd4Gi2LX6Q1JDqakCkg",
+      "audio_storage_path": "kharia/audio/vwa3gvyPrjfjpz1tIT7V_1655144725607.mp3",
+      "phonetic": "barha",
+      "glosses": {
+        "en": "boar",
+        "hi": "सूअर"
+      },
+      "speaker_name": "Maduri Dongdong",
+      "example_sentence": null,
+      "lng": 84.402,
+      "lat": 22.349
+    },
+    {
+      "id": "9f060a94-6dff-4978-afac-82450041c889",
+      "dict_id": "birhor",
+      "dict_url": "birhor",
+      "dict_name": "Birhor",
+      "dict_location": "Jharkhand and Odisha, India",
+      "entry_id": "1oaeTEBu6NxKVvlxGvF5",
+      "lexeme": "dʰanija",
+      "gloss": "coriander",
+      "gloss_language": "hi",
+      "photo_serving_url": "cbTODdmPFkBt_cwIevQ9OSo_RXfNLIFBcUKKrg8Pi8WpfW7fGxJ_U0VWcfnnCrHYxqyejgvvHG3fmInetl1sFKaNj3dlBkCobA",
+      "audio_storage_path": "birhor/audio/1oaeTEBu6NxKVvlxGvF5_1646843664118.wav",
+      "phonetic": "dʰanija",
+      "glosses": {
+        "en": "coriander, Coriandrum sativum L.",
+        "hi": "धनिया / धनीया पत्ता"
+      },
+      "speaker_name": "Biswanath Birhor",
+      "example_sentence": null,
+      "lng": 85.33,
+      "lat": 23.35
+    },
+    {
+      "id": "6a93276d-f09d-4573-b718-4eae761da043",
+      "dict_id": "pingelapese",
+      "dict_url": "pingelapese",
+      "dict_name": "Pingelapese",
+      "dict_location": "Pingelap, Federated States of Micronesia",
+      "entry_id": "QTTxv2KfvhSvrVQXTpqt",
+      "lexeme": "mei",
+      "gloss": "breadfruit",
+      "gloss_language": "en",
+      "photo_serving_url": "cErUDDJN9MaY2SN08019UoxUirI04DvvF7l2FYUFcf-m0pQzAesnS7r-Qd4HAGVfe7Tpjxg5o_nAvi_1fViaHaS5a60v12jG8_E",
+      "audio_storage_path": "pingelapese/audio/QTTxv2KfvhSvrVQXTpqt_1722368038611.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "breadfruit"
+      },
+      "speaker_name": "Flora Ikosia",
+      "example_sentence": null,
+      "lng": 160.702,
+      "lat": 6.218
+    },
+    {
+      "id": "b3a3ce1c-c2f7-46ac-a86b-b04faa8d5279",
+      "dict_id": "pingelapese",
+      "dict_url": "pingelapese",
+      "dict_name": "Pingelapese",
+      "dict_location": "Pingelap, Federated States of Micronesia",
+      "entry_id": "7zscrOIDSkmeISOUT9im",
+      "lexeme": "ni",
+      "gloss": "coconut tree",
+      "gloss_language": "en",
+      "photo_serving_url": "AXqj9_EFzLYS6ssg4dqiTyBlxPrT1kh-uSDqyL_B_ZWbX5qmFd1pFTuLW5uv3-27rrMm_Y0rIqfaJ6SR89t3jRE6w7YhFe5v0n4",
+      "audio_storage_path": "pingelapese/audio/7zscrOIDSkmeISOUT9im_1722368043154.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "coconut tree"
+      },
+      "speaker_name": "Flora Ikosia",
+      "example_sentence": null,
+      "lng": 160.702,
+      "lat": 6.218
+    },
+    {
+      "id": "df556b75-dc68-44a9-ab1b-13acb0ed7764",
+      "dict_id": "woleaia",
+      "dict_url": "woleaia",
+      "dict_name": "Woleaian",
+      "dict_location": null,
+      "entry_id": "00645d71-4dc4-4d84-8df8-9b01b8fecf67",
+      "lexeme": "pworoote",
+      "gloss": "kiapoko",
+      "gloss_language": "haw",
+      "photo_serving_url": "y-OowvocMhmLqitKKQCUzE9MBUA5V_huMO8TnEQOGcLON5Lwnu3H7kYumiBFTt8ZNuBnY13pqgzpKawwHqMpUeUAhNgSSmjxCJU\n",
+      "audio_storage_path": "woleaia/audio/00645d71-4dc4-4d84-8df8-9b01b8fecf67_1749771209256.wav",
+      "phonetic": "ˈpʷɔ.ɾɒ.tə̥",
+      "glosses": {
+        "en": "canoe",
+        "haw": "kiapoko"
+      },
+      "speaker_name": "DJ Dominic Taruwemai Taiwer Jr",
+      "example_sentence": {
+        "text": {
+          "default": "Mena temai ye fela toge sefoashe poroot bwe waai."
+        },
+        "translation": {
+          "en": "My father carved a child's canoe for me."
+        }
+      },
+      "lng": 143.87,
+      "lat": 7.35
+    },
+    {
+      "id": "d34b1597-5422-45ed-892d-109680500455",
+      "dict_id": "panim",
+      "dict_url": "panim",
+      "dict_name": "Panim",
+      "dict_location": "Papua New Guinea",
+      "entry_id": "w071jEhGw9yvdrqCxKXL",
+      "lexeme": "zɔl",
+      "gloss": "bilum",
+      "gloss_language": "en",
+      "photo_serving_url": "IgihicM9ZWwM2qhxs5IUXyYS7gmDtY3mGxWW4wi2ZcDAGqdmQfUngLqi8J9AqyihFHjba8sQHyKYxOCSsMzt",
+      "audio_storage_path": "panim/audio/local_import/2010-07-18-Segena-Som-string-netbag-a-1581898764250.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "bilum (PNG woven bag)"
+      },
+      "speaker_name": "Segena Som",
+      "example_sentence": {
+        "text": {
+          "default": "Different types of bilum. Photo by Kahunapule Michael Johnson via Flickr. CC-BY-NC-SA 2.0. https://www.flickr.com/photos/kahunapulej/2861749158"
+        },
+        "translation": null
+      },
+      "lng": 145.745,
+      "lat": -5.214
+    },
+    {
+      "id": "51478635-c9c6-4129-a715-7d2422ba8561",
+      "dict_id": "jaRhn6MAZim4Blvr1iEv",
+      "dict_url": "bahasa-lani",
+      "dict_name": "Bahasa Lani",
+      "dict_location": "Papua, Indonesia",
+      "entry_id": "yt9ja7ymh9xgba5i",
+      "lexeme": "yawi",
+      "gloss": "cendrawasih",
+      "gloss_language": "id",
+      "photo_serving_url": "hsV0DIX4t8Z6XqKGPrpYaUrAoXrGp_DsOHwPvOk7-ec8THjAaYKlBOmoqxOOsKzLg9tnojAkl-EmFeCUrPIPrg",
+      "audio_storage_path": "audio/Bahasa_Lani_jaRhn6MAZim4Blvr1iEv/yawi_yt9ja7ymh9xgba5i_1543340840425.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "the bird of paradise",
+        "id": "cendrawasih"
+      },
+      "speaker_name": "Yafeth Warijo",
+      "example_sentence": null,
+      "lng": 138.909,
+      "lat": -3.777
+    },
+    {
+      "id": "89f3c9b1-5cac-4b41-a16a-e9dc87a49df9",
+      "dict_id": "kapingamarangi",
+      "dict_url": "kapingamarangi",
+      "dict_name": "Kapingamarangi",
+      "dict_location": "Kapingamarangi Atoll, Federated States of Micronesia",
+      "entry_id": "C1a7jSOzXuC5RTVfBLRj",
+      "lexeme": "gee gee",
+      "gloss": "green sea turtle",
+      "gloss_language": "en",
+      "photo_serving_url": "Du7VDcWddAWT_Gb3u9Xe01MGFsbdywVyU9CXSpIWT5uy7RvQ35vWGybRXdMsH9qAQTGrTb5kr08DfNCwrkjnEfDYPOaelTE2y_E",
+      "audio_storage_path": "kapingamarangi/audio/C1a7jSOzXuC5RTVfBLRj_1721843403947.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "green sea turtle"
+      },
+      "speaker_name": "Howartson Heinrich",
+      "example_sentence": null,
+      "lng": 154.7833,
+      "lat": 1.0666
+    },
+    {
+      "id": "seed-babanki-BrPDoMk36ffdqznii5mT",
+      "dict_id": "babanki",
+      "dict_url": "babanki",
+      "dict_name": "Babanki (Kejom)",
+      "dict_location": "Cameroon",
+      "entry_id": "BrPDoMk36ffdqznii5mT",
+      "lexeme": "kətʉ kə əngòm",
+      "gloss": "regime (of banana)",
+      "gloss_language": "en",
+      "photo_serving_url": "x-vywKJEdwxXEtQbkEB0iygn52ptKvjG0SAmJqKKbtnvlRMVhJKfeatFiSzEjt87ff7qYJgArxKPh79-LA6L67NO1QI9iE2LN6s",
+      "audio_storage_path": "babanki/audio/BrPDoMk36ffdqznii5mT_1669398388918.wav",
+      "phonetic": "kə̀tʉ́ kə́ ŋ̀ɡɔ̀m",
+      "glosses": {
+        "en": "regime (of banana, plantain)"
+      },
+      "speaker_name": "Pius Akumbu",
+      "example_sentence": null,
+      "lng": 10.315,
+      "lat": 5.978
+    },
+    {
+      "id": "seed-birhor-Ja9fkjn1dOo74Xy25f32",
+      "dict_id": "birhor",
+      "dict_url": "birhor",
+      "dict_name": "Birhor",
+      "dict_location": "Jharkhand and Odisha, India",
+      "entry_id": "Ja9fkjn1dOo74Xy25f32",
+      "lexeme": "baplaniʔ",
+      "gloss": "शादी-शुदा",
+      "gloss_language": "hi",
+      "photo_serving_url": "Yf9cvDcRuGQ4iRs1Uh63g5iHHVQAA8gBXFL1GDQoxY9o3ZLkWqS8_rj7UakJVJYAmHxkCTDL87h26l_swLTgRVvbIxniAmzadSA",
+      "audio_storage_path": "birhor/audio/Ja9fkjn1dOo74Xy25f32_1646844055726.wav",
+      "phonetic": "baplaniʔ",
+      "glosses": {
+        "en": "married",
+        "hi": "शादी-शुदा"
+      },
+      "speaker_name": "Kaushila Birhor",
+      "example_sentence": null,
+      "lng": 85.33,
+      "lat": 23.35
+    },
+    {
+      "id": "seed-eyak-3Si3qfoxkKDjjTWGkQVe",
+      "dict_id": "eyak",
+      "dict_url": "eyak",
+      "dict_name": "dAXunhyuuga'",
+      "dict_location": "Alaska, USA",
+      "entry_id": "3Si3qfoxkKDjjTWGkQVe",
+      "lexeme": "sahs",
+      "gloss": "sea otter",
+      "gloss_language": "en",
+      "photo_serving_url": "2djtHtsfoS0B18VAMjr1gOt4JD-ctXEIJzQrWN11nQnp1dPWAch-bDroXInd6yEOlfnLeMcit7XVOStnAztKg4VwNFYqBL-TBA",
+      "audio_storage_path": "eyak/audio/3Si3qfoxkKDjjTWGkQVe_1697235677054.mpeg",
+      "phonetic": null,
+      "glosses": {
+        "en": "sea otter"
+      },
+      "speaker_name": "Jenna May",
+      "example_sentence": null,
+      "lng": -145.7589,
+      "lat": 60.5439
+    },
     {
       "id": "seed-gta-JX3PWfsBnFG5Av3m9oJw",
       "dict_id": "gta",
       "dict_url": "gta",
       "dict_name": "GtaɁ",
+      "dict_location": "India",
       "entry_id": "JX3PWfsBnFG5Av3m9oJw",
       "lexeme": "goeʔthõ sǝlaʔ",
       "gloss": "dead-standing tree",
       "gloss_language": "en",
       "photo_serving_url": "XGVlF5s8p0BMgzL9QYR40ByeoRNWgJdW9yJ5fQgp9FRrECC_7_YJlkcHUjte2CzMJh53XleBndALPiY5OBI5QA",
       "audio_storage_path": "gta/audio/local_import/Gta-Tkrpr-Dec13-img-1460-1580860182394.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "dead-standing tree"
+      },
+      "speaker_name": "Dosorup Kirsani",
+      "example_sentence": {
+        "text": {
+          "default": "Photo by Opino Gomango"
+        },
+        "translation": null
+      },
       "lng": 82.991,
       "lat": 18.617
     },
@@ -29,320 +778,241 @@
       "dict_id": "gutob",
       "dict_url": "gutob",
       "dict_name": "Gutob",
+      "dict_location": "India",
       "entry_id": "eutXHkCekHZNJ0j5NvmL",
       "lexeme": "gunija",
       "gloss": "sifter",
       "gloss_language": "en",
       "photo_serving_url": "ULV-O50WSWeCxjvtdKm5sSQEcPmW8694Vg960688f-OPX_uDeppDWKLhVcAW7gNkTe_4QlKwXu8d2i75fywokCc",
       "audio_storage_path": "gutob/audio/local_import/Gutob-Oct17-TS-Image-1914-1580857088170.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "sifter"
+      },
+      "speaker_name": "Tonkodar Sisa",
+      "example_sentence": {
+        "text": {
+          "default": "Photo by Opino Gomango"
+        },
+        "translation": null
+      },
       "lng": 82.716,
       "lat": 18.816
-    },
-    {
-      "id": "seed-sibe-x6VbpAH4QZybvF8kAD11",
-      "dict_id": "sibe",
-      "dict_url": "sibe",
-      "dict_name": "Manchu",
-      "entry_id": "x6VbpAH4QZybvF8kAD11",
-      "lexeme": "vecen",
-      "gloss": "供物",
-      "gloss_language": "cmn",
-      "photo_serving_url": "pFr-xHXnIfHTb_1RT2nr-bBkQIeC_Ph-JJBkd1W2dlhH3y2QQgdqWi8DFBPMoMRPG1DJiMGSgAwwd8uv5Ne82kjtaCT9vszWeBk",
-      "audio_storage_path": "sibe/audio/x6VbpAH4QZybvF8kAD11_1640709191444.wav",
-      "lng": 81.087,
-      "lat": 43.801
     },
     {
       "id": "seed-hazaragi-68CJuYT8QVW6Ki0Aa9Ty",
       "dict_id": "hazaragi",
       "dict_url": "hazaragi",
       "dict_name": "Hazaragi Language",
+      "dict_location": "Afghanistan",
       "entry_id": "68CJuYT8QVW6Ki0Aa9Ty",
       "lexeme": "Aatish",
       "gloss": "fire",
       "gloss_language": "en",
       "photo_serving_url": "0bVhz_QYBUCFZ2pgrDYCXlJqF1Py6JEDsyju28_g4twcRivCAP1gG8PBMks_5xel1N10UnfWHmedS-CXXvK5_es8ZnDrr_ma44az",
       "audio_storage_path": "hazaragi/audio/68CJuYT8QVW6Ki0Aa9Ty_1668949401054.wav",
+      "phonetic": "ãtəʂ",
+      "glosses": {
+        "en": "fire"
+      },
+      "speaker_name": "JG",
+      "example_sentence": null,
       "lng": 66.026,
       "lat": 33.838
-    },
-    {
-      "id": "seed-apatani-tmwySG4qGElDnYeO6o7g",
-      "dict_id": "apatani",
-      "dict_url": "apatani",
-      "dict_name": "Apatani",
-      "entry_id": "tmwySG4qGElDnYeO6o7g",
-      "lexeme": "diifañ pákù",
-      "gloss": "Mountain Imperial Pigeon",
-      "gloss_language": "en",
-      "photo_serving_url": "Yugc9ku_ab5jjQSLrClD9dzDocQTiyuiZTbcoIOULNaLoBIJQu7UkOehtzOWWZUjstdT2leU_tAr4ZuwMWBX8g",
-      "audio_storage_path": "apatani/audio/local_import/diifa-p-k--1580854634921.mp3",
-      "lng": 93.814,
-      "lat": 27.539
-    },
-    {
-      "id": "seed-birhor-Ja9fkjn1dOo74Xy25f32",
-      "dict_id": "birhor",
-      "dict_url": "birhor",
-      "dict_name": "Birhor",
-      "entry_id": "Ja9fkjn1dOo74Xy25f32",
-      "lexeme": "baplaniʔ",
-      "gloss": "शादी-शुदा",
-      "gloss_language": "hi",
-      "photo_serving_url": "Yf9cvDcRuGQ4iRs1Uh63g5iHHVQAA8gBXFL1GDQoxY9o3ZLkWqS8_rj7UakJVJYAmHxkCTDL87h26l_swLTgRVvbIxniAmzadSA",
-      "audio_storage_path": "birhor/audio/Ja9fkjn1dOo74Xy25f32_1646844055726.wav",
-      "lng": 85.33,
-      "lat": 23.35
-    },
-    {
-      "id": "seed-sora-05XIuFHE2ZL4fS3ymEQR",
-      "dict_id": "sora",
-      "dict_url": "sora",
-      "dict_name": "Sora",
-      "entry_id": "05XIuFHE2ZL4fS3ymEQR",
-      "lexeme": "eʔkoŋɽiol",
-      "gloss": "Nippon lily",
-      "gloss_language": "en",
-      "photo_serving_url": "0HPh3BX2gcP8bW2AJWNTAepvxjtLMv8xkK4A9ufasJnbSyxiNmEe7JyRxw4w9DobVUZ8_Mg6Jw7QtK1dQNRbLg",
-      "audio_storage_path": "audio/sora/05XIuFHE2ZL4fS3ymEQR_1589531815542.x-wav",
-      "lng": 83.833,
-      "lat": 18.975
-    },
-    {
-      "id": "seed-mahasuvi-m7bqmZqXlGqEKLAj51iD",
-      "dict_id": "mahasuvi",
-      "dict_url": "mahasuvi",
-      "dict_name": "Mahasuvi",
-      "entry_id": "m7bqmZqXlGqEKLAj51iD",
-      "lexeme": "धौंटी",
-      "gloss": "कमान",
-      "gloss_language": "hi",
-      "photo_serving_url": "wEE2WuGbnJXGqog9b7jDBVHa8km3PjqzbNwdJSEX5aDcVU5dHaHSkp_Xpy8Mr3UWHLlbcFO8LBZwoIzQ2KOPZ6K7yNiGGpmNoNc",
-      "audio_storage_path": "audio/mahasuvi/m7bqmZqXlGqEKLAj51iD_1625133673712.wav",
-      "lng": 77.1765,
-      "lat": 31.1012
-    },
-    {
-      "id": "seed-kharia-x7x63Ek0vxXaJTA7mTuM",
-      "dict_id": "kharia",
-      "dict_url": "kharia",
-      "dict_name": "Kharia",
-      "entry_id": "x7x63Ek0vxXaJTA7mTuM",
-      "lexeme": "कचिया",
-      "gloss": "पैसे, रुपए",
-      "gloss_language": "hi",
-      "photo_serving_url": "gEtiH2qkm_ShhlkSYJJSeXbyXjmC3GU9lZmTf5-8l10vTzQCR-lN6nnoTF-jbfz4t7IXl0rQQzt9waNzB017hNFftrOPN8SW0i4",
-      "audio_storage_path": "kharia/audio/x7x63Ek0vxXaJTA7mTuM_1655144735088.mp3",
-      "lng": 84.402,
-      "lat": 22.349
-    },
-    {
-      "id": "seed-northern-michif-POefyDeAarPPKJcD7Ojk",
-      "dict_id": "northern-michif",
-      "dict_url": "northern-michif",
-      "dict_name": "Northern Michif",
-      "entry_id": "POefyDeAarPPKJcD7Ojk",
-      "lexeme": "mihkwâķan",
-      "gloss": "face",
-      "gloss_language": "en",
-      "photo_serving_url": "EgTnBpJGcUYO2wZcZqhEgpQ7dIz4gD6tIY1BWt-bi7yJcqDFQQrg1432_vi06SPUvbtAzXwZCHCOhg_IECWeSQ7qM-SU-teEhDs",
-      "audio_storage_path": "northern-michif/audio/POefyDeAarPPKJcD7Ojk_1709671083136.mp3",
-      "lng": -116.4416,
-      "lat": 53.5863
-    },
-    {
-      "id": "seed-eyak-3Si3qfoxkKDjjTWGkQVe",
-      "dict_id": "eyak",
-      "dict_url": "eyak",
-      "dict_name": "dAXunhyuuga'",
-      "entry_id": "3Si3qfoxkKDjjTWGkQVe",
-      "lexeme": "sahs",
-      "gloss": "sea otter",
-      "gloss_language": "en",
-      "photo_serving_url": "2djtHtsfoS0B18VAMjr1gOt4JD-ctXEIJzQrWN11nQnp1dPWAch-bDroXInd6yEOlfnLeMcit7XVOStnAztKg4VwNFYqBL-TBA",
-      "audio_storage_path": "eyak/audio/3Si3qfoxkKDjjTWGkQVe_1697235677054.mpeg",
-      "lng": -145.7589,
-      "lat": 60.5439
-    },
-    {
-      "id": "seed-kaqchikel-BnYpzNwKwc72ge4aNbbL",
-      "dict_id": "kaqchikel",
-      "dict_url": "kaqchikel",
-      "dict_name": "Kaqchikel",
-      "entry_id": "BnYpzNwKwc72ge4aNbbL",
-      "lexeme": "Ik'",
-      "gloss": "luna",
-      "gloss_language": "es",
-      "photo_serving_url": "Wb3JiOfm1GKCjpP50eWigyb4Md15mpSLoNLlp39Q2TjdPQzftNV9EXJBsjNANkt092lSUYEn1LW5GEmc1uKcRA",
-      "audio_storage_path": "kaqchikel/audio/local_import/kaqchikel-Byron-Vinicio-Socorec-Yucute-05Jun2014-1414-luna-1580863043650.mp3",
-      "lng": -90.975,
-      "lat": 14.743
-    },
-    {
-      "id": "seed-qeqchi-fUP6HZHE31SeyPPksImD",
-      "dict_id": "qeqchi",
-      "dict_url": "qeqchi",
-      "dict_name": "Q'eqchi'",
-      "entry_id": "fUP6HZHE31SeyPPksImD",
-      "lexeme": "B'aqb'il K'aam",
-      "gloss": "lazo",
-      "gloss_language": "es",
-      "photo_serving_url": "2im9Oe08fYAWD1mdPSbNa5T1jCDDiuGGM-64WhIBAVXw5ToMvkoQARQ12VZZ4wOUKdkZuwFTXbou5x60XP8Y",
-      "audio_storage_path": "qeqchi/audio/local_import/qeqchi-Vicente-de-Jes-s-Ch-Melgar-05Jun2014-1858-lazo-1580868828474.mp3",
-      "lng": -89.832,
-      "lat": 15.897
     },
     {
       "id": "seed-iquito-oUxIC17H1ZAEESbY57Qq",
       "dict_id": "iquito",
       "dict_url": "iquito",
       "dict_name": "Iquito",
+      "dict_location": "Perú",
       "entry_id": "oUxIC17H1ZAEESbY57Qq",
       "lexeme": "kusiúùrì",
       "gloss": "cushuri",
       "gloss_language": "es",
       "photo_serving_url": "wsXDlzbyqAoPRUD4eEpXxZ9NH6JbYZxmL5vqTd9TulWgI8zmo1-1rVzDRajIj4gxJFBvnwlR6qogcZbnbBa_tlDpDKfz8NMv3A",
       "audio_storage_path": "iquito/audio/oUxIC17H1ZAEESbY57Qq_1704840354732.wav",
+      "phonetic": "ku.ʃúù.ɾì",
+      "glosses": {
+        "en": "neotropic cormorant",
+        "es": "cushuri"
+      },
+      "speaker_name": "Ema Llona Yareja",
+      "example_sentence": null,
       "lng": -73.78,
       "lat": -3.704
-    },
-    {
-      "id": "seed-werikyana-9ptJdOfLbwRzWOHFUI64",
-      "dict_id": "werikyana",
-      "dict_url": "werikyana",
-      "dict_name": "Werikyana Tiriyó Prtgês Inglês",
-      "entry_id": "9ptJdOfLbwRzWOHFUI64",
-      "lexeme": "Kutmahorï",
-      "gloss": "Piraíba",
-      "gloss_language": "pt",
-      "photo_serving_url": "zNwpnLmg_lz0yukJvHuQzW4ENddksrjDlq1wvhc8R-azqu2rzH2-q6wxBQkRIaBWpsxnqaVbNVKU5kCO4ZGimyDNTCxmQTixzQ20",
-      "audio_storage_path": "werikyana/audio/9ptJdOfLbwRzWOHFUI64_1705666713157.wav",
-      "lng": -57.3427,
-      "lat": -0.9185
     },
     {
       "id": "seed-ishir-chamacoco-ArZZbKuTrJGzQuZijqaV",
       "dict_id": "ishir-chamacoco",
       "dict_url": "ishir-chamacoco",
       "dict_name": "Ɨshɨr (Chamacoco)",
+      "dict_location": "Puerto Diana, Karcha Bahlut y otras comunidades (Alto Paraguay)",
       "entry_id": "ArZZbKuTrJGzQuZijqaV",
       "lexeme": "hmeyto",
       "gloss": "Amazonian motmot",
       "gloss_language": "en",
       "photo_serving_url": "ElKAah0B9zDJBuDyJ69By9BqApOIMgo5EFQtyW09oldoIJPxfVB7zBg7HyCWTaJiasSyNammt86J6Jx0I6Z4ZjiQVKVx2ET2_8dp",
       "audio_storage_path": "ishir-chamacoco/audio/local_import/6-22-2012-Ishir-Chamacoco-AO-Hmeyto-pajero-a-1583189166265.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "Amazonian motmot",
+        "es": "burgo o momoto amazónico o momoto común​ (Momotus momota)"
+      },
+      "speaker_name": "Andres Ozuna",
+      "example_sentence": null,
       "lng": -58.166,
       "lat": -20.257
     },
     {
-      "id": "seed-kihunde-MYpfQrDJr0r7kTPaPoi3",
-      "dict_id": "kihunde",
-      "dict_url": "kihunde",
-      "dict_name": "Kihunde",
-      "entry_id": "MYpfQrDJr0r7kTPaPoi3",
-      "lexeme": "piripǐri",
-      "gloss": "Piment",
-      "gloss_language": "fr",
-      "photo_serving_url": "4vA07jWNcTfpw0FBwJhPGLShWpXWAYOcElEnAMZNIAQGssc-8Rmyi5NeyoxbHrEfnV_4FoLzRBSJsH5EZ-vLakb0TWgSO9F-mBqt",
-      "audio_storage_path": "kihunde/audio/MYpfQrDJr0r7kTPaPoi3_1666892059323.aac",
-      "lng": 29.225,
-      "lat": -1.667
+      "id": "seed-kaqchikel-BnYpzNwKwc72ge4aNbbL",
+      "dict_id": "kaqchikel",
+      "dict_url": "kaqchikel",
+      "dict_name": "Kaqchikel",
+      "dict_location": "Guatemala",
+      "entry_id": "BnYpzNwKwc72ge4aNbbL",
+      "lexeme": "Ik'",
+      "gloss": "luna",
+      "gloss_language": "es",
+      "photo_serving_url": "Wb3JiOfm1GKCjpP50eWigyb4Md15mpSLoNLlp39Q2TjdPQzftNV9EXJBsjNANkt092lSUYEn1LW5GEmc1uKcRA",
+      "audio_storage_path": "kaqchikel/audio/local_import/kaqchikel-Byron-Vinicio-Socorec-Yucute-05Jun2014-1414-luna-1580863043650.mp3",
+      "phonetic": "ʔik'",
+      "glosses": {
+        "en": "moon",
+        "es": "luna"
+      },
+      "speaker_name": "Byron Vinicio Socorec Yucute",
+      "example_sentence": null,
+      "lng": -90.975,
+      "lat": 14.743
     },
     {
-      "id": "seed-kihunde-5BRBnWPyFDo9qdme9k0M",
-      "dict_id": "kihunde",
-      "dict_url": "kihunde",
-      "dict_name": "Kihunde",
-      "entry_id": "5BRBnWPyFDo9qdme9k0M",
-      "lexeme": "fumbiri",
-      "gloss": "Antiloppe",
-      "gloss_language": "fr",
-      "photo_serving_url": "XZV6dLOlaix0NQeJHkahLPE6CK-Eb7ayjDdHVx5I4v1_ZRjUaYIVnyx5ON-9CtZjOrjoXDLzIoqhzZfRtYGG9i9cTCRr5-W9DxFs",
-      "audio_storage_path": "kihunde/audio/5BRBnWPyFDo9qdme9k0M_1669650975650.aac",
-      "lng": 29.225,
-      "lat": -1.667
-    },
-    {
-      "id": "seed-sengwer-lcXaEd6H2bqCb4yzQp5T",
-      "dict_id": "sengwer",
-      "dict_url": "sengwer",
-      "dict_name": "Sengwer",
-      "entry_id": "lcXaEd6H2bqCb4yzQp5T",
-      "lexeme": "chēēpoopēēt",
-      "gloss": "Butterfly bush",
-      "gloss_language": "en",
-      "photo_serving_url": "qks7zbgrPSADK5Zz-EccwJe_RL8FPnzakEgQhOfXOzNuv0zKAyZXWUGYzeV7aOMdUWF7-r7ciVlL5ENBWU_ymW7Z2YE-APplb6nK",
-      "audio_storage_path": "sengwer/audio/lcXaEd6H2bqCb4yzQp5T_1689016790502.wav",
-      "lng": 35.293,
-      "lat": 1.098
-    },
-    {
-      "id": "seed-babanki-BrPDoMk36ffdqznii5mT",
-      "dict_id": "babanki",
-      "dict_url": "babanki",
-      "dict_name": "Babanki (Kejom)",
-      "entry_id": "BrPDoMk36ffdqznii5mT",
-      "lexeme": "kətʉ kə əngòm",
-      "gloss": "regime (of banana)",
-      "gloss_language": "en",
-      "photo_serving_url": "x-vywKJEdwxXEtQbkEB0iygn52ptKvjG0SAmJqKKbtnvlRMVhJKfeatFiSzEjt87ff7qYJgArxKPh79-LA6L67NO1QI9iE2LN6s",
-      "audio_storage_path": "babanki/audio/BrPDoMk36ffdqznii5mT_1669398388918.wav",
-      "lng": 10.315,
-      "lat": 5.978
+      "id": "seed-kharia-x7x63Ek0vxXaJTA7mTuM",
+      "dict_id": "kharia",
+      "dict_url": "kharia",
+      "dict_name": "Kharia",
+      "dict_location": "India",
+      "entry_id": "x7x63Ek0vxXaJTA7mTuM",
+      "lexeme": "कचिया",
+      "gloss": "पैसे, रुपए",
+      "gloss_language": "hi",
+      "photo_serving_url": "gEtiH2qkm_ShhlkSYJJSeXbyXjmC3GU9lZmTf5-8l10vTzQCR-lN6nnoTF-jbfz4t7IXl0rQQzt9waNzB017hNFftrOPN8SW0i4",
+      "audio_storage_path": "kharia/audio/x7x63Ek0vxXaJTA7mTuM_1655144735088.mp3",
+      "phonetic": "kecia",
+      "glosses": {
+        "en": "money",
+        "hi": "पैसे, रुपए"
+      },
+      "speaker_name": "Maduri Dongdong",
+      "example_sentence": null,
+      "lng": 84.402,
+      "lat": 22.349
     },
     {
       "id": "seed-kihehe-hLoGlZK4VySEKJYhjZYP",
       "dict_id": "kihehe",
       "dict_url": "kihehe",
       "dict_name": "Kihehe",
+      "dict_location": "Tanzania",
       "entry_id": "hLoGlZK4VySEKJYhjZYP",
       "lexeme": "mveengi",
       "gloss": "mzambarau",
       "gloss_language": "sw",
       "photo_serving_url": "5zK3fCRRy2xhy0-QHCF43E0jVVTmDP6emFnIbdkPpU8pzO1kb97UB9m6izBwOQ-cQOEjIK6Y73_9DtzLxmCocOutNUqDsPVBQg",
       "audio_storage_path": "kihehe/audio/hLoGlZK4VySEKJYhjZYP_1672975892170.wav",
+      "phonetic": "mʋeéŋgi",
+      "glosses": {
+        "en": "Water pear",
+        "sw": "mzambarau"
+      },
+      "speaker_name": "Richard",
+      "example_sentence": null,
       "lng": 35.476,
       "lat": -7.8033
     },
     {
-      "id": "seed-sepedi-living-dictionary-g7XQGHo0ft79Q6Be4n1e",
-      "dict_id": "sepedi-living-dictionary",
-      "dict_url": "sepedi-living-dictionary",
-      "dict_name": "Segagešo Living Dictionary",
-      "entry_id": "g7XQGHo0ft79Q6Be4n1e",
-      "lexeme": "abakhase",
-      "gloss": "abacus",
-      "gloss_language": "en",
-      "photo_serving_url": "sRqW4junZ2BgHXurLA_KtoE-nvCI9p_TglQqHqCrjVi4ivuQ1sHeq_gLC_zbuKWspe0Xqyu9kAeL4Wjf1tLdJx8NKlEDg-nBHQg",
-      "audio_storage_path": "sepedi-living-dictionary/audio/g7XQGHo0ft79Q6Be4n1e_1666177275421.wav",
-      "lng": 24.671,
-      "lat": -27.928
+      "id": "seed-kihunde-5BRBnWPyFDo9qdme9k0M",
+      "dict_id": "kihunde",
+      "dict_url": "kihunde",
+      "dict_name": "Kihunde",
+      "dict_location": "Masisi, Walikale, Rutshuru, Nyiragongo, Kalehe",
+      "entry_id": "5BRBnWPyFDo9qdme9k0M",
+      "lexeme": "fumbiri",
+      "gloss": "Antiloppe",
+      "gloss_language": "fr",
+      "photo_serving_url": "XZV6dLOlaix0NQeJHkahLPE6CK-Eb7ayjDdHVx5I4v1_ZRjUaYIVnyx5ON-9CtZjOrjoXDLzIoqhzZfRtYGG9i9cTCRr5-W9DxFs",
+      "audio_storage_path": "kihunde/audio/5BRBnWPyFDo9qdme9k0M_1669650975650.aac",
+      "phonetic": null,
+      "glosses": {
+        "fr": "Antiloppe"
+      },
+      "speaker_name": "Hangi Bulebe Methodes",
+      "example_sentence": null,
+      "lng": 29.225,
+      "lat": -1.667
     },
     {
-      "id": "seed-nukuoro-j2mdL4hPjVcmWnSF9PxK",
-      "dict_id": "nukuoro",
-      "dict_url": "nukuoro",
-      "dict_name": "Nukuoro",
-      "entry_id": "j2mdL4hPjVcmWnSF9PxK",
-      "lexeme": "daaea",
-      "gloss": "snapper",
-      "gloss_language": "en",
-      "photo_serving_url": "Ud_4WjAcvJnK8Su8_oBOpUE7aXeUy8Q8LZPJQdL9KColgybgOHF0oLhWJqZOrc00EAAbl9oqK9-p6Hm_Ftg1gITvG88-SEbY9Lg1",
-      "audio_storage_path": "nukuoro/audio/j2mdL4hPjVcmWnSF9PxK_1686983977709.wav",
-      "lng": 154.942,
-      "lat": 3.845
+      "id": "seed-kihunde-MYpfQrDJr0r7kTPaPoi3",
+      "dict_id": "kihunde",
+      "dict_url": "kihunde",
+      "dict_name": "Kihunde",
+      "dict_location": "Masisi, Walikale, Rutshuru, Nyiragongo, Kalehe",
+      "entry_id": "MYpfQrDJr0r7kTPaPoi3",
+      "lexeme": "piripǐri",
+      "gloss": "Piment",
+      "gloss_language": "fr",
+      "photo_serving_url": "4vA07jWNcTfpw0FBwJhPGLShWpXWAYOcElEnAMZNIAQGssc-8Rmyi5NeyoxbHrEfnV_4FoLzRBSJsH5EZ-vLakb0TWgSO9F-mBqt",
+      "audio_storage_path": "kihunde/audio/MYpfQrDJr0r7kTPaPoi3_1666892059323.aac",
+      "phonetic": null,
+      "glosses": {
+        "fr": "Piment"
+      },
+      "speaker_name": "Hangi Bulebe Methodes",
+      "example_sentence": null,
+      "lng": 29.225,
+      "lat": -1.667
+    },
+    {
+      "id": "seed-mahasuvi-m7bqmZqXlGqEKLAj51iD",
+      "dict_id": "mahasuvi",
+      "dict_url": "mahasuvi",
+      "dict_name": "Mahasuvi",
+      "dict_location": "Shimla, HP, India",
+      "entry_id": "m7bqmZqXlGqEKLAj51iD",
+      "lexeme": "धौंटी",
+      "gloss": "कमान",
+      "gloss_language": "hi",
+      "photo_serving_url": "wEE2WuGbnJXGqog9b7jDBVHa8km3PjqzbNwdJSEX5aDcVU5dHaHSkp_Xpy8Mr3UWHLlbcFO8LBZwoIzQ2KOPZ6K7yNiGGpmNoNc",
+      "audio_storage_path": "audio/mahasuvi/m7bqmZqXlGqEKLAj51iD_1625133673712.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "Bow",
+        "hi": "कमान"
+      },
+      "speaker_name": "Rajneesh Verma",
+      "example_sentence": null,
+      "lng": 77.1765,
+      "lat": 31.1012
     },
     {
       "id": "seed-matukar-ZVoO5fLyCiqpa1BORTZS",
       "dict_id": "matukar",
       "dict_url": "matukar",
       "dict_name": "Matukar",
+      "dict_location": "Madang Province, Papua New Guinea",
       "entry_id": "ZVoO5fLyCiqpa1BORTZS",
       "lexeme": "te dabok",
       "gloss": "bilum",
       "gloss_language": "tpi",
       "photo_serving_url": "Rv3tuYO9VzFGQLxqoKEnspNS4JHruoW49AGIlz7dXoVTJ5kMVIq-uvWBm42_gFXT_rAeyenJvoL-qB-hVBZFTA",
       "audio_storage_path": "matukar/audio/local_import/Cult-elicit-Feb-24-2010-Kadagoi-big-bilum-a-1581898352580.mp3",
+      "phonetic": "te dabok",
+      "glosses": {
+        "en": "big string net bag",
+        "tpi": "bilum"
+      },
+      "speaker_name": "Kadagoi Rawad",
+      "example_sentence": null,
       "lng": 145.787,
       "lat": -4.888
     },
@@ -351,28 +1021,2387 @@
       "dict_id": "mokilese",
       "dict_url": "mokilese",
       "dict_name": "Mokilese",
+      "dict_location": "Mwoakilloa, Federated States of Micronesia",
       "entry_id": "ehhZJ6Ubl5YSzSnnYCol",
       "lexeme": "pwu",
       "gloss": "betel nut",
       "gloss_language": "en",
       "photo_serving_url": "M245aKTwiqnoVYRi9va9QQ_goWDbczHGEIhSRhOSvScx_CJqMXFCwVxk6ztTBPhCZZV18LJD74CURFlWRDIIYqzyHX-kyt81CVfv",
       "audio_storage_path": "mokilese/audio/ehhZJ6Ubl5YSzSnnYCol_1721940368878.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "betel nut"
+      },
+      "speaker_name": "Danio Poll",
+      "example_sentence": null,
       "lng": 159.7595,
       "lat": 6.6917
+    },
+    {
+      "id": "seed-nukuoro-j2mdL4hPjVcmWnSF9PxK",
+      "dict_id": "nukuoro",
+      "dict_url": "nukuoro",
+      "dict_name": "Nukuoro",
+      "dict_location": "Micronesia ",
+      "entry_id": "j2mdL4hPjVcmWnSF9PxK",
+      "lexeme": "daaea",
+      "gloss": "snapper",
+      "gloss_language": "en",
+      "photo_serving_url": "Ud_4WjAcvJnK8Su8_oBOpUE7aXeUy8Q8LZPJQdL9KColgybgOHF0oLhWJqZOrc00EAAbl9oqK9-p6Hm_Ftg1gITvG88-SEbY9Lg1",
+      "audio_storage_path": "nukuoro/audio/j2mdL4hPjVcmWnSF9PxK_1686983977709.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "fish sp., snapper"
+      },
+      "speaker_name": "Harson Henry",
+      "example_sentence": null,
+      "lng": 154.942,
+      "lat": 3.845
+    },
+    {
+      "id": "seed-qeqchi-fUP6HZHE31SeyPPksImD",
+      "dict_id": "qeqchi",
+      "dict_url": "qeqchi",
+      "dict_name": "Q'eqchi'",
+      "dict_location": "Guatemala",
+      "entry_id": "fUP6HZHE31SeyPPksImD",
+      "lexeme": "B'aqb'il K'aam",
+      "gloss": "lazo",
+      "gloss_language": "es",
+      "photo_serving_url": "2im9Oe08fYAWD1mdPSbNa5T1jCDDiuGGM-64WhIBAVXw5ToMvkoQARQ12VZZ4wOUKdkZuwFTXbou5x60XP8Y",
+      "audio_storage_path": "qeqchi/audio/local_import/qeqchi-Vicente-de-Jes-s-Ch-Melgar-05Jun2014-1858-lazo-1580868828474.mp3",
+      "phonetic": "ɓaqʰ.'ɓil k'a:m",
+      "glosses": {
+        "en": "rope",
+        "es": "lazo"
+      },
+      "speaker_name": "Vicente de Jesús Ché Melgar",
+      "example_sentence": null,
+      "lng": -89.832,
+      "lat": 15.897
+    },
+    {
+      "id": "seed-sengwer-lcXaEd6H2bqCb4yzQp5T",
+      "dict_id": "sengwer",
+      "dict_url": "sengwer",
+      "dict_name": "Sengwer",
+      "dict_location": "Kenya",
+      "entry_id": "lcXaEd6H2bqCb4yzQp5T",
+      "lexeme": "chēēpoopēēt",
+      "gloss": "Butterfly bush",
+      "gloss_language": "en",
+      "photo_serving_url": "qks7zbgrPSADK5Zz-EccwJe_RL8FPnzakEgQhOfXOzNuv0zKAyZXWUGYzeV7aOMdUWF7-r7ciVlL5ENBWU_ymW7Z2YE-APplb6nK",
+      "audio_storage_path": "sengwer/audio/lcXaEd6H2bqCb4yzQp5T_1689016790502.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "Butterfly bush"
+      },
+      "speaker_name": "Amos",
+      "example_sentence": null,
+      "lng": 35.293,
+      "lat": 1.098
+    },
+    {
+      "id": "seed-sepedi-living-dictionary-g7XQGHo0ft79Q6Be4n1e",
+      "dict_id": "sepedi-living-dictionary",
+      "dict_url": "sepedi-living-dictionary",
+      "dict_name": "Segagešo Living Dictionary",
+      "dict_location": "South Africa",
+      "entry_id": "g7XQGHo0ft79Q6Be4n1e",
+      "lexeme": "abakhase",
+      "gloss": "abacus",
+      "gloss_language": "en",
+      "photo_serving_url": "sRqW4junZ2BgHXurLA_KtoE-nvCI9p_TglQqHqCrjVi4ivuQ1sHeq_gLC_zbuKWspe0Xqyu9kAeL4Wjf1tLdJx8NKlEDg-nBHQg",
+      "audio_storage_path": "sepedi-living-dictionary/audio/g7XQGHo0ft79Q6Be4n1e_1666177275421.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "abacus",
+        "ts": "abakhase"
+      },
+      "speaker_name": "Mokgadi Mathole",
+      "example_sentence": null,
+      "lng": 24.671,
+      "lat": -27.928
+    },
+    {
+      "id": "seed-sora-05XIuFHE2ZL4fS3ymEQR",
+      "dict_id": "sora",
+      "dict_url": "sora",
+      "dict_name": "Sora",
+      "dict_location": "India",
+      "entry_id": "05XIuFHE2ZL4fS3ymEQR",
+      "lexeme": "eʔkoŋɽiol",
+      "gloss": "Nippon lily",
+      "gloss_language": "en",
+      "photo_serving_url": "0HPh3BX2gcP8bW2AJWNTAepvxjtLMv8xkK4A9ufasJnbSyxiNmEe7JyRxw4w9DobVUZ8_Mg6Jw7QtK1dQNRbLg",
+      "audio_storage_path": "audio/sora/05XIuFHE2ZL4fS3ymEQR_1589531815542.x-wav",
+      "phonetic": "eʔkoŋɽiol",
+      "glosses": {
+        "en": "Nippon lily"
+      },
+      "speaker_name": "Opino Gomango",
+      "example_sentence": null,
+      "lng": 83.833,
+      "lat": 18.975
+    },
+    {
+      "id": "seed-werikyana-9ptJdOfLbwRzWOHFUI64",
+      "dict_id": "werikyana",
+      "dict_url": "werikyana",
+      "dict_name": "Werikyana Tiriyó Prtgês Inglês",
+      "dict_location": "Northern Pará, Brazil",
+      "entry_id": "9ptJdOfLbwRzWOHFUI64",
+      "lexeme": "Kutmahorï",
+      "gloss": "Piraíba",
+      "gloss_language": "pt",
+      "photo_serving_url": "zNwpnLmg_lz0yukJvHuQzW4ENddksrjDlq1wvhc8R-azqu2rzH2-q6wxBQkRIaBWpsxnqaVbNVKU5kCO4ZGimyDNTCxmQTixzQ20",
+      "audio_storage_path": "werikyana/audio/9ptJdOfLbwRzWOHFUI64_1705666713157.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "catfish",
+        "pt": "Piraíba",
+        "tri": "Kanaimë"
+      },
+      "speaker_name": "João Pekiriruwa",
+      "example_sentence": {
+        "text": {
+          "default": "Kutmahorï akanï."
+        },
+        "translation": {
+          "pt": "Piraíba grande.",
+          "tri": "Kanaimë monoikëpï."
+        }
+      },
+      "lng": -57.3427,
+      "lat": -0.9185
     },
     {
       "id": "seed-yokoim-uKCcQQ0Y4ALSas24J3pk",
       "dict_id": "yokoim",
       "dict_url": "yokoim",
       "dict_name": "Yokoim",
+      "dict_location": "Papua New Guinea",
       "entry_id": "uKCcQQ0Y4ALSas24J3pk",
       "lexeme": "mandɨm",
       "gloss": "bilum bag",
       "gloss_language": "en",
       "photo_serving_url": "hHzM2wqxjjvWXXYD8PVJJRPM0mwDiBvyXKN8IBJi2RVF9iMtGbXBQoRhjdHlsdSJZq3sfQQcB_srvKKCk__jqQ",
       "audio_storage_path": "yokoim/audio/local_import/Yokoim-LK-375-bilum-bag-b-1580870516394.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "bilum bag"
+      },
+      "speaker_name": "Louis Kolisi",
+      "example_sentence": null,
       "lng": 143.605,
       "lat": -4.483
+    },
+    {
+      "id": "a422cd12-2d0d-421d-8cad-2ccf3f9fd484",
+      "dict_id": "gutob",
+      "dict_url": "gutob",
+      "dict_name": "Gutob",
+      "dict_location": "India",
+      "entry_id": "2ojk0OxozkKnaov9pbsZ",
+      "lexeme": "lablaʔ",
+      "gloss": "butterfly",
+      "gloss_language": "en",
+      "photo_serving_url": "4Pbjz1iN-kMLUksHugQzGrXUCMUiMZ7fYHyXXVJLg_9zo2yzaTQU9TMb8NDe1PtIjiWFoqZ4RJAKf8An69im",
+      "audio_storage_path": "gutob/audio/local_import/Gutob-Malkangiri-Oct17-BK-Img-1774-butterfly-1580857415652.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "butterfly"
+      },
+      "speaker_name": "Bondu Kirsani",
+      "example_sentence": null,
+      "lng": 82.716,
+      "lat": 18.816
+    },
+    {
+      "id": "4c0fc93c-c9dc-408d-9322-ca9a820c0081",
+      "dict_id": "gutob",
+      "dict_url": "gutob",
+      "dict_name": "Gutob",
+      "dict_location": "India",
+      "entry_id": "4PaKjdmbCDyMiNKh6LLU",
+      "lexeme": "aʤuɖaɽi ʤeta",
+      "gloss": "large stone grinder used for dal, maize, etc.",
+      "gloss_language": "en",
+      "photo_serving_url": "zGD5jo1pbtqO17UWYE9tgF94cVReSrmDp50OiXZgCC6LyD27pwPOpC-CfThcXb1u8gCTuuI-wPoX8XTHc36QncU",
+      "audio_storage_path": "gutob/audio/local_import/Gutob-Oct17-BK-Image-1901-1580856519642.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "large stone grinder used for dal, maize, etc."
+      },
+      "speaker_name": "Bondu Kirsani",
+      "example_sentence": null,
+      "lng": 82.716,
+      "lat": 18.816
+    },
+    {
+      "id": "557c333b-2af2-4a04-9fbc-ca1ec2201647",
+      "dict_id": "hazaragi",
+      "dict_url": "hazaragi",
+      "dict_name": "Hazaragi Language",
+      "dict_location": "Afghanistan",
+      "entry_id": "Xup0RjtfbztxaTDXs11a",
+      "lexeme": "Aa'sal",
+      "gloss": "honey",
+      "gloss_language": "en",
+      "photo_serving_url": "uA2AbO1cTt2st-mdOCtFshyu1x0rBuo26pdU4VcSQJqo-yjU74f0tl4d6Db1S5rk98gL90sTh4O_zAMoZ94omg-G0RurSmZZidZZ",
+      "audio_storage_path": "hazaragi/audio/Xup0RjtfbztxaTDXs11a_1668948093669.wav",
+      "phonetic": "ãsil",
+      "glosses": {
+        "en": "honey"
+      },
+      "speaker_name": "JG",
+      "example_sentence": {
+        "text": {
+          "default": "Aa'sal wari sheeren nah."
+        },
+        "translation": {
+          "en": "Sweet like honey"
+        }
+      },
+      "lng": 66.026,
+      "lat": 33.838
+    },
+    {
+      "id": "33bba9c6-b85f-43f1-8c4f-135b53d404cd",
+      "dict_id": "hazaragi",
+      "dict_url": "hazaragi",
+      "dict_name": "Hazaragi Language",
+      "dict_location": "Afghanistan",
+      "entry_id": "Rh7K1fFAYoge4ER5gJM1",
+      "lexeme": "Aahin+gar",
+      "gloss": "Black smith",
+      "gloss_language": "en",
+      "photo_serving_url": "vX_Goj9DXEFTJUYabgAd2vLEp2wpoOwAMas7pam9bv8uvfbxVX0Ld_JYuiWJ1ZagjxavX2bJ-mgbWDTZHGXnrw_mqVlmnEdM0B0",
+      "audio_storage_path": "hazaragi/audio/Rh7K1fFAYoge4ER5gJM1_1668948735350.wav",
+      "phonetic": "ɑːhiŋɡɾ",
+      "glosses": {
+        "en": "Black smith"
+      },
+      "speaker_name": "JG",
+      "example_sentence": {
+        "text": {
+          "default": "Sad zadan Zargar, Yak zadan e ahinger"
+        },
+        "translation": {
+          "en": "hundreds hits by goldsmith vs. one hit by blacksmith"
+        }
+      },
+      "lng": 66.026,
+      "lat": 33.838
+    },
+    {
+      "id": "9db65290-775d-4653-8109-11ce06114a8b",
+      "dict_id": "kihunde",
+      "dict_url": "kihunde",
+      "dict_name": "Kihunde",
+      "dict_location": "Masisi, Walikale, Rutshuru, Nyiragongo, Kalehe",
+      "entry_id": "dttsd0KGP3lD0rGdGmM7",
+      "lexeme": "Nyakatama",
+      "gloss": "Léopard",
+      "gloss_language": "fr",
+      "photo_serving_url": "gkNJzAaFjGToREOgdlMOtn0vTvNXU7Gv_4jMK7YiMXFWUqzjpnakpGIjBQwBNRR3C5S0j3S4fTeZNIDA1gIlSYj_9sYIpn9vA9g7",
+      "audio_storage_path": "kihunde/audio/dttsd0KGP3lD0rGdGmM7_1667063069253.aac",
+      "phonetic": null,
+      "glosses": {
+        "fr": "Léopard"
+      },
+      "speaker_name": "Hangi Bulebe Methodes",
+      "example_sentence": {
+        "text": {
+          "default": "Nyakatama amelya sambene sa Mwami."
+        },
+        "translation": {
+          "fr": "Le léopard a dévoré les chèvres du roi."
+        }
+      },
+      "lng": 29.225,
+      "lat": -1.667
+    },
+    {
+      "id": "ce09f921-42e1-463f-abb6-dae0431d08fd",
+      "dict_id": "nukuoro",
+      "dict_url": "nukuoro",
+      "dict_name": "Nukuoro",
+      "dict_location": "Micronesia ",
+      "entry_id": "94ZGUuBgNLQzgh5TZobi",
+      "lexeme": "buu-ili",
+      "gloss": "type of shell (Triton's trumpet)",
+      "gloss_language": "en",
+      "photo_serving_url": "Vic1NXA4pBFMB7bRpwA_TWYSFQ8y0JJM0jWR3-eAXmujkhb2I9LILcMVjTiqBXbZ48wbg-T6llIEUpuew8GaX1ALe_erBJBm5rk",
+      "audio_storage_path": "nukuoro/audio/94ZGUuBgNLQzgh5TZobi_1656094247634.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "type of shell (Triton's trumpet)"
+      },
+      "speaker_name": "Johnny Rudolph",
+      "example_sentence": null,
+      "lng": 154.942,
+      "lat": 3.845
+    },
+    {
+      "id": "9df8cef0-b701-4b0c-83d5-be9ce8c94a07",
+      "dict_id": "gta",
+      "dict_url": "gta",
+      "dict_name": "GtaɁ",
+      "dict_location": "India",
+      "entry_id": "0yztba7GEOa8RX6rnMvI",
+      "lexeme": "iŋkʰiʔdi",
+      "gloss": "hydrophylax malabaricus",
+      "gloss_language": "en",
+      "photo_serving_url": "iBBD8rkREons3XCPwfWpxaki1kGt2eh6rcad5pSCJMQ9t0NlXCAAeE4_DZ2fSs74rXB5r4OZZ0bZNjW6ifC2pA",
+      "audio_storage_path": "gta/audio/local_import/Gta-Pkd-Dec13-Amp8-hydrophylax-malabaricus-c-1580860472692.mp3",
+      "phonetic": "Inki dih",
+      "glosses": {
+        "en": "hydrophylax malabaricus"
+      },
+      "speaker_name": "Budra Raspeda",
+      "example_sentence": null,
+      "lng": 82.991,
+      "lat": 18.617
+    },
+    {
+      "id": "81a75bdf-d846-40d3-9fd1-eb080b158654",
+      "dict_id": "gta",
+      "dict_url": "gta",
+      "dict_name": "GtaɁ",
+      "dict_location": "India",
+      "entry_id": "0I8lngP370XfFEn1VRtZ",
+      "lexeme": "tʃi+hɽæʔ=tǝnǝ nlaʔ-pog",
+      "gloss": "Charaxes bernardus, tawny rajah butterfly",
+      "gloss_language": "en",
+      "photo_serving_url": "uVmkUO4gcBhFggzNyQ7SsUC-mh0cXaM214zam5Z_fmd3dWX6of8q0W-5GifCO0w5NRTMfSWONbEMWqSDYE8kqg",
+      "audio_storage_path": "gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-tawny-rajah--1580861920666.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "Charaxes bernardus, tawny rajah butterfly"
+      },
+      "speaker_name": "Dosorup Kirsani",
+      "example_sentence": null,
+      "lng": 82.991,
+      "lat": 18.617
+    },
+    {
+      "id": "dbf70f18-2eff-4819-b2bd-11f6ede3890c",
+      "dict_id": "matukar",
+      "dict_url": "matukar",
+      "dict_name": "Matukar",
+      "dict_location": "Madang Province, Papua New Guinea",
+      "entry_id": "rVy3NnMv5UE1ldUvmis9",
+      "lexeme": "wag",
+      "gloss": "kanu",
+      "gloss_language": "tpi",
+      "photo_serving_url": "Ef_vGx8UleteXxgyz4kjzV2OCfG71cLcd_NZiajw8Cg7LX7TPam4a4pJR_UV0Hjihm6OAo1iP7Bbja3zWbzBmg",
+      "audio_storage_path": "matukar/audio/local_import/Cult-elicit-Feb-24-2010-Kadagoi-canoe-a-1581898372321.mp3",
+      "phonetic": "wag",
+      "glosses": {
+        "en": "canoe",
+        "tpi": "kanu"
+      },
+      "speaker_name": "Kadagoi Rawad",
+      "example_sentence": {
+        "text": {
+          "default": "Justin Willy stands by a canoe being stored."
+        },
+        "translation": null
+      },
+      "lng": 145.787,
+      "lat": -4.888
+    },
+    {
+      "id": "c4a7c910-988b-43b2-b27c-bd1e70f2cb51",
+      "dict_id": "matukar",
+      "dict_url": "matukar",
+      "dict_name": "Matukar",
+      "dict_location": "Madang Province, Papua New Guinea",
+      "entry_id": "aobRKkf5XWY3eMjHjDUJ",
+      "lexeme": "dawa",
+      "gloss": "spia, supia",
+      "gloss_language": "tpi",
+      "photo_serving_url": "xY93PxLu06KG21L2PSJ-ph0EVnizizln9lkDZcAJiIhKTqMZztDm1eZL0SMbnzofBhSrv8Ni4wE2JOwE1t2O",
+      "audio_storage_path": "matukar/audio/local_import/Cult-elicit-Feb-24-2010-Kadagoi-spear-for-fishing-a-1581897744589.mp3",
+      "phonetic": "dawa",
+      "glosses": {
+        "en": "spear for fishing",
+        "tpi": "spia, supia"
+      },
+      "speaker_name": "Kadagoi Rawad",
+      "example_sentence": {
+        "text": {
+          "default": "Tomas Taleo Kreno holds a fishing spear."
+        },
+        "translation": null
+      },
+      "lng": 145.787,
+      "lat": -4.888
+    },
+    {
+      "id": "7fff4b5c-e3e1-4f7d-aa74-de651c761d82",
+      "dict_id": "werikyana",
+      "dict_url": "werikyana",
+      "dict_name": "Werikyana Tiriyó Prtgês Inglês",
+      "dict_location": "Northern Pará, Brazil",
+      "entry_id": "Fdp2DzkbcZuEyjKPnYQm",
+      "lexeme": "Pewu",
+      "gloss": "meu",
+      "gloss_language": "tri",
+      "photo_serving_url": "LJFnRt1-15E-MLCYcu9DaxvUayiFeq9-7Ctlw8-dcqJzJnCw--UKKux7nrpDR2hh2OKKkRzBaok7GSl__khBkmcIQFqHwYl6dQ",
+      "audio_storage_path": "werikyana/audio/Fdp2DzkbcZuEyjKPnYQm/1721160694002.wav",
+      "phonetic": null,
+      "glosses": {
+        "pt": "galo da serra/passaro",
+        "tri": "meu"
+      },
+      "speaker_name": "Neide",
+      "example_sentence": {
+        "text": {
+          "default": "pewu nasï torono"
+        },
+        "translation": {
+          "pt": "pewu é um aves conhecido como galo da serra",
+          "tri": "meu nai tonoro"
+        }
+      },
+      "lng": -57.3427,
+      "lat": -0.9185
+    },
+    {
+      "id": "24d4c926-64da-4366-b71b-f031fa34b51f",
+      "dict_id": "werikyana",
+      "dict_url": "werikyana",
+      "dict_name": "Werikyana Tiriyó Prtgês Inglês",
+      "dict_location": "Northern Pará, Brazil",
+      "entry_id": "wXstpmB1gV5dQSBo94CH",
+      "lexeme": "watwa",
+      "gloss": "ariwe",
+      "gloss_language": "tri",
+      "photo_serving_url": "H7N6Id9eC7tjS7fIcbSeKd_tIpCRT0qKvJsna97qciPCih09DqWHprvI0d5g0UG2zHC0pgtDcT3K7pdx1DDSp4t0gPl5R1lGKA",
+      "audio_storage_path": "werikyana/audio/wXstpmB1gV5dQSBo94CH_1706214327202.wav",
+      "phonetic": null,
+      "glosses": {
+        "pt": "jacaré",
+        "tri": "ariwe"
+      },
+      "speaker_name": "Celestino maritï kaxuyana tiriyó",
+      "example_sentence": {
+        "text": {
+          "default": "watwa he emeke soro kuwaye"
+        },
+        "translation": {
+          "pt": "tem muito jacaré nesse rio",
+          "tri": "ariwe fiye serë hao"
+        }
+      },
+      "lng": -57.3427,
+      "lat": -0.9185
+    },
+    {
+      "id": "ea0e03a5-2136-4a26-8674-6209972fa955",
+      "dict_id": "sengwer",
+      "dict_url": "sengwer",
+      "dict_name": "Sengwer",
+      "dict_location": "Kenya",
+      "entry_id": "02WaQoomP0nl8HWsw8vp",
+      "lexeme": "kimeeng’wa",
+      "gloss": "kimulimuli",
+      "gloss_language": "sw",
+      "photo_serving_url": "R1SitXjLI0XLBxONb5YYV0E3QqmXxaUsOgXpLLjFGptrYkbWF3UEIujyblvX_XiAzbR_60Wl0sa6seqgTfufyo2H_1Er48RH7xk",
+      "audio_storage_path": "sengwer/audio/02WaQoomP0nl8HWsw8vp_1689753380014.wav",
+      "phonetic": "kɪ̀-mɛ̀ɛŋ-wà",
+      "glosses": {
+        "en": "firefly (Lampyridae)",
+        "sw": "kimulimuli"
+      },
+      "speaker_name": "Irine",
+      "example_sentence": null,
+      "lng": 35.293,
+      "lat": 1.098
+    },
+    {
+      "id": "49c14dc2-a0b1-4b16-aec3-d0e341e5406a",
+      "dict_id": "sengwer",
+      "dict_url": "sengwer",
+      "dict_name": "Sengwer",
+      "dict_location": "Kenya",
+      "entry_id": "2yMrW1f26jR5AReD2bAc",
+      "lexeme": "chuuyna",
+      "gloss": "Umbrella thorn",
+      "gloss_language": "en",
+      "photo_serving_url": "6LCewRDEg6MBORS5kN5r9R5Crv1-mk3Z0EVDpcycWWA3Ql911O6-2FtRhFe0sZtiMe0VBrJ51S9c7kf3U1iykswee2Tv1rbTDEU",
+      "audio_storage_path": "sengwer/audio/2yMrW1f26jR5AReD2bAc_1677578991574.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "Umbrella thorn"
+      },
+      "speaker_name": "Irine",
+      "example_sentence": null,
+      "lng": 35.293,
+      "lat": 1.098
+    },
+    {
+      "id": "6abe3468-223c-43ae-bd2b-6ec8decf663a",
+      "dict_id": "birhor",
+      "dict_url": "birhor",
+      "dict_name": "Birhor",
+      "dict_location": "Jharkhand and Odisha, India",
+      "entry_id": "4Ipv6Cdjf6HuHC2SSf2b",
+      "lexeme": "tut",
+      "gloss": "शहतुत",
+      "gloss_language": "hi",
+      "photo_serving_url": "uIns_GoIP9SxUurnSX5TwVSyFyViDJ5UW6TP9Y6TkLqWdk2ei3gXerQolOhiXAvSufPIbDbl5kmg2CVnAjlfrdOJhXlJS0cw7w",
+      "audio_storage_path": "birhor/audio/4Ipv6Cdjf6HuHC2SSf2b_1646843055979.wav",
+      "phonetic": "tut",
+      "glosses": {
+        "en": "1. mulberry, Morus indica L.  2. berry",
+        "hi": "शहतुत"
+      },
+      "speaker_name": "Malti Birhor",
+      "example_sentence": null,
+      "lng": 85.33,
+      "lat": 23.35
+    },
+    {
+      "id": "3ee43820-5fb6-4e54-8e1d-a3ce0459b85b",
+      "dict_id": "birhor",
+      "dict_url": "birhor",
+      "dict_name": "Birhor",
+      "dict_location": "Jharkhand and Odisha, India",
+      "entry_id": "sqTpa5acEI6dkJV7C8LU",
+      "lexeme": "mat",
+      "gloss": "बांस",
+      "gloss_language": "hi",
+      "photo_serving_url": "liAYezn9PXlFST_AWDkfhLOOtfNuWlIV_Uhicky29oJ1saI4H220xOdSczw2naYXJ7QdDxr5l6xTclKLjKfTZ7lVtUMXzvFYTZ8",
+      "audio_storage_path": "birhor/audio/sqTpa5acEI6dkJV7C8LU_1646842814207.wav",
+      "phonetic": "mat",
+      "glosses": {
+        "en": "Bambusa bambos (L.) Voss",
+        "hi": "बांस"
+      },
+      "speaker_name": "Anil Birhor",
+      "example_sentence": null,
+      "lng": 85.33,
+      "lat": 23.35
+    },
+    {
+      "id": "13b32829-39a0-430f-9870-e74195c202c4",
+      "dict_id": "kapingamarangi",
+      "dict_url": "kapingamarangi",
+      "dict_name": "Kapingamarangi",
+      "dict_location": "Kapingamarangi Atoll, Federated States of Micronesia",
+      "entry_id": "531DvgbwvRv4e5PEnew4",
+      "lexeme": "mangha",
+      "gloss": "branch",
+      "gloss_language": "en",
+      "photo_serving_url": "Xx2T7t5E0U4QGR51amUaq3vCmjL6hVjdqCL8FxmkLjiYY2-Na1AubTwBYHneGBdyZVGxP1HBRgxPu7UuavCYmjvghLSqzEZnujI",
+      "audio_storage_path": "kapingamarangi/audio/531DvgbwvRv4e5PEnew4_1721843674486.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "branch"
+      },
+      "speaker_name": "Howartson Heinrich",
+      "example_sentence": null,
+      "lng": 154.7833,
+      "lat": 1.0666
+    },
+    {
+      "id": "3fa265a7-648b-4d6a-8ecc-1cfa01c2402c",
+      "dict_id": "kihehe",
+      "dict_url": "kihehe",
+      "dict_name": "Kihehe",
+      "dict_location": "Tanzania",
+      "entry_id": "3cLBAmcT1cXv1ZeWbKK1",
+      "lexeme": "nzogolo",
+      "gloss": "jogoo",
+      "gloss_language": "sw",
+      "photo_serving_url": "aqQ3Obz9p78DsPl6GIyPxQP9qNc3FhWxKYWuRPeJMLZabPv6YYjcaY-vXbqKSPi7dzTYWaSSNn2pqefjzC2VZ5mLVI02TYV2Qw",
+      "audio_storage_path": "kihehe/audio/3cLBAmcT1cXv1ZeWbKK1_1706047742571.wav",
+      "phonetic": "nzoɠólo",
+      "glosses": {
+        "en": "rooster",
+        "sw": "jogoo"
+      },
+      "speaker_name": "Richard",
+      "example_sentence": null,
+      "lng": 35.476,
+      "lat": -7.8033
+    },
+    {
+      "id": "89fe5b48-cc36-4e3c-b9c2-feff48dfd11e",
+      "dict_id": "kihehe",
+      "dict_url": "kihehe",
+      "dict_name": "Kihehe",
+      "dict_location": "Tanzania",
+      "entry_id": "4stWI69BPchiGbNHwUvS",
+      "lexeme": "litoondwe",
+      "gloss": "boga",
+      "gloss_language": "sw",
+      "photo_serving_url": "3mQiQL9os8N6hw5KZx2KZD2VwZHK9gV6ffRupAfLXadDy63LuE_0K4RFFaQiRC_IE1zzzMtFRCDMjq2cFKtRZgc0-Z5rBB8sZQ",
+      "audio_storage_path": "kihehe/audio/4stWI69BPchiGbNHwUvS/1733743691234.wav",
+      "phonetic": "lítoondwê",
+      "glosses": {
+        "en": "squash",
+        "sw": "boga"
+      },
+      "speaker_name": "Richard",
+      "example_sentence": {
+        "text": {
+          "default": "litoonde linono"
+        },
+        "translation": {
+          "en": "the squash is delicious",
+          "sw": "boga tamu"
+        }
+      },
+      "lng": 35.476,
+      "lat": -7.8033
+    },
+    {
+      "id": "20b76bc5-5f44-4f48-8251-a988991e3d48",
+      "dict_id": "san-sebastian-del-monte-m",
+      "dict_url": "san-sebastian-del-monte-m",
+      "dict_name": "San Sebastián del Monte Mixtec (Tò’on Ndà’vi)",
+      "dict_location": "Oaxaca, México",
+      "entry_id": "8Rl4sx33obHRu7YL5td4",
+      "lexeme": "ita ndìkandì",
+      "gloss": "girasol",
+      "gloss_language": "es",
+      "photo_serving_url": "kbyChw32yYnDCEMF3e0rh2lSKhGbBDCM4fIHKykgVp_QR5Gfz7h9vy_q5fv_Hloov-x7mNiv5YnJl9BD_utwCAhGOWcJ307rVFI",
+      "audio_storage_path": "san-sebastian-del-monte-m/audio/8Rl4sx33obHRu7YL5td4/1739334098079.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "sunflower",
+        "es": "girasol"
+      },
+      "speaker_name": "Ignacio Pimentel Rojas",
+      "example_sentence": null,
+      "lng": -98.022,
+      "lat": 17.677
+    },
+    {
+      "id": "6bb42d64-16a3-413b-9dfa-de379c8e8c45",
+      "dict_id": "san-sebastian-del-monte-m",
+      "dict_url": "san-sebastian-del-monte-m",
+      "dict_name": "San Sebastián del Monte Mixtec (Tò’on Ndà’vi)",
+      "dict_location": "Oaxaca, México",
+      "entry_id": "0E0nlrVL23uRFlll7wKc",
+      "lexeme": "ndivà'yí",
+      "gloss": "coyote",
+      "gloss_language": "es",
+      "photo_serving_url": "YkGhLB5wbIv3gNyOjwLZd81zwUBYd8-2rmEGnZP_S1O8KHLFXKxrt8_hOHS_uTorgyPcvrLes0hERijizDlOiw9KaTuOScZ6vs4",
+      "audio_storage_path": "audio/san-sebastian-del-monte-m/0E0nlrVL23uRFlll7wKc_1626232833759.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "coyote",
+        "es": "coyote"
+      },
+      "speaker_name": "Adrian Davila",
+      "example_sentence": null,
+      "lng": -98.022,
+      "lat": 17.677
+    },
+    {
+      "id": "422f6acf-9621-42bc-bfa2-926ce33f25c7",
+      "dict_id": "sora",
+      "dict_url": "sora",
+      "dict_name": "Sora",
+      "dict_location": "India",
+      "entry_id": "8Va7icoImi5B4bCAQqoq",
+      "lexeme": "arsi",
+      "gloss": "लंगूर",
+      "gloss_language": "hi",
+      "photo_serving_url": "AWpXeyRH-2zzIkLCwOygR2fMhdzoUWlQdKygQ5hrZfWk_k0LvbH2L8RxtMKxgN0DaL_PZBAJK2ox-j_qlgbZthQ",
+      "audio_storage_path": "sora/audio/local_import/Sora_black_faced_monkey_PSI_16-1589122781235.wav",
+      "phonetic": "arsi",
+      "glosses": {
+        "as": "ক’লা মুখ'ৰ বান্দৰ",
+        "en": "black faced monkey",
+        "hi": "लंगूर",
+        "or": "କଳା ମୁହାଁ ମାଙ୍କଡ"
+      },
+      "speaker_name": "Somari Sabar",
+      "example_sentence": null,
+      "lng": 83.833,
+      "lat": 18.975
+    },
+    {
+      "id": "c06af164-7678-48c4-b7bc-c6c305572e21",
+      "dict_id": "sora",
+      "dict_url": "sora",
+      "dict_name": "Sora",
+      "dict_location": "India",
+      "entry_id": "ByeRmrYPVY1Hzz95CrQo",
+      "lexeme": "kupa per",
+      "gloss": "grasshopper",
+      "gloss_language": "en",
+      "photo_serving_url": "qboWcspXRe-r-aNONzY2bNXiLW3i7AxkAFLQj92QwyIFQBWLAv43OcztsO38m9Xit0upfgSmSXxo035c45ohHA",
+      "audio_storage_path": "audio/sora/ByeRmrYPVY1Hzz95CrQo_1589601989392.x-wav",
+      "phonetic": "kupa per",
+      "glosses": {
+        "en": "grasshopper"
+      },
+      "speaker_name": "Opino Gomango",
+      "example_sentence": null,
+      "lng": 83.833,
+      "lat": 18.975
+    },
+    {
+      "id": "86aba627-c27f-4dcd-9df6-df53f6bc6e2e",
+      "dict_id": "ishir-chamacoco",
+      "dict_url": "ishir-chamacoco",
+      "dict_name": "Ɨshɨr (Chamacoco)",
+      "dict_location": "Puerto Diana, Karcha Bahlut y otras comunidades (Alto Paraguay)",
+      "entry_id": "OShdGAFORtiab7vIkKKU",
+      "lexeme": "tho",
+      "gloss": "Posiblemente gavilán de estero",
+      "gloss_language": "es",
+      "photo_serving_url": "76qpIcXJbtjQyrtp9_cJtCcZ78yMfm5Tsogia4AiX1AUn7u02cpe26JyPvHdPDsWoLhKkiqR4ePpXYFjzw2tnwnis6INjQ-ndg",
+      "audio_storage_path": "ishir-chamacoco/audio/OShdGAFORtiab7vIkKKU/1774544523462.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "black-collared hawk or other hawks",
+        "es": "Posiblemente gavilán de estero"
+      },
+      "speaker_name": "Andres Ozuna",
+      "example_sentence": null,
+      "lng": -58.166,
+      "lat": -20.257
+    },
+    {
+      "id": "ebd530cc-74e7-4a68-a36a-558fa4dc9350",
+      "dict_id": "mokilese",
+      "dict_url": "mokilese",
+      "dict_name": "Mokilese",
+      "dict_location": "Mwoakilloa, Federated States of Micronesia",
+      "entry_id": "8V9pVchEFVjn4M3mp64n",
+      "lexeme": "pohp",
+      "gloss": "clown triggerfish",
+      "gloss_language": "en",
+      "photo_serving_url": "n4y7H9ZhJHHCK_ZE1M0LSr8jolZElm2EESCgW5v8Z9eoyzToBPngqUqn_A-YmZppv0Viq8qL6PMvX1TVxE34fx3VJ5BjnxOEKth0",
+      "audio_storage_path": "mokilese/audio/8V9pVchEFVjn4M3mp64n_1721940286308.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "clown triggerfish"
+      },
+      "speaker_name": "Danio Poll",
+      "example_sentence": null,
+      "lng": 159.7595,
+      "lat": 6.6917
+    },
+    {
+      "id": "d1b7cb09-14c4-47ed-8bbd-0eb4eb5667c7",
+      "dict_id": "mokilese",
+      "dict_url": "mokilese",
+      "dict_name": "Mokilese",
+      "dict_location": "Mwoakilloa, Federated States of Micronesia",
+      "entry_id": "j8akX8dNgtQLSMhkUSsj",
+      "lexeme": "nambwo",
+      "gloss": "pennant bannerfish",
+      "gloss_language": "en",
+      "photo_serving_url": "LB3-fP2Ma88HV2lbDfdqQJE4Bmz-kPOzzqjV4wHI9gw1KLTTQ6ezgBhc8BHTzmlCvfAymkKyyXXL7DSdugj0ge7akTHesu33GQ",
+      "audio_storage_path": "mokilese/audio/j8akX8dNgtQLSMhkUSsj_1721940289800.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "pennant bannerfish"
+      },
+      "speaker_name": "Danio Poll",
+      "example_sentence": null,
+      "lng": 159.7595,
+      "lat": 6.6917
+    },
+    {
+      "id": "b3de4c84-c921-4bab-90fa-4f7f8c9eb152",
+      "dict_id": "northern-michif",
+      "dict_url": "northern-michif",
+      "dict_name": "Northern Michif",
+      "dict_location": "Alberta, Canada",
+      "entry_id": "0HpjUyWcMMgWVTYGqNCv",
+      "lexeme": "onîmihitowak",
+      "gloss": "Northern Lights",
+      "gloss_language": "en",
+      "photo_serving_url": "XBdjWyvsNDDKhSqFZVPU22L22AwBFZWomvRVhiLr9L6-0Sxe-Nm_0GxxzLOr_jEhDYePhOXkYMqlCIkAGUeoYhcNtgYbi7ObKg",
+      "audio_storage_path": "northern-michif/audio/0HpjUyWcMMgWVTYGqNCv_1709670637035.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "Northern Lights"
+      },
+      "speaker_name": "Sandra Davenport, Métis educator",
+      "example_sentence": null,
+      "lng": -116.4416,
+      "lat": 53.5863
+    },
+    {
+      "id": "cf4a1b21-934d-45dd-9f99-4b1bd1354638",
+      "dict_id": "northern-michif",
+      "dict_url": "northern-michif",
+      "dict_name": "Northern Michif",
+      "dict_location": "Alberta, Canada",
+      "entry_id": "05nDdG4KWFdMLGb4AMbl",
+      "lexeme": "osiķiyâsîs",
+      "gloss": "salamander",
+      "gloss_language": "en",
+      "photo_serving_url": "3Gw1lA_WMnsVyDPJs8ZgZpEFYgypCL3QKgiqf152molK0hO51Tb2Co1K_KDTWV3UvBwLE3W8QEMGuLTzF-DD0kG_18_OQkyUMA",
+      "audio_storage_path": "northern-michif/audio/05nDdG4KWFdMLGb4AMbl_1709670842938.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "salamander"
+      },
+      "speaker_name": "Sandra Davenport, Métis educator",
+      "example_sentence": null,
+      "lng": -116.4416,
+      "lat": 53.5863
+    },
+    {
+      "id": "ff934acc-4899-440a-a89f-03918f134398",
+      "dict_id": "pingelapese",
+      "dict_url": "pingelapese",
+      "dict_name": "Pingelapese",
+      "dict_location": "Pingelap, Federated States of Micronesia",
+      "entry_id": "WDDGvF1HmAE361pLnFLs",
+      "lexeme": "irip",
+      "gloss": "fan",
+      "gloss_language": "en",
+      "photo_serving_url": "9pEMxzjjgP32EBrzC9vY4R1HavMLtaw2aBBr2iQWBJCAre7U2pTyyFgkhZ9PWiSwIw4_lERhCSZpeCqGynqKC5Xnk7Wc-WqLLw",
+      "audio_storage_path": "pingelapese/audio/WDDGvF1HmAE361pLnFLs_1722368046109.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "fan"
+      },
+      "speaker_name": "Flora Ikosia",
+      "example_sentence": null,
+      "lng": 160.702,
+      "lat": 6.218
+    },
+    {
+      "id": "f932845d-0540-4741-8234-26986915d528",
+      "dict_id": "haryanvi",
+      "dict_url": "haryanvi",
+      "dict_name": "Haryanvi",
+      "dict_location": "Jhajjar",
+      "entry_id": "WOiG2C0umHLCzY2te77G",
+      "lexeme": "गरंडफांक",
+      "gloss": "Kingfisher",
+      "gloss_language": "en",
+      "photo_serving_url": "lN-bOGnsF7vJ9Eiuh2OoRyQh6sQX9Bp2g78jqezZHT3gGhjoec1GfeILggoLomTkpBL2GxsLMm_NvSAxyEzx8KIIhXqieZZzIA",
+      "audio_storage_path": "haryanvi/audio/WOiG2C0umHLCzY2te77G_1643716634384.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "Kingfisher"
+      },
+      "speaker_name": "Amit",
+      "example_sentence": {
+        "text": {
+          "default": "डाळ्यां बैठ्या गरण्डफांक माछळी खावै सै।"
+        },
+        "translation": null
+      },
+      "lng": 76.299,
+      "lat": 29.325
+    },
+    {
+      "id": "e76aba27-448c-4c2d-b6db-b6588e43371a",
+      "dict_id": "haryanvi",
+      "dict_url": "haryanvi",
+      "dict_name": "Haryanvi",
+      "dict_location": "Jhajjar",
+      "entry_id": "LiMa2S6ey6ZoQuVE710t",
+      "lexeme": "अंजळ",
+      "gloss": "अन्न-जल, एक समय का भोजन",
+      "gloss_language": "hi",
+      "photo_serving_url": "zQpWay6iAuLro4Qyr3KwW6D4GdEN5DPStWAe2Ac9Q8gwyUeQLsf6sPNQ0mK_nd8Ds-EYgqbfEv1eOCRD679DhXjdJ41i8ZkEkjE",
+      "audio_storage_path": "haryanvi/audio/LiMa2S6ey6ZoQuVE710t_1643716023282.wav",
+      "phonetic": "əɲdʒəɭ",
+      "glosses": {
+        "en": "Food & Water, one meal at a time.",
+        "hi": "अन्न-जल, एक समय का भोजन",
+        "pa": "ਭੋਜਨ-ਪਾਣੀ, ਇੱਕ ਸਮੇਂ ਦਾ ਭੋਜਨ"
+      },
+      "speaker_name": "Amit",
+      "example_sentence": null,
+      "lng": 76.299,
+      "lat": 29.325
+    },
+    {
+      "id": "93c93679-11d1-4547-a48b-8b92376017fb",
+      "dict_id": "yokoim",
+      "dict_url": "yokoim",
+      "dict_name": "Yokoim",
+      "dict_location": "Papua New Guinea",
+      "entry_id": "5LEACDmVmibm5rz7CEVy",
+      "lexeme": "usapi",
+      "gloss": "flame of the forest flower",
+      "gloss_language": "en",
+      "photo_serving_url": "wDDOmvf8XrCmlPZWoD4g7szn5t7L_9Z-1lYbadh3YNhjy2LuNdCKvDEmqCCo4xJZ2-QB9jtzotT1Uyjlvcwo9Q",
+      "audio_storage_path": "yokoim/audio/local_import/Yokoim-LK-469-flame-of-the-forest-flower-d-1580870608160.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "flame of the forest flower"
+      },
+      "speaker_name": "Louis Kolisi",
+      "example_sentence": null,
+      "lng": 143.605,
+      "lat": -4.483
+    },
+    {
+      "id": "8061b543-9e7d-45b5-9bb9-ba25f97ef886",
+      "dict_id": "yokoim",
+      "dict_url": "yokoim",
+      "dict_name": "Yokoim",
+      "dict_location": "Papua New Guinea",
+      "entry_id": "7Hf9zyj5fUzOz7HcsUOk",
+      "lexeme": "sumbun",
+      "gloss": "cloud or sky (pl. clouds)",
+      "gloss_language": "en",
+      "photo_serving_url": "0RTwFhRifZu5XOCRCRXQEsoDj6zv9Fn0D0GGJ9owoV9LXHWY5t6J-vpS8YqB66fFK9-A-GdTyMwqukymvDd1WrU",
+      "audio_storage_path": "yokoim/audio/local_import/Yokoim-FA-7-18-09-Krwr-cloud-sky-1580870585407.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "cloud or sky (pl. clouds)"
+      },
+      "speaker_name": "Felix Andi",
+      "example_sentence": null,
+      "lng": 143.605,
+      "lat": -4.483
+    },
+    {
+      "id": "70a79215-0649-4107-a8a3-db3a47de3755",
+      "dict_id": "mam",
+      "dict_url": "mam",
+      "dict_name": "Mam",
+      "dict_location": "Guatemala",
+      "entry_id": "0oyJtOHk4H4t1lgYVNQp",
+      "lexeme": "tz'awin",
+      "gloss": "arena",
+      "gloss_language": "es",
+      "photo_serving_url": "HMJwnSeQHe96C8gbkzQOMJEYSAmCz3bnGxNnhUHbXWANHheLUvJhDDfRtwM0JmfAXtqfRoI0OoXd3fKu0N14lUE",
+      "audio_storage_path": "mam/audio/import_1575584998193/mam-JRPV-09-01-2013-arena.mp3",
+      "phonetic": "'tsʼa:.wiŋ",
+      "glosses": {
+        "en": "sand",
+        "es": "arena"
+      },
+      "speaker_name": "José Reginaldo Pérez Vail",
+      "example_sentence": null,
+      "lng": -91.805,
+      "lat": 15.44
+    },
+    {
+      "id": "bc0fba89-a821-4d7f-8ab5-00b70873a2d0",
+      "dict_id": "shona",
+      "dict_url": "shona",
+      "dict_name": "Shona",
+      "dict_location": "Zimbabwe, Mozambique, Botswana",
+      "entry_id": "ckCQ313mRYQO4jLwrPaK",
+      "lexeme": "dongo",
+      "gloss": "abandoned home",
+      "gloss_language": "en",
+      "photo_serving_url": "lyV6ZdGTrSdEFdNf4zRbAZSPYPzNgD7eYVrSWcCyYkdSvBcuKdEIPRKIOLn3xhPG__d0c8Ue9eqZaYM0c5Ev",
+      "audio_storage_path": "shona/audio/local_import/shona-Ignatius-Mabasa-06Nov2015-0503-abandoned-home-1581898499557.mp3",
+      "phonetic": "LL",
+      "glosses": {
+        "en": "abandoned home"
+      },
+      "speaker_name": "Ignatius Mabasa",
+      "example_sentence": {
+        "text": {
+          "default": "outside Mt Darwin (IM)"
+        },
+        "translation": null
+      },
+      "lng": 30.647,
+      "lat": -18.291
+    },
+    {
+      "id": "acf5a472-47c7-4228-ad50-1657c7fab792",
+      "dict_id": "iquito",
+      "dict_url": "iquito",
+      "dict_name": "Iquito",
+      "dict_location": "Perú",
+      "entry_id": "2St0guydat7vgM8rRNm9",
+      "lexeme": "kurɨ́ɨ̀sì",
+      "gloss": "mono huapo",
+      "gloss_language": "es",
+      "photo_serving_url": "yfB5VgJiJQtWbCwK60GE9Ecxzs3lCkTEGPFg3F21VkjcfsfqTkax1gzPGYn2BYrzI2Yro8WxmnmKQZShz6WL0KY4apb_19ITfy_5",
+      "audio_storage_path": "iquito/audio/2St0guydat7vgM8rRNm9_1704840349515.wav",
+      "phonetic": "ku.ɾɨ́ɨ̀.ʃì",
+      "glosses": {
+        "en": "monk saki monkey",
+        "es": "mono huapo"
+      },
+      "speaker_name": "Ema Llona Yareja",
+      "example_sentence": null,
+      "lng": -73.78,
+      "lat": -3.704
+    },
+    {
+      "id": "e988e763-8871-49bb-8201-8d73c7348b78",
+      "dict_id": "sepedi-living-dictionary",
+      "dict_url": "sepedi-living-dictionary",
+      "dict_name": "Segagešo Living Dictionary",
+      "dict_location": "South Africa",
+      "entry_id": "HIGdg6qMhNwAsJFBGQZP",
+      "lexeme": "sego, mokgopu",
+      "gloss": "calabash",
+      "gloss_language": "en",
+      "photo_serving_url": "tt4uxbYHglOj2z-bvFPZye1FjD1wBiHW7Gv0T7Pj2cOFb0VJ-Xv4JRsaWI00xdpGaNFYRelid6U9uGI2zllvZ4h1M6xiOiqcSQ",
+      "audio_storage_path": "sepedi-living-dictionary/audio/HIGdg6qMhNwAsJFBGQZP_1653659954887.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "calabash"
+      },
+      "speaker_name": "Mokgadi Mathole",
+      "example_sentence": null,
+      "lng": 24.671,
+      "lat": -27.928
+    },
+    {
+      "id": "b7ed1b89-2c26-4fe2-ab1f-aca83b98183f",
+      "dict_id": "opata",
+      "dict_url": "opata",
+      "dict_name": "Opata",
+      "dict_location": "Sonora, Mexico. Arizona, U.S.",
+      "entry_id": "KLh1fR1GWFwqVQiPARTy",
+      "lexeme": "Äguït",
+      "gloss": "Luna",
+      "gloss_language": "es",
+      "photo_serving_url": "vZYxhaRgOhETtxh1Xizgq3p31ksL9-PaRPjRCuxO_AFGWsGVghRs7YSgmAVej4F1CIXhwscfoPYniSbjOxzgkQ",
+      "audio_storage_path": "audio/opata/KLh1fR1GWFwqVQiPARTy_1605918237247.x-m4a",
+      "phonetic": "Aaguiit",
+      "glosses": {
+        "en": "Moon",
+        "es": "Luna"
+      },
+      "speaker_name": "Edgar Garcia",
+      "example_sentence": null,
+      "lng": -109.389,
+      "lat": 29.738
+    },
+    {
+      "id": "2cd8b2e4-8cf0-47b5-b2a9-c983f0ada2b0",
+      "dict_id": "sakapulteko",
+      "dict_url": "sakapulteko",
+      "dict_name": "Sakapulteko",
+      "dict_location": "Guatemala",
+      "entry_id": "AJ1ocQJexNcIV2GqAWe6",
+      "lexeme": "Ploow",
+      "gloss": "mar",
+      "gloss_language": "es",
+      "photo_serving_url": "hpqiZjeat7mkoIkHXAhIySKIM9AXjEpZWdmPP36fyoWrhjAT83Rvz8QIzeCCekNerww9wR4IFHZkcDI81OqXrw",
+      "audio_storage_path": "sakapulteko/audio/local_import/sakapulteko-Carmelina-L-pez-Ulu-n-06Jun2014-1800-mar-1580869629425.mp3",
+      "phonetic": "plo:w̥",
+      "glosses": {
+        "en": "sea",
+        "es": "mar"
+      },
+      "speaker_name": "Carmelina López Uluán",
+      "example_sentence": null,
+      "lng": -91.104,
+      "lat": 15.27
+    },
+    {
+      "id": "a97de2a3-d72c-4673-bc58-f74f709f1b9a",
+      "dict_id": "sakapulteko",
+      "dict_url": "sakapulteko",
+      "dict_name": "Sakapulteko",
+      "dict_location": "Guatemala",
+      "entry_id": "ADI9oRAGKg5lfq3RwMwH",
+      "lexeme": "Seb'",
+      "gloss": "humo",
+      "gloss_language": "es",
+      "photo_serving_url": "rC3RVW8Aev_3Evts6CwZp3iQXgBmZeRdWruZG2KBQEwcCeDkENwVoOqJYvzIF9MKveaiaov6gPCkZgBQjVusSA",
+      "audio_storage_path": "sakapulteko/audio/local_import/sakapulteko-Carmelina-L-pez-Ulu-n-06Jun2014-1744-humo-1580869653145.mp3",
+      "phonetic": "seɓ",
+      "glosses": {
+        "en": "smoke",
+        "es": "humo"
+      },
+      "speaker_name": "Carmelina López Uluán",
+      "example_sentence": null,
+      "lng": -91.104,
+      "lat": 15.27
+    },
+    {
+      "id": "96ba9fff-1fcd-44d9-b7e5-e9453af4258c",
+      "dict_id": "chalchiteko",
+      "dict_url": "chalchiteko",
+      "dict_name": "Chalchiteko",
+      "dict_location": "Guatemala",
+      "entry_id": "CxvoZK99RMlHvQwhRrMi",
+      "lexeme": "Wikojb'il",
+      "gloss": "Mundo",
+      "gloss_language": "es",
+      "photo_serving_url": "yckZQOwKsyt7jG2amgNFjAAIoLJI-RM9ri_5FtzIPQ8GNRU8kIEbKz1P4bPhBstiXnJXwZk0Cr097vNsDSE9kA",
+      "audio_storage_path": "chalchiteko/audio/local_import/chalchiteko-Pedro-Mart-nez-Vel-squez-06Aug2014-1408-Mundo-1580855717673.mp3",
+      "phonetic": "wi.koh.'ɓil",
+      "glosses": {
+        "en": "world",
+        "es": "Mundo"
+      },
+      "speaker_name": "Pedro Martínez Velásquez",
+      "example_sentence": {
+        "text": {
+          "default": "B'ene'ntzi'n"
+        },
+        "translation": null
+      },
+      "lng": -91.312,
+      "lat": 15.342
+    },
+    {
+      "id": "43058dee-f1c7-45ca-a7aa-88cfc20bd0aa",
+      "dict_id": "chalchiteko",
+      "dict_url": "chalchiteko",
+      "dict_name": "Chalchiteko",
+      "dict_location": "Guatemala",
+      "entry_id": "RmUMbrnhw0Nqnttmcl2b",
+      "lexeme": "Slup",
+      "gloss": "mariposa",
+      "gloss_language": "es",
+      "photo_serving_url": "AbGCi8msGu0B34DjQ7H8zKx4ioR4lEingYG1nOweozID_aEQsfq22gBMnrAfQ_oZv2_A3zo08xwpFLIPLgOC",
+      "audio_storage_path": "chalchiteko/audio/local_import/chalchiteko-Pedro-Mart-nez-Vel-squez-06Aug2014-1424-mariposa-1580855680071.mp3",
+      "phonetic": "slupʰ",
+      "glosses": {
+        "en": "butterfly",
+        "es": "mariposa"
+      },
+      "speaker_name": "Pedro Martínez Velásquez",
+      "example_sentence": null,
+      "lng": -91.312,
+      "lat": 15.342
+    },
+    {
+      "id": "1ad2da25-7be7-40f4-93e6-70083f9581d8",
+      "dict_id": "kharia",
+      "dict_url": "kharia",
+      "dict_name": "Kharia",
+      "dict_location": "India",
+      "entry_id": "81IIRhbRnTM1I01eLIJK",
+      "lexeme": "किड़ो'",
+      "gloss": "बाघ",
+      "gloss_language": "hi",
+      "photo_serving_url": "CSvnLb1uCHArvM3kA2pGfFz_fYeIhpipzTCLgWhddOB-b2kUdeP2343ZGdylhwzdF85vEYfIaJsvxC5zVTSfhcMs8iRkazI5PQwR",
+      "audio_storage_path": "kharia/audio/81IIRhbRnTM1I01eLIJK_1655144791814.mp3",
+      "phonetic": "kiɽoʔŏ",
+      "glosses": {
+        "en": "tiger",
+        "hi": "बाघ"
+      },
+      "speaker_name": "Maduri Dongdong",
+      "example_sentence": null,
+      "lng": 84.402,
+      "lat": 22.349
+    },
+    {
+      "id": "ec609589-d8ea-4601-92f4-2137496fef25",
+      "dict_id": "kharia",
+      "dict_url": "kharia",
+      "dict_name": "Kharia",
+      "dict_location": "India",
+      "entry_id": "0Y90rMm5JenQlgsdFJDw",
+      "lexeme": "केंडो'ड ",
+      "gloss": "मेंढक",
+      "gloss_language": "hi",
+      "photo_serving_url": "AykVQsi5kDsCEv7XUeyvURqzkEmXmQLQJVmyhsm7CJC-2sWfplLn_KyT1znwD0VhDwr4UP8CGNwwXH0DPKkFKmUasalm3Lv7uQ",
+      "audio_storage_path": "kharia/audio/0Y90rMm5JenQlgsdFJDw_1655144791585.mp3",
+      "phonetic": "kenɖoˀɖ",
+      "glosses": {
+        "en": "frog",
+        "hi": "मेंढक"
+      },
+      "speaker_name": "Maduri Dongdong",
+      "example_sentence": null,
+      "lng": 84.402,
+      "lat": 22.349
+    },
+    {
+      "id": "4f7ec253-162a-4dec-8569-53315b44cfcf",
+      "dict_id": "malapulaya",
+      "dict_url": "malapulaya",
+      "dict_name": "Malapulaya",
+      "dict_location": "Kerala and Karnataka, India",
+      "entry_id": "2yCDhpPLcFeFGNJ59j1A",
+      "lexeme": "naccattiṛo",
+      "gloss": "நட்சத்திரம்",
+      "gloss_language": "ta",
+      "photo_serving_url": "6exuuXW8YZySc3HC2yLR47nbaYZCYP9a0SR6VRc2Cc97yoVYhu60BqplMBDkXz6xWQUjHcmQiuh33otoW-9CCw",
+      "audio_storage_path": "audio/malapulaya/2yCDhpPLcFeFGNJ59j1A_1598280922753.ogg",
+      "phonetic": "n̪ɐʧ.ʧəθ.ðiro",
+      "glosses": {
+        "en": "Star",
+        "hi": "सितारा",
+        "ta": "நட்சத்திரம்",
+        "te": "నక్షత్రం"
+      },
+      "speaker_name": "Vanitha",
+      "example_sentence": {
+        "text": {
+          "default": "The Sun will then continue its life as a red giant star, but not for long."
+        },
+        "translation": null
+      },
+      "lng": 76.407,
+      "lat": 10.45
+    },
+    {
+      "id": "216d57c5-6f3a-4fa6-b052-33f14c171e89",
+      "dict_id": "taiengdictionary",
+      "dict_url": "taiengdictionary",
+      "dict_name": "Tai-Eng-Thai-Viet",
+      "dict_location": "Vietnam",
+      "entry_id": "DXZC1Z14YUqAxxh3MNYk",
+      "lexeme": "piij",
+      "gloss": "chuồn chuồn",
+      "gloss_language": "vi",
+      "photo_serving_url": "YMJ_OJBtRa1H8oFt7famg82T5595o34w7LY_O53-Lp2kOi8roXVG1kAXSygaYV0f45TrCDattlrCe0pVo_0ctcR5INlNo4pdzy2D",
+      "audio_storage_path": "audio/taiengdictionary/DXZC1Z14YUqAxxh3MNYk_1635486749290.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "dragonflies",
+        "vi": "chuồn chuồn"
+      },
+      "speaker_name": "Nam Tran",
+      "example_sentence": null,
+      "lng": 107.393,
+      "lat": 21.526
+    },
+    {
+      "id": "a374046c-7e4e-42eb-8583-c58d0aa4b83c",
+      "dict_id": "oron",
+      "dict_url": "oron",
+      "dict_name": "Oro",
+      "dict_location": "Oron, Mbo, Okobo, Udung Uko, and Urue Offong-Uruko Local Government Areas, Akwa Ibom State, Nigeria.",
+      "entry_id": "f7TkeNWBcHyiLlTZphp9",
+      "lexeme": "édìm",
+      "gloss": "rain",
+      "gloss_language": "en",
+      "photo_serving_url": "31KAujl-YIcuy3ELePhYqV0OOUV0NwMr0SiuFPl9lTMyuu4lphCoViFiVFD4FZOD5YC0SCMx_6qT20nNFjqjnJkraBc5JKwK1pc",
+      "audio_storage_path": "oron/audio/f7TkeNWBcHyiLlTZphp9_1674376668139.x-wav",
+      "phonetic": "edim HL",
+      "glosses": {
+        "en": "rain"
+      },
+      "speaker_name": "Golden Ekpo, PhD",
+      "example_sentence": {
+        "text": {
+          "default": "Edim ekedi kokokọ onwi ki."
+        },
+        "translation": {
+          "en": "Rain doesn't fall on the roof of only one person"
+        }
+      },
+      "lng": 7.9302,
+      "lat": 4.9939
+    },
+    {
+      "id": "eeb51a56-97f1-4372-912a-5689ed8be1bf",
+      "dict_id": "qeqchi",
+      "dict_url": "qeqchi",
+      "dict_name": "Q'eqchi'",
+      "dict_location": "Guatemala",
+      "entry_id": "H3mi0arWgzg1vuu9EGwT",
+      "lexeme": "Palaw",
+      "gloss": "sea",
+      "gloss_language": "en",
+      "photo_serving_url": "e98gsAqLIiaffoxteWfJ11gjaQ5uauoRIwRlUUGgbzY--E1k3RjQCxQGXAdg6CJR-m8EI4NMpczh4XN7dh0Ftg",
+      "audio_storage_path": "qeqchi/audio/local_import/qeqchi-Vicente-de-Jes-s-Ch-Melgar-05Jun2014-1852-mar-1580868908767.mp3",
+      "phonetic": "pa.'law",
+      "glosses": {
+        "en": "sea",
+        "es": "mar"
+      },
+      "speaker_name": "Vicente de Jesús Ché Melgar",
+      "example_sentence": null,
+      "lng": -89.832,
+      "lat": 15.897
+    },
+    {
+      "id": "d9dd181a-1f9e-49f9-84f8-bb50c52883a8",
+      "dict_id": "qeqchi",
+      "dict_url": "qeqchi",
+      "dict_name": "Q'eqchi'",
+      "dict_location": "Guatemala",
+      "entry_id": "0swyTU3zVI8D5Zq6dhyr",
+      "lexeme": "Choql",
+      "gloss": "cloud",
+      "gloss_language": "en",
+      "photo_serving_url": "lEt0afLySlw9jGpxHW07SrUdvF3GufzgO7PksXX6RyzkWMnbaKQhbNyb9SmQ9h4zw0dvuTzTBU8Boz5p6jjXJGA",
+      "audio_storage_path": "qeqchi/audio/local_import/qeqchi-Vicente-de-Jes-s-Ch-Melgar-05Jun2014-1900-nube-1580868844920.mp3",
+      "phonetic": "t͡ʂoqʰl۪",
+      "glosses": {
+        "en": "cloud",
+        "es": "nube"
+      },
+      "speaker_name": "Vicente de Jesús Ché Melgar",
+      "example_sentence": null,
+      "lng": -89.832,
+      "lat": 15.897
+    },
+    {
+      "id": "6909b9b9-cf7f-431e-926f-bded187576a2",
+      "dict_id": "arvanitika",
+      "dict_url": "arvanitika",
+      "dict_name": "Arvanitika",
+      "dict_location": "Greece",
+      "entry_id": "2O4y4yVJIilaTwu4vyAf",
+      "lexeme": "hamotcheládh",
+      "gloss": "xαμοκελάδα",
+      "gloss_language": "el",
+      "photo_serving_url": "XwRgC19VhmIDt2v8yGTK6qoRUF2ivp_0Fjk67FUgDY7WuWpvZ3_Bf0FE__NvnkN_NTgfCuPam3h9ayaxPZd0wEz2ucXnvAKsp2kZ",
+      "audio_storage_path": "arvanitika/audio/2O4y4yVJIilaTwu4vyAf_1705723939232.wav",
+      "phonetic": null,
+      "glosses": {
+        "el": "xαμοκελάδα",
+        "en": "tawny pipit"
+      },
+      "speaker_name": "Peter Constantine",
+      "example_sentence": null,
+      "lng": 22.8803,
+      "lat": 37.9068
+    },
+    {
+      "id": "49cca61c-8562-4e51-9165-5fdaa9b1d1a0",
+      "dict_id": "arvanitika",
+      "dict_url": "arvanitika",
+      "dict_name": "Arvanitika",
+      "dict_location": "Greece",
+      "entry_id": "39OU8GDxNJdRyTwiUp0X",
+      "lexeme": "kjefalá",
+      "gloss": "shrike; butcherbird",
+      "gloss_language": "en",
+      "photo_serving_url": "KXeO4J3XkK9eTKGuJ1j1WwP-S4gG0yJ9u972IIWl5wGc6qR_6cx9SkWj4w4ZgK0UffFo0P_fmrio1PHqUd7BHGRLqyJjLTzymTM",
+      "audio_storage_path": "arvanitika/audio/39OU8GDxNJdRyTwiUp0X_1689972566481.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "shrike; butcherbird"
+      },
+      "speaker_name": "Peter Constantine",
+      "example_sentence": null,
+      "lng": 22.8803,
+      "lat": 37.9068
+    },
+    {
+      "id": "935618b7-4fd4-4c1b-8cf4-4a69b1034e58",
+      "dict_id": "poqomam",
+      "dict_url": "poqomam",
+      "dict_name": "Poqomam",
+      "dict_location": "Guatemala",
+      "entry_id": "nhWL5JQluCaLnkIV1HXJ",
+      "lexeme": "ihtz'ub'",
+      "gloss": "flower",
+      "gloss_language": "en",
+      "photo_serving_url": "Usvw3A85qaZJYBlKNYFBYvkqebKTIJFbSTkhzxSqHIUND3xQhSk-ypP0TepphiIGvs6-Fe2YuAXXv5832yQqRw",
+      "audio_storage_path": "poqomam/audio/local_import/poqomam-Ixel-Ixmukane-Mueres-Vicente-05Jun2014-1724-flor-1581897416817.mp3",
+      "phonetic": "ʔih.t͡s'uɓ˺",
+      "glosses": {
+        "en": "flower",
+        "es": "flor"
+      },
+      "speaker_name": "Ixel Ixmukane Mueres Vicente",
+      "example_sentence": {
+        "text": {
+          "default": "k'oo'al"
+        },
+        "translation": null
+      },
+      "lng": -90.453,
+      "lat": 14.722
+    },
+    {
+      "id": "b588cf49-513b-454c-9210-647e1a238b68",
+      "dict_id": "poqomam",
+      "dict_url": "poqomam",
+      "dict_name": "Poqomam",
+      "dict_location": "Guatemala",
+      "entry_id": "7iWyGAPPSoschcx2IRCY",
+      "lexeme": "teew",
+      "gloss": "wind",
+      "gloss_language": "en",
+      "photo_serving_url": "dxT_cQ1uJd1a0sJcdDTY1bSMK8ICk6EYUEKx45RwtoipdkrGQMafuPaFPHjR2f8ugQAvfp6sAPZHdBHGdwCq",
+      "audio_storage_path": "poqomam/audio/local_import/poqomam-Ixel-Ixmukane-Mueres-Vicente-05Jun2014-1815-viento-1581897476536.mp3",
+      "phonetic": "te:w̥",
+      "glosses": {
+        "en": "wind",
+        "es": "viento"
+      },
+      "speaker_name": "Ixel Ixmukane Mueres Vicente",
+      "example_sentence": null,
+      "lng": -90.453,
+      "lat": 14.722
+    },
+    {
+      "id": "e100e323-2fa4-4a82-b34b-9f92cab6e79e",
+      "dict_id": "itza",
+      "dict_url": "itza",
+      "dict_name": "Itza",
+      "dict_location": "Guatemala",
+      "entry_id": "6GuXiMDrEggyy2CghK5E",
+      "lexeme": "K'aak'",
+      "gloss": "fire",
+      "gloss_language": "en",
+      "photo_serving_url": "kpytE0ZK7kEYWPee25v7kPWFiJzITBlabq77I1V4nrgrTLDqnN5SNkZiG2Scb9ZFF1hEW3TdgjMDDkpzeDQ5hQ",
+      "audio_storage_path": "itza/audio/local_import/itza-Ram-n-Ismael-Cant-Duarte-06Jun2014-1520-fuego-1581895988530.mp3",
+      "phonetic": "k'a:k' ",
+      "glosses": {
+        "en": "fire",
+        "es": "fuego"
+      },
+      "speaker_name": "Ramòn Ismael Cantè Duarte",
+      "example_sentence": null,
+      "lng": -89.879,
+      "lat": 17.009
+    },
+    {
+      "id": "37b2bcdd-b74a-4640-8653-4bee9d3ba9d0",
+      "dict_id": "itza",
+      "dict_url": "itza",
+      "dict_name": "Itza",
+      "dict_location": "Guatemala",
+      "entry_id": "5iTUbAX8kYncZnd5tr7C",
+      "lexeme": "B'äk'",
+      "gloss": "meat",
+      "gloss_language": "en",
+      "photo_serving_url": "4XfwkC6I2XT26Wk7zAjdzEDMSLyvS6bjeOu_7YA9ue7AtWei8_3R6qdzfd26N3bWK0rCVF_UTP1By3Z2052ZsQ",
+      "audio_storage_path": "itza/audio/local_import/itza-Ram-n-Ismael-Cant-Duarte-06Jun2014-1503-carne-1581895942256.mp3",
+      "phonetic": "ɓɨk'",
+      "glosses": {
+        "en": "meat",
+        "es": "carne"
+      },
+      "speaker_name": "Ramòn Ismael Cantè Duarte",
+      "example_sentence": null,
+      "lng": -89.879,
+      "lat": 17.009
+    },
+    {
+      "id": "c81d628d-8b2a-479b-b991-1d44400d4062",
+      "dict_id": "uspanteko",
+      "dict_url": "uspanteko",
+      "dict_name": "Uspanteko",
+      "dict_location": "Guatemala",
+      "entry_id": "GYkHemI7Tg5rR6g7o8TD",
+      "lexeme": "choo",
+      "gloss": "lake",
+      "gloss_language": "en",
+      "photo_serving_url": "JmrX-KEJ7S0uEoyU-efAOLepCURId65_6dOiVMc4xjLC00ShzfoQjyGZkr3WO0EgGh1HLQtr7EY3OEEYK4rU4Q",
+      "audio_storage_path": "uspanteko/audio/local_import/uspanteko-Miguel-ngel-Dami-n-y-Dami-n-10Jun2014-1659-lago-1581897163136.mp3",
+      "phonetic": "ʧ͡o:",
+      "glosses": {
+        "en": "lake",
+        "es": "lago"
+      },
+      "speaker_name": "Miguel Àngel Damiàn y Damiàn",
+      "example_sentence": {
+        "text": {
+          "default": "chooj"
+        },
+        "translation": null
+      },
+      "lng": -90.891,
+      "lat": 15.363
+    },
+    {
+      "id": "b7d4e6a6-745a-45cd-ab9a-4d9a0d73bd0c",
+      "dict_id": "yanesha",
+      "dict_url": "yanesha",
+      "dict_name": "Yanesha'",
+      "dict_location": " Perú",
+      "entry_id": "DOamdvijBc28RApXAgxR",
+      "lexeme": "ontáp",
+      "gloss": "river",
+      "gloss_language": "en",
+      "photo_serving_url": "c2MeHsU9_PvOLFjWazlUFo4uESckDpDXLPiEWUkcImDpfybNfMsh8B2trX3TTTcgCaBb4P2KFhXZgHCQiOjteR454XR8RERvTnNO",
+      "audio_storage_path": "yanesha/audio/import_1574470284885/yanesha-EBP-10-01-2013-rio.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "river",
+        "es": "río"
+      },
+      "speaker_name": "Espiritu Bautista Pascual",
+      "example_sentence": null,
+      "lng": -75.314,
+      "lat": -10.527
+    },
+    {
+      "id": "cbeb7468-bc1d-4a73-b27e-f09f855f5c6d",
+      "dict_id": "yanesha",
+      "dict_url": "yanesha",
+      "dict_name": "Yanesha'",
+      "dict_location": " Perú",
+      "entry_id": "GAOoV16sfhYlr5Fclb2o",
+      "lexeme": "poetsáthmarero",
+      "gloss": "mountain",
+      "gloss_language": "en",
+      "photo_serving_url": "EZZy6PfiiZtl99p9S921cBZQrEmrVwQTBfBXkJu8Obe_iMufDUZqVwLwSs8JCc9k4RQFUAGDtz0ffMCUt8dZknuyZMHuvhRu3Po",
+      "audio_storage_path": "yanesha/audio/import_1574470284885/yanesha-EBP-10-01-2013-monta-a.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "mountain",
+        "es": "montaña"
+      },
+      "speaker_name": "Espiritu Bautista Pascual",
+      "example_sentence": null,
+      "lng": -75.314,
+      "lat": -10.527
+    },
+    {
+      "id": "aaab47bd-3b81-4567-a618-9b3666aaeaed",
+      "dict_id": "yanesha",
+      "dict_url": "yanesha",
+      "dict_name": "Yanesha'",
+      "dict_location": " Perú",
+      "entry_id": "hHynma7ErRD7CYI7vqaI",
+      "lexeme": "sa'p",
+      "gloss": "lake",
+      "gloss_language": "en",
+      "photo_serving_url": "HKOyS1fZD_Y_1yjgzS4cuj9wyBn8Ai7vXt_tG_cjHq411riHV0lZmZhHW8QbjcxWK0PQNe-LNZalxYAyP6UNrP9W2S7nJqkmWCg",
+      "audio_storage_path": "yanesha/audio/import_1574470284885/yanesha-EBP-10-01-2013-lago.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "lake",
+        "es": "lago"
+      },
+      "speaker_name": "Espiritu Bautista Pascual",
+      "example_sentence": null,
+      "lng": -75.314,
+      "lat": -10.527
+    },
+    {
+      "id": "8e7c38bc-5a2c-4aa1-aed2-37199c32f50b",
+      "dict_id": "gaidhlig-uisge-dhearg",
+      "dict_url": "gaidhlig-uisge-dhearg",
+      "dict_name": "Gàedhlig Uisge Dhearg",
+      "dict_location": "Manitoba, Canada",
+      "entry_id": "X9PYOY6CChRY5BqRELU5",
+      "lexeme": "Uisge Dhearg",
+      "gloss": "Rivière Rouge",
+      "gloss_language": "fr",
+      "photo_serving_url": "1Xjza-knG1CDZJqNOF9z-8dXhnQKD6uxvZe4c9q3csOfAfT6dYCXuauEOIByQLWawmW3fXRvREA_p82xlLfP4WNXxOaconf6xBA",
+      "audio_storage_path": "gaidhlig-uisge-dhearg/audio/X9PYOY6CChRY5BqRELU5_1649385651188.x-m4a",
+      "phonetic": null,
+      "glosses": {
+        "en": "Red River, Red Water",
+        "fr": "Rivière Rouge"
+      },
+      "speaker_name": "Trìnda NicÉigeir (Trynda Adair)",
+      "example_sentence": null,
+      "lng": -97.136,
+      "lat": 50.067
+    },
+    {
+      "id": "6f355c53-6a28-4727-b680-ea690d71867e",
+      "dict_id": "wakhi",
+      "dict_url": "wakhi",
+      "dict_name": "Wakhi",
+      "dict_location": "Afghanistan, China, Pakistan, Tajikistan",
+      "entry_id": "4028528b-8b96-44b0-a205-f0232f0a4131",
+      "lexeme": "Mʉlʉng",
+      "gloss": "Middle",
+      "gloss_language": "en",
+      "photo_serving_url": "gext916VSl9GS6w1NWqjeti6IUX2g0TYYti7tavbL_hyDDLn6imd7Wq1a5grPps48A5PrJjEk9uFlsO4TqtqEHObYU18lIQgzKk",
+      "audio_storage_path": "wakhi/audio/4028528b-8b96-44b0-a205-f0232f0a4131/1775073817513.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "Middle"
+      },
+      "speaker_name": "Noor",
+      "example_sentence": {
+        "text": {
+          "default": "Da khʉ mʉlʉngi yi boy"
+        },
+        "translation": null
+      },
+      "lng": 73.8372,
+      "lat": 36.9155
+    },
+    {
+      "id": "d70ec81a-3dd4-4859-a41d-7af54df1f9a0",
+      "dict_id": "houma-uma",
+      "dict_url": "houma-uma",
+      "dict_name": "Houma (Uma')",
+      "dict_location": "Louisiana, US",
+      "entry_id": "1Hz0zE5Z2XdFIMbhpCOH",
+      "lexeme": "pakãle'",
+      "gloss": "flower",
+      "gloss_language": "en",
+      "photo_serving_url": "2MBxWFjO6lQbsLE8CPWQOz1pAMVSwI9Y8crLQgGs2E0Ix0ywK_xtkogaZhJlTC-JG1eT7Qq5vGNGnadIUzD6Qyu_sZlGdwYQrk8",
+      "audio_storage_path": "houma-uma/audio/1Hz0zE5Z2XdFIMbhpCOH_1695754640349.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "flower"
+      },
+      "speaker_name": "Ben W",
+      "example_sentence": null,
+      "lng": -90.7275,
+      "lat": 29.5918
+    },
+    {
+      "id": "738a3cd3-d6a2-4e08-bf6a-7fb591b60c57",
+      "dict_id": "houma-uma",
+      "dict_url": "houma-uma",
+      "dict_name": "Houma (Uma')",
+      "dict_location": "Louisiana, US",
+      "entry_id": "2ObWiaAIlMp4WHQryXFk",
+      "lexeme": "pakét",
+      "gloss": "turkey",
+      "gloss_language": "en",
+      "photo_serving_url": "S3fy-21ufCbLLSTNC6wqQbJdQbcmDXB-LmeNdo9ekAYFlTGTleRDyP_vFrMU0ZBxmtYsLFUa3ChlOqvxIbDOnBvu16fW1CVynVc",
+      "audio_storage_path": "houma-uma/audio/2ObWiaAIlMp4WHQryXFk_1695754692100.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "turkey"
+      },
+      "speaker_name": "Ben W",
+      "example_sentence": null,
+      "lng": -90.7275,
+      "lat": 29.5918
+    },
+    {
+      "id": "d25d4120-f238-4c74-b5b5-0456d51e1f60",
+      "dict_id": "houma-uma",
+      "dict_url": "houma-uma",
+      "dict_name": "Houma (Uma')",
+      "dict_location": "Louisiana, US",
+      "entry_id": "2uEtGUvSmE7lLRSn0RQa",
+      "lexeme": "lukse'",
+      "gloss": "turtle",
+      "gloss_language": "en",
+      "photo_serving_url": "uLtFm_lvGJefdQvu6SKq0xxT9pF1qEt2D8qV-BBCoXjRkh9dcgFuOs_YnwtOwqN7qRkG0EMzq6aX7oeVOaiow-H_z7yKbqDQULs",
+      "audio_storage_path": "houma-uma/audio/2uEtGUvSmE7lLRSn0RQa_1695754525700.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "turtle"
+      },
+      "speaker_name": "Ben W",
+      "example_sentence": null,
+      "lng": -90.7275,
+      "lat": 29.5918
+    },
+    {
+      "id": "5a200cce-4136-4caf-8a0f-4c9d1d772e00",
+      "dict_id": "houma-uma",
+      "dict_url": "houma-uma",
+      "dict_name": "Houma (Uma')",
+      "dict_location": "Louisiana, US",
+      "entry_id": "26tw1RpuPdAT6gVfPHDU",
+      "lexeme": "palaska'",
+      "gloss": "bread",
+      "gloss_language": "en",
+      "photo_serving_url": "Ja14O0vDB3VaIMcOw28tNsRCSS5KGeDmkqA4bH-T8KIZqDemAmxptqKyRfAlgwrvKVTCwcsNGKWwcr-LSP2dSj7bf2B5b1raYFsj",
+      "audio_storage_path": "houma-uma/audio/26tw1RpuPdAT6gVfPHDU_1695754576079.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "bread"
+      },
+      "speaker_name": "Ben W",
+      "example_sentence": null,
+      "lng": -90.7275,
+      "lat": 29.5918
+    },
+    {
+      "id": "e8266ff0-042a-47f3-85d4-1f7e04858d99",
+      "dict_id": "aewa",
+      "dict_url": "aewa",
+      "dict_name": "Aewa",
+      "dict_location": "Perú",
+      "entry_id": "2Cz8oanykC2USD83aSYU",
+      "lexeme": "ũjũrṹã",
+      "gloss": "eagle",
+      "gloss_language": "en",
+      "photo_serving_url": "HOp-_zGuwxIY6V33QzD5z8l_SMPUQ8IRnpNF0GhOxf0zKJhHxEQy3NHMcxYS43mS1-7weBZ3DjSqWzgA1KtAtZ7TyZYvjxXPQF0",
+      "audio_storage_path": "aewa/audio/2Cz8oanykC2USD83aSYU_1704758907716.wav",
+      "phonetic": "ˌũ.hũˡɾũ.ã",
+      "glosses": {
+        "en": "eagle",
+        "es": "gavilán"
+      },
+      "speaker_name": "Delia Andi Macahuachi",
+      "example_sentence": null,
+      "lng": -75.08,
+      "lat": -1.28
+    },
+    {
+      "id": "08032db4-e591-4093-848e-1544225d9605",
+      "dict_id": "aewa",
+      "dict_url": "aewa",
+      "dict_name": "Aewa",
+      "dict_location": "Perú",
+      "entry_id": "06fTqBCkfXcEyiwNk4rg",
+      "lexeme": "atári",
+      "gloss": "papaya",
+      "gloss_language": "en",
+      "photo_serving_url": "JJHl6GpSetPZ3KuzEMNdNk5JrI-5mIba1YYjEGWon6BV9_Bec92Ny26CVvgqZlP1TbaAcsVxi_VuUHigNTK63B_8XURZI0bQQid3",
+      "audio_storage_path": "aewa/audio/06fTqBCkfXcEyiwNk4rg_1704758972291.wav",
+      "phonetic": "aˡta.ɾi",
+      "glosses": {
+        "en": "papaya",
+        "es": "papaya"
+      },
+      "speaker_name": "Delia Andi Macahuachi",
+      "example_sentence": null,
+      "lng": -75.08,
+      "lat": -1.28
+    },
+    {
+      "id": "87af207a-8093-4806-aaab-f2e45d8c1b6e",
+      "dict_id": "aewa",
+      "dict_url": "aewa",
+      "dict_name": "Aewa",
+      "dict_location": "Perú",
+      "entry_id": "20Mxjs1JlulcxEaIVcov",
+      "lexeme": "ashlúku",
+      "gloss": "woolly monkey",
+      "gloss_language": "en",
+      "photo_serving_url": "Af3ut9gtoXOGzAFacVrxQ0d8v9DWH9cSEMd4LR7HHn-lo3v5qsxgw1jE7UmLTKlNzTYTA2n74nj0lw2Z4-fN_dWUJYLfNDivm_vm",
+      "audio_storage_path": "aewa/audio/20Mxjs1JlulcxEaIVcov_1704759030818.wav",
+      "phonetic": "aʃˡlu.ku",
+      "glosses": {
+        "en": "woolly monkey",
+        "es": "mono choro"
+      },
+      "speaker_name": "Delia Andi Macahuachi",
+      "example_sentence": null,
+      "lng": -75.08,
+      "lat": -1.28
+    },
+    {
+      "id": "812ac4fa-1061-4f3a-826a-ea547c43d210",
+      "dict_id": "zapoteco-de-la-sierra-n",
+      "dict_url": "zapoteco-de-la-sierra-n",
+      "dict_name": "Zapoteco de la sierra norte, San Juan Bautista Atepec, Oaxaca",
+      "dict_location": "San Juan Bautista Atepec, México",
+      "entry_id": "219mAxq6VtsiTDJMPg8Z",
+      "lexeme": "loo xata",
+      "gloss": "jaguar",
+      "gloss_language": "en",
+      "photo_serving_url": "LT0cVtPhUAIgWUwlvup1CKjoWfC3ofZpVcN6Lpr-0cAtTBFkHYk9a2S7fAeQ03vAeincEbb11BSCSVCmohUDvA",
+      "audio_storage_path": "audio/zapoteco-de-la-sierra-n/219mAxq6VtsiTDJMPg8Z_1570253002541.mp3",
+      "phonetic": "lo: ʂata",
+      "glosses": {
+        "en": "jaguar",
+        "es": "jaguar (cara plana)"
+      },
+      "speaker_name": "Victoria Hernández Pérez",
+      "example_sentence": null,
+      "lng": null,
+      "lat": null
+    },
+    {
+      "id": "81099d09-8a10-4a53-adac-b91a151d0814",
+      "dict_id": "woleaia",
+      "dict_url": "woleaia",
+      "dict_name": "Woleaian",
+      "dict_location": null,
+      "entry_id": "0fade015-d920-47d3-9d2f-158cb3d9c2cc",
+      "lexeme": "metaw",
+      "gloss": "ocean",
+      "gloss_language": "en",
+      "photo_serving_url": "G6uiP5wCbPKLQkNR35WG4iBB-ZRBmOFVydsEu0KOXGIWgzp0mJeOu6l88upCSdoM1Ngr9zairPMyzHqOF7q-DgLeGZNhjnv6Fyk\n",
+      "audio_storage_path": "woleaia/audio/0fade015-d920-47d3-9d2f-158cb3d9c2cc_1749771198045.wav",
+      "phonetic": "ˈme.tɒ",
+      "glosses": {
+        "en": "ocean",
+        "haw": "moana, kai"
+      },
+      "speaker_name": "DJ Dominic Taruwemai Taiwer Jr",
+      "example_sentence": null,
+      "lng": 143.87,
+      "lat": 7.35
+    },
+    {
+      "id": "82377e61-20b7-48cd-ab90-da094d6e3855",
+      "dict_id": "quechuaboliviano",
+      "dict_url": "quechuaboliviano",
+      "dict_name": "Quechua del sur de Bolivia",
+      "dict_location": "Bolivia",
+      "entry_id": "9oj4c9GUgsrHdExupQHt",
+      "lexeme": "pili",
+      "gloss": "duck",
+      "gloss_language": "en",
+      "photo_serving_url": "BRiDzM0c3OhtSgA8vNWoQKQG3TJ6e-ALuLJt6Tg-0mXp01XkO_EWDu3xcGZl7p6C6wlgWUaw7Ta9mzxgwqhsjHbpPPVjZrVlpAk",
+      "audio_storage_path": "audio/quechuaboliviano/9oj4c9GUgsrHdExupQHt_1609810006544.wav",
+      "phonetic": "ˈpi.li",
+      "glosses": {
+        "en": "duck",
+        "es": "pato"
+      },
+      "speaker_name": "Condori Arias Noemy",
+      "example_sentence": {
+        "text": {
+          "default": "yana pilita uywashani. (estoy criando un pato negro)"
+        },
+        "translation": null
+      },
+      "lng": -65.294,
+      "lat": -17.22
+    },
+    {
+      "id": "582e49a8-b0bc-4d31-b133-b1ff629cffb4",
+      "dict_id": "dompo",
+      "dict_url": "dompo",
+      "dict_name": "Dompo",
+      "dict_location": "Ghana",
+      "entry_id": "Ueeao8SamscWWGYLgu1m",
+      "lexeme": "chápó",
+      "gloss": "squirrel",
+      "gloss_language": "en",
+      "photo_serving_url": "Sry-iJQV6dvK88uMGNvltBD_kMCcyGjNPRb66-TsPikxjQwftsZP_SUA4vbjn9k7f4QDH-136i3ankzjWbCFzk-48E4UZ5hCrA",
+      "audio_storage_path": "dompo/audio/Ueeao8SamscWWGYLgu1m_1643729894109.x-wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "squirrel"
+      },
+      "speaker_name": "Mr. Mila",
+      "example_sentence": null,
+      "lng": -2.435,
+      "lat": 8.118
+    },
+    {
+      "id": "96c20b74-0212-4bf5-98f3-c2e8816ebb3a",
+      "dict_id": "tepehua-de-huehuetla",
+      "dict_url": "tepehua-de-huehuetla",
+      "dict_name": "Tepehua de Huehuetla",
+      "dict_location": "México",
+      "entry_id": "33apzfjc454MKK8JxMpE",
+      "lexeme": "mubay",
+      "gloss": "Mexican honeysuckle",
+      "gloss_language": "en",
+      "photo_serving_url": "4LEuaS3OzUZsFt4ZIVemtTRG4505p00KwjdSHbdtHbyE7vyptno4XCuvjRL1fG9OVEw-t2g_Dl-AkperAHi2CplFW1R9Pq-YXAE",
+      "audio_storage_path": "tepehua-de-huehuetla/audio/33apzfjc454MKK8JxMpE_1681403712827.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "Mexican honeysuckle",
+        "es": "muicle"
+      },
+      "speaker_name": "María Catalina Plata Máximino ",
+      "example_sentence": null,
+      "lng": -97.93,
+      "lat": 20.62
+    },
+    {
+      "id": "b16c8e48-925f-43ad-91dd-0a5a4a811bdd",
+      "dict_id": "tepehua-de-huehuetla",
+      "dict_url": "tepehua-de-huehuetla",
+      "dict_name": "Tepehua de Huehuetla",
+      "dict_location": "México",
+      "entry_id": "H61THevcZ9SANJ4RIM5u",
+      "lexeme": "ismilh",
+      "gloss": "purslane",
+      "gloss_language": "en",
+      "photo_serving_url": "znlvP0z0z-iPNNc1xPm1ZrwrjUNs5zNYMMCTA4oXfVh0IidMG2CC7cpP3Fb9Sf0frACE6TjCq52CMkiwfWCw1VMF-kAVGHlUqh8",
+      "audio_storage_path": "tepehua-de-huehuetla/audio/H61THevcZ9SANJ4RIM5u_1681403786752.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "purslane",
+        "es": "verdolaga"
+      },
+      "speaker_name": "María Catalina Plata Máximino ",
+      "example_sentence": null,
+      "lng": -97.93,
+      "lat": 20.62
+    },
+    {
+      "id": "9d0693d7-4f12-4d39-881f-a6c162ad1659",
+      "dict_id": "poqomam",
+      "dict_url": "poqomam",
+      "dict_name": "Poqomam",
+      "dict_location": "Guatemala",
+      "entry_id": "9cchZxeqjR35uzkoxW7O",
+      "lexeme": "atz'am",
+      "gloss": "sal",
+      "gloss_language": "es",
+      "photo_serving_url": "Xqp2tMScj1BClXHxYPnyHl1N-2HubirgZw3JWwqggUwNdfx648hxFQypzZYDsQQs6oGvvUNG-YjeJK2T-NYdIBA",
+      "audio_storage_path": "poqomam/audio/local_import/poqomam-Ixel-Ixmukane-Mueres-Vicente-05Jun2014-1705-sal-1581897400741.mp3",
+      "phonetic": "ʔa.'t͡s'a:m",
+      "glosses": {
+        "en": "salt",
+        "es": "sal"
+      },
+      "speaker_name": "Ixel Ixmukane Mueres Vicente",
+      "example_sentence": null,
+      "lng": -90.453,
+      "lat": 14.722
+    },
+    {
+      "id": "8ec0f019-d925-44d7-bae3-da9e35c00223",
+      "dict_id": "ishir-chamacoco",
+      "dict_url": "ishir-chamacoco",
+      "dict_name": "Ɨshɨr (Chamacoco)",
+      "dict_location": "Puerto Diana, Karcha Bahlut y otras comunidades (Alto Paraguay)",
+      "entry_id": "CeWRGZZwnAiIUvzk72Nf",
+      "lexeme": "yokomta",
+      "gloss": "tatú bolita",
+      "gloss_language": "es",
+      "photo_serving_url": "Cb0V7PuG8U69hmqAfj0Q2oQuawKOmHjOczwGq2Hy85D3CmQDD8pCAEKOBgVBmonLZA3gcrYkiaFFNhEwtNIO3E3W2FU_bBYsaBo",
+      "audio_storage_path": "ishir-chamacoco/audio/CeWRGZZwnAiIUvzk72Nf_1666565445919.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "ball armadillo",
+        "es": "tatú bolita"
+      },
+      "speaker_name": "Anna Luisa Daigneault",
+      "example_sentence": null,
+      "lng": -58.166,
+      "lat": -20.257
+    },
+    {
+      "id": "fd142bb3-7fcb-4a79-91be-1dc49aa3c811",
+      "dict_id": "jewish-neo-aramaic",
+      "dict_url": "jewish-neo-aramaic",
+      "dict_name": "Jewish Neo-Aramaic",
+      "dict_location": "Israel, Iran, Kurdistan, Iraq, Turkey, Azerbaijan, Georgia",
+      "entry_id": "7oKdMtNNLZ7AH1gr6JxF",
+      "lexeme": "אָזִיַאת",
+      "gloss": "אֵבֶל",
+      "gloss_language": "he",
+      "photo_serving_url": "pf5Fuvax-pw7fbsApGOtrdqcCb7Fd95Z5qJqJeK5PikgDC1ENtiQG59LIjZDyBDvgQCIizaHfnDnKYgyuULMESQ09VI2uddEO9U",
+      "audio_storage_path": "jewish-neo-aramaic/audio/7oKdMtNNLZ7AH1gr6JxF_1708956590829.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "mourning",
+        "he": "אֵבֶל"
+      },
+      "speaker_name": "Nissan",
+      "example_sentence": {
+        "text": {
+          "default": "דָּוִיד בַּקַא תַתַא-רוּאֵף אָזִיַאת דְוקַאי"
+        },
+        "translation": {
+          "en": "David is mourning his grandfather's death.",
+          "he": "דָּוִיד מִתְאַבֵּל עַל סָבוֹ."
+        }
+      },
+      "lng": 34.847,
+      "lat": 32.116
+    },
+    {
+      "id": "97f7f4e3-77dc-45d7-89c5-57be46660198",
+      "dict_id": "ese-ejja",
+      "dict_url": "ese-ejja",
+      "dict_name": "Ese Ejja",
+      "dict_location": "Bolivia, Peru",
+      "entry_id": "XEodHa6qaTwM63pWJHUF",
+      "lexeme": "dokwéi ibia",
+      "gloss": "león, puma",
+      "gloss_language": "es",
+      "photo_serving_url": "mErhdiZn-ziewJ9hb6VPAvio-tV6p6zMnBnXVFM7zLS1F2_-XPAokjz1ZTBZmzd9mmYUvx6jwXpnT_bo966G1AENnLUybnYbCS8",
+      "audio_storage_path": "audio/ese-ejja/XEodHa6qaTwM63pWJHUF_1617117156689.wav",
+      "phonetic": "ɗoˈkʷei ˈiɓia",
+      "glosses": {
+        "en": "cougar",
+        "es": "león, puma"
+      },
+      "speaker_name": "Alejandro Machuqui",
+      "example_sentence": null,
+      "lng": -66.2978,
+      "lat": -11.2612
+    },
+    {
+      "id": "41d6e5f8-a726-4287-9531-d47d9123f123",
+      "dict_id": "wakhi",
+      "dict_url": "wakhi",
+      "dict_name": "Wakhi",
+      "dict_location": "Afghanistan, China, Pakistan, Tajikistan",
+      "entry_id": "Bb4DE80wmWjnhXNJRzYC",
+      "lexeme": "Boi",
+      "gloss": "Cave",
+      "gloss_language": "en",
+      "photo_serving_url": "Qxb9eHyHHEvoMrwJbXEgUppSn7uCBeJVmG5tquCISSCSMTWi7Njjh5LZJePI4v_qo2bLQIv9tnjDcwd0tIgNv60Y516kxHXBAEY",
+      "audio_storage_path": "wakhi/audio/Bb4DE80wmWjnhXNJRzYC_1650788048630.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "Cave"
+      },
+      "speaker_name": "Aejaz",
+      "example_sentence": null,
+      "lng": 73.8372,
+      "lat": 36.9155
+    },
+    {
+      "id": "df13f8ee-77ff-40a4-bdb5-5178a87737e4",
+      "dict_id": "woleaia",
+      "dict_url": "woleaia",
+      "dict_name": "Woleaian",
+      "dict_location": null,
+      "entry_id": "1dd82478-9bf4-4378-af6a-f8c154d472dc",
+      "lexeme": "shoasemaliu",
+      "gloss": "small outrigger paddling canoe",
+      "gloss_language": "en",
+      "photo_serving_url": "kfB_qWvSSLjI3HDcnACT0INns9hoADdYsgCHBmV9w6fQNgXO5yQ5H-122Nw-f951le-Z2fPr_ahJcye-TiKK2Inw7BPajJUZoxs\n",
+      "audio_storage_path": "woleaia/audio/1dd82478-9bf4-4378-af6a-f8c154d472dc_1749771214666.wav",
+      "phonetic": "ʂɒ.sə.ˈmɛ.ɾʉ̥",
+      "glosses": {
+        "en": "small outrigger paddling canoe",
+        "haw": "panipani"
+      },
+      "speaker_name": "DJ Dominic Taruwemai Taiwer Jr",
+      "example_sentence": null,
+      "lng": 143.87,
+      "lat": 7.35
+    },
+    {
+      "id": "df3c035f-95fb-4679-b9e9-58eaae9ca2ba",
+      "dict_id": "kihunde",
+      "dict_url": "kihunde",
+      "dict_name": "Kihunde",
+      "dict_location": "Masisi, Walikale, Rutshuru, Nyiragongo, Kalehe",
+      "entry_id": "YelLp11TqPRZnv2vxeD9",
+      "lexeme": "teête / mateête",
+      "gloss": "courge",
+      "gloss_language": "fr",
+      "photo_serving_url": "qiwR0h_RFQ4ccX3zKU42pfcLTtsqZCN4bxOz28NSIBD_YdT9KKSFp3-9N6gNcUH5ht0bxZ9Jb8K7DCOqMKA9hazi3MFXDQsMf11X",
+      "audio_storage_path": "kihunde/audio/YelLp11TqPRZnv2vxeD9_1659208498448.aac",
+      "phonetic": null,
+      "glosses": {
+        "fr": "courge"
+      },
+      "speaker_name": "Jacques MUISHA",
+      "example_sentence": {
+        "text": {
+          "default": "Méthodes Bulebe ahingiré mateête"
+        },
+        "translation": {
+          "fr": "Monsieur Méthodes Bulebe a une culture de courge."
+        }
+      },
+      "lng": 29.225,
+      "lat": -1.667
+    },
+    {
+      "id": "614dc7ce-2327-4699-955e-9ea42c198579",
+      "dict_id": "werikyana",
+      "dict_url": "werikyana",
+      "dict_name": "Werikyana Tiriyó Prtgês Inglês",
+      "dict_location": "Northern Pará, Brazil",
+      "entry_id": "4GS3cfdwupVVeFdsNT41",
+      "lexeme": "wetu",
+      "gloss": "wetu",
+      "gloss_language": "tri",
+      "photo_serving_url": "vwUAejc7lOrxa7tA3zKraphmlPrV0yHhTIhBEw_yxNdt9-n-1lOR9AWqcgcTFNxFTg9yD5EFG9QalD2nR6Dyi28LiXufCO5_0Gw",
+      "audio_storage_path": "werikyana/audio/4GS3cfdwupVVeFdsNT41/1719061366198.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "woodpecker (sp)",
+        "pt": "pica-pau",
+        "tri": "wetu"
+      },
+      "speaker_name": "jacilene parena kaxuyana tiriyo",
+      "example_sentence": {
+        "text": {
+          "default": "Wetu takpirem ihuru"
+        },
+        "translation": {
+          "pt": "Pica-pau é cabelo vermelho",
+          "tri": "Wetu tapirem iputupë"
+        }
+      },
+      "lng": -57.3427,
+      "lat": -0.9185
+    },
+    {
+      "id": "35c08a96-0750-4f91-a37c-a9cde3679ab8",
+      "dict_id": "sepedi-living-dictionary",
+      "dict_url": "sepedi-living-dictionary",
+      "dict_name": "Segagešo Living Dictionary",
+      "dict_location": "South Africa",
+      "entry_id": "9Ijgvzpg5WHGjXo8OOuE",
+      "lexeme": "khobe",
+      "gloss": "khelobedu",
+      "gloss_language": "nso",
+      "photo_serving_url": "tFvA831mRQHBXuEHWJKqMm2mxPaMNxDF5anXAB2TrJ9t-cy5hKFf1qmk5zGZNE8SLTB8ZC1NDak_ienk-flME3cyRVFLer6nyQ",
+      "audio_storage_path": "sepedi-living-dictionary/audio/9Ijgvzpg5WHGjXo8OOuE_1695708833968.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "fish",
+        "nso": "khelobedu"
+      },
+      "speaker_name": "Mokgadi Mathole",
+      "example_sentence": {
+        "text": {
+          "default": "khobe khe phoofolo ya ho ke a lewa"
+        },
+        "translation": {
+          "en": "a fish is an animal that is not edible"
+        }
+      },
+      "lng": 24.671,
+      "lat": -27.928
+    },
+    {
+      "id": "421a1c30-eed5-442f-b752-62a44cd611d9",
+      "dict_id": "malapulaya",
+      "dict_url": "malapulaya",
+      "dict_name": "Malapulaya",
+      "dict_location": "Kerala and Karnataka, India",
+      "entry_id": "2ld2wXoLIh2fGKAaWJHL",
+      "lexeme": "kāttu",
+      "gloss": "காற்று",
+      "gloss_language": "ta",
+      "photo_serving_url": "V6GARyOFge_PKrJysGPnijvNsIDPS8Fp_B5VJgTnzwQkSlvqFbtaov35U5_OFhHpVqLdcqVadm8k8reJxzz6Eg",
+      "audio_storage_path": "audio/malapulaya/2ld2wXoLIh2fGKAaWJHL_1598200246722.ogg",
+      "phonetic": "ˈkaːθ.θu",
+      "glosses": {
+        "en": "Wind",
+        "hi": "हवा",
+        "ta": "காற்று",
+        "te": "గాలి"
+      },
+      "speaker_name": "Vanitha",
+      "example_sentence": {
+        "text": {
+          "default": "The wind howled about the building."
+        },
+        "translation": null
+      },
+      "lng": 76.407,
+      "lat": 10.45
+    },
+    {
+      "id": "464ee74a-11ea-4956-8c7c-be600b9ad90f",
+      "dict_id": "gutob",
+      "dict_url": "gutob",
+      "dict_name": "Gutob",
+      "dict_location": "India",
+      "entry_id": "4zd1v6kOoQDOCfRIRfxo",
+      "lexeme": "ninoŋkila(ʔ)",
+      "gloss": "yoke",
+      "gloss_language": "en",
+      "photo_serving_url": "89L_Yugp2xaETTtjL2spK9qZamoPXqyi65X3oKnAxg-7e3m_yPjMTTH_ecVW1MBQHb9o_34m0B0wx1LWW6xJ",
+      "audio_storage_path": "gutob/audio/local_import/Gutob-Oct17-BK-Image-1820-1580858072147.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "yoke"
+      },
+      "speaker_name": "Bondu Kirsani",
+      "example_sentence": null,
+      "lng": 82.716,
+      "lat": 18.816
+    },
+    {
+      "id": "41e14002-71fb-46ca-b8de-9fcf9170a321",
+      "dict_id": "hazaragi",
+      "dict_url": "hazaragi",
+      "dict_name": "Hazaragi Language",
+      "dict_location": "Afghanistan",
+      "entry_id": "cyvuEZWxSqPQvKRJxUXs",
+      "lexeme": "Alwa",
+      "gloss": "Halwa",
+      "gloss_language": "en",
+      "photo_serving_url": "VDWRbgoZMSrSVT6wfZvgduzy3wVBjIVAAkzn7p05o_3-0Rea1T6BfBk5i61r7noHy9T1Vo0ubbIPzcib5iy1qmRLX7CderTVew",
+      "audio_storage_path": "hazaragi/audio/cyvuEZWxSqPQvKRJxUXs/1762514677823.wav",
+      "phonetic": "ɑlwɑ",
+      "glosses": {
+        "en": "Halwa"
+      },
+      "speaker_name": "JG",
+      "example_sentence": {
+        "text": {
+          "default": "Alwa ra hakim mokhra, Chaplagh ra eethim"
+        },
+        "translation": {
+          "en": "The Governor eats the desert, and orphan are slapped"
+        }
+      },
+      "lng": 66.026,
+      "lat": 33.838
+    },
+    {
+      "id": "ec9bc6f5-c845-49b7-9b88-24663a34bde8",
+      "dict_id": "gta",
+      "dict_url": "gta",
+      "dict_name": "GtaɁ",
+      "dict_location": "India",
+      "entry_id": "0886ihHhQ7YptC6X8V95",
+      "lexeme": "kabrahela",
+      "gloss": "Spotted Deer",
+      "gloss_language": "en",
+      "photo_serving_url": "xdkbt5Yfn7__kEL8Lv9iB8aA4s6CA-nRh8EFxKhW1dTXXiPH6lFv-UvaFwO9q9gyu9SKG0S_UkD9KHlbuXJskOg",
+      "audio_storage_path": "gta/audio/local_import/Gta-Pkd-Dec13-AL240-spotted-deer-1580860490712.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "Spotted Deer"
+      },
+      "speaker_name": "Budra Raspeda",
+      "example_sentence": null,
+      "lng": 82.991,
+      "lat": 18.617
+    },
+    {
+      "id": "40bdcf0f-f724-4dcb-94ed-a25c20affb76",
+      "dict_id": "apatani",
+      "dict_url": "apatani",
+      "dict_name": "Apatani",
+      "dict_location": "India",
+      "entry_id": "2CkL4kY1l5RjDjnUE9N6",
+      "lexeme": "tado' tasañ",
+      "gloss": "a variety of yellow beads",
+      "gloss_language": "en",
+      "photo_serving_url": "giKwRYPhQOUvVrvQqcF2gNWWm7mpIcIA2vdRiIpl6D3m5R5QpcCD1H6SAsFzSGE1-wFCm1nrhP_xVhgTw6Det8w",
+      "audio_storage_path": "apatani/audio/local_import/tado-tasa--1580855394677.mp3",
+      "phonetic": "tadoɁ tasã",
+      "glosses": {
+        "en": "a variety of yellow beads"
+      },
+      "speaker_name": "Tage Kanno",
+      "example_sentence": null,
+      "lng": 93.814,
+      "lat": 27.539
+    },
+    {
+      "id": "2b560412-5474-4893-be1e-ea177182e4e2",
+      "dict_id": "matukar",
+      "dict_url": "matukar",
+      "dict_name": "Matukar",
+      "dict_location": "Madang Province, Papua New Guinea",
+      "entry_id": "gt1tsJazFKGZOrrEsHUs",
+      "lexeme": "yad",
+      "gloss": "outrigger cross boom, part of a canoe",
+      "gloss_language": "en",
+      "photo_serving_url": "cwJPkqRn5Z2xD1nzYGdqP54c3zxtcw__u6dHdz0cQM2kaohoFNUNjoOS7bKngqSD9gWCq7XpeCA4d1N6s3MH",
+      "audio_storage_path": "matukar/audio/local_import/Cult-elicit-Mar-22-2010-Kadagoi-part-of-a-canoe-yad-a-1581898387251.mp3",
+      "phonetic": "yad",
+      "glosses": {
+        "en": "outrigger cross boom, part of a canoe"
+      },
+      "speaker_name": "Kadagoi Rawad",
+      "example_sentence": {
+        "text": {
+          "default": "Tomas Taleo Kreno points to the outrigger cross boom."
+        },
+        "translation": null
+      },
+      "lng": 145.787,
+      "lat": -4.888
+    },
+    {
+      "id": "36f942fb-d620-481a-a035-68bde1496d7d",
+      "dict_id": "sengwer",
+      "dict_url": "sengwer",
+      "dict_name": "Sengwer",
+      "dict_location": "Kenya",
+      "entry_id": "1giIb8oLO6PQgJzL4TmW",
+      "lexeme": "chēēlēēlmoo",
+      "gloss": "European pied flycatcher",
+      "gloss_language": "en",
+      "photo_serving_url": "B5IhehU0gm3RAbuRIlSCTuUdbDgfvxaf94LHvvfBmCLMFlHVYRe6TF442PIeCvmlgmC2-4XLLekq_S3yczA9UQ9fZaPOsXNztg",
+      "audio_storage_path": "sengwer/audio/1giIb8oLO6PQgJzL4TmW_1688462078132.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "European pied flycatcher"
+      },
+      "speaker_name": "Amos",
+      "example_sentence": null,
+      "lng": 35.293,
+      "lat": 1.098
+    },
+    {
+      "id": "8e5409e5-e0e4-48a7-a226-d7616c853460",
+      "dict_id": "birhor",
+      "dict_url": "birhor",
+      "dict_name": "Birhor",
+      "dict_location": "Jharkhand and Odisha, India",
+      "entry_id": "1WHapX0E84z6m3mif0wa",
+      "lexeme": "omonnaʔ",
+      "gloss": "अंकुर",
+      "gloss_language": "hi",
+      "photo_serving_url": "v8a0olvDYckpfRXRAG00ImpIcqGbEA2yT47r3CxZbKq7IGc5IZlcIW51lH9KwZrEVy-PK-YcvQhPgQFBuo7-9XN1owMqN-txxoer",
+      "audio_storage_path": "birhor/audio/1WHapX0E84z6m3mif0wa_1646843114116.wav",
+      "phonetic": "omonnaʔ",
+      "glosses": {
+        "en": "1. sprout (n.)   2. seedling   3. offshoot",
+        "hi": "अंकुर"
+      },
+      "speaker_name": "Bitni Birhor",
+      "example_sentence": null,
+      "lng": 85.33,
+      "lat": 23.35
+    },
+    {
+      "id": "4d7dda29-307a-4a25-9fea-771558fa2bf2",
+      "dict_id": "kapingamarangi",
+      "dict_url": "kapingamarangi",
+      "dict_name": "Kapingamarangi",
+      "dict_location": "Kapingamarangi Atoll, Federated States of Micronesia",
+      "entry_id": "2ydLnEbQwG1FJ7zG26eR",
+      "lexeme": "langi",
+      "gloss": "sky",
+      "gloss_language": "en",
+      "photo_serving_url": "qLkzpKIVkctj-ZrK9KHspUBFLt_xzG25Kefn8CQWEjUXmtx3QiYQupzmIUMAmJe37WpRf6nM4bvUMiiJYaCp5Ihs88_2hfIQV_k",
+      "audio_storage_path": "kapingamarangi/audio/2ydLnEbQwG1FJ7zG26eR_1721843590410.mp3",
+      "phonetic": null,
+      "glosses": {
+        "en": "sky"
+      },
+      "speaker_name": "Howartson Heinrich",
+      "example_sentence": null,
+      "lng": 154.7833,
+      "lat": 1.0666
+    },
+    {
+      "id": "c64297b5-1f01-47b1-b841-f6b756607a52",
+      "dict_id": "babanki",
+      "dict_url": "babanki",
+      "dict_name": "Babanki (Kejom)",
+      "dict_location": "Cameroon",
+      "entry_id": "EUHVvVWKjeWR6I5cLQly",
+      "lexeme": "fəngwòlè",
+      "gloss": "mango",
+      "gloss_language": "en",
+      "photo_serving_url": "FK1D3l9vZi4MxsOrdZmBkUbl6IZ7UpDRTraWT0U-QfWO0h3ObNpWrCpkCoISVk7JX72q8rzfA7J_yPuQL-PJnbmaMPRMa94oACc",
+      "audio_storage_path": "babanki/audio/EUHVvVWKjeWR6I5cLQly_1669294957281.wav",
+      "phonetic": "fə́ŋɡwòlè",
+      "glosses": {
+        "en": "mango"
+      },
+      "speaker_name": "Pius Akumbu",
+      "example_sentence": null,
+      "lng": 10.315,
+      "lat": 5.978
+    },
+    {
+      "id": "8bc33ff5-e921-4746-af0f-41d63c140ed7",
+      "dict_id": "san-sebastian-del-monte-m",
+      "dict_url": "san-sebastian-del-monte-m",
+      "dict_name": "San Sebastián del Monte Mixtec (Tò’on Ndà’vi)",
+      "dict_location": "Oaxaca, México",
+      "entry_id": "7XtLEJMhPIqq2mifh88w",
+      "lexeme": "tìna",
+      "gloss": "perro",
+      "gloss_language": "es",
+      "photo_serving_url": "tSYGyuM89NZhrwGcc1_vbF5bPLLOAQMCZ4TYX4l9SutDMuN09x99vk5fwI0xABrQFFcBnbU7m7IXZVdYjzdZwH-fOO5GkuLhxgjQ",
+      "audio_storage_path": "san-sebastian-del-monte-m/audio/7XtLEJMhPIqq2mifh88w/1742957689540.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "dog",
+        "es": "perro"
+      },
+      "speaker_name": "Ignacio Pimentel Rojas",
+      "example_sentence": null,
+      "lng": -98.022,
+      "lat": 17.677
+    },
+    {
+      "id": "c531b9da-b2bb-4cc0-ab2e-dd9e6ee85429",
+      "dict_id": "nukuoro",
+      "dict_url": "nukuoro",
+      "dict_name": "Nukuoro",
+      "dict_location": "Micronesia ",
+      "entry_id": "DwYzA3fTdjhYLNtLrNFq",
+      "lexeme": "tibidibi",
+      "gloss": "ball woven from coconut palm, used for sport",
+      "gloss_language": "en",
+      "photo_serving_url": "E0z2-JgevM5hNUaSA-IkZBb1FVKvyuFcIYHEQAQFLxPllRtVWjSBqUfUIMWaN8vkwA-mfqEKuGJx2YBvA5zaj7Zf8lTRPpT5Ez2V",
+      "audio_storage_path": "nukuoro/audio/DwYzA3fTdjhYLNtLrNFq_1656094443084.wav",
+      "phonetic": null,
+      "glosses": {
+        "en": "ball woven from coconut palm, used for sport"
+      },
+      "speaker_name": "Ruth Rudolph",
+      "example_sentence": null,
+      "lng": 154.942,
+      "lat": 3.845
     }
   ]
 }

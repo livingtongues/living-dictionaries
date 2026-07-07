@@ -2,7 +2,7 @@
   import type { ZoomTransform } from 'd3'
   import type { MapDict } from '../types'
   import type { MapColors } from './theme-colors'
-  import type { Cluster } from './view-helpers'
+  import type { Cluster, PlacedLabel } from './view-helpers'
   import type { SsrMap } from './ssr-map'
   import { geoContains, geoPath, select, zoom, zoomIdentity } from 'd3'
   import { onMount } from 'svelte'
@@ -12,7 +12,7 @@
   import country_labels from './data/country-labels.json'
   import { fit_equal_earth, MAX_ZOOM, MIN_ZOOM } from './projection'
   import { read_map_colors } from './theme-colors'
-  import { cluster_points, create_label_placer, view_bbox } from './view-helpers'
+  import { apply_forced_merges, cluster_points, create_label_placer, LABEL_HEIGHT, layout_labels, view_bbox } from './view-helpers'
   import IconMdiArrowCollapseAll from '~icons/mdi/arrow-collapse-all'
   import IconMdiClose from '~icons/mdi/close'
   import IconMdiMapMarker from '~icons/mdi/map-marker'
@@ -22,17 +22,25 @@
     bbox: { west: number, south: number, east: number, north: number } | null
   }
 
+  export interface ConnectorLabel {
+    dict_id: string
+    opacity: number
+  }
+
   interface Props {
     dicts: MapDict[]
     ssr_map: SsrMap
     highlighted_dict_id?: string | null
+    /** Card-strip connector: these dicts' labels render red with an entry-count suffix (crossfading via opacity). */
+    connector_labels?: ConnectorLabel[]
     on_view_change?: (view: MapView) => void
   }
 
-  const { dicts, ssr_map, highlighted_dict_id = null, on_view_change }: Props = $props()
+  const { dicts, ssr_map, highlighted_dict_id = null, connector_labels = [], on_view_change }: Props = $props()
   const t = $derived(page.data.t)
 
   const located_dicts = $derived(dicts.filter(dict => dict.lat !== null && dict.lng !== null))
+  const dict_by_id = $derived(new Map(located_dicts.map(dict => [dict.id, dict])))
 
   let container: HTMLDivElement = $state()
   let canvas: HTMLCanvasElement = $state()
@@ -72,6 +80,17 @@
   let cities_loading = false
   let hint_timeout: ReturnType<typeof setTimeout> | null = null
   const text_widths: Record<string, number> = {}
+
+  /** Click depth: 0 world → 1 country fit → 2 the closer third level (declustered). */
+  let zoom_depth = 0
+  /** Settled-view force layout of dict labels (offsets relative to each dot). */
+  let label_layout = new Map<string, PlacedLabel>()
+  /** Level-2 singles whose label could not be placed — folded into a nearby cluster. */
+  let merged_ids = new Set<string>()
+  let layout_key = ''
+  let last_transform_change = 0
+  let layout_retry_timeout: ReturnType<typeof setTimeout> | null = null
+  const LAYOUT_SETTLE_MS = 150
 
   function rebuild_geometry() {
     if (!container)
@@ -238,6 +257,107 @@
     return true
   }
 
+  function connector_text(dict: MapDict): string {
+    return `${dict.name} · ${dict.entry_count.toLocaleString(page.data.locale || 'en')} ${t('home_v2.entries')}`
+  }
+
+  /** Halo + fill text at a known position (already placed by the force layout). */
+  function draw_plain_label({ text, x, y, font, fill, alpha = 1, align = 'left' }: {
+    text: string
+    x: number
+    y: number
+    font: string
+    fill: string
+    alpha?: number
+    align?: 'left' | 'center'
+  }) {
+    context.globalAlpha = alpha
+    context.font = font
+    context.textAlign = align
+    context.strokeStyle = colors.label_halo
+    context.lineWidth = 3
+    context.lineJoin = 'round'
+    context.strokeText(text, x, y)
+    context.fillStyle = fill
+    context.fillText(text, x, y)
+    context.globalAlpha = 1
+    context.textAlign = 'left'
+  }
+
+  /** Thin blue line from a dot to its displaced label box. */
+  function draw_leader({ dot, box }: { dot: { x: number, y: number }, box: { x: number, y: number, width: number, height: number } }) {
+    const target_x = Math.max(box.x, Math.min(box.x + box.width, dot.x))
+    const target_y = Math.max(box.y, Math.min(box.y + box.height, dot.y))
+    const dx = target_x - dot.x
+    const dy = target_y - dot.y
+    const distance = Math.hypot(dx, dy)
+    if (distance < 6)
+      return
+    const start = 4.5 / distance
+    context.beginPath()
+    context.moveTo(dot.x + dx * start, dot.y + dy * start)
+    context.lineTo(target_x, target_y)
+    context.strokeStyle = colors.dot
+    context.globalAlpha = 0.6
+    context.lineWidth = 1
+    context.stroke()
+    context.globalAlpha = 1
+  }
+
+  /**
+   * Recompute the dict-label force layout once the view has settled (debounced
+   * — during zoom/pan animation the previous offsets keep riding their dots).
+   */
+  function maybe_refresh_layout({ declustered, base_clusters, dict_font }: {
+    declustered: boolean
+    base_clusters: Cluster<MapDict>[]
+    dict_font: string
+  }) {
+    const key = `${transform.k.toFixed(3)}|${transform.x.toFixed(1)}|${transform.y.toFixed(1)}|${declustered}|${width}x${height}`
+    if (key === layout_key)
+      return
+    if (performance.now() - last_transform_change < LAYOUT_SETTLE_MS) {
+      if (!layout_retry_timeout) {
+        layout_retry_timeout = setTimeout(() => {
+          layout_retry_timeout = null
+          schedule_draw()
+        }, LAYOUT_SETTLE_MS + 20)
+      }
+      return
+    }
+    layout_key = key
+    const bounds = { width, height }
+    const make_items = (clusters: Cluster<MapDict>[]) => clusters
+      .filter(cluster => cluster.count === 1)
+      .map((cluster) => {
+        const [dict] = cluster.items
+        return { id: dict.id, x: cluster.x, y: cluster.y, width: measure(dict.name, dict_font) + 4, priority: dict.entry_count }
+      })
+    const make_obstacles = (clusters: Cluster<MapDict>[]) => clusters.map((cluster) => {
+      const radius = cluster.count > 1 ? Math.min(4 + cluster.count * 0.45, 10) : 3.5
+      return { x: cluster.x - radius, y: cluster.y - radius, width: radius * 2, height: radius * 2 }
+    })
+
+    if (declustered) {
+      // level 3: everything is its own dot and EVERY dot gets a name
+      merged_ids = new Set()
+      const { placed } = layout_labels({ items: make_items(base_clusters), obstacles: make_obstacles(base_clusters), bounds, guarantee: true })
+      label_layout = new Map(placed.map(label => [label.id, label]))
+      return
+    }
+    // level 2: no unlabeled lone dots — the unplaceable ones become clusters
+    const first = layout_labels({ items: make_items(base_clusters), obstacles: make_obstacles(base_clusters), bounds, guarantee: false })
+    if (!first.failed.length) {
+      merged_ids = new Set()
+      label_layout = new Map(first.placed.map(label => [label.id, label]))
+      return
+    }
+    merged_ids = new Set(first.failed)
+    const merged_clusters = apply_forced_merges({ clusters: base_clusters, merged_ids, get_id: dict => dict.id })
+    const second = layout_labels({ items: make_items(merged_clusters), obstacles: make_obstacles(merged_clusters), bounds, guarantee: true })
+    label_layout = new Map(second.placed.map(label => [label.id, label]))
+  }
+
   function draw() {
     if (!context || !base_projection || !land_path || !colors)
       return
@@ -275,33 +395,76 @@
     const label_font = `500 10.5px ${font_family}`
     const dict_font = `600 11px ${font_family}`
 
-    // dictionary dots (clustered while zoomed out)
-    const on_screen = []
+    // dictionary dots — clustered while zoomed out, fully individual at level 3
+    const on_screen: { x: number, y: number, item: MapDict }[] = []
     for (const dot of base_dots) {
       const [x, y] = screen_of(dot.x, dot.y)
       if (x < -20 || x > width + 20 || y < -20 || y > height + 20)
         continue
       on_screen.push({ x, y, item: dot.dict })
     }
-    visible_clusters = cluster_points({ points: on_screen, bin_size: k < 4 ? 14 : 7 })
+    const declustered = (zoom_depth >= 2 && k >= 3) || k >= 8
+    const labels_active = zoom_depth >= 1 || k >= 3.5
+    const base_clusters = declustered
+      ? on_screen.map(point => ({ x: point.x, y: point.y, count: 1, items: [point.item] }))
+      : cluster_points({ points: on_screen, bin_size: k < 4 ? 14 : 7 })
 
-    // dict labels first (our content wins the collision contest)
-    if (k >= 3.5) {
-      const singles = visible_clusters
-        .filter(cluster => cluster.count === 1)
-        .sort((a, b) => b.items[0].entry_count - a.items[0].entry_count)
-        .slice(0, 60)
-      for (const cluster of singles) {
-        draw_label({
-          text: cluster.items[0].name,
-          x: cluster.x + 8,
-          y: cluster.y + 4,
-          font: dict_font,
-          fill: colors.dict_label,
-          halo: colors.label_halo,
-          placer,
-        })
-      }
+    // settled-view force layout: every single dot gets a name (any side, blue
+    // leader when pushed); level-2 singles that can't fit fold into a cluster
+    if (labels_active) {
+      maybe_refresh_layout({ declustered, base_clusters, dict_font })
+    } else if (label_layout.size) {
+      label_layout = new Map()
+      merged_ids = new Set()
+      layout_key = ''
+    }
+    visible_clusters = !declustered && merged_ids.size
+      ? apply_forced_merges({ clusters: base_clusters, merged_ids, get_id: dict => dict.id })
+      : base_clusters
+
+    const singles_pos: Record<string, { x: number, y: number }> = {}
+    for (const cluster of visible_clusters) {
+      if (cluster.count === 1)
+        singles_pos[cluster.items[0].id] = { x: cluster.x, y: cluster.y }
+    }
+    const connector_alpha = new Map(connector_labels.filter(label => label.opacity > 0.01).map(label => [label.dict_id, label.opacity]))
+
+    // dict labels first (our content wins the collision contest); the strip's
+    // connector dict renders red with an entry-count suffix, crossfading
+    for (const [id, placed] of label_layout) {
+      const pos = singles_pos[id]
+      const dict = dict_by_id.get(id)
+      if (!pos || !dict)
+        continue
+      const box = { x: pos.x + placed.dx, y: pos.y + placed.dy, width: placed.width, height: placed.height }
+      placer.block(box)
+      if (placed.leader)
+        draw_leader({ dot: pos, box })
+      const baseline_y = box.y + 10.5
+      const alpha = connector_alpha.get(id) ?? 0
+      if (alpha < 0.99)
+        draw_plain_label({ text: dict.name, x: box.x, y: baseline_y, font: dict_font, fill: colors.dict_label, alpha: 1 - alpha })
+      if (alpha > 0.01)
+        draw_plain_label({ text: connector_text(dict), x: box.x, y: baseline_y, font: dict_font, fill: colors.highlight, alpha })
+    }
+
+    // connector dict hidden inside a cluster (or no labels at this zoom yet) —
+    // float its red label just above the dot/cluster the line points at
+    for (const { dict_id, opacity } of connector_labels) {
+      if (opacity <= 0.01 || (label_layout.has(dict_id) && singles_pos[dict_id]))
+        continue
+      const dict = dict_by_id.get(dict_id)
+      if (!dict)
+        continue
+      const cluster = visible_clusters.find(candidate => candidate.items.some(item => item.id === dict_id))
+      if (!cluster)
+        continue
+      const text = connector_text(dict)
+      const text_width = measure(text, dict_font)
+      const x = Math.max(text_width / 2 + 4, Math.min(width - text_width / 2 - 4, cluster.x))
+      const y = cluster.y - 12
+      placer.block({ x: x - text_width / 2, y: y - 11, width: text_width, height: LABEL_HEIGHT })
+      draw_plain_label({ text, x, y, font: dict_font, fill: colors.highlight, alpha: opacity, align: 'center' })
     }
 
     // country labels, progressively by size
@@ -501,10 +664,12 @@
       // already at (or past) this country's fit — a still-grouped cluster gets a
       // third, closer zoom level instead of re-fitting the same country
       if (new_transform.k > transform.k * 1.15) {
+        zoom_depth = 1
         select(canvas).transition().duration(500).call(zoom_behavior.transform, new_transform)
         return
       }
       if (cluster) {
+        zoom_depth = 2 // level 3: clustering off, every dot named
         zoom_toward(seed)
         return
       }
@@ -512,8 +677,10 @@
     }
 
     // cluster over water / unmatched border → gentle zoom toward the crowd
-    if (cluster)
+    if (cluster) {
+      zoom_depth = zoom_depth >= 1 ? 2 : 1
       zoom_toward(seed)
+    }
   }
 
   function on_pointermove(event: PointerEvent) {
@@ -540,11 +707,31 @@
 
   export function reset_view() {
     selected_dict = null
+    zoom_depth = 0
     select(canvas).transition().duration(450).call(zoom_behavior.transform, zoomIdentity)
   }
 
   onMount(() => {
     context = canvas.getContext('2d')
+
+    // dev-only deterministic zoom hook for e2e (tree-shaken from prod builds)
+    if (import.meta.env.DEV) {
+      (window as unknown as { __ld_worldmap?: unknown }).__ld_worldmap = {
+        zoom_to: ({ lng, lat, k, depth }: { lng: number, lat: number, k: number, depth?: number }) => {
+          if (!base_projection)
+            return
+          const projected = base_projection([lng, lat])
+          if (!projected)
+            return
+          if (depth !== undefined)
+            zoom_depth = depth
+          const next = zoomIdentity.translate(width / 2 - projected[0] * k, height / 2 - projected[1] * k).scale(k)
+          select(canvas).transition().duration(400).call(zoom_behavior.transform, next)
+        },
+        state: () => ({ k: transform.k, depth: zoom_depth, labels: label_layout.size, merged: merged_ids.size, clusters: visible_clusters.length }),
+        reset: () => reset_view(),
+      }
+    }
     font_family = getComputedStyle(document.body).fontFamily || 'sans-serif'
     reduced_motion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     colors = read_map_colors(swatches)
@@ -561,6 +748,7 @@
       .on('zoom', (event) => {
         ({ transform } = event)
         zoom_level = transform.k
+        last_transform_change = performance.now()
         hover_tip = null
         schedule_draw()
       })
@@ -601,11 +789,14 @@
       scheme_query.removeEventListener('change', on_scheme_change)
       if (hint_timeout)
         clearTimeout(hint_timeout)
+      if (layout_retry_timeout)
+        clearTimeout(layout_retry_timeout)
     }
   })
 
   $effect(() => {
     void highlighted_dict_id
+    void connector_labels
     if (context)
       schedule_draw()
   })

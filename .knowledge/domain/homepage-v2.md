@@ -47,18 +47,59 @@ to reach ~region level, labels (country/state/city) matter as you zoom.
   alive at k=1 and 110m is much cheaper per frame.
 - **Zoom has 3 levels**: world → country fit → if a clicked country fit wouldn't move the view
   (new k ≤ current×1.15), a still-grouped cluster falls through to a ×2.2 `zoom_toward` step.
+  A `zoom_depth` counter (0 world / 1 country / 2 the third step; reset by `reset_view`) drives
+  declustering: at **depth ≥ 2 (and k ≥ 3), or k ≥ 8**, clustering turns fully OFF — every dot is
+  its own labeled marker.
+- **Label force-layout — no unlabeled dots at zoom (round 3, 2026-07-07)**: once labels are active
+  (`zoom_depth ≥ 1` or k ≥ 3.5) a settled-view (debounced ~150ms after the last transform change)
+  force layout places a name for every SINGLE dot — `layout_labels` in `view-helpers.ts` tries
+  snug sides (right/left/above/below/corners) then rings outward, rejecting overlaps with placed
+  labels + dot obstacles + the canvas edge; displaced boxes get a thin blue leader line dot→label.
+  **Level 2** (clustered) runs it with `guarantee:false`: any single that can't be placed is folded
+  into the nearest cluster (`apply_forced_merges`, ≤48px) so it shows as a `②`-style count instead
+  of a nameless dot — Jacob's rule "a lone dot must show its name; if too tight, it's a cluster."
+  **Level 3** (declustered) runs `guarantee:true`: everything is placed even if it must overlap
+  (last resort). The layout is a plain `Map`/`Record` recomputed only when the view settles (keyed
+  on transform+size), NOT per frame. Invariants proven live via the dev hook's `state()`: L2 India
+  labels==singles (0 merges typical), L3 labels==clusters (fully declustered).
 - **Mobile**: the map is full-bleed to the screen edge (HeroUnit zeroes `.hero-constrained`
   padding + `.map-frame` radius ≤640px).
 - **Connector line (2026-07-07)**: ONE red line everywhere (desktop falloff set removed) — the
   strip-center or hovered/playing card; other visible cards' lines stay mounted at opacity 0 and
   are keyed by `card.id` (index-suffixed keys recreated elements and skipped the CSS transition —
   the old harsh mobile switching) so the 250ms crossfade runs on handoff.
+- **Red connector LABEL is drawn on the canvas, not SVG (round 3)**: HeroUnit no longer floats an
+  SVG `<text>` mid-line. It steps a smoothed per-dict alpha map (rAF, plain `Record` — SvelteMap
+  would be wrong here) and passes `connector_labels: {dict_id, opacity}[]` to WorldMap. The canvas
+  draws the connector dict's label FIRST (wins the collision contest) in the highlight red with a
+  `· N entries` suffix, at the dict's own force-laid label position, suppressing the blue copy
+  (crossfading blue↔red by `1-alpha`/`alpha`). If the dict is hidden inside a cluster (or at world
+  zoom where no labels are laid out yet) the red label floats just above the cluster/dot the line
+  points at. `--world-aspect` unchanged.
+- **Dev-only zoom hook** (`import.meta.env.DEV`, tree-shaken from prod): WorldMap's onMount exposes
+  `window.__ld_worldmap = { zoom_to({lng,lat,k,depth}), state(), reset() }` for deterministic e2e
+  (pixel-hunting the tap-driven canvas is flaky; `state()` returns `{k,depth,labels,merged,clusters}`).
 - **Canvas theming**: hidden swatch divs styled with theme vars/color-mix → `getComputedStyle`
   → canvas colors; re-read on `<html>` class MutationObserver + prefers-color-scheme change.
   (Canvas can't resolve CSS vars itself.)
 
 Regenerating label data: `node site/scripts/build-map-data.mjs` (downloads NE geojson to /tmp,
 outputs are committed; eslint-ignored as generated).
+
+## Homepage hero extras (round 3, 2026-07-07)
+
+- **Strip narrows to in-view dicts** (`WordCards`): once the map is zoomed (`map_view.k ≥ 2`,
+  debounced 400ms) the card strip shows STRICTLY the featured cards whose dict falls in the
+  viewport bbox; **zero in view → the full shuffled strip** (no pad-to-N with misleading
+  out-of-view cards — that behavior was removed). The bbox is Equal-Earth-approximate (corner+edge
+  samples) so a far-Pacific card can occasionally leak into a wide continental view — acceptable.
+- **Quick-jump pills** (`QuickJump.svelte`, under `HeroSearch` on `/home-preview`): logged-in users
+  with dictionaries see "My Dictionaries" (their `$my_dictionaries`); everyone else sees "Recently
+  viewed" from a new `visited_dictionaries` localStorage list (`$lib/state/visited-dicts.ts`,
+  most-recent-first, cap 10, written from the `[dictionaryId]/+layout.svelte` open effect). Up to 3
+  pills + a `+N more` pill that expands the rest inline. Replaced the old rough
+  `my_dictionaries.slice(0,5)` row (which also showed 5 random big dicts for no-history visitors —
+  dropped since the map now covers discovery).
 
 ## Word showcase (featured_entries)
 

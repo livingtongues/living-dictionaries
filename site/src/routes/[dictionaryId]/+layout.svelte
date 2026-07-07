@@ -7,6 +7,7 @@
   import Header from '$lib/components/shell/Header.svelte'
   import { track } from '$lib/debug/remote-log'
   import { DICTIONARY_OPENED } from '$lib/debug/log-events'
+  import { record_visited_dict } from '$lib/state/visited-dicts'
   import './custom-fonts.css'
 
   const { data, children } = $props()
@@ -24,6 +25,7 @@
     if (id && id !== last_opened_dict_id) {
       last_opened_dict_id = id
       track({ event: DICTIONARY_OPENED, props: { dictionary_id: id, public: dictionary.public } })
+      record_visited_dict({ id, url: dictionary.url, name: dictionary.name })
     }
   })
 </script>

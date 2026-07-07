@@ -48,20 +48,18 @@
     }, 400)
   })
 
-  const MIN_CARDS = 8
+  /** Strictly the dictionaries in view once zoomed; zero in view → the full world strip. */
   const displayed = $derived.by(() => {
     if (!bbox_filter)
       return order
     const inside = order.filter(card => card.lng !== null && card.lat !== null
       && bbox_contains({ bbox: bbox_filter, lng: card.lng, lat: card.lat }))
-    if (inside.length >= MIN_CARDS)
-      return inside
-    const outside = order.filter(card => !inside.includes(card))
-    return [...inside, ...outside.slice(0, MIN_CARDS - inside.length)]
+    return inside.length ? inside : order
   })
 
   /** Duplicate the track when it can loop seamlessly (enough cards to overflow). */
-  const looped = $derived(displayed.length >= MIN_CARDS ? [...displayed, ...displayed] : displayed)
+  const LOOP_MIN = 8
+  const looped = $derived(displayed.length >= LOOP_MIN ? [...displayed, ...displayed] : displayed)
 
   function set_active(id: string | null) {
     hovered_id = id
