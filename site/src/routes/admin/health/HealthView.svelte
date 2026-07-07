@@ -262,20 +262,23 @@
           <div class="ver-sub">SqliteError / dropped column · ship a migration</div>
         </div>
       </div>
-      <table class="src-table">
-        <thead><tr><th>Route</th><th>Fault</th><th>Status</th><th>Last seen</th><th>Count</th></tr></thead>
-        <tbody>
-          {#each server_faults.clusters as cluster (`${cluster.route}|${cluster.message}`)}
-            <tr class:drift-row={cluster.is_schema_drift}>
-              <td>{cluster.route ?? '—'}</td>
-              <td>{#if cluster.is_schema_drift}<span class="drift-tag" title="Schema drift — post-migration regression">drift</span> {/if}{cluster.message}</td>
-              <td>{cluster.statuses ?? '—'}</td>
-              <td>{ago(cluster.last_seen)}</td>
-              <td class="danger">{format_number(cluster.count)}</td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
+      <details class="rows">
+        <summary>Show {format_number(server_faults.clusters.length)} fault class{server_faults.clusters.length === 1 ? '' : 'es'}</summary>
+        <table class="src-table">
+          <thead><tr><th>Route</th><th>Fault</th><th>Status</th><th>Last seen</th><th>Count</th></tr></thead>
+          <tbody>
+            {#each server_faults.clusters as cluster (`${cluster.route}|${cluster.message}`)}
+              <tr class:drift-row={cluster.is_schema_drift}>
+                <td>{cluster.route ?? '—'}</td>
+                <td>{#if cluster.is_schema_drift}<span class="drift-tag" title="Schema drift — post-migration regression">drift</span> {/if}{cluster.message}</td>
+                <td>{cluster.statuses ?? '—'}</td>
+                <td>{ago(cluster.last_seen)}</td>
+                <td class="danger">{format_number(cluster.count)}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </details>
     {/if}
   </section>
 
@@ -344,14 +347,17 @@
             <div class="ver-sub">{format_number(errors_by_version.deploy_tail_errors)} within {30}min of a build's first appearance — churn, not a regression</div>
           </div>
         </div>
-        <table class="src-table">
-          <thead><tr><th>Build</th><th>Errors</th></tr></thead>
-          <tbody>
-            {#each errors_by_version.versions as row (row.version)}
-              <tr><td>{short_version(row.version)}{row.is_current ? ' (current)' : ''}</td><td class:danger={!row.is_current}>{format_number(row.errors)}</td></tr>
-            {/each}
-          </tbody>
-        </table>
+        <details class="rows">
+          <summary>Show {format_number(errors_by_version.versions.length)} build{errors_by_version.versions.length === 1 ? '' : 's'}</summary>
+          <table class="src-table">
+            <thead><tr><th>Build</th><th>Errors</th></tr></thead>
+            <tbody>
+              {#each errors_by_version.versions as row (row.version)}
+                <tr><td>{short_version(row.version)}{row.is_current ? ' (current)' : ''}</td><td class:danger={!row.is_current}>{format_number(row.errors)}</td></tr>
+              {/each}
+            </tbody>
+          </table>
+        </details>
       {/if}
     </section>
 
@@ -441,19 +447,22 @@
           </tbody>
         </table>
         {#if sync_health.stuck.length}
-          <table class="src-table stuck-table">
-            <thead><tr><th>Stuck tab (user · dict)</th><th>Build</th><th>Last</th><th>Rows</th></tr></thead>
-            <tbody>
-              {#each sync_health.stuck as row (`${row.user_id}|${row.dict_id}`)}
-                <tr>
-                  <td>{row.user_id ?? 'anon'} · {row.dict_id ?? '—'}</td>
-                  <td class="mono">{short_version(row.app_version)}</td>
-                  <td class="nowrap">{ago(row.last_seen)}</td>
-                  <td>{format_number(row.count)}</td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
+          <details class="rows">
+            <summary>Show {format_number(sync_health.stuck.length)} stuck tab{sync_health.stuck.length === 1 ? '' : 's'}</summary>
+            <table class="src-table stuck-table">
+              <thead><tr><th>Stuck tab (user · dict)</th><th>Build</th><th>Last</th><th>Rows</th></tr></thead>
+              <tbody>
+                {#each sync_health.stuck as row (`${row.user_id}|${row.dict_id}`)}
+                  <tr>
+                    <td>{row.user_id ?? 'anon'} · {row.dict_id ?? '—'}</td>
+                    <td class="mono">{short_version(row.app_version)}</td>
+                    <td class="nowrap">{ago(row.last_seen)}</td>
+                    <td>{format_number(row.count)}</td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </details>
         {/if}
       </div>
     {/if}
@@ -729,21 +738,24 @@
     {#if clusters.length === 0}
       <p class="muted">No errors recorded. 🎉</p>
     {:else}
-      <table class="err-table">
-        <thead><tr><th>#</th><th>Lvl</th><th>Src</th><th>Users</th><th>Last</th><th>Message</th></tr></thead>
-        <tbody>
-          {#each clusters as row (row.message + row.stack_head)}
-            <tr class:noise={row.is_noise}>
-              <td class="nowrap">{format_number(row.count)}</td>
-              <td class="lvl">{row.level}</td>
-              <td>{row.sources}</td>
-              <td>{format_number(row.users)}</td>
-              <td class="nowrap mono">{short_time(row.last_seen)}</td>
-              <td class="msg" title={row.stack_head}>{row.is_noise ? '⚪ ' : ''}{row.message}</td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
+      <details class="rows">
+        <summary>Show {format_number(clusters.length)} error cluster{clusters.length === 1 ? '' : 's'}</summary>
+        <table class="err-table">
+          <thead><tr><th>#</th><th>Lvl</th><th>Src</th><th>Users</th><th>Last</th><th>Message</th></tr></thead>
+          <tbody>
+            {#each clusters as row (row.message + row.stack_head)}
+              <tr class:noise={row.is_noise}>
+                <td class="nowrap">{format_number(row.count)}</td>
+                <td class="lvl">{row.level}</td>
+                <td>{row.sources}</td>
+                <td>{format_number(row.users)}</td>
+                <td class="nowrap mono">{short_time(row.last_seen)}</td>
+                <td class="msg" title={row.stack_head}>{row.is_noise ? '⚪ ' : ''}{row.message}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </details>
     {/if}
   </section>
 </div>
@@ -985,6 +997,12 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 0.8125rem;
+    /* A many-column diagnostic table's min-content can exceed a phone's width;
+       scroll it locally instead of pushing the whole page into a sideways
+       scroll (responsive-table pattern — the block box scrolls, the rows still
+       lay out as a table inside it). */
+    display: block;
+    overflow-x: auto;
   }
   th {
     text-align: left;
@@ -1157,4 +1175,19 @@
     .perf-summary { grid-template-columns: 1fr; }
     .speed-grid { grid-template-columns: 1fr; }
   }
+  /* Collapse long error/row lists behind a toggle — the verdict/stat cards above
+     stay visible, the raw rows are opt-in (mirrors house's HealthView). */
+  .rows { margin-top: 0.6rem; }
+  .rows > summary {
+    cursor: pointer;
+    list-style: none;
+    color: var(--color-secondary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.25rem 0;
+  }
+  .rows > summary::-webkit-details-marker { display: none; }
+  .rows > summary::before { content: '▸ '; }
+  .rows[open] > summary::before { content: '▾ '; }
+  .rows > summary:hover { color: var(--color); }
 </style>

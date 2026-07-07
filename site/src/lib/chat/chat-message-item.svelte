@@ -156,6 +156,10 @@
     line-height: 1.5;
     margin-top: 0.1rem;
     word-break: break-word;
+    /* `anywhere` is the reliable cross-browser break for long URLs/tokens
+       (iOS Safari honours it where `break-word` alone can leak). */
+    overflow-wrap: anywhere;
+    min-width: 0;
   }
   .body :global(p) {
     margin: 0 0 0.25rem;

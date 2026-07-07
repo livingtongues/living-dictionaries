@@ -102,11 +102,24 @@
     border-bottom-right-radius: 0.5rem;
   }
   .seg-text {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 0.3rem;
     padding: 0 0.4rem;
+    max-width: 100%;
     white-space: nowrap;
+  }
+  /* When a segment is too narrow for its name (e.g. an 11% slice on a phone),
+     truncate the NAME with an ellipsis rather than centre-clipping it into an
+     unreadable mid-word fragment ("obile"); the short % stays put. */
+  .seg-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .seg-icon,
+  .seg-pct {
+    flex: none;
   }
   .seg-icon {
     font-size: 0.95rem;

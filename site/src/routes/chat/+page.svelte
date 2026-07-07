@@ -328,6 +328,9 @@
     overflow-y: auto;
     border-right: 1px solid var(--border-color);
     padding-right: 0.75rem;
+    /* Grid item — without this a long room/DM name's min-content can widen the
+       track and force a page-wide horizontal scroll on mobile. */
+    min-width: 0;
   }
   /* The "← Rooms" back button is mobile-only (desktop shows both panes). */
   .rooms-back {
@@ -434,6 +437,10 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
+    /* Grid item — a message with a long unbreakable token/URL (or the composer)
+       has a large min-content; without this the `1fr` track grows past the
+       viewport and the whole page scrolls sideways on mobile. */
+    min-width: 0;
   }
   .thread-head {
     display: flex;
@@ -441,10 +448,13 @@
     gap: 0.75rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border-color);
+    min-width: 0;
   }
   .thread-title {
     font-size: 1.1rem;
     font-weight: 700;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   .members-wrap {
     position: relative;
@@ -477,6 +487,7 @@
   .thread {
     flex: 1;
     min-height: 0;
+    min-width: 0;
     overflow-y: auto;
     padding: 0.5rem 0;
     display: flex;
