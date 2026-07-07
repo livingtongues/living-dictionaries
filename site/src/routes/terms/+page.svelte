@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/state'
-  import Footer from '$lib/components/shell/Footer.svelte'
   import Header from '$lib/components/shell/Header.svelte'
   import LegalPage from '$lib/components/LegalPage.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
@@ -12,8 +11,6 @@
 </Header>
 
 <LegalPage md={terms_md} />
-
-<Footer />
 
 <SeoMetaTags
   title={page.data.t('dictionary.terms_of_use')}

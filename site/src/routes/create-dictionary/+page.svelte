@@ -6,7 +6,6 @@
   import Form from '$lib/components/ui/Form.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
-  import Footer from '$lib/components/shell/Footer.svelte'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
   import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
@@ -419,8 +418,6 @@ Use: ${conlang_use.trim()}`
       }} />
   {/await}
 {/if}
-
-<Footer />
 
 <SeoMetaTags
   title={page.data.t('create.create_new_dictionary')}

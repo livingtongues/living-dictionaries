@@ -75,7 +75,7 @@
         type="button"
         class="audio-btn"
         onclick={toggle_audio}
-        aria-label="{playing ? 'Pause' : 'Play'} {card.lexeme}">
+        aria-label="{playing ? t('misc.pause') : t('misc.play')} {card.lexeme}">
         {#if playing}<IconMdiPause />{:else}<IconMdiPlay />{/if}
       </button>
       <a class="btn-primary btn-default open-entry" href="/{card.dict_url}/entry/{card.entry_id}">

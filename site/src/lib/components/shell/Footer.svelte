@@ -39,13 +39,6 @@
     line-height: 1.25rem;
   }
 
-  @media (min-width: 768px) {
-    footer {
-      position: sticky;
-      bottom: 0;
-    }
-  }
-
   @media print {
     footer {
       display: none;
@@ -98,6 +91,35 @@
   @media (min-width: 640px) {
     .social :global(.icon-inline) {
       margin-top: -0.25rem;
+    }
+  }
+
+  /* Mobile: roomier tap targets and larger social / theme controls (desktop is
+     already comfortable, so these overrides are scoped below the tablet width). */
+  @media (max-width: 767.9px) {
+    footer {
+      padding: 0.625rem 0.75rem;
+      line-height: 1.75rem;
+    }
+
+    .social {
+      padding: 0.4375rem;
+      margin: 0;
+    }
+
+    .social-first {
+      margin-left: 0.375rem;
+    }
+
+    .social :global(.icon-inline) {
+      font-size: 1.6rem;
+      margin-top: -0.375rem;
+    }
+
+    .scheme-toggle :global(button) {
+      padding: 0.4375rem;
+      margin: 0;
+      font-size: 1.5rem;
     }
   }
 </style>

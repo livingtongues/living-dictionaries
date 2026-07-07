@@ -43,7 +43,9 @@ Authoritative shapes: `site/src/lib/types/` (Drizzle-derived) and the schemas in
 `site/src/lib/db/schemas/`. Related-entries design rationale: `.knowledge/domain/related-entries-model.md`.
 
 ## Routes (high level)
-`/` (Mapbox globe of dictionaries) · `/about` · `/tutorials` · `/dictionaries` · `/account` ·
+`/` (homepage — canvas Equal Earth map of dictionaries + hero search, curated word-card strip,
+build-baked stats, features grid; see `.knowledge/domain/homepage-v2.md`) · `/about` ·
+`/tutorials` · `/dictionaries` · `/account` ·
 `/create-dictionary` · `/[dictionaryId]/*` (entries list — unified search with
 Words·Sentences·Texts scope chips [admin-3 preview; the texts/sentences corpus pipeline, see
 `.issues/texts-sentences-pipeline.md`] — entry detail, sentence detail, `texts` browse +
@@ -59,9 +61,7 @@ super admins) · `/translate` (standalone translator backend — server-authorit
 `/api/translate/*`, gate = ≥1 `translator_languages` row or admin) · `/admin/*` (local-first super-admin: dashboard + ntfy onboarding, messages incl.
 unmatched→match + AI triage, users, dictionaries, buckets [serve/tolerate/delete triage of every
 dict via `dictionaries.bucket`], analytics, schema graph, sync, triage-examples,
-legal-review, featured-words) · `/home-preview` (homepage v2 preview — canvas Equal Earth map,
-curated word-card strip, build-baked stats; replaces `/` at go-live; see
-`.knowledge/domain/homepage-v2.md`) · `/og` (share image) · `/terms` · `/privacy-policy` · `/setlocale`.
+legal-review, featured-words) · `/og` (share image) · `/terms` · `/privacy-policy` · `/setlocale`.
 
 Inbound email is AI-triaged by `$lib/agent/*` (xAI Grok, env-gated on `XAI_API_KEY`; classifies →
 auto-assigns/auto-resolves → drafts a reply). See `.knowledge/admin/ai-triage-pipeline.md`.

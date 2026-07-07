@@ -29,6 +29,15 @@
 
   const { children }: Props = $props()
 
+  // Footer belongs on informational pages, not the app-workspace pages. Hidden on
+  // dictionary/entry pages (where a bottom bar is in the way), admin, chat,
+  // translate, and the tile-map dev tool. Unknown routes (404) default to showing.
+  const footer_hidden_prefixes = ['/[dictionaryId]', '/admin', '/chat', '/translate', '/tile-map']
+  const show_footer = $derived(!footer_hidden_prefixes.some(prefix => page.route.id?.startsWith(prefix)))
+  // The dictionaries list fills the viewport exactly so its table scrolls
+  // internally with no page scrollbar; other footer pages scroll normally.
+  const fit_viewport = $derived(page.route.id === '/dictionaries')
+
   onMount(() => {
     init_color_scheme()
     init_pwa_install()
@@ -103,6 +112,46 @@
 <Toasts />
 <ViewAsBanner />
 
-<div id="direction" dir={page.data.t('page.direction') as 'ltr' | 'rtl' | 'auto'}>
-  {@render children?.()}
+<div
+  id="direction"
+  dir={page.data.t('page.direction') as 'ltr' | 'rtl' | 'auto'}
+  class:footer-layout={show_footer}
+  class:fit={fit_viewport}>
+  {#if show_footer}
+    <div class="footer-layout-main">
+      {@render children?.()}
+    </div>
+    {#await import('$lib/components/shell/Footer.svelte') then { default: Footer }}
+      <Footer />
+    {/await}
+  {:else}
+    {@render children?.()}
+  {/if}
 </div>
+
+<style>
+  .footer-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  .footer-layout-main {
+    flex: 1 0 auto;
+  }
+
+  /* Fit-to-viewport pages (dictionaries list): the shell is exactly the viewport
+     so the inner table scrolls on its own and the page itself never scrolls. */
+  .footer-layout.fit {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .footer-layout.fit .footer-layout-main {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+</style>

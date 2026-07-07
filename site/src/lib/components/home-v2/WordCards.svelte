@@ -3,6 +3,7 @@
   import type { MapView } from './map/WorldMap.svelte'
   import { onMount } from 'svelte'
   import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
+  import { page } from '$app/state'
   import { image_src, url_from_storage_path } from '$lib/utils/media-url'
   import { bbox_contains } from './map/view-helpers'
   import FeaturedEntryFullscreen from './FeaturedEntryFullscreen.svelte'
@@ -17,6 +18,7 @@
   }
 
   const { cards, map_view = null, on_active_dict }: Props = $props()
+  const t = $derived(page.data.t)
 
   let scroller: HTMLDivElement = $state()
   let reduced_motion = false
@@ -241,7 +243,7 @@
         type="button"
         class="play"
         onclick={event => toggle_audio(event, card)}
-        aria-label="{playing_id === card.id ? 'Pause' : 'Play'} {card.lexeme}">
+        aria-label="{playing_id === card.id ? t('misc.pause') : t('misc.play')} {card.lexeme}">
         {#if playing_id === card.id}<IconMdiPause />{:else}<IconMdiPlay />{/if}
       </button>
     </a>

@@ -104,7 +104,7 @@
       <button
         type="button"
         class="clear"
-        aria-label="Clear"
+        aria-label={t('misc.clear')}
         onclick={() => { query = ''; input_element.focus() }}>
         <IconMdiClose style="font-size: 1.25rem" />
       </button>

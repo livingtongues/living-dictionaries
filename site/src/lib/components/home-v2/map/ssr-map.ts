@@ -1,6 +1,6 @@
 import { geoPath } from 'd3-geo'
 import * as topojson from 'topojson-client'
-import countries_topo from '$lib/components/globe/data/countries-110m.json'
+import countries_topo from './data/countries-110m.json'
 import { fit_equal_earth, natural_height } from './projection'
 
 /**

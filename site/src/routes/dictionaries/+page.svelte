@@ -3,7 +3,6 @@
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
-  import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import { dictionary_headers, prepareDictionaryForCsv } from '$lib/export/prepare-dictionaries-for-csv'
@@ -96,8 +95,6 @@
   </ResponsiveTable>
 </div>
 
-<Footer />
-
 <SeoMetaTags
   title={page.data.t('home.list_of_dictionaries')}
   description="A dynamically updated list of all the public dictionaries available on the Living Dictionaries platform. This list includes the names, URLs, GPS coordinates, ISO 639-3 Codes and Glottocodes associated with the Living Dictionaries. Living Dictionaries are language documentation tools that support endangered and under-represented languages"
@@ -106,10 +103,8 @@
 <style>
   .dict-list-panel {
     padding: 0.75rem;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    height: 92vh;
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     background-color: var(--background);

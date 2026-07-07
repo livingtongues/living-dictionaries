@@ -1,9 +1,11 @@
 # Homepage v2 — map stack + word showcase decisions (2026-07-04)
 
-Lives at **`/home-preview`** until go-live (swap with `/` is a separate task; the old Mapbox
-homepage + `/globe` experiment stay untouched until then). Code: `$lib/components/home-v2/`,
-`routes/home-preview/`, `routes/admin/featured-words/`, `routes/api/homepage/export/`,
-`routes/api/admin/featured-entries/`.
+**This IS the live homepage `/`** (swapped in from `/home-preview` on 2026-07-07; the old Mapbox
+homepage + the `/globe` experiment + the whole old-home component cluster `$lib/components/home/`
+were deleted in the same change). Code: `$lib/components/home-v2/`, root `routes/+page.svelte` +
+`+page.server.ts` + `+page.ts`, `routes/admin/featured-words/`, `routes/api/homepage/export/`,
+`routes/api/admin/featured-entries/`. The hero h1 + subline are i18n (`home_v2.headline` /
+`home_v2.subline`); the SEO description/keywords stay hard-coded English (as before the swap).
 
 ## Map stack — why canvas + d3-geo, not Mapbox/MapLibre/protomaps
 
@@ -41,8 +43,10 @@ to reach ~region level, labels (country/state/city) matter as you zoom.
   `WORLD_ASPECT` (~2.06, `aspect-ratio` capped by 58vh) — big monitors used to letterbox vertically
   and expose Antarctica. Applies to both the SSR SVG and the canvas so they line up.
 - **Land derived, not shipped**: land silhouette = `topojson.merge(countries.geometries)` at both
-  resolutions (canvas + SSR) — land-110m/land-50m are NOT imported by home-v2 (kept only for the
-  old /globe + /og). Zoom-tier data (countries-50m, admin1, cities) is idle-prefetched after load
+  resolutions (canvas + SSR) — home-v2 imports the country topojson from
+  `home-v2/map/data/countries-{110m,50m}.json` (moved there from the deleted `$lib/components/globe/`
+  when /globe was removed; land-110m/land-50m are gone — /og keeps its own `routes/og/land-110m.json`).
+  Zoom-tier data (countries-50m, admin1, cities) is idle-prefetched after load
   (`requestIdleCallback`), but draw only *uses* hi-res at k ≥ 2.5: the pulse ring keeps a rAF loop
   alive at k=1 and 110m is much cheaper per frame.
 - **Zoom has 3 levels**: world → country fit → if a clicked country fit wouldn't move the view
@@ -93,7 +97,7 @@ outputs are committed; eslint-ignored as generated).
   viewport bbox; **zero in view → the full shuffled strip** (no pad-to-N with misleading
   out-of-view cards — that behavior was removed). The bbox is Equal-Earth-approximate (corner+edge
   samples) so a far-Pacific card can occasionally leak into a wide continental view — acceptable.
-- **Quick-jump pills** (`QuickJump.svelte`, under `HeroSearch` on `/home-preview`): logged-in users
+- **Quick-jump pills** (`QuickJump.svelte`, under `HeroSearch` on the homepage `/`): logged-in users
   with dictionaries see "My Dictionaries" (their `$my_dictionaries`); everyone else sees "Recently
   viewed" from a new `visited_dictionaries` localStorage list (`$lib/state/visited-dicts.ts`,
   most-recent-first, cap 10, written from the `[dictionaryId]/+layout.svelte` open effect). Up to 3
@@ -149,9 +153,9 @@ outputs are committed; eslint-ignored as generated).
 - **Dictionaries stat = public + unlisted** (`public` col = 1 OR `bucket = 'unlisted'`), computed
   in `compute_homepage_stats`. It also bakes a separate `public_dictionaries` (public col only) for
   the footer. Both are build-time baked into `homepage-baked.json` — the footer reads them from
-  that JSON too, NOT a per-visitor query (the only per-request DB touch on `/home-preview` is the
+  that JSON too, NOT a per-visitor query (the only per-request DB touch on `/` is the
   single `map_dicts` SELECT for the dots/search). Consolidating `public` col → `bucket` is a
   logged follow-up (`.issues/dictionary-public-vs-bucket-consolidation.md`).
 - **Agent/API diagram** ("Turn archives into living data") is **admin-level-3 only** for now
-  (still being iterated) — gated in `home-preview/+page.svelte` on `auth_user.admin_level >= 3`.
+  (still being iterated) — gated in the homepage `+page.svelte` on `auth_user.admin_level >= 3`.
 - 435 total videos — weak next to the other numbers; flagged to Jacob whether to keep showing.

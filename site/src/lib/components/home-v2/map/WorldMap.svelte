@@ -8,7 +8,7 @@
   import { onMount } from 'svelte'
   import * as topojson from 'topojson-client'
   import { page } from '$app/state'
-  import countries110_topo from '$lib/components/globe/data/countries-110m.json'
+  import countries110_topo from './data/countries-110m.json'
   import country_labels from './data/country-labels.json'
   import { fit_equal_earth, MAX_ZOOM, MIN_ZOOM } from './projection'
   import { read_map_colors } from './theme-colors'
@@ -144,7 +144,7 @@
       return
     hi_res_loading = true
     try {
-      const countries50 = await import('$lib/components/globe/data/countries-50m.json').then(module => module.default)
+      const countries50 = await import('./data/countries-50m.json').then(module => module.default)
       const path = geoPath(base_projection).digits(1)
       const land = topojson.merge(countries50 as any, (countries50 as any).objects.countries.geometries)
       const borders = topojson.mesh(countries50 as any, (countries50 as any).objects.countries, (a: any, b: any) => a !== b)

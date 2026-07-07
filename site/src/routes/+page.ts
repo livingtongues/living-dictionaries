@@ -1,19 +1,6 @@
-import type { DictionaryView } from '$lib/types'
 import type { PageLoad } from './$types'
-import { api_dictionaries_list } from '$api/dictionaries/_call'
 
-export const load: PageLoad = ({ fetch }) => {
-  async function get_dictionaries(visibility: 'public' | 'private') {
-    const { data, error } = await api_dictionaries_list(visibility, { fetch })
-    if (error) {
-      console.error(`Could not load ${visibility} dictionaries: ${error.message}`)
-      return [] as DictionaryView[]
-    }
-    return data.dictionaries
-  }
-
-  return {
-    get_public_dictionaries: () => get_dictionaries('public'),
-    get_private_dictionaries: () => get_dictionaries('private'),
-  }
-}
+// Pass-through: the server load provides map_dicts + ssr_map; parent (root
+// universal layout) data merges automatically. The explicit universal load
+// keeps the generated PageData types happy (same quirk as /admin/analytics).
+export const load: PageLoad = ({ data }) => data

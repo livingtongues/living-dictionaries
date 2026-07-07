@@ -4,7 +4,6 @@
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
-  import Footer from '$lib/components/shell/Footer.svelte'
   import { dev } from '$app/environment'
   import { init_remote_logging, log_event } from '$lib/debug/remote-log'
   import { http_status_to_log_level } from '$lib/debug/classify-error'
@@ -66,8 +65,6 @@
     </div>
   {/if}
 </div>
-
-<Footer />
 
 <style>
   .error-panel {

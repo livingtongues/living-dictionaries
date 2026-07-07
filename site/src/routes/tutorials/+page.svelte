@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
-  import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 </script>
 
@@ -57,8 +56,6 @@
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowfullscreen></iframe>
 </div>
-
-<Footer />
 
 <SeoMetaTags
   title={page.data.t('header.tutorials')}
