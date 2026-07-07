@@ -84,7 +84,7 @@ export function create_entries_ui_store({
   if (browser && connection)
     void load_bundle_with_retry(connection)
 
-  async function load_bundle_with_retry(conn: DictConnection, attempt = 0): Promise<void> {
+  async function load_bundle_with_retry(conn: DictConnection, attempt = 0, boot_attempt = 0): Promise<void> {
     try {
       const bundle = await read_dict_bundle({ connection: conn })
       await init_entries({
@@ -122,6 +122,18 @@ export function create_entries_ui_store({
         globals.__ld_orama_watchers[dictionary_id] = create_orama_watcher({ connection: conn, dict_db, initial_watermark: watermark })
       }
     } catch (err) {
+      // Cold-boot wait-out: the dict `+layout.ts` now returns before the leader
+      // worker is ready (non-blocking boot), so this first bundle read can fire
+      // while the snapshot is still downloading — the queued RPC times out after
+      // the transport's 20s window (`code === 'timeout'`). Retry with backoff on
+      // its own budget: once the leader is ready the read returns immediately, so
+      // this only spins on genuinely slow boots (big dict + poor connection).
+      // Without it a >20s boot would leave the Orama list empty.
+      if ((err as { code?: string } | null)?.code === 'timeout' && boot_attempt < 6) {
+        await new Promise(resolve => setTimeout(resolve, Math.min(1000 * 2 ** boot_attempt, 8000)))
+        return load_bundle_with_retry(conn, attempt, boot_attempt + 1)
+      }
+
       // Retry on a torn-down-connection error: a concurrent snapshot_expired
       // reset closes the leader's OPFS connection mid-query (SQLITE_MISUSE
       // code 21), which would otherwise leave an EMPTY entry list even though
@@ -138,7 +150,7 @@ export function create_entries_ui_store({
       const max_attempts = snapshot_expired_recently(dictionary_id) ? 2 : 1
       if (attempt < max_attempts && is_transient_connection_error(err)) {
         await new Promise(resolve => setTimeout(resolve, 300 * (attempt + 1)))
-        return load_bundle_with_retry(conn, attempt + 1)
+        return load_bundle_with_retry(conn, attempt + 1, boot_attempt)
       }
       const code = sqlite_code_of(err)
       log_event({

@@ -6,9 +6,8 @@
   import AgentApiDiagram from '$lib/components/home-v2/AgentApiDiagram.svelte'
   import CtaBand from '$lib/components/home-v2/CtaBand.svelte'
   import FeaturesGrid from '$lib/components/home-v2/FeaturesGrid.svelte'
-  import HeroSearch from '$lib/components/home-v2/HeroSearch.svelte'
+  import HeroSearchBar from '$lib/components/home-v2/HeroSearchBar.svelte'
   import HeroUnit from '$lib/components/home-v2/HeroUnit.svelte'
-  import QuickJump from '$lib/components/home-v2/QuickJump.svelte'
   import StatsBand from '$lib/components/home-v2/StatsBand.svelte'
   import Header from '$lib/components/shell/Header.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
@@ -31,8 +30,7 @@
   <section class="hero">
     <h1>{t('home_v2.headline')}</h1>
     <p class="subline">{t('home_v2.subline')}</p>
-    <HeroSearch dicts={map_dicts} />
-    <QuickJump my_dictionaries={$my_dictionaries ?? []} />
+    <HeroSearchBar dicts={map_dicts} my_dictionaries={$my_dictionaries ?? []} />
   </section>
 
   <HeroUnit dicts={map_dicts} {ssr_map} cards={baked.featured_entries} />

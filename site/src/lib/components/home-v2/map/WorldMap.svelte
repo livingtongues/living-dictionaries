@@ -8,6 +8,7 @@
   import { onMount } from 'svelte'
   import * as topojson from 'topojson-client'
   import { page } from '$app/state'
+  import { portal } from '$lib/utils/portal'
   import countries110_topo from './data/countries-110m.json'
   import country_labels from './data/country-labels.json'
   import { fit_equal_earth, MAX_ZOOM, MIN_ZOOM } from './projection'
@@ -67,6 +68,9 @@
   let country_features: GeoJSON.Feature[] = []
   let base_dots: { x: number, y: number, dict: MapDict }[] = []
   let visible_clusters: Cluster<MapDict>[] = []
+  /** Screen boxes of the drawn single-dict name labels — so clicking a label
+   *  opens its popover just like clicking the dot (rebuilt every draw). */
+  let label_hit_boxes: { dict_id: string, x: number, y: number, width: number, height: number }[] = []
   let colors: MapColors | null = null
   let font_family = 'sans-serif'
   let reduced_motion = false
@@ -390,7 +394,7 @@
 
     const placer = create_label_placer()
     const label_font = `500 10.5px ${font_family}`
-    const dict_font = `600 11px ${font_family}`
+    const dict_font = `600 12px ${font_family}`
 
     // dictionary dots — clustered while zoomed out, fully individual at level 3
     const on_screen: { x: number, y: number, item: MapDict }[] = []
@@ -431,6 +435,7 @@
 
     // dict labels first (our content wins the collision contest); the strip's
     // connector dict renders red with an entry-count suffix, crossfading
+    label_hit_boxes = []
     for (const [id, placed] of label_layout) {
       const pos = singles_pos[id]
       const dict = dict_by_id.get(id)
@@ -438,6 +443,7 @@
         continue
       const box = { x: pos.x + placed.dx, y: pos.y + placed.dy, width: placed.width, height: placed.height }
       placer.block(box)
+      label_hit_boxes.push({ dict_id: id, x: box.x, y: box.y, width: box.width, height: box.height })
       if (placed.leader)
         draw_leader({ dot: pos, box })
       const baseline_y = box.y + 10.5
@@ -572,11 +578,25 @@
       }
     }
 
-    // keep popover glued to its dot
+    // keep popover glued to its dot. It's portaled to <body> (position: fixed) so
+    // the map's overflow:hidden can't truncate it — critical on a short mobile map
+    // where the popover is taller than the map. Convert to VIEWPORT coords, clamp
+    // X to the viewport (never off the left/right edge), and flip above/below
+    // toward whichever side has room.
     if (selected_dict && selected_dict.lng !== null) {
       const point = project_point({ lng: selected_dict.lng, lat: selected_dict.lat })
-      if (point)
-        popover_position = { x: Math.max(110, Math.min(width - 110, point.x)), y: point.y, above: point.y > 150 }
+      if (point) {
+        const rect = container.getBoundingClientRect()
+        const vx = rect.left + point.x
+        const vy = rect.top + point.y
+        const half_width = 116 // half the 13.5rem (~216px) popover + a small margin
+        const popover_height = 170
+        const clamped_x = Math.max(half_width, Math.min(window.innerWidth - half_width, vx))
+        const fits_above = vy - 14 - popover_height >= 8
+        const fits_below = vy + 14 + popover_height <= window.innerHeight - 8
+        const above = fits_above ? true : (fits_below ? false : vy >= window.innerHeight - vy)
+        popover_position = { x: clamped_x, y: vy, above }
+      }
     }
 
     canvas_ready = true
@@ -602,6 +622,16 @@
       }
     }
     return best
+  }
+
+  /** A drawn dict-name label under the cursor → its dict (labels sit offset from
+   *  the dot, so they miss find_cluster). A few px of padding for tap-friendliness. */
+  function find_label_dict(x: number, y: number): MapDict | null {
+    for (const box of label_hit_boxes) {
+      if (x >= box.x - 3 && x <= box.x + box.width + 3 && y >= box.y - 3 && y <= box.y + box.height + 3)
+        return dict_by_id.get(box.dict_id) ?? null
+    }
+    return null
   }
 
   /** Screen point → [lng, lat] through the current transform + base projection. */
@@ -663,6 +693,15 @@
       return
     }
 
+    // a dictionary-name label is clickable too → open that dict's popover, same
+    // as tapping the dot itself
+    const label_dict = find_label_dict(x, y)
+    if (label_dict) {
+      selected_dict = label_dict
+      schedule_draw()
+      return
+    }
+
     // a grouping dot OR a bare country click → zoom to that country
     selected_dict = null
     const seed = cluster ? { x: cluster.x, y: cluster.y } : { x, y }
@@ -693,8 +732,11 @@
 
   function on_pointermove(event: PointerEvent) {
     const rect = canvas.getBoundingClientRect()
-    const cluster = find_cluster(event.clientX - rect.left, event.clientY - rect.top)
-    hover_dot = !!cluster
+    const mx = event.clientX - rect.left
+    const my = event.clientY - rect.top
+    const cluster = find_cluster(mx, my)
+    // dots AND their name labels show the pointer cursor (both are clickable)
+    hover_dot = !!cluster || (!cluster && !!find_label_dict(mx, my))
     if (!cluster) {
       hover_tip = null
       return
@@ -737,6 +779,8 @@
           select(canvas).transition().duration(400).call(zoom_behavior.transform, next)
         },
         state: () => ({ k: transform.k, depth: zoom_depth, labels: label_layout.size, merged: merged_ids.size, clusters: visible_clusters.length }),
+        // Drawn dict-name label boxes (screen px) — lets e2e click a label to prove it opens the popover.
+        label_boxes: () => label_hit_boxes.map(box => ({ ...box })),
         reset: () => reset_view(),
       }
     }
@@ -816,6 +860,12 @@
   })
 </script>
 
+<!-- the popover is portaled + position:fixed, so re-glue it to its dot when the
+     page scrolls/resizes (motion users already get this via the pulse rAF loop) -->
+<svelte:window
+  onscroll={() => { if (selected_dict) schedule_draw() }}
+  onresize={() => { if (selected_dict) schedule_draw() }} />
+
 <div class="map" bind:this={container}>
   <svg
     class={['ssr-map', { hidden: canvas_ready }]}
@@ -857,6 +907,7 @@
 
   {#if selected_dict}
     <div
+      use:portal
       class={['popover', { below: !popover_position.above }]}
       style="left: {popover_position.x}px; top: {popover_position.y}px">
       <button type="button" class="popover-close" onclick={() => selected_dict = null} aria-label={t('misc.cancel')}>
@@ -990,7 +1041,7 @@
   }
 
   .popover {
-    position: absolute;
+    position: fixed;
     transform: translate(-50%, calc(-100% - 14px));
     width: 13.5rem;
     padding: 0.75rem;
@@ -998,7 +1049,7 @@
     border: 1px solid var(--border-color);
     border-radius: 0.75rem;
     box-shadow: 0 10px 28px rgb(0 0 0 / 0.22);
-    z-index: 20;
+    z-index: 50;
   }
 
   .popover.below {

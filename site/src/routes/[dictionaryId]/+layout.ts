@@ -84,19 +84,21 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       let cached = globals.__ld_dict_connections[dictionary_id]
       if (!cached) {
         const conn = await open_dict({ dict_id: dictionary_id, has_editor_role: can_edit, auth: {} })
-        // Bootstrap sync. OPFS-backed boots already hold the snapshot on disk,
-        // so the `/changes` round-trip is fire-and-forget — first paint renders
-        // local data and deltas fill in reactively (the apply broadcasts
-        // `tables_changed`, re-querying every store + the Orama feed). A
-        // MemoryVFS fallback boot (pre-iOS-17) starts EMPTY and pull-since-null
-        // is its only data source, so it still blocks to avoid an empty flash.
-        const initial_sync = conn.sync_now().catch(err => log_event({
+        // Bootstrap sync — fire-and-forget so navigation stays instant. `open_dict`
+        // now returns before the leader worker is ready (a cold-boot snapshot
+        // download runs in the background), so this `sync_now()` RPC queues in the
+        // transport until the leader is up; first paint renders the loading state
+        // (or the entry page's server-fetched cold-window content) and deltas fill
+        // in reactively as the sync applies (`tables_changed` re-queries every
+        // store + the Orama feed). The old `if (!is_opfs_backed) await` guard is
+        // gone: `is_opfs_backed` is unknown until ready, and blocking here is
+        // exactly what stalled nav. A MemoryVFS fallback boot (pre-iOS-17) may
+        // flash an empty list briefly before pull-since-null fills it — accepted.
+        void conn.sync_now().catch(err => log_event({
           level: 'error',
           message: 'initial dict sync failed',
           context: { dict_id: dictionary_id, code: (err as { code?: string })?.code ?? null, error: (err as Error)?.message ?? String(err) },
         }))
-        if (!conn.is_opfs_backed)
-          await initial_sync
         cached = { connection: conn, dict_db: create_dict_live_db(conn, { user_id: auth_user.user?.id }), sync_status: new DictSyncStatus(conn) }
         globals.__ld_dict_connections[dictionary_id] = cached
 

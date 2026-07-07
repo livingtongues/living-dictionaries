@@ -45,6 +45,30 @@ fixed 12 s watchdog. See `.issues/leader-worker-boot-hang-robustness.md`.
    `{ dict_id, boot_message, last_stage, attempt, will_retry }` — `last_stage` (from the progress
    ticks) points a stall at the exact phase.
 
+## Main-thread boot is non-blocking (2026-07-07)
+
+The WORKER still awaits the download in the factory (above) — but the **main thread no longer
+awaits the leader's `ready()`**. `open_dict` (`dict-lifecycle.ts`) returns the `DictConnection`
+shim **immediately**; the dict `[dictionaryId]/+layout.ts` load no longer blocks, so navigating
+into a dictionary (homepage "Open entry", entries list, the map "Open dictionary" popover) is
+**instant** even on a cold first open. The shim's queries/execs queue in the transport and resolve
+once the leader announces `ready`; the root-layout `DictBootProgress` bar streams the snapshot
+download % over the already-rendered page.
+
+Three things make instant nav SAFE (spread across files — connect them before touching this):
+- **Entry page** (`entry/[entryId]/+page.ts`) has a "cold window" branch that server-fetches the
+  single entry for immediate real content while the snapshot downloads.
+- **Entries list** shows its `loading` spinner until `read_dict_bundle` resolves.
+- **`entries-ui-store.ts` `load_bundle_with_retry`** retries on `code === 'timeout'` (its own
+  6-attempt budget) — the first bundle read can fire mid-cold-boot and hit the transport's 20 s
+  buffered-request timeout; without the retry a boot > 20 s would leave the Orama list empty.
+  (The reactive `DictTableStore` queries already retried timeouts via `live-query-retry.ts`.)
+
+Trade-off (accepted): a MemoryVFS fallback boot (pre-iOS-17, no OPFS snapshot) can flash an empty
+entries list briefly before pull-since-null fills it — the old `await initial_sync` guard that hid
+that is gone (`is_opfs_backed` is unknown until ready anyway, and awaiting it is what stalled nav).
+The common OPFS path never flashes empty (queries queue → full snapshot data on ready).
+
 ## Cross-app matrix (audited 2026-07-01)
 
 | app | boot download | status |

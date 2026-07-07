@@ -61,9 +61,29 @@ Decisions (from Jacob, 2026-07-07):
 +layout.svelte, +error.svelte, about/create-dictionary/dictionaries/privacy-policy/terms/tutorials
 +page.svelte). Those are NOT mine — Jacob to review/commit together.
 
-## Phase 2 — AI translation fill (AFTER Jacob deploys)
-- [ ] Run `/fill-translations` against prod shared.db (new keys + en_changed triage for headline/subline)
-- [ ] `pnpm i18n:refresh`, verify diff, commit locale files, push
+## Phase 2 — AI translation fill ✅ DONE (2026-07-07, prod)
+- ✅ Backed up prod first: `r2/backups-rolling/db/living/2026-07-07T06-23-45Z.tar.zst`
+- ✅ Verified deploy `e15d3258` mirrored keys into prod: 3 new (`misc.play/pause/clear`),
+     2 changed en (`home_v2.headline/subline`), 8 soft-deleted (pruned).
+- ✅ `en_changed` queue = **0** (headline/subline had no prior translations → just "missing", nothing to triage).
+- ✅ Scope = the whole homepage: **44 keys × 17 locales = 748 missing cells** (all 41 `home_v2.*`
+     never translated during preview + 3 new `misc`). Other homepage keys already translated.
+- ✅ Drafted + inserted all **748** into prod `i18n_translations` (`source='ai'`, `needs_review='ai'`,
+     `updated_by_name='AI (fill-translations)'`, `ON CONFLICT DO NOTHING`) — 44/locale, 0 conflicts.
+     `{count}` tokens preserved; brand `api_ld_label` matches each locale's `misc.LD`;
+     `feature_free_body` keeps the English org name so the link-split still works.
+- ✅ `pnpm i18n:refresh` (pulls prod export) → 17 non-English locale files updated, no `en.json` change.
+- ✅ Validated all 90 locale JSONs parse; full `pnpm test` green (1319 pass).
+- ✅ End-to-end render check: `/` in `es` (LTR) + `he` (RTL) — hero/stats/features/CTA all translated,
+     RTL layout correct, map connector shows "· N ערכים".
+
+### Handoff to Jacob (per commit rule — I did NOT commit)
+- The 17 `src/lib/i18n/locales/*.json` files are staged-ready but **uncommitted**. Review + commit
+  (`i18n: AI translation fill 2026-07-07`) + push → deploy bakes them into the app for end users.
+- **Commit selectively**: the working tree also has an UNRELATED in-flight `HeroSearchBar` refactor
+  (`+page.svelte`, `QuickJump.svelte`, new `HeroSearchBar.svelte`/`.stories.ts`) — not mine.
+  `git add src/lib/i18n/locales/` to keep the i18n commit clean.
+- "Notify translators" on `/translate` is now safe to press (748 AI drafts await review).
 
 ## Notes / findings
 - Mapbox is NOT orphaned: settings/WhereSpoken, [dict]/synopsis/VisualMap, [dict]/entry EntryMedia + GeoTaggingModal all use it.

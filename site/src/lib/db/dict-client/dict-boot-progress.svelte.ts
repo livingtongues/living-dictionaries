@@ -1,8 +1,10 @@
 /**
  * Boot download progress for the per-dict leader worker, surfaced to the boot UI
- * (`routes/DictBootProgress.svelte`, rendered in the ROOT layout because the dict
- * `+layout.ts` load BLOCKS on `open_dict` — the bar has to live above the blocked
- * child layout, and the worker posts progress while that load is pending).
+ * (`routes/DictBootProgress.svelte`, rendered in the ROOT layout as a global
+ * fixed bar). The dict `+layout.ts` load no longer blocks on `open_dict` (nav is
+ * instant; the shim's RPCs queue until the leader is ready), so this bar streams
+ * the cold-boot snapshot download while the already-rendered dict page shows its
+ * loading state.
  *
  * Only the leader tab's worker reports (followers reach a ready leader and never
  * spawn one), and only a COLD boot that actually downloads a snapshot activates

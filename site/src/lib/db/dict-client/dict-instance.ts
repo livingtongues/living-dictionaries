@@ -20,11 +20,14 @@ import { DICT_DB_OPFS_PREFIX } from '$lib/constants'
  * two-instance split does not apply.
  *
  * Boot strategy — `BLOCKING_SNAPSHOT_BOOT_WITH_IDLE_WATCHDOG` (see the named
- * constant below): the leader BLOCKS boot while it fetches → opens → migrates the
- * dict snapshot (the `+layout.ts` load `await`s `open_dict`), and each download
- * chunk + each boot phase `report_progress`-ticks the idle watchdog so a
+ * constant below): the leader BLOCKS its own boot (doesn't announce `ready`)
+ * while it fetches → opens → migrates the dict snapshot, and each download chunk
+ * + each boot phase `report_progress`-ticks the idle watchdog so a
  * slow-but-progressing download is never false-timed-out — only a TRUE stall (no
- * bytes/phase change for the idle window) trips it. Contrast house, which is
+ * bytes/phase change for the idle window) trips it. The MAIN thread no longer
+ * blocks on this: `open_dict` returns the connection shim immediately and its
+ * RPCs queue in the transport until this boot announces ready (so navigation is
+ * instant and the boot bar streams the download). Contrast house, which is
  * naming its `progressive_snapshot_boot` (render-then-fill) side in its own repo.
  *
  * Boot: snapshot drop-in (viewer → public R2, editor → VPS) if the OPFS file

@@ -26,7 +26,6 @@
 
   const own = $derived(my_dictionaries.map(dictionary => ({ id: dictionary.id, url: dictionary.url ?? dictionary.id, name: dictionary.name })))
   const pills = $derived(own.length ? own : visited)
-  const label = $derived(own.length ? t('home.my_dictionaries') : t('home_v2.recently_viewed'))
 
   let expanded = $state(false)
   const shown = $derived(expanded ? pills : pills.slice(0, VISIBLE))
@@ -34,7 +33,6 @@
 
 {#if pills.length}
   <div class="quick-jump">
-    <span class="label">{label}:</span>
     {#each shown as pill (pill.id)}
       <a class="btn btn-sm pill" href="/{pill.url}">{pill.name}</a>
     {/each}
@@ -53,12 +51,6 @@
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
-    margin-top: 1rem;
-  }
-
-  .label {
-    font-size: 0.8125rem;
-    color: var(--color-secondary);
   }
 
   .pill {

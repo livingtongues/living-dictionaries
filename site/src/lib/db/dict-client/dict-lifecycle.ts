@@ -10,8 +10,14 @@ import { get_session_id, log_event } from '$lib/debug/remote-log'
 /**
  * Main-thread lifecycle for the per-dict leader-worker DB. `open_dict` runs the
  * leader election for that dict (one `DbClient` per dict per tab — the winner
- * spawns the leader dedicated worker; followers RPC it over BroadcastChannel),
- * waits for a leader to be ready, and returns the `DictConnection` shim.
+ * spawns the leader dedicated worker; followers RPC it over BroadcastChannel)
+ * and returns the `DictConnection` shim IMMEDIATELY — it does NOT wait for the
+ * leader to be ready. This is what makes navigating into a dictionary instant:
+ * the shim's queries/execs queue in the transport until the leader boots (a
+ * cold-boot snapshot download happens in the background, streamed by the
+ * root-layout `DictBootProgress` bar), so the page renders its loading state
+ * (or the entry page's server-fetched cold-window content) right away instead
+ * of the whole `+layout.ts` load blocking on the download.
  *
  * Clients are cached per dict_id on globalThis for the tab's lifetime (mirrors
  * the `+layout.ts` connection cache). No unload teardown is needed: a dedicated
@@ -33,6 +39,11 @@ interface OpenDictOptions {
   auth: AuthHeaders
 }
 
+// Intentionally async-without-await: it no longer awaits `client.ready()` (that's
+// what made nav block), but the `Promise<DictConnection>` contract is kept — the
+// layout's editor re-assert path does `open_dict(...).catch(...)` and callers
+// `await` it. Readiness is handled in the background via `on_ready`.
+// eslint-disable-next-line require-await
 export async function open_dict(options: OpenDictOptions): Promise<DictConnection> {
   const { dict_id } = options
   const globals = globalThis as DictClientGlobals
@@ -68,6 +79,9 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
 
     const entry = cached
     client.on_ready(() => {
+      // Leader is ready — the snapshot is in OPFS and open, so drop the boot bar.
+      // Fires on every leader (including hand-offs); ending the bar is idempotent.
+      end_dict_boot_progress(dict_id)
       // Re-assert the editor capability on every leader (covers hand-offs to a
       // viewer-booted leader). Idempotent on the instance side.
       if (entry.has_editor_role)
@@ -80,12 +94,9 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
     void cached.client.request({ type: 'set_role', has_editor_role: true, auth: options.auth }).catch(() => { /* retried on next ready */ })
   }
 
-  await cached.client.ready()
-  // Leader is ready — the snapshot is in OPFS and open, so drop the boot bar.
-  end_dict_boot_progress(dict_id)
-  if (cached.has_editor_role)
-    await cached.client.request({ type: 'set_role', has_editor_role: true, auth: cached.auth })
-
+  // Return the shim WITHOUT awaiting readiness — navigation stays instant. The
+  // boot bar + editor set_role are handled by the `on_ready` callback above (and
+  // for an already-cached client the `set_role` above / below covers it).
   return create_dict_worker_connection({ client: cached.client, dict_id })
 }
 

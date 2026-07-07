@@ -63,7 +63,9 @@ try {
     return { status: r.status, body: (await r.text()).slice(0, 200) }
   }, DICT_ID)
 
-  // 3. Open entries page — +layout.ts open_dict awaits client.ready() before render.
+  // 3. Open entries page — +layout.ts open_dict returns before the leader is ready
+  //    (non-blocking boot), so the page renders immediately and data streams in;
+  //    we wait for the add button + confirm the dict client reports ready below.
   await page.goto(`${BASE}/${DICT_ID}/entries`, { waitUntil: 'networkidle2' }).catch(() => {})
   const add_button = await page.waitForSelector('.add-entry-button', { visible: true, timeout: 30000 }).then(() => true).catch(() => false)
   // Belt-and-braces: confirm the dict client reports ready.
