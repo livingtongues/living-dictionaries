@@ -23,3 +23,16 @@ export const Mobile: Story<typeof Component> = {
   viewports: [{ width: 375, height: 180 }],
   props: { dicts: story_dicts, my_dictionaries: story_my_dictionaries },
 }
+
+/** Long dictionary name — pill truncates with ellipsis, full name on hover. */
+export const LongName: Story<typeof Component> = {
+  viewports: [{ width: 900, height: 100 }],
+  props: {
+    dicts: story_dicts,
+    my_dictionaries: [
+      { id: 'zapoteco', url: 'zapoteco', name: 'Zapoteco de la sierra norte, San Juan Bautista Atascadero' },
+      { id: 'haryanvi', url: 'haryanvi', name: 'Haryanvi' },
+      { id: 'sengwer', url: 'sengwer', name: 'Sengwer' },
+    ] as unknown as Story<typeof Component>['props']['my_dictionaries'],
+  },
+}

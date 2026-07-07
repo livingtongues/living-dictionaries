@@ -34,7 +34,9 @@
 {#if pills.length}
   <div class="quick-jump">
     {#each shown as pill (pill.id)}
-      <a class="btn btn-sm pill" href="/{pill.url}">{pill.name}</a>
+      <a class="btn btn-sm pill" href="/{pill.url}" title={pill.name}>
+        <span class="pill-label">{pill.name}</span>
+      </a>
     {/each}
     {#if !expanded && pills.length > VISIBLE}
       <button type="button" class="btn btn-sm more" onclick={() => expanded = true}>
@@ -54,10 +56,16 @@
   }
 
   .pill {
-    max-width: 14rem;
+    /* ~"Zapoteco de la sierra norte…" — btn is inline-flex so min-width:0 + inner span ellipsize */
+    max-width: 11rem;
+    min-width: 0;
+  }
+
+  .pill-label {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-width: 0;
   }
 
   .more {
