@@ -210,6 +210,9 @@
     }
 
     .map-frame {
+      /* drop the aspect-ratio here: with an explicit height it would derive the
+         WIDTH (height × ~2.06) and overflow the viewport — let width fill instead */
+      aspect-ratio: auto;
       height: clamp(220px, 56vw, 300px);
       min-height: 0;
       border-radius: 0;

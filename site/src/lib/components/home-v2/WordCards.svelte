@@ -154,6 +154,22 @@
     on_active_dict?.(card.dict_id)
   }
 
+  // Fade each card image in as it decodes so swapped/lazy-loaded photos don't
+  // pop in jarringly. Handles the already-cached case (SSR-loaded eager images
+  // finish before the action runs, so their `load` event never fires).
+  function fade_in(img: HTMLImageElement) {
+    // reveal via inline style (not a class): a runtime-only `.loaded` class would
+    // be pruned by Svelte's scoped-CSS "unused selector" pass. Inline opacity
+    // overrides the base `opacity: 0` and triggers its CSS transition.
+    const reveal = () => { img.style.opacity = '1' }
+    if (img.complete && img.naturalWidth > 0) {
+      reveal()
+    } else {
+      img.addEventListener('load', reveal, { once: true })
+      img.addEventListener('error', reveal, { once: true })
+    }
+  }
+
   /**
    * Anchor points (viewport coords) of the cards currently visible in the
    * scroller — the hero line overlay draws from these to the map dots.
@@ -212,7 +228,7 @@
       onpointerleave={() => set_active(null)}
       onfocus={() => set_active(card.id)}
       onblur={() => set_active(null)}>
-      <img src={image_src(card.photo_serving_url, 's340-p')} alt={card.lexeme} loading={index < 8 ? 'eager' : 'lazy'} />
+      <img use:fade_in src={image_src(card.photo_serving_url, 's340-p')} alt={card.lexeme} loading={index < 8 ? 'eager' : 'lazy'} />
       <div class="fade"></div>
       <div class="text">
         <div class="dict-name">{card.dict_name}</div>
@@ -287,6 +303,8 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    opacity: 0;
+    transition: opacity 100ms ease;
   }
 
   .fade {

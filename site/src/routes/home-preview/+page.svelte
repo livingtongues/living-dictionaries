@@ -58,6 +58,10 @@
 <style>
   main {
     min-height: 100vh;
+    /* the hero's decorative connector-line SVG uses overflow:visible and can
+       paint a few px past the map edge — clip x so it never adds page scroll
+       (clip, not hidden, so it doesn't turn overflow-y into a scroll box) */
+    overflow-x: clip;
   }
 
   .hero {

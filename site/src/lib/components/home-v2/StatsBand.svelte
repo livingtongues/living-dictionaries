@@ -63,16 +63,25 @@
 <style>
   .stats-band {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    /* 2 cols on the narrowest phones — 3 tracks can't hold the unbreakable
+       numbers (e.g. "554,800+") without overflowing. minmax(0, 1fr) keeps a
+       plain 1fr from flooring at that min-content width. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
     max-width: 72rem;
     margin: 0 auto;
     padding: 2rem 1rem;
   }
 
+  @media (min-width: 420px) {
+    .stats-band {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
   @media (min-width: 768px) {
     .stats-band {
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       padding: 2.5rem 1.5rem;
     }
   }
