@@ -1,6 +1,7 @@
 import type Database from 'better-sqlite3'
 import type { SyncRequest } from '$lib/db/sync/types'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
+import { open_logs_db } from './logs-db'
 import { latest_shared_migration_name, open_shared_db } from './shared-db'
 import { process_sync } from './sync-helpers'
 
@@ -35,16 +36,21 @@ describe(process_sync, () => {
   // NOT 500 the whole admin sync — it should skip + log the missing table.
   test('skips and logs a missing syncable table instead of throwing', () => {
     db.exec('DROP TABLE dictionary_partners')
+    // `client_logs` lives in logs.db (split out of shared.db 2026-07-05), so the
+    // drift warn must land there — logging to the shared `db` would silently drop
+    // on a post-split server where that table is gone.
+    const logs_db = open_logs_db(':memory:')
 
-    const response = process_sync({ db, request: empty_request(), user_id: 'admin-1' })
+    const response = process_sync({ db, request: empty_request(), user_id: 'admin-1', logs_db })
     expect(response.changes.dictionary_partners).toBeUndefined()
 
-    const log = db.prepare(
+    const log = logs_db.prepare(
       `SELECT level, message, context FROM client_logs WHERE message = 'sync_missing_syncable_table'`,
     ).get() as { level: string, message: string, context: string } | undefined
     expect(log).toBeDefined()
     expect(log?.level).toBe('warn')
     expect(JSON.parse(log?.context ?? '{}').missing_tables).toEqual(['dictionary_partners'])
+    logs_db.close()
   })
 
   test('still pushes a dirty row for a present table when another table is missing', () => {

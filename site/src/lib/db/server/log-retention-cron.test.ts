@@ -7,7 +7,7 @@ import type { RequestGeo } from '$lib/server/geo-from-request'
 import { insert_client_log } from '$lib/server/insert-client-log'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { open_log_archive_db } from './log-archive-db'
-import { archive_old_logs, get_rollup_watermark, normalize_route, reroll_archived_days_once, rollup_day, run_log_retention_once } from './log-retention-cron'
+import { archive_old_logs, get_rollup_watermark, MONTHLY_FINALIZED_KEY, normalize_route, prev_month, reroll_archived_days_once, rollup_day, rollup_month, rollup_recent_months, run_log_retention_once, SITE_SCOPE } from './log-retention-cron'
 import { CLIENT_LOG_COLUMNS, open_logs_db } from './logs-db'
 import { open_shared_db } from './shared-db'
 
@@ -172,11 +172,27 @@ describe(rollup_day, () => {
 
     rollup_day({ day: '2026-06-01', shared_db, logs_db })
 
-    const views = shared_db.prepare(`SELECT dictionary_id, sessions, anon_sessions FROM dictionary_daily_views WHERE day = ? ORDER BY dictionary_id`).all('2026-06-01') as { dictionary_id: string, sessions: number, anon_sessions: number }[]
+    // No visitor_id in these rows → visitor key falls back to session_id, so
+    // visitors == sessions (the pre-rollout behavior).
+    const views = shared_db.prepare(`SELECT dictionary_id, sessions, anon_sessions, visitors, anon_visitors FROM dictionary_daily_views WHERE day = ? ORDER BY dictionary_id`).all('2026-06-01') as { dictionary_id: string, sessions: number, anon_sessions: number, visitors: number, anon_visitors: number }[]
     expect(views).toEqual([
-      { dictionary_id: 'dictA', sessions: 2, anon_sessions: 1 }, // anon1 + auth1; anon subset = anon1
-      { dictionary_id: 'dictB', sessions: 1, anon_sessions: 1 },
+      { dictionary_id: 'dictA', sessions: 2, anon_sessions: 1, visitors: 2, anon_visitors: 1 }, // anon1 + auth1; anon subset = anon1
+      { dictionary_id: 'dictB', sessions: 1, anon_sessions: 1, visitors: 1, anon_visitors: 1 },
     ])
+  })
+
+  test('counts distinct persistent visitor_id as ONE visitor across multiple sessions (visits > visitors)', () => {
+    // One person (visitor v1) visits dictA twice — two page loads = two sessions,
+    // but the same persistent visitor_id. Visits = 2, Visitors = 1.
+    add_log({ message: 'dictionary_opened', context: { session_id: 's1', visitor_id: 'v1', dictionary_id: 'dictA' } })
+    add_log({ message: 'dictionary_opened', context: { session_id: 's2', visitor_id: 'v1', dictionary_id: 'dictA' } })
+    // A second, different person (visitor v2) visits once.
+    add_log({ message: 'dictionary_opened', context: { session_id: 's3', visitor_id: 'v2', dictionary_id: 'dictA' } })
+
+    rollup_day({ day: '2026-06-01', shared_db, logs_db })
+
+    const row = shared_db.prepare(`SELECT sessions, anon_sessions, visitors, anon_visitors FROM dictionary_daily_views WHERE day = '2026-06-01' AND dictionary_id = 'dictA'`).get() as { sessions: number, anon_sessions: number, visitors: number, anon_visitors: number }
+    expect(row).toEqual({ sessions: 3, anon_sessions: 3, visitors: 2, anon_visitors: 2 })
   })
 
   test('per-dictionary viewership is idempotent (full-day REPLACE, no doubling)', () => {
@@ -200,6 +216,87 @@ describe(rollup_day, () => {
     rollup_day({ day: '2026-06-01', shared_db, logs_db })
     expect(metric('2026-06-01', 'sessions')).toBe(1) // only the dwelling human
     expect(metric('2026-06-01', 'bot:sessions')).toBe(25)
+  })
+})
+
+const HEADLESS_UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/148.0.0.0 Safari/537.36'
+
+describe(prev_month, () => {
+  test('steps back a calendar month, crossing a year boundary', () => {
+    expect(prev_month('2026-07')).toBe('2026-06')
+    expect(prev_month('2026-01')).toBe('2025-12')
+  })
+})
+
+describe(rollup_month, () => {
+  test('counts TRUE monthly-unique visitors (union across days), per-dict + site, bots excluded', () => {
+    // Visitor v1 (anonymous) opens dictA on TWO different days → ONE monthly visitor
+    // (union), TWO visits. This is the whole point vs daily-distinct "visitor-days".
+    add_log({ day: '2026-06-01', message: 'session_start', context: { session_id: 's1', visitor_id: 'v1' } })
+    add_log({ day: '2026-06-01', message: 'dictionary_opened', context: { session_id: 's1', visitor_id: 'v1', dictionary_id: 'dictA' } })
+    add_log({ day: '2026-06-10', message: 'session_start', context: { session_id: 's2', visitor_id: 'v1' } })
+    add_log({ day: '2026-06-10', message: 'dictionary_opened', context: { session_id: 's2', visitor_id: 'v1', dictionary_id: 'dictA' } })
+    // A second, SIGNED-IN visitor v2 opens dictA once.
+    add_log({ day: '2026-06-05', message: 'session_start', user_id: 'u2', context: { session_id: 's3', visitor_id: 'v2' } })
+    add_log({ day: '2026-06-05', message: 'dictionary_opened', user_id: 'u2', context: { session_id: 's3', visitor_id: 'v2', dictionary_id: 'dictA' } })
+    // A bot opens dictA — excluded via log_daily_sessions UA classification.
+    add_log({ day: '2026-06-02', message: 'session_start', context: { session_id: 'bot1', visitor_id: 'vb' }, user_agent: HEADLESS_UA })
+    add_log({ day: '2026-06-02', message: 'dictionary_opened', context: { session_id: 'bot1', visitor_id: 'vb', dictionary_id: 'dictA' }, user_agent: HEADLESS_UA })
+
+    // Populate log_daily_sessions (the bot-classification + anon source) for each day.
+    for (const day of ['2026-06-01', '2026-06-02', '2026-06-05', '2026-06-10'])
+      rollup_day({ day, shared_db, logs_db })
+
+    rollup_month({ month: '2026-06', shared_db, logs_db, archive_db })
+
+    const dictA = shared_db.prepare(`SELECT visits, anon_visits, visitors, anon_visitors FROM dictionary_monthly_visitors WHERE month = '2026-06' AND scope = 'dictA'`).get()
+    // visits = s1,s2,s3 (bot excluded) = 3; anon_visits = s1,s2 = 2;
+    // visitors = v1,v2 = 2 (v1 counted ONCE despite two days); anon_visitors = v1 = 1.
+    expect(dictA).toEqual({ visits: 3, anon_visits: 2, visitors: 2, anon_visitors: 1 })
+
+    const site = shared_db.prepare(`SELECT visits, visitors, anon_visitors FROM dictionary_monthly_visitors WHERE month = '2026-06' AND scope = ?`).get(SITE_SCOPE)
+    // site (session_start): s1,s2,s3 → visits 3; visitors v1,v2 = 2; anon_visitors v1 = 1.
+    expect(site).toEqual({ visits: 3, visitors: 2, anon_visitors: 1 })
+  })
+
+  test('is idempotent (full-month REPLACE, no doubling)', () => {
+    add_log({ day: '2026-06-01', message: 'session_start', context: { session_id: 's1', visitor_id: 'v1' } })
+    rollup_day({ day: '2026-06-01', shared_db, logs_db })
+    rollup_month({ month: '2026-06', shared_db, logs_db, archive_db })
+    rollup_month({ month: '2026-06', shared_db, logs_db, archive_db })
+    const site = shared_db.prepare(`SELECT visitors FROM dictionary_monthly_visitors WHERE month = '2026-06' AND scope = ?`).get(SITE_SCOPE) as { visitors: number }
+    expect(site.visitors).toBe(1)
+    expect((shared_db.prepare(`SELECT COUNT(*) n FROM dictionary_monthly_visitors WHERE month = '2026-06' AND scope = ?`).get(SITE_SCOPE) as { n: number }).n).toBe(1)
+  })
+
+  test('reads across hot + archive so a month spanning the storage boundary is whole', () => {
+    // Same visitor, one session in hot logs, one in the archive file, same month.
+    add_log({ day: '2026-06-20', message: 'dictionary_opened', context: { session_id: 's-hot', visitor_id: 'v1', dictionary_id: 'dictA' }, db: logs_db })
+    add_log({ day: '2026-06-02', message: 'dictionary_opened', context: { session_id: 's-arc', visitor_id: 'v1', dictionary_id: 'dictA' }, db: archive_db })
+    rollup_day({ day: '2026-06-20', shared_db, logs_db })
+    rollup_day({ day: '2026-06-02', shared_db, logs_db: archive_db })
+    rollup_month({ month: '2026-06', shared_db, logs_db, archive_db })
+    const dictA = shared_db.prepare(`SELECT visits, visitors FROM dictionary_monthly_visitors WHERE month = '2026-06' AND scope = 'dictA'`).get()
+    expect(dictA).toEqual({ visits: 2, visitors: 1 })
+  })
+})
+
+describe(rollup_recent_months, () => {
+  test('rolls every recent month and freezes completed ones via the watermark', () => {
+    add_log({ day: '2026-06-15', message: 'session_start', context: { session_id: 's1', visitor_id: 'v1' } })
+    rollup_day({ day: '2026-06-15', shared_db, logs_db })
+    // "Now" is in July → June is complete and should freeze.
+    rollup_recent_months({ shared_db, logs_db, archive_db, now: new Date('2026-07-03T00:00:00.000Z') })
+    expect((shared_db.prepare(`SELECT value FROM db_metadata WHERE key = ?`).get(MONTHLY_FINALIZED_KEY) as { value: string }).value).toBe('2026-06')
+    const site = shared_db.prepare(`SELECT visitors FROM dictionary_monthly_visitors WHERE month = '2026-06' AND scope = ?`).get(SITE_SCOPE) as { visitors: number }
+    expect(site.visitors).toBe(1)
+  })
+
+  test('does NOT finalize the current month when no earlier month has rolled', () => {
+    add_log({ day: '2026-07-02', message: 'session_start', context: { session_id: 's1', visitor_id: 'v1' } })
+    rollup_day({ day: '2026-07-02', shared_db, logs_db })
+    rollup_recent_months({ shared_db, logs_db, archive_db, now: new Date('2026-07-03T00:00:00.000Z') })
+    expect(shared_db.prepare(`SELECT value FROM db_metadata WHERE key = ?`).get(MONTHLY_FINALIZED_KEY)).toBeUndefined()
   })
 })
 
@@ -269,10 +366,10 @@ describe(run_log_retention_once, () => {
     // And the run marker was still recorded (record_ran_at ran after the failures).
     const marker = shared_db.prepare(`SELECT value FROM db_metadata WHERE key = 'log_retention_ran_at'`).get() as { value: string } | undefined
     expect(marker?.value).toBe(now.toISOString())
-    // Both failing steps (reroll + archive) logged a server event into logs.db
-    // instead of throwing out of the sweep.
+    // All three archive-touching steps (reroll + rollup_recent_months + archive)
+    // logged a server event into logs.db instead of throwing out of the sweep.
     const step_failures = logs_db.prepare(`SELECT COUNT(*) n FROM client_logs WHERE message = 'log_retention_step_failed'`).get() as { n: number }
-    expect(step_failures.n).toBe(2)
+    expect(step_failures.n).toBe(3)
   })
 })
 

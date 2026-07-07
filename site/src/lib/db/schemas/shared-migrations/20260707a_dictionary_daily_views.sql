@@ -1,8 +1,8 @@
 -- Per-dictionary daily viewership — a tiny FOREVER rollup (never pruned) written
 -- by the retention cron's rollup_day() from `client_logs` `dictionary_opened`
--- events (bots excluded, SAME classifier as log_daily_metrics). Powers the admin
--- "Top dictionaries by viewers" panel and, later, a public "visits/month" stat on
--- each (star) dictionary's home page.
+-- events (bots excluded, SAME classifier as log_daily_metrics). Feeds the daily
+-- "Visits" activity column of the admin "Top dictionaries by unique visitors" panel
+-- (unique counts come from the separate dictionary_monthly_visitors rollup).
 --
 -- `sessions`      = distinct human viewer-sessions that opened the dict that day.
 -- `anon_sessions` = subset whose session had no user_id (≈ outside public visitors,

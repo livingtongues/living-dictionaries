@@ -35,6 +35,7 @@ export const CLIENT_LOG_COLUMNS = [
   'context',
   'source',
   'session_id',
+  'visitor_id',
   'country',
   'region',
   'city',
@@ -60,6 +61,7 @@ export const CLIENT_LOGS_TABLE_SQL = `
     context TEXT,
     source TEXT,
     session_id TEXT,
+    visitor_id TEXT,
     country TEXT,
     region TEXT,
     city TEXT,
@@ -106,6 +108,16 @@ export function open_logs_db(path: string | ':memory:'): Database.Database {
     -- Session-grouped scans (window sessions live tail).
     CREATE INDEX IF NOT EXISTS idx_client_logs_session_id ON client_logs(session_id, received_at) WHERE session_id IS NOT NULL;
   `)
+  // Retrofit ANY column missing from a pre-existing logs.db file (CREATE TABLE IF
+  // NOT EXISTS never adds columns). Mirrors the archive DB's retrofit so a new
+  // column (e.g. `visitor_id`, 2026-07-07) lands on already-created files without a
+  // migration runner. TEXT for everything except the REAL geo pair.
+  const geo_real = new Set(['latitude', 'longitude'])
+  const existing = new Set((db.prepare(`SELECT name FROM pragma_table_info('client_logs')`).all() as { name: string }[]).map(row => row.name))
+  for (const column of CLIENT_LOG_COLUMNS) {
+    if (!existing.has(column))
+      db.exec(`ALTER TABLE client_logs ADD COLUMN ${column} ${geo_real.has(column) ? 'REAL' : 'TEXT'}`)
+  }
   return db
 }
 
@@ -129,8 +141,15 @@ export function split_client_logs_from_shared({ shared_db, logs_db }: {
   if (!table_exists)
     return { moved: 0 }
 
-  const columns = CLIENT_LOG_COLUMNS.join(', ')
-  const placeholders = CLIENT_LOG_COLUMNS.map(() => '?').join(', ')
+  // Copy only columns that actually exist on the (old) shared.db table. A column
+  // added to CLIENT_LOG_COLUMNS AFTER the split shipped (e.g. `visitor_id`,
+  // 2026-07-07) is never present on a pre-split shared.db, so SELECTing it by name
+  // would 500 this one-time migration ("no such column"). logs.db's target column
+  // is left at its DEFAULT (NULL) for those.
+  const present = new Set((shared_db.prepare(`SELECT name FROM pragma_table_info('client_logs')`).all() as { name: string }[]).map(row => row.name))
+  const copy_columns = CLIENT_LOG_COLUMNS.filter(column => present.has(column))
+  const columns = copy_columns.join(', ')
+  const placeholders = copy_columns.map(() => '?').join(', ')
   const insert = logs_db.prepare(`INSERT OR IGNORE INTO client_logs (${columns}) VALUES (${placeholders})`)
 
   let moved = 0
@@ -138,7 +157,7 @@ export function split_client_logs_from_shared({ shared_db, logs_db }: {
   try {
     const copy_all = logs_db.transaction(() => {
       for (const row of shared_db.prepare(`SELECT ${columns} FROM client_logs`).iterate() as IterableIterator<Record<string, unknown>>) {
-        insert.run(...CLIENT_LOG_COLUMNS.map(column => row[column] ?? null))
+        insert.run(...copy_columns.map(column => row[column] ?? null))
         moved++
       }
     })

@@ -116,6 +116,39 @@ export function get_session_id(): string {
   return session_id
 }
 
+/**
+ * A cookieless, persistent per-browser id — generated once, stored in
+ * localStorage, reused across every page load AND across days. Where `session_id`
+ * resets each page load (→ "visits"), `visitor_id` is stable per browser/device
+ * (→ "visitors"). Chosen over a server IP+UA hash because it doesn't collapse a
+ * whole shared-connection community (NAT) into one visitor — common for LD's
+ * dictionary communities. NOT personal data (a random UUID we mint and never join
+ * to identity), so no cookie/consent surface. "Visitors" here means distinct
+ * browsers/devices, not humans — the universal analytics meaning.
+ */
+const VISITOR_ID_KEY = 'ld_visitor_id'
+let visitor_id = ''
+
+/** Read-or-create the persistent visitor id. Sync (localStorage) so it's ready before the first `session_start`. */
+function ensure_visitor_id(): string {
+  if (visitor_id)
+    return visitor_id
+  try {
+    const existing = localStorage.getItem(VISITOR_ID_KEY)
+    if (existing) {
+      visitor_id = existing
+      return visitor_id
+    }
+    visitor_id = crypto.randomUUID()
+    localStorage.setItem(VISITOR_ID_KEY, visitor_id)
+  } catch {
+    // Private mode / disabled storage: fall back to a per-session id so the row
+    // still carries *a* visitor_id (server COALESCEs to session_id anyway).
+    visitor_id = visitor_id || crypto.randomUUID()
+  }
+  return visitor_id
+}
+
 /** House is a web app today; a native client would override `platform` via the payload. */
 function get_platform(): 'web' | 'ios' | 'android' {
   return 'web'
@@ -262,6 +295,7 @@ function enrich(entry: ClientLogPayload): InternalEntry {
     context: {
       ...(entry.context ?? {}),
       session_id,
+      visitor_id: visitor_id || ensure_visitor_id(),
       breadcrumbs: breadcrumbs.slice(-MAX_BREADCRUMBS),
       ...(is_webdriver() ? { webdriver: true } : {}),
     },
@@ -508,6 +542,7 @@ export function init_remote_logging(): void {
     return
   initialized = true
   session_id = crypto.randomUUID()
+  ensure_visitor_id()
   session_started_at_ms = Date.now()
 
   // Replay anything emitted before init (now that session enrichment is ready).

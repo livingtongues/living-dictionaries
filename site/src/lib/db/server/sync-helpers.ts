@@ -7,6 +7,7 @@ import { CLIENT_BEHIND, SERVER_BEHIND, SyncVersionError } from '$lib/db/sync/err
 import { is_readonly_table, is_syncable_table, SYNCABLE_TABLE_NAMES } from '$lib/db/sync/types'
 import { log_server_event } from '$lib/server/log-server-event'
 import { getTableColumns } from 'drizzle-orm'
+import { get_logs_db } from './logs-db'
 import { latest_shared_migration_name } from './shared-db'
 import { query_all, query_one } from './typed-query'
 
@@ -50,7 +51,7 @@ const PRIMARY_KEY: Record<SyncableTableName, string> = {
  * `shared.db.dictionaries.updated_at`. All three ride the column name `updated_at`
  * but live on different DBs / propagation paths — keep them straight.
  */
-export function process_sync({ db, request, user_id, server_latest_migration = latest_shared_migration_name }: {
+export function process_sync({ db, request, user_id, logs_db = get_logs_db(), server_latest_migration = latest_shared_migration_name }: {
   db: Database.Database
   request: SyncRequest
   /**
@@ -58,6 +59,8 @@ export function process_sync({ db, request, user_id, server_latest_migration = l
    * `update_last_visit` ping.
    */
   user_id?: string
+  /** Where server telemetry (schema-drift warns) lands — `client_logs` lives in logs.db, NOT shared.db. */
+  logs_db?: Database.Database
   server_latest_migration?: string
 }): SyncResponse {
   // Migration version handshake. Filenames are date-prefixed and sort
@@ -77,7 +80,7 @@ export function process_sync({ db, request, user_id, server_latest_migration = l
   // + log such tables rather than letting a `no such table` throw 500 the whole
   // round trip. Computed once, BEFORE the transaction, so the warn isn't lost to
   // a later rollback.
-  const tables = present_syncable_tables({ db, user_id })
+  const tables = present_syncable_tables({ db, logs_db, user_id })
 
   db.pragma('defer_foreign_keys = ON')
   db.exec('BEGIN IMMEDIATE')
@@ -172,10 +175,14 @@ export function process_sync({ db, request, user_id, server_latest_migration = l
  * (e.g. an in-place-edited / consolidated migration that never re-ran — the
  * `dictionary_partners` incident). Logs a `warn` listing any missing tables so
  * the drift is visible in `client_logs` (`source='server'`) instead of 500-ing
- * every admin sync. Call BEFORE opening the write transaction.
+ * every admin sync. The warn goes to `logs_db` — `client_logs` was split out of
+ * shared.db (2026-07-05), so logging to the shared `db` here would silently drop
+ * on the (post-split) server where that table no longer exists. Call BEFORE
+ * opening the write transaction.
  */
-function present_syncable_tables({ db, user_id }: {
+function present_syncable_tables({ db, logs_db, user_id }: {
   db: Database.Database
+  logs_db: Database.Database
   user_id?: string
 }): readonly SyncableTableName[] {
   const existing = new Set(
@@ -186,7 +193,7 @@ function present_syncable_tables({ db, user_id }: {
   if (missing.length === 0)
     return SYNCABLE_TABLE_NAMES
   log_server_event({
-    db,
+    db: logs_db,
     level: 'warn',
     message: 'sync_missing_syncable_table',
     user_id: user_id ?? null,

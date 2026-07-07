@@ -10,7 +10,7 @@ import { distance_bucket, DISTANCE_BUCKETS, distance_to_origin_km } from '$lib/g
 import { geo_key } from '$lib/server/geo-from-request'
 import { classify_ua_frequency_bot_sessions, MIN_UA_BOT_SESSIONS_PER_DAY } from './bot-sessions'
 import { get_log_archive_db } from './log-archive-db'
-import { get_rollup_watermark, normalize_route } from './log-retention-cron'
+import { get_rollup_watermark, month_string, normalize_route, prev_month, SESSION_START, SITE_SCOPE } from './log-retention-cron'
 import { get_logs_db } from './logs-db'
 import { get_shared_db } from './shared-db'
 
@@ -441,32 +441,41 @@ export interface TopDictionaryRow {
   /** Catalog url slug — links the panel row to the live dictionary. */
   url: string | null
   is_public: boolean
-  /** Distinct human viewer-sessions summed over the 30d window — "visits" (a session resets per page-load), NOT unique visitors. */
-  views_30d: number
-  /** Anonymous (logged-out) subset of `views_30d` ≈ outside public visitors — the star-dict brag number. */
-  anon_30d: number
-  /** Same, last 7 days. */
-  views_7d: number
-  /** Same, today (live tail). */
-  views_1d: number
+  /** TRUE unique visitors (distinct `visitor_id`) who OPENED this dict THIS calendar
+   * month — a UNION over the whole month (from the forever monthly rollup), NOT a
+   * daily-distinct sum, so it's real uniques not "visitor-days". Human-only. */
+  visitors_month: number
+  /** Anonymous (logged-out) subset of `visitors_month` ≈ outside public visitors. */
+  anon_visitors_month: number
+  /** TRUE unique visitors last COMPLETE calendar month (frozen forever). */
+  visitors_prev_month: number
+  /** TRUE unique visitors over the rolling last 7 days (live from hot logs). */
+  visitors_7d: number
+  /** Visits (distinct sessions, resets per page-load) over 30d — activity context. */
+  visits_30d: number
 }
 /**
- * Per-dictionary viewership — the "which dictionaries are being viewed, by how
- * many" picture, and the raw material for a future public "visits/month" stat on
- * each dictionary's home page. Merges the forever `dictionary_daily_views` rollup
- * (finalized days, human-only, never pruned) with a live `dictionary_opened` scan
- * for days past the watermark. Bots excluded (audience-filtered). CAVEAT: counts
- * distinct sessions/day summed over the window = visits, not unique visitors —
- * true monthly uniques await the cookieless `visitor_hash`.
+ * Per-dictionary viewership — "which dictionaries are being viewed, by how many
+ * UNIQUE visitors", and the raw material for a public "visitors/month" badge on
+ * each dictionary's home page. Monthly figures come from the forever
+ * `dictionary_monthly_visitors` rollup (true month-long UNION of visitor_ids,
+ * human-only, never pruned); the rolling 7d figure is a live hot-log scan;
+ * `visits_30d` (sessions) comes from the daily rollup + live tail for activity
+ * context. "Visitors" = distinct browsers/devices (cookieless `visitor_id`), not
+ * humans. Bots excluded. DEV: the cron doesn't run, so the monthly rollup is empty
+ * → monthly figures read 0 locally (7d still live).
  */
 export interface TopDictionaries {
-  /** Distinct dictionaries that got ≥1 (audience) view in the window. */
+  /** Distinct dictionaries with ≥1 (audience) view this month or last (or 7d activity). */
   distinct_dictionaries: number
-  /** Total viewer-sessions (visits) across all dicts — 30d / 7d / today. */
-  total_30d: number
-  total_7d: number
-  total_1d: number
-  /** Per-dictionary totals, most-viewed first (top N). */
+  /** Current + previous calendar month ('YYYY-MM' UTC), for column labels. */
+  month: string
+  prev_month: string
+  /** Site-wide TRUE unique visitors (distinct visitor across ALL sessions) — this month, last month, last 7d. */
+  site_visitors_month: number
+  site_visitors_prev_month: number
+  site_visitors_7d: number
+  /** Per-dictionary rows, most unique-visitors-this-month first (top N). */
   dictionaries: TopDictionaryRow[]
 }
 
@@ -1833,89 +1842,109 @@ function build_api_v1_activity(ctx: AnalyticsContext): ApiV1Activity {
   }
 }
 
+interface DictTotals { visitors_month: number, anon_visitors_month: number, visitors_prev_month: number, visitors_7d: number, visits_30d: number }
+function empty_dict_totals(): DictTotals {
+  return { visitors_month: 0, anon_visitors_month: 0, visitors_prev_month: 0, visitors_7d: 0, visits_30d: 0 }
+}
+
 /**
- * Per-dictionary viewership (the "who's being viewed, by how many" panel + the
- * seed for a future public visits/month stat). Merges the forever
- * `dictionary_daily_views` rollup for finalized days (human-only, written by the
- * retention cron) with a live `dictionary_opened` scan for days past the
- * watermark. Both keyed per (dict, day) distinct-session so totals sum the same
- * way hot and cold. Names/urls join the shared.db `dictionaries` catalog. Bots
- * follow the audience toggle; the cold table is human-only, so a 'bots' audience
- * shows only its live tail (acceptable — this is a usage/props panel).
+ * Per-dictionary viewership by TRUE UNIQUE VISITORS. Monthly figures
+ * (`visitors_month` / `visitors_prev_month`) come from the forever
+ * `dictionary_monthly_visitors` rollup — a whole-month UNION of distinct
+ * `visitor_id`s (real uniques, NOT daily-distinct "visitor-days"), human-only,
+ * written by the retention cron. `visitors_7d` is a live rolling scan of hot logs
+ * (14d window ⊇ 7d, exact). `visits_30d` (sessions) merges the daily rollup +
+ * live tail for activity context. Names/urls join the shared.db `dictionaries`
+ * catalog. Monthly rows have no bot variant, so a 'bots' audience shows 0 monthly
+ * (7d still audience-filtered). DEV: cron idle → monthly rollup empty → monthly = 0.
  */
 function build_top_dictionaries(ctx: AnalyticsContext): TopDictionaries {
   const { shared_db, logs_db, audience, audience_filter, window_start_day, live_start_day, live_start_iso, now } = ctx
-  const today = day_string(now)
-  const day_7d_start = day_string(new Date(now.getTime() - 6 * 86_400_000))
+  const month = month_string(now)
+  const previous_month = prev_month(month)
+  const iso_7d_start = new Date(now.getTime() - 6 * 86_400_000).toISOString()
 
-  // per_dict → per-day {sessions, anon}, merged from cold rollup + live tail.
-  const per_dict = new Map<string, Map<string, { sessions: number, anon: number }>>()
-  const add = (dictionary_id: string, day: string, sessions: number, anon: number): void => {
-    let by_day = per_dict.get(dictionary_id)
-    if (!by_day) {
-      by_day = new Map()
-      per_dict.set(dictionary_id, by_day)
+  const totals_by_dict = new Map<string, DictTotals>()
+  const totals_for = (dictionary_id: string): DictTotals => {
+    let totals = totals_by_dict.get(dictionary_id)
+    if (!totals) {
+      totals = empty_dict_totals()
+      totals_by_dict.set(dictionary_id, totals)
     }
-    const point = by_day.get(day) ?? { sessions: 0, anon: 0 }
-    point.sessions += sessions
-    point.anon += anon
-    by_day.set(day, point)
+    return totals
   }
+  let site_visitors_month = 0
+  let site_visitors_prev_month = 0
 
-  // Cold rollup — human-only rows for finalized days (skip for the bots audience,
-  // which the table never stored). Wrapped: a pre-migration shared.db has no table.
+  // --- Monthly TRUE uniques (human-only forever rollup). Wrapped: a pre-migration
+  // shared.db has no table (and the whole panel degrades to 7d + visits). ---
   if (audience === 'humans') {
     try {
-      const cold = shared_db.prepare(`
-        SELECT dictionary_id, day, sessions, anon_sessions
-        FROM dictionary_daily_views
-        WHERE day >= ? AND day < ?
-      `).all(window_start_day, live_start_day) as { dictionary_id: string, day: string, sessions: number, anon_sessions: number }[]
-      for (const row of cold)
-        add(row.dictionary_id, row.day, row.sessions, row.anon_sessions)
+      for (const row of shared_db.prepare(`
+        SELECT month, scope, visitors, anon_visitors
+        FROM dictionary_monthly_visitors WHERE month IN (?, ?)
+      `).all(month, previous_month) as { month: string, scope: string, visitors: number, anon_visitors: number }[]) {
+        if (row.scope === SITE_SCOPE) {
+          if (row.month === month)
+            site_visitors_month = row.visitors
+          else
+            site_visitors_prev_month = row.visitors
+          continue
+        }
+        const totals = totals_for(row.scope)
+        if (row.month === month) {
+          totals.visitors_month = row.visitors
+          totals.anon_visitors_month = row.anon_visitors
+        } else {
+          totals.visitors_prev_month = row.visitors
+        }
+      }
     } catch {
-      // table absent (never migrated) — cold contributes nothing.
+      // table absent (never migrated) — monthly figures stay 0.
     }
   }
 
-  // Live tail — distinct human sessions per (dict, day) past the watermark. A
-  // logged-in session carries a server-stamped user_id on every row, so
-  // `user_id IS NULL` on the open row == the session-level anon the rollup stores.
-  const live = logs_db.prepare(`
-    SELECT substr(received_at, 1, 10)                                          day,
-           json_extract(context, '$.dictionary_id')                           dictionary_id,
-           COUNT(DISTINCT session_id)                                          sessions,
-           COUNT(DISTINCT CASE WHEN user_id IS NULL THEN session_id END)       anon
+  // --- Rolling 7d TRUE uniques, live from hot logs (audience-filtered). Per-dict +
+  // site (session_start = anyone who visited). ---
+  for (const row of logs_db.prepare(`
+    SELECT json_extract(context, '$.dictionary_id')          dictionary_id,
+           COUNT(DISTINCT COALESCE(visitor_id, session_id))  visitors
     FROM client_logs
     WHERE received_at >= ? AND message = ? AND session_id IS NOT NULL
-      AND json_extract(context, '$.dictionary_id') IS NOT NULL
-      AND ${audience_filter}
-    GROUP BY day, dictionary_id
-  `).all(live_start_iso, DICTIONARY_OPENED) as { day: string, dictionary_id: string, sessions: number, anon: number }[]
-  for (const row of live)
-    add(row.dictionary_id, row.day, row.sessions, row.anon)
+      AND json_extract(context, '$.dictionary_id') IS NOT NULL AND ${audience_filter}
+    GROUP BY dictionary_id
+  `).all(iso_7d_start, DICTIONARY_OPENED) as { dictionary_id: string, visitors: number }[])
+    totals_for(row.dictionary_id).visitors_7d = row.visitors
+  const site_visitors_7d = (logs_db.prepare(`
+    SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id)) visitors
+    FROM client_logs
+    WHERE received_at >= ? AND message = ? AND session_id IS NOT NULL AND ${audience_filter}
+  `).get(iso_7d_start, SESSION_START) as { visitors: number }).visitors
 
-  // Fold per-day into windowed totals per dict.
-  interface Totals { views_30d: number, anon_30d: number, views_7d: number, views_1d: number }
-  const totals_by_dict = new Map<string, Totals>()
-  let total_30d = 0
-  let total_7d = 0
-  let total_1d = 0
-  for (const [dictionary_id, by_day] of per_dict) {
-    const totals: Totals = { views_30d: 0, anon_30d: 0, views_7d: 0, views_1d: 0 }
-    for (const [day, point] of by_day) {
-      totals.views_30d += point.sessions
-      totals.anon_30d += point.anon
-      if (day >= day_7d_start)
-        totals.views_7d += point.sessions
-      if (day === today)
-        totals.views_1d += point.sessions
-    }
-    totals_by_dict.set(dictionary_id, totals)
-    total_30d += totals.views_30d
-    total_7d += totals.views_7d
-    total_1d += totals.views_1d
+  // --- Visits (sessions) over 30d, daily rollup + live tail, for activity context. ---
+  const visits_by_dict = new Map<string, number>()
+  const bump_visits = (dictionary_id: string, count: number): void => {
+    visits_by_dict.set(dictionary_id, (visits_by_dict.get(dictionary_id) ?? 0) + count)
   }
+  if (audience === 'humans') {
+    try {
+      for (const row of shared_db.prepare(`
+        SELECT dictionary_id, SUM(sessions) sessions FROM dictionary_daily_views
+        WHERE day >= ? AND day < ? GROUP BY dictionary_id
+      `).all(window_start_day, live_start_day) as { dictionary_id: string, sessions: number }[])
+        bump_visits(row.dictionary_id, row.sessions)
+    } catch { /* table absent */ }
+  }
+  for (const row of logs_db.prepare(`
+    SELECT json_extract(context, '$.dictionary_id') dictionary_id, COUNT(DISTINCT session_id) sessions
+    FROM client_logs
+    WHERE received_at >= ? AND message = ? AND session_id IS NOT NULL
+      AND json_extract(context, '$.dictionary_id') IS NOT NULL AND ${audience_filter}
+    GROUP BY dictionary_id
+  `).all(live_start_iso, DICTIONARY_OPENED) as { dictionary_id: string, sessions: number }[])
+    bump_visits(row.dictionary_id, row.sessions)
+  for (const [dictionary_id, sessions] of visits_by_dict)
+    totals_for(dictionary_id).visits_30d = sessions
 
   // Catalog names/urls for the dicts in play (one IN query).
   const ids = [...totals_by_dict.keys()]
@@ -1939,8 +1968,20 @@ function build_top_dictionaries(ctx: AnalyticsContext): TopDictionaries {
         ...totals,
       }
     })
-    .sort((first, second) => second.views_30d - first.views_30d || second.views_7d - first.views_7d)
+    .sort((first, second) =>
+      second.visitors_month - first.visitors_month
+      || second.visitors_prev_month - first.visitors_prev_month
+      || second.visitors_7d - first.visitors_7d
+      || second.visits_30d - first.visits_30d)
     .slice(0, TOP_DICTIONARIES_LIMIT)
 
-  return { distinct_dictionaries: totals_by_dict.size, total_30d, total_7d, total_1d, dictionaries }
+  return {
+    distinct_dictionaries: totals_by_dict.size,
+    month,
+    prev_month: previous_month,
+    site_visitors_month,
+    site_visitors_prev_month,
+    site_visitors_7d,
+    dictionaries,
+  }
 }

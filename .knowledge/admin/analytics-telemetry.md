@@ -48,12 +48,13 @@ days — the classification is never frozen into the metric.
 
 ## Per-dictionary viewership is a dedicated forever rollup, and it's "visits" not "visitors"
 
-`dictionary_daily_views(day, dictionary_id, sessions, anon_sessions)` (LD-only, 2026-07-07) is a
-tiny FOREVER rollup written by `rollup_day()` from `dictionary_opened` events — one open fires per
-dict entry (the `[dictionaryId]` layout mounts even on a deep-linked entry), so it captures any
-entry into a dict, anonymous public visitors included, bots excluded via the SAME classifier as the
-metric buckets. It seeds the admin "Top dictionaries by viewers" panel and, later, a public
-"visits/month" badge on star dictionaries' home pages.
+`dictionary_daily_views(day, dictionary_id, sessions, anon_sessions, visitors, anon_visitors)`
+(LD-only, 2026-07-07) is a tiny FOREVER rollup written by `rollup_day()` from `dictionary_opened`
+events — one open fires per dict entry (the `[dictionaryId]` layout mounts even on a deep-linked
+entry), so it captures any entry into a dict, anonymous public visitors included, bots excluded via
+the SAME classifier as the metric buckets. It feeds the `visits_30d` (activity) column of the admin
+"Top dictionaries by unique visitors" panel; the panel's headline UNIQUE-visitor numbers come from the
+separate `dictionary_monthly_visitors` monthly rollup (see below), not from summing this daily table.
 
 Two durable decisions that aren't obvious from the code:
 
@@ -67,11 +68,54 @@ Two durable decisions that aren't obvious from the code:
   never via this table.
 - **`sessions` summed over a window = VISITS, not unique VISITORS.** A `session_id` resets per
   page-load, so a returning person is many sessions. Daily-distinct summed over a month is honest
-  "visits/month"; true monthly *uniques* need the backlogged cookieless `visitor_hash`
-  (dashboard-improvements.md). Frame the public stat as visits until that ships. `anon_sessions`
-  (session with no user_id — server-stamps user_id per request, so per-row null == session-level
-  anon) ≈ outside public visitors, the star-dict brag number (a logged-in non-member still counts as
-  a view but not as anon; good-enough approximation, member-exclusion deferred).
+  "visits/month". `anon_sessions` (session with no user_id — server-stamps user_id per request, so
+  per-row null == session-level anon) ≈ outside public visitors, the star-dict brag number (a
+  logged-in non-member still counts as a view but not as anon; good-enough approximation,
+  member-exclusion deferred).
+
+## Cookieless persistent `visitor_id` — for unique-VISITOR (not visits) counts
+
+Chosen (2026-07-07) over the server IP+UA `visitor_hash` that earlier backlog notes proposed — the
+hash mass-collapses a whole shared-connection community (one NAT gateway → one "visitor"), the exact
+failure mode common to LD's dictionary communities. A random UUID minted once and kept in
+`localStorage` (`ld_visitor_id`) has no such systematic merge; its errors are small + random +
+mostly slight *over*-count (harmless for a "how many people" brag). Not personal data (we mint it,
+never join it to identity), so **no cookie/consent surface** — GDPR is an explicit non-concern.
+
+Plumbing mirrors `session_id` exactly: `remote-log.ts` reads-or-creates it (sync, before the first
+`session_start`) and `enrich()` stamps `context.visitor_id` on every row; `insert-client-log.ts`
+promotes it to a real indexed `visitor_id` column. **The column lives ONLY in logs.db + logs-archive.db**
+(their DDL + a retrofit-ALTER loop) — NOT in shared.db. An earlier attempt added a `20260707c` migration
+ALTERing shared.db's `client_logs`, but the 2026-07-05 split DROPS that table from shared.db at boot, so
+the ALTER threw `no such table: client_logs` on every already-split server (boot-breaking; it also
+surfaced as a swallowed failure in the entry-SSR endpoint's `get_shared_db()` call → admin tags read as
+public). The migration was deleted: `insert_client_log` writes to logs.db, visitor_id postdates the split,
+and shared.db's `client_logs` is transient/empty — it never needed the column. (Same reason
+`log_server_event` must target logs.db, not a shared.db handle — see the sync-drift note below.)
+
+### TRUE monthly-unique visitors — the forever `dictionary_monthly_visitors` rollup (2026-07-07)
+The daily `visitors`/`anon_visitors` columns are DAILY-distinct: summed over a month they give
+"visitor-DAYS" (a person on 5 days counts 5×), NOT unique visitors. True uniques require a **UNION** of
+`visitor_id`s over the whole period. `dictionary_monthly_visitors(month, scope, visits, anon_visits,
+visitors, anon_visitors)` stores exactly that, keyed by calendar month:
+- `scope` = a `dictionary_id` (distinct visitors who opened that dict, from `dictionary_opened`) OR
+  `'__site__'` (`SITE_SCOPE`) = distinct visitors who started ANY session, from `session_start` — the
+  whole-site number for the homepage badge (NOT the sum of per-dict rows; one visitor across many dicts
+  is one site visitor).
+- `rollup_month()` scans raw `client_logs` from **hot logs.db ∪ archive** for the month, excludes bots
+  via the SAME classifier sourced from `log_daily_sessions` (survives the raw prune), and unions
+  `visitor_id ?? session_id`. `rollup_recent_months()` (a `run_log_retention_once` step, before
+  archive/prune) recomputes every non-finalized month from the `monthly_visitors_finalized_through`
+  watermark through the current month, then **freezes** completed months (a month is ≤31d old when it
+  finalizes, well within the 60d raw window → full coverage, then never recomputed → survives forever).
+- **Reader**: `build_top_dictionaries` reads this rollup for the month/prev-month unique columns, plus a
+  live hot-log scan for the rolling 7d unique (14d hot window ⊇ 7d, exact) and the daily rollup for
+  `visits_30d` (activity). It needs NO archive access. DEV: the cron is idle → the rollup is empty →
+  monthly figures read 0 locally (7d still live); prod is fine.
+
+"Visitors" universally means distinct **browsers/devices**, not humans (a shared family phone → one; one
+person on 3 devices → three) — no cookieless method solves that, so any public surface says so. See
+`.issues/true-unique-visitors.md` + `.issues/future/dictionary-public-visits-stat.md`.
 
 ## Client SPA navigation timing was logged-but-invisible until 2026-07-07
 

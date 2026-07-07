@@ -84,13 +84,16 @@ export function insert_client_log({
     // Promote context.session_id to a real column so analytics filters/groups on
     // it directly (never a per-row json_extract — the old hot-path cost).
     const session_id = typeof payload.context?.session_id === 'string' ? payload.context.session_id : null
+    // Same for the persistent, cookieless visitor id (one per browser across days)
+    // — the raw material for unique-VISITOR counts (vs session_id's per-load visits).
+    const visitor_id = typeof payload.context?.visitor_id === 'string' ? payload.context.visitor_id : null
 
     db.prepare(`
       INSERT INTO client_logs (
         id, received_at, client_time, user_id, level, message, stack,
         url, user_agent, platform, app_version, build_target, context, source,
-        session_id, country, region, city, latitude, longitude
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        session_id, visitor_id, country, region, city, latitude, longitude
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       received_at,
@@ -107,6 +110,7 @@ export function insert_client_log({
       context_json,
       source,
       session_id,
+      visitor_id,
       geo.country,
       geo.region,
       geo.city,
@@ -253,6 +257,17 @@ if (import.meta.vitest) {
       expect(rows).toEqual([
         { message: 'no-session', session_id: null },
         { message: 'session_start', session_id: 'sess-9' },
+      ])
+    })
+
+    test('promotes context.visitor_id to the real visitor_id column', () => {
+      const db = open_logs_db(':memory:')
+      insert_client_log({ payload: { level: 'info', message: 'session_start', context: { visitor_id: 'vis-42', session_id: 's1' } }, user_id: null, db })
+      insert_client_log({ payload: { level: 'info', message: 'no-visitor', context: { foo: 'bar' } }, user_id: null, db })
+      const rows = db.prepare('SELECT message, visitor_id FROM client_logs ORDER BY message').all() as { message: string, visitor_id: string | null }[]
+      expect(rows).toEqual([
+        { message: 'no-visitor', visitor_id: null },
+        { message: 'session_start', visitor_id: 'vis-42' },
       ])
     })
 

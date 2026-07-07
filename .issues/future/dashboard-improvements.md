@@ -182,15 +182,20 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   **visibility-aware** — a single idle tab today emitted ~1,200 heartbeats over 11 h and would read as
   668 min of "engagement". Either gate heartbeats on `document.visibilityState` in `remote-log.ts`, or
   compute duration as the **active (visible) span** only.
-- **True unique-visitor counts via a cookieless `visitor_hash`** (lifted from the retired
-  `analytics-pipeline.md` — the one idea the house-port analytics didn't carry over). The shipped
-  dashboard counts **sessions** (`session_id`), not long-lived visitors. To add real uniques:
-  server-stamp `visitor_hash = sha256(cf-connecting-ip + '|' + user_agent + '|' + ANALYTICS_SALT)` at
-  ingest in `insert-client-log.ts` (new nullable column + index), roll it up in
-  `log-retention-cron.ts`. Decisions already made with Jacob: **per-app `ANALYTICS_SALT`** (hashes
-  non-correlatable across LD/tutor/house), **NOT daily-rotated** (a visitor stays one id across days),
-  **GDPR explicitly a non-concern** (no cookie/consent banner). Accepted tradeoffs: phone+laptop = 2
-  visitors; NAT + same UA can collide. Good enough for traffic stats.
+- ✅ **True unique-visitor counts via a cookieless persistent `visitor_id`** *(SHIPPED 2026-07-07,
+  `.issues/persistent-visitor-id.md`).* The dashboard counted **sessions** (`session_id`), not
+  long-lived visitors. **Jacob chose the localStorage persistent `visitor_id` over the server IP+UA
+  `visitor_hash`** originally proposed here — the hash mass-collapses a whole shared-connection
+  community (one NAT → one "visitor"), the exact failure common to LD dictionary communities, whereas a
+  minted UUID has no systematic merge. Shipped: `remote-log.ts` mints/persists `ld_visitor_id` + stamps
+  `context.visitor_id` (like `session_id`); `insert-client-log.ts` promotes it to a real column (logs.db
+  + archive + shared.db legacy via migration `20260707c`); `rollup_day()` rolls distinct `visitor_id`
+  per dict/day into `dictionary_daily_views(visitors, anon_visitors)`; the "Top dictionaries by viewers"
+  panel shows a Visitors column + Visitor-days stat. No cookie/consent (GDPR non-concern — a random
+  UUID never joined to identity). **Remaining for the public badge:** daily-distinct summed = visitor-
+  *days*, not true monthly uniques — needs a UNION of raw visitor_ids (see
+  `.issues/future/dictionary-public-visits-stat.md`). Superseded the `visitor_hash` idea (kept as a
+  possible zero-client fallback only).
 - ✅ **Split real vs noise in the daily-error series** *(filed + SHIPPED 2026-07-02 — grounded in a
   live false spike).* On 07-02 one contributor caught two back-to-back deploys and logged **99
   stale-chunk `Failed to fetch dynamically imported module`** rows (`KNOWN_NOISE_PATTERNS`) + 8 real,

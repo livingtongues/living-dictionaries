@@ -38,7 +38,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [], failed_by_code: [], failed_current: 0, failed_stale: 0 },
     sync_health: { total: 0, by_kind: [], client_behind: { total: 0, current: 0, stale: 0 }, stuck_pairs: 0, oldest_unresolved_at: null, stuck: [] },
     api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
-    top_dictionaries: { distinct_dictionaries: 0, total_30d: 0, total_7d: 0, total_1d: 0, dictionaries: [] },
+    top_dictionaries: { distinct_dictionaries: 0, month: '2026-07', prev_month: '2026-06', site_visitors_month: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] },
     missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
     boot_health: { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] },
     uptime: { probes: 0, availability: null, ttfb: { p50: null, p95: null }, total: { p50: null, p95: null }, vantages: [], daily: [] },

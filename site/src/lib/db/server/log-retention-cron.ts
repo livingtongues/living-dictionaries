@@ -58,7 +58,7 @@ export function normalize_route(pathname: string | null | undefined): string {
   return `dictionary:${sub}`
 }
 
-interface AccumRow { source: string, level: string, message: string, user_id: string | null, context: string | null, session_id: string | null, country: string | null, region: string | null, user_agent: string | null }
+interface AccumRow { source: string, level: string, message: string, user_id: string | null, context: string | null, session_id: string | null, visitor_id: string | null, country: string | null, region: string | null, user_agent: string | null }
 
 /**
  * Aggregate one UTC day's `client_logs` (read from `logs.db`) into shared.db's
@@ -69,7 +69,7 @@ interface AccumRow { source: string, level: string, message: string, user_id: st
  */
 export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_logs_db() }: { day: string, shared_db?: Database.Database, logs_db?: Database.Database }): { metrics_written: number } {
   const rows = logs_db.prepare(`
-    SELECT coalesce(source,'client') source, level, message, user_id, context, session_id, country, region, user_agent
+    SELECT coalesce(source,'client') source, level, message, user_id, context, session_id, visitor_id, country, region, user_agent
     FROM client_logs WHERE substr(received_at, 1, 10) = ?
   `).all(day) as AccumRow[]
 
@@ -158,7 +158,11 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
   // on a deep-linked entry), so this counts any entry into the dict. Bots excluded
   // via the same session_is_bot gate as the metric buckets. Written to the forever
   // `dictionary_daily_views` table (never pruned) — see the migration.
-  const dict_views = new Map<string, { sessions: Set<string>, anon: Set<string> }>()
+  // `sessions`/`anon` = distinct session_id (visits, reset per page-load). `visitors`/
+  // `anon_visitors` = distinct persistent visitor_id (people/devices across days) —
+  // falls back to session_id for pre-rollout rows with no visitor_id, so the count
+  // never undercounts during the capture ramp-up.
+  const dict_views = new Map<string, { sessions: Set<string>, anon: Set<string>, visitors: Set<string>, anon_visitors: Set<string> }>()
   for (const { row, context, session_id } of parsed_rows) {
     const is_bot = session_id ? session_is_bot(session_id) : is_bot_user_agent(row.user_agent)
     const bucket = is_bot ? bot_bucket : bucket_for(row.source)
@@ -167,12 +171,17 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
       if (dict_id) {
         let views = dict_views.get(dict_id)
         if (!views) {
-          views = { sessions: new Set(), anon: new Set() }
+          views = { sessions: new Set(), anon: new Set(), visitors: new Set(), anon_visitors: new Set() }
           dict_views.set(dict_id, views)
         }
+        const visitor_key = row.visitor_id ?? session_id
+        const is_anon = !session_activity.get(session_id)?.has_user_id
         views.sessions.add(session_id)
-        if (!session_activity.get(session_id)?.has_user_id)
+        views.visitors.add(visitor_key)
+        if (is_anon) {
           views.anon.add(session_id)
+          views.anon_visitors.add(visitor_key)
+        }
       }
     }
     bucket.logs++
@@ -251,7 +260,8 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `)
   const insert_dict_view = shared_db.prepare(`
-    INSERT INTO dictionary_daily_views (day, dictionary_id, sessions, anon_sessions) VALUES (?, ?, ?, ?)
+    INSERT INTO dictionary_daily_views (day, dictionary_id, sessions, anon_sessions, visitors, anon_visitors)
+    VALUES (?, ?, ?, ?, ?, ?)
   `)
   const write_all = shared_db.transaction((items: typeof metrics) => {
     // Full-day REPLACE, not merge: without the delete, a metric that no longer
@@ -279,10 +289,167 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
     // Full-day REPLACE (same idempotency contract as the metrics/sessions above).
     shared_db.prepare('DELETE FROM dictionary_daily_views WHERE day = ?').run(day)
     for (const [dict_id, views] of dict_views)
-      insert_dict_view.run(day, dict_id, views.sessions.size, views.anon.size)
+      insert_dict_view.run(day, dict_id, views.sessions.size, views.anon.size, views.visitors.size, views.anon_visitors.size)
   })
   write_all(metrics)
   return { metrics_written: metrics.length }
+}
+
+/** Sentinel `scope` for the whole-site combined monthly-visitor row. */
+export const SITE_SCOPE = '__site__'
+/** The `client_logs.message` emitted once per page-load/session boot (remote-log init). */
+export const SESSION_START = 'session_start'
+/** db_metadata key: the last COMPLETE calendar month whose monthly-visitor rollup is frozen ('YYYY-MM'). */
+export const MONTHLY_FINALIZED_KEY = 'monthly_visitors_finalized_through'
+
+/** 'YYYY-MM' UTC month for a date. */
+export function month_string(date: Date): string {
+  return date.toISOString().slice(0, 7)
+}
+/** The calendar month before `month` ('YYYY-MM'). */
+export function prev_month(month: string): string {
+  const [year, mon] = month.split('-').map(Number)
+  return month_string(new Date(Date.UTC(year, mon - 2, 1)))
+}
+/** The calendar month after `month` ('YYYY-MM'). */
+function next_month(month: string): string {
+  const [year, mon] = month.split('-').map(Number)
+  return month_string(new Date(Date.UTC(year, mon, 1)))
+}
+
+interface ScopeAccum { visits: Set<string>, anon_visits: Set<string>, visitors: Set<string>, anon_visitors: Set<string> }
+
+/**
+ * Roll one CALENDAR MONTH's raw `client_logs` (hot logs.db ∪ archive) into the
+ * forever `dictionary_monthly_visitors` table — the UNION of distinct visitor_ids
+ * over the WHOLE month (TRUE monthly uniques), vs `dictionary_daily_views`'s
+ * daily-distinct (which summed = "visitor-days", overcounting). Idempotent
+ * full-month DELETE + INSERT, so re-running the in-progress current month is safe.
+ *
+ * Two scope kinds: each `dictionary_id` (distinct visitors who OPENED that dict,
+ * from `dictionary_opened`) + `__site__` (distinct visitors who started ANY
+ * session, from `session_start` — one visitor across many dicts is ONE site
+ * visitor, so it is NOT the sum of the per-dict rows). Bots are excluded using the
+ * SAME UA + webdriver + per-day-frequency classifier as the daily rollup, sourced
+ * from the forever `log_daily_sessions` materialization (survives the raw prune).
+ * Anonymity is session-level (`has_user_id` from log_daily_sessions), matching the
+ * daily rollup. `visitor_id` falls back to `session_id` for pre-2026-07-07 rows.
+ */
+export function rollup_month({ month, shared_db = get_shared_db(), logs_db = get_logs_db(), archive_db = get_log_archive_db() }: {
+  month: string
+  shared_db?: Database.Database
+  logs_db?: Database.Database
+  archive_db?: Database.Database
+}): { scopes_written: number } {
+  const month_start_iso = `${month}-01T00:00:00.000Z`
+  const month_end_iso = `${next_month(month)}-01T00:00:00.000Z`
+
+  // Bot sessions + per-session anon flag for the month, from the forever
+  // log_daily_sessions rows (one per (day, session)). The per-day frequency
+  // classifier keys by day+UA, so passing the raw day-rows matches the daily rollup.
+  const session_days = shared_db.prepare(`
+    SELECT day, session_id, user_agent, heartbeats, has_user_id, webdriver
+    FROM log_daily_sessions WHERE substr(day, 1, 7) = ?
+  `).all(month) as { day: string, session_id: string, user_agent: string | null, heartbeats: number, has_user_id: number, webdriver: number | null }[]
+  const freq_bots = classify_ua_frequency_bot_sessions({
+    sessions: session_days.map(row => ({ session_id: row.session_id, day: row.day, user_agent: row.user_agent, heartbeats: row.heartbeats, has_user_id: row.has_user_id === 1 })),
+  })
+  const bot_sessions = new Set<string>(freq_bots)
+  const has_user = new Map<string, boolean>()
+  for (const row of session_days) {
+    if (is_bot_user_agent(row.user_agent) || row.webdriver === 1)
+      bot_sessions.add(row.session_id)
+    if (row.has_user_id === 1)
+      has_user.set(row.session_id, true)
+  }
+
+  const scopes = new Map<string, ScopeAccum>()
+  const accum = (scope: string, session_id: string, visitor_id: string | null): void => {
+    if (bot_sessions.has(session_id))
+      return
+    let sc = scopes.get(scope)
+    if (!sc) {
+      sc = { visits: new Set(), anon_visits: new Set(), visitors: new Set(), anon_visitors: new Set() }
+      scopes.set(scope, sc)
+    }
+    const visitor_key = visitor_id ?? session_id
+    const is_anon = !has_user.get(session_id)
+    sc.visits.add(session_id)
+    sc.visitors.add(visitor_key)
+    if (is_anon) {
+      sc.anon_visits.add(session_id)
+      sc.anon_visitors.add(visitor_key)
+    }
+  }
+
+  // Scan raw rows from BOTH files (a month spans the 14d hot / 60d archive boundary).
+  for (const db of [logs_db, archive_db]) {
+    for (const row of db.prepare(`
+      SELECT json_extract(context, '$.dictionary_id') dict, session_id, visitor_id
+      FROM client_logs
+      WHERE received_at >= ? AND received_at < ? AND message = ? AND session_id IS NOT NULL
+        AND json_extract(context, '$.dictionary_id') IS NOT NULL
+    `).all(month_start_iso, month_end_iso, DICTIONARY_OPENED) as { dict: string, session_id: string, visitor_id: string | null }[])
+      accum(row.dict, row.session_id, row.visitor_id)
+    for (const row of db.prepare(`
+      SELECT session_id, visitor_id FROM client_logs
+      WHERE received_at >= ? AND received_at < ? AND message = ? AND session_id IS NOT NULL
+    `).all(month_start_iso, month_end_iso, SESSION_START) as { session_id: string, visitor_id: string | null }[])
+      accum(SITE_SCOPE, row.session_id, row.visitor_id)
+  }
+
+  const insert = shared_db.prepare(`
+    INSERT INTO dictionary_monthly_visitors (month, scope, visits, anon_visits, visitors, anon_visitors)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `)
+  const write = shared_db.transaction(() => {
+    shared_db.prepare('DELETE FROM dictionary_monthly_visitors WHERE month = ?').run(month)
+    for (const [scope, sc] of scopes)
+      insert.run(month, scope, sc.visits.size, sc.anon_visits.size, sc.visitors.size, sc.anon_visitors.size)
+  })
+  write()
+  return { scopes_written: scopes.size }
+}
+
+/**
+ * Recompute every non-finalized recent month (from the `monthly_visitors_finalized_through`
+ * watermark — or the earliest month with raw rows — through the current month) into
+ * `dictionary_monthly_visitors`, then advance the watermark to the month BEFORE the
+ * current one so completed months FREEZE (their true-unique count is captured while
+ * the raw rows still exist, then never recomputed → survives the 60d prune forever).
+ * A calendar month is ≤~31 days old when it finalizes (cron runs every 6h), well
+ * within the 60d raw window, so full coverage is guaranteed.
+ */
+export function rollup_recent_months({ shared_db = get_shared_db(), logs_db = get_logs_db(), archive_db = get_log_archive_db(), now = new Date() }: {
+  shared_db?: Database.Database
+  logs_db?: Database.Database
+  archive_db?: Database.Database
+  now?: Date
+} = {}): { months_rolled: number } {
+  const current = month_string(now)
+  const finalized = (shared_db.prepare(`SELECT value FROM db_metadata WHERE key = ?`).get(MONTHLY_FINALIZED_KEY) as { value: string } | undefined)?.value ?? null
+  const earliest_raw = [logs_db, archive_db]
+    .map(db => (db.prepare(`SELECT substr(MIN(received_at), 1, 7) m FROM client_logs`).get() as { m: string | null }).m)
+    .filter((month): month is string => !!month)
+    .sort()[0] ?? current
+  let start = finalized ? next_month(finalized) : earliest_raw
+  if (start > current)
+    start = current
+
+  let months_rolled = 0
+  for (let month = start; month <= current; month = next_month(month)) {
+    rollup_month({ month, shared_db, logs_db, archive_db })
+    months_rolled++
+  }
+
+  const prev = prev_month(current)
+  if (start <= prev && (!finalized || prev > finalized)) {
+    shared_db.prepare(`
+      INSERT INTO db_metadata (key, value) VALUES (?, ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    `).run(MONTHLY_FINALIZED_KEY, prev)
+  }
+  return { months_rolled }
 }
 
 /**
@@ -417,6 +584,10 @@ export function run_log_retention_once({ shared_db = get_shared_db(), logs_db = 
       `).run(ROLLUP_WATERMARK_KEY, yesterday)
     } })
   }
+  // TRUE unique-visitor monthly rollup — BEFORE archive/prune so the current +
+  // recently-completed months' raw rows are all still present (hot or archive) for
+  // the union. Reads both files, so archive order doesn't matter for correctness.
+  step({ label: 'rollup_recent_months', fallback: undefined, run: () => rollup_recent_months({ shared_db, logs_db, archive_db, now }) })
   const { archived, pruned } = step({
     label: 'archive_old_logs',
     fallback: { archived: 0, pruned: 0 },

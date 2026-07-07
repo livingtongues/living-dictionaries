@@ -31,10 +31,19 @@ catalog. Options (decide then):
 Recommend (1) if the number is dict-home-only; (2) if the homepage globe / dictionaries list also
 wants it. Likely (1) first.
 
-## Caveat to surface honestly
-"Visits", NOT unique "visitors" (session_id resets per page-load). If we want true monthly uniques,
-ship the cookieless `visitor_hash` first (dashboard-improvements.md backlog) and roll a
-`visitor_hash`-distinct count into `dictionary_daily_views`. Until then, label it "visits" (or "views").
+## Data is now TRUE monthly uniques — the badge is mostly a display + delivery task
+**Update 2026-07-07 (round 2):** the forever `dictionary_monthly_visitors(month, scope, visits,
+anon_visits, visitors, anon_visitors)` rollup now ships (`.issues/true-unique-visitors.md`) — a true
+month-long UNION of `visitor_id`s per dict (`scope = dictionary_id`) AND a site-wide `scope='__site__'`
+row for the homepage combined number. Recomputed from raw each cron sweep, then frozen forever. So the
+badge just needs to read `visitors` (or `anon_visitors` for "outside public") for the desired month(s)
+and get the number to the browser (see the delivery options above). No more cardinality math — the
+"visitor-days" trap is already solved server-side.
+
+Still hold ~1mo so a month of real `visitor_id` history accumulates (counts read low until then; capture
+started 2026-07-07). "Visitors" = distinct browsers/devices, not humans (shared device → one; multi-device
+person → many) — say so on the badge. For a rolling-30d (vs calendar-month) public number, either sum
+partial calendar months or compute a 30d union from raw `client_logs` (within its 60d retention).
 
 ## Also consider
 - Threshold + opt-out: don't embarrass low-traffic dicts. Per-dict toggle? Or auto-hide < N.

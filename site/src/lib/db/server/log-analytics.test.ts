@@ -1387,9 +1387,11 @@ describe(get_log_analytics, () => {
           "top_dictionaries": {
             "dictionaries": [],
             "distinct_dictionaries": 0,
-            "total_1d": 0,
-            "total_30d": 0,
-            "total_7d": 0,
+            "month": "2026-06",
+            "prev_month": "2026-05",
+            "site_visitors_7d": 3,
+            "site_visitors_month": 0,
+            "site_visitors_prev_month": 0,
           },
           "top_events": [
             {
