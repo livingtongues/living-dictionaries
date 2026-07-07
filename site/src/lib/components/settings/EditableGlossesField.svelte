@@ -25,7 +25,7 @@
 
   const activeGlossingBcps = $derived(Array.isArray(selectedLanguages)
     ? selectedLanguages.map(bcp =>
-      page.data.t({ dynamicKey: `gl.${bcp}`, fallback: availableLanguages[bcp].vernacularName }),
+      page.data.t({ dynamicKey: `gl.${bcp}`, fallback: availableLanguages[bcp]?.vernacularName ?? bcp }),
     )
     : [])
   const remainingGlossingLanguagesAsArray = $derived(Object.entries(availableLanguages)

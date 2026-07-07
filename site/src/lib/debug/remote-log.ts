@@ -75,6 +75,47 @@ function is_noise_message(message: string | undefined | null): boolean {
   return NOISE_MESSAGE_PATTERNS.some(pattern => message.includes(pattern))
 }
 
+/**
+ * Repeat-error coalescing. A runaway loop (rAF / reactive effect firing every
+ * frame with the same fault) once logged 8,170 byte-identical rows from ONE
+ * session (the 2026-07-07 homepage WorldMap `getBoundingClientRect` storm) —
+ * ~40% of the day's total log volume, and it drowned the raw error channel.
+ *
+ * So for the error-ish levels only, we count identical (level|message|stack-head)
+ * faults inside a rolling window and emit the first few verbatim, then only at
+ * power-of-two occurrences (1..5, 8, 16, 32, 64, …). Every emitted row is stamped
+ * with `context.repeat_count`, so a loop is instantly legible ("repeat_count: 8170")
+ * AND self-suppressing (8k rows → ~18). Info rows (heartbeat/nav/perf/analytics)
+ * are curated + needed, so they bypass this entirely.
+ */
+const COALESCED_LEVELS = new Set(['error', 'unhandled_rejection', 'crash', 'warn'])
+const COALESCE_WINDOW_MS = 60_000
+const COALESCE_VERBATIM = 5
+let repeat_counts = new Map<string, number>()
+let repeat_window_start = 0
+
+function is_power_of_two(n: number): boolean {
+  return n > 0 && (n & (n - 1)) === 0
+}
+
+/**
+ * Decide whether this fault should ship and how many identical ones it stands
+ * for. `emit: false` → drop silently (a suppressed loop frame). Never throws.
+ */
+function coalesce_repeat(entry: ClientLogPayload): { emit: boolean, repeat_count: number } {
+  if (!entry.level || !COALESCED_LEVELS.has(entry.level))
+    return { emit: true, repeat_count: 1 }
+  const now = Date.now()
+  if (now - repeat_window_start > COALESCE_WINDOW_MS) {
+    repeat_counts = new Map()
+    repeat_window_start = now
+  }
+  const key = `${entry.level}|${entry.message ?? ''}|${(entry.stack ?? '').slice(0, 120)}`
+  const count = (repeat_counts.get(key) ?? 0) + 1
+  repeat_counts.set(key, count)
+  return { emit: count <= COALESCE_VERBATIM || is_power_of_two(count), repeat_count: count }
+}
+
 interface InternalEntry extends ClientLogPayload {
   /** Internal id only — server assigns its own; useful for de-dupe in buffer. */
   _id: string
@@ -336,6 +377,11 @@ function write_pending(entries: InternalEntry[]): void {
 function push(entry: ClientLogPayload): void {
   if (is_noise_message(entry.message))
     return
+  const { emit, repeat_count } = coalesce_repeat(entry)
+  if (!emit)
+    return
+  if (repeat_count > 1)
+    entry = { ...entry, context: { ...(entry.context ?? {}), repeat_count } }
   if (!initialized) {
     // Buffer until init replays these (capped — drop oldest on overflow).
     pre_init_buffer.push(entry)
@@ -735,6 +781,8 @@ export function _reset_for_tests(): void {
   registered_listeners = []
   breadcrumbs = []
   pre_init_buffer = []
+  repeat_counts = new Map()
+  repeat_window_start = 0
   initialized = false
   in_console_error_patch = false
   session_id = ''

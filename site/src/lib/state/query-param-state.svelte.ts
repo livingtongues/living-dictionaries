@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store'
 import type { Writable } from 'svelte/store'
 import { cleanObject } from '$lib/utils/clean-object'
+import { log_warning } from '$lib/debug/remote-log'
 import { goto } from '$app/navigation'
 import { page } from '$app/state'
 
@@ -76,8 +77,16 @@ export function createQueryParamStore<T>(options: QueryParamStoreOptions<T>) {
     if (log)
       console.info(`URL set ${key} to ${value}`)
     let parsed_value = parse(value)
-    if (!parsed_value && typeof startWith === 'object')
+    // An object-shaped store (e.g. the entries page's `?q={"query":…}`) must never
+    // hold a scalar: a hand-typed/legacy `?q=hua` parses to the bare string `'hua'`,
+    // and a later `bind:checked={$store.has_sentence}` then throws "Cannot create
+    // property 'has_sentence' on string 'hua'". The old guard only caught FALSY values;
+    // coerce ANY non-object back to the empty default (was a live crash — 2026-07-07 log review).
+    if (typeof startWith === 'object' && (typeof parsed_value !== 'object' || parsed_value === null)) {
+      if (typeof window !== 'undefined' && value !== '' && value !== null && value !== undefined)
+        log_warning({ message: 'malformed_query_param', context: { key, raw: String(value).slice(0, 120) } })
       parsed_value = {}
+    }
     set(parsed_value)
     storage?.setItem(storageKey, JSON.stringify(parsed_value))
     if (log && storage)

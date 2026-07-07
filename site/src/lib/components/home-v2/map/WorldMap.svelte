@@ -360,7 +360,7 @@
   }
 
   function draw() {
-    if (!context || !base_projection || !land_path || !colors)
+    if (!context || !container || !base_projection || !land_path || !colors)
       return
     const { k, x: tx, y: ty } = transform
 
@@ -586,7 +586,9 @@
     if (selected_dict && selected_dict.lng !== null) {
       const point = project_point({ lng: selected_dict.lng, lat: selected_dict.lat })
       if (point) {
-        const rect = container.getBoundingClientRect()
+        const rect = container?.getBoundingClientRect()
+        if (!rect)
+          return
         const vx = rect.left + point.x
         const vy = rect.top + point.y
         const half_width = 116 // half the 13.5rem (~216px) popover + a small margin

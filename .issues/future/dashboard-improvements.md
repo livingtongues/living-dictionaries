@@ -60,6 +60,26 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   by-route tables in the Performance panel.
 
 ## Open proposals
+- **★★ NEW — Per-session error breadth on the error-cluster panel (loop-bug detector)** *(filed
+  2026-07-07 — grounded in TODAY's live P1; verified NOT present).* The `ErrorCluster` shape
+  (`log-analytics.ts` ~line 230) exposes `count` + `users` but **no per-session breadth**, so a
+  client-side *infinite-loop* bug is indistinguishable from broad breakage by the ranked list alone.
+  Today the WorldMap `getBoundingClientRect` loop logged **8,170 hits from ONE session / ONE user**
+  and topped the cluster list looking like "1 user, low reach" — when it was actually a rAF storm
+  firing every frame (see `.issues/worldmap-getboundingclientrect-loop-2026-07-07.md`). Add
+  `sessions` (`COUNT(DISTINCT session_id)`) and `max_per_session` (max rows for this cluster within a
+  single `session_id`) to `ErrorCluster`; surface a **"⟳ loop" flag** when `max_per_session` is high
+  (e.g. > 100) so a runaway animation/effect loop is legible at a glance and doesn't get dismissed as
+  "one user." Cheap — same GROUP BY, one extra `COUNT(DISTINCT …)` + a correlated per-session max
+  subquery (or a windowed CTE). Directly answers a question this review had to hand-run today.
+- **Stale-bundle error share as a headline % on the errors panel** *(ported from house · filed
+  2026-07-07 — MEDIUM).* house's open item: "one number — % of window errors from stale (non-current)
+  bundles." LD already computes `totals.stale_errors` but does **not** surface a stale-vs-current
+  *share* on the analytics errors panel (verified: no `stale`/`bundle` reference in
+  `admin/analytics/+page.svelte`). Today it would have instantly answered "is this error spike a live
+  regression or just old tabs?" — the answer was **live** (10,854 of 11,482 errors on the two current
+  builds), which a `stale_errors / errors` % would have shown at a glance. Display-only, data already
+  in `totals`.
 - **★★ NEW — "Sync health / stuck client_behind" panel** *(filed 2026-07-05 run 1 — grounded in a live
   P2; **reaffirmed + doubly-grounded 2026-07-05 run 2** after the source fix `f66b209c` shipped; see
   `.issues/dict-sync-client-behind-storm-2026-07-05.md`).* Run 1: the per-dict sync engine's
