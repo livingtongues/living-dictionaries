@@ -338,14 +338,11 @@
       return { x: cluster.x - radius, y: cluster.y - radius, width: radius * 2, height: radius * 2 }
     })
 
-    if (declustered) {
-      // level 3: everything is its own dot and EVERY dot gets a name
-      merged_ids = new Set()
-      const { placed } = layout_labels({ items: make_items(base_clusters), obstacles: make_obstacles(base_clusters), bounds, guarantee: true })
-      label_layout = new Map(placed.map(label => [label.id, label]))
-      return
-    }
-    // level 2: no unlabeled lone dots — the unplaceable ones become clusters
+    // level 2 AND level 3 share one path: place every label that FITS, then fold
+    // the unplaceable singles into a nearby cluster so text never overlaps. At
+    // level 3 base_clusters are all singles (sparse areas fully decluster); dense
+    // pockets (e.g. the Guatemalan highlands) keep a cluster until you zoom in
+    // enough for the labels to fit.
     const first = layout_labels({ items: make_items(base_clusters), obstacles: make_obstacles(base_clusters), bounds, guarantee: false })
     if (!first.failed.length) {
       merged_ids = new Set()
@@ -418,7 +415,7 @@
       merged_ids = new Set()
       layout_key = ''
     }
-    visible_clusters = !declustered && merged_ids.size
+    visible_clusters = merged_ids.size
       ? apply_forced_merges({ clusters: base_clusters, merged_ids, get_id: dict => dict.id })
       : base_clusters
 
@@ -428,6 +425,9 @@
         singles_pos[cluster.items[0].id] = { x: cluster.x, y: cluster.y }
     }
     const connector_alpha = new Map(connector_labels.filter(label => label.opacity > 0.01).map(label => [label.dict_id, label.opacity]))
+    // red connector labels are collected here and drawn in a final pass, on top
+    // of every blue label AND the dots — the red strip highlight always wins
+    const deferred_red: { text: string, x: number, y: number, alpha: number, align: 'left' | 'center' }[] = []
 
     // dict labels first (our content wins the collision contest); the strip's
     // connector dict renders red with an entry-count suffix, crossfading
@@ -444,8 +444,12 @@
       const alpha = connector_alpha.get(id) ?? 0
       if (alpha < 0.99)
         draw_plain_label({ text: dict.name, x: box.x, y: baseline_y, font: dict_font, fill: colors.dict_label, alpha: 1 - alpha })
-      if (alpha > 0.01)
-        draw_plain_label({ text: connector_text(dict), x: box.x, y: baseline_y, font: dict_font, fill: colors.highlight, alpha })
+      if (alpha > 0.01) {
+        // reserve the wider red text (name + "· N entries") so nearby labels dodge it
+        const text = connector_text(dict)
+        placer.block({ x: box.x - 2, y: baseline_y - 11, width: measure(text, dict_font) + 4, height: 14 })
+        deferred_red.push({ text, x: box.x, y: baseline_y, alpha, align: 'left' })
+      }
     }
 
     // connector dict hidden inside a cluster (or no labels at this zoom yet) —
@@ -464,7 +468,7 @@
       const x = Math.max(text_width / 2 + 4, Math.min(width - text_width / 2 - 4, cluster.x))
       const y = cluster.y - 12
       placer.block({ x: x - text_width / 2, y: y - 11, width: text_width, height: LABEL_HEIGHT })
-      draw_plain_label({ text, x, y, font: dict_font, fill: colors.highlight, alpha: opacity, align: 'center' })
+      deferred_red.push({ text, x, y, alpha: opacity, align: 'center' })
     }
 
     // country labels, progressively by size
@@ -532,6 +536,10 @@
         context.fillText(String(cluster.count), cluster.x, cluster.y + 3)
       }
     }
+
+    // red connector label(s) last — always on top of blue labels + dots
+    for (const red of deferred_red)
+      draw_plain_label({ text: red.text, x: red.x, y: red.y, font: dict_font, fill: colors.highlight, alpha: red.alpha, align: red.align })
 
     // pulse ring for the highlighted / selected dictionary
     const pulse_dict = highlighted_dict_id

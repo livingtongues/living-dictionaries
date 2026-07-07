@@ -240,6 +240,9 @@
   .strip {
     display: flex;
     gap: 0.75rem;
+    /* `safe center`: centers a short (filtered/zoomed) strip, but falls back to
+       flex-start once the looped track overflows so scroll + auto-drift work */
+    justify-content: safe center;
     overflow-x: auto;
     width: 100%;
     padding: 0.875rem 0 0.375rem;
