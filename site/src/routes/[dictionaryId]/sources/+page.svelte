@@ -7,7 +7,7 @@
   import IconFaSolidPen from '~icons/fa-solid/pen'
   import IconFaSolidTrash from '~icons/fa-solid/trash'
 
-  const { sources, can_edit, dbOperations, t } = $derived(page.data)
+  const { sources, can_edit, db_operations, t } = $derived(page.data)
   const connection = $derived(page.data.connection as { query: <T>(sql: string, params?: unknown[]) => Promise<T[]> } | null)
 
   let editing = $state<Tables<'sources'> | null | undefined>(undefined) // undefined = closed, null = create
@@ -40,11 +40,11 @@
     if (count > 0) {
       if (!confirm(t({ dynamicKey: 'source.confirm_remove_all', fallback: `"${label}" is used by ${count} item(s). Remove it from all of them and delete the source?` })))
         return
-      await dbOperations.remove_source_and_delete({ source_id: source.id, slug: source.slug })
+      await db_operations.remove_source_and_delete({ source_id: source.id, slug: source.slug })
     } else {
       if (!confirm(`${t('misc.delete')} "${label}"?`))
         return
-      await dbOperations.remove_source_and_delete({ source_id: source.id, slug: source.slug })
+      await db_operations.remove_source_and_delete({ source_id: source.id, slug: source.slug })
     }
   }
 </script>

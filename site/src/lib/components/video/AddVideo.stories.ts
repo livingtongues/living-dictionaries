@@ -29,7 +29,7 @@ export const shared_meta: StoryMeta = {
     dictionary: { id: 'demo' },
     speakers: readable([{ id: 'sp1', name: 'Ana Marija' }]),
     sources: readable([]),
-    dbOperations: {
+    db_operations: {
       uploadVideo: () => readable({ progress: 0 }),
       insert_video: async () => ({ id: 'v1' }),
       assign_speaker: async () => {},

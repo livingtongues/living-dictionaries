@@ -8,14 +8,14 @@ function t(key: string | { dynamicKey?: string, fallback?: string }): string {
   return labels[key] || key
 }
 
-const dbOperations = {
+const db_operations = {
   insert_source: async (source: unknown) => { console.info('insert_source', source); return source },
   update_source: async (source: unknown) => { console.info('update_source', source); return source },
 }
 
 export const shared_meta: StoryMeta = {
   viewports: [{ width: 640, height: 720 }],
-  page_data: { t, dbOperations },
+  page_data: { t, db_operations },
 }
 
 export const Create: Story<typeof Component> = {

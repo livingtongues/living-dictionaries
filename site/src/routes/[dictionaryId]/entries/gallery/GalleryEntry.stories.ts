@@ -5,7 +5,7 @@ import { mock_t } from '$lib/mocks/mock-t'
 
 export const shared_meta: StoryMeta = {
   viewports: [{ width: 320, height: 340 }],
-  page_data: { t: mock_t, dbOperations: {} },
+  page_data: { t: mock_t, db_operations: {} },
 }
 
 const dictionary = {

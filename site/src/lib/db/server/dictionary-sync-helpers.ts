@@ -22,6 +22,56 @@ const VALID_COLUMNS: Record<DictSyncableTable, Set<string>> = Object.fromEntries
   ]),
 ) as Record<DictSyncableTable, Set<string>>
 
+/**
+ * The UNIQUE natural-key columns each syncable dict table carries IN ADDITION to
+ * its synthetic-UUID `id` primary key (see `dictionary-migrations/*.sql`). Two
+ * clients that create the SAME natural row — a junction linking the same
+ * (entry, tag), a source with the same slug — mint DIFFERENT random-UUID ids
+ * (`insert_row` in `dict-writes.ts`), so the second push's INSERT collides on the
+ * natural-key UNIQUE, which `merge_dict_row`'s `ON CONFLICT(id)` upsert does NOT
+ * catch → `UNIQUE constraint failed` → the whole per-dict push 500s and rolls
+ * back. This is the per-dict sibling of house's `people.name` collision
+ * (`.issues/sync-junction-natural-key-collision.md`). Every
+ * listed table is a LEAF row (no other row FK-references its id), so deduping the
+ * pushed row onto the canonical existing id needs no FK-remap / id echo — unlike
+ * house's lookup dedupe. NULLable columns are matched with COALESCE(…,'') to
+ * mirror the functional UNIQUE index on `entry_relationships`.
+ */
+const DICT_NATURAL_KEY_COLUMNS: Partial<Record<DictSyncableTable, readonly string[]>> = {
+  senses_in_sentences: ['sense_id', 'sentence_id'],
+  audio_speakers: ['audio_id', 'speaker_id'],
+  video_speakers: ['video_id', 'speaker_id'],
+  sense_videos: ['sense_id', 'video_id'],
+  sentence_videos: ['sentence_id', 'video_id'],
+  sense_photos: ['sense_id', 'photo_id'],
+  sentence_photos: ['sentence_id', 'photo_id'],
+  entry_dialects: ['entry_id', 'dialect_id'],
+  entry_tags: ['entry_id', 'tag_id'],
+  featured_entries: ['entry_id'],
+  sources: ['slug'],
+  entry_relationships: ['from_entry_id', 'from_sense_id', 'to_entry_id', 'to_sense_id', 'type', 'custom_type_id'],
+}
+
+/**
+ * The id currently owning `row`'s natural key on the server, or undefined when
+ * the table has no natural key or no row owns it. COALESCE(…,'') on both sides
+ * so NULL columns compare equal (matching the `entry_relationships` functional
+ * index and treating absent/NULL uniformly).
+ */
+function find_natural_key_owner_id({ db, table_name, row }: {
+  db: Database.Database
+  table_name: DictSyncableTable
+  row: Record<string, unknown>
+}): string | undefined {
+  const columns = DICT_NATURAL_KEY_COLUMNS[table_name]
+  if (!columns)
+    return undefined
+  const where = columns.map(column => `COALESCE("${column}",'') = COALESCE(?,'')`).join(' AND ')
+  const params = columns.map(column => (row[column] ?? null) as string | null)
+  const owner = db.prepare(`SELECT id FROM "${table_name}" WHERE ${where} LIMIT 1`).get(...params) as { id: string } | undefined
+  return owner?.id
+}
+
 export interface DictChangesRequest {
   /** Client's last-seen `db_metadata.last_modified_at`. null = first sync. */
   synced_up_to: string | null
@@ -347,9 +397,26 @@ export function merge_dict_row({ db, table_name, row, user_id, at, api_key_id }:
     return null
 
   // Full existing row: needed for the LWW check AND the history delta.
-  const existing = db.prepare(
+  let existing = db.prepare(
     `SELECT * FROM "${table_name}" WHERE id = ?`,
   ).get(row_id) as Record<string, unknown> | undefined
+
+  // Natural-key collision guard. When the pushed id is unknown here but its
+  // natural key already belongs to a DIFFERENT id, two clients minted the same
+  // junction/lookup row with different random UUIDs — dedupe onto that canonical
+  // id (LWW-merge the pushed content onto it) instead of letting the INSERT throw
+  // `UNIQUE constraint failed` and roll back the whole push. See
+  // DICT_NATURAL_KEY_COLUMNS. Leaf rows → no FK-remap / echo needed.
+  let canonical_id = row_id
+  if (!existing) {
+    const owner_id = find_natural_key_owner_id({ db, table_name, row })
+    if (owner_id && owner_id !== row_id) {
+      canonical_id = owner_id
+      existing = db.prepare(
+        `SELECT * FROM "${table_name}" WHERE id = ?`,
+      ).get(owner_id) as Record<string, unknown> | undefined
+    }
+  }
 
   if (existing && (row.updated_at as string) && (existing.updated_at as string) > (row.updated_at as string)) {
     // Server wins — caller will see this row come back in the pull stage.
@@ -358,12 +425,15 @@ export function merge_dict_row({ db, table_name, row, user_id, at, api_key_id }:
   }
 
   const op: 'insert' | 'update' = existing ? 'update' : 'insert'
-  const delta = at ? build_delta(table_name, existing, row) : null
+  // When deduped onto a canonical id, upsert against THAT id so the content
+  // merges onto the existing row rather than inserting a duplicate natural key.
+  const merge_source = canonical_id === row_id ? row : { ...row, id: canonical_id }
+  const delta = at ? build_delta(table_name, existing, merge_source) : null
 
   // Stamp updated_by_user_id with the authenticated caller (server is the
   // authority on this). created_by_user_id is preserved if the row already
   // exists; otherwise it's stamped with the caller too.
-  const stringified = stringify_dict_row(table_name, { ...row })
+  const stringified = stringify_dict_row(table_name, { ...merge_source })
   const allowed = VALID_COLUMNS[table_name]
   const columns = Object.keys(stringified).filter(c => c !== 'dirty' && allowed.has(c))
   if (!columns.includes('updated_by_user_id')) {
@@ -394,10 +464,10 @@ export function merge_dict_row({ db, table_name, row, user_id, at, api_key_id }:
   // column actually changed (an updated_at-only re-push yields a null delta).
   if (op === 'update' && !delta)
     return null
-  const after = db.prepare(`SELECT * FROM "${table_name}" WHERE id = ?`).get(row_id) as Record<string, unknown>
+  const after = db.prepare(`SELECT * FROM "${table_name}" WHERE id = ?`).get(canonical_id) as Record<string, unknown>
   return {
     table_name,
-    row_id,
+    row_id: canonical_id,
     op,
     user_id,
     at,

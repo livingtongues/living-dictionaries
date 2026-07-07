@@ -5,7 +5,7 @@ import type { AudioVideoUploadStatus } from '$lib/components/audio/upload-audio'
 
 const log_args = (args: any) => console.info({ args }) as unknown as Promise<any>
 
-export const logDbOperations: DbOperations = {
+export const log_db_operations: DbOperations = {
   addImage: ({ sense_id, image_options }) => {
     console.info({ sense_id, image_options })
     return readable({ progress: 25, preview_url: URL.createObjectURL(image_options.file) })

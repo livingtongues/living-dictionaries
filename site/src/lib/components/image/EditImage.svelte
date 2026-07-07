@@ -17,10 +17,10 @@
   let rights = $state(false)
   let ai_image = $state(false)
 
-  const { dbOperations } = $derived(page.data)
+  const { db_operations } = $derived(page.data)
 
   function handleImageUpload(file: File) {
-    const status = dbOperations.addImage({
+    const status = db_operations.addImage({
       sense_id,
       image_options: {
         file,
@@ -119,7 +119,7 @@
       <Button
         onclick={async () => {
           const confirmation = confirm(page.data.t('entry.delete_audio'))
-          if (confirmation) await dbOperations.update_audio({ deleted: new Date().toISOString(), id: image_file.id })
+          if (confirmation) await db_operations.update_audio({ deleted: new Date().toISOString(), id: image_file.id })
           on_close()
         }}
         color="red">

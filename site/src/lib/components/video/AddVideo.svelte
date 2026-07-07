@@ -14,7 +14,7 @@
   import { get_headword } from '$lib/helpers/orthographies'
   import IconUilMicrophone from '~icons/uil/microphone'
 
-  const { dbOperations } = $derived(page.data)
+  const { db_operations } = $derived(page.data)
 
   interface Props {
     on_close: () => void
@@ -28,7 +28,7 @@
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: page.data.dictionary?.orthographies }))
 
   function startUpload({ file, speaker_id, source_slug }: { file: File | Blob, speaker_id?: string, source_slug?: string }): Readable<VideoUploadStatus> {
-    const uploadStore = dbOperations.uploadVideo({ file, sense_id: entry.senses[0].id, speaker_id, source: source_slug })
+    const uploadStore = db_operations.uploadVideo({ file, sense_id: entry.senses[0].id, speaker_id, source: source_slug })
     const unsubscribe = uploadStore.subscribe((status) => {
       if (status?.progress === 100) {
         upload_triggered = true
@@ -39,9 +39,9 @@
   }
 
   async function save_hosted({ speaker_id, source_slug }: { speaker_id?: string, source_slug?: string }) {
-    const data = await dbOperations.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video, ...(source_slug ? { source: source_slug } : {}) } })
+    const data = await db_operations.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video, ...(source_slug ? { source: source_slug } : {}) } })
     if (speaker_id)
-      await dbOperations.assign_speaker({ speaker_id, media: 'video', media_id: data.id })
+      await db_operations.assign_speaker({ speaker_id, media: 'video', media_id: data.id })
     on_close()
   }
 </script>

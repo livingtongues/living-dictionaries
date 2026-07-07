@@ -13,7 +13,7 @@
 
   const { entry, can_edit = false, dictionary }: Props = $props()
 
-  const { dbOperations } = $derived(page.data)
+  const { db_operations } = $derived(page.data)
 
   const glosses = $derived(order_glosses({
     glosses: entry.senses?.[0]?.glosses,
@@ -38,7 +38,7 @@
           photographer={first_photo.photographer}
           page_context="gallery"
           {can_edit}
-          on_delete_image={async () => await dbOperations.delete_photo(first_photo.id)} />
+          on_delete_image={async () => await db_operations.delete_photo(first_photo.id)} />
       </div>
       <a href="/{dictionary.url}/entry/{entry.id}" class="caption">
         <div class="headword">

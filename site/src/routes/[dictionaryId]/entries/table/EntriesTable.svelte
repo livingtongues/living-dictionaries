@@ -12,7 +12,7 @@
     can_edit?: boolean
     dictionary: Tables<'dictionaries'>
     preferred_table_columns: IColumn[]
-    dbOperations: DbOperations
+    db_operations: DbOperations
   }
 
   const {
@@ -20,7 +20,7 @@
     can_edit = false,
     dictionary,
     preferred_table_columns,
-    dbOperations,
+    db_operations,
   }: Props = $props()
 
   const columns = $derived(setUpColumns(preferred_table_columns, dictionary))
@@ -67,7 +67,7 @@
               {column}
               {entry}
               {can_edit}
-              {dbOperations} />
+              {db_operations} />
           </td>
         {/each}
       </tr>

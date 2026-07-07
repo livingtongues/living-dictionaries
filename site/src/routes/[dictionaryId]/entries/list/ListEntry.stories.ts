@@ -32,7 +32,7 @@ function make_entry(lexeme: Record<string, string>): EntryData {
 const shared_props = {
   dictionary,
   can_edit: false,
-  dbOperations: {} as DbOperations,
+  db_operations: {} as DbOperations,
 }
 
 export const DefaultHeadwordWithAlternate: Story<typeof Component> = {

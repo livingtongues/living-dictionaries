@@ -6,6 +6,7 @@ import { start_log_retention_cron_once } from '$lib/db/server/log-retention-cron
 import { get_logs_db, split_client_logs_from_shared } from '$lib/db/server/logs-db'
 import { start_r2_snapshot_builder } from '$lib/db/server/r2-snapshot-builder'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { start_wal_checkpoint_cron_once } from '$lib/db/server/wal-checkpoint-cron'
 import { ensure_all_admins_in_team_chat } from '$lib/server/chat/ensure-team-membership'
 import { is_cross_origin_form_forbidden } from '$lib/server/csrf'
 import { boot_i18n_catalog } from '$lib/server/i18n/boot'
@@ -46,6 +47,12 @@ if (env.R2_SNAPSHOT_BUILDER_ENABLED === 'true' && env.IS_STANDBY !== 'true')
 // Two-tier client_logs retention + the forever log_daily_metrics rollup. Always
 // runs on the active node — only self-gates on IS_STANDBY + dev/build (no enable flag).
 start_log_retention_cron_once()
+
+// Periodic `wal_checkpoint(TRUNCATE)` on the central DBs (shared.db / logs.db /
+// logs-archive.db) so their WAL files can't ratchet up unbounded under steady
+// sync/read load. Primary-only (IS_STANDBY-gated) + singleton + dev/build-dormant.
+// Per-dictionary DBs are deliberately out of scope pending investigation.
+start_wal_checkpoint_cron_once()
 
 // Admin team-chat gentle re-ping cron. Hourly, sends exactly one more nudge for
 // chat pings unread ~1 day. IS_STANDBY-guarded + singleton-guarded; notify_admin

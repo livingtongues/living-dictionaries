@@ -10,6 +10,7 @@
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import type { DbOperations } from '$lib/db-operations'
   import { get_orthographies } from '$lib/helpers/orthographies'
+  import { dedupe_keyed_children } from '$lib/utils/dedupe-keyed-children'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
   import IconSystemUiconsVersions from '~icons/system-uicons/versions'
   import IconFaSolidTimes from '~icons/fa-solid/times'
@@ -19,21 +20,21 @@
     entry: EntryData
     dictionary: Tables<'dictionaries'>
     can_edit?: boolean
-    dbOperations: DbOperations
+    db_operations: DbOperations
   }
 
   const {
     entry,
     dictionary,
     can_edit = false,
-    dbOperations,
+    db_operations,
   }: Props = $props()
 
   // Scalar entry fields render + save directly off the live `dict_db` row
   // (mutate, then `_save()` — auto-stamps the editing user + dirty). The Orama
   // watcher reflects each save back into the `EntryData` read-model that the
   // list/gallery/table/SEO surfaces use. Multi-table concerns (senses, media,
-  // dialects, tags) stay on `dbOperations`/the read-model for now. See
+  // dialects, tags) stay on `db_operations`/the read-model for now. See
   // `.issues/livedb-scalar-field-migration.md`.
   const dict_db = $derived(page.data.dict_db)
   const entry_row = $derived(dict_db?.entries.id(entry.id))
@@ -43,6 +44,9 @@
   // field names, so the swap to `entry_row` once it arrives is seamless.
   const fields = $derived(entry_row ?? entry.main)
   const orthographies = $derived(get_orthographies(dictionary))
+  // Deduped at the assemble_entry_data choke point already; the guard-log here
+  // still names this list if a dupe ever slips through to the keyed `{#each}`.
+  const senses = $derived(dedupe_keyed_children({ rows: entry.senses || [], child_kind: 'senses', entry_id: entry.id, dict_id: dictionary.id }))
 
   async function save_entry(patch: Partial<NonNullable<typeof entry_row>>) {
     if (!entry_row) return
@@ -66,7 +70,7 @@
   </div>
 
   <div style="grid-area: media;">
-    <EntryMedia {dictionary} {entry} {can_edit} {dbOperations} />
+    <EntryMedia {dictionary} {entry} {can_edit} {db_operations} />
   </div>
 
   <div class="content-col" style="grid-area: content;">
@@ -89,12 +93,12 @@
       display={page.data.t('entry_field.phonetic')}
       on_update={new_value => save_entry({ phonetic: new_value })} />
 
-    {#each entry.senses || [] as sense, index (sense.id)}
-      {#if entry.senses.length === 1}
+    {#each senses as sense, index (sense.id)}
+      {#if senses.length === 1}
         <Sense {sense} glossLanguages={dictionary.gloss_languages} {can_edit} />
 
         {#if can_edit}
-          <Button class="add-sense-button" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><IconSystemUiconsVersions class="icon-inline" style="font-size: 1.25rem" /> {page.data.t('sense.add')}</Button>
+          <Button class="add-sense-button" form="menu" onclick={async () => await db_operations.insert_sense(entry.id)}><IconSystemUiconsVersions class="icon-inline" style="font-size: 1.25rem" /> {page.data.t('sense.add')}</Button>
         {/if}
       {:else}
         <div class="sense-block">
@@ -104,8 +108,8 @@
             </div>
             <div style="margin-left: auto; margin-right: auto"></div>
             {#if can_edit}
-              <Button class="sense-action-button delete-sense-button" size="sm" form="menu" onclick={async () => await dbOperations.delete_sense(sense.id)}><IconFaSolidTimes class="icon-inline" style="margin-top: -0.25rem" /></Button>
-              <Button class="sense-action-button insert-sense-button" size="sm" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" /></Button>
+              <Button class="sense-action-button delete-sense-button" size="sm" form="menu" onclick={async () => await db_operations.delete_sense(sense.id)}><IconFaSolidTimes class="icon-inline" style="margin-top: -0.25rem" /></Button>
+              <Button class="sense-action-button insert-sense-button" size="sm" form="menu" onclick={async () => await db_operations.insert_sense(entry.id)}><IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" /></Button>
             {/if}
           </div>
 

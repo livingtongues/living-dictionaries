@@ -6,7 +6,7 @@
   import IconFaSolidTimes from '~icons/fa-solid/times'
   import IconFaTrashO from '~icons/fa/trash-o'
 
-  const { dbOperations, url_from_storage_path } = $derived(page.data)
+  const { db_operations, url_from_storage_path } = $derived(page.data)
 
   interface Props {
     lexeme: string
@@ -51,7 +51,7 @@
           form="filled"
           onclick={async () => {
             const confirmation = confirm(page.data.t('entry.delete_video'))
-            if (confirmation) await dbOperations.delete_video(video.id)
+            if (confirmation) await db_operations.delete_video(video.id)
           }}>
           <IconFaTrashO class="icon-inline" style="margin: -1px 0 2px;" />
           {page.data.t('misc.delete')}

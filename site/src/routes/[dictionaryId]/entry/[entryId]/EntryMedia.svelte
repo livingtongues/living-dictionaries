@@ -7,6 +7,7 @@
   import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
   import Image from '$lib/components/image/Image.svelte'
   import { get_headword } from '$lib/helpers/orthographies'
+  import { dedupe_keyed_children } from '$lib/utils/dedupe-keyed-children'
   import { page } from '$app/state'
   import type { DbOperations } from '$lib/db-operations'
   import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
@@ -19,18 +20,23 @@
     entry: EntryData
     dictionary: Tables<'dictionaries'>
     can_edit?: boolean
-    dbOperations: DbOperations
+    db_operations: DbOperations
   }
 
   const {
     entry,
     dictionary,
     can_edit = false,
-    dbOperations,
+    db_operations,
   }: Props = $props()
 
-  const photos = $derived(entry?.senses?.map(({ photos }) => photos).filter(Boolean).flat())
-  const videos = $derived(entry?.senses?.map(({ videos }) => videos).filter(Boolean).flat())
+  // Photos/videos are flattened across senses, so the same medium linked to two
+  // senses of this entry produces a duplicate id — a gap assemble_entry_data's
+  // per-sense dedupe can't close. Dedupe (and guard-log) here before the keyed
+  // `{#each … (photo.id)}` / `(video.id)` blocks.
+  const photos = $derived(dedupe_keyed_children({ rows: entry?.senses?.map(({ photos }) => photos).filter(Boolean).flat() ?? [], child_kind: 'photos', entry_id: entry.id, dict_id: dictionary.id }))
+  const videos = $derived(dedupe_keyed_children({ rows: entry?.senses?.map(({ videos }) => videos).filter(Boolean).flat() ?? [], child_kind: 'videos', entry_id: entry.id, dict_id: dictionary.id }))
+  const audios = $derived(dedupe_keyed_children({ rows: entry.audios ?? [], child_kind: 'audios', entry_id: entry.id, dict_id: dictionary.id }))
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary.orthographies }))
 
   // Coordinates persist straight to the live `dict_db` entries row (auto-stamps
@@ -42,7 +48,7 @@
   {#if entry.audios?.length > 0 || can_edit}
     {#await import('../../entries/components/Audio.svelte') then { default: Audio }}
       {#if entry.audios?.length > 0}
-        {#each entry.audios as sound_file (sound_file.id)}
+        {#each audios as sound_file (sound_file.id)}
           <Audio {entry} {sound_file} {can_edit} context="entry" class="entry-audio-tile" />
         {/each}
       {/if}
@@ -60,7 +66,7 @@
         photo_source={photo.source}
         photographer={photo.photographer}
         {can_edit}
-        on_delete_image={async () => await dbOperations.delete_photo(photo.id)} />
+        on_delete_image={async () => await db_operations.delete_photo(photo.id)} />
     </div>
   {/each}
   {#if can_edit}

@@ -26,7 +26,7 @@
     auth_user,
     can_edit,
     is_editor_or_above,
-    dbOperations,
+    db_operations,
     dict_db,
   } = $derived(data)
 
@@ -114,7 +114,7 @@
         form="simple"
         onclick={async () => {
           const confirmation = confirm(page.data.t('entry.delete_entry'))
-          if (confirmation) await dbOperations.delete_entry()
+          if (confirmation) await db_operations.delete_entry()
           history.back()
         }}>
 
@@ -170,7 +170,7 @@
   {entry}
   {dictionary}
   can_edit={can_edit}
-  {dbOperations} />
+  {db_operations} />
 
 <style>
   .action-bar {

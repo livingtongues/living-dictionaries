@@ -68,7 +68,7 @@
       console.error(err)
     }
   }
-  let { entries_data, auth_user, search_entries, search_sentences, search_texts, default_entries_per_page, search_params, dictionary, can_edit, is_manager, dbOperations, search_index_updated } = $derived(data)
+  let { entries_data, auth_user, search_entries, search_sentences, search_texts, default_entries_per_page, search_params, dictionary, can_edit, is_manager, db_operations, search_index_updated } = $derived(data)
   const { loading } = $derived(entries_data)
   // Corpus scopes (sentences/texts) are an admin-3 preview while iterated on —
   // see .issues/texts-sentences-pipeline.md. Gate must not shape the views.
@@ -112,7 +112,7 @@
 <ShowHide>
   {#snippet children({ show: show_mobile_filters, toggle })}
     {#if entries_length === 0 && !$loading && !scope}
-      <EntriesEmptyState {dictionary} {can_edit} {is_manager} add_entry={dbOperations.insert_entry} />
+      <EntriesEmptyState {dictionary} {can_edit} {is_manager} add_entry={db_operations.insert_entry} />
     {:else}
       {#if show_scope_chips}
         <SearchScopeChips {search_params} />
@@ -167,7 +167,7 @@
                 {/await}
               {:else if !scope}
                 {#await import('./AddEntry.svelte') then { default: AddEntry }}
-                  <AddEntry add_entry={dbOperations.insert_entry} class={placement_class} />
+                  <AddEntry add_entry={db_operations.insert_entry} class={placement_class} />
                 {/await}
               {/if}
             {/snippet}

@@ -19,7 +19,7 @@
     sense_id,
   }: Props = $props()
 
-  const { dbOperations } = $derived(page.data)
+  const { db_operations } = $derived(page.data)
 
   const orthographies = $derived(get_orthographies(page.data.dictionary ?? {}))
 </script>
@@ -30,7 +30,7 @@
       type="button"
       class="delete-sentence"
       title={page.data.t('sentence.delete')}
-      onclick={() => dbOperations.delete_sentence(sentence.id)}>
+      onclick={() => db_operations.delete_sentence(sentence.id)}>
       <IconSystemUiconsTrash class="icon-inline" style="font-size: 1.25rem" />
     </button>
   {/if}
@@ -46,12 +46,12 @@
         : `${orthography.name}: ${page.data.t('entry_field.example_sentence')}`}
       on_update={(new_value) => {
         if (!sentence.id) {
-          dbOperations.insert_sentence({
+          db_operations.insert_sentence({
             sentence: { text: { [orthography.code]: new_value } },
             sense_id,
           })
         } else {
-          dbOperations.update_sentence({
+          db_operations.update_sentence({
             text: { ...(sentence.text || {}), [orthography.code]: new_value },
             id: sentence.id,
           })
@@ -68,7 +68,7 @@
         {can_edit}
         display="{page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: {page.data.t('entry_field.example_sentence')}"
         on_update={(new_value) => {
-          dbOperations.update_sentence({
+          db_operations.update_sentence({
             translation: {
               ...(sentence.translation || {}),
               [bcp]: new_value,

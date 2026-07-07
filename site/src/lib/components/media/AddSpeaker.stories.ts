@@ -24,7 +24,7 @@ export const shared_meta: StoryMeta = {
   viewports: [{ width: 480, height: 720 }],
   page_data: {
     t,
-    dbOperations: { insert_speaker: async () => ({ id: 'sp1' }) },
+    db_operations: { insert_speaker: async () => ({ id: 'sp1' }) },
   },
 }
 

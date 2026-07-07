@@ -17,7 +17,7 @@
   }
 
   const { entries, page_data }: Props = $props()
-  const { dictionary, can_edit, preferred_table_columns, dbOperations, search_params } = $derived(page_data)
+  const { dictionary, can_edit, preferred_table_columns, db_operations, search_params } = $derived(page_data)
 
   function handle_entry_click(e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }, entry: EntryData) {
     // bail if opening a new tab
@@ -39,7 +39,7 @@
         {entry}
         can_edit={can_edit}
         on_click={(e) => { handle_entry_click(e, entry) }}
-        {dbOperations} />
+        {db_operations} />
 
       {#if page.state.entry_id === entry.id}
         <Modal noscroll class="entry-overlay-modal" on_close={() => history.back()} show_x={false}>
@@ -58,7 +58,7 @@
       preferred_table_columns={$preferred_table_columns}
       {dictionary}
       can_edit={can_edit}
-      {dbOperations} />
+      {db_operations} />
   {:else if $search_params.view === 'gallery'}
     <EntriesGallery
       {entries}

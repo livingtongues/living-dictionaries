@@ -8,7 +8,7 @@ import type { TranslateFunction } from '$lib/i18n/types'
 import type { ReloadGuard } from '$lib/db/client/client-behind-recovery'
 import { CLIENT_BEHIND_GUARD_KEY, decide_client_behind_recovery } from '$lib/db/client/client-behind-recovery'
 import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
-import { dbOperations, DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/db-operations'
+import { db_operations, DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/db-operations'
 import { url_from_storage_path } from '$lib/helpers/media'
 import { create_dict_live_db } from '$lib/db/dict-client/dict-live-db.svelte'
 import { DictSyncStatus } from '$lib/db/dict-client/dict-sync-status.svelte'
@@ -181,7 +181,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       update_dictionary,
       url_from_storage_path: (path: string) => url_from_storage_path(path, PUBLIC_STORAGE_BUCKET),
       default_entries_per_page,
-      dbOperations,
+      db_operations,
 
       entries_data: entries_ui,
       speakers: entries_ui.speakers,

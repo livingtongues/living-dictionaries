@@ -15,7 +15,7 @@
   }
 
   const { source = null, on_close, on_saved }: Props = $props()
-  const { dbOperations } = $derived(page.data)
+  const { db_operations } = $derived(page.data)
   const is_edit = !!source?.id
 
   // Seed once from the prop — this modal is freshly mounted for each open.
@@ -55,9 +55,9 @@
       type: type || null,
     }
     if (is_edit)
-      await dbOperations.update_source({ id: source.id, ...fields })
+      await db_operations.update_source({ id: source.id, ...fields })
     else
-      await dbOperations.insert_source(fields)
+      await db_operations.insert_source(fields)
     saving = false
     on_saved?.({ slug: clean_slug })
     on_close()

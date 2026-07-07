@@ -14,7 +14,7 @@ export const shared_meta: StoryMeta = {
     sources,
     can_edit: true,
     connection: null,
-    dbOperations: { remove_source_and_delete: async () => {} },
+    db_operations: { remove_source_and_delete: async () => {} },
   },
 }
 

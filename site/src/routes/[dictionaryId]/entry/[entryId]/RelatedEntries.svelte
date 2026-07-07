@@ -3,6 +3,7 @@
   import type { TranslationKeys } from '$lib/i18n/types'
   import { page } from '$app/state'
   import { RELATIONSHIP_TYPES } from '$lib/constants'
+  import { dedupe_keyed_children } from '$lib/utils/dedupe-keyed-children'
   import AddRelatedEntryModal from './AddRelatedEntryModal.svelte'
   import RelationshipTypesInfo from './RelationshipTypesInfo.svelte'
   import IconMdiHelpCircleOutline from '~icons/mdi/help-circle-outline'
@@ -69,12 +70,15 @@
         note: display_string(row.note as MultiString | undefined) || undefined,
       })
     }
-    return out
+    // Live `dict_db` query — NOT covered by assemble_entry_data's dedupe. A
+    // duplicated relationship junction row in a client's local dict DB would
+    // otherwise throw `each_key_duplicate` on the keyed `{#each … (item.id)}`.
+    return dedupe_keyed_children({ rows: out, child_kind: 'related_entries', entry_id, dict_id: dictionary_id })
   })
 
   async function remove(relationship_id: string) {
     if (!confirm(page.data.t('relationship_type.remove_confirm'))) return
-    await page.data.dbOperations.delete_relationship(relationship_id)
+    await page.data.db_operations.delete_relationship(relationship_id)
   }
 </script>
 

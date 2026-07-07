@@ -19,7 +19,7 @@
     showPlus = true,
   }: Props = $props()
 
-  const { tags: dictionary_tags, dbOperations, auth_user } = $derived(page.data)
+  const { tags: dictionary_tags, db_operations, auth_user } = $derived(page.data)
   const tag_ids = $derived(tags.map(tag => tag.id))
   const visible_tags = $derived($dictionary_tags.filter(tag => should_include_tag(tag, auth_user.admin_level)))
   const options = $derived(visible_tags.map(tag => ({ value: tag.id, name: tag.name })) satisfies SelectOption[])
@@ -29,7 +29,7 @@
     for (const tag_id of tag_ids) {
       const value_is_removed = !new_values.includes(tag_id)
       if (value_is_removed) {
-        await dbOperations.assign_tag({ tag_id, entry_id, remove: true })
+        await db_operations.assign_tag({ tag_id, entry_id, remove: true })
       }
     }
 
@@ -39,11 +39,11 @@
       // need to assign tag
       if ($dictionary_tags.find(({ id }) => id === tag_id)) {
         // if the value is in the tags, assign it to this entry
-        await dbOperations.assign_tag({ tag_id, entry_id })
+        await db_operations.assign_tag({ tag_id, entry_id })
       } else {
         // if a value is not in the dictionary's tags first add the tag to the dictionary
-        const data = await dbOperations.insert_tag({ name: tag_id })
-        await dbOperations.assign_tag({ tag_id: data.id, entry_id })
+        const data = await db_operations.insert_tag({ name: tag_id })
+        await db_operations.assign_tag({ tag_id: data.id, entry_id })
       }
     }
   }

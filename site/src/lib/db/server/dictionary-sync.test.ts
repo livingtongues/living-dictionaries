@@ -338,3 +338,119 @@ describe('dictionary.db push + pull', () => {
     db.close()
   })
 })
+
+describe('junction natural-key collision (two clients, different ids, same pair)', () => {
+  const empty_entry = (id: string, at: string) => ({
+    id,
+    lexeme: { en: id },
+    phonetic: null,
+    interlinearization: null,
+    morphology: null,
+    notes: null,
+    sources: null,
+    scientific_names: null,
+    coordinates: null,
+    unsupported_fields: null,
+    elicitation_id: null,
+    dirty: 1,
+    created_by_user_id: 'u1',
+    created_at: at,
+    updated_by_user_id: 'u1',
+    updated_at: at,
+  })
+
+  const tag_row = (id: string, at: string) => ({
+    id,
+    name: id,
+    private: null,
+    dirty: 1,
+    created_by_user_id: 'u1',
+    created_at: at,
+    updated_by_user_id: 'u1',
+    updated_at: at,
+  })
+
+  const link_row = ({ id, user, at }: { id: string, user: string, at: string }) => ({
+    id,
+    entry_id: 'e1',
+    tag_id: 't1',
+    dirty: 1,
+    created_by_user_id: user,
+    created_at: at,
+    updated_by_user_id: user,
+    updated_at: at,
+  })
+
+  function seed_entry_and_tag(db: ReturnType<typeof open_dictionary_db_in_memory>, at: string) {
+    process_dict_changes({
+      db,
+      request: {
+        synced_up_to: null,
+        dirty_rows: { entries: [empty_entry('e1', at)], tags: [tag_row('t1', at)] },
+        deletes: [],
+        latest_dict_migration: '20260606_initial.sql',
+      },
+      user_id: 'u1',
+      is_editor: true,
+    })
+  }
+
+  test('second client pushing the same (entry_id, tag_id) with a new id does not 500 and leaves one row', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    const t1 = '2026-07-07T00:00:00.000Z'
+    const t2 = '2026-07-07T00:00:01.000Z'
+    seed_entry_and_tag(db, t1)
+
+    // Client A links e1↔t1 as link_A.
+    process_dict_changes({
+      db,
+      request: { synced_up_to: null, dirty_rows: { entry_tags: [link_row({ id: 'link_A', user: 'a', at: t1 })] }, deletes: [], latest_dict_migration: '20260606_initial.sql' },
+      user_id: 'a',
+      is_editor: true,
+    })
+
+    // Client B independently links the SAME pair as link_B (a different UUID) — this
+    // is the collision that used to throw `UNIQUE constraint failed: entry_tags.entry_id`.
+    expect(() => process_dict_changes({
+      db,
+      request: { synced_up_to: null, dirty_rows: { entry_tags: [link_row({ id: 'link_B', user: 'b', at: t2 })] }, deletes: [], latest_dict_migration: '20260606_initial.sql' },
+      user_id: 'b',
+      is_editor: true,
+    })).not.toThrow()
+
+    const rows = db.prepare('SELECT id, updated_by_user_id FROM entry_tags').all() as { id: string, updated_by_user_id: string }[]
+    expect(rows).toHaveLength(1)
+    // Deduped onto the canonical (first-seen) id, with the newer push's content merged.
+    expect(rows[0].id).toBe('link_A')
+    expect(rows[0].updated_by_user_id).toBe('b')
+    db.close()
+  })
+
+  test('an older duplicate push loses LWW and does not clobber the canonical row', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    const older = '2026-07-07T00:00:00.000Z'
+    const newer = '2026-07-07T00:00:05.000Z'
+    seed_entry_and_tag(db, older)
+
+    process_dict_changes({
+      db,
+      request: { synced_up_to: null, dirty_rows: { entry_tags: [link_row({ id: 'link_A', user: 'a', at: newer })] }, deletes: [], latest_dict_migration: '20260606_initial.sql' },
+      user_id: 'a',
+      is_editor: true,
+    })
+
+    // A stale second-client link with an OLDER updated_at must not win.
+    process_dict_changes({
+      db,
+      request: { synced_up_to: null, dirty_rows: { entry_tags: [link_row({ id: 'link_B', user: 'b', at: older })] }, deletes: [], latest_dict_migration: '20260606_initial.sql' },
+      user_id: 'b',
+      is_editor: true,
+    })
+
+    const rows = db.prepare('SELECT id, updated_by_user_id FROM entry_tags').all() as { id: string, updated_by_user_id: string }[]
+    expect(rows).toHaveLength(1)
+    expect(rows[0].id).toBe('link_A')
+    expect(rows[0].updated_by_user_id).toBe('a')
+    db.close()
+  })
+})

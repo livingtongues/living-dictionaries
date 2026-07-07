@@ -7,6 +7,7 @@
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
+  import { dedupe_keyed_children } from '$lib/utils/dedupe-keyed-children'
   import IconSystemUiconsVersions from '~icons/system-uicons/versions'
 
   interface Props {
@@ -18,11 +19,11 @@
   const { sense, glossLanguages, can_edit = false }: Props = $props()
 
   const dictionary = $derived(page.data.dictionary)
-  const dbOperations = $derived(page.data.dbOperations)
+  const db_operations = $derived(page.data.db_operations)
 
   // Scalar sense fields render + save off the live `dict_db` senses row (mutate,
   // then `_save()` — auto-stamps editor + dirty); the Orama watcher reflects each
-  // save back into the read-model. Sentences stay on `dbOperations` (multi-table).
+  // save back into the read-model. Sentences stay on `db_operations` (multi-table).
   const dict_db = $derived(page.data.dict_db)
   const sense_row = $derived(dict_db?.senses.id(sense.id))
   // Display values prefer the live row, falling back to the read-model `sense`
@@ -38,6 +39,9 @@
 
   const glossingLanguages = $derived(order_entry_and_dictionary_gloss_languages(sense_fields?.glosses, glossLanguages))
   const hasSemanticDomain = $derived(sense_fields?.semantic_domains?.length || sense_fields?.write_in_semantic_domains?.length)
+  // Deduped per-sense at the assemble_entry_data choke point already; the
+  // guard-log here names this list if a dupe ever reaches the keyed `{#each}`.
+  const sentences = $derived(dedupe_keyed_children({ rows: sense.sentences ?? [], child_kind: 'sentences', entry_id: sense_row?.entry_id ?? sense.id, dict_id: dictionary?.id }))
 </script>
 
 {#each glossingLanguages as bcp (bcp)}
@@ -95,19 +99,19 @@
   display={page.data.t('entry_field.noun_class')}
   on_update={new_value => save_sense({ noun_class: new_value })} />
 
-{#if sense.sentences?.length}
-  {#each sense.sentences as sentence (sentence.id)}
+{#if sentences.length}
+  {#each sentences as sentence (sentence.id)}
     <EntrySentence {sentence} {can_edit} sense_id={sense.id} glossingLanguages={glossingLanguages} />
   {/each}
 {:else}
   <EntrySentence sentence={{ text: {}, id: null, translation: null }} {can_edit} sense_id={sense.id} glossingLanguages={glossingLanguages} />
 {/if}
 
-{#if can_edit && sense.sentences?.length}
+{#if can_edit && sentences.length}
   <button
     type="button"
     class="add-sentence"
-    onclick={() => dbOperations.insert_sentence({ sentence: {}, sense_id: sense.id })}>
+    onclick={() => db_operations.insert_sentence({ sentence: {}, sense_id: sense.id })}>
     <IconSystemUiconsVersions class="icon-inline" style="font-size: 1.25rem" /> {page.data.t('sentence.add')}
   </button>
 {/if}

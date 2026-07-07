@@ -19,7 +19,7 @@
     entry: EntryData
     dictionary: Tables<'dictionaries'>
     can_edit?: boolean
-    dbOperations: DbOperations
+    db_operations: DbOperations
     on_click?: (e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => void
   }
 
@@ -27,7 +27,7 @@
     entry,
     dictionary,
     can_edit = false,
-    dbOperations,
+    db_operations,
     on_click = undefined,
   }: Props = $props()
 
@@ -175,7 +175,7 @@
             photo_source={first_photo.source}
             photographer={first_photo.photographer}
             {can_edit}
-            on_delete_image={() => dbOperations.delete_photo(first_photo.id)} />
+            on_delete_image={() => db_operations.delete_photo(first_photo.id)} />
           {#if first_sense.photos.length > 1}
             <IconFluentImageStack20Regular class="icon-inline photo-stack-icon" />
           {/if}

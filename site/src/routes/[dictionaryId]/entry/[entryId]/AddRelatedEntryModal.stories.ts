@@ -71,7 +71,7 @@ export const shared_meta: StoryMeta = {
     entries_data,
     search_entries,
     dictionary: { id: 'demo' },
-    dbOperations: { insert_relationship: async () => ({}) },
+    db_operations: { insert_relationship: async () => ({}) },
   },
   csr: true,
 }

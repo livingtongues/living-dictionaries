@@ -22,7 +22,7 @@
   const { on_close, entry, sound_file }: Props = $props()
 
   let upload_triggered = $state(false)
-  const { auth_user, dbOperations, url_from_storage_path } = $derived(page.data)
+  const { auth_user, db_operations, url_from_storage_path } = $derived(page.data)
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: page.data.dictionary?.orthographies }))
   // Must match RecordAudio's $bindable fallbacks (permissionGranted = false, audioBlob = null):
   // binding an `undefined` $state to a prop with a non-undefined fallback throws Svelte's
@@ -43,7 +43,7 @@
   const initial_source_slug = $derived(sound_file?.source ?? undefined)
 
   function startUpload({ speaker_id, source_slug }: { speaker_id?: string, source_slug?: string }): Readable<AudioVideoUploadStatus> {
-    const uploadStore = dbOperations.addAudio({
+    const uploadStore = db_operations.addAudio({
       file: file || audioBlob,
       entry_id: entry.id,
       speaker_id,
@@ -65,14 +65,14 @@
     if (initial_speaker_id === new_speaker_id) return
 
     if (initial_speaker_id)
-      await dbOperations.assign_speaker({ speaker_id: initial_speaker_id, media: 'audio', media_id: sound_file.id, remove: true })
-    await dbOperations.assign_speaker({ speaker_id: new_speaker_id, media: 'audio', media_id: sound_file.id })
+      await db_operations.assign_speaker({ speaker_id: initial_speaker_id, media: 'audio', media_id: sound_file.id, remove: true })
+    await db_operations.assign_speaker({ speaker_id: new_speaker_id, media: 'audio', media_id: sound_file.id })
   }
 
   async function select_source(new_source_slug: string) {
     if (!sound_file) return
     if (sound_file.source === new_source_slug) return
-    await dbOperations.update_audio({ id: sound_file.id, source: new_source_slug })
+    await db_operations.update_audio({ id: sound_file.id, source: new_source_slug })
   }
 </script>
 
@@ -137,7 +137,7 @@
       <Button
         onclick={async () => {
           const confirmation = confirm(page.data.t('entry.delete_audio'))
-          if (confirmation) await dbOperations.delete_audio(sound_file.id)
+          if (confirmation) await db_operations.delete_audio(sound_file.id)
           on_close()
         }}
         color="red">

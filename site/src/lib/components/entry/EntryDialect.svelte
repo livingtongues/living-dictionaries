@@ -18,7 +18,7 @@
     showPlus = true,
   }: Props = $props()
 
-  const { dialects: dictionary_dialects, dbOperations } = $derived(page.data)
+  const { dialects: dictionary_dialects, db_operations } = $derived(page.data)
   const dialect_ids = $derived(dialects.map(dialect => dialect.id))
   const options = $derived($dictionary_dialects.map(dialect => ({ value: dialect.id, name: dialect.name.default })) satisfies SelectOption[])
 
@@ -27,7 +27,7 @@
     for (const dialect_id of dialect_ids) {
       const value_is_removed = !new_values.includes(dialect_id)
       if (value_is_removed) {
-        await dbOperations.assign_dialect({ dialect_id, entry_id, remove: true })
+        await db_operations.assign_dialect({ dialect_id, entry_id, remove: true })
       }
     }
 
@@ -37,11 +37,11 @@
       // need to assign dialect
       if ($dictionary_dialects.find(({ id }) => id === dialect_id)) {
         // if the value is in the dialects, assign it to this entry
-        await dbOperations.assign_dialect({ dialect_id, entry_id })
+        await db_operations.assign_dialect({ dialect_id, entry_id })
       } else {
         // if a value is not in the dictionary's dialects first add the dialect to the dictionary
-        const data = await dbOperations.insert_dialect({ name: { default: dialect_id } })
-        await dbOperations.assign_dialect({ dialect_id: data.id, entry_id })
+        const data = await db_operations.insert_dialect({ name: { default: dialect_id } })
+        await db_operations.assign_dialect({ dialect_id: data.id, entry_id })
       }
     }
   }

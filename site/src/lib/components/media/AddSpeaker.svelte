@@ -12,7 +12,7 @@
   }
 
   const { on_close, on_speaker_added }: Props = $props()
-  const { dbOperations } = $derived(page.data)
+  const { db_operations } = $derived(page.data)
 
   let displayName = $state('')
   let birthplace = $state('')
@@ -30,7 +30,7 @@
   <Form
 
     onsubmit={async () => {
-      const speaker = await dbOperations.insert_speaker({
+      const speaker = await db_operations.insert_speaker({
         name: displayName.trim(),
         birthplace: birthplace.trim(),
         decade,
