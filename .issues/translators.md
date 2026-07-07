@@ -1,0 +1,1 @@
+look at the /about page list of translators and find the matching users in the database and mark each as a translator for their assigned language.
