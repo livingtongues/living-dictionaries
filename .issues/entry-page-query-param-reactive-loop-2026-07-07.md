@@ -1,7 +1,7 @@
-# Entry-detail page reactive loop: `effect_update_depth_exceeded` (+ `reading 'page'` / `setting 'query'`)
+# Entry-page `effect_update_depth_exceeded` — the shared `?q=` query-param store feeds back into the URL
 
-**Filed:** 2026-07-07 (log review, run 2 · 21:00 UTC). **Severity:** 🔴 P1 — broad reach on a core
-flow (entry detail), and **growing daily**. Read-only review — NOT yet fixed.
+**Filed:** 2026-07-07 (log review, run 2 · 21:00 UTC). **Severity:** was 🔴 P1 — broad reach on a
+core flow (entry detail), and **growing daily**. **Status:** ✅ **FIXED + tested 2026-07-08.**
 
 ## Symptom (from prod `client_logs`)
 
@@ -20,7 +20,7 @@ certainly the same root cause surfacing during teardown/navigation:
 - `Uncaught TypeError: Cannot read properties of undefined (reading 'page')` (×8)
 - `Cannot set properties of undefined (setting 'query')` (×8) and `set page_from_url … setting 'page'` (×2)
 
-## Root-cause hypothesis (grounded)
+## Root cause
 
 The trend **exactly correlates** with commit **`af2ec863`** (2026-07-04 03:57 UTC, "Add homepage v2
 preview, featured-words admin, and converge lib layout"), which rewrote
@@ -38,36 +38,56 @@ const start = () => {
 }
 ```
 
-`handle_search_params` → `setStoreValue` → `set(parsed_value)` notifies store subscribers. The
-entries/entry `?q=` store is **read-write**: the entry page uses it to preserve the search context
-for prev/next pagination, and a consumer writing back (`setQueryParam` → `goto(...)`) mutates
-`page.url`, which re-fires the `$effect`, which sets the store again → the `br → br → br` flush loop
-that trips `effect_update_depth_exceeded`. The `reading 'page'` / `setting 'query'` variants are the
-same store racing against `page` being momentarily undefined during entry↔entry navigation.
+On the entry page the entries list stays mounted underneath (SvelteKit **shallow routing** — the entry
+opens as a `pushState` overlay in `entries/View.svelte`), so the entries `search_params` store is
+alive on the entry URL — which is why the loop logged 100% on `/{dict}/entry/*`.
+
+The loop: the URL effect called `writable.set()` on **every** URL change, emitting a **fresh object
+identity** even when the parsed value was logically unchanged. Downstream `$derived`/two-way `bind:`
+consumers re-derived and wrote the (equal) value back through `setQueryParam → goto`, changing
+`page.url`, re-running the effect → `set()` → … until Svelte tripped `effect_update_depth_exceeded`.
+The `reading 'page'` / `setting 'query'` variants are the same store racing against `page` being
+momentarily undefined during entry↔entry navigation.
 
 Before `af2ec863` the store used the old `$app/stores` `page.subscribe(...)` (no rune effect), which
 did not participate in Svelte 5's effect-flush graph the same way — hence ~zero of these before 07-04.
 
-## Recommended fix (NOT applied — needs the owner's eyes)
+## Fix (three guards, all in `query-param-state.svelte.ts`)
 
-Break the store↔URL feedback in the rune effect. Options, cheapest first:
-1. **Dedupe harder before `set`.** In `handle_search_params`, bail when the parsed value is
-   value-equal to the current store value (not just when the raw `searchParams` string is identical —
-   `current_params_value` only compares the raw string, so a `goto` that reorders params or a
-   store-driven write still passes through). A deep/JSON compare against the last emitted value would
-   stop the self-trigger.
-2. **Untrack the write path.** Ensure the write side (`setQueryParam`/`goto`) can't be seen as a
-   dependency of the read `$effect` — or guard re-entrancy with a `writing` flag so a store-initiated
-   `goto` doesn't loop back into `setStoreValue`.
-3. Confirm the entry page isn't independently `set()`-ing the `?q=` store on mount (which would race
-   the effect). If it is, make that a one-time init, not reactive.
+1. **Deep-equal dedupe before `set()`** — track the last value pushed into the writable (`store_value`)
+   and skip the emit when the newly-parsed URL value `deep_equal`s it. No redundant object identity →
+   no downstream churn. New util `$lib/utils/deep-equal.ts` (`deep_equal`, key-order-insensitive for
+   objects, order-significant for arrays; fully inline-tested).
+2. **No-op navigation guard in `setQueryParam`** — compared **deeply** against the current URL param
+   (so a key-reordered echo `{query,page}` vs the URL's `{page,query}` is recognized as identical) —
+   skip the `goto` entirely.
+3. **Re-entrancy flag** (`applying_store_value`) around `set()` — a synchronously-resolving
+   shallow/`pushState` navigation can't re-enter `handle_search_params` mid-emit.
 
-Verify by loading `/{dict}/entry/{id}?q={"query":"g"}` in a real browser, paginating prev/next, and
-watching the console for `effect_update_depth_exceeded`. Because the store factory is shared, also
-re-check the entries list, texts, and any other `createQueryParamStore` consumer for regressions.
+## Test harness
 
-## Related this run
+Added a second vitest **project** so runes actually execute (the node `unit` project never touched
+`.svelte.ts`): `vitest.config.ts` now has `unit` (node) + **`reactive`** (`svelte()` plugin +
+`resolve.conditions:['browser']` + `happy-dom`), mirroring tutor's `vitest.config.component.ts`.
+`pnpm test` runs both.
+
+- New mocks: `$lib/mocks/app-state.svelte.ts` (a `$state` `page`) + `$lib/mocks/app-navigation.ts`
+  (a `goto` that updates the happy-dom URL **and** `page.url`). So a `goto` the store fires feeds back
+  through **real Svelte reactivity** — a reintroduced loop actually manifests in the test.
+- `query-param-state.svelte.test.ts` drives the real store: new-value nav+emit, no-op nav guard,
+  key-reordered dedupe (no re-emit), a write-back subscriber **reaching a steady state** (the loop
+  regression guard), external nav to a new value, and malformed-scalar `?q=hua` coercion.
+
+Verified: `pnpm vitest run` (1341 pass), `pnpm lint` clean, `pnpm check` 0 errors.
+
+## Related
+
+- `.issues/entry-page-effect-loop-residual.md` — the earlier star-effect strand of the same
+  entry-page loop (the `page.params.entryId`-stable-dependency fix). This query-param store was the
+  remaining source that fix's write-up predicted ("there is at least one more source").
 - The **entries table-view** `RangeError: Maximum call stack size exceeded` (Sk@/Qk@ mutual
   recursion, `/highlander/entries?q={"view":"table",…}`) is a *separate* recursion on the same
   entries surface — track it alongside but it's a different code path (table renderer, not the
-  query-param store). ~57 rows/24h, concentrated in a couple of table-view sessions on `highlander`.
+  query-param store). See `.issues/highlander-table-view-stack-overflow-2026-07-07.md`.
+- Confirm in prod: next log review should show `effect_update_depth_exceeded` on the current build
+  drop toward ~0.

@@ -218,6 +218,18 @@ missing). Build nothing. Lenses: what did I compute by hand here that the page s
 trend is legible now that wasn't? what's noisy/misleading? Spot-check a headline number vs your raw
 query — drift means a bug to file. The reusable chart lib is `$lib/charts/` (Bar/Combo/Line).
 
+> **What the admin DASHBOARDS are FOR — aggregate stability/health, NOT individual-error triage.**
+> The `/admin/analytics` + `/admin/health` dashboards exist to answer **aggregate health/stability**
+> questions at a glance: *is error volume trending up or down? is the CURRENT build clean? are the
+> subsystems (OPFS/leader-worker DB, sync, boot, retention cron, uptime) working for essentially
+> EVERYONE?* They are health/trend/subsystem-working-for-all instruments — **not** scrollable lists of
+> individual errors to page through. **Triaging individual errors is THIS log-review session's job** —
+> that's what the `logs.db` cluster/drill/session-replay queries above are for. So when proposing Phase
+> C/D dashboard features, **favor health / stability / trend / "subsystem is working for everyone"
+> panels** (rates, current-vs-stale splits, distinct-affected counts, loop/breadth flags, pipeline
+> liveness) and **avoid per-error-list features** — a raw feed of individual errors belongs in the
+> log-parsing scripts here, not on the dashboard.
+
 ---
 
 ## Phase D — Cross-pollinate across the three apps (end step)

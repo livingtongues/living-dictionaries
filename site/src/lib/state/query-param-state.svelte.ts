@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store'
 import type { Writable } from 'svelte/store'
 import { cleanObject } from '$lib/utils/clean-object'
+import { deep_equal } from '$lib/utils/deep-equal'
 import { log_warning } from '$lib/debug/remote-log'
 import { goto } from '$app/navigation'
 import { page } from '$app/state'
@@ -18,7 +19,7 @@ export interface QueryParamStoreOptions<T> {
   log?: boolean
 }
 
-function stringify(value: any, cleanFalseValues?: boolean) {
+export function stringify(value: any, cleanFalseValues?: boolean) {
   if (typeof value === 'undefined' || value === null || value === '')
     return undefined
   if (typeof value === 'string')
@@ -26,7 +27,7 @@ function stringify(value: any, cleanFalseValues?: boolean) {
   const cleanedValue = cleanObject(value, cleanFalseValues)
   return cleanedValue === undefined ? undefined : JSON.stringify(cleanedValue)
 }
-function parse(value: any) {
+export function parse(value: any) {
   if (typeof value === 'undefined')
     return undefined
   try {
@@ -54,7 +55,15 @@ export function createQueryParamStore<T>(options: QueryParamStoreOptions<T>) {
       return removeQueryParam()
     const { hash } = window.location
     const searchParams = new URLSearchParams(window.location.search)
-    searchParams.set(key, stringify(value, cleanFalseValues))
+    // No-op navigation guard: a subscriber writing back the value it just received
+    // (two-way binds, effects re-deriving the same params) must not fire a redundant
+    // `goto`, which re-runs the URL effect → `set()` → the subscriber again. Compared
+    // DEEPLY (not by raw string) so a re-ordered-key echo — `{query,page}` vs the URL's
+    // `{page,query}` — is also recognised as identical. Breaks the store↔URL loop.
+    const current_raw = searchParams.get(key)
+    if (current_raw !== null && deep_equal(parse(current_raw), parse(stringified_value)))
+      return
+    searchParams.set(key, stringified_value)
     goto(`?${searchParams}${hash}`, { keepFocus: true, noScroll: true, replaceState })
     if (log)
       console.info(`user action changed: ${key} to ${value}`)
@@ -73,6 +82,13 @@ export function createQueryParamStore<T>(options: QueryParamStoreOptions<T>) {
     if (log)
       console.info(`user action removed: ${key}`)
   }
+  // The last value pushed into the writable — tracked here (not read back via
+  // `get(store)`, which would spin a throwaway subscription and re-run `start`) so
+  // `setStoreValue` can deep-equal-dedupe redundant emits.
+  let store_value: T | undefined = startWith
+  // Re-entrancy guard: if a `goto` resolves synchronously (shallow/`pushState`
+  // navigations can), the URL effect could re-enter `handle_search_params` mid-emit.
+  let applying_store_value = false
   const setStoreValue = (value: any) => {
     if (log)
       console.info(`URL set ${key} to ${value}`)
@@ -87,14 +103,32 @@ export function createQueryParamStore<T>(options: QueryParamStoreOptions<T>) {
         log_warning({ message: 'malformed_query_param', context: { key, raw: String(value).slice(0, 120) } })
       parsed_value = {}
     }
-    set(parsed_value)
     storage?.setItem(storageKey, JSON.stringify(parsed_value))
+    // Deep-equal dedupe: a URL echo that parses to a value we already hold must NOT
+    // push a fresh object identity into subscribers. A redundant emit re-triggers
+    // downstream `$derived`/`bind:` reactions that write the same value back through
+    // `goto`, re-running this effect — the entry-page `effect_update_depth_exceeded`
+    // loop introduced when the store moved to `$app/state` + `$effect.root` (af2ec863).
+    if (deep_equal(parsed_value, store_value)) {
+      if (log)
+        console.info('parsed value equals current store value, skipping emit')
+      return
+    }
+    store_value = parsed_value
+    applying_store_value = true
+    try {
+      set(parsed_value)
+    } finally {
+      applying_store_value = false
+    }
     if (log && storage)
       console.info({ [`${storageKey}_to_cache`]: parsed_value })
   }
   let firstUrlCheck = true
   let current_params_value: string | null
   const handle_search_params = (searchParams: URLSearchParams) => {
+    if (applying_store_value)
+      return // re-entrancy guard: ignore a URL echo triggered by our own in-flight `set()`
     let value = searchParams.get(key)
     if (current_params_value && value === current_params_value) {
       if (log)

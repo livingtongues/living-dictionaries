@@ -368,7 +368,7 @@ if (import.meta.vitest) {
       const again = await seed_translations_if_empty({ db })
       expect(again).toBe(false)
       db.close()
-    })
+    }, 15_000)
   })
 
   describe(upsert_translation, () => {

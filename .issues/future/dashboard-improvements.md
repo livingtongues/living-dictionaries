@@ -315,6 +315,24 @@ house's **/admin/revenue** dashboard (no payments).
   per-entity (not just per-user) sync loop added since the shared `report-sync-failure.ts` policy was
   set (2026-07-02). See `.issues/dict-sync-client-behind-storm-2026-07-05.md` for the full writeup.
 
+- **★ Propagate the three shared logging/dashboard primitives across house + LD + tutor as ONE
+  grooming pass** *(batched 2026-07-08, from the 2026-07-07 run-2 review follow-ups).* Three
+  loop-detection / storage-health primitives keep getting proposed piecemeal per-repo; groom them once
+  as a coordinated cross-repo sweep so all three apps land the same shape (they share `remote-log.ts`,
+  `ErrorCluster`, and the analytics stack, so each is a near-mechanical port):
+  1. **Repeat-error coalescing in `remote-log.ts`** — emit the first *N* of an identical
+     (`message` + `stack_head`) error per session, then coalesce to a periodic `"×N more"` row. Slashes
+     runaway-loop junk volume AND makes a loop *more* legible (one `×8170` row screams "loop" vs 8k
+     identical rows). Grounded in the 07-07 WorldMap rAF storm (8,170 byte-identical rows / 1 session).
+  2. **Per-session loop-flag on the error-cluster panel** — add `sessions` (`COUNT(DISTINCT
+     session_id)`) + `max_per_session` to `ErrorCluster` and a **"⟳ loop"** badge when
+     `max_per_session` is high (>100), so a 1-session-8k-hit rAF/effect storm stops ranking as "1 user,
+     low reach." (Already filed standalone for LD above — fold into this batch for house + tutor too.)
+  3. **WAL/storage-health strip** — a small `/admin/health` panel surfacing local-DB storage health
+     signals (OPFS/wa-sqlite VFS errors, WAL/journal state, `storage_lost`/`snapshot_expired`, quota)
+     so a "storage broke for this class of clients" trend is visible in aggregate, not just per-incident.
+  Do all three in one grooming pass across the three repos rather than three separate per-repo tickets.
+
 ## Sourced from
 - `.cron/log-reviews/2026-06-25.md` (first run / zero-data baseline)
 - `.cron/log-reviews/2026-06-26.md` (first real-data run; ~91% synthetic/headless)
