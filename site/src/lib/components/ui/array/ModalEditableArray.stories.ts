@@ -30,6 +30,26 @@ export const Badges: Story<typeof Component> = {
   },
 }
 
+// Regression: several distinct values that resolve to the SAME display name
+// (e.g. three custom tags all named "above"). The chips `{#each}` must key by
+// the unique `value`, not `name`, or Svelte throws `each_key_duplicate` and the
+// field freezes showing raw ids. See Diego's sugtstun bug.
+export const DuplicateNames: Story<typeof Component> = {
+  props: {
+    values: ['tag-1', 'tag-2', 'tag-3', 'tag-4'],
+    options: [
+      { value: 'tag-1', name: 'above' },
+      { value: 'tag-2', name: 'above' },
+      { value: 'tag-3', name: 'above' },
+      { value: 'tag-4', name: 'Millie' },
+    ],
+    placeholder: 'Select…',
+    can_edit: true,
+    on_update: () => {},
+    heading: heading_snippet,
+  },
+}
+
 export const ModalOpen: Story<typeof Component> = {
   csr: true,
   props: {

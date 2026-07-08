@@ -216,7 +216,15 @@ export async function assign_speaker({
 export async function insert_tag({ name }: { name: string }) {
   try {
     const { dict_db } = get_pieces()
-    const [tag] = await dict_db.tags.insert({ name })
+    const trimmed = name.trim()
+    // Dedup by name (case-insensitive) so a write-in reuses an existing tag
+    // instead of minting a duplicate — the write-in path can't see existing
+    // tags when the dictionary store hasn't loaded yet, which is how dictionaries
+    // accumulated hundreds of same-named tag rows. Mirrors the server v1 dedup.
+    const existing = await dict_db.tags.query({ where: 'lower(name) = lower(?)', params: [trimmed] }).snapshot()
+    if (existing.length)
+      return existing[0]
+    const [tag] = await dict_db.tags.insert({ name: trimmed })
     return tag
   } catch (err) {
     alert(err)
@@ -385,6 +393,15 @@ export async function delete_relationship(relationship_id: string) {
 export async function insert_dialect({ name }: { name: MultiString }) {
   try {
     const { dict_db } = get_pieces()
+    // Dedup by default-locale name (case-insensitive) — same rationale as
+    // insert_tag: a write-in must reuse an existing dialect, not duplicate it.
+    const default_name = (name.default ?? '').trim().toLowerCase()
+    if (default_name) {
+      const all = await dict_db.dialects.query({}).snapshot()
+      const existing = all.find(dialect => (dialect.name?.default ?? '').trim().toLowerCase() === default_name)
+      if (existing)
+        return existing
+    }
     const [dialect] = await dict_db.dialects.insert({ name })
     return dialect
   } catch (err) {

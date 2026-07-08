@@ -57,7 +57,7 @@
       class="value-display"
       onclick={() => set(can_edit)}>
       <div class="chips" onclick={() => set(can_edit)}>
-        {#each Object.values(selectedOptions) as { name } (name)}
+        {#each Object.values(selectedOptions) as { value, name } (value)}
           <div class="chip">
             {name}
           </div>

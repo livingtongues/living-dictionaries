@@ -22,7 +22,20 @@
   const { tags: dictionary_tags, db_operations, auth_user } = $derived(page.data)
   const tag_ids = $derived(tags.map(tag => tag.id))
   const visible_tags = $derived($dictionary_tags.filter(tag => should_include_tag(tag, auth_user.admin_level)))
-  const options = $derived(visible_tags.map(tag => ({ value: tag.id, name: tag.name })) satisfies SelectOption[])
+  // Seed options from the dictionary-wide store, but always fold in this entry's
+  // OWN tags so their names resolve even before that store has loaded (otherwise
+  // the chip falls back to rendering the raw id — the "hash" bug). The entry's
+  // tags are already privacy-filtered upstream, so no leak.
+  const options = $derived.by(() => {
+    const seen: Record<string, true> = {}
+    const result: SelectOption[] = []
+    for (const tag of [...visible_tags, ...tags]) {
+      if (seen[tag.id]) continue
+      seen[tag.id] = true
+      result.push({ value: tag.id, name: tag.name })
+    }
+    return result
+  })
 
   async function on_update(new_values: string[]) {
     // go through current tag_ids and check if they are in the new_values, if not remove them
