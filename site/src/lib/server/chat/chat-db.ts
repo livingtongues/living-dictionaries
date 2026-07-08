@@ -56,8 +56,21 @@ export interface ChatAttachment {
   created_at: string
 }
 
+/** Aggregated reactions for one message: one entry per distinct emoji. */
+export interface MessageReaction {
+  emoji: string
+  user_ids: string[]
+}
+
 export interface ChatMessageWithAttachments extends ChatMessageRow {
   attachments: ChatAttachment[]
+  reactions: MessageReaction[]
+}
+
+/** A room member's read position (drives the read-receipt bubbles). */
+export interface RoomReadPosition {
+  user_id: string
+  last_read_at: string | null
 }
 
 export interface RoomSummary {
@@ -167,6 +180,7 @@ export function delete_room({ db, room_id }: { db: Database.Database, room_id: s
     throw new ChatError('System rooms cannot be deleted', 400)
   const storage_keys = (db.prepare('SELECT a.storage_key FROM chat_attachments a JOIN chat_messages m ON m.id = a.message_id WHERE m.room_id = ?')
     .all(room_id) as { storage_key: string }[]).map(row => row.storage_key)
+  db.prepare('DELETE FROM chat_reactions WHERE message_id IN (SELECT id FROM chat_messages WHERE room_id = ?)').run(room_id)
   db.prepare('DELETE FROM chat_attachments WHERE message_id IN (SELECT id FROM chat_messages WHERE room_id = ?)').run(room_id)
   db.prepare('DELETE FROM chat_messages WHERE room_id = ?').run(room_id)
   db.prepare('DELETE FROM chat_room_members WHERE room_id = ?').run(room_id)
@@ -294,7 +308,34 @@ export function attach_attachments({ db, messages }: { db: Database.Database, me
     list.push(row)
     by_message.set(row.message_id, list)
   }
-  return messages.map(message => ({ ...message, attachments: by_message.get(message.id) ?? [] }))
+  return messages.map(message => ({ ...message, attachments: by_message.get(message.id) ?? [], reactions: [] as MessageReaction[] }))
+}
+
+/** Hydrate messages with their aggregated reactions in one batched query. */
+export function attach_reactions({ db, messages }: { db: Database.Database, messages: ChatMessageWithAttachments[] }): ChatMessageWithAttachments[] {
+  if (!messages.length)
+    return messages
+  const ids = messages.map(message => message.id)
+  const placeholders = ids.map(() => '?').join(', ')
+  const rows = db.prepare(`SELECT message_id, emoji, user_id FROM chat_reactions WHERE message_id IN (${placeholders}) ORDER BY created_at ASC`)
+    .all(...ids) as { message_id: string, emoji: string, user_id: string }[]
+  // message_id → emoji → user_ids (insertion order = first-reacted-first)
+  const by_message = new Map<string, Map<string, string[]>>()
+  for (const row of rows) {
+    let emojis = by_message.get(row.message_id)
+    if (!emojis) {
+      emojis = new Map()
+      by_message.set(row.message_id, emojis)
+    }
+    const users = emojis.get(row.emoji) ?? []
+    users.push(row.user_id)
+    emojis.set(row.emoji, users)
+  }
+  for (const message of messages) {
+    const emojis = by_message.get(message.id)
+    message.reactions = emojis ? [...emojis.entries()].map(([emoji, user_ids]) => ({ emoji, user_ids })) : []
+  }
+  return messages
 }
 
 /**
@@ -313,11 +354,64 @@ export function get_room_messages({ db, room_id, user_id, after, limit = MESSAGE
   if (after) {
     const rows = db.prepare('SELECT * FROM chat_messages WHERE room_id = ? AND created_at > ? ORDER BY created_at ASC, id ASC LIMIT ?')
       .all(room_id, after, limit) as ChatMessageRow[]
-    return attach_attachments({ db, messages: rows })
+    return attach_reactions({ db, messages: attach_attachments({ db, messages: rows }) })
   }
   const rows = db.prepare('SELECT * FROM chat_messages WHERE room_id = ? ORDER BY created_at DESC, id DESC LIMIT ?')
     .all(room_id, limit) as ChatMessageRow[]
-  return attach_attachments({ db, messages: rows.reverse() })
+  return attach_reactions({ db, messages: attach_attachments({ db, messages: rows.reverse() }) })
+}
+
+/** Longest emoji grapheme we accept (a few code points for ZWJ sequences / skin tones). */
+const REACTION_MAX_LENGTH = 24
+
+/**
+ * Toggle the caller's reaction on a message (insert if absent, remove if
+ * present). Gated on room membership. Returns the message's full aggregated
+ * reaction set so the caller can update in place.
+ */
+export function toggle_reaction({ db, message_id, user_id, emoji }: {
+  db: Database.Database
+  message_id: string
+  user_id: string
+  emoji: string
+}): MessageReaction[] {
+  const trimmed = emoji.trim()
+  if (!trimmed || trimmed.length > REACTION_MAX_LENGTH)
+    throw new ChatError('Invalid emoji', 400)
+  const message = db.prepare('SELECT room_id, deleted_at FROM chat_messages WHERE id = ?')
+    .get(message_id) as { room_id: string, deleted_at: string | null } | undefined
+  if (!message)
+    throw new ChatError('Message not found', 404)
+  if (message.deleted_at)
+    throw new ChatError('Message deleted', 400)
+  require_member({ db, room_id: message.room_id, user_id })
+  const existing = db.prepare('SELECT id FROM chat_reactions WHERE message_id = ? AND user_id = ? AND emoji = ?')
+    .get(message_id, user_id, trimmed) as { id: string } | undefined
+  if (existing)
+    db.prepare('DELETE FROM chat_reactions WHERE id = ?').run(existing.id)
+  else
+    db.prepare('INSERT INTO chat_reactions (id, message_id, user_id, emoji, created_at) VALUES (?, ?, ?, ?, ?)')
+      .run(crypto.randomUUID(), message_id, user_id, trimmed, now_iso())
+  const rows = db.prepare('SELECT message_id, emoji, user_id FROM chat_reactions WHERE message_id = ? ORDER BY created_at ASC')
+    .all(message_id) as { message_id: string, emoji: string, user_id: string }[]
+  const emojis = new Map<string, string[]>()
+  for (const row of rows) {
+    const users = emojis.get(row.emoji) ?? []
+    users.push(row.user_id)
+    emojis.set(row.emoji, users)
+  }
+  return [...emojis.entries()].map(([reaction_emoji, user_ids]) => ({ emoji: reaction_emoji, user_ids }))
+}
+
+/** Every member's read position for a room (drives read-receipt bubbles). Gated on membership. */
+export function get_room_read_positions({ db, room_id, user_id }: {
+  db: Database.Database
+  room_id: string
+  user_id: string
+}): RoomReadPosition[] {
+  require_member({ db, room_id, user_id })
+  return db.prepare('SELECT user_id, last_read_at FROM chat_room_members WHERE room_id = ?')
+    .all(room_id) as RoomReadPosition[]
 }
 
 export interface ChatAttachmentServeRow {
@@ -719,6 +813,54 @@ if (import.meta.vitest) {
       const room = seed_channel(db, 'General', ['u-a', 'u-b'])
       const message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>mine</p>', body_text: 'mine' })
       expect(() => delete_message({ db, message_id: message.id, user_id: 'u-b' })).toThrow(ChatError)
+    })
+  })
+
+  describe(toggle_reaction, () => {
+    it('adds, aggregates, and removes reactions; hydrates onto the message', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      const room = seed_channel(db, 'General', ['u-a', 'u-b'])
+      const message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>hi</p>', body_text: 'hi' })
+
+      toggle_reaction({ db, message_id: message.id, user_id: 'u-a', emoji: '👍' })
+      const after_two = toggle_reaction({ db, message_id: message.id, user_id: 'u-b', emoji: '👍' })
+      expect(after_two).toEqual([{ emoji: '👍', user_ids: ['u-a', 'u-b'] }])
+
+      const [hydrated] = get_room_messages({ db, room_id: room.id, user_id: 'u-a' })
+      expect(hydrated.reactions).toEqual([{ emoji: '👍', user_ids: ['u-a', 'u-b'] }])
+
+      const after_toggle_off = toggle_reaction({ db, message_id: message.id, user_id: 'u-a', emoji: '👍' })
+      expect(after_toggle_off).toEqual([{ emoji: '👍', user_ids: ['u-b'] }])
+    })
+
+    it('rejects non-members and deleted messages', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      const room = seed_channel(db, 'General', ['u-a'])
+      const message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>hi</p>', body_text: 'hi' })
+      expect(() => toggle_reaction({ db, message_id: message.id, user_id: 'u-b', emoji: '👍' })).toThrow(ChatError)
+      delete_message({ db, message_id: message.id, user_id: 'u-a' })
+      expect(() => toggle_reaction({ db, message_id: message.id, user_id: 'u-a', emoji: '👍' })).toThrow(ChatError)
+    })
+  })
+
+  describe(get_room_read_positions, () => {
+    it('returns every member\'s last_read_at and gates on membership', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      seed_user(db, 'u-c', 'c@example.com')
+      const room = seed_channel(db, 'General', ['u-a', 'u-b'])
+      // u-a posting marks u-a read; u-b hasn't read yet.
+      post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>hi</p>', body_text: 'hi' })
+      const positions = get_room_read_positions({ db, room_id: room.id, user_id: 'u-a' })
+      const by_user = Object.fromEntries(positions.map(row => [row.user_id, row.last_read_at]))
+      expect(by_user['u-a']).not.toBeNull()
+      expect(by_user['u-b']).toBeNull()
+      expect(() => get_room_read_positions({ db, room_id: room.id, user_id: 'u-c' })).toThrow(ChatError)
     })
   })
 }

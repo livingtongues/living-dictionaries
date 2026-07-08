@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ChatMessageWithAttachments } from '$lib/server/chat/chat-db'
+  import type { ChatMessageWithAttachments, RoomReadPosition } from '$lib/server/chat/chat-db'
   import { goto } from '$app/navigation'
   import { page } from '$app/state'
   import { onMount, tick } from 'svelte'
@@ -7,14 +7,18 @@
   import ChatMessageItem from '$lib/chat/chat-message-item.svelte'
   import { chat_store } from '$lib/chat/chat-store.svelte'
   import NewChannelForm from '$lib/chat/new-channel-form.svelte'
+  import ReadBubbles from '$lib/chat/read-bubbles.svelte'
+  import { caught_up_others, compute_read_boundaries } from '$lib/chat/read-receipts'
   import RoomMembersPopover from '$lib/chat/room-members-popover.svelte'
   import Header from '$lib/components/shell/Header.svelte'
   import LoginModal from '$lib/components/LoginModal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
+  import { format_relative_time } from '$lib/utils/format-relative-time'
   import { api_chat_delete } from '$api/chat/delete/_call'
   import { api_chat_dm } from '$api/chat/dm/_call'
   import { api_chat_edit } from '$api/chat/edit/_call'
   import { api_chat_messages } from '$api/chat/messages/_call'
+  import { api_chat_react } from '$api/chat/react/_call'
   import { api_chat_send } from '$api/chat/send/_call'
   import { api_chat_upload } from '$api/chat/upload/_call'
   import IconMdiAccountPlusOutline from '~icons/mdi/account-plus-outline'
@@ -27,6 +31,7 @@
 
   let active_room_id = $state<string>('')
   let messages = $state<ChatMessageWithAttachments[]>([])
+  let read_positions = $state<RoomReadPosition[]>([])
   let loading = $state(true)
   let sending = $state(false)
   let thread_el = $state<HTMLDivElement>()
@@ -41,6 +46,25 @@
   // Presence counts OTHER members only — "1 online" that's just yourself is noise.
   const others_online_count = $derived(active_room ? active_room.online_member_ids.filter(id => id !== chat_store.me_user_id).length : 0)
 
+  // Read receipts — where each other member's read position parks + who's caught
+  // up to the newest message (drives the moving bubbles + the "Seen …" summary).
+  const read_boundaries = $derived(compute_read_boundaries({ messages, read_positions, me_user_id: chat_store.me_user_id }))
+  const caught_up = $derived(caught_up_others({ messages, read_positions, me_user_id: chat_store.me_user_id }))
+  const seen_summary = $derived.by(() => {
+    if (!caught_up.length)
+      return ''
+    if (active_room?.kind === 'dm') {
+      const position = read_positions.find(row => row.user_id === caught_up[0])
+      const when = format_relative_time(position?.last_read_at)
+      return when ? `Seen · ${when}` : 'Seen'
+    }
+    return `Seen by ${caught_up.map(id => chat_store.name_for(id)).join(', ')}`
+  })
+
+  function members_for(user_ids: string[] | undefined) {
+    return (user_ids ?? []).map(user_id => ({ user_id, name: chat_store.name_for(user_id) }))
+  }
+
   // Members popover (opened from the "N members" / "N others online" header on a channel).
   let show_members = $state(false)
 
@@ -49,10 +73,6 @@
     if (member_id === chat_store.me_user_id)
       return
     await start_dm(member_id)
-  }
-
-  function cursor(): string | null {
-    return messages.length ? messages[messages.length - 1].created_at : null
   }
 
   async function scroll_to_bottom() {
@@ -66,10 +86,24 @@
     const { data } = await api_chat_messages({ room_id })
     loading = false
     if (data && room_id === active_room_id) {
-      const { messages: loaded } = data
+      const { messages: loaded, read_positions: positions } = data
       messages = loaded
+      read_positions = positions
       await scroll_to_bottom()
     }
+  }
+
+  /**
+   * Reconcile the recent window (not append-only) so reactions/edits/deletes and
+   * read positions all stay live. `incoming` is the authoritative newest page;
+   * we keep only local messages newer than it (an optimistic just-sent one the
+   * server hasn't returned yet), preserving order.
+   */
+  function reconcile_messages(incoming: ChatMessageWithAttachments[]) {
+    const incoming_ids = new Set(incoming.map(message => message.id))
+    const last_incoming = incoming.length ? incoming[incoming.length - 1].created_at : ''
+    const pending = messages.filter(message => !incoming_ids.has(message.id) && message.created_at >= last_incoming)
+    messages = [...incoming, ...pending]
   }
 
   async function poll_messages() {
@@ -78,18 +112,26 @@
     if (!active_room_id)
       return
     const room_id = active_room_id
-    const { data } = await api_chat_messages({ room_id, after: cursor() })
-    if (!data || room_id !== active_room_id || !data.messages.length)
+    const { data } = await api_chat_messages({ room_id })
+    if (!data || room_id !== active_room_id)
       return
     const near_bottom = thread_el ? (thread_el.scrollHeight - thread_el.scrollTop - thread_el.clientHeight < 80) : true
-    const known = new Set(messages.map(message => message.id))
-    for (const message of data.messages) {
-      if (!known.has(message.id))
-        messages.push(message)
-    }
-    if (near_bottom)
+    const { messages: incoming, read_positions: positions } = data
+    const had_new = incoming.length ? incoming[incoming.length - 1].id !== messages[messages.length - 1]?.id : false
+    reconcile_messages(incoming)
+    read_positions = positions
+    if (near_bottom && had_new)
       await scroll_to_bottom()
     void chat_store.refresh_rooms()
+  }
+
+  async function react({ message_id, emoji }: { message_id: string, emoji: string }) {
+    const { data } = await api_chat_react({ message_id, emoji })
+    if (!data)
+      return
+    const index = messages.findIndex(message => message.id === message_id)
+    if (index >= 0)
+      messages[index] = { ...messages[index], reactions: data.reactions }
   }
 
   async function select_room(room_id: string) {
@@ -98,6 +140,7 @@
     show_members = false
     mobile_view = 'thread' // picking a room reveals the thread on mobile
     messages = []
+    read_positions = []
     await goto(`/chat?room=${encodeURIComponent(room_id)}`, { replaceState: true, keepFocus: true, noScroll: true })
     await load_messages(room_id)
     void chat_store.refresh_rooms()
@@ -112,7 +155,7 @@
       return
     }
     const uploaded = files.length ? (await api_chat_upload({ message_id: data.message.id, files })).data : null
-    const message: ChatMessageWithAttachments = { ...data.message, attachments: uploaded?.attachments ?? [] }
+    const message: ChatMessageWithAttachments = { ...data.message, attachments: uploaded?.attachments ?? [], reactions: [] }
     sending = false
     if (room_id === active_room_id && !messages.some(existing => existing.id === message.id)) {
       messages.push(message)
@@ -295,13 +338,21 @@
         {:else if !messages.length}
           <p class="empty">No messages yet. Say hello 👋</p>
         {:else}
-          {#each messages as message (message.id)}
+          {#each messages as message, index (message.id)}
             <ChatMessageItem
               {message}
               author_name={chat_store.name_for(message.author_user_id)}
               is_own={message.author_user_id === chat_store.me_user_id}
+              me_user_id={chat_store.me_user_id}
               on_edit={edit_msg}
-              on_delete={delete_msg} />
+              on_delete={delete_msg}
+              on_react={react} />
+            {#if read_boundaries.get(message.id)}
+              <ReadBubbles members={members_for(read_boundaries.get(message.id))} />
+            {/if}
+            {#if index === messages.length - 1 && seen_summary}
+              <div class="seen-summary">{seen_summary}</div>
+            {/if}
           {/each}
         {/if}
       </div>
@@ -498,6 +549,12 @@
     color: var(--color-secondary);
     font-size: 0.9rem;
     margin: auto;
+  }
+  .seen-summary {
+    align-self: flex-end;
+    font-size: 0.7rem;
+    color: var(--color-secondary);
+    padding: 0.1rem 0.5rem 0.2rem 0;
   }
   .composer-wrap {
     padding-top: 0.5rem;

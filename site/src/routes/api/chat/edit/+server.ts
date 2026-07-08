@@ -1,7 +1,7 @@
 import type { ChatMessageWithAttachments } from '$lib/server/chat/chat-db'
 import type { RequestHandler } from './$types'
 import { gate_chat, throw_chat_error } from '$lib/server/chat/api'
-import { attach_attachments, edit_message } from '$lib/server/chat/chat-db'
+import { attach_attachments, attach_reactions, edit_message } from '$lib/server/chat/chat-db'
 import { ResponseCodes } from '$lib/constants'
 import { error, json } from '@sveltejs/kit'
 
@@ -22,7 +22,7 @@ export const POST: RequestHandler = async (event) => {
     error(ResponseCodes.BAD_REQUEST, 'message_id required')
   try {
     const edited = edit_message({ db, message_id: body.message_id, user_id, body_html: body.body_html ?? '', body_text: body.body_text ?? '' })
-    const [message] = attach_attachments({ db, messages: [edited] })
+    const [message] = attach_reactions({ db, messages: attach_attachments({ db, messages: [edited] }) })
     return json({ message } satisfies ChatEditResponse)
   } catch (err) {
     throw_chat_error(err)

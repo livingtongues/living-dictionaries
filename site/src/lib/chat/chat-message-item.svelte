@@ -5,23 +5,32 @@
   import { linkify_html } from '$lib/utils/linkify-html'
   import IconMdiCheck from '~icons/mdi/check'
   import IconMdiClose from '~icons/mdi/close'
+  import IconMdiEmoticonOutline from '~icons/mdi/emoticon-outline'
   import IconMdiFileOutline from '~icons/mdi/file-outline'
   import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
   import IconMdiTrashCanOutline from '~icons/mdi/trash-can-outline'
   import { chat_attachment_url, format_bytes, is_image_mimetype } from './attachments'
+  import ReactionPicker from './reaction-picker.svelte'
 
   interface Props {
     message: ChatMessageWithAttachments
     author_name: string
     is_own: boolean
+    me_user_id: string
     on_edit: (input: { message_id: string, body_html: string, body_text: string }) => Promise<void> | void
     on_delete: (message_id: string) => Promise<void> | void
+    on_react: (input: { message_id: string, emoji: string }) => Promise<void> | void
   }
-  let { message, author_name, is_own, on_edit, on_delete }: Props = $props()
+  let { message, author_name, is_own, me_user_id, on_edit, on_delete, on_react }: Props = $props()
 
   let editing = $state(false)
   let draft = $state('')
   let busy = $state(false)
+  let show_reactions = $state(false)
+
+  function react(emoji: string) {
+    void on_react({ message_id: message.id, emoji })
+  }
 
   function start_edit() {
     draft = message.body_html
@@ -58,10 +67,18 @@
     <span class="author">{author_name}</span>
     <span class="time">{time_label(message.created_at)}</span>
     {#if message.edited_at && !message.deleted_at}<span class="edited">(edited)</span>{/if}
-    {#if is_own && !message.deleted_at && !editing}
-      <span class="msg-actions">
-        <button type="button" title="Edit" aria-label="Edit" onclick={start_edit}><IconMdiPencilOutline /></button>
-        <button type="button" title="Delete" aria-label="Delete" onclick={remove} disabled={busy}><IconMdiTrashCanOutline /></button>
+    {#if !message.deleted_at && !editing}
+      <span class={['msg-actions', { open: show_reactions }]}>
+        <span class="react-wrap">
+          <button type="button" title="Add reaction" aria-label="Add reaction" aria-expanded={show_reactions} onclick={() => { show_reactions = !show_reactions }}><IconMdiEmoticonOutline /></button>
+          {#if show_reactions}
+            <ReactionPicker on_pick={react} close={() => { show_reactions = false }} />
+          {/if}
+        </span>
+        {#if is_own}
+          <button type="button" title="Edit" aria-label="Edit" onclick={start_edit}><IconMdiPencilOutline /></button>
+          <button type="button" title="Delete" aria-label="Delete" onclick={remove} disabled={busy}><IconMdiTrashCanOutline /></button>
+        {/if}
       </span>
     {/if}
   </div>
@@ -96,6 +113,20 @@
               {#if attachment.size_bytes}<span class="att-size">{format_bytes(attachment.size_bytes)}</span>{/if}
             </a>
           {/if}
+        {/each}
+      </div>
+    {/if}
+    {#if message.reactions.length}
+      <div class="reactions">
+        {#each message.reactions as reaction (reaction.emoji)}
+          <button
+            type="button"
+            class={['chip', { mine: reaction.user_ids.includes(me_user_id) }]}
+            title={`${reaction.user_ids.length} reaction${reaction.user_ids.length === 1 ? '' : 's'}`}
+            onclick={() => react(reaction.emoji)}>
+            <span class="chip-emoji">{reaction.emoji}</span>
+            <span class="chip-count">{reaction.user_ids.length}</span>
+          </button>
         {/each}
       </div>
     {/if}
@@ -135,8 +166,13 @@
     opacity: 0;
     transition: opacity 0.15s;
   }
-  .msg:hover .msg-actions {
+  .msg:hover .msg-actions,
+  .msg-actions.open {
     opacity: 1;
+  }
+  .react-wrap {
+    position: relative;
+    display: inline-flex;
   }
   .msg-actions button {
     border: none;
@@ -173,6 +209,42 @@
     font-style: italic;
     color: var(--color-secondary);
     margin-top: 0.1rem;
+  }
+  .reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.3rem;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+  .chip:hover {
+    border-color: var(--primary);
+  }
+  .chip.mine {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary), transparent 85%);
+  }
+  .chip-emoji {
+    font-size: 0.9rem;
+  }
+  .chip-count {
+    color: var(--color-secondary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .chip.mine .chip-count {
+    color: var(--primary);
   }
   .attachments {
     display: flex;
