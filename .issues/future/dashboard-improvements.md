@@ -60,6 +60,26 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   by-route tables in the Performance panel.
 
 ## Open proposals
+- **★★ NEW — Top-route attribution on the error-cluster panel** *(filed 2026-07-07 run 2 — grounded
+  in TODAY's live entry-page loop; verified NOT present).* `ErrorCluster` (`log-analytics.ts` ~line
+  230) has no route dimension, so pinning *where* a cluster fires means a hand-run
+  `GROUP BY url-route` query — which this review had to do to discover that **100% of the 170
+  `effect_update_depth_exceeded` rows fire on `/{dict}/entry/{id}` entry-detail pages** (bucket query
+  returned `{ entry: 170 }`, zero elsewhere) and that the `RangeError: Maximum call stack` recursion
+  is 100% on `/{dict}/entries?q={view:table}` (the **table view**). Add a `top_route` (most common
+  normalized route for the cluster, reusing the existing `url_route` helper already powering the perf
+  panel) + its share to `ErrorCluster`, shown inline in the ranked list. Cheap (one extra grouped
+  read or a correlated subquery), and it turns "which surface is broken?" from a manual query into a
+  glance. Complements the per-session breadth loop-flag above — breadth says *how* it breaks (loop
+  vs. wide), route says *where*.
+- **Storage & WAL health strip on `/admin/health`** *(ported from house → tutor · filed 2026-07-07
+  run 2 — LOW-MEDIUM).* house shipped, and tutor borrowed, a `/admin/health` strip listing each
+  `.db` / `.db-wal` file size + WAL/DB ratio (via `fs.statSync` server-side), red when WAL > 2× DB —
+  it catches the silent-checkpoint bloat class where a WAL balloons to many× the DB. **Timely for
+  LD:** LD split `client_logs` into its own `logs.db` (+ `logs-archive.db`) on 2026-07-05, exactly
+  the kind of new DB file whose WAL can silently grow unbacked-up. LD's `log-analytics.ts` has no
+  `statSync`/WAL check today (verified). Small server-side add; no new logging. *(ported from
+  house/tutor)*.
 - **★★ NEW — Per-session error breadth on the error-cluster panel (loop-bug detector)** *(filed
   2026-07-07 — grounded in TODAY's live P1; verified NOT present).* The `ErrorCluster` shape
   (`log-analytics.ts` ~line 230) exposes `count` + `users` but **no per-session breadth**, so a
