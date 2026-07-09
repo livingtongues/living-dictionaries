@@ -1,5 +1,7 @@
 import type Database from 'better-sqlite3'
 import type { DeviceType } from '$lib/debug/parse-user-agent'
+import { readdirSync, statSync } from 'node:fs'
+import { join } from 'node:path'
 import process from 'node:process'
 import { version } from '$app/environment'
 import { is_expected_error_response, is_known_noise, is_noise_error_message } from '$lib/debug/classify-error'
@@ -308,6 +310,10 @@ export interface LogAnalytics {
   leader_health: LeaderHealth
   /** Sync health — the `sync_failed` family (client_behind storm detector), invisible to every other panel. */
   sync_health: SyncHealth
+  /** Build adoption — active sessions by build age; who's stranded on un-fixable old code. */
+  build_adoption: BuildAdoption
+  /** Server DB file + WAL sizes — the "checkpoint isn't firing" / runaway-logs catch. */
+  storage: StorageHealth
   /** Agent/API write activity — the server-emitted `v1_*` events (hot window only). */
   api_v1: ApiV1Activity
   /** Per-dictionary viewership (forever rollup + live tail) — who's being viewed, how much. */
@@ -409,6 +415,46 @@ export interface SyncHealth {
   oldest_unresolved_at: string | null
   /** Per stuck tab — who to nudge / which build to reload, most-recent first. */
   stuck: { user_id: string | null, dict_id: string | null, app_version: string | null, count: number, first_seen: string, last_seen: string }[]
+}
+
+/**
+ * Build adoption — the stale-client POPULATION metric (2026-07-08 review). The
+ * dashboard tracked *errors* by version but had no answer to "how many active
+ * sessions are stranded on un-fixable old code?" — on 07-08, 4 clients stuck on
+ * a 5-day-old build (incl. an admin) drove 67% of all error rows and were
+ * invisible until a hand query. Groups the last-24h `session_start` rows by
+ * `app_version` (a build epoch ms) decoded to an age bucket. Hot window only.
+ */
+export interface BuildAdoption {
+  /** Sessions started in the recency window with any build id. */
+  total: number
+  /** On the live deployed build. */
+  current: number
+  /** On a non-current build < STALE_BUILD_DAYS old (normal deploy churn). */
+  behind: number
+  /** On a build ≥ STALE_BUILD_DAYS old — can't receive fixes until a hard reload. */
+  stale: number
+  /** Build id didn't parse as a build epoch (dev builds etc). */
+  unknown: number
+  /** (behind + stale) ÷ judgeable sessions — "N% of active sessions can't receive fixes". */
+  stranded_pct: number | null
+  /** Per-build detail: age + session count + the signed-in users on it (who to nudge). */
+  builds: { app_version: string, age_days: number | null, sessions: number, users: string[], last_seen: string, is_current: boolean }[]
+}
+
+/** One server SQLite file's size + WAL footprint. `wal_ratio` > 2 = checkpoint isn't firing. */
+export interface StorageDb { name: string, db_bytes: number, wal_bytes: number, wal_ratio: number | null }
+/**
+ * Live storage / WAL health for the server DB files (same strip house + tutor
+ * run). `statSync` on the open handles' paths + an aggregate over
+ * `dictionaries/*.db`. Catches both the silent "wal_checkpoint is losing to a
+ * pinned reader" regression and raw-log growth (logs.db hit 467MB growing
+ * ~110MB/day during the 07-08 storm). In-memory handles (tests) yield no rows.
+ */
+export interface StorageHealth {
+  dbs: StorageDb[]
+  /** Aggregate over per-dict DB files (`dictionaries/*.db`, incl. history DBs); null when the dir is absent (tests / fresh dev). */
+  dict_dbs: { count: number, db_bytes: number, wal_bytes: number } | null
 }
 
 /**
@@ -716,6 +762,8 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
 
   const leader_health = timed('build_leader_health', () => build_leader_health(ctx))
   const sync_health = timed('build_sync_health', () => build_sync_health(ctx))
+  const build_adoption = timed('build_build_adoption', () => build_build_adoption(ctx))
+  const storage = timed('build_storage', () => build_storage({ shared_db, logs_db }))
   const api_v1 = timed('build_api_v1', () => build_api_v1_activity(ctx))
   const top_dictionaries = timed('build_top_dictionaries', () => build_top_dictionaries(ctx))
   const missing_i18n_keys = timed('build_missing_i18n', () => build_missing_i18n_keys(ctx))
@@ -750,6 +798,8 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
     event_coverage,
     leader_health,
     sync_health,
+    build_adoption,
+    storage,
     api_v1,
     top_dictionaries,
     missing_i18n_keys,
@@ -1789,6 +1839,136 @@ function build_sync_health(ctx: AnalyticsContext): SyncHealth {
     oldest_unresolved_at,
     stuck,
   }
+}
+
+/** "Active" for build adoption = a session_start within this many hours of now. */
+const BUILD_ADOPTION_ACTIVE_HOURS = 24
+/** A non-current build this many days older than the current one counts as stranded. */
+const STALE_BUILD_DAYS = 3
+
+/** Parse an `app_version` (build epoch ms) to a number; null for dev/odd builds. */
+function build_epoch_ms(app_version: string | null): number | null {
+  if (!app_version)
+    return null
+  const parsed = Number(app_version)
+  // Sanity: build epochs are ms timestamps (13 digits, year ≥ 2020).
+  return Number.isFinite(parsed) && parsed > 1_577_836_800_000 ? parsed : null
+}
+
+/**
+ * Build adoption (see `BuildAdoption` doc): last-24h `session_start` rows grouped
+ * by `app_version`, the build epoch decoded to an age bucket relative to the
+ * current build. Signed-in users per stale build are named so "who to nudge" is
+ * one glance, not a hand query.
+ */
+function build_build_adoption(ctx: AnalyticsContext): BuildAdoption {
+  const { logs_db, current_app_version, now } = ctx
+  const active_start_iso = new Date(Math.max(now.getTime() - BUILD_ADOPTION_ACTIVE_HOURS * 3600_000, Date.parse(ctx.window_start_iso))).toISOString()
+  const rows = logs_db.prepare(`
+    SELECT app_version, COUNT(DISTINCT session_id) sessions, MAX(received_at) last_seen
+    FROM client_logs
+    WHERE received_at >= ? AND message = 'session_start' AND app_version IS NOT NULL AND ${ctx.audience_filter}
+    GROUP BY app_version
+  `).all(active_start_iso) as { app_version: string, sessions: number, last_seen: string }[]
+  // Signed-in users per build — from ANY row (login often happens after session_start).
+  const user_rows = logs_db.prepare(`
+    SELECT DISTINCT app_version, user_id
+    FROM client_logs
+    WHERE received_at >= ? AND user_id IS NOT NULL AND app_version IS NOT NULL AND ${ctx.audience_filter}
+  `).all(active_start_iso) as { app_version: string, user_id: string }[]
+  const users_by_build = new Map<string, string[]>()
+  for (const row of user_rows) {
+    const list = users_by_build.get(row.app_version) ?? []
+    list.push(row.user_id)
+    users_by_build.set(row.app_version, list)
+  }
+
+  // Age is measured against the current build's epoch (falling back to now when
+  // the deployed version isn't a parseable epoch, e.g. dev).
+  const reference_ms = build_epoch_ms(current_app_version) ?? now.getTime()
+  let current = 0
+  let behind = 0
+  let stale = 0
+  let unknown = 0
+  const builds = rows.map((row) => {
+    const is_current = current_app_version != null && row.app_version === current_app_version
+    const epoch = build_epoch_ms(row.app_version)
+    const age_days = epoch != null ? Math.max(0, Math.round(((reference_ms - epoch) / 86_400_000) * 10) / 10) : null
+    if (is_current)
+      current += row.sessions
+    else if (age_days == null)
+      unknown += row.sessions
+    else if (age_days >= STALE_BUILD_DAYS)
+      stale += row.sessions
+    else
+      behind += row.sessions
+    return { app_version: row.app_version, age_days, sessions: row.sessions, users: (users_by_build.get(row.app_version) ?? []).sort(), last_seen: row.last_seen, is_current }
+  }).sort((first, second) => ((second.age_days ?? -1) - (first.age_days ?? -1)) || (second.sessions - first.sessions)) // oldest (most stranded) first
+
+  const judgeable = current + behind + stale
+  return {
+    total: current + behind + stale + unknown,
+    current,
+    behind,
+    stale,
+    unknown,
+    stranded_pct: judgeable > 0 ? (behind + stale) / judgeable : null,
+    builds,
+  }
+}
+
+/** `statSync` size; null when the path doesn't exist (`:memory:` handles, missing WAL). */
+function file_bytes(path: string): number | null {
+  try {
+    return statSync(path).size
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Live storage / WAL health (see `StorageHealth`): `statSync` over the central DB
+ * files' paths (taken from the open handles) + an aggregate over
+ * `dictionaries/*.db`. Ported from the house/tutor strip.
+ */
+function build_storage({ shared_db, logs_db }: { shared_db: Database.Database, logs_db: Database.Database }): StorageHealth {
+  const targets = [
+    { path: shared_db.name, name: 'shared.db' },
+    { path: logs_db.name, name: 'logs.db' },
+  ]
+  try {
+    targets.push({ path: get_log_archive_db().name, name: 'logs-archive.db' })
+  } catch {
+    // archive DB unavailable (tests) — skip the row
+  }
+  const seen_paths = new Set<string>()
+  const dbs: StorageDb[] = []
+  for (const target of targets) {
+    if (seen_paths.has(target.path))
+      continue // tests pass one handle for both shared + logs
+    seen_paths.add(target.path)
+    const db_bytes = file_bytes(target.path)
+    if (db_bytes === null)
+      continue
+    const wal_bytes = file_bytes(`${target.path}-wal`) ?? 0
+    dbs.push({ name: target.name, db_bytes, wal_bytes, wal_ratio: db_bytes > 0 ? wal_bytes / db_bytes : null })
+  }
+
+  let dict_dbs: StorageHealth['dict_dbs'] = null // stays null when the dictionaries dir is absent (tests / fresh dev)
+  try {
+    const dictionaries_dir = join(process.env.DATA_DIR || '.data', 'dictionaries')
+    const db_files = readdirSync(dictionaries_dir).filter(file => file.endsWith('.db'))
+    let db_bytes = 0
+    let wal_bytes = 0
+    for (const file of db_files) {
+      db_bytes += file_bytes(join(dictionaries_dir, file)) ?? 0
+      wal_bytes += file_bytes(join(dictionaries_dir, `${file}-wal`)) ?? 0
+    }
+    dict_dbs = { count: db_files.length, db_bytes, wal_bytes }
+  } catch {
+    // dictionaries dir unreadable — leave dict_dbs null
+  }
+  return { dbs, dict_dbs }
 }
 
 /**

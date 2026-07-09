@@ -615,6 +615,11 @@ export function init_remote_logging(): void {
 
   on_window('unhandledrejection', (event) => {
     const { reason } = event as PromiseRejectionEvent
+    const dom_event = describe_dom_event(reason)
+    if (dom_event) {
+      push({ level: 'unhandled_rejection', message: dom_event.message, context: dom_event.context })
+      return
+    }
     const message = reason instanceof Error
       ? reason.message
       : typeof reason === 'string' ? reason : safe_serialize_reason(reason)
@@ -653,16 +658,19 @@ export function init_remote_logging(): void {
     try {
       original_console_error?.(...args)
       const [first] = args
-      const message = first instanceof Error
-        ? first.message
-        : typeof first === 'string' ? first : safe_serialize_reason(first)
+      const dom_event = describe_dom_event(first)
+      const message = dom_event
+        ? dom_event.message
+        : first instanceof Error
+          ? first.message
+          : typeof first === 'string' ? first : safe_serialize_reason(first)
       const stack = first instanceof Error ? clamp_stack(first.stack) : null
       const extras = args.length > 1 ? args.slice(1).map(safe_serialize_reason) : null
       push({
         level: 'error',
         message: message || 'console.error',
         stack,
-        context: extras ? { extras } : null,
+        context: dom_event || extras ? { ...(dom_event?.context ?? {}), ...(extras ? { extras } : {}) } : null,
       })
     } catch {
       // Never throw from console.error.
@@ -745,6 +753,30 @@ export function init_remote_logging(): void {
 
   // Try a flush right away — picks up offline-buffered entries from a prior crash.
   void flush()
+}
+
+/**
+ * A DOM `Event` JSON-stringifies to just `{"isTrusted":true}` — 50+ blind rows/day
+ * (a media/resource `error` event thrown into a rejection handler or
+ * `console.error`). Extract the event type + target element + its src/href so the
+ * row reads "error event on <audio>: https://…/clip.mp3" instead. Returns null for
+ * non-Event values (callers fall through to normal serialization). Never throws.
+ */
+function describe_dom_event(value: unknown): { message: string, context: Record<string, unknown> } | null {
+  try {
+    if (typeof Event === 'undefined' || !(value instanceof Event))
+      return null
+    const { target } = value
+    const tag = target instanceof Element ? target.tagName.toLowerCase() : null
+    const src = target instanceof Element ? (target.getAttribute('src') || target.getAttribute('href') || null) : null
+    const type = value.type || 'unknown'
+    return {
+      message: `DOM ${type} event${tag ? ` on <${tag}>` : ''}${src ? `: ${src}` : ''}`,
+      context: { dom_event: type, target_tag: tag, target_src: src },
+    }
+  } catch {
+    return null
+  }
 }
 
 function safe_serialize_reason(value: unknown): string {

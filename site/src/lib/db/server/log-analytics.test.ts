@@ -116,6 +116,42 @@ describe(get_log_analytics, () => {
     expect(sync_health.oldest_unresolved_at).toBe(sync_health.stuck[0].first_seen)
   })
 
+  test('build_adoption buckets active sessions by build age and names the users on stale builds', () => {
+    const now = NOW
+    const cur = String(now.getTime() - 2 * 3600_000) // deployed 2h ago
+    const behind = String(now.getTime() - 86_400_000) // 1 day old
+    const stale = String(now.getTime() - 5 * 86_400_000) // 5 days old — stranded
+    add_log({ day: '2026-06-30', message: 'session_start', app_version: cur, context: { session_id: 's1' } })
+    add_log({ day: '2026-06-30', message: 'session_start', app_version: cur, context: { session_id: 's2' } })
+    add_log({ day: '2026-06-30', message: 'session_start', app_version: behind, context: { session_id: 's3' } })
+    add_log({ day: '2026-06-30', message: 'session_start', app_version: stale, context: { session_id: 's4' } })
+    // The stuck user signs in AFTER session_start — still named on the stale build.
+    add_log({ day: '2026-06-30', level: 'warn', message: 'sync_failed', user_id: 'greg', app_version: stale, context: { session_id: 's4', kind: 'client_behind' } })
+    // Unparseable build id (dev) → unknown bucket.
+    add_log({ day: '2026-06-30', message: 'session_start', app_version: 'dev', context: { session_id: 's5' } })
+    // A session_start older than 24h is not "active" — ignored.
+    add_log({ day: '2026-06-28', message: 'session_start', app_version: stale, context: { session_id: 's6' } })
+
+    const { build_adoption } = get_log_analytics({ shared_db: db, logs_db, days: 30, now, current_app_version: cur })
+    expect(build_adoption.current).toBe(2)
+    expect(build_adoption.behind).toBe(1)
+    expect(build_adoption.stale).toBe(1)
+    expect(build_adoption.unknown).toBe(1)
+    expect(build_adoption.total).toBe(5)
+    // "50% of active sessions can't receive fixes" (2 of 4 judgeable).
+    expect(build_adoption.stranded_pct).toBe(0.5)
+    // Oldest (most stranded) build first, with its signed-in users named.
+    expect(build_adoption.builds[0]).toMatchObject({ app_version: stale, sessions: 1, users: ['greg'], is_current: false, age_days: 4.9 })
+    const current_build = build_adoption.builds.find(row => row.is_current)
+    expect(current_build?.sessions).toBe(2)
+  })
+
+  test('storage never throws and yields no db rows for in-memory handles', () => {
+    const { storage } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    // `:memory:` handles have no stat-able file; dict_dbs depends on DATA_DIR presence.
+    expect(storage.dbs.every(row => row.name === 'logs-archive.db')).toBeTruthy()
+  })
+
   test('errors_by_version folds post-deploy settling churn (errors within 30min of a build first appearing)', () => {
     // Build B1 first appears 2026-06-29; a same-window error the NEXT day is 24h
     // later → past the deploy tail, so it's a standing fault, not settling.
@@ -571,6 +607,9 @@ describe(get_log_analytics, () => {
       db.prepare(`INSERT INTO log_daily_metrics (day, metric, source, value) VALUES ('2026-06-05', 'logs', 'client', 42), ('2026-06-05', 'sessions', 'client', 7), ('2026-06-05', 'errors', 'client', 3), ('2026-06-05', 'geo:US-CA', 'client', 5), ('2026-06-05', 'event:search_performed', 'client', 9), ('2026-06-05', 'nav:about', 'client', 4)`).run()
 
       const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: 'v-cur' })
+      // `storage` stat-syncs real files (the temp-dir archive) — zero its
+      // machine-varying byte sizes so the drift guard stays deterministic.
+      analytics.storage = { dbs: analytics.storage.dbs.map(row => ({ ...row, db_bytes: 0, wal_bytes: 0, wal_ratio: null })), dict_dbs: analytics.storage.dict_dbs }
       expect(analytics).toMatchInlineSnapshot(`
         {
           "api_v1": {
@@ -589,6 +628,24 @@ describe(get_log_analytics, () => {
             "non_recovery_pct": null,
             "recovered_sessions": 0,
             "snapshot_expired_sessions": 0,
+          },
+          "build_adoption": {
+            "behind": 0,
+            "builds": [
+              {
+                "age_days": null,
+                "app_version": "v-cur",
+                "is_current": true,
+                "last_seen": "2026-06-30T10:00:00.000Z",
+                "sessions": 1,
+                "users": [],
+              },
+            ],
+            "current": 1,
+            "stale": 0,
+            "stranded_pct": 0,
+            "total": 1,
+            "unknown": 0,
           },
           "by_source": [
             {
@@ -1371,6 +1428,17 @@ describe(get_log_analytics, () => {
             ],
             "schema_drift_count": 0,
             "total": 1,
+          },
+          "storage": {
+            "dbs": [
+              {
+                "db_bytes": 0,
+                "name": "logs-archive.db",
+                "wal_bytes": 0,
+                "wal_ratio": null,
+              },
+            ],
+            "dict_dbs": null,
           },
           "sync_health": {
             "by_kind": [],

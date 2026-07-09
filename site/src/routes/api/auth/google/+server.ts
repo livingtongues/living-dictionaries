@@ -49,23 +49,19 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
     },
   })
 
-  // On every re-login, refresh email/name/avatar from the latest Google
-  // profile (COALESCE keeps existing values if Google returned an empty).
-  // First-login already wrote these via INSERT, so skip the no-op UPDATE.
-  if (!created) {
+  // On re-login, refresh ONLY the avatar from the latest Google profile.
+  // We deliberately do NOT touch the primary `users.email` or `name`: the
+  // primary email is the canonical identity anchor — LD's admin levels are
+  // computed from the hardcoded email allow-list in `$lib/admins.ts`, so a
+  // provider login silently flipping `users.email` away from the allow-listed
+  // address demotes that admin (the exact class that duplicated house's Wayne
+  // account and dropped his admin). `name` is the user's own to set.
+  if (!created && google_user.picture) {
     db.prepare(
       `UPDATE users
-       SET email = COALESCE(?, email),
-           name = COALESCE(?, name),
-           avatar_url = COALESCE(?, avatar_url),
-           updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+       SET avatar_url = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
        WHERE id = ?`,
-    ).run(
-      google_user.email,
-      google_user.name || null,
-      google_user.picture ?? null,
-      user.id,
-    )
+    ).run(google_user.picture, user.id)
   }
   // New signup → post into the admin Notifications room (+ ping admins by their
   // channel). An admin's own first login logs the event but doesn't ping the team.
@@ -78,10 +74,15 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
     }).catch(err => console.error('new-user notification failed:', (err as Error).message))
   }
 
+  // Sign the JWT from the CANONICAL resolved user (not the Google profile), so
+  // API auth and the SSR layer key off the same email — the admin allow-list
+  // (`$lib/admins.ts`) matches `users.email`, and signing with the raw Google
+  // email would re-introduce the primary/identity split for admins whose
+  // allow-list email differs from their Google address.
   const token = await sign_jwt({
     sub: user.id,
-    email: google_user.email,
-    name: google_user.name || user.name || undefined,
+    email: user.email ?? undefined,
+    name: user.name ?? undefined,
   })
 
   // Same cookie shape as email-verify so the SSR layer treats both providers

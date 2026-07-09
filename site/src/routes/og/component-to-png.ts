@@ -38,6 +38,22 @@ function render_svg({ markup, height, width, load_dynamic }: {
   })
 }
 
+/**
+ * Name the failure class for `og_render_failed` telemetry — the old blanket
+ * `og_font_unsupported` label actively misled triage when the real fault was
+ * satori failing to FETCH the entry photo from lh3 (2026-07-08 review).
+ */
+export function classify_og_failure(error: unknown): 'image_fetch' | 'font' | 'render' {
+  const message = (error as { message?: unknown } | null | undefined)?.message
+  if (typeof message === 'string') {
+    if (/load.{0,20}image|image.{0,30}fetch failed/i.test(message))
+      return 'image_fetch'
+    if (/font|lookupType|substFormat|glyph|opentype/i.test(message))
+      return 'font'
+  }
+  return 'render'
+}
+
 const get_png = withCache(async (html: string, height: number, width: number) => {
   const markup = toReactNode(html)
   let svg: string
@@ -46,7 +62,9 @@ const get_png = withCache(async (html: string, height: number, width: number) =>
   } catch (error) {
     // A dynamic fallback font tripped satori's opentype.js parse — fall back to a
     // NotoSans-only render (non-Latin glyphs may tofu) so the share image never 500s.
-    log_server_event({ level: 'warn', message: 'og_font_unsupported', error, context: { width, height } })
+    // (An `image_fetch` fault will fail this retry too; the route's outer catch
+    // then renders the text-only fallback card.)
+    log_server_event({ level: 'warn', message: 'og_render_failed', error, context: { reason: classify_og_failure(error), retry: 'static_fonts_only', width, height } })
     svg = await render_svg({ markup: toReactNode(html), height, width, load_dynamic: false })
   }
 
@@ -160,4 +178,20 @@ function hash(str: string) {
     hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24)
   }
   return (`00000${(hval >>> 0).toString(36)}`).slice(-6)
+}
+
+if (import.meta.vitest) {
+  describe(classify_og_failure, () => {
+    test('an lh3 photo fetch failure is image_fetch (the 2026-07-08 mislabel)', () => {
+      expect(classify_og_failure(new Error(`Can't load image https://lh3.googleusercontent.com/abc=w1200: fetch failed`))).toBe('image_fetch')
+    })
+    test('an opentype GSUB parse failure is font', () => {
+      expect(classify_og_failure(new Error('lookupType: 5 - substFormat: 3 is not yet supported'))).toBe('font')
+      expect(classify_og_failure(new Error('unsupported font glyph table'))).toBe('font')
+    })
+    test('anything else is render', () => {
+      expect(classify_og_failure(new Error('something unexpected'))).toBe('render')
+      expect(classify_og_failure(null)).toBe('render')
+    })
+  })
 }

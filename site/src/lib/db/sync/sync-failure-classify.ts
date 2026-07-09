@@ -6,7 +6,13 @@
  *
  * Level policy (shared across house/tutor/LD, 2026-07-02):
  *   version blocks / network / auth / snapshot lifecycle → warn
- *   corruption / everything else                        → error
+ *   corruption / not_found / everything else            → error
+ *
+ * `not_found` (2026-07-09): a 404 from `/changes` (the dictionary is gone —
+ * e.g. deleted while a tab still had it open; `zapoteco-de-analco` storm) is
+ * FATAL — retrying never helps and local edits are stranded. Named so the
+ * Sync-Health panel shows the real cause instead of `other`, kept at `error`
+ * level, and non-transient so `RepeatFailureTracker` halts the engine after 3.
  */
 import { ClientBehindError, ServerBehindError } from './errors'
 
@@ -18,6 +24,7 @@ export type SyncFailureKind
     | 'auth'
     | 'snapshot_expired'
     | 'storage_lost'
+    | 'not_found'
     | 'other'
 
 /** Suppress repeat-identical throttled-kind rows (same kind+message) within this window. */
@@ -77,12 +84,20 @@ export function classify_sync_failure(error: unknown): SyncFailureKind {
   const status = (error as { status?: unknown } | null | undefined)?.status
   if (typeof status === 'number' && (status === 502 || status === 504 || (status >= 520 && status <= 527)))
     return 'network'
+  // The synced resource is GONE (dict deleted / never existed for this client).
+  // Fatal: work-losing, retrying never helps — see the `not_found` header note.
+  if (status === 404)
+    return 'not_found'
   if (is_storage_lost_error(error))
     return 'storage_lost'
   const message = (error as { message?: unknown } | null | undefined)?.message
   if (typeof message === 'string') {
     if (/not a database|disk image is malformed|file is not a database|\bcorrupt/i.test(message))
       return 'corruption'
+    // Fallback for paths that lost the numeric `status` (e.g. the main-thread
+    // admin engine's post_request) — match the server's 404 detail text.
+    if (/dictionary not found|\bHTTP 404\b/i.test(message))
+      return 'not_found'
     // post_request collapses fetch rejections to these prefixes; the dict
     // engine's raw fetch rejects with the browser-native messages.
     if (/^Network error:|^Request timed out|Failed to fetch|NetworkError|Load failed/i.test(message))
@@ -202,6 +217,12 @@ if (import.meta.vitest) {
     test('a bare app 500 stays other (a real fault worth surfacing)', () => {
       expect(classify_sync_failure(Object.assign(new Error('Internal Error'), { status: 500 }))).toBe('other')
     })
+    test('a 404 (dictionary gone) is not_found — fatal, named, never a transient retry', () => {
+      expect(classify_sync_failure(Object.assign(new Error('dictionary not found'), { status: 404 }))).toBe('not_found')
+      expect(classify_sync_failure(Object.assign(new Error('HTTP 404'), { status: 404 }))).toBe('not_found')
+      // Status lost (main-thread admin engine) — the message still classifies.
+      expect(classify_sync_failure(new Error('dictionary not found'))).toBe('not_found')
+    })
     test('classifies a browser-closed OPFS access handle as storage_lost', () => {
       expect(classify_sync_failure(new Error('AccessHandle is closed'))).toBe('storage_lost')
       expect(classify_sync_failure(new Error('The access handle was already closed.'))).toBe('storage_lost')
@@ -222,6 +243,7 @@ if (import.meta.vitest) {
       expect(sync_failure_level('snapshot_expired')).toBe('warn')
       expect(sync_failure_level('storage_lost')).toBe('warn')
       expect(sync_failure_level('corruption')).toBe('error')
+      expect(sync_failure_level('not_found')).toBe('error')
       expect(sync_failure_level('other')).toBe('error')
     })
   })
@@ -269,7 +291,21 @@ if (import.meta.vitest) {
       expect(is_transient_failure('snapshot_expired')).toBe(true)
       expect(is_transient_failure('client_behind')).toBe(false)
       expect(is_transient_failure('corruption')).toBe(false)
+      expect(is_transient_failure('not_found')).toBe(false)
       expect(is_transient_failure('other')).toBe(false)
+    })
+  })
+
+  describe('not_found retry policy', () => {
+    test('the repeat-failure breaker halts a retried 404 after 3 attempts (no infinite error storm)', () => {
+      const tracker = new RepeatFailureTracker()
+      tracker.record({ kind: 'not_found', message: 'dictionary not found' })
+      tracker.record({ kind: 'not_found', message: 'dictionary not found' })
+      expect(tracker.record({ kind: 'not_found', message: 'dictionary not found' })).toEqual({ halt: true, consecutive: 3 })
+    })
+    test('every not_found row ships (hard failures are never throttle-suppressed)', () => {
+      const now = 1_000_000
+      expect(should_ship_failure({ kind: 'not_found', message: 'dictionary not found', last: { key: 'not_found:dictionary not found', at: now - 1 }, now })).toBe(true)
     })
   })
 

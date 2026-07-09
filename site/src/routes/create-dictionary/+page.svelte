@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { IPoint, IRegion } from '$lib/types'
   import { onMount } from 'svelte'
-  import { convertToFriendlyUrl } from './convert-to-friendly-url'
+  import { convertToFriendlyUrl, is_url_like } from './convert-to-friendly-url'
+  import { log_event } from '$lib/debug/remote-log'
   import Button from '$lib/components/ui/Button.svelte'
   import Form from '$lib/components/ui/Form.svelte'
   import { page } from '$app/state'
@@ -49,8 +50,15 @@
     return isUniqueURL
   }
 
+  // Set when the raw name/url input reads like a pasted URL (the slug generator
+  // cleans it, but flag the attempt — a truncated paste once shipped as the
+  // unusable slug `httpslivingdictionari`).
+  let url_like_input: string | null = $state(null)
+
   function handle_url_input(e: Event) {
     const newCustomUrl = (e.target as HTMLInputElement).value
+    if (is_url_like(newCustomUrl))
+      url_like_input = newCustomUrl
     if (customUrl !== newCustomUrl)
       customUrl = convertToFriendlyUrl(newCustomUrl, MAX_URL_LENGTH)
   }
@@ -71,6 +79,9 @@
 
   onsubmit={async () => {
     if (!user) return modal = 'auth'
+
+    if (url_like_input || is_url_like(name) || /http|www/.test(urlToUse))
+      log_event({ level: 'warn', message: 'dict_slug_suspicious', context: { name, url: urlToUse, raw_input: url_like_input } })
 
     await data.create_dictionary({
       id: urlToUse,

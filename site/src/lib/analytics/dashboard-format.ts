@@ -51,6 +51,19 @@ export function one_decimal(value: number | null): string {
   return value == null ? '—' : value.toFixed(1)
 }
 
+/** Human-readable file size (matches tutor's storage strip). */
+export function format_bytes(bytes: number | null): string {
+  if (bytes == null)
+    return '—'
+  if (bytes >= 1024 ** 3)
+    return `${(bytes / 1024 ** 3).toFixed(1)} GB`
+  if (bytes >= 1024 ** 2)
+    return `${(bytes / 1024 ** 2).toFixed(1)} MB`
+  if (bytes >= 1024)
+    return `${Math.round(bytes / 1024)} KB`
+  return `${bytes} B`
+}
+
 /** Build ids are long timestamps; show a short trailing slice for readability. */
 export function short_version(version: string | null): string {
   if (!version)

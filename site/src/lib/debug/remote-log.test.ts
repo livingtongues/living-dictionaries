@@ -285,6 +285,28 @@ describe('remote-log buffer + flush', () => {
     expect(forwarded?.level).toBe('error')
   })
 
+  test('a DOM Event logged via console.error ships its type + target instead of {"isTrusted":true}', async () => {
+    const module = await import('./remote-log')
+    module.init_remote_logging()
+
+    const audio = document.createElement('audio')
+    audio.setAttribute('src', 'https://example.com/clip.mp3')
+    const error_event = new Event('error')
+    audio.dispatchEvent(error_event)
+    console.error(error_event)
+    await module.flush_now()
+
+    const shipped = find_sent_entry('DOM error event on <audio>: https://example.com/clip.mp3')
+    expect(shipped?.level).toBe('error')
+    expect(shipped?.context).toMatchObject({
+      dom_event: 'error',
+      target_tag: 'audio',
+      target_src: 'https://example.com/clip.mp3',
+    })
+    // The old useless serialization must be gone.
+    expect(find_sent_entry('{"isTrusted":true}')).toBeUndefined()
+  })
+
   test('log_warning ships at warn level', async () => {
     const module = await import('./remote-log')
     module.init_remote_logging()

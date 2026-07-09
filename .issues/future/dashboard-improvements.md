@@ -59,17 +59,17 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   in-app navigation p50/p95 (+ 30d p50 micro-sparklines), LCP p75. Plus nav trend chart + nav/LCP
   by-route tables in the Performance panel.
 
+## Shipped (2026-07-09, `.issues/log-review-2026-07-08-actions.md`)
+- ✅ **Build adoption / stale-client population strip** — `build_build_adoption` (last-24h
+  `session_start` GROUP BY `app_version`, build epoch → current / <3d behind / ≥3d stale / unknown)
+  with the "N% of active sessions can't receive fixes" headline + per-build named signed-in users;
+  panel on `/admin/health` above Sync health.
+- ✅ **Storage & WAL health strip** — `build_storage` (statSync on shared.db / logs.db /
+  logs-archive.db + `dictionaries/*.db` aggregate, `wal_ratio` red > 2×); panel on `/admin/health`.
+- ✅ **`sync_failed` 404 cause named** — new `not_found` classifier kind (error-level, non-transient →
+  repeat-breaker halts after 3), so the Sync-Health by-kind table names the fatal class instead of `other`.
+
 ## Open proposals
-- **★ NEW — "Build adoption / stale-client population" health strip** *(filed 2026-07-08 — grounded
-  in TODAY's #1 issue; verified NOT present).* LD tracks **errors** by version (`build_errors_by_version`)
-  and `totals.stale_errors`, but has **no metric for how many active sessions are stranded on
-  un-fixable old code** — a *population* health number distinct from the error-share item below. Add a
-  small strip grouping **sessions by build age** (decode the `app_version` build-epoch → `current` /
-  `1–2 builds behind` / `≥3 days stale`) with the headline "**N% of active sessions can't receive
-  fixes.**" Today it would read ~4 clients stuck on 07-03 builds (incl. **admin Greg**) driving 100%
-  of a ~5,700-row `sync_failed` retry-storm — a storm that is un-fixable for those tabs until they
-  reload. Cheap: one `GROUP BY app_version` over `session_start` rows in the hot window. Pairs with
-  the "stale-bundle error-share %" item (that = errors; this = who's stuck). *(LD-native, 2026-07-08 review)*
 - **★ NEW — Sync-Health: name the server-side cause + RED "one-user-dominates" verdict** *(ported
   from house 07-07 Phase C · filed 2026-07-08 — grounded in TODAY's live P2).* LD's `build_sync_health`
   (`log-analytics.ts` ~line 1722) groups `sync_failed` by `context.kind` current-vs-stale + tracks
@@ -91,14 +91,6 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   read or a correlated subquery), and it turns "which surface is broken?" from a manual query into a
   glance. Complements the per-session breadth loop-flag above — breadth says *how* it breaks (loop
   vs. wide), route says *where*.
-- **Storage & WAL health strip on `/admin/health`** *(ported from house → tutor · filed 2026-07-07
-  run 2 — LOW-MEDIUM).* house shipped, and tutor borrowed, a `/admin/health` strip listing each
-  `.db` / `.db-wal` file size + WAL/DB ratio (via `fs.statSync` server-side), red when WAL > 2× DB —
-  it catches the silent-checkpoint bloat class where a WAL balloons to many× the DB. **Timely for
-  LD:** LD split `client_logs` into its own `logs.db` (+ `logs-archive.db`) on 2026-07-05, exactly
-  the kind of new DB file whose WAL can silently grow unbacked-up. LD's `log-analytics.ts` has no
-  `statSync`/WAL check today (verified). Small server-side add; no new logging. *(ported from
-  house/tutor)*.
 - **★★ NEW — Per-session error breadth on the error-cluster panel (loop-bug detector)** *(filed
   2026-07-07 — grounded in TODAY's live P1; verified NOT present).* The `ErrorCluster` shape
   (`log-analytics.ts` ~line 230) exposes `count` + `users` but **no per-session breadth**, so a

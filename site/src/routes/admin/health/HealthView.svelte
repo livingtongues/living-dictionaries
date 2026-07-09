@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types'
-  import { ago, country_flag, format_ms, perf_label, short_time, short_version, USERS_COLOR } from '$lib/analytics/dashboard-format'
+  import { ago, country_flag, format_bytes, format_ms, perf_label, short_time, short_version, USERS_COLOR } from '$lib/analytics/dashboard-format'
   import { log_insights } from '$lib/analytics/insights'
   import ComboChart from '$lib/charts/ComboChart.svelte'
   import LineChart from '$lib/charts/LineChart.svelte'
@@ -96,6 +96,11 @@
   const clusters = $derived(analytics.error_clusters)
   const leader = $derived(analytics.leader_health)
   const sync_health = $derived(analytics.sync_health)
+  const adoption = $derived(analytics.build_adoption)
+  const storage = $derived(analytics.storage)
+  /** WAL bigger than 2× its DB = wal_checkpoint(TRUNCATE) losing to a pinned reader. */
+  const WAL_RATIO_RED = 2
+  const wal_red = $derived(storage.dbs.some(row => (row.wal_ratio ?? 0) > WAL_RATIO_RED))
   const boot_health = $derived(analytics.boot_health)
   const boot_non_recovery_pct = $derived(boot_health.non_recovery_pct === null ? null : Math.round(boot_health.non_recovery_pct * 100))
   const boot_points = $derived(boot_health.daily.map(day => ({ date: day.day, value: day.sessions })))
@@ -409,6 +414,45 @@
   </div>
 
   <section class="panel">
+    <h2>Build adoption <span class="hint">active sessions (last 24h) by build age · who's stranded on un-fixable old code</span></h2>
+    {#if adoption.total === 0}
+      <p class="muted">No active sessions in the last 24h.</p>
+    {:else}
+      <div class="ver-split">
+        <div class="ver-stat">
+          <div class="ver-value" class:danger={adoption.stale > 0}>{adoption.stranded_pct != null ? format_pct(adoption.stranded_pct) : '—'}</div>
+          <div class="ver-label">of active sessions can't receive fixes</div>
+          <div class="ver-sub">{format_number(adoption.behind + adoption.stale)} of {format_number(adoption.current + adoption.behind + adoption.stale)} on a non-current build</div>
+        </div>
+        <div class="ver-stat">
+          <div class="ver-value">{format_number(adoption.current)}</div>
+          <div class="ver-label">On the current build</div>
+          <div class="ver-sub">{format_number(adoption.behind)} 1–2 days behind{adoption.unknown > 0 ? ` · ${format_number(adoption.unknown)} unknown build` : ''}</div>
+        </div>
+        <div class="ver-stat">
+          <div class="ver-value" class:danger={adoption.stale > 0}>{format_number(adoption.stale)}</div>
+          <div class="ver-label">Stranded (≥3 days stale)</div>
+          <div class="ver-sub">stuck until a hard reload — nudge the named users</div>
+        </div>
+      </div>
+      <table class="src-table">
+        <thead><tr><th>Build</th><th>Age</th><th>Sessions</th><th>Signed-in users</th><th>Last seen</th></tr></thead>
+        <tbody>
+          {#each adoption.builds as row (row.app_version)}
+            <tr>
+              <td class="mono">{short_version(row.app_version)}{row.is_current ? ' (current)' : ''}</td>
+              <td class:danger={(row.age_days ?? 0) >= 3 && !row.is_current}>{row.age_days != null ? `${row.age_days}d` : '—'}</td>
+              <td>{format_number(row.sessions)}</td>
+              <td>{row.users.length ? row.users.join(', ') : '—'}</td>
+              <td class="nowrap">{ago(row.last_seen)}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    {/if}
+  </section>
+
+  <section class="panel">
     <h2>Sync health <span class="hint">sync_failed family · client_behind storm detector · warn-level · hot window</span></h2>
     {#if sync_health.total === 0}
       <p class="muted">No sync failures in the hot window. 🎉 Every client is in step with the server schema.</p>
@@ -465,6 +509,38 @@
           </details>
         {/if}
       </div>
+    {/if}
+  </section>
+
+  <section class="panel">
+    <h2>Storage · WAL <span class="hint">server DB files · red = WAL &gt; {WAL_RATIO_RED}× DB (checkpoint losing to a pinned reader)</span></h2>
+    {#if storage.dbs.length > 0 || storage.dict_dbs}
+      <table class="src-table">
+        <thead><tr><th>DB</th><th>Size</th><th>WAL</th><th>Ratio</th></tr></thead>
+        <tbody>
+          {#each storage.dbs as row (row.name)}
+            <tr>
+              <td class="mono">{row.name}</td>
+              <td>{format_bytes(row.db_bytes)}</td>
+              <td class:danger={(row.wal_ratio ?? 0) > WAL_RATIO_RED}>{format_bytes(row.wal_bytes)}</td>
+              <td class:danger={(row.wal_ratio ?? 0) > WAL_RATIO_RED}>{row.wal_ratio != null ? `${row.wal_ratio.toFixed(row.wal_ratio >= 10 ? 0 : 1)}×` : '—'}</td>
+            </tr>
+          {/each}
+          {#if storage.dict_dbs}
+            <tr>
+              <td class="mono">dictionaries/*.db · {format_number(storage.dict_dbs.count)} file{storage.dict_dbs.count === 1 ? '' : 's'}</td>
+              <td>{format_bytes(storage.dict_dbs.db_bytes)}</td>
+              <td>{format_bytes(storage.dict_dbs.wal_bytes)}</td>
+              <td>—</td>
+            </tr>
+          {/if}
+        </tbody>
+      </table>
+      {#if wal_red}
+        <p class="muted">⚠️ A WAL over {WAL_RATIO_RED}× its DB means <code>wal_checkpoint(TRUNCATE)</code> keeps losing to a pinned reader — a checkpoint regression, not normal growth.</p>
+      {/if}
+    {:else}
+      <p class="muted">No DB files on disk to measure (in-memory / dev).</p>
     {/if}
   </section>
 

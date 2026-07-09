@@ -10,7 +10,7 @@
   const { dictionary } = data
   const activeGlossingBcps = $derived(Array.isArray(dictionary.gloss_languages)
     ? dictionary.gloss_languages.map(bcp =>
-      page.data.t({ dynamicKey: `gl.${bcp}`, fallback: glossingLanguages[bcp].vernacularName }),
+      page.data.t({ dynamicKey: `gl.${bcp}`, fallback: glossingLanguages[bcp]?.vernacularName ?? bcp }),
     )
     : [])
 

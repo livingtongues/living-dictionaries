@@ -294,6 +294,32 @@ export const mock_analytics: LogAnalytics = {
       { user_id: 'marlene', dict_id: 'zapoteco-de-analco', app_version: '1783172350007', count: 1158, first_seen: new Date(Date.now() - 20 * 3600_000).toISOString(), last_seen: new Date(Date.now() - 15 * 60_000).toISOString() },
     ],
   },
+  // The 07-08 shape: most sessions on the fresh build, a couple riding yesterday's,
+  // and a few tabs stranded on a 5-day-old build (incl. named users to nudge).
+  build_adoption: {
+    total: 212,
+    current: 187,
+    behind: 19,
+    stale: 4,
+    unknown: 2,
+    stranded_pct: 23 / 210,
+    builds: [
+      { app_version: '1783096241136', age_days: 5.1, sessions: 3, users: ['greg', 'marlene'], last_seen: new Date(Date.now() - 4 * 60_000).toISOString(), is_current: false },
+      { app_version: '1783053248757', age_days: 5.0, sessions: 1, users: [], last_seen: new Date(Date.now() - 42 * 60_000).toISOString(), is_current: false },
+      { app_version: '1783431428497', age_days: 1.2, sessions: 19, users: ['diego'], last_seen: new Date(Date.now() - 11 * 60_000).toISOString(), is_current: false },
+      { app_version: '1783526000580', age_days: 0.2, sessions: 187, users: ['jacob', 'anna'], last_seen: new Date(Date.now() - 60_000).toISOString(), is_current: true },
+    ],
+  },
+  // logs.db carrying the raw-log bulk (healthy WAL); shared.db small; the ~1,300
+  // dict DBs aggregate. A wal_ratio > 2 turns the row red in the panel.
+  storage: {
+    dbs: [
+      { name: 'shared.db', db_bytes: 48 * 1024 * 1024, wal_bytes: 6 * 1024 * 1024, wal_ratio: 0.125 },
+      { name: 'logs.db', db_bytes: 467 * 1024 * 1024, wal_bytes: 112 * 1024 * 1024, wal_ratio: 0.24 },
+      { name: 'logs-archive.db', db_bytes: 16 * 1024, wal_bytes: 0, wal_ratio: 0 },
+    ],
+    dict_dbs: { count: 1312, db_bytes: 3_407_872_000, wal_bytes: 214_958_080 },
+  },
   // A realistic agent pass: one contributor bulk-editing `river` via api_key +
   // a lighter session-authed pass on `galo`, with a couple of failures.
   api_v1: {
@@ -411,6 +437,8 @@ export const empty_analytics: LogAnalytics = {
   },
   leader_health: { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [], failed_by_code: [], failed_current: 0, failed_stale: 0 },
   sync_health: { total: 0, by_kind: [], client_behind: { total: 0, current: 0, stale: 0 }, stuck_pairs: 0, oldest_unresolved_at: null, stuck: [] },
+  build_adoption: { total: 0, current: 0, behind: 0, stale: 0, unknown: 0, stranded_pct: null, builds: [] },
+  storage: { dbs: [], dict_dbs: null },
   api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
   top_dictionaries: { distinct_dictionaries: 0, month: '2026-07', prev_month: '2026-06', site_visitors_month: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] },
   missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
