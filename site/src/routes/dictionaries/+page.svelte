@@ -7,8 +7,14 @@
   import { download_objects_as_csv } from '$lib/export/csv'
   import { dictionary_headers, prepare_dictionary_for_csv } from '$lib/export/prepare-dictionaries-for-csv'
 
-  const { auth_user, dictionaries } = $derived(page.data)
-  const filtered_dictionaries = $derived(auth_user.admin_level >= 1 ? $dictionaries : $dictionaries?.filter(dictionary => dictionary.public))
+  const { auth_user, dictionaries, ssr_dictionaries } = $derived(page.data)
+  // SSR rows paint (and are crawled) first; the client store replaces them once its
+  // fetch lands — it carries the extra columns the admin view + CSV export need.
+  const filtered_dictionaries = $derived.by(() => {
+    if (!$dictionaries?.length)
+      return ssr_dictionaries
+    return auth_user.admin_level >= 1 ? $dictionaries : $dictionaries.filter(dictionary => dictionary.public)
+  })
 
 </script>
 

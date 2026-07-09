@@ -8,6 +8,7 @@
   import DomainsPanel from './DomainsPanel.svelte'
   import NudgeCard from './NudgeCard.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import JsonLd from '$lib/components/JsonLd.svelte'
   import CopyButton from '$lib/components/ui/CopyButton.svelte'
   import Skeleton from '$lib/components/ui/Skeleton.svelte'
   import { stream_resolve } from '$lib/state/stream-resolve.svelte'
@@ -163,6 +164,32 @@
     void goto(`/${dictionary.url}/entries${suffix}`)
   }
 
+  const dict_url = $derived(`https://livingdictionaries.app/${dictionary.url}`)
+  const seo_home_description = $derived(about_snippet
+    || `${dictionary.name} Living Dictionary${dictionary.location ? ` (${dictionary.location})` : ''}: a collaborative multimedia dictionary with ${dictionary.entry_count} entries — words with translations, audio from speakers, and photos.`)
+
+  // schema.org DefinedTermSet + Language — the citable "set" that each entry's
+  // DefinedTerm points back into, so AI answer engines can attribute the corpus.
+  const json_ld = $derived({
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTermSet',
+    '@id': dict_url,
+    'url': dict_url,
+    'name': `${dictionary.name} Living Dictionary`,
+    'description': seo_home_description,
+    'about': {
+      '@type': 'Language',
+      'name': dictionary.name,
+      ...dictionary.alternate_names?.length && { alternateName: dictionary.alternate_names },
+      ...dictionary.iso_639_3 && { identifier: dictionary.iso_639_3 },
+    },
+    'publisher': {
+      '@type': 'Organization',
+      'name': 'Living Tongues Institute for Endangered Languages',
+      'url': 'https://livingtongues.org',
+    },
+  })
+
   const show_nudges = $derived(is_editor_or_above && live_featured_ready && !$entries_loading)
   const nudge_star = $derived(show_nudges && featured_cards.length === 0)
   const nudge_location = $derived(is_manager && !has_coordinates)
@@ -313,6 +340,10 @@
   {/if}
 </div>
 
+{#if dictionary.public}
+  <JsonLd data={json_ld} />
+{/if}
+
 <SeoMetaTags
   norobots={!dictionary.public}
   title={t('dict_home.home')}
@@ -320,7 +351,7 @@
   gcsPath={dictionary.featured_image?.serving_url}
   lng={dictionary.coordinates?.points?.[0]?.coordinates.longitude}
   lat={dictionary.coordinates?.points?.[0]?.coordinates.latitude}
-  description="Explore this Living Dictionary: featured words with photos and audio, dictionary statistics, and information about the language community." />
+  description={seo_home_description} />
 
 <style>
   .home {

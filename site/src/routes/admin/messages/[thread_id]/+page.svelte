@@ -13,6 +13,7 @@
   import { page } from '$app/state'
   import AssigneeDropdown from '$lib/admin/AssigneeDropdown.svelte'
   import CopyButton from '$lib/components/ui/CopyButton.svelte'
+  import ImageLightbox from '$lib/components/image/image-lightbox.svelte'
   import { use_admin_back } from '$lib/utils/admin-back.svelte'
   import { format_bytes } from '$lib/utils/format-bytes'
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
@@ -25,6 +26,11 @@
   const db = $derived(data.db)
   const thread_id = $derived(page.params.thread_id)
   const current_user_id = $derived(data.auth_user.user?.id)
+
+  function message_attachment_url(id: string): string {
+    return `/api/messages/attachments/${id}`
+  }
+  let lightbox_url = $state<string | null>(null)
 
   const back = use_admin_back({
     fallback: { label: 'Back to inbox', url: '/admin/messages' },
@@ -279,11 +285,27 @@
         {#if attachments_by_message[message.id]?.length}
           <ul class="att-list">
             {#each attachments_by_message[message.id] as att (att.id)}
-              <li class="att-item">
-                <IconMdiPaperclip />
-                {att.filename}
-                <span class="att-size">({format_bytes(att.size_bytes)})</span>
-              </li>
+              {#if att.mimetype?.startsWith('image/')}
+                <li class="att-figure">
+                  <button
+                    type="button"
+                    class="att-thumb-button"
+                    title="View {att.filename}"
+                    onclick={() => { lightbox_url = message_attachment_url(att.id) }}>
+                    <img src={message_attachment_url(att.id)} alt={att.filename} loading="lazy" />
+                  </button>
+                  <span class="att-caption">
+                    {att.filename}
+                    <span class="att-size">({format_bytes(att.size_bytes)})</span>
+                  </span>
+                </li>
+              {:else}
+                <li class="att-item">
+                  <IconMdiPaperclip />
+                  {att.filename}
+                  <span class="att-size">({format_bytes(att.size_bytes)})</span>
+                </li>
+              {/if}
             {/each}
           </ul>
         {/if}
@@ -294,6 +316,10 @@
   {#if !thread.resolved_at}
     <ReplyComposer {thread_id} {db} sync={data.sync} bind:body_html={draft_html} />
   {/if}
+{/if}
+
+{#if lightbox_url}
+  <ImageLightbox src={lightbox_url} on_close={() => { lightbox_url = null }} />
 {/if}
 
 <style>
@@ -492,5 +518,29 @@
   }
   .att-size {
     color: var(--color-secondary);
+  }
+  .att-figure {
+    list-style: none;
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .att-thumb-button {
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+    line-height: 0;
+  }
+  .att-thumb-button img {
+    max-height: 140px;
+    max-width: 240px;
+    object-fit: cover;
+    border-radius: 0.375rem;
+    display: block;
+  }
+  .att-caption {
+    font-size: 0.75rem;
+    color: var(--color);
   }
 </style>

@@ -68,9 +68,16 @@
     gcsPath: gcsPath?.replace('\n', ''), // this slipped into the server response, can remove after database cleaned
   })
   const encodedImageProps = $derived(encode(JSON.stringify(imageProps)))
-  const imageUrl = $derived(gcsPath || generate_og_image ? `${IMAGE_API}?props=${encodedImageProps}&v=${OG_IMAGE_VERSION}` : DEFAULT_IMAGE)
+  // og:image must be an absolute URL (https://ogp.me) — many scrapers drop relative ones.
+  const imageUrl = $derived(gcsPath || generate_og_image ? `${page.url.origin}${IMAGE_API}?props=${encodedImageProps}&v=${OG_IMAGE_VERSION}` : DEFAULT_IMAGE)
   const imageWidth = $derived(dictionaryName ? width.toString() : '987')
   const imageHeight = $derived(dictionaryName ? width.toString() : '299')
+
+  // Canonical: the explicit `url` prop when a page passes one (e.g. entries), else the
+  // current path with the query string stripped — collapses filter/pagination states
+  // into one indexable URL. Omitted on noindex pages. The [dictionaryId] layout already
+  // redirects legacy ids to the canonical slug, so pathname is canonical by then.
+  const canonicalUrl = $derived(url !== page.url.toString() ? url : `${page.url.origin}${page.url.pathname}`)
 </script>
 
 <svelte:head>
@@ -81,6 +88,8 @@
 
   {#if norobots}
     <meta name="robots" content="noindex" />
+  {:else}
+    <link rel="canonical" href={canonicalUrl} />
   {/if}
 
   <!-- https://ogp.me -->
@@ -88,7 +97,7 @@
   <meta property="og:description" content={textDescription} />
   <meta property="og:site_name" content="Living Dictionaries" />
   <meta property="og:type" content={type} />
-  <meta property="og:url" content={url} />
+  <meta property="og:url" content={canonicalUrl} />
   <meta property="og:locale" content="en" />
 
   <meta property="og:image" content={imageUrl} />
@@ -104,7 +113,7 @@
   <meta name="twitter:description" content={textDescription} />
   <meta name="twitter:image" content={imageUrl} />
   <meta name="twitter:image:alt" content={`${imageTitle}: ${imageDescription}`} />
-  <meta name="twitter:url" content={url} />
+  <meta name="twitter:url" content={canonicalUrl} />
   <meta name="twitter:site" content="@{handle}" />
   <meta name="twitter:creator" content="@{handle}" />
 </svelte:head>

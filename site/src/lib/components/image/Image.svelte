@@ -74,7 +74,7 @@
       onclick={load}
       in:receive|local={{ key }}
       out:send|local={{ key }}
-      alt=""
+      alt={title}
       src={image_src(gcs, square
         ? `s${square}-p`
         : width

@@ -11,6 +11,7 @@
   import StatsBand from '$lib/components/home-v2/StatsBand.svelte'
   import Header from '$lib/components/shell/Header.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import JsonLd from '$lib/components/JsonLd.svelte'
 
   interface Props {
     data: PageData
@@ -22,6 +23,26 @@
   const baked = baked_json as HomepageBaked
   // The "Turn archives into living data" block is still being iterated — admin-3 only for now.
   const show_agent_diagram = $derived((page.data.auth_user?.admin_level ?? 0) >= 3)
+
+  // schema.org WebSite + Organization — publisher context for search + AI answer engines.
+  const json_ld = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      '@id': 'https://livingdictionaries.app',
+      'url': 'https://livingdictionaries.app',
+      'name': 'Living Dictionaries',
+      'description': 'Collaborative multimedia dictionaries built by communities speaking endangered and under-represented languages.',
+      'publisher': { '@id': 'https://livingtongues.org' },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      '@id': 'https://livingtongues.org',
+      'url': 'https://livingtongues.org',
+      'name': 'Living Tongues Institute for Endangered Languages',
+    },
+  ]
 </script>
 
 <Header />
@@ -45,6 +66,8 @@
 
   <CtaBand />
 </main>
+
+<JsonLd data={json_ld} />
 
 <SeoMetaTags
   title={page.data.t('misc.LD')}

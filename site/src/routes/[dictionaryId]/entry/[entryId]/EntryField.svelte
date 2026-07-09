@@ -30,7 +30,11 @@
         {#if field !== 'lexeme'}
           <div class="field-label">{display}</div>
         {/if}
-        <div
+        <!-- The headword is the page's h1 (SEO: primary keyword needs heading weight).
+          Pixel-identical to the old div: the Tailwind reset zeroes h1 margins and
+          inherits font-size/weight, then .headword applies the same styles as before. -->
+        <svelte:element
+          this={field === 'lexeme' ? 'h1' : 'div'}
           class:sompeng={display === 'Sompeng'}
           class:headword={field === 'lexeme'}
           class:underlined={field !== 'lexeme'}
@@ -54,7 +58,7 @@
               {/if}
             </div>
           {:else}<IconFa6SolidPencil class="icon-inline" style="opacity: 0.4; font-size: 0.875rem" />{/if}
-        </div>
+        </svelte:element>
       </div>
       {#if show}
         {#await import('$lib/components/entry/EditFieldModal.svelte') then { default: EditFieldModal }}

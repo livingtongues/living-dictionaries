@@ -22,6 +22,11 @@ DONE** (DNS flipped 2026-07-03, +1d grace watch clean 2026-07-04) — see
   convergence mechanism, the prunable Convergence sections, the ALTER-order column-position gotcha,
   the audit-driven index decisions (junction UNIQUE-leading-column rule, the two `deletes` indexes
   differing on purpose), and `entry_count`'s single `mirror_dictionary_cursor` chokepoint.
+- [server-side-content-cleanup-sync.md](./server-side-content-cleanup-sync.md) — how a one-off
+  server-side bulk write to `dictionaries/<id>.db` reaches browsers via BOTH channels (fresh-`updated_at`
+  rows + `deletes` tombstones → `/changes` for open editors; catalog `updated_at` bump → R2 snapshot
+  rebuild for cold loaders), the junction-repoint-then-tombstone merge pattern, and the blue/green
+  `docker exec`/`localhost:3000` ECONNREFUSED gotcha. From the 2026-07-09 tag/dialect dedup.
 - [adding-a-syncable-dict-table.md](./adding-a-syncable-dict-table.md) — the ~7-place checklist for
   adding a new per-dict table/column: the new-migration rule, the `process_delete_cascade`
   DROP+re-CREATE gotcha (SQLite has no ALTER TRIGGER), the search-feed wiring order, and how the

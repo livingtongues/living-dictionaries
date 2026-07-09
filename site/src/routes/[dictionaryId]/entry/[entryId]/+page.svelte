@@ -7,6 +7,7 @@
   import { share } from '$lib/utils/share'
   import { get_headword } from '$lib/helpers/orthographies'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import JsonLd from '$lib/components/JsonLd.svelte'
   import ChangeHistory from '$lib/components/history/ChangeHistory.svelte'
   import { track } from '$lib/debug/remote-log'
   import { ENTRY_OPENED } from '$lib/debug/log-events'
@@ -83,6 +84,26 @@
     const [last] = await dict_db.featured_entries.query({ order_by: 'sort_key DESC', limit: 1 }).snapshot()
     await dict_db.featured_entries.insert({ entry_id: entry.id, sort_key: key_between(last?.sort_key ?? null, null) })
   }
+
+  const entry_description = $derived(seo_description({ entry, gloss_languages: dictionary.gloss_languages, orthographies: dictionary.orthographies, t: page.data.t }))
+  const entry_url = $derived(`https://livingdictionaries.app/${dictionary.url}/entry/${entry.id}`)
+
+  // schema.org DefinedTerm — lets search + AI answer engines parse the entry as data.
+  const json_ld = $derived({
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTerm',
+    '@id': entry_url,
+    'url': entry_url,
+    'name': headword.value,
+    ...entry_description && { description: entry_description },
+    ...dictionary.iso_639_3 && { inLanguage: dictionary.iso_639_3 },
+    ...entry.senses?.[0]?.photos?.[0]?.serving_url && { image: entry.senses[0].photos[0].serving_url },
+    'inDefinedTermSet': {
+      '@type': 'DefinedTermSet',
+      '@id': `https://livingdictionaries.app/${dictionary.url}`,
+      'name': `${dictionary.name} Living Dictionary`,
+    },
+  })
 </script>
 
 <div
@@ -235,11 +256,15 @@
   }
 </style>
 
+{#if dictionary.public}
+  <JsonLd data={json_ld} />
+{/if}
+
 <SeoMetaTags
   norobots={!dictionary.public}
   generate_og_image
   imageTitle={headword.value}
-  imageDescription={seo_description({ entry, gloss_languages: dictionary.gloss_languages, orthographies: dictionary.orthographies, t: page.data.t })}
+  imageDescription={entry_description}
   dictionaryName={dictionary.name}
   lng={dictionary.coordinates?.points?.[0]?.coordinates.longitude}
   lat={dictionary.coordinates?.points?.[0]?.coordinates.latitude}
