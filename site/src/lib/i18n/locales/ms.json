@@ -313,6 +313,7 @@
     "theme_dark": "Gelap",
     "app_update_needed": "Versi baharu aplikasi diperlukan untuk terus menyegerakkan kamus ini. Sila muat semula halaman.",
     "local_data_expired": "Data luar talian kamus ini terlalu lama untuk disegerakkan dan mesti dimuat semula.",
+    "sync_paused_repeated_failure": "Perubahan anda tidak disimpan ke pelayan. Ralat yang sama terus berlaku, jadi penyegerakan dijeda. Kerja anda selamat pada peranti ini — muat semula halaman untuk mencuba lagi, dan hubungi kami jika mesej ini muncul semula.",
     "play": "Main",
     "pause": "Jeda",
     "clear": "Kosongkan"

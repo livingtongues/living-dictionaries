@@ -52,6 +52,24 @@ export function report_sync_failure({ engine, error, result, log_entries }: {
   }
 }
 
+/**
+ * Ship a "repeat-fatal circuit breaker tripped" marker
+ * (`sync_halted_repeated_failure`) — the admin engine stopped retrying after N
+ * identical consecutive non-transient failures (see `RepeatFailureTracker`).
+ * Exactly one row per latch, so no throttle needed.
+ */
+export function report_sync_halted({ message, consecutive }: { message: string, consecutive: number }): void {
+  try {
+    log_event({
+      level: 'error',
+      message: 'sync_halted_repeated_failure',
+      context: { engine: 'admin', error: message, consecutive },
+    })
+  } catch {
+    // Never let telemetry break the sync path.
+  }
+}
+
 /** Test-only. */
 export function _reset_throttle_for_tests(): void {
   last_shipped = null

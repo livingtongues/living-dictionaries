@@ -113,8 +113,14 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
         //   snapshot_expired = cursor > 60 days behind. The worker auto-resets
         //     viewers/clean editors in place; the toast matters for editors with
         //     un-pushed writes (do NOT auto-reload — that's not a stale bundle).
+        //   sync_halted = the repeat-fatal circuit breaker tripped (the same
+        //     non-transient failure kept recurring), so the engine stopped
+        //     retrying. The editor's local writes are safe but NOT reaching the
+        //     server — prompt a manual reload (fresh engine); do NOT auto-reload
+        //     (they may have work mid-edit).
         let schema_recovery_handled = false
         let snapshot_toasted = false
+        let halt_toasted = false
         conn.subscribe_broadcasts((broadcast) => {
           if (broadcast.type === 'schema_outdated') {
             if (schema_recovery_handled)
@@ -131,6 +137,11 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
               snapshot_toasted = true
               toast(t('misc.local_data_expired'), { action: { label: t('misc.reload'), callback: () => location.reload() }, dismiss_label: t('misc.close') })
             }
+            return
+          }
+          if (broadcast.type === 'sync_halted' && !halt_toasted) {
+            halt_toasted = true
+            toast(t('misc.sync_paused_repeated_failure'), { action: { label: t('misc.reload'), callback: () => location.reload() }, dismiss_label: t('misc.close') })
           }
         })
 

@@ -313,6 +313,7 @@
     "theme_dark": "Giza",
     "app_update_needed": "Toleo jipya la programu linahitajika ili kuendelea kusawazisha kamusi hii. Tafadhali pakia upya ukurasa.",
     "local_data_expired": "Data ya nje ya mtandao ya kamusi hii ni ya zamani mno kusawazishwa na lazima iburudishwe.",
+    "sync_paused_repeated_failure": "Mabadiliko yako hayahifadhiwi kwenye seva. Hitilafu ile ile inaendelea kutokea, kwa hivyo usawazishaji umesitishwa. Kazi yako iko salama kwenye kifaa hiki — pakia upya ukurasa ili kujaribu tena, na wasiliana nasi ikiwa ujumbe huu utarudi.",
     "play": "Cheza",
     "pause": "Simamisha",
     "clear": "Futa"

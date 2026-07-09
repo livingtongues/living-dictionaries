@@ -99,6 +99,60 @@ export function sync_failure_level(kind: SyncFailureKind): 'warn' | 'error' {
   return WARN_KINDS.has(kind) ? 'warn' : 'error'
 }
 
+/**
+ * Kinds expected to self-heal without code/data changes: connectivity blips, a
+ * mid-deploy server, a browser-closed OPFS handle (the instance reopens it), a
+ * token refresh (`auth`), and `snapshot_expired` (the worker auto-resets in
+ * place). These must NEVER trip the repeat-failure circuit breaker — offline
+ * for an hour is 120 identical failures and completely normal.
+ */
+const TRANSIENT_KINDS: ReadonlySet<SyncFailureKind> = new Set(['network', 'server_behind', 'storage_lost', 'auth', 'snapshot_expired'])
+
+export function is_transient_failure(kind: SyncFailureKind): boolean {
+  return TRANSIENT_KINDS.has(kind)
+}
+
+/** Consecutive identical non-transient failures before an engine halts retrying. */
+export const REPEAT_FAILURE_HALT_THRESHOLD = 3
+
+/**
+ * Repeat-fatal circuit breaker POLICY (cross-app hardening Part 2, mirrored
+ * from house). A repeated same-signature fatal failure — e.g. a UNIQUE
+ * collision the merge can't resolve — used to retry silently forever: the 30s
+ * interval / auto-flush re-pushed the identical doomed payload while the
+ * editor kept working, unaware (house's Wayne wedge ran ~7h). Engines feed
+ * every failure here; after `REPEAT_FAILURE_HALT_THRESHOLD` identical
+ * consecutive non-transient failures they latch a repeated-failure block
+ * (stop retrying, surface a "keeps failing — reload / contact us" prompt).
+ *
+ * - transient kinds never halt AND reset the streak (an intervening blip means
+ *   the fatal wasn't consecutive);
+ * - `client_behind` has its own latch that stops the engine first — counted
+ *   anyway (harmless belt + suspenders);
+ * - a successful sync resets via `reset()`.
+ */
+export class RepeatFailureTracker {
+  #key: string | null = null
+  #count = 0
+
+  /** Feed one failure; returns the halt decision + current streak length. */
+  record({ kind, message }: { kind: SyncFailureKind, message: string }): { halt: boolean, consecutive: number } {
+    if (is_transient_failure(kind)) {
+      this.reset()
+      return { halt: false, consecutive: 0 }
+    }
+    const key = `${kind}:${message}`
+    this.#count = key === this.#key ? this.#count + 1 : 1
+    this.#key = key
+    return { halt: this.#count >= REPEAT_FAILURE_HALT_THRESHOLD, consecutive: this.#count }
+  }
+
+  reset(): void {
+    this.#key = null
+    this.#count = 0
+  }
+}
+
 /** Pure throttle decision — ship unless an identical throttled-kind failure shipped within the window. */
 export function should_ship_failure({ kind, message, last, now }: {
   kind: SyncFailureKind
@@ -169,6 +223,53 @@ if (import.meta.vitest) {
       expect(sync_failure_level('storage_lost')).toBe('warn')
       expect(sync_failure_level('corruption')).toBe('error')
       expect(sync_failure_level('other')).toBe('error')
+    })
+  })
+
+  describe(RepeatFailureTracker, () => {
+    test('halts after 3 identical consecutive non-transient failures', () => {
+      const tracker = new RepeatFailureTracker()
+      expect(tracker.record({ kind: 'other', message: 'UNIQUE constraint failed: entry_tags.entry_id' })).toEqual({ halt: false, consecutive: 1 })
+      expect(tracker.record({ kind: 'other', message: 'UNIQUE constraint failed: entry_tags.entry_id' })).toEqual({ halt: false, consecutive: 2 })
+      expect(tracker.record({ kind: 'other', message: 'UNIQUE constraint failed: entry_tags.entry_id' })).toEqual({ halt: true, consecutive: 3 })
+    })
+
+    test('a different message restarts the streak', () => {
+      const tracker = new RepeatFailureTracker()
+      tracker.record({ kind: 'other', message: 'a' })
+      tracker.record({ kind: 'other', message: 'a' })
+      expect(tracker.record({ kind: 'other', message: 'b' })).toEqual({ halt: false, consecutive: 1 })
+    })
+
+    test('transient kinds never halt and reset the streak (offline forever must keep retrying)', () => {
+      const tracker = new RepeatFailureTracker()
+      tracker.record({ kind: 'other', message: 'a' })
+      tracker.record({ kind: 'other', message: 'a' })
+      expect(tracker.record({ kind: 'network', message: 'Failed to fetch' })).toEqual({ halt: false, consecutive: 0 })
+      expect(tracker.record({ kind: 'other', message: 'a' })).toEqual({ halt: false, consecutive: 1 })
+      for (let i = 0; i < 50; i++)
+        expect(tracker.record({ kind: 'network', message: 'Failed to fetch' }).halt).toBe(false)
+    })
+
+    test('reset() clears the streak (successful sync)', () => {
+      const tracker = new RepeatFailureTracker()
+      tracker.record({ kind: 'other', message: 'a' })
+      tracker.record({ kind: 'other', message: 'a' })
+      tracker.reset()
+      expect(tracker.record({ kind: 'other', message: 'a' })).toEqual({ halt: false, consecutive: 1 })
+    })
+  })
+
+  describe(is_transient_failure, () => {
+    test('self-healing kinds are transient; latched + fatal kinds are not', () => {
+      expect(is_transient_failure('network')).toBe(true)
+      expect(is_transient_failure('server_behind')).toBe(true)
+      expect(is_transient_failure('storage_lost')).toBe(true)
+      expect(is_transient_failure('auth')).toBe(true)
+      expect(is_transient_failure('snapshot_expired')).toBe(true)
+      expect(is_transient_failure('client_behind')).toBe(false)
+      expect(is_transient_failure('corruption')).toBe(false)
+      expect(is_transient_failure('other')).toBe(false)
     })
   })
 

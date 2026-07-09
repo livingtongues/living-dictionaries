@@ -7,7 +7,7 @@ import type { AuthHeaders } from './worker/instance'
 import { ResponseCodes } from '$lib/constants'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
-import { classify_sync_failure, is_storage_lost_error } from '$lib/db/sync/sync-failure-classify'
+import { classify_sync_failure, is_storage_lost_error, RepeatFailureTracker } from '$lib/db/sync/sync-failure-classify'
 import { LATEST_DICT_MIGRATION } from './dict-migrations-bundle'
 import { report_dict_stuck_dirty, report_dict_sync_failure } from './report-dict-sync-failure'
 
@@ -82,6 +82,15 @@ export interface SyncEngineOptions {
    * retry-storm — see `.issues/dict-sync-client-behind-storm-2026-07-05.md`).
    */
   on_version_blocked?: () => void
+  /**
+   * Fires ONCE when the repeat-fatal circuit breaker trips (the same
+   * non-transient failure recurred `REPEAT_FAILURE_HALT_THRESHOLD`× in a row —
+   * see `RepeatFailureTracker`). The engine latches a blocked flag so the 30s
+   * interval stops re-pushing the identical doomed payload; the instance
+   * broadcasts `sync_halted` so every tab shows "your changes aren't saving —
+   * reload / contact us". Cleared only by building a fresh engine.
+   */
+  on_repeated_failure?: (info: { message: string, consecutive: number }) => void
 }
 
 export class DictSyncEngine {
@@ -95,6 +104,7 @@ export class DictSyncEngine {
   #on_status?: (status: { is_syncing: boolean, last_error: string | null, last_sync_at: string | null }) => void
   #on_storage_lost?: () => void
   #on_version_blocked?: () => void
+  #on_repeated_failure?: (info: { message: string, consecutive: number }) => void
 
   #timer: ReturnType<typeof setInterval> | null = null
   #stuck_timer: ReturnType<typeof setInterval> | null = null
@@ -110,6 +120,13 @@ export class DictSyncEngine {
    * building a fresh engine (reset / storage-lost reopen construct a new one).
    */
   #version_blocked = false
+  /**
+   * Latched true when the repeat-fatal circuit breaker trips (see
+   * `on_repeated_failure`). Like `#version_blocked`, permanent for this
+   * engine's lifetime — reset / storage-lost reopen construct a fresh one.
+   */
+  #repeated_failure_blocked = false
+  #repeat_tracker = new RepeatFailureTracker()
 
   constructor(options: SyncEngineOptions) {
     this.#dict_id = options.dict_id
@@ -122,11 +139,17 @@ export class DictSyncEngine {
     this.#on_status = options.on_status
     this.#on_storage_lost = options.on_storage_lost
     this.#on_version_blocked = options.on_version_blocked
+    this.#on_repeated_failure = options.on_repeated_failure
   }
 
   /** True once a `schema_outdated` block has latched (see `#version_blocked`). */
   get is_version_blocked(): boolean {
     return this.#version_blocked
+  }
+
+  /** True once the repeat-fatal circuit breaker has latched (see `#repeated_failure_blocked`). */
+  get is_repeated_failure_blocked(): boolean {
+    return this.#repeated_failure_blocked
   }
 
   start() {
@@ -199,7 +222,8 @@ export class DictSyncEngine {
   async sync_if_needed(): Promise<void> {
     // A latched schema-outdated block is permanent until the tab reloads onto a
     // fresh bundle — retrying just re-hits the same 409 every 30s (the storm).
-    if (this.#version_blocked || this.#in_flight || this.#stopped)
+    // Same for a latched repeat-failure block (the breaker tripped).
+    if (this.#version_blocked || this.#repeated_failure_blocked || this.#in_flight || this.#stopped)
       return
     await this.sync_once().catch((err) => {
       console.warn(`[dict-sync] ${this.#dict_id} sync failed:`, err)
@@ -209,6 +233,13 @@ export class DictSyncEngine {
   async sync_once(): Promise<DictChangesResponse | null> {
     if (this.#in_flight)
       return null
+    if (this.#repeated_failure_blocked) {
+      // The breaker tripped — the same failure would just recur. A reload
+      // (fresh engine + possibly fresh bundle) is the way out; the broadcast
+      // prompt says so. Direct calls (post-write flush, sync_now RPC) must not
+      // bypass the halt or they'd keep re-pushing the doomed payload.
+      return null
+    }
     this.#in_flight = true
     this.#on_status?.({ is_syncing: true, last_error: this.#last_error, last_sync_at: this.#last_sync_at })
 
@@ -218,6 +249,7 @@ export class DictSyncEngine {
       await this.#apply_response(response, request)
       this.#last_error = null
       this.#last_sync_at = new Date().toISOString()
+      this.#repeat_tracker.reset()
       return response
     } catch (err) {
       this.#last_error = (err as Error).message
@@ -240,6 +272,16 @@ export class DictSyncEngine {
         // mid-deploy) and self-heals on the next tick, like the admin engine.
         this.#version_blocked = true
         this.#on_version_blocked?.()
+      } else {
+        // Repeat-fatal circuit breaker (cross-app hardening Part 2): the same
+        // non-transient failure N× in a row means retrying is pointless and
+        // noisy — halt and prompt the user instead of silently looping.
+        const message = (err as Error).message ?? String(err)
+        const { halt, consecutive } = this.#repeat_tracker.record({ kind: classify_sync_failure(err), message })
+        if (halt && !this.#repeated_failure_blocked) {
+          this.#repeated_failure_blocked = true
+          this.#on_repeated_failure?.({ message, consecutive })
+        }
       }
       throw err
     } finally {
@@ -348,6 +390,18 @@ export class DictSyncEngine {
       // re-inserts the natural key while the stale old row is still present →
       // `UNIQUE constraint failed` → the whole apply rolls back and this dict wedges
       // into a retry loop. Clearing the delete first frees the natural key.
+      // Ids we just pushed this round. If the server tells us to delete one of
+      // them, our push was authoritatively superseded — the natural-key dedup
+      // adopted a canonical id and tombstoned our loser (see
+      // DICT_NATURAL_KEY_COLUMNS in dictionary-sync-helpers). Honor that delete
+      // rather than skipping it as a "stale local edit": the local loser still
+      // owns the natural key, so skipping would make the canonical row's upsert
+      // below throw the same UNIQUE error and wedge this client into a
+      // retry-forever loop (house's Wayne wedge, 2026-07-08).
+      const pushed_ids: Record<string, Set<string>> = {}
+      for (const table of DICT_SYNCABLE_TABLES)
+        pushed_ids[table] = new Set((request.dirty_rows?.[table] ?? []).map(pushed => (pushed as { id: string }).id))
+
       for (const { table_name, id } of response.deletes) {
         // Local row may be dirty (we pushed it this round). If so, skip the
         // delete — server already accepted our newer write.
@@ -355,7 +409,9 @@ export class DictSyncEngine {
           `SELECT dirty FROM "${table_name}" WHERE id = ?`,
           [id],
         )
-        const is_dirty = local.length > 0 && local[0].dirty === 1
+        let is_dirty = local.length > 0 && local[0].dirty === 1
+        if (is_dirty && pushed_ids[table_name]?.has(id))
+          is_dirty = false
         if (!is_dirty) {
           await this.#connection.execute(`DELETE FROM "${table_name}" WHERE id = ?`, [id])
           affected.add(table_name)

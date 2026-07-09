@@ -313,6 +313,7 @@
     "theme_dark": "Oscuro",
     "app_update_needed": "Se necesita una nueva versión de la aplicación para seguir sincronizando este diccionario. Por favor, recargue la página.",
     "local_data_expired": "Los datos sin conexión de este diccionario son demasiado antiguos para sincronizarse y deben actualizarse.",
+    "sync_paused_repeated_failure": "Sus cambios no se están guardando en el servidor. El mismo error sigue ocurriendo, por lo que la sincronización está en pausa. Su trabajo está seguro en este dispositivo — recargue la página para volver a intentarlo y contáctenos si este mensaje vuelve a aparecer.",
     "play": "Reproducir",
     "pause": "Pausar",
     "clear": "Borrar"

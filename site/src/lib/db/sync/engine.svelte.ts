@@ -8,7 +8,8 @@ import { online } from 'svelte/reactivity/window'
 import { ClientBehindError, ServerBehindError } from './errors'
 import { SyncHistory } from './history.svelte.js'
 import { record_last_visit_ping, should_ping_last_visit } from './last-visit-ping'
-import { report_sync_failure } from './report-sync-failure'
+import { report_sync_failure, report_sync_halted } from './report-sync-failure'
+import { classify_sync_failure, RepeatFailureTracker } from './sync-failure-classify'
 import { is_readonly_table, SYNCABLE_TABLE_NAMES } from './types'
 
 export type SyncPostFn = (body: SyncRequest) => Promise<{ data: SyncResponse | null, error: { status: number, message: string } | null }>
@@ -38,6 +39,15 @@ export class Sync {
   total_dirty = $state(0)
   watermark = $state<string | null>(null)
   blocked_by_client_behind = $state(false)
+  /**
+   * Repeat-fatal circuit breaker (cross-app hardening Part 2, mirrored from
+   * house): latched after N identical consecutive non-transient failures.
+   * Auto-flush / resume stop and direct syncs early-return — re-pushing an
+   * identical doomed payload every 30s only buries the signal. Cleared only by
+   * a reload (fresh engine).
+   */
+  blocked_by_repeated_failure = $state(false)
+  #repeat_tracker = new RepeatFailureTracker()
   #last_sync_finished_at = 0
 
   #auto_flush_timer: ReturnType<typeof setTimeout> | null = null
@@ -47,19 +57,23 @@ export class Sync {
   #post_fn: SyncPostFn
   #on_tables_changed?: (tables: Set<NotifiableTable>) => void
   #on_client_behind?: () => void
+  #on_repeated_failure?: () => void
 
-  constructor({ connection, user_id, post_fn, on_tables_changed, on_client_behind }: {
+  constructor({ connection, user_id, post_fn, on_tables_changed, on_client_behind, on_repeated_failure }: {
     connection: SqliteConnection
     user_id: string
     post_fn?: SyncPostFn
     on_tables_changed?: (tables: Set<NotifiableTable>) => void
     on_client_behind?: () => void
+    /** Fires ONCE when the repeat-fatal circuit breaker trips (see `blocked_by_repeated_failure`). */
+    on_repeated_failure?: () => void
   }) {
     this.#connection = connection
     this.#user_id = user_id
     this.#post_fn = post_fn ?? api_admin_sync
     this.#on_tables_changed = on_tables_changed
     this.#on_client_behind = on_client_behind
+    this.#on_repeated_failure = on_repeated_failure
     this.#load_watermark()
   }
 
@@ -102,7 +116,7 @@ export class Sync {
   async sync_if_needed() {
     if (this.is_syncing)
       return
-    if (this.blocked_by_client_behind)
+    if (this.blocked_by_client_behind || this.blocked_by_repeated_failure)
       return
     if (online.current === false)
       return
@@ -114,7 +128,7 @@ export class Sync {
   async sync_on_resume() {
     if (this.is_syncing)
       return
-    if (this.blocked_by_client_behind)
+    if (this.blocked_by_client_behind || this.blocked_by_repeated_failure)
       return
     if (online.current === false)
       return
@@ -126,6 +140,12 @@ export class Sync {
   async #run() {
     if (this.is_syncing)
       throw new Error('Sync already in progress')
+    if (this.blocked_by_repeated_failure) {
+      // The circuit breaker tripped — the same failure would just recur.
+      // Reload (fresh engine) is the way out; the prompt says so.
+      this.#log({ level: 'error', phase: 'sync', message: 'Sync halted — the same failure keeps recurring. Reload the page to retry.' })
+      return
+    }
     if (online.current === false) {
       this.log_entries = []
       this.#log({ level: 'warn', phase: 'sync', message: 'Sync skipped — offline' })
@@ -158,6 +178,7 @@ export class Sync {
       await this.#sync_once({ result, update_last_visit: needs_visit_ping })
       if (needs_visit_ping)
         record_last_visit_ping({ user_id: this.#user_id })
+      this.#repeat_tracker.reset()
       this.total_dirty = 0
       // eslint-disable-next-line svelte/prefer-svelte-reactivity
       result.last_sync_time = new Date().toISOString()
@@ -174,6 +195,18 @@ export class Sync {
         this.#log({ level: 'warn', phase: 'sync', message: `Sync deferred — server is behind this client bundle. Will retry. ${(error as Error).message}` })
       } else {
         this.#log({ level: 'error', phase: 'sync', message: `Sync failed: ${result.error}` })
+      }
+      // Repeat-fatal circuit breaker: the same non-transient failure N× in a
+      // row means retrying is pointless and noisy — halt + prompt instead of
+      // silently looping (classify already demotes edge-5xx bodies to network).
+      const message = result.error ?? 'unknown sync failure'
+      const { halt, consecutive } = this.#repeat_tracker.record({ kind: classify_sync_failure(error), message })
+      if (halt && !this.blocked_by_repeated_failure) {
+        this.blocked_by_repeated_failure = true
+        this.#cancel_auto_flush()
+        this.#log({ level: 'error', phase: 'sync', message: `Sync halted — the same failure recurred ${consecutive}× in a row. Reload the page to retry.` })
+        report_sync_halted({ message, consecutive })
+        this.#on_repeated_failure?.()
       }
       sync_error = error
     } finally {
@@ -250,6 +283,20 @@ export class Sync {
       // `/changes` window carrying both the delete and the re-insert would collide
       // on the natural key (UNIQUE constraint failed → whole sync rolls back) if
       // upserts ran first. Clearing the delete first frees the natural key.
+      // Ids we just pushed this round. If the server then tells us to delete
+      // one of them, our push was authoritatively superseded (natural-key dedup
+      // adopted a canonical id, or the tombstone-resurrection guard refused the
+      // row) — honor the delete rather than skipping it as a "stale local
+      // edit". The local loser still owns its natural key, so skipping would
+      // make the echoed canonical row's upsert throw the SAME UNIQUE error and
+      // wedge this client into a retry-forever loop (house's Wayne wedge,
+      // 2026-07-08 — parity with house + the dict engine).
+      const pushed_ids: Record<string, Set<string>> = {}
+      for (const table_name of SYNCABLE_TABLE_NAMES) {
+        // eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral lookup set, never rendered
+        pushed_ids[table_name] = new Set(((dirty_rows[table_name] ?? []) as { id: string }[]).map(pushed => pushed.id))
+      }
+
       let deletes_pulled = 0
       let deletes_skipped = 0
       for (const { table_name, id } of response.deletes) {
@@ -260,6 +307,8 @@ export class Sync {
             [id],
           )
           is_dirty = local.length > 0 && local[0].dirty === 1
+          if (is_dirty && pushed_ids[table_name]?.has(id))
+            is_dirty = false
         }
         if (!is_dirty) {
           await this.#connection.execute(`DELETE FROM "${table_name}" WHERE id = ?`, [id])
@@ -307,14 +356,23 @@ export class Sync {
       }
 
       if (response.new_synced_up_to) {
+        // ON CONFLICT DO UPDATE, never INSERT OR REPLACE (delete+reinsert breaks
+        // upsert semantics under triggers — shared sync invariant; parity with
+        // house + the dict engine).
         await this.#connection.execute(
-          'INSERT OR REPLACE INTO db_metadata (key, value) VALUES (?, ?)',
+          `INSERT INTO db_metadata (key, value) VALUES (?, ?)
+           ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
           ['synced_up_to', response.new_synced_up_to],
         )
         this.watermark = response.new_synced_up_to
       }
 
-      await this.#connection.execute('DELETE FROM deletes')
+      // Drain ONLY the tombstones we actually pushed — a delete queued DURING
+      // this sync's network round trip must stay queued for the next push (a
+      // blanket `DELETE FROM deletes` silently dropped it; same invariant as
+      // the by-id dirty clear above).
+      for (const { table_name, id } of request.deletes ?? [])
+        await this.#connection.execute('DELETE FROM deletes WHERE table_name = ? AND id = ?', [table_name, id])
       await this.#connection.execute('COMMIT')
     } catch (error) {
       await this.#connection.execute('ROLLBACK')
@@ -340,7 +398,11 @@ export class Sync {
         throw new ClientBehindError(error.message || 'Client bundle is out of date')
       if (error.status === ResponseCodes.SERVICE_UNAVAILABLE)
         throw new ServerBehindError(error.message || 'Server bundle is behind the client')
-      throw new Error(error.message || `Sync failed: ${error.status}`)
+      // Carry the HTTP status so `classify_sync_failure` can demote edge/
+      // gateway 5xx (deploy-swap interstitials) to transient `network` — the
+      // dict engine's #post does the same; without it a 502 whose body isn't
+      // the CF interstitial text classified as fatal `other`.
+      throw Object.assign(new Error(error.message || `Sync failed: ${error.status}`), { status: error.status })
     }
     return data!
   }

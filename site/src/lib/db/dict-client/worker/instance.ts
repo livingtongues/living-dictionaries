@@ -39,6 +39,13 @@ export type DbEvent
     | { type: 'sync_status', is_syncing: boolean, last_error: string | null, last_sync_at: string | null }
     | { type: 'snapshot_expired' }
     | { type: 'schema_outdated' }
+  /**
+   * The repeat-fatal circuit breaker tripped: the same non-transient sync
+   * failure recurred N× consecutively, so the engine halted retrying (see
+   * `DictSyncEngine.on_repeated_failure`). Tabs surface a persistent
+   * "your changes aren't saving — reload / contact us" prompt.
+   */
+    | { type: 'sync_halted' }
 
 /** Leader metadata announced to clients on `ready`. */
 export interface LeaderMeta {

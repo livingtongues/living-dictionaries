@@ -313,6 +313,7 @@
     "theme_dark": "Gelap",
     "app_update_needed": "Versi baru aplikasi diperlukan untuk terus menyinkronkan kamus ini. Silakan muat ulang halaman.",
     "local_data_expired": "Data luring kamus ini terlalu lama untuk disinkronkan dan harus disegarkan.",
+    "sync_paused_repeated_failure": "Perubahan Anda tidak tersimpan ke server. Kesalahan yang sama terus terjadi, jadi sinkronisasi dijeda. Pekerjaan Anda aman di perangkat ini — muat ulang halaman untuk mencoba lagi, dan hubungi kami jika pesan ini muncul kembali.",
     "play": "Putar",
     "pause": "Jeda",
     "clear": "Hapus"

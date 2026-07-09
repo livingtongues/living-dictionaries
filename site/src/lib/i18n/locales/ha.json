@@ -313,6 +313,7 @@
     "theme_dark": "Duhu",
     "app_update_needed": "Ana buƙatar sabon salon manhajar don ci gaba da daidaita wannan ƙamus. Da fatan za a sake lodawa shafin.",
     "local_data_expired": "Bayanan wannan ƙamus na waje sun tsufa sosai don a daidaita su, dole ne a sabunta su.",
+    "sync_paused_repeated_failure": "Ba a adana canje-canjenka zuwa sabar ba. Kuskure iri ɗaya na ci gaba da faruwa, don haka an dakatar da aiki tare. Aikinka yana nan lafiya a wannan na'urar — sake loda shafin don sake gwadawa, kuma ka tuntuɓe mu idan wannan saƙon ya sake bayyana.",
     "play": "Kunna",
     "pause": "Dakata",
     "clear": "Share"

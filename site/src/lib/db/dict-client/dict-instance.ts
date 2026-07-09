@@ -7,7 +7,7 @@ import { dispatch_dict_write } from './dict-writes'
 import { evict_if_over_budget, touch_dict } from './opfs-lru'
 import { fetch_dict_snapshot } from './fetch-snapshot'
 import { open_memory_connection } from './memory-connection'
-import { report_dict_storage_reopened, set_dict_log_session } from './report-dict-sync-failure'
+import { report_dict_storage_reopened, report_dict_sync_halted, set_dict_log_session } from './report-dict-sync-failure'
 import { delete_opfs_db_file, open_opfs_connection, opfs_file_exists, write_opfs_db_file } from './worker/opfs-connection'
 import { DICT_DB_OPFS_PREFIX } from '$lib/constants'
 
@@ -181,6 +181,14 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
         // issue). Same broadcast `translate_sync_error` emits for the explicit
         // sync_now/reset paths; the +layout subscriber dedupes.
         on_version_blocked: () => { context.emit_event({ type: 'schema_outdated' }) },
+        // Repeat-fatal circuit breaker tripped (same non-transient failure N×
+        // in a row): the engine halted retrying. Ship ONE telemetry row from
+        // the worker + broadcast so every tab prompts "changes aren't saving —
+        // reload / contact us".
+        on_repeated_failure: (info) => {
+          report_dict_sync_halted({ dict_id, ...info })
+          context.emit_event({ type: 'sync_halted' })
+        },
       })
       engine.start()
 

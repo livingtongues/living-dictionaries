@@ -34,10 +34,21 @@ const VALID_COLUMNS: Record<DictSyncableTable, Set<string>> = Object.fromEntries
  * (`.issues/sync-junction-natural-key-collision.md`). Every
  * listed table is a LEAF row (no other row FK-references its id), so deduping the
  * pushed row onto the canonical existing id needs no FK-remap / id echo — unlike
- * house's lookup dedupe. NULLable columns are matched with COALESCE(…,'') to
+ * house's lookup dedupe (leaf-ness is enforced by a schema-driven guard test in
+ * `dictionary-sync.test.ts`). NULLable columns are matched with COALESCE(…,'') to
  * mirror the functional UNIQUE index on `entry_relationships`.
+ *
+ * CLIENT CONVERGENCE (2026-07-09, house's Wayne wedge — cross-app hardening
+ * Part 3): adopting the canonical id server-side is only HALF the fix. The
+ * pushing client still holds its loser row, which owns the natural key locally
+ * — applying the pulled canonical row would throw the same UNIQUE error
+ * client-side, roll back the whole apply, and wedge that client into a
+ * retry-forever loop. So the dedup ALSO tombstones the loser id: the client
+ * applies deletes BEFORE upserts and honors a delete for an id it just pushed
+ * (see `DictSyncEngine.#apply_transaction`), so it drops its loser and adopts
+ * the canonical row cleanly.
  */
-const DICT_NATURAL_KEY_COLUMNS: Partial<Record<DictSyncableTable, readonly string[]>> = {
+export const DICT_NATURAL_KEY_COLUMNS: Partial<Record<DictSyncableTable, readonly string[]>> = {
   senses_in_sentences: ['sense_id', 'sentence_id'],
   audio_speakers: ['audio_id', 'speaker_id'],
   video_speakers: ['video_id', 'speaker_id'],
@@ -259,6 +270,9 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
   // Server receive time — one stamp shared by every event in this push batch.
   const history_at = new Date().toISOString()
   const history_events: HistoryEvent[] = []
+  // Natural-key dedup losers (see merge_dict_row) — echoed as deletes + their
+  // canonical rows so the pushing client converges instead of wedging.
+  const deduped_losers: { table_name: DictSyncableTable, id: string, canonical_id: string }[] = []
 
   db.pragma('defer_foreign_keys = ON')
   db.exec('BEGIN IMMEDIATE')
@@ -298,7 +312,7 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
         for (const row of rows) {
           if (skip_keys?.has(`${table_name}::${(row as { id: string }).id}`))
             continue // FK-orphan: skip so it can't poison the whole batch.
-          const event = merge_dict_row({ db, table_name, row, user_id, at: history_at })
+          const event = merge_dict_row({ db, table_name, row, user_id, at: history_at, deduped_losers })
           if (event)
             history_events.push(event)
         }
@@ -353,6 +367,30 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
       }
     }
 
+    // Dedup-loser convergence echoes: the delete for each loser id (dedupe
+    // against the cursor-scan above, which already picks it up when
+    // synced_up_to is set) + the canonical row itself, EXPLICITLY — the pull
+    // filter is `updated_at > cursor`, and when the canonical row LWW-beat the
+    // push its updated_at can predate the client's cursor, so without this
+    // echo the client would drop its loser and never receive the replacement.
+    if (deduped_losers.length) {
+      const echoed = new Set(response.deletes.map(del => `${del.table_name}::${del.id}`))
+      for (const loser of deduped_losers) {
+        if (!echoed.has(`${loser.table_name}::${loser.id}`)) {
+          echoed.add(`${loser.table_name}::${loser.id}`)
+          response.deletes.push({ table_name: loser.table_name, id: loser.id })
+        }
+        const canonical = db.prepare(`SELECT * FROM "${loser.table_name}" WHERE id = ?`).get(loser.canonical_id) as Record<string, unknown> | undefined
+        if (!canonical)
+          continue
+        const rows = response.changes[loser.table_name] ?? (response.changes[loser.table_name] = [])
+        if (!rows.some(row => row.id === loser.canonical_id)) {
+          parse_dict_row(loser.table_name, canonical)
+          rows.push(canonical)
+        }
+      }
+    }
+
     // New cursor = post-write last_modified_at. The trigger already fired on
     // any pushed row, so this catches up to the latest.
     const lmod = db.prepare(`SELECT value FROM db_metadata WHERE key = 'last_modified_at'`).get() as { value: string } | undefined
@@ -382,7 +420,7 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
  * way a pushed editor row lands. Exported so the `/api/v1` write API applies
  * rows through the EXACT path a browser push uses (history-aware via `at`).
  */
-export function merge_dict_row({ db, table_name, row, user_id, at, api_key_id }: {
+export function merge_dict_row({ db, table_name, row, user_id, at, api_key_id, deduped_losers }: {
   db: Database.Database
   table_name: DictSyncableTable
   row: Record<string, unknown>
@@ -391,6 +429,17 @@ export function merge_dict_row({ db, table_name, row, user_id, at, api_key_id }:
   at?: string
   /** Acting agent's API key id (v1 API key path); null/omitted for human edits. */
   api_key_id?: string | null
+  /**
+   * Collector for loser ids tombstoned by the natural-key dedup — the caller
+   * (`apply_dict_changes`) echoes them in `response.deletes` so the pushing
+   * client drops its local loser BEFORE upserting the canonical row (otherwise
+   * the client-side apply throws the same UNIQUE error and wedges — see
+   * DICT_NATURAL_KEY_COLUMNS), and explicitly echoes the canonical row so the
+   * client adopts it even when it predates the client's cursor. Omitted on the
+   * v1 API path (no syncing client holds the loser id; the tombstone alone is
+   * still written and is harmless).
+   */
+  deduped_losers?: { table_name: DictSyncableTable, id: string, canonical_id: string }[]
 }): HistoryEvent | null {
   const row_id = row.id as string
   if (!row_id)
@@ -406,7 +455,8 @@ export function merge_dict_row({ db, table_name, row, user_id, at, api_key_id }:
   // junction/lookup row with different random UUIDs — dedupe onto that canonical
   // id (LWW-merge the pushed content onto it) instead of letting the INSERT throw
   // `UNIQUE constraint failed` and roll back the whole push. See
-  // DICT_NATURAL_KEY_COLUMNS. Leaf rows → no FK-remap / echo needed.
+  // DICT_NATURAL_KEY_COLUMNS. Leaf rows → no FK-remap / echo needed, but the
+  // LOSER id must be tombstoned so the pushing client converges (see above).
   let canonical_id = row_id
   if (!existing) {
     const owner_id = find_natural_key_owner_id({ db, table_name, row })
@@ -415,6 +465,12 @@ export function merge_dict_row({ db, table_name, row, user_id, at, api_key_id }:
       existing = db.prepare(
         `SELECT * FROM "${table_name}" WHERE id = ?`,
       ).get(owner_id) as Record<string, unknown> | undefined
+      // Tombstone the loser id (the row never existed server-side, so the
+      // cascade trigger no-ops) — every client that minted/held it drops it.
+      db.prepare(
+        `INSERT OR REPLACE INTO deletes (table_name, id, updated_at) VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+      ).run(table_name, row_id)
+      deduped_losers?.push({ table_name, id: row_id, canonical_id: owner_id })
     }
   }
 

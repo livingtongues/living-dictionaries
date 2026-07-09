@@ -63,3 +63,63 @@ describe(process_sync, () => {
     expect(response.changes.dictionaries?.find(row => row.id === 'd1')).toBeDefined()
   })
 })
+
+describe('dictionary_roles natural-key dedup (adopt-canonical + loser echo)', () => {
+  const T0 = '2026-07-09T00:00:00.000Z'
+  const T1 = '2026-07-09T00:00:01.000Z'
+
+  function seed_role(role_id: string, at: string) {
+    db.prepare(`INSERT INTO dictionaries (id, name, updated_at) VALUES ('d1', 'Demo', ?)`).run(at)
+    db.prepare(`INSERT INTO users (id, email, updated_at) VALUES ('u1', 'u1@example.com', ?)`).run(at)
+    db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES (?, 'd1', 'u1', 'editor', ?, ?)`).run(role_id, at, at)
+  }
+
+  const role_push = (id: string, at: string): SyncRequest => ({
+    synced_up_to: T0,
+    dirty_rows: { dictionary_roles: [{ id, dictionary_id: 'd1', user_id: 'u1', role: 'editor', invited_by_user_id: null, dirty: 1, created_at: at, updated_at: at }] },
+    deletes: [],
+    latest_migration: latest_shared_migration_name,
+  })
+
+  test('a second same-grant push with a different id does not 500; adopts the canonical id + echoes the loser delete', () => {
+    seed_role('role_A', T0)
+
+    // Pre-fix this threw `UNIQUE constraint failed: dictionary_roles.dictionary_id`
+    // and rolled back the WHOLE push (the latent Part 1 bug).
+    const response = process_sync({ db, request: role_push('role_B', T1), user_id: 'admin-1' })
+
+    // One grant, canonical id, on the server.
+    const rows = db.prepare(`SELECT id FROM dictionary_roles`).all() as { id: string }[]
+    expect(rows).toEqual([{ id: 'role_A' }])
+    // Loser delete echoed + tombstoned; canonical row echoed so the pushing
+    // client converges (drop loser → adopt canonical) instead of wedging.
+    expect(response.deletes).toContainEqual({ table_name: 'dictionary_roles', id: 'role_B' })
+    expect(db.prepare(`SELECT 1 FROM deletes WHERE table_name = 'dictionary_roles' AND id = 'role_B'`).get()).toBeTruthy()
+    expect((response.changes.dictionary_roles ?? []).map(row => row.id)).toContain('role_A')
+  })
+
+  test('an LWW-losing duplicate grant still converges (loser delete + canonical echo, canonical content kept)', () => {
+    seed_role('role_A', T1) // canonical is NEWER than the push
+
+    const response = process_sync({ db, request: role_push('role_B', T0), user_id: 'admin-1' })
+
+    expect(response.deletes).toContainEqual({ table_name: 'dictionary_roles', id: 'role_B' })
+    expect((response.changes.dictionary_roles ?? []).map(row => row.id)).toContain('role_A')
+    const row = db.prepare(`SELECT updated_at FROM dictionary_roles WHERE id = 'role_A'`).get() as { updated_at: string }
+    expect(row.updated_at).toBe(T1)
+  })
+
+  test('tombstone-resurrection guard: a stale client copy of a deleted row is refused + delete echoed', () => {
+    seed_role('role_A', T0)
+    // The role is revoked server-side (tombstone + cascade delete).
+    db.prepare(`INSERT INTO deletes (table_name, id, updated_at) VALUES ('dictionary_roles', 'role_A', ?)`).run(T1)
+    db.prepare(`DELETE FROM dictionary_roles WHERE id = 'role_A'`).run()
+
+    // A stale client that never pulled the revocation re-pushes its copy.
+    const response = process_sync({ db, request: role_push('role_A', T0), user_id: 'admin-1' })
+
+    // NOT resurrected; the delete is echoed so the stale client drops it too.
+    expect(db.prepare(`SELECT 1 FROM dictionary_roles WHERE id = 'role_A'`).get()).toBeFalsy()
+    expect(response.deletes).toContainEqual({ table_name: 'dictionary_roles', id: 'role_A' })
+  })
+})

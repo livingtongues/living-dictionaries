@@ -358,7 +358,8 @@
     "theme_light": "Light",
     "theme_dark": "Dark",
     "app_update_needed": "A new version of the app is needed to keep syncing this dictionary. Please reload the page.",
-    "local_data_expired": "This dictionary's offline data is too old to sync and must be refreshed."
+    "local_data_expired": "This dictionary's offline data is too old to sync and must be refreshed.",
+    "sync_paused_repeated_failure": "Your changes are not saving to the server. The same error keeps happening, so syncing is paused. Your work is safe on this device — reload the page to try again, and contact us if this message returns."
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",

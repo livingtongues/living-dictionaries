@@ -35,6 +35,45 @@ const PRIMARY_KEY: Record<SyncableTableName, string> = {
 }
 
 /**
+ * Natural keys shared.db syncable tables carry IN ADDITION to their `id` PK.
+ * `dictionary_roles` has UNIQUE (dictionary_id, user_id, role): two admin
+ * clients independently granting the SAME role mint different random UUIDs, so
+ * the second push's INSERT collides on the natural key — which `merge_row`'s
+ * `ON CONFLICT(id)` upsert does NOT catch — and 500s + rolls back the whole
+ * push (cross-app hardening Part 1; the shared.db sibling of the dict-db
+ * `DICT_NATURAL_KEY_COLUMNS` dedup). A role grant is a LEAF row (nothing
+ * FK-references its id) and (dict, user, role) minted twice IS the same grant,
+ * so adopt-canonical is right (not house's replace-slot). The loser id is
+ * tombstoned + echoed so the pushing client drops its local copy before the
+ * canonical row applies — otherwise the client-side apply throws the same
+ * UNIQUE error and wedges into a retry-forever loop (Part 3; house's Wayne
+ * wedge 2026-07-08).
+ *
+ * `dictionaries.url` (single-col UNIQUE) is deliberately ABSENT: a url
+ * collision is a genuine "url taken" conflict between two DISTINCT
+ * dictionaries — auto-adopting would silently merge two different dicts.
+ */
+export const SHARED_NATURAL_KEY_COLUMNS: Partial<Record<SyncableTableName, readonly string[]>> = {
+  dictionary_roles: ['dictionary_id', 'user_id', 'role'],
+}
+
+/** The id currently owning `row`'s natural key, or undefined (mirrors the dict-db helper). */
+function find_natural_key_owner_id<K extends SyncableTableName>({ db, table_name, row }: {
+  db: Database.Database
+  table_name: K
+  row: SyncRow<K>
+}): string | undefined {
+  const columns = SHARED_NATURAL_KEY_COLUMNS[table_name]
+  if (!columns)
+    return undefined
+  const record = row as unknown as Record<string, unknown>
+  const where = columns.map(column => `COALESCE("${column}",'') = COALESCE(?,'')`).join(' AND ')
+  const params = columns.map(column => (record[column] ?? null) as string | null)
+  const owner = db.prepare(`SELECT "${PRIMARY_KEY[table_name]}" AS id FROM "${table_name}" WHERE ${where} LIMIT 1`).get(...params) as { id: string } | undefined
+  return owner?.id
+}
+
+/**
  * Process an admin-sync round trip (push + pull) in a single transaction.
  *
  * LD uses one sector (per Q-shared.3), so this is simpler than house's
@@ -245,31 +284,54 @@ function merge_row<K extends SyncableTableName>({ db, table_name, row, response 
 }) {
   const pk = PRIMARY_KEY[table_name]
   const row_id = (row as unknown as Record<string, string>)[pk]
-  const existing = db.prepare(
+  let merge_id = row_id
+  let existing = db.prepare(
     `SELECT updated_at FROM "${table_name}" WHERE "${pk}" = ?`,
   ).get(row_id) as { updated_at: string } | undefined
 
+  if (!existing) {
+    // Tombstone-resurrection guard (ported from house): the row is absent AND a
+    // delete tombstone exists — a stale client copy pushed after the delete
+    // must NOT resurrect it via the upsert. Echo the delete back so the pushing
+    // client drops its copy too.
+    const tombstoned = db.prepare(
+      `SELECT 1 FROM deletes WHERE table_name = ? AND id = ? LIMIT 1`,
+    ).get(table_name, row_id)
+    if (tombstoned) {
+      response.deletes.push({ table_name, id: row_id })
+      return
+    }
+
+    // Natural-key collision guard (SHARED_NATURAL_KEY_COLUMNS): the pushed id is
+    // unknown but its natural key already belongs to a DIFFERENT id — two admins
+    // minted the same grant. Adopt the canonical id instead of letting the
+    // INSERT throw `UNIQUE constraint failed` and roll back the whole push, AND
+    // tombstone + echo the loser id so the pushing client drops its local copy
+    // before the canonical row applies (it wedges on the UNIQUE key otherwise).
+    const owner_id = find_natural_key_owner_id({ db, table_name, row })
+    if (owner_id && owner_id !== row_id) {
+      merge_id = owner_id
+      existing = db.prepare(
+        `SELECT updated_at FROM "${table_name}" WHERE "${pk}" = ?`,
+      ).get(owner_id) as { updated_at: string } | undefined
+      db.prepare(
+        `INSERT OR REPLACE INTO deletes (table_name, id, updated_at) VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+      ).run(table_name, row_id)
+      response.deletes.push({ table_name, id: row_id })
+    }
+  }
+
   if (existing && existing.updated_at > (row as unknown as { updated_at: string }).updated_at) {
     // Server wins — add server's full row (parsed) to response changes.
-    const server_row = query_one<SyncRow<K>>({
-      db,
-      table: table_name,
-      sql: `SELECT * FROM "${table_name}" WHERE "${pk}" = ?`,
-      params: [row_id],
-    })
-    if (!server_row)
-      return
-    const existing_changes = response.changes[table_name]
-    if (existing_changes)
-      (existing_changes as SyncRow<K>[]).push(server_row)
-    else
-      (response.changes[table_name] as SyncRow<K>[]) = [server_row]
+    echo_server_row({ db, table_name, id: merge_id, response })
     return
   }
 
   // Client wins — upsert (only allow known columns; stringify JSON cols).
+  // When deduped onto a canonical id, upsert against THAT id so the content
+  // merges onto the existing row rather than inserting a duplicate natural key.
   const allowed = VALID_COLUMNS[table_name]
-  const stringified = stringify_row(table_name, { ...(row as unknown as Record<string, unknown>) })
+  const stringified = stringify_row(table_name, { ...(row as unknown as Record<string, unknown>), [pk]: merge_id })
   const columns = Object.keys(stringified).filter(c => c !== 'dirty' && allowed.has(c))
   const placeholders = columns.map(() => '?').join(', ')
   const update_set = columns
@@ -284,6 +346,34 @@ function merge_row<K extends SyncableTableName>({ db, table_name, row, response 
      VALUES (${placeholders})
      ON CONFLICT(${pk}) DO UPDATE SET ${update_set}`,
   ).run(...values)
+
+  // A dedup rewrote the pushed id → the client only knows the LOSER id, and the
+  // pull filter (`updated_at > cursor`) can miss the canonical row when the
+  // canonical's stamp predates the cursor. Echo it explicitly.
+  if (merge_id !== row_id)
+    echo_server_row({ db, table_name, id: merge_id, response })
+}
+
+/** Push the server's current row for `id` into `response.changes` (parsed). */
+function echo_server_row<K extends SyncableTableName>({ db, table_name, id, response }: {
+  db: Database.Database
+  table_name: K
+  id: string
+  response: SyncResponse
+}) {
+  const server_row = query_one<SyncRow<K>>({
+    db,
+    table: table_name,
+    sql: `SELECT * FROM "${table_name}" WHERE "${PRIMARY_KEY[table_name]}" = ?`,
+    params: [id],
+  })
+  if (!server_row)
+    return
+  const existing_changes = response.changes[table_name]
+  if (existing_changes)
+    (existing_changes as SyncRow<K>[]).push(server_row)
+  else
+    (response.changes[table_name] as SyncRow<K>[]) = [server_row]
 }
 
 function strip_sql_ext(migration_name: string): string {

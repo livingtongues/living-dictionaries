@@ -68,6 +68,15 @@ export const load: LayoutLoad = async ({ parent }) => {
           dismiss_label: translate('misc.close'),
         })
       },
+      // Repeat-fatal circuit breaker tripped: the engine halted retrying (the
+      // same failure kept recurring). Local writes are safe but NOT reaching
+      // the server — prompt a manual reload (never auto-reload an admin).
+      on_repeated_failure: () => {
+        toast(translate('misc.sync_paused_repeated_failure'), {
+          action: { label: translate('misc.reload'), callback: () => location.reload() },
+          dismiss_label: translate('misc.close'),
+        })
+      },
     })
     globals.__ld_admin_sync = sync
   }

@@ -313,6 +313,7 @@
     "theme_dark": "Tối",
     "app_update_needed": "Cần một phiên bản mới của ứng dụng để tiếp tục đồng bộ từ điển này. Vui lòng tải lại trang.",
     "local_data_expired": "Dữ liệu ngoại tuyến của từ điển này quá cũ để đồng bộ và phải được làm mới.",
+    "sync_paused_repeated_failure": "Các thay đổi của bạn không được lưu lên máy chủ. Cùng một lỗi cứ lặp lại, nên việc đồng bộ đã tạm dừng. Công việc của bạn vẫn an toàn trên thiết bị này — hãy tải lại trang để thử lại, và liên hệ với chúng tôi nếu thông báo này xuất hiện lại.",
     "play": "Phát",
     "pause": "Tạm dừng",
     "clear": "Xóa"

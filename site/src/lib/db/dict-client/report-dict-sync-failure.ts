@@ -126,6 +126,36 @@ export function report_dict_stuck_dirty({ dict_id, dirty_rows, deletes, last_syn
 }
 
 /**
+ * Ship a "repeat-fatal circuit breaker tripped" marker
+ * (`sync_halted_repeated_failure`) — the engine stopped retrying after N
+ * identical consecutive non-transient failures (see `RepeatFailureTracker`).
+ * Exactly one row per latch (the engine fires `on_repeated_failure` once), so
+ * no throttle needed. This is the loud "an editor is wedged RIGHT NOW" signal
+ * the per-attempt `sync_failed` rows only imply in aggregate.
+ */
+export function report_dict_sync_halted({ dict_id, message, consecutive }: {
+  dict_id: string
+  message: string
+  consecutive: number
+}): void {
+  try {
+    void api_log({
+      entries: [{
+        level: 'error',
+        message: 'sync_halted_repeated_failure',
+        client_time: new Date().toISOString(),
+        user_agent: safe_user_agent(),
+        platform: 'web',
+        app_version: version ?? null,
+        context: { worker: true, engine: 'dict', dict_id, error: message, consecutive, session_id: worker_session_id ?? undefined },
+      }],
+    })
+  } catch {
+    // Never let telemetry break the sync path.
+  }
+}
+
+/**
  * Ship a "reopened the OPFS connection after the browser closed our access
  * handle" marker (`storage_lost` self-heal in `dict-instance.ts`) — the
  * observability that the recovery path actually ran in the wild.

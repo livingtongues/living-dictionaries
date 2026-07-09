@@ -273,3 +273,55 @@ describe('DictSyncEngine junction natural-key replace-all apply ordering', () =>
     expect(rows).toEqual([{ id: 'new-id' }])
   })
 })
+
+// Cross-app hardening Part 2 (mirrored from house): a repeated same-signature
+// fatal failure must trip the circuit breaker — halt the 30s retry loop + fire
+// the prompt hook once — while transient failures keep retrying forever.
+describe('DictSyncEngine repeat-failure circuit breaker', () => {
+  beforeEach(() => {
+    vi.mocked(api_log).mockClear()
+    _reset_dict_failure_throttle_for_tests()
+  })
+
+  function make_breaker_engine({ error, on_repeated_failure }: { error: Error, on_repeated_failure?: (info: { message: string, consecutive: number }) => void }) {
+    const query = vi.fn(() => Promise.reject(error))
+    const connection: EngineConnection = { query, execute: () => Promise.reject(error) }
+    const engine = new DictSyncEngine({
+      dict_id: 'test-dict',
+      connection,
+      has_editor_role: true,
+      get_auth: () => ({}) as never,
+      on_repeated_failure,
+    })
+    return { engine, query }
+  }
+
+  test('halts after 3 identical consecutive fatal failures and fires on_repeated_failure once', async () => {
+    const on_repeated_failure = vi.fn()
+    const { engine } = make_breaker_engine({ error: new Error('FOREIGN KEY constraint failed'), on_repeated_failure })
+    await expect(engine.sync_once()).rejects.toThrow()
+    await expect(engine.sync_once()).rejects.toThrow()
+    expect(engine.is_repeated_failure_blocked).toBeFalsy()
+    await expect(engine.sync_once()).rejects.toThrow()
+    expect(engine.is_repeated_failure_blocked).toBeTruthy()
+    expect(on_repeated_failure).toHaveBeenCalledTimes(1)
+    expect(on_repeated_failure).toHaveBeenCalledWith({ message: 'FOREIGN KEY constraint failed', consecutive: 3 })
+  })
+
+  test('once latched, sync_once early-returns null and sync_if_needed no-ops (no more pushes)', async () => {
+    const { engine, query } = make_breaker_engine({ error: new Error('FOREIGN KEY constraint failed') })
+    for (let i = 0; i < 3; i++)
+      await expect(engine.sync_once()).rejects.toThrow()
+    const calls_at_latch = query.mock.calls.length
+    await expect(engine.sync_once()).resolves.toBeNull()
+    await engine.sync_if_needed()
+    expect(query.mock.calls).toHaveLength(calls_at_latch)
+  })
+
+  test('transient failures (storage_lost) never halt, no matter how many', async () => {
+    const { engine } = make_breaker_engine({ error: new Error('AccessHandle is closed') })
+    for (let i = 0; i < 5; i++)
+      await expect(engine.sync_once()).rejects.toThrow()
+    expect(engine.is_repeated_failure_blocked).toBeFalsy()
+  })
+})

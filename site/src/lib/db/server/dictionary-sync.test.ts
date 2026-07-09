@@ -1,6 +1,6 @@
 import type { DictChangesRequest } from './dictionary-sync-helpers'
 import { open_dictionary_db_in_memory } from './dictionary-db'
-import { process_dict_changes } from './dictionary-sync-helpers'
+import { DICT_NATURAL_KEY_COLUMNS, process_dict_changes } from './dictionary-sync-helpers'
 
 describe('dictionary.db push + pull', () => {
   test('fresh dict + push entry → row lands + last_modified_at advances', () => {
@@ -451,6 +451,80 @@ describe('junction natural-key collision (two clients, different ids, same pair)
     expect(rows).toHaveLength(1)
     expect(rows[0].id).toBe('link_A')
     expect(rows[0].updated_by_user_id).toBe('a')
+    db.close()
+  })
+})
+
+describe('junction natural-key dedup echoes the loser delete + canonical row (client convergence)', () => {
+  const at = '2026-07-07T00:00:00.000Z'
+  const newer = '2026-07-07T00:00:05.000Z'
+
+  function seed(db: ReturnType<typeof open_dictionary_db_in_memory>) {
+    db.prepare(`INSERT INTO entries (id, lexeme, created_by_user_id, updated_by_user_id, created_at, updated_at) VALUES ('e1', '{}', 'u1', 'u1', ?, ?)`).run(at, at)
+    db.prepare(`INSERT INTO tags (id, name, created_by_user_id, updated_by_user_id, created_at, updated_at) VALUES ('t1', 'tag', 'u1', 'u1', ?, ?)`).run(at, at)
+    db.prepare(`INSERT INTO entry_tags (id, entry_id, tag_id, created_by_user_id, updated_by_user_id, created_at, updated_at) VALUES ('link_A', 'e1', 't1', 'u1', 'u1', ?, ?)`).run(at, at)
+  }
+
+  const loser_push = (updated_at: string): DictChangesRequest => ({
+    synced_up_to: at,
+    dirty_rows: { entry_tags: [{ id: 'link_B', entry_id: 'e1', tag_id: 't1', created_by_user_id: 'b', created_at: updated_at, updated_by_user_id: 'b', updated_at }] },
+    deletes: [],
+    latest_dict_migration: '20260606_initial.sql',
+  })
+
+  test('a deduped fresh mint gets response.deletes for the loser id + the canonical row echoed', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    seed(db)
+
+    const response = process_dict_changes({ db, request: loser_push(newer), user_id: 'b', is_editor: true })
+
+    // Loser delete echoed (so the pushing client drops its local copy BEFORE
+    // upserting the canonical row — otherwise it wedges on the UNIQUE key)…
+    expect(response.deletes).toContainEqual({ table_name: 'entry_tags', id: 'link_B' })
+    // …AND a server tombstone recorded so any other holder of link_B converges.
+    const tombstone = db.prepare(`SELECT 1 FROM deletes WHERE table_name = 'entry_tags' AND id = 'link_B'`).get()
+    expect(tombstone).toBeTruthy()
+    // …AND the canonical row echoed explicitly (its updated_at may predate the
+    // client's cursor, so the normal pull filter can miss it).
+    expect((response.changes.entry_tags ?? []).map(row => row.id)).toContain('link_A')
+    db.close()
+  })
+
+  test('an LWW-losing duplicate push still tombstones + echoes (server-wins branch must converge too)', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    seed(db)
+    // Make the canonical row NEWER than the pushed loser.
+    db.prepare(`UPDATE entry_tags SET updated_at = ? WHERE id = 'link_A'`).run(newer)
+
+    const response = process_dict_changes({ db, request: loser_push(at), user_id: 'b', is_editor: true })
+
+    expect(response.deletes).toContainEqual({ table_name: 'entry_tags', id: 'link_B' })
+    expect((response.changes.entry_tags ?? []).map(row => row.id)).toContain('link_A')
+    // Canonical content untouched (LWW held).
+    const row = db.prepare(`SELECT updated_by_user_id FROM entry_tags WHERE id = 'link_A'`).get() as { updated_by_user_id: string }
+    expect(row.updated_by_user_id).toBe('u1')
+    db.close()
+  })
+})
+
+describe('DICT_NATURAL_KEY_COLUMNS leaf-ness guard', () => {
+  test('no table FK-references a natural-key table (adopt-canonical without FK-remap relies on this)', () => {
+    // If a dedup-able table ever gains an FK referrer, adopting the canonical id
+    // + tombstoning the loser would cascade the referrer away on the pushing
+    // client (house needed an FK-rewrite echo for exactly this). This guard
+    // forces that design conversation instead of silently shipping drift.
+    const db = open_dictionary_db_in_memory('test_dict')
+    const natural_key_tables = new Set(Object.keys(DICT_NATURAL_KEY_COLUMNS))
+    const tables = (db.prepare(`SELECT name FROM sqlite_master WHERE type = 'table'`).all() as { name: string }[]).map(row => row.name)
+    const referrers: string[] = []
+    for (const table of tables) {
+      const fks = db.pragma(`foreign_key_list("${table}")`) as { table: string }[]
+      for (const fk of fks) {
+        if (natural_key_tables.has(fk.table))
+          referrers.push(`${table} → ${fk.table}`)
+      }
+    }
+    expect(referrers).toEqual([])
     db.close()
   })
 })
