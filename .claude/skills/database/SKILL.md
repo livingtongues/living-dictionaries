@@ -581,10 +581,23 @@ an orchestrator to `dict-writes.ts` + a line to the `DictWrites` facade. Plan + 
   eventually reflects pushed rows in R2. Server helpers: `dictionary-sync-helpers.ts`.
 
 **Sync-engine invariants (don't relearn):** clear `dirty` ONLY by pushed row id
-(not blanket `WHERE dirty=1` — junctions silently never sync); `db_metadata`
+(not blanket `WHERE dirty=1` — junctions silently never sync); drain local
+`deletes` tombstones ONLY by pushed (table_name,id) — a blanket `DELETE FROM
+deletes` drops a delete queued mid-round-trip; `db_metadata`
 triggers use `ON CONFLICT DO UPDATE` (not `INSERT OR REPLACE`); `/changes`
 fast-bail must not drop pushes when `cursor==watermark`; `ensure_initial_sync()`
-before writes. Full detail: `.knowledge/migration/dict-sync-invariants.md` +
+before writes. **Natural-key dedup must converge the CLIENT too** (2026-07-09,
+house's Wayne wedge): a server-side adopt-canonical resolution must ALSO
+tombstone + echo the loser id (clients apply deletes before upserts and honor
+deletes for ids they just pushed) and explicitly echo the canonical row —
+otherwise the pushing client's local loser still owns the UNIQUE key, its apply
+throws the same error, and it wedges into a retry-forever loop. Every
+natural-key table needs a spec in the coverage-guarded convergence e2e suites
+(`dict-sync-engine.convergence.test.ts` / `engine-convergence.svelte.test.ts`).
+Both client engines carry a repeat-fatal circuit breaker (`RepeatFailureTracker`
+in `sync-failure-classify.ts`): 3 identical consecutive non-transient failures
+halt retrying + prompt a reload (`sync_halted_repeated_failure` in client_logs).
+Full detail: `.knowledge/migration/dict-sync-invariants.md` +
 `m4-write-sync.md`.
 
 ## Folder map (cheat-sheet)
