@@ -17,7 +17,7 @@ export type StandardDictionaryForCSV = Record<DictionaryForCSVKeys, string | num
 
 export const dictionary_headers: StandardDictionaryForCSV = { ...StandardDictionaryCSVFields }
 
-export function prepareDictionaryForCsv(dictionary: DictionaryView): StandardDictionaryForCSV {
+export function prepare_dictionary_for_csv(dictionary: DictionaryView): StandardDictionaryForCSV {
   let cleanedLocation = ''
   if (dictionary.location) {
     const location = `${dictionary.location}`

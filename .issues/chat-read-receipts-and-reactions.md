@@ -26,25 +26,15 @@ Build in **Living** (`/chat`), then port to house (`/team`) once Jacob is happy.
 - `chat_room_members.last_read_at` written on message fetch (view) + on send. Already powers
   unread counts. This IS the read position.
 
-## Tasks — DONE (Living)
-- ✅ Migration `shared-migrations/20260708_chat_reactions.sql` (+ index).
-- ✅ `chat-db.ts`: `toggle_reaction`, `attach_reactions` (batched), `get_room_read_positions`;
-      extended `ChatMessageWithAttachments` with `reactions`; `get_room_messages` hydrates reactions.
-      Types `MessageReaction`, `RoomReadPosition`. `delete_room` also cascades `chat_reactions`.
-- ✅ `/api/chat/react` POST toggle endpoint (+ `_call.ts` + `server.test.ts`).
-- ✅ Messages endpoint returns `read_positions` too.
-- ✅ `$lib/chat/read-receipts.ts` pure helpers (+ inline vitest).
-- ✅ `$lib/chat/emoji-data.ts` curated palette (quick set + ~90 across 5 categories).
-- ✅ `$lib/chat/reaction-picker.svelte` (quick set + ＋ palette, clickoutside).
-- ✅ `$lib/chat/read-bubbles.svelte` (stacked initials, +N collapse, name tooltip).
-- ✅ `chat-message-item.svelte`: reaction chips + react affordance on ALL messages.
-- ✅ `/chat/+page.svelte`: reconcile poll, read_positions state, bubbles per boundary + seen summary.
-- ✅ Stories: read-bubbles, reaction-picker; chat-message-item WithReactions.
-- ✅ Verified: `pnpm vitest` (72 chat tests pass), `pnpm check` (0 errors), `pnpm eslint` clean,
-      + two-user headless e2e (bubble moves mid-thread→last msg, "Seen by" summary, live reaction
-      chip, zero page errors).
+## Living — ✅ COMPLETE (2026-07-08)
+Migration `shared-migrations/20260708_chat_reactions.sql`; `chat-db.ts` (`toggle_reaction`,
+`attach_reactions`, `get_room_read_positions`, reactions hydrated into `get_room_messages`,
+`delete_room` cascade); `/api/chat/react` toggle endpoint; messages endpoint returns
+`read_positions`; `$lib/chat/` (`read-receipts.ts`, `emoji-data.ts`, `reaction-picker.svelte`,
+`read-bubbles.svelte`); `chat-message-item.svelte` reaction chips; `/chat/+page.svelte` reconcile
+poll + bubbles + seen summary; stories. Verified (72 chat tests, check/lint clean, two-user e2e).
 
-## Port to house (later, after Jacob signs off)
+## REMAINING — Port to house (after Jacob signs off on Living)
 - Rename "Team" label → "Chat" (keep `/team` route). Port reactions + read receipts.
 - house chat lives at house `$lib/db/worker` OPFS model — reactions table + read positions port
   the same way (server-authoritative via /api). Check house's chat schema location before porting.

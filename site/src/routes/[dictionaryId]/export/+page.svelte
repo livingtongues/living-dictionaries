@@ -7,7 +7,7 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Progress from '$lib/export/Progress.svelte'
   import { page } from '$app/state'
-  import { downloadObjectsAsCSV } from '$lib/export/csv'
+  import { download_objects_as_csv } from '$lib/export/csv'
 
   const { data } = $props()
   const { is_manager, dictionary, auth_user, entries_data, url_from_storage_path } = $derived(data)
@@ -108,7 +108,7 @@
       <HeadlessButton
         class="btn-primary btn-default"
         loading={!ready}
-        onclick={() => downloadObjectsAsCSV(entryHeaders, formattedEntries, dictionary.id)}>
+        onclick={() => download_objects_as_csv(entryHeaders, formattedEntries, dictionary.id)}>
         {page.data.t('export.download_csv')}
       </HeadlessButton>
     {/if}

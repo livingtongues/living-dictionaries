@@ -3,8 +3,8 @@
   import type { Tables } from '$lib/types'
   import { onDestroy, onMount } from 'svelte'
   import type { EntryForCSV } from './prepare-entries-for-csv'
-  import { objectsToCsvByHeaders } from '$lib/export/csv'
-  import { downloadBlob } from '$lib/export/download-blob'
+  import { objects_to_csv_by_headers } from '$lib/export/csv'
+  import { download_blob } from '$lib/export/download-blob'
 
   interface Props {
     dictionary: Tables<'dictionaries'>
@@ -76,14 +76,14 @@
       fetched++
     }
 
-    const csv = objectsToCsvByHeaders(entryHeaders, finalizedEntries)
+    const csv = objects_to_csv_by_headers(entryHeaders, finalizedEntries)
     const csvBlob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' })
 
     zip.file(`${dictionary.url}.csv`, csvBlob)
 
     const blob = await zip.generateAsync({ type: 'blob' })
     if (destroyed) return
-    downloadBlob(blob, dictionary.url, '.zip')
+    download_blob(blob, dictionary.url, '.zip')
     if (!errors.length)
       on_completed?.()
   })

@@ -84,8 +84,12 @@ export function createQueryParamStore<T>(options: QueryParamStoreOptions<T>) {
   }
   // The last value pushed into the writable — tracked here (not read back via
   // `get(store)`, which would spin a throwaway subscription and re-run `start`) so
-  // `setStoreValue` can deep-equal-dedupe redundant emits.
-  let store_value: T | undefined = startWith
+  // `setStoreValue` can deep-equal-dedupe redundant emits. MUST be an independent
+  // clone, never the emitted object itself: Svelte's `bind:value={$store.query}`
+  // mutates the emitted object IN PLACE before calling `set`, so an aliased baseline
+  // already matches the incoming URL echo and the emit gets wrongly skipped —
+  // search/pagination froze until refresh (2026-07-09 regression).
+  let store_value: T | undefined = structuredClone(startWith)
   // Re-entrancy guard: if a `goto` resolves synchronously (shallow/`pushState`
   // navigations can), the URL effect could re-enter `handle_search_params` mid-emit.
   let applying_store_value = false
@@ -114,7 +118,7 @@ export function createQueryParamStore<T>(options: QueryParamStoreOptions<T>) {
         console.info('parsed value equals current store value, skipping emit')
       return
     }
-    store_value = parsed_value
+    store_value = structuredClone(parsed_value)
     applying_store_value = true
     try {
       set(parsed_value)

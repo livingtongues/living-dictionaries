@@ -1,12 +1,12 @@
-import { downloadBlob } from './download-blob'
+import { download_blob } from './download-blob'
 
-export function downloadObjectsAsCSV(headers: Record<string, any>, items: Record<string, any>[], title: string) {
-  const csv = objectsToCsvByHeaders(headers, items)
+export function download_objects_as_csv(headers: Record<string, any>, items: Record<string, any>[], title: string) {
+  const csv = objects_to_csv_by_headers(headers, items)
   const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' })
-  downloadBlob(blob, title, '.csv')
+  download_blob(blob, title, '.csv')
 }
 
-export function objectsToCsvByHeaders(headers: Record<string, any>, items: Record<string, any>[]): string {
+export function objects_to_csv_by_headers(headers: Record<string, any>, items: Record<string, any>[]): string {
   const helperRow = Object.values(headers).map(turnValueIntoStringSurroundWithQuotesAsNeeded).join(',')
   const headerKeys = Object.keys(headers)
   const itemRows = items
@@ -26,7 +26,7 @@ function turnValueIntoStringSurroundWithQuotesAsNeeded(value: any) {
 }
 
 if (import.meta.vitest) {
-  describe('objectsToCsvByHeaders', () => {
+  describe('objects_to_csv_by_headers', () => {
     const headers = {
       name: 'Name',
       age: 'Age',
@@ -39,7 +39,7 @@ if (import.meta.vitest) {
         { name: 'Jane', age: 25, city: 'Los Angeles' },
         { name: 'Bob', age: 40, city: 'Chicago' },
       ]
-      const result = objectsToCsvByHeaders(headers, items)
+      const result = objects_to_csv_by_headers(headers, items)
       expect(result).toMatchInlineSnapshot(`
         "name,age,city
         Name,Age,City
@@ -55,7 +55,7 @@ if (import.meta.vitest) {
         { name: 'Jane', city: 'Los Angeles', age: undefined },
         { name: 'Bob', city: 'Chicago' },
       ]
-      const result = objectsToCsvByHeaders(headers, items)
+      const result = objects_to_csv_by_headers(headers, items)
       expect(result).toMatchInlineSnapshot(`
         "name,age,city
         Name,Age,City
@@ -71,7 +71,7 @@ if (import.meta.vitest) {
         { name: 'Jane', age: 25, city: 'Los Angeles, CA' },
         { name: 'Bob', age: 40, city: 'Chicago "Windy City"' },
       ]
-      const result = objectsToCsvByHeaders(headers, items)
+      const result = objects_to_csv_by_headers(headers, items)
       const expectedCsv = `name,age,city\nName,Age,City\nJohn,30,New York\nJane,25,"Los Angeles, CA"\nBob,40,"Chicago ""Windy City"""`
       expect(result).toEqual(expectedCsv)
     })
@@ -82,7 +82,7 @@ if (import.meta.vitest) {
         windy: 'Windy',
       }
       const items = [{ city: 'Chicago', windy: true }]
-      const result = objectsToCsvByHeaders(headers, items)
+      const result = objects_to_csv_by_headers(headers, items)
       const expectedCsv = `city,windy\nCity,Windy\nChicago,true`
       expect(result).toEqual(expectedCsv)
     })
@@ -95,7 +95,7 @@ if (import.meta.vitest) {
         hasQuote: 'The "Expression"',
       }
       const items = []
-      const result = objectsToCsvByHeaders(headers, items)
+      const result = objects_to_csv_by_headers(headers, items)
       const expectedCsv = `number,boolean,hasComma,hasQuote\n1,true,"City, State","The ""Expression"""`
       expect(result).toEqual(expectedCsv)
     })

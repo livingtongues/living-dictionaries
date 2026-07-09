@@ -24,6 +24,8 @@ payload has the real names (`"Lower Cook Inlet"`, `"above"` ×3, `"Millie"`).
    pre-load UUID state. Entry-specific because only this entry has collision-named
    tags.
 
+## Status: DONE (committed `d0c2fc5f`, pushed to main → deploying) ✅
+
 ## Fix applied ✅
 
 - `ModalEditableArray.svelte`: key chips by unique `value`, not `name`
@@ -33,15 +35,22 @@ payload has the real names (`"Lower Cook Inlet"`, `"above"` ×3, `"Millie"`).
 - Added `DuplicateNames` story reproducing 3×"above" + "Millie"; verified via
   svelte-look (renders cleanly, no crash).
 
-## Still open (needs Jacob's call)
+All three approved follow-ups are done:
+- ✅ **Write-side dedup** (`insert_tag`/`insert_dialect` reuse same-named rows,
+  case-insensitive).
+- ✅ **Deeper resilience** — `EntryDialect`/`EntryTag` fold the entry's own
+  items into options so names resolve without the worker store.
+- ✅ **Data dedup (Diego's entry)** — tombstoned the 2 extra "above" tags +
+  their junctions on prod (`sugtstun.db`, backed up to `sugtstun.db.bak-…`).
+  Bumped catalog `updated_at` so the next R2 sweep (≤30 min) rebuilds the
+  snapshot. Entry now: tags "above" + "Millie", dialect "Lower Cook Inlet".
 
-- **Production data dedup**: sugtstun has 3 tags named "above"
-  (`8fb4cb6f…`, `3dc6fb74…`, `08da6c3e…`) all on this entry. Merge into one +
-  tombstone extras? (per-dict write → propagates via next R2 snapshot rebuild)
-- **Write-side dedup gap**: `EntryTag.on_update`'s write-in path always
-  `insert_tag`s a new tag; it never dedups by name against existing tags, and if
-  the dictionary store is empty when editing it can't see existing tags at all —
-  this is how the 3 "above" dupes got created.
-- **Deeper resilience (optional)**: have `EntryDialect`/`EntryTag` use the name
-  already on the entry's own object as the display source, removing the
-  pre-worker-load UUID flash entirely.
+## Still open — needs Jacob's decision (SYSTEMIC, bigger than reported)
+
+**sugtstun's tag table is riddled with duplicate-name tags** from the old
+write behavior: `millie` ×98, `shane` ×30, `teglunaliq` ×19, `boil`/`boat` ×8,
+plus ~50 more names with 2–7 copies each. The code fix stops NEW dupes, but a
+one-time full-dictionary dedup pass (merge same-name tags → earliest, repoint
+`entry_tags`, tombstone extras) would clean the existing mess. Likely affects
+OTHER dictionaries too — worth a dedup migration/script across all dicts.
+NOT run yet (out of the scope Jacob approved, which was just Diego's entry).

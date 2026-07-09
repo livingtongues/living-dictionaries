@@ -60,6 +60,25 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   by-route tables in the Performance panel.
 
 ## Open proposals
+- **★ NEW — "Build adoption / stale-client population" health strip** *(filed 2026-07-08 — grounded
+  in TODAY's #1 issue; verified NOT present).* LD tracks **errors** by version (`build_errors_by_version`)
+  and `totals.stale_errors`, but has **no metric for how many active sessions are stranded on
+  un-fixable old code** — a *population* health number distinct from the error-share item below. Add a
+  small strip grouping **sessions by build age** (decode the `app_version` build-epoch → `current` /
+  `1–2 builds behind` / `≥3 days stale`) with the headline "**N% of active sessions can't receive
+  fixes.**" Today it would read ~4 clients stuck on 07-03 builds (incl. **admin Greg**) driving 100%
+  of a ~5,700-row `sync_failed` retry-storm — a storm that is un-fixable for those tabs until they
+  reload. Cheap: one `GROUP BY app_version` over `session_start` rows in the hot window. Pairs with
+  the "stale-bundle error-share %" item (that = errors; this = who's stuck). *(LD-native, 2026-07-08 review)*
+- **★ NEW — Sync-Health: name the server-side cause + RED "one-user-dominates" verdict** *(ported
+  from house 07-07 Phase C · filed 2026-07-08 — grounded in TODAY's live P2).* LD's `build_sync_health`
+  (`log-analytics.ts` ~line 1722) groups `sync_failed` by `context.kind` current-vs-stale + tracks
+  stuck `(user,dict_id)` pairs, but a `kind:"other"`/`"unknown"` hides the real cause and the panel
+  never flags user concentration. Enrich it to (a) **join concurrent `source='server'` error rows** to
+  surface the constraint/table/message behind an opaque kind, and (b) turn the panel **RED and name the
+  account** when `sync_failed` concentrates on one user. Today it would have said "**Greg (admin) stuck ·
+  schema_outdated · 5-day-old build**" and "Zapotec editor · 3,531 retries" instead of an unactionable
+  per-kind bar. *(ported from house)*
 - **★★ NEW — Top-route attribution on the error-cluster panel** *(filed 2026-07-07 run 2 — grounded
   in TODAY's live entry-page loop; verified NOT present).* `ErrorCluster` (`log-analytics.ts` ~line
   230) has no route dimension, so pinning *where* a cluster fires means a hand-run

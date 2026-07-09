@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`prepareDictionaryForCsv > dictionary example 1 1`] = `
+exports[`prepare_dictionary_for_csv > dictionary example 1 1`] = `
 {
   "entry_count": 0,
   "glottocode": "badh1238",
@@ -15,7 +15,7 @@ exports[`prepareDictionaryForCsv > dictionary example 1 1`] = `
 }
 `;
 
-exports[`prepareDictionaryForCsv > dictionary example 2 1`] = `
+exports[`prepare_dictionary_for_csv > dictionary example 2 1`] = `
 {
   "entry_count": 1,
   "glottocode": "buri1258",
@@ -30,7 +30,7 @@ exports[`prepareDictionaryForCsv > dictionary example 2 1`] = `
 }
 `;
 
-exports[`prepareDictionaryForCsv > dictionary example 3 1`] = `
+exports[`prepare_dictionary_for_csv > dictionary example 3 1`] = `
 {
   "entry_count": 1,
   "glottocode": undefined,

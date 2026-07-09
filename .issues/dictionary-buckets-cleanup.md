@@ -1,131 +1,46 @@
-# Dictionary buckets — weed out junk, classify everything
+# Dictionary buckets — classification DONE; execute the `delete` bucket (remaining)
 
-Jacob wants the 2,232 production dictionaries classified into buckets so we can (a) delete
-explorer-junk, (b) tolerate-but-contain conlangs/glossaries (media storage off for them later),
-and (c) know who we actually serve.
+All 2,232 prod dictionaries are classified into `dictionaries.bucket`
+(`public | unlisted | secure | conlang | glossary | delete`) and reviewable/reassignable in
+`/admin/buckets` + `/admin/dictionaries`. **The one remaining piece of work is executing the
+`delete` bucket teardown** (a later session, on Jacob's go-ahead).
 
-## Decisions (interview 2026-07-04)
+## What's already shipped (2026-07-04, applied to prod)
+- Migration `20260704a_featured_entries_pivot_and_dictionary_buckets.sql`: `bucket` + `public_at`
+  columns + `stamp_dictionary_public_at` trigger. Drizzle schema + `DICTIONARY_BUCKETS` constant.
+- Classification applied to prod (2,232 rows): **public 221 · unlisted 396 · conlang 696 ·
+  glossary 269 · delete 650**. Conlang-field cleanup (nulled stale `con_language_description` on
+  210 kept-bucket non-conlang dicts, real substance appended to `author_connection`).
+- `/admin/buckets` review UI + `/admin/dictionaries` bucket filter/column + editable conlang-desc
+  (only when `bucket === 'conlang'`).
+- Classification tooling lives in `scripts/bucket-classification/` (`build-assignments.js`,
+  `apply-assignments.js`, `bucket-assignments.csv`).
 
-- **One new `dictionaries.bucket` column** (shared.db, syncable): `public | unlisted | secure | conlang | glossary | delete`
-  - `public` = real + listed (all current public dicts are known-good)
-  - `unlisted` = real private dictionaries we desire to serve
-  - `secure` = FUTURE: key-code-locked dictionaries (no rows yet, reserved value)
-  - `conlang` / `glossary` = tolerated cruft (media storage will be turned off for these — separate story)
-  - `delete` = queued for teardown (mostly explorers who moved on)
-- **Plus `public_at`** — when the dict first went public. No historical data → NULL backfill,
-  stamped going forward (trigger on first publish).
-- **Delete rule**: ≤3 entries AND no content activity for ≥1 year ("What's three entries from
-  years ago? Not a dictionary"). Content activity only — a member's recent site login does NOT
-  protect an empty dict. Stale 4–10-entry dicts get judged individually (obvious junk → delete).
-- **NO deletion this round** — produce the list, review, delete in a later session (Q3=C).
-- **Claude hand-classifies everything** (no LLM API calls) — judgment over name, conlang
-  description, author_connection, sample lexemes/glosses, iso/glottocode/coordinates signals.
-- **Review UI**: small /admin page to review + reclassify bucket assignments in-app (built this
-  round). Jacob reviews there, then a later session executes the delete bucket.
-- **Storage dashboard** (media bytes by dict/type/bucket): ISSUE ONLY this round → `.issues/admin-media-storage-dashboard.md`
-- **Playground/sandbox** (let people play without creating junk): ISSUE ONLY → `.issues/sandbox-playground-dictionaries.md`
+## REMAINING — execute the delete bucket (later session, Jacob's go-ahead)
+Back up a tarball → R2 first, then batch-drive the existing teardown endpoint
+`DELETE /api/dictionaries/[id]` (admin-only; shared.db tombstones + dict.db + history.db + R2
+snapshot; GCS media harvest is deferred to the storage-dashboard story). Safety check on the
+650 delete-bucket dicts: 629 entries · 124 audio · 157 photos · 4 videos total — nothing of value;
+111 have a few stray media files whose GCS bytes get orphaned at teardown (harvest deferred).
 
-## Production findings (data pulled 2026-07-04)
+Fresh-empty junk ("test test test", keyboard-mash) couldn't be deleted under the stale rule (≤3
+entries + no content activity ≥1yr) — bucketed `glossary`/`conlang` by intent; a NEXT sweep
+(re-run `build-assignments.js` against fresh stats) graduates them to delete.
 
-- 2,232 dicts total; 221 public; 2,011 private.
-- `con_language_description` non-empty ≈ self-declared conlang (create form checkbox fills
-  `Source: … Use: …`). 1,038 have it — but false positives exist (e.g. Northern Michif import
-  "This is not a conlang…", real Chiapas dict "No es artificial") → rescue skim needed.
-- `updated_at` polluted by bulk re-stamps: 499 dict.db content rows on **2025-05-13**, 794
-  catalog rows 2025-03. Composite activity signal instead:
-  `max(dict created_at, entry created_at range, content writes AFTER 2025-05-14)`.
-- Preliminary split (private): **630 delete** (≤3 entries + stale ≥1yr; 111 have stray media),
-  **764 conlang-marked**, **617 gray** (mix of real gems — Ainu, Algonquin, Ancient Aramaic,
-  A'ingae, Awakateko — unmarked conlangs, classroom glossaries).
-- Existing teardown endpoint: `DELETE /api/dictionaries/[id]` (admin-only; shared.db tombstones +
-  dict.db + history.db + R2 snapshot; GCS media harvest deferred).
-- GCS media: S3-interop HMAC creds on VPS (`GCLOUD_MEDIA_BUCKET_ACCESS_KEY_ID/SECRET`), bucket
-  `talking-dictionaries-alpha.appspot.com`, objects keyed `<dict_id>/...` → ListObjectsV2 sweep
-  can aggregate bytes by dict/type (dashboard issue).
-- Working data: `/tmp/dict-stats.jsonl` on mustang (per-dict counts, activity, samples) built by
-  `/tmp/collect-dict-stats.js` run inside `sveltekit_blue` on living.
-
-## Plan
-
-1. ✅ Interview + data collection
-2. ✅ Migration `20260704a_featured_entries_pivot_and_dictionary_buckets.sql`: `bucket` TEXT + `public_at` TEXT on
-   `dictionaries`; `stamp_dictionary_public_at` trigger (UPDATE-only — an INSERT twin would
-   mis-stamp historical public dicts during a client's initial sync). Drizzle schema +
-   `DICTIONARY_BUCKETS` constant updated. Verified: all migrations apply + trigger behavior
-   (first publish stamps; re-publish keeps; server stamp wins).
-3. ✅ Classification → `scripts/bucket-classification/bucket-assignments.csv` (2,232 rows) built
-   by `build-assignments.js` (deterministic rules + hand-review override lists, all reviewed by
-   Claude across ~1,500 rows on 2026-07-04). Final counts:
-   **public 221 · unlisted 396 · conlang 696 · glossary 269 · delete 650**.
-   - KEY FINDING: `con_language_description` non-empty ≠ conlang for OLD-form dicts — the legacy
-     form stored the answer text even when it was a denial ("No.", "Not a conlang…"). 66 real
-     dictionaries rescued (Kalenjin 31k entries, the Dargwa dialect series, Tseltal, Garifuna,
-     Biloxi, Tillamook…). NEW-form (`Source: … Use: …` template) = trustworthy self-declaration.
-   - Stale 4–10-entry junk hand-moved to delete (18 dicts: hebreo, kabardian, test1234…).
-4. ✅ Apply script `scripts/bucket-classification/apply-assignments.js` (runs in the container via
-   ssh stdin; requires the migration deployed first; bumps updated_at ONLY — setting `dirty`
-   server-side would echo rows back through admin client push).
-5. ✅ /admin/buckets review UI (`site/src/routes/admin/buckets/`): per-bucket filter pills +
-   counts, unclassified + mismatch views (bucket↔public disagreement), search, entry/member/
-   iso/glottocode signals, conlang-desc snippet, one-click reassign via
-   `db.dictionaries.update()`. Nav link added (compact). Stories + svelte-look verified
-   light/dark incl. filter-click interactions. NOTE: filter is local $state initialized from
-   `?bucket=` (goto try/caught — story harness has no router).
-6. ✅ Side-quest issues: `.issues/sandbox-playground-dictionaries.md` +
-   `.issues/admin-media-storage-dashboard.md`.
-7. ✅ APPLIED TO PROD 2026-07-04: migration deployed, `apply-assignments.js` ran in `sveltekit_blue`
-   → all 2,232 classified (public 221 · unlisted 396 · conlang 696 · glossary 269 · delete 650),
-   0 skipped/missing. shared.db backed up first (`shared.db.bak-20260704-101058`). Jacob reviews in
-   /admin/buckets.
-8. ✅ CONLANG-FIELD CLEANUP (prod, 2026-07-04): for the 210 kept-bucket (public/unlisted/glossary)
-   non-conlang dicts carrying a `con_language_description`, NULLed the field (it's a *flag* that
-   hides ISO/location/public and excludes the dict from the "real private" catalog in
-   `get-dictionaries-catalog.ts` — a stale denial mis-handles a real dict). Where the text held
-   real substance (175 of 210), appended it to `author_connection` as
-   `Author also said about this dictionary: <verbatim>` (admin-only field; existing content kept,
-   idempotent via label check). 35 bare denials ("No."/"YES"/"not a conlang") dropped. The 222
-   **delete**-bucket dicts were SKIPPED (torn down soon) and the 696 **conlang** dicts untouched.
-   Script `/tmp/conlang-cleanup.js` (FE_WRITE=1 to apply); backup `shared.db.bak-preconlang-*`.
-   Jacob's decisions: Q1 = author_connection append; Q2 = skip delete bucket.
-9. ✅ ADMIN UI (2026-07-04): `/admin/dictionaries` now filters by the 5 buckets (public/unlisted/
-   conlang/glossary/delete, + secure/unclassified pills only when non-empty) off `dict.bucket`;
-   a single **Bucket** column (`<select>`, color-coded) shows + changes the bucket via
-   `dictionary._save()`; the old public/private + conlang YES/NO filter and the conlang toggle
-   column are gone. The **Conlang description** column is now an editable `<textarea>` ONLY when
-   `dictionary.bucket === 'conlang'` (else read-only) — "impossible to type into the conlang field
-   unless it is a conlang". Create page verified: conlang Source/Use fields already gated behind
-   `conlang === true` (no change needed). `active_filter` switched to local `$state` (matches the
-   /admin/buckets pattern; story harness has no router). Stories + svelte-look verified light/dark
-   incl. the ConlangTab interaction; check 0 errors, lint clean, 1245 tests pass.
-10. LATER SESSION: execute delete bucket (backup tarball → R2 first, then batch-drive the
-   existing teardown endpoint `DELETE /api/dictionaries/[id]`; GCS orphan sweep comes with the
-   storage story).
-
-## Notables for Jacob's in-app review
-
-- **`river`** — 8,692 entries + 4,733 audio, created 2026-07, private, glosses look like a bulk
-  import ("Exclamatory initial particle" ×many). Kept `unlisted`; worth a look.
-- **`tla-wilano`** (Oli'ichi Tla Wilano, Ivanhoe VA) — 1,034 entries + 704 audio, answered YES
-  to conlang on the old form → `conlang`; flag if you know better.
-- Team/test dicts kept out of delete (fresh activity): `jacob-test2`, `test-004`,
-  `example-v4-senses`, `test-language-x` (MELD sandbox, m7), `test-german` → all `glossary`;
-  hand-delete whenever. `sugtstun-test` kept `unlisted` (referenced in
-  `DICTIONARIES_WITH_VARIANTS` constant!).
-- Media-heavy conlangs (squash targets): `leshing` (2,460 audio / 2,159 photos), `orich`
-  (1,180 audio), `taharini` (806 audio).
-- 111 of the 650 delete-bucket dicts have a few stray media files — GCS bytes get orphaned at
-  teardown (harvest deferred to the storage story).
-- Fresh-empty junk ("test test test", keyboard-mash) couldn't be deleted under the stale rule —
-  bucketed `glossary`/`conlang` by intent; the NEXT sweep graduates them to delete. Re-run
-  `build-assignments.js` against fresh stats then.
-
-## Delete-bucket media totals (safety check)
-
-650 dicts · 629 entries · 124 audio · 157 photos · 4 videos — nothing of value.
+## Notables for Jacob's in-app review before deleting
+- **`river`** — 8,692 entries + 4,733 audio, kept `unlisted`; worth a look.
+- **`tla-wilano`** — 1,034 entries + 704 audio, answered YES to conlang on the old form → `conlang`.
+- Team/test dicts kept OUT of delete (fresh activity): `jacob-test2`, `test-004`,
+  `example-v4-senses`, `test-language-x`, `test-german` → all `glossary`; hand-delete whenever.
+  `sugtstun-test` kept `unlisted` (referenced in `DICTIONARIES_WITH_VARIANTS` constant!).
+- Media-heavy conlangs (future media-squash targets): `leshing` (2,460 audio / 2,159 photos),
+  `orich` (1,180 audio), `taharini` (806 audio).
 
 ## Notes / gotchas
-
-- Bucket is NOT auto-coupled to the `public` column for now; the review UI should surface
-  mismatches (bucket='public' but public≠1 and vice versa). UI-level coupling when toggling.
-- Mass updated_at bump on dictionaries rows = another restamp event (2026-07) — activity signal
-  already avoids catalog updated_at, but note it here for posterity.
+- Bucket is NOT auto-coupled to the `public` column; the review UI surfaces mismatches. See
+  `.issues/dictionary-public-vs-bucket-consolidation.md` for the direction to make bucket the single
+  visibility truth.
+- Bulk `updated_at` bumps on dictionaries rows are restamp events — the activity signal avoids
+  catalog `updated_at`.
+- Side-quests spun off: `.issues/admin-media-storage-dashboard.md`,
+  `.issues/sandbox-playground-dictionaries.md`.

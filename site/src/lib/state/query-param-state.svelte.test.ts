@@ -123,6 +123,38 @@ describe(createQueryParamStore, () => {
     expect(last(emissions)).toEqual({ page: 1, query: 'anno' })
   })
 
+  test('an in-place mutation of the emitted object still emits (bind:value path)', () => {
+    // Svelte compiles `bind:value={$store.query}` to "mutate the object the store
+    // last emitted, then call set(sameObject)". The dedupe baseline must not alias
+    // that object, or the URL echo deep-equals the pre-mutated baseline and the
+    // emit is skipped — typing in search / flipping pages did nothing (2026-07-09).
+    const store = make_store()
+    const emissions: Params[] = []
+    subscribe(store, value => emissions.push(value))
+
+    const bound_object = last(emissions) // `{}` — the URL effect's initial run coerces the absent param
+    bound_object.query = 'anno'
+    store.set(bound_object)
+    flushSync()
+
+    expect(last(emissions)).not.toBe(bound_object)
+    expect(last(emissions)).toEqual({ query: 'anno' })
+
+    // Second keystroke-style mutation on the freshly emitted object
+    const rebound_object = last(emissions)
+    rebound_object.query = 'annog'
+    store.set(rebound_object)
+    flushSync()
+    expect(last(emissions)).toEqual({ query: 'annog' })
+
+    // Pagination-style mutation
+    const paged_object = last(emissions)
+    paged_object.page = 2
+    store.set(paged_object)
+    flushSync()
+    expect(last(emissions)).toEqual({ page: 2, query: 'annog' })
+  })
+
   test('reflects an external navigation to a genuinely new value', () => {
     const store = make_store()
     const emissions: Params[] = []

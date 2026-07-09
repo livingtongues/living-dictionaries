@@ -1,9 +1,9 @@
 import type { DictionaryView } from '$lib/types'
-import { prepareDictionaryForCsv } from './prepare-dictionaries-for-csv'
+import { prepare_dictionary_for_csv } from './prepare-dictionaries-for-csv'
 
 const timestamp = new Date('2021-08-02T14:00:00.000Z').toISOString()
 
-describe(prepareDictionaryForCsv, () => {
+describe(prepare_dictionary_for_csv, () => {
   const dictionaries: Partial<DictionaryView>[] = [
     {
       glottocode: 'badh1238',
@@ -61,7 +61,7 @@ describe(prepareDictionaryForCsv, () => {
 
   dictionaries.forEach((dictionary, index) => {
     test(`dictionary example ${index + 1}`, () => {
-      expect(prepareDictionaryForCsv(dictionary as DictionaryView)).toMatchSnapshot()
+      expect(prepare_dictionary_for_csv(dictionary as DictionaryView)).toMatchSnapshot()
     })
   })
 })

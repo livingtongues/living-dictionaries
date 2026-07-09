@@ -1,4 +1,4 @@
-export function downloadBlob(blob: Blob, title: string, extension: string) {
+export function download_blob(blob: Blob, title: string, extension: string) {
   const d = new Date()
   const date = `${d.getMonth() + 1}_${d.getDate()}_${d.getFullYear()}`
   const exportedFilename = `${title}_${date}${extension}`
