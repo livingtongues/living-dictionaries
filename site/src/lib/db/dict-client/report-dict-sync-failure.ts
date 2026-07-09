@@ -178,6 +178,34 @@ export function report_dict_storage_reopened({ dict_id, attempt }: { dict_id: st
   }
 }
 
+/**
+ * Ship a "FK self-heal" marker (`sync_self_healed`) — the instance detected the
+ * FK-wedge class (2 consecutive `fk_constraint` apply failures, or the one-time
+ * seq-cursor transition) and is rebuilding from a fresh snapshot. THE row to
+ * look for when verifying wedged editors recovered after the 2026-07-09 fix.
+ */
+export function report_dict_self_healed({ dict_id, reason, flushed_push }: {
+  dict_id: string
+  reason: 'fk_wedge' | 'seq_cursor_transition'
+  flushed_push: boolean
+}): void {
+  try {
+    void api_log({
+      entries: [{
+        level: 'warn',
+        message: 'sync_self_healed',
+        client_time: new Date().toISOString(),
+        user_agent: safe_user_agent(),
+        platform: 'web',
+        app_version: version ?? null,
+        context: { worker: true, engine: 'dict', dict_id, reason, flushed_push, session_id: worker_session_id ?? undefined },
+      }],
+    })
+  } catch {
+    // Never let telemetry break the recovery path.
+  }
+}
+
 /** Test-only. */
 export function _reset_dict_failure_throttle_for_tests(): void {
   last_shipped = null

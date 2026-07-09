@@ -133,12 +133,30 @@ export async function build_and_upload_snapshot(dict_id: string) {
   // refetch) anyway, so they can never be needed for a pull again — without
   // pruning, the deletes log grows forever. (DELETE on `deletes` is inert:
   // the cascade trigger is AFTER INSERT only, and no lmod trigger watches it.)
+  // Record the highest pruned seq in `db_metadata.pruned_up_to_seq` FIRST —
+  // that's what the /changes endpoint compares cursors against to 410
+  // `snapshot_expired` (cursors are server_seq values, not timestamps).
   const cutoff = new Date(Date.now() - SNAPSHOT_EXPIRED_DAYS * 24 * 60 * 60 * 1000).toISOString()
   const source_has_deletes = dict_db.prepare(
     `SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'deletes'`,
   ).get()
-  if (source_has_deletes)
+  if (source_has_deletes) {
+    // Only on a migrated source (counter table present ⇒ deletes.server_seq +
+    // db_metadata exist too) — tolerate a pre-20260709 file.
+    const source_has_counter = dict_db.prepare(
+      `SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'server_seq_counter'`,
+    ).get()
+    if (source_has_counter) {
+      const pruned = dict_db.prepare(`SELECT MAX(server_seq) AS max_seq FROM deletes WHERE updated_at < ?`).get(cutoff) as { max_seq: number | null }
+      if (pruned.max_seq !== null) {
+        dict_db.prepare(
+          `INSERT INTO db_metadata (key, value) VALUES ('pruned_up_to_seq', ?)
+           ON CONFLICT(key) DO UPDATE SET value = MAX(CAST(value AS INTEGER), CAST(excluded.value AS INTEGER))`,
+        ).run(String(pruned.max_seq))
+      }
+    }
     dict_db.prepare(`DELETE FROM deletes WHERE updated_at < ?`).run(cutoff)
+  }
 
   const temp_path = join(tmpdir(), `snapshot-${dict_id}-${crypto.randomUUID()}.db`)
   try {
@@ -159,6 +177,11 @@ export async function build_and_upload_snapshot(dict_id: string) {
       if (has_deletes)
         temp_db.exec('DELETE FROM deletes')
 
+      // Bake the snapshot's own sync cursor into it: everything in this file has
+      // server_seq ≤ the counter, so a client booting from it starts pulling from
+      // exactly here (`db_metadata.synced_seq` is the key the engine reads).
+      bake_synced_seq(temp_db)
+
       // `backup()` preserves the source's WAL-mode header (writer/read version 2);
       // the browser's single-file OPFS sync-access-handle VFS can only open a
       // rollback-journal file (version 1). Flip it to DELETE so the header is
@@ -175,6 +198,25 @@ export async function build_and_upload_snapshot(dict_id: string) {
   } finally {
     try { await unlink(temp_path) } catch { /* best-effort */ }
   }
+}
+
+/**
+ * Write the counter's current value into a SNAPSHOT COPY's
+ * `db_metadata.synced_seq` so booting clients know their pull cursor. Exported
+ * for the editor `/db` endpoint, which builds its snapshot the same way.
+ * Tolerates a pre-20260709 source (no counter table) by skipping.
+ */
+export function bake_synced_seq(snapshot_db: Database.Database): void {
+  const has_counter = snapshot_db.prepare(
+    `SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'server_seq_counter'`,
+  ).get()
+  if (!has_counter)
+    return
+  const counter = snapshot_db.prepare(`SELECT seq FROM server_seq_counter`).get() as { seq: number } | undefined
+  snapshot_db.prepare(
+    `INSERT INTO db_metadata (key, value) VALUES ('synced_seq', ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+  ).run(String(counter?.seq ?? 0))
 }
 
 async function upload_to_r2({ key, bytes }: { key: string, bytes: Uint8Array }) {

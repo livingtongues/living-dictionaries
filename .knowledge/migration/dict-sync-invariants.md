@@ -76,3 +76,38 @@ sync-pulled deletes DO propagate).
 - If you add a writable scope sharing one dict.db, scope the drain to that scope's tables.
 - Keep the snapshot's `DELETE FROM deletes` and the server-side hard-delete trigger together: dropping
   either reintroduces the resurrection/re-push bug.
+
+## 2026-07-09 — server_seq cursor (the FK-wedge root fix)
+
+**Never pull by `updated_at` again.** LWW keeps the CLIENT-supplied `updated_at` on merge, so a
+pushed row could land BELOW another client's cursor and stay invisible to it forever; when a child
+of that row later rode down, the peer's deferred-FK check failed at apply-COMMIT and every sync
+rolled back (2 admins + 3 sugtstun editors wedged in prod; issue
+`sync-fk-wedge-server-seq-and-self-heal.md`). Both engines now pull `WHERE server_seq > cursor` —
+a per-DB trigger-maintained monotonic counter (`server_seq_counter`), stamped on every
+insert/update of every syncable table + `deletes`. `updated_at` is ONLY the LWW arbiter.
+
+Non-obvious facts locked in by `server-seq.test.ts` and the migration comments:
+- **FK actions fire triggers regardless of `recursive_triggers` and nesting** — a
+  `DELETE … ON DELETE SET NULL` cascade initiated INSIDE `process_delete_cascade` still runs the
+  seq-assignment trigger on the touched row (verified empirically; this is what keeps
+  cascade-nulled rows visible to pulls).
+- Server strips a pushed `server_seq` (like `dirty`) and reassigns — a client value could hide the
+  row below peers' cursors.
+- Client-side the same triggers run but their values are meaningless; the cursor comes ONLY from
+  the response (`db_metadata.synced_seq`). Fresh snapshots carry a baked `synced_seq` (R2 builder +
+  `/db` endpoint — the `/db` endpoint also now strips `deletes`, fixing an editor-bootstrap
+  re-push storm).
+- `snapshot_expired` is exact now: builder records `pruned_up_to_seq` before pruning tombstones;
+  `/changes` 410s when `cursor < pruned_up_to_seq`.
+- **Self-heal at 2 consecutive `fk_constraint` failures** (breaker still halts at 3): admin engine
+  = full resync with prune (any null-cursor sync prunes non-dirty local rows absent from the
+  response); dict instance = `rebuild()` (flush-push-only → snapshot reset; a failed sync already
+  pushed its dirty rows — the failure is the LOCAL apply). Telemetry: `sync_self_healed`.
+- One-time transition: old ISO cursors are ignored; admin clients full-pull+prune, dict OPFS files
+  without `synced_seq` (but with `last_modified_at`) trigger the transition rebuild at boot.
+- RESIDUAL (accepted): the dict engine's cursor-null full pull doesn't prune stale local rows
+  (tombstones aren't sent for null cursors) — only reachable via MemoryVFS boots and the
+  stale-snapshot transition window; the admin engine DOES prune.
+
+**house + tutor have the same LWW-timestamp pull hole** — port this fix (spawn parity sessions).

@@ -23,7 +23,7 @@ const base_sync = {
   blocked_by_client_behind: false,
   last_error: null as string | null,
   total_dirty: 0,
-  watermark: '2026-05-29T14:55:01.234Z',
+  watermark: 48213,
   last_sync_result: {
     success: true,
     items_uploaded: 0,
@@ -32,6 +32,7 @@ const base_sync = {
     deletes_pulled: 1,
     duration_ms: 612,
     error: null,
+    last_sync_time: '2026-05-29T14:55:01.234Z',
   },
   log_entries,
   history: {

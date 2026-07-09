@@ -41,6 +41,7 @@ export const deletes = sqliteTable('deletes', {
   table_name: text().notNull(),
   id: text().notNull(),
   updated_at: text().notNull(),
+  server_seq: integer(),
 })
 
 export const users = sqliteTable('users', {
@@ -89,6 +90,7 @@ export const users = sqliteTable('users', {
   notify_channel: text({ enum: ['email', 'ntfy'] }).notNull().default('email'),
   created_at: text().notNull(),
   updated_at: text().notNull(),
+  server_seq: integer(),
 })
 
 /** Email-OTP one-time codes. Server-only — stays empty on admin clients. */
@@ -174,6 +176,7 @@ export const dictionaries = sqliteTable('dictionaries', {
   updated_at: text().notNull(),
   updated_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),
   dirty: integer(),
+  server_seq: integer(),
 })
 
 /**
@@ -187,6 +190,7 @@ export const dictionary_roles = sqliteTable('dictionary_roles', {
   role: text({ enum: ['manager', 'editor', 'contributor'] }).notNull(),
   invited_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),
   dirty: integer(),
+  server_seq: integer(),
   created_at: text().notNull(),
   updated_at: text().notNull(),
 })
@@ -203,6 +207,7 @@ export const dictionary_partners = sqliteTable('dictionary_partners', {
   photo_storage_path: text(),
   photo_serving_url: text(),
   dirty: integer(),
+  server_seq: integer(),
   created_at: text().notNull(),
   updated_at: text().notNull(),
 })
@@ -217,6 +222,7 @@ export const invites = sqliteTable('invites', {
   role: text({ enum: ['manager', 'editor', 'contributor'] }).notNull(),
   status: text({ enum: ['queued', 'sent', 'claimed', 'cancelled'] }).notNull(),
   dirty: integer(),
+  server_seq: integer(),
   created_at: text().notNull(),
   updated_at: text().notNull(),
 })
@@ -241,6 +247,7 @@ export const message_threads = sqliteTable('message_threads', {
   resolved_at: text(),
   resolved_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),
   dirty: integer(),
+  server_seq: integer(),
   created_at: text().notNull(),
   updated_at: text().notNull(),
   assigned_to_user_id: text().references(() => users.id, { onDelete: 'set null' }),
@@ -279,6 +286,7 @@ export const messages = sqliteTable('messages', {
   /** Comma-joined Bcc list on outbound admin messages (display-only). */
   bcc: text(),
   dirty: integer(),
+  server_seq: integer(),
   created_at: text().notNull(),
   updated_at: text().notNull(),
   sent_at: text(),
@@ -296,6 +304,7 @@ export const message_attachments = sqliteTable('message_attachments', {
   disposition: text({ enum: ['attachment', 'inline'] }).notNull(),
   storage_key: text().notNull(),
   dirty: integer(),
+  server_seq: integer(),
   created_at: text().notNull(),
   updated_at: text().notNull(),
 })

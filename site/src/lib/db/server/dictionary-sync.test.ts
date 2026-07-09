@@ -1,6 +1,6 @@
 import type { DictChangesRequest } from './dictionary-sync-helpers'
 import { open_dictionary_db_in_memory } from './dictionary-db'
-import { DICT_NATURAL_KEY_COLUMNS, process_dict_changes } from './dictionary-sync-helpers'
+import { DICT_NATURAL_KEY_COLUMNS, process_dict_changes, read_server_seq_counter } from './dictionary-sync-helpers'
 
 describe('dictionary.db push + pull', () => {
   test('fresh dict + push entry → row lands + last_modified_at advances', () => {
@@ -124,7 +124,7 @@ describe('dictionary.db push + pull', () => {
     const db = open_dictionary_db_in_memory('test_dict')
     const now = new Date().toISOString()
 
-    process_dict_changes({
+    const create_response = process_dict_changes({
       db,
       request: {
         synced_up_to: null,
@@ -158,7 +158,7 @@ describe('dictionary.db push + pull', () => {
     process_dict_changes({
       db,
       request: {
-        synced_up_to: now,
+        synced_up_to: create_response.new_synced_up_to,
         dirty_rows: {},
         deletes: [{ table_name: 'entries', id: 'entry_doomed' }],
         latest_dict_migration: '20260606_initial.sql',
@@ -177,7 +177,7 @@ describe('dictionary.db push + pull', () => {
     const peer_response = process_dict_changes({
       db,
       request: {
-        synced_up_to: '2026-01-01T00:00:00.000Z',
+        synced_up_to: 0,
         dirty_rows: {},
         deletes: [],
         latest_dict_migration: '20260606_initial.sql',
@@ -465,8 +465,11 @@ describe('junction natural-key dedup echoes the loser delete + canonical row (cl
     db.prepare(`INSERT INTO entry_tags (id, entry_id, tag_id, created_by_user_id, updated_by_user_id, created_at, updated_at) VALUES ('link_A', 'e1', 't1', 'u1', 'u1', ?, ?)`).run(at, at)
   }
 
-  const loser_push = (updated_at: string): DictChangesRequest => ({
-    synced_up_to: at,
+  // Cursor = the post-seed counter (the pushing client has already synced the
+  // seed rows), so nothing seeded rides back as a "change" — matching the old
+  // timestamp-cursor setup.
+  const loser_push = (updated_at: string, db: ReturnType<typeof open_dictionary_db_in_memory>): DictChangesRequest => ({
+    synced_up_to: read_server_seq_counter(db),
     dirty_rows: { entry_tags: [{ id: 'link_B', entry_id: 'e1', tag_id: 't1', created_by_user_id: 'b', created_at: updated_at, updated_by_user_id: 'b', updated_at }] },
     deletes: [],
     latest_dict_migration: '20260606_initial.sql',
@@ -476,7 +479,7 @@ describe('junction natural-key dedup echoes the loser delete + canonical row (cl
     const db = open_dictionary_db_in_memory('test_dict')
     seed(db)
 
-    const response = process_dict_changes({ db, request: loser_push(newer), user_id: 'b', is_editor: true })
+    const response = process_dict_changes({ db, request: loser_push(newer, db), user_id: 'b', is_editor: true })
 
     // Loser delete echoed (so the pushing client drops its local copy BEFORE
     // upserting the canonical row — otherwise it wedges on the UNIQUE key)…
@@ -496,7 +499,7 @@ describe('junction natural-key dedup echoes the loser delete + canonical row (cl
     // Make the canonical row NEWER than the pushed loser.
     db.prepare(`UPDATE entry_tags SET updated_at = ? WHERE id = 'link_A'`).run(newer)
 
-    const response = process_dict_changes({ db, request: loser_push(at), user_id: 'b', is_editor: true })
+    const response = process_dict_changes({ db, request: loser_push(at, db), user_id: 'b', is_editor: true })
 
     expect(response.deletes).toContainEqual({ table_name: 'entry_tags', id: 'link_B' })
     expect((response.changes.entry_tags ?? []).map(row => row.id)).toContain('link_A')

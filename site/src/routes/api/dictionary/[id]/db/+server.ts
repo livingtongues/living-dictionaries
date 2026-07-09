@@ -9,6 +9,7 @@ import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
+import { bake_synced_seq } from '$lib/db/server/r2-snapshot-builder'
 import { error } from '@sveltejs/kit'
 
 /**
@@ -50,6 +51,19 @@ export const GET: RequestHandler = async (event) => {
     // OPFS-openable (else the client falls back to MemoryVFS + re-downloads).
     const temp_db = new Database(temp_path)
     try {
+      // Strip the durable tombstone log (parity with the R2 builder): the client
+      // `deletes` table doubles as its PUSH QUEUE, so leaving the server's history
+      // in would make this editor re-push every historical tombstone on first
+      // sync — re-bumping their server_seq and re-fanning them out to every peer.
+      const has_deletes = temp_db.prepare(
+        `SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'deletes'`,
+      ).get()
+      if (has_deletes)
+        temp_db.exec('DELETE FROM deletes')
+
+      // Bake the pull cursor (db_metadata.synced_seq) — parity with the R2 builder.
+      bake_synced_seq(temp_db)
+
       temp_db.pragma('journal_mode = DELETE')
     } finally {
       temp_db.close()

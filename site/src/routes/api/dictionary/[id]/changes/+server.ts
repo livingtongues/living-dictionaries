@@ -1,19 +1,27 @@
 import type { RequestHandler } from './$types'
 import type { DictChangesRequest, DictChangesResponse } from '$lib/db/server/dictionary-sync-helpers'
+import type Database from 'better-sqlite3'
 import { verify_auth } from '$lib/auth/verify'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
-import { ResponseCodes, SNAPSHOT_EXPIRED_DAYS } from '$lib/constants'
+import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_dictionary_db, LATEST_DICT_MIGRATION, read_last_modified_at } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
-import { process_dict_changes, strip_sql_ext } from '$lib/db/server/dictionary-sync-helpers'
+import { process_dict_changes, read_server_seq_counter, strip_sql_ext } from '$lib/db/server/dictionary-sync-helpers'
 import { mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
 export type { DictChangesRequest, DictChangesResponse }
 
-const DAY_MS = 24 * 60 * 60 * 1000
+/** Highest tombstone seq the snapshot builder has pruned, or null if never pruned. */
+function read_pruned_up_to_seq(db: Database.Database): number | null {
+  const row = db.prepare(`SELECT value FROM db_metadata WHERE key = 'pruned_up_to_seq'`).get() as { value: string } | undefined
+  if (!row?.value)
+    return null
+  const seq = Number(row.value)
+  return Number.isFinite(seq) ? seq : null
+}
 
 /**
  * POST /api/dictionary/[id]/changes
@@ -64,24 +72,29 @@ export const POST: RequestHandler = async (event) => {
   }
 
   const dict_db = get_dictionary_db(dict_id)
-  const last_modified_at = read_last_modified_at(dict_db)
+  const counter = read_server_seq_counter(dict_db)
+  const cursor = typeof body.synced_up_to === 'number' ? body.synced_up_to : null
 
-  // Fast bail: nothing to push AND nothing changed on the server since cursor.
+  // Fast bail: nothing to push AND nothing written on the server since cursor.
   // MUST NOT bail when the editor has dirty rows/tombstones to push, or the
   // push is silently dropped (cursor often equals the server watermark).
-  if (!has_push && last_modified_at && body.synced_up_to && last_modified_at <= body.synced_up_to) {
+  if (!has_push && cursor !== null && counter <= cursor) {
     const fast_bail: DictChangesResponse = {
-      new_synced_up_to: body.synced_up_to,
+      new_synced_up_to: cursor,
       changes: {},
       deletes: [],
     }
     return json(fast_bail)
   }
 
-  // Snapshot expired check (Story C.6).
-  if (last_modified_at && body.synced_up_to) {
-    const gap_ms = new Date(last_modified_at).getTime() - new Date(body.synced_up_to).getTime()
-    if (gap_ms > SNAPSHOT_EXPIRED_DAYS * DAY_MS)
+  // Snapshot expired check (Story C.6). The snapshot builder prunes tombstones
+  // older than SNAPSHOT_EXPIRED_DAYS and records the highest pruned seq in
+  // db_metadata.pruned_up_to_seq — a cursor below that may have missed a pruned
+  // delete, so the client must refetch a fresh snapshot. Exact replacement for
+  // the old date-gap heuristic (cursors are seqs now, not timestamps).
+  if (cursor !== null) {
+    const pruned_up_to_seq = read_pruned_up_to_seq(dict_db)
+    if (pruned_up_to_seq !== null && cursor < pruned_up_to_seq)
       error(ResponseCodes.GONE, 'snapshot_expired')
   }
 
@@ -115,9 +128,11 @@ export const POST: RequestHandler = async (event) => {
 
   // Mirror to shared.db.dictionaries.updated_at + refresh entry_count +
   // snapshot_uploaded_at gate (Q5 cross-DB cascade). Only when an editor
-  // actually pushed something.
-  if (is_editor && response.new_synced_up_to !== body.synced_up_to)
-    mirror_dictionary_cursor({ dict_id, cursor: response.new_synced_up_to })
+  // actually pushed something. The mirror stays an ISO timestamp (it lives in
+  // shared.db `dictionaries.updated_at` — the catalog_updated_at_mirror), so it
+  // reads the post-write `last_modified_at`, NOT the seq cursor.
+  if (is_editor && has_push)
+    mirror_dictionary_cursor({ dict_id, cursor: read_last_modified_at(dict_db) })
 
   return json(response)
 }

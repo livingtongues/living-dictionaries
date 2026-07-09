@@ -25,6 +25,7 @@ export type SyncFailureKind
     | 'snapshot_expired'
     | 'storage_lost'
     | 'not_found'
+    | 'fk_constraint'
     | 'other'
 
 /** Suppress repeat-identical throttled-kind rows (same kind+message) within this window. */
@@ -92,6 +93,13 @@ export function classify_sync_failure(error: unknown): SyncFailureKind {
     return 'storage_lost'
   const message = (error as { message?: unknown } | null | undefined)?.message
   if (typeof message === 'string') {
+    // The local apply-transaction rolled back on a deferred-FK check — the
+    // client's delta view is missing a parent row (the FK-wedge class, see
+    // .issues/sync-fk-wedge-server-seq-and-self-heal.md). Named so the engines
+    // can SELF-HEAL on the 2nd consecutive occurrence (full resync / snapshot
+    // rebuild) instead of wedging until the breaker's dead "reload" prompt.
+    if (/FOREIGN KEY constraint failed/i.test(message))
+      return 'fk_constraint'
     if (/not a database|disk image is malformed|file is not a database|\bcorrupt/i.test(message))
       return 'corruption'
     // Fallback for paths that lost the numeric `status` (e.g. the main-thread
@@ -228,9 +236,14 @@ if (import.meta.vitest) {
       expect(classify_sync_failure(new Error('The access handle was already closed.'))).toBe('storage_lost')
       expect(classify_sync_failure(new Error('The database connection is closing.'))).toBe('storage_lost')
     })
+    test('a client-side FK apply failure is fk_constraint — named so the engines self-heal', () => {
+      expect(classify_sync_failure(new Error('FOREIGN KEY constraint failed'))).toBe('fk_constraint')
+      expect(classify_sync_failure(new Error('Sync failed: FOREIGN KEY constraint failed'))).toBe('fk_constraint')
+    })
+
     test('everything else is other', () => {
-      expect(classify_sync_failure(new Error('FOREIGN KEY constraint failed'))).toBe('other')
       expect(classify_sync_failure(null)).toBe('other')
+      expect(classify_sync_failure(new Error('something exotic'))).toBe('other')
     })
   })
 
@@ -244,6 +257,7 @@ if (import.meta.vitest) {
       expect(sync_failure_level('storage_lost')).toBe('warn')
       expect(sync_failure_level('corruption')).toBe('error')
       expect(sync_failure_level('not_found')).toBe('error')
+      expect(sync_failure_level('fk_constraint')).toBe('error')
       expect(sync_failure_level('other')).toBe('error')
     })
   })
@@ -292,6 +306,9 @@ if (import.meta.vitest) {
       expect(is_transient_failure('client_behind')).toBe(false)
       expect(is_transient_failure('corruption')).toBe(false)
       expect(is_transient_failure('not_found')).toBe(false)
+      // fk_constraint is non-transient: the engines self-heal at 2 consecutive,
+      // and the breaker still halts at 3 if healing itself fails.
+      expect(is_transient_failure('fk_constraint')).toBe(false)
       expect(is_transient_failure('other')).toBe(false)
     })
   })

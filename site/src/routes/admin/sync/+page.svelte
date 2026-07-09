@@ -197,13 +197,15 @@
     <table class="watermark-table">
       <thead>
         <tr class="watermark-thead">
-          <th class="watermark-th">Last synced up to</th>
+          <th class="watermark-th">Cursor (server seq)</th>
+          <th class="watermark-th">Last successful sync</th>
           <th class="watermark-th align-right">Pending (dirty)</th>
         </tr>
       </thead>
       <tbody>
         <tr class="watermark-row">
-          <td class="watermark-td muted" title={sync.watermark ?? ''}>{format_relative_time(sync.watermark) || '—'}</td>
+          <td class="watermark-td tabular">{sync.watermark != null ? `#${sync.watermark}` : '—'}</td>
+          <td class="watermark-td muted" title={sync.last_sync_result?.last_sync_time ?? ''}>{format_relative_time(sync.last_sync_result?.last_sync_time) || '—'}</td>
           <td class="watermark-td align-right tabular">{sync.total_dirty}</td>
         </tr>
       </tbody>

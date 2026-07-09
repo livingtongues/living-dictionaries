@@ -91,6 +91,15 @@ export interface SyncEngineOptions {
    * reload / contact us". Cleared only by building a fresh engine.
    */
   on_repeated_failure?: (info: { message: string, consecutive: number }) => void
+  /**
+   * Fires ONCE on the 2nd consecutive `fk_constraint` apply failure — the
+   * client's local DB is missing a parent row (the FK-wedge class, see
+   * .issues/sync-fk-wedge-server-seq-and-self-heal.md), so retrying re-hits the
+   * same COMMIT rollback forever. Fires BEFORE the breaker halts at 3 so the
+   * instance can SELF-HEAL: flush any pending push, then reset to a fresh
+   * snapshot (`rebuild()` in dict-instance).
+   */
+  on_integrity_wedged?: () => void
 }
 
 export class DictSyncEngine {
@@ -105,6 +114,8 @@ export class DictSyncEngine {
   #on_storage_lost?: () => void
   #on_version_blocked?: () => void
   #on_repeated_failure?: (info: { message: string, consecutive: number }) => void
+  #on_integrity_wedged?: () => void
+  #integrity_wedged_fired = false
 
   #timer: ReturnType<typeof setInterval> | null = null
   #stuck_timer: ReturnType<typeof setInterval> | null = null
@@ -140,6 +151,7 @@ export class DictSyncEngine {
     this.#on_storage_lost = options.on_storage_lost
     this.#on_version_blocked = options.on_version_blocked
     this.#on_repeated_failure = options.on_repeated_failure
+    this.#on_integrity_wedged = options.on_integrity_wedged
   }
 
   /** True once a `schema_outdated` block has latched (see `#version_blocked`). */
@@ -277,7 +289,16 @@ export class DictSyncEngine {
         // non-transient failure N× in a row means retrying is pointless and
         // noisy — halt and prompt the user instead of silently looping.
         const message = (err as Error).message ?? String(err)
-        const { halt, consecutive } = this.#repeat_tracker.record({ kind: classify_sync_failure(err), message })
+        const kind = classify_sync_failure(err)
+        const { halt, consecutive } = this.#repeat_tracker.record({ kind, message })
+        // FK self-heal: 2nd consecutive fk_constraint → hand recovery to the
+        // instance (flush push + reset to a fresh snapshot) BEFORE the breaker
+        // halts at 3. Once per engine lifetime — the rebuild constructs a fresh
+        // engine; if the heal fails the breaker takes over as before.
+        if (kind === 'fk_constraint' && consecutive >= 2 && !this.#integrity_wedged_fired) {
+          this.#integrity_wedged_fired = true
+          this.#on_integrity_wedged?.()
+        }
         if (halt && !this.#repeated_failure_blocked) {
           this.#repeated_failure_blocked = true
           this.#on_repeated_failure?.({ message, consecutive })
@@ -291,7 +312,7 @@ export class DictSyncEngine {
   }
 
   async #build_request(): Promise<DictChangesRequest> {
-    const synced_up_to = await this.#read_metadata('last_modified_at')
+    const synced_up_to = await this.#read_cursor()
 
     const dirty_rows: DictChangesRequest['dirty_rows'] = {}
     const deletes: DictChangesRequest['deletes'] = []
@@ -448,9 +469,9 @@ export class DictSyncEngine {
       // UPDATE`, never `INSERT OR REPLACE` (delete+reinsert breaks upsert
       // semantics under triggers — shared sync invariant).
       await this.#connection.execute(
-        `INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', ?)
+        `INSERT INTO db_metadata (key, value) VALUES ('synced_seq', ?)
          ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
-        [response.new_synced_up_to],
+        [String(response.new_synced_up_to)],
       )
 
       await this.#connection.execute('COMMIT')
@@ -479,11 +500,40 @@ export class DictSyncEngine {
     )
   }
 
-  async #read_metadata(key: string): Promise<string | null> {
+  /**
+   * The pull cursor: `db_metadata.synced_seq` — written by every sync apply,
+   * and BAKED into fresh snapshots by the server (R2 builder + /db endpoint),
+   * so a snapshot boot starts pulling from exactly the snapshot's high-water
+   * mark. Absent on a pre-server_seq local file (the old ISO cursor under
+   * `last_modified_at` is ignored) → null → the instance's transition rebuild
+   * handles it (OPFS) or a full pull backfills (MemoryVFS).
+   */
+  async #read_cursor(): Promise<number | null> {
     const rows = await this.#connection.query<{ value: string }>(
       `SELECT value FROM db_metadata WHERE key = ?`,
-      [key],
+      ['synced_seq'],
     )
-    return rows[0]?.value ?? null
+    if (!rows[0]?.value)
+      return null
+    const seq = Number(rows[0].value)
+    return Number.isFinite(seq) ? seq : null
+  }
+
+  /**
+   * Push-only flush used by the instance's `rebuild()` self-heal: send dirty
+   * rows + tombstones so the server has them, but DON'T apply the response —
+   * the local DB is about to be discarded for a fresh snapshot (applying is
+   * what keeps failing in the FK-wedge state). Throws on transport/server
+   * failure so the caller can abort the rebuild rather than lose local work.
+   * No-op (returns false) when there's nothing pending.
+   */
+  async flush_push_only(): Promise<boolean> {
+    const request = await this.#build_request()
+    const has_pending = Object.values(request.dirty_rows ?? {}).some(rows => rows && rows.length > 0)
+      || (request.deletes?.length ?? 0) > 0
+    if (!has_pending)
+      return false
+    await this.#post(request)
+    return true
   }
 }

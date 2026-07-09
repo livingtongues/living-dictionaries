@@ -58,7 +58,7 @@ describe(process_sync, () => {
     db.prepare(`INSERT INTO dictionaries (id, name, updated_at) VALUES ('d1', 'Demo', '2026-06-29T00:00:00.000Z')`).run()
 
     const request = empty_request()
-    request.synced_up_to = '2026-06-28T00:00:00.000Z'
+    request.synced_up_to = 0
     const response = process_sync({ db, request, user_id: 'admin-1' })
     expect(response.changes.dictionaries?.find(row => row.id === 'd1')).toBeDefined()
   })
@@ -74,8 +74,10 @@ describe('dictionary_roles natural-key dedup (adopt-canonical + loser echo)', ()
     db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES (?, 'd1', 'u1', 'editor', ?, ?)`).run(role_id, at, at)
   }
 
+  // Cursor 0 = "behind everything" (the old timestamp cursor was T0; a low seq
+  // has the same "client is behind the seeded rows" meaning).
   const role_push = (id: string, at: string): SyncRequest => ({
-    synced_up_to: T0,
+    synced_up_to: 0,
     dirty_rows: { dictionary_roles: [{ id, dictionary_id: 'd1', user_id: 'u1', role: 'editor', invited_by_user_id: null, dirty: 1, created_at: at, updated_at: at }] },
     deletes: [],
     latest_migration: latest_shared_migration_name,
@@ -121,5 +123,51 @@ describe('dictionary_roles natural-key dedup (adopt-canonical + loser echo)', ()
     // NOT resurrected; the delete is echoed so the stale client drops it too.
     expect(db.prepare(`SELECT 1 FROM dictionary_roles WHERE id = 'role_A'`).get()).toBeFalsy()
     expect(response.deletes).toContainEqual({ table_name: 'dictionary_roles', id: 'role_A' })
+  })
+})
+
+// Port of the dict engine's FK-orphan push recovery (2026-07-09): one dangling
+// pushed child row must not roll back (and 500) the WHOLE admin round trip.
+describe('FK-orphan push recovery (skip + report)', () => {
+  const T0 = '2026-07-09T00:00:00.000Z'
+
+  test('skips the dangling child, lands the rest, reports it in skipped_orphans', () => {
+    db.prepare(`INSERT INTO users (id, email, providers) VALUES ('u1', 'u1@example.com', '[]')`).run()
+    db.prepare(`INSERT INTO dictionaries (id, name) VALUES ('d1', 'Demo')`).run()
+
+    const request = empty_request()
+    request.synced_up_to = 0
+    request.dirty_rows = {
+      // Lands: parents exist.
+      dictionary_roles: [
+        { id: 'role_good', dictionary_id: 'd1', user_id: 'u1', role: 'editor', invited_by_user_id: null, dirty: 1, created_at: T0, updated_at: T0 },
+        // Orphan: dictionary 'ghost-dict' does not exist server-side.
+        { id: 'role_orphan', dictionary_id: 'ghost-dict', user_id: 'u1', role: 'editor', invited_by_user_id: null, dirty: 1, created_at: T0, updated_at: T0 },
+      ],
+    }
+
+    const response = process_sync({ db, request, user_id: 'u1' })
+
+    expect(db.prepare(`SELECT 1 FROM dictionary_roles WHERE id = 'role_good'`).get()).toBeTruthy()
+    expect(db.prepare(`SELECT 1 FROM dictionary_roles WHERE id = 'role_orphan'`).get()).toBeFalsy()
+    expect(response.skipped_orphans).toEqual([
+      { table_name: 'dictionary_roles', id: 'role_orphan', parent_table: 'dictionaries' },
+    ])
+  })
+
+  test('an FK violation NOT attributable to a pushed row still surfaces', () => {
+    // Pull-only request + a server-side violation is impossible to construct via
+    // the API, so simulate the guard directly: a push whose rows are all valid
+    // must not be blamed. (The recovery only retries when orphans came from the
+    // push — anything else rethrows the original error.)
+    db.prepare(`INSERT INTO users (id, email, providers) VALUES ('u1', 'u1@example.com', '[]')`).run()
+    db.prepare(`INSERT INTO dictionaries (id, name) VALUES ('d1', 'Demo')`).run()
+    const request = empty_request()
+    request.dirty_rows = {
+      dictionary_roles: [{ id: 'role_ok', dictionary_id: 'd1', user_id: 'u1', role: 'editor', invited_by_user_id: null, dirty: 1, created_at: T0, updated_at: T0 }],
+    }
+    const response = process_sync({ db, request, user_id: 'u1' })
+    expect(response.skipped_orphans).toBeUndefined()
+    expect(db.prepare(`SELECT 1 FROM dictionary_roles WHERE id = 'role_ok'`).get()).toBeTruthy()
   })
 })

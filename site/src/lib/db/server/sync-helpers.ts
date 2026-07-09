@@ -82,13 +82,14 @@ function find_natural_key_owner_id<K extends SyncableTableName>({ db, table_name
  *
  * WATERMARK VOCABULARY — this file's `synced_up_to` / `new_synced_up_to` is the
  * **admin_catalog_cursor**: an admin client's high-water mark over `shared.db`'s
- * catalog + messaging tables, computed as `MAX(updated_at)` across
- * `SYNCABLE_TABLE_NAMES` (`compute_max_updated_at`). It is a DIFFERENT cursor
- * from the per-dict content watermark in `dictionary-sync-helpers.ts`
- * (`dict_content_cursor`, keyed off that dict.db's `db_metadata.last_modified_at`)
- * and from the `catalog_updated_at_mirror` that `v1-route-context.ts` writes onto
- * `shared.db.dictionaries.updated_at`. All three ride the column name `updated_at`
- * but live on different DBs / propagation paths — keep them straight.
+ * catalog + messaging tables. Since 2026-07-09 it is the server-assigned
+ * `server_seq` counter value (see the 20260709 migration), NOT a timestamp —
+ * client-supplied `updated_at` stamps could land below other clients' cursors
+ * and wedge them on FK checks. It is a DIFFERENT cursor from the per-dict
+ * content cursor in `dictionary-sync-helpers.ts` (that dict.db's own
+ * `server_seq_counter`) and from the `catalog_updated_at_mirror` that
+ * `v1-route-context.ts` writes onto `shared.db.dictionaries.updated_at`
+ * (still an ISO timestamp). Keep them straight.
  */
 export function process_sync({ db, request, user_id, logs_db = get_logs_db(), server_latest_migration = latest_shared_migration_name }: {
   db: Database.Database
@@ -121,6 +122,110 @@ export function process_sync({ db, request, user_id, logs_db = get_logs_db(), se
   // a later rollback.
   const tables = present_syncable_tables({ db, logs_db, user_id })
 
+  // FK-orphan recovery (mirrors `process_dict_changes`): a single pushed child
+  // row whose parent no longer exists trips the deferred-FK check at COMMIT and
+  // rolls back the WHOLE round trip — which would otherwise 500 (and poison)
+  // every subsequent sync from that client. Identify the orphans, skip them,
+  // retry, and report them in `skipped_orphans`.
+  try {
+    return apply_sync({ db, request, user_id, tables })
+  } catch (err) {
+    if (!is_foreign_key_error(err))
+      throw err
+    try {
+      const orphans = identify_orphan_push_rows({ db, request, tables })
+      if (!orphans.length)
+        throw err // Not attributable to a pushed row — surface the real fault.
+      const skip_keys = new Set(orphans.map(orphan => `${orphan.table_name}::${orphan.id}`))
+      const response = apply_sync({ db, request, user_id, tables, skip_keys })
+      response.skipped_orphans = orphans
+      return response
+    } catch {
+      throw err
+    }
+  }
+}
+
+/** better-sqlite3 throws `SqliteError` with this code on a FK-constraint failure. */
+function is_foreign_key_error(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null | undefined)?.code
+  if (code === 'SQLITE_CONSTRAINT_FOREIGNKEY')
+    return true
+  const message = (error as { message?: unknown } | null | undefined)?.message
+  return typeof message === 'string' && /FOREIGN KEY constraint failed/i.test(message)
+}
+
+/**
+ * Re-apply the push in a throwaway transaction, ask SQLite which rows dangle
+ * (`PRAGMA foreign_key_check`), and return the orphans that came from THIS
+ * push's dirty rows. Never commits — pure diagnosis (mirrors the dict-side
+ * `identify_orphan_push_rows`).
+ */
+function identify_orphan_push_rows({ db, request, tables }: {
+  db: Database.Database
+  request: SyncRequest
+  tables: readonly SyncableTableName[]
+}): { table_name: string, id: string, parent_table: string }[] {
+  const pushed = new Set<string>()
+  for (const table_name of tables) {
+    if (is_readonly_table(table_name))
+      continue
+    for (const row of request.dirty_rows[table_name] ?? [])
+      pushed.add(`${table_name}::${(row as { id: string }).id}`)
+  }
+  if (!pushed.size)
+    return []
+
+  db.pragma('defer_foreign_keys = ON')
+  db.exec('BEGIN IMMEDIATE')
+  try {
+    for (const { table_name, id } of request.deletes) {
+      if (!is_syncable_table(table_name) || is_readonly_table(table_name))
+        continue
+      db.prepare(
+        `INSERT OR REPLACE INTO deletes (table_name, id, updated_at)
+         VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+      ).run(table_name, id)
+    }
+    const throwaway: SyncResponse = { new_synced_up_to: null, changes: {}, deletes: [] }
+    for (const table_name of tables) {
+      if (is_readonly_table(table_name))
+        continue
+      for (const row of request.dirty_rows[table_name] ?? [])
+        merge_row({ db, table_name, row, response: throwaway })
+    }
+    const violations = db.pragma('foreign_key_check') as { table: string, rowid: number, parent: string, fkid: number }[]
+    const orphans: { table_name: string, id: string, parent_table: string }[] = []
+    const seen = new Set<string>()
+    for (const violation of violations) {
+      const found = db.prepare(`SELECT id FROM "${violation.table}" WHERE rowid = ?`).get(violation.rowid) as { id?: string } | undefined
+      const id = found?.id
+      if (!id)
+        continue
+      const key = `${violation.table}::${id}`
+      if (!pushed.has(key) || seen.has(key))
+        continue
+      seen.add(key)
+      orphans.push({ table_name: violation.table, id, parent_table: violation.parent })
+    }
+    return orphans
+  } finally {
+    db.exec('ROLLBACK') // Diagnosis only — never keep these writes.
+  }
+}
+
+function apply_sync({ db, request, user_id, tables, skip_keys }: {
+  db: Database.Database
+  request: SyncRequest
+  user_id?: string
+  tables: readonly SyncableTableName[]
+  /** Pushed `${table}::${id}` keys to skip merging (FK-orphan recovery). */
+  skip_keys?: ReadonlySet<string>
+}): SyncResponse {
+  // Defensive cursor normalization: a legacy ISO-string cursor (pre-server_seq
+  // bundle that somehow slipped past the migration handshake) means a full pull.
+  const cursor = typeof request.synced_up_to === 'number' ? request.synced_up_to : null
+
   db.pragma('defer_foreign_keys = ON')
   db.exec('BEGIN IMMEDIATE')
 
@@ -150,8 +255,11 @@ export function process_sync({ db, request, user_id, logs_db = get_logs_db(), se
       const rows = request.dirty_rows[table_name]
       if (!rows?.length)
         continue
-      for (const row of rows)
+      for (const row of rows) {
+        if (skip_keys?.has(`${table_name}::${row_key_of(table_name, row)}`))
+          continue // FK-orphan: skip so it can't poison the whole batch.
         merge_row({ db, table_name, row, response })
+      }
     }
 
     // Once-per-day visit ping. Runs BEFORE fetch_changes so the
@@ -164,11 +272,14 @@ export function process_sync({ db, request, user_id, logs_db = get_logs_db(), se
 
     // Fetch server changes since watermark.
     for (const table_name of tables) {
-      const rows = fetch_changes({ db, table_name, synced_up_to: request.synced_up_to })
+      const rows = fetch_changes({ db, table_name, cursor })
 
-      // Exclude rows we just merged from the client (they'd show up as "changes" otherwise).
+      // Exclude rows we just merged from the client (they'd show up as "changes"
+      // otherwise) — but NOT skipped orphans (never written, so not "just merged").
       const uploaded_ids = new Set(
-        (request.dirty_rows[table_name] ?? []).map(row => row_key_of(table_name, row)),
+        (request.dirty_rows[table_name] ?? [])
+          .map(row => row_key_of(table_name, row))
+          .filter(id => !skip_keys?.has(`${table_name}::${id}`)),
       )
       let filtered = rows.filter(row => !uploaded_ids.has(row_key_of(table_name, row)))
       filtered = filtered.map(row => strip_unknown_columns(table_name, row))
@@ -184,11 +295,11 @@ export function process_sync({ db, request, user_id, logs_db = get_logs_db(), se
 
     // Fetch server-side deletes since watermark. Skip ones where the row was
     // since re-added (rare).
-    if (request.synced_up_to) {
+    if (cursor !== null) {
       for (const table_name of tables) {
         const deletes = db.prepare(
-          `SELECT table_name, id FROM deletes WHERE table_name = ? AND updated_at > ?`,
-        ).all(table_name, request.synced_up_to) as { table_name: string, id: string }[]
+          `SELECT table_name, id FROM deletes WHERE table_name = ? AND server_seq > ?`,
+        ).all(table_name, cursor) as { table_name: string, id: string }[]
 
         for (const del of deletes) {
           const exists = db.prepare(`SELECT 1 FROM "${table_name}" WHERE "${PRIMARY_KEY[table_name]}" = ?`).get(del.id)
@@ -198,7 +309,8 @@ export function process_sync({ db, request, user_id, logs_db = get_logs_db(), se
       }
     }
 
-    response.new_synced_up_to = compute_max_updated_at({ db, tables })
+    // New cursor = the counter's current value. Exact under BEGIN IMMEDIATE.
+    response.new_synced_up_to = read_shared_server_seq_counter(db)
 
     db.exec('COMMIT')
     return response
@@ -241,17 +353,20 @@ function present_syncable_tables({ db, logs_db, user_id }: {
   return SYNCABLE_TABLE_NAMES.filter(name => existing.has(name))
 }
 
-function fetch_changes<K extends SyncableTableName>({ db, table_name, synced_up_to }: {
+function fetch_changes<K extends SyncableTableName>({ db, table_name, cursor }: {
   db: Database.Database
   table_name: K
-  synced_up_to: string | null
+  cursor: number | null
 }): SyncRow<K>[] {
-  const where_sql = synced_up_to ? `WHERE updated_at > ?` : ''
+  // Pull rides `server_seq` (server-assigned, strictly monotonic — see the
+  // 20260709 migration), NEVER `updated_at` (client-supplied LWW stamp that can
+  // land below other clients' cursors — the FK-wedge hole).
+  const where_sql = cursor !== null ? `WHERE server_seq > ?` : ''
   return query_all<SyncRow<K>>({
     db,
     table: table_name,
-    sql: `SELECT * FROM "${table_name}" ${where_sql} ORDER BY updated_at ASC`,
-    params: synced_up_to ? [synced_up_to] : [],
+    sql: `SELECT * FROM "${table_name}" ${where_sql} ORDER BY server_seq ASC`,
+    params: cursor !== null ? [cursor] : [],
   })
 }
 
@@ -330,9 +445,11 @@ function merge_row<K extends SyncableTableName>({ db, table_name, row, response 
   // Client wins — upsert (only allow known columns; stringify JSON cols).
   // When deduped onto a canonical id, upsert against THAT id so the content
   // merges onto the existing row rather than inserting a duplicate natural key.
+  // `server_seq` is server-assigned (triggers) — NEVER accept a client value,
+  // or a stale pushed seq could hide the row from other clients' pulls.
   const allowed = VALID_COLUMNS[table_name]
   const stringified = stringify_row(table_name, { ...(row as unknown as Record<string, unknown>), [pk]: merge_id })
-  const columns = Object.keys(stringified).filter(c => c !== 'dirty' && allowed.has(c))
+  const columns = Object.keys(stringified).filter(c => c !== 'dirty' && c !== 'server_seq' && allowed.has(c))
   const placeholders = columns.map(() => '?').join(', ')
   const update_set = columns
     .filter(c => c !== pk)
@@ -380,14 +497,10 @@ function strip_sql_ext(migration_name: string): string {
   return migration_name.replace(/\.sql$/, '')
 }
 
-function compute_max_updated_at({ db, tables }: { db: Database.Database, tables: readonly SyncableTableName[] }): string | null {
-  let max: string | null = null
-  for (const table of tables) {
-    const result = db.prepare(`SELECT MAX(updated_at) as max_ts FROM "${table}"`).get() as { max_ts: string | null }
-    if (result.max_ts && (!max || result.max_ts > max))
-      max = result.max_ts
-  }
-  return max
+/** Current value of shared.db's `server_seq_counter` — the pull cursor's high-water mark. */
+function read_shared_server_seq_counter(db: Database.Database): number {
+  const row = db.prepare(`SELECT seq FROM server_seq_counter`).get() as { seq: number } | undefined
+  return row?.seq ?? 0
 }
 
 if (import.meta.vitest) {
@@ -403,7 +516,7 @@ if (import.meta.vitest) {
 
   describe('VALID_COLUMNS', () => {
     test('users columns', () => {
-      expect(VALID_COLUMNS.users).toEqual(new Set(['id', 'email', 'name', 'avatar_url', 'providers', 'roles', 'unsubscribed_from_emails', 'preferred_locale', 'last_visit_at', 'notify_channel', 'created_at', 'updated_at']))
+      expect(VALID_COLUMNS.users).toEqual(new Set(['id', 'email', 'name', 'avatar_url', 'providers', 'roles', 'unsubscribed_from_emails', 'preferred_locale', 'last_visit_at', 'notify_channel', 'created_at', 'updated_at', 'server_seq']))
     })
     test('dictionaries columns include catalog + bookkeeping', () => {
       expect(VALID_COLUMNS.dictionaries.has('id')).toBe(true)
@@ -412,10 +525,10 @@ if (import.meta.vitest) {
       expect(VALID_COLUMNS.dictionaries.has('dirty')).toBe(true)
     })
     test('dictionary_roles columns', () => {
-      expect(VALID_COLUMNS.dictionary_roles).toEqual(new Set(['id', 'dictionary_id', 'user_id', 'role', 'invited_by_user_id', 'dirty', 'created_at', 'updated_at']))
+      expect(VALID_COLUMNS.dictionary_roles).toEqual(new Set(['id', 'dictionary_id', 'user_id', 'role', 'invited_by_user_id', 'dirty', 'created_at', 'updated_at', 'server_seq']))
     })
     test('invites columns', () => {
-      expect(VALID_COLUMNS.invites).toEqual(new Set(['id', 'dictionary_id', 'inviter_user_id', 'inviter_email', 'target_email', 'role', 'status', 'dirty', 'created_at', 'updated_at']))
+      expect(VALID_COLUMNS.invites).toEqual(new Set(['id', 'dictionary_id', 'inviter_user_id', 'inviter_email', 'target_email', 'role', 'status', 'dirty', 'created_at', 'updated_at', 'server_seq']))
     })
   })
 }

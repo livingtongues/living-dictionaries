@@ -44,6 +44,7 @@
   let show_delete = $state(false)
   let typed_id = $state('')
   let deleting = $state(false)
+  let show_text_field: 'author_connection' | 'con_language_description' | null = $state(null)
 
   const point = $derived(dictionary.coordinates?.points?.[0]?.coordinates)
 
@@ -180,7 +181,13 @@
 </td>
 <td class="wide-cell">{dictionary.community_permission || '—'}</td>
 <td class="text-cell">
-  <div class="clamp" title={dictionary.author_connection ?? ''}>{dictionary.author_connection || '—'}</div>
+  {#if dictionary.author_connection}
+    <button type="button" class="clamp-btn" onclick={() => show_text_field = 'author_connection'}>
+      <div class="clamp">{dictionary.author_connection}</div>
+    </button>
+  {:else}
+    <span class="dim">—</span>
+  {/if}
 </td>
 <td class="text-cell">
   {#if dictionary.bucket === 'conlang'}
@@ -190,8 +197,12 @@
       placeholder="Conlang description"
       value={dictionary.con_language_description ?? ''}
       onchange={save_conlang_description}></textarea>
+  {:else if dictionary.con_language_description}
+    <button type="button" class="clamp-btn" onclick={() => show_text_field = 'con_language_description'}>
+      <div class="clamp locked" title="Editable only when the dictionary is bucketed as a conlang">{dictionary.con_language_description}</div>
+    </button>
   {:else}
-    <div class="clamp locked" title="Editable only when the dictionary is bucketed as a conlang">{dictionary.con_language_description || '—'}</div>
+    <span class="dim">—</span>
   {/if}
 </td>
 <td>
@@ -207,6 +218,17 @@
       on_remove={remove_coordinates}
       on_close={() => show_coordinates = false} />
   {/await}
+{/if}
+
+{#if show_text_field}
+  <Modal on_close={() => show_text_field = null}>
+    {#snippet heading()}
+      {show_text_field === 'author_connection' ? 'Author connection' : 'Conlang description'}
+    {/snippet}
+    <p class="text-field-body">
+      {show_text_field === 'author_connection' ? dictionary.author_connection : dictionary.con_language_description}
+    </p>
+  </Modal>
 {/if}
 
 {#if show_delete}
@@ -357,6 +379,26 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     font-size: 0.8125rem;
+  }
+  .clamp-btn {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+  }
+  .clamp-btn:hover .clamp {
+    text-decoration: underline;
+  }
+  .text-field-body {
+    white-space: pre-wrap;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin: 0;
   }
   .meta-cell {
     white-space: nowrap;

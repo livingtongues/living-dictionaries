@@ -70,6 +70,25 @@ export function report_sync_halted({ message, consecutive }: { message: string, 
   }
 }
 
+/**
+ * Ship a "FK self-heal started" marker (`sync_self_healed`) — the admin engine
+ * detected the FK-wedge class (2 consecutive `fk_constraint` apply failures)
+ * and is rebuilding its mirror with a full resync + prune. One row per attempt
+ * (at most one per engine lifetime), so no throttle needed. THE row to look for
+ * when verifying wedged admins recovered after the 2026-07-09 fix.
+ */
+export function report_sync_self_healed({ watermark }: { watermark: number | null }): void {
+  try {
+    log_event({
+      level: 'warn',
+      message: 'sync_self_healed',
+      context: { engine: 'admin', watermark },
+    })
+  } catch {
+    // Never let telemetry break the sync path.
+  }
+}
+
 /** Test-only. */
 export function _reset_throttle_for_tests(): void {
   last_shipped = null

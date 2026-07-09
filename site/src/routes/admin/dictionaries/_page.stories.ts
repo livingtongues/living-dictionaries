@@ -105,6 +105,14 @@ export const Catalog: PageStory<typeof Component> = {
   props: shared_props,
 }
 
+export const AuthorConnectionModal: PageStory<typeof Component> = {
+  props: shared_props,
+  csr: true,
+  interactions: async (page) => {
+    await page.click('.clamp-btn')
+  },
+}
+
 export const ConlangTab: PageStory<typeof Component> = {
   props: shared_props,
   csr: true,

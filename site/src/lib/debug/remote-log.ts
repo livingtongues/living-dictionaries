@@ -280,6 +280,26 @@ function safe_visibility_state(): 'visible' | 'hidden' | null {
 }
 
 /**
+ * Real display geometry, captured once at session_start. `viewport` is the CSS-px
+ * window (reflects OS/browser zoom — what layouts actually get), `screen` the
+ * monitor in CSS px, `dpr` the pixel ratio. Used to learn which sizes our real
+ * audience uses so svelte-look previews target them instead of industry averages.
+ */
+function screen_context(): Record<string, string | number> {
+  try {
+    if (typeof window === 'undefined')
+      return {}
+    return {
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      screen: `${window.screen.width}x${window.screen.height}`,
+      dpr: window.devicePixelRatio,
+    }
+  } catch {
+    return {}
+  }
+}
+
+/**
  * Returns used JS heap in MB when the runtime exposes `performance.memory`.
  * Chromium-only — other browsers return null here.
  */
@@ -688,6 +708,7 @@ export function init_remote_logging(): void {
       memory_mb: get_memory_mb(),
       pathname: safe_pathname(),
       visibility: safe_visibility_state(),
+      ...screen_context(),
       // Device fitness for the local-first DB, captured up front so we can see
       // which tier (opfs-worker / idb-worker / idb-main / SSR-floor) each session
       // can run — even anonymously, even if the DB later fails to open. This is

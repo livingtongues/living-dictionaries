@@ -185,6 +185,43 @@ Total rows, daily volume + growth, oldest `received_at` vs **retention status** 
 on the active node — verify `db_metadata.log_retention_ran_at` is recent and oldest row ≤14d), DB
 size, heartbeat/noise ratio.
 
+### A5. Host resources (past 24h)
+
+The box self-reports whole-machine CPU/RAM/swap/disk every 5 min as `host_stats` server events
+(`$lib/server/host-stats.ts` + `host-stats-cron.ts`; same rows feed the `/admin/health` "Host
+resources" panel). Each `cpu_pct` is the **true average over its 5-min window** (diffed cumulative
+`/proc/stat` counters — bursts inside the window can't hide), so max(cpu_pct) = the hottest 5-min
+window of the day.
+
+```js
+const db = require('better-sqlite3')('/data/logs.db', { readonly: true })
+const since = new Date(Date.now() - 24*60*60*1000).toISOString()
+const rows = db.prepare(`
+  SELECT context FROM client_logs
+  WHERE received_at >= ? AND message='host_stats' AND source='server'
+  ORDER BY received_at
+`).all(since).map(r => JSON.parse(r.context))
+const nums = k => rows.map(r => r[k]).filter(v => typeof v === 'number')
+const avg = a => a.length ? +(a.reduce((s,v)=>s+v,0)/a.length).toFixed(1) : null
+const max = a => a.length ? Math.max(...a) : null
+console.log(JSON.stringify({
+  samples: rows.length, // expect ~288; big gaps = cron/standby problem, flag it
+  cpu_avg: avg(nums('cpu_pct')), cpu_hottest_5min: max(nums('cpu_pct')),
+  load1_max: max(nums('load1')),
+  mem_avg: avg(nums('mem_pct')), mem_max: max(nums('mem_pct')),
+  swap_max_pct: max(nums('swap_pct')), swap_used_mb_last: rows.at(-1)?.swap_used_mb,
+  disk_pct_now: rows.at(-1)?.disk_pct,
+}, null, 2))
+```
+
+Write a **short snippet** (3-5 lines) into the report's `## Host resources` section: headline
+verdict ("plenty of headroom" / "watch X" / "act on X"), CPU avg + hottest 5-min window, RAM
+avg/max + swap, disk %. **Flag as an action item if:** disk ≥ 80%, swap % rising day-over-day,
+`load1_max` sustained above core count (2), the hottest-window CPU repeatedly pinned near 100,
+RAM creeping up vs the prior days (leak), or sample count far below ~288 (telemetry gap).
+Otherwise keep it to the calm one-liner — this section exists so a bad trend gets caught weeks
+early, not to pad the report.
+
 ---
 
 ## Phase B — Scour the codebase for missing logging
@@ -287,6 +324,9 @@ anything notable) + a generic/anonymous picture of everyone else — never name 
 
 ## 4. Health & housekeeping
 <volume, growth, db size, retention status, noise>
+
+## Host resources (past 24h)
+<3-5 lines from A5: verdict + CPU avg/hottest-window, RAM+swap, disk %. Flags become action items.>
 
 ## 5. Coverage gaps (Phase B)
 <prioritized: path → event → level → fields → why>

@@ -64,6 +64,16 @@ export const DICT_NATURAL_KEY_COLUMNS: Partial<Record<DictSyncableTable, readonl
 }
 
 /**
+ * Current value of this DB's `server_seq_counter` — the pull cursor's
+ * high-water mark. 0 on a DB that predates the 20260709 migration (impossible
+ * server-side once migrations run at open).
+ */
+export function read_server_seq_counter(db: Database.Database): number {
+  const row = db.prepare(`SELECT seq FROM server_seq_counter`).get() as { seq: number } | undefined
+  return row?.seq ?? 0
+}
+
+/**
  * The id currently owning `row`'s natural key on the server, or undefined when
  * the table has no natural key or no row owns it. COALESCE(…,'') on both sides
  * so NULL columns compare equal (matching the `entry_relationships` functional
@@ -84,8 +94,17 @@ function find_natural_key_owner_id({ db, table_name, row }: {
 }
 
 export interface DictChangesRequest {
-  /** Client's last-seen `db_metadata.last_modified_at`. null = first sync. */
-  synced_up_to: string | null
+  /**
+   * Client's `server_seq` cursor (from the last response, persisted in client
+   * `db_metadata.synced_seq`; a fresh snapshot carries the baked value). null =
+   * first sync / full pull. Was the `last_modified_at` ISO timestamp before
+   * 2026-07-09 — client-supplied `updated_at` stamps could land below other
+   * clients' cursors and wedge them on FK checks (see
+   * .issues/sync-fk-wedge-server-seq-and-self-heal.md). A legacy string cursor
+   * is treated as null (defensive; the migration handshake reloads old bundles
+   * first).
+   */
+  synced_up_to: number | null
   /** Per-table dirty rows. Editors only — viewers send nothing. */
   dirty_rows?: Partial<Record<DictSyncableTable, Record<string, unknown>[]>>
   /** Tombstones to apply. Editors only. */
@@ -95,7 +114,7 @@ export interface DictChangesRequest {
 }
 
 export interface DictChangesResponse {
-  new_synced_up_to: string
+  new_synced_up_to: number
   changes: Partial<Record<DictSyncableTable, Record<string, unknown>[]>>
   deletes: { table_name: string, id: string }[]
   /**
@@ -274,6 +293,10 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
   // canonical rows so the pushing client converges instead of wedging.
   const deduped_losers: { table_name: DictSyncableTable, id: string, canonical_id: string }[] = []
 
+  // Defensive cursor normalization: a legacy ISO-string cursor (pre-server_seq
+  // bundle that somehow slipped past the migration handshake) means a full pull.
+  const cursor = typeof request.synced_up_to === 'number' ? request.synced_up_to : null
+
   db.pragma('defer_foreign_keys = ON')
   db.exec('BEGIN IMMEDIATE')
   try {
@@ -319,9 +342,12 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
       }
     }
 
-    // PULL: rows updated since cursor (filter out rows we just wrote).
+    // PULL: rows written since cursor (filter out rows we just wrote). Pull
+    // rides `server_seq` (server-assigned, strictly monotonic — see the
+    // 20260709 migration), NEVER `updated_at` (client-supplied LWW stamp that
+    // can land below other clients' cursors).
     const response: DictChangesResponse = {
-      new_synced_up_to: '',
+      new_synced_up_to: 0,
       changes: {},
       deletes: [],
     }
@@ -339,10 +365,10 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
     }
 
     for (const table_name of DICT_SYNCABLE_TABLES) {
-      const where_sql = request.synced_up_to ? `WHERE updated_at > ?` : ''
-      const params = request.synced_up_to ? [request.synced_up_to] : []
+      const where_sql = cursor !== null ? `WHERE server_seq > ?` : ''
+      const params = cursor !== null ? [cursor] : []
       const rows = db.prepare(
-        `SELECT * FROM "${table_name}" ${where_sql} ORDER BY updated_at ASC`,
+        `SELECT * FROM "${table_name}" ${where_sql} ORDER BY server_seq ASC`,
       ).all(...params) as Record<string, unknown>[]
       for (const row of rows)
         parse_dict_row(table_name, row)
@@ -354,10 +380,10 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
     // PULL: tombstones since cursor. Skip any whose row currently exists — it
     // was re-created (same id) after the delete, so forwarding the tombstone
     // would wrongly delete the live row on peers.
-    if (request.synced_up_to) {
+    if (cursor !== null) {
       const tombstones = db.prepare(
-        `SELECT table_name, id FROM deletes WHERE updated_at > ? ORDER BY updated_at ASC`,
-      ).all(request.synced_up_to) as { table_name: string, id: string }[]
+        `SELECT table_name, id FROM deletes WHERE server_seq > ? ORDER BY server_seq ASC`,
+      ).all(cursor) as { table_name: string, id: string }[]
       for (const tombstone of tombstones) {
         if (!is_dict_syncable_table(tombstone.table_name))
           continue
@@ -368,11 +394,11 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
     }
 
     // Dedup-loser convergence echoes: the delete for each loser id (dedupe
-    // against the cursor-scan above, which already picks it up when
-    // synced_up_to is set) + the canonical row itself, EXPLICITLY — the pull
-    // filter is `updated_at > cursor`, and when the canonical row LWW-beat the
-    // push its updated_at can predate the client's cursor, so without this
-    // echo the client would drop its loser and never receive the replacement.
+    // against the cursor-scan above, which already picks it up when the cursor
+    // is set) + the canonical row itself, EXPLICITLY — when the canonical row
+    // LWW-beat the push no write happened, so its server_seq can predate the
+    // client's cursor; without this echo the client would drop its loser and
+    // never receive the replacement.
     if (deduped_losers.length) {
       const echoed = new Set(response.deletes.map(del => `${del.table_name}::${del.id}`))
       for (const loser of deduped_losers) {
@@ -391,10 +417,9 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
       }
     }
 
-    // New cursor = post-write last_modified_at. The trigger already fired on
-    // any pushed row, so this catches up to the latest.
-    const lmod = db.prepare(`SELECT value FROM db_metadata WHERE key = 'last_modified_at'`).get() as { value: string } | undefined
-    response.new_synced_up_to = lmod?.value ?? (request.synced_up_to ?? new Date(0).toISOString())
+    // New cursor = the counter's current value. Exact under BEGIN IMMEDIATE:
+    // every row in this DB with server_seq ≤ counter is visible in this txn.
+    response.new_synced_up_to = read_server_seq_counter(db)
 
     db.exec('COMMIT')
 
@@ -489,9 +514,11 @@ export function merge_dict_row({ db, table_name, row, user_id, at, api_key_id, d
   // Stamp updated_by_user_id with the authenticated caller (server is the
   // authority on this). created_by_user_id is preserved if the row already
   // exists; otherwise it's stamped with the caller too.
+  // `server_seq` is server-assigned (triggers) — NEVER accept a client value,
+  // or a stale pushed seq could hide the row from other clients' pulls.
   const stringified = stringify_dict_row(table_name, { ...merge_source })
   const allowed = VALID_COLUMNS[table_name]
-  const columns = Object.keys(stringified).filter(c => c !== 'dirty' && allowed.has(c))
+  const columns = Object.keys(stringified).filter(c => c !== 'dirty' && c !== 'server_seq' && allowed.has(c))
   if (!columns.includes('updated_by_user_id')) {
     columns.push('updated_by_user_id')
     stringified.updated_by_user_id = user_id

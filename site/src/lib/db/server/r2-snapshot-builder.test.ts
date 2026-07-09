@@ -1,5 +1,9 @@
 import type { PutObjectCommand } from '@aws-sdk/client-s3'
 import Database from 'better-sqlite3'
+import { rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { gunzipSync } from 'node:zlib'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { open_shared_db } from './shared-db'
 import { sweep_dirty_dictionaries } from './r2-snapshot-builder'
@@ -107,5 +111,43 @@ describe(sweep_dirty_dictionaries, () => {
 
     const remaining = dict_db.prepare(`SELECT id FROM deletes`).all() as { id: string }[]
     expect(remaining).toEqual([{ id: 'recent' }])
+  })
+
+  test('on a seq-migrated source: records pruned_up_to_seq before pruning + bakes synced_seq into the snapshot', async () => {
+    insert_dict({ id: 'd1', updated_at: '2026-01-01T00:00:00.000Z', snapshot_uploaded_at: null })
+    const dict_db = dict_dbs.get('d1')
+    dict_db.exec(`
+      CREATE TABLE deletes (table_name TEXT NOT NULL, id TEXT NOT NULL, updated_at TEXT NOT NULL, server_seq INTEGER, PRIMARY KEY (table_name, id));
+      CREATE TABLE db_metadata (key TEXT PRIMARY KEY, value TEXT);
+      CREATE TABLE server_seq_counter (seq INTEGER NOT NULL);
+      INSERT INTO server_seq_counter (seq) VALUES (42);
+    `)
+    const ancient = '2020-01-01T00:00:00.000Z'
+    dict_db.prepare(`INSERT INTO deletes (table_name, id, updated_at, server_seq) VALUES ('entries', 'old_a', ?, 7)`).run(ancient)
+    dict_db.prepare(`INSERT INTO deletes (table_name, id, updated_at, server_seq) VALUES ('entries', 'old_b', ?, 9)`).run(ancient)
+    dict_db.prepare(`INSERT INTO deletes (table_name, id, updated_at, server_seq) VALUES ('entries', 'recent', ?, 40)`).run(new Date().toISOString())
+
+    await sweep_dirty_dictionaries()
+
+    // Highest PRUNED seq recorded (the /changes 410 boundary), pruning applied.
+    const pruned_meta = dict_db.prepare(`SELECT value FROM db_metadata WHERE key = 'pruned_up_to_seq'`).get() as { value: string }
+    expect(pruned_meta.value).toBe('9')
+    expect((dict_db.prepare(`SELECT id FROM deletes`).all() as { id: string }[])).toEqual([{ id: 'recent' }])
+
+    // The uploaded snapshot carries a baked cursor = the counter value, and an
+    // emptied deletes log (the client's deletes table doubles as its push queue).
+    const [[command]] = put_spy.mock.calls
+    const snapshot_bytes = gunzipSync(Buffer.from(command.input.Body as Uint8Array))
+    const temp_path = join(tmpdir(), `snapshot-test-${crypto.randomUUID()}.db`)
+    writeFileSync(temp_path, snapshot_bytes)
+    const snapshot_db = new Database(temp_path, { readonly: true })
+    try {
+      const baked = snapshot_db.prepare(`SELECT value FROM db_metadata WHERE key = 'synced_seq'`).get() as { value: string }
+      expect(baked.value).toBe('42')
+      expect(snapshot_db.prepare(`SELECT COUNT(*) AS c FROM deletes`).get()).toEqual({ c: 0 })
+    } finally {
+      snapshot_db.close()
+      rmSync(temp_path, { force: true })
+    }
   })
 })

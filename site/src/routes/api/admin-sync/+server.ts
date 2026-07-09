@@ -5,6 +5,7 @@ import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { process_sync } from '$lib/db/server/sync-helpers'
+import { log_server_event } from '$lib/server/log-server-event'
 import { CLIENT_BEHIND, SERVER_BEHIND, SyncVersionError } from '$lib/db/sync/errors'
 import { error, json } from '@sveltejs/kit'
 
@@ -21,6 +22,11 @@ export const POST: RequestHandler = async (event) => {
 
   try {
     const response = process_sync({ db, request: body, user_id })
+    // A dangling pushed child row (its parent no longer exists) was skipped so
+    // it couldn't 500 the whole round trip — log which rows/parents so a
+    // recurring poison-pill is diagnosable (parity with the dict endpoint).
+    if (response.skipped_orphans?.length)
+      log_server_event({ level: 'warn', message: 'admin_sync_orphans_skipped', user_id, context: { orphans: response.skipped_orphans } })
     return json(response satisfies AdminSyncResponseBody)
   } catch (err) {
     if (err instanceof SyncVersionError) {

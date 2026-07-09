@@ -283,7 +283,7 @@ describe('DictSyncEngine repeat-failure circuit breaker', () => {
     _reset_dict_failure_throttle_for_tests()
   })
 
-  function make_breaker_engine({ error, on_repeated_failure }: { error: Error, on_repeated_failure?: (info: { message: string, consecutive: number }) => void }) {
+  function make_breaker_engine({ error, on_repeated_failure, on_integrity_wedged }: { error: Error, on_repeated_failure?: (info: { message: string, consecutive: number }) => void, on_integrity_wedged?: () => void }) {
     const query = vi.fn(() => Promise.reject(error))
     const connection: EngineConnection = { query, execute: () => Promise.reject(error) }
     const engine = new DictSyncEngine({
@@ -292,6 +292,7 @@ describe('DictSyncEngine repeat-failure circuit breaker', () => {
       has_editor_role: true,
       get_auth: () => ({}) as never,
       on_repeated_failure,
+      on_integrity_wedged,
     })
     return { engine, query }
   }
@@ -323,5 +324,26 @@ describe('DictSyncEngine repeat-failure circuit breaker', () => {
     for (let i = 0; i < 5; i++)
       await expect(engine.sync_once()).rejects.toThrow()
     expect(engine.is_repeated_failure_blocked).toBeFalsy()
+  })
+
+  test('fires on_integrity_wedged ONCE at the 2nd consecutive fk_constraint failure (before the breaker halts at 3)', async () => {
+    const on_integrity_wedged = vi.fn()
+    const { engine } = make_breaker_engine({ error: new Error('FOREIGN KEY constraint failed'), on_integrity_wedged })
+    await expect(engine.sync_once()).rejects.toThrow()
+    expect(on_integrity_wedged).not.toHaveBeenCalled()
+    await expect(engine.sync_once()).rejects.toThrow()
+    expect(on_integrity_wedged).toHaveBeenCalledTimes(1)
+    expect(engine.is_repeated_failure_blocked).toBeFalsy() // heal fires BEFORE the halt
+    // A 3rd failure (heal didn't rescue in time) doesn't re-fire the hook.
+    await expect(engine.sync_once()).rejects.toThrow()
+    expect(on_integrity_wedged).toHaveBeenCalledTimes(1)
+  })
+
+  test('a non-FK fatal failure never fires on_integrity_wedged', async () => {
+    const on_integrity_wedged = vi.fn()
+    const { engine } = make_breaker_engine({ error: new Error('UNIQUE constraint failed: entry_tags.entry_id'), on_integrity_wedged })
+    for (let i = 0; i < 3; i++)
+      await expect(engine.sync_once()).rejects.toThrow()
+    expect(on_integrity_wedged).not.toHaveBeenCalled()
   })
 })

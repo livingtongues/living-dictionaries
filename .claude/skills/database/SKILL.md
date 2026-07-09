@@ -571,14 +571,32 @@ an orchestrator to `dict-writes.ts` + a line to the `DictWrites` facade. Plan + 
 ## Sync engines (read this when touching sync code)
 
 - **Admin shared.db sync**: `$lib/db/sync/engine.svelte.ts` (client) +
-  `lib/db/server/sync-helpers.ts` (server). Sector-based; tracks watermarks in
-  `db_metadata`. Dirty rows uploaded, server rows pulled by sector.
+  `lib/db/server/sync-helpers.ts` (server). Single sector; cursor in client
+  `db_metadata.synced_seq`. Dirty rows uploaded, server rows pulled.
 - **Per-dict sync**: `$lib/db/dict-client/dict-sync-engine.ts` is much simpler —
   snapshot-as-of-build + change-since-snapshot fetch on connect, and editors'
   dirty rows pushed through `/api/dictionary/[id]/changes` (the `/db` endpoint is
   the editor snapshot fetch, not the push). Runs inside the leader dedicated
   worker; its apply-transaction shares the instance op-mutex. The snapshot builder
   eventually reflects pushed rows in R2. Server helpers: `dictionary-sync-helpers.ts`.
+
+**Pull cursors are `server_seq`, NEVER timestamps (2026-07-09).** Every syncable
+table + `deletes` carries a `server_seq` column assigned by triggers from a
+strictly monotonic per-DB `server_seq_counter`; pulls filter `server_seq > cursor`
+and the response cursor is the counter value. `updated_at` is ONLY the LWW
+arbiter — it's client-supplied, so filtering on it let pushed rows land below
+other clients' cursors (invisible forever → deferred-FK wedge at apply COMMIT,
+the 2026-07-09 incident). Server strips `server_seq` from pushed rows and
+reassigns. FK actions (CASCADE / SET NULL) fire the seq triggers even from inside
+the delete-cascade trigger — proven in `server-seq.test.ts`. Snapshots carry a
+baked `db_metadata.synced_seq` (R2 builder + `/db` endpoint) so a snapshot boot
+pulls from exactly its high-water mark; `snapshot_expired` (410) is now
+`cursor < db_metadata.pruned_up_to_seq` (recorded when the builder prunes
+tombstones). **Self-heal:** a 2nd consecutive `fk_constraint` apply failure
+triggers automatic recovery — admin engine does a full resync (cursor null →
+prune local rows absent from the response, keeping dirty + just-pushed); the
+dict instance does `rebuild()` (flush-push-only → reset to fresh snapshot).
+`sync_self_healed` in client_logs marks each occurrence.
 
 **Sync-engine invariants (don't relearn):** clear `dirty` ONLY by pushed row id
 (not blanket `WHERE dirty=1` — junctions silently never sync); drain local

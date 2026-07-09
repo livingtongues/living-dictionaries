@@ -160,6 +160,100 @@ describe('tombstone drain scoping', () => {
   })
 })
 
+// The 2026-07-09 root fix: pulls ride the server-assigned `server_seq`, never
+// the client-supplied `updated_at` LWW stamp. Under the old timestamp cursor a
+// row pushed with an OLD stamp (offline editor, clock skew) landed BELOW other
+// clients' cursors and was invisible to them FOREVER — until a child of it
+// arrived and wedged their apply on the deferred-FK check.
+describe('server_seq cursor closes the stale-stamp delta hole', () => {
+  test('a row pushed with an updated_at OLDER than a peer cursor is still delivered', async () => {
+    const engine = make_engine()
+    const first = await engine.sync()
+    expect(first?.success).toBeTruthy()
+    const cursor_after_first = engine.watermark
+    expect(cursor_after_first).not.toBeNull()
+
+    // Another editor now pushes a role stamped in the PAST (T0 — far below any
+    // timestamp cursor). The insert fires the server's seq trigger, so it gets
+    // a seq ABOVE the peer's cursor even though its updated_at is ancient.
+    insert_role({ db: server_db, id: 'role-backdated', updated_at: T0 })
+
+    const second = await engine.sync()
+    expect(second?.success).toBeTruthy()
+    expect(client_db.prepare(`SELECT id FROM dictionary_roles WHERE id = 'role-backdated'`).get()).toBeTruthy()
+    expect(engine.watermark).toBeGreaterThan(cursor_after_first ?? 0) // eslint-disable-line no-restricted-syntax -- cursor monotonicity is a genuine range check
+  })
+})
+
+// FK self-heal: 2 consecutive fk_constraint apply failures → one automatic
+// full resync + prune (no prompt; dirty rows ride the same request).
+describe('FK-wedge self-heal (full resync + prune)', () => {
+  test('a client missing a parent row heals itself instead of wedging', async () => {
+    const engine = make_engine()
+    expect((await engine.sync())?.success).toBeTruthy()
+
+    // Server gains a user the client will NEVER see under normal deltas: we
+    // backdate its seq below the client's cursor (the WHEN guard skips the
+    // trigger when server_seq changes, so the backdate sticks) — simulating
+    // the pre-fix hole / any residual poisoned mirror.
+    server_db.prepare(`INSERT INTO users (id, email, created_at, updated_at) VALUES ('u-hidden', 'hidden@example.com', ?, ?)`).run(T0, T0)
+    server_db.prepare(`UPDATE users SET server_seq = 1 WHERE id = 'u-hidden'`).run()
+    // …and a dictionary role referencing that user (fresh seq → WILL ride down).
+    server_db.prepare(
+      `INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES ('role-orphaning', 'd1', 'u-hidden', 'editor', ?, ?)`,
+    ).run(T1, T1)
+    // The client also holds a stale ghost row the server no longer has (a
+    // cascade-deleted child whose tombstone it missed) — prune must clear it.
+    insert_role({ db: client_db, id: 'role-ghost', updated_at: T0 })
+
+    // 1st sync: apply rolls back on the deferred-FK check.
+    const first = await engine.sync()
+    expect(first?.success).toBeFalsy()
+    expect(first?.error).toMatch(/FOREIGN KEY/i)
+    expect(client_db.prepare(`SELECT 1 FROM dictionary_roles WHERE id = 'role-orphaning'`).get()).toBeFalsy()
+
+    // 2nd sync: fails the same way, which fires the self-heal (async).
+    const second = await engine.sync()
+    expect(second?.success).toBeFalsy()
+    await vi.waitFor(() => {
+      expect(client_db.prepare(`SELECT 1 FROM users WHERE id = 'u-hidden'`).get()).toBeTruthy()
+    })
+
+    // Healed: missing parent + child present, ghost pruned, engine not halted.
+    expect(client_db.prepare(`SELECT 1 FROM dictionary_roles WHERE id = 'role-orphaning'`).get()).toBeTruthy()
+    expect(client_db.prepare(`SELECT 1 FROM dictionary_roles WHERE id = 'role-ghost'`).get()).toBeFalsy()
+    expect(engine.blocked_by_repeated_failure).toBeFalsy()
+
+    // And the next regular sync is clean.
+    const after = await engine.sync()
+    expect(after?.success).toBeTruthy()
+  })
+
+  test('self-heal preserves un-pushed dirty rows (they ride the same request)', async () => {
+    const engine = make_engine()
+    expect((await engine.sync())?.success).toBeTruthy()
+
+    // Poison the delta (same shape as above)…
+    server_db.prepare(`INSERT INTO users (id, email, created_at, updated_at) VALUES ('u-hidden', 'hidden@example.com', ?, ?)`).run(T0, T0)
+    server_db.prepare(`UPDATE users SET server_seq = 1 WHERE id = 'u-hidden'`).run()
+    server_db.prepare(
+      `INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES ('role-orphaning', 'd1', 'u-hidden', 'editor', ?, ?)`,
+    ).run(T1, T1)
+    // …while the client holds un-pushed local work.
+    insert_role({ db: client_db, id: 'role-local-work', dirty: true, updated_at: T1 })
+
+    await engine.sync()
+    await engine.sync()
+    await vi.waitFor(() => {
+      expect(client_db.prepare(`SELECT 1 FROM users WHERE id = 'u-hidden'`).get()).toBeTruthy()
+    })
+
+    // The local edit survived the heal AND reached the server.
+    expect(client_db.prepare(`SELECT 1 FROM dictionary_roles WHERE id = 'role-local-work'`).get()).toBeTruthy()
+    expect(server_db.prepare(`SELECT 1 FROM dictionary_roles WHERE id = 'role-local-work'`).get()).toBeTruthy()
+  })
+})
+
 // Cross-app hardening Part 2: the admin engine's repeat-fatal circuit breaker.
 describe('Sync repeat-failure circuit breaker', () => {
   test('halts after 3 identical consecutive fatal failures; transient failures never halt', async () => {

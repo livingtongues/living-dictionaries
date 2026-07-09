@@ -68,14 +68,24 @@ export function is_readonly_table(table: SyncableTableName): boolean {
 /**
  * Wire shape for a syncable table row. JSON columns flow as parsed objects.
  * `dirty` is local bookkeeping — the server strips it on receive and clears
- * it before sending rows back; optional on the wire type.
+ * it before sending rows back; optional on the wire type. `server_seq` is
+ * server-assigned (the pull cursor's source) — the server strips any pushed
+ * value and reassigns via triggers; optional on the wire type.
  */
 export type SyncRow<K extends SyncableTableName>
-  = Omit<RowType<K>, 'dirty' | '_save' | '_delete' | '_reset'>
-    & { dirty?: number | null }
+  = Omit<RowType<K>, 'dirty' | 'server_seq' | '_save' | '_delete' | '_reset'>
+    & { dirty?: number | null, server_seq?: number | null }
 
 export interface SyncRequest {
-  synced_up_to: string | null
+  /**
+   * Server-assigned sync cursor (`server_seq` high-water mark from the last
+   * response, persisted in client `db_metadata.synced_seq`). `null` = full pull
+   * (initial sync / transition from the old ISO-timestamp cursor / self-heal).
+   * NEVER a timestamp: client-supplied `updated_at` stamps can land below other
+   * clients' watermarks (the FK-wedge hole) — `updated_at` is purely the LWW
+   * arbiter now.
+   */
+  synced_up_to: number | null
   dirty_rows: { [K in SyncableTableName]?: SyncRow<K>[] }
   deletes: { table_name: string, id: string }[]
   /**
@@ -92,9 +102,15 @@ export interface SyncRequest {
 }
 
 export interface SyncResponse {
-  new_synced_up_to: string | null
+  new_synced_up_to: number | null
   changes: { [K in SyncableTableName]?: SyncRow<K>[] }
   deletes: { table_name: string, id: string }[]
+  /**
+   * Pushed rows the server SKIPPED because their parent no longer exists
+   * (deferred-FK would have rolled back the whole push otherwise). Mirrors the
+   * dict engine's recovery (see `process_dict_changes`). The client logs a warn.
+   */
+  skipped_orphans?: { table_name: string, id: string, parent_table: string }[]
 }
 
 export interface SyncResult {

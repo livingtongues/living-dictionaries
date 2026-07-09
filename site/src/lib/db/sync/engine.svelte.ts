@@ -8,7 +8,7 @@ import { online } from 'svelte/reactivity/window'
 import { ClientBehindError, ServerBehindError } from './errors'
 import { SyncHistory } from './history.svelte.js'
 import { record_last_visit_ping, should_ping_last_visit } from './last-visit-ping'
-import { report_sync_failure, report_sync_halted } from './report-sync-failure'
+import { report_sync_failure, report_sync_halted, report_sync_self_healed } from './report-sync-failure'
 import { classify_sync_failure, RepeatFailureTracker } from './sync-failure-classify'
 import { is_readonly_table, SYNCABLE_TABLE_NAMES } from './types'
 
@@ -37,7 +37,12 @@ export class Sync {
   log_entries: SyncLogEntry[] = $state([])
   history = new SyncHistory()
   total_dirty = $state(0)
-  watermark = $state<string | null>(null)
+  /**
+   * Server-assigned `server_seq` cursor (persisted in `db_metadata.synced_seq`).
+   * null = never synced (or pre-2026-07-09 DB whose old ISO cursor is ignored →
+   * the next sync is a full pull + prune, same path as self-heal).
+   */
+  watermark = $state<number | null>(null)
   blocked_by_client_behind = $state(false)
   /**
    * Repeat-fatal circuit breaker (cross-app hardening Part 2, mirrored from
@@ -49,6 +54,18 @@ export class Sync {
   blocked_by_repeated_failure = $state(false)
   #repeat_tracker = new RepeatFailureTracker()
   #last_sync_finished_at = 0
+  /**
+   * FK self-heal (see .issues/sync-fk-wedge-server-seq-and-self-heal.md): a 2nd
+   * consecutive `fk_constraint` apply failure means this client's mirror is
+   * missing a parent row — retrying re-hits the same COMMIT rollback forever.
+   * Instead of wedging, run ONE automatic full resync (cursor null → the server
+   * returns everything → upsert all + prune local rows the server no longer
+   * has). Dirty rows ride the same request, so nothing local is lost. One
+   * attempt per engine lifetime — if the heal itself fails the breaker halts at
+   * 3 as before.
+   */
+  #self_heal_attempted = false
+  #self_heal_pending = false
 
   #auto_flush_timer: ReturnType<typeof setTimeout> | null = null
 
@@ -80,10 +97,12 @@ export class Sync {
   async #load_watermark() {
     const rows = await this.#connection.query<{ value: string }>(
       'SELECT value FROM db_metadata WHERE key = ?',
-      ['synced_up_to'],
+      ['synced_seq'],
     )
-    if (rows.length > 0)
-      this.watermark = rows[0].value
+    if (rows.length > 0) {
+      const seq = Number(rows[0].value)
+      this.watermark = Number.isFinite(seq) ? seq : null
+    }
   }
 
   mark_dirty(table_name: SyncableTableName) {
@@ -137,7 +156,7 @@ export class Sync {
     await this.#run()
   }
 
-  async #run() {
+  async #run({ full_resync = false }: { full_resync?: boolean } = {}) {
     if (this.is_syncing)
       throw new Error('Sync already in progress')
     if (this.blocked_by_repeated_failure) {
@@ -175,7 +194,7 @@ export class Sync {
 
     let sync_error: unknown = null
     try {
-      await this.#sync_once({ result, update_last_visit: needs_visit_ping })
+      await this.#sync_once({ result, update_last_visit: needs_visit_ping, full_resync })
       if (needs_visit_ping)
         record_last_visit_ping({ user_id: this.#user_id })
       this.#repeat_tracker.reset()
@@ -200,7 +219,12 @@ export class Sync {
       // row means retrying is pointless and noisy — halt + prompt instead of
       // silently looping (classify already demotes edge-5xx bodies to network).
       const message = result.error ?? 'unknown sync failure'
-      const { halt, consecutive } = this.#repeat_tracker.record({ kind: classify_sync_failure(error), message })
+      const kind = classify_sync_failure(error)
+      const { halt, consecutive } = this.#repeat_tracker.record({ kind, message })
+      // FK self-heal: 2nd consecutive fk_constraint → one automatic full
+      // resync + prune (fires from the finally block, after is_syncing clears).
+      if (kind === 'fk_constraint' && consecutive >= 2 && !this.#self_heal_attempted)
+        this.#self_heal_pending = true
       if (halt && !this.blocked_by_repeated_failure) {
         this.blocked_by_repeated_failure = true
         this.#cancel_auto_flush()
@@ -217,9 +241,25 @@ export class Sync {
       this.history.save_report({ result, log_entries: this.log_entries, started_at })
       if (!result.success)
         report_sync_failure({ engine: 'admin', error: sync_error, result, log_entries: this.log_entries })
+      if (this.#self_heal_pending && !this.#self_heal_attempted)
+        void this.#self_heal()
     }
 
     return result
+  }
+
+  /**
+   * One-shot automatic recovery from the FK-wedge class: full resync (cursor
+   * null) + prune. See `#self_heal_attempted`. Dirty rows are pushed in the
+   * same round trip, so no local work is lost — no prompt needed.
+   */
+  async #self_heal() {
+    this.#self_heal_pending = false
+    this.#self_heal_attempted = true
+    report_sync_self_healed({ watermark: this.watermark })
+    const result = await this.#run({ full_resync: true }).catch(() => null)
+    if (result?.success)
+      this.#log({ level: 'success', phase: 'sync', message: 'Self-heal complete — local mirror rebuilt from the server.' })
   }
 
   #log({ level, phase, table, message, detail, row_count }: Omit<SyncLogEntry, 'timestamp'>) {
@@ -227,7 +267,7 @@ export class Sync {
     this.log_entries = [...this.log_entries, { timestamp: new Date(), level, phase, table, message, detail, row_count }]
   }
 
-  async #sync_once({ result, update_last_visit }: { result: SyncResult, update_last_visit: boolean }) {
+  async #sync_once({ result, update_last_visit, full_resync = false }: { result: SyncResult, update_last_visit: boolean, full_resync?: boolean }) {
     // eslint-disable-next-line svelte/prefer-svelte-reactivity
     const affected_tables = new Set<NotifiableTable>()
 
@@ -257,7 +297,9 @@ export class Sync {
       this.#log({ level: 'info', phase: 'upload', message: 'Pushing deletes', row_count: deletes.length })
     }
 
-    const synced_up_to = await this.#get_watermark()
+    const synced_up_to = full_resync ? null : await this.#get_watermark()
+    if (full_resync)
+      this.#log({ level: 'warn', phase: 'sync', message: 'Full resync — pulling everything and pruning stale local rows (self-heal / first sync on the seq cursor).' })
 
     const request: SyncRequest = {
       synced_up_to,
@@ -270,6 +312,12 @@ export class Sync {
     const fetch_start = Date.now()
     const response = await this.#post_sync(request)
     this.#log({ level: 'info', phase: 'fetch', message: `Server responded in ${Date.now() - fetch_start}ms` })
+
+    if (response.skipped_orphans?.length) {
+      // The server refused (skipped) pushed rows whose parent no longer exists —
+      // they'd have rolled back the whole push otherwise. Surface loudly.
+      this.#log({ level: 'warn', phase: 'upload', message: `Server skipped ${response.skipped_orphans.length} orphaned pushed row(s): ${response.skipped_orphans.map(orphan => `${orphan.table_name}/${orphan.id} (missing ${orphan.parent_table})`).join(', ')}` })
+    }
 
     await this.#connection.execute('PRAGMA defer_foreign_keys = ON')
     await this.#connection.execute('BEGIN')
@@ -355,14 +403,50 @@ export class Sync {
         }
       }
 
-      if (response.new_synced_up_to) {
+      // Full-resync prune — applies to EVERY null-cursor sync (self-heal,
+      // first sync on the seq cursor after the 20260709 transition, true
+      // initial sync where it's a no-op): the response holds EVERY server row,
+      // so any local non-dirty row absent from it no longer exists server-side
+      // — a stale ghost (missed tombstone / cascaded child / the FK-wedge
+      // fallout the self-heal exists for). Keep: dirty rows (unsynced local
+      // work) and rows we just uploaded (the response excludes them by design)
+      // — EXCEPT server-skipped orphans, which the server refused because
+      // their parent is gone (keeping them would recreate the wedge).
+      if (synced_up_to === null) {
+        // eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral lookup set, never rendered
+        const skipped = new Set((response.skipped_orphans ?? []).map(orphan => `${orphan.table_name}::${orphan.id}`))
+        let pruned = 0
+        for (const table_name of SYNCABLE_TABLE_NAMES) {
+          // eslint-disable-next-line svelte/prefer-svelte-reactivity -- ephemeral lookup set, never rendered
+          const server_ids = new Set(((response.changes[table_name] ?? []) as { id: string }[]).map(row => row.id))
+          const has_dirty = !is_readonly_table(table_name)
+          const local_rows = await this.#connection.query<{ id: string, dirty?: number | null }>(
+            `SELECT ${has_dirty ? 'id, dirty' : 'id'} FROM "${table_name}"`,
+          )
+          for (const local of local_rows) {
+            if (server_ids.has(local.id))
+              continue
+            if (has_dirty && local.dirty === 1)
+              continue
+            if (pushed_ids[table_name]?.has(local.id) && !skipped.has(`${table_name}::${local.id}`))
+              continue
+            await this.#connection.execute(`DELETE FROM "${table_name}" WHERE id = ?`, [local.id])
+            affected_tables.add(table_name)
+            pruned++
+          }
+        }
+        if (pruned > 0)
+          this.#log({ level: 'info', phase: 'download', message: 'Pruned stale local rows absent from the server', row_count: pruned })
+      }
+
+      if (response.new_synced_up_to != null) {
         // ON CONFLICT DO UPDATE, never INSERT OR REPLACE (delete+reinsert breaks
         // upsert semantics under triggers — shared sync invariant; parity with
         // house + the dict engine).
         await this.#connection.execute(
           `INSERT INTO db_metadata (key, value) VALUES (?, ?)
            ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
-          ['synced_up_to', response.new_synced_up_to],
+          ['synced_seq', String(response.new_synced_up_to)],
         )
         this.watermark = response.new_synced_up_to
       }
@@ -383,12 +467,15 @@ export class Sync {
       this.#on_tables_changed?.(affected_tables)
   }
 
-  async #get_watermark(): Promise<string | null> {
+  async #get_watermark(): Promise<number | null> {
     const rows = await this.#connection.query<{ value: string }>(
       'SELECT value FROM db_metadata WHERE key = ?',
-      ['synced_up_to'],
+      ['synced_seq'],
     )
-    return rows.length > 0 ? rows[0].value : null
+    if (rows.length === 0)
+      return null
+    const seq = Number(rows[0].value)
+    return Number.isFinite(seq) ? seq : null
   }
 
   async #post_sync(request: SyncRequest): Promise<SyncResponse> {

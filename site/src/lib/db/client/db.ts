@@ -127,7 +127,8 @@ async function run_needed_migrations(connection: SqliteConnection, was_resumed: 
 export async function reset_sync_metadata(): Promise<void> {
   if (!bundle_instance)
     throw new Error('Admin DB not initialized')
-  await bundle_instance.connection.execute(`DELETE FROM db_metadata WHERE key = 'synced_up_to'`)
+  // 'synced_up_to' was the pre-2026-07-09 ISO cursor key; cleared for hygiene.
+  await bundle_instance.connection.execute(`DELETE FROM db_metadata WHERE key IN ('synced_seq', 'synced_up_to')`)
 }
 
 /** Bundled latest migration filename — used by the sync handshake. */
