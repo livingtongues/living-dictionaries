@@ -1,4 +1,5 @@
 import type { Story, StoryMeta } from 'svelte-look'
+import type { PreviewDictRole } from '$lib/auth/view-as'
 import type Component from './ViewAsBanner.svelte'
 import { AuthUser } from '$lib/auth/user.svelte'
 
@@ -6,7 +7,7 @@ export const shared_meta: StoryMeta = {
   viewports: [{ width: 640, height: 240 }],
 }
 
-function admin_user({ preview_level }: { preview_level: number }) {
+function admin_user({ preview_level, preview_dict_role }: { preview_level?: number, preview_dict_role?: PreviewDictRole }) {
   const auth_user = new AuthUser()
   auth_user.set_session({
     user: {
@@ -23,7 +24,7 @@ function admin_user({ preview_level }: { preview_level: number }) {
       unsubscribed_from_emails: false,
     },
   })
-  auth_user.set_preview({ admin_level: preview_level })
+  auth_user.set_preview({ admin_level: preview_level ?? 0, dict_role: preview_dict_role })
   return auth_user
 }
 
@@ -35,4 +36,14 @@ export const PreviewingVisitor: Story<typeof Component> = {
 /** The pill shown while previewing as a lower tier (Super Manager). */
 export const PreviewingSuperManager: Story<typeof Component> = {
   page_data: { auth_user: admin_user({ preview_level: 1 }) },
+}
+
+/** The pill shown while previewing the dictionary-scoped Manager persona. */
+export const PreviewingManager: Story<typeof Component> = {
+  page_data: { auth_user: admin_user({ preview_dict_role: 'manager' }) },
+}
+
+/** The pill shown while previewing the dictionary-scoped Editor persona. */
+export const PreviewingEditor: Story<typeof Component> = {
+  page_data: { auth_user: admin_user({ preview_dict_role: 'editor' }) },
 }

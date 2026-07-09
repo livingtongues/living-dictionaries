@@ -13,9 +13,10 @@
     entries_href: string
     settings_href: string
     about_href: string
+    on_image_file?: (file: File) => void
   }
 
-  const { show_star, show_location, show_image, show_about, entries_href, settings_href, about_href }: Props = $props()
+  const { show_star, show_location, show_image, show_about, entries_href, settings_href, about_href, on_image_file }: Props = $props()
   const t = $derived(page.data.t)
 </script>
 
@@ -29,7 +30,26 @@
       <li><IconMdiMapMarkerPlus class="icon-inline" /> <a href={settings_href}>{t('dict_home.nudge_location')}</a></li>
     {/if}
     {#if show_image}
-      <li><IconMdiImagePlus class="icon-inline" /> <a href={settings_href}>{t('dict_home.nudge_image')}</a></li>
+      <li>
+        <IconMdiImagePlus class="icon-inline" />
+        {#if on_image_file}
+          <label class="file-nudge">
+            <input
+              type="file"
+              accept="image/*"
+              style="display: none"
+              oninput={(event) => {
+                const input = event.target as HTMLInputElement
+                const file = input.files?.[0]
+                if (file) on_image_file(file)
+                input.value = ''
+              }} />
+            {t('dict_home.nudge_image')}
+          </label>
+        {:else}
+          <a href={settings_href}>{t('dict_home.nudge_image')}</a>
+        {/if}
+      </li>
     {/if}
     {#if show_about}
       <li><IconMdiTextBoxPlus class="icon-inline" /> <a href={about_href}>{t('dict_home.nudge_about')}</a></li>
@@ -69,8 +89,13 @@
     color: inherit;
   }
 
-  a:hover {
+  a:hover,
+  .file-nudge:hover {
     text-decoration: underline;
     color: var(--primary);
+  }
+
+  .file-nudge {
+    cursor: pointer;
   }
 </style>

@@ -615,9 +615,14 @@
     "nudge_heading": "Make this page shine",
     "nudge_star": "Star 4–8 favorite entries to feature them here",
     "nudge_location": "Add coordinates so your language appears on the map",
-    "nudge_image": "Add a featured image in Settings",
+    "nudge_image": "Add a cover photo",
     "nudge_about": "Write an About section",
     "feature_entry": "Feature this entry",
-    "unfeature_entry": "Remove from featured entries"
+    "unfeature_entry": "Remove from featured entries",
+    "add_cover": "Add cover photo",
+    "replace_cover": "Replace photo",
+    "delete_cover": "Remove photo",
+    "delete_cover_confirm": "Remove the cover photo?",
+    "drop_cover_hint": "Drop an image to set the cover photo"
   }
 }

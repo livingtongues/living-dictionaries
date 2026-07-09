@@ -3,19 +3,31 @@
  * `AuthUser` class holds the `$state` and delegates the role math here so it
  * stays testable. Client-only and in-memory — see `AuthUser.preview`.
  *
- * LD has no subscriptions (unlike house), so a persona is just an admin tier:
- * the real admin's level down to 1, then a single level-0 "Visitor".
+ * The ladder has two segments: site-wide admin tiers (the real admin's level
+ * down to 1) and dictionary-scoped roles (Manager, Editor) that only bite
+ * inside a dictionary. Both step DOWN to a single level-0 "Visitor". The
+ * dict-role personas ride at admin_level 0 (they are NOT site admins) and carry
+ * a `dict_role` the `[dictionaryId]` layout applies as the effective role.
  */
+
+/** Dictionary-scoped roles a "View as…" persona can simulate (below Super Manager, above Visitor). */
+export type PreviewDictRole = 'manager' | 'editor'
 
 export interface PreviewState {
   /** Previewed admin tier: 0 = non-admin visitor, else a level at or below the real level. */
   admin_level: number
+  /**
+   * Dictionary role to simulate inside a dictionary (Manager/Editor personas).
+   * `null`/absent = no dict-role override (site-admin tiers and the plain Visitor).
+   */
+  dict_role?: PreviewDictRole | null
 }
 
 export interface Persona {
   key: string
   label: string
   admin_level: number
+  dict_role?: PreviewDictRole | null
 }
 
 export const LEVEL_LABELS: Readonly<Record<number, string>> = {
@@ -25,17 +37,26 @@ export const LEVEL_LABELS: Readonly<Record<number, string>> = {
   3: 'Super Admin',
 }
 
+export const DICT_ROLE_LABELS: Readonly<Record<PreviewDictRole, string>> = {
+  manager: 'Manager',
+  editor: 'Editor',
+}
+
 /**
- * The "View as…" ladder for a real admin: their own level down to 1, then a
- * single level-0 "Visitor". A non-admin (level 0) gets an empty ladder — the
- * picker is never shown to them.
+ * The "View as…" ladder for a real admin: their own level down to 1, then the
+ * dictionary-scoped Manager and Editor personas, then a single level-0
+ * "Visitor". A non-admin (level 0) gets an empty ladder — the picker is never
+ * shown to them.
  */
 export function build_personas({ real_admin_level }: { real_admin_level: number }): Persona[] {
   const personas: Persona[] = []
   for (let level = real_admin_level; level >= 1; level--)
     personas.push({ key: `admin-${level}`, label: LEVEL_LABELS[level], admin_level: level })
-  if (real_admin_level >= 1)
+  if (real_admin_level >= 1) {
+    personas.push({ key: 'manager', label: DICT_ROLE_LABELS.manager, admin_level: 0, dict_role: 'manager' })
+    personas.push({ key: 'editor', label: DICT_ROLE_LABELS.editor, admin_level: 0, dict_role: 'editor' })
     personas.push({ key: 'visitor', label: LEVEL_LABELS[0], admin_level: 0 })
+  }
   return personas
 }
 
@@ -44,13 +65,16 @@ export function clamp_preview_level({ requested, real_admin_level }: { requested
   return Math.max(0, Math.min(requested, real_admin_level))
 }
 
-export function persona_label({ admin_level }: PreviewState): string {
+export function persona_label({ admin_level, dict_role }: PreviewState): string {
+  if (dict_role)
+    return DICT_ROLE_LABELS[dict_role]
   return LEVEL_LABELS[admin_level] ?? LEVEL_LABELS[0]
 }
 
 /**
  * Whether a persona is the one currently in effect. `preview === null` means
- * "real you" — the top rung.
+ * "real you" — the top rung. Manager/Editor/Visitor all sit at admin_level 0,
+ * so the dict-role must match too.
  */
 export function is_active_persona({ persona, preview, real_admin_level }: {
   persona: Persona
@@ -60,6 +84,7 @@ export function is_active_persona({ persona, preview, real_admin_level }: {
   if (!preview)
     return persona.admin_level === real_admin_level
   return persona.admin_level === preview.admin_level
+    && (persona.dict_role ?? null) === (preview.dict_role ?? null)
 }
 
 if (import.meta.vitest) {
@@ -69,13 +94,15 @@ if (import.meta.vitest) {
         { key: 'admin-3', label: 'Super Admin', admin_level: 3 },
         { key: 'admin-2', label: 'Admin', admin_level: 2 },
         { key: 'admin-1', label: 'Super Manager', admin_level: 1 },
+        { key: 'manager', label: 'Manager', admin_level: 0, dict_role: 'manager' },
+        { key: 'editor', label: 'Editor', admin_level: 0, dict_role: 'editor' },
         { key: 'visitor', label: 'Visitor', admin_level: 0 },
       ])
     })
 
     it('starts the ladder at the real level (a level-2 admin cannot preview level 3)', () => {
       const personas = build_personas({ real_admin_level: 2 })
-      expect(personas.map(persona => persona.key)).toEqual(['admin-2', 'admin-1', 'visitor'])
+      expect(personas.map(persona => persona.key)).toEqual(['admin-2', 'admin-1', 'manager', 'editor', 'visitor'])
     })
 
     it('is empty for a non-admin', () => {
@@ -110,6 +137,11 @@ if (import.meta.vitest) {
     it('labels the level-0 persona as a visitor', () => {
       expect(persona_label({ admin_level: 0 })).toBe('Visitor')
     })
+
+    it('labels dict-role personas by their role', () => {
+      expect(persona_label({ admin_level: 0, dict_role: 'manager' })).toBe('Manager')
+      expect(persona_label({ admin_level: 0, dict_role: 'editor' })).toBe('Editor')
+    })
   })
 
   describe(is_active_persona, () => {
@@ -133,6 +165,15 @@ if (import.meta.vitest) {
       const preview = { admin_level: 0 }
       expect(is_active_persona({ persona: visitor, preview, real_admin_level })).toBe(true)
       expect(is_active_persona({ persona: top, preview, real_admin_level })).toBe(false)
+    })
+
+    it('distinguishes dict-role personas that share admin_level 0', () => {
+      const manager = personas.find(persona => persona.key === 'manager') as Persona
+      const editor = personas.find(persona => persona.key === 'editor') as Persona
+      const preview = { admin_level: 0, dict_role: 'manager' as const }
+      expect(is_active_persona({ persona: manager, preview, real_admin_level })).toBe(true)
+      expect(is_active_persona({ persona: editor, preview, real_admin_level })).toBe(false)
+      expect(is_active_persona({ persona: visitor, preview, real_admin_level })).toBe(false)
     })
   })
 }

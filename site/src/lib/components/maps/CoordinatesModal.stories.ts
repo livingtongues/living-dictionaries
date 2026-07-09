@@ -33,6 +33,7 @@ export const WithCoordinates: Story<typeof Component> = {
   },
   interactions: async (page) => {
     await page.waitForSelector('.modal-card')
-    await new Promise(resolve => setTimeout(resolve, 2500))
+    await page.waitForSelector('.mapboxgl-marker', { timeout: 10000 })
+    await new Promise(resolve => setTimeout(resolve, 300))
   },
 }

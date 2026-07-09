@@ -104,11 +104,21 @@
     }
 
     window.mapboxgl.accessToken = accessToken
+    // Dummy/missing tokens can't fetch Mapbox styles, so `load` never fires and
+    // children (markers) never mount. Use a blank local style so CSR stories and
+    // offline/dev can still verify marker DOM overlays.
+    const effective_style = (!accessToken || accessToken === 'dummy')
+      ? {
+        version: 8 as const,
+        sources: {},
+        layers: [{ id: 'background', type: 'background' as const, paint: { 'background-color': '#e5e7eb' } }],
+      }
+      : style
     try {
       map = new window.mapboxgl.Map({
         ...options,
         container,
-        style,
+        style: effective_style,
         center,
         zoom,
       })

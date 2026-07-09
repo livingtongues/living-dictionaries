@@ -46,5 +46,3 @@ export const db_operations = {
 }
 
 export type DbOperations = typeof db_operations
-
-export const DICTIONARY_UPDATED_LOAD_TRIGGER = 'dictionary:updated'

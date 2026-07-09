@@ -38,6 +38,9 @@ export enum ResponseCodes {
 
 export const MINIMUM_ABOUT_LENGTH = 200
 
+// invalidate() key that re-runs the [dictionaryId] layout loads (universal + server) after a catalog edit
+export const DICTIONARY_UPDATED_LOAD_TRIGGER = 'dictionary:updated'
+
 /** Allowed values for a `sources.type` (the citation kind). */
 export const SOURCE_TYPES = ['dictionary', 'wordlist', 'fieldwork', 'manuscript', 'other'] as const
 export type SourceType = typeof SOURCE_TYPES[number]

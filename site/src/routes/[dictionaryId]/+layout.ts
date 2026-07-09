@@ -7,8 +7,8 @@ import type { DictLiveDb } from '$lib/db/dict-client/dict-live-db.svelte'
 import type { TranslateFunction } from '$lib/i18n/types'
 import type { ReloadGuard } from '$lib/db/client/client-behind-recovery'
 import { CLIENT_BEHIND_GUARD_KEY, decide_client_behind_recovery } from '$lib/db/client/client-behind-recovery'
-import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
-import { db_operations, DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/db-operations'
+import { DICTIONARY_UPDATED_LOAD_TRIGGER, MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
+import { db_operations } from '$lib/db-operations'
 import { url_from_storage_path } from '$lib/helpers/media'
 import { create_dict_live_db } from '$lib/db/dict-client/dict-live-db.svelte'
 import { DictSyncStatus } from '$lib/db/dict-client/dict-sync-status.svelte'
@@ -28,12 +28,11 @@ interface DictLayoutGlobals {
 }
 
 export const load: LayoutLoad = async ({ parent, depends, data }) => {
-  // Catalog-edit refresh hinges on this: `invalidate(DICTIONARY_UPDATED_LOAD_TRIGGER)`
-  // re-runs THIS universal load, and because it `await parent()`s a server load
-  // (`+layout.server.ts`, which holds the authoritative catalog row), SvelteKit
-  // re-runs that parent too and re-reads the catalog. Don't remove the
-  // `await parent()` below or catalog edits (settings/about/grammar) silently
-  // stop refreshing. (The server layout itself does NOT depend on this trigger.)
+  // Catalog-edit refresh: `invalidate(DICTIONARY_UPDATED_LOAD_TRIGGER)` re-runs
+  // this load AND `+layout.server.ts` (which registers the same trigger and holds
+  // the authoritative catalog row). Both registrations matter — a universal
+  // load's `depends` does NOT drag its server parent along on invalidate, so
+  // without the server-side one this re-run reads a cached `data.dictionary`.
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
 
   try {
@@ -50,18 +49,26 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
     // dev admin-level toggle all `invalidateAll`). Server push endpoints
     // re-check the role on every write (verify-dict-role), so a stale cache is
     // safe — UI badges just lag.
-    // `admin_level` is preview-aware (the "View as…" persona), but it's read once
-    // here and baked into role / can_edit / the entries-search `readable(admin_level)`
-    // below — so an active preview downgrades this view on the NEXT navigation into a
-    // dictionary, not live while already on the page (no invalidation fires). Mirrors
-    // house's accepted search-bound-once gap; see .issues/view-as-persona-preview.md.
-    const { admin_level } = auth_user
+    // `admin_level` + `preview` are the preview-aware "View as…" persona. They're
+    // read once here and baked into role / can_edit / the entries-search
+    // `readable(admin_level)` below, so switching persona invalidates this load
+    // (`DICTIONARY_UPDATED_LOAD_TRIGGER`, fired from UserMenu) to re-derive live.
+    const { admin_level, preview } = auth_user
     const is_site_admin = admin_level >= 1
     // `dict_roles` is a browser-only localStorage cache (empty during SSR), so
     // fall back to `ssr_role` (resolved from shared.db in +layout.server.ts) —
     // otherwise a hard load of an editor-gated page 403s until client hydration.
     const role_grant = dict_roles.roles.find(grant => grant.dictionary_id === dictionary_id)?.role
-    const role = is_site_admin ? 'admin' : (role_grant ?? data.ssr_role ?? null)
+    // An active preview FULLY determines the effective role so "View as
+    // Manager/Editor/Visitor" is deterministic regardless of any real grant on
+    // this dict: the Manager/Editor personas carry a `dict_role`; Visitor carries
+    // none (→ null, a pure viewer). Site-admin tiers (Super Manager and up) map to
+    // 'admin'. Without a preview, the real grant / ssr_role wins as before.
+    const role = is_site_admin
+      ? 'admin'
+      : preview
+        ? (preview.dict_role ?? null)
+        : (role_grant ?? data.ssr_role ?? null)
     const is_manager = role === 'admin' || role === 'manager'
     const is_contributor = role === 'admin' || role === 'contributor'
     const can_edit = is_manager || is_contributor || role === 'editor'

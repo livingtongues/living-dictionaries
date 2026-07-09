@@ -112,19 +112,22 @@ endpoint.)
      interception while doctoring metadata.
 - ✅ .knowledge/migration/dict-sync-invariants.md + database skill updated
 
-## Deploy notes (NOT yet deployed — Jacob to say when)
-1. Push to main → VPS deploy. Server shared.db migrates at boot; dict dbs migrate lazily on first
-   open. Old bundles get 409 → reload → clients migrate + transition (admin full pull+prune; dict
-   snapshot rebuild).
-2. ONE-TIME after deploy: force-refresh all R2 snapshots so viewers boot with baked cursors
-   instead of falling back to cursor-null full pulls over /changes:
-   `UPDATE dictionaries SET snapshot_uploaded_at = NULL` on prod shared.db → builder rebuilds all
-   on its next sweeps (opening each db also applies its migration).
-3. Verify wedged users recover: query logs.db for `sync_self_healed` rows (Diego b083633c admin;
-   2ee3d8f3 + 259acd88 on sugtstun) and confirm no new `FOREIGN KEY` sync_failed rows.
+## Deploy verification — DONE 2026-07-09 (deployed 08:27Z)
+1. ✅ Deployed; migration `20260709_server_seq_sync_cursor.sql` applied at boot (08:27:03Z),
+   counter live and advancing.
+2. ✅ ONE-TIME snapshot re-bake: backed up shared.db, ran
+   `UPDATE dictionaries SET snapshot_uploaded_at = NULL` (1,594 rows) → builder rebuilt ALL
+   1,594 R2 snapshots with baked cursors within the hour.
+3. ✅ Telemetry since deploy: 179 `sync_self_healed` rows (all `seq_cursor_transition`, dict
+   engine — the expected one-time transition), ZERO FK `sync_failed` rows, zero halts. Last FK
+   failure was 07:15Z (pre-deploy). The three wedged users (Diego b083633c admin; 2ee3d8f3 +
+   259acd88 on sugtstun) were last seen pre-deploy — they self-heal on next visit; horse cron
+   follow-up scheduled to confirm.
 
 ## Follow-ups (separate tasks)
-- house + tutor have the same LWW-timestamp pull hole → spawn parity sessions.
+- ✅ house + tutor ports DONE 2026-07-09 (same session as deploy verification) — see
+  house `.issues/sync-server-seq-cursor-and-self-heal.md` and tutor
+  `.issues/sync-server-seq-cursor-and-self-heal.md`. Not yet pushed.
 - Optional: dict-engine prune on cursor-null full pulls (admin engine has it; dict path only
   reachable via MemoryVFS boots + stale-snapshot transition window).
 - Optional: auto-tombstone cascaded children via AFTER DELETE triggers (ghost-child cleanup

@@ -90,15 +90,16 @@ export class AuthUser {
    * privilege escalation). The requested level is clamped so it can only step
    * down; landing back on the real level exits the preview.
    */
-  set_preview({ admin_level }: PreviewState) {
+  set_preview({ admin_level, dict_role }: PreviewState) {
     if (!this.real_is_admin)
       return
     const level = clamp_preview_level({ requested: admin_level, real_admin_level: this.real_admin_level })
-    if (level === this.real_admin_level) {
+    // Only the plain top rung (real level, no dict-role override) is "the real you".
+    if (level === this.real_admin_level && !dict_role) {
       this.preview = null
       return
     }
-    this.preview = { admin_level: level }
+    this.preview = { admin_level: level, dict_role: dict_role ?? null }
   }
 
   exit_preview() {

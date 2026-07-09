@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit'
 import type { Tables } from '$lib/types'
 import type { LayoutServerLoad } from './$types'
-import { ResponseCodes } from '$lib/constants'
+import { DICTIONARY_UPDATED_LOAD_TRIGGER, ResponseCodes } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_user_dict_role } from '$lib/db/server/get-dictionary-role'
 import { build_canonical_path } from './canonical-path'
@@ -13,17 +13,20 @@ import { build_canonical_path } from './canonical-path'
  * per-dictionary content (entries, info, editors) still loads via the stub in
  * `+layout.ts` for now — converted incrementally in later M4 phases.
  *
- * Re-runs only when `params.dictionaryId` changes (dict→dict nav) or on
- * `invalidateAll()` — NOT on within-dict navigation. Catalog edits refresh it
- * indirectly: `+layout.ts` depends on DICTIONARY_UPDATED_LOAD_TRIGGER and
- * `await parent()`s this server load, which drags it along on a re-run.
+ * Re-runs when `params.dictionaryId` changes (dict→dict nav), on
+ * `invalidateAll()`, or on `invalidate(DICTIONARY_UPDATED_LOAD_TRIGGER)` — NOT
+ * on within-dict navigation. The trigger MUST be registered HERE (not just in
+ * `+layout.ts`): a universal load's `depends` doesn't drag its server parent
+ * along on invalidate, so without this the client re-runs `+layout.ts` against
+ * a CACHED catalog row and edits never appear until a hard reload.
  *
  * Also SSR-resolves this user's role grant (`ssr_role`) from shared.db so
  * `+layout.ts` can compute `is_editor_or_above` / `can_edit` on a hard load —
  * the browser `dict_roles` cache is empty during SSR, so without this a
  * non-admin editor/manager 403s on refresh of editor-gated pages (e.g. history).
  */
-export const load: LayoutServerLoad = async ({ params: { dictionaryId: dictionary_url }, parent, url }) => {
+export const load: LayoutServerLoad = async ({ params: { dictionaryId: dictionary_url }, parent, url, depends }) => {
+  depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
   const dictionary = get_dictionary_by_url_or_id(dictionary_url)
   if (!dictionary)
     redirect(ResponseCodes.MOVED_PERMANENTLY, '/')

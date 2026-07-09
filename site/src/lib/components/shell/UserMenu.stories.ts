@@ -1,4 +1,5 @@
 import type { Story, StoryMeta } from 'svelte-look'
+import type { PreviewDictRole } from '$lib/auth/view-as'
 import type Component from './UserMenu.svelte'
 import { AuthUser } from '$lib/auth/user.svelte'
 
@@ -8,7 +9,7 @@ export const shared_meta: StoryMeta = {
 
 const t = ((key: string) => key) as never
 
-function admin_user({ preview_level }: { preview_level?: number } = {}) {
+function admin_user({ preview_level, preview_dict_role }: { preview_level?: number, preview_dict_role?: PreviewDictRole } = {}) {
   const auth_user = new AuthUser()
   auth_user.set_session({
     user: {
@@ -25,8 +26,8 @@ function admin_user({ preview_level }: { preview_level?: number } = {}) {
       unsubscribed_from_emails: false,
     },
   })
-  if (preview_level !== undefined)
-    auth_user.set_preview({ admin_level: preview_level })
+  if (preview_level !== undefined || preview_dict_role !== undefined)
+    auth_user.set_preview({ admin_level: preview_level ?? 0, dict_role: preview_dict_role })
   return auth_user
 }
 
@@ -40,4 +41,10 @@ export const AdminLadder: Story<typeof Component> = {
 export const PreviewingVisitor: Story<typeof Component> = {
   props: { close: () => {} },
   page_data: { auth_user: admin_user({ preview_level: 0 }), t },
+}
+
+/** Previewing the dictionary-scoped Manager persona — the Manager rung is checked. */
+export const PreviewingManager: Story<typeof Component> = {
+  props: { close: () => {} },
+  page_data: { auth_user: admin_user({ preview_dict_role: 'manager' }), t },
 }

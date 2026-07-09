@@ -1,6 +1,6 @@
 import { invalidate } from '$app/navigation'
 import { api_dictionaries_catalog } from '$api/dictionaries/[id]/catalog/_call'
-import { DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/db-operations'
+import { DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/constants'
 
 export function load({ parent }) {
   async function update_about(updated: string) {

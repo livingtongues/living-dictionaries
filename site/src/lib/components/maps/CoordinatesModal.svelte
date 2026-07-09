@@ -122,7 +122,7 @@
           placeholder={page.data.t('about.search')}
           on_result={handleGeocoderResult}
           on_error={error => console.error(error)} />
-        {#if lng && lat}
+        {#if lng !== undefined && lat !== undefined}
           <Marker
             draggable
             on_dragend={coordinates => ({ lng, lat } = setMarker(coordinates.lng, coordinates.lat))}

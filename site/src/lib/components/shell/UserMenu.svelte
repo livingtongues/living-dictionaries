@@ -2,7 +2,7 @@
   import type { Persona } from '$lib/auth/view-as'
   import { page } from '$app/state'
   import { browser, dev } from '$app/environment'
-  import { invalidateAll } from '$app/navigation'
+  import { invalidate, invalidateAll } from '$app/navigation'
   import IconMdiCellphoneArrowDown from '~icons/mdi/cellphone-arrow-down'
   import IconMdiCheck from '~icons/mdi/check'
   import IconMdiCog from '~icons/mdi/cog'
@@ -13,6 +13,7 @@
   import IconMdiWrench from '~icons/mdi/wrench'
   import { build_personas, is_active_persona } from '$lib/auth/view-as'
   import { api_dev_admin_level } from '$api/auth/dev-admin-level/_call'
+  import { DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/constants'
   import { chat_store } from '$lib/chat/chat-store.svelte'
   import { mode } from '$lib/mode'
   import { pwa_install } from '$lib/state/pwa-install.svelte'
@@ -32,10 +33,13 @@
   const personas = $derived(build_personas({ real_admin_level: auth_user.real_admin_level }))
 
   function select(persona: Persona) {
-    if (persona.admin_level === auth_user.real_admin_level)
+    if (persona.admin_level === auth_user.real_admin_level && !persona.dict_role)
       auth_user.exit_preview()
     else
-      auth_user.set_preview({ admin_level: persona.admin_level })
+      auth_user.set_preview({ admin_level: persona.admin_level, dict_role: persona.dict_role })
+    // Re-run the dictionary layout load so role / can_edit / side-menu re-derive
+    // live from the new persona (they're baked once per load). No-op outside a dict.
+    void invalidate(DICTIONARY_UPDATED_LOAD_TRIGGER)
   }
 
   async function set_dev_admin_role() {

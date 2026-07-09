@@ -70,11 +70,16 @@
   }
 
   onMount(() => {
-    const customMarker = element.hasChildNodes() // if pin slot used
-    const elementOrColor: { element } | { color } = customMarker ? { element } : { color }
+    // Prefer the pin snippet prop over hasChildNodes(): Svelte 5 can leave
+    // comment/whitespace nodes in the bound div, which made Mapbox treat an
+    // empty div as a custom marker (invisible) instead of the default pin.
+    const custom_marker = !!pin
+    const element_or_color: { element: HTMLDivElement } | { color: string } = custom_marker
+      ? { element }
+      : { color }
 
     marker = new mapbox.Marker({
-      ...elementOrColor,
+      ...element_or_color,
       ...options,
       draggable,
     })
@@ -89,6 +94,7 @@
       markerEl.removeEventListener('click', handleClick)
       marker.off('dragend', handleDragEnd)
       marker.remove()
+      markers.delete(marker)
     }
   })
 </script>

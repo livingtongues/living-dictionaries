@@ -39,7 +39,7 @@
   {page.data.t('create.where_spoken')}
 </div>
 
-{#if first_longitude}
+{#if first_longitude !== undefined}
   <div class="hint">
     {page.data.t('create.map_instructions')}
   </div>
@@ -133,21 +133,21 @@
     {#snippet children({ show, toggle })}
       <Button
         onclick={toggle}
-        color={first_longitude ? 'black' : 'primary'}
-        size={first_longitude ? 'sm' : 'md'}>
+        color={first_longitude !== undefined ? 'black' : 'primary'}
+        size={first_longitude !== undefined ? 'sm' : 'md'}>
         <IconMdiMapMarkerPlus class="icon-inline" style="margin-right: 0.25rem; margin-top: -3px;" />
         {page.data.t('create.select_coordinates')}
       </Button>
       {#if show}
         <CoordinatesModal
-          initialCenter={{ ...(first_longitude && { longitude: first_longitude, latitude: first_latitude }) }}
+          initialCenter={first_longitude !== undefined ? { longitude: first_longitude, latitude: first_latitude } : undefined}
           on_update={addCoordinates}
           on_close={toggle} />
       {/if}
     {/snippet}
   </ShowHide>
 
-  {#if first_longitude}
+  {#if first_longitude !== undefined}
     <ShowHide>
       {#snippet children({ show, toggle })}
         <Button onclick={toggle} color="black" size="sm">

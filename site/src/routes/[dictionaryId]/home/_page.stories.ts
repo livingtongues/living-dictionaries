@@ -35,7 +35,7 @@ const dictionary = {
   grammar: '<p>GtaɁ is an agglutinative language with subject-object-verb word order. Nouns inflect for number and case.</p>',
   citation: null,
   entry_count: 6378,
-  orthographies: null,
+  orthographies: [{ code: 'default', name: 'Gtaʔ', primary: true }, { code: 'ipa', name: 'IPA' }],
   con_language_description: null,
   hide_living_tongues_logo: 0,
 }
@@ -43,9 +43,11 @@ const dictionary = {
 const loading_entries_data = Object.assign(readable({}), { loading: readable(true) })
 const base = {
   dictionary,
-  ssr_featured: ssr_cards.slice(0, 5),
-  ssr_recent: ssr_cards.slice(3, 6),
-  partners: [],
+  home_data: {
+    ssr_featured: ssr_cards.slice(0, 5),
+    ssr_recent: ssr_cards.slice(3, 6),
+    partners: [],
+  },
   dict_db: null,
   entries_data: loading_entries_data,
   speakers: readable([]),
@@ -55,22 +57,34 @@ const base = {
   is_manager: false,
   can_edit: false,
   is_editor_or_above: false,
+  update_dictionary: async () => {},
 } as never
 
 /** Anonymous visitor, snapshot still downloading — SSR cards + pulsing stats. */
 export const Visitor: PageStory<typeof Component> = {
-  viewports: [{ width: 1024, height: 1200 }, { width: 390, height: 1400 }],
+  viewports: [{ width: 1600, height: 1200 }, { width: 390, height: 1400 }],
   props: base,
 }
 
-/** Manager of a bare dictionary — nudges, dashed add-location, no hero image. */
+/** Manager of a bare dictionary — nudges, dashed add-pills, cover-photo button, no hero image. */
 export const ManagerBareDict: PageStory<typeof Component> = {
   viewports: [{ width: 1024, height: 1000 }],
   props: {
     ...(base as object),
-    dictionary: { ...dictionary, featured_image: null, coordinates: null, about: null, grammar: null, alternate_names: null },
-    ssr_featured: [],
-    ssr_recent: ssr_cards.slice(0, 3),
+    dictionary: { ...dictionary, featured_image: null, coordinates: null, about: null, grammar: null, alternate_names: null, location: null, iso_639_3: null, glottocode: null, orthographies: null },
+    home_data: { ssr_featured: [], ssr_recent: ssr_cards.slice(0, 3), partners: [] },
+    is_manager: true,
+    can_edit: true,
+    is_editor_or_above: true,
+    auth_user: { admin_level: 0, user: { id: 'u1' } },
+  } as never,
+}
+
+/** Manager with a full hero — pencil affordances on every field + replace/remove cover. */
+export const ManagerFullHero: PageStory<typeof Component> = {
+  viewports: [{ width: 1280, height: 900 }],
+  props: {
+    ...(base as object),
     is_manager: true,
     can_edit: true,
     is_editor_or_above: true,
