@@ -122,6 +122,42 @@
     { label: 'p95', color: USERS_COLOR, points: uptime_days.map(point => ({ date: point.day, value: point.ttfb_p95 as number })) },
   ])
 
+  // --- Host resources (whole-VPS CPU/RAM/disk — the `host_stats` family). Only
+  // present for level-3 admins (the API injects it; null hides the panel). Live
+  // /proc reading preferred; falls back to the newest logged sample. The live
+  // CPU gets its own fallback (the first request after boot has no /proc/stat
+  // baseline to average against, so it reads null).
+  const host = $derived(analytics.host)
+  const host_current = $derived(host?.now?.mem_pct != null ? host.now : host?.latest ?? null)
+  const host_cpu = $derived(host?.now?.cpu_pct ?? host?.latest?.cpu_pct ?? null)
+  function meter_level(pct: number | null | undefined): 'ok' | 'warn' | 'danger' {
+    if ((pct ?? 0) >= 85)
+      return 'danger'
+    if ((pct ?? 0) >= 70)
+      return 'warn'
+    return 'ok'
+  }
+  function format_host_pct(value: number | null | undefined): string {
+    if (value == null)
+      return '—'
+    return `${value < 10 ? value.toFixed(1) : Math.round(value)}%`
+  }
+  function format_mb(mb: number | null | undefined): string {
+    if (mb == null)
+      return '—'
+    return mb >= 1024 ? `${(mb / 1024).toFixed(1)} GB` : `${Math.round(mb)} MB`
+  }
+  const HOST_MAX_COLOR = '#f59e0b'
+  const host_hourly = $derived(host?.hourly ?? [])
+  const host_cpu_series = $derived([
+    { label: 'hourly avg', color: 'var(--primary)', area: true, points: host_hourly.filter(point => point.cpu_avg !== null).map(point => ({ date: point.hour, value: point.cpu_avg as number })) },
+    { label: 'hottest 5-min window', color: HOST_MAX_COLOR, points: host_hourly.filter(point => point.cpu_max !== null).map(point => ({ date: point.hour, value: point.cpu_max as number })) },
+  ])
+  const host_mem_series = $derived([
+    { label: 'hourly avg', color: 'var(--primary)', area: true, points: host_hourly.filter(point => point.mem_avg !== null).map(point => ({ date: point.hour, value: point.mem_avg as number })) },
+    { label: 'hourly max', color: HOST_MAX_COLOR, points: host_hourly.filter(point => point.mem_max !== null).map(point => ({ date: point.hour, value: point.mem_max as number })) },
+  ])
+
   const error_suffix = $derived(insights.error_rate != null ? `, ${format_pct(insights.error_rate)} error rate` : '')
   const headline = $derived(
     `${format_number(totals.logs)} logs from ${format_number(totals.unique_users)} users across ${format_number(totals.sessions)} sessions over the last ${analytics.window_days} days${error_suffix}.`,
@@ -201,6 +237,52 @@
       fill in. The nightly rollup keeps history after raw rows are archived.</p>
   {:else}
     <p class="headline">{headline}</p>
+  {/if}
+
+  {#if host}
+    <section class="panel">
+      <h2>Host resources <span class="hint">whole VPS · CPU avg over each 5-min window · read from /proc</span></h2>
+      {#if !host_current}
+        <p class="muted">No host readings yet — the 5-min <code>host_stats</code> sampler starts reporting once this build is deployed (dev shows live values only on Linux).</p>
+      {:else}
+        <div class="host-meters">
+          <div class="host-meter">
+            <div class="host-top"><span class="host-name">CPU</span><span class="host-val" class:danger={meter_level(host_cpu) === 'danger'}>{format_host_pct(host_cpu)}</span></div>
+            <div class="meter-track"><span class="meter-fill {meter_level(host_cpu)}" style:width="{Math.min(host_cpu ?? 0, 100)}%"></span></div>
+            <div class="host-sub">load {host_current.load1 ?? '—'} / {host_current.load5 ?? '—'} / {host_current.load15 ?? '—'} · {host_current.cores ?? '?'} core{host_current.cores === 1 ? '' : 's'}</div>
+          </div>
+          <div class="host-meter">
+            <div class="host-top"><span class="host-name">RAM</span><span class="host-val" class:danger={meter_level(host_current.mem_pct) === 'danger'}>{format_host_pct(host_current.mem_pct)}</span></div>
+            <div class="meter-track"><span class="meter-fill {meter_level(host_current.mem_pct)}" style:width="{Math.min(host_current.mem_pct ?? 0, 100)}%"></span></div>
+            <div class="host-sub">{format_mb(host_current.mem_used_mb)} of {format_mb(host_current.mem_total_mb)}</div>
+          </div>
+          <div class="host-meter">
+            <div class="host-top"><span class="host-name">Disk</span><span class="host-val" class:danger={meter_level(host_current.disk_pct) === 'danger'}>{format_host_pct(host_current.disk_pct)}</span></div>
+            <div class="meter-track"><span class="meter-fill {meter_level(host_current.disk_pct)}" style:width="{Math.min(host_current.disk_pct ?? 0, 100)}%"></span></div>
+            <div class="host-sub">{host_current.disk_used_gb ?? '—'} of {host_current.disk_total_gb ?? '—'} GB{#if host_current.data_dir_mb != null} · app data {format_mb(host_current.data_dir_mb)}{/if}</div>
+          </div>
+          <div class="host-meter">
+            <div class="host-top"><span class="host-name">Swap</span><span class="host-val" class:danger={meter_level(host_current.swap_pct) === 'danger'}>{host_current.swap_total_mb ? format_host_pct(host_current.swap_pct) : 'none'}</span></div>
+            <div class="meter-track"><span class="meter-fill {meter_level(host_current.swap_pct)}" style:width="{Math.min(host_current.swap_pct ?? 0, 100)}%"></span></div>
+            <div class="host-sub">{#if host_current.swap_total_mb}{format_mb(host_current.swap_used_mb)} of {format_mb(host_current.swap_total_mb)}{:else}no swap configured{/if}</div>
+          </div>
+        </div>
+        {#if host_hourly.length > 1}
+          <div class="grid">
+            <div>
+              <h3 class="perf-h3">CPU % <span class="hint">hourly · avg + hottest 5-min window</span></h3>
+              <ComboChart series={host_cpu_series} height={170} value_format={format_host_pct} />
+            </div>
+            <div>
+              <h3 class="perf-h3">RAM % <span class="hint">hourly · avg + max</span></h3>
+              <ComboChart series={host_mem_series} height={170} value_format={format_host_pct} />
+            </div>
+          </div>
+        {:else}
+          <p class="muted chart-note">Trend charts appear once a few hours of <code>host_stats</code> samples land ({format_number(host.samples)} so far).</p>
+        {/if}
+      {/if}
+    </section>
   {/if}
 
   <section class="panel speed-panel">
@@ -1236,6 +1318,56 @@
   .nowrap { white-space: nowrap; }
   .mono { font-family: var(--font-mono); font-size: 0.75rem; }
   .muted { color: var(--color-secondary); font-size: 0.8125rem; margin: 0; }
+  .chart-note { margin-top: 0.5rem; }
+  .host-meters {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .host-meter {
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.75rem;
+  }
+  .host-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .host-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-secondary);
+  }
+  .host-val {
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .host-val.danger { color: var(--danger); }
+  .meter-track {
+    height: 0.5rem;
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--color-secondary) 18%, transparent);
+    overflow: hidden;
+    margin: 0.45rem 0 0.4rem;
+  }
+  .meter-fill {
+    display: block;
+    height: 100%;
+    border-radius: 0.25rem;
+    transition: width 0.3s ease;
+  }
+  .meter-fill.ok { background: var(--success, #16a34a); }
+  .meter-fill.warn { background: var(--warning, #d97706); }
+  .meter-fill.danger { background: var(--danger, #dc2626); }
+  .host-sub {
+    color: var(--color-secondary);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+  }
   .empty {
     color: var(--color-secondary);
     background: var(--surface);
@@ -1250,6 +1382,7 @@
     .grid { grid-template-columns: 1fr; }
     .perf-summary { grid-template-columns: 1fr; }
     .speed-grid { grid-template-columns: 1fr; }
+    .host-meters { grid-template-columns: repeat(2, 1fr); }
   }
   /* Collapse long error/row lists behind a toggle — the verdict/stat cards above
      stay visible, the raw rows are opt-in (mirrors house's HealthView). */

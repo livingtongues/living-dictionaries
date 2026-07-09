@@ -43,9 +43,13 @@
   const mt = $derived(events.length ? 30 : 14)
   const ih = $derived(height - mt - m.b)
 
+  // Accepts 'YYYY-MM-DD' day points and 'YYYY-MM-DDTHH:00' hourly points (the
+  // host-resources charts) — parsed part-wise so no timezone shift is applied.
   function to_date(value: string): Date {
-    const parts = value.split('-').map(Number)
-    return new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1)
+    const [date_part, time_part] = value.split('T')
+    const parts = date_part.split('-').map(Number)
+    const hour = time_part ? Number(time_part.split(':')[0]) || 0 : 0
+    return new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1, hour)
   }
   const prepared = $derived(
     series.map(s => ({
@@ -61,7 +65,17 @@
     ...evts.map(e => e.d),
   ])
   const xs = $derived(scaleTime().domain(extent(all_dates) as [Date, Date]).range([0, iw]))
-  const y_max = $derived(max(prepared.flatMap(s => s.pts.map(p => p.value))) ?? 1)
+
+  // Legend series toggle: clicking a legend entry hides/shows that series. Hidden
+  // series drop out of the y-domain, the drawn lines, and the hover readout (the
+  // x-domain stays put so the chart doesn't jump).
+  let hidden = $state<Record<string, boolean>>({})
+  const visible = $derived(prepared.filter(s => !hidden[s.label]))
+  function toggle(label: string) {
+    hidden = { ...hidden, [label]: !hidden[label] }
+  }
+
+  const y_max = $derived(max(visible.flatMap(s => s.pts.map(p => p.value))) ?? 1)
   const ys = $derived(scaleLinear().domain([0, y_max * 1.06]).range([ih, 0]).nice())
 
   // Cluster deploy markers so a burst collapses to one tick instead of a pile.
@@ -85,7 +99,11 @@
       .y1(d => ys(d.value))
       .curve(curveMonotoneX)(pts)
 
-  const xticks = $derived(xs.ticks(7))
+  // Container-responsive chrome-shedding: fewer x-ticks on narrow widths so date
+  // labels never collide (the viewBox keeps everything else proportional).
+  let cw = $state(0)
+  const x_tick_count = $derived(cw > 0 && cw < 420 ? 3 : cw > 0 && cw < 640 ? 4 : 7)
+  const xticks = $derived(xs.ticks(x_tick_count))
   const yticks = $derived(ys.ticks(5))
 
   // Adaptive x-tick labels: month + 2-digit year for ≤~13-month windows, else year.
@@ -95,6 +113,8 @@
     return lo && hi ? (+hi - +lo) / 86_400_000 : 0
   })
   function tick_label(date: Date): string {
+    if (span_days <= 32)
+      return `${MONTHS[date.getMonth()]} ${date.getDate()}` // short windows: day beats a repeated month label
     return span_days <= 400 ? `${MONTHS[date.getMonth()]} '${String(date.getFullYear()).slice(2)}` : String(date.getFullYear())
   }
 
@@ -121,34 +141,10 @@
   let svg_el: SVGSVGElement
   let hover = $state<{ ix: number, raw: string, items: HoverItem[], gaps: { label: string, value: number }[] } | null>(null)
 
-  function on_move(event: PointerEvent) {
-    if (!svg_el)
-      return
-    const rect = svg_el.getBoundingClientRect()
-    const ix = ((event.clientX - rect.left) / rect.width) * W - m.l
-    const iy = ((event.clientY - rect.top) / rect.height) * height - mt
-    if (ix < -6 || ix > iw + 6 || iy < 0 || iy > ih) {
-      hover = null
-      return
-    }
-    let best_pt: { date: Date, raw: string } | null = null
-    let best_dist = Infinity
-    for (const s of prepared) {
-      for (const p of s.pts) {
-        const dist = Math.abs(xs(p.date) - ix)
-        if (dist < best_dist) {
-          best_dist = dist
-          best_pt = p
-        }
-      }
-    }
-    if (!best_pt) {
-      hover = null
-      return
-    }
+  function set_hover(best_pt: { date: Date, raw: string }) {
     const t = +best_pt.date
     const items: HoverItem[] = []
-    for (const s of prepared) {
+    for (const s of visible) {
       if (s.pts.length === 0)
         continue
       const v = value_at(s.pts, t)
@@ -165,24 +161,96 @@
     hover = { ix: xs(best_pt.date), raw: best_pt.raw, items, gaps: gap_rows }
   }
 
+  function on_move(event: PointerEvent) {
+    if (!svg_el)
+      return
+    const rect = svg_el.getBoundingClientRect()
+    const ix = ((event.clientX - rect.left) / rect.width) * W - m.l
+    const iy = ((event.clientY - rect.top) / rect.height) * height - mt
+    if (ix < -6 || ix > iw + 6 || iy < 0 || iy > ih) {
+      hover = null
+      return
+    }
+    let best_pt: { date: Date, raw: string } | null = null
+    let best_dist = Infinity
+    for (const s of visible) {
+      for (const p of s.pts) {
+        const dist = Math.abs(xs(p.date) - ix)
+        if (dist < best_dist) {
+          best_dist = dist
+          best_pt = p
+        }
+      }
+    }
+    if (!best_pt) {
+      hover = null
+      return
+    }
+    set_hover(best_pt)
+  }
+
+  // Keyboard navigation: focus the chart, then ←/→ (or ↑/↓) step between the union
+  // of visible-series dates, Home/End jump to the ends, Esc clears — driving the
+  // same shared tooltip + crosshair as the mouse.
+  const kb_points = $derived.by(() => {
+    const seen: Record<number, boolean> = {}
+    const out: { date: Date, raw: string }[] = []
+    for (const s of visible) {
+      for (const p of s.pts) {
+        const key = +p.date
+        if (!seen[key]) {
+          seen[key] = true
+          out.push({ date: p.date, raw: p.raw })
+        }
+      }
+    }
+    return out.sort((first, second) => +first.date - +second.date)
+  })
+  let kb_index = $state<number | null>(null)
+  function focus_index(index: number) {
+    if (kb_points.length === 0)
+      return
+    const i = Math.max(0, Math.min(kb_points.length - 1, index))
+    kb_index = i
+    set_hover(kb_points[i])
+  }
+  function on_keydown(event: KeyboardEvent) {
+    if (kb_points.length === 0)
+      return
+    switch (event.key) {
+      case 'ArrowRight': case 'ArrowUp': focus_index((kb_index ?? -1) + 1); break
+      case 'ArrowLeft': case 'ArrowDown': focus_index((kb_index ?? kb_points.length) - 1); break
+      case 'Home': focus_index(0); break
+      case 'End': focus_index(kb_points.length - 1); break
+      case 'Escape': kb_index = null; hover = null; break
+      default: return
+    }
+    event.preventDefault()
+  }
+
   const tip_left = $derived(hover ? ((m.l + hover.ix) / W) * 100 : 0)
   const tip_shift = $derived(tip_left > 70 ? 'translateX(-100%)' : tip_left < 30 ? 'translateX(0)' : 'translateX(-50%)')
 </script>
 
 <div class="legend">
   {#each series as s (s.label)}
-    <span class="item"><span class="sw" style:background={s.color}></span>{s.label}</span>
+    <button type="button" class="item" class:off={hidden[s.label]} aria-pressed={!hidden[s.label]} onclick={() => toggle(s.label)}>
+      <span class="sw" style:background={s.color}></span>{s.label}
+    </button>
   {/each}
 </div>
 
-<div class="wrap">
+<div class="wrap" bind:clientWidth={cw}>
   <svg
     bind:this={svg_el}
     viewBox={`0 0 ${W} ${height}`}
     style="width:100%;height:auto;display:block;touch-action:none"
     role="img"
+    tabindex="0"
     onpointermove={on_move}
-    onpointerleave={() => (hover = null)}>
+    onpointerleave={() => (hover = null)}
+    onkeydown={on_keydown}
+    onblur={() => { kb_index = null; hover = null }}>
     <g transform={`translate(${m.l},${mt})`}>
       {#each yticks as t (t)}
         <line x1={0} x2={iw} y1={ys(t)} y2={ys(t)} stroke="var(--border-color)" stroke-opacity="0.7" />
@@ -205,7 +273,7 @@
           stroke-opacity={current ? 0.6 : 0.4} />
       {/each}
 
-      {#each prepared as s (s.label)}
+      {#each visible as s (s.label)}
         {#if s.area}<path d={area_path(s.pts)} fill={s.color} fill-opacity="0.1" />{/if}
         <path d={line_path(s.pts)} fill="none" stroke={s.color} stroke-width="2.25" />
       {/each}
@@ -245,10 +313,29 @@
 </div>
 
 <style>
-  .legend { display: flex; gap: 1.1rem; margin-bottom: 0.4rem; font-size: 0.8rem; color: var(--color-secondary); }
-  .item { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; margin-bottom: 0.4rem; font-size: 0.8rem; color: var(--color-secondary); }
+  .item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: none;
+    border: none;
+    padding: 0.1rem 0.2rem;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: opacity 0.12s ease;
+  }
+  .item:hover { color: var(--color); }
+  .item:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+  .item.off { opacity: 0.4; }
+  .item.off .sw { background: var(--color-secondary) !important; }
   .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
   .wrap { position: relative; }
+  svg:focus { outline: none; }
+  svg:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
   .tip {
     position: absolute;
     top: 34px;

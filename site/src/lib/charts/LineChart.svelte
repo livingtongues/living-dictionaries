@@ -106,11 +106,40 @@
         .curve(curveMonotoneX)(pts)
       : null,
   )
-  const xticks = $derived(xs.ticks(6))
+  // Container-responsive chrome-shedding: fewer x-ticks on narrow widths so date
+  // labels never collide (the viewBox keeps everything else proportional).
+  let cw = $state(0)
+  const x_tick_count = $derived(cw > 0 && cw < 420 ? 3 : cw > 0 && cw < 640 ? 4 : 6)
+  const xticks = $derived(xs.ticks(x_tick_count))
   const yticks = $derived(ys.ticks(5))
 
   let svg_el: SVGSVGElement
   let hover = $state<{ ix: number, cy: number, raw: string, value: number } | null>(null)
+
+  // Keyboard navigation: focus the chart, then ←/→ (or ↑/↓) step between points,
+  // Home/End jump to the ends, Esc clears — driving the same hover/crosshair as the mouse.
+  let kb_index = $state<number | null>(null)
+  function focus_point(index: number) {
+    if (pts.length === 0)
+      return
+    const i = Math.max(0, Math.min(pts.length - 1, index))
+    kb_index = i
+    const p = pts[i]
+    hover = { ix: xs(p.date), cy: ys(p.value), raw: p.raw, value: p.value }
+  }
+  function on_keydown(event: KeyboardEvent) {
+    if (pts.length === 0)
+      return
+    switch (event.key) {
+      case 'ArrowRight': case 'ArrowUp': focus_point((kb_index ?? -1) + 1); break
+      case 'ArrowLeft': case 'ArrowDown': focus_point((kb_index ?? pts.length) - 1); break
+      case 'Home': focus_point(0); break
+      case 'End': focus_point(pts.length - 1); break
+      case 'Escape': kb_index = null; hover = null; break
+      default: return
+    }
+    event.preventDefault()
+  }
 
   function on_move(event: PointerEvent) {
     if (!svg_el || pts.length === 0)
@@ -138,14 +167,17 @@
   const tip_shift = $derived(tip_left > 70 ? 'translateX(-100%)' : tip_left < 30 ? 'translateX(0)' : 'translateX(-50%)')
 </script>
 
-<div class="wrap">
+<div class="wrap" bind:clientWidth={cw}>
   <svg
     bind:this={svg_el}
     viewBox={`0 0 ${W} ${height}`}
     style="width:100%;height:auto;display:block;touch-action:none"
     role="img"
+    tabindex="0"
     onpointermove={on_move}
-    onpointerleave={() => (hover = null)}>
+    onpointerleave={() => (hover = null)}
+    onkeydown={on_keydown}
+    onblur={() => { kb_index = null; hover = null }}>
     <g transform={`translate(${m.l},${mt})`}>
       {#each yticks as t (t)}
         {@const zero = Math.abs(t) < 1e-9}
@@ -199,6 +231,8 @@
 
 <style>
   .wrap { position: relative; }
+  svg:focus { outline: none; }
+  svg:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
   .tip {
     position: absolute;
     pointer-events: none;

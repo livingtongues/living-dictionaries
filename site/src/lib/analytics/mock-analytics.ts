@@ -103,6 +103,46 @@ function build_uptime(): LogAnalytics['uptime'] {
   }
 }
 
+/** 14 days of hourly host samples: quiet nights, warm afternoons, one hot spike. */
+function build_host(): NonNullable<LogAnalytics['host']> {
+  const end = new Date('2026-06-23T13:00:00.000Z')
+  const hourly: NonNullable<LogAnalytics['host']>['hourly'] = []
+  for (let offset = 14 * 24 - 1; offset >= 0; offset--) {
+    const at = new Date(end.getTime() - offset * 3_600_000)
+    // Daily traffic wave peaking mid-afternoon UTC; one deploy-build spike.
+    const wave = Math.max(0, Math.sin(((at.getUTCHours() - 6) / 24) * Math.PI * 2))
+    const cpu_avg = Math.round((4 + wave * 14 + (offset === 70 ? 55 : 0)) * 10) / 10
+    const mem_avg = Math.round((38 + wave * 9 + (14 * 24 - offset) * 0.012) * 10) / 10
+    hourly.push({
+      hour: `${at.toISOString().slice(0, 13)}:00`,
+      cpu_avg,
+      cpu_max: Math.min(100, Math.round((cpu_avg * 1.9 + 3) * 10) / 10),
+      mem_avg,
+      mem_max: Math.round((mem_avg + 4) * 10) / 10,
+      disk_pct: 41.2,
+    })
+  }
+  const now = {
+    cpu_pct: 7.4,
+    cpu_window_s: 300,
+    load1: 0.18,
+    load5: 0.11,
+    load15: 0.06,
+    cores: 2,
+    mem_pct: 46.3,
+    mem_used_mb: 1772,
+    mem_total_mb: 3824,
+    swap_pct: 2.1,
+    swap_used_mb: 43,
+    swap_total_mb: 2048,
+    disk_pct: 41.2,
+    disk_used_gb: 39.6,
+    disk_total_gb: 96.2,
+    data_dir_mb: 12_680,
+  }
+  return { now, samples: 4032, latest: { ...now, at: '2026-06-23T13:00:00.000Z' }, hourly }
+}
+
 export const mock_analytics: LogAnalytics = {
   audience: 'humans',
   window_days: 30,
@@ -395,6 +435,7 @@ export const mock_analytics: LogAnalytics = {
     ],
   },
   uptime: build_uptime(),
+  host: build_host(),
 }
 
 export const mock_analytics_bots: LogAnalytics = {
@@ -444,4 +485,5 @@ export const empty_analytics: LogAnalytics = {
   missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
   boot_health: { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] },
   uptime: { probes: 0, availability: null, ttfb: { p50: null, p95: null }, total: { p50: null, p95: null }, vantages: [], daily: [] },
+  host: { now: null, samples: 0, latest: null, hourly: [] },
 }

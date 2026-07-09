@@ -2,6 +2,7 @@ import type { HandleServerError } from '@sveltejs/kit'
 import { dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { start_chat_reping_cron_once } from '$lib/db/server/chat-reping-cron'
+import { start_host_stats_cron_once } from '$lib/db/server/host-stats-cron'
 import { start_log_retention_cron_once } from '$lib/db/server/log-retention-cron'
 import { get_logs_db, split_client_logs_from_shared } from '$lib/db/server/logs-db'
 import { start_r2_snapshot_builder } from '$lib/db/server/r2-snapshot-builder'
@@ -53,6 +54,12 @@ start_log_retention_cron_once()
 // sync/read load. Primary-only (IS_STANDBY-gated) + singleton + dev/build-dormant.
 // Per-dictionary DBs are deliberately out of scope pending investigation.
 start_wal_checkpoint_cron_once()
+
+// Host-resource sampler: every 5 min, one `host_stats` server event (whole-box
+// CPU/RAM/disk read from /proc inside the container — see host-stats.ts) feeding
+// the /admin/health "Host resources" panel. Primary-only (IS_STANDBY-gated) +
+// singleton + dev/build-dormant.
+start_host_stats_cron_once()
 
 // Admin team-chat gentle re-ping cron. Hourly, sends exactly one more nudge for
 // chat pings unread ~1 day. IS_STANDBY-guarded + singleton-guarded; notify_admin

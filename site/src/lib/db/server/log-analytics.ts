@@ -10,6 +10,8 @@ import { is_below_db_worker_capability, is_bot_user_agent, parse_user_agent } fr
 import { SYNCABLE_TABLE_NAMES } from '$lib/db/sync/types'
 import { distance_bucket, DISTANCE_BUCKETS, distance_to_origin_km } from '$lib/geo/distance'
 import { geo_key } from '$lib/server/geo-from-request'
+import type { HostStats } from '$lib/server/host-stats'
+import { read_host_stats } from '$lib/server/host-stats'
 import { classify_ua_frequency_bot_sessions, MIN_UA_BOT_SESSIONS_PER_DAY } from './bot-sessions'
 import { get_log_archive_db } from './log-archive-db'
 import { get_rollup_watermark, month_string, normalize_route, prev_month, SESSION_START, SITE_SCOPE } from './log-retention-cron'
@@ -37,7 +39,7 @@ import { get_shared_db } from './shared-db'
 
 const ERROR_LEVELS_SQL = `('error','unhandled_rejection','crash')`
 /** Infra/telemetry plumbing excluded from the "top events" list so real analytics events surface. */
-const INFRA_EVENTS = new Set(['heartbeat', 'navigation', 'perf', 'session_start', 'visibility_visible', 'visibility_hidden', 'uptime_probe'])
+const INFRA_EVENTS = new Set(['heartbeat', 'navigation', 'perf', 'session_start', 'visibility_visible', 'visibility_hidden', 'uptime_probe', 'host_stats'])
 const TOP_LIMIT = 12
 const ERROR_CLUSTER_LIMIT = 25
 const ROUTE_PERF_LIMIT = 12
@@ -324,6 +326,12 @@ export interface LogAnalytics {
   boot_health: BootHealth
   /** Synthetic external uptime + latency (`uptime_probe`, hot window only). */
   uptime: UptimeSummary
+  /**
+   * Whole-box host resources (live snapshot + hot-window trend from `host_stats`).
+   * Always null from `get_log_analytics` (the cached blob must not carry a "live"
+   * reading) — the analytics API endpoint injects it fresh for level-3 admins.
+   */
+  host: HostStatsSummary | null
 }
 
 /** One day of synthetic-probe availability + latency (hot window). */
@@ -805,7 +813,86 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
     missing_i18n_keys,
     boot_health,
     uptime,
+    // Never computed here (this result is cached 15 min — a "live" reading must
+    // not ride it). The analytics API endpoint injects a fresh section for
+    // level-3 admins; everyone else sees null.
+    host: null,
   }
+}
+
+/** One hour of `host_stats` samples — avg + max of the per-5-min window averages. */
+export interface HostHourlyPoint {
+  /** 'YYYY-MM-DDTHH:00' (UTC hour, matching `received_at`). */
+  hour: string
+  cpu_avg: number | null
+  /** The hottest 5-min window that hour — the burst signal a mean hides. */
+  cpu_max: number | null
+  mem_avg: number | null
+  mem_max: number | null
+  disk_pct: number | null
+}
+/**
+ * Whole-box host resources (CPU / RAM / disk) from the `host_stats` server-log
+ * family (a 5-min cron reads /proc from inside the container — host values are
+ * not namespaced; see host-stats.ts). `now` is a live reading taken while this
+ * response was built; `latest`/`hourly` come from logged samples (hot window).
+ */
+export interface HostStatsSummary {
+  now: HostStats | null
+  samples: number
+  latest: (HostStats & { at: string }) | null
+  hourly: HostHourlyPoint[]
+}
+
+/**
+ * Build the host-resources section: live snapshot + hot-window hourly trend.
+ * Reads raw `host_stats` rows only (they age out of logs.db with retention, so
+ * the file itself IS the hot window — no date filter needed). Called fresh per
+ * request by the analytics API endpoint (NOT inside the cached analytics blob).
+ */
+export function build_host_stats({ logs_db, read_now = () => read_host_stats({ tracker: 'health-request' }) }: {
+  logs_db: Database.Database
+  read_now?: () => HostStats
+}): HostStatsSummary {
+  let now: HostStats | null
+  try {
+    now = read_now()
+  } catch {
+    now = null // /proc unavailable (non-Linux dev) — panel falls back to logged samples
+  }
+
+  const samples = (logs_db.prepare(`
+    SELECT COUNT(*) count FROM client_logs WHERE source = 'server' AND message = 'host_stats'
+  `).get() as { count: number }).count
+
+  let latest: HostStatsSummary['latest'] = null
+  const latest_row = logs_db.prepare(`
+    SELECT received_at, context FROM client_logs
+    WHERE source = 'server' AND message = 'host_stats'
+    ORDER BY received_at DESC LIMIT 1
+  `).get() as { received_at: string, context: string | null } | undefined
+  if (latest_row?.context) {
+    try {
+      latest = { ...(JSON.parse(latest_row.context) as HostStats), at: latest_row.received_at }
+    } catch {
+      latest = null
+    }
+  }
+
+  const hourly = logs_db.prepare(`
+    SELECT substr(received_at, 1, 13) || ':00'                        hour,
+           ROUND(AVG(json_extract(context, '$.cpu_pct')), 1)          cpu_avg,
+           MAX(json_extract(context, '$.cpu_pct'))                    cpu_max,
+           ROUND(AVG(json_extract(context, '$.mem_pct')), 1)          mem_avg,
+           MAX(json_extract(context, '$.mem_pct'))                    mem_max,
+           MAX(json_extract(context, '$.disk_pct'))                   disk_pct
+    FROM client_logs
+    WHERE source = 'server' AND message = 'host_stats'
+    GROUP BY hour
+    ORDER BY hour
+  `).all() as HostHourlyPoint[]
+
+  return { now, samples, latest, hourly }
 }
 
 /**

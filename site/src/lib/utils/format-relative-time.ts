@@ -75,13 +75,17 @@ export function format_date(iso: string | Date | null | undefined): string {
 }
 
 /**
- * Compact date label for chart tooltips/axes from a 'YYYY-MM-DD' or 'YYYY-MM'
- * string: "Mar 7, 2020" (full) or "Mar 2020" (month-only). Parses the string
- * parts directly (no timezone shift), unlike the Date-based helpers above.
+ * Compact date label for chart tooltips/axes from a 'YYYY-MM-DD', 'YYYY-MM', or
+ * 'YYYY-MM-DDTHH:00' string: "Mar 7, 2020" (full), "Mar 2020" (month-only), or
+ * "Mar 7, 14:00" (hourly). Parses the string parts directly (no timezone
+ * shift), unlike the Date-based helpers above.
  */
 export function format_point_date(iso: string): string {
-  const [year, month, day] = iso.split('-').map(Number)
+  const [date_part, time_part] = iso.split('T')
+  const [year, month, day] = date_part.split('-').map(Number)
   const name = MONTHS[(month || 1) - 1]
+  if (time_part && day)
+    return `${name} ${day}, ${time_part.slice(0, 5)}`
   return day ? `${name} ${day}, ${year}` : `${name} ${year}`
 }
 
@@ -180,6 +184,9 @@ if (import.meta.vitest) {
     })
     test('month-only from YYYY-MM', () => {
       expect(format_point_date('2020-03')).toBe('Mar 2020')
+    })
+    test('hourly from YYYY-MM-DDTHH:00', () => {
+      expect(format_point_date('2020-03-07T14:00')).toBe('Mar 7, 14:00')
     })
   })
 }

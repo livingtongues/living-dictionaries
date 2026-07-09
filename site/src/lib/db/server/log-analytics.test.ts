@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import process from 'node:process'
 import { insert_client_log } from '$lib/server/insert-client-log'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
-import { get_log_analytics } from './log-analytics'
+import { build_host_stats, get_log_analytics } from './log-analytics'
 import { _reset_log_archive_db_for_tests } from './log-archive-db'
 import { open_logs_db } from './logs-db'
 import { open_shared_db } from './shared-db'
@@ -1174,6 +1174,7 @@ describe(get_log_analytics, () => {
               },
             ],
           },
+          "host": null,
           "leader_health": {
             "failed": 2,
             "failed_by_code": [
@@ -1537,5 +1538,54 @@ describe(get_log_analytics, () => {
       else
         process.env.DATA_DIR = prev_data_dir
     }
+  })
+})
+
+describe(build_host_stats, () => {
+  const SAMPLE = { cpu_pct: 12.5, cpu_window_s: 300, load1: 0.4, load5: 0.2, load15: 0.1, cores: 2, mem_pct: 55, mem_used_mb: 2100, mem_total_mb: 3800, swap_pct: 1, swap_used_mb: 20, swap_total_mb: 2048, disk_pct: 40, disk_used_gb: 38.4, disk_total_gb: 96, data_dir_mb: 9000 }
+
+  function add_host_stats({ at, cpu_pct, mem_pct }: { at: string, cpu_pct: number, mem_pct: number }): void {
+    insert_client_log({
+      payload: { level: 'info', message: 'host_stats', context: { ...SAMPLE, cpu_pct, mem_pct } },
+      user_id: null,
+      source: 'server',
+      db: logs_db,
+      now: new Date(at),
+    })
+  }
+
+  test('latest sample + hourly avg/max buckets from logged host_stats rows', () => {
+    add_host_stats({ at: '2026-06-30T10:05:00.000Z', cpu_pct: 10, mem_pct: 50 })
+    add_host_stats({ at: '2026-06-30T10:35:00.000Z', cpu_pct: 30, mem_pct: 54 })
+    add_host_stats({ at: '2026-06-30T11:05:00.000Z', cpu_pct: 5, mem_pct: 52 })
+
+    const host = build_host_stats({ logs_db, read_now: () => ({ ...SAMPLE }) })
+
+    expect(host.samples).toBe(3)
+    expect(host.latest?.at).toBe('2026-06-30T11:05:00.000Z')
+    expect(host.latest?.cpu_pct).toBe(5)
+    expect(host.now?.cpu_pct).toBe(12.5)
+    expect(host.hourly).toEqual([
+      { hour: '2026-06-30T10:00', cpu_avg: 20, cpu_max: 30, mem_avg: 52, mem_max: 54, disk_pct: 40 },
+      { hour: '2026-06-30T11:00', cpu_avg: 5, cpu_max: 5, mem_avg: 52, mem_max: 52, disk_pct: 40 },
+    ])
+  })
+
+  test('empty logs → null latest, empty hourly, live snapshot still present', () => {
+    const host = build_host_stats({ logs_db, read_now: () => ({ ...SAMPLE }) })
+    expect(host.samples).toBe(0)
+    expect(host.latest).toBeNull()
+    expect(host.hourly).toEqual([])
+    expect(host.now?.mem_pct).toBe(55)
+  })
+
+  test('a throwing live reader degrades to null instead of failing the dashboard', () => {
+    const host = build_host_stats({ logs_db, read_now: () => { throw new Error('no /proc') } })
+    expect(host.now).toBeNull()
+  })
+
+  test('get_log_analytics leaves host null (endpoint injects it fresh)', () => {
+    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    expect(analytics.host).toBeNull()
   })
 })
