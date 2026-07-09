@@ -1,9 +1,9 @@
 /**
  * Bounding box of [lng, lat] positions as [minLng, minLat, maxLng, maxLat] —
  * local replacement for `bbox(lineString(positions))` from @turf/turf
- * (yoinked 2026-07-02 along with centerOfCoordinates).
+ * (yoinked 2026-07-02 along with center_of_coordinates).
  */
-export function bboxOfCoordinates(
+export function bbox_of_coordinates(
   positions: number[][],
 ): [minLng: number, minLat: number, maxLng: number, maxLat: number] {
   const lngs = positions.map(([lng]) => lng)
@@ -12,10 +12,10 @@ export function bboxOfCoordinates(
 }
 
 if (import.meta.vitest) {
-  describe(bboxOfCoordinates, () => {
+  describe(bbox_of_coordinates, () => {
     test('matches turf bbox(lineString(...)) shape', () => {
       expect(
-        bboxOfCoordinates([
+        bbox_of_coordinates([
           [-105, 35],
           [-95, 44],
           [-99.9115, 34.4528],

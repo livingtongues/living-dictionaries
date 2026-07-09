@@ -8,10 +8,10 @@
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte'
   import NavigationControl from './mapbox/controls/NavigationControl.svelte'
   import GeoJSONSource from './mapbox/sources/GeoJSONSource.svelte'
-  import { polygonFeatureCoordinates } from './utils/polygon-from-coordinates'
-  import { centerOfCoordinates } from './utils/center-of-coordinates'
+  import { polygon_feature_coordinates } from './utils/polygon-from-coordinates'
+  import { center_of_coordinates } from './utils/center-of-coordinates'
   import Layer from './mapbox/map/Layer.svelte'
-  import { randomColor } from './utils/random-color'
+  import { random_color } from './utils/random-color'
   import Popup from './mapbox/map/Popup.svelte'
   import Button from '$lib/components/ui/Button.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
@@ -35,7 +35,7 @@
 
   onMount(() => {
     if (region) {
-      [centerLng, centerLat] = centerOfCoordinates(region.coordinates)
+      [centerLng, centerLat] = center_of_coordinates(region.coordinates)
     } else if (initialCenter) {
       ({ longitude: centerLng, latitude: centerLat } = initialCenter)
     } else if (navigator.geolocation) {
@@ -116,7 +116,7 @@
                   type: 'Feature',
                   geometry: {
                     type: 'Polygon',
-                    coordinates: polygonFeatureCoordinates(points),
+                    coordinates: polygon_feature_coordinates(points),
                   },
                   properties: undefined,
                 }}>
@@ -124,7 +124,7 @@
                   options={{
                     type: 'fill',
                     paint: {
-                      'fill-color': randomColor(),
+                      'fill-color': random_color(),
                       'fill-opacity': 0.5,
                     },
                   }} />

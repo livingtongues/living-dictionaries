@@ -9,7 +9,7 @@
   } from 'mapbox-gl'
   import { mapKey, sourceKey } from '../context'
   import type { MapKeyContext, SourceKeyContext } from '../context'
-  import { randomId } from '../../utils/random-id'
+  import { random_id } from '../../utils/random-id'
 
   const { getMap } = getContext<MapKeyContext>(mapKey)
   const map = getMap()
@@ -39,7 +39,7 @@
   }
 
   const {
-    id = randomId(),
+    id = random_id(),
     options = {
       type: 'fill',
       paint: {

@@ -636,11 +636,21 @@
   }
 
   .chip {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
     padding: 0.125rem 0.5rem;
+    border: 1px solid transparent; /* match .add-chip's dashed border so all chips are the same height */
     border-radius: 9999px;
     font-size: 0.75rem;
+    line-height: 1.5;
     background: color-mix(in srgb, var(--color) 8%, transparent);
+  }
+
+  /* beats button.editable's font-size: inherit so editable chips match plain chips */
+  button.chip.editable,
+  button.chip.add-chip {
+    font-size: 0.75rem;
   }
 
   .has-image .chip {

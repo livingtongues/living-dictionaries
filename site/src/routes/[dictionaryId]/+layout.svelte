@@ -69,7 +69,7 @@
         </div>
       </ResponsiveSlideover>
       <div class="side-gap"></div>
-      <div style="flex-grow: 1">
+      <div class="page-content">
         {@render children_render?.()}
       </div>
     </div>
@@ -132,6 +132,11 @@
     display: flex;
     padding-left: 0.75rem;
     padding-right: 0.75rem;
+  }
+
+  .page-content {
+    flex-grow: 1;
+    min-width: 0; /* let wide children (strips, grids) shrink instead of forcing page overflow */
   }
 
   .side-panel {

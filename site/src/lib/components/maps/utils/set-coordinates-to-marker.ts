@@ -3,7 +3,7 @@ interface CoordinatesType {
   lat: number
 }
 
-export function setMarker(longitude: number, latitude: number): CoordinatesType {
+export function set_marker(longitude: number, latitude: number): CoordinatesType {
   if (!(longitude && latitude)) return
   if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90)
     return

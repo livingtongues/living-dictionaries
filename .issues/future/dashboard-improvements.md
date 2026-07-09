@@ -70,6 +70,17 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   repeat-breaker halts after 3), so the Sync-Health by-kind table names the fatal class instead of `other`.
 
 ## Open proposals
+- **★★ NEW — Bot/crawler share % on each error cluster** *(filed 2026-07-09 — grounded in TODAY's
+  SEO-crawl flood; also ported from tutor 07-08 Phase C).* `ErrorCluster` (`log-analytics.ts` ~line
+  234) keeps ALL rows on purpose ("a bot hitting a real error is a real signal") but exposes **no
+  bot share**, so a crawler storm ranks as a P1 until a hand UA query. Today: `live_query_failed`
+  1,378 rows / 294 sessions looked catastrophic — **1,358 / 1,378 = 98.5% Nexus 5X Googlebot/
+  GoogleOther** (US/SC) deep-linking entry pages after sitemaps shipped (`b7fb42fd`). Same shape as
+  tutor's 07-08 finding (3 "real" errors that were 100% one webdriver session). Add `bot_sessions` +
+  `bot_pct` (UA `is_bot_user_agent` ∪ webdriver ∪ frequency-bot sessions) to `ErrorCluster`; badge or
+  sink clusters with `bot_pct > 90%` as "mostly crawler". Cheap — same GROUP BY, conditional SUM.
+  Complements the humans/bots audience toggle (which already filters *usage*, not diagnostic
+  clusters). *(ported from tutor · LD urgency higher while Google is ingesting new sitemaps)*
 - **★ NEW — Sync-Health: name the server-side cause + RED "one-user-dominates" verdict** *(ported
   from house 07-07 Phase C · filed 2026-07-08 — grounded in TODAY's live P2).* LD's `build_sync_health`
   (`log-analytics.ts` ~line 1722) groups `sync_failed` by `context.kind` current-vs-stale + tracks
@@ -345,6 +356,9 @@ house's **/admin/revenue** dashboard (no payments).
   Do all three in one grooming pass across the three repos rather than three separate per-repo tickets.
 
 ## Sourced from
+- `.cron/log-reviews/2026-07-09.md` (SEO crawl after sitemaps: ~10k Googlebot sessions; top error
+  clusters 94–98% bot SQLITE_MISUSE; Greg + Zapotec editor still on 07-03 tabs; Sugstun FK ✅ fixed
+  live via `71d18e34`; build-adoption + storage strips ✅ shipped; Phase C = bot share on clusters)
 - `.cron/log-reviews/2026-06-25.md` (first run / zero-data baseline)
 - `.cron/log-reviews/2026-06-26.md` (first real-data run; ~91% synthetic/headless)
 - `.cron/log-reviews/2026-06-27.md` (idle day; deploy-markers + page_load-hygiene proposals; tutor

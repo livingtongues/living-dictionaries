@@ -1,4 +1,4 @@
-export function getTimeZoneLongitude(): number {
+export function get_time_zone_longitude(): number {
   const date = new Date()
   const timeZoneOffset = date.getTimezoneOffset() || 0
   const timeZoneMaxOffset = 60 * 12

@@ -3,8 +3,8 @@
   import { getContext } from 'svelte'
   import { mapKey } from '../context'
   import type { MapKeyContext } from '../context'
-  import { polygonFeatureCoordinates } from '../../utils/polygon-from-coordinates'
-  import { centerOfCoordinates } from '../../utils/center-of-coordinates'
+  import { polygon_feature_coordinates } from '../../utils/polygon-from-coordinates'
+  import { center_of_coordinates } from '../../utils/center-of-coordinates'
   import GeoJSONSource from '../sources/GeoJSONSource.svelte'
   import PopupOfMap from './PopupOfMap.svelte'
   import Layer from './Layer.svelte'
@@ -21,7 +21,7 @@
 
   const { region, color = undefined, children }: Props = $props()
 
-  const [lng, lat] = $derived(centerOfCoordinates(region?.coordinates || []))
+  const [lng, lat] = $derived(center_of_coordinates(region?.coordinates || []))
 
   const children_render = $derived(children)
 </script>
@@ -33,7 +33,7 @@
         type: 'Feature',
         geometry: {
           type: 'Polygon',
-          coordinates: polygonFeatureCoordinates(region.coordinates),
+          coordinates: polygon_feature_coordinates(region.coordinates),
         },
         properties: undefined,
       }}>

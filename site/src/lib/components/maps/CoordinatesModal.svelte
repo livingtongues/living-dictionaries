@@ -6,7 +6,7 @@
   import Marker from './mapbox/map/Marker.svelte'
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte'
   import NavigationControl from './mapbox/controls/NavigationControl.svelte'
-  import { setMarker } from './utils/set-coordinates-to-marker'
+  import { set_marker } from './utils/set-coordinates-to-marker'
   import Button from '$lib/components/ui/Button.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
@@ -52,9 +52,9 @@
 
   function handleGeocoderResult(result) {
     if (result?.user_coordinates?.[0])
-      setMarker(result.user_coordinates[0], result.user_coordinates[1])
+      set_marker(result.user_coordinates[0], result.user_coordinates[1])
     else
-      setMarker(result.center[0], result.center[1])
+      set_marker(result.center[0], result.center[1])
   }
 
   function update() {
@@ -114,7 +114,7 @@
         lng={centerLng}
         lat={centerLat}
         {zoom}
-        on_click={lng_lat => ({ lng, lat } = setMarker(lng_lat.lng, lng_lat.lat))}>
+        on_click={lng_lat => ({ lng, lat } = set_marker(lng_lat.lng, lng_lat.lat))}>
         {@render children?.()}
         <NavigationControl />
         <Geocoder
@@ -125,7 +125,7 @@
         {#if lng !== undefined && lat !== undefined}
           <Marker
             draggable
-            on_dragend={coordinates => ({ lng, lat } = setMarker(coordinates.lng, coordinates.lat))}
+            on_dragend={coordinates => ({ lng, lat } = set_marker(coordinates.lng, coordinates.lat))}
             {lng}
             {lat} />
         {/if}

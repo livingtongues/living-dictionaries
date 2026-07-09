@@ -1,6 +1,6 @@
 import type { IPoint, IRegion } from '$lib/types'
 import type { Feature, FeatureCollection, Point, Polygon } from 'geojson'
-import { sortPoints } from '../../utils/polygon-from-coordinates'
+import { sort_points } from '../../utils/polygon-from-coordinates'
 // http://geojson.io/ to create GeoJSON easily
 
 export function convertPointsIntoRegion(
@@ -9,7 +9,7 @@ export function convertPointsIntoRegion(
     latitude: number
   }[],
 ) {
-  const sorted = sortPoints(
+  const sorted = sort_points(
     points.map(({ longitude, latitude }) => ({ lng: longitude, lat: latitude })),
   )
   const sortedLooped = [...sorted, sorted[0]]
@@ -33,7 +33,7 @@ function getPointFeature(point: IPoint, options = { primary: false }): Feature<P
 }
 
 function getPolygonFeature(region: IRegion): Feature<Polygon> {
-  const sorted = sortPoints(region.coordinates.map(({ longitude, latitude }) => ({ lng: longitude, lat: latitude })))
+  const sorted = sort_points(region.coordinates.map(({ longitude, latitude }) => ({ lng: longitude, lat: latitude })))
   const sortedLooped = [...sorted, sorted[0]]
   const coordinates = [
     sortedLooped.map(({ lng, lat }) => [

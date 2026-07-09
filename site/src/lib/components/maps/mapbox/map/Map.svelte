@@ -5,7 +5,7 @@
   import { mapKey } from '../context'
   import { EventQueue } from '../queue'
   import { bindEvents } from '../event-bindings'
-  import { getTimeZoneLongitude } from '../../utils/get-time-zone-longitude'
+  import { get_time_zone_longitude } from '../../utils/get-time-zone-longitude'
   import { ADDED_FEATURE_ID_PREFIX } from '../../utils/random-id'
   import { loadScriptOnce, loadStylesOnce } from '$lib/utils/load-once'
   import { log_event } from '$lib/debug/remote-log'
@@ -53,7 +53,7 @@
     children,
   }: Props = $props()
 
-  const center: LngLatLike = $derived(lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10])
+  const center: LngLatLike = $derived(lng && lat ? [lng, lat] : [get_time_zone_longitude() || -80, 10])
 
   let container: HTMLDivElement = $state()
   let mapbox: typeof import('mapbox-gl')
@@ -187,8 +187,8 @@
       setCenter(pointsToFit[0])
       return
     }
-    const { bboxOfCoordinates } = await import('../../utils/bbox-of-coordinates')
-    const box = bboxOfCoordinates(pointsToFit) as LngLatBoundsLike
+    const { bbox_of_coordinates } = await import('../../utils/bbox-of-coordinates')
+    const box = bbox_of_coordinates(pointsToFit) as LngLatBoundsLike
     map.fitBounds(box, {
       padding: { top: 10, bottom: 10, left: 10, right: 10 },
       maxZoom: 6,

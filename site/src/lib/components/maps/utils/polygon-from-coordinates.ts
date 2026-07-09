@@ -5,17 +5,17 @@ interface Point {
 }
 
 /** Will add loop back to first point so don't duplicate first point to last before sending points in, as the point ordering probably will change */
-export function polygonFeatureCoordinates(
+export function polygon_feature_coordinates(
   points: { latitude?: number, longitude?: number }[],
 ): number[][][] {
-  const sorted = sortPoints(
+  const sorted = sort_points(
     points.map(({ latitude, longitude }) => ({ lng: longitude, lat: latitude })),
   )
   const sortedLooped = [...sorted, sorted[0]]
   return [sortedLooped.map(({ lng, lat }) => [lng, lat])]
 }
 
-export function sortPoints(points: Point[]) {
+export function sort_points(points: Point[]) {
   points = points.splice(0)
   const p0: Point = { lng: 0, lat: 0 }
   p0.lat = Math.min(...points.map(p => p.lat))
@@ -41,7 +41,7 @@ function distCompare(p0: Point, a: Point, b: Point) {
 }
 
 if (import.meta.vitest) {
-  describe(sortPoints, () => {
+  describe(sort_points, () => {
     test('basic', () => {
       const expected = [
         { lng: 1, lat: 0 },
@@ -50,7 +50,7 @@ if (import.meta.vitest) {
         { lng: 1, lat: 1 },
       ]
       expect(
-        sortPoints([
+        sort_points([
           { lng: 0, lat: 0 },
           { lng: 0, lat: 1 },
           { lng: 1, lat: 1 },
@@ -59,7 +59,7 @@ if (import.meta.vitest) {
       ).toEqual(expected)
 
       expect(
-        sortPoints([
+        sort_points([
           { lng: 0, lat: 0 },
           { lng: 1, lat: 0 },
           { lng: 1, lat: 1 },
@@ -76,7 +76,7 @@ if (import.meta.vitest) {
         { lng: -96, lat: 37 },
         { lng: -99.9115, lat: 34.4528 },
       ]
-      expect(sortPoints(points)).toEqual([
+      expect(sort_points(points)).toEqual([
         { lng: -99.9115, lat: 34.4528 },
         { lng: -105, lat: 35 },
         { lng: -105, lat: 42 },
