@@ -129,7 +129,7 @@ function backfill_name_if_missing(db: Database.Database, row: UserRow): UserRow 
 }
 
 if (import.meta.vitest) {
-  const { open_shared_db } = await import('$lib/db/server/shared-db')
+  const { open_test_shared_db } = await import('$lib/db/server/shared-db')
 
   describe(default_name_from_email, () => {
     it('returns the local part of an email', () => {
@@ -147,7 +147,7 @@ if (import.meta.vitest) {
 
   describe(find_or_create_auth_user, () => {
     it('derives name from email on first login when no name supplied', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_test_shared_db()
       const { user, created } = find_or_create_auth_user({
         db,
         provider: 'email',
@@ -162,7 +162,7 @@ if (import.meta.vitest) {
     })
 
     it('prefers an explicit name over the email-derived fallback', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_test_shared_db()
       const { user, created } = find_or_create_auth_user({
         db,
         provider: 'google',
@@ -176,7 +176,7 @@ if (import.meta.vitest) {
     })
 
     it('backfills name on existing-identity login when previously null', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_test_shared_db()
       // Seed a user without a name
       db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at)
                   VALUES (?, ?, ?, ?, ?, ?)`)
@@ -195,7 +195,7 @@ if (import.meta.vitest) {
     })
 
     it('leaves a real name alone on existing-identity login', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_test_shared_db()
       db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at)
                   VALUES (?, ?, ?, ?, ?, ?)`)
         .run('u1', 'real@example.com', 'Real Name', JSON.stringify([{ provider: 'email', provider_id: 'real@example.com' }]), '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z')

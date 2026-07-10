@@ -1,29 +1,38 @@
 import type { MultiString } from '$lib/types'
+import { render_markdown_to_html } from '$lib/markdown/render'
 
-/** First gloss value in the dictionary's gloss-language order (any value as fallback). */
-export function first_gloss({ glosses, gloss_languages }: {
+/** Up to `limit` gloss values in the dictionary's gloss-language order (other values as fallback). */
+export function top_glosses({ glosses, gloss_languages, limit = 2 }: {
   glosses: MultiString | null | undefined
   gloss_languages: string[] | null | undefined
-}): string | null {
+  limit?: number
+}): string[] {
   if (!glosses)
-    return null
-  for (const bcp of gloss_languages || []) {
-    if (glosses[bcp])
-      return glosses[bcp]
+    return []
+  const ordered = gloss_languages || []
+  const values = ordered.map(bcp => glosses[bcp]).filter(Boolean)
+  for (const [bcp, value] of Object.entries(glosses)) {
+    if (value && !ordered.includes(bcp))
+      values.push(value)
   }
-  return Object.values(glosses).find(Boolean) ?? null
+  return values.slice(0, limit)
 }
 
-/** Plain-text preview of a rich-text field (tags stripped, whitespace collapsed, ellipsized). */
-export function text_snippet({ html, max_length = 240 }: { html: string | null | undefined, max_length?: number }): string | null {
-  if (!html)
+/** Plain-text preview of a markdown field (rendered so escapes/syntax resolve, tags stripped, whitespace collapsed, ellipsized). */
+export function text_snippet({ markdown, max_length = 240 }: { markdown: string | null | undefined, max_length?: number }): string | null {
+  if (!markdown)
     return null
-  const text = html
+  const text = render_markdown_to_html(markdown)
     .replace(/<[^>]*>/g, ' ')
     .replace(/&nbsp;/g, ' ')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, '\'')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
     .replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ')
-    .replace(/\s+([.,;:!?])/g, '$1')
+    .replace(/\s+(?<closer>[.,;:!?)\]])/g, '$<closer>')
+    .replace(/(?<opener>[([])\s+/g, '$<opener>')
     .trim()
   if (!text)
     return null
@@ -42,32 +51,36 @@ export function card_hue(id: string): number {
 }
 
 if (import.meta.vitest) {
-  describe(first_gloss, () => {
-    it('prefers the dictionary gloss-language order', () => {
-      expect(first_gloss({ glosses: { es: 'manzana', en: 'apple' }, gloss_languages: ['en', 'es'] })).toBe('apple')
+  describe(top_glosses, () => {
+    it('prefers the dictionary gloss-language order, capped at limit', () => {
+      expect(top_glosses({ glosses: { es: 'manzana', en: 'apple', fr: 'pomme' }, gloss_languages: ['en', 'es', 'fr'] })).toEqual(['apple', 'manzana'])
     })
-    it('falls back to any value', () => {
-      expect(first_gloss({ glosses: { fr: 'pomme' }, gloss_languages: ['en'] })).toBe('pomme')
+    it('falls back to values outside the gloss languages', () => {
+      expect(top_glosses({ glosses: { fr: 'pomme' }, gloss_languages: ['en'] })).toEqual(['pomme'])
     })
     it('handles empty', () => {
-      expect(first_gloss({ glosses: null, gloss_languages: ['en'] })).toBe(null)
-      expect(first_gloss({ glosses: {}, gloss_languages: ['en'] })).toBe(null)
+      expect(top_glosses({ glosses: null, gloss_languages: ['en'] })).toEqual([])
+      expect(top_glosses({ glosses: {}, gloss_languages: ['en'] })).toEqual([])
     })
   })
 
   describe(text_snippet, () => {
     it('strips tags and collapses whitespace', () => {
-      expect(text_snippet({ html: '<p>Hello <i>world</i>.</p>\n<p>More.</p>' })).toBe('Hello world. More.')
+      expect(text_snippet({ markdown: '<p>Hello <i>world</i>.</p>\n\n<p>More.</p>' })).toBe('Hello world. More.')
+    })
+    it('resolves markdown escapes and syntax instead of bleeding them through', () => {
+      expect(text_snippet({ markdown: String.raw`Gta? \[gaq\] is *also* known as **Didey**.` })).toBe('Gta? [gaq] is also known as Didey.')
+      expect(text_snippet({ markdown: 'known as (**Didayi**) here' })).toBe('known as (Didayi) here')
     })
     it('ellipsizes long text at a word boundary', () => {
       const long = 'word '.repeat(100)
-      const snippet = text_snippet({ html: long, max_length: 50 })
+      const snippet = text_snippet({ markdown: long, max_length: 50 })
       expect(snippet.endsWith('…')).toBe(true)
       expect(snippet.length).toBeLessThanOrEqual(52)
     })
     it('returns null for empty/markup-only input', () => {
-      expect(text_snippet({ html: null })).toBe(null)
-      expect(text_snippet({ html: '<p> </p>' })).toBe(null)
+      expect(text_snippet({ markdown: null })).toBe(null)
+      expect(text_snippet({ markdown: '<p> </p>' })).toBe(null)
     })
   })
 

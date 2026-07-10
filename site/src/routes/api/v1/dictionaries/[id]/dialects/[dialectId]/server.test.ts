@@ -3,11 +3,11 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { create_api_key } from '$lib/api-keys/api-key'
 import { open_dictionary_db_in_memory } from '$lib/db/server/dictionary-db'
 import { open_dictionary_history_db_in_memory } from '$lib/db/server/dictionary-history-db'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { apply_entry_writes } from '$lib/db/server/v1-entry-write'
 import { DELETE, PATCH } from './+server'
 
-let shared_db: ReturnType<typeof open_shared_db>
+let shared_db: ReturnType<typeof open_test_shared_db>
 let dict_db: Database.Database
 let history_db: Database.Database
 let api_token: string
@@ -18,7 +18,7 @@ vi.mock('$lib/db/server/dictionary-db', async orig => ({ ...(await orig<typeof i
 vi.mock('$lib/db/server/dictionary-history-db', async orig => ({ ...(await orig<typeof import('$lib/db/server/dictionary-history-db')>()), get_dictionary_history_db: () => history_db }))
 
 beforeEach(() => {
-  shared_db = open_shared_db(':memory:')
+  shared_db = open_test_shared_db()
   dict_db = open_dictionary_db_in_memory('dict-1')
   history_db = open_dictionary_history_db_in_memory()
   shared_db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)

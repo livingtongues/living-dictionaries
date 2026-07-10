@@ -1,7 +1,7 @@
 import type { SyncRequest } from '$lib/db/sync/types'
 import { open_dictionary_db_in_memory } from './dictionary-db'
 import { read_server_seq_counter } from './dictionary-sync-helpers'
-import { latest_shared_migration_name, open_shared_db } from './shared-db'
+import { latest_shared_migration_name, open_test_shared_db } from './shared-db'
 import { process_sync } from './sync-helpers'
 
 /**
@@ -13,7 +13,7 @@ import { process_sync } from './sync-helpers'
 
 describe('server_seq triggers (shared.db)', () => {
   test('every insert/update assigns a fresh, strictly increasing seq', () => {
-    const db = open_shared_db(':memory:')
+    const db = open_test_shared_db()
     const seq_of = (id: string) => (db.prepare(`SELECT server_seq FROM users WHERE id = ?`).get(id) as { server_seq: number }).server_seq
 
     const start = read_server_seq_counter(db)
@@ -30,7 +30,7 @@ describe('server_seq triggers (shared.db)', () => {
   })
 
   test('FK actions (ON DELETE SET NULL) fire the seq trigger — cascade-touched rows ride the next pull', () => {
-    const db = open_shared_db(':memory:')
+    const db = open_test_shared_db()
     db.prepare(`INSERT INTO users (id, email, providers) VALUES ('author', 'a@x.com', '[]')`).run()
     db.prepare(`INSERT INTO dictionaries (id, name, created_by_user_id) VALUES ('d1', 'Demo', 'author')`).run()
     const cursor = read_server_seq_counter(db)
@@ -48,7 +48,7 @@ describe('server_seq triggers (shared.db)', () => {
   })
 
   test('tombstone inserts get a seq (the deletes pull rides the same cursor)', () => {
-    const db = open_shared_db(':memory:')
+    const db = open_test_shared_db()
     const cursor = read_server_seq_counter(db)
     db.prepare(`INSERT INTO deletes (table_name, id) VALUES ('dictionary_roles', 'gone')`).run()
     const tombstone = db.prepare(`SELECT server_seq FROM deletes WHERE id = 'gone'`).get() as { server_seq: number }
@@ -57,7 +57,7 @@ describe('server_seq triggers (shared.db)', () => {
   })
 
   test('a pushed server_seq is stripped — the server always reassigns', () => {
-    const db = open_shared_db(':memory:')
+    const db = open_test_shared_db()
     db.prepare(`INSERT INTO dictionaries (id, name) VALUES ('d1', 'Demo')`).run()
     db.prepare(`INSERT INTO users (id, email, providers) VALUES ('u1', 'a@x.com', '[]')`).run()
     const cursor = read_server_seq_counter(db)

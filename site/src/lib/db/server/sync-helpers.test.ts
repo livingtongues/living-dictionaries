@@ -2,13 +2,13 @@ import type Database from 'better-sqlite3'
 import type { SyncRequest } from '$lib/db/sync/types'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { open_logs_db } from './logs-db'
-import { latest_shared_migration_name, open_shared_db } from './shared-db'
+import { latest_shared_migration_name, open_test_shared_db } from './shared-db'
 import { process_sync } from './sync-helpers'
 
 let db: Database.Database
 
 beforeEach(() => {
-  db = open_shared_db(':memory:')
+  db = open_test_shared_db()
 })
 
 afterEach(() => {

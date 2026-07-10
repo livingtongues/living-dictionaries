@@ -30,7 +30,9 @@
   import { key_between } from '$lib/api/v1/fractional-index'
   import { build_citation } from '../contributors/build-citation'
   import { MINIMUM_ABOUT_LENGTH } from '$lib/constants'
-  import { first_gloss, text_snippet } from './home-helpers'
+  import { text_snippet, top_glosses } from './home-helpers'
+  import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
+  import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
   import { upload_cover_image } from './hero-image'
   import IconMdiMagnify from '~icons/mdi/magnify'
   import IconMdiStarOutline from '~icons/mdi/star-outline'
@@ -63,17 +65,34 @@
     id: string
     entry_id: string
     lexeme: string
-    gloss: string | null
+    alt: string | null
+    phonetic: string | null
+    pos: string | null
+    glosses: string[]
+    dialect: string | null
     photo_serving_url: string | null
     audio_storage_path: string | null
   }
 
+  function format_pos(parts_of_speech: string[] | null | undefined): string | null {
+    if (!parts_of_speech?.length)
+      return null
+    return add_periods_and_comma_separate_parts_of_speech(
+      parts_of_speech.map(pos => t({ dynamicKey: `psAbbrev.${pos}`, fallback: pos })),
+    ) || null
+  }
+
   function card_from_ssr(card: DictHomeCard): HomeCard {
+    const headword = get_headword({ lexeme: card.lexeme, orthographies: dictionary.orthographies })
     return {
       id: card.id,
       entry_id: card.entry_id,
-      lexeme: get_headword({ lexeme: card.lexeme, orthographies: dictionary.orthographies }).value,
-      gloss: first_gloss({ glosses: card.glosses, gloss_languages: dictionary.gloss_languages }),
+      lexeme: headword.value,
+      alt: get_local_orthographies(card.lexeme, { exclude_code: headword.code })[0] ?? null,
+      phonetic: card.phonetic,
+      pos: format_pos(card.parts_of_speech),
+      glosses: top_glosses({ glosses: card.glosses, gloss_languages: dictionary.gloss_languages }),
+      dialect: card.dialect,
       photo_serving_url: card.photo_serving_url,
       audio_storage_path: card.audio_storage_path,
     }
@@ -82,17 +101,23 @@
   function card_from_entry_data({ id, entry }: { id: string, entry: EntryData }): HomeCard {
     const photo = entry.senses?.flatMap(sense => sense.photos || [])[0]
     const glosses = entry.senses?.map(sense => sense.glosses).find(g => g && Object.values(g).some(Boolean))
+    const headword = get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary.orthographies })
     return {
       id,
       entry_id: entry.id,
-      lexeme: get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary.orthographies }).value,
-      gloss: first_gloss({ glosses, gloss_languages: dictionary.gloss_languages }),
+      lexeme: headword.value,
+      alt: get_local_orthographies(entry.main.lexeme, { exclude_code: headword.code })[0] ?? null,
+      phonetic: entry.main.phonetic ?? null,
+      pos: format_pos(entry.senses?.[0]?.parts_of_speech),
+      glosses: top_glosses({ glosses, gloss_languages: dictionary.gloss_languages }),
+      dialect: entry.dialects?.[0]?.name?.default ?? null,
       photo_serving_url: photo?.serving_url ?? null,
       audio_storage_path: entry.audios?.[0]?.storage_path ?? null,
     }
   }
 
   // ── featured entries: SSR paints first, the live dict_db takes over ─────────
+  const STRIP_CAP = 8
   const featured_query = $derived(dict_db?.featured_entries.query({ order_by: 'sort_key' }))
   const live_featured_ready = $derived(!!featured_query && !featured_query.loading && !$entries_loading)
   const featured_cards: HomeCard[] = $derived.by(() => {
@@ -103,10 +128,13 @@
           return entry ? card_from_entry_data({ id: row.id, entry }) : null
         })
         .filter(Boolean)
+        .slice(0, STRIP_CAP)
     }
-    return ssr_featured.map(card_from_ssr)
+    return ssr_featured.map(card_from_ssr).slice(0, STRIP_CAP)
   })
-  const recent_cards: HomeCard[] = $derived(ssr_recent.map(card_from_ssr).filter(card => card.entry_id && !featured_cards.some(featured => featured.entry_id === card.entry_id)))
+  const recent_cards: HomeCard[] = $derived(ssr_recent.map(card_from_ssr)
+    .filter(card => card.entry_id && !featured_cards.some(featured => featured.entry_id === card.entry_id))
+    .slice(0, STRIP_CAP))
 
   // Manage (editor+): unstar + move left/right over the live rows' fractional keys.
   const can_manage = $derived(is_editor_or_above && live_featured_ready)
@@ -156,13 +184,15 @@
     .slice(0, 10)
     .map(([key, count]) => {
       const restored = restore_spaces_periods_from_underscores(key)
-      return { label: t({ dynamicKey: `sd.${restored}`, fallback: restored }), count }
+      return { key, label: t({ dynamicKey: `sd.${restored}`, fallback: restored }), count }
     }))
 
   // ── hero bits ────────────────────────────────────────────────────────────────
   const gloss_chips = $derived((Array.isArray(dictionary.gloss_languages) ? dictionary.gloss_languages : [])
     .map(bcp => t({ dynamicKey: `gl.${bcp}`, fallback: glossingLanguages[bcp]?.vernacularName ?? bcp })))
-  const about_snippet = $derived(text_snippet({ html: dictionary.about }))
+  // Long JS cap (2000) is just a safety bound — visual truncation is the CSS line
+  // clamp on the panel snippets, so text fills its container before ellipsizing.
+  const about_snippet = $derived(text_snippet({ markdown: dictionary.about, max_length: 2000 }))
 
   // ── manager in-place editing (server catalog endpoint stays manager-gated) ──
   const is_con_lang = $derived(!!dictionary.con_language_description)
@@ -213,20 +243,12 @@
     if (file)
       add_cover_file(file)
   }
-  const grammar_snippet = $derived(text_snippet({ html: dictionary.grammar }))
+  const grammar_snippet = $derived(text_snippet({ markdown: dictionary.grammar, max_length: 2000 }))
   const citation = $derived(build_citation({ t, dictionary, custom_citation: dictionary.citation || undefined, partners }))
   const has_coordinates = $derived(!!dictionary.coordinates?.points?.length || !!dictionary.coordinates?.regions?.length)
 
-  let search_query = $state('')
-  function submit_search(event: SubmitEvent) {
-    event.preventDefault()
-    const query = search_query.trim()
-    const suffix = query ? `?q=${encodeURIComponent(JSON.stringify({ page: 1, query }))}` : ''
-    void goto(`/${dictionary.url}/entries${suffix}`)
-  }
-
   const dict_url = $derived(`https://livingdictionaries.app/${dictionary.url}`)
-  const seo_home_description = $derived(about_snippet
+  const seo_home_description = $derived(text_snippet({ markdown: dictionary.about })
     || `${dictionary.name} Living Dictionary${dictionary.location ? ` (${dictionary.location})` : ''}: a collaborative multimedia dictionary with ${dictionary.entry_count} entries — words with translations, audio from speakers, and photos.`)
 
   // schema.org DefinedTermSet + Language — the citable "set" that each entry's
@@ -343,14 +365,11 @@
           <button type="button" class="chip add-chip" onclick={() => editing = 'alt_names'}>+ {t('create.alternate_names')}</button>
         {/if}
       </div>
-      <form class="search" onsubmit={submit_search}>
+      <!-- Acts as a doorway, not a real input: tap → entries page with its search focused. -->
+      <button type="button" class="search" onclick={() => goto(`/${dictionary.url}/entries`, { state: { focus_search: true } })}>
         <IconMdiMagnify style="font-size: 1.125rem; opacity: 0.6" />
-        <input
-          type="search"
-          bind:value={search_query}
-          placeholder={t('dict_home.search_placeholder')}
-          aria-label={t('dict_home.search_placeholder')} />
-      </form>
+        <span class="search-hint">{t('dict_home.search_placeholder')}</span>
+      </button>
       {#if gloss_chips.length || is_manager}
         <div class="gloss-chips">
           {#each gloss_chips as chip (chip)}
@@ -405,7 +424,11 @@
               href="/{dictionary.url}/entry/{card.entry_id}"
               entry_id={card.entry_id}
               lexeme={card.lexeme}
-              gloss={card.gloss}
+              alt={card.alt}
+              phonetic={card.phonetic}
+              pos={card.pos}
+              glosses={card.glosses}
+              dialect={card.dialect}
               photo_serving_url={card.photo_serving_url}
               audio_storage_path={card.audio_storage_path}
               manage={can_manage
@@ -436,16 +459,18 @@
         <section class="panel">
           {#if about_snippet}
             <h2>{t('header.about')}</h2>
-            <p>{about_snippet} <a class="read-more" href="/{dictionary.url}/about">{t('dict_home.read_more')}</a></p>
+            <p class="snippet" class:solo={!grammar_snippet}>{about_snippet}</p>
+            <a class="read-more" href="/{dictionary.url}/about">{t('dict_home.read_more')}</a>
           {/if}
           {#if grammar_snippet}
-            <h2>{t('dictionary.grammar')}</h2>
-            <p>{grammar_snippet} <a class="read-more" href="/{dictionary.url}/grammar">{t('dict_home.read_more')}</a></p>
+            <h2 class:stacked={!!about_snippet}>{t('dictionary.grammar')}</h2>
+            <p class="snippet" class:solo={!about_snippet}>{grammar_snippet}</p>
+            <a class="read-more" href="/{dictionary.url}/grammar">{t('dict_home.read_more')}</a>
           {/if}
         </section>
       {/if}
-      {#if has_coordinates || is_manager}
-        <MapPanel {has_coordinates} {is_manager} settings_href="/{dictionary.url}/settings" />
+      {#if has_coordinates || (is_manager && !is_con_lang)}
+        <MapPanel {dictionary} {is_manager} {update_dictionary} />
       {/if}
     </div>
   {/if}
@@ -459,7 +484,11 @@
             href="/{dictionary.url}/entry/{card.entry_id}"
             entry_id={card.entry_id}
             lexeme={card.lexeme}
-            gloss={card.gloss}
+            alt={card.alt}
+            phonetic={card.phonetic}
+            pos={card.pos}
+            glosses={card.glosses}
+            dialect={card.dialect}
             photo_serving_url={card.photo_serving_url}
             audio_storage_path={card.audio_storage_path} />
         {/each}
@@ -485,8 +514,8 @@
     {/if}
   </div>
 
-  {#if auth_user.admin_level >= 3 && top_domains.length}
-    <DomainsPanel domains={top_domains} />
+  {#if top_domains.length > 2}
+    <DomainsPanel domains={top_domains} entries_href="/{dictionary.url}/entries" />
   {/if}
 </div>
 
@@ -522,14 +551,22 @@
     on_close={() => editing = null} />
 {:else if editing === 'alt_names'}
   <Modal on_close={() => editing = null}>
+    {#snippet heading()}
+      <span>{t('create.alternate_names')}</span>
+    {/snippet}
     <EditableAlternateNames
       alternateNames={dictionary.alternate_names}
+      show_title={false}
       on_update={async new_value => await save_catalog({ alternate_names: new_value })} />
   </Modal>
 {:else if editing === 'gloss_languages'}
   <Modal on_close={() => editing = null}>
+    {#snippet heading()}
+      <span>{t('create.gloss_dictionary_in')}</span>
+    {/snippet}
     <EditableGlossesField
       minimum={1}
+      show_title={false}
       availableLanguages={glossingLanguages}
       selectedLanguages={dictionary.gloss_languages}
       add_language={async language_id => await save_catalog({ gloss_languages: [...dictionary.gloss_languages, language_id] })}
@@ -537,8 +574,12 @@
   </Modal>
 {:else if editing === 'orthographies'}
   <Modal on_close={() => editing = null}>
+    {#snippet heading()}
+      <span>{t('entry_field.local_orthography')}</span>
+    {/snippet}
     <EditableOrthographies
       {dictionary}
+      show_title={false}
       on_update={async orthographies => await save_catalog({ orthographies })} />
   </Modal>
 {/if}
@@ -561,7 +602,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
-    padding: 0.75rem 0 3rem;
+    padding: 0 0 3rem;
   }
 
   .hero {
@@ -728,6 +769,8 @@
     background: var(--background);
     color: var(--color);
     max-width: 26rem;
+    text-align: start;
+    cursor: text; /* reads as a search box even though it's a doorway button */
   }
 
   .has-image .search {
@@ -735,19 +778,11 @@
     color: rgb(23 23 23);
   }
 
-  .search input {
-    flex-grow: 1;
-    border: none;
-    background: transparent;
-    font-size: 0.9375rem;
-    color: inherit;
-    outline: none;
-    padding: 0;
-  }
-
   /* The pill's own background (white over a hero image even in dark mode) makes the
      global placeholder var unreadable — derive it from the pill's text color instead. */
-  .search input::placeholder {
+  .search-hint {
+    flex-grow: 1;
+    font-size: 0.9375rem;
     color: color-mix(in srgb, currentColor 55%, transparent);
   }
 
@@ -814,9 +849,30 @@
     margin-bottom: 0;
   }
 
+  /* Snippets fill their panel and only ellipsize at overflow (line clamp), never
+     mid-panel — a lone section gets more lines than when about + grammar share. */
+  .snippet {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    overflow: hidden;
+    margin-bottom: 0.25rem;
+  }
+
+  .snippet.solo {
+    -webkit-line-clamp: 9;
+    line-clamp: 9;
+  }
+
+  h2.stacked {
+    margin-top: 1rem;
+  }
+
   .read-more {
     color: var(--primary);
     white-space: nowrap;
+    font-size: 0.875rem;
   }
 
   .citation {

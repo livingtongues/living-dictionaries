@@ -33,6 +33,7 @@ export enum ResponseCodes {
   UNSUPPORTED_MEDIA_TYPE = 415,
   CONFLICT = 409,
   GONE = 410,
+  BAD_GATEWAY = 502,
   SERVICE_UNAVAILABLE = 503,
 }
 

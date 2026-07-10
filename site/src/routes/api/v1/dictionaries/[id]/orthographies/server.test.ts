@@ -2,11 +2,11 @@ import type Database from 'better-sqlite3'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { create_api_key } from '$lib/api-keys/api-key'
 import { open_dictionary_db_in_memory } from '$lib/db/server/dictionary-db'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { GET, POST, PUT } from './+server'
 import { DELETE, PATCH } from './[code]/+server'
 
-let shared_db: ReturnType<typeof open_shared_db>
+let shared_db: ReturnType<typeof open_test_shared_db>
 let dict_db: Database.Database
 let write_key: string
 let read_key: string
@@ -19,7 +19,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  shared_db = open_shared_db(':memory:')
+  shared_db = open_test_shared_db()
   dict_db = open_dictionary_db_in_memory('dict-1')
   shared_db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
     .run('edt-1', 'edt@x.com', 'Edt', JSON.stringify([]), '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')

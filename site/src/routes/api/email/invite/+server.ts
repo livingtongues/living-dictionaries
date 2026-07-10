@@ -1,5 +1,6 @@
 import { error, json } from '@sveltejs/kit'
-import { send_email } from '../send-email'
+import { institute_no_reply_address } from '$lib/email/addresses'
+import { send_email } from '$lib/email/send-email'
 import type { RequestHandler } from './$types'
 import { is_admin } from '$lib/admins'
 import { verify_auth } from '$lib/auth/verify'
@@ -47,6 +48,7 @@ export const POST: RequestHandler = async (event) => {
     const inviter_name_or_email = name || inviter_email
 
     await send_email({
+      from: institute_no_reply_address,
       to: [{ email: target_email }],
       reply_to: { email: inviter_email },
       subject: `${inviter_name_or_email} has invited you to contribute to the ${dictionary.name} Living Dictionary`,

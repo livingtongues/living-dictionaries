@@ -28,6 +28,10 @@
     center_value?: string
     center_label?: string
     format?: (value: number) => string
+    /** Makes wedges + legend rows clickable (e.g. jump to a filtered view). */
+    on_select?: (index: number) => void
+    /** Let long legend labels wrap instead of ellipsizing. */
+    wrap_labels?: boolean
   }
   const {
     data,
@@ -39,6 +43,8 @@
     center_value,
     center_label,
     format = (value: number) => String(value),
+    on_select = undefined,
+    wrap_labels = false,
   }: Props = $props()
 
   const FALLBACK = ['#7c3aed', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#64748b', '#3b82f6', '#ef4444']
@@ -128,10 +134,10 @@
   <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size} role="img" style="flex:none">
     <g transform={`translate(${cx},${cy})`}>
       {#each inner_wedges as wedge, i (i)}
-        <path d={wedge.d} fill={wedge.color} class:dim={dimmed(wedge.parent)} role="presentation" onmouseenter={() => (hovered = wedge.parent)} onmouseleave={() => (hovered = null)} />
+        <path d={wedge.d} fill={wedge.color} class:dim={dimmed(wedge.parent)} class:selectable={!!on_select} role="presentation" onmouseenter={() => (hovered = wedge.parent)} onmouseleave={() => (hovered = null)} onclick={() => on_select?.(wedge.parent)} />
       {/each}
       {#each outer_wedges as wedge, i (i)}
-        <path d={wedge.d} fill={wedge.color} class:dim={dimmed(wedge.parent)} role="presentation" onmouseenter={() => (hovered = wedge.parent)} onmouseleave={() => (hovered = null)} />
+        <path d={wedge.d} fill={wedge.color} class:dim={dimmed(wedge.parent)} class:selectable={!!on_select} role="presentation" onmouseenter={() => (hovered = wedge.parent)} onmouseleave={() => (hovered = null)} onclick={() => on_select?.(wedge.parent)} />
       {/each}
     </g>
     {#if center_value || center_label}
@@ -143,9 +149,18 @@
   </svg>
   <ul class="legend">
     {#each legend_rows as row (row.label)}
-      <li class:dim={dimmed(row.index)} title={`${row.label}: ${format(row.value)}`} onmouseenter={() => (hovered = row.index)} onmouseleave={() => (hovered = null)}>
+      <li
+        class:dim={dimmed(row.index)}
+        class:selectable={!!on_select}
+        title={`${row.label}: ${format(row.value)}`}
+        role={on_select ? 'button' : undefined}
+        tabindex={on_select ? 0 : undefined}
+        onmouseenter={() => (hovered = row.index)}
+        onmouseleave={() => (hovered = null)}
+        onclick={() => on_select?.(row.index)}
+        onkeydown={(event) => { if (on_select && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); on_select(row.index) } }}>
         <span class="swatch" style:background={row.color}></span>
-        <span class="leg-label">{row.label}</span>
+        <span class="leg-label" class:wrap={wrap_labels}>{row.label}</span>
         <span class="leg-pct">{(row.pct * 100).toFixed(0)}%</span>
         <span class="leg-count">{format(row.value)}</span>
         {#if row.children.length}<span class="leg-kids">{row.children.join(' · ')}</span>{/if}
@@ -167,6 +182,10 @@
   }
   path.dim {
     opacity: 0.28;
+  }
+  path.selectable,
+  .legend li.selectable {
+    cursor: pointer;
   }
   .legend {
     list-style: none;
@@ -202,6 +221,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .leg-label.wrap {
+    white-space: normal;
+    overflow-wrap: break-word;
   }
   .leg-pct {
     font-weight: 700;

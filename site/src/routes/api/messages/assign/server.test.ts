@@ -1,12 +1,12 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { sign_jwt } from '$lib/auth/jwt'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { POST } from './+server'
 
 // Silence ntfy pushes during tests (no network) — see notify-admins.ts.
 process.env.NTFY_DISABLED = '1'
 
-let db: ReturnType<typeof open_shared_db>
+let db: ReturnType<typeof open_test_shared_db>
 
 vi.mock('$lib/db/server/shared-db', async () => {
   const actual = await vi.importActual<typeof import('$lib/db/server/shared-db')>('$lib/db/server/shared-db')
@@ -25,7 +25,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  db = open_shared_db(':memory:')
+  db = open_test_shared_db()
   const now = new Date().toISOString()
   db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
     .run(ADMIN_USER_ID, ADMIN_EMAIL, 'Jacob', '[]', now, now)

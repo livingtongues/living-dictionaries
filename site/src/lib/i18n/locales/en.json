@@ -608,7 +608,6 @@
     "stat_with_video": "with video",
     "stat_speakers": "speakers",
     "recently_added": "Recently added",
-    "map_soon": "Map coming soon",
     "add_location": "Add a location",
     "read_more": "Read more",
     "how_to_cite": "How to cite",
@@ -623,6 +622,7 @@
     "replace_cover": "Replace photo",
     "delete_cover": "Remove photo",
     "delete_cover_confirm": "Remove the cover photo?",
-    "drop_cover_hint": "Drop an image to set the cover photo"
+    "drop_cover_hint": "Drop an image to set the cover photo",
+    "top_domains": "Top semantic domains"
   }
 }

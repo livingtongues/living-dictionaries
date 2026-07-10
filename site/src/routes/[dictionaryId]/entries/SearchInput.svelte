@@ -11,9 +11,17 @@
     search_params: QueryParamStore<QueryParams>
     index_ready?: boolean
     placeholder?: string
+    /** Focus the input on mount (used by the dictionary home's search pill hand-off). */
+    focus_on_mount?: boolean
   }
 
-  const { on_show_filter_menu, search_params, index_ready = false, placeholder = undefined }: Props = $props()
+  const { on_show_filter_menu, search_params, index_ready = false, placeholder = undefined, focus_on_mount = false }: Props = $props()
+
+  let input_el = $state<HTMLInputElement>()
+  $effect(() => {
+    if (focus_on_mount)
+      input_el?.focus()
+  })
 </script>
 
 <div class="search-wrap">
@@ -27,6 +35,7 @@
     </div>
     <input
       type="search"
+      bind:this={input_el}
       bind:value={$search_params.query}
       oninput={() => {
         if ($search_params.page && $search_params.page > 1) {

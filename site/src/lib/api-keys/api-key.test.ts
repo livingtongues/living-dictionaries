@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { create_api_key, delete_api_key, generate_api_key, hash_api_key, list_api_keys, resolve_api_keys, revoke_api_key, verify_api_key } from './api-key'
 
-let db: ReturnType<typeof open_shared_db>
+let db: ReturnType<typeof open_test_shared_db>
 
 function seed_dictionary(id: string) {
   db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at)
@@ -14,7 +14,7 @@ function seed_dictionary(id: string) {
 }
 
 beforeEach(() => {
-  db = open_shared_db(':memory:')
+  db = open_test_shared_db()
   seed_dictionary('dict-1')
 })
 

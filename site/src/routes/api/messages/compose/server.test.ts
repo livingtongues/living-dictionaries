@@ -1,10 +1,10 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import type { SendRawEmailParts } from '$lib/email/send-raw-email'
 import { sign_jwt } from '$lib/auth/jwt'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { POST } from './+server'
 
-let db: ReturnType<typeof open_shared_db>
+let db: ReturnType<typeof open_test_shared_db>
 
 vi.mock('$lib/db/server/shared-db', async () => {
   const actual = await vi.importActual<typeof import('$lib/db/server/shared-db')>('$lib/db/server/shared-db')
@@ -49,7 +49,7 @@ function seed_user({ id = 'user-1', email = 'customer@example.com', name = 'Cath
 }
 
 beforeEach(() => {
-  db = open_shared_db(':memory:')
+  db = open_test_shared_db()
   // Admin's own users row (created lazily on first OTP login in prod) — needed
   // so messages.author_user_id / threads.replied_by_user_id FKs resolve.
   db.prepare('INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)')

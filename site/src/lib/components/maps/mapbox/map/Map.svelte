@@ -189,7 +189,8 @@
     }
     const { bbox_of_coordinates } = await import('../../utils/bbox-of-coordinates')
     const box = bbox_of_coordinates(pointsToFit) as LngLatBoundsLike
-    map.fitBounds(box, {
+    // queued (not map.fitBounds directly) — this effect can fire before the map instance exists
+    fitBounds(box, {
       padding: { top: 10, bottom: 10, left: 10, right: 10 },
       maxZoom: 6,
     })

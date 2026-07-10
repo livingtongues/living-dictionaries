@@ -14,7 +14,7 @@ import type Database from 'better-sqlite3'
 import type { EffectiveAdminLevel } from '$lib/admins'
 // default-import: 'xss' is CJS — named imports break Vite dev SSR (see sanitize-rich-text.ts)
 import xss from 'xss'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import {
   MESSAGE_PAGE_LIMIT,
   PRESENCE_WINDOW_MS,
@@ -529,7 +529,7 @@ export function delete_message({ db, message_id, user_id }: { db: Database.Datab
 
 if (import.meta.vitest) {
   function fresh_db() {
-    return open_shared_db(':memory:')
+    return open_test_shared_db()
   }
 
   function seed_user(db: Database.Database, user_id: string, email: string | null, name = 'Someone') {

@@ -57,9 +57,9 @@ export function export_locale_files({ db }: { db: Database.Database }): I18nExpo
 if (import.meta.vitest) {
   describe(export_locale_files, () => {
     test('mirrors the locales file layout with values filled and misses as empty strings', async () => {
-      const { open_shared_db } = await import('$lib/db/server/shared-db')
+      const { open_test_shared_db } = await import('$lib/db/server/shared-db')
       const { sync_en_catalog, upsert_translation } = await import('./i18n-db')
-      const db = open_shared_db(':memory:')
+      const db = open_test_shared_db()
       sync_en_catalog({ db })
       upsert_translation({ db, key_id: 'misc.add', locale: 'es', value: 'Agregar', source: 'human' })
       upsert_translation({ db, key_id: 'ps.pr.n', locale: 'es', value: 'n.pr.', source: 'human' })

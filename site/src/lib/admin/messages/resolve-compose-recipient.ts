@@ -107,8 +107,8 @@ if (import.meta.vitest) {
   let db: Database.Database
 
   beforeEach(async () => {
-    const { open_shared_db } = await import('$lib/db/server/shared-db')
-    db = open_shared_db(':memory:')
+    const { open_test_shared_db } = await import('$lib/db/server/shared-db')
+    db = open_test_shared_db()
     const now = '2026-01-01T00:00:00.000Z'
     db.prepare('INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)')
       .run('u-1', 'customer@example.com', 'Customer', '[]', now, now)

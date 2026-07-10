@@ -14,7 +14,7 @@ import { get_admin } from '$lib/admins'
 import { notify_user } from '$lib/notifications/notify-admins'
 import { get_room, online_user_ids, post_message } from '$lib/server/chat/chat-db'
 import { log_server_event } from '$lib/server/log-server-event'
-import { get_shared_db, open_shared_db } from './shared-db'
+import { get_shared_db, open_test_shared_db } from './shared-db'
 
 const REPING_AFTER_MS = 24 * 60 * 60 * 1000 // ~1 day unread → one gentle nudge
 const CHECK_INTERVAL_MS = 60 * 60 * 1000 // hourly sweep
@@ -126,7 +126,7 @@ if (import.meta.vitest) {
   const { create_channel, add_room_member } = await import('$lib/server/chat/chat-db')
 
   function seed() {
-    const db = open_shared_db(':memory:')
+    const db = open_test_shared_db()
     const ts = new Date().toISOString()
     // One admin + one non-admin partner member (repings must reach both).
     db.prepare('INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)')
@@ -138,10 +138,10 @@ if (import.meta.vitest) {
     return { db, room_id: room.id }
   }
 
-  function set_notified(db: ReturnType<typeof open_shared_db>, room_id: string, user_id: string, iso: string) {
+  function set_notified(db: ReturnType<typeof open_test_shared_db>, room_id: string, user_id: string, iso: string) {
     db.prepare('UPDATE chat_room_members SET last_notified_at = ? WHERE room_id = ? AND user_id = ?').run(iso, room_id, user_id)
   }
-  function reping_at(db: ReturnType<typeof open_shared_db>, room_id: string, user_id: string): string | null {
+  function reping_at(db: ReturnType<typeof open_test_shared_db>, room_id: string, user_id: string): string | null {
     return (db.prepare('SELECT gentle_reping_at FROM chat_room_members WHERE room_id = ? AND user_id = ?').get(room_id, user_id) as { gentle_reping_at: string | null }).gentle_reping_at
   }
 

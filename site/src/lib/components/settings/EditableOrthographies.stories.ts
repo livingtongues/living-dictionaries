@@ -3,7 +3,7 @@ import type Component from './EditableOrthographies.svelte'
 import { mock_t } from '$lib/mocks/mock-t'
 
 export const shared_meta: StoryMeta = {
-  viewports: [{ width: 460, height: 420 }],
+  viewports: [{ width: 560, height: 420 }],
   page_data: { t: mock_t, dict_db: null, url: new URL('http://localhost/demo/settings') },
 }
 

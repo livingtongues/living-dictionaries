@@ -159,11 +159,29 @@ export function _cache_size_for_tests(): number {
   return db_cache.size
 }
 
-/** For tests: open a dict.db in memory + run migrations, no caching. */
+let dict_template: Buffer | null = null
+
+function get_dict_template(): Buffer {
+  if (!dict_template) {
+    const seed = new Database(':memory:')
+    seed.pragma('foreign_keys = ON')
+    run_sql_migrations({ db: seed, migration_files })
+    dict_template = seed.serialize()
+    seed.close()
+  }
+  return dict_template
+}
+
+/**
+ * For tests (+ the admin schema-introspection endpoint): a fresh in-memory
+ * dict.db + the per-dict db_metadata rows. Running the migrations costs ~58ms
+ * per open; serialize-once + restore is ~0.2ms, so `beforeEach` setups stay
+ * cheap. Per-connection pragmas (`foreign_keys`) must be re-applied after
+ * restore; the dict_id-specific db_metadata rows are inserted per open.
+ */
 export function open_dictionary_db_in_memory(dict_id: string): Database.Database {
-  const db = new Database(':memory:')
+  const db = new Database(get_dict_template())
   db.pragma('foreign_keys = ON')
-  run_sql_migrations({ db, migration_files })
   db.prepare(`INSERT OR IGNORE INTO db_metadata (key, value) VALUES (?, ?)`).run('dictionary_id', dict_id)
   db.prepare(`INSERT INTO db_metadata (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run('schema_version', LATEST_DICT_MIGRATION)
   return db

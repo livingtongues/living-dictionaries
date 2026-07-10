@@ -35,6 +35,10 @@ blind. You are also my advisor on how to improve this command + our logging.
 All four write into a single dated report: **`.cron/log-reviews/YYYY-MM-DD.md`**, then a short chat
 summary. B, C and D are read-and-recommend — they propose, they don't build.
 
+**Memory:** before Phase A, read **`.cron/log-reviews/decisions.md`** — Jacob's standing decisions
+for this lane (declines, known-noise rulings like the stale-tab storms, watch baselines); **never
+re-raise anything listed there.** Then skim the last couple of dated digests for carried items.
+
 ## Default scope
 
 - **Window:** last **24h**, all levels — but always render **7-day** and **30-day** trend context.
@@ -303,7 +307,7 @@ currently the furthest-along dashboard; recent LD-only wins worth flagging for t
 
 ## Output
 
-1. **Write `.cron/log-reviews/YYYY-MM-DD.md`** (create the folder if missing). **If a digest already exists for today** (a manual + scheduled run, or a catch-up re-run after downtime), **append a new `# Log review — YYYY-MM-DD (run N · HH:MM UTC)` section rather than overwriting it** — never clobber an earlier run's memory:
+1. **Write `.cron/log-reviews/YYYY-MM-DD.md`** (create the folder if missing). **If a digest already exists for today** (a manual + scheduled run, or a catch-up re-run after downtime), **append a new `# Log review — YYYY-MM-DD (run N · HH:MM UTC)` section rather than overwriting it** — never clobber an earlier run's memory. **Memory upkeep after writing:** add any newly-durable decision (a decline, a known-noise ruling, a standing baseline) as a dated one-liner to `.cron/log-reviews/decisions.md` (delete obsolete lines), then **prune** to the newest **7** dated digests in `.cron/log-reviews/` — delete older, git history is the archive:
 
 ```markdown
 # Log review — YYYY-MM-DD (new.livingdictionaries.app · window: last 24h)

@@ -1,14 +1,14 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { create_api_key } from '$lib/api-keys/api-key'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { _reset_feedback_limiter, FEEDBACK_OWNER_EMAIL, submit_agent_feedback } from '$lib/server/agent-feedback'
 import { POST } from './+server'
 
 // Silence ntfy/email pushes during tests (no network) — see notify-admins.ts.
 process.env.NTFY_DISABLED = '1'
 
-let shared_db: ReturnType<typeof open_shared_db>
+let shared_db: ReturnType<typeof open_test_shared_db>
 let write_key: string
 let read_key: string
 
@@ -20,7 +20,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   _reset_feedback_limiter()
-  shared_db = open_shared_db(':memory:')
+  shared_db = open_test_shared_db()
   shared_db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
     .run('edt-1', 'edt@x.com', 'Edt', JSON.stringify([]), '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')
   shared_db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)

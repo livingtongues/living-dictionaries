@@ -26,3 +26,6 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
 - [homepage-v2.md](./homepage-v2.md) — the `/home-preview` rebuild: why canvas+d3 Equal Earth beat
   Mapbox/MapLibre/protomaps, SSR-SVG first paint, the featured_entries curation pipeline + build-time
   bake, and the preload/scrollLeft gotchas.
+- [mapbox-usage.md](./mapbox-usage.md) — the Referer-restricted public token (server fetches must
+  spoof it), the 30-day static-image caching proxy (`/api/map-static`) that keeps every dict-home +
+  entry map on the free tier, `is_dark_mode()` for light/dark variants, and where each map lives.

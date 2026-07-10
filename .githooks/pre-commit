@@ -8,9 +8,23 @@ export PATH="$HOME/.local/share/pnpm:$PATH"
 # commit without pulling in files you didn't stage.
 echo "Running pre-commit checks..."
 
-echo "→ pnpm test:site"
-pnpm test:site --run --reporter=dot
-if [ $? -ne 0 ]; then
+# Tests run scoped: `vitest --changed` traces the module graph from all uncommitted changes
+# (staged + unstaged + untracked) and runs only the affected test files. Blind spot: files loaded
+# via import.meta.glob (the .sql migrations in shared-db.ts / dictionary-db.ts / history + the
+# dict-client bundle) plus config/dep changes aren't in that graph — any of those flips the gate to
+# the full suite.
+changed_paths=$(git status --porcelain | awk '{ print $NF }')
+full_run_triggers='\.sql$|^site/vitest\.config\.ts$|^site/package\.json$|^pnpm-lock\.yaml$'
+if echo "$changed_paths" | grep -qE "$full_run_triggers"; then
+    echo "→ vitest run (full suite — .sql/config/dep changes are not traceable by --changed)"
+    pnpm --filter=site exec vitest run --reporter=dot
+    test_status=$?
+else
+    echo "→ vitest run --changed"
+    pnpm --filter=site exec vitest run --changed --reporter=dot
+    test_status=$?
+fi
+if [ $test_status -ne 0 ]; then
     echo "❌ Tests failed. Commit aborted."
     exit 1
 fi

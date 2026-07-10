@@ -4,10 +4,10 @@ import { create_api_key } from '$lib/api-keys/api-key'
 import { sign_jwt } from '$lib/auth/jwt'
 import { open_dictionary_db_in_memory } from '$lib/db/server/dictionary-db'
 import { open_dictionary_history_db_in_memory } from '$lib/db/server/dictionary-history-db'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { GET, POST } from './+server'
 
-let shared_db: ReturnType<typeof open_shared_db>
+let shared_db: ReturnType<typeof open_test_shared_db>
 let dict_db: Database.Database
 let history_db: Database.Database
 let api_token: string
@@ -21,7 +21,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  shared_db = open_shared_db(':memory:')
+  shared_db = open_test_shared_db()
   dict_db = open_dictionary_db_in_memory('dict-1')
   history_db = open_dictionary_history_db_in_memory()
 

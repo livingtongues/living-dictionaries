@@ -2,7 +2,7 @@ import type BetterSqlite3 from 'better-sqlite3'
 import type { SqliteConnection } from '$lib/db/client/connection'
 import type { SyncPostFn } from './engine.svelte'
 import { open_logs_db } from '$lib/db/server/logs-db'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { process_sync } from '$lib/db/server/sync-helpers'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { Sync } from './engine.svelte'
@@ -15,7 +15,7 @@ vi.mock('$api/log/_call', () => ({
  * End-to-end convergence proof for the shared.db admin engine — the LD-shared
  * sibling of the dict-engine convergence suite (cross-app hardening Parts 1+3;
  * house's Wayne wedge 2026-07-08). Real shared migrations on BOTH sides
- * (`open_shared_db(':memory:')` — admin clients run the same files), the REAL
+ * (`open_test_shared_db()` — admin clients run the same files), the REAL
  * `Sync` engine, and the REAL `process_sync` as post_fn: the only shape that
  * catches CLIENT-side apply failures (a loser row still owning the natural key
  * when the canonical row arrives → `UNIQUE constraint failed` → apply rollback
@@ -25,8 +25,8 @@ vi.mock('$api/log/_call', () => ({
 const T0 = '2026-07-09T00:00:00.000Z'
 const T1 = '2026-07-09T00:00:01.000Z'
 
-let server_db: ReturnType<typeof open_shared_db>
-let client_db: ReturnType<typeof open_shared_db>
+let server_db: ReturnType<typeof open_test_shared_db>
+let client_db: ReturnType<typeof open_test_shared_db>
 let logs_db: ReturnType<typeof open_logs_db>
 
 function connection_for(db: BetterSqlite3.Database): SqliteConnection {
@@ -73,8 +73,8 @@ function insert_role({ db, id, dirty, updated_at }: { db: BetterSqlite3.Database
 }
 
 beforeEach(() => {
-  server_db = open_shared_db(':memory:')
-  client_db = open_shared_db(':memory:')
+  server_db = open_test_shared_db()
+  client_db = open_test_shared_db()
   logs_db = open_logs_db(':memory:')
   for (const db of [server_db, client_db])
     seed_parents(db)

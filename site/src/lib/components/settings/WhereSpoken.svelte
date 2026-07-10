@@ -19,9 +19,10 @@
     on_update_points: (points: IPoint[]) => void
     on_update_regions: (regions: IRegion[]) => void
     dictionary: Partial<DictionaryView>
+    show_title?: boolean
   }
 
-  const { on_update_points, on_update_regions, dictionary }: Props = $props()
+  const { on_update_points, on_update_regions, dictionary, show_title = true }: Props = $props()
 
   const first_longitude = $derived(dictionary.coordinates?.points?.[0]?.coordinates?.longitude)
   const first_latitude = $derived(dictionary.coordinates?.points?.[0]?.coordinates?.latitude)
@@ -35,9 +36,11 @@
   let mapClickCoordinates: LngLat = $state()
 </script>
 
-<div class="section-title">
-  {page.data.t('create.where_spoken')}
-</div>
+{#if show_title}
+  <div class="section-title">
+    {page.data.t('create.where_spoken')}
+  </div>
+{/if}
 
 {#if first_longitude !== undefined}
   <div class="hint">

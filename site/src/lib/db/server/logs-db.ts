@@ -2,7 +2,7 @@ import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
 import process from 'node:process'
 import Database from 'better-sqlite3'
-import { open_shared_db } from './shared-db'
+import { open_test_shared_db } from './shared-db'
 
 /**
  * Hot storage for `client_logs` telemetry, in its OWN file (`logs.db`) — split
@@ -189,7 +189,7 @@ if (import.meta.vitest) {
   const { describe, test, expect } = import.meta.vitest
   describe(split_client_logs_from_shared, () => {
     test('moves rows, drops the shared table, and is idempotent', () => {
-      const shared_db = open_shared_db(':memory:')
+      const shared_db = open_test_shared_db()
       const logs_db = open_logs_db(':memory:')
       shared_db.prepare(`
         INSERT INTO client_logs (id, received_at, level, message) VALUES (?, ?, ?, ?)
@@ -213,7 +213,7 @@ if (import.meta.vitest) {
     })
 
     test('re-running after a crash between copy and drop does not duplicate rows', () => {
-      const shared_db = open_shared_db(':memory:')
+      const shared_db = open_test_shared_db()
       const logs_db = open_logs_db(':memory:')
       shared_db.prepare(`
         INSERT INTO client_logs (id, received_at, level, message) VALUES ('log-1', '2026-07-01T00:00:00.000Z', 'info', 'x')

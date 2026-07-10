@@ -296,10 +296,10 @@ export function list_translators({ db }: { db: Database.Database }): TranslatorI
 }
 
 if (import.meta.vitest) {
-  const { open_shared_db } = await import('$lib/db/server/shared-db')
+  const { open_test_shared_db } = await import('$lib/db/server/shared-db')
 
   function make_db() {
-    const db = open_shared_db(':memory:')
+    const db = open_test_shared_db()
     db.prepare('INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, \'[]\', ?, ?)')
       .run('u-1', 'translator@example.com', 'Tina', '2026-01-01', '2026-01-01')
     return db

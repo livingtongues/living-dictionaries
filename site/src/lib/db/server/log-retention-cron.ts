@@ -484,6 +484,38 @@ export function archive_old_logs({ logs_db = get_logs_db(), archive_db = get_log
   return { archived: old_rows.length, pruned }
 }
 
+const VACUUM_MIN_RECLAIMABLE_BYTES = 64 * 1024 * 1024
+const VACUUM_MIN_RECLAIMABLE_FRACTION = 0.25
+
+/**
+ * VACUUM a log db after the prune, but only when it's worth the cost. VACUUM
+ * rewrites the whole file synchronously (blocks the event loop for seconds on a
+ * multi-hundred-MB db), so it only fires when the freelist holds meaningful
+ * reclaimable space: ≥64 MB outright, or ≥25% of the file (and ≥8 MB, so a tiny
+ * dev db never bothers). Without this, a growth bulge (e.g. the 2026-07 SEO
+ * crawl, +111 MB/6h) keeps logs.db at its peak size forever once the bulge ages
+ * out of the hot window — freed pages get reused but the disk is never returned.
+ */
+export function vacuum_if_worthwhile({ db, label, min_reclaimable_bytes = VACUUM_MIN_RECLAIMABLE_BYTES, min_reclaimable_fraction = VACUUM_MIN_RECLAIMABLE_FRACTION }: {
+  db: Database.Database
+  label: string
+  min_reclaimable_bytes?: number
+  min_reclaimable_fraction?: number
+}): { vacuumed: boolean, reclaimable_bytes: number } {
+  const page_size = db.pragma('page_size', { simple: true }) as number
+  const freelist_pages = db.pragma('freelist_count', { simple: true }) as number
+  const page_count = db.pragma('page_count', { simple: true }) as number
+  const reclaimable_bytes = freelist_pages * page_size
+  const reclaimable_fraction = page_count ? freelist_pages / page_count : 0
+  const worthwhile = reclaimable_bytes >= min_reclaimable_bytes
+    || (reclaimable_fraction >= min_reclaimable_fraction && reclaimable_bytes >= 8 * 1024 * 1024)
+  if (!worthwhile)
+    return { vacuumed: false, reclaimable_bytes }
+  db.exec('VACUUM')
+  console.info(`[log-retention] VACUUM ${label}: reclaimed ~${Math.round(reclaimable_bytes / 1024 / 1024)} MB.`)
+  return { vacuumed: true, reclaimable_bytes }
+}
+
 /** db_metadata key: the last COMPLETED day whose rollup ran after the day ended. */
 export const ROLLUP_WATERMARK_KEY = 'log_rollup_finalized_through'
 
@@ -593,6 +625,9 @@ export function run_log_retention_once({ shared_db = get_shared_db(), logs_db = 
     fallback: { archived: 0, pruned: 0 },
     run: () => archive_old_logs({ logs_db, archive_db, now }),
   })
+  // Return pruned disk to the OS once a growth bulge drains (guarded — see helper).
+  step({ label: 'vacuum_logs_db', fallback: undefined, run: () => vacuum_if_worthwhile({ db: logs_db, label: 'logs.db' }) })
+  step({ label: 'vacuum_archive_db', fallback: undefined, run: () => vacuum_if_worthwhile({ db: archive_db, label: 'logs-archive.db' }) })
   step({ label: 'record_ran_at', fallback: undefined, run: () => {
     shared_db.prepare(`
       INSERT INTO db_metadata (key, value) VALUES ('log_retention_ran_at', ?)

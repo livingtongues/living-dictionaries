@@ -1,11 +1,15 @@
 import { get_featured_cards, get_recent_cards } from './dict-home'
 import { open_dictionary_db_in_memory } from './dictionary-db'
 
-function seed_entry(db: ReturnType<typeof open_dictionary_db_in_memory>, options: { id: string, lexeme: string, created_at: string, with_photo?: boolean, with_audio?: boolean, gloss?: string }) {
-  const { id, lexeme, created_at, with_photo, with_audio, gloss } = options
+function seed_entry(db: ReturnType<typeof open_dictionary_db_in_memory>, options: { id: string, lexeme: string, created_at: string, with_photo?: boolean, with_audio?: boolean, gloss?: string, parts_of_speech?: string[], dialect?: string }) {
+  const { id, lexeme, created_at, with_photo, with_audio, gloss, parts_of_speech, dialect } = options
   const audit = `'u1', '${created_at}', 'u1', '${created_at}'`
   db.prepare(`INSERT INTO entries (id, lexeme, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES (?, ?, ${audit})`).run(id, JSON.stringify({ default: lexeme }))
-  db.prepare(`INSERT INTO senses (id, entry_id, glosses, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES (?, ?, ?, ${audit})`).run(`${id}-s1`, id, gloss ? JSON.stringify({ en: gloss }) : null)
+  db.prepare(`INSERT INTO senses (id, entry_id, glosses, parts_of_speech, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES (?, ?, ?, ?, ${audit})`).run(`${id}-s1`, id, gloss ? JSON.stringify({ en: gloss }) : null, parts_of_speech ? JSON.stringify(parts_of_speech) : null)
+  if (dialect) {
+    db.prepare(`INSERT INTO dialects (id, name, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES (?, ?, ${audit})`).run(`${id}-d1`, JSON.stringify({ default: dialect }))
+    db.prepare(`INSERT INTO entry_dialects (id, entry_id, dialect_id, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES (?, ?, ?, ${audit})`).run(`${id}-ed1`, id, `${id}-d1`)
+  }
   if (with_photo) {
     db.prepare(`INSERT INTO photos (id, storage_path, serving_url, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES (?, ?, ?, ${audit})`).run(`${id}-p1`, `photos/${id}.jpg`, `serving-${id}`)
     db.prepare(`INSERT INTO sense_photos (id, sense_id, photo_id, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES (?, ?, ?, ${audit})`).run(`${id}-sp1`, `${id}-s1`, `${id}-p1`)
@@ -22,7 +26,7 @@ function star_entry(db: ReturnType<typeof open_dictionary_db_in_memory>, options
 describe(get_featured_cards, () => {
   test('returns starred entries in sort_key order with first photo/audio/gloss', () => {
     const db = open_dictionary_db_in_memory('test-dict')
-    seed_entry(db, { id: 'e1', lexeme: 'apple', created_at: '2026-01-01T00:00:00.000Z', with_photo: true, with_audio: true, gloss: 'fruit' })
+    seed_entry(db, { id: 'e1', lexeme: 'apple', created_at: '2026-01-01T00:00:00.000Z', with_photo: true, with_audio: true, gloss: 'fruit', parts_of_speech: ['n'], dialect: 'Northern' })
     seed_entry(db, { id: 'e2', lexeme: 'bird', created_at: '2026-01-02T00:00:00.000Z' })
     star_entry(db, { id: 'f1', entry_id: 'e1', sort_key: 'm' })
     star_entry(db, { id: 'f2', entry_id: 'e2', sort_key: 'a' })
@@ -35,6 +39,8 @@ describe(get_featured_cards, () => {
       lexeme: { default: 'bird' },
       phonetic: null,
       glosses: null,
+      parts_of_speech: null,
+      dialect: null,
       photo_serving_url: null,
       audio_storage_path: null,
     })
@@ -44,6 +50,8 @@ describe(get_featured_cards, () => {
       lexeme: { default: 'apple' },
       phonetic: null,
       glosses: { en: 'fruit' },
+      parts_of_speech: ['n'],
+      dialect: 'Northern',
       photo_serving_url: 'serving-e1',
       audio_storage_path: 'audio/e1.mp3',
     })

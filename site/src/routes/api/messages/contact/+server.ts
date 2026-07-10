@@ -2,8 +2,8 @@ import type { RequestHandler } from './$types'
 import { randomUUID } from 'node:crypto'
 import { dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
-import { languages_7000_address } from '$api/email/addresses'
-import { send_email } from '$api/email/send-email'
+import { institute_no_reply_address, languages_7000_address } from '$lib/email/addresses'
+import { send_email } from '$lib/email/send-email'
 import { fire_agent_email_inbound } from '$lib/agent/email-inbound-hook'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
@@ -142,6 +142,7 @@ export const POST: RequestHandler = async ({ request, url: request_url }) => {
 
     if (manager_addresses.length) {
       void send_email({
+        from: institute_no_reply_address,
         to: manager_addresses,
         reply_to: { email },
         subject: `${dictionary_name ?? 'Living Dictionary'}: ${email} requests editing access`,
@@ -157,6 +158,7 @@ export const POST: RequestHandler = async ({ request, url: request_url }) => {
   // dev-safety the legacy `api/email/learning_materials` endpoint had.
   if (subject_key === 'learning_materials' && !dev) {
     void send_email({
+      from: institute_no_reply_address,
       to: [languages_7000_address],
       reply_to: { email },
       subject: `Request for learning materials - ${dictionary_name || 'unknown'} Living Dictionary`,

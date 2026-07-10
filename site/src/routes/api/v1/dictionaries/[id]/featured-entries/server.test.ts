@@ -3,11 +3,11 @@ import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vi
 import { create_api_key } from '$lib/api-keys/api-key'
 import { open_dictionary_db_in_memory } from '$lib/db/server/dictionary-db'
 import { open_dictionary_history_db_in_memory } from '$lib/db/server/dictionary-history-db'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { GET, PATCH, POST } from './+server'
 import { DELETE } from './[entryId]/+server'
 
-let shared_db: ReturnType<typeof open_shared_db>
+let shared_db: ReturnType<typeof open_test_shared_db>
 let dict_db: Database.Database
 let history_db: Database.Database
 let write_key: string
@@ -22,7 +22,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  shared_db = open_shared_db(':memory:')
+  shared_db = open_test_shared_db()
   dict_db = open_dictionary_db_in_memory('dict-1')
   history_db = open_dictionary_history_db_in_memory()
   shared_db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)

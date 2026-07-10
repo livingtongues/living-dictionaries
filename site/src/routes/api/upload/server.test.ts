@@ -1,7 +1,7 @@
 import type { Database } from 'better-sqlite3'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { sign_jwt } from '$lib/auth/jwt'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { reset_gcs_client } from '$lib/server/gcloud'
 import { POST } from './+server'
 
@@ -21,7 +21,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  db = open_shared_db(':memory:')
+  db = open_test_shared_db()
   const now = '2026-01-01T00:00:00Z'
   db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
     .run('u_ed', 'editor@example.com', 'Editor', JSON.stringify([]), now, now)

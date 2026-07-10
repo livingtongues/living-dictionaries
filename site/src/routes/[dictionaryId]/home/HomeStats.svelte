@@ -19,13 +19,21 @@
   const { stats }: Props = $props()
   const t = $derived(page.data.t)
 
-  const tiles = [
+  // entries + with_audio always render (placeholders while stats stream in); the
+  // rest only join once they have a nonzero value — no "0 with video" tiles.
+  const base_tiles = [
     { key: 'entries', label_key: 'dict_home.stat_entries' },
     { key: 'with_audio', label_key: 'dict_home.stat_with_audio' },
+  ] as const
+  const extra_tiles = [
     { key: 'with_photos', label_key: 'dict_home.stat_with_photos' },
     { key: 'with_video', label_key: 'dict_home.stat_with_video' },
     { key: 'speakers', label_key: 'dict_home.stat_speakers' },
   ] as const
+  const tiles = $derived([
+    ...base_tiles,
+    ...extra_tiles.filter(tile => (stats?.[tile.key] ?? 0) > 0),
+  ])
 
   /** 0→1 count-up progress, kicked off the moment stats arrive. */
   let progress = $state(0)

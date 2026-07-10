@@ -13,7 +13,7 @@ import { assert_optional_recipients_allowed } from '$lib/admin/messages/resolve-
 import { put_attachment } from '$lib/r2/put-attachment'
 import { log_server_event } from '$lib/server/log-server-event'
 import MessageReply from '../../email/components/MessageReply.svelte'
-import { render_component_to_html } from '../../email/render-component-to-html'
+import { render_component_to_html } from '$lib/email/render-component-to-html'
 import { error, json } from '@sveltejs/kit'
 
 /**

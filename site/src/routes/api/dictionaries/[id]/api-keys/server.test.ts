@@ -1,10 +1,10 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { sign_jwt } from '$lib/auth/jwt'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { DELETE } from './[key_id]/+server'
 import { GET, POST } from './+server'
 
-let db: ReturnType<typeof open_shared_db>
+let db: ReturnType<typeof open_test_shared_db>
 
 vi.mock('$lib/db/server/shared-db', async () => {
   const actual = await vi.importActual<typeof import('$lib/db/server/shared-db')>('$lib/db/server/shared-db')
@@ -16,7 +16,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  db = open_shared_db(':memory:')
+  db = open_test_shared_db()
   db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?)`)
     .run('mgr-1', 'mgr@x.com', 'Mgr', JSON.stringify([{ provider: 'email', provider_id: 'mgr@x.com' }]), '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')

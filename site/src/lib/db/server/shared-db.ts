@@ -27,6 +27,30 @@ export function open_shared_db(path: string | ':memory:'): Database.Database {
   return db
 }
 
+let test_template: Buffer | null = null
+
+function get_test_template(): Buffer {
+  if (!test_template) {
+    const seed = open_shared_db(':memory:')
+    test_template = seed.serialize()
+    seed.close()
+  }
+  return test_template
+}
+
+/**
+ * Test-only: a fresh in-memory shared.db restored from a serialized template.
+ * Running all migrations costs ~42ms per open; serialize-once + restore is
+ * ~0.2ms, so `beforeEach` setups stay cheap. Per-connection pragmas must be
+ * re-applied after restore (`foreign_keys` is per-connection in SQLite).
+ */
+export function open_test_shared_db(): Database.Database {
+  const db = new Database(get_test_template())
+  db.pragma('busy_timeout = 5000')
+  db.pragma('foreign_keys = ON')
+  return db
+}
+
 /** Bundled latest migration filename — used by the sync handshake to detect schema drift. */
 export const latest_shared_migration_name = (() => {
   const names = Object.keys(migration_files)

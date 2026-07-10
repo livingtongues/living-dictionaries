@@ -76,7 +76,7 @@ export async function post_system_notification({ db, content, base_url, suppress
 }
 
 if (import.meta.vitest) {
-  const { open_shared_db } = await import('$lib/db/server/shared-db')
+  const { open_test_shared_db } = await import('$lib/db/server/shared-db')
   const { ensure_all_admins_in_team_chat } = await import('./ensure-team-membership')
   const { format_new_dictionary_notification } = await import('./notification-messages')
 
@@ -96,7 +96,7 @@ if (import.meta.vitest) {
     afterEach(() => { process.env.NTFY_DISABLED = original })
 
     it('posts the message to the Notifications room as the System bot', async () => {
-      const db = open_shared_db(':memory:')
+      const db = open_test_shared_db()
       ensure_all_admins_in_team_chat({ db })
       await post_system_notification({ db, content, base_url: 'https://new.livingdictionaries.app' })
       const row = db.prepare('SELECT author_user_id, body_text FROM chat_messages WHERE room_id = ?').get(ROOM_NOTIFICATIONS) as { author_user_id: string, body_text: string } | undefined
@@ -105,14 +105,14 @@ if (import.meta.vitest) {
     })
 
     it('pings an on-duty admin member', async () => {
-      const db = open_shared_db(':memory:')
+      const db = open_test_shared_db()
       ensure_all_admins_in_team_chat({ db })
       await post_system_notification({ db, content, base_url: 'https://new.livingdictionaries.app' })
       expect(notified_at(db, ROOM_NOTIFICATIONS, diego_id(db))).not.toBeNull()
     })
 
     it('suppress_ping posts the message but pings nobody', async () => {
-      const db = open_shared_db(':memory:')
+      const db = open_test_shared_db()
       ensure_all_admins_in_team_chat({ db })
       await post_system_notification({ db, content, base_url: 'https://new.livingdictionaries.app', suppress_ping: true })
       expect(db.prepare('SELECT COUNT(*) AS c FROM chat_messages WHERE room_id = ?').get(ROOM_NOTIFICATIONS)).toEqual({ c: 1 })
@@ -120,7 +120,7 @@ if (import.meta.vitest) {
     })
 
     it('skips off-duty admins (notify:false)', async () => {
-      const db = open_shared_db(':memory:')
+      const db = open_test_shared_db()
       ensure_all_admins_in_team_chat({ db })
       await post_system_notification({ db, content, base_url: 'https://new.livingdictionaries.app' })
       const anna_id = (db.prepare('SELECT id FROM users WHERE email = ?').get('dictionaries@livingtongues.org') as { id: string }).id

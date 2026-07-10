@@ -15,9 +15,10 @@
 
   interface Props {
     dictionary: Tables<'dictionaries'>
+    show_title?: boolean
     on_update: (orthographies: Orthography[]) => Promise<void>
   }
-  const { dictionary, on_update }: Props = $props()
+  const { dictionary, show_title = true, on_update }: Props = $props()
 
   const registry = $derived(get_orthographies(dictionary))
 
@@ -73,10 +74,19 @@
     return entries.length + sentences.length
   }
 
+  // Delete buttons only render once a code is confirmed unused (undefined = still counting).
+  let usage_counts = $state<Record<string, number>>({})
+  $effect(() => {
+    for (const orthography of registry.alternates) {
+      usage_count(orthography.code).then((count) => { usage_counts[orthography.code] = count })
+    }
+  })
+
   async function remove(orthography: Orthography) {
     const count = await usage_count(orthography.code)
     if (count > 0) {
       alert(`“${orthography.name || orthography.code}” is used by ${count} entr${count === 1 ? 'y' : 'ies'}/sentence(s). Clear it from those first.`)
+      usage_counts[orthography.code] = count
       return
     }
     if (!confirm(`Delete the “${orthography.name || orthography.code}” orthography?`)) return
@@ -118,7 +128,9 @@
   }
 </script>
 
-<div class="section-title">{page.data.t('entry_field.local_orthography')}</div>
+{#if show_title}
+  <div class="section-title">{page.data.t('entry_field.local_orthography')}</div>
+{/if}
 <div class="hint">The primary headword is always first. Add more writing systems for the same words.</div>
 
 <div class="ortho-list">
@@ -150,9 +162,13 @@
       <button type="button" class="icon-button" title="Move down" disabled={index === registry.alternates.length - 1} onclick={() => move(index, 1)}>
         <IconFa6SolidChevronDown class="icon-inline" />
       </button>
-      <button type="button" class="icon-button danger" title="Delete" onclick={() => remove(orthography)}>
-        <IconFa6SolidTrash class="icon-inline" />
-      </button>
+      {#if usage_counts[orthography.code] === 0}
+        <button type="button" class="icon-button danger" title="Delete" onclick={() => remove(orthography)}>
+          <IconFa6SolidTrash class="icon-inline" />
+        </button>
+      {:else if usage_counts[orthography.code] > 0}
+        <span class="code-tag" title="Used by {usage_counts[orthography.code]} entries/sentences — clear it from those to delete">in use</span>
+      {/if}
     </div>
   {/each}
 </div>

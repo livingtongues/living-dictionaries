@@ -12,7 +12,7 @@
 import type Database from 'better-sqlite3'
 import type { ChatMessageRow } from './chat-db'
 import { ADMINS } from '$lib/admins'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { notify_user } from '$lib/notifications/notify-admins'
 import { get_room, online_user_ids, post_message, touch_presence } from './chat-db'
 import { SYSTEM_USER_ID, SYSTEM_USER_NAME } from './constants'
@@ -103,7 +103,7 @@ if (import.meta.vitest) {
   const { create_channel, add_room_member } = await import('./chat-db')
 
   function seed_room() {
-    const db = open_shared_db(':memory:')
+    const db = open_test_shared_db()
     const now = new Date().toISOString()
     // One admin (real allow-listed email) + one partner (not in ADMINS).
     db.prepare('INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)')
@@ -115,7 +115,7 @@ if (import.meta.vitest) {
     return { db, room }
   }
 
-  function notified_at(db: ReturnType<typeof open_shared_db>, room_id: string, user_id: string): string | null {
+  function notified_at(db: ReturnType<typeof open_test_shared_db>, room_id: string, user_id: string): string | null {
     return (db.prepare('SELECT last_notified_at FROM chat_room_members WHERE room_id = ? AND user_id = ?').get(room_id, user_id) as { last_notified_at: string | null }).last_notified_at
   }
 

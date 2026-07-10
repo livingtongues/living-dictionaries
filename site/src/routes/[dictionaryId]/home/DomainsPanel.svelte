@@ -1,32 +1,31 @@
 <script lang="ts">
-  import IconFa6SolidUserShield from '~icons/fa6-solid/user-shield'
+  import DonutChart from '$lib/charts/DonutChart.svelte'
+  import { page } from '$app/state'
+  import { goto } from '$app/navigation'
 
   interface Props {
-    /** Translated label → entry count, already sorted descending. */
-    domains: { label: string, count: number }[]
+    /** Facet key (underscored form the search index stores) + translated label + entry count, sorted descending. */
+    domains: { key: string, label: string, count: number }[]
+    entries_href: string
   }
 
-  const { domains }: Props = $props()
-  const max = $derived(domains[0]?.count ?? 1)
+  const { domains, entries_href }: Props = $props()
+  const t = $derived(page.data.t)
+
+  const data = $derived(domains.map(domain => ({ label: domain.label, value: domain.count })))
+
+  // Same `q` JSON blob the entries page's query-param store reads (see entries +page.ts).
+  function open_domain(index: number) {
+    const key = domains[index]?.key
+    if (!key)
+      return
+    void goto(`${entries_href}?q=${encodeURIComponent(JSON.stringify({ page: 1, query: '', semantic_domains: [key] }))}`)
+  }
 </script>
 
-<!-- Admin-level-3 preview (see the shield) — goes public once the concept is fine-tuned. -->
 <section class="panel">
-  <h2>
-    Top semantic domains
-    <IconFa6SolidUserShield class="icon-inline" style="font-size: 0.75rem; opacity: 0.5" />
-  </h2>
-  <div class="bars">
-    {#each domains as domain (domain.label)}
-      <div class="row">
-        <span class="label">{domain.label}</span>
-        <div class="track">
-          <div class="bar" style:width="{Math.max(domain.count / max * 100, 2)}%"></div>
-        </div>
-        <span class="count">{domain.count.toLocaleString()}</span>
-      </div>
-    {/each}
-  </div>
+  <h2>{t('dict_home.top_domains')}</h2>
+  <DonutChart {data} nested={false} wrap_labels on_select={open_domain} format={value => value.toLocaleString()} />
 </section>
 
 <style>
@@ -40,48 +39,12 @@
     font-size: 0.9375rem;
     font-weight: 600;
     margin: 0 0 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
   }
 
-  .bars {
-    display: flex;
-    flex-direction: column;
-    gap: 0.375rem;
-  }
-
-  .row {
-    display: grid;
-    grid-template-columns: minmax(6rem, 11rem) 1fr 3.5rem;
-    align-items: center;
-    gap: 0.625rem;
-    font-size: 0.8125rem;
-  }
-
-  .label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--color-secondary);
-  }
-
-  .track {
-    height: 0.5rem;
-    border-radius: 9999px;
-    background: color-mix(in srgb, var(--color) 8%, transparent);
-    overflow: hidden;
-  }
-
-  .bar {
-    height: 100%;
-    border-radius: 9999px;
-    background: var(--primary);
-  }
-
-  .count {
-    text-align: end;
-    font-variant-numeric: tabular-nums;
-    color: var(--color-secondary);
+  /* No pie on mobile — the legend's percentages carry the story on their own. */
+  @media (max-width: 640px) {
+    .panel :global(.donut svg) {
+      display: none;
+    }
   }
 </style>

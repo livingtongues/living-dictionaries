@@ -15,12 +15,18 @@ export interface DictHomeCard {
   lexeme: MultiString
   phonetic: string | null
   glosses: MultiString | null
+  parts_of_speech: string[] | null
+  dialect: string | null
   photo_serving_url: string | null
   audio_storage_path: string | null
 }
 
 const CARD_MEDIA_SUBQUERIES = `
   (SELECT s.glosses FROM senses s WHERE s.entry_id = e.id ORDER BY s.created_at LIMIT 1) AS glosses,
+  (SELECT s.parts_of_speech FROM senses s WHERE s.entry_id = e.id ORDER BY s.created_at LIMIT 1) AS parts_of_speech,
+  (SELECT json_extract(d.name, '$.default') FROM entry_dialects ed
+     JOIN dialects d ON d.id = ed.dialect_id
+   WHERE ed.entry_id = e.id ORDER BY ed.created_at LIMIT 1) AS dialect,
   (SELECT p.serving_url FROM senses s
      JOIN sense_photos sp ON sp.sense_id = s.id
      JOIN photos p ON p.id = sp.photo_id
@@ -44,6 +50,8 @@ function to_card(row: Record<string, unknown>): DictHomeCard {
     lexeme: parse_json_column<MultiString>(row.lexeme) ?? {},
     phonetic: (row.phonetic as string | null) ?? null,
     glosses: parse_json_column<MultiString>(row.glosses),
+    parts_of_speech: parse_json_column<string[]>(row.parts_of_speech),
+    dialect: (row.dialect as string | null) ?? null,
     photo_serving_url: (row.photo_serving_url as string | null) ?? null,
     audio_storage_path: (row.audio_storage_path as string | null) ?? null,
   }
@@ -59,8 +67,9 @@ export function get_featured_cards({ db }: { db: Database.Database }): DictHomeC
   return rows.map(to_card)
 }
 
-/** Newest entries for the "recently added" strip. */
-export function get_recent_cards({ db, limit = 6 }: { db: Database.Database, limit?: number }): DictHomeCard[] {
+/** Newest entries for the "recently added" strip — fetched with headroom so the
+ * client's featured-overlap filter still leaves a full strip (display cap is 8). */
+export function get_recent_cards({ db, limit = 12 }: { db: Database.Database, limit?: number }): DictHomeCard[] {
   const rows = db.prepare(`
     SELECT e.id, e.id AS entry_id, e.lexeme, e.phonetic,${CARD_MEDIA_SUBQUERIES}
     FROM entries e

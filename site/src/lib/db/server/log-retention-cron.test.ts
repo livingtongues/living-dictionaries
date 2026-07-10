@@ -7,16 +7,16 @@ import type { RequestGeo } from '$lib/server/geo-from-request'
 import { insert_client_log } from '$lib/server/insert-client-log'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { open_log_archive_db } from './log-archive-db'
-import { archive_old_logs, get_rollup_watermark, MONTHLY_FINALIZED_KEY, normalize_route, prev_month, reroll_archived_days_once, rollup_day, rollup_month, rollup_recent_months, run_log_retention_once, SITE_SCOPE } from './log-retention-cron'
+import { archive_old_logs, get_rollup_watermark, MONTHLY_FINALIZED_KEY, normalize_route, prev_month, reroll_archived_days_once, rollup_day, rollup_month, rollup_recent_months, run_log_retention_once, SITE_SCOPE, vacuum_if_worthwhile } from './log-retention-cron'
 import { CLIENT_LOG_COLUMNS, open_logs_db } from './logs-db'
-import { open_shared_db } from './shared-db'
+import { open_test_shared_db } from './shared-db'
 
 let shared_db: Database.Database
 let logs_db: Database.Database
 let archive_db: Database.Database
 
 beforeEach(() => {
-  shared_db = open_shared_db(':memory:')
+  shared_db = open_test_shared_db()
   logs_db = open_logs_db(':memory:')
   archive_db = open_log_archive_db(':memory:')
 })
@@ -315,6 +315,38 @@ describe(archive_old_logs, () => {
 
     const archived_rows = archive_db.prepare('SELECT message FROM client_logs ORDER BY message').all() as { message: string }[]
     expect(archived_rows.map(r => r.message)).toEqual(['aged'])
+  })
+})
+
+describe(vacuum_if_worthwhile, () => {
+  test('vacuums when the freelist crosses the reclaimable threshold and skips when it does not', () => {
+    // Bulk-insert then delete so the freelist holds real reclaimable pages.
+    const filler = 'x'.repeat(2000)
+    for (let index = 0; index < 200; index++)
+      add_log({ day: '2026-06-01', message: `bulk ${index} ${filler}` })
+    logs_db.prepare('DELETE FROM client_logs').run()
+    const freelist_before = logs_db.pragma('freelist_count', { simple: true }) as number
+    // eslint-disable-next-line no-restricted-syntax -- genuine range check on freed page count
+    expect(freelist_before).toBeGreaterThan(0)
+
+    // Guard holds: thresholds far above what the delete freed → no VACUUM.
+    const skipped = vacuum_if_worthwhile({ db: logs_db, label: 'logs.db', min_reclaimable_bytes: 1024 * 1024 * 1024 })
+    expect(skipped.vacuumed).toBeFalsy()
+    expect(logs_db.pragma('freelist_count', { simple: true })).toBe(freelist_before)
+
+    // Guard passes: tiny thresholds → VACUUM runs and empties the freelist.
+    const vacuumed = vacuum_if_worthwhile({ db: logs_db, label: 'logs.db', min_reclaimable_bytes: 1 })
+    expect(vacuumed.vacuumed).toBeTruthy()
+    expect(vacuumed.reclaimable_bytes).toBe(freelist_before * (logs_db.pragma('page_size', { simple: true }) as number))
+    expect(logs_db.pragma('freelist_count', { simple: true })).toBe(0)
+  })
+
+  test('fraction rule needs at least 8 MB reclaimable, so small dbs never vacuum', () => {
+    add_log({ day: '2026-06-01', message: 'one row' })
+    logs_db.prepare('DELETE FROM client_logs').run()
+    // Nearly 100% of this tiny db is reclaimable, but it is far under 8 MB.
+    const result = vacuum_if_worthwhile({ db: logs_db, label: 'logs.db' })
+    expect(result.vacuumed).toBeFalsy()
   })
 })
 

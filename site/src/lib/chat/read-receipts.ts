@@ -67,6 +67,27 @@ export function caught_up_others({ messages, read_positions, me_user_id }: {
     .map(position => position.user_id)
 }
 
+/**
+ * Where the "new messages" divider sits when opening a room: the id of the
+ * first message another member wrote after MY `last_read_at`, or null when
+ * nothing is new (no divider). Compute it from the FIRST fetch after opening a
+ * room — the server reads positions BEFORE marking the view as read, so my
+ * position still reflects the previous visit — and freeze it until the room
+ * changes. A member with no read position yet sees every other-authored
+ * message as new.
+ */
+export function first_unread_message_id({ messages, read_positions, me_user_id }: {
+  messages: readonly BoundaryMessage[]
+  read_positions: readonly RoomReadPosition[]
+  me_user_id: string
+}): string | null {
+  const my_last_read = read_positions.find(position => position.user_id === me_user_id)?.last_read_at ?? ''
+  const first_unread = messages.find(message =>
+    message.author_user_id !== me_user_id
+    && message.created_at > my_last_read)
+  return first_unread?.id ?? null
+}
+
 /** Up to two uppercase initials from a display name (falls back to '?'). */
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -134,6 +155,44 @@ if (import.meta.vitest) {
         me_user_id: 'u-me',
       })
       expect(result).toEqual(['u-a'])
+    })
+  })
+
+  describe(first_unread_message_id, () => {
+    it('points at the first other-authored message after my last read', () => {
+      const result = first_unread_message_id({
+        messages,
+        read_positions: [{ user_id: 'u-me', last_read_at: '2026-07-08T10:01:00.000Z' }],
+        me_user_id: 'u-me',
+      })
+      expect(result).toBe('m2') // m3 is newer too, but m2 is where new starts
+    })
+
+    it('skips my own messages when finding the divider anchor', () => {
+      const result = first_unread_message_id({
+        messages,
+        read_positions: [{ user_id: 'u-me', last_read_at: '2026-07-08T10:06:00.000Z' }],
+        me_user_id: 'u-me',
+      })
+      expect(result).toBe(null) // only m3 is newer and it's mine
+    })
+
+    it('returns null when I am caught up', () => {
+      const result = first_unread_message_id({
+        messages,
+        read_positions: [{ user_id: 'u-me', last_read_at: '2026-07-08T10:10:00.000Z' }],
+        me_user_id: 'u-me',
+      })
+      expect(result).toBe(null)
+    })
+
+    it('treats everything by others as new when I have no read position', () => {
+      const result = first_unread_message_id({
+        messages,
+        read_positions: [],
+        me_user_id: 'u-me',
+      })
+      expect(result).toBe('m2') // m1 is mine
     })
   })
 

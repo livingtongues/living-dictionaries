@@ -1,5 +1,5 @@
 import type { Database } from 'better-sqlite3'
-import { get_shared_db, open_shared_db } from './shared-db'
+import { get_shared_db, open_test_shared_db } from './shared-db'
 
 export type DictRole = 'manager' | 'editor' | 'contributor'
 
@@ -27,7 +27,7 @@ if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
 
   function seed() {
-    const db = open_shared_db(':memory:')
+    const db = open_test_shared_db()
     const add_dict = db.prepare(`INSERT INTO dictionaries (id, name) VALUES (?, ?)`)
     const add_user = db.prepare(`INSERT INTO users (id, email) VALUES (?, ?)`)
     const add_role = db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at) VALUES (?, ?, ?, ?, ?)`)

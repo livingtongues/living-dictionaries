@@ -16,8 +16,11 @@ export default defineConfig({
   test: {
     projects: [
       {
-        // Node project: pure TS units + in-source tests. No Svelte plugin, so it
-        // never touches runes — excludes the `.svelte.test.ts` reactive suite.
+        // Node project: pure TS units + in-source tests. Keeps vite-plugin-svelte
+        // so `.svelte` imports compile for SSR (tests exercising `svelte/server`
+        // render, e.g. email) — but still excludes the `.svelte.test.ts` reactive
+        // suite, which needs the browser resolve condition below.
+        plugins: [svelte()],
         test: {
           name: 'unit',
           alias,

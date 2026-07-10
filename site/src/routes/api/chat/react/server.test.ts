@@ -1,11 +1,11 @@
 import type { ChatReactResponse } from './+server'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { post_message } from '$lib/server/chat/chat-db'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { make_cookies, PARTNER, seed_chat_users, seed_rooms, STRANGER, SUPER_ADMIN, token_for } from '../_test-helpers'
 import { POST } from './+server'
 
-let db: ReturnType<typeof open_shared_db>
+let db: ReturnType<typeof open_test_shared_db>
 
 vi.mock('$lib/db/server/shared-db', async () => {
   const actual = await vi.importActual<typeof import('$lib/db/server/shared-db')>('$lib/db/server/shared-db')
@@ -19,7 +19,7 @@ beforeAll(() => {
 let regular_id: string
 
 beforeEach(() => {
-  db = open_shared_db(':memory:')
+  db = open_test_shared_db()
   seed_chat_users(db)
   ;({ regular_id } = seed_rooms(db))
 })

@@ -8,7 +8,8 @@
   import { chat_store } from '$lib/chat/chat-store.svelte'
   import NewChannelForm from '$lib/chat/new-channel-form.svelte'
   import ReadBubbles from '$lib/chat/read-bubbles.svelte'
-  import { caught_up_others, compute_read_boundaries } from '$lib/chat/read-receipts'
+  import { caught_up_others, compute_read_boundaries, first_unread_message_id } from '$lib/chat/read-receipts'
+  import UnreadDivider from '$lib/chat/unread-divider.svelte'
   import RoomMembersPopover from '$lib/chat/room-members-popover.svelte'
   import Header from '$lib/components/shell/Header.svelte'
   import LoginModal from '$lib/components/LoginModal.svelte'
@@ -32,6 +33,8 @@
   let active_room_id = $state<string>('')
   let messages = $state<ChatMessageWithAttachments[]>([])
   let read_positions = $state<RoomReadPosition[]>([])
+  // Frozen on room open (see first_unread_message_id) — where the "New" divider sits.
+  let first_unread_id = $state<string | null>(null)
   let loading = $state(true)
   let sending = $state(false)
   let thread_el = $state<HTMLDivElement>()
@@ -89,6 +92,7 @@
       const { messages: loaded, read_positions: positions } = data
       messages = loaded
       read_positions = positions
+      first_unread_id = first_unread_message_id({ messages, read_positions, me_user_id: chat_store.me_user_id })
       await scroll_to_bottom()
     }
   }
@@ -141,6 +145,7 @@
     mobile_view = 'thread' // picking a room reveals the thread on mobile
     messages = []
     read_positions = []
+    first_unread_id = null
     await goto(`/chat?room=${encodeURIComponent(room_id)}`, { replaceState: true, keepFocus: true, noScroll: true })
     await load_messages(room_id)
     void chat_store.refresh_rooms()
@@ -339,6 +344,9 @@
           <p class="empty">No messages yet. Say hello 👋</p>
         {:else}
           {#each messages as message, index (message.id)}
+            {#if message.id === first_unread_id}
+              <UnreadDivider />
+            {/if}
             <ChatMessageItem
               {message}
               author_name={chat_store.name_for(message.author_user_id)}

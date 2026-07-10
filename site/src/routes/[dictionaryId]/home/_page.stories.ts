@@ -9,12 +9,14 @@ export const shared_meta: StoryMeta = {
   page_data: { t: mock_t, locale: 'en' },
 }
 
-const ssr_cards: DictHomeCard[] = story_cards.slice(0, 6).map(card => ({
+const ssr_cards: DictHomeCard[] = story_cards.slice(0, 6).map((card, index) => ({
   id: card.id,
   entry_id: card.entry_id,
   lexeme: { default: card.lexeme },
-  phonetic: null,
+  phonetic: index % 2 === 0 ? card.lexeme.toLowerCase() : null,
   glosses: card.gloss ? { [card.gloss_language ?? 'en']: card.gloss } : null,
+  parts_of_speech: index % 3 === 0 ? ['n'] : null,
+  dialect: null,
   photo_serving_url: card.photo_serving_url,
   audio_storage_path: card.audio_storage_path,
 }))
@@ -31,8 +33,9 @@ const dictionary = {
   gloss_languages: ['en', 'or', 'hi'],
   coordinates: { points: [{ coordinates: { longitude: 82.991, latitude: 18.617 } }] },
   featured_image: { serving_url: story_cards[0]?.photo_serving_url },
-  about: '<p>GtaɁ (also known as Didayi) is a Munda language spoken by the Didayi people of Odisha, India. This dictionary documents the language as spoken in the Koraput district, with audio recordings from native speakers across three generations.</p><p>Second paragraph that should not appear.</p>',
-  grammar: '<p>GtaɁ is an agglutinative language with subject-object-verb word order. Nouns inflect for number and case.</p>',
+  // Markdown (as stored) — the escaped \[gaq\] must render as [gaq] in the snippet.
+  about: String.raw`GtaɁ \[gaq\] (also known as **Didayi**) is a Munda language spoken by the Didayi people of Odisha, India. This dictionary documents the language as spoken in the Koraput district, with audio recordings from native speakers across three generations. The materials were collected, annotated and transcribed by researchers working alongside community members, under the auspices of a long-running documentation project that continues to add new entries every year.`,
+  grammar: 'GtaɁ is an *agglutinative* language with subject-object-verb word order. Nouns inflect for number and case.',
   citation: null,
   entry_count: 6378,
   orthographies: [{ code: 'default', name: 'Gtaʔ', primary: true }, { code: 'ipa', name: 'IPA' }],
@@ -92,8 +95,8 @@ export const ManagerFullHero: PageStory<typeof Component> = {
   } as never,
 }
 
-/** Admin-3 with the local index ready — stats count up + the gated domains panel. */
-export const AdminLoadedStats: PageStory<typeof Component> = {
+/** Local index ready — stats count up + the public domains pie (>2 domains in use). */
+export const LoadedStats: PageStory<typeof Component> = {
   viewports: [{ width: 1024, height: 1500 }],
   csr: true,
   interactions: async (page) => {
@@ -112,6 +115,6 @@ export const AdminLoadedStats: PageStory<typeof Component> = {
         _semantic_domains: { values: { Body_parts: 412, Animals: 388, Plants: 301, Food_and_drink: 244, Kinship: 199, Motion: 150, Tools: 96, Weather: 71 } },
       },
     }),
-    auth_user: { admin_level: 3, user: { id: 'admin' } },
+    auth_user: { admin_level: 0, user: null },
   } as never,
 }

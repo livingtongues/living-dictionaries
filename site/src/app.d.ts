@@ -35,6 +35,8 @@ declare global {
     }
     interface PageState {
       entry_id?: string
+      // Set by the dictionary home's search pill so the entries page focuses its search input on arrival.
+      focus_search?: boolean
       // Smart back-target persisted into history.state by admin detail pages (use_admin_back).
       admin_back?: { label: string, url: string }
     }

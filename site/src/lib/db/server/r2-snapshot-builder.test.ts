@@ -5,10 +5,10 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { gunzipSync } from 'node:zlib'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { open_shared_db } from './shared-db'
+import { open_test_shared_db } from './shared-db'
 import { sweep_dirty_dictionaries } from './r2-snapshot-builder'
 
-let shared: ReturnType<typeof open_shared_db>
+let shared: ReturnType<typeof open_test_shared_db>
 const dict_dbs = new Map<string, Database.Database>()
 const put_spy = vi.fn((_command: PutObjectCommand) => Promise.resolve())
 
@@ -45,7 +45,7 @@ function insert_dict({ id, updated_at, snapshot_uploaded_at }: {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  shared = open_shared_db(':memory:')
+  shared = open_test_shared_db()
   dict_dbs.clear()
 })
 

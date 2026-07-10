@@ -1,11 +1,11 @@
 import type { TranslateNotifyResponse } from './+server'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { add_translator_language } from '$lib/server/i18n/i18n-db'
 import { ADMIN, make_cookies, seed_translate, token_for, TRANSLATOR } from '../_test-helpers'
 import { POST } from './+server'
 
-let db: ReturnType<typeof open_shared_db>
+let db: ReturnType<typeof open_test_shared_db>
 
 vi.mock('$lib/db/server/shared-db', async () => {
   const actual = await vi.importActual<typeof import('$lib/db/server/shared-db')>('$lib/db/server/shared-db')
@@ -21,7 +21,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   notify_user.mockClear()
-  db = open_shared_db(':memory:')
+  db = open_test_shared_db()
   seed_translate({ db })
 })
 

@@ -5,7 +5,8 @@ import { env } from '$env/dynamic/private'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { log_server_event } from '$lib/server/log-server-event'
-import { send_email } from '../../../email/send-email'
+import { dictionary_address, institute_no_reply_address } from '$lib/email/addresses'
+import { send_email } from '$lib/email/send-email'
 import { error, json } from '@sveltejs/kit'
 
 export interface AuthEmailSendCodeRequestBody {
@@ -78,7 +79,10 @@ export const POST: RequestHandler = async ({ request }) => {
     return json({ result: 'success', code } satisfies AuthEmailSendCodeResponseBody)
 
   try {
+    // from/reply_to preserve the legacy route-level sender's implicit defaults
     await send_email({
+      from: institute_no_reply_address,
+      reply_to: dictionary_address,
       to: [{ email }],
       subject: `${code}: Sign-in code for Living Dictionaries`,
       body: `${code} is your sign-in code for Living Dictionaries. It expires in ${CODE_EXPIRY_MINUTES} minutes.`,

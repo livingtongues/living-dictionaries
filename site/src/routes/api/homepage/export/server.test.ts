@@ -1,9 +1,9 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { reset_homepage_stats_cache } from '$lib/db/server/homepage-stats'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { GET } from './+server'
 
-let db: ReturnType<typeof open_shared_db>
+let db: ReturnType<typeof open_test_shared_db>
 
 vi.mock('$lib/db/server/shared-db', async () => {
   const actual = await vi.importActual<typeof import('$lib/db/server/shared-db')>('$lib/db/server/shared-db')
@@ -22,7 +22,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   reset_homepage_stats_cache()
-  db = open_shared_db(':memory:')
+  db = open_test_shared_db()
   const now = '2026-07-01T00:00:00.000Z'
   db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES ('u1', 'a@b.com', 'A', '[]', ?, ?)`).run(now, now)
   db.prepare(`INSERT INTO dictionaries (id, url, name, public, entry_count, created_at, updated_at) VALUES ('achi', 'achi', 'Achi', 1, 120, ?, ?)`).run(now, now)

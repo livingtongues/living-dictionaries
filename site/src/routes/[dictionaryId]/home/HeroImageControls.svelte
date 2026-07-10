@@ -44,11 +44,10 @@
   </div>
 {:else}
   <div class="cover-controls" class:on-image={has_image}>
-    <label class="cover-btn">
+    <label class="cover-btn" title={has_image ? t('dict_home.replace_cover') : t('dict_home.add_cover')}>
       <input type="file" accept="image/*" style="display: none" oninput={handle_input} />
       {#if has_image}
         <IconMdiImageSyncOutline class="icon-inline" />
-        <span class="btn-label">{t('dict_home.replace_cover')}</span>
       {:else}
         <IconMdiImagePlus class="icon-inline" />
         <span class="btn-label">{t('dict_home.add_cover')}</span>
@@ -58,12 +57,13 @@
       <button
         type="button"
         class="cover-btn"
+        title={t('dict_home.delete_cover')}
+        aria-label={t('dict_home.delete_cover')}
         onclick={async () => {
           if (confirm(t('dict_home.delete_cover_confirm')))
             await on_delete()
         }}>
         <IconMdiTrashCanOutline class="icon-inline" />
-        <span class="btn-label">{t('dict_home.delete_cover')}</span>
       </button>
     {/if}
   </div>

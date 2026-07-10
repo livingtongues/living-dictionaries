@@ -1,12 +1,12 @@
 import type Database from 'better-sqlite3'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
-import { open_shared_db } from './shared-db'
+import { open_test_shared_db } from './shared-db'
 import { load_dictionaries_for_user, load_public_dictionaries } from './get-dictionaries-catalog'
 
 let db: Database.Database
 
 beforeEach(() => {
-  db = open_shared_db(':memory:')
+  db = open_test_shared_db()
 })
 
 afterEach(() => {

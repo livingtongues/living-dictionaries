@@ -11,6 +11,7 @@
     availableLanguages: IGlossLanguages
     selectedLanguages: string[]
     minimum?: number
+    show_title?: boolean
     add_language: (languageId: string) => void
     remove_language: (languageId: string) => void
   }
@@ -19,6 +20,7 @@
     availableLanguages,
     selectedLanguages,
     minimum = 1,
+    show_title = true,
     add_language,
     remove_language,
   }: Props = $props()
@@ -37,9 +39,11 @@
     .filter(e => !selectedLanguages.includes(e.bcp)))
 </script>
 
-<div class="section-title">
-  {page.data.t('create.gloss_dictionary_in')}
-</div>
+{#if show_title}
+  <div class="section-title">
+    {page.data.t('create.gloss_dictionary_in')}
+  </div>
+{/if}
 
 <ShowHide>
   {#snippet children({ show, toggle })}

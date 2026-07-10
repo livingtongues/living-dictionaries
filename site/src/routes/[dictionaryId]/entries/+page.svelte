@@ -112,14 +112,26 @@
 <ShowHide>
   {#snippet children({ show: show_mobile_filters, toggle })}
     {#if entries_length === 0 && !$loading && !scope}
-      <EntriesEmptyState {dictionary} {can_edit} {is_manager} add_entry={db_operations.insert_entry} />
+      <!-- `$loading` only means the LOCAL bundle read + index build finished. On a
+        cold boot without a snapshot (fetch failed → empty DB, sync backfills via
+        /changes) that read returns 0 rows while the pull is still in flight — so
+        when the server catalog says entries exist, show a loading state instead
+        of the misleading empty state. Rows stream in reactively as sync applies. -->
+      {#if dictionary.entry_count > 0}
+        <div class="sync-pending">
+          <IconSvgSpinners3DotsFade style="font-size: 1.5rem" />
+          <div>{page.data.t('misc.loading')}…</div>
+        </div>
+      {:else}
+        <EntriesEmptyState {dictionary} {can_edit} {is_manager} add_entry={db_operations.insert_entry} />
+      {/if}
     {:else}
       {#if show_scope_chips}
         <SearchScopeChips {search_params} />
       {/if}
       <div class="search-bar">
 
-        <SearchInput {search_params} index_ready={true} on_show_filter_menu={toggle} placeholder={search_placeholder} />
+        <SearchInput {search_params} index_ready={true} on_show_filter_menu={toggle} placeholder={search_placeholder} focus_on_mount={!!page.state.focus_search} />
         <div style="width: 0.25rem"></div>
         {#if !scope}
           <SwitchView bind:view={$search_params.view} can_print={!!dictionary.print_access || can_edit} />
@@ -195,6 +207,15 @@
     padding-bottom: 0.25rem;
     background-color: var(--background);
     z-index: 20;
+  }
+
+  .sync-pending {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 4rem 1rem;
+    color: var(--color-secondary);
   }
 
   .results-pane {

@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { build_host_stats, get_log_analytics } from './log-analytics'
 import { _reset_log_archive_db_for_tests } from './log-archive-db'
 import { open_logs_db } from './logs-db'
-import { open_shared_db } from './shared-db'
+import { open_test_shared_db } from './shared-db'
 
 // `db` = shared.db (rollups + db_metadata); `logs_db` = the hot raw-row store
 // (split out of shared.db 2026-07-05). Raw client_logs go into `logs_db`; the
@@ -19,7 +19,7 @@ let logs_db: Database.Database
 const NOW = new Date('2026-06-30T12:00:00.000Z')
 
 beforeEach(() => {
-  db = open_shared_db(':memory:')
+  db = open_test_shared_db()
   logs_db = open_logs_db(':memory:')
 })
 

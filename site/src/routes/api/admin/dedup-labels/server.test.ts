@@ -1,11 +1,11 @@
 import type Database from 'better-sqlite3'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { sign_jwt } from '$lib/auth/jwt'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { open_dictionary_db_in_memory } from '$lib/db/server/dictionary-db'
 import { POST } from './+server'
 
-let shared: ReturnType<typeof open_shared_db>
+let shared: ReturnType<typeof open_test_shared_db>
 const dict_dbs = new Map<string, Database.Database>()
 
 vi.mock('$lib/db/server/shared-db', async () => {
@@ -52,7 +52,7 @@ function seed_dupes(db: Database.Database) {
 }
 
 beforeEach(() => {
-  shared = open_shared_db(':memory:')
+  shared = open_test_shared_db()
   dict_dbs.clear()
 })
 

@@ -10,24 +10,75 @@ export const shared_meta: StoryMeta = {
 
 const noop = () => {}
 
-export const WithPhoto: Story<typeof Component> = {
+export const WithPhotoFullData: Story<typeof Component> = {
   props: {
     href: '#',
     entry_id: 'e1',
     lexeme: story_cards[0].lexeme,
-    gloss: story_cards[0].gloss,
+    phonetic: 'mikʷʼɛɬ',
+    pos: 'n.',
+    glosses: [story_cards[0].gloss, 'helecho'],
+    dialect: 'Northern',
     photo_serving_url: story_cards[0].photo_serving_url,
     audio_storage_path: story_cards[0].audio_storage_path,
   },
 }
 
-/** No photo → deterministic hue gradient stands in. */
-export const NoPhoto: Story<typeof Component> = {
+/** No photo → deterministic soft hue gradient stands in; full entry data. */
+export const NoPhotoFullData: Story<typeof Component> = {
   props: {
     href: '#',
     entry_id: 'entry-without-photo',
     lexeme: 'tzʼikin',
-    gloss: 'bird',
+    phonetic: 'tsʼikin',
+    pos: 'n.',
+    glosses: ['bird', 'pájaro'],
+    audio_storage_path: story_cards[0].audio_storage_path,
+  },
+}
+
+/** Alternate orthography + dialect chip. */
+export const NoPhotoAltOrthography: Story<typeof Component> = {
+  props: {
+    href: '#',
+    entry_id: 'entry-alt-ortho',
+    lexeme: 'ᱥᱟᱱᱛᱟᱲ',
+    alt: 'santaṛ',
+    pos: 'n.',
+    glosses: ['orange'],
+    dialect: 'Mayurbhanj',
+    audio_storage_path: story_cards[0].audio_storage_path,
+  },
+}
+
+/** Gloss only, no audio → no ear button. */
+export const NoPhotoGlossOnly: Story<typeof Component> = {
+  props: {
+    href: '#',
+    entry_id: 'entry-gloss-only',
+    lexeme: 'aŋätī',
+    glosses: ['to walk slowly'],
+  },
+}
+
+/** Lexeme only → centered. */
+export const NoPhotoSparse: Story<typeof Component> = {
+  props: {
+    href: '#',
+    entry_id: 'entry-sparse',
+    lexeme: 'weyeḱen',
+  },
+}
+
+/** Long lexeme clamps to two lines. */
+export const NoPhotoLongLexeme: Story<typeof Component> = {
+  props: {
+    href: '#',
+    entry_id: 'entry-long-lexeme',
+    lexeme: 'nakattirundhukondiruppen',
+    phonetic: 'nakattiɾundʱukondiɾuppen',
+    pos: 'v.',
+    glosses: ['I will keep on swimming'],
     audio_storage_path: story_cards[0].audio_storage_path,
   },
 }
@@ -42,7 +93,7 @@ export const ManageControls: Story<typeof Component> = {
     href: '#',
     entry_id: 'e1',
     lexeme: story_cards[0].lexeme,
-    gloss: story_cards[0].gloss,
+    glosses: [story_cards[0].gloss],
     photo_serving_url: story_cards[0].photo_serving_url,
     audio_storage_path: story_cards[0].audio_storage_path,
     manage: {

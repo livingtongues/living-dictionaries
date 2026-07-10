@@ -4,6 +4,12 @@ import { env } from '$env/dynamic/private'
 import { no_reply_address } from './addresses'
 import type { Address } from './addresses'
 
+/**
+ * The TRANSACTIONAL send lane: one-off notices (OTP codes, admin notices,
+ * confirmations) via SES's high-level `SendEmailCommand`. For message-thread
+ * replies that need RFC 5322 threading headers or attachments, use the raw
+ * MIME lane in `send-raw-email.ts` instead.
+ */
 const { AWS_SES_ACCESS_KEY_ID, AWS_SES_REGION, AWS_SES_SECRET_ACCESS_KEY } = env
 
 interface EmailParts {

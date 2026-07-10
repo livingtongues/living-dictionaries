@@ -4,15 +4,18 @@
 
   interface Props {
     alternateNames: string[]
+    show_title?: boolean
     on_update: (new_value: string[]) => void
   }
 
-  const { alternateNames, on_update }: Props = $props()
+  const { alternateNames, show_title = true, on_update }: Props = $props()
 </script>
 
-<div class="section-title">
-  {page.data.t('create.alternate_names')}
-</div>
+{#if show_title}
+  <div class="section-title">
+    {page.data.t('create.alternate_names')}
+  </div>
+{/if}
 
 <BadgeArray
   strings={alternateNames}

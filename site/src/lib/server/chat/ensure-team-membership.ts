@@ -17,7 +17,7 @@ import type Database from 'better-sqlite3'
 import { randomUUID } from 'node:crypto'
 import { ROOM_ALL_ADMINS, ROOM_NOTIFICATIONS, SYSTEM_ROOM_IDS } from '$lib/chat/constants'
 import { ADMINS } from '$lib/admins'
-import { get_shared_db, open_shared_db } from '$lib/db/server/shared-db'
+import { get_shared_db, open_test_shared_db } from '$lib/db/server/shared-db'
 
 const SYSTEM_ROOM_NAMES: Record<string, string> = {
   [ROOM_ALL_ADMINS]: 'All Admins',
@@ -64,7 +64,7 @@ export function ensure_all_admins_in_team_chat({ db = get_shared_db() }: { db?: 
 if (import.meta.vitest) {
   describe(ensure_all_admins_in_team_chat, () => {
     it('creates the system rooms + user rows + memberships for every admin, idempotently', () => {
-      const db = open_shared_db(':memory:')
+      const db = open_test_shared_db()
       // The squashed migration seeds the system rooms — drop them to prove the boot step recreates.
       db.prepare('DELETE FROM chat_room_members').run()
       db.prepare('DELETE FROM chat_rooms').run()

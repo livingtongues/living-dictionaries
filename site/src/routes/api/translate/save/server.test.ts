@@ -1,11 +1,11 @@
 import type { TranslateSaveResponse } from './+server'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
-import { open_shared_db } from '$lib/db/server/shared-db'
+import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { upsert_translation } from '$lib/server/i18n/i18n-db'
 import { make_cookies, seed_translate, STRANGER, token_for, TRANSLATOR } from '../_test-helpers'
 import { POST } from './+server'
 
-let db: ReturnType<typeof open_shared_db>
+let db: ReturnType<typeof open_test_shared_db>
 
 vi.mock('$lib/db/server/shared-db', async () => {
   const actual = await vi.importActual<typeof import('$lib/db/server/shared-db')>('$lib/db/server/shared-db')
@@ -17,7 +17,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  db = open_shared_db(':memory:')
+  db = open_test_shared_db()
   seed_translate({ db })
 })
 
