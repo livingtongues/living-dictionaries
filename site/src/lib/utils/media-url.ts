@@ -21,15 +21,18 @@ export function url_from_storage_path(path: string, storage_bucket: string): str
 /**
  * Build an App Engine Images (lh3) `src` from a stored `serving_url` hash + an
  * lh3 size spec (the part after `=`, e.g. `s150-p`, `w900`, `s0`). A dev-uploaded
- * image (`dev-local:<key>`) is served from the local `/api/dev-media` store; an
- * empty hash renders the bundled placeholder. Real hashes (incl. pulled-dict
- * photos) still go to the public lh3 CDN, so they load on dev with no bucket.
+ * image (`dev-local:<key>`) is served from the local `/api/dev-media` store. An
+ * empty hash renders the bundled placeholder on DEV only (useful for agents
+ * testing without media); on prod it returns '' — callers must treat a missing
+ * hash as "no image" (guard before rendering an <img>). Real hashes (incl.
+ * pulled-dict photos) still go to the public lh3 CDN, so they load on dev with
+ * no bucket.
  */
 export function image_src(serving_url: string, size: string): string {
   if (serving_url?.startsWith(DEV_LOCAL_PREFIX))
     return `/api/dev-media/${serving_url.slice(DEV_LOCAL_PREFIX.length)}`
   if (!serving_url)
-    return '/dev-placeholder-image.svg'
+    return import.meta.env.DEV ? '/dev-placeholder-image.svg' : ''
   return `https://lh3.googleusercontent.com/${serving_url}=${size}`
 }
 
@@ -40,7 +43,7 @@ if (import.meta.vitest) {
   test('image_src: dev-local sentinel → local dev-media store', () => {
     expect(image_src(`${DEV_LOCAL_PREFIX}achi/images/s1/9.jpg`, 'w900')).toBe('/api/dev-media/achi/images/s1/9.jpg')
   })
-  test('image_src: empty/missing hash → bundled placeholder', () => {
+  test('image_src: empty/missing hash → bundled placeholder (DEV only; vitest runs with DEV true — prod returns empty string)', () => {
     expect(image_src('', 's0')).toBe('/dev-placeholder-image.svg')
   })
   test('url_from_storage_path: dev routes through the local dev-media store', () => {

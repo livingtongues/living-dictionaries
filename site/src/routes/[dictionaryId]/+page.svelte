@@ -16,13 +16,15 @@
   import CopyButton from '$lib/components/ui/CopyButton.svelte'
   import Skeleton from '$lib/components/ui/Skeleton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
+  import ImageLightbox from '$lib/components/image/image-lightbox.svelte'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
   import EditableOrthographies from '$lib/components/settings/EditableOrthographies.svelte'
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
+  import { onMount } from 'svelte'
   import { stream_resolve } from '$lib/state/stream-resolve.svelte'
   import { page } from '$app/state'
   import { browser } from '$app/environment'
-  import { goto } from '$app/navigation'
+  import { goto, preloadCode } from '$app/navigation'
   import { image_src } from '$lib/utils/media-url'
   import { get_headword } from '$lib/helpers/orthographies'
   import { glossingLanguages } from '$lib/glosses/glossing-languages'
@@ -276,11 +278,34 @@
     },
   })
 
+  // Anticipatory preload: from home the next hop is almost always the entries
+  // list (search doorway) or an entry page (featured/recent cards). Hover
+  // preloading never fires for the search doorway (it's a button, not an <a>),
+  // so an incognito visitor pays the route-chunk download at click time — fetch
+  // the code at idle instead. `preloadCode` only pulls JS (no loads), and
+  // deferring to idle keeps it off the home hot path.
+  function preload_next_routes() {
+    void preloadCode(`/${dictionary.url}/entries`)
+    void preloadCode(`/${dictionary.url}/entry/_`)
+  }
+  onMount(() => {
+    if ('requestIdleCallback' in window)
+      window.requestIdleCallback(preload_next_routes, { timeout: 3000 })
+    else
+      setTimeout(preload_next_routes, 1500)
+  })
+
   let map_modal_open = $state(false)
   const show_nudges = $derived(is_editor_or_above && live_featured_ready && !$entries_loading)
   const nudge_star = $derived(show_nudges && featured_cards.length === 0)
   const nudge_location = $derived(is_manager && !is_con_lang && !has_coordinates)
-  const nudge_image = $derived(can_edit_cover && !dictionary.featured_image)
+  // A featured_image without a usable serving_url (e.g. malformed legacy data) renders the same as no image.
+  const has_cover_image = $derived(!!dictionary.featured_image?.serving_url)
+  // Shared by the hero <img> and the fullscreen lightbox — same URL means the
+  // lightbox paints instantly from cache, so the crossfade never shows a blink.
+  const cover_src = $derived(has_cover_image ? image_src(dictionary.featured_image.serving_url, 'w1600') : null)
+  let show_cover_lightbox = $state(false)
+  const nudge_image = $derived(can_edit_cover && !has_cover_image)
   const nudge_about = $derived(is_manager && (dictionary.about?.length || 0) < MINIMUM_ABOUT_LENGTH)
   const any_nudge = $derived(nudge_star || nudge_location || nudge_image || nudge_about)
 </script>
@@ -288,18 +313,26 @@
 <div class="home">
   <header
     class="hero"
-    class:has-image={!!dictionary.featured_image}
+    class:has-image={has_cover_image}
     ondragenter={can_edit_cover ? (event) => { if (has_files(event)) { event.preventDefault(); drag_depth += 1 } } : undefined}
     ondragover={can_edit_cover ? (event) => { if (has_files(event)) event.preventDefault() } : undefined}
     ondragleave={can_edit_cover ? () => { drag_depth = Math.max(0, drag_depth - 1) } : undefined}
     ondrop={can_edit_cover ? drop_cover_file : undefined}>
-    {#if dictionary.featured_image}
-      <img class="hero-image" src={image_src(dictionary.featured_image.serving_url, 'w1600')} alt={dictionary.name} />
+    {#if has_cover_image}
+      <img class="hero-image" src={cover_src} alt={dictionary.name} />
       <div class="hero-scrim"></div>
+      <!-- Full-bleed expand layer: sits above image+scrim but BELOW the controls
+           and .hero-content (document order), so every overlaid button keeps
+           working — clicks on empty hero space open the fullscreen viewer. -->
+      <button
+        type="button"
+        class="hero-expand"
+        aria-label={t('dict_home.view_cover_image')}
+        onclick={() => show_cover_lightbox = true}></button>
     {/if}
     {#if can_edit_cover}
       <HeroImageControls
-        has_image={!!dictionary.featured_image}
+        has_image={has_cover_image}
         uploading={cover_upload}
         on_file={add_cover_file}
         on_delete={async () => await save_catalog({ featured_image: null })}
@@ -369,8 +402,14 @@
           <button type="button" class="chip add-chip" onclick={() => editing = 'alt_names'}>+ {t('create.alternate_names')}</button>
         {/if}
       </div>
-      <!-- Acts as a doorway, not a real input: tap → entries page with its search focused. -->
-      <button type="button" class="search" onclick={() => goto(`/${dictionary.url}/entries`, { state: { focus_search: true } })}>
+      <!-- Acts as a doorway, not a real input: tap → entries page with its search focused.
+           pointerenter/focus preload catches fast movers who beat the idle callback. -->
+      <button
+        type="button"
+        class="search"
+        onpointerenter={() => void preloadCode(`/${dictionary.url}/entries`)}
+        onfocus={() => void preloadCode(`/${dictionary.url}/entries`)}
+        onclick={() => goto(`/${dictionary.url}/entries`, { state: { focus_search: true } })}>
         <IconMdiMagnify style="font-size: 1.125rem; opacity: 0.6" />
         <span class="search-hint">{t('dict_home.search_placeholder')}</span>
       </button>
@@ -609,6 +648,10 @@
   </Modal>
 {/if}
 
+{#if show_cover_lightbox && cover_src}
+  <ImageLightbox src={cover_src} alt={dictionary.name} on_close={() => show_cover_lightbox = false} />
+{/if}
+
 {#if dictionary.public}
   <JsonLd data={json_ld} />
 {/if}
@@ -652,11 +695,33 @@
     background: linear-gradient(to top, rgb(0 0 0 / 0.72), rgb(0 0 0 / 0.35) 55%, rgb(0 0 0 / 0.15));
   }
 
+  .hero-expand {
+    position: absolute;
+    inset: 0;
+    cursor: zoom-in;
+  }
+
   .hero-content {
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.625rem;
+  }
+
+  /* Let clicks in the gaps between hero-content rows fall through to the expand
+     layer; each real element re-enables its own hit-testing (so buttons, chips,
+     and selectable text all behave exactly as before). h1 hugs its text so the
+     empty area beside the title stays zoomable. */
+  .has-image .hero-content {
+    pointer-events: none;
+  }
+
+  .has-image .hero-content :is(h1, button, a, span) {
+    pointer-events: auto;
+  }
+
+  .has-image h1 {
+    width: fit-content;
   }
 
   .drop-hint {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import IconMdiClose from '~icons/mdi/close'
   import { onMount } from 'svelte'
-  import { fade } from 'svelte/transition'
+  import { fade, scale } from 'svelte/transition'
   import { portal } from '$lib/utils/portal'
 
   interface Props {
@@ -22,9 +22,9 @@
 
 <svelte:window onkeydown={(e) => { if (e.key === 'Escape') on_close() }} />
 
-<div use:portal class="lightbox-root" transition:fade={{ duration: 150 }}>
+<div use:portal class="lightbox-root" transition:fade={{ duration: 200 }}>
   <button type="button" class="lightbox-backdrop" aria-label="Close viewer" onclick={on_close}></button>
-  <img class="lightbox-image" {src} {alt} />
+  <img class="lightbox-image" {src} {alt} in:scale={{ start: 0.96, duration: 200 }} />
   <button type="button" class="lightbox-close" aria-label="Close" onclick={on_close}>
     <IconMdiClose />
   </button>
