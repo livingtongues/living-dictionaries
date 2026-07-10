@@ -496,26 +496,30 @@
     </section>
   {/if}
 
-  <div class="two-col">
-    <section class="panel cite">
-      <h2>{t('dict_home.how_to_cite')} <CopyButton value={citation} /></h2>
-      <p class="citation">{citation}</p>
-    </section>
-    {#if any_nudge}
-      <NudgeCard
-        show_star={nudge_star}
-        show_location={nudge_location}
-        show_image={nudge_image}
-        show_about={nudge_about}
-        entries_href="/{dictionary.url}/entries"
-        settings_href="/{dictionary.url}/settings"
-        about_href="/{dictionary.url}/about"
-        on_image_file={add_cover_file} />
-    {/if}
+  <div class="domains-cite-wrap">
+    <div class="domains-cite">
+      {#if top_domains.length > 2}
+        <div class="domains-col">
+          <DomainsPanel domains={top_domains} entries_href="/{dictionary.url}/entries" />
+        </div>
+      {/if}
+      <section class="panel cite">
+        <h2>{t('dict_home.how_to_cite')} <CopyButton value={citation} /></h2>
+        <p class="citation">{citation}</p>
+      </section>
+    </div>
   </div>
 
-  {#if top_domains.length > 2}
-    <DomainsPanel domains={top_domains} entries_href="/{dictionary.url}/entries" />
+  {#if any_nudge}
+    <NudgeCard
+      show_star={nudge_star}
+      show_location={nudge_location}
+      show_image={nudge_image}
+      show_about={nudge_about}
+      entries_href="/{dictionary.url}/entries"
+      settings_href="/{dictionary.url}/settings"
+      about_href="/{dictionary.url}/about"
+      on_image_file={add_cover_file} />
   {/if}
 </div>
 
@@ -763,7 +767,6 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 0.375rem;
     padding: 0.5rem 0.875rem;
     border-radius: 9999px;
     background: var(--background);
@@ -829,6 +832,32 @@
   @media (min-width: 768px) {
     .two-col {
       grid-template-columns: 3fr 2fr;
+    }
+  }
+
+  /* Domains max ~650px; 50/50 with cite only when half the row ≥ that width.
+     Wrapper is the query container — an element can't @container-query itself. */
+  .domains-cite-wrap {
+    container-type: inline-size;
+  }
+
+  .domains-cite {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .domains-col {
+    max-width: 40.625rem; /* ~650px at 16px root — scales with text zoom */
+  }
+
+  @container (min-width: 81.25rem) {
+    .domains-cite {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .domains-col {
+      max-width: none;
     }
   }
 

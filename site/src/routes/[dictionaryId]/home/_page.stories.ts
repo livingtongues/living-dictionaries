@@ -95,9 +95,10 @@ export const ManagerFullHero: PageStory<typeof Component> = {
   } as never,
 }
 
-/** Local index ready — stats count up + the public domains pie (>2 domains in use). */
+/** Local index ready — stats count up + the public domains pie (>2 domains in use).
+ *  1024 = domains stacked above cite; 1600 = 50/50 once the row is ≥ ~1300px. */
 export const LoadedStats: PageStory<typeof Component> = {
-  viewports: [{ width: 1024, height: 1500 }],
+  viewports: [{ width: 1024, height: 1500 }, { width: 1600, height: 1200 }],
   csr: true,
   interactions: async (page) => {
     await page.waitForFunction(() => document.body.textContent?.includes('6,378'), { timeout: 4000 })

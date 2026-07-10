@@ -10,6 +10,11 @@
 
 <script lang="ts">
   import { page } from '$app/state'
+  import IconMdiFormatListBulleted from '~icons/mdi/format-list-bulleted'
+  import IconMdiWaveform from '~icons/mdi/waveform'
+  import IconMdiImageOutline from '~icons/mdi/image-outline'
+  import IconMdiVideoOutline from '~icons/mdi/video-outline'
+  import IconMdiAccountVoice from '~icons/mdi/account-voice'
 
   interface Props {
     /** null = local index not ready yet — tiles pulse until values arrive, then count up. */
@@ -22,13 +27,13 @@
   // entries + with_audio always render (placeholders while stats stream in); the
   // rest only join once they have a nonzero value — no "0 with video" tiles.
   const base_tiles = [
-    { key: 'entries', label_key: 'dict_home.stat_entries' },
-    { key: 'with_audio', label_key: 'dict_home.stat_with_audio' },
+    { key: 'entries', label_key: 'dict_home.stat_entries', icon: IconMdiFormatListBulleted, accent: '#3b82f6' },
+    { key: 'with_audio', label_key: 'dict_home.stat_with_audio', icon: IconMdiWaveform, accent: '#8b5cf6' },
   ] as const
   const extra_tiles = [
-    { key: 'with_photos', label_key: 'dict_home.stat_with_photos' },
-    { key: 'with_video', label_key: 'dict_home.stat_with_video' },
-    { key: 'speakers', label_key: 'dict_home.stat_speakers' },
+    { key: 'with_photos', label_key: 'dict_home.stat_with_photos', icon: IconMdiImageOutline, accent: '#06b6d4' },
+    { key: 'with_video', label_key: 'dict_home.stat_with_video', icon: IconMdiVideoOutline, accent: '#f59e0b' },
+    { key: 'speakers', label_key: 'dict_home.stat_speakers', icon: IconMdiAccountVoice, accent: '#10b981' },
   ] as const
   const tiles = $derived([
     ...base_tiles,
@@ -65,13 +70,14 @@
 
 <section class="stats" aria-label={t('dict_home.stat_entries')}>
   {#each tiles as tile (tile.key)}
-    <div class="stat">
+    <div class="stat" style:--accent={tile.accent}>
       {#if stats}
         <div class="value">{displayed(tile.key)}</div>
       {:else}
         <div class="value placeholder" aria-hidden="true"></div>
       {/if}
       <div class="label">{t(tile.label_key)}</div>
+      <tile.icon class="stat-icon" />
     </div>
   {/each}
 </section>
@@ -84,12 +90,15 @@
   }
 
   .stat {
+    position: relative;
     background: var(--surface);
     border-radius: 0.75rem;
     padding: 0.875rem 1rem;
+    overflow: hidden;
   }
 
   .value {
+    position: relative;
     font-size: 1.375rem;
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -112,8 +121,19 @@
   }
 
   .label {
+    position: relative;
     margin-top: 0.125rem;
     font-size: 0.8125rem;
     color: var(--color-secondary);
+  }
+
+  .stat-icon {
+    position: absolute;
+    right: 0.625rem;
+    bottom: 0.625rem;
+    font-size: 2.5rem;
+    color: var(--accent);
+    opacity: 0.12;
+    pointer-events: none;
   }
 </style>

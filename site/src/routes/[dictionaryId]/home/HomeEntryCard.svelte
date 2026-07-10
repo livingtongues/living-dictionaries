@@ -333,11 +333,11 @@
 
   .manage {
     position: absolute;
-    top: 0.4375rem;
-    left: 0.4375rem;
-    right: 0.4375rem;
+    inset: 0;
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     opacity: 0;
     transition: opacity 200ms;
   }
