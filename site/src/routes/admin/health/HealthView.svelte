@@ -7,6 +7,7 @@
   import VitalBar from '$lib/charts/VitalBar.svelte'
   import { format_number, format_pct } from '$lib/constants'
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
+  import DeploysPanel from './DeploysPanel.svelte'
 
   interface Props {
     data: Omit<PageData, 'analytics'> & { analytics: NonNullable<Awaited<PageData['analytics']>> }
@@ -283,6 +284,10 @@
         {/if}
       {/if}
     </section>
+  {/if}
+
+  {#if analytics.deploy_metrics?.length}
+    <DeploysPanel deploys={analytics.deploy_metrics} />
   {/if}
 
   <section class="panel speed-panel">

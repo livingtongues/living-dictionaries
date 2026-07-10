@@ -6,16 +6,18 @@
  * rides along automatically). Uses default DB handles so the 15-min cache applies.
  */
 import type { RequestHandler } from './$types'
+import type { DeployMetric } from '$lib/db/server/deploy-metrics'
 import type { LogAnalytics } from '$lib/db/server/log-analytics'
 import { is_admin, is_admin_at_least } from '$lib/admins'
 import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
+import { read_deploy_metrics } from '$lib/db/server/deploy-metrics'
 import { build_host_stats, get_log_analytics } from '$lib/db/server/log-analytics'
 import { get_logs_db } from '$lib/db/server/logs-db'
 import { error, json } from '@sveltejs/kit'
 
 export interface AdminAnalyticsResponseBody {
-  analytics: LogAnalytics
+  analytics: LogAnalytics & { deploy_metrics: DeployMetric[] }
 }
 
 export const GET: RequestHandler = async (event) => {
@@ -28,6 +30,10 @@ export const GET: RequestHandler = async (event) => {
   // Host resources are injected OUTSIDE the cached analytics blob (the live
   // /proc reading must stay fresh) and only for level-3 (super) admins — VPS
   // capacity is operator data, not a level-2 concern.
-  const host = is_admin_at_least(auth.email, 3) ? build_host_stats({ logs_db: get_logs_db() }) : null
-  return json({ analytics: { ...analytics, host } } satisfies AdminAnalyticsResponseBody)
+  const is_super_admin = is_admin_at_least(auth.email, 3)
+  const host = is_super_admin ? build_host_stats({ logs_db: get_logs_db() }) : null
+  // Deploy history (deploy-metrics.jsonl written by this box's deploy.sh) — same
+  // operator-data gate as host, injected outside the cached blob.
+  const deploy_metrics = is_super_admin ? read_deploy_metrics() : []
+  return json({ analytics: { ...analytics, host, deploy_metrics } } satisfies AdminAnalyticsResponseBody)
 }

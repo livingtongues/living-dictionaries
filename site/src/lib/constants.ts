@@ -15,6 +15,8 @@ export function format_pct(fraction: number, { signed = false, digits = 1 }: { s
   return `${sign}${pct.toFixed(digits)}%`
 }
 
+export const GITHUB_REPO_URL = 'https://github.com/livingtongues/living-dictionaries'
+
 // localStorage key prefix for the per-user browser admin wa-sqlite DB id (admin sync engine).
 export const ADMIN_DB_ID_FOR_USER_PREFIX = 'admin_db_id_for_user_'
 
