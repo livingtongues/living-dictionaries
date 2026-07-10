@@ -59,7 +59,7 @@ export const POST: RequestHandler = async (event) => {
       .run(now, invite_id)
   } catch (err) {
     console.error(`Error accepting invite: ${(err as Error).message}`)
-    log_server_event({ db, level: 'error', message: 'invite_accept_failed', error: err, user_id, context: { dictionary_id: dict_id, invite_id } })
+    log_server_event({ level: 'error', message: 'invite_accept_failed', error: err, user_id, context: { dictionary_id: dict_id, invite_id } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Could not accept invite')
   }
 

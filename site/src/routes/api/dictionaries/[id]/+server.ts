@@ -81,13 +81,13 @@ export const DELETE: RequestHandler = async (event) => {
     db_files_removed = delete_dictionary_db_file(dict_id).length
   } catch (err) {
     console.error(`[delete dictionary ${dict_id}] db file removal failed:`, err)
-    log_server_event({ db, level: 'warn', message: 'dictionary_db_file_removal_failed', error: err, context: { dictionary_id: dict_id } })
+    log_server_event({ level: 'warn', message: 'dictionary_db_file_removal_failed', error: err, context: { dictionary_id: dict_id } })
   }
   try {
     db_files_removed += delete_dictionary_history_db_file(dict_id).length
   } catch (err) {
     console.error(`[delete dictionary ${dict_id}] history db file removal failed:`, err)
-    log_server_event({ db, level: 'warn', message: 'dictionary_history_db_file_removal_failed', error: err, context: { dictionary_id: dict_id } })
+    log_server_event({ level: 'warn', message: 'dictionary_history_db_file_removal_failed', error: err, context: { dictionary_id: dict_id } })
   }
 
   // 3. R2 snapshot (idempotent; missing key is fine).
@@ -95,7 +95,7 @@ export const DELETE: RequestHandler = async (event) => {
     await delete_object({ key: r2_dict_snapshot_key(dict_id) })
   } catch (err) {
     console.error(`[delete dictionary ${dict_id}] R2 snapshot removal failed:`, err)
-    log_server_event({ db, level: 'warn', message: 'dictionary_r2_snapshot_removal_failed', error: err, context: { dictionary_id: dict_id } })
+    log_server_event({ level: 'warn', message: 'dictionary_r2_snapshot_removal_failed', error: err, context: { dictionary_id: dict_id } })
   }
 
   return json({

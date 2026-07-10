@@ -75,8 +75,11 @@ let logs_singleton: Database.Database | null = null
 export function get_logs_db(): Database.Database {
   if (logs_singleton)
     return logs_singleton
-  const data_dir = process.env.DATA_DIR || '.data'
-  logs_singleton = open_logs_db(`${data_dir}/logs.db`)
+  // Under vitest, endpoint tests that don't mock this module must not write
+  // telemetry into the dev .data/logs.db file — give them a throwaway DB.
+  logs_singleton = process.env.VITEST
+    ? open_logs_db(':memory:')
+    : open_logs_db(`${process.env.DATA_DIR || '.data'}/logs.db`)
   return logs_singleton
 }
 

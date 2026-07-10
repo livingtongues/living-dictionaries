@@ -1,7 +1,8 @@
 <script lang="ts">
   import User from './User.svelte'
+  import ColorSchemeToggle from './ColorSchemeToggle.svelte'
   import Button from '$lib/components/ui/Button.svelte'
-  import ResponsiveSlideover from '$lib/components/ui/ResponsiveSlideover.svelte'
+  import Slideover from '$lib/components/ui/Slideover.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import { mode } from '$lib/mode'
@@ -16,6 +17,65 @@
 </script>
 
 <header class="site-header">
+  {#if !left}
+    <ShowHide>
+      {#snippet children({ show, toggle, set })}
+        <button type="button" class="menu-button" aria-label={page.data.t('header.menu')} onclick={toggle}>
+          <i class="far fa-bars print-hidden"></i>
+        </button>
+        {#if show}
+          <Slideover
+            side={page.data.t('page.direction') === 'rtl' ? 'right' : 'left'}
+            widthRem={13}
+            on_close={() => set(false)}>
+            <div class="menu-panel">
+              <header>
+                <div class="menu-heading">{page.data.t('header.menu')}</div>
+              </header>
+              <div class="menu-items">
+                <Button
+                  form="text"
+                  href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
+                  target="_blank">
+                  <i class="far fa-donate"></i>
+                  <span class="label">{page.data.t('header.donate')}</span>
+                </Button>
+                <Button href="/about" form="text">
+                  <i class="far fa-info-circle"></i>
+                  <span class="label">{page.data.t('header.about')}</span>
+                </Button>
+                <Button href="/tutorials" form="text">
+                  <IconFluentLearningApp24Regular class="icon-inline" style="margin-top: -2px" />
+                  <span class="label">{page.data.t('header.tutorials')}</span>
+                </Button>
+                <Button
+                  form="text"
+                  href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
+                  target="_blank">
+                  <i class="far fa-question-circle"></i>
+                  <span class="label">
+                    FAQ
+                  </span>
+                </Button>
+                {#if !page.data.auth_user?.user}
+                  <div class="menu-theme">
+                    <ColorSchemeToggle />
+                  </div>
+                {/if}
+              </div>
+              <div class="menu-bottom">
+                <hr />
+                <Button form="menu" class="menu-close-btn" onclick={toggle}>
+                  <i class="far fa-times fa-lg fa-fw"></i>
+                  {page.data.t('misc.close')}
+                </Button>
+              </div>
+            </div>
+          </Slideover>
+        {/if}
+      {/snippet}
+    </ShowHide>
+  {/if}
   {#if children}
     <Button form="text" href="/"><i class="fas fa-home"></i></Button>
     <div class="page-title">
@@ -27,9 +87,9 @@
     <div class="brand">
       <a class="brand-link" href="/">
         <img
+          class="brand-logo"
           alt="logo"
-          src="/images/LD_logo_white.svg"
-          style="height: 30px; width: 30px; filter: var(--invert-in-light); margin-left: 0.5rem; margin-right: 0.5rem;" />
+          src="/images/LD_logo_white.svg" />
         {page.data.t('misc.LD')}
         {#if mode === 'development'}
           <span class="dev-badge">(dev)</span>
@@ -104,58 +164,11 @@
       {/snippet}
     </ShowHide>
 
-    <ShowHide>
-      {#snippet children({ show, toggle, set })}
-        <button type="button" class="menu-button" onclick={toggle}>
-          <i class="far fa-bars print-hidden"></i>
-        </button>
-        <ResponsiveSlideover
-          side={page.data.t('page.direction') === 'ltr' ? 'right' : 'left'}
-          showWidth={show ? 'md' : null}
-          widthRem={9}
-          on_close={() => set(false)}
-          open={show}>
-          <div class="menu-panel">
-            <header>
-              <div class="menu-heading">{page.data.t('header.menu')}</div>
-            </header>
-            <div>
-              <Button
-                form="text"
-                href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
-                target="_blank">
-                <i class="far fa-donate"></i>
-                <span class="label">{page.data.t('header.donate')}</span>
-              </Button>
-              <Button href="/about" form="text">
-                <i class="far fa-info-circle"></i>
-                <span class="label">{page.data.t('header.about')}</span>
-              </Button>
-              <Button href="/tutorials" form="text">
-                <IconFluentLearningApp24Regular class="icon-inline" style="margin-top: -2px" />
-                <span class="label">{page.data.t('header.tutorials')}</span>
-              </Button>
-              <Button
-                form="text"
-                href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
-                target="_blank">
-                <i class="far fa-question-circle"></i>
-                <span class="label">
-                  FAQ
-                </span>
-              </Button>
-            </div>
-            <div class="menu-bottom">
-              <hr />
-              <Button form="menu" class="menu-close-btn" onclick={toggle}>
-                <i class="far fa-times fa-lg fa-fw"></i>
-                {page.data.t('misc.close')}
-              </Button>
-            </div>
-          </div>
-        </ResponsiveSlideover>
-      {/snippet}
-    </ShowHide>
+    {#if !page.data.auth_user?.user}
+      <span class="scheme-toggle">
+        <ColorSchemeToggle compact />
+      </span>
+    {/if}
 
     <User />
   </div>
@@ -209,6 +222,21 @@
 
   .brand-link:hover {
     color: var(--color);
+  }
+
+  .brand-logo {
+    height: 20px;
+    width: 20px;
+    filter: var(--invert-in-light);
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .brand-logo {
+      height: 30px;
+      width: 30px;
+    }
   }
 
   .dev-badge {
@@ -313,14 +341,46 @@
     text-align: left;
   }
 
-  @media (min-width: 768px) {
-    .menu-panel hr {
-      display: none;
-    }
+  .menu-items :global(a),
+  .menu-items :global(button) {
+    display: flex;
+    align-items: center;
+    text-align: left;
+  }
 
-    .menu-panel :global(.menu-close-btn) {
-      display: none !important;
+  .menu-theme :global(button) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    width: 100%;
+    text-align: left;
+  }
+
+  .menu-theme :global(button:hover) {
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%);
+  }
+
+  /* Compact theme toggle in the header for signed-out users — desktop only
+     (mobile relies on the hamburger-menu entry). */
+  .scheme-toggle {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .scheme-toggle {
+      display: inline-flex;
     }
+  }
+
+  .scheme-toggle :global(button) {
+    padding: 0.75rem;
+    font-size: 1.05rem;
+    color: var(--color-secondary);
+  }
+
+  .scheme-toggle :global(button:hover) {
+    color: var(--color);
   }
 
   @media print {

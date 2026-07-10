@@ -3,11 +3,12 @@
   import type { DictSyncStatus } from '$lib/db/dict-client/dict-sync-status.svelte'
   import DictSyncStatusButton from '$lib/db/dict-client/DictSyncStatus.svelte'
   import { page } from '$app/state'
+  import ColorSchemeToggle from '$lib/components/shell/ColorSchemeToggle.svelte'
+  import IconFluentLearningApp24Regular from '~icons/fluent/learning-app-24-regular'
   import IconFaSolidList from '~icons/fa-solid/list'
   import IconMdiBookOpenPageVariantOutline from '~icons/mdi/book-open-page-variant-outline'
   import IconFa6SolidUserShield from '~icons/fa6-solid/user-shield'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
-  import IconFa6SolidFileLines from '~icons/fa6-solid/file-lines'
   import IconFa6SolidCircleInfo from '~icons/fa6-solid/circle-info'
   import IconTablerTextGrammar from '~icons/tabler/text-grammar'
   import IconFa6SolidUsers from '~icons/fa6-solid/users'
@@ -101,16 +102,6 @@
       <IconFa6SolidUserShield class="icon-inline admin-gate-icon" style={texts_count ? 'margin-inline-start: 0.375rem' : ''} />
     </a>
   {/if}
-  {#if !is_manager}
-    <a
-      href={`/${dictionary.url}/synopsis`}
-      class:active={page.url.pathname.includes('synopsis')}>
-      <IconFa6SolidFileLines class="icon-inline" />
-      <span class="item-label">
-        {page.data.t('synopsis.name')}
-      </span>
-    </a>
-  {/if}
   <a
     href={`/${dictionary.url}/about`}
     class:active={page.url.pathname.includes('about')}>
@@ -196,6 +187,33 @@
 </div>
 
 <div style="margin-top: auto"></div>
+
+<!-- Mobile-only: these replaced the header's right-side hamburger menu. -->
+<div class="mobile-extras">
+  <a href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ" target="_blank">
+    <i class="far fa-donate"></i>
+    <span class="item-label">{page.data.t('header.donate')}</span>
+  </a>
+  <a href="/about">
+    <i class="far fa-info-circle"></i>
+    <span class="item-label">{page.data.t('header.about')}</span>
+  </a>
+  <a href="/tutorials">
+    <IconFluentLearningApp24Regular class="icon-inline" style="margin-top: -2px" />
+    <span class="item-label">{page.data.t('header.tutorials')}</span>
+  </a>
+  <a
+    href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
+    target="_blank">
+    <i class="far fa-question-circle"></i>
+    <span class="item-label">FAQ</span>
+  </a>
+  {#if !page.data.auth_user?.user}
+    <div class="menu-theme">
+      <ColorSchemeToggle />
+    </div>
+  {/if}
+</div>
 
 <a href="/terms" target="_blank" class="link">
   {page.data.t('dictionary.terms_of_use')}
@@ -321,6 +339,32 @@
   .active {
     background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
     color: var(--color); /* ≈ gray-900 */
+  }
+
+  .mobile-extras {
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .mobile-extras {
+      display: none;
+    }
+  }
+
+  .menu-theme :global(button) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    color: color-mix(in srgb, var(--color) 75%, var(--background));
+  }
+
+  .menu-theme :global(button:hover) {
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%);
   }
 
   .link {

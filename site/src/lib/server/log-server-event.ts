@@ -19,6 +19,7 @@ export function log_server_event({ level, message, error, context, user_id = nul
   error?: unknown
   context?: Record<string, unknown> | null
   user_id?: string | null
+  /** A LOGS db handle (tests / sync-helpers). NEVER pass shared.db — client_logs was split out of it 2026-07-05. */
   db?: Database.Database
 }): void {
   try {

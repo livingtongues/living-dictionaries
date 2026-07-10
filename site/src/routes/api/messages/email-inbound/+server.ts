@@ -137,7 +137,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
       now,
     })
   } catch (err) {
-    log_server_event({ db, level: 'error', message: 'email_inbound_insert_failed', error: err, context: { thread_id, from_email: from_email_lower, is_new } })
+    log_server_event({ level: 'error', message: 'email_inbound_insert_failed', error: err, context: { thread_id, from_email: from_email_lower, is_new } })
     throw err
   }
 
@@ -202,7 +202,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
     })
   }
 
-  log_server_event({ db, level: 'info', message: 'email_inbound_received', user_id: matching_user?.id ?? null, context: { thread_id, is_new, attachments: body.attachments.length, auto_resolved: !!notification, to_email: body.to_email } })
+  log_server_event({ level: 'info', message: 'email_inbound_received', user_id: matching_user?.id ?? null, context: { thread_id, is_new, attachments: body.attachments.length, auto_resolved: !!notification, to_email: body.to_email } })
 
   return json({
     ok: true,

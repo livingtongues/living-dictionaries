@@ -129,11 +129,11 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 
   const full_user = get_user({ db, user_id: user.id, cookies })
   if (!full_user) {
-    log_server_event({ db, level: 'error', message: 'auth_login_failed', user_id: user.id, context: { method: 'email', reason: 'user_not_found_after_create' } })
+    log_server_event({ level: 'error', message: 'auth_login_failed', user_id: user.id, context: { method: 'email', reason: 'user_not_found_after_create' } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Failed to load user after creation')
   }
 
-  log_server_event({ db, level: 'info', message: 'auth_login', user_id: user.id, context: { method: 'email', created } })
+  log_server_event({ level: 'info', message: 'auth_login', user_id: user.id, context: { method: 'email', created } })
 
   return json({
     user: full_user,

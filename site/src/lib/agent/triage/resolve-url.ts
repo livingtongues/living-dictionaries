@@ -13,7 +13,7 @@ import type Database from 'better-sqlite3'
  *   /{dictionaryId}                    a dictionary's landing page
  *   /{dictionaryId}/{section}          entries | entry | settings | about |
  *                                      contributors | grammar | history |
- *                                      export | import | invite | synopsis
+ *                                      export | import | invite
  *   /{dictionaryId}/entry/{entryId}    a single entry detail page
  *
  * `{dictionaryId}` is either the dictionaries.id or its url slug.
@@ -42,7 +42,6 @@ const DICTIONARY_SECTIONS: Record<string, string> = {
   export: 'the export page',
   import: 'the import page',
   invite: 'the invite page',
-  synopsis: 'the synopsis page',
 }
 
 interface DictRow { name: string }

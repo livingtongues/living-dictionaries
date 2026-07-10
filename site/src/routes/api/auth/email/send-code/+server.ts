@@ -91,7 +91,7 @@ export const POST: RequestHandler = async ({ request }) => {
     return json({ result: 'success' } satisfies AuthEmailSendCodeResponseBody)
   } catch (err) {
     console.error(`Error sending email: ${(err as Error).message}`)
-    log_server_event({ db, level: 'error', message: 'auth_send_code_email_failed', error: err, context: { email } })
+    log_server_event({ level: 'error', message: 'auth_send_code_email_failed', error: err, context: { email } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error sending email: ${(err as Error).message}`)
   }
 }

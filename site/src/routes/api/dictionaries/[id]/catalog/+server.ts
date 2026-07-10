@@ -82,7 +82,7 @@ export const POST: RequestHandler = async (event) => {
     db.prepare(`UPDATE dictionaries SET ${set_clauses.join(', ')} WHERE id = ?`).run(...values)
   } catch (err) {
     console.error(`Error updating dictionary catalog: ${(err as Error).message}`)
-    log_server_event({ db, level: 'error', message: 'dictionary_catalog_update_failed', error: err, user_id, context: { dictionary_id: dict_id, fields: keys } })
+    log_server_event({ level: 'error', message: 'dictionary_catalog_update_failed', error: err, user_id, context: { dictionary_id: dict_id, fields: keys } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Could not update dictionary')
   }
 

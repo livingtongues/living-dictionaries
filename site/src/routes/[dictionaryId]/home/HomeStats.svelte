@@ -134,8 +134,12 @@
     height: 50%;
     width: auto;
     font-size: 3rem;
-    color: var(--accent);
-    opacity: 0.16;
+    /* Pull the accent toward the mode's foreground so the decoration reads in
+       both modes (raw accents were too dark on dark surfaces, too bright on light). */
+    color: light-dark(
+      color-mix(in srgb, color-mix(in srgb, var(--accent) 55%, black) 40%, transparent),
+      color-mix(in srgb, color-mix(in srgb, var(--accent) 55%, white) 28%, transparent)
+    );
     pointer-events: none;
   }
 </style>

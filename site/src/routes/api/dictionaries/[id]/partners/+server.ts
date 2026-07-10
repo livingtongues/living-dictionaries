@@ -146,7 +146,7 @@ export const POST: RequestHandler = async (event) => {
     if (err && typeof err === 'object' && 'status' in err)
       throw err
     console.error(`Error updating dictionary partners: ${(err as Error).message}`)
-    log_server_event({ db, level: 'error', message: 'dictionary_partners_update_failed', error: err, context: { dictionary_id: dict_id, action: body.action } })
+    log_server_event({ level: 'error', message: 'dictionary_partners_update_failed', error: err, context: { dictionary_id: dict_id, action: body.action } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Could not update partners')
   }
 }

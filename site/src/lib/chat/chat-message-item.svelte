@@ -5,6 +5,7 @@
   import { linkify_html } from '$lib/utils/linkify-html'
   import IconMdiCheck from '~icons/mdi/check'
   import IconMdiClose from '~icons/mdi/close'
+  import IconMdiContentCopy from '~icons/mdi/content-copy'
   import IconMdiEmoticonOutline from '~icons/mdi/emoticon-outline'
   import IconMdiFileOutline from '~icons/mdi/file-outline'
   import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
@@ -60,6 +61,11 @@
   function time_label(iso: string): string {
     return new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
   }
+
+  async function copy_message() {
+    const text = message.body_text || html_to_text(message.body_html)
+    await navigator.clipboard.writeText(text)
+  }
 </script>
 
 <div class="msg" class:own={is_own}>
@@ -75,6 +81,7 @@
             <ReactionPicker on_pick={react} close={() => { show_reactions = false }} />
           {/if}
         </span>
+        <button type="button" title="Copy message" aria-label="Copy message" onclick={copy_message}><IconMdiContentCopy /></button>
         {#if is_own}
           <button type="button" title="Edit" aria-label="Edit" onclick={start_edit}><IconMdiPencilOutline /></button>
           <button type="button" title="Delete" aria-label="Delete" onclick={remove} disabled={busy}><IconMdiTrashCanOutline /></button>

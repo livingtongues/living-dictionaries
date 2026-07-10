@@ -50,7 +50,6 @@ const shots = [
   { name: 'dict-export', url: '/achi/export', wait: 3000, login: true },
   { name: 'dict-import', url: '/achi/import', wait: 3000, login: true },
   { name: 'dict-grammar', url: '/achi/grammar', wait: 3000, login: true },
-  { name: 'dict-synopsis', url: '/achi/synopsis', wait: 3000, login: true },
 ]
 
 async function click_button_with_text(page, text) {

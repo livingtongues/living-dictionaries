@@ -104,11 +104,11 @@ export const POST: RequestHandler = async (event) => {
     create()
   } catch (err) {
     console.error(`Error creating dictionary: ${(err as Error).message}`)
-    log_server_event({ db, level: 'error', message: 'dictionary_create_failed', error: err, user_id, context: { dictionary_id: id } })
+    log_server_event({ level: 'error', message: 'dictionary_create_failed', error: err, user_id, context: { dictionary_id: id } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Could not create dictionary')
   }
 
-  log_server_event({ db, level: 'info', message: 'dictionary_created', user_id, context: { dictionary_id: id, gloss_languages: body.gloss_languages } })
+  log_server_event({ level: 'info', message: 'dictionary_created', user_id, context: { dictionary_id: id, gloss_languages: body.gloss_languages } })
 
   // Hydrate JSON columns (gloss_languages, alternate_names, coordinates) — the
   // raw row stores them as strings, but the email composer expects arrays/objects
@@ -118,7 +118,7 @@ export const POST: RequestHandler = async (event) => {
     await send_new_dictionary_creator_email(saved_dictionary as any, email ?? '')
   } catch (err) {
     console.error(`Dictionary created but emails failed: ${(err as Error).message}`)
-    log_server_event({ db, level: 'warn', message: 'dictionary_create_email_failed', error: err, user_id, context: { dictionary_id: id } })
+    log_server_event({ level: 'warn', message: 'dictionary_create_email_failed', error: err, user_id, context: { dictionary_id: id } })
   }
 
   // Post into the admin Notifications room (+ ping admins by their channel).
