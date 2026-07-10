@@ -37,6 +37,7 @@
   import IconMdiMagnify from '~icons/mdi/magnify'
   import IconMdiStarOutline from '~icons/mdi/star-outline'
   import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
+  import IconMdiClose from '~icons/mdi/close'
 
   const { data } = $props()
   const {
@@ -138,6 +139,8 @@
 
   // Manage (editor+): unstar + move left/right over the live rows' fractional keys.
   const can_manage = $derived(is_editor_or_above && live_featured_ready)
+  // Touch devices have no hover to reveal the card controls — a mobile-only pencil/X toggles them.
+  let manage_open = $state(false)
   function move_featured({ row_id, direction }: { row_id: string, direction: -1 | 1 }) {
     if (!featured_query || !dict_db)
       return
@@ -417,7 +420,23 @@
 
   {#if featured_cards.length || nudge_star}
     <section>
-      <h2>{t('dict_home.featured_entries')}</h2>
+      <h2>
+        {t('dict_home.featured_entries')}
+        {#if can_manage && featured_cards.length}
+          <button
+            type="button"
+            class="edit-btn manage-toggle"
+            title={t('misc.edit')}
+            aria-label={t('misc.edit')}
+            onclick={() => manage_open = !manage_open}>
+            {#if manage_open}
+              <IconMdiClose class="icon-inline" />
+            {:else}
+              <IconMdiPencilOutline class="icon-inline" />
+            {/if}
+          </button>
+        {/if}
+      </h2>
       {#if featured_cards.length}
         <div class="strip featured-strip">
           {#each featured_cards as card, index (card.id)}
@@ -432,6 +451,7 @@
               dialect={card.dialect}
               photo_serving_url={card.photo_serving_url}
               audio_storage_path={card.audio_storage_path}
+              force_manage={manage_open}
               manage={can_manage
                 ? {
                   can_move_left: index > 0,
@@ -611,6 +631,7 @@
 
   .hero {
     position: relative;
+    isolation: isolate; /* contain the cover-control z-indexes so they can't paint over the sticky site header */
     border-radius: 1rem;
     overflow: hidden;
     background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 18%, var(--surface)), var(--surface));
@@ -713,6 +734,13 @@
 
   .edit-btn:hover {
     opacity: 1;
+  }
+
+  /* Hover devices reveal card controls on hover — the toggle is for touch only. */
+  @media (hover: hover) {
+    .manage-toggle {
+      display: none;
+    }
   }
 
   button.editable {

@@ -35,6 +35,8 @@
     photo_serving_url?: string | null
     audio_storage_path?: string | null
     manage?: Manage | null
+    /** Touch devices have no hover — the strip's mobile edit toggle forces the manage controls visible. */
+    force_manage?: boolean
   }
 
   const {
@@ -49,6 +51,7 @@
     photo_serving_url = null,
     audio_storage_path = null,
     manage = null,
+    force_manage = false,
   }: Props = $props()
 
   const sparse = $derived(!alt && !phonetic && !pos && !glosses.length && !dialect)
@@ -126,7 +129,7 @@
     </button>
   {/if}
   {#if manage}
-    <div class="manage">
+    <div class="manage" class:force-visible={force_manage}>
       <button
         type="button"
         class="overlay-button"
@@ -339,18 +342,14 @@
     justify-content: center;
     gap: 0.5rem;
     opacity: 0;
+    pointer-events: none; /* invisible buttons must not swallow taps meant for the card link */
     transition: opacity 200ms;
   }
 
   .card:hover .manage,
-  .card:focus-within .manage {
+  .card:focus-within .manage,
+  .manage.force-visible {
     opacity: 1;
-  }
-
-  /* Touch devices have no hover — keep the manage controls visible. */
-  @media (hover: none) {
-    .manage {
-      opacity: 1;
-    }
+    pointer-events: auto;
   }
 </style>
