@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { crossfade, fade, scale } from 'svelte/transition'
+  import { fade } from 'svelte/transition'
   import { page } from '$app/state'
+  import { portal } from '$lib/utils/portal'
   import { image_src } from '$lib/helpers/media'
   import IconGgSpinner from '~icons/gg/spinner'
   import IconTablerAi from '~icons/tabler/ai'
@@ -12,143 +13,132 @@
   interface Props {
     title: string
     gcs: string
-    can_edit?: boolean
-    square?: number
-    width?: number
-    height?: number
+    square: number
+    href: string
+    subtitle?: string
     photo_source?: string
     photographer?: string
-    /** Entry (or other detail) page — renders the viewer title as a link. */
-    href?: string
-    /** Secondary line under the viewer title (e.g. the entry's gloss). */
-    subtitle?: string
+    can_edit?: boolean
     on_delete_image: () => Promise<any>
   }
 
   const {
     title,
     gcs,
-    can_edit = false,
-    square = undefined,
-    width = undefined,
-    height = undefined,
+    square,
+    href,
+    subtitle = undefined,
     photo_source = undefined,
     photographer = undefined,
-    href = undefined,
-    subtitle = undefined,
+    can_edit = false,
     on_delete_image,
   }: Props = $props()
 
-  const [send, receive] = crossfade({
-    duration: 200,
-    fallback: scale,
-  })
-  const key = {}
-
-  let windowWidth: number = $state()
+  let window_width: number = $state()
   let loading = $state(false)
   let viewing = $state(false)
 
-  const isDesktop = $derived(windowWidth >= 768)
-  const fullscreenSource = $derived(image_src(gcs, `w${isDesktop ? windowWidth - 24 : windowWidth}`))
+  const is_desktop = $derived(window_width >= 768)
+  const fullscreen_src = $derived(image_src(gcs, `w${is_desktop ? window_width - 24 : window_width}`))
 
-  function load() {
+  let preload_promise: Promise<void> | undefined
+  let preloaded_src: string | undefined
+
+  /** Kicked off on hover so the fullscreen image is (usually) ready before the click. */
+  function start_preload() {
+    if (preload_promise && preloaded_src === fullscreen_src)
+      return preload_promise
+    preloaded_src = fullscreen_src
+    preload_promise = new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => resolve()
+      img.onerror = () => {
+        preload_promise = undefined
+        preloaded_src = undefined
+        resolve()
+      }
+      img.src = fullscreen_src
+    })
+    return preload_promise
+  }
+
+  async function open() {
     const timeout = setTimeout(() => (loading = true), 100)
-    const img = new Image()
-
-    img.onload = () => {
-      clearTimeout(timeout)
-      loading = false
-      viewing = true
-    }
-
-    img.src = fullscreenSource
+    await start_preload()
+    clearTimeout(timeout)
+    loading = false
+    viewing = true
   }
 </script>
 
 <svelte:window
-  bind:innerWidth={windowWidth}
+  bind:innerWidth={window_width}
   onkeydown={(e) => {
     if (e.key === 'Escape') viewing = false
   }} />
 
-<div class="image-wrap">
-  {#if !viewing}
-    <img
-      class="thumb"
-      onclick={load}
-      in:receive={{ key }}
-      out:send={{ key }}
-      alt={title}
-      src={image_src(gcs, square
-        ? `s${square}-p`
-        : width
-        ? `w${width}`
-        : height
-        ? `h${height}`
-        : 's0')} />
-    {#if loading}
-      <IconGgSpinner class="icon-inline spinner" />
-    {:else if photographer === 'AI'}
-      <IconTablerAi class="icon-inline ai-badge" style="font-size: 1.5rem" />
-    {/if}
+<div class="thumb-wrap">
+  <img class="thumb" onclick={open} onmouseenter={start_preload} alt={title} src={image_src(gcs, `s${square}-p`)} />
+  {#if loading}
+    <IconGgSpinner class="icon-inline spinner" />
+  {:else if photographer === 'AI'}
+    <IconTablerAi class="icon-inline ai-badge" />
   {/if}
 </div>
 
 {#if viewing}
-  <div onclick={() => viewing = false} class="viewer">
-    <div class="viewer-backdrop" transition:fade={{ duration: 200 }}></div>
-    <img class="full-img" in:receive={{ key }} out:send={{ key }} alt="Image of {title}" src={fullscreenSource} />
-    <div class="viewer-header" transition:fade={{ duration: 150 }}>
-      <div class="title-block" onclick={e => e.stopPropagation()}>
-        {#if href}
+  <!-- Portaled to <body> so the card's transform/overflow can never contain or clip it —
+    the viewer is truly fullscreen from its first frame and simply fades in on top. -->
+  <div use:portal>
+    <div class="viewer" transition:fade={{ duration: 150 }} onclick={() => viewing = false}>
+      <img class="full-img" alt="Image of {title}" src={fullscreen_src} />
+      <div class="viewer-header">
+        <div class="title-block" onclick={e => e.stopPropagation()}>
           <a class="title-link" {href}>
             {title}
             <IconMdiArrowRight class="icon-inline title-arrow" />
           </a>
-        {:else}
-          <div class="viewer-title">{title}</div>
-        {/if}
-        {#if subtitle}
-          <div class="viewer-subtitle">{subtitle}</div>
-        {/if}
-      </div>
-      <button type="button" class="viewer-button" aria-label={page.data.t('misc.cancel')} onclick={() => viewing = false}>
-        <IconMdiClose style="font-size: 1.375rem" />
-      </button>
-    </div>
-    {#if photo_source || photographer || can_edit}
-      <div class="viewer-footer" transition:fade={{ duration: 150 }}>
-        <div class="credit" onclick={e => e.stopPropagation()}>
-          {#if photographer === 'AI'}
-            <span class="ai-chip"><IconTablerAi style="font-size: 1.375rem" /> generated</span>
-          {:else if photographer}
-            <span class="credit-line"><IconMdiCameraOutline class="icon-inline" style="opacity: 0.7" /> {photographer}</span>
-          {/if}
-          {#if photo_source}
-            <span class="credit-line source">{photo_source}</span>
+          {#if subtitle}
+            <div class="viewer-subtitle">{subtitle}</div>
           {/if}
         </div>
-        {#if can_edit}
-          <button
-            type="button"
-            class="viewer-button delete"
-            onclick={async (e) => {
-              e.stopPropagation()
-              if (confirm(page.data.t('entry.delete_image')))
-                await on_delete_image()
-            }}>
-            <IconMdiTrashCanOutline style="font-size: 1.125rem" />
-            {page.data.t('misc.delete')}
-          </button>
-        {/if}
+        <button type="button" class="viewer-button" aria-label={page.data.t('misc.cancel')} onclick={() => viewing = false}>
+          <IconMdiClose style="font-size: 1.375rem" />
+        </button>
       </div>
-    {/if}
+      {#if photo_source || photographer || can_edit}
+        <div class="viewer-footer">
+          <div class="credit" onclick={e => e.stopPropagation()}>
+            {#if photographer === 'AI'}
+              <span class="ai-chip"><IconTablerAi style="font-size: 1.375rem" /> generated</span>
+            {:else if photographer}
+              <span class="credit-line"><IconMdiCameraOutline class="icon-inline" style="opacity: 0.7" /> {photographer}</span>
+            {/if}
+            {#if photo_source}
+              <span class="credit-line source">{photo_source}</span>
+            {/if}
+          </div>
+          {#if can_edit}
+            <button
+              type="button"
+              class="viewer-button delete"
+              onclick={async (e) => {
+                e.stopPropagation()
+                if (confirm(page.data.t('entry.delete_image')))
+                  await on_delete_image()
+              }}>
+              <IconMdiTrashCanOutline style="font-size: 1.125rem" />
+              {page.data.t('misc.delete')}
+            </button>
+          {/if}
+        </div>
+      {/if}
+    </div>
   </div>
 {/if}
 
 <style>
-  .image-wrap {
+  .thumb-wrap {
     height: 100%;
     width: 100%;
     position: relative;
@@ -161,17 +151,19 @@
     cursor: pointer;
   }
 
-  .image-wrap :global(.spinner) {
+  /* Centered on the card, above its scrim/text overlays, while the fullscreen image preloads. */
+  .thumb-wrap :global(.spinner) {
     position: absolute;
-    bottom: 0.25rem;
-    right: 0.25rem;
-    z-index: 1; /* above the gallery card's scrim/text overlays */
+    inset: 0;
+    margin: auto;
+    z-index: 1;
+    font-size: 2.25rem;
     color: #fff;
     filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.6));
-    animation: image-spin 1s linear infinite;
+    animation: gallery-image-spin 1s linear infinite;
   }
 
-  @keyframes image-spin {
+  @keyframes gallery-image-spin {
     from {
       transform: rotate(0deg);
     }
@@ -181,11 +173,12 @@
     }
   }
 
-  .image-wrap :global(.ai-badge) {
+  .thumb-wrap :global(.ai-badge) {
     color: #fff;
     position: absolute;
     bottom: 0.25rem;
     left: 0.25rem;
+    font-size: 3.75rem;
   }
 
   .viewer {
@@ -196,22 +189,14 @@
     align-items: center;
     justify-content: center;
     color: #fff;
-  }
-
-  /* Separate layer so it can fade while the image zooms. */
-  .viewer-backdrop {
-    position: absolute;
-    inset: 0;
     background: rgb(0 0 0 / 0.88);
     backdrop-filter: blur(10px);
   }
 
   .full-img {
-    position: relative;
     object-fit: contain;
     max-height: 100%;
     max-width: 100%;
-    will-change: transform, opacity;
   }
 
   /* Top/bottom bars float over the photo on soft gradients — no chrome boxes. */
@@ -245,20 +230,16 @@
     text-shadow: 0 1px 3px rgb(0 0 0 / 0.6);
   }
 
-  .viewer-title,
-  .title-link {
-    font-weight: 700;
-    font-size: 1.25rem;
-    line-height: 1.3;
-    overflow-wrap: anywhere;
-  }
-
   .title-link {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
     color: #fff;
     text-decoration: none;
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
   }
 
   .title-link :global(.title-arrow) {

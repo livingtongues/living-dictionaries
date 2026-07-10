@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { EntryData, Tables } from '$lib/types'
-  import Image from '$lib/components/image/Image.svelte'
+  import GalleryImage from './GalleryImage.svelte'
   import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { url_from_storage_path } from '$lib/utils/media-url'
   import { create_exclusive_audio } from '$lib/utils/exclusive-audio.svelte'
@@ -45,7 +45,7 @@
 
 {#if first_photo}
   <div class="card">
-    <Image
+    <GalleryImage
       square={480}
       title={headword.value}
       subtitle={glosses[0]}
@@ -53,7 +53,6 @@
       gcs={first_photo.serving_url}
       photo_source={first_photo.source}
       photographer={first_photo.photographer}
-      page_context="gallery"
       {can_edit}
       on_delete_image={async () => await db_operations.delete_photo(first_photo.id)} />
     <div class="scrim"></div>
@@ -103,9 +102,8 @@
     transition: transform 200ms;
   }
 
-  /* Lift only while the viewer is closed — a transformed ancestor would become the
-     containing block for the fullscreen viewer (position: fixed) and clip it to the card. */
-  .card:hover:has(:global(.image-wrap:not(.viewing))) {
+  /* The fullscreen viewer is portaled to <body>, so this transform can't contain/clip it. */
+  .card:hover {
     transform: translateY(-3px);
   }
 
