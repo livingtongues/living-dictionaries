@@ -82,12 +82,12 @@
     "def": "kb.by",
     "indf": "kbf",
     "indfpro": "kwj",
-    "pers": "",
-    "poss": "",
-    "reflpro": "",
-    "relpro": "",
-    "vd": "",
-    "va": "",
-    "obj": ""
+    "pers": "kw.bn",
+    "poss": "kw.ml",
+    "reflpro": "kw.jr",
+    "relpro": "kw.rj",
+    "vd": "kt.el.mb",
+    "va": "kt.el/kel",
+    "obj": "shm"
   }
 }
