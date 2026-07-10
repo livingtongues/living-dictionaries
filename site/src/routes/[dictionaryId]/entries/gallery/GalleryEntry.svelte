@@ -103,9 +103,9 @@
     transition: transform 200ms;
   }
 
-  /* Lift only while the thumb is showing — a transformed ancestor would become the
+  /* Lift only while the viewer is closed — a transformed ancestor would become the
      containing block for the fullscreen viewer (position: fixed) and clip it to the card. */
-  .card:hover:has(:global(.thumb)) {
+  .card:hover:has(:global(.image-wrap:not(.viewing))) {
     transform: translateY(-3px);
   }
 

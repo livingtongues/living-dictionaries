@@ -58,7 +58,7 @@ export const FullscreenViewer: Story<typeof Component> = {
   interactions: async (page) => {
     await page.click('.thumb')
     await page.waitForSelector('.viewer', { timeout: 15000 })
-    await new Promise(resolve => setTimeout(resolve, 400)) // let the crossfade settle
+    await new Promise(resolve => setTimeout(resolve, 400)) // let the zoom settle
   },
   props: { dictionary, can_edit: true, entry: make_entry({ lexeme: 'adiʔol', gloss: 'cotton leaves', full: true }) },
 }

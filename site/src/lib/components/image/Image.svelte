@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { crossfade, scale } from 'svelte/transition'
+  import type { TransitionConfig } from 'svelte/transition'
+  import { fade } from 'svelte/transition'
+  import { cubicOut } from 'svelte/easing'
   import { page } from '$app/state'
   import { image_src } from '$lib/helpers/media'
   import IconGgSpinner from '~icons/gg/spinner'
@@ -41,14 +43,10 @@
     on_delete_image,
   }: Props = $props()
 
-  const [send, receive] = crossfade({
-    duration: 200,
-    fallback: scale,
-  })
-
   let windowWidth: number = $state()
   let loading = $state(false)
   let viewing = $state(false)
+  let thumb_el = $state<HTMLImageElement>()
 
   const isDesktop = $derived(windowWidth >= 768)
   const fullscreenSource = $derived(image_src(gcs, `w${isDesktop ? windowWidth - 24 : windowWidth}`))
@@ -65,7 +63,23 @@
 
     img.src = fullscreenSource
   }
-  const key = {}
+
+  /** Zoom the fullscreen image out from (and back into) the thumbnail's on-screen rect —
+   * transform + opacity only, so it stays on the compositor. */
+  function zoom_from_thumb(node: HTMLElement): TransitionConfig {
+    const from = thumb_el?.getBoundingClientRect()
+    const to = node.getBoundingClientRect()
+    if (!from?.width || !to.width || !to.height)
+      return { duration: 200, css: transition_time => `opacity: ${transition_time}` }
+    const dx = from.left + from.width / 2 - (to.left + to.width / 2)
+    const dy = from.top + from.height / 2 - (to.top + to.height / 2)
+    const start_scale = Math.max(from.width / to.width, from.height / to.height)
+    return {
+      duration: 240,
+      easing: cubicOut,
+      css: (transition_time, remaining) => `transform: translate(${dx * remaining}px, ${dy * remaining}px) scale(${1 - (1 - start_scale) * remaining}); opacity: ${Math.min(1, transition_time / 0.4)}`,
+    }
+  }
 </script>
 
 <svelte:window
@@ -74,38 +88,31 @@
     if (e.key === 'Escape') viewing = false
   }} />
 
-{#if !viewing}
-  <div class="image-wrap">
-    <img
-      class="thumb"
-      onclick={load}
-      in:receive|local={{ key }}
-      out:send|local={{ key }}
-      alt={title}
-      src={image_src(gcs, square
-        ? `s${square}-p`
-        : width
-        ? `w${width}`
-        : height
-        ? `h${height}`
-        : 's0')} />
-    {#if loading}
-      <IconGgSpinner class="icon-inline spinner" />
-    {:else if photographer === 'AI'}
-      <IconTablerAi class="icon-inline ai-badge" style="font-size: {page_context === 'gallery' ? '3.75rem' : '1.5rem'}" />
-    {/if}
-  </div>
-{/if}
+<div class="image-wrap" class:viewing>
+  <img
+    bind:this={thumb_el}
+    class="thumb"
+    onclick={load}
+    alt={title}
+    src={image_src(gcs, square
+      ? `s${square}-p`
+      : width
+      ? `w${width}`
+      : height
+      ? `h${height}`
+      : 's0')} />
+  {#if loading}
+    <IconGgSpinner class="icon-inline spinner" />
+  {:else if photographer === 'AI'}
+    <IconTablerAi class="icon-inline ai-badge" style="font-size: {page_context === 'gallery' ? '3.75rem' : '1.5rem'}" />
+  {/if}
+</div>
 
 {#if viewing}
-  <div
-    onclick={() => viewing = false}
-    class="viewer"
-    in:receive={{ key }}
-    out:send={{ key }}
-    style="will-change: transform;">
-    <img class="full-img" alt="Image of {title}" src={fullscreenSource} />
-    <div class="viewer-header">
+  <div onclick={() => viewing = false} class="viewer">
+    <div class="viewer-backdrop" transition:fade={{ duration: 200 }}></div>
+    <img class="full-img" transition:zoom_from_thumb alt="Image of {title}" src={fullscreenSource} />
+    <div class="viewer-header" transition:fade={{ duration: 150 }}>
       <div class="title-block" onclick={e => e.stopPropagation()}>
         {#if href}
           <a class="title-link" {href}>
@@ -124,7 +131,7 @@
       </button>
     </div>
     {#if photo_source || photographer || can_edit}
-      <div class="viewer-footer">
+      <div class="viewer-footer" transition:fade={{ duration: 150 }}>
         <div class="credit" onclick={e => e.stopPropagation()}>
           {#if photographer === 'AI'}
             <span class="ai-chip"><IconTablerAi style="font-size: 1.375rem" /> generated</span>
@@ -199,15 +206,23 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgb(0 0 0 / 0.88);
-    backdrop-filter: blur(10px);
     color: #fff;
   }
 
+  /* Separate layer so it can fade while the image zooms. */
+  .viewer-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.88);
+    backdrop-filter: blur(10px);
+  }
+
   .full-img {
+    position: relative;
     object-fit: contain;
     max-height: 100%;
     max-width: 100%;
+    will-change: transform, opacity;
   }
 
   /* Top/bottom bars float over the photo on soft gradients — no chrome boxes. */
