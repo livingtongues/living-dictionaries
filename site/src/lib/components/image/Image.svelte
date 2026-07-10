@@ -1,12 +1,13 @@
 <script lang="ts">
   import { crossfade, scale } from 'svelte/transition'
-  import Button from '$lib/components/ui/Button.svelte'
   import { page } from '$app/state'
   import { image_src } from '$lib/helpers/media'
   import IconGgSpinner from '~icons/gg/spinner'
   import IconTablerAi from '~icons/tabler/ai'
-  import IconFaSolidTimes from '~icons/fa-solid/times'
-  import IconFaTrashO from '~icons/fa/trash-o'
+  import IconMdiClose from '~icons/mdi/close'
+  import IconMdiArrowRight from '~icons/mdi/arrow-right'
+  import IconMdiTrashCanOutline from '~icons/mdi/trash-can-outline'
+  import IconMdiCameraOutline from '~icons/mdi/camera-outline'
 
   interface Props {
     title: string
@@ -18,6 +19,10 @@
     photo_source?: string
     photographer?: string
     page_context?: string
+    /** Entry (or other detail) page — renders the viewer title as a link. */
+    href?: string
+    /** Secondary line under the viewer title (e.g. the entry's gloss). */
+    subtitle?: string
     on_delete_image: () => Promise<any>
   }
 
@@ -31,6 +36,8 @@
     photo_source = undefined,
     photographer = undefined,
     page_context = undefined,
+    href = undefined,
+    subtitle = undefined,
     on_delete_image,
   }: Props = $props()
 
@@ -96,44 +103,53 @@
     class="viewer"
     in:receive={{ key }}
     out:send={{ key }}
-    style="background: rgba(0, 0, 0, 0.85); z-index: 51; will-change: transform;">
-    <div class="viewer-inner">
-      <div class="viewer-header">
-        <span onclick={e => e.stopPropagation()}>{title}</span>
-        <IconFaSolidTimes class="icon-inline viewer-close" style="font-size: 2.5rem" />
+    style="will-change: transform;">
+    <img class="full-img" alt="Image of {title}" src={fullscreenSource} />
+    <div class="viewer-header">
+      <div class="title-block" onclick={e => e.stopPropagation()}>
+        {#if href}
+          <a class="title-link" {href}>
+            {title}
+            <IconMdiArrowRight class="icon-inline title-arrow" />
+          </a>
+        {:else}
+          <div class="viewer-title">{title}</div>
+        {/if}
+        {#if subtitle}
+          <div class="viewer-subtitle">{subtitle}</div>
+        {/if}
       </div>
-      {#if photographer === 'AI'}
-        <div class="ai-fullscreen">
-          <IconTablerAi class="icon-inline" style="font-size: 4.5rem" />
-          <span style="vertical-align: sub; font-size: 1.25rem; line-height: 1.75rem">generated</span>
-        </div>
-      {/if}
-      <img class="full-img" alt="Image of {title}" src={fullscreenSource} />
-      {#if photo_source}
-        <div class="caption-row">
-          <span>{photo_source}</span>
-          {#if photographer !== 'AI'}<span>{photographer}</span>{/if}
-        </div>
-      {/if}
-      {#if can_edit}
-        <div class="viewer-footer">
-          <Button
-            class="image-delete-button"
-            color="red"
-            form="filled"
-            onclick={async (e) => {
-              const confirmation = confirm(page.data.t('entry.delete_image'))
-              if (confirmation) {
-                e.stopPropagation()
-                await on_delete_image()
-              }
-            }}>
-            <IconFaTrashO class="icon-inline" style="margin: -1px 0 2px;" />
-            {page.data.t('misc.delete')}
-          </Button>
-        </div>
-      {/if}
+      <button type="button" class="viewer-button" aria-label={page.data.t('misc.cancel')} onclick={() => viewing = false}>
+        <IconMdiClose style="font-size: 1.375rem" />
+      </button>
     </div>
+    {#if photo_source || photographer || can_edit}
+      <div class="viewer-footer">
+        <div class="credit" onclick={e => e.stopPropagation()}>
+          {#if photographer === 'AI'}
+            <span class="ai-chip"><IconTablerAi style="font-size: 1.375rem" /> generated</span>
+          {:else if photographer}
+            <span class="credit-line"><IconMdiCameraOutline class="icon-inline" style="opacity: 0.7" /> {photographer}</span>
+          {/if}
+          {#if photo_source}
+            <span class="credit-line source">{photo_source}</span>
+          {/if}
+        </div>
+        {#if can_edit}
+          <button
+            type="button"
+            class="viewer-button delete"
+            onclick={async (e) => {
+              e.stopPropagation()
+              if (confirm(page.data.t('entry.delete_image')))
+                await on_delete_image()
+            }}>
+            <IconMdiTrashCanOutline style="font-size: 1.125rem" />
+            {page.data.t('misc.delete')}
+          </button>
+        {/if}
+      </div>
+    {/if}
   </div>
 {/if}
 
@@ -179,80 +195,148 @@
   .viewer {
     position: fixed;
     inset: 0;
+    z-index: 51;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-  }
-
-  @media (min-width: 768px) {
-    .viewer {
-      padding: 0.75rem;
-    }
-  }
-
-  .viewer-inner {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .viewer-header {
-    font-weight: 600;
+    background: rgb(0 0 0 / 0.88);
+    backdrop-filter: blur(10px);
     color: #fff;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    background-color: rgb(0 0 0 / 0.25);
-  }
-
-  .viewer-header :global(.viewer-close) {
-    cursor: pointer;
-    opacity: 0.75;
-  }
-
-  .viewer-header :global(.viewer-close:hover) {
-    opacity: 1;
-  }
-
-  .ai-fullscreen {
-    position: absolute;
-    bottom: 0.25rem;
-    left: 2.5rem;
-    color: #fff;
-    z-index: 10;
   }
 
   .full-img {
     object-fit: contain;
     max-height: 100%;
+    max-width: 100%;
   }
 
-  .caption-row {
-    color: #fff;
+  /* Top/bottom bars float over the photo on soft gradients — no chrome boxes. */
+  .viewer-header,
+  .viewer-footer {
+    position: absolute;
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 1rem;
+  }
+
+  .viewer-header {
+    top: 0;
+    align-items: flex-start;
+    background: linear-gradient(to bottom, rgb(0 0 0 / 0.65), rgb(0 0 0 / 0));
+    padding-bottom: 2.5rem;
   }
 
   .viewer-footer {
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: absolute;
     bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: rgb(0 0 0 / 0.25);
+    align-items: flex-end;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.65), rgb(0 0 0 / 0));
+    padding-top: 2.5rem;
   }
 
-  .viewer-footer :global(.image-delete-button) {
-    margin-left: auto;
+  .title-block {
+    min-width: 0;
+    text-shadow: 0 1px 3px rgb(0 0 0 / 0.6);
+  }
+
+  .viewer-title,
+  .title-link {
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .title-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .title-link :global(.title-arrow) {
+    font-size: 1rem;
+    opacity: 0.6;
+    transition: transform 200ms, opacity 200ms;
+  }
+
+  .title-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .title-link:hover :global(.title-arrow) {
+    opacity: 1;
+    transform: translateX(3px);
+  }
+
+  .viewer-subtitle {
+    font-size: 0.875rem;
+    opacity: 0.8;
+  }
+
+  .viewer-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    flex-shrink: 0;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    padding: 0 0.625rem;
+    border: none;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.15);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 200ms, transform 75ms;
+  }
+
+  .viewer-button:hover {
+    background: rgb(255 255 255 / 0.3);
+  }
+
+  .viewer-button:active {
+    transform: scale(0.93);
+  }
+
+  .viewer-button.delete:hover {
+    background: color-mix(in srgb, var(--danger), transparent 25%);
+  }
+
+  .credit {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+    font-size: 0.8125rem;
+    text-shadow: 0 1px 3px rgb(0 0 0 / 0.6);
+  }
+
+  .credit-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .credit-line.source {
+    opacity: 0.75;
+  }
+
+  .ai-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.15);
+    backdrop-filter: blur(4px);
+    font-size: 0.75rem;
   }
 </style>

@@ -1,11 +1,7 @@
-<script lang="ts" module>
-  /** One card plays at a time across every strip on the page. */
-  let stop_current_audio: (() => void) | null = null
-</script>
-
 <script lang="ts">
   import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { image_src, url_from_storage_path } from '$lib/utils/media-url'
+  import { create_exclusive_audio } from '$lib/utils/exclusive-audio.svelte'
   import { card_hue } from './home-helpers'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import IconMdiStarOff from '~icons/mdi/star-off'
@@ -56,31 +52,13 @@
 
   const sparse = $derived(!alt && !phonetic && !pos && !glosses.length && !dialect)
 
-  let playing = $state(false)
-  let audio_element: HTMLAudioElement | null = null
-
-  function stop() {
-    audio_element?.pause()
-    playing = false
-  }
+  const audio = create_exclusive_audio()
 
   function toggle_audio(event: MouseEvent) {
     event.preventDefault()
     event.stopPropagation()
-    if (!audio_storage_path)
-      return
-    if (playing) {
-      stop()
-      stop_current_audio = null
-      return
-    }
-    stop_current_audio?.()
-    stop_current_audio = stop
-    audio_element = new Audio(url_from_storage_path(audio_storage_path, PUBLIC_STORAGE_BUCKET))
-    audio_element.onended = stop
-    audio_element.onerror = stop
-    playing = true
-    void audio_element.play()
+    if (audio_storage_path)
+      audio.toggle(url_from_storage_path(audio_storage_path, PUBLIC_STORAGE_BUCKET))
   }
 
   function manage_click(event: MouseEvent, action: () => void) {
@@ -122,9 +100,9 @@
     <button
       type="button"
       class="overlay-button play"
-      class:playing
+      class:playing={audio.playing}
       onclick={toggle_audio}
-      aria-label="{playing ? page.data.t('misc.pause') : page.data.t('misc.play')} {lexeme}">
+      aria-label="{audio.playing ? page.data.t('misc.pause') : page.data.t('misc.play')} {lexeme}">
       <IconMaterialSymbolsHearing />
     </button>
   {/if}

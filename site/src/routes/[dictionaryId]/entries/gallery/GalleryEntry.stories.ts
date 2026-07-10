@@ -11,21 +11,31 @@ export const shared_meta: StoryMeta = {
 const dictionary = {
   id: 'demo',
   url: 'demo',
-  gloss_languages: ['en'],
+  gloss_languages: ['en', 'es'],
 } as unknown as Tables<'dictionaries'>
 
-function make_entry({ lexeme, gloss }: { lexeme: string, gloss: string }): EntryData {
+const photo = {
+  id: 'p1',
+  serving_url: 'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g',
+  source: 'Community field collection',
+  photographer: 'A. Photographer',
+}
+
+function make_entry({ lexeme, gloss, full }: { lexeme: string, gloss: string, full?: boolean }): EntryData {
   return {
     id: 'e1',
     updated_at: '2026-01-01T00:00:00Z',
-    main: { lexeme: { default: lexeme } },
+    main: {
+      lexeme: { default: lexeme, ...full && { lo2: 'ଅଦିଓଲ' } },
+      ...full && { phonetic: 'adiʔɔl' },
+    },
+    ...full && { dialects: [{ id: 'd1', name: { default: 'Plains' } }] },
+    ...full && { audios: [{ id: 'a1', storage_path: 'demo/audio/e1.mp3' }] },
     senses: [{
       id: 's1',
-      glosses: { en: gloss },
-      photos: [{
-        id: 'p1',
-        serving_url: 'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g',
-      }],
+      glosses: { en: gloss, ...full && { es: 'hojas de algodón' } },
+      ...full && { parts_of_speech: ['n'] },
+      photos: [photo],
     }],
   } as unknown as EntryData
 }
@@ -34,10 +44,21 @@ export const WithGloss: Story<typeof Component> = {
   props: { dictionary, can_edit: false, entry: make_entry({ lexeme: 'adiʔol', gloss: 'cotton leaves' }) },
 }
 
+export const FullDetails: Story<typeof Component> = {
+  props: { dictionary, can_edit: false, entry: make_entry({ lexeme: 'adiʔol', gloss: 'cotton leaves', full: true }) },
+}
+
 export const NoGloss: Story<typeof Component> = {
   props: { dictionary, can_edit: false, entry: make_entry({ lexeme: 'aŋkullaol', gloss: '' }) },
 }
 
-export const CanEdit: Story<typeof Component> = {
-  props: { dictionary, can_edit: true, entry: make_entry({ lexeme: 'ame ol', gloss: 'monkey' }) },
+export const FullscreenViewer: Story<typeof Component> = {
+  viewports: [{ width: 800, height: 600 }],
+  csr: true,
+  interactions: async (page) => {
+    await page.click('.thumb')
+    await page.waitForSelector('.viewer', { timeout: 15000 })
+    await new Promise(resolve => setTimeout(resolve, 400)) // let the crossfade settle
+  },
+  props: { dictionary, can_edit: true, entry: make_entry({ lexeme: 'adiʔol', gloss: 'cotton leaves', full: true }) },
 }
