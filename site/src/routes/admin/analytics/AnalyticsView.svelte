@@ -2,6 +2,7 @@
   import type { PageData } from './$types'
   import { BROWSER_COLORS, country_flag, db_tier_color, DEVICE_META, one_decimal, OS_COLORS, short_day, short_time, USERS_COLOR } from '$lib/analytics/dashboard-format'
   import { log_insights } from '$lib/analytics/insights'
+  import AtAGlance from '$lib/analytics/AtAGlance.svelte'
   import type { DonutDatum } from '$lib/charts/DonutChart.svelte'
   import type { Segment } from '$lib/charts/SegmentedBar.svelte'
   import BarChart from '$lib/charts/BarChart.svelte'
@@ -124,6 +125,8 @@
 
   {#if analytics.audience === 'bots'}
     <p class="audience-note">🤖 Showing <b>bot / crawler / AI-agent</b> traffic — usage, routes, events and geo below are bot-only. Diagnostics (errors, build, leader, clusters) live on <a href="/admin/health">Site health</a>.</p>
+  {:else}
+    <AtAGlance {analytics} />
   {/if}
 
   <section class="cards">

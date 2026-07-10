@@ -26,6 +26,12 @@ export const ENTRY_CREATED = 'entry_created'
 /** An entry was deleted via the editing UI. props: dictionary_id, entry_id. */
 export const ENTRY_DELETED = 'entry_deleted'
 
+/** An editor starred an entry onto the dictionary-home featured strip. props: dictionary_id, entry_id. */
+export const ENTRY_FEATURED = 'entry_featured'
+
+/** An editor removed an entry from the featured strip. props: dictionary_id, entry_id. */
+export const ENTRY_UNFEATURED = 'entry_unfeatured'
+
 /**
  * Every analytics event the app is SUPPOSED to emit. The dashboard's
  * self-instrumentation panel compares this list against what's actually been
@@ -40,4 +46,6 @@ export const ALL_TRACKED_EVENTS = [
   AUDIO_PLAYED,
   ENTRY_CREATED,
   ENTRY_DELETED,
+  ENTRY_FEATURED,
+  ENTRY_UNFEATURED,
 ] as const

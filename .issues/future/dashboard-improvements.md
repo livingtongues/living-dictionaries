@@ -4,6 +4,13 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
 `src/lib/db/server/log-analytics.ts`; page: `src/routes/admin/analytics/+page.svelte`; chart lib:
 `$lib/charts/` (Bar/Combo/Line).
 
+**STANDING DESIGN DIRECTIVE (Jacob, 2026-07-10):** steer both dashboards AWAY from error lists and
+analytics jargon, TOWARD plain language + at-a-glance visuals. Prioritize: user numbers, user
+experience, where the site is being used well, where the pain points are, concrete action steps,
+and what to be aware of. New panels should read as sentences/verdicts first, tables second (see
+`$lib/analytics/at-a-glance.ts` + `AtAGlance.svelte` for the shipped pattern). Weigh future Phase C
+proposals against this lens.
+
 ## Shipped (2026-06-26, `.issues/logging-buildout.md`)
 - ✅ **Pipeline-health / ingestion-liveness strip** — last log / session_start / server log /
   retention + hot/archived counts; live vs "no ingestion in 24h" verdict.
@@ -68,6 +75,27 @@ Deduped backlog of proposals from the `log-and-fix` daily review (Phase C). Read
   logs-archive.db + `dictionaries/*.db` aggregate, `wal_ratio` red > 2×); panel on `/admin/health`.
 - ✅ **`sync_failed` 404 cause named** — new `not_found` classifier kind (error-level, non-transient →
   repeat-breaker halts after 3), so the Sync-Health by-kind table names the fatal class instead of `other`.
+
+## Shipped (2026-07-10, `.issues/log-review-2026-07-10-actions.md`)
+- ✅ **Dictionary-boot cold/warm perf panel + `dict_boot` emitter** — `dict-instance.ts` now emits a
+  worker-safe `dict_boot` perf row on boot completion (cold/warm + `storage` + `snapshot_bytes` +
+  per-stage `stage_ms`; `report_dict_boot` in `report-dict-sync-failure.ts`); `build_dict_boot`
+  (`DictBootPerf`: cold/warm p50/p90/p95, typical snapshot size, slowest-first by-dictionary with
+  catalog names, daily trend) + the "Opening a dictionary" panel on `/admin/health` with a
+  "collecting since this deploy" empty state. E2E-verified cold (497ms, snapshot 1.5MB) + warm
+  (270ms) rows in dev. `dict_boot` also joined `PERF_METRICS` so it rides the shared perf summary.
+- ✅ **Nav from-section split (the interim)** — `performance.nav_sections` classifies every SPA hop
+  as `entering_dictionary` (cold first hop) / `within_dictionary` (warm) / `other`; table in the
+  Performance panel + a split line on the Speed-at-a-glance nav card.
+- ✅ **Low-sample "thin data" guard** — `THIN_SAMPLE_N = 15` + `is_thin_sample` in
+  `dashboard-format.ts`; perf summary cards, speed cards, all route/nav/LCP/dict-boot tables dim +
+  asterisk thin rows with a shared footnote. *(ported from tutor)*
+- ✅ **"At a glance" plain-language story strip** — `$lib/analytics/at-a-glance.ts` (`build_glance`,
+  tested) + `AtAGlance.svelte`, rendered at the top of BOTH `/admin/analytics` and `/admin/health`
+  (humans audience): People (count + WoW trend + sparkline), Experience (verdict sentence + the
+  cold-boot pain point), Where (top dictionaries + areas), and a tone-colored "For you" action list
+  derived from schema-drift / server-faults / sync-storm / boot-health / stale-build signals. The
+  first concrete instance of the plain-language directive above.
 
 ## Open proposals
 - **★★ NEW — Bot/crawler share % on each error cluster** *(filed 2026-07-09 — grounded in TODAY's

@@ -7,7 +7,7 @@ import { dispatch_dict_write } from './dict-writes'
 import { evict_if_over_budget, touch_dict } from './opfs-lru'
 import { fetch_dict_snapshot } from './fetch-snapshot'
 import { open_memory_connection } from './memory-connection'
-import { report_dict_self_healed, report_dict_storage_reopened, report_dict_sync_halted, set_dict_log_session } from './report-dict-sync-failure'
+import { report_dict_boot, report_dict_self_healed, report_dict_storage_reopened, report_dict_sync_halted, set_dict_log_session } from './report-dict-sync-failure'
 import { delete_opfs_db_file, open_opfs_connection, opfs_file_exists, write_opfs_db_file } from './worker/opfs-connection'
 import { DICT_DB_OPFS_PREFIX } from '$lib/constants'
 
@@ -82,6 +82,39 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
     // apply-transaction so none enrols in another's SQLite txn.
     const op_lock = create_mutex()
 
+    // Boot telemetry (`dict_boot` perf row): stage marks accumulate from the
+    // first `mark_boot_stage` until the FIRST successful open_and_wire emits —
+    // reopen/reset re-wires never re-emit (they have their own markers). A
+    // seq-transition rebuild's second pass keeps accumulating, so the emitted
+    // duration is the total boot the user actually waited through.
+    const boot_marks: { stage: string, at: number }[] = []
+    let boot_reported = false
+    let boot_cold = false
+    let boot_snapshot_bytes: number | null = null
+    function mark_boot_stage(stage: string): void {
+      if (!boot_reported)
+        boot_marks.push({ stage, at: Date.now() })
+    }
+    function report_boot_complete(storage: 'opfs' | 'memory'): void {
+      if (boot_reported || boot_marks.length === 0)
+        return
+      boot_reported = true
+      const done_at = Date.now()
+      const stage_ms: Record<string, number> = {}
+      boot_marks.forEach(({ stage, at }, index) => {
+        const next_at = boot_marks[index + 1]?.at ?? done_at
+        stage_ms[stage] = (stage_ms[stage] ?? 0) + (next_at - at)
+      })
+      report_dict_boot({
+        dict_id,
+        duration_ms: done_at - boot_marks[0].at,
+        cold: boot_cold || storage === 'memory',
+        storage,
+        snapshot_bytes: boot_snapshot_bytes,
+        stage_ms,
+      })
+    }
+
     await open_and_wire()
 
     /**
@@ -93,6 +126,8 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
      */
     async function drop_in_snapshot(): Promise<void> {
       try {
+        boot_cold = true
+        mark_boot_stage('snapshot_fetch')
         context.report_progress?.('snapshot_fetch')
         const fetched = await fetch_dict_snapshot({
           dict_id,
@@ -104,6 +139,7 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
           // AND feeds the boot download progress bar with the byte counts.
           on_progress: ({ received_bytes, total_bytes }) => context.report_progress?.('snapshot_fetch', { received_bytes, total_bytes }),
         })
+        boot_snapshot_bytes = fetched.bytes.length
         await write_opfs_db_file({ path, bytes: fetched.bytes })
         console.info(`[dict-instance] ${dict_id} fetched fresh snapshot from ${fetched.source} (${fetched.bytes.length} bytes)`)
       } catch (err) {
@@ -125,9 +161,11 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
             console.info(`[dict-instance] ${dict_id} opening existing OPFS file (no fetch)`)
           else
             await drop_in_snapshot()
+          mark_boot_stage('opfs_open')
           context.report_progress?.('opfs_open')
           const { connection: opened } = await open_opfs_connection({ path, foreign_keys: true })
           try {
+            mark_boot_stage('migrate')
             context.report_progress?.('migrate')
             await ensure_migrations({ dict_id, connection: opened })
             await ensure_metadata({ dict_id, connection: opened })
@@ -147,6 +185,7 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
     }
 
     async function open_and_wire(): Promise<void> {
+      mark_boot_stage('probe')
       context.report_progress?.('probe')
       if (await opfs_is_available()) {
         connection = await open_opfs_prepared()
@@ -156,11 +195,13 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
         // scratch and the sync engine backfills via pull-since-null.
         connection = await open_memory_connection({ foreign_keys: true })
         is_opfs_backed = false
+        mark_boot_stage('migrate')
         context.report_progress?.('migrate')
         await ensure_migrations({ dict_id, connection })
         await ensure_metadata({ dict_id, connection })
       }
 
+      mark_boot_stage('engine_start')
       context.report_progress?.('engine_start')
       engine = new DictSyncEngine({
         dict_id,
@@ -209,6 +250,7 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
       }
 
       engine.start()
+      report_boot_complete(is_opfs_backed ? 'opfs' : 'memory')
 
       await touch_dict({ dict_id, is_editor: has_editor_role }).catch(() => { /* best-effort */ })
       // Opportunistic eviction in the background — never block opening. The

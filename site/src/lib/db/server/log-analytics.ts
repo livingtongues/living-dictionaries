@@ -88,7 +88,7 @@ function ensure_is_noise_msg(db: Database.Database): void {
  * `navigation` is the client-side SPA nav duration (home→entry etc), folded in
  * from the already-logged `navigation` events — no dedicated perf row.
  */
-const PERF_METRICS = ['page_load', 'navigation', 'search'] as const
+const PERF_METRICS = ['page_load', 'navigation', 'dict_boot', 'search'] as const
 /** Core Web Vitals surfaced on the dashboard, in display order (the canonical CWV trio first). */
 const WEB_VITAL_METRICS = ['LCP', 'INP', 'CLS', 'FCP', 'TTFB'] as const
 
@@ -105,6 +105,34 @@ export interface PerfSummary { name: string, count: number, p50: number | null, 
 export interface PerfDailyPoint { day: string, metrics: Record<string, { p50: number, p95: number, count: number }> }
 /** Per-route `page_load` timing (hot window) — slowest routes (by p95) first. */
 export interface RoutePerf { route: string, count: number, p50: number | null, p95: number | null, max: number | null }
+/**
+ * Plain-language SPA-navigation split: `entering_dictionary` = a hop from outside
+ * any dictionary (home, /dictionaries, …) into one — the hop that may pay the
+ * cold dict-DB snapshot download; `within_dictionary` = hops between pages of a
+ * dictionary (warm, should feel instant). The 2026-07-10 review had to hand-split
+ * these; averaged together the cold first-hop hides inside the warm numbers.
+ */
+export interface NavSection { section: 'entering_dictionary' | 'within_dictionary' | 'other', count: number, p50: number | null, p90: number | null, p95: number | null }
+/** One side (cold or warm) of the dict-DB boot distribution. */
+export interface DictBootSide { count: number, p50: number | null, p90: number | null, p95: number | null }
+/**
+ * Dictionary local-DB boot timing from the worker-emitted `dict_boot` perf rows
+ * (`dict-instance.ts`): cold = the OPFS file was absent so the boot downloaded a
+ * snapshot (or a MemoryVFS boot); warm = the on-device copy opened in place.
+ * Directly measures the one segment of the homepage→dictionary journey that SPA
+ * `navigation` timings can only imply. Emitting from 2026-07-10 — empty until a
+ * deploy carries the emitter.
+ */
+export interface DictBootPerf {
+  total: number
+  cold: DictBootSide
+  warm: DictBootSide
+  /** Typical (p50) snapshot download size on cold boots, in bytes; null when unknown. */
+  cold_snapshot_bytes_p50: number | null
+  /** Slowest dictionaries first (by cold p50, warm p50 as fallback). */
+  by_dictionary: { dictionary_id: string, name: string | null, url: string | null, count: number, cold_count: number, cold_p50: number | null, warm_p50: number | null, max: number | null }[]
+  daily: { day: string, cold_count: number, warm_count: number, cold_p50: number | null, cold_p95: number | null }[]
+}
 /** Core Web Vitals distribution (LCP/INP/CLS/FCP/TTFB); `value` is ms except CLS (unitless). p75 is the CWV threshold metric. */
 export interface WebVitalSummary { metric: string, count: number, p50: number | null, p75: number | null, p95: number | null }
 /** Per-bucket TTFB (page_load `responseStart`) distribution. */
@@ -293,6 +321,10 @@ export interface LogAnalytics {
     by_route: RoutePerf[]
     /** Per-destination-route client SPA navigation timing (home→entry etc), most-travelled first. */
     nav_by_route: RoutePerf[]
+    /** SPA navigation split by section: entering a dictionary (cold hop) vs within one (warm). */
+    nav_sections: NavSection[]
+    /** Dictionary local-DB boot timing, cold (snapshot download) vs warm (on-device). */
+    dict_boot: DictBootPerf
     /** Per-landing-route LCP (largest contentful paint), most-sampled first. */
     lcp_by_route: RoutePerf[]
   }
@@ -1490,7 +1522,7 @@ function build_boot_health(ctx: AnalyticsContext): BootHealth {
  * bfcache/instant-nav 0ms loads + negatives that drag the p50 down). Includes the
  * per-route page-load split (slowest p95 first).
  */
-function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: DailyPoint[] }): { summary: PerfSummary[], daily: PerfDailyPoint[], by_route: RoutePerf[], nav_by_route: RoutePerf[], lcp_by_route: RoutePerf[] } {
+function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: DailyPoint[] }): LogAnalytics['performance'] {
   const perf_rows = ctx.logs_db.prepare(`
     SELECT substr(received_at, 1, 10) day,
            json_extract(context, '$.name') name,
@@ -1535,19 +1567,37 @@ function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: Daily
     SELECT substr(received_at, 1, 10)              day,
            json_extract(context, '$.duration_ms') duration_ms,
            json_extract(context, '$.to')          to_path,
+           json_extract(context, '$.from')        from_path,
            url
     FROM client_logs
     WHERE received_at >= ? AND message = 'navigation' AND ${ctx.audience_filter}
       AND json_extract(context, '$.duration_ms') > 0
-  `).all(ctx.window_start_iso) as { day: string, duration_ms: number, to_path: string | null, url: string | null }[]
+  `).all(ctx.window_start_iso) as { day: string, duration_ms: number, to_path: string | null, from_path: string | null, url: string | null }[]
   const nav_route_values = new Map<string, number[]>()
+  const nav_section_values = new Map<NavSection['section'], number[]>()
+  const is_dict_route = (route: string): boolean => route.startsWith('dictionary:')
   for (const row of nav_rows) {
     const to_route = normalize_route(typeof row.to_path === 'string' ? row.to_path : (row.url ? url_route(row.url).split('?')[0] : null))
     record_timing('navigation', row.day, row.duration_ms, to_route)
     if (!nav_route_values.has(to_route))
       nav_route_values.set(to_route, [])
     nav_route_values.get(to_route)?.push(row.duration_ms)
+    // Cold-vs-warm hop classification: entering a dictionary from outside pays
+    // the dict-DB boot; hops within one should be near-instant.
+    const from_route = normalize_route(typeof row.from_path === 'string' ? row.from_path : null)
+    const section: NavSection['section'] = is_dict_route(to_route)
+      ? (is_dict_route(from_route) ? 'within_dictionary' : 'entering_dictionary')
+      : 'other'
+    if (!nav_section_values.has(section))
+      nav_section_values.set(section, [])
+    nav_section_values.get(section)?.push(row.duration_ms)
   }
+  const nav_sections: NavSection[] = (['entering_dictionary', 'within_dictionary', 'other'] as const)
+    .filter(section => nav_section_values.has(section))
+    .map((section) => {
+      const values = nav_section_values.get(section) ?? []
+      return { section, count: values.length, p50: percentile(values, 50), p90: percentile(values, 90), p95: percentile(values, 95) }
+    })
 
   const perf_names = [...PERF_METRICS, ...[...perf_all.keys()].filter(name => !PERF_METRICS.includes(name as typeof PERF_METRICS[number]))]
   const summary: PerfSummary[] = perf_names.map((name) => {
@@ -1608,7 +1658,83 @@ function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: Daily
     .sort((first, second) => second.count - first.count)
     .slice(0, ROUTE_PERF_LIMIT)
 
-  return { summary, daily: daily_perf, by_route, nav_by_route, lcp_by_route }
+  return { summary, daily: daily_perf, by_route, nav_by_route, nav_sections, lcp_by_route, dict_boot: build_dict_boot(ctx) }
+}
+
+/**
+ * Dictionary local-DB boot timing (`dict_boot` perf rows shipped by the leader
+ * worker in `dict-instance.ts`). Cold = downloaded a snapshot / MemoryVFS; warm
+ * = the on-device OPFS copy opened in place. Empty until a deployed build
+ * carries the emitter (2026-07-10) — the panel shows a "collecting" note.
+ */
+function build_dict_boot(ctx: AnalyticsContext): DictBootPerf {
+  const rows = ctx.logs_db.prepare(`
+    SELECT substr(received_at, 1, 10)                 day,
+           json_extract(context, '$.duration_ms')    duration_ms,
+           json_extract(context, '$.cold')           cold,
+           json_extract(context, '$.dict_id')        dict_id,
+           json_extract(context, '$.snapshot_bytes') snapshot_bytes
+    FROM client_logs
+    WHERE received_at >= ? AND message = 'perf' AND ${ctx.audience_filter}
+      AND json_extract(context, '$.name') = 'dict_boot'
+      AND json_extract(context, '$.duration_ms') > 0
+  `).all(ctx.window_start_iso) as { day: string, duration_ms: number, cold: number | null, dict_id: string | null, snapshot_bytes: number | null }[]
+
+  const cold_values: number[] = []
+  const warm_values: number[] = []
+  const snapshot_sizes: number[] = []
+  const by_dict = new Map<string, { cold: number[], warm: number[] }>()
+  const by_day = new Map<string, { cold: number[], warm: number[] }>()
+  for (const row of rows) {
+    const is_cold = row.cold === 1
+    ;(is_cold ? cold_values : warm_values).push(row.duration_ms)
+    if (is_cold && typeof row.snapshot_bytes === 'number' && row.snapshot_bytes > 0)
+      snapshot_sizes.push(row.snapshot_bytes)
+    const dict_id = row.dict_id ?? 'unknown'
+    if (!by_dict.has(dict_id))
+      by_dict.set(dict_id, { cold: [], warm: [] })
+    ;(is_cold ? by_dict.get(dict_id)?.cold : by_dict.get(dict_id)?.warm)?.push(row.duration_ms)
+    if (!by_day.has(row.day))
+      by_day.set(row.day, { cold: [], warm: [] })
+    ;(is_cold ? by_day.get(row.day)?.cold : by_day.get(row.day)?.warm)?.push(row.duration_ms)
+  }
+
+  const side = (values: number[]): DictBootSide => ({ count: values.length, p50: percentile(values, 50), p90: percentile(values, 90), p95: percentile(values, 95) })
+
+  // Catalog names so the panel reads "Sugt'stun", not an opaque id.
+  const dict_ids = [...by_dict.keys()].filter(id => id !== 'unknown')
+  const names = new Map<string, { name: string | null, url: string | null }>()
+  if (dict_ids.length) {
+    const placeholders = dict_ids.map(() => '?').join(', ')
+    for (const row of ctx.shared_db.prepare(`SELECT id, name, url FROM dictionaries WHERE id IN (${placeholders})`).all(...dict_ids) as { id: string, name: string | null, url: string | null }[])
+      names.set(row.id, { name: row.name, url: row.url })
+  }
+  const by_dictionary = [...by_dict.entries()]
+    .map(([dictionary_id, values]) => ({
+      dictionary_id,
+      name: names.get(dictionary_id)?.name ?? null,
+      url: names.get(dictionary_id)?.url ?? null,
+      count: values.cold.length + values.warm.length,
+      cold_count: values.cold.length,
+      cold_p50: percentile(values.cold, 50),
+      warm_p50: percentile(values.warm, 50),
+      max: values.cold.length + values.warm.length ? Math.max(...values.cold, ...values.warm) : null,
+    }))
+    .sort((first, second) => (second.cold_p50 ?? second.warm_p50 ?? 0) - (first.cold_p50 ?? first.warm_p50 ?? 0))
+    .slice(0, ROUTE_PERF_LIMIT)
+
+  const daily = [...by_day.entries()]
+    .sort(([first_day], [second_day]) => first_day.localeCompare(second_day))
+    .map(([day, values]) => ({ day, cold_count: values.cold.length, warm_count: values.warm.length, cold_p50: percentile(values.cold, 50), cold_p95: percentile(values.cold, 95) }))
+
+  return {
+    total: rows.length,
+    cold: side(cold_values),
+    warm: side(warm_values),
+    cold_snapshot_bytes_p50: percentile(snapshot_sizes, 50),
+    by_dictionary,
+    daily,
+  }
 }
 
 /**

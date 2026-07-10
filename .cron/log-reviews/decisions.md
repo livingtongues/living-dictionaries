@@ -17,4 +17,13 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   after the crawl settles.
 - **2026-07-09 — crawler noise:** `live_query_failed` proved 98.5% Googlebot; treat crawler
   misuse / bot boot-cascade rows as known-noise pending the fleet noise-floor artifact
-  (worker `74d5d94a`).
+  (worker `74d5d94a`). Same known-noise family: `[orama-watcher] delta scan failed`,
+  `initial dict sync failed`, `Rejected` (serviceWorker.register — all anon/bot prerenderers),
+  stale-build dynamic-import/CSS-preload 404s during blue/green swaps.
+- **2026-07-10 — entry-page `effect_update_depth_exceeded`: essentially CLOSED.** Collapsed 57→1 on
+  build `1783663107615` after `daed5d93`/`24b080b1`/`42f737d7`. Watch the residual 1; don't
+  re-propose the fix (documented in-code at `entry/[entryId]/+page.svelte` L62–71).
+- **2026-07-10 — dashboard route/nav/homepage perf split ALREADY SHIPPED** (`RoutePerf` per-route
+  page_load p95, navigation-by-destination split, LCP-by-distance, CWV, boot-health). Don't
+  re-propose per-route or homepage-vs-entry perf panels. The open gap is a `dict_boot` cold/warm
+  timing (needs a new client `track_timing` first).

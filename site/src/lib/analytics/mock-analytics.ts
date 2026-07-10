@@ -53,7 +53,8 @@ function build_perf(days: number): LogAnalytics['performance'] {
       { name: 'page_load', count: 1240, p50: 1197, p90: 3344, p95: 4537, max: 14652, slowest: { duration_ms: 14652, route: '/example-dict/entries' } },
       { name: 'navigation', count: 3620, p50: 312, p90: 980, p95: 1640, max: 9210, slowest: { duration_ms: 9210, route: '/example-dict/entry/abc' } },
       { name: 'viewer_boot', count: 188, p50: 1184, p90: 4688, p95: 6493, max: 7687, slowest: { duration_ms: 7687, route: '/example-dict' } },
-      { name: 'search', count: 0, p50: null, p90: null, p95: null, max: null, slowest: null },
+      { name: 'dict_boot', count: 402, p50: 480, p90: 2600, p95: 4900, max: 9600, slowest: { duration_ms: 9600, route: 'sugtstun' } },
+      { name: 'search', count: 9, p50: 12, p90: 84, p95: 120, max: 140, slowest: { duration_ms: 140, route: '/example-dict/entries' } },
     ],
     daily,
     by_route: [
@@ -71,11 +72,38 @@ function build_perf(days: number): LogAnalytics['performance'] {
       { route: 'dictionary:settings', count: 188, p50: 340, p95: 980, max: 3100 },
       { route: 'account', count: 96, p50: 180, p95: 520, max: 1400 },
     ],
+    // Entering a dictionary pays the cold dict-DB boot; hops within one are instant.
+    nav_sections: [
+      { section: 'entering_dictionary', count: 486, p50: 310, p90: 980, p95: 1740 },
+      { section: 'within_dictionary', count: 2610, p50: 48, p90: 190, p95: 320 },
+      { section: 'other', count: 524, p50: 120, p90: 380, p95: 690 },
+    ],
     lcp_by_route: [
       { route: 'dictionary:entry', count: 168, p50: 1720, p95: 4980, max: 9800 },
       { route: 'dictionary:entries', count: 92, p50: 1480, p95: 3810, max: 8200 },
       { route: 'home', count: 56, p50: 1120, p95: 2610, max: 5200 },
     ],
+    // Cold = snapshot download + OPFS open; warm = the on-device copy. One big
+    // dictionary (sugtstun-scale) dominates the cold tail; a thin-data row too.
+    dict_boot: {
+      total: 402,
+      cold: { count: 118, p50: 1480, p90: 4200, p95: 6800 },
+      warm: { count: 284, p50: 210, p90: 520, p95: 890 },
+      cold_snapshot_bytes_p50: 4_600_000,
+      by_dictionary: [
+        { dictionary_id: 'sugtstun', name: "Sugt'stun", url: 'sugtstun', count: 64, cold_count: 22, cold_p50: 3900, warm_p50: 340, max: 9600 },
+        { dictionary_id: 'apatani', name: 'Apatani', url: 'apatani', count: 141, cold_count: 38, cold_p50: 1350, warm_p50: 210, max: 5100 },
+        { dictionary_id: 'river', name: 'River Dweller', url: 'river', count: 102, cold_count: 31, cold_p50: 1120, warm_p50: 180, max: 4200 },
+        { dictionary_id: 'galo', name: 'Galo', url: 'galo', count: 88, cold_count: 24, cold_p50: 890, warm_p50: 150, max: 2900 },
+        { dictionary_id: 'onondaga', name: 'Onondaga', url: 'onondaga', count: 7, cold_count: 3, cold_p50: 760, warm_p50: 120, max: 1900 },
+      ],
+      daily: [
+        { day: '2026-06-20', cold_count: 24, warm_count: 61, cold_p50: 1520, cold_p95: 7100 },
+        { day: '2026-06-21', cold_count: 31, warm_count: 74, cold_p50: 1410, cold_p95: 6200 },
+        { day: '2026-06-22', cold_count: 36, warm_count: 82, cold_p50: 1490, cold_p95: 6900 },
+        { day: '2026-06-23', cold_count: 27, warm_count: 67, cold_p50: 1460, cold_p95: 6400 },
+      ],
+    },
   }
 }
 
@@ -461,7 +489,15 @@ export const empty_analytics: LogAnalytics = {
   by_source: [],
   error_clusters: [],
   capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, webdriver_sessions: 0, devices: [], os: [], browsers: [], db_tiers: [] },
-  performance: { summary: [], daily: [], by_route: [], nav_by_route: [], lcp_by_route: [] },
+  performance: {
+    summary: [],
+    daily: [],
+    by_route: [],
+    nav_by_route: [],
+    nav_sections: [],
+    lcp_by_route: [],
+    dict_boot: { total: 0, cold: { count: 0, p50: null, p90: null, p95: null }, warm: { count: 0, p50: null, p90: null, p95: null }, cold_snapshot_bytes_p50: null, by_dictionary: [], daily: [] },
+  },
   web_vitals: [],
   geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [], lcp_by_country: [], lcp_by_distance: [] },
   errors_by_version: { current_version: '1719300000123', total: 0, current: 0, stale: 0, stale_pct: null, deploy_tail_errors: 0, deploy_tail_pct: null, versions: [] },

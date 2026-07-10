@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { PageData } from './$types'
-  import { ago, country_flag, format_bytes, format_ms, perf_label, short_time, short_version, USERS_COLOR } from '$lib/analytics/dashboard-format'
+  import { ago, country_flag, format_bytes, format_ms, is_thin_sample, perf_label, short_time, short_version, THIN_SAMPLE_N, USERS_COLOR } from '$lib/analytics/dashboard-format'
   import { log_insights } from '$lib/analytics/insights'
+  import AtAGlance from '$lib/analytics/AtAGlance.svelte'
   import ComboChart from '$lib/charts/ComboChart.svelte'
   import LineChart from '$lib/charts/LineChart.svelte'
   import VitalBar from '$lib/charts/VitalBar.svelte'
@@ -63,6 +64,19 @@
   const search_series = $derived(perf_series('search'))
 
   const web_vitals = $derived(analytics.web_vitals)
+
+  // Dictionary local-DB boot (cold snapshot download vs warm on-device open) +
+  // the entering-vs-within nav split — the plain-language "opening a dictionary"
+  // story. Empty until a deployed build emits `dict_boot` (2026-07-10).
+  const dict_boot = $derived(perf.dict_boot)
+  const nav_entering = $derived(perf.nav_sections.find(section => section.section === 'entering_dictionary'))
+  const nav_within = $derived(perf.nav_sections.find(section => section.section === 'within_dictionary'))
+  const dict_boot_daily_series = $derived([
+    { label: 'first-time p50', color: 'var(--primary)', points: dict_boot.daily.filter(point => point.cold_p50 !== null).map(point => ({ date: point.day, value: point.cold_p50 as number })) },
+    { label: 'first-time p95', color: USERS_COLOR, points: dict_boot.daily.filter(point => point.cold_p95 !== null).map(point => ({ date: point.day, value: point.cold_p95 as number })) },
+  ])
+  /** Any thin-sample rows in the perf tables → show the shared footnote once. */
+  const perf_has_thin = $derived([...perf.by_route, ...perf.nav_by_route, ...perf.lcp_by_route].some(row => is_thin_sample(row.count)) || perf.summary.some(metric => metric.count > 0 && is_thin_sample(metric.count)))
 
   // "Speed at a glance" — the friendly top-of-page summary of load + nav + paint.
   const perf_by_name = $derived(new Map(perf.summary.map(metric => [metric.name, metric])))
@@ -180,6 +194,8 @@
 
   {#if analytics.audience === 'bots'}
     <p class="audience-note">🤖 Showing <b>bot / crawler / AI-agent</b> traffic — timings below are bot-only. Diagnostics (errors, build, leader, clusters) always show everyone.</p>
+  {:else}
+    <AtAGlance {analytics} />
   {/if}
 
   {#if pipeline.missing_syncable_tables.length}
@@ -298,7 +314,7 @@
           <div class="speed-name">Page load</div>
           <div class="speed-desc">first / hard load (incl. SSR)</div>
           <div class="speed-value">{format_ms(page_load_metric?.p50 ?? null)} <span class="speed-unit">typical</span></div>
-          <div class="speed-sub">p95 {format_ms(page_load_metric?.p95 ?? null)} · n={format_number(page_load_metric?.count ?? 0)}</div>
+          <div class="speed-sub">p95 {format_ms(page_load_metric?.p95 ?? null)} · n={format_number(page_load_metric?.count ?? 0)}{#if (page_load_metric?.count ?? 0) > 0 && is_thin_sample(page_load_metric?.count)}<span class="thin-mark" title="thin data — under {THIN_SAMPLE_N} samples">*</span>{/if}</div>
           {#if page_load_spark.length > 1}
             <svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none" aria-hidden="true"><path d={spark_path(page_load_spark)} fill="none" stroke="var(--primary)" stroke-width="1.5" vector-effect="non-scaling-stroke" /></svg>
           {/if}
@@ -307,7 +323,12 @@
           <div class="speed-name">In-app navigation</div>
           <div class="speed-desc">home → entry &amp; other SPA moves</div>
           <div class="speed-value">{format_ms(navigation_metric?.p50 ?? null)} <span class="speed-unit">typical</span></div>
-          <div class="speed-sub">p95 {format_ms(navigation_metric?.p95 ?? null)} · n={format_number(navigation_metric?.count ?? 0)}</div>
+          <div class="speed-sub">p95 {format_ms(navigation_metric?.p95 ?? null)} · n={format_number(navigation_metric?.count ?? 0)}{#if (navigation_metric?.count ?? 0) > 0 && is_thin_sample(navigation_metric?.count)}<span class="thin-mark" title="thin data — under {THIN_SAMPLE_N} samples">*</span>{/if}</div>
+          {#if nav_within || nav_entering}
+            <div class="speed-sub">
+              {#if nav_within}inside a dictionary {format_ms(nav_within.p50)}{/if}{#if nav_within && nav_entering} · {/if}{#if nav_entering}entering one {format_ms(nav_entering.p50)}{/if}
+            </div>
+          {/if}
           {#if navigation_spark.length > 1}
             <svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none" aria-hidden="true"><path d={spark_path(navigation_spark)} fill="none" stroke={USERS_COLOR} stroke-width="1.5" vector-effect="non-scaling-stroke" /></svg>
           {/if}
@@ -321,6 +342,53 @@
       </div>
     {:else}
       <p class="muted">No speed samples in window yet — page-load, in-app navigation, and LCP timings land here once real sessions arrive.</p>
+    {/if}
+  </section>
+
+  <section class="panel">
+    <h2>Opening a dictionary <span class="hint">local dictionary DB boot · first-time = downloads it to the device · returning = already there</span></h2>
+    {#if dict_boot.total === 0}
+      <p class="muted">Collecting since this deploy — dictionaries report how long they take to open (first-time download vs returning) and the numbers appear here within a day of real visits.</p>
+      {#if nav_entering || nav_within}
+        <p class="muted">Meanwhile, from navigation timings: {#if nav_entering}entering a dictionary typically takes <b>{format_ms(nav_entering.p50)}</b> (p95 {format_ms(nav_entering.p95)}, n={format_number(nav_entering.count)}){/if}{#if nav_entering && nav_within}; {/if}{#if nav_within}moving around inside one takes <b>{format_ms(nav_within.p50)}</b>{/if}.</p>
+      {/if}
+    {:else}
+      <div class="ver-split">
+        <div class="ver-stat" class:thin={is_thin_sample(dict_boot.cold.count)}>
+          <div class="ver-value">{format_ms(dict_boot.cold.p50)}{#if is_thin_sample(dict_boot.cold.count)}<span class="thin-mark">*</span>{/if}</div>
+          <div class="ver-label">First-time open (typical)</div>
+          <div class="ver-sub">downloads the dictionary · p90 {format_ms(dict_boot.cold.p90)} · p95 {format_ms(dict_boot.cold.p95)} · n={format_number(dict_boot.cold.count)}{#if dict_boot.cold_snapshot_bytes_p50} · typical download {format_bytes(dict_boot.cold_snapshot_bytes_p50)}{/if}</div>
+        </div>
+        <div class="ver-stat" class:thin={is_thin_sample(dict_boot.warm.count)}>
+          <div class="ver-value">{format_ms(dict_boot.warm.p50)}{#if is_thin_sample(dict_boot.warm.count)}<span class="thin-mark">*</span>{/if}</div>
+          <div class="ver-label">Returning open (typical)</div>
+          <div class="ver-sub">already on the device · p90 {format_ms(dict_boot.warm.p90)} · p95 {format_ms(dict_boot.warm.p95)} · n={format_number(dict_boot.warm.count)}</div>
+        </div>
+      </div>
+      {#if dict_boot_daily_series[0].points.length > 1}
+        <h3 class="perf-h3">First-time open trend <span class="hint">ms · typical + p95</span></h3>
+        <ComboChart series={dict_boot_daily_series} height={160} value_format={format_ms} />
+      {/if}
+      {#if dict_boot.by_dictionary.length}
+        <h3 class="perf-h3">By dictionary <span class="hint">slowest first-time opens first</span></h3>
+        <table class="route-perf dict-boot-table">
+          <thead><tr><th>Dictionary</th><th>First-time</th><th>Returning</th><th>Worst</th><th>Opens</th></tr></thead>
+          <tbody>
+            {#each dict_boot.by_dictionary as row (row.dictionary_id)}
+              <tr class:thin={is_thin_sample(row.count)}>
+                <td class="perf-route">{#if row.url}<a href={`/${row.url}`}>{row.name ?? row.url}</a>{:else}{row.name ?? row.dictionary_id}{/if}</td>
+                <td><b>{format_ms(row.cold_p50)}</b></td>
+                <td>{format_ms(row.warm_p50)}</td>
+                <td class="muted-inline">{format_ms(row.max)}</td>
+                <td class="muted-inline">{format_number(row.count)}{#if is_thin_sample(row.count)}<span class="thin-mark">*</span>{/if}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      {/if}
+      {#if is_thin_sample(dict_boot.cold.count) || is_thin_sample(dict_boot.warm.count) || dict_boot.by_dictionary.some(row => is_thin_sample(row.count))}
+        <p class="thin-note">* thin data — fewer than {THIN_SAMPLE_N} samples, treat as anecdotes rather than a trend.</p>
+      {/if}
     {/if}
   </section>
 
@@ -637,12 +705,12 @@
       <div class="perf-summary">
         {#each perf.summary as metric (metric.name)}
           {#if metric.count > 0}
-            <div class="perf-stat">
+            <div class="perf-stat" class:thin={is_thin_sample(metric.count)}>
               <div class="perf-name">{perf_label(metric.name)}</div>
               <div class="perf-nums">
                 <span><b>{format_ms(metric.p50 ?? 0)}</b> p50</span>
                 <span><b>{format_ms(metric.p95 ?? 0)}</b> p95</span>
-                <span class="muted-inline">{format_ms(metric.max ?? 0)} max · n={format_number(metric.count)}</span>
+                <span class="muted-inline">{format_ms(metric.max ?? 0)} max · n={format_number(metric.count)}{#if is_thin_sample(metric.count)}<span class="thin-mark">*</span>{/if}</span>
               </div>
               {#if metric.slowest}
                 <div class="perf-slowest" title={metric.slowest.route}>
@@ -681,12 +749,12 @@
               <thead><tr><th>Route</th><th>p50</th><th>p95</th><th>max</th><th>n</th></tr></thead>
               <tbody>
                 {#each perf.by_route as row (row.route)}
-                  <tr>
+                  <tr class:thin={is_thin_sample(row.count)}>
                     <td class="perf-route">{row.route}</td>
                     <td>{format_ms(row.p50 ?? 0)}</td>
                     <td><b>{format_ms(row.p95 ?? 0)}</b></td>
                     <td class="muted-inline">{format_ms(row.max ?? 0)}</td>
-                    <td class="muted-inline">{format_number(row.count)}</td>
+                    <td class="muted-inline">{format_number(row.count)}{#if is_thin_sample(row.count)}<span class="thin-mark">*</span>{/if}</td>
                   </tr>
                 {/each}
               </tbody>
@@ -700,12 +768,12 @@
               <thead><tr><th>Destination</th><th>p50</th><th>p95</th><th>max</th><th>n</th></tr></thead>
               <tbody>
                 {#each perf.nav_by_route as row (row.route)}
-                  <tr>
+                  <tr class:thin={is_thin_sample(row.count)}>
                     <td class="perf-route">{row.route}</td>
                     <td>{format_ms(row.p50 ?? 0)}</td>
                     <td><b>{format_ms(row.p95 ?? 0)}</b></td>
                     <td class="muted-inline">{format_ms(row.max ?? 0)}</td>
-                    <td class="muted-inline">{format_number(row.count)}</td>
+                    <td class="muted-inline">{format_number(row.count)}{#if is_thin_sample(row.count)}<span class="thin-mark">*</span>{/if}</td>
                   </tr>
                 {/each}
               </tbody>
@@ -713,22 +781,42 @@
           </div>
         {/if}
       </div>
+      {#if perf.nav_sections.length}
+        <h3 class="perf-h3">Navigation, entering vs inside a dictionary <span class="hint">the first hop may download the dictionary; hops inside should feel instant</span></h3>
+        <table class="route-perf">
+          <thead><tr><th>Hop</th><th>p50</th><th>p90</th><th>p95</th><th>n</th></tr></thead>
+          <tbody>
+            {#each perf.nav_sections as row (row.section)}
+              <tr class:thin={is_thin_sample(row.count)}>
+                <td>{row.section === 'entering_dictionary' ? 'Entering a dictionary' : row.section === 'within_dictionary' ? 'Inside a dictionary' : 'Elsewhere on the site'}</td>
+                <td><b>{format_ms(row.p50 ?? 0)}</b></td>
+                <td>{format_ms(row.p90 ?? 0)}</td>
+                <td>{format_ms(row.p95 ?? 0)}</td>
+                <td class="muted-inline">{format_number(row.count)}{#if is_thin_sample(row.count)}<span class="thin-mark">*</span>{/if}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      {/if}
       {#if perf.lcp_by_route.length}
         <h3 class="perf-h3">LCP by landing route <span class="hint">largest contentful paint · most-sampled first · ms</span></h3>
         <table class="route-perf">
           <thead><tr><th>Route</th><th>p50</th><th>p95</th><th>max</th><th>n</th></tr></thead>
           <tbody>
             {#each perf.lcp_by_route as row (row.route)}
-              <tr>
+              <tr class:thin={is_thin_sample(row.count)}>
                 <td class="perf-route">{row.route}</td>
                 <td>{format_ms(row.p50 ?? 0)}</td>
                 <td><b>{format_ms(row.p95 ?? 0)}</b></td>
                 <td class="muted-inline">{format_ms(row.max ?? 0)}</td>
-                <td class="muted-inline">{format_number(row.count)}</td>
+                <td class="muted-inline">{format_number(row.count)}{#if is_thin_sample(row.count)}<span class="thin-mark">*</span>{/if}</td>
               </tr>
             {/each}
           </tbody>
         </table>
+      {/if}
+      {#if perf_has_thin}
+        <p class="thin-note">* thin data — fewer than {THIN_SAMPLE_N} samples, treat percentiles as anecdotes rather than a trend.</p>
       {/if}
     {:else}
       <p class="muted">No performance timings in window yet. Page-load, viewer-boot, and search timings appear here.</p>
@@ -1283,6 +1371,28 @@
     max-width: 34rem;
     margin-top: 0.5rem;
     font-variant-numeric: tabular-nums;
+  }
+  .dict-boot-table a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .dict-boot-table a:hover { text-decoration: underline; }
+  /* Thin-sample percentiles are anecdotes, not trends — dim + asterisk them. */
+  tr.thin td:not(:first-child),
+  .perf-stat.thin .perf-nums,
+  .ver-stat.thin .ver-value {
+    opacity: 0.55;
+  }
+  .thin-mark {
+    color: var(--warning, #d97706);
+    font-weight: 700;
+    margin-left: 0.1rem;
+  }
+  .thin-note {
+    margin: 0.5rem 0 0;
+    font-size: 0.72rem;
+    color: var(--color-secondary);
   }
   .route-perf td:not(.perf-route) { text-align: right; }
   .route-perf th:not(:first-child) { text-align: right; }

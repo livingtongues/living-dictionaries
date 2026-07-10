@@ -92,6 +92,48 @@ describe(get_log_analytics, () => {
     expect(bundle_row?.code).toBe('MISUSE')
   })
 
+  test('dict_boot splits cold vs warm, joins catalog names, and ranks slowest first', () => {
+    db.prepare(`INSERT INTO dictionaries (id, name, url) VALUES ('apatani', 'Apatani', 'apatani')`).run()
+    // Two cold boots of apatani (snapshot download) + one warm re-open.
+    add_log({ day: '2026-06-30', message: 'perf', context: { name: 'dict_boot', duration_ms: 3000, cold: true, dict_id: 'apatani', snapshot_bytes: 4_000_000, session_id: 's1' } })
+    add_log({ day: '2026-06-29', message: 'perf', context: { name: 'dict_boot', duration_ms: 1000, cold: true, dict_id: 'apatani', snapshot_bytes: 2_000_000, session_id: 's2' } })
+    add_log({ day: '2026-06-30', message: 'perf', context: { name: 'dict_boot', duration_ms: 200, cold: false, dict_id: 'apatani', session_id: 's3' } })
+    // A faster dictionary with no catalog row.
+    add_log({ day: '2026-06-30', message: 'perf', context: { name: 'dict_boot', duration_ms: 400, cold: true, dict_id: 'galo', session_id: 's4' } })
+    // A non-dict_boot perf row must NOT be counted.
+    add_log({ day: '2026-06-30', message: 'perf', context: { name: 'page_load', duration_ms: 900, session_id: 's5' } })
+
+    const { performance } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const { dict_boot } = performance
+    expect(dict_boot.total).toBe(4)
+    expect(dict_boot.cold.count).toBe(3)
+    expect(dict_boot.warm).toEqual({ count: 1, p50: 200, p90: 200, p95: 200 })
+    expect(dict_boot.cold_snapshot_bytes_p50).toBe(2_000_000)
+    // Slowest cold p50 first; catalog name joined; missing catalog → nulls.
+    expect(dict_boot.by_dictionary[0]).toMatchObject({ dictionary_id: 'apatani', name: 'Apatani', url: 'apatani', count: 3, cold_count: 2, warm_p50: 200, max: 3000 })
+    expect(dict_boot.by_dictionary[1]).toMatchObject({ dictionary_id: 'galo', name: null, url: null, cold_p50: 400 })
+    expect(dict_boot.daily.map(point => point.day)).toEqual(['2026-06-29', '2026-06-30'])
+    // dict_boot rows also feed the shared perf summary as a first-class metric.
+    const summary_row = performance.summary.find(metric => metric.name === 'dict_boot')
+    expect(summary_row?.count).toBe(4)
+  })
+
+  test('nav_sections splits SPA hops into entering vs within a dictionary', () => {
+    // Homepage → dictionary entries: the cold first hop.
+    add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's1', from: '/', to: '/apatani/entries', duration_ms: 800 } })
+    // Within a dictionary (warm hops).
+    add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's1', from: '/apatani', to: '/apatani/entries/e1', duration_ms: 40 } })
+    add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's1', from: '/apatani/entries/e1', to: '/apatani/entries', duration_ms: 20 } })
+    // Dictionary → about page: not a dict destination.
+    add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's1', from: '/apatani/entries', to: '/about', duration_ms: 100 } })
+
+    const { performance } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const sections = new Map(performance.nav_sections.map(section => [section.section, section]))
+    expect(sections.get('entering_dictionary')).toMatchObject({ count: 1, p50: 800 })
+    expect(sections.get('within_dictionary')).toMatchObject({ count: 2, p50: 20 })
+    expect(sections.get('other')).toMatchObject({ count: 1, p50: 100 })
+  })
+
   test('sync_health splits sync_failed by kind + current/stale build and isolates currently-stuck client_behind tabs', () => {
     // Rows land at T10:00; NOW at T10:30 keeps the same-day ones inside the 45-min stuck window.
     const now = new Date('2026-06-30T10:30:00.000Z')
@@ -1131,8 +1173,18 @@ describe(get_log_analytics, () => {
                 "event": "entry_deleted",
                 "seen": false,
               },
+              {
+                "count": 0,
+                "event": "entry_featured",
+                "seen": false,
+              },
+              {
+                "count": 0,
+                "event": "entry_unfeatured",
+                "seen": false,
+              },
             ],
-            "never_emitted": 4,
+            "never_emitted": 6,
           },
           "generated_at": "2026-06-30T12:00:00.000Z",
           "geo": {
@@ -1359,8 +1411,27 @@ describe(get_log_analytics, () => {
                 },
               },
             ],
+            "dict_boot": {
+              "by_dictionary": [],
+              "cold": {
+                "count": 0,
+                "p50": null,
+                "p90": null,
+                "p95": null,
+              },
+              "cold_snapshot_bytes_p50": null,
+              "daily": [],
+              "total": 0,
+              "warm": {
+                "count": 0,
+                "p50": null,
+                "p90": null,
+                "p95": null,
+              },
+            },
             "lcp_by_route": [],
             "nav_by_route": [],
+            "nav_sections": [],
             "summary": [
               {
                 "count": 4,
@@ -1378,6 +1449,15 @@ describe(get_log_analytics, () => {
                 "count": 0,
                 "max": null,
                 "name": "navigation",
+                "p50": null,
+                "p90": null,
+                "p95": null,
+                "slowest": null,
+              },
+              {
+                "count": 0,
+                "max": null,
+                "name": "dict_boot",
                 "p50": null,
                 "p90": null,
                 "p95": null,

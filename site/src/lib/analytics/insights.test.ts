@@ -28,7 +28,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     by_source: [],
     error_clusters: [],
     capability: { total_sessions: 0, below_capability_sessions: 0, bot_sessions: 0, webdriver_sessions: 0, devices: [], os: [], browsers: [], db_tiers: [] },
-    performance: { summary: [], daily: [], by_route: [], nav_by_route: [], lcp_by_route: [] },
+    performance: { summary: [], daily: [], by_route: [], nav_by_route: [], nav_sections: [], lcp_by_route: [], dict_boot: { total: 0, cold: { count: 0, p50: null, p90: null, p95: null }, warm: { count: 0, p50: null, p90: null, p95: null }, cold_snapshot_bytes_p50: null, by_dictionary: [], daily: [] } },
     web_vitals: [],
     geo: { located_sessions: 0, areas: [], ttfb_by_country: [], ttfb_by_distance: [], lcp_by_country: [], lcp_by_distance: [] },
     errors_by_version: { current_version: null, total: 0, current: 0, stale: 0, stale_pct: null, deploy_tail_errors: 0, deploy_tail_pct: null, versions: [] },

@@ -13,9 +13,19 @@ export function format_ms(ms: number | null): string {
   return ms >= 1000 ? `${(ms / 1000).toFixed(ms >= 10000 ? 0 : 1)}s` : `${Math.round(ms)}ms`
 }
 
-const PERF_LABELS: Record<string, string> = { page_load: 'Page load', navigation: 'Navigation', search: 'Search', web_vital: 'Web vital', viewer_boot: 'Viewer boot' }
+const PERF_LABELS: Record<string, string> = { page_load: 'Page load', navigation: 'Navigation', search: 'Search', web_vital: 'Web vital', viewer_boot: 'Viewer boot', dict_boot: 'Dictionary open' }
 export function perf_label(name: string): string {
   return PERF_LABELS[name] ?? name
+}
+
+/**
+ * Percentiles from fewer samples than this are anecdotes, not trends — one cold
+ * outlier in n=9 once read as a "p90 = 7.8s regression" (2026-07-10 review,
+ * ported from tutor). Views dim + asterisk such rows.
+ */
+export const THIN_SAMPLE_N = 15
+export function is_thin_sample(count: number | null | undefined): boolean {
+  return (count ?? 0) < THIN_SAMPLE_N
 }
 
 /** Relative "…m/h/d ago" from an ISO instant, or `never` when null. */

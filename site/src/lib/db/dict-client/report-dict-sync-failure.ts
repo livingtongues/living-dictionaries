@@ -206,6 +206,49 @@ export function report_dict_self_healed({ dict_id, reason, flushed_push }: {
   }
 }
 
+/**
+ * Ship the completed dict-DB boot as a `perf` row (`context.name = 'dict_boot'`)
+ * — the one segment of the homepage→dictionary journey that was previously only
+ * inferred from SPA `navigation` timings (2026-07-10 review, coverage gap B1).
+ * `cold` = a snapshot fetch ran (OPFS file absent) or a MemoryVFS boot that
+ * re-pulls everything; warm = the existing OPFS file opened in place. Feeds the
+ * cold/warm boot panel on /admin/health.
+ */
+export function report_dict_boot({ dict_id, duration_ms, cold, storage, snapshot_bytes, stage_ms }: {
+  dict_id: string
+  duration_ms: number
+  cold: boolean
+  storage: 'opfs' | 'memory'
+  snapshot_bytes: number | null
+  stage_ms: Record<string, number>
+}): void {
+  try {
+    void api_log({
+      entries: [{
+        level: 'info',
+        message: 'perf',
+        client_time: new Date().toISOString(),
+        user_agent: safe_user_agent(),
+        platform: 'web',
+        app_version: version ?? null,
+        context: {
+          name: 'dict_boot',
+          duration_ms: Math.round(duration_ms),
+          worker: true,
+          dict_id,
+          cold,
+          storage,
+          snapshot_bytes,
+          stage_ms,
+          session_id: worker_session_id ?? undefined,
+        },
+      }],
+    })
+  } catch {
+    // Never let telemetry break the boot path.
+  }
+}
+
 /** Test-only. */
 export function _reset_dict_failure_throttle_for_tests(): void {
   last_shipped = null

@@ -10,7 +10,7 @@
   import JsonLd from '$lib/components/JsonLd.svelte'
   import ChangeHistory from '$lib/components/history/ChangeHistory.svelte'
   import { track } from '$lib/debug/remote-log'
-  import { ENTRY_OPENED } from '$lib/debug/log-events'
+  import { ENTRY_FEATURED, ENTRY_OPENED, ENTRY_UNFEATURED } from '$lib/debug/log-events'
   import { page } from '$app/state'
   import { dev } from '$app/environment'
   import { key_between } from '$lib/api/v1/fractional-index'
@@ -74,15 +74,30 @@
     const entry_id = page.params.entryId
     star_row_id = dict_db?.featured_entries.rows.find(row => row.entry_id === entry_id)?.id
   })
+  // In-flight guard + optimistic `star_row_id` from the insert's returned row:
+  // the `$effect` above only refreshes after the insert → live-rows round-trip,
+  // so a rapid second click used to re-insert the same entry_id and trip the
+  // UNIQUE natural key (2026-07-10 review, 🟡 P3).
+  let star_in_flight = false
   async function toggle_star() {
-    if (!dict_db)
+    if (!dict_db || star_in_flight)
       return
-    if (star_row_id) {
-      await dict_db.featured_entries.delete(star_row_id)
-      return
+    star_in_flight = true
+    try {
+      if (star_row_id) {
+        const unstarred_row_id = star_row_id
+        star_row_id = undefined
+        await dict_db.featured_entries.delete(unstarred_row_id)
+        track({ event: ENTRY_UNFEATURED, props: { dictionary_id: dictionary.id, entry_id: entry.id } })
+        return
+      }
+      const [last] = await dict_db.featured_entries.query({ order_by: 'sort_key DESC', limit: 1 }).snapshot()
+      const [inserted] = await dict_db.featured_entries.insert({ entry_id: entry.id, sort_key: key_between(last?.sort_key ?? null, null) })
+      star_row_id = inserted?.id
+      track({ event: ENTRY_FEATURED, props: { dictionary_id: dictionary.id, entry_id: entry.id } })
+    } finally {
+      star_in_flight = false
     }
-    const [last] = await dict_db.featured_entries.query({ order_by: 'sort_key DESC', limit: 1 }).snapshot()
-    await dict_db.featured_entries.insert({ entry_id: entry.id, sort_key: key_between(last?.sort_key ?? null, null) })
   }
 
   const entry_description = $derived(seo_description({ entry, gloss_languages: dictionary.gloss_languages, orthographies: dictionary.orthographies, t: page.data.t }))
