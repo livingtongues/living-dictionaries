@@ -2,15 +2,15 @@
   import type { Readable } from 'svelte/store'
   import type { EntryData } from '$lib/types'
   import type { DictHomeCard } from '$lib/db/server/dict-home'
-  import type { DictHomeStats } from './HomeStats.svelte'
+  import type { DictHomeStats } from './home/HomeStats.svelte'
   import type { ImageUploadStatus } from '$lib/components/image/upload-image'
-  import HomeEntryCard from './HomeEntryCard.svelte'
-  import HomeStats from './HomeStats.svelte'
-  import MapPanel from './MapPanel.svelte'
-  import DomainsPanel from './DomainsPanel.svelte'
-  import NudgeCard from './NudgeCard.svelte'
-  import HeroFieldModal from './HeroFieldModal.svelte'
-  import HeroImageControls from './HeroImageControls.svelte'
+  import HomeEntryCard from './home/HomeEntryCard.svelte'
+  import HomeStats from './home/HomeStats.svelte'
+  import MapPanel from './home/MapPanel.svelte'
+  import DomainsPanel from './home/DomainsPanel.svelte'
+  import NudgeCard from './home/NudgeCard.svelte'
+  import HeroFieldModal from './home/HeroFieldModal.svelte'
+  import HeroImageControls from './home/HeroImageControls.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import JsonLd from '$lib/components/JsonLd.svelte'
   import CopyButton from '$lib/components/ui/CopyButton.svelte'
@@ -28,12 +28,12 @@
   import { glossingLanguages } from '$lib/glosses/glossing-languages'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import { key_between } from '$lib/api/v1/fractional-index'
-  import { build_citation } from '../contributors/build-citation'
+  import { build_citation } from './contributors/build-citation'
   import { MINIMUM_ABOUT_LENGTH } from '$lib/constants'
-  import { text_snippet, top_glosses } from './home-helpers'
+  import { text_snippet, top_glosses } from './home/home-helpers'
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
-  import { upload_cover_image } from './hero-image'
+  import { upload_cover_image } from './home/hero-image'
   import IconMdiMagnify from '~icons/mdi/magnify'
   import IconMdiStarOutline from '~icons/mdi/star-outline'
   import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
@@ -273,9 +273,10 @@
     },
   })
 
+  let map_modal_open = $state(false)
   const show_nudges = $derived(is_editor_or_above && live_featured_ready && !$entries_loading)
   const nudge_star = $derived(show_nudges && featured_cards.length === 0)
-  const nudge_location = $derived(is_manager && !has_coordinates)
+  const nudge_location = $derived(is_manager && !is_con_lang && !has_coordinates)
   const nudge_image = $derived(can_edit_cover && !dictionary.featured_image)
   const nudge_about = $derived(is_manager && (dictionary.about?.length || 0) < MINIMUM_ABOUT_LENGTH)
   const any_nudge = $derived(nudge_star || nudge_location || nudge_image || nudge_about)
@@ -470,7 +471,7 @@
         </section>
       {/if}
       {#if has_coordinates || (is_manager && !is_con_lang)}
-        <MapPanel {dictionary} {is_manager} {update_dictionary} />
+        <MapPanel {dictionary} {is_manager} {update_dictionary} bind:show_modal={map_modal_open} />
       {/if}
     </div>
   {/if}
@@ -517,8 +518,8 @@
       show_image={nudge_image}
       show_about={nudge_about}
       entries_href="/{dictionary.url}/entries"
-      settings_href="/{dictionary.url}/settings"
       about_href="/{dictionary.url}/about"
+      on_location_click={() => map_modal_open = true}
       on_image_file={add_cover_file} />
   {/if}
 </div>
@@ -594,7 +595,6 @@
 
 <SeoMetaTags
   norobots={!dictionary.public}
-  title={t('dict_home.home')}
   dictionaryName={dictionary.name}
   gcsPath={dictionary.featured_image?.serving_url}
   lng={dictionary.coordinates?.points?.[0]?.coordinates.longitude}
@@ -835,8 +835,9 @@
     }
   }
 
-  /* Domains max ~650px; 50/50 with cite only when half the row ≥ that width.
-     Wrapper is the query container — an element can't @container-query itself. */
+  /* Domains max ~650px; cite slips up beside it once it'd get ≥ 1/3 of the row
+     (40.625 * 1.5 ≈ 61rem). Wrapper is the query container — an element can't
+     @container-query itself. */
   .domains-cite-wrap {
     container-type: inline-size;
   }
@@ -844,6 +845,7 @@
   .domains-cite {
     display: grid;
     grid-template-columns: 1fr;
+    align-items: start; /* cite panel hugs its content instead of matching domains height */
     gap: 0.75rem;
   }
 
@@ -851,13 +853,9 @@
     max-width: 40.625rem; /* ~650px at 16px root — scales with text zoom */
   }
 
-  @container (min-width: 81.25rem) {
+  @container (min-width: 61rem) {
     .domains-cite {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .domains-col {
-      max-width: none;
+      grid-template-columns: minmax(0, 40.625rem) 1fr;
     }
   }
 

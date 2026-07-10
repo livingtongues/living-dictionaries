@@ -229,7 +229,7 @@ describe(get_log_analytics, () => {
 
     const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(analytics.top_routes[0]).toEqual({ route: 'about', count: 3, sessions: 3 })
-    expect(analytics.top_routes[1]).toEqual({ route: 'dictionary:entry', count: 50, sessions: 1 })
+    expect(analytics.top_routes[1]).toEqual({ route: 'dictionary:entries', count: 50, sessions: 1 })
   })
 
   test('api_v1 panel aggregates server v1_* events by day / event / dictionary / via with a failure split', () => {

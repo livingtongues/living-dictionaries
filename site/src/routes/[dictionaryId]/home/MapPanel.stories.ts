@@ -28,9 +28,12 @@ const dictionary = {
   },
 } as DictionaryView
 
-/** Static cached map fills the panel (dev/dummy token falls back to the gray placeholder). */
+/** Static cached map fills the panel (dev/dummy token falls back to the gray placeholder).
+ *  The wide viewport exercises the solo full-width case — the requested image tracks the
+ *  box aspect (static_map_height) so cover never crops the fitted markers. */
 export const WithCoordinates: Story<typeof Component> = {
   csr: true,
+  viewports: [{ width: 420, height: 240 }, { width: 1200, height: 340 }],
   props: {
     dictionary,
     is_manager: false,

@@ -9,14 +9,17 @@
   import Region from '$lib/components/maps/mapbox/map/Region.svelte'
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
   import IconMdiPlus from '~icons/mdi/plus'
+  import { static_map_height } from './home-helpers'
 
   interface Props {
     dictionary: DictionaryView
     is_manager: boolean
     update_dictionary: (change: { coordinates: Coordinates }) => Promise<void>
+    /** Bindable so the location nudge on the home page can open the modal. */
+    show_modal?: boolean
   }
 
-  const { dictionary, is_manager, update_dictionary }: Props = $props()
+  let { dictionary, is_manager, update_dictionary, show_modal = $bindable(false) }: Props = $props()
   const t = $derived(page.data.t)
 
   const points = $derived(dictionary.coordinates?.points || [])
@@ -28,8 +31,6 @@
     ...regions.flatMap(region => region.coordinates.map(({ longitude, latitude }) => [longitude, latitude])),
   ])
 
-  let show_modal = $state(false)
-
   async function save(change: Partial<Coordinates>) {
     try {
       await update_dictionary({ coordinates: { points, regions, ...change } })
@@ -37,11 +38,20 @@
       alert(`${t('misc.error')}: ${err}`)
     }
   }
+
+  // See static_map_height — the requested image tracks the rendered box's
+  // aspect so object-fit: cover never crops away fitted markers.
+  const STATIC_WIDTH = 480
+  let box_width = $state(0)
+  let box_height = $state(0)
+  const static_height = $derived(static_map_height({ box_width, box_height, static_width: STATIC_WIDTH }))
 </script>
 
 {#if has_coordinates}
-  <button type="button" class="map map-button" title={t('create.where_spoken')} onclick={() => show_modal = true}>
-    <MapboxStatic {points} {regions} width={480} height={280} single_point_zoom={4} alt={t('create.where_spoken')} />
+  <button type="button" class="map map-button" title={t('create.where_spoken')} onclick={() => show_modal = true} bind:clientWidth={box_width} bind:clientHeight={box_height}>
+    {#if box_width}
+      <MapboxStatic {points} {regions} fill width={STATIC_WIDTH} height={static_height} single_point_zoom={4} alt={t('create.where_spoken')} />
+    {/if}
   </button>
 {:else if is_manager}
   <button type="button" class="map add-location" onclick={() => show_modal = true}>
@@ -107,18 +117,6 @@
        (paired with the about panel) overrides aspect-ratio via height: 100% */
     aspect-ratio: 12 / 7;
     max-height: 20rem;
-  }
-
-  .map-button :global(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .map-button :global(.static-placeholder) {
-    width: 100%;
-    height: 100%;
   }
 
   .add-location {

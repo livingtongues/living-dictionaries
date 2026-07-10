@@ -11,6 +11,8 @@
     height?: number
     single_point_zoom?: number
     alt?: string
+    /** Cover the parent box (image AND dummy-token placeholder) instead of rendering at the requested pixel size. */
+    fill?: boolean
   }
 
   const {
@@ -20,6 +22,7 @@
     height = 200,
     single_point_zoom = 3,
     alt = 'Map',
+    fill = false,
   }: Props = $props()
 
   // Browser-only: SSR can't know the visitor's color mode, and a light-mode
@@ -31,9 +34,9 @@
 </script>
 
 {#if src && !failed}
-  <img {alt} {src} width={width * 2} height={height * 2} loading="lazy" onerror={() => (failed = true)} />
+  <img class:fill {alt} {src} width={width * 2} height={height * 2} loading="lazy" onerror={() => (failed = true)} />
 {:else}
-  <div style="aspect-ratio: {width} / {height}; width: {width * 2}px" class="static-placeholder"></div>
+  <div style={fill ? undefined : `aspect-ratio: ${width} / ${height}; width: ${width * 2}px`} class="static-placeholder" class:fill></div>
 {/if}
 
 <style>
@@ -46,5 +49,15 @@
     background-color: color-mix(in srgb, var(--background), var(--color) 10%); /* ≈ gray-200 */
     max-width: 100%;
     max-height: 100%;
+  }
+
+  .fill {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  img.fill {
+    object-fit: cover;
   }
 </style>

@@ -49,12 +49,12 @@ export function normalize_route(pathname: string | null | undefined): string {
   const [top = ''] = segments
   if (TOP_LEVEL_ROUTES.has(top))
     return top
-  // Otherwise a per-dictionary route: /[dictionaryId]/(entries/[entryId]|settings|about|…)
-  const [, sub] = segments
+  // Otherwise a per-dictionary route: /[dictionaryId]/(entries[/entryId]|settings|about|…)
+  const [, sub, third] = segments
   if (!sub)
-    return 'dictionary:entries'
+    return 'dictionary:home'
   if (sub === 'entries')
-    return 'dictionary:entry'
+    return third ? 'dictionary:entry' : 'dictionary:entries'
   return `dictionary:${sub}`
 }
 

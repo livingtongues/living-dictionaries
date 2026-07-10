@@ -2,7 +2,7 @@ import type Database from 'better-sqlite3'
 import type { MultiString } from '$lib/types'
 
 /**
- * Server-side reads for the dictionary home page (`/[dictionaryId]/home`).
+ * Server-side reads for the dictionary home page (`/[dictionaryId]`).
  * Queried in `+page.server.ts` from the server's copy of `dictionaries/{id}.db`
  * so the page paints instantly — the browser's live dict_db takes over once the
  * local snapshot opens. Cheap indexed reads (a handful of rows via subqueries).

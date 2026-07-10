@@ -11,12 +11,12 @@
     show_image: boolean
     show_about: boolean
     entries_href: string
-    settings_href: string
     about_href: string
-    on_image_file?: (file: File) => void
+    on_location_click: () => void
+    on_image_file: (file: File) => void
   }
 
-  const { show_star, show_location, show_image, show_about, entries_href, settings_href, about_href, on_image_file }: Props = $props()
+  const { show_star, show_location, show_image, show_about, entries_href, about_href, on_location_click, on_image_file }: Props = $props()
   const t = $derived(page.data.t)
 </script>
 
@@ -27,28 +27,24 @@
       <li><IconMdiStarOutline class="icon-inline" /> <a href={entries_href}>{t('dict_home.nudge_star')}</a></li>
     {/if}
     {#if show_location}
-      <li><IconMdiMapMarkerPlus class="icon-inline" /> <a href={settings_href}>{t('dict_home.nudge_location')}</a></li>
+      <li><IconMdiMapMarkerPlus class="icon-inline" /> <button type="button" class="nudge-action" onclick={on_location_click}>{t('dict_home.nudge_location')}</button></li>
     {/if}
     {#if show_image}
       <li>
         <IconMdiImagePlus class="icon-inline" />
-        {#if on_image_file}
-          <label class="file-nudge">
-            <input
-              type="file"
-              accept="image/*"
-              style="display: none"
-              oninput={(event) => {
-                const input = event.target as HTMLInputElement
-                const file = input.files?.[0]
-                if (file) on_image_file(file)
-                input.value = ''
-              }} />
-            {t('dict_home.nudge_image')}
-          </label>
-        {:else}
-          <a href={settings_href}>{t('dict_home.nudge_image')}</a>
-        {/if}
+        <label class="file-nudge">
+          <input
+            type="file"
+            accept="image/*"
+            style="display: none"
+            oninput={(event) => {
+              const input = event.target as HTMLInputElement
+              const file = input.files?.[0]
+              if (file) on_image_file(file)
+              input.value = ''
+            }} />
+          {t('dict_home.nudge_image')}
+        </label>
       </li>
     {/if}
     {#if show_about}
@@ -90,9 +86,16 @@
   }
 
   a:hover,
+  .nudge-action:hover,
   .file-nudge:hover {
     text-decoration: underline;
     color: var(--primary);
+  }
+
+  .nudge-action {
+    padding: 0;
+    font-size: inherit;
+    color: inherit;
   }
 
   .file-nudge {

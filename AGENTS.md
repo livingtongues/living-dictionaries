@@ -46,15 +46,16 @@ Authoritative shapes: `site/src/lib/types/` (Drizzle-derived) and the schemas in
 `/` (homepage — canvas Equal Earth map of dictionaries + hero search, curated word-card strip,
 build-baked stats, features grid; see `.knowledge/domain/homepage-v2.md`) · `/about` ·
 `/tutorials` · `/dictionaries` · `/account` ·
-`/create-dictionary` · `/[dictionaryId]/*` (entries list — unified search with
-Words·Sentences·Texts scope chips [admin-3 preview; the texts/sentences corpus pipeline, see
+`/create-dictionary` · `/[dictionaryId]/*` (bare `/{dict}` IS the dictionary home page — hero
+with in-place manager editing of catalog fields [name, codes, languages, orthographies, location,
+cover image], starred "featured entries" strip [synced dict.db `featured_entries`, star toggle on
+entry pages for editor+], stats, about/grammar snippets — plus `entries` list — unified search
+with Words·Sentences·Texts scope chips [admin-3 preview; the texts/sentences corpus pipeline, see
 `.issues/texts-sentences-pipeline.md`] — entry detail, sentence detail, `texts` browse +
 `texts/new` paste-to-sentences ingest + `text/[id]` reader [same admin-3 preview, route-guarded
-via `$lib/corpus/corpus-preview-guard.ts` — lift at GA] — settings, about,
-contributors, grammar, history, export, import, invite, and `home` — the dictionary home page:
-starred "featured entries" strip [synced dict.db `featured_entries`, star toggle on entry pages
-for editor+], stats, about/grammar snippets; side-menu-linked for admin 3 only while iterated on,
-eventually replaces the `/{dict}` → entries redirect) · `/chat` (standalone membership-based
+via `$lib/corpus/corpus-preview-guard.ts` — lift at GA] — settings (just the public/print
+toggles + delete; catalog fields moved to home), about,
+contributors, grammar, history, export, import, invite) · `/chat` (standalone membership-based
 chat — DB-managed channels + DMs for admins, super managers, and partners; server-authoritative
 via `/api/chat/*` polling, gate = member of ≥1 room, `admin_room` channels manageable only by
 super admins) · `/translate` (standalone translator backend — server-authoritative via
@@ -72,5 +73,5 @@ the human editing UI should reach **full feature parity** — anything a human c
 edit, and vice-versa, ideally through the same validated server helpers. We don't need it all at
 once; when adding an editing feature, add (or plan) both surfaces and prefer routing them through one
 shared server module (e.g. orthographies: `$lib/db/server/orthographies.ts` backs both the v1
-endpoints and the settings-page catalog write).
+endpoints and the dictionary-home catalog write).
 

@@ -7,7 +7,7 @@ import { SITEMAP_CACHE_CONTROL, urlset } from '$lib/server/sitemap-helpers'
 
 /**
  * Child sitemap for one public dictionary (listed by the `/sitemap.xml` index):
- * `/{url}/entries`, `/{url}/about`, `/{url}/grammar` (when grammar content exists)
+ * `/{url}` (the dictionary home), `/{url}/entries`, `/{url}/about`, `/{url}/grammar` (when grammar content exists)
  * and every `/{url}/entry/{id}` from the dictionary's dict.db. The special id
  * `site` yields the static top-level pages.
  *
@@ -41,6 +41,7 @@ export const GET: RequestHandler = ({ params, url: request_url }) => {
 
   const slug = encodeURIComponent(dictionary.url || dictionary.id)
   const urls: { loc: string, lastmod?: string }[] = [
+    { loc: `${origin}/${slug}` },
     { loc: `${origin}/${slug}/entries` },
     { loc: `${origin}/${slug}/about` },
     ...dictionary.grammar ? [{ loc: `${origin}/${slug}/grammar` }] : [],

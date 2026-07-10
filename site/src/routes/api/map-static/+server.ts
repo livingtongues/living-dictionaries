@@ -112,7 +112,11 @@ export const GET: RequestHandler = async ({ url }) => {
   const viewport = is_single_point
     ? `${points[0].coordinates.longitude},${points[0].coordinates.latitude},${zoom}`
     : 'auto'
-  const mapbox_url = `https://api.mapbox.com/styles/v1/mapbox/${STYLES[mode]}/static/geojson(${overlay})/${viewport}/${width}x${height}@2x?logo=false&access_token=${token}`
+  // Explicit padding on auto-fit keeps edge markers clear of the frame even when
+  // the client displays the image with a slightly different aspect (object-fit:
+  // cover after quantized sizing — see static_map_height).
+  const padding = viewport === 'auto' ? '&padding=40' : ''
+  const mapbox_url = `https://api.mapbox.com/styles/v1/mapbox/${STYLES[mode]}/static/geojson(${overlay})/${viewport}/${width}x${height}@2x?logo=false${padding}&access_token=${token}`
 
   const cache_key = createHash('sha256')
     .update(JSON.stringify({ geojson, viewport, width, height, mode }))

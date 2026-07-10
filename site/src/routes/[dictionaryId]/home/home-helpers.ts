@@ -50,6 +50,24 @@ export function card_hue(id: string): number {
   return hash
 }
 
+/**
+ * Height to request from the static-map proxy so the image's aspect matches the
+ * rendered box and `object-fit: cover` never crops away fitted markers (a solo
+ * full-width map panel is far wider than the paired 12/7 cell). Quantized to
+ * 40px steps so window resizes don't fragment the 30-day server-side Mapbox
+ * cache; clamped inside the proxy's 50-1280 bounds.
+ */
+export function static_map_height({ box_width, box_height, static_width = 480 }: {
+  box_width: number
+  box_height: number
+  static_width?: number
+}): number {
+  if (!box_width || !box_height)
+    return 280
+  const height = Math.round((static_width * box_height) / box_width / 40) * 40
+  return Math.min(480, Math.max(120, height))
+}
+
 if (import.meta.vitest) {
   describe(top_glosses, () => {
     it('prefers the dictionary gloss-language order, capped at limit', () => {
@@ -89,6 +107,23 @@ if (import.meta.vitest) {
       expect(card_hue('abc')).toBe(card_hue('abc'))
       expect(card_hue('xyz')).toBeGreaterThanOrEqual(0)
       expect(card_hue('xyz')).toBeLessThan(360)
+    })
+  })
+
+  describe(static_map_height, () => {
+    it('matches the paired 12/7 cell (~same as the old fixed 480x280)', () => {
+      expect(static_map_height({ box_width: 480, box_height: 280 })).toBe(280)
+    })
+    it('flattens for a solo full-width panel capped at 20rem tall', () => {
+      expect(static_map_height({ box_width: 1200, box_height: 320 })).toBe(120)
+    })
+    it('quantizes to 40px steps and clamps to 120-480', () => {
+      expect(static_map_height({ box_width: 900, box_height: 320 })).toBe(160)
+      expect(static_map_height({ box_width: 100, box_height: 900 })).toBe(480)
+      expect(static_map_height({ box_width: 2000, box_height: 100 })).toBe(120)
+    })
+    it('falls back to 280 before the box is measured', () => {
+      expect(static_map_height({ box_width: 0, box_height: 0 })).toBe(280)
     })
   })
 }

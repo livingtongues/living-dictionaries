@@ -127,13 +127,15 @@
     color: var(--color-secondary);
   }
 
-  .stat-icon {
+  .stat :global(.stat-icon) {
     position: absolute;
-    right: 0.625rem;
-    bottom: 0.625rem;
-    font-size: 2.5rem;
+    right: 0.25rem;
+    top: 0.25rem;
+    height: 50%;
+    width: auto;
+    font-size: 3rem;
     color: var(--accent);
-    opacity: 0.12;
+    opacity: 0.16;
     pointer-events: none;
   }
 </style>

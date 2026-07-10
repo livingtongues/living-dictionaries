@@ -4,7 +4,7 @@
   import DictSyncStatusButton from '$lib/db/dict-client/DictSyncStatus.svelte'
   import { page } from '$app/state'
   import IconFaSolidList from '~icons/fa-solid/list'
-  import IconFa6SolidHouse from '~icons/fa6-solid/house'
+  import IconMdiBookOpenPageVariantOutline from '~icons/mdi/book-open-page-variant-outline'
   import IconFa6SolidUserShield from '~icons/fa6-solid/user-shield'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
   import IconFa6SolidFileLines from '~icons/fa6-solid/file-lines'
@@ -51,19 +51,17 @@
   </h5>
 </div>
 <div onclick={on_close}>
-  <!-- Admin-3 preview while the dictionary home is iterated on (the shield marks
-       the gate) — it eventually replaces the /entries redirect as the dict root. -->
-  {#if page.data.auth_user?.admin_level >= 3}
-    <a
-      href={`/${dictionary.url}/home`}
-      class:active={page.url.pathname.endsWith('/home')}>
-      <IconFa6SolidHouse class="icon-inline" />
-      <span class="item-label">
-        {page.data.t('dict_home.home')}
-      </span>
-      <IconFa6SolidUserShield class="icon-inline admin-gate-icon" />
-    </a>
-  {/if}
+  <!-- The dictionary home lives at the bare dict root; the open-book icon
+       (matching the site home's "Living Dictionary" node) keeps it visually
+       distinct from the site-home house button in the header. -->
+  <a
+    href={`/${dictionary.url}`}
+    class:active={page.url.pathname.split('/').filter(Boolean).length === 1}>
+    <IconMdiBookOpenPageVariantOutline class="icon-inline" />
+    <span class="item-label">
+      {page.data.t('dict_home.home')}
+    </span>
+  </a>
   <div class="nav-row" class:active={page.url.pathname.match(/entry|entries/)}>
     <a class="entries-link" href={`/${dictionary.url}/entries`}>
       <IconFaSolidList class="icon-inline" />
