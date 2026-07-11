@@ -1,7 +1,7 @@
 import type Database from 'better-sqlite3'
 import type { Orthography } from '$lib/db/schemas/shared.types'
 import { PRIMARY_ORTHOGRAPHY_CODE } from '$lib/db/schemas/shared.types'
-import { additionalKeyboards, glossingLanguages } from '$lib/glosses/glossing-languages'
+import { additional_keyboards, glossing_languages } from '$lib/glosses/glossing-languages'
 import keyman_writing_systems from '$lib/components/keyboards/keyman/keyman-writing-systems.json'
 import { get_dictionary_db } from './dictionary-db'
 import { get_shared_db } from './shared-db'
@@ -29,7 +29,7 @@ const keyman_tags = keyman_writing_systems as Record<string, { id: string, name:
 
 /** True when `code` is already a known writing-system tag in one of our lists. */
 export function is_known_writing_system(code: string): boolean {
-  return !!(glossingLanguages[code] || additionalKeyboards[code] || keyman_tags[code])
+  return !!(glossing_languages[code] || additional_keyboards[code] || keyman_tags[code])
 }
 
 /** True when `code` is reserved and can never be a custom alternate code. */

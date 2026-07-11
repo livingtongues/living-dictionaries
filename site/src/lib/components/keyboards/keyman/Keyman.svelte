@@ -13,7 +13,7 @@
   import { onDestroy, onMount, tick } from 'svelte'
   import type { KeymanWritingSystems } from './writing-systems'
   import { keyboard_for_bcp, load_keyman_writing_systems } from './writing-systems'
-  import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages'
+  import { additional_keyboards, glossing_languages } from '../../../glosses/glossing-languages'
   import Button from '$lib/components/ui/Button.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
@@ -122,7 +122,7 @@
 
   let selectedBcp: string = $state()
   const currentBcp = $derived(selectedBcp || bcp)
-  const glossLanguage = $derived(glossingLanguages[currentBcp] || additionalKeyboards[currentBcp])
+  const glossLanguage = $derived(glossing_languages[currentBcp] || additional_keyboards[currentBcp])
   const resolvedKeyboard = $derived(keyboard_for_bcp(currentBcp, keyman_writing_systems))
   const internalName = $derived(resolvedKeyboard?.internalName)
   const keyboardBcp = $derived(resolvedKeyboard?.keyboardBcp || currentBcp)
@@ -202,7 +202,7 @@
         {#snippet heading()}
           <span>Select Keyboard</span>
         {/snippet}
-        {#each [...Object.entries(glossingLanguages), ...Object.entries(additionalKeyboards)] as [_bcp, languageDefinition] (_bcp)}
+        {#each [...Object.entries(glossing_languages), ...Object.entries(additional_keyboards)] as [_bcp, languageDefinition] (_bcp)}
           {#if languageDefinition.showKeyboard}
             <Button
               form="menu"

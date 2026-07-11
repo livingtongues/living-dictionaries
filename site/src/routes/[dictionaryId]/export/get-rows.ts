@@ -2,7 +2,7 @@ import type { EntryData, MultiString } from '$lib/types'
 import type { EntryForCSV, translate_entries } from './prepare-entries-for-csv'
 import { friendlyName } from './friendly-name'
 import type { DeepPartial } from '$lib/utils/deep-partial'
-import { glossingLanguages } from '$lib/glosses/glossing-languages'
+import { glossing_languages } from '$lib/glosses/glossing-languages'
 
 interface ExportMetaData {
   sense_index: number
@@ -27,7 +27,7 @@ export function get_glosses(glosses: MultiString, metadata: ExportMetaData) {
   if (glosses) {
     Object.entries(glosses).forEach(([bcp, value]) => {
       formatted_data[`${count_sense(sense_index)}${bcp}_gloss`] = position === 'header'
-        ? `${get_readable_sense(sense_index)}${glossingLanguages[bcp]?.vernacularName || bcp} Gloss`
+        ? `${get_readable_sense(sense_index)}${glossing_languages[bcp]?.vernacularName || bcp} Gloss`
         : value
     })
   }
@@ -77,7 +77,7 @@ export function get_example_sentence(
   if (sentence?.translation) {
     Object.keys(sentence?.translation).forEach((bcp) => {
       formatted_data[`${count_sense(sense_index)}${bcp}_exampleSentence`] = position === 'header'
-        ? `${get_readable_sense(sense_index)}Example sentence in ${glossingLanguages[bcp]?.vernacularName || bcp}`
+        ? `${get_readable_sense(sense_index)}Example sentence in ${glossing_languages[bcp]?.vernacularName || bcp}`
         : sentence.translation?.[bcp]
     })
   }

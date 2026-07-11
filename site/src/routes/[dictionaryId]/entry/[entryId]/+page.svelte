@@ -78,6 +78,17 @@
   // the `$effect` above only refreshes after the insert → live-rows round-trip,
   // so a rapid second click used to re-insert the same entry_id and trip the
   // UNIQUE natural key (2026-07-10 review, 🟡 P3).
+  //
+  // RESIDUAL RACE (2026-07-10 review run 2): the in-flight guard closed the
+  // double-click path, but if the entry is ALREADY featured (starred earlier /
+  // from another surface) and the star is clicked BEFORE the live
+  // `featured_entries.rows` have loaded, `star_row_id` is still `undefined`, the
+  // guard passes, and we insert a duplicate → UNIQUE rejection. So before
+  // inserting we snapshot the live DB directly for an existing `entry_id` row
+  // (the DB is authoritative even when the reactive `.rows` store hasn't
+  // finished its first load) and, on a hit, short-circuit to a no-op that just
+  // syncs the local `star_row_id` — no silent ON CONFLICT (the dict-client
+  // insert layer is meant to collide loudly).
   let star_in_flight = false
   async function toggle_star() {
     if (!dict_db || star_in_flight)
@@ -89,6 +100,13 @@
         star_row_id = undefined
         await dict_db.featured_entries.delete(unstarred_row_id)
         track({ event: ENTRY_UNFEATURED, props: { dictionary_id: dictionary.id, entry_id: entry.id } })
+        return
+      }
+      const [existing] = await dict_db.featured_entries.query({ where: 'entry_id = ?', params: [entry.id], limit: 1 }).snapshot()
+      if (existing) {
+        // Already featured — the click raced the live-rows load. Reflect reality
+        // (show the filled star); a subsequent click will unstar via the branch above.
+        star_row_id = existing.id
         return
       }
       const [last] = await dict_db.featured_entries.query({ order_by: 'sort_key DESC', limit: 1 }).snapshot()

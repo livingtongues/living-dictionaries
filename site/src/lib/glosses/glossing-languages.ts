@@ -6,9 +6,9 @@
 import type { IGlossLanguages } from '$lib/types'
 import glossing_languages_list from './glossing-languages-list.json'
 
-export const glossingLanguages: IGlossLanguages = glossing_languages_list
+export const glossing_languages: IGlossLanguages = glossing_languages_list
 
-export const additionalKeyboards: IGlossLanguages = {
+export const additional_keyboards: IGlossLanguages = {
   'srb-sora': {
     vernacularName: 'Sora',
     internalName: 'basic_kbdsora',

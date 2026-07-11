@@ -98,6 +98,18 @@ proposals against this lens.
   first concrete instance of the plain-language directive above.
 
 ## Open proposals
+- **★ NEW — Dict-boot cold-tail vs snapshot-size correlation on the "Opening a dictionary" panel**
+  *(filed 2026-07-10 run 2 — grounded in the FIRST day of live `dict_boot` data; verified NOT present).*
+  The just-shipped `build_dict_boot` (`log-analytics.ts` ~line 1670) reports cold/warm p50/p90/p95 +
+  a single `cold_snapshot_bytes_p50`, but does NOT correlate boot duration against snapshot size — so
+  the human cold **p95 of 11.6 s** (measured 07-10: cold n=92 p50 1,936 ms / p90 7,298 ms / p95
+  11,650 ms; warm n=100 p50 133 ms) can't be attributed to *download-bound* (a big-dictionary snapshot
+  over a slow link) vs *device-bound* (OPFS write / migrate on a weak phone). `snapshot_bytes` and
+  per-stage `stage_ms` are ALREADY captured on every cold row, so this is presentation-only: add a small
+  scatter or a two-bucket split (e.g. boot p50 for snapshots <2 MB vs ≥2 MB) + a `snapshot_fetch` vs
+  `opfs_open`+`migrate` stage-time breakdown for cold boots. Answers "is the cold tail the snapshot
+  download or the device?" — the exact next question the new panel raises. *(LD-original; broadcast to
+  siblings once shaped — house/tutor have no equivalent local-DB-boot panel yet.)*
 - **★★ NEW — Bot/crawler share % on each error cluster** *(filed 2026-07-09 — grounded in TODAY's
   SEO-crawl flood; also ported from tutor 07-08 Phase C).* `ErrorCluster` (`log-analytics.ts` ~line
   234) keeps ALL rows on purpose ("a bot hitting a real error is a real signal") but exposes **no

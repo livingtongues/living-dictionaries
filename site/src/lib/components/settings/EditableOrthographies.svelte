@@ -6,7 +6,7 @@
   import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
   import { get_orthographies } from '$lib/helpers/orthographies'
-  import { additionalKeyboards, glossingLanguages } from '$lib/glosses/glossing-languages'
+  import { additional_keyboards, glossing_languages } from '$lib/glosses/glossing-languages'
   import { is_reserved_or_known_code, load_keyman_writing_systems } from '$lib/components/keyboards/keyman/writing-systems'
   import IconFa6SolidChevronUp from '~icons/fa6-solid/chevron-up'
   import IconFa6SolidChevronDown from '~icons/fa6-solid/chevron-down'
@@ -24,8 +24,8 @@
 
   interface WritingSystemOption { bcp: string, name: string, keyboard: boolean }
   const base_options: WritingSystemOption[] = [
-    ...Object.entries(glossingLanguages).map(([bcp, lang]) => ({ bcp, name: lang.vernacularName || bcp, keyboard: !!lang.internalName })),
-    ...Object.entries(additionalKeyboards).map(([bcp, lang]) => ({ bcp, name: lang.vernacularName || bcp, keyboard: true })),
+    ...Object.entries(glossing_languages).map(([bcp, lang]) => ({ bcp, name: lang.vernacularName || bcp, keyboard: !!lang.internalName })),
+    ...Object.entries(additional_keyboards).map(([bcp, lang]) => ({ bcp, name: lang.vernacularName || bcp, keyboard: true })),
   ]
   let keyman_writing_systems = $state<KeymanWritingSystems>()
   const options = $derived.by(() => {

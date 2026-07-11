@@ -10,7 +10,7 @@
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
   import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
-  import { glossingLanguages } from '$lib/glosses/glossing-languages'
+  import { glossing_languages } from '$lib/glosses/glossing-languages'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { debounce } from '$lib/utils/debounce'
   import { browser, dev } from '$app/environment'
@@ -249,7 +249,7 @@ Use: ${conlang_use.trim()}`
         {#if conlang != null}
           <EditableGlossesField
             minimum={1}
-            availableLanguages={glossingLanguages}
+            availableLanguages={glossing_languages}
             selectedLanguages={gloss_languages}
             add_language={(languageId) => {
               if (!gloss_languages.includes(languageId))

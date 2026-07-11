@@ -1,4 +1,4 @@
-import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages'
+import { additional_keyboards, glossing_languages } from '../../../glosses/glossing-languages'
 
 /** One entry of the minimal Keyman writing-systems map (`keyman-writing-systems.json`). */
 export interface KeymanWritingSystem {
@@ -43,7 +43,7 @@ export function keyboard_for_bcp(
   keyman_writing_systems?: KeymanWritingSystems,
 ): ResolvedKeyboard | undefined {
   if (!bcp) return undefined
-  const gloss = glossingLanguages[bcp] || additionalKeyboards[bcp]
+  const gloss = glossing_languages[bcp] || additional_keyboards[bcp]
   if (gloss?.internalName)
     return { internalName: gloss.internalName, keyboardBcp: gloss.useKeyboard || bcp }
   const keyman = keyman_writing_systems?.[bcp]
@@ -63,13 +63,13 @@ export function is_reserved_or_known_code(
   keyman_writing_systems?: KeymanWritingSystems,
 ): boolean {
   if (code === 'default' || /^lo\d+$/.test(code)) return true
-  if (glossingLanguages[code] || additionalKeyboards[code]) return true
+  if (glossing_languages[code] || additional_keyboards[code]) return true
   return !!keyman_writing_systems?.[code]
 }
 
 if (import.meta.vitest) {
   describe(keyboard_for_bcp, () => {
-    test('resolves via additionalKeyboards', () => {
+    test('resolves via additional_keyboards', () => {
       expect(keyboard_for_bcp('srb-sora')).toEqual({ internalName: 'basic_kbdsora', keyboardBcp: 'srb-sora' })
     })
     test('resolves via the loaded Keyman set when not in gloss lists', () => {

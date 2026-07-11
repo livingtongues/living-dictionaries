@@ -19,7 +19,10 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   misuse / bot boot-cascade rows as known-noise pending the fleet noise-floor artifact
   (worker `74d5d94a`). Same known-noise family: `[orama-watcher] delta scan failed`,
   `initial dict sync failed`, `Rejected` (serviceWorker.register — all anon/bot prerenderers),
-  stale-build dynamic-import/CSS-preload 404s during blue/green swaps.
+  stale-build dynamic-import/CSS-preload 404s during blue/green swaps. **Also in this family
+  (confirmed 2026-07-10 run 2):** `leader_boot_failed` (mostly anon/Googlebot, `will_retry:true`,
+  "module script canceled" mid-boot + "disk image malformed" on bot OPFS) and `Failed to read dict
+  bundle from wa-sqlite` (`sqlite_code:21 MISUSE`, `retried:true`) — both self-heal; don't re-triage.
 - **2026-07-10 — entry-page `effect_update_depth_exceeded`: essentially CLOSED.** Collapsed 57→1 on
   build `1783663107615` after `daed5d93`/`24b080b1`/`42f737d7`. Watch the residual 1; don't
   re-propose the fix (documented in-code at `entry/[entryId]/+page.svelte` L62–71).

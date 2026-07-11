@@ -27,7 +27,7 @@
   import { goto, preloadCode } from '$app/navigation'
   import { image_src } from '$lib/utils/media-url'
   import { get_headword } from '$lib/helpers/orthographies'
-  import { glossingLanguages } from '$lib/glosses/glossing-languages'
+  import { glossing_languages } from '$lib/glosses/glossing-languages'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import { key_between } from '$lib/api/v1/fractional-index'
   import { build_citation } from './contributors/build-citation'
@@ -194,7 +194,7 @@
 
   // ── hero bits ────────────────────────────────────────────────────────────────
   const gloss_chips = $derived((Array.isArray(dictionary.gloss_languages) ? dictionary.gloss_languages : [])
-    .map(bcp => t({ dynamicKey: `gl.${bcp}`, fallback: glossingLanguages[bcp]?.vernacularName ?? bcp })))
+    .map(bcp => t({ dynamicKey: `gl.${bcp}`, fallback: glossing_languages[bcp]?.vernacularName ?? bcp })))
   // Long JS cap (2000) is just a safety bound — visual truncation is the CSS line
   // clamp on the panel snippets, so text fills its container before ellipsizing.
   const about_snippet = $derived(text_snippet({ markdown: dictionary.about, max_length: 2000 }))
@@ -631,7 +631,7 @@
     <EditableGlossesField
       minimum={1}
       show_title={false}
-      availableLanguages={glossingLanguages}
+      availableLanguages={glossing_languages}
       selectedLanguages={dictionary.gloss_languages}
       add_language={async language_id => await save_catalog({ gloss_languages: [...dictionary.gloss_languages, language_id] })}
       remove_language={async language_id => await remove_gloss_language(language_id)} />

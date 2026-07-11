@@ -1,4 +1,4 @@
-import { glossingLanguages } from '$lib/glosses/glossing-languages'
+import { glossing_languages } from '$lib/glosses/glossing-languages'
 import { english_translate } from '$lib/i18n'
 import { filter_items } from './filter-items'
 
@@ -6,7 +6,7 @@ import { filter_items } from './filter-items'
 // raw gloss record plus the localized (English) display name shown in the
 // parenthetical. The localizedName is what makes a language searchable by its
 // English name (the original bug: typing "Mandarin" never surfaced 中文 / cmn).
-const raw_items = Object.entries(glossingLanguages).map(([bcp, value]) => ({ bcp, ...value }))
+const raw_items = Object.entries(glossing_languages).map(([bcp, value]) => ({ bcp, ...value }))
 const enriched_items = raw_items.map(item => ({
   ...item,
   localizedName: english_translate({ dynamicKey: `gl.${item.bcp}`, fallback: item.bcp }),
