@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state'
   import { goto } from '$app/navigation'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { split_text_into_sentences } from '$lib/corpus/split-text-into-sentences'
   import { get_orthographies } from '$lib/helpers/orthographies'
@@ -104,14 +104,14 @@
         {/if}
       </div>
       <div class="actions">
-        <Button form="filled" disabled={!preview.length || !title.trim()} onclick={continue_to_adjust}>
+        <HeadlessButton class="btn-primary btn-default" disabled={!preview.length || !title.trim()} onclick={continue_to_adjust}>
           {page.data.t('text.adjust')}
-        </Button>
+        </HeadlessButton>
       </div>
     {:else}
       <div class="adjust-head">
         <button type="button" class="btn-outline btn-sm" onclick={back_to_paste}>
-          <IconFa6SolidArrowLeft class="icon-inline" />
+          <IconFa6SolidArrowLeft />
           {page.data.t('text.back_to_paste')}
         </button>
         <span class="detected">{page.data.t('text.detected', { values: { count: String(rows.filter(row => row.text.trim()).length), paragraphs: String(rows.filter(row => row.ends_paragraph).length + (rows.length ? 1 : 0)) } })}</span>
@@ -125,7 +125,7 @@
             <div class="row-actions">
               {#if index > 0}
                 <button type="button" class="row-action" title={page.data.t('text.merge_up')} onclick={() => merge_up(index)}>
-                  <IconFa6SolidArrowTurnUp class="icon-inline" />
+                  <IconFa6SolidArrowTurnUp />
                 </button>
               {/if}
               <button
@@ -137,7 +137,7 @@
                 ¶
               </button>
               <button type="button" class="row-action" title={page.data.t('text.remove_sentence')} onclick={() => rows.splice(index, 1)}>
-                <IconSystemUiconsTrash class="icon-inline" />
+                <IconSystemUiconsTrash />
               </button>
             </div>
           </div>
@@ -146,13 +146,13 @@
 
       <div class="actions">
         <button type="button" class="btn-outline btn-sm" onclick={() => rows.push({ text: '', ends_paragraph: false })}>
-          <IconFaSolidPlus class="icon-inline" />
+          <IconFaSolidPlus />
           {page.data.t('sentence.add')}
         </button>
         <span style="flex-grow: 1"></span>
-        <Button form="filled" loading={saving} disabled={!title.trim() || !rows.some(row => row.text.trim())} onclick={create_text}>
+        <HeadlessButton class="btn-primary btn-default" loading={saving} disabled={!title.trim() || !rows.some(row => row.text.trim())} onclick={create_text}>
           {page.data.t('text.create')}
-        </Button>
+        </HeadlessButton>
       </div>
     {/if}
   {/if}

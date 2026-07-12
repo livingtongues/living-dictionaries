@@ -48,12 +48,12 @@
         {/each}
         <div class="meta">
           {#if parent_text}
-            <span class="badge"><IconCarbonDocument class="icon-inline" />
+            <span class="badge"><IconCarbonDocument />
               {Object.values(parent_text.title || {}).find(Boolean) || ''}</span>
           {/if}
-          {#if hit.document.has_audio}<IconIonMdVolumeHigh class="icon-inline" />{/if}
-          {#if hit.document.has_image}<IconCarbonImage class="icon-inline" />{/if}
-          {#if hit.document.has_video}<IconCarbonVideo class="icon-inline" />{/if}
+          {#if hit.document.has_audio}<IconIonMdVolumeHigh />{/if}
+          {#if hit.document.has_image}<IconCarbonImage />{/if}
+          {#if hit.document.has_video}<IconCarbonVideo />{/if}
         </div>
       </a>
     {/if}

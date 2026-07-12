@@ -1,7 +1,7 @@
 <script lang="ts">
   import { crossfade, fade, scale } from 'svelte/transition'
   import { page } from '$app/state'
-  import { image_src } from '$lib/helpers/media'
+  import { image_src } from '$lib/utils/media-url'
   import IconGgSpinner from '~icons/gg/spinner'
   import IconTablerAi from '~icons/tabler/ai'
   import IconMdiClose from '~icons/mdi/close'
@@ -88,9 +88,9 @@
         ? `h${height}`
         : 's0')} />
     {#if loading}
-      <IconGgSpinner class="icon-inline spinner" />
+      <IconGgSpinner class="spinner" />
     {:else if photographer === 'AI'}
-      <IconTablerAi class="icon-inline ai-badge" style="font-size: 1.5rem" />
+      <IconTablerAi class="ai-badge" style="font-size: 1.5rem" />
     {/if}
   {/if}
 </div>
@@ -104,7 +104,7 @@
         {#if href}
           <a class="title-link" {href}>
             {title}
-            <IconMdiArrowRight class="icon-inline title-arrow" />
+            <IconMdiArrowRight class="title-arrow" />
           </a>
         {:else}
           <div class="viewer-title">{title}</div>
@@ -123,7 +123,7 @@
           {#if photographer === 'AI'}
             <span class="ai-chip"><IconTablerAi style="font-size: 1.375rem" /> generated</span>
           {:else if photographer}
-            <span class="credit-line"><IconMdiCameraOutline class="icon-inline" style="opacity: 0.7" /> {photographer}</span>
+            <span class="credit-line"><IconMdiCameraOutline style="opacity: 0.7" /> {photographer}</span>
           {/if}
           {#if photo_source}
             <span class="credit-line source">{photo_source}</span>

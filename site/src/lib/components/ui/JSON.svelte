@@ -1,5 +1,5 @@
 <script lang="ts"> import IconFaSolidCode from '~icons/fa-solid/code'
-  import Button from './Button.svelte'
+  import HeadlessButton from './HeadlessButton.svelte'
   import ShowHide from './ShowHide.svelte'
 
   const { obj } = $props()
@@ -26,9 +26,9 @@
 
 <ShowHide>
   {#snippet children({ show, toggle })}
-    <Button onclick={toggle} form="simple" color="black">
-      <IconFaSolidCode class="icon-inline" />
-    </Button>
+    <HeadlessButton class="btn-ghost btn-default" onclick={toggle}>
+      <IconFaSolidCode />
+    </HeadlessButton>
     {#if show}
       <div class="overlay">
         <button type="button" class="hide-button" onclick={toggle}>Hide</button>

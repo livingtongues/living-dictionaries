@@ -1,9 +1,10 @@
 <script lang="ts">
+  import IconInfoCircle from '~icons/fa-solid/info-circle'
   import type { IPoint, IRegion } from '$lib/types'
   import { onMount } from 'svelte'
   import { convertToFriendlyUrl, is_url_like } from './convert-to-friendly-url'
   import { log_event } from '$lib/debug/remote-log'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Form from '$lib/components/ui/Form.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
@@ -126,9 +127,9 @@ Use: ${conlang_use.trim()}`
 
       {#if name.length > 2}
         {#if dev}
-          <Button type="submit" class="dev-button" color="red">
+          <HeadlessButton type="submit" class="btn btn-default dev-button">
             Dev: Add Test Dictionary Immediately
-          </Button>
+          </HeadlessButton>
         {/if}
         <div class="url-label-row" style="direction: ltr">
           <label for="url" class="label-sm"> URL </label>
@@ -306,7 +307,7 @@ Use: ${conlang_use.trim()}`
                   target="_blank"
                   rel="noreferrer"
                   class="info-link">
-                  <i class="far fa-info-circle"></i>
+                  <IconInfoCircle />
                 </a>
               </label>
               <div class="input-shadow-wrap" style="margin-top: 0.25rem">
@@ -330,7 +331,7 @@ Use: ${conlang_use.trim()}`
                   target="_blank"
                   rel="noreferrer"
                   class="info-link">
-                  <i class="far fa-info-circle"></i>
+                  <IconInfoCircle />
                 </a>
               </label>
               <div class="input-shadow-wrap" style="margin-top: 0.25rem">
@@ -406,9 +407,9 @@ Use: ${conlang_use.trim()}`
           <div class="spacer"></div>
         {/if}
 
-        <Button type="submit" class="submit-button" form="filled" {loading}>
+        <HeadlessButton type="submit" class="btn-primary btn-default submit-button" {loading}>
           {page.data.t('create.create_dictionary')}
-        </Button>
+        </HeadlessButton>
 
         <div class="terms-note">
           {page.data.t('terms.agree_by_submit')}

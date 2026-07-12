@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Tables } from '$lib/types'
   import { decades } from './ages'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Form from '$lib/components/ui/Form.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
@@ -12,7 +12,7 @@
   }
 
   const { on_close, on_speaker_added }: Props = $props()
-  const { db_operations } = $derived(page.data)
+  const { writes } = $derived(page.data)
 
   let displayName = $state('')
   let birthplace = $state('')
@@ -30,7 +30,7 @@
   <Form
 
     onsubmit={async () => {
-      const speaker = await db_operations.insert_speaker({
+      const speaker = await writes.insert_speaker({
         name: displayName.trim(),
         birthplace: birthplace.trim(),
         decade,
@@ -120,12 +120,12 @@
       <!-- TODO: "The speaker is me" checkbox -->
 
       <div class="modal-footer">
-        <Button disabled={loading} onclick={on_close} form="simple" color="black">
+        <HeadlessButton class="btn-ghost btn-default" disabled={loading} onclick={on_close}>
           {page.data.t('misc.cancel')}
-        </Button>
-        <Button type="submit" form="filled" {loading}>
+        </HeadlessButton>
+        <HeadlessButton class="btn-primary btn-default" type="submit" {loading}>
           {page.data.t('misc.save')}
-        </Button>
+        </HeadlessButton>
       </div>
     {/snippet}
   </Form>

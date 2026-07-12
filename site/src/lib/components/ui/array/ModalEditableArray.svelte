@@ -1,7 +1,7 @@
 <script lang="ts">
   import MultiSelect from './MultiSelect.svelte'
   import type { SelectOption } from './select-options.interface'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
@@ -66,7 +66,7 @@
         {@render additional?.()}
         {#if plus}{@render plus()}{:else}
           {#if can_edit && showPlus && !values?.length}
-            <IconFaSolidPlus class="icon-inline" style="opacity: 0.4; margin-top: 0.25rem; margin-bottom: 0.25rem" />
+            <IconFaSolidPlus style="opacity: 0.4; margin-top: 0.25rem; margin-bottom: 0.25rem" />
           {/if}
         {/if}
       </div>
@@ -94,19 +94,18 @@
 
           <!-- the child gaps (was `space-x-1`) are built into the global .modal-footer rules -->
           <div class="modal-footer">
-            <Button
+            <HeadlessButton
+              class="btn-ghost btn-default"
               onclick={() => {
                 prepareSelected(values, options)
                 toggle()
-              }}
-              form="simple"
-              color="black">
+              }}>
               {page.data.t('misc.cancel')}
-            </Button>
+            </HeadlessButton>
 
-            <Button type="submit" form="filled">
+            <HeadlessButton class="btn-primary btn-default" type="submit">
               {page.data.t('misc.save')}
-            </Button>
+            </HeadlessButton>
           </div>
         </form>
 

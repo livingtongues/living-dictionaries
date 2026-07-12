@@ -1,7 +1,10 @@
 <script lang="ts">
+  import IconArrowLeft from '~icons/fa-solid/arrow-left'
+  import IconTrash from '~icons/fa-solid/trash'
+  import IconShareSquare from '~icons/fa-solid/share-square'
   import EntryDisplay from './EntryDisplay.svelte'
   import { seo_description } from './seo_description'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import JSON from '$lib/components/ui/JSON.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { share } from '$lib/utils/share'
@@ -27,7 +30,7 @@
     auth_user,
     can_edit,
     is_editor_or_above,
-    db_operations,
+    writes,
     dict_db,
   } = $derived(data)
 
@@ -143,10 +146,9 @@
   class:padded={!shallow}
   class:raised={shallow}
   class="action-bar">
-  <Button
-    class="entry-back-button"
-    color="black"
-    form="simple"
+  <HeadlessButton
+    class="btn-ghost btn-default entry-back-button"
+
     onclick={() => {
       if (history.length > 1) {
         history.back()
@@ -154,36 +156,36 @@
         window.location.href = `/${dictionary.url}/entries`
       }
     }}>
-    <i class="fas fa-arrow-left rtl-x-flip"></i>
+    <IconArrowLeft class="rtl-x-flip" />
     {page.data.t('misc.back')}
-  </Button>
+  </HeadlessButton>
 
   <div>
     {#if dev || auth_user.admin_level >= 3}
       <JSON obj={entry} />
     {/if}
     {#if can_edit}
-      <Button
-        color="red"
-        form="simple"
+      <HeadlessButton
+        style="color: var(--danger)"
+        class="btn-ghost btn-default"
         onclick={async () => {
           const confirmation = confirm(page.data.t('entry.delete_entry'))
-          if (confirmation) await db_operations.delete_entry()
+          if (confirmation) await writes.delete_entry(entry.id)
           history.back()
         }}>
 
         <span class="delete-label">
           {page.data.t('misc.delete')}
         </span>
-        <i class="fas fa-trash icon-gap"></i>
-      </Button>
+        <IconTrash class="icon-gap" />
+      </HeadlessButton>
     {/if}
     {#if !shallow}
-      <Button class="entry-share-button" form="simple" onclick={() => share(dictionary.url, entry)}>
+      <HeadlessButton class="btn-ghost btn-default entry-share-button" onclick={() => share(dictionary.url, entry)}>
         <span>{page.data.t('misc.share')}</span>
         <div style="width: 0.5rem"></div>
-        <i class="fas fa-share-square rtl-x-flip"></i>
-      </Button>
+        <IconShareSquare class="rtl-x-flip" />
+      </HeadlessButton>
     {/if}
     {#if is_editor_or_above && dict_db}
       <button
@@ -224,7 +226,7 @@
   {entry}
   {dictionary}
   can_edit={can_edit}
-  {db_operations} />
+  {writes} />
 
 <style>
   .action-bar {

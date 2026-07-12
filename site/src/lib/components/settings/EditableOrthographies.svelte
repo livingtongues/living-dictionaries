@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Orthography, Tables } from '$lib/types'
   import type { KeymanWritingSystems } from '$lib/components/keyboards/keyman/writing-systems'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
@@ -142,7 +142,7 @@
       value={registry.primary.name}
       onchange={event => rename(registry.primary.code, (event.target as HTMLInputElement).value)} />
     <button type="button" class="kb-button" class:has-kb={!!registry.primary.bcp} title="Writing system / keyboard" onclick={() => open_picker('primary')}>
-      <IconFa6SolidKeyboard class="icon-inline" />
+      <IconFa6SolidKeyboard />
       {registry.primary.bcp || 'set'}
     </button>
   </div>
@@ -157,14 +157,14 @@
         onchange={event => rename(orthography.code, (event.target as HTMLInputElement).value)} />
       <span class="code-tag" title="immutable code">{orthography.code}</span>
       <button type="button" class="icon-button" title="Move up" disabled={index === 0} onclick={() => move(index, -1)}>
-        <IconFa6SolidChevronUp class="icon-inline" />
+        <IconFa6SolidChevronUp />
       </button>
       <button type="button" class="icon-button" title="Move down" disabled={index === registry.alternates.length - 1} onclick={() => move(index, 1)}>
-        <IconFa6SolidChevronDown class="icon-inline" />
+        <IconFa6SolidChevronDown />
       </button>
       {#if usage_counts[orthography.code] === 0}
         <button type="button" class="icon-button danger" title="Delete" onclick={() => remove(orthography)}>
-          <IconFa6SolidTrash class="icon-inline" />
+          <IconFa6SolidTrash />
         </button>
       {:else if usage_counts[orthography.code] > 0}
         <span class="code-tag" title="Used by {usage_counts[orthography.code]} entries/sentences — clear it from those to delete">in use</span>
@@ -173,7 +173,7 @@
   {/each}
 </div>
 
-<Button form="menu" size="sm" onclick={() => open_picker('new')}>+ {page.data.t('misc.add')}</Button>
+<HeadlessButton class="btn-ghost btn-sm" onclick={() => open_picker('new')}>+ {page.data.t('misc.add')}</HeadlessButton>
 
 {#if picker_target}
   <Modal on_close={() => (picker_target = null)}>
@@ -184,10 +184,10 @@
       {#snippet children({ filteredItems }: { filteredItems: WritingSystemOption[] })}
         <div class="option-list">
           {#each filteredItems.slice(0, 60) as option (option.bcp)}
-            <Button form="simple" color="green" class="ws-option" onclick={() => choose_option(option)}>
+            <HeadlessButton style="color: var(--success)" class="btn-ghost btn-default ws-option" onclick={() => choose_option(option)}>
               <span>{option.name}</span>
               <span class="ws-bcp">{option.bcp}{option.keyboard ? ' ⌨' : ''}</span>
-            </Button>
+            </HeadlessButton>
           {/each}
         </div>
       {/snippet}
@@ -195,11 +195,11 @@
 
     <div class="custom-row">
       <input class="name-input" placeholder="or a custom code (e.g. village-spelling)" bind:value={custom_code} />
-      <Button form="filled" size="sm" onclick={add_custom}>Add custom</Button>
+      <HeadlessButton class="btn-primary btn-sm" onclick={add_custom}>Add custom</HeadlessButton>
     </div>
 
     <div class="modal-footer">
-      <Button onclick={() => (picker_target = null)} color="black">{page.data.t('misc.cancel')}</Button>
+      <HeadlessButton class="btn btn-default" onclick={() => (picker_target = null)}>{page.data.t('misc.cancel')}</HeadlessButton>
     </div>
   </Modal>
 {/if}

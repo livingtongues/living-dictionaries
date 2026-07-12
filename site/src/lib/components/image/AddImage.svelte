@@ -1,11 +1,10 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store'
   import ImageDropZone from './ImageDropZone.svelte'
-  import type { ImageUploadStatus } from './upload-image'
+  import type { MediaUploadHandle } from '$lib/media/upload-media'
   import { page } from '$app/state'
 
   interface Props {
-    upload_image: (file: File) => Readable<ImageUploadStatus>
+    upload_image: (file: File) => MediaUploadHandle
     border?: boolean
     require_entry_fields?: boolean
     children?: import('svelte').Snippet
@@ -18,23 +17,23 @@
     children,
   }: Props = $props()
 
-  let upload_statuses: Readable<ImageUploadStatus>[] = $state([])
+  let upload_handles: MediaUploadHandle[] = $state([])
 </script>
 
-{#each upload_statuses as upload_status, index (index)}
+{#each upload_handles as handle, index (index)}
   {#await import('$lib/components/image/UploadImageStatus.svelte') then { default: UploadImageStatus }}
     <div style="display: flex; flex-direction: column; flex-grow: 1">
       <UploadImageStatus
-        {upload_status}
+        {handle}
         on_finish={() => {
-          upload_statuses = upload_statuses.filter((_, i) => i !== index)
+          upload_handles = upload_handles.filter((_, i) => i !== index)
         }} />
     </div>
   {/await}
 {/each}
 
-{#if !upload_statuses.length}
-  <ImageDropZone {border} {require_entry_fields} class="image-drop-pad" on_file_added={file => upload_statuses = [...upload_statuses, upload_image(file)]}>
+{#if !upload_handles.length}
+  <ImageDropZone {border} {require_entry_fields} class="image-drop-pad" on_file_added={file => upload_handles = [...upload_handles, upload_image(file)]}>
     {#snippet label()}
 
       {#if children}{@render children()}{:else}{page.data.t('misc.upload')}{/if}

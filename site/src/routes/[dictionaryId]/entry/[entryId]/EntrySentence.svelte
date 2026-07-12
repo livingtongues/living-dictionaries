@@ -19,7 +19,7 @@
     sense_id,
   }: Props = $props()
 
-  const { db_operations } = $derived(page.data)
+  const { writes } = $derived(page.data)
 
   const orthographies = $derived(get_orthographies(page.data.dictionary ?? {}))
 </script>
@@ -30,8 +30,12 @@
       type="button"
       class="delete-sentence"
       title={page.data.t('sentence.delete')}
-      onclick={() => db_operations.delete_sentence(sentence.id)}>
-      <IconSystemUiconsTrash class="icon-inline" style="font-size: 1.25rem" />
+      onclick={() => {
+        // confirm() is a UI concern — the write facade only deletes
+        if (confirm('Are you sure you want to delete this sentence?'))
+          writes.delete_sentence(sentence.id)
+      }}>
+      <IconSystemUiconsTrash style="font-size: 1.25rem" />
     </button>
   {/if}
 
@@ -46,12 +50,12 @@
         : `${orthography.name}: ${page.data.t('entry_field.example_sentence')}`}
       on_update={(new_value) => {
         if (!sentence.id) {
-          db_operations.insert_sentence({
+          writes.insert_sentence({
             sentence: { text: { [orthography.code]: new_value } },
             sense_id,
           })
         } else {
-          db_operations.update_sentence({
+          writes.update_sentence({
             text: { ...(sentence.text || {}), [orthography.code]: new_value },
             id: sentence.id,
           })
@@ -68,7 +72,7 @@
         {can_edit}
         display="{page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: {page.data.t('entry_field.example_sentence')}"
         on_update={(new_value) => {
-          db_operations.update_sentence({
+          writes.update_sentence({
             translation: {
               ...(sentence.translation || {}),
               [bcp]: new_value,

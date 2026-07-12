@@ -12,7 +12,9 @@
   import EntriesEmptyState from './EntriesEmptyState.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import type { QueryParams } from '$lib/search/types'
+  import type { MultiString } from '$lib/types'
   import { page } from '$app/state'
+  import { goto } from '$app/navigation'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { browser } from '$app/environment'
   import { track, track_timing } from '$lib/debug/remote-log'
@@ -68,7 +70,15 @@
       console.error(err)
     }
   }
-  let { entries_data, auth_user, search_entries, search_sentences, search_texts, default_entries_per_page, search_params, dictionary, can_edit, is_manager, db_operations, search_index_updated } = $derived(data)
+  let { entries_data, auth_user, search_entries, search_sentences, search_texts, default_entries_per_page, search_params, dictionary, can_edit, is_manager, writes, search_index_updated } = $derived(data)
+
+  // Navigation after create is a UI concern — the write facade just returns
+  // the entry (undefined when the write was blocked/failed and toasted).
+  async function add_entry(lexeme: MultiString) {
+    const entry = await writes.insert_entry(lexeme)
+    if (entry)
+      await goto(`/${dictionary.url}/entry/${entry.id}`)
+  }
   const { loading } = $derived(entries_data)
   // Corpus scopes (sentences/texts) are an admin-3 preview while iterated on —
   // see .issues/texts-sentences-pipeline.md. Gate must not shape the views.
@@ -123,7 +133,7 @@
           <div>{page.data.t('misc.loading')}…</div>
         </div>
       {:else}
-        <EntriesEmptyState {dictionary} {can_edit} {is_manager} add_entry={db_operations.insert_entry} />
+        <EntriesEmptyState {dictionary} {can_edit} {is_manager} {add_entry} />
       {/if}
     {:else}
       {#if show_scope_chips}
@@ -153,7 +163,7 @@
               {/if}
             {/if}
             {#if $loading}
-              <span class="loading-spinner" title="Ensuring all entries are up to date"><IconSvgSpinners3DotsFade class="icon-inline" style="vertical-align: -4px" /></span>
+              <span class="loading-spinner" title="Ensuring all entries are up to date"><IconSvgSpinners3DotsFade style="vertical-align: -4px" /></span>
             {/if}
           </div>
           {#if scope === 'sentences'}
@@ -171,15 +181,15 @@
                   <AddSentence class={placement_class} />
                 {/await}
               {:else if scope === 'texts'}
-                {#await import('$lib/components/ui/Button.svelte') then { default: Button }}
-                  <Button class="add-entry-button {placement_class}" form="filled" href={`/${dictionary.url}/texts/new`}>
-                    <IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" />
+                {#await import('$lib/components/ui/HeadlessButton.svelte') then { default: HeadlessButton }}
+                  <HeadlessButton class="btn-primary btn-default add-entry-button {placement_class}" href={`/${dictionary.url}/texts/new`}>
+                    <IconFaSolidPlus style="margin-top: -0.25rem" />
                     {page.data.t('text.new')}
-                  </Button>
+                  </HeadlessButton>
                 {/await}
               {:else if !scope}
                 {#await import('./AddEntry.svelte') then { default: AddEntry }}
-                  <AddEntry add_entry={db_operations.insert_entry} class={placement_class} />
+                  <AddEntry {add_entry} class={placement_class} />
                 {/await}
               {/if}
             {/snippet}

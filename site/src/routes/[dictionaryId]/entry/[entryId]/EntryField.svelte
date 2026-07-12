@@ -57,7 +57,7 @@
                 {value}
               {/if}
             </div>
-          {:else}<IconFa6SolidPencil class="icon-inline" style="opacity: 0.4; font-size: 0.875rem" />{/if}
+          {:else}<IconFa6SolidPencil style="opacity: 0.4; font-size: 0.875rem" />{/if}
         </svelte:element>
       </div>
       {#if show}

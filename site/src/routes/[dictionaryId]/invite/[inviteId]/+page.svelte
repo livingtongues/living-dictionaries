@@ -1,6 +1,7 @@
 <script lang="ts">
+  import IconSignInAlt from '~icons/fa-solid/sign-in-alt'
   import IconFa6SolidChevronRight from '~icons/fa6-solid/chevron-right'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import Skeleton from '$lib/components/ui/Skeleton.svelte'
   import { api_dictionaries_id_invites_accept } from '$api/dictionaries/[id]/invites/[invite_id]/accept/_call'
@@ -44,20 +45,20 @@
       <p style="margin-bottom: 0.5rem">
         You are already a manager.
       </p>
-      <Button href={`/${dictionary.url}/entries`}>
+      <HeadlessButton class="btn btn-default" href={`/${dictionary.url}/entries`}>
         {page.data.t('dictionary.entries')}
-        <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.25rem" />
-      </Button>
+        <IconFa6SolidChevronRight class="rtl-x-flip" style="margin-top: -0.25rem" />
+      </HeadlessButton>
     {:else if is_contributor && invite.role === 'contributor'}
       <p style="margin-bottom: 0.5rem">
         You are already a contributor.
       </p>
-      <Button href={`/${dictionary.url}/entries`}>
+      <HeadlessButton class="btn btn-default" href={`/${dictionary.url}/entries`}>
         {page.data.t('dictionary.entries')}
-        <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.25rem" />
-      </Button>
+        <IconFa6SolidChevronRight class="rtl-x-flip" style="margin-top: -0.25rem" />
+      </HeadlessButton>
     {:else}
-      <Button form="filled" onclick={accept_invite}>{page.data.t('invite.accept_invitation')}</Button>
+      <HeadlessButton class="btn-primary btn-default" onclick={accept_invite}>{page.data.t('invite.accept_invitation')}</HeadlessButton>
 
       <div class="terms-note">
         {page.data.t('terms.agree_by_submit')}
@@ -70,12 +71,12 @@
   {:else}
     <ShowHide>
       {#snippet children({ show, toggle })}
-        <Button form="text" onclick={toggle}>
-          <i class="far fa-sign-in"></i>
+        <HeadlessButton class="btn-ghost btn-default" onclick={toggle}>
+          <IconSignInAlt />
           <span style="margin-left: 0.25rem">
             {page.data.t('header.login')}
           </span>
-        </Button>
+        </HeadlessButton>
         {#if show}
           {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
             <AuthModal on_close={toggle} />
@@ -89,10 +90,10 @@
     {page.data.t('invite.invitation_claimed')}
   </p>
 
-  <Button href={`/${dictionary.url}/entries`}>
+  <HeadlessButton class="btn btn-default" href={`/${dictionary.url}/entries`}>
     {page.data.t('dictionary.entries')}
-    <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.25rem" />
-  </Button>
+    <IconFa6SolidChevronRight class="rtl-x-flip" style="margin-top: -0.25rem" />
+  </HeadlessButton>
 {:else if !user}
   {page.data.t('header.please_create_account')}
   <ShowHide>

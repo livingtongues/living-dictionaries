@@ -1,7 +1,15 @@
 <script lang="ts">
+  import IconBars from '~icons/fa-solid/bars'
+  import IconDonate from '~icons/fa-solid/donate'
+  import IconInfoCircle from '~icons/fa-solid/info-circle'
+  import IconQuestionCircle from '~icons/fa-regular/question-circle'
+  import IconTimes from '~icons/fa-solid/times'
+  import IconHome from '~icons/fa-solid/home'
+  import IconComment from '~icons/fa-regular/comment'
+  import IconLanguage from '~icons/fa-solid/language'
   import User from './User.svelte'
   import ColorSchemeToggle from './ColorSchemeToggle.svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Slideover from '$lib/components/ui/Slideover.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
@@ -21,7 +29,7 @@
     <ShowHide>
       {#snippet children({ show, toggle, set })}
         <button type="button" class="menu-button" aria-label={page.data.t('header.menu')} onclick={toggle}>
-          <i class="far fa-bars print-hidden"></i>
+          <IconBars class="print-hidden" />
         </button>
         {#if show}
           <Slideover
@@ -33,30 +41,24 @@
                 <div class="menu-heading">{page.data.t('header.menu')}</div>
               </header>
               <div class="menu-items">
-                <Button
-                  form="text"
-                  href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
-                  target="_blank">
-                  <i class="far fa-donate"></i>
+                <HeadlessButton class="btn-ghost btn-default" href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ" target="_blank">
+                  <IconDonate />
                   <span class="label">{page.data.t('header.donate')}</span>
-                </Button>
-                <Button href="/about" form="text">
-                  <i class="far fa-info-circle"></i>
+                </HeadlessButton>
+                <HeadlessButton class="btn-ghost btn-default" href="/about">
+                  <IconInfoCircle />
                   <span class="label">{page.data.t('header.about')}</span>
-                </Button>
-                <Button href="/tutorials" form="text">
-                  <IconFluentLearningApp24Regular class="icon-inline" style="margin-top: -2px" />
+                </HeadlessButton>
+                <HeadlessButton class="btn-ghost btn-default" href="/tutorials">
+                  <IconFluentLearningApp24Regular style="margin-top: -2px" />
                   <span class="label">{page.data.t('header.tutorials')}</span>
-                </Button>
-                <Button
-                  form="text"
-                  href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
-                  target="_blank">
-                  <i class="far fa-question-circle"></i>
+                </HeadlessButton>
+                <HeadlessButton class="btn-ghost btn-default" href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing" target="_blank">
+                  <IconQuestionCircle />
                   <span class="label">
                     FAQ
                   </span>
-                </Button>
+                </HeadlessButton>
                 {#if !page.data.auth_user?.user}
                   <div class="menu-theme">
                     <ColorSchemeToggle />
@@ -65,10 +67,10 @@
               </div>
               <div class="menu-bottom">
                 <hr />
-                <Button form="menu" class="menu-close-btn" onclick={toggle}>
-                  <i class="far fa-times fa-lg fa-fw"></i>
+                <HeadlessButton class="btn-ghost btn-default menu-close-btn" onclick={toggle}>
+                  <IconTimes style="font-size: 1.3333em" />
                   {page.data.t('misc.close')}
-                </Button>
+                </HeadlessButton>
               </div>
             </div>
           </Slideover>
@@ -77,7 +79,7 @@
     </ShowHide>
   {/if}
   {#if children}
-    <Button form="text" href="/"><i class="fas fa-home"></i></Button>
+    <HeadlessButton class="btn-ghost btn-default" href="/"><IconHome /></HeadlessButton>
     <div class="page-title">
       {@render children?.()}
     </div>
@@ -100,46 +102,46 @@
   <div class="spacer"></div>
 
   <div class="actions">
-    <Button
-      class="show-md"
-      form="text"
+    <HeadlessButton
+      class="btn-ghost btn-default show-md"
+
       href="https://www.paypal.com/donate?hosted_button_id=QCELFXU8ZGTVC"
       target="_blank">
-      <i class="far fa-donate"></i>
+      <IconDonate />
       <span class="label label-lg">{page.data.t('header.donate')}</span>
-    </Button>
-    <Button href="/about" form="text" class="show-lg">
-      <i class="far fa-info-circle"></i>
+    </HeadlessButton>
+    <HeadlessButton href="/about" class="btn-ghost btn-default show-lg">
+      <IconInfoCircle />
       <span class="label label-lg">{page.data.t('header.about')}</span>
-    </Button>
-    <Button href="/tutorials" form="text" class="show-md">
-      <IconFluentLearningApp24Regular class="icon-inline" style="margin-top: -2px" />
+    </HeadlessButton>
+    <HeadlessButton href="/tutorials" class="btn-ghost btn-default show-md">
+      <IconFluentLearningApp24Regular style="margin-top: -2px" />
       <span class="label label-lg">{page.data.t('header.tutorials')}</span>
-    </Button>
-    <Button
-      form="text"
+    </HeadlessButton>
+    <HeadlessButton
+
       href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
       target="_blank"
-      class="faq-btn">
-      <i class="far fa-question-circle"></i>
+      class="btn-ghost btn-default faq-btn">
+      <IconQuestionCircle />
       <span class="label">
         FAQ
       </span>
-    </Button>
+    </HeadlessButton>
 
     <ShowHide>
       {#snippet children({ show, toggle })}
-        <Button form="text" onclick={toggle}>
+        <HeadlessButton class="btn-ghost btn-default" onclick={toggle}>
           <span>
-            <i class="far fa-comment"></i>
+            <IconComment />
           </span>
           <!-- <span class="lg:hidden">
-            <i class="far fa-question-circle" />
+            <IconQuestionCircle />
           </span> -->
           <span class="label label-sm">
             {page.data.t('header.contact_us')}
           </span>
-        </Button>
+        </HeadlessButton>
         {#if show}
           {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
             <Contact on_close={toggle} />
@@ -150,12 +152,12 @@
 
     <ShowHide>
       {#snippet children({ show, toggle })}
-        <Button form="text" onclick={toggle}>
-          <i class="far fa-language"></i>
+        <HeadlessButton class="btn-ghost btn-default" onclick={toggle}>
+          <IconLanguage />
           <span class="label label-lg">
             {page.data.t('header.language')}
           </span>
-        </Button>
+        </HeadlessButton>
         {#if show}
           {#await import('$lib/components/modals/SelectLanguage.svelte') then { default: SelectLanguage }}
             <SelectLanguage on_close={toggle} />

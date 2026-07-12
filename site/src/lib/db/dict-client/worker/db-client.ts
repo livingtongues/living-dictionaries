@@ -13,7 +13,7 @@
  * transport. On a leader hand-off the transport re-sends outstanding requests, so
  * callers don't see the churn. `on_ready` re-fires on every hand-off — editor
  * tabs use it to re-assert `set_role` on a new leader that may have booted
- * viewer-mode (see `dict-lifecycle.ts`).
+ * viewer-mode (see `dict-session.ts`).
  */
 import type { BootFailure, BootProgressDetail, DbEvent, DbRequest, InstanceOptions, LeaderMeta, WorkerInitMessage } from './instance'
 import { db_channel_name, db_lock_name } from './instance'
@@ -87,7 +87,7 @@ export function create_db_client({ instance_options, on_boot_failed, on_boot_pro
     on_promote: () => {
       spawn_leader_worker()
       // Origin-scoped silent request (never prompts viewers). Editors get the
-      // prompting request in `dict-lifecycle.ts` once their role is known.
+      // prompting request in `dict-session.ts` once their role is known.
       void ensure_persistent_storage({ allow_prompt: false })
     },
   })

@@ -23,7 +23,7 @@
     {#if text}
       {@const sentence_count = sentences.filter(sentence => sentence.text_id === hit.id).length}
       <a class="card" href={`/${dictionary.url}/text/${hit.id}`}>
-        <IconCarbonDocument class="icon-inline" style="font-size: 1.25rem; opacity: 0.6" />
+        <IconCarbonDocument style="font-size: 1.25rem; opacity: 0.6" />
         <div>
           <div class="title">{Object.values(text.title || {}).find(Boolean) || ''}</div>
           <div class="meta">{page.data.t('text.sentence_count', { values: { count: sentence_count } })}</div>

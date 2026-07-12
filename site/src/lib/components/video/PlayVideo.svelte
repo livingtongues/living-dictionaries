@@ -1,12 +1,13 @@
 <script lang="ts">
+  import IconDownload from '~icons/fa-solid/download'
   import type { EntryData } from '$lib/types'
   import VideoThirdParty from './VideoThirdParty.svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
   import IconFaSolidTimes from '~icons/fa-solid/times'
   import IconFaTrashO from '~icons/fa/trash-o'
 
-  const { db_operations, url_from_storage_path } = $derived(page.data)
+  const { writes, url_from_storage_path } = $derived(page.data)
 
   interface Props {
     lexeme: string
@@ -30,7 +31,7 @@
   <div class="viewer-inner">
     <div class="viewer-header">
       <span onclick={e => e.stopPropagation()}>{lexeme}</span>
-      <IconFaSolidTimes class="icon-inline viewer-close" style="font-size: 2.5rem" />
+      <IconFaSolidTimes class="viewer-close" style="font-size: 2.5rem" />
     </div>
     {#if video.storage_path}
       <video
@@ -45,17 +46,16 @@
     {/if}
     {#if can_edit}
       <div class="viewer-footer">
-        <Button
-          class="video-delete-button"
-          color="red"
-          form="filled"
+        <HeadlessButton
+          class="btn btn-default video-delete-button"
+
           onclick={async () => {
             const confirmation = confirm(page.data.t('entry.delete_video'))
-            if (confirmation) await db_operations.delete_video(video.id)
+            if (confirmation) await writes.delete_video(video.id)
           }}>
-          <IconFaTrashO class="icon-inline" style="margin: -1px 0 2px;" />
+          <IconFaTrashO style="margin: -1px 0 2px;" />
           {page.data.t('misc.delete')}
-        </Button>
+        </HeadlessButton>
       </div>
     {/if}
   </div>
@@ -120,13 +120,13 @@
 </style>
 
 <!-- {#if !video.youtubeId && !video.vimeoId}
-        <Button
+        <HeadlessButton class="btn btn-default"
           href={video.storage_url}
           target="_blank">
-          <i class="fas fa-download" />
+          <IconDownload />
           <span class="hidden sm:inline"
             >{page.data.t('misc.download', {
               default: 'Download',
             })}</span>
-        </Button>
+        </HeadlessButton>
       {/if} -->

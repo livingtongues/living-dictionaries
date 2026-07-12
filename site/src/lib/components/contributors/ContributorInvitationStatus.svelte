@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { supabase_date_to_friendly } from '$lib/utils/time'
   import IconFaSolidTimes from '~icons/fa-solid/times'
   import IconFaKey from '~icons/fa/key'
@@ -26,13 +26,10 @@
     {invite.target_email}
   </span>
   {#if admin}
-    <Button
-      color="red"
-      size="sm"
-      onclick={on_delete_invite}>
-      <IconFaSolidTimes class="icon-inline" />
-      <IconFaKey class="icon-inline" />
-    </Button>
+    <HeadlessButton style="color: var(--danger)" class="btn btn-sm" onclick={on_delete_invite}>
+      <IconFaSolidTimes />
+      <IconFaKey />
+    </HeadlessButton>
   {/if}
 </div>
 

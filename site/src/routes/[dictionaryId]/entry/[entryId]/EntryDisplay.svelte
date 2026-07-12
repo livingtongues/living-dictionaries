@@ -4,11 +4,11 @@
   import EntryMedia from './EntryMedia.svelte'
   import RelatedEntries from './RelatedEntries.svelte'
   import Sense from './Sense.svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
-  import type { DbOperations } from '$lib/db-operations'
+  import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
   import { get_orthographies } from '$lib/helpers/orthographies'
   import { dedupe_keyed_children } from '$lib/utils/dedupe-keyed-children'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
@@ -20,21 +20,21 @@
     entry: EntryData
     dictionary: Tables<'dictionaries'>
     can_edit?: boolean
-    db_operations: DbOperations
+    writes: GuardedWrites
   }
 
   const {
     entry,
     dictionary,
     can_edit = false,
-    db_operations,
+    writes,
   }: Props = $props()
 
   // Scalar entry fields render + save directly off the live `dict_db` row
   // (mutate, then `_save()` — auto-stamps the editing user + dirty). The Orama
   // watcher reflects each save back into the `EntryData` read-model that the
   // list/gallery/table/SEO surfaces use. Multi-table concerns (senses, media,
-  // dialects, tags) stay on `db_operations`/the read-model for now. See
+  // dialects, tags) stay on `writes`/the read-model for now. See
   // `.issues/livedb-scalar-field-migration.md`.
   const dict_db = $derived(page.data.dict_db)
   const entry_row = $derived(dict_db?.entries.id(entry.id))
@@ -70,7 +70,7 @@
   </div>
 
   <div style="grid-area: media;">
-    <EntryMedia {dictionary} {entry} {can_edit} {db_operations} />
+    <EntryMedia {dictionary} {entry} {can_edit} {writes} />
   </div>
 
   <div class="content-col" style="grid-area: content;">
@@ -98,7 +98,7 @@
         <Sense {sense} glossLanguages={dictionary.gloss_languages} {can_edit} />
 
         {#if can_edit}
-          <Button class="add-sense-button" form="menu" onclick={async () => await db_operations.insert_sense(entry.id)}><IconSystemUiconsVersions class="icon-inline" style="font-size: 1.25rem" /> {page.data.t('sense.add')}</Button>
+          <HeadlessButton class="btn-ghost btn-default add-sense-button" onclick={async () => await writes.insert_sense(entry.id)}><IconSystemUiconsVersions style="font-size: 1.25rem" /> {page.data.t('sense.add')}</HeadlessButton>
         {/if}
       {:else}
         <div class="sense-block">
@@ -108,8 +108,8 @@
             </div>
             <div style="margin-left: auto; margin-right: auto"></div>
             {#if can_edit}
-              <Button class="sense-action-button delete-sense-button" size="sm" form="menu" onclick={async () => await db_operations.delete_sense(sense.id)}><IconFaSolidTimes class="icon-inline" style="margin-top: -0.25rem" /></Button>
-              <Button class="sense-action-button insert-sense-button" size="sm" form="menu" onclick={async () => await db_operations.insert_sense(entry.id)}><IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" /></Button>
+              <HeadlessButton class="btn-ghost btn-sm sense-action-button delete-sense-button" onclick={async () => await writes.delete_sense(sense.id)}><IconFaSolidTimes style="margin-top: -0.25rem" /></HeadlessButton>
+              <HeadlessButton class="btn-ghost btn-sm sense-action-button insert-sense-button" onclick={async () => await writes.insert_sense(entry.id)}><IconFaSolidPlus style="margin-top: -0.25rem" /></HeadlessButton>
             {/if}
           </div>
 

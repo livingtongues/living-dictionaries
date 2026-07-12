@@ -24,8 +24,8 @@
     <a href="/terms" class="lt-link">{page.data.t('dictionary.terms_of_use')}</a>
     <a href="/privacy-policy" class="lt-link">{page.data.t('terms.privacy_policy')}</a>
   </span>
-  <a href="https://www.facebook.com/living.tongues" target="_blank" class="social social-first"><IconMageFacebookSquare class="icon-inline" /></a>
-  <a href="https://www.instagram.com/livingtongues" target="_blank" class="social"><IconF7LogoInstagram class="icon-inline" /></a>
+  <a href="https://www.facebook.com/living.tongues" target="_blank" class="social social-first"><IconMageFacebookSquare /></a>
+  <a href="https://www.instagram.com/livingtongues" target="_blank" class="social"><IconF7LogoInstagram /></a>
   <span class="scheme-toggle"><ColorSchemeToggle compact /></span>
 </footer>
 
@@ -83,13 +83,13 @@
     margin-left: 0.25rem;
   }
 
-  .social :global(.icon-inline) {
+  .social :global(svg) {
     font-size: 1.25rem;
     margin-top: -0.125rem;
   }
 
   @media (min-width: 640px) {
-    .social :global(.icon-inline) {
+    .social :global(svg) {
       margin-top: -0.25rem;
     }
   }
@@ -111,7 +111,7 @@
       margin-left: 0.375rem;
     }
 
-    .social :global(.icon-inline) {
+    .social :global(svg) {
       font-size: 1.6rem;
       margin-top: -0.375rem;
     }

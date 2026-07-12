@@ -4,7 +4,7 @@
 </script>
 
 <script lang="ts">
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
 
@@ -46,7 +46,7 @@
   {/if}
 
   {#if !$sources?.length}
-    <Button onclick={() => source_slug = addSource} form="filled"><IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" /> {page.data.t('misc.add')}</Button>
+    <HeadlessButton class="btn-primary btn-default" onclick={() => source_slug = addSource}><IconFaSolidPlus style="margin-top: -0.25rem" /> {page.data.t('misc.add')}</HeadlessButton>
   {:else}
     <div class="speaker-row">
       <label for="source">
@@ -89,7 +89,7 @@
   {/if}
 
   {#if !$speakers?.length}
-    <Button onclick={() => speaker_id = addSpeaker} form="filled"><IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" /> {page.data.t('misc.add')}</Button>
+    <HeadlessButton class="btn-primary btn-default" onclick={() => speaker_id = addSpeaker}><IconFaSolidPlus style="margin-top: -0.25rem" /> {page.data.t('misc.add')}</HeadlessButton>
   {:else}
     <div class="speaker-row">
       <label for="speaker">

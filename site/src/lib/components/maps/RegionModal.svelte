@@ -13,7 +13,7 @@
   import Layer from './mapbox/map/Layer.svelte'
   import { random_color } from './utils/random-color'
   import Popup from './mapbox/map/Popup.svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ReactiveSet from '$lib/components/ui/ReactiveSet.svelte'
   import { page } from '$app/state'
@@ -102,11 +102,7 @@
                 lng={point.longitude}
                 lat={point.latitude}>
                 <Popup>
-                  <Button
-                    form="simple"
-                    size="sm"
-                    color="red"
-                    onclick={() => remove(point)}><IconFaTrashO class="icon-inline" /></Button>
+                  <HeadlessButton style="color: var(--danger)" class="btn-ghost btn-sm" onclick={() => remove(point)}><IconFaTrashO /></HeadlessButton>
                 </Popup>
               </Marker>
             {/each}
@@ -143,15 +139,15 @@
         </div>
 
         <div class="modal-footer">
-          <Button onclick={on_close} form="simple" color="black">
+          <HeadlessButton class="btn-ghost btn-default" onclick={on_close}>
             {page.data.t('misc.cancel')}
-          </Button>
-          <Button onclick={removeRegion} form="simple" color="red">
+          </HeadlessButton>
+          <HeadlessButton style="color: var(--danger)" class="btn-ghost btn-default" onclick={removeRegion}>
             {page.data.t('misc.remove')}
-          </Button>
-          <Button type="submit" form="filled" disabled={size < 3}>
+          </HeadlessButton>
+          <HeadlessButton class="btn-primary btn-default" type="submit" disabled={size < 3}>
             {page.data.t('misc.save')}
-          </Button>
+          </HeadlessButton>
         </div>
       </form>
     </Modal>

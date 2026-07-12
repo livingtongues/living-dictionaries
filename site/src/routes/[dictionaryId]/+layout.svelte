@@ -1,6 +1,9 @@
 <script lang="ts">
+  import IconHome from '~icons/fa-solid/home'
+  import IconBars from '~icons/fa-solid/bars'
+  import IconTimes from '~icons/fa-solid/times'
   import SideMenu from './SideMenu.svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ResponsiveSlideover from '$lib/components/ui/ResponsiveSlideover.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
@@ -38,12 +41,12 @@
           <a
             class="home-link"
             href="/">
-            <i class="fas fa-home"></i>
+            <IconHome />
           </a>
           <div class="home-gap"></div>
 
           <button type="button" class="menu-button" onclick={toggle}>
-            <i class="far fa-bars print-hidden"></i>
+            <IconBars class="print-hidden" />
             {dictionary.name}
           </button>
           <a class="dict-link" href="/{dictionary.url}">
@@ -62,10 +65,10 @@
         <div class="side-panel">
           <SideMenu {dictionary} is_manager={is_manager} is_editor_or_above={is_editor_or_above} {can_edit} {dict_sync_status} entry_count={Object.keys($entries_data).length} on_close={() => set(false)} loading={$loading} />
           <hr />
-          <Button form="menu" class="side-close-button" onclick={toggle}>
-            <i class="far fa-times fa-lg fa-fw"></i>
+          <HeadlessButton class="btn-ghost btn-default side-close-button" onclick={toggle}>
+            <IconTimes style="font-size: 1.3333em" />
             {page.data.t('misc.close')}
-          </Button>
+          </HeadlessButton>
         </div>
       </ResponsiveSlideover>
       <div class="side-gap"></div>

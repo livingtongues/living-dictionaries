@@ -1,8 +1,9 @@
 <script lang="ts">
+  import IconSpinner from '~icons/fa-solid/spinner'
   import MediaStream from '../record/MediaStream.svelte'
   import Recorder from '../record/Recorder.svelte'
   import { srcObject } from './src-object'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
 
   interface Props {
@@ -30,9 +31,9 @@
         }}>
         {#snippet children({ start, pause, stop, recordingTime, state })}
           {#if state === 'inactive'}
-            <Button onclick={start} color="red" class="record-full record-tall record-spaced">
+            <HeadlessButton onclick={start} class="btn btn-default record-full record-tall record-spaced">
               {page.data.t('audio.tap_to_record')}
-            </Button>
+            </HeadlessButton>
 
             {#if microphones.length > 1 && selectedMicrophone}
               <select
@@ -65,16 +66,16 @@
           {/if}
 
           {#if state === 'recording' || state === 'paused'}
-            <Button
+            <HeadlessButton
               onclick={async () => {
                 videoBlob = await stop()
               }}
-              color="red"
-              class="record-full record-tall record-spaced">
+
+              class="btn btn-default record-full record-tall record-spaced">
               <div class="recording-time">{recordingTime}s</div>
               {page.data.t('audio.stop_recording')}
-            </Button>
-            <Button class="record-full record-spaced" color="black" onclick={pause}>{state === 'recording' ? 'Pause' : 'Unpause'}</Button>
+            </HeadlessButton>
+            <HeadlessButton class="btn btn-default record-full record-spaced" onclick={pause}>{state === 'recording' ? 'Pause' : 'Unpause'}</HeadlessButton>
           {/if}
         {/snippet}
       </Recorder>
@@ -86,12 +87,12 @@
           <!-- audio.undo_permission_denied_explanation needs split -->
           Permission to access media was denied.
         </div>
-        <Button
-          class="record-spaced-2"
-          form="filled"
+        <HeadlessButton
+          class="btn-primary btn-default record-spaced-2"
+
           href="https://www.google.com/search?q=How+do+I+enable+microphone+access"
           target="_blank"
-          rel="noopener">{page.data.t('audio.learn_more')}</Button>
+          rel="noopener">{page.data.t('audio.learn_more')}</HeadlessButton>
       </div>
     {/snippet}
 
@@ -102,13 +103,13 @@
           browser asks for permission.
         </div>
         <div>
-          <Button form="filled" class="record-spaced-2" onclick={() => location.reload()}>{page.data.t('audio.reload')}</Button>
+          <HeadlessButton class="btn-primary btn-default record-spaced-2" onclick={() => location.reload()}>{page.data.t('audio.reload')}</HeadlessButton>
         </div>
       </div>
     {/snippet}
 
     {#snippet loading()}
-      <div>Accessing Microphone and Camera <i class="far fa-spinner fa-pulse"></i></div>
+      <div>Accessing Microphone and Camera <IconSpinner class="animate-spin" /></div>
     {/snippet}
   </MediaStream>
 {:else}

@@ -19,7 +19,7 @@
     <div
       class="{klass} video-action"
       onclick={toggle}>
-      <IconBiCameraVideo class="icon-inline" style="font-size: 1.25rem; margin-top: 0.25rem" />
+      <IconBiCameraVideo style="font-size: 1.25rem; margin-top: 0.25rem" />
       <div class="view-label">
         {page.data.t('video.view')}
       </div>

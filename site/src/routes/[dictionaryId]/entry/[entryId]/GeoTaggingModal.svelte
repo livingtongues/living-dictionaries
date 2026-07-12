@@ -3,7 +3,7 @@
   import { onMount } from 'svelte'
   import InitableShowHide from './InitableShowHide.svelte'
   import { flattenCoordinates } from './flatten-coordinates'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
@@ -82,9 +82,9 @@
           <Popup>
             <ShowHide>
               {#snippet children({ show, toggle })}
-                <Button form="simple" size="sm" onclick={toggle}>
-                  <IconOcticonPencil class="icon-inline" />
-                </Button>
+                <HeadlessButton class="btn-ghost btn-sm" onclick={toggle}>
+                  <IconOcticonPencil />
+                </HeadlessButton>
                 {#if show}
                   <CoordinatesModal
                     lng={point.coordinates.longitude}
@@ -116,9 +116,9 @@
         <Region {region}>
           <ShowHide>
             {#snippet children({ show, toggle })}
-              <Button form="simple" size="sm" onclick={toggle}>
-                <IconOcticonPencil class="icon-inline" />
-              </Button>
+              <HeadlessButton class="btn-ghost btn-sm" onclick={toggle}>
+                <IconOcticonPencil />
+              </HeadlessButton>
               {#if show}
                 <RegionModal
                   initialCenter={initialCenter}
@@ -146,10 +146,10 @@
       {#if mounted}
         <InitableShowHide show={addPoint}>
           {#snippet children({ show, toggle })}
-            <Button onclick={toggle} color="black" size="sm">
-              <IconMdiMapMarkerPlus class="icon-inline" style="margin-right: 0.25rem; margin-top: -3px;" />
+            <HeadlessButton class="btn btn-sm" onclick={toggle}>
+              <IconMdiMapMarkerPlus style="margin-right: 0.25rem; margin-top: -3px;" />
               {page.data.t('create.select_coordinates')}
-            </Button>
+            </HeadlessButton>
             {#if show}
               <CoordinatesModal
                 {initialCenter}
@@ -167,10 +167,10 @@
 
         <InitableShowHide show={addRegion}>
           {#snippet children({ show, toggle })}
-            <Button onclick={toggle} color="black" size="sm">
-              <IconMdiMapMarkerPath class="icon-inline" style="margin-right: 0.25rem; margin-top: -2px;" />
+            <HeadlessButton class="btn btn-sm" onclick={toggle}>
+              <IconMdiMapMarkerPath style="margin-right: 0.25rem; margin-top: -2px;" />
               {page.data.t('create.select_region')}
-            </Button>
+            </HeadlessButton>
             {#if show}
               <RegionModal
                 initialCenter={initialCenter}
@@ -188,8 +188,8 @@
   </div>
 
   <div class="modal-footer">
-    <Button onclick={on_close} form="simple" color="black">
+    <HeadlessButton class="btn-ghost btn-default" onclick={on_close}>
       {page.data.t('misc.close')}
-    </Button>
+    </HeadlessButton>
   </div>
 </Modal>

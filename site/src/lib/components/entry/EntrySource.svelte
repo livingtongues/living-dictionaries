@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
@@ -40,7 +40,7 @@
         {/each}
         {#if can_edit && !value?.length}
           <button type="button" class="add-source">
-            <IconFaSolidPlus class="icon-inline" style="margin-bottom: 0.25rem" />
+            <IconFaSolidPlus style="margin-bottom: 0.25rem" />
             {page.data.t('misc.add')}
           </button>
         {/if}
@@ -57,15 +57,15 @@
           <MultiSelect bind:selectedOptions {options} placeholder={page.data.t('entry_field.sources')} />
 
           <button type="button" class="create-new" onclick={() => (creating = true)}>
-            <IconFaSolidPlus class="icon-inline" />
+            <IconFaSolidPlus />
             {page.data.t({ dynamicKey: 'source.create', fallback: 'Add source' })}
           </button>
 
           <div style="min-height: 40vh"></div>
 
           <div class="modal-footer">
-            <Button onclick={toggle} form="simple" color="black">{page.data.t('misc.cancel')}</Button>
-            <Button type="submit" form="filled">{page.data.t('misc.save')}</Button>
+            <HeadlessButton class="btn-ghost btn-default" onclick={toggle}>{page.data.t('misc.cancel')}</HeadlessButton>
+            <HeadlessButton class="btn-primary btn-default" type="submit">{page.data.t('misc.save')}</HeadlessButton>
           </div>
         </form>
       </Modal>

@@ -1,6 +1,5 @@
 <script lang="ts">
-  import type { Tables } from '$lib/types'
-  import type { DbOperations } from '$lib/db-operations'
+  import type { MultiString, Tables } from '$lib/types'
   import { page } from '$app/state'
   import AddEntry from './AddEntry.svelte'
   import IconFa6SolidBookOpen from '~icons/fa6-solid/book-open'
@@ -11,7 +10,7 @@
     dictionary: Tables<'dictionaries'>
     can_edit: boolean
     is_manager: boolean
-    add_entry: DbOperations['insert_entry']
+    add_entry: (lexeme: MultiString) => Promise<void>
   }
 
   const { dictionary, can_edit, is_manager, add_entry }: Props = $props()
@@ -19,7 +18,7 @@
 
 <div class="empty-state">
   <div class="icon-circle">
-    <IconFa6SolidBookOpen class="icon-inline" style="font-size: 1.75rem" />
+    <IconFa6SolidBookOpen style="font-size: 1.75rem" />
   </div>
 
   {#if can_edit}
@@ -32,9 +31,9 @@
 
     {#if is_manager}
       <a class="agent-line" href={`/${dictionary.url}/agents`}>
-        <IconFa6SolidRobot class="icon-inline" style="font-size: 0.9rem" />
+        <IconFa6SolidRobot style="font-size: 0.9rem" />
         Working with an AI agent? Create a key
-        <IconFa6SolidArrowRight class="icon-inline rtl-x-flip" style="font-size: 0.8rem" />
+        <IconFa6SolidArrowRight class="rtl-x-flip" style="font-size: 0.8rem" />
       </a>
     {/if}
   {:else}

@@ -31,8 +31,7 @@ export const shared_meta: StoryMeta = {
     url_from_storage_path: (path: string) => `/api/dev-media/${path}`,
     speakers: readable([{ id: 'sp1', name: 'Ana Marija' }]),
     sources: readable([]),
-    db_operations: {
-      addAudio: () => readable({ progress: 0 }),
+    writes: {
       assign_speaker: async () => {},
     },
   },

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import IconUndo from '~icons/fa-solid/undo'
   import type { QueryParamStore } from '$lib/state/query-param-state.svelte'
   import type { QueryParams } from '$lib/search/types'
 
@@ -19,7 +20,7 @@
 </script>
 
 {#if filtered}
-  <button type="button" onclick={clear_filters}><i class="far fa-undo fa-sm"></i> Clear</button>
+  <button type="button" onclick={clear_filters}><IconUndo style="font-size: 0.875em" /> Clear</button>
 {/if}
 
 <style>

@@ -5,14 +5,14 @@
   import { setUpColumns } from './set-up-columns'
   import { minutes_ago_in_ms } from '$lib/utils/time'
   import { browser } from '$app/environment'
-  import type { DbOperations } from '$lib/db-operations'
+  import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
 
   interface Props {
     entries?: EntryData[]
     can_edit?: boolean
     dictionary: Tables<'dictionaries'>
     preferred_table_columns: IColumn[]
-    db_operations: DbOperations
+    writes: GuardedWrites
   }
 
   const {
@@ -20,7 +20,7 @@
     can_edit = false,
     dictionary,
     preferred_table_columns,
-    db_operations,
+    writes,
   }: Props = $props()
 
   const columns = $derived(setUpColumns(preferred_table_columns, dictionary))
@@ -67,7 +67,7 @@
               {column}
               {entry}
               {can_edit}
-              {db_operations} />
+              {writes} />
           </td>
         {/each}
       </tr>

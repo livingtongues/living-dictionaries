@@ -1,5 +1,5 @@
 <script lang='ts'>
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import IconFaSolidTimes from '~icons/fa-solid/times'
@@ -13,7 +13,7 @@
           <b>{page.data.t('banner.attention')}</b>: We are updating our website, and running into temporary login issues. Please bear with us as we return normal operations shortly.
         </div>
         <div class="banner-gap"></div>
-        <Button form="simple" color="black" onclick={toggle}><IconFaSolidTimes class="icon-inline" /></Button>
+        <HeadlessButton class="btn-ghost btn-default" onclick={toggle}><IconFaSolidTimes /></HeadlessButton>
       </div>
     {/if}
   {/snippet}

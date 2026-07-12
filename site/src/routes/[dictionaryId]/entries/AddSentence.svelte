@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import { goto } from '$app/navigation'
@@ -24,10 +24,10 @@
 
 <ShowHide>
   {#snippet children({ show, toggle })}
-    <Button class="add-entry-button {props.class}" form="filled" onclick={toggle}>
-      <IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" />
+    <HeadlessButton class="btn-primary btn-default add-entry-button {props.class}" onclick={toggle}>
+      <IconFaSolidPlus style="margin-top: -0.25rem" />
       {page.data.t('sentence.add')}
-    </Button>
+    </HeadlessButton>
     {#if show}
       <EditFieldModal
         field="example_sentence"

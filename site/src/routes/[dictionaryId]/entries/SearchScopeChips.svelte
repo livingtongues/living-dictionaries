@@ -41,7 +41,7 @@
   {/each}
   <!-- Admin-3 preview marker while the corpus scopes are iterated on (same
        shield convention as the dict-home side-menu link). -->
-  <IconFa6SolidUserShield class="icon-inline" style="font-size: 0.6875rem; opacity: 0.45; align-self: center" />
+  <IconFa6SolidUserShield style="font-size: 0.6875rem; opacity: 0.45; align-self: center" />
 </div>
 
 <style>

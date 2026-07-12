@@ -1,5 +1,6 @@
 <script lang="ts">
-  import Button from '$lib/components/ui/Button.svelte'
+  import IconKey from '~icons/fa-solid/key'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
   import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/change-locale'
@@ -22,24 +23,20 @@
 
   <div>
     {#each locales as [bcp, name] (bcp)}
-      <Button
-        class="locale-button"
-        color="black"
-        form={page.data.locale.includes(bcp) ? 'filled' : 'simple'}
+      <HeadlessButton
+        class="{page.data.locale.includes(bcp) ? 'btn-primary' : 'btn-ghost'} btn-default locale-button"
         onclick={() => changeLocale(bcp)}>
         {name}
-      </Button>
+      </HeadlessButton>
     {/each}
     {#if auth_user.is_admin}
       {#each unpublishedLocales as [bcp, name] (bcp)}
-        <Button
-          class="locale-button"
-          color="black"
-          form={page.data.locale.includes(bcp) ? 'filled' : 'simple'}
+        <HeadlessButton
+          class="{page.data.locale.includes(bcp) ? 'btn-primary' : 'btn-ghost'} btn-default locale-button"
           onclick={() => changeLocale(bcp)}>
           {name}
-          <i class="far fa-key"></i>
-        </Button>
+          <IconKey />
+        </HeadlessButton>
       {/each}
     {/if}
   </div>

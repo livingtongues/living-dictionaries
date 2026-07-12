@@ -19,7 +19,7 @@
     type="button"
     onclick={() => view = null}
     class:active={!view}>
-    <IconFaSolidList class="icon-inline" style="margin-top: -0.25rem" />
+    <IconFaSolidList style="margin-top: -0.25rem" />
     <span class="view-label">
       {page.data.t('entry.list')}
     </span>
@@ -29,7 +29,7 @@
     type="button"
     onclick={() => view = 'table'}
     class:active={view === 'table'}>
-    <IconFaTable class="icon-inline" style="margin-top: -0.25rem" />
+    <IconFaTable style="margin-top: -0.25rem" />
     <span class="view-label">
       {page.data.t('entry.table')}
     </span>
@@ -39,7 +39,7 @@
     type="button"
     onclick={() => view = 'gallery'}
     class:active={view === 'gallery'}>
-    <IconIcOutlineImage class="icon-inline" style="margin-top: -0.25rem; font-size: 1.125rem" />
+    <IconIcOutlineImage style="margin-top: -0.25rem; font-size: 1.125rem" />
     <span class="view-label">
       {page.data.t('entry.gallery')}
     </span>
@@ -50,7 +50,7 @@
       type="button"
       onclick={() => view = 'print'}
       class:active={view === 'print'}>
-      <IconFaPrint class="icon-inline" style="margin-top: -0.25rem" />
+      <IconFaPrint style="margin-top: -0.25rem" />
       <span class="view-label">
         {page.data.t('entry.print')}
       </span>

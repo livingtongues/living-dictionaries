@@ -28,9 +28,9 @@
   <div class="input-wrap">
     <div class="search-icon">
       {#if index_ready}
-        <IconCarbonSearch class="icon-inline" style="color: var(--color-secondary)" />
+        <IconCarbonSearch style="color: var(--color-secondary)" />
       {:else}
-        <IconSvgSpinners3DotsFade class="icon-inline" style="vertical-align: -4px" />
+        <IconSvgSpinners3DotsFade style="vertical-align: -4px" />
       {/if}
     </div>
     <input
@@ -48,7 +48,7 @@
     type="button"
     onclick={on_show_filter_menu}
     class="filter-button">
-    <IconMaterialSymbolsFilterAlt class="icon-inline" style="color: color-mix(in srgb, var(--color) 45%, var(--background))" />
+    <IconMaterialSymbolsFilterAlt style="color: color-mix(in srgb, var(--color) 45%, var(--background))" />
     <span class="filter-label">
       {page.data.t('entry.filters')}
     </span>

@@ -7,7 +7,7 @@
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte'
   import NavigationControl from './mapbox/controls/NavigationControl.svelte'
   import { set_marker } from './utils/set-coordinates-to-marker'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
 
@@ -134,17 +134,17 @@
     </div>
 
     <div class="modal-footer">
-      <Button onclick={on_close} form="simple" color="black">
+      <HeadlessButton class="btn-ghost btn-default" onclick={on_close}>
         {page.data.t('misc.cancel')}
-      </Button>
+      </HeadlessButton>
       {#if canRemove}
-        <Button onclick={remove} form="simple" color="red">
+        <HeadlessButton style="color: var(--danger)" class="btn-ghost btn-default" onclick={remove}>
           {page.data.t('misc.remove')}
-        </Button>
+        </HeadlessButton>
       {/if}
-      <Button type="submit" form="filled">
+      <HeadlessButton class="btn-primary btn-default" type="submit">
         {page.data.t('misc.save')}
-      </Button>
+      </HeadlessButton>
     </div>
   </form>
 </Modal>

@@ -86,10 +86,10 @@
     {#if Object.keys(filtered_values).length > max_show}
       <button type="button" class="show-more" onclick={toggle}>
         {#if show}
-          <IconFa6SolidChevronUp class="icon-inline" />
+          <IconFa6SolidChevronUp />
           {page.data.t('entry.show_less')}
         {:else}
-          <IconFa6SolidChevronDown class="icon-inline" style="margin-top: -0.25rem" />
+          <IconFa6SolidChevronDown style="margin-top: -0.25rem" />
           {page.data.t('entry.show_more')}
         {/if}
       </button>

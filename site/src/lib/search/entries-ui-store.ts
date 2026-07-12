@@ -6,15 +6,11 @@ import type { DictLiveDb } from '$lib/db/dict-client/dict-live-db.svelte'
 import { init_entries, search_entries, search_sentences, search_texts } from '$lib/search'
 import { read_dict_bundle } from '$lib/search/read-dict-bundle'
 import { create_orama_watcher } from '$lib/search/orama-watcher'
-import type { OramaWatcher } from '$lib/search/orama-watcher'
 import { decode_sqlite_code, is_transient_connection_error, sqlite_code_of } from '$lib/db/client/sqlite-result-codes'
 import { snapshot_expired_recently } from '$lib/db/dict-client/snapshot-expired-tracker'
+import { replace_orama_watcher } from '$lib/db/dict-client/dict-session'
 import { log_event } from '$lib/debug/remote-log'
 import { browser } from '$app/environment'
-
-interface OramaWatcherGlobals {
-  __ld_orama_watchers?: Record<string, OramaWatcher>
-}
 
 export function create_entries_ui_store({
   dictionary_id,
@@ -106,8 +102,8 @@ export function create_entries_ui_store({
       // P4b: start the watch-based Orama feed once the bulk index is built.
       // Watermark = newest row already indexed; the watcher reindexes only
       // rows that change after it (local edits + remote pulls). init_entries
-      // re-runs per navigation, so stop+replace any prior watcher for this
-      // dict to avoid stacked subscribers.
+      // re-runs per navigation, so the dict-session registry stops+replaces
+      // any prior watcher for this dict to avoid stacked subscribers.
       if (dict_db) {
         let watermark = ''
         for (const rows of Object.values(bundle)) {
@@ -116,10 +112,7 @@ export function create_entries_ui_store({
             if (updated_at > watermark) watermark = updated_at
           }
         }
-        const globals = globalThis as OramaWatcherGlobals
-        globals.__ld_orama_watchers ??= {}
-        globals.__ld_orama_watchers[dictionary_id]?.stop()
-        globals.__ld_orama_watchers[dictionary_id] = create_orama_watcher({ connection: conn, dict_db, initial_watermark: watermark })
+        replace_orama_watcher({ dict_id: dictionary_id, make: () => create_orama_watcher({ connection: conn, dict_db, initial_watermark: watermark }) })
       }
     } catch (err) {
       // Cold-boot wait-out: the dict `+layout.ts` now returns before the leader

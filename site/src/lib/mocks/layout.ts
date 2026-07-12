@@ -4,7 +4,7 @@ import type { LayoutData } from '../../routes/$types'
 import type { LayoutData as DictionaryLayoutData } from '../../routes/[dictionaryId]/$types'
 import { AuthUser } from '$lib/auth/user.svelte'
 import { get_my_dictionary_roles } from '$lib/me/dictionary-roles.svelte'
-import { log_db_operations } from './db'
+import { log_writes } from './db'
 
 // @ts-expect-error
 export const mockAppLayoutData: LayoutData = {
@@ -29,7 +29,7 @@ export const justMockDictionaryLayoutData = {
   can_edit: false,
   search_entries: null,
   default_entries_per_page: null,
-  db_operations: log_db_operations,
+  writes: log_writes,
   // about_content: readable(null) as Awaited<ReturnType<typeof awaitableDocStore<IAbout>>>,
   // about_content: readable({
   //   about: 'this is just a small example',

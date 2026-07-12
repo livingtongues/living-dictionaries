@@ -3,7 +3,7 @@ import { api_dictionaries_catalog } from '$api/dictionaries/[id]/catalog/_call'
 import { api_dictionaries_partners } from '$api/dictionaries/[id]/partners/_call'
 import { api_dictionaries_id_roles_role_id_delete } from '$api/dictionaries/[id]/roles/[role_id]/_call'
 import { api_dictionaries_id_invite_cancel } from '$api/dictionaries/[id]/invites/[invite_id]/_call'
-import { upload_image } from '$lib/components/image/upload-image'
+import { upload_media } from '$lib/media/upload-media'
 import { invalidate } from '$app/navigation'
 import { inviteHelper } from '$lib/helpers/invite-helper'
 
@@ -79,26 +79,21 @@ export const load = (async ({ parent, data }) => {
     },
 
     add_partner_image: (partner_id: string, file: File) => {
-      const status = upload_image({ file, folder: `${dictionary_id}/partners/${partner_id}/logo` })
-      let handled = false
-      const unsubscribe = status.subscribe(async ({ storage_path, serving_url }) => {
-        if (handled || !storage_path || !serving_url) return
-        handled = true
+      const handle = upload_media({ file, folder: `${dictionary_id}/partners/${partner_id}/logo`, dictionary_id, kind: 'image' })
+      const done = handle.done.then(async ({ storage_path, serving_url }) => {
         const { error } = await api_dictionaries_partners(dictionary_id, {
           action: 'set_photo',
           partner_id,
           photo_serving_url: serving_url,
           photo_storage_path: storage_path,
         })
-        if (error) {
-          console.error(error)
-          alert(`${t('misc.error')}: ${error.message}`)
-        } else {
-          await invalidate('contributors:reload')
-        }
-        unsubscribe()
+        if (error)
+          throw new Error(error.message)
+        await invalidate('contributors:reload')
+        return { storage_path, serving_url }
       })
-      return status
+      done.catch(() => undefined) // error renders in the upload tile
+      return { ...handle, done }
     },
 
     delete_partner_image: async ({ partner_id }: { partner_id: string, photo_id: string }) => {

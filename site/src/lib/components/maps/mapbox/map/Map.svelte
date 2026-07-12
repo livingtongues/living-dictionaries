@@ -211,12 +211,12 @@
     {@render children?.({ map })}
   {:else if webgl_failed}
     <div class="map-placeholder map-unavailable">
-      <IconFaSolidGlobeAsia class="icon-inline globe-static" />
+      <IconFaSolidGlobeAsia class="globe-static" />
       <p>{page.data.t('map.webgl_unavailable')}</p>
     </div>
   {:else}
     <div class="map-placeholder">
-      <IconFaSolidGlobeAsia class="icon-inline globe-pulse" />
+      <IconFaSolidGlobeAsia class="globe-pulse" />
     </div>
   {/if}
 </div>

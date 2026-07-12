@@ -2,7 +2,7 @@
   import { fade } from 'svelte/transition'
   import { page } from '$app/state'
   import { portal } from '$lib/utils/portal'
-  import { image_src } from '$lib/helpers/media'
+  import { image_src } from '$lib/utils/media-url'
   import IconGgSpinner from '~icons/gg/spinner'
   import IconTablerAi from '~icons/tabler/ai'
   import IconMdiClose from '~icons/mdi/close'
@@ -80,9 +80,9 @@
 <div class="thumb-wrap">
   <img class="thumb" onclick={open} onmouseenter={start_preload} alt={title} src={image_src(gcs, `s${square}-p`)} />
   {#if loading}
-    <IconGgSpinner class="icon-inline spinner" />
+    <IconGgSpinner class="spinner" />
   {:else if photographer === 'AI'}
-    <IconTablerAi class="icon-inline ai-badge" />
+    <IconTablerAi class="ai-badge" />
   {/if}
 </div>
 
@@ -96,7 +96,7 @@
         <div class="title-block" onclick={e => e.stopPropagation()}>
           <a class="title-link" {href}>
             {title}
-            <IconMdiArrowRight class="icon-inline title-arrow" />
+            <IconMdiArrowRight class="title-arrow" />
           </a>
           {#if subtitle}
             <div class="viewer-subtitle">{subtitle}</div>
@@ -112,7 +112,7 @@
             {#if photographer === 'AI'}
               <span class="ai-chip"><IconTablerAi style="font-size: 1.375rem" /> generated</span>
             {:else if photographer}
-              <span class="credit-line"><IconMdiCameraOutline class="icon-inline" style="opacity: 0.7" /> {photographer}</span>
+              <span class="credit-line"><IconMdiCameraOutline style="opacity: 0.7" /> {photographer}</span>
             {/if}
             {#if photo_source}
               <span class="credit-line source">{photo_source}</span>

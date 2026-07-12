@@ -285,7 +285,7 @@ class DictLiveDbImpl {
   // Current editing user. Every syncable content table carries NOT NULL
   // `created_by_user_id` / `updated_by_user_id`; when this is set the write
   // paths auto-stamp them so components can mutate-then-`_save()` without a
-  // wrapper layer doing it (the `db_operations` layer used to). Kept mutable via
+  // wrapper layer doing it (the old `db_operations` layer used to). Kept mutable via
   // `set_user_id` because the dict_db is cached across layout invalidations, so
   // a login/logout while a dict is open must update who gets stamped.
   #user_id: string | undefined

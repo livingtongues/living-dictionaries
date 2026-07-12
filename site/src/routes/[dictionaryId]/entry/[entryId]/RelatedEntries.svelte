@@ -78,7 +78,7 @@
 
   async function remove(relationship_id: string) {
     if (!confirm(page.data.t('relationship_type.remove_confirm'))) return
-    await page.data.db_operations.delete_relationship(relationship_id)
+    await page.data.writes.delete_relationship(relationship_id)
   }
 </script>
 

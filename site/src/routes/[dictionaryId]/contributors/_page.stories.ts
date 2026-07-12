@@ -31,7 +31,7 @@ const editor_edits = {
 const partner_edits = {
   add_partner_name: noop,
   delete_partner: noop,
-  add_partner_image: () => readable({ progress: 0, preview_url: '' }),
+  add_partner_image: () => ({ progress: readable({ progress: 0, preview_url: '' }), done: new Promise(() => {}), abort: () => {} }),
   delete_partner_image: noop,
   hide_living_tongues_logo: noop,
 }

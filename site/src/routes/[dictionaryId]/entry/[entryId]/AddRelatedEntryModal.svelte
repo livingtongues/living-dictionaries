@@ -19,7 +19,7 @@
 
   const { entry_id, entry_lexeme, exclude_ids = [], on_close }: Props = $props()
 
-  const { t, dict_db, db_operations, entries_data, search_entries, dictionary } = $derived(page.data)
+  const { t, dict_db, writes, entries_data, search_entries, dictionary } = $derived(page.data)
 
   const CUSTOM_PREFIX = 'custom:'
   const global_slugs = Object.keys(RELATIONSHIP_TYPES) as GlobalRelationshipType[]
@@ -91,7 +91,7 @@
     if (!target_id || !selected_type || saving) return
     saving = true
     try {
-      await db_operations.insert_relationship({
+      await writes.insert_relationship({
         from_entry_id: entry_id,
         to_entry_id: target_id,
         ...(selected_type.startsWith(CUSTOM_PREFIX)

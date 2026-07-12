@@ -48,15 +48,15 @@
   aria-label={label}
   onclick={on_click}>
   {#if status === 'syncing'}
-    <IconMdiCloudSyncOutline class="icon-inline sync-icon syncing" />
+    <IconMdiCloudSyncOutline class="sync-icon syncing" />
   {:else if status === 'synced'}
-    <IconMdiCloudCheckOutline class="icon-inline sync-icon" />
+    <IconMdiCloudCheckOutline class="sync-icon" />
   {:else if status === 'error'}
-    <IconMdiCloudAlertOutline class="icon-inline sync-icon" style="color: var(--danger)" />
+    <IconMdiCloudAlertOutline class="sync-icon" style="color: var(--danger)" />
   {:else if status === 'offline'}
-    <IconMdiCloudOffOutline class="icon-inline sync-icon" />
+    <IconMdiCloudOffOutline class="sync-icon" />
   {:else}
-    <IconMdiCloudOutline class="icon-inline sync-icon" />
+    <IconMdiCloudOutline class="sync-icon" />
   {/if}
 </button>
 
@@ -82,11 +82,12 @@
     cursor: default;
   }
 
-  .sync-icon {
+  /* class lands on the icon component's svg — needs :global under the scoped ancestor */
+  .sync-button :global(.sync-icon) {
     font-size: 1rem;
   }
 
-  .sync-icon.syncing {
+  .sync-button :global(.sync-icon.syncing) {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 

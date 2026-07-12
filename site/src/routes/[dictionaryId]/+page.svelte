@@ -1,9 +1,8 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store'
   import type { EntryData } from '$lib/types'
   import type { DictHomeCard } from '$lib/db/server/dict-home'
   import type { DictHomeStats } from './home/HomeStats.svelte'
-  import type { ImageUploadStatus } from '$lib/components/image/upload-image'
+  import type { MediaUploadHandle } from '$lib/media/upload-media'
   import HomeEntryCard from './home/HomeEntryCard.svelte'
   import HomeStats from './home/HomeStats.svelte'
   import MapPanel from './home/MapPanel.svelte'
@@ -227,7 +226,7 @@
 
   // ── cover image (hidden for con-langs, mirroring settings) ──────────────────
   const can_edit_cover = $derived(is_manager && !is_con_lang)
-  let cover_upload = $state<Readable<ImageUploadStatus> | null>(null)
+  let cover_upload = $state<MediaUploadHandle | null>(null)
   function add_cover_file(file: File) {
     cover_upload = upload_cover_image({
       file,
@@ -346,7 +345,7 @@
         {dictionary.name}
         {#if is_manager}
           <button type="button" class="edit-btn" title={t('settings.edit_dict_name')} onclick={() => editing = 'name'}>
-            <IconMdiPencilOutline class="icon-inline" />
+            <IconMdiPencilOutline />
           </button>
         {/if}
       </h1>
@@ -355,7 +354,7 @@
           {#if is_manager && !is_con_lang}
             <button type="button" class="editable" title={t('dictionary.location')} onclick={() => editing = 'location'}>
               {dictionary.location}
-              <IconMdiPencilOutline class="icon-inline pencil" />
+              <IconMdiPencilOutline class="pencil" />
             </button>
           {:else}
             <span>{dictionary.location}</span>
@@ -368,7 +367,7 @@
             {#if is_manager}
               <button type="button" class="chip editable" title="ISO 639-3" onclick={() => editing = 'iso'}>
                 ISO 639-3: {dictionary.iso_639_3}
-                <IconMdiPencilOutline class="icon-inline pencil" />
+                <IconMdiPencilOutline class="pencil" />
               </button>
             {:else}
               <span class="chip">ISO 639-3: {dictionary.iso_639_3}</span>
@@ -380,7 +379,7 @@
             {#if is_manager}
               <button type="button" class="chip editable" title="Glottocode" onclick={() => editing = 'glottocode'}>
                 {dictionary.glottocode}
-                <IconMdiPencilOutline class="icon-inline pencil" />
+                <IconMdiPencilOutline class="pencil" />
               </button>
             {:else}
               <span class="chip">{dictionary.glottocode}</span>
@@ -393,7 +392,7 @@
           {#if is_manager}
             <button type="button" class="editable alt-names" title={t('create.alternate_names')} onclick={() => editing = 'alt_names'}>
               {dictionary.alternate_names.join(' · ')}
-              <IconMdiPencilOutline class="icon-inline pencil" />
+              <IconMdiPencilOutline class="pencil" />
             </button>
           {:else}
             <span class="alt-names">{dictionary.alternate_names.join(' · ')}</span>
@@ -420,7 +419,7 @@
           {/each}
           {#if is_manager}
             <button type="button" class="chip editable" title={t('create.gloss_dictionary_in')} onclick={() => editing = 'gloss_languages'}>
-              <IconMdiPencilOutline class="icon-inline pencil" />
+              <IconMdiPencilOutline class="pencil" />
             </button>
           {/if}
         </div>
@@ -434,7 +433,7 @@
             {/each}
             {#if is_manager}
               <button type="button" class="chip editable" title={t('entry_field.local_orthography')} onclick={() => editing = 'orthographies'}>
-                <IconMdiPencilOutline class="icon-inline pencil" />
+                <IconMdiPencilOutline class="pencil" />
               </button>
             {/if}
           {:else}
@@ -469,9 +468,9 @@
             aria-label={t('misc.edit')}
             onclick={() => manage_open = !manage_open}>
             {#if manage_open}
-              <IconMdiClose class="icon-inline" />
+              <IconMdiClose />
             {:else}
-              <IconMdiPencilOutline class="icon-inline" />
+              <IconMdiPencilOutline />
             {/if}
           </button>
         {/if}
@@ -504,7 +503,7 @@
         </div>
       {:else}
         <p class="featured-hint">
-          <IconMdiStarOutline class="icon-inline" style="color: var(--warning)" />
+          <IconMdiStarOutline style="color: var(--warning)" />
           {t('dict_home.featured_hint_editor')}
         </p>
       {/if}

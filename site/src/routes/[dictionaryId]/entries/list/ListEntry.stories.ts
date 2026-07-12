@@ -1,7 +1,7 @@
 import type { Story, StoryMeta } from 'svelte-look'
 import type Component from './ListEntry.svelte'
 import type { EntryData, Tables } from '$lib/types'
-import type { DbOperations } from '$lib/db-operations'
+import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
 import { mock_t } from '$lib/mocks/mock-t'
 
 export const shared_meta: StoryMeta = {
@@ -32,7 +32,7 @@ function make_entry(lexeme: Record<string, string>): EntryData {
 const shared_props = {
   dictionary,
   can_edit: false,
-  db_operations: {} as DbOperations,
+  writes: {} as GuardedWrites,
 }
 
 export const DefaultHeadwordWithAlternate: Story<typeof Component> = {

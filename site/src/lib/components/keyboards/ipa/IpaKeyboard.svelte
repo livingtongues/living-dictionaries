@@ -1,7 +1,7 @@
 <script lang="ts">
   import IconHeroiconsBackspace20Solid from '~icons/heroicons/backspace-20-solid'
   import vowelTrapezoid from './vowel-trapezoid.gif'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
 
   interface Props {
     on_ipa_change: (new_value: string) => void
@@ -45,44 +45,16 @@
 </div>
 
 <div class="key-tabs">
-  <Button form="menu" color="black" class="backspace-button" onclick={backSpace}>
-    <IconHeroiconsBackspace20Solid class="icon-inline" />
-  </Button>
-  <Button
-    form="menu"
-    size="sm"
-    active={activeTable === 'consonants'}
-    onclick={() => (activeTable = 'consonants')}>Consonants</Button>
-  <Button
-    form="menu"
-    size="sm"
-    active={activeTable === 'vowels'}
-    onclick={() => (activeTable = 'vowels')}>Vowels</Button>
-  <Button
-    form="menu"
-    size="sm"
-    active={activeTable === 'diacritics'}
-    onclick={() => (activeTable = 'diacritics')}>Diacritics</Button>
-  <Button
-    form="menu"
-    size="sm"
-    active={activeTable === 'other'}
-    onclick={() => (activeTable = 'other')}>Suprasegmentals, Tone</Button>
-  <Button
-    form="menu"
-    size="sm"
-    active={activeTable === 'nonPulmonic'}
-    onclick={() => (activeTable = 'nonPulmonic')}>Non-pulmonic Consonants</Button>
-  <Button
-    form="menu"
-    size="sm"
-    active={activeTable === 'affricates'}
-    onclick={() => (activeTable = 'affricates')}>Affricates</Button>
-  <Button
-    form="menu"
-    size="sm"
-    active={activeTable === 'coarticulated'}
-    onclick={() => (activeTable = 'coarticulated')}>Co-Articulated Consonants</Button>
+  <HeadlessButton class="btn-ghost btn-default backspace-button" onclick={backSpace}>
+    <IconHeroiconsBackspace20Solid />
+  </HeadlessButton>
+  <button type="button" class="btn-ghost btn-sm" class:active={activeTable === 'consonants'} onclick={() => (activeTable = 'consonants')}>Consonants</button>
+  <button type="button" class="btn-ghost btn-sm" class:active={activeTable === 'vowels'} onclick={() => (activeTable = 'vowels')}>Vowels</button>
+  <button type="button" class="btn-ghost btn-sm" class:active={activeTable === 'diacritics'} onclick={() => (activeTable = 'diacritics')}>Diacritics</button>
+  <button type="button" class="btn-ghost btn-sm" class:active={activeTable === 'other'} onclick={() => (activeTable = 'other')}>Suprasegmentals, Tone</button>
+  <button type="button" class="btn-ghost btn-sm" class:active={activeTable === 'nonPulmonic'} onclick={() => (activeTable = 'nonPulmonic')}>Non-pulmonic Consonants</button>
+  <button type="button" class="btn-ghost btn-sm" class:active={activeTable === 'affricates'} onclick={() => (activeTable = 'affricates')}>Affricates</button>
+  <button type="button" class="btn-ghost btn-sm" class:active={activeTable === 'coarticulated'} onclick={() => (activeTable = 'coarticulated')}>Co-Articulated Consonants</button>
 </div>
 
 <div class="ipa-charts" style="overflow-x: auto" onclick={addSelectedLetter}>
@@ -771,6 +743,11 @@
 </div>
 
 <style>
+  .key-tabs button.active {
+    background-color: color-mix(in srgb, var(--background), var(--primary) 12%);
+    color: var(--primary);
+  }
+
   /* The IPA charts are a deliberately light-designed widget (pastel place/manner
      tints are literals) — force light text/surface so dark mode stays readable. */
   .ipa-charts {

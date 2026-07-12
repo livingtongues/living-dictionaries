@@ -1,13 +1,13 @@
 <script lang="ts">
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte'
-  import type { DbOperations } from '$lib/db-operations'
+  import type { MultiString } from '$lib/types'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
 
   interface Props {
-    add_entry: DbOperations['insert_entry']
+    add_entry: (lexeme: MultiString) => Promise<void>
     [key: string]: any
   }
 
@@ -20,14 +20,14 @@
 
 <ShowHide>
   {#snippet children({ show, toggle })}
-    <Button class="add-entry-button {props.class}" form="filled" onclick={toggle} disabled={!online}>
+    <HeadlessButton class="btn-primary btn-default add-entry-button {props.class}" onclick={toggle} disabled={!online}>
       {#if online}
-        <IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" />
+        <IconFaSolidPlus style="margin-top: -0.25rem" />
       {:else}
         Return online to
       {/if}
       {page.data.t('entry.add_entry')}
-    </Button>
+    </HeadlessButton>
     {#if show}
       <EditFieldModal
         field="lexeme"

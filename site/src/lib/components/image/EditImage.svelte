@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { get } from 'svelte/store'
+  import IconDownload from '~icons/fa-solid/download'
+  import IconTrashAlt from '~icons/fa-regular/trash-alt'
   import { apply_button_label } from './image-store'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
   import AddImage from '$lib/components/image/AddImage.svelte'
+  import { add_photo } from '$lib/media/add-media'
 
   interface Props {
     on_close: () => void
@@ -17,27 +19,17 @@
   let rights = $state(false)
   let ai_image = $state(false)
 
-  const { db_operations } = $derived(page.data)
-
-  function handleImageUpload(file: File) {
-    const status = db_operations.addImage({
+  function handle_image_upload(file: File) {
+    const handle = add_photo({
+      writes: page.data.writes,
+      dictionary_id: page.data.dictionary.id,
       sense_id,
-      image_options: {
-        file,
-        source: photo_source,
-        photographer,
-      },
+      file,
+      source: photo_source,
+      photographer,
     })
-
-    const checkInterval = setInterval(() => {
-      const currentStatus = get(status)
-      if (currentStatus.progress === 100 && currentStatus.serving_url) {
-        clearInterval(checkInterval)
-        on_close()
-      }
-    }, 100)
-
-    return status
+    handle.done.then(on_close).catch(() => undefined) // error renders in the upload tile
+    return handle
   }
 
   $effect(() => {
@@ -95,43 +87,16 @@
 
   <div style="margin-bottom: 1.5rem"></div>
 
-  <AddImage upload_image={handleImageUpload} require_entry_fields>
+  <AddImage upload_image={handle_image_upload} require_entry_fields>
     <div style="font-size: 0.75rem; line-height: 1rem">
       {page.data.t('entry_field.photo')}
     </div>
   </AddImage>
 
   <div class="modal-footer">
-    <!-- {#if image_file}
-      {#if admin > 1}
-        <JSON obj={image_file} />
-        <div class="w-1" />
-      {/if}
-
-      <Button
-        href={url_from_storage_path(image_file.storage_path)}
-        target="_blank">
-        <i class="fas fa-download" />
-        <span class="hidden sm:inline">{page.data.t('misc.download')}</span>
-      </Button>
-      <div class="w-1" />
-
-      <Button
-        onclick={async () => {
-          const confirmation = confirm(page.data.t('entry.delete_audio'))
-          if (confirmation) await db_operations.update_audio({ deleted: new Date().toISOString(), id: image_file.id })
-          on_close()
-        }}
-        color="red">
-        <i class="far fa-trash-alt" />&nbsp;
-        <span class="hidden sm:inline">{page.data.t('misc.delete')}</span>
-      </Button>
-      <div class="w-1" />
-    {/if} -->
-
-    <Button onclick={on_close} color="black">
+    <HeadlessButton class="btn btn-default" onclick={on_close}>
       {page.data.t('misc.close')}
-    </Button>
+    </HeadlessButton>
   </div>
 </Modal>
 

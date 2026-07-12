@@ -3,7 +3,7 @@
   import ToggleFacet from './ToggleFacet.svelte'
   import ClearFilters from './ClearFilters.svelte'
   import FilterList from './FilterList.svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ResponsiveSlideover from '$lib/components/ui/ResponsiveSlideover.svelte'
   import type { QueryParamStore } from '$lib/state/query-param-state.svelte'
   import type { QueryParams } from '$lib/search/types'
@@ -39,9 +39,9 @@
           {page.data.t('entry.filters')}
         </h2>
         <ClearFilters {search_params} />
-        <Button onclick={on_close} size="sm" form="filled" class="view-entries-button">
+        <HeadlessButton onclick={on_close} class="btn-primary btn-sm view-entries-button">
           {page.data.t('sentence.sentences')}
-        </Button>
+        </HeadlessButton>
       </header>
       <div class="filter-scroll">
         {#if result_facets._sources?.count}

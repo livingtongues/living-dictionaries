@@ -2,9 +2,9 @@
 Verbatim copy of `@unocss/reset/tailwind.css` (v66.7.0), kept byte-identical when
 UnoCSS was dropped 2026-06-12 so element defaults stayed identical — see
 .issues/drop-unocss.md. Loaded by `./reset.css` inside `layer(reset)`.
-(NOTE: the example repo's `archive/css/reset.css` variant adds font-smoothing and
-svg{display:inline-block} tweaks — deliberately NOT adopted here for pixel parity;
-LD's icons handle inline display via the `.icon-inline` class instead.)
+(ONE deliberate fork, matching tutor's reset: `svg` is inline-block + middle instead
+of block, so unplugin-icons components sit inline with text without a per-icon shim —
+the old `.icon-inline` class in icons.css was deleted 2026-07-12.)
 If we want a leaner reset later, prune in a follow-up.
 */
 
@@ -362,7 +362,6 @@ Make sure disabled buttons don't get the pointer cursor.
 */
 
 img,
-svg,
 video,
 canvas,
 audio,
@@ -371,6 +370,19 @@ embed,
 object {
   display: block; /* 1 */
   vertical-align: middle; /* 2 */
+}
+
+/*
+unplugin-icons renders icons as real <svg> elements. Keeping svg as inline-block +
+middle alignment lets icons sit inline with text and respects per-icon
+`vertical-align` style hints, while avoiding a baseline descender gap. Hand-authored
+chart svgs set explicit sizes, so this doesn't affect them. (Fork from the verbatim
+tailwind reset, shared with tutor's reset-tailwind.css.)
+*/
+
+svg {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 /*

@@ -14,7 +14,7 @@
   </h3>
 
   <div class="agent-callout">
-    <IconFa6SolidRobot class="icon-inline" style="font-size: 1.1rem; flex-shrink: 0; margin-top: 0.15rem" />
+    <IconFa6SolidRobot style="font-size: 1.1rem; flex-shrink: 0; margin-top: 0.15rem" />
     <p>
       <strong>Want it done faster?</strong> If you're comfortable with an AI coding agent (like Claude
       or ChatGPT), skip the wait — create an API key on the <a href={`/${dictionary.url}/agents`}>Agents</a>

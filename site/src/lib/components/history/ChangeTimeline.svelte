@@ -62,7 +62,7 @@
           <span class="kind">{table_label(change.table_name)}</span>
           {#if change.api_key_id}
             <span class="who agent" title="Edited by an agent on behalf of {user_display(users[change.user_id], change.user_id)}">
-              <IconRobot class="icon-inline agent-icon" />
+              <IconRobot class="agent-icon" />
               {agent?.label ?? 'Agent'}
               <span class="on-behalf">· {user_display(users[change.user_id], change.user_id)}</span>
             </span>

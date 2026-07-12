@@ -1,6 +1,5 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store'
-  import type { ImageUploadStatus } from '$lib/components/image/upload-image'
+  import type { MediaUploadHandle } from '$lib/media/upload-media'
   import { page } from '$app/state'
   import IconMdiImagePlus from '~icons/mdi/image-plus'
   import IconMdiImageSyncOutline from '~icons/mdi/image-sync-outline'
@@ -9,7 +8,7 @@
 
   interface Props {
     has_image: boolean
-    uploading: Readable<ImageUploadStatus> | null
+    uploading: MediaUploadHandle | null
     on_file: (file: File) => void
     on_delete: () => Promise<void>
     on_dismiss_error: () => void
@@ -17,6 +16,13 @@
 
   const { has_image, uploading, on_file, on_delete, on_dismiss_error }: Props = $props()
   const t = $derived(page.data.t)
+  const progress = $derived(uploading?.progress)
+  let error = $state<string | null>(null)
+
+  $effect(() => {
+    error = null
+    uploading?.done.catch((err: unknown) => error = err instanceof Error ? err.message : String(err))
+  })
 
   function handle_input(event: Event) {
     const input = event.target as HTMLInputElement
@@ -29,17 +35,17 @@
 
 {#if uploading}
   <div class="upload-overlay">
-    {#if $uploading.error}
+    {#if error}
       <button type="button" class="error-note" onclick={on_dismiss_error}>
-        {t('misc.error')}: {$uploading.error}
-        <IconMdiClose class="icon-inline" />
+        {t('misc.error')}: {error}
+        <IconMdiClose />
       </button>
     {:else}
-      {#if $uploading.preview_url}
-        <img class="preview" src={$uploading.preview_url} alt="" />
+      {#if $progress.preview_url}
+        <img class="preview" src={$progress.preview_url} alt="" />
       {/if}
-      <div class="progress-veil" style="height: {100 - $uploading.progress}%"></div>
-      <div class="progress-text">{$uploading.progress}%</div>
+      <div class="progress-veil" style="height: {100 - $progress.progress}%"></div>
+      <div class="progress-text">{$progress.progress}%</div>
     {/if}
   </div>
 {:else}
@@ -47,9 +53,9 @@
     <label class="cover-btn" title={has_image ? t('dict_home.replace_cover') : t('dict_home.add_cover')}>
       <input type="file" accept="image/*" style="display: none" oninput={handle_input} />
       {#if has_image}
-        <IconMdiImageSyncOutline class="icon-inline" />
+        <IconMdiImageSyncOutline />
       {:else}
-        <IconMdiImagePlus class="icon-inline" />
+        <IconMdiImagePlus />
         <span class="btn-label">{t('dict_home.add_cover')}</span>
       {/if}
     </label>
@@ -63,7 +69,7 @@
           if (confirm(t('dict_home.delete_cover_confirm')))
             await on_delete()
         }}>
-        <IconMdiTrashCanOutline class="icon-inline" />
+        <IconMdiTrashCanOutline />
       </button>
     {/if}
   </div>

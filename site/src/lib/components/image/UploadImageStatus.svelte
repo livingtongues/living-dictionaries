@@ -1,44 +1,47 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store'
-  import type { ImageUploadStatus } from './upload-image'
+  import type { MediaUploadHandle } from '$lib/media/upload-media'
   import { page } from '$app/state'
   import IconFaSolidTimes from '~icons/fa-solid/times'
   import IconFa6SolidCheck from '~icons/fa6-solid/check'
 
   interface Props {
-    upload_status: Readable<ImageUploadStatus>
+    handle: MediaUploadHandle
     on_finish: () => void
   }
 
-  const { upload_status, on_finish }: Props = $props()
+  const { handle, on_finish }: Props = $props()
+  const progress = $derived(handle.progress)
+  let error = $state<string | null>(null)
+
   $effect(() => {
-    if ($upload_status.storage_path) {
-      on_finish()
-    }
+    error = null
+    handle.done
+      .then(() => on_finish())
+      .catch((err: unknown) => error = err instanceof Error ? err.message : String(err))
   })
 </script>
 
 <div class="status-frame">
-  {#if $upload_status.error}
+  {#if error}
     <div class="error-note">
-      <div><IconFaSolidTimes class="icon-inline" /></div>
-      {page.data.t('misc.error')}: {$upload_status.error}
+      <div><IconFaSolidTimes /></div>
+      {page.data.t('misc.error')}: {error}
     </div>
   {:else}
-    {#if $upload_status.serving_url}
+    {#if $progress.progress === 100}
       <div class="done-check text-dark-shadow">
-        <IconFa6SolidCheck class="icon-inline" />
+        <IconFa6SolidCheck />
       </div>
     {:else}
       <div class="progress-text text-dark-shadow">
-        {$upload_status.progress}%
+        {$progress.progress}%
       </div>
     {/if}
-    {#if $upload_status.preview_url}
-      <img style="object-fit: cover; height: 100%; width: 100%; position: absolute; inset: 0" src={$upload_status.preview_url} />
+    {#if $progress.preview_url}
+      <img style="object-fit: cover; height: 100%; width: 100%; position: absolute; inset: 0" src={$progress.preview_url} />
     {/if}
     <div
-      style="height:{100 - $upload_status.progress}%"
+      style="height:{100 - $progress.progress}%"
       class="progress-veil smooth-height-transition"></div>
   {/if}
 </div>

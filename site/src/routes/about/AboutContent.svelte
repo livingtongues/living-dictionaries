@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
   import IconMdiAccountGroupOutline from '~icons/mdi/account-group-outline'
   import IconMdiWaveform from '~icons/mdi/waveform'
@@ -156,14 +156,14 @@
   <div class="donate-card">
     <h2 class="section-title" style="margin: 0">{t('about.help_us_launch_more')}</h2>
     <p class="spaced">{t('about.with_your_help')}</p>
-    <Button
-      form="filled"
-      class="donate-button"
+    <HeadlessButton
+
+      class="btn-primary btn-default donate-button"
       target="_blank"
       href="https://www.paypal.com/donate?hosted_button_id=QCELFXU8ZGTVC"
       rel="noopener">
       {t('header.donate')}
-    </Button>
+    </HeadlessButton>
   </div>
 </div>
 

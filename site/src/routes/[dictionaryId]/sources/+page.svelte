@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
   import type { Tables } from '$lib/types'
   import EditSource from '$lib/components/sources/EditSource.svelte'
@@ -7,7 +7,7 @@
   import IconFaSolidPen from '~icons/fa-solid/pen'
   import IconFaSolidTrash from '~icons/fa-solid/trash'
 
-  const { sources, can_edit, db_operations, t } = $derived(page.data)
+  const { sources, can_edit, writes, t } = $derived(page.data)
   const connection = $derived(page.data.connection as { query: <T>(sql: string, params?: unknown[]) => Promise<T[]> } | null)
 
   let editing = $state<Tables<'sources'> | null | undefined>(undefined) // undefined = closed, null = create
@@ -40,11 +40,11 @@
     if (count > 0) {
       if (!confirm(t({ dynamicKey: 'source.confirm_remove_all', fallback: `"${label}" is used by ${count} item(s). Remove it from all of them and delete the source?` })))
         return
-      await db_operations.remove_source_and_delete({ source_id: source.id, slug: source.slug })
+      await writes.remove_source_and_delete({ source_id: source.id, slug: source.slug })
     } else {
       if (!confirm(`${t('misc.delete')} "${label}"?`))
         return
-      await db_operations.remove_source_and_delete({ source_id: source.id, slug: source.slug })
+      await writes.remove_source_and_delete({ source_id: source.id, slug: source.slug })
     }
   }
 </script>
@@ -54,10 +54,10 @@
 <div class="header">
   <h3 class="sources-heading">{t({ dynamicKey: 'source.sources', fallback: 'Sources' })}</h3>
   {#if can_edit}
-    <Button form="filled" onclick={() => (editing = null)}>
-      <IconFaSolidPlus class="icon-inline" />
+    <HeadlessButton class="btn-primary btn-default" onclick={() => (editing = null)}>
+      <IconFaSolidPlus />
       {t({ dynamicKey: 'source.create', fallback: 'Add source' })}
-    </Button>
+    </HeadlessButton>
   {/if}
 </div>
 
@@ -83,8 +83,8 @@
           <td class="num">{usage[source.slug] || 0}</td>
           {#if can_edit}
             <td class="actions">
-              <button type="button" title={t('misc.edit')} onclick={() => (editing = source)}><IconFaSolidPen class="icon-inline" /></button>
-              <button type="button" class="danger" title={t('misc.delete')} onclick={() => delete_source(source)}><IconFaSolidTrash class="icon-inline" /></button>
+              <button type="button" title={t('misc.edit')} onclick={() => (editing = source)}><IconFaSolidPen /></button>
+              <button type="button" class="danger" title={t('misc.delete')} onclick={() => delete_source(source)}><IconFaSolidTrash /></button>
             </td>
           {/if}
         </tr>

@@ -69,9 +69,9 @@ stub (write = M4-write); the flow's edits update the in-worker index, reads come
 ## Verification harnesses (puppeteer-core via the shared launcher, vs `node build`)
 - `e2e/catalog-sqlite.mjs` (`test:catalog`): API public 220 / private 949; `/dictionaries` 221 rows
   incl. real Torwali; dict detail resolves; unknown slug → home.
-- `e2e/entries-sqlite.mjs` (`test:entries`, `DICT=torwali`): bundle 9908 entries; `/torwali/entries`
-  renders real entries; lexeme parsed; bookkeeping stripped.
-- Both **filter known-external errors** — Mapbox tile 403s (no WebGL/token in headless) and the
+- `e2e/entries-sqlite.mjs` (`test:entries`, `DICT=torwali`) — DELETED 2026-07-12: it targeted the
+  removed `/api/dictionaries/[id]/entries-data` endpoint (dead since commit `bacef8a7`).
+- The catalog flow **filters known-external errors** — Mapbox tile 403s (no WebGL/token in headless) and the
   entries-worker CDN-cache 403 (`cache.livingdictionaries.app`, still attempted before the SQLite
   load) — so the pageerror assertion reflects the conversion's health, not pre-existing noise.
 

@@ -1,6 +1,7 @@
 <script lang="ts">
+  import IconSignInAlt from '~icons/fa-solid/sign-in-alt'
   import { onMount } from 'svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import Slideover from '$lib/components/ui/Slideover.svelte'
   import { display_one_tap_popover } from '$lib/auth/google-one-tap'
@@ -57,12 +58,12 @@
 {:else}
   <ShowHide>
     {#snippet children({ show, toggle })}
-      <Button form="text" onclick={toggle}>
-        <i class="far fa-sign-in"></i>
+      <HeadlessButton class="btn-ghost btn-default" onclick={toggle}>
+        <IconSignInAlt />
         <span class="login-label">
           {page.data.t('header.login')}
         </span>
-      </Button>
+      </HeadlessButton>
       {#if show}
         {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
           <AuthModal on_close={toggle} />

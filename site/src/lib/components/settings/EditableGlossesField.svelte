@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IGlossLanguages } from '$lib/types'
   import BadgeArrayEmit from '$lib/components/ui/BadgeArrayEmit.svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
@@ -67,14 +67,13 @@
           placeholder={page.data.t('about.search')}>
           {#snippet children({ filteredItems: filteredLanguages })}
             {#each filteredLanguages as language (language.bcp)}
-              <Button
+              <HeadlessButton
                 onclick={() => {
                   add_language(language.bcp)
                   toggle()
                 }}
-                color="green"
-                form="simple"
-                class="language-option">
+
+                class="btn-ghost btn-default language-option">
                 {language.vernacularName || page.data.t({ dynamicKey: `gl.${language.bcp}`, fallback: language.bcp })}
                 {#if language.vernacularAlternate}
                   {language.vernacularAlternate}
@@ -82,12 +81,12 @@
                 {#if language.vernacularName}
                   <small>({page.data.t({ dynamicKey: `gl.${language.bcp}`, fallback: language.bcp })})</small>
                 {/if}
-              </Button>
+              </HeadlessButton>
             {/each}
           {/snippet}
         </Filter>
         <div class="modal-footer">
-          <Button onclick={toggle} color="black">Cancel</Button>
+          <HeadlessButton class="btn btn-default" onclick={toggle}>Cancel</HeadlessButton>
         </div>
       </Modal>
     {/if}

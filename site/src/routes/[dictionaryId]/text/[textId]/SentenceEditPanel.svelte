@@ -75,7 +75,7 @@
 
       <div class="actions">
         <button type="button" class="btn-outline btn-sm" style="gap: 0.375rem; color: var(--danger)" onclick={delete_sentence}>
-          <IconSystemUiconsTrash class="icon-inline" />
+          <IconSystemUiconsTrash />
           {page.data.t('sentence.delete')}
         </button>
       </div>

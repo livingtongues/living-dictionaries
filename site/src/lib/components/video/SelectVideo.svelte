@@ -1,4 +1,5 @@
 <script lang="ts">
+  import IconUpload from '~icons/fa-solid/upload'
   import { page } from '$app/state'
 
   interface Props {
@@ -47,7 +48,7 @@
       }} />
 
     <div>
-      <i class="far fa-upload"></i>&nbsp;
+      <IconUpload />&nbsp;
       {dragging
         ? page.data.t('upload.drop_to_upload')
         : page.data.t('upload.select_video_file')}

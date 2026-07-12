@@ -29,11 +29,12 @@ sense → assert the original survives. Since M4 the 13 achi entries are read fr
 ## M4 SQLite-read flows
 - `test:catalog` (`catalog-sqlite.mjs`) — the dictionary catalog reads from `shared.db`: API
   public/private counts, the `/dictionaries` list, dict detail resolution, unknown-slug redirect.
-- `test:entries` (`entries-sqlite.mjs`, `DICT=torwali`) — the Orama worker is fed from the per-dict
-  SQLite db via `/api/dictionaries/[id]/entries-data`; asserts the real torwali corpus renders.
 - `review-shots.mjs` (`node e2e/review-shots.mjs`) — quick visual pass: screenshots `/`,
   `/dictionaries`, `/<dict>/entries`, `/<dict>/about` into `e2e/review/` (git-ignored) for eyeballing.
-- Both SQLite flows **filter known-external console errors** (Mapbox tile 403s in headless, the
+  (A `test:entries` / `entries-sqlite.mjs` flow existed but targeted the removed
+  `/api/dictionaries/[id]/entries-data` endpoint — deleted 2026-07-12; entries reads are covered
+  by `test:flow` + the snapshot-read flows.)
+- The catalog flow **filters known-external console errors** (Mapbox tile 403s in headless, the
   entries-worker CDN-cache 403) so the pageerror assertion reflects the conversion, not ambient noise.
 - Needs `site/.data` seeded (shared.db + per-dict dbs from the example; `VACUUM INTO` for clean copies).
 

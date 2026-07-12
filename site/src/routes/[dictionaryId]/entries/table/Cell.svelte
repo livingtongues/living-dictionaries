@@ -15,7 +15,7 @@
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import Image from '$lib/components/image/Image.svelte'
-  import type { DbOperations } from '$lib/db-operations'
+  import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
   import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
   import IconIcOutlineCameraAlt from '~icons/ic/outline-camera-alt'
@@ -24,14 +24,14 @@
     column: IColumn
     entry: EntryData
     can_edit?: boolean
-    db_operations: DbOperations
+    writes: GuardedWrites
   }
 
   const {
     column,
     entry = $bindable(),
     can_edit = false,
-    db_operations,
+    writes,
   }: Props = $props()
 
   const sense = $derived(entry.senses?.[0])
@@ -44,7 +44,7 @@
   // row via `update({ id })` — a partial update by id, so no per-cell reactive
   // row subscription. The audit columns + dirty are auto-stamped; the Orama
   // watcher reflects the write back into the read-model. (Sentences/photos stay
-  // on `db_operations` — multi-table.)
+  // on `writes` — multi-table.)
   const dict_db = $derived(page.data.dict_db)
   function update_entry(update: TablesUpdate<'entries'>) {
     dict_db?.entries.update({ ...update, id: entry.id })
@@ -68,17 +68,17 @@
         photo_source={first_photo.source}
         photographer={first_photo.photographer}
         {can_edit}
-        on_delete_image={async () => await db_operations.delete_photo(first_photo.id)} />
+        on_delete_image={async () => await writes.delete_photo(first_photo.id)} />
     {:else if can_edit}
       <!-- <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col"> -->
       <ShowHide>
         {#snippet children({ show, toggle })}
           <div class="photo-upload" onclick={toggle}>
             <span class="desktop-only">
-              <IconIcOutlineCloudUpload class="icon-inline" style="font-size: 1.5rem" />
+              <IconIcOutlineCloudUpload style="font-size: 1.5rem" />
             </span>
             <span class="mobile-only">
-              <IconIcOutlineCameraAlt class="icon-inline" style="font-size: 1.25rem" />
+              <IconIcOutlineCameraAlt style="font-size: 1.25rem" />
             </span>
           </div>
 
@@ -154,12 +154,12 @@
         display={page.data.t('entry_field.example_sentence')}
         on_update={async (new_value) => {
           if (!sentence?.id) {
-            await db_operations.insert_sentence({
+            await writes.insert_sentence({
               sentence: { text: { default: new_value } },
               sense_id: sense?.id,
             })
           } else {
-            await db_operations.update_sentence({
+            await writes.update_sentence({
               text: { default: new_value },
               id: sentence.id,
             })
@@ -172,7 +172,7 @@
           value={sentence?.translation?.[column.bcp]}
           display="{page.data.t({ dynamicKey: `gl.${column.bcp}`, fallback: column.bcp })}: {page.data.t('entry_field.example_sentence')}"
           on_update={async (new_value) => {
-            await db_operations.update_sentence({
+            await writes.update_sentence({
               translation: {
                 ...sentence?.translation,
                 [column.bcp]: new_value,

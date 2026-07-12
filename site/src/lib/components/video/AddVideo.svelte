@@ -1,10 +1,13 @@
 <script lang="ts">
+  import IconFilm from '~icons/fa-solid/film'
+  import IconTrashAlt from '~icons/fa-regular/trash-alt'
+  import IconUpload from '~icons/fa-solid/upload'
   import type { EntryData, HostedVideo } from '$lib/types'
-  import type { Readable } from 'svelte/store'
   import SelectVideo from './SelectVideo.svelte'
   import PasteVideoLink from './PasteVideoLink.svelte'
-  import type { VideoUploadStatus } from './upload-video'
-  import Button from '$lib/components/ui/Button.svelte'
+  import type { MediaUploadHandle } from '$lib/media/upload-media'
+  import { add_video } from '$lib/media/add-media'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
@@ -14,7 +17,7 @@
   import { get_headword } from '$lib/helpers/orthographies'
   import IconUilMicrophone from '~icons/uil/microphone'
 
-  const { db_operations } = $derived(page.data)
+  const { writes } = $derived(page.data)
 
   interface Props {
     on_close: () => void
@@ -27,28 +30,23 @@
   let upload_triggered = $state(false)
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: page.data.dictionary?.orthographies }))
 
-  function startUpload({ file, speaker_id, source_slug }: { file: File | Blob, speaker_id?: string, source_slug?: string }): Readable<VideoUploadStatus> {
-    const uploadStore = db_operations.uploadVideo({ file, sense_id: entry.senses[0].id, speaker_id, source: source_slug })
-    const unsubscribe = uploadStore.subscribe((status) => {
-      if (status?.progress === 100) {
-        upload_triggered = true
-        unsubscribe()
-      }
-    })
-    return uploadStore
+  function start_upload({ file, speaker_id, source_slug }: { file: File | Blob, speaker_id?: string, source_slug?: string }): MediaUploadHandle {
+    const handle = add_video({ writes, dictionary_id: page.data.dictionary.id, file, sense_id: entry.senses[0].id, speaker_id, source: source_slug })
+    handle.done.then(() => upload_triggered = true).catch(() => undefined) // error renders in the progress pill
+    return handle
   }
 
   async function save_hosted({ speaker_id, source_slug }: { speaker_id?: string, source_slug?: string }) {
-    const data = await db_operations.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video, ...(source_slug ? { source: source_slug } : {}) } })
+    const data = await writes.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video, ...(source_slug ? { source: source_slug } : {}) } })
     if (speaker_id)
-      await db_operations.assign_speaker({ speaker_id, media: 'video', media_id: data.id })
+      await writes.assign_speaker({ speaker_id, media: 'video', media_id: data.id })
     on_close()
   }
 </script>
 
 <Modal on_close={on_close}>
   {#snippet heading()}
-    <span> <i class="far fa-film-alt heading-icon"></i> {headword.value} </span>
+    <span> <IconFilm class="heading-icon" /> {headword.value} </span>
   {/snippet}
 
   <SelectSpeaker>
@@ -56,15 +54,13 @@
       {#if hosted_video}
         <VideoThirdParty {hosted_video} />
         <div class="modal-footer">
-          <Button onclick={() => hosted_video = null} color="black">
+          <HeadlessButton class="btn btn-default" onclick={() => hosted_video = null}>
             {page.data.t('misc.cancel')}
-          </Button>
+          </HeadlessButton>
           <div style="width: 0.25rem"></div>
-          <Button
-            onclick={() => save_hosted({ speaker_id, source_slug })}
-            form="filled">
+          <HeadlessButton class="btn-primary btn-default" onclick={() => save_hosted({ speaker_id, source_slug })}>
             {page.data.t('misc.save')}
-          </Button>
+          </HeadlessButton>
         </div>
       {:else if speaker_id || source_slug}
         <ShowHide>
@@ -73,17 +69,17 @@
               <PasteVideoLink on_pasted_valid_url={video_info => hosted_video = video_info} />
               <SelectVideo>
                 {#snippet children({ file })}
-                  {@const upload_status = startUpload({ file, speaker_id, source_slug })}
+                  {@const handle = start_upload({ file, speaker_id, source_slug })}
                   {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
-                    <UploadProgressBarStatus {upload_status} />
+                    <UploadProgressBarStatus {handle} />
                   {/await}
                 {/snippet}
               </SelectVideo>
 
-              <Button onclick={toggle} class="record-video-button" color="red" type="button">
-                <IconUilMicrophone class="icon-inline" />
+              <HeadlessButton onclick={toggle} class="btn btn-default record-video-button" type="button">
+                <IconUilMicrophone />
                 {page.data.t('video.prepare_to_record_video')}
-              </Button>
+              </HeadlessButton>
             {:else}
               <RecordVideo>
                 {#snippet children({ videoBlob, reset })}
@@ -93,15 +89,15 @@
                     {#snippet children({ show, toggle })}
                       {#if !show}
                         <div class="modal-footer">
-                          <Button onclick={reset} color="red"><i class="far fa-trash-alt"></i>
-                            {page.data.t('misc.delete')}</Button>
+                          <HeadlessButton style="color: var(--danger)" class="btn btn-default" onclick={reset}><IconTrashAlt />
+                            {page.data.t('misc.delete')}</HeadlessButton>
                           <div style="width: 0.25rem"></div>
-                          <Button onclick={toggle} color="green" form="filled"><i class="fas fa-upload"></i> {page.data.t('misc.upload')}</Button>
+                          <HeadlessButton class="btn-primary btn-default" onclick={toggle}><IconUpload /> {page.data.t('misc.upload')}</HeadlessButton>
                         </div>
                       {:else if !upload_triggered}
-                        {@const upload_status = startUpload({ file: videoBlob, speaker_id, source_slug })}
+                        {@const handle = start_upload({ file: videoBlob, speaker_id, source_slug })}
                         {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
-                          <UploadProgressBarStatus {upload_status} />
+                          <UploadProgressBarStatus {handle} />
                         {/await}
                       {/if}
                     {/snippet}
@@ -113,9 +109,9 @@
         </ShowHide>
       {:else}
         <div class="modal-footer">
-          <Button onclick={close} color="black">
+          <HeadlessButton class="btn btn-default" onclick={close}>
             {page.data.t('misc.cancel')}
-          </Button>
+          </HeadlessButton>
         </div>
       {/if}
     {/snippet}

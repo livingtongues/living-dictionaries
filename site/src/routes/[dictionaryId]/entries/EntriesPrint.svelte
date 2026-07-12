@@ -6,7 +6,7 @@
   import PrintFieldCheckboxes from './print/PrintFieldCheckboxes.svelte'
   import { defaultPrintFields } from './print/print-fields'
   import { truncateAuthors } from './print/truncate-authors'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { createPersistedStore } from '$lib/state/persisted-store'
   import type { QueryParamStore } from '$lib/state/query-param-state.svelte'
   import { page } from '$app/state'
@@ -52,10 +52,10 @@
 {#if dictionary.print_access || can_edit}
   <div class="print-toolbar">
     <div class="controls-row">
-      <Button class="print-button" form="filled" type="button" onclick={() => window.print()}>
-        <IconFaPrint class="icon-inline" style="margin-top: -0.25rem" />
+      <HeadlessButton class="btn-primary btn-default print-button" type="button" onclick={() => window.print()}>
+        <IconFaPrint style="margin-top: -0.25rem" />
         {page.data.t('entry.print')}
-      </Button>
+      </HeadlessButton>
 
       <div class="control">
         <label for="maxEntries">{page.data.t('print.max_entries')}</label>

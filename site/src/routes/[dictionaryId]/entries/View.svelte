@@ -19,7 +19,7 @@
   }
 
   const { entries, page_data }: Props = $props()
-  const { dictionary, can_edit, preferred_table_columns, db_operations, search_params } = $derived(page_data)
+  const { dictionary, can_edit, preferred_table_columns, writes, search_params } = $derived(page_data)
 
   // Defensive boundary around the results render. A client-local corruption of the
   // local dict.db (or a would-be render recursion) must not white-screen the whole
@@ -64,7 +64,7 @@
           {entry}
           can_edit={can_edit}
           on_click={(e) => { handle_entry_click(e, entry) }}
-          {db_operations} />
+          {writes} />
 
         {#if page.state.entry_id === entry.id}
           <Modal noscroll class="entry-overlay-modal" on_close={() => history.back()} show_x={false}>
@@ -83,7 +83,7 @@
         preferred_table_columns={$preferred_table_columns}
         {dictionary}
         can_edit={can_edit}
-        {db_operations} />
+        {writes} />
     {:else if $search_params.view === 'gallery'}
       <EntriesGallery
         {entries}

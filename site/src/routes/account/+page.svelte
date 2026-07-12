@@ -2,7 +2,7 @@
   import IconIcOutlineMail from '~icons/ic/outline-mail'
   import IconMdiKey from '~icons/mdi/key'
   import EditString from '../[dictionaryId]/EditString.svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import { toast } from '$lib/state/toast.svelte'
@@ -65,7 +65,7 @@
             save={async name => await update_name(name)}
             display={page.data.t('account.your_name')} />
           <div class="email-row">
-            <IconIcOutlineMail class="icon-inline" style="vertical-align: -3px; color: var(--color-secondary)" />
+            <IconIcOutlineMail style="vertical-align: -3px; color: var(--color-secondary)" />
             {user.email}
           </div>
         </div>
@@ -91,7 +91,7 @@
         </label>
       </div>
 
-      <Button onclick={() => auth_user.logout()}>{page.data.t('account.log_out')}</Button>
+      <HeadlessButton class="btn btn-default" onclick={() => auth_user.logout()}>{page.data.t('account.log_out')}</HeadlessButton>
     </div>
   {:else}
     <p style="color: var(--color-secondary)">Not logged in</p>

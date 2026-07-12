@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
@@ -43,7 +43,7 @@
 
   <ShowHide>
     {#snippet children({ show, toggle })}
-      <Button form="filled" onclick={toggle}>{page.data.t('header.contact_us')}</Button>
+      <HeadlessButton class="btn-primary btn-default" onclick={toggle}>{page.data.t('header.contact_us')}</HeadlessButton>
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
           <Contact subject="report_problem" on_close={toggle} />

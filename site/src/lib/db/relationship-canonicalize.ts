@@ -4,7 +4,7 @@ import { RELATIONSHIP_TYPES } from '$lib/constants'
 /**
  * Pure canonicalization rules for `entry_relationships` rows, shared by the
  * server write path (`db/server/v1-relationship-write.ts`) and the browser
- * editing UI (`db/dict-client/operations.ts`) so both surfaces store identical
+ * editing UI (`db/dict-client/guarded-writes.ts`) so both surfaces store identical
  * rows. See `.knowledge/domain/related-entries-model.md` for the reasoning.
  */
 

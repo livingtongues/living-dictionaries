@@ -9,7 +9,7 @@
   import { get_headword } from '$lib/helpers/orthographies'
   import { minutes_ago_in_ms } from '$lib/utils/time'
   import { page } from '$app/state'
-  import type { DbOperations } from '$lib/db-operations'
+  import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
   import IconBiCameraVideo from '~icons/bi/camera-video'
   import IconFluentImageStack20Regular from '~icons/fluent/image-stack-20-regular'
   import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
@@ -19,7 +19,7 @@
     entry: EntryData
     dictionary: Tables<'dictionaries'>
     can_edit?: boolean
-    db_operations: DbOperations
+    writes: GuardedWrites
     on_click?: (e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => void
   }
 
@@ -27,7 +27,7 @@
     entry,
     dictionary,
     can_edit = false,
-    db_operations,
+    writes,
     on_click = undefined,
   }: Props = $props()
 
@@ -150,7 +150,7 @@
             type="button"
             class="media-block add-video"
             onclick={toggle}>
-            <IconBiCameraVideo class="icon-inline" style="font-size: 1.5rem; margin-top: 0.25rem; color: rgb(30 64 175)" />
+            <IconBiCameraVideo style="font-size: 1.5rem; margin-top: 0.25rem; color: rgb(30 64 175)" />
           </button>
           {#if show}
             {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
@@ -175,9 +175,9 @@
             photo_source={first_photo.source}
             photographer={first_photo.photographer}
             {can_edit}
-            on_delete_image={() => db_operations.delete_photo(first_photo.id)} />
+            on_delete_image={() => writes.delete_photo(first_photo.id)} />
           {#if first_sense.photos.length > 1}
-            <IconFluentImageStack20Regular class="icon-inline photo-stack-icon" />
+            <IconFluentImageStack20Regular class="photo-stack-icon" />
           {/if}
         </div>
       {:else if can_edit}
@@ -185,10 +185,10 @@
           class="upload-block"
           onclick={toggle}>
           <span class="desktop-only">
-            <IconIcOutlineCloudUpload class="icon-inline" style="font-size: 1.5rem" />
+            <IconIcOutlineCloudUpload style="font-size: 1.5rem" />
           </span>
           <span class="mobile-only">
-            <IconIcOutlineCameraAlt class="icon-inline" style="font-size: 1.25rem" />
+            <IconIcOutlineCameraAlt style="font-size: 1.25rem" />
           </span>
           <div style="font-size: 0.75rem; line-height: 1rem">
             {page.data.t('entry_field.photo')}

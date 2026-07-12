@@ -1,7 +1,7 @@
 <script lang="ts">
   // learning from https://github.com/pngwn/peng-move/blob/main/src/lib/Animal.svelte
   import { spring } from 'svelte/motion'
-  import { image_src } from '$lib/helpers/media'
+  import { image_src } from '$lib/utils/media-url'
 
   interface Props {
     gcs: string

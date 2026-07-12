@@ -1,31 +1,17 @@
 import { error } from '@sveltejs/kit'
 import type { TablesUpdate } from '$lib/types'
-import { readable } from 'svelte/store'
+import { get, readable } from 'svelte/store'
 import type { LayoutLoad } from './$types'
-import type { DictConnection } from '$lib/db/dict-client/worker-connection'
-import type { DictLiveDb } from '$lib/db/dict-client/dict-live-db.svelte'
-import type { TranslateFunction } from '$lib/i18n/types'
-import type { ReloadGuard } from '$lib/db/client/client-behind-recovery'
-import { CLIENT_BEHIND_GUARD_KEY, decide_client_behind_recovery } from '$lib/db/client/client-behind-recovery'
 import { DICTIONARY_UPDATED_LOAD_TRIGGER, MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
-import { db_operations } from '$lib/db-operations'
-import { url_from_storage_path } from '$lib/helpers/media'
-import { create_dict_live_db } from '$lib/db/dict-client/dict-live-db.svelte'
-import { DictSyncStatus } from '$lib/db/dict-client/dict-sync-status.svelte'
-import { open_dict } from '$lib/db/dict-client/dict-lifecycle'
-import { mark_snapshot_expired } from '$lib/db/dict-client/snapshot-expired-tracker'
-import { log_event } from '$lib/debug/remote-log'
-import { live_share } from '$lib/db/client/live-share.svelte'
+import { url_from_storage_path } from '$lib/utils/media-url'
+import { create_guarded_writes } from '$lib/db/dict-client/guarded-writes'
+import { get_dict_session } from '$lib/db/dict-client/dict-session'
 import { toast } from '$lib/state/toast.svelte'
 import { api_dictionaries_catalog } from '$api/dictionaries/[id]/catalog/_call'
 import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
-import { browser, dev, version } from '$app/environment'
+import { browser } from '$app/environment'
 import { invalidate } from '$app/navigation'
 import { create_entries_ui_store } from '$lib/search/entries-ui-store'
-
-interface DictLayoutGlobals {
-  __ld_dict_connections?: Record<string, { connection: DictConnection, dict_db: DictLiveDb, sync_status: DictSyncStatus }>
-}
 
 export const load: LayoutLoad = async ({ parent, depends, data }) => {
   // Catalog-edit refresh: `invalidate(DICTIONARY_UPDATED_LOAD_TRIGGER)` re-runs
@@ -78,105 +64,29 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
 
     const default_entries_per_page = 20
 
-    // vps-migration M4 write/sync: open the browser wa-sqlite dict.db (everyone;
-    // editors push, viewers pull-only) via the per-dict leader worker. It's the
-    // client source of truth — the Orama worker is fed from it, and saves write
-    // to it. Cached per dict_id on globalThis to survive layout invalidation.
-    let connection: DictConnection | null = null
-    let dict_db: DictLiveDb | null = null
-    let dict_sync_status: DictSyncStatus | null = null
-    if (browser) {
-      const globals = globalThis as DictLayoutGlobals
-      globals.__ld_dict_connections ??= {}
-      let cached = globals.__ld_dict_connections[dictionary_id]
-      if (!cached) {
-        const conn = await open_dict({ dict_id: dictionary_id, has_editor_role: can_edit, auth: {} })
-        // Bootstrap sync — fire-and-forget so navigation stays instant. `open_dict`
-        // now returns before the leader worker is ready (a cold-boot snapshot
-        // download runs in the background), so this `sync_now()` RPC queues in the
-        // transport until the leader is up; first paint renders the loading state
-        // (or the entry page's server-fetched cold-window content) and deltas fill
-        // in reactively as the sync applies (`tables_changed` re-queries every
-        // store + the Orama feed). The old `if (!is_opfs_backed) await` guard is
-        // gone: `is_opfs_backed` is unknown until ready, and blocking here is
-        // exactly what stalled nav. A MemoryVFS fallback boot (pre-iOS-17) may
-        // flash an empty list briefly before pull-since-null fills it — accepted.
-        void conn.sync_now().catch(err => log_event({
-          level: 'error',
-          message: 'initial dict sync failed',
-          context: { dict_id: dictionary_id, code: (err as { code?: string })?.code ?? null, error: (err as Error)?.message ?? String(err) },
-        }))
-        cached = { connection: conn, dict_db: create_dict_live_db(conn, { user_id: auth_user.user?.id }), sync_status: new DictSyncStatus(conn) }
-        globals.__ld_dict_connections[dictionary_id] = cached
-
-        // Surface sync-fatal sentinels (these otherwise die silently in the
-        // worker). Both arrive on EVERY tab via the BroadcastChannel.
-        //   schema_outdated  = this bundle is older than the server's schema.
-        //     The sync engine lives in ONE per-dict leader worker, so reloading
-        //     a single tab just makes it a follower of the still-alive stale
-        //     leader (the "reload doesn't help" loop). Auto-reload ALL tabs to
-        //     evict that leader so a fresh one boots on the new bundle. Guarded
-        //     to one reload per window; if it recurs we fall back to a toast.
-        //   snapshot_expired = cursor > 60 days behind. The worker auto-resets
-        //     viewers/clean editors in place; the toast matters for editors with
-        //     un-pushed writes (do NOT auto-reload — that's not a stale bundle).
-        //   sync_halted = the repeat-fatal circuit breaker tripped (the same
-        //     non-transient failure kept recurring), so the engine stopped
-        //     retrying. The editor's local writes are safe but NOT reaching the
-        //     server — prompt a manual reload (fresh engine); do NOT auto-reload
-        //     (they may have work mid-edit).
-        let schema_recovery_handled = false
-        let snapshot_toasted = false
-        let halt_toasted = false
-        conn.subscribe_broadcasts((broadcast) => {
-          if (broadcast.type === 'schema_outdated') {
-            if (schema_recovery_handled)
-              return
-            schema_recovery_handled = true
-            recover_from_schema_outdated({ t, dict_id: dictionary_id })
-            return
-          }
-          if (broadcast.type === 'snapshot_expired') {
-            // Proxy for "a reset is in flight" so a concurrent bundle read that
-            // hits SQLITE_MISUSE knows why (see entries-ui-store telemetry).
-            mark_snapshot_expired(dictionary_id)
-            if (!snapshot_toasted) {
-              snapshot_toasted = true
-              toast(t('misc.local_data_expired'), { action: { label: t('misc.reload'), callback: () => location.reload() }, dismiss_label: t('misc.close') })
-            }
-            return
-          }
-          if (broadcast.type === 'sync_halted' && !halt_toasted) {
-            halt_toasted = true
-            toast(t('misc.sync_paused_repeated_failure'), { action: { label: t('misc.reload'), callback: () => location.reload() }, dismiss_label: t('misc.close') })
-          }
-        })
-
-        // Dev-only: expose this dict.db to the SQL proxy under a composite
-        // client_id so `sqlite-query.sh --dict <id>` can reach it. Writes route
-        // through the DictConnection's `execute()` → leader-worker broadcast, so
-        // open tabs live-update. No-op in prod (`dev` is false).
-        if (dev) {
-          const email = auth_user.user?.email ?? auth_user.user?.id ?? 'dev'
-          live_share.register({ connection: conn, client_id: `${email}::dict::${dictionary_id}` })
-        }
-      } else if (can_edit) {
-        // The connection was cached (possibly opened pull-only before the user
-        // gained edit rights — login or role grant mid-session). Re-assert the
-        // editor capability: `open_dict` reuses the cached per-dict client and
-        // `set_role` is idempotent, so this is cheap. Without it, local writes
-        // would queue dirty=1 and never push until a full reload.
-        void open_dict({ dict_id: dictionary_id, has_editor_role: true, auth: {} })
-          .catch(err => console.warn('editor capability re-assert failed (retried next load)', err))
-      }
-      ;({ connection, dict_db, sync_status: dict_sync_status } = cached)
-      // The dict_db is cached on globalThis and survives layout invalidation, so
-      // refresh who gets audit-stamped on writes after a login/logout while a
-      // dict is open (this load re-runs on auth changes via invalidateAll).
-      dict_db?.set_user_id(auth_user.user?.id)
-    }
+    // vps-migration M4 write/sync: everything that lives exactly once per open
+    // dict (leader-worker connection, DictLiveDb, sync status, broadcast
+    // sentinels, dev SQL proxy) is owned by `dict-session.ts`. Null during SSR;
+    // cache hits re-stamp editor capability + audit user (this load re-runs on
+    // every navigation and on invalidateAll).
+    const session = await get_dict_session({ dict_id: dictionary_id, can_edit, user_id: auth_user.user?.id, user_email: auth_user.user?.email, t })
+    const connection = session?.connection ?? null
+    const dict_db = session?.dict_db ?? null
+    const dict_sync_status = session?.sync_status ?? null
 
     const entries_ui = create_entries_ui_store({ dictionary_id, can_edit: readable(can_edit), admin: readable(admin_level), connection, dict_db })
+
+    // The one write facade for components (`page.data.writes`) — guard +
+    // telemetry + error toast live inside (guarded-writes.ts). Recreated per
+    // load run (cheap) so it tracks the current auth/loading state.
+    const writes = create_guarded_writes({
+      dict_db,
+      connection,
+      dictionary: { id: dictionary_id, url: dictionary.url },
+      get_user_id: () => auth_user.user?.id,
+      is_loading: () => get(entries_ui.loading),
+      on_error: err => toast.error(err instanceof Error ? err.message : String(err)),
+    })
 
     function about_is_too_short() {
       return (dictionary.about?.length || 0) < MINIMUM_ABOUT_LENGTH
@@ -201,7 +111,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       update_dictionary,
       url_from_storage_path: (path: string) => url_from_storage_path(path, PUBLIC_STORAGE_BUCKET),
       default_entries_per_page,
-      db_operations,
+      writes,
 
       entries_data: entries_ui,
       speakers: entries_ui.speakers,
@@ -229,37 +139,4 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       throw err instanceof Error ? err : new Error(String(err))
     error(ResponseCodes.INTERNAL_SERVER_ERROR, err)
   }
-}
-
-/**
- * Auto-reload to escape a `schema_outdated` block (a stale per-dict leader
- * worker pinning an old bundle), or fall back to a manual-reload toast if we
- * already tried recently (see `client-behind-recovery`).
- */
-function recover_from_schema_outdated({ t, dict_id }: { t: TranslateFunction, dict_id: string }): void {
-  let stored: ReloadGuard | null = null
-  try {
-    const raw = sessionStorage.getItem(CLIENT_BEHIND_GUARD_KEY)
-    if (raw)
-      stored = JSON.parse(raw) as ReloadGuard
-  } catch { /* sessionStorage unavailable or malformed — treat as no prior reload */ }
-
-  const decision = decide_client_behind_recovery({ stored, now: Date.now() })
-  if (decision.action === 'reload') {
-    try { sessionStorage.setItem(CLIENT_BEHIND_GUARD_KEY, JSON.stringify(decision.next)) } catch { /* ignore */ }
-    // Diagnostic for the client_behind storm: this row's `app_version` is the
-    // stale bundle we're reloading AWAY from. If the very next session_start
-    // still carries the SAME version, the reload re-served a stale bundle
-    // (SW/CDN) rather than picking up the deploy — the pagehide beacon flushes
-    // this before the navigation tears the page down.
-    log_event({ level: 'info', message: 'schema_outdated_reload', context: { dict_id } })
-    location.reload()
-    return
-  }
-
-  // Reload guard already fired within the window and it didn't help (stale
-  // SW/CDN, or the bundle is genuinely unavailable) — surface a manual toast
-  // instead of reload-looping. `version` distinguishes this from the reload row.
-  log_event({ level: 'warn', message: 'schema_outdated_reload_gave_up', context: { dict_id, app_version: version } })
-  toast(t('misc.app_update_needed'), { action: { label: t('misc.reload'), callback: () => location.reload() }, dismiss_label: t('misc.close') })
 }

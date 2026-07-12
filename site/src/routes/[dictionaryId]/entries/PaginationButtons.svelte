@@ -44,14 +44,14 @@
       type="button"
       class="edge-button"
       onclick={() => go_to_page(1)}>
-      <IconFa6SolidAnglesLeft class="icon-inline rtl-x-flip" /></button>
+      <IconFa6SolidAnglesLeft class="rtl-x-flip" /></button>
   {/if}
 
   {#if current_page > 1}
     <button
       type="button"
       onclick={() => go_to_page(current_page - 1)}>
-      <IconFa6SolidAngleLeft class="icon-inline rtl-x-flip" /></button>
+      <IconFa6SolidAngleLeft class="rtl-x-flip" /></button>
   {/if}
 
   <div class="pages-scroll no-scrollbar">
@@ -69,7 +69,7 @@
     <button
       type="button"
       onclick={() => go_to_page(current_page + 1)}>
-      <IconFa6SolidAngleRight class="icon-inline rtl-x-flip" /></button>
+      <IconFa6SolidAngleRight class="rtl-x-flip" /></button>
   {/if}
 
   {#if current_page < pages - 1}
@@ -77,7 +77,7 @@
       type="button"
       class="edge-button"
       onclick={() => go_to_page(pages)}>
-      <IconFa6SolidAnglesRight class="icon-inline rtl-x-flip" /></button>
+      <IconFa6SolidAnglesRight class="rtl-x-flip" /></button>
   {/if}
 
   {@render children?.()}
@@ -153,7 +153,7 @@
     color: rgb(30 64 175); /* blue-800 */
   }
 
-  button :global(.icon-inline) {
+  button :global(svg) {
     margin-top: -0.25rem;
   }
 

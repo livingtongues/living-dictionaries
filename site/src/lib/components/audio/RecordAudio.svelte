@@ -2,7 +2,7 @@
   import { onMount } from 'svelte'
   import type { Options, StereoAudioRecorder } from 'recordrtc'
   import { page } from '$app/state'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import IconUilMicrophone from '~icons/uil/microphone'
 
   interface Props {
@@ -110,34 +110,33 @@
       </div>
 
       <div>
-        <Button class="record-spaced" size="sm" onclick={() => location.reload()}>{page.data.t('audio.reload')}</Button>
-        <Button
-          size="sm"
-          class="record-spaced"
-          form="simple"
-          color="green"
+        <HeadlessButton class="btn btn-sm record-spaced" onclick={() => location.reload()}>{page.data.t('audio.reload')}</HeadlessButton>
+        <HeadlessButton
+
+          class="btn-ghost btn-sm record-spaced"
+
           href="https://www.google.com/search?q=How+do+I+enable+microphone+access"
           target="_blank"
-          rel="noopener">{page.data.t('audio.learn_more')}</Button>
+          rel="noopener">{page.data.t('audio.learn_more')}</HeadlessButton>
       </div>
     {:else}
-      <Button onclick={checkAudioPermissions} class="record-full">
-        <IconUilMicrophone class="icon-inline" />
+      <HeadlessButton onclick={checkAudioPermissions} class="btn btn-default record-full">
+        <IconUilMicrophone />
         {page.data.t('audio.prepare_to_record')}
-      </Button>
+      </HeadlessButton>
     {/if}
   {:else if !recorder}
-    <Button onclick={record} color="red" class="record-full record-tall">
+    <HeadlessButton onclick={record} class="btn btn-default record-full record-tall">
       {page.data.t('audio.tap_to_record')}
-    </Button>
+    </HeadlessButton>
     <div class="record-hint">
       ({page.data.t('audio.tapToStopRecording')})
     </div>
   {:else}
-    <Button onclick={stop} color="red" class="record-full record-tall">
+    <HeadlessButton onclick={stop} class="btn btn-default record-full record-tall">
       <div class="recording-time">{recordingTime}s</div>
       {page.data.t('audio.stop_recording')}
-    </Button>
+    </HeadlessButton>
   {/if}
 
   <!-- {:else}

@@ -19,7 +19,7 @@
 
   const { entry, can_edit = false, dictionary }: Props = $props()
 
-  const { db_operations, t } = $derived(page.data)
+  const { writes, t } = $derived(page.data)
 
   const first_photo = $derived(entry.senses?.flatMap(sense => sense.photos || [])[0])
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary.orthographies }))
@@ -54,7 +54,7 @@
       photo_source={first_photo.source}
       photographer={first_photo.photographer}
       {can_edit}
-      on_delete_image={async () => await db_operations.delete_photo(first_photo.id)} />
+      on_delete_image={async () => await writes.delete_photo(first_photo.id)} />
     <div class="scrim"></div>
     <div class="content">
       {#if dialect}

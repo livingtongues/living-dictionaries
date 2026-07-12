@@ -1,6 +1,6 @@
 <script>
   import IconFaSolidPlus from '~icons/fa-solid/plus'
-  import Button from './Button.svelte'
+  import HeadlessButton from './HeadlessButton.svelte'
   import Badge from './Badge.svelte'
   import DetectUrl from './DetectUrl.svelte'
 
@@ -41,10 +41,10 @@
     {#if add}
       {@render add()}
     {:else}
-      <Button class="badge-item" onclick={() => on_additem?.()} color="orange" size="sm">
-        <IconFaSolidPlus class="icon-inline" />
+      <HeadlessButton class="btn-ghost btn-sm badge-item" style="color: var(--warning)" onclick={() => on_additem?.()}>
+        <IconFaSolidPlus />
         {addMessage}
-      </Button>
+      </HeadlessButton>
     {/if}
   {:else}
     {#each list as string, index (index)}

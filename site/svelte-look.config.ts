@@ -11,7 +11,6 @@ export default define_config({
     'src/lib/theme.css',
     'src/lib/buttons.css',
     'src/lib/forms.css',
-    'src/lib/icons.css',
     'src/routes/global.css',
   ],
 

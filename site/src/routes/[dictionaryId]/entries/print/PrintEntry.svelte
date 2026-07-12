@@ -9,7 +9,7 @@
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
   import { get_headword } from '$lib/helpers/orthographies'
-  import { image_src } from '$lib/helpers/media'
+  import { image_src } from '$lib/utils/media-url'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text } from '$lib/markdown/sanitize-rich-text'
 

@@ -3,7 +3,7 @@
  * this dict". The reset itself runs inside the leader worker (which closes +
  * reopens the OPFS connection), so the main-thread bundle read can't observe it
  * directly. But `snapshot_expired` is broadcast to every tab (see
- * `[dictionaryId]/+layout.ts`), and it's exactly what triggers the in-worker
+ * `dict-session.ts`), and it's exactly what triggers the in-worker
  * reset — so a recent broadcast is an honest signal that the connection was
  * being torn down when a concurrent `read_dict_bundle` hit SQLITE_MISUSE.
  *

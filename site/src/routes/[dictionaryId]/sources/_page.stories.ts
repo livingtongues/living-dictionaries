@@ -9,12 +9,13 @@ const sources = readable([
 ] as never)
 
 export const shared_meta: StoryMeta = {
+  viewports: [{ width: 800, height: 720 }],
   page_data: {
     t: mock_t,
     sources,
     can_edit: true,
     connection: null,
-    db_operations: { remove_source_and_delete: async () => {} },
+    writes: { remove_source_and_delete: async () => {} },
   },
 }
 

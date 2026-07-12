@@ -1,7 +1,8 @@
 <script lang="ts">
+  import IconLink from '~icons/fa-solid/link'
   import type { HostedVideo } from '$lib/types'
   import { parse_hosted_video_url } from './parse-hosted-video-url'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
 
   let url: string = $state()
@@ -23,7 +24,7 @@
 
 <form style="margin-bottom: 1rem" onsubmit={(e) => { e.preventDefault(); handle() }}>
   <label for="vURL">
-    <i class="far fa-link"></i>
+    <IconLink />
     {page.data.t('video.video_url')}
   </label>
   <div style="display: flex">
@@ -36,9 +37,9 @@
         bind:value={url} />
     </div>
     <div style="width: 0.25rem"></div>
-    <Button type="submit" form={url ? 'filled' : 'outline'}>
+    <HeadlessButton type="submit" class="btn-primary btn-default">
       {page.data.t('misc.add')}
-    </Button>
+    </HeadlessButton>
   </div>
 </form>
 

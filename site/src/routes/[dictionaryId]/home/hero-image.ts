@@ -1,22 +1,22 @@
-import type { Readable } from 'svelte/store'
-import type { ImageUploadStatus } from '$lib/components/image/upload-image'
+import type { MediaUploadHandle } from '$lib/media/upload-media'
 import type { TablesUpdate } from '$lib/types'
-import { upload_image } from '$lib/components/image/upload-image'
+import { upload_media } from '$lib/media/upload-media'
 import { page } from '$app/state'
 
 const TEN_MB = 10_485_760
 
 /**
  * Validate + upload a hero cover image, then persist it to the dictionary
- * catalog. Returns the upload status store for the progress overlay, or null
- * when the file fails validation (alerted). Same validation as ImageDropZone.
+ * catalog. Returns the upload handle for the progress overlay (`done` includes
+ * the catalog save — errors render in the overlay), or null when the file
+ * fails validation (alerted). Same validation as ImageDropZone.
  */
 export function upload_cover_image({ file, dictionary_id, update_dictionary, on_saved }: {
   file: File
   dictionary_id: string
   update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>
   on_saved: () => void
-}): Readable<ImageUploadStatus> | null {
+}): MediaUploadHandle | null {
   if (file.type.split('/')[0] !== 'image' || file.type === 'image/svg+xml') {
     alert(page.data.t('upload.error'))
     return null
@@ -26,14 +26,12 @@ export function upload_cover_image({ file, dictionary_id, update_dictionary, on_
     return null
   }
 
-  const status = upload_image({ file, folder: `${dictionary_id}/featured_images` })
-  const unsubscribe = status.subscribe(({ storage_path, serving_url }) => {
-    if (storage_path && serving_url) {
-      update_dictionary({ featured_image: { storage_path, serving_url } })
-        .then(on_saved)
-        .catch(err => alert(`${page.data.t('misc.error')}: ${err}`))
-      unsubscribe()
-    }
+  const handle = upload_media({ file, folder: `${dictionary_id}/featured_images`, dictionary_id, kind: 'image' })
+  const done = handle.done.then(async ({ storage_path, serving_url }) => {
+    await update_dictionary({ featured_image: { storage_path, serving_url } })
+    on_saved()
+    return { storage_path, serving_url }
   })
-  return status
+  done.catch(() => undefined) // error renders in the hero overlay
+  return { ...handle, done }
 }

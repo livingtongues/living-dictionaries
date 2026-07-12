@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import { decode_audio_buffer, get_peaks } from './waveform-utils'
 
@@ -199,13 +199,11 @@
 </script>
 
 <div style="display: flex; align-items: center; direction: ltr;">
-  <Button
-    class="waveform-play-button"
-    color={playing ? 'green' : 'primary'}
-    form="filled"
+  <HeadlessButton
+    class="btn-primary waveform-play-button {playing ? 'playing' : ''}"
     onclick={start_stop}>
-    <IconMaterialSymbolsHearing class="icon-inline" style="margin-top: 0.25rem; margin-bottom: 0.25rem; width: 2em; height: 2em;" />
-  </Button>
+    <IconMaterialSymbolsHearing style="margin-top: 0.25rem; margin-bottom: 0.25rem; width: 2em; height: 2em;" />
+  </HeadlessButton>
   <div bind:this={container} class="waveform" style:height="{HEIGHT}px">
     <canvas bind:this={canvas} onclick={seek} style:height="{HEIGHT}px"></canvas>
   </div>

@@ -24,14 +24,14 @@
   <h2>{t('dict_home.nudge_heading')}</h2>
   <ul>
     {#if show_star}
-      <li><IconMdiStarOutline class="icon-inline" /> <a href={entries_href}>{t('dict_home.nudge_star')}</a></li>
+      <li><IconMdiStarOutline /> <a href={entries_href}>{t('dict_home.nudge_star')}</a></li>
     {/if}
     {#if show_location}
-      <li><IconMdiMapMarkerPlus class="icon-inline" /> <button type="button" class="nudge-action" onclick={on_location_click}>{t('dict_home.nudge_location')}</button></li>
+      <li><IconMdiMapMarkerPlus /> <button type="button" class="nudge-action" onclick={on_location_click}>{t('dict_home.nudge_location')}</button></li>
     {/if}
     {#if show_image}
       <li>
-        <IconMdiImagePlus class="icon-inline" />
+        <IconMdiImagePlus />
         <label class="file-nudge">
           <input
             type="file"
@@ -48,7 +48,7 @@
       </li>
     {/if}
     {#if show_about}
-      <li><IconMdiTextBoxPlus class="icon-inline" /> <a href={about_href}>{t('dict_home.nudge_about')}</a></li>
+      <li><IconMdiTextBoxPlus /> <a href={about_href}>{t('dict_home.nudge_about')}</a></li>
     {/if}
   </ul>
 </section>
@@ -76,7 +76,7 @@
     font-size: 0.875rem;
   }
 
-  li :global(.icon-inline) {
+  li :global(svg) {
     color: var(--primary);
     margin-inline-end: 0.25rem;
   }

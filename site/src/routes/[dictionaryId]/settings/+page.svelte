@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { TablesUpdate } from '$lib/types'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import JSON from '$lib/components/ui/JSON.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
@@ -59,10 +59,10 @@
     <div>
       <ShowHide>
         {#snippet children({ show, toggle })}
-          <Button onclick={toggle} class="delete-dict-button" color="red">
+          <HeadlessButton onclick={toggle} class="btn btn-default delete-dict-button">
             {page.data.t('settings.delete_dictionary')}:
             {page.data.t('header.contact_us')}
-          </Button>
+          </HeadlessButton>
           {#if show}
             {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
               <Contact subject="delete_dictionary" on_close={toggle} />

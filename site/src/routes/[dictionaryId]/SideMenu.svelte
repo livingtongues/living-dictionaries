@@ -1,4 +1,7 @@
 <script lang="ts">
+  import IconDonate from '~icons/fa-solid/donate'
+  import IconInfoCircle from '~icons/fa-solid/info-circle'
+  import IconQuestionCircle from '~icons/fa-regular/question-circle'
   import type { Tables } from '$lib/types'
   import type { DictSyncStatus } from '$lib/db/dict-client/dict-sync-status.svelte'
   import DictSyncStatusButton from '$lib/db/dict-client/DictSyncStatus.svelte'
@@ -58,21 +61,21 @@
   <a
     href={`/${dictionary.url}`}
     class:active={page.url.pathname.split('/').filter(Boolean).length === 1}>
-    <IconMdiBookOpenPageVariantOutline class="icon-inline" />
+    <IconMdiBookOpenPageVariantOutline />
     <span class="item-label">
       {page.data.t('dict_home.home')}
     </span>
   </a>
   <div class="nav-row" class:active={page.url.pathname.match(/entry|entries/)}>
     <a class="entries-link" href={`/${dictionary.url}/entries`}>
-      <IconFaSolidList class="icon-inline" />
+      <IconFaSolidList />
       <span class="item-label">
         {page.data.t('dictionary.entries')}
       </span>
     </a>
     <span style="flex-grow: 1"></span>
     {#if is_manager && loading}
-      <IconSvgSpinners3DotsFade class="icon-inline" style="vertical-align: -4px; margin-left: 0.25rem; margin-right: 0.25rem" />
+      <IconSvgSpinners3DotsFade style="vertical-align: -4px; margin-left: 0.25rem; margin-right: 0.25rem" />
     {/if}
     {#if can_edit && dict_sync_status}
       <DictSyncStatusButton sync_status={dict_sync_status} />
@@ -90,7 +93,7 @@
     <a
       href={`/${dictionary.url}/texts`}
       class:active={page.url.pathname.match(/\/texts?(\/|$)/)}>
-      <IconFa6SolidScroll class="icon-inline" />
+      <IconFa6SolidScroll />
       <span class="item-label">
         {page.data.t('dictionary.texts')}
       </span>
@@ -99,13 +102,13 @@
           {new Intl.NumberFormat().format(texts_count)}
         </span>
       {/if}
-      <IconFa6SolidUserShield class="icon-inline admin-gate-icon" style={texts_count ? 'margin-inline-start: 0.375rem' : ''} />
+      <IconFa6SolidUserShield class="admin-gate-icon" style={texts_count ? 'margin-inline-start: 0.375rem' : ''} />
     </a>
   {/if}
   <a
     href={`/${dictionary.url}/about`}
     class:active={page.url.pathname.includes('about')}>
-    <IconFa6SolidCircleInfo class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
+    <IconFa6SolidCircleInfo style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
     <span class="item-label">
       {page.data.t('header.about')}
     </span>
@@ -113,7 +116,7 @@
   <a
     href={`/${dictionary.url}/grammar`}
     class:active={page.url.pathname.includes('grammar')}>
-    <IconTablerTextGrammar class="icon-inline" style="font-size: 1.125rem" />
+    <IconTablerTextGrammar style="font-size: 1.125rem" />
     <span class="item-label">
       {page.data.t('dictionary.grammar')}
     </span>
@@ -121,7 +124,7 @@
   <a
     href={`/${dictionary.url}/contributors`}
     class:active={page.url.pathname.includes('contributors')}>
-    <IconFa6SolidUsers class="icon-inline" style="font-size: 1.125rem" />
+    <IconFa6SolidUsers style="font-size: 1.125rem" />
     <span class="item-label">
       {page.data.t('dictionary.contributors')}
     </span>
@@ -130,7 +133,7 @@
     <a
       href={`/${dictionary.url}/settings`}
       class:active={page.url.pathname.includes('settings')}>
-      <IconFa6SolidGear class="icon-inline" style="margin-left: 0.125rem; margin-right: 0.125rem" />
+      <IconFa6SolidGear style="margin-left: 0.125rem; margin-right: 0.125rem" />
       <span class="item-label">
         {page.data.t('misc.settings')}
       </span>
@@ -140,7 +143,7 @@
     <a
       href={`/${dictionary.url}/agents`}
       class:active={page.url.pathname.includes('agents')}>
-      <IconFa6SolidRobot class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
+      <IconFa6SolidRobot style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
       <span class="item-label">
         Agents
       </span>
@@ -148,7 +151,7 @@
     <a
       href={`/${dictionary.url}/history`}
       class:active={page.url.pathname.includes('history')}>
-      <IconFa6SolidClockRotateLeft class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
+      <IconFa6SolidClockRotateLeft style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
       <span class="item-label">
         {page.data.t('history.history')}
       </span>
@@ -156,7 +159,7 @@
     <a
       href={`/${dictionary.url}/sources`}
       class:active={page.url.pathname.includes('sources')}>
-      <IconFa6SolidBook class="icon-inline" style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
+      <IconFa6SolidBook style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
       <span class="item-label">
         {page.data.t({ dynamicKey: 'source.sources', fallback: 'Sources' })}
       </span>
@@ -167,7 +170,7 @@
       <a
         href={`/${dictionary.url}/import`}
         class:active={page.url.pathname.includes('import')}>
-        <IconFa6SolidFileImport class="icon-inline" style="margin-left: 0.125rem; margin-right: 0.125rem" />
+        <IconFa6SolidFileImport style="margin-left: 0.125rem; margin-right: 0.125rem" />
         <span class="item-label">
           {page.data.t('import_page.import')}
         </span>
@@ -177,7 +180,7 @@
       <a
         href={`/${dictionary.url}/export`}
         class:active={page.url.pathname.includes('export')}>
-        <IconFa6SolidFileExport class="icon-inline" style="margin-left: 0.25rem" />
+        <IconFa6SolidFileExport style="margin-left: 0.25rem" />
         <span class="item-label">
           {page.data.t('misc.export')}
         </span>
@@ -191,21 +194,21 @@
 <!-- Mobile-only: these replaced the header's right-side hamburger menu. -->
 <div class="mobile-extras">
   <a href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ" target="_blank">
-    <i class="far fa-donate"></i>
+    <IconDonate />
     <span class="item-label">{page.data.t('header.donate')}</span>
   </a>
   <a href="/about">
-    <i class="far fa-info-circle"></i>
+    <IconInfoCircle />
     <span class="item-label">{page.data.t('header.about')}</span>
   </a>
   <a href="/tutorials">
-    <IconFluentLearningApp24Regular class="icon-inline" style="margin-top: -2px" />
+    <IconFluentLearningApp24Regular style="margin-top: -2px" />
     <span class="item-label">{page.data.t('header.tutorials')}</span>
   </a>
   <a
     href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
     target="_blank">
-    <i class="far fa-question-circle"></i>
+    <IconQuestionCircle />
     <span class="item-label">FAQ</span>
   </a>
   {#if !page.data.auth_user?.user}

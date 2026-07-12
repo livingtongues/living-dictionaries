@@ -29,6 +29,8 @@ load-bearing, not legacy. Rename/reword/port, but don't destroy access.</Callout
       Supabase and deletes GCS objects. Decide where the deletion queue lives post-cutover, then port.
 
 ## Delete after settling (≥2 weeks post-cutover, and after any Phase-B delta re-migrate)
+> Scheduled: the committed one-shot cron `living-dictionaries/teardown-2026-07-17`
+> (`.cron/teardown-2026-07-17.md`) executes this section on 2026-07-17.
 - [ ] `scripts/supabase/cutover/` — the one-shot cutover pipeline. Phase-B delta re-migrate is DONE
       (2026-07-03), so this is now safe to delete once we're confident no further legacy re-pull is
       needed. Lives in git history after deletion. (Self-contained: its own

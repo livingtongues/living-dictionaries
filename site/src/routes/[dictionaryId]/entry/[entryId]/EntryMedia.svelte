@@ -9,7 +9,7 @@
   import { get_headword } from '$lib/helpers/orthographies'
   import { dedupe_keyed_children } from '$lib/utils/dedupe-keyed-children'
   import { page } from '$app/state'
-  import type { DbOperations } from '$lib/db-operations'
+  import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
   import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
   import IconIcOutlineCameraAlt from '~icons/ic/outline-camera-alt'
   import IconBiCameraVideo from '~icons/bi/camera-video'
@@ -20,14 +20,14 @@
     entry: EntryData
     dictionary: Tables<'dictionaries'>
     can_edit?: boolean
-    db_operations: DbOperations
+    writes: GuardedWrites
   }
 
   const {
     entry,
     dictionary,
     can_edit = false,
-    db_operations,
+    writes,
   }: Props = $props()
 
   // Photos/videos are flattened across senses, so the same medium linked to two
@@ -66,7 +66,7 @@
         photo_source={photo.source}
         photographer={photo.photographer}
         {can_edit}
-        on_delete_image={async () => await db_operations.delete_photo(photo.id)} />
+        on_delete_image={async () => await writes.delete_photo(photo.id)} />
     </div>
   {/each}
   {#if can_edit}
@@ -75,10 +75,10 @@
         <div class="photo-upload-tile" onclick={toggle}>
           <div class="photo-upload-inner">
             <span class="desktop-only">
-              <IconIcOutlineCloudUpload class="icon-inline" style="font-size: 1.5rem" />
+              <IconIcOutlineCloudUpload style="font-size: 1.5rem" />
             </span>
             <span class="mobile-only">
-              <IconIcOutlineCameraAlt class="icon-inline" style="font-size: 1.25rem" />
+              <IconIcOutlineCameraAlt style="font-size: 1.25rem" />
             </span>
             <div class="tile-label">
               {page.data.t('entry_field.photo')}
@@ -110,7 +110,7 @@
           type="button"
           class="add-tile"
           onclick={toggle}>
-          <IconBiCameraVideo class="icon-inline" style="font-size: 1.25rem" />
+          <IconBiCameraVideo style="font-size: 1.25rem" />
           <span class="tile-label">
             {page.data.t('video.add_video')}
           </span>
@@ -139,7 +139,7 @@
           onclick={() => set('point')}
           type="button"
           class="add-tile">
-          <IconMdiMapMarkerPlus class="icon-inline" style="margin-right: 0.25rem; margin-top: -3px;" />
+          <IconMdiMapMarkerPlus style="margin-right: 0.25rem; margin-top: -3px;" />
           <span class="tile-label">
             {page.data.t('create.select_coordinates')}
           </span>
@@ -148,7 +148,7 @@
           onclick={() => set('region')}
           type="button"
           class="add-tile">
-          <IconMdiMapMarkerPath class="icon-inline" style="margin-right: 0.25rem; margin-top: -2px;" />
+          <IconMdiMapMarkerPath style="margin-right: 0.25rem; margin-top: -2px;" />
           <span class="tile-label">
             {page.data.t('create.select_region')}
           </span>

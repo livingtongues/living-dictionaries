@@ -2,7 +2,7 @@
   import { page } from '$app/state'
   import { goto } from '$app/navigation'
   import { tick } from 'svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte'
   import SentenceEditPanel from './SentenceEditPanel.svelte'
@@ -106,7 +106,7 @@
       <h2>{display_title}</h2>
       {#if can_edit}
         <button type="button" class="icon-action" title={page.data.t('text.edit_title')} onclick={() => show_title_edit = true}>
-          <IconFa6SolidPencil class="icon-inline" />
+          <IconFa6SolidPencil />
         </button>
       {/if}
     </div>
@@ -120,14 +120,14 @@
         class:toolbar-active={show_translations}
         style="gap: 0.375rem"
         onclick={() => show_translations = !show_translations}>
-        <IconCarbonTranslate class="icon-inline" />
+        <IconCarbonTranslate />
         {page.data.t('text.show_translations')}
       </button>
       {#if can_edit}
-        <Button form="filled" onclick={() => show_append = true}>
-          <IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" />
+        <HeadlessButton class="btn-primary btn-default" onclick={() => show_append = true}>
+          <IconFaSolidPlus style="margin-top: -0.25rem" />
           {page.data.t('text.append')}
-        </Button>
+        </HeadlessButton>
       {/if}
     </div>
 
@@ -171,13 +171,13 @@
     {#if can_edit}
       <div class="danger-zone">
         <button type="button" class="btn-outline btn-sm" style="gap: 0.375rem; color: var(--danger)" onclick={delete_text}>
-          <IconSystemUiconsTrash class="icon-inline" />
+          <IconSystemUiconsTrash />
           {page.data.t('text.delete')}
         </button>
       </div>
     {/if}
   {:else if loading}
-    <div class="state-note"><IconSvgSpinners3DotsFade class="icon-inline" /></div>
+    <div class="state-note"><IconSvgSpinners3DotsFade /></div>
   {:else}
     <div class="state-note">{page.data.t('text.none_yet')}</div>
   {/if}

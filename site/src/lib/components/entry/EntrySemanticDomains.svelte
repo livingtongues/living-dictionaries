@@ -56,7 +56,7 @@
             class="remove-write-in"
             title="Remove"
             onclick={(e) => { e.stopPropagation(); deleteWriteIn(domain) }}>
-            <IconFaSolidTimes class="icon-inline" />
+            <IconFaSolidTimes />
           </button>
         {/if}
       </div>
@@ -67,7 +67,7 @@
   {#snippet plus()}
 
     {#if can_edit && show_plus && !(semantic_domain_keys?.length || write_in_semantic_domains?.length)}
-      <IconFaSolidPlus class="icon-inline" style="opacity: 0.4; margin-top: 0.25rem; margin-bottom: 0.25rem" />
+      <IconFaSolidPlus style="opacity: 0.4; margin-top: 0.25rem; margin-bottom: 0.25rem" />
     {/if}
 
   {/snippet}

@@ -37,11 +37,11 @@
 
 <button type="button" onclick={cycle_color_scheme} title="{page.data.t('misc.appearance')}: {scheme_label}">
   {#if color_scheme === 'system'}
-    <IconMdiBrightnessAuto class="icon-inline" />
+    <IconMdiBrightnessAuto />
   {:else if color_scheme === 'light'}
-    <IconMdiWhiteBalanceSunny class="icon-inline" />
+    <IconMdiWhiteBalanceSunny />
   {:else}
-    <IconMdiWeatherNight class="icon-inline" />
+    <IconMdiWeatherNight />
   {/if}
   {#if !compact}
     {scheme_label}

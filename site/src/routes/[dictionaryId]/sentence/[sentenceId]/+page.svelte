@@ -44,7 +44,7 @@
     <a href={sentences_scope_href}>{page.data.t('sentence.sentences')}</a>
     {#if parent_text}
       <span class="crumb-sep">/</span>
-      <span class="parent-text"><IconCarbonDocument class="icon-inline" />
+      <span class="parent-text"><IconCarbonDocument />
         {page.data.t('sentence.part_of_text')}: {Object.values(parent_text.title || {}).find(Boolean) || ''}</span>
     {/if}
   </nav>
@@ -77,13 +77,13 @@
     {#if can_edit}
       <div class="actions">
         <button type="button" class="btn-outline btn-sm" style="gap: 0.375rem; color: var(--danger)" onclick={delete_sentence}>
-          <IconSystemUiconsTrash class="icon-inline" />
+          <IconSystemUiconsTrash />
           {page.data.t('sentence.delete')}
         </button>
       </div>
     {/if}
   {:else if loading}
-    <div class="state-note"><IconSvgSpinners3DotsFade class="icon-inline" /></div>
+    <div class="state-note"><IconSvgSpinners3DotsFade /></div>
   {:else}
     <div class="state-note">{page.data.t('sentence.no_results')}</div>
   {/if}

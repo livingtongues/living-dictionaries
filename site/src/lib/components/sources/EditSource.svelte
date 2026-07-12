@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import type { SourceType } from '$lib/constants'
   import type { Tables } from '$lib/types'
@@ -15,7 +15,7 @@
   }
 
   const { source = null, on_close, on_saved }: Props = $props()
-  const { db_operations } = $derived(page.data)
+  const { writes } = $derived(page.data)
   const is_edit = !!source?.id
 
   // Seed once from the prop — this modal is freshly mounted for each open.
@@ -55,9 +55,9 @@
       type: type || null,
     }
     if (is_edit)
-      await db_operations.update_source({ id: source.id, ...fields })
+      await writes.update_source({ id: source.id, ...fields })
     else
-      await db_operations.insert_source(fields)
+      await writes.insert_source(fields)
     saving = false
     on_saved?.({ slug: clean_slug })
     on_close()
@@ -122,8 +122,8 @@
     {/if}
 
     <div class="modal-footer">
-      <Button onclick={on_close} form="simple" color="black">{page.data.t('misc.cancel')}</Button>
-      <Button type="submit" form="filled" loading={saving}>{page.data.t('misc.save')}</Button>
+      <HeadlessButton class="btn-ghost btn-default" onclick={on_close}>{page.data.t('misc.cancel')}</HeadlessButton>
+      <HeadlessButton class="btn-primary btn-default" type="submit" loading={saving}>{page.data.t('misc.save')}</HeadlessButton>
     </div>
   </form>
 </Modal>

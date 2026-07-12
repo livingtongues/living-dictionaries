@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import type { ApiKeyRecord, ApiKeyRole } from '$lib/api-keys/api-key'
   import { api_create_api_key, api_list_api_keys } from '$api/dictionaries/[id]/api-keys/_call'
   import { api_revoke_api_key } from '$api/dictionaries/[id]/api-keys/[key_id]/_call'
@@ -89,8 +89,8 @@
       <div class="token-reveal-label">Copy this key now — it won't be shown again:</div>
       <code class="token">{new_token}</code>
       <div class="token-actions">
-        <Button onclick={copy} form="fill" color="primary">{copied ? 'Copied ✓' : 'Copy'}</Button>
-        <Button onclick={() => (new_token = '')} form="simple" color="black">Done</Button>
+        <HeadlessButton class="btn-primary btn-default" onclick={copy}>{copied ? 'Copied ✓' : 'Copy'}</HeadlessButton>
+        <HeadlessButton class="btn-ghost btn-default" onclick={() => (new_token = '')}>Done</HeadlessButton>
       </div>
     </div>
   {/if}
@@ -108,7 +108,7 @@
           <option value="read">Read only</option>
         </select>
       </label>
-      <Button onclick={create} loading={creating} form="fill" color="primary">Create key</Button>
+      <HeadlessButton class="btn-primary btn-default" onclick={create} loading={creating}>Create key</HeadlessButton>
     </div>
 
     <p class="role-hint">
@@ -131,7 +131,7 @@
           <span class="key-role">{role_label(key.role)}</span>
           <span class="muted key-used">{format_when(key.last_used_at)}</span>
           {#if can_manage}
-            <Button onclick={() => revoke(key)} form="simple" color="red" size="sm">Revoke</Button>
+            <HeadlessButton style="color: var(--danger)" class="btn-ghost btn-sm" onclick={() => revoke(key)}>Revoke</HeadlessButton>
           {/if}
         </li>
       {/each}

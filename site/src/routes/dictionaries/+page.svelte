@@ -1,5 +1,8 @@
 <script lang="ts">
-  import Button from '$lib/components/ui/Button.svelte'
+  import IconDownload from '~icons/fa-solid/download'
+  import IconPencilAlt from '~icons/fa-solid/pencil-alt'
+  import IconKey from '~icons/fa-solid/key'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte'
   import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
@@ -22,25 +25,25 @@
 
 <div class="dict-list-panel">
   <div>
-    <Button
-      form="filled"
-      color="black"
+    <HeadlessButton
+      class="btn-primary btn-default"
+
       onclick={() =>
         download_objects_as_csv(
           dictionary_headers,
           filtered_dictionaries.map(prepare_dictionary_for_csv),
           'living-dictionaries-list',
         )}>
-      <i class="fas fa-download icon-gap-right"></i>
+      <IconDownload class="icon-gap-right" />
       {page.data.t('misc.download')}
       (.csv)
-    </Button>
+    </HeadlessButton>
     {#if auth_user.is_admin}
-      <Button href="/admin/dictionaries" color="black">
-        <i class="far fa-pencil icon-gap-right"></i>
+      <HeadlessButton class="btn btn-default" href="/admin/dictionaries">
+        <IconPencilAlt class="icon-gap-right" />
         Edit
-        <i class="far fa-key fa-sm icon-gap-left"></i>
-      </Button>
+        <IconKey class="icon-gap-left" style="font-size: 0.875em" />
+      </HeadlessButton>
     {/if}
   </div>
   <ResponsiveTable stickyColumn stickyHeading class="dict-table">

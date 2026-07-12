@@ -19,11 +19,11 @@
   const { sense, glossLanguages, can_edit = false }: Props = $props()
 
   const dictionary = $derived(page.data.dictionary)
-  const db_operations = $derived(page.data.db_operations)
+  const writes = $derived(page.data.writes)
 
   // Scalar sense fields render + save off the live `dict_db` senses row (mutate,
   // then `_save()` — auto-stamps editor + dirty); the Orama watcher reflects each
-  // save back into the read-model. Sentences stay on `db_operations` (multi-table).
+  // save back into the read-model. Sentences stay on `writes` (multi-table).
   const dict_db = $derived(page.data.dict_db)
   const sense_row = $derived(dict_db?.senses.id(sense.id))
   // Display values prefer the live row, falling back to the read-model `sense`
@@ -111,8 +111,8 @@
   <button
     type="button"
     class="add-sentence"
-    onclick={() => db_operations.insert_sentence({ sentence: {}, sense_id: sense.id })}>
-    <IconSystemUiconsVersions class="icon-inline" style="font-size: 1.25rem" /> {page.data.t('sentence.add')}
+    onclick={() => writes.insert_sentence({ sentence: {}, sense_id: sense.id })}>
+    <IconSystemUiconsVersions style="font-size: 1.25rem" /> {page.data.t('sentence.add')}
   </button>
 {/if}
 

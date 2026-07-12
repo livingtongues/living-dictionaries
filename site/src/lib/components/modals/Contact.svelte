@@ -1,6 +1,9 @@
 <script lang="ts">
+  import IconQuestionCircle from '~icons/fa-regular/question-circle'
+  import IconComment from '~icons/fa-regular/comment'
+  import IconCheck from '~icons/fa-solid/check'
   import IconFluentLearningApp24Regular from '~icons/fluent/learning-app-24-regular'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Form from '$lib/components/ui/Form.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
@@ -78,35 +81,33 @@
 <Modal {on_close} class="contact-modal">
   {#snippet heading()}
     <span>
-      <i class="far fa-question-circle"></i>
+      <IconQuestionCircle />
     </span>
   {/snippet}
   <div style="display: flex; flex-direction: column; margin-bottom: 1.25rem">
-    <Button
+    <HeadlessButton
       onclick={() => {
         goto('/tutorials')
         on_close()
       }}
-      class="tutorials-button">
-      <IconFluentLearningApp24Regular class="icon-inline" style="margin-top: -2px" />
+      class="btn btn-default tutorials-button">
+      <IconFluentLearningApp24Regular style="margin-top: -2px" />
       {page.data.t('header.tutorials')}
-    </Button>
-    <Button
-      href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
-      target="_blank">
-      <i class="far fa-question-circle"></i>
+    </HeadlessButton>
+    <HeadlessButton class="btn btn-default" href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing" target="_blank">
+      <IconQuestionCircle />
       <span style="margin-left: 0.25rem">
         FAQ
         <!-- {page.data.t('header.faq')} -->
       </span>
-    </Button>
+    </HeadlessButton>
   </div>
 
   {#if !dictionary?.con_language_description}
     <hr style="margin-top: 1.25rem; margin-bottom: 1.25rem" />
 
     <h2 class="contact-heading">
-      <i class="far fa-comment"></i>
+      <IconComment />
       {page.data.t('header.contact_us')}
     </h2>
 
@@ -152,24 +153,24 @@
           {/if}
 
           <div style="margin-top: 1.25rem">
-            <Button {loading} form="filled" type="submit">
+            <HeadlessButton class="btn-primary btn-default" {loading} type="submit">
               {page.data.t('contact.send_message')}
-            </Button>
-            <Button disabled={loading} onclick={on_close} form="simple" color="black">
+            </HeadlessButton>
+            <HeadlessButton class="btn-ghost btn-default" disabled={loading} onclick={on_close}>
               {page.data.t('misc.cancel')}
-            </Button>
+            </HeadlessButton>
           </div>
         {/snippet}
       </Form>
     {:else if status === 'success'}
       <h4 class="success-heading">
-        <i class="fas fa-check"></i>
+        <IconCheck />
         {page.data.t('contact.message_sent')}
       </h4>
       <div>
-        <Button onclick={on_close} color="black">
+        <HeadlessButton class="btn btn-default" onclick={on_close}>
           {page.data.t('misc.close')}
-        </Button>
+        </HeadlessButton>
       </div>
     {:else if status === 'fail'}
       <h4 class="fail-heading">

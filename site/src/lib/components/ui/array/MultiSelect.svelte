@@ -115,7 +115,7 @@
           onclick={(e) => { e.stopPropagation(); remove(option.value) }}
           class="remove-token"
           title="Remove {option.name}">
-          <IconLaTimes class="icon-inline" />
+          <IconLaTimes />
         </div>
       </div>
     {/each}
@@ -128,7 +128,7 @@
         onfocus={() => setShowOptions(true)}
         onblur={addWriteInIfApplicable}
         placeholder={Object.keys(selectedOptions).length ? '' : placeholder} />
-      <IconCarbonCaretDown class="icon-inline" style="opacity: 0.5" />
+      <IconCarbonCaretDown style="opacity: 0.5" />
     </div>
   </div>
 

@@ -20,7 +20,6 @@
     "test:delete-2tab": "node e2e/dict-delete-2tab.mjs",
     "test:history": "node e2e/history-sync.mjs",
     "test:catalog": "node e2e/catalog-sqlite.mjs",
-    "test:entries": "node e2e/entries-sqlite.mjs",
     "test:markdown": "node e2e/markdown-editor-flow.mjs",
     "local-svelte-pieces": "link:../../../svelte-pieces"
   },

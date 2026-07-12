@@ -1,8 +1,10 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store'
+  import IconDownload from '~icons/fa-solid/download'
+  import IconTrashAlt from '~icons/fa-regular/trash-alt'
   import type { EntryData } from '$lib/types'
-  import type { AudioVideoUploadStatus } from './upload-audio'
-  import Button from '$lib/components/ui/Button.svelte'
+  import type { MediaUploadHandle } from '$lib/media/upload-media'
+  import { add_audio } from '$lib/media/add-media'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import JSON from '$lib/components/ui/JSON.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
@@ -22,7 +24,7 @@
   const { on_close, entry, sound_file }: Props = $props()
 
   let upload_triggered = $state(false)
-  const { auth_user, db_operations, url_from_storage_path } = $derived(page.data)
+  const { auth_user, writes, url_from_storage_path } = $derived(page.data)
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: page.data.dictionary?.orthographies }))
   // Must match RecordAudio's $bindable fallbacks (permissionGranted = false, audioBlob = null):
   // binding an `undefined` $state to a prop with a non-undefined fallback throws Svelte's
@@ -42,22 +44,17 @@
   const initial_speaker_id = $derived(sound_file?.speakers?.[0].id)
   const initial_source_slug = $derived(sound_file?.source ?? undefined)
 
-  function startUpload({ speaker_id, source_slug }: { speaker_id?: string, source_slug?: string }): Readable<AudioVideoUploadStatus> {
-    const uploadStore = db_operations.addAudio({
+  function start_upload({ speaker_id, source_slug }: { speaker_id?: string, source_slug?: string }): MediaUploadHandle {
+    const handle = add_audio({
+      writes,
+      dictionary_id: page.data.dictionary.id,
       file: file || audioBlob,
       entry_id: entry.id,
       speaker_id,
       source: source_slug,
     })
-
-    const unsubscribe = uploadStore.subscribe((status) => {
-      if (status?.progress === 100) {
-        upload_triggered = true
-        unsubscribe()
-      }
-    })
-
-    return uploadStore
+    handle.done.then(() => upload_triggered = true).catch(() => undefined) // error renders in the progress pill
+    return handle
   }
 
   async function select_speaker(new_speaker_id: string) {
@@ -65,20 +62,20 @@
     if (initial_speaker_id === new_speaker_id) return
 
     if (initial_speaker_id)
-      await db_operations.assign_speaker({ speaker_id: initial_speaker_id, media: 'audio', media_id: sound_file.id, remove: true })
-    await db_operations.assign_speaker({ speaker_id: new_speaker_id, media: 'audio', media_id: sound_file.id })
+      await writes.assign_speaker({ speaker_id: initial_speaker_id, media: 'audio', media_id: sound_file.id, remove: true })
+    await writes.assign_speaker({ speaker_id: new_speaker_id, media: 'audio', media_id: sound_file.id })
   }
 
   async function select_source(new_source_slug: string) {
     if (!sound_file) return
     if (sound_file.source === new_source_slug) return
-    await db_operations.update_audio({ id: sound_file.id, source: new_source_slug })
+    await writes.update_audio({ id: sound_file.id, source: new_source_slug })
   }
 </script>
 
 <Modal on_close={on_close}>
   {#snippet heading()}
-    <span> <IconMaterialSymbolsHearing class="icon-inline" style="font-size: 0.875rem" /> {headword.value} </span>
+    <span> <IconMaterialSymbolsHearing style="font-size: 0.875rem" /> {headword.value} </span>
   {/snippet}
 
   <SelectSpeaker
@@ -100,9 +97,9 @@
           {/if}
           <div style="margin-bottom: 0.75rem"></div>
           {#if !upload_triggered && (file || audioBlob)}
-            {@const upload_status = startUpload({ speaker_id, source_slug })}
+            {@const handle = start_upload({ speaker_id, source_slug })}
             {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
-              <UploadProgressBarStatus {upload_status} />
+              <UploadProgressBarStatus {handle} />
             {/await}
           {/if}
         {:else}
@@ -126,30 +123,29 @@
         <div style="width: 0.25rem"></div>
       {/if}
 
-      <Button
-        href={url_from_storage_path(sound_file.storage_path)}
-        target="_blank">
-        <i class="fas fa-download"></i>
+      <HeadlessButton class="btn btn-default" href={url_from_storage_path(sound_file.storage_path)} target="_blank">
+        <IconDownload />
         <span class="wide-only">{page.data.t('misc.download')}</span>
-      </Button>
+      </HeadlessButton>
       <div style="width: 0.25rem"></div>
 
-      <Button
+      <HeadlessButton
+        style="color: var(--danger)"
+        class="btn btn-default"
         onclick={async () => {
           const confirmation = confirm(page.data.t('entry.delete_audio'))
-          if (confirmation) await db_operations.delete_audio(sound_file.id)
+          if (confirmation) await writes.delete_audio(sound_file.id)
           on_close()
-        }}
-        color="red">
-        <i class="far fa-trash-alt"></i>&nbsp;
+        }}>
+        <IconTrashAlt />&nbsp;
         <span class="wide-only">{page.data.t('misc.delete')}</span>
-      </Button>
+      </HeadlessButton>
       <div style="width: 0.25rem"></div>
     {/if}
 
-    <Button onclick={on_close} color="black">
+    <HeadlessButton class="btn btn-default" onclick={on_close}>
       {page.data.t('misc.close')}
-    </Button>
+    </HeadlessButton>
   </div>
 </Modal>
 

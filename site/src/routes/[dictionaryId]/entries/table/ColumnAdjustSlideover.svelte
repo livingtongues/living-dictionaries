@@ -67,7 +67,7 @@
                 type="button"
                 onclick={() => move(i, 'up')}
                 class="round-button">
-                <IconFa6SolidChevronUp class="icon-inline" />
+                <IconFa6SolidChevronUp />
               </button>
             {/if}
             {#if i > 0 && i !== $preferred_table_columns.length - 1}
@@ -75,7 +75,7 @@
                 type="button"
                 onclick={() => move(i, 'down')}
                 class="round-button">
-                <IconFa6SolidChevronDown class="icon-inline" />
+                <IconFa6SolidChevronDown />
               </button>
             {/if}
           </div>
@@ -90,9 +90,9 @@
                   onclick={() => (column.sticky = !column.sticky)}
                   class="round-button no-shrink">
                   {#if column.sticky}
-                    <IconTeenyiconsThumbtackSolid class="icon-inline" />
+                    <IconTeenyiconsThumbtackSolid />
                   {:else}
-                    <IconTeenyiconsThumbtackOutline class="icon-inline" />
+                    <IconTeenyiconsThumbtackOutline />
                   {/if}
                 </button>
               {/if}
@@ -101,9 +101,9 @@
                 onclick={() => (column.hidden = !column.hidden)}
                 class="round-button no-shrink">
                 {#if column.hidden}
-                  <IconStreamlineEyeOff class="icon-inline" />
+                  <IconStreamlineEyeOff />
                 {:else}
-                  <IconStreamlineEye class="icon-inline" />
+                  <IconStreamlineEye />
                 {/if}
               </button>
             </div>

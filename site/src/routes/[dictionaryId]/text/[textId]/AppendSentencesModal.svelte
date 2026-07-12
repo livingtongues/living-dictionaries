@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state'
   import Modal from '$lib/components/ui/Modal.svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { split_text_into_sentences } from '$lib/corpus/split-text-into-sentences'
   import { key_between } from '$lib/api/v1/fractional-index'
   import { get_orthographies } from '$lib/helpers/orthographies'
@@ -61,9 +61,9 @@
       {/if}
     </span>
     <span style="flex-grow: 1"></span>
-    <Button form="filled" loading={saving} disabled={!preview.length} onclick={append}>
+    <HeadlessButton class="btn-primary btn-default" loading={saving} disabled={!preview.length} onclick={append}>
       {page.data.t('text.append')}
-    </Button>
+    </HeadlessButton>
   </div>
 </Modal>
 

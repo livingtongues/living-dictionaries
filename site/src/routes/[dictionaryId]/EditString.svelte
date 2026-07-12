@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Form from '$lib/components/ui/Form.svelte'
   import { page } from '$app/state'
 
@@ -42,9 +42,9 @@
         bind:value
         placeholder={display} />
       <div style="width: 0.25rem"></div>
-      <Button class="save-button" {loading} type="submit">
+      <HeadlessButton class="btn btn-default save-button" {loading} type="submit">
         {page.data.t('misc.save')}
-      </Button>
+      </HeadlessButton>
     </div>
   {/snippet}
 </Form>

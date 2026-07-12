@@ -78,14 +78,14 @@
             initAudio()
         }}>
         {#if context === 'list'}
-          <IconMaterialSymbolsHearing class="icon-inline {playing ? 'playing-color' : ''}" style="font-size: 1.25rem; margin-top: 0.25rem" />
+          <IconMaterialSymbolsHearing class="{playing ? 'playing-color' : ''}" style="font-size: 1.25rem; margin-top: 0.25rem" />
           <div class="listen-label">
             {page.data.t('audio.listen')}
           </div>
         {:else if context === 'table'}
-          <IconMaterialSymbolsHearing class="icon-inline {playing ? 'playing-color' : ''}" style="font-size: 1.125rem; margin-top: 0.25rem" />
+          <IconMaterialSymbolsHearing class="{playing ? 'playing-color' : ''}" style="font-size: 1.125rem; margin-top: 0.25rem" />
         {:else if context === 'entry'}
-          <IconMaterialSymbolsHearing class="icon-inline {playing ? 'playing-color' : ''}" style="font-size: 1.125rem; margin-bottom: 0.25rem" />
+          <IconMaterialSymbolsHearing class="{playing ? 'playing-color' : ''}" style="font-size: 1.125rem; margin-bottom: 0.25rem" />
           <div class="entry-label">
             {page.data.t('audio.listen')}
             {#if can_edit}
@@ -99,7 +99,7 @@
       <div
         class="{klass} audio-action add-audio"
         onclick={toggle}>
-        <IconUilMicrophone class="icon-inline {context === 'list' || context === 'table' ? 'mic-color' : ''}" style="font-size: 1.125rem; margin: 0.25rem" />
+        <IconUilMicrophone class="{context === 'list' || context === 'table' ? 'mic-color' : ''}" style="font-size: 1.125rem; margin: 0.25rem" />
         {#if context === 'entry'}
           <div style="font-size: 0.75rem; line-height: 1rem">
             {page.data.t('audio.add_audio')}

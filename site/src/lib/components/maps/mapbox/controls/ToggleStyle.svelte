@@ -33,7 +33,7 @@
   type="button"
   class="toggle-style"
   style="bottom: 40px; left: 8px; z-index: 1;">
-  <IconFaSolidGlobeAsia class="icon-inline" />
+  <IconFaSolidGlobeAsia />
 </button>
 
 <style>

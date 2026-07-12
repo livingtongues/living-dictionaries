@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store'
   import IconMdiClose from '~icons/mdi/close'
   import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
   import type { PartnerWithPhoto } from '$lib/types'
+  import type { MediaUploadHandle } from '$lib/media/upload-media'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
   import Image from '$lib/components/image/Image.svelte'
@@ -14,7 +14,7 @@
     partners: PartnerWithPhoto[]
     add_partner_name: (name: string) => Promise<void>
     delete_partner: (partner_id: string) => Promise<void>
-    add_partner_image: (partner_id: string, file: File) => Readable<{ progress: number, error?: string, preview_url: string }>
+    add_partner_image: (partner_id: string, file: File) => MediaUploadHandle
     delete_partner_image: ({ partner_id, photo_id }: { partner_id: string, photo_id: string }) => Promise<void>
     hide_living_tongues_logo: (allow: boolean) => Promise<void>
     hideLivingTonguesLogo?: boolean

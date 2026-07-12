@@ -5,7 +5,7 @@ export const shared_meta: StoryMeta = {
   viewports: [{ width: 480, height: 640 }],
   page_data: {
     t: (key: string | { fallback?: string }) => typeof key === 'object' ? key.fallback || '' : key,
-    db_operations: { addImage: () => ({ subscribe: () => () => {} }) },
+    dictionary: { id: 'demo' },
   },
 }
 

@@ -57,10 +57,10 @@
       handleImage(e.target.files)
     }} />
   <span class="desktop-only">
-    <IconIcOutlineCloudUpload class="icon-inline" style="font-size: 1.5rem" />
+    <IconIcOutlineCloudUpload style="font-size: 1.5rem" />
   </span>
   <span class="mobile-only">
-    <IconIcOutlineCameraAlt class="icon-inline" style="font-size: 1.25rem" />
+    <IconIcOutlineCameraAlt style="font-size: 1.25rem" />
   </span>
 
   {@render label?.()}

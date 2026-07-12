@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { toast } from '$lib/state/toast.svelte'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Form from '$lib/components/ui/Form.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { display_one_tap_button } from '$lib/auth/google-one-tap'
@@ -88,7 +88,7 @@
   {#snippet heading()}
     <span>{page.data.t('header.login')}
       {#if submitting_code}
-        <IconSvgSpinners3DotsFade class="icon-inline" style="vertical-align: -4px" />
+        <IconSvgSpinners3DotsFade style="vertical-align: -4px" />
       {/if}
     </span>
   {/snippet}
@@ -116,7 +116,7 @@
             class="text-input"
             required
             bind:value={email} />
-          <Button class="send-code-button" {loading} form="filled" type="submit">{page.data.t('account.send_code')}</Button>
+          <HeadlessButton class="btn-primary btn-default send-code-button" {loading} type="submit">{page.data.t('account.send_code')}</HeadlessButton>
         </div>
       {/snippet}
     </Form>

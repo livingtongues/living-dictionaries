@@ -1,7 +1,7 @@
 <script lang="ts">
   import sanitize from 'xss'
   import type { EntryFieldValue } from '$lib/types'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Form from '$lib/components/ui/Form.svelte'
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
   import MarkdownEditor from '$lib/markdown/MarkdownEditor.svelte'
@@ -164,19 +164,17 @@
 
       {#if field === 'interlinearization'}
         <div class="interlinear-gap"></div>
-        <Button
-          class="edit-helper-button"
-          size="sm"
-          form="simple"
-          onclick={() => (value = smallCapsSelection(inputEl))}>Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
+        <HeadlessButton
+          class="btn-ghost btn-sm edit-helper-button"
+
+          onclick={() => (value = smallCapsSelection(inputEl))}>Toggle sᴍᴀʟʟCᴀᴘs for selection</HeadlessButton>
       {/if}
 
       {#if field === 'scientific_names'}
-        <Button
-          class="edit-helper-button"
-          size="sm"
-          form="simple"
-          onclick={() => (value = italicizeSelection(inputEl))}><i>Italicize</i> selection</Button>
+        <HeadlessButton
+          class="btn-ghost btn-sm edit-helper-button"
+
+          onclick={() => (value = italicizeSelection(inputEl))}><i>Italicize</i> selection</HeadlessButton>
         {#if value.includes('<i>')}
           <div class="tw-prose italic-preview">
             {@html sanitize(value)}
@@ -186,19 +184,19 @@
     </div>
 
     <div class="modal-footer">
-      <Button disabled={loading} onclick={on_close} form="simple" color="black">
+      <HeadlessButton class="btn-ghost btn-default" disabled={loading} onclick={on_close}>
         {page.data.t('misc.cancel')}
-      </Button>
+      </HeadlessButton>
       <div style="width: 0.25rem"></div>
       {#if addingLexeme}
-        <Button {loading} type="submit" form="filled">
+        <HeadlessButton class="btn-primary btn-default" {loading} type="submit">
           {page.data.t('misc.next')}
-          <IconFa6SolidChevronRight class="icon-inline rtl-x-flip" style="margin-top: -0.125rem" />
-        </Button>
+          <IconFa6SolidChevronRight class="rtl-x-flip" style="margin-top: -0.125rem" />
+        </HeadlessButton>
       {:else}
-        <Button {loading} type="submit" form="filled">
+        <HeadlessButton class="btn-primary btn-default" {loading} type="submit">
           {page.data.t('misc.save')}
-        </Button>
+        </HeadlessButton>
       {/if}
     </div>
   {/snippet}

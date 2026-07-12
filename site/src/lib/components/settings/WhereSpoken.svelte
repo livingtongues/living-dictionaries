@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { DictionaryView, IPoint, IRegion } from '$lib/types'
   import type { LngLat } from 'mapbox-gl'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
@@ -69,12 +69,12 @@
           <Popup>
             <ShowHide>
               {#snippet children({ show, toggle })}
-                <Button form="simple" size="sm" onclick={toggle}>
-                  <IconOcticonPencil class="icon-inline" />
+                <HeadlessButton class="btn-ghost btn-sm" onclick={toggle}>
+                  <IconOcticonPencil />
                   {#if index === 0}
                     {page.data.t('create.primary_coordinate')}
                   {/if}
-                </Button>
+                </HeadlessButton>
                 {#if show}
                   <CoordinatesModal
                     lng={point.coordinates.longitude}
@@ -104,9 +104,9 @@
         <Region {region}>
           <ShowHide>
             {#snippet children({ show, toggle })}
-              <Button form="simple" size="sm" onclick={toggle}>
-                <IconOcticonPencil class="icon-inline" />
-              </Button>
+              <HeadlessButton class="btn-ghost btn-sm" onclick={toggle}>
+                <IconOcticonPencil />
+              </HeadlessButton>
               {#if show}
                 <RegionModal
                   {region}
@@ -134,13 +134,12 @@
 <div style="margin-top: 0.25rem">
   <ShowHide>
     {#snippet children({ show, toggle })}
-      <Button
+      <HeadlessButton
         onclick={toggle}
-        color={first_longitude !== undefined ? 'black' : 'primary'}
-        size={first_longitude !== undefined ? 'sm' : 'md'}>
-        <IconMdiMapMarkerPlus class="icon-inline" style="margin-right: 0.25rem; margin-top: -3px;" />
+        class="btn {first_longitude !== undefined ? 'btn-sm' : 'btn-default'}">
+        <IconMdiMapMarkerPlus style="margin-right: 0.25rem; margin-top: -3px;" />
         {page.data.t('create.select_coordinates')}
-      </Button>
+      </HeadlessButton>
       {#if show}
         <CoordinatesModal
           initialCenter={first_longitude !== undefined ? { longitude: first_longitude, latitude: first_latitude } : undefined}
@@ -153,10 +152,10 @@
   {#if first_longitude !== undefined}
     <ShowHide>
       {#snippet children({ show, toggle })}
-        <Button onclick={toggle} color="black" size="sm">
-          <IconMdiMapMarkerPath class="icon-inline" style="margin-right: 0.25rem; margin-top: -2px;" />
+        <HeadlessButton class="btn btn-sm" onclick={toggle}>
+          <IconMdiMapMarkerPath style="margin-right: 0.25rem; margin-top: -2px;" />
           {page.data.t('create.select_region')}
-        </Button>
+        </HeadlessButton>
         {#if show}
           <RegionModal
             initialCenter={{ longitude: first_longitude, latitude: first_latitude }}

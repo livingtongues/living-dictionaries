@@ -16,10 +16,10 @@
 
 <span class:icon-row={!verbose}>
   {#if column.field === 'audio'}
-    <IconMaterialSymbolsHearing class="icon-inline" style="font-size: 1.125rem; margin-left: auto; margin-right: auto" />
+    <IconMaterialSymbolsHearing style="font-size: 1.125rem; margin-left: auto; margin-right: auto" />
     {#if verbose}{page.data.t('entry_field.audio')}{/if}
   {:else if column.field === 'photo'}
-    <IconIcOutlineImage class="icon-inline" style="font-size: 1.25rem; margin-left: auto; margin-right: auto" />
+    <IconIcOutlineImage style="font-size: 1.25rem; margin-left: auto; margin-right: auto" />
     {#if verbose}{page.data.t('entry.image')}{/if}
     <!-- {:else if column.field === 'checked'} ✓ -->
   {:else if ['gloss', 'example_sentence', 'local_orthography'].includes(column.field)}

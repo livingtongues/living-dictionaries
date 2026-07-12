@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
 
   const { dictionary_id }: { dictionary_id: string } = $props()
 
@@ -25,7 +25,7 @@ Read the reference to help me with the tasks I give you.`)
 <div class="agent-prompt">
   <div class="prompt-head">
     <span class="prompt-title">Create an API key then hand your agent this prompt</span>
-    <Button onclick={copy} form="fill" color="primary" size="sm">{copied ? 'Copied ✓' : 'Copy'}</Button>
+    <HeadlessButton class="btn-primary btn-sm" onclick={copy}>{copied ? 'Copied ✓' : 'Copy'}</HeadlessButton>
   </div>
   <pre class="prompt-body">{prompt}</pre>
 </div>

@@ -28,6 +28,9 @@ are `migration/shared-stack-conventions.md`.
 - [svelte/](./svelte/index.md) — Svelte 5 runtime-internals gotchas: the
   `current_sources` dependency-exclusion rule that freezes lazily-created stores
   (why `construct_outside_reaction` exists).
+- [workflow/](./workflow/index.md) — multi-agent working discipline: the shared-working-tree
+  rules from the 2026-07-12 codemod clobber (check `horse list` + `git status` before bulk
+  reverts; JSONL-replay recovery).
 
 ## Pointers to the reference repo
 The **target** architecture (SQLite shared.db + per-dict dict.db, wa-sqlite/better-sqlite3,

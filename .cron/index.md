@@ -34,6 +34,7 @@ a repo job by editing its file and committing; `horse cron run <id>` still trigg
 | id | source | schedule | runs | output |
 |---|---|---|---|---|
 | `living-dictionaries/invoice-2026-07-24` | `.cron/invoice-2026-07-24.md` (repo, `runs_on: mustang`) | one-time `at: 2026-07-23T23:00` | Living Tongues invoice draft | summary in the Horse chat session |
+| `living-dictionaries/teardown-2026-07-17` | `.cron/teardown-2026-07-17.md` (repo, `runs_on: mustang`, self-deleting) | one-time `at: 2026-07-17T09:00` | post-cutover `scripts/supabase/` deletions (`.issues/post-cutover-teardown.md`) | commit + summary in its session |
 
 > The daily log review is no longer a cron here — the **horse nightly orchestrator** spawns it
 > (see `~/code/horse/.cron/fleet.md`). The `log-and-fix` *command* stays at

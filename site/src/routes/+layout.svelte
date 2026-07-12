@@ -4,7 +4,6 @@
   import '$lib/theme.css'
   import '$lib/buttons.css'
   import '$lib/forms.css'
-  import '$lib/icons.css'
   import './global.css'
   import LoadingIndicator from './LoadingIndicator.svelte'
   import DictBootProgress from './DictBootProgress.svelte'

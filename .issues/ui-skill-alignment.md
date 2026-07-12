@@ -6,14 +6,39 @@ move the app to the design system described in `.claude/skills/svelte-ui/SKILL.m
 (minimal chrome, surface-based hierarchy, `.btn-*` buttons, mdi icons, invisible inputs)
 and retire the uno-era captured-CSS shims. Read the skill first — it IS the spec.
 
+## Session progress (2026-07-12)
+
+- ✅ Phase 4 DONE: reset-tailwind.css forks `svg { inline-block; middle }` (tutor-shared),
+  vite `Icons({ scale: 1 })` (icons = 1em, skill statement now true), all 188 `icon-inline`
+  classes stripped (3 style blocks now select `:global(svg)`), icons.css deleted (+ layout
+  import + svelte-look css_files entry). Screenshot-verified home/entries/admin/dict-home.
+- ✅ Phase 1 DONE: all 47 FA `<i>` tags across 20 files → `~icons/fa-*` components
+  (codemod: /tmp/fa-codemod.mjs). Kit was FA **Pro 5.15.4** — Pro-only regular glyphs
+  (info-circle, donate, times, bars, sign-in→sign-in-alt, key, undo, spinner,
+  pencil→pencil-alt, link, language, film-alt→film, upload, check) provisionally use
+  **fa-solid**; free-regular kept for question-circle/trash-alt/comment. `fa-lg`→
+  font-size:1.3333em, `fa-sm`→0.875em, `fa-pulse`→animate-spin, `fa-fw` dropped.
+  Kit script REMOVED from app.html. Jacob will pick final glyphs on /admin/icon-review.
+- Phase 2 DELETED by Jacob (no mdi unification pass).
+- ⏳ /admin/icon-review page (level 3): Pro original (page injects kit itself) vs
+  fa-solid vs mdi-outline, tap-select, Jacob screenshots back after next push.
+  DELETE the page after picks are applied.
+- ⏳ Phase 3 buttons: Jacob chose MINIMAL mapping — only 1-2 btn-primary CTAs per page,
+  everything else btn-ghost/plain btn.
+- ⏳ Wrap-up: phase 5 → own issue, delete this file, AGENTS.md update.
+
 Items are largely independent; suggested order = listed order (mechanical → design).
 Each phase: convert route-by-route/batch, verify with svelte-look stories + :3041
 screenshots (`site/e2e/uno-parity-shots.mjs` works for any whole-app visual pass).
 Sibling: house's equivalent is `~/code/house/.issues/future/post-parity-styling-improvements.md`.
 
+Already done (details in git/past issue revisions): uno-preflights.css deleted, all `--un-*`
+vars gone, `ui/Menu.svelte` deleted, forms.css + typography.css rewritten skill-styled on
+theme vars (`.form-input` class gone), HeadlessButton ported and in use, dark mode live.
+
 ## 1. Replace the Font Awesome Kit (mechanical, glyph-identical — do first)
 
-- 25 files of `<i class="fas fa-x">` / `<i class="far fa-x">` → identical-glyph
+- 20 files / 47 tags of `<i class="fas fa-x">` / `<i class="far fa-x">` → identical-glyph
   `~icons/fa-solid/*` / `~icons/fa-regular/*` components (same `@iconify/json` source —
   exact same SVGs; the proven presetIcons-swap method from the uno drop).
 - **Icon-swap mechanics** (inlined from the retired drop-unocss.md so they aren't lost):
@@ -42,49 +67,39 @@ Sibling: house's equivalent is `~/code/house/.issues/future/post-parity-styling-
   the nearest mdi equivalent. Combine with phase 1 where convenient (an FA `<i>` being
   touched anyway can jump straight to mdi).
 
-## 3. Adopt `.btn-*` for buttons
+## 3. Adopt `.btn-*` for buttons / retire legacy `ui/Button.svelte`
 
-- Replace parity-styled raw buttons (scoped-CSS recreations of the old tailwind button
-  recipes) with the global `.btn` / `.btn-outline` / `.btn-ghost` / `.btn-primary` +
-  `btn-sm|default|lg` classes. For async actions, FIRST port tutor's `HeadlessButton.svelte`
-  (LD doesn't have it — today the legacy `ui/Button.svelte` fills that role), then compose
-  `btn-*` on its `class` prop.
+(Absorbed from the retired `.issues/button-retirement.md`, 2026-07-12.)
+
+Jacob (2026-07-04) wants the legacy vendored `ui/Button.svelte` (own `form`/`size`/`color` API,
+compiled sp-* styles) gone and buttons modernized, BUT not as one giant hard-to-review UI change.
+His stated taste: **"I really like the clean look of buttons without any background or border,
+just a slight hover change"** — i.e. the ghost/text style, minimal chrome. Scope: LD has ~54
+files importing it; house ~13 (mirror there afterwards with the same variant map). Replacement:
+`HeadlessButton` (already ported and in use) + global `.btn-*` classes, leaning `btn-ghost`-like.
+
+Execution strategy:
+1. **Inventory by variant**: map every call site's `form=` (`filled|outline|text|simple|menu`) ×
+   `color` × `size` to its nearest `.btn-*` equivalent. Many `form="text"`/`form="simple"` sites
+   are already Jacob's preferred look — those migrate with near-zero visual delta and go FIRST.
+2. **Batch by route/section** (one reviewable chunk each, svelte-look/e2e screenshots per batch):
+   admin area (internal, lowest risk) → header/shell → entries UI → settings/about pages.
+3. Genuinely filled CTA sites → `btn-primary`; deliberate restyle, flag per batch for Jacob.
+4. Temporary lint guard (`no-restricted-imports` on `ui/Button.svelte`) once a section is
+   migrated to stop regressions; delete the component + its compiled styles at the end
+   (self-contained — no `--un-` vars).
 - This changes the look (pill shape, press-scale) — deliberate restyle, batch by route.
-- Also migrate usages of the vendored legacy `sp-*` svelte-pieces `Button` toward
-  HeadlessButton + `.btn-*` (feeds phase 4's shim removal).
 
-## 4. Retire the uno-era captured-CSS shims — ✅ MOSTLY DONE (2026-07-02 dark flip)
+## 4. Delete the last uno-era shim: `icons.css`
 
-Done during the dark-mode flip: forms.css rewritten skill-styled on theme vars (element-level,
-`.form-input` class deleted + stripped from call sites, native checkbox/radio via accent-color);
-typography.css rewritten readable on theme vars; uno-preflights.css trimmed to ONLY the `--un-*`
-var-init block; global.css select rule merged into forms.css. HeadlessButton is ported and in use.
-Remaining below: the `--un-*` var-init block itself (blocked on modernizing the vendored sp-*
-pieces) and the icons.css shim.
-
-End-state: the global layer is just reset + theme + buttons + a small skill-styled forms/
-typography layer — no verbatim uno dumps.
-
-- **`uno-preflights.css`** — ✅ DELETED (2026-07-04, `.issues/drop-uno-preflights.md`): every
-  component referencing `var(--un-…)` was rewritten to plain scoped CSS with identical computed
-  values (Slideover, ResponsiveSlideover, JSON, Badge×3, Search×2, ImageDropZone, SelectAudio/Video;
-  screenshot-verified pixel parity); `--un-default-border-color` renamed `--default-border-color`
-  across all three repos. `ui/Menu.svelte` deleted earlier the same day (orphaned by the user-menu
-  slideover). Note: `ui/Button.svelte`'s compiled styles are self-contained (no `--un-` vars) and
-  remain — see `.issues/button-retirement.md`.
-- **`forms.css`** (`.form-input`, 16 call sites) — restyle inputs per the skill
-  ("the content IS the interface": minimal chrome, transparent where possible,
-  `::placeholder` in `--color-secondary`), or at minimum theme-var the existing class
-  (the dark flip already forces the color literals onto vars).
-- **`typography.css`** — the verbatim `tw-prose` dump serves 5 usage sites (about,
-  grammar, EntryField/EditField rich text). Trim to what those actually need and restyle
-  to skill standards; colors onto theme vars.
 - **`icons.css`** (`.icon-inline` shim) — as icons get touched in phases 1-2, move their
   sizing/align to per-icon inline styles per the skill, then delete the shim. (Cross-repo
   context: tutor solves this with a forked reset — `svg { inline-block; middle }` — house
   with per-icon inline styles; unifying the strategy is logged in house's
   `post-parity-styling-improvements.md`.)
 - **`reset-tailwind.css`** stays — it's a standard reset, not debt.
+- End-state: the global layer is just reset + theme + buttons + the skill-styled forms/
+  typography layers — no verbatim uno dumps.
 
 ## 5. Minimal-chrome restyle pass (the big one)
 

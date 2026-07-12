@@ -1,22 +1,29 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store'
-  import type { AudioVideoUploadStatus } from './upload-audio'
+  import IconCheck from '~icons/fa-solid/check'
+  import type { MediaUploadHandle } from '$lib/media/upload-media'
   import { page } from '$app/state'
 
   interface Props {
-    upload_status: Readable<AudioVideoUploadStatus>
+    handle: MediaUploadHandle
   }
 
-  const { upload_status }: Props = $props()
+  const { handle }: Props = $props()
+  const progress = $derived(handle.progress)
+  let error = $state<string | null>(null)
+
+  $effect(() => {
+    error = null
+    handle.done.catch((err: unknown) => error = err instanceof Error ? err.message : String(err))
+  })
 </script>
 
-{#if $upload_status.error}
+{#if error}
   <span class="status-pill error-pill">
-    {page.data.t('misc.error')}: {$upload_status.error}
+    {page.data.t('misc.error')}: {error}
   </span>
-{:else if $upload_status.progress === 100}
+{:else if $progress.progress === 100}
   <span class="status-pill success-pill">
-    <i class="far fa-check"></i>
+    <IconCheck />
     {page.data.t('upload.success')}
   </span>
 {:else}
@@ -29,13 +36,13 @@
       </div>
       <div style="text-align: right">
         <span class="progress-percent">
-          {$upload_status.progress}%
+          {$progress.progress}%
         </span>
       </div>
     </div>
     <div class="progress-track">
       <div
-        style="width:{$upload_status.progress}%"
+        style="width:{$progress.progress}%"
         class="progress-bar smooth-width-transition"></div>
     </div>
   </div>

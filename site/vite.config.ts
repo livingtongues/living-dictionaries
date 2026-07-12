@@ -21,7 +21,9 @@ export default defineConfig(async (): Promise<UserConfig> => ({
   plugins: [
     await load_svelte_look(),
     // `~icons/<collection>/<name>` → Svelte component (all icons site-wide; reads @iconify/json)
-    Icons({ compiler: 'svelte' }),
+    // scale: 1 → icons render 1em tall (width follows each icon's aspect ratio), so
+    // `font-size` on the icon or its parent IS the icon size (default would be 1.2em)
+    Icons({ compiler: 'svelte', scale: 1 }),
     sveltekit(),
     rawFonts(['.ttf']),
     // Dev-only HTTP+WS proxy so the agent CLI (`scripts/sqlite-query.sh`) can

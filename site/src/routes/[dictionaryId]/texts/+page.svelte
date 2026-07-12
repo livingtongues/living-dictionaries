@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state'
-  import Button from '$lib/components/ui/Button.svelte'
+  import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { get_headword } from '$lib/helpers/orthographies'
   import IconCarbonDocument from '~icons/carbon/document'
@@ -30,10 +30,10 @@
   <div class="heading-row">
     <h2>{page.data.t('dictionary.texts')}</h2>
     {#if can_edit}
-      <Button form="filled" href={`/${dictionary.url}/texts/new`}>
-        <IconFaSolidPlus class="icon-inline" style="margin-top: -0.25rem" />
+      <HeadlessButton class="btn-primary btn-default" href={`/${dictionary.url}/texts/new`}>
+        <IconFaSolidPlus style="margin-top: -0.25rem" />
         {page.data.t('text.new')}
-      </Button>
+      </HeadlessButton>
     {/if}
   </div>
 
@@ -41,7 +41,7 @@
     <div class="text-cards">
       {#each texts as text (text.id)}
         <a class="card" href={`/${dictionary.url}/text/${text.id}`}>
-          <IconCarbonDocument class="icon-inline" style="font-size: 1.5rem; opacity: 0.6" />
+          <IconCarbonDocument style="font-size: 1.5rem; opacity: 0.6" />
           <div class="card-body">
             <div class="title">{display_title(text.title)}</div>
             <div class="meta">
@@ -53,7 +53,7 @@
       {/each}
     </div>
   {:else if loading}
-    <div class="state-note"><IconSvgSpinners3DotsFade class="icon-inline" /></div>
+    <div class="state-note"><IconSvgSpinners3DotsFade /></div>
   {:else}
     <div class="state-note">{page.data.t('text.none_yet')}</div>
   {/if}

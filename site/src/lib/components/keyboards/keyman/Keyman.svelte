@@ -14,7 +14,6 @@
   import type { KeymanWritingSystems } from './writing-systems'
   import { keyboard_for_bcp, load_keyman_writing_systems } from './writing-systems'
   import { additional_keyboards, glossing_languages } from '../../../glosses/glossing-languages'
-  import Button from '$lib/components/ui/Button.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { loadScriptOnce } from '$lib/utils/load-once'
@@ -177,7 +176,7 @@
               type="button"
               onclick={toggle}
               title="Select Keyboard">
-              <IconPhGlobe class="icon-inline" />
+              <IconPhGlobe />
             </button>
           {/if}
           {#if showKeyboardButton}
@@ -187,9 +186,9 @@
               onclick={() => (show = !show)}
               title={show ? 'Keyboard active' : 'Keyboard inactive'}>
               {#if show}
-                <IconMdiKeyboard class="icon-inline" />
+                <IconMdiKeyboard />
               {:else}
-                <IconMdiKeyboardOffOutline class="icon-inline" />
+                <IconMdiKeyboardOffOutline />
               {/if}
             </button>
           {/if}
@@ -204,15 +203,15 @@
         {/snippet}
         {#each [...Object.entries(glossing_languages), ...Object.entries(additional_keyboards)] as [_bcp, languageDefinition] (_bcp)}
           {#if languageDefinition.showKeyboard}
-            <Button
-              form="menu"
-              size="sm"
+            <button
+              type="button"
+              class="btn-ghost btn-sm"
+              class:active={_bcp === bcp}
               onclick={() => {
                 toggle()
                 selectedBcp = _bcp
                 show = true
-              }}
-              active={_bcp === bcp}>{languageDefinition.vernacularName}</Button>
+              }}>{languageDefinition.vernacularName}</button>
           {/if}
         {/each}
       </Modal>
@@ -251,5 +250,10 @@
 
   .keyboard-toggle:hover {
     color: var(--color);
+  }
+
+  button.active {
+    background-color: color-mix(in srgb, var(--background), var(--primary) 12%);
+    color: var(--primary);
   }
 </style>

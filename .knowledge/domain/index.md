@@ -29,3 +29,7 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
 - [mapbox-usage.md](./mapbox-usage.md) — the Referer-restricted public token (server fetches must
   spoof it), the 30-day static-image caching proxy (`/api/map-static`) that keeps every dict-home +
   entry map on the free tier, `is_dark_mode()` for light/dark variants, and where each map lives.
+- [tile-map-canvas-tiles.md](./tile-map-canvas-tiles.md) — the library-free zoomable vector-tile
+  tracer (`/tile-map` dev route): raster-tile compositing model, PMTiles/protomaps format gotchas
+  (winding rewind, antimeridian, landcover seams), and the headless-canvas perf trap. Feeds
+  `.issues/future/tile-map-r2-tileset.md`.
