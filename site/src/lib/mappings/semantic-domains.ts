@@ -1,6 +1,6 @@
 import type { SemanticDomain } from '$lib/types'
 
-export const semanticDomains: SemanticDomain[] = [
+export const semantic_domains: SemanticDomain[] = [
   { key: '1', name: 'Universe and the natural world' },
   { key: '1.1', name: 'Sky, weather and climate' },
   { key: '1.2', name: 'Earth, geology and landscape' },

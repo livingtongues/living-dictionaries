@@ -30,3 +30,11 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   page_load p95, navigation-by-destination split, LCP-by-distance, CWV, boot-health). Don't
   re-propose per-route or homepage-vs-entry perf panels. The open gap is a `dict_boot` cold/warm
   timing (needs a new client `track_timing` first).
+- **2026-07-11 — featured-entry ⭐ `UNIQUE` error: CLOSED.** 0 occurrences (was 12 on 07-10); the
+  residual-race fix held. Don't re-raise.
+- **2026-07-11 — new zombie tab in the `sync_failed` storm is a non-admin (Marlene, ~4.6k/day
+  null-session).** Same known-noise family as Greg's stale tab (2026-07-09 ruling); no forced-reload
+  will be built. Don't re-triage individual stale-tab clients.
+- **2026-07-11 — waveform ▶ play-before-init bug** (`Waveform.svelte` `wavesurfer.play()` on undefined
+  during async wavesurfer.js import): long-standing 🟡 P3, fix = null-guard. Action item filed; not a
+  regression. Guaycura is a REAL Baja dictionary (MX-BCS), not the conlang fork.

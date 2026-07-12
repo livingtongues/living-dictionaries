@@ -30,3 +30,10 @@ export const TTFB_NeedsWork: Story<typeof Component> = {
 export const LCP_Poor: Story<typeof Component> = {
   props: { vital: { metric: 'LCP', count: 88, p50: 3200, p75: 5400, p95: 12400 } } as never,
 }
+
+// Thin-sample state (n < 15): the card dims, the sample count gets an asterisk,
+// and a "thin data" note appears so a cold-load outlier doesn't read as a real
+// regression. Mirrors the 2026-07-11 FCP/LCP case (~4.9s p75 off n≈15).
+export const FCP_ThinSample: Story<typeof Component> = {
+  props: { vital: { metric: 'FCP', count: 12, p50: 3900, p75: 4900, p95: 8800 } } as never,
+}

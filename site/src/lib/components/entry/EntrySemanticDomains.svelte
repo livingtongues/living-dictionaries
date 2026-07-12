@@ -2,7 +2,7 @@
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
   import { page } from '$app/state'
-  import { semanticDomains } from '$lib/mappings/semantic-domains'
+  import { semantic_domains } from '$lib/mappings/semantic-domains'
   import IconFaSolidTimes from '~icons/fa-solid/times'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
 
@@ -24,7 +24,7 @@
     on_update_write_in,
   }: Props = $props()
 
-  const translated_semantic_domain_options = $derived(semanticDomains.map(domain => ({
+  const translated_semantic_domain_options = $derived(semantic_domains.map(domain => ({
     value: domain.key,
     name: page.data.t({ dynamicKey: `sd.${domain.key}`, fallback: domain.name }),
   })) satisfies SelectOption[])

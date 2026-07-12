@@ -21,7 +21,14 @@
   const AMBER = '#d97706'
   const RED = '#dc2626'
 
+  // Percentiles from very few samples are anecdotes, not trends — one cold
+  // outlier can read as an alarming "Poor". Below this N we dim the card +
+  // asterisk the sample count + add a note. Inlined (like META / thresholds
+  // above) so this component stays self-contained across house / LD / tutor.
+  const THIN_SAMPLE_N = 15
+
   const meta = $derived(META[vital.metric])
+  const is_thin = $derived(vital.count > 0 && vital.count < THIN_SAMPLE_N)
 
   function fmt(value: number | null, unit: 'ms' | 'cls'): string {
     if (value === null)
@@ -58,7 +65,7 @@
   })
 </script>
 
-<div class="vital">
+<div class="vital" class:thin={is_thin}>
   {#if meta}
     <div class="head">
       <span class="name">{meta.name} <span class="abbr">{vital.metric}</span></span>
@@ -81,14 +88,20 @@
     <div class="zone-labels"><span>Good</span><span>Needs work</span><span>Poor</span></div>
 
     <div class="caption">
-      target ≤ {fmt(meta.good, meta.unit)} · median {fmt(vital.p50, meta.unit)} · slowest 5% {fmt(vital.p95, meta.unit)} · {vital.count.toLocaleString()} samples
+      target ≤ {fmt(meta.good, meta.unit)} · median {fmt(vital.p50, meta.unit)} · slowest 5% {fmt(vital.p95, meta.unit)} · {vital.count.toLocaleString()} samples{#if is_thin}<span class="thin-mark" title="thin data — under {THIN_SAMPLE_N} samples">*</span>{/if}
     </div>
+    {#if is_thin}
+      <div class="thin-note">* thin data — under {THIN_SAMPLE_N} samples; treat as an anecdote, not a trend.</div>
+    {/if}
   {:else}
     <div class="head">
       <span class="name">{vital.metric}</span>
       <b class="value">{fmt(vital.p75, 'ms')}</b>
     </div>
-    <div class="caption">median {fmt(vital.p50, 'ms')} · slowest 5% {fmt(vital.p95, 'ms')} · {vital.count.toLocaleString()} samples</div>
+    <div class="caption">median {fmt(vital.p50, 'ms')} · slowest 5% {fmt(vital.p95, 'ms')} · {vital.count.toLocaleString()} samples{#if is_thin}<span class="thin-mark" title="thin data — under {THIN_SAMPLE_N} samples">*</span>{/if}</div>
+    {#if is_thin}
+      <div class="thin-note">* thin data — under {THIN_SAMPLE_N} samples; treat as an anecdote, not a trend.</div>
+    {/if}
   {/if}
 </div>
 
@@ -136,4 +149,8 @@
   }
   .zone-labels { display: flex; justify-content: space-between; font-size: 0.64rem; color: var(--color-secondary); opacity: 0.85; }
   .caption { font-size: 0.7rem; color: var(--color-secondary); margin-top: 0.45rem; font-variant-numeric: tabular-nums; }
+  /* Thin-sample vitals are anecdotes, not trends — dim the card + asterisk + note. */
+  .vital.thin { opacity: 0.6; }
+  .thin-mark { color: #d97706; font-weight: 700; margin-left: 0.1rem; }
+  .thin-note { font-size: 0.66rem; color: var(--color-secondary); margin-top: 0.3rem; }
 </style>

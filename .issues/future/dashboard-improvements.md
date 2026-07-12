@@ -110,6 +110,11 @@ proposals against this lens.
   `opfs_open`+`migrate` stage-time breakdown for cold boots. Answers "is the cold tail the snapshot
   download or the device?" — the exact next question the new panel raises. *(LD-original; broadcast to
   siblings once shaped — house/tutor have no equivalent local-DB-boot panel yet.)*
+  **UPDATE 2026-07-11 (ported from house 07-10):** add a *time-series* dimension too — a **daily cold-boot
+  p50/p95 trend chart + sample count**, not just the within-window size split. house's 07-10 Phase C
+  proposes exactly this for its analogous `viewer_cold_download` metric and explicitly flags LD's
+  dictionary snapshot-boot path as the place to mirror it; the daily curve makes an R2/snapshot
+  regression legible over days rather than only in the current window.
 - **★★ NEW — Bot/crawler share % on each error cluster** *(filed 2026-07-09 — grounded in TODAY's
   SEO-crawl flood; also ported from tutor 07-08 Phase C).* `ErrorCluster` (`log-analytics.ts` ~line
   234) keeps ALL rows on purpose ("a bot hitting a real error is a real signal") but exposes **no
