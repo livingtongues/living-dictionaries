@@ -94,11 +94,6 @@ export interface SyncRequest {
    * (client behind — needs reload) or 503 (server behind — retry shortly).
    */
   latest_migration: string
-  /**
-   * Once-per-day ping. When `true`, the server bumps
-   * `users.last_visit_at = now WHERE id = caller_user_id`.
-   */
-  update_last_visit?: boolean
 }
 
 export interface SyncResponse {

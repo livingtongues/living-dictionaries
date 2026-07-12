@@ -162,6 +162,11 @@ this session's JSONL and finished verification. See .issues/clobber-recovery-202
 NOTE for the loading-guard UX (pre-existing semantics, surfaced by e2e): media upload is
 unguarded and the modal closes optimistically, so a still_loading block toasts AFTER the modal
 closed (upload succeeded, insert dropped). Consider an up-front readiness check in add-media.
+→ ✅ CLOSED 2026-07-12: `writes.check_ready()` probe added to the guarded facade; `add_photo` /
+`add_audio` / `add_video` abort before upload start when blocked (rejected `done`, toast +
+`write_blocked` telemetry as usual) AND reject `done` if the guarded insert is swallowed after a
+successful upload — modal stays open, error renders in the upload tile. Tests in
+add-media.test.ts (blocked + swallowed paths) and guarded-writes.test.ts (check_ready).
 
 ## Verification
 

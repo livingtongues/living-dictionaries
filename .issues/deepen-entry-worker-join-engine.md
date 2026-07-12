@@ -1,6 +1,16 @@
 # Deepen entry assembly — retire entry.worker's hand-rolled incremental join engine
 
-**Recommendation strength: WORTH EXPLORING (needs a design spike before committing). Not yet assigned.**
+**RETIRED AS A STANDALONE ISSUE 2026-07-12** (Jacob-approved, readmodel-boundary spike option C).
+The durable idea — `gather_entry_slices`, SQL-shaped assembly shared with the server's
+`build-entry-data.ts` — is FOLDED INTO `.issues/in-worker-orama.md` Phase 1, where assembly
+lands in the dict leader worker next to its own connection (building it on the main thread
+first would construct it in the wrong place only to move it). The mirror-drift analysis below
+remains the reference for why the hand-rolled join engine must die; in-worker-orama deletes it
+wholesale. Do NOT execute this issue standalone.
+
+---
+
+Original analysis (kept for reference):
 
 Do AFTER `.issues/deepen-worker-readmodel-boundary.md` (the patch-union seam makes this diff much
 smaller). Also coordinate with the texts/sentences corpus pipeline

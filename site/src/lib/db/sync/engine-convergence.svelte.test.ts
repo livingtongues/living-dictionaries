@@ -57,7 +57,7 @@ function make_engine() {
       return Promise.resolve({ data: null, error: { status: 500, message: (error as Error).message } })
     }
   }
-  return new Sync({ connection: connection_for(client_db), user_id: 'admin-1', post_fn })
+  return new Sync({ connection: connection_for(client_db), post_fn })
 }
 
 function seed_parents(db: BetterSqlite3.Database) {
@@ -146,7 +146,7 @@ describe('tombstone drain scoping', () => {
       const data = process_sync({ db: server_db, request: body, user_id: 'admin-1', logs_db })
       return Promise.resolve({ data, error: null })
     }
-    const engine = new Sync({ connection: connection_for(client_db), user_id: 'admin-1', post_fn })
+    const engine = new Sync({ connection: connection_for(client_db), post_fn })
 
     const first = await engine.sync()
     expect(first?.error).toBeNull()
@@ -259,7 +259,7 @@ describe('Sync repeat-failure circuit breaker', () => {
   test('halts after 3 identical consecutive fatal failures; transient failures never halt', async () => {
     const on_repeated_failure = vi.fn()
     const post_fn: SyncPostFn = () => Promise.resolve({ data: null, error: { status: 500, message: 'UNIQUE constraint failed: users.email' } })
-    const engine = new Sync({ connection: connection_for(client_db), user_id: 'admin-1', post_fn, on_repeated_failure })
+    const engine = new Sync({ connection: connection_for(client_db), post_fn, on_repeated_failure })
 
     await engine.sync()
     await engine.sync()
@@ -277,7 +277,7 @@ describe('Sync repeat-failure circuit breaker', () => {
 
   test('network failures never halt (offline retry loop must survive)', async () => {
     const post_fn: SyncPostFn = () => Promise.resolve({ data: null, error: { status: 502, message: 'Bad Gateway' } })
-    const engine = new Sync({ connection: connection_for(client_db), user_id: 'admin-1', post_fn })
+    const engine = new Sync({ connection: connection_for(client_db), post_fn })
     for (let i = 0; i < 5; i++)
       await engine.sync()
     expect(engine.blocked_by_repeated_failure).toBeFalsy()
@@ -290,7 +290,7 @@ describe('Sync repeat-failure circuit breaker', () => {
         return Promise.resolve({ data: null, error: { status: 500, message: 'boom' } })
       return Promise.resolve({ data: process_sync({ db: server_db, request: body, user_id: 'admin-1', logs_db }), error: null })
     }
-    const engine = new Sync({ connection: connection_for(client_db), user_id: 'admin-1', post_fn })
+    const engine = new Sync({ connection: connection_for(client_db), post_fn })
     await engine.sync()
     await engine.sync()
     fail = false

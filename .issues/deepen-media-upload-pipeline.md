@@ -1,5 +1,11 @@
 # Deepen the media upload pipeline — one module, promise-based outcome
 
+**COMPLETED 2026-07-12** (verification finished during clobber recovery — see
+`.issues/clobber-recovery-2026-07-12.md`). Follow-up gap also closed same day: up-front
+`writes.check_ready()` in `add-media.ts` (no upload starts while writes are blocked) + `done`
+rejects when the guarded insert is swallowed post-upload — no more silent row drop after the
+modal closed.
+
 **Status: assigned to a spawned session. Recommendation strength: STRONG.**
 
 ## Problem

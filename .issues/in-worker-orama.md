@@ -96,6 +96,22 @@ tabs (any number)
 - **svelte-look mocks** (`mocks/layout.ts` etc.) mock `entries_data` — stories for entries views
   need their mocks reshaped to the paged API.
 
+## Absorbed from the retired join-engine issue (2026-07-12)
+
+`.issues/deepen-entry-worker-join-engine.md` is retired as a standalone; its durable design
+lands HERE in Phase 1: extract the server `build-entry-data.ts` row-gathering into a shared,
+connection-parameterized **`gather_entry_slices({ query, entry_id })`** and make the leader
+worker's incremental path query-shaped (changed row → affected entry ids via ~20 lines of
+SQL-backed reverse-join mapping → re-gather + `assemble_entry_data` → reindex). This deletes
+entry.worker's ~400-line in-memory relational mirror (14 `recompute_*` fns + the 215-line
+`apply_one` switch) — the highest-drift-risk code in the app (it already shipped the
+duplicate-junction bugs behind `dedupe_by_id` / `dedupe_keyed_children`). Bulk init keeps the
+existing single-pass grouping assembler; only the incremental mirror dies. Burst mitigation:
+`WHERE entry_id IN (...)` chunks or full re-init above a threshold. See the retired issue file
+for the full analysis + test plan. Also note the worker→store boundary is now ONE `WorkerPatch`
+union (`lib/search/worker-patch.ts`, landed 2026-07-12) — the `search_index_updated` union
+member maps 1:1 onto this issue's planned broadcast.
+
 ## What must ride along (the "smooth" checklist)
 
 - [ ] Parity test: server assembler vs client assembler on shared fixtures (drift tripwire).

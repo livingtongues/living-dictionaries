@@ -52,7 +52,6 @@ export const load: LayoutLoad = async ({ parent }) => {
     let client_behind_toasted = false
     sync = new Sync({
       connection,
-      user_id: auth_user.user.id,
       on_tables_changed: (tables) => {
         if (!live_db_ref)
           return

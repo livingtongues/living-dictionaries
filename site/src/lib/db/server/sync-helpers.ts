@@ -94,10 +94,7 @@ function find_natural_key_owner_id<K extends SyncableTableName>({ db, table_name
 export function process_sync({ db, request, user_id, logs_db = get_logs_db(), server_latest_migration = latest_shared_migration_name }: {
   db: Database.Database
   request: SyncRequest
-  /**
-   * Authenticated admin's user_id. Used to scope the once-per-day
-   * `update_last_visit` ping.
-   */
+  /** Authenticated admin's user_id — scopes which per-user rows are presented as syncable. */
   user_id?: string
   /** Where server telemetry (schema-drift warns) lands — `client_logs` lives in logs.db, NOT shared.db. */
   logs_db?: Database.Database
@@ -128,7 +125,7 @@ export function process_sync({ db, request, user_id, logs_db = get_logs_db(), se
   // every subsequent sync from that client. Identify the orphans, skip them,
   // retry, and report them in `skipped_orphans`.
   try {
-    return apply_sync({ db, request, user_id, tables })
+    return apply_sync({ db, request, tables })
   } catch (err) {
     if (!is_foreign_key_error(err))
       throw err
@@ -137,7 +134,7 @@ export function process_sync({ db, request, user_id, logs_db = get_logs_db(), se
       if (!orphans.length)
         throw err // Not attributable to a pushed row — surface the real fault.
       const skip_keys = new Set(orphans.map(orphan => `${orphan.table_name}::${orphan.id}`))
-      const response = apply_sync({ db, request, user_id, tables, skip_keys })
+      const response = apply_sync({ db, request, tables, skip_keys })
       response.skipped_orphans = orphans
       return response
     } catch {
@@ -214,10 +211,9 @@ function identify_orphan_push_rows({ db, request, tables }: {
   }
 }
 
-function apply_sync({ db, request, user_id, tables, skip_keys }: {
+function apply_sync({ db, request, tables, skip_keys }: {
   db: Database.Database
   request: SyncRequest
-  user_id?: string
   tables: readonly SyncableTableName[]
   /** Pushed `${table}::${id}` keys to skip merging (FK-orphan recovery). */
   skip_keys?: ReadonlySet<string>
@@ -260,14 +256,6 @@ function apply_sync({ db, request, user_id, tables, skip_keys }: {
           continue // FK-orphan: skip so it can't poison the whole batch.
         merge_row({ db, table_name, row, response })
       }
-    }
-
-    // Once-per-day visit ping. Runs BEFORE fetch_changes so the
-    // trigger-bumped `updated_at` flows into the same response.
-    if (request.update_last_visit && user_id) {
-      db.prepare(
-        `UPDATE users SET last_visit_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`,
-      ).run(user_id)
     }
 
     // Fetch server changes since watermark.

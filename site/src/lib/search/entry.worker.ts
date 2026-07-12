@@ -1,5 +1,6 @@
-import { expose } from 'comlink'
+import { expose, releaseProxy } from 'comlink'
 import type { EntryData, Tables } from '$lib/types'
+import type { WorkerPatch } from './worker-patch'
 import { _search_entries, _search_sentences, _search_texts, create_corpus_indexes, create_index, update_index_entry, update_index_sentence, update_index_text } from './orama.worker'
 import { should_include_tag } from '$lib/helpers/tag-visibility'
 import { assemble_entry_data } from './assemble-entry-data'
@@ -9,13 +10,8 @@ const log = false
 
 let dictionary_id: string
 let admin: number
-let upsert_entry_data: (entries_data: Record<string, EntryData>) => Promise<void>
-let delete_entry: (entry_id: string) => Promise<void>
-let set_speakers: (speakers: Tables<'speakers'>[]) => Promise<void>
-let set_tags: (tags: Tables<'tags'>[]) => Promise<void>
-let set_dialects: (dialects: Tables<'dialects'>[]) => Promise<void>
-let set_sources: (sources: Tables<'sources'>[]) => Promise<void>
-let mark_search_index_updated: () => Promise<void>
+/** The ONE proxied callback to the main-thread store reducer (see worker-patch.ts). */
+let on_patch: (patch: WorkerPatch) => Promise<void>
 
 let entries: Record<string, Tables<'entries'>>
 let senses: Record<string, Tables<'senses'>>
@@ -288,7 +284,7 @@ function apply_one(table: string, row: Record<string, any>): string[] {
     case 'speakers': {
       if (is_deleted) delete speakers[row.id]
       else speakers[row.id] = { ...speakers[row.id], ...row }
-      set_speakers(Object.values(speakers))
+      on_patch({ type: 'speakers', rows: Object.values(speakers) })
       const affected: string[] = []
       for (const join of pair_values(audio_speakers, 'speaker_id', row.id)) {
         const { audio_id } = join as Tables<'audio_speakers'>
@@ -311,7 +307,7 @@ function apply_one(table: string, row: Record<string, any>): string[] {
     case 'tags': {
       if (is_deleted) delete tags[row.id]
       else tags[row.id] = { ...tags[row.id], ...row }
-      set_tags(Object.values(tags))
+      on_patch({ type: 'tags', rows: Object.values(tags) })
       const affected: string[] = []
       for (const join of pair_values(entry_tags, 'tag_id', row.id)) {
         const { entry_id } = join as Tables<'entry_tags'>
@@ -323,7 +319,7 @@ function apply_one(table: string, row: Record<string, any>): string[] {
     case 'dialects': {
       if (is_deleted) delete dialects[row.id]
       else dialects[row.id] = { ...dialects[row.id], ...row }
-      set_dialects(Object.values(dialects))
+      on_patch({ type: 'dialects', rows: Object.values(dialects) })
       const affected: string[] = []
       for (const join of pair_values(entry_dialects, 'dialect_id', row.id)) {
         const { entry_id } = join as Tables<'entry_dialects'>
@@ -338,7 +334,7 @@ function apply_one(table: string, row: Record<string, any>): string[] {
       // (facet chips + badges + picker resolve slug→citation from page.data.sources).
       if (is_deleted) delete sources[row.id]
       else sources[row.id] = { ...sources[row.id], ...row }
-      set_sources(Object.values(sources))
+      on_patch({ type: 'sources', rows: Object.values(sources) })
       return []
     }
     case 'audio_speakers': {
@@ -522,7 +518,7 @@ export async function apply_rows(
   }
 
   for (const entry_id of removed_entry_ids) {
-    await delete_entry(entry_id)
+    await on_patch({ type: 'entry_delete', entry_id })
     await update_index_entry({ id: entry_id, deleted: new Date().toISOString() } as EntryData, dictionary_id)
   }
   for (const entry_id of affected_entry_ids) {
@@ -551,15 +547,15 @@ export async function apply_rows(
   if (affected_entry_ids.size || removed_entry_ids.size
     || affected_sentence_ids.size || removed_sentence_ids.size
     || affected_text_ids.size || removed_text_ids.size) {
-    await mark_search_index_updated()
+    await on_patch({ type: 'index_updated' })
   }
 }
 
 async function process_and_update_entry(entry: Tables<'entries'>) {
   const entry_data = process_entry(entry)
-  await upsert_entry_data({ [entry.id]: entry_data })
+  await on_patch({ type: 'entries_upsert', entries: { [entry.id]: entry_data } })
   await update_index_entry(entry_data, dictionary_id)
-  await mark_search_index_updated()
+  await on_patch({ type: 'index_updated' })
 }
 
 export interface InitEntryWorkerOptions {
@@ -567,15 +563,7 @@ export interface InitEntryWorkerOptions {
   can_edit: boolean
   admin: number
   bundle: EntriesDataBundle
-  set_entries_data: (entries_data: Record<string, EntryData>) => void
-  upsert_entry_data: (entries_data: Record<string, EntryData>) => void
-  delete_entry: (entry_id: string) => void
-  set_speakers: (speakers: Tables<'speakers'>[]) => void
-  set_tags: (tags: Tables<'tags'>[]) => void
-  set_dialects: (dialects: Tables<'dialects'>[]) => void
-  set_sources: (sources: Tables<'sources'>[]) => void
-  set_loading: (loading: boolean) => void
-  mark_search_index_updated: () => void
+  on_patch: (patch: WorkerPatch) => void
 }
 
 export async function init_entries(
@@ -585,23 +573,15 @@ export async function init_entries(
     admin: number
   },
   bundle: EntriesDataBundle,
-  set_entries_data: (entries_data: Record<string, EntryData>) => Promise<void>,
-  _upsert_entry_data: (entries_data: Record<string, EntryData>) => Promise<void>,
-  _delete_entry: (entry_id: string) => Promise<void>,
-  _set_speakers: (speakers: Tables<'speakers'>[]) => Promise<void>,
-  _set_tags: (tags: Tables<'tags'>[]) => Promise<void>,
-  _set_dialects: (dialects: Tables<'dialects'>[]) => Promise<void>,
-  _set_sources: (sources: Tables<'sources'>[]) => Promise<void>,
-  set_loading: (loading: boolean) => Promise<void>,
-  _mark_search_index_updated: () => Promise<void>,
+  // comlink-proxied callbacks must be TOP-LEVEL arguments (nested inside an
+  // options object they'd hit structured clone and throw), hence not folded
+  // into `options`.
+  _on_patch: (patch: WorkerPatch) => Promise<void>,
 ) {
-  upsert_entry_data = _upsert_entry_data
-  delete_entry = _delete_entry
-  set_speakers = _set_speakers
-  set_tags = _set_tags
-  set_dialects = _set_dialects
-  set_sources = _set_sources
-  mark_search_index_updated = _mark_search_index_updated
+  // init_entries re-runs per dict navigation; release the previous run's
+  // proxy so its MessagePort doesn't leak (pre-union this leaked 9 ports/nav).
+  ;(on_patch as unknown as { [releaseProxy]?: () => void } | undefined)?.[releaseProxy]?.()
+  on_patch = _on_patch
 
   ;({ dictionary_id, admin } = options)
 
@@ -713,15 +693,15 @@ export async function init_entries(
   }
   console.timeEnd('Process Entries Time')
 
-  set_entries_data(processed_data)
-  set_tags(Object.values(tags))
-  set_dialects(Object.values(dialects))
-  set_sources(Object.values(sources))
-  set_speakers(Object.values(speakers))
+  on_patch({ type: 'entries_set', entries: processed_data })
+  on_patch({ type: 'tags', rows: Object.values(tags) })
+  on_patch({ type: 'dialects', rows: Object.values(dialects) })
+  on_patch({ type: 'sources', rows: Object.values(sources) })
+  on_patch({ type: 'speakers', rows: Object.values(speakers) })
 
   await create_index(Object.values(processed_data), dictionary_id)
-  mark_search_index_updated()
-  set_loading(false)
+  on_patch({ type: 'index_updated' })
+  on_patch({ type: 'loading', value: false })
 
   // Corpus indexes build after the entries index so word search is ready first.
   await create_corpus_indexes({
@@ -729,7 +709,7 @@ export async function init_entries(
     text_docs: Object.values(texts).map(augment_text_for_search),
     dictionary_id,
   })
-  mark_search_index_updated()
+  on_patch({ type: 'index_updated' })
 }
 
 // Delegates the final shaping to the shared `assemble_entry_data` (also used by

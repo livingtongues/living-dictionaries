@@ -86,6 +86,24 @@ export function create_guarded_writes({ dict_db, connection, dictionary, get_use
   }
 
   return {
+    /**
+     * Up-front readiness probe for flows that do slow work BEFORE their DB
+     * write (media upload): surfaces the same blocked toast + `write_blocked`
+     * telemetry as a guarded op and returns the error so the caller can abort
+     * before starting — otherwise an upload finishing after a blocked insert
+     * looks like success while the row is silently dropped.
+     */
+    check_ready: (): Error | null => {
+      try {
+        ready()
+        return null
+      } catch (err) {
+        on_error(err)
+        console.error(err)
+        return err as Error
+      }
+    },
+
     insert_entry: guard(async (db, lexeme: MultiString) => {
       const entry = await db.writes.insert_entry({ lexeme })
       track({ event: ENTRY_CREATED, props: { dictionary_id: dictionary.id, entry_id: entry.id } })

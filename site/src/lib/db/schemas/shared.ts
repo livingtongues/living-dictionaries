@@ -77,8 +77,10 @@ export const users = sqliteTable('users', {
    */
   preferred_locale: text(),
   /**
-   * Touched at most once per day per user, driven by the sync engine's
-   * `update_last_visit` flag (see `lib/db/sync/last-visit-ping.ts`).
+   * Last activity timestamp, bumped at most once per UTC day for ANY
+   * authenticated visit from the root `+layout.server.ts` on session-cookie
+   * verify (see `lib/server/bump-last-visit.ts`). Powers the admin
+   * "active last 30 days" filter.
    */
   last_visit_at: text(),
   /**

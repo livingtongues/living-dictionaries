@@ -105,6 +105,23 @@ describe(create_guarded_writes, () => {
       expect(on_error).toHaveBeenCalledExactlyOnceWith(new Error('Editing database is not ready yet'))
     })
 
+    test('check_ready returns the blocked error + fires toast/telemetry without running an op', () => {
+      const { writes, on_error } = blocked_deps({ is_loading: () => true })
+      expect(writes.check_ready()).toEqual(new Error('Wait until loading spinner stops to make edits.'))
+      expect(log_warning).toHaveBeenCalledExactlyOnceWith({
+        message: 'write_blocked',
+        context: { reason: 'still_loading', dictionary_id: 'dict-1', signed_in: true },
+      })
+      expect(on_error).toHaveBeenCalledExactlyOnceWith(new Error('Wait until loading spinner stops to make edits.'))
+    })
+
+    test('check_ready returns null when writes are ready', () => {
+      const { writes, on_error } = blocked_deps({})
+      expect(writes.check_ready()).toBe(null)
+      expect(log_warning).not.toHaveBeenCalled()
+      expect(on_error).not.toHaveBeenCalled()
+    })
+
     test('entries bundle still loading → still_loading', async () => {
       const { writes, on_error } = blocked_deps({ is_loading: () => true })
       await expect(writes.insert_tag({ name: 'x' })).resolves.toBe(undefined)

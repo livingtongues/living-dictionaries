@@ -30,6 +30,7 @@ export const shared_meta: StoryMeta = {
     speakers: readable([{ id: 'sp1', name: 'Ana Marija' }]),
     sources: readable([]),
     writes: {
+      check_ready: () => null,
       insert_video: async () => ({ id: 'v1' }),
       assign_speaker: async () => {},
     },

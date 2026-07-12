@@ -2,6 +2,7 @@ import type { AuthUserData } from '$lib/auth/types'
 import type { LayoutServerLoad } from './$types'
 import { verify_jwt } from '$lib/auth/jwt'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { bump_last_visit } from '$lib/server/bump-last-visit'
 import { get_user } from '$lib/server/get-user'
 import { findSupportedLocaleFromAcceptedLanguages } from '$lib/i18n/locales'
 
@@ -23,7 +24,12 @@ export const load: LayoutServerLoad = async ({ cookies, request }) => {
   if (token) {
     try {
       const { sub } = await verify_jwt(token)
-      ssr_user = get_user({ db: get_shared_db(), user_id: sub, cookies }) ?? null
+      const db = get_shared_db()
+      ssr_user = get_user({ db, user_id: sub, cookies }) ?? null
+      // Record activity for EVERY authenticated visit (throttled once/UTC-day),
+      // so "active last 30 days" reflects all users, not just syncing admins.
+      if (ssr_user)
+        bump_last_visit({ db, user_id: sub })
     } catch {
       ssr_user = null
     }

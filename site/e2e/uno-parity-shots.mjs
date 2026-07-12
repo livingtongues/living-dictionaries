@@ -39,9 +39,10 @@ const shots = [
   { name: 'create-dictionary', url: '/create-dictionary', wait: 2000, login: true },
   { name: 'entries-list', url: '/achi/entries', wait: 5000, login: true },
   { name: 'entries-list-narrow', url: '/achi/entries', wait: 5000, width: 480, login: true },
-  { name: 'entries-table', url: '/achi/entries?view=table', wait: 5000, login: true },
-  { name: 'entries-gallery', url: '/achi/entries?view=gallery', wait: 5000, login: true },
-  { name: 'entries-print', url: '/achi/entries?view=print', wait: 5000, login: true },
+  // the view lives inside the `q` JSON param (query-param-state store) — bare `?view=` is ignored
+  { name: 'entries-table', url: `/achi/entries?q=${encodeURIComponent('{"view":"table"}')}`, wait: 5000, login: true },
+  { name: 'entries-gallery', url: `/achi/entries?q=${encodeURIComponent('{"view":"gallery"}')}`, wait: 5000, login: true },
+  { name: 'entries-print', url: `/achi/entries?q=${encodeURIComponent('{"view":"print"}')}`, wait: 5000, login: true },
   { name: 'entry-detail', url: '/achi/entry/06Tmb3jM1atoGNQvlxIY', wait: 4500, login: true },
   { name: 'entry-detail-narrow', url: '/achi/entry/06Tmb3jM1atoGNQvlxIY', wait: 4500, width: 480, login: true },
   { name: 'dict-about', url: '/achi/about', wait: 3000, login: true },
@@ -74,7 +75,8 @@ async function main() {
   if (process.env.DARK)
     await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'dark' }])
   const errors = []
-  page.on('pageerror', event => errors.push(event.message.split('\n')[0]))
+  let current_shot = 'startup'
+  page.on('pageerror', event => errors.push(`[${current_shot}] ${String(event?.message ?? event).split('\n')[0]}`))
   // Google avatars intermittently ERR_BLOCKED_BY_ORB in headless — block them outright so
   // the avatar fallback renders deterministically in every run (no false diffs).
   await page.setRequestInterception(true)
@@ -88,6 +90,7 @@ async function main() {
   for (const shot of shots) {
     if (only && !only.some(prefix => shot.name.startsWith(prefix)))
       continue
+    current_shot = shot.name
     if (shot.login && !logged_in) {
       await page.goto(`${base}/`, { waitUntil: 'domcontentloaded' })
       const status = await api_login(page, 'jwrunner7@gmail.com')

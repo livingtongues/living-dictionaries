@@ -4,6 +4,7 @@ import type { EntryData, Tables } from '$lib/types'
 import type { DictConnection } from '$lib/db/dict-client/worker-connection'
 import type { DictLiveDb } from '$lib/db/dict-client/dict-live-db.svelte'
 import { init_entries, search_entries, search_sentences, search_texts } from '$lib/search'
+import { create_patch_reducer } from '$lib/search/worker-patch'
 import { read_dict_bundle } from '$lib/search/read-dict-bundle'
 import { create_orama_watcher } from '$lib/search/orama-watcher'
 import { decode_sqlite_code, is_transient_connection_error, sqlite_code_of } from '$lib/db/client/sqlite-result-codes'
@@ -33,46 +34,8 @@ export function create_entries_ui_store({
   const search_index_updated = writable(false)
   const loading = writable(true)
 
-  function set_entries_data(_entries_data: Record<string, EntryData>) {
-    entries_data.set(_entries_data)
-  }
-
-  function upsert_entry_data(_entries_data: Record<string, EntryData>) {
-    entries_data.update((e) => {
-      return { ...e, ..._entries_data }
-    })
-  }
-
-  function delete_entry(entry_id: string) {
-    entries_data.update((e) => {
-      const new_entries = { ...e }
-      delete new_entries[entry_id]
-      return new_entries
-    })
-  }
-
-  function set_speakers(_speakers: Tables<'speakers'>[]) {
-    speakers.set(_speakers)
-  }
-
-  function set_tags(_tags: Tables<'tags'>[]) {
-    tags.set(_tags)
-  }
-  function set_dialects(_dialects: Tables<'dialects'>[]) {
-    dialects.set(_dialects)
-  }
-  function set_sources(_sources: Tables<'sources'>[]) {
-    sources.set(_sources)
-  }
-
-  function set_loading(_loading: boolean) {
-    loading.set(_loading)
-  }
-
-  function mark_search_index_updated() {
-    search_index_updated.set(true)
-    search_index_updated.set(false)
-  }
+  // Every worker→store state transition lives in the reducer (worker-patch.ts).
+  const apply_patch = create_patch_reducer({ entries_data, speakers, tags, dialects, sources, loading, search_index_updated })
 
   const is_editor = get(can_edit)
   const is_admin = get(admin)
@@ -88,15 +51,7 @@ export function create_entries_ui_store({
         can_edit: is_editor,
         admin: is_admin,
         bundle,
-        set_entries_data,
-        upsert_entry_data,
-        delete_entry,
-        set_speakers,
-        set_tags,
-        set_dialects,
-        set_sources,
-        set_loading,
-        mark_search_index_updated,
+        on_patch: apply_patch,
       })
 
       // P4b: start the watch-based Orama feed once the bulk index is built.
@@ -157,7 +112,7 @@ export function create_entries_ui_store({
           retried: attempt > 0,
         },
       })
-      set_loading(false)
+      loading.set(false)
     }
   }
 

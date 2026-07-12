@@ -20,7 +20,9 @@ function load_script(url: string) {
     // serves `Access-Control-Allow-Origin: *`, so opt in to real errors.
     script.crossOrigin = 'anonymous'
     script.onload = resolve
-    script.onerror = reject
+    // reject with a real Error, not the raw error Event — an uncaught raw
+    // Event surfaces as a useless "Event" pageerror/telemetry row
+    script.onerror = () => reject(new Error(`Failed to load script: ${url}`))
     document.head.appendChild(script)
   })
 }

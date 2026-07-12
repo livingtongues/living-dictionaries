@@ -73,8 +73,10 @@
   // and the email-OTP path is the only way to sign in.
   const can_google_authenticate = !location.origin.includes('vercel.app') && !!public_env.PUBLIC_GOOGLE_OAUTH_CLIENT_ID
   onMount(() => {
-    if (can_google_authenticate && button_parent)
-      display_one_tap_button(button_parent)
+    if (can_google_authenticate && button_parent) {
+      // benign when GSI is blocked (ad-blocker/offline) — email-OTP still works
+      display_one_tap_button(button_parent).catch(error => console.warn('[google one-tap]', error))
+    }
   })
 </script>
 

@@ -7,7 +7,6 @@ import { JSON_COLUMNS, parse_row, stringify_row } from '$lib/db/schemas/json-col
 import { online } from 'svelte/reactivity/window'
 import { ClientBehindError, ServerBehindError } from './errors'
 import { SyncHistory } from './history.svelte.js'
-import { record_last_visit_ping, should_ping_last_visit } from './last-visit-ping'
 import { report_sync_failure, report_sync_halted, report_sync_self_healed } from './report-sync-failure'
 import { classify_sync_failure, RepeatFailureTracker } from './sync-failure-classify'
 import { is_readonly_table, SYNCABLE_TABLE_NAMES } from './types'
@@ -70,15 +69,13 @@ export class Sync {
   #auto_flush_timer: ReturnType<typeof setTimeout> | null = null
 
   #connection: SqliteConnection
-  #user_id: string
   #post_fn: SyncPostFn
   #on_tables_changed?: (tables: Set<NotifiableTable>) => void
   #on_client_behind?: () => void
   #on_repeated_failure?: () => void
 
-  constructor({ connection, user_id, post_fn, on_tables_changed, on_client_behind, on_repeated_failure }: {
+  constructor({ connection, post_fn, on_tables_changed, on_client_behind, on_repeated_failure }: {
     connection: SqliteConnection
-    user_id: string
     post_fn?: SyncPostFn
     on_tables_changed?: (tables: Set<NotifiableTable>) => void
     on_client_behind?: () => void
@@ -86,7 +83,6 @@ export class Sync {
     on_repeated_failure?: () => void
   }) {
     this.#connection = connection
-    this.#user_id = user_id
     this.#post_fn = post_fn ?? api_admin_sync
     this.#on_tables_changed = on_tables_changed
     this.#on_client_behind = on_client_behind
@@ -190,13 +186,9 @@ export class Sync {
 
     this.#log({ level: 'info', phase: 'sync', message: 'Starting sync' })
 
-    const needs_visit_ping = should_ping_last_visit({ user_id: this.#user_id })
-
     let sync_error: unknown = null
     try {
-      await this.#sync_once({ result, update_last_visit: needs_visit_ping, full_resync })
-      if (needs_visit_ping)
-        record_last_visit_ping({ user_id: this.#user_id })
+      await this.#sync_once({ result, full_resync })
       this.#repeat_tracker.reset()
       this.total_dirty = 0
       // eslint-disable-next-line svelte/prefer-svelte-reactivity
@@ -267,7 +259,7 @@ export class Sync {
     this.log_entries = [...this.log_entries, { timestamp: new Date(), level, phase, table, message, detail, row_count }]
   }
 
-  async #sync_once({ result, update_last_visit, full_resync = false }: { result: SyncResult, update_last_visit: boolean, full_resync?: boolean }) {
+  async #sync_once({ result, full_resync = false }: { result: SyncResult, full_resync?: boolean }) {
     // eslint-disable-next-line svelte/prefer-svelte-reactivity
     const affected_tables = new Set<NotifiableTable>()
 
@@ -306,7 +298,6 @@ export class Sync {
       dirty_rows,
       deletes,
       latest_migration: latest_client_migration_name,
-      update_last_visit,
     }
 
     const fetch_start = Date.now()

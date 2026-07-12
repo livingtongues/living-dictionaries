@@ -1,6 +1,6 @@
 import { proxy } from 'comlink'
-import type { EntryData, Tables } from '$lib/types'
 import type { InitEntryWorkerOptions } from './entry.worker'
+import type { WorkerPatch } from './worker-patch'
 import type { SearchEntriesOptions } from './search-entries'
 import type { SearchCorpusOptions } from './search-corpus'
 
@@ -28,19 +28,11 @@ export async function apply_rows(
 }
 
 export async function init_entries(options: InitEntryWorkerOptions) {
-  const { dictionary_id, can_edit, admin, bundle } = options
+  const { dictionary_id, can_edit, admin, bundle, on_patch } = options
   const { api } = await import('./expose-entry-worker')
   return api.init_entries(
     { dictionary_id, can_edit, admin },
     bundle,
-    proxy(options.set_entries_data as (entries_data: Record<string, EntryData>) => Promise<void>),
-    proxy(options.upsert_entry_data as (entries_data: Record<string, EntryData>) => Promise<void>),
-    proxy(options.delete_entry as (entry_id: string) => Promise<void>),
-    proxy(options.set_speakers as (speakers: Tables<'speakers'>[]) => Promise<void>),
-    proxy(options.set_tags as (tags: Tables<'tags'>[]) => Promise<void>),
-    proxy(options.set_dialects as (dialects: Tables<'dialects'>[]) => Promise<void>),
-    proxy(options.set_sources as (sources: Tables<'sources'>[]) => Promise<void>),
-    proxy(options.set_loading as (loading: boolean) => Promise<void>),
-    proxy(options.mark_search_index_updated as () => Promise<void>),
+    proxy(on_patch as (patch: WorkerPatch) => Promise<void>),
   )
 }

@@ -12,16 +12,21 @@ function fake_handle(done: Promise<MediaUploadResult>): MediaUploadHandle {
   return { progress: readable({ progress: 0 }), done, abort: vi.fn() }
 }
 
+const check_ready = vi.fn<() => Error | null>()
 const insert_photo = vi.fn()
 const insert_audio = vi.fn()
 const insert_video = vi.fn()
 
 beforeEach(() => {
   vi.clearAllMocks()
+  check_ready.mockReturnValue(null)
+  insert_photo.mockResolvedValue({ id: 'photo-1' })
+  insert_audio.mockResolvedValue({ id: 'audio-1' })
+  insert_video.mockResolvedValue({ id: 'video-1' })
 })
 
 describe(add_photo, () => {
-  const writes = { insert_photo }
+  const writes = { check_ready, insert_photo }
 
   test('uploads to the sense image folder then inserts the photo row', async () => {
     mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/images/s1/1.jpg', serving_url: 'lh3-hash' })))
@@ -40,10 +45,25 @@ describe(add_photo, () => {
     await expect(handle.done).rejects.toThrow('PUT failed')
     expect(insert_photo).not.toHaveBeenCalled()
   })
+
+  test('writes not ready → NO upload starts and done rejects with the blocked error', async () => {
+    check_ready.mockReturnValue(new Error('Wait until loading spinner stops to make edits.'))
+    const handle = add_photo({ writes, dictionary_id: 'demo', sense_id: 's1', file: new File(['x'], 'photo.jpg', { type: 'image/jpeg' }), source: 'my source' })
+    await expect(handle.done).rejects.toThrow('Wait until loading spinner stops to make edits.')
+    expect(mocked_upload_media).not.toHaveBeenCalled()
+    expect(insert_photo).not.toHaveBeenCalled()
+  })
+
+  test('insert swallowed by the guard (resolves undefined) → done rejects instead of phantom success', async () => {
+    mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/images/s1/1.jpg', serving_url: 'lh3-hash' })))
+    insert_photo.mockResolvedValue(undefined)
+    const handle = add_photo({ writes, dictionary_id: 'demo', sense_id: 's1', file: new File(['x'], 'photo.jpg', { type: 'image/jpeg' }), source: 'my source' })
+    await expect(handle.done).rejects.toThrow('could not be saved')
+  })
 })
 
 describe(add_audio, () => {
-  const writes = { insert_audio }
+  const writes = { check_ready, insert_audio }
 
   test('uploads to the entry audio folder then runs the atomic audio+speaker insert', async () => {
     mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/audio/e1/1.webm' })))
@@ -59,10 +79,24 @@ describe(add_audio, () => {
     await expect(handle.done).rejects.toThrow('network down')
     expect(insert_audio).not.toHaveBeenCalled()
   })
+
+  test('writes not ready → NO upload starts', async () => {
+    check_ready.mockReturnValue(new Error('You must be signed in to edit'))
+    const handle = add_audio({ writes, dictionary_id: 'demo', entry_id: 'e1', file: new Blob(['x'], { type: 'audio/webm' }), speaker_id: 'sp1' })
+    await expect(handle.done).rejects.toThrow('You must be signed in to edit')
+    expect(mocked_upload_media).not.toHaveBeenCalled()
+  })
+
+  test('insert swallowed → done rejects', async () => {
+    mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/audio/e1/1.webm' })))
+    insert_audio.mockResolvedValue(undefined)
+    const handle = add_audio({ writes, dictionary_id: 'demo', entry_id: 'e1', file: new Blob(['x'], { type: 'audio/webm' }), speaker_id: 'sp1' })
+    await expect(handle.done).rejects.toThrow('could not be saved')
+  })
 })
 
 describe(add_video, () => {
-  const writes = { insert_video }
+  const writes = { check_ready, insert_video }
 
   test('uploads to the sense video folder then runs the atomic video insert (source included when given)', async () => {
     mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/videos/s1/1.mp4' })))
@@ -84,5 +118,19 @@ describe(add_video, () => {
     const handle = add_video({ writes, dictionary_id: 'demo', sense_id: 's1', file: new Blob(['x'], { type: 'video/mp4' }), speaker_id: 'sp1' })
     await expect(handle.done).rejects.toThrow('aborted')
     expect(insert_video).not.toHaveBeenCalled()
+  })
+
+  test('writes not ready → NO upload starts', async () => {
+    check_ready.mockReturnValue(new Error('Editing database is not ready yet'))
+    const handle = add_video({ writes, dictionary_id: 'demo', sense_id: 's1', file: new Blob(['x'], { type: 'video/mp4' }), speaker_id: 'sp1' })
+    await expect(handle.done).rejects.toThrow('Editing database is not ready yet')
+    expect(mocked_upload_media).not.toHaveBeenCalled()
+  })
+
+  test('insert swallowed → done rejects', async () => {
+    mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/videos/s1/1.mp4' })))
+    insert_video.mockResolvedValue(undefined)
+    const handle = add_video({ writes, dictionary_id: 'demo', sense_id: 's1', file: new Blob(['x'], { type: 'video/mp4' }), speaker_id: 'sp1' })
+    await expect(handle.done).rejects.toThrow('could not be saved')
   })
 })

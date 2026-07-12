@@ -3,6 +3,7 @@ import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
 const log_args = (args: any) => console.info({ args }) as unknown as Promise<any>
 
 export const log_writes: GuardedWrites = {
+  check_ready: () => null,
   insert_entry: log_args,
   delete_entry: log_args,
   insert_sense: log_args,

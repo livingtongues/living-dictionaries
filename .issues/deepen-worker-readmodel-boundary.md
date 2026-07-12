@@ -1,10 +1,65 @@
 # Deepen the Orama worker read-model boundary — one `on_patch` event union instead of 10 positional proxies
 
-**Recommendation strength: WORTH EXPLORING. Not yet assigned.**
+**✅ COMPLETED 2026-07-12** (option C from the spike, per Jacob). Implemented exactly per the
+design + spike corrections: `worker-patch.ts` (union + `create_patch_reducer`),
+`entry.worker.ts` down to ONE `on_patch` (old proxy `releaseProxy`d on re-init — closes the
+9-ports-per-navigation leak), `index.ts` single-proxy passthrough (note: the proxied callback
+must stay a TOP-LEVEL comlink argument, not nested in the options object), `entries-ui-store.ts`
+reduced to stores + reducer (176→~120 lines). 5 reducer tests in `worker-patch.test.ts`
+(set/upsert/delete + resurrect-after-delete documented, side tables, loading, pulse edge).
+Await semantics + pulse counts preserved byte-identically per path.
+
+Verified: full suite 1539 ✅ / tsc ✅ / lint ✅ / check ✅; live dev e2e — boot (486 entries,
+speaker filter, search), same-SPA-session create → count 487 + searchable, delete → DB/store/
+index all correct (fresh query: 0 hits, 486). Found + A/B-confirmed a PRE-EXISTING stale-view
+bug in the process → `.issues/stale-entries-view-after-live-delete.md` (index_updated pulse
+invisible to Svelte 5 effects + post-delete nav race; fix = counter store, kept separate).
+
+Join-engine standalone RETIRED per the spike recommendation — `gather_entry_slices` folded into
+in-worker-orama Phase 1 (see that issue).
 
 Coordinate with: `.issues/deepen-entry-worker-join-engine.md` (same files — if both are done, do
 THIS one first; it makes that diff much smaller) and the in-flight
 `.issues/in-worker-orama.md` / texts-sentences corpus work (check state before starting).
+
+## Design-spike findings (2026-07-12)
+
+**The design below is valid against current code** (entry.worker.ts 776 lines, ui-store 176,
+index.ts 46 — shapes exactly as described; the corpus pipeline landed WITHOUT adding callbacks,
+so it's 9 proxied callbacks, not 10 — corpus docs stay worker-internal and flow back via the
+search RPCs). Precision corrections from reading the code:
+
+1. **Setter call sites beyond init**: `apply_one`'s `speakers`/`tags`/`dialects`/`sources` cases
+   call `set_*` directly mid-mutation (refresh the side-store from the mirror on every change to
+   those tables). Map each to a union emit — they're easy to miss since the issue only mentioned
+   speakers.
+2. **Await semantics differ by path** (the gotcha under-specified this): `init_entries` calls
+   every callback fire-and-forget, but `apply_rows` DOES await (`await delete_entry(...)`,
+   `process_and_update_entry` awaits `upsert_entry_data` + pulses per entry, then apply_rows
+   pulses once more at the end — a multi-entry pull emits N+1 pulses). Keep each path's
+   await/fire-and-forget behavior AND pulse count byte-identical.
+3. **Proxy leak is real and per-navigation**: `init_entries` re-runs per dict navigation and the
+   9 comlink `proxy()` MessagePorts from the previous run are never released. With one `on_patch`
+   the worker can hold the previous proxy and `releaseProxy` it when a new init replaces it.
+
+**Strategic finding — the union is scaffolding on a condemned structure.**
+`.issues/in-worker-orama.md` (planned target model, unscheduled) retires this ENTIRE boundary:
+per-tab entry.worker, comlink, all callbacks, and the full main-thread `entries_data` Record. In
+that model tabs hold no patches at all — they get a `search_index_updated` broadcast + re-run
+their paged query. So the sequencing options are:
+
+- **A. union → join-engine → in-worker-orama**: each step shrinks the next, but two intermediate
+  refactors of code that ultimately dies.
+- **B. skip both, jump to in-worker-orama when triggered**: no wasted motion, but the 776-line
+  hand-rolled mirror (which has already shipped user-facing duplicate-row bugs) and the 9-port
+  boundary remain drift risks for an unbounded time.
+- **C (spike recommendation). do the union now; RETIRE join-engine as a standalone issue** —
+  fold its durable idea (`gather_entry_slices`, SQL-shaped assembly) into in-worker-orama
+  Phase 1, where assembly lands in the leader worker next to its connection anyway. Doing
+  SQL-shaped incremental assembly on the main thread first (join-engine standalone) builds it in
+  the wrong place only to move it. The union is day-scale, net-negative lines, makes the
+  reducer testable, closes the proxy leak, and its reducer discipline makes the eventual
+  consumer-by-consumer conversion (orama Phase 2) easier to audit.
 
 ## Problem
 
