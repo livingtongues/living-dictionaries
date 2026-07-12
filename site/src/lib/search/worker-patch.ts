@@ -19,7 +19,7 @@ export type WorkerPatch
     | { type: 'dialects', rows: Tables<'dialects'>[] }
     | { type: 'sources', rows: Tables<'sources'>[] }
     | { type: 'loading', value: boolean }
-    | { type: 'index_updated' } // pulses the store true→false so open queries re-run
+    | { type: 'index_updated' } // increments the counter so open queries re-run
 
 export interface PatchStores {
   entries_data: Writable<Record<string, EntryData>>
@@ -28,7 +28,9 @@ export interface PatchStores {
   dialects: Writable<Tables<'dialects'>[]>
   sources: Writable<Tables<'sources'>[]>
   loading: Writable<boolean>
-  search_index_updated: Writable<boolean>
+  // counter, not boolean — a synchronous true→false pulse is invisible to
+  // Svelte 5 effects (batching reads the settled value); a number can't be missed
+  search_index_updated: Writable<number>
 }
 
 export function create_patch_reducer(stores: PatchStores) {
@@ -64,10 +66,7 @@ export function create_patch_reducer(stores: PatchStores) {
         loading.set(patch.value)
         break
       case 'index_updated':
-        // pulse: consumers watch for the true edge; reset immediately so the
-        // next update produces a fresh edge
-        search_index_updated.set(true)
-        search_index_updated.set(false)
+        search_index_updated.update(count => count + 1)
         break
       default: {
         const unhandled: never = patch

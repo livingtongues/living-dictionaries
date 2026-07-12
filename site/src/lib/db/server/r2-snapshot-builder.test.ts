@@ -1,4 +1,5 @@
 import type { PutObjectCommand } from '@aws-sdk/client-s3'
+import { DeleteObjectCommand } from '@aws-sdk/client-s3'
 import Database from 'better-sqlite3'
 import { rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -10,7 +11,14 @@ import { sweep_dirty_dictionaries } from './r2-snapshot-builder'
 
 let shared: ReturnType<typeof open_test_shared_db>
 const dict_dbs = new Map<string, Database.Database>()
-const put_spy = vi.fn((_command: PutObjectCommand) => Promise.resolve())
+const put_spy = vi.fn((_command: PutObjectCommand | DeleteObjectCommand) => Promise.resolve())
+
+/** Narrow a recorded command to a Put for its typed `input` (throws on a Delete). */
+function put_input(command: PutObjectCommand | DeleteObjectCommand): PutObjectCommand['input'] {
+  if (command instanceof DeleteObjectCommand)
+    throw new Error('expected a PutObjectCommand')
+  return command.input
+}
 
 vi.mock('./shared-db', async () => {
   const actual = await vi.importActual<typeof import('./shared-db')>('./shared-db')
@@ -32,14 +40,15 @@ function make_dict_db(): Database.Database {
   return db
 }
 
-function insert_dict({ id, updated_at, snapshot_uploaded_at }: {
+function insert_dict({ id, updated_at, snapshot_uploaded_at, bucket = null }: {
   id: string
   updated_at: string
   snapshot_uploaded_at: string | null
+  bucket?: string | null
 }) {
   shared.prepare(
-    `INSERT INTO dictionaries (id, name, updated_at, snapshot_uploaded_at) VALUES (?, ?, ?, ?)`,
-  ).run(id, id, updated_at, snapshot_uploaded_at)
+    `INSERT INTO dictionaries (id, name, updated_at, snapshot_uploaded_at, bucket) VALUES (?, ?, ?, ?, ?)`,
+  ).run(id, id, updated_at, snapshot_uploaded_at, bucket)
   dict_dbs.set(id, make_dict_db())
 }
 
@@ -62,7 +71,7 @@ describe(sweep_dirty_dictionaries, () => {
 
     const result = await sweep_dirty_dictionaries()
 
-    expect(result).toEqual({ uploaded: 2 })
+    expect(result).toEqual({ uploaded: 2, deleted: 0 })
     expect(put_spy).toHaveBeenCalledTimes(2)
     const uploaded_keys = put_spy.mock.calls.map(([command]) => command.input.Key).sort()
     expect(uploaded_keys).toEqual(['dictionaries/never-built.db.gz', 'dictionaries/stale.db.gz'])
@@ -82,8 +91,32 @@ describe(sweep_dirty_dictionaries, () => {
 
     const result = await sweep_dirty_dictionaries()
 
-    expect(result).toEqual({ uploaded: 0 })
+    expect(result).toEqual({ uploaded: 0, deleted: 0 })
     expect(put_spy).not.toHaveBeenCalled()
+  })
+
+  test('never uploads a secure dictionary, even when dirty', async () => {
+    insert_dict({ id: 'hidden', updated_at: '2026-03-01T00:00:00.000Z', snapshot_uploaded_at: null, bucket: 'secure' })
+    insert_dict({ id: 'open', updated_at: '2026-03-01T00:00:00.000Z', snapshot_uploaded_at: null, bucket: 'public' })
+
+    const result = await sweep_dirty_dictionaries()
+
+    expect(result).toEqual({ uploaded: 1, deleted: 0 })
+    expect(put_spy.mock.calls.map(([command]) => command.input.Key)).toEqual(['dictionaries/open.db.gz'])
+  })
+
+  test('deletes the lingering public snapshot of a dictionary flipped to secure and clears its watermark', async () => {
+    insert_dict({ id: 'hidden', updated_at: '2026-01-01T00:00:00.000Z', snapshot_uploaded_at: '2026-02-01T00:00:00.000Z', bucket: 'secure' })
+
+    const result = await sweep_dirty_dictionaries()
+
+    expect(result).toEqual({ uploaded: 0, deleted: 1 })
+    expect(put_spy).toHaveBeenCalledTimes(1)
+    const [[command]] = put_spy.mock.calls
+    expect(command).toBeInstanceOf(DeleteObjectCommand)
+    expect(command.input).toEqual({ Bucket: 'test-snapshots', Key: 'dictionaries/hidden.db.gz' })
+    const row = shared.prepare(`SELECT snapshot_uploaded_at FROM dictionaries WHERE id = 'hidden'`).get() as { snapshot_uploaded_at: string | null }
+    expect(row.snapshot_uploaded_at).toBe(null)
   })
 
   test('uploads gzip-encoded octet-stream to the snapshots bucket', async () => {
@@ -92,10 +125,11 @@ describe(sweep_dirty_dictionaries, () => {
     await sweep_dirty_dictionaries()
 
     const [[command]] = put_spy.mock.calls
-    expect(command.input.Bucket).toBe('test-snapshots')
-    expect(command.input.ContentEncoding).toBe('gzip')
-    expect(command.input.ContentType).toBe('application/octet-stream')
-    expect(command.input.Body).toBeInstanceOf(Uint8Array)
+    const input = put_input(command)
+    expect(input.Bucket).toBe('test-snapshots')
+    expect(input.ContentEncoding).toBe('gzip')
+    expect(input.ContentType).toBe('application/octet-stream')
+    expect(input.Body).toBeInstanceOf(Uint8Array)
   })
 
   test('prunes tombstones older than the snapshot-expiry window from the source db', async () => {
@@ -137,7 +171,7 @@ describe(sweep_dirty_dictionaries, () => {
     // The uploaded snapshot carries a baked cursor = the counter value, and an
     // emptied deletes log (the client's deletes table doubles as its push queue).
     const [[command]] = put_spy.mock.calls
-    const snapshot_bytes = gunzipSync(Buffer.from(command.input.Body as Uint8Array))
+    const snapshot_bytes = gunzipSync(Buffer.from(put_input(command).Body as Uint8Array))
     const temp_path = join(tmpdir(), `snapshot-test-${crypto.randomUUID()}.db`)
     writeFileSync(temp_path, snapshot_bytes)
     const snapshot_db = new Database(temp_path, { readonly: true })

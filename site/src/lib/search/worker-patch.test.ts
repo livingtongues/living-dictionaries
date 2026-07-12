@@ -10,7 +10,7 @@ function make_stores() {
     dialects: writable<Tables<'dialects'>[]>([]),
     sources: writable<Tables<'sources'>[]>([]),
     loading: writable(true),
-    search_index_updated: writable(false),
+    search_index_updated: writable(0),
   }
 }
 
@@ -80,17 +80,17 @@ describe(create_patch_reducer, () => {
     expect(get(stores.loading)).toBeFalsy()
   })
 
-  test('index_updated pulses true then false so every patch produces a fresh edge', () => {
+  test('index_updated increments the counter — every patch is observable (no missable edge)', () => {
     const stores = make_stores()
     const apply_patch = create_patch_reducer(stores)
-    const seen: boolean[] = []
+    const seen: number[] = []
     const unsubscribe = stores.search_index_updated.subscribe(value => seen.push(value))
 
     apply_patch({ type: 'index_updated' })
     apply_patch({ type: 'index_updated' })
 
-    expect(seen).toEqual([false, true, false, true, false])
-    expect(get(stores.search_index_updated)).toBeFalsy()
+    expect(seen).toEqual([0, 1, 2])
+    expect(get(stores.search_index_updated)).toBe(2)
     unsubscribe()
   })
 })

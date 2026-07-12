@@ -93,7 +93,10 @@
     return Math.ceil(count / entries_per_page)
   })())
   $effect(() => {
-    if (browser || $search_index_updated) {
+    // read unconditionally so index rebuilds re-run the open query — behind a
+    // short-circuit (`browser || $x`) it was never tracked as a dependency
+    void $search_index_updated
+    if (browser) {
       search({ ...$search_params, scope }, current_page_index)
     }
   })

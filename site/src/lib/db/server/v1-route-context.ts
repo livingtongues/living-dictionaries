@@ -25,7 +25,7 @@ export async function load_v1_dictionary_context({ event, access }: {
   const dictionary = get_dictionary_by_url_or_id(event.params.id ?? '')
   if (!dictionary)
     error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-  const resolved = await verify_dict_api_access(event, dictionary.id, access)
+  const resolved = await verify_dict_api_access(event, dictionary, access)
   return { dictionary, access: resolved }
 }
 

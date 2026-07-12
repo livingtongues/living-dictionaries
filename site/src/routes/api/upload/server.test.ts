@@ -27,6 +27,8 @@ beforeEach(() => {
     .run('u_ed', 'editor@example.com', 'Editor', JSON.stringify([]), now, now)
   db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
     .run('u_con', 'contributor@example.com', 'Contributor', JSON.stringify([]), now, now)
+  db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
+    .run('u_none', 'norole@example.com', 'No Role', JSON.stringify([]), now, now)
   db.prepare(`INSERT INTO dictionaries (id, url, name, entry_count, created_at, updated_at) VALUES (?, ?, ?, 0, ?, ?)`)
     .run('dict1', 'dict1', 'Dict One', now, now)
   db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
@@ -68,9 +70,14 @@ describe(POST, () => {
     await expect(call({ body: valid_body })).rejects.toMatchObject({ status: 401 })
   })
 
-  test('403 for a contributor (below editor)', async () => {
-    await expect(call({ token: await token({ id: 'u_con', email: 'contributor@example.com' }), body: valid_body }))
+  test('403 for a user with no role on the dictionary', async () => {
+    await expect(call({ token: await token({ id: 'u_none', email: 'norole@example.com' }), body: valid_body }))
       .rejects.toMatchObject({ status: 403 })
+  })
+
+  test('contributors may upload — they are the editing tier (client can_edit includes them)', async () => {
+    const response = await call({ token: await token({ id: 'u_con', email: 'contributor@example.com' }), body: valid_body })
+    expect(response.status).toBe(200)
   })
 
   test('400 when dictionary_id missing', async () => {

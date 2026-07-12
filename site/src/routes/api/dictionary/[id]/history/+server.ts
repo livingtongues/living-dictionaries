@@ -31,7 +31,7 @@ export const GET: RequestHandler = async (event) => {
   const dict_id = dictionary.id
 
   // Hard gate: editor rank or above (manager/admin included), else 401/403.
-  await verify_auth_dict_role(event, dict_id, 'editor')
+  await verify_auth_dict_role(event, { dictionary, min_role: 'editor' })
 
   const params = event.url.searchParams
   const before_raw = params.get('before')

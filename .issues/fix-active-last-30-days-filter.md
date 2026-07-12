@@ -28,8 +28,12 @@ distinct authenticated users active in the last 30 days per `client_logs`.
 - `pnpm check` → 0 errors. Touched-file lint clean (4 pre-existing engine warnings left for another lane).
 - Sync/engine/layout tests pass.
 
-## TODO — run the backfill on prod (after deploy)
-The trigger already exists in prod, so it can run anytime, but back up first:
+## Backfill on prod ✅ (2026-07-12, after deploy)
+Backed up shared.db, dry-ran (102 would update, 0 orphans), applied → **102 users updated**.
+Verified: `active_last_30 = 102`, `with_any_visit = 102` (was 3/3). Admin clients pick it
+up on next sync via the `updated_at` trigger bump.
+
+Commands used (kept for reference):
 ```
 ssh living 'sudo cp /opt/hosting/data/shared.db /opt/hosting/data/shared.db.bak-$(date -u +%Y%m%d-%H%M%S)'
 DRY=1 preview:  ssh living 'docker exec -i -e DRY=1 sveltekit_blue node' < scripts/one-off/2026-07-12-backfill-last-visit-from-logs.cjs

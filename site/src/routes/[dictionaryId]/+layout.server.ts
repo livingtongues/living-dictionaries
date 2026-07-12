@@ -4,6 +4,7 @@ import type { LayoutServerLoad } from './$types'
 import { DICTIONARY_UPDATED_LOAD_TRIGGER, ResponseCodes } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_user_dict_role } from '$lib/db/server/get-dictionary-role'
+import { can_access_secure_dictionary, is_secure_dictionary } from '$lib/db/server/secure-dictionary'
 import { build_canonical_path } from './canonical-path'
 
 /**
@@ -31,14 +32,22 @@ export const load: LayoutServerLoad = async ({ params: { dictionaryId: dictionar
   if (!dictionary)
     redirect(ResponseCodes.MOVED_PERMANENTLY, '/')
 
+  const { ssr_user } = await parent()
+  const ssr_role = ssr_user ? get_user_dict_role({ dictionary_id: dictionary.id, user_id: ssr_user.id }) : null
+
+  // Secure dictionary (`bucket = 'secure'`): only direct role holders and
+  // level-3 admins may pass — everyone else gets the exact unknown-slug
+  // redirect, BEFORE the canonicalize 301 below (which would itself confirm the
+  // dictionary exists). Zero cost on the hot path: bucket rides on the row we
+  // already fetched, ssr_role and admin_level are already resolved.
+  if (is_secure_dictionary(dictionary) && !can_access_secure_dictionary({ role: ssr_role, admin_level: ssr_user?.admin_level ?? 0 }))
+    redirect(ResponseCodes.MOVED_PERMANENTLY, '/')
+
   // Canonicalize: reached via the legacy id (or a stale url) → 301 to the
   // canonical url slug, path + query preserved. `encodeURIComponent` matters —
   // legacy ids contain characters that cannot go into a Location header.
   if (dictionary.url && dictionary_url !== dictionary.url)
     redirect(ResponseCodes.MOVED_PERMANENTLY, build_canonical_path({ pathname: url.pathname, search: url.search, canonical_url: dictionary.url }))
-
-  const { ssr_user } = await parent()
-  const ssr_role = ssr_user ? get_user_dict_role({ dictionary_id: dictionary.id, user_id: ssr_user.id }) : null
 
   return { dictionary: dictionary as unknown as Tables<'dictionaries'>, ssr_role }
 }

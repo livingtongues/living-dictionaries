@@ -26,7 +26,7 @@ export const GET: RequestHandler = async (event) => {
   const dictionary = get_dictionary_by_url_or_id(event.params.id)
   if (!dictionary)
     error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-  await verify_auth_dict_role(event, dictionary.id, 'editor')
+  await verify_auth_dict_role(event, { dictionary, min_role: 'editor' })
 
   const keys = list_api_keys({ db: get_shared_db(), dictionary_id: dictionary.id })
   return json({ keys } satisfies DictionariesIdApiKeysGetResponseBody)
@@ -47,7 +47,7 @@ export const POST: RequestHandler = async (event) => {
   const dictionary = get_dictionary_by_url_or_id(event.params.id)
   if (!dictionary)
     error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-  const auth = await verify_auth_dict_role(event, dictionary.id, 'manager')
+  const auth = await verify_auth_dict_role(event, { dictionary, min_role: 'manager' })
 
   const body = await event.request.json() as DictionariesIdApiKeysPostRequestBody
   const label = (body.label || '').trim()

@@ -465,13 +465,15 @@ class DictLiveDbImpl {
   /**
    * Run a worker-side atomic write op, injecting the current editor for audit
    * stamping. The worker broadcasts `tables_changed`/`rows_deleted` to every
-   * tab (including this one); we also notify locally off the returned outcome
-   * so this tab's stores refresh without waiting on the broadcast bus.
+   * tab (INCLUDING this one — a worker's BroadcastChannel post reaches its own
+   * tab's main thread, and lands before the RPC response on the same ordered
+   * channel). Table notifies also run locally off the outcome for snappy store
+   * refreshes; delete events do NOT — the broadcast alone delivers them, so
+   * each delete reaches `subscribe_deletes` exactly once per tab.
    */
   async #dict_write<T>(op: DictWriteOp, args: Record<string, unknown>): Promise<DictWriteOutcome<T>> {
     const outcome = await this.#connection.dict_write<T>(op, { ...args, user_id: this.#user_id })
     for (const table of outcome.affected_tables) this.#notifier.notify(table)
-    if (outcome.deleted_rows?.length) this.#notify_deletes(outcome.deleted_rows)
     return outcome
   }
 
@@ -617,14 +619,14 @@ class DictLiveDbImpl {
       await this.#connection.execute(
         `INSERT OR IGNORE INTO deletes (table_name, id) VALUES (?, ?)`,
         [table_name, id],
-        // `affected_tables` refreshes other tabs' table stores; `deleted_rows`
-        // makes the worker re-broadcast `rows_deleted` so other tabs' Orama
-        // index drops them too (this tab handles its own via #notify_deletes).
+        // `affected_tables` refreshes every tab's table stores; `deleted_rows`
+        // makes the worker broadcast `rows_deleted` so every tab's Orama index
+        // drops the rows — including THIS tab (a worker BroadcastChannel post
+        // reaches its own tab), so no extra local #notify_deletes here.
         { affected_tables: [...DICT_SYNCABLE_TABLES, 'deletes'], deleted_rows: [{ table_name, id }] },
       )
     }
     for (const table of DICT_SYNCABLE_TABLES) this.#notifier.notify(table)
-    this.#notify_deletes(ids.map(id => ({ table_name, id })))
   }
 }
 

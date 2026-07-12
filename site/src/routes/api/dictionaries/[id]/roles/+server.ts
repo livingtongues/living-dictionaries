@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
+import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
@@ -45,7 +46,10 @@ export const GET: RequestHandler = async (event) => {
   if (!dict_id)
     error(ResponseCodes.BAD_REQUEST, 'Missing dictionary id')
 
-  await verify_auth_dict_role(event, dict_id, 'manager')
+  const dictionary = get_dictionary_by_url_or_id(dict_id)
+  if (!dictionary)
+    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
+  await verify_auth_dict_role(event, { dictionary, min_role: 'manager' })
 
   const db = get_shared_db()
   const roles = db.prepare(`
@@ -91,7 +95,10 @@ export const POST: RequestHandler = async (event) => {
   if (!dict_id)
     error(ResponseCodes.BAD_REQUEST, 'Missing dictionary id')
 
-  const auth = await verify_auth_dict_role(event, dict_id, 'manager')
+  const dictionary = get_dictionary_by_url_or_id(dict_id)
+  if (!dictionary)
+    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
+  const auth = await verify_auth_dict_role(event, { dictionary, min_role: 'manager' })
   if (!auth.email)
     error(ResponseCodes.BAD_REQUEST, 'inviter must have an email on file')
 

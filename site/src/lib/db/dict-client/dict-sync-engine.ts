@@ -436,7 +436,13 @@ export class DictSyncEngine {
         if (!is_dirty) {
           await this.#connection.execute(`DELETE FROM "${table_name}" WHERE id = ?`, [id])
           affected.add(table_name)
-          deleted_rows.push({ table_name, id })
+          // Only report deletes that removed a row that actually existed. The
+          // server echoes our OWN pushed tombstones back in the pull window;
+          // those rows are already gone locally (and the search index was
+          // already notified via the write-time `rows_deleted` broadcast), so
+          // re-reporting them re-fans a duplicate delete event to every tab.
+          if (local.length > 0)
+            deleted_rows.push({ table_name, id })
         }
       }
 

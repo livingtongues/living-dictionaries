@@ -4,6 +4,7 @@ import { error, json } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
+import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { gcs_is_configured, get_gcs } from '$lib/server/gcloud'
 import { log_server_event } from '$lib/server/log-server-event'
 
@@ -29,8 +30,13 @@ export const POST: RequestHandler = async (event) => {
   if (!dictionary_id?.trim())
     error(ResponseCodes.BAD_REQUEST, 'Missing dictionary_id')
 
-  // Editor (or admin) on this dictionary — re-checked server-side every upload.
-  await verify_auth_dict_role(event, dictionary_id, 'editor')
+  const dictionary = get_dictionary_by_url_or_id(dictionary_id)
+  if (!dictionary)
+    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
+
+  // Contributor+ (or admin) on this dictionary — re-checked server-side every
+  // upload. Contributors are LD's editing tier (client `can_edit` includes them).
+  await verify_auth_dict_role(event, { dictionary, min_role: 'contributor' })
 
   if (!folder?.trim())
     error(ResponseCodes.BAD_REQUEST, 'Missing folder')

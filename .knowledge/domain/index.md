@@ -33,3 +33,7 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
   tracer (`/tile-map` dev route): raster-tile compositing model, PMTiles/protomaps format gotchas
   (winding rewind, antimeridian, landcover seams), and the headless-canvas perf trap. Feeds
   `.issues/future/tile-map-r2-tileset.md`.
+- [secure-dictionary-mode.md](./secure-dictionary-mode.md) — `bucket='secure'` decisions: why
+  admin levels 1-2 are deliberately blocked, the no-existence-leak rule, accepted media/metadata
+  leaks, no invite exemption (manual back-end setup; river is the one prod case), and the
+  "contributor = editing tier" server-gate fix (prod has zero 'editor' rows).

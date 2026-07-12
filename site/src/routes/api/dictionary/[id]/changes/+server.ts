@@ -51,8 +51,9 @@ export const POST: RequestHandler = async (event) => {
 
   const body = await event.request.json() as DictChangesRequest
 
-  // Resolve caller. Anonymous viewers are OK (they get pull-only).
-  const caller = await resolve_caller(event, dict_id)
+  // Resolve caller. Anonymous viewers are OK (they get pull-only) — except on a
+  // secure dictionary, where non-members get the same 404 as an unknown id.
+  const caller = await resolve_caller(event, dictionary)
   const { user_id, is_editor } = caller
 
   // Does this editor have rows/tombstones to PUSH this round?
@@ -137,18 +138,24 @@ export const POST: RequestHandler = async (event) => {
   return json(response)
 }
 
-async function resolve_caller(event: Parameters<RequestHandler>[0], dict_id: string): Promise<{ user_id: string, is_editor: boolean }> {
+async function resolve_caller(event: Parameters<RequestHandler>[0], dictionary: { id: string, bucket?: string | null }): Promise<{ user_id: string, is_editor: boolean }> {
   try {
-    const auth = await verify_auth_dict_role(event, dict_id, 'editor')
+    // Contributor rank counts as the editing tier (matches the client's
+    // `can_edit`, which includes contributors — LD has no 'editor' grants).
+    const auth = await verify_auth_dict_role(event, { dictionary, min_role: 'contributor' })
     return { user_id: auth.user_id, is_editor: true }
   } catch (err) {
     const { status } = err as { status?: number }
+    // Secure dictionary: verify_auth_dict_role answers 404 for anonymous /
+    // no-grant callers — propagate it (no anonymous pull-only fallback).
+    if (status === ResponseCodes.NOT_FOUND)
+      throw err
     if (status === ResponseCodes.UNAUTHORIZED) {
       // No session at all — viewer (anonymous).
       return { user_id: '', is_editor: false }
     }
     if (status === ResponseCodes.FORBIDDEN) {
-      // Has session but no editor role.
+      // Has session but no editing role.
       try {
         const auth = await verify_auth(event)
         return { user_id: auth.user_id, is_editor: false }

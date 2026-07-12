@@ -272,6 +272,35 @@ describe('DictSyncEngine junction natural-key replace-all apply ordering', () =>
     const rows = db.prepare(`SELECT id FROM entry_tags WHERE entry_id = 'e1' AND tag_id = 't1'`).all() as { id: string }[]
     expect(rows).toEqual([{ id: 'new-id' }])
   })
+
+  // The server echoes a client's OWN pushed tombstones back in the pull window.
+  // Those rows are already hard-deleted locally (and the Orama index was already
+  // notified at write time via the `rows_deleted` broadcast), so re-reporting
+  // them fans a DUPLICATE delete event to every tab. Only deletes that removed
+  // an actually-present local row may reach on_rows_deleted.
+  test('on_rows_deleted skips echoed deletes for rows already gone locally', async () => {
+    db.prepare(`INSERT INTO entries (id, dirty) VALUES ('present-id', NULL)`).run()
+
+    globalThis.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({
+        new_synced_up_to: '2026-07-06T00:00:00.000Z',
+        changes: {},
+        deletes: [
+          { table_name: 'entries', id: 'already-gone-id' }, // our own echoed tombstone
+          { table_name: 'entries', id: 'present-id' }, // a genuine remote delete
+        ],
+      }),
+    })) as never
+
+    const on_rows_deleted = vi.fn()
+    const engine = new DictSyncEngine({ dict_id: 'test-dict', connection: real_connection(), has_editor_role: true, get_auth: () => ({}) as never, on_rows_deleted })
+    await engine.sync_once()
+
+    expect(on_rows_deleted).toHaveBeenCalledTimes(1)
+    expect(on_rows_deleted).toHaveBeenCalledWith([{ table_name: 'entries', id: 'present-id' }])
+  })
 })
 
 // Cross-app hardening Part 2 (mirrored from house): a repeated same-signature

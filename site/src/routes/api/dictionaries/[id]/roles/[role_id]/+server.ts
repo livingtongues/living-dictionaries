@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
+import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { error, json } from '@sveltejs/kit'
 
@@ -23,7 +24,10 @@ export const DELETE: RequestHandler = async (event) => {
   if (!dict_id || !role_id)
     error(ResponseCodes.BAD_REQUEST, 'Missing dictionary id or role id')
 
-  await verify_auth_dict_role(event, dict_id, 'manager')
+  const dictionary = get_dictionary_by_url_or_id(dict_id)
+  if (!dictionary)
+    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
+  await verify_auth_dict_role(event, { dictionary, min_role: 'manager' })
 
   const db = get_shared_db()
 

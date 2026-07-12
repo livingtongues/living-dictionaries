@@ -31,7 +31,7 @@ export function create_entries_ui_store({
   const tags = writable<Tables<'tags'>[]>([])
   const dialects = writable<Tables<'dialects'>[]>([])
   const sources = writable<Tables<'sources'>[]>([])
-  const search_index_updated = writable(false)
+  const search_index_updated = writable(0)
   const loading = writable(true)
 
   // Every worker→store state transition lives in the reducer (worker-patch.ts).

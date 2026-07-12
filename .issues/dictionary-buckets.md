@@ -17,6 +17,14 @@ Fresh-empty junk ("test test test") couldn't be deleted under the stale rule (�
 content activity ≥1yr) — bucketed `glossary`/`conlang` by intent; a NEXT sweep (re-run
 `build-assignments.js` against fresh stats) graduates them to delete.
 
+✅ **2026-07-12 conlang/glossary purge (Jacob-approved):** deleted 344 conlang/glossary dicts with
+<10 entries AND no content edit (per-dict `MAX(updated_at)` across content tables) AND no member
+`last_visit_at` within 6 months. Executed by batch-driving `DELETE /api/dictionaries/[id]` from
+inside the container with a minted admin JWT; shared.db backed up first
+(`shared.db.bak-20260712-105523`+). 344/344 succeeded, 344 `dictionaries` tombstones written.
+Record: `scripts/one-off/2026-07-12-purged-conlang-glossary.csv`. Remaining conlang/glossary:
+468 + 163 = 631 (253 of them still <10 entries but had recent activity — recheck in a future sweep).
+
 ### Notables for Jacob's in-app review before deleting
 - **`river`** — 8,692 entries + 4,733 audio, kept `unlisted`; worth a look.
 - **`tla-wilano`** — 1,034 entries + 704 audio, answered YES to conlang on the old form → `conlang`.

@@ -61,8 +61,11 @@ via `/api/chat/*` polling, gate = member of ≥1 room, `admin_room` channels man
 super admins) · `/translate` (standalone translator backend — server-authoritative via
 `/api/translate/*`, gate = ≥1 `translator_languages` row or admin) · `/admin/*` (local-first super-admin: dashboard + ntfy onboarding, messages incl.
 unmatched→match + AI triage, users, dictionaries, buckets [serve/tolerate/delete triage of every
-dict via `dictionaries.bucket`], analytics, schema graph, sync, triage-examples,
-legal-review, featured-words) · `/og` (share image) · `/terms` · `/privacy-policy` · `/setlocale`.
+dict via `dictionaries.bucket`; `bucket='secure'` is ENFORCED — direct-role holders + level-3
+admins only, everyone else sees the unknown-slug redirect/404, no public R2 snapshot; rule lives
+in `$lib/db/server/secure-dictionary.ts` + `verify_auth_dict_role`], analytics, schema graph,
+sync, triage-examples, legal-review, featured-words) · `/og` (share image) · `/terms` ·
+`/privacy-policy` · `/setlocale`.
 
 Inbound email is AI-triaged by `$lib/agent/*` (xAI Grok, env-gated on `XAI_API_KEY`; classifies →
 auto-assigns/auto-resolves → drafts a reply). See `.knowledge/admin/ai-triage-pipeline.md`.

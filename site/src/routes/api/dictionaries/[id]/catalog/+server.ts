@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
+import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { validate_orthographies_array } from '$lib/db/server/orthographies'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { log_server_event } from '$lib/server/log-server-event'
@@ -38,7 +39,10 @@ export interface DictionariesCatalogResponseBody {
 
 export const POST: RequestHandler = async (event) => {
   const dict_id = event.params.id
-  const { user_id } = await verify_auth_dict_role(event, dict_id, 'manager')
+  const dictionary = get_dictionary_by_url_or_id(dict_id ?? '')
+  if (!dictionary)
+    error(ResponseCodes.NOT_FOUND, 'dictionary not found')
+  const { user_id } = await verify_auth_dict_role(event, { dictionary, min_role: 'manager' })
 
   const body = await event.request.json() as DictionariesCatalogRequestBody
   const keys = Object.keys(body)
@@ -59,10 +63,6 @@ export const POST: RequestHandler = async (event) => {
   }
 
   const db = get_shared_db()
-  const existing = db.prepare('SELECT id FROM dictionaries WHERE id = ?').get(dict_id)
-  if (!existing)
-    error(ResponseCodes.NOT_FOUND, 'Dictionary not found')
-
   const set_clauses: string[] = []
   const values: unknown[] = []
   for (const key of keys) {
@@ -76,13 +76,13 @@ export const POST: RequestHandler = async (event) => {
 
   const now = new Date().toISOString()
   set_clauses.push('updated_at = ?', 'updated_by_user_id = ?', 'dirty = 1')
-  values.push(now, user_id, dict_id)
+  values.push(now, user_id, dictionary.id)
 
   try {
     db.prepare(`UPDATE dictionaries SET ${set_clauses.join(', ')} WHERE id = ?`).run(...values)
   } catch (err) {
     console.error(`Error updating dictionary catalog: ${(err as Error).message}`)
-    log_server_event({ level: 'error', message: 'dictionary_catalog_update_failed', error: err, user_id, context: { dictionary_id: dict_id, fields: keys } })
+    log_server_event({ level: 'error', message: 'dictionary_catalog_update_failed', error: err, user_id, context: { dictionary_id: dictionary.id, fields: keys } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Could not update dictionary')
   }
 

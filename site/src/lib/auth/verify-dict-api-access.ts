@@ -52,17 +52,20 @@ export interface DictApiAccess {
  *     `verify_auth_dict_role` (so the same endpoints work from a logged-in human
  *     or a personal JWT), gated by the human role `ACCESS_TO_HUMAN_ROLE` maps to.
  *
- * `dict_id` MUST be the canonical dictionary id (resolve url-slugs with
- * `get_dictionary_by_url_or_id` before calling). API writes are attributed to
- * the key's creator so history/audit columns name a real human.
+ * `dictionary` MUST be the resolved catalog row (via `get_dictionary_by_url_or_id`)
+ * so key scoping checks against the canonical id and secure dictionaries
+ * (`bucket = 'secure'`) tighten the human-session admin bypass to level 3 —
+ * dict-scoped API keys are inside the trust boundary and work unchanged. API
+ * writes are attributed to the key's creator so history/audit columns name a
+ * real human.
  *
  * Throws 401 (no/invalid credential), 403 (key for another dict, or
- * insufficient scope/role).
+ * insufficient scope/role), 404 (secure dict + session with no grant).
  */
 export async function verify_dict_api_access(event: {
   request: Request
   cookies?: Pick<Cookies, 'get'>
-}, dict_id: string, access: ApiAccess = 'write'): Promise<DictApiAccess> {
+}, dictionary: { id: string, bucket?: string | null }, access: ApiAccess = 'write'): Promise<DictApiAccess> {
   const auth_header = event.request.headers.get('Authorization')
   const bearer = auth_header?.startsWith('Bearer ') ? auth_header.slice('Bearer '.length) : null
 
@@ -72,7 +75,7 @@ export async function verify_dict_api_access(event: {
     const verified = verify_api_key({ db: get_shared_db(), token: bearer })
     if (!verified)
       error(ResponseCodes.UNAUTHORIZED, 'Invalid or revoked API key')
-    if (verified.dictionary_id !== dict_id)
+    if (verified.dictionary_id !== dictionary.id)
       error(ResponseCodes.FORBIDDEN, 'API key is scoped to a different dictionary')
 
     if (!key_scope_allows(verified.role, access))
@@ -89,6 +92,6 @@ export async function verify_dict_api_access(event: {
   }
 
   // Session / JWT path — the ONE place API access maps onto a human role.
-  const auth = await verify_auth_dict_role(event, dict_id, ACCESS_TO_HUMAN_ROLE[access])
+  const auth = await verify_auth_dict_role(event, { dictionary, min_role: ACCESS_TO_HUMAN_ROLE[access] })
   return { user_id: auth.user_id, role: auth.role, via: 'session' }
 }

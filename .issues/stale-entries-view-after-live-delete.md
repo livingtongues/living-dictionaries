@@ -1,4 +1,36 @@
-# Entries view shows a deleted entry until the next query (pre-existing)
+# ✅ FIXED 2026-07-12 — Entries view shows a deleted entry until the next query (pre-existing)
+
+**Resolution:** counter fix implemented (`tick()` was considered and rejected — it makes the
+reducer async AND double-fires consumers on the true/false edges; a counter fires exactly once
+per pulse). While fixing, found a THIRD cause: `entries/+page.svelte`'s effect read the store
+behind `if (browser || $search_index_updated)` — short-circuit meant it was **never tracked as a
+dependency** in the browser at all. Now `void $search_index_updated` unconditionally.
+Touchpoints landed: worker-patch.ts (reducer + type), entries-ui-store.ts, worker-patch.test.ts,
+entries/+page.svelte, _page.stories.ts. Verified: full suite 1539 ✅ / tsc / eslint / check 0
+errors; new e2e `site/e2e/live-delete-refresh.mjs` (create → delete → list self-corrects to
+baseline with zero input, deleted lexeme gone, no page errors); dict-home stories light+dark ✅.
+
+**Follow-up ✅ FIXED 2026-07-12 — 3× delete-event fan-out deduped to exactly 1.** Traced the
+three paths hitting the acting tab's `subscribe_deletes`:
+1. Direct local `#notify_deletes` in `#delete`/`#dict_write` (dict-live-db.svelte.ts) — the
+   comments assumed the worker broadcast only reached OTHER tabs, but a worker's
+   BroadcastChannel post reaches its OWN tab's main thread too.
+2. The worker `rows_deleted` broadcast echo (arrives before the RPC response — same ordered
+   channel — so it's the keeper: exactly-once per tab, all tabs symmetric).
+3. Sync pull echo: the server returns our own pushed tombstone in `response.deletes`; the
+   engine's DELETE no-oped (row already gone) but `deleted_rows.push` was unconditional →
+   another broadcast.
+Fix: removed the direct notifies (1), kept the broadcast (2), and gated the sync-engine report
+on `local.length > 0` (3) — a delete only reaches `on_rows_deleted` if it removed a row that
+actually existed. Regression unit test added in dict-sync-engine.test.ts (echoed tombstone
+skipped, genuine remote delete reported once). Verified live with a temp `[dedupe-probe]`
+console instrument + throwaway e2e: create → delete → wait past the sync round-trip → exactly
+**1** delete event for the entry id (was 3); `live-delete-refresh.mjs` still fully green
+(self-correction now rides the broadcast). Full suite 1537 ✅ / tsc / eslint (no new) / lint
+clean. house had the same sync-echo pattern (2× there: write-time `remove_ids` + echo; no
+broadcast fan-out in its topology) — ported the exists-gate to its `worker-engine.ts` delete
+apply (existence now queried for readonly too) + `worker-engine.delete-echo.test.ts`, verified
+2026-07-12 (house suite 1859 ✅, tsc/lint/check clean, uncommitted).
 
 Found 2026-07-12 while verifying the worker patch-union refactor. **Pre-existing** — reproduced
 byte-identically on the pre-union code (git-stash A/B tested). Data layers are all CORRECT; this

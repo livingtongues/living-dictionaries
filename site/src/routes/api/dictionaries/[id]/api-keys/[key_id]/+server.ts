@@ -19,7 +19,7 @@ export const DELETE: RequestHandler = async (event) => {
   const dictionary = get_dictionary_by_url_or_id(event.params.id)
   if (!dictionary)
     error(ResponseCodes.NOT_FOUND, 'dictionary not found')
-  const auth = await verify_auth_dict_role(event, dictionary.id, 'manager')
+  const auth = await verify_auth_dict_role(event, { dictionary, min_role: 'manager' })
 
   const { key_id } = event.params
   if (!key_id)

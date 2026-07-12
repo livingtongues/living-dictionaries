@@ -55,7 +55,7 @@ const base = {
   entries_data: loading_entries_data,
   speakers: readable([]),
   search_entries: async () => ({ count: 0, facets: {} }),
-  search_index_updated: readable(false),
+  search_index_updated: readable(0),
   auth_user: { admin_level: 0, user: null },
   is_manager: false,
   can_edit: false,

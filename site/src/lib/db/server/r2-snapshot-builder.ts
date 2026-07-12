@@ -4,7 +4,7 @@ import { unlink } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { gzipSync } from 'node:zlib'
-import { PutObjectCommand } from '@aws-sdk/client-s3'
+import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { r2_dict_snapshot_key, R2_SNAPSHOT_INTERVAL_MS, SNAPSHOT_EXPIRED_DAYS } from '$lib/constants'
 import { get_r2_snapshot_client } from '$lib/r2/snapshot-client'
 import { get_dictionary_db } from './dictionary-db'
@@ -100,14 +100,36 @@ async function run_once(state: BuilderState) {
 
 export async function sweep_dirty_dictionaries() {
   const shared = get_shared_db()
+
+  // Secure dictionaries (`bucket = 'secure'`) must never have a snapshot in the
+  // PUBLIC R2 bucket — members boot via the authed `/api/dictionary/[id]/db`
+  // path instead. Self-healing: any secure dict that still has one uploaded
+  // (e.g. it was flipped secure after a snapshot existed) gets its R2 object
+  // deleted and its watermark cleared.
+  const secure_with_snapshot = shared.prepare(
+    `SELECT id FROM dictionaries WHERE bucket = 'secure' AND snapshot_uploaded_at IS NOT NULL`,
+  ).all() as { id: string }[]
+  let deleted = 0
+  for (const { id } of secure_with_snapshot) {
+    try {
+      await delete_from_r2({ key: r2_dict_snapshot_key(id) })
+      shared.prepare(`UPDATE dictionaries SET snapshot_uploaded_at = NULL WHERE id = ?`).run(id)
+      deleted++
+      console.info(`[r2-snapshot-builder] Deleted public snapshot of secure dictionary ${id}.`)
+    } catch (err) {
+      console.error(`[r2-snapshot-builder] Failed to delete secure snapshot for ${id}:`, err)
+    }
+  }
+
   const rows = shared.prepare(
     `SELECT id FROM dictionaries
      WHERE updated_at > COALESCE(snapshot_uploaded_at, '1970-01-01T00:00:00.000Z')
+       AND (bucket IS NULL OR bucket != 'secure')
      ORDER BY updated_at ASC`,
   ).all() as { id: string }[]
 
   if (rows.length === 0)
-    return { uploaded: 0 }
+    return { uploaded: 0, deleted }
 
   console.info(`[r2-snapshot-builder] ${rows.length} dictionary/dictionaries need fresh snapshots.`)
   let uploaded = 0
@@ -122,7 +144,7 @@ export async function sweep_dirty_dictionaries() {
     }
   }
   console.info(`[r2-snapshot-builder] Uploaded ${uploaded}/${rows.length} snapshots.`)
-  return { uploaded }
+  return { uploaded, deleted }
 }
 
 export async function build_and_upload_snapshot(dict_id: string) {
@@ -231,8 +253,17 @@ async function upload_to_r2({ key, bytes }: { key: string, bytes: Uint8Array }) 
   }))
 }
 
+async function delete_from_r2({ key }: { key: string }) {
+  const { client, bucket } = get_r2_snapshot_client()
+  await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }))
+}
+
 /** Build one snapshot ad-hoc (e.g. a cutover-day backfill or an admin force-rebuild). */
 export async function force_rebuild_snapshot(dict_id: string): Promise<void> {
+  const shared_db: Database.Database = get_shared_db()
+  const row = shared_db.prepare(`SELECT bucket FROM dictionaries WHERE id = ?`).get(dict_id) as { bucket: string | null } | undefined
+  if (row?.bucket === 'secure')
+    throw new Error(`Refusing to upload a PUBLIC snapshot of secure dictionary ${dict_id}`)
   await build_and_upload_snapshot(dict_id)
   const shared: Database.Database = get_shared_db()
   shared.prepare(`UPDATE dictionaries SET snapshot_uploaded_at = ? WHERE id = ?`).run(new Date().toISOString(), dict_id)

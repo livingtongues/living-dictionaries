@@ -35,7 +35,10 @@ export const GET: RequestHandler = async (event) => {
   if (!dictionary)
     error(ResponseCodes.NOT_FOUND, 'dictionary not found')
 
-  await verify_auth_dict_role(event, dictionary.id, 'editor')
+  // Contributor rank or above — contributors ARE LD's editing tier (the client's
+  // `can_edit` includes them and there are no 'editor' grants in prod), and on a
+  // secure dictionary this endpoint is the ONLY snapshot source (no public R2).
+  await verify_auth_dict_role(event, { dictionary, min_role: 'contributor' })
 
   const dict_db = get_dictionary_db(dictionary.id)
 
