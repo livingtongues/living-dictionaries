@@ -45,6 +45,19 @@ Files:
 - [ ] tutor: single admin → no audience split, but apply the health CWV move, deploys gridlines,
       drop event-coverage/error-clusters/build-adoption-table if present; sanity-check analytics
 
+## STATUS: complete across LD + house + tutor (2026-07-13)
+- **LD** — done, committed + pushed to `main` by Jacob.
+- **house** — done: geo admin-filter (migration + rollup + reader), AnalyticsView bots trims
+  (no Readers card, no Users line, human-only panels hidden) + geography header, HealthView (CWV
+  moved up, Event coverage removed — no Error-clusters/Build-adoption tables exist there). Tests +
+  svelte-check (0 errors) + screenshots verified. NOT committed (Jacob commits).
+- **tutor** — done (single-admin, no split needed): geo admin-filter, analytics For-you dedupe
+  (moved to health) + geography header, HealthView (CWV up, Event coverage + Error clusters
+  removed). Tests + svelte-check (0 errors) + screenshots verified. NOT committed.
+- **Shared** — DeploysPanel gridlines + ComboChart EVENT_GAP 28→18 + AtAGlance `show_attention`
+  prop mirrored to all 3 (DeploysPanel/ComboChart byte-identical per PARITY.md; AtAGlance is
+  app-specific so only the prop was ported).
+
 ## Decisions (settled)
 - **Q1 deploy markers → keep_fix.** Aggregate `deploy_events` to ONE event per DAY in the views
   (label=count, note lists that day's builds), and lower shared `EVENT_GAP` 28→16 in ComboChart so

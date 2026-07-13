@@ -135,3 +135,36 @@ standard panel. On 2026-07-05 a `client_behind` retry storm was 42% of a day's l
 showed on neither dashboard. The **Sync health** panel (`build_sync_health`) closes it: per-kind
 volume split current-vs-stale build, plus the distinct (user, dict) tabs still stuck on a stale
 build. Both siblings filed the same panel independently — another convergence data point.
+
+## Geography excludes admins — geo-only, heals over ~30d (all 3 apps, 2026-07-13)
+
+The `/admin/analytics` **Geography** area chart excludes admin (allow-listed staff) sessions,
+because a single admin browsing heavily skews "where visitors come from" (Jacob's own Malaysia
+sessions dwarfed real traffic). Mechanism, mirrored in LD + house + tutor:
+
+- `log_daily_sessions` gained a nullable **`user_id`** column (migration `20260713_*`); the rollup
+  writer records the session's first signed-in user. `get_admin_user_ids({ shared_db })` maps the
+  `$lib/admins` allow-list emails → `users.id`s.
+- Admin sessions are dropped from the geo tally **only** — in `build_capability`'s per-session area
+  pass (reader, the primary source) AND in the cold `geo:` metric rollup (`rollup_day`, the
+  fallback seed). Session/user counts, device/OS/browser breakdowns, and everything else STILL
+  count admins. house already had `get_admin_user_ids` (it excludes admin *reading* time from the
+  per-book panel); the geo use reuses the same helper.
+- **Gotcha — it heals forward, not retroactively.** Pre-migration `log_daily_sessions` rows have
+  `user_id = NULL`, so historically-materialized cold days keep their admin geo until they age out
+  of the 30-day window (or get re-rolled). The live/hot window is clean immediately; the whole
+  window is clean after ~30d. This was an accepted tradeoff (vs. a heavier full backfill).
+- house/tutor are single-or-few-admin, but the same skew applies, so the filter is uniform. Scope
+  is deliberately geography-only — NOT applied to session/user/traffic counts.
+
+## Deploy markers: same-day clustering, not one 80-count blob (shared ComboChart, 2026-07-13)
+
+Deploy ticks on the Traffic/Errors ComboCharts are keyed by **day** (`first_seen.slice(0,10)`), so
+same-day deploys share an identical x and always merge into one per-day tick with a count badge.
+The pile-up bug ("⬆ 86" on one spot) was `EVENT_GAP` (single-linkage cluster gap in
+`ComboChart.svelte`) at **28px** > one day's ~26px width, chaining the whole recent week into a
+single cluster. Lowered to **18px** so distinct days separate; single-deploy days show just the
+icon (no wide count chip → no overlap). `ComboChart.svelte` + `DeploysPanel.svelte` are
+byte-identical across LD/house/tutor (see health `PARITY.md`) — mirror any change to all three.
+`DeploysPanel` also gained horizontal minute gridlines (read a bar's duration off the axis without
+hovering).
