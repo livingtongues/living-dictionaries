@@ -156,6 +156,87 @@ describe('natural-key convergence coverage guard', () => {
   })
 })
 
+/**
+ * Stale-file convergence (the 2026-07-13 tutelo-saponi stuck-"Loading" fix):
+ * a pre-server_seq OPFS file has `last_modified_at` but NO `synced_seq` →
+ * the engine reads a null cursor and must converge IN PLACE via a full pull
+ * with prune-to-response — no snapshot reset, no connection teardown. The
+ * server sends no tombstones for a null cursor, so without the prune, rows
+ * deleted server-side since the file's last sync would linger as ghosts.
+ */
+describe('stale-file (null-cursor) full-pull convergence', () => {
+  function insert_entry(db: BetterSqlite3.Database, { id, dirty = false }: { id: string, dirty?: boolean }) {
+    db.prepare(
+      `INSERT INTO entries (id, lexeme, dirty, created_by_user_id, updated_by_user_id, created_at, updated_at)
+       VALUES (?, '{}', ?, 'u1', 'u1', ?, ?)`,
+    ).run(id, dirty ? 1 : null, T0, T0)
+  }
+
+  function make_stale_client() {
+    // The pre-2026-07-09 cursor state: old ISO watermark present, seq cursor absent.
+    client_db.prepare(`INSERT INTO db_metadata (key, value) VALUES ('last_modified_at', ?)`).run(T0)
+    client_db.prepare(`DELETE FROM db_metadata WHERE key = 'synced_seq'`).run()
+  }
+
+  test('converges in place: ghosts pruned, new rows pulled, dirty work pushed, synced_seq written', async () => {
+    make_stale_client()
+    insert_entry(server_db, { id: 'ent-live' })
+    insert_entry(server_db, { id: 'ent-new' }) // written server-side after the stale file's last sync
+    insert_entry(client_db, { id: 'ent-live' })
+    insert_entry(client_db, { id: 'ent-ghost' }) // deleted server-side; tombstone unavailable to a null cursor
+    insert_entry(client_db, { id: 'ent-dirty', dirty: true }) // un-pushed local work — must survive + push
+
+    const deleted: { table_name: string, id: string }[] = []
+    const engine = new DictSyncEngine({
+      dict_id: 'test-dict',
+      connection: connection_for(client_db),
+      has_editor_role: true,
+      get_auth: () => ({}) as never,
+      on_rows_deleted: rows => deleted.push(...rows),
+    })
+    await expect(engine.sync_once()).resolves.toBeTruthy()
+
+    const client_ids = client_db.prepare(`SELECT id FROM entries ORDER BY id`).all() as { id: string }[]
+    expect(client_ids).toEqual([{ id: 'ent-dirty' }, { id: 'ent-live' }, { id: 'ent-new' }])
+    const server_ids = server_db.prepare(`SELECT id FROM entries ORDER BY id`).all() as { id: string }[]
+    expect(server_ids).toEqual([{ id: 'ent-dirty' }, { id: 'ent-live' }, { id: 'ent-new' }])
+    expect(deleted).toEqual([{ table_name: 'entries', id: 'ent-ghost' }])
+
+    // Cursor persisted → the file is healed, never a null cursor again.
+    const cursor_row = client_db.prepare(`SELECT value FROM db_metadata WHERE key = 'synced_seq'`).get() as { value: string }
+    const server_counter = server_db.prepare(`SELECT seq FROM server_seq_counter`).get() as { seq: number }
+    expect(Number(cursor_row.value)).toBe(server_counter.seq)
+
+    // Nothing left dirty, and the next sync is a clean incremental no-op.
+    const { n: dirty } = client_db.prepare(`SELECT COUNT(*) AS n FROM entries WHERE dirty = 1`).get() as { n: number }
+    expect(dirty).toBe(0)
+    await expect(engine.sync_once()).resolves.toBeTruthy()
+    expect(client_db.prepare(`SELECT COUNT(*) AS n FROM entries`).get()).toEqual({ n: 3 })
+  })
+
+  test('an incremental (non-null cursor) sync never prunes', async () => {
+    insert_entry(server_db, { id: 'ent-live' })
+    insert_entry(client_db, { id: 'ent-live' })
+    insert_entry(client_db, { id: 'ent-local-only' }) // stale-but-clean row an incremental pull must NOT touch
+    const server_counter = server_db.prepare(`SELECT seq FROM server_seq_counter`).get() as { seq: number }
+    client_db.prepare(
+      `INSERT INTO db_metadata (key, value) VALUES ('synced_seq', ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+    ).run(String(server_counter.seq))
+
+    const engine = new DictSyncEngine({
+      dict_id: 'test-dict',
+      connection: connection_for(client_db),
+      has_editor_role: true,
+      get_auth: () => ({}) as never,
+    })
+    await expect(engine.sync_once()).resolves.toBeTruthy()
+
+    const ids = client_db.prepare(`SELECT id FROM entries ORDER BY id`).all() as { id: string }[]
+    expect(ids).toEqual([{ id: 'ent-live' }, { id: 'ent-local-only' }])
+  })
+})
+
 describe('adopt-canonical convergence: a client whose fresh-minted duplicate collides converges instead of wedging', () => {
   for (const [table, spec] of Object.entries(SPECS) as [DictSyncableTable, NonNullable<typeof SPECS[DictSyncableTable]>][]) {
     test(table, async () => {

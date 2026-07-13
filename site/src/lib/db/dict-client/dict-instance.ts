@@ -66,9 +66,9 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
     // One automatic reset per worker lifetime — prevents a 410→reset→410 loop
     // if the server keeps rejecting the cursor even after a fresh snapshot.
     let auto_reset_attempted = false
-    // One FK-wedge / seq-transition rebuild per worker lifetime — a reset lands
-    // a fresh snapshot with a baked cursor, so a SECOND wedge in the same
-    // session means something deeper is wrong (let the breaker halt + prompt).
+    // One FK-wedge rebuild per worker lifetime — a reset lands a fresh
+    // snapshot with a baked cursor, so a SECOND wedge in the same session
+    // means something deeper is wrong (let the breaker halt + prompt).
     let rebuild_attempted = false
     // Storage-lost self-heal budget (browser closed our held OPFS handle —
     // observed after tab suspension/system sleep). Capped so a browser that
@@ -84,9 +84,7 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
 
     // Boot telemetry (`dict_boot` perf row): stage marks accumulate from the
     // first `mark_boot_stage` until the FIRST successful open_and_wire emits —
-    // reopen/reset re-wires never re-emit (they have their own markers). A
-    // seq-transition rebuild's second pass keeps accumulating, so the emitted
-    // duration is the total boot the user actually waited through.
+    // reopen/reset re-wires never re-emit (they have their own markers).
     const boot_marks: { stage: string, at: number }[] = []
     let boot_reported = false
     let boot_cold = false
@@ -240,15 +238,13 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
         on_integrity_wedged: () => { void rebuild({ reason: 'fk_wedge' }) },
       })
 
-      // One-time transition to the server_seq cursor (2026-07-09): an OPFS file
-      // synced under the old ISO-timestamp cursor has no `synced_seq`. Rebuild
-      // from a fresh snapshot (which carries a baked cursor) instead of letting
-      // the engine full-pull a huge JSON body over /changes.
-      if (is_opfs_backed && !rebuild_attempted && await needs_seq_transition()) {
-        void rebuild({ reason: 'seq_cursor_transition' })
-        return
-      }
-
+      // NOTE: a pre-server_seq OPFS file (no `synced_seq` in db_metadata) needs
+      // NO special handling here — the engine reads a null cursor and does a
+      // full pull with prune-to-response (full-resync semantics), converging
+      // the file in place. The old `seq_cursor_transition` rebuild (delete +
+      // refetch snapshot) raced live queries with a torn-down connection
+      // (SQLITE_MISUSE) and looped on worker respawn, wedging editors on
+      // "Loading" forever (tutelo-saponi incident, 2026-07-13).
       engine.start()
       report_boot_complete(is_opfs_backed ? 'opfs' : 'memory')
 
@@ -292,26 +288,17 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
       await reset().catch(err => console.error(`[dict-instance] ${dict_id} auto-reset failed:`, err))
     }
 
-    /** Old-cursor file: synced under the pre-2026-07-09 ISO cursor, no seq cursor yet. */
-    async function needs_seq_transition(): Promise<boolean> {
-      const rows = await connection.query<{ key: string }>(
-        `SELECT key FROM db_metadata WHERE key IN ('synced_seq', 'last_modified_at')`,
-      )
-      const keys = new Set(rows.map(row => row.key))
-      return !keys.has('synced_seq') && keys.has('last_modified_at')
-    }
-
     /**
-     * FK-wedge / seq-transition self-heal: flush any un-pushed local writes to
-     * the server (push-only — applying pulls is exactly what's failing in the
-     * wedge state), then reset to a fresh snapshot. A failed sync has already
+     * FK-wedge self-heal: flush any un-pushed local writes to the server
+     * (push-only — applying pulls is exactly what's failing in the wedge
+     * state), then reset to a fresh snapshot. A failed sync has already
      * pushed its dirty rows server-side (the server commits push+pull in its
      * own transaction; the failure is the LOCAL apply), so the flush only
      * covers writes made since — and if the flush itself fails (offline, 5xx)
      * we ABORT rather than discard local work; the engine keeps retrying and
      * the breaker prompts at 3 as before.
      */
-    async function rebuild({ reason }: { reason: 'fk_wedge' | 'seq_cursor_transition' }): Promise<void> {
+    async function rebuild({ reason }: { reason: 'fk_wedge' }): Promise<void> {
       if (rebuild_attempted)
         return
       rebuild_attempted = true
@@ -320,8 +307,6 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
         flushed_push = await engine.flush_push_only()
       } catch (err) {
         console.warn(`[dict-instance] ${dict_id} rebuild (${reason}) aborted — could not flush un-pushed local writes:`, err)
-        if (reason === 'seq_cursor_transition')
-          engine.start() // fall back to the engine's cursor-null full pull (no data loss, just heavy)
         return
       }
       console.warn(`[dict-instance] ${dict_id} rebuilding from a fresh snapshot (${reason}; flushed_push=${flushed_push})`)

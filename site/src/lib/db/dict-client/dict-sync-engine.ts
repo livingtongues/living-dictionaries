@@ -456,6 +456,33 @@ export class DictSyncEngine {
         affected.add(table)
       }
 
+      // FULL-RESYNC semantics for a null-cursor pull over a NON-empty DB: the
+      // server sends no tombstones when `since` is null (nothing to diff
+      // against), so rows deleted server-side since this file's last sync would
+      // linger as ghosts forever. Prune every local row absent from the full
+      // response, keeping dirty rows (un-pushed local work) — the same
+      // prune-to-response the admin engine's full resync uses. This is what
+      // lets a pre-server_seq OPFS file (no `synced_seq`) converge IN PLACE via
+      // the normal pull path instead of the old delete-and-refetch snapshot
+      // rebuild, which raced live queries (SQLITE_MISUSE) and could loop on
+      // worker respawn (the 2026-07-13 tutelo-saponi stuck-"Loading" incident).
+      // Runs under defer_foreign_keys, so prune order across tables is safe.
+      if (request.synced_up_to === null) {
+        for (const table of DICT_SYNCABLE_TABLES) {
+          const server_ids = new Set((response.changes[table] ?? []).map(row => (row as { id: string }).id))
+          const local_rows = await this.#connection.query<{ id: string, dirty: number | null }>(
+            `SELECT id, dirty FROM "${table}"`,
+          )
+          for (const local of local_rows) {
+            if (local.dirty === 1 || server_ids.has(local.id) || pushed_ids[table]?.has(local.id))
+              continue
+            await this.#connection.execute(`DELETE FROM "${table}" WHERE id = ?`, [local.id])
+            affected.add(table)
+            deleted_rows.push({ table_name: table, id: local.id })
+          }
+        }
+      }
+
       // Clear dirty flags ONLY on the rows we actually pushed (keyed by id), not a blanket
       // `WHERE dirty = 1`. A blanket clear would silently drop rows inserted AFTER
       // #build_request snapshotted but DURING this sync's network round-trip (writes only
@@ -511,8 +538,9 @@ export class DictSyncEngine {
    * and BAKED into fresh snapshots by the server (R2 builder + /db endpoint),
    * so a snapshot boot starts pulling from exactly the snapshot's high-water
    * mark. Absent on a pre-server_seq local file (the old ISO cursor under
-   * `last_modified_at` is ignored) → null → the instance's transition rebuild
-   * handles it (OPFS) or a full pull backfills (MemoryVFS).
+   * `last_modified_at` is ignored) → null → a full pull with prune-to-response
+   * (full-resync semantics — see `#apply_transaction`) converges the file in
+   * place; a MemoryVFS/empty boot takes the same path with nothing to prune.
    */
   async #read_cursor(): Promise<number | null> {
     const rows = await this.#connection.query<{ value: string }>(

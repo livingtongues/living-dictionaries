@@ -180,13 +180,15 @@ export function report_dict_storage_reopened({ dict_id, attempt }: { dict_id: st
 
 /**
  * Ship a "FK self-heal" marker (`sync_self_healed`) — the instance detected the
- * FK-wedge class (2 consecutive `fk_constraint` apply failures, or the one-time
- * seq-cursor transition) and is rebuilding from a fresh snapshot. THE row to
- * look for when verifying wedged editors recovered after the 2026-07-09 fix.
+ * FK-wedge class (2 consecutive `fk_constraint` apply failures) and is
+ * rebuilding from a fresh snapshot. THE row to look for when verifying wedged
+ * editors recovered after the 2026-07-09 fix. (The `seq_cursor_transition`
+ * reason was retired 2026-07-13 — old-cursor files now converge in place via
+ * the engine's null-cursor full pull.)
  */
 export function report_dict_self_healed({ dict_id, reason, flushed_push }: {
   dict_id: string
-  reason: 'fk_wedge' | 'seq_cursor_transition'
+  reason: 'fk_wedge'
   flushed_push: boolean
 }): void {
   try {

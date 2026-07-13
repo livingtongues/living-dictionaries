@@ -596,7 +596,12 @@ tombstones). **Self-heal:** a 2nd consecutive `fk_constraint` apply failure
 triggers automatic recovery — admin engine does a full resync (cursor null →
 prune local rows absent from the response, keeping dirty + just-pushed); the
 dict instance does `rebuild()` (flush-push-only → reset to fresh snapshot).
-`sync_self_healed` in client_logs marks each occurrence.
+`sync_self_healed` in client_logs marks each occurrence. **Dict null-cursor
+pulls carry the same full-resync prune semantics** (2026-07-13): a
+pre-server_seq OPFS file (no `synced_seq`) converges IN PLACE via a full pull +
+prune-to-response — NEVER reintroduce a boot-time snapshot reset for that case;
+the old `seq_cursor_transition` rebuild raced live queries (SQLITE_MISUSE) and
+looped on worker respawn, wedging editors on "Loading" forever (tutelo-saponi).
 
 **Sync-engine invariants (don't relearn):** clear `dirty` ONLY by pushed row id
 (not blanket `WHERE dirty=1` — junctions silently never sync); drain local
