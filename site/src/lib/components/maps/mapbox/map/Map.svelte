@@ -7,7 +7,7 @@
   import { bindEvents } from '../event-bindings'
   import { get_time_zone_longitude } from '../../utils/get-time-zone-longitude'
   import { ADDED_FEATURE_ID_PREFIX } from '../../utils/random-id'
-  import { loadScriptOnce, loadStylesOnce } from '$lib/utils/load-once'
+  import { load_script_once, load_styles_once } from '$lib/utils/load-once'
   import { log_event } from '$lib/debug/remote-log'
   import { page } from '$app/state'
   import { PUBLIC_mapboxAccessToken } from '$env/static/public'
@@ -93,14 +93,14 @@
   let unbind: () => void
 
   onMount(async () => {
-    await loadScriptOnce(
+    await load_script_once(
       `//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.js`,
     )
-    await loadStylesOnce(
+    await load_styles_once(
       `//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.css`,
     )
     if (customStylesheetUrl) {
-      await loadStylesOnce(customStylesheetUrl)
+      await load_styles_once(customStylesheetUrl)
     }
 
     window.mapboxgl.accessToken = accessToken

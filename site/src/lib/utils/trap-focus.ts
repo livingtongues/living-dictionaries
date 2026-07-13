@@ -2,7 +2,7 @@
  * Keyboard handler that keeps Tab/Shift+Tab cycling within `container`.
  * Wire from a `keydown` handler that filters for Tab.
  */
-export function trapFocus(e: KeyboardEvent, container: HTMLElement) {
+export function trap_focus(e: KeyboardEvent, container: HTMLElement) {
   const nodes = container.querySelectorAll('*') as NodeListOf<HTMLElement>
   const tabbable = Array.from(nodes).filter(n => n.tabIndex >= 0)
 

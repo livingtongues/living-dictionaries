@@ -6,7 +6,7 @@
   import { mapKey } from '../context'
   import type { MapKeyContext } from '../context'
   import { bindEvents } from '../event-bindings'
-  import { loadScriptOnce, loadStylesOnce } from '$lib/utils/load-once'
+  import { load_script_once, load_styles_once } from '$lib/utils/load-once'
 
   const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
   const map = getMap()
@@ -80,13 +80,13 @@
   let geocoder: MapboxGeocoder = $state()
 
   onMount(async () => {
-    await loadScriptOnce(
+    await load_script_once(
       `//api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/${version}/mapbox-gl-geocoder.min.js`,
     )
-    await loadStylesOnce(
+    await load_styles_once(
       `//api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/${version}/mapbox-gl-geocoder.css`,
     )
-    customStylesheetUrl && (await loadStylesOnce(customStylesheetUrl))
+    customStylesheetUrl && (await load_styles_once(customStylesheetUrl))
     geocoder = new window.MapboxGeocoder({
       ...options,
       // @ts-expect-error - types are not yet updated to 5.0.0 so they don't have enableGeolocation

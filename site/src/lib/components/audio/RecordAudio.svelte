@@ -16,7 +16,7 @@
   let RecordRTC: typeof import('recordrtc') = $state()
   onMount(async () => {
     RecordRTC = (await import('recordrtc')).default
-  // Could also use `await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.5.6/RecordRTC.js');` in context module block
+  // Could also use `await load_script_once('https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.5.6/RecordRTC.js');` in context module block
   })
 
   // let recorder: StereoAudioRecorder = null;

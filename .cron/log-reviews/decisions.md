@@ -35,6 +35,14 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
 - **2026-07-11 — new zombie tab in the `sync_failed` storm is a non-admin (Marlene, ~4.6k/day
   null-session).** Same known-noise family as Greg's stale tab (2026-07-09 ruling); no forced-reload
   will be built. Don't re-triage individual stale-tab clients.
-- **2026-07-11 — waveform ▶ play-before-init bug** (`Waveform.svelte` `wavesurfer.play()` on undefined
-  during async wavesurfer.js import): long-standing 🟡 P3, fix = null-guard. Action item filed; not a
-  regression. Guaycura is a REAL Baja dictionary (MX-BCS), not the conlang fork.
+- **2026-07-12 — waveform ▶ play-before-init bug: CLOSED.** Commit `56a40b63` replaced wavesurfer.js
+  with a static canvas `Waveform.svelte` (plays via a plain `<audio>` element) — the async-import race
+  is gone entirely. 0 occurrences (was 7). Don't re-raise; the proposed null-guard is moot.
+- **2026-07-12 — search `RangeError: Maximum call stack size exceeded` on `/opata/entries?q="Flores"`:**
+  new low-freq 🟡 P3 WATCH. iPhone/Chrome-iOS, MX-Sinaloa, 2 rows/1 user/1 session, retired build.
+  Minified `Sk@/Qk@` recursion — NO confident fix, do not guess. Only act if it recurs on the current
+  build or from a 2nd user (then drill + repro with sourcemaps). Opata & Guaycura are REAL dictionaries,
+  not the conlang fork.
+- **2026-07-12 — LD dashboard is AHEAD of siblings on: thin-data perf guard (`THIN_SAMPLE_N=15`) + the
+  At-a-Glance strip.** Both are being ported FROM LD by house/tutor — don't accept them as inbound Phase D
+  ports; they're LD-originals.

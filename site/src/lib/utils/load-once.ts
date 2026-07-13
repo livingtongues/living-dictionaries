@@ -9,7 +9,7 @@ function loadScript(url: string): Promise<unknown> {
   })
 }
 
-export const loadScriptOnce = (() => {
+export const load_script_once = (() => {
   const loaded: string[] = []
   return async function (url: string) {
     if (!loaded.includes(url)) {
@@ -32,7 +32,7 @@ function loadStyles(url: string): Promise<unknown> {
   })
 }
 
-export const loadStylesOnce = (() => {
+export const load_styles_once = (() => {
   const loaded: string[] = []
   return async function (url: string) {
     if (!loaded.includes(url)) {

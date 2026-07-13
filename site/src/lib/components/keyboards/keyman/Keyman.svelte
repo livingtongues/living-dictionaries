@@ -16,7 +16,7 @@
   import { additional_keyboards, glossing_languages } from '../../../glosses/glossing-languages'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
-  import { loadScriptOnce } from '$lib/utils/load-once'
+  import { load_script_once } from '$lib/utils/load-once'
   import { browser } from '$app/environment'
 
   interface Props {
@@ -57,7 +57,7 @@
       keyman_writing_systems = systems
     })
 
-    await loadScriptOnce(`https://s.keyman.com/kmw/engine/${version}/keymanweb.js`)
+    await load_script_once(`https://s.keyman.com/kmw/engine/${version}/keymanweb.js`)
 
     await keyman.init({
       attachType: 'manual',
@@ -86,7 +86,7 @@
 
   async function targetInput() {
     // `wrapperEl` can be null if the entry dialog is torn down while Keyman's
-    // async init is still resolving (onMount → loadScriptOnce → init → here).
+    // async init is still resolving (onMount → load_script_once → init → here).
     // Touching `.querySelector`/`.firstElementChild` on null was a recurring
     // `firstElementChild`-on-null unhandled_rejection in production.
     if (!wrapperEl)

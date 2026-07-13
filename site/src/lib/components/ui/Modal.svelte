@@ -3,7 +3,7 @@
   import { onMount } from 'svelte'
   import { fade } from 'svelte/transition'
   import { portal } from '$lib/utils/portal'
-  import { trapFocus } from '$lib/utils/trap-focus'
+  import { trap_focus } from '$lib/utils/trap-focus'
 
   interface Props {
     class?: string
@@ -48,7 +48,7 @@
     if (e.key === 'Escape')
       return on_close()
     if (e.key === 'Tab')
-      trapFocus(e, modal)
+      trap_focus(e, modal)
   }} />
 
 <div

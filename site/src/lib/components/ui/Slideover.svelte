@@ -2,7 +2,7 @@
   import { fade, fly } from 'svelte/transition'
   import IconFaSolidTimes from '~icons/fa-solid/times'
   import { portal } from '$lib/utils/portal'
-  import { trapFocus } from '$lib/utils/trap-focus'
+  import { trap_focus } from '$lib/utils/trap-focus'
 
   const {
     zIndex = 60,
@@ -30,7 +30,7 @@
 <svelte:window
   onkeydown={(e) => {
     if (e.key === 'Escape') return close()
-    if (e.key === 'Tab') trapFocus(e, slideover)
+    if (e.key === 'Tab') trap_focus(e, slideover)
   }} />
 
 <div
