@@ -45,7 +45,11 @@ re-trigger the transition → the 474× loop.
   synced_seq=1704, no console/page errors). Screenshots /tmp/stale-cursor-{broken,fixed}.png.
 
 ## Post-deploy follow-up
-- [ ] After deploy: Jacob + affected user reload → expect entries to load. Watch client_logs for
+- ✅ Deployed 2026-07-13 (~08:5x UTC, version 1783930717688, commit df7dec18).
+- ✅ PROD-verified: headless browser against livingdictionaries.app — staged the stale state
+      (deleted synced_seq + planted ghost in the browser OPFS via `__ld_dict_connections`),
+      plain reload → synced_seq=1704 restored, ghost pruned, 1682 entries rendered, no errors.
+- [ ] Jacob + affected user reload → expect entries to load. Watch client_logs for
       `Failed to read dict bundle` / `sync_self_healed seq_cursor_transition` (should cease; the
       reason literally no longer exists in the bundle) on tutelo/batsi/werikyana.
 - Unrelated case spotted while digging (NOT this bug): `äynu` loops `duplicate column name:
