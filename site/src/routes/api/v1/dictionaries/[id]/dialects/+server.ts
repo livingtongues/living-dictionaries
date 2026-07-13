@@ -1,5 +1,6 @@
 import type { RequestHandler } from './$types'
 import type { DialectRecord } from '$lib/db/server/v1-sub-resources'
+import type { Coordinates } from '$lib/types'
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
@@ -14,6 +15,8 @@ export interface V1DialectsGetResponseBody {
 
 export interface V1DialectPostRequestBody {
   name: string
+  /** Optional where-spoken geometry (the variety's areal extent). Applied on create only. */
+  coordinates?: Coordinates | null
 }
 
 export interface V1DialectPostResponseBody {
@@ -32,7 +35,7 @@ export const POST: RequestHandler = async (event) => {
   const body = await event.request.json() as V1DialectPostRequestBody
   let result
   try {
-    result = find_or_create_dialect({ db: get_dictionary_db(dictionary.id), history_db: get_dictionary_history_db(dictionary.id), user_id: access.user_id, api_key_id: access.key_id ?? null, name: body.name })
+    result = find_or_create_dialect({ db: get_dictionary_db(dictionary.id), history_db: get_dictionary_history_db(dictionary.id), user_id: access.user_id, api_key_id: access.key_id ?? null, name: body.name, coordinates: body.coordinates })
   } catch (err) {
     error(ResponseCodes.BAD_REQUEST, (err as Error).message)
   }

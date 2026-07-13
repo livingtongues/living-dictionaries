@@ -1,6 +1,6 @@
 import type { EntryInput, EntryPatch, SenseInput, SentenceInput, SentencePatch } from './entry-input'
 import { describe, expect, test } from 'vitest'
-import { build_openapi_spec } from './openapi'
+import { build_openapi_spec, OPENAPI_TAGS, select_openapi_view, tag_for_path } from './openapi'
 
 const spec = build_openapi_spec({ origin: 'https://example.test' })
 
@@ -23,7 +23,7 @@ function property_keys(name: string): string[] {
 const ENTRY_INPUT_KEYS: Record<keyof EntryInput, true> = {
   id: true, lexeme: true, phonetic: true, interlinearization: true, morphology: true,
   notes: true, linguistic_history: true, sources: true, scientific_names: true, elicitation_id: true,
-  dialects: true, tags: true, senses: true,
+  coordinates: true, dialects: true, tags: true, senses: true,
 }
 const SENSE_INPUT_KEYS: Record<keyof SenseInput, true> = {
   id: true, glosses: true, definition: true, parts_of_speech: true, semantic_domains: true,
@@ -38,7 +38,7 @@ const SENTENCE_PATCH_KEYS: Record<keyof SentencePatch, true> = {
 const ENTRY_PATCH_KEYS: Record<keyof EntryPatch, true> = {
   lexeme: true, phonetic: true, interlinearization: true, morphology: true, notes: true,
   linguistic_history: true, sources: true, scientific_names: true, elicitation_id: true,
-  dialects: true, tags: true, senses: true,
+  coordinates: true, dialects: true, tags: true, senses: true,
 }
 
 function expected(keys: Record<string, true>): string[] {
@@ -115,5 +115,75 @@ describe(build_openapi_spec, () => {
   test('is a valid OpenAPI 3.1 document with the server origin', () => {
     expect(spec.openapi).toBe('3.1.0')
     expect((spec.servers as { url: string }[])[0].url).toBe('https://example.test')
+  })
+
+  test('every operation is tagged with a known tag', () => {
+    const tag_names = new Set<string>(OPENAPI_TAGS.map(t => t.name))
+    const paths = spec.paths as Record<string, Record<string, { tags?: string[] }>>
+    for (const [path, ops] of Object.entries(paths)) {
+      for (const [method, op] of Object.entries(ops)) {
+        expect(op.tags, `${method} ${path}`).toHaveLength(1)
+        expect(tag_names.has((op.tags ?? [])[0]), `${method} ${path} → ${op.tags}`).toBeTruthy()
+      }
+    }
+  })
+})
+
+describe(tag_for_path, () => {
+  test('maps paths to their group (media wins over the owning resource)', () => {
+    expect(tag_for_path('/api/v1/dictionaries/{id}')).toBe('dictionary')
+    expect(tag_for_path('/api/v1/dictionaries/{id}/entries')).toBe('entries')
+    expect(tag_for_path('/api/v1/dictionaries/{id}/entries/{entryId}/audio')).toBe('media')
+    expect(tag_for_path('/api/v1/dictionaries/{id}/senses/{senseId}/photos/{photoId}')).toBe('media')
+    expect(tag_for_path('/api/v1/dictionaries/{id}/senses/{senseId}')).toBe('entries')
+    expect(tag_for_path('/api/v1/dictionaries/{id}/dialects/{dialectId}')).toBe('dialects')
+    expect(tag_for_path('/api/v1/dictionaries/{id}/featured-entries')).toBe('featured-entries')
+  })
+})
+
+describe(select_openapi_view, () => {
+  test('no view/tag → the full spec unchanged', () => {
+    expect(select_openapi_view({ spec, view: null, tag: null })).toBe(spec)
+  })
+
+  test('view=index → summaries + schema names only, no property bodies', () => {
+    const index = select_openapi_view({ spec, view: 'index' }) as {
+      paths: Record<string, Record<string, { summary?: string, tags?: string[] }>>
+      schema_names: string[]
+      components?: unknown
+    }
+    // Same set of paths as the full spec…
+    expect(Object.keys(index.paths).sort()).toEqual(Object.keys(spec.paths as object).sort())
+    // …but each operation is just { summary, tags } — no requestBody/responses.
+    const get_entries = index.paths['/api/v1/dictionaries/{id}/entries'].get
+    expect(Object.keys(get_entries).sort()).toEqual(['summary', 'tags'])
+    // Schema NAMES only, no bodies.
+    expect(index.schema_names).toContain('EntryInput')
+    expect(index.schema_names).toContain('Coordinates')
+    expect(index.components).toBeUndefined()
+  })
+
+  test('tag=dialects → only dialect paths, full schemas retained for $ref resolution', () => {
+    const sliced = select_openapi_view({ spec, tag: 'dialects' }) as {
+      paths: Record<string, unknown>
+      tags: { name: string }[]
+      components: { schemas: Record<string, unknown> }
+    }
+    expect(Object.keys(sliced.paths).sort()).toEqual([
+      '/api/v1/dictionaries/{id}/dialects',
+      '/api/v1/dictionaries/{id}/dialects/{dialectId}',
+    ])
+    expect(sliced.tags).toEqual([OPENAPI_TAGS.find(t => t.name === 'dialects')])
+    // All schemas kept so `#/components/schemas/Coordinates` still resolves.
+    expect(sliced.components.schemas.Coordinates).toBeDefined()
+    expect(sliced.components.schemas.EntryInput).toBeDefined()
+  })
+
+  test('tag=media → collects the audio/photo/video paths across owners', () => {
+    const sliced = select_openapi_view({ spec, tag: 'media' }) as { paths: Record<string, unknown> }
+    const paths = Object.keys(sliced.paths)
+    expect(paths).toContain('/api/v1/dictionaries/{id}/entries/{entryId}/audio')
+    expect(paths).toContain('/api/v1/dictionaries/{id}/texts/{textId}/videos')
+    expect(paths.every(p => /\/(?:audio|photos|videos)(?:\/|$)/.test(p))).toBeTruthy()
   })
 })

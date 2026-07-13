@@ -15,7 +15,7 @@ export interface EntryData {
   main: Pick<Tables<'entries'>, 'coordinates' | 'elicitation_id' | 'lexeme' | 'interlinearization' | 'linguistic_history' | 'morphology' | 'notes' | 'phonetic' | 'scientific_names' | 'sources'>
   senses: EntryDataSense[]
   audios?: EntryDataAudio[]
-  dialects?: Pick<Tables<'dialects'>, 'id' | 'updated_at' | 'name'>[]
+  dialects?: Pick<Tables<'dialects'>, 'id' | 'updated_at' | 'name' | 'coordinates'>[]
   tags?: Pick<Tables<'tags'>, 'id' | 'updated_at' | 'name' | 'private'>[]
   updated_at: string
   deleted?: string

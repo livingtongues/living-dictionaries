@@ -293,6 +293,58 @@ describe(apply_entry_update, () => {
   })
 })
 
+describe('entry coordinates', () => {
+  const point = { coordinates: { longitude: 77.2, latitude: 28.6 }, label: 'Khirsu' }
+
+  test('POST persists valid points + regions, and a bad geometry fails ONLY that item', () => {
+    const ring = [{ longitude: 0, latitude: 0 }, { longitude: 1, latitude: 1 }, { longitude: 2, latitude: 0 }]
+    const report = apply_entry_writes({ db, user_id: 'u1', entries: [
+      { lexeme: 'good', coordinates: { points: [point], regions: [{ coordinates: ring }] } },
+      { lexeme: 'bad', coordinates: { points: [{ coordinates: { longitude: 999, latitude: 0 } }] } },
+    ] })
+    expect(report.created).toBe(1)
+    expect(report.failed).toBe(1)
+    expect(report.results[1].error).toMatch(/longitude must be between/)
+    const good = db.prepare(`SELECT coordinates FROM entries WHERE id = ?`).get(report.results[0].entry_id) as { coordinates: string }
+    expect(JSON.parse(good.coordinates)).toEqual({ points: [point], regions: [{ coordinates: ring }] })
+  })
+
+  test('POST rejects over the point cap for that item', () => {
+    const many = Array.from({ length: 101 }, () => ({ coordinates: { longitude: 0, latitude: 0 } }))
+    const report = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'x', coordinates: { points: many } }] })
+    expect(report.failed).toBe(1)
+    expect(report.results[0].error).toMatch(/at most 100 points/)
+  })
+
+  test('PATCH replaces coordinates, clears with null, and leaves them untouched when omitted', () => {
+    const report = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'geo', coordinates: { points: [point] } }] })
+    const entry_id = report.results[0].entry_id as string
+
+    const next = { coordinates: { longitude: 10, latitude: 20 } }
+    apply_entry_update({ db, entry_id, patch: { coordinates: { points: [next] } }, user_id: 'u1' })
+    let row = db.prepare(`SELECT coordinates, phonetic FROM entries WHERE id = ?`).get(entry_id) as { coordinates: string, phonetic: string | null }
+    expect(JSON.parse(row.coordinates)).toEqual({ points: [next] })
+
+    // Omitted → untouched (a scalar-only patch keeps the geometry).
+    apply_entry_update({ db, entry_id, patch: { phonetic: 'ɡeoʊ' }, user_id: 'u1' })
+    row = db.prepare(`SELECT coordinates, phonetic FROM entries WHERE id = ?`).get(entry_id) as { coordinates: string, phonetic: string | null }
+    expect(JSON.parse(row.coordinates)).toEqual({ points: [next] })
+    expect(row.phonetic).toBe('ɡeoʊ')
+
+    // null → cleared.
+    apply_entry_update({ db, entry_id, patch: { coordinates: null }, user_id: 'u1' })
+    row = db.prepare(`SELECT coordinates, phonetic FROM entries WHERE id = ?`).get(entry_id) as { coordinates: string, phonetic: string | null }
+    expect(row.coordinates).toBe(null)
+  })
+
+  test('PATCH with an invalid geometry throws (route maps to 400)', () => {
+    const report = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'z' }] })
+    const entry_id = report.results[0].entry_id as string
+    expect(() => apply_entry_update({ db, entry_id, patch: { coordinates: { regions: [{ coordinates: [{ longitude: 0, latitude: 0 }] }] } }, user_id: 'u1' }))
+      .toThrow(/at least 3 vertices/)
+  })
+})
+
 describe(apply_entry_delete, () => {
   test('returns found:false for an unknown entry', () => {
     expect(apply_entry_delete({ db, entry_id: 'nope', user_id: 'u1' }).found).toBeFalsy()

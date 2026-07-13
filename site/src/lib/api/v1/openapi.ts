@@ -21,6 +21,47 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const client_id_prop = { type: 'string', format: 'uuid', description: 'Optional client-generated UUID (any version — deterministic uuid5 ids work well). Supply it to know the id up front (for later edits) and to make writes idempotent — re-sending the same id is a safe no-op. Omit → the server mints one.' }
 
+  const LngLat = {
+    type: 'object',
+    required: ['longitude', 'latitude'],
+    description: 'A single WGS-84 geographic point.',
+    properties: {
+      longitude: { type: 'number', minimum: -180, maximum: 180, description: 'Decimal degrees east, −180…180.' },
+      latitude: { type: 'number', minimum: -90, maximum: 90, description: 'Decimal degrees north, −90…90.' },
+    },
+    example: { longitude: 77.2, latitude: 28.6 },
+  }
+  const GeoPoint = {
+    type: 'object',
+    required: ['coordinates'],
+    description: 'A single located point (e.g. one elicitation/survey village).',
+    properties: {
+      coordinates: { $ref: '#/components/schemas/LngLat' },
+      label: { type: 'string', description: 'Optional display label (e.g. the village name).' },
+      color: { type: 'string', description: 'Optional marker color (any CSS color string).' },
+    },
+  }
+  const GeoRegion = {
+    type: 'object',
+    required: ['coordinates'],
+    description: 'A closed area, given as its ring of vertices (3–100).',
+    properties: {
+      coordinates: { type: 'array', items: { $ref: '#/components/schemas/LngLat' }, minItems: 3, maxItems: 100, description: 'Ring vertices; at least 3.' },
+      label: { type: 'string' },
+      color: { type: 'string' },
+    },
+  }
+  const Coordinates = {
+    type: 'object',
+    description: 'Where-spoken geometry, `{ points?, regions? }`. On an ENTRY these are the attestation/elicitation location(s) of that specific form; on a DIALECT they are the variety\'s areal extent (set once on the dialect, not repeated per entry). Longitude/latitude are validated to their real-world ranges; a bad point rejects the write. Limits: ≤100 points, ≤20 regions, each region 3–100 vertices. On PATCH the whole object is REPLACED — send `null` to clear, or omit the field to leave it untouched.',
+    properties: {
+      points: { type: 'array', items: { $ref: '#/components/schemas/GeoPoint' }, maxItems: 100 },
+      regions: { type: 'array', items: { $ref: '#/components/schemas/GeoRegion' }, maxItems: 20 },
+    },
+    example: { points: [{ coordinates: { longitude: 77.2, latitude: 28.6 }, label: 'Khirsu' }] },
+  }
+  const CoordinatesNullableRef = { oneOf: [{ $ref: '#/components/schemas/Coordinates' }, { type: 'null' }] }
+
   const SentenceInput = {
     type: 'object',
     description: 'An example sentence.',
@@ -64,6 +105,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist in this dictionary\'s registry (create via `POST …/sources`); an unknown slug rejects the write.' },
       scientific_names: StringOrStringArray,
       elicitation_id: { type: 'string', description: 'Source-side stable id for word-list/elicitation ordering. Persisted and queryable via `?elicitation_id=`; use it as a server-recoverable dedupe key ONLY if your source id is genuinely elicitation data — for generic idempotency, supply your own `id` instead.' },
+      coordinates: { ...CoordinatesNullableRef, description: 'Where-spoken geometry for this form: the attestation/elicitation point(s) (and/or region[s]). See the `Coordinates` schema.' },
       dialects: { ...StringOrStringArray, description: 'Dialect names — found-or-created on this dictionary.' },
       tags: { ...StringOrStringArray, description: 'Tag names — found-or-created.' },
       senses: { type: 'array', items: { $ref: '#/components/schemas/SenseInput' }, description: 'Defaults to one empty sense if omitted.' },
@@ -100,6 +142,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist (create via `POST …/sources`). Replaces the entry\'s current source list.' },
       scientific_names: StringOrStringArray,
       elicitation_id: { type: 'string' },
+      coordinates: { ...CoordinatesNullableRef, description: 'Whole-object replace: `{ points?, regions? }` overwrites; `null` clears; omit → untouched.' },
       dialects: StringOrStringArray,
       tags: StringOrStringArray,
       senses: { type: 'array', items: { $ref: '#/components/schemas/SensePatch' } },
@@ -298,7 +341,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       sources: { type: 'array', items: { type: 'string' }, nullable: true },
       scientific_names: { type: 'array', items: { type: 'string' }, nullable: true },
       elicitation_id: { type: 'string', nullable: true },
-      coordinates: { type: 'object', nullable: true, description: 'Where-spoken geometry, when set.' },
+      coordinates: { ...CoordinatesNullableRef, description: 'Where-spoken geometry (attestation/elicitation location) for this form, when set.' },
     },
   }
 
@@ -310,7 +353,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       main: { $ref: '#/components/schemas/EntryMain' },
       senses: { type: 'array', items: { $ref: '#/components/schemas/SenseFull' } },
       tags: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, private: { type: 'boolean', nullable: true }, updated_at: { type: 'string', format: 'date-time' } } }, description: 'Entry-level tags (includes the `import_id` private tag from a bulk import). Present only when tags exist.' },
-      dialects: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, updated_at: { type: 'string', format: 'date-time' } } }, description: 'Present only when dialects exist.' },
+      dialects: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, name: { $ref: '#/components/schemas/MultiString' }, coordinates: { ...CoordinatesNullableRef, description: 'The dialect\'s areal-extent geometry, when set (managed via the `…/dialects` endpoints, not entry payloads).' }, updated_at: { type: 'string', format: 'date-time' } } }, description: 'Present only when dialects exist.' },
       audios: { type: 'array', items: { $ref: '#/components/schemas/AudioMedia' }, description: 'Present only when audio exists. Write via `POST …/entries/{entryId}/audio`.' },
       updated_at: { type: 'string', format: 'date-time' },
     },
@@ -551,8 +594,9 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     '/api/v1/dictionaries/{id}/texts/{textId}/videos/{videoId}': media_delete_op({ owner_label: 'text', owner_params: [text_id_param], media_id_p: video_id_param, medium: 'video' }),
   }
 
-  return {
+  const spec = {
     openapi: '3.1.0',
+    tags: OPENAPI_TAGS,
     info: {
       title: 'Living Dictionaries Write API',
       version: '1.0.0',
@@ -575,7 +619,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '4. Spot-verify with `GET /api/v1/dictionaries/{id}/entries/{entryId}` (returns the full nested entry — the READ shape), or bulk-read with `GET /api/v1/dictionaries/{id}/entries?include=senses`. Heads-up on the input→output asymmetry: top-level scalars you POST come back nested under `entry.main`, and `senses[].example_sentences` come back as `senses[].sentences`. See the `EntryResponse` schema. (`elicitation_id` is for word-list/elicitation ordering; it is persisted and queryable via `?elicitation_id=`, so use it for dedupe only if your source id is genuinely elicitation data — otherwise use your own `id` as above.)',
         '',
         '## Data model',
-        'An **entry** is a headword (`lexeme`) plus metadata and one or more **senses**. A **sense** is one meaning: its `glosses` (short translations keyed by gloss-language), an optional longer `definition`, `parts_of_speech`, `semantic_domains`, and `example_sentences`. `parts_of_speech` values should come from the supported abbreviation list in the `SenseInput` schema (abbrevs and full English names are matched case-insensitively and stored as the canonical lowercase abbrev, e.g. "N"/"Noun" → "n"; anything else is stored verbatim). An **example sentence** has vernacular `text` + `translation`(s). `dialects` and `tags` are entry-level labels (referenced by name; created automatically if new). If you omit `senses`, one empty sense is created. A **text** is a separate object: a connected passage/story (`title`) with its own ORDERED list of sentences (each with optional paragraph breaks) — use the `…/texts` endpoints for those; they are independent of entries.',
+        'An **entry** is a headword (`lexeme`) plus metadata and one or more **senses**. A **sense** is one meaning: its `glosses` (short translations keyed by gloss-language), an optional longer `definition`, `parts_of_speech`, `semantic_domains`, and `example_sentences`. `parts_of_speech` values should come from the supported abbreviation list in the `SenseInput` schema (abbrevs and full English names are matched case-insensitively and stored as the canonical lowercase abbrev, e.g. "N"/"Noun" → "n"; anything else is stored verbatim). An **example sentence** has vernacular `text` + `translation`(s). `dialects` and `tags` are entry-level labels (referenced by name; created automatically if new). If you omit `senses`, one empty sense is created. An entry may carry `coordinates` — where-spoken geometry (points/regions) marking where THIS form was attested/elicited; a **dialect** has its own `coordinates` too, for the variety\'s areal extent (set via the `…/dialects` endpoints so one polygon isn\'t repeated across thousands of entries). See the `Coordinates` schema for the shape + limits. A **text** is a separate object: a connected passage/story (`title`) with its own ORDERED list of sentences (each with optional paragraph breaks) — use the `…/texts` endpoints for those; they are independent of entries.',
         '',
         '## Edits & deletes',
         '`PATCH …/entries/{entryId}` field-merges the entry: provided fields overwrite, omitted ones stay. `senses` are a true upsert by client `id`: an id already on the entry → field-merge that sense; an unknown id (or none) → create the sense WITH that id, so deterministic import ids (e.g. uuid5 of a stable external key) keep addressing the same sense across re-syncs. Example sentences upsert by id too (re-sent links are not duplicated); `dialects`/`tags` are added (never removed) by this call. `DELETE …/entries/{entryId}` removes the entry and its senses.',
@@ -602,6 +646,9 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '',
         '## Feedback (agents welcome)',
         'If you hit a wall — a field you need that doesn\'t exist, a bug, or an awkward workflow — `POST /api/v1/dictionaries/{id}/feedback` with `{ "message": "…" }`. It reaches the Living Dictionaries team directly (read OR write keys). After sending, relay the response\'s `relay_to_human` sentence to your human so they know what you asked for; if we adopt it we notify them directly.',
+        '',
+        '## Fetching this spec (progressive disclosure)',
+        'This document is comprehensive and grows over time. If you only need part of it, fetch a slice instead of the whole thing: `GET /api/v1/openapi.json?view=index` returns a compact map (every path + its method summaries + tag, plus the list of schema names) — read that first; then `GET /api/v1/openapi.json?tag=<name>` returns just one group\'s paths WITH their full ($ref-complete) schemas. Tag names are in the top-level `tags` list (e.g. `entries`, `media`, `texts`, `dialects`, `sources`). Fetching with no query params returns everything (this document).',
         '',
         '## Clients',
         'Any standard HTTP client works (curl, Python `requests`/`urllib`, fetch, etc.) — there is nothing special about this API. Sending a descriptive `User-Agent` (e.g. naming your import tool) is good practice.',
@@ -759,11 +806,11 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         delete: { summary: 'Unstar an entry', description: 'Removes the entry from the dictionary-home featured strip (by ENTRY id — one star per entry).', parameters: [dict_id_param, entry_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: { description: 'Entry is not starred' } } },
       },
       '/api/v1/dictionaries/{id}/dialects': {
-        get: { summary: 'List dialects', parameters: [dict_id_param], responses: { 200: { description: '{ dialects }' } } },
-        post: { summary: 'Find-or-create a dialect', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['name'], properties: { name: { type: 'string' } } } } } }, responses: { 200: { description: '{ dialect, created }' } } },
+        get: { summary: 'List dialects', description: 'Each dialect with its `name` and `coordinates` (areal-extent geometry, or `null`).', parameters: [dict_id_param], responses: { 200: { description: '{ dialects }' } } },
+        post: { summary: 'Find-or-create a dialect', description: 'Found-or-created by case-insensitive name. Optional `coordinates` set the variety\'s areal extent — applied on CREATE only (edit later via PATCH). Returns `{ dialect, created }`.', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['name'], properties: { name: { type: 'string' }, coordinates: { ...CoordinatesNullableRef, description: 'The variety\'s areal-extent geometry (points/regions). Applied only when the dialect is newly created.' } } } } } }, responses: { 200: { description: '{ dialect, created }' }, 400: { description: 'Invalid coordinates' } } },
       },
       '/api/v1/dictionaries/{id}/dialects/{dialectId}': {
-        patch: { summary: 'Rename a dialect', description: 'Renames the dialect (plain string or locale map). Affects EVERY entry it is on. Returns `{ dialect }`.', parameters: [dict_id_param, dialect_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { name: StringOrMultiString } } } } }, responses: { 200: { description: '{ dialect }' }, 400: { description: 'Name collides with another dialect' }, 404: {} } },
+        patch: { summary: 'Edit a dialect (name / coordinates)', description: 'Rename the dialect (plain string or locale map) and/or replace its `coordinates` (the variety\'s areal extent — whole-object replace; `null` clears; omit → untouched). Affects EVERY entry it is on. Returns `{ dialect }`.', parameters: [dict_id_param, dialect_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { name: StringOrMultiString, coordinates: { ...CoordinatesNullableRef, description: 'Replace the dialect\'s areal-extent geometry; `null` clears; omit → untouched.' } } } } } }, responses: { 200: { description: '{ dialect }' }, 400: { description: 'Name collides / invalid coordinates' }, 404: {} } },
         delete: { summary: 'Delete a dialect (globally)', description: 'Deletes the dialect and unlinks it from every entry. To remove it from just one entry use `DELETE …/entries/{entryId}/dialects/{dialectId}`.', parameters: [dict_id_param, dialect_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
       },
       '/api/v1/dictionaries/{id}/orthographies': {
@@ -790,6 +837,10 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       },
       schemas: {
         MultiString,
+        LngLat,
+        GeoPoint,
+        GeoRegion,
+        Coordinates,
         SentenceInput,
         SenseInput,
         EntryInput,
@@ -824,4 +875,116 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       },
     },
   }
+
+  // Tag every operation (derived from its path) so the spec groups cleanly and the
+  // `?tag=` slice can filter — see OPENAPI_TAGS + select_openapi_view.
+  for (const [path, ops] of Object.entries(spec.paths as Record<string, Record<string, { tags?: string[] }>>)) {
+    const tag = tag_for_path(path)
+    for (const method of Object.keys(ops))
+      ops[method].tags = [tag]
+  }
+
+  return spec as Record<string, unknown>
+}
+
+/**
+ * The operation groups. Order = the order a reader should skim them. Drives both
+ * the OpenAPI `tags` list and the `?tag=<name>` slice served by `select_openapi_view`.
+ */
+export const OPENAPI_TAGS = [
+  { name: 'dictionary', description: 'Read the dictionary\'s metadata (gloss languages, orthographies, entry count) — call this first.' },
+  { name: 'entries', description: 'Create, read, update, and delete entries, their senses, and example sentences.' },
+  { name: 'media', description: 'Attach or remove audio, photos, and videos on entries, senses, sentences, and texts.' },
+  { name: 'texts', description: 'Connected passages/stories with their own ordered sentences.' },
+  { name: 'relationships', description: 'Typed links between two entries (optionally narrowed to senses).' },
+  { name: 'dialects', description: 'Dialect labels and their areal-extent geometry.' },
+  { name: 'tags', description: 'Entry tags.' },
+  { name: 'speakers', description: 'Speaker records for audio/video attribution.' },
+  { name: 'sources', description: 'The citation/source registry entries and sentences reference by slug.' },
+  { name: 'orthographies', description: 'Alternate writing systems.' },
+  { name: 'featured-entries', description: 'The starred entries shown on the dictionary home page.' },
+  { name: 'feedback', description: 'Send feedback/requests to the Living Dictionaries team.' },
+] as const
+
+const PATH_SEGMENT_TAGS: Record<string, string> = {
+  'entries': 'entries',
+  'senses': 'entries',
+  'sentences': 'entries',
+  'relationships': 'relationships',
+  'texts': 'texts',
+  'feedback': 'feedback',
+  'speakers': 'speakers',
+  'tags': 'tags',
+  'featured-entries': 'featured-entries',
+  'dialects': 'dialects',
+  'orthographies': 'orthographies',
+  'sources': 'sources',
+}
+
+/** Derive an operation's tag from its path (media wins over the owning resource). */
+export function tag_for_path(path: string): string {
+  if (/\/(?:audio|photos|videos)(?:\/|$)/.test(path))
+    return 'media'
+  const rest = path.replace('/api/v1/dictionaries/{id}', '')
+  if (rest === '' || rest === '/')
+    return 'dictionary'
+  const [segment] = rest.split('/').filter(Boolean)
+  return PATH_SEGMENT_TAGS[segment] ?? 'other'
+}
+
+/**
+ * Progressive disclosure for the (large + growing) spec. The default full spec is
+ * ~100KB; an agent can fetch a compact map first, then just the group it needs:
+ *  • `view=index` → `info` + a `{ path → { method → { summary, tags } } }` map +
+ *    the schema NAMES only. No property bodies — a cheap first read.
+ *  • `tag=<name>` → only that group's paths, WITH the full ($ref-complete) schemas.
+ *  • neither → the complete spec (backward compatible default).
+ */
+export function select_openapi_view({ spec, view, tag }: { spec: Record<string, unknown>, view?: string | null, tag?: string | null }): Record<string, unknown> {
+  if (view === 'index')
+    return build_openapi_index(spec)
+  if (tag)
+    return filter_openapi_by_tag({ spec, tag })
+  return spec
+}
+
+function build_openapi_index(spec: Record<string, unknown>): Record<string, unknown> {
+  const full_paths = spec.paths as Record<string, Record<string, { summary?: string, tags?: string[] }>>
+  const paths: Record<string, Record<string, { summary?: string, tags?: string[] }>> = {}
+  for (const [path, ops] of Object.entries(full_paths)) {
+    paths[path] = {}
+    for (const [method, op] of Object.entries(ops))
+      paths[path][method] = { summary: op.summary, tags: op.tags }
+  }
+  const info = spec.info as { title?: string, version?: string }
+  const schema_names = Object.keys((spec.components as { schemas?: Record<string, unknown> }).schemas ?? {})
+  return {
+    openapi: spec.openapi,
+    tags: spec.tags,
+    info: {
+      title: info.title,
+      version: info.version,
+      description: [
+        'COMPACT INDEX of the Living Dictionaries Write API. Each path lists its method(s), one-line summary, and tag.',
+        'Every request needs `Authorization: Bearer ldk_…` (an API key scoped to one dictionary).',
+        'Fetch the operations WITH full request/response schemas for a group via `?tag=<name>` (e.g. `openapi.json?tag=entries`); the tag names are in the top-level `tags` list. Omit all query params for the complete spec. `schema_names` lists every component schema.',
+      ].join('\n'),
+    },
+    servers: spec.servers,
+    paths,
+    schema_names,
+  }
+}
+
+function filter_openapi_by_tag({ spec, tag }: { spec: Record<string, unknown>, tag: string }): Record<string, unknown> {
+  const full_paths = spec.paths as Record<string, Record<string, { tags?: string[] }>>
+  const paths: Record<string, Record<string, unknown>> = {}
+  for (const [path, ops] of Object.entries(full_paths)) {
+    const kept = Object.fromEntries(Object.entries(ops).filter(([, op]) => op.tags?.includes(tag)))
+    if (Object.keys(kept).length)
+      paths[path] = kept
+  }
+  const tags = (spec.tags as { name: string }[]).filter(t => t.name === tag)
+  // Keep ALL component schemas so every `$ref` in the kept paths still resolves.
+  return { ...spec, tags, paths }
 }

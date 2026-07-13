@@ -6,6 +6,7 @@ import { DICTIONARY_OPENED } from '$lib/debug/log-events'
 import { is_bot_user_agent } from '$lib/debug/parse-user-agent'
 import { geo_key } from '$lib/server/geo-from-request'
 import { log_server_event } from '$lib/server/log-server-event'
+import { get_admin_user_ids } from './admin-user-ids'
 import type { SessionActivity } from './bot-sessions'
 import { classify_ua_frequency_bot_sessions } from './bot-sessions'
 import { get_log_archive_db } from './log-archive-db'
@@ -113,7 +114,10 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
     db_tier: string | null
     country: string | null
     region: string | null
+    /** First non-null signed-in user for the session — lets the reader exclude admin sessions from geo. */
+    user_id: string | null
   }
+  const admin_user_ids = get_admin_user_ids({ shared_db })
   const parsed_rows: ParsedRow[] = []
   const session_activity = new Map<string, DailySessionAccum>()
   const webdriver_sessions = new Set<string>()
@@ -125,13 +129,15 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
     if (session_id) {
       let activity = session_activity.get(session_id)
       if (!activity) {
-        activity = { session_id, day, user_agent: row.user_agent, heartbeats: 0, has_user_id: false, db_tier: null, country: null, region: null }
+        activity = { session_id, day, user_agent: row.user_agent, heartbeats: 0, has_user_id: false, db_tier: null, country: null, region: null, user_id: null }
         session_activity.set(session_id, activity)
       }
       if (!activity.user_agent && row.user_agent)
         activity.user_agent = row.user_agent
-      if (row.user_id)
+      if (row.user_id) {
         activity.has_user_id = true
+        activity.user_id ??= row.user_id
+      }
       if (row.message === 'heartbeat')
         activity.heartbeats++
       if (context?.webdriver === true)
@@ -150,6 +156,13 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
   const session_is_bot = (session_id: string): boolean => {
     const activity = session_activity.get(session_id)
     return (activity ? is_bot_user_agent(activity.user_agent) : false) || webdriver_sessions.has(session_id) || freq_bot_sessions.has(session_id)
+  }
+  // Admin (level >= 2) sessions — excluded from the geo area tally only (they skew
+  // "where visitors come from"); still counted everywhere else.
+  const admin_sessions = new Set<string>()
+  for (const activity of session_activity.values()) {
+    if (activity.user_id && admin_user_ids.has(activity.user_id))
+      admin_sessions.add(activity.session_id)
   }
 
   // Per-dictionary viewership: distinct HUMAN sessions that opened each dict today,
@@ -228,8 +241,12 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
       metrics.push({ metric: `${prefix}event:${event}`, source, value })
     for (const [route, value] of bucket.navs)
       metrics.push({ metric: `${prefix}nav:${route}`, source, value })
-    for (const [area, sessions] of bucket.geo)
-      metrics.push({ metric: `${prefix}geo:${area}`, source, value: sessions.size })
+    for (const [area, sessions] of bucket.geo) {
+      // Geo excludes admin sessions (skews "where visitors come from"); other metrics keep them.
+      const visitors = [...sessions].filter(session_id => !admin_sessions.has(session_id)).length
+      if (visitors > 0)
+        metrics.push({ metric: `${prefix}geo:${area}`, source, value: visitors })
+    }
   }
   for (const [source, bucket] of by_source)
     emit(bucket, source, '')
@@ -256,8 +273,8 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
   // the reader re-classifies from the stored UA/webdriver/heartbeats) so the
   // capability/geo panels never re-scan raw rows for finalized days.
   const insert_session = shared_db.prepare(`
-    INSERT INTO log_daily_sessions (day, session_id, user_agent, heartbeats, has_user_id, webdriver, db_tier, country, region)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO log_daily_sessions (day, session_id, user_agent, heartbeats, has_user_id, webdriver, db_tier, country, region, user_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `)
   const insert_dict_view = shared_db.prepare(`
     INSERT INTO dictionary_daily_views (day, dictionary_id, sessions, anon_sessions, visitors, anon_visitors)
@@ -284,6 +301,7 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
         session.db_tier,
         session.country,
         session.region,
+        session.user_id,
       )
     }
     // Full-day REPLACE (same idempotency contract as the metrics/sessions above).

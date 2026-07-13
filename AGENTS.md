@@ -53,15 +53,16 @@ entry pages for editor+], stats, about/grammar snippets — plus `entries` list 
 with Words·Sentences·Texts scope chips [admin-3 preview; the texts/sentences corpus pipeline, see
 `.issues/texts-sentences-pipeline.md`] — entry detail, sentence detail, `texts` browse +
 `texts/new` paste-to-sentences ingest + `text/[id]` reader [same admin-3 preview, route-guarded
-via `$lib/corpus/corpus-preview-guard.ts` — lift at GA] — settings (just the public/print
-toggles + delete; catalog fields moved to home), about,
+via `$lib/corpus/corpus-preview-guard.ts` — lift at GA] — settings (public/print
+toggles + delete + a dialects manager [editor+: rename / map areal-extent geometry via
+GeoTaggingModal / delete]; catalog fields moved to home), about,
 contributors, grammar, history, export, import, invite) · `/chat` (standalone membership-based
 chat — DB-managed channels + DMs for admins, super managers, and partners; server-authoritative
 via `/api/chat/*` polling, gate = member of ≥1 room, `admin_room` channels manageable only by
 super admins) · `/translate` (standalone translator backend — server-authoritative via
 `/api/translate/*`, gate = ≥1 `translator_languages` row or admin) · `/admin/*` (local-first super-admin: dashboard + ntfy onboarding, messages incl.
-unmatched→match + AI triage, users, dictionaries, buckets [serve/tolerate/delete triage of every
-dict via `dictionaries.bucket`; `bucket='secure'` is ENFORCED — direct-role holders + level-3
+unmatched→match + AI triage, users, dictionaries [paginated table w/ serve/tolerate/delete bucket
+triage via `dictionaries.bucket`; `bucket='secure'` is ENFORCED — direct-role holders + level-3
 admins only, everyone else sees the unknown-slug redirect/404, no public R2 snapshot; rule lives
 in `$lib/db/server/secure-dictionary.ts` + `verify_auth_dict_role`], analytics, schema graph,
 sync, triage-examples, legal-review, featured-words) · `/og` (share image) · `/terms` ·

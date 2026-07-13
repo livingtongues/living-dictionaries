@@ -14,7 +14,6 @@
   import IconMdiBookMultipleOutline from '~icons/mdi/book-multiple-outline'
   import IconMdiChartLine from '~icons/mdi/chart-line'
   import IconMdiCloudSync from '~icons/mdi/cloud-sync'
-  import IconMdiFilterVariant from '~icons/mdi/filter-variant'
   import IconMdiForumOutline from '~icons/mdi/forum-outline'
   import IconMdiHeartPulse from '~icons/mdi/heart-pulse'
   import IconMdiImageMultipleOutline from '~icons/mdi/image-multiple-outline'
@@ -30,14 +29,12 @@
 
   interface NavLink { href: string, label: string, icon: Component, compact?: boolean, min_level?: number }
   const all_nav_links: NavLink[] = [
+    { href: '/admin/dictionaries', label: 'Dictionaries', icon: IconMdiBookMultipleOutline },
+    { href: '/admin/users', label: 'Users', icon: IconMdiAccountMultipleOutline },
     { href: '/admin/messages', label: 'Messages', icon: IconMdiMessageTextOutline },
-    { href: '/admin/users', label: 'Users', icon: IconMdiAccountMultipleOutline, compact: true },
     // Chat lives OUTSIDE /admin (membership-based — partners + super managers
     // join too), but admins keep this entry point + unread badge.
     { href: '/chat', label: 'Chat', icon: IconMdiForumOutline },
-    { href: '/admin/dictionaries', label: 'Dictionaries', icon: IconMdiBookMultipleOutline },
-    // Bucket triage: serve / tolerate / delete classification of every dict.
-    { href: '/admin/buckets', label: 'Buckets', icon: IconMdiFilterVariant, compact: true },
     // Dev tools — `compact` renders them icon-only on desktop (labels still
     // hide on mobile, where every link is icon-only anyway). Analytics + Schema
     // are Super Admin only (level 3) — raw log/db internals.

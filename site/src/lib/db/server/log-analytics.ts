@@ -12,6 +12,7 @@ import { distance_bucket, DISTANCE_BUCKETS, distance_to_origin_km } from '$lib/g
 import { geo_key } from '$lib/server/geo-from-request'
 import type { HostStats } from '$lib/server/host-stats'
 import { read_host_stats } from '$lib/server/host-stats'
+import { get_admin_user_ids } from './admin-user-ids'
 import { classify_ua_frequency_bot_sessions, MIN_UA_BOT_SESSIONS_PER_DAY } from './bot-sessions'
 import { get_log_archive_db } from './log-archive-db'
 import { get_rollup_watermark, month_string, normalize_route, prev_month, SESSION_START, SITE_SCOPE } from './log-retention-cron'
@@ -627,6 +628,8 @@ interface WindowSession {
   db_tier: string | null
   country: string | null
   region: string | null
+  /** Signed-in user for the session — lets the geo panel exclude admin sessions. NULL = anon. */
+  user_id: string | null
 }
 
 /**
@@ -664,6 +667,8 @@ interface AnalyticsContext {
   bot_session_ids: Set<string>
   /** One row per window session (materialized finalized days + live tail) — the shared session source. */
   window_sessions: WindowSession[]
+  /** Admin (level >= 2) `users.id`s — excluded from the geo area tally only. */
+  admin_user_ids: Set<string>
 }
 
 interface LogAnalyticsOptions {
@@ -772,7 +777,8 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
 
   const hot_min_day = (logs_db.prepare(`SELECT substr(MIN(received_at), 1, 10) day FROM client_logs`).get() as { day: string | null }).day ?? '9999-12-31'
 
-  const ctx: AnalyticsContext = { shared_db, logs_db, audience, audience_filter, rollup_metric, window_start_iso, window_start_day, live_start_day, live_start_iso, materialized_days, hot_min_day, current_app_version, days, now, bot_session_ids, window_sessions }
+  const admin_user_ids = get_admin_user_ids({ shared_db })
+  const ctx: AnalyticsContext = { shared_db, logs_db, audience, audience_filter, rollup_metric, window_start_iso, window_start_day, live_start_day, live_start_iso, materialized_days, hot_min_day, current_app_version, days, now, bot_session_ids, window_sessions, admin_user_ids }
 
   const { daily, rollup_rows, live_by_day } = timed('build_daily_series', () => build_daily_series(ctx))
   // `area_counts` is seeded from the cold `geo:` rollup here, then the window-session
@@ -942,7 +948,7 @@ function query_window_sessions({ shared_db, logs_db, window_start_day, live_star
   live_start_iso: string
 }): { window_sessions: WindowSession[], materialized_days: Set<string> } {
   const materialized = shared_db.prepare(`
-    SELECT day, session_id, user_agent, heartbeats, has_user_id, webdriver, db_tier, country, region
+    SELECT day, session_id, user_agent, heartbeats, has_user_id, webdriver, db_tier, country, region, user_id
     FROM log_daily_sessions
     WHERE day >= ? AND day < ?
     ORDER BY day
@@ -957,7 +963,8 @@ function query_window_sessions({ shared_db, logs_db, window_start_day, live_star
            MAX(json_extract(context, '$.webdriver')) webdriver,
            MAX(json_extract(context, '$.db_tier')) db_tier,
            MAX(country) country,
-           MAX(region) region
+           MAX(region) region,
+           MAX(user_id) user_id
     FROM client_logs
     WHERE received_at >= ? AND session_id IS NOT NULL
     GROUP BY session_id
@@ -980,6 +987,7 @@ function query_window_sessions({ shared_db, logs_db, window_start_day, live_star
     existing.db_tier = existing.db_tier ?? row.db_tier
     existing.country = existing.country ?? row.country
     existing.region = existing.region ?? row.region
+    existing.user_id = existing.user_id ?? row.user_id
   }
   return { window_sessions: [...merged.values()], materialized_days }
 }
@@ -1300,7 +1308,7 @@ function build_capability({ ctx, area_counts }: {
   ctx: AnalyticsContext
   area_counts: Map<string, { country: string, sessions: number }>
 }): LogAnalytics['capability'] {
-  const { audience, bot_session_ids, window_sessions } = ctx
+  const { audience, bot_session_ids, window_sessions, admin_user_ids } = ctx
   const device_counts = new Map<DeviceType, number>()
   const os_counts = new Map<string, { sessions: number, versions: Map<string, number> }>()
   const browser_counts = new Map<string, number>()
@@ -1314,8 +1322,10 @@ function build_capability({ ctx, area_counts }: {
       webdriver_sessions++
     const is_bot = is_bot_user_agent(row.user_agent) || is_webdriver || bot_session_ids.has(row.session_id)
     // Geo areas follow the active audience — bot check FIRST so bot sessions don't
-    // leak into the human area tally.
-    if ((audience === 'bots') === is_bot) {
+    // leak into the human area tally. Admin sessions are excluded from geo only
+    // (they skew "where visitors come from"); still counted in every other panel.
+    const is_admin = !!row.user_id && admin_user_ids.has(row.user_id)
+    if ((audience === 'bots') === is_bot && !is_admin) {
       const area_key = geo_key({ country: row.country, region: row.region })
       if (area_key && row.country) {
         const area = area_counts.get(area_key) ?? { country: row.country, sessions: 0 }

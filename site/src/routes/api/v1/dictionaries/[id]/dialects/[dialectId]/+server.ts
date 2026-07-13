@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types'
 import type { DialectRecord } from '$lib/db/server/v1-sub-resources'
-import type { MultiString } from '$lib/types'
+import type { Coordinates, MultiString } from '$lib/types'
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
@@ -11,6 +11,8 @@ import { error, json } from '@sveltejs/kit'
 
 export interface V1DialectPatchRequestBody {
   name?: MultiString | string
+  /** Whole-object replace: `{ points?, regions? }` overwrites; `null` clears; omit → untouched. */
+  coordinates?: Coordinates | null
 }
 
 export interface V1DialectPatchResponseBody {
@@ -38,7 +40,7 @@ export const PATCH: RequestHandler = async (event) => {
 
   let result
   try {
-    result = apply_dialect_update({ db, history_db: get_dictionary_history_db(dictionary.id), dialect_id, name: body.name, user_id: access.user_id, api_key_id: access.key_id ?? null })
+    result = apply_dialect_update({ db, history_db: get_dictionary_history_db(dictionary.id), dialect_id, name: body.name, coordinates: body.coordinates, has_coordinates: 'coordinates' in body, user_id: access.user_id, api_key_id: access.key_id ?? null })
   } catch (err) {
     error(ResponseCodes.BAD_REQUEST, (err as Error).message)
   }

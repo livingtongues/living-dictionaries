@@ -2,7 +2,7 @@ import type Database from 'better-sqlite3'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { open_dictionary_db_in_memory } from './dictionary-db'
 import { open_dictionary_history_db_in_memory } from './dictionary-history-db'
-import { create_speaker, find_or_create_dialect, find_or_create_tag, list_dialects, list_speakers, list_tags } from './v1-sub-resources'
+import { apply_dialect_update, create_speaker, find_or_create_dialect, find_or_create_tag, list_dialects, list_speakers, list_tags } from './v1-sub-resources'
 
 let db: Database.Database
 
@@ -52,6 +52,43 @@ describe(find_or_create_dialect, () => {
     const second = find_or_create_dialect({ db, user_id: 'u1', name: 'coastal' })
     expect(second.created).toBeFalsy()
     expect(list_dialects(db)).toHaveLength(1)
+  })
+})
+
+describe('dialect coordinates', () => {
+  const point = { coordinates: { longitude: 77.2, latitude: 28.6 }, label: 'Region A' }
+
+  test('create stores coordinates and list_dialects reads them back (null when unset)', () => {
+    const { dialect } = find_or_create_dialect({ db, user_id: 'u1', name: 'Coastal', coordinates: { points: [point] } })
+    expect(dialect.coordinates).toEqual({ points: [point] })
+    const plain = find_or_create_dialect({ db, user_id: 'u1', name: 'Highland' })
+    expect(plain.dialect.coordinates).toBe(null)
+    const listed = list_dialects(db)
+    expect(listed.find(d => d.id === dialect.id)?.coordinates).toEqual({ points: [point] })
+    expect(listed.find(d => d.id === plain.dialect.id)?.coordinates).toBe(null)
+  })
+
+  test('create rejects an invalid geometry', () => {
+    expect(() => find_or_create_dialect({ db, user_id: 'u1', name: 'Bad', coordinates: { points: [{ coordinates: { longitude: 0, latitude: 200 } }] } }))
+      .toThrow(/latitude must be between/)
+  })
+
+  test('PATCH replaces coordinates, clears with null, and leaves them untouched when has_coordinates is false', () => {
+    const { dialect } = find_or_create_dialect({ db, user_id: 'u1', name: 'Coastal', coordinates: { points: [point] } })
+    const next = { coordinates: { longitude: 1, latitude: 2 } }
+
+    apply_dialect_update({ db, dialect_id: dialect.id, coordinates: { points: [next] }, has_coordinates: true, user_id: 'u1' })
+    expect(list_dialects(db).find(d => d.id === dialect.id)?.coordinates).toEqual({ points: [next] })
+
+    // Rename only (no coordinates key) → geometry untouched.
+    apply_dialect_update({ db, dialect_id: dialect.id, name: 'Coast', user_id: 'u1' })
+    const after_rename = list_dialects(db).find(d => d.id === dialect.id)
+    expect(after_rename?.name).toEqual({ default: 'Coast' })
+    expect(after_rename?.coordinates).toEqual({ points: [next] })
+
+    // null → cleared.
+    apply_dialect_update({ db, dialect_id: dialect.id, coordinates: null, has_coordinates: true, user_id: 'u1' })
+    expect(list_dialects(db).find(d => d.id === dialect.id)?.coordinates).toBe(null)
   })
 })
 

@@ -107,8 +107,6 @@
   const pipeline = $derived(analytics.pipeline)
   const server_faults = $derived(analytics.server_faults)
   const errors_by_version = $derived(analytics.errors_by_version)
-  const event_coverage = $derived(analytics.event_coverage)
-  const clusters = $derived(analytics.error_clusters)
   const leader = $derived(analytics.leader_health)
   const sync_health = $derived(analytics.sync_health)
   const adoption = $derived(analytics.build_adoption)
@@ -342,6 +340,21 @@
       </div>
     {:else}
       <p class="muted">No speed samples in window yet — page-load, in-app navigation, and LCP timings land here once real sessions arrive.</p>
+    {/if}
+  </section>
+
+  <section class="panel">
+    <h2>Core Web Vitals <span class="hint">graded on the typical (75th-percentile) visit · recent traffic · {analytics.audience === 'bots' ? 'bots' : 'real people, bots excluded'}</span></h2>
+    {#if web_vitals.length}
+      <div class="vitals">
+        {#each web_vitals as vital (vital.metric)}
+          <VitalBar {vital} />
+        {/each}
+      </div>
+    {:else if totals.sessions > 0}
+      <p class="muted">No Web Vitals landed despite {format_number(totals.sessions)} session{totals.sessions === 1 ? '' : 's'}. FCP/TTFB report on load; LCP/INP/CLS only finalize on real interaction or page-hide — so short or automated sessions may never flush them. If this stays empty under genuine traffic, verify <code>init_web_vitals()</code>.</p>
+    {:else}
+      <p class="muted">No Web Vitals in window yet. LCP, INP, CLS, FCP and TTFB appear here once real sessions land.</p>
     {/if}
   </section>
 
@@ -587,23 +600,9 @@
         <div class="ver-stat">
           <div class="ver-value" class:danger={adoption.stale > 0}>{format_number(adoption.stale)}</div>
           <div class="ver-label">Stranded (≥3 days stale)</div>
-          <div class="ver-sub">stuck until a hard reload — nudge the named users</div>
+          <div class="ver-sub">stuck until a hard reload{adoption.stale > 0 ? ' — ask me who' : ''}</div>
         </div>
       </div>
-      <table class="src-table">
-        <thead><tr><th>Build</th><th>Age</th><th>Sessions</th><th>Signed-in users</th><th>Last seen</th></tr></thead>
-        <tbody>
-          {#each adoption.builds as row (row.app_version)}
-            <tr>
-              <td class="mono">{short_version(row.app_version)}{row.is_current ? ' (current)' : ''}</td>
-              <td class:danger={(row.age_days ?? 0) >= 3 && !row.is_current}>{row.age_days != null ? `${row.age_days}d` : '—'}</td>
-              <td>{format_number(row.sessions)}</td>
-              <td>{row.users.length ? row.users.join(', ') : '—'}</td>
-              <td class="nowrap">{ago(row.last_seen)}</td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
     {/if}
   </section>
 
@@ -861,21 +860,6 @@
   </section>
 
   <section class="panel">
-    <h2>Core Web Vitals <span class="hint">graded on the typical (75th-percentile) visit · recent traffic · {analytics.audience === 'bots' ? 'bots' : 'real people, bots excluded'}</span></h2>
-    {#if web_vitals.length}
-      <div class="vitals">
-        {#each web_vitals as vital (vital.metric)}
-          <VitalBar {vital} />
-        {/each}
-      </div>
-    {:else if totals.sessions > 0}
-      <p class="muted">No Web Vitals landed despite {format_number(totals.sessions)} session{totals.sessions === 1 ? '' : 's'}. FCP/TTFB report on load; LCP/INP/CLS only finalize on real interaction or page-hide — so short or automated sessions may never flush them. If this stays empty under genuine traffic, verify <code>init_web_vitals()</code>.</p>
-    {:else}
-      <p class="muted">No Web Vitals in window yet. LCP, INP, CLS, FCP and TTFB appear here once real sessions land.</p>
-    {/if}
-  </section>
-
-  <section class="panel">
     <h2>Latency by geography <span class="hint">TTFB · p50 / p95 · hot window · {format_number(geo.located_sessions)} located sessions</span></h2>
     {#if has_geo_latency}
       <div class="grid">
@@ -952,25 +936,6 @@
   </section>
 
   <section class="panel">
-    <h2>Event coverage <span class="hint">declared analytics events vs seen · self-instrumentation</span></h2>
-    {#if event_coverage.never_emitted > 0}
-      <p class="cap-warn">⚠️ {event_coverage.never_emitted} of {event_coverage.events.length} declared events have NOT been seen this window — either no one hit that path, or the event isn't wired up.</p>
-    {/if}
-    <table class="src-table">
-      <thead><tr><th>Event</th><th>Status</th><th>Count</th></tr></thead>
-      <tbody>
-        {#each event_coverage.events as row (row.event)}
-          <tr>
-            <td class="mono">{row.event}</td>
-            <td>{row.seen ? '✅ seen' : '⚪ never'}</td>
-            <td class:muted={!row.seen}>{format_number(row.count)}</td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  </section>
-
-  <section class="panel">
     <h2>By source</h2>
     <table class="src-table">
       <thead><tr><th>Source</th><th>Logs</th><th>Errors</th></tr></thead>
@@ -982,32 +947,6 @@
         {/each}
       </tbody>
     </table>
-  </section>
-
-  <section class="panel">
-    <h2>Error clusters <span class="hint">grouped by message + stack · hot window · all traffic · known-noise sunk</span></h2>
-    {#if clusters.length === 0}
-      <p class="muted">No errors recorded. 🎉</p>
-    {:else}
-      <details class="rows">
-        <summary>Show {format_number(clusters.length)} error cluster{clusters.length === 1 ? '' : 's'}</summary>
-        <table class="err-table">
-          <thead><tr><th>#</th><th>Lvl</th><th>Src</th><th>Users</th><th>Last</th><th>Message</th></tr></thead>
-          <tbody>
-            {#each clusters as row (row.message + row.stack_head)}
-              <tr class:noise={row.is_noise}>
-                <td class="nowrap">{format_number(row.count)}</td>
-                <td class="lvl">{row.level}</td>
-                <td>{row.sources}</td>
-                <td>{format_number(row.users)}</td>
-                <td class="nowrap mono">{short_time(row.last_seen)}</td>
-                <td class="msg" title={row.stack_head}>{row.is_noise ? '⚪ ' : ''}{row.message}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </details>
-    {/if}
   </section>
 </div>
 

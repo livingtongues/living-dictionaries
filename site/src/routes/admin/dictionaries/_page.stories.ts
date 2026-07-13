@@ -105,6 +105,42 @@ export const Catalog: PageStory<typeof Component> = {
   props: shared_props,
 }
 
+const langs = ['Nahuatl', 'Mixtec', 'Quechua', 'Zapotec', 'Otomi', 'Maya', 'Tzeltal', 'Wixárika', 'Purépecha', 'Totonac', 'Chinantec', 'Mazatec']
+const places = ['Oaxaca', 'Puebla', 'Chiapas', 'Guerrero', 'Michoacán', 'Veracruz', 'Hidalgo', 'Jalisco']
+const many_dictionaries = Array.from({ length: 260 }, (_, i) => {
+  const day = String((i % 27) + 1).padStart(2, '0')
+  return {
+    id: `d-${i}`,
+    url: `d-${i}`,
+    name: `${langs[i % langs.length]} of ${places[(i * 5) % places.length]} ${i}`,
+    public: 1,
+    bucket: 'public',
+    entry_count: (i * 137) % 5000,
+    iso_639_3: i % 3 === 0 ? 'nhn' : '',
+    glottocode: i % 4 === 0 ? 'cent2132' : '',
+    location: `${places[(i * 5) % places.length]}, Mexico`,
+    gloss_languages: ['es', 'en'],
+    alternate_names: [],
+    orthographies: [],
+    created_at: `2024-06-${day}T00:00:00Z`,
+    updated_at: `2026-05-${day}T00:00:00Z`,
+  }
+})
+const many_db = {
+  dictionaries: { ...make_table(many_dictionaries, 'id'), query: () => ({ rows: many_dictionaries, loading: false }), update: async () => {} },
+  dictionary_roles: { ...make_table([] as Row[], 'id'), query: () => ({ rows: [], loading: false }) },
+  invites: { ...make_table([] as Row[], 'id'), query: () => ({ rows: [], loading: false }) },
+  users: make_table(users, 'id'),
+}
+
+export const Paginated: PageStory<typeof Component> = {
+  props: {
+    auth_user: { user: { id: 'admin-1', email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', is_admin: true, admin_level: 3 }, token: 'fake', logout: () => {} },
+    sync: null,
+    db: many_db,
+  } as never,
+}
+
 export const AuthorConnectionModal: PageStory<typeof Component> = {
   props: shared_props,
   csr: true,

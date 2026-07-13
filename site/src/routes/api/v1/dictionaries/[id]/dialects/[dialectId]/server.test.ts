@@ -67,6 +67,20 @@ describe(PATCH, () => {
     expect((await res.json()).dialect.name).toEqual({ default: 'Coastal' })
     expect(JSON.parse((dict_db.prepare(`SELECT name FROM dialects WHERE id = ?`).get(dialect_id) as { name: string }).name)).toEqual({ default: 'Coastal' })
   })
+
+  test('sets, then clears, the dialect coordinates', async () => {
+    const point = { coordinates: { longitude: 5, latitude: 6 }, label: 'Zone 1' }
+    const set = await patch_call({ api_key: api_token, id: dialect_id, body: { coordinates: { points: [point] } } })
+    expect((await set.json()).dialect.coordinates).toEqual({ points: [point] })
+
+    const cleared = await patch_call({ api_key: api_token, id: dialect_id, body: { coordinates: null } })
+    expect((await cleared.json()).dialect.coordinates).toBe(null)
+  })
+
+  test('400 for an invalid geometry', async () => {
+    await expect(patch_call({ api_key: api_token, id: dialect_id, body: { coordinates: { points: [{ coordinates: { longitude: 999, latitude: 0 } }] } } }))
+      .rejects.toMatchObject({ status: 400 })
+  })
 })
 
 describe(DELETE, () => {

@@ -7,10 +7,11 @@
   import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte' // only used here - perhaps colocate
   import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte' // only used here - perhaps colocate
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import DialectsManager from './DialectsManager.svelte'
   import { goto } from '$app/navigation'
 
   const { data } = $props()
-  const { dictionary, auth_user, is_manager, update_dictionary, about_is_too_short } = $derived(data)
+  const { dictionary, auth_user, is_manager, can_edit, update_dictionary, about_is_too_short } = $derived(data)
 
   // Catalog fields (name, codes, languages, orthographies, location, cover image…)
   // are edited in place on the dictionary home page — settings only keeps the
@@ -51,6 +52,11 @@
         dictionary.public = 0
       }} />
     <div style="margin-bottom: 1.25rem"></div>
+  {/if}
+
+  {#if can_edit}
+    <hr class="settings-divider" />
+    <DialectsManager />
   {/if}
 
   {#if is_manager}

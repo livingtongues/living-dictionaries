@@ -400,4 +400,6 @@ export const log_daily_sessions = sqliteTable('log_daily_sessions', {
   db_tier: text(),
   country: text(),
   region: text(),
+  /** Signed-in user for the session (first non-null seen). Lets the analytics Geography panel exclude admin sessions. NULL = anon or pre-migration. */
+  user_id: text(),
 }, table => [primaryKey({ columns: [table.day, table.session_id] })])

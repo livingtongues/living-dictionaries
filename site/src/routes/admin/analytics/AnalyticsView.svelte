@@ -23,11 +23,13 @@
   const daily = $derived(analytics.daily)
   const insights = $derived(log_insights({ analytics }))
 
+  const is_bots = $derived(analytics.audience === 'bots')
   const has_traffic = $derived(totals.sessions > 0 || totals.unique_users > 0)
 
+  // Bots have no signed-in "users" — drop the (always-0) Users line for that audience.
   const traffic_series = $derived([
     { label: 'Sessions', color: 'var(--primary)', points: daily.map(point => ({ date: point.day, value: point.sessions })) },
-    { label: 'Users', color: USERS_COLOR, points: daily.map(point => ({ date: point.day, value: point.users })) },
+    ...(is_bots ? [] : [{ label: 'Users', color: USERS_COLOR, points: daily.map(point => ({ date: point.day, value: point.users })) }]),
   ])
   // Deploy markers for the traffic timeline: a vertical chip per build
   // (app_version = build epoch ms), so a spike pins to the deploy that caused it.
@@ -126,11 +128,11 @@
   {#if analytics.audience === 'bots'}
     <p class="audience-note">🤖 Showing <b>bot / crawler / AI-agent</b> traffic — usage, routes, events and geo below are bot-only. Diagnostics (errors, build, leader, clusters) live on <a href="/admin/health">Site health</a>.</p>
   {:else}
-    <AtAGlance {analytics} />
+    <AtAGlance {analytics} show_attention={false} />
   {/if}
 
   <section class="cards">
-    {#each [['Sessions', analytics.totals.sessions], ['Unique users', analytics.totals.unique_users], ['Log rows', analytics.totals.logs]] as [label, value] (label)}
+    {#each is_bots ? [['Sessions', analytics.totals.sessions]] : [['Sessions', analytics.totals.sessions], ['Unique users', analytics.totals.unique_users]] as [label, value] (label)}
       <div class="card">
         <div class="value">{format_number(Number(value))}</div>
         <div class="label">{label}</div>
@@ -150,11 +152,6 @@
       <div class="insight-value">{one_decimal(insights.sessions_per_day)}</div>
       <div class="insight-label">Sessions / day</div>
       <div class="insight-sub">avg over {analytics.window_days}d</div>
-    </div>
-    <div class="insight">
-      <div class="insight-value">{one_decimal(insights.logs_per_session)}</div>
-      <div class="insight-label">Logs / session</div>
-      <div class="insight-sub">engagement depth</div>
     </div>
     <div class="insight">
       <div class="insight-value">{insights.busiest_day ? short_day(insights.busiest_day.day) : '—'}</div>
@@ -199,47 +196,49 @@
     </section>
   </div>
 
-  <section class="panel">
-    <h2>Top dictionaries by unique visitors <span class="hint">distinct {analytics.audience === 'bots' ? 'bot' : 'human'} visitors (cookieless <code>visitor_id</code>) · anonymous ≈ outside public</span></h2>
-    {#if top_dictionaries.dictionaries.length}
-      <div class="ver-split">
-        <div class="ver-stat">
-          <div class="ver-value">{format_number(top_dictionaries.site_visitors_month)}</div>
-          <div class="ver-label">Site visitors · {month_label(top_dictionaries.month)}</div>
-          <div class="ver-sub">{format_number(top_dictionaries.site_visitors_prev_month)} in {month_label(top_dictionaries.prev_month)} · {format_number(top_dictionaries.site_visitors_7d)} in 7d</div>
+  {#if !is_bots}
+    <section class="panel">
+      <h2>Top dictionaries by unique visitors <span class="hint">distinct {analytics.audience === 'bots' ? 'bot' : 'human'} visitors (cookieless <code>visitor_id</code>) · anonymous ≈ outside public</span></h2>
+      {#if top_dictionaries.dictionaries.length}
+        <div class="ver-split">
+          <div class="ver-stat">
+            <div class="ver-value">{format_number(top_dictionaries.site_visitors_month)}</div>
+            <div class="ver-label">Site visitors · {month_label(top_dictionaries.month)}</div>
+            <div class="ver-sub">{format_number(top_dictionaries.site_visitors_prev_month)} in {month_label(top_dictionaries.prev_month)} · {format_number(top_dictionaries.site_visitors_7d)} in 7d</div>
+          </div>
+          <div class="ver-stat">
+            <div class="ver-value">{format_number(top_dictionaries.distinct_dictionaries)}</div>
+            <div class="ver-label">Dictionaries with visitors</div>
+            <div class="ver-sub">this month, last month, or the last 7d</div>
+          </div>
         </div>
-        <div class="ver-stat">
-          <div class="ver-value">{format_number(top_dictionaries.distinct_dictionaries)}</div>
-          <div class="ver-label">Dictionaries with visitors</div>
-          <div class="ver-sub">this month, last month, or the last 7d</div>
-        </div>
-      </div>
-      <table class="dict-table">
-        <thead><tr><th>Dictionary</th><th title="TRUE unique visitors this calendar month (month-long union of visitor ids)">Visitors {month_label(top_dictionaries.month)}</th><th title="unique visitors last complete month">{month_label(top_dictionaries.prev_month)}</th><th title="unique visitors, rolling last 7 days">7d</th><th title="distinct sessions/visits over 30d (activity)">Visits 30d</th><th title="anonymous (logged-out) share of this month's visitors ≈ outside public">Anon</th></tr></thead>
-        <tbody>
-          {#each top_dictionaries.dictionaries as row (row.dictionary_id)}
-            <tr>
-              <td class="dict-name">
-                {#if row.url}<a href={`/${row.url}`}>{row.name ?? row.url}</a>{:else}{row.name ?? row.dictionary_id}{/if}
-                {#if !row.is_public}<span class="priv" title="Private dictionary">🔒</span>{/if}
-              </td>
-              <td class="num"><b>{row.visitors_month ? format_number(row.visitors_month) : '—'}</b></td>
-              <td class="num">{row.visitors_prev_month ? format_number(row.visitors_prev_month) : '—'}</td>
-              <td class="num">{row.visitors_7d ? format_number(row.visitors_7d) : '—'}</td>
-              <td class="num">{format_number(row.visits_30d)}</td>
-              <td class="num anon">{row.visitors_month ? format_pct(row.anon_visitors_month / row.visitors_month) : '—'}</td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-      <p class="dict-note"><b>Visitors</b> = distinct persistent <code>visitor_id</code>s (one per browser/device, cookieless localStorage) — a true unique count, computed as a UNION over the whole period (NOT daily-distinct "visitor-days"). Monthly figures come from the forever <code>dictionary_monthly_visitors</code> rollup; <b>7d</b> is a live rolling scan; <b>Visits 30d</b> counts sessions (resets per page-load) for activity context. "Visitors" means distinct browsers, not humans (a shared device → one; a person across devices → several). Populating from 2026-07-07 onward (reads low until a month of history builds). Bots excluded. This-month is partial until the month ends.</p>
-    {:else}
-      <p class="muted">No dictionary visitors yet. Monthly figures need the retention cron (prod only); every open of a dictionary counts here once it runs.</p>
-    {/if}
-  </section>
+        <table class="dict-table">
+          <thead><tr><th>Dictionary</th><th title="TRUE unique visitors this calendar month (month-long union of visitor ids)">Visitors {month_label(top_dictionaries.month)}</th><th title="unique visitors last complete month">{month_label(top_dictionaries.prev_month)}</th><th title="unique visitors, rolling last 7 days">7d</th><th title="distinct sessions/visits over 30d (activity)">Visits 30d</th><th title="anonymous (logged-out) share of this month's visitors ≈ outside public">Anon</th></tr></thead>
+          <tbody>
+            {#each top_dictionaries.dictionaries as row (row.dictionary_id)}
+              <tr>
+                <td class="dict-name">
+                  {#if row.url}<a href={`/${row.url}`}>{row.name ?? row.url}</a>{:else}{row.name ?? row.dictionary_id}{/if}
+                  {#if !row.is_public}<span class="priv" title="Private dictionary">🔒</span>{/if}
+                </td>
+                <td class="num"><b>{row.visitors_month ? format_number(row.visitors_month) : '—'}</b></td>
+                <td class="num">{row.visitors_prev_month ? format_number(row.visitors_prev_month) : '—'}</td>
+                <td class="num">{row.visitors_7d ? format_number(row.visitors_7d) : '—'}</td>
+                <td class="num">{format_number(row.visits_30d)}</td>
+                <td class="num anon">{row.visitors_month ? format_pct(row.anon_visitors_month / row.visitors_month) : '—'}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+        <p class="dict-note"><b>Visitors</b> = distinct persistent <code>visitor_id</code>s (one per browser/device, cookieless localStorage) — a true unique count, computed as a UNION over the whole period (NOT daily-distinct "visitor-days"). Monthly figures come from the forever <code>dictionary_monthly_visitors</code> rollup; <b>7d</b> is a live rolling scan; <b>Visits 30d</b> counts sessions (resets per page-load) for activity context. "Visitors" means distinct browsers, not humans (a shared device → one; a person across devices → several). Populating from 2026-07-07 onward (reads low until a month of history builds). Bots excluded. This-month is partial until the month ends.</p>
+      {:else}
+        <p class="muted">No dictionary visitors yet. Monthly figures need the retention cron (prod only); every open of a dictionary counts here once it runs.</p>
+      {/if}
+    </section>
+  {/if}
 
   <section class="panel">
-    <h2>Geography <span class="hint">approximate · Cloudflare edge · {format_number(geo.located_sessions)} located sessions · TTFB splits on <a href="/admin/health">Site health</a></span></h2>
+    <h2>Geography <span class="hint">{format_number(geo.located_sessions)} located {is_bots ? 'bot ' : ''}sessions (visits, not unique people) by region · {is_bots ? '' : 'admins excluded · '}approximate (Cloudflare edge) · latency splits on <a href="/admin/health">Site health</a></span></h2>
     {#if area_bars.length}
       <BarChart data={area_bars} format={format_number} label_width={120} />
     {:else}
@@ -247,105 +246,107 @@
     {/if}
   </section>
 
-  <section class="panel">
-    <h2>Agent API activity <span class="hint">/api/v1 writes · server v1_* audit rows · hot window</span></h2>
-    {#if api_v1.total === 0}
-      <p class="muted">No /api/v1 activity in the hot window. Agent edits (per-dict API keys) land here.</p>
-    {:else}
-      <div class="ver-split">
-        <div class="ver-stat">
-          <div class="ver-value">{format_number(api_v1.total)}</div>
-          <div class="ver-label">Operations</div>
-          <div class="ver-sub">{format_number(api_v1.by_dictionary.length)} {api_v1.by_dictionary.length === 1 ? 'dictionary' : 'dictionaries'} touched</div>
+  {#if !is_bots}
+    <section class="panel">
+      <h2>Agent API activity <span class="hint">/api/v1 writes · server v1_* audit rows · hot window</span></h2>
+      {#if api_v1.total === 0}
+        <p class="muted">No /api/v1 activity in the hot window. Agent edits (per-dict API keys) land here.</p>
+      {:else}
+        <div class="ver-split">
+          <div class="ver-stat">
+            <div class="ver-value">{format_number(api_v1.total)}</div>
+            <div class="ver-label">Operations</div>
+            <div class="ver-sub">{format_number(api_v1.by_dictionary.length)} {api_v1.by_dictionary.length === 1 ? 'dictionary' : 'dictionaries'} touched</div>
+          </div>
+          <div class="ver-stat">
+            <div class="ver-value" class:danger={api_v1.failures > 0}>{format_number(api_v1.failures)}</div>
+            <div class="ver-label">Failures</div>
+            <div class="ver-sub">error-level v1 rows</div>
+          </div>
         </div>
-        <div class="ver-stat">
-          <div class="ver-value" class:danger={api_v1.failures > 0}>{format_number(api_v1.failures)}</div>
-          <div class="ver-label">Failures</div>
-          <div class="ver-sub">error-level v1 rows</div>
+        {#if api_v1_daily_points.length > 1}
+          <LineChart series={api_v1_daily_points} area color="#7c3aed" height={140} y_format={format_number} tip_format={format_number} />
+        {/if}
+        <div class="grid dev-grid">
+          <div class="dev-block">
+            <div class="block-h">By operation <span class="hint">v1_ prefix dropped</span></div>
+            <BarChart data={api_v1_event_bars} format={format_number} label_width={172} />
+          </div>
+          <div class="dev-block">
+            <div class="block-h">By dictionary</div>
+            <BarChart data={api_v1_dict_bars} format={format_number} label_width={132} />
+          </div>
         </div>
-      </div>
-      {#if api_v1_daily_points.length > 1}
-        <LineChart series={api_v1_daily_points} area color="#7c3aed" height={140} y_format={format_number} tip_format={format_number} />
+        <div class="dev-block">
+          <div class="block-h">Auth channel <span class="hint">context.via</span></div>
+          <SegmentedBar segments={api_v1_via_segments} format={format_number} />
+        </div>
       {/if}
-      <div class="grid dev-grid">
-        <div class="dev-block">
-          <div class="block-h">By operation <span class="hint">v1_ prefix dropped</span></div>
-          <BarChart data={api_v1_event_bars} format={format_number} label_width={172} />
-        </div>
-        <div class="dev-block">
-          <div class="block-h">By dictionary</div>
-          <BarChart data={api_v1_dict_bars} format={format_number} label_width={132} />
-        </div>
-      </div>
-      <div class="dev-block">
-        <div class="block-h">Auth channel <span class="hint">context.via</span></div>
-        <SegmentedBar segments={api_v1_via_segments} format={format_number} />
-      </div>
-    {/if}
-  </section>
+    </section>
 
-  <section class="panel">
-    <h2>Missing translations <span class="hint">i18n gap worklist · human sessions · hot window</span></h2>
-    {#if missing_i18n.total === 0}
-      <p class="muted">No missing translation keys in the hot window. 🎉</p>
-    {:else}
-      <div class="ver-split">
-        <div class="ver-stat">
-          <div class="ver-value">{format_number(missing_i18n.distinct_keys)}</div>
-          <div class="ver-label">Missing keys</div>
-          <div class="ver-sub">{format_number(missing_i18n.total)} rows · {format_number(missing_i18n.sessions)} sessions</div>
+    <section class="panel">
+      <h2>Browsers &amp; devices <span class="hint">human sessions, last {analytics.window_days}d{capability.bot_sessions > 0 ? ` · ${format_number(capability.bot_sessions)} bot sessions excluded${capability.webdriver_sessions > 0 ? ` (${format_number(capability.webdriver_sessions)} automated)` : ''}` : ''}</span></h2>
+      {#if capability.total_sessions === 0}
+        <p class="muted">No human sessions in window.</p>
+      {:else}
+        {#if capability.below_capability_sessions > 0}
+          <p class="cap-warn">
+            ⚠️ {format_number(capability.below_capability_sessions)} of {format_number(capability.total_sessions)} sessions ({format_pct(below_pct)}) are on a browser that can't run the local-first DB worker (Safari &lt; 15.4) — they fall back to main-thread IndexedDB or SSR.
+          </p>
+        {/if}
+        <div class="dev-block">
+          <div class="block-h">Device</div>
+          <SegmentedBar segments={device_segments} format={format_number} />
         </div>
-        <div class="ver-stat">
-          <div class="ver-label">Fill at <a href="/translate">/translate</a></div>
-          <div class="ver-sub">one row per key per session — a live translation-gap worklist</div>
+        <div class="grid dev-grid">
+          <div class="dev-block">
+            <div class="block-h">Operating systems <span class="hint">versions in legend</span></div>
+            <DonutChart data={os_rings} nested={false} center_value={format_number(capability.total_sessions)} center_label="sessions" format={format_number} />
+          </div>
+          <div class="dev-block">
+            <div class="block-h">Browsers <span class="hint">by family</span></div>
+            <DonutChart data={browser_rings} format={format_number} />
+          </div>
         </div>
-      </div>
-      <table class="src-table">
-        <thead><tr><th>Key</th><th>Locales</th><th>Sessions</th><th>Rows</th></tr></thead>
-        <tbody>
-          {#each missing_i18n.keys as row (row.key)}
-            <tr>
-              <td><code>{row.key}</code></td>
-              <td>{row.locales ?? '—'}</td>
-              <td>{format_number(row.sessions)}</td>
-              <td>{format_number(row.count)}</td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-    {/if}
-  </section>
-
-  <section class="panel">
-    <h2>Browsers &amp; devices <span class="hint">human sessions, last {analytics.window_days}d{capability.bot_sessions > 0 ? ` · ${format_number(capability.bot_sessions)} bot sessions excluded${capability.webdriver_sessions > 0 ? ` (${format_number(capability.webdriver_sessions)} automated)` : ''}` : ''}</span></h2>
-    {#if capability.total_sessions === 0}
-      <p class="muted">No human sessions in window.</p>
-    {:else}
-      {#if capability.below_capability_sessions > 0}
-        <p class="cap-warn">
-          ⚠️ {format_number(capability.below_capability_sessions)} of {format_number(capability.total_sessions)} sessions ({format_pct(below_pct)}) are on a browser that can't run the local-first DB worker (Safari &lt; 15.4) — they fall back to main-thread IndexedDB or SSR.
-        </p>
+        <div class="dev-block">
+          <div class="block-h">Local-DB engine <span class="hint">storage tier the session actually ran</span></div>
+          <SegmentedBar segments={db_tier_segments} format={format_number} />
+        </div>
       {/if}
-      <div class="dev-block">
-        <div class="block-h">Device</div>
-        <SegmentedBar segments={device_segments} format={format_number} />
-      </div>
-      <div class="grid dev-grid">
-        <div class="dev-block">
-          <div class="block-h">Operating systems <span class="hint">versions in legend</span></div>
-          <DonutChart data={os_rings} nested={false} center_value={format_number(capability.total_sessions)} center_label="sessions" format={format_number} />
+    </section>
+
+    <section class="panel">
+      <h2>Missing translations <span class="hint">i18n gap worklist · human sessions · hot window</span></h2>
+      {#if missing_i18n.total === 0}
+        <p class="muted">No missing translation keys in the hot window. 🎉</p>
+      {:else}
+        <div class="ver-split">
+          <div class="ver-stat">
+            <div class="ver-value">{format_number(missing_i18n.distinct_keys)}</div>
+            <div class="ver-label">Missing keys</div>
+            <div class="ver-sub">{format_number(missing_i18n.total)} rows · {format_number(missing_i18n.sessions)} sessions</div>
+          </div>
+          <div class="ver-stat">
+            <div class="ver-label">Fill at <a href="/translate">/translate</a></div>
+            <div class="ver-sub">one row per key per session — a live translation-gap worklist</div>
+          </div>
         </div>
-        <div class="dev-block">
-          <div class="block-h">Browsers <span class="hint">by family</span></div>
-          <DonutChart data={browser_rings} format={format_number} />
-        </div>
-      </div>
-      <div class="dev-block">
-        <div class="block-h">Local-DB engine <span class="hint">storage tier the session actually ran</span></div>
-        <SegmentedBar segments={db_tier_segments} format={format_number} />
-      </div>
-    {/if}
-  </section>
+        <table class="src-table">
+          <thead><tr><th>Key</th><th>Locales</th><th>Sessions</th><th>Rows</th></tr></thead>
+          <tbody>
+            {#each missing_i18n.keys as row (row.key)}
+              <tr>
+                <td><code>{row.key}</code></td>
+                <td>{row.locales ?? '—'}</td>
+                <td>{format_number(row.sessions)}</td>
+                <td>{format_number(row.count)}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      {/if}
+    </section>
+  {/if}
 </div>
 
 <style>
@@ -435,7 +436,7 @@
   }
   .cards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
   }
   .card {
@@ -466,7 +467,7 @@
   }
   .insights {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
   }
   .insight {

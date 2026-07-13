@@ -370,7 +370,12 @@
     "unable_to_delete": "Note: you will not be able to delete these glossing languages later.",
     "print_access_meaning": "This gives the public the ability to download and print this Living Dictionary as a .PDF",
     "featured_image": "Featured Image",
-    "delete_dictionary": "Delete Dictionary"
+    "delete_dictionary": "Delete Dictionary",
+    "dialects_heading": "Dialects",
+    "dialects_meaning": "Rename a dialect, map the area where it is spoken, or remove it. Changes apply to every entry using it.",
+    "no_dialects": "No dialects yet. Dialects are created as you tag entries with them.",
+    "edit_dialect_area": "Map area",
+    "delete_dialect_confirm": "Delete this dialect? It will be removed from every entry that uses it."
   },
   "source": {
     "create": "Add source",

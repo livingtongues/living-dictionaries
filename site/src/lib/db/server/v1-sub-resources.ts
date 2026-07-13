@@ -2,7 +2,8 @@ import type Database from 'better-sqlite3'
 import type { HistoryEvent } from './dictionary-history-db'
 import type { SingleWriteResult } from './v1-entry-write'
 import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
-import type { MultiString } from '$lib/types'
+import type { Coordinates, MultiString } from '$lib/types'
+import { to_coordinates } from '$lib/api/v1/coordinates-input'
 import { to_multistring } from '$lib/api/v1/entry-input'
 import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { read_last_modified_at } from './dictionary-db'
@@ -109,19 +110,24 @@ export function find_or_create_tag({ db, history_db, user_id, api_key_id, name, 
 
 // ── Dialects ────────────────────────────────────────────────────────────────
 
-export interface DialectRecord { id: string, name: MultiString }
+export interface DialectRecord { id: string, name: MultiString, coordinates: Coordinates | null }
 
 export function list_dialects(db: Database.Database): DialectRecord[] {
-  const rows = db.prepare(`SELECT id, name FROM dialects ORDER BY name`).all() as { id: string, name: string }[]
-  return rows.map(row => parse_dict_row('dialects', row) as unknown as DialectRecord)
+  const rows = db.prepare(`SELECT id, name, coordinates FROM dialects ORDER BY name`).all() as Record<string, unknown>[]
+  return rows.map((row) => {
+    const parsed = parse_dict_row('dialects', row) as { id: string, name: MultiString, coordinates?: Coordinates }
+    return { id: parsed.id, name: parsed.name, coordinates: parsed.coordinates ?? null }
+  })
 }
 
-export function find_or_create_dialect({ db, history_db, user_id, api_key_id, name }: {
+export function find_or_create_dialect({ db, history_db, user_id, api_key_id, name, coordinates }: {
   db: Database.Database
   history_db?: Database.Database
   user_id: string
   api_key_id?: string | null
   name: string
+  /** Optional where-spoken geometry (the variety's areal extent). Only applied on create. */
+  coordinates?: Coordinates | null
 }): { dialect: DialectRecord, created: boolean, cursor: string | null } {
   const trimmed = (name || '').trim()
   if (!trimmed)
@@ -129,9 +135,10 @@ export function find_or_create_dialect({ db, history_db, user_id, api_key_id, na
   const existing = list_dialects(db).find(dialect => Object.values(dialect.name ?? {}).some(value => name_key(value) === name_key(trimmed)))
   if (existing)
     return { dialect: existing, created: false, cursor: read_last_modified_at(db) }
+  const geometry = to_coordinates(coordinates) ?? null
   const id = crypto.randomUUID()
-  const dialect: DialectRecord = { id, name: { default: trimmed } }
-  const { cursor, event } = insert_row({ db, table: 'dialects', user_id, api_key_id, row: { id, name: dialect.name } })
+  const dialect: DialectRecord = { id, name: { default: trimmed }, coordinates: geometry }
+  const { cursor, event } = insert_row({ db, table: 'dialects', user_id, api_key_id, row: { id, name: dialect.name, coordinates: geometry } })
   commit_history(history_db, event)
   return { dialect, created: true, cursor }
 }
@@ -197,30 +204,44 @@ export function apply_tag_delete({ db, history_db, tag_id, user_id, api_key_id }
  * locale-keyed map. Affects every entry linked to the dialect. Rejects a name
  * that collides with another dialect. Returns `found: false` if absent.
  */
-export function apply_dialect_update({ db, history_db, dialect_id, name, user_id, api_key_id }: {
+export function apply_dialect_update({ db, history_db, dialect_id, name, coordinates, has_coordinates, user_id, api_key_id }: {
   db: Database.Database
   history_db?: Database.Database
   dialect_id: string
   name?: MultiString | string
+  /** New geometry (whole-object replace; `null` clears). Only read when `has_coordinates` is true. */
+  coordinates?: Coordinates | null
+  /** True when the request body carried a `coordinates` key (so `null` means clear, not omit). */
+  has_coordinates?: boolean
   user_id: string
   api_key_id?: string | null
 }): SingleWriteResult {
   const existing = db.prepare(`SELECT * FROM dialects WHERE id = ?`).get(dialect_id) as Record<string, unknown> | undefined
   if (!existing)
     return { found: false, new_synced_up_to: read_last_modified_at(db) }
-  if (name === undefined)
-    return { found: true, new_synced_up_to: read_last_modified_at(db) }
-  const value = to_multistring(name)
-  if (!value)
-    throw new Error('dialect name cannot be empty')
-  const collides = list_dialects(db).some(dialect => dialect.id !== dialect_id
-    && Object.values(dialect.name ?? {}).some(existing_value => Object.values(value).some(new_value => name_key(existing_value) === name_key(new_value))))
-  if (collides)
-    throw new Error('another dialect already has that name')
-
   const now = new Date().toISOString()
-  const row: Record<string, unknown> = { ...existing, name: value, updated_at: now }
+  const row: Record<string, unknown> = { ...parse_dict_row('dialects', existing), updated_at: now }
   delete row.updated_by_user_id
+  let changed = false
+
+  if (name !== undefined) {
+    const value = to_multistring(name)
+    if (!value)
+      throw new Error('dialect name cannot be empty')
+    const collides = list_dialects(db).some(dialect => dialect.id !== dialect_id
+      && Object.values(dialect.name ?? {}).some(existing_value => Object.values(value).some(new_value => name_key(existing_value) === name_key(new_value))))
+    if (collides)
+      throw new Error('another dialect already has that name')
+    row.name = value
+    changed = true
+  }
+  if (has_coordinates) {
+    row.coordinates = to_coordinates(coordinates) ?? null
+    changed = true
+  }
+  if (!changed)
+    return { found: true, new_synced_up_to: read_last_modified_at(db) }
+
   const event = merge_dict_row({ db, table_name: 'dialects', row, user_id, at: now, api_key_id })
   commit_history(history_db, event)
   return { found: true, new_synced_up_to: read_last_modified_at(db) }

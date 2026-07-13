@@ -10,7 +10,9 @@
   import type { EffectiveAdminLevel } from '$lib/admins'
   import AdminBadge from '$lib/admin/AdminBadge.svelte'
   import DictionaryPickerModal from '$lib/admin/DictionaryPickerModal.svelte'
+  import Pagination from '$lib/components/ui/Pagination.svelte'
   import { get_admin_level, has_super_manager_role } from '$lib/admins'
+  import { fill_remaining_height } from '$lib/utils/fill-remaining-height'
   import { download_as_csv } from '$lib/utils/csv'
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
   import { score_record } from '$lib/utils/fuzzy-score'
@@ -310,8 +312,17 @@
     download_as_csv(records, 'ld-users')
   }
 
-  const MAX_RENDER = 200
-  const rendered_rows = $derived(rows.slice(0, MAX_RENDER))
+  const PAGE_SIZE = 100
+  let current_page = $state(1)
+  // Reset to the first page whenever the filtered/sorted set changes underneath us.
+  $effect(() => {
+    void search_query
+    void user_filter
+    void sort_key
+    void sort_desc
+    current_page = 1
+  })
+  const rendered_rows = $derived(rows.slice((current_page - 1) * PAGE_SIZE, current_page * PAGE_SIZE))
 
   function autofocus(node: HTMLInputElement) {
     setTimeout(() => node.focus(), 15)
@@ -369,11 +380,7 @@
     <p>No users match this filter.</p>
   </div>
 {:else}
-  <div class="results-count">
-    Showing {rendered_rows.length.toLocaleString()} of {rows.length.toLocaleString()}{#if search_active} · sorted by relevance{/if}{#if rows.length > MAX_RENDER} · refine search or filter to see more{/if}
-  </div>
-
-  <div class="table-wrap">
+  <div class="table-wrap" use:fill_remaining_height>
     <table class="users-table">
       <thead>
         <tr>
@@ -478,6 +485,8 @@
       </tbody>
     </table>
   </div>
+
+  <Pagination page={current_page} page_size={PAGE_SIZE} total={rows.length} noun="users" on_change={page => current_page = page} />
 {/if}
 
 {#if add_target}
@@ -587,13 +596,8 @@
     padding-bottom: 4rem;
     color: var(--color-secondary);
   }
-  .results-count {
-    font-size: 0.75rem;
-    color: var(--color-secondary);
-    margin-bottom: 0.5rem;
-  }
   .table-wrap {
-    overflow-x: auto;
+    overflow: auto;
     border-radius: 0.5rem;
     border: 1px solid var(--border-color);
   }

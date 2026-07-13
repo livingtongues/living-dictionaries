@@ -4,9 +4,11 @@
 
   interface Props {
     analytics: LogAnalytics
+    /** The "For you" action-items box. Hidden on the shared /admin/analytics usage page (it's operator-facing → lives on /admin/health). */
+    show_attention?: boolean
   }
 
-  const { analytics }: Props = $props()
+  const { analytics, show_attention = true }: Props = $props()
   const glance = $derived(build_glance({ analytics }))
 
   // Axis-less micro-sparkline path, normalized to a 120×28 box.
@@ -53,14 +55,16 @@
     {/if}
   </div>
 
-  <div class="glance-attention tone-{glance.attention.tone}">
-    <div class="glance-kicker">{glance.attention.tone === 'ok' ? 'All clear' : 'For you'}</div>
-    <ul>
-      {#each glance.attention.items as item (item.text)}
-        <li class="item-{item.tone}"><span class="dot" aria-hidden="true"></span>{item.text}</li>
-      {/each}
-    </ul>
-  </div>
+  {#if show_attention}
+    <div class="glance-attention tone-{glance.attention.tone}">
+      <div class="glance-kicker">{glance.attention.tone === 'ok' ? 'All clear' : 'For you'}</div>
+      <ul>
+        {#each glance.attention.items as item (item.text)}
+          <li class="item-{item.tone}"><span class="dot" aria-hidden="true"></span>{item.text}</li>
+        {/each}
+      </ul>
+    </div>
+  {/if}
 </section>
 
 <style>

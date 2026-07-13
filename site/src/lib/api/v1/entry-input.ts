@@ -1,4 +1,4 @@
-import type { MultiString } from '$lib/types'
+import type { Coordinates, MultiString } from '$lib/types'
 
 /** Cap per-request batch size; agents chunk larger imports. */
 export const MAX_ENTRIES_PER_REQUEST = 1000
@@ -67,6 +67,9 @@ export interface EntryInput {
   scientific_names?: string[] | string
   /** Source-side stable id (linguistic elicitation id) — also handy for dedupe lookups. */
   elicitation_id?: string
+  /** Where-spoken geometry: the attestation/elicitation point(s) (and/or region[s])
+   *  for this form. `{ points?, regions? }`; see the `Coordinates` schema. */
+  coordinates?: Coordinates | null
   /** Dialect names — found-or-created on this dictionary. */
   dialects?: string[] | string
   /** Tag names — found-or-created on this dictionary. */
@@ -127,6 +130,8 @@ export interface EntryPatch {
   sources?: string[] | string
   scientific_names?: string[] | string
   elicitation_id?: string
+  /** Whole-object replace: `{ points?, regions? }` overwrites; `null` clears; omit → untouched. */
+  coordinates?: Coordinates | null
   dialects?: string[] | string
   tags?: string[] | string
   senses?: SensePatch[]

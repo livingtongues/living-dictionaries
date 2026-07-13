@@ -17,6 +17,17 @@
   }
   const max_seconds = $derived(Math.max(60, ...chart_rows.map(bar_seconds)))
 
+  // Horizontal minute gridlines so a bar's duration reads off the axis without a
+  // hover. Step snaps to a tidy interval giving ~3-5 lines across the range.
+  const GRID_STEPS = [30, 60, 120, 180, 300, 600, 900, 1800, 3600]
+  const grid_lines = $derived.by(() => {
+    const step = GRID_STEPS.find(candidate => max_seconds / candidate <= 5) ?? 3600
+    const lines: { seconds: number, label: string }[] = []
+    for (let seconds = step; seconds <= max_seconds; seconds += step)
+      lines.push({ seconds, label: format_s(seconds) })
+    return lines
+  })
+
   const PULL_COLOR = '#06b6d4'
   const BUILD_COLOR = 'var(--primary)'
   const ROLLOUT_COLOR = '#f59e0b'
@@ -104,14 +115,21 @@
       <span><b class:danger={failed_count > 0}>{failed_count}</b> failed</span>
       <span class="hint">{deploys.length} recorded</span>
     </div>
-    <div class="bars" style:height="{BAR_AREA_PX}px">
-      {#each chart_rows as deploy (deploy.at)}
-        <div class="bar" class:failed={deploy.outcome === 'failed'} title={tooltip(deploy)}>
-          {#each segments(deploy) as segment (segment.key)}
-            <div style:height="{(segment.seconds / max_seconds) * BAR_AREA_PX}px" style:background={segment.color}></div>
-          {/each}
-        </div>
-      {/each}
+    <div class="chart" style:height="{BAR_AREA_PX}px">
+      <div class="gridlines" aria-hidden="true">
+        {#each grid_lines as line (line.seconds)}
+          <div class="gridline" style:bottom="{(line.seconds / max_seconds) * BAR_AREA_PX}px"><span>{line.label}</span></div>
+        {/each}
+      </div>
+      <div class="bars">
+        {#each chart_rows as deploy (deploy.at)}
+          <div class="bar" class:failed={deploy.outcome === 'failed'} title={tooltip(deploy)}>
+            {#each segments(deploy) as segment (segment.key)}
+              <div style:height="{(segment.seconds / max_seconds) * BAR_AREA_PX}px" style:background={segment.color}></div>
+            {/each}
+          </div>
+        {/each}
+      </div>
     </div>
     <div class="axis">
       <span>{format_when(chart_rows[0].at)}</span>
@@ -190,7 +208,35 @@
   }
   .stats b { font-size: 0.9375rem; }
   .stats b.danger { color: var(--danger); }
+  .chart {
+    position: relative;
+  }
+  .gridlines {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .gridline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px dashed var(--border-color);
+    opacity: 0.8;
+  }
+  .gridline span {
+    position: absolute;
+    left: 0;
+    top: -0.55rem;
+    font-size: 0.6rem;
+    line-height: 1;
+    color: var(--color-secondary);
+    background: var(--surface);
+    padding-right: 3px;
+    font-variant-numeric: tabular-nums;
+  }
   .bars {
+    position: relative;
+    height: 100%;
     display: flex;
     align-items: flex-end;
     gap: 3px;

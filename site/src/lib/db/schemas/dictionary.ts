@@ -280,6 +280,10 @@ export const sentence_photos = sqliteTable('sentence_photos', {
 export const dialects = sqliteTable('dialects', {
   id: text().primaryKey(),
   name: text({ mode: 'json' }).$type<MultiString>().notNull(),
+  /** Where-spoken geometry for the whole variety — same `{ points, regions }` shape
+   *  as a dictionary's/entry's coordinates. The areal extent, set once here rather
+   *  than repeated on every entry. */
+  coordinates: text({ mode: 'json' }).$type<DictionaryCoordinates>(),
   dirty: integer(),
   server_seq: integer(),
   created_by_user_id: text().notNull(),

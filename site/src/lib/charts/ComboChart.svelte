@@ -79,7 +79,11 @@
   const ys = $derived(scaleLinear().domain([0, y_max * 1.06]).range([ih, 0]).nice())
 
   // Cluster deploy markers so a burst collapses to one tick instead of a pile.
-  const EVENT_GAP = 28
+  // Same-day deploys share an identical x (day granularity) → always merge into one
+  // per-day tick with a count badge; the gap is kept BELOW one day's pixel width so
+  // distinct days stay separate instead of chaining the whole recent week into a
+  // single 80-count blob. KEEP IN SYNC across house / living-dictionaries / tutor.
+  const EVENT_GAP = 18
   const event_clusters = $derived(
     cluster_events({ points: evts.map(e => ({ item: e, x: xs(e.d) })), min_gap: EVENT_GAP }),
   )

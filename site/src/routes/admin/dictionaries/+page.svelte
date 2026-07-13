@@ -7,8 +7,10 @@
   import IconMdiMenuUp from '~icons/mdi/menu-up'
   import { goto } from '$app/navigation'
   import { page } from '$app/state'
+  import Pagination from '$lib/components/ui/Pagination.svelte'
   import type { DictionaryBucket } from '$lib/constants'
   import { download_as_csv } from '$lib/utils/csv'
+  import { fill_remaining_height } from '$lib/utils/fill-remaining-height'
   import { format_date } from '$lib/utils/format-relative-time'
   import { score_record } from '$lib/utils/fuzzy-score'
   import DictionaryRow from './DictionaryRow.svelte'
@@ -134,8 +136,17 @@
     return scored.map(s => s.dict)
   })
 
-  const MAX_RENDER = 100
-  const rendered = $derived(filtered.slice(0, MAX_RENDER))
+  const PAGE_SIZE = 100
+  let current_page = $state(1)
+  // Reset to the first page whenever the filtered/sorted set changes underneath us.
+  $effect(() => {
+    void search_query
+    void active_filter
+    void sort_key
+    void sort_desc
+    current_page = 1
+  })
+  const rendered = $derived(filtered.slice((current_page - 1) * PAGE_SIZE, current_page * PAGE_SIZE))
 
   async function on_change() {
     await data.sync?.sync()
@@ -243,11 +254,7 @@
     <p>No {active_filter} dictionaries match this search.</p>
   </div>
 {:else}
-  <div class="results-count">
-    Showing {rendered.length.toLocaleString()} of {filtered.length.toLocaleString()}{#if search_active} · sorted by relevance{/if}{#if filtered.length > MAX_RENDER} · refine search or filter to see more{/if}
-  </div>
-
-  <div class="table-wrap">
+  <div class="table-wrap" use:fill_remaining_height>
     <table class="dicts-table">
       <thead>
         <tr>
@@ -277,7 +284,7 @@
           {@const invites = invites_by_dict.get(dict.id) ?? { manager: [], contributor: [] }}
           <tr class="dict-row">
             <DictionaryRow
-              {index}
+              index={(current_page - 1) * PAGE_SIZE + index}
               dictionary={dict}
               managers={roles.managers}
               contributors={roles.contributors}
@@ -290,6 +297,8 @@
       </tbody>
     </table>
   </div>
+
+  <Pagination page={current_page} page_size={PAGE_SIZE} total={filtered.length} noun="dictionaries" on_change={page => current_page = page} />
 {/if}
 
 <style>
@@ -396,13 +405,8 @@
     padding-bottom: 4rem;
     color: var(--color-secondary);
   }
-  .results-count {
-    font-size: 0.75rem;
-    color: var(--color-secondary);
-    margin-bottom: 0.5rem;
-  }
   .table-wrap {
-    overflow-x: auto;
+    overflow: auto;
     border-radius: 0.5rem;
     border: 1px solid var(--border-color);
   }

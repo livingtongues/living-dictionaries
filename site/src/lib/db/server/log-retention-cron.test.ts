@@ -106,6 +106,25 @@ describe(rollup_day, () => {
     ])
   })
 
+  test('excludes admin (level >= 2) sessions from the geo tally, keeps them everywhere else, and stores user_id', async () => {
+    const { ADMINS } = await import('$lib/admins')
+    const admin_email = ADMINS[0].email
+    shared_db.prepare('INSERT INTO users (id, email) VALUES (?, ?)').run('admin1', admin_email)
+    // Admin session in US-CA + a normal visitor also in US-CA.
+    add_log({ message: 'session_start', user_id: 'admin1', context: { session_id: 'sa' }, geo: { country: 'US', region: 'CA', city: null, latitude: null, longitude: null } })
+    add_log({ message: 'session_start', user_id: 'u9', context: { session_id: 'su' }, geo: { country: 'US', region: 'CA', city: null, latitude: null, longitude: null } })
+
+    rollup_day({ day: '2026-06-01', shared_db, logs_db })
+
+    // Geo counts only the non-admin visitor; sessions/users still count the admin.
+    expect(metric('2026-06-01', 'geo:US-CA')).toBe(1)
+    expect(metric('2026-06-01', 'sessions')).toBe(2)
+    expect(metric('2026-06-01', 'users')).toBe(2)
+    // user_id is materialized so the live reader can exclude admins on hot days too.
+    const admin_session = shared_db.prepare(`SELECT user_id FROM log_daily_sessions WHERE day = '2026-06-01' AND session_id = 'sa'`).get() as { user_id: string | null }
+    expect(admin_session.user_id).toBe('admin1')
+  })
+
   test('counts a user with both client and server rows once (no cross-source double count)', () => {
     // Same user appears in a browser session AND a server-attributed row the same day.
     add_log({ message: 'session_start', user_id: 'u1', context: { session_id: 's1' } })
