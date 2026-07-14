@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { ChatMessageWithAttachments } from '$lib/server/chat/chat-db'
   import RichTextEditor from '$lib/components/ui/RichTextEditor.svelte'
+  import ImageLightbox from '$lib/components/image/image-lightbox.svelte'
   import { html_to_text } from '$lib/utils/html-to-text'
   import { linkify_html } from '$lib/utils/linkify-html'
   import IconMdiCheck from '~icons/mdi/check'
@@ -66,6 +67,8 @@
     const text = message.body_text || html_to_text(message.body_html)
     await navigator.clipboard.writeText(text)
   }
+
+  let viewer_url: string | null = $state(null)
 </script>
 
 <div class="msg" class:own={is_own}>
@@ -110,9 +113,9 @@
       <div class="attachments">
         {#each message.attachments as attachment (attachment.id)}
           {#if is_image_mimetype(attachment.mimetype)}
-            <a class="att-image" href={chat_attachment_url(attachment.id)} target="_blank" rel="noopener" title={attachment.filename}>
+            <button type="button" class="att-image" title={attachment.filename} onclick={() => { viewer_url = chat_attachment_url(attachment.id) }}>
               <img src={chat_attachment_url(attachment.id)} alt={attachment.filename} loading="lazy" />
-            </a>
+            </button>
           {:else}
             <a class="att-file" href={chat_attachment_url(attachment.id)} target="_blank" rel="noopener">
               <IconMdiFileOutline />
@@ -139,6 +142,10 @@
     {/if}
   {/if}
 </div>
+
+{#if viewer_url}
+  <ImageLightbox src={viewer_url} on_close={() => { viewer_url = null }} />
+{/if}
 
 <style>
   .msg {
@@ -265,6 +272,9 @@
     overflow: hidden;
     border: 1px solid var(--border-color);
     max-width: 14rem;
+    padding: 0;
+    background: none;
+    cursor: pointer;
   }
   .att-image img {
     display: block;
