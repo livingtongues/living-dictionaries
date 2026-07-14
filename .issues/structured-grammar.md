@@ -298,9 +298,23 @@ sentence-write API is fine (Jacob is the only consumer) — do it all at once he
   empty-grammar dict untouched). RUN POST-DEPLOY (after the migration is live), back up shared.db first.
 
 **Verification:** full `pnpm vitest run` = 1636 passed / 3 skipped; `pnpm check` 0 errors; eslint clean.
-NOT committed by me? — committed to bookmark per Jacob (he does push/deploy). No push/deploy yet: the
-backfill + the grammar cutover (freeze old column, switch rendering to sections, drop column) land with
-the UI milestone, and the deploy is held until the whole pre-deploy batch is done.
+
+**⚠️ DEPLOYED EARLY — accidental push, 2026-07-14.** Both bookmark commits (`49303666` 2a +
+`312ea0d3` 2b/intro-migration) were pushed to `main` by accident and the VPS deploy ran. **Post-deploy
+health audit = ALL CLEAR** (verified from live prod): homepage/`/dictionaries`/real dict `babanki` all
+200 → the 315-line per-dict migration applied cleanly on real data; new `/api/v1/.../grammar/sections`
+route returns 401 (new container live); server logs show NO 500s / SQLite / migration errors (only
+benign pre-deploy `og_render_failed`); `dirty_rows_stuck` FLAT (editors saving fine); `schema_outdated`
+409s are the chronic self-healing `client-behind-recovery` pattern (LOWER today than baseline, not a
+spike); legacy `dictionaries.grammar` blob intact + still editable (no manager stranded); the "dropped
+`PATCH …/grammar`" was a draft-spec entry, never a live route. The shipped changes are ADDITIVE ONLY —
+the deferred **cutover** (run backfill, freeze old column, switch rendering, drop column) is NOT in
+these commits, so the old blob stays authoritative. **The v1 grammar/IGT write surface is now genuinely
+callable in prod** (corpus agent can feed structured data into tables nothing renders yet — harmless).
+
+**Still TODO post-deploy:** the backfill (`scripts/one-off/2026-07-14-grammar-blob-to-sections.cjs`) is
+correctly NOT run — it lands WITH the UI milestone (running it before rendering exists is premature).
+Back up shared.db first when it does run.
 
 **Circle back (Jacob's ask, AFTER the dust settles — NOT this pass):** eyeball the longer migrated
 blobs and split/prettify them into proper multi-section trees where it adds value (per-dict, reviewed).
@@ -559,3 +573,100 @@ Relevance to this schema:
 - Headless e2e on a seeded dict (the data the corpus agent stuffs) — build a section tree, link an
   entry, attach a sentence, confirm tappable/karaoke render when tokens/timings exist.
 - `pnpm test` / `tsc` / `pnpm lint` / `pnpm check`.
+
+---
+
+## CORE UI PASS (Milestone 3 + entry-notes half of 4) — build plan (2026-07-14)
+
+Interview locked (2026-07-14, tier 2): **Q1** grouping = core-first (this pass = grammar-page tree
+render + per-language MarkdownEditor stack + reorder/nest + cutover render w/ blob fallback + entry
+"Grammar notes" read-only block; DEFERRED to pass 2 = clause diagram, texts motif tagging, sentence-
+reference examples). **Q-reorder** = up/down + indent/outdent buttons (no DnD lib; `key_between` for
+sibling order, `parent_id` for nesting). **Q-edit-surface** = inline expand-in-place editor
+(full-width per-language MarkdownEditor stack + live preview, like today's blob editor), NOT a
+Slideover. **Q-entry-notes** = read-only reverse list (sections whose `entry_id`/`sense_id` = this
+entry), linking into the grammar page; entry→section linking is done from the section editor.
+**Q-cutover-flip** = section-tree RENDER stays admin-3-gated during preview (public keeps seeing the
+`dictionaries.grammar` blob even on dicts with test sections); the cutover deploy runs the backfill
+AND lifts the render gate together; EDIT gate stays admin-3 until GA.
+
+### Grounded machinery (verified in code this session)
+- Read: `page.data.dict_db.<table>.rows` (reactive array) / `.id(id)` / `.loading` / `.delete(id|ids)`.
+  Rows expose `._save()` (persists changed cols) + `._delete()`. Create: `dict_db.<table>.insert(row|rows)`
+  → parsed rows; `.upsert(...)`; junctions via `dict_db.writes.link_junction/unlink_junction({table,key})`.
+- Fractional order: `key_between(a,b)` / `initial_keys(n)` from `$lib/api/v1/fractional-index` (already
+  used by entry star + text sentences — compute new `sort_key` in the component from current siblings).
+- Per-language field stack pattern = `text/[textId]/SentenceEditPanel.svelte` (iterate langs, one field
+  each). Markdown render = `$lib/markdown/render` `render_markdown_to_html` + `$lib/markdown/sanitize-rich-text`
+  `sanitize_rich_text`; editor = `$lib/markdown/MarkdownEditor.svelte` (dynamic import, like today's page).
+- Language axis = gloss/analysis languages: `dictionary.gloss_languages` +
+  `order_entry_and_dictionary_gloss_languages` ($lib/helpers/glosses).
+- Story mock pattern: `page_data: { t: mock_t, dictionary, dict_db }` where `dict_db` is a plain object
+  exposing just the collections the component reads (`{ grammar_sections: { rows: [...] , loading:false }, ... }`).
+- Entry page: `entry/[entryId]/+page.svelte` renders `<EntryDisplay/>`; add `<GrammarNotes/>` after it,
+  gated `auth_user.admin_level >= 3` (data already provides `auth_user`, `dict_db`, `dictionary`, entry w/ senses).
+
+### Files to build
+- `[dictionaryId]/grammar/grammar-tree.ts` (+ `.test.ts`) — pure: `build_section_tree(rows)` (flat→nested
+  by parent_id, sorted by sort_key), reorder/nest key math (`move_up/down` → new sort_key among siblings,
+  `indent` → become last child of prev sibling, `outdent` → become next sibling of parent), `derive_number_label`
+  (dotted decimal from tree position when `number_label` NULL).
+- `[dictionaryId]/grammar/GrammarSectionsView.svelte` — reads `dict_db.grammar_sections`, builds tree,
+  renders nodes; admin-3 edit controls (add root section, per-node up/down/indent/outdent/edit/delete).
+- `[dictionaryId]/grammar/GrammarSection.svelte` — one node: number + title + body + usage_conditions
+  (per active gloss lang, markdown→html) + recursive children; inline `SectionEditor` when editing.
+- `[dictionaryId]/grammar/SectionEditor.svelte` — inline full-width per-language MarkdownEditor stack
+  (title/body/usage) + entry/sense link picker (reuse entry search from `AddRelatedEntryModal`) + live preview.
+- `[dictionaryId]/entry/[entryId]/GrammarNotes.svelte` — read-only reverse list, admin-3-gated.
+- `$lib/corpus/grammar-preview.ts` — `grammar_sections_visible({ auth_user })` = admin_level ≥ 3 (the
+  render gate; flip to public at cutover) — parallels `corpus-preview-guard.ts` but RENDER-conditional (no redirect).
+- Rewrite `[dictionaryId]/grammar/+page.svelte`: KEEP the legacy blob intro (render + manager edit) for
+  everyone (the "blob fallback"); when `grammar_sections_visible` ALSO render `<GrammarSectionsView>` below.
+  Update `+page.ts` to surface `auth_user` + `dict_db` needs (dict_db already on page.data).
+- Stories: `GrammarSection`, `SectionEditor`, `GrammarNotes`, and the rewritten `_page.stories.ts`
+  (Viewer/ManagerBlob unchanged + new Admin3Tree / Admin3Editing / EmptyTree stories).
+- i18n EN keys: `grammar.*` / `section.*` in `$lib/i18n/locales/*en.json` (EN only).
+
+### DEFERRED to pass 2 (do NOT build now): clause slot badge/diagram + slot picker; example-sentence
+attach/detach/order + tappable/karaoke render; texts motif/genre tag chips + filter; discourse-role.
+
+### Verification: svelte-look screenshots for each new component; unit tests for grammar-tree; `pnpm test`
+/ `tsc` / `pnpm lint` / `pnpm check`. NO deploy (build behind admin-3, verify with mocks + local).
+
+### ✅ CORE UI PASS DONE (2026-07-14) — all verified, NOT committed (awaiting Jacob's go)
+Built:
+- `grammar/grammar-tree.ts` (+ 16 unit tests) — `build_section_tree` (flat→numbered nested tree, orphan/
+  self-parent→root, positional + `number_label`-override numbering, depth/index/sibling_count),
+  `ordered_children`, `flatten_tree`, and the fractional key ops `move_up_key`/`move_down_key`/
+  `append_child_key`/`after_sibling_key`.
+- `$lib/corpus/grammar-preview.ts` — `grammar_sections_visible` / `grammar_sections_editable` (admin-3;
+  the RENDER gate widens to public at cutover, EDIT stays admin-3 to GA). **Cutover TODO is documented in
+  the file's header comment.**
+- `grammar/grammar-section-actions.ts` — shared `GrammarSectionActions` type for the recursive render.
+- `grammar/GrammarSectionsView.svelte` — reads `dict_db.grammar_sections.rows`, builds the tree, holds
+  `editing_id`, does the reorder/nest fractional math + writes (`insert`/`delete`/row `_save`), add-root.
+- `grammar/GrammarSection.svelte` — recursive node: number, per-language title, markdown body +
+  usage_conditions, entry chip (→ entry page), edit controls (edit/up/down/indent/outdent/delete +
+  add-subsection) with correct enablement.
+- `grammar/SectionEditor.svelte` — inline expand editor: per-language title input + MarkdownEditor stack
+  (cached import promise so titles paint before tiptap) + collapsible usage_conditions + entry-link picker
+  (reuses `page.data.search_entries` / `entries_data`).
+- `entry/[entryId]/GrammarNotes.svelte` — read-only reverse list (sections where `entry_id`/`sense_id` =
+  this entry), admin-3-gated, links to `/{dict}/grammar#section-{id}`.
+- Rewrote `grammar/+page.svelte`: KEPT the blob intro (render + manager edit) for everyone; renders
+  `<GrammarSectionsView>` below with a preview badge when `grammar_sections_visible`. Wired `<GrammarNotes>`
+  into `entry/[entryId]/+page.svelte` (admin-3-gated).
+- i18n: top-level `grammar.*` block added to `en.json` (EN only).
+- Stories: `GrammarSection` (ReadOnly/Editable), `SectionEditor` (Editing/WithLinkedEntry), `GrammarNotes`
+  (WithNotes/NoMatches), rewritten `_page.stories.ts` (+ Admin3Sections / Admin3Empty).
+
+**Verification (all green):** grammar-tree 16/16; full `pnpm vitest run` = 1652 passed / 3 skipped;
+`pnpm check` 0 errors; eslint clean on all new files (only pre-existing entry-page star warnings remain).
+svelte-look screenshots (light+dark) confirmed: tree render + numbering + entry chip + usage block, edit
+controls w/ correct enablement, GrammarNotes list, blob-intro-only for non-admin Viewer, blob+tree+badge
+for admin-3. (MarkdownEditor body = async tiptap mount, not captured in static screenshots — same as the
+existing blob editor; renders at runtime.)
+
+### PASS-2 (next): clause-template diagram + slot picker; example-sentence attach/detach/order + tappable/
+karaoke render (`section_sentences`); texts motif/genre tag chips + filter (`text_tags`); discourse-role.
+Then CUTOVER (run backfill + widen `grammar_sections_visible` to public) + eventually lift EDIT gate → GA.

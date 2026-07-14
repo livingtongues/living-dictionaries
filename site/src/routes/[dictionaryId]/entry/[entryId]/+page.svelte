@@ -3,6 +3,8 @@
   import IconTrash from '~icons/fa-solid/trash'
   import IconShareSquare from '~icons/fa-solid/share-square'
   import EntryDisplay from './EntryDisplay.svelte'
+  import GrammarNotes from './GrammarNotes.svelte'
+  import { grammar_sections_visible } from '$lib/corpus/grammar-preview'
   import { seo_description } from './seo_description'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import JSON from '$lib/components/ui/JSON.svelte'
@@ -227,6 +229,10 @@
   {dictionary}
   can_edit={can_edit}
   {writes} />
+
+{#if dict_db && grammar_sections_visible({ auth_user })}
+  <GrammarNotes {entry} />
+{/if}
 
 <style>
   .action-bar {

@@ -4,12 +4,19 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text as sanitize } from '$lib/markdown/sanitize-rich-text'
+  import GrammarSectionsView from './GrammarSectionsView.svelte'
+  import { grammar_sections_editable, grammar_sections_visible } from '$lib/corpus/grammar-preview'
 
   const { data } = $props()
   const { is_manager, dictionary, update_grammar } = $derived(data)
   let updated = $state('')
 
   let editing = $state(false)
+
+  // Structured section tree is admin-3 preview-only until the cutover deploy
+  // (which runs the blob→sections backfill AND widens this to public together).
+  const sections_visible = $derived(grammar_sections_visible({ auth_user: page.data.auth_user }))
+  const sections_editable = $derived(grammar_sections_editable({ auth_user: page.data.auth_user }))
 
   function start_editing() {
     updated = dictionary.grammar || ''
@@ -56,6 +63,13 @@
       {/if}
     </div>
   </div>
+
+  {#if sections_visible}
+    <div class="sections-block">
+      <div class="preview-badge">{page.data.t('grammar.preview_badge')}</div>
+      <GrammarSectionsView editable={sections_editable} />
+    </div>
+  {/if}
 </div>
 
 <SeoMetaTags
@@ -101,5 +115,24 @@
     .grammar-content.editing {
       display: block;
     }
+  }
+
+  .sections-block {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .preview-badge {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, var(--background));
+    margin-bottom: 0.5rem;
   }
 </style>

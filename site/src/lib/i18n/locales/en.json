@@ -1,4 +1,22 @@
 {
+  "grammar": {
+    "grammar_notes": "Grammar notes",
+    "untitled_section": "Untitled section",
+    "linked_entry": "Linked entry",
+    "documents_entry": "Documents entry",
+    "section_title": "Section title",
+    "section_body": "Description",
+    "usage_conditions": "Usage conditions",
+    "usage_conditions_hint": "When to use this form vs. omit it",
+    "move_up": "Move up",
+    "move_down": "Move down",
+    "indent": "Indent (make a subsection)",
+    "outdent": "Outdent",
+    "add_subsection": "Add subsection",
+    "add_section": "Add section",
+    "delete_section_confirm": "Delete this section and all its subsections?",
+    "preview_badge": "Structured grammar (preview)"
+  },
   "page": {
     "direction": "ltr"
   },
