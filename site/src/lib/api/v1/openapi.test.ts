@@ -41,9 +41,11 @@ const SENSE_INPUT_KEYS: Record<keyof SenseInput, true> = {
 }
 const SENTENCE_INPUT_KEYS: Record<keyof SentenceInput, true> = {
   id: true, text: true, translation: true, sources: true,
+  tokens: true, citations: true, example_label: true, discourse_role: true,
 }
 const SENTENCE_PATCH_KEYS: Record<keyof SentencePatch, true> = {
   text: true, translation: true, sources: true, ends_paragraph: true,
+  tokens: true, citations: true, example_label: true, discourse_role: true,
 }
 const ENTRY_PATCH_KEYS: Record<keyof EntryPatch, true> = {
   lexeme: true, phonetic: true, interlinearization: true, morphology: true, notes: true,
@@ -107,8 +109,8 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}/senses/{senseId}': ['delete'],
       '/api/v1/dictionaries/{id}/texts': ['get', 'post'],
       '/api/v1/dictionaries/{id}/texts/{textId}': ['delete', 'get', 'patch'],
-      // Structured grammar (.issues/structured-grammar.md): live, except the grammar-intro PATCH (still draft).
-      '/api/v1/dictionaries/{id}/grammar': ['patch'],
+      // Structured grammar (.issues/structured-grammar.md): live. No grammar-intro
+      // PATCH — the introductory prose is simply the first top-level section.
       '/api/v1/dictionaries/{id}/grammar/sections': ['get', 'post'],
       '/api/v1/dictionaries/{id}/grammar/sections/{sectionId}': ['delete', 'get', 'patch'],
       '/api/v1/dictionaries/{id}/grammar/sections/{sectionId}/sentences': ['post'],
@@ -151,34 +153,40 @@ describe(build_openapi_spec, () => {
     })
   })
 
-  test('the grammar + text-tag surface is live; only the grammar-intro PATCH stays draft', () => {
+  test('the whole grammar + text-tag surface is live (no draft ops remain)', () => {
     const paths = spec.paths as Record<string, Record<string, { 'summary'?: string, 'x-status'?: string }>>
     const grammar_entries = Object.entries(paths).filter(([path]) =>
       /\/grammar(?:\/|$)/.test(path) || /\/texts\/\{textId\}\/tags(?:\/|$)/.test(path))
-    expect(grammar_entries).toHaveLength(12)
+    expect(grammar_entries).toHaveLength(11)
 
-    // The grammar intro PATCH is the sole remaining draft op.
-    const intro = paths['/api/v1/dictionaries/{id}/grammar'].patch
-    expect(intro['x-status']).toBe('draft')
-    expect(intro.summary).toMatch(/^\[DRAFT\]/)
+    // There is no bare grammar-intro path anymore.
+    expect(paths['/api/v1/dictionaries/{id}/grammar']).toBeUndefined()
 
-    // Every OTHER grammar / text-tag op is live (no draft marker, no [DRAFT] prefix).
-    const live_ops = grammar_entries
-      .filter(([path]) => path !== '/api/v1/dictionaries/{id}/grammar')
-      .flatMap(([, ops]) => Object.values(ops))
-    for (const op of live_ops) {
+    // Every grammar / text-tag op is live (no draft marker, no [DRAFT] prefix).
+    for (const op of grammar_entries.flatMap(([, ops]) => Object.values(ops))) {
       expect(op['x-status']).toBeUndefined()
       expect(op.summary).not.toMatch(/^\[DRAFT\]/)
     }
   })
 
-  test('live grammar schemas are not draft; the intro + IGT sentence-write schemas remain draft', () => {
-    const live = ['GrammarSectionInput', 'GrammarSectionPatch', 'GrammarSectionFull', 'SectionSentenceRef', 'ClauseSlotInput', 'ClauseSlotFull', 'TextTagInput', 'TextTagView', 'GlossingAbbreviationInput', 'GlossingAbbreviationFull']
+  test('grammar + IGT sentence-write schemas are all live; no schema carries x-status draft', () => {
+    const live = ['GrammarSectionInput', 'GrammarSectionPatch', 'GrammarSectionFull', 'SectionSentenceRef', 'ClauseSlotInput', 'ClauseSlotFull', 'TextTagInput', 'TextTagView', 'GlossingAbbreviationInput', 'GlossingAbbreviationFull', 'SourceCitation', 'Morpheme', 'SentenceTokenInput', 'SentenceTokenFull']
     for (const name of live)
       expect((schema(name) as { 'x-status'?: string })['x-status']).toBeUndefined()
-    const draft = ['GrammarIntroPatch', 'SentenceDiscourseFieldDraft', 'SourceScriptFieldDraft', 'SentenceIgtWriteDraft', 'SentenceTokenInputDraft', 'SentenceTokenFull', 'MorphemeDraft', 'SourceCitationDraft']
-    for (const name of draft)
-      expect((schema(name) as { 'x-status'?: string })['x-status']).toBe('draft')
+
+    // The IGT fields are integrated into the sentence-write shapes (not a standalone draft schema).
+    for (const name of ['SentenceInput', 'SentencePatch', 'TextSentenceInput']) {
+      const props = (schema(name) as { properties: Record<string, unknown> }).properties
+      expect(props).toHaveProperty('tokens')
+      expect(props).toHaveProperty('citations')
+      expect(props).toHaveProperty('discourse_role')
+    }
+    expect((schema('SourceInput') as { properties: Record<string, unknown> }).properties).toHaveProperty('orthography')
+
+    // No draft schemas remain anywhere.
+    const { schemas } = spec.components as { schemas: Record<string, { 'x-status'?: string }> }
+    for (const def of Object.values(schemas))
+      expect(def['x-status']).toBeUndefined()
   })
 
   test('is a valid OpenAPI 3.1 document with the server origin', () => {

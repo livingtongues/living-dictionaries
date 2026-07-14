@@ -2,9 +2,11 @@ import type Database from 'better-sqlite3'
 import type { HistoryEvent } from './dictionary-history-db'
 import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
 import type { EntriesWriteResponseBody, EntryInput, EntryPatch, EntryWriteResult, SenseInput, SentenceInput, SentencePatch } from '$lib/api/v1/entry-input'
+import type { SentenceTokens, SourceCitation } from '$lib/db/schemas/dictionary.types'
 import type { MultiString } from '$lib/types'
 import { to_coordinates } from '$lib/api/v1/coordinates-input'
 import { resolve_client_id, to_multistring, to_string_array } from '$lib/api/v1/entry-input'
+import { citation_slugs, resolve_sentence_igt, to_citations, to_discourse_role } from '$lib/api/v1/sentence-igt'
 import { normalize_part_of_speech } from '$lib/mappings/parts-of-speech'
 import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { read_last_modified_at } from './dictionary-db'
@@ -93,15 +95,19 @@ function load_tag_map(db: Database.Database): Map<string, string> {
 }
 
 function build_sentence_rows({ sentence, sense_id, now, source_slug_set }: { sentence: SentenceInput, sense_id: string, now: string, source_slug_set: Set<string> }): BuiltRow[] | null {
-  const text = to_multistring(sentence.text)
   const translation = to_multistring(sentence.translation)
   const sources = to_string_array(sentence.sources)
-  if (!text && !translation && !sources)
+  const { tokens, text } = resolve_sentence_igt({ tokens: sentence.tokens, text: to_multistring(sentence.text) })
+  if (!text && !translation && !sources && !tokens)
     return null
   assert_known_source_slugs(sources, source_slug_set)
+  const citations = to_citations(sentence.citations)
+  assert_known_source_slugs(citation_slugs(citations), source_slug_set)
+  const discourse_role = to_discourse_role(sentence.discourse_role)
+  const example_label = sentence.example_label?.trim() || undefined
   const sentence_id = resolve_client_id(sentence.id, { field: 'sentence id' })
   return [
-    { table_name: 'sentences', row: prune({ id: sentence_id, text, translation, sources, created_at: now, updated_at: now }) },
+    { table_name: 'sentences', row: prune({ id: sentence_id, text, translation, sources, tokens, citations, discourse_role: discourse_role ?? undefined, example_label, created_at: now, updated_at: now }) },
     { table_name: 'senses_in_sentences', row: prune({ id: crypto.randomUUID(), sense_id, sentence_id, created_at: now, updated_at: now }) },
   ]
 }
@@ -628,6 +634,10 @@ export interface SentenceRecord {
   text: MultiString | null
   translation: MultiString | null
   sources: string[] | null
+  tokens: SentenceTokens | null
+  citations: SourceCitation[] | null
+  example_label: string | null
+  discourse_role: string | null
   text_id: string | null
   sort_key: string | null
   ends_paragraph: number | null
@@ -644,6 +654,10 @@ export function read_sentence_record(db: Database.Database, sentence_id: string)
     text: (row.text as MultiString) ?? null,
     translation: (row.translation as MultiString) ?? null,
     sources: (row.sources as string[]) ?? null,
+    tokens: (row.tokens as SentenceTokens) ?? null,
+    citations: (row.citations as SourceCitation[]) ?? null,
+    example_label: (row.example_label as string) ?? null,
+    discourse_role: (row.discourse_role as string) ?? null,
     text_id: (row.text_id as string) ?? null,
     sort_key: (row.sort_key as string) ?? null,
     ends_paragraph: (row.ends_paragraph as number) ?? null,
@@ -689,6 +703,27 @@ export function apply_sentence_update({ db, history_db, sentence_id, patch, user
   }
   if ('ends_paragraph' in source) {
     row.ends_paragraph = patch.ends_paragraph ? 1 : null
+    changed = true
+  }
+  if ('tokens' in source) {
+    const base_text = ('text' in source ? row.text : existing.text) as MultiString | null | undefined
+    const { tokens, text } = resolve_sentence_igt({ tokens: patch.tokens, text: base_text ?? undefined })
+    row.tokens = tokens ?? null
+    if (text) row.text = text
+    changed = true
+  }
+  if ('citations' in source) {
+    const citations = to_citations(patch.citations)
+    assert_known_source_slugs(citation_slugs(citations), load_source_slug_set(db))
+    row.citations = citations ?? null
+    changed = true
+  }
+  if ('example_label' in source) {
+    row.example_label = patch.example_label?.trim() || null
+    changed = true
+  }
+  if ('discourse_role' in source) {
+    row.discourse_role = to_discourse_role(patch.discourse_role) ?? null
     changed = true
   }
   if (!changed)

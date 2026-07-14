@@ -1,8 +1,11 @@
 import type Database from 'better-sqlite3'
 import type { HistoryEvent } from './dictionary-history-db'
 import type { SingleWriteResult } from './v1-entry-write'
+import type { SentenceIgtFields } from '$lib/api/v1/entry-input'
+import type { SentenceTokens, SourceCitation } from '$lib/db/schemas/dictionary.types'
 import type { MultiString } from '$lib/types'
 import { resolve_client_id, to_multistring, to_string_array } from '$lib/api/v1/entry-input'
+import { citation_slugs, resolve_sentence_igt, to_citations, to_discourse_role } from '$lib/api/v1/sentence-igt'
 import { initial_keys, key_between } from '$lib/api/v1/fractional-index'
 import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { read_last_modified_at } from './dictionary-db'
@@ -20,7 +23,7 @@ import { run_tombstone_delete } from './v1-entry-write'
  */
 
 /** Agent-facing input for one sentence within a text. */
-export interface TextSentenceInput {
+export interface TextSentenceInput extends SentenceIgtFields {
   /** Optional client-generated UUID (idempotency + known-id-for-edits). */
   id?: string
   text?: MultiString | string
@@ -49,6 +52,10 @@ export interface TextSentenceRecord {
   text: MultiString | null
   translation: MultiString | null
   sources: string[] | null
+  tokens: SentenceTokens | null
+  citations: SourceCitation[] | null
+  example_label: string | null
+  discourse_role: string | null
   ends_paragraph: number | null
   sort_key: string | null
 }
@@ -88,10 +95,14 @@ function build_text_sentence_row({ sentence, text_id, sort_key, now, source_slug
   now: string
   source_slug_set: Set<string>
 }): Record<string, unknown> {
-  const text = to_multistring(sentence.text)
   const translation = to_multistring(sentence.translation)
   const sources = to_string_array(sentence.sources)
   assert_known_source_slugs(sources, source_slug_set)
+  const { tokens, text } = resolve_sentence_igt({ tokens: sentence.tokens, text: to_multistring(sentence.text) })
+  const citations = to_citations(sentence.citations)
+  assert_known_source_slugs(citation_slugs(citations), source_slug_set)
+  const discourse_role = to_discourse_role(sentence.discourse_role)
+  const example_label = sentence.example_label?.trim() || undefined
   const row: Record<string, unknown> = {
     id: resolve_client_id(sentence.id, { field: 'sentence id' }),
     text_id,
@@ -103,6 +114,10 @@ function build_text_sentence_row({ sentence, text_id, sort_key, now, source_slug
   if (text) row.text = text
   if (translation) row.translation = translation
   if (sources) row.sources = sources
+  if (tokens) row.tokens = tokens
+  if (citations) row.citations = citations
+  if (discourse_role) row.discourse_role = discourse_role
+  if (example_label) row.example_label = example_label
   return row
 }
 
@@ -116,14 +131,18 @@ function read_text_row(db: Database.Database, text_id: string): { id: string, ti
 
 function list_text_sentences(db: Database.Database, text_id: string): TextSentenceRecord[] {
   const rows = db.prepare(
-    `SELECT id, text, translation, sources, ends_paragraph, sort_key
+    `SELECT id, text, translation, sources, tokens, citations, example_label, discourse_role, ends_paragraph, sort_key
      FROM sentences WHERE text_id = ? ORDER BY sort_key ASC, created_at ASC`,
-  ).all(text_id) as { id: string, text: string | null, translation: string | null, sources: string | null, ends_paragraph: number | null, sort_key: string | null }[]
+  ).all(text_id) as { id: string, text: string | null, translation: string | null, sources: string | null, tokens: string | null, citations: string | null, example_label: string | null, discourse_role: string | null, ends_paragraph: number | null, sort_key: string | null }[]
   return rows.map(row => ({
     id: row.id,
     text: row.text ? JSON.parse(row.text) as MultiString : null,
     translation: row.translation ? JSON.parse(row.translation) as MultiString : null,
     sources: row.sources ? JSON.parse(row.sources) as string[] : null,
+    tokens: row.tokens ? JSON.parse(row.tokens) as SentenceTokens : null,
+    citations: row.citations ? JSON.parse(row.citations) as SourceCitation[] : null,
+    example_label: row.example_label,
+    discourse_role: row.discourse_role,
     ends_paragraph: row.ends_paragraph,
     sort_key: row.sort_key,
   }))

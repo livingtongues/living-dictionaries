@@ -14,7 +14,56 @@ export const MAX_LIST_LIMIT = 500
  * dict.db row shapes (see `db/server/v1-entry-write.ts`).
  */
 
-export interface SentenceInput {
+/** One morpheme within a token's word-internal segmentation (agent input). */
+export interface MorphemeInput {
+  form: string
+  gloss?: MultiString | string
+  entry_id?: string
+  separator?: '-' | '=' | '~' | '.'
+}
+
+/**
+ * A writable interlinear (IGT) token — the GOLD alignment from a glossed source.
+ * `start`/`end` are OPTIONAL: omit them and the server derives offsets by walking
+ * the ordered `form`s against the sentence text with a LEFT-TO-RIGHT cursor.
+ */
+export interface SentenceTokenInput {
+  form: string
+  start?: number
+  end?: number
+  /** The Leipzig gloss line, per analysis language. Neutral category codes (`3PL`)
+   *  go under the reserved `default` key (a bare string wraps to `default`). */
+  gloss?: MultiString | string
+  morphemes?: MorphemeInput[]
+  entry_id?: string
+  sense_id?: string
+  status?: 'auto' | 'confirmed' | 'ignored'
+}
+
+/** `tokens` on a sentence write: orthography code → ordered token list. */
+export type SentenceTokensInput = Record<string, SentenceTokenInput[]>
+
+/** A source reference WITH a citation locus (agent input). */
+export interface SourceCitationInput {
+  slug: string
+  locator?: string
+}
+
+/** The IGT / discourse fields shared by every sentence-write shape. */
+export interface SentenceIgtFields {
+  /** Gold interlinear tokens per orthography (usually just `default`). When the
+   *  text for an orthography is omitted but its tokens are supplied, the server
+   *  builds the text by joining the token forms with a space. */
+  tokens?: SentenceTokensInput
+  /** Source refs with a citation locus (page/example number) — complements `sources`. */
+  citations?: SourceCitationInput[]
+  /** The author's own example number (e.g. "(2a)"). */
+  example_label?: string | null
+  /** Discourse salience / information role (see `DISCOURSE_ROLES`). */
+  discourse_role?: string | null
+}
+
+export interface SentenceInput extends SentenceIgtFields {
   /** Optional client-generated UUID. Supply it so you know the id up front (for
    *  later edits) and so a re-POST is idempotent. Omit → the server mints one. */
   id?: string
@@ -141,7 +190,7 @@ export interface EntryPatch {
  * Field-merge an existing example sentence (`PATCH …/sentences/{id}`). Provided
  * fields overwrite (string → `{ default: … }`); omitted ones stay.
  */
-export interface SentencePatch {
+export interface SentencePatch extends SentenceIgtFields {
   text?: MultiString | string
   translation?: MultiString | string
   /** `sources.slug` refs — each must already exist. */

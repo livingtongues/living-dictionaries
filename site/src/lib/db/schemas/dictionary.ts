@@ -500,8 +500,8 @@ export const grammar_sections = sqliteTable('grammar_sections', {
   sort_key: text().notNull(),
   /** Optional explicit label ("2.2.1.1"); when NULL, derived from tree position. Stored form lets an imported grammar keep its own numbering. */
   number_label: text(),
-  /** Section heading, per analysis language (markdown-capable, usually short). */
-  title: text({ mode: 'json' }).$type<MultiString>().notNull(),
+  /** Section heading, per analysis language (markdown-capable, usually short). Optional — a section may be headless (body-only), e.g. the migrated grammar intro. */
+  title: text({ mode: 'json' }).$type<MultiString>(),
   /** Main documentation prose as markdown, per analysis language. */
   body: text({ mode: 'json' }).$type<MultiString>(),
   /** "When to include vs omit this form" prose as markdown, per analysis language — distinct from `body`. */

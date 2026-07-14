@@ -52,8 +52,16 @@ describe(create_section, () => {
     expect(row.created_by_user_id).toBe('u1')
   })
 
-  test('rejects a blank title', () => {
-    expect(() => create({ title: '  ' })).toThrow(/title is required/)
+  test('rejects a section with neither title nor body', () => {
+    expect(() => create({ title: '  ' })).toThrow(/at least a title or a body/)
+  })
+
+  test('creates a headless (body-only) section — the migrated grammar intro shape', () => {
+    const { section } = create({ body: { en: 'Migrated grammar blob…' } })
+    expect(section.title).toEqual({})
+    expect(section.body).toEqual({ en: 'Migrated grammar blob…' })
+    const row = db.prepare(`SELECT title FROM grammar_sections WHERE id = ?`).get(section.id) as { title: string | null }
+    expect(row.title).toBeNull()
   })
 
   test('is idempotent on a supplied id', () => {

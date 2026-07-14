@@ -43,6 +43,12 @@ describe(create_source, () => {
   test('requires a slug', () => {
     expect(() => create_source({ db, user_id: 'u1', input: { slug: '  ' } })).toThrow(/slug is required/)
   })
+
+  test('stores the source orthography', () => {
+    const { source } = create_source({ db, user_id: 'u1', input: { slug: 'rpa', orthography: 'rpa' } })
+    expect(source.orthography).toBe('rpa')
+    expect(list_sources(db)[0].orthography).toBe('rpa')
+  })
 })
 
 describe(apply_source_update, () => {
@@ -52,6 +58,12 @@ describe(apply_source_update, () => {
     expect(result.found).toBeTruthy()
     const [updated] = list_sources(db)
     expect(updated).toMatchObject({ citation: 'new', author: 'Smith' })
+  })
+
+  test('patches the source orthography', () => {
+    const { source } = create_source({ db, user_id: 'u1', input: { slug: 's' } })
+    apply_source_update({ db, source_id: source.id, patch: { orthography: 'ipa' }, user_id: 'u1' })
+    expect(list_sources(db)[0].orthography).toBe('ipa')
   })
 
   test('rejects renaming a slug onto an existing one', () => {

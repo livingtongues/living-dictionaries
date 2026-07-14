@@ -226,13 +226,86 @@ DELETE · `grammar/clause-slots/` GET·POST · `grammar/clause-slots/[slotId]/` 
   ALTER the existing sentence PATCH / text-sentence create + source PATCH paths (schemas
   `SentenceIgtWriteDraft` etc. still draft). Highest value for the corpus agent's 1,072 IGT examples.
 
-**Ready for Jacob to commit + deploy** (per his instruction, he handles all commits/pushes). Uncommitted
-new/changed files: `grammar-sections.ts`(+test), `v1-texts.ts`, 11 route `+server.ts` + 1 route test,
-`openapi.ts`(+test), `constants.ts`, `dictionary.ts`/`dictionary.types.ts`, `20260714_structured_grammar.sql`,
-`dict-syncable-tables.ts`, `dict-writes.ts`, `dictionary-json-columns.ts`(test), `dictionary-grammar-schema.test.ts`.
+**2a COMMITTED** `49303666` (2026-07-14). Pre-commit ran the full vitest suite (green).
 
-Next after deploy: Milestone 2b (IGT sentence writes) → then UI milestones (grammar page rewrite, entry
-"Grammar notes" block, clause-template diagram) behind the admin-3 gate.
+### Milestone 2b + grammar-intro→dict.db pass (2026-07-14) — IN PROGRESS
+
+Jacob green-lit continuing to build everything doable BEFORE the next deploy (he commits to bookmark;
+NO push/deploy until the whole pre-deploy batch is done). **Direction change on the intro** (interview
+2026-07-14): the legacy `dictionaries.grammar` shared-db blob does NOT become a shared-db MultiString —
+it moves OUT of shared.db and INTO each `dictionaries/{id}.db` as a **`grammar_sections` row** (the
+"first section"). End goal: the `dictionaries.grammar` column is GONE. Rug-pull on the current agent
+sentence-write API is fine (Jacob is the only consumer) — do it all at once here.
+
+**Locked decisions:**
+- **Q1 scope (THIS pass, no deploy needed to build/verify):** (a) backfill SCRIPT (blob → ONE dict.db
+  `grammar_sections` row per dict), READY but NOT run; (b) spec/schema cleanup — DROP the obsolete
+  `PATCH …/grammar` intro endpoint + `GrammarIntroPatch`, make `grammar_sections.title` OPTIONAL;
+  (c) Milestone 2b IGT sentence writes (flip off draft). The CUTOVER (run backfill + freeze the old
+  column's edits + switch grammar-page/home-snippet/sitemap rendering to sections + eventually DROP the
+  column via a later shared migration) happens WITH the structured-grammar UI milestone — that rendering
+  IS that UI. Don't freeze/switch rendering now (would strand managers with no edit path).
+- **Q2 migrate shape:** ONE top-level section per dict, `body = { [gloss_languages[0]]: blob }`,
+  deterministic + lossless. (Auto-split into a tree is a LATER per-dict reviewable pass — see "Circle
+  back" below.)
+- **Q3 title:** make `grammar_sections.title` optional (nullable) → import a HEADLESS body-only section
+  (no redundant "Overview" heading colliding with blobs that open with their own `##`). Require
+  `title || body` in `create_section` so a section still can't be fully empty.
+- **Q4/backfill run:** committed idempotent `tsx` script (`site/scripts/`), reuses the REAL server
+  helpers (`get_shared_db` / `get_dictionary_db` / `create_section` — the whole chain is
+  `$env`/`$app`-free, only `v1-route-context.ts` pulls `@sveltejs/kit`), deterministic section id =
+  uuid5(dict_id) so re-runs no-op via `create_section`'s own id-idempotency. After each create it
+  inlines `mirror_dictionary_cursor`'s effect (`UPDATE dictionaries SET updated_at=<cursor>,
+  entry_count=…`) so the snapshot builder (`WHERE updated_at > COALESCE(snapshot_uploaded_at,'1970')`)
+  rebuilds the R2 snapshot → clients pull the new section. Run POST-deploy (schema must be live).
+
+**Grounding (verified in code + live prod shared.db):**
+- 170 dicts have non-empty grammar; the prose language == `gloss_languages[0]` in ALL of them (151 en,
+  8 es, 4 fr, 3 pt, +5 singletons); ZERO have empty gloss_languages. First-gloss key is safe.
+- dict.db content (texts/sentences/`grammar_sections`) renders CLIENT-SIDE via `page.data.dict_db`
+  (LiveDb), not SSR — so the public grammar-page render under the new model IS the section UI (deferred).
+- `dictionary.grammar` render sites (all stay reading the frozen column until the cutover): grammar page
+  (render+edit), home-snippet `[dictionaryId]/+page.svelte:250`, sitemap presence-check.
+- No server-side token matcher exists; `sentences.tokens` has NO write path today → 2b is purely additive.
+- All 2b columns already exist in the committed `20260714_structured_grammar.sql` (Milestone 1):
+  `sentences.tokens`(JSON)/`.citations`(JSON)/`.example_label`/`.discourse_role`, `sources.orthography`.
+
+**Build checklist (this pass) — ✅ ALL DONE (2026-07-14), all tests green:**
+- [x] Task 1 — `grammar_sections.title` OPTIONAL: `dictionary.ts` dropped `.notNull()`; folded
+  `title TEXT NOT NULL`→`title TEXT` INTO `20260714_structured_grammar.sql` (undeployed, one-lane rule);
+  `create_section`/`update_section` require `title||body`; read shape returns `{}` for headless;
+  openapi `GrammarSectionInput` title no longer required; tests updated (headless-section test added).
+- [x] Task 2 — DROPPED `PATCH …/grammar` path + `GrammarIntroPatch` (intro = the first section now);
+  retagged `grammar` tag LIVE; rewrote the info.description legend (grammar + IGT LIVE, no draft);
+  removed the now-orphaned `DRAFT` const; `openapi.test.ts` path/schema snapshots updated (asserts NO
+  schema carries `x-status: draft`).
+- [x] Task 3 — Milestone 2b IGT sentence writes: new `$lib/api/v1/sentence-igt.ts` (`resolve_sentence_igt`
+  L→R cursor offset derivation + text-join fallback + neutral-`default` gloss key via `to_multistring`,
+  `to_citations`, `to_discourse_role`; +inline tests); `SentenceIgtFields` on `SentenceInput`/`SentencePatch`
+  (entry-input) + `TextSentenceInput` (v1-texts); `SourceInput.orthography`; threaded through
+  `build_sentence_rows`/`apply_sentence_update`/`read_sentence_record` (v1-entry-write),
+  `build_text_sentence_row`/`list_text_sentences` (v1-texts), `create_source`/`apply_source_update`
+  (v1-sources); citation slugs validated against the source registry. openapi: draft schemas flipped
+  live + renamed (`SourceCitation`/`Morpheme`/`SentenceTokenInput`/`SentenceTokenFull`), IGT fields
+  spread into the sentence-write schemas via `sentence_igt_props`, read fields added to
+  `SentenceFull`/`TextSentenceFull`; standalone `*Draft` wrappers removed. Write-path + source tests added.
+- [x] Task 4 — backfill `scripts/one-off/2026-07-14-grammar-blob-to-sections.cjs` (raw better-sqlite3,
+  matches the `.cjs` one-off precedent so it runs via `docker exec node` in prod — NOT a `$lib`/tsx
+  script, which the built container can't run). Headless body-only section under `gloss_languages[0]`,
+  deterministic `uuid5(dict_id)` id (idempotent, skip-if-exists), `sort_key='i'`, bumps shared.db
+  `dictionaries.updated_at` → snapshot rebuild. `DRY=1` preview; skips dicts missing the table / local
+  file. VERIFIED end-to-end on throwaway data (create → idempotent re-run → correct body/id/sort_key,
+  empty-grammar dict untouched). RUN POST-DEPLOY (after the migration is live), back up shared.db first.
+
+**Verification:** full `pnpm vitest run` = 1636 passed / 3 skipped; `pnpm check` 0 errors; eslint clean.
+NOT committed by me? — committed to bookmark per Jacob (he does push/deploy). No push/deploy yet: the
+backfill + the grammar cutover (freeze old column, switch rendering to sections, drop column) land with
+the UI milestone, and the deploy is held until the whole pre-deploy batch is done.
+
+**Circle back (Jacob's ask, AFTER the dust settles — NOT this pass):** eyeball the longer migrated
+blobs and split/prettify them into proper multi-section trees where it adds value (per-dict, reviewed).
+
+Then: UI milestones (grammar page rewrite = the cutover render, entry "Grammar notes", clause diagram).
 
 **Original design decisions (still the build target):**
 **Gate: admin-3 preview** (same as texts) until the data shape is stable, then graduate to all

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { open_dictionary_db_in_memory } from './dictionary-db'
 import { open_dictionary_history_db_in_memory } from './dictionary-history-db'
 import * as sync_helpers from './dictionary-sync-helpers'
-import { apply_entry_delete, apply_entry_update, apply_entry_writes } from './v1-entry-write'
+import { apply_entry_delete, apply_entry_update, apply_entry_writes, apply_sentence_update, read_sentence_record } from './v1-entry-write'
 import { create_source } from './v1-sources'
 
 let db: Database.Database
@@ -342,6 +342,69 @@ describe('entry coordinates', () => {
     const entry_id = report.results[0].entry_id as string
     expect(() => apply_entry_update({ db, entry_id, patch: { coordinates: { regions: [{ coordinates: [{ longitude: 0, latitude: 0 }] }] } }, user_id: 'u1' }))
       .toThrow(/at least 3 vertices/)
+  })
+})
+
+describe('IGT sentence writes (tokens / gloss / citations / discourse)', () => {
+  function seed_sentence_with_igt() {
+    create_source({ db, user_id: 'u1', input: { slug: 'smith-1981' } })
+    const { entry_id, sense_id } = seed_entry()
+    apply_entry_update({ db, entry_id, patch: { senses: [{ id: sense_id, example_sentences: [{
+      text: 'na na bird',
+      translation: { en: 'the bird flew' },
+      tokens: { default: [{ form: 'na' }, { form: 'na', gloss: '3PL' }, { form: 'bird', gloss: { en: 'bird' }, entry_id }] },
+      citations: [{ slug: 'smith-1981', locator: '1981:31' }],
+      example_label: '(2a)',
+      discourse_role: 'storyline',
+    }] }] }, user_id: 'u1' })
+    const row = db.prepare(`SELECT * FROM sentences`).get() as Record<string, string>
+    return { row, entry_id }
+  }
+
+  test('stores derived token offsets, gloss default-key, citations, label, and discourse_role', () => {
+    const { row } = seed_sentence_with_igt()
+    const tokens = JSON.parse(row.tokens)
+    expect(tokens.default.map((t: { start: number, end: number }) => [t.start, t.end])).toEqual([[0, 2], [3, 5], [6, 10]])
+    expect(tokens.default[1].gloss).toEqual({ default: '3PL' })
+    expect(tokens.default[2].gloss).toEqual({ en: 'bird' })
+    expect(JSON.parse(row.citations)).toEqual([{ slug: 'smith-1981', locator: '1981:31' }])
+    expect(row.example_label).toBe('(2a)')
+    expect(row.discourse_role).toBe('storyline')
+  })
+
+  test('rejects a citation slug that is not a known source', () => {
+    const { entry_id, sense_id } = seed_entry()
+    const report = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'x', senses: [{ glosses: { en: 'y' }, example_sentences: [{ text: 'hi', citations: [{ slug: 'ghost' }] }] }] }] })
+    expect(report.results[0].status).toBe('failed')
+    expect(report.results[0].error).toMatch(/ghost/)
+    void entry_id
+    void sense_id
+  })
+
+  test('rejects an invalid discourse_role', () => {
+    const { entry_id, sense_id } = seed_entry()
+    const report = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'z', senses: [{ glosses: { en: 'y' }, example_sentences: [{ text: 'hi', discourse_role: 'bogus' }] }] }] })
+    expect(report.results[0].status).toBe('failed')
+    expect(report.results[0].error).toMatch(/invalid discourse_role/)
+    void entry_id
+    void sense_id
+  })
+
+  test('a tokens-only sentence synthesizes its text by joining forms', () => {
+    const { entry_id, sense_id } = seed_entry()
+    apply_entry_update({ db, entry_id, patch: { senses: [{ id: sense_id, example_sentences: [{ tokens: { default: [{ form: 'kaq' }, { form: 'sii', gloss: { en: 'dog' } }] } }] }] }, user_id: 'u1' })
+    const row = db.prepare(`SELECT * FROM sentences ORDER BY created_at DESC LIMIT 1`).get() as Record<string, string>
+    expect(JSON.parse(row.text)).toEqual({ default: 'kaq sii' })
+  })
+
+  test('PATCH re-derives tokens and exposes IGT fields on the read record', () => {
+    const { row } = seed_sentence_with_igt()
+    apply_sentence_update({ db, sentence_id: row.id, patch: { discourse_role: null, tokens: { default: [{ form: 'na' }, { form: 'na' }, { form: 'bird' }] } }, user_id: 'u1' })
+    const record = read_sentence_record(db, row.id)
+    expect(record?.discourse_role).toBeNull()
+    expect(record?.tokens?.default).toHaveLength(3)
+    expect(record?.citations).toEqual([{ slug: 'smith-1981', locator: '1981:31' }])
+    expect(record?.example_label).toBe('(2a)')
   })
 })
 

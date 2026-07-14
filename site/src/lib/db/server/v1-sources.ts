@@ -40,11 +40,12 @@ export interface SourceRecord {
   url: string | null
   license: string | null
   type: string | null
+  orthography: string | null
 }
 
 export interface SourceReferenceCounts { entries: number, sentences: number, texts: number, audio: number, videos: number }
 
-const SOURCE_COLUMNS = `id, slug, citation, abbreviation, author, year, url, license, type`
+const SOURCE_COLUMNS = `id, slug, citation, abbreviation, author, year, url, license, type, orthography`
 
 export function list_sources(db: Database.Database): SourceRecord[] {
   return db.prepare(`SELECT ${SOURCE_COLUMNS} FROM sources ORDER BY slug`).all() as SourceRecord[]
@@ -107,6 +108,9 @@ export interface SourceInput {
   url?: string
   license?: string
   type?: string
+  /** Which writing system this source's forms use — an orthography `code` from
+   *  the dictionary's `orthographies` (or `default`); nullable. */
+  orthography?: string
 }
 
 export function create_source({ db, history_db, user_id, api_key_id, input }: {
@@ -134,13 +138,14 @@ export function create_source({ db, history_db, user_id, api_key_id, input }: {
     url: input.url?.trim() || null,
     license: input.license?.trim() || null,
     type,
+    orthography: input.orthography?.trim() || null,
   }
   const event = merge_dict_row({ db, table_name: 'sources', row: { ...source, created_at: now, updated_at: now }, user_id, at: now, api_key_id })
   commit_history(history_db, event)
   return { source, cursor: read_last_modified_at(db) }
 }
 
-const SOURCE_PATCH_FIELDS = ['citation', 'abbreviation', 'author', 'year', 'url', 'license'] as const
+const SOURCE_PATCH_FIELDS = ['citation', 'abbreviation', 'author', 'year', 'url', 'license', 'orthography'] as const
 
 /** Field-merge a source's metadata (and/or rename its slug). Rejects a slug collision. */
 export function apply_source_update({ db, history_db, source_id, patch, user_id, api_key_id }: {

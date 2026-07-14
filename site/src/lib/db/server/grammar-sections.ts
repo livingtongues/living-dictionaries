@@ -41,7 +41,8 @@ export interface GrammarSectionInput {
   parent_id?: string | null
   after_section_id?: string
   number_label?: string
-  title: MultiString | string
+  /** Optional — a section may be headless (body-only). At least one of `title`/`body` is required. */
+  title?: MultiString | string
   body?: MultiString | string
   usage_conditions?: MultiString | string
   slot_id?: string | null
@@ -205,8 +206,9 @@ export function create_section({ db, history_db, user_id, api_key_id, input }: {
   input: GrammarSectionInput
 }): CreateSectionResult {
   const title = to_multistring(input.title)
-  if (!title)
-    throw new Error('section title is required')
+  const body = to_multistring(input.body)
+  if (!title && !body)
+    throw new Error('a section needs at least a title or a body')
   const section_id = resolve_client_id(input.id, { field: 'section id' })
 
   if (input.id) {
@@ -228,9 +230,10 @@ export function create_section({ db, history_db, user_id, api_key_id, input }: {
   db.exec('BEGIN IMMEDIATE')
   try {
     const sort_key = sibling_sort_key({ db, parent_id, after_section_id: input.after_section_id })
-    const row: Record<string, unknown> = { id: section_id, parent_id, sort_key, title, created_at: now, updated_at: now }
+    const row: Record<string, unknown> = { id: section_id, parent_id, sort_key, created_at: now, updated_at: now }
+    if (title) row.title = title
     if (input.number_label) row.number_label = input.number_label
-    const body = to_multistring(input.body); if (body) row.body = body
+    if (body) row.body = body
     const usage = to_multistring(input.usage_conditions); if (usage) row.usage_conditions = usage
     if (input.slot_id) row.slot_id = input.slot_id
     if (input.entry_id) row.entry_id = input.entry_id
@@ -281,13 +284,11 @@ export function apply_section_update({ db, history_db, section_id, patch, user_i
   const row: Record<string, unknown> = { ...existing, updated_at: now }
   delete row.updated_by_user_id
 
-  if (patch.title !== undefined) {
-    const title = to_multistring(patch.title)
-    if (!title)
-      throw new Error('section title cannot be empty')
-    row.title = title
-  }
+  if (patch.title !== undefined)
+    row.title = to_multistring(patch.title) ?? null
   if (patch.body !== undefined) row.body = to_multistring(patch.body) ?? null
+  if (!row.title && !row.body)
+    throw new Error('a section needs at least a title or a body')
   if (patch.usage_conditions !== undefined) row.usage_conditions = to_multistring(patch.usage_conditions) ?? null
   if (patch.number_label !== undefined) row.number_label = patch.number_label ?? null
   if (patch.slot_id !== undefined) row.slot_id = patch.slot_id ?? null

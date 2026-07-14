@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS grammar_sections (
   parent_id TEXT REFERENCES grammar_sections(id) ON DELETE CASCADE, -- NULL = top-level
   sort_key TEXT NOT NULL,          -- fractional index, ordering among siblings (same parent_id)
   number_label TEXT,               -- optional explicit "2.2.1.1"; derived when NULL
-  title TEXT NOT NULL,             -- JSON MultiString (markdown)
+  title TEXT,                      -- JSON MultiString (markdown); nullable — a section may be headless (body-only), e.g. the migrated grammar intro
   body TEXT,                       -- JSON MultiString (markdown)
   usage_conditions TEXT,           -- JSON MultiString (markdown)
   slot_id TEXT REFERENCES clause_slots(id) ON DELETE SET NULL,

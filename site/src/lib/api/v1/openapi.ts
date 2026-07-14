@@ -62,6 +62,18 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   }
   const CoordinatesNullableRef = { oneOf: [{ $ref: '#/components/schemas/Coordinates' }, { type: 'null' }] }
 
+  // Interlinear-glossing (IGT) + discourse fields shared by every sentence-write
+  // shape (SentenceInput / TextSentenceInput / SentencePatch). Turns a sentence
+  // into a first-class interlinear unit: the default-orthography token list is the
+  // SHARED index the gloss line, word→entry taps, AND `audio.timings` karaoke all
+  // align to 1:1. When `tokens` are omitted the server auto-matches as today.
+  const sentence_igt_props = {
+    tokens: { type: 'object', additionalProperties: { type: 'array', items: { $ref: '#/components/schemas/SentenceTokenInput' } }, description: 'Orthography code → ordered token list (usually just `default`, the vernacular line) — the GOLD alignment from a glossed source, carrying the per-token gloss line + optional morphemes. If the sentence `text` for an orthography is omitted but its tokens are supplied, the server builds `text` by joining the token `form`s with a space — so a rows-only glossed source (aligned `[form, gloss]` rows, no separate vernacular line) imports without pre-assembling the text.' },
+    citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitation' }, description: 'Source refs with a citation locus (page/example number) — complements the bare `sources[]` membership. Each `slug` must already exist in the source registry.' },
+    example_label: { type: 'string', nullable: true, description: 'The author\'s own example number (e.g. "(2a)") for cross-referencing within a grammar.' },
+    discourse_role: { type: 'string', enum: DISCOURSE_ROLES, nullable: true, description: 'Discourse salience / information role — lets a narrative render foreground vs. background and a grammar section point at the role a particle signals.' },
+  }
+
   const SentenceInput = {
     type: 'object',
     description: 'An example sentence.',
@@ -70,6 +82,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       text: { ...StringOrMultiString, description: 'The sentence in the vernacular.' },
       translation: { ...StringOrMultiString, description: 'Translation(s), keyed by gloss-language code.' },
       sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist (create via `POST …/sources`).' },
+      ...sentence_igt_props,
     },
   }
 
@@ -126,6 +139,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       translation: { ...StringOrMultiString, description: 'Translation(s), keyed by gloss-language code.' },
       sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist (create via `POST …/sources`).' },
       ends_paragraph: { type: 'boolean', description: 'For a text-sentence: whether a paragraph break follows it.' },
+      ...sentence_igt_props,
     },
   }
 
@@ -174,6 +188,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       url: { type: 'string' },
       license: { type: 'string' },
       type: { type: 'string', enum: ['dictionary', 'wordlist', 'fieldwork', 'manuscript', 'other'] },
+      orthography: { type: 'string', nullable: true, description: 'Which writing system this source\'s forms use — an orthography `code` from the dictionary\'s `orthographies` (or `default`), so multiple romanizations/scripts across a corpus are not conflated.' },
     },
   }
 
@@ -231,6 +246,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       translation: { ...StringOrMultiString, description: 'Translation(s), keyed by gloss-language code.' },
       sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist.' },
       ends_paragraph: { type: 'boolean', description: 'Whether a paragraph break follows this sentence.' },
+      ...sentence_igt_props,
     },
   }
 
@@ -252,6 +268,10 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       text: { ...MultiString, nullable: true },
       translation: { ...MultiString, nullable: true },
       sources: { type: 'array', items: { type: 'string' }, nullable: true },
+      tokens: { type: 'object', additionalProperties: { type: 'array', items: { $ref: '#/components/schemas/SentenceTokenFull' } }, nullable: true, description: 'Stored interlinear tokens per orthography.' },
+      citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitation' }, nullable: true },
+      example_label: { type: 'string', nullable: true },
+      discourse_role: { type: 'string', nullable: true },
       ends_paragraph: { type: 'integer', nullable: true },
       sort_key: { type: 'string', nullable: true, description: 'Fractional ordering index within the text.' },
     },
@@ -303,6 +323,10 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       text_id: { type: 'string', nullable: true, description: 'Set when the sentence belongs to a longer connected `text`; `null` for a standalone example sentence (the usual case for imports).' },
       sort_key: { type: 'string', nullable: true, description: 'Fractional ordering index within its `text_id`; `null` for standalone example sentences.' },
       ends_paragraph: { type: 'integer', nullable: true, description: '1 when a paragraph break follows this sentence within a `text`; otherwise `null`.' },
+      tokens: { type: 'object', additionalProperties: { type: 'array', items: { $ref: '#/components/schemas/SentenceTokenFull' } }, nullable: true, description: 'Stored interlinear tokens per orthography (the shared index for the gloss line, word→entry taps, and karaoke timings).' },
+      citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitation' }, nullable: true, description: 'Source refs with a citation locus.' },
+      example_label: { type: 'string', nullable: true, description: 'The author\'s own example number.' },
+      discourse_role: { type: 'string', nullable: true, description: 'Discourse salience / information role.' },
       updated_at: { type: 'string', format: 'date-time' },
     },
   }
@@ -598,23 +622,17 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   }
 
   // ───────────────────────────────────────────────────────────────────────
-  // DRAFT — Structured, entry-linked grammar (see .issues/structured-grammar.md).
-  // Every schema + path in this block carries `x-status: draft`: the shape is
-  // SPECIFIED FOR REVIEW (by the corpus-import agent) but NOT yet implemented —
-  // calling the endpoints currently 404s. Shapes may change before the build.
+  // Structured, entry-linked grammar (see .issues/structured-grammar.md) — LIVE.
   // ───────────────────────────────────────────────────────────────────────
-  const DRAFT = { 'x-status': 'draft' as const }
-
   const GrammarSectionInput = {
     type: 'object',
-    required: ['title'],
-    description: 'A node in the dictionary\'s hierarchical grammar. Usually documents ONE lexeme (a particle/affix/construction): link it with `entry_id` (+ optional `sense_id`) and it surfaces as "grammar notes" on that entry, while the section pulls the entry\'s lexeme/phonetic/audio. Prose is parallel-language MARKDOWN keyed by gloss/analysis language (the object-language forms come from the linked entry + referenced sentences, not from this prose).',
+    description: 'A node in the dictionary\'s hierarchical grammar. Usually documents ONE lexeme (a particle/affix/construction): link it with `entry_id` (+ optional `sense_id`) and it surfaces as "grammar notes" on that entry, while the section pulls the entry\'s lexeme/phonetic/audio. Prose is parallel-language MARKDOWN keyed by gloss/analysis language (the object-language forms come from the linked entry + referenced sentences, not from this prose). At least one of `title`/`body` is required.',
     properties: {
       id: client_id_prop,
       parent_id: { type: 'string', nullable: true, description: 'Parent section id; omit/null for a top-level section.' },
       after_section_id: { type: 'string', description: 'Insert immediately after this sibling (fractional ordering). Omit → append to the end of the parent\'s children.' },
       number_label: { type: 'string', description: 'Explicit outline number (e.g. "2.2.1.1") — e.g. to preserve a source grammar\'s numbering. Omit → derived from tree position.' },
-      title: { ...StringOrMultiString, description: 'Section heading (markdown), per gloss/analysis language. Required.' },
+      title: { ...StringOrMultiString, description: 'Section heading (markdown), per gloss/analysis language. Optional — omit for a headless, body-only section.' },
       body: { ...StringOrMultiString, description: 'Main documentation prose as MARKDOWN, per gloss/analysis language.' },
       usage_conditions: { ...StringOrMultiString, description: 'When to include vs. omit this form (markdown, per language) — distinct from `body`.' },
       slot_id: { type: 'string', nullable: true, description: 'A clause-template slot id (see `…/grammar/clause-slots`) positioning this particle within the clause.' },
@@ -695,15 +713,6 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     },
   }
 
-  const GrammarIntroPatch = {
-    type: 'object',
-    ...DRAFT,
-    description: 'DRAFT. The optional free-text grammar INTRO shown above the section tree (the legacy single grammar blob, promoted to parallel-language markdown). Sections hold the structured content; this is just a preamble.',
-    properties: {
-      intro: { ...StringOrMultiString, nullable: true, description: 'Markdown, per gloss/analysis language.' },
-    },
-  }
-
   const TextTagInput = {
     type: 'object',
     required: ['name'],
@@ -726,45 +735,25 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     },
   }
 
-  const SentenceDiscourseFieldDraft = {
+  // ── Interlinear glossed text (IGT / Leipzig glossing) at the SENTENCE layer:
+  // the aligned GLOSS line the section layer's example sentences reference. The
+  // default-orthography token list is the SHARED index the gloss line, word→entry
+  // taps, and `audio.timings` karaoke all align to 1:1. These schemas back the IGT
+  // fields spread into the sentence-write shapes (see `sentence_igt_props`).
+  const SourceCitation = {
     type: 'object',
-    ...DRAFT,
-    description: 'DRAFT — a PROPOSED addition to the existing sentence write shapes (`SentenceInput` / `TextSentenceInput` / `SentencePatch`), NOT a standalone endpoint. Tags a sentence\'s discourse salience / information role so a narrative can render foreground vs. background and a grammar section can point at the role a particle signals.',
-    properties: {
-      discourse_role: { type: 'string', enum: DISCOURSE_ROLES, nullable: true, description: 'Salience band / information type. Suggested controlled vocabulary; extensible.' },
-    },
-  }
-
-  const SourceScriptFieldDraft = {
-    type: 'object',
-    ...DRAFT,
-    description: 'DRAFT — a PROPOSED addition to the existing `SourceInput`, NOT a standalone endpoint. Declares which writing system a source\'s forms are in (an orthography `code`) so multiple romanizations/scripts across a corpus are not conflated.',
-    properties: {
-      orthography: { type: 'string', nullable: true, description: 'An orthography code from the dictionary\'s `orthographies` (or `default`).' },
-    },
-  }
-
-  // ── DRAFT — Interlinear glossed text (IGT / Leipzig glossing) at the SENTENCE
-  // layer (corpus-agent review, chunk 3). Adds the aligned GLOSS line that the
-  // section layer's example sentences currently can't carry. The default-orthography
-  // token list is the SHARED index the gloss line, word→entry taps, and
-  // `audio.timings` karaoke all align to 1:1.
-  const SourceCitationDraft = {
-    type: 'object',
-    ...DRAFT,
     required: ['slug'],
-    description: 'DRAFT. A source reference WITH a citation locus (page / example number, e.g. "1981:31"). A bare slug string is still accepted where a source ref is expected; this richer form preserves scholarly provenance.',
+    description: 'A source reference WITH a citation locus (page / example number, e.g. "1981:31"). A bare slug string is still accepted where a source ref is expected; this richer form preserves scholarly provenance.',
     properties: {
       slug: { type: 'string', description: 'An existing source-registry slug.' },
       locator: { type: 'string', description: 'Page / example number / "as quoted from X 1981:31" note.' },
     },
   }
 
-  const MorphemeDraft = {
+  const Morpheme = {
     type: 'object',
-    ...DRAFT,
     required: ['form'],
-    description: 'DRAFT. Optional word-INTERNAL segmentation of a token, for polysynthetic/agglutinative data (isolating languages need only the token-level `gloss`).',
+    description: 'Optional word-INTERNAL segmentation of a token, for polysynthetic/agglutinative data (isolating languages need only the token-level `gloss`).',
     properties: {
       form: { type: 'string', description: 'The morpheme\'s surface form.' },
       gloss: { ...MultiString, description: 'Aligned gloss for this morpheme, per analysis language.' },
@@ -773,11 +762,10 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     },
   }
 
-  const SentenceTokenInputDraft = {
+  const SentenceTokenInput = {
     type: 'object',
-    ...DRAFT,
     required: ['form'],
-    description: 'DRAFT. A writable interlinear token — the GOLD alignment from a glossed source. `start`/`end` are OPTIONAL on write: omit them and the server derives offsets by walking the ORDERED `form`s against the sentence `text` with a LEFT-TO-RIGHT CURSOR that consumes each match in turn (a global search would collide — ~28% of real sentences repeat a form). Derivation therefore requires each `form` to be an exact substring of `text`, in order: keep surface forms byte-identical to the text (do not strip footnote/tone/OCR artifacts from the form but not the text, or vice-versa). On read, offsets are always present.',
+    description: 'A writable interlinear token — the GOLD alignment from a glossed source. `start`/`end` are OPTIONAL on write: omit them and the server derives offsets by walking the ORDERED `form`s against the sentence `text` with a LEFT-TO-RIGHT CURSOR that consumes each match in turn (a global search would collide — ~28% of real sentences repeat a form). Derivation therefore requires each `form` to be an exact substring of `text`, in order: keep surface forms byte-identical to the text (do not strip footnote/tone/OCR artifacts from the form but not the text, or vice-versa). On read, offsets are always present.',
     properties: {
       form: { type: 'string', description: 'Surface form exactly as it appears in the sentence text (byte-identical, so offset derivation can locate it).' },
       start: { type: 'integer', description: 'Char offset into the orthography\'s text. Optional on write (derived if omitted).' },
@@ -785,15 +773,14 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       gloss: { ...MultiString, description: 'The aligned interlinear gloss — the Leipzig gloss line, per analysis language. CONVENTION (locked): store language-neutral grammatical category codes (`3PL`, `PFV`, `CLF`) under the reserved `default` key, and per-language LEXICAL glosses (`tiger`, `虎`) under their language codes (`en`, `zh`). A reader on gloss-language X sees `gloss[X] ?? gloss.default`, so a neutral code kept under `default` survives every gloss-language switch (storing it under `en` would make it vanish for a `zh` reader). Independent of `entry_id` (grammatical morphemes/portmanteaux often have no headword but must still be glossable). A legend code found ANYWHERE in a gloss cell (matched as a substring, so portmanteaux like `eat PFV` / `can/ATT` still highlight) renders SMALL CAPS + tap-to-expand automatically — so no per-token "grammatical?" flag is needed.' },
       entry_id: { type: 'string', nullable: true, description: 'Optional link to the dictionary entry for this token (independent of, and optional to, `gloss`). Multi-word→one-gloss = one token spanning the char range.' },
       sense_id: { type: 'string', nullable: true },
-      morphemes: { type: 'array', items: { $ref: '#/components/schemas/MorphemeDraft' }, description: 'Optional word-internal segmentation.' },
-      status: { type: 'string', enum: ['auto', 'confirmed', 'ignored'], description: 'Match state; supplied gold tokens are `confirmed`. `ignored` = punctuation (keeps offset/timing arrays aligned).' },
+      morphemes: { type: 'array', items: { $ref: '#/components/schemas/Morpheme' }, description: 'Optional word-internal segmentation.' },
+      status: { type: 'string', enum: ['auto', 'confirmed', 'ignored'], description: 'Match state; supplied gold tokens default to `confirmed`. `ignored` = punctuation (keeps offset/timing arrays aligned).' },
     },
   }
 
   const SentenceTokenFull = {
     type: 'object',
-    ...DRAFT,
-    description: 'DRAFT. A stored interlinear token (read shape). The default-orthography token list is the shared index that the gloss line, word→entry taps, AND `audio.timings` karaoke all align to 1:1.',
+    description: 'A stored interlinear token (read shape). The default-orthography token list is the shared index that the gloss line, word→entry taps, AND `audio.timings` karaoke all align to 1:1.',
     properties: {
       form: { type: 'string' },
       start: { type: 'integer' },
@@ -801,20 +788,8 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       gloss: { ...MultiString, nullable: true },
       entry_id: { type: 'string', nullable: true },
       sense_id: { type: 'string', nullable: true },
-      morphemes: { type: 'array', items: { $ref: '#/components/schemas/MorphemeDraft' } },
+      morphemes: { type: 'array', items: { $ref: '#/components/schemas/Morpheme' } },
       status: { type: 'string', nullable: true },
-    },
-  }
-
-  const SentenceIgtWriteDraft = {
-    type: 'object',
-    ...DRAFT,
-    description: 'DRAFT — PROPOSED additive fields for the existing sentence write shapes (`SentenceInput` / `TextSentenceInput` / `SentencePatch`), NOT a standalone endpoint. Turns a sentence into a first-class interlinear (IGT) unit: supply the gold `tokens` (per orthography) with their gloss line, cite a source `locator`, carry the author\'s example number, and tag its discourse role. When `tokens` are omitted the server auto-matches as today (but auto-match cannot invent glosses).',
-    properties: {
-      tokens: { type: 'object', additionalProperties: { type: 'array', items: { $ref: '#/components/schemas/SentenceTokenInputDraft' } }, description: 'Orthography code → ordered token list (usually just `default`, the vernacular line). If the sentence `text` for an orthography is omitted but its tokens are supplied, the server builds `text` by joining the token `form`s with a space — so a rows-only glossed source (aligned `[form, gloss]` rows, no separate vernacular line) imports without the client pre-assembling the text.' },
-      citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitationDraft' }, description: 'Source refs with a citation locus (page/example number) — complements the bare `sources[]` membership.' },
-      example_label: { type: 'string', nullable: true, description: 'The author\'s own example number (e.g. "(2a)") for cross-referencing within a grammar.' },
-      discourse_role: { type: 'string', enum: DISCOURSE_ROLES, nullable: true, description: 'See `SentenceDiscourseFieldDraft` — the salience / information role.' },
     },
   }
 
@@ -893,9 +868,9 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '## Feedback (agents welcome)',
         'If you hit a wall — a field you need that doesn\'t exist, a bug, or an awkward workflow — `POST /api/v1/dictionaries/{id}/feedback` with `{ "message": "…" }`. It reaches the Living Dictionaries team directly (read OR write keys). After sending, relay the response\'s `relay_to_human` sentence to your human so they know what you asked for; if we adopt it we notify them directly.',
         '',
-        '## Structured grammar — LIVE; a few draft surfaces remain',
-        'The structured, entry-linked GRAMMAR surface is now implemented and live: grammar sections (hierarchical, parallel-language markdown, entry/sense links, usage conditions), example sentences by reference (`…/grammar/sections/{sectionId}/sentences`), clause-template slots (`…/grammar/clause-slots`), the glossing-abbreviations legend (`…/grammar/glossing-abbreviations`), the reverse entry→grammar lookup (`…/entries/{entryId}/grammar`), and text-classification tags (`…/texts/{textId}/tags`).',
-        'A few surfaces are still marked `x-status: draft` (summaries prefixed `[DRAFT]`, still 404): the grammar INTRO (`PATCH …/grammar`, pending a parallel-language promotion of the legacy single grammar string), and — the bigger piece — the interlinear-glossing (IGT / Leipzig) SENTENCE-WRITE additions: making `tokens` writable with an aligned per-token `gloss` line + optional `morphemes`, plus `citations`, `example_label`, and `discourse_role` on the existing sentence write shapes (`SentenceIgtWriteDraft`, `SentenceTokenInputDraft`/`SentenceTokenFull`, `MorphemeDraft`, `SourceCitationDraft`, `SentenceDiscourseFieldDraft`), and `sources.orthography` (`SourceScriptFieldDraft`). If you are importing IGT / corpus data and any of the draft shapes need adjusting before they are built, tell your human — that feedback still shapes the build.',
+        '## Structured grammar + interlinear glossing (IGT) — LIVE',
+        'The structured, entry-linked GRAMMAR surface is implemented and live: grammar sections (hierarchical, parallel-language markdown, entry/sense links, usage conditions — a section may be headless/body-only), example sentences by reference (`…/grammar/sections/{sectionId}/sentences`), clause-template slots (`…/grammar/clause-slots`), the glossing-abbreviations legend (`…/grammar/glossing-abbreviations`), the reverse entry→grammar lookup (`…/entries/{entryId}/grammar`), and text-classification tags (`…/texts/{textId}/tags`). There is no separate grammar-intro endpoint — the introductory prose is simply the first top-level section.',
+        'Interlinear glossed text (IGT / Leipzig glossing) is live on every sentence write shape (`SentenceInput` / `TextSentenceInput` / `SentencePatch`): supply gold `tokens` per orthography (each `SentenceTokenInput` carrying the aligned per-token `gloss` line + optional `morphemes`; offsets derived if omitted — see the schema), plus `citations` (a source ref WITH a page/example `locator`), `example_label`, and `discourse_role`. `sources.orthography` declares which script a source\'s forms use. When `tokens` are omitted the server behaves as before. If you are importing IGT / corpus data and a shape is awkward, send `POST …/feedback` — that still shapes the build.',
         '',
         '## Fetching this spec (progressive disclosure)',
         'This document is comprehensive and grows over time. If you only need part of it, fetch a slice instead of the whole thing: `GET /api/v1/openapi.json?view=index` returns a compact map (every path + its method summaries + tag, plus the list of schema names) — read that first; then `GET /api/v1/openapi.json?tag=<name>` returns just one group\'s paths WITH their full ($ref-complete) schemas. Tag names are in the top-level `tags` list (e.g. `entries`, `media`, `texts`, `dialects`, `sources`). Fetching with no query params returns everything (this document).',
@@ -1081,12 +1056,9 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         delete: { summary: 'Delete a source', description: 'Refuses with 409 while the source is still referenced. Pass `?remove_from_all=true` to strip the slug from every referencing entry/sentence/text first and then delete.', parameters: [dict_id_param, source_id_param, { name: 'remove_from_all', in: 'query', required: false, schema: { type: 'boolean' } }], responses: { 200: { description: "{ result: 'deleted', removed_from }" }, 409: { description: 'Still referenced (retry with remove_from_all)' }, 404: {} } },
       },
       // Structured grammar (tag: grammar) — see .issues/structured-grammar.md
-      '/api/v1/dictionaries/{id}/grammar': {
-        patch: { summary: '[DRAFT] Set the grammar intro', description: 'DRAFT — not yet implemented (currently 404s). Sets the optional free-text intro shown above the section tree. (The intro still lives as the single shared `dictionaries.grammar` string, edited via the dictionary settings today; a parallel-language promotion is pending — the structured content is in the sections below.)', ...DRAFT, parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GrammarIntroPatch' } } } }, responses: { 200: { description: '{ grammar }' } } },
-      },
       '/api/v1/dictionaries/{id}/grammar/sections': {
         get: { summary: 'List grammar sections', description: 'Returns the ordered section tree. Filter with `?entry_id=` (sections documenting one headword) or `?parent_id=` (one level; empty = top-level).', parameters: [dict_id_param, { name: 'entry_id', in: 'query', required: false, schema: { type: 'string' } }, { name: 'parent_id', in: 'query', required: false, schema: { type: 'string' } }], responses: { 200: { description: '{ sections }', content: { 'application/json': { schema: { type: 'object', properties: { sections: { type: 'array', items: { $ref: '#/components/schemas/GrammarSectionFull' } } } } } } } } },
-        post: { summary: 'Create a grammar section', description: 'Create a section (optionally nested under `parent_id`, positioned after `after_section_id`), optionally linked to an entry/sense with pre-attached example sentences. Supply your own `id` for idempotency.', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GrammarSectionInput' } } } }, responses: { 200: { description: '{ section, created }', content: { 'application/json': { schema: { type: 'object', properties: { section: { $ref: '#/components/schemas/GrammarSectionFull' }, created: { type: 'boolean' } } } } } }, 400: { description: 'Missing title / bad parent/entry id' } } },
+        post: { summary: 'Create a grammar section', description: 'Create a section (optionally nested under `parent_id`, positioned after `after_section_id`), optionally linked to an entry/sense with pre-attached example sentences. Supply your own `id` for idempotency. At least one of `title`/`body` is required.', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GrammarSectionInput' } } } }, responses: { 200: { description: '{ section, created }', content: { 'application/json': { schema: { type: 'object', properties: { section: { $ref: '#/components/schemas/GrammarSectionFull' }, created: { type: 'boolean' } } } } } }, 400: { description: 'Empty section (needs a title or body) / bad parent/entry id' } } },
       },
       '/api/v1/dictionaries/{id}/grammar/sections/{sectionId}': {
         get: { summary: 'Read a grammar section', parameters: [dict_id_param, section_id_param], responses: { 200: { description: '{ section }', content: { 'application/json': { schema: { type: 'object', properties: { section: { $ref: '#/components/schemas/GrammarSectionFull' } } } } } }, 404: {} } },
@@ -1175,16 +1147,12 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         GrammarSectionFull,
         ClauseSlotInput,
         ClauseSlotFull,
-        GrammarIntroPatch,
         TextTagInput,
         TextTagView,
-        SentenceDiscourseFieldDraft,
-        SourceScriptFieldDraft,
-        SourceCitationDraft,
-        MorphemeDraft,
-        SentenceTokenInputDraft,
+        SourceCitation,
+        Morpheme,
+        SentenceTokenInput,
         SentenceTokenFull,
-        SentenceIgtWriteDraft,
         GlossingAbbreviationInput,
         GlossingAbbreviationFull,
       },
@@ -1210,8 +1178,8 @@ export const OPENAPI_TAGS = [
   { name: 'dictionary', description: 'Read the dictionary\'s metadata (gloss languages, orthographies, entry count) — call this first.' },
   { name: 'entries', description: 'Create, read, update, and delete entries, their senses, and example sentences.' },
   { name: 'media', description: 'Attach or remove audio, photos, and videos on entries, senses, sentences, and texts.' },
-  { name: 'texts', description: 'Connected passages/stories with their own ordered sentences. (DRAFT: `…/texts/{textId}/tags` classification — genre/motif/tale-type.)' },
-  { name: 'grammar', description: '[DRAFT — under review, not yet built] Structured, hierarchical grammar sections: parallel-language markdown prose linked to entries/senses, example sentences by reference, clause-template slots, and usage conditions.' },
+  { name: 'texts', description: 'Connected passages/stories with their own ordered sentences, plus `…/texts/{textId}/tags` classification (genre/motif/tale-type).' },
+  { name: 'grammar', description: 'Structured, hierarchical grammar sections: parallel-language markdown prose linked to entries/senses, example sentences by reference, clause-template slots, usage conditions, and the glossing-abbreviations legend.' },
   { name: 'relationships', description: 'Typed links between two entries (optionally narrowed to senses).' },
   { name: 'dialects', description: 'Dialect labels and their areal-extent geometry.' },
   { name: 'tags', description: 'Entry tags.' },
@@ -1242,7 +1210,7 @@ export function tag_for_path(path: string): string {
   if (/\/(?:audio|photos|videos)(?:\/|$)/.test(path))
     return 'media'
   // Grammar wins over the owning resource, so the entry reverse-lookup
-  // (`/entries/{entryId}/grammar`) groups with the grammar surface (DRAFT).
+  // (`/entries/{entryId}/grammar`) groups with the grammar surface.
   if (/\/grammar(?:\/|$)/.test(path))
     return 'grammar'
   const rest = path.replace('/api/v1/dictionaries/{id}', '')
