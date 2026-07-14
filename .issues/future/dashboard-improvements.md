@@ -115,6 +115,11 @@ proposals against this lens.
   proposes exactly this for its analogous `viewer_cold_download` metric and explicitly flags LD's
   dictionary snapshot-boot path as the place to mirror it; the daily curve makes an R2/snapshot
   regression legible over days rather than only in the current window.
+- ✅ **SHIPPED 2026-07-14 — Bot/crawler share % on each error cluster.** Ported tutor's
+  `build_error_clusters` implementation: `ErrorCluster` now carries `sessions`, `max_per_session`,
+  `bot_sessions`, and `bot_pct` (UA `is_bot_user_agent` ∪ webdriver ∪ frequency-bot); `bot_pct > 90`
+  is the "mostly crawler" signal. Same GROUP BY + a per-(cluster,session) breadth pass. See
+  `log-analytics.ts` `build_error_clusters` + its test. *(Original entry below.)*
 - **★★ NEW — Bot/crawler share % on each error cluster** *(filed 2026-07-09 — grounded in TODAY's
   SEO-crawl flood; also ported from tutor 07-08 Phase C).* `ErrorCluster` (`log-analytics.ts` ~line
   234) keeps ALL rows on purpose ("a bot hitting a real error is a real signal") but exposes **no
@@ -126,6 +131,10 @@ proposals against this lens.
   sink clusters with `bot_pct > 90%` as "mostly crawler". Cheap — same GROUP BY, conditional SUM.
   Complements the humans/bots audience toggle (which already filters *usage*, not diagnostic
   clusters). *(ported from tutor · LD urgency higher while Google is ingesting new sitemaps)*
+  **↑ 2026-07-13: tutor + house have now SHIPPED this** — tutor's `build_error_clusters` carries the
+  🤖-bot-only badge live, house's error tooling shows `sess`/`bot`/`stale` columns. Port tutor's
+  implementation rather than re-designing. Re-grounded again 07-13 (US-SC 1,325 crawler / `Rejected` +
+  `initial dict sync failed` + `Internal Error` all 100% bot — all hand-classified).
 - **★ NEW — Sync-Health: name the server-side cause + RED "one-user-dominates" verdict** *(ported
   from house 07-07 Phase C · filed 2026-07-08 — grounded in TODAY's live P2).* LD's `build_sync_health`
   (`log-analytics.ts` ~line 1722) groups `sync_failed` by `context.kind` current-vs-stale + tracks
@@ -147,6 +156,11 @@ proposals against this lens.
   read or a correlated subquery), and it turns "which surface is broken?" from a manual query into a
   glance. Complements the per-session breadth loop-flag above — breadth says *how* it breaks (loop
   vs. wide), route says *where*.
+- ✅ **SHIPPED 2026-07-14 — Per-session error breadth + "⟳ loop" marker.** Ported alongside the
+  bot-share item above: `ErrorCluster` now carries `sessions` (`COUNT(DISTINCT session_id)`) and
+  `max_per_session` (max rows for the cluster within one session) — a high `max_per_session` is the
+  "⟳ loop" marker. Server rows (no session) stay null. See `log-analytics.ts` `build_error_clusters`.
+  *(Original entry below.)*
 - **★★ NEW — Per-session error breadth on the error-cluster panel (loop-bug detector)** *(filed
   2026-07-07 — grounded in TODAY's live P1; verified NOT present).* The `ErrorCluster` shape
   (`log-analytics.ts` ~line 230) exposes `count` + `users` but **no per-session breadth**, so a
@@ -159,6 +173,9 @@ proposals against this lens.
   (e.g. > 100) so a runaway animation/effect loop is legible at a glance and doesn't get dismissed as
   "one user." Cheap — same GROUP BY, one extra `COUNT(DISTINCT …)` + a correlated per-session max
   subquery (or a windowed CTE). Directly answers a question this review had to hand-run today.
+  **↑ 2026-07-13: tutor has SHIPPED the ⟳-loop marker on its `ErrorCluster`** (verified in its 07-12
+  review). Port tutor's `build_error_clusters` `max_per_session` implementation to LD alongside the
+  bot-share % item above — both proven in tutor now.
 - **Stale-bundle error share as a headline % on the errors panel** *(ported from house · filed
   2026-07-07 — MEDIUM).* house's open item: "one number — % of window errors from stale (non-current)
   bundles." LD already computes `totals.stale_errors` but does **not** surface a stale-vs-current

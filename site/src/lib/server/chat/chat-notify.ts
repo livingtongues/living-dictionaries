@@ -38,7 +38,7 @@ const off_duty_emails = new Set(ADMINS.filter(admin => admin.notify === false).m
  *   4. else ping (admins: chosen channel; others: email) + stamp `last_notified_at`
  *      (resetting gentle_reping_at so the 1-day gentle re-ping re-arms)
  */
-export async function ping_room_members({ db, room_id, author_user_id, subject, body, link, email, respect_off_duty = false }: {
+export async function ping_room_members({ db, room_id, author_user_id, subject, body, link, email, respect_off_duty = false, skip_user_ids = [] }: {
   db: Database.Database
   room_id: string
   author_user_id: string
@@ -47,14 +47,19 @@ export async function ping_room_members({ db, room_id, author_user_id, subject, 
   link: string
   email: { subject: string, html: string, text: string }
   respect_off_duty?: boolean
+  /** Extra members to NOT ping (e.g. the human a System message is posted on behalf of). */
+  skip_user_ids?: string[]
 }): Promise<void> {
   const members = db.prepare('SELECT m.user_id, m.last_read_at, m.last_notified_at, u.email, u.name FROM chat_room_members m LEFT JOIN users u ON u.id = m.user_id WHERE m.room_id = ? AND m.user_id != ?')
     .all(room_id, author_user_id) as MemberRow[]
   const online = online_user_ids({ db })
+  const skip = new Set(skip_user_ids)
   const stamp = db.prepare('UPDATE chat_room_members SET last_notified_at = ?, gentle_reping_at = NULL WHERE room_id = ? AND user_id = ?')
 
   for (const member of members) {
     if (member.user_id === SYSTEM_USER_ID)
+      continue
+    if (skip.has(member.user_id))
       continue
     if (online.has(member.user_id))
       continue
@@ -78,7 +83,7 @@ export function author_display_name({ db, author_user_id }: { db: Database.Datab
   return row?.name || row?.email || 'Someone'
 }
 
-export async function notify_room_message({ db, message, base_url }: { db: Database.Database, message: ChatMessageRow, base_url: string }): Promise<void> {
+export async function notify_room_message({ db, message, base_url, skip_user_ids = [] }: { db: Database.Database, message: ChatMessageRow, base_url: string, skip_user_ids?: string[] }): Promise<void> {
   const room = get_room({ db, room_id: message.room_id })
   if (!room)
     return
@@ -96,7 +101,7 @@ export async function notify_room_message({ db, message, base_url }: { db: Datab
   // doesn't), plus the full message. Same builder the preview uses.
   const email = build_chat_notification_email({ author_name, room_name, body_html: message.body_html, body_text: message.body_text, link, is_dm })
 
-  await ping_room_members({ db, room_id: message.room_id, author_user_id: message.author_user_id, subject, body, link, email })
+  await ping_room_members({ db, room_id: message.room_id, author_user_id: message.author_user_id, subject, body, link, email, skip_user_ids })
 }
 
 if (import.meta.vitest) {

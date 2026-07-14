@@ -4,13 +4,24 @@
   import HealthView from './HealthView.svelte'
 
   let { data } = $props()
+
+  // Progressive swap: `primary` (light tier) paints first; when the full
+  // `secondary` (diagnostics) tier resolves we render from it instead, so the
+  // heavy panels fill in below without blocking the top summary.
+  let secondary = $state<Awaited<typeof data.secondary> | undefined>(undefined)
+  $effect(() => {
+    secondary = undefined
+    data.secondary?.then((value) => { secondary = value }).catch(() => {
+    // Detail tier failed to load — stay on the light `primary` render.
+    })
+  })
 </script>
 
-{#if data.analytics}
-  {#await data.analytics}
+{#if data.primary}
+  {#await data.primary}
     <AdminPageSkeleton variant="panels" title_width="8rem" cards={4} panels={3} />
-  {:then analytics}
-    <HealthView data={{ ...data, analytics }} />
+  {:then primary}
+    <HealthView data={{ ...data, analytics: secondary ?? primary }} />
   {:catch error}
     <div class="wrap"><LoadError {error} label="Couldn’t load site health." /></div>
   {/await}

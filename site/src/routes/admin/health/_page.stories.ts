@@ -7,18 +7,25 @@ export const shared_meta: StoryMeta = {
   csr: true,
 }
 
+// The page loads two streamed tiers (`primary` light, `secondary` full) and swaps
+// to `secondary` once it resolves — stories resolve both to the same mock so the
+// full rendered page is what's verified.
+function tiers(analytics: unknown) {
+  return { primary: Promise.resolve(analytics), secondary: Promise.resolve(analytics) } as never
+}
+
 export const Default: PageStory<typeof Component> = {
-  props: { analytics: mock_analytics } as never,
+  props: tiers(mock_analytics),
 }
 
 export const Bots: PageStory<typeof Component> = {
-  props: { analytics: mock_analytics_bots } as never,
+  props: tiers(mock_analytics_bots),
 }
 
 export const SchemaDrift: PageStory<typeof Component> = {
-  props: { analytics: mock_analytics_schema_drift } as never,
+  props: tiers(mock_analytics_schema_drift),
 }
 
 export const Empty: PageStory<typeof Component> = {
-  props: { analytics: empty_analytics } as never,
+  props: tiers(empty_analytics),
 }

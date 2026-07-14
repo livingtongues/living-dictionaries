@@ -253,11 +253,22 @@ error?, context })` server-side (`source='server'`). `console.error` stays patch
 `/admin/analytics` (admin-gated, `log-analytics.ts`) turns the logs into decisions — usage / perf /
 geo / health from `log_daily_metrics` + live `client_logs`, merged hot+cold per day. It should get
 **more useful every week** as data accumulates — that only happens if someone keeps pushing it.
-**Each run, study it and propose ≥1 concrete improvement** (never "looks fine"); write the idea into
-the report + append to a deduped backlog **`.issues/future/dashboard-improvements.md`** (create if
-missing). Build nothing. Lenses: what did I compute by hand here that the page should just show? what
-trend is legible now that wasn't? what's noisy/misleading? Spot-check a headline number vs your raw
-query — drift means a bug to file. The reusable chart lib is `$lib/charts/` (Bar/Combo/Line).
+**Each run, study it.** When today's data — or a sibling win — justifies a *new* panel/metric, propose
+it, grounded in that evidence: write the idea into the report + append to a deduped backlog
+**`.issues/future/dashboard-improvements.md`** (create if missing). When it genuinely doesn't (nothing
+today changes what's worth building and the backlog already holds ready items), that is a valid
+**clean no-op**: say so in one line and name the single highest-value item **already in the backlog**
+to build next — don't manufacture a fresh proposal. An honest "nothing new tonight — build X next" is
+a better report than a filed-for-the-sake-of-it idea. (Never let the backlog's un-shippable,
+data-gated items count as "nothing to build".) Build nothing. Lenses: what did I compute by hand here
+that the page should just show? what trend is legible now that wasn't? what's noisy/misleading?
+Spot-check a headline number vs your raw query — drift means a bug to file. The reusable chart lib is
+`$lib/charts/` (Bar/Combo/Line).
+
+**Standing watch — keep `/admin/health` + `/admin/analytics` page LOAD PERFORMANCE in view.** These
+pages run heavy per-request analytics; each run, sanity-check that they still load quickly (the
+`log-analytics.ts` timings, the progressive top-down render). If load time is regressing, that's a
+real item worth filing/building — don't let it drift.
 
 > **What the admin DASHBOARDS are FOR — aggregate stability/health, NOT individual-error triage.**
 > The `/admin/analytics` + `/admin/health` dashboards exist to answer **aggregate health/stability**

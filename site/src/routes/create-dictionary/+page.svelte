@@ -202,15 +202,15 @@ Use: ${conlang_use.trim()}`
             {page.data.t('create.conlang_info_2')}
           </div>
           <div class="spacer"></div>
-          <div>
+          <div class="checkbox-row">
             <input type="checkbox" id="agreement" name="agreement" required />
             <label for="agreement">{page.data.t('create.agree_above')}</label>
           </div>
-          <div>
+          <div class="checkbox-row">
             <input type="checkbox" id="citeAgreement" name="citeAgreement" required />
             <label for="citeAgreement">{page.data.t('create.agree_to_cite')}</label>
           </div>
-          <div>
+          <div class="checkbox-row">
             <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" required />
             <label for="non-commercialAgreement">{page.data.t('create.agree_for_non-commercial')}</label>
           </div>
@@ -396,11 +396,11 @@ Use: ${conlang_use.trim()}`
           </div>
           <div class="spacer"></div>
 
-          <div>
+          <div class="checkbox-row">
             <input type="checkbox" id="citeAgreement" name="citeAgreement" required />
             <label for="citeAgreement">{page.data.t('create.agree_to_cite')}</label>
           </div>
-          <div>
+          <div class="checkbox-row">
             <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" required />
             <label for="non-commercialAgreement">{page.data.t('create.agree_for_non-commercial')}</label>
           </div>
@@ -471,7 +471,7 @@ Use: ${conlang_use.trim()}`
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
   }
 
-  .create-form input,
+  .create-form input:not([type='radio']):not([type='checkbox']),
   .create-form select {
     width: 100%;
   }
@@ -547,7 +547,33 @@ Use: ${conlang_use.trim()}`
   }
 
   .radio-label {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+    cursor: pointer;
+  }
+
+  .radio-label input {
+    flex: none;
+    margin: 0;
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .checkbox-row input {
+    flex: none;
+    margin: 0;
+    margin-top: 0.2rem;
+  }
+
+  .checkbox-row label {
+    cursor: pointer;
   }
 
   .conlang-warning {

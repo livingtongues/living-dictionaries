@@ -22,7 +22,12 @@
 
   let input: HTMLInputElement = $state()
   let inputValue: string = $state()
-  let activeOption: SelectOption = $state()
+  // $state.raw (not $state): activeOption holds a whole option object by
+  // reference and is only ever swapped wholesale. A deep-proxying $state would
+  // make `filtered.includes(activeOption)` always false (proxy !== raw target),
+  // so the reconciling $effect below would reassign every cycle → infinite loop
+  // (effect_update_depth_exceeded — the "parts of speech menu freezes" bug).
+  let activeOption: SelectOption = $state.raw()
   let showOptions = $state(false)
 
   onMount(() => {

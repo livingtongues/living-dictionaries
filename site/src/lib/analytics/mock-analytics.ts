@@ -219,9 +219,9 @@ export const mock_analytics: LogAnalytics = {
     { source: 'server', logs: 119, errors: 5 },
   ],
   error_clusters: [
-    { message: 'Cannot read properties of undefined (reading \'split\')', stack_head: 'at parseQuery (search.ts:42)', level: 'error', count: 18, users: 3, first_seen: '2026-06-23T08:10:00.000Z', last_seen: '2026-06-23T11:58:02.000Z', sources: 'client', platforms: 'web', is_noise: false },
-    { message: 'entry_save_failed: conflict', stack_head: '', level: 'error', count: 9, users: 2, first_seen: '2026-06-22T20:00:00.000Z', last_seen: '2026-06-23T10:41:15.000Z', sources: 'server', platforms: 'web', is_noise: false },
-    { message: '[post_request] Network error for /api/log', stack_head: '', level: 'error', count: 47, users: 1, first_seen: '2026-06-22T19:00:00.000Z', last_seen: '2026-06-23T09:12:44.000Z', sources: 'client', platforms: 'web', is_noise: true },
+    { message: 'Cannot read properties of undefined (reading \'split\')', stack_head: 'at parseQuery (search.ts:42)', level: 'error', count: 18, users: 3, first_seen: '2026-06-23T08:10:00.000Z', last_seen: '2026-06-23T11:58:02.000Z', sources: 'client', platforms: 'web', is_noise: false, sessions: 5, max_per_session: 6, bot_sessions: 0, bot_pct: 0 },
+    { message: 'entry_save_failed: conflict', stack_head: '', level: 'error', count: 9, users: 2, first_seen: '2026-06-22T20:00:00.000Z', last_seen: '2026-06-23T10:41:15.000Z', sources: 'server', platforms: 'web', is_noise: false, sessions: 0, max_per_session: null, bot_sessions: 0, bot_pct: null },
+    { message: '[post_request] Network error for /api/log', stack_head: '', level: 'error', count: 47, users: 1, first_seen: '2026-06-22T19:00:00.000Z', last_seen: '2026-06-23T09:12:44.000Z', sources: 'client', platforms: 'web', is_noise: true, sessions: 2, max_per_session: 45, bot_sessions: 2, bot_pct: 100 },
   ],
   capability: {
     total_sessions: 177,

@@ -45,4 +45,16 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   not the conlang fork.
 - **2026-07-12 — LD dashboard is AHEAD of siblings on: thin-data perf guard (`THIN_SAMPLE_N=15`) + the
   At-a-Glance strip.** Both are being ported FROM LD by house/tutor — don't accept them as inbound Phase D
-  ports; they're LD-originals.
+  ports; they're LD-originals. **Also LD-ahead: the Sync-health stuck-(user,dict) panel** (`build_sync_health`,
+  `/admin/health`) — house's proposed "wedged clients" indicator is the same idea; don't accept it as an
+  inbound port.
+- **2026-07-13 — SEO/bot crawl SETTLED.** Volume dropped 184k→33k (−82%), host CPU avg back to ~2%,
+  `logs.db` growth 300MB/day → 66MB/day. New baseline: treat a return to 100k+/day as a *new* crawl to
+  investigate, not the old one. The 07-12 "watch logs.db growth" item is effectively resolved.
+- **2026-07-13 — `sync_failed` `kind:client_behind`/`schema_outdated` 409 on a live-session (non-null)
+  tab is the SAME known-noise stale-build family** as the null-session zombies — a migration shipped and
+  the old tab can't sync until reload. Already surfaced by `build_sync_health.stuck[]`. Don't re-triage
+  individual stuck tabs (e.g. evelyn/solari 07-13); no forced-reload (07-09).
+- **2026-07-13 — Phase D: tutor + house have SHIPPED LD's two open error-cluster items** (bot-share % +
+  `max_per_session` ⟳-loop marker; tutor's `build_error_clusters` has both live). Next time these come up,
+  port tutor's implementation rather than re-designing — the design is proven in two apps.

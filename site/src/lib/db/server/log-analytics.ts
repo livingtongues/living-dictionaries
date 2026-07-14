@@ -274,6 +274,18 @@ export interface ErrorCluster {
   platforms: string
   /** True when the message matches a `KNOWN_NOISE_PATTERNS` entry (excluded from the real-error count). */
   is_noise: boolean
+  /** Distinct sessions this cluster hit (rows without a session_id — server rows — don't count). */
+  sessions: number
+  /** Highest row count from any ONE session — a large value is a single tab retry-storming
+   * (the "⟳ loop" marker) vs many users independently hurting. Null when no session-attributed rows. */
+  max_per_session: number | null
+  /** Of `sessions`, how many are automated (crawler UA / `navigator.webdriver` / UA-frequency).
+   * A bot hitting a real error is still real signal, so the cluster is never hidden — but a high share
+   * lets the panel sink it. */
+  bot_sessions: number
+  /** `bot_sessions / sessions` as a 0–100 percent, or null when no session-attributed rows.
+   * `> 90` renders the "mostly crawler" badge. */
+  bot_pct: number | null
 }
 export interface LogAnalytics {
   /** Which audience these usage/geo/perf panels were computed for. */
@@ -645,6 +657,8 @@ interface AnalyticsContext {
   audience: Audience
   /** Hot-row SQL predicate scoping to the active audience (humans / bots). */
   audience_filter: string
+  /** Raw SQL predicate — 1 when a hot row is a bot (crawler UA / webdriver / UA-frequency), audience-agnostic. */
+  is_bot_row: string
   /** Maps a rollup metric name into the active audience's namespace, or null to skip. */
   rollup_metric: (metric: string) => string | null
   window_start_iso: string
@@ -683,7 +697,22 @@ interface LogAnalyticsOptions {
   audience?: Audience
   /** Per-day zero-heartbeat sessions-per-UA that flip a UA to crawler (test seam). */
   bot_ua_min_per_day?: number
+  /**
+   * Which panels to compute — lets each admin page skip the OTHER page's heavy
+   * builders (progressive/top-down loading). Skipped sections return typed empty
+   * defaults. Default `full` (back-compat — the log-review reader wants everything).
+   * - `light` — core summary only (daily/deploys/totals/geo areas/capability/top
+   *   events+routes/by_source/event_coverage/error_clusters/pipeline).
+   * - `usage` — light + usage-heavy (api_v1 / top_dictionaries / missing_i18n_keys).
+   * - `diagnostics` — light + diagnostics-heavy (performance / web_vitals / geo
+   *   latency / errors_by_version / server_faults / leader+sync health / build
+   *   adoption / storage / boot_health / uptime).
+   */
+  scope?: AnalyticsScope
 }
+
+/** Panel-compute scope — see `LogAnalyticsOptions.scope`. */
+export type AnalyticsScope = 'light' | 'usage' | 'diagnostics' | 'full'
 
 /**
  * Memo of whole-window computes. With finalized days served from rollups +
@@ -698,19 +727,19 @@ const analytics_cache = new Map<string, { at_ms: number, value: LogAnalytics }>(
 const ANALYTICS_CACHE_TTL_MS = 15 * 60_000
 
 export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalytics {
-  const { shared_db = get_shared_db(), logs_db = get_logs_db(), days = 30, now = new Date(), current_app_version = version, audience = 'humans', bot_ua_min_per_day = MIN_UA_BOT_SESSIONS_PER_DAY } = options
+  const { shared_db = get_shared_db(), logs_db = get_logs_db(), days = 30, now = new Date(), current_app_version = version, audience = 'humans', bot_ua_min_per_day = MIN_UA_BOT_SESSIONS_PER_DAY, scope = 'full' } = options
   // Cache only the live-DB (default-handle) path — a test injecting a db/now/…
   // always bypasses. Checking `undefined` (never the identity of get_*_db())
   // keeps tests from touching the real .data files.
   const cacheable = options.shared_db === undefined && options.logs_db === undefined && options.now === undefined
     && options.current_app_version === undefined && options.bot_ua_min_per_day === undefined
-  const cache_key = `${days}:${audience}`
+  const cache_key = `${days}:${audience}:${scope}`
   if (cacheable) {
     const hit = analytics_cache.get(cache_key)
     if (hit && now.getTime() - hit.at_ms < ANALYTICS_CACHE_TTL_MS)
       return { ...hit.value, pipeline: build_pipeline_health({ shared_db, logs_db }) }
   }
-  const value = compute_log_analytics({ shared_db, logs_db, days, now, current_app_version, audience, bot_ua_min_per_day })
+  const value = compute_log_analytics({ shared_db, logs_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope })
   if (cacheable)
     analytics_cache.set(cache_key, { at_ms: now.getTime(), value })
   return value
@@ -728,7 +757,35 @@ function timed<T>(label: string, fn: () => T): T {
   return result
 }
 
-function compute_log_analytics({ shared_db, logs_db, days, now, current_app_version, audience, bot_ua_min_per_day }: Required<Omit<LogAnalyticsOptions, 'current_app_version'>> & { current_app_version: string | null }): LogAnalytics {
+/**
+ * Typed empty defaults for the heavy, page-specific sections a scoped compute
+ * skips. Shapes are tsc-enforced against the `LogAnalytics` field types, so a
+ * schema change here fails the build rather than shipping a wrong-shaped panel.
+ */
+const EMPTY_PERFORMANCE: LogAnalytics['performance'] = {
+  summary: [], daily: [], by_route: [], nav_by_route: [], nav_sections: [], lcp_by_route: [],
+  dict_boot: { total: 0, cold: { count: 0, p50: null, p90: null, p95: null }, warm: { count: 0, p50: null, p90: null, p95: null }, cold_snapshot_bytes_p50: null, by_dictionary: [], daily: [] },
+}
+const EMPTY_WEB_VITALS: LogAnalytics['web_vitals'] = []
+const EMPTY_ERRORS_BY_VERSION: LogAnalytics['errors_by_version'] = { current_version: '', total: 0, current: 0, stale: 0, stale_pct: null, deploy_tail_errors: 0, deploy_tail_pct: null, versions: [] }
+const EMPTY_SERVER_FAULTS: LogAnalytics['server_faults'] = { total: 0, schema_drift_count: 0, clusters: [] }
+const EMPTY_LEADER_HEALTH: LogAnalytics['leader_health'] = { timeouts: 0, recovered: 0, failed: 0, failed_no_leader: 0, failed_by_source: [], failed_by_code: [], failed_current: 0, failed_stale: 0 }
+const EMPTY_SYNC_HEALTH: LogAnalytics['sync_health'] = { total: 0, by_kind: [], client_behind: { total: 0, current: 0, stale: 0 }, stuck_pairs: 0, oldest_unresolved_at: null, stuck: [] }
+const EMPTY_BUILD_ADOPTION: LogAnalytics['build_adoption'] = { total: 0, current: 0, behind: 0, stale: 0, unknown: 0, stranded_pct: null, builds: [] }
+const EMPTY_STORAGE: LogAnalytics['storage'] = { dbs: [], dict_dbs: null }
+const EMPTY_BOOT_HEALTH: LogAnalytics['boot_health'] = { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] }
+const EMPTY_UPTIME: LogAnalytics['uptime'] = { probes: 0, availability: null, ttfb: { p50: null, p95: null }, total: { p50: null, p95: null }, vantages: [], daily: [] }
+const EMPTY_API_V1: LogAnalytics['api_v1'] = { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] }
+const EMPTY_TOP_DICTIONARIES: LogAnalytics['top_dictionaries'] = { distinct_dictionaries: 0, month: '', prev_month: '', site_visitors_month: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] }
+const EMPTY_MISSING_I18N: LogAnalytics['missing_i18n_keys'] = { total: 0, distinct_keys: 0, sessions: 0, keys: [] }
+const EMPTY_EVENT_COVERAGE: LogAnalytics['event_coverage'] = { events: [], never_emitted: 0 }
+const EMPTY_GEO_LATENCY: { ttfb_by_country: GeoLatency[], ttfb_by_distance: GeoLatency[], lcp_by_country: GeoLatency[], lcp_by_distance: GeoLatency[] } = { ttfb_by_country: [], ttfb_by_distance: [], lcp_by_country: [], lcp_by_distance: [] }
+
+function compute_log_analytics({ shared_db, logs_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope }: Required<Omit<LogAnalyticsOptions, 'current_app_version'>> & { current_app_version: string | null }): LogAnalytics {
+  // Which heavy, cleanly-independent builders to run this compute (the shared
+  // core always runs). `light` = neither; each page's tier requests its own half.
+  const want_usage = scope === 'usage' || scope === 'full'
+  const want_diagnostics = scope === 'diagnostics' || scope === 'full'
   ensure_is_noise_msg(logs_db)
   const window_start = new Date(now.getTime() - (days - 1) * 86_400_000)
   const window_start_day = day_string(window_start)
@@ -778,7 +835,7 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
   const hot_min_day = (logs_db.prepare(`SELECT substr(MIN(received_at), 1, 10) day FROM client_logs`).get() as { day: string | null }).day ?? '9999-12-31'
 
   const admin_user_ids = get_admin_user_ids({ shared_db })
-  const ctx: AnalyticsContext = { shared_db, logs_db, audience, audience_filter, rollup_metric, window_start_iso, window_start_day, live_start_day, live_start_iso, materialized_days, hot_min_day, current_app_version, days, now, bot_session_ids, window_sessions, admin_user_ids }
+  const ctx: AnalyticsContext = { shared_db, logs_db, audience, audience_filter, is_bot_row, rollup_metric, window_start_iso, window_start_day, live_start_day, live_start_iso, materialized_days, hot_min_day, current_app_version, days, now, bot_session_ids, window_sessions, admin_user_ids }
 
   const { daily, rollup_rows, live_by_day } = timed('build_daily_series', () => build_daily_series(ctx))
   // `area_counts` is seeded from the cold `geo:` rollup here, then the window-session
@@ -788,33 +845,38 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
   const error_clusters = timed('build_error_clusters', () => build_error_clusters(ctx))
   const unique_users = timed('build_unique_users', () => build_unique_users(ctx))
   const capability = timed('build_capability', () => build_capability({ ctx, area_counts }))
-  const performance = timed('build_performance', () => build_performance({ ctx, daily }))
-  const web_vitals = timed('build_web_vitals', () => build_web_vitals(ctx))
-  const { ttfb_by_country, ttfb_by_distance, lcp_by_country, lcp_by_distance } = timed('build_geo_latency', () => build_geo_latency(ctx))
-  const geo = build_geo_areas({ area_counts, ttfb_by_country, ttfb_by_distance, lcp_by_country, lcp_by_distance })
-  const errors_by_version = timed('build_errors_by_version', () => build_errors_by_version(ctx))
+  // Diagnostics-heavy (health page only) — skipped for the usage/light tiers.
+  const performance = want_diagnostics ? timed('build_performance', () => build_performance({ ctx, daily })) : EMPTY_PERFORMANCE
+  const web_vitals = want_diagnostics ? timed('build_web_vitals', () => build_web_vitals(ctx)) : EMPTY_WEB_VITALS
+  const geo_latency = want_diagnostics ? timed('build_geo_latency', () => build_geo_latency(ctx)) : EMPTY_GEO_LATENCY
+  // `geo` areas stay core (both pages); only the TTFB/LCP latency splits are diagnostics-gated.
+  const geo = build_geo_areas({ area_counts, ttfb_by_country: geo_latency.ttfb_by_country, ttfb_by_distance: geo_latency.ttfb_by_distance, lcp_by_country: geo_latency.lcp_by_country, lcp_by_distance: geo_latency.lcp_by_distance })
+  const errors_by_version = want_diagnostics ? timed('build_errors_by_version', () => build_errors_by_version(ctx)) : EMPTY_ERRORS_BY_VERSION
   const deploys = timed('build_deploys', () => build_deploys(ctx))
   const pipeline = timed('build_pipeline', () => build_pipeline_health({ shared_db, logs_db }))
-  const server_faults = timed('build_server_faults', () => build_server_faults(ctx))
+  const server_faults = want_diagnostics ? timed('build_server_faults', () => build_server_faults(ctx)) : EMPTY_SERVER_FAULTS
 
-  const coverage_events = ALL_TRACKED_EVENTS.map((event) => {
-    const count = event_counts.get(event) ?? 0
-    return { event, seen: count > 0, count }
-  })
-  const event_coverage: EventCoverage = {
-    events: coverage_events,
-    never_emitted: coverage_events.filter(entry => !entry.seen).length,
-  }
+  // event_coverage is a usage panel — cheap, but gated with the usage tier.
+  const event_coverage: EventCoverage = want_usage
+    ? (() => {
+        const coverage_events = ALL_TRACKED_EVENTS.map((event) => {
+          const count = event_counts.get(event) ?? 0
+          return { event, seen: count > 0, count }
+        })
+        return { events: coverage_events, never_emitted: coverage_events.filter(entry => !entry.seen).length }
+      })()
+    : EMPTY_EVENT_COVERAGE
 
-  const leader_health = timed('build_leader_health', () => build_leader_health(ctx))
-  const sync_health = timed('build_sync_health', () => build_sync_health(ctx))
-  const build_adoption = timed('build_build_adoption', () => build_build_adoption(ctx))
-  const storage = timed('build_storage', () => build_storage({ shared_db, logs_db }))
-  const api_v1 = timed('build_api_v1', () => build_api_v1_activity(ctx))
-  const top_dictionaries = timed('build_top_dictionaries', () => build_top_dictionaries(ctx))
-  const missing_i18n_keys = timed('build_missing_i18n', () => build_missing_i18n_keys(ctx))
-  const boot_health = timed('build_boot_health', () => build_boot_health(ctx))
-  const uptime = timed('build_uptime', () => build_uptime(ctx))
+  const leader_health = want_diagnostics ? timed('build_leader_health', () => build_leader_health(ctx)) : EMPTY_LEADER_HEALTH
+  const sync_health = want_diagnostics ? timed('build_sync_health', () => build_sync_health(ctx)) : EMPTY_SYNC_HEALTH
+  const build_adoption = want_diagnostics ? timed('build_build_adoption', () => build_build_adoption(ctx)) : EMPTY_BUILD_ADOPTION
+  const storage = want_diagnostics ? timed('build_storage', () => build_storage({ shared_db, logs_db })) : EMPTY_STORAGE
+  // Usage-heavy (analytics page only) — skipped for the diagnostics/light tiers.
+  const api_v1 = want_usage ? timed('build_api_v1', () => build_api_v1_activity(ctx)) : EMPTY_API_V1
+  const top_dictionaries = want_usage ? timed('build_top_dictionaries', () => build_top_dictionaries(ctx)) : EMPTY_TOP_DICTIONARIES
+  const missing_i18n_keys = want_usage ? timed('build_missing_i18n', () => build_missing_i18n_keys(ctx)) : EMPTY_MISSING_I18N
+  const boot_health = want_diagnostics ? timed('build_boot_health', () => build_boot_health(ctx)) : EMPTY_BOOT_HEALTH
+  const uptime = want_diagnostics ? timed('build_uptime', () => build_uptime(ctx)) : EMPTY_UPTIME
 
   return {
     audience,
@@ -1392,8 +1454,34 @@ function build_geo_areas({ area_counts, ttfb_by_country, ttfb_by_distance, lcp_b
 /**
  * Grouped error classes (message + stack head), real errors first, known-noise +
  * expected-response rows sunk. Always ALL rows — a bot's real error still matters.
+ * Per-cluster session breadth (`sessions` / `max_per_session`) + `bot_sessions` /
+ * `bot_pct` feed the "⟳ loop" and "mostly crawler" markers: a single-tab retry storm
+ * or an all-crawler cluster is visibly sunk without being hidden.
  */
 function build_error_clusters(ctx: AnalyticsContext): ErrorCluster[] {
+  // Session breadth pass: one row per (cluster, session), classified bot/human via
+  // the same temp-set predicate the audience filter uses. Server rows (NULL
+  // session_id) are excluded — they have no session to loop or to be a bot.
+  const per_session_rows = ctx.logs_db.prepare(`
+    SELECT message,
+           substr(coalesce(stack, ''), 1, 200) stack_head,
+           COUNT(*) n,
+           MAX(CASE WHEN ${ctx.is_bot_row} THEN 1 ELSE 0 END) is_bot
+    FROM client_logs
+    WHERE level IN ${ERROR_LEVELS_SQL} AND received_at >= ? AND session_id IS NOT NULL
+    GROUP BY message, stack_head, session_id
+  `).all(ctx.window_start_iso) as { message: string, stack_head: string, n: number, is_bot: number }[]
+  const breadth = new Map<string, { sessions: number, max_per_session: number, bot_sessions: number }>()
+  for (const row of per_session_rows) {
+    const key = `${row.message}\u0000${row.stack_head}`
+    const entry = breadth.get(key) ?? { sessions: 0, max_per_session: 0, bot_sessions: 0 }
+    entry.sessions++
+    entry.max_per_session = Math.max(entry.max_per_session, row.n)
+    if (row.is_bot === 1)
+      entry.bot_sessions++
+    breadth.set(key, entry)
+  }
+
   return (ctx.logs_db.prepare(`
     SELECT message,
            substr(coalesce(stack, ''), 1, 200) stack_head,
@@ -1409,8 +1497,21 @@ function build_error_clusters(ctx: AnalyticsContext): ErrorCluster[] {
     GROUP BY message, stack_head
     ORDER BY count DESC, last_seen DESC
     LIMIT ${ERROR_CLUSTER_LIMIT}
-  `).all(ctx.window_start_iso) as Omit<ErrorCluster, 'is_noise'>[])
-    .map(row => ({ ...row, is_noise: is_known_noise(row.message) || is_expected_error_response(row.message) }))
+  `).all(ctx.window_start_iso) as Omit<ErrorCluster, 'is_noise' | 'sessions' | 'max_per_session' | 'bot_sessions' | 'bot_pct'>[])
+    .map((row) => {
+      const cluster_breadth = breadth.get(`${row.message}\u0000${row.stack_head}`)
+      const sessions = cluster_breadth?.sessions ?? 0
+      const bot_sessions = cluster_breadth?.bot_sessions ?? 0
+      return {
+        ...row,
+        is_noise: is_known_noise(row.message) || is_expected_error_response(row.message),
+        sessions,
+        max_per_session: cluster_breadth ? cluster_breadth.max_per_session : null,
+        bot_sessions,
+        bot_pct: sessions > 0 ? Math.round((bot_sessions / sessions) * 100) : null,
+      }
+    })
+    // Real errors first, known-noise sunk to the bottom; count desc within each.
     .sort((first, second) => Number(first.is_noise) - Number(second.is_noise) || second.count - first.count)
 }
 

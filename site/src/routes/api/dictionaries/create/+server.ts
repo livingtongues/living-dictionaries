@@ -8,7 +8,6 @@ import { log_server_event } from '$lib/server/log-server-event'
 import { send_new_dictionary_creator_email } from '$api/email/new_dictionary/dictionary-emails'
 import { post_system_notification } from '$lib/server/chat/system-notifier'
 import { format_new_dictionary_notification } from '$lib/server/chat/notification-messages'
-import { is_admin } from '$lib/admins'
 import { error, json } from '@sveltejs/kit'
 
 /**
@@ -122,20 +121,22 @@ export const POST: RequestHandler = async (event) => {
   }
 
   // Post into the admin Notifications room (+ ping admins by their channel).
-  // An admin creating their own dictionary still logs the event but doesn't
-  // ping the team — they already got their own confirmation email above.
-  void post_system_notification({
-    db,
-    content: format_new_dictionary_notification({
-      dictionary_name: name,
-      dictionary_id: id,
-      actor: actor_name || email || 'Someone',
-      actor_user_id: user_id,
-      base_url: event.url.origin,
-    }),
-    base_url: event.url.origin,
-    suppress_ping: is_admin(email),
-  }).catch(err => console.error('new-dictionary notification failed:', (err as Error).message))
+  // Log the event into the admin Notifications room (batched into the daily
+  // digest — no immediate ping). Non-fatal: never fail dictionary creation on it.
+  try {
+    post_system_notification({
+      db,
+      content: format_new_dictionary_notification({
+        dictionary_name: name,
+        dictionary_id: id,
+        actor: actor_name || email || 'Someone',
+        actor_user_id: user_id,
+        base_url: event.url.origin,
+      }),
+    })
+  } catch (err) {
+    console.error('new-dictionary notification failed:', (err as Error).message)
+  }
 
   return json({ id } satisfies DictionariesCreateResponseBody)
 }

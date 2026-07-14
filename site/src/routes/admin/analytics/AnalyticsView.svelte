@@ -14,7 +14,7 @@
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
 
   interface Props {
-    data: Omit<PageData, 'analytics'> & { analytics: NonNullable<Awaited<PageData['analytics']>> }
+    data: Omit<PageData, 'primary' | 'secondary'> & { analytics: NonNullable<Awaited<PageData['secondary']>> }
   }
 
   let { data }: Props = $props()

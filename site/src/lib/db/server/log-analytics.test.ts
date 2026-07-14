@@ -408,6 +408,66 @@ describe(get_log_analytics, () => {
     expect(clusters[clusters.length - 1]).toMatchObject({ is_noise: true })
   })
 
+  test('error clusters carry per-session breadth + bot share for the loop / mostly-crawler markers', () => {
+    const BOT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+    // One crawler session storms the same rejection 3x; a human session hits it once.
+    for (let hit = 0; hit < 3; hit++)
+      add_log({ day: '2026-06-30', level: 'unhandled_rejection', message: 'Failed to fetch', context: { session_id: 'bot1' }, user_agent: BOT })
+    add_log({ day: '2026-06-30', level: 'unhandled_rejection', message: 'Failed to fetch', context: { session_id: 'human1' } })
+    add_log({ day: '2026-06-30', level: 'error', message: 'server-only-fault', source: 'server' })
+
+    const { error_clusters } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const fetch_cluster = error_clusters.find(cluster => cluster.message === 'Failed to fetch')
+    expect(fetch_cluster?.sessions).toBe(2)
+    expect(fetch_cluster?.max_per_session).toBe(3) // the crawler's 3-row storm
+    expect(fetch_cluster?.bot_sessions).toBe(1) // NOT bot-only — the human session keeps it a real signal
+    expect(fetch_cluster?.bot_pct).toBe(50)
+    // Server rows have no session — breadth stays empty rather than faking reach.
+    const server_cluster = error_clusters.find(cluster => cluster.message === 'server-only-fault')
+    expect(server_cluster?.sessions).toBe(0)
+    expect(server_cluster?.max_per_session).toBeNull()
+    expect(server_cluster?.bot_sessions).toBe(0)
+    expect(server_cluster?.bot_pct).toBeNull()
+  })
+
+  test('scope gates the heavy page-specific sections while keeping the shared core identical', () => {
+    add_log({ day: '2026-06-30', message: 'session_start', user_id: 'u1', context: { session_id: 's1' } })
+    add_log({ day: '2026-06-30', message: 'search_performed', user_id: 'u1', context: { session_id: 's1' } })
+    add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'web_vital', metric: 'LCP', value: 1200 } })
+    add_log({ day: '2026-06-30', source: 'server', message: 'v1_entry_created', context: { dictionary_id: 'd1', via: 'api_key' } })
+
+    const base = { shared_db: db, logs_db, days: 30, now: NOW } as const
+    const full = get_log_analytics(base)
+    const light = get_log_analytics({ ...base, scope: 'light' })
+    const usage = get_log_analytics({ ...base, scope: 'usage' })
+    const diagnostics = get_log_analytics({ ...base, scope: 'diagnostics' })
+
+    // Full computes BOTH halves.
+    expect(full.api_v1.total).toBe(1)
+    expect(full.web_vitals).toHaveLength(1)
+
+    // Light skips BOTH halves (usage-heavy + diagnostics-heavy).
+    expect(light.api_v1.total).toBe(0)
+    expect(light.web_vitals).toEqual([])
+    expect(light.performance.summary).toEqual([])
+
+    // Usage computes the usage half, skips diagnostics.
+    expect(usage.api_v1.total).toBe(1)
+    expect(usage.web_vitals).toEqual([])
+
+    // Diagnostics computes the diagnostics half, skips usage.
+    expect(diagnostics.web_vitals).toHaveLength(1)
+    expect(diagnostics.api_v1.total).toBe(0)
+
+    // The shared CORE is byte-identical regardless of scope — the swap-in tier can't
+    // change any top-of-page summary number.
+    expect(light.daily).toEqual(full.daily)
+    expect(light.totals).toEqual(full.totals)
+    expect(light.top_events).toEqual(full.top_events)
+    expect(light.capability).toEqual(full.capability)
+    expect(light.geo.areas).toEqual(full.geo.areas)
+  })
+
   test('missing i18n keys: ranks by distinct sessions, dedupes keys, excludes bots', () => {
     const BOT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
     // `sd.animal` hit in two sessions (3 rows) → outranks `ps.verbo` (1 session, 1 row).
@@ -1031,85 +1091,113 @@ describe(get_log_analytics, () => {
           ],
           "error_clusters": [
             {
+              "bot_pct": 0,
+              "bot_sessions": 0,
               "count": 3,
               "first_seen": "2026-06-30T10:00:00.000Z",
               "is_noise": false,
               "last_seen": "2026-06-30T10:00:00.000Z",
               "level": "crash",
+              "max_per_session": 3,
               "message": "boom",
               "platforms": "web",
+              "sessions": 1,
               "sources": "client",
               "stack_head": "",
               "users": 1,
             },
             {
+              "bot_pct": 0,
+              "bot_sessions": 0,
               "count": 2,
               "first_seen": "2026-06-30T10:00:00.000Z",
               "is_noise": false,
               "last_seen": "2026-06-30T10:00:00.000Z",
               "level": "error",
+              "max_per_session": 1,
               "message": "live_query_failed",
               "platforms": "web",
+              "sessions": 2,
               "sources": "client",
               "stack_head": "",
               "users": 0,
             },
             {
+              "bot_pct": null,
+              "bot_sessions": 0,
               "count": 1,
               "first_seen": "2026-06-30T10:00:00.000Z",
               "is_noise": false,
               "last_seen": "2026-06-30T10:00:00.000Z",
               "level": "error",
+              "max_per_session": null,
               "message": "versioned-boom",
               "platforms": "web",
+              "sessions": 0,
               "sources": "client",
               "stack_head": "",
               "users": 0,
             },
             {
+              "bot_pct": null,
+              "bot_sessions": 0,
               "count": 1,
               "first_seen": "2026-06-30T10:00:00.000Z",
               "is_noise": false,
               "last_seen": "2026-06-30T10:00:00.000Z",
               "level": "error",
+              "max_per_session": null,
               "message": "stale-boom",
               "platforms": "web",
+              "sessions": 0,
               "sources": "client",
               "stack_head": "",
               "users": 0,
             },
             {
+              "bot_pct": null,
+              "bot_sessions": 0,
               "count": 1,
               "first_seen": "2026-06-30T10:00:00.000Z",
               "is_noise": false,
               "last_seen": "2026-06-30T10:00:00.000Z",
               "level": "error",
+              "max_per_session": null,
               "message": "server-err",
               "platforms": "web",
+              "sessions": 0,
               "sources": "server",
               "stack_head": "",
               "users": 0,
             },
             {
+              "bot_pct": null,
+              "bot_sessions": 0,
               "count": 5,
               "first_seen": "2026-06-30T10:00:00.000Z",
               "is_noise": true,
               "last_seen": "2026-06-30T10:00:00.000Z",
               "level": "error",
+              "max_per_session": null,
               "message": "[post_request] Network error for /api/log",
               "platforms": "web",
+              "sessions": 0,
               "sources": "client",
               "stack_head": "",
               "users": 0,
             },
             {
+              "bot_pct": null,
+              "bot_sessions": 0,
               "count": 1,
               "first_seen": "2026-06-30T10:00:00.000Z",
               "is_noise": true,
               "last_seen": "2026-06-30T10:00:00.000Z",
               "level": "error",
+              "max_per_session": null,
               "message": "Not found: /api/entries/abc",
               "platforms": "web",
+              "sessions": 0,
               "sources": "client",
               "stack_head": "",
               "users": 0,

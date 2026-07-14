@@ -6,8 +6,8 @@ import { send_email } from '$lib/email/send-email'
 /**
  * Confirmation email to the dictionary's creator. The admin team is no longer
  * emailed here — new dictionaries post into the admin "Notifications" room
- * instead (`post_system_notification`), which pings each admin by their chosen
- * channel.
+ * instead (`post_system_notification`), which the daily 8am-Pacific digest
+ * (`notification-digest-cron.ts`) summarizes to each admin.
  */
 export async function send_new_dictionary_creator_email(dictionary: Tables<'dictionaries'>, email: string) {
   try {

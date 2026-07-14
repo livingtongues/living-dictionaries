@@ -168,3 +168,39 @@ icon (no wide count chip → no overlap). `ComboChart.svelte` + `DeploysPanel.sv
 byte-identical across LD/house/tutor (see health `PARITY.md`) — mirror any change to all three.
 `DeploysPanel` also gained horizontal minute gridlines (read a bar's duration off the axis without
 hovering).
+
+## `LogAnalytics.error_clusters` is DATA-ONLY — not rendered in any Svelte page (2026-07-14)
+
+`ErrorCluster[]` is computed by `build_error_clusters` and returned in the analytics blob, but
+NEITHER `/admin/analytics` nor `/admin/health` renders it (HealthView shows `server_faults.clusters`,
+a different thing). Its only consumer is the nightly **log-review** command reading the analytics
+JSON. So the per-cluster "badges" (`bot_pct > 90` = "mostly crawler", high `max_per_session` = the
+loop marker) live in the *review's markdown*, not in code — porting tutor's enhancements meant adding
+the DATA fields (`sessions`, `max_per_session`, `bot_sessions`, `bot_pct`), not a UI. Breadth is
+computed from a per-(cluster, session) pass over hot rows keyed by message + stack_head; server rows
+(NULL session_id) stay null.
+
+## Admin analytics: one endpoint, scoped compute + progressive top-down loading (2026-07-14)
+
+`/admin/analytics` (usage) and `/admin/health` (diagnostics) BOTH fetch the SAME
+`/api/admin/analytics` endpoint and share `get_log_analytics`. It used to compute the ENTIRE
+`LogAnalytics` blob (both pages' panels) on every call. Now `get_log_analytics({ scope })` gates the
+cleanly-independent heavy builders:
+- `light` — shared core only (daily / deploys / totals / geo AREAS / capability / top events+routes /
+  by_source / event_coverage / error_clusters / pipeline).
+- `usage` — light + api_v1 / top_dictionaries / missing_i18n_keys.
+- `diagnostics` — light + performance / web_vitals / geo LATENCY / errors_by_version / server_faults /
+  leader+sync health / build_adoption / storage / boot_health / uptime.
+- `full` (default) — everything; the log-review reader keeps this. Cache key includes scope.
+
+**Coupling constraint (why the split isn't cleaner):** `area_counts` is threaded
+`build_usage_and_areas` -> mutated by `build_capability` -> fed with `build_geo_latency` into
+`build_geo_areas`. So `geo.areas` / `geo.located_sessions` / `capability` MUST stay core (both pages);
+only `geo`'s TTFB/LCP *latency* splits are diagnostics-gated. Skipped sections return typed
+`EMPTY_*` consts (tsc-checked against the field types; mirror `empty_analytics`).
+
+**Progressive render:** each `+page.ts` returns TWO streamed promises — `primary` (`scope=light`,
+paints first) + `secondary` (the page's full half). `+page.svelte` renders `primary` immediately and
+SWAPS to `secondary` once it resolves (`secondary ?? primary` — both are complete `LogAnalytics`
+objects, so no fragile field-merge; the heavy panels show their normal empty states until the swap).
+The `light` cache entry is shared by both pages.

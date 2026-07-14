@@ -11,6 +11,7 @@
 import type Database from 'better-sqlite3'
 import { env } from '$env/dynamic/private'
 import { get_admin } from '$lib/admins'
+import { ROOM_NOTIFICATIONS } from '$lib/chat/constants'
 import { notify_user } from '$lib/notifications/notify-admins'
 import { get_room, online_user_ids, post_message } from '$lib/server/chat/chat-db'
 import { log_server_event } from '$lib/server/log-server-event'
@@ -36,6 +37,9 @@ export async function sweep_chat_repings({ db = get_shared_db(), base_url = SITE
   now?: Date
 } = {}): Promise<number> {
   const cutoff = new Date(now.getTime() - REPING_AFTER_MS).toISOString()
+  // The Notifications room is excluded — it no longer sends immediate pings (it's
+  // a daily digest, see notification-digest-cron.ts), so any stale last_notified_at
+  // from the old per-event model must not trigger a gentle re-ping.
   const candidates = db.prepare(`
     SELECT m.room_id, m.user_id, m.last_read_at, u.email, u.name
     FROM chat_room_members m
@@ -43,8 +47,9 @@ export async function sweep_chat_repings({ db = get_shared_db(), base_url = SITE
     WHERE m.last_notified_at IS NOT NULL
       AND m.gentle_reping_at IS NULL
       AND m.last_notified_at <= ?
+      AND m.room_id != ?
       AND (m.last_read_at IS NULL OR m.last_notified_at > m.last_read_at)
-  `).all(cutoff) as RepingCandidate[]
+  `).all(cutoff, ROOM_NOTIFICATIONS) as RepingCandidate[]
 
   const online = online_user_ids({ db })
   const stamp = db.prepare('UPDATE chat_room_members SET gentle_reping_at = ? WHERE room_id = ? AND user_id = ?')

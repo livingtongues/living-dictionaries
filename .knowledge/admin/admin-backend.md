@@ -45,6 +45,25 @@ Key design facts:
   ntfy/email `notify_channel` pref. Same one-ping-per-unread-batch policy + 1-day gentle reping
   cron for everyone. Message `body_html` is **sanitized server-side with `xss`** at post/edit —
   required now that non-admins author messages rendered via `{@html}`.
+- **The System bot** (`SYSTEM_USER_ID = 'system'`, a real `users` row) authors platform notices.
+  Three deliberate behaviors (2026-07-14, Jacob):
+  - **`post_message` bypasses `require_member` for System** — it posts into rooms it isn't a member
+    of (notifications, and agent-authored DMs) WITHOUT joining, so a DM stays two-person.
+  - **It's excluded from read-receipt bubbles** (`get_room_read_positions` filters it) — posting
+    marks the author "read", which otherwise parked a bogus System bubble on the latest message.
+  - **The `notifications` room no longer pings per event.** `post_system_notification` only records
+    the message (in-app badge); the per-event ping + 24h reping were replaced by ONE daily **8am
+    Pacific digest** (`notification-digest-cron.ts`, day-guarded in `db_metadata`
+    `notification_digest_last_day`) that summarizes each on-duty admin's unread events ("5 new users
+    and 2 new dictionaries" via `summarize_notifications`). Regular DMs/channels still ping instantly;
+    the reping cron explicitly excludes `notifications`.
+- **Agent-authored System messages** (Jacob's agent posting as System into any room so recipients
+  know it's the agent, not Jacob) go through the **`chat_system_outbox`** table: the agent raw-INSERTs
+  one row (no API/auth — Jacob rejected that; `/system-chat` slash command documents it), and
+  `system-outbox-cron.ts` (~20s) drains it — `post_message` as System + normal member ping (skipping
+  `skip_user_id`, the human being acted for). Pings need the SvelteKit runtime for SES/ntfy, which is
+  why a bare SQL insert can't ping and the outbox+cron exists. A past raw-insert attempt "didn't show"
+  because `require_member` threw (System wasn't a DM member) — now bypassed.
 - Presence heartbeat runs only on /chat + inside /admin; the rooms/unread poll runs site-wide for
   members (root layout → avatar dot + UserMenu badge). A member browsing elsewhere still gets
   email pings — deliberate.

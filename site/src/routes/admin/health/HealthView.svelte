@@ -11,7 +11,7 @@
   import DeploysPanel from './DeploysPanel.svelte'
 
   interface Props {
-    data: Omit<PageData, 'analytics'> & { analytics: NonNullable<Awaited<PageData['analytics']>> }
+    data: Omit<PageData, 'primary' | 'secondary'> & { analytics: NonNullable<Awaited<PageData['secondary']>> }
   }
 
   let { data }: Props = $props()

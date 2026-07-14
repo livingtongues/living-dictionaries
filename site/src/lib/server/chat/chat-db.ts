@@ -274,7 +274,11 @@ export function post_message({ db, room_id, user_id, body_html, body_text, clien
   client_message_id?: string | null
   allow_empty?: boolean
 }): ChatMessageRow {
-  require_member({ db, room_id, user_id })
+  // The System bot posts into rooms it isn't a member of (platform notifications,
+  // agent-authored messages via the outbox) — bypass the membership gate for it.
+  // Server-only: clients always pass their own authenticated user_id.
+  if (user_id !== SYSTEM_USER_ID)
+    require_member({ db, room_id, user_id })
   if (!allow_empty && !body_text.trim() && !body_html.trim())
     throw new ChatError('Message is empty', 400)
 
@@ -410,8 +414,11 @@ export function get_room_read_positions({ db, room_id, user_id }: {
   user_id: string
 }): RoomReadPosition[] {
   require_member({ db, room_id, user_id })
-  return db.prepare('SELECT user_id, last_read_at FROM chat_room_members WHERE room_id = ?')
-    .all(room_id) as RoomReadPosition[]
+  // Exclude the System bot: it authors notifications (which marks it "read up to
+  // now"), so it would otherwise show a read-receipt bubble parked on the latest
+  // message — it's not a person and should never appear in read receipts.
+  return db.prepare('SELECT user_id, last_read_at FROM chat_room_members WHERE room_id = ? AND user_id != ?')
+    .all(room_id, SYSTEM_USER_ID) as RoomReadPosition[]
 }
 
 export interface ChatAttachmentServeRow {
@@ -861,6 +868,35 @@ if (import.meta.vitest) {
       expect(by_user['u-a']).not.toBeNull()
       expect(by_user['u-b']).toBeNull()
       expect(() => get_room_read_positions({ db, room_id: room.id, user_id: 'u-c' })).toThrow(ChatError)
+    })
+
+    it('excludes the System bot (never a read-receipt bubble)', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, SYSTEM_USER_ID, null, 'System')
+      const room = seed_channel(db, 'Notes', ['u-a'])
+      add_room_member({ db, room_id: room.id, user_id: SYSTEM_USER_ID })
+      // System posting marks itself read; it must still not surface as a position.
+      post_message({ db, room_id: room.id, user_id: SYSTEM_USER_ID, body_html: '<p>event</p>', body_text: 'event' })
+      const positions = get_room_read_positions({ db, room_id: room.id, user_id: 'u-a' })
+      expect(positions.some(row => row.user_id === SYSTEM_USER_ID)).toBe(false)
+    })
+  })
+
+  describe('System membership bypass', () => {
+    it('lets System post into a room it is not a member of', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      seed_user(db, 'u-b', 'b@example.com')
+      seed_user(db, SYSTEM_USER_ID, null, 'System')
+      const dm = ensure_dm({ db, user_id: 'u-a', other_user_id: 'u-b' })
+      expect(is_member({ db, room_id: dm, user_id: SYSTEM_USER_ID })).toBe(false)
+      const message = post_message({ db, room_id: dm, user_id: SYSTEM_USER_ID, body_html: '<p>from the agent</p>', body_text: 'from the agent' })
+      expect(message.author_user_id).toBe(SYSTEM_USER_ID)
+      // Still not a member — the DM stays a two-person room.
+      expect(is_member({ db, room_id: dm, user_id: SYSTEM_USER_ID })).toBe(false)
+      const [loaded] = get_room_messages({ db, room_id: dm, user_id: 'u-a' })
+      expect(loaded.body_text).toBe('from the agent')
     })
   })
 }

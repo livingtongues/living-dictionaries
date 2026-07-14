@@ -1,3 +1,5 @@
+import type { V1DialectPostRequestBody } from '../../../routes/api/v1/dictionaries/[id]/dialects/+server'
+import type { V1DialectPatchRequestBody } from '../../../routes/api/v1/dictionaries/[id]/dialects/[dialectId]/+server'
 import type { EntryInput, EntryPatch, SenseInput, SentenceInput, SentencePatch } from './entry-input'
 import { describe, expect, test } from 'vitest'
 import { build_openapi_spec, OPENAPI_TAGS, select_openapi_view, tag_for_path } from './openapi'
@@ -11,6 +13,14 @@ function schema(name: string): { required?: string[], properties?: Record<string
 
 function property_keys(name: string): string[] {
   return Object.keys(schema(name).properties ?? {}).sort()
+}
+
+/** Inline request-body schema property keys for a given path + method (dialect bodies are
+ * declared inline in the paths, not as named component schemas). */
+function request_body_property_keys({ path, method }: { path: string, method: string }): string[] {
+  const paths = spec.paths as Record<string, Record<string, { requestBody?: { content?: Record<string, { schema?: { properties?: Record<string, unknown> } }> } }>>
+  const request_schema = paths[path]?.[method]?.requestBody?.content?.['application/json']?.schema
+  return Object.keys(request_schema?.properties ?? {}).sort()
 }
 
 /**
@@ -40,6 +50,15 @@ const ENTRY_PATCH_KEYS: Record<keyof EntryPatch, true> = {
   linguistic_history: true, sources: true, scientific_names: true, elicitation_id: true,
   coordinates: true, dialects: true, tags: true, senses: true,
 }
+// Dialect request bodies live in the route files (no named component schema); TS fails
+// to compile if a key is added/removed without updating these, and the runtime test then
+// asserts the published OpenAPI inline request body lists exactly the same keys.
+const DIALECT_POST_KEYS: Record<keyof V1DialectPostRequestBody, true> = {
+  name: true, coordinates: true,
+}
+const DIALECT_PATCH_KEYS: Record<keyof V1DialectPatchRequestBody, true> = {
+  name: true, coordinates: true,
+}
 
 function expected(keys: Record<string, true>): string[] {
   return Object.keys(keys).sort()
@@ -52,6 +71,13 @@ describe(build_openapi_spec, () => {
     expect(property_keys('SentenceInput')).toEqual(expected(SENTENCE_INPUT_KEYS))
     expect(property_keys('SentencePatch')).toEqual(expected(SENTENCE_PATCH_KEYS))
     expect(property_keys('EntryPatch')).toEqual(expected(ENTRY_PATCH_KEYS))
+  })
+
+  test('dialect inline request bodies stay aligned with the V1Dialect*RequestBody route shapes', () => {
+    expect(request_body_property_keys({ path: '/api/v1/dictionaries/{id}/dialects', method: 'post' }))
+      .toEqual(expected(DIALECT_POST_KEYS))
+    expect(request_body_property_keys({ path: '/api/v1/dictionaries/{id}/dialects/{dialectId}', method: 'patch' }))
+      .toEqual(expected(DIALECT_PATCH_KEYS))
   })
 
   test('lexeme is the only required EntryInput field', () => {

@@ -7,7 +7,7 @@
  */
 import type { RequestHandler } from './$types'
 import type { DeployMetric } from '$lib/db/server/deploy-metrics'
-import type { LogAnalytics } from '$lib/db/server/log-analytics'
+import type { AnalyticsScope, LogAnalytics } from '$lib/db/server/log-analytics'
 import { is_admin, is_admin_at_least } from '$lib/admins'
 import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
@@ -26,7 +26,11 @@ export const GET: RequestHandler = async (event) => {
     error(ResponseCodes.FORBIDDEN, 'Admin only')
 
   const audience = event.url.searchParams.get('audience') === 'bots' ? 'bots' : 'humans'
-  const analytics = get_log_analytics({ days: 30, audience })
+  // Panel scope — each admin page fetches only its own half (progressive loading);
+  // an unknown/absent value falls back to the full compute (e.g. the log-review reader).
+  const scope_param = event.url.searchParams.get('scope')
+  const scope: AnalyticsScope = scope_param === 'light' || scope_param === 'usage' || scope_param === 'diagnostics' ? scope_param : 'full'
+  const analytics = get_log_analytics({ days: 30, audience, scope })
   // Host resources are injected OUTSIDE the cached analytics blob (the live
   // /proc reading must stay fresh) and only for level-3 (super) admins — VPS
   // capacity is operator data, not a level-2 concern.

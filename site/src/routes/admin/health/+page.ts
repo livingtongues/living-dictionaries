@@ -9,8 +9,10 @@ import { browser } from '$app/environment'
  * `+layout.ts`, so this page can't use a `+page.server.ts`; it fetches via the
  * admin-gated API (passing the load `fetch` so SSR keeps the direct-handler path).
  *
- * The analytics fetch is STREAMED (returned un-awaited) so client-side nav
- * transitions to a skeleton immediately; the payload fills in when it resolves.
+ * Progressive/top-down loading: TWO streamed fetches. `primary` is the shared
+ * light tier (summary + charts) — it paints first; `secondary` is the full
+ * diagnostics half, which the page SWAPS in below when it resolves. Both are
+ * returned un-awaited so client-side nav transitions to a skeleton immediately.
  */
 export const load: PageLoad = async ({ fetch, parent, url }) => {
   const { auth_user } = await parent()
@@ -18,7 +20,7 @@ export const load: PageLoad = async ({ fetch, parent, url }) => {
   // no-access shell and won't render this page, so skip the admin-gated fetch
   // that would otherwise 401 and crash into the generic site-wide error page.
   if (!auth_user.user || !auth_user.is_admin)
-    return { analytics: null }
+    return { primary: null, secondary: null }
 
   // The Humans/Bots toggle is a URL param; reading it makes `load` re-run (re-fetch)
   // when the operator flips it.
@@ -27,13 +29,13 @@ export const load: PageLoad = async ({ fetch, parent, url }) => {
   // SSR skips the fetch (this universal load re-runs on hydration; its promise
   // doesn't stream on SSR anyway) — the page renders a skeleton and fills in.
   if (!browser)
-    return { analytics: null }
+    return { primary: null, secondary: null }
 
-  const analytics = (async () => {
-    const { data, error: err } = await api_admin_analytics({ fetch, audience })
+  async function fetch_scope(scope: 'light' | 'diagnostics') {
+    const { data, error: err } = await api_admin_analytics({ fetch, audience, scope })
     if (err || !data)
       throw new Error(err?.message ?? 'Failed to load analytics')
     return data.analytics
-  })()
-  return { analytics }
+  }
+  return { primary: fetch_scope('light'), secondary: fetch_scope('diagnostics') }
 }

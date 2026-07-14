@@ -5,8 +5,10 @@ import { start_chat_reping_cron_once } from '$lib/db/server/chat-reping-cron'
 import { start_host_stats_cron_once } from '$lib/db/server/host-stats-cron'
 import { start_log_retention_cron_once } from '$lib/db/server/log-retention-cron'
 import { get_logs_db, split_client_logs_from_shared } from '$lib/db/server/logs-db'
+import { start_notification_digest_cron_once } from '$lib/db/server/notification-digest-cron'
 import { start_r2_snapshot_builder } from '$lib/db/server/r2-snapshot-builder'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { start_system_outbox_cron_once } from '$lib/db/server/system-outbox-cron'
 import { start_wal_checkpoint_cron_once } from '$lib/db/server/wal-checkpoint-cron'
 import { ensure_all_admins_in_team_chat } from '$lib/server/chat/ensure-team-membership'
 import { is_cross_origin_form_forbidden } from '$lib/server/csrf'
@@ -65,6 +67,16 @@ start_host_stats_cron_once()
 // chat pings unread ~1 day. IS_STANDBY-guarded + singleton-guarded; notify_admin
 // is a no-op under NTFY_DISABLED so dev stays quiet.
 start_chat_reping_cron_once()
+
+// Notifications-room daily digest. Hourly sweep; once/day at 8am Pacific it sends
+// each on-duty admin ONE summary of unread platform events (replaced the noisy
+// per-event ping). Dev/build-dormant + IS_STANDBY-guarded + singleton.
+start_notification_digest_cron_once()
+
+// System-outbox drain. Every 20s, delivers agent-authored System messages queued
+// into chat_system_outbox (posts as System + pings members). Dev/build-dormant +
+// IS_STANDBY-guarded + singleton.
+start_system_outbox_cron_once()
 
 /**
  * Adapter-node enforces `BODY_SIZE_LIMIT` by THROWING mid-body-read, which

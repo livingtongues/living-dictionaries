@@ -1,21 +1,16 @@
 /**
  * Post a platform event (new dictionary / new user / invite) into the admin
- * "Notifications" room as the System bot, then ping each admin member by their
- * preferred channel (ntfy/email) using the shared team-chat policy.
- *
- * `suppress_ping` (set when the actor was an admin) still records the message as
- * a log/audit row in the room, but sends NO external pings. Off-duty admins
- * (`notify:false`) are skipped from notification pings even when on someone
- * else's action — these are broadcast-style notices.
+ * "Notifications" room as the System bot. It records the audit/message row (which
+ * drives the in-app unread badge) but sends NO immediate external ping — those
+ * events are batched into ONE daily 8am-Pacific digest by
+ * `notification-digest-cron.ts` (Jacob's call: the per-event ping was noisy and
+ * never summarized). Regular DMs/channels still ping instantly.
  *
  * Fire-and-forget from request handlers (`void post_system_notification(...)`):
- * the message INSERT runs synchronously before the first `await`, so the row is
- * persisted even if the caller doesn't await the network pings.
+ * the message INSERT runs synchronously, so the row is persisted regardless.
  */
 import type Database from 'better-sqlite3'
 import type { SystemNotificationContent } from './notification-messages'
-import { build_chat_notification_email } from './notification-email'
-import { ping_room_members } from './chat-notify'
 import { post_message } from './chat-db'
 import { ROOM_NOTIFICATIONS, SYSTEM_USER_NAME } from './constants'
 import { SYSTEM_USER_ID } from '$lib/chat/constants'
@@ -33,12 +28,10 @@ function ensure_system_notifier(db: Database.Database): void {
     .run(ROOM_NOTIFICATIONS, SYSTEM_USER_ID, now)
 }
 
-export async function post_system_notification({ db, content, base_url, suppress_ping = false }: {
+export function post_system_notification({ db, content }: {
   db: Database.Database
   content: SystemNotificationContent
-  base_url: string
-  suppress_ping?: boolean
-}): Promise<void> {
+}): void {
   ensure_system_notifier(db)
 
   post_message({
@@ -47,31 +40,6 @@ export async function post_system_notification({ db, content, base_url, suppress
     user_id: SYSTEM_USER_ID,
     body_html: content.body_html,
     body_text: content.body_text,
-  })
-
-  if (suppress_ping)
-    return
-
-  const link = `${base_url}/chat?room=${encodeURIComponent(ROOM_NOTIFICATIONS)}`
-  const email = build_chat_notification_email({
-    author_name: SYSTEM_USER_NAME,
-    room_name: NOTIFICATIONS_ROOM_NAME,
-    body_html: content.body_html,
-    body_text: content.body_text,
-    link,
-    is_dm: false,
-  })
-  email.subject = content.subject
-
-  await ping_room_members({
-    db,
-    room_id: ROOM_NOTIFICATIONS,
-    author_user_id: SYSTEM_USER_ID,
-    subject: content.subject,
-    body: content.body_text.replace(/\s+/g, ' ').trim().slice(0, 200),
-    link,
-    email,
-    respect_off_duty: true,
   })
 }
 
@@ -91,40 +59,20 @@ if (import.meta.vitest) {
   const content = format_new_dictionary_notification({ dictionary_name: 'Test', dictionary_id: 'test', actor: 'someone@example.com', base_url: 'https://new.livingdictionaries.app' })
 
   describe(post_system_notification, () => {
-    const original = process.env.NTFY_DISABLED
-    beforeEach(() => { process.env.NTFY_DISABLED = '1' })
-    afterEach(() => { process.env.NTFY_DISABLED = original })
-
-    it('posts the message to the Notifications room as the System bot', async () => {
+    it('posts the message to the Notifications room as the System bot', () => {
       const db = open_test_shared_db()
       ensure_all_admins_in_team_chat({ db })
-      await post_system_notification({ db, content, base_url: 'https://new.livingdictionaries.app' })
+      post_system_notification({ db, content })
       const row = db.prepare('SELECT author_user_id, body_text FROM chat_messages WHERE room_id = ?').get(ROOM_NOTIFICATIONS) as { author_user_id: string, body_text: string } | undefined
       expect(row?.author_user_id).toBe(SYSTEM_USER_ID)
       expect(row?.body_text).toContain('created a new dictionary')
     })
 
-    it('pings an on-duty admin member', async () => {
+    it('sends NO immediate external ping (batched into the daily digest instead)', () => {
       const db = open_test_shared_db()
       ensure_all_admins_in_team_chat({ db })
-      await post_system_notification({ db, content, base_url: 'https://new.livingdictionaries.app' })
-      expect(notified_at(db, ROOM_NOTIFICATIONS, diego_id(db))).not.toBeNull()
-    })
-
-    it('suppress_ping posts the message but pings nobody', async () => {
-      const db = open_test_shared_db()
-      ensure_all_admins_in_team_chat({ db })
-      await post_system_notification({ db, content, base_url: 'https://new.livingdictionaries.app', suppress_ping: true })
-      expect(db.prepare('SELECT COUNT(*) AS c FROM chat_messages WHERE room_id = ?').get(ROOM_NOTIFICATIONS)).toEqual({ c: 1 })
+      post_system_notification({ db, content })
       expect(notified_at(db, ROOM_NOTIFICATIONS, diego_id(db))).toBeNull()
-    })
-
-    it('skips off-duty admins (notify:false)', async () => {
-      const db = open_test_shared_db()
-      ensure_all_admins_in_team_chat({ db })
-      await post_system_notification({ db, content, base_url: 'https://new.livingdictionaries.app' })
-      const anna_id = (db.prepare('SELECT id FROM users WHERE email = ?').get('dictionaries@livingtongues.org') as { id: string }).id
-      expect(notified_at(db, ROOM_NOTIFICATIONS, anna_id)).toBeNull()
     })
   })
 }

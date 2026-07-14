@@ -2,7 +2,6 @@ import { error, json } from '@sveltejs/kit'
 import { institute_no_reply_address } from '$lib/email/addresses'
 import { send_email } from '$lib/email/send-email'
 import type { RequestHandler } from './$types'
-import { is_admin } from '$lib/admins'
 import { verify_auth } from '$lib/auth/verify'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
@@ -69,22 +68,24 @@ https://livingdictionaries.app (Living Dictionaries website)`,
     db.prepare(`UPDATE invites SET status = 'sent', dirty = 1, updated_at = ? WHERE id = ?`)
       .run(new Date().toISOString(), invite_id)
 
-    // Post into the admin Notifications room (+ ping admins by their channel).
-    // An admin sending the invite logs the event but doesn't ping the team.
-    void post_system_notification({
-      db,
-      content: format_invite_notification({
-        actor: inviter_name_or_email,
-        actor_user_id: user_id,
-        target_email: target_email.trim().toLowerCase(),
-        role,
-        dictionary_name: dictionary.name,
-        dictionary_id,
-        base_url: event.url.origin,
-      }),
-      base_url: event.url.origin,
-      suppress_ping: is_admin(inviter_email),
-    }).catch(err => console.error('invite notification failed:', (err as Error).message))
+    // Log the invite into the admin Notifications room (batched into the daily
+    // digest — no immediate ping). Non-fatal.
+    try {
+      post_system_notification({
+        db,
+        content: format_invite_notification({
+          actor: inviter_name_or_email,
+          actor_user_id: user_id,
+          target_email: target_email.trim().toLowerCase(),
+          role,
+          dictionary_name: dictionary.name,
+          dictionary_id,
+          base_url: event.url.origin,
+        }),
+      })
+    } catch (err) {
+      console.error('invite notification failed:', (err as Error).message)
+    }
 
     return json('success')
   } catch (err) {
