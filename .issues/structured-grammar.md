@@ -667,6 +667,76 @@ controls w/ correct enablement, GrammarNotes list, blob-intro-only for non-admin
 for admin-3. (MarkdownEditor body = async tiptap mount, not captured in static screenshots — same as the
 existing blob editor; renders at runtime.)
 
-### PASS-2 (next): clause-template diagram + slot picker; example-sentence attach/detach/order + tappable/
-karaoke render (`section_sentences`); texts motif/genre tag chips + filter (`text_tags`); discourse-role.
-Then CUTOVER (run backfill + widen `grammar_sections_visible` to public) + eventually lift EDIT gate → GA.
+## PASS-2 (2026-07-14, IN PROGRESS) — build plan (interview locked)
+
+Pass-1 committed `07f0041c`. Pass-2 = pure UI + wiring; schema (M1) + v1 endpoints (2a/2b) already exist.
+Everything stays admin-3 RENDER-gated (`grammar_sections_visible`/`grammar_sections_editable` in
+`$lib/corpus/grammar-preview.ts`), verified via mocks + svelte-look, NO deploy. Jacob commits/pushes.
+
+**Interview answers (2026-07-14):** Q1 sentence source = **attach existing + inline quick-create standalone
+sentence** (`text_id` NULL, paste one line). Q2 clause = **slot vocab manager + per-section slot picker + a
+simple horizontal ordered-slot strip** (no elaborate SVG diagram). Q3 text tags = **kinded chips
+(motif/genre/tale_type + optional ATU/Thompson code) on text page & cards + click-to-filter chip row atop
+texts list**. Q4 discourse = **render a role badge on a section's attached example sentences + set
+`discourse_role` from SentenceEditPanel (admin-3)**; foreground/background text-reader coloring stays corpus-side.
+
+### Grounded machinery (verified this session)
+- Write facade (`page.data.writes`, `$lib/db/dict-client/guarded-writes.ts`) = the place for junction
+  link/unlink + multi-table orchestration (mirrors `assign_tag`/`assign_dialect`). Single-row field edits
+  mutate the live row + `_save()` directly (mirrors `GrammarSectionsView` reorder). Collections:
+  `dict_db.<table>.insert/upsert/delete/id/rows/loading`; junctions insert directly WITH a `sort_key`
+  (`link_junction_local` does NOT set sort_key). Fractional order via `key_between`/`initial_keys`.
+- `section_sentences` has `sort_key`; reorder = mutate junction row `.sort_key` + `_save()`; detach =
+  `dict_db.section_sentences.delete(id)`; attach = dedupe then `dict_db.section_sentences.insert({section_id,
+  sentence_id, sort_key})`. Quick-create = `dict_db.sentences.insert({text:{[primary]:...}})` (text_id NULL)
+  then attach.
+- Constants: `DISCOURSE_ROLES`, `TAG_KINDS` in `$lib/constants.ts`. Tag create (kinded) =
+  `dict_db.tags.insert({name, kind, code})` + `writes.link_junction({table:'text_tags', key:{text_id,tag_id}})`.
+- SentenceEditPanel (`text/[textId]/SentenceEditPanel.svelte`) uses EntryField rows; add a discourse `<select>`.
+- Sentence render today = plain headword + translations (no token/karaoke UI exists yet — render plain,
+  structure so tokens/timings upgrade later).
+
+### Files to build/modify
+- **§5** `grammar/GrammarExampleSentence.svelte` (one sentence: headword + translations + discourse badge;
+  future tokens/karaoke) · `grammar/SectionSentenceEditor.svelte` (attach-existing search + quick-create
+  paste + ordered list w/ up/down/detach) embedded in `SectionEditor.svelte` · render list read-only in
+  `GrammarSection.svelte`. Facade: `attach_section_sentence` / `detach_section_sentence`.
+- **§6** `grammar/ClauseSlotManager.svelte` (create/rename/reorder/delete `clause_slots`, admin-3) ·
+  `grammar/ClauseTemplateStrip.svelte` (ordered slots w/ their sections) atop `GrammarSectionsView` · slot
+  `<select>` in `SectionEditor` (set `grammar_sections.slot_id`) · slot badge in `GrammarSection`.
+- **§7** `TextTags.svelte` (kinded chips + editor) on `text/[textId]/+page.svelte`; chips on `texts/+page.svelte`
+  cards + filter chip row. Facade: `assign_text_tag` (find-or-create kinded tag + link) / `remove_text_tag`.
+- **§8** discourse badge in `GrammarExampleSentence`; discourse `<select>` in `SentenceEditPanel` (admin-3).
+- i18n EN: extend `grammar.*` (example_sentences/attach/paste/detach/clause_*), new `discourse.*`, `text_tag.*`.
+- Stories + light/dark screenshots for every new component. Unit tests where there's logic.
+
+### DONE
+- [x] Fixed pass-1 prose-width rule violation (`.body` max-width 46rem → constrain `.sections-block` to 768px).
+- [x] **Facade** (`guarded-writes.ts`): `attach_section_sentence` (dedupe + fractional sort_key) / `detach_section_sentence` /
+  `assign_text_tag` (find-or-create kinded tag + link) / `remove_text_tag`; added to mock `log_writes`.
+- [x] **§5** `GrammarExampleSentence.svelte` (headword + translations + discourse badge + example_label; deep-links into
+  text/sentence) · `SectionSentenceEditor.svelte` (attach-existing search + quick-create paste standalone + ordered
+  list w/ up/down/detach) embedded in `SectionEditor` · read-only list rendered in `GrammarSection`.
+- [x] **§6** `ClauseSlotPicker.svelte` (controlled `<select>`, draft `linked_slot_id` in SectionEditor) ·
+  `ClauseSlotManager.svelte` (create/rename/reorder/delete `clause_slots`) toggled via "Edit clause slots" in
+  GrammarSectionsView · `ClauseTemplateStrip.svelte` (ordered slots w/ their particles) atop the tree · slot badge in
+  GrammarSection. Slot name stored in `dictionary.gloss_languages[0]`; `first_multistring_value` helper (+3 tests).
+- [x] **§7** `TextTags.svelte` (kinded chips motif/genre/tale_type + code + suggestions) on `text/[textId]` (inside the
+  already-admin-3-gated texts routes) · chips on `texts/` cards + click-to-filter chip row (plain-object derives, no
+  SvelteMap needed).
+- [x] **§8** discourse badge in `GrammarExampleSentence`; discourse `<select>` in `SentenceEditPanel` (gated
+  `grammar_sections_editable` = admin-3).
+- [x] i18n EN: `grammar.*` (example/clause/slot keys), new `discourse.*` + `text_tag.*` blocks.
+- [x] Stories + light/dark screenshots for every new component (+ enriched GrammarSection / _page / SectionEditor
+  stories); shared `$lib/mocks/mock-dict-db.ts` helper. Verified: full `pnpm vitest run` = 1655 pass / 3 skip;
+  `pnpm check` 0 errors; eslint clean.
+
+**PASS-2 COMPLETE (2026-07-14) — NOT committed (awaiting Jacob's go).** Screenshots confirmed the integrated
+admin-3 grammar page: blob intro (public fallback) + preview badge + clause-template strip (particles per slot) +
+"Edit clause slots" + section tree with entry chip / slot badge / usage / example sentences (discourse badges) + full
+editing. All behind the admin-3 render gate — NO deploy needed to verify.
+
+### STILL DEFERRED (post pass-2): the CUTOVER deploy (run backfill `scripts/one-off/2026-07-14-grammar-blob-to-sections.cjs`
++ widen `grammar_sections_visible` to public + drop the old `dictionaries.grammar` column) and eventually lifting the
+EDIT gate (`grammar_sections_editable`) to GA. Tappable/karaoke sentence render lands when the corpus agent populates
+`sentences.tokens` + media `timings` (GrammarExampleSentence renders plain today, structured to upgrade).

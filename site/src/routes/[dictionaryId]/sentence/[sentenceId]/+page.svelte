@@ -32,7 +32,7 @@
 
   async function delete_sentence() {
     if (!sentence) return
-    // eslint-disable-next-line no-alert
+
     if (!confirm(`${page.data.t('sentence.delete')}?`)) return
     await sentence._delete()
     await goto(sentences_scope_href)

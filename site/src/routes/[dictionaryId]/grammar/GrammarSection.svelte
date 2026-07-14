@@ -2,10 +2,12 @@
   import { page } from '$app/state'
   import Self from './GrammarSection.svelte'
   import SectionEditor from './SectionEditor.svelte'
+  import GrammarExampleSentence from './GrammarExampleSentence.svelte'
   import type { GrammarNode, GrammarSectionActions } from './grammar-section-actions'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text as sanitize } from '$lib/markdown/sanitize-rich-text'
   import { get_headword } from '$lib/helpers/orthographies'
+  import { first_multistring_value } from './grammar-tree'
   import type { MultiString } from '$lib/types'
   import IconFa6SolidPencil from '~icons/fa6-solid/pencil'
   import IconMdiChevronUp from '~icons/mdi/chevron-up'
@@ -21,7 +23,7 @@
   }
 
   const { node, actions }: Props = $props()
-  const { t, dictionary, entries_data } = $derived(page.data)
+  const { t, dictionary, entries_data, dict_db } = $derived(page.data)
 
   const section = $derived(node.section)
   const is_editing = $derived(actions.editing_id === section.id)
@@ -44,6 +46,16 @@
   const linked_lexeme = $derived(linked_entry
     ? get_headword({ lexeme: linked_entry.main.lexeme, orthographies: dictionary.orthographies }).value
     : '')
+
+  const slot = $derived(section.slot_id ? dict_db?.clause_slots.id(section.slot_id) : undefined)
+  const slot_label = $derived(slot ? first_multistring_value(slot.name, dictionary.gloss_languages) : '')
+
+  // Attached example sentences (ordered) — read-only render below the prose.
+  const example_sentences = $derived([...(dict_db?.section_sentences.rows ?? [])]
+    .filter(link => link.section_id === section.id)
+    .sort((first, second) => (first.sort_key || '').localeCompare(second.sort_key || ''))
+    .map(link => dict_db?.sentences.id(link.sentence_id))
+    .filter((sentence): sentence is NonNullable<typeof sentence> => !!sentence))
 
   const is_empty = $derived(!title_languages.length && !body_languages.length && !usage_languages.length)
 </script>
@@ -68,6 +80,10 @@
       <a class="entry-chip" href={`/${dictionary.url}/entry/${section.entry_id}`}>
         {linked_lexeme || t('grammar.linked_entry')}
       </a>
+    {/if}
+
+    {#if slot_label}
+      <span class="slot-badge" title={t('grammar.clause_slot')}>{slot_label}</span>
     {/if}
 
     {#if actions.editable}
@@ -112,6 +128,14 @@
             {#if multilingual}<span class="lang-tag body-lang">{language_label(bcp)}</span>{/if}
             {@html sanitize(render_markdown_to_html(section.usage_conditions?.[bcp] || ''))}
           </div>
+        {/each}
+      </div>
+    {/if}
+
+    {#if example_sentences.length}
+      <div class="examples">
+        {#each example_sentences as sentence (sentence.id)}
+          <GrammarExampleSentence {sentence} />
         {/each}
       </div>
     {/if}
@@ -195,6 +219,19 @@
     background: color-mix(in srgb, var(--primary) 20%, var(--background));
   }
 
+  .slot-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.0625rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--color-secondary);
+    background: color-mix(in srgb, var(--color) 8%, var(--background));
+  }
+
   .controls {
     display: flex;
     gap: 0.125rem;
@@ -230,7 +267,6 @@
 
   .body {
     margin-top: 0.375rem;
-    max-width: 46rem;
   }
 
   .body-lang {
@@ -253,6 +289,13 @@
     letter-spacing: 0.03em;
     color: var(--color-secondary);
     margin-bottom: 0.25rem;
+  }
+
+  .examples {
+    margin-top: 0.625rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
   }
 
   .children {

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { page } from '$app/state'
   import GrammarSection from './GrammarSection.svelte'
+  import ClauseTemplateStrip from './ClauseTemplateStrip.svelte'
+  import ClauseSlotManager from './ClauseSlotManager.svelte'
   import {
     after_sibling_key,
     append_child_key,
@@ -11,6 +13,7 @@
   import type { GrammarNode, GrammarSectionActions } from './grammar-section-actions'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
+  import IconMdiCog from '~icons/mdi/cog'
 
   interface Props {
     /** Whether the current user may add/reorder/nest/edit (admin-3 during preview). */
@@ -28,6 +31,7 @@
   const tree = $derived(build_section_tree(rows))
 
   let editing_id = $state<string | null>(null)
+  let show_slot_manager = $state(false)
 
   // id → parent node (null at root) — lets the ops find a section's
   // siblings/children straight off the built (already-normalized) tree.
@@ -118,6 +122,21 @@
   {#if loading}
     <div class="state-note"><IconSvgSpinners3DotsFade /></div>
   {:else}
+    <ClauseTemplateStrip />
+
+    {#if editable}
+      <div class="slot-controls">
+        <button type="button" class="btn-outline btn-sm" style="gap: 0.375rem" onclick={() => show_slot_manager = !show_slot_manager}>
+          <IconMdiCog /> {t('grammar.edit_clause_slots')}
+        </button>
+      </div>
+      {#if show_slot_manager}
+        <div class="slot-manager-wrap">
+          <ClauseSlotManager />
+        </div>
+      {/if}
+    {/if}
+
     {#each tree as node (node.section.id)}
       <GrammarSection {node} {actions} />
     {/each}
@@ -137,6 +156,14 @@
 <style>
   .sections {
     margin-top: 0.5rem;
+  }
+
+  .slot-controls {
+    margin-bottom: 0.75rem;
+  }
+
+  .slot-manager-wrap {
+    margin-bottom: 1rem;
   }
 
   .state-note {

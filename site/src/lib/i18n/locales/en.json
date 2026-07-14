@@ -15,7 +15,45 @@
     "add_subsection": "Add subsection",
     "add_section": "Add section",
     "delete_section_confirm": "Delete this section and all its subsections?",
-    "preview_badge": "Structured grammar (preview)"
+    "preview_badge": "Structured grammar (preview)",
+    "example_sentences": "Example sentences",
+    "add_example_sentence": "Add example sentence",
+    "attach_existing_sentence": "Attach an existing sentence",
+    "paste_new_sentence": "Or paste a new example sentence",
+    "search_sentences": "Search sentences",
+    "detach_sentence": "Remove from section",
+    "no_example_sentences": "No example sentences yet",
+    "clause_slot": "Clause slot",
+    "no_clause_slot": "No clause slot",
+    "clause_template": "Clause template",
+    "clause_slots": "Clause slots",
+    "add_clause_slot": "Add slot",
+    "slot_name": "Slot name",
+    "slot_code": "Short code (optional)",
+    "edit_clause_slots": "Edit clause slots",
+    "delete_slot_confirm": "Delete this clause slot?",
+    "slot_unassigned": "Unassigned"
+  },
+  "discourse": {
+    "role": "Discourse role",
+    "none": "None",
+    "storyline": "Storyline",
+    "backgrounded": "Backgrounded",
+    "flashback": "Flashback",
+    "setting": "Setting",
+    "evaluation": "Evaluation",
+    "reported_speech": "Reported speech"
+  },
+  "text_tag": {
+    "motif": "Motif",
+    "genre": "Genre",
+    "tale_type": "Tale type",
+    "add": "Add tag",
+    "name": "Tag name",
+    "code": "Index code (e.g. ATU)",
+    "classification": "Classification",
+    "filter_all": "All",
+    "remove": "Remove tag"
   },
   "page": {
     "direction": "ltr"

@@ -135,3 +135,35 @@ export function append_child_key(existing_child_sort_keys: string[]): string {
 export function after_sibling_key(parent_sort_key: string, next_uncle_sort_key: string | null): string {
   return key_between(parent_sort_key, next_uncle_sort_key)
 }
+
+/**
+ * First non-empty value of a per-language MultiString, preferring the given
+ * language order (dictionary gloss languages). Used to label clause slots +
+ * other short MultiString fields that only need one representative string.
+ */
+export function first_multistring_value(field: Record<string, string> | null | undefined, prefer: string[] = []): string {
+  if (!field) return ''
+  for (const bcp of prefer) {
+    if (field[bcp]?.trim()) return field[bcp].trim()
+  }
+  for (const value of Object.values(field)) {
+    if (value?.trim()) return value.trim()
+  }
+  return ''
+}
+
+if (import.meta.vitest) {
+  const { describe, it, expect } = import.meta.vitest
+  describe(first_multistring_value, () => {
+    it('prefers the given language order', () => {
+      expect(first_multistring_value({ en: 'verb', fr: 'verbe' }, ['fr', 'en'])).toBe('verbe')
+    })
+    it('falls back to the first non-empty value', () => {
+      expect(first_multistring_value({ en: '', es: 'nombre' }, ['fr'])).toBe('nombre')
+    })
+    it('returns empty string for null/blank', () => {
+      expect(first_multistring_value(null)).toBe('')
+      expect(first_multistring_value({ en: '   ' })).toBe('')
+    })
+  })
+}

@@ -7,6 +7,7 @@
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte'
   import SentenceEditPanel from './SentenceEditPanel.svelte'
   import AppendSentencesModal from './AppendSentencesModal.svelte'
+  import TextTags from './TextTags.svelte'
   import { get_headword } from '$lib/helpers/orthographies'
   import type { DictRowType } from '$lib/db/dict-client/dict-live-db.svelte'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
@@ -129,6 +130,10 @@
           {page.data.t('text.append')}
         </HeadlessButton>
       {/if}
+    </div>
+
+    <div class="tags-row">
+      <TextTags {text_id} {can_edit} />
     </div>
 
     <article class="reader" class:interlinear={show_translations}>
@@ -260,7 +265,11 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin: 0.75rem 0 1.25rem;
+    margin: 0.75rem 0 0.75rem;
+  }
+
+  .tags-row {
+    margin-bottom: 1.25rem;
   }
 
   .meta {

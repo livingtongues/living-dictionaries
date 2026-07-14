@@ -1,6 +1,7 @@
 import type { MultiString } from '$lib/types'
 import type { DictInsertType, DictLiveDb, DictUpdateType } from '$lib/db/dict-client/dict-live-db.svelte'
-import type { GlobalRelationshipType } from '$lib/constants'
+import type { GlobalRelationshipType, TagKind } from '$lib/constants'
+import { key_between } from '$lib/api/v1/fractional-index'
 import { canonicalize_relationship_endpoints, resolve_global_relationship_type } from '$lib/db/relationship-canonicalize'
 import { log_warning, track } from '$lib/debug/remote-log'
 import { ENTRY_CREATED, ENTRY_DELETED } from '$lib/debug/log-events'
@@ -197,6 +198,55 @@ export function create_guarded_writes({ dict_db, connection, dictionary, get_use
         await db.writes.unlink_junction({ table: 'entry_tags', key })
       else
         await db.writes.link_junction({ table: 'entry_tags', key })
+    }),
+
+    /**
+     * Link an existing sentence to a grammar section as an ordered example
+     * (`section_sentences` junction). Dedupes by natural key; appends after the
+     * given sibling (or at the end) with a fractional `sort_key`. The junction
+     * carries ordering, so this inserts directly rather than via `link_junction`
+     * (which never sets `sort_key`).
+     */
+    attach_section_sentence: guard(async (db, { section_id, sentence_id, after_sort_key, before_sort_key }: {
+      section_id: string
+      sentence_id: string
+      /** Sibling to append after (its `sort_key`); null → prepend/first. */
+      after_sort_key?: string | null
+      /** Sibling to insert before (its `sort_key`); null → append/last. */
+      before_sort_key?: string | null
+    }) => {
+      const existing = await db.section_sentences.query({ where: 'section_id = ? AND sentence_id = ?', params: [section_id, sentence_id] }).snapshot()
+      if (existing.length)
+        return existing[0]
+      const sort_key = key_between(after_sort_key ?? null, before_sort_key ?? null)
+      const [row] = await db.section_sentences.insert({ section_id, sentence_id, sort_key })
+      return row
+    }),
+
+    detach_section_sentence: guard(async (db, { section_id, sentence_id }: { section_id: string, sentence_id: string }) => {
+      await db.writes.unlink_junction({ table: 'section_sentences', key: { section_id, sentence_id } })
+    }),
+
+    /**
+     * Attach a text-classification tag (motif / genre / tale-type) to a text —
+     * find-or-create the kinded tag by (name, kind) then link via `text_tags`.
+     * Mirrors the server v1 `link_text_tag` dedupe.
+     */
+    assign_text_tag: guard(async (db, { text_id, name, kind, code }: {
+      text_id: string
+      name: string
+      kind: TagKind
+      code?: string
+    }) => {
+      const trimmed = name.trim()
+      const existing = await db.tags.query({ where: 'lower(name) = lower(?) AND kind = ?', params: [trimmed, kind] }).snapshot()
+      const tag = existing[0] ?? (await db.tags.insert({ name: trimmed, kind, ...(code?.trim() ? { code: code.trim() } : {}) }))[0]
+      await db.writes.link_junction({ table: 'text_tags', key: { text_id, tag_id: tag.id } })
+      return tag
+    }),
+
+    remove_text_tag: guard(async (db, { text_id, tag_id }: { text_id: string, tag_id: string }) => {
+      await db.writes.unlink_junction({ table: 'text_tags', key: { text_id, tag_id } })
     }),
 
     insert_dialect: guard(async (db, { name }: { name: MultiString }) => {

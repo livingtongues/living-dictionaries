@@ -39,7 +39,6 @@
       await dict_db.sentences.insert(rows)
       on_close()
     } catch (err) {
-      // eslint-disable-next-line no-alert
       alert(err)
       console.error(err)
       saving = false

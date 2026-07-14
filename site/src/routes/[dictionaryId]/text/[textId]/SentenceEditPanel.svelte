@@ -4,6 +4,8 @@
   import EntryField from '../../entry/[entryId]/EntryField.svelte'
   import { get_orthographies } from '$lib/helpers/orthographies'
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
+  import { grammar_sections_editable } from '$lib/corpus/grammar-preview'
+  import { DISCOURSE_ROLES } from '$lib/constants'
   import type { DictRowType } from '$lib/db/dict-client/dict-live-db.svelte'
   import IconSystemUiconsTrash from '~icons/system-uicons/trash'
 
@@ -18,6 +20,8 @@
 
   const { dictionary } = $derived(page.data)
   const orthographies = $derived(get_orthographies(dictionary ?? {}))
+  // Discourse role is a structured-grammar preview field — admin-3 only until the cutover.
+  const show_discourse = $derived(grammar_sections_editable({ auth_user: page.data.auth_user }))
   const glossing_languages = $derived(order_entry_and_dictionary_gloss_languages(sentence?.translation, dictionary.gloss_languages))
 
   async function save(patch: Record<string, unknown>) {
@@ -73,6 +77,21 @@
         {page.data.t('text.paragraph_break')}
       </label>
 
+      {#if show_discourse}
+        <label class="discourse-field">
+          <span class="discourse-label">{page.data.t('discourse.role')}</span>
+          <select
+            class="discourse-select"
+            value={sentence.discourse_role ?? ''}
+            onchange={event => save({ discourse_role: event.currentTarget.value || null })}>
+            <option value="">{page.data.t('discourse.none')}</option>
+            {#each DISCOURSE_ROLES as role (role)}
+              <option value={role}>{page.data.t({ dynamicKey: `discourse.${role}`, fallback: role })}</option>
+            {/each}
+          </select>
+        </label>
+      {/if}
+
       <div class="actions">
         <button type="button" class="btn-outline btn-sm" style="gap: 0.375rem; color: var(--danger)" onclick={delete_sentence}>
           <IconSystemUiconsTrash />
@@ -100,6 +119,27 @@
     font-size: 0.875rem;
     margin-top: 1.25rem;
     color: color-mix(in srgb, var(--color) 85%, var(--background));
+  }
+
+  .discourse-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    margin-top: 1rem;
+  }
+
+  .discourse-label {
+    color: var(--color-secondary);
+  }
+
+  .discourse-select {
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-color);
+    background: var(--background);
+    color: var(--color);
+    font-size: 0.875rem;
   }
 
   .actions {

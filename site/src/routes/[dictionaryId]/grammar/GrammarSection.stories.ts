@@ -4,6 +4,7 @@ import { readable } from 'svelte/store'
 import { build_section_tree } from './grammar-tree'
 import type { GrammarSectionActions } from './grammar-section-actions'
 import { mock_t } from '$lib/mocks/mock-t'
+import { mock_dict_db } from '$lib/mocks/mock-dict-db'
 
 const dictionary = {
   id: 'demo',
@@ -19,9 +20,20 @@ const entries_data = readable({
 
 const rows = [
   { id: 's1', parent_id: null, sort_key: 'a', title: { en: 'Verb morphology' }, body: { en: 'Nahuatl is **polysynthetic**: a single verb encodes subject, object, and tense affixes, so one word can express a whole clause.' }, entry_id: null, sense_id: null },
-  { id: 's1a', parent_id: 's1', sort_key: 'a', title: { en: 'Subject prefixes' }, body: { en: 'Subjects are marked by a prefix in the first slot of the verb.' }, usage_conditions: { en: 'Only on finite verbs — omitted on nominalized forms.' }, entry_id: 'tlahtoa', sense_id: null },
+  { id: 's1a', parent_id: 's1', sort_key: 'a', title: { en: 'Subject prefixes' }, body: { en: 'Subjects are marked by a prefix in the first slot of the verb.' }, usage_conditions: { en: 'Only on finite verbs — omitted on nominalized forms.' }, entry_id: 'tlahtoa', sense_id: null, slot_id: 'sl1' },
   { id: 's1b', parent_id: 's1', sort_key: 'b', title: { en: 'Object prefixes' }, body: { en: 'Objects occupy a second prefix slot immediately after the subject.' }, entry_id: null, sense_id: null },
 ]
+
+const clause_slots = [{ id: 'sl1', sort_key: 'a', name: { en: 'Subject' }, code: 'SBJ' }]
+const sentences = [
+  { id: 'q1', text: { default: 'Ni-tlahtoa' }, translation: { en: 'I speak.' }, discourse_role: 'storyline' },
+  { id: 'q2', text: { default: 'Ti-tlahtoa' }, translation: { en: 'You speak.' } },
+]
+const section_sentences = [
+  { id: 'ss1', section_id: 's1a', sentence_id: 'q1', sort_key: 'a' },
+  { id: 'ss2', section_id: 's1a', sentence_id: 'q2', sort_key: 'b' },
+]
+const dict_db = mock_dict_db({ grammar_sections: rows, clause_slots, sentences, section_sentences })
 
 const [node] = build_section_tree(rows as never)
 
@@ -39,8 +51,8 @@ const read_actions: GrammarSectionActions = {
 const edit_actions: GrammarSectionActions = { ...read_actions, editable: true }
 
 export const shared_meta: StoryMeta = {
-  viewports: [{ width: 760, height: 560 }],
-  page_data: { t: mock_t, dictionary, entries_data },
+  viewports: [{ width: 760, height: 620 }],
+  page_data: { t: mock_t, dictionary, entries_data, dict_db } as never,
 }
 
 export const ReadOnly: Story<typeof Component> = {

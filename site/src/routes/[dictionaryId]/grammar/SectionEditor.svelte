@@ -1,5 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state'
+  import SectionSentenceEditor from './SectionSentenceEditor.svelte'
+  import ClauseSlotPicker from './ClauseSlotPicker.svelte'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
   import { get_headword } from '$lib/helpers/orthographies'
@@ -26,6 +28,7 @@
   let draft_body = $state<MultiString>({ ...(section.body || {}) })
   let draft_usage = $state<MultiString>({ ...(section.usage_conditions || {}) })
   let linked_entry_id = $state<string | null>(section.entry_id ?? null)
+  let linked_slot_id = $state<string | null>(section.slot_id ?? null)
   let show_usage = $state(!!Object.values(section.usage_conditions || {}).some(Boolean))
   // Plain flag (not reactive state): a re-entrancy guard only, never read in the template.
   let saving = false
@@ -82,6 +85,7 @@
       section.body = clean(draft_body)
       section.usage_conditions = clean(draft_usage)
       section.entry_id = linked_entry_id
+      section.slot_id = linked_slot_id
       // A section can't be fully empty — if the user cleared everything, keep a headless body-only placeholder untouched isn't needed here; a blank new section is allowed while editing.
       await section._save()
       on_close()
@@ -151,6 +155,10 @@
       </button>
     {/if}
   </div>
+
+  <ClauseSlotPicker bind:value={linked_slot_id} />
+
+  <SectionSentenceEditor section_id={section.id} />
 
   <div class="actions">
     <button type="button" class="btn btn-default" onclick={on_close}>{t('misc.cancel')}</button>

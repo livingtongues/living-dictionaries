@@ -33,7 +33,6 @@
   }
 
   function back_to_paste() {
-    // eslint-disable-next-line no-alert
     if (rows.length && !confirm(page.data.t('text.resplit_warning'))) return
     phase = 'paste'
   }
@@ -60,7 +59,6 @@
       })
       await goto(`/${dictionary.url}/text/${text.id}`)
     } catch (err) {
-      // eslint-disable-next-line no-alert
       alert(err)
       console.error(err)
       saving = false

@@ -121,6 +121,7 @@
     margin-top: 2rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--border-color);
+    max-width: 768px;
   }
 
   .preview-badge {
