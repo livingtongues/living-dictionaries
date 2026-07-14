@@ -128,6 +128,112 @@ reconstruct text; lift `(a)/(b)` labels into `example_label`; map their `cite` f
 **Loop status:** design loop SETTLED from the corpus agent's side ("ready for them to build"). Next
 gate = Jacob's go to (a) deploy V3 spec pins + (b) start the build.
 
+---
+
+## BUILD (2026-07-14) — green-lit by Jacob (deploy V3 ✅ pushed `595e9128`, build ✅ go)
+
+Citation storage = **separate `sentences.citations` JSON column** (Jacob's default). Whole feature
+built as one; admin-3 gated until shape frozen.
+
+### Milestone 1 — dict.db schema + migrations + sync wiring
+Grounded machinery (verified in code): dict migrations auto-discover via `import.meta.glob` on BOTH
+server (`dictionary-db.ts`) and client (`dict-migrations-bundle.ts`); `LATEST_DICT_MIGRATION`
+auto-derives (last-sorted file) — no constant to bump. JSON columns auto-derive from Drizzle
+(`dictionary-json-columns.ts`). New syncable table needs: (a) Drizzle table, (b) CREATE TABLE + indexes
++ bump-lmod ai/au triggers + server_seq ai/au triggers (`WHEN NEW.server_seq IS OLD.server_seq` on au)
++ re-declared `process_delete_cascade`, (c) `DICT_SYNCABLE_TABLES` (FK-safe order), (d) junctions →
+`JUNCTION_TABLES` in `dict-writes.ts`. Sync-apply runs under `PRAGMA defer_foreign_keys = ON` → self-FK
+safe. Migration runs FK-OFF wrapped in BEGIN/COMMIT.
+
+Milestone 1 files — ✅ DONE (2026-07-14), all tests green:
+- [x] `constants.ts` — `DISCOURSE_ROLES`, `TAG_KINDS`
+- [x] `dictionary.types.ts` — `Morpheme`, `SourceCitation`; extend `SentenceToken` (`gloss`, `morphemes`)
+- [x] `dictionary.ts` — 5 tables (clause_slots, glossing_abbreviations, grammar_sections,
+  section_sentences, text_tags) + cols on sentences (discourse_role, example_label, citations),
+  sources (orthography), tags (kind, code)
+- [x] `20260714_structured_grammar.sql` migration (CREATE + indexes + bump-lmod ai/au +
+  server_seq ai/au for 5 tables + ALTERs + re-declared `process_delete_cascade` [28 tables])
+- [x] `dict-syncable-tables.ts` register 5 tables (FK-safe order)
+- [x] `dict-writes.ts` add section_sentences + text_tags to JUNCTION_TABLES
+- [x] `dictionary-json-columns.ts` test (sentences += citations; new tables asserted)
+- [x] `dictionary-grammar-schema.test.ts` — new tables/cols exist, self-FK subtree cascade,
+  entry_id SET NULL (section outlives entry), junction cascade both sides, UNIQUE keys, server_seq
+- [x] `openapi.ts` — lifted `DISCOURSE_ROLES` to `constants.ts` (spec enum ⇄ DB column single source)
+- [x] Live-db proxy auto-exposes new tables (derives from `DICT_SYNCABLE_TABLES` + `dict_schema`)
+
+**Verification:** 24 touched tests + full `src/lib/db` suite (478 tests / 51 files) green; tsc clean;
+lint clean. NOT yet committed (schema push = prod migration — checkpoint with Jacob first).
+
+**PARKED — multi-orthography IGT (corpus agent's final note, 2026-07-14, NOT a blocker):**
+When a sentence has tokens in >1 orthography (their later RPA ↔ Miao-pinyin same-speech goal), the
+convention is `gloss` + `entry_id` ride the `default`-orthography token list; other orthographies are
+index-aligned alternate spellings. **Already supported by the shape** — `SentenceTokens =
+Record<orthography, SentenceToken[]>` is per-orthography, and `SentenceIgtWriteDraft.tokens` is keyed
+by orthography code. Additive whenever they get there (transliteration setup OR entries carrying both
+orthographies); the JSON token column does NOT foreclose it. Jacob: "yes I want it somehow… I don't
+care [which mechanism]." No schema change now.
+
+Next: Milestone 2 — `$lib/db/server/grammar-sections.ts` shared write module + `/api/v1/*` endpoints
+(gives the corpus agent the real write API, replacing the draft 404s) + flip those ops off `draft`.
+
+### Milestone 2 (2026-07-14, IN PROGRESS) — v1 server module + endpoints
+Constraints from Jacob: **Jacob does ALL commits/pushes now** (I never commit). **At most ONE new
+`.sql` per migration lane for the whole feature** → the existing uncommitted
+`20260714_structured_grammar.sql` is my one dict migration; fold any further schema need INTO it, no
+new migration files.
+
+Scope split: **2a (this pass)** = the dict.db grammar surface (sections CRUD+reorder, section↔sentence
+link/unlink, clause-slots CRUD, glossing-abbreviations CRUD, reverse entry→grammar, text-tags
+link/unlink, grammar intro on shared.db) → flip these ops off `draft`. **2b (next)** = the IGT
+sentence-WRITE additions (writable `tokens`+`gloss`+`morphemes`, `citations`, `example_label`,
+`discourse_role` on the existing sentence PATCH / text-sentence create; `sources.orthography` on
+source PATCH) — these modify EXISTING sentence/source write paths, stay `draft` until 2b.
+
+Machinery (verified): server module = pure fns over a better-sqlite3 dict.db using `merge_dict_row`
+(same path+history as a browser push) + `run_tombstone_delete` + `read_last_modified_at` (cursor);
+routes use `load_v1_dictionary_context({ event, access })` + `mirror_dictionary_cursor`; input helpers
+`to_multistring`/`resolve_client_id`/`to_string_array`; ordering `initial_keys`/`key_between`. Template
+= `v1-texts.ts` + `v1-sub-resources.ts` + the texts routes.
+
+Routes to add (12) + flip drafts: `grammar/` PATCH · `grammar/sections/` GET·POST ·
+`grammar/sections/[sectionId]/` GET·PATCH·DELETE · `…/sentences/` POST · `…/sentences/[sentenceId]/`
+DELETE · `grammar/clause-slots/` GET·POST · `grammar/clause-slots/[slotId]/` PATCH·DELETE ·
+`entries/[entryId]/grammar/` GET · `grammar/glossing-abbreviations/` GET·POST ·
+`…/[code]/` PATCH·DELETE · `texts/[textId]/tags/` GET·POST · `texts/[textId]/tags/[tagId]/` DELETE.
+
+**Milestone 2a — ✅ DONE (2026-07-14), all tests green:**
+- [x] `$lib/db/server/grammar-sections.ts` — shared write module: sections CRUD (create/get/list/
+  update/delete) w/ fractional sibling ordering + parent nesting + entry/sense/slot links + FK
+  validation; `section_sentences` link/unlink (append/after/dedupe); `clause_slots` CRUD;
+  `glossing_abbreviations` find-or-create-by-code CRUD; reverse `list_entry_grammar_sections`.
+- [x] `v1-texts.ts` — `list_text_tags` / `link_text_tag` (find-or-create kinded tag + link, idempotent) /
+  `unlink_text_tag`.
+- [x] 11 route files wired (all but grammar-intro): sections (2) · section/[id] (3) · sentences link (1)
+  + unlink (1) · clause-slots (2) · clause-slot/[id] (2) · entries/[id]/grammar (1) · glossing (2) ·
+  glossing/[code] (2) · text tags (2) · text tag/[id] (1).
+- [x] openapi: flipped those 11 paths' ops + their schemas off `draft` (removed `[DRAFT]`/`...DRAFT`/
+  "not yet implemented"); rewrote the "Draft surfaces" legend; only `PATCH …/grammar` (intro) stays draft.
+- [x] `grammar-sections.test.ts` (17 unit tests) + `grammar/sections/server.test.ts` (3 route tests,
+  incl. read-key 403 + 400 + full CRUD/link/reverse/text-tag round-trip) + openapi.test.ts updated.
+- [x] Verified: `src/lib/db` + `src/routes/api/v1` = 608 tests green; `pnpm check` 0 errors; lint clean.
+
+**STILL DRAFT (deliberately deferred):**
+- **Grammar INTRO** `PATCH …/grammar` — needs the shared.db `dictionaries.grammar` string → MultiString
+  promotion (a shared-lane migration + settings-UI + home rendering). Left draft; a human can still set
+  the plain-string intro via dictionary settings today.
+- **Milestone 2b — IGT sentence WRITES**: make `sentences.tokens` writable with per-token `gloss` +
+  `morphemes`; `sentences.citations` / `example_label` / `discourse_role`; `sources.orthography`. These
+  ALTER the existing sentence PATCH / text-sentence create + source PATCH paths (schemas
+  `SentenceIgtWriteDraft` etc. still draft). Highest value for the corpus agent's 1,072 IGT examples.
+
+**Ready for Jacob to commit + deploy** (per his instruction, he handles all commits/pushes). Uncommitted
+new/changed files: `grammar-sections.ts`(+test), `v1-texts.ts`, 11 route `+server.ts` + 1 route test,
+`openapi.ts`(+test), `constants.ts`, `dictionary.ts`/`dictionary.types.ts`, `20260714_structured_grammar.sql`,
+`dict-syncable-tables.ts`, `dict-writes.ts`, `dictionary-json-columns.ts`(test), `dictionary-grammar-schema.test.ts`.
+
+Next after deploy: Milestone 2b (IGT sentence writes) → then UI milestones (grammar page rewrite, entry
+"Grammar notes" block, clause-template diagram) behind the admin-3 gate.
+
 **Original design decisions (still the build target):**
 **Gate: admin-3 preview** (same as texts) until the data shape is stable, then graduate to all
 managers + public. Old `dictionaries.grammar` blob stays visible to everyone as intro/fallback the

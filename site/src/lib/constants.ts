@@ -49,6 +49,25 @@ export const SOURCE_TYPES = ['dictionary', 'wordlist', 'fieldwork', 'manuscript'
 export type SourceType = typeof SOURCE_TYPES[number]
 
 /**
+ * Controlled vocabulary for `sentences.discourse_role` — the salience band /
+ * information type a clause carries in narrative (storyline vs backgrounded,
+ * etc.). Nullable + extensible (a suggested vocab, not enforced); a grammar
+ * section can point at the role a particle signals. Labels are i18n keys
+ * `discourse_role.<value>`.
+ */
+export const DISCOURSE_ROLES = ['storyline', 'backgrounded', 'flashback', 'setting', 'evaluation', 'reported_speech'] as const
+export type DiscourseRole = typeof DISCOURSE_ROLES[number]
+
+/**
+ * Kind of a `tags` row when it classifies TEXTS (motif / genre / tale-type) via
+ * the `text_tags` junction. NULL = a plain entry tag (the legacy use). The tag's
+ * `code` column then holds the controlled index code (e.g. an ATU/Thompson motif
+ * number). Labels are i18n keys `tag_kind.<value>`.
+ */
+export const TAG_KINDS = ['motif', 'genre', 'tale_type'] as const
+export type TagKind = typeof TAG_KINDS[number]
+
+/**
  * Admin-curated classification of every dictionary (`dictionaries.bucket`) —
  * who we serve ('public'/'unlisted'/'secure') vs what we tolerate
  * ('conlang'/'glossary' — media storage to be disabled) vs 'delete' (queued

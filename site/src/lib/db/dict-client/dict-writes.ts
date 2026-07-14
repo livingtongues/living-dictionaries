@@ -50,6 +50,8 @@ const JUNCTION_TABLES = [
   'sense_videos',
   'sentence_photos',
   'sentence_videos',
+  'section_sentences',
+  'text_tags',
 ] as const
 export type JunctionTable = typeof JUNCTION_TABLES[number]
 

@@ -1,6 +1,7 @@
 import type { DictionaryCoordinates } from './shared.types'
-import type { HostedElsewhere, MediaTimings, MultiString, SentenceTokens } from './dictionary.types'
-import { SOURCE_TYPES } from '$lib/constants'
+import type { HostedElsewhere, MediaTimings, MultiString, SentenceTokens, SourceCitation } from './dictionary.types'
+import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
+import { DISCOURSE_ROLES, SOURCE_TYPES, TAG_KINDS } from '$lib/constants'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 /**
@@ -119,6 +120,12 @@ export const sentences = sqliteTable('sentences', {
   sources: text({ mode: 'json' }).$type<string[]>(),
   /** Per-orthography tokenization + word→entry match state (see `SentenceTokens`). */
   tokens: text({ mode: 'json' }).$type<SentenceTokens>(),
+  /** Salience band / information role in narrative (see `DISCOURSE_ROLES`); nullable. */
+  discourse_role: text({ enum: DISCOURSE_ROLES }),
+  /** The author's own example number (e.g. "(2a)") for cross-referencing within a grammar. */
+  example_label: text(),
+  /** Source refs WITH a citation locus (page/example number); complements `sources[]` (see `SourceCitation`). */
+  citations: text({ mode: 'json' }).$type<SourceCitation[]>(),
   dirty: integer(),
   server_seq: integer(),
   created_by_user_id: text().notNull(),
@@ -309,6 +316,10 @@ export const tags = sqliteTable('tags', {
   name: text().notNull(),
   /** NULL/0 = visible to all; 1 = admin-only (legacy `private` column). */
   private: integer(),
+  /** NULL = plain entry tag; else classifies a TEXT (motif/genre/tale-type) via `text_tags` (see `TAG_KINDS`). */
+  kind: text({ enum: TAG_KINDS }),
+  /** Controlled index code for a classification tag (e.g. an ATU/Thompson motif number). */
+  code: text(),
   dirty: integer(),
   server_seq: integer(),
   created_by_user_id: text().notNull(),
@@ -415,6 +426,126 @@ export const sources = sqliteTable('sources', {
   license: text(),
   /** The citation kind: dictionary/wordlist/fieldwork/manuscript/other. */
   type: text({ enum: SOURCE_TYPES }),
+  /** Which script/orthography this source's forms use — a `code` from `dictionaries.orthographies` (nullable), so multiple romanizations/scripts in one corpus aren't conflated. */
+  orthography: text(),
+  dirty: integer(),
+  server_seq: integer(),
+  created_by_user_id: text().notNull(),
+  created_at: text().notNull(),
+  updated_by_user_id: text().notNull(),
+  updated_at: text().notNull(),
+})
+
+/**
+ * Per-dictionary vocabulary of clause-template positions (a "clause slot" like
+ * pre-subject / modal / pre-verb / final). Ordered by `sort_key`, the list IS
+ * the clause template; a `grammar_sections.slot_id` places a particle in its
+ * slot so the UI can render a template diagram and order particles correctly.
+ * Found-or-created per dict, like `tags`/`dialects`.
+ */
+export const clause_slots = sqliteTable('clause_slots', {
+  id: text().primaryKey(),
+  sort_key: text().notNull(),
+  name: text({ mode: 'json' }).$type<MultiString>().notNull(),
+  /** Optional short code for the slot. */
+  code: text(),
+  dirty: integer(),
+  server_seq: integer(),
+  created_by_user_id: text().notNull(),
+  created_at: text().notNull(),
+  updated_by_user_id: text().notNull(),
+  updated_at: text().notNull(),
+})
+
+/**
+ * Per-dictionary glossing-abbreviations legend (`3PL` → "third person plural").
+ * Makes IGT gloss lines self-documenting: a code found here (matched as a
+ * substring of a gloss cell) renders SMALL CAPS + tap-to-expand — so no
+ * per-token "grammatical?" flag is needed. Found-or-created by `code`; seed from
+ * the standard Leipzig set + custom codes.
+ */
+export const glossing_abbreviations = sqliteTable('glossing_abbreviations', {
+  id: text().primaryKey(),
+  /** The abbreviation as it appears in glosses, e.g. "3PL", "PFV", "CLF". UNIQUE per dict. */
+  code: text().notNull(),
+  /** Expansion, per analysis language, e.g. "third person plural". */
+  name: text({ mode: 'json' }).$type<MultiString>().notNull(),
+  /** Optional grouping for the legend UI (person / number / tense / aspect / case…). */
+  category: text(),
+  dirty: integer(),
+  server_seq: integer(),
+  created_by_user_id: text().notNull(),
+  created_at: text().notNull(),
+  updated_by_user_id: text().notNull(),
+  updated_at: text().notNull(),
+})
+
+/**
+ * Hierarchical grammar section tree — the structured, entry-linked replacement
+ * for the single free-text `dictionaries.grammar` blob (which stays as an
+ * optional page intro). A section usually documents ONE lexeme: link it via
+ * `entry_id` (+ optional `sense_id`) and it surfaces as "grammar notes" on that
+ * entry, while the section pulls the entry's lexeme/phonetic/audio. Prose
+ * (`title`/`body`/`usage_conditions`) is per-analysis-language markdown; example
+ * sentences attach by reference via `section_sentences`.
+ *
+ * `parent_id` self-FK is safe under the sync engine's `PRAGMA defer_foreign_keys
+ * = ON` (children may arrive before parents in a batch). `entry_id`/`sense_id`/
+ * `slot_id` are SET NULL so documentation outlives the thing it points at.
+ */
+export const grammar_sections = sqliteTable('grammar_sections', {
+  id: text().primaryKey(),
+  parent_id: text().references((): AnySQLiteColumn => grammar_sections.id, { onDelete: 'cascade' }),
+  /** Fractional index (LexoRank-style) ordering this section AMONG ITS SIBLINGS (same `parent_id`). */
+  sort_key: text().notNull(),
+  /** Optional explicit label ("2.2.1.1"); when NULL, derived from tree position. Stored form lets an imported grammar keep its own numbering. */
+  number_label: text(),
+  /** Section heading, per analysis language (markdown-capable, usually short). */
+  title: text({ mode: 'json' }).$type<MultiString>().notNull(),
+  /** Main documentation prose as markdown, per analysis language. */
+  body: text({ mode: 'json' }).$type<MultiString>(),
+  /** "When to include vs omit this form" prose as markdown, per analysis language — distinct from `body`. */
+  usage_conditions: text({ mode: 'json' }).$type<MultiString>(),
+  slot_id: text().references(() => clause_slots.id, { onDelete: 'set null' }),
+  entry_id: text().references(() => entries.id, { onDelete: 'set null' }),
+  sense_id: text().references(() => senses.id, { onDelete: 'set null' }),
+  dirty: integer(),
+  server_seq: integer(),
+  created_by_user_id: text().notNull(),
+  created_at: text().notNull(),
+  updated_by_user_id: text().notNull(),
+  updated_at: text().notNull(),
+})
+
+/**
+ * Grammar examples as REFERENCES into existing `sentences` (not re-typed copies)
+ * — one sentence then serves reading (in a text), a sense's example, AND grammar
+ * evidence at once, inheriting its tokens (tappable), media timings (listenable),
+ * and source citation for free. Mirrors `senses_in_sentences` + ordering.
+ */
+export const section_sentences = sqliteTable('section_sentences', {
+  id: text().primaryKey(),
+  section_id: text().notNull().references(() => grammar_sections.id, { onDelete: 'cascade' }),
+  sentence_id: text().notNull().references(() => sentences.id, { onDelete: 'cascade' }),
+  /** Fractional index ordering examples WITHIN a section. */
+  sort_key: text(),
+  dirty: integer(),
+  server_seq: integer(),
+  created_by_user_id: text().notNull(),
+  created_at: text().notNull(),
+  updated_by_user_id: text().notNull(),
+  updated_at: text().notNull(),
+})
+
+/**
+ * Text classification tags (motif / genre / tale-type): the `text` ↔ `tag`
+ * junction, mirroring `entry_tags`. The tag's `kind` + `code` carry the
+ * controlled classification (e.g. an ATU/Thompson motif index).
+ */
+export const text_tags = sqliteTable('text_tags', {
+  id: text().primaryKey(),
+  text_id: text().notNull().references(() => texts.id, { onDelete: 'cascade' }),
+  tag_id: text().notNull().references(() => tags.id, { onDelete: 'cascade' }),
   dirty: integer(),
   server_seq: integer(),
   created_by_user_id: text().notNull(),

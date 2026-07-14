@@ -5,7 +5,7 @@
  * (not generated) so the prose is agent-oriented.
  */
 
-import { RELATIONSHIP_TYPES } from '$lib/constants'
+import { DISCOURSE_ROLES, RELATIONSHIP_TYPES } from '$lib/constants'
 import { partsOfSpeech } from '$lib/mappings/parts-of-speech'
 
 export function build_openapi_spec({ origin }: { origin: string }): Record<string, unknown> {
@@ -604,13 +604,11 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   // calling the endpoints currently 404s. Shapes may change before the build.
   // ───────────────────────────────────────────────────────────────────────
   const DRAFT = { 'x-status': 'draft' as const }
-  const DISCOURSE_ROLES = ['storyline', 'backgrounded', 'flashback', 'setting', 'evaluation', 'reported_speech']
 
   const GrammarSectionInput = {
     type: 'object',
-    ...DRAFT,
     required: ['title'],
-    description: 'DRAFT. A node in the dictionary\'s hierarchical grammar. Usually documents ONE lexeme (a particle/affix/construction): link it with `entry_id` (+ optional `sense_id`) and it surfaces as "grammar notes" on that entry, while the section pulls the entry\'s lexeme/phonetic/audio. Prose is parallel-language MARKDOWN keyed by gloss/analysis language (the object-language forms come from the linked entry + referenced sentences, not from this prose).',
+    description: 'A node in the dictionary\'s hierarchical grammar. Usually documents ONE lexeme (a particle/affix/construction): link it with `entry_id` (+ optional `sense_id`) and it surfaces as "grammar notes" on that entry, while the section pulls the entry\'s lexeme/phonetic/audio. Prose is parallel-language MARKDOWN keyed by gloss/analysis language (the object-language forms come from the linked entry + referenced sentences, not from this prose).',
     properties: {
       id: client_id_prop,
       parent_id: { type: 'string', nullable: true, description: 'Parent section id; omit/null for a top-level section.' },
@@ -629,8 +627,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const GrammarSectionPatch = {
     type: 'object',
-    ...DRAFT,
-    description: 'DRAFT. Field-merge edit of a grammar section: provided fields overwrite, omitted fields are unchanged. `parent_id` + `after_section_id` move/renest it.',
+    description: 'Field-merge edit of a grammar section: provided fields overwrite, omitted fields are unchanged. `parent_id` + `after_section_id` move/renest it.',
     properties: {
       parent_id: { type: 'string', nullable: true },
       after_section_id: { type: 'string' },
@@ -646,8 +643,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const SectionSentenceRef = {
     type: 'object',
-    ...DRAFT,
-    description: 'DRAFT. An example sentence attached to a grammar section BY REFERENCE.',
+    description: 'An example sentence attached to a grammar section BY REFERENCE.',
     properties: {
       id: { type: 'string', description: 'The link id (section_sentences row).' },
       sentence_id: { type: 'string' },
@@ -657,8 +653,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const GrammarSectionFull = {
     type: 'object',
-    ...DRAFT,
-    description: 'DRAFT. A grammar section (read shape) with its ordered example-sentence refs and child ids.',
+    description: 'A grammar section (read shape) with its ordered example-sentence refs and child ids.',
     properties: {
       id: { type: 'string' },
       parent_id: { type: 'string', nullable: true },
@@ -678,9 +673,8 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const ClauseSlotInput = {
     type: 'object',
-    ...DRAFT,
     required: ['name'],
-    description: 'DRAFT. One position in the language\'s clause template (e.g. pre-subject, pre-modal, modal, pre-verb, post-verb, phase, final). The ordered set of slots IS the template — used to render a particle-order diagram and to position grammar sections.',
+    description: 'One position in the language\'s clause template (e.g. pre-subject, pre-modal, modal, pre-verb, post-verb, phase, final). The ordered set of slots IS the template — used to render a particle-order diagram and to position grammar sections.',
     properties: {
       id: client_id_prop,
       code: { type: 'string', description: 'Short stable code, e.g. "pre_verb".' },
@@ -691,8 +685,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const ClauseSlotFull = {
     type: 'object',
-    ...DRAFT,
-    description: 'DRAFT. A clause-template slot (read shape).',
+    description: 'A clause-template slot (read shape).',
     properties: {
       id: { type: 'string' },
       code: { type: 'string', nullable: true },
@@ -713,9 +706,8 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const TextTagInput = {
     type: 'object',
-    ...DRAFT,
     required: ['name'],
-    description: 'DRAFT. A classification tag attached to a TEXT (find-or-created, mirroring entry tags): genre, motif, or tale-type — enabling a folklore-style motif index + cross-text browse. Reuses the entry-tag registry; `kind`/`code` are proposed additions to it.',
+    description: 'A classification tag attached to a TEXT (find-or-created, mirroring entry tags): genre, motif, or tale-type — enabling a folklore-style motif index + cross-text browse. Reuses the shared tag registry with `kind`/`code` classification columns.',
     properties: {
       name: { type: 'string', description: 'Tag label (found-or-created). Required.' },
       kind: { type: 'string', enum: ['motif', 'genre', 'tale_type'], nullable: true, description: 'Classification namespace; omit for a plain label.' },
@@ -725,8 +717,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const TextTagView = {
     type: 'object',
-    ...DRAFT,
-    description: 'DRAFT. A text\'s classification tag (read shape).',
+    description: 'A text\'s classification tag (read shape).',
     properties: {
       id: { type: 'string' },
       name: { type: 'string' },
@@ -829,9 +820,8 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const GlossingAbbreviationInput = {
     type: 'object',
-    ...DRAFT,
     required: ['code', 'name'],
-    description: 'DRAFT. One entry in the dictionary\'s glossing-abbreviations legend (mirrors clause-slots). Makes gloss lines self-documenting: a code found here — matched as a SUBSTRING of a gloss cell, so portmanteaux like `eat PFV` still highlight — is tap-to-expand AND renders SMALL CAPS (so no per-token "grammatical" flag is needed). Seed from the standard Leipzig set + custom codes.',
+    description: 'One entry in the dictionary\'s glossing-abbreviations legend (mirrors clause-slots). Makes gloss lines self-documenting: a code found here — matched as a SUBSTRING of a gloss cell, so portmanteaux like `eat PFV` still highlight — is tap-to-expand AND renders SMALL CAPS (so no per-token "grammatical" flag is needed). Seed from the standard Leipzig set + custom codes.',
     properties: {
       code: { type: 'string', description: 'The abbreviation as it appears in glosses, e.g. "3PL", "PFV", "CLF". Required.' },
       name: { ...StringOrMultiString, description: 'Expansion, per analysis language, e.g. "third person plural". Required.' },
@@ -841,8 +831,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const GlossingAbbreviationFull = {
     type: 'object',
-    ...DRAFT,
-    description: 'DRAFT. A glossing-abbreviation legend entry (read shape).',
+    description: 'A glossing-abbreviation legend entry (read shape).',
     properties: {
       code: { type: 'string' },
       name: { $ref: '#/components/schemas/MultiString' },
@@ -904,8 +893,9 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '## Feedback (agents welcome)',
         'If you hit a wall — a field you need that doesn\'t exist, a bug, or an awkward workflow — `POST /api/v1/dictionaries/{id}/feedback` with `{ "message": "…" }`. It reaches the Living Dictionaries team directly (read OR write keys). After sending, relay the response\'s `relay_to_human` sentence to your human so they know what you asked for; if we adopt it we notify them directly.',
         '',
-        '## Draft surfaces (under review — NOT yet implemented)',
-        'Some operations and schemas are marked `x-status: draft` (their summaries are prefixed `[DRAFT]`) — the shape is SPECIFIED FOR REVIEW but not yet built, so calling those endpoints currently returns 404. The whole `grammar` tag is draft: structured, entry-linked grammar sections (parallel-language markdown, example sentences by reference, clause-template slots, usage conditions) PLUS an interlinear-glossing (IGT / Leipzig) layer at the sentence level — a dictionary glossing-abbreviations legend (`…/grammar/glossing-abbreviations`) and proposed sentence-write additions documented as draft schemas: `SentenceIgtWriteDraft` (writable `tokens` carrying an aligned per-token `gloss` line + optional `morphemes`, a `citations` locus, an `example_label`, and `discourse_role`), `SentenceTokenInputDraft`/`SentenceTokenFull`, `MorphemeDraft`, `SourceCitationDraft`. Also draft: the text-classification endpoints (`…/texts/{textId}/tags`) and the `SentenceDiscourseFieldDraft` / `SourceScriptFieldDraft` field additions. If you are reviewing this API to import structured grammar / corpus data, tell your human whether these cover what you need or what is missing — that feedback shapes the build before it ships.',
+        '## Structured grammar — LIVE; a few draft surfaces remain',
+        'The structured, entry-linked GRAMMAR surface is now implemented and live: grammar sections (hierarchical, parallel-language markdown, entry/sense links, usage conditions), example sentences by reference (`…/grammar/sections/{sectionId}/sentences`), clause-template slots (`…/grammar/clause-slots`), the glossing-abbreviations legend (`…/grammar/glossing-abbreviations`), the reverse entry→grammar lookup (`…/entries/{entryId}/grammar`), and text-classification tags (`…/texts/{textId}/tags`).',
+        'A few surfaces are still marked `x-status: draft` (summaries prefixed `[DRAFT]`, still 404): the grammar INTRO (`PATCH …/grammar`, pending a parallel-language promotion of the legacy single grammar string), and — the bigger piece — the interlinear-glossing (IGT / Leipzig) SENTENCE-WRITE additions: making `tokens` writable with an aligned per-token `gloss` line + optional `morphemes`, plus `citations`, `example_label`, and `discourse_role` on the existing sentence write shapes (`SentenceIgtWriteDraft`, `SentenceTokenInputDraft`/`SentenceTokenFull`, `MorphemeDraft`, `SourceCitationDraft`, `SentenceDiscourseFieldDraft`), and `sources.orthography` (`SourceScriptFieldDraft`). If you are importing IGT / corpus data and any of the draft shapes need adjusting before they are built, tell your human — that feedback still shapes the build.',
         '',
         '## Fetching this spec (progressive disclosure)',
         'This document is comprehensive and grows over time. If you only need part of it, fetch a slice instead of the whole thing: `GET /api/v1/openapi.json?view=index` returns a compact map (every path + its method summaries + tag, plus the list of schema names) — read that first; then `GET /api/v1/openapi.json?tag=<name>` returns just one group\'s paths WITH their full ($ref-complete) schemas. Tag names are in the top-level `tags` list (e.g. `entries`, `media`, `texts`, `dialects`, `sources`). Fetching with no query params returns everything (this document).',
@@ -1090,52 +1080,52 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         patch: { summary: 'Edit source metadata', description: 'Field-merges citation metadata (and optionally renames the `slug`). Avoid renaming a slug that is already in use — the rename does not rewrite referencing rows.', parameters: [dict_id_param, source_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/SourceInput' } } } }, responses: { 200: { description: '{ source }' }, 400: { description: 'Slug collision or invalid type' }, 404: {} } },
         delete: { summary: 'Delete a source', description: 'Refuses with 409 while the source is still referenced. Pass `?remove_from_all=true` to strip the slug from every referencing entry/sentence/text first and then delete.', parameters: [dict_id_param, source_id_param, { name: 'remove_from_all', in: 'query', required: false, schema: { type: 'boolean' } }], responses: { 200: { description: "{ result: 'deleted', removed_from }" }, 409: { description: 'Still referenced (retry with remove_from_all)' }, 404: {} } },
       },
-      // ── DRAFT: Structured grammar (tag: grammar) — see .issues/structured-grammar.md ──
+      // Structured grammar (tag: grammar) — see .issues/structured-grammar.md
       '/api/v1/dictionaries/{id}/grammar': {
-        patch: { summary: '[DRAFT] Set the grammar intro', description: 'DRAFT — not yet implemented (currently 404s). Sets the optional free-text intro shown above the section tree (parallel-language markdown).', ...DRAFT, parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GrammarIntroPatch' } } } }, responses: { 200: { description: '{ grammar }' } } },
+        patch: { summary: '[DRAFT] Set the grammar intro', description: 'DRAFT — not yet implemented (currently 404s). Sets the optional free-text intro shown above the section tree. (The intro still lives as the single shared `dictionaries.grammar` string, edited via the dictionary settings today; a parallel-language promotion is pending — the structured content is in the sections below.)', ...DRAFT, parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GrammarIntroPatch' } } } }, responses: { 200: { description: '{ grammar }' } } },
       },
       '/api/v1/dictionaries/{id}/grammar/sections': {
-        get: { summary: '[DRAFT] List grammar sections', description: 'DRAFT — not yet implemented (currently 404s). Returns the ordered section tree. Filter with `?entry_id=` (sections documenting one headword) or `?parent_id=` (one level).', ...DRAFT, parameters: [dict_id_param, { name: 'entry_id', in: 'query', required: false, schema: { type: 'string' } }, { name: 'parent_id', in: 'query', required: false, schema: { type: 'string' } }], responses: { 200: { description: '{ sections }', content: { 'application/json': { schema: { type: 'object', properties: { sections: { type: 'array', items: { $ref: '#/components/schemas/GrammarSectionFull' } } } } } } } } },
-        post: { summary: '[DRAFT] Create a grammar section', description: 'DRAFT — not yet implemented (currently 404s). Create a section (optionally nested under `parent_id`, positioned after `after_section_id`), optionally linked to an entry/sense with pre-attached example sentences. Supply your own `id` for idempotency.', ...DRAFT, parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GrammarSectionInput' } } } }, responses: { 200: { description: '{ section, created }', content: { 'application/json': { schema: { type: 'object', properties: { section: { $ref: '#/components/schemas/GrammarSectionFull' }, created: { type: 'boolean' } } } } } }, 400: { description: 'Missing title / bad parent/entry id' } } },
+        get: { summary: 'List grammar sections', description: 'Returns the ordered section tree. Filter with `?entry_id=` (sections documenting one headword) or `?parent_id=` (one level; empty = top-level).', parameters: [dict_id_param, { name: 'entry_id', in: 'query', required: false, schema: { type: 'string' } }, { name: 'parent_id', in: 'query', required: false, schema: { type: 'string' } }], responses: { 200: { description: '{ sections }', content: { 'application/json': { schema: { type: 'object', properties: { sections: { type: 'array', items: { $ref: '#/components/schemas/GrammarSectionFull' } } } } } } } } },
+        post: { summary: 'Create a grammar section', description: 'Create a section (optionally nested under `parent_id`, positioned after `after_section_id`), optionally linked to an entry/sense with pre-attached example sentences. Supply your own `id` for idempotency.', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GrammarSectionInput' } } } }, responses: { 200: { description: '{ section, created }', content: { 'application/json': { schema: { type: 'object', properties: { section: { $ref: '#/components/schemas/GrammarSectionFull' }, created: { type: 'boolean' } } } } } }, 400: { description: 'Missing title / bad parent/entry id' } } },
       },
       '/api/v1/dictionaries/{id}/grammar/sections/{sectionId}': {
-        get: { summary: '[DRAFT] Read a grammar section', description: 'DRAFT — not yet implemented (currently 404s).', ...DRAFT, parameters: [dict_id_param, section_id_param], responses: { 200: { description: '{ section }', content: { 'application/json': { schema: { type: 'object', properties: { section: { $ref: '#/components/schemas/GrammarSectionFull' } } } } } }, 404: {} } },
-        patch: { summary: '[DRAFT] Update / move a grammar section', description: 'DRAFT — not yet implemented (currently 404s). Field-merge; `parent_id` + `after_section_id` re-nest/reorder.', ...DRAFT, parameters: [dict_id_param, section_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GrammarSectionPatch' } } } }, responses: { 200: { description: '{ section }' }, 404: {} } },
-        delete: { summary: '[DRAFT] Delete a grammar section', description: 'DRAFT — not yet implemented (currently 404s). Cascades to descendant sections and detaches its example-sentence links (the sentences themselves are untouched).', ...DRAFT, parameters: [dict_id_param, section_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
+        get: { summary: 'Read a grammar section', parameters: [dict_id_param, section_id_param], responses: { 200: { description: '{ section }', content: { 'application/json': { schema: { type: 'object', properties: { section: { $ref: '#/components/schemas/GrammarSectionFull' } } } } } }, 404: {} } },
+        patch: { summary: 'Update / move a grammar section', description: 'Field-merge; `parent_id` + `after_section_id` re-nest/reorder.', parameters: [dict_id_param, section_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GrammarSectionPatch' } } } }, responses: { 200: { description: '{ section }' }, 404: {} } },
+        delete: { summary: 'Delete a grammar section', description: 'Cascades to descendant sections and detaches its example-sentence links (the sentences themselves are untouched).', parameters: [dict_id_param, section_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
       },
       '/api/v1/dictionaries/{id}/grammar/sections/{sectionId}/sentences': {
-        post: { summary: '[DRAFT] Attach an example sentence to a section', description: 'DRAFT — not yet implemented (currently 404s). Links an EXISTING sentence (by `sentence_id`) as evidence — a reference, not a copy. Order with `after_sentence_id`.', ...DRAFT, parameters: [dict_id_param, section_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['sentence_id'], properties: { sentence_id: { type: 'string' }, after_sentence_id: { type: 'string', description: 'Existing attached sentence id to insert after; omit → append.' } } } } } }, responses: { 200: { description: '{ link }', content: { 'application/json': { schema: { type: 'object', properties: { link: { $ref: '#/components/schemas/SectionSentenceRef' } } } } } }, 404: { description: 'Section or sentence not found' } } },
+        post: { summary: 'Attach an example sentence to a section', description: 'Links an EXISTING sentence (by `sentence_id`) as evidence — a reference, not a copy. Order with `after_sentence_id`.', parameters: [dict_id_param, section_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['sentence_id'], properties: { sentence_id: { type: 'string' }, after_sentence_id: { type: 'string', description: 'Existing attached sentence id to insert after; omit → append.' } } } } } }, responses: { 200: { description: '{ link }', content: { 'application/json': { schema: { type: 'object', properties: { link: { $ref: '#/components/schemas/SectionSentenceRef' } } } } } }, 404: { description: 'Section or sentence not found' } } },
       },
       '/api/v1/dictionaries/{id}/grammar/sections/{sectionId}/sentences/{sentenceId}': {
-        delete: { summary: '[DRAFT] Detach an example sentence from a section', description: 'DRAFT — not yet implemented (currently 404s). Removes the reference only; the sentence survives.', ...DRAFT, parameters: [dict_id_param, section_id_param, sentence_id_param], responses: { 200: { description: "{ result: 'unlinked' }" }, 404: { description: 'Sentence not attached to this section' } } },
+        delete: { summary: 'Detach an example sentence from a section', description: 'Removes the reference only; the sentence survives.', parameters: [dict_id_param, section_id_param, sentence_id_param], responses: { 200: { description: "{ result: 'unlinked' }" }, 404: { description: 'Sentence not attached to this section' } } },
       },
       '/api/v1/dictionaries/{id}/grammar/clause-slots': {
-        get: { summary: '[DRAFT] List clause-template slots', description: 'DRAFT — not yet implemented (currently 404s). The ordered slot set defining the clause template.', ...DRAFT, parameters: [dict_id_param], responses: { 200: { description: '{ clause_slots }', content: { 'application/json': { schema: { type: 'object', properties: { clause_slots: { type: 'array', items: { $ref: '#/components/schemas/ClauseSlotFull' } } } } } } } } },
-        post: { summary: '[DRAFT] Create a clause-template slot', description: 'DRAFT — not yet implemented (currently 404s). Order with `after_slot_id`.', ...DRAFT, parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/ClauseSlotInput' } } } }, responses: { 200: { description: '{ clause_slot, created }' }, 400: {} } },
+        get: { summary: 'List clause-template slots', description: 'The ordered slot set defining the clause template.', parameters: [dict_id_param], responses: { 200: { description: '{ clause_slots }', content: { 'application/json': { schema: { type: 'object', properties: { clause_slots: { type: 'array', items: { $ref: '#/components/schemas/ClauseSlotFull' } } } } } } } } },
+        post: { summary: 'Create a clause-template slot', description: 'Order with `after_slot_id`.', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/ClauseSlotInput' } } } }, responses: { 200: { description: '{ clause_slot, created }' }, 400: {} } },
       },
       '/api/v1/dictionaries/{id}/grammar/clause-slots/{slotId}': {
-        patch: { summary: '[DRAFT] Rename / reorder a clause slot', description: 'DRAFT — not yet implemented (currently 404s).', ...DRAFT, parameters: [dict_id_param, slot_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/ClauseSlotInput' } } } }, responses: { 200: { description: '{ clause_slot }' }, 404: {} } },
-        delete: { summary: '[DRAFT] Delete a clause slot', description: 'DRAFT — not yet implemented (currently 404s). Sections referencing it have their `slot_id` cleared.', ...DRAFT, parameters: [dict_id_param, slot_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
+        patch: { summary: 'Rename / reorder a clause slot', parameters: [dict_id_param, slot_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/ClauseSlotInput' } } } }, responses: { 200: { description: '{ clause_slot }' }, 404: {} } },
+        delete: { summary: 'Delete a clause slot', description: 'Sections referencing it have their `slot_id` cleared.', parameters: [dict_id_param, slot_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
       },
       '/api/v1/dictionaries/{id}/entries/{entryId}/grammar': {
-        get: { summary: '[DRAFT] List grammar sections documenting an entry', description: 'DRAFT — not yet implemented (currently 404s). The reverse of a section\'s `entry_id` link — the "grammar notes" for this headword.', ...DRAFT, parameters: [dict_id_param, entry_id_param], responses: { 200: { description: '{ sections }', content: { 'application/json': { schema: { type: 'object', properties: { sections: { type: 'array', items: { $ref: '#/components/schemas/GrammarSectionFull' } } } } } } } } },
+        get: { summary: 'List grammar sections documenting an entry', description: 'The reverse of a section\'s `entry_id` link — the "grammar notes" for this headword.', parameters: [dict_id_param, entry_id_param], responses: { 200: { description: '{ sections }', content: { 'application/json': { schema: { type: 'object', properties: { sections: { type: 'array', items: { $ref: '#/components/schemas/GrammarSectionFull' } } } } } } } } },
       },
-      // ── DRAFT: Interlinear glossing legend (tag: grammar) — the abbreviations key (3PL → "third person plural") ──
+      // Interlinear glossing legend (tag: grammar) — the abbreviations key (3PL → "third person plural")
       '/api/v1/dictionaries/{id}/grammar/glossing-abbreviations': {
-        get: { summary: '[DRAFT] List glossing abbreviations', description: 'DRAFT — not yet implemented (currently 404s). The dictionary\'s gloss legend that makes IGT gloss lines self-documenting.', ...DRAFT, parameters: [dict_id_param], responses: { 200: { description: '{ glossing_abbreviations }', content: { 'application/json': { schema: { type: 'object', properties: { glossing_abbreviations: { type: 'array', items: { $ref: '#/components/schemas/GlossingAbbreviationFull' } } } } } } } } },
-        post: { summary: '[DRAFT] Add glossing abbreviations (find-or-create)', description: 'DRAFT — not yet implemented (currently 404s). Find-or-create by `code`. Seed the standard Leipzig set here, then add custom codes.', ...DRAFT, parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GlossingAbbreviationInput' } } } }, responses: { 200: { description: '{ glossing_abbreviation, created }' }, 400: {} } },
+        get: { summary: 'List glossing abbreviations', description: 'The dictionary\'s gloss legend that makes IGT gloss lines self-documenting.', parameters: [dict_id_param], responses: { 200: { description: '{ glossing_abbreviations }', content: { 'application/json': { schema: { type: 'object', properties: { glossing_abbreviations: { type: 'array', items: { $ref: '#/components/schemas/GlossingAbbreviationFull' } } } } } } } } },
+        post: { summary: 'Add a glossing abbreviation (find-or-create)', description: 'Find-or-create by `code`. Seed the standard Leipzig set here, then add custom codes.', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GlossingAbbreviationInput' } } } }, responses: { 200: { description: '{ glossing_abbreviation, created }' }, 400: {} } },
       },
       '/api/v1/dictionaries/{id}/grammar/glossing-abbreviations/{code}': {
-        patch: { summary: '[DRAFT] Edit a glossing abbreviation', description: 'DRAFT — not yet implemented (currently 404s).', ...DRAFT, parameters: [dict_id_param, glossing_code_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GlossingAbbreviationInput' } } } }, responses: { 200: { description: '{ glossing_abbreviation }' }, 404: {} } },
-        delete: { summary: '[DRAFT] Delete a glossing abbreviation', description: 'DRAFT — not yet implemented (currently 404s).', ...DRAFT, parameters: [dict_id_param, glossing_code_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
+        patch: { summary: 'Edit a glossing abbreviation', parameters: [dict_id_param, glossing_code_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GlossingAbbreviationInput' } } } }, responses: { 200: { description: '{ glossing_abbreviation }' }, 404: {} } },
+        delete: { summary: 'Delete a glossing abbreviation', parameters: [dict_id_param, glossing_code_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
       },
-      // ── DRAFT: Text classification tags / motif index (tag: texts) ──
+      // Text classification tags / motif index (tag: texts)
       '/api/v1/dictionaries/{id}/texts/{textId}/tags': {
-        get: { summary: '[DRAFT] List a text\'s classification tags', description: 'DRAFT — not yet implemented (currently 404s). Genre / motif / tale-type tags on a text.', ...DRAFT, parameters: [dict_id_param, text_id_param], responses: { 200: { description: '{ tags }', content: { 'application/json': { schema: { type: 'object', properties: { tags: { type: 'array', items: { $ref: '#/components/schemas/TextTagView' } } } } } } } } },
-        post: { summary: '[DRAFT] Tag a text (find-or-create)', description: 'DRAFT — not yet implemented (currently 404s). Attaches a classification tag (reuses the entry-tag registry; `kind`/`code` are proposed additions).', ...DRAFT, parameters: [dict_id_param, text_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/TextTagInput' } } } }, responses: { 200: { description: '{ tag, created }' }, 400: {} } },
+        get: { summary: 'List a text\'s classification tags', description: 'Genre / motif / tale-type tags on a text.', parameters: [dict_id_param, text_id_param], responses: { 200: { description: '{ tags }', content: { 'application/json': { schema: { type: 'object', properties: { tags: { type: 'array', items: { $ref: '#/components/schemas/TextTagView' } } } } } } } } },
+        post: { summary: 'Tag a text (find-or-create)', description: 'Attaches a classification tag (reuses the entry-tag registry with `kind`/`code` classification columns).', parameters: [dict_id_param, text_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/TextTagInput' } } } }, responses: { 200: { description: '{ tag, created }' }, 400: {} } },
       },
       '/api/v1/dictionaries/{id}/texts/{textId}/tags/{tagId}': {
-        delete: { summary: '[DRAFT] Untag a text', description: 'DRAFT — not yet implemented (currently 404s). Unlinks one tag from this text; the tag survives.', ...DRAFT, parameters: [dict_id_param, text_id_param, tag_id_param], responses: { 200: { description: "{ result: 'unlinked' }" }, 404: {} } },
+        delete: { summary: 'Untag a text', description: 'Unlinks one tag from this text; the tag survives.', parameters: [dict_id_param, text_id_param, tag_id_param], responses: { 200: { description: "{ result: 'unlinked' }" }, 404: {} } },
       },
     },
     components: {

@@ -107,7 +107,7 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}/senses/{senseId}': ['delete'],
       '/api/v1/dictionaries/{id}/texts': ['get', 'post'],
       '/api/v1/dictionaries/{id}/texts/{textId}': ['delete', 'get', 'patch'],
-      // DRAFT (structured grammar — .issues/structured-grammar.md): specced for review, not built.
+      // Structured grammar (.issues/structured-grammar.md): live, except the grammar-intro PATCH (still draft).
       '/api/v1/dictionaries/{id}/grammar': ['patch'],
       '/api/v1/dictionaries/{id}/grammar/sections': ['get', 'post'],
       '/api/v1/dictionaries/{id}/grammar/sections/{sectionId}': ['delete', 'get', 'patch'],
@@ -151,22 +151,33 @@ describe(build_openapi_spec, () => {
     })
   })
 
-  test('every draft grammar + text-tag operation is marked x-status: draft and [DRAFT]-prefixed', () => {
+  test('the grammar + text-tag surface is live; only the grammar-intro PATCH stays draft', () => {
     const paths = spec.paths as Record<string, Record<string, { 'summary'?: string, 'x-status'?: string }>>
-    const draft_entries = Object.entries(paths).filter(([path]) =>
+    const grammar_entries = Object.entries(paths).filter(([path]) =>
       /\/grammar(?:\/|$)/.test(path) || /\/texts\/\{textId\}\/tags(?:\/|$)/.test(path))
-    expect(draft_entries).toHaveLength(12)
-    for (const [, ops] of draft_entries) {
-      for (const op of Object.values(ops)) {
-        expect(op['x-status']).toBe('draft')
-        expect(op.summary).toMatch(/^\[DRAFT\]/)
-      }
+    expect(grammar_entries).toHaveLength(12)
+
+    // The grammar intro PATCH is the sole remaining draft op.
+    const intro = paths['/api/v1/dictionaries/{id}/grammar'].patch
+    expect(intro['x-status']).toBe('draft')
+    expect(intro.summary).toMatch(/^\[DRAFT\]/)
+
+    // Every OTHER grammar / text-tag op is live (no draft marker, no [DRAFT] prefix).
+    const live_ops = grammar_entries
+      .filter(([path]) => path !== '/api/v1/dictionaries/{id}/grammar')
+      .flatMap(([, ops]) => Object.values(ops))
+    for (const op of live_ops) {
+      expect(op['x-status']).toBeUndefined()
+      expect(op.summary).not.toMatch(/^\[DRAFT\]/)
     }
   })
 
-  test('draft grammar schemas are registered and marked x-status: draft', () => {
-    const draft_schema_names = ['GrammarSectionInput', 'GrammarSectionFull', 'ClauseSlotInput', 'TextTagInput', 'SentenceDiscourseFieldDraft', 'SourceScriptFieldDraft', 'SentenceIgtWriteDraft', 'SentenceTokenInputDraft', 'MorphemeDraft', 'GlossingAbbreviationInput']
-    for (const name of draft_schema_names)
+  test('live grammar schemas are not draft; the intro + IGT sentence-write schemas remain draft', () => {
+    const live = ['GrammarSectionInput', 'GrammarSectionPatch', 'GrammarSectionFull', 'SectionSentenceRef', 'ClauseSlotInput', 'ClauseSlotFull', 'TextTagInput', 'TextTagView', 'GlossingAbbreviationInput', 'GlossingAbbreviationFull']
+    for (const name of live)
+      expect((schema(name) as { 'x-status'?: string })['x-status']).toBeUndefined()
+    const draft = ['GrammarIntroPatch', 'SentenceDiscourseFieldDraft', 'SourceScriptFieldDraft', 'SentenceIgtWriteDraft', 'SentenceTokenInputDraft', 'SentenceTokenFull', 'MorphemeDraft', 'SourceCitationDraft']
+    for (const name of draft)
       expect((schema(name) as { 'x-status'?: string })['x-status']).toBe('draft')
   })
 

@@ -311,3 +311,94 @@ export function apply_text_delete({ db, history_db, text_id, user_id, api_key_id
     run_tombstone_delete({ db, history_db, table_name: 'sentences', id, user_id, api_key_id })
   return run_tombstone_delete({ db, history_db, table_name: 'texts', id: text_id, user_id, api_key_id })
 }
+
+// ── Text classification tags (motif / genre / tale-type) ──────────────────────
+
+export interface TextTagView { id: string, name: string, kind: string | null, code: string | null }
+
+function tag_name_key(name: string): string {
+  return name.trim().toLowerCase()
+}
+
+export function list_text_tags(db: Database.Database, text_id: string): TextTagView[] {
+  return db.prepare(
+    `SELECT t.id, t.name, t.kind, t.code
+     FROM text_tags tt JOIN tags t ON t.id = tt.tag_id
+     WHERE tt.text_id = ? ORDER BY t.name`,
+  ).all(text_id) as TextTagView[]
+}
+
+/**
+ * Attach a classification tag to a text, find-or-creating the tag by
+ * (name, kind). Reuses the shared `tags` registry (with the `kind`/`code`
+ * classification columns) and the `text_tags` junction. Idempotent per
+ * (text, tag). Returns `found: false` if the text is gone.
+ */
+export function link_text_tag({ db, history_db, text_id, name, kind, code, user_id, api_key_id }: {
+  db: Database.Database
+  history_db?: Database.Database
+  text_id: string
+  name: string
+  kind?: string | null
+  code?: string | null
+  user_id: string
+  api_key_id?: string | null
+}): { tag?: TextTagView, found: boolean, created: boolean, cursor: string | null } {
+  const trimmed = (name || '').trim()
+  if (!trimmed)
+    throw new Error('tag name is required')
+  if (!(db.prepare(`SELECT 1 FROM texts WHERE id = ?`).get(text_id)))
+    return { found: false, created: false, cursor: read_last_modified_at(db) }
+
+  const now = new Date().toISOString()
+  const events: HistoryEvent[] = []
+  const push = (table_name: 'tags' | 'text_tags', row: Record<string, unknown>) => {
+    const event = merge_dict_row({ db, table_name, row, user_id, at: now, api_key_id })
+    if (event) events.push(event)
+  }
+
+  db.exec('BEGIN IMMEDIATE')
+  try {
+    const existing_tag = db.prepare(`SELECT id, name, kind, code FROM tags WHERE kind IS ? AND lower(trim(name)) = ?`).get(kind ?? null, tag_name_key(trimmed)) as TextTagView | undefined
+    let tag: TextTagView
+    let created = false
+    if (existing_tag) {
+      tag = existing_tag
+    } else {
+      const id = crypto.randomUUID()
+      const row: Record<string, unknown> = { id, name: trimmed, created_at: now, updated_at: now }
+      if (kind) row.kind = kind
+      if (code) row.code = code
+      push('tags', row)
+      tag = { id, name: trimmed, kind: kind ?? null, code: code ?? null }
+      created = true
+    }
+
+    const already = db.prepare(`SELECT id FROM text_tags WHERE text_id = ? AND tag_id = ?`).get(text_id, tag.id) as { id: string } | undefined
+    if (!already)
+      push('text_tags', { id: crypto.randomUUID(), text_id, tag_id: tag.id, created_at: now, updated_at: now })
+
+    const cursor = read_last_modified_at(db)
+    db.exec('COMMIT')
+    commit_history(history_db, events)
+    return { tag, found: true, created, cursor }
+  } catch (err) {
+    db.exec('ROLLBACK')
+    throw err
+  }
+}
+
+/** Unlink ONE tag from ONE text (the tag itself, and its other links, survive). */
+export function unlink_text_tag({ db, history_db, text_id, tag_id, user_id, api_key_id }: {
+  db: Database.Database
+  history_db?: Database.Database
+  text_id: string
+  tag_id: string
+  user_id: string
+  api_key_id?: string | null
+}): SingleWriteResult {
+  const junction = db.prepare(`SELECT id FROM text_tags WHERE text_id = ? AND tag_id = ?`).get(text_id, tag_id) as { id: string } | undefined
+  if (!junction)
+    return { found: false, new_synced_up_to: read_last_modified_at(db) }
+  return run_tombstone_delete({ db, history_db, table_name: 'text_tags', id: junction.id, user_id, api_key_id })
+}

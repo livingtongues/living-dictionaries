@@ -17,6 +17,10 @@
  *   sentences (references texts; also referenced by senses_in_sentences)
  *   speakers, audio, videos, photos (top-level media; audio/videos reference texts)
  *   then junctions
+ *   clause_slots, glossing_abbreviations (vocab, no deps) →
+ *   grammar_sections (references entries, senses, clause_slots, self) →
+ *   section_sentences (references grammar_sections + sentences),
+ *   text_tags (references texts + tags)
  */
 export const DICT_SYNCABLE_TABLES = [
   'entries',
@@ -42,6 +46,11 @@ export const DICT_SYNCABLE_TABLES = [
   'relationship_types',
   'entry_relationships',
   'featured_entries',
+  'clause_slots',
+  'glossing_abbreviations',
+  'grammar_sections',
+  'section_sentences',
+  'text_tags',
 ] as const
 
 export type DictSyncableTable = typeof DICT_SYNCABLE_TABLES[number]
