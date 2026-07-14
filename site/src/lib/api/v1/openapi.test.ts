@@ -107,6 +107,19 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}/senses/{senseId}': ['delete'],
       '/api/v1/dictionaries/{id}/texts': ['get', 'post'],
       '/api/v1/dictionaries/{id}/texts/{textId}': ['delete', 'get', 'patch'],
+      // DRAFT (structured grammar — .issues/structured-grammar.md): specced for review, not built.
+      '/api/v1/dictionaries/{id}/grammar': ['patch'],
+      '/api/v1/dictionaries/{id}/grammar/sections': ['get', 'post'],
+      '/api/v1/dictionaries/{id}/grammar/sections/{sectionId}': ['delete', 'get', 'patch'],
+      '/api/v1/dictionaries/{id}/grammar/sections/{sectionId}/sentences': ['post'],
+      '/api/v1/dictionaries/{id}/grammar/sections/{sectionId}/sentences/{sentenceId}': ['delete'],
+      '/api/v1/dictionaries/{id}/grammar/clause-slots': ['get', 'post'],
+      '/api/v1/dictionaries/{id}/grammar/clause-slots/{slotId}': ['delete', 'patch'],
+      '/api/v1/dictionaries/{id}/grammar/glossing-abbreviations': ['get', 'post'],
+      '/api/v1/dictionaries/{id}/grammar/glossing-abbreviations/{code}': ['delete', 'patch'],
+      '/api/v1/dictionaries/{id}/entries/{entryId}/grammar': ['get'],
+      '/api/v1/dictionaries/{id}/texts/{textId}/tags': ['get', 'post'],
+      '/api/v1/dictionaries/{id}/texts/{textId}/tags/{tagId}': ['delete'],
       '/api/v1/dictionaries/{id}/feedback': ['post'],
       '/api/v1/dictionaries/{id}/speakers': ['get', 'post'],
       '/api/v1/dictionaries/{id}/tags': ['get', 'post'],
@@ -138,6 +151,25 @@ describe(build_openapi_spec, () => {
     })
   })
 
+  test('every draft grammar + text-tag operation is marked x-status: draft and [DRAFT]-prefixed', () => {
+    const paths = spec.paths as Record<string, Record<string, { 'summary'?: string, 'x-status'?: string }>>
+    const draft_entries = Object.entries(paths).filter(([path]) =>
+      /\/grammar(?:\/|$)/.test(path) || /\/texts\/\{textId\}\/tags(?:\/|$)/.test(path))
+    expect(draft_entries).toHaveLength(12)
+    for (const [, ops] of draft_entries) {
+      for (const op of Object.values(ops)) {
+        expect(op['x-status']).toBe('draft')
+        expect(op.summary).toMatch(/^\[DRAFT\]/)
+      }
+    }
+  })
+
+  test('draft grammar schemas are registered and marked x-status: draft', () => {
+    const draft_schema_names = ['GrammarSectionInput', 'GrammarSectionFull', 'ClauseSlotInput', 'TextTagInput', 'SentenceDiscourseFieldDraft', 'SourceScriptFieldDraft', 'SentenceIgtWriteDraft', 'SentenceTokenInputDraft', 'MorphemeDraft', 'GlossingAbbreviationInput']
+    for (const name of draft_schema_names)
+      expect((schema(name) as { 'x-status'?: string })['x-status']).toBe('draft')
+  })
+
   test('is a valid OpenAPI 3.1 document with the server origin', () => {
     expect(spec.openapi).toBe('3.1.0')
     expect((spec.servers as { url: string }[])[0].url).toBe('https://example.test')
@@ -164,6 +196,13 @@ describe(tag_for_path, () => {
     expect(tag_for_path('/api/v1/dictionaries/{id}/senses/{senseId}')).toBe('entries')
     expect(tag_for_path('/api/v1/dictionaries/{id}/dialects/{dialectId}')).toBe('dialects')
     expect(tag_for_path('/api/v1/dictionaries/{id}/featured-entries')).toBe('featured-entries')
+  })
+
+  test('grammar paths (incl. the entry reverse-lookup) group under grammar; text tags stay in texts', () => {
+    expect(tag_for_path('/api/v1/dictionaries/{id}/grammar/sections')).toBe('grammar')
+    expect(tag_for_path('/api/v1/dictionaries/{id}/grammar/clause-slots/{slotId}')).toBe('grammar')
+    expect(tag_for_path('/api/v1/dictionaries/{id}/entries/{entryId}/grammar')).toBe('grammar')
+    expect(tag_for_path('/api/v1/dictionaries/{id}/texts/{textId}/tags')).toBe('texts')
   })
 })
 
