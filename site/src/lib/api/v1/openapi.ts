@@ -786,12 +786,12 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     type: 'object',
     ...DRAFT,
     required: ['form'],
-    description: 'DRAFT. A writable interlinear token — the GOLD alignment from a glossed source. `start`/`end` are OPTIONAL on write: omit them and the server derives offsets by walking the `form`s against the sentence `text` (an importer usually has ordered `[form, gloss]` rows, not char offsets). On read, offsets are always present.',
+    description: 'DRAFT. A writable interlinear token — the GOLD alignment from a glossed source. `start`/`end` are OPTIONAL on write: omit them and the server derives offsets by walking the ORDERED `form`s against the sentence `text` with a LEFT-TO-RIGHT CURSOR that consumes each match in turn (a global search would collide — ~28% of real sentences repeat a form). Derivation therefore requires each `form` to be an exact substring of `text`, in order: keep surface forms byte-identical to the text (do not strip footnote/tone/OCR artifacts from the form but not the text, or vice-versa). On read, offsets are always present.',
     properties: {
-      form: { type: 'string', description: 'Surface form exactly as it appears in the sentence text.' },
+      form: { type: 'string', description: 'Surface form exactly as it appears in the sentence text (byte-identical, so offset derivation can locate it).' },
       start: { type: 'integer', description: 'Char offset into the orthography\'s text. Optional on write (derived if omitted).' },
       end: { type: 'integer', description: 'Char offset, exclusive. Optional on write.' },
-      gloss: { ...MultiString, description: 'The aligned interlinear gloss — the Leipzig gloss line. Per analysis language (lexical glosses vary by language; a language-neutral grammatical category code like `3PL`/`PFV` may use one key). Independent of `entry_id` (grammatical morphemes/portmanteaux often have no headword but must still be glossable). A code present in the glossing-abbreviations legend renders SMALL CAPS + tap-to-expand automatically — so no per-token "grammatical?" flag is needed.' },
+      gloss: { ...MultiString, description: 'The aligned interlinear gloss — the Leipzig gloss line, per analysis language. CONVENTION (locked): store language-neutral grammatical category codes (`3PL`, `PFV`, `CLF`) under the reserved `default` key, and per-language LEXICAL glosses (`tiger`, `虎`) under their language codes (`en`, `zh`). A reader on gloss-language X sees `gloss[X] ?? gloss.default`, so a neutral code kept under `default` survives every gloss-language switch (storing it under `en` would make it vanish for a `zh` reader). Independent of `entry_id` (grammatical morphemes/portmanteaux often have no headword but must still be glossable). A legend code found ANYWHERE in a gloss cell (matched as a substring, so portmanteaux like `eat PFV` / `can/ATT` still highlight) renders SMALL CAPS + tap-to-expand automatically — so no per-token "grammatical?" flag is needed.' },
       entry_id: { type: 'string', nullable: true, description: 'Optional link to the dictionary entry for this token (independent of, and optional to, `gloss`). Multi-word→one-gloss = one token spanning the char range.' },
       sense_id: { type: 'string', nullable: true },
       morphemes: { type: 'array', items: { $ref: '#/components/schemas/MorphemeDraft' }, description: 'Optional word-internal segmentation.' },
@@ -820,7 +820,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     ...DRAFT,
     description: 'DRAFT — PROPOSED additive fields for the existing sentence write shapes (`SentenceInput` / `TextSentenceInput` / `SentencePatch`), NOT a standalone endpoint. Turns a sentence into a first-class interlinear (IGT) unit: supply the gold `tokens` (per orthography) with their gloss line, cite a source `locator`, carry the author\'s example number, and tag its discourse role. When `tokens` are omitted the server auto-matches as today (but auto-match cannot invent glosses).',
     properties: {
-      tokens: { type: 'object', additionalProperties: { type: 'array', items: { $ref: '#/components/schemas/SentenceTokenInputDraft' } }, description: 'Orthography code → ordered token list (usually just `default`, the vernacular line).' },
+      tokens: { type: 'object', additionalProperties: { type: 'array', items: { $ref: '#/components/schemas/SentenceTokenInputDraft' } }, description: 'Orthography code → ordered token list (usually just `default`, the vernacular line). If the sentence `text` for an orthography is omitted but its tokens are supplied, the server builds `text` by joining the token `form`s with a space — so a rows-only glossed source (aligned `[form, gloss]` rows, no separate vernacular line) imports without the client pre-assembling the text.' },
       citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitationDraft' }, description: 'Source refs with a citation locus (page/example number) — complements the bare `sources[]` membership.' },
       example_label: { type: 'string', nullable: true, description: 'The author\'s own example number (e.g. "(2a)") for cross-referencing within a grammar.' },
       discourse_role: { type: 'string', enum: DISCOURSE_ROLES, nullable: true, description: 'See `SentenceDiscourseFieldDraft` — the salience / information role.' },
@@ -831,7 +831,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     type: 'object',
     ...DRAFT,
     required: ['code', 'name'],
-    description: 'DRAFT. One entry in the dictionary\'s glossing-abbreviations legend (mirrors clause-slots). Makes gloss lines self-documenting: a gloss code found here is tap-to-expand AND renders SMALL CAPS (so no per-token "grammatical" flag is needed). Seed from the standard Leipzig set + custom codes.',
+    description: 'DRAFT. One entry in the dictionary\'s glossing-abbreviations legend (mirrors clause-slots). Makes gloss lines self-documenting: a code found here — matched as a SUBSTRING of a gloss cell, so portmanteaux like `eat PFV` still highlight — is tap-to-expand AND renders SMALL CAPS (so no per-token "grammatical" flag is needed). Seed from the standard Leipzig set + custom codes.',
     properties: {
       code: { type: 'string', description: 'The abbreviation as it appears in glosses, e.g. "3PL", "PFV", "CLF". Required.' },
       name: { ...StringOrMultiString, description: 'Expansion, per analysis language, e.g. "third person plural". Required.' },

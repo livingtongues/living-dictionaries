@@ -94,6 +94,40 @@ citation locus as a separate `sentences.citations` JSON column (recommended — 
 BODY prose tappable (only referenced example sentences are tappable in v1); clause-level (not just
 sentence-level) discourse tagging.
 
+### V2 validation round (2026-07-14) — corpus agent ran the numbers on all 1,072 real examples
+Candid write-up: `.issues/ld-igt-corpus-feedback-2026-07-14.md` (Round 2 section). **Verdict: V2
+nails it, no blockers, no structural/schema changes** — the shape is validated on real data and ready
+to build. Empirical highlights: derived offsets succeed **97.6%** (1046/1072) via an L→R cursor walk;
+**28%** of sentences repeat a token form (→ cursor, not global find); **61%** have ≥1 multi-word token
+(the one-span design is the norm); **68%** of gloss lines mix category codes + lexical glosses across
+tokens (per-token gloss handles it); morpheme sub-structure is **<1%** (correctly optional).
+
+**V3 spec pins folded in (2026-07-14, DESCRIPTION-ONLY — no new schemas/paths, no test-snapshot
+change; tests 15/15, tsc + lint clean):**
+1. **Neutral gloss-key convention LOCKED** — `SentenceTokenInputDraft.gloss`: store language-neutral
+   category codes (`3PL`/`PFV`/`CLF`) under the reserved **`default`** key; per-language LEXICAL
+   glosses under language codes; readers see `gloss[selected] ?? gloss.default`. (A code stored under
+   `en` would vanish on a switch to `zh` — bites trilingual sources.) This is convention #6 above, now
+   pinned in the spec text so the build + import follow it.
+2. **Offset-derivation contract documented** — `SentenceTokenInputDraft`: derivation is a LEFT-TO-RIGHT
+   cursor consuming each match in turn (a global search collides on the 28% repeated forms); each
+   `form` must be an exact substring of `text`, in order (surface forms byte-identical — don't strip
+   footnote/tone/OCR artifacts from one but not the other).
+3. **Text-less source fallback** — `SentenceIgtWriteDraft.tokens`: when `text` is omitted but tokens
+   are supplied, the server builds `text = join(form, ' ')` (serves the rows-only source class → makes
+   derivation total).
+4. **Legend small-caps is a SUBSTRING match** — `GlossingAbbreviationInput` + the gloss field: a
+   legend code found anywhere within a gloss cell highlights (portmanteaux like `eat PFV` / `can/ATT`,
+   ~2% of cells), not whole-cell only.
+
+**Corpus agent's OWN extraction TODO** (their side, not an API issue — logged so it's not lost): strip
+footnote/tone artifacts (`Tsov26`, `ATT28,29`) + OCR line-break hyphens from surface forms so tokens
+reconstruct text; lift `(a)/(b)` labels into `example_label`; map their `cite` field →
+`citations[].locator`.
+
+**Loop status:** design loop SETTLED from the corpus agent's side ("ready for them to build"). Next
+gate = Jacob's go to (a) deploy V3 spec pins + (b) start the build.
+
 **Original design decisions (still the build target):**
 **Gate: admin-3 preview** (same as texts) until the data shape is stable, then graduate to all
 managers + public. Old `dictionaries.grammar` blob stays visible to everyone as intro/fallback the

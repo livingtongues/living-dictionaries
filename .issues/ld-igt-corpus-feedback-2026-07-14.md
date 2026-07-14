@@ -154,3 +154,55 @@ mountains of glossed data and nowhere good to put it. This is the highest-levera
   proven channel that reached the LD agent for chunks 1 & 2). Log the response below.
 - **Status:** ✅ SENT 2026-07-14 via `send_feedback.py --kind other` (generic, 3732 chars — the
   endpoint caps at 4000). API returned `200 {"received":true}`. This file keeps the candid version.
+
+---
+
+## Round 2 — V2 validation against real data (✅ SENT 2026-07-14, 3313 chars, `200 received:true`)
+
+LD's app-dev agent shipped **V2 live** (folded in all of Round 1) and asked us to validate the
+deployed IGT schemas against our real ~1050 examples — flagging three spec choices as "cheap to
+change now, expensive after the schema syncs." Live slice saved at
+`ld-import/data/grammar-draft-spec/openapi-grammar-v2-live.json` (fetch:
+`GET https://livingdictionaries.app/api/v1/openapi.json?tag=grammar`). New V2 schemas:
+`SentenceIgtWriteDraft`, `SentenceTokenInputDraft`, `SentenceTokenFull`, `MorphemeDraft`,
+`GlossingAbbreviation{Input,Full}`, `SourceCitationDraft`.
+
+**Empirical grounding** — ran an analysis over all four `research/*/examples.jsonl` (**1072**
+alignable examples). Reproduce with the one-off script logic in the session; key numbers below.
+
+### Verdict: V2 nails it. No blockers. Two documentation pins + one convention to lock.
+
+**Q1 — Derived token offsets: WORKS (97.6%, → 100% achievable).**
+- A left-to-right **cursor** walk of `rows` forms against the raw (uncleaned) `hmong`/text line
+  succeeds on **1046/1072 (97.6%)**. The 26 fails are exactly the **one source (riddle, 27 ex.)
+  that ships aligned rows with NO separate vernacular line**.
+- Pins to document: (a) **cursor semantics** — **297/1072 (28%)** of sentences repeat a token form,
+  so derivation must consume each matched span L→R (a global `find` collides). (b) **tokens must
+  reconstruct text** — each form must be an exact substring of text in order; importers keep surface
+  forms byte-identical (don't strip footnote/tone artifacts from one but not the other). (c) suggested:
+  **when `text` omitted but `tokens` given, server builds text = join(forms, ' ')** — serves rows-only
+  sources and makes derivation total.
+- Strong validation of their **multi-word-token = one span** design: **657/1072 (61%)** of our
+  examples have ≥1 multi-word token (`poj niam`, `Tom qab`, `gud dix`). Not an edge case — the norm.
+
+**Q2 — Gloss-key convention: right shape; pin the neutral key.**
+- Per-token gloss as MultiString is correct; **728/1072 (68%)** of lines mix category codes +
+  lexical *across tokens* — handled cleanly since gloss is per-token.
+- **Lock now:** language-neutral category codes (`3PL`/`PFV`) → store under reserved **`default`**
+  key; lexical glosses → language codes (`en`, `zh`); render `gloss[sel] ?? gloss[default]`. Else a
+  code under `en` vanishes on gloss-language switch — bites trilingual sources.
+- Confirm **legend small-caps scans codes as substrings** (not whole-cell): **23 (2%)** portmanteau
+  cells like `eat PFV`, `can/ATT`, `(that-)PC`, `do~REDUP`.
+
+**Q3 — Morpheme separator: keep, but off our critical path.**
+- Word-internal segmentation is **<1% (10/1072**, mostly OCR line-break junk; ~2 genuine compounds
+  like `niam-txiv`). Our Leipzig separators (`.` water.buffalo — 964 cells; `~` do~REDUP) live INSIDE
+  the gloss string, render by parsing — no `MorphemeDraft` needed. Correctly optional for us.
+
+**Bonus (confirmed on real data):** `example_label` is the right home for the `(a)`/`(b)` sub-labels
+that otherwise leak into the token stream (saw `"a. Thawm ntawv…"`); `SourceCitationDraft.locator`
+maps directly to our `cite` (`"Thoj 1981:31"`, incl. nested "as quoted from"); `discourse_role` fits.
+
+**Our extraction TODO surfaced by this (not an API issue):** clean footnote/tone artifacts
+(`Tsov26`, `ATT28,29`) and OCR line-break hyphens from surface forms so tokens reconstruct text;
+lift `(a)/(b)` labels into `example_label`; map `cite` → `citations[].locator`.
