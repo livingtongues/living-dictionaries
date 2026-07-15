@@ -9,7 +9,6 @@
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { onMount } from 'svelte'
   import IconMdiAccountMultipleOutline from '~icons/mdi/account-multiple-outline'
-  import IconMdiApi from '~icons/mdi/api'
   import IconMdiArrowLeft from '~icons/mdi/arrow-left'
   import IconMdiBookMultipleOutline from '~icons/mdi/book-multiple-outline'
   import IconMdiChartLine from '~icons/mdi/chart-line'
@@ -18,7 +17,6 @@
   import IconMdiHeartPulse from '~icons/mdi/heart-pulse'
   import IconMdiImageMultipleOutline from '~icons/mdi/image-multiple-outline'
   import IconMdiMessageTextOutline from '~icons/mdi/message-text-outline'
-  import IconMdiRobotOutline from '~icons/mdi/robot-outline'
   import IconMdiScaleBalance from '~icons/mdi/scale-balance'
   import IconMdiShieldAccount from '~icons/mdi/shield-account'
   import IconMdiTableCog from '~icons/mdi/table-cog'
@@ -41,8 +39,6 @@
     { href: '/admin/analytics', label: 'Analytics', icon: IconMdiChartLine, compact: true, min_level: 3 },
     { href: '/admin/health', label: 'Health', icon: IconMdiHeartPulse, compact: true, min_level: 3 },
     { href: '/admin/schema', label: 'Schema', icon: IconMdiTableCog, compact: true, min_level: 3 },
-    { href: '/admin/api-docs', label: 'API', icon: IconMdiApi, compact: true },
-    { href: '/admin/triage-examples', label: 'Triage', icon: IconMdiRobotOutline, compact: true },
     { href: '/admin/legal-review', label: 'Legal', icon: IconMdiScaleBalance, compact: true },
     { href: '/admin/featured-words', label: 'Featured', icon: IconMdiImageMultipleOutline, compact: true },
     // Sync last — icon-only (SyncStatus widget), always visible.

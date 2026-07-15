@@ -17,6 +17,7 @@
   import IconMdiMonitor from '~icons/mdi/monitor'
   import IconMdiOpenInNew from '~icons/mdi/open-in-new'
   import IconMdiRobotOutline from '~icons/mdi/robot-outline'
+  import IconMdiSortVariant from '~icons/mdi/sort-variant'
   import IconMdiTableCog from '~icons/mdi/table-cog'
   import IconMdiTranslate from '~icons/mdi/translate'
   import NotifyChannelToggle from '$lib/admin/notify-channel-toggle.svelte'
@@ -65,6 +66,7 @@
     { href: '/admin/schema', title: 'Schema', body: 'Browse the wa-sqlite + server schema — tables, columns, foreign keys, and the relationship graph.', cta: 'Open', icon: IconMdiTableCog, accent: 'var(--success)', min_level: 3 },
     { href: '/admin/sync', title: 'Sync', body: 'Live sync-engine dashboard — cursors, watermarks, dirty rows, and per-table push / pull history.', cta: 'Open', icon: IconMdiCloudSync, accent: 'var(--warning)' },
     { href: '/admin/api-docs', title: 'Agent API', body: 'A human-readable view of the live /api/v1/openapi.json spec — exactly what agents read to self-configure their reads & writes.', cta: 'Open', icon: IconMdiRobotOutline, accent: 'var(--primary)' },
+    { href: '/admin/triage-examples', title: 'Triage examples', body: 'The curated few-shot examples fed to the inbound-email classifier — how we route, spam-filter, and reply to incoming support mail.', cta: 'Open', icon: IconMdiSortVariant, accent: 'var(--warning)' },
   ]
   const boxes = $derived(all_boxes.filter(box => !box.min_level || admin_level >= box.min_level))
 

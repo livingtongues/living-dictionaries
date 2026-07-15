@@ -177,9 +177,9 @@ if (import.meta.vitest) {
     it('pings each on-duty admin once at/after 8am, then day-guards the rest of the day', async () => {
       const db = open_test_shared_db()
       seed_notifications(db)
-      // 3 on-duty admins (Jacob, Diego, Greg); Anna is notify:false; System has no email.
+      // 4 on-duty admins (Jacob, Diego, Greg, Cailie); Anna is notify:false; System has no email.
       const first = await sweep_notification_digest({ db, now: eight_am_pt })
-      expect(first).toBe(3)
+      expect(first).toBe(4)
       expect((db.prepare('SELECT value FROM db_metadata WHERE key = ?').get(DIGEST_DAY_KEY) as { value: string }).value).toBe('2026-07-14')
       // Same day → guarded.
       expect(await sweep_notification_digest({ db, now: new Date('2026-07-14T20:00:00.000Z') })).toBe(0)
@@ -191,8 +191,8 @@ if (import.meta.vitest) {
       const diego_id = (db.prepare('SELECT id FROM users WHERE email = ?').get('diego@livingtongues.org') as { id: string }).id
       db.prepare('UPDATE chat_room_members SET last_read_at = ? WHERE room_id = ? AND user_id = ?')
         .run(new Date().toISOString(), ROOM_NOTIFICATIONS, diego_id)
-      // Diego (read) drops out → the other 2 on-duty admins still get the digest.
-      expect(await sweep_notification_digest({ db, now: eight_am_pt })).toBe(2)
+      // Diego (read) drops out → the other 3 on-duty admins still get the digest.
+      expect(await sweep_notification_digest({ db, now: eight_am_pt })).toBe(3)
     })
   })
 }

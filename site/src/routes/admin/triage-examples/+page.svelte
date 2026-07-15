@@ -1,7 +1,7 @@
 <script lang="ts">
   import IconMdiEmailArrowRightOutline from '~icons/mdi/email-arrow-right-outline'
   import IconMdiLightbulbOnOutline from '~icons/mdi/lightbulb-on-outline'
-  import IconMdiRobotOutline from '~icons/mdi/robot-outline'
+  import IconMdiSortVariant from '~icons/mdi/sort-variant'
   import RoutingLegend from '$lib/admin/RoutingLegend.svelte'
   import { TRIAGE_EXAMPLES } from '$lib/agent/triage/examples'
 
@@ -12,7 +12,7 @@
 
 <div class="wrap">
   <header class="head">
-    <h1><IconMdiRobotOutline style="color: var(--primary)" /> Triage examples</h1>
+    <h1><IconMdiSortVariant style="color: var(--primary)" /> Triage examples</h1>
     <p class="sub">
       The {examples.length} curated few-shot examples fed to the inbound-email classifier as a guide
       for how we triage and reply. Read-only — to change one, send Jacob a link or the new wording.

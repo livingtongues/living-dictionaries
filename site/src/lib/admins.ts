@@ -67,6 +67,7 @@ export const ADMINS: readonly Admin[] = [
   { email: 'diego@livingtongues.org', name: 'Diego Córdova', ntfy_topic: 'living_pings_diego', ld_address: 'diego@livingdictionaries.app', level: 3 },
   { email: 'dictionaries@livingtongues.org', name: 'Anna Luisa Daigneault', ntfy_topic: 'living_pings_anna', ld_address: 'annaluisa@livingdictionaries.app', level: 2, notify: false },
   { email: 'livingtongues@gmail.com', name: 'Dr. Greg Anderson', ntfy_topic: 'living_pings_greg', ld_address: 'greg@livingdictionaries.app', level: 2 },
+  { email: 'ck1105@georgetown.edu', name: 'Cailie Keating', ntfy_topic: 'living_pings_cailie_3ede043330d4', ld_address: 'cailie@livingdictionaries.app', level: 2 },
 ]
 
 export function is_admin(email: string | undefined | null): boolean {
