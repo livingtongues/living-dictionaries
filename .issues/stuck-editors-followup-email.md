@@ -68,3 +68,50 @@ signatures in the first hour post-deploy.
 - Sending infra: AWS SES via `$lib/email/send-email.ts` (see the shared email conventions). Honor
   `unsubscribed_from_emails`.
 - ntfy the findings when spawned; don't mutate/send to real recipients before Jacob replies.
+
+## 2026-07-15 follow-up session — findings
+
+✅ **Telemetry re-check (48h + since-deploy window, prod `logs.db`):**
+- `seq_cursor_transition` mentions since the 07-13 07:00Z deploy: **0** (the reason literally no
+  longer exists in the bundle — confirms the specific rebuild-loop mechanism is gone).
+- `leader_boot_failed` / `initial dict sync failed` / `Failed to read dict bundle` still fire
+  post-deploy (871 events / 8 users / 86 sessions in the 48h window) but these are UNRELATED
+  causes: deploy-time chunk-hash module-fetch failures ("Importing a module script failed"),
+  `leader boot stalled` at `opfs_open`/`migrate` (a different, already-tracked issue —
+  `.issues/dict-client-migration-idempotency.md`), and plain `Failed to fetch` network blips. None
+  reference `seq_cursor_transition`.
+
+✅ **Recomputed the candidate list fresh** (30d window, `sessions>=3 OR events>=20`, same heuristic
+as the 07-13 snapshot) — got the same 8 people (7 named + Jacob's own `jwrunner7@gmail.com` test
+account, which resolves to `f0fdbb2f-b87d-4717-8858-37e64efeb112` and is excluded). For each,
+checked every session after the deploy for a "clean" one (no error/crash/dict-bundle-fail rows):
+
+| user | pre-deploy signal | post-deploy sessions | self-healed? |
+|---|---|---|---|
+| Senhaja | 254 events/1 session | 1 | ✅ clean session found |
+| Eduardo A. Muñoz Espinoza | 87 events/20 sessions | 24 | ✅ clean session found |
+| Boie' nen (alclaveria@) | 80 events/15 sessions | 31 | ✅ clean (+ already excluded per Jacob) |
+| michelle M | 6 events/5 sessions | 1 | ✅ clean session found |
+| Matteo Ifergane | 3 events/3 sessions | 19 | ✅ clean session found |
+| Eeden | 3 events/3 sessions | 3 | ✅ clean session found |
+| **Carlos G. M.** | 4 events/3 sessions, last seen 07-10 16:42Z, exact `SQLITE_MISUSE(21)` "Failed to read dict bundle" on `nahuatl` (manages 13 dicts) | **0** | ❌ **never returned since the deploy** |
+
+**Only Carlos G. M. (`carlosgonmir@gmail.com`) qualifies** — genuinely hit the bug (confirmed
+MISUSE-21 dict-bundle failure on `nahuatl`, where he's a manager) and has not opened the site again
+since 07-10, i.e. no chance yet to see it's fixed. `unsubscribed_from_emails` is null (ok to email),
+`preferred_locale` is null (defaults to English).
+
+✅ **Draft copy sent to Jacob only** (`jwrunner7@gmail.com`) via a raw SigV4-signed SES `SendEmail`
+call run inside the prod `sveltekit_blue` container (reused its already-loaded `AWS_SES_*` env vars
+— see `/tmp/ses-send.js`/`/tmp/ses-draft-send.js` this session, not committed anywhere). Subject
+prefixed `[DRAFT for review]` so Jacob can tell it apart from the real send. From:
+`Living Tongues Institute for Endangered Languages <no-reply@livingdictionaries.app>`, Reply-To
+`support@livingdictionaries.app`.
+
+✅ **Jacob approved as-is.** Real copy sent 2026-07-15 to `carlosgonmir@gmail.com` only (subject
+`Fixed: dictionary stuck on "Loading"`, no `[DRAFT]` prefix) — SES `MessageId`
+`010f019f6515aeee-cfe1c1d5-3674-46be-8a3d-2b996e1f53fa-000000`, HTTP 200. No other recipients
+qualified (everyone else on the candidate list had already self-healed post-deploy — see table
+above). Cron job `c-2de834` removed.
+
+**Status: DONE.**

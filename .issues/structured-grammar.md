@@ -789,9 +789,45 @@ shared.updated_at bumped). Prod audit: 170 blob-dicts (99 @20260709, 7 @20260713
    idempotent re-run = 0 created / 170 present / 0 migrations. Log check 02:54→: NO migration/SQLite/schema-409
    errors; only pre-existing `river` 404 sync noise (below baseline). Migration race did NOT materialize.
    Current live code still admin-3-gates the render → public sees blob, admin-3 sees blob+sections (benign).
-4. [ ] **AWAITING Jacob's push**: commit + push the render-flip + column-drop code → webhook deploy →
-   the shared migration drops the prod `dictionaries.grammar` column at server boot; public /grammar flips to
-   sections. (Safe to leave un-deployed indefinitely; sections just sit admin-3-preview-only until then.)
+4. [x] **DEPLOYED (2026-07-15, commit `356dd77d`)**: pushed render-flip + column-drop → webhook deploy →
+   shared migration dropped the prod `dictionaries.grammar` column at server boot; public /grammar flipped
+   to sections.
+
+### PROD SMOKE TEST (2026-07-15 ~03:35 UTC) — ✅ ALL GREEN
+- **Migration landed**: `20260715_drop_dictionaries_grammar.sql` recorded in shared.db `migrations`;
+  `PRAGMA table_info(dictionaries)` confirms the `grammar` column is GONE.
+- **Sections present**: sampled public dicts (hazaragi, shauki, south-saami, iipay-aa, sibe…) each have
+  their 1 backfilled headless section.
+- **Snapshots rebuilt AFTER backfill**: `snapshot_uploaded_at` (03:26–03:28) > `updated_at` (02:56) for the
+  sample → R2 now serves `grammar_sections` (snapshot = full `dict_db.backup()`, so the table + rows ship).
+- **Public render verified** (headless logged-out visitor, `livingdictionaries.app/hazaragi/grammar`): full
+  migrated blob content renders as section "1" (phonetics-chart table + footnotes intact); `hasPreviewBadge=false`,
+  `hasNoInfoEmpty=false`, no edit controls; ZERO pageerrors (only the pre-existing Google GSI CORS console noise).
+- **Home teaser** sources from the section server-side (grammar snippet + "Read more" on `/hazaragi`).
+- **Sitemap** section-sourced: `/sitemaps/hazaragi.xml` emits `/hazaragi/grammar`; `ache` (no grammar) omits it.
+- **Prod logs since deploy**: NO grammar/migration/schema errors. Only pre-existing/unrelated noise —
+  `sync_failed` ×26 = the known deleted-dict `river` 404 poller; 1 transient leader-election RPC timeout
+  (kihehe, during backfill); 1 unrelated entry-page 500 (`batsi-kop-tsotsil-tsot`, out of scope).
+
+### POST-DEPLOY CLEANUP (pending soak) — scheduled
+- Remove after soak: `/opt/hosting/data/shared.db.bak-20260715-025523` + `dictionaries.bak-20260715-025523`
+  (1.8G) and `/tmp/dictionary-migrations` inside the container.
+- **horse-cron scheduled** (`c-66533d`, one-time @ 2026-07-16 09:00, opus): re-checks prod logs since deploy
+  for grammar/migration errors + re-verifies the public render, then removes the two backups +
+  `/tmp/dictionary-migrations` (pings Jacob instead if anything looks off).
+- Unrelated follow-ups spotted (NOT this task): the `river` stuck-poller 404 → folded into
+  `.issues/stale-client-sync-storm-2026-07-08.md` (same pre-404-breaker stale-client class, secure-flip trigger);
+  one `Internal Error` 500 on a `batsi-kop-tsotsil-tsot` entry page — glance if it recurs.
+
+### PROD OUTAGE during the soak window (2026-07-15 03:37–03:53 UTC) — Hostinger maintenance, NOT us
+While smoke-testing, `livingdictionaries.app` went fully unreachable (CF 522, direct-origin TCP :443/:80
+unreachable, Tailscale rx 0, ping 100% loss). Root cause = **Hostinger provider maintenance**: the panel
+showed the `living` KVM in "Maintenance"; `last -x` confirms an **orderly `shutdown` at 03:37 → reboot at
+03:53 onto a NEWER kernel `6.8.0-124`→`6.8.0-134`** (16-min downtime). NOT a crash, NOT OOM (mem 793Mi/7.8Gi
+at recovery), NOT deploy-related. Docker-compose auto-restarted blue/green + caddy on boot. **Cutover verified
+intact post-reboot**: drop migration still recorded, `grammar` column still gone, hazaragi section present,
+public `/grammar` renders clean, ZERO errors since 03:53. (Side note: kernel `134` is progress on the
+`vps-setup/.issues/copy-fail-kernel-followup.md` CVE-2026-31431 loop — verify its changelog carries the fix.)
 
 ### Stage 2 — DROP `dictionaries.grammar` — ✅ DONE IN THIS SAME PUSH (Q2 flipped to B: "do it now")
 Verified SAFE before committing (this is the FIRST DROP COLUMN in a shared migration):

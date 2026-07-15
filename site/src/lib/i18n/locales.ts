@@ -2,10 +2,12 @@ export enum Locales {
   en = 'English',
   es = 'Español',
   fr = 'Français',
+  de = 'Deutsch',
   zh = '中文',
   sw = 'Kiswahili',
   ru = 'русский',
   he = 'עברית',
+  ar = 'العَرَبِيَّة‎',
   pt = 'Portuguese',
   id = 'Bahasa Indonesia',
   ms = 'Malay',
@@ -19,7 +21,6 @@ export type LocaleCode = keyof typeof Locales
 
 export enum UnpublishedLocales {
   ha = 'Harshen Hausa / هَرْشَن هَوْسَ',
-  ar = 'العَرَبِيَّة‎',
   am = 'አማርኛ',
   or = 'ଓଡ଼ିଆ',
   // it = 'Italiano', // change to how they spell it

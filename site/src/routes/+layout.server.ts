@@ -40,5 +40,20 @@ export const load: LayoutServerLoad = async ({ cookies, request }) => {
     ssr_user,
     user_latitude,
     user_longitude,
+    // Locales with ≥1 assigned translator — a published locale absent from this
+    // list shows the "needs a reviewer" recruiting prompt in the language switcher.
+    locales_with_translators: get_locales_with_translators(),
+  }
+}
+
+/** DISTINCT `translator_languages.locale`; empty on any DB error (fail open → no recruiting prompt). */
+function get_locales_with_translators(): string[] {
+  try {
+    const rows = get_shared_db()
+      .prepare('SELECT DISTINCT locale FROM translator_languages')
+      .all() as { locale: string }[]
+    return rows.map(row => row.locale)
+  } catch {
+    return []
   }
 }

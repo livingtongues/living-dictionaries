@@ -176,7 +176,8 @@
     "other": "Other topic",
     "select_topic": "Select a topic",
     "data_fields": "Optional data fields",
-    "learning": "Create language learning materials from my dictionary"
+    "learning": "Create language learning materials from my dictionary",
+    "translate_volunteer": "Volunteer to review interface translations"
   },
   "create": {
     "select_coordinates": "Select Coordinates",
@@ -319,7 +320,11 @@
     "about": "About",
     "faq": "FAQ",
     "tutorials": "Tutorials",
-    "menu": "Menu"
+    "menu": "Menu",
+    "needs_reviewer": "Needs a reviewer",
+    "volunteer_to_review": "Volunteer to review",
+    "volunteer_sent": "Thank you! We'll be in touch about reviewing {language}.",
+    "volunteer_failed": "Could not send your request. Please try again."
   },
   "home": {
     "list_of_dictionaries": "List of Dictionaries",

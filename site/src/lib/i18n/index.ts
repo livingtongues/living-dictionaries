@@ -63,15 +63,30 @@ function report_missing_translation({ key, locale, fallback }: MissingTranslatio
   on_missing_translation?.({ key, locale, fallback })
 }
 
+/**
+ * A locale can be published (added to `Locales`) a deploy BEFORE its committed
+ * files are baked (a fresh locale like `de` is filled in the DB, then the next
+ * deploy's export/bake writes the files). Until then the file `import()` rejects
+ * with "Unknown variable dynamic import" — swallow it and fall back to `{}` so
+ * every key resolves to the English base instead of crashing the whole app.
+ */
+async function load_locale_file(path_promise: Promise<unknown>): Promise<Record<string, unknown>> {
+  try {
+    return await path_promise as Record<string, unknown>
+  } catch {
+    return {}
+  }
+}
+
 export async function getTranslator(locale: LocaleCode) {
   if (!loadedTranslations[locale]) {
     loadedTranslations[locale] = {
-      ...await import(`./locales/${locale}.json`),
-      ...await import(`./locales/gl/${locale}.json`), // glossing languages
-      ...await import(`./locales/ps/${locale}.json`), // parts of speech
-      ...await import(`./locales/psAbbrev/${locale}.json`),
-      ...await import(`./locales/sd/${locale}.json`), // semantic domains
-    }
+      ...await load_locale_file(import(`./locales/${locale}.json`)),
+      ...await load_locale_file(import(`./locales/gl/${locale}.json`)), // glossing languages
+      ...await load_locale_file(import(`./locales/ps/${locale}.json`)), // parts of speech
+      ...await load_locale_file(import(`./locales/psAbbrev/${locale}.json`)),
+      ...await load_locale_file(import(`./locales/sd/${locale}.json`)), // semantic domains
+    } as typeof en
   }
 
   return (keyOrOptions: TranslationKeys | TranslateOptions, options?: TranslateOptions): string => {

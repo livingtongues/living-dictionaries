@@ -45,6 +45,17 @@ fatal kinds (corruption, not_found, other) → error. Marlene's error rows were 
 (correctly error); Greg's warn rows were schema_outdated (correctly warn). No blanket downgrade —
 the fatal-error rows are the class that caught house's live Wayne incident.
 
+## 2026-07-15 — another instance: `river` (secure-flip trigger, same 404 class)
+
+Spotted during the structured-grammar cutover smoke test: a stale client polls dict `river` →
+404 `sync_failed` every ~30s (26× in a 44-min window; `{"engine":"dict","dict_id":"river","status":404}`,
+`user_id` NULL). NOT a deleted dict — `river` is `bucket='secure'`, so the secure-gate
+(`$lib/db/server/secure-dictionary.ts` / `verify_auth_dict_role`) returns the unknown-slug 404 to a
+non-authorized (or logged-out/cached) client. Root cause is identical to marlene's `zapoteco-de-analco`
+rows: a **pre-404-breaker build** that never halts on `not_found`. Current builds halt after 3 identical
+404s (`sync-failure-classify.ts`), so this is another stale-tab symptom — the SW-stale-tab-hard-reload
+follow-up above would clear it. No new fix needed; folding it in as evidence the class is still live.
+
 ## Dashboard support (shipped 2026-07-09)
 
 - Build-adoption strip on `/admin/health` — sessions grouped by build age with the
