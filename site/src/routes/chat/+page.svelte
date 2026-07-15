@@ -6,6 +6,7 @@
   import ChatComposer from '$lib/chat/chat-composer.svelte'
   import ChatMessageItem from '$lib/chat/chat-message-item.svelte'
   import { chat_store } from '$lib/chat/chat-store.svelte'
+  import { MESSAGE_PAGE_LIMIT } from '$lib/chat/constants'
   import NewChannelForm from '$lib/chat/new-channel-form.svelte'
   import ReadBubbles from '$lib/chat/read-bubbles.svelte'
   import { caught_up_others, compute_read_boundaries, first_unread_message_id } from '$lib/chat/read-receipts'
@@ -40,6 +41,11 @@
   let thread_el = $state<HTMLDivElement>()
   // On narrow screens we show EITHER the room list or the thread (not both).
   let mobile_view = $state<'rooms' | 'thread'>('thread')
+  // Discord-style reply: the message the composer is currently attached to.
+  let replying_to = $state<ChatMessageWithAttachments | null>(null)
+  // Load-older pagination: whether older history may exist above the window.
+  let has_more_older = $state(false)
+  let loading_older = $state(false)
 
   const active_room = $derived(chat_store.rooms.find(room => room.id === active_room_id) ?? null)
   const channels = $derived(chat_store.rooms.filter(room => room.kind === 'channel'))
@@ -68,6 +74,25 @@
     return (user_ids ?? []).map(user_id => ({ user_id, name: chat_store.name_for(user_id) }))
   }
 
+  /** One-line preview text for a message: its plain text, else an attachment label. */
+  function reply_snippet(message: ChatMessageWithAttachments): string {
+    const text = message.body_text.trim()
+    if (text)
+      return text.length > 140 ? `${text.slice(0, 140)}…` : text
+    const [attachment] = message.attachments
+    if (attachment)
+      return (attachment.mimetype ?? '').startsWith('image/') ? 'Photo' : attachment.filename
+    return ''
+  }
+
+  const reply_target = $derived(replying_to
+    ? { author_name: chat_store.name_for(replying_to.author_user_id), snippet: reply_snippet(replying_to) }
+    : null)
+
+  function start_reply(message: ChatMessageWithAttachments) {
+    replying_to = message
+  }
+
   // Members popover (opened from the "N members" / "N others online" header on a channel).
   let show_members = $state(false)
 
@@ -92,22 +117,91 @@
       const { messages: loaded, read_positions: positions } = data
       messages = loaded
       read_positions = positions
+      has_more_older = loaded.length >= MESSAGE_PAGE_LIMIT
       first_unread_id = first_unread_message_id({ messages, read_positions, me_user_id: chat_store.me_user_id })
       await scroll_to_bottom()
     }
   }
 
   /**
+   * Fetch the page of messages OLDER than the current oldest, prepend it, and
+   * hold the viewport steady (keep the same message under the reader's eye).
+   * Returns how many new messages were added (0 = nothing more, or a race).
+   */
+  async function load_older(): Promise<number> {
+    if (loading_older || !has_more_older || !messages.length)
+      return 0
+    loading_older = true
+    const room_id = active_room_id
+    const before = messages[0].created_at
+    const prev_height = thread_el?.scrollHeight ?? 0
+    const prev_top = thread_el?.scrollTop ?? 0
+    const { data } = await api_chat_messages({ room_id, before })
+    loading_older = false
+    if (!data || room_id !== active_room_id)
+      return 0
+    has_more_older = data.messages.length >= MESSAGE_PAGE_LIMIT
+    const existing_ids = new Set(messages.map(message => message.id))
+    const fresh = data.messages.filter(message => !existing_ids.has(message.id))
+    if (!fresh.length)
+      return 0
+    messages = [...fresh, ...messages]
+    await tick()
+    // Restore scroll so the content the reader was looking at doesn't jump.
+    if (thread_el)
+      thread_el.scrollTop = prev_top + (thread_el.scrollHeight - prev_height)
+    return fresh.length
+  }
+
+  /**
+   * Scroll to (and briefly flash) the referenced message. If it's above the
+   * loaded window, page backwards until it's in view, capped so a reply to a
+   * very old message can't spin forever.
+   */
+  async function jump_to(message_id: string) {
+    const MAX_PAGES = 20
+    let pages = 0
+    while (!messages.some(message => message.id === message_id) && has_more_older && pages < MAX_PAGES) {
+      const added = await load_older()
+      pages += 1
+      if (!added)
+        break
+    }
+    await tick()
+    const el = thread_el?.querySelector<HTMLElement>(`[data-message-id="${CSS.escape(message_id)}"]`)
+    if (!el)
+      return
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    flash_element(el)
+  }
+
+  /** Brief background pulse (inline styles → no scoped-CSS pruning surprises). */
+  function flash_element(el: HTMLElement) {
+    el.style.transition = 'none'
+    el.style.backgroundColor = 'color-mix(in srgb, transparent, var(--primary) 25%)'
+    requestAnimationFrame(() => {
+      el.style.transition = 'background-color 1.3s ease-out'
+      el.style.backgroundColor = ''
+    })
+    setTimeout(() => { el.style.transition = '' }, 1500)
+  }
+
+  /**
    * Reconcile the recent window (not append-only) so reactions/edits/deletes and
-   * read positions all stay live. `incoming` is the authoritative newest page;
-   * we keep only local messages newer than it (an optimistic just-sent one the
-   * server hasn't returned yet), preserving order.
+   * read positions all stay live. `incoming` is the authoritative newest page.
+   * We keep (a) older history loaded above the window via "Load older" — the poll
+   * only refetches the newest page, so without this it'd be wiped — and (b) any
+   * optimistic just-sent message the server hasn't returned yet.
    */
   function reconcile_messages(incoming: ChatMessageWithAttachments[]) {
+    if (!incoming.length)
+      return
     const incoming_ids = new Set(incoming.map(message => message.id))
-    const last_incoming = incoming.length ? incoming[incoming.length - 1].created_at : ''
+    const oldest_incoming = incoming[0].created_at
+    const last_incoming = incoming[incoming.length - 1].created_at
+    const older = messages.filter(message => message.created_at < oldest_incoming && !incoming_ids.has(message.id))
     const pending = messages.filter(message => !incoming_ids.has(message.id) && message.created_at >= last_incoming)
-    messages = [...incoming, ...pending]
+    messages = [...older, ...incoming, ...pending]
   }
 
   async function poll_messages() {
@@ -146,6 +240,8 @@
     messages = []
     read_positions = []
     first_unread_id = null
+    replying_to = null
+    has_more_older = false
     await goto(`/chat?room=${encodeURIComponent(room_id)}`, { replaceState: true, keepFocus: true, noScroll: true })
     await load_messages(room_id)
     void chat_store.refresh_rooms()
@@ -153,14 +249,21 @@
 
   async function send({ body_html, body_text, files }: { body_html: string, body_text: string, files: File[] }) {
     const room_id = active_room_id
+    const reply = replying_to
+    replying_to = null
     sending = true
-    const { data } = await api_chat_send({ room_id, body_html, body_text, has_attachments: files.length > 0, client_message_id: crypto.randomUUID() })
+    const { data } = await api_chat_send({ room_id, body_html, body_text, has_attachments: files.length > 0, client_message_id: crypto.randomUUID(), reply_to_message_id: reply?.id ?? null })
     if (!data?.message) {
       sending = false
       return
     }
     const uploaded = files.length ? (await api_chat_upload({ message_id: data.message.id, files })).data : null
-    const message: ChatMessageWithAttachments = { ...data.message, attachments: uploaded?.attachments ?? [], reactions: [] }
+    // Synthesize the reply preview optimistically; the next poll replaces it with
+    // the server's live-resolved version.
+    const reply_to = reply
+      ? { message_id: reply.id, author_user_id: reply.author_user_id, snippet: reply_snippet(reply), deleted: !!reply.deleted_at, attachment: null }
+      : null
+    const message: ChatMessageWithAttachments = { ...data.message, attachments: uploaded?.attachments ?? [], reactions: [], reply_to }
     sending = false
     if (room_id === active_room_id && !messages.some(existing => existing.id === message.id)) {
       messages.push(message)
@@ -343,6 +446,13 @@
         {:else if !messages.length}
           <p class="empty">No messages yet. Say hello 👋</p>
         {:else}
+          {#if has_more_older}
+            <div class="load-older">
+              <button type="button" class="load-older-btn" onclick={load_older} disabled={loading_older}>
+                {loading_older ? 'Loading…' : 'Load older messages'}
+              </button>
+            </div>
+          {/if}
           {#each messages as message, index (message.id)}
             {#if message.id === first_unread_id}
               <UnreadDivider />
@@ -350,11 +460,14 @@
             <ChatMessageItem
               {message}
               author_name={chat_store.name_for(message.author_user_id)}
+              reply_author_name={message.reply_to ? chat_store.name_for(message.reply_to.author_user_id) : ''}
               is_own={message.author_user_id === chat_store.me_user_id}
               me_user_id={chat_store.me_user_id}
               on_edit={edit_msg}
               on_delete={delete_msg}
-              on_react={react} />
+              on_react={react}
+              on_reply={start_reply}
+              on_jump={jump_to} />
             {#if read_boundaries.get(message.id)}
               <ReadBubbles members={members_for(read_boundaries.get(message.id))} />
             {/if}
@@ -366,7 +479,7 @@
       </div>
 
       <div class="composer-wrap">
-        <ChatComposer {sending} on_send={send} placeholder="Write your message…" />
+        <ChatComposer {sending} {reply_target} on_cancel_reply={() => { replying_to = null }} on_send={send} placeholder="Write your message…" />
       </div>
     </section>
   </div>
@@ -557,6 +670,28 @@
     color: var(--color-secondary);
     font-size: 0.9rem;
     margin: auto;
+  }
+  .load-older {
+    display: flex;
+    justify-content: center;
+    padding: 0.25rem 0 0.5rem;
+  }
+  .load-older-btn {
+    border: 1px solid var(--border-color);
+    background: var(--surface);
+    color: var(--color-secondary);
+    border-radius: 999px;
+    padding: 0.25rem 0.9rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .load-older-btn:hover:not(:disabled) {
+    color: var(--color);
+    border-color: var(--primary);
+  }
+  .load-older-btn:disabled {
+    cursor: default;
+    opacity: 0.7;
   }
   .seen-summary {
     align-self: flex-end;

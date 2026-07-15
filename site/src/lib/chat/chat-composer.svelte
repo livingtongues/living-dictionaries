@@ -8,15 +8,19 @@
   import { onDestroy } from 'svelte'
   import IconMdiClose from '~icons/mdi/close'
   import IconMdiPaperclip from '~icons/mdi/paperclip'
+  import IconMdiReplyOutline from '~icons/mdi/reply-outline'
   import IconMdiSend from '~icons/mdi/send'
   import { format_bytes, is_image_mimetype } from './attachments'
 
   interface Props {
     placeholder?: string
     sending?: boolean
+    /** When set, shows a "Replying to …" bar above the editor. */
+    reply_target?: { author_name: string, snippet: string } | null
+    on_cancel_reply?: () => void
     on_send: (input: { body_html: string, body_text: string, files: File[] }) => Promise<void> | void
   }
-  let { placeholder = 'Write a message…', sending = false, on_send }: Props = $props()
+  let { placeholder = 'Write a message…', sending = false, reply_target = null, on_cancel_reply, on_send }: Props = $props()
 
   interface StagedFile {
     file: File
@@ -103,6 +107,15 @@
 </script>
 
 <div class="composer">
+  {#if reply_target}
+    <div class="reply-bar">
+      <IconMdiReplyOutline />
+      <span class="reply-to">Replying to <span class="reply-author">{reply_target.author_name}</span></span>
+      <span class="reply-snippet">{reply_target.snippet}</span>
+      <button type="button" class="reply-cancel" title="Cancel reply" aria-label="Cancel reply" onclick={() => on_cancel_reply?.()}><IconMdiClose /></button>
+    </div>
+  {/if}
+
   <RichTextEditor bind:value={html} {placeholder} {on_keydown} on_paste={handle_paste} toolbar="email" />
 
   {#if staged.length}
@@ -147,6 +160,45 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+  .reply-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.5rem;
+    border-left: 2px solid var(--primary);
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, transparent, var(--color) 5%);
+    font-size: 0.8rem;
+    color: var(--color-secondary);
+    min-width: 0;
+  }
+  .reply-to {
+    flex-shrink: 0;
+  }
+  .reply-author {
+    font-weight: 600;
+    color: var(--color);
+  }
+  .reply-snippet {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .reply-cancel {
+    display: inline-flex;
+    margin-left: auto;
+    border: none;
+    background: transparent;
+    color: var(--color-secondary);
+    cursor: pointer;
+    padding: 0.1rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .reply-cancel:hover {
+    color: var(--color);
   }
   .chips {
     display: flex;

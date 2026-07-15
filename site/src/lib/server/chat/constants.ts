@@ -9,6 +9,7 @@
  * its membership is UI-managed.
  */
 export {
+  MESSAGE_PAGE_LIMIT,
   ROOM_NOTIFICATIONS,
   SYSTEM_ROOM_IDS,
   SYSTEM_USER_ID,
@@ -17,6 +18,3 @@ export {
 
 /** A member counts as "online" (→ suppress external ping) if seen within this window. */
 export const PRESENCE_WINDOW_MS = 60_000
-
-/** Newest-first page size for the message list / poll. */
-export const MESSAGE_PAGE_LIMIT = 100

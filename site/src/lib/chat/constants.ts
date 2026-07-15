@@ -30,3 +30,10 @@ export const SYSTEM_USER_NAME = 'System'
 export const MAX_CHAT_ATTACHMENT_BYTES = 20 * 1024 * 1024
 /** Most files allowed on a single message. */
 export const MAX_CHAT_ATTACHMENTS_PER_MESSAGE = 10
+
+/**
+ * Newest-first page size for the message list / poll / load-older paging. Not
+ * sensitive, so it's client-safe here (the /chat page reads it to decide when
+ * more history may exist); the server constants module re-exports it.
+ */
+export const MESSAGE_PAGE_LIMIT = 100

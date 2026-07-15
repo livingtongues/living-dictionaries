@@ -11,6 +11,8 @@ export interface ChatSendRequestBody {
   body_html: string
   body_text: string
   client_message_id?: string
+  /** Discord-style reply reference — an earlier message in the same room. */
+  reply_to_message_id?: string | null
   /** Allow an empty body because attachments will be uploaded right after. */
   has_attachments?: boolean
 }
@@ -32,6 +34,7 @@ export const POST: RequestHandler = async (event) => {
       body_html: body.body_html ?? '',
       body_text: body.body_text ?? '',
       client_message_id: body.client_message_id,
+      reply_to_message_id: body.reply_to_message_id,
       allow_empty: body.has_attachments,
     })
     // Fire-and-forget: apply the anti-spam policy + ping offline members.

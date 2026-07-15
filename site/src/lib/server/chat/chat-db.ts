@@ -42,6 +42,8 @@ export interface ChatMessageRow {
   body_html: string
   body_text: string
   client_message_id: string | null
+  /** Discord-style reply reference — an earlier message in the SAME room, or null. */
+  reply_to_message_id: string | null
   created_at: string
   updated_at: string
   edited_at: string | null
@@ -63,9 +65,24 @@ export interface MessageReaction {
   user_ids: string[]
 }
 
+/**
+ * Live-resolved preview of the message a reply points at (the Discord-style
+ * quote-line). Recomputed on every fetch so edits/deletes to the original show
+ * through. `snippet` is the original's plain-text mirror, trimmed; `attachment`
+ * carries a label when the original is media-only (no text).
+ */
+export interface ReplyPreview {
+  message_id: string
+  author_user_id: string
+  snippet: string
+  deleted: boolean
+  attachment: { is_image: boolean, filename: string } | null
+}
+
 export interface ChatMessageWithAttachments extends ChatMessageRow {
   attachments: ChatAttachment[]
   reactions: MessageReaction[]
+  reply_to: ReplyPreview | null
 }
 
 /** A room member's read position (drives the read-receipt bubbles). */
@@ -284,13 +301,14 @@ export function get_room({ db, room_id }: { db: Database.Database, room_id: stri
  * up to now. `allow_empty` permits an attachment-only message (the body guard
  * is relaxed; attachments are uploaded + linked right after the insert).
  */
-export function post_message({ db, room_id, user_id, body_html, body_text, client_message_id, allow_empty = false }: {
+export function post_message({ db, room_id, user_id, body_html, body_text, client_message_id, reply_to_message_id, allow_empty = false }: {
   db: Database.Database
   room_id: string
   user_id: string
   body_html: string
   body_text: string
   client_message_id?: string | null
+  reply_to_message_id?: string | null
   allow_empty?: boolean
 }): ChatMessageRow {
   // The System bot posts into rooms it isn't a member of (platform notifications,
@@ -301,6 +319,15 @@ export function post_message({ db, room_id, user_id, body_html, body_text, clien
   if (!allow_empty && !body_text.trim() && !body_html.trim())
     throw new ChatError('Message is empty', 400)
 
+  // A reply may only reference a message in the SAME room — drop a dangling or
+  // cross-room ref rather than storing a link the reader could never resolve.
+  let reply_to = reply_to_message_id ?? null
+  if (reply_to) {
+    const target = db.prepare('SELECT room_id FROM chat_messages WHERE id = ?').get(reply_to) as { room_id: string } | undefined
+    if (!target || target.room_id !== room_id)
+      reply_to = null
+  }
+
   if (client_message_id) {
     const existing = db.prepare('SELECT * FROM chat_messages WHERE room_id = ? AND author_user_id = ? AND client_message_id = ?')
       .get(room_id, user_id, client_message_id) as ChatMessageRow | undefined
@@ -310,8 +337,8 @@ export function post_message({ db, room_id, user_id, body_html, body_text, clien
 
   const id = crypto.randomUUID()
   const ts = now_iso()
-  db.prepare('INSERT INTO chat_messages (id, room_id, author_user_id, body_html, body_text, client_message_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-    .run(id, room_id, user_id, sanitize_body_html(body_html), body_text, client_message_id ?? null, ts, ts)
+  db.prepare('INSERT INTO chat_messages (id, room_id, author_user_id, body_html, body_text, client_message_id, reply_to_message_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    .run(id, room_id, user_id, sanitize_body_html(body_html), body_text, client_message_id ?? null, reply_to, ts, ts)
   db.prepare('UPDATE chat_rooms SET updated_at = ? WHERE id = ?').run(ts, room_id)
   db.prepare('UPDATE chat_room_members SET last_read_at = ? WHERE room_id = ? AND user_id = ?').run(ts, room_id, user_id)
   return db.prepare('SELECT * FROM chat_messages WHERE id = ?').get(id) as ChatMessageRow
@@ -331,7 +358,51 @@ export function attach_attachments({ db, messages }: { db: Database.Database, me
     list.push(row)
     by_message.set(row.message_id, list)
   }
-  return messages.map(message => ({ ...message, attachments: by_message.get(message.id) ?? [], reactions: [] as MessageReaction[] }))
+  return messages.map(message => ({ ...message, attachments: by_message.get(message.id) ?? [], reactions: [] as MessageReaction[], reply_to: null as ReplyPreview | null }))
+}
+
+/** Max chars kept from the referenced message's plain text for the quote-line. */
+const REPLY_SNIPPET_MAX_LENGTH = 140
+
+/**
+ * Live-resolve each message's reply reference (Discord-style quote-line). One
+ * batched query for the referenced rows + one for their first attachment (to
+ * label media-only originals). Recomputed every fetch so edits/deletes to the
+ * original show through. Referenced messages may be older than the caller's
+ * loaded window, so we resolve by id independent of the returned page.
+ */
+export function attach_reply_previews({ db, messages }: { db: Database.Database, messages: ChatMessageWithAttachments[] }): ChatMessageWithAttachments[] {
+  const target_ids = [...new Set(messages.map(message => message.reply_to_message_id).filter((id): id is string => !!id))]
+  if (!target_ids.length)
+    return messages
+  const placeholders = target_ids.map(() => '?').join(', ')
+  const targets = db.prepare(`SELECT id, author_user_id, body_text, deleted_at FROM chat_messages WHERE id IN (${placeholders})`)
+    .all(...target_ids) as { id: string, author_user_id: string, body_text: string, deleted_at: string | null }[]
+  const attachments = db.prepare(`SELECT message_id, filename, mimetype FROM chat_attachments WHERE message_id IN (${placeholders}) ORDER BY created_at ASC`)
+    .all(...target_ids) as { message_id: string, filename: string, mimetype: string | null }[]
+  const first_attachment = new Map<string, { filename: string, mimetype: string | null }>()
+  for (const row of attachments) {
+    if (!first_attachment.has(row.message_id))
+      first_attachment.set(row.message_id, { filename: row.filename, mimetype: row.mimetype })
+  }
+  const preview_by_id = new Map<string, ReplyPreview>()
+  for (const target of targets) {
+    const deleted = !!target.deleted_at
+    const text = target.body_text.trim()
+    const attachment = first_attachment.get(target.id)
+    preview_by_id.set(target.id, {
+      message_id: target.id,
+      author_user_id: target.author_user_id,
+      snippet: text.length > REPLY_SNIPPET_MAX_LENGTH ? `${text.slice(0, REPLY_SNIPPET_MAX_LENGTH)}…` : text,
+      deleted,
+      attachment: !deleted && !text && attachment
+        ? { is_image: (attachment.mimetype ?? '').startsWith('image/'), filename: attachment.filename }
+        : null,
+    })
+  }
+  for (const message of messages)
+    message.reply_to = message.reply_to_message_id ? (preview_by_id.get(message.reply_to_message_id) ?? null) : null
+  return messages
 }
 
 /** Hydrate messages with their aggregated reactions in one batched query. */
@@ -361,27 +432,40 @@ export function attach_reactions({ db, messages }: { db: Database.Database, mess
   return messages
 }
 
+/** Hydrate a raw row page with attachments + reactions + reply previews, oldest-first. */
+function hydrate_messages({ db, rows }: { db: Database.Database, rows: ChatMessageRow[] }): ChatMessageWithAttachments[] {
+  return attach_reply_previews({ db, messages: attach_reactions({ db, messages: attach_attachments({ db, messages: rows }) }) })
+}
+
 /**
- * Messages for a room, each hydrated with its attachments. With `after` (ISO) →
- * only newer rows ascending (the poll path). Otherwise the latest `limit` rows,
- * oldest-first (initial load).
+ * Messages for a room, each hydrated with attachments + reactions + reply
+ * previews. With `after` (ISO) → only newer rows ascending (unused live-poll
+ * path). With `before` (ISO) → the `limit` rows OLDER than it, oldest-first
+ * (load-older pagination). Otherwise the latest `limit` rows, oldest-first
+ * (initial load).
  */
-export function get_room_messages({ db, room_id, user_id, after, limit = MESSAGE_PAGE_LIMIT }: {
+export function get_room_messages({ db, room_id, user_id, after, before, limit = MESSAGE_PAGE_LIMIT }: {
   db: Database.Database
   room_id: string
   user_id: string
   after?: string | null
+  before?: string | null
   limit?: number
 }): ChatMessageWithAttachments[] {
   require_member({ db, room_id, user_id })
   if (after) {
     const rows = db.prepare('SELECT * FROM chat_messages WHERE room_id = ? AND created_at > ? ORDER BY created_at ASC, id ASC LIMIT ?')
       .all(room_id, after, limit) as ChatMessageRow[]
-    return attach_reactions({ db, messages: attach_attachments({ db, messages: rows }) })
+    return hydrate_messages({ db, rows })
+  }
+  if (before) {
+    const rows = db.prepare('SELECT * FROM chat_messages WHERE room_id = ? AND created_at < ? ORDER BY created_at DESC, id DESC LIMIT ?')
+      .all(room_id, before, limit) as ChatMessageRow[]
+    return hydrate_messages({ db, rows: rows.reverse() })
   }
   const rows = db.prepare('SELECT * FROM chat_messages WHERE room_id = ? ORDER BY created_at DESC, id DESC LIMIT ?')
     .all(room_id, limit) as ChatMessageRow[]
-  return attach_reactions({ db, messages: attach_attachments({ db, messages: rows.reverse() }) })
+  return hydrate_messages({ db, rows: rows.reverse() })
 }
 
 /** Longest emoji grapheme we accept (a few code points for ZWJ sequences / skin tones). */
@@ -574,6 +658,14 @@ if (import.meta.vitest) {
     return room
   }
 
+  /** Insert a message with an explicit created_at (deterministic paging tests). */
+  function seed_message({ db, room_id, user_id, text, created_at }: { db: Database.Database, room_id: string, user_id: string, text: string, created_at: string }) {
+    const id = crypto.randomUUID()
+    db.prepare('INSERT INTO chat_messages (id, room_id, author_user_id, body_html, body_text, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+      .run(id, room_id, user_id, `<p>${text}</p>`, text, created_at, created_at)
+    return id
+  }
+
   describe(create_channel, () => {
     it('creates a channel and auto-joins the creator', () => {
       const db = fresh_db()
@@ -760,6 +852,70 @@ if (import.meta.vitest) {
       expect(message.body_html).toContain('<p>hi</p>')
       const edited = edit_message({ db, message_id: message.id, user_id: 'u-a', body_html: '<img src=x onerror=alert(1)>', body_text: 'x' })
       expect(edited.body_html).not.toContain('onerror')
+    })
+
+    it('drops a cross-room reply reference', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      const room1 = seed_channel(db, 'One', ['u-a'])
+      const room2 = seed_channel(db, 'Two', ['u-a'])
+      const elsewhere = post_message({ db, room_id: room1.id, user_id: 'u-a', body_html: '<p>x</p>', body_text: 'x' })
+      const message = post_message({ db, room_id: room2.id, user_id: 'u-a', body_html: '<p>y</p>', body_text: 'y', reply_to_message_id: elsewhere.id })
+      expect(message.reply_to_message_id).toBe(null)
+    })
+  })
+
+  describe(attach_reply_previews, () => {
+    it('live-resolves author + snippet and reflects an edit to the original', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com', 'Anna')
+      seed_user(db, 'u-b', 'b@example.com', 'Bob')
+      const room = seed_channel(db, 'General', ['u-a', 'u-b'])
+      const original = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>check entry 42</p>', body_text: 'check entry 42' })
+      const reply_message = post_message({ db, room_id: room.id, user_id: 'u-b', body_html: '<p>done</p>', body_text: 'done', reply_to_message_id: original.id })
+      const find_reply = () => get_room_messages({ db, room_id: room.id, user_id: 'u-a' }).find(message => message.id === reply_message.id)
+      expect(find_reply()?.reply_to?.author_user_id).toBe('u-a')
+      expect(find_reply()?.reply_to?.snippet).toBe('check entry 42')
+      expect(find_reply()?.reply_to?.deleted).toBe(false)
+      edit_message({ db, message_id: original.id, user_id: 'u-a', body_html: '<p>check entry 43</p>', body_text: 'check entry 43' })
+      expect(find_reply()?.reply_to?.snippet).toBe('check entry 43')
+    })
+
+    it('flags a deleted original', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      const room = seed_channel(db, 'General', ['u-a'])
+      const original = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>oops</p>', body_text: 'oops' })
+      const reply_message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>reply</p>', body_text: 'reply', reply_to_message_id: original.id })
+      delete_message({ db, message_id: original.id, user_id: 'u-a' })
+      const reply = get_room_messages({ db, room_id: room.id, user_id: 'u-a' }).find(message => message.id === reply_message.id)
+      expect(reply?.reply_to?.deleted).toBe(true)
+    })
+
+    it('labels a media-only original with its first attachment', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      const room = seed_channel(db, 'General', ['u-a'])
+      const original = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '', body_text: '', allow_empty: true })
+      add_chat_attachment({ db, message_id: original.id, user_id: 'u-a', storage_key: 'k', filename: 'tree.jpg', mimetype: 'image/jpeg', size_bytes: 10 })
+      const reply_message = post_message({ db, room_id: room.id, user_id: 'u-a', body_html: '<p>nice</p>', body_text: 'nice', reply_to_message_id: original.id })
+      const reply = get_room_messages({ db, room_id: room.id, user_id: 'u-a' }).find(message => message.id === reply_message.id)
+      expect(reply?.reply_to?.snippet).toBe('')
+      expect(reply?.reply_to?.attachment).toEqual({ is_image: true, filename: 'tree.jpg' })
+    })
+  })
+
+  describe('get_room_messages before-cursor paging', () => {
+    it('returns the messages older than the cursor, oldest-first, honoring limit', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-a', 'a@example.com')
+      const room = seed_channel(db, 'General', ['u-a'])
+      for (let i = 1; i <= 5; i++)
+        seed_message({ db, room_id: room.id, user_id: 'u-a', text: `m${i}`, created_at: `2026-01-01T00:00:0${i}.000Z` })
+      const older = get_room_messages({ db, room_id: room.id, user_id: 'u-a', before: '2026-01-01T00:00:04.000Z' })
+      expect(older.map(message => message.body_text)).toEqual(['m1', 'm2', 'm3'])
+      const page = get_room_messages({ db, room_id: room.id, user_id: 'u-a', before: '2026-01-01T00:00:04.000Z', limit: 2 })
+      expect(page.map(message => message.body_text)).toEqual(['m2', 'm3'])
     })
   })
 

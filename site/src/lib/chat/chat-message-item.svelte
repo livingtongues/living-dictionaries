@@ -9,7 +9,9 @@
   import IconMdiContentCopy from '~icons/mdi/content-copy'
   import IconMdiEmoticonOutline from '~icons/mdi/emoticon-outline'
   import IconMdiFileOutline from '~icons/mdi/file-outline'
+  import IconMdiImageOutline from '~icons/mdi/image-outline'
   import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
+  import IconMdiReplyOutline from '~icons/mdi/reply-outline'
   import IconMdiTrashCanOutline from '~icons/mdi/trash-can-outline'
   import { chat_attachment_url, format_bytes, is_image_mimetype } from './attachments'
   import ReactionPicker from './reaction-picker.svelte'
@@ -17,13 +19,17 @@
   interface Props {
     message: ChatMessageWithAttachments
     author_name: string
+    /** Display name of the author of the message this one replies to (if any). */
+    reply_author_name?: string
     is_own: boolean
     me_user_id: string
     on_edit: (input: { message_id: string, body_html: string, body_text: string }) => Promise<void> | void
     on_delete: (message_id: string) => Promise<void> | void
     on_react: (input: { message_id: string, emoji: string }) => Promise<void> | void
+    on_reply: (message: ChatMessageWithAttachments) => void
+    on_jump: (message_id: string) => void
   }
-  let { message, author_name, is_own, me_user_id, on_edit, on_delete, on_react }: Props = $props()
+  let { message, author_name, reply_author_name = '', is_own, me_user_id, on_edit, on_delete, on_react, on_reply, on_jump }: Props = $props()
 
   let editing = $state(false)
   let draft = $state('')
@@ -71,7 +77,23 @@
   let viewer_url: string | null = $state(null)
 </script>
 
-<div class="msg" class:own={is_own}>
+<div class="msg" class:own={is_own} data-message-id={message.id}>
+  {#if message.reply_to && !message.deleted_at}
+    {@const reply = message.reply_to}
+    <button type="button" class="reply-ref" title="Jump to replied message" onclick={() => on_jump(reply.message_id)}>
+      <IconMdiReplyOutline />
+      <span class="reply-author">{reply_author_name}</span>
+      {#if reply.deleted}
+        <span class="reply-snippet reply-deleted">message deleted</span>
+      {:else if reply.snippet}
+        <span class="reply-snippet">{reply.snippet}</span>
+      {:else if reply.attachment}
+        <span class="reply-snippet reply-attachment">
+          {#if reply.attachment.is_image}<IconMdiImageOutline /> Photo{:else}<IconMdiFileOutline /> {reply.attachment.filename}{/if}
+        </span>
+      {/if}
+    </button>
+  {/if}
   <div class="msg-head">
     <span class="author">{author_name}</span>
     <span class="time">{time_label(message.created_at)}</span>
@@ -84,6 +106,7 @@
             <ReactionPicker on_pick={react} close={() => { show_reactions = false }} />
           {/if}
         </span>
+        <button type="button" title="Reply" aria-label="Reply" onclick={() => on_reply(message)}><IconMdiReplyOutline /></button>
         <button type="button" title="Copy message" aria-label="Copy message" onclick={copy_message}><IconMdiContentCopy /></button>
         {#if is_own}
           <button type="button" title="Edit" aria-label="Edit" onclick={start_edit}><IconMdiPencilOutline /></button>
@@ -200,6 +223,46 @@
   .msg-actions button:hover {
     color: var(--color);
     background: var(--surface);
+  }
+  .reply-ref {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    max-width: 100%;
+    margin-bottom: 0.15rem;
+    padding: 0.1rem 0.45rem 0.1rem 0.35rem;
+    border: none;
+    border-left: 2px solid var(--primary);
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, transparent, var(--color) 5%);
+    color: var(--color-secondary);
+    font-size: 0.75rem;
+    line-height: 1.3;
+    cursor: pointer;
+    text-align: left;
+    min-width: 0;
+  }
+  .reply-ref:hover {
+    background: color-mix(in srgb, transparent, var(--color) 9%);
+  }
+  .reply-author {
+    font-weight: 600;
+    color: var(--color);
+    flex-shrink: 0;
+  }
+  .reply-snippet {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .reply-attachment {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+  }
+  .reply-deleted {
+    font-style: italic;
   }
   .body {
     font-size: 0.9rem;
