@@ -24,6 +24,9 @@
     return bcp !== 'en' && !locales_with_translators.includes(bcp)
   }
 
+  /** The currently active published locale, if any. */
+  const current = $derived(locales.find(([bcp]) => locale.includes(bcp)))
+
   let requested = $state<Record<string, boolean>>({})
   let show_login = $state(false)
   let pending = $state<{ bcp: string, name: string } | null>(null)
@@ -72,42 +75,40 @@
     <span>{t('header.select_language')}</span>
   {/snippet}
 
-  <div class="locale-list">
+  <div class="locale-pills">
     {#each locales as [bcp, name] (bcp)}
-      <div class={['locale-row', { active: locale.includes(bcp) }]}>
-        <HeadlessButton
-          class="{locale.includes(bcp) ? 'btn-primary' : 'btn-ghost'} btn-default locale-switch"
-          onclick={() => changeLocale(bcp)}>
-          {name}
-        </HeadlessButton>
-        {#if needs_reviewer(bcp)}
-          {#if requested[bcp]}
-            <span class="requested"><IconCheck /> {t('header.needs_reviewer')}</span>
-          {:else}
-            <HeadlessButton
-              class="btn-ghost btn-sm volunteer-btn"
-              title={t('header.needs_reviewer')}
-              onclick={() => start_volunteer(bcp, name)}>
-              <IconHandHeart /> {t('header.volunteer_to_review')}
-            </HeadlessButton>
-          {/if}
-        {/if}
-      </div>
+      <HeadlessButton
+        class="{locale.includes(bcp) ? 'btn-primary' : 'btn-ghost'} btn-default locale-pill"
+        onclick={() => changeLocale(bcp)}>
+        {name}
+      </HeadlessButton>
     {/each}
-
     {#if auth_user.is_admin}
       {#each unpublishedLocales as [bcp, name] (bcp)}
-        <div class={['locale-row', { active: locale.includes(bcp) }]}>
-          <HeadlessButton
-            class="{locale.includes(bcp) ? 'btn-primary' : 'btn-ghost'} btn-default locale-switch"
-            onclick={() => changeLocale(bcp)}>
-            {name}
-            <IconKey />
-          </HeadlessButton>
-        </div>
+        <HeadlessButton
+          class="{locale.includes(bcp) ? 'btn-primary' : 'btn-ghost'} btn-default locale-pill"
+          onclick={() => changeLocale(bcp)}>
+          {name}
+          <IconKey />
+        </HeadlessButton>
       {/each}
     {/if}
   </div>
+
+  {#if current && needs_reviewer(current[0])}
+    <div class="volunteer">
+      {#if requested[current[0]]}
+        <span class="requested"><IconCheck /> {t('header.volunteer_sent', { values: { language: current[1] } })}</span>
+      {:else}
+        <p>{t('header.needs_reviewer')}</p>
+        <HeadlessButton
+          class="btn-primary btn-sm volunteer-btn"
+          onclick={() => start_volunteer(current[0], current[1])}>
+          <IconHandHeart /> {t('header.volunteer_to_review')}
+        </HeadlessButton>
+      {/if}
+    </div>
+  {/if}
 </Modal>
 
 {#if show_login}
@@ -115,47 +116,42 @@
 {/if}
 
 <style>
-  .locale-list {
+  .locale-pills {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 0.25rem;
   }
 
-  .locale-row {
+  .locale-pills :global(.locale-pill) {
+    text-transform: none !important;
+  }
+
+  .volunteer {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
-    border-radius: 0.5rem;
-    padding: 0.125rem;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--default-border-color);
   }
 
-  .locale-row.active {
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
+  .volunteer p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-secondary);
   }
 
-  .locale-list :global(.locale-switch) {
+  .volunteer :global(.volunteer-btn) {
     text-transform: none !important;
-    justify-content: flex-start;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .locale-list :global(.volunteer-btn) {
-    text-transform: none !important;
-    color: var(--primary);
-    white-space: nowrap;
     gap: 0.25rem;
-    flex-shrink: 0;
   }
 
   .requested {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     color: var(--color-secondary);
-    white-space: nowrap;
-    flex-shrink: 0;
-    padding-right: 0.5rem;
   }
 </style>

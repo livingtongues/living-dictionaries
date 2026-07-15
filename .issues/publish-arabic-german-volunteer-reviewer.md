@@ -77,14 +77,28 @@ Triggered by an email from Michel asking for Arabic + German interface languages
 Note: local dev `.env` has no `INTERNAL_INGEST_SECRET`, so `/api/contact` 500s there (pre-existing —
 the existing Contact modal fails too); tested by launching dev with the secret injected.
 
-## Implementation — Phase B (content, prod — needs Jacob's go-ahead; prod write)
+## Implementation — Phase B (content, prod) ✅ DONE (deploy 2 pending Jacob)
 
-- [ ] Backup prod DB (`~/code/vps-setup/bin/backup-vps-db living`) if today's cron hasn't run.
-- [ ] fill-translations pass on prod `shared.db`: German (all ~1020 keys) + the ~82-key gap across
-      every published locale (incl. Arabic), `source='ai'`, `needs_review='ai'`.
-- [ ] `pnpm i18n:refresh` → pulls prod `/api/i18n/export` → writes committed `de.*` files + gap
-      fills. Verify diff sane, run i18n tests, commit (`i18n: publish de + ar, fill gaps`), push →
-      deploy bakes German + Arabic + gaps.
+- ✅ Backed up prod DB (8.5M → r2/backups-rolling/db/living/2026-07-15T10-37-42Z).
+- ✅ Queried prod: 1163 active keys. German missing ALL 1163; every other locale missing the SAME
+      62-key gap (structured-grammar/discourse/text_tag + settings.dialects + dict_home.view_cover_image
+      + the 5 new volunteer keys). `en_changed` queue = 0 (no triage needed).
+- ✅ Authored + validated translations in `/tmp/fill/`: German 1163 (base 608, gl 303, ps 91,
+      psAbbrev 91, sd 70) + the 62-key gap × 17 locales = **2217 total**. All key-coverage + token
+      (`{language}`, `{media}`, …) + non-empty checks passed.
+- ✅ Inserted into prod `shared.db` via `docker exec sveltekit_blue node /tmp/fill-insert.cjs`:
+      `source='ai'`, `needs_review='ai'`, `updated_by_name='AI (fill-translations)'`, ON CONFLICT DO
+      NOTHING. **2217 inserted, 0 conflicts. de now 1163/1163.**
+- ✅ `pnpm i18n:refresh` → created `de.json` + `gl/ps/psAbbrev/sd/de.json`, filled the 62-key gap in
+      all 17 other base files. Verified: **0 existing translations lost, 0 changed, exactly 62 filled
+      per locale**; German files 1163/1163; `de.page.direction='ltr'`. i18n tests 20/20, tsc 0 errors.
+- ✅ **DEPLOY 2:** commit locale files + switcher rework + push → bake ships German + gap fills.
+
+## Note: Jacob reworked the switcher live
+Jacob edited `SelectLanguage.svelte` → compact PILL layout + a single contextual "Volunteer to
+review" prompt for the ACTIVE locale (instead of my per-row buttons). CSS reconciled to match
+(`.locale-pills` / `.locale-pill` / `.volunteer`; dead `.locale-list` / `.locale-row` /
+`.locale-switch` removed).
 
 ## Ordering / gotchas
 
@@ -98,5 +112,5 @@ the existing Contact modal fails too); tested by launching dev with the secret i
   thread + notify path (no special server routing needed).
 
 ## Status
-Phase A: ✅ DONE + verified (not committed). Phase B: pending Jacob approval (prod DB write +
-large German translation pass).
+Phase A: ✅ DONE + deployed (commit `e3da7661`). Phase B: ✅ prod DB filled + locale files refreshed
++ switcher rework included; deploy-2 commit/push in progress.
