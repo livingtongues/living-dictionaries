@@ -58,7 +58,7 @@ toggles + delete + a dialects manager [editor+: rename / map areal-extent geomet
 GeoTaggingModal / delete]; catalog fields moved to home), about,
 contributors, grammar, history, export, import, invite) · `/chat` (standalone membership-based
 chat — DB-managed channels + DMs for admins, super managers, and partners; server-authoritative
-via `/api/chat/*` polling, gate = member of ≥1 room, `admin_room` channels manageable only by
+via `/api/chat/*` polling, gate = admin OR a `users.chat_access` grant (toggled on /admin/users/[id]) OR member of ≥1 room — one circle, any chat member can DM any other; `admin_room` channels manageable only by
 super admins) · `/translate` (standalone translator backend — server-authoritative via
 `/api/translate/*`, gate = ≥1 `translator_languages` row or admin) · `/admin/*` (local-first super-admin: dashboard + ntfy onboarding, messages incl.
 unmatched→match + AI triage, users, dictionaries [paginated table w/ serve/tolerate/delete bucket

@@ -15,6 +15,7 @@ interface UserRow {
   preferred_locale: string | null
   unsubscribed_from_emails: string | null
   roles: string | null
+  chat_access: number
 }
 
 /**
@@ -24,7 +25,7 @@ interface UserRow {
  */
 export function get_user({ db, user_id, cookies }: { db: Database.Database, user_id: string, cookies?: Pick<Cookies, 'get'> }): AuthUserData | undefined {
   const user = db.prepare(
-    'SELECT id, email, name, avatar_url, created_at, preferred_locale, unsubscribed_from_emails, roles FROM users WHERE id = ?',
+    'SELECT id, email, name, avatar_url, created_at, preferred_locale, unsubscribed_from_emails, roles, chat_access FROM users WHERE id = ?',
   ).get(user_id) as UserRow | undefined
   if (!user)
     return undefined
@@ -32,9 +33,10 @@ export function get_user({ db, user_id, cookies }: { db: Database.Database, user
   const roles = user.roles ? JSON.parse(user.roles) as SiteRole[] : null
   const admin_level = resolve_admin_level({ email: user.email, roles, cookies })
 
-  // Admins are boot-seeded into the system chat rooms, so they're always
-  // members; everyone else is a member iff someone added them to a channel.
+  // A chat member is an admin (always), anyone granted chat_access, or anyone
+  // added to >= 1 room. See `is_chat_member_by_id` in chat-db.ts — same rule.
   const is_chat_member = admin_level >= 2
+    || !!user.chat_access
     || !!db.prepare('SELECT 1 FROM chat_room_members WHERE user_id = ? LIMIT 1').get(user.id)
 
   // Admins may translate every locale; others only their assigned ones.

@@ -1,8 +1,8 @@
 /**
- * Shared server helpers for the `/api/chat/*` endpoints: the membership auth
- * gate (verify_auth + member-of-≥1-room; NOT an admin-level check — partners
- * and super managers get in by being added to a channel) and the manage gate
- * for channel administration.
+ * Shared server helpers for the `/api/chat/*` endpoints: the chat-member auth
+ * gate (verify_auth + admin OR chat_access grant OR member-of-≥1-room — partners
+ * and super managers get in via the grant or by being added to a channel) and
+ * the manage gate for channel administration.
  */
 import type { RequestEvent } from '@sveltejs/kit'
 import type Database from 'better-sqlite3'
@@ -13,8 +13,7 @@ import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { get_effective_admin_level } from '$lib/server/effective-admin-level'
 import { error } from '@sveltejs/kit'
-import { can_manage_room, ChatError, get_room, has_any_membership, is_member } from './chat-db'
-import { ensure_admin_system_memberships } from './ensure-team-membership'
+import { can_manage_room, ChatError, get_room, is_chat_member_by_id, is_member } from './chat-db'
 
 export interface ChatGate {
   db: Database.Database
@@ -27,11 +26,9 @@ export async function gate_chat(event: RequestEvent): Promise<ChatGate> {
   const { user_id, email } = await verify_auth(event)
   const db = get_shared_db()
   const admin_level = get_effective_admin_level({ db, user_id, email, cookies: event.cookies })
-  // Admins are seeded into the system rooms at boot; this lazy backstop covers
-  // rows created between boots (and dev-cookie admins in local dev).
-  if (admin_level >= 2)
-    ensure_admin_system_memberships({ db, user_id })
-  if (!has_any_membership({ db, user_id }))
+  // Chat member = admin (level >= 2) OR chat_access grant OR in >= 1 room.
+  // Admins pass without needing a room membership.
+  if (admin_level < 2 && !is_chat_member_by_id({ db, user_id }))
     error(ResponseCodes.FORBIDDEN, 'Chat members only')
   return { db, user_id, email: email ?? null, admin_level }
 }

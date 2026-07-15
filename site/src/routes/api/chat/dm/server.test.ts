@@ -1,7 +1,7 @@
 import type { ChatDmResponse } from './+server'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { open_test_shared_db } from '$lib/db/server/shared-db'
-import { ADMIN, make_cookies, PARTNER, seed_chat_users, seed_rooms, SUPER_ADMIN, token_for } from '../_test-helpers'
+import { ADMIN, make_cookies, PARTNER, seed_chat_users, seed_rooms, STRANGER, SUPER_ADMIN, token_for } from '../_test-helpers'
 import { POST } from './+server'
 
 let db: ReturnType<typeof open_test_shared_db>
@@ -41,9 +41,16 @@ describe(POST, () => {
     expect(room_id).toContain('dm:')
   })
 
-  test('403 when the target shares no room with the caller', async () => {
-    // Greg is only in the admin room + system rooms — no overlap with the partner.
-    await expect(call({ token: await token_for(PARTNER), user_id: ADMIN.user_id }))
+  test('partner can DM another chat member they share no room with (one circle)', async () => {
+    // Greg is only in the admin room — no shared room with the partner, but both
+    // are chat members, so the DM is allowed.
+    const response = await call({ token: await token_for(PARTNER), user_id: ADMIN.user_id })
+    const { room_id } = await response.json() as ChatDmResponse
+    expect(room_id).toContain('dm:')
+  })
+
+  test('403 when the target is not a chat member', async () => {
+    await expect(call({ token: await token_for(SUPER_ADMIN), user_id: STRANGER.user_id }))
       .rejects.toMatchObject({ status: 403 })
   })
 })

@@ -31,16 +31,28 @@ Key design facts:
   column**, and are **absent from `SYNCABLE_TABLE_NAMES`** → the sync engine never touches them.
   Privacy: DMs + private channels must never land in a non-member's local wa-sqlite DB.
   Served only through the membership-filtered `/api/chat/*` endpoints + a 5s poll.
-- **Access gate = member of ≥1 room** (`gate_chat`), NOT an admin-level check. Page entry rides on
+- **Chat-member rule (single source of truth: `is_chat_member_by_id` in chat-db.ts, mirrored in
+  get-user.ts's `is_chat_member`) = admin (≥2) OR `users.chat_access` grant OR member of ≥1 room.**
+  This is the `/chat` access gate (`gate_chat`), NOT an admin-level check. Page entry rides on
   `AuthUserData.is_chat_member` (SSR, no extra nav round-trip); endpoints re-check fresh.
+  - **`chat_access`** is a boolean `users` column (2026-07-15, syncable/download-only), toggled per
+    user on `/admin/users/[id]` ("Grant chat access", site-admin only, `/api/admin/users/[id]/chat-access`).
+    It's the durable way to admit someone (e.g. a super manager) to chat WITHOUT first adding them to a
+    channel. Jacob's design: "anyone admitted to chat can DM anyone" — see the one-circle rule below.
+- **One circle**: any chat member can DM/see any other. `can_dm` = both parties are chat members
+  (replaced the old `shares_room` "must share a channel" rule, 2026-07-15). `list_chat_directory`
+  is caller-independent — it returns **every chat member** (self included, System excluded). Names
+  resolve from `users.name` → email. (Partner-scoping was dropped; revisit only if external partners
+  need isolating.)
 - **All channels are DB rows** (FIXED_CHANNELS is gone — Jacob 2026-07-03: "cleaner in the long
   run"). Admins (≥2) create/rename/delete channels + add/remove members in the /chat UI;
-  `chat_rooms.admin_room = 1` rooms (the four originals) are manageable **only by super admins
-  (level 3)**. The two SYSTEM rooms (`all-admins`, `notifications`) are boot-seeded
-  (`ensure_all_admins_in_team_chat`) with every allow-list admin and can never be deleted;
-  `notifications` stays admins-only (platform telemetry — don't add partners).
-- **Directory = people who share a room with you** (`list_chat_directory`), which also scopes who
-  you may DM (`shares_room` enforced server-side). Names resolve from `users.name` → email.
+  `chat_rooms.admin_room = 1` rooms are manageable **only by super admins (level 3)**.
+  - **Membership is fully UI-managed** (2026-07-15) — the boot step no longer seeds admins into any
+    room. `ensure_notifications_room` only upserts the one SYSTEM room (`notifications`); admins
+    always pass the gate via their level, and are added to `notifications` explicitly if they want
+    the feed. The old **`all-admins` room was removed entirely** (`ROOM_ALL_ADMINS` /
+    `ensure_all_admins_in_team_chat` are gone); `notifications` can never be deleted and stays
+    telemetry-only.
 - **Non-admin members always get EMAIL pings** (`notify_chat_member`); allow-list admins keep their
   ntfy/email `notify_channel` pref. Same one-ping-per-unread-batch policy + 1-day gentle reping
   cron for everyone. Message `body_html` is **sanitized server-side with `xss`** at post/edit —
@@ -48,7 +60,9 @@ Key design facts:
 - **The System bot** (`SYSTEM_USER_ID = 'system'`, a real `users` row) authors platform notices.
   Three deliberate behaviors (2026-07-14, Jacob):
   - **`post_message` bypasses `require_member` for System** — it posts into rooms it isn't a member
-    of (notifications, and agent-authored DMs) WITHOUT joining, so a DM stays two-person.
+    of (notifications, and agent-authored DMs) WITHOUT joining, so a DM stays two-person. As of
+    2026-07-15 System is **never** a room member (the notifications-membership insert was removed +
+    `list_my_rooms.member_ids` filters it) so it never shows in a member list.
   - **It's excluded from read-receipt bubbles** (`get_room_read_positions` filters it) — posting
     marks the author "read", which otherwise parked a bogus System bubble on the latest message.
   - **The `notifications` room no longer pings per event.** `post_system_notification` only records

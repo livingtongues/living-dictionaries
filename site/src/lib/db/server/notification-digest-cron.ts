@@ -141,12 +141,12 @@ function run_guarded(state: CronState): void {
 }
 
 if (import.meta.vitest) {
-  const { ensure_all_admins_in_team_chat } = await import('$lib/server/chat/ensure-team-membership')
+  const { seed_admins_in_notifications } = await import('$lib/server/chat/chat-test-helpers')
   const { post_system_notification } = await import('$lib/server/chat/system-notifier')
   const { format_new_user_notification, format_new_dictionary_notification } = await import('$lib/server/chat/notification-messages')
 
   function seed_notifications(db: ReturnType<typeof open_test_shared_db>) {
-    ensure_all_admins_in_team_chat({ db })
+    seed_admins_in_notifications(db)
     post_system_notification({ db, content: format_new_user_notification({ actor: 'A', email: 'a@b.com', base_url: 'https://ld.app' }) })
     post_system_notification({ db, content: format_new_user_notification({ actor: 'B', email: 'b@b.com', base_url: 'https://ld.app' }) })
     post_system_notification({ db, content: format_new_dictionary_notification({ dictionary_name: 'D', dictionary_id: 'd1', actor: 'A', base_url: 'https://ld.app' }) })

@@ -60,7 +60,7 @@ const super_admin_seed: SeedConfig = {
   admin_level: 3,
   directory,
   rooms: [
-    room({ id: 'all-admins', name: 'All Admins', admin_room: true, can_manage: true, member_ids: ['u-jacob', 'u-diego', 'u-greg'], online_member_ids: ['u-jacob', 'u-diego'] }),
+    room({ id: 'notifications', name: 'Notifications', admin_room: true, can_manage: true, member_ids: ['u-jacob', 'u-diego', 'u-greg'], online_member_ids: ['u-jacob', 'u-diego'] }),
     room({ id: 'partners', name: 'Yawalapiti project', can_manage: true, member_ids: ['u-jacob', 'u-partner'], unread: 2 }),
   ],
 }
@@ -70,7 +70,7 @@ const admin_view_seed: SeedConfig = {
   admin_level: 2,
   directory,
   rooms: [
-    room({ id: 'all-admins', name: 'All Admins', admin_room: true, member_ids: ['u-jacob', 'u-diego', 'u-greg'], online_member_ids: ['u-diego'] }),
+    room({ id: 'notifications', name: 'Notifications', admin_room: true, member_ids: ['u-jacob', 'u-diego', 'u-greg'], online_member_ids: ['u-diego'] }),
   ],
 }
 

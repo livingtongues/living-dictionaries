@@ -7,7 +7,7 @@ import { json } from '@sveltejs/kit'
 
 export interface ChatRoomsResponse {
   rooms: RoomSummary[]
-  /** Everyone sharing a room with the caller (self included) — name resolution, presence, DM picker. */
+  /** Every chat member (self included) — name resolution, presence, DM picker. */
   directory: ChatDirectoryEntry[]
   me: { user_id: string, admin_level: EffectiveAdminLevel }
 }
@@ -16,7 +16,7 @@ export const GET: RequestHandler = async (event) => {
   const { db, user_id, admin_level } = await gate_chat(event)
   return json({
     rooms: list_my_rooms({ db, user_id, admin_level }),
-    directory: list_chat_directory({ db, user_id }),
+    directory: list_chat_directory({ db }),
     me: { user_id, admin_level },
   } satisfies ChatRoomsResponse)
 }

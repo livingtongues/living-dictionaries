@@ -41,13 +41,15 @@ DELETE FROM chat_rooms WHERE id = 'anna-greg-jacob';
 -- them from the lazy upsert era). All four are admin rooms. The two 'all'
 -- rooms (all-admins + notifications) get admin membership from the boot step
 -- (ensure_all_admins_in_team_chat), which also creates missing user rows.
+-- NOTE (2026-07-15): the 'all-admins' room was retired (see 20260715_chat_access
+-- + the chat-access redesign); it's no longer seeded here so fresh DBs never
+-- create it. Prod's existing row is removed by a one-time ops step.
 INSERT INTO chat_rooms (id, kind, name) VALUES
-  ('all-admins', 'channel', 'All Admins'),
   ('notifications', 'channel', 'Notifications'),
   ('diego-greg-jacob', 'channel', 'Diego, Greg & Jacob'),
   ('diego-anna-greg', 'channel', 'Diego, Anna & Greg')
 ON CONFLICT (id) DO NOTHING;
-UPDATE chat_rooms SET admin_room = 1 WHERE id IN ('all-admins', 'notifications', 'diego-greg-jacob', 'diego-anna-greg');
+UPDATE chat_rooms SET admin_room = 1 WHERE id IN ('notifications', 'diego-greg-jacob', 'diego-anna-greg');
 
 -- Membership for the two explicit-member admin rooms, resolved by email.
 -- No-op wherever those users rows don't exist (e.g. fresh admin clients,

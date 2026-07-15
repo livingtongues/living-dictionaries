@@ -64,6 +64,14 @@ export const users = sqliteTable('users', {
    */
   roles: text({ mode: 'json' }).$type<SiteRole[]>(),
   /**
+   * Explicit "admitted to /chat" grant, toggled per-user from /admin/users/[id].
+   * A user is a chat member iff admin (level >= 2) OR `chat_access` OR a member
+   * of >= 1 chat room; any chat member can DM/see any other. This is the durable
+   * way to admit someone (e.g. a super manager) to chat without first adding
+   * them to a channel. Download-only on admin clients, like the other columns.
+   */
+  chat_access: integer({ mode: 'boolean' }).notNull().default(false),
+  /**
    * ISO 8601 timestamp of when the user unsubscribed from non-transactional
    * email. NULL = they're still subscribed. UI surfaces a boolean via
    * `!!users.unsubscribed_from_emails`; admin tooling can read the value for

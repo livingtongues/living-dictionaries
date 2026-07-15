@@ -10,7 +10,7 @@ import { start_r2_snapshot_builder } from '$lib/db/server/r2-snapshot-builder'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { start_system_outbox_cron_once } from '$lib/db/server/system-outbox-cron'
 import { start_wal_checkpoint_cron_once } from '$lib/db/server/wal-checkpoint-cron'
-import { ensure_all_admins_in_team_chat } from '$lib/server/chat/ensure-team-membership'
+import { ensure_notifications_room } from '$lib/server/chat/ensure-team-membership'
 import { is_cross_origin_form_forbidden } from '$lib/server/csrf'
 import { boot_i18n_catalog } from '$lib/server/i18n/boot'
 import { log_server_event } from '$lib/server/log-server-event'
@@ -27,11 +27,11 @@ get_shared_db()
 // table is gone. Runs in dev too so local + prod share one storage topology.
 split_client_logs_from_shared({ shared_db: get_shared_db(), logs_db: get_logs_db() })
 
-// Make every allow-listed admin a member of the team-chat channels (creating any
-// missing admin user rows), so posting in "All Admins" reaches everyone before
-// they've ever opened the chat. Idempotent (ON CONFLICT DO NOTHING) — safe on
-// every boot + both blue/green containers.
-ensure_all_admins_in_team_chat()
+// Ensure the one system chat room (`notifications`) exists so the System bot can
+// post platform events + admins can add members from the UI. Chat membership is
+// otherwise fully UI-managed (no admin-list seeding). Idempotent — safe on every
+// boot + both blue/green containers.
+ensure_notifications_room()
 
 // Mirror the code's English i18n catalog into `i18n_keys` (new/changed/removed
 // keys) and, on a virgin DB, seed translations from the committed locale files.

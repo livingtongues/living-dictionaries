@@ -3,6 +3,7 @@
   import IconInfoCircle from '~icons/fa-solid/info-circle'
   import IconQuestionCircle from '~icons/fa-regular/question-circle'
   import type { Tables } from '$lib/types'
+  import { is_api_unavailable_bucket } from '$lib/constants'
   import type { DictSyncStatus } from '$lib/db/dict-client/dict-sync-status.svelte'
   import DictSyncStatusButton from '$lib/db/dict-client/DictSyncStatus.svelte'
   import { page } from '$app/state'
@@ -139,7 +140,7 @@
       </span>
     </a>
   {/if}
-  {#if is_editor_or_above}
+  {#if is_editor_or_above && !is_api_unavailable_bucket(dictionary.bucket)}
     <a
       href={`/${dictionary.url}/agents`}
       class:active={page.url.pathname.includes('agents')}>

@@ -5,13 +5,14 @@
  *
  * Channels are DB-managed rows: admins (level >= 2) create channels and manage
  * their members in the UI; rooms flagged `admin_room` are only manageable by
- * super admins (level 3). The two system rooms (`all-admins`,
- * `notifications`) are seeded + admin-joined at boot by
- * `ensure_all_admins_in_team_chat`. Raw better-sqlite3 statements — chat has
- * no JSON columns, so the auto-parse driver isn't needed.
+ * super admins (level 3). The one system room (`notifications`) is ensured at
+ * boot by `ensure_notifications_room`; its membership is UI-managed. Raw
+ * better-sqlite3 statements — chat has no JSON columns, so the auto-parse
+ * driver isn't needed.
  */
 import type Database from 'better-sqlite3'
 import type { EffectiveAdminLevel } from '$lib/admins'
+import { ADMINS, is_admin } from '$lib/admins'
 // default-import: 'xss' is CJS — named imports break Vite dev SSR (see sanitize-rich-text.ts)
 import xss from 'xss'
 import { open_test_shared_db } from '$lib/db/server/shared-db'
@@ -87,7 +88,7 @@ export interface RoomSummary {
   online_member_ids: string[]
 }
 
-/** One person in the caller's chat directory (anyone sharing a room, self included). */
+/** One person in the chat directory (every chat member, self included, System excluded). */
 export interface ChatDirectoryEntry {
   user_id: string
   name: string | null
@@ -200,36 +201,54 @@ export function add_room_member({ db, room_id, user_id }: { db: Database.Databas
 }
 
 export function remove_room_member({ db, room_id, user_id }: { db: Database.Database, room_id: string, user_id: string }): void {
-  // The System bot must stay in its room or platform-event posts start 403ing.
+  // The System bot is never a real member (it posts by bypassing the gate); it
+  // must never be added/removed as one.
   if (user_id === SYSTEM_USER_ID)
     throw new ChatError('The System bot cannot be removed', 400)
   db.prepare('DELETE FROM chat_room_members WHERE room_id = ? AND user_id = ?').run(room_id, user_id)
 }
 
-/** The /chat access gate: does this user belong to at least one room? */
+/** Is this user a member of at least one room? */
 export function has_any_membership({ db, user_id }: { db: Database.Database, user_id: string }): boolean {
   return !!db.prepare('SELECT 1 FROM chat_room_members WHERE user_id = ? LIMIT 1').get(user_id)
 }
 
-/** Do two users share at least one room? (DM permission rule.) */
-export function shares_room({ db, user_id, other_user_id }: { db: Database.Database, user_id: string, other_user_id: string }): boolean {
-  return !!db.prepare('SELECT 1 FROM chat_room_members a JOIN chat_room_members b ON b.room_id = a.room_id WHERE a.user_id = ? AND b.user_id = ? LIMIT 1')
-    .get(user_id, other_user_id)
+/**
+ * The chat-member rule — single source of truth (mirrored in get-user.ts's
+ * `is_chat_member`): an admin (level >= 2), anyone granted `chat_access`, or
+ * anyone added to >= 1 room. Every chat member can DM/see every other (one
+ * circle), so this also decides the /chat gate + DM permission + directory.
+ */
+export function is_chat_member_by_id({ db, user_id }: { db: Database.Database, user_id: string }): boolean {
+  const row = db.prepare('SELECT email, chat_access FROM users WHERE id = ?').get(user_id) as { email: string | null, chat_access: number } | undefined
+  if (!row)
+    return false
+  if (row.chat_access || is_admin(row.email))
+    return true
+  return has_any_membership({ db, user_id })
+}
+
+/** DM permission: both parties must be chat members (one circle). */
+export function can_dm({ db, user_id, other_user_id }: { db: Database.Database, user_id: string, other_user_id: string }): boolean {
+  return is_chat_member_by_id({ db, user_id }) && is_chat_member_by_id({ db, user_id: other_user_id })
 }
 
 /**
- * Everyone who shares a room with the caller (self included, System excluded),
- * with presence — the name-resolution directory + DM picker source. Members of
- * your channels are the only people you can see/DM.
+ * Every chat member (self included, System excluded), with presence — the
+ * name-resolution directory + DM picker source. Since chat is one circle,
+ * everyone admitted can see + DM everyone else, so this is caller-independent.
  */
-export function list_chat_directory({ db, user_id }: { db: Database.Database, user_id: string }): ChatDirectoryEntry[] {
-  const rows = db.prepare(`SELECT DISTINCT u.id AS user_id, u.name, u.email
-    FROM chat_room_members mine
-    JOIN chat_room_members them ON them.room_id = mine.room_id
-    JOIN users u ON u.id = them.user_id
-    WHERE mine.user_id = ? AND them.user_id != ?
+export function list_chat_directory({ db }: { db: Database.Database }): ChatDirectoryEntry[] {
+  const admin_emails = ADMINS.map(admin => admin.email)
+  const placeholders = admin_emails.map(() => '?').join(', ')
+  const rows = db.prepare(`SELECT u.id AS user_id, u.name, u.email
+    FROM users u
+    WHERE u.id != ?
+      AND (u.chat_access = 1
+        OR u.email IN (${placeholders})
+        OR EXISTS (SELECT 1 FROM chat_room_members m WHERE m.user_id = u.id))
     ORDER BY u.name IS NULL, u.name COLLATE NOCASE, u.email`)
-    .all(user_id, SYSTEM_USER_ID) as { user_id: string, name: string | null, email: string | null }[]
+    .all(SYSTEM_USER_ID, ...admin_emails) as { user_id: string, name: string | null, email: string | null }[]
   const online = online_user_ids({ db })
   return rows.map(row => ({ ...row, online: online.has(row.user_id) }))
 }
@@ -487,7 +506,9 @@ export function list_my_rooms({ db, user_id, admin_level = 0 }: { db: Database.D
       .get(room.id, user_id, last_read, last_read) as { count: number }).count
     const last_message = db.prepare('SELECT * FROM chat_messages WHERE room_id = ? AND deleted_at IS NULL ORDER BY created_at DESC, id DESC LIMIT 1')
       .get(room.id) as ChatMessageRow | undefined
-    const member_ids = (db.prepare('SELECT user_id FROM chat_room_members WHERE room_id = ?').all(room.id) as { user_id: string }[]).map(row => row.user_id)
+    // Exclude the System bot: it may hold a membership row (legacy), but it's a
+    // bot, never a person, so it must not appear in a room's member list.
+    const member_ids = (db.prepare('SELECT user_id FROM chat_room_members WHERE room_id = ? AND user_id != ?').all(room.id, SYSTEM_USER_ID) as { user_id: string }[]).map(row => row.user_id)
     return {
       id: room.id,
       kind: room.kind,
@@ -636,37 +657,58 @@ if (import.meta.vitest) {
 
     it('refuses system rooms and DMs', () => {
       const db = fresh_db()
-      // 'all-admins' is seeded by the squashed migration.
-      expect(() => delete_room({ db, room_id: 'all-admins' })).toThrow(ChatError)
+      // 'notifications' is seeded by the squashed migration.
+      expect(() => delete_room({ db, room_id: 'notifications' })).toThrow(ChatError)
       const dm = ensure_dm({ db, user_id: 'u-a', other_user_id: 'u-b' })
       expect(() => delete_room({ db, room_id: dm })).toThrow(ChatError)
     })
   })
 
   describe(list_chat_directory, () => {
-    it('returns everyone sharing a room (self included), not strangers or System', () => {
+    it('returns every chat member (self included, System excluded); strangers with no access are hidden', () => {
       const db = fresh_db()
       seed_user(db, 'u-a', 'a@example.com', 'Alice')
       seed_user(db, 'u-b', 'b@example.com', 'Bob')
-      seed_user(db, 'u-c', 'c@example.com', 'Carol')
+      seed_user(db, 'u-granted', 'g@example.com', 'Grace') // no room, chat_access grant
+      seed_user(db, 'u-stranger', 's@example.com', 'Stan') // not a chat member
       seed_user(db, SYSTEM_USER_ID, null, 'System')
       const room = seed_channel(db, 'General', ['u-a', 'u-b'])
       add_room_member({ db, room_id: room.id, user_id: SYSTEM_USER_ID })
-      seed_channel(db, 'Elsewhere', ['u-c'])
-      const ids = list_chat_directory({ db, user_id: 'u-a' }).map(entry => entry.user_id).sort()
-      expect(ids).toEqual(['u-a', 'u-b'])
+      db.prepare('UPDATE users SET chat_access = 1 WHERE id = ?').run('u-granted')
+      const ids = list_chat_directory({ db }).map(entry => entry.user_id).sort()
+      // u-a + u-b via room, u-granted via grant; System + the stranger excluded.
+      expect(ids).toEqual(['u-a', 'u-b', 'u-granted'])
     })
   })
 
-  describe(shares_room, () => {
-    it('true only for users with a common room', () => {
+  describe(is_chat_member_by_id, () => {
+    it('true for room members and chat_access grantees, false for strangers + System', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-room', 'r@example.com')
+      seed_user(db, 'u-granted', 'g@example.com')
+      seed_user(db, 'u-stranger', 's@example.com')
+      seed_user(db, SYSTEM_USER_ID, null, 'System')
+      seed_channel(db, 'General', ['u-room'])
+      db.prepare('UPDATE users SET chat_access = 1 WHERE id = ?').run('u-granted')
+      expect(is_chat_member_by_id({ db, user_id: 'u-room' })).toBe(true)
+      expect(is_chat_member_by_id({ db, user_id: 'u-granted' })).toBe(true)
+      expect(is_chat_member_by_id({ db, user_id: 'u-stranger' })).toBe(false)
+      expect(is_chat_member_by_id({ db, user_id: SYSTEM_USER_ID })).toBe(false)
+      expect(is_chat_member_by_id({ db, user_id: 'nobody' })).toBe(false)
+    })
+  })
+
+  describe(can_dm, () => {
+    it('allows a DM only when both parties are chat members', () => {
       const db = fresh_db()
       seed_user(db, 'u-a', 'a@example.com')
-      seed_user(db, 'u-b', 'b@example.com')
-      seed_user(db, 'u-c', 'c@example.com')
-      seed_channel(db, 'General', ['u-a', 'u-b'])
-      expect(shares_room({ db, user_id: 'u-a', other_user_id: 'u-b' })).toBe(true)
-      expect(shares_room({ db, user_id: 'u-a', other_user_id: 'u-c' })).toBe(false)
+      seed_user(db, 'u-granted', 'g@example.com')
+      seed_user(db, 'u-stranger', 's@example.com')
+      seed_channel(db, 'General', ['u-a'])
+      db.prepare('UPDATE users SET chat_access = 1 WHERE id = ?').run('u-granted')
+      // Two chat members in different rooms can still DM (one circle).
+      expect(can_dm({ db, user_id: 'u-a', other_user_id: 'u-granted' })).toBe(true)
+      expect(can_dm({ db, user_id: 'u-a', other_user_id: 'u-stranger' })).toBe(false)
     })
   })
 

@@ -5,19 +5,17 @@
  * and adds the server-only values (presence window, page size).
  *
  * Channels are DB-managed rows (created + administered in the /chat UI) —
- * only the two SYSTEM rooms keep well-known ids the code needs to reference.
+ * only the SYSTEM room keeps a well-known id the code needs to reference.
  */
 
-/** Every allow-listed admin is auto-joined at boot; membership beyond that is UI-managed. */
-export const ROOM_ALL_ADMINS = 'all-admins'
 /**
  * System-notifications channel. The server's System bot posts platform events
- * (new dictionary / new user / invite sent) here; every admin is a member.
- * Stays admins-only — it carries platform telemetry.
+ * (new dictionary / new user / invite sent) here. Membership is UI-managed
+ * (admins add whoever should receive the feed). Carries platform telemetry.
  */
 export const ROOM_NOTIFICATIONS = 'notifications'
-/** The system rooms can't be deleted; like all admin rooms they're only manageable by super admins. */
-export const SYSTEM_ROOM_IDS = [ROOM_ALL_ADMINS, ROOM_NOTIFICATIONS] as const
+/** The system room can't be deleted; like all admin rooms it's only manageable by super admins. */
+export const SYSTEM_ROOM_IDS = [ROOM_NOTIFICATIONS] as const
 
 /**
  * The System bot that authors notification messages. A real `users` row (so the

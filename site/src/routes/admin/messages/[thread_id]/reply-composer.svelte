@@ -13,6 +13,7 @@
   import RichTextEditor from '$lib/components/ui/RichTextEditor.svelte'
   import { format_bytes } from '$lib/utils/format-bytes'
   import { html_to_text } from '$lib/utils/html-to-text'
+  import { paste_image_from_clipboard } from '$lib/utils/paste-image-from-clipboard'
   import { api_messages_reply } from '../../../api/messages/reply/_call'
 
   interface Props {
@@ -124,6 +125,12 @@
     staged.splice(index, 1)
   }
 
+  function handle_paste(event: ClipboardEvent) {
+    const file = paste_image_from_clipboard(event)
+    if (file)
+      staged.push({ file })
+  }
+
   function on_editor_keydown(event: KeyboardEvent) {
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
       event.preventDefault()
@@ -144,7 +151,8 @@
     placeholder="Type your reply…"
     disabled={sending}
     toolbar="email"
-    on_keydown={on_editor_keydown} />
+    on_keydown={on_editor_keydown}
+    on_paste={handle_paste} />
 
   {#if staged.length > 0}
     <ul class="staged-list">

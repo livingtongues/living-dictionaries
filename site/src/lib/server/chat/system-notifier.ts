@@ -17,15 +17,17 @@ import { SYSTEM_USER_ID } from '$lib/chat/constants'
 
 const NOTIFICATIONS_ROOM_NAME = 'Notifications'
 
-/** Idempotently ensure the System bot user + Notifications room + its membership. */
+/**
+ * Idempotently ensure the System bot user + Notifications room exist. The System
+ * bot is deliberately NOT a room member — it posts by bypassing the membership
+ * gate (see `post_message`), and a bot must never show up in a member list.
+ */
 function ensure_system_notifier(db: Database.Database): void {
   const now = new Date().toISOString()
   db.prepare('INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, NULL, ?, \'[]\', ?, ?) ON CONFLICT(id) DO NOTHING')
     .run(SYSTEM_USER_ID, SYSTEM_USER_NAME, now, now)
   db.prepare('INSERT INTO chat_rooms (id, kind, name, admin_room, created_at, updated_at) VALUES (?, \'channel\', ?, 1, ?, ?) ON CONFLICT(id) DO NOTHING')
     .run(ROOM_NOTIFICATIONS, NOTIFICATIONS_ROOM_NAME, now, now)
-  db.prepare('INSERT INTO chat_room_members (room_id, user_id, created_at) VALUES (?, ?, ?) ON CONFLICT(room_id, user_id) DO NOTHING')
-    .run(ROOM_NOTIFICATIONS, SYSTEM_USER_ID, now)
 }
 
 export function post_system_notification({ db, content }: {
@@ -45,7 +47,7 @@ export function post_system_notification({ db, content }: {
 
 if (import.meta.vitest) {
   const { open_test_shared_db } = await import('$lib/db/server/shared-db')
-  const { ensure_all_admins_in_team_chat } = await import('./ensure-team-membership')
+  const { seed_admins_in_notifications } = await import('./chat-test-helpers')
   const { format_new_dictionary_notification } = await import('./notification-messages')
 
   function notified_at(db: Database.Database, room_id: string, user_id: string): string | null {
@@ -61,16 +63,23 @@ if (import.meta.vitest) {
   describe(post_system_notification, () => {
     it('posts the message to the Notifications room as the System bot', () => {
       const db = open_test_shared_db()
-      ensure_all_admins_in_team_chat({ db })
+      seed_admins_in_notifications(db)
       post_system_notification({ db, content })
       const row = db.prepare('SELECT author_user_id, body_text FROM chat_messages WHERE room_id = ?').get(ROOM_NOTIFICATIONS) as { author_user_id: string, body_text: string } | undefined
       expect(row?.author_user_id).toBe(SYSTEM_USER_ID)
       expect(row?.body_text).toContain('created a new dictionary')
     })
 
+    it('does NOT make the System bot a room member', () => {
+      const db = open_test_shared_db()
+      seed_admins_in_notifications(db)
+      post_system_notification({ db, content })
+      expect(db.prepare('SELECT 1 FROM chat_room_members WHERE room_id = ? AND user_id = ?').get(ROOM_NOTIFICATIONS, SYSTEM_USER_ID)).toBeUndefined()
+    })
+
     it('sends NO immediate external ping (batched into the daily digest instead)', () => {
       const db = open_test_shared_db()
-      ensure_all_admins_in_team_chat({ db })
+      seed_admins_in_notifications(db)
       post_system_notification({ db, content })
       expect(notified_at(db, ROOM_NOTIFICATIONS, diego_id(db))).toBeNull()
     })

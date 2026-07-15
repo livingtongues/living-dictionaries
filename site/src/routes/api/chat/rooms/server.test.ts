@@ -41,23 +41,23 @@ describe(GET, () => {
     await expect(call(await token_for(STRANGER))).rejects.toMatchObject({ status: 403 })
   })
 
-  test('partner sees only their room + a directory scoped to co-members', async () => {
+  test('partner sees only their room, but the directory is the whole chat circle', async () => {
     const response = await call(await token_for(PARTNER))
     const body = await response.json() as ChatRoomsResponse
     expect(body.me).toEqual({ user_id: PARTNER.user_id, admin_level: 0 })
     expect(body.rooms.map(room => room.id)).toEqual([rooms.regular_id])
     expect(body.rooms[0].can_manage).toBeFalsy()
-    // Directory = self + Jacob (shares the regular room). Greg + stranger invisible.
-    expect(body.directory.map(entry => entry.user_id).sort()).toEqual(['u-jacob', 'u-partner'])
+    // One circle: self + both admins (Jacob, Greg). The stranger (no access) stays hidden.
+    expect(body.directory.map(entry => entry.user_id).sort()).toEqual(['u-greg', 'u-jacob', 'u-partner'])
   })
 
-  test('admin (level 2) is auto-joined to the system rooms and cannot manage the admin room', async () => {
+  test('admin (level 2) passes the gate via level (not auto-joined to system rooms) and cannot manage the admin room', async () => {
     const response = await call(await token_for(ADMIN))
     const body = await response.json() as ChatRoomsResponse
     expect(body.me.admin_level).toBe(2)
     const ids = body.rooms.map(room => room.id)
-    expect(ids).toContain('all-admins')
-    expect(ids).toContain('notifications')
+    // Membership is UI-managed now — Greg only sees rooms he was actually added to.
+    expect(ids).not.toContain('notifications')
     const admin_room = body.rooms.find(room => room.id === rooms.admin_room_id)
     expect(admin_room?.admin_room).toBeTruthy()
     expect(admin_room?.can_manage).toBeFalsy() // level 3 required for admin rooms

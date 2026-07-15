@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { open_test_shared_db } from '$lib/db/server/shared-db'
-import { get_room } from '$lib/server/chat/chat-db'
+import { add_room_member, get_room } from '$lib/server/chat/chat-db'
 import { ADMIN, make_cookies, PARTNER, seed_chat_users, seed_rooms, STRANGER, SUPER_ADMIN, token_for } from '../../_test-helpers'
 import { POST } from './+server'
 
@@ -56,8 +56,10 @@ describe(POST, () => {
     expect(get_room({ db, room_id: rooms.admin_room_id })).toBeUndefined()
   })
 
-  test('400 for system rooms even as super admin', async () => {
-    await expect(call({ token: await token_for(SUPER_ADMIN), room_id: 'all-admins' }))
+  test('400 for the system room even as super admin', async () => {
+    // Must be a member to pass the manage gate before the system-room refusal.
+    add_room_member({ db, room_id: 'notifications', user_id: SUPER_ADMIN.user_id })
+    await expect(call({ token: await token_for(SUPER_ADMIN), room_id: 'notifications' }))
       .rejects.toMatchObject({ status: 400 })
   })
 

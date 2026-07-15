@@ -8,7 +8,7 @@ export const shared_meta: StoryMeta = {
 function message(overrides: Record<string, unknown> = {}) {
   return {
     id: 'm1',
-    room_id: 'all-admins',
+    room_id: 'notifications',
     author_user_id: 'u-anna',
     body_html: '<p>Did you see the new Yawalapiti entries? Looks great — one typo in the <strong>phonetics</strong>.</p>',
     body_text: 'Did you see the new Yawalapiti entries?',

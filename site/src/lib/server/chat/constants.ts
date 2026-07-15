@@ -4,12 +4,11 @@
  * import site. The rest below is server-only.
  *
  * Channels are DB-managed `chat_rooms` rows (see chat-db.ts `create_channel`
- * etc.) — there is no fixed channel list in source anymore. The two system
- * rooms (`all-admins`, `notifications`) are seeded + admin-joined at boot by
- * `ensure_all_admins_in_team_chat`.
+ * etc.) — there is no fixed channel list in source anymore. The one system
+ * room (`notifications`) is ensured at boot by `ensure_notifications_room`;
+ * its membership is UI-managed.
  */
 export {
-  ROOM_ALL_ADMINS,
   ROOM_NOTIFICATIONS,
   SYSTEM_ROOM_IDS,
   SYSTEM_USER_ID,

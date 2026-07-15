@@ -21,6 +21,7 @@
   import { use_admin_back } from '$lib/utils/admin-back.svelte'
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
   import { api_admin_user_name } from '../../../api/admin/users/[id]/name/_call'
+  import { api_admin_user_chat_access } from '../../../api/admin/users/[id]/chat-access/_call'
   import { api_admin_user_roles } from '../../../api/admin/users/[id]/roles/_call'
   import { api_admin_user_unsubscribe } from '../../../api/admin/users/[id]/unsubscribe/_call'
   import { api_dictionaries_id_roles_post } from '../../../api/dictionaries/[id]/roles/_call'
@@ -30,6 +31,8 @@
   const user_id = $derived(page.params.user_id)
   const user = $derived(db?.users.id(user_id))
   const is_super_manager = $derived(has_super_manager_role(user?.roles))
+  // Admins (level >= 2) always have chat access; the toggle grants it to everyone else.
+  const is_admin_user = $derived(get_admin_level(user?.email) !== null)
   // Allow-list tier (2/3) first; else the DB-granted super_manager tier (1).
   const target_admin_level = $derived(user ? (get_admin_level(user.email) ?? (is_super_manager ? 1 : null)) : null)
 
@@ -171,6 +174,22 @@
     await data.sync?.sync()
   }
 
+  async function toggle_chat_access() {
+    if (!user) return
+    const next = !user.chat_access
+    const previous = user.chat_access
+    // Optimistic in-memory update; `users` is download-only on admin clients,
+    // so persistence goes through the admin endpoint (not live-db `_save()`).
+    user.chat_access = next
+    const { error } = await api_admin_user_chat_access(user.id, { chat_access: next })
+    if (error) {
+      user.chat_access = previous
+      alert(`Could not update chat access: ${error.message}`)
+      return
+    }
+    await data.sync?.sync()
+  }
+
   async function toggle_unsubscribed() {
     if (!user) return
     const next = !user.unsubscribed_from_emails
@@ -239,13 +258,21 @@
         class="btn-outline btn-sm">
         {user.unsubscribed_from_emails ? 'Re-subscribe to emails' : 'Mark unsubscribed'}
       </button>
-      {#if get_admin_level(user.email) === null}
+      {#if !is_admin_user}
         <button
           type="button"
           onclick={toggle_super_manager}
           title="Super managers get dictionary-manager powers on every dictionary (no admin panel access)"
           class="btn-outline btn-sm">
           {is_super_manager ? 'Remove Super Manager' : 'Make Super Manager'}
+        </button>
+        <button
+          type="button"
+          onclick={toggle_chat_access}
+          title="Chat members can open /chat and DM anyone else in the chat circle"
+          class="btn-outline btn-sm">
+          <IconMdiForumOutline style="margin-right: 0.25rem" />
+          {user.chat_access ? 'Remove chat access' : 'Grant chat access'}
         </button>
       {/if}
     </div>
