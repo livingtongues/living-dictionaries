@@ -2,6 +2,8 @@ import type { PartOfSpeech } from '$lib/types'
 
 export const partsOfSpeech: PartOfSpeech[] = [
   { enAbbrev: 'n', enName: 'noun' },
+  { enAbbrev: 'n.f', enName: 'noun, feminine' },
+  { enAbbrev: 'n.m', enName: 'noun, masculine' },
   { enAbbrev: 'pro', enName: 'pronoun' },
   { enAbbrev: 'v', enName: 'verb' },
   { enAbbrev: 'adj', enName: 'adjective' },

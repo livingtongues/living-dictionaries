@@ -98,6 +98,20 @@ proposals against this lens.
   first concrete instance of the plain-language directive above.
 
 ## Open proposals
+- **★ NEW — Sync-Health: surface the `sync_halted_repeated_failure` terminal wedge** *(ported from
+  tutor 07-13 Phase D · filed 2026-07-14 — grounded in a live halt row today; verified NOT present).*
+  `build_sync_health` (`log-analytics.ts:2105`) filters `message = 'sync_failed'` only, but LD **does
+  emit** `sync_halted_repeated_failure` (via `report_dict_sync_halted`, dict-instance repeat-breaker) —
+  1 row on 2026-07-14. So a client that has **given up entirely** (past the retry cap) is invisible on
+  the Sync-health panel and only shows in raw error triage — the exact "is a client terminally wedged?"
+  question the panel exists to answer. tutor found + is fixing the identical gap in its shared sync
+  engine. Add a **terminal-wedge count + distinct (user,dict) pairs** to the panel (a second grouped
+  read + one verdict line). Cheap, display-only. *(ported from tutor/house)*
+- **Small — "current-build clean?" verdict badge on `/admin/health`** *(ported from tutor 07-13 · filed
+  2026-07-14 · LOW).* tutor's top Phase-C item: a one-line "Current build `<id>`: ✓ clean / ⚠ N errors"
+  derived from the `errors_by_version` `is_current` row LD already computes. LD renders the current-vs-
+  stale split but leaves the current-build verdict to inference. One-line, data present. Low priority
+  while error volume is calm.
 - **★ NEW — Dict-boot cold-tail vs snapshot-size correlation on the "Opening a dictionary" panel**
   *(filed 2026-07-10 run 2 — grounded in the FIRST day of live `dict_boot` data; verified NOT present).*
   The just-shipped `build_dict_boot` (`log-analytics.ts` ~line 1670) reports cold/warm p50/p90/p95 +

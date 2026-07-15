@@ -1,6 +1,8 @@
 {
   "psAbbrev": {
     "n": "n",
+    "n.f": "n.f",
+    "n.m": "n.m",
     "pro": "pro",
     "v": "v",
     "adj": "adj",

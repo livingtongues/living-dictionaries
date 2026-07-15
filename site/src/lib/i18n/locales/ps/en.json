@@ -1,6 +1,8 @@
 {
   "ps": {
     "n": "noun",
+    "n.f": "noun, feminine",
+    "n.m": "noun, masculine",
     "pro": "pronoun",
     "v": "verb",
     "adj": "adjective",

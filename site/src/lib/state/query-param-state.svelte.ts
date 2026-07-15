@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store'
 import type { Writable } from 'svelte/store'
-import { cleanObject } from '$lib/utils/clean-object'
+import { clean_object } from '$lib/utils/clean-object'
 import { deep_equal } from '$lib/utils/deep-equal'
 import { log_warning } from '$lib/debug/remote-log'
 import { goto } from '$app/navigation'
@@ -24,7 +24,7 @@ export function stringify(value: any, cleanFalseValues?: boolean) {
     return undefined
   if (typeof value === 'string')
     return value
-  const cleanedValue = cleanObject(value, cleanFalseValues)
+  const cleanedValue = clean_object(value, cleanFalseValues)
   return cleanedValue === undefined ? undefined : JSON.stringify(cleanedValue)
 }
 export function parse(value: any) {

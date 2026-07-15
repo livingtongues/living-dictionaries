@@ -77,7 +77,16 @@
       ({ duration } = buffer)
       peaks = get_peaks(buffer, NUM_PEAKS)
     } catch (error) {
-      console.error('Unable to decode audio for waveform', error)
+      // A bare DOMException serializes to `{}` in telemetry (no enumerable own
+      // props), leaving the cause blind. Log structured context so the next
+      // occurrence tells us codec/container (mime), empty-blob (bytes), and source.
+      console.error('Unable to decode audio for waveform', {
+        name: error?.name,
+        message: error?.message,
+        mime: audioBlob?.type ?? null,
+        bytes: audioBlob?.size ?? null,
+        source: audioUrl ? 'url' : 'blob',
+      })
     }
   }
 

@@ -58,3 +58,21 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
 - **2026-07-13 — Phase D: tutor + house have SHIPPED LD's two open error-cluster items** (bot-share % +
   `max_per_session` ⟳-loop marker; tutor's `build_error_clusters` has both live). Next time these come up,
   port tutor's implementation rather than re-designing — the design is proven in two apps.
+- **2026-07-14 — error-cluster bot-share % + ⟳-loop marker SHIPPED in LD** (`build_error_clusters` now has
+  `bot_pct` + `max_per_session`). Don't re-propose. **`dict_boot` cold/warm dashboard timing also SHIPPED**
+  (`build_dict_boot`, avg ~2.3s live) — the 07-10 "dict_boot coverage gap needs a client track_timing"
+  item is CLOSED; don't re-raise it.
+- **2026-07-14 — Greg's "river" zombie tab is the SAME forgotten-laptop stale-tab family** (07-09): null
+  session, dict slug `river` 404 `dictionary not found`, ~1,528/day, inflates his event count. Known-noise,
+  no forced-reload. Don't re-triage; just subtract it from his real activity.
+- **2026-07-14 — `Unable to decode audio for waveform` (`Waveform.svelte:80`): NEW 🟡 P3, cosmetic.**
+  Freshly-recorded audio; waveform peaks fail to decode; playback (plain `<audio>`) unaffected. 2 real
+  users (Android-Chrome + Mac-Safari). The logged `error` serializes to `{}` — **first fix is to enrich
+  the log** (name/message/mime/bytes/source), THEN diagnose. Don't guess a fix blind. Watch for recurrence.
+- **2026-07-14 — i18n missing-key warns (~800/day, mostly EN `ps.*`/`sd.*`) are non-canonical hand-typed
+  POS/semantic-domain labels, NOT catalog bugs** — already surfaced on `/admin/analytics` missing-i18n
+  panel (working as designed). Don't treat as an error or propose a panel. Only `gl.default`/he-type single
+  keys are real `/translate` gaps.
+- **2026-07-14 — NO wedged-client dashboard panels.** Jacob: "wedges are your job to find and fix, not
+  mine to watch and observe in a dashboard." Stop proposing sync-halt / wedged-client indicator panels.
+  Surface wedges as ACTIONABLE nightly-digest items (fix or human-nudge), not a dashboard to watch.
