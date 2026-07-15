@@ -33,12 +33,18 @@ const section_sentences = [
   { id: 'ss1', section_id: 's1a', sentence_id: 'q1', sort_key: 'a' },
   { id: 'ss2', section_id: 's1a', sentence_id: 'q2', sort_key: 'b' },
 ]
-const dict_db = mock_dict_db({ grammar_sections: rows, clause_slots, sentences, section_sentences })
+// A headless (title-less) top-level section — the migrated intro a manager may prose-edit.
+const intro_rows = [
+  { id: 'intro', parent_id: null, sort_key: 'i', title: null, body: { en: 'Nahuatl is a *polysynthetic* language; a single verb can express a whole clause.' }, entry_id: null, sense_id: null },
+]
+const dict_db = mock_dict_db({ grammar_sections: [...intro_rows, ...rows], clause_slots, sentences, section_sentences })
 
 const [node] = build_section_tree(rows as never)
+const [intro_node] = build_section_tree(intro_rows as never)
 
 const read_actions: GrammarSectionActions = {
   editable: false,
+  prose_editable: false,
   editing_id: null,
   set_editing() {},
   move_up() {},
@@ -49,6 +55,7 @@ const read_actions: GrammarSectionActions = {
   add_child() {},
 }
 const edit_actions: GrammarSectionActions = { ...read_actions, editable: true }
+const prose_actions: GrammarSectionActions = { ...read_actions, prose_editable: true }
 
 export const shared_meta: StoryMeta = {
   viewports: [{ width: 760, height: 620 }],
@@ -61,4 +68,9 @@ export const ReadOnly: Story<typeof Component> = {
 
 export const Editable: Story<typeof Component> = {
   props: { node, actions: edit_actions } as never,
+}
+
+// Manager (non-admin-3) on the headless intro: a single scoped prose "edit" button.
+export const ManagerProse: Story<typeof Component> = {
+  props: { node: intro_node, actions: prose_actions } as never,
 }

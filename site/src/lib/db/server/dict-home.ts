@@ -67,6 +67,35 @@ export function get_featured_cards({ db }: { db: Database.Database }): DictHomeC
   return rows.map(to_card)
 }
 
+/**
+ * Markdown of the grammar "intro" — the first top-level `grammar_sections` body,
+ * in the first gloss language present. Source for the home-page grammar teaser +
+ * sitemap presence since the 2026-07-15 cutover (replacing the legacy
+ * `dictionaries.grammar` blob). Returns '' for a dict with no sections yet (an
+ * un-backfilled dict.db or one predating the migration) so the caller can fall
+ * back to the blob. Tolerates a dict.db that predates the grammar migration.
+ */
+export function get_grammar_intro_markdown({ db, gloss_languages = [] }: {
+  db: Database.Database
+  gloss_languages?: string[]
+}): string {
+  const has_table = db.prepare(`SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'grammar_sections'`).get()
+  if (!has_table)
+    return ''
+  const row = db.prepare(
+    `SELECT body FROM grammar_sections WHERE parent_id IS NULL ORDER BY sort_key ASC LIMIT 1`,
+  ).get() as { body: string | null } | undefined
+  const body = parse_json_column<MultiString>(row?.body)
+  if (!body)
+    return ''
+  for (const lang of [...gloss_languages, ...Object.keys(body)]) {
+    const value = body[lang]
+    if (value && value.trim())
+      return value
+  }
+  return ''
+}
+
 /** Newest entries for the "recently added" strip — fetched with headroom so the
  * client's featured-overlap filter still leaves a full strip (display cap is 8). */
 export function get_recent_cards({ db, limit = 12 }: { db: Database.Database, limit?: number }): DictHomeCard[] {

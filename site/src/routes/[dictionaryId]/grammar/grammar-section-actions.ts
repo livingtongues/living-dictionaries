@@ -10,7 +10,10 @@ export type GrammarNode = GrammarTreeNode<DictRowType<'grammar_sections'>>
  * recursive render so every node shares one handler set.
  */
 export interface GrammarSectionActions {
+  /** Admin-3: full STRUCTURAL editing (add/reorder/nest/link/slots/delete + full SectionEditor). */
   editable: boolean
+  /** Manager (non-admin-3): scoped body-only editing of the migrated intro section. */
+  prose_editable: boolean
   editing_id: string | null
   set_editing: (id: string | null) => void
   move_up: (node: GrammarNode) => void
@@ -19,4 +22,17 @@ export interface GrammarSectionActions {
   outdent: (node: GrammarNode) => void
   remove: (node: GrammarNode) => void
   add_child: (node: GrammarNode) => void
+}
+
+/**
+ * Which nodes a plain manager may edit the prose of: the migrated grammar
+ * "intro" — a top-level (depth 0) headless (no title in any language) section.
+ * Structural sections that admin-3 authors carry a title, so they stay
+ * admin-3-only. A manager editing here only touches the per-language `body`.
+ */
+export function prose_editable_node(node: GrammarNode): boolean {
+  if (node.depth !== 0)
+    return false
+  const { title } = node.section
+  return !title || !Object.values(title).some(value => value?.trim())
 }

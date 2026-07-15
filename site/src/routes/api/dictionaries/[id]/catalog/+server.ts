@@ -25,7 +25,7 @@ const JSON_FIELDS = new Set([
 const SCALAR_FIELDS = new Set([
   'name', 'url', 'location', 'iso_639_3', 'glottocode', 'copyright',
   'author_connection', 'community_permission', 'con_language_description',
-  'about', 'citation', 'grammar', 'public', 'print_access',
+  'about', 'citation', 'public', 'print_access',
   'language_used_by_community', 'hide_living_tongues_logo',
 ])
 

@@ -16,11 +16,13 @@
   import IconMdiCog from '~icons/mdi/cog'
 
   interface Props {
-    /** Whether the current user may add/reorder/nest/edit (admin-3 during preview). */
+    /** Admin-3: may add / reorder / nest / link / delete + full section editor. */
     editable: boolean
+    /** Manager (non-admin-3): may edit the intro section's prose + start one when none exists. */
+    prose_editable?: boolean
   }
 
-  const { editable }: Props = $props()
+  const { editable, prose_editable = false }: Props = $props()
 
   const { t, dict_db } = $derived(page.data)
 
@@ -63,6 +65,7 @@
 
   const actions: GrammarSectionActions = {
     get editable() { return editable },
+    get prose_editable() { return prose_editable },
     get editing_id() { return editing_id },
     set_editing: (id) => { editing_id = id },
 
@@ -111,6 +114,9 @@
     },
   }
 
+  // Add a headless top-level section (the same shape the blob backfill produces)
+  // and open it. Serves both admin-3 "add section" and the manager "add grammar"
+  // (start grammar on a dict with none yet — opens in the prose-only editor).
   async function add_root_section() {
     const sort_key = append_child_key(tree.map(node => node.section.sort_key))
     const [row] = await dict_db.grammar_sections.insert({ parent_id: null, sort_key })
@@ -141,8 +147,14 @@
       <GrammarSection {node} {actions} />
     {/each}
 
-    {#if !tree.length && !editable}
-      <p class="state-note"><i>{t('dictionary.no_info_yet')}</i></p>
+    {#if !tree.length}
+      {#if prose_editable && !editable}
+        <button type="button" class="add-root" onclick={add_root_section}>
+          <IconFaSolidPlus /> {t('grammar.add_grammar')}
+        </button>
+      {:else if !editable}
+        <p class="state-note"><i>{t('dictionary.no_info_yet')}</i></p>
+      {/if}
     {/if}
 
     {#if editable}

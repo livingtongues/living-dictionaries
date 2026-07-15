@@ -13,9 +13,11 @@
   interface Props {
     section: DictRowType<'grammar_sections'>
     on_close: () => void
+    /** Manager-scoped mode: only the per-language body prose (no title / entry link / usage / slot / example sentences). */
+    prose_only?: boolean
   }
 
-  const { section, on_close }: Props = $props()
+  const { section, on_close, prose_only = false }: Props = $props()
 
   const { t, dictionary, search_entries, entries_data } = $derived(page.data)
 
@@ -81,11 +83,15 @@
     if (saving) return
     saving = true
     try {
-      section.title = clean(draft_title)
+      // Prose-only (manager) edits touch just the body; the structural fields
+      // (title / entry link / usage / slot) stay admin-3-owned, so leave them.
       section.body = clean(draft_body)
-      section.usage_conditions = clean(draft_usage)
-      section.entry_id = linked_entry_id
-      section.slot_id = linked_slot_id
+      if (!prose_only) {
+        section.title = clean(draft_title)
+        section.usage_conditions = clean(draft_usage)
+        section.entry_id = linked_entry_id
+        section.slot_id = linked_slot_id
+      }
       // A section can't be fully empty — if the user cleared everything, keep a headless body-only placeholder untouched isn't needed here; a blank new section is allowed while editing.
       await section._save()
       on_close()
@@ -97,68 +103,74 @@
 </script>
 
 <div class="section-editor">
-  <!-- Entry link -->
-  <div class="entry-link">
-    <span class="field-label">{t('grammar.documents_entry')}</span>
-    {#if linked_entry_id}
-      <div class="linked">
-        <strong>{linked_lexeme || linked_entry_id}</strong>
-        <button type="button" class="btn-ghost unlink" aria-label={t('misc.remove')} onclick={() => { linked_entry_id = null }}>
-          <IconMdiClose />
-        </button>
-      </div>
-    {:else}
-      <div class="search-wrap">
-        <IconMdiMagnify class="section-search-icon" />
-        <input type="search" class="search-input" placeholder={t('entry.search_entries')} bind:value={search_text} />
-      </div>
-      {#if result_ids.length}
-        <div class="results">
-          {#each result_ids as id (id)}
-            <button type="button" class="result-row" onclick={() => { linked_entry_id = id; search_text = '' }}>
-              {entry_lexeme(id) || '—'}
-            </button>
-          {/each}
+  {#if !prose_only}
+    <!-- Entry link -->
+    <div class="entry-link">
+      <span class="field-label">{t('grammar.documents_entry')}</span>
+      {#if linked_entry_id}
+        <div class="linked">
+          <strong>{linked_lexeme || linked_entry_id}</strong>
+          <button type="button" class="btn-ghost unlink" aria-label={t('misc.remove')} onclick={() => { linked_entry_id = null }}>
+            <IconMdiClose />
+          </button>
         </div>
+      {:else}
+        <div class="search-wrap">
+          <IconMdiMagnify class="section-search-icon" />
+          <input type="search" class="search-input" placeholder={t('entry.search_entries')} bind:value={search_text} />
+        </div>
+        {#if result_ids.length}
+          <div class="results">
+            {#each result_ids as id (id)}
+              <button type="button" class="result-row" onclick={() => { linked_entry_id = id; search_text = '' }}>
+                {entry_lexeme(id) || '—'}
+              </button>
+            {/each}
+          </div>
+        {/if}
       {/if}
-    {/if}
-  </div>
+    </div>
+  {/if}
 
   {#each languages as bcp (bcp)}
     <fieldset class="lang-group">
       <legend>{language_label(bcp)}</legend>
-      <input
-        type="text"
-        class="title-input"
-        placeholder={t('grammar.section_title')}
-        bind:value={draft_title[bcp]} />
+      {#if !prose_only}
+        <input
+          type="text"
+          class="title-input"
+          placeholder={t('grammar.section_title')}
+          bind:value={draft_title[bcp]} />
+      {/if}
       {#await markdown_editor_promise then { default: MarkdownEditor }}
         <MarkdownEditor bind:value={draft_body[bcp]} placeholder={t('grammar.section_body')} />
       {/await}
     </fieldset>
   {/each}
 
-  <div class="usage">
-    {#if show_usage}
-      <span class="field-label">{t('grammar.usage_conditions')}</span>
-      {#each languages as bcp (bcp)}
-        <div class="usage-lang">
-          <span class="usage-lang-label">{language_label(bcp)}</span>
-          {#await markdown_editor_promise then { default: MarkdownEditor }}
-            <MarkdownEditor bind:value={draft_usage[bcp]} preset="minimal" placeholder={t('grammar.usage_conditions_hint')} />
-          {/await}
-        </div>
-      {/each}
-    {:else}
-      <button type="button" class="btn-ghost add-usage" onclick={() => { show_usage = true }}>
-        + {t('grammar.usage_conditions')}
-      </button>
-    {/if}
-  </div>
+  {#if !prose_only}
+    <div class="usage">
+      {#if show_usage}
+        <span class="field-label">{t('grammar.usage_conditions')}</span>
+        {#each languages as bcp (bcp)}
+          <div class="usage-lang">
+            <span class="usage-lang-label">{language_label(bcp)}</span>
+            {#await markdown_editor_promise then { default: MarkdownEditor }}
+              <MarkdownEditor bind:value={draft_usage[bcp]} preset="minimal" placeholder={t('grammar.usage_conditions_hint')} />
+            {/await}
+          </div>
+        {/each}
+      {:else}
+        <button type="button" class="btn-ghost add-usage" onclick={() => { show_usage = true }}>
+          + {t('grammar.usage_conditions')}
+        </button>
+      {/if}
+    </div>
 
-  <ClauseSlotPicker bind:value={linked_slot_id} />
+    <ClauseSlotPicker bind:value={linked_slot_id} />
 
-  <SectionSentenceEditor section_id={section.id} />
+    <SectionSentenceEditor section_id={section.id} />
+  {/if}
 
   <div class="actions">
     <button type="button" class="btn btn-default" onclick={on_close}>{t('misc.cancel')}</button>

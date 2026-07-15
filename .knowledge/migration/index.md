@@ -31,6 +31,10 @@ DONE** (DNS flipped 2026-07-03, +1d grace watch clean 2026-07-04) — see
   adding a new per-dict table/column: the new-migration rule, the `process_delete_cascade`
   DROP+re-CREATE gotcha (SQLite has no ALTER TRIGGER), the search-feed wiring order, and how the
   cutover auto-picks up the DDL. Distilled from the `sources` registry work.
+- [dropping-a-syncable-column.md](./dropping-a-syncable-column.md) — the complement: why an
+  `ALTER TABLE … DROP COLUMN` on a SYNCED table is safe (wa-sqlite 3.44 supports it — how to verify
+  the exact build in Node; version-skew tolerated because sync-apply filters to schema-known columns;
+  what non-type reads `tsc` won't catch). From the 2026-07-15 `dictionaries.grammar` drop.
 - [shared-stack-conventions.md](./shared-stack-conventions.md) — the durable LD ↔ house contract:
   orchestration norms, the stack/architecture decisions (keep UnoCSS, numeric roles rejected,
   native deps in `dependencies`), the sync-engine invariants, the R2/media boundary, and

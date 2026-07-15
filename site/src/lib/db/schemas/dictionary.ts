@@ -482,8 +482,9 @@ export const glossing_abbreviations = sqliteTable('glossing_abbreviations', {
 
 /**
  * Hierarchical grammar section tree — the structured, entry-linked replacement
- * for the single free-text `dictionaries.grammar` blob (which stays as an
- * optional page intro). A section usually documents ONE lexeme: link it via
+ * for the legacy single free-text `dictionaries.grammar` blob (migrated into a
+ * headless section + column dropped, 2026-07-15). A section usually documents
+ * ONE lexeme: link it via
  * `entry_id` (+ optional `sense_id`) and it surfaces as "grammar notes" on that
  * entry, while the section pulls the entry's lexeme/phonetic/audio. Prose
  * (`title`/`body`/`usage_conditions`) is per-analysis-language markdown; example

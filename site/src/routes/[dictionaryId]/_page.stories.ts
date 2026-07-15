@@ -35,7 +35,6 @@ const dictionary = {
   featured_image: { serving_url: story_cards[0]?.photo_serving_url },
   // Markdown (as stored) — the escaped \[gaq\] must render as [gaq] in the snippet.
   about: String.raw`GtaɁ \[gaq\] (also known as **Didayi**) is a Munda language spoken by the Didayi people of Odisha, India. This dictionary documents the language as spoken in the Koraput district, with audio recordings from native speakers across three generations. The materials were collected, annotated and transcribed by researchers working alongside community members, under the auspices of a long-running documentation project that continues to add new entries every year.`,
-  grammar: 'GtaɁ is an *agglutinative* language with subject-object-verb word order. Nouns inflect for number and case.',
   citation: null,
   entry_count: 6378,
   orthographies: [{ code: 'default', name: 'Gtaʔ', primary: true }, { code: 'ipa', name: 'IPA' }],
@@ -50,6 +49,7 @@ const base = {
     ssr_featured: ssr_cards.slice(0, 5),
     ssr_recent: ssr_cards.slice(3, 6),
     partners: [],
+    grammar_source: 'GtaɁ is an *agglutinative* language with subject-object-verb word order. Nouns inflect for number and case.',
   },
   dict_db: null,
   entries_data: loading_entries_data,
@@ -74,7 +74,7 @@ export const ManagerBareDict: PageStory<typeof Component> = {
   viewports: [{ width: 1024, height: 1000 }],
   props: {
     ...(base as object),
-    dictionary: { ...dictionary, featured_image: null, coordinates: null, about: null, grammar: null, alternate_names: null, location: null, iso_639_3: null, glottocode: null, orthographies: null },
+    dictionary: { ...dictionary, featured_image: null, coordinates: null, about: null, alternate_names: null, location: null, iso_639_3: null, glottocode: null, orthographies: null },
     home_data: { ssr_featured: [], ssr_recent: ssr_cards.slice(0, 3), partners: [] },
     is_manager: true,
     can_edit: true,

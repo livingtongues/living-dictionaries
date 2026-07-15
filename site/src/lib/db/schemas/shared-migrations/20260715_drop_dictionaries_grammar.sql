@@ -1,0 +1,13 @@
+-- Structured-grammar CUTOVER, stage 2 (2026-07-15). The legacy free-text
+-- `dictionaries.grammar` markdown blob has been migrated INTO each per-dict
+-- `dictionaries/<id>.db` as a headless `grammar_sections` row (the backfill ran
+-- against all 170 blob-dicts). The grammar page / home teaser / sitemap now read
+-- the section tree, so the column is unused — drop it.
+--
+-- Safe on synced admin clients: the shared sync layer filters both directions to
+-- schema-known columns (server `sync-helpers.ts` `allowed` on push apply +
+-- `strip_unknown_columns` on pull), so an old client that still has the column
+-- and pushes it is tolerated; and wa-sqlite (SQLite 3.44) supports DROP COLUMN
+-- (verified against the exact bundled build). The column is plain TEXT with no
+-- index/trigger/FK referencing it.
+ALTER TABLE dictionaries DROP COLUMN grammar;

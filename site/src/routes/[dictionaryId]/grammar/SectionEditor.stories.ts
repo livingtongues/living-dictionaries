@@ -68,3 +68,19 @@ export const WithLinkedEntry: Story<typeof Component> = {
     on_close: () => {},
   } as never,
 }
+
+// Manager-scoped: body prose only (no title / entry link / usage / slot / examples).
+export const ProseOnly: Story<typeof Component> = {
+  props: {
+    section: {
+      id: 'intro',
+      title: null,
+      body: { en: 'Nahuatl is a *polysynthetic* language; a single verb can express a whole clause.' },
+      usage_conditions: {},
+      entry_id: null,
+      _save: async () => {},
+    },
+    on_close: () => {},
+    prose_only: true,
+  } as never,
+}

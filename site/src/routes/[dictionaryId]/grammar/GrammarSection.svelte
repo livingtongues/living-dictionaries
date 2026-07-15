@@ -3,6 +3,7 @@
   import Self from './GrammarSection.svelte'
   import SectionEditor from './SectionEditor.svelte'
   import GrammarExampleSentence from './GrammarExampleSentence.svelte'
+  import { prose_editable_node } from './grammar-section-actions'
   import type { GrammarNode, GrammarSectionActions } from './grammar-section-actions'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text as sanitize } from '$lib/markdown/sanitize-rich-text'
@@ -27,6 +28,11 @@
 
   const section = $derived(node.section)
   const is_editing = $derived(actions.editing_id === section.id)
+
+  // Managers (non-admin-3) may edit the migrated intro's prose only; admin-3 has
+  // full structural editing on every node.
+  const can_prose_edit = $derived(!actions.editable && actions.prose_editable && prose_editable_node(node))
+  const can_edit = $derived(actions.editable || can_prose_edit)
 
   function present_languages(field: MultiString | null | undefined): string[] {
     if (!field) return []
@@ -86,32 +92,34 @@
       <span class="slot-badge" title={t('grammar.clause_slot')}>{slot_label}</span>
     {/if}
 
-    {#if actions.editable}
+    {#if can_edit}
       <div class="controls">
         <button type="button" class="ctrl" title={t('misc.edit')} aria-label={t('misc.edit')} onclick={() => actions.set_editing(is_editing ? null : section.id)}>
           <IconFa6SolidPencil />
         </button>
-        <button type="button" class="ctrl" title={t('grammar.move_up')} aria-label={t('grammar.move_up')} disabled={node.index === 0} onclick={() => actions.move_up(node)}>
-          <IconMdiChevronUp />
-        </button>
-        <button type="button" class="ctrl" title={t('grammar.move_down')} aria-label={t('grammar.move_down')} disabled={node.index >= node.sibling_count - 1} onclick={() => actions.move_down(node)}>
-          <IconMdiChevronDown />
-        </button>
-        <button type="button" class="ctrl" title={t('grammar.indent')} aria-label={t('grammar.indent')} disabled={node.index === 0} onclick={() => actions.indent(node)}>
-          <IconMdiFormatIndentIncrease />
-        </button>
-        <button type="button" class="ctrl" title={t('grammar.outdent')} aria-label={t('grammar.outdent')} disabled={node.depth === 0} onclick={() => actions.outdent(node)}>
-          <IconMdiFormatIndentDecrease />
-        </button>
-        <button type="button" class="ctrl danger" title={t('misc.delete')} aria-label={t('misc.delete')} onclick={() => actions.remove(node)}>
-          <IconSystemUiconsTrash />
-        </button>
+        {#if actions.editable}
+          <button type="button" class="ctrl" title={t('grammar.move_up')} aria-label={t('grammar.move_up')} disabled={node.index === 0} onclick={() => actions.move_up(node)}>
+            <IconMdiChevronUp />
+          </button>
+          <button type="button" class="ctrl" title={t('grammar.move_down')} aria-label={t('grammar.move_down')} disabled={node.index >= node.sibling_count - 1} onclick={() => actions.move_down(node)}>
+            <IconMdiChevronDown />
+          </button>
+          <button type="button" class="ctrl" title={t('grammar.indent')} aria-label={t('grammar.indent')} disabled={node.index === 0} onclick={() => actions.indent(node)}>
+            <IconMdiFormatIndentIncrease />
+          </button>
+          <button type="button" class="ctrl" title={t('grammar.outdent')} aria-label={t('grammar.outdent')} disabled={node.depth === 0} onclick={() => actions.outdent(node)}>
+            <IconMdiFormatIndentDecrease />
+          </button>
+          <button type="button" class="ctrl danger" title={t('misc.delete')} aria-label={t('misc.delete')} onclick={() => actions.remove(node)}>
+            <IconSystemUiconsTrash />
+          </button>
+        {/if}
       </div>
     {/if}
   </div>
 
   {#if is_editing}
-    <SectionEditor {section} on_close={() => actions.set_editing(null)} />
+    <SectionEditor {section} prose_only={!actions.editable} on_close={() => actions.set_editing(null)} />
   {:else}
     {#each body_languages as bcp (bcp)}
       <div class="body tw-prose">

@@ -740,3 +740,79 @@ editing. All behind the admin-3 render gate — NO deploy needed to verify.
 + widen `grammar_sections_visible` to public + drop the old `dictionaries.grammar` column) and eventually lifting the
 EDIT gate (`grammar_sections_editable`) to GA. Tappable/karaoke sentence render lands when the corpus agent populates
 `sentences.tokens` + media `timings` (GrammarExampleSentence renders plain today, structured to upgrade).
+
+## CUTOVER (2026-07-15, IN PROGRESS) — render flip + prod warm/backfill
+
+Decisions (interview 2026-07-15):
+- **Q1 = B** manager edit path: keep a scoped **intro-prose** editor for managers on the migrated
+  headless section (body-only, per gloss language); STRUCTURAL editing (add/nest/reorder/link/slots/
+  delete) stays admin-3 (`grammar_sections_editable`). No manager regression.
+- **Q2 = A** two-stage: render flip + backfill NOW; DROP `dictionaries.grammar` column in a SEPARATE
+  later deploy once prod section-render is verified stable (blob stays as fallback + instant rollback).
+- **Q3 = A** agent runs the prod warm/backfill from mustang (backup → dry-run → run → verify).
+
+### Prod wrinkle discovered
+Per-dict migrations run LAZILY on first `get_dictionary_db()` open. Prod audit (2026-07-15):
+170 dicts have a grammar blob; **106 of their dict.dbs still lack the `grammar_sections` table**
+(never opened since the 2026-07-14 deploy); 0 dicts have any sections yet. The committed backfill
+SKIPS tables-missing dicts → would migrate only 64/170. Fix: **warm+migrate all dict.dbs first**
+(reuse the real migration `.sql` via `docker cp` into the container + faithful ~15-line runner replay),
+THEN backfill. Blob-fallback render makes order irrelevant + reversible.
+
+### Code (this cutover — grammar PAGE flips; home-snippet + sitemap ALSO source from sections w/ blob fallback) — ✅ DONE + locally verified
+- [x] `grammar-preview.ts`: `grammar_sections_visible` → returns TRUE (public); `_editable` stays admin-3.
+- [x] grammar `+page.svelte`: dropped blob editor + `+page.ts` (update_grammar gone); renders
+  `<GrammarSectionsView editable={admin3} prose_editable={is_manager} blob_fallback={dictionary.grammar}>` for all; no badge.
+- [x] `GrammarSectionsView`: `prose_editable` + `blob_fallback` props → read-only blob when 0 sections;
+  manager "Add grammar" when truly empty (no blob); intro-prose editor path.
+- [x] `GrammarSection`: scoped edit button + prose-only `SectionEditor` for manager on the intro-eligible
+  node (depth 0 + headless via `prose_editable_node`). Structural controls stay admin-3.
+- [x] `SectionEditor`: `prose_only` prop → body-only (hides title/entry-link/usage/slot/sentence editor; save touches only `body`).
+- [x] `grammar-section-actions.ts`: added `prose_editable` + `prose_editable_node(node)`.
+- [x] home `+page.server.ts` + `dict-home.ts` `get_grammar_intro_markdown`: SSR snippet from first top-level
+  section body (fallback blob); `+page.svelte` reads `home_data.grammar_source`. Sitemap: /grammar url from sections-or-blob.
+- [x] Stories refreshed + light/dark screenshots verified (public tree read-only, manager single prose pencil, Add grammar, admin-3 full editing, blob fallback, ProseOnly editor = body-only).
+- [x] Verification: `pnpm check` 0 errors · full `pnpm vitest run` = 1655 pass / 3 skip · eslint clean.
+
+### Consolidated prod script — ✅ WRITTEN + locally verified end-to-end
+`scripts/one-off/2026-07-15-grammar-cutover-warm-and-backfill.cjs` (supersedes the 2026-07-14 one):
+warms/migrates each blob-dict's dict.db (faithful `run_sql_migrations` replay over `.sql` from `MIGRATIONS_DIR`,
+`docker cp`'d in) THEN inserts the headless uuid5 section. DRY=1 preview. Verified on a synthesized DATA_DIR
+(dict @20260709 → migrates 2 + creates; dict @current → creates; re-run idempotent; server_seq trigger fired;
+shared.updated_at bumped). Prod audit: 170 blob-dicts (99 @20260709, 7 @20260713, 64 @20260714).
+
+### Prod steps (agent, from mustang) — ✅ DATA CUTOVER DONE (2026-07-15 ~02:57 UTC), clean
+1. [x] Backed up: `/opt/hosting/data/shared.db.bak-20260715-025523` + `dictionaries.bak-20260715-025523` (1.8G).
+2. [x] `docker cp` dict-migrations → `sveltekit_blue:/tmp/dictionary-migrations`; DRY (would create 170,
+   migrate 105/203 runs, 0 errors) → real run: **created 170 sections · migrated 105 dict.db (203 runs) · 0 errors**.
+3. [x] Verified: all 170 blob-dicts have their uuid5 section w/ valid server_seq (0 missing/noTable/noFile/badServerSeq);
+   idempotent re-run = 0 created / 170 present / 0 migrations. Log check 02:54→: NO migration/SQLite/schema-409
+   errors; only pre-existing `river` 404 sync noise (below baseline). Migration race did NOT materialize.
+   Current live code still admin-3-gates the render → public sees blob, admin-3 sees blob+sections (benign).
+4. [ ] **AWAITING Jacob's push**: commit + push the render-flip + column-drop code → webhook deploy →
+   the shared migration drops the prod `dictionaries.grammar` column at server boot; public /grammar flips to
+   sections. (Safe to leave un-deployed indefinitely; sections just sit admin-3-preview-only until then.)
+
+### Stage 2 — DROP `dictionaries.grammar` — ✅ DONE IN THIS SAME PUSH (Q2 flipped to B: "do it now")
+Verified SAFE before committing (this is the FIRST DROP COLUMN in a shared migration):
+- **wa-sqlite supports DROP COLUMN** — tested `ALTER TABLE … DROP COLUMN` on the exact bundled build
+  (SQLite **3.44.0**) in Node: SUCCESS (even with an unrelated index present). better-sqlite3 (server) too.
+- **Synced-column-drop version-skew is tolerated by design**: the server sync-apply filters pushed rows to
+  schema-known columns (`sync-helpers.ts` `allowed.has(c)`) + strips unknown on pull (`strip_unknown_columns`),
+  so an old admin client that still has `grammar` and pushes it (client push is `SELECT *`, engine.svelte.ts:271)
+  is silently dropped — no error. Self-heals on reload (its own drop-migration removes the local column).
+- No index/trigger/FK on the column; no hardcoded `grammar` in sync/json-columns.
+Changes: `20260715_drop_dictionaries_grammar.sql` (shared) + removed `grammar: text()` from `shared.ts` +
+removed all reads (grammar page blob_fallback, GrammarSectionsView blob path, home server+client fallback,
+sitemap SELECT, catalog `SCALAR_FIELDS` allowlist) + stories/comments. Verified: fresh shared.db applies all 14
+migrations cleanly w/ NO grammar column; `pnpm check` 0 errors; full `pnpm vitest run` = 1655 pass / 3 skip; eslint clean.
+
+### Cleanup / notes
+- `scripts/one-off/2026-07-14-grammar-blob-to-sections.cjs` is SUPERSEDED by the 2026-07-15 warm+backfill (kept as record).
+- Prod backups (`shared.db.bak-20260715-025523` + `dictionaries.bak-20260715-025523`) + `/tmp/dictionary-migrations`
+  in the container can be removed after the deploy is verified stable.
+- Observed pre-existing (out of scope): a stuck client polls deleted dict `river` → 404 `sync_failed` every 30s.
+
+### Still deferred to GA
+Lift the EDIT gate (`grammar_sections_editable`) from admin-3 to all managers once the structural shape is proven.
+Tappable/karaoke sentence render lands when the corpus agent populates `sentences.tokens` + media `timings`.

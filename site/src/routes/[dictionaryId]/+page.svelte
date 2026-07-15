@@ -247,7 +247,9 @@
     if (file)
       add_cover_file(file)
   }
-  const grammar_snippet = $derived(text_snippet({ markdown: dictionary.grammar, max_length: 2000 }))
+  // Grammar teaser sources from the section tree server-side (`grammar_source`).
+  // On client-nav it streams in with the rest of home_data (empty until resolved).
+  const grammar_snippet = $derived(text_snippet({ markdown: home_data.value?.grammar_source ?? '', max_length: 2000 }))
   const citation = $derived(build_citation({ t, dictionary, custom_citation: dictionary.citation || undefined, partners }))
   const has_coordinates = $derived(!!dictionary.coordinates?.points?.length || !!dictionary.coordinates?.regions?.length)
 

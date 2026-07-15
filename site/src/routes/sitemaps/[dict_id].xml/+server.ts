@@ -34,21 +34,32 @@ export const GET: RequestHandler = ({ params, url: request_url }) => {
   }
 
   const dictionary = get_shared_db()
-    .prepare('SELECT id, url, grammar FROM dictionaries WHERE public = 1 AND id = ?')
-    .get(params.dict_id) as { id: string, url: string | null, grammar: string | null } | undefined
+    .prepare('SELECT id, url FROM dictionaries WHERE public = 1 AND id = ?')
+    .get(params.dict_id) as { id: string, url: string | null } | undefined
   if (!dictionary)
     error(404, 'Not found')
 
   const slug = encodeURIComponent(dictionary.url || dictionary.id)
+
+  // Grammar page exists if there's a section tree (the post-2026-07-15-cutover
+  // source of truth — the legacy `dictionaries.grammar` blob column was dropped).
+  const dict_db = existsSync(dictionary_db_path(dictionary.id)) ? get_dictionary_db(dictionary.id) : null
+  let has_grammar = false
+  if (dict_db) {
+    const has_table = dict_db.prepare(`SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'grammar_sections'`).get()
+    if (has_table && dict_db.prepare(`SELECT 1 FROM grammar_sections LIMIT 1`).get())
+      has_grammar = true
+  }
+
   const urls: { loc: string, lastmod?: string }[] = [
     { loc: `${origin}/${slug}` },
     { loc: `${origin}/${slug}/entries` },
     { loc: `${origin}/${slug}/about` },
-    ...dictionary.grammar ? [{ loc: `${origin}/${slug}/grammar` }] : [],
+    ...has_grammar ? [{ loc: `${origin}/${slug}/grammar` }] : [],
   ]
 
-  if (existsSync(dictionary_db_path(dictionary.id))) {
-    const entries = get_dictionary_db(dictionary.id)
+  if (dict_db) {
+    const entries = dict_db
       .prepare(`SELECT id, updated_at FROM entries ORDER BY id LIMIT ${SITEMAP_URL_LIMIT}`)
       .all() as { id: string, updated_at: string | null }[]
     for (const entry of entries)

@@ -160,7 +160,9 @@ export const dictionaries = sqliteTable('dictionaries', {
   /** Long-form dictionary metadata (legacy `dictionary_info`, 1:1 with a dict). */
   about: text(),
   citation: text(),
-  grammar: text(),
+  // `grammar` (legacy free-text blob) was migrated INTO each dict.db as a
+  // `grammar_sections` row + the column DROPPED (2026-07-15 cutover stage 2,
+  // shared migration 20260715_drop_dictionaries_grammar.sql).
   write_in_collaborators: text({ mode: 'json' }).$type<string[]>(),
   /**
    * Last `dict.db.db_metadata.last_modified_at` mirrored here by the push
