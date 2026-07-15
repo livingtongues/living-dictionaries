@@ -88,6 +88,8 @@
     "relpro": "pronombre relativo",
     "vd": "verbo ditransitivo",
     "va": "ambitransitivo",
-    "obj": "marcador de objeto"
+    "obj": "marcador de objeto",
+    "n.f": "sustantivo femenino",
+    "n.m": "sustantivo masculino"
   }
 }

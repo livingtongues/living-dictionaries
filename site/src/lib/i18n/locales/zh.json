@@ -327,7 +327,12 @@
     "unable_to_delete": "注意：您将无法删除这些语言标注",
     "print_access_meaning": "这使得公众能够下载并打印这本《活词典》的PDF版本。",
     "featured_image": "特色图片",
-    "delete_dictionary": "删除词典"
+    "delete_dictionary": "删除词典",
+    "dialects_heading": "",
+    "dialects_meaning": "",
+    "no_dialects": "",
+    "edit_dialect_area": "",
+    "delete_dialect_confirm": ""
   },
   "source": {
     "create": "添加来源",
@@ -456,10 +461,6 @@
     "title": "合作伙伴组织",
     "button": "填写合作伙伴组织",
     "name": "合作伙伴组织名称"
-  },
-  "synopsis": {
-    "translations": "翻译",
-    "name": "概要"
   },
   "sense": {
     "sense": "感觉",
@@ -600,7 +601,8 @@
     "delete_cover": "移除照片",
     "delete_cover_confirm": "移除封面照片？",
     "drop_cover_hint": "拖入图片以设置封面照片",
-    "top_domains": "主要语义领域"
+    "top_domains": "主要语义领域",
+    "view_cover_image": ""
   },
   "text": {
     "text": "文本",
@@ -624,5 +626,61 @@
     "none_yet": "暂无文本",
     "sentence_count": "{count} 个句子",
     "edit_title": "编辑标题"
+  },
+  "grammar": {
+    "grammar_notes": "",
+    "untitled_section": "",
+    "linked_entry": "",
+    "documents_entry": "",
+    "section_title": "",
+    "section_body": "",
+    "usage_conditions": "",
+    "usage_conditions_hint": "",
+    "move_up": "",
+    "move_down": "",
+    "indent": "",
+    "outdent": "",
+    "add_subsection": "",
+    "add_section": "",
+    "delete_section_confirm": "",
+    "preview_badge": "",
+    "example_sentences": "",
+    "add_example_sentence": "",
+    "attach_existing_sentence": "",
+    "paste_new_sentence": "",
+    "search_sentences": "",
+    "detach_sentence": "",
+    "no_example_sentences": "",
+    "clause_slot": "",
+    "no_clause_slot": "",
+    "clause_template": "",
+    "clause_slots": "",
+    "add_clause_slot": "",
+    "slot_name": "",
+    "slot_code": "",
+    "edit_clause_slots": "",
+    "delete_slot_confirm": "",
+    "slot_unassigned": ""
+  },
+  "discourse": {
+    "role": "",
+    "none": "",
+    "storyline": "",
+    "backgrounded": "",
+    "flashback": "",
+    "setting": "",
+    "evaluation": "",
+    "reported_speech": ""
+  },
+  "text_tag": {
+    "motif": "",
+    "genre": "",
+    "tale_type": "",
+    "add": "",
+    "name": "",
+    "code": "",
+    "classification": "",
+    "filter_all": "",
+    "remove": ""
   }
 }

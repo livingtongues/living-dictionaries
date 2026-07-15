@@ -48,5 +48,18 @@ the window, so only `he` logged it).
   ("ברירת מחדל"). Prod Hebrew value also needs a /translate DB entry to survive the
   deploy bake (committed he.json is only the fresh-DB seed + fallback) — flagged for Jacob.
 
+## Prod translation fill (after deploy of fb7f85ef) ✅
+- Verified all 5 new keys landed in prod `i18n_keys` (sync_en_catalog at boot).
+- Backed up prod DB → `r2/backups-rolling/db/living/2026-07-15T02-13-48Z`.
+- Filled all 17 `TRANSLATABLE_LOCALES` × 5 keys = **85 rows** into prod
+  `i18n_translations` (source='ai', needs_review='ai', 'AI (fill-translations)'),
+  ON CONFLICT DO NOTHING. 0 pre-existing, 0 missing-key.
+- Ran `pnpm i18n:refresh` → committed seed files now mirror prod (my 5 keys across
+  all locales + legitimate translator drift + dead-key `synopsis` cleanup).
+- Low-confidence AI guesses flagged for human review on /translate: the `psAbbrev.*`
+  abbreviations for languages without a gendered-noun convention (sw, id, ms, vi, ha),
+  and `gl.default` for ha ("Asali"). All are needs_review='ai' so a translator vets them.
+- "Notify translators" on /translate is now safe to press.
+
 ## Verify
-- `pnpm test` (i18n + POS + waveform-utils), `tsc`, `pnpm lint`.
+- `pnpm test` (i18n + POS + waveform-utils), `tsc`, `pnpm lint` — all green.

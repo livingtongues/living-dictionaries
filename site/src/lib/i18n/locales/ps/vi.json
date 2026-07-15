@@ -88,6 +88,8 @@
     "relpro": "đại từ liên hệ",
     "vd": "vị từ ba diễn tố",
     "va": "vị từ lưỡng động (có thể cả nội động và ngoại động)",
-    "obj": "dấu hiệu tân ngữ"
+    "obj": "dấu hiệu tân ngữ",
+    "n.f": "danh từ giống cái",
+    "n.m": "danh từ giống đực"
   }
 }

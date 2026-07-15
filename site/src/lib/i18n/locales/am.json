@@ -327,7 +327,12 @@
     "unable_to_delete": "ማሳሰቢያ፡ እነዚህን የሚያብረቀርቁ ቋንቋዎች በኋላ ላይ መሰረዝ አይችሉም።",
     "print_access_meaning": "ይህ ለሕዝብ ይህንን ሕያው መዝገበ-ቃላት እንደ .PDF የማውረድ እና የማተም ችሎታ ይሰጣል።",
     "featured_image": "ተለይቶ የቀረበ ምስል",
-    "delete_dictionary": "መዝገበ ቃላት ሰርዝ"
+    "delete_dictionary": "መዝገበ ቃላት ሰርዝ",
+    "dialects_heading": "",
+    "dialects_meaning": "",
+    "no_dialects": "",
+    "edit_dialect_area": "",
+    "delete_dialect_confirm": ""
   },
   "source": {
     "create": "ምንጭ አክል",
@@ -456,10 +461,6 @@
     "title": "የአጋር ድርጅቶች",
     "button": "በአጋር ድርጅት ውስጥ ይፃፉ",
     "name": "የአጋር ድርጅት ስም"
-  },
-  "synopsis": {
-    "translations": "ትርጉሞች",
-    "name": "ማጠቃለያ"
   },
   "sense": {
     "sense": "ሴንስ",
@@ -600,7 +601,8 @@
     "delete_cover": "ፎቶ ያስወግዱ",
     "delete_cover_confirm": "የሽፋን ፎቶውን ያስወግዱ?",
     "drop_cover_hint": "የሽፋን ፎቶ ለማዘጋጀት ምስል እዚህ ይጣሉ",
-    "top_domains": "ዋና የትርጉም ዘርፎች"
+    "top_domains": "ዋና የትርጉም ዘርፎች",
+    "view_cover_image": ""
   },
   "text": {
     "text": "ጽሑፍ",
@@ -624,5 +626,61 @@
     "none_yet": "እስካሁን ጽሑፎች የሉም",
     "sentence_count": "{count} ዓረፍተ ነገሮች",
     "edit_title": "ርዕስ ያርትዑ"
+  },
+  "grammar": {
+    "grammar_notes": "",
+    "untitled_section": "",
+    "linked_entry": "",
+    "documents_entry": "",
+    "section_title": "",
+    "section_body": "",
+    "usage_conditions": "",
+    "usage_conditions_hint": "",
+    "move_up": "",
+    "move_down": "",
+    "indent": "",
+    "outdent": "",
+    "add_subsection": "",
+    "add_section": "",
+    "delete_section_confirm": "",
+    "preview_badge": "",
+    "example_sentences": "",
+    "add_example_sentence": "",
+    "attach_existing_sentence": "",
+    "paste_new_sentence": "",
+    "search_sentences": "",
+    "detach_sentence": "",
+    "no_example_sentences": "",
+    "clause_slot": "",
+    "no_clause_slot": "",
+    "clause_template": "",
+    "clause_slots": "",
+    "add_clause_slot": "",
+    "slot_name": "",
+    "slot_code": "",
+    "edit_clause_slots": "",
+    "delete_slot_confirm": "",
+    "slot_unassigned": ""
+  },
+  "discourse": {
+    "role": "",
+    "none": "",
+    "storyline": "",
+    "backgrounded": "",
+    "flashback": "",
+    "setting": "",
+    "evaluation": "",
+    "reported_speech": ""
+  },
+  "text_tag": {
+    "motif": "",
+    "genre": "",
+    "tale_type": "",
+    "add": "",
+    "name": "",
+    "code": "",
+    "classification": "",
+    "filter_all": "",
+    "remove": ""
   }
 }

@@ -88,6 +88,8 @@
     "relpro": "pr. rel.",
     "vd": "v. ditr.",
     "va": "v. ambitr.",
-    "obj": "obj."
+    "obj": "obj.",
+    "n.f": "n. f.",
+    "n.m": "n. m."
   }
 }

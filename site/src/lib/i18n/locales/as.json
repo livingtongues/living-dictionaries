@@ -327,7 +327,12 @@
     "unable_to_delete": "টোকা: আপুনি এই গ্লছিং ভাষাসমূহ পিছত বিলোপ কৰিব নোৱাৰিব।",
     "print_access_meaning": "এইটোৱে ৰাইজক এই Living Dictionary খন .PDF হিচাপে ডাউনল'ড আৰু প্ৰিণ্ট কৰাৰ ক্ষমতা দিয়ে",
     "featured_image": "বৈশিষ্ট্যযুক্ত ছবি",
-    "delete_dictionary": "অভিধান বিলোপ কৰক"
+    "delete_dictionary": "অভিধান বিলোপ কৰক",
+    "dialects_heading": "",
+    "dialects_meaning": "",
+    "no_dialects": "",
+    "edit_dialect_area": "",
+    "delete_dialect_confirm": ""
   },
   "source": {
     "create": "উৎস যোগ কৰক",
@@ -456,10 +461,6 @@
     "title": "অংশীদাৰ সংস্থা",
     "button": "অংশীদাৰ সংস্থা লিখক",
     "name": "অংশীদাৰ সংস্থাৰ নাম"
-  },
-  "synopsis": {
-    "translations": "অনুবাদ",
-    "name": "সাৰাংশ"
   },
   "sense": {
     "sense": "অৰ্থ",
@@ -600,7 +601,8 @@
     "delete_cover": "ফটো আঁতৰাওক",
     "delete_cover_confirm": "কভাৰ ফটোখন আঁতৰাব নেকি?",
     "drop_cover_hint": "কভাৰ ফটো নিৰ্ধাৰণ কৰিবলৈ এখন ছবি ইয়াত এৰি দিয়ক",
-    "top_domains": "শীৰ্ষ অৰ্থগত ক্ষেত্ৰ"
+    "top_domains": "শীৰ্ষ অৰ্থগত ক্ষেত্ৰ",
+    "view_cover_image": ""
   },
   "text": {
     "text": "পাঠ",
@@ -624,5 +626,61 @@
     "none_yet": "এতিয়ালৈকে কোনো পাঠ নাই",
     "sentence_count": "{count}টা বাক্য",
     "edit_title": "শিৰোনাম সম্পাদনা কৰক"
+  },
+  "grammar": {
+    "grammar_notes": "",
+    "untitled_section": "",
+    "linked_entry": "",
+    "documents_entry": "",
+    "section_title": "",
+    "section_body": "",
+    "usage_conditions": "",
+    "usage_conditions_hint": "",
+    "move_up": "",
+    "move_down": "",
+    "indent": "",
+    "outdent": "",
+    "add_subsection": "",
+    "add_section": "",
+    "delete_section_confirm": "",
+    "preview_badge": "",
+    "example_sentences": "",
+    "add_example_sentence": "",
+    "attach_existing_sentence": "",
+    "paste_new_sentence": "",
+    "search_sentences": "",
+    "detach_sentence": "",
+    "no_example_sentences": "",
+    "clause_slot": "",
+    "no_clause_slot": "",
+    "clause_template": "",
+    "clause_slots": "",
+    "add_clause_slot": "",
+    "slot_name": "",
+    "slot_code": "",
+    "edit_clause_slots": "",
+    "delete_slot_confirm": "",
+    "slot_unassigned": ""
+  },
+  "discourse": {
+    "role": "",
+    "none": "",
+    "storyline": "",
+    "backgrounded": "",
+    "flashback": "",
+    "setting": "",
+    "evaluation": "",
+    "reported_speech": ""
+  },
+  "text_tag": {
+    "motif": "",
+    "genre": "",
+    "tale_type": "",
+    "add": "",
+    "name": "",
+    "code": "",
+    "classification": "",
+    "filter_all": "",
+    "remove": ""
   }
 }

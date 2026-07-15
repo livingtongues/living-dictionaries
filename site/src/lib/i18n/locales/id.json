@@ -327,7 +327,12 @@
     "unable_to_delete": "CATATAN: Anda tidak akan dapat menghapus bahasa -bahasa yang memoles ini nanti.",
     "print_access_meaning": "Hal ini memberikan kemampuan kepada masyarakat untuk mengunduh dan mencetak Kamus Hidup ini sebagai file .PDF.",
     "featured_image": "Gambar Unggulan",
-    "delete_dictionary": "Hapus Kamus"
+    "delete_dictionary": "Hapus Kamus",
+    "dialects_heading": "",
+    "dialects_meaning": "",
+    "no_dialects": "",
+    "edit_dialect_area": "",
+    "delete_dialect_confirm": ""
   },
   "source": {
     "create": "Tambah sumber",
@@ -456,10 +461,6 @@
     "title": "Organisasi Mitra",
     "button": "Tulis di Organisasi Mitra",
     "name": "Nama Organisasi Mitra"
-  },
-  "synopsis": {
-    "translations": "Terjemahan",
-    "name": "Ringkasan"
   },
   "sense": {
     "sense": "Nalar",
@@ -600,7 +601,8 @@
     "delete_cover": "Hapus foto",
     "delete_cover_confirm": "Hapus foto sampul?",
     "drop_cover_hint": "Letakkan gambar untuk mengatur foto sampul",
-    "top_domains": "Ranah semantik teratas"
+    "top_domains": "Ranah semantik teratas",
+    "view_cover_image": ""
   },
   "text": {
     "text": "Teks",
@@ -624,5 +626,61 @@
     "none_yet": "Belum ada teks",
     "sentence_count": "{count} kalimat",
     "edit_title": "Ubah judul"
+  },
+  "grammar": {
+    "grammar_notes": "",
+    "untitled_section": "",
+    "linked_entry": "",
+    "documents_entry": "",
+    "section_title": "",
+    "section_body": "",
+    "usage_conditions": "",
+    "usage_conditions_hint": "",
+    "move_up": "",
+    "move_down": "",
+    "indent": "",
+    "outdent": "",
+    "add_subsection": "",
+    "add_section": "",
+    "delete_section_confirm": "",
+    "preview_badge": "",
+    "example_sentences": "",
+    "add_example_sentence": "",
+    "attach_existing_sentence": "",
+    "paste_new_sentence": "",
+    "search_sentences": "",
+    "detach_sentence": "",
+    "no_example_sentences": "",
+    "clause_slot": "",
+    "no_clause_slot": "",
+    "clause_template": "",
+    "clause_slots": "",
+    "add_clause_slot": "",
+    "slot_name": "",
+    "slot_code": "",
+    "edit_clause_slots": "",
+    "delete_slot_confirm": "",
+    "slot_unassigned": ""
+  },
+  "discourse": {
+    "role": "",
+    "none": "",
+    "storyline": "",
+    "backgrounded": "",
+    "flashback": "",
+    "setting": "",
+    "evaluation": "",
+    "reported_speech": ""
+  },
+  "text_tag": {
+    "motif": "",
+    "genre": "",
+    "tale_type": "",
+    "add": "",
+    "name": "",
+    "code": "",
+    "classification": "",
+    "filter_all": "",
+    "remove": ""
   }
 }

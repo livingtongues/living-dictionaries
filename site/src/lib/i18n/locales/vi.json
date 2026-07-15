@@ -327,7 +327,12 @@
     "unable_to_delete": "Lưu ý: Sau này bạn sẽ không thể xóa các ngôn ngữ chú thích đã dùng",
     "print_access_meaning": "Việc này cho phép công chúng khả năng tải xuống và in Từ Điển này theo định dạng tệp PDF.",
     "featured_image": "Hình ảnh nổi bật",
-    "delete_dictionary": "Xóa từ điển"
+    "delete_dictionary": "Xóa từ điển",
+    "dialects_heading": "",
+    "dialects_meaning": "",
+    "no_dialects": "",
+    "edit_dialect_area": "",
+    "delete_dialect_confirm": ""
   },
   "source": {
     "create": "Thêm nguồn",
@@ -456,10 +461,6 @@
     "title": "Các tổ chức đối tác",
     "button": "Viết cho Tổ chức Đối tác",
     "name": "Tên tổ chức đối tác"
-  },
-  "synopsis": {
-    "translations": "Bản dịch",
-    "name": "Tóm tắt"
   },
   "sense": {
     "sense": "Giác quan",
@@ -600,7 +601,8 @@
     "delete_cover": "Xóa ảnh",
     "delete_cover_confirm": "Xóa ảnh bìa?",
     "drop_cover_hint": "Thả một hình ảnh vào đây để đặt làm ảnh bìa",
-    "top_domains": "Các miền ngữ nghĩa hàng đầu"
+    "top_domains": "Các miền ngữ nghĩa hàng đầu",
+    "view_cover_image": ""
   },
   "text": {
     "text": "Văn bản",
@@ -624,5 +626,61 @@
     "none_yet": "Chưa có văn bản nào",
     "sentence_count": "{count} câu",
     "edit_title": "Sửa tiêu đề"
+  },
+  "grammar": {
+    "grammar_notes": "",
+    "untitled_section": "",
+    "linked_entry": "",
+    "documents_entry": "",
+    "section_title": "",
+    "section_body": "",
+    "usage_conditions": "",
+    "usage_conditions_hint": "",
+    "move_up": "",
+    "move_down": "",
+    "indent": "",
+    "outdent": "",
+    "add_subsection": "",
+    "add_section": "",
+    "delete_section_confirm": "",
+    "preview_badge": "",
+    "example_sentences": "",
+    "add_example_sentence": "",
+    "attach_existing_sentence": "",
+    "paste_new_sentence": "",
+    "search_sentences": "",
+    "detach_sentence": "",
+    "no_example_sentences": "",
+    "clause_slot": "",
+    "no_clause_slot": "",
+    "clause_template": "",
+    "clause_slots": "",
+    "add_clause_slot": "",
+    "slot_name": "",
+    "slot_code": "",
+    "edit_clause_slots": "",
+    "delete_slot_confirm": "",
+    "slot_unassigned": ""
+  },
+  "discourse": {
+    "role": "",
+    "none": "",
+    "storyline": "",
+    "backgrounded": "",
+    "flashback": "",
+    "setting": "",
+    "evaluation": "",
+    "reported_speech": ""
+  },
+  "text_tag": {
+    "motif": "",
+    "genre": "",
+    "tale_type": "",
+    "add": "",
+    "name": "",
+    "code": "",
+    "classification": "",
+    "filter_all": "",
+    "remove": ""
   }
 }

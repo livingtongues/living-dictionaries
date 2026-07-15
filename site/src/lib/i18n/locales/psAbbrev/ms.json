@@ -88,6 +88,8 @@
     "relpro": "kgn rel",
     "vd": "kk dwitr",
     "va": "kk ambitr",
-    "obj": "obj"
+    "obj": "obj",
+    "n.f": "kn. fem.",
+    "n.m": "kn. mask."
   }
 }

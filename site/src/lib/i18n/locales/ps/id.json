@@ -88,6 +88,8 @@
     "relpro": "kata ganti relatif",
     "vd": "kata kerja ditransitif",
     "va": "Ambitransitif",
-    "obj": "penanda objek"
+    "obj": "penanda objek",
+    "n.f": "nomina feminin",
+    "n.m": "nomina maskulin"
   }
 }

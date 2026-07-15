@@ -327,7 +327,12 @@
     "unable_to_delete": "Nota: no podrá eliminar las glosas de estas lenguas más tarde",
     "print_access_meaning": "Esto le da al público la capacidad de descargar e imprimir este diccionario vivo como un .pdf",
     "featured_image": "Imagen principal",
-    "delete_dictionary": "Eliminar diccionario"
+    "delete_dictionary": "Eliminar diccionario",
+    "dialects_heading": "",
+    "dialects_meaning": "",
+    "no_dialects": "",
+    "edit_dialect_area": "",
+    "delete_dialect_confirm": ""
   },
   "source": {
     "create": "Agregar fuente",
@@ -456,10 +461,6 @@
     "title": "Organizaciones asociadas",
     "button": "Escribir la organización asociada",
     "name": "Nombre de la organización asociada"
-  },
-  "synopsis": {
-    "translations": "Traducciones",
-    "name": "Sinopsis"
   },
   "sense": {
     "sense": "Sentido",
@@ -600,7 +601,8 @@
     "delete_cover": "Quitar foto",
     "delete_cover_confirm": "¿Quitar la foto de portada?",
     "drop_cover_hint": "Suelta una imagen para establecer la foto de portada",
-    "top_domains": "Principales dominios semánticos"
+    "top_domains": "Principales dominios semánticos",
+    "view_cover_image": ""
   },
   "text": {
     "text": "Texto",
@@ -624,5 +626,61 @@
     "none_yet": "Aún no hay textos",
     "sentence_count": "{count} oraciones",
     "edit_title": "Editar título"
+  },
+  "grammar": {
+    "grammar_notes": "",
+    "untitled_section": "",
+    "linked_entry": "",
+    "documents_entry": "",
+    "section_title": "",
+    "section_body": "",
+    "usage_conditions": "",
+    "usage_conditions_hint": "",
+    "move_up": "",
+    "move_down": "",
+    "indent": "",
+    "outdent": "",
+    "add_subsection": "",
+    "add_section": "",
+    "delete_section_confirm": "",
+    "preview_badge": "",
+    "example_sentences": "",
+    "add_example_sentence": "",
+    "attach_existing_sentence": "",
+    "paste_new_sentence": "",
+    "search_sentences": "",
+    "detach_sentence": "",
+    "no_example_sentences": "",
+    "clause_slot": "",
+    "no_clause_slot": "",
+    "clause_template": "",
+    "clause_slots": "",
+    "add_clause_slot": "",
+    "slot_name": "",
+    "slot_code": "",
+    "edit_clause_slots": "",
+    "delete_slot_confirm": "",
+    "slot_unassigned": ""
+  },
+  "discourse": {
+    "role": "",
+    "none": "",
+    "storyline": "",
+    "backgrounded": "",
+    "flashback": "",
+    "setting": "",
+    "evaluation": "",
+    "reported_speech": ""
+  },
+  "text_tag": {
+    "motif": "",
+    "genre": "",
+    "tale_type": "",
+    "add": "",
+    "name": "",
+    "code": "",
+    "classification": "",
+    "filter_all": "",
+    "remove": ""
   }
 }
