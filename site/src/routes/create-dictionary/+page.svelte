@@ -95,6 +95,7 @@
       glottocode: glottocode.trim(),
       community_permission,
       author_connection,
+      conlang,
       con_language_description: conlang
         ? `Source: ${conlang_source.trim()}
 

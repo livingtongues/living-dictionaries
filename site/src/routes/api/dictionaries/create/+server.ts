@@ -30,6 +30,8 @@ export interface DictionariesCreateRequestBody {
   glottocode?: string | null
   community_permission?: string | null
   author_connection?: string | null
+  /** Creator checked the "constructed language" box → auto-bucket as `conlang`. */
+  conlang?: boolean
   con_language_description?: string | null
 }
 
@@ -65,15 +67,18 @@ export const POST: RequestHandler = async (event) => {
 
   const now = new Date().toISOString()
   const role_id = crypto.randomUUID()
+  // A constructed language is auto-classified into the `conlang` bucket (which
+  // blocks the agent API); admins can re-bucket later.
+  const bucket = body.conlang ? 'conlang' : null
 
   const create = db.transaction(() => {
     db.prepare(`
       INSERT INTO dictionaries (
         id, url, name, gloss_languages, alternate_names, location, coordinates,
         iso_639_3, glottocode, community_permission, author_connection,
-        con_language_description, entry_count, dirty, created_at,
+        con_language_description, bucket, entry_count, dirty, created_at,
         created_by_user_id, updated_at, updated_by_user_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, ?, ?, ?, ?)
     `).run(
       id,
       id,
@@ -87,6 +92,7 @@ export const POST: RequestHandler = async (event) => {
       body.community_permission || null,
       body.author_connection?.trim() || null,
       body.con_language_description?.trim() || null,
+      bucket,
       now,
       user_id,
       now,

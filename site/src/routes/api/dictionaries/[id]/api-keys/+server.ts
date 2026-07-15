@@ -2,7 +2,7 @@ import type { RequestHandler } from './$types'
 import type { ApiKeyRecord, ApiKeyRole } from '$lib/api-keys/api-key'
 import { create_api_key, list_api_keys } from '$lib/api-keys/api-key'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
-import { ResponseCodes } from '$lib/constants'
+import { API_UNAVAILABLE_MESSAGE, is_api_unavailable_bucket, ResponseCodes } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { log_server_event } from '$lib/server/log-server-event'
@@ -48,6 +48,9 @@ export const POST: RequestHandler = async (event) => {
   if (!dictionary)
     error(ResponseCodes.NOT_FOUND, 'dictionary not found')
   const auth = await verify_auth_dict_role(event, { dictionary, min_role: 'manager' })
+
+  if (is_api_unavailable_bucket(dictionary.bucket))
+    error(ResponseCodes.FORBIDDEN, API_UNAVAILABLE_MESSAGE)
 
   const body = await event.request.json() as DictionariesIdApiKeysPostRequestBody
   const label = (body.label || '').trim()

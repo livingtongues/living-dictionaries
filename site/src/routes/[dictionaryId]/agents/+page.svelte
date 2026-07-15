@@ -2,16 +2,20 @@
   import AgentPrompt from '$lib/components/settings/AgentPrompt.svelte'
   import ApiKeys from '$lib/components/settings/ApiKeys.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import { API_UNAVAILABLE_MESSAGE, is_api_unavailable_bucket } from '$lib/constants'
 
   const { data } = $props()
   const { dictionary, is_manager, is_editor_or_above } = $derived(data)
+  const api_unavailable = $derived(is_api_unavailable_bucket(dictionary.bucket))
 </script>
 
 <div class="agents-page">
   <h3 class="agents-heading">Agents</h3>
   <p class="agents-sub">Use your AI Agent to read & write this dictionary on your behalf. This is for those who know how to use an agent harness like Claude Code, Codex, Grok Code, Pi, OpenCode, Claude Cowork, GitHub Copilot, etc...</p>
 
-  {#if is_editor_or_above}
+  {#if api_unavailable}
+    <p class="api-unavailable">{API_UNAVAILABLE_MESSAGE}</p>
+  {:else if is_editor_or_above}
     <div class="explainer">
       <AgentPrompt dictionary_id={dictionary.id} />
       <p class="muted-note">
@@ -75,5 +79,13 @@
   .no-access {
     color: var(--color-secondary);
     padding: 1rem 0;
+  }
+  .api-unavailable {
+    color: var(--color-secondary);
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--color) 12%, var(--background));
+    border-radius: 0.5rem;
+    padding: 1rem;
+    line-height: 1.5;
   }
 </style>

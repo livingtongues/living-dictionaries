@@ -77,6 +77,19 @@ export const DICTIONARY_BUCKETS = ['public', 'unlisted', 'secure', 'conlang', 'g
 export type DictionaryBucket = typeof DICTIONARY_BUCKETS[number]
 
 /**
+ * Buckets denied the agent `/api/v1` API. The API is for communities documenting
+ * endangered/under-represented languages, so constructed languages and glossaries
+ * cannot mint keys (no key = no access; the v1 routes themselves need no guard).
+ */
+export const API_UNAVAILABLE_BUCKETS = ['conlang', 'glossary'] as const
+
+export const API_UNAVAILABLE_MESSAGE = 'The Living Dictionaries API is available only to communities documenting endangered and under-represented languages. It isn\'t available for constructed languages or glossaries.'
+
+export function is_api_unavailable_bucket(bucket: string | null | undefined): boolean {
+  return !!bucket && (API_UNAVAILABLE_BUCKETS as readonly string[]).includes(bucket)
+}
+
+/**
  * Controlled global vocabulary for `entry_relationships.type`. Labels (and the
  * inverse-side label of directed types) are i18n keys `relationship_type.<slug>`
  * — never hard-code display text here. `symmetric` types read the same from

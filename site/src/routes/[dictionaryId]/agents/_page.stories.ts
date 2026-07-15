@@ -29,3 +29,11 @@ export const NoAccess: PageStory<typeof Component> = {
     is_editor_or_above: false,
   } as never,
 }
+
+export const ApiUnavailableConlang: PageStory<typeof Component> = {
+  props: {
+    dictionary: { id: 'demo', url: 'demo', name: 'Sindarin', public: false, bucket: 'conlang' },
+    is_manager: true,
+    is_editor_or_above: true,
+  } as never,
+}

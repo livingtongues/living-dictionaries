@@ -71,6 +71,19 @@ describe(POST, () => {
       .rejects.toMatchObject({ status: 400 })
   })
 
+  test('403 for a conlang dictionary (API unavailable)', async () => {
+    db.prepare(`UPDATE dictionaries SET bucket = 'conlang' WHERE id = 'dict-1'`).run()
+    await expect(POST(event({ method: 'POST', token: await manager_token(), body: { label: 'x' } })))
+      .rejects.toMatchObject({ status: 403 })
+    expect(db.prepare(`SELECT COUNT(*) c FROM api_keys`).get()).toMatchObject({ c: 0 })
+  })
+
+  test('403 for a glossary dictionary (API unavailable)', async () => {
+    db.prepare(`UPDATE dictionaries SET bucket = 'glossary' WHERE id = 'dict-1'`).run()
+    await expect(POST(event({ method: 'POST', token: await manager_token(), body: { label: 'x' } })))
+      .rejects.toMatchObject({ status: 403 })
+  })
+
   test('manager mints a key; token returned once, hash stored', async () => {
     const res = await POST(event({ method: 'POST', token: await manager_token(), body: { label: 'My agent', role: 'read' } }))
     const data = await res.json()
