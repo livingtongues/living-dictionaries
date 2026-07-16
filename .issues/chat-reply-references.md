@@ -1,13 +1,19 @@
 # Chat: Discord-style reply references + load-older pagination
 
-## STATUS: built + verified (tests/types/lint/check/visual). Live smoke test on tuf pending.
+## STATUS: built + verified end-to-end (tests/types/lint/check/visual + LIVE browser). Done.
 - ✅ All steps 1–10 implemented.
 - ✅ `vitest` chat suite: 54 pass (incl. new reply-preview + before-paging + cross-room reject).
 - ✅ `tsc --noEmit` clean · `eslint` 0 errors · `svelte-check` 0 errors.
 - ✅ svelte-look screenshots (light+dark): reply quote-line (text/photo/file/deleted) + composer reply bar.
-- ⏳ NOT yet exercised live in a browser: the client wiring (jump-backwards loop, load-older
-  scroll-preservation, poll reconcile keeping older pages). Needs a run on tuf (dev server +
-  a room with >100 messages) to confirm end-to-end. Everything else is green.
+- ✅ LIVE headless smoke test (mustang, 2026-07-15) against a seeded 120-msg room, 21/22 assertions
+  pass (the 1 "fail" is Google One Tap `gsi/client` CORS — no route to Google on mustang, unrelated):
+  - Server: newest-100 window; reply previews live-resolve author+snippet even when the target is
+    BELOW the loaded window; `before` cursor returns the correct older slice.
+  - Client: load-older prepends the older page + **scroll preserved** (anchor moved 0.8px);
+    deep **jump-backwards loop** (sm-119→sm-000) pages until the target loads, scrolls it into view
+    + flashes; **poll reconcile keeps loaded older pages** (count/first stable across 8s of ~3s polls);
+    reply compose shows the "Replying to…" bar, optimistic reply_to synthesizes locally, persists
+    server-side with `reply_to_message_id`, bar clears after send.
 
 
 Add the ability to reply to a specific earlier message in /chat, rendered Discord-style:

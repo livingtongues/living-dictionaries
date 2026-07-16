@@ -76,3 +76,18 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
 - **2026-07-14 — NO wedged-client dashboard panels.** Jacob: "wedges are your job to find and fix, not
   mine to watch and observe in a dashboard." Stop proposing sync-halt / wedged-client indicator panels.
   Surface wedges as ACTIONABLE nightly-digest items (fix or human-nudge), not a dashboard to watch.
+  (Applied 07-15: the carried "sync-halt terminal-wedge panel" backlog item is DROPPED per this ruling.)
+- **2026-07-15 — grammar `props_invalid_value` P3 (preview-only): root cause PINNED, fix pending.**
+  `SectionEditor.svelte` `bind:value={draft_body[bcp]}` / `draft_usage[bcp]` (undefined for absent
+  locales) into `MarkdownEditor` `value = $bindable('')` → Svelte throws. Admin-3-gated preview only
+  (`/[dict]/grammar`, new structured-grammar UI), zero real-user exposure; only Jacob hits it. Fix = drop
+  the `''` fallback or pre-seed the locale key. Don't re-derive the cause next run; it's in current code
+  until fixed.
+- **2026-07-15 — `nyishi` dict-worker `Maximum call stack size exceeded` halt: WATCH.** 1 anon worker
+  `sync_halted_repeated_failure` today; echoes the 07-12 Opata search recursion. Only drill nyishi's data
+  if a REAL contributor reports a broken boot; a single null-user worker instance is not actionable.
+- **2026-07-15 — LD is AHEAD on known-noise classification.** The command's standing Phase-D note that
+  "LD's raw recent_errors lacks error-cluster + known-noise classification" is STALE — LD has
+  `is_noise_msg` UDF + `real_errors` rollup + cluster `is_noise` (`log-analytics.ts` / `classify-error.ts`).
+  Don't accept it as an inbound port. Open cross-browser gap: add `Importing a module script failed.` +
+  `Unable to preload CSS` to `KNOWN_NOISE_PATTERNS` (build-next, backlog).

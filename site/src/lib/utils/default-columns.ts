@@ -1,6 +1,6 @@
 import type { IColumn } from '$lib/types'
 
-export const defaultColumns: IColumn[] = [
+export const default_columns: IColumn[] = [
   // field must match those used for i18n (e.g. lx = entry.lx)
   {
     field: 'lexeme',

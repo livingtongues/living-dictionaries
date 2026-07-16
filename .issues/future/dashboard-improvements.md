@@ -98,15 +98,19 @@ proposals against this lens.
   first concrete instance of the plain-language directive above.
 
 ## Open proposals
-- **★ NEW — Sync-Health: surface the `sync_halted_repeated_failure` terminal wedge** *(ported from
-  tutor 07-13 Phase D · filed 2026-07-14 — grounded in a live halt row today; verified NOT present).*
-  `build_sync_health` (`log-analytics.ts:2105`) filters `message = 'sync_failed'` only, but LD **does
-  emit** `sync_halted_repeated_failure` (via `report_dict_sync_halted`, dict-instance repeat-breaker) —
-  1 row on 2026-07-14. So a client that has **given up entirely** (past the retry cap) is invisible on
-  the Sync-health panel and only shows in raw error triage — the exact "is a client terminally wedged?"
-  question the panel exists to answer. tutor found + is fixing the identical gap in its shared sync
-  engine. Add a **terminal-wedge count + distinct (user,dict) pairs** to the panel (a second grouped
-  read + one verdict line). Cheap, display-only. *(ported from tutor/house)*
+- **★ NEW — Fold cross-browser stale-bundle transients into `KNOWN_NOISE_PATTERNS`** *(ported from
+  tutor 07-08 candidate · filed 2026-07-15 — grounded in today's rows; verified NOT present).*
+  `classify-error.ts` already folds out Chrome's `Failed to fetch dynamically imported module`, but not
+  the identical stale-bundle-after-deploy transient in other engines' wording: **`Importing a module
+  script failed.`** (Safari/Firefox — 2 rows on 2026-07-15) and **`Unable to preload CSS`** (Vite's
+  `preloadError` prefix — tutor's 07-08 add). Same cause, same benign class; adding the two strings keeps
+  the real-error headline honest across browsers. One-line each. *(Skip bare `Failed to fetch` /
+  `Network error` — a real user's network failure shares those; fold via `bot_pct` instead.)* Build-next.
+- ~~**★ Sync-Health: surface the `sync_halted_repeated_failure` terminal wedge**~~ **DROPPED
+  (Jacob, 07-14 ruling):** "wedges are your job to find and fix, not mine to watch in a dashboard —
+  surface as actionable digest items, not a panel." No wedged-client dashboard panels. `sync_halted_*`
+  rows are surfaced as nightly-digest items instead (07-15: the day's 2 halts were bot/worker, no real
+  wedge). Removed from the backlog per the standing "no wedged-client panels" decision.
 - **Small — "current-build clean?" verdict badge on `/admin/health`** *(ported from tutor 07-13 · filed
   2026-07-14 · LOW).* tutor's top Phase-C item: a one-line "Current build `<id>`: ✓ clean / ⚠ N errors"
   derived from the `errors_by_version` `is_current` row LD already computes. LD renders the current-vs-

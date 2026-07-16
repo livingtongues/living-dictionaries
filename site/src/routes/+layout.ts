@@ -3,7 +3,7 @@ import { browser } from '$app/environment'
 import { createPersistedStore } from '$lib/state/persisted-store'
 import { getSupportedLocale } from '$lib/i18n/locales'
 import { getTranslator } from '$lib/i18n'
-import { defaultColumns } from '$lib/stores/columns'
+import { default_columns } from '$lib/utils/default-columns'
 import { get_auth_user } from '$lib/auth/user.svelte'
 import { get_my_dictionary_roles } from '$lib/me/dictionary-roles.svelte'
 import { create_dictionaries_store, create_my_dictionaries_store } from '$lib/dictionaries'
@@ -40,7 +40,7 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
   const my_dictionaries = create_my_dictionaries_store({ user_id: ssr_user?.id })
 
   const columns_key = `table_columns_03.18.2024-${ssr_user?.id ?? 'anon'}` // rename when adding more columns to invalidate the user's cache
-  const preferred_table_columns = createPersistedStore(columns_key, defaultColumns)
+  const preferred_table_columns = createPersistedStore(columns_key, default_columns)
   const mode = import.meta.env.MODE as 'development' | 'production'
 
   return {
