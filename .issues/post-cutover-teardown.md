@@ -29,15 +29,21 @@ load-bearing, not legacy. Rename/reword/port, but don't destroy access.</Callout
       Supabase and deletes GCS objects. Decide where the deletion queue lives post-cutover, then port.
 
 ## Delete after settling (≥2 weeks post-cutover, and after any Phase-B delta re-migrate)
-> Scheduled: the committed one-shot cron `living-dictionaries/teardown-2026-07-17`
-> (`.cron/teardown-2026-07-17.md`) executes this section on 2026-07-17.
-- [ ] `scripts/supabase/cutover/` — the one-shot cutover pipeline. Phase-B delta re-migrate is DONE
-      (2026-07-03), so this is now safe to delete once we're confident no further legacy re-pull is
-      needed. Lives in git history after deletion. (Self-contained: its own
-      `looks-like-html.ts` since the site shim was removed 2026-07-04.)
-- [ ] `scripts/supabase/reset-local-db.ts` — Supabase local-dev reset; obsolete under SQLite dev flow.
-- [ ] `scripts/supabase/create-entry-caches/` — pre-cutover Cloudflare entry caches; superseded by
-      the R2 snapshot + OPFS leader-worker model. Confirm nothing consumes the caches, then delete.
-- [ ] `scripts/types/supabase/` — legacy generated Supabase TS types; delete only once nothing
-      (config-supabase aside) imports them. If `config-supabase.ts` still needs them for legacy
-      lookups, keep. (Left at `scripts/types/` — not moved.)
+> Executed 2026-07-16 by the one-shot cron `living-dictionaries/teardown-2026-07-17` (now self-deleted).
+- [x] `scripts/supabase/cutover/` — DELETED 2026-07-16. The one-shot cutover pipeline (incl. its
+      `migrate.test.ts` / `richtext.test.ts`). Nothing imported it outside itself; lives on in git
+      history. Also removed its 5 `scripts/package.json` scripts (`migrate-to-sqlite:dry`,
+      `migrate-to-sqlite`, `verify-migration`, `validate-migration`, `audit-rich-text`).
+- [x] `scripts/supabase/create-entry-caches/` — DELETED 2026-07-16. Pre-cutover Cloudflare entry
+      caches, superseded by the R2 snapshot + OPFS leader-worker model. The only consumer was the
+      archived (dead) `archive/api-keys/external-api/read-entries/+server.ts` hitting
+      `cache.livingdictionaries.app` — not wired into the site build. Removed its
+      `create-entry-caches` `scripts/package.json` script too.
+- [ ] `scripts/supabase/reset-local-db.ts` — **KEPT** (not deleted 2026-07-16). Retained port-item
+      `scripts/import/import-data.test.ts` still imports `reset_local_db` from it
+      (`beforeEach(reset_local_db)`); deleting it would break that file (which we're not to touch
+      pre-port). Delete this together with the import-tooling SQLite port above.
+- [ ] `scripts/types/supabase/` — **KEPT** (not deleted 2026-07-16). Still transitively required by
+      the retained `config-supabase.ts`: it imports `Database` from `../types`, whose `index.ts`
+      re-exports from `./supabase/{combined.types,entry.interface,content-update.interface,
+      unsupported.interface,orthography.interface}`. Per the keep-if-config-needs-them rule, keep.
