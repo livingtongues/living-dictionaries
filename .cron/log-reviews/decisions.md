@@ -77,12 +77,29 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   mine to watch and observe in a dashboard." Stop proposing sync-halt / wedged-client indicator panels.
   Surface wedges as ACTIONABLE nightly-digest items (fix or human-nudge), not a dashboard to watch.
   (Applied 07-15: the carried "sync-halt terminal-wedge panel" backlog item is DROPPED per this ruling.)
-- **2026-07-15 — grammar `props_invalid_value` P3 (preview-only): root cause PINNED, fix pending.**
-  `SectionEditor.svelte` `bind:value={draft_body[bcp]}` / `draft_usage[bcp]` (undefined for absent
-  locales) into `MarkdownEditor` `value = $bindable('')` → Svelte throws. Admin-3-gated preview only
-  (`/[dict]/grammar`, new structured-grammar UI), zero real-user exposure; only Jacob hits it. Fix = drop
-  the `''` fallback or pre-seed the locale key. Don't re-derive the cause next run; it's in current code
-  until fixed.
+- **2026-07-16 — grammar `props_invalid_value` P3: CORRECTED — NOT admin-3/preview-only; real
+  shared-editor bug, fix pending.** The 07-15 "admin-3 preview only, only Jacob" framing is WRONG:
+  `GrammarSection.svelte` (`can_prose_edit`, L32-35) opens `SectionEditor` in `prose_only` mode for any
+  dictionary **manager** editing grammar intro prose. 07-16 it fired for 2 NON-admin users. Zero *mission*
+  impact only because they were on `bucket:"conlang"` dicts (cormani/lunvot/rhenic — fenced, 07-07); it
+  WILL hit a real-dict manager once they edit grammar. Root cause (still pinned): `SectionEditor.svelte:146/159`
+  binds `draft_body[bcp]`/`draft_usage[bcp]` (undefined) into `MarkdownEditor` `value = $bindable('')`
+  (`:32`). Fix = drop the `''` fallback or pre-seed the key. Keep as a REAL P3, not preview-only.
+- **2026-07-16 — waveform-decode P3: ENRICHMENT SHIPPED, diagnosed, CLOSED.** `Waveform.svelte:83` now
+  logs `{name,message,mime,bytes,source}`; the rows reveal root cause = transient `NetworkError` fetching
+  the audio URL (`source:"url"`), NOT a codec issue. Cosmetic (playback via `<audio>` unaffected). Don't
+  re-raise the enrich item or a codec fix; only revisit if it recurs at volume (→ R2/CDN audio delivery,
+  not the decoder).
+- **2026-07-16 — `real_errors` rollup is ~100× inflated by known-noise the classifier doesn't catch.**
+  The forever metric reads ~1,600–2,000/day but genuine user-facing errors are a handful; the bulk is the
+  null-session `sync_failed` zombie storm (~1,384/day, one tab) + anon/bot `leader_boot_failed` + bot
+  `Internal Error` 500s — none in `KNOWN_NOISE_PATTERNS`. Two backlog fixes filed (fold null-session
+  `sync_failed`/`leader_boot_failed` out of `real_errors`; add the cross-browser stale-bundle strings).
+  Don't re-derive this each run; it's a metric-honesty backlog item, not a new error to triage.
+- **2026-07-16 — Phase D inbound port ACCEPTED from tutor: persist `/admin/analytics` compute cost.**
+  LD has the identical ephemeral `[profile]` `console.log` pattern (`log-analytics.ts:750`); adopt tutor's
+  `admin_analytics_computed` server-event-per-uncached-compute so dashboard load-perf becomes a trend.
+  Filed to backlog (LOW). Don't re-propose the design; port tutor's.
 - **2026-07-15 — `nyishi` dict-worker `Maximum call stack size exceeded` halt: WATCH.** 1 anon worker
   `sync_halted_repeated_failure` today; echoes the 07-12 Opata search recursion. Only drill nyishi's data
   if a REAL contributor reports a broken boot; a single null-user worker instance is not actionable.

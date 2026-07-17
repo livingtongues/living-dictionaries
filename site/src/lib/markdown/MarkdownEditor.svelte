@@ -29,7 +29,7 @@
   }
 
   let {
-    value = $bindable(''),
+    value = $bindable(),
     on_change,
     placeholder = '',
     disabled = false,

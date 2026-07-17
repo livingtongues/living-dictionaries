@@ -204,3 +204,13 @@ paints first) + `secondary` (the page's full half). `+page.svelte` renders `prim
 SWAPS to `secondary` once it resolves (`secondary ?? primary` — both are complete `LogAnalytics`
 objects, so no fragile field-merge; the heavy panels show their normal empty states until the swap).
 The `light` cache entry is shared by both pages.
+
+**Malformed-`context` read guard (2026-07-16, borrowed from house `7023529`):** every
+`json_extract(context, …)` in `log-analytics.ts` is wrapped as
+`json_extract(CASE WHEN json_valid(context) THEN context END, …)`. A single row with invalid JSON in
+`context` (SQLite doesn't validate on write) would otherwise make `json_extract` **throw**, 500-ing
+BOTH `/admin/analytics` and `/admin/health` at once. The `CASE` short-circuits to `NULL` on bad JSON
+(`json_extract(NULL,…)` is NULL, never an error) — works identically in SELECT/WHERE/aggregate. **Any
+new `json_extract(context, …)` MUST use this guard.** Paired write-side defense: `insert-client-log.ts`
+uses `stringify_context_capped()` (not a blind `.slice()`), so oversized `context` is truncated to
+still-valid JSON rather than cut mid-token — the DB can no longer persist invalid JSON in the first place.

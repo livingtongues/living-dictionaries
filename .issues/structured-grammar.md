@@ -809,12 +809,19 @@ shared.updated_at bumped). Prod audit: 170 blob-dicts (99 @20260709, 7 @20260713
   `sync_failed` ×26 = the known deleted-dict `river` 404 poller; 1 transient leader-election RPC timeout
   (kihehe, during backfill); 1 unrelated entry-page 500 (`batsi-kop-tsotsil-tsot`, out of scope).
 
-### POST-DEPLOY CLEANUP (pending soak) — scheduled
-- Remove after soak: `/opt/hosting/data/shared.db.bak-20260715-025523` + `dictionaries.bak-20260715-025523`
-  (1.8G) and `/tmp/dictionary-migrations` inside the container.
-- **horse-cron scheduled** (`c-66533d`, one-time @ 2026-07-16 09:00, opus): re-checks prod logs since deploy
-  for grammar/migration errors + re-verifies the public render, then removes the two backups +
-  `/tmp/dictionary-migrations` (pings Jacob instead if anything looks off).
+### POST-DEPLOY CLEANUP — ✅ DONE (2026-07-16, soak clean)
+- ✅ Soak re-verify (2026-07-16 ~09:xx, agent from mustang): homepage + `/hazaragi/grammar` both HTTP 200;
+  public headless render shows section "1" (HAZARAGI GRAMMAR & PHONETICS CHART consonants table + IPA),
+  `hasPreviewBadge=false`, no edit controls, ZERO pageerrors (only pre-existing Google GSI CORS console noise).
+- ✅ Prod logs since 2026-07-15 deploy: NO new grammar/migration/schema errors. The 2 "grammar"-URL rows
+  are browser-extension `serviceWorker.register` "Rejected" noise; the 17 "sqlite"-matched rows are the
+  pre-existing "Failed to read dict bundle from wa-sqlite" snapshot class on /entries (NOT the cutover).
+  No `grammar_sections`/`no such column`/`no such table`/409/`drop column` errors.
+- ✅ shared.db still correct: `20260715_drop_dictionaries_grammar.sql` recorded; `dictionaries.grammar`
+  column absent (34 cols).
+- ✅ Backups removed (reclaimed ~1.8G): `shared.db.bak-20260715-025523` + `dictionaries.bak-20260715-025523`
+  (a directory → `rm -rf`) + container `/tmp/dictionary-migrations`. All confirmed GONE.
+- **horse-cron** (`c-66533d`, one-time @ 2026-07-16 09:00, opus): this run fulfilled it.
 - Unrelated follow-ups spotted (NOT this task): the `river` stuck-poller 404 → folded into
   `.issues/stale-client-sync-storm-2026-07-08.md` (same pre-404-breaker stale-client class, secure-flip trigger);
   one `Internal Error` 500 on a `batsi-kop-tsotsil-tsot` entry page — glance if it recurs.

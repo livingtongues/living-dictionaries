@@ -79,7 +79,7 @@ export function insert_client_log({
     const message = clamp(payload.message, MAX_MESSAGE_LEN) ?? ''
     const stack = clamp(payload.stack, MAX_STACK_LEN)
     const context_json = payload.context
-      ? clamp(safe_stringify(payload.context), MAX_CONTEXT_LEN)
+      ? stringify_context_capped(payload.context)
       : null
     // Promote context.session_id to a real column so analytics filters/groups on
     // it directly (never a per-row json_extract — the old hot-path cost).
@@ -130,6 +130,44 @@ function safe_stringify(value: unknown): string | null {
   } catch {
     return null
   }
+}
+
+/**
+ * Serialize `context` to JSON that is ALWAYS valid and never longer than
+ * `MAX_CONTEXT_LEN`. A blind `.slice()` on the serialized string used to cut
+ * JSON mid-token, persisting invalid JSON that then 500-ed every unguarded
+ * `json_extract(context, …)` in the analytics dashboards. Instead of slicing,
+ * we replace the largest top-level fields with a short marker until the object
+ * fits — the small, useful fields (session_id, code, route…) survive intact.
+ */
+function stringify_context_capped(context: Record<string, unknown>): string | null {
+  const full = safe_stringify(context)
+  if (full === null)
+    return null
+  if (full.length <= MAX_CONTEXT_LEN)
+    return full
+
+  // Rank top-level fields by serialized size and replace the biggest ones with
+  // a marker until the whole object fits. Re-stringify + re-check each step so
+  // we stop as soon as we're under the cap.
+  const fields = Object.entries(context)
+    .map(([key, value]) => ({ key, size: (safe_stringify(value) ?? 'null').length }))
+    .sort((first, second) => second.size - first.size)
+
+  const capped: Record<string, unknown> = { ...context, _context_truncated: true }
+  for (const field of fields) {
+    const current = safe_stringify(capped)
+    if (current !== null && current.length <= MAX_CONTEXT_LEN)
+      return current
+    capped[field.key] = `[truncated: ${field.size} chars]`
+  }
+
+  // Every field replaced and still over cap (e.g. thousands of tiny keys) —
+  // fall back to a minimal valid marker rather than persist invalid JSON.
+  const result = safe_stringify(capped)
+  if (result !== null && result.length <= MAX_CONTEXT_LEN)
+    return result
+  return JSON.stringify({ _context_truncated: true, _reason: 'context exceeded max length' })
 }
 
 /**
@@ -299,6 +337,27 @@ if (import.meta.vitest) {
       const row = db.prepare('SELECT message, stack FROM client_logs').get() as { message: string, stack: string }
       expect(row.message).toHaveLength(MAX_MESSAGE_LEN)
       expect(row.stack).toHaveLength(MAX_STACK_LEN)
+    })
+
+    test('truncates oversize context to VALID JSON rather than slicing mid-token', () => {
+      const db = open_logs_db(':memory:')
+      // A giant log_tail array — the exact shape (a big sync_failed context) that
+      // used to overflow 16 KB and get sliced into invalid JSON.
+      const huge_tail = Array.from({ length: 6000 }, (_, index) => `event-${index}-with-some-padding-text`)
+      const ok = insert_client_log({
+        payload: { level: 'error', message: 'sync_failed', context: { code: 'FK_FAIL', session_id: 's-1', log_tail: huge_tail } },
+        user_id: null,
+        db,
+      })
+      expect(ok).toBe(true)
+      const row = db.prepare('SELECT context, session_id FROM client_logs').get() as { context: string, session_id: string | null }
+      expect(row.context.length <= MAX_CONTEXT_LEN).toBe(true)
+      // The whole point: what we persisted parses as valid JSON.
+      const parsed = JSON.parse(row.context) as Record<string, unknown>
+      expect(parsed._context_truncated).toBe(true)
+      expect(parsed.code).toBe('FK_FAIL') // small fields survive intact
+      expect(typeof parsed.log_tail).toBe('string') // the oversized field is replaced by a marker
+      expect(row.session_id).toBe('s-1') // promotion still works
     })
 
     test('survives a context object containing a circular reference', () => {

@@ -981,11 +981,11 @@ export function build_host_stats({ logs_db, read_now = () => read_host_stats({ t
 
   const hourly = logs_db.prepare(`
     SELECT substr(received_at, 1, 13) || ':00'                        hour,
-           ROUND(AVG(json_extract(context, '$.cpu_pct')), 1)          cpu_avg,
-           MAX(json_extract(context, '$.cpu_pct'))                    cpu_max,
-           ROUND(AVG(json_extract(context, '$.mem_pct')), 1)          mem_avg,
-           MAX(json_extract(context, '$.mem_pct'))                    mem_max,
-           MAX(json_extract(context, '$.disk_pct'))                   disk_pct
+           ROUND(AVG(json_extract(CASE WHEN json_valid(context) THEN context END, '$.cpu_pct')), 1)          cpu_avg,
+           MAX(json_extract(CASE WHEN json_valid(context) THEN context END, '$.cpu_pct'))                    cpu_max,
+           ROUND(AVG(json_extract(CASE WHEN json_valid(context) THEN context END, '$.mem_pct')), 1)          mem_avg,
+           MAX(json_extract(CASE WHEN json_valid(context) THEN context END, '$.mem_pct'))                    mem_max,
+           MAX(json_extract(CASE WHEN json_valid(context) THEN context END, '$.disk_pct'))                   disk_pct
     FROM client_logs
     WHERE source = 'server' AND message = 'host_stats'
     GROUP BY hour
@@ -1022,8 +1022,8 @@ function query_window_sessions({ shared_db, logs_db, window_start_day, live_star
            substr(MIN(received_at), 1, 10) day,
            SUM(CASE WHEN message = 'heartbeat' THEN 1 ELSE 0 END) heartbeats,
            MAX(CASE WHEN user_id IS NOT NULL THEN 1 ELSE 0 END) has_user_id,
-           MAX(json_extract(context, '$.webdriver')) webdriver,
-           MAX(json_extract(context, '$.db_tier')) db_tier,
+           MAX(json_extract(CASE WHEN json_valid(context) THEN context END, '$.webdriver')) webdriver,
+           MAX(json_extract(CASE WHEN json_valid(context) THEN context END, '$.db_tier')) db_tier,
            MAX(country) country,
            MAX(region) region,
            MAX(user_id) user_id
@@ -1086,11 +1086,11 @@ function populate_temp_set({ logs_db, table, column, values }: {
 function build_uptime(ctx: AnalyticsContext): UptimeSummary {
   const rows = ctx.logs_db.prepare(`
     SELECT substr(received_at, 1, 10)               day,
-           json_extract(context, '$.ttfb_ms')       ttfb_ms,
-           json_extract(context, '$.total_ms')      total_ms,
-           json_extract(context, '$.ok')            ok,
-           json_extract(context, '$.status')        status,
-           json_extract(context, '$.vantage')       vantage
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.ttfb_ms')       ttfb_ms,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.total_ms')      total_ms,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.ok')            ok,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.status')        status,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.vantage')       vantage
     FROM client_logs
     WHERE received_at >= ? AND source = 'server' AND message = 'uptime_probe'
     ORDER BY received_at
@@ -1268,7 +1268,7 @@ function build_usage_and_areas({ ctx, rollup_rows, live_by_day }: {
   const route_counts = new Map<string, number>()
   const route_sessions = new Map<string, Set<string>>()
   for (const row of logs_db.prepare(`
-    SELECT json_extract(context, '$.to') to_path,
+    SELECT json_extract(CASE WHEN json_valid(context) THEN context END, '$.to') to_path,
            session_id sid,
            COUNT(*) count
     FROM client_logs
@@ -1535,13 +1535,13 @@ const SCHEMA_DRIFT_PATTERN = /no such (?:column|table)|has no column named|sqlit
  */
 function build_server_faults(ctx: AnalyticsContext): ServerFaults {
   const clusters = (ctx.logs_db.prepare(`
-    SELECT coalesce(json_extract(context, '$.route'), json_extract(context, '$.pathname')) route,
+    SELECT coalesce(json_extract(CASE WHEN json_valid(context) THEN context END, '$.route'), json_extract(CASE WHEN json_valid(context) THEN context END, '$.pathname')) route,
            message,
            substr(coalesce(stack, ''), 1, 300) stack_head,
            COUNT(*) count,
            MIN(received_at) first_seen,
            MAX(received_at) last_seen,
-           group_concat(DISTINCT json_extract(context, '$.status')) statuses
+           group_concat(DISTINCT json_extract(CASE WHEN json_valid(context) THEN context END, '$.status')) statuses
     FROM client_logs
     WHERE received_at >= ? AND source = 'server' AND level IN ${ERROR_LEVELS_SQL}
     GROUP BY route, message
@@ -1556,7 +1556,7 @@ function build_server_faults(ctx: AnalyticsContext): ServerFaults {
 }
 
 /** Missing-translation warn rows → a ranked, deduped translation-gap worklist. */
-const MISSING_I18N_KEY_SQL = `coalesce(json_extract(context, '$.i18n_key'), replace(message, 'i18n missing key: ', ''))`
+const MISSING_I18N_KEY_SQL = `coalesce(json_extract(CASE WHEN json_valid(context) THEN context END, '$.i18n_key'), replace(message, 'i18n missing key: ', ''))`
 function build_missing_i18n_keys(ctx: AnalyticsContext): MissingI18nKeys {
   const where = `received_at >= ? AND message LIKE 'i18n missing key:%' AND ${ctx.audience_filter}`
   const summary = ctx.logs_db.prepare(`
@@ -1569,7 +1569,7 @@ function build_missing_i18n_keys(ctx: AnalyticsContext): MissingI18nKeys {
     SELECT ${MISSING_I18N_KEY_SQL} key,
            COUNT(*) count,
            COUNT(DISTINCT session_id) sessions,
-           group_concat(DISTINCT json_extract(context, '$.locale')) locales
+           group_concat(DISTINCT json_extract(CASE WHEN json_valid(context) THEN context END, '$.locale')) locales
     FROM client_logs WHERE ${where}
     GROUP BY key
     ORDER BY sessions DESC, count DESC
@@ -1600,7 +1600,7 @@ function build_boot_health(ctx: AnalyticsContext): BootHealth {
   const by_message = logs_db.prepare(`
     SELECT message,
            CASE WHEN message IN ('initial dict sync failed', 'Failed to read dict bundle from wa-sqlite')
-                THEN coalesce(json_extract(context, '$.code'), json_extract(context, '$.sqlite_code_name'))
+                THEN coalesce(json_extract(CASE WHEN json_valid(context) THEN context END, '$.code'), json_extract(CASE WHEN json_valid(context) THEN context END, '$.sqlite_code_name'))
                 ELSE NULL END code,
            COUNT(DISTINCT session_id) sessions,
            COUNT(*) count,
@@ -1636,12 +1636,12 @@ function build_boot_health(ctx: AnalyticsContext): BootHealth {
 function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: DailyPoint[] }): LogAnalytics['performance'] {
   const perf_rows = ctx.logs_db.prepare(`
     SELECT substr(received_at, 1, 10) day,
-           json_extract(context, '$.name') name,
-           json_extract(context, '$.duration_ms') duration_ms,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.name') name,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.duration_ms') duration_ms,
            url
     FROM client_logs
     WHERE received_at >= ? AND message = 'perf' AND ${ctx.audience_filter}
-      AND json_extract(context, '$.duration_ms') > 0
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.duration_ms') > 0
   `).all(ctx.window_start_iso) as { day: string, name: string | null, duration_ms: number, url: string | null }[]
 
   const perf_all = new Map<string, number[]>()
@@ -1676,13 +1676,13 @@ function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: Daily
   // No new logging.
   const nav_rows = ctx.logs_db.prepare(`
     SELECT substr(received_at, 1, 10)              day,
-           json_extract(context, '$.duration_ms') duration_ms,
-           json_extract(context, '$.to')          to_path,
-           json_extract(context, '$.from')        from_path,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.duration_ms') duration_ms,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.to')          to_path,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.from')        from_path,
            url
     FROM client_logs
     WHERE received_at >= ? AND message = 'navigation' AND ${ctx.audience_filter}
-      AND json_extract(context, '$.duration_ms') > 0
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.duration_ms') > 0
   `).all(ctx.window_start_iso) as { day: string, duration_ms: number, to_path: string | null, from_path: string | null, url: string | null }[]
   const nav_route_values = new Map<string, number[]>()
   const nav_section_values = new Map<NavSection['section'], number[]>()
@@ -1750,12 +1750,12 @@ function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: Daily
   // content" metric, per route. web_vital rows carry `value` (ms), only on hard loads.
   const lcp_route_values = new Map<string, number[]>()
   for (const row of ctx.logs_db.prepare(`
-    SELECT url, json_extract(context, '$.value') value
+    SELECT url, json_extract(CASE WHEN json_valid(context) THEN context END, '$.value') value
     FROM client_logs
     WHERE received_at >= ? AND message = 'perf' AND ${ctx.audience_filter}
-      AND json_extract(context, '$.name') = 'web_vital'
-      AND json_extract(context, '$.metric') = 'LCP'
-      AND json_extract(context, '$.value') > 0
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.name') = 'web_vital'
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.metric') = 'LCP'
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.value') > 0
   `).all(ctx.window_start_iso) as { url: string | null, value: number }[]) {
     if (!row.url)
       continue
@@ -1781,14 +1781,14 @@ function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: Daily
 function build_dict_boot(ctx: AnalyticsContext): DictBootPerf {
   const rows = ctx.logs_db.prepare(`
     SELECT substr(received_at, 1, 10)                 day,
-           json_extract(context, '$.duration_ms')    duration_ms,
-           json_extract(context, '$.cold')           cold,
-           json_extract(context, '$.dict_id')        dict_id,
-           json_extract(context, '$.snapshot_bytes') snapshot_bytes
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.duration_ms')    duration_ms,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.cold')           cold,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.dict_id')        dict_id,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.snapshot_bytes') snapshot_bytes
     FROM client_logs
     WHERE received_at >= ? AND message = 'perf' AND ${ctx.audience_filter}
-      AND json_extract(context, '$.name') = 'dict_boot'
-      AND json_extract(context, '$.duration_ms') > 0
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.name') = 'dict_boot'
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.duration_ms') > 0
   `).all(ctx.window_start_iso) as { day: string, duration_ms: number, cold: number | null, dict_id: string | null, snapshot_bytes: number | null }[]
 
   const cold_values: number[] = []
@@ -1855,11 +1855,11 @@ function build_dict_boot(ctx: AnalyticsContext): DictBootPerf {
  */
 function build_web_vitals(ctx: AnalyticsContext): WebVitalSummary[] {
   const web_vital_rows = ctx.logs_db.prepare(`
-    SELECT json_extract(context, '$.metric') metric, json_extract(context, '$.value') value
+    SELECT json_extract(CASE WHEN json_valid(context) THEN context END, '$.metric') metric, json_extract(CASE WHEN json_valid(context) THEN context END, '$.value') value
     FROM client_logs
     WHERE received_at >= ? AND message = 'perf' AND ${ctx.audience_filter}
-      AND json_extract(context, '$.name') = 'web_vital'
-      AND json_extract(context, '$.value') IS NOT NULL
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.name') = 'web_vital'
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.value') IS NOT NULL
   `).all(ctx.window_start_iso) as { metric: string | null, value: number }[]
   const web_vital_values = new Map<string, number[]>()
   for (const row of web_vital_rows) {
@@ -1920,19 +1920,19 @@ function split_geo_latency(rows: GeoLatencyRow[]): { by_country: GeoLatency[], b
  */
 function build_geo_latency(ctx: AnalyticsContext): { ttfb_by_country: GeoLatency[], ttfb_by_distance: GeoLatency[], lcp_by_country: GeoLatency[], lcp_by_distance: GeoLatency[] } {
   const ttfb_rows = ctx.logs_db.prepare(`
-    SELECT json_extract(context, '$.ttfb') value, country, latitude, longitude
+    SELECT json_extract(CASE WHEN json_valid(context) THEN context END, '$.ttfb') value, country, latitude, longitude
     FROM client_logs
     WHERE received_at >= ? AND message = 'perf' AND ${ctx.audience_filter}
-      AND json_extract(context, '$.name') = 'page_load'
-      AND json_extract(context, '$.ttfb') IS NOT NULL
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.name') = 'page_load'
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.ttfb') IS NOT NULL
   `).all(ctx.window_start_iso) as GeoLatencyRow[]
   const lcp_rows = ctx.logs_db.prepare(`
-    SELECT json_extract(context, '$.value') value, country, latitude, longitude
+    SELECT json_extract(CASE WHEN json_valid(context) THEN context END, '$.value') value, country, latitude, longitude
     FROM client_logs
     WHERE received_at >= ? AND message = 'perf' AND ${ctx.audience_filter}
-      AND json_extract(context, '$.name') = 'web_vital'
-      AND json_extract(context, '$.metric') = 'LCP'
-      AND json_extract(context, '$.value') IS NOT NULL
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.name') = 'web_vital'
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.metric') = 'LCP'
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.value') IS NOT NULL
   `).all(ctx.window_start_iso) as GeoLatencyRow[]
 
   const ttfb = split_geo_latency(ttfb_rows)
@@ -2050,15 +2050,15 @@ function build_leader_health(ctx: AnalyticsContext): LeaderHealth {
   ).get(window_start_iso, message) as { n: number }).n
   const failed_no_leader = (logs_db.prepare(`
     SELECT COUNT(*) n FROM client_logs
-    WHERE received_at >= ? AND message = 'live_query_failed' AND json_extract(context, '$.had_leader') = 0
+    WHERE received_at >= ? AND message = 'live_query_failed' AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.had_leader') = 0
   `).get(window_start_iso) as { n: number }).n
   const failed_by_source = logs_db.prepare(`
-    SELECT coalesce(json_extract(context, '$.source'), 'unknown') lq_source, COUNT(*) count
+    SELECT coalesce(json_extract(CASE WHEN json_valid(context) THEN context END, '$.source'), 'unknown') lq_source, COUNT(*) count
     FROM client_logs WHERE received_at >= ? AND message = 'live_query_failed'
     GROUP BY lq_source ORDER BY count DESC
   `).all(window_start_iso).map((row: { lq_source: string, count: number }) => ({ source: row.lq_source, count: row.count })) as { source: string, count: number }[]
   const failed_by_code = logs_db.prepare(`
-    SELECT coalesce(json_extract(context, '$.code'), 'unknown') code, COUNT(*) count
+    SELECT coalesce(json_extract(CASE WHEN json_valid(context) THEN context END, '$.code'), 'unknown') code, COUNT(*) count
     FROM client_logs WHERE received_at >= ? AND message = 'live_query_failed'
     GROUP BY code ORDER BY count DESC
   `).all(window_start_iso) as { code: string, count: number }[]
@@ -2096,10 +2096,10 @@ const SYNC_STUCK_RECENT_MS = 45 * 60 * 1000
 function build_sync_health(ctx: AnalyticsContext): SyncHealth {
   const { logs_db, window_start_iso, current_app_version, now } = ctx
   const rows = logs_db.prepare(`
-    SELECT coalesce(json_extract(context, '$.kind'), 'unknown') kind,
+    SELECT coalesce(json_extract(CASE WHEN json_valid(context) THEN context END, '$.kind'), 'unknown') kind,
            app_version,
            user_id,
-           json_extract(context, '$.dict_id') dict_id,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.dict_id') dict_id,
            received_at
     FROM client_logs
     WHERE received_at >= ? AND message = 'sync_failed'
@@ -2304,8 +2304,8 @@ function build_api_v1_activity(ctx: AnalyticsContext): ApiV1Activity {
     SELECT substr(received_at, 1, 10) day,
            message event,
            CASE WHEN level IN ${ERROR_LEVELS_SQL} THEN 1 ELSE 0 END is_failure,
-           json_extract(context, '$.dictionary_id') dictionary_id,
-           json_extract(context, '$.via') via,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.dictionary_id') dictionary_id,
+           json_extract(CASE WHEN json_valid(context) THEN context END, '$.via') via,
            COUNT(*) count
     FROM client_logs
     WHERE received_at >= ? AND source = 'server' AND message LIKE 'v1\\_%' ESCAPE '\\'
@@ -2411,11 +2411,11 @@ function build_top_dictionaries(ctx: AnalyticsContext): TopDictionaries {
   // --- Rolling 7d TRUE uniques, live from hot logs (audience-filtered). Per-dict +
   // site (session_start = anyone who visited). ---
   for (const row of logs_db.prepare(`
-    SELECT json_extract(context, '$.dictionary_id')          dictionary_id,
+    SELECT json_extract(CASE WHEN json_valid(context) THEN context END, '$.dictionary_id')          dictionary_id,
            COUNT(DISTINCT COALESCE(visitor_id, session_id))  visitors
     FROM client_logs
     WHERE received_at >= ? AND message = ? AND session_id IS NOT NULL
-      AND json_extract(context, '$.dictionary_id') IS NOT NULL AND ${audience_filter}
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.dictionary_id') IS NOT NULL AND ${audience_filter}
     GROUP BY dictionary_id
   `).all(iso_7d_start, DICTIONARY_OPENED) as { dictionary_id: string, visitors: number }[])
     totals_for(row.dictionary_id).visitors_7d = row.visitors
@@ -2440,10 +2440,10 @@ function build_top_dictionaries(ctx: AnalyticsContext): TopDictionaries {
     } catch { /* table absent */ }
   }
   for (const row of logs_db.prepare(`
-    SELECT json_extract(context, '$.dictionary_id') dictionary_id, COUNT(DISTINCT session_id) sessions
+    SELECT json_extract(CASE WHEN json_valid(context) THEN context END, '$.dictionary_id') dictionary_id, COUNT(DISTINCT session_id) sessions
     FROM client_logs
     WHERE received_at >= ? AND message = ? AND session_id IS NOT NULL
-      AND json_extract(context, '$.dictionary_id') IS NOT NULL AND ${audience_filter}
+      AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.dictionary_id') IS NOT NULL AND ${audience_filter}
     GROUP BY dictionary_id
   `).all(live_start_iso, DICTIONARY_OPENED) as { dictionary_id: string, sessions: number }[])
     bump_visits(row.dictionary_id, row.sessions)
