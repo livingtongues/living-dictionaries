@@ -294,17 +294,20 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       discourse_role: { type: 'string', nullable: true },
       ends_paragraph: { type: 'integer', nullable: true },
       sort_key: { type: 'string', nullable: true, description: 'Fractional ordering index within the text.' },
+      audio: { type: 'array', items: { $ref: '#/components/schemas/AudioMedia' }, description: 'This sentence\'s attached audio (each with `timings` + `download_url`). Present only when audio exists.' },
     },
   }
 
   const TextFull = {
     type: 'object',
-    description: 'A text with its ordered sentences (read shape).',
+    description: 'A text with its ordered sentences, attached audio, and referenced speakers (read shape).',
     properties: {
       id: { type: 'string' },
       title: { $ref: '#/components/schemas/MultiString' },
       updated_at: { type: 'string', format: 'date-time' },
       sentences: { type: 'array', items: { $ref: '#/components/schemas/TextSentenceFull' }, description: 'Ordered by `sort_key` ascending.' },
+      audio: { type: 'array', items: { $ref: '#/components/schemas/AudioMedia' }, description: 'TEXT-level audio (whole-passage recordings, each with `timings` + `download_url`). Present only when audio exists; sentence-level audio nests under `sentences[].audio`.' },
+      speakers: { type: 'array', items: { $ref: '#/components/schemas/SpeakerFull' }, description: 'Full records for every speaker referenced by the included audio — one call serves text + sentences + audio + speakers.' },
     },
   }
 
@@ -465,13 +468,32 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     },
   }
   const SpeakerBrief = { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' } } }
+  const SpeakerFull = {
+    type: 'object',
+    description: 'A full speaker record (audio/video attribution — shown on the contributors page).',
+    properties: {
+      id: { type: 'string' },
+      name: { type: 'string' },
+      decade: { type: 'integer', nullable: true, description: 'Birth decade, e.g. 1980.' },
+      gender: { type: 'string', enum: ['m', 'f', 'o'], nullable: true },
+      birthplace: { type: 'string', nullable: true },
+    },
+  }
+  const MediaTimings = {
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    description: 'Karaoke word-timings: a map of sentence id → compact timing string `"offset,duration|offset,duration|…"` (milliseconds). Entries align 1:1 with that sentence\'s default-orthography tokens; each offset is relative to the END of the previous timed token (chainable across sentences for text-level audio); an empty entry marks an untimed token (punctuation).',
+    example: { 'sentence-uuid-1': '0,320|40,280|', 'sentence-uuid-2': '120,300|' },
+  }
   const AudioMedia = {
     type: 'object',
     description: 'A stored audio recording (the pronunciation/utterance). Attaches to an entry, sentence, or text. Requires attribution: a speaker and/or a registry `source`.',
     properties: {
       id: { type: 'string' },
       storage_path: { type: 'string' },
+      download_url: { type: 'string', description: 'Absolute URL for the audio bytes (`GET …/media/{storage_path}`, same Bearer auth, 302-redirects to storage). Present in text reads.' },
       source: { type: 'string', nullable: true, description: 'A sources-registry slug (see `GET …/sources`) — the speaker-less attribution path.' },
+      timings: { ...MediaTimings, nullable: true },
       entry_id: { type: 'string', nullable: true },
       sentence_id: { type: 'string', nullable: true },
       text_id: { type: 'string', nullable: true },
@@ -529,11 +551,13 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   const attributed_speaker_prop = { type: 'string', description: 'An existing speaker id (list via `GET …/speakers`, create via `POST …/speakers`). REQUIRED unless `source` is provided.' }
   const attributed_source_prop = { type: 'string', description: 'A sources-registry slug — must already exist (list via `GET …/sources`, create via `POST …/sources`). REQUIRED unless `speaker_id` is provided.' }
 
+  const audio_timings_multipart_prop = { type: 'string', description: 'Optional karaoke word-timings as a JSON string (see the `MediaTimings` schema). Can also be set/corrected later via `PATCH …/audio/{audioId}` (e.g. after forced alignment).' }
+  const audio_timings_json_prop = { ...MediaTimings, description: `Optional. ${MediaTimings.description} Can also be set/corrected later via \`PATCH …/audio/{audioId}\` (e.g. after forced alignment).` }
   const audio_request_body = media_request_body({
     multipart_required: ['file'],
-    multipart_props: { file: file_prop, speaker_id: attributed_speaker_prop, source: attributed_source_prop, id: media_id_prop, replace: media_replace_prop },
+    multipart_props: { file: file_prop, speaker_id: attributed_speaker_prop, source: attributed_source_prop, timings: audio_timings_multipart_prop, id: media_id_prop, replace: media_replace_prop },
     json_required: ['url'],
-    json_props: { url: url_prop, speaker_id: attributed_speaker_prop, source: attributed_source_prop, id: media_id_prop, replace: media_replace_prop },
+    json_props: { url: url_prop, speaker_id: attributed_speaker_prop, source: attributed_source_prop, timings: audio_timings_json_prop, id: media_id_prop, replace: media_replace_prop },
   })
   const photo_request_body = media_request_body({
     multipart_required: ['file'],
@@ -623,6 +647,22 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     }
   }
 
+  function audio_timings_patch_op({ owner_label, owner_params }: { owner_label: string, owner_params: unknown[] }) {
+    return {
+      patch: {
+        summary: `Set/update an audio's timings on this ${owner_label}`,
+        description: `Set, replace, or clear (\`null\`) the audio row's karaoke word-timings — e.g. writing corrected forced-alignment output back after upload. Whole-object replace. Verifies the audio is linked to THIS ${owner_label}.`,
+        parameters: [dict_id_param, ...owner_params, audio_id_param],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['timings'], properties: { timings: { ...MediaTimings, nullable: true, description: `${MediaTimings.description} \`null\` clears.` } } } } } },
+        responses: {
+          200: { description: '{ audio }', content: { 'application/json': { schema: { type: 'object', properties: { audio: { $ref: '#/components/schemas/AudioMedia' } } } } } },
+          400: { description: 'Malformed timings (must map sentence id → timing string)' },
+          404: { description: `audio not linked to this ${owner_label}` },
+        },
+      },
+    }
+  }
+
   const media_paths = {
     '/api/v1/dictionaries/{id}/entries/{entryId}/audio': media_attach_op({ summary: 'Attach audio to an entry', description: 'Upload a pronunciation recording for the headword (multipart `file` or JSON `url`). Attribution required: `speaker_id` and/or `source` (a registry slug). Use `replace: true` for one-audio-per-headword imports.', owner_params: [entry_id_param], request_body: audio_request_body, medium: 'audio' }),
     '/api/v1/dictionaries/{id}/entries/{entryId}/audio/{audioId}': media_delete_op({ owner_label: 'entry', owner_params: [entry_id_param], media_id_p: audio_id_param, medium: 'audio' }),
@@ -631,15 +671,23 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     '/api/v1/dictionaries/{id}/senses/{senseId}/videos': media_attach_op({ summary: 'Attach a video to a sense', description: 'Upload a video (`file`/`url`) OR link a hosted one (`hosted_url`/`hosted_elsewhere`). Attribution required: `speaker_id` and/or `source` (a registry slug).', owner_params: [sense_id_param], request_body: video_request_body, medium: 'video' }),
     '/api/v1/dictionaries/{id}/senses/{senseId}/videos/{videoId}': media_delete_op({ owner_label: 'sense', owner_params: [sense_id_param], media_id_p: video_id_param, medium: 'video' }),
     '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio': media_attach_op({ summary: 'Attach audio to a sentence', description: 'Upload audio for an example/text sentence (`file`/`url`). Attribution required: `speaker_id` and/or `source`.', owner_params: [sentence_id_param], request_body: audio_request_body, medium: 'audio' }),
-    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio/{audioId}': media_delete_op({ owner_label: 'sentence', owner_params: [sentence_id_param], media_id_p: audio_id_param, medium: 'audio' }),
+    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio/{audioId}': { ...media_delete_op({ owner_label: 'sentence', owner_params: [sentence_id_param], media_id_p: audio_id_param, medium: 'audio' }), ...audio_timings_patch_op({ owner_label: 'sentence', owner_params: [sentence_id_param] }) },
     '/api/v1/dictionaries/{id}/sentences/{sentenceId}/photos': media_attach_op({ summary: 'Attach a photo to a sentence', description: 'Upload a photo for a sentence (`file`/`url`), optionally with `source`/`photographer`.', owner_params: [sentence_id_param], request_body: photo_request_body, medium: 'photo' }),
     '/api/v1/dictionaries/{id}/sentences/{sentenceId}/photos/{photoId}': media_delete_op({ owner_label: 'sentence', owner_params: [sentence_id_param], media_id_p: photo_id_param, medium: 'photo' }),
     '/api/v1/dictionaries/{id}/sentences/{sentenceId}/videos': media_attach_op({ summary: 'Attach a video to a sentence', description: 'Upload (`file`/`url`) or link (`hosted_url`/`hosted_elsewhere`) a video for a sentence. Attribution required: `speaker_id` and/or `source`.', owner_params: [sentence_id_param], request_body: video_request_body, medium: 'video' }),
     '/api/v1/dictionaries/{id}/sentences/{sentenceId}/videos/{videoId}': media_delete_op({ owner_label: 'sentence', owner_params: [sentence_id_param], media_id_p: video_id_param, medium: 'video' }),
     '/api/v1/dictionaries/{id}/texts/{textId}/audio': media_attach_op({ summary: 'Attach audio to a text', description: 'Upload audio for a whole text/passage (`file`/`url`). Attribution required: `speaker_id` and/or `source`.', owner_params: [text_id_param], request_body: audio_request_body, medium: 'audio' }),
-    '/api/v1/dictionaries/{id}/texts/{textId}/audio/{audioId}': media_delete_op({ owner_label: 'text', owner_params: [text_id_param], media_id_p: audio_id_param, medium: 'audio' }),
+    '/api/v1/dictionaries/{id}/texts/{textId}/audio/{audioId}': { ...media_delete_op({ owner_label: 'text', owner_params: [text_id_param], media_id_p: audio_id_param, medium: 'audio' }), ...audio_timings_patch_op({ owner_label: 'text', owner_params: [text_id_param] }) },
     '/api/v1/dictionaries/{id}/texts/{textId}/videos': media_attach_op({ summary: 'Attach a video to a text', description: 'Upload (`file`/`url`) or link (`hosted_url`/`hosted_elsewhere`) a video for a text. Attribution required: `speaker_id` and/or `source`.', owner_params: [text_id_param], request_body: video_request_body, medium: 'video' }),
     '/api/v1/dictionaries/{id}/texts/{textId}/videos/{videoId}': media_delete_op({ owner_label: 'text', owner_params: [text_id_param], media_id_p: video_id_param, medium: 'video' }),
+    '/api/v1/dictionaries/{id}/media/{storagePath}': {
+      get: {
+        summary: 'Download media bytes by storage_path',
+        description: 'The stable download URL for stored media bytes (this is what `download_url` in read shapes points at). Verifies the `storage_path` belongs to a media row in THIS dictionary, then 302-redirects to the storage backend — follow redirects and keep sending the same Bearer key.',
+        parameters: [dict_id_param, { name: 'storagePath', in: 'path', required: true, schema: { type: 'string' }, description: 'The media row\'s `storage_path` (slashes allowed, e.g. `{dictId}/audio/{ownerId}/file.mp3`).' }],
+        responses: { 302: { description: 'Redirect to the bytes' }, 404: { description: 'No media row in this dictionary has that storage_path' } },
+      },
+    },
   }
 
   // ───────────────────────────────────────────────────────────────────────
@@ -882,9 +930,14 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '- **videos** → a sense, sentence, or text: `POST …/senses/{senseId}/videos`, etc. Upload bytes OR link a hosted video via `hosted_url` (a YouTube/Vimeo watch URL) — preferred for large video, which would exceed the upload cap.',
         'Idempotency + replace: send your own `id` (UUID) so a re-POST is a no-op; send `replace: true` to first remove existing media of that type on that owner (e.g. exactly one pronunciation per headword). Remove media with `DELETE …/{audioId|photoId|videoId}`.',
         'Typical import: create the entry (get its `id` + `sense_ids`), then `POST …/entries/{entryId}/audio` with the pronunciation and `POST …/senses/{senseId}/photos` with the illustrative photo.',
+        'Karaoke **timings**: sentence/text audio can carry per-word timings (`MediaTimings` schema — sentence id → compact timing string aligned to the sentence\'s stored tokens). Send `timings` on the audio POST, or set/correct them later via `PATCH …/sentences/{sentenceId}/audio/{audioId}` / `…/texts/{textId}/audio/{audioId}` (e.g. after running forced alignment on the uploaded bytes).',
+        '**Reading media back**: `GET …/texts/{textId}` returns the text\'s audio (text- AND sentence-level, with `timings`, speakers, and a `download_url` per row) — one call serves text + sentences + audio + speakers. Download any stored media\'s bytes via `GET …/media/{storage_path}` (302-redirects to storage).',
         '',
         '## Limits',
         'Batch ≤1000 entries per request AND keep each request body under ~16MB — split larger imports. A single media upload (file or fetched url) is capped separately (~25MB); for larger video use a `hosted_url` link instead. Writes are per-item best-effort (read `results`).',
+        '',
+        '## Bulk reads — dictionary snapshots',
+        'Mirroring or bulk-reading a whole dictionary? Don\'t paginate the API — every public AND unlisted dictionary has a downloadable gzipped SQLite snapshot of its full database (entries, senses, sentences, texts, media rows, speakers, …) at `https://snapshots.livingdictionaries.app/dictionaries/{id}.db.gz` (no auth; use the dictionary id, not the url slug, if they differ). It is rebuilt within ~30 minutes of any edit (a 30-minute sweep that only rebuilds when content actually changed) and served with `Cache-Control: max-age=120` — so treat it as at most ~30 minutes stale, and use the write API\'s responses (not the snapshot) to verify your own fresh writes.',
         '',
         '## Feedback (agents welcome)',
         'If you hit a wall — a field you need that doesn\'t exist, a bug, or an awkward workflow — `POST /api/v1/dictionaries/{id}/feedback` with `{ "message": "…" }`. It reaches the Living Dictionaries team directly (read OR write keys). After sending, relay the response\'s `relay_to_human` sentence to your human so they know what you asked for; if we adopt it we notify them directly.',
@@ -1010,7 +1063,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         },
       },
       '/api/v1/dictionaries/{id}/texts/{textId}': {
-        get: { summary: 'Read one text (with ordered sentences)', parameters: [dict_id_param, { name: 'textId', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: '{ text }', content: { 'application/json': { schema: { type: 'object', properties: { text: { $ref: '#/components/schemas/TextFull' } } } } } }, 404: {} } },
+        get: { summary: 'Read one text (sentences + audio + speakers)', description: 'The text with its ordered sentences, attached audio (text- and sentence-level, each with `timings` + `download_url`), and the full records of every referenced speaker — one call serves a complete text read.', parameters: [dict_id_param, { name: 'textId', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: '{ text }', content: { 'application/json': { schema: { type: 'object', properties: { text: { $ref: '#/components/schemas/TextFull' } } } } } }, 404: {} } },
         patch: {
           summary: 'Update a text (title / append / reorder)',
           description: 'Field-merge the title, append new sentences, and/or reorder existing sentences (`sentence_order`). Edit ONE sentence\'s text/translation/paragraph-break via `PATCH …/sentences/{id}`; delete one via `DELETE …/sentences/{id}`.',
@@ -1181,6 +1234,8 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         TextPatch,
         HostedElsewhere,
         SpeakerBrief,
+        SpeakerFull,
+        MediaTimings,
         AudioMedia,
         PhotoMedia,
         VideoMedia,
@@ -1243,6 +1298,7 @@ const PATH_SEGMENT_TAGS: Record<string, string> = {
   'senses': 'entries',
   'sentences': 'entries',
   'relationships': 'relationships',
+  'media': 'media',
   'texts': 'texts',
   'feedback': 'feedback',
   'speakers': 'speakers',

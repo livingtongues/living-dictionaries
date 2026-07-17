@@ -1,3 +1,4 @@
+import type { MediaTimings } from '$lib/db/schemas/dictionary.types'
 import type { MediaCellKey, MediaFieldInput } from '$lib/db/server/v1-media-write'
 import type { HostedVideo } from '$lib/types'
 import type { RequestHandler } from '@sveltejs/kit'
@@ -7,7 +8,7 @@ import { parse_hosted_video_url } from '$lib/components/video/parse-hosted-video
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
-import { attach_media, delete_media, MEDIA_CELLS, media_requires_attribution, read_media_record } from '$lib/db/server/v1-media-write'
+import { attach_media, delete_media, MEDIA_CELLS, media_requires_attribution, read_media_record, update_media_timings } from '$lib/db/server/v1-media-write'
 import { load_source_slug_set } from '$lib/db/server/source-slugs'
 import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
 import { MediaStorageNotConfiguredError, resolve_photo_serving_url, store_media_bytes } from '$lib/server/media-storage'
@@ -74,6 +75,37 @@ function assert_media_bytes({ medium, bytes, declared_type }: { medium: 'audio' 
   const check = validate_media_bytes({ category: medium_category(medium), declared_type, bytes })
   if (!check.ok)
     error(ResponseCodes.UNSUPPORTED_MEDIA_TYPE, check.reason ?? 'Unsupported media type')
+}
+
+const TIMINGS_ERROR = 'timings must be an object mapping sentence id → compact word-timing string (e.g. { "<sentence_id>": "0,320|40,280|" })'
+
+/**
+ * Lenient `timings` parse: accepts an object (JSON body) or a JSON string
+ * (multipart field), requires only string keys → string values. `null` clears.
+ * Throws `error(400)` on anything else.
+ */
+export function parse_timings(value: unknown): MediaTimings | null | undefined {
+  if (value === undefined)
+    return undefined
+  if (value === null)
+    return null
+  let parsed = value
+  if (typeof parsed === 'string') {
+    try {
+      parsed = JSON.parse(parsed)
+    } catch {
+      error(ResponseCodes.BAD_REQUEST, TIMINGS_ERROR)
+    }
+  }
+  if (parsed === null)
+    return null
+  if (typeof parsed !== 'object' || Array.isArray(parsed))
+    error(ResponseCodes.BAD_REQUEST, TIMINGS_ERROR)
+  for (const timing of Object.values(parsed as Record<string, unknown>)) {
+    if (typeof timing !== 'string')
+      error(ResponseCodes.BAD_REQUEST, TIMINGS_ERROR)
+  }
+  return parsed as MediaTimings
 }
 
 function validate_hosted(value: unknown): HostedVideo {
@@ -167,6 +199,12 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
 
     const media_fields: MediaFieldInput = { source: source ?? null }
 
+    if (fields.timings !== undefined && fields.timings !== null) {
+      if (cell.medium !== 'audio')
+        error(ResponseCodes.BAD_REQUEST, 'timings are only supported on audio')
+      media_fields.timings = parse_timings(fields.timings)
+    }
+
     if (cell.medium === 'video') {
       const hosted = resolve_hosted(fields)
       if (hosted) {
@@ -210,6 +248,36 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
     log_server_event({ level: 'info', message: 'v1_media_attached', user_id: access.user_id, context: { dictionary_id: dictionary.id, cell: cell_key, owner_id, media_id: result.media?.id, replace, via: access.via } })
 
     return json({ [cell.medium]: result.media, created: result.created })
+  }
+}
+
+/**
+ * PATCH handler for one audio row: set/replace/clear its `timings` after the
+ * fact (e.g. writing corrected forced-alignment output back post-upload).
+ * Body: `{ timings: { <sentence_id>: "offset,duration|…" } | null }`.
+ */
+export function make_media_timings_patch_handler(cell_key: MediaCellKey): RequestHandler {
+  const cell = MEDIA_CELLS[cell_key]
+  return async (event) => {
+    const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
+    const owner_id = event.params[cell.owner_param]
+    const media_id = event.params[cell.media_param]
+    if (!owner_id || !media_id)
+      error(ResponseCodes.BAD_REQUEST, 'Missing owner or media id')
+
+    const body = await event.request.json().catch(() => undefined) as { timings?: unknown } | undefined
+    if (!body || body.timings === undefined)
+      error(ResponseCodes.BAD_REQUEST, 'Provide { timings } (an object mapping sentence id → compact word-timing string, or null to clear)')
+    const timings = parse_timings(body.timings) ?? null
+
+    const result = update_media_timings({ db: get_dictionary_db(dictionary.id), history_db: get_dictionary_history_db(dictionary.id), cell_key, owner_id, media_id, timings, user_id: access.user_id, api_key_id: access.key_id ?? null })
+    if (!result.found)
+      error(ResponseCodes.NOT_FOUND, `${cell.medium} not linked to this ${owner_label(cell_key)}`)
+
+    mirror_dictionary_cursor({ dict_id: dictionary.id, cursor: result.new_synced_up_to })
+    log_server_event({ level: 'info', message: 'v1_media_timings_updated', user_id: access.user_id, context: { dictionary_id: dictionary.id, cell: cell_key, owner_id, media_id, cleared: timings === null, via: access.via } })
+
+    return json({ [cell.medium]: result.media })
   }
 }
 

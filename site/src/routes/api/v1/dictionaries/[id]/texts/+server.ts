@@ -4,7 +4,7 @@ import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
 import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
-import { create_text, list_texts } from '$lib/db/server/v1-texts'
+import { add_audio_download_urls, create_text, list_texts } from '$lib/db/server/v1-texts'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
@@ -44,5 +44,5 @@ export const POST: RequestHandler = async (event) => {
   if (result.created)
     mirror_dictionary_cursor({ dict_id: dictionary.id, cursor: result.cursor })
   log_server_event({ level: 'info', message: 'v1_text_created', user_id: access.user_id, context: { dictionary_id: dictionary.id, text_id: result.text.id, created: result.created, via: access.via } })
-  return json({ text: result.text, created: result.created } satisfies V1TextPostResponseBody)
+  return json({ text: add_audio_download_urls({ text: result.text, origin: event.url.origin, dict_id: dictionary.id }), created: result.created } satisfies V1TextPostResponseBody)
 }

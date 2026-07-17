@@ -1,8 +1,9 @@
 import type Database from 'better-sqlite3'
 import type { HistoryEvent } from './dictionary-history-db'
 import type { SingleWriteResult } from './v1-entry-write'
+import type { SpeakerRecord } from './v1-sub-resources'
 import type { SentenceIgtFields } from '$lib/api/v1/entry-input'
-import type { SentenceTokens, SourceCitation } from '$lib/db/schemas/dictionary.types'
+import type { MediaTimings, SentenceTokens, SourceCitation } from '$lib/db/schemas/dictionary.types'
 import type { MultiString } from '$lib/types'
 import { resolve_client_id, to_multistring, to_string_array } from '$lib/api/v1/entry-input'
 import { citation_slugs, resolve_sentence_igt, to_citations, to_discourse_role } from '$lib/api/v1/sentence-igt'
@@ -47,6 +48,20 @@ export interface TextPatchInput {
   sentence_order?: string[]
 }
 
+/** One audio row in the text READ shape (text- or sentence-level; owner implied by nesting). */
+export interface TextAudioRecord {
+  id: string
+  storage_path: string | null
+  source: string | null
+  timings: MediaTimings | null
+  /** Present only when a speaker is attached; full records in `TextRecord.speakers`. */
+  speakers?: { id: string, name: string }[]
+  created_at: string
+  updated_at: string
+  /** Absolute URL that redirects to the audio bytes — set by the route layer. */
+  download_url?: string
+}
+
 export interface TextSentenceRecord {
   id: string
   text: MultiString | null
@@ -58,6 +73,8 @@ export interface TextSentenceRecord {
   discourse_role: string | null
   ends_paragraph: number | null
   sort_key: string | null
+  /** Present only when this sentence has attached audio. */
+  audio?: TextAudioRecord[]
 }
 
 export interface TextRecord {
@@ -65,6 +82,10 @@ export interface TextRecord {
   title: MultiString
   updated_at: string
   sentences: TextSentenceRecord[]
+  /** Present only when TEXT-level audio exists (whole-passage recordings). */
+  audio?: TextAudioRecord[]
+  /** Full speaker records for every speaker referenced by the included audio. */
+  speakers?: SpeakerRecord[]
 }
 
 export interface TextSummary {
@@ -148,11 +169,76 @@ function list_text_sentences(db: Database.Database, text_id: string): TextSenten
   }))
 }
 
+function read_audio_records(db: Database.Database, rows: Record<string, unknown>[]): TextAudioRecord[] {
+  return rows.map((raw) => {
+    const row = parse_dict_row('audio', raw) as Record<string, any>
+    const record: TextAudioRecord = {
+      id: row.id,
+      storage_path: row.storage_path ?? null,
+      source: row.source ?? null,
+      timings: (row.timings as MediaTimings) ?? null,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    }
+    const speakers = db.prepare(
+      `SELECT sp.id, sp.name FROM speakers sp
+         JOIN audio_speakers j ON j.speaker_id = sp.id
+        WHERE j.audio_id = ? ORDER BY sp.name`,
+    ).all(row.id) as { id: string, name: string }[]
+    if (speakers.length)
+      record.speakers = speakers
+    return record
+  })
+}
+
+/** Attach text- and sentence-level audio (+ deduped full speaker records) to a text read. */
+function include_text_audio(db: Database.Database, text: TextRecord): void {
+  const text_audio = read_audio_records(db, db.prepare(`SELECT * FROM audio WHERE text_id = ? ORDER BY created_at`).all(text.id) as Record<string, unknown>[])
+  if (text_audio.length)
+    text.audio = text_audio
+
+  const all_audio = [...text_audio]
+  for (const sentence of text.sentences) {
+    const sentence_audio = read_audio_records(db, db.prepare(`SELECT * FROM audio WHERE sentence_id = ? ORDER BY created_at`).all(sentence.id) as Record<string, unknown>[])
+    if (sentence_audio.length) {
+      sentence.audio = sentence_audio
+      all_audio.push(...sentence_audio)
+    }
+  }
+
+  const speaker_ids = [...new Set(all_audio.flatMap(audio => audio.speakers?.map(speaker => speaker.id) ?? []))]
+  if (speaker_ids.length) {
+    text.speakers = db.prepare(
+      `SELECT id, name, decade, gender, birthplace FROM speakers WHERE id IN (${speaker_ids.map(() => '?').join(', ')}) ORDER BY name`,
+    ).all(...speaker_ids) as SpeakerRecord[]
+  }
+}
+
 export function get_text(db: Database.Database, text_id: string): TextRecord | undefined {
   const text = read_text_row(db, text_id)
   if (!text)
     return undefined
-  return { ...text, sentences: list_text_sentences(db, text_id) }
+  const record: TextRecord = { ...text, sentences: list_text_sentences(db, text_id) }
+  include_text_audio(db, record)
+  return record
+}
+
+/**
+ * Stamp each included audio record with the absolute `download_url` a consumer
+ * fetches the bytes from (`GET …/media/{storage_path}` — redirects to storage).
+ * Route-layer concern: only the route knows the request origin.
+ */
+export function add_audio_download_urls({ text, origin, dict_id }: { text: TextRecord, origin: string, dict_id: string }): TextRecord {
+  const stamp = (records?: TextAudioRecord[]) => {
+    for (const record of records ?? []) {
+      if (record.storage_path)
+        record.download_url = `${origin}/api/v1/dictionaries/${dict_id}/media/${record.storage_path.split('/').map(encodeURIComponent).join('/')}`
+    }
+  }
+  stamp(text.audio)
+  for (const sentence of text.sentences)
+    stamp(sentence.audio)
+  return text
 }
 
 export function list_texts(db: Database.Database): TextSummary[] {

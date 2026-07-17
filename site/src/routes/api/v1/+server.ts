@@ -49,6 +49,9 @@ export const GET: RequestHandler = (event) => {
   <p class="muted">v1 covers entries/senses/example-sentences/<strong>texts</strong>/speakers/tags/dialects/sources and media (audio/photos/videos). Audio &amp; video require attribution: <code>speaker_id</code> and/or <code>source</code> (a sources-registry slug — create-first, like entry sources). Any standard HTTP client works; a descriptive <code>User-Agent</code> is good practice.</p>
   <p class="muted">Stuck or need something we don't offer? <code>POST …/feedback</code> with <code>{ message }</code> — it reaches the LD team directly (read or write keys); then relay the response's note to your human.</p>
 
+  <h2>Bulk reads — dictionary snapshots</h2>
+  <p class="muted">Mirroring or bulk-reading a whole dictionary? Don't paginate the API — every <strong>public and unlisted</strong> dictionary has a downloadable gzipped SQLite snapshot of its full database (entries, senses, sentences, texts, media rows, speakers…) at <code>https://snapshots.livingdictionaries.app/dictionaries/&lt;id&gt;.db.gz</code> (no auth). It's rebuilt within ~30 minutes of any edit (a 30-minute sweep that only rebuilds when content changed; served with <code>Cache-Control: max-age=120</code>) — so treat it as at most ~30 minutes stale, and verify your own fresh writes via the API responses, not the snapshot.</p>
+
   <h2>Editing &amp; cleanup</h2>
   <p>Field-merge a whole entry with <code>PATCH …/entries/&lt;entryId&gt;</code>, or fix ONE row by its id (read ids from <code>GET …/entries/&lt;entryId&gt;</code>):</p>
   <ul>

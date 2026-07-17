@@ -147,15 +147,16 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}/senses/{senseId}/videos': ['post'],
       '/api/v1/dictionaries/{id}/senses/{senseId}/videos/{videoId}': ['delete'],
       '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio': ['post'],
-      '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio/{audioId}': ['delete'],
+      '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio/{audioId}': ['delete', 'patch'],
       '/api/v1/dictionaries/{id}/sentences/{sentenceId}/photos': ['post'],
       '/api/v1/dictionaries/{id}/sentences/{sentenceId}/photos/{photoId}': ['delete'],
       '/api/v1/dictionaries/{id}/sentences/{sentenceId}/videos': ['post'],
       '/api/v1/dictionaries/{id}/sentences/{sentenceId}/videos/{videoId}': ['delete'],
       '/api/v1/dictionaries/{id}/texts/{textId}/audio': ['post'],
-      '/api/v1/dictionaries/{id}/texts/{textId}/audio/{audioId}': ['delete'],
+      '/api/v1/dictionaries/{id}/texts/{textId}/audio/{audioId}': ['delete', 'patch'],
       '/api/v1/dictionaries/{id}/texts/{textId}/videos': ['post'],
       '/api/v1/dictionaries/{id}/texts/{textId}/videos/{videoId}': ['delete'],
+      '/api/v1/dictionaries/{id}/media/{storagePath}': ['get'],
     })
   })
 
@@ -274,6 +275,7 @@ describe(select_openapi_view, () => {
     const paths = Object.keys(sliced.paths)
     expect(paths).toContain('/api/v1/dictionaries/{id}/entries/{entryId}/audio')
     expect(paths).toContain('/api/v1/dictionaries/{id}/texts/{textId}/videos')
-    expect(paths.every(p => /\/(?:audio|photos|videos)(?:\/|$)/.test(p))).toBeTruthy()
+    expect(paths).toContain('/api/v1/dictionaries/{id}/media/{storagePath}')
+    expect(paths.every(p => /\/(?:audio|photos|videos|media)(?:\/|$)/.test(p))).toBeTruthy()
   })
 })

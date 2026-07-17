@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3'
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { create_api_key } from '$lib/api-keys/api-key'
 import { open_dictionary_db_in_memory } from '$lib/db/server/dictionary-db'
+import { merge_dict_row } from '$lib/db/server/dictionary-sync-helpers'
 import { open_dictionary_history_db_in_memory } from '$lib/db/server/dictionary-history-db'
 import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { GET as GET_LIST, POST } from './+server'
@@ -49,11 +50,11 @@ function list_texts(key = write_key) {
 }
 function get_text(text_id: string, key = write_key) {
   const request = new Request(`http://localhost/api/v1/dictionaries/dict-1/texts/${text_id}`, { method: 'GET', headers: { Authorization: `Bearer ${key}` } })
-  return GET_ONE({ request, cookies: { get: () => undefined }, params: { id: 'dict-1', textId: text_id } } as never)
+  return GET_ONE({ request, cookies: { get: () => undefined }, params: { id: 'dict-1', textId: text_id }, url: new URL(request.url) } as never)
 }
 function patch_text(text_id: string, body: unknown, key = write_key) {
   const request = new Request(`http://localhost/api/v1/dictionaries/dict-1/texts/${text_id}`, { method: 'PATCH', body: JSON.stringify(body), headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${key}` } })
-  return PATCH({ request, cookies: { get: () => undefined }, params: { id: 'dict-1', textId: text_id } } as never)
+  return PATCH({ request, cookies: { get: () => undefined }, params: { id: 'dict-1', textId: text_id }, url: new URL(request.url) } as never)
 }
 function delete_text(text_id: string, key = write_key) {
   const request = new Request(`http://localhost/api/v1/dictionaries/dict-1/texts/${text_id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${key}` } })
@@ -127,5 +128,30 @@ describe(GET_ONE, () => {
 
   test('404 for an unknown text', async () => {
     await expect(get_text(crypto.randomUUID())).rejects.toMatchObject({ status: 404 })
+  })
+
+  test('includes text- and sentence-level audio (timings + download_url) and full speaker records', async () => {
+    const NOW = '2026-01-01T00:00:00.000Z'
+    const { text } = await (await post_text({ title: 'Story', sentences: [{ text: 'one' }, { text: 'two' }] })).json()
+    const [sentence_1] = text.sentences
+    merge_dict_row({ db: dict_db, table_name: 'speakers', row: { id: 'sp1', name: 'Ana', decade: 1980, gender: 'f', birthplace: 'Wenshan', created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
+    merge_dict_row({ db: dict_db, table_name: 'audio', row: { id: 'aud-text', text_id: text.id, storage_path: 'dict-1/audio/t1/full.mp3', timings: { [sentence_1.id]: '0,320|40,280|' }, created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
+    merge_dict_row({ db: dict_db, table_name: 'audio_speakers', row: { id: 'as1', audio_id: 'aud-text', speaker_id: 'sp1', created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
+    merge_dict_row({ db: dict_db, table_name: 'audio', row: { id: 'aud-sent', sentence_id: sentence_1.id, storage_path: 'dict-1/audio/s1/one.mp3', created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
+
+    const { text: full } = await (await get_text(text.id, read_key)).json()
+
+    expect(full.audio).toHaveLength(1)
+    expect(full.audio[0].id).toBe('aud-text')
+    expect(full.audio[0].timings).toEqual({ [sentence_1.id]: '0,320|40,280|' })
+    expect(full.audio[0].speakers).toEqual([{ id: 'sp1', name: 'Ana' }])
+    expect(full.audio[0].download_url).toBe('http://localhost/api/v1/dictionaries/dict-1/media/dict-1/audio/t1/full.mp3')
+
+    expect(full.sentences[0].audio).toHaveLength(1)
+    expect(full.sentences[0].audio[0].id).toBe('aud-sent')
+    expect(full.sentences[0].audio[0].download_url).toBe('http://localhost/api/v1/dictionaries/dict-1/media/dict-1/audio/s1/one.mp3')
+    expect(full.sentences[1].audio).toBeUndefined()
+
+    expect(full.speakers).toEqual([{ id: 'sp1', name: 'Ana', decade: 1980, gender: 'f', birthplace: 'Wenshan' }])
   })
 })

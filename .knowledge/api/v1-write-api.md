@@ -253,3 +253,32 @@ Two things an agent bulk-using the media endpoints hit, both non-obvious from on
 - Routes: `routes/api/v1/**` (entries CRUD + `…/sentences/{id}`, `…/senses/{id}`, `…/texts`(+`/{textId}`),
   `…/feedback`, `…/tags/{id}`, `…/dialects/{id}`, `…/entries/{entryId}/tags|dialects/{id}`,
   speakers/tags/dialects/sources collections, dict meta, `openapi.json`, landing).
+
+## Text audio reads, writable timings, media download URLs (2026-07-17)
+
+Built for the first real external consumer — Poly Tutor's 文山话 (`wenshanhua`)
+Tutor↔LD bridge; requirements arrived as a live `POST …/feedback` message (prod
+thread `3eb63b49…`, itself an end-to-end test of the feedback channel). Decisions:
+
+- **`GET …/texts/{textId}` is the one-call full read**: sentences + text-level
+  `text.audio` + `sentences[].audio` (each with `timings` + `download_url`) +
+  deduped FULL `text.speakers` records. Arrays present only when non-empty.
+  Decoration of `download_url` happens at the ROUTE layer
+  (`add_audio_download_urls` in `v1-texts.ts`) because only the route knows the
+  request origin.
+- **Bytes are exposed via a redirecting endpoint**, NOT raw firebasestorage URLs:
+  `GET …/media/{...storage_path}` verifies the path belongs to a media row in
+  THIS dictionary (keeps private dicts behind key scoping), then 302s to
+  `url_from_storage_path` (firebasestorage in prod, `/api/dev-media` in dev).
+  Rationale: stable consumer URL that survives a future storage-backend move.
+- **`timings` is audio-only in the API** (videos have the column too but no
+  consumer; attach 400s on non-audio timings). Accepted on audio attach (object
+  in JSON, JSON string in multipart) and via
+  `PATCH …/texts|sentences/{ownerId}/audio/{audioId}` `{ timings }` (whole-object
+  replace, `null` clears) — the post-upload forced-alignment write-back path.
+  Entry audio has NO timings PATCH (timings are sentence-keyed). Validation is
+  deliberately lenient: any string→string map.
+- **Snapshot tip is docs-only** (landing + openapi info description): public AND
+  unlisted dicts → `https://snapshots.livingdictionaries.app/dictionaries/{id}.db.gz`,
+  rebuilt ≤~30 min after an edit, `Cache-Control: max-age=120`. Jacob explicitly
+  wanted the cadence note; explicitly NO `snapshot` field on API responses.

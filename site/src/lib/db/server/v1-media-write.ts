@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3'
 import type { HistoryEvent } from './dictionary-history-db'
 import type { SingleWriteResult } from './v1-entry-write'
 import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
+import type { MediaTimings } from '$lib/db/schemas/dictionary.types'
 import type { HostedVideo } from '$lib/types'
 import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { read_last_modified_at } from './dictionary-db'
@@ -63,6 +64,8 @@ export interface MediaFieldInput {
   photographer?: string | null
   videographer?: string | null
   hosted_elsewhere?: HostedVideo | null
+  /** Audio: sentence id → compact word-timing string (see `MediaTimings`). */
+  timings?: MediaTimings | null
 }
 
 export interface MediaRecord {
@@ -73,6 +76,9 @@ export interface MediaRecord {
   source?: string | null
   photographer?: string | null
   videographer?: string | null
+  timings?: MediaTimings | null
+  /** Absolute URL that redirects to the stored bytes (audio; set by the route layer). */
+  download_url?: string
   entry_id?: string | null
   sentence_id?: string | null
   text_id?: string | null
@@ -101,7 +107,7 @@ function prune(row: Record<string, unknown>): Record<string, unknown> {
 
 function build_media_columns(cell: MediaCellConfig, fields: MediaFieldInput): Record<string, unknown> {
   if (cell.medium === 'audio')
-    return { storage_path: fields.storage_path, source: fields.source ?? null }
+    return { storage_path: fields.storage_path, source: fields.source ?? null, timings: fields.timings ?? null }
   if (cell.medium === 'photo')
     return { storage_path: fields.storage_path, serving_url: fields.serving_url, source: fields.source ?? null, photographer: fields.photographer ?? null }
   // video
@@ -138,6 +144,7 @@ export function read_media_record({ db, cell_key, media_id }: { db: Database.Dat
   if (cell.medium === 'audio') {
     record.storage_path = row.storage_path
     record.source = row.source ?? null
+    record.timings = (row.timings as MediaTimings) ?? null
     record.entry_id = row.entry_id ?? null
     record.sentence_id = row.sentence_id ?? null
     record.text_id = row.text_id ?? null
@@ -284,4 +291,53 @@ export function delete_media({ db, history_db, cell_key, owner_id, media_id, use
   if (!linked)
     return { found: false, new_synced_up_to: read_last_modified_at(db) }
   return run_tombstone_delete({ db, history_db, table_name: cell.media_table, id: media_id, user_id, api_key_id })
+}
+
+export interface MediaTimingsUpdateResult {
+  found: boolean
+  media?: MediaRecord
+  new_synced_up_to: string | null
+}
+
+/**
+ * Set / replace / clear (`null`) an audio row's `timings` — the post-upload
+ * forced-alignment write-back path. Verifies the audio is linked to THIS owner
+ * (found: false otherwise), then merges the single column through
+ * `merge_dict_row` like any editor push.
+ */
+export function update_media_timings({ db, history_db, cell_key, owner_id, media_id, timings, user_id, api_key_id }: {
+  db: Database.Database
+  history_db?: Database.Database
+  cell_key: MediaCellKey
+  owner_id: string
+  media_id: string
+  timings: MediaTimings | null
+  user_id: string
+  api_key_id?: string | null
+}): MediaTimingsUpdateResult {
+  const cell = MEDIA_CELLS[cell_key]
+  if (cell.medium !== 'audio')
+    throw new Error('timings are only stored on audio')
+  const linked = cell.link.kind === 'column'
+    ? db.prepare(`SELECT 1 FROM "${cell.media_table}" WHERE id = ? AND "${cell.link.column}" = ?`).get(media_id, owner_id)
+    : db.prepare(`SELECT 1 FROM "${cell.link.table}" WHERE "${cell.link.owner_col}" = ? AND "${cell.link.media_col}" = ?`).get(owner_id, media_id)
+  if (!linked)
+    return { found: false, new_synced_up_to: read_last_modified_at(db) }
+
+  const existing = parse_dict_row(cell.media_table, db.prepare(`SELECT * FROM "${cell.media_table}" WHERE id = ?`).get(media_id) as Record<string, unknown>)
+  const now = new Date().toISOString()
+  const row: Record<string, unknown> = { ...existing, timings, updated_at: now }
+  delete row.updated_by_user_id
+
+  db.exec('BEGIN IMMEDIATE')
+  try {
+    const event = merge_dict_row({ db, table_name: cell.media_table, row, user_id, at: now, api_key_id })
+    const new_synced_up_to = read_last_modified_at(db)
+    db.exec('COMMIT')
+    commit_history(history_db, event ? [event] : [])
+    return { found: true, media: read_media_record({ db, cell_key, media_id }), new_synced_up_to }
+  } catch (err) {
+    db.exec('ROLLBACK')
+    throw err
+  }
 }

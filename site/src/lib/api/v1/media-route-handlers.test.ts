@@ -6,7 +6,7 @@ import { open_dictionary_history_db_in_memory } from '$lib/db/server/dictionary-
 import { merge_dict_row } from '$lib/db/server/dictionary-sync-helpers'
 import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { store_media_bytes } from '$lib/server/media-storage'
-import { make_media_attach_handler, make_media_delete_handler } from './media-route-handlers'
+import { make_media_attach_handler, make_media_delete_handler, make_media_timings_patch_handler } from './media-route-handlers'
 
 let shared_db: ReturnType<typeof open_test_shared_db>
 let dict_db: Database.Database
@@ -41,6 +41,7 @@ beforeEach(() => {
   read_key = create_api_key({ db: shared_db, dictionary_id: 'dict-1', label: 'r', role: 'read', created_by_user_id: 'edt-1' }).token
   merge_dict_row({ db: dict_db, table_name: 'entries', row: { id: 'e1', lexeme: { default: 'mbwa' }, created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
   merge_dict_row({ db: dict_db, table_name: 'senses', row: { id: 's1', entry_id: 'e1', created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
+  merge_dict_row({ db: dict_db, table_name: 'sentences', row: { id: 'sent1', text: { default: 'Mbwa wangu' }, created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
   merge_dict_row({ db: dict_db, table_name: 'speakers', row: { id: 'sp1', name: 'Ana', created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
   merge_dict_row({ db: dict_db, table_name: 'sources', row: { id: 'src1', slug: 'field-2026', citation: 'Fieldwork 2026', created_at: NOW, updated_at: NOW }, user_id: 'edt-1' })
 })
@@ -193,6 +194,63 @@ describe(make_media_attach_handler, () => {
   test('photo needs no attribution (source stays free-text caption)', async () => {
     const res = await attach({ cell: 'photo:sense', params: { senseId: 's1' }, fields: { source: 'any prose, not a slug' }, file: new File([JPEG_BYTES], 'pic.jpg', { type: 'image/jpeg' }) })
     expect((await res.json()).photo.source).toBe('any prose, not a slug')
+  })
+
+  test('audio→sentence: timings accepted as a JSON string in multipart', async () => {
+    const timings = { sent1: '0,320|40,280|' }
+    const res = await attach({ cell: 'audio:sentence', params: { sentenceId: 'sent1' }, fields: { speaker_id: 'sp1', timings: JSON.stringify(timings) } })
+    expect(res.status).toBe(200)
+    expect((await res.json()).audio.timings).toEqual(timings)
+  })
+
+  test('audio→sentence: timings accepted as an object in JSON body', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(MP3_BYTES, { headers: { 'content-type': 'audio/mpeg', 'content-length': '4' } }))))
+    const res = await attach_json({ cell: 'audio:sentence', params: { sentenceId: 'sent1' }, body: { url: 'https://example.com/sound.mp3', speaker_id: 'sp1', timings: { sent1: '0,320|' } } })
+    expect((await res.json()).audio.timings).toEqual({ sent1: '0,320|' })
+  })
+
+  test('400 for malformed timings (non-string values / broken JSON) — no upload attempted', async () => {
+    await expect(attach({ cell: 'audio:sentence', params: { sentenceId: 'sent1' }, fields: { speaker_id: 'sp1', timings: '{not json' } })).rejects.toMatchObject({ status: 400 })
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(MP3_BYTES, { headers: { 'content-type': 'audio/mpeg', 'content-length': '4' } }))))
+    await expect(attach_json({ cell: 'audio:sentence', params: { sentenceId: 'sent1' }, body: { url: 'https://example.com/a.mp3', speaker_id: 'sp1', timings: { sent1: 42 } } })).rejects.toMatchObject({ status: 400 })
+  })
+
+  test('400 when timings are sent for a non-audio medium', async () => {
+    await expect(attach({ cell: 'photo:sense', params: { senseId: 's1' }, fields: { timings: '{}' }, file: new File([JPEG_BYTES], 'pic.jpg', { type: 'image/jpeg' }) })).rejects.toMatchObject({ status: 400 })
+  })
+})
+
+describe(make_media_timings_patch_handler, () => {
+  function patch_timings({ cell, params, body, key = write_key }: { cell: Parameters<typeof make_media_timings_patch_handler>[0], params: Record<string, string>, body: unknown, key?: string }) {
+    const handler = make_media_timings_patch_handler(cell)
+    const request = new Request('http://localhost/api/v1/media', { method: 'PATCH', body: JSON.stringify(body), headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${key}` } })
+    return handler({ request, cookies: { get: () => undefined }, params: { id: 'dict-1', ...params } } as never)
+  }
+
+  test('sets, replaces, and clears timings on an attached sentence audio', async () => {
+    const created = await (await attach({ cell: 'audio:sentence', params: { sentenceId: 'sent1' }, fields: { speaker_id: 'sp1' } })).json()
+    expect(created.audio.timings).toBeNull()
+
+    const set = await (await patch_timings({ cell: 'audio:sentence', params: { sentenceId: 'sent1', audioId: created.audio.id }, body: { timings: { sent1: '0,320|40,280|' } } })).json()
+    expect(set.audio.timings).toEqual({ sent1: '0,320|40,280|' })
+
+    const replaced = await (await patch_timings({ cell: 'audio:sentence', params: { sentenceId: 'sent1', audioId: created.audio.id }, body: { timings: { sent1: '10,300|' } } })).json()
+    expect(replaced.audio.timings).toEqual({ sent1: '10,300|' })
+    expect(dict_db.prepare(`SELECT timings FROM audio WHERE id = ?`).get(created.audio.id)).toEqual({ timings: JSON.stringify({ sent1: '10,300|' }) })
+
+    const cleared = await (await patch_timings({ cell: 'audio:sentence', params: { sentenceId: 'sent1', audioId: created.audio.id }, body: { timings: null } })).json()
+    expect(cleared.audio.timings).toBeNull()
+  })
+
+  test('404 when the audio is not linked to the owner', async () => {
+    const created = await (await attach({ cell: 'audio:sentence', params: { sentenceId: 'sent1' }, fields: { speaker_id: 'sp1' } })).json()
+    await expect(patch_timings({ cell: 'audio:text', params: { textId: 'ghost', audioId: created.audio.id }, body: { timings: {} } })).rejects.toMatchObject({ status: 404 })
+  })
+
+  test('400 without a timings key; 403 for a read key', async () => {
+    const created = await (await attach({ cell: 'audio:sentence', params: { sentenceId: 'sent1' }, fields: { speaker_id: 'sp1' } })).json()
+    await expect(patch_timings({ cell: 'audio:sentence', params: { sentenceId: 'sent1', audioId: created.audio.id }, body: {} })).rejects.toMatchObject({ status: 400 })
+    await expect(patch_timings({ cell: 'audio:sentence', params: { sentenceId: 'sent1', audioId: created.audio.id }, body: { timings: {} }, key: read_key })).rejects.toMatchObject({ status: 403 })
   })
 })
 

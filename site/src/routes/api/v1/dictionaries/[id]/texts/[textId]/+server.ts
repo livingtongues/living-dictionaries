@@ -4,7 +4,7 @@ import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
 import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
-import { apply_text_delete, apply_text_update, get_text } from '$lib/db/server/v1-texts'
+import { add_audio_download_urls, apply_text_delete, apply_text_update, get_text } from '$lib/db/server/v1-texts'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
@@ -18,7 +18,11 @@ export interface V1TextDeleteResponseBody {
 
 export type V1TextPatchRequestBody = TextPatchInput
 
-/** GET /api/v1/dictionaries/[id]/texts/[textId] — the text + its ordered sentences. */
+/**
+ * GET /api/v1/dictionaries/[id]/texts/[textId] — the text + its ordered
+ * sentences, attached audio (text- and sentence-level, each with `timings` and
+ * a `download_url` for the bytes), and the referenced speaker records.
+ */
 export const GET: RequestHandler = async (event) => {
   const { dictionary } = await load_v1_dictionary_context({ event, access: 'read' })
 
@@ -29,7 +33,7 @@ export const GET: RequestHandler = async (event) => {
   const text = get_text(get_dictionary_db(dictionary.id), text_id)
   if (!text)
     error(ResponseCodes.NOT_FOUND, 'text not found')
-  return json({ text } satisfies V1TextResponseBody)
+  return json({ text: add_audio_download_urls({ text, origin: event.url.origin, dict_id: dictionary.id }) } satisfies V1TextResponseBody)
 }
 
 /**
@@ -59,7 +63,7 @@ export const PATCH: RequestHandler = async (event) => {
 
   mirror_dictionary_cursor({ dict_id: dictionary.id, cursor: result.new_synced_up_to })
   log_server_event({ level: 'info', message: 'v1_text_updated', user_id: access.user_id, context: { dictionary_id: dictionary.id, text_id, via: access.via } })
-  return json({ text: result.text } satisfies V1TextResponseBody)
+  return json({ text: add_audio_download_urls({ text: result.text, origin: event.url.origin, dict_id: dictionary.id }) } satisfies V1TextResponseBody)
 }
 
 /**
