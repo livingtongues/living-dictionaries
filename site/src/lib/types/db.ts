@@ -4,7 +4,7 @@ import type * as dict from '$lib/db/schemas/dictionary'
 
 /**
  * Drizzle is the single source of truth for every data shape. The legacy
- * Supabase-generated `Tables<>` / `TablesInsert<>` / `TablesUpdate<>` helpers are
+ * generated `Tables<>` / `TablesInsert<>` / `TablesUpdate<>` helpers are
  * re-implemented here over `InferSelectModel` / `InferInsertModel` so the ~130
  * existing call sites keep working while every shape now comes from the SQLite
  * schemas (`$lib/db/schemas/{shared,dictionary}.ts`).

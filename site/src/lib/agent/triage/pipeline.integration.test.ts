@@ -36,7 +36,7 @@ function seed_db(): Database.Database {
   db.prepare('INSERT INTO dictionaries (id, url, name, entry_count, public, updated_at) VALUES (?,?,?,?,?,?)')
     .run('dict1', 'nuxalk', 'Nuxalk', 412, 1, '2026-06-20T00:00:00.000Z')
   db.prepare('INSERT INTO dictionary_roles VALUES (?,?,?,?)')
-    .run('role1', 'dict1', 'cust-1', 'editor')
+    .run('role1', 'dict1', 'cust-1', 'contributor')
   return db
 }
 
@@ -60,7 +60,7 @@ describe('triage pipeline (build context + apply)', () => {
     const ctx = build_triage_context({ db, thread_id: 't1' })
     expect(ctx).not.toBeNull()
     expect(ctx?.is_known_customer).toBeTruthy()
-    expect(ctx?.dictionaries[0]).toMatchObject({ name: 'Nuxalk', role: 'editor', entry_count: 412, is_public: true })
+    expect(ctx?.dictionaries[0]).toMatchObject({ name: 'Nuxalk', role: 'contributor', entry_count: 412, is_public: true })
     expect(ctx?.page_context).toBe('the "Nuxalk" dictionary — browsing the entries list')
     expect(ctx?.messages).toHaveLength(1)
   })

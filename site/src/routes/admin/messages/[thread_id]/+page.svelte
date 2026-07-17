@@ -143,6 +143,45 @@
       return message.author_user_id
     return thread?.from_user_id ?? null
   }
+
+  /**
+   * The dictionary this thread concerns: the stored `dictionary_id` when
+   * present (import requests + newer contact submissions), else parsed from
+   * the thread `url`'s first path segment against the local catalog.
+   */
+  const thread_dictionary = $derived.by(() => {
+    if (thread?.dictionary_id) {
+      const dict = db?.dictionaries.objects[thread.dictionary_id]
+      return { id: thread.dictionary_id, url: dict?.url ?? null }
+    }
+    if (!thread?.url)
+      return null
+    try {
+      const [slug] = new URL(thread.url).pathname.split('/').filter(Boolean)
+      if (!slug)
+        return null
+      const dict = db?.dictionaries.rows.find(row => row.url === slug)
+      return dict ? { id: dict.id, url: dict.url } : null
+    } catch {
+      return null
+    }
+  })
+
+  /** Everything an agent needs about one message, ready to paste into an agent thread. */
+  function message_copy_payload(message: { author_kind: string, author_user_id: string | null, created_at: string, body_text: string | null, body_html: string | null }): string {
+    const user_id = author_user_id(message)
+    const email = message.author_kind === 'customer'
+      ? thread?.from_email
+      : (user_id ? db?.users.id(user_id)?.email : null)
+    const lines = [
+      `From: ${author_label(message)}${email ? ` <${email}>` : ''}`,
+      `User id: ${user_id ?? '(no account)'}`,
+    ]
+    if (thread_dictionary)
+      lines.push(`Dictionary: ${thread_dictionary.url ?? '(unknown url)'} (dictionary id: ${thread_dictionary.id})`)
+    lines.push(`Sent: ${message.created_at}`, '', message.body_text?.trim() || message.body_html || '(empty message)')
+    return lines.join('\n')
+  }
 </script>
 
 <a href={back.target.url} onclick={back.on_click} class="back-link">
@@ -245,6 +284,7 @@
           {/if}
           <span>·</span>
           <span title={format_date_time(message.created_at)}>{format_relative_time(message.created_at)}</span>
+          <CopyButton value={message_copy_payload(message)} label="Copy sender + dictionary + body for an agent" />
           {#if message.author_kind === 'admin' && message.delivery_status}
             <span>·</span>
             {#if message.delivery_status === 'pending'}

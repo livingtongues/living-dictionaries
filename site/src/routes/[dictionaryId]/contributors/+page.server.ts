@@ -6,14 +6,14 @@ import { stream } from '$lib/server/stream-load'
 export interface ContributorRole {
   id: string
   user_id: string
-  role: 'manager' | 'editor' | 'contributor'
+  role: 'manager' | 'contributor'
   full_name: string | null
 }
 export interface ContributorInvite {
   id: string
   inviter_email: string
   target_email: string
-  role: 'manager' | 'editor' | 'contributor'
+  role: 'manager' | 'contributor'
   status: string
   created_at: string
 }

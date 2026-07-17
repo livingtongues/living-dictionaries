@@ -16,7 +16,7 @@ afterEach(() => {
 })
 
 function token() {
-  return sign_jwt({ sub: 'u_ed', email: 'editor@example.com', name: 'Editor' })
+  return sign_jwt({ sub: 'u_ed', email: 'manager@example.com', name: 'Manager' })
 }
 
 function call(options: { token?: string, body: unknown }) {

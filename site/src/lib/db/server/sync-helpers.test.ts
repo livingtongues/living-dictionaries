@@ -71,14 +71,14 @@ describe('dictionary_roles natural-key dedup (adopt-canonical + loser echo)', ()
   function seed_role(role_id: string, at: string) {
     db.prepare(`INSERT INTO dictionaries (id, name, updated_at) VALUES ('d1', 'Demo', ?)`).run(at)
     db.prepare(`INSERT INTO users (id, email, updated_at) VALUES ('u1', 'u1@example.com', ?)`).run(at)
-    db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES (?, 'd1', 'u1', 'editor', ?, ?)`).run(role_id, at, at)
+    db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES (?, 'd1', 'u1', 'contributor', ?, ?)`).run(role_id, at, at)
   }
 
   // Cursor 0 = "behind everything" (the old timestamp cursor was T0; a low seq
   // has the same "client is behind the seeded rows" meaning).
   const role_push = (id: string, at: string): SyncRequest => ({
     synced_up_to: 0,
-    dirty_rows: { dictionary_roles: [{ id, dictionary_id: 'd1', user_id: 'u1', role: 'editor', invited_by_user_id: null, dirty: 1, created_at: at, updated_at: at }] },
+    dirty_rows: { dictionary_roles: [{ id, dictionary_id: 'd1', user_id: 'u1', role: 'contributor', invited_by_user_id: null, dirty: 1, created_at: at, updated_at: at }] },
     deletes: [],
     latest_migration: latest_shared_migration_name,
   })
@@ -140,9 +140,9 @@ describe('FK-orphan push recovery (skip + report)', () => {
     request.dirty_rows = {
       // Lands: parents exist.
       dictionary_roles: [
-        { id: 'role_good', dictionary_id: 'd1', user_id: 'u1', role: 'editor', invited_by_user_id: null, dirty: 1, created_at: T0, updated_at: T0 },
+        { id: 'role_good', dictionary_id: 'd1', user_id: 'u1', role: 'contributor', invited_by_user_id: null, dirty: 1, created_at: T0, updated_at: T0 },
         // Orphan: dictionary 'ghost-dict' does not exist server-side.
-        { id: 'role_orphan', dictionary_id: 'ghost-dict', user_id: 'u1', role: 'editor', invited_by_user_id: null, dirty: 1, created_at: T0, updated_at: T0 },
+        { id: 'role_orphan', dictionary_id: 'ghost-dict', user_id: 'u1', role: 'contributor', invited_by_user_id: null, dirty: 1, created_at: T0, updated_at: T0 },
       ],
     }
 
@@ -164,7 +164,7 @@ describe('FK-orphan push recovery (skip + report)', () => {
     db.prepare(`INSERT INTO dictionaries (id, name) VALUES ('d1', 'Demo')`).run()
     const request = empty_request()
     request.dirty_rows = {
-      dictionary_roles: [{ id: 'role_ok', dictionary_id: 'd1', user_id: 'u1', role: 'editor', invited_by_user_id: null, dirty: 1, created_at: T0, updated_at: T0 }],
+      dictionary_roles: [{ id: 'role_ok', dictionary_id: 'd1', user_id: 'u1', role: 'contributor', invited_by_user_id: null, dirty: 1, created_at: T0, updated_at: T0 }],
     }
     const response = process_sync({ db, request, user_id: 'u1' })
     expect(response.skipped_orphans).toBeUndefined()

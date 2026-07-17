@@ -192,6 +192,26 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     },
   }
 
+  const SourceFile = {
+    type: 'object',
+    description: 'An uploaded import resource (any format — spreadsheet, FLEx/LIFT export, PDF scan…). Bytes download from `GET …/files/{fileId}`. `import_instructions` is the uploader\'s authoritative brief for the import; `source_note` is their (optional) citation info. After importing, link the file to its permanent `sources` registry row via `PATCH …/files/{fileId}` with `source_id` when the resource is a real citable source.',
+    properties: {
+      id: { type: 'string', format: 'uuid' },
+      dictionary_id: { type: 'string' },
+      source_id: { type: 'string', nullable: true, description: 'The dict `sources.id` this file is filed under, once linked.' },
+      filename: { type: 'string' },
+      mimetype: { type: 'string' },
+      size_bytes: { type: 'integer' },
+      import_instructions: { type: 'string', nullable: true },
+      source_note: { type: 'string', nullable: true },
+      upload_confirmed_at: { type: 'string', format: 'date-time', nullable: true },
+      import_requested_at: { type: 'string', format: 'date-time', nullable: true },
+      uploaded_by_user_id: { type: 'string' },
+      created_at: { type: 'string', format: 'date-time' },
+      updated_at: { type: 'string', format: 'date-time' },
+    },
+  }
+
   const EntryWriteResult = {
     type: 'object',
     properties: {
@@ -422,6 +442,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   const tag_id_param = { name: 'tagId', in: 'path', required: true, schema: { type: 'string' } }
   const dialect_id_param = { name: 'dialectId', in: 'path', required: true, schema: { type: 'string' } }
   const source_id_param = { name: 'sourceId', in: 'path', required: true, schema: { type: 'string' } }
+  const file_id_param = { name: 'fileId', in: 'path', required: true, schema: { type: 'string' } }
   const orthography_code_param = { name: 'code', in: 'path', required: true, schema: { type: 'string' }, description: 'The orthography\'s immutable code (a BCP-47 tag, a custom slug, or `default` for the primary).' }
   const text_id_param = { name: 'textId', in: 'path', required: true, schema: { type: 'string' } }
   const audio_id_param = { name: 'audioId', in: 'path', required: true, schema: { type: 'string' } }
@@ -872,6 +893,9 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         'The structured, entry-linked GRAMMAR surface is implemented and live: grammar sections (hierarchical, parallel-language markdown, entry/sense links, usage conditions — a section may be headless/body-only), example sentences by reference (`…/grammar/sections/{sectionId}/sentences`), clause-template slots (`…/grammar/clause-slots`), the glossing-abbreviations legend (`…/grammar/glossing-abbreviations`), the reverse entry→grammar lookup (`…/entries/{entryId}/grammar`), and text-classification tags (`…/texts/{textId}/tags`). There is no separate grammar-intro endpoint — the introductory prose is simply the first top-level section.',
         'Interlinear glossed text (IGT / Leipzig glossing) is live on every sentence write shape (`SentenceInput` / `TextSentenceInput` / `SentencePatch`): supply gold `tokens` per orthography (each `SentenceTokenInput` carrying the aligned per-token `gloss` line + optional `morphemes`; offsets derived if omitted — see the schema), plus `citations` (a source ref WITH a page/example `locator`), `example_label`, and `discourse_role`. `sources.orthography` declares which script a source\'s forms use. When `tokens` are omitted the server behaves as before. If you are importing IGT / corpus data and a shape is awkward, send `POST …/feedback` — that still shapes the build.',
         '',
+        '## Uploaded resources & import guides',
+        'When a dictionary team asks us to import their materials, the original files live at `GET …/files` (write scope) — each with the uploader\'s per-file `import_instructions` (authoritative) and an optional `source_note`. Download originals via `GET …/files/{fileId}`. **Before importing anything, fetch the matching format guide**: `GET /api/v1/guides` lists lean markdown guides (start with `/api/v1/guides/importing`, then the one for your source format — spreadsheets, flex-lift, pdf-scans). If the resource is a real citable work, create its `sources` registry row and link the file to it (`PATCH …/files/{fileId}` with `source_id`) so the original stays downloadable behind its citation.',
+        '',
         '## Fetching this spec (progressive disclosure)',
         'This document is comprehensive and grows over time. If you only need part of it, fetch a slice instead of the whole thing: `GET /api/v1/openapi.json?view=index` returns a compact map (every path + its method summaries + tag, plus the list of schema names) — read that first; then `GET /api/v1/openapi.json?tag=<name>` returns just one group\'s paths WITH their full ($ref-complete) schemas. Tag names are in the top-level `tags` list (e.g. `entries`, `media`, `texts`, `dialects`, `sources`). Fetching with no query params returns everything (this document).',
         '',
@@ -1055,6 +1079,27 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         patch: { summary: 'Edit source metadata', description: 'Field-merges citation metadata (and optionally renames the `slug`). Avoid renaming a slug that is already in use — the rename does not rewrite referencing rows.', parameters: [dict_id_param, source_id_param], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/SourceInput' } } } }, responses: { 200: { description: '{ source }' }, 400: { description: 'Slug collision or invalid type' }, 404: {} } },
         delete: { summary: 'Delete a source', description: 'Refuses with 409 while the source is still referenced. Pass `?remove_from_all=true` to strip the slug from every referencing entry/sentence/text first and then delete.', parameters: [dict_id_param, source_id_param, { name: 'remove_from_all', in: 'query', required: false, schema: { type: 'boolean' } }], responses: { 200: { description: "{ result: 'deleted', removed_from }" }, 409: { description: 'Still referenced (retry with remove_from_all)' }, 404: {} } },
       },
+      '/api/v1/dictionaries/{id}/files': {
+        get: { summary: 'List uploaded import resources', description: 'Every uploaded resource with its uploader-written `import_instructions` (authoritative — follow them) and optional `source_note`. Write scope required (file names + instructions are never public).', parameters: [dict_id_param], responses: { 200: { description: '{ files }', content: { 'application/json': { schema: { type: 'object', properties: { files: { type: 'array', items: { $ref: '#/components/schemas/SourceFile' } } } } } } } } },
+        post: { summary: 'Register an upload', description: 'Registers the file and returns `{ file, upload_url }` — PUT the raw bytes to `upload_url` (Content-Type must match `mimetype`), then `POST …/files/{fileId}/confirm`. 100MB cap per file.', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['filename', 'mimetype', 'size_bytes'], properties: { filename: { type: 'string' }, mimetype: { type: 'string' }, size_bytes: { type: 'integer' } } } } } }, responses: { 200: { description: '{ file, upload_url }' }, 400: { description: 'Missing fields or over the 100MB cap' } } },
+      },
+      '/api/v1/dictionaries/{id}/files/{fileId}': {
+        get: { summary: 'Download the resource bytes', description: 'Streams the original file (Content-Disposition: attachment).', parameters: [dict_id_param, file_id_param], responses: { 200: { description: 'The file bytes' }, 404: {} } },
+        patch: { summary: 'Update file metadata / link to a source', description: 'Update `import_instructions`, `source_note`, `filename`, or set `source_id` to an EXISTING dict source (create it first via `POST …/sources`) to file this resource under its permanent source — do this when the resource is a real citable work (a published dictionary scan, a thesis…), not for ad-hoc working spreadsheets. See the importing guide.', parameters: [dict_id_param, file_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { filename: { type: 'string' }, import_instructions: { type: 'string', nullable: true }, source_note: { type: 'string', nullable: true }, source_id: { type: 'string', nullable: true } } } } } }, responses: { 200: { description: '{ file }' }, 400: { description: 'Unknown source_id / empty filename' }, 404: {} } },
+        delete: { summary: 'Delete an uploaded resource', description: 'Removes the row + stored bytes. Blocked (403) once the file is part of a requested import, except for site admins.', parameters: [dict_id_param, file_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 403: { description: 'Part of a requested import' }, 404: {} } },
+      },
+      '/api/v1/dictionaries/{id}/files/{fileId}/confirm': {
+        post: { summary: 'Confirm an upload landed', description: 'Verifies the bytes exist in storage (and enforces the size cap on what was actually stored). Call after the PUT.', parameters: [dict_id_param, file_id_param], responses: { 200: { description: '{ file }' }, 400: { description: 'No bytes found / oversize (removed)' }, 404: {} } },
+      },
+      '/api/v1/dictionaries/{id}/files/request-import': {
+        post: { summary: 'Ask the Living Dictionaries team to import these files', description: 'Turns a batch of uploaded, instruction-carrying files into a request message for the LD team (humans normally do this from the Import page — agents rarely need it).', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['file_ids'], properties: { file_ids: { type: 'array', items: { type: 'string' } }, message: { type: 'string' } } } } } }, responses: { 200: { description: '{ ok, thread_id }' }, 400: { description: 'Unconfirmed / instruction-less / already-requested file' } } },
+      },
+      '/api/v1/guides': {
+        get: { summary: 'List the format-import guides', description: 'Public. Returns `{ guides: [{ slug, title, description, url }] }` in recommended reading order (`importing` first).', responses: { 200: { description: '{ guides }' } } },
+      },
+      '/api/v1/guides/{slug}': {
+        get: { summary: 'Read one guide (markdown)', description: 'Public. Returns the guide as `text/markdown`.', parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: 'Markdown text' }, 404: {} } },
+      },
       // Structured grammar (tag: grammar) — see .issues/structured-grammar.md
       '/api/v1/dictionaries/{id}/grammar/sections': {
         get: { summary: 'List grammar sections', description: 'Returns the ordered section tree. Filter with `?entry_id=` (sections documenting one headword) or `?parent_id=` (one level; empty = top-level).', parameters: [dict_id_param, { name: 'entry_id', in: 'query', required: false, schema: { type: 'string' } }, { name: 'parent_id', in: 'query', required: false, schema: { type: 'string' } }], responses: { 200: { description: '{ sections }', content: { 'application/json': { schema: { type: 'object', properties: { sections: { type: 'array', items: { $ref: '#/components/schemas/GrammarSectionFull' } } } } } } } } },
@@ -1102,7 +1147,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     },
     components: {
       securitySchemes: {
-        bearerAuth: { type: 'http', scheme: 'bearer', description: 'A Living Dictionaries API key (`ldk_…`) minted in the dictionary Settings.' },
+        bearerAuth: { type: 'http', scheme: 'bearer', description: 'A Living Dictionaries API key (`ldk_…`) minted on the dictionary\'s Agents page.' },
       },
       schemas: {
         MultiString,
@@ -1118,6 +1163,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         EntryPatch,
         OrthographyInput,
         SourceInput,
+        SourceFile,
         EntryWriteResult,
         EntriesWriteResponse,
         SenseSummary,
@@ -1185,6 +1231,8 @@ export const OPENAPI_TAGS = [
   { name: 'tags', description: 'Entry tags.' },
   { name: 'speakers', description: 'Speaker records for audio/video attribution.' },
   { name: 'sources', description: 'The citation/source registry entries and sentences reference by slug.' },
+  { name: 'files', description: 'Uploaded import resources (original spreadsheets, FLEx/LIFT exports, PDF scans…) with per-file import instructions — list, download, upload, link to sources. Write scope required for everything (never public).' },
+  { name: 'guides', description: 'Format-import guides (markdown): how to parse + import spreadsheets, FLEx/LIFT/Toolbox, PDF scans, and the overall import workflow.' },
   { name: 'orthographies', description: 'Alternate writing systems.' },
   { name: 'featured-entries', description: 'The starred entries shown on the dictionary home page.' },
   { name: 'feedback', description: 'Send feedback/requests to the Living Dictionaries team.' },
@@ -1203,10 +1251,13 @@ const PATH_SEGMENT_TAGS: Record<string, string> = {
   'dialects': 'dialects',
   'orthographies': 'orthographies',
   'sources': 'sources',
+  'files': 'files',
 }
 
 /** Derive an operation's tag from its path (media wins over the owning resource). */
 export function tag_for_path(path: string): string {
+  if (path.startsWith('/api/v1/guides'))
+    return 'guides'
   if (/\/(?:audio|photos|videos)(?:\/|$)/.test(path))
     return 'media'
   // Grammar wins over the owning resource, so the entry reverse-lookup

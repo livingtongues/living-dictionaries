@@ -20,7 +20,7 @@
   import { api_dictionaries_id_roles_post } from '../../api/dictionaries/[id]/roles/_call'
   import { api_translate_summary } from '../../api/translate/summary/_call'
 
-  type DictionaryRole = 'manager' | 'editor' | 'contributor'
+  type DictionaryRole = 'manager' | 'contributor'
 
   let { data } = $props()
   const db = $derived(data.db)
@@ -60,12 +60,12 @@
     return map
   })
 
-  interface RoleCounts { manager: number, editor: number, contributor: number, total: number }
+  interface RoleCounts { manager: number, contributor: number, total: number }
   const roles_by_user_id = $derived.by(() => {
     // eslint-disable-next-line svelte/prefer-svelte-reactivity
     const map = new Map<string, RoleCounts>()
     for (const role of roles_query?.rows ?? []) {
-      const counts = map.get(role.user_id) ?? { manager: 0, editor: 0, contributor: 0, total: 0 }
+      const counts = map.get(role.user_id) ?? { manager: 0, contributor: 0, total: 0 }
       counts[role.role] += 1
       counts.total += 1
       map.set(role.user_id, counts)
@@ -169,7 +169,7 @@
     for (const user of users_query?.rows ?? []) {
       const aliases = aliases_by_user_id.get(user.id) ?? []
       const stats = thread_stats_by_user_id.get(user.id)
-      const roles = roles_by_user_id.get(user.id) ?? { manager: 0, editor: 0, contributor: 0, total: 0 }
+      const roles = roles_by_user_id.get(user.id) ?? { manager: 0, contributor: 0, total: 0 }
       const is_unsub = !!user.unsubscribed_from_emails
       const admin_level = admin_level_of(user)
 
@@ -300,7 +300,6 @@
       aliases: row.aliases.join('; '),
       dictionary_roles: row.roles.total,
       managers: row.roles.manager,
-      editors: row.roles.editor,
       contributors: row.roles.contributor,
       threads: row.thread_count,
       last_msg: row.last_msg_at ? new Date(row.last_msg_at).toISOString().slice(0, 10) : '',
@@ -450,7 +449,6 @@
                   class="add-role-select">
                   <option value="" disabled selected>+ role…</option>
                   <option value="manager">+ manager</option>
-                  <option value="editor">+ editor</option>
                   <option value="contributor">+ contributor</option>
                 </select>
               </div>
@@ -754,10 +752,6 @@
   .role-manager {
     background: color-mix(in srgb, var(--primary), transparent 86%);
     color: var(--primary);
-  }
-  .role-editor {
-    background: color-mix(in srgb, var(--warning), transparent 86%);
-    color: var(--warning);
   }
   .role-contributor {
     background: color-mix(in srgb, var(--success), transparent 86%);

@@ -5,7 +5,7 @@
   import { API_UNAVAILABLE_MESSAGE, is_api_unavailable_bucket } from '$lib/constants'
 
   const { data } = $props()
-  const { dictionary, is_manager, is_editor_or_above } = $derived(data)
+  const { dictionary, is_manager } = $derived(data)
   const api_unavailable = $derived(is_api_unavailable_bucket(dictionary.bucket))
 </script>
 
@@ -15,7 +15,7 @@
 
   {#if api_unavailable}
     <p class="api-unavailable">{API_UNAVAILABLE_MESSAGE}</p>
-  {:else if is_editor_or_above}
+  {:else if is_manager}
     <div class="explainer">
       <AgentPrompt dictionary_id={dictionary.id} />
       <p class="muted-note">
@@ -26,12 +26,6 @@
     </div>
 
     <ApiKeys dictionary_id={dictionary.id} can_manage={is_manager} />
-
-    {#if !is_manager}
-      <p class="readonly-note">
-        Only dictionary managers can create or revoke keys. You can see which agents are active here.
-      </p>
-    {/if}
   {:else}
     <p class="no-access">You don't have access to this dictionary's agents.</p>
   {/if}
@@ -67,11 +61,6 @@
     text-decoration: underline;
   }
   .muted-note {
-    font-size: 0.82rem;
-    color: var(--color-secondary);
-    margin-top: 0.5rem;
-  }
-  .readonly-note {
     font-size: 0.82rem;
     color: var(--color-secondary);
     margin-top: 0.5rem;

@@ -31,7 +31,7 @@
     dictionary,
     auth_user,
     can_edit,
-    is_editor_or_above,
+    is_manager,
     writes,
     dict_db,
   } = $derived(data)
@@ -189,7 +189,7 @@
         <IconShareSquare class="rtl-x-flip" />
       </HeadlessButton>
     {/if}
-    {#if is_editor_or_above && dict_db}
+    {#if is_manager && dict_db}
       <button
         type="button"
         class="btn-ghost entry-star-button"
@@ -200,7 +200,7 @@
         {#if star_row_id}<IconMdiStar />{:else}<IconMdiStarOutline />{/if}
       </button>
     {/if}
-    {#if is_editor_or_above}
+    {#if is_manager}
       <button
         type="button"
         class="btn-ghost entry-history-button"

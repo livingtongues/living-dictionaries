@@ -25,7 +25,6 @@ export const justMockDictionaryLayoutData = {
   speakers: null,
   is_manager: false,
   is_contributor: false,
-  is_editor_or_above: false,
   can_edit: false,
   search_entries: null,
   default_entries_per_page: null,

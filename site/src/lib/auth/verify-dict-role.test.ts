@@ -75,10 +75,10 @@ describe(verify_auth_dict_role, () => {
       expect(await status_of(verify_auth_dict_role(await event_for(user('no-role')), { dictionary: normal_dict }))).toBe(403)
     })
 
-    test('contributor passes a contributor gate but not an editor gate', async () => {
+    test('contributor passes a contributor gate but not a manager gate', async () => {
       const result = await verify_auth_dict_role(await event_for(user('normal-contributor')), { dictionary: normal_dict, min_role: 'contributor' })
       expect(result.role).toBe('contributor')
-      expect(await status_of(verify_auth_dict_role(await event_for(user('normal-contributor')), { dictionary: normal_dict, min_role: 'editor' }))).toBe(403)
+      expect(await status_of(verify_auth_dict_role(await event_for(user('normal-contributor')), { dictionary: normal_dict, min_role: 'manager' }))).toBe(403)
     })
 
     test('admin level 1 bypasses the role check', async () => {

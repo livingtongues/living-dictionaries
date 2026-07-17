@@ -24,7 +24,7 @@ beforeEach(() => {
   db = open_test_shared_db()
   const now = '2026-01-01T00:00:00Z'
   db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
-    .run('u_ed', 'editor@example.com', 'Editor', JSON.stringify([]), now, now)
+    .run('u_ed', 'manager@example.com', 'Manager', JSON.stringify([]), now, now)
   db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
     .run('u_con', 'contributor@example.com', 'Contributor', JSON.stringify([]), now, now)
   db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
@@ -32,7 +32,7 @@ beforeEach(() => {
   db.prepare(`INSERT INTO dictionaries (id, url, name, entry_count, created_at, updated_at) VALUES (?, ?, ?, 0, ?, ?)`)
     .run('dict1', 'dict1', 'Dict One', now, now)
   db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
-    .run('r_ed', 'dict1', 'u_ed', 'editor', now, now)
+    .run('r_ed', 'dict1', 'u_ed', 'manager', now, now)
   db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
     .run('r_con', 'dict1', 'u_con', 'contributor', now, now)
 
@@ -81,17 +81,17 @@ describe(POST, () => {
   })
 
   test('400 when dictionary_id missing', async () => {
-    await expect(call({ token: await token({ id: 'u_ed', email: 'editor@example.com' }), body: { ...valid_body, dictionary_id: '' } }))
+    await expect(call({ token: await token({ id: 'u_ed', email: 'manager@example.com' }), body: { ...valid_body, dictionary_id: '' } }))
       .rejects.toMatchObject({ status: 400 })
   })
 
   test('400 when file_name missing', async () => {
-    await expect(call({ token: await token({ id: 'u_ed', email: 'editor@example.com' }), body: { ...valid_body, file_name: '' } }))
+    await expect(call({ token: await token({ id: 'u_ed', email: 'manager@example.com' }), body: { ...valid_body, file_name: '' } }))
       .rejects.toMatchObject({ status: 400 })
   })
 
   test('dev media mock (200) when GCS not configured — points at the local /api/dev-media store', async () => {
-    const response = await call({ token: await token({ id: 'u_ed', email: 'editor@example.com' }), body: valid_body })
+    const response = await call({ token: await token({ id: 'u_ed', email: 'manager@example.com' }), body: valid_body })
     expect(response.status).toBe(200)
     const data = await response.json()
     expect(data.dev_mock).toBeTruthy()
@@ -99,9 +99,9 @@ describe(POST, () => {
     expect(data.presigned_upload_url).toBe(`/api/dev-media/${data.object_key}`)
   })
 
-  test('editor gets a presigned PUT url + object_key', async () => {
+  test('manager gets a presigned PUT url + object_key', async () => {
     set_creds()
-    const response = await call({ token: await token({ id: 'u_ed', email: 'editor@example.com' }), body: valid_body })
+    const response = await call({ token: await token({ id: 'u_ed', email: 'manager@example.com' }), body: valid_body })
     expect(response.status).toBe(200)
     const data = await response.json()
     expect(data.presigned_upload_url).toBe('https://storage.googleapis.com/signed-put-url')

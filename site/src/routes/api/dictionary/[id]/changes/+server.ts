@@ -141,7 +141,7 @@ export const POST: RequestHandler = async (event) => {
 async function resolve_caller(event: Parameters<RequestHandler>[0], dictionary: { id: string, bucket?: string | null }): Promise<{ user_id: string, is_editor: boolean }> {
   try {
     // Contributor rank counts as the editing tier (matches the client's
-    // `can_edit`, which includes contributors — LD has no 'editor' grants).
+    // `can_edit`, which includes contributors).
     const auth = await verify_auth_dict_role(event, { dictionary, min_role: 'contributor' })
     return { user_id: auth.user_id, is_editor: true }
   } catch (err) {

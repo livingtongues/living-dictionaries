@@ -6,7 +6,7 @@ import { create_markdown_extensions, get_editor_markdown } from './extensions'
  * Convert one block of CKEditor-era HTML → markdown, through the SAME Tiptap
  * extension set the editor uses — so a converted doc reloaded into the editor
  * is byte-stable (no spurious first-save churn). Used client-side at edit-open
- * time (the html-era shim) and by the Supabase-cutover migration (under
+ * time (the html-era shim) and by the legacy-content cutover migration (under
  * happy-dom — see house `site/src/lib/markdown/backfill/` for the pattern).
  *
  * Two-step because `tiptap-markdown` treats a `content` STRING as markdown:

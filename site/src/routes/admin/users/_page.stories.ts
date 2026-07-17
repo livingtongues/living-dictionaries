@@ -32,7 +32,7 @@ const dictionaries = [
 const roles = [
   { id: 'r1', dictionary_id: 'dict-1', user_id: 'user-1', role: 'manager' },
   { id: 'r2', dictionary_id: 'dict-2', user_id: 'user-1', role: 'contributor' },
-  { id: 'r3', dictionary_id: 'dict-1', user_id: 'user-2', role: 'editor' },
+  { id: 'r3', dictionary_id: 'dict-1', user_id: 'user-2', role: 'contributor' },
 ]
 
 const threads = [

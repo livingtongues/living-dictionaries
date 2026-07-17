@@ -29,7 +29,6 @@
     entry_count: number
     on_close: () => void
     is_manager: boolean
-    is_editor_or_above: boolean
     loading: boolean
     can_edit: boolean
     dict_sync_status: DictSyncStatus | null
@@ -40,7 +39,6 @@
     entry_count,
     on_close,
     is_manager,
-    is_editor_or_above,
     loading,
     can_edit,
     dict_sync_status,
@@ -140,15 +138,7 @@
       </span>
     </a>
   {/if}
-  {#if is_editor_or_above && !is_api_unavailable_bucket(dictionary.bucket)}
-    <a
-      href={`/${dictionary.url}/agents`}
-      class:active={page.url.pathname.includes('agents')}>
-      <IconFa6SolidRobot style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
-      <span class="item-label">
-        Agents
-      </span>
-    </a>
+  {#if is_manager && !is_api_unavailable_bucket(dictionary.bucket)}
     <a
       href={`/${dictionary.url}/history`}
       class:active={page.url.pathname.includes('history')}>
@@ -163,6 +153,14 @@
       <IconFa6SolidBook style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
       <span class="item-label">
         {page.data.t({ dynamicKey: 'source.sources', fallback: 'Sources' })}
+      </span>
+    </a>
+    <a
+      href={`/${dictionary.url}/agents`}
+      class:active={page.url.pathname.includes('agents')}>
+      <IconFa6SolidRobot style="margin-left: 0.0625rem; margin-right: 0.0625rem" />
+      <span class="item-label">
+        Agents
       </span>
     </a>
   {/if}

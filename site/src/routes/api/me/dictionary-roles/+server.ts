@@ -25,7 +25,7 @@ export interface MyDictionaryRolesResponseBody {
   roles: {
     dictionary_id: string
     dictionary_name: string
-    role: 'manager' | 'editor' | 'contributor'
+    role: 'manager' | 'contributor'
     granted_at: string
   }[]
 }

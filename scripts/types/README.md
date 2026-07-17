@@ -1,1 +1,0 @@
-# Living Dictionaries Types

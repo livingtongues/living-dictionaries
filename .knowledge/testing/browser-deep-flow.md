@@ -49,7 +49,7 @@ Auth is real now. The flows log in **in-page** via the dev inline-OTP path: `POS
 **non-admin** `achi-manager@example.com`, so `can_edit` resolves from a real `dictionary_roles` row.
 
 - **The seed is required:** `pnpm -F site seed:achi-fixture` (`scripts/seed-achi-fixture.ts`) inserts
-  that user + a manager role into `shared.db`. It's **self-contained** (the old Supabase-mock content
+  that user + a manager role into `shared.db`. It's **self-contained** (the old mock content
   reseed was retired). The achi **content** fixture (`e_*` entries, all stamped `MOCK_USER_ID`) lives
   in `.data/dictionaries/achi.db`.
 - **Pulling the full prod catalog into `shared.db` CLOBBERS achi's roles** with the real

@@ -81,7 +81,7 @@
   )
   const message_count = $derived(all_thread_messages_query?.rows.length ?? 0)
 
-  const ROLE_OPTIONS = ['manager', 'editor', 'contributor'] as const
+  const ROLE_OPTIONS = ['manager', 'contributor'] as const
 
   const all_dictionaries = $derived(db?.dictionaries.rows ?? [])
   let show_add_role = $state(false)

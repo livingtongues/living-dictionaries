@@ -177,7 +177,7 @@ if (import.meta.vitest) {
     it('pings each on-duty admin once at/after 8am, then day-guards the rest of the day', async () => {
       const db = open_test_shared_db()
       seed_notifications(db)
-      // 4 on-duty admins (Jacob, Diego, Greg, Cailie); Anna is notify:false; System has no email.
+      // 4 admins (Jacob, Diego, Greg, Cailie), all on duty; System has no email.
       const first = await sweep_notification_digest({ db, now: eight_am_pt })
       expect(first).toBe(4)
       expect((db.prepare('SELECT value FROM db_metadata WHERE key = ?').get(DIGEST_DAY_KEY) as { value: string }).value).toBe('2026-07-14')

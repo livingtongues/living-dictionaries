@@ -39,7 +39,6 @@ if (import.meta.vitest) {
   describe(can_access_secure_dictionary, () => {
     it('any direct role grants access', () => {
       expect(can_access_secure_dictionary({ role: 'contributor', admin_level: 0 })).toBe(true)
-      expect(can_access_secure_dictionary({ role: 'editor', admin_level: 0 })).toBe(true)
       expect(can_access_secure_dictionary({ role: 'manager', admin_level: 0 })).toBe(true)
     })
 

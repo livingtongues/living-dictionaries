@@ -93,7 +93,7 @@ export type MediaTimings = Record<string, string>
 
 /**
  * Hosted-elsewhere video reference, AS STORED in `videos.hosted_elsewhere`.
- * The Supabase→SQLite migration preserved the legacy value verbatim — the real
+ * The legacy-platform migration preserved the stored value verbatim — the real
  * shape is `{ type, video_id, start_at_seconds? }` (see old-site
  * `parse-hosted-video-url.ts` + its tests), NOT `{ provider, id, url }`.
  */

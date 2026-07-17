@@ -59,7 +59,6 @@ const base = {
   auth_user: { admin_level: 0, user: null },
   is_manager: false,
   can_edit: false,
-  is_editor_or_above: false,
   update_dictionary: async () => {},
 } as never
 
@@ -78,7 +77,6 @@ export const ManagerBareDict: PageStory<typeof Component> = {
     home_data: { ssr_featured: [], ssr_recent: ssr_cards.slice(0, 3), partners: [] },
     is_manager: true,
     can_edit: true,
-    is_editor_or_above: true,
     auth_user: { admin_level: 0, user: { id: 'u1' } },
   } as never,
 }
@@ -90,7 +88,6 @@ export const ManagerFullHero: PageStory<typeof Component> = {
     ...(base as object),
     is_manager: true,
     can_edit: true,
-    is_editor_or_above: true,
     auth_user: { admin_level: 0, user: { id: 'u1' } },
   } as never,
 }

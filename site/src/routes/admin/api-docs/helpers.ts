@@ -24,11 +24,6 @@ export interface Operation {
   responses?: Record<string, { description?: string, content?: Record<string, any> }>
 }
 
-export interface OperationGroup {
-  label: string
-  operations: Operation[]
-}
-
 export function ref_name(ref: string): string {
   return ref.split('/').pop() ?? ref
 }
@@ -70,50 +65,6 @@ export function nested_object(node?: SchemaNode): SchemaNode | null {
   return null
 }
 
-const DICT_PREFIX = '/api/v1/dictionaries/{id}'
-const MEDIA_SEGMENTS = ['audio', 'photos', 'videos']
-
-const TOKEN_LABEL: Record<string, string> = {
-  entries: 'Entries',
-  senses: 'Senses',
-  sentences: 'Sentences',
-  texts: 'Texts',
-  relationships: 'Relationships',
-  speakers: 'Speakers',
-  tags: 'Tags',
-  dialects: 'Dialects',
-  orthographies: 'Orthographies',
-  sources: 'Sources',
-  feedback: 'Feedback',
-}
-
-export const GROUP_ORDER = [
-  'Dictionary',
-  'Entries',
-  'Senses',
-  'Sentences',
-  'Texts',
-  'Relationships',
-  'Media',
-  'Speakers',
-  'Tags',
-  'Dialects',
-  'Orthographies',
-  'Sources',
-  'Feedback',
-]
-
-export function group_for_path(path: string): string {
-  const rest = path.replace(DICT_PREFIX, '')
-  if (rest === '')
-    return 'Dictionary'
-  const segments = rest.split('/').filter(Boolean)
-  if (segments.some(segment => MEDIA_SEGMENTS.includes(segment)))
-    return 'Media'
-  const [first] = segments
-  return TOKEN_LABEL[first] ?? (first.charAt(0).toUpperCase() + first.slice(1))
-}
-
 export const METHOD_ORDER = ['get', 'post', 'put', 'patch', 'delete']
 
 export function method_color(method: string): string {
@@ -127,22 +78,50 @@ export function method_color(method: string): string {
   }
 }
 
-export function build_groups(paths: Record<string, Record<string, any>>): OperationGroup[] {
+export interface TagGroup {
+  name: string
+  description: string
+  operations: Operation[]
+}
+
+/**
+ * Group operations by their OpenAPI TAG (every op carries exactly one — the
+ * same grouping agents use via `?tag=`), ordered by the spec's `tags` list.
+ */
+export function build_tag_groups(spec: { tags?: { name: string, description?: string }[], paths?: Record<string, Record<string, any>> }): TagGroup[] {
   const map = new Map<string, Operation[]>()
-  for (const [path, methods] of Object.entries(paths ?? {})) {
+  for (const [path, methods] of Object.entries(spec.paths ?? {})) {
     for (const method of METHOD_ORDER) {
       const op = methods[method]
       if (!op)
         continue
-      const group = group_for_path(path)
-      const list = map.get(group) ?? []
+      const tag = (op.tags?.[0] as string) ?? 'other'
+      const list = map.get(tag) ?? []
       list.push({ method, path, ...op })
-      map.set(group, list)
+      map.set(tag, list)
     }
   }
-  const ordered = GROUP_ORDER.filter(group => map.has(group))
-    .concat([...map.keys()].filter(group => !GROUP_ORDER.includes(group)))
-  return ordered.map(label => ({ label, operations: map.get(label) ?? [] }))
+  const tag_order = (spec.tags ?? []).map(tag => tag.name)
+  const ordered = tag_order.filter(name => map.has(name))
+    .concat([...map.keys()].filter(name => !tag_order.includes(name)))
+  const descriptions = new Map((spec.tags ?? []).map(tag => [tag.name, tag.description ?? '']))
+  return ordered.map(name => ({ name, description: descriptions.get(name) ?? '', operations: map.get(name) ?? [] }))
+}
+
+/**
+ * Split a long markdown document into an intro + its `## ` sections so the
+ * page can render an accordion instead of a prose wall.
+ */
+export function split_markdown_sections(markdown: string): { intro: string, sections: { title: string, body: string }[] } {
+  const parts = markdown.split(/\n(?=## )/)
+  const intro = parts[0]?.startsWith('## ') ? '' : (parts.shift() ?? '')
+  const sections = parts.map((part) => {
+    const newline = part.indexOf('\n')
+    const title = part.slice(3, newline === -1 ? undefined : newline).trim()
+    const body = newline === -1 ? '' : part.slice(newline + 1).trim()
+    return { title, body }
+  })
+  return { intro: intro.trim(), sections }
 }
 
 /** Flattens a requestBody's content map into a list of { media_type, schema, example }. */

@@ -46,10 +46,10 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
     // otherwise a hard load of an editor-gated page 403s until client hydration.
     const role_grant = dict_roles.roles.find(grant => grant.dictionary_id === dictionary_id)?.role
     // An active preview FULLY determines the effective role so "View as
-    // Manager/Editor/Visitor" is deterministic regardless of any real grant on
-    // this dict: the Manager/Editor personas carry a `dict_role`; Visitor carries
-    // none (→ null, a pure viewer). Site-admin tiers (Super Manager and up) map to
-    // 'admin'. Without a preview, the real grant / ssr_role wins as before.
+    // Manager/Contributor/Visitor" is deterministic regardless of any real grant
+    // on this dict: the Manager/Contributor personas carry a `dict_role`; Visitor
+    // carries none (→ null, a pure viewer). Site-admin tiers (Super Manager and up)
+    // map to 'admin'. Without a preview, the real grant / ssr_role wins as before.
     const role = is_site_admin
       ? 'admin'
       : preview
@@ -57,10 +57,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
         : (role_grant ?? data.ssr_role ?? null)
     const is_manager = role === 'admin' || role === 'manager'
     const is_contributor = role === 'admin' || role === 'contributor'
-    const can_edit = is_manager || is_contributor || role === 'editor'
-    // Change-history visibility: editor rank or above (manager/admin), NOT bare
-    // contributors. Mirrors the server gate `verify_auth_dict_role(…, 'editor')`.
-    const is_editor_or_above = role === 'admin' || role === 'manager' || role === 'editor'
+    const can_edit = is_manager || is_contributor
 
     const default_entries_per_page = 20
 
@@ -102,7 +99,6 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       dictionary,
       is_manager,
       is_contributor,
-      is_editor_or_above,
       can_edit,
       dict_db,
       connection,

@@ -43,7 +43,7 @@ export const PreviewingManager: Story<typeof Component> = {
   page_data: { auth_user: admin_user({ preview_dict_role: 'manager' }) },
 }
 
-/** The pill shown while previewing the dictionary-scoped Editor persona. */
-export const PreviewingEditor: Story<typeof Component> = {
-  page_data: { auth_user: admin_user({ preview_dict_role: 'editor' }) },
+/** The pill shown while previewing the dictionary-scoped Contributor persona. */
+export const PreviewingContributor: Story<typeof Component> = {
+  page_data: { auth_user: admin_user({ preview_dict_role: 'contributor' }) },
 }

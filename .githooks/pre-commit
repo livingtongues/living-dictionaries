@@ -3,7 +3,7 @@
 export PATH="$HOME/.local/share/pnpm:$PATH"
 
 # Pre-commit checks: test + check + lint:fix (lint scoped to site/ + root; the legacy/reference
-# trees packages/, supabase/, site/e2e/ are ignored in eslint.config.js). lint:fix auto-formats
+# trees packages/ and site/e2e/ are ignored in eslint.config.js). lint:fix auto-formats
 # then re-stages the already-staged files (mirrors house/example), so the auto-fixes land in the
 # commit without pulling in files you didn't stage.
 echo "Running pre-commit checks..."

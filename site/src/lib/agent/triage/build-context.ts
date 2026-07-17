@@ -22,7 +22,7 @@ export interface TriageMessageContext {
 
 export interface TriageDictionaryContext {
   name: string
-  /** 'manager' | 'editor' | 'contributor' | 'owner' (owner = they created it). */
+  /** 'manager' | 'contributor' | 'owner' (owner = they created it). */
   role: string
   entry_count: number
   is_public: boolean

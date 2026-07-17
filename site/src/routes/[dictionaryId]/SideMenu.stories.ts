@@ -43,41 +43,37 @@ const shared_props = {
 }
 
 export const Manager: Story<typeof Component> = {
-  props: { ...shared_props, is_manager: true, is_editor_or_above: true },
-}
-
-export const Editor: Story<typeof Component> = {
-  props: { ...shared_props, is_manager: false, is_editor_or_above: true },
+  props: { ...shared_props, is_manager: true },
 }
 
 export const Contributor: Story<typeof Component> = {
-  props: { ...shared_props, is_manager: false, is_editor_or_above: false },
+  props: { ...shared_props, is_manager: false },
 }
 
 export const Viewer: Story<typeof Component> = {
-  props: { ...shared_props, is_manager: false, is_editor_or_above: false, can_edit: false, dict_sync_status: null },
+  props: { ...shared_props, is_manager: false, can_edit: false, dict_sync_status: null },
 }
 
 export const SyncStatusSyncing: Story<typeof Component> = {
-  props: { ...shared_props, is_manager: true, is_editor_or_above: true, dict_sync_status: mock_sync_status({ busy: true }) },
+  props: { ...shared_props, is_manager: true, dict_sync_status: mock_sync_status({ busy: true }) },
 }
 
 export const SyncStatusError: Story<typeof Component> = {
-  props: { ...shared_props, is_manager: true, is_editor_or_above: true, dict_sync_status: mock_sync_status({ last_error: 'HTTP 500', last_sync_at: new Date().toISOString() }) },
+  props: { ...shared_props, is_manager: true, dict_sync_status: mock_sync_status({ last_error: 'HTTP 500', last_sync_at: new Date().toISOString() }) },
 }
 
 export const SyncStatusOffline: Story<typeof Component> = {
-  props: { ...shared_props, is_manager: true, is_editor_or_above: true, dict_sync_status: mock_sync_status({ online: false }) },
+  props: { ...shared_props, is_manager: true, dict_sync_status: mock_sync_status({ online: false }) },
 }
 
 export const SyncStatusIdle: Story<typeof Component> = {
-  props: { ...shared_props, is_manager: true, is_editor_or_above: true, dict_sync_status: mock_sync_status({}) },
+  props: { ...shared_props, is_manager: true, dict_sync_status: mock_sync_status({}) },
 }
 
 export const LargeEntryCount: Story<typeof Component> = {
-  props: { ...shared_props, entry_count: 99_000, is_manager: true, is_editor_or_above: true },
+  props: { ...shared_props, entry_count: 99_000, is_manager: true },
 }
 
 export const ExtraLargeEntryCount: Story<typeof Component> = {
-  props: { ...shared_props, entry_count: 999_999, is_manager: true, is_editor_or_above: true },
+  props: { ...shared_props, entry_count: 999_999, is_manager: true },
 }

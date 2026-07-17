@@ -32,7 +32,7 @@ beforeEach(() => {
       .run(id, id, '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')
   }
   shared_db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
-    .run('r-edt', 'dict-1', 'edt-1', 'editor', '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')
+    .run('r-edt', 'dict-1', 'edt-1', 'manager', '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')
 
   api_token = create_api_key({ db: shared_db, dictionary_id: 'dict-1', label: 'agent', role: 'write', created_by_user_id: 'edt-1' }).token
 })
@@ -90,7 +90,7 @@ describe(POST, () => {
     expect(mirrored.updated_at).not.toBe('2026-01-01T00:00:00Z')
   })
 
-  test('session JWT path also works for an editor', async () => {
+  test('session JWT path also works for a manager', async () => {
     const token = await sign_jwt({ sub: 'edt-1', email: 'edt@x.com', name: 'Edt' })
     const res = await call({ token, body: { lexeme: 'solo-entry' } })
     expect(res.status).toBe(200)

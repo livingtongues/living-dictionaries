@@ -10,7 +10,7 @@ import { SmallCaps } from './small-caps'
 /**
  * The ONE Tiptap extension set that defines the rich-text content model
  * (dictionary `about` / `grammar`, entry `notes`) — shared by the live editor,
- * the HTML→markdown converter, and (at cutover) the Supabase migration, so
+ * the HTML→markdown converter, and (at cutover) the legacy-content migration, so
  * every path round-trips identically. Ported from house's library extensions.
  *
  * Deliberate omissions (matching house + the ckeditor-to-tiptap decision,

@@ -2,7 +2,8 @@ import type Database from 'better-sqlite3'
 import type { RequestHandler } from './$types'
 import { randomUUID } from 'node:crypto'
 import { env } from '$env/dynamic/private'
-import { is_internal_email } from '$lib/admins'
+import { get_admin_by_ld_address, is_internal_email } from '$lib/admins'
+import { assign_directed_thread } from '$lib/email/assign-directed-thread'
 import { match_notification } from '$lib/agent/auto-resolve/notification-registry'
 import { resolve_notification_thread } from '$lib/agent/auto-resolve/resolve-notification'
 import { fire_agent_email_inbound } from '$lib/agent/email-inbound-hook'
@@ -10,7 +11,7 @@ import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { find_or_create_thread } from '$lib/email/find-or-create-thread'
 import { log_server_event } from '$lib/server/log-server-event'
-import { notify_admins } from '$lib/notifications/notify-admins'
+import { notify_admin, notify_admins } from '$lib/notifications/notify-admins'
 import { error, json } from '@sveltejs/kit'
 
 /**
@@ -178,20 +179,29 @@ export const POST: RequestHandler = async ({ request, url }) => {
     }))
   }
 
-  // Broadcast ntfy push — skip auto-resolved notifications (need no attention)
-  // and mail from US (our own `@livingdictionaries.app` domain / admins) so our
-  // own no-reply/OTP loops don't buzz phones.
+  // Mail addressed straight to an admin's own alias (jacob@, diego@, greg@,
+  // cailie@) is deterministically assigned to that admin — no LLM triage.
+  const directed_admin = notification ? undefined : get_admin_by_ld_address(body.to_email)
+  if (directed_admin)
+    assign_directed_thread({ db, thread_id, admin: directed_admin, now })
+
+  // ntfy push — skip auto-resolved notifications (need no attention) and mail
+  // from US (our own `@livingdictionaries.app` domain / admins) so our own
+  // no-reply/OTP loops don't buzz phones. Directed mail pings only its admin.
   if (!notification && !is_internal_email(from_email_lower)) {
-    void notify_admins({
-      subject: is_new ? `New email: ${body.subject}` : `Reply: ${body.subject}`,
-      body: `${body.from_name?.trim() || from_email_lower}: ${(body.body_text ?? '').slice(0, 200)}`,
-      link: `${url.origin}/admin/messages/${thread_id}`,
-    })
+    const subject = is_new ? `New email: ${body.subject}` : `Reply: ${body.subject}`
+    const notify_body = `${body.from_name?.trim() || from_email_lower}: ${(body.body_text ?? '').slice(0, 200)}`
+    const link = `${url.origin}/admin/messages/${thread_id}`
+    if (directed_admin)
+      void notify_admin({ email: directed_admin.email, subject, body: notify_body, link })
+    else
+      void notify_admins({ subject, body: notify_body, link })
   }
 
   // Inbound-email triage agent hook (fire-and-forget LLM classification).
-  // Skipped for auto-resolved notifications — they're already handled.
-  if (!notification) {
+  // Skipped for auto-resolved notifications (already handled) and for
+  // admin-directed mail (already assigned — nothing to classify).
+  if (!notification && !directed_admin) {
     fire_agent_email_inbound({
       thread_id,
       message_id: message_row_id,
@@ -202,7 +212,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
     })
   }
 
-  log_server_event({ level: 'info', message: 'email_inbound_received', user_id: matching_user?.id ?? null, context: { thread_id, is_new, attachments: body.attachments.length, auto_resolved: !!notification, to_email: body.to_email } })
+  log_server_event({ level: 'info', message: 'email_inbound_received', user_id: matching_user?.id ?? null, context: { thread_id, is_new, attachments: body.attachments.length, auto_resolved: !!notification, to_email: body.to_email, directed_admin: directed_admin?.name ?? null } })
 
   return json({
     ok: true,

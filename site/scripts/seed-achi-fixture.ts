@@ -12,10 +12,9 @@
  *
  * The achi CONTENT fixture (13 entries `e_*`, senses, speakers, audio, dialects,
  * tags) already lives in `.data/dictionaries/achi.db` — every row stamped with
- * `MOCK_USER_ID`. The old Supabase-era content reseed (from `src/lib/mocks/
- * dummy-entries.ts`) was retired with the Supabase stub; if achi.db is ever
- * missing/wrong, re-pull `.data` from the example repo (see
- * `.knowledge/migration/pulling-supabase-data-locally.md`).
+ * `MOCK_USER_ID`. The legacy content reseed (from `src/lib/mocks/
+ * dummy-entries.ts`) was retired at the platform cutover; if achi.db is ever
+ * missing/wrong, re-pull `.data` from the example repo.
  *
  * Idempotent: upserts the user, replaces the achi role row. Safe to re-run while
  * the dev server is up (a small shared.db write the server picks up per-request).

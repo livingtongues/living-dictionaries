@@ -16,7 +16,7 @@ import { error, json } from '@sveltejs/kit'
  */
 export interface DictionariesIdInvitesInviteIdAcceptResponseBody {
   result: 'accepted'
-  role: 'manager' | 'editor' | 'contributor'
+  role: 'manager' | 'contributor'
 }
 
 export const POST: RequestHandler = async (event) => {
@@ -34,7 +34,7 @@ export const POST: RequestHandler = async (event) => {
     FROM invites
     WHERE id = ? AND dictionary_id = ?
   `).get(invite_id, dict_id) as
-  | { id: string, dictionary_id: string, inviter_user_id: string, role: 'manager' | 'editor' | 'contributor', status: string }
+  | { id: string, dictionary_id: string, inviter_user_id: string, role: 'manager' | 'contributor', status: string }
   | undefined
 
   if (!invite)

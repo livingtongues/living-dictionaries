@@ -12,8 +12,9 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
   subset gotcha), custom-code rules, and human/agent parity.
 - [media-serving-urls.md](./media-serving-urls.md) — how GCS storage paths become image/audio
   URLs, and the App Engine Images `lh3` magic-URL resize/crop spec the photo pipeline depends on.
-- [dictionary-import-process.md](./dictionary-import-process.md) — the human + script process for
-  importing a dictionary from the Google Sheets template (dev dry-run → prod → make public).
+- Imports are agent-driven now: managers upload resources on `/{dict}/import` → a request
+  message reaches the team → an agent imports via `/api/v1` following the guides at
+  `/api/v1/guides` (the old Google-Sheets template + `scripts/import/` CLI are retired).
 - [change-history.md](./change-history.md) — the server-side per-dict audit log (entry/text/sentence
   edit timelines): where capture hooks in, the separate `{id}.history.db` + owners-index shape, how it
   survives schema drift, the entry≠text attribution boundary, and the red-phase correctness bugs.

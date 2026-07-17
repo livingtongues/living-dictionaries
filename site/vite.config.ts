@@ -38,7 +38,7 @@ export default defineConfig(async (): Promise<UserConfig> => ({
     target: 'es2015',
   },
   worker: {
-    format: 'es', // to allow code-splitted supabase to be imported into the worker
+    format: 'es', // allow code-split chunks to be imported into the worker
   },
   ssr: {
     external: ['better-sqlite3'], // native module: keep external so adapter-node doesn't inline its bindings loader

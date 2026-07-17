@@ -66,7 +66,7 @@ describe('server_seq triggers (shared.db)', () => {
       synced_up_to: cursor,
       // A (stale/hostile) client claims server_seq 1 — accepting it would hide
       // the row below every other client's cursor forever.
-      dirty_rows: { dictionary_roles: [{ id: 'r1', dictionary_id: 'd1', user_id: 'u1', role: 'editor', invited_by_user_id: null, dirty: 1, server_seq: 1, created_at: '2026-07-09T00:00:00.000Z', updated_at: '2026-07-09T00:00:00.000Z' }] },
+      dirty_rows: { dictionary_roles: [{ id: 'r1', dictionary_id: 'd1', user_id: 'u1', role: 'contributor', invited_by_user_id: null, dirty: 1, server_seq: 1, created_at: '2026-07-09T00:00:00.000Z', updated_at: '2026-07-09T00:00:00.000Z' }] },
       deletes: [],
       latest_migration: latest_shared_migration_name,
     }

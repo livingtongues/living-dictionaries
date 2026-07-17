@@ -1,9 +1,10 @@
 # Knowledge wiki — Living Dictionaries
 
 Durable decisions/gotchas that augment the code (not discoverable by reading a single file).
-Active plans live in `.issues/`. The Supabase/Vercel → SQLite/VPS migration and production
-cutover are complete (2026-07; deploys run from `main`); the durable cross-project conventions
-are `migration/shared-stack-conventions.md`.
+Active plans live in `.issues/`. The legacy-platform → SQLite/VPS migration is complete and its
+code fully torn down (2026-07; deploys run from `main`) — the one-page historical record is
+[supabase-cutover.md](./supabase-cutover.md); cross-project conventions are
+[shared-stack-conventions.md](./shared-stack-conventions.md).
 
 ## Business frame
 - [portfolio-context.md](./portfolio-context.md) — Jacob's actual priorities for Living
@@ -12,8 +13,8 @@ are `migration/shared-stack-conventions.md`.
   Jacob about.
 
 ## Categories
-- [migration/](./migration/index.md) — gotchas and decisions for the Vercel/Supabase →
-  VPS/SQLite evolution (build/deploy, lockfile discipline, what's deferred).
+- [db/](./db/index.md) — the living SQLite/local-first architecture docs: schema + migration
+  recipes, sync invariants, the OPFS leader-worker model, media upload, build/deploy gotchas.
 - [testing/](./testing/index.md) — verification conventions: the puppeteer-core deep-flow
   harness and its headless-browser gotchas.
 - [tooling/](./tooling/index.md) — dev tooling that augments the app: the sqlite-proxy /

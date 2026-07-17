@@ -67,8 +67,8 @@ well as an API key, so the same validated write path serves both — see the AGE
 
 ## Legacy → cutover
 
-Legacy Supabase orthographies were `{ bcp, name: MultiString }` with positional `lo1`/`lo2` lexeme keys.
-The Supabase→SQLite cutover (`map_orthographies` + `rewrite_orthography_keys` in
-`scripts/supabase-cutover/`) assigns `code = bcp` (slug/`orth{n}` fallback, de-duped) and rewrites every
+Legacy orthographies were `{ bcp, name: MultiString }` with positional `lo1`/`lo2` lexeme keys.
+The platform cutover (`map_orthographies` + `rewrite_orthography_keys`, now in git history)
+assigned `code = bcp` (slug/`orth{n}` fallback, de-duped) and rewrote every
 `lexeme`/`sentence.text` `lo{n}` key to the new code. Pre-cutover VPS data was disposable. The legacy
 `scripts/import/*` bulk importer still emits `lo1/lo2` and is stale (flagged for post-cutover porting).

@@ -20,10 +20,11 @@ The app runs on SQLite + a VPS. It's committed on and deployed from **`main`** �
 ## Additional Key Directories
 
 - Shared TS types live in `src/lib/types` (Drizzle-derived).
-- `scripts/` — standalone data/migration tooling (its own lockfile; NOT a workspace member — install
-  with `pnpm install --ignore-workspace`, else pnpm installs the root workspace instead). Several
-  tools still target the legacy platform and await porting to SQLite — the full keep/port/delete
-  inventory lives in `.issues/post-cutover-teardown.md`.
+- `scripts/` — standalone data tooling (its own lockfile; NOT a workspace member — install with
+  `pnpm install --ignore-workspace`, else pnpm installs the root workspace instead). All legacy
+  Supabase/import tooling is deleted (2026-07-17; git history has it) — what remains is
+  one-off/`.cjs` prod-DB scripts + small helpers. `scripts/supabase-creds.private` (gitignored)
+  is kept for legacy data access; the connector code would come from git history if ever needed.
 
 ## Domain data model
 Text fields that vary by language are "MultiString" — a map of `{ <locale>: "…" }`.
@@ -37,7 +38,7 @@ Text fields that vary by language are "MultiString" — a map of `{ <locale>: "�
 - **Audio / Photo / Video** — media rows with a storage path + serving url; linked to
   entries/senses/sentences and (for audio) to speakers.
 - **Dialect**, **Tag** — labels attached to entries. **User**, per-dict role
-  (manager/editor/contributor), **invite**, **partner**.
+  (manager/contributor — there is NO 'editor' role), **invite**, **partner**.
 
 Authoritative shapes: `site/src/lib/types/` (Drizzle-derived) and the schemas in
 `site/src/lib/db/schemas/`. Related-entries design rationale: `.knowledge/domain/related-entries-model.md`.
@@ -49,14 +50,14 @@ build-baked stats, features grid; see `.knowledge/domain/homepage-v2.md`) · `/a
 `/create-dictionary` · `/[dictionaryId]/*` (bare `/{dict}` IS the dictionary home page — hero
 with in-place manager editing of catalog fields [name, codes, languages, orthographies, location,
 cover image], starred "featured entries" strip [synced dict.db `featured_entries`, star toggle on
-entry pages for editor+], stats, about/grammar snippets — plus `entries` list — unified search
+entry pages for managers], stats, about/grammar snippets — plus `entries` list — unified search
 with Words·Sentences·Texts scope chips [admin-3 preview; the texts/sentences corpus pipeline, see
 `.issues/texts-sentences-pipeline.md`] — entry detail, sentence detail, `texts` browse +
 `texts/new` paste-to-sentences ingest + `text/[id]` reader [same admin-3 preview, route-guarded
 via `$lib/corpus/corpus-preview-guard.ts` — lift at GA] — settings (public/print
-toggles + delete + a dialects manager [editor+: rename / map areal-extent geometry via
+toggles + delete + a dialects manager [manager: rename / map areal-extent geometry via
 GeoTaggingModal / delete]; catalog fields moved to home), about,
-contributors, grammar, history, export, import, invite) · `/chat` (standalone membership-based
+contributors, grammar, history, export, import [manager-only, agent-driven: upload ANY-format resources → per-file instructions → "request import" creates a Diego-assigned message thread; files live in shared.db `source_files` (server-only) + R2 `import/{dict}/{file}`, served via `/api/v1/dictionaries/{id}/files/*`], invite) · `/chat` (standalone membership-based
 chat — DB-managed channels + DMs for admins, super managers, and partners; server-authoritative
 via `/api/chat/*` polling, gate = admin OR a `users.chat_access` grant (toggled on /admin/users/[id]) OR member of ≥1 room — one circle, any chat member can DM any other; `admin_room` channels manageable only by
 super admins) · `/translate` (standalone translator backend — server-authoritative via
@@ -69,7 +70,10 @@ sync, triage-examples, legal-review, featured-words) · `/og` (share image) · `
 `/privacy-policy` · `/setlocale`.
 
 Inbound email is AI-triaged by `$lib/agent/*` (xAI Grok, env-gated on `XAI_API_KEY`; classifies →
-auto-assigns/auto-resolves → drafts a reply). See `.knowledge/admin/ai-triage-pipeline.md`.
+auto-assigns/auto-resolves → drafts a reply); mail addressed to an admin's own alias (jacob@…)
+skips triage and deterministically assigns to that admin. See `.knowledge/admin/ai-triage-pipeline.md`.
+Agent-facing format-import guides are served at `/api/v1/guides` (markdown in `$lib/api/v1/guides/`)
+and rendered on /admin/api-docs.
 
 ## Human/agent editing parity (a direction we're walking toward)
 The agent-facing `/api/v1` write API (per-dict API keys, `openapi.json`, `$lib/db/server/v1-*`) and

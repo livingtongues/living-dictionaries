@@ -4,7 +4,7 @@ Single surviving OPFS/dict-db issue. The 2026-06-11 hardening pass (transport re
 wasm re-register, corrupt-file self-heal, snapshot-404 fallback, `snapshot_expired` auto-reset,
 sentinel toasts, tombstone pruning, non-blocking first-paint sync, atomic worker-side `dict_write`
 ops) is **landed + committed**; durable design notes live in
-`.knowledge/migration/opfs-leader-worker-dict-db.md`.
+`.knowledge/db/opfs-leader-worker-dict-db.md`.
 
 > The four harness files in `dict-client/worker/` (`opfs-sah-vfs.js`, `opfs-connection.ts`,
 > `leader-election.ts`, `transport.ts`) are **byte-identical with house** — patch both repos

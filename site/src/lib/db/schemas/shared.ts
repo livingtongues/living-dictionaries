@@ -199,7 +199,7 @@ export const dictionary_roles = sqliteTable('dictionary_roles', {
   id: text().primaryKey(),
   dictionary_id: text().notNull().references(() => dictionaries.id, { onDelete: 'cascade' }),
   user_id: text().notNull().references(() => users.id, { onDelete: 'cascade' }),
-  role: text({ enum: ['manager', 'editor', 'contributor'] }).notNull(),
+  role: text({ enum: ['manager', 'contributor'] }).notNull(),
   invited_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),
   dirty: integer(),
   server_seq: integer(),
@@ -231,7 +231,7 @@ export const invites = sqliteTable('invites', {
   inviter_user_id: text().notNull().references(() => users.id, { onDelete: 'cascade' }),
   inviter_email: text().notNull(),
   target_email: text().notNull(),
-  role: text({ enum: ['manager', 'editor', 'contributor'] }).notNull(),
+  role: text({ enum: ['manager', 'contributor'] }).notNull(),
   status: text({ enum: ['queued', 'sent', 'claimed', 'cancelled'] }).notNull(),
   dirty: integer(),
   server_seq: integer(),
@@ -280,6 +280,12 @@ export const message_threads = sqliteTable('message_threads', {
   triage_advice: text(),
   triage_draft_reply: text(),
   triage_at: text(),
+  /**
+   * Which dictionary this thread concerns, when known (import requests +
+   * dictionary-scoped contact submissions). Older threads fall back to
+   * parsing the `url` slug client-side.
+   */
+  dictionary_id: text(),
 })
 
 export const messages = sqliteTable('messages', {
@@ -317,6 +323,36 @@ export const message_attachments = sqliteTable('message_attachments', {
   storage_key: text().notNull(),
   dirty: integer(),
   server_seq: integer(),
+  created_at: text().notNull(),
+  updated_at: text().notNull(),
+})
+
+/**
+ * Import resources uploaded by dictionary managers (any format — spreadsheets,
+ * FLEx/LIFT, Toolbox, PDF scans…). Bytes live in the private R2 attachments
+ * bucket under `import/{dictionary_id}/{file_id}`. SERVER-ONLY: never syncs
+ * (not in `SYNCABLE_TABLE_NAMES`) — filenames + instructions must never reach
+ * non-manager clients; managers/admins + write-scoped agents read via
+ * `/api/v1/dictionaries/{id}/files`.
+ */
+export const source_files = sqliteTable('source_files', {
+  id: text().primaryKey(),
+  dictionary_id: text().notNull(),
+  /** Dict-db `sources.id` once an agent links this file to its permanent source (cross-db, no FK). */
+  source_id: text(),
+  filename: text().notNull(),
+  mimetype: text().notNull(),
+  size_bytes: integer().notNull(),
+  storage_key: text().notNull(),
+  /** How the uploader wants this imported — required before requesting an import. */
+  import_instructions: text(),
+  /** Optional citation/provenance written by the uploader. */
+  source_note: text(),
+  /** Set once the client confirms the R2 PUT landed. */
+  upload_confirmed_at: text(),
+  import_requested_at: text(),
+  import_thread_id: text(),
+  uploaded_by_user_id: text().notNull().references(() => users.id, { onDelete: 'cascade' }),
   created_at: text().notNull(),
   updated_at: text().notNull(),
 })

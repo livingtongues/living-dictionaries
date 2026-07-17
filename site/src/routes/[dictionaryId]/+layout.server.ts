@@ -22,9 +22,9 @@ import { build_canonical_path } from './canonical-path'
  * a CACHED catalog row and edits never appear until a hard reload.
  *
  * Also SSR-resolves this user's role grant (`ssr_role`) from shared.db so
- * `+layout.ts` can compute `is_editor_or_above` / `can_edit` on a hard load —
- * the browser `dict_roles` cache is empty during SSR, so without this a
- * non-admin editor/manager 403s on refresh of editor-gated pages (e.g. history).
+ * `+layout.ts` can compute `is_manager` / `can_edit` on a hard load — the
+ * browser `dict_roles` cache is empty during SSR, so without this a non-admin
+ * manager 403s on refresh of manager-gated pages (e.g. history).
  */
 export const load: LayoutServerLoad = async ({ params: { dictionaryId: dictionary_url }, parent, url, depends }) => {
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)

@@ -9,7 +9,7 @@ import { verify_auth_dict_role } from './verify-dict-role'
 
 /**
  * The two access levels the v1 API gates on. These are the API's OWN vocabulary
- * — deliberately NOT the human dictionary roles (contributor/editor/manager).
+ * — deliberately NOT the human dictionary roles (contributor/manager).
  *   - `read`  → any GET endpoint.
  *   - `write` → any mutating endpoint.
  * A key carries a scope of the same names; the human-session fallback translates
@@ -26,11 +26,11 @@ function key_scope_allows(scope: ApiKeyRole, needed: ApiAccess): boolean {
 /**
  * Human-session fallback ONLY: which dictionary role a logged-in human needs to
  * exercise this access level via the v1 endpoints. Isolated here so the key path
- * never touches contributor/editor semantics.
+ * never touches contributor/manager semantics.
  *   - read  → any member of the dictionary (contributor+) may read.
- *   - write → editor+ (admins bypass, per verify_auth_dict_role).
+ *   - write → manager (admins bypass, per verify_auth_dict_role).
  */
-const ACCESS_TO_HUMAN_ROLE: Record<ApiAccess, DictRole> = { read: 'contributor', write: 'editor' }
+const ACCESS_TO_HUMAN_ROLE: Record<ApiAccess, DictRole> = { read: 'contributor', write: 'manager' }
 
 export interface DictApiAccess {
   /** The acting human's user id — for an API key, the key's creator. */

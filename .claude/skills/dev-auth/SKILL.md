@@ -53,14 +53,14 @@ Level ≥ 1 also acts as `role: 'admin'` on EVERY dictionary (bypasses `dictiona
 `level: 1` is the quick "manager of everything" persona. Alternatively log in as a real allow-list
 email (`$lib/admins.ts`): `jwrunner7@gmail.com` / `diego@livingtongues.org` = L3.
 
-### A specific dictionary role (manager / editor / contributor)
+### A specific dictionary role (manager / contributor)
 
 To act as a normal user with a scoped role, log in as their email — or mint a fresh user and grant
 the role in `shared.db` (the `dictionary_roles` table lives there):
 
 ```bash
 sqlite3 site/.data/shared.db "INSERT INTO dictionary_roles (dictionary_id, user_id, role, created_at)
-  VALUES ('some-dict-id', (SELECT id FROM users WHERE email = 'agent@test.com'), 'editor', strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+  VALUES ('some-dict-id', (SELECT id FROM users WHERE email = 'agent@test.com'), 'manager', strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
 ```
 
 Roles are checked live per request (`verify_auth_dict_role`) — no re-login needed after the insert.

@@ -65,7 +65,6 @@ export interface Admin {
 export const ADMINS: readonly Admin[] = [
   { email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin', ntfy_topic: 'living_pings', ld_address: 'jacob@livingdictionaries.app', level: 3 },
   { email: 'diego@livingtongues.org', name: 'Diego Córdova', ntfy_topic: 'living_pings_diego', ld_address: 'diego@livingdictionaries.app', level: 3 },
-  { email: 'dictionaries@livingtongues.org', name: 'Anna Luisa Daigneault', ntfy_topic: 'living_pings_anna', ld_address: 'annaluisa@livingdictionaries.app', level: 2, notify: false },
   { email: 'livingtongues@gmail.com', name: 'Dr. Greg Anderson', ntfy_topic: 'living_pings_greg', ld_address: 'greg@livingdictionaries.app', level: 2 },
   { email: 'ck1105@georgetown.edu', name: 'Cailie Keating', ntfy_topic: 'living_pings_cailie_3ede043330d4', ld_address: 'cailie@livingdictionaries.app', level: 2 },
 ]
@@ -82,6 +81,14 @@ export function get_admin(email: string | undefined | null): Admin | undefined {
 
 export function get_admin_name(email: string | undefined | null): string | undefined {
   return get_admin(email)?.name
+}
+
+/** The admin whose `ld_address` an inbound email was sent TO (directed mail: jacob@ → Jacob, …). */
+export function get_admin_by_ld_address(email: string | undefined | null): Admin | undefined {
+  if (!email)
+    return undefined
+  const lower = email.trim().toLowerCase()
+  return ADMINS.find(admin => admin.ld_address.toLowerCase() === lower)
 }
 
 export function get_admin_level(email: string | undefined | null): AdminLevel | null {
@@ -161,6 +168,13 @@ if (import.meta.vitest) {
     expect(is_admin_at_least('livingtongues@gmail.com', 3)).toBe(false)
     expect(is_admin_at_least('random@example.com', 2)).toBe(false)
     expect(is_admin_at_least(null, 2)).toBe(false)
+  })
+
+  test('get_admin_by_ld_address maps an alias to its admin, case-insensitively', () => {
+    expect(get_admin_by_ld_address('jacob@livingdictionaries.app')?.name).toBe('Jacob Bowdoin')
+    expect(get_admin_by_ld_address('Diego@LivingDictionaries.app')?.name).toBe('Diego Córdova')
+    expect(get_admin_by_ld_address('no-reply@livingdictionaries.app')).toBeUndefined()
+    expect(get_admin_by_ld_address(null)).toBeUndefined()
   })
 
   test('is_internal_email: our domain + admin logins are internal', () => {

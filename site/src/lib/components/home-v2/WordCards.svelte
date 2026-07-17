@@ -101,9 +101,14 @@
     void audio_element.play()
   }
 
-  // --- auto-drift (pauses on hover/touch/focus/audio; off under reduced motion) ---
+  // --- auto-drift (pauses on hover/touch/focus/audio/fullscreen; off under reduced motion) ---
   let paused = $state(false)
   let touch_resume_timeout: ReturnType<typeof setTimeout> | null = null
+  // Declared above the drift rAF so the tick can read it — opening the image
+  // portals focus/pointer off the strip, which would otherwise un-pause drift.
+  let fullscreen_card = $state<FeaturedCard | null>(null)
+  let fullscreen_key = $state<string | null>(null)
+  let loading_key = $state<string | null>(null)
 
   onMount(() => {
     reduced_motion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -119,7 +124,7 @@
     const tick = (now: number) => {
       const dt = Math.min((now - last) / 1000, 0.1)
       last = now
-      const should_drift = !paused && !playing_id && !hovered_id && !document.hidden
+      const should_drift = !paused && !playing_id && !hovered_id && !fullscreen_card && !document.hidden
       if (should_drift && scroller && scroller.scrollWidth > scroller.clientWidth * 1.5) {
         if (drift_position === null || Math.abs(scroller.scrollLeft - drift_position) > 2)
           drift_position = scroller.scrollLeft // first frame or the user scrolled manually
@@ -167,10 +172,6 @@
   // curious homepage clicks don't intend. Modified/middle clicks keep the
   // default open-in-new-tab behavior. A card-image → viewer crossfade morphs the
   // tapped thumbnail up to full size; a spinner shows if the full image isn't cached yet.
-  let fullscreen_card = $state<FeaturedCard | null>(null)
-  let fullscreen_key = $state<string | null>(null)
-  let loading_key = $state<string | null>(null)
-
   function open_fullscreen(event: MouseEvent, card: FeaturedCard, card_key: string) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)
       return

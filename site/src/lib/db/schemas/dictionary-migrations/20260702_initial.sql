@@ -736,7 +736,7 @@ END;
 
 ------------------------------------------------------------------
 -- Convergence (no-op on freshly-provisioned DBs; heals pre-squash DBs).
--- Prune this section after the Supabase cutover once no pre-squash DB remains.
+-- Prune this section once no pre-squash DB remains.
 ------------------------------------------------------------------
 
 -- Sweep rows whose tombstone landed while the 20260701b-era trigger was stale

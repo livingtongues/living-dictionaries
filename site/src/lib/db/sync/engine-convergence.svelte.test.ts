@@ -68,7 +68,7 @@ function seed_parents(db: BetterSqlite3.Database) {
 
 function insert_role({ db, id, dirty, updated_at }: { db: BetterSqlite3.Database, id: string, dirty?: boolean, updated_at: string }) {
   db.prepare(
-    `INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, dirty, created_at, updated_at) VALUES (?, 'd1', 'u1', 'editor', ?, ?, ?)`,
+    `INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, dirty, created_at, updated_at) VALUES (?, 'd1', 'u1', 'contributor', ?, ?, ?)`,
   ).run(id, dirty ? 1 : null, T0, updated_at)
 }
 
@@ -200,7 +200,7 @@ describe('FK-wedge self-heal (full resync + prune)', () => {
     server_db.prepare(`UPDATE users SET server_seq = 1 WHERE id = 'u-hidden'`).run()
     // …and a dictionary role referencing that user (fresh seq → WILL ride down).
     server_db.prepare(
-      `INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES ('role-orphaning', 'd1', 'u-hidden', 'editor', ?, ?)`,
+      `INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES ('role-orphaning', 'd1', 'u-hidden', 'contributor', ?, ?)`,
     ).run(T1, T1)
     // The client also holds a stale ghost row the server no longer has (a
     // cascade-deleted child whose tombstone it missed) — prune must clear it.
@@ -237,7 +237,7 @@ describe('FK-wedge self-heal (full resync + prune)', () => {
     server_db.prepare(`INSERT INTO users (id, email, created_at, updated_at) VALUES ('u-hidden', 'hidden@example.com', ?, ?)`).run(T0, T0)
     server_db.prepare(`UPDATE users SET server_seq = 1 WHERE id = 'u-hidden'`).run()
     server_db.prepare(
-      `INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES ('role-orphaning', 'd1', 'u-hidden', 'editor', ?, ?)`,
+      `INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES ('role-orphaning', 'd1', 'u-hidden', 'contributor', ?, ?)`,
     ).run(T1, T1)
     // …while the client holds un-pushed local work.
     insert_role({ db: client_db, id: 'role-local-work', dirty: true, updated_at: T1 })

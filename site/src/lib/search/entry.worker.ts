@@ -587,7 +587,7 @@ export async function init_entries(
 
   // vps-migration M4 write/sync: the bundle is read on the main thread from the
   // browser wa-sqlite dict.db (snapshot + sync), NOT fetched from an endpoint.
-  // Rows arrive in the legacy supabase shape (JSON parsed, soft-deletes excluded).
+  // Rows arrive in the legacy materialized-entry shape (JSON parsed, soft-deletes excluded).
   entries = key_by_id(bundle.entries)
   senses = key_by_id(bundle.senses)
   audios = key_by_id(bundle.audio)

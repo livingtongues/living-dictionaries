@@ -104,7 +104,7 @@ add button; AddSentence modal; `/[dictionaryId]/sentence/[sentenceId]` detail pa
 
 ## Data model changes (one dictionary-migration)
 
-Follow `.knowledge/migration/adding-a-syncable-dict-table.md` — columns only, no new tables, so
+Follow `.knowledge/db/adding-a-syncable-dict-table.md` — columns only, no new tables, so
 the checklist is light (no cascade-trigger rewrite, no `DICT_SYNCABLE_TABLES` change):
 
 1. **`sentences.tokens` TEXT (JSON)** — keyed by orthography for future-proofing; v1 tokenizes only

@@ -283,7 +283,7 @@ easy to override.
 }
 
 /* SmallCaps mark (markdown `[text]{.smallcaps}` → span.smallcaps) — legacy
-   CKEditor small-caps content converted at the Supabase cutover. */
+   CKEditor small-caps content converted at the platform cutover. */
 .tw-prose :where(.smallcaps) {
   font-variant-caps: small-caps;
   font-variant: small-caps;

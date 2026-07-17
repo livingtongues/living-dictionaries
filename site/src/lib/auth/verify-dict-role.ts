@@ -6,9 +6,9 @@ import { get_effective_admin_level } from '$lib/server/effective-admin-level'
 import { error } from '@sveltejs/kit'
 import { verify_auth } from './verify'
 
-const ROLE_RANK = { contributor: 1, editor: 2, manager: 3 } as const
+const ROLE_RANK = { contributor: 1, manager: 2 } as const
 type Role = keyof typeof ROLE_RANK
-/** The human per-dictionary roles, weakest → strongest. */
+/** The human per-dictionary roles, weakest → strongest (there is no 'editor' role). */
 export type DictRole = Role
 
 /**
@@ -33,7 +33,7 @@ export type DictRole = Role
 export async function verify_auth_dict_role(event: {
   request: Request
   cookies?: Pick<Cookies, 'get'>
-}, { dictionary, min_role = 'editor' }: {
+}, { dictionary, min_role = 'manager' }: {
   dictionary: { id: string, bucket?: string | null }
   min_role?: Role
 }): Promise<{ user_id: string, email: string | undefined, name: string | undefined, admin_level: number, role: Role | 'admin' }> {
@@ -58,9 +58,8 @@ export async function verify_auth_dict_role(event: {
      WHERE dictionary_id = ? AND user_id = ?
      ORDER BY CASE role
        WHEN 'manager' THEN 1
-       WHEN 'editor' THEN 2
-       WHEN 'contributor' THEN 3
-       ELSE 4 END
+       WHEN 'contributor' THEN 2
+       ELSE 3 END
      LIMIT 1`,
   ).get(dictionary.id, auth.user_id) as { role: Role } | undefined
   if (!row) {
@@ -69,7 +68,9 @@ export async function verify_auth_dict_role(event: {
     error(ResponseCodes.FORBIDDEN, 'role_revoked')
   }
 
-  if (ROLE_RANK[row.role] < ROLE_RANK[min_role])
+  // `?? 0` so an unknown/legacy role value (e.g. a stale 'editor' row) can
+  // never satisfy a gate — without it `undefined < n` is false and would PASS.
+  if ((ROLE_RANK[row.role] ?? 0) < ROLE_RANK[min_role])
     error(ResponseCodes.FORBIDDEN, `Requires ${min_role} role`)
 
   return { ...auth, admin_level, role: row.role }

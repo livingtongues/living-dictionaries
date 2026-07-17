@@ -6,6 +6,15 @@ export const shared_meta: StoryMeta = {
   page_data: { t: mock_t },
 }
 
-export const Default: PageStory<typeof Component> = {
-  props: { dictionary: { id: 'demo', url: 'demo', name: 'Nahuatl', public: true } } as never,
+const dictionary = { id: 'demo', url: 'demo', name: 'Nahuatl', public: true }
+
+/** Manager: education + dropzone (file list empty — no session in stories). */
+export const Manager: PageStory<typeof Component> = {
+  viewports: [{ width: 900, height: 1000 }, { width: 390, height: 1100 }],
+  props: { dictionary, is_manager: true } as never,
+}
+
+/** Everyone else: education + managers-only note + contact. */
+export const NotManager: PageStory<typeof Component> = {
+  props: { dictionary, is_manager: false } as never,
 }

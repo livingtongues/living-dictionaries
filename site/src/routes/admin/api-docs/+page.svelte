@@ -5,19 +5,25 @@
   import { sanitize_rich_text as sanitize } from '$lib/markdown/sanitize-rich-text'
   import SchemaView from './schema-view.svelte'
   import {
-    build_groups,
+    build_tag_groups,
     method_color,
     request_body_contents,
+    split_markdown_sections,
   } from './helpers'
 
   let { data } = $props()
 
   const spec = $derived(data.spec)
+  const guides = $derived(data.guides)
   const info = $derived(spec?.info ?? {})
-  const description_html = $derived(info.description ? sanitize(render_markdown_to_html(info.description)) : '')
-  const groups = $derived(build_groups(spec?.paths ?? {}))
+  const overview = $derived(split_markdown_sections(info.description ?? ''))
+  const groups = $derived(build_tag_groups(spec ?? {}))
   const schemas = $derived(Object.entries(spec?.components?.schemas ?? {}) as [string, any][])
   const security_scheme = $derived(spec?.components?.securitySchemes?.bearerAuth)
+
+  function md(markdown: string): string {
+    return sanitize(render_markdown_to_html(markdown))
+  }
 </script>
 
 <svelte:head><title>Agent API · Admin</title></svelte:head>
@@ -42,110 +48,155 @@
     </div>
   </header>
 
-  {#if description_html}
-    <section class="overview tw-prose">
-      {@html description_html}
-    </section>
-  {/if}
-
-  {#if security_scheme}
-    <section class="auth-note">
-      <strong>Auth:</strong> {security_scheme.description ?? `${security_scheme.scheme} ${security_scheme.type}`}
-    </section>
-  {/if}
-
-  <nav class="jump">
-    {#each groups as group (group.label)}
-      <a href="#group-{group.label}">{group.label} <span class="count">{group.operations.length}</span></a>
-    {/each}
-    <a href="#schemas">Schemas <span class="count">{schemas.length}</span></a>
-  </nav>
-
-  {#each groups as group (group.label)}
-    <section id="group-{group.label}" class="group">
-      <h2 class="group-title">{group.label}</h2>
-      {#each group.operations as op (op.method + op.path)}
-        {@const bodies = request_body_contents(op.requestBody)}
-        <details class="op">
-          <summary class="op-summary">
-            <span class="method" style="--method: {method_color(op.method)}">{op.method}</span>
-            <code class="op-path">{op.path}</code>
-            <span class="op-title">{op.summary ?? ''}</span>
-          </summary>
-          <div class="op-body">
-            {#if op.description}
-              <p class="op-desc">{op.description}</p>
-            {/if}
-
-            {#if op.parameters?.length}
-              <div class="block">
-                <h4 class="block-title">Parameters</h4>
-                <ul class="params">
-                  {#each op.parameters as param (param.name + param.in)}
-                    <li class="param">
-                      <code class="param-name">{param.name}</code>
-                      <span class="param-in">{param.in}</span>
-                      {#if param.required}<span class="req">required</span>{/if}
-                      {#if param.schema}<span class="param-type">{param.schema.type ?? ''}{param.schema.enum ? ` (${param.schema.enum.join(' · ')})` : ''}</span>{/if}
-                      {#if param.description}<p class="param-desc">{param.description}</p>{/if}
-                    </li>
-                  {/each}
-                </ul>
-              </div>
-            {/if}
-
-            {#if bodies.length}
-              <div class="block">
-                <h4 class="block-title">Request body</h4>
-                {#each bodies as body (body.media_type)}
-                  <div class="body-block">
-                    <code class="media-type">{body.media_type}</code>
-                    <SchemaView schema={body.schema} />
-                  </div>
-                {/each}
-              </div>
-            {/if}
-
-            {#if op.responses}
-              <div class="block">
-                <h4 class="block-title">Responses</h4>
-                <ul class="responses">
-                  {#each Object.entries(op.responses) as [status, res] (status)}
-                    <li class="response">
-                      <span class="status status-{String(status).charAt(0)}">{status}</span>
-                      <span class="response-desc">{res?.description ?? ''}</span>
-                    </li>
-                  {/each}
-                </ul>
-              </div>
-            {/if}
-          </div>
-        </details>
+  <div class="layout">
+    <nav class="toc">
+      <a href="#overview">Overview</a>
+      {#if guides.length}
+        <a href="#guides">Import guides <span class="count">{guides.length}</span></a>
+      {/if}
+      <div class="toc-heading">Endpoints</div>
+      {#each groups as group (group.name)}
+        <a href="#group-{group.name}" class="toc-sub">{group.name} <span class="count">{group.operations.length}</span></a>
       {/each}
-    </section>
-  {/each}
+      <a href="#schemas">Schemas <span class="count">{schemas.length}</span></a>
+    </nav>
 
-  <section id="schemas" class="group">
-    <h2 class="group-title">Schemas</h2>
-    <p class="schemas-note">Reusable object shapes referenced by the endpoints above (links jump here).</p>
-    {#each schemas as [name, schema] (name)}
-      <details id="schema-{name}" class="op schema">
-        <summary class="op-summary">
-          <code class="op-path">{name}</code>
-          <span class="op-title">{schema.description ?? ''}</span>
-        </summary>
-        <div class="op-body">
-          <SchemaView {schema} />
-        </div>
-      </details>
-    {/each}
-  </section>
+    <main class="content">
+      <section id="overview" class="group">
+        <h2 class="group-title">Overview</h2>
+        {#if security_scheme}
+          <div class="auth-note">
+            <strong>Auth:</strong> {security_scheme.description ?? `${security_scheme.scheme} ${security_scheme.type}`}
+          </div>
+        {/if}
+        {#if overview.intro}
+          <div class="overview tw-prose">
+            {@html md(overview.intro)}
+          </div>
+        {/if}
+        {#each overview.sections as section (section.title)}
+          <details class="op overview-section">
+            <summary class="op-summary">
+              <span class="section-title">{section.title}</span>
+            </summary>
+            <div class="op-body tw-prose">
+              {@html md(section.body)}
+            </div>
+          </details>
+        {/each}
+      </section>
+
+      {#if guides.length}
+        <section id="guides" class="group">
+          <h2 class="group-title">Import guides</h2>
+          <p class="schemas-note">
+            Lean format-specific guides agents fetch from <code>/api/v1/guides</code> before an import —
+            grow these as real imports teach us things.
+          </p>
+          {#each guides as guide (guide.slug)}
+            <details class="op">
+              <summary class="op-summary">
+                <code class="op-path">{guide.slug}</code>
+                <span class="op-title">{guide.description}</span>
+              </summary>
+              <div class="op-body tw-prose">
+                {@html md(guide.markdown)}
+              </div>
+            </details>
+          {/each}
+        </section>
+      {/if}
+
+      {#each groups as group (group.name)}
+        <section id="group-{group.name}" class="group">
+          <h2 class="group-title">{group.name}</h2>
+          {#if group.description}
+            <p class="schemas-note">{group.description}</p>
+          {/if}
+          {#each group.operations as op (op.method + op.path)}
+            {@const bodies = request_body_contents(op.requestBody)}
+            <details class="op">
+              <summary class="op-summary">
+                <span class="method" style="--method: {method_color(op.method)}">{op.method}</span>
+                <code class="op-path">{op.path}</code>
+                <span class="op-title">{op.summary ?? ''}</span>
+              </summary>
+              <div class="op-body">
+                {#if op.description}
+                  <p class="op-desc">{op.description}</p>
+                {/if}
+
+                {#if op.parameters?.length}
+                  <div class="block">
+                    <h4 class="block-title">Parameters</h4>
+                    <ul class="params">
+                      {#each op.parameters as param (param.name + param.in)}
+                        <li class="param">
+                          <code class="param-name">{param.name}</code>
+                          <span class="param-in">{param.in}</span>
+                          {#if param.required}<span class="req">required</span>{/if}
+                          {#if param.schema}<span class="param-type">{param.schema.type ?? ''}{param.schema.enum ? ` (${param.schema.enum.join(' · ')})` : ''}</span>{/if}
+                          {#if param.description}<p class="param-desc">{param.description}</p>{/if}
+                        </li>
+                      {/each}
+                    </ul>
+                  </div>
+                {/if}
+
+                {#if bodies.length}
+                  <div class="block">
+                    <h4 class="block-title">Request body</h4>
+                    {#each bodies as body (body.media_type)}
+                      <div class="body-block">
+                        <code class="media-type">{body.media_type}</code>
+                        <SchemaView schema={body.schema} />
+                      </div>
+                    {/each}
+                  </div>
+                {/if}
+
+                {#if op.responses}
+                  <div class="block">
+                    <h4 class="block-title">Responses</h4>
+                    <ul class="responses">
+                      {#each Object.entries(op.responses) as [status, res] (status)}
+                        <li class="response">
+                          <span class="status status-{String(status).charAt(0)}">{status}</span>
+                          <span class="response-desc">{res?.description ?? ''}</span>
+                        </li>
+                      {/each}
+                    </ul>
+                  </div>
+                {/if}
+              </div>
+            </details>
+          {/each}
+        </section>
+      {/each}
+
+      <section id="schemas" class="group">
+        <h2 class="group-title">Schemas</h2>
+        <p class="schemas-note">Reusable object shapes referenced by the endpoints above (links jump here).</p>
+        {#each schemas as [name, schema] (name)}
+          <details id="schema-{name}" class="op schema">
+            <summary class="op-summary">
+              <code class="op-path">{name}</code>
+              <span class="op-title">{schema.description ?? ''}</span>
+            </summary>
+            <div class="op-body">
+              <SchemaView {schema} />
+            </div>
+          </details>
+        {/each}
+      </section>
+    </main>
+  </div>
 </div>
 
 <style>
   .root {
     width: 100%;
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0.75rem;
   }
@@ -191,13 +242,94 @@
     gap: 0.375rem;
   }
 
+  .layout {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+  .toc {
+    position: sticky;
+    top: 0.75rem;
+    flex-shrink: 0;
+    width: 13rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    max-height: calc(100vh - 1.5rem);
+    overflow-y: auto;
+    padding-right: 0.25rem;
+  }
+  .toc a {
+    font-size: 0.85rem;
+    color: var(--color-secondary);
+    text-decoration: none;
+    padding: 0.3rem 0.55rem;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.3rem;
+  }
+  .toc a:hover {
+    color: var(--primary);
+    background: var(--surface);
+  }
+  .toc .toc-sub {
+    padding-left: 1.1rem;
+    text-transform: capitalize;
+  }
+  .toc-heading {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-secondary);
+    padding: 0.6rem 0.55rem 0.15rem;
+  }
+  .toc .count {
+    font-size: 0.7rem;
+    color: var(--color-secondary);
+    background: var(--surface);
+    border-radius: 999px;
+    padding: 0 0.35rem;
+  }
+  .content {
+    flex-grow: 1;
+    min-width: 0;
+  }
+  @media (max-width: 760px) {
+    .layout {
+      flex-direction: column;
+    }
+    .toc {
+      position: static;
+      width: 100%;
+      max-height: none;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    .toc .toc-sub {
+      padding-left: 0.55rem;
+    }
+    .toc-heading {
+      flex-basis: 100%;
+      padding-top: 0.25rem;
+    }
+  }
+
   .overview {
     background: var(--surface);
     border: 1px solid var(--border-color);
     border-radius: 0.75rem;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1.25rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
     max-width: none;
+  }
+  .overview-section .op-body {
+    max-width: none;
+  }
+  .section-title {
+    font-size: 0.9rem;
+    font-weight: 600;
   }
   .auth-note {
     background: color-mix(in srgb, var(--primary), transparent 92%);
@@ -205,36 +337,7 @@
     border-radius: 0.5rem;
     padding: 0.625rem 0.875rem;
     font-size: 0.85rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .jump {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
-    margin-bottom: 1.5rem;
-  }
-  .jump a {
-    font-size: 0.8rem;
-    color: var(--color-secondary);
-    text-decoration: none;
-    padding: 0.2rem 0.55rem;
-    border: 1px solid var(--border-color);
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-  .jump a:hover {
-    color: var(--primary);
-    border-color: var(--primary);
-  }
-  .jump .count {
-    font-size: 0.7rem;
-    color: var(--color-secondary);
-    background: var(--surface);
-    border-radius: 999px;
-    padding: 0 0.35rem;
+    margin-bottom: 0.75rem;
   }
 
   .group {
@@ -247,11 +350,16 @@
     padding-bottom: 0.375rem;
     border-bottom: 1px solid var(--border-color);
     margin-bottom: 0.75rem;
+    text-transform: capitalize;
   }
   .schemas-note {
     font-size: 0.82rem;
     color: var(--color-secondary);
     margin-bottom: 0.75rem;
+  }
+  .schemas-note code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
   }
 
   .op {

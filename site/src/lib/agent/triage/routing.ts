@@ -14,8 +14,8 @@ import { ADMINS } from '$lib/admins'
 const JACOB = 'jwrunner7@gmail.com'
 const DIEGO = 'diego@livingtongues.org'
 
-// Anna is off-duty (admins.ts `notify: false`) — account moved to Jacob (login/access
-// issues are technical-adjacent, and he's the technical + other + fallback owner).
+// Account issues go to Jacob (login/access issues are technical-adjacent,
+// and he's the technical + other + fallback owner).
 export const CATEGORY_ROUTING: Record<TriageCategory, string> = {
   technical: JACOB,
   content: DIEGO,

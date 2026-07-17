@@ -19,11 +19,9 @@ export interface UserProviderIdentity {
 export type ClientLogLevel = 'error' | 'warn' | 'info' | 'unhandled_rejection' | 'crash'
 
 /**
- * Coordinates blob on dictionary catalog rows. Shape matches legacy LD
- * (`@living-dictionaries/types` `Coordinates`/`IPoint`/`IRegion`) EXACTLY so
- * the Supabase→new-site migration can copy this JSON blob verbatim with no
- * transform and no data loss. Kept as a local copy (not imported from the
- * legacy types package) to keep the new site's types self-contained.
+ * Coordinates blob on dictionary catalog rows. Shape matches the legacy LD
+ * `Coordinates`/`IPoint`/`IRegion` types EXACTLY — the platform migration
+ * copied this JSON blob verbatim with no transform and no data loss.
  *
  * ⚠ Do NOT flatten `points` or drop `label`/`color` — they're real used data
  * (legacy map fill color + the where-spoken editor). See

@@ -6,7 +6,7 @@ export interface InviteSummary {
   id: string
   dictionary_id: string
   inviter_email: string
-  role: 'manager' | 'editor' | 'contributor'
+  role: 'manager' | 'contributor'
   status: 'queued' | 'sent' | 'claimed' | 'cancelled'
 }
 

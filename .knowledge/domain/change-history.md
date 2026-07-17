@@ -20,7 +20,7 @@ history. Bulk paths (cutover seed, future direct writes) bypass `/changes` → i
 - Two tables: `changes` (id, table_name, row_id, op, user_id, at, snapshot, delta) + `change_owners`
   (change_id, owner_type, owner_id). The **owners side-table is a many-to-many index** (not denormalized
   FK columns) so one change can belong to several subjects and a NEW owner type later is just a new
-  string — never a migration. The old Supabase `content_updates` used fixed FK columns; that's lossy on
+  string — never a migration. The legacy `content_updates` table used fixed FK columns; that's lossy on
   multi-owner changes and is why it "never really worked."
 
 ## Why it survives schema changes (the hard part)

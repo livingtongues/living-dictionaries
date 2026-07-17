@@ -28,14 +28,14 @@ export interface DictionariesIdRolesGetResponseBody {
     user_id: string
     user_email: string | null
     user_name: string | null
-    role: 'manager' | 'editor' | 'contributor'
+    role: 'manager' | 'contributor'
     invited_by_user_id: string | null
     created_at: string
   }[]
   invites: {
     id: string
     target_email: string
-    role: 'manager' | 'editor' | 'contributor'
+    role: 'manager' | 'contributor'
     status: 'queued' | 'sent' | 'claimed' | 'cancelled'
     created_at: string
   }[]
@@ -79,7 +79,7 @@ export const GET: RequestHandler = async (event) => {
 
 export interface DictionariesIdRolesPostRequestBody {
   target_email: string
-  role: 'manager' | 'editor' | 'contributor'
+  role: 'manager' | 'contributor'
 }
 
 export interface DictionariesIdRolesPostResponseBody {
@@ -88,7 +88,7 @@ export interface DictionariesIdRolesPostResponseBody {
   invite_id?: string
 }
 
-const VALID_ROLES = new Set(['manager', 'editor', 'contributor'])
+const VALID_ROLES = new Set(['manager', 'contributor'])
 
 export const POST: RequestHandler = async (event) => {
   const dict_id = event.params.id

@@ -161,7 +161,7 @@ CREATE TABLE IF NOT EXISTS dictionary_roles (
   id TEXT PRIMARY KEY,
   dictionary_id TEXT NOT NULL REFERENCES dictionaries(id) ON DELETE CASCADE,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  role TEXT NOT NULL, -- 'manager' | 'editor' | 'contributor'
+  role TEXT NOT NULL, -- 'manager' | 'contributor'
   invited_by_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
   dirty INTEGER,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS invites (
   inviter_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   inviter_email TEXT NOT NULL,
   target_email TEXT NOT NULL COLLATE NOCASE,
-  role TEXT NOT NULL, -- 'manager' | 'editor' | 'contributor'
+  role TEXT NOT NULL, -- 'manager' | 'contributor'
   status TEXT NOT NULL, -- 'queued' | 'sent' | 'claimed' | 'cancelled'
   dirty INTEGER,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -546,7 +546,7 @@ VALUES (
 -- the schema above (redundant duplicates of a UNIQUE's leading column / PK —
 -- see the 2026-07-02 schema audit). No-ops on freshly-provisioned DBs; drops
 -- them from any DB provisioned before the squash. Prune this section after
--- the Supabase cutover once no pre-squash DB remains.
+-- the platform cutover once no pre-squash DB remains.
 ------------------------------------------------------------------
 
 DROP INDEX IF EXISTS idx_dictionary_roles_dict;

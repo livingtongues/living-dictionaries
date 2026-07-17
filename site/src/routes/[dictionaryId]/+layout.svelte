@@ -14,7 +14,7 @@
   import './custom-fonts.css'
 
   const { data, children } = $props()
-  const { dictionary, is_manager, is_editor_or_above, can_edit, dict_sync_status, entries_data } = $derived(data)
+  const { dictionary, is_manager, can_edit, dict_sync_status, entries_data } = $derived(data)
   const { loading } = $derived(entries_data)
 
   const children_render = $derived(children)
@@ -63,7 +63,7 @@
         on_close={() => set(false)}
         open={show}>
         <div class="side-panel">
-          <SideMenu {dictionary} is_manager={is_manager} is_editor_or_above={is_editor_or_above} {can_edit} {dict_sync_status} entry_count={Object.keys($entries_data).length} on_close={() => set(false)} loading={$loading} />
+          <SideMenu {dictionary} is_manager={is_manager} {can_edit} {dict_sync_status} entry_count={Object.keys($entries_data).length} on_close={() => set(false)} loading={$loading} />
           <hr />
           <HeadlessButton class="btn-ghost btn-default side-close-button" onclick={toggle}>
             <IconTimes style="font-size: 1.3333em" />

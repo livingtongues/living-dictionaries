@@ -78,8 +78,8 @@ export const POST: RequestHandler = async ({ request, url: request_url }) => {
     db.prepare(`
       INSERT INTO message_threads (
         id, subject, source, from_user_id, from_email, from_name, url,
-        last_message_at, created_at, updated_at
-      ) VALUES (?, ?, 'contact_form', ?, ?, ?, ?, ?, ?, ?)
+        dictionary_id, last_message_at, created_at, updated_at
+      ) VALUES (?, ?, 'contact_form', ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       thread_id,
       subject ?? null,
@@ -87,6 +87,7 @@ export const POST: RequestHandler = async ({ request, url: request_url }) => {
       email,
       name?.trim() || null,
       url,
+      dictionary_id ?? null,
       now,
       now,
       now,

@@ -3,14 +3,14 @@
 //
 //   pnpm -F site build && pnpm -F site test:history
 //
-// Boots `node build` on an ISOLATED temp DATA_DIR, seeds shared.db with one
-// dictionary + a manager / editor / contributor user, then drives a sequence of
-// real `POST /api/dictionary/[id]/changes` syncs of every shape (cold viewer
-// pull, editor inserts/updates, a text+sentence+sense link, media + speaker, a
-// LWW-losing second-editor push, a delete, a mid-stream viewer pull). After
+// Boots `node build` on an ISOLATED temp DATA_DIR, seeds shared.db with two
+// managers + a contributor user, then drives a sequence of real
+// `POST /api/dictionary/[id]/changes` syncs of every shape (cold viewer
+// pull, manager inserts/updates, a text+sentence+sense link, media + speaker, a
+// LWW-losing second-manager push, a delete, a mid-stream viewer pull). After
 // each it reads the on-disk `<id>.db` + `<id>.history.db` and asserts the
 // `changes` / `change_owners` look right, then checks the `GET …/history` role
-// gate (editor/manager → 200, contributor/anon → 403/401).
+// gate (manager → 200, contributor/anon → 403/401).
 /* eslint-disable no-console, node/prefer-global/process */
 
 import { spawn } from 'node:child_process'
@@ -36,7 +36,7 @@ const history_db_path = join(data_dir, 'dictionaries', `${DICT}.history.db`)
 
 const USERS = {
   manager: { id: 'u_manager', email: 'hist-manager@example.com', role: 'manager' },
-  editor: { id: 'u_editor', email: 'hist-editor@example.com', role: 'editor' },
+  second_manager: { id: 'u_second_manager', email: 'hist-second-manager@example.com', role: 'manager' },
   contributor: { id: 'u_contributor', email: 'hist-contributor@example.com', role: 'contributor' },
 }
 
@@ -181,10 +181,10 @@ async function main() {
   // Warm up so the server creates + migrates shared.db, then seed it.
   await api('/api/auth/email/send-code', { method: 'POST', body: { email: 'warmup@example.com' } })
   seed_shared()
-  console.log('• seeded shared.db: dictionary + manager/editor/contributor')
+  console.log('• seeded shared.db: dictionary + two managers + contributor')
 
   const manager = await login(USERS.manager.email)
-  const editor = await login(USERS.editor.email)
+  const second_manager = await login(USERS.second_manager.email)
   const contributor = await login(USERS.contributor.email)
   console.log('• logged in all three roles')
 
@@ -231,15 +231,15 @@ async function main() {
     audio_speakers: [audio_speaker('as1', 'a1', 'sp1', '2026-01-04T00:00:00.000Z', USERS.manager.id)],
   })
 
-  console.log('\n— step 6: a SECOND editor pushes a stale (older updated_at) entry → LWW loses, no history')
+  console.log('\n— step 6: a SECOND manager pushes a stale (older updated_at) entry → LWW loses, no history')
   const before_lww = all_changes().length
-  await push(editor, { entries: [entry('e1', '2025-06-01T00:00:00.000Z', USERS.editor.id, { phonetic: 'STALE' })] })
+  await push(second_manager, { entries: [entry('e1', '2025-06-01T00:00:00.000Z', USERS.second_manager.id, { phonetic: 'STALE' })] })
   ok(all_changes().length === before_lww, 'LWW-losing push recorded no history row')
 
-  console.log('\n— step 7: editor edits the sentence (junction now exists → overlaps text + entry)')
-  await push(editor, { sentences: [sentence('snt1', '2026-01-05T00:00:00.000Z', USERS.editor.id, { text_id: 'tx1', sort_key: 'a', text: { en: 'The water is very cold.' } })] })
+  console.log('\n— step 7: second manager edits the sentence (junction now exists → overlaps text + entry)')
+  await push(second_manager, { sentences: [sentence('snt1', '2026-01-05T00:00:00.000Z', USERS.second_manager.id, { text_id: 'tx1', sort_key: 'a', text: { en: 'The water is very cold.' } })] })
   const sentence_update = all_changes().find(r => r.table_name === 'sentences' && r.op === 'update')
-  ok(sentence_update.user_id === USERS.editor.id, 'sentence edit attributed to the editor')
+  ok(sentence_update.user_id === USERS.second_manager.id, 'sentence edit attributed to the second manager')
   {
     const db = open_ro(history_db_path)
     const owner_types = db.prepare('SELECT owner_type FROM change_owners WHERE change_id = ? ORDER BY owner_type').all(sentence_update.id).map(o => o.owner_type)
@@ -281,10 +281,10 @@ async function main() {
   const m = await api(`/api/dictionary/${DICT}/history?owner_type=entry&owner_id=e1`, { cookie: manager })
   ok(m.status === 200, 'manager can read entry history (200)')
   ok(Array.isArray(m.json.changes) && m.json.changes.length > 0, 'manager gets a non-empty entry timeline')
-  ok(m.json.users[USERS.manager.id]?.email === USERS.manager.email, 'response resolves the editor display name')
+  ok(m.json.users[USERS.manager.id]?.email === USERS.manager.email, 'response resolves the manager display name')
   ok(m.json.changes[0].at >= m.json.changes[m.json.changes.length - 1].at, 'timeline is newest-first')
-  const e = await api(`/api/dictionary/${DICT}/history?owner_type=entry&owner_id=e1`, { cookie: editor })
-  ok(e.status === 200, 'editor can read history (200)')
+  const e = await api(`/api/dictionary/${DICT}/history?owner_type=entry&owner_id=e1`, { cookie: second_manager })
+  ok(e.status === 200, 'second manager can read history (200)')
   const feed = await api(`/api/dictionary/${DICT}/history?feed=1`, { cookie: manager })
   ok(feed.json.changes.some(c => c.table_name === 'speakers'), 'dict-wide feed includes the unattributed speaker change')
   const c = await api(`/api/dictionary/${DICT}/history?owner_type=entry&owner_id=e1`, { cookie: contributor })

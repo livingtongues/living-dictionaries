@@ -50,7 +50,6 @@
     search_index_updated,
     auth_user,
     is_manager,
-    is_editor_or_above,
     update_dictionary,
   } = $derived(data)
   // Resolved on SSR/hydration; a pending streamed promise on client-nav (see the
@@ -139,7 +138,7 @@
     .slice(0, STRIP_CAP))
 
   // Manage (editor+): unstar + move left/right over the live rows' fractional keys.
-  const can_manage = $derived(is_editor_or_above && live_featured_ready)
+  const can_manage = $derived(is_manager && live_featured_ready)
   // Touch devices have no hover to reveal the card controls — a mobile-only pencil/X toggles them.
   let manage_open = $state(false)
   function move_featured({ row_id, direction }: { row_id: string, direction: -1 | 1 }) {
@@ -297,7 +296,7 @@
   })
 
   let map_modal_open = $state(false)
-  const show_nudges = $derived(is_editor_or_above && live_featured_ready && !$entries_loading)
+  const show_nudges = $derived(is_manager && live_featured_ready && !$entries_loading)
   const nudge_star = $derived(show_nudges && featured_cards.length === 0)
   const nudge_location = $derived(is_manager && !is_con_lang && !has_coordinates)
   // A featured_image without a usable serving_url (e.g. malformed legacy data) renders the same as no image.

@@ -30,8 +30,8 @@ export const GET: RequestHandler = async (event) => {
     error(ResponseCodes.NOT_FOUND, 'dictionary not found')
   const dict_id = dictionary.id
 
-  // Hard gate: editor rank or above (manager/admin included), else 401/403.
-  await verify_auth_dict_role(event, { dictionary, min_role: 'editor' })
+  // Hard gate: manager or admin, else 401/403.
+  await verify_auth_dict_role(event, { dictionary, min_role: 'manager' })
 
   const params = event.url.searchParams
   const before_raw = params.get('before')

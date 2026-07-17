@@ -54,7 +54,7 @@ Knowing which database you're touching dictates everything else.
 | **Server access** | `get_dictionary_db(dict_id)` from `$lib/db/server/dictionary-db.ts` (better-sqlite3, on demand). Also `open_dictionary_db_in_memory(dict_id)` for tests. |
 | **Drizzle schema** | `$lib/db/schemas/dictionary.ts` |
 | **Migrations** | `$lib/db/schemas/dictionary-migrations/*.sql` (date-prefixed, applied per-DB) |
-| **Browser mirror** | One per dict, in wa-sqlite **OPFS in a leader-elected dedicated worker** (`$lib/db/dict-client/dict-instance.ts`, harness in `dict-client/worker/`; opened via `dict-lifecycle.ts` `open_dict`), exposed via `DictLiveDb` (`dict-live-db.svelte.ts`) over the `worker-connection.ts` shim. Mounted at **`page.data.dict_db`** for all `[dictionaryId]/*` routes. One leader per dict (keyed by `dict_id`); other tabs are followers over a BroadcastChannel. See `.knowledge/migration/opfs-leader-worker-dict-db.md`. |
+| **Browser mirror** | One per dict, in wa-sqlite **OPFS in a leader-elected dedicated worker** (`$lib/db/dict-client/dict-instance.ts`, harness in `dict-client/worker/`; opened via `dict-lifecycle.ts` `open_dict`), exposed via `DictLiveDb` (`dict-live-db.svelte.ts`) over the `worker-connection.ts` shim. Mounted at **`page.data.dict_db`** for all `[dictionaryId]/*` routes. One leader per dict (keyed by `dict_id`); other tabs are followers over a BroadcastChannel. See `.knowledge/db/opfs-leader-worker-dict-db.md`. |
 | **Read path** | R2 snapshot (`snapshots.livingdictionaries.app/<id>.db.gz`) seeds the OPFS file; `/api/dictionary/[id]/changes` applies any deltas newer than the snapshot. |
 | **Write path** | Editor mutations → `dict_db` (dirty rows) → the leader worker's sync engine pushes to `/api/dictionary/[id]/changes`; editors fetch their fresh snapshot from `/api/dictionary/[id]/db` (gated by `verify_auth_dict_role`). A cron-driven snapshot builder rebuilds the R2 `.db.gz` periodically. **Snapshots must ship a rollback-journal header (`journal_mode = DELETE`) — the single-file OPFS VFS can't open a WAL-mode header.** |
 
@@ -135,7 +135,7 @@ mid-flight migration would strand editors holding the old snapshot. The
 boot-sweep ensures every dict catalog row gets the new `dict_db_schema_version`
 before the snapshot builder rebuilds — DO NOT skip the version bump when
 introducing a new dict-migration. Background:
-`.knowledge/migration/dict-sync-invariants.md` + `m4-write-sync.md`.
+`.knowledge/db/dict-sync-invariants.md` + `m4-write-sync.md`.
 
 ## Server-side queries
 
@@ -620,7 +620,7 @@ natural-key table needs a spec in the coverage-guarded convergence e2e suites
 Both client engines carry a repeat-fatal circuit breaker (`RepeatFailureTracker`
 in `sync-failure-classify.ts`): 3 identical consecutive non-transient failures
 halt retrying + prompt a reload (`sync_halted_repeated_failure` in client_logs).
-Full detail: `.knowledge/migration/dict-sync-invariants.md` +
+Full detail: `.knowledge/db/dict-sync-invariants.md` +
 `m4-write-sync.md`.
 
 ## Folder map (cheat-sheet)
@@ -688,7 +688,7 @@ $lib/db/
   returns `SQLITE_CANTOPEN` on a WAL-mode header (better-sqlite3 `.backup()`
   preserves it). The R2 cron + editor `/db` endpoint run `journal_mode = DELETE`;
   the client `normalize_snapshot_header` flips the header bytes as a safety net.
-  See `.knowledge/migration/opfs-leader-worker-dict-db.md`.
+  See `.knowledge/db/opfs-leader-worker-dict-db.md`.
 - **`storage_path` is a path, not a URL** — media (audio/photos/videos) stores
   a storage path; resolve to the GCS / lh3 serving URL at render time (see
   `src/lib/helpers/media-url.ts` and `.knowledge/domain/media-serving-urls.md`),
@@ -700,8 +700,8 @@ $lib/db/
 ## Cross-references
 
 - API-endpoint patterns (auth + tests): `.claude/skills/api-endpoint/SKILL.md`
-- Per-dict write/sync deep-dive: `.knowledge/migration/m4-write-sync.md`
-- Per-dict read layer (bundle → Orama → EntryData): `.knowledge/migration/m4-sqlite-read-layer.md`
-- Sync invariants: `.knowledge/migration/dict-sync-invariants.md`
-- Build/deploy + lockfile discipline: `.knowledge/migration/build-and-deploy-gotchas.md`
+- Per-dict write/sync deep-dive: `.knowledge/db/m4-write-sync.md`
+- Per-dict read layer (bundle → Orama → EntryData): `.knowledge/db/m4-sqlite-read-layer.md`
+- Sync invariants: `.knowledge/db/dict-sync-invariants.md`
+- Build/deploy + lockfile discipline: `.knowledge/db/build-and-deploy-gotchas.md`
 - Related-entries model: `.knowledge/domain/related-entries-model.md`

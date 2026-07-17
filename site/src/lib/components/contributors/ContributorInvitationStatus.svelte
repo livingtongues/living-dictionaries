@@ -1,6 +1,6 @@
 <script lang="ts">
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
-  import { supabase_date_to_friendly } from '$lib/utils/time'
+  import { date_to_friendly } from '$lib/utils/time'
   import IconFaSolidTimes from '~icons/fa-solid/times'
   import IconFaKey from '~icons/fa/key'
 
@@ -19,7 +19,7 @@
   }: Props = $props()
 </script>
 
-<div title="Sent by {invite.inviter_email} on {supabase_date_to_friendly(invite.created_at)}">
+<div title="Sent by {invite.inviter_email} on {date_to_friendly(invite.created_at)}">
   {#if prefix}{@render prefix()}{:else}<i>Invited: </i>{/if}
 
   <span class="invite-email">

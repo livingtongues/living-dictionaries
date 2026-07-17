@@ -30,7 +30,7 @@ beforeEach(() => {
     .run('r-mgr', 'dict-1', 'mgr-1', 'manager', '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')
   db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?)`)
-    .run('r-edt', 'dict-1', 'edt-1', 'editor', '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')
+    .run('r-edt', 'dict-1', 'edt-1', 'contributor', '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')
 })
 
 afterEach(() => db.close())
@@ -38,7 +38,7 @@ afterEach(() => db.close())
 function manager_token() {
   return sign_jwt({ sub: 'mgr-1', email: 'mgr@x.com', name: 'Mgr' })
 }
-function editor_token() {
+function contributor_token() {
   return sign_jwt({ sub: 'edt-1', email: 'edt@x.com', name: 'Edt' })
 }
 
@@ -61,8 +61,8 @@ describe(POST, () => {
       .rejects.toMatchObject({ status: 401 })
   })
 
-  test('403 for an editor (manager-gated)', async () => {
-    await expect(POST(event({ method: 'POST', token: await editor_token(), body: { label: 'x' } })))
+  test('403 for a contributor (manager-gated)', async () => {
+    await expect(POST(event({ method: 'POST', token: await contributor_token(), body: { label: 'x' } })))
       .rejects.toMatchObject({ status: 403 })
   })
 
@@ -106,10 +106,10 @@ describe(GET, () => {
     expect(data.keys[0]).not.toHaveProperty('token_hash')
   })
 
-  test('an editor may list keys (read-only Agents page)', async () => {
+  test('403 for a contributor (the Agents page is manager-only)', async () => {
     await POST(event({ method: 'POST', token: await manager_token(), body: { label: 'k1' } }))
-    const res = await GET(event({ method: 'GET', token: await editor_token() }))
-    expect((await res.json()).keys).toHaveLength(1)
+    await expect(GET(event({ method: 'GET', token: await contributor_token() })))
+      .rejects.toMatchObject({ status: 403 })
   })
 })
 
@@ -127,9 +127,9 @@ describe(DELETE, () => {
     expect(list.keys).toHaveLength(0)
   })
 
-  test('403 for an editor (revoke is manager-gated)', async () => {
+  test('403 for a contributor (revoke is manager-gated)', async () => {
     const created = await (await POST(event({ method: 'POST', token: await manager_token(), body: { label: 'k' } }))).json()
-    await expect(DELETE(event({ method: 'DELETE', token: await editor_token(), key_id: created.key.id })))
+    await expect(DELETE(event({ method: 'DELETE', token: await contributor_token(), key_id: created.key.id })))
       .rejects.toMatchObject({ status: 403 })
   })
 

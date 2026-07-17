@@ -1,14 +1,14 @@
 import type { Database } from 'better-sqlite3'
 import { get_shared_db, open_test_shared_db } from './shared-db'
 
-export type DictRole = 'manager' | 'editor' | 'contributor'
+export type DictRole = 'manager' | 'contributor'
 
 /**
  * The signed-in user's `dictionary_roles` grant for one dictionary, resolved
- * server-side from `shared.db`. Used to SSR-hydrate the role so editor-gated
+ * server-side from `shared.db`. Used to SSR-hydrate the role so manager-gated
  * dictionary pages (history, etc.) don't 403 on a hard load — the browser
  * `dict_roles` localStorage cache is empty during SSR (`!browser`), so without
- * this the SSR role is always null for non-admin editors/managers.
+ * this the SSR role is always null for non-admin contributors/managers.
  *
  * Ordered most-recent-first to mirror the `/api/me/dictionary-roles` feed the
  * client cache is built from. Returns null when there is no grant.
@@ -34,7 +34,7 @@ if (import.meta.vitest) {
     for (const id of ['demo', 'other', 'dupe']) add_dict.run(id, id)
     for (const id of ['u1', 'u2', 'u3']) add_user.run(id, `${id}@example.com`)
     add_role.run('r1', 'demo', 'u1', 'manager', '2026-01-01T00:00:00.000Z')
-    add_role.run('r2', 'demo', 'u2', 'editor', '2026-01-01T00:00:00.000Z')
+    add_role.run('r2', 'demo', 'u2', 'contributor', '2026-01-01T00:00:00.000Z')
     add_role.run('r3', 'other', 'u1', 'contributor', '2026-01-01T00:00:00.000Z')
     add_role.run('r4', 'dupe', 'u3', 'contributor', '2026-01-01T00:00:00.000Z')
     add_role.run('r5', 'dupe', 'u3', 'manager', '2026-02-01T00:00:00.000Z')
@@ -46,7 +46,7 @@ if (import.meta.vitest) {
 
     it('returns the grant for a user on a dictionary', () => {
       expect(get_user_dict_role({ dictionary_id: 'demo', user_id: 'u1', db })).toBe('manager')
-      expect(get_user_dict_role({ dictionary_id: 'demo', user_id: 'u2', db })).toBe('editor')
+      expect(get_user_dict_role({ dictionary_id: 'demo', user_id: 'u2', db })).toBe('contributor')
     })
 
     it('returns null when the user has no grant on that dictionary', () => {

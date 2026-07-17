@@ -71,13 +71,13 @@ const { user_id, email, name } = await verify_auth(event)
 
 `verify_auth(event)` reads the JWT from the httpOnly `session` cookie first, then falls back to `Authorization: Bearer <JWT>` (for non-browser callers). Returns `{ user_id, email, name }`.
 
-### `verify_auth_dict_role` — per-dictionary editor / manager actions
+### `verify_auth_dict_role` — per-dictionary contributor / manager actions
 ```ts
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 
-const { user_id, email, role } = await verify_auth_dict_role(event, dict_id, 'editor')
+const { user_id, email, role } = await verify_auth_dict_role(event, { dictionary, min_role: 'manager' })
 // throws 401 on no auth, 403 on missing/insufficient role
-// role: 'contributor' | 'editor' | 'manager' | 'admin'
+// role: 'contributor' | 'manager' | 'admin' (LD has no 'editor' role)
 ```
 
 Site admins (`admin_level >= 1`, derived from `site/src/lib/admins.ts`) bypass the per-dict role check entirely. The fresh DB lookup on every push ensures revocations are immediate — JWT-baked roles would let revoked editors keep pushing until token expiry.
