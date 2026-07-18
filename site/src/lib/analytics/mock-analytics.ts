@@ -33,6 +33,24 @@ function build_daily(days: number): LogAnalytics['daily'] {
   return out
 }
 
+function build_entry_edits(days: number): LogAnalytics['entry_edits'] {
+  const end = new Date('2026-06-23T00:00:00.000Z')
+  const daily: LogAnalytics['entry_edits']['daily'] = []
+  let ui_total = 0
+  let api_total = 0
+  for (let offset = days - 1; offset >= 0; offset--) {
+    const day = new Date(end.getTime() - offset * 86_400_000).toISOString().slice(0, 10)
+    const ui = Math.max(0, Math.round(55 + Math.sin(offset) * 30))
+    // API silent for the first ~half of the window, then ramping, with one
+    // bulk-import day (the 63-second 4,728-entry pattern) near the end.
+    const api = offset > 14 ? 0 : offset === 3 ? 4728 : Math.round((14 - offset) * 26)
+    ui_total += ui
+    api_total += api
+    daily.push({ day, ui, api })
+  }
+  return { ui_total, api_total, daily }
+}
+
 function build_perf(days: number): LogAnalytics['performance'] {
   const end = new Date('2026-06-23T00:00:00.000Z')
   const daily: LogAnalytics['performance']['daily'] = []
@@ -415,6 +433,9 @@ export const mock_analytics: LogAnalytics = {
       { via: 'session', count: 310 },
     ],
   },
+  // The UI→agent-API transition story: steady human editing, then the API line
+  // wakes up mid-window and dwarfs it with a bulk-import spike.
+  entry_edits: build_entry_edits(30),
   // A handful of star dictionaries pulling real outside traffic + a long tail.
   top_dictionaries: {
     distinct_dictionaries: 34,
@@ -517,6 +538,7 @@ export const empty_analytics: LogAnalytics = {
   build_adoption: { total: 0, current: 0, behind: 0, stale: 0, unknown: 0, stranded_pct: null, builds: [] },
   storage: { dbs: [], dict_dbs: null },
   api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
+  entry_edits: { ui_total: 0, api_total: 0, daily: [] },
   top_dictionaries: { distinct_dictionaries: 0, month: '2026-07', prev_month: '2026-06', site_visitors_month: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] },
   missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
   boot_health: { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] },

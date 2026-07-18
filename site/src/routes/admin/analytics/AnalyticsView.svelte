@@ -67,6 +67,13 @@
     color: API_VIA_COLORS[row.via] ?? '#94a3b8',
   })))
 
+  // --- Entry edits by channel — watch the UI→agent-API transition. ---
+  const entry_edits = $derived(analytics.entry_edits)
+  const entry_edit_series = $derived([
+    { label: 'UI', color: 'var(--primary)', points: entry_edits.daily.map(point => ({ date: point.day, value: point.ui })) },
+    { label: 'Agent API', color: '#7c3aed', points: entry_edits.daily.map(point => ({ date: point.day, value: point.api })) },
+  ])
+
   const capability = $derived(analytics.capability)
   const below_pct = $derived(capability.total_sessions > 0 ? capability.below_capability_sessions / capability.total_sessions : 0)
 
@@ -281,6 +288,28 @@
           <div class="block-h">Auth channel <span class="hint">context.via</span></div>
           <SegmentedBar segments={api_v1_via_segments} format={format_number} />
         </div>
+      {/if}
+    </section>
+
+    <section class="panel">
+      <h2>Entry edits · UI vs Agent API <span class="hint">creates/updates/deletes per day · forever rollup + live tail</span></h2>
+      {#if entry_edits.ui_total === 0 && entry_edits.api_total === 0}
+        <p class="muted">No entry edits in this window yet. Human editing-UI events and /api/v1 agent writes both land here.</p>
+      {:else}
+        <div class="ver-split">
+          <div class="ver-stat">
+            <div class="ver-value">{format_number(entry_edits.ui_total)}</div>
+            <div class="ver-label">UI edits</div>
+            <div class="ver-sub">entry creates + deletes</div>
+          </div>
+          <div class="ver-stat">
+            <div class="ver-value">{format_number(entry_edits.api_total)}</div>
+            <div class="ver-label">Agent API edits</div>
+            <div class="ver-sub">creates + updates + deletes, bulk-weighted</div>
+          </div>
+        </div>
+        <ComboChart series={entry_edit_series} height={180} value_format={format_number} />
+        <p class="muted">UI counts <code>entry_created</code> + <code>entry_deleted</code> events (in-place field edits aren't discrete events); API counts v1 entry writes, with bulk imports weighted by their created/updated entry counts.</p>
       {/if}
     </section>
 

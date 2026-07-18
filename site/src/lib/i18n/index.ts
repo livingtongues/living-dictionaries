@@ -64,6 +64,18 @@ function report_missing_translation({ key, locale, fallback }: MissingTranslatio
 }
 
 /**
+ * Sections whose keys mix a canonical UI catalog with FREE-FORM USER DATA:
+ * parts of speech + semantic domains accept arbitrary user-entered values by
+ * design (custom semantic domains like `Verbs; Motion`, Mayan dicts storing full
+ * Spanish phrases as POS, Italian `v-è` verb labels). The EN catalog defines the
+ * canonical translatable set — a key absent from it is data, not a UI string, so
+ * it renders raw with NO lookup cascade and NO missing-key report (decision
+ * 2026-07-17: these values will never have translations and must not be promoted
+ * into the catalog or logged as translation gaps).
+ */
+const USER_DATA_SECTIONS = new Set(['ps', 'psAbbrev', 'sd'])
+
+/**
  * A locale can be published (added to `Locales`) a deploy BEFORE its committed
  * files are baked (a fresh locale like `de` is filled in the DB, then the next
  * deploy's export/bake writes the files). Until then the file `import()` rejects
@@ -103,6 +115,11 @@ export async function getTranslator(locale: LocaleCode) {
       throw new Error('Incorrect i18n key. Must be nested 1 level (contain 1 period).')
 
     const [section, item] = splitByFirstPeriod(key)
+
+    // Free-form user-entered value (custom semantic domain / unknown POS) —
+    // render it raw, skip the lookup + missing-key report entirely.
+    if (USER_DATA_SECTIONS.has(section) && loadedTranslations.en[section]?.[item] === undefined)
+      return options?.fallback || item
 
     const localeResult = loadedTranslations[locale][section]?.[item]
     if (localeResult)
@@ -152,6 +169,28 @@ if (import.meta.vitest) {
 
       expect(reported).toEqual(['gl.zz-not-a-real-language'])
       set_missing_translation_handler(null)
+    })
+
+    test('renders free-form POS / semantic-domain values raw with NO missing-key report', async () => {
+      const reported: string[] = []
+      set_missing_translation_handler(info => reported.push(info.key))
+      const t = await getTranslator('en')
+
+      // User-entered values (custom domains, unknown POS) are data, not UI strings.
+      expect(t({ dynamicKey: 'ps.v-è', fallback: 'v-è' })).toBe('v-è')
+      expect(t({ dynamicKey: 'psAbbrev.v-isce', fallback: 'v-isce' })).toBe('v-isce')
+      expect(t({ dynamicKey: 'sd.Verbs; Motion; Pronouns', fallback: 'Verbs; Motion; Pronouns' })).toBe('Verbs; Motion; Pronouns')
+      // No fallback passed → still the raw value, never the prefixed key.
+      expect(t({ dynamicKey: 'sd.Custom Domain' })).toBe('Custom Domain')
+
+      expect(reported).toEqual([])
+      set_missing_translation_handler(null)
+    })
+
+    test('canonical POS / semantic-domain keys still translate', async () => {
+      const t = await getTranslator('en')
+      expect(t({ dynamicKey: 'ps.n' })).toBe('noun')
+      expect(t({ dynamicKey: 'sd.1' })).toBe('Universe and the natural world')
     })
 
     test('does NOT report when an English fallback exists', async () => {

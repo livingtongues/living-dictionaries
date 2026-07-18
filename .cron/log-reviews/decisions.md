@@ -103,8 +103,20 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
 - **2026-07-15 — `nyishi` dict-worker `Maximum call stack size exceeded` halt: WATCH.** 1 anon worker
   `sync_halted_repeated_failure` today; echoes the 07-12 Opata search recursion. Only drill nyishi's data
   if a REAL contributor reports a broken boot; a single null-user worker instance is not actionable.
+- **2026-07-17 — CSV export `friendly-name.ts:9` glosses crash: OPEN P2, one-char fix.** `entry.senses?.[0].glosses`
+  throws for an entry with audio but empty `senses[]` (the `?.` guards `senses` null, not `[0]` undefined) →
+  crashes the whole `/[dict]/export` render. Fix = `entry.senses?.[0]?.glosses`. Filed
+  `.issues/export-friendlyname-glosses-crash.md`. Surfaced by Jacob on `/1p-emanuscript/export`. Verify fixed
+  next run; don't re-diagnose.
+- **2026-07-17 — Phase D: LD ALREADY ships the malformed-`context` 500 guard on BOTH sides.** Read:
+  `log-analytics.ts` has 56 `json_valid(context)` guards / 0 unguarded `json_extract(context)`. Write:
+  `insert-client-log.ts` `stringify_context_capped` never persists invalid JSON (tests for oversize + circular).
+  house's 07-16 "LD has NOT" flag is STALE — DECLINE the inbound port, broadcast back. Don't accept this port
+  next run; don't re-verify unless the code changes.
 - **2026-07-15 — LD is AHEAD on known-noise classification.** The command's standing Phase-D note that
   "LD's raw recent_errors lacks error-cluster + known-noise classification" is STALE — LD has
   `is_noise_msg` UDF + `real_errors` rollup + cluster `is_noise` (`log-analytics.ts` / `classify-error.ts`).
   Don't accept it as an inbound port. Open cross-browser gap: add `Importing a module script failed.` +
   `Unable to preload CSS` to `KNOWN_NOISE_PATTERNS` (build-next, backlog).
+
+- 2026-07-17 — **Free-form user-entered i18n values are DATA, not UI strings — render raw, no warn, no translation, no catalog promotion** (Jacob). Applies to custom semantic domains (`sd.*`, e.g. wenshanhua's 706 warns) AND free-form parts of speech (`ps.*`/`psAbbrev.*`, e.g. Italian `ps.v-è`/`psAbbrev.v-isce`/`psAbbrev.expr` on `1p-emanuscript`). These are NOT fill-translations gaps — the write path passes unknown values through verbatim by design. Code fix dispatched (living-dictionaries/f9fb21c3) to gate free-form values out of the missing-key i18n warn path entirely. STOP re-flagging these warns as actionable; do NOT propose promoting them into the en.json catalog (Jacob declined).

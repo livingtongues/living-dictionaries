@@ -176,9 +176,24 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
   // falls back to session_id for pre-rollout rows with no visitor_id, so the count
   // never undercounts during the capture ramp-up.
   const dict_views = new Map<string, { sessions: Set<string>, anon: Set<string>, visitors: Set<string>, anon_visitors: Set<string> }>()
+  // Agent-API entry edits (creates + updates + deletes), BULK-WEIGHTED: one
+  // `v1_entries_written` row can carry thousands of entries in its context counts
+  // (4,728 in the 2026-07-15 rusitene import), so the plain `event:` row-count
+  // metric wildly undercounts. Feeds the forever UI-vs-API edits trend (the UI
+  // side is already exact via `event:entry_created` / `event:entry_deleted`).
+  let api_entry_edits = 0
   for (const { row, context, session_id } of parsed_rows) {
     const is_bot = session_id ? session_is_bot(session_id) : is_bot_user_agent(row.user_agent)
     const bucket = is_bot ? bot_bucket : bucket_for(row.source)
+    if (row.source === 'server' && row.level === 'info') {
+      if (row.message === 'v1_entries_written') {
+        const created = typeof context?.created === 'number' ? context.created : 0
+        const updated = typeof context?.updated === 'number' ? context.updated : 0
+        api_entry_edits += created + updated
+      } else if (row.message === 'v1_entry_updated' || row.message === 'v1_entry_deleted') {
+        api_entry_edits++
+      }
+    }
     if (!is_bot && session_id && row.message === DICTIONARY_OPENED) {
       const dict_id = typeof context?.dictionary_id === 'string' ? context.dictionary_id : null
       if (dict_id) {
@@ -259,6 +274,8 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
       human_users.add(user)
   }
   metrics.push({ metric: 'users', source: 'client', value: human_users.size })
+  if (api_entry_edits > 0)
+    metrics.push({ metric: 'api_entry_edits', source: 'server', value: api_entry_edits })
   // Only emit bot metrics when bots were actually seen (keeps quiet days lean).
   if (bot_bucket.logs > 0) {
     emit(bot_bucket, 'client', 'bot:')

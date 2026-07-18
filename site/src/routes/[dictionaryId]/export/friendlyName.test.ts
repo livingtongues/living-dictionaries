@@ -19,6 +19,10 @@ test('friendlyName returns second gloss or no gloss if first gloss or gloss obje
   expect(friendlyName({ id: '1234' }, 'e3j3jsi.wav')).toBe('1234_.wav')
 })
 
+test('friendlyName handles an entry with audio but an empty senses array (export-page crash, 2026-07-17)', () => {
+  expect(friendlyName({ id: '1234', senses: [] }, 'e3j3jsi.wav')).toBe('1234_.wav')
+})
+
 test('friendlyName simplifies complicated glosses and strips out non a-z characters', () => {
   expect(
     friendlyName({ id: '1234', senses: [{ glosses: { en: 'How was your day?' } }] }, 'e3j3jsi.jpg'),

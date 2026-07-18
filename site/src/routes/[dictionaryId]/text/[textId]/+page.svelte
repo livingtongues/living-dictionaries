@@ -8,13 +8,18 @@
   import SentenceEditPanel from './SentenceEditPanel.svelte'
   import AppendSentencesModal from './AppendSentencesModal.svelte'
   import TextTags from './TextTags.svelte'
+  import TextAudioPlayer from './TextAudioPlayer.svelte'
+  import KaraokeSentence from './KaraokeSentence.svelte'
   import { get_headword } from '$lib/helpers/orthographies'
+  import { build_text_timings } from '$lib/media/media-timings'
+  import { create_exclusive_audio } from '$lib/utils/exclusive-audio.svelte'
   import type { DictRowType } from '$lib/db/dict-client/dict-live-db.svelte'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
   import IconSystemUiconsTrash from '~icons/system-uicons/trash'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
   import IconFa6SolidPencil from '~icons/fa6-solid/pencil'
   import IconCarbonTranslate from '~icons/carbon/translate'
+  import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
 
   const { data } = $props()
   const { dictionary, can_edit } = $derived(data)
@@ -56,6 +61,57 @@
 
   function sentence_display(sentence: DictRowType<'sentences'>): string {
     return get_headword({ lexeme: sentence.text, orthographies: dictionary.orthographies }).value
+  }
+
+  // --- Audio + karaoke ---
+  const audio_rows = $derived(dict_db?.audio.rows ?? [])
+  const text_audio = $derived(audio_rows.find(audio => audio.text_id === text_id))
+  const audio_url = $derived(text_audio ? page.data.url_from_storage_path(text_audio.storage_path) : '')
+
+  const speaker_labels = $derived.by(() => {
+    if (!text_audio) return []
+    const links = (dict_db?.audio_speakers.rows ?? []).filter(link => link.audio_id === text_audio.id)
+    return links
+      .map(link => dict_db?.speakers.id(link.speaker_id))
+      .filter((speaker): speaker is DictRowType<'speakers'> => !!speaker)
+      .map(speaker => ({ name: speaker.name, decade: speaker.decade }))
+  })
+
+  const sentence_audio_by_id = $derived.by(() => {
+    const by_id: Record<string, DictRowType<'audio'>> = {}
+    for (const audio of audio_rows)
+      if (audio.sentence_id) by_id[audio.sentence_id] = audio
+    return by_id
+  })
+
+  const sentence_timings = $derived(build_text_timings({
+    ordered_sentence_ids: ordered.map(sentence => sentence.id),
+    timings: text_audio?.timings,
+  }))
+
+  let current_ms = $state(0)
+  let playing = $state(false)
+  let player = $state<ReturnType<typeof TextAudioPlayer> | null>(null)
+
+  const active_sentence_id = $derived.by(() => {
+    if (!text_audio) return null
+    for (const [sentence_id, timing] of sentence_timings) {
+      if (timing.start_ms !== null && timing.end_ms !== null
+        && current_ms >= timing.start_ms && current_ms < timing.end_ms)
+        return sentence_id
+    }
+    return null
+  })
+
+  const clip_player = create_exclusive_audio()
+
+  function on_sentence_click(sentence: DictRowType<'sentences'>) {
+    const timing = sentence_timings.get(sentence.id)
+    if (text_audio && timing && timing.start_ms !== null && timing.end_ms !== null) {
+      player?.play_span({ start_ms: timing.start_ms, end_ms: timing.end_ms })
+      return
+    }
+    select_sentence(sentence.id)
   }
 
   // Deep-link support: search results link in-text sentences as /text/{id}#{sentence_id}.
@@ -136,6 +192,35 @@
       <TextTags {text_id} {can_edit} />
     </div>
 
+    {#if text_audio}
+      <div class="audio-bar">
+        <TextAudioPlayer bind:this={player} bind:current_ms bind:playing {audio_url} speakers={speaker_labels} />
+      </div>
+    {/if}
+
+    {#snippet sentence_extras(sentence: DictRowType<'sentences'>)}
+      {@const clip = sentence_audio_by_id[sentence.id]}
+      {#if clip}
+        {@const clip_url = page.data.url_from_storage_path(clip.storage_path)}
+        <button
+          type="button"
+          class="clip-btn"
+          title={page.data.t('audio.listen')}
+          onclick={() => clip_player.toggle(clip_url)}>
+          <IconMaterialSymbolsHearing />
+        </button>
+      {/if}
+      {#if can_edit && text_audio}
+        <button
+          type="button"
+          class="clip-btn"
+          title={page.data.t('sentence.sentence')}
+          onclick={() => select_sentence(sentence.id)}>
+          <IconFa6SolidPencil style="font-size: 0.75rem" />
+        </button>
+      {/if}
+    {/snippet}
+
     <article class="reader" class:interlinear={show_translations}>
       {#each paragraphs as paragraph, paragraph_index (paragraph_index)}
         <p class="paragraph">
@@ -147,23 +232,37 @@
                   class="sentence"
                   class:selected={selected_id === sentence.id}
                   class:anchored={anchored_id === sentence.id}
-                  onclick={() => select_sentence(sentence.id)}>
-                  {sentence_display(sentence)}
+                  class:speaking={active_sentence_id === sentence.id}
+                  onclick={() => on_sentence_click(sentence)}>
+                  <KaraokeSentence
+                    {sentence}
+                    timing={sentence_timings.get(sentence.id)}
+                    fallback_text={sentence_display(sentence)}
+                    {current_ms}
+                    is_active={active_sentence_id === sentence.id} />
                 </button>
+                {@render sentence_extras(sentence)}
                 {#each Object.values(sentence.translation || {}).filter(Boolean) as translation, translation_index (translation_index)}
                   <span class="translation">{translation}</span>
                 {/each}
               </span>
             {:else}
-              <button
-                type="button"
-                class="sentence"
-                id={`s-${sentence.id}`}
-                class:selected={selected_id === sentence.id}
-                class:anchored={anchored_id === sentence.id}
-                onclick={() => select_sentence(sentence.id)}>
-                {sentence_display(sentence)}
-              </button>
+              <span class="sentence-inline" id={`s-${sentence.id}`}>
+                <button
+                  type="button"
+                  class="sentence"
+                  class:selected={selected_id === sentence.id}
+                  class:anchored={anchored_id === sentence.id}
+                  class:speaking={active_sentence_id === sentence.id}
+                  onclick={() => on_sentence_click(sentence)}>
+                  <KaraokeSentence
+                    {sentence}
+                    timing={sentence_timings.get(sentence.id)}
+                    fallback_text={sentence_display(sentence)}
+                    {current_ms}
+                    is_active={active_sentence_id === sentence.id} />
+                </button>{@render sentence_extras(sentence)}
+              </span>
             {/if}
           {/each}
         </p>
@@ -281,6 +380,29 @@
     background-color: color-mix(in srgb, var(--background), var(--color) 10%);
   }
 
+  .audio-bar {
+    position: sticky;
+    top: 0.5rem;
+    z-index: 10;
+    margin-bottom: 1.25rem;
+  }
+
+  .clip-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.375rem;
+    color: var(--color-secondary);
+    vertical-align: middle;
+  }
+
+  .clip-btn:hover {
+    background-color: color-mix(in srgb, var(--background), var(--color) 10%);
+    color: var(--primary);
+  }
+
   .reader {
     font-size: 1.125rem;
     line-height: 1.9;
@@ -310,6 +432,10 @@
 
   .sentence.anchored {
     background-color: color-mix(in srgb, var(--primary) 28%, var(--background));
+  }
+
+  .sentence.speaking {
+    background-color: color-mix(in srgb, var(--primary) 12%, var(--background));
   }
 
   /* Interlinear mode: one sentence per line with its translations beneath. */

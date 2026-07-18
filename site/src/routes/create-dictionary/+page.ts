@@ -1,6 +1,6 @@
 import type { PageLoad } from './$types'
 import { goto } from '$app/navigation'
-import { pruneObject } from '$lib/utils/prune'
+import { prune_object } from '$lib/utils/prune'
 import { api_dictionaries_create } from '$api/dictionaries/create/_call'
 import type { DictionariesCreateRequestBody } from '$api/dictionaries/create/+server'
 import { api_dictionaries_id_exists } from '$api/dictionaries/[id]/_call'
@@ -23,7 +23,7 @@ export const load = (({ parent }) => {
     }
 
     try {
-      const pruned_dictionary = pruneObject(dictionary) as DictionariesCreateRequestBody
+      const pruned_dictionary = prune_object(dictionary) as DictionariesCreateRequestBody
       if (mode === 'development') {
         console.info(pruned_dictionary)
         if (!confirm('Dictionary value logged to console because in dev mode. Do you still want to create this dictionary?')) {

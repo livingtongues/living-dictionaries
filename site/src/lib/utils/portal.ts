@@ -8,18 +8,18 @@
  *
  * Originally adapted from https://github.com/romkor/svelte-portal
  */
-export function portal(node: HTMLElement, target = 'body') {
-  const target_div = document.querySelector(target || 'body')
+export function portal(node: HTMLElement, target = 'body'): { destroy: () => void } | undefined {
+  const target_div = document.querySelector(target)
   if (!target_div)
     return
 
-  const portal = document.createElement('div')
-  target_div.appendChild(portal)
-  portal.appendChild(node)
+  const portal_el = document.createElement('div')
+  target_div.appendChild(portal_el)
+  portal_el.appendChild(node)
 
   return {
     destroy() {
-      portal.parentElement.removeChild(portal)
+      portal_el.parentElement?.removeChild(portal_el)
     },
   }
 }

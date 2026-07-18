@@ -1,8 +1,8 @@
-import { pruneObject } from './prune'
+import { prune_object } from './prune'
 
-test('pruneObject removes empty string, empty array, null, false, and undefined at root and nested level', () => {
+test('prune_object removes empty string, empty array, null, false, and undefined at root and nested level', () => {
   expect(
-    pruneObject({
+    prune_object({
       id: '1234',
       myArrayWithStuff: ['test'],
       emptyString: '',

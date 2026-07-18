@@ -138,6 +138,24 @@ describe(rollup_day, () => {
     expect(rows).toEqual([{ source: 'client', value: 1 }])
   })
 
+  test('emits a bulk-weighted api_entry_edits metric from server v1 entry writes', () => {
+    // One bulk import row carrying thousands of entries in its context counts…
+    add_log({ source: 'server', message: 'v1_entries_written', context: { dictionary_id: 'rusitene', via: 'api_key', created: 4728, skipped: 2, updated: 3, failed: 1 } })
+    // …plus per-row single-entry ops.
+    add_log({ source: 'server', message: 'v1_entry_updated', context: { dictionary_id: 'river', via: 'api_key' } })
+    add_log({ source: 'server', message: 'v1_entry_deleted', context: { dictionary_id: 'river', via: 'api_key' } })
+    // Non-entry v1 ops and client rows must NOT count toward the API channel.
+    add_log({ source: 'server', message: 'v1_media_attached', context: { dictionary_id: 'river' } })
+    add_log({ message: 'entry_created', user_id: 'u1', context: { session_id: 's1' } })
+
+    rollup_day({ day: '2026-06-01', shared_db, logs_db })
+
+    // 4728 created + 3 updated (skipped/failed excluded) + 1 update + 1 delete.
+    expect(metric('2026-06-01', 'api_entry_edits', 'server')).toBe(4733)
+    // The UI channel rides the existing event metric — no separate metric needed.
+    expect(metric('2026-06-01', 'event:entry_created')).toBe(1)
+  })
+
   test('is idempotent — re-running overwrites, never doubles', () => {
     add_log({ message: 'heartbeat', context: { session_id: 's1' } })
     rollup_day({ day: '2026-06-01', shared_db, logs_db })

@@ -7,6 +7,14 @@ write path normalizes case-insensitively (abbrev or full English name → canoni
 values pass through verbatim — Mayan dicts store full Spanish phrases as POS). Added 2026-07-02
 after the river import stored `["N","CONJ",…]` and the entries-filter facet showed raw keys.
 
+**Display side (decision 2026-07-17, shipped 2026-07-18):** `ps` / `psAbbrev` / `sd` are
+"user-data sections" in `$lib/i18n/index.ts` (`USER_DATA_SECTIONS`) — a key absent from the EN
+catalog is free-form user data (custom semantic domains, Mayan Spanish-phrase POS, Italian `v-è`
+verb labels), rendered raw with NO locale lookup and NO missing-key warn/telemetry. Jacob
+explicitly declined both promoting such values into en.json and a silent catch-all swallow; the
+EN-catalog-membership check IS the canonical/data boundary. Canonical keys still translate and
+still report if genuinely broken.
+
 River's 2,549 affected prod senses were repaired in place (lowercased + `updated_at` bumped so the
 trigger advanced `last_modified_at` and clients pulled the fix via `/changes` — no history events;
 backup left at `/data/dictionaries/river.db.bak-2026-07-02T02-56-52-813Z`).

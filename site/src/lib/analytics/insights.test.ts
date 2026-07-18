@@ -40,6 +40,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     build_adoption: { total: 0, current: 0, behind: 0, stale: 0, unknown: 0, stranded_pct: null, builds: [] },
     storage: { dbs: [], dict_dbs: null },
     api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
+    entry_edits: { ui_total: 0, api_total: 0, daily: [] },
     top_dictionaries: { distinct_dictionaries: 0, month: '2026-07', prev_month: '2026-06', site_visitors_month: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] },
     missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
     boot_health: { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] },

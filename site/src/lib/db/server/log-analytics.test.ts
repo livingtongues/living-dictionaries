@@ -302,6 +302,36 @@ describe(get_log_analytics, () => {
     ])
   })
 
+  test('entry_edits merges rollup + live tail into a UI-vs-API daily trend, bulk-weighted', () => {
+    // Finalized days: rollup metrics only (no raw rows left). 06-28 carries the
+    // weighted `api_entry_edits` metric; 06-27 predates it → `event:v1_*` fallback.
+    db.prepare(`
+      INSERT INTO log_daily_metrics (day, metric, source, value) VALUES
+        ('2026-06-28', 'event:entry_created', 'client', 5),
+        ('2026-06-28', 'event:entry_deleted', 'client', 2),
+        ('2026-06-28', 'api_entry_edits', 'server', 4728),
+        ('2026-06-27', 'event:v1_entry_updated', 'server', 3),
+        ('2026-06-30', 'event:entry_created', 'client', 99)
+    `).run()
+    // Live day (raw rows exist) — live wins, so the 99-row rollup above is ignored.
+    add_log({ day: '2026-06-30', message: 'entry_created', user_id: 'u1', context: { session_id: 's1' } })
+    add_log({ day: '2026-06-30', message: 'entry_created', user_id: 'u1', context: { session_id: 's1' } })
+    add_log({ day: '2026-06-30', message: 'entry_deleted', user_id: 'u1', context: { session_id: 's1' } })
+    add_log({ day: '2026-06-30', source: 'server', message: 'v1_entries_written', context: { dictionary_id: 'river', via: 'api_key', created: 10, updated: 2, skipped: 5 } })
+    add_log({ day: '2026-06-30', source: 'server', message: 'v1_entry_updated', context: { dictionary_id: 'river', via: 'api_key' } })
+    // Non-entry ops don't count in either channel.
+    add_log({ day: '2026-06-30', source: 'server', message: 'v1_media_attached', context: { dictionary_id: 'river' } })
+
+    const { entry_edits } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    expect(entry_edits.daily).toHaveLength(30) // zero-filled window
+    const by_day = new Map(entry_edits.daily.map(point => [point.day, point]))
+    expect(by_day.get('2026-06-30')).toEqual({ day: '2026-06-30', ui: 3, api: 13 })
+    expect(by_day.get('2026-06-28')).toEqual({ day: '2026-06-28', ui: 7, api: 4728 })
+    expect(by_day.get('2026-06-27')).toEqual({ day: '2026-06-27', ui: 0, api: 3 })
+    expect(entry_edits.ui_total).toBe(10)
+    expect(entry_edits.api_total).toBe(4744)
+  })
+
   test('server_faults clusters server error rows by route+message and flags schema drift', () => {
     // Two occurrences of the same labelled fault, one carrying a status.
     add_log({ day: '2026-06-30', source: 'server', level: 'error', message: 'dictionary_create_failed', context: { route: '/api/dictionaries/create', status: 500 } })
@@ -1089,6 +1119,162 @@ describe(get_log_analytics, () => {
               "version": "v-old",
             },
           ],
+          "entry_edits": {
+            "api_total": 0,
+            "daily": [
+              {
+                "api": 0,
+                "day": "2026-06-01",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-02",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-03",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-04",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-05",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-06",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-07",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-08",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-09",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-10",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-11",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-12",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-13",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-14",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-15",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-16",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-17",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-18",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-19",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-20",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-21",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-22",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-23",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-24",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-25",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-26",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-27",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-28",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-29",
+                "ui": 0,
+              },
+              {
+                "api": 0,
+                "day": "2026-06-30",
+                "ui": 0,
+              },
+            ],
+            "ui_total": 0,
+          },
           "error_clusters": [
             {
               "bot_pct": 0,

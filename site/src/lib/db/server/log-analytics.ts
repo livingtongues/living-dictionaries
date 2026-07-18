@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import process from 'node:process'
 import { version } from '$app/environment'
 import { is_expected_error_response, is_known_noise, is_noise_error_message } from '$lib/debug/classify-error'
-import { ALL_TRACKED_EVENTS, DICTIONARY_OPENED } from '$lib/debug/log-events'
+import { ALL_TRACKED_EVENTS, DICTIONARY_OPENED, ENTRY_CREATED, ENTRY_DELETED } from '$lib/debug/log-events'
 import { is_below_db_worker_capability, is_bot_user_agent, parse_user_agent } from '$lib/debug/parse-user-agent'
 import { SYNCABLE_TABLE_NAMES } from '$lib/db/sync/types'
 import { distance_bucket, DISTANCE_BUCKETS, distance_to_origin_km } from '$lib/geo/distance'
@@ -363,6 +363,8 @@ export interface LogAnalytics {
   storage: StorageHealth
   /** Agent/API write activity — the server-emitted `v1_*` events (hot window only). */
   api_v1: ApiV1Activity
+  /** Entry edits by channel (UI vs agent API), forever rollup + live tail. */
+  entry_edits: EntryEditChannels
   /** Per-dictionary viewership (forever rollup + live tail) — who's being viewed, how much. */
   top_dictionaries: TopDictionaries
   /** Top missing i18n keys — the live translation-gap worklist (hot window, human). */
@@ -530,6 +532,24 @@ export interface ApiV1Activity {
   by_dictionary: { dictionary_id: string, count: number }[]
   /** Auth channel split (`context.via`: `api_key` vs session), highest first. */
   by_via: { via: string, count: number }[]
+}
+
+/**
+ * Entry edits by channel — human editing UI vs the `/api/v1` agent write surface —
+ * so the UI→API transition can be watched as the write-API matures (Jacob,
+ * 2026-07-17). UI = `entry_created` + `entry_deleted` client events (in-place
+ * field edits aren't discrete events, so the UI line is creates + deletes only).
+ * API = server `v1_entries_written` weighted by its `context.created + updated`
+ * counts (one bulk row can carry thousands of entries) + `v1_entry_updated` +
+ * `v1_entry_deleted` rows. Finalized days come from the forever rollup
+ * (`event:entry_*` + the weighted `api_entry_edits` metric); the live tail scans
+ * raw rows. Rollup days predating the `api_entry_edits` metric fall back to
+ * `event:v1_*` row counts (undercounts bulk writes — better than zero).
+ */
+export interface EntryEditChannels {
+  ui_total: number
+  api_total: number
+  daily: { day: string, ui: number, api: number }[]
 }
 
 /** One dictionary's viewership over the window — most-viewed first. */
@@ -776,6 +796,7 @@ const EMPTY_STORAGE: LogAnalytics['storage'] = { dbs: [], dict_dbs: null }
 const EMPTY_BOOT_HEALTH: LogAnalytics['boot_health'] = { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] }
 const EMPTY_UPTIME: LogAnalytics['uptime'] = { probes: 0, availability: null, ttfb: { p50: null, p95: null }, total: { p50: null, p95: null }, vantages: [], daily: [] }
 const EMPTY_API_V1: LogAnalytics['api_v1'] = { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] }
+const EMPTY_ENTRY_EDITS: LogAnalytics['entry_edits'] = { ui_total: 0, api_total: 0, daily: [] }
 const EMPTY_TOP_DICTIONARIES: LogAnalytics['top_dictionaries'] = { distinct_dictionaries: 0, month: '', prev_month: '', site_visitors_month: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] }
 const EMPTY_MISSING_I18N: LogAnalytics['missing_i18n_keys'] = { total: 0, distinct_keys: 0, sessions: 0, keys: [] }
 const EMPTY_EVENT_COVERAGE: LogAnalytics['event_coverage'] = { events: [], never_emitted: 0 }
@@ -873,6 +894,7 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
   const storage = want_diagnostics ? timed('build_storage', () => build_storage({ shared_db, logs_db })) : EMPTY_STORAGE
   // Usage-heavy (analytics page only) — skipped for the diagnostics/light tiers.
   const api_v1 = want_usage ? timed('build_api_v1', () => build_api_v1_activity(ctx)) : EMPTY_API_V1
+  const entry_edits = want_usage ? timed('build_entry_edits', () => build_entry_edit_channels({ ctx, rollup_rows, live_by_day })) : EMPTY_ENTRY_EDITS
   const top_dictionaries = want_usage ? timed('build_top_dictionaries', () => build_top_dictionaries(ctx)) : EMPTY_TOP_DICTIONARIES
   const missing_i18n_keys = want_usage ? timed('build_missing_i18n', () => build_missing_i18n_keys(ctx)) : EMPTY_MISSING_I18N
   const boot_health = want_diagnostics ? timed('build_boot_health', () => build_boot_health(ctx)) : EMPTY_BOOT_HEALTH
@@ -909,6 +931,7 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
     build_adoption,
     storage,
     api_v1,
+    entry_edits,
     top_dictionaries,
     missing_i18n_keys,
     boot_health,
@@ -2344,6 +2367,83 @@ function build_api_v1_activity(ctx: AnalyticsContext): ApiV1Activity {
     by_dictionary: desc(by_dictionary).map(([dictionary_id, count]) => ({ dictionary_id, count })),
     by_via: desc(by_via).map(([via, count]) => ({ via, count })),
   }
+}
+
+/**
+ * Entry edits by channel (see the `EntryEditChannels` doc). Zero-filled ascending
+ * daily series over the full window: finalized days from the rollup
+ * (`event:entry_created`/`event:entry_deleted` for UI, the bulk-weighted
+ * `api_entry_edits` metric for API), live-tail days from raw rows — live wins
+ * per day, same contract as `build_daily_series`.
+ */
+function build_entry_edit_channels({ ctx, rollup_rows, live_by_day }: {
+  ctx: AnalyticsContext
+  rollup_rows: RollupRow[]
+  live_by_day: Map<string, DailyPoint>
+}): EntryEditChannels {
+  const { logs_db, audience_filter, rollup_metric, live_start_iso, days, now } = ctx
+
+  const ui_by_day = new Map<string, number>()
+  const api_by_day = new Map<string, number>()
+
+  // Rollup days pre-dating the `api_entry_edits` metric (shipped 2026-07-18):
+  // collect their `event:v1_*` row counts as a fallback (undercounts bulk writes).
+  const has_api_metric = new Set<string>()
+  const legacy_api_by_day = new Map<string, number>()
+  for (const row of rollup_rows) {
+    if (live_by_day.has(row.day))
+      continue // live wins for this day
+    const metric = rollup_metric(row.metric)
+    if (metric === null)
+      continue // wrong audience namespace
+    if (metric === `event:${ENTRY_CREATED}` || metric === `event:${ENTRY_DELETED}`) {
+      bump(ui_by_day, row.day, row.value)
+    } else if (metric === 'api_entry_edits') {
+      has_api_metric.add(row.day)
+      bump(api_by_day, row.day, row.value)
+    } else if (metric === 'event:v1_entries_written' || metric === 'event:v1_entry_updated' || metric === 'event:v1_entry_deleted') {
+      bump(legacy_api_by_day, row.day, row.value)
+    }
+  }
+  for (const [day, value] of legacy_api_by_day) {
+    if (!has_api_metric.has(day))
+      bump(api_by_day, day, value)
+  }
+
+  // Live tail — UI analytics events (client rows, audience-filtered like every usage panel).
+  for (const row of logs_db.prepare(`
+    SELECT substr(received_at, 1, 10) day, COUNT(*) count FROM client_logs
+    WHERE received_at >= ? AND level = 'info' AND message IN (?, ?) AND ${audience_filter}
+    GROUP BY day
+  `).all(live_start_iso, ENTRY_CREATED, ENTRY_DELETED) as { day: string, count: number }[])
+    bump(ui_by_day, row.day, row.count)
+
+  // Live tail — v1 entry writes (server rows are never bots), bulk-weighted.
+  for (const row of logs_db.prepare(`
+    SELECT substr(received_at, 1, 10) day,
+           SUM(CASE WHEN message = 'v1_entries_written'
+                THEN coalesce(json_extract(CASE WHEN json_valid(context) THEN context END, '$.created'), 0)
+                   + coalesce(json_extract(CASE WHEN json_valid(context) THEN context END, '$.updated'), 0)
+                ELSE 1 END) count
+    FROM client_logs
+    WHERE received_at >= ? AND source = 'server' AND level = 'info'
+      AND message IN ('v1_entries_written', 'v1_entry_updated', 'v1_entry_deleted')
+    GROUP BY day
+  `).all(live_start_iso) as { day: string, count: number }[])
+    bump(api_by_day, row.day, row.count)
+
+  let ui_total = 0
+  let api_total = 0
+  const daily: EntryEditChannels['daily'] = []
+  for (let offset = days - 1; offset >= 0; offset--) {
+    const day = day_string(new Date(now.getTime() - offset * 86_400_000))
+    const ui = ui_by_day.get(day) ?? 0
+    const api = api_by_day.get(day) ?? 0
+    ui_total += ui
+    api_total += api
+    daily.push({ day, ui, api })
+  }
+  return { ui_total, api_total, daily }
 }
 
 interface DictTotals { visitors_month: number, anon_visitors_month: number, visitors_prev_month: number, visitors_7d: number, visits_30d: number }

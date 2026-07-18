@@ -151,6 +151,8 @@
     "tap_to_record": "Tap to Record",
     "stop_recording": "Stop Recording",
     "listen": "Listen",
+    "pause": "Pause",
+    "unavailable": "Audio unavailable",
     "add_audio": "Add Audio",
     "undo_permission_denied_explanation": "Permission to access your microphone was denied. If you previously clicked 'No', please reload and click 'Yes' when your browser asks for permission to use your microphone.",
     "reload": "Reload",
