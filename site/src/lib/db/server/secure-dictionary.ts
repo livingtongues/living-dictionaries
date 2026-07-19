@@ -8,7 +8,7 @@ import type { DictRole } from './get-dictionary-role'
  * bypass does NOT apply to secure dictionaries.
  *
  * Blocked callers must not be able to distinguish a secure dictionary from a
- * nonexistent one: pages redirect to `/` exactly like an unknown slug, and API
+ * nonexistent one: pages return the same 404 as an unknown slug, and API
  * endpoints answer 404 `dictionary not found`.
  */
 

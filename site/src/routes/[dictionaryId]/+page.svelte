@@ -30,7 +30,6 @@
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import { key_between } from '$lib/api/v1/fractional-index'
   import { build_citation } from './contributors/build-citation'
-  import { MINIMUM_ABOUT_LENGTH } from '$lib/constants'
   import { text_snippet, top_glosses } from './home/home-helpers'
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
@@ -50,6 +49,7 @@
     search_index_updated,
     auth_user,
     is_manager,
+    about_is_too_short,
     update_dictionary,
   } = $derived(data)
   // Resolved on SSR/hydration; a pending streamed promise on client-nav (see the
@@ -306,7 +306,7 @@
   const cover_src = $derived(has_cover_image ? image_src(dictionary.featured_image.serving_url, 'w1600') : null)
   let show_cover_lightbox = $state(false)
   const nudge_image = $derived(can_edit_cover && !has_cover_image)
-  const nudge_about = $derived(is_manager && (dictionary.about?.length || 0) < MINIMUM_ABOUT_LENGTH)
+  const nudge_about = $derived(is_manager && about_is_too_short())
   const any_nudge = $derived(nudge_star || nudge_location || nudge_image || nudge_about)
 </script>
 

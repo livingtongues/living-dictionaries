@@ -3,12 +3,14 @@ import { error } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
 import { dictionary_db_path, get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_shared_db } from '$lib/db/server/shared-db'
+import { about_has_meaningful_content } from '$lib/markdown/about-content'
 import { SITEMAP_CACHE_CONTROL, urlset } from '$lib/server/sitemap-helpers'
 
 /**
  * Child sitemap for one public dictionary (listed by the `/sitemap.xml` index):
- * `/{url}` (the dictionary home), `/{url}/entries`, `/{url}/about`, `/{url}/grammar` (when grammar content exists)
- * and every `/{url}/entry/{id}` from the dictionary's dict.db. The special id
+ * `/{url}` (the dictionary home), `/{url}/entries`, `/{url}/about` (when it has
+ * meaningful content), `/{url}/grammar` (when grammar content exists), and every
+ * `/{url}/entry/{id}` from the dictionary's dict.db. The special id
  * `site` yields the static top-level pages.
  *
  * Deletion is HARD in dict.db (rows go to `deletes`), so every `entries` row is a
@@ -34,8 +36,8 @@ export const GET: RequestHandler = ({ params, url: request_url }) => {
   }
 
   const dictionary = get_shared_db()
-    .prepare('SELECT id, url FROM dictionaries WHERE public = 1 AND id = ?')
-    .get(params.dict_id) as { id: string, url: string | null } | undefined
+    .prepare('SELECT id, url, about FROM dictionaries WHERE public = 1 AND id = ?')
+    .get(params.dict_id) as { id: string, url: string | null, about: string | null } | undefined
   if (!dictionary)
     error(404, 'Not found')
 
@@ -54,7 +56,7 @@ export const GET: RequestHandler = ({ params, url: request_url }) => {
   const urls: { loc: string, lastmod?: string }[] = [
     { loc: `${origin}/${slug}` },
     { loc: `${origin}/${slug}/entries` },
-    { loc: `${origin}/${slug}/about` },
+    ...about_has_meaningful_content(dictionary.about) ? [{ loc: `${origin}/${slug}/about` }] : [],
     ...has_grammar ? [{ loc: `${origin}/${slug}/grammar` }] : [],
   ]
 

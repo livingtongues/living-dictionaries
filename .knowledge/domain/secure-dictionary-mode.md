@@ -9,8 +9,8 @@ Implementation lives in `$lib/db/server/secure-dictionary.ts` + `verify_auth_dic
   There is deliberately NO invite-flow exemption and NO settings-page toggle.
 - **Admin levels 1 (Super Manager) and 2 (Admin) are intentionally blocked** — this is the one
   place the site-wide "level ≥ 1 bypasses per-dict roles" rule does not apply. Don't "fix" it.
-- **No-existence-leak is a hard requirement**: blocked pages get the byte-identical unknown-slug
-  `301 /`; blocked API calls get the same `404 dictionary not found` as an unknown id (including
+- **No-existence-leak is a hard requirement**: blocked pages get the same unknown-slug `404`
+  response; blocked API calls get the same `404 dictionary not found` as an unknown id (including
   converting the would-be 401 for anonymous callers). A *member* with insufficient rank keeps the
   normal 403 — they already know the dict exists.
 - **Accepted leaks** (Jacob signed off): media bytes on public GCS/lh3 URLs remain fetchable by

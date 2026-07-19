@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit'
 import type { TablesUpdate } from '$lib/types'
 import { get, readable } from 'svelte/store'
 import type { LayoutLoad } from './$types'
-import { DICTIONARY_UPDATED_LOAD_TRIGGER, MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
+import { DICTIONARY_UPDATED_LOAD_TRIGGER, ResponseCodes } from '$lib/constants'
 import { url_from_storage_path } from '$lib/utils/media-url'
 import { create_guarded_writes } from '$lib/db/dict-client/guarded-writes'
 import { get_dict_session } from '$lib/db/dict-client/dict-session'
@@ -86,7 +86,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
     })
 
     function about_is_too_short() {
-      return (dictionary.about?.length || 0) < MINIMUM_ABOUT_LENGTH
+      return !data.about_is_complete
     }
 
     async function update_dictionary(change: TablesUpdate<'dictionaries'>) {

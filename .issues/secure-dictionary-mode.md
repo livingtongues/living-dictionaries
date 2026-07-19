@@ -12,7 +12,7 @@ value already exists in `DICTIONARY_BUCKETS`; only enforcement is missing). Curr
 - **Who may access**: any **direct `dictionary_roles` grant** (contributor/editor/manager) on the
   dict, OR **site admin level ≥ 3** (Super Admin). Levels 1 (Super Manager) and 2 (Admin) are
   **blocked** — this deliberately breaks the usual `admin_level >= 1` bypass, for secure dicts only.
-- **Blocked users**: redirect to `/` exactly like an unknown slug — a secure dict must be
+- **Blocked users**: return 404 exactly like an unknown slug — a secure dict must be
   indistinguishable from a nonexistent one (no existence leak). API endpoints answer the same
   404 `dictionary not found` they give for unknown ids.
 - **API keys** (`/api/v1`): keep working unchanged — keys are dict-scoped and minted by manager+,
@@ -43,7 +43,7 @@ Unit-tested inline (`import.meta.vitest`).
 ### 1. Page shell — `[dictionaryId]/+layout.server.ts` ✳ the "don't pass go" gate
 After `get_dictionary_by_url_or_id` and **before** the canonical-slug 301 (that redirect itself
 leaks existence): if secure and `!can_access({ role: ssr_role, admin_level: ssr_user?.admin_level ?? 0 })`
-→ `redirect(MOVED_PERMANENTLY, '/')` — byte-identical outcome to the unknown-slug branch.
+→ `error(NOT_FOUND, 'Not found')` — byte-identical outcome to the unknown-slug branch.
 - `ssr_role` lookup currently only runs when `ssr_user` exists — anonymous → no role → redirect. ✅
 - `ssr_user.admin_level` comes from `get_user` → `resolve_admin_level` (allow-list + roles +
   dev cookie), already computed in root `+layout.server.ts`. Zero new queries.
@@ -125,8 +125,8 @@ and for the `/changes` push path (`resolve_caller`), matching client semantics. 
 2. `tsc`, `pnpm lint`, `pnpm check`.
 3. Dev e2e (dev-auth + puppeteer, port 3041): set a local dict `bucket='secure'` in
    `.data/shared.db`, then:
-   - anonymous + logged-in-no-role → `/{dict}` and `/{dict}/entries` land on `/`
-   - `dev_admin_level` 2 → redirected; 3 → full dict loads (boot via VPS snapshot path)
+   - anonymous + logged-in-no-role → `/{dict}` and `/{dict}/entries` return 404
+   - `dev_admin_level` 2 → 404; 3 → full dict loads (boot via VPS snapshot path)
    - manager/contributor of the dict → loads + sync works
    - `curl` `/api/dictionary/{id}/changes` (anon) → 404; `/api/dictionary/{id}/db` (anon) → 401,
      contributor → 200; `/api/dictionary/{id}/entry/{entryId}` (anon) → 404

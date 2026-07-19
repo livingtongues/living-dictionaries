@@ -22,6 +22,7 @@ declare global {
       is_manager?: boolean
       is_contributor?: boolean
       dictionary?: DictionaryLayoutData['dictionary']
+      about_is_complete?: boolean
       writes?: DictionaryLayoutData['writes']
       url_from_storage_path?: DictionaryLayoutData['url_from_storage_path']
       entries_data?: DictionaryLayoutData['entries_data']

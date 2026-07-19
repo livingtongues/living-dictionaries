@@ -1,16 +1,17 @@
-import { redirect } from '@sveltejs/kit'
+import { error, redirect } from '@sveltejs/kit'
 import type { Tables } from '$lib/types'
 import type { LayoutServerLoad } from './$types'
 import { DICTIONARY_UPDATED_LOAD_TRIGGER, ResponseCodes } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { get_user_dict_role } from '$lib/db/server/get-dictionary-role'
 import { can_access_secure_dictionary, is_secure_dictionary } from '$lib/db/server/secure-dictionary'
+import { about_has_meaningful_content } from '$lib/markdown/about-content'
 import { build_canonical_path } from './canonical-path'
 
 /**
  * M4 · SSR-resolve the dictionary catalog row from `shared.db` (better-sqlite3,
  * server-only) by url-slug first, then id. Replaces the M1 stub lookup in
- * `+layout.ts`. Unknown slug → 301 home (matches the legacy behavior). The
+ * `+layout.ts`. Unknown slugs return a genuine 404. The
  * per-dictionary content (entries, info, editors) still loads via the stub in
  * `+layout.ts` for now — converted incrementally in later M4 phases.
  *
@@ -30,18 +31,18 @@ export const load: LayoutServerLoad = async ({ params: { dictionaryId: dictionar
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
   const dictionary = get_dictionary_by_url_or_id(dictionary_url)
   if (!dictionary)
-    redirect(ResponseCodes.MOVED_PERMANENTLY, '/')
+    error(ResponseCodes.NOT_FOUND, 'Not found')
 
   const { ssr_user } = await parent()
   const ssr_role = ssr_user ? get_user_dict_role({ dictionary_id: dictionary.id, user_id: ssr_user.id }) : null
 
   // Secure dictionary (`bucket = 'secure'`): only direct role holders and
   // level-3 admins may pass — everyone else gets the exact unknown-slug
-  // redirect, BEFORE the canonicalize 301 below (which would itself confirm the
+  // 404, BEFORE the canonicalize 301 below (which would itself confirm the
   // dictionary exists). Zero cost on the hot path: bucket rides on the row we
   // already fetched, ssr_role and admin_level are already resolved.
   if (is_secure_dictionary(dictionary) && !can_access_secure_dictionary({ role: ssr_role, admin_level: ssr_user?.admin_level ?? 0 }))
-    redirect(ResponseCodes.MOVED_PERMANENTLY, '/')
+    error(ResponseCodes.NOT_FOUND, 'Not found')
 
   // Canonicalize: reached via the legacy id (or a stale url) → 301 to the
   // canonical url slug, path + query preserved. `encodeURIComponent` matters —
@@ -49,5 +50,9 @@ export const load: LayoutServerLoad = async ({ params: { dictionaryId: dictionar
   if (dictionary.url && dictionary_url !== dictionary.url)
     redirect(ResponseCodes.MOVED_PERMANENTLY, build_canonical_path({ pathname: url.pathname, search: url.search, canonical_url: dictionary.url }))
 
-  return { dictionary: dictionary as unknown as Tables<'dictionaries'>, ssr_role }
+  return {
+    dictionary: dictionary as unknown as Tables<'dictionaries'>,
+    ssr_role,
+    about_is_complete: about_has_meaningful_content(dictionary.about),
+  }
 }

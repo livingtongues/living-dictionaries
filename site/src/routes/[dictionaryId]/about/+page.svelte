@@ -3,6 +3,7 @@
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import { about_has_meaningful_content } from '$lib/markdown/about-content'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text as sanitize } from '$lib/markdown/sanitize-rich-text'
 
@@ -63,7 +64,7 @@
 </div>
 
 <SeoMetaTags
-  norobots={!dictionary.public}
+  norobots={!dictionary.public || !about_has_meaningful_content(dictionary.about)}
   title={page.data.t('header.about')}
   dictionaryName={dictionary.name}
   description="Learn about the background and creation of this Living Dictionary."
