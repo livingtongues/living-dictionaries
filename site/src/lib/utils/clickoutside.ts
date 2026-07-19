@@ -6,15 +6,15 @@ interface Attributes {
 }
 
 export function clickoutside(node: Node): ActionReturn<undefined, Attributes> {
-  const handleClick = (event: MouseEvent) => {
+  const handle_click = (event: MouseEvent) => {
     if (node && !node.contains(event.target as Node) && !event.defaultPrevented) {
       node.dispatchEvent(new CustomEvent('clickoutside'))
     }
   }
-  document.addEventListener('click', handleClick, true)
+  document.addEventListener('click', handle_click, true)
   return {
     destroy() {
-      document.removeEventListener('click', handleClick, true)
+      document.removeEventListener('click', handle_click, true)
     },
   }
 }

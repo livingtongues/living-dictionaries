@@ -40,7 +40,7 @@ export enum ResponseCodes {
   SERVICE_UNAVAILABLE = 503,
 }
 
-export const MINIMUM_ABOUT_LENGTH = 200
+export const MINIMUM_ABOUT_LENGTH = 100
 
 // invalidate() key that re-runs the [dictionaryId] layout loads (universal + server) after a catalog edit
 export const DICTIONARY_UPDATED_LOAD_TRIGGER = 'dictionary:updated'

@@ -103,11 +103,10 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
 - **2026-07-15 — `nyishi` dict-worker `Maximum call stack size exceeded` halt: WATCH.** 1 anon worker
   `sync_halted_repeated_failure` today; echoes the 07-12 Opata search recursion. Only drill nyishi's data
   if a REAL contributor reports a broken boot; a single null-user worker instance is not actionable.
-- **2026-07-17 — CSV export `friendly-name.ts:9` glosses crash: OPEN P2, one-char fix.** `entry.senses?.[0].glosses`
-  throws for an entry with audio but empty `senses[]` (the `?.` guards `senses` null, not `[0]` undefined) →
-  crashes the whole `/[dict]/export` render. Fix = `entry.senses?.[0]?.glosses`. Filed
-  `.issues/export-friendlyname-glosses-crash.md`. Surfaced by Jacob on `/1p-emanuscript/export`. Verify fixed
-  next run; don't re-diagnose.
+- **2026-07-18 — CSV export `friendly-name.ts` glosses crash: CLOSED, verified fixed in prod.** The
+  `entry.senses?.[0]?.glosses` optional-chain fix (all 3 refs) shipped in build `1784341957685`; **0
+  `glosses` errors in 24h**, the only 6 rows in 48h are all on the pre-fix build `1784294143202` (last
+  07-17 13:56 UTC). Close `.issues/export-friendlyname-glosses-crash.md`. Don't re-raise.
 - **2026-07-17 — Phase D: LD ALREADY ships the malformed-`context` 500 guard on BOTH sides.** Read:
   `log-analytics.ts` has 56 `json_valid(context)` guards / 0 unguarded `json_extract(context)`. Write:
   `insert-client-log.ts` `stringify_context_capped` never persists invalid JSON (tests for oversize + circular).

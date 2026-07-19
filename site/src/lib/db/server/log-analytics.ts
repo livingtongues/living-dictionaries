@@ -645,6 +645,22 @@ function bump(map: Map<string, number>, key: string, by = 1): void {
   map.set(key, (map.get(key) ?? 0) + by)
 }
 
+/**
+ * The ascending daily window every zero-filled panel iterates over: today back
+ * through `days - 1` days ago, oldest-first, as `YYYY-MM-DD` strings. Owns the
+ * off-by-one-prone `day_string(now - offset * 86_400_000)` walk so a new daily
+ * panel can't silently drift — the classic bug is zero-filling only the days that
+ * had data instead of the whole window. Pair with `.map()` + per-panel `by_day`
+ * Maps to build the series (live wins, then rollup, then empty). See the
+ * log-analytics cross-app map for the full rollup + live-tail merge contract.
+ */
+function zero_fill_days({ days, now }: { days: number, now: Date }): string[] {
+  const out: string[] = []
+  for (let offset = days - 1; offset >= 0; offset--)
+    out.push(day_string(new Date(now.getTime() - offset * 86_400_000)))
+  return out
+}
+
 interface RollupRow { day: string, metric: string, source: string, value: number }
 
 /** One window session, aggregated from the materialized finalized days + the live tail. */
@@ -1183,7 +1199,7 @@ function build_uptime(ctx: AnalyticsContext): UptimeSummary {
  * index so the usage builder can reuse them without a second query.
  */
 function build_daily_series(ctx: AnalyticsContext): { daily: DailyPoint[], rollup_rows: RollupRow[], live_by_day: Map<string, DailyPoint> } {
-  const { logs_db, shared_db, audience_filter, rollup_metric, window_start_iso, window_start_day, live_start_iso, current_app_version, days, now } = ctx
+  const { logs_db, shared_db, audience_filter, rollup_metric, window_start_iso, window_start_day, live_start_iso, current_app_version } = ctx
   // Bot/headless rows excluded so the sessions/users/logs/errors trend reflects real people.
   // `real_errors` drops known-noise / expected-response rows; `stale_errors` (deploy-day fold)
   // counts errors from a non-current app_version so a redeploy burst auto-explains.
@@ -1247,11 +1263,8 @@ function build_daily_series(ctx: AnalyticsContext): { daily: DailyPoint[], rollu
       point.real_errors = point.errors
   }
 
-  const daily: DailyPoint[] = []
-  for (let offset = days - 1; offset >= 0; offset--) {
-    const day = day_string(new Date(now.getTime() - offset * 86_400_000))
-    daily.push(live_by_day.get(day) ?? rollup_by_day.get(day) ?? { day, sessions: 0, users: 0, errors: 0, real_errors: 0, stale_errors: 0, logs: 0 })
-  }
+  const daily: DailyPoint[] = zero_fill_days(ctx).map(day =>
+    live_by_day.get(day) ?? rollup_by_day.get(day) ?? { day, sessions: 0, users: 0, errors: 0, real_errors: 0, stale_errors: 0, logs: 0 })
   return { daily, rollup_rows, live_by_day }
 }
 
@@ -2381,7 +2394,7 @@ function build_entry_edit_channels({ ctx, rollup_rows, live_by_day }: {
   rollup_rows: RollupRow[]
   live_by_day: Map<string, DailyPoint>
 }): EntryEditChannels {
-  const { logs_db, audience_filter, rollup_metric, live_start_iso, days, now } = ctx
+  const { logs_db, audience_filter, rollup_metric, live_start_iso } = ctx
 
   const ui_by_day = new Map<string, number>()
   const api_by_day = new Map<string, number>()
@@ -2434,15 +2447,13 @@ function build_entry_edit_channels({ ctx, rollup_rows, live_by_day }: {
 
   let ui_total = 0
   let api_total = 0
-  const daily: EntryEditChannels['daily'] = []
-  for (let offset = days - 1; offset >= 0; offset--) {
-    const day = day_string(new Date(now.getTime() - offset * 86_400_000))
+  const daily: EntryEditChannels['daily'] = zero_fill_days(ctx).map((day) => {
     const ui = ui_by_day.get(day) ?? 0
     const api = api_by_day.get(day) ?? 0
     ui_total += ui
     api_total += api
-    daily.push({ day, ui, api })
-  }
+    return { day, ui, api }
+  })
   return { ui_total, api_total, daily }
 }
 

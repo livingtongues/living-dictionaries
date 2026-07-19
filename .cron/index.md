@@ -17,6 +17,12 @@ Home for this repo's recurring/scheduled agent work and the reports it produces 
   Library #076, adopted 2026-07-16). Reconciles the OpenAPI spec against the `/api/v1` handlers +
   tests into a requirement ledger. Playbook: `.claude/commands/api-conformance-review.md`.
   Audit-first until promoted; also worth a manual run after each v1 milestone.
+- **`invoice-reviews/`** — the Living Tongues invoice loop's **memory** (dated records: billing
+  window · Jacob's commit count · estimated hours · dollar total · anomaly note). STEP 4 of each
+  `invoice-*.md` run READS the last 2–3 to anchor its hours estimate to the recent trend (not a
+  frozen calibration) and flag >30% swings / skipped months; STEP 7 WRITES the new record. This is
+  what turns the invoice lane from a memory-less cron into a real feedback loop (rationale:
+  `horse/.cron/loop-reviews/2026-07-18.md`).
 
 ## How crons run
 
@@ -44,7 +50,7 @@ a repo job by editing its file and committing; `horse cron run <id>` still trigg
 | `living-dictionaries/fill-translations` | `.cron/fill-translations.md` (repo, `runs_on: mustang`, `claude-opus-4-8`) | weekly `every: 0 6 * * 1` (Mon 06:00 machine-local) | AI-fill missing i18n translations + `en_changed` triage via `.claude/commands/fill-translations.md`; refresh seed + push `main` | commit + summary in its session |
 | `living-dictionaries/seo-review` | `.cron/seo-review.md` (repo, `runs_on: mustang`, `claude-opus-4-8`) | monthly `every: 10 22 1 * *` (1st, 22:10 UTC) | SEO/GEO discoverability audit of production page-types via `.claude/commands/seo-review.md`; audit-first | dated digest in `.cron/seo-reviews/` |
 | `living-dictionaries/api-conformance-review` | `.cron/api-conformance-review.md` (repo, `runs_on: mustang`, `claude-opus-4-8`) | monthly `every: 10 22 15 * *` (15th, 22:10 UTC) + post-milestone | v1 OpenAPI ↔ code conformance ledger via `.claude/commands/api-conformance-review.md`; audit-first | dated digest in `.cron/api-conformance-reviews/` |
-| `living-dictionaries/invoice-2026-07-24` | `.cron/invoice-2026-07-24.md` (repo, `runs_on: mustang`) | one-time `at: 2026-07-23T23:00` | Living Tongues invoice draft | summary in the Horse chat session |
+| `living-dictionaries/invoice-2026-07-24` | `.cron/invoice-2026-07-24.md` (repo, `runs_on: mustang`) | one-time `at: 2026-07-23T23:00` (self-re-arms ~4-weekly) | Living Tongues invoice draft; reads/writes `.cron/invoice-reviews/` for its hours anchor | summary in the Horse chat session + dated record in `.cron/invoice-reviews/` |
 
 > The daily log review is no longer a cron here — the **horse nightly orchestrator** spawns it
 > (see `~/code/horse/.cron/fleet.md`). The `log-and-fix` *command* stays at

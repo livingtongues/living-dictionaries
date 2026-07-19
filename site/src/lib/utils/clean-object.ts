@@ -1,13 +1,13 @@
 export function clean_object(obj: any, cleanFalseValues = false): any {
-  const isArray = Array.isArray(obj)
-  const isObject = typeof obj === 'object' && obj !== null
-  if (isArray) {
+  const is_array = Array.isArray(obj)
+  const is_object = typeof obj === 'object' && obj !== null
+  if (is_array) {
     const result = obj
       .filter(item => item !== null && item !== undefined && item !== '' && !(Array.isArray(item) && item.length === 0) && !(cleanFalseValues && item === false))
       .map(item => (typeof item === 'object' ? clean_object(item, cleanFalseValues) : item))
     return result.length === 0 ? undefined : result
   }
-  if (isObject) {
+  if (is_object) {
     const result = Object.entries(obj)
       .filter(([_, value]) => value !== null && value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0) && !(cleanFalseValues && value === false))
       .reduce((acc, [key, value]) => ({ ...acc, [key]: typeof value === 'object' ? clean_object(value, cleanFalseValues) : value }), {})

@@ -71,10 +71,10 @@ which are stale/transient, and which reveal sitemap, metadata, routing, or serve
    - 26 of the 200 pages literally rendered `No information yet`; all were empty `/about` pages
      advertised in the sitemap before this fix.
    - Production catalog: 221 public dictionaries; 70 have empty About content, three have 1–99
-     characters, 79 are below the app's existing 200-character completeness threshold, and 142
-     meet it. The sitemap currently includes `/about` unconditionally.
+     characters, 73 are below the revised 100-character completeness threshold, and 148 meet it.
+     The sitemap previously included `/about` unconditionally.
    - **Implemented:** `/about` is included in a child sitemap only when its rendered, sanitized
-     visible text meets `MINIMUM_ABOUT_LENGTH = 200`. Thin pages remain available to managers but
+     visible text meets `MINIMUM_ABOUT_LENGTH = 100`. Thin pages remain available to managers but
      emit `noindex`; the manager nudges and SEO surfaces use the same predicate.
 
 5. **Server error 5xx (24)**
@@ -126,6 +126,9 @@ which are stale/transient, and which reveal sitemap, metadata, routing, or serve
   sitemap inclusion, URL Inspection, and validation.
 
 ## Implementation verification — 2026-07-19
+
+- Follow-up: lowered `MINIMUM_ABOUT_LENGTH` from 200 to 100 characters at Jacob's request; the
+  shared predicate means manager nudges, sitemap inclusion, and robots metadata remain aligned.
 
 - Full Vitest run: 238 files passed, one skipped; 1,726 tests passed, three skipped.
 - Focused regressions: eight tests cover visible-text thresholding, sitemap inclusion/omission,
