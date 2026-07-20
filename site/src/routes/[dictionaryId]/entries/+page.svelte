@@ -99,7 +99,7 @@
     // short-circuit (`browser || $x`) it was never tracked as a dependency
     void $search_index_updated
     if (browser) {
-      search({ ...search_params.value, scope }, current_page_index)
+      search({ ...$state.snapshot(search_params.value), scope }, current_page_index)
     }
   })
   const page_entries = $derived(_hits.map((hit) => {
