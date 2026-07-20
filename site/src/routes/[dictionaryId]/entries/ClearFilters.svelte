@@ -1,14 +1,14 @@
 <script lang="ts">
   import IconUndo from '~icons/fa-solid/undo'
-  import type { QueryParamStore } from '$lib/state/query-param-state.svelte'
+  import type { QueryParamState } from '$lib/state/query-param-state.svelte'
   import type { QueryParams } from '$lib/search/types'
 
   interface Props {
-    search_params: QueryParamStore<QueryParams>
+    search_params: QueryParamState<QueryParams>
   }
 
   const { search_params }: Props = $props()
-  const filtered = $derived(!!Object.keys($search_params).filter(key => !['page', 'query', 'view', 'scope'].includes(key)).length)
+  const filtered = $derived(!!Object.keys(search_params.value).filter(key => !['page', 'query', 'view', 'scope'].includes(key)).length)
 
   function clear_filters() {
     // update receives the parsed URL param — null when no `?q=` is set.

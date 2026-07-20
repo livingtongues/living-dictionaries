@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { QueryParamStore } from '$lib/state/query-param-state.svelte'
+  import type { QueryParamState } from '$lib/state/query-param-state.svelte'
   import type { QueryParams, SearchScope } from '$lib/search/types'
   import { page } from '$app/state'
   import IconFa6SolidUserShield from '~icons/fa6-solid/user-shield'
 
   interface Props {
-    search_params: QueryParamStore<QueryParams>
+    search_params: QueryParamState<QueryParams>
   }
 
   const { search_params }: Props = $props()
@@ -32,9 +32,9 @@
     <button
       type="button"
       role="tab"
-      aria-selected={($search_params.scope ?? null) === value}
+      aria-selected={(search_params.value.scope ?? null) === value}
       class="chip"
-      class:active={($search_params.scope ?? null) === value}
+      class:active={(search_params.value.scope ?? null) === value}
       onclick={() => set_scope(value)}>
       {label}
     </button>

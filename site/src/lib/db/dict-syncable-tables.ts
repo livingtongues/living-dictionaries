@@ -20,7 +20,8 @@
  *   clause_slots, glossing_abbreviations (vocab, no deps) →
  *   grammar_sections (references entries, senses, clause_slots, self) →
  *   section_sentences (references grammar_sections + sentences),
- *   text_tags (references texts + tags)
+ *   text_tags (references texts + tags),
+ *   text_dialects (references texts + dialects)
  */
 export const DICT_SYNCABLE_TABLES = [
   'entries',
@@ -51,6 +52,7 @@ export const DICT_SYNCABLE_TABLES = [
   'grammar_sections',
   'section_sentences',
   'text_tags',
+  'text_dialects',
 ] as const
 
 export type DictSyncableTable = typeof DICT_SYNCABLE_TABLES[number]

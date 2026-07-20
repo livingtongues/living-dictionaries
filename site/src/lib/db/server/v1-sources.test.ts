@@ -77,7 +77,7 @@ describe(count_source_references, () => {
   test('counts entries citing the slug', () => {
     create_source({ db, user_id: 'u1', input: { slug: 'h' } })
     apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'a', sources: ['h'] }, { lexeme: 'b', sources: ['h'] }, { lexeme: 'c' }] })
-    expect(count_source_references(db, 'h')).toEqual({ entries: 2, sentences: 0, texts: 0, audio: 0, videos: 0 })
+    expect(count_source_references(db, 'h')).toEqual({ entries: 2, senses: 0, sentences: 0, texts: 0, audio: 0, videos: 0, citations: 0 })
   })
 
   test('counts audio/video rows whose scalar source is the slug', () => {
@@ -85,7 +85,7 @@ describe(count_source_references, () => {
     apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'a' }] })
     const entry = db.prepare(`SELECT id FROM entries`).get() as { id: string }
     attach_media({ db, cell_key: 'audio:entry', owner_id: entry.id, fields: { storage_path: 'a.mp3', source: 'h' }, user_id: 'u1' })
-    expect(count_source_references(db, 'h')).toEqual({ entries: 0, sentences: 0, texts: 0, audio: 1, videos: 0 })
+    expect(count_source_references(db, 'h')).toEqual({ entries: 0, senses: 0, sentences: 0, texts: 0, audio: 1, videos: 0, citations: 0 })
   })
 })
 
@@ -101,7 +101,7 @@ describe(apply_source_delete, () => {
     const { source } = create_source({ db, user_id: 'u1', input: { slug: 'h' } })
     apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'a', sources: ['h'] }] })
     remove_source_from_all({ db, history_db, slug: 'h', user_id: 'u1' })
-    expect(count_source_references(db, 'h')).toEqual({ entries: 0, sentences: 0, texts: 0, audio: 0, videos: 0 })
+    expect(count_source_references(db, 'h')).toEqual({ entries: 0, senses: 0, sentences: 0, texts: 0, audio: 0, videos: 0, citations: 0 })
     const entry = db.prepare(`SELECT sources FROM entries`).get() as { sources: string | null }
     expect(entry.sources).toBeNull()
     const result = apply_source_delete({ db, history_db, source_id: source.id, user_id: 'u1' })

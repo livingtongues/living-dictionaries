@@ -30,6 +30,10 @@ function t(key: string | { dynamicKey?: string, fallback?: string }): string {
 
 const empty_array_facet = { count: 0, values: {} }
 
+function mock_search_params(value = {}) {
+  return { value, update: () => {}, remove: () => {} } as any
+}
+
 const array_facets = {
   _parts_of_speech: empty_array_facet,
   _semantic_domains: empty_array_facet,
@@ -55,7 +59,7 @@ export const shared_meta: StoryMeta = {
 // "No" toggle should render; the other "No X" toggles must be hidden.
 export const AllEntriesLackFields: Story<typeof Component> = {
   props: {
-    search_params: writable({}) as any,
+    search_params: mock_search_params(),
     on_close: () => {},
     result_facets: {
       ...array_facets,
@@ -75,7 +79,7 @@ export const AllEntriesLackFields: Story<typeof Component> = {
 // Sanity check: every field has a real split, so BOTH Has and No toggles appear.
 export const MixedFields: Story<typeof Component> = {
   props: {
-    search_params: writable({}) as any,
+    search_params: mock_search_params(),
     on_close: () => {},
     result_facets: {
       ...array_facets,
@@ -108,7 +112,7 @@ const river_dictionary = {
 export const OrthographyFacetIncludesNamedPartialDefault: Story<typeof Component> = {
   page_data: { dictionary: river_dictionary },
   props: {
-    search_params: writable({}) as any,
+    search_params: mock_search_params(),
     on_close: () => {},
     total: 400,
     result_facets: {
@@ -126,7 +130,7 @@ export const OrthographyFacetIncludesNamedPartialDefault: Story<typeof Component
 export const SelectedOrthographyStaysVisibleAtFullCount: Story<typeof Component> = {
   page_data: { dictionary: river_dictionary },
   props: {
-    search_params: writable({ orthographies: ['ipa'] }) as any,
+    search_params: mock_search_params({ orthographies: ['ipa'] }),
     on_close: () => {},
     total: 120,
     result_facets: {

@@ -35,7 +35,7 @@
       message: 'entries_view_render_failed',
       context: {
         dict_id: dictionary?.id ?? null,
-        view: $search_params.view ?? 'list',
+        view: search_params.value.view ?? 'list',
         entry_count: entries?.length ?? 0,
         first_entry_ids: (entries ?? []).slice(0, 5).map(entry => entry.id),
         error: error instanceof Error ? error.message : String(error),
@@ -57,7 +57,7 @@
 
 {#if entries?.length}
   <svelte:boundary onerror={on_render_error}>
-    {#if !$search_params.view}
+    {#if !search_params.value.view}
       {#each entries as entry (entry.id)}
         <ListEntry
           {dictionary}
@@ -77,19 +77,19 @@
           </Modal>
         {/if}
       {/each}
-    {:else if $search_params.view === 'table'}
+    {:else if search_params.value.view === 'table'}
       <EntriesTable
         {entries}
         preferred_table_columns={$preferred_table_columns}
         {dictionary}
         can_edit={can_edit}
         {writes} />
-    {:else if $search_params.view === 'gallery'}
+    {:else if search_params.value.view === 'gallery'}
       <EntriesGallery
         {entries}
         {dictionary}
         can_edit={can_edit} />
-    {:else if $search_params.view === 'print'}
+    {:else if search_params.value.view === 'print'}
       <EntriesPrint
         {search_params}
         {entries}

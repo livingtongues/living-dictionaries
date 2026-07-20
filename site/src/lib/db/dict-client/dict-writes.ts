@@ -52,6 +52,7 @@ const JUNCTION_TABLES = [
   'sentence_videos',
   'section_sentences',
   'text_tags',
+  'text_dialects',
 ] as const
 export type JunctionTable = typeof JUNCTION_TABLES[number]
 

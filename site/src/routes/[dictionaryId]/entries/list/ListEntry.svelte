@@ -58,7 +58,7 @@
     onclick={on_click}
     class="entry-link">
     <div>
-      <span class="lexeme">{headword.value}</span>
+      <span class="lexeme">{headword.value}{#if entry.main.homograph}<sup class="homograph">{entry.main.homograph}</sup>{/if}</span>
       {#if entry.main.phonetic}
         <span class="phonetic">[{entry.main.phonetic}]</span>
       {/if}
@@ -251,6 +251,12 @@
     font-weight: 600;
     color: var(--color); /* ≈ gray-900 */
     margin-right: 0.25rem;
+  }
+
+  .homograph {
+    font-weight: 400;
+    opacity: 0.7;
+    margin-left: 0.05em;
   }
 
   .phonetic {

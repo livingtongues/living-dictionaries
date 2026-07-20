@@ -24,8 +24,12 @@ export interface SenseSummary {
 export interface EntrySummary {
   id: string
   lexeme: MultiString
+  /** Homograph number ("1", "2", …) when the dictionary distinguishes identically-spelled headwords. */
+  homograph: string | null
   phonetic: string | null
   elicitation_id: string | null
+  /** `sources.slug` refs — included unconditionally so provenance checks don't need per-entry detail fetches. */
+  sources: string[] | null
   updated_at: string
   /** Present only when the caller passes `?include=senses`. */
   senses?: SenseSummary[]
@@ -84,9 +88,9 @@ export const GET: RequestHandler = async (event) => {
 
   const db = get_dictionary_db(dictionary.id)
   const rows = db.prepare(
-    `SELECT id, lexeme, phonetic, elicitation_id, updated_at FROM entries
+    `SELECT id, lexeme, homograph, phonetic, elicitation_id, sources, updated_at FROM entries
      ${where_sql} ORDER BY updated_at ASC LIMIT ? OFFSET ?`,
-  ).all(...args, limit + 1, offset) as { id: string, lexeme: string, phonetic: string | null, elicitation_id: string | null, updated_at: string }[]
+  ).all(...args, limit + 1, offset) as { id: string, lexeme: string, homograph: string | null, phonetic: string | null, elicitation_id: string | null, sources: string | null, updated_at: string }[]
 
   const has_more = rows.length > limit
   const page = rows.slice(0, limit)
@@ -96,8 +100,10 @@ export const GET: RequestHandler = async (event) => {
   const entries: EntrySummary[] = page.map(row => ({
     id: row.id,
     lexeme: JSON.parse(row.lexeme) as MultiString,
+    homograph: row.homograph,
     phonetic: row.phonetic,
     elicitation_id: row.elicitation_id,
+    sources: row.sources ? JSON.parse(row.sources) as string[] : null,
     updated_at: row.updated_at,
     ...(senses_by_entry ? { senses: senses_by_entry.get(row.id) ?? [] } : {}),
   }))

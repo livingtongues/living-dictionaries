@@ -20,11 +20,11 @@ const dictionary = {
   ],
 } as unknown as Tables<'dictionaries'>
 
-function make_entry(lexeme: Record<string, string>): EntryData {
+function make_entry(lexeme: Record<string, string>, main_extra: Record<string, unknown> = {}): EntryData {
   return {
     id: 'e1',
     updated_at: '2026-01-01T00:00:00Z',
-    main: { lexeme, phonetic: 'foo' },
+    main: { lexeme, phonetic: 'foo', ...main_extra },
     senses: [{ id: 's1', glosses: { en: 'water' } }],
   } as unknown as EntryData
 }
@@ -45,4 +45,8 @@ export const NoDefaultFallsBackToAlternate: Story<typeof Component> = {
 
 export const NoDefaultPicksFirstRegistryAlternate: Story<typeof Component> = {
   props: { ...shared_props, entry: make_entry({ 'x-deva': 'atl-in-deva', 'x-olck': 'atl-in-olck' }) },
+}
+
+export const HomographNumberSuperscript: Story<typeof Component> = {
+  props: { ...shared_props, entry: make_entry({ default: 'caws' }, { homograph: '3' }) },
 }

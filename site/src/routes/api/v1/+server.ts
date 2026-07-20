@@ -40,7 +40,7 @@ export const GET: RequestHandler = (event) => {
 
   <h2>Import workflow</h2>
   <ol>
-    <li><code>GET /api/v1/dictionaries/&lt;id&gt;</code> → read <code>gloss_languages</code> (which locale codes to key glosses by). <span class="muted">Don't trust <code>entry_count</code> to verify an import — it's eventually-consistent and lags; paginate <code>/entries</code> for a live count.</span></li>
+    <li><code>GET /api/v1/dictionaries/&lt;id&gt;</code> → read <code>gloss_languages</code> (which locale codes to key glosses by; add another via <code>POST …/gloss-languages</code>). <span class="muted">Don't trust <code>entry_count</code> to verify an import — it's eventually-consistent and lags; paginate <code>/entries</code> for a live count.</span></li>
     <li>Generate a UUID (v4) yourself for each entry and send it as <code>id</code> — that's your idempotency key: you know it up front (record it against your source id), you use it for later <code>PATCH …/entries/&lt;id&gt;</code> edits, and re-POSTing the same <code>id</code> is a safe no-op (<code>status: "exists"</code>).</li>
     <li><code>POST …/entries</code> with <code>{ entries: [...], import_id }</code> in batches of ≤1000 (and ≤~16MB/request); read the per-item <code>results</code> and re-send only <code>failed</code>.</li>
     <li>Spot-check with <code>GET …/entries/&lt;entryId&gt;</code>, or bulk-read with <code>GET …/entries?include=senses</code>. <span class="muted">Read shape ≠ write shape: top-level scalars come back under <code>entry.main</code>, and <code>example_sentences</code> come back as <code>sentences</code>.</span></li>
@@ -50,7 +50,7 @@ export const GET: RequestHandler = (event) => {
   <p class="muted">Stuck or need something we don't offer? <code>POST …/feedback</code> with <code>{ message }</code> — it reaches the LD team directly (read or write keys); then relay the response's note to your human.</p>
 
   <h2>Bulk reads — dictionary snapshots</h2>
-  <p class="muted">Mirroring or bulk-reading a whole dictionary? Don't paginate the API — every <strong>public and unlisted</strong> dictionary has a downloadable gzipped SQLite snapshot of its full database (entries, senses, sentences, texts, media rows, speakers…) at <code>https://snapshots.livingdictionaries.app/dictionaries/&lt;id&gt;.db.gz</code> (no auth). It's rebuilt within ~30 minutes of any edit (a 30-minute sweep that only rebuilds when content changed; served with <code>Cache-Control: max-age=120</code>) — so treat it as at most ~30 minutes stale, and verify your own fresh writes via the API responses, not the snapshot.</p>
+  <p class="muted">Mirroring or bulk-reading a whole dictionary? Don't paginate the API — <strong>every dictionary except secure ones</strong> has a downloadable gzipped SQLite snapshot of its full database (entries, senses, sentences, texts, media rows, speakers…) at <code>https://snapshots.livingdictionaries.app/dictionaries/&lt;id&gt;.db.gz</code> (no auth). It's rebuilt within ~30 minutes of any edit (a 30-minute sweep that only rebuilds when content changed; served with <code>Cache-Control: max-age=120</code>) — so treat it as at most ~30 minutes stale, and verify your own fresh writes via the API responses, not the snapshot. How to load and query it: <code>GET /api/v1/guides/snapshot</code>.</p>
 
   <h2>Editing &amp; cleanup</h2>
   <p>Field-merge a whole entry with <code>PATCH …/entries/&lt;entryId&gt;</code>, or fix ONE row by its id (read ids from <code>GET …/entries/&lt;entryId&gt;</code>):</p>

@@ -8,14 +8,21 @@
   import EditSource from '$lib/components/sources/EditSource.svelte'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
 
+  import type { SourceCitation } from '$lib/db/schemas/dictionary.types'
+
   interface Props {
     can_edit?: boolean
     value: string[]
+    /** Read-only citation loci (page/example numbers) — shown muted after each source chip. */
+    citations?: SourceCitation[] | null
     on_update: (new_value: string[]) => void
   }
 
-  const { can_edit = false, value, on_update }: Props = $props()
+  const { can_edit = false, value, citations = null, on_update }: Props = $props()
   const { sources } = $derived(page.data)
+  const locator_of = $derived((slug: string) => (citations || []).find(citation => citation.slug === slug && citation.locator)?.locator)
+  /** Source chips: the `sources` slugs plus any citation-only slugs. */
+  const chip_slugs = $derived([...new Set([...(value || []), ...(citations || []).map(citation => citation.slug)])])
 
   const options = $derived(($sources || []).map(source => ({ value: source.slug, name: source.abbreviation || source.citation || source.slug })) satisfies SelectOption[])
   const label_of = $derived((slug: string) => options.find(option => option.value === slug)?.name || slug)
@@ -35,10 +42,10 @@
   {#snippet children({ show, set, toggle })}
     <div class="value-display" class:editable={can_edit} onclick={() => { if (can_edit) { prepare(value); set(true) } }}>
       <div class="chips">
-        {#each value || [] as slug (slug)}
-          <div class="chip">{label_of(slug)}</div>
+        {#each chip_slugs as slug (slug)}
+          <div class="chip">{label_of(slug)}{#if locator_of(slug)}<span class="locator">{locator_of(slug)}</span>{/if}</div>
         {/each}
-        {#if can_edit && !value?.length}
+        {#if can_edit && !chip_slugs.length}
           <button type="button" class="add-source">
             <IconFaSolidPlus style="margin-bottom: 0.25rem" />
             {page.data.t('misc.add')}
@@ -95,8 +102,14 @@
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
     line-height: 1.25;
-    background-color: rgb(219 234 254); /* blue-100 */
+    /* mode-aware take on the old blue-100 chip (hardcoded blue-100 was unreadable in dark mode) */
+    background-color: color-mix(in srgb, var(--primary) 14%, var(--background));
+    color: var(--color);
     border-radius: 0.25rem;
+  }
+  .locator {
+    opacity: 0.6;
+    margin-left: 0.375em;
   }
   .add-source {
     opacity: 0.4;

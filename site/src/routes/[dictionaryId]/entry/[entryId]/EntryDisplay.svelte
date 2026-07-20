@@ -60,6 +60,7 @@
     <EntryField
       value={fields?.lexeme?.default}
       field="lexeme"
+      sup={fields?.homograph}
       {can_edit}
       display={page.data.t('entry_field.lexeme')}
       bcp={orthographies.primary.bcp}
@@ -177,12 +178,13 @@
       display={page.data.t('entry_field.linguistic_history')}
       on_update={new_value => save_entry({ linguistic_history: { default: new_value } })} />
 
-    {#if fields?.sources?.length || can_edit}
-      <div class="side-section" class:at-end={!fields?.sources?.length}>
+    {#if fields?.sources?.length || fields?.citations?.length || can_edit}
+      <div class="side-section" class:at-end={!fields?.sources?.length && !fields?.citations?.length}>
         <div class="section-label">{page.data.t('entry_field.sources')}</div>
         <EntrySource
           {can_edit}
           value={fields?.sources}
+          citations={fields?.citations}
           on_update={new_value => save_entry({ sources: new_value })} />
         <div class="dashed-divider"></div>
       </div>

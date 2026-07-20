@@ -31,13 +31,13 @@ function request_body_property_keys({ path, method }: { path: string, method: st
  * can't silently drift from the TS request shapes the server actually accepts.
  */
 const ENTRY_INPUT_KEYS: Record<keyof EntryInput, true> = {
-  id: true, lexeme: true, phonetic: true, interlinearization: true, morphology: true,
-  notes: true, linguistic_history: true, sources: true, scientific_names: true, elicitation_id: true,
+  id: true, lexeme: true, homograph: true, phonetic: true, interlinearization: true, morphology: true,
+  notes: true, linguistic_history: true, sources: true, citations: true, scientific_names: true, elicitation_id: true,
   coordinates: true, dialects: true, tags: true, senses: true,
 }
 const SENSE_INPUT_KEYS: Record<keyof SenseInput, true> = {
   id: true, glosses: true, definition: true, parts_of_speech: true, semantic_domains: true,
-  write_in_semantic_domains: true, noun_class: true, plural_form: true, variant: true, example_sentences: true,
+  write_in_semantic_domains: true, noun_class: true, plural_form: true, variant: true, sources: true, example_sentences: true,
 }
 const SENTENCE_INPUT_KEYS: Record<keyof SentenceInput, true> = {
   id: true, text: true, translation: true, sources: true,
@@ -48,8 +48,8 @@ const SENTENCE_PATCH_KEYS: Record<keyof SentencePatch, true> = {
   tokens: true, citations: true, example_label: true, discourse_role: true,
 }
 const ENTRY_PATCH_KEYS: Record<keyof EntryPatch, true> = {
-  lexeme: true, phonetic: true, interlinearization: true, morphology: true, notes: true,
-  linguistic_history: true, sources: true, scientific_names: true, elicitation_id: true,
+  lexeme: true, homograph: true, phonetic: true, interlinearization: true, morphology: true, notes: true,
+  linguistic_history: true, sources: true, citations: true, scientific_names: true, elicitation_id: true,
   coordinates: true, dialects: true, tags: true, senses: true,
 }
 // Dialect request bodies live in the route files (no named component schema); TS fails
@@ -136,6 +136,8 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}/featured-entries/{entryId}': ['delete'],
       '/api/v1/dictionaries/{id}/dialects': ['get', 'post'],
       '/api/v1/dictionaries/{id}/dialects/{dialectId}': ['delete', 'patch'],
+      '/api/v1/dictionaries/{id}/gloss-languages': ['post'],
+      '/api/v1/dictionaries/{id}/gloss-languages/{code}': ['delete'],
       '/api/v1/dictionaries/{id}/orthographies': ['get', 'post', 'put'],
       '/api/v1/dictionaries/{id}/orthographies/{code}': ['delete', 'patch'],
       '/api/v1/dictionaries/{id}/sources': ['get', 'post'],

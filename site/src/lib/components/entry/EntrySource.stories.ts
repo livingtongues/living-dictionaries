@@ -26,3 +26,12 @@ export const WithSources: Story<typeof Component> = {
 export const Empty: Story<typeof Component> = {
   props: { can_edit: true, value: [], on_update: (v: string[]) => console.info(v) },
 }
+
+export const WithCitationLocators: Story<typeof Component> = {
+  props: {
+    can_edit: false,
+    value: ['smith-2020'],
+    citations: [{ slug: 'smith-2020', locator: 'p. 42' }, { slug: 'lee-1998', locator: 'ex. 3b' }],
+    on_update: (v: string[]) => console.info(v),
+  },
+}

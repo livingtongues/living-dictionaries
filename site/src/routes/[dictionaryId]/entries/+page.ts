@@ -1,4 +1,4 @@
-import { createQueryParamStore } from '$lib/state/query-param-state.svelte'
+import { QueryParamState } from '$lib/state/query-param-state.svelte'
 import type { QueryParams } from '$lib/search/types'
 
 export function load() {
@@ -6,7 +6,7 @@ export function load() {
     page: 1,
     query: '',
   }
-  const search_params = createQueryParamStore({
+  const search_params = new QueryParamState({
     key: 'q',
     startWith: default_params,
     cleanFalseValues: true,

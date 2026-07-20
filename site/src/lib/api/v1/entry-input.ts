@@ -91,6 +91,8 @@ export interface SenseInput {
   noun_class?: string
   plural_form?: MultiString | string
   variant?: MultiString | string
+  /** `sources.slug` refs — per-sense provenance (each must already exist). */
+  sources?: string[] | string
   example_sentences?: SentenceInput[]
 }
 
@@ -106,6 +108,9 @@ export interface EntryInput {
   id?: string
   /** The headword. Required. string → `{ default: … }`. */
   lexeme: MultiString | string
+  /** Homograph number for identically-spelled headwords ("1", "2"; some sources
+   *  use "a"/"b") — shown as a superscript after the lexeme. */
+  homograph?: string
   phonetic?: string
   interlinearization?: string
   morphology?: string
@@ -113,6 +118,8 @@ export interface EntryInput {
   linguistic_history?: MultiString | string
   /** `sources.slug` refs — each must already exist (create via POST …/sources first). */
   sources?: string[] | string
+  /** Source refs WITH a citation locus (page/example number) — complements `sources`. */
+  citations?: SourceCitationInput[]
   scientific_names?: string[] | string
   /** Source-side stable id (linguistic elicitation id) — also handy for dedupe lookups. */
   elicitation_id?: string
@@ -171,12 +178,15 @@ export function resolve_client_id(id: unknown, { field = 'id' }: { field?: strin
  */
 export interface EntryPatch {
   lexeme?: MultiString | string
+  homograph?: string
   phonetic?: string
   interlinearization?: string
   morphology?: string
   notes?: MultiString | string
   linguistic_history?: MultiString | string
   sources?: string[] | string
+  /** Whole-array replace: source refs with a citation locus. */
+  citations?: SourceCitationInput[]
   scientific_names?: string[] | string
   elicitation_id?: string
   /** Whole-object replace: `{ points?, regions? }` overwrites; `null` clears; omit → untouched. */

@@ -14,9 +14,11 @@
     can_edit?: boolean
     on_update: (new_value: string) => void
     class?: string
+    /** Superscript rendered after the value (the entry's homograph number). */
+    sup?: string | null
   }
 
-  const { value, field, bcp = undefined, display, can_edit = false, on_update, class: klass = '' }: Props = $props()
+  const { value, field, bcp = undefined, display, can_edit = false, on_update, class: klass = '', sup = null }: Props = $props()
 </script>
 
 {#if value || can_edit}
@@ -54,7 +56,7 @@
               {:else if field === 'scientific_names' && !value?.includes('<i>')}
                 <i>{value}</i>
               {:else}
-                {value}
+                {value}{#if sup}<sup class="homograph">{sup}</sup>{/if}
               {/if}
             </div>
           {:else}<IconFa6SolidPencil style="opacity: 0.4; font-size: 0.875rem" />{/if}
@@ -114,5 +116,11 @@
 
   .underlined {
     border-bottom-width: 2px;
+  }
+
+  .homograph {
+    font-weight: 400;
+    opacity: 0.7;
+    margin-left: 0.05em;
   }
 </style>

@@ -428,3 +428,52 @@ describe(apply_entry_delete, () => {
     expect(del.c).toBe(1)
   })
 })
+
+describe('quick-wins fields: homograph, entry citations, sense sources', () => {
+  function seed_source(slug: string) {
+    create_source({ db, user_id: 'u1', input: { slug } })
+  }
+
+  test('create stores homograph, entry citations, and sense sources', () => {
+    seed_source('smith-1979')
+    const report = apply_entry_writes({
+      db,
+      user_id: 'u1',
+      entries: [{
+        lexeme: 'caws',
+        homograph: '3',
+        sources: ['smith-1979'],
+        citations: [{ slug: 'smith-1979', locator: 'p. 12' }],
+        senses: [{ glosses: { en: 'squeeze' }, sources: ['smith-1979'] }],
+      }],
+    })
+    expect(report).toMatchObject({ created: 1, failed: 0 })
+    const entry = db.prepare(`SELECT * FROM entries`).get() as Record<string, string>
+    expect(entry.homograph).toBe('3')
+    expect(JSON.parse(entry.citations)).toEqual([{ slug: 'smith-1979', locator: 'p. 12' }])
+    const sense = db.prepare(`SELECT * FROM senses`).get() as Record<string, string>
+    expect(JSON.parse(sense.sources)).toEqual(['smith-1979'])
+  })
+
+  test('unknown citation / sense source slugs fail the item', () => {
+    const bad_citation = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'a', citations: [{ slug: 'nope' }] }] })
+    expect(bad_citation.results[0]).toMatchObject({ status: 'failed' })
+    expect(bad_citation.results[0].error).toMatch(/unknown source slug/)
+    const bad_sense = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'b', senses: [{ sources: 'nope' }] }] })
+    expect(bad_sense.results[0]).toMatchObject({ status: 'failed' })
+  })
+
+  test('patch overwrites homograph + citations and replaces sense sources', () => {
+    seed_source('s1')
+    seed_source('s2')
+    const report = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'x', homograph: '1', citations: [{ slug: 's1', locator: '3' }], senses: [{ id: crypto.randomUUID(), sources: ['s1'] }] }] })
+    const entry_id = report.results[0].entry_id as string
+    const sense_id = report.results[0].sense_ids?.[0] as string
+    apply_entry_update({ db, entry_id, patch: { homograph: '2', citations: [{ slug: 's2' }], senses: [{ id: sense_id, sources: ['s2'] }] }, user_id: 'u1' })
+    const entry = db.prepare(`SELECT * FROM entries WHERE id = ?`).get(entry_id) as Record<string, string>
+    expect(entry.homograph).toBe('2')
+    expect(JSON.parse(entry.citations)).toEqual([{ slug: 's2' }])
+    const sense = db.prepare(`SELECT * FROM senses WHERE id = ?`).get(sense_id) as Record<string, string>
+    expect(JSON.parse(sense.sources)).toEqual(['s2'])
+  })
+})

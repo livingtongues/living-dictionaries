@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte'
   import type { FacetResult } from '@orama/orama'
   import Pagination from './Pagination.svelte'
   import SwitchView from './SwitchView.svelte'
@@ -71,6 +72,7 @@
     }
   }
   let { entries_data, auth_user, search_entries, search_sentences, search_texts, default_entries_per_page, search_params, dictionary, can_edit, is_manager, writes, search_index_updated } = $derived(data)
+  onDestroy(() => search_params.destroy())
 
   // Navigation after create is a UI concern — the write facade just returns
   // the entry (undefined when the write was blocked/failed and toasted).
@@ -83,10 +85,10 @@
   // Corpus scopes (sentences/texts) are an admin-3 preview while iterated on —
   // see .issues/texts-sentences-pipeline.md. Gate must not shape the views.
   const show_scope_chips = $derived(auth_user.admin_level >= 3)
-  const scope = $derived(show_scope_chips ? $search_params.scope : undefined)
+  const scope = $derived(show_scope_chips ? search_params.value.scope : undefined)
   const entries_length = $derived(Object.keys($entries_data).length)
-  const current_page_index = $derived($search_params.page - 1 || 0)
-  let entries_per_page = $derived($search_params.entries_per_page || default_entries_per_page)
+  const current_page_index = $derived(search_params.value.page - 1 || 0)
+  let entries_per_page = $derived(search_params.value.entries_per_page || default_entries_per_page)
   const number_of_pages = $derived((() => {
     const count = search_results_count ?? entries_length
     if (!count) return 0
@@ -97,7 +99,7 @@
     // short-circuit (`browser || $x`) it was never tracked as a dependency
     void $search_index_updated
     if (browser) {
-      search({ ...$search_params, scope }, current_page_index)
+      search({ ...search_params.value, scope }, current_page_index)
     }
   })
   const page_entries = $derived(_hits.map((hit) => {
@@ -147,7 +149,7 @@
         <SearchInput {search_params} index_ready={true} on_show_filter_menu={toggle} placeholder={search_placeholder} focus_on_mount={!!page.state.focus_search} />
         <div style="width: 0.25rem"></div>
         {#if !scope}
-          <SwitchView bind:view={$search_params.view} can_print={!!dictionary.print_access || can_edit} />
+          <SwitchView bind:view={search_params.value.view} can_print={!!dictionary.print_access || can_edit} />
         {/if}
       </div>
 
@@ -176,7 +178,7 @@
           {:else}
             <View entries={page_entries} page_data={data} />
           {/if}
-          <Pagination bind:page_from_url={$search_params.page} {number_of_pages} can_edit={can_edit}>
+          <Pagination bind:page_from_url={search_params.value.page} {number_of_pages} can_edit={can_edit}>
             <!-- Scope-adaptive add button (texts get theirs with the M2 ingest flow). -->
             {#snippet add_button(placement_class: string)}
               {#if scope === 'sentences'}

@@ -47,9 +47,9 @@ a repo job by editing its file and committing; `horse cron run <id>` still trigg
 
 | id | source | schedule | runs | output |
 |---|---|---|---|---|
-| `living-dictionaries/fill-translations` | `.cron/fill-translations.md` (repo, `runs_on: mustang`, `claude-opus-4-8`) | weekly `every: 0 6 * * 1` (Mon 06:00 machine-local) | AI-fill missing i18n translations + `en_changed` triage via `.claude/commands/fill-translations.md`; refresh seed + push `main` | commit + summary in its session |
-| `living-dictionaries/seo-review` | `.cron/seo-review.md` (repo, `runs_on: mustang`, `claude-opus-4-8`) | monthly `every: 10 22 1 * *` (1st, 22:10 UTC) | SEO/GEO discoverability audit of production page-types via `.claude/commands/seo-review.md`; audit-first | dated digest in `.cron/seo-reviews/` |
-| `living-dictionaries/api-conformance-review` | `.cron/api-conformance-review.md` (repo, `runs_on: mustang`, `claude-opus-4-8`) | monthly `every: 10 22 15 * *` (15th, 22:10 UTC) + post-milestone | v1 OpenAPI ↔ code conformance ledger via `.claude/commands/api-conformance-review.md`; audit-first | dated digest in `.cron/api-conformance-reviews/` |
+| `living-dictionaries/fill-translations` | `.cron/fill-translations.md` (repo, `runs_on: mustang`, `codex · gpt-5.6-sol`) | weekly `every: 0 6 * * 1` (Mon 06:00 machine-local) | AI-fill missing i18n translations + `en_changed` triage via `.claude/commands/fill-translations.md`; refresh seed + push `main` | commit + summary in its session |
+| `living-dictionaries/seo-review` | `.cron/seo-review.md` (repo, `runs_on: mustang`, `codex · gpt-5.6-sol`) | monthly `every: 10 22 1 * *` (1st, 22:10 UTC) | SEO/GEO discoverability audit of production page-types via `.claude/commands/seo-review.md`; audit-first | dated digest in `.cron/seo-reviews/` |
+| `living-dictionaries/api-conformance-review` | `.cron/api-conformance-review.md` (repo, `runs_on: mustang`, `codex · gpt-5.6-sol`) | monthly `every: 10 22 15 * *` (15th, 22:10 UTC) + post-milestone | v1 OpenAPI ↔ code conformance ledger via `.claude/commands/api-conformance-review.md`; audit-first | dated digest in `.cron/api-conformance-reviews/` |
 | `living-dictionaries/invoice-2026-07-24` | `.cron/invoice-2026-07-24.md` (repo, `runs_on: mustang`) | one-time `at: 2026-07-23T23:00` (self-re-arms ~4-weekly) | Living Tongues invoice draft; reads/writes `.cron/invoice-reviews/` for its hours anchor | summary in the Horse chat session + dated record in `.cron/invoice-reviews/` |
 
 > The daily log review is no longer a cron here — the **horse nightly orchestrator** spawns it

@@ -13,14 +13,17 @@
   let editing = $state<Tables<'sources'> | null | undefined>(undefined) // undefined = closed, null = create
   let usage = $state<Record<string, number>>({})
 
-  // Total reference count per slug across entries + sentences + texts (slug
-  // arrays) + audio + videos (scalar slug columns) — local wa-sqlite.
+  // Total reference count per slug across entries + senses + sentences + texts
+  // (slug arrays) + audio + videos (scalar slug columns) + entry/sentence/text
+  // citations ({slug, locator} arrays) — local wa-sqlite.
   $effect(() => {
     const _ = $sources // re-run when the registry changes
     if (!connection) return
     connection.query<{ slug: string, c: number }>(`
       SELECT value AS slug, COUNT(*) AS c FROM (
         SELECT value FROM entries CROSS JOIN json_each(entries.sources) WHERE entries.sources IS NOT NULL
+        UNION ALL
+        SELECT value FROM senses CROSS JOIN json_each(senses.sources) WHERE senses.sources IS NOT NULL
         UNION ALL
         SELECT value FROM sentences CROSS JOIN json_each(sentences.sources) WHERE sentences.sources IS NOT NULL
         UNION ALL
@@ -29,6 +32,12 @@
         SELECT source AS value FROM audio WHERE source IS NOT NULL
         UNION ALL
         SELECT source AS value FROM videos WHERE source IS NOT NULL
+        UNION ALL
+        SELECT json_extract(value, '$.slug') AS value FROM entries CROSS JOIN json_each(entries.citations) WHERE entries.citations IS NOT NULL
+        UNION ALL
+        SELECT json_extract(value, '$.slug') AS value FROM sentences CROSS JOIN json_each(sentences.citations) WHERE sentences.citations IS NOT NULL
+        UNION ALL
+        SELECT json_extract(value, '$.slug') AS value FROM texts CROSS JOIN json_each(texts.citations) WHERE texts.citations IS NOT NULL
       ) GROUP BY value`)
       .then((rows) => { usage = Object.fromEntries(rows.map(row => [row.slug, row.c])) })
       .catch(err => console.error('source usage query failed', err))

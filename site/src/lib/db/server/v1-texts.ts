@@ -2,7 +2,7 @@ import type Database from 'better-sqlite3'
 import type { HistoryEvent } from './dictionary-history-db'
 import type { SingleWriteResult } from './v1-entry-write'
 import type { SpeakerRecord } from './v1-sub-resources'
-import type { SentenceIgtFields } from '$lib/api/v1/entry-input'
+import type { SentenceIgtFields, SourceCitationInput } from '$lib/api/v1/entry-input'
 import type { MediaTimings, SentenceTokens, SourceCitation } from '$lib/db/schemas/dictionary.types'
 import type { MultiString } from '$lib/types'
 import { resolve_client_id, to_multistring, to_string_array } from '$lib/api/v1/entry-input'
@@ -13,7 +13,7 @@ import { read_last_modified_at } from './dictionary-db'
 import { record_history } from './dictionary-history-db'
 import { merge_dict_row } from './dictionary-sync-helpers'
 import { assert_known_source_slugs, load_source_slug_set } from './source-slugs'
-import { run_tombstone_delete } from './v1-entry-write'
+import { load_dialect_map, run_tombstone_delete } from './v1-entry-write'
 
 /**
  * `/api/v1` TEXTS sub-resource: a per-dict long-text / story (`texts.title`) with
@@ -37,11 +37,32 @@ export interface TextSentenceInput extends SentenceIgtFields {
 export interface TextCreateInput {
   id?: string
   title: MultiString | string
+  /** `sources.slug` refs — each must already exist. */
+  sources?: string[] | string
+  /** Source refs WITH a citation locus (page/hymn number). */
+  citations?: SourceCitationInput[]
+  /** Synopsis/abstract of the text, per language. */
+  summary?: MultiString | string
+  /** Dialect names — found-or-created, linked via `text_dialects`. */
+  dialects?: string[] | string
+  /** Grouping key: texts sharing a `work_id` are versions of ONE work (parallel
+   *  texts across dialects). Supply your own stable id or reuse a sibling's. */
+  work_id?: string
   sentences?: TextSentenceInput[]
 }
 
 export interface TextPatchInput {
   title?: MultiString | string
+  /** Whole-array replace of the text's `sources.slug` refs. */
+  sources?: string[] | string
+  /** Whole-array replace of the citation loci. */
+  citations?: SourceCitationInput[]
+  /** Overwrites the summary; `null` clears. */
+  summary?: MultiString | string | null
+  /** ADDITIVE dialect links (found-or-created); unlink via the dialects UI/API. */
+  dialects?: string[] | string
+  /** Overwrites the parallel-text grouping key; `null` clears. */
+  work_id?: string | null
   /** New sentences appended after the current last one, in array order. */
   append_sentences?: TextSentenceInput[]
   /** Full ordering of EXISTING sentence ids — sort_keys are reassigned to match. */
@@ -77,11 +98,26 @@ export interface TextSentenceRecord {
   audio?: TextAudioRecord[]
 }
 
+/** A sibling version of the same work (shared `work_id`). */
+export interface ParallelTextRef {
+  id: string
+  title: MultiString
+  dialects: { id: string, name: MultiString }[]
+}
+
 export interface TextRecord {
   id: string
   title: MultiString
+  sources: string[] | null
+  citations: SourceCitation[] | null
+  summary: MultiString | null
+  work_id: string | null
   updated_at: string
   sentences: TextSentenceRecord[]
+  /** Dialects this text version is written in (via `text_dialects`). Present only when set. */
+  dialects?: { id: string, name: MultiString }[]
+  /** Other versions of the same work (same `work_id`). Present only when siblings exist. */
+  parallel_texts?: ParallelTextRef[]
   /** Present only when TEXT-level audio exists (whole-passage recordings). */
   audio?: TextAudioRecord[]
   /** Full speaker records for every speaker referenced by the included audio. */
@@ -142,12 +178,40 @@ function build_text_sentence_row({ sentence, text_id, sort_key, now, source_slug
   return row
 }
 
-function read_text_row(db: Database.Database, text_id: string): { id: string, title: MultiString, updated_at: string } | undefined {
+function read_text_row(db: Database.Database, text_id: string): Pick<TextRecord, 'id' | 'title' | 'sources' | 'citations' | 'summary' | 'work_id' | 'updated_at'> | undefined {
   const row = db.prepare(`SELECT * FROM texts WHERE id = ?`).get(text_id) as Record<string, unknown> | undefined
   if (!row)
     return undefined
   const parsed = parse_dict_row('texts', row)
-  return { id: parsed.id as string, title: (parsed.title as MultiString) ?? {}, updated_at: parsed.updated_at as string }
+  return {
+    id: parsed.id as string,
+    title: (parsed.title as MultiString) ?? {},
+    sources: (parsed.sources as string[]) ?? null,
+    citations: (parsed.citations as SourceCitation[]) ?? null,
+    summary: (parsed.summary as MultiString) ?? null,
+    work_id: (parsed.work_id as string) ?? null,
+    updated_at: parsed.updated_at as string,
+  }
+}
+
+function list_text_dialects(db: Database.Database, text_id: string): { id: string, name: MultiString }[] {
+  const rows = db.prepare(
+    `SELECT d.id, d.name FROM text_dialects td JOIN dialects d ON d.id = td.dialect_id
+     WHERE td.text_id = ? ORDER BY td.created_at`,
+  ).all(text_id) as { id: string, name: string }[]
+  return rows.map(row => ({ id: row.id, name: row.name ? JSON.parse(row.name) as MultiString : {} }))
+}
+
+/** Sibling versions of the same work — texts sharing this text's `work_id`. */
+function list_parallel_texts(db: Database.Database, { text_id, work_id }: { text_id: string, work_id: string | null }): ParallelTextRef[] {
+  if (!work_id)
+    return []
+  const rows = db.prepare(`SELECT id, title FROM texts WHERE work_id = ? AND id != ? ORDER BY created_at`).all(work_id, text_id) as { id: string, title: string | null }[]
+  return rows.map(row => ({
+    id: row.id,
+    title: row.title ? JSON.parse(row.title) as MultiString : {},
+    dialects: list_text_dialects(db, row.id),
+  }))
 }
 
 function list_text_sentences(db: Database.Database, text_id: string): TextSentenceRecord[] {
@@ -219,6 +283,12 @@ export function get_text(db: Database.Database, text_id: string): TextRecord | u
   if (!text)
     return undefined
   const record: TextRecord = { ...text, sentences: list_text_sentences(db, text_id) }
+  const dialects = list_text_dialects(db, text_id)
+  if (dialects.length)
+    record.dialects = dialects
+  const parallel_texts = list_parallel_texts(db, { text_id, work_id: text.work_id })
+  if (parallel_texts.length)
+    record.parallel_texts = parallel_texts
   include_text_audio(db, record)
   return record
 }
@@ -253,6 +323,45 @@ export function list_texts(db: Database.Database): TextSummary[] {
     sentence_count: row.sentence_count,
     updated_at: row.updated_at,
   }))
+}
+
+/**
+ * ADDITIVE dialect links for a text (found-or-created by name, deduped) — the
+ * text twin of the entry write path's dialect handling. Runs inside the caller's
+ * open transaction; new rows' history events are appended to `events`.
+ */
+function link_text_dialects({ db, text_id, dialects, now, user_id, api_key_id, events }: {
+  db: Database.Database
+  text_id: string
+  dialects: string[] | string | undefined
+  now: string
+  user_id: string
+  api_key_id?: string | null
+  events: HistoryEvent[]
+}): void {
+  const names = to_string_array(dialects)
+  if (!names)
+    return
+  const dialect_map = load_dialect_map(db)
+  const linked = new Set((db.prepare(`SELECT dialect_id FROM text_dialects WHERE text_id = ?`).all(text_id) as { dialect_id: string }[]).map(row => row.dialect_id))
+  const push = (table_name: 'dialects' | 'text_dialects', row: Record<string, unknown>) => {
+    const event = merge_dict_row({ db, table_name, row, user_id, at: now, api_key_id })
+    if (event)
+      events.push(event)
+  }
+  for (const raw of names) {
+    const key = raw.trim().toLowerCase()
+    let id = dialect_map.get(key)
+    if (!id) {
+      id = crypto.randomUUID()
+      dialect_map.set(key, id)
+      push('dialects', { id, name: { default: raw.trim() }, created_at: now, updated_at: now })
+    }
+    if (!linked.has(id)) {
+      push('text_dialects', { id: crypto.randomUUID(), text_id, dialect_id: id, created_at: now, updated_at: now })
+      linked.add(id)
+    }
+  }
 }
 
 export interface CreateTextResult {
@@ -291,11 +400,24 @@ export function create_text({ db, history_db, user_id, api_key_id, input }: {
   const sort_keys = initial_keys(sentences.length)
   const events: HistoryEvent[] = []
 
+  const sources = to_string_array(input.sources)
+  assert_known_source_slugs(sources, source_slug_set)
+  const citations = to_citations(input.citations)
+  assert_known_source_slugs(citation_slugs(citations), source_slug_set)
+  const summary = to_multistring(input.summary)
+  const work_id = typeof input.work_id === 'string' && input.work_id.trim() ? input.work_id.trim() : undefined
+
   db.exec('BEGIN IMMEDIATE')
   try {
-    const text_event = merge_dict_row({ db, table_name: 'texts', row: { id: text_id, title, created_at: now, updated_at: now }, user_id, at: now, api_key_id })
+    const text_row: Record<string, unknown> = { id: text_id, title, created_at: now, updated_at: now }
+    if (sources) text_row.sources = sources
+    if (citations) text_row.citations = citations
+    if (summary) text_row.summary = summary
+    if (work_id) text_row.work_id = work_id
+    const text_event = merge_dict_row({ db, table_name: 'texts', row: text_row, user_id, at: now, api_key_id })
     if (text_event)
       events.push(text_event)
+    link_text_dialects({ db, text_id, dialects: input.dialects, now, user_id, api_key_id, events })
     sentences.forEach((sentence, index) => {
       const row = build_text_sentence_row({ sentence, text_id, sort_key: sort_keys[index], now, source_slug_set })
       const event = merge_dict_row({ db, table_name: 'sentences', row, user_id, at: now, api_key_id })
@@ -320,10 +442,12 @@ export interface UpdateTextResult extends SingleWriteResult {
 }
 
 /**
- * Field-merge a text: `title` overwrites; `append_sentences` are added after the
- * current last sentence; `sentence_order` (existing sentence ids) reassigns
- * sort_keys to the given order. Returns `found: false` if the text is gone. Edit
- * one sentence's text/translation/paragraph-break via `PATCH …/sentences/{id}`.
+ * Field-merge a text: `title`/`sources`/`citations`/`summary`/`work_id`
+ * overwrite (null clears the nullable ones); `dialects` are ADDITIVE links
+ * (found-or-created); `append_sentences` are added after the current last
+ * sentence; `sentence_order` (existing sentence ids) reassigns sort_keys to the
+ * given order. Returns `found: false` if the text is gone. Edit one sentence's
+ * text/translation/paragraph-break via `PATCH …/sentences/{id}`.
  */
 export function apply_text_update({ db, history_db, text_id, patch, user_id, api_key_id }: {
   db: Database.Database
@@ -351,14 +475,41 @@ export function apply_text_update({ db, history_db, text_id, patch, user_id, api
 
   db.exec('BEGIN IMMEDIATE')
   try {
+    const patch_source = patch as Record<string, unknown>
+    const row: Record<string, unknown> = { ...existing, updated_at: now }
+    delete row.updated_by_user_id
+    let text_row_changed = false
     if (patch.title !== undefined) {
       const title = to_multistring(patch.title)
       if (!title)
         throw new Error('text title cannot be empty')
-      const row: Record<string, unknown> = { ...existing, title, updated_at: now }
-      delete row.updated_by_user_id
-      push('texts', row)
+      row.title = title
+      text_row_changed = true
     }
+    if ('sources' in patch_source) {
+      const sources = to_string_array(patch.sources) ?? null
+      assert_known_source_slugs(sources ?? undefined, source_slug_set)
+      row.sources = sources
+      text_row_changed = true
+    }
+    if ('citations' in patch_source) {
+      const citations = to_citations(patch.citations)
+      assert_known_source_slugs(citation_slugs(citations), source_slug_set)
+      row.citations = citations ?? null
+      text_row_changed = true
+    }
+    if ('summary' in patch_source) {
+      row.summary = to_multistring(patch.summary) ?? null
+      text_row_changed = true
+    }
+    if ('work_id' in patch_source) {
+      row.work_id = typeof patch.work_id === 'string' && patch.work_id.trim() ? patch.work_id.trim() : null
+      text_row_changed = true
+    }
+    if (text_row_changed)
+      push('texts', row)
+
+    link_text_dialects({ db, text_id, dialects: patch.dialects, now, user_id, api_key_id, events })
 
     if (patch.append_sentences?.length) {
       const last = db.prepare(`SELECT sort_key FROM sentences WHERE text_id = ? ORDER BY sort_key DESC LIMIT 1`).get(text_id) as { sort_key: string | null } | undefined

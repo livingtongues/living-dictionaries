@@ -5,7 +5,7 @@
  * (not generated) so the prose is agent-oriented.
  */
 
-import { DISCOURSE_ROLES, RELATIONSHIP_TYPES } from '$lib/constants'
+import { DISCOURSE_ROLES, RELATIONSHIP_TYPES, SOURCE_TYPES } from '$lib/constants'
 import { partsOfSpeech } from '$lib/mappings/parts-of-speech'
 
 export function build_openapi_spec({ origin }: { origin: string }): Record<string, unknown> {
@@ -99,6 +99,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       noun_class: { type: 'string' },
       plural_form: StringOrMultiString,
       variant: StringOrMultiString,
+      sources: { ...StringOrStringArray, description: 'Source slug(s) for THIS sense — per-sense provenance when an entry\'s senses are merged from several sources. Each must already exist (create via `POST …/sources`).' },
       example_sentences: { type: 'array', items: { $ref: '#/components/schemas/SentenceInput' } },
     },
   }
@@ -110,12 +111,14 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     properties: {
       id: { type: 'string', format: 'uuid', description: 'Optional client-generated UUID (any version — deterministic uuid5 ids work well) — THE idempotency key. Generate it yourself and a re-POST of the same entry is a safe no-op (`status: "exists"`) instead of a duplicate, and you already know the id for later `PATCH …/entries/{id}` edits (no round-trip to discover it). Omit → the server mints one. Must be a valid UUID if provided.' },
       lexeme: { ...StringOrMultiString, description: 'The headword. Required.' },
+      homograph: { type: 'string', description: 'Homograph number for identically-spelled headwords — "1", "2" (some sources use "a"/"b"). Rendered as a superscript after the lexeme, so deliberate homographs are distinguishable from accidental duplicates. Orthogonal to the `homophone` relationship type (differently-spelled words that sound alike).' },
       phonetic: { type: 'string' },
       interlinearization: { type: 'string' },
       morphology: { type: 'string' },
       notes: { ...StringOrMultiString, description: 'Rich text stored as MARKDOWN (headings/bold/lists/links) — write markdown, not HTML.' },
       linguistic_history: StringOrMultiString,
       sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist in this dictionary\'s registry (create via `POST …/sources`); an unknown slug rejects the write.' },
+      citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitation' }, description: 'Source refs WITH a citation locus (the page/example number this entry came from — always known for scanned dictionaries). Complements the bare `sources` slugs.' },
       scientific_names: StringOrStringArray,
       elicitation_id: { type: 'string', description: 'Source-side stable id for word-list/elicitation ordering. Persisted and queryable via `?elicitation_id=`; use it as a server-recoverable dedupe key ONLY if your source id is genuinely elicitation data — for generic idempotency, supply your own `id` instead.' },
       coordinates: { ...CoordinatesNullableRef, description: 'Where-spoken geometry for this form: the attestation/elicitation point(s) (and/or region[s]). See the `Coordinates` schema.' },
@@ -148,12 +151,14 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     description: 'Partial entry update. Provided fields overwrite; omitted ones are untouched. `dialects`/`tags` are ADDITIVE links. `senses` upsert by client id (unknown id → created with that id — see SensePatch).',
     properties: {
       lexeme: StringOrMultiString,
+      homograph: { type: 'string', description: 'Homograph number ("1", "2", …); empty string clears.' },
       phonetic: { type: 'string' },
       interlinearization: { type: 'string' },
       morphology: { type: 'string' },
       notes: { ...StringOrMultiString, description: 'Rich text stored as MARKDOWN (headings/bold/lists/links) — write markdown, not HTML.' },
       linguistic_history: StringOrMultiString,
       sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist (create via `POST …/sources`). Replaces the entry\'s current source list.' },
+      citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitation' }, description: 'Whole-array replace of the entry\'s citation loci.' },
       scientific_names: StringOrStringArray,
       elicitation_id: { type: 'string' },
       coordinates: { ...CoordinatesNullableRef, description: 'Whole-object replace: `{ points?, regions? }` overwrites; `null` clears; omit → untouched.' },
@@ -187,7 +192,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       year: { type: 'string', description: 'Text (allows ranges like "1979–1985").' },
       url: { type: 'string' },
       license: { type: 'string' },
-      type: { type: 'string', enum: ['dictionary', 'wordlist', 'fieldwork', 'manuscript', 'other'] },
+      type: { type: 'string', enum: [...SOURCE_TYPES] },
       orthography: { type: 'string', nullable: true, description: 'Which writing system this source\'s forms use — an orthography `code` from the dictionary\'s `orthographies` (or `default`), so multiple romanizations/scripts across a corpus are not conflated.' },
     },
   }
@@ -250,8 +255,10 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     properties: {
       id: { type: 'string' },
       lexeme: { $ref: '#/components/schemas/MultiString' },
+      homograph: { type: 'string', nullable: true },
       phonetic: { type: 'string', nullable: true },
       elicitation_id: { type: 'string', nullable: true },
+      sources: { type: 'array', items: { type: 'string' }, nullable: true, description: 'Entry-level source slugs — always included, so provenance checks don\'t need per-entry detail fetches.' },
       updated_at: { type: 'string', format: 'date-time' },
       senses: { type: 'array', items: { $ref: '#/components/schemas/SenseSummary' }, description: 'Present only when the request passes `?include=senses`.' },
     },
@@ -273,10 +280,15 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   const TextInput = {
     type: 'object',
     required: ['title'],
-    description: 'A text (long connected passage/story) with ordered sentences.',
+    description: 'A text (long connected passage/story) with ordered sentences. Text-level metadata (sources, citations, summary, dialects, work_id) lives HERE — don\'t repeat it on every sentence.',
     properties: {
       id: client_id_prop,
       title: { ...StringOrMultiString, description: 'The text\'s title. Required.' },
+      sources: { ...StringOrStringArray, description: 'Source slug(s) for the whole text — each must already exist (create via `POST …/sources`).' },
+      citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitation' }, description: 'Source refs WITH a citation locus (page / hymn number).' },
+      summary: { ...StringOrMultiString, description: 'Synopsis/abstract of the text, per language.' },
+      dialects: { ...StringOrStringArray, description: 'Dialect name(s) this text version is written in — found-or-created, linked via the text↔dialect junction.' },
+      work_id: { type: 'string', description: 'Parallel-texts grouping key: texts sharing a `work_id` are versions of ONE work (e.g. the same hymn in two dialects, each with its own wording + audio). Mint any stable id for the first version and reuse it on the others; reads then include `parallel_texts` siblings.' },
       sentences: { type: 'array', items: { $ref: '#/components/schemas/TextSentenceInput' }, description: 'Ordered sentences — sort_keys are assigned in array order.' },
     },
   }
@@ -304,6 +316,12 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     properties: {
       id: { type: 'string' },
       title: { $ref: '#/components/schemas/MultiString' },
+      sources: { type: 'array', items: { type: 'string' }, nullable: true },
+      citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitation' }, nullable: true },
+      summary: { ...MultiString, nullable: true },
+      work_id: { type: 'string', nullable: true, description: 'Parallel-texts grouping key (versions of one work share it).' },
+      dialects: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, name: { $ref: '#/components/schemas/MultiString' } } }, description: 'Dialect(s) this version is written in. Present only when set.' },
+      parallel_texts: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, title: { $ref: '#/components/schemas/MultiString' }, dialects: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, name: { $ref: '#/components/schemas/MultiString' } } } } } }, description: 'Other versions of the same work (same `work_id`). Present only when siblings exist.' },
       updated_at: { type: 'string', format: 'date-time' },
       sentences: { type: 'array', items: { $ref: '#/components/schemas/TextSentenceFull' }, description: 'Ordered by `sort_key` ascending.' },
       audio: { type: 'array', items: { $ref: '#/components/schemas/AudioMedia' }, description: 'TEXT-level audio (whole-passage recordings, each with `timings` + `download_url`). Present only when audio exists; sentence-level audio nests under `sentences[].audio`.' },
@@ -313,9 +331,14 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const TextPatch = {
     type: 'object',
-    description: 'Edit a text: `title` overwrites; `append_sentences` add after the last sentence; `sentence_order` (a full list of existing sentence ids) reassigns their order. Edit a single sentence via `PATCH …/sentences/{id}`.',
+    description: 'Edit a text: `title`/`sources`/`citations`/`summary`/`work_id` overwrite (`null` clears the nullable ones); `dialects` are ADDITIVE links; `append_sentences` add after the last sentence; `sentence_order` (a full list of existing sentence ids) reassigns their order. Edit a single sentence via `PATCH …/sentences/{id}`.',
     properties: {
       title: StringOrMultiString,
+      sources: { ...StringOrStringArray, description: 'Whole-array replace of the text\'s source slugs.' },
+      citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitation' }, nullable: true, description: 'Whole-array replace of the citation loci; `null` clears.' },
+      summary: { ...StringOrMultiString, nullable: true },
+      dialects: { ...StringOrStringArray, description: 'ADDITIVE dialect links (found-or-created).' },
+      work_id: { type: 'string', nullable: true, description: 'Overwrites the parallel-texts grouping key; `null` clears.' },
       append_sentences: { type: 'array', items: { $ref: '#/components/schemas/TextSentenceInput' } },
       sentence_order: { type: 'array', items: { type: 'string' }, description: 'Existing sentence ids in the desired order.' },
     },
@@ -367,6 +390,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       noun_class: { type: 'string', nullable: true },
       plural_form: { ...MultiString, nullable: true },
       variant: { ...MultiString, nullable: true },
+      sources: { type: 'array', items: { type: 'string' }, nullable: true, description: 'Per-sense source slugs.' },
       sentences: { type: 'array', items: { $ref: '#/components/schemas/SentenceFull' }, description: 'The sense\'s example sentences. Present only when sentences exist. (Input field name is `example_sentences`.)' },
       photos: { type: 'array', items: { $ref: '#/components/schemas/PhotoMedia' }, description: 'Present only when photos exist. Write via `POST …/senses/{senseId}/photos`.' },
       videos: { type: 'array', items: { $ref: '#/components/schemas/VideoMedia' }, description: 'Present only when videos exist. Write via `POST …/senses/{senseId}/videos`.' },
@@ -380,12 +404,14 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     description: 'The entry\'s top-level scalar fields. These are exactly the fields you POST at the top level of `EntryInput` (lexeme, phonetic, notes, sources, …) — on READ they live here, nested under `entry.main`.',
     properties: {
       lexeme: { $ref: '#/components/schemas/MultiString' },
+      homograph: { type: 'string', nullable: true },
       phonetic: { type: 'string', nullable: true },
       interlinearization: { type: 'string', nullable: true },
       morphology: { type: 'string', nullable: true },
       notes: { ...MultiString, nullable: true, description: 'Rich text as MARKDOWN.' },
       linguistic_history: { ...MultiString, nullable: true },
       sources: { type: 'array', items: { type: 'string' }, nullable: true },
+      citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitation' }, nullable: true },
       scientific_names: { type: 'array', items: { type: 'string' }, nullable: true },
       elicitation_id: { type: 'string', nullable: true },
       coordinates: { ...CoordinatesNullableRef, description: 'Where-spoken geometry (attestation/elicitation location) for this form, when set.' },
@@ -903,7 +929,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         'Headwords/glosses/translations/notes are multilingual. Every such field accepts EITHER a plain string (stored under the `default` writing system) OR a `{ "<locale>": "text" }` map. Use `default` for the vernacular (the language being documented) and gloss-language codes (e.g. `en`, `es`, `fr`) for glosses & translations. **Call `GET /api/v1/dictionaries/{id}` first to read the dictionary\'s valid `gloss_languages`** and key your glosses by those codes. Full Unicode (IPA, diacritics, non-Latin scripts) is supported and stored verbatim — never transliterate or strip diacritics.',
         '',
         '## Recommended import workflow',
-        '1. `GET /api/v1/dictionaries/{id}` → note `gloss_languages` (which locale codes to use). `entry_count` is updated asynchronously and lags — **do not use it to verify a fresh import** (it can read 0 right after a bulk POST). For a live count, paginate `/entries` instead.',
+        '1. `GET /api/v1/dictionaries/{id}` → note `gloss_languages` (which locale codes to use; if your source glosses in a language not listed, add it first via `POST …/gloss-languages`). `entry_count` is updated asynchronously and lags — **do not use it to verify a fresh import** (it can read 0 right after a bulk POST). For a live count, paginate `/entries` instead.',
         '2. `POST /api/v1/dictionaries/{id}/entries` with `{ "entries": [ … ], "import_id": "my-import-2026" }` in batches of ≤1000 (and ≤~16MB/request — see Limits). **Generate a UUID (v4) yourself for each entry and send it as `id`.** That id IS your idempotency key: you already know it (record it in your ledger keyed by your source id), you use it directly for later `PATCH …/entries/{id}` edits, and a re-POST of the same id is a safe no-op. The whole batch shares an `import_id`, which tags every entry with a private tag of that name so you can find/clean the batch later.',
         '3. Read the per-item `results` array. Each item is `{ status: "created"|"exists"|"failed", entry_id?, sense_ids?, error? }` (one per input entry, in order). `exists` means an entry with that `id` was already present and was skipped — so retrying a timed-out batch never duplicates. Re-POST only the `failed` ones.',
         '4. Spot-verify with `GET /api/v1/dictionaries/{id}/entries/{entryId}` (returns the full nested entry — the READ shape), or bulk-read with `GET /api/v1/dictionaries/{id}/entries?include=senses`. Heads-up on the input→output asymmetry: top-level scalars you POST come back nested under `entry.main`, and `senses[].example_sentences` come back as `senses[].sentences`. See the `EntryResponse` schema. (`elicitation_id` is for word-list/elicitation ordering; it is persisted and queryable via `?elicitation_id=`, so use it for dedupe only if your source id is genuinely elicitation data — otherwise use your own `id` as above.)',
@@ -918,6 +944,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '- `DELETE …/senses/{senseId}` — delete one sense (refused for an entry\'s LAST sense → delete the entry instead).',
         '- `PATCH …/tags/{tagId}` / `…/dialects/{dialectId}` — rename a tag/dialect (affects EVERY entry it\'s on); `DELETE` removes it globally (unlinks it everywhere).',
         '- `DELETE …/entries/{entryId}/tags/{tagId}` / `…/entries/{entryId}/dialects/{dialectId}` — unlink ONE tag/dialect from ONE entry (it survives on other entries).',
+        'REPAIR & RE-SYNC SEMANTICS: PATCH is field-merge and NEVER deletes — re-syncing a corrected source over an earlier import updates fields but leaves stale senses/sentences/tags behind; remove those explicitly with the DELETE routes above. See the importing guide\'s repair section.',
         '',
         '## Scope (v1)',
         'v1 covers entries, senses, example sentences, **texts** (connected passages with ordered sentences), speakers, tags, dialects, sources, and **media** (audio, photos, video). Text-only imports never need to touch media.',
@@ -937,7 +964,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         'Batch ≤1000 entries per request AND keep each request body under ~16MB — split larger imports. A single media upload (file or fetched url) is capped separately (~25MB); for larger video use a `hosted_url` link instead. Writes are per-item best-effort (read `results`).',
         '',
         '## Bulk reads — dictionary snapshots',
-        'Mirroring or bulk-reading a whole dictionary? Don\'t paginate the API — every public AND unlisted dictionary has a downloadable gzipped SQLite snapshot of its full database (entries, senses, sentences, texts, media rows, speakers, …) at `https://snapshots.livingdictionaries.app/dictionaries/{id}.db.gz` (no auth; use the dictionary id, not the url slug, if they differ). It is rebuilt within ~30 minutes of any edit (a 30-minute sweep that only rebuilds when content actually changed) and served with `Cache-Control: max-age=120` — so treat it as at most ~30 minutes stale, and use the write API\'s responses (not the snapshot) to verify your own fresh writes.',
+        'Mirroring or bulk-reading a whole dictionary? Don\'t paginate the API — every dictionary except secure ones has a downloadable gzipped SQLite snapshot of its full database (entries, senses, sentences, texts, media rows, speakers, …) at `https://snapshots.livingdictionaries.app/dictionaries/{id}.db.gz` (no auth; use the dictionary id, not the url slug, if they differ). It is rebuilt within ~30 minutes of any edit (a 30-minute sweep that only rebuilds when content actually changed) and served with `Cache-Control: max-age=120` — so treat it as at most ~30 minutes stale, and use the write API\'s responses (not the snapshot) to verify your own fresh writes. **How to load and query it (URL shape, gunzip, key tables): `GET /api/v1/guides/snapshot`.** Secure dictionaries have no public snapshot — paginate the API instead.',
         '',
         '## Feedback (agents welcome)',
         'If you hit a wall — a field you need that doesn\'t exist, a bug, or an awkward workflow — `POST /api/v1/dictionaries/{id}/feedback` with `{ "message": "…" }`. It reaches the Living Dictionaries team directly (read OR write keys). After sending, relay the response\'s `relay_to_human` sentence to your human so they know what you asked for; if we adopt it we notify them directly.',
@@ -971,7 +998,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       '/api/v1/dictionaries/{id}/entries': {
         get: {
           summary: 'List/filter entries',
-          description: 'Entry summaries for verification / live counts. Ordered by `updated_at` ASC. Paginated via `limit` (default 100, max 500) + `offset`; `has_more` tells you when to fetch the next page. (For idempotent imports, prefer a local `external_id`→`entry_id` ledger over paginating for dedupe.)',
+          description: 'Entry summaries for verification / live counts. Ordered by `updated_at` ASC. Paginated via `limit` (default 100, max 500) + `offset`; `has_more` tells you when to fetch the next page. GOTCHA: `limit` is silently capped at 500 — advance `offset` by the number of entries RETURNED while `has_more` is true, never by your requested limit (a `returned < limit` break-condition silently truncates when limit > 500). (For idempotent imports, prefer a local `external_id`→`entry_id` ledger over paginating for dedupe.)',
           parameters: [
             dict_id_param,
             { name: 'elicitation_id', in: 'query', schema: { type: 'string' }, description: 'Exact match.' },
@@ -1078,7 +1105,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
           summary: 'Send feedback to the LD team',
           description: 'Blocked, missing a field, or something\'s awkward? Tell us here — it reaches the Living Dictionaries team directly (you do NOT need your human to relay it). Works with read OR write keys. Rate-limited. After sending, TELL YOUR HUMAN what you requested: the response includes a `relay_to_human` sentence to pass along (if we adopt it, we notify your human directly).',
           parameters: [dict_id_param],
-          requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['message'], properties: { message: { type: 'string', description: 'What you need / what\'s wrong.' }, kind: { type: 'string', enum: ['missing_field', 'bug', 'awkward', 'other'] } } } } } },
+          requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['message'], properties: { message: { type: 'string', maxLength: 4000, description: 'What you need / what\'s wrong. Max 4000 characters.' }, kind: { type: 'string', enum: ['missing_field', 'bug', 'awkward', 'other'] } } } } } },
           responses: { 200: { description: '{ received: true, relay_to_human }' }, 400: { description: 'Empty/too-long message' }, 429: { description: 'Rate-limited (non-blocking — earlier feedback was received)' } },
         },
       },
@@ -1114,6 +1141,12 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       '/api/v1/dictionaries/{id}/dialects/{dialectId}': {
         patch: { summary: 'Edit a dialect (name / coordinates)', description: 'Rename the dialect (plain string or locale map) and/or replace its `coordinates` (the variety\'s areal extent — whole-object replace; `null` clears; omit → untouched). Affects EVERY entry it is on. Returns `{ dialect }`.', parameters: [dict_id_param, dialect_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { name: StringOrMultiString, coordinates: { ...CoordinatesNullableRef, description: 'Replace the dialect\'s areal-extent geometry; `null` clears; omit → untouched.' } } } } } }, responses: { 200: { description: '{ dialect }' }, 400: { description: 'Name collides / invalid coordinates' }, 404: {} } },
         delete: { summary: 'Delete a dialect (globally)', description: 'Deletes the dialect and unlinks it from every entry. To remove it from just one entry use `DELETE …/entries/{entryId}/dialects/{dialectId}`.', parameters: [dict_id_param, dialect_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
+      },
+      '/api/v1/dictionaries/{id}/gloss-languages': {
+        post: { summary: 'Add a gloss language', description: 'Registers another locale code glosses/translations can be keyed by (e.g. importing a French-glossed source into an en/zh dictionary → add `fr` first). The code must be in Living Dictionaries\' supported glossing-languages list. Write key / manager+.', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['code'], properties: { code: { type: 'string', description: 'A supported gloss-language code, e.g. `fr`.' } } } } } }, responses: { 200: { description: '{ gloss_languages } — the updated full list', content: { 'application/json': { schema: { type: 'object', properties: { gloss_languages: { type: 'array', items: { type: 'string' } } } } } } }, 400: { description: 'Unsupported code or already present' } } },
+      },
+      '/api/v1/dictionaries/{id}/gloss-languages/{code}': {
+        delete: { summary: 'Remove a gloss language', description: 'Refused while any sense/sentence still stores gloss/definition/translation text under the code (clear those first).', parameters: [dict_id_param, { name: 'code', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: '{ gloss_languages }' }, 400: { description: 'Not on this dictionary, or still in use' } } },
       },
       '/api/v1/dictionaries/{id}/orthographies': {
         get: { summary: 'List orthographies', description: 'The dictionary\'s ALTERNATE writing systems (the primary headword, keyed `default`, is implicit and excluded), each with `used_by` counts of entries/sentences that store text under it.', parameters: [dict_id_param], responses: { 200: { description: '{ orthographies }' } } },
@@ -1306,6 +1339,7 @@ const PATH_SEGMENT_TAGS: Record<string, string> = {
   'featured-entries': 'featured-entries',
   'dialects': 'dialects',
   'orthographies': 'orthographies',
+  'gloss-languages': 'dictionary',
   'sources': 'sources',
   'files': 'files',
 }

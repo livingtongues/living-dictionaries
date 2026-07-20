@@ -12,6 +12,7 @@ import { translate_part_of_speech, translate_part_of_speech_abbreviation, transl
 export enum StandardEntryCSVFields {
   ID = 'Entry Id',
   lexeme = 'Lexeme/Word/Phrase',
+  homograph = 'Homograph Number',
   phonetic = 'Phonetic (IPA)',
   interlinearization = 'Interlinearization',
   morphology = 'Morphology',
@@ -78,6 +79,7 @@ export function formatCsvEntries(
       // Falls back to the first populated alternate orthography when `default` is absent;
       // the alternate's own localOrthography column stays faithful (value in both is honest).
       lexeme: get_headword({ lexeme: entry.main.lexeme, orthographies }).value,
+      homograph: entry.main?.homograph,
       phonetic: entry.main?.phonetic,
       interlinearization: entry.main?.interlinearization,
       morphology: entry.main?.morphology,

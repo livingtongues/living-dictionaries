@@ -8,14 +8,14 @@
   import { truncateAuthors } from './print/truncate-authors'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { createPersistedStore } from '$lib/state/persisted-store'
-  import type { QueryParamStore } from '$lib/state/query-param-state.svelte'
+  import type { QueryParamState } from '$lib/state/query-param-state.svelte'
   import { page } from '$app/state'
   import type { QueryParams } from '$lib/search/types'
   import { api_dictionaries_partners_get } from '$api/dictionaries/[id]/partners/_call'
   import IconFaPrint from '~icons/fa/print'
 
   interface Props {
-    search_params: QueryParamStore<QueryParams>
+    search_params: QueryParamState<QueryParams>
     entries?: EntryData[]
     dictionary: Tables<'dictionaries'>
     can_edit?: boolean
@@ -33,9 +33,9 @@
 
   onMount(() => {
     api_dictionaries_partners_get(dictionary.id).then(data => partners = data)
-    $search_params.page = 1
-    $search_params.entries_per_page = print_per_page
-    return () => $search_params.entries_per_page = null
+    search_params.value.page = 1
+    search_params.value.entries_per_page = print_per_page
+    return () => search_params.value.entries_per_page = null
   })
 
   const visitor_max_entries = 300
@@ -65,7 +65,7 @@
           type="number"
           min="1"
           max={can_edit ? 1000000 : visitor_max_entries}
-          bind:value={$search_params.entries_per_page} />
+          bind:value={search_params.value.entries_per_page} />
       </div>
       <div class="control">
         <label for="columnCount">{page.data.t('print.columns')}</label>

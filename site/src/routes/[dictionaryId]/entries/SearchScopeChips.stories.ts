@@ -1,13 +1,11 @@
 import type { Story, StoryMeta } from 'svelte-look'
-import { writable } from 'svelte/store'
 import type Component from './SearchScopeChips.svelte'
 import type { QueryParams } from '$lib/search/types'
-import type { QueryParamStore } from '$lib/state/query-param-state.svelte'
+import type { QueryParamState } from '$lib/state/query-param-state.svelte'
 import { mock_t } from '$lib/mocks/mock-t'
 
-function mock_search_params(value: Partial<QueryParams>): QueryParamStore<QueryParams> {
-  const store = writable({ page: 1, query: '', ...value })
-  return { ...store, remove: () => {} } as QueryParamStore<QueryParams>
+function mock_search_params(value: Partial<QueryParams>): QueryParamState<QueryParams> {
+  return { value: { page: 1, query: '', ...value }, update: () => {}, remove: () => {} } as any
 }
 
 export const shared_meta: StoryMeta = {

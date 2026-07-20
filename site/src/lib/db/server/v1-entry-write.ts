@@ -66,7 +66,8 @@ function to_parts_of_speech(value: unknown): string[] | undefined {
   return normalized.length ? normalized : undefined
 }
 
-function load_dialect_map(db: Database.Database): Map<string, string> {
+/** name-key (lowercased trimmed name, any locale) → dialect id, for found-or-create linking. */
+export function load_dialect_map(db: Database.Database): Map<string, string> {
   const map = new Map<string, string>()
   const rows = db.prepare(`SELECT id, name FROM dialects`).all() as { id: string, name: string }[]
   for (const { id, name } of rows) {
@@ -114,6 +115,8 @@ function build_sentence_rows({ sentence, sense_id, now, source_slug_set }: { sen
 
 function build_sense_rows({ sense, entry_id, now, source_slug_set }: { sense: SenseInput, entry_id: string, now: string, source_slug_set: Set<string> }): { sense_id: string, rows: BuiltRow[] } {
   const sense_id = resolve_client_id(sense.id, { field: 'sense id' })
+  const sense_sources = to_string_array(sense.sources)
+  assert_known_source_slugs(sense_sources, source_slug_set)
   const rows: BuiltRow[] = [{
     table_name: 'senses',
     row: prune({
@@ -127,6 +130,7 @@ function build_sense_rows({ sense, entry_id, now, source_slug_set }: { sense: Se
       noun_class: sense.noun_class?.trim() || undefined,
       plural_form: to_multistring(sense.plural_form),
       variant: to_multistring(sense.variant),
+      sources: sense_sources,
       created_at: now,
       updated_at: now,
     }),
@@ -155,6 +159,8 @@ function build_entry({ entry, entry_id, now, dialect_map, tag_map, source_slug_s
 
   const entry_sources = to_string_array(entry.sources)
   assert_known_source_slugs(entry_sources, source_slug_set)
+  const entry_citations = to_citations(entry.citations)
+  assert_known_source_slugs(citation_slugs(entry_citations), source_slug_set)
 
   const ordered_rows: BuiltRow[] = []
   const new_dialects = new Map<string, string>()
@@ -192,12 +198,14 @@ function build_entry({ entry, entry_id, now, dialect_map, tag_map, source_slug_s
     row: prune({
       id: entry_id,
       lexeme,
+      homograph: entry.homograph?.trim() || undefined,
       phonetic: entry.phonetic?.trim() || undefined,
       interlinearization: entry.interlinearization?.trim() || undefined,
       morphology: entry.morphology?.trim() || undefined,
       notes: to_multistring(entry.notes),
       linguistic_history: to_multistring(entry.linguistic_history),
       sources: entry_sources,
+      citations: entry_citations,
       scientific_names: to_string_array(entry.scientific_names),
       elicitation_id: entry.elicitation_id?.trim() || undefined,
       coordinates: to_coordinates(entry.coordinates) ?? undefined,
@@ -347,12 +355,12 @@ function entry_exists(db: Database.Database, entry_id: string): boolean {
 
 // ── Update (PATCH) ──────────────────────────────────────────────────────────
 
-const ENTRY_PATCH_TEXT_FIELDS = ['phonetic', 'interlinearization', 'morphology', 'elicitation_id'] as const
+const ENTRY_PATCH_TEXT_FIELDS = ['homograph', 'phonetic', 'interlinearization', 'morphology', 'elicitation_id'] as const
 const ENTRY_PATCH_MULTISTRING_FIELDS = ['notes', 'linguistic_history'] as const
 const ENTRY_PATCH_ARRAY_FIELDS = ['sources', 'scientific_names'] as const
 const SENSE_PATCH_TEXT_FIELDS = ['noun_class'] as const
 const SENSE_PATCH_MULTISTRING_FIELDS = ['glosses', 'definition', 'plural_form', 'variant'] as const
-const SENSE_PATCH_ARRAY_FIELDS = ['parts_of_speech', 'semantic_domains', 'write_in_semantic_domains'] as const
+const SENSE_PATCH_ARRAY_FIELDS = ['parts_of_speech', 'semantic_domains', 'write_in_semantic_domains', 'sources'] as const
 
 function read_parsed_row({ db, table, id }: { db: Database.Database, table: string, id: string }): Record<string, unknown> | undefined {
   const row = db.prepare(`SELECT * FROM "${table}" WHERE id = ?`).get(id) as Record<string, unknown> | undefined
@@ -397,6 +405,12 @@ function build_entry_patch_row({ existing, patch, now, source_slug_set }: { exis
       changed = true
     }
   }
+  if ('citations' in source) {
+    const citations = to_citations(patch.citations)
+    assert_known_source_slugs(citation_slugs(citations), source_slug_set)
+    row.citations = citations ?? null
+    changed = true
+  }
   if ('coordinates' in source) {
     row.coordinates = to_coordinates(source.coordinates) ?? null
     changed = true
@@ -404,7 +418,7 @@ function build_entry_patch_row({ existing, patch, now, source_slug_set }: { exis
   return changed ? row : null
 }
 
-function build_sense_patch_row({ existing, sense, now }: { existing: Record<string, unknown>, sense: SenseInput, now: string }): Record<string, unknown> | null {
+function build_sense_patch_row({ existing, sense, now, source_slug_set }: { existing: Record<string, unknown>, sense: SenseInput, now: string, source_slug_set: Set<string> }): Record<string, unknown> | null {
   const source = sense as Record<string, unknown>
   const row: Record<string, unknown> = { ...existing, updated_at: now }
   delete row.updated_by_user_id // let merge_dict_row re-stamp the current editor
@@ -423,7 +437,10 @@ function build_sense_patch_row({ existing, sense, now }: { existing: Record<stri
   }
   for (const field of SENSE_PATCH_ARRAY_FIELDS) {
     if (field in source) {
-      row[field] = (field === 'parts_of_speech' ? to_parts_of_speech(source[field]) : to_string_array(source[field])) ?? null
+      const value = (field === 'parts_of_speech' ? to_parts_of_speech(source[field]) : to_string_array(source[field])) ?? null
+      if (field === 'sources')
+        assert_known_source_slugs(value ?? undefined, source_slug_set)
+      row[field] = value
       changed = true
     }
   }
@@ -504,7 +521,7 @@ export function apply_entry_update({ db, history_db, entry_id, patch, user_id, a
       if (existing_sense) {
         if (existing_sense.entry_id !== entry_id)
           throw new Error(`sense ${sense_id} belongs to a different entry`)
-        const sense_row = build_sense_patch_row({ existing: existing_sense, sense, now })
+        const sense_row = build_sense_patch_row({ existing: existing_sense, sense, now, source_slug_set })
         if (sense_row)
           push('senses', sense_row)
         for (const sentence of sense.example_sentences ?? [])

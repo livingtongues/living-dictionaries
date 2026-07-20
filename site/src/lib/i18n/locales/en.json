@@ -460,6 +460,12 @@
     "type_wordlist": "Wordlist",
     "type_fieldwork": "Fieldwork",
     "type_manuscript": "Manuscript",
+    "type_video": "Video",
+    "type_grammar": "Grammar",
+    "type_phrasebook": "Phrasebook",
+    "type_hymnal": "Hymnal",
+    "type_primer": "Primer",
+    "type_corpus": "Corpus",
     "type_other": "Other",
     "sources": "Sources",
     "cite_instead": "Speaker unknown? Cite a source instead",
@@ -638,7 +644,8 @@
     "show_translations": "Show translations",
     "none_yet": "No texts yet",
     "sentence_count": "{count} sentences",
-    "edit_title": "Edit title"
+    "edit_title": "Edit title",
+    "other_versions": "Other versions"
   },
   "relationship_type": {
     "related_entries": "Related entries",
@@ -648,6 +655,7 @@
     "dialectal_variant": "Dialectal variant",
     "see_also": "See also",
     "spelling_variant": "Spelling variant",
+    "homophone": "Homophone",
     "hypernym": "Broader than",
     "hyponym": "Narrower than",
     "holonym": "Has part",
@@ -662,6 +670,7 @@
     "dialectal_variant_description": "The same word as used in a different dialect.",
     "see_also_description": "A general pointer to another entry worth comparing.",
     "spelling_variant_description": "An alternative accepted spelling of the same word.",
+    "homophone_description": "A different word that sounds identical to this one (they may be spelled differently).",
     "hypernym_description": "This word is the broader category that includes the other (animal is broader than dog).",
     "hyponym_description": "This word is a specific kind of the other (dog is narrower than animal).",
     "holonym_description": "The other word names a part of this one (hand has part finger).",

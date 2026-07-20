@@ -5,14 +5,14 @@
   import FilterList from './FilterList.svelte'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import ResponsiveSlideover from '$lib/components/ui/ResponsiveSlideover.svelte'
-  import type { QueryParamStore } from '$lib/state/query-param-state.svelte'
+  import type { QueryParamState } from '$lib/state/query-param-state.svelte'
   import type { QueryParams } from '$lib/search/types'
   import { page } from '$app/state'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import { get_orthographies } from '$lib/helpers/orthographies'
 
   interface Props {
-    search_params: QueryParamStore<QueryParams>
+    search_params: QueryParamState<QueryParams>
     show_mobile_filters?: boolean
     on_close: () => void
     result_facets: FacetResult
@@ -44,7 +44,7 @@
   const orthography_values = $derived(Object.fromEntries(
     Object.entries(result_facets?._orthographies?.values ?? {})
       .filter(([key]) => key in orthography_labels)
-      .filter(([key, count]) => count !== total || $search_params.orthographies?.includes(key)),
+      .filter(([key, count]) => count !== total || search_params.value.orthographies?.includes(key)),
   ))
 </script>
 
@@ -69,11 +69,11 @@
         <input
           style="width: 100%"
           type="range"
-          value={$search_params.tolerance || 0}
+          value={search_params.value.tolerance || 0}
           oninput={(e) => {
             // @ts-ignore
             const { value } = e.target
-            $search_params.tolerance = value === '1' ? null : value
+            search_params.value.tolerance = value === '1' ? null : value
           }}
           min="0"
           max="5"
@@ -157,112 +157,112 @@
 
         {#if result_facets.has_sentence?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.has_sentence}
+            bind:checked={search_params.value.has_sentence}
             count={result_facets.has_sentence.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.example_sentence')}`} />
         {/if}
         {#if result_facets.has_sentence?.values.false && result_facets.has_sentence?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.no_sentence}
+            bind:checked={search_params.value.no_sentence}
             count={result_facets.has_sentence.values.false}
             label={`${page.data.t('entry.does_not_exist')} ${page.data.t('entry_field.example_sentence')}`} />
         {/if}
-        {#if $search_params.view !== 'gallery'}
+        {#if search_params.value.view !== 'gallery'}
           {#if result_facets.has_image?.values.true}
             <ToggleFacet
-              bind:checked={$search_params.has_image}
+              bind:checked={search_params.value.has_image}
               count={result_facets.has_image.values.true}
               label={`${page.data.t('entry.has_exists')} ${page.data.t('entry.image')}`} />
           {/if}
           {#if result_facets.has_image?.values.false && result_facets.has_image?.values.true}
             <ToggleFacet
-              bind:checked={$search_params.no_image}
+              bind:checked={search_params.value.no_image}
               count={result_facets.has_image.values.false}
               label={`${page.data.t('entry.does_not_exist')} ${page.data.t('entry.image')}`} />
           {/if}
         {/if}
         {#if result_facets.has_audio?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.has_audio}
+            bind:checked={search_params.value.has_audio}
             count={result_facets.has_audio.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.audio')}`} />
         {/if}
         {#if result_facets.has_audio?.values.false && result_facets.has_audio?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.no_audio}
+            bind:checked={search_params.value.no_audio}
             count={result_facets.has_audio.values.false}
             label={`${page.data.t('entry.does_not_exist')} ${page.data.t('entry_field.audio')}`} />
         {/if}
         {#if result_facets.has_video?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.has_video}
+            bind:checked={search_params.value.has_video}
             count={result_facets.has_video.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.video')}`} />
         {/if}
         <!-- If they are not yet using video, we are currently not advertising this feature -->
         <!-- {#if result_facets.has_video?.values.false}
         <ToggleFacet
-          bind:checked={$search_params.no_video}
+          bind:checked={search_params.value.no_video}
           count={result_facets.has_video.values.false}
           label={page.data.t('entry.does_not_exist') + ' ' + page.data.t('entry_field.video')} />
       {/if} -->
         {#if result_facets.has_speaker?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.has_speaker}
+            bind:checked={search_params.value.has_speaker}
             count={result_facets.has_speaker.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.speaker')}`} />
         {/if}
         {#if result_facets.has_speaker?.values.false && result_facets.has_speaker?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.no_speaker}
+            bind:checked={search_params.value.no_speaker}
             count={result_facets.has_speaker.values.false}
             label={`${page.data.t('entry.does_not_exist')} ${page.data.t('entry_field.speaker')}`} />
         {/if}
         {#if result_facets.has_noun_class?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.has_noun_class}
+            bind:checked={search_params.value.has_noun_class}
             count={result_facets.has_noun_class.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.noun_class')}`} />
         {/if}
         {#if result_facets.has_noun_class?.values.false && result_facets.has_noun_class?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.no_noun_class}
+            bind:checked={search_params.value.no_noun_class}
             count={result_facets.has_noun_class.values.false}
             label={`${page.data.t('entry.does_not_exist')} ${page.data.t('entry_field.noun_class')}`} />
         {/if}
         {#if result_facets.has_plural_form?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.has_plural_form}
+            bind:checked={search_params.value.has_plural_form}
             count={result_facets.has_plural_form.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.plural_form')}`} />
         {/if}
         {#if result_facets.has_plural_form?.values.false && result_facets.has_plural_form?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.no_plural_form}
+            bind:checked={search_params.value.no_plural_form}
             count={result_facets.has_plural_form.values.false}
             label={`${page.data.t('entry.does_not_exist')} ${page.data.t('entry_field.plural_form')}`} />
         {/if}
         {#if result_facets.has_part_of_speech?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.has_part_of_speech}
+            bind:checked={search_params.value.has_part_of_speech}
             count={result_facets.has_part_of_speech.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.parts_of_speech')}`} />
         {/if}
         {#if result_facets.has_part_of_speech?.values.false && result_facets.has_part_of_speech?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.no_part_of_speech}
+            bind:checked={search_params.value.no_part_of_speech}
             count={result_facets.has_part_of_speech.values.false}
             label={`${page.data.t('entry.does_not_exist')} ${page.data.t('entry_field.parts_of_speech')}`} />
         {/if}
         {#if result_facets.has_semantic_domain?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.has_semantic_domain}
+            bind:checked={search_params.value.has_semantic_domain}
             count={result_facets.has_semantic_domain.values.true}
             label={`${page.data.t('entry.has_exists')} ${page.data.t('entry_field.semantic_domains')}`} />
         {/if}
         {#if result_facets.has_semantic_domain?.values.false && result_facets.has_semantic_domain?.values.true}
           <ToggleFacet
-            bind:checked={$search_params.no_semantic_domain}
+            bind:checked={search_params.value.no_semantic_domain}
             count={result_facets.has_semantic_domain.values.false}
             label={`${page.data.t('entry.does_not_exist')} ${page.data.t('entry_field.semantic_domains')}`} />
         {/if}

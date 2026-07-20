@@ -1,7 +1,7 @@
 <script lang="ts">
   import { slide } from 'svelte/transition'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
-  import type { QueryParamStore } from '$lib/state/query-param-state.svelte'
+  import type { QueryParamState } from '$lib/state/query-param-state.svelte'
   import { page } from '$app/state'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import type { FilterListKeys, QueryParams } from '$lib/search/types'
@@ -9,7 +9,7 @@
   import IconFa6SolidChevronDown from '~icons/fa6-solid/chevron-down'
 
   interface Props {
-    search_params: QueryParamStore<QueryParams>
+    search_params: QueryParamState<QueryParams>
     search_param_key: FilterListKeys
     label: string
     values: Record<string, number> // keys are item key, numbers are count found
@@ -27,11 +27,11 @@
   let search_value: string = $state()
 
   function add_filter(item: string) {
-    $search_params[search_param_key] = [...$search_params[search_param_key] || [], item]
+    search_params.value[search_param_key] = [...search_params.value[search_param_key] || [], item]
   }
 
   function remove_filter(item: string) {
-    $search_params[search_param_key] = $search_params[search_param_key].filter((existing_item: string) => existing_item !== item)
+    search_params.value[search_param_key] = search_params.value[search_param_key].filter((existing_item: string) => existing_item !== item)
   }
 
   function make_item_readable(_item: string, _keys_to_values: Record<string, string>) {
@@ -61,7 +61,7 @@
         {#if index < max_show || show}
           {@const cleaned_item = item.replace(' ', '')}
           {@const id = `${search_param_key}_${cleaned_item}`}
-          {@const checked = $search_params[search_param_key]?.includes(item)}
+          {@const checked = search_params.value[search_param_key]?.includes(item)}
           <li transition:slide>
             <input
               {id}

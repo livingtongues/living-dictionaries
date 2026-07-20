@@ -52,12 +52,18 @@ export const deletes = sqliteTable('deletes', {
 export const entries = sqliteTable('entries', {
   id: text().primaryKey(),
   lexeme: text({ mode: 'json' }).$type<MultiString>().notNull(),
+  /** Printed-dictionary homograph number ("1", "2"; some sources use "a"/"b") —
+   *  distinguishes deliberately identical headwords from accidental duplicates.
+   *  Rendered as a superscript after the lexeme. */
+  homograph: text(),
   phonetic: text(),
   interlinearization: text(),
   morphology: text(),
   notes: text({ mode: 'json' }).$type<MultiString>(),
   linguistic_history: text({ mode: 'json' }).$type<MultiString>(),
   sources: text({ mode: 'json' }).$type<string[]>(),
+  /** Source refs WITH a citation locus (page/example number); complements `sources[]` (see `SourceCitation`). */
+  citations: text({ mode: 'json' }).$type<SourceCitation[]>(),
   scientific_names: text({ mode: 'json' }).$type<string[]>(),
   /**
    * Geo data AS STORED (migration preserved the legacy `Coordinates` shape
@@ -80,6 +86,13 @@ export const texts = sqliteTable('texts', {
   title: text({ mode: 'json' }).$type<MultiString>().notNull(),
   /** Array of `sources.slug` refs (no FK — validated on write, integrity-swept on source delete). */
   sources: text({ mode: 'json' }).$type<string[]>(),
+  /** Source refs WITH a citation locus (page/example number); complements `sources[]` (see `SourceCitation`). */
+  citations: text({ mode: 'json' }).$type<SourceCitation[]>(),
+  /** Synopsis/abstract of the text, per language. */
+  summary: text({ mode: 'json' }).$type<MultiString>(),
+  /** Grouping key: texts sharing a `work_id` are versions of ONE work (parallel
+   *  texts across dialects — hymnal/scripture). Agent-supplied or minted; no FK. */
+  work_id: text(),
   dirty: integer(),
   server_seq: integer(),
   created_by_user_id: text().notNull(),
@@ -99,6 +112,9 @@ export const senses = sqliteTable('senses', {
   noun_class: text(),
   plural_form: text({ mode: 'json' }).$type<MultiString>(),
   variant: text({ mode: 'json' }).$type<MultiString>(),
+  /** Array of `sources.slug` refs (no FK — validated on write, integrity-swept on
+   *  source delete) — per-sense provenance when senses come from different sources. */
+  sources: text({ mode: 'json' }).$type<string[]>(),
   dirty: integer(),
   server_seq: integer(),
   created_by_user_id: text().notNull(),
@@ -424,7 +440,7 @@ export const sources = sqliteTable('sources', {
   year: text(),
   url: text(),
   license: text(),
-  /** The citation kind: dictionary/wordlist/fieldwork/manuscript/other. */
+  /** The citation kind — see `SOURCE_TYPES` (dictionary/wordlist/fieldwork/manuscript/video/grammar/phrasebook/hymnal/primer/corpus/other). */
   type: text({ enum: SOURCE_TYPES }),
   /** Which script/orthography this source's forms use — a `code` from `dictionaries.orthographies` (nullable), so multiple romanizations/scripts in one corpus aren't conflated. */
   orthography: text(),
@@ -547,6 +563,23 @@ export const text_tags = sqliteTable('text_tags', {
   id: text().primaryKey(),
   text_id: text().notNull().references(() => texts.id, { onDelete: 'cascade' }),
   tag_id: text().notNull().references(() => tags.id, { onDelete: 'cascade' }),
+  dirty: integer(),
+  server_seq: integer(),
+  created_by_user_id: text().notNull(),
+  created_at: text().notNull(),
+  updated_by_user_id: text().notNull(),
+  updated_at: text().notNull(),
+})
+
+/**
+ * Which dialect(s)/varieties a text is written in — the `text` ↔ `dialect`
+ * junction, mirroring `entry_dialects`. With `texts.work_id` grouping, this
+ * carries the per-version variety metadata of parallel texts.
+ */
+export const text_dialects = sqliteTable('text_dialects', {
+  id: text().primaryKey(),
+  text_id: text().notNull().references(() => texts.id, { onDelete: 'cascade' }),
+  dialect_id: text().notNull().references(() => dialects.id, { onDelete: 'cascade' }),
   dirty: integer(),
   server_seq: integer(),
   created_by_user_id: text().notNull(),

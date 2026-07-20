@@ -11,6 +11,8 @@
   import TextAudioPlayer from './TextAudioPlayer.svelte'
   import KaraokeSentence from './KaraokeSentence.svelte'
   import { get_headword } from '$lib/helpers/orthographies'
+  import { render_markdown_to_html } from '$lib/markdown/render'
+  import { sanitize_rich_text } from '$lib/markdown/sanitize-rich-text'
   import { build_text_timings } from '$lib/media/media-timings'
   import { create_exclusive_audio } from '$lib/utils/exclusive-audio.svelte'
   import type { DictRowType } from '$lib/db/dict-client/dict-live-db.svelte'
@@ -52,6 +54,24 @@
 
   const title_headword = $derived(get_headword({ lexeme: text?.title, orthographies: dictionary.orthographies }))
   const display_title = $derived(title_headword.value || page.data.t('text.untitled'))
+
+  // Text-level metadata (quick-wins): summary, dialect chips, parallel versions.
+  const summary_html = $derived.by(() => {
+    if (!text?.summary) return ''
+    for (const lang of [...(dictionary.gloss_languages || []), ...Object.keys(text.summary)]) {
+      const value = text.summary[lang]
+      if (value?.trim())
+        return sanitize_rich_text(render_markdown_to_html(value))
+    }
+    return ''
+  })
+  const text_dialects = $derived((dict_db?.text_dialects.rows ?? [])
+    .filter(link => link.text_id === text_id)
+    .map(link => dict_db?.dialects.id(link.dialect_id))
+    .filter((dialect): dialect is DictRowType<'dialects'> => !!dialect))
+  const parallel_texts = $derived(text?.work_id
+    ? (dict_db?.texts.rows ?? []).filter(other => other.work_id === text.work_id && other.id !== text_id)
+    : [])
 
   let show_translations = $state(true)
   let selected_id = $state<string | null>(null)
@@ -187,6 +207,26 @@
         </HeadlessButton>
       {/if}
     </div>
+
+    {#if summary_html}
+      <div class="summary tw-prose">{@html summary_html}</div>
+    {/if}
+
+    {#if text_dialects.length || parallel_texts.length}
+      <div class="text-meta-row">
+        {#each text_dialects as dialect (dialect.id)}
+          <span class="dialect-chip">{dialect.name?.default || Object.values(dialect.name || {})[0]}</span>
+        {/each}
+        {#if parallel_texts.length}
+          <span class="other-versions">
+            {page.data.t({ dynamicKey: 'text.other_versions', fallback: 'Other versions' })}:
+            {#each parallel_texts as other (other.id)}
+              <a href={`/${dictionary.url}/text/${other.id}`}>{get_headword({ lexeme: other.title, orthographies: dictionary.orthographies }).value || page.data.t('text.untitled')}</a>
+            {/each}
+          </span>
+        {/if}
+      </div>
+    {/if}
 
     <div class="tags-row">
       <TextTags {text_id} {can_edit} />
@@ -369,6 +409,39 @@
 
   .tags-row {
     margin-bottom: 1.25rem;
+  }
+
+  .summary {
+    color: var(--color-secondary);
+    margin-bottom: 0.75rem;
+  }
+
+  .text-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .dialect-chip {
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    background: color-mix(in srgb, var(--primary) 10%, var(--background));
+  }
+
+  .other-versions {
+    font-size: 0.8125rem;
+    color: var(--color-secondary);
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .other-versions a {
+    color: var(--primary);
+    text-decoration: underline;
   }
 
   .meta {

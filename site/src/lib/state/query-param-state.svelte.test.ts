@@ -1,15 +1,7 @@
 import { flushSync } from 'svelte'
-import { afterEach, beforeEach, describe, expect, test } from 'vitest'
-import { createQueryParamStore } from './query-param-state.svelte'
-// Import the mock helpers from the real path (vitest aliases `$app/navigation` to
-// this same file, so the store and the test share one `navigation_log`/`goto`).
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { QueryParamState } from './query-param-state.svelte'
 import { goto, navigation_log, reset_navigation } from '$lib/mocks/app-navigation'
-
-// These tests drive the REAL store through real Svelte reactivity: the mock
-// `goto` ($app/navigation) updates the happy-dom URL + the `$app/state` `page.url`
-// `$state`, which the store's internal `$effect` tracks. So a store↔URL feedback
-// loop would actually manifest here (runaway `goto`s / `effect_update_depth_exceeded`),
-// which is the regression these guards prevent.
 
 interface Params {
   page?: number
@@ -18,166 +10,141 @@ interface Params {
   has_sentence?: boolean
 }
 
-function make_store() {
-  return createQueryParamStore<Params>({
+function make_state(options: { persist?: 'localStorage' | 'sessionStorage' } = {}) {
+  const state = new QueryParamState<Params>({
     key: 'q',
     startWith: { page: 1, query: '' },
     cleanFalseValues: true,
+    ...options,
   })
+  states.push(state)
+  return state
 }
 
-function last<T>(items: T[]): T {
-  return items[items.length - 1]
-}
-
-let unsubscribers: (() => void)[] = []
-
-function subscribe(store: ReturnType<typeof make_store>, on_value: (value: Params) => void) {
-  const unsub = store.subscribe(on_value)
-  unsubscribers.push(unsub)
-  flushSync()
-}
+let states: QueryParamState<Params>[] = []
 
 beforeEach(() => {
   reset_navigation('http://localhost:3000/dictionary/entries')
+  localStorage.clear()
+  sessionStorage.clear()
 })
 
 afterEach(() => {
-  unsubscribers.forEach(unsub => unsub())
-  unsubscribers = []
+  states.forEach(state => state.destroy())
+  states = []
+  vi.restoreAllMocks()
 })
 
-describe(createQueryParamStore, () => {
-  test('a new value navigates once and emits it back through the URL', () => {
-    const store = make_store()
-    const emissions: Params[] = []
-    subscribe(store, value => emissions.push(value))
+describe(QueryParamState, () => {
+  test('a new value navigates once and flows back from the URL', () => {
+    const state = make_state()
 
-    store.set({ page: 1, query: 'anno' })
+    state.value = { page: 1, query: 'anno' }
     flushSync()
 
     expect(navigation_log).toHaveLength(1)
     expect(new URL(navigation_log[0].url, 'http://localhost:3000').searchParams.get('q'))
       .toBe('{"page":1,"query":"anno"}')
-    expect(last(emissions)).toEqual({ page: 1, query: 'anno' })
+    expect(state.value).toEqual({ page: 1, query: 'anno' })
   })
 
-  test('writing back an identical value does not re-navigate (no-op nav guard)', () => {
-    const store = make_store()
-    subscribe(store, () => { /* observe only */ })
+  test('an identical value with reordered keys does not re-navigate', () => {
+    const state = make_state()
 
-    store.set({ page: 1, query: 'anno' })
+    state.value = { page: 1, query: 'anno' }
     flushSync()
-    expect(navigation_log).toHaveLength(1)
+    state.value = { query: 'anno', page: 1 }
+    flushSync()
 
-    // A subscriber re-deriving and writing back the same value (fresh identity)
-    // must not fire a second navigation.
-    store.set({ query: 'anno', page: 1 })
-    flushSync()
     expect(navigation_log).toHaveLength(1)
   })
 
-  test('a key-reordered URL echo does not re-emit (deep-equal dedupe)', () => {
-    const store = make_store()
-    const emissions: Params[] = []
-    subscribe(store, value => emissions.push(value))
-
-    store.set({ page: 1, query: 'anno' })
+  test('a key-reordered URL echo does not replace the current state proxy', () => {
+    const state = make_state()
+    state.value = { page: 1, query: 'anno' }
     flushSync()
-    const emissions_after_set = emissions.length
+    const current_value = state.value
 
-    // Simulate an external navigation to the SAME logical value but a different
-    // JSON string (keys reordered). Without the deep-equal dedupe this pushes a
-    // fresh object identity to subscribers — the churn that fed the entry-page loop.
-    const sp = new URLSearchParams()
-    sp.set('q', JSON.stringify({ query: 'anno', page: 1 }))
-    goto(`?${sp}`)
+    const search_params = new URLSearchParams()
+    search_params.set('q', JSON.stringify({ query: 'anno', page: 1 }))
+    goto(`?${search_params}`)
     flushSync()
 
-    expect(emissions).toHaveLength(emissions_after_set)
-    expect(last(emissions)).toEqual({ page: 1, query: 'anno' })
+    expect(state.value).toBe(current_value)
+    expect(state.value).toEqual({ page: 1, query: 'anno' })
   })
 
-  test('a subscriber that writes back on every emission reaches a steady state', () => {
-    const store = make_store()
-    const emissions: Params[] = []
-    // Model a two-way-bound consumer: echoes back a fresh-identity copy of every
-    // value it receives. Without the dedupe + no-op-nav + re-entrancy guards this
-    // ping-pongs store→URL→store forever (`effect_update_depth_exceeded`).
-    subscribe(store, (value) => {
-      emissions.push(value)
-      store.set({ ...value })
-    })
+  test('an in-place nested mutation navigates once and remains reactive', () => {
+    const state = make_state()
 
-    store.set({ page: 1, query: 'anno' })
+    state.value.query = 'anno'
     flushSync()
 
+    expect(navigation_log).toHaveLength(1)
+    expect(state.value).toEqual({ page: 1, query: 'anno' })
+
+    state.value.page = 2
+    flushSync()
+    expect(navigation_log).toHaveLength(2)
+    expect(state.value).toEqual({ page: 2, query: 'anno' })
+  })
+
+  test('update starts from the reactive value when the URL parameter is absent', () => {
+    const state = make_state()
+
+    state.update(value => ({ ...value, tags: ['visible'] }))
+    flushSync()
+
+    expect(navigation_log).toHaveLength(1)
+    expect(state.value).toEqual({ page: 1, tags: ['visible'] })
+  })
+
+  test('reflects external navigation and reaches a steady state', () => {
+    const state = make_state()
+    const search_params = new URLSearchParams()
+    search_params.set('q', JSON.stringify({ page: 2, query: 'blue', tags: ['teglunaliq'] }))
+
+    goto(`?${search_params}`)
+    flushSync()
     const settled_navigations = navigation_log.length
-    const settled_emissions = emissions.length
-    // Further flushes must not keep growing — the system is at rest.
     flushSync()
     flushSync()
 
     expect(navigation_log).toHaveLength(settled_navigations)
-    expect(emissions).toHaveLength(settled_emissions)
-    expect(last(emissions)).toEqual({ page: 1, query: 'anno' })
+    expect(state.value).toEqual({ page: 2, query: 'blue', tags: ['teglunaliq'] })
   })
 
-  test('an in-place mutation of the emitted object still emits (bind:value path)', () => {
-    // Svelte compiles `bind:value={$store.query}` to "mutate the object the store
-    // last emitted, then call set(sameObject)". The dedupe baseline must not alias
-    // that object, or the URL echo deep-equals the pre-mutated baseline and the
-    // emit is skipped — typing in search / flipping pages did nothing (2026-07-09).
-    const store = make_store()
-    const emissions: Params[] = []
-    subscribe(store, value => emissions.push(value))
+  test('coerces a malformed scalar query value to an empty object', () => {
+    const state = make_state()
 
-    const bound_object = last(emissions) // `{}` — the URL effect's initial run coerces the absent param
-    bound_object.query = 'anno'
-    store.set(bound_object)
-    flushSync()
-
-    expect(last(emissions)).not.toBe(bound_object)
-    expect(last(emissions)).toEqual({ query: 'anno' })
-
-    // Second keystroke-style mutation on the freshly emitted object
-    const rebound_object = last(emissions)
-    rebound_object.query = 'annog'
-    store.set(rebound_object)
-    flushSync()
-    expect(last(emissions)).toEqual({ query: 'annog' })
-
-    // Pagination-style mutation
-    const paged_object = last(emissions)
-    paged_object.page = 2
-    store.set(paged_object)
-    flushSync()
-    expect(last(emissions)).toEqual({ page: 2, query: 'annog' })
-  })
-
-  test('reflects an external navigation to a genuinely new value', () => {
-    const store = make_store()
-    const emissions: Params[] = []
-    subscribe(store, value => emissions.push(value))
-
-    const sp = new URLSearchParams()
-    sp.set('q', JSON.stringify({ page: 2, query: 'blue', tags: ['teglunaliq'] }))
-    goto(`?${sp}`)
-    flushSync()
-
-    expect(last(emissions)).toEqual({ page: 2, query: 'blue', tags: ['teglunaliq'] })
-  })
-
-  test('coerces a malformed scalar ?q= to the empty object default', () => {
-    const store = make_store()
-    const emissions: Params[] = []
-    subscribe(store, value => emissions.push(value))
-
-    // A hand-typed/legacy `?q=hua` parses to the bare string 'hua'; an object store
-    // must never hold a scalar (would crash `bind:checked={$store.has_sentence}`).
     goto('?q=hua')
     flushSync()
 
-    expect(last(emissions)).toEqual({})
+    expect(state.value).toEqual({})
+  })
+
+  test('remove clears the parameter without a re-entrant echo', () => {
+    reset_navigation('http://localhost:3000/dictionary/entries?q=%7B%22query%22%3A%22anno%22%7D&other=kept')
+    const state = make_state()
+
+    state.remove()
+    flushSync()
+
+    expect(navigation_log).toHaveLength(1)
+    const url = new URL(navigation_log[0].url, 'http://localhost:3000')
+    expect(url.searchParams.has('q')).toBeFalsy()
+    expect(url.searchParams.get('other')).toBe('kept')
+    expect(state.value).toEqual({})
+  })
+
+  test('restores persisted state through the URL', () => {
+    localStorage.setItem('q', JSON.stringify({ page: 3, query: 'cached' }))
+
+    const state = make_state({ persist: 'localStorage' })
+    flushSync()
+
+    expect(navigation_log).toHaveLength(1)
+    expect(state.value).toEqual({ page: 3, query: 'cached' })
+    expect(new URL(window.location.href).searchParams.get('q')).toBe('{"page":3,"query":"cached"}')
   })
 })

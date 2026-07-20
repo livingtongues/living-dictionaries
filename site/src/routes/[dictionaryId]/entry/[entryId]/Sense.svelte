@@ -6,6 +6,7 @@
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
+  import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
   import { dedupe_keyed_children } from '$lib/utils/dedupe-keyed-children'
   import IconSystemUiconsVersions from '~icons/system-uicons/versions'
@@ -122,6 +123,17 @@
   {can_edit}
   display={page.data.t('entry_field.plural_form')}
   on_update={new_value => save_sense({ plural_form: { default: new_value } })} />
+
+{#if sense_fields?.sources?.length || can_edit}
+  <div class="side-section" class:at-end={!sense_fields?.sources?.length}>
+    <div class="section-label">{page.data.t('entry_field.sources')}</div>
+    <EntrySource
+      {can_edit}
+      value={sense_fields?.sources}
+      on_update={new_value => save_sense({ sources: new_value.length ? new_value : null })} />
+    <div class="dashed-divider"></div>
+  </div>
+{/if}
 
 {#if DICTIONARIES_WITH_VARIANTS.includes(dictionary.id)}
   <EntryField

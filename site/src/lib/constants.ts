@@ -45,8 +45,8 @@ export const MINIMUM_ABOUT_LENGTH = 100
 // invalidate() key that re-runs the [dictionaryId] layout loads (universal + server) after a catalog edit
 export const DICTIONARY_UPDATED_LOAD_TRIGGER = 'dictionary:updated'
 
-/** Allowed values for a `sources.type` (the citation kind). */
-export const SOURCE_TYPES = ['dictionary', 'wordlist', 'fieldwork', 'manuscript', 'other'] as const
+/** Allowed values for a `sources.type` (the citation kind). Closed enum (`other` is the catch-all); labels are i18n keys `source.type_<value>`. */
+export const SOURCE_TYPES = ['dictionary', 'wordlist', 'fieldwork', 'manuscript', 'video', 'grammar', 'phrasebook', 'hymnal', 'primer', 'corpus', 'other'] as const
 export type SourceType = typeof SOURCE_TYPES[number]
 
 /**
@@ -111,6 +111,10 @@ export const RELATIONSHIP_TYPES = {
   dialectal_variant: { symmetric: true, inverse_slug: 'dialectal_variant' },
   see_also: { symmetric: true, inverse_slug: 'see_also' },
   spelling_variant: { symmetric: true, inverse_slug: 'spelling_variant' },
+  // Different words that SOUND identical (may be spelled differently) — orthogonal
+  // to spelling_variant (same word, different spelling) and to the entries.homograph
+  // field (identically-SPELLED entries, which may or may not sound alike).
+  homophone: { symmetric: true, inverse_slug: 'homophone' },
   // Directed — canonical members (stored as-is; `from` plays the named role).
   hypernym: { symmetric: false, inverse_slug: 'hyponym' },
   holonym: { symmetric: false, inverse_slug: 'meronym' },

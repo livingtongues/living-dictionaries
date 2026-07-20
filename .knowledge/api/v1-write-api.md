@@ -278,7 +278,41 @@ thread `3eb63b49…`, itself an end-to-end test of the feedback channel). Decisi
   replace, `null` clears) — the post-upload forced-alignment write-back path.
   Entry audio has NO timings PATCH (timings are sentence-keyed). Validation is
   deliberately lenient: any string→string map.
-- **Snapshot tip is docs-only** (landing + openapi info description): public AND
-  unlisted dicts → `https://snapshots.livingdictionaries.app/dictionaries/{id}.db.gz`,
-  rebuilt ≤~30 min after an edit, `Cache-Control: max-age=120`. Jacob explicitly
-  wanted the cadence note; explicitly NO `snapshot` field on API responses.
+- **Snapshot tip is docs-only** (landing + openapi info description): every dict
+  except `bucket='secure'` → `https://snapshots.livingdictionaries.app/dictionaries/{id}.db.gz`
+  (docs corrected 2026-07-19 — they used to say "public and unlisted", which was
+  wrong: the builder skips only secure), rebuilt ≤~30 min after an edit,
+  `Cache-Control: max-age=120`. Jacob explicitly wanted the cadence note;
+  explicitly NO `snapshot` field on API responses. A how-to-load guide lives at
+  `/api/v1/guides/snapshot`.
+
+## 2026-07-19 quick wins (from agent feedback threads — .issues/v1-api-quick-wins.md)
+
+Small additive round driven by real importer feedback (文山话 + River agents). Key
+decisions that code alone won't tell you:
+
+- **Source `type` stays a CLOSED enum** — Jacob rejected free-text; new kinds get
+  added to `SOURCE_TYPES` (2026-07-19 added video/grammar/phrasebook/hymnal/primer/corpus).
+  The openapi enum + the sources-page select both derive from the constant.
+- **`entries.homograph` vs `homophone` relationship**: homograph = identically-SPELLED
+  headwords numbered by the source (a text column, superscript display); homophone =
+  a symmetric global relationship type for same-SOUND words (any spelling). They are
+  deliberately separate features, not one.
+- **Parallel texts = `texts.work_id` grouping column**, NOT a pairwise
+  text_relationships table (rejected as overkill for grouping N versions). Reads
+  attach `parallel_texts` siblings (id/title/dialects). Per-version variety lives in
+  the new `text_dialects` junction.
+- **Source integrity sweep now covers everything**: `remove_source_from_all` +
+  `count_source_references` include `senses.sources` AND the three `citations`
+  columns (entries/sentences/texts). Before 2026-07-19, citations were NOT counted
+  or swept — a source cited only via `citations` could be deleted leaving dangling
+  refs (fixed as part of adding entry/text citations).
+- **EntrySummary carries `sources` + `homograph` UNCONDITIONALLY** (no include flag)
+  — decided cheaper than plumbing `?include=sources`; they're columns already on the row.
+- **Gloss-language endpoints** (`POST …/gloss-languages`, `DELETE …/{code}`) follow
+  the orthographies shared-module pattern (`db/server/gloss-languages.ts`, writes
+  shared.db catalog with dirty=1). DELETE is guarded by a usage scan over
+  senses.glosses/definition keys + sentences.translation keys — mirroring
+  orthography delete. Codes validate against `glossing-languages-list.json`.
+- The 07-18 claim "entry tags are additive-only" was a FALSE alarm — the unlink
+  route existed since 07-01; the fix was discoverability (guides' repair section).

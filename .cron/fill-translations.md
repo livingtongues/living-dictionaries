@@ -1,8 +1,8 @@
 ---
 every: 0 22 * * 1
 runs_on: mustang
-provider: claude
-model: claude-opus-4-8
+provider: codex
+model: gpt-5.6-sol
 notify: poly_pings
 ---
 

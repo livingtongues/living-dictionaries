@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { QueryParamStore } from '$lib/state/query-param-state.svelte'
+  import type { QueryParamState } from '$lib/state/query-param-state.svelte'
   import { page } from '$app/state'
   import type { QueryParams } from '$lib/search/types'
   import IconCarbonSearch from '~icons/carbon/search'
@@ -8,7 +8,7 @@
 
   interface Props {
     on_show_filter_menu: () => void
-    search_params: QueryParamStore<QueryParams>
+    search_params: QueryParamState<QueryParams>
     index_ready?: boolean
     placeholder?: string
     /** Focus the input on mount (used by the dictionary home's search pill hand-off). */
@@ -36,10 +36,10 @@
     <input
       type="search"
       bind:this={input_el}
-      bind:value={$search_params.query}
+      bind:value={search_params.value.query}
       oninput={() => {
-        if ($search_params.page && $search_params.page > 1) {
-          $search_params.page = 1
+        if (search_params.value.page && search_params.value.page > 1) {
+          search_params.value.page = 1
         }
       }}
       placeholder={placeholder ?? page.data.t('entry.search_entries')} />
