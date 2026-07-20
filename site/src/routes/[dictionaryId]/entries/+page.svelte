@@ -98,7 +98,7 @@
     // read unconditionally so index rebuilds re-run the open query — behind a
     // short-circuit (`browser || $x`) it was never tracked as a dependency
     void $search_index_updated
-    if (browser) {
+    if (browser && !$loading) {
       search({ ...$state.snapshot(search_params.value), scope }, current_page_index)
     }
   })
