@@ -97,7 +97,9 @@
     "add_audio": "Ajouter de l'audio",
     "undo_permission_denied_explanation": "L'autorisation d'accéder à votre microphone a été refusée. Si vous avez cliqué sur \"Non\" précédemment, veuillez recharger le navigateur et cliquer sur \"Oui” lorsqu'on vous demande l'autorisation d'utiliser votre microphone.",
     "reload": "Recharger",
-    "edit_audio": "Éditer l'audio"
+    "edit_audio": "Éditer l'audio",
+    "pause": "Pause",
+    "unavailable": "Audio indisponible"
   },
   "column": {
     "adjust_columns": "Ajuster les colonnes",
@@ -363,7 +365,13 @@
     "cite_instead": "Locuteur inconnu ? Citez une source à la place",
     "select_source": "Source de cet enregistrement",
     "choose_speaker_instead": "Vous connaissez le locuteur ? Choisissez plutôt un locuteur",
-    "source": "Source"
+    "source": "Source",
+    "type_video": "Vidéo",
+    "type_grammar": "Grammaire",
+    "type_phrasebook": "Manuel de phrases",
+    "type_hymnal": "Hymnaire",
+    "type_primer": "Manuel de base",
+    "type_corpus": "Corpus"
   },
   "speakers": {
     "add_new_speaker": "Ajouter un nouveau locuteur",
@@ -438,12 +446,31 @@
   },
   "import_page": {
     "import": "Importer",
-    "template_link": "Lien vers le modèle",
-    "instructions_1": "Si vous possédez déjà des données linguistiques que vous souhaitez importer dans votre dictionnaire, veuillez suivre les étapes ci-dessous.",
-    "instructions_2": "Cliquez sur le bouton bleu « Lien vers le modèle » ci-dessous. Téléchargez le modèle au format Excel ou créez-en une copie sur Google Docs. Modifiez le modèle en fonction des besoins de votre projet. Copiez-collez vos données dans la feuille de calcul.",
-    "instructions_3": "Utilisez le formulaire « Nous contacter » ci-dessous pour nous joindre. Indiquez-nous que vous disposez d'une nouvelle feuille de calcul prête à être importée. Posez-nous toutes vos questions. Nous vous répondrons par courriel, et vous pourrez ensuite nous envoyer votre fichier.",
-    "instructions_4": "Pour nous envoyer des données exportées de logiciels de dictionnaires tels que FLEx, Lexique Pro ou Shoebox, veuillez utiliser le bouton « Nous contacter » ci-dessous et nous indiquer les détails de votre projet.",
-    "no_imports": "Nous collaborons actuellement avec de nombreuses communautés et organisations partenaires afin d'importer un grand nombre d'entrées de dictionnaire sur cette plateforme. Nous procédons également à d'importantes mises à jour de notre base de données. Les importations de données seront acceptées à partir du 1er juillet 2024. Nous vous remercions de votre patience et nous excusons pour la gêne occasionnée."
+    "any_format_title": "Nous pouvons importer depuis n’importe quel format",
+    "any_format_body": "Tableurs, documents Word, exports FLEx ou LIFT, fichiers Toolbox/Shoebox, Lexique Pro, ELAN, anciennes sauvegardes de bases de données — même des scans PDF de dictionnaires imprimés. Aucune exception. Notre équipe utilise des outils d’IA avec révision humaine pour lire vos documents et les importer, donc vous n’avez jamais besoin de tout reformater.",
+    "how_step_1": "Téléversez vos ressources ci-dessous — n’importe quel fichier, n’importe quel format.",
+    "how_step_2": "Pour chaque fichier, indiquez-nous comment vous souhaitez qu’il soit importé : ce qu’il faut inclure, ce qu’il faut laisser de côté.",
+    "how_step_3": "Appuyez sur « Demander l’importation » — notre équipe s’en occupe et vous recontacte par e-mail.",
+    "drop_files": "Déposez les fichiers ici ou cliquez pour choisir",
+    "max_file_size": "Jusqu’à 100 Mo par fichier",
+    "uploading": "Téléversement en cours…",
+    "uploaded": "Téléversé",
+    "requested": "Importation demandée",
+    "instructions_label": "Comment devons-nous importer ceci ?",
+    "instructions_placeholder": "p. ex. Importer toutes les entrées avec leurs phrases d’exemple. Les gloses sont en espagnol. Ignorer les pages d’introduction.",
+    "instructions_required": "Obligatoire — chaque fichier nécessite des instructions d’importation avant d’envoyer la demande.",
+    "source_label": "Source (facultatif)",
+    "source_placeholder": "D’où provient ce matériel ? p. ex. Smith, J. (1979). A Dictionary of …. Si vous laissez vide, nous rédigerons une citation au mieux de nos capacités.",
+    "request_note_label": "Autre chose à propos de cette demande ? (facultatif)",
+    "request_button": "Demander à importer ceci",
+    "request_sent": "Demande envoyée ! Notre équipe vous recontactera par e-mail.",
+    "requested_files": "Ressources demandées",
+    "requested_on": "Demandé le",
+    "delete_file": "Supprimer le fichier",
+    "download_file": "Télécharger",
+    "self_serve_title": "Préférez le faire vous-même ?",
+    "self_serve_body": "Si vous êtes à l’aise avec un agent de codage IA (comme Claude Code ou Codex), vous pouvez éviter l’attente : créez une clé API sur la page Agents et laissez votre agent lire vos fichiers et importer les données directement via notre API.",
+    "managers_only": "Seuls les gestionnaires de dictionnaire peuvent téléverser des ressources et demander des importations. Si vous devriez avoir accès, demandez à un gestionnaire de ce dictionnaire de vous inviter."
   },
   "history": {
     "history": "Histoire",
@@ -532,7 +559,9 @@
     "no_matches": "Aucune entrée correspondante trouvée.",
     "remove_confirm": "Supprimer ce lien entre les entrées ?",
     "help_intro": "Les entrées peuvent être liées à d'autres entrées de ce dictionnaire pour montrer comment les mots sont en relation. Chaque lien a un type qui décrit la relation :",
-    "custom_types_note": "Un dictionnaire peut aussi définir ses propres types de relation personnalisés."
+    "custom_types_note": "Un dictionnaire peut aussi définir ses propres types de relation personnalisés.",
+    "homophone": "Homophone",
+    "homophone_description": "Un mot différent qui sonne identique à celui-ci (il peut être orthographié différemment)."
   },
   "home_v2": {
     "headline": "Au service des communautés linguistiques du monde entier",
@@ -630,7 +659,8 @@
     "show_translations": "Afficher les traductions",
     "none_yet": "Pas encore de textes",
     "sentence_count": "{count} phrases",
-    "edit_title": "Modifier le titre"
+    "edit_title": "Modifier le titre",
+    "other_versions": "Autres versions"
   },
   "grammar": {
     "grammar_notes": "Notes grammaticales",

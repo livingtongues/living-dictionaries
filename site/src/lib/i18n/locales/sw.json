@@ -97,7 +97,9 @@
     "add_audio": "Ongeza faili la sauti",
     "undo_permission_denied_explanation": "Ruhusa ya kutumia maikrofoni yako ilinyimwa. Ikiwa hapo awali ulibofya \"Hapana\", tafadhali anza tena na ubonyeze \"Ndio\" wakati kisakuzi chako kinaomba ruhusa ya kutumia maikrofoni yako.",
     "reload": "Pakia upya",
-    "edit_audio": "Hariri faili la sauti"
+    "edit_audio": "Hariri faili la sauti",
+    "pause": "Sitisha",
+    "unavailable": "Sauti haipatikani"
   },
   "column": {
     "adjust_columns": "Rekebisha safu",
@@ -363,7 +365,13 @@
     "cite_instead": "Msemaji hajulikani? Taja chanzo badala yake",
     "select_source": "Chanzo cha rekodi hii",
     "choose_speaker_instead": "Unamjua msemaji? Chagua msemaji badala yake",
-    "source": "Chanzo"
+    "source": "Chanzo",
+    "type_video": "Video",
+    "type_grammar": "Sarufi",
+    "type_phrasebook": "Kitabu cha misemo",
+    "type_hymnal": "Kitabu cha nyimbo",
+    "type_primer": "Kitabu cha mwanzo",
+    "type_corpus": "Mkondo"
   },
   "speakers": {
     "add_new_speaker": "Ongeza Mzungumzaji Mpya",
@@ -438,12 +446,31 @@
   },
   "import_page": {
     "import": "Ingiza",
-    "template_link": "Kiungo cha Kiolezo",
-    "instructions_1": "Ikiwa tayari una data ya lugha unayotaka kuingiza kwenye Kamusi yako, tafadhali fuata hatua zilizo hapa chini.",
-    "instructions_2": "Bofya kitufe cha bluu cha “Kiungo cha Kiolezo” hapa chini. Pakua kiolezo kama faili ya Excel, au unda nakala kwenye Hati za Google. Hariri kiolezo kulingana na mahitaji ya mradi wako. Nakili na ubandike data yako kwenye lahajedwali.",
-    "instructions_3": "Tumia \"Wasiliana Nasi\" hapa chini kuwasiliana nasi. Tujulishe kwamba una lahajedwali mpya ambayo iko tayari kuingizwa. Tuulize maswali yoyote uliyo nayo. Tutakujibu kwa barua pepe, na kisha unaweza kututumia faili yako.",
-    "instructions_4": "Ili kututumia data iliyosafirishwa kutoka kwa programu za kamusi kama vile FLEx, Lexique Pro, Shoebox, tafadhali tumia kitufe cha \"Wasiliana Nasi\" kilicho hapa chini na utuambie maelezo ya mradi wako.",
-    "no_imports": "Kwa sasa tunafanya kazi na jumuiya nyingi na mashirika washirika kuingiza idadi kubwa ya maingizo ya kamusi kwenye mfumo huu. Pia tunafanya masasisho makubwa kwenye hifadhidata yetu. Tutakubali uingizaji mpya wa data kuanzia Julai 1, 2024. Tunashukuru kwa uvumilivu wako, na tunaomba radhi kwa usumbufu huo."
+    "any_format_title": "Tunaweza kuleta kutoka umbizo lolote",
+    "any_format_body": "Majedwali, hati za Word, usafirishaji wa FLEx au LIFT, faili za Toolbox/Shoebox, Lexique Pro, ELAN, nakala za hifadhidata za zamani — hata skani za PDF za kamusi zilizochapishwa. Hakuna vighairi. Timu yetu hutumia zana za AI pamoja na ukaguzi wa binadamu kusoma nyenzo zako na kuzileta, kwa hivyo huna haja ya kubadilisha umbizo lolote.",
+    "how_step_1": "Pakia nyenzo zako hapa chini — faili yoyote, umbizo lolote.",
+    "how_step_2": "Kwa kila faili, tuambie jinsi unavyotaka iingizwe: nini kizingatia, nini kuacha.",
+    "how_step_3": "Bonyeza “Request import” — timu yetu huanza kazi na inakufuata kupitia barua pepe.",
+    "drop_files": "Achilia faili hapa au bofya kuchagua",
+    "max_file_size": "Hadi MB 100 kwa faili",
+    "uploading": "Inapakia…",
+    "uploaded": "Imepakiwa",
+    "requested": "Kuleta kumeombwa",
+    "instructions_label": "Tuleteje hii?",
+    "instructions_placeholder": "k.m. Leta maingizo yote pamoja na sentensi za mfano. Tafsiri ziko kwa Kihispania. Ruka kurasa za utangulizi.",
+    "instructions_required": "Inahitajika — kila faili inahitaji maelekezo ya kuleta kabla ya kutuma ombi.",
+    "source_label": "Chanzo (si lazima)",
+    "source_placeholder": "Nyenzo hii inatoka wapi? k.m. Smith, J. (1979). A Dictionary of …. Ukiacha hii wazi, tutaandika dondoo bora tuwezavyo.",
+    "request_note_label": "Kitu kingine kuhusu ombi hili? (si lazima)",
+    "request_button": "Omba tulete hii",
+    "request_sent": "Ombi limetumwa! Timu yetu itakufuata kupitia barua pepe.",
+    "requested_files": "Nyenzo zilizoomwa",
+    "requested_on": "Iliyoomwa",
+    "delete_file": "Ondoa faili",
+    "download_file": "Pakua",
+    "self_serve_title": "Unapendelea kufanya mwenyewe?",
+    "self_serve_body": "Ikiwa unajisikia vizuri na wakala wa AI wa kuandika msimbo (kama Claude Code au Codex), unaweza kuruka kusubiri: tengeneza ufunguo wa API kwenye ukurasa wa Agents na uwaachie wakala wako kusoma faili zako na kuleta data moja kwa moja kupitia API yetu.",
+    "managers_only": "Ni wasimamizi wa kamusi pekee wanaoweza kupakia nyenzo na kuomba kuleta. Ikiwa unapaswa kuwa na ufikiaji, mwombe msimamizi wa kamusi hii kukualika."
   },
   "history": {
     "history": "Historia",
@@ -532,7 +559,9 @@
     "no_matches": "Hakuna maingizo yanayolingana yaliyopatikana.",
     "remove_confirm": "Ondoa kiungo hiki kati ya maingizo?",
     "help_intro": "Maingizo yanaweza kuunganishwa na maingizo mengine katika kamusi hii ili kuonyesha jinsi maneno yanavyohusiana. Kila kiungo kina aina inayoeleza uhusiano huo:",
-    "custom_types_note": "Kamusi pia inaweza kufafanua aina zake za uhusiano maalum."
+    "custom_types_note": "Kamusi pia inaweza kufafanua aina zake za uhusiano maalum.",
+    "homophone": "Sauti sawa",
+    "homophone_description": "Neno tofauti ambalo linasikika sawa na hili (huenda limeandikwa tofauti)."
   },
   "home_v2": {
     "headline": "Kuhudumia jamii za lugha kote ulimwenguni",
@@ -630,7 +659,8 @@
     "show_translations": "Onyesha tafsiri",
     "none_yet": "Bado hakuna matini",
     "sentence_count": "Sentensi {count}",
-    "edit_title": "Hariri kichwa"
+    "edit_title": "Hariri kichwa",
+    "other_versions": "Matoleo mengine"
   },
   "grammar": {
     "grammar_notes": "Maelezo ya sarufi",

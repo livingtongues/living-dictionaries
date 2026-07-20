@@ -97,7 +97,9 @@
     "add_audio": "添加音频",
     "undo_permission_denied_explanation": "访问您的麦克风被拒绝。如果您之前选择了“否”，请重新加载，然后当您的浏览器请求使用麦克风的权限时点击“是”。",
     "reload": "刷新",
-    "edit_audio": "编辑音频"
+    "edit_audio": "编辑音频",
+    "pause": "暂停",
+    "unavailable": "音频不可用"
   },
   "column": {
     "adjust_columns": "调整列表宽度",
@@ -363,7 +365,13 @@
     "cite_instead": "不知道说话人？改为引用来源",
     "select_source": "此录音的来源",
     "choose_speaker_instead": "知道说话人？改为选择说话人",
-    "source": "来源"
+    "source": "来源",
+    "type_video": "视频",
+    "type_grammar": "语法",
+    "type_phrasebook": "常用语手册",
+    "type_hymnal": "赞美诗集",
+    "type_primer": "初级读本",
+    "type_corpus": "语料库"
   },
   "speakers": {
     "add_new_speaker": "添加新的母语者",
@@ -438,12 +446,31 @@
   },
   "import_page": {
     "import": "进口",
-    "template_link": "模板链接",
-    "instructions_1": "如果您已有想要导入词典的语言数据，请按照以下步骤操作。",
-    "instructions_2": "点击下方蓝色“链接到模板”按钮。您可以将模板下载为 Excel 文件，或在 Google 文档中创建副本。根据项目需要编辑模板。然后将您的数据复制粘贴到电子表格中。",
-    "instructions_3": "请使用下方的“联系我们”与我们联系。请告知我们您已准备好导入的新电子表格。如有任何疑问，欢迎随时咨询。我们将通过电子邮件回复您，之后您可以将文件发送给我们。",
-    "instructions_4": "要向我们发送从 FLEx、Lexique Pro、Shoebox 等词典软件导出的数据，请使用下面的“联系我们”按钮，并告诉我们您的项目详情。",
-    "no_imports": "我们目前正与众多社区和合作伙伴组织携手，将大量词典条目导入本平台。同时，我们也在对数据库进行重大更新。我们将于2024年7月1日起接受新的数据导入。感谢您的耐心等待，由此带来的不便，我们深表歉意。"
+    "any_format_title": "我们可从任何格式导入",
+    "any_format_body": "电子表格、Word 文档、FLEx 或 LIFT 导出文件、Toolbox/Shoebox 文件、Lexique Pro、ELAN、旧数据库备份——甚至印刷词典的 PDF 扫描件。无一例外。我们的团队使用 AI 工具配合人工审核来读取您的材料并导入，因此您无需重新格式化任何内容。",
+    "how_step_1": "在下方上传您的资源——任何文件、任何格式。",
+    "how_step_2": "对于每个文件，请告诉我们您希望如何导入：重点关注什么，忽略什么。",
+    "how_step_3": "点击“请求导入”——我们的团队将开始工作并通过电子邮件与您跟进。",
+    "drop_files": "将文件拖到此处或点击选择",
+    "max_file_size": "每个文件最多 100MB",
+    "uploading": "正在上传…",
+    "uploaded": "已上传",
+    "requested": "已请求导入",
+    "instructions_label": "我们应如何导入此项？",
+    "instructions_placeholder": "例如：导入所有条目及其例句。注释为西班牙语。跳过引言页。",
+    "instructions_required": "必填——每个文件在发送请求前都需要导入说明。",
+    "source_label": "来源（可选）",
+    "source_placeholder": "此材料来自何处？例如：Smith, J. (1979). A Dictionary of …. 如果留空，我们将尽力撰写引文。",
+    "request_note_label": "关于此请求还有其他说明吗？（可选）",
+    "request_button": "请求我们导入此项",
+    "request_sent": "请求已发送！我们的团队将通过电子邮件与您跟进。",
+    "requested_files": "已请求的资源",
+    "requested_on": "请求时间",
+    "delete_file": "移除文件",
+    "download_file": "下载",
+    "self_serve_title": "更喜欢自己操作？",
+    "self_serve_body": "如果您熟悉 AI 编码代理（如 Claude Code 或 Codex），您可以跳过等待：在 Agents 页面创建 API 密钥，让您的代理读取文件并通过我们的 API 直接导入数据。",
+    "managers_only": "只有词典管理员可以上传资源并请求导入。如果您应有权访问，请请求此词典的管理员邀请您。"
   },
   "history": {
     "history": "历史",
@@ -532,7 +559,9 @@
     "no_matches": "未找到匹配的词条。",
     "remove_confirm": "移除词条之间的此链接？",
     "help_intro": "词条可以与本词典中的其他词条建立链接，以显示词语之间的关系。每个链接都有一个描述该关系的类型：",
-    "custom_types_note": "词典还可以定义自己的自定义关系类型。"
+    "custom_types_note": "词典还可以定义自己的自定义关系类型。",
+    "homophone": "同音词",
+    "homophone_description": "发音与此词相同但不同的词（拼写可能不同）。"
   },
   "home_v2": {
     "headline": "服务全球各地的语言社区",
@@ -630,7 +659,8 @@
     "show_translations": "显示翻译",
     "none_yet": "暂无文本",
     "sentence_count": "{count} 个句子",
-    "edit_title": "编辑标题"
+    "edit_title": "编辑标题",
+    "other_versions": "其他版本"
   },
   "grammar": {
     "grammar_notes": "语法注释",

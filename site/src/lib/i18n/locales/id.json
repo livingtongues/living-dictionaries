@@ -97,7 +97,9 @@
     "add_audio": "Tambahkan Audio",
     "undo_permission_denied_explanation": "Izin untuk mengakses mikrofon Anda ditolak. Jika sebelumnya Anda mengklik 'Tidak', silakan kembali dan klik 'Ya' saat peramban anda meminta izin untuk menggunakan mikrofon Anda.",
     "reload": "Memuat Ulang",
-    "edit_audio": "Menyunting Audion"
+    "edit_audio": "Menyunting Audion",
+    "pause": "Jeda",
+    "unavailable": "Audio tidak tersedia"
   },
   "column": {
     "adjust_columns": "Menyesuaikan Kolom",
@@ -363,7 +365,13 @@
     "cite_instead": "Penutur tidak diketahui? Kutip sumber sebagai gantinya",
     "select_source": "Sumber rekaman ini",
     "choose_speaker_instead": "Kenal penuturnya? Pilih penutur sebagai gantinya",
-    "source": "Sumber"
+    "source": "Sumber",
+    "type_video": "Video",
+    "type_grammar": "Tata bahasa",
+    "type_phrasebook": "Buku frasa",
+    "type_hymnal": "Buku himne",
+    "type_primer": "Buku pengantar",
+    "type_corpus": "Korpus"
   },
   "speakers": {
     "add_new_speaker": "Bidang Data Bersifat Pilihan ",
@@ -438,12 +446,31 @@
   },
   "import_page": {
     "import": "Impor",
-    "template_link": "Tautan ke Templat",
-    "instructions_1": "Jika Anda sudah memiliki data linguistik yang ingin Anda impor ke dalam Kamus Anda, silakan ikuti langkah-langkah di bawah ini.",
-    "instructions_2": "Klik tombol biru “Tautan ke Templat” di bawah ini. Unduh templat sebagai file Excel, atau buat salinannya di Google Docs. Edit templat sesuai kebutuhan proyek Anda. Salin dan tempel data Anda ke dalam spreadsheet.",
-    "instructions_3": "Gunakan bagian “Hubungi Kami” di bawah ini untuk menghubungi kami. Beri tahu kami bahwa Anda memiliki spreadsheet baru yang siap untuk diimpor. Ajukan pertanyaan apa pun yang Anda miliki. Kami akan membalas Anda melalui email, dan kemudian Anda dapat mengirimkan file Anda kepada kami.",
-    "instructions_4": "Untuk mengirimkan data yang diekspor dari perangkat lunak kamus seperti FLEx, Lexique Pro, Shoebox, silakan gunakan tombol “Hubungi Kami” di bawah ini dan beri tahu kami detail proyek Anda.",
-    "no_imports": "Saat ini kami sedang bekerja sama dengan banyak komunitas dan organisasi mitra untuk mengimpor sejumlah besar entri kamus ke platform ini. Kami juga sedang melakukan pembaruan besar pada basis data kami. Kami akan menerima impor data baru mulai 1 Juli 2024. Kami menghargai kesabaran Anda, dan kami mohon maaf atas ketidaknyamanan ini."
+    "any_format_title": "Kami dapat mengimpor dari format apa pun",
+    "any_format_body": "Spreadsheet, dokumen Word, ekspor FLEx atau LIFT, file Toolbox/Shoebox, Lexique Pro, ELAN, cadangan basis data lama — bahkan pindaian PDF kamus cetak. Tanpa kecuali. Tim kami menggunakan alat AI dengan tinjauan manusia untuk membaca materi Anda dan memasukkannya, jadi Anda tidak perlu memformat ulang apa pun.",
+    "how_step_1": "Unggah sumber daya Anda di bawah — file apa pun, format apa pun.",
+    "how_step_2": "Untuk setiap file, beri tahu kami cara mengimpornya: apa yang difokuskan, apa yang diabaikan.",
+    "how_step_3": "Tekan “Minta impor” — tim kami akan bekerja dan menghubungi Anda melalui email.",
+    "drop_files": "Jatuhkan file di sini atau klik untuk memilih",
+    "max_file_size": "Maksimal 100MB per file",
+    "uploading": "Mengunggah…",
+    "uploaded": "Diunggah",
+    "requested": "Impor diminta",
+    "instructions_label": "Bagaimana kami harus mengimpor ini?",
+    "instructions_placeholder": "mis. Impor semua entri beserta contoh kalimatnya. Glos dalam bahasa Spanyol. Lewati halaman pengantar.",
+    "instructions_required": "Wajib — setiap file memerlukan instruksi impor sebelum Anda dapat mengirim permintaan.",
+    "source_label": "Sumber (opsional)",
+    "source_placeholder": "Dari mana materi ini berasal? mis. Smith, J. (1979). A Dictionary of …. Jika dibiarkan kosong, kami akan membuat sitasi sebaik mungkin.",
+    "request_note_label": "Ada hal lain tentang permintaan ini? (opsional)",
+    "request_button": "Minta kami mengimpor ini",
+    "request_sent": "Permintaan terkirim! Tim kami akan menghubungi Anda melalui email.",
+    "requested_files": "Sumber daya yang diminta",
+    "requested_on": "Diminta",
+    "delete_file": "Hapus file",
+    "download_file": "Unduh",
+    "self_serve_title": "Lebih suka melakukannya sendiri?",
+    "self_serve_body": "Jika Anda nyaman dengan agen pengodean AI (seperti Claude Code atau Codex), Anda dapat melewati antrean: buat kunci API di halaman Agen dan biarkan agen Anda membaca file serta mengimpor data langsung melalui API kami.",
+    "managers_only": "Hanya pengelola kamus yang dapat mengunggah sumber daya dan meminta impor. Jika Anda seharusnya memiliki akses, mintalah pengelola kamus ini mengundang Anda."
   },
   "history": {
     "history": "Sejarah",
@@ -532,7 +559,9 @@
     "no_matches": "Tidak ada entri yang cocok ditemukan.",
     "remove_confirm": "Hapus tautan antar-entri ini?",
     "help_intro": "Entri dapat ditautkan ke entri lain dalam kamus ini untuk menunjukkan bagaimana kata-kata saling berhubungan. Setiap tautan memiliki jenis yang menjelaskan hubungannya:",
-    "custom_types_note": "Kamus juga dapat menentukan jenis hubungan kustomnya sendiri."
+    "custom_types_note": "Kamus juga dapat menentukan jenis hubungan kustomnya sendiri.",
+    "homophone": "Homofon",
+    "homophone_description": "Kata berbeda yang bunyinya identik dengan kata ini (mungkin dieja berbeda)."
   },
   "home_v2": {
     "headline": "Melayani komunitas bahasa di seluruh dunia",
@@ -630,7 +659,8 @@
     "show_translations": "Tampilkan terjemahan",
     "none_yet": "Belum ada teks",
     "sentence_count": "{count} kalimat",
-    "edit_title": "Ubah judul"
+    "edit_title": "Ubah judul",
+    "other_versions": "Versi lain"
   },
   "grammar": {
     "grammar_notes": "Catatan tata bahasa",

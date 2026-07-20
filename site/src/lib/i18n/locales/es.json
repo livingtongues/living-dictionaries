@@ -97,7 +97,9 @@
     "add_audio": "Agregar audio",
     "undo_permission_denied_explanation": "El permiso para acceder a su micrófono fue denegado. Si ha hecho clic en 'No', vuelva a cargar la página web y haga clic en 'Sí' cuando su navegador le pida permiso para utilizar el micrófono.",
     "reload": "Recargar",
-    "edit_audio": "Editar audio"
+    "edit_audio": "Editar audio",
+    "pause": "Pausar",
+    "unavailable": "Audio no disponible"
   },
   "column": {
     "adjust_columns": "Ajustar columnas",
@@ -363,7 +365,13 @@
     "cite_instead": "¿Hablante desconocido? Cite una fuente en su lugar",
     "select_source": "Fuente de esta grabación",
     "choose_speaker_instead": "¿Conoce al hablante? Elija un hablante en su lugar",
-    "source": "Fuente"
+    "source": "Fuente",
+    "type_video": "Video",
+    "type_grammar": "Gramática",
+    "type_phrasebook": "Libro de frases",
+    "type_hymnal": "Himnario",
+    "type_primer": "Cartilla",
+    "type_corpus": "Corpus"
   },
   "speakers": {
     "add_new_speaker": "Agregar un nuevo hablante",
@@ -438,12 +446,31 @@
   },
   "import_page": {
     "import": "Importar",
-    "template_link": "Enlace a la plantilla",
-    "instructions_1": "Si ya tiene datos lingüísticos que desea importar a su diccionario, siga los pasos a continuación.",
-    "instructions_2": "Haga clic en el botón azul \"Enlace a plantilla\" a continuación. Descargue la plantilla como un archivo de Excel, o cree una copia en Google Docs. Edite la plantilla de acuerdo con las necesidades de su proyecto. Copie y pegue sus datos en la hoja de cálculo.",
-    "instructions_3": "Use el \"Contáctenos\" a continuación para contactarnos. Háganos saber que tiene una nueva hoja de cálculo que está lista para la importación. Háganos cualquier pregunta que tenga. Le responderemos por correo electrónico, y luego puede enviarnos su archivo.",
-    "instructions_4": "Para enviarnos datos exportados desde softwares de diccionarios como Flex, Lexique Pro, Shobox, use el botón \"Contáctenos\" a continuación y cuéntenos los detalles de su proyecto.",
-    "no_imports": "Actualmente estamos trabajando con muchas comunidades y organizaciones asociadas para importar una gran cantidad de entradas de diccionario a esta plataforma. También estamos realizando grandes actualizaciones en nuestra base de datos. Aceptaremos nuevas importaciones de datos a partir del 1 de julio de 2024. Agradecemos su paciencia y nos disculpamos por las molestias."
+    "any_format_title": "Podemos importar desde cualquier formato",
+    "any_format_body": "Hojas de cálculo, documentos de Word, exportaciones de FLEx o LIFT, archivos de Toolbox/Shoebox, Lexique Pro, ELAN, copias de seguridad de bases de datos antiguas — incluso escaneos en PDF de diccionarios impresos. Sin excepciones. Nuestro equipo utiliza herramientas de IA con revisión humana para leer sus materiales e importarlos, para que nunca necesite reformatear nada.",
+    "how_step_1": "Suba sus recursos a continuación — cualquier archivo, cualquier formato.",
+    "how_step_2": "Para cada archivo, díganos cómo desea importarlo: qué enfocarse, qué omitir.",
+    "how_step_3": "Presione “Solicitar importación” — nuestro equipo se pone a trabajar y le da seguimiento por correo electrónico.",
+    "drop_files": "Suelte los archivos aquí o haga clic para elegir",
+    "max_file_size": "Hasta 100 MB por archivo",
+    "uploading": "Subiendo…",
+    "uploaded": "Subido",
+    "requested": "Importación solicitada",
+    "instructions_label": "¿Cómo deberíamos importar esto?",
+    "instructions_placeholder": "p. ej. Importar todas las entradas con sus oraciones de ejemplo. Las glosas están en español. Omitir las páginas de introducción.",
+    "instructions_required": "Requerido — cada archivo necesita instrucciones de importación antes de enviar la solicitud.",
+    "source_label": "Fuente (opcional)",
+    "source_placeholder": "¿De dónde proviene este material? p. ej. Smith, J. (1979). A Dictionary of …. Si lo deja en blanco, escribiremos una cita lo mejor que podamos.",
+    "request_note_label": "¿Algo más sobre esta solicitud? (opcional)",
+    "request_button": "Solicitar que importemos esto",
+    "request_sent": "¡Solicitud enviada! Nuestro equipo le dará seguimiento por correo electrónico.",
+    "requested_files": "Recursos solicitados",
+    "requested_on": "Solicitado",
+    "delete_file": "Eliminar archivo",
+    "download_file": "Descargar",
+    "self_serve_title": "¿Prefiere hacerlo usted mismo?",
+    "self_serve_body": "Si se siente cómodo con un agente de codificación de IA (como Claude Code o Codex), puede omitir la espera: cree una clave API en la página de Agentes y haga que su agente lea sus archivos e importe los datos directamente a través de nuestra API.",
+    "managers_only": "Solo los administradores del diccionario pueden subir recursos y solicitar importaciones. Si debería tener acceso, pida a un administrador de este diccionario que lo invite."
   },
   "history": {
     "history": "Historial",
@@ -532,7 +559,9 @@
     "no_matches": "No se encontraron entradas coincidentes.",
     "remove_confirm": "¿Eliminar este enlace entre entradas?",
     "help_intro": "Las entradas se pueden vincular con otras entradas de este diccionario para mostrar cómo se relacionan las palabras entre sí. Cada enlace tiene un tipo que describe la relación:",
-    "custom_types_note": "Un diccionario también puede definir sus propios tipos de relación personalizados."
+    "custom_types_note": "Un diccionario también puede definir sus propios tipos de relación personalizados.",
+    "homophone": "Homófono",
+    "homophone_description": "Una palabra diferente que suena idéntica a esta (puede que se escriba de manera diferente)."
   },
   "home_v2": {
     "headline": "Al servicio de las comunidades lingüísticas de todo el mundo",
@@ -630,7 +659,8 @@
     "show_translations": "Mostrar traducciones",
     "none_yet": "Aún no hay textos",
     "sentence_count": "{count} oraciones",
-    "edit_title": "Editar título"
+    "edit_title": "Editar título",
+    "other_versions": "Otras versiones"
   },
   "grammar": {
     "grammar_notes": "Notas gramaticales",

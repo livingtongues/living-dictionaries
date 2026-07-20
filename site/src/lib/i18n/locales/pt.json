@@ -97,7 +97,9 @@
     "add_audio": "Anexar Audio",
     "undo_permission_denied_explanation": "A permissão para aceder ao microfone foi negada. Se já clicou em 'Não', recarregue e clique em 'Sim' quando o seu navegador pedir permissão para usar o microfone.",
     "reload": "Recarregar",
-    "edit_audio": "Editar Audio"
+    "edit_audio": "Editar Audio",
+    "pause": "Pausar",
+    "unavailable": "Áudio indisponível"
   },
   "column": {
     "adjust_columns": "Ajustar as Colunas",
@@ -363,7 +365,13 @@
     "cite_instead": "Orador desconhecido? Cite uma fonte em vez disso",
     "select_source": "Fonte desta gravação",
     "choose_speaker_instead": "Conhece o orador? Escolha um orador em vez disso",
-    "source": "Fonte"
+    "source": "Fonte",
+    "type_video": "Vídeo",
+    "type_grammar": "Gramática",
+    "type_phrasebook": "Livro de frases",
+    "type_hymnal": "Hinário",
+    "type_primer": "Cartilha",
+    "type_corpus": "Corpus"
   },
   "speakers": {
     "add_new_speaker": "Adicionar um falante novo",
@@ -438,12 +446,31 @@
   },
   "import_page": {
     "import": "Importar",
-    "template_link": "Link para modelo",
-    "instructions_1": "Se você já possui dados linguísticos que deseja importar para o seu dicionário, siga os passos abaixo.",
-    "instructions_2": "Clique no botão azul “Link para o modelo” abaixo. Baixe o modelo como um arquivo do Excel ou crie uma cópia no Google Docs. Edite o modelo de acordo com as necessidades do seu projeto. Copie e cole seus dados na planilha.",
-    "instructions_3": "Use a opção “Fale Conosco” abaixo para entrar em contato conosco. Informe-nos que você tem uma nova planilha pronta para importação. Tire todas as suas dúvidas. Responderemos por e-mail e, em seguida, você poderá nos enviar o arquivo.",
-    "instructions_4": "Para nos enviar dados exportados de softwares de dicionário como FLEx, Lexique Pro, Shoebox, utilize o botão “Fale Conosco” abaixo e nos informe os detalhes do seu projeto.",
-    "no_imports": "Atualmente, estamos trabalhando com diversas comunidades e organizações parceiras para importar um grande número de verbetes de dicionário para esta plataforma. Também estamos realizando grandes atualizações em nosso banco de dados. Aceitaremos novas importações de dados a partir de 1º de julho de 2024. Agradecemos sua paciência e pedimos desculpas pelo inconveniente."
+    "any_format_title": "Podemos importar de qualquer formato",
+    "any_format_body": "Planilhas, documentos Word, exportações FLEx ou LIFT, arquivos Toolbox/Shoebox, Lexique Pro, ELAN, backups antigos de bancos de dados — até mesmo digitalizações PDF de dicionários impressos. Sem exceções. Nossa equipe usa ferramentas de IA com revisão humana para ler seus materiais e importá-los, então você nunca precisa reformatar nada.",
+    "how_step_1": "Envie seus recursos abaixo — qualquer arquivo, qualquer formato.",
+    "how_step_2": "Para cada arquivo, diga-nos como deseja importá-lo: o que focar, o que deixar de fora.",
+    "how_step_3": "Pressione “Solicitar importação” — nossa equipe começa a trabalhar e entra em contato por email.",
+    "drop_files": "Solte os arquivos aqui ou clique para escolher",
+    "max_file_size": "Até 100MB por arquivo",
+    "uploading": "Enviando…",
+    "uploaded": "Enviado",
+    "requested": "Importação solicitada",
+    "instructions_label": "Como devemos importar isso?",
+    "instructions_placeholder": "ex.: Importe todas as entradas com suas frases de exemplo. As glosas estão em espanhol. Ignore as páginas de introdução.",
+    "instructions_required": "Obrigatório — todo arquivo precisa de instruções de importação antes de enviar a solicitação.",
+    "source_label": "Fonte (opcional)",
+    "source_placeholder": "De onde vem este material? ex.: Silva, J. (1979). Um Dicionário de …. Se deixar em branco, faremos uma citação da melhor forma possível.",
+    "request_note_label": "Algo mais sobre esta solicitação? (opcional)",
+    "request_button": "Solicitar que importemos isso",
+    "request_sent": "Solicitação enviada! Nossa equipe entrará em contato por email.",
+    "requested_files": "Recursos solicitados",
+    "requested_on": "Solicitado",
+    "delete_file": "Remover arquivo",
+    "download_file": "Baixar",
+    "self_serve_title": "Prefere fazer você mesmo?",
+    "self_serve_body": "Se você se sente confortável com um agente de codificação de IA (como Claude Code ou Codex), pode pular a espera: crie uma chave de API na página Agentes e faça seu agente ler seus arquivos e importar os dados diretamente pela nossa API.",
+    "managers_only": "Apenas gerentes do dicionário podem enviar recursos e solicitar importações. Se você deveria ter acesso, peça a um gerente deste dicionário para convidá-lo."
   },
   "history": {
     "history": "História",
@@ -532,7 +559,9 @@
     "no_matches": "Não foram encontradas entradas correspondentes.",
     "remove_confirm": "Remover esta ligação entre entradas?",
     "help_intro": "As entradas podem ser ligadas a outras entradas deste dicionário para mostrar como as palavras se relacionam entre si. Cada ligação tem um tipo que descreve a relação:",
-    "custom_types_note": "Um dicionário também pode definir os seus próprios tipos de relação personalizados."
+    "custom_types_note": "Um dicionário também pode definir os seus próprios tipos de relação personalizados.",
+    "homophone": "Homófono",
+    "homophone_description": "Uma palavra diferente que soa idêntica a esta (pode ser escrita de forma diferente)."
   },
   "home_v2": {
     "headline": "Ao serviço das comunidades linguísticas de todo o mundo",
@@ -630,7 +659,8 @@
     "show_translations": "Mostrar traduções",
     "none_yet": "Ainda não há textos",
     "sentence_count": "{count} frases",
-    "edit_title": "Editar título"
+    "edit_title": "Editar título",
+    "other_versions": "Outras versões"
   },
   "grammar": {
     "grammar_notes": "Notas gramaticais",

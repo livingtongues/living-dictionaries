@@ -97,7 +97,9 @@
     "add_audio": "Audio hinzufügen",
     "undo_permission_denied_explanation": "Der Zugriff auf Ihr Mikrofon wurde verweigert. Falls Sie zuvor auf „Nein“ geklickt haben, laden Sie die Seite bitte neu und klicken Sie auf „Ja“, wenn Ihr Browser um Erlaubnis zur Nutzung des Mikrofons bittet.",
     "reload": "Neu laden",
-    "edit_audio": "Audio bearbeiten"
+    "edit_audio": "Audio bearbeiten",
+    "pause": "Pause",
+    "unavailable": "Audio nicht verfügbar"
   },
   "column": {
     "adjust_columns": "Spalten anpassen",
@@ -363,7 +365,13 @@
     "cite_instead": "Sprecherin/Sprecher unbekannt? Stattdessen eine Quelle angeben",
     "select_source": "Quelle dieser Aufnahme",
     "choose_speaker_instead": "Sprecherin/Sprecher bekannt? Stattdessen eine Person auswählen",
-    "source": "Quelle"
+    "source": "Quelle",
+    "type_video": "Video",
+    "type_grammar": "Grammatik",
+    "type_phrasebook": "Phrasebuch",
+    "type_hymnal": "Gesangbuch",
+    "type_primer": "Einführungsbuch",
+    "type_corpus": "Korpus"
   },
   "speakers": {
     "add_new_speaker": "Neue sprechende Person hinzufügen",
@@ -438,12 +446,31 @@
   },
   "import_page": {
     "import": "Importieren",
-    "template_link": "Link zur Vorlage",
-    "instructions_1": "Wenn Sie bereits linguistische Daten haben, die Sie in Ihr Wörterbuch importieren möchten, folgen Sie bitte den untenstehenden Schritten.",
-    "instructions_2": "Klicken Sie unten auf die blaue Schaltfläche „Link zur Vorlage“. Laden Sie die Vorlage als Excel-Datei herunter oder erstellen Sie eine Kopie in Google Docs. Bearbeiten Sie die Vorlage entsprechend den Anforderungen Ihres Projekts. Kopieren Sie Ihre Daten und fügen Sie sie in die Tabelle ein.",
-    "instructions_3": "Nutzen Sie „Kontaktieren Sie uns“ unten, um uns zu kontaktieren. Teilen Sie uns mit, dass Sie eine neue Tabelle haben, die zum Import bereit ist. Stellen Sie uns Ihre Fragen. Wir antworten Ihnen per E-Mail, und dann können Sie uns Ihre Datei senden.",
-    "instructions_4": "Um uns Daten zu senden, die aus Wörterbuch-Software wie FLEx, Lexique Pro oder Shoebox exportiert wurden, nutzen Sie bitte die Schaltfläche „Kontaktieren Sie uns“ unten und teilen Sie uns die Details Ihres Projekts mit.",
-    "no_imports": "Wir arbeiten derzeit mit vielen Gemeinschaften und Partnerorganisationen zusammen, um eine große Zahl von Wörterbucheinträgen auf diese Plattform zu importieren. Außerdem nehmen wir große Aktualisierungen an unserer Datenbank vor. Wir werden ab dem 1. Juli 2024 neue Datenimporte annehmen. Wir danken Ihnen für Ihre Geduld und entschuldigen die Unannehmlichkeiten."
+    "any_format_title": "Wir können aus jedem Format importieren",
+    "any_format_body": "Tabellenkalkulationen, Word-Dokumente, FLEx- oder LIFT-Exporte, Toolbox/Shoebox-Dateien, Lexique Pro, ELAN, alte Datenbanksicherungen – sogar PDF-Scans gedruckter Wörterbücher. Keine Ausnahmen. Unser Team verwendet KI-Tools mit menschlicher Überprüfung, um Ihre Materialien zu lesen und zu importieren, sodass Sie nichts umformatieren müssen.",
+    "how_step_1": "Laden Sie Ihre Ressourcen unten hoch – jede Datei, jedes Format.",
+    "how_step_2": "Sagen Sie uns für jede Datei, wie sie importiert werden soll: worauf zu achten ist, was wegzulassen ist.",
+    "how_step_3": "Klicken Sie auf „Import anfordern“ – unser Team macht sich an die Arbeit und meldet sich per E-Mail bei Ihnen.",
+    "drop_files": "Dateien hier ablegen oder klicken zum Auswählen",
+    "max_file_size": "Bis zu 100 MB pro Datei",
+    "uploading": "Wird hochgeladen…",
+    "uploaded": "Hochgeladen",
+    "requested": "Import angefordert",
+    "instructions_label": "Wie sollen wir dies importieren?",
+    "instructions_placeholder": "z. B. Alle Einträge mit ihren Beispielsätzen importieren. Glossen sind auf Spanisch. Einleitungsseiten überspringen.",
+    "instructions_required": "Erforderlich – jede Datei benötigt Importanweisungen, bevor Sie die Anfrage senden können.",
+    "source_label": "Quelle (optional)",
+    "source_placeholder": "Woher stammt dieses Material? z. B. Smith, J. (1979). A Dictionary of …. Wenn Sie dies leer lassen, erstellen wir nach bestem Wissen eine Zitation.",
+    "request_note_label": "Sonstiges zu dieser Anfrage? (optional)",
+    "request_button": "Import anfordern",
+    "request_sent": "Anfrage gesendet! Unser Team wird sich per E-Mail bei Ihnen melden.",
+    "requested_files": "Angeforderte Ressourcen",
+    "requested_on": "Angefordert",
+    "delete_file": "Datei entfernen",
+    "download_file": "Herunterladen",
+    "self_serve_title": "Lieber selbst machen?",
+    "self_serve_body": "Wenn Sie mit einem KI-Codieragenten (wie Claude Code oder Codex) vertraut sind, können Sie die Wartezeit überspringen: Erstellen Sie einen API-Schlüssel auf der Agents-Seite und lassen Sie Ihren Agenten Ihre Dateien lesen und die Daten direkt über unsere API importieren.",
+    "managers_only": "Nur Wörterbuch-Manager können Ressourcen hochladen und Importe anfordern. Wenn Sie Zugriff haben sollten, bitten Sie einen Manager dieses Wörterbuchs, Sie einzuladen."
   },
   "history": {
     "history": "Verlauf",
@@ -532,7 +559,9 @@
     "no_matches": "Keine passenden Einträge gefunden.",
     "remove_confirm": "Diese Verknüpfung zwischen Einträgen entfernen?",
     "help_intro": "Einträge können mit anderen Einträgen in diesem Wörterbuch verknüpft werden, um zu zeigen, wie Wörter zusammenhängen. Jede Verknüpfung hat einen Typ, der die Beziehung beschreibt:",
-    "custom_types_note": "Ein Wörterbuch kann auch eigene benutzerdefinierte Beziehungstypen definieren."
+    "custom_types_note": "Ein Wörterbuch kann auch eigene benutzerdefinierte Beziehungstypen definieren.",
+    "homophone": "Homophon",
+    "homophone_description": "Ein anderes Wort, das identisch klingt wie dieses (die Schreibweise kann abweichen)."
   },
   "home_v2": {
     "headline": "Im Dienst von Sprachgemeinschaften auf der ganzen Welt",
@@ -630,7 +659,8 @@
     "show_translations": "Übersetzungen anzeigen",
     "none_yet": "Noch keine Texte",
     "sentence_count": "{count} Sätze",
-    "edit_title": "Titel bearbeiten"
+    "edit_title": "Titel bearbeiten",
+    "other_versions": "Andere Versionen"
   },
   "grammar": {
     "grammar_notes": "Grammatiknotizen",

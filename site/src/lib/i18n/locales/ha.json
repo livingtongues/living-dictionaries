@@ -97,7 +97,9 @@
     "add_audio": "Add Audio",
     "undo_permission_denied_explanation": "Izni domin samun Reno aka hana. Idan ka a baya ya danna 'A'a', don Allah Reload da kuma danna 'a' a lokacin da browser tambaya ga izinin amfani da Reno.",
     "reload": "sake sakawa",
-    "edit_audio": "Shirya Audio"
+    "edit_audio": "Shirya Audio",
+    "pause": "Dakata",
+    "unavailable": "Sauti ba ya samuwa"
   },
   "column": {
     "adjust_columns": "daidaita ginshikan",
@@ -363,7 +365,13 @@
     "cite_instead": "Ba a san mai magana ba? Ka ambaci tushe maimakon haka",
     "select_source": "Tushen wannan rikodin",
     "choose_speaker_instead": "Ka san mai magana? Zaɓi mai magana maimakon haka",
-    "source": "Tushe"
+    "source": "Tushe",
+    "type_video": "Bidiyo",
+    "type_grammar": "Nahawu",
+    "type_phrasebook": "Littafin jumla",
+    "type_hymnal": "Waƙoƙin ibada",
+    "type_primer": "Litafin koyarwa",
+    "type_corpus": "Rukuni"
   },
   "speakers": {
     "add_new_speaker": "Add New Majalisa",
@@ -438,12 +446,31 @@
   },
   "import_page": {
     "import": "Shigo da kaya",
-    "template_link": "Haɗi zuwa Samfura",
-    "instructions_1": "Idan kana da bayanan harshe da kake son shigar da su cikin Kamus ɗinka, da fatan za a bi matakan da ke ƙasa.",
-    "instructions_2": "Danna maɓallin shuɗi mai suna \"Haɗi zuwa Samfura\" da ke ƙasa. Sauke samfurin a matsayin fayil ɗin Excel, ko ƙirƙirar kwafi akan Google Docs. Shirya samfurin bisa ga buƙatun aikinka. Kwafi kuma liƙa bayananka a cikin maƙunsar bayanai.",
-    "instructions_3": "Yi amfani da \"Tuntuɓe Mu\" da ke ƙasa don tuntuɓar mu. Sanar da mu cewa kuna da sabon takardar lissafi wanda aka shirya don shigo da shi. Yi mana duk wata tambaya da kuke da ita. Za mu amsa muku ta imel, sannan za ku iya aiko mana da fayil ɗinku.",
-    "instructions_4": "Domin aiko mana da bayanai daga manhajojin ƙamus kamar FLex, Lexique Pro, da Shoebox, da fatan za a yi amfani da maɓallin \"Tuntuɓe Mu\" da ke ƙasa kuma ku gaya mana cikakkun bayanai game da aikinku.",
-    "no_imports": "A halin yanzu muna aiki tare da al'ummomi da ƙungiyoyi masu haɗin gwiwa da yawa don shigo da adadi mai yawa na shigarwar ƙamus zuwa wannan dandamali. Muna kuma yin manyan sabuntawa ga rumbun adana bayanai. Za mu karɓi sabbin bayanai daga ranar 1 ga Yuli, 2024. Muna godiya da haƙurinku, kuma muna ba da haƙuri game da rashin jin daɗin."
+    "any_format_title": "Za mu iya shigo da kowane tsari",
+    "any_format_body": "Tables, takardun Word, fitar FLEx ko LIFT, fayilolin Toolbox/Shoebox, Lexique Pro, ELAN, tsoffin bayanan bayanai — har ma da duba PDF na ƙamus da aka buga. Babu wani keɓancewa. Ƙungiyarmu tana amfani da kayan aikin AI tare da nazarin ɗan adam don karanta kayan ku da shigo da su, don haka ba za ku taɓa buƙatar sake tsara komai ba.",
+    "how_step_1": "Loda albarkatun ku a ƙasa — kowane fayil, kowane tsari.",
+    "how_step_2": "Ga kowane fayil, gaya mana yadda kuke son shigo da shi: abin da za a mayar da hankali, abin da za a bar.",
+    "how_step_3": "Danna “Nemi shigo da” — ƙungiyarmu ta fara aiki kuma ta bi ku ta imel.",
+    "drop_files": "Jefe fayiloli a nan ko danna don zaɓa",
+    "max_file_size": "Har zuwa 100MB a fayil",
+    "uploading": "Ana ɗora…",
+    "uploaded": "An ɗora",
+    "requested": "An nemi shigo da",
+    "instructions_label": "Yaya ya kamata mu shigo da wannan?",
+    "instructions_placeholder": "misali. Shigo da duk shigarwa tare da jumla misali. Glosses a cikin Spanish. Tsallake shafukan gabatarwa.",
+    "instructions_required": "Ana buƙata — kowane fayil yana buƙatar umarnin shigo da shi kafin ku iya aika buƙatar.",
+    "source_label": "Tushen (zaɓi)",
+    "source_placeholder": "A ina wannan abu ya fito? misali. Smith, J. (1979). A Dictionary of …. Idan kun bar wannan babu komai, za mu rubuta ambaton gwargwadon iyawarmu.",
+    "request_note_label": "Wani abu game da wannan buƙatar? (zaɓi)",
+    "request_button": "Nemi mu shigo da wannan",
+    "request_sent": "An aika buƙatar! Ƙungiyarmu za ta bi ku ta imel.",
+    "requested_files": "Albarkatun da aka nema",
+    "requested_on": "An nema",
+    "delete_file": "Cire fayil",
+    "download_file": "Sauke",
+    "self_serve_title": "Ku fi son yin da kanku?",
+    "self_serve_body": "Idan kun ji daɗi tare da wakilin coding na AI (kamar Claude Code ko Codex), za ku iya tsallake jira: ƙirƙiri maɓallin API a shafin Agents kuma ku sa wakilinku ya karanta fayilolin ku da shigo da bayanan kai tsaye ta API ɗinmu.",
+    "managers_only": "Manajojin ƙamus kawai za su iya ɗaukar albarkatu da neman shigo da su. Idan ya kamata ku sami damar, tambayi manajan wannan ƙamus don ɗaukar ku."
   },
   "history": {
     "history": "Tarihi",
@@ -532,7 +559,9 @@
     "no_matches": "Ba a sami shigarwar da ta dace ba.",
     "remove_confirm": "A cire wannan haɗi tsakanin shigarwa?",
     "help_intro": "Ana iya haɗa shigarwa da wasu shigarwa a cikin wannan ƙamus don nuna yadda kalmomi suke da alaƙa da juna. Kowane haɗi yana da nau'i da ke bayyana alaƙar:",
-    "custom_types_note": "Ƙamus kuma yana iya ayyana nasa nau'ikan alaƙa na musamman."
+    "custom_types_note": "Ƙamus kuma yana iya ayyana nasa nau'ikan alaƙa na musamman.",
+    "homophone": "Sautin kamanni",
+    "homophone_description": "Wata kalma dabam da take da sautina daidai da wannan (za a iya rubuta ta dabam)."
   },
   "home_v2": {
     "headline": "Hidima ga al'ummomin harshe a duniya baki ɗaya",
@@ -630,7 +659,8 @@
     "show_translations": "Nuna fassarori",
     "none_yet": "Babu rubutu tukuna",
     "sentence_count": "Jimloli {count}",
-    "edit_title": "Gyara take"
+    "edit_title": "Gyara take",
+    "other_versions": "Sauran nau'oyi"
   },
   "grammar": {
     "grammar_notes": "Bayanan nahawu",

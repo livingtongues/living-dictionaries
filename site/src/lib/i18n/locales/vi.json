@@ -97,7 +97,9 @@
     "add_audio": "Thêm tệp âm ",
     "undo_permission_denied_explanation": "Quyền truy cập và sử dụng mi-crô của bạn đã bị từ chối. Nếu bạn đã nhấp 'Không', xin hãy tải lại và ấn 'Có' khi trình duyệt của bạn yêu cầu cho phép sử dụng mi-crô.",
     "reload": "Tải lại",
-    "edit_audio": "Chỉnh sửa âm thanh"
+    "edit_audio": "Chỉnh sửa âm thanh",
+    "pause": "Tạm dừng",
+    "unavailable": "Âm thanh không khả dụng"
   },
   "column": {
     "adjust_columns": "Điều chỉnh cột",
@@ -363,7 +365,13 @@
     "cite_instead": "Không rõ người nói? Trích dẫn nguồn thay thế",
     "select_source": "Nguồn của bản ghi này",
     "choose_speaker_instead": "Biết người nói? Chọn người nói thay thế",
-    "source": "Nguồn"
+    "source": "Nguồn",
+    "type_video": "Video",
+    "type_grammar": "Ngữ pháp",
+    "type_phrasebook": "Sách hội thoại",
+    "type_hymnal": "Sách thánh ca",
+    "type_primer": "Sách giáo khoa cơ bản",
+    "type_corpus": "Kho ngữ liệu"
   },
   "speakers": {
     "add_new_speaker": "Thêm người nói mới",
@@ -438,12 +446,31 @@
   },
   "import_page": {
     "import": "Nhập khẩu",
-    "template_link": "Liên kết đến mẫu",
-    "instructions_1": "Nếu bạn đã có dữ liệu ngôn ngữ muốn nhập vào Từ điển của mình, vui lòng làm theo các bước bên dưới.",
-    "instructions_2": "Nhấp vào nút màu xanh lam “Liên kết đến mẫu” bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu của dự án. Sao chép và dán dữ liệu của bạn vào bảng tính.",
-    "instructions_3": "Hãy sử dụng mục “Liên hệ với chúng tôi” bên dưới để liên hệ với chúng tôi. Hãy cho chúng tôi biết rằng bạn có một bảng tính mới đã sẵn sàng để nhập. Hãy hỏi chúng tôi bất kỳ câu hỏi nào bạn có. Chúng tôi sẽ trả lời bạn qua email, sau đó bạn có thể gửi tệp của mình cho chúng tôi.",
-    "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như FLEx, Lexique Pro, Shoebox, vui lòng sử dụng nút “Liên hệ với chúng tôi” bên dưới và cho chúng tôi biết chi tiết về dự án của bạn.",
-    "no_imports": "Hiện tại, chúng tôi đang hợp tác với nhiều cộng đồng và tổ chức đối tác để nhập một lượng lớn mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện những cập nhật lớn cho cơ sở dữ liệu của mình. Chúng tôi sẽ bắt đầu chấp nhận nhập dữ liệu mới từ ngày 1 tháng 7 năm 2024. Chúng tôi rất cảm kích sự kiên nhẫn của quý vị và xin lỗi vì sự bất tiện này."
+    "any_format_title": "Chúng tôi có thể nhập từ bất kỳ định dạng nào",
+    "any_format_body": "Bảng tính, tài liệu Word, xuất FLEx hoặc LIFT, tệp Toolbox/Shoebox, Lexique Pro, ELAN, bản sao lưu cơ sở dữ liệu cũ — ngay cả bản quét PDF của từ điển in. Không ngoại lệ. Đội ngũ của chúng tôi sử dụng công cụ AI với đánh giá của con người để đọc tài liệu của bạn và nhập chúng, vì vậy bạn không bao giờ cần định dạng lại bất cứ thứ gì.",
+    "how_step_1": "Tải lên tài nguyên của bạn bên dưới — bất kỳ tệp nào, bất kỳ định dạng nào.",
+    "how_step_2": "Đối với mỗi tệp, cho chúng tôi biết bạn muốn nhập nó như thế nào: tập trung vào cái gì, bỏ qua cái gì.",
+    "how_step_3": "Nhấn “Yêu cầu nhập” — đội ngũ của chúng tôi sẽ bắt đầu làm việc và liên hệ lại với bạn qua email.",
+    "drop_files": "Thả tệp vào đây hoặc nhấp để chọn",
+    "max_file_size": "Tối đa 100MB mỗi tệp",
+    "uploading": "Đang tải lên…",
+    "uploaded": "Đã tải lên",
+    "requested": "Đã yêu cầu nhập",
+    "instructions_label": "Chúng tôi nên nhập cái này như thế nào?",
+    "instructions_placeholder": "ví dụ: Nhập tất cả mục từ cùng với câu ví dụ của chúng. Các chú thích bằng tiếng Tây Ban Nha. Bỏ qua các trang giới thiệu.",
+    "instructions_required": "Bắt buộc — mọi tệp cần hướng dẫn nhập trước khi bạn có thể gửi yêu cầu.",
+    "source_label": "Nguồn (tùy chọn)",
+    "source_placeholder": "Tài liệu này đến từ đâu? ví dụ: Smith, J. (1979). A Dictionary of …. Nếu bạn để trống, chúng tôi sẽ viết trích dẫn tốt nhất có thể.",
+    "request_note_label": "Có điều gì khác về yêu cầu này không? (tùy chọn)",
+    "request_button": "Yêu cầu chúng tôi nhập cái này",
+    "request_sent": "Yêu cầu đã gửi! Đội ngũ của chúng tôi sẽ liên hệ lại với bạn qua email.",
+    "requested_files": "Tài nguyên đã yêu cầu",
+    "requested_on": "Đã yêu cầu",
+    "delete_file": "Xóa tệp",
+    "download_file": "Tải xuống",
+    "self_serve_title": "Thích tự làm?",
+    "self_serve_body": "Nếu bạn thoải mái với tác nhân mã hóa AI (như Claude Code hoặc Codex), bạn có thể bỏ qua thời gian chờ: tạo khóa API trên trang Tác nhân và để tác nhân của bạn đọc tệp của bạn và nhập dữ liệu trực tiếp qua API của chúng tôi.",
+    "managers_only": "Chỉ quản lý từ điển mới có thể tải lên tài nguyên và yêu cầu nhập. Nếu bạn nên có quyền truy cập, hãy yêu cầu quản lý của từ điển này mời bạn."
   },
   "history": {
     "history": "Lịch sử",
@@ -532,7 +559,9 @@
     "no_matches": "Không tìm thấy mục từ khớp.",
     "remove_confirm": "Gỡ liên kết này giữa các mục từ?",
     "help_intro": "Các mục từ có thể được liên kết với các mục từ khác trong từ điển này để thể hiện cách các từ liên hệ với nhau. Mỗi liên kết có một loại mô tả mối quan hệ:",
-    "custom_types_note": "Một từ điển cũng có thể định nghĩa các loại quan hệ tùy chỉnh riêng."
+    "custom_types_note": "Một từ điển cũng có thể định nghĩa các loại quan hệ tùy chỉnh riêng.",
+    "homophone": "Từ đồng âm",
+    "homophone_description": "Một từ khác phát âm giống hệt từ này (có thể viết khác nhau)."
   },
   "home_v2": {
     "headline": "Phục vụ các cộng đồng ngôn ngữ trên khắp thế giới",
@@ -630,7 +659,8 @@
     "show_translations": "Hiện bản dịch",
     "none_yet": "Chưa có văn bản nào",
     "sentence_count": "{count} câu",
-    "edit_title": "Sửa tiêu đề"
+    "edit_title": "Sửa tiêu đề",
+    "other_versions": "Các phiên bản khác"
   },
   "grammar": {
     "grammar_notes": "Ghi chú ngữ pháp",
