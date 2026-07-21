@@ -87,7 +87,7 @@
   const show_scope_chips = $derived(auth_user.admin_level >= 3)
   const scope = $derived(show_scope_chips ? search_params.value.scope : undefined)
   const entries_length = $derived(Object.keys($entries_data).length)
-  const current_page_index = $derived(search_params.value.page - 1 || 0)
+  const current_page_index = $derived((search_params.value.page || 1) - 1)
   let entries_per_page = $derived(search_params.value.entries_per_page || default_entries_per_page)
   const number_of_pages = $derived((() => {
     const count = search_results_count ?? entries_length
