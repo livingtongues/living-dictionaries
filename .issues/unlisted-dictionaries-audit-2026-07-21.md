@@ -84,8 +84,8 @@ test-dictionary plan yet; the future preference is a shared sandbox that removes
 test dictionaries.
 
 - ✅ Resolve the production room, members, Jacob's skip-notification user ID, and current buckets.
-- 🔄 Show Jacob the resolved recipients and obtain the required final approval before writing.
-- ⬜ Queue one `chat_system_outbox` row and confirm the cron delivers it without error.
+- ✅ Show Jacob the resolved recipients and obtain the required final approval before writing.
+- ✅ Queue one `chat_system_outbox` row and confirm the cron delivers it without error.
 
 Resolved destination: room `diego-greg-jacob`, channel name “Greg, Jacob, Diego, Cailie”. Members
 are Greg (`livingtongues@gmail.com`), Cailie (`ck1105@georgetown.edu`), Diego
@@ -96,3 +96,7 @@ Current catalog state was verified before drafting: the conlangs/glossaries/dele
 are present. `chol`, `tseltal-mexico`, and `tsotsil-mexico` are URL-unlisted (`public = 0`) but their
 newer `bucket` column remains NULL, so the message will use the user-facing “unlisted” wording and
 will not claim that those three carry an explicit `bucket = 'unlisted'` value.
+
+Delivered successfully as System on 2026-07-21 at `01:39:29.830Z`. Outbox row
+`414caa1b-37b7-40ff-8ab9-666f4c01633b` has `processed_at = 2026-07-21T01:39:30.174Z` and
+`error = NULL`; resulting chat message ID is `10ce3b2a-526f-41c9-ae95-439af22dcd54`.
