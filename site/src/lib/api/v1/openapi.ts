@@ -76,7 +76,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const SentenceInput = {
     type: 'object',
-    description: 'An example sentence.',
+    description: 'A sentence write/reference. With content fields, creates or field-merges the sentence. Nested under a sense, `{ id: "<existing sentence UUID>" }` alone links that existing sentence without rewriting it; an unknown id-only reference fails loudly.',
     properties: {
       id: client_id_prop,
       text: { ...StringOrMultiString, description: 'The sentence in the vernacular.' },
@@ -100,7 +100,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       plural_form: StringOrMultiString,
       variant: StringOrMultiString,
       sources: { ...StringOrStringArray, description: 'Source slug(s) for THIS sense — per-sense provenance when an entry\'s senses are merged from several sources. Each must already exist (create via `POST …/sources`).' },
-      example_sentences: { type: 'array', items: { $ref: '#/components/schemas/SentenceInput' } },
+      example_sentences: { type: 'array', items: { $ref: '#/components/schemas/SentenceInput' }, description: 'Sentence content to create/upsert, or `{ id }` alone to link an existing sentence. Re-linking is idempotent; an unknown id-only reference fails.' },
     },
   }
 
@@ -130,7 +130,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const SensePatch = {
     allOf: [{ $ref: '#/components/schemas/SenseInput' }],
-    description: 'A sense within a PATCH — a true upsert by client id. With an `id` already on this entry → field-merge that sense; with an unknown `id` (or none) → create the sense WITH that id (deterministic import ids keep addressing the same sense across re-syncs). An `id` belonging to a different entry is a 400. Example sentences upsert by id (existing links are not duplicated); without an id they are appended.',
+    description: 'A sense within a PATCH — a true upsert by client id. With an `id` already on this entry → field-merge that sense; with an unknown `id` (or none) → create the sense WITH that id (deterministic import ids keep addressing the same sense across re-syncs). An `id` belonging to a different entry is a 400. Example sentences upsert by id; `{ id }` alone links an existing sentence without rewriting it, existing links are not duplicated, and an unknown id-only reference is a 400.',
     properties: { id: { type: 'string' } },
   }
 
@@ -148,7 +148,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const EntryPatch = {
     type: 'object',
-    description: 'Partial entry update. Provided fields overwrite; omitted ones are untouched. `dialects`/`tags` are ADDITIVE links. `senses` upsert by client id (unknown id → created with that id — see SensePatch).',
+    description: 'Partial entry update. Provided fields overwrite; omitted ones are untouched. `dialects`/`tags` are ADDITIVE links. `senses` upsert by client id (unknown id → created with that id — see SensePatch). Within a sense, `example_sentences: [{ id }]` links an existing sentence by reference without copying its content.',
     properties: {
       lexeme: StringOrMultiString,
       homograph: { type: 'string', description: 'Homograph number ("1", "2", …); empty string clears.' },
@@ -322,10 +322,23 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       work_id: { type: 'string', nullable: true, description: 'Parallel-texts grouping key (versions of one work share it).' },
       dialects: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, name: { $ref: '#/components/schemas/MultiString' } } }, description: 'Dialect(s) this version is written in. Present only when set.' },
       parallel_texts: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, title: { $ref: '#/components/schemas/MultiString' }, dialects: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, name: { $ref: '#/components/schemas/MultiString' } } } } } }, description: 'Other versions of the same work (same `work_id`). Present only when siblings exist.' },
+      tags: { type: 'array', items: { $ref: '#/components/schemas/TextTagView' }, description: 'Classification tags. Present only when non-empty.' },
       updated_at: { type: 'string', format: 'date-time' },
       sentences: { type: 'array', items: { $ref: '#/components/schemas/TextSentenceFull' }, description: 'Ordered by `sort_key` ascending.' },
       audio: { type: 'array', items: { $ref: '#/components/schemas/AudioMedia' }, description: 'TEXT-level audio (whole-passage recordings, each with `timings` + `download_url`). Present only when audio exists; sentence-level audio nests under `sentences[].audio`.' },
       speakers: { type: 'array', items: { $ref: '#/components/schemas/SpeakerFull' }, description: 'Full records for every speaker referenced by the included audio — one call serves text + sentences + audio + speakers.' },
+    },
+  }
+
+  const TextSummary = {
+    type: 'object',
+    description: 'One item in the text list.',
+    properties: {
+      id: { type: 'string' },
+      title: { $ref: '#/components/schemas/MultiString' },
+      sentence_count: { type: 'integer' },
+      updated_at: { type: 'string', format: 'date-time' },
+      tags: { type: 'array', items: { $ref: '#/components/schemas/TextTagView' }, description: 'Classification tags. Present only when non-empty.' },
     },
   }
 
@@ -366,6 +379,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       id: { type: 'string' },
       text: { $ref: '#/components/schemas/MultiString' },
       translation: { $ref: '#/components/schemas/MultiString' },
+      sources: { type: 'array', items: { type: 'string' }, nullable: true, description: 'Source registry slugs.' },
       text_id: { type: 'string', nullable: true, description: 'Set when the sentence belongs to a longer connected `text`; `null` for a standalone example sentence (the usual case for imports).' },
       sort_key: { type: 'string', nullable: true, description: 'Fractional ordering index within its `text_id`; `null` for standalone example sentences.' },
       ends_paragraph: { type: 'integer', nullable: true, description: '1 when a paragraph break follows this sentence within a `text`; otherwise `null`.' },
@@ -938,9 +952,9 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         'An **entry** is a headword (`lexeme`) plus metadata and one or more **senses**. A **sense** is one meaning: its `glosses` (short translations keyed by gloss-language), an optional longer `definition`, `parts_of_speech`, `semantic_domains`, and `example_sentences`. `parts_of_speech` values should come from the supported abbreviation list in the `SenseInput` schema (abbrevs and full English names are matched case-insensitively and stored as the canonical lowercase abbrev, e.g. "N"/"Noun" → "n"; anything else is stored verbatim). An **example sentence** has vernacular `text` + `translation`(s). `dialects` and `tags` are entry-level labels (referenced by name; created automatically if new). If you omit `senses`, one empty sense is created. An entry may carry `coordinates` — where-spoken geometry (points/regions) marking where THIS form was attested/elicited; a **dialect** has its own `coordinates` too, for the variety\'s areal extent (set via the `…/dialects` endpoints so one polygon isn\'t repeated across thousands of entries). See the `Coordinates` schema for the shape + limits. A **text** is a separate object: a connected passage/story (`title`) with its own ORDERED list of sentences (each with optional paragraph breaks) — use the `…/texts` endpoints for those; they are independent of entries.',
         '',
         '## Edits & deletes',
-        '`PATCH …/entries/{entryId}` field-merges the entry: provided fields overwrite, omitted ones stay. `senses` are a true upsert by client `id`: an id already on the entry → field-merge that sense; an unknown id (or none) → create the sense WITH that id, so deterministic import ids (e.g. uuid5 of a stable external key) keep addressing the same sense across re-syncs. Example sentences upsert by id too (re-sent links are not duplicated); `dialects`/`tags` are added (never removed) by this call. `DELETE …/entries/{entryId}` removes the entry and its senses.',
+        '`PATCH …/entries/{entryId}` field-merges the entry: provided fields overwrite, omitted ones stay. `senses` are a true upsert by client `id`: an id already on the entry → field-merge that sense; an unknown id (or none) → create the sense WITH that id, so deterministic import ids (e.g. uuid5 of a stable external key) keep addressing the same sense across re-syncs. Example sentences upsert by id too; send `{ "id": "<existing-sentence-id>" }` alone to link an existing sentence without rewriting it (re-sent links are not duplicated; an unknown id-only reference fails). `dialects`/`tags` are added (never removed) by this call. `DELETE …/entries/{entryId}` removes the entry and its senses.',
         'For surgical, single-row fixes (e.g. correcting ONE OCR typo) read the ids from the entry READ shape (`senses[].id`, `senses[].sentences[].id`, `tags[].id`, `dialects[].id`) and use the dedicated routes:',
-        '- `PATCH …/sentences/{sentenceId}` — edit one example sentence\'s `text`/`translation`; `DELETE …/sentences/{sentenceId}` removes it.',
+        '- `POST …/sentences` — create a standalone sentence, then attach its id to a grammar section and/or link it to a sense by id; `GET`/`PATCH`/`DELETE …/sentences/{sentenceId}` read, edit, or remove it.',
         '- `DELETE …/senses/{senseId}` — delete one sense (refused for an entry\'s LAST sense → delete the entry instead).',
         '- `PATCH …/tags/{tagId}` / `…/dialects/{dialectId}` — rename a tag/dialect (affects EVERY entry it\'s on); `DELETE` removes it globally (unlinks it everywhere).',
         '- `DELETE …/entries/{entryId}/tags/{tagId}` / `…/entries/{entryId}/dialects/{dialectId}` — unlink ONE tag/dialect from ONE entry (it survives on other entries).',
@@ -970,7 +984,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         'If you hit a wall — a field you need that doesn\'t exist, a bug, or an awkward workflow — `POST /api/v1/dictionaries/{id}/feedback` with `{ "message": "…" }`. It reaches the Living Dictionaries team directly (read OR write keys). After sending, relay the response\'s `relay_to_human` sentence to your human so they know what you asked for; if we adopt it we notify them directly.',
         '',
         '## Structured grammar + interlinear glossing (IGT) — LIVE',
-        'The structured, entry-linked GRAMMAR surface is implemented and live: grammar sections (hierarchical, parallel-language markdown, entry/sense links, usage conditions — a section may be headless/body-only), example sentences by reference (`…/grammar/sections/{sectionId}/sentences`), clause-template slots (`…/grammar/clause-slots`), the glossing-abbreviations legend (`…/grammar/glossing-abbreviations`), the reverse entry→grammar lookup (`…/entries/{entryId}/grammar`), and text-classification tags (`…/texts/{textId}/tags`). There is no separate grammar-intro endpoint — the introductory prose is simply the first top-level section.',
+        'The structured, entry-linked GRAMMAR surface is implemented and live: grammar sections (hierarchical, parallel-language markdown, entry/sense links, usage conditions — a section may be headless/body-only), example sentences by reference (`POST …/sentences` to create → `…/grammar/sections/{sectionId}/sentences` to attach), clause-template slots (`…/grammar/clause-slots`), the glossing-abbreviations legend (`…/grammar/glossing-abbreviations`), the reverse entry→grammar lookup (`…/entries/{entryId}/grammar`), and text-classification tags (`…/texts/{textId}/tags`; tags are also included in text reads and `GET …/texts?tag=<name>` filters by exact case-insensitive name). There is no separate grammar-intro endpoint — the introductory prose is simply the first top-level section.',
         'Interlinear glossed text (IGT / Leipzig glossing) is live on every sentence write shape (`SentenceInput` / `TextSentenceInput` / `SentencePatch`): supply gold `tokens` per orthography (each `SentenceTokenInput` carrying the aligned per-token `gloss` line + optional `morphemes`; offsets derived if omitted — see the schema), plus `citations` (a source ref WITH a page/example `locator`), `example_label`, and `discourse_role`. `sources.orthography` declares which script a source\'s forms use. When `tokens` are omitted the server behaves as before. If you are importing IGT / corpus data and a shape is awkward, send `POST …/feedback` — that still shapes the build.',
         '',
         '## Uploaded resources & import guides',
@@ -1066,21 +1080,41 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       '/api/v1/dictionaries/{id}/entries/{entryId}/dialects/{dialectId}': {
         delete: { summary: 'Unlink a dialect from this entry', description: 'Removes ONE dialect from ONE entry; the dialect survives globally. To delete it everywhere use `DELETE …/dialects/{dialectId}`.', parameters: [dict_id_param, entry_id_param, dialect_id_param], responses: { 200: { description: "{ result: 'unlinked' }" }, 404: { description: 'Dialect not linked to this entry' } } },
       },
+      '/api/v1/dictionaries/{id}/sentences': {
+        post: {
+          summary: 'Create a standalone sentence',
+          description: 'Create a first-class sentence without attaching it to a sense or text. Use this for free-standing grammar examples, then attach the returned id to a grammar section (`POST …/grammar/sections/{sectionId}/sentences`) and/or link it to a sense (`PATCH …/entries/{entryId}` with `example_sentences: [{ id }]`). A client-supplied id makes retries idempotent.',
+          parameters: [dict_id_param],
+          requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/SentenceInput' } } } },
+          responses: { 200: { description: '{ sentence, created }', content: { 'application/json': { schema: { type: 'object', properties: { sentence: { $ref: '#/components/schemas/SentenceFull' }, created: { type: 'boolean' } } } } } }, 400: { description: 'Missing content / bad id / unknown source' } },
+        },
+      },
       '/api/v1/dictionaries/{id}/sentences/{sentenceId}': {
+        get: {
+          summary: 'Read one sentence',
+          description: 'Read any sentence by id, including a standalone grammar example.',
+          parameters: [dict_id_param, sentence_id_param],
+          responses: { 200: { description: '{ sentence }', content: { 'application/json': { schema: { type: 'object', properties: { sentence: { $ref: '#/components/schemas/SentenceFull' } } } } } }, 404: {} },
+        },
         patch: {
-          summary: 'Edit one example sentence',
-          description: 'Field-merge `text` / `translation` for a single example sentence — the surgical OCR-typo fix. Read its id from `senses[].sentences[].id` in the entry READ shape. Returns `{ sentence }`.',
+          summary: 'Edit one sentence',
+          description: 'Field-merge one sentence, whether it is sense-linked, text-owned, or standalone. Returns `{ sentence }`.',
           parameters: [dict_id_param, sentence_id_param],
           requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/SentencePatch' } } } },
           responses: { 200: { description: 'The updated sentence', content: { 'application/json': { schema: { type: 'object', properties: { sentence: { $ref: '#/components/schemas/SentenceFull' } } } } } }, 400: {}, 404: {} },
         },
-        delete: { summary: 'Delete one example sentence', description: 'Deletes the sentence and its sense links.', parameters: [dict_id_param, sentence_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
+        delete: { summary: 'Delete one sentence', description: 'Deletes the sentence and its sense/grammar links.', parameters: [dict_id_param, sentence_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
       },
       '/api/v1/dictionaries/{id}/senses/{senseId}': {
         delete: { summary: 'Delete one sense', description: 'Deletes a single sense and its sentence/media links. Refused (400) when it is the entry\'s ONLY sense — delete the entry instead.', parameters: [dict_id_param, sense_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 400: { description: "Can't delete an entry's only sense" }, 404: {} } },
       },
       '/api/v1/dictionaries/{id}/texts': {
-        get: { summary: 'List texts', description: 'Each text with its `sentence_count`.', parameters: [dict_id_param], responses: { 200: { description: '{ texts }' } } },
+        get: {
+          summary: 'List texts',
+          description: 'Each text with its `sentence_count` and any classification `tags`. Pass `tag` for an exact, case-insensitive tag-name match.',
+          parameters: [dict_id_param, { name: 'tag', in: 'query', schema: { type: 'string' }, description: 'Exact classification tag name, matched case-insensitively after trimming.' }],
+          responses: { 200: { description: '{ texts }', content: { 'application/json': { schema: { type: 'object', properties: { texts: { type: 'array', items: { $ref: '#/components/schemas/TextSummary' } } } } } } } },
+        },
         post: {
           summary: 'Create a text (with ordered sentences)',
           description: 'Create a connected text/story plus its ordered sentences (sort_keys assigned in array order). Supply your own `id` (UUID) for idempotency — a re-POST of an existing id is a no-op (`created: false`). A text-sentence is standalone (not attached to a sense).',
@@ -1090,7 +1124,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         },
       },
       '/api/v1/dictionaries/{id}/texts/{textId}': {
-        get: { summary: 'Read one text (sentences + audio + speakers)', description: 'The text with its ordered sentences, attached audio (text- and sentence-level, each with `timings` + `download_url`), and the full records of every referenced speaker — one call serves a complete text read.', parameters: [dict_id_param, { name: 'textId', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: '{ text }', content: { 'application/json': { schema: { type: 'object', properties: { text: { $ref: '#/components/schemas/TextFull' } } } } } }, 404: {} } },
+        get: { summary: 'Read one text (sentences + tags + audio + speakers)', description: 'The text with its ordered sentences, classification tags, attached audio (text- and sentence-level, each with `timings` + `download_url`), and the full records of every referenced speaker — one call serves a complete text read.', parameters: [dict_id_param, { name: 'textId', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: '{ text }', content: { 'application/json': { schema: { type: 'object', properties: { text: { $ref: '#/components/schemas/TextFull' } } } } } }, 404: {} } },
         patch: {
           summary: 'Update a text (title / append / reorder)',
           description: 'Field-merge the title, append new sentences, and/or reorder existing sentences (`sentence_order`). Edit ONE sentence\'s text/translation/paragraph-break via `PATCH …/sentences/{id}`; delete one via `DELETE …/sentences/{id}`.',
@@ -1263,6 +1297,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         TextSentenceInput,
         TextInput,
         TextSentenceFull,
+        TextSummary,
         TextFull,
         TextPatch,
         HostedElsewhere,

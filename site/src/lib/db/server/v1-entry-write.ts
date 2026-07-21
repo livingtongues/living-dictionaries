@@ -95,25 +95,49 @@ function load_tag_map(db: Database.Database): Map<string, string> {
   return map
 }
 
-function build_sentence_rows({ sentence, sense_id, now, source_slug_set }: { sentence: SentenceInput, sense_id: string, now: string, source_slug_set: Set<string> }): BuiltRow[] | null {
+function build_sentence_row({ db, sentence, now, source_slug_set }: { db: Database.Database, sentence: SentenceInput, now: string, source_slug_set: Set<string> }): { sentence_id: string, row: Record<string, unknown> | null } | null {
   const translation = to_multistring(sentence.translation)
   const sources = to_string_array(sentence.sources)
   const { tokens, text } = resolve_sentence_igt({ tokens: sentence.tokens, text: to_multistring(sentence.text) })
-  if (!text && !translation && !sources && !tokens)
-    return null
-  assert_known_source_slugs(sources, source_slug_set)
   const citations = to_citations(sentence.citations)
-  assert_known_source_slugs(citation_slugs(citations), source_slug_set)
   const discourse_role = to_discourse_role(sentence.discourse_role)
   const example_label = sentence.example_label?.trim() || undefined
-  const sentence_id = resolve_client_id(sentence.id, { field: 'sentence id' })
-  return [
-    { table_name: 'sentences', row: prune({ id: sentence_id, text, translation, sources, tokens, citations, discourse_role: discourse_role ?? undefined, example_label, created_at: now, updated_at: now }) },
-    { table_name: 'senses_in_sentences', row: prune({ id: crypto.randomUUID(), sense_id, sentence_id, created_at: now, updated_at: now }) },
-  ]
+  const has_content = !!(text || translation || sources || tokens || citations || discourse_role || example_label)
+  const supplied_id = sentence.id ? resolve_client_id(sentence.id, { field: 'sentence id' }) : undefined
+
+  if (!has_content) {
+    if (!supplied_id)
+      return null
+    if (!read_parsed_row({ db, table: 'sentences', id: supplied_id }))
+      throw new Error(`sentence ${supplied_id} does not exist; provide sentence content to create it`)
+    return { sentence_id: supplied_id, row: null }
+  }
+
+  assert_known_source_slugs(sources, source_slug_set)
+  assert_known_source_slugs(citation_slugs(citations), source_slug_set)
+  const sentence_id = supplied_id ?? resolve_client_id(undefined, { field: 'sentence id' })
+  const input_row = prune({ id: sentence_id, text, translation, sources, tokens, citations, discourse_role: discourse_role ?? undefined, example_label, created_at: now, updated_at: now })
+  const existing = supplied_id ? read_parsed_row({ db, table: 'sentences', id: supplied_id }) : undefined
+  if (!existing)
+    return { sentence_id, row: input_row }
+
+  const row: Record<string, unknown> = { ...existing, ...input_row, created_at: existing.created_at, updated_at: now }
+  delete row.updated_by_user_id
+  return { sentence_id, row }
 }
 
-function build_sense_rows({ sense, entry_id, now, source_slug_set }: { sense: SenseInput, entry_id: string, now: string, source_slug_set: Set<string> }): { sense_id: string, rows: BuiltRow[] } {
+function build_sentence_rows({ db, sentence, sense_id, now, source_slug_set }: { db: Database.Database, sentence: SentenceInput, sense_id: string, now: string, source_slug_set: Set<string> }): BuiltRow[] | null {
+  const built = build_sentence_row({ db, sentence, now, source_slug_set })
+  if (!built)
+    return null
+  const rows: BuiltRow[] = []
+  if (built.row)
+    rows.push({ table_name: 'sentences', row: built.row })
+  rows.push({ table_name: 'senses_in_sentences', row: prune({ id: crypto.randomUUID(), sense_id, sentence_id: built.sentence_id, created_at: now, updated_at: now }) })
+  return rows
+}
+
+function build_sense_rows({ db, sense, entry_id, now, source_slug_set }: { db: Database.Database, sense: SenseInput, entry_id: string, now: string, source_slug_set: Set<string> }): { sense_id: string, rows: BuiltRow[] } {
   const sense_id = resolve_client_id(sense.id, { field: 'sense id' })
   const sense_sources = to_string_array(sense.sources)
   assert_known_source_slugs(sense_sources, source_slug_set)
@@ -136,14 +160,15 @@ function build_sense_rows({ sense, entry_id, now, source_slug_set }: { sense: Se
     }),
   }]
   for (const sentence of sense.example_sentences ?? []) {
-    const sentence_rows = build_sentence_rows({ sentence, sense_id, now, source_slug_set })
+    const sentence_rows = build_sentence_rows({ db, sentence, sense_id, now, source_slug_set })
     if (sentence_rows)
       rows.push(...sentence_rows)
   }
   return { sense_id, rows }
 }
 
-function build_entry({ entry, entry_id, now, dialect_map, tag_map, source_slug_set, import_tag_id }: {
+function build_entry({ db, entry, entry_id, now, dialect_map, tag_map, source_slug_set, import_tag_id }: {
+  db: Database.Database
   entry: EntryInput
   /** Pre-resolved (validated / minted) entry id — see resolve_client_id. */
   entry_id: string
@@ -226,7 +251,7 @@ function build_entry({ entry, entry_id, now, dialect_map, tag_map, source_slug_s
   const senses = entry.senses?.length ? entry.senses : [{}]
   const sense_ids: string[] = []
   for (const sense of senses) {
-    const { sense_id, rows } = build_sense_rows({ sense, entry_id, now, source_slug_set })
+    const { sense_id, rows } = build_sense_rows({ db, sense, entry_id, now, source_slug_set })
     sense_ids.push(sense_id)
     ordered_rows.push(...rows)
   }
@@ -308,7 +333,7 @@ export function apply_entry_writes({ db, history_db, entries, user_id, import_id
           skipped++
           continue
         }
-        const built = build_entry({ entry, entry_id, now, dialect_map, tag_map, source_slug_set, import_tag_id })
+        const built = build_entry({ db, entry, entry_id, now, dialect_map, tag_map, source_slug_set, import_tag_id })
         for (const { table_name, row } of built.ordered_rows) {
           const event = merge_dict_row({ db, table_name, row, user_id, at: history_at, api_key_id })
           if (event)
@@ -525,11 +550,11 @@ export function apply_entry_update({ db, history_db, entry_id, patch, user_id, a
         if (sense_row)
           push('senses', sense_row)
         for (const sentence of sense.example_sentences ?? [])
-          push_built_rows(build_sentence_rows({ sentence, sense_id, now, source_slug_set }) ?? [])
+          push_built_rows(build_sentence_rows({ db, sentence, sense_id, now, source_slug_set }) ?? [])
       } else {
         // Upsert-by-client-id: unknown (or absent) sense id → create the sense,
         // honoring the caller's id (build_sense_rows re-resolves sense.id).
-        const built = build_sense_rows({ sense, entry_id, now, source_slug_set })
+        const built = build_sense_rows({ db, sense, entry_id, now, source_slug_set })
         push_built_rows(built.rows)
       }
     }
@@ -679,6 +704,54 @@ export function read_sentence_record(db: Database.Database, sentence_id: string)
     sort_key: (row.sort_key as string) ?? null,
     ends_paragraph: (row.ends_paragraph as number) ?? null,
     updated_at: row.updated_at as string,
+  }
+}
+
+export interface CreateSentenceResult {
+  sentence: SentenceRecord
+  created: boolean
+  cursor: string | null
+}
+
+/** Create one standalone sentence (`text_id` / `sort_key` stay null). */
+export function create_standalone_sentence({ db, history_db, input, user_id, api_key_id }: {
+  db: Database.Database
+  history_db?: Database.Database
+  input: SentenceInput
+  user_id: string
+  api_key_id?: string | null
+}): CreateSentenceResult {
+  const supplied_id = input.id ? resolve_client_id(input.id, { field: 'sentence id' }) : undefined
+  if (supplied_id) {
+    const existing = read_sentence_record(db, supplied_id)
+    if (existing)
+      return { sentence: existing, created: false, cursor: read_last_modified_at(db) }
+  }
+
+  const now = new Date().toISOString()
+  const built = build_sentence_row({ db, sentence: input, now, source_slug_set: load_source_slug_set(db) })
+  if (!built?.row)
+    throw new Error('sentence content is required')
+
+  db.exec('BEGIN IMMEDIATE')
+  try {
+    const event = merge_dict_row({ db, table_name: 'sentences', row: built.row, user_id, at: now, api_key_id })
+    const cursor = read_last_modified_at(db)
+    const sentence = read_sentence_record(db, built.sentence_id)
+    if (!sentence)
+      throw new Error('sentence vanished after create')
+    db.exec('COMMIT')
+    if (history_db && event) {
+      try {
+        record_history(history_db, [event])
+      } catch (err) {
+        console.warn('Could not record v1 sentence create history:', err)
+      }
+    }
+    return { sentence, created: true, cursor }
+  } catch (err) {
+    db.exec('ROLLBACK')
+    throw err
   }
 }
 

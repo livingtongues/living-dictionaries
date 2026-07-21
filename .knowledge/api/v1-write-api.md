@@ -106,6 +106,28 @@ and reorders by reassigning `initial_keys` to a given id order. **Text DELETE al
 its sentences** (the FK is SET NULL, which would otherwise orphan them). Single text-sentence
 edits reuse `PATCH …/sentences/{id}` (now also handles `ends_paragraph`).
 
+## Sentence identity, by-reference linking, and text-tag reads — 2026-07-20
+
+Every example is one canonical `sentences` row. A sentence may independently be
+owned by a text (`text_id`), linked to one or more senses (`senses_in_sentences`),
+and referenced by one or more grammar sections (`section_sentences`); sentence
+content is never embedded in a sense or grammar row.
+
+- `POST …/sentences` creates a standalone sentence with the complete IGT write
+  shape. Its `text_id`/`sort_key` remain null. A client-supplied UUID makes a
+  retry an idempotent `{ created: false }` no-op.
+- Nested `example_sentences: [{ id }]` in entry POST/PATCH means “link this
+  existing sentence to the sense without rewriting it.” Re-sending the same
+  link is idempotent. An id-only reference to a missing sentence fails loudly;
+  it is never silently discarded. Supplying content alongside a known id keeps
+  the existing field-merge behavior.
+- `GET …/sentences/{id}` reads standalone, sense-linked, and text-owned sentences
+  through one route. Grammar-example orchestration is therefore create sentence
+  → attach its id to a section, with an optional independent sense link.
+- Text list/detail reads include classification `tags` only when non-empty.
+  `GET …/texts?tag=<name>` uses exact case-insensitive, trimmed name matching.
+  List attachment is one batched junction query, not an N+1 lookup.
+
 ## Agent feedback → a support message (not a log)
 
 `POST …/feedback` (access `read`, so read keys too) lets an agent tell the LD team what it

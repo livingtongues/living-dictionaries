@@ -105,7 +105,8 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}/entries/{entryId}/dialects/{dialectId}': ['delete'],
       '/api/v1/dictionaries/{id}/relationships': ['get', 'post'],
       '/api/v1/dictionaries/{id}/relationships/{relationshipId}': ['delete'],
-      '/api/v1/dictionaries/{id}/sentences/{sentenceId}': ['delete', 'patch'],
+      '/api/v1/dictionaries/{id}/sentences': ['post'],
+      '/api/v1/dictionaries/{id}/sentences/{sentenceId}': ['delete', 'get', 'patch'],
       '/api/v1/dictionaries/{id}/senses/{senseId}': ['delete'],
       '/api/v1/dictionaries/{id}/texts': ['get', 'post'],
       '/api/v1/dictionaries/{id}/texts/{textId}': ['delete', 'get', 'patch'],
@@ -196,6 +197,15 @@ describe(build_openapi_spec, () => {
     const { schemas } = spec.components as { schemas: Record<string, { 'x-status'?: string }> }
     for (const def of Object.values(schemas))
       expect(def['x-status']).toBeUndefined()
+  })
+
+  test('publishes sentence linking and text-tag read shapes', () => {
+    expect(property_keys('SentenceFull')).toContain('sources')
+    expect(property_keys('TextSummary')).toEqual(['id', 'sentence_count', 'tags', 'title', 'updated_at'])
+    expect(property_keys('TextFull')).toContain('tags')
+
+    const paths = spec.paths as Record<string, Record<string, { parameters?: { name: string }[] }>>
+    expect(paths['/api/v1/dictionaries/{id}/texts'].get.parameters?.map(parameter => parameter.name)).toContain('tag')
   })
 
   test('is a valid OpenAPI 3.1 document with the server origin', () => {

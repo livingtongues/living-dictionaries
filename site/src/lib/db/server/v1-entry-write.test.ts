@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { open_dictionary_db_in_memory } from './dictionary-db'
 import { open_dictionary_history_db_in_memory } from './dictionary-history-db'
 import * as sync_helpers from './dictionary-sync-helpers'
-import { apply_entry_delete, apply_entry_update, apply_entry_writes, apply_sentence_update, read_sentence_record } from './v1-entry-write'
+import { apply_entry_delete, apply_entry_update, apply_entry_writes, apply_sentence_update, create_standalone_sentence, read_sentence_record } from './v1-entry-write'
 import { create_source } from './v1-sources'
 
 let db: Database.Database
@@ -60,6 +60,33 @@ describe(apply_entry_writes, () => {
     const sentence = db.prepare(`SELECT * FROM sentences`).get() as Record<string, string>
     expect(JSON.parse(sentence.text)).toEqual({ default: 'Mbwa wangu' })
     expect(JSON.parse(sentence.translation)).toEqual({ en: 'My dog' })
+  })
+
+  test('links an existing standalone sentence by id only during entry creation', () => {
+    const { sentence } = create_standalone_sentence({ db, input: { text: 'Already here' }, user_id: 'u1' })
+    const report = apply_entry_writes({
+      db,
+      history_db,
+      user_id: 'u1',
+      entries: [{ lexeme: 'linker', senses: [{ glosses: { en: 'link' }, example_sentences: [{ id: sentence.id }] }] }],
+    })
+
+    expect(report).toMatchObject({ created: 1, failed: 0 })
+    expect(count('sentences')).toBe(1)
+    expect(count('senses_in_sentences')).toBe(1)
+  })
+
+  test('reports an unknown id-only sentence reference as a failed entry', () => {
+    const missing_id = crypto.randomUUID()
+    const report = apply_entry_writes({
+      db,
+      user_id: 'u1',
+      entries: [{ lexeme: 'broken', senses: [{ example_sentences: [{ id: missing_id }] }] }],
+    })
+
+    expect(report).toMatchObject({ created: 0, failed: 1 })
+    expect(report.results[0].error).toContain(`sentence ${missing_id} does not exist`)
+    expect(count('entries')).toBe(0)
   })
 
   test('defaults to one empty sense when none provided', () => {
@@ -278,6 +305,37 @@ describe(apply_entry_update, () => {
     expect(count('senses_in_sentences')).toBe(1)
   })
 
+  test('links an existing standalone sentence by id only and is idempotent', () => {
+    const { entry_id, sense_id } = seed_entry()
+    const { sentence } = create_standalone_sentence({
+      db,
+      history_db,
+      input: { text: 'Mbwa mdogo', translation: { en: 'Small dog' } },
+      user_id: 'u1',
+    })
+    const patch = { senses: [{ id: sense_id, example_sentences: [{ id: sentence.id }] }] }
+
+    apply_entry_update({ db, entry_id, patch, user_id: 'u1' })
+    apply_entry_update({ db, entry_id, patch, user_id: 'u1' })
+
+    expect(count('sentences')).toBe(1)
+    expect(count('senses_in_sentences')).toBe(1)
+    expect(db.prepare(`SELECT sentence_id FROM senses_in_sentences WHERE sense_id = ?`).get(sense_id))
+      .toEqual({ sentence_id: sentence.id })
+  })
+
+  test('throws when an id-only sentence reference does not exist', () => {
+    const { entry_id, sense_id } = seed_entry()
+    const missing_id = crypto.randomUUID()
+
+    expect(() => apply_entry_update({
+      db,
+      entry_id,
+      patch: { senses: [{ id: sense_id, example_sentences: [{ id: missing_id }] }] },
+      user_id: 'u1',
+    })).toThrow(`sentence ${missing_id} does not exist`)
+  })
+
   test('throws when a sense id belongs to a different entry', () => {
     const { sense_id } = seed_entry()
     const other = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'paka' }] })
@@ -290,6 +348,47 @@ describe(apply_entry_update, () => {
     const { entry_id } = seed_entry()
     expect(() => apply_entry_update({ db, entry_id, patch: { senses: [{ id: 'not-a-uuid', glosses: { en: 'x' } }] }, user_id: 'u1' }))
       .toThrow(/sense id must be a valid UUID/)
+  })
+})
+
+describe(create_standalone_sentence, () => {
+  test('creates a full IGT sentence without a sense or text owner', () => {
+    create_source({ db, user_id: 'u1', input: { slug: 'smith-1981' } })
+    const result = create_standalone_sentence({
+      db,
+      history_db,
+      input: {
+        text: 'na bird',
+        translation: { en: 'the bird' },
+        tokens: { default: [{ form: 'na', gloss: 'DET' }, { form: 'bird', gloss: { en: 'bird' } }] },
+        citations: [{ slug: 'smith-1981', locator: '31' }],
+        example_label: '(2a)',
+        discourse_role: 'storyline',
+        sources: ['smith-1981'],
+      },
+      user_id: 'u1',
+    })
+
+    expect(result.created).toBeTruthy()
+    expect(result.sentence).toMatchObject({ text_id: null, sort_key: null, example_label: '(2a)', discourse_role: 'storyline' })
+    expect(result.sentence.tokens?.default).toHaveLength(2)
+    expect(count('senses_in_sentences')).toBe(0)
+  })
+
+  test('a supplied id makes re-create an idempotent no-op', () => {
+    const id = crypto.randomUUID()
+    const first = create_standalone_sentence({ db, input: { id, text: 'Original' }, user_id: 'u1' })
+    const again = create_standalone_sentence({ db, input: { id, text: 'Changed' }, user_id: 'u1' })
+
+    expect(first.created).toBeTruthy()
+    expect(again.created).toBeFalsy()
+    expect(again.sentence.text).toEqual({ default: 'Original' })
+    expect(count('sentences')).toBe(1)
+  })
+
+  test('rejects an empty standalone sentence', () => {
+    expect(() => create_standalone_sentence({ db, input: {}, user_id: 'u1' }))
+      .toThrow('sentence content is required')
   })
 })
 

@@ -5,6 +5,7 @@ import { open_dictionary_db_in_memory } from '$lib/db/server/dictionary-db'
 import { merge_dict_row } from '$lib/db/server/dictionary-sync-helpers'
 import { open_dictionary_history_db_in_memory } from '$lib/db/server/dictionary-history-db'
 import { open_test_shared_db } from '$lib/db/server/shared-db'
+import { link_text_tag } from '$lib/db/server/v1-texts'
 import { GET as GET_LIST, POST } from './+server'
 import { DELETE, GET as GET_ONE, PATCH } from './[textId]/+server'
 
@@ -44,9 +45,12 @@ function post_text(body: unknown, key = write_key) {
   const request = new Request('http://localhost/api/v1/dictionaries/dict-1/texts', { method: 'POST', body: JSON.stringify(body), headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${key}` } })
   return POST({ request, cookies: { get: () => undefined }, params: { id: 'dict-1' }, url: new URL(request.url) } as never)
 }
-function list_texts(key = write_key) {
-  const request = new Request('http://localhost/api/v1/dictionaries/dict-1/texts', { method: 'GET', headers: { Authorization: `Bearer ${key}` } })
-  return GET_LIST({ request, cookies: { get: () => undefined }, params: { id: 'dict-1' } } as never)
+function list_texts({ key = write_key, tag }: { key?: string, tag?: string } = {}) {
+  const url = new URL('http://localhost/api/v1/dictionaries/dict-1/texts')
+  if (tag)
+    url.searchParams.set('tag', tag)
+  const request = new Request(url, { method: 'GET', headers: { Authorization: `Bearer ${key}` } })
+  return GET_LIST({ request, cookies: { get: () => undefined }, params: { id: 'dict-1' }, url } as never)
 }
 function get_text(text_id: string, key = write_key) {
   const request = new Request(`http://localhost/api/v1/dictionaries/dict-1/texts/${text_id}`, { method: 'GET', headers: { Authorization: `Bearer ${key}` } })
@@ -102,7 +106,7 @@ describe(GET_ONE, () => {
   test('read key can read a text; append + reorder via PATCH', async () => {
     const { text } = await (await post_text({ title: 'T', sentences: [{ text: 'one' }, { text: 'two' }] })).json()
 
-    const listed = await (await list_texts(read_key)).json()
+    const listed = await (await list_texts({ key: read_key })).json()
     expect(listed.texts[0].sentence_count).toBe(2)
 
     // Append a sentence.
@@ -128,6 +132,27 @@ describe(GET_ONE, () => {
 
   test('404 for an unknown text', async () => {
     await expect(get_text(crypto.randomUUID())).rejects.toMatchObject({ status: 404 })
+  })
+
+  test('includes tags in list/detail reads and filters by exact case-insensitive name', async () => {
+    const first = await (await post_text({ title: 'Private story' })).json()
+    const second = await (await post_text({ title: 'Public story' })).json()
+    link_text_tag({ db: dict_db, history_db, text_id: first.text.id, name: 'sensitive-cn', kind: 'audience', user_id: 'edt-1' })
+    link_text_tag({ db: dict_db, history_db, text_id: second.text.id, name: 'sensitive', kind: 'audience', user_id: 'edt-1' })
+
+    const all = await (await list_texts({ key: read_key })).json()
+    expect(all.texts.find((text: { id: string }) => text.id === first.text.id).tags)
+      .toEqual([expect.objectContaining({ name: 'sensitive-cn', kind: 'audience' })])
+
+    const detail = await (await get_text(first.text.id, read_key)).json()
+    expect(detail.text.tags).toEqual([expect.objectContaining({ name: 'sensitive-cn', kind: 'audience' })])
+
+    const filtered = await (await list_texts({ key: read_key, tag: ' SENSITIVE-CN ' })).json()
+    expect(filtered.texts.map((text: { id: string }) => text.id)).toEqual([first.text.id])
+    expect(filtered.texts[0].tags).toEqual([expect.objectContaining({ name: 'sensitive-cn' })])
+
+    const no_match = await (await list_texts({ key: read_key, tag: 'sensitive-c' })).json()
+    expect(no_match.texts).toEqual([])
   })
 
   test('includes text- and sentence-level audio (timings + download_url) and full speaker records', async () => {

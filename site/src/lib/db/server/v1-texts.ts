@@ -118,6 +118,8 @@ export interface TextRecord {
   dialects?: { id: string, name: MultiString }[]
   /** Other versions of the same work (same `work_id`). Present only when siblings exist. */
   parallel_texts?: ParallelTextRef[]
+  /** Classification tags attached through `text_tags`. Present only when set. */
+  tags?: TextTagView[]
   /** Present only when TEXT-level audio exists (whole-passage recordings). */
   audio?: TextAudioRecord[]
   /** Full speaker records for every speaker referenced by the included audio. */
@@ -129,6 +131,8 @@ export interface TextSummary {
   title: MultiString
   sentence_count: number
   updated_at: string
+  /** Classification tags attached through `text_tags`. Present only when set. */
+  tags?: TextTagView[]
 }
 
 function commit_history(history_db: Database.Database | undefined, events: HistoryEvent[]) {
@@ -289,6 +293,9 @@ export function get_text(db: Database.Database, text_id: string): TextRecord | u
   const parallel_texts = list_parallel_texts(db, { text_id, work_id: text.work_id })
   if (parallel_texts.length)
     record.parallel_texts = parallel_texts
+  const tags = list_text_tags(db, text_id)
+  if (tags.length)
+    record.tags = tags
   include_text_audio(db, record)
   return record
 }
@@ -311,18 +318,28 @@ export function add_audio_download_urls({ text, origin, dict_id }: { text: TextR
   return text
 }
 
-export function list_texts(db: Database.Database): TextSummary[] {
+export function list_texts(db: Database.Database, { tag }: { tag?: string } = {}): TextSummary[] {
+  const normalized_tag = tag?.trim().toLowerCase() || undefined
   const rows = db.prepare(
     `SELECT t.id, t.title, t.updated_at,
             (SELECT COUNT(*) FROM sentences s WHERE s.text_id = t.id) AS sentence_count
-     FROM texts t ORDER BY t.updated_at DESC`,
-  ).all() as { id: string, title: string, updated_at: string, sentence_count: number }[]
-  return rows.map(row => ({
+     FROM texts t
+     ${normalized_tag
+        ? `WHERE EXISTS (
+       SELECT 1 FROM text_tags tt JOIN tags tag ON tag.id = tt.tag_id
+       WHERE tt.text_id = t.id AND lower(trim(tag.name)) = ?
+     )`
+        : ''}
+     ORDER BY t.updated_at DESC`,
+  ).all(...(normalized_tag ? [normalized_tag] : [])) as { id: string, title: string, updated_at: string, sentence_count: number }[]
+  const texts: TextSummary[] = rows.map(row => ({
     id: row.id,
     title: row.title ? JSON.parse(row.title) as MultiString : {},
     sentence_count: row.sentence_count,
     updated_at: row.updated_at,
   }))
+  attach_text_tags(db, texts)
+  return texts
 }
 
 /**
@@ -582,6 +599,30 @@ export function list_text_tags(db: Database.Database, text_id: string): TextTagV
      FROM text_tags tt JOIN tags t ON t.id = tt.tag_id
      WHERE tt.text_id = ? ORDER BY t.name`,
   ).all(text_id) as TextTagView[]
+}
+
+/** Attach tags to a page of text summaries with one batched junction query. */
+function attach_text_tags(db: Database.Database, texts: TextSummary[]): void {
+  if (!texts.length)
+    return
+  const text_ids = texts.map(text => text.id)
+  const rows = db.prepare(
+    `SELECT tt.text_id, t.id, t.name, t.kind, t.code
+     FROM text_tags tt JOIN tags t ON t.id = tt.tag_id
+     WHERE tt.text_id IN (${text_ids.map(() => '?').join(', ')})
+     ORDER BY t.name`,
+  ).all(...text_ids) as (TextTagView & { text_id: string })[]
+  const by_text = new Map<string, TextTagView[]>()
+  for (const { text_id, ...tag } of rows) {
+    const tags = by_text.get(text_id) ?? []
+    tags.push(tag)
+    by_text.set(text_id, tags)
+  }
+  for (const text of texts) {
+    const tags = by_text.get(text.id)
+    if (tags?.length)
+      text.tags = tags
+  }
 }
 
 /**

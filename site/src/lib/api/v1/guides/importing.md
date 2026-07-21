@@ -69,6 +69,17 @@ Not every uploaded file deserves a `sources` registry row:
   `…/texts` endpoints; interlinear glossed text goes in sentence `tokens`.
   Text-level metadata (sources, `citations`, `summary`, `dialects`, `work_id` for
   parallel versions) lives on the TEXT — don't repeat it on every sentence.
+- A sentence is a first-class row, not content stored inside a sense. For a
+  free-standing grammar example, `POST …/sentences` with the full sentence/IGT
+  payload, then attach the returned `sentence.id` to a grammar section with
+  `POST …/grammar/sections/{sectionId}/sentences`. If the same sentence is also
+  an example for a sense, link it by PATCHing that sense with
+  `example_sentences: [{ "id": "<sentence-id>" }]`; this does not copy or rewrite
+  the sentence. Re-linking is idempotent, and an unknown id-only reference fails.
+- Text classification tags created through `POST …/texts/{textId}/tags` are
+  included directly in both text list and detail reads. Use
+  `GET …/texts?tag=sensitive-cn` for an exact, case-insensitive tag-name filter;
+  this avoids hardcoding text IDs in downstream consumers.
 - Never invent data. If glosses/POS are ambiguous in the source, leave the field
   empty rather than guessing, and note it in your report.
 
@@ -87,6 +98,8 @@ Not every uploaded file deserves a `sources` registry row:
 - **Per-import counts**: your `import_id` is a private tag on every imported entry.
 - Spot-check ~10 imported entries against the source (diacritics intact, glosses on
   the right senses, examples attached to the right entries).
+- For grammar examples, verify the standalone sentence via
+  `GET …/sentences/{sentenceId}` after creating and attaching it.
 
 ## Repair & re-sync semantics
 

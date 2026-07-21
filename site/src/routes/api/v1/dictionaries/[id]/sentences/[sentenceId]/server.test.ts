@@ -5,7 +5,7 @@ import { open_dictionary_db_in_memory } from '$lib/db/server/dictionary-db'
 import { open_dictionary_history_db_in_memory } from '$lib/db/server/dictionary-history-db'
 import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { apply_entry_writes } from '$lib/db/server/v1-entry-write'
-import { DELETE, PATCH } from './+server'
+import { DELETE, GET, PATCH } from './+server'
 
 let shared_db: ReturnType<typeof open_test_shared_db>
 let dict_db: Database.Database
@@ -44,6 +44,14 @@ function patch_call({ api_key, id, body }: { api_key?: string, id: string, body:
   return PATCH({ request, cookies: { get: () => undefined }, params: { id: 'dict-1', sentenceId: id } } as never)
 }
 
+function get_call({ api_key, id }: { api_key?: string, id: string }) {
+  const headers: Record<string, string> = {}
+  if (api_key)
+    headers.Authorization = `Bearer ${api_key}`
+  const request = new Request(`http://localhost/api/v1/dictionaries/dict-1/sentences/${id}`, { headers })
+  return GET({ request, cookies: { get: () => undefined }, params: { id: 'dict-1', sentenceId: id } } as never)
+}
+
 function delete_call({ api_key, id }: { api_key?: string, id: string }) {
   const headers: Record<string, string> = {}
   if (api_key)
@@ -67,6 +75,23 @@ describe(PATCH, () => {
     const { sentence } = await res.json()
     expect(sentence.text).toEqual({ default: 'Mbwa wangu mkubwa' })
     expect(sentence.translation).toEqual({ en: 'My dog' })
+  })
+})
+
+describe(GET, () => {
+  test('401 without a credential', async () => {
+    await expect(get_call({ id: sentence_id })).rejects.toMatchObject({ status: 401 })
+  })
+
+  test('reads a sentence by id', async () => {
+    const response = await get_call({ api_key: api_token, id: sentence_id })
+    expect(await response.json()).toMatchObject({
+      sentence: { id: sentence_id, text: { default: 'Mbwa wangu' }, translation: { en: 'My dog' } },
+    })
+  })
+
+  test('404 for an unknown sentence', async () => {
+    await expect(get_call({ api_key: api_token, id: 'nope' })).rejects.toMatchObject({ status: 404 })
   })
 })
 

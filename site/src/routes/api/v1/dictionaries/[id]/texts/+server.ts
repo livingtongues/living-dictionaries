@@ -20,10 +20,10 @@ export interface V1TextPostResponseBody {
   created: boolean
 }
 
-/** GET /api/v1/dictionaries/[id]/texts — list texts (title + sentence_count). */
+/** GET /api/v1/dictionaries/[id]/texts — list texts, optionally filtered by exact tag name. */
 export const GET: RequestHandler = async (event) => {
   const { dictionary } = await load_v1_dictionary_context({ event, access: 'read' })
-  return json({ texts: list_texts(get_dictionary_db(dictionary.id)) } satisfies V1TextsGetResponseBody)
+  return json({ texts: list_texts(get_dictionary_db(dictionary.id), { tag: event.url.searchParams.get('tag') ?? undefined }) } satisfies V1TextsGetResponseBody)
 }
 
 /**

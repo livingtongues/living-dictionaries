@@ -17,6 +17,20 @@ export interface V1SentenceDeleteResponseBody {
   result: 'deleted'
 }
 
+/** GET — read any sentence by id, including standalone grammar examples. */
+export const GET: RequestHandler = async (event) => {
+  const { dictionary } = await load_v1_dictionary_context({ event, access: 'read' })
+
+  const sentence_id = event.params.sentenceId
+  if (!sentence_id)
+    error(ResponseCodes.BAD_REQUEST, 'Missing sentence id')
+
+  const sentence = read_sentence_record(get_dictionary_db(dictionary.id), sentence_id)
+  if (!sentence)
+    error(ResponseCodes.NOT_FOUND, 'sentence not found')
+  return json({ sentence } satisfies V1SentenceUpdateResponseBody)
+}
+
 /**
  * PATCH /api/v1/dictionaries/[id]/sentences/[sentenceId]
  *
