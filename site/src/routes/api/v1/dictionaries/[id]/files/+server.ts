@@ -1,10 +1,12 @@
 import type { RequestHandler } from './$types'
-import type { SourceFileRow } from '$lib/db/server/source-files'
+import type { ImportFileForClient, ImportRequestSummary } from '$lib/import/types'
 import { dev } from '$app/environment'
 import { ResponseCodes } from '$lib/constants'
 import { create_pending_source_file, list_source_files, MAX_IMPORT_FILE_BYTES } from '$lib/db/server/source-files'
+import type { SourceFileRow } from '$lib/db/server/source-files'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { load_v1_dictionary_context } from '$lib/db/server/v1-route-context'
+import { can_manage_requested_file, list_import_requests } from '$lib/import/server/import-request-thread'
 import { presign_import_upload, r2_is_configured } from '$lib/r2/import-files'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
@@ -16,7 +18,8 @@ import { error, json } from '@sveltejs/kit'
  */
 
 export interface V1FilesGetResponseBody {
-  files: SourceFileRow[]
+  files: ImportFileForClient[]
+  requests: ImportRequestSummary[]
 }
 
 export interface V1FilePostRequestBody {
@@ -35,9 +38,14 @@ export interface V1FilePostResponseBody {
 
 /** GET /api/v1/dictionaries/[id]/files — list uploaded import resources. Manager/agent-write only. */
 export const GET: RequestHandler = async (event) => {
-  const { dictionary } = await load_v1_dictionary_context({ event, access: 'write' })
-  const files = list_source_files({ db: get_shared_db(), dictionary_id: dictionary.id })
-  return json({ files } satisfies V1FilesGetResponseBody)
+  const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
+  const db = get_shared_db()
+  const files = list_source_files({ db, dictionary_id: dictionary.id }).map(file => ({
+    ...file,
+    can_manage_requested: !file.import_requested_at || can_manage_requested_file({ db, access, file }),
+  }))
+  const requests = list_import_requests({ db, dictionary_id: dictionary.id, access })
+  return json({ files, requests } satisfies V1FilesGetResponseBody)
 }
 
 /** POST /api/v1/dictionaries/[id]/files — register an upload + get a presigned PUT url. */

@@ -1,0 +1,14 @@
+{
+  "rules": [
+    {
+      "id": "livingdictionaries-import-uploads",
+      "allowed": {
+        "origins": ["https://livingdictionaries.app"],
+        "methods": ["PUT"],
+        "headers": ["Content-Type"]
+      },
+      "exposeHeaders": ["ETag"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+}

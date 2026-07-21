@@ -1,6 +1,6 @@
 export type { DictionaryView, Tables, TablesInsert, TablesUpdate } from './db'
 export type { EntryData } from './entry.interface'
-export type { HostedVideo, VideoCustomMetadata } from './video.interface'
+export type { HostedMetadata, HostedVideo, VideoCustomMetadata } from './video.interface'
 export type { Coordinates, IPoint, IRegion, LngLatFull } from './coordinates.interface'
 export type { IGlossLanguage, IGlossLanguages } from './gloss-language.interface'
 export type { MultiString } from './gloss.interface'

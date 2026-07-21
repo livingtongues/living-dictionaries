@@ -16,6 +16,7 @@ import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 import { parse_media_request } from './media-request'
 import { validate_media_bytes } from './validate-media-bytes'
+import { fetch_hosted_video_metadata } from '$lib/video/hosted-video-metadata'
 
 /**
  * Factories that turn a {@link MediaCellKey} into the POST (attach) and DELETE
@@ -113,8 +114,12 @@ function validate_hosted(value: unknown): HostedVideo {
   if (!obj || (obj.type !== 'youtube' && obj.type !== 'vimeo') || typeof obj.video_id !== 'string' || !obj.video_id)
     error(ResponseCodes.BAD_REQUEST, 'hosted_elsewhere must be { type: "youtube"|"vimeo", video_id, start_at_seconds? }')
   const hosted: HostedVideo = { type: obj.type as 'youtube' | 'vimeo', video_id: obj.video_id }
-  if (obj.start_at_seconds !== undefined && obj.start_at_seconds !== null)
-    hosted.start_at_seconds = Number(obj.start_at_seconds)
+  if (obj.start_at_seconds !== undefined && obj.start_at_seconds !== null) {
+    const start_at_seconds = Number(obj.start_at_seconds)
+    if (!Number.isFinite(start_at_seconds) || start_at_seconds < 0)
+      error(ResponseCodes.BAD_REQUEST, 'start_at_seconds must be a non-negative number')
+    hosted.start_at_seconds = start_at_seconds
+  }
   return hosted
 }
 
@@ -209,6 +214,7 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
       const hosted = resolve_hosted(fields)
       if (hosted) {
         media_fields.hosted_elsewhere = hosted
+        media_fields.hosted_metadata = await fetch_hosted_video_metadata({ hosted_video: hosted })
       } else if (parsed.bytes) {
         assert_media_bytes({ medium: cell.medium, bytes: parsed.bytes, declared_type: parsed.file_type })
         const stored = await store_bytes({ folder: `${dictionary.id}/${cell.folder}/${owner_id}`, file_name: parsed.file_name ?? 'upload', file_type: parsed.file_type ?? 'application/octet-stream', bytes: parsed.bytes })

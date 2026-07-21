@@ -2,7 +2,7 @@
   import IconFilm from '~icons/fa-solid/film'
   import IconTrashAlt from '~icons/fa-regular/trash-alt'
   import IconUpload from '~icons/fa-solid/upload'
-  import type { EntryData, HostedVideo } from '$lib/types'
+  import type { EntryData, HostedMetadata, HostedVideo } from '$lib/types'
   import SelectVideo from './SelectVideo.svelte'
   import PasteVideoLink from './PasteVideoLink.svelte'
   import type { MediaUploadHandle } from '$lib/media/upload-media'
@@ -27,6 +27,7 @@
   const { on_close, entry }: Props = $props()
 
   let hosted_video: HostedVideo = $state()
+  let hosted_metadata: HostedMetadata = $state()
   let upload_triggered = $state(false)
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: page.data.dictionary?.orthographies }))
 
@@ -37,7 +38,7 @@
   }
 
   async function save_hosted({ speaker_id, source_slug }: { speaker_id?: string, source_slug?: string }) {
-    const data = await writes.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video, ...(source_slug ? { source: source_slug } : {}) } })
+    const data = await writes.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video, ...(hosted_metadata ? { hosted_metadata } : {}), ...(source_slug ? { source: source_slug } : {}) } })
     if (speaker_id)
       await writes.assign_speaker({ speaker_id, media: 'video', media_id: data.id })
     on_close()
@@ -52,9 +53,9 @@
   <SelectSpeaker>
     {#snippet children({ speaker_id, source_slug })}
       {#if hosted_video}
-        <VideoThirdParty {hosted_video} />
+        <VideoThirdParty {hosted_video} {hosted_metadata} />
         <div class="modal-footer">
-          <HeadlessButton class="btn btn-default" onclick={() => hosted_video = null}>
+          <HeadlessButton class="btn btn-default" onclick={() => { hosted_video = null; hosted_metadata = null }}>
             {page.data.t('misc.cancel')}
           </HeadlessButton>
           <div style="width: 0.25rem"></div>
@@ -66,7 +67,7 @@
         <ShowHide>
           {#snippet children({ show: record, toggle })}
             {#if !record && !upload_triggered}
-              <PasteVideoLink on_pasted_valid_url={video_info => hosted_video = video_info} />
+              <PasteVideoLink on_pasted_valid_url={({ hosted_video: pasted_video, hosted_metadata: pasted_metadata }) => { hosted_video = pasted_video; hosted_metadata = pasted_metadata }} />
               <SelectVideo>
                 {#snippet children({ file })}
                   {@const handle = start_upload({ file, speaker_id, source_slug })}

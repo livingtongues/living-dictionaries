@@ -59,7 +59,7 @@ if (import.meta.vitest) {
     expect(DICT_JSON_COLUMNS.sentences).toEqual(['text', 'translation', 'sources', 'tokens', 'citations'])
     expect(DICT_JSON_COLUMNS.texts).toEqual(['title', 'sources', 'citations', 'summary'])
     expect(DICT_JSON_COLUMNS.dialects).toEqual(['name', 'coordinates'])
-    expect(DICT_JSON_COLUMNS.videos).toEqual(['hosted_elsewhere', 'timings'])
+    expect(DICT_JSON_COLUMNS.videos).toEqual(['hosted_elsewhere', 'hosted_metadata', 'timings'])
     expect(DICT_JSON_COLUMNS.audio).toEqual(['timings'])
     expect(DICT_JSON_COLUMNS.photos).toEqual([])
     expect(DICT_JSON_COLUMNS.tags).toEqual([])

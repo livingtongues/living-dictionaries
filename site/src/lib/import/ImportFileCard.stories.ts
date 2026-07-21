@@ -1,6 +1,6 @@
 import type { Story, StoryMeta } from 'svelte-look'
 import type Component from './ImportFileCard.svelte'
-import type { SourceFileRow } from '$lib/db/server/source-files'
+import type { ImportFileForClient } from '$lib/import/types'
 import { mock_t } from '$lib/mocks/mock-t'
 
 export const shared_meta: StoryMeta = {
@@ -8,7 +8,7 @@ export const shared_meta: StoryMeta = {
   viewports: [{ width: 760, height: 420 }],
 }
 
-function file(overrides: Partial<SourceFileRow> = {}): SourceFileRow {
+function file(overrides: Partial<ImportFileForClient> = {}): ImportFileForClient {
   return {
     id: 'f1',
     dictionary_id: 'demo',
@@ -25,6 +25,7 @@ function file(overrides: Partial<SourceFileRow> = {}): SourceFileRow {
     uploaded_by_user_id: 'u1',
     created_at: '2026-07-17T01:00:00Z',
     updated_at: '2026-07-17T01:00:00Z',
+    can_manage_requested: true,
     ...overrides,
   }
 }
@@ -41,7 +42,21 @@ export const ReadyToRequest: Story<typeof Component> = {
   props: { ...base, file: file({ import_instructions: 'Import all entries with their senses and example sentences. Glosses are in English and Setswana.', source_note: 'Wentzel, P. J. (1983). The Relationship between Venda and Western Shona.' }) },
 }
 
-/** Already part of a requested import — read-only. */
+/** Already requested — uploader sees edit, delete, and download actions. */
 export const Requested: Story<typeof Component> = {
   props: { ...base, file: file({ import_instructions: 'Import all entries. Skip the grammar sketch at the front.', source_note: 'Smith 1979 print dictionary', import_requested_at: '2026-07-17T02:00:00Z', import_thread_id: 't1' }) },
+}
+
+/** Explicit batched editor shown after clicking the requested card's pencil. */
+export const RequestedEditing: Story<typeof Component> = {
+  csr: true,
+  props: Requested.props,
+  interactions: async (page) => {
+    await page.click('button[title="Edit instructions and source"]')
+  },
+}
+
+/** Another manager can inspect/download, but only the uploader or an admin can mutate it. */
+export const RequestedByAnotherManager: Story<typeof Component> = {
+  props: { ...base, file: file({ import_instructions: 'Import all entries. Skip the grammar sketch at the front.', source_note: 'Smith 1979 print dictionary', import_requested_at: '2026-07-17T02:00:00Z', import_thread_id: 't1', can_manage_requested: false }) },
 }

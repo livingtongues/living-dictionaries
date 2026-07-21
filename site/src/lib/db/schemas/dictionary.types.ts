@@ -105,3 +105,11 @@ export interface HostedElsewhere {
   /** Optional start offset in seconds (youtube `?t=`). */
   start_at_seconds?: number
 }
+
+/** Best-effort cached metadata for a `videos.hosted_elsewhere` reference. */
+export interface HostedMetadata {
+  title?: string
+  description?: string
+  thumbnail_url?: string
+  duration_seconds?: number
+}

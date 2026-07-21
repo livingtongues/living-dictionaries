@@ -6,6 +6,7 @@ import { open_dictionary_history_db_in_memory } from '$lib/db/server/dictionary-
 import { merge_dict_row } from '$lib/db/server/dictionary-sync-helpers'
 import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { store_media_bytes } from '$lib/server/media-storage'
+import { fetch_hosted_video_metadata } from '$lib/video/hosted-video-metadata'
 import { make_media_attach_handler, make_media_delete_handler, make_media_timings_patch_handler } from './media-route-handlers'
 
 let shared_db: ReturnType<typeof open_test_shared_db>
@@ -26,6 +27,11 @@ vi.mock('$lib/server/media-storage', async (orig) => {
     resolve_photo_serving_url: vi.fn(() => Promise.resolve('mockservinghash')),
   }
 })
+vi.mock('$lib/video/hosted-video-metadata', () => ({
+  fetch_hosted_video_metadata: vi.fn(({ hosted_video }) => Promise.resolve(hosted_video.type === 'vimeo'
+    ? { title: 'Vimeo film', thumbnail_url: 'https://example.com/vimeo.jpg', duration_seconds: 64 }
+    : { title: 'YouTube clip', thumbnail_url: 'https://example.com/youtube.jpg' })),
+}))
 
 beforeEach(() => {
   process.env.JWT_SECRET = 'test-secret-that-is-long-enough-for-hs256'
@@ -177,6 +183,7 @@ describe(make_media_attach_handler, () => {
     const res = await attach({ cell: 'video:sense', params: { senseId: 's1' }, fields: { hosted_url: 'https://www.youtube.com/watch?v=GrsknWZpr-k', source: 'field-2026' }, file: null })
     const body = await res.json()
     expect(body.video.hosted_elsewhere).toEqual({ type: 'youtube', video_id: 'GrsknWZpr-k' })
+    expect(body.video.hosted_metadata).toEqual({ title: 'YouTube clip', thumbnail_url: 'https://example.com/youtube.jpg' })
     expect(body.video.source).toBe('field-2026')
     expect(store_media_bytes).not.toHaveBeenCalled()
     expect(dict_db.prepare(`SELECT 1 FROM sense_videos WHERE sense_id = ? AND video_id = ?`).get('s1', body.video.id)).toBeTruthy()
@@ -184,11 +191,25 @@ describe(make_media_attach_handler, () => {
 
   test('video→sense: structured hosted_elsewhere via JSON', async () => {
     const res = await attach_json({ cell: 'video:sense', params: { senseId: 's1' }, body: { hosted_elsewhere: { type: 'vimeo', video_id: '239862299' }, speaker_id: 'sp1' } })
-    expect((await res.json()).video.hosted_elsewhere).toEqual({ type: 'vimeo', video_id: '239862299' })
+    const { video } = await res.json()
+    expect(video.hosted_elsewhere).toEqual({ type: 'vimeo', video_id: '239862299' })
+    expect(video.hosted_metadata).toEqual({ title: 'Vimeo film', thumbnail_url: 'https://example.com/vimeo.jpg', duration_seconds: 64 })
+  })
+
+  test('metadata failure does not block a valid hosted video', async () => {
+    vi.mocked(fetch_hosted_video_metadata).mockResolvedValueOnce(undefined)
+    const res = await attach_json({ cell: 'video:sense', params: { senseId: 's1' }, body: { hosted_elsewhere: { type: 'vimeo', video_id: '239862299', start_at_seconds: 18 }, speaker_id: 'sp1' } })
+    const { video } = await res.json()
+    expect(video.hosted_elsewhere).toEqual({ type: 'vimeo', video_id: '239862299', start_at_seconds: 18 })
+    expect(video.hosted_metadata).toBeNull()
   })
 
   test('400 when a video has neither speaker_id nor source', async () => {
     await expect(attach_json({ cell: 'video:sense', params: { senseId: 's1' }, body: { hosted_elsewhere: { type: 'vimeo', video_id: '239862299' } } })).rejects.toMatchObject({ status: 400 })
+  })
+
+  test('400 for an invalid hosted-video start offset', async () => {
+    await expect(attach_json({ cell: 'video:sense', params: { senseId: 's1' }, body: { hosted_elsewhere: { type: 'vimeo', video_id: '239862299', start_at_seconds: -1 }, speaker_id: 'sp1' } })).rejects.toMatchObject({ status: 400 })
   })
 
   test('photo needs no attribution (source stays free-text caption)', async () => {

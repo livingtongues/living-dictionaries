@@ -128,6 +128,7 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}/files/{fileId}': ['delete', 'get', 'patch'],
       '/api/v1/dictionaries/{id}/files/{fileId}/confirm': ['post'],
       '/api/v1/dictionaries/{id}/files/request-import': ['post'],
+      '/api/v1/dictionaries/{id}/files/requests/{threadId}': ['patch'],
       '/api/v1/guides': ['get'],
       '/api/v1/guides/{slug}': ['get'],
       '/api/v1/dictionaries/{id}/speakers': ['get', 'post'],

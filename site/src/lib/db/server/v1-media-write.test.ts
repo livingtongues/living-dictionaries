@@ -114,6 +114,28 @@ describe(attach_media, () => {
       .toThrow('requires attribution')
   })
 
+  test('later partial edits preserve cached hosted metadata', () => {
+    const result = attach_media({
+      db,
+      cell_key: 'video:sense',
+      owner_id: 's1',
+      fields: {
+        hosted_elsewhere: { type: 'youtube', video_id: 'abc', start_at_seconds: 12 },
+        hosted_metadata: { title: 'Field recording', thumbnail_url: 'https://example.com/thumb.jpg' },
+        source: 'field-2026',
+      },
+      user_id: USER,
+    })
+    const existing = db.prepare(`SELECT created_at, created_by_user_id FROM videos WHERE id = ?`).get(result.media.id) as { created_at: string, created_by_user_id: string }
+    merge_dict_row({ db, table_name: 'videos', row: { id: result.media.id, ...existing, videographer: 'Ana', updated_at: '2030-01-02T00:00:00.000Z' }, user_id: USER })
+    expect(read_media_record({ db, cell_key: 'video:sense', media_id: result.media.id })).toMatchObject({
+      hosted_elsewhere: { type: 'youtube', video_id: 'abc', start_at_seconds: 12 },
+      hosted_metadata: { title: 'Field recording', thumbnail_url: 'https://example.com/thumb.jpg' },
+      source: 'field-2026',
+      videographer: 'Ana',
+    })
+  })
+
   test('audio with an unknown source slug is rejected (strict registry)', () => {
     expect(() => attach_media({ db, cell_key: 'audio:entry', owner_id: 'e1', fields: { storage_path: 'a.mp3', source: 'no-such-slug' }, user_id: USER }))
       .toThrow(`unknown source slug 'no-such-slug'`)

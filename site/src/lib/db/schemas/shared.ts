@@ -286,6 +286,8 @@ export const message_threads = sqliteTable('message_threads', {
    * parsing the `url` slug client-side.
    */
   dictionary_id: text(),
+  /** Editable overall note for a source_files import-request batch. */
+  import_request_note: text(),
 })
 
 export const messages = sqliteTable('messages', {

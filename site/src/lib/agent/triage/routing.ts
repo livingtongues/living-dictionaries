@@ -32,6 +32,11 @@ export function route_admin_for_category(category: TriageCategory): Admin | unde
   return ADMINS.find(admin => admin.email === email)
 }
 
+/** Import requests are operational work owned by Jacob, independent of content triage. */
+export function route_admin_for_imports(): Admin | undefined {
+  return ADMINS.find(admin => admin.email === JACOB)
+}
+
 export function fallback_admin(): Admin | undefined {
   return ADMINS.find(admin => admin.email === FALLBACK_ADMIN_EMAIL)
 }
@@ -61,5 +66,10 @@ if (import.meta.vitest) {
 
   test('fallback admin is Jacob', () => {
     expect(fallback_admin()?.name).toBe('Jacob Bowdoin')
+  })
+
+  test('import requests route to Jacob without changing content routing', () => {
+    expect(route_admin_for_imports()?.name).toBe('Jacob Bowdoin')
+    expect(route_admin_for_category('content')?.name).toBe('Diego Córdova')
   })
 }

@@ -2,7 +2,7 @@ import type Database from 'better-sqlite3'
 import type { HistoryEvent } from './dictionary-history-db'
 import type { SingleWriteResult } from './v1-entry-write'
 import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
-import type { MediaTimings } from '$lib/db/schemas/dictionary.types'
+import type { HostedMetadata, MediaTimings } from '$lib/db/schemas/dictionary.types'
 import type { HostedVideo } from '$lib/types'
 import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { read_last_modified_at } from './dictionary-db'
@@ -64,6 +64,7 @@ export interface MediaFieldInput {
   photographer?: string | null
   videographer?: string | null
   hosted_elsewhere?: HostedVideo | null
+  hosted_metadata?: HostedMetadata | null
   /** Audio: sentence id → compact word-timing string (see `MediaTimings`). */
   timings?: MediaTimings | null
 }
@@ -73,6 +74,7 @@ export interface MediaRecord {
   storage_path?: string | null
   serving_url?: string | null
   hosted_elsewhere?: HostedVideo | null
+  hosted_metadata?: HostedMetadata | null
   source?: string | null
   photographer?: string | null
   videographer?: string | null
@@ -111,7 +113,7 @@ function build_media_columns(cell: MediaCellConfig, fields: MediaFieldInput): Re
   if (cell.medium === 'photo')
     return { storage_path: fields.storage_path, serving_url: fields.serving_url, source: fields.source ?? null, photographer: fields.photographer ?? null }
   // video
-  return { storage_path: fields.storage_path ?? null, hosted_elsewhere: fields.hosted_elsewhere ?? null, source: fields.source ?? null, videographer: fields.videographer ?? null }
+  return { storage_path: fields.storage_path ?? null, hosted_elsewhere: fields.hosted_elsewhere ?? null, hosted_metadata: fields.hosted_metadata ?? null, source: fields.source ?? null, videographer: fields.videographer ?? null }
 }
 
 function existing_media_ids({ db, cell, owner_id }: { db: Database.Database, cell: MediaCellConfig, owner_id: string }): string[] {
@@ -156,6 +158,7 @@ export function read_media_record({ db, cell_key, media_id }: { db: Database.Dat
   } else {
     record.storage_path = row.storage_path ?? null
     record.hosted_elsewhere = (row.hosted_elsewhere as HostedVideo) ?? null
+    record.hosted_metadata = (row.hosted_metadata as HostedMetadata) ?? null
     record.source = row.source ?? null
     record.videographer = row.videographer ?? null
     record.text_id = row.text_id ?? null

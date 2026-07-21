@@ -211,9 +211,22 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       source_note: { type: 'string', nullable: true },
       upload_confirmed_at: { type: 'string', format: 'date-time', nullable: true },
       import_requested_at: { type: 'string', format: 'date-time', nullable: true },
+      import_thread_id: { type: 'string', format: 'uuid', nullable: true },
       uploaded_by_user_id: { type: 'string' },
+      can_manage_requested: { type: 'boolean', description: 'Whether this caller may edit/delete the resource after import was requested (original uploader or site admin).' },
       created_at: { type: 'string', format: 'date-time' },
       updated_at: { type: 'string', format: 'date-time' },
+    },
+  }
+
+  const ImportRequest = {
+    type: 'object',
+    description: 'One import-request batch. Multiple source files can share this thread and its editable overall note.',
+    properties: {
+      thread_id: { type: 'string', format: 'uuid' },
+      request_note: { type: 'string', nullable: true },
+      requested_at: { type: 'string', format: 'date-time' },
+      can_manage: { type: 'boolean', description: 'Whether this caller may edit the request note (original requester or site admin).' },
     },
   }
 
@@ -507,6 +520,16 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       start_at_seconds: { type: 'integer', nullable: true },
     },
   }
+  const HostedMetadata = {
+    type: 'object',
+    description: 'Best-effort provider metadata cached when a hosted video is attached. Metadata unavailability never prevents the reference from being saved.',
+    properties: {
+      title: { type: 'string' },
+      description: { type: 'string' },
+      thumbnail_url: { type: 'string', format: 'uri' },
+      duration_seconds: { type: 'number' },
+    },
+  }
   const SpeakerBrief = { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' } } }
   const SpeakerFull = {
     type: 'object',
@@ -562,6 +585,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       id: { type: 'string' },
       storage_path: { type: 'string', nullable: true },
       hosted_elsewhere: { ...HostedElsewhere, nullable: true },
+      hosted_metadata: { ...HostedMetadata, nullable: true },
       source: { type: 'string', nullable: true, description: 'A sources-registry slug (see `GET …/sources`) — the speaker-less attribution path.' },
       videographer: { type: 'string', nullable: true },
       text_id: { type: 'string', nullable: true },
@@ -1200,19 +1224,22 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         delete: { summary: 'Delete a source', description: 'Refuses with 409 while the source is still referenced. Pass `?remove_from_all=true` to strip the slug from every referencing entry/sentence/text first and then delete.', parameters: [dict_id_param, source_id_param, { name: 'remove_from_all', in: 'query', required: false, schema: { type: 'boolean' } }], responses: { 200: { description: "{ result: 'deleted', removed_from }" }, 409: { description: 'Still referenced (retry with remove_from_all)' }, 404: {} } },
       },
       '/api/v1/dictionaries/{id}/files': {
-        get: { summary: 'List uploaded import resources', description: 'Every uploaded resource with its uploader-written `import_instructions` (authoritative — follow them) and optional `source_note`. Write scope required (file names + instructions are never public).', parameters: [dict_id_param], responses: { 200: { description: '{ files }', content: { 'application/json': { schema: { type: 'object', properties: { files: { type: 'array', items: { $ref: '#/components/schemas/SourceFile' } } } } } } } } },
+        get: { summary: 'List uploaded import resources', description: 'Every uploaded resource with its uploader-written `import_instructions` (authoritative — follow them), optional `source_note`, and request-batch summaries. Write scope required (file names + instructions are never public).', parameters: [dict_id_param], responses: { 200: { description: '{ files, requests }', content: { 'application/json': { schema: { type: 'object', properties: { files: { type: 'array', items: { $ref: '#/components/schemas/SourceFile' } }, requests: { type: 'array', items: { $ref: '#/components/schemas/ImportRequest' } } } } } } } } },
         post: { summary: 'Register an upload', description: 'Registers the file and returns `{ file, upload_url }` — PUT the raw bytes to `upload_url` (Content-Type must match `mimetype`), then `POST …/files/{fileId}/confirm`. 100MB cap per file.', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['filename', 'mimetype', 'size_bytes'], properties: { filename: { type: 'string' }, mimetype: { type: 'string' }, size_bytes: { type: 'integer' } } } } } }, responses: { 200: { description: '{ file, upload_url }' }, 400: { description: 'Missing fields or over the 100MB cap' } } },
       },
       '/api/v1/dictionaries/{id}/files/{fileId}': {
         get: { summary: 'Download the resource bytes', description: 'Streams the original file (Content-Disposition: attachment).', parameters: [dict_id_param, file_id_param], responses: { 200: { description: 'The file bytes' }, 404: {} } },
-        patch: { summary: 'Update file metadata / link to a source', description: 'Update `import_instructions`, `source_note`, `filename`, or set `source_id` to an EXISTING dict source (create it first via `POST …/sources`) to file this resource under its permanent source — do this when the resource is a real citable work (a published dictionary scan, a thesis…), not for ad-hoc working spreadsheets. See the importing guide.', parameters: [dict_id_param, file_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { filename: { type: 'string' }, import_instructions: { type: 'string', nullable: true }, source_note: { type: 'string', nullable: true }, source_id: { type: 'string', nullable: true } } } } } }, responses: { 200: { description: '{ file }' }, 400: { description: 'Unknown source_id / empty filename' }, 404: {} } },
-        delete: { summary: 'Delete an uploaded resource', description: 'Removes the row + stored bytes. Blocked (403) once the file is part of a requested import, except for site admins.', parameters: [dict_id_param, file_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 403: { description: 'Part of a requested import' }, 404: {} } },
+        patch: { summary: 'Update file metadata / link to a source', description: 'Update `import_instructions`, `source_note`, `filename`, or set `source_id` to an EXISTING dict source (create it first via `POST …/sources`) to file this resource under its permanent source — do this when the resource is a real citable work (a published dictionary scan, a thesis…), not for ad-hoc working spreadsheets. After an import is requested, only the original uploader or a site admin may update it; the update appends to/reopens the request thread and notifies its assignee.', parameters: [dict_id_param, file_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { filename: { type: 'string' }, import_instructions: { type: 'string', nullable: true }, source_note: { type: 'string', nullable: true }, source_id: { type: 'string', nullable: true } } } } } }, responses: { 200: { description: '{ file }' }, 400: { description: 'Unknown source_id / empty filename' }, 403: { description: 'Requested resource owned by another uploader' }, 404: {} } },
+        delete: { summary: 'Delete an uploaded resource', description: 'Removes the row + stored bytes. After an import is requested, only the original uploader or a site admin may delete it; deletion appends to/reopens the original thread and notifies its assignee.', parameters: [dict_id_param, file_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 403: { description: 'Requested resource owned by another uploader' }, 404: {} } },
       },
       '/api/v1/dictionaries/{id}/files/{fileId}/confirm': {
         post: { summary: 'Confirm an upload landed', description: 'Verifies the bytes exist in storage (and enforces the size cap on what was actually stored). Call after the PUT.', parameters: [dict_id_param, file_id_param], responses: { 200: { description: '{ file }' }, 400: { description: 'No bytes found / oversize (removed)' }, 404: {} } },
       },
       '/api/v1/dictionaries/{id}/files/request-import': {
         post: { summary: 'Ask the Living Dictionaries team to import these files', description: 'Turns a batch of uploaded, instruction-carrying files into a request message for the LD team (humans normally do this from the Import page — agents rarely need it).', parameters: [dict_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['file_ids'], properties: { file_ids: { type: 'array', items: { type: 'string' } }, message: { type: 'string' } } } } } }, responses: { 200: { description: '{ ok, thread_id }' }, 400: { description: 'Unconfirmed / instruction-less / already-requested file' } } },
+      },
+      '/api/v1/dictionaries/{id}/files/requests/{threadId}': {
+        patch: { summary: 'Update an import request note', description: 'Updates the once-per-batch overall note, appends the change to/reopens the original request thread, and notifies its current assignee. Original requester or site admin only.', parameters: [dict_id_param, { name: 'threadId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['request_note'], properties: { request_note: { type: 'string', nullable: true } } } } } }, responses: { 200: { description: '{ request }' }, 403: { description: 'Import request owned by another requester' }, 404: {} } },
       },
       '/api/v1/guides': {
         get: { summary: 'List the format-import guides', description: 'Public. Returns `{ guides: [{ slug, title, description, url }] }` in recommended reading order (`importing` first).', responses: { 200: { description: '{ guides }' } } },
@@ -1284,6 +1311,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         OrthographyInput,
         SourceInput,
         SourceFile,
+        ImportRequest,
         EntryWriteResult,
         EntriesWriteResponse,
         SenseSummary,

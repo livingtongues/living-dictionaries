@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { HostedVideo } from '$lib/types'
+  import type { HostedMetadata, HostedVideo } from '$lib/types'
 
   interface Props {
     hosted_video: HostedVideo
+    hosted_metadata?: HostedMetadata
   }
 
-  const { hosted_video }: Props = $props()
+  const { hosted_video, hosted_metadata }: Props = $props()
 
   let window_width: number = $state()
 </script>
@@ -19,7 +20,7 @@
       width={window_width >= 540 ? '456' : window_width * 0.8444}
       height={window_width >= 540 ? '342' : window_width * 0.6333}
       src={`https://www.youtube.com/embed/${hosted_video.video_id}${hosted_video.start_at_seconds ? `?start=${hosted_video.start_at_seconds}` : ''}`}
-      title="YouTube video player"
+      title={hosted_metadata?.title ?? 'YouTube video player'}
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       allowfullscreen></iframe>
   {/if}
@@ -29,7 +30,7 @@
       width={window_width >= 540 ? '456' : window_width * 0.8444}
       height={window_width >= 540 ? '342' : window_width * 0.6333}
       src={`https://player.vimeo.com/video/${hosted_video.video_id}${hosted_video.start_at_seconds ? `#t=${hosted_video.start_at_seconds}` : ''}`}
-      title="Vimeo video player"
+      title={hosted_metadata?.title ?? 'Vimeo video player'}
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       allowfullscreen></iframe>
   {/if}

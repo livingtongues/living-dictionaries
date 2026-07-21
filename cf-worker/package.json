@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
+    "r2:cors:apply": "wrangler r2 bucket cors set livingdictionaries-attachments --file r2-cors.json",
+    "r2:cors:list": "wrangler r2 bucket cors list livingdictionaries-attachments",
     "tail": "wrangler tail",
     "test": "vitest run",
     "test:watch": "vitest"

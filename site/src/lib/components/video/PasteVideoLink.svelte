@@ -1,28 +1,31 @@
 <script lang="ts">
   import IconLink from '~icons/fa-solid/link'
-  import type { HostedVideo } from '$lib/types'
+  import type { HostedMetadata, HostedVideo } from '$lib/types'
   import { parse_hosted_video_url } from './parse-hosted-video-url'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
+  import { api_video_hosted_metadata } from '$api/video/hosted-metadata/_call'
 
   let url: string = $state()
   interface Props {
-    on_pasted_valid_url: (hosted_video: HostedVideo) => void
+    on_pasted_valid_url: (value: { hosted_video: HostedVideo, hosted_metadata?: HostedMetadata }) => void
   }
 
   const { on_pasted_valid_url }: Props = $props()
 
-  function handle() {
+  async function handle() {
     const video = parse_hosted_video_url(url)
     if (!video) {
       alert(page.data.t('misc.invalid_url'))
       url = ''
+      return
     }
-    on_pasted_valid_url(video)
+    const { data } = await api_video_hosted_metadata({ hosted_video: video })
+    on_pasted_valid_url({ hosted_video: video, ...(data?.metadata ? { hosted_metadata: data.metadata } : {}) })
   }
 </script>
 
-<form style="margin-bottom: 1rem" onsubmit={(e) => { e.preventDefault(); handle() }}>
+<form style="margin-bottom: 1rem" onsubmit={async (event) => { event.preventDefault(); await handle() }}>
   <label for="vURL">
     <IconLink />
     {page.data.t('video.video_url')}

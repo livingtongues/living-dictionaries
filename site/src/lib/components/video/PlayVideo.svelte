@@ -42,7 +42,7 @@
         <track kind="captions" />
       </video>
     {:else if video.hosted_elsewhere}
-      <VideoThirdParty hosted_video={video.hosted_elsewhere} />
+      <VideoThirdParty hosted_video={video.hosted_elsewhere} hosted_metadata={video.hosted_metadata} />
     {/if}
     {#if can_edit}
       <div class="viewer-footer">

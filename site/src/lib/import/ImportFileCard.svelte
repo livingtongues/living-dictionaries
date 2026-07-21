@@ -1,8 +1,9 @@
 <script lang="ts">
-  import type { SourceFileRow } from '$lib/db/server/source-files'
+  import type { ImportFileForClient } from '$lib/import/types'
   import IconFa6SolidFile from '~icons/fa6-solid/file'
   import IconFa6SolidTrash from '~icons/fa6-solid/trash'
   import IconFa6SolidDownload from '~icons/fa6-solid/download'
+  import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
   import { page } from '$app/state'
   import { api_dict_file_delete, api_dict_file_update } from '$api/v1/dictionaries/[id]/files/_call'
   import { format_bytes } from '$lib/utils/format-bytes'
@@ -10,7 +11,7 @@
   import { toast } from '$lib/state/toast.svelte'
 
   interface Props {
-    file: SourceFileRow
+    file: ImportFileForClient
     dictionary_id: string
     on_changed: () => void
   }
@@ -19,11 +20,12 @@
   const { t } = $derived(page.data)
   const requested = $derived(!!file.import_requested_at)
 
-  // Cards are keyed by file.id in the page's {#each}, so initializing from the
-  // prop is safe — a list refresh updates the SAME component instance and we
-  // deliberately keep whatever the user has typed since.
-  let instructions = $state(file.import_instructions ?? '')
-  let source_note = $state(file.source_note ?? '')
+  let instructions_edit = $state<string | null>(null)
+  let source_note_edit = $state<string | null>(null)
+  const instructions = $derived(instructions_edit ?? file.import_instructions ?? '')
+  const source_note = $derived(source_note_edit ?? file.source_note ?? '')
+  let editing = $state(false)
+  let saving = $state(false)
 
   async function save_field(field: 'import_instructions' | 'source_note', value: string) {
     const current = field === 'import_instructions' ? (file.import_instructions ?? '') : (file.source_note ?? '')
@@ -32,18 +34,59 @@
     const { error } = await api_dict_file_update({ dictionary_id, file_id: file.id, [field]: value })
     if (error)
       toast.error(error.message)
-    else
+    else {
+      if (field === 'import_instructions')
+        instructions_edit = null
+      else
+        source_note_edit = null
       on_changed()
+    }
   }
 
   async function remove() {
-    if (!confirm(`${t('import_page.delete_file')}: "${file.filename}"?`))
+    const message = requested
+      ? `${t('import_page.delete_requested_confirm')} "${file.filename}"?`
+      : `${t('import_page.delete_file')}: "${file.filename}"?`
+    if (!confirm(message))
       return
     const { error } = await api_dict_file_delete({ dictionary_id, file_id: file.id })
     if (error)
       toast.error(error.message)
     else
       on_changed()
+  }
+
+  function start_editing() {
+    instructions_edit = file.import_instructions ?? ''
+    source_note_edit = file.source_note ?? ''
+    editing = true
+  }
+
+  function cancel_editing() {
+    instructions_edit = null
+    source_note_edit = null
+    editing = false
+  }
+
+  async function save_requested_metadata() {
+    if (saving)
+      return
+    saving = true
+    const { error } = await api_dict_file_update({
+      dictionary_id,
+      file_id: file.id,
+      import_instructions: instructions,
+      source_note,
+    })
+    saving = false
+    if (error) {
+      toast.error(error.message)
+      return
+    }
+    instructions_edit = null
+    source_note_edit = null
+    editing = false
+    on_changed()
   }
 </script>
 
@@ -63,14 +106,34 @@
     <a class="icon-btn" href={`/api/v1/dictionaries/${dictionary_id}/files/${file.id}`} title={t('import_page.download_file')} download={file.filename}>
       <IconFa6SolidDownload />
     </a>
-    {#if !requested}
+    {#if requested && file.can_manage_requested}
+      <button type="button" class="icon-btn" title={t('import_page.edit_metadata')} onclick={start_editing}>
+        <IconMdiPencilOutline />
+      </button>
+    {/if}
+    {#if !requested || file.can_manage_requested}
       <button type="button" class="icon-btn danger" title={t('import_page.delete_file')} onclick={remove}>
         <IconFa6SolidTrash />
       </button>
     {/if}
   </div>
 
-  {#if requested}
+  {#if requested && editing}
+    <label class="field">
+      <span class="field-label">{t('import_page.instructions_label')} <span class="required-star">*</span></span>
+      <textarea rows="2" value={instructions} placeholder={t('import_page.instructions_placeholder')} oninput={(event) => { instructions_edit = event.currentTarget.value }}></textarea>
+    </label>
+    <label class="field">
+      <span class="field-label">{t('import_page.source_label')}</span>
+      <textarea rows="2" value={source_note} placeholder={t('import_page.source_placeholder')} oninput={(event) => { source_note_edit = event.currentTarget.value }}></textarea>
+    </label>
+    <div class="edit-actions">
+      <button type="button" class="btn btn-sm" disabled={saving} onclick={cancel_editing}>{t('misc.cancel')}</button>
+      <button type="button" class="btn-primary btn-sm" disabled={saving || !instructions.trim()} onclick={save_requested_metadata}>
+        {saving ? t('import_page.saving') : t('import_page.save_changes')}
+      </button>
+    </div>
+  {:else if requested}
     {#if file.import_instructions}
       <div class="readonly-field">{file.import_instructions}</div>
     {/if}
@@ -82,16 +145,18 @@
       <span class="field-label">{t('import_page.instructions_label')} <span class="required-star">*</span></span>
       <textarea
         rows="2"
-        bind:value={instructions}
+        value={instructions}
         placeholder={t('import_page.instructions_placeholder')}
+        oninput={(event) => { instructions_edit = event.currentTarget.value }}
         onblur={() => save_field('import_instructions', instructions)}></textarea>
     </label>
     <label class="field">
       <span class="field-label">{t('import_page.source_label')}</span>
       <textarea
         rows="2"
-        bind:value={source_note}
+        value={source_note}
         placeholder={t('import_page.source_placeholder')}
+        oninput={(event) => { source_note_edit = event.currentTarget.value }}
         onblur={() => save_field('source_note', source_note)}></textarea>
     </label>
   {/if}
@@ -108,7 +173,7 @@
     background: var(--surface);
   }
   .file-card.requested {
-    opacity: 0.85;
+    border-color: color-mix(in srgb, var(--primary) 15%, var(--background));
   }
   .file-head {
     display: flex;
@@ -187,5 +252,10 @@
   }
   .readonly-field.muted {
     color: var(--color-secondary);
+  }
+  .edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
   }
 </style>

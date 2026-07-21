@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types'
 import { randomUUID } from 'node:crypto'
-import { route_admin_for_category } from '$lib/agent/triage/routing'
+import { route_admin_for_imports } from '$lib/agent/triage/routing'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { list_source_files, mark_files_requested } from '$lib/db/server/source-files'
@@ -29,7 +29,7 @@ function format_mb(bytes: number): string {
 /**
  * POST /api/v1/dictionaries/[id]/files/request-import — "Request we import
  * this": turns a batch of uploaded resources into a message thread for the
- * team, deterministically assigned to the content admin (Diego). The message
+ * team, deterministically assigned to the import owner (Jacob). The message
  * body is agent-ready — one copy button on the admin side and the whole job
  * (downloads, per-file instructions, API pointers) can be dumped into an
  * agent session.
@@ -92,13 +92,14 @@ export const POST: RequestHandler = async (event) => {
   const thread_id = randomUUID()
   const message_id = randomUUID()
   const now = new Date().toISOString()
+  const request_note = body.message?.trim() || null
   const insert = db.transaction(() => {
     db.prepare(`
       INSERT INTO message_threads (
         id, subject, source, from_user_id, from_email, from_name, url,
-        dictionary_id, last_message_at, created_at, updated_at
-      ) VALUES (?, ?, 'contact_form', ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(thread_id, subject, requester.id, requester.email, requester.name ?? null, `${origin}/${dictionary.url}/import`, dictionary.id, now, now, now)
+        dictionary_id, import_request_note, last_message_at, created_at, updated_at
+      ) VALUES (?, ?, 'contact_form', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(thread_id, subject, requester.id, requester.email, requester.name ?? null, `${origin}/${dictionary.url}/import`, dictionary.id, request_note, now, now, now)
     db.prepare(`
       INSERT INTO messages (id, thread_id, author_user_id, author_kind, body_text, created_at, updated_at)
       VALUES (?, ?, ?, 'customer', ?, ?, ?)
@@ -108,12 +109,11 @@ export const POST: RequestHandler = async (event) => {
 
   mark_files_requested({ db, dictionary_id: dictionary.id, file_ids: files.map(file => file.id), thread_id, now })
 
-  // Deterministic routing: imports are content work — same owner as content triage.
-  const content_admin = route_admin_for_category('content')
-  if (content_admin) {
-    assign_directed_thread({ db, thread_id, admin: content_admin, now })
+  const import_admin = route_admin_for_imports()
+  if (import_admin) {
+    assign_directed_thread({ db, thread_id, admin: import_admin, now })
     void notify_admin({
-      email: content_admin.email,
+      email: import_admin.email,
       subject: `Import request: ${dictionary.name}`,
       body: `${requester.name || requester.email} uploaded ${files.length} resource${files.length === 1 ? '' : 's'} to import.`,
       link: `${origin}/admin/messages/${thread_id}`,

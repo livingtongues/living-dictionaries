@@ -9,3 +9,5 @@ export interface HostedVideo {
   video_id: string
   start_at_seconds?: number
 }
+
+export type { HostedMetadata } from '$lib/db/schemas/dictionary.types'

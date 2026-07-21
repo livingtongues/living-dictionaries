@@ -152,7 +152,17 @@
   const thread_dictionary = $derived.by(() => {
     if (thread?.dictionary_id) {
       const dict = db?.dictionaries.objects[thread.dictionary_id]
-      return { id: thread.dictionary_id, url: dict?.url ?? null }
+      if (dict?.url)
+        return { id: thread.dictionary_id, url: dict.url }
+      if (thread.url) {
+        try {
+          const [slug] = new URL(thread.url).pathname.split('/').filter(Boolean)
+          return { id: thread.dictionary_id, url: slug ?? null }
+        } catch {
+          return { id: thread.dictionary_id, url: null }
+        }
+      }
+      return { id: thread.dictionary_id, url: null }
     }
     if (!thread?.url)
       return null

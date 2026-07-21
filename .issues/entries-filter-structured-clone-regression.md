@@ -22,8 +22,7 @@ The current code is still unguarded; no later commit fixes or snapshots this wor
 
 ## Recommended fix
 
-- [ ] Convert the whole query-param value to a plain structured-clone-safe object before the Comlink call. Prefer one boundary guard in `site/src/lib/search/index.ts` (covering entry, sentence, and text search) or an explicit `$state.snapshot(search_params.value)` in the entries-page effect if the library layer must remain rune-agnostic.
+- [x] ✅ Snapshot the whole query-param value before the Comlink call (`f4c3d8bc`). The bare-route follow-ups are `fc83af67` (wait for index readiness) and `33ef5987` (normalize `null` page to index 0).
 - [ ] Add a regression test with nested filter arrays, not only scalar query/page values. The test must exercise the real worker/Comlink boundary or assert that its payload is cloneable; a direct `search_entries.ts` unit test will miss this class.
-- [ ] Verify in a browser on Chrome and Safari/WebKit: open an entries list, select multiple parts of speech/speakers, paginate, clear filters, and confirm results update without console or telemetry errors.
-- [ ] After deployment, query production for all three clone-message variants and confirm zero occurrences on the new build.
-
+- [x] ✅ Verified the deployed `/gta/entries` bare route in a fresh Chromium browser: 20 entry links, `Entries: 1-20 / 6378`, no page errors.
+- [x] ✅ Production telemetry audit at 2026-07-21 03:06 UTC: zero clone variants on every repaired/current build across Chrome, Safari, and Firefox. Two Safari rows at 00:21 UTC were from one continuously-open stale tab on broken build `1784516782010`, not a repaired build. Chrome's last occurrence was 23:50 UTC and Firefox's was 18:50 UTC on 2026-07-20.

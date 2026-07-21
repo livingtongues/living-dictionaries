@@ -1,11 +1,13 @@
 <script lang="ts">
-  import type { SourceFileRow } from '$lib/db/server/source-files'
+  import type { ImportFileForClient, ImportRequestSummary } from '$lib/import/types'
+  import IconMdiClose from '~icons/mdi/close'
   import IconMdiMessageOutline from '~icons/mdi/message-outline'
   import IconFa6SolidRobot from '~icons/fa6-solid/robot'
   import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
   import IconFa6SolidPaperPlane from '~icons/fa6-solid/paper-plane'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import ImportFileCard from '$lib/import/ImportFileCard.svelte'
+  import ImportRequestGroup from '$lib/import/ImportRequestGroup.svelte'
   import UploadProgressRow from '$lib/import/UploadProgressRow.svelte'
   import { upload_import_file } from '$lib/import/upload-import-file'
   import type { ImportUploadHandle } from '$lib/import/upload-import-file'
@@ -17,7 +19,8 @@
   const { dictionary, is_manager } = $derived(data)
   const { t } = $derived(page.data)
 
-  let files = $state<SourceFileRow[]>([])
+  let files = $state<ImportFileForClient[]>([])
+  let requests = $state<ImportRequestSummary[]>([])
   interface ActiveUpload {
     key: string
     filename: string
@@ -33,6 +36,10 @@
 
   const pending_files = $derived(files.filter(file => !file.import_requested_at))
   const requested_files = $derived(files.filter(file => !!file.import_requested_at))
+  const requested_groups = $derived(requests.map(request => ({
+    request,
+    files: requested_files.filter(file => file.import_thread_id === request.thread_id),
+  })).filter(group => group.files.length > 0))
   const missing_instructions = $derived(pending_files.filter(file => !file.import_instructions?.trim()))
   const can_request = $derived(pending_files.length > 0 && missing_instructions.length === 0 && active_uploads.length === 0 && !requesting)
 
@@ -44,7 +51,9 @@
         toast.error(error.message)
       return
     }
-    files = listed.files.filter(file => !!file.upload_confirmed_at)
+    const { files: listed_files, requests: listed_requests } = listed
+    files = listed_files.filter(file => !!file.upload_confirmed_at)
+    requests = listed_requests
   }
 
   $effect(() => {
@@ -158,14 +167,19 @@
     {/if}
 
     {#if request_sent}
-      <p class="sent-note">{t('import_page.request_sent')}</p>
+      <div class="sent-note">
+        <span>{t('import_page.request_sent')}</span>
+        <button type="button" class="sent-dismiss" aria-label={t('import_page.dismiss_success')} title={t('import_page.dismiss_success')} onclick={() => { request_sent = false }}>
+          <IconMdiClose />
+        </button>
+      </div>
     {/if}
 
-    {#if requested_files.length}
+    {#if requested_groups.length}
       <h4 class="requested-heading">{t('import_page.requested_files')}</h4>
-      <div class="file-list">
-        {#each requested_files as file (file.id)}
-          <ImportFileCard {file} dictionary_id={dictionary.id} on_changed={refresh_files} />
+      <div class="request-groups">
+        {#each requested_groups as group (group.request.thread_id)}
+          <ImportRequestGroup request={group.request} files={group.files} dictionary_id={dictionary.id} on_changed={refresh_files} />
         {/each}
       </div>
     {/if}
@@ -304,11 +318,32 @@
     border-radius: 0.5rem;
     padding: 0.6rem 1rem;
     font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .sent-dismiss {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    flex-shrink: 0;
+    border-radius: 0.375rem;
+  }
+  .sent-dismiss:hover {
+    background: color-mix(in srgb, var(--success) 12%, transparent);
   }
 
   .requested-heading {
     font-weight: 600;
     margin-top: 0.5rem;
+  }
+  .request-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
   .agent-callout {

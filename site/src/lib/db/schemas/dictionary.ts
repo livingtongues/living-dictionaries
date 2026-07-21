@@ -1,5 +1,5 @@
 import type { DictionaryCoordinates } from './shared.types'
-import type { HostedElsewhere, MediaTimings, MultiString, SentenceTokens, SourceCitation } from './dictionary.types'
+import type { HostedElsewhere, HostedMetadata, MediaTimings, MultiString, SentenceTokens, SourceCitation } from './dictionary.types'
 import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 import { DISCOURSE_ROLES, SOURCE_TYPES, TAG_KINDS } from '$lib/constants'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
@@ -211,6 +211,7 @@ export const videos = sqliteTable('videos', {
   id: text().primaryKey(),
   storage_path: text(),
   hosted_elsewhere: text({ mode: 'json' }).$type<HostedElsewhere>(),
+  hosted_metadata: text({ mode: 'json' }).$type<HostedMetadata>(),
   /** A `sources.slug` registry ref (no FK — validated on write, NULLed on source delete). Speaker-less video must carry one (write-time rule). */
   source: text(),
   videographer: text(),
