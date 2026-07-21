@@ -80,7 +80,7 @@
     }
   }
 
-  let search = $state('')
+  let search = $state(page.url.searchParams.get('search') ?? '')
   let sort_key = $state<SortKey>('name')
   let sort_desc = $state(false)
   function set_sort(key: SortKey) {
