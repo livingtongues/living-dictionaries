@@ -439,17 +439,16 @@ export const mock_analytics: LogAnalytics = {
   // A handful of star dictionaries pulling real outside traffic + a long tail.
   top_dictionaries: {
     distinct_dictionaries: 34,
-    month: '2026-07',
     prev_month: '2026-06',
-    site_visitors_month: 1284,
+    site_visitors_30d: 1284,
     site_visitors_prev_month: 1607,
     site_visitors_7d: 402,
     dictionaries: [
-      { dictionary_id: 'apatani', name: 'Apatani', url: 'apatani', is_public: true, visitors_month: 214, anon_visitors_month: 198, visitors_prev_month: 271, visitors_7d: 61, visits_30d: 342 },
-      { dictionary_id: 'river', name: 'River Dweller', url: 'river', is_public: true, visitors_month: 168, anon_visitors_month: 121, visitors_prev_month: 152, visitors_7d: 52, visits_30d: 261 },
-      { dictionary_id: 'galo', name: 'Galo', url: 'galo', is_public: true, visitors_month: 133, anon_visitors_month: 127, visitors_prev_month: 118, visitors_7d: 44, visits_30d: 205 },
-      { dictionary_id: 'zapoteco-de-analco', name: 'Zapoteco de Analco', url: 'zapoteco-de-analco', is_public: true, visitors_month: 96, anon_visitors_month: 74, visitors_prev_month: 88, visitors_7d: 28, visits_30d: 149 },
-      { dictionary_id: 'onondaga', name: 'Onondaga', url: 'onondaga', is_public: false, visitors_month: 41, anon_visitors_month: 6, visitors_prev_month: 37, visitors_7d: 12, visits_30d: 63 },
+      { dictionary_id: 'apatani', name: 'Apatani', url: 'apatani', is_public: true, visitors_30d: 214, anon_visitors_30d: 198, visitors_prev_month: 271, visitors_7d: 61, visits_30d: 342 },
+      { dictionary_id: 'river', name: 'River Dweller', url: 'river', is_public: true, visitors_30d: 168, anon_visitors_30d: 121, visitors_prev_month: 152, visitors_7d: 52, visits_30d: 261 },
+      { dictionary_id: 'galo', name: 'Galo', url: 'galo', is_public: true, visitors_30d: 133, anon_visitors_30d: 127, visitors_prev_month: 118, visitors_7d: 44, visits_30d: 205 },
+      { dictionary_id: 'zapoteco-de-analco', name: 'Zapoteco de Analco', url: 'zapoteco-de-analco', is_public: true, visitors_30d: 96, anon_visitors_30d: 74, visitors_prev_month: 88, visitors_7d: 28, visits_30d: 149 },
+      { dictionary_id: 'onondaga', name: 'Onondaga', url: 'onondaga', is_public: false, visitors_30d: 41, anon_visitors_30d: 6, visitors_prev_month: 37, visitors_7d: 12, visits_30d: 63 },
     ],
   },
   missing_i18n_keys: {
@@ -539,7 +538,7 @@ export const empty_analytics: LogAnalytics = {
   storage: { dbs: [], dict_dbs: null },
   api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
   entry_edits: { ui_total: 0, api_total: 0, daily: [] },
-  top_dictionaries: { distinct_dictionaries: 0, month: '2026-07', prev_month: '2026-06', site_visitors_month: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] },
+  top_dictionaries: { distinct_dictionaries: 0, prev_month: '2026-06', site_visitors_30d: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] },
   missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
   boot_health: { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] },
   uptime: { probes: 0, availability: null, ttfb: { p50: null, p95: null }, total: { p50: null, p95: null }, vantages: [], daily: [] },

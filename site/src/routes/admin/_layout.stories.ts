@@ -11,17 +11,17 @@ export const shared_meta: StoryMeta = {
 
 const t = ((key: string) => key) as never
 
-function admin_user() {
+function admin_user(level: 2 | 3 = 3) {
   const auth_user = new AuthUser()
   auth_user.set_session({
     user: {
       id: 'u1',
-      email: 'jwrunner7@gmail.com',
-      name: 'Jacob Bowdoin',
+      email: level === 3 ? 'jwrunner7@gmail.com' : 'livingtongues@gmail.com',
+      name: level === 3 ? 'Jacob Bowdoin' : 'Greg Anderson',
       avatar_url: null,
       created_at: '2024-01-15T00:00:00Z',
       is_admin: true,
-      admin_level: 3,
+      admin_level: level,
       is_chat_member: true,
       translator_locales: [],
       preferred_locale: null,
@@ -47,6 +47,15 @@ export const SignedIn: PageStory<typeof Component> = {
     sync: null,
   } as never,
   page_data: { auth_user: admin_user(), t },
+}
+
+export const SignedInLevel2: PageStory<typeof Component> = {
+  props: {
+    auth_user: admin_user(2),
+    db: null,
+    sync: null,
+  } as never,
+  page_data: { auth_user: admin_user(2), t },
 }
 
 export const SignedInMobile: PageStory<typeof Component> = {

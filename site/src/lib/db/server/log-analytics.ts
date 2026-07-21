@@ -560,12 +560,11 @@ export interface TopDictionaryRow {
   /** Catalog url slug — links the panel row to the live dictionary. */
   url: string | null
   is_public: boolean
-  /** TRUE unique visitors (distinct `visitor_id`) who OPENED this dict THIS calendar
-   * month — a UNION over the whole month (from the forever monthly rollup), NOT a
-   * daily-distinct sum, so it's real uniques not "visitor-days". Human-only. */
-  visitors_month: number
-  /** Anonymous (logged-out) subset of `visitors_month` ≈ outside public visitors. */
-  anon_visitors_month: number
+  /** TRUE unique visitors (distinct `visitor_id`) who opened this dictionary over
+   * the rolling last 30 days. A whole-period UNION, not daily-distinct visitor-days. */
+  visitors_30d: number
+  /** Anonymous (logged-out) subset of `visitors_30d` ≈ outside public visitors. */
+  anon_visitors_30d: number
   /** TRUE unique visitors last COMPLETE calendar month (frozen forever). */
   visitors_prev_month: number
   /** TRUE unique visitors over the rolling last 7 days (live from hot logs). */
@@ -575,23 +574,20 @@ export interface TopDictionaryRow {
 }
 /**
  * Per-dictionary viewership — "which dictionaries are being viewed, by how many
- * UNIQUE visitors", and the raw material for a public "visitors/month" badge on
- * each dictionary's home page. Monthly figures come from the forever
- * `dictionary_monthly_visitors` rollup (true month-long UNION of visitor_ids,
- * human-only, never pruned); the rolling 7d figure is a live hot-log scan;
+ * UNIQUE visitors". The primary 30d figures UNION visitor IDs across the retained
+ * hot + archive raw logs; the previous complete month comes from the forever
+ * `dictionary_monthly_visitors` rollup; the rolling 7d figure scans hot logs;
  * `visits_30d` (sessions) comes from the daily rollup + live tail for activity
  * context. "Visitors" = distinct browsers/devices (cookieless `visitor_id`), not
- * humans. Bots excluded. DEV: the cron doesn't run, so the monthly rollup is empty
- * → monthly figures read 0 locally (7d still live).
+ * humans. Bots excluded.
  */
 export interface TopDictionaries {
-  /** Distinct dictionaries with ≥1 (audience) view this month or last (or 7d activity). */
+  /** Distinct dictionaries with at least one visitor in the rolling last 30 days. */
   distinct_dictionaries: number
-  /** Current + previous calendar month ('YYYY-MM' UTC), for column labels. */
-  month: string
+  /** Previous complete calendar month ('YYYY-MM' UTC), for the comparison label. */
   prev_month: string
-  /** Site-wide TRUE unique visitors (distinct visitor across ALL sessions) — this month, last month, last 7d. */
-  site_visitors_month: number
+  /** Site-wide TRUE unique visitors (distinct visitor across all sessions) — last 30d, previous month, last 7d. */
+  site_visitors_30d: number
   site_visitors_prev_month: number
   site_visitors_7d: number
   /** Per-dictionary rows, most unique-visitors-this-month first (top N). */
@@ -690,6 +686,8 @@ interface AnalyticsContext {
   shared_db: Database.Database
   /** Raw hot `client_logs` rows live here (logs.db) — every live scan uses this handle. */
   logs_db: Database.Database
+  /** Aged raw `client_logs` rows retained in logs-archive.db. */
+  archive_db: Database.Database | null
   audience: Audience
   /** Hot-row SQL predicate scoping to the active audience (humans / bots). */
   audience_filter: string
@@ -725,6 +723,8 @@ interface LogAnalyticsOptions {
   shared_db?: Database.Database
   /** Raw hot log rows (logs.db). */
   logs_db?: Database.Database
+  /** Raw aged log rows (logs-archive.db). */
+  archive_db?: Database.Database | null
   days?: number
   now?: Date
   /** The live deployed build id; errors on any other build count as "stale". */
@@ -764,10 +764,13 @@ const ANALYTICS_CACHE_TTL_MS = 15 * 60_000
 
 export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalytics {
   const { shared_db = get_shared_db(), logs_db = get_logs_db(), days = 30, now = new Date(), current_app_version = version, audience = 'humans', bot_ua_min_per_day = MIN_UA_BOT_SESSIONS_PER_DAY, scope = 'full' } = options
+  const archive_db = options.archive_db === undefined
+    ? (options.logs_db === undefined ? get_log_archive_db() : null)
+    : options.archive_db
   // Cache only the live-DB (default-handle) path — a test injecting a db/now/…
   // always bypasses. Checking `undefined` (never the identity of get_*_db())
   // keeps tests from touching the real .data files.
-  const cacheable = options.shared_db === undefined && options.logs_db === undefined && options.now === undefined
+  const cacheable = options.shared_db === undefined && options.logs_db === undefined && options.archive_db === undefined && options.now === undefined
     && options.current_app_version === undefined && options.bot_ua_min_per_day === undefined
   const cache_key = `${days}:${audience}:${scope}`
   if (cacheable) {
@@ -775,7 +778,7 @@ export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalyti
     if (hit && now.getTime() - hit.at_ms < ANALYTICS_CACHE_TTL_MS)
       return { ...hit.value, pipeline: build_pipeline_health({ shared_db, logs_db }) }
   }
-  const value = compute_log_analytics({ shared_db, logs_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope })
+  const value = compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope })
   if (cacheable)
     analytics_cache.set(cache_key, { at_ms: now.getTime(), value })
   return value
@@ -813,12 +816,12 @@ const EMPTY_BOOT_HEALTH: LogAnalytics['boot_health'] = { failed_sessions: 0, rec
 const EMPTY_UPTIME: LogAnalytics['uptime'] = { probes: 0, availability: null, ttfb: { p50: null, p95: null }, total: { p50: null, p95: null }, vantages: [], daily: [] }
 const EMPTY_API_V1: LogAnalytics['api_v1'] = { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] }
 const EMPTY_ENTRY_EDITS: LogAnalytics['entry_edits'] = { ui_total: 0, api_total: 0, daily: [] }
-const EMPTY_TOP_DICTIONARIES: LogAnalytics['top_dictionaries'] = { distinct_dictionaries: 0, month: '', prev_month: '', site_visitors_month: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] }
+const EMPTY_TOP_DICTIONARIES: LogAnalytics['top_dictionaries'] = { distinct_dictionaries: 0, prev_month: '', site_visitors_30d: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] }
 const EMPTY_MISSING_I18N: LogAnalytics['missing_i18n_keys'] = { total: 0, distinct_keys: 0, sessions: 0, keys: [] }
 const EMPTY_EVENT_COVERAGE: LogAnalytics['event_coverage'] = { events: [], never_emitted: 0 }
 const EMPTY_GEO_LATENCY: { ttfb_by_country: GeoLatency[], ttfb_by_distance: GeoLatency[], lcp_by_country: GeoLatency[], lcp_by_distance: GeoLatency[] } = { ttfb_by_country: [], ttfb_by_distance: [], lcp_by_country: [], lcp_by_distance: [] }
 
-function compute_log_analytics({ shared_db, logs_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope }: Required<Omit<LogAnalyticsOptions, 'current_app_version'>> & { current_app_version: string | null }): LogAnalytics {
+function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope }: Required<Omit<LogAnalyticsOptions, 'current_app_version'>> & { current_app_version: string | null }): LogAnalytics {
   // Which heavy, cleanly-independent builders to run this compute (the shared
   // core always runs). `light` = neither; each page's tier requests its own half.
   const want_usage = scope === 'usage' || scope === 'full'
@@ -872,7 +875,7 @@ function compute_log_analytics({ shared_db, logs_db, days, now, current_app_vers
   const hot_min_day = (logs_db.prepare(`SELECT substr(MIN(received_at), 1, 10) day FROM client_logs`).get() as { day: string | null }).day ?? '9999-12-31'
 
   const admin_user_ids = get_admin_user_ids({ shared_db })
-  const ctx: AnalyticsContext = { shared_db, logs_db, audience, audience_filter, is_bot_row, rollup_metric, window_start_iso, window_start_day, live_start_day, live_start_iso, materialized_days, hot_min_day, current_app_version, days, now, bot_session_ids, window_sessions, admin_user_ids }
+  const ctx: AnalyticsContext = { shared_db, logs_db, archive_db, audience, audience_filter, is_bot_row, rollup_metric, window_start_iso, window_start_day, live_start_day, live_start_iso, materialized_days, hot_min_day, current_app_version, days, now, bot_session_ids, window_sessions, admin_user_ids }
 
   const { daily, rollup_rows, live_by_day } = timed('build_daily_series', () => build_daily_series(ctx))
   // `area_counts` is seeded from the cold `geo:` rollup here, then the window-session
@@ -2457,24 +2460,21 @@ function build_entry_edit_channels({ ctx, rollup_rows, live_by_day }: {
   return { ui_total, api_total, daily }
 }
 
-interface DictTotals { visitors_month: number, anon_visitors_month: number, visitors_prev_month: number, visitors_7d: number, visits_30d: number }
+interface DictTotals { visitors_30d: number, anon_visitors_30d: number, visitors_prev_month: number, visitors_7d: number, visits_30d: number }
 function empty_dict_totals(): DictTotals {
-  return { visitors_month: 0, anon_visitors_month: 0, visitors_prev_month: 0, visitors_7d: 0, visits_30d: 0 }
+  return { visitors_30d: 0, anon_visitors_30d: 0, visitors_prev_month: 0, visitors_7d: 0, visits_30d: 0 }
 }
 
 /**
- * Per-dictionary viewership by TRUE UNIQUE VISITORS. Monthly figures
- * (`visitors_month` / `visitors_prev_month`) come from the forever
- * `dictionary_monthly_visitors` rollup — a whole-month UNION of distinct
- * `visitor_id`s (real uniques, NOT daily-distinct "visitor-days"), human-only,
- * written by the retention cron. `visitors_7d` is a live rolling scan of hot logs
- * (14d window ⊇ 7d, exact). `visits_30d` (sessions) merges the daily rollup +
- * live tail for activity context. Names/urls join the shared.db `dictionaries`
- * catalog. Monthly rows have no bot variant, so a 'bots' audience shows 0 monthly
- * (7d still audience-filtered). DEV: cron idle → monthly rollup empty → monthly = 0.
+ * Per-dictionary viewership by TRUE UNIQUE VISITORS. `visitors_30d` unions raw
+ * visitor IDs across hot + archive storage, so a returning browser counts once
+ * across the whole rolling window. The previous complete month comes from the
+ * forever `dictionary_monthly_visitors` rollup. `visitors_7d` is a live hot-log
+ * scan; `visits_30d` merges daily rollups + the live tail for activity context.
+ * Names/URLs join the shared.db dictionary catalog.
  */
 function build_top_dictionaries(ctx: AnalyticsContext): TopDictionaries {
-  const { shared_db, logs_db, audience, audience_filter, window_start_day, live_start_day, live_start_iso, now } = ctx
+  const { shared_db, logs_db, archive_db, audience, audience_filter, window_start_iso, window_start_day, live_start_day, live_start_iso, now, bot_session_ids, window_sessions } = ctx
   const month = month_string(now)
   const previous_month = prev_month(month)
   const iso_7d_start = new Date(now.getTime() - 6 * 86_400_000).toISOString()
@@ -2488,34 +2488,76 @@ function build_top_dictionaries(ctx: AnalyticsContext): TopDictionaries {
     }
     return totals
   }
-  let site_visitors_month = 0
   let site_visitors_prev_month = 0
 
-  // --- Monthly TRUE uniques (human-only forever rollup). Wrapped: a pre-migration
-  // shared.db has no table (and the whole panel degrades to 7d + visits). ---
+  // --- Rolling 30d TRUE uniques across BOTH raw-log files. Sets union visitors
+  // across files, sessions, and days. Anonymity follows the whole-session flag.
+  // Raw rows are retained for 60d, so this remains exact after hot→archive moves. ---
+  interface VisitorRow { dictionary_id?: string, session_id: string, visitor_id: string | null, user_agent: string | null }
+  interface VisitorSets { visitors: Set<string>, anon_visitors: Set<string> }
+  const visitor_sets_by_dict = new Map<string, VisitorSets>()
+  const site_visitor_sets: VisitorSets = { visitors: new Set(), anon_visitors: new Set() }
+  const session_has_user = new Map(window_sessions.map(session => [session.session_id, session.has_user_id]))
+  const is_selected_audience = (row: VisitorRow): boolean => {
+    const is_bot = is_bot_user_agent(row.user_agent) || bot_session_ids.has(row.session_id)
+    return audience === 'bots' ? is_bot : !is_bot
+  }
+  const add_visitor = (sets: VisitorSets, row: VisitorRow): void => {
+    if (!is_selected_audience(row))
+      return
+    const visitor_key = row.visitor_id ?? row.session_id
+    sets.visitors.add(visitor_key)
+    if (!session_has_user.get(row.session_id))
+      sets.anon_visitors.add(visitor_key)
+  }
+  for (const raw_db of [...(archive_db ? [archive_db] : []), logs_db]) {
+    for (const row of raw_db.prepare(`
+      SELECT json_extract(CASE WHEN json_valid(context) THEN context END, '$.dictionary_id') dictionary_id,
+             session_id, visitor_id, user_agent
+      FROM client_logs
+      WHERE received_at >= ? AND message = ? AND session_id IS NOT NULL
+        AND json_extract(CASE WHEN json_valid(context) THEN context END, '$.dictionary_id') IS NOT NULL
+    `).all(window_start_iso, DICTIONARY_OPENED) as VisitorRow[]) {
+      if (!is_selected_audience(row))
+        continue
+      let sets = visitor_sets_by_dict.get(row.dictionary_id as string)
+      if (!sets) {
+        sets = { visitors: new Set(), anon_visitors: new Set() }
+        visitor_sets_by_dict.set(row.dictionary_id as string, sets)
+      }
+      add_visitor(sets, row)
+    }
+    for (const row of raw_db.prepare(`
+      SELECT session_id, visitor_id, user_agent
+      FROM client_logs
+      WHERE received_at >= ? AND message = ? AND session_id IS NOT NULL
+    `).all(window_start_iso, SESSION_START) as VisitorRow[])
+      add_visitor(site_visitor_sets, row)
+  }
+  for (const [dictionary_id, sets] of visitor_sets_by_dict) {
+    const totals = totals_for(dictionary_id)
+    totals.visitors_30d = sets.visitors.size
+    totals.anon_visitors_30d = sets.anon_visitors.size
+  }
+  const site_visitors_30d = site_visitor_sets.visitors.size
+
+  // --- Previous complete month's TRUE uniques (human-only forever rollup). ---
   if (audience === 'humans') {
     try {
       for (const row of shared_db.prepare(`
-        SELECT month, scope, visitors, anon_visitors
-        FROM dictionary_monthly_visitors WHERE month IN (?, ?)
-      `).all(month, previous_month) as { month: string, scope: string, visitors: number, anon_visitors: number }[]) {
+        SELECT scope, visitors
+        FROM dictionary_monthly_visitors WHERE month = ?
+      `).all(previous_month) as { scope: string, visitors: number }[]) {
         if (row.scope === SITE_SCOPE) {
-          if (row.month === month)
-            site_visitors_month = row.visitors
-          else
-            site_visitors_prev_month = row.visitors
+          site_visitors_prev_month = row.visitors
           continue
         }
-        const totals = totals_for(row.scope)
-        if (row.month === month) {
-          totals.visitors_month = row.visitors
-          totals.anon_visitors_month = row.anon_visitors
-        } else {
+        const totals = totals_by_dict.get(row.scope)
+        if (totals)
           totals.visitors_prev_month = row.visitors
-        }
       }
     } catch {
-      // table absent (never migrated) — monthly figures stay 0.
+      // Table absent (never migrated) — previous-month figures stay 0.
     }
   }
 
@@ -2584,17 +2626,16 @@ function build_top_dictionaries(ctx: AnalyticsContext): TopDictionaries {
       }
     })
     .sort((first, second) =>
-      second.visitors_month - first.visitors_month
+      second.visitors_30d - first.visitors_30d
       || second.visitors_prev_month - first.visitors_prev_month
       || second.visitors_7d - first.visitors_7d
       || second.visits_30d - first.visits_30d)
     .slice(0, TOP_DICTIONARIES_LIMIT)
 
   return {
-    distinct_dictionaries: totals_by_dict.size,
-    month,
+    distinct_dictionaries: [...totals_by_dict.values()].filter(totals => totals.visitors_30d > 0).length,
     prev_month: previous_month,
-    site_visitors_month,
+    site_visitors_30d,
     site_visitors_prev_month,
     site_visitors_7d,
     dictionaries,

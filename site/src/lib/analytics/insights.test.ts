@@ -41,7 +41,7 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     storage: { dbs: [], dict_dbs: null },
     api_v1: { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] },
     entry_edits: { ui_total: 0, api_total: 0, daily: [] },
-    top_dictionaries: { distinct_dictionaries: 0, month: '2026-07', prev_month: '2026-06', site_visitors_month: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] },
+    top_dictionaries: { distinct_dictionaries: 0, prev_month: '2026-06', site_visitors_30d: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] },
     missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
     boot_health: { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] },
     uptime: { probes: 0, availability: null, ttfb: { p50: null, p95: null }, total: { p50: null, p95: null }, vantages: [], daily: [] },

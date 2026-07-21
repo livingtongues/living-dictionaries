@@ -105,7 +105,7 @@
 
   const missing_i18n = $derived(analytics.missing_i18n_keys)
 
-  // Per-dictionary unique visitors — monthly rollup + live 7d (see build_top_dictionaries).
+  // Per-dictionary unique visitors — rolling 30d + previous month + live 7d.
   const top_dictionaries = $derived(analytics.top_dictionaries)
   const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   /** 'YYYY-MM' → 'Mon' (short label for column headers / stats). */
@@ -209,37 +209,37 @@
       {#if top_dictionaries.dictionaries.length}
         <div class="ver-split">
           <div class="ver-stat">
-            <div class="ver-value">{format_number(top_dictionaries.site_visitors_month)}</div>
-            <div class="ver-label">Site visitors · {month_label(top_dictionaries.month)}</div>
+            <div class="ver-value">{format_number(top_dictionaries.site_visitors_30d)}</div>
+            <div class="ver-label">Site visitors · last 30d</div>
             <div class="ver-sub">{format_number(top_dictionaries.site_visitors_prev_month)} in {month_label(top_dictionaries.prev_month)} · {format_number(top_dictionaries.site_visitors_7d)} in 7d</div>
           </div>
           <div class="ver-stat">
             <div class="ver-value">{format_number(top_dictionaries.distinct_dictionaries)}</div>
             <div class="ver-label">Dictionaries with visitors</div>
-            <div class="ver-sub">this month, last month, or the last 7d</div>
+            <div class="ver-sub">in the last 30 days</div>
           </div>
         </div>
         <table class="dict-table">
-          <thead><tr><th>Dictionary</th><th title="TRUE unique visitors this calendar month (month-long union of visitor ids)">Visitors {month_label(top_dictionaries.month)}</th><th title="unique visitors last complete month">{month_label(top_dictionaries.prev_month)}</th><th title="unique visitors, rolling last 7 days">7d</th><th title="distinct sessions/visits over 30d (activity)">Visits 30d</th><th title="anonymous (logged-out) share of this month's visitors ≈ outside public">Anon</th></tr></thead>
+          <thead><tr><th>Dictionary</th><th title="TRUE unique visitors over the rolling last 30 days">Visitors 30d</th><th title="unique visitors last complete month">{month_label(top_dictionaries.prev_month)}</th><th title="unique visitors, rolling last 7 days">7d</th><th title="distinct sessions/visits over 30d (activity)">Visits 30d</th><th title="anonymous (logged-out) share of the last 30 days' visitors ≈ outside public">Anon</th></tr></thead>
           <tbody>
             {#each top_dictionaries.dictionaries as row (row.dictionary_id)}
               <tr>
                 <td class="dict-name">
                   {#if row.url}<a href={`/${row.url}`}>{row.name ?? row.url}</a>{:else}{row.name ?? row.dictionary_id}{/if}
-                  {#if !row.is_public}<span class="priv" title="Private dictionary">🔒</span>{/if}
+                  {#if !row.is_public}<span class="unlisted">(unlisted)</span>{/if}
                 </td>
-                <td class="num"><b>{row.visitors_month ? format_number(row.visitors_month) : '—'}</b></td>
+                <td class="num"><b>{row.visitors_30d ? format_number(row.visitors_30d) : '—'}</b></td>
                 <td class="num">{row.visitors_prev_month ? format_number(row.visitors_prev_month) : '—'}</td>
                 <td class="num">{row.visitors_7d ? format_number(row.visitors_7d) : '—'}</td>
                 <td class="num">{format_number(row.visits_30d)}</td>
-                <td class="num anon">{row.visitors_month ? format_pct(row.anon_visitors_month / row.visitors_month) : '—'}</td>
+                <td class="num anon">{row.visitors_30d ? format_pct(row.anon_visitors_30d / row.visitors_30d) : '—'}</td>
               </tr>
             {/each}
           </tbody>
         </table>
-        <p class="dict-note"><b>Visitors</b> = distinct persistent <code>visitor_id</code>s (one per browser/device, cookieless localStorage) — a true unique count, computed as a UNION over the whole period (NOT daily-distinct "visitor-days"). Monthly figures come from the forever <code>dictionary_monthly_visitors</code> rollup; <b>7d</b> is a live rolling scan; <b>Visits 30d</b> counts sessions (resets per page-load) for activity context. "Visitors" means distinct browsers, not humans (a shared device → one; a person across devices → several). Populating from 2026-07-07 onward (reads low until a month of history builds). Bots excluded. This-month is partial until the month ends.</p>
+        <p class="dict-note"><b>Visitors</b> = distinct persistent <code>visitor_id</code>s (one per browser/device, cookieless localStorage) — a true unique count, computed as a UNION over the whole period (NOT daily-distinct "visitor-days"). <b>30d</b> is a rolling scan across retained logs; the named month is the previous complete calendar month; <b>7d</b> is the shorter rolling view; <b>Visits 30d</b> counts sessions (resets per page-load) for activity context. "Visitors" means distinct browsers, not humans (a shared device → one; a person across devices → several). Populating from 2026-07-07 onward (reads low until 30 days of history builds). Bots excluded.</p>
       {:else}
-        <p class="muted">No dictionary visitors yet. Monthly figures need the retention cron (prod only); every open of a dictionary counts here once it runs.</p>
+        <p class="muted">No dictionary visitors in the last 30 days.</p>
       {/if}
     </section>
   {/if}
@@ -575,7 +575,7 @@
   .dict-table th:not(:first-child) { text-align: right; }
   .dict-name a { color: var(--primary); text-decoration: none; font-weight: 600; }
   .dict-name a:hover { text-decoration: underline; }
-  .priv { font-size: 0.7rem; margin-left: 0.15rem; }
+  .unlisted { margin-left: 0.25rem; color: var(--color-secondary); font-size: 0.72rem; font-style: italic; }
   .anon { color: var(--color-secondary); }
   .dict-note {
     margin: 0.6rem 0 0;

@@ -7,7 +7,7 @@ import process from 'node:process'
 import { insert_client_log } from '$lib/server/insert-client-log'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { build_host_stats, get_log_analytics } from './log-analytics'
-import { _reset_log_archive_db_for_tests } from './log-archive-db'
+import { _reset_log_archive_db_for_tests, open_log_archive_db } from './log-archive-db'
 import { open_logs_db } from './logs-db'
 import { open_test_shared_db } from './shared-db'
 
@@ -28,7 +28,7 @@ afterEach(() => {
   logs_db.close()
 })
 
-function add_log({ day, level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, user_agent = null, app_version = null, stack = null, geo }: {
+function add_log({ day, level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, user_agent = null, app_version = null, stack = null, geo, target_db = logs_db }: {
   day: string
   level?: 'error' | 'warn' | 'info' | 'unhandled_rejection' | 'crash'
   message?: string
@@ -39,8 +39,9 @@ function add_log({ day, level = 'info', message = 'heartbeat', source = 'client'
   app_version?: string | null
   stack?: string | null
   geo?: RequestGeo
+  target_db?: Database.Database
 }): void {
-  insert_client_log({ payload: { level, message, context, user_agent, app_version, stack }, user_id, source, ...(geo ? { geo } : {}), db: logs_db, now: new Date(`${day}T10:00:00.000Z`) })
+  insert_client_log({ payload: { level, message, context, user_agent, app_version, stack }, user_id, source, ...(geo ? { geo } : {}), db: target_db, now: new Date(`${day}T10:00:00.000Z`) })
 }
 
 describe(get_log_analytics, () => {
@@ -68,6 +69,64 @@ describe(get_log_analytics, () => {
     expect(analytics.totals.errors).toBe(1)
     expect(analytics.totals.real_errors).toBe(1)
     expect(analytics.totals.unique_users).toBe(2)
+  })
+
+  test('top dictionaries unions unique visitors over the rolling last 30 days across hot and archive logs', () => {
+    const archive_db = open_log_archive_db(':memory:')
+    try {
+      db.prepare(`
+        INSERT INTO dictionaries (id, name, url, public) VALUES
+          ('d1', 'Dictionary One', 'one', 1),
+          ('d2', 'Dictionary Two', 'two', 0),
+          ('old', 'Previous Month Only', 'old', 1)
+      `).run()
+      db.prepare(`
+        INSERT INTO dictionary_monthly_visitors (month, scope, visitors) VALUES
+          ('2026-05', '__site__', 10),
+          ('2026-05', 'd1', 9),
+          ('2026-05', 'old', 8)
+      `).run()
+
+      // The same browser returns in a second session at the other end of the
+      // window. It remains one visitor across the archive/hot boundary.
+      add_log({ day: '2026-06-01', message: 'session_start', context: { session_id: 's-archive', visitor_id: 'visitor-1' }, target_db: archive_db })
+      add_log({ day: '2026-06-01', message: 'dictionary_opened', context: { session_id: 's-archive', visitor_id: 'visitor-1', dictionary_id: 'd1' }, target_db: archive_db })
+      add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's-return', visitor_id: 'visitor-1' } })
+      add_log({ day: '2026-06-30', message: 'dictionary_opened', context: { session_id: 's-return', visitor_id: 'visitor-1', dictionary_id: 'd1' } })
+
+      add_log({ day: '2026-06-29', message: 'session_start', user_id: 'u1', context: { session_id: 's-signed', visitor_id: 'visitor-2' } })
+      add_log({ day: '2026-06-29', message: 'dictionary_opened', user_id: 'u1', context: { session_id: 's-signed', visitor_id: 'visitor-2', dictionary_id: 'd1' } })
+      add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's-unlisted', visitor_id: 'visitor-3' } })
+      add_log({ day: '2026-06-30', message: 'dictionary_opened', context: { session_id: 's-unlisted', visitor_id: 'visitor-3', dictionary_id: 'd2' } })
+
+      // Thirty-one date labels ago is outside the inclusive Jun 1–30 window.
+      add_log({ day: '2026-05-31', message: 'session_start', context: { session_id: 's-old', visitor_id: 'visitor-old' }, target_db: archive_db })
+      add_log({ day: '2026-05-31', message: 'dictionary_opened', context: { session_id: 's-old', visitor_id: 'visitor-old', dictionary_id: 'old' }, target_db: archive_db })
+
+      const { top_dictionaries } = get_log_analytics({ shared_db: db, logs_db, archive_db, days: 30, now: NOW })
+
+      expect(top_dictionaries.site_visitors_30d).toBe(3)
+      expect(top_dictionaries.site_visitors_prev_month).toBe(10)
+      expect(top_dictionaries.distinct_dictionaries).toBe(2)
+      expect(top_dictionaries.dictionaries).toHaveLength(2)
+      expect(top_dictionaries.dictionaries[0]).toMatchObject({
+        dictionary_id: 'd1',
+        is_public: true,
+        visitors_30d: 2,
+        anon_visitors_30d: 1,
+        visitors_prev_month: 9,
+        visitors_7d: 2,
+      })
+      expect(top_dictionaries.dictionaries[1]).toMatchObject({
+        dictionary_id: 'd2',
+        is_public: false,
+        visitors_30d: 1,
+        anon_visitors_30d: 1,
+      })
+      expect(top_dictionaries.dictionaries.some(row => row.dictionary_id === 'old')).toBeFalsy()
+    } finally {
+      archive_db.close()
+    }
   })
 
   test('boot_health clusters the fresh-viewer boot cascade + computes non-recovery', () => {
@@ -1810,10 +1869,9 @@ describe(get_log_analytics, () => {
           "top_dictionaries": {
             "dictionaries": [],
             "distinct_dictionaries": 0,
-            "month": "2026-06",
             "prev_month": "2026-05",
+            "site_visitors_30d": 3,
             "site_visitors_7d": 3,
-            "site_visitors_month": 0,
             "site_visitors_prev_month": 0,
           },
           "top_events": [

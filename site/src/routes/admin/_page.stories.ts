@@ -16,3 +16,10 @@ const data = {
 export const Default: PageStory<typeof Component> = {
   props: data as never,
 }
+
+export const Level2Admin: PageStory<typeof Component> = {
+  props: {
+    ...data,
+    auth_user: { user: { id: 'admin-2', email: 'livingtongues@gmail.com', name: 'Greg' }, admin_level: 2 },
+  } as never,
+}

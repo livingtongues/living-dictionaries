@@ -34,9 +34,9 @@
     // join too), but admins keep this entry point + unread badge.
     { href: '/chat', label: 'Chat', icon: IconMdiForumOutline },
     // Dev tools — `compact` renders them icon-only on desktop (labels still
-    // hide on mobile, where every link is icon-only anyway). Analytics + Schema
+    // hide on mobile, where every link is icon-only anyway). Health + Schema
     // are Super Admin only (level 3) — raw log/db internals.
-    { href: '/admin/analytics', label: 'Analytics', icon: IconMdiChartLine, compact: true, min_level: 3 },
+    { href: '/admin/analytics', label: 'Analytics', icon: IconMdiChartLine, compact: true, min_level: 2 },
     { href: '/admin/health', label: 'Health', icon: IconMdiHeartPulse, compact: true, min_level: 3 },
     { href: '/admin/schema', label: 'Schema', icon: IconMdiTableCog, compact: true, min_level: 3 },
     { href: '/admin/legal-review', label: 'Legal', icon: IconMdiScaleBalance, compact: true },
