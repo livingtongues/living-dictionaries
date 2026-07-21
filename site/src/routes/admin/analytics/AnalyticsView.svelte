@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types'
-  import { BROWSER_COLORS, country_flag, db_tier_color, DEVICE_META, one_decimal, OS_COLORS, short_day, short_time, USERS_COLOR } from '$lib/analytics/dashboard-format'
+  import { BROWSER_COLORS, country_flag, db_tier_color, DEVICE_META, one_decimal, OS_COLORS, short_time, USERS_COLOR } from '$lib/analytics/dashboard-format'
   import { log_insights } from '$lib/analytics/insights'
   import AtAGlance from '$lib/analytics/AtAGlance.svelte'
   import type { DonutDatum } from '$lib/charts/DonutChart.svelte'
@@ -103,8 +103,6 @@
   const geo = $derived(analytics.geo)
   const area_bars = $derived(geo.areas.map(area => ({ label: `${country_flag(area.country)} ${area.key}`, value: area.sessions })))
 
-  const missing_i18n = $derived(analytics.missing_i18n_keys)
-
   // Per-dictionary unique visitors — rolling 30d + previous month + live 7d.
   const top_dictionaries = $derived(analytics.top_dictionaries)
   const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -113,10 +111,6 @@
     const [, mon] = month.split('-').map(Number)
     return MONTH_NAMES[(mon ?? 1) - 1] ?? month
   }
-
-  const headline = $derived(
-    `${format_number(totals.logs)} logs from ${format_number(totals.unique_users)} users across ${format_number(totals.sessions)} sessions over the last ${analytics.window_days} days.`,
-  )
 </script>
 
 <svelte:head><title>Analytics · Admin</title></svelte:head>
@@ -125,7 +119,6 @@
   <header class="head">
     <h1>Analytics</h1>
     <span class="sub">usage · last {analytics.window_days} days · generated {short_time(analytics.generated_at)}</span>
-    <a class="health-link" href="/admin/health">Site health →</a>
     <div class="audience-toggle" role="group" aria-label="Audience filter">
       <a class="seg" class:active={analytics.audience === 'humans'} href="?audience=humans" data-sveltekit-noscroll>🧑 Humans</a>
       <a class="seg" class:active={analytics.audience === 'bots'} href="?audience=bots" data-sveltekit-noscroll>🤖 Bots</a>
@@ -147,23 +140,11 @@
     {/each}
   </section>
 
-  {#if totals.logs === 0}
-    <p class="empty">No log activity in this window yet. Once real traffic lands the charts below
-      fill in. The nightly rollup keeps history after raw rows are archived.</p>
-  {:else}
-    <p class="headline">{headline}</p>
-  {/if}
-
   <section class="insights">
     <div class="insight">
       <div class="insight-value">{one_decimal(insights.sessions_per_day)}</div>
       <div class="insight-label">Sessions / day</div>
       <div class="insight-sub">avg over {analytics.window_days}d</div>
-    </div>
-    <div class="insight">
-      <div class="insight-value">{insights.busiest_day ? short_day(insights.busiest_day.day) : '—'}</div>
-      <div class="insight-label">Busiest day</div>
-      <div class="insight-sub">{insights.busiest_day ? `${format_number(insights.busiest_day.logs)} logs` : 'no activity yet'}</div>
     </div>
     <div class="insight">
       <div class="insight-value" class:pos={(insights.wow_change ?? 0) >= 0 && insights.wow_change != null} class:neg={(insights.wow_change ?? 0) < 0}>
@@ -179,7 +160,7 @@
     {#if has_traffic}
       <ComboChart series={traffic_series} events={deploy_events} event_icon="⬆" height={200} value_format={format_number} />
     {:else}
-      <p class="muted">No sessions logged yet.</p>
+      <p class="muted">No sessions yet.</p>
     {/if}
   </section>
 
@@ -189,7 +170,7 @@
       {#if route_bars.length}
         <BarChart data={route_bars} format={format_number} label_width={132} />
       {:else}
-        <p class="muted">No navigation logged yet.</p>
+        <p class="muted">No navigation yet.</p>
       {/if}
     </section>
 
@@ -237,9 +218,42 @@
             {/each}
           </tbody>
         </table>
-        <p class="dict-note"><b>Visitors</b> = distinct persistent <code>visitor_id</code>s (one per browser/device, cookieless localStorage) — a true unique count, computed as a UNION over the whole period (NOT daily-distinct "visitor-days"). <b>30d</b> is a rolling scan across retained logs; the named month is the previous complete calendar month; <b>7d</b> is the shorter rolling view; <b>Visits 30d</b> counts sessions (resets per page-load) for activity context. "Visitors" means distinct browsers, not humans (a shared device → one; a person across devices → several). Populating from 2026-07-07 onward (reads low until 30 days of history builds). Bots excluded.</p>
+        <p class="dict-note"><b>Visitors</b> = distinct persistent <code>visitor_id</code>s (one per browser/device, cookieless localStorage) — a true unique count, computed as a UNION over the whole period (NOT daily-distinct "visitor-days"). <b>30d</b> is the rolling last 30 days; the named month is the previous complete calendar month; <b>7d</b> is the shorter rolling view; <b>Visits 30d</b> counts sessions (resets per page-load) for activity context. "Visitors" means distinct browsers, not humans (a shared device → one; a person across devices → several). Populating from 2026-07-07 onward (reads low until 30 days of history builds). Bots excluded.</p>
       {:else}
         <p class="muted">No dictionary visitors in the last 30 days.</p>
+      {/if}
+    </section>
+  {/if}
+
+  {#if !is_bots}
+    <section class="panel">
+      <h2>Browsers &amp; devices <span class="hint">human sessions, last {analytics.window_days}d{capability.bot_sessions > 0 ? ` · ${format_number(capability.bot_sessions)} bot sessions excluded${capability.webdriver_sessions > 0 ? ` (${format_number(capability.webdriver_sessions)} automated)` : ''}` : ''}</span></h2>
+      {#if capability.total_sessions === 0}
+        <p class="muted">No human sessions in window.</p>
+      {:else}
+        {#if capability.below_capability_sessions > 0}
+          <p class="cap-warn">
+            ⚠️ {format_number(capability.below_capability_sessions)} of {format_number(capability.total_sessions)} sessions ({format_pct(below_pct)}) are on a browser that can't run the local-first DB worker (Safari &lt; 15.4) — they fall back to main-thread IndexedDB or SSR.
+          </p>
+        {/if}
+        <div class="dev-block">
+          <div class="block-h">Device</div>
+          <SegmentedBar segments={device_segments} format={format_number} />
+        </div>
+        <div class="grid dev-grid">
+          <div class="dev-block">
+            <div class="block-h">Operating systems <span class="hint">versions in legend</span></div>
+            <DonutChart data={os_rings} nested={false} center_value={format_number(capability.total_sessions)} center_label="sessions" format={format_number} />
+          </div>
+          <div class="dev-block">
+            <div class="block-h">Browsers <span class="hint">by family</span></div>
+            <DonutChart data={browser_rings} format={format_number} />
+          </div>
+        </div>
+        <div class="dev-block">
+          <div class="block-h">Local-DB engine <span class="hint">storage tier the session actually ran</span></div>
+          <SegmentedBar segments={db_tier_segments} format={format_number} />
+        </div>
       {/if}
     </section>
   {/if}
@@ -313,68 +327,6 @@
       {/if}
     </section>
 
-    <section class="panel">
-      <h2>Browsers &amp; devices <span class="hint">human sessions, last {analytics.window_days}d{capability.bot_sessions > 0 ? ` · ${format_number(capability.bot_sessions)} bot sessions excluded${capability.webdriver_sessions > 0 ? ` (${format_number(capability.webdriver_sessions)} automated)` : ''}` : ''}</span></h2>
-      {#if capability.total_sessions === 0}
-        <p class="muted">No human sessions in window.</p>
-      {:else}
-        {#if capability.below_capability_sessions > 0}
-          <p class="cap-warn">
-            ⚠️ {format_number(capability.below_capability_sessions)} of {format_number(capability.total_sessions)} sessions ({format_pct(below_pct)}) are on a browser that can't run the local-first DB worker (Safari &lt; 15.4) — they fall back to main-thread IndexedDB or SSR.
-          </p>
-        {/if}
-        <div class="dev-block">
-          <div class="block-h">Device</div>
-          <SegmentedBar segments={device_segments} format={format_number} />
-        </div>
-        <div class="grid dev-grid">
-          <div class="dev-block">
-            <div class="block-h">Operating systems <span class="hint">versions in legend</span></div>
-            <DonutChart data={os_rings} nested={false} center_value={format_number(capability.total_sessions)} center_label="sessions" format={format_number} />
-          </div>
-          <div class="dev-block">
-            <div class="block-h">Browsers <span class="hint">by family</span></div>
-            <DonutChart data={browser_rings} format={format_number} />
-          </div>
-        </div>
-        <div class="dev-block">
-          <div class="block-h">Local-DB engine <span class="hint">storage tier the session actually ran</span></div>
-          <SegmentedBar segments={db_tier_segments} format={format_number} />
-        </div>
-      {/if}
-    </section>
-
-    <section class="panel">
-      <h2>Missing translations <span class="hint">i18n gap worklist · human sessions · hot window</span></h2>
-      {#if missing_i18n.total === 0}
-        <p class="muted">No missing translation keys in the hot window. 🎉</p>
-      {:else}
-        <div class="ver-split">
-          <div class="ver-stat">
-            <div class="ver-value">{format_number(missing_i18n.distinct_keys)}</div>
-            <div class="ver-label">Missing keys</div>
-            <div class="ver-sub">{format_number(missing_i18n.total)} rows · {format_number(missing_i18n.sessions)} sessions</div>
-          </div>
-          <div class="ver-stat">
-            <div class="ver-label">Fill at <a href="/translate">/translate</a></div>
-            <div class="ver-sub">one row per key per session — a live translation-gap worklist</div>
-          </div>
-        </div>
-        <table class="src-table">
-          <thead><tr><th>Key</th><th>Locales</th><th>Sessions</th><th>Rows</th></tr></thead>
-          <tbody>
-            {#each missing_i18n.keys as row (row.key)}
-              <tr>
-                <td><code>{row.key}</code></td>
-                <td>{row.locales ?? '—'}</td>
-                <td>{format_number(row.sessions)}</td>
-                <td>{format_number(row.count)}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/if}
-    </section>
   {/if}
 </div>
 
@@ -401,12 +353,6 @@
   .sub {
     color: var(--color-secondary);
     font-size: 0.8125rem;
-  }
-  .health-link {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--primary);
-    text-decoration: none;
   }
   .audience-toggle {
     margin-left: auto;
@@ -480,23 +426,14 @@
     line-height: 1.1;
     font-variant-numeric: tabular-nums;
   }
-  td.danger {
-    color: var(--danger);
-  }
   .card .label {
     color: var(--color-secondary);
     font-size: 0.75rem;
     margin-top: 0.25rem;
   }
-  .headline {
-    font-size: 0.9rem;
-    line-height: 1.5;
-    margin: 0;
-    color: var(--color);
-  }
   .insights {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
   }
   .insight {
@@ -566,7 +503,6 @@
     border-bottom: 1px solid var(--border-color);
     vertical-align: top;
   }
-  .src-table { max-width: 22rem; }
   .dict-table {
     max-width: 34rem;
     font-variant-numeric: tabular-nums;
@@ -617,18 +553,6 @@
     font-weight: 400;
   }
   .muted { color: var(--color-secondary); font-size: 0.8125rem; margin: 0; }
-  .empty {
-    color: var(--color-secondary);
-    background: var(--surface);
-    border: 1px dashed var(--border-color);
-    border-radius: 0.625rem;
-    padding: 0.875rem 1rem;
-    font-size: 0.8125rem;
-    margin: 0;
-  }
-  @media (max-width: 64rem) {
-    .insights { grid-template-columns: repeat(2, 1fr); }
-  }
   @media (max-width: 48rem) {
     .cards { grid-template-columns: repeat(2, 1fr); }
     .insights { grid-template-columns: repeat(2, 1fr); }

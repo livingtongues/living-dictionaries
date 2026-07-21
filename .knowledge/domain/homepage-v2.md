@@ -150,8 +150,9 @@ outputs are committed; eslint-ignored as generated).
 - **Stats rounding rule** (Jacob): **dictionaries is shown EXACT + "+"** (a small curated
   number, the "+" nods at gems buried in conlang/glossary); users floors to tens; entries/audio/
   photos/videos floor to hundreds; locale separators + "+" throughout (`round-stat.ts`).
-- **Dictionaries stat = public + unlisted** (`public` col = 1 OR `bucket = 'unlisted'`), computed
-  in `compute_homepage_stats`. It also bakes a separate `public_dictionaries` (public col only) for
+- **Dictionaries stat = public + established unlisted** (`public` col = 1 OR
+  (`bucket = 'unlisted'` AND `entry_count > 5`)), computed in `compute_homepage_stats`. It also
+  bakes a separate `public_dictionaries` (public col only) for
   the footer. Both are build-time baked into `homepage-baked.json` — the footer reads them from
   that JSON too, NOT a per-visitor query (the only per-request DB touch on `/` is the
   single `map_dicts` SELECT for the dots/search). Consolidating `public` col → `bucket` is a

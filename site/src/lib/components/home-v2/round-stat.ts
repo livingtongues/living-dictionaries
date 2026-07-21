@@ -4,7 +4,7 @@ import type { HomepageStats } from './types'
 const TENS_STATS: (keyof HomepageStats)[] = ['users']
 
 export function stat_step(stat: keyof HomepageStats): number {
-  // dictionaries is a small, curated count (public + unlisted) — show it exact,
+  // dictionaries is a small, curated count (public + established unlisted) — show it exact,
   // the trailing "+" already nods at gems buried in the conlang/glossary piles.
   if (stat === 'dictionaries')
     return 1

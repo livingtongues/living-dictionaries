@@ -739,7 +739,8 @@ interface LogAnalyticsOptions {
    * defaults. Default `full` (back-compat — the log-review reader wants everything).
    * - `light` — core summary only (daily/deploys/totals/geo areas/capability/top
    *   events+routes/by_source/event_coverage/error_clusters/pipeline).
-   * - `usage` — light + usage-heavy (api_v1 / top_dictionaries / missing_i18n_keys).
+   * - `usage` — light + usage-heavy (api_v1 / top_dictionaries) and the
+   *   performance/Web Vitals inputs used by the Experience summary.
    * - `diagnostics` — light + diagnostics-heavy (performance / web_vitals / geo
    *   latency / errors_by_version / server_faults / leader+sync health / build
    *   adoption / storage / boot_health / uptime).
@@ -826,6 +827,7 @@ function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, curr
   // core always runs). `light` = neither; each page's tier requests its own half.
   const want_usage = scope === 'usage' || scope === 'full'
   const want_diagnostics = scope === 'diagnostics' || scope === 'full'
+  const want_experience = want_usage || want_diagnostics
   ensure_is_noise_msg(logs_db)
   const window_start = new Date(now.getTime() - (days - 1) * 86_400_000)
   const window_start_day = day_string(window_start)
@@ -885,9 +887,10 @@ function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, curr
   const error_clusters = timed('build_error_clusters', () => build_error_clusters(ctx))
   const unique_users = timed('build_unique_users', () => build_unique_users(ctx))
   const capability = timed('build_capability', () => build_capability({ ctx, area_counts }))
-  // Diagnostics-heavy (health page only) — skipped for the usage/light tiers.
-  const performance = want_diagnostics ? timed('build_performance', () => build_performance({ ctx, daily })) : EMPTY_PERFORMANCE
-  const web_vitals = want_diagnostics ? timed('build_web_vitals', () => build_web_vitals(ctx)) : EMPTY_WEB_VITALS
+  // Performance/Web Vitals also feed Analytics' Experience summary; the other
+  // latency breakdowns remain diagnostics-only. The light tier skips both.
+  const performance = want_experience ? timed('build_performance', () => build_performance({ ctx, daily })) : EMPTY_PERFORMANCE
+  const web_vitals = want_experience ? timed('build_web_vitals', () => build_web_vitals(ctx)) : EMPTY_WEB_VITALS
   const geo_latency = want_diagnostics ? timed('build_geo_latency', () => build_geo_latency(ctx)) : EMPTY_GEO_LATENCY
   // `geo` areas stay core (both pages); only the TTFB/LCP latency splits are diagnostics-gated.
   const geo = build_geo_areas({ area_counts, ttfb_by_country: geo_latency.ttfb_by_country, ttfb_by_distance: geo_latency.ttfb_by_distance, lcp_by_country: geo_latency.lcp_by_country, lcp_by_distance: geo_latency.lcp_by_distance })
@@ -915,7 +918,7 @@ function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, curr
   const api_v1 = want_usage ? timed('build_api_v1', () => build_api_v1_activity(ctx)) : EMPTY_API_V1
   const entry_edits = want_usage ? timed('build_entry_edits', () => build_entry_edit_channels({ ctx, rollup_rows, live_by_day })) : EMPTY_ENTRY_EDITS
   const top_dictionaries = want_usage ? timed('build_top_dictionaries', () => build_top_dictionaries(ctx)) : EMPTY_TOP_DICTIONARIES
-  const missing_i18n_keys = want_usage ? timed('build_missing_i18n', () => build_missing_i18n_keys(ctx)) : EMPTY_MISSING_I18N
+  const missing_i18n_keys = scope === 'full' ? timed('build_missing_i18n', () => build_missing_i18n_keys(ctx)) : EMPTY_MISSING_I18N
   const boot_health = want_diagnostics ? timed('build_boot_health', () => build_boot_health(ctx)) : EMPTY_BOOT_HEALTH
   const uptime = want_diagnostics ? timed('build_uptime', () => build_uptime(ctx)) : EMPTY_UPTIME
 

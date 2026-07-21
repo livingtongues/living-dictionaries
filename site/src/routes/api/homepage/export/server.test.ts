@@ -57,18 +57,20 @@ describe(GET, () => {
     expect(typeof body.generated_at).toBe('string')
   })
 
-  test('dictionaries stat = public + unlisted; public_dictionaries = public only', async () => {
+  test('dictionaries stat = public + unlisted with more than 5 entries', async () => {
     const now = '2026-07-01T00:00:00.000Z'
-    // unlisted bucket (public col 0) counts toward the cube but not the footer number
-    db.prepare(`INSERT INTO dictionaries (id, url, name, public, bucket, entry_count, created_at, updated_at) VALUES ('sora', 'sora', 'Sora', 0, 'unlisted', 50, ?, ?)`).run(now, now)
-    // a conlang bucket counts toward neither
+    // Public dictionaries always count, even before they have meaningful content.
+    db.prepare(`INSERT INTO dictionaries (id, url, name, public, entry_count, created_at, updated_at) VALUES ('new-public', 'new-public', 'New Public', 1, 0, ?, ?)`).run(now, now)
+    // Six entries clears the unlisted threshold; five does not.
+    db.prepare(`INSERT INTO dictionaries (id, url, name, public, bucket, entry_count, created_at, updated_at) VALUES ('sora', 'sora', 'Sora', 0, 'unlisted', 6, ?, ?)`).run(now, now)
+    db.prepare(`INSERT INTO dictionaries (id, url, name, public, bucket, entry_count, created_at, updated_at) VALUES ('shell', 'shell', 'Shell', 0, 'unlisted', 5, ?, ?)`).run(now, now)
     db.prepare(`INSERT INTO dictionaries (id, url, name, public, bucket, entry_count, created_at, updated_at) VALUES ('klingon', 'klingon', 'Klingon', 0, 'conlang', 999, ?, ?)`).run(now, now)
     reset_homepage_stats_cache()
 
     const response = await GET({ request: new Request('http://localhost/api/homepage/export') } as Parameters<typeof GET>[0])
     const body = await response.json()
-    expect(body.stats.dictionaries).toBe(3) // 2 public + 1 unlisted
-    expect(body.stats.public_dictionaries).toBe(2)
+    expect(body.stats.dictionaries).toBe(4) // 3 public + 1 qualifying unlisted
+    expect(body.stats.public_dictionaries).toBe(3)
   })
 
   test('modal snapshot fields ride along (JSON columns parsed, catalog location joined)', async () => {

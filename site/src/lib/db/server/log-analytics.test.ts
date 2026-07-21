@@ -522,6 +522,7 @@ describe(get_log_analytics, () => {
   test('scope gates the heavy page-specific sections while keeping the shared core identical', () => {
     add_log({ day: '2026-06-30', message: 'session_start', user_id: 'u1', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', message: 'search_performed', user_id: 'u1', context: { session_id: 's1' } })
+    add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms: 500 } })
     add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'web_vital', metric: 'LCP', value: 1200 } })
     add_log({ day: '2026-06-30', source: 'server', message: 'v1_entry_created', context: { dictionary_id: 'd1', via: 'api_key' } })
 
@@ -540,9 +541,12 @@ describe(get_log_analytics, () => {
     expect(light.web_vitals).toEqual([])
     expect(light.performance.summary).toEqual([])
 
-    // Usage computes the usage half, skips diagnostics.
+    // Usage computes its own panels plus the Experience summary inputs, while
+    // still skipping the rest of diagnostics and the removed i18n worklist.
     expect(usage.api_v1.total).toBe(1)
-    expect(usage.web_vitals).toEqual([])
+    expect(usage.web_vitals).toHaveLength(1)
+    expect(usage.performance.summary.find(metric => metric.name === 'page_load')).toMatchObject({ count: 1, p50: 500 })
+    expect(usage.missing_i18n_keys.keys).toEqual([])
 
     // Diagnostics computes the diagnostics half, skips usage.
     expect(diagnostics.web_vitals).toHaveLength(1)

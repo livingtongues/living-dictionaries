@@ -11,16 +11,19 @@ import { dictionary_db_path } from './dictionary-db'
  * bake fetch (once per deploy), not live traffic.
  */
 let cached: HomepageStats | null = null
+const MIN_UNLISTED_ENTRIES_FOR_HOMEPAGE = 6
 
 export function compute_homepage_stats({ shared_db }: { shared_db: BetterSqlite3.Database }): HomepageStats {
   if (cached)
     return cached
 
-  // Cube number: the dictionaries we serve — publicly listed (public col = 1)
-  // plus admin-curated 'unlisted' (real dicts, URL-reachable but not listed).
+  // Cube number: every publicly listed dictionary plus established unlisted
+  // projects. Small unlisted shells are covered by the trailing "+".
   const dictionaries = (shared_db.prepare(
-    `SELECT COUNT(*) AS count FROM dictionaries WHERE public = 1 OR bucket = 'unlisted'`,
-  ).get() as { count: number }).count
+    `SELECT COUNT(*) AS count
+     FROM dictionaries
+     WHERE public = 1 OR (bucket = 'unlisted' AND entry_count >= ?)`,
+  ).get(MIN_UNLISTED_ENTRIES_FOR_HOMEPAGE) as { count: number }).count
   const public_dictionaries = (shared_db.prepare(
     'SELECT COUNT(*) AS count FROM dictionaries WHERE public = 1',
   ).get() as { count: number }).count
