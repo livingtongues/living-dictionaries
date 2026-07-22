@@ -32,7 +32,7 @@ try {
   if (!files || typeof files !== 'object' || Object.keys(files).length < 10)
     throw new Error(`Suspicious payload: ${Object.keys(files || {}).length} files`)
   for (const [path, content] of Object.entries(files)) {
-    if (!/^(?:(?:gl|ps|psAbbrev|sd)\/)?\w+\.json$/.test(path))
+    if (!/^(?:(?:gl|ps|psAbbrev|sd)\/)?[\w-]+\.json$/.test(path))
       throw new Error(`Unexpected file path in payload: ${path}`)
     if (path.startsWith('en.') || path.endsWith('/en.json'))
       throw new Error(`Payload tried to overwrite an English file: ${path}`)

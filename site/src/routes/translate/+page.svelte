@@ -101,7 +101,12 @@
   })
 
   afterNavigate(() => {
-    search = page.url.searchParams.get('q') ?? ''
+    // Only re-sync from the URL on real navigations (back/forward, locale switch).
+    // The URL's `q` is trimmed, so syncing while typing would strip a trailing space
+    // and make multi-word searches impossible.
+    const url_query = page.url.searchParams.get('q') ?? ''
+    if (url_query.trim() !== search.trim())
+      search = url_query
     if (active_locale && translate_store.locale !== active_locale)
       void translate_store.load_locale(active_locale)
   })

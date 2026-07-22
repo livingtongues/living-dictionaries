@@ -20,7 +20,7 @@ export function round_stat({ value, stat, locale }: { value: number, stat: keyof
 
 if (import.meta.vitest) {
   test('users floor to tens', () => {
-    expect(round_stat({ value: 5335, stat: 'users' })).toBe('5,330+')
+    expect(round_stat({ value: 1715, stat: 'users' })).toBe('1,710+')
   })
   test('dictionaries shown exact with a trailing +', () => {
     expect(round_stat({ value: 618, stat: 'dictionaries' })).toBe('618+')

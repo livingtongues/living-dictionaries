@@ -74,7 +74,7 @@ export const AI_CONFIDENCE_META: Record<AiConfidence, AiConfidenceMeta> = {
 }
 
 const AI_CONFIDENCE_BY_LOCALE: Record<AiConfidence, string[]> = {
-  confident: ['es', 'fr', 'de', 'pt', 'zh', 'ru', 'hi', 'vi', 'id', 'ms', 'ar', 'he', 'bn'],
+  confident: ['es', 'fr', 'de', 'pt', 'zh-CN', 'zh-TW', 'ru', 'hi', 'vi', 'id', 'ms', 'ar', 'he', 'bn'],
   decent: ['sw'],
   low: ['as', 'or', 'am', 'ha'],
 }

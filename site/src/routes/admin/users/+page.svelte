@@ -132,7 +132,12 @@
 
   let search = $state(page.url.searchParams.get('q') ?? '')
   afterNavigate(() => {
-    search = page.url.searchParams.get('q') ?? ''
+    // Only re-sync from the URL on real navigations (back/forward). The URL's `q` is
+    // trimmed, so syncing while typing would strip a trailing space and make multi-word
+    // searches impossible.
+    const url_query = page.url.searchParams.get('q') ?? ''
+    if (url_query.trim() !== search.trim())
+      search = url_query
   })
 
   const user_filter = $derived(read_choice_param({ search_params: page.url.searchParams, key: 'filter', choices: USER_FILTERS, fallback: 'all' }))

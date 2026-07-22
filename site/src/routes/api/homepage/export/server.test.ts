@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
-import { reset_homepage_stats_cache } from '$lib/db/server/homepage-stats'
+import { LEGACY_TALKING_DICTIONARIES_CONTRIBUTORS, reset_homepage_stats_cache } from '$lib/db/server/homepage-stats'
 import { open_test_shared_db } from '$lib/db/server/shared-db'
 import { GET } from './+server'
 
@@ -43,8 +43,9 @@ describe(GET, () => {
     const response = await GET({ request: new Request('http://localhost/api/homepage/export') } as Parameters<typeof GET>[0])
     expect(response.status).toBe(200)
     const body = await response.json()
-    // users: 2 = the seeded agent@livingdictionaries.app row (initial migration) + u1
-    expect(body.stats).toEqual({ dictionaries: 2, public_dictionaries: 2, entries: 200, audio: 0, photos: 0, videos: 0, users: 2 })
+    // users = distinct contributors (role-holders ∪ entry authors) + legacy offset;
+    // no roles seeded and the per-dict scan is mocked away, so only the offset shows.
+    expect(body.stats).toEqual({ dictionaries: 2, public_dictionaries: 2, entries: 200, audio: 0, photos: 0, videos: 0, users: LEGACY_TALKING_DICTIONARIES_CONTRIBUTORS })
     expect(body.featured_entries).toHaveLength(1)
     expect(body.featured_entries[0]).toMatchObject({
       id: 'fe1',
@@ -71,6 +72,24 @@ describe(GET, () => {
     const body = await response.json()
     expect(body.stats.dictionaries).toBe(4) // 3 public + 1 qualifying unlisted
     expect(body.stats.public_dictionaries).toBe(3)
+  })
+
+  test('contributors = distinct role-holders + legacy offset, not total signups', async () => {
+    const now = '2026-07-01T00:00:00.000Z'
+    // Two extra accounts that never contribute — must NOT inflate the count.
+    for (const id of ['u2', 'u3'])
+      db.prepare(`INSERT INTO users (id, email, name, providers, created_at, updated_at) VALUES (?, ?, 'x', '[]', ?, ?)`).run(id, `${id}@b.com`, now, now)
+    // u1 holds a role on BOTH dicts (must count once); u2 holds one role. u3 holds none.
+    const role = db.prepare(`INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
+    role.run('r1', 'achi', 'u1', 'manager', now, now)
+    role.run('r2', 'gta', 'u1', 'contributor', now, now)
+    role.run('r3', 'achi', 'u2', 'contributor', now, now)
+    reset_homepage_stats_cache()
+
+    const response = await GET({ request: new Request('http://localhost/api/homepage/export') } as Parameters<typeof GET>[0])
+    const body = await response.json()
+    // 2 distinct role-holders (u1, u2) + legacy offset; u3 and the seeded agent don't count.
+    expect(body.stats.users).toBe(2 + LEGACY_TALKING_DICTIONARIES_CONTRIBUTORS)
   })
 
   test('modal snapshot fields ride along (JSON columns parsed, catalog location joined)', async () => {

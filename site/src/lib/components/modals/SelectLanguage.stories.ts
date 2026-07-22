@@ -40,7 +40,7 @@ function make_user({ admin = false }: { admin?: boolean } = {}) {
 const logged_out = new AuthUser()
 
 // Languages that already have an assigned translator — these show NO recruiting prompt.
-const covered = ['es', 'zh', 'ru', 'he', 'hi', 'as']
+const covered = ['es', 'zh-CN', 'ru', 'he', 'hi', 'as']
 
 /** A signed-in visitor browsing in German (uncovered → the row is active AND shows Volunteer). */
 export const SignedIn: Story<typeof Component> = {
