@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { TranslateFilter } from '$lib/translate/constants'
-  import { goto } from '$app/navigation'
+  import { afterNavigate, goto } from '$app/navigation'
   import { page } from '$app/state'
   import { onMount } from 'svelte'
   import Header from '$lib/components/shell/Header.svelte'
@@ -11,6 +11,7 @@
   import { FILTER_LABELS, section_label, TRANSLATE_FILTERS } from '$lib/translate/constants'
   import TranslateRow from '$lib/translate/translate-row.svelte'
   import { translate_store } from '$lib/translate/translate-store.svelte'
+  import { read_choice_param, update_query_params } from '$lib/utils/url-search-params'
   import IconMdiShieldLockOutline from '~icons/mdi/shield-lock-outline'
   import IconMdiTranslate from '~icons/mdi/translate'
 
@@ -18,9 +19,12 @@
   const my_locales = $derived(auth_user.translator_locales)
   const is_admin = $derived(auth_user.admin_level >= 2)
 
-  let active_locale = $state('')
-  let filter = $state<TranslateFilter>('all')
-  let search = $state('')
+  const active_locale = $derived.by(() => {
+    const url_locale = page.url.searchParams.get('locale')
+    return url_locale && my_locales.includes(url_locale) ? url_locale : (my_locales[0] ?? '')
+  })
+  const filter = $derived(read_choice_param({ search_params: page.url.searchParams, key: 'filter', choices: TRANSLATE_FILTERS, fallback: 'all' }))
+  let search = $state(page.url.searchParams.get('q') ?? '')
 
   const rows = $derived(translate_store.rows)
   const counts = $derived({
@@ -60,39 +64,42 @@
     return [...grouped.entries()].map(([id, section_rows]) => ({ id, label: section_label(id), rows: section_rows }))
   })
 
-  function sync_url() {
-    const params = new URLSearchParams()
-    if (active_locale)
-      params.set('locale', active_locale)
-    if (filter !== 'all')
-      params.set('filter', filter)
-    void goto(`?${params}`, { replaceState: true, keepFocus: true, noScroll: true })
+  function navigate_query({ values, replace_state = false }: { values: Record<string, string | null>, replace_state?: boolean }) {
+    const url = update_query_params({
+      url: page.url,
+      values,
+      defaults: { locale: my_locales[0] ?? '', filter: 'all', q: '' },
+    })
+    void goto(url, { replaceState: replace_state, keepFocus: true, noScroll: true })
   }
 
   function pick_locale(locale: string) {
     if (locale === active_locale)
       return
-    active_locale = locale
-    sync_url()
-    void translate_store.load_locale(locale)
+    navigate_query({ values: { locale } })
   }
 
   function pick_filter(next: TranslateFilter) {
-    filter = next
-    sync_url()
+    if (next !== filter)
+      navigate_query({ values: { filter: next } })
+  }
+
+  function set_search(value: string) {
+    search = value
+    navigate_query({ values: { q: value }, replace_state: true })
   }
 
   onMount(() => {
     if (!my_locales.length)
       return
-    const url_filter = page.url.searchParams.get('filter') as TranslateFilter | null
-    if (url_filter && TRANSLATE_FILTERS.includes(url_filter))
-      filter = url_filter
-    const url_locale = page.url.searchParams.get('locale')
-    active_locale = url_locale && my_locales.includes(url_locale) ? url_locale : my_locales[0]
-    void translate_store.load_locale(active_locale)
     if (is_admin)
       void translate_store.refresh_summary()
+  })
+
+  afterNavigate(() => {
+    search = page.url.searchParams.get('q') ?? ''
+    if (active_locale && translate_store.locale !== active_locale)
+      void translate_store.load_locale(active_locale)
   })
 </script>
 
@@ -140,7 +147,7 @@
           </button>
         {/each}
       </div>
-      <input type="search" placeholder="Search keys and text…" bind:value={search} />
+      <input type="search" placeholder="Search keys and text…" value={search} oninput={event => set_search(event.currentTarget.value)} />
     </div>
 
     {#if is_admin}

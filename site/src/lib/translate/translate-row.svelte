@@ -13,6 +13,8 @@
 
   let { row }: Props = $props()
 
+  // This component is keyed by locale + key, so a fresh row intentionally seeds a fresh draft.
+  // svelte-ignore state_referenced_locally
   let draft = $state(row.value ?? '')
   let saving = $state(false)
   let saved_flash = $state(false)
@@ -49,7 +51,7 @@
     }
     grow()
     el.addEventListener('input', grow)
-    return { destroy: () => el.removeEventListener('input', grow) }
+    return () => el.removeEventListener('input', grow)
   }
 </script>
 
@@ -64,7 +66,7 @@
       rows="1"
       placeholder="Translate…"
       bind:value={draft}
-      use:autosize
+      {@attach autosize}
       onblur={save}
       onkeydown={(event) => { if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) (event.target as HTMLTextAreaElement).blur() }}></textarea>
     <div class="meta">
@@ -145,9 +147,10 @@
 
   textarea {
     width: 100%;
-    background: transparent;
-    border: none;
-    padding: 0;
+    background: var(--background);
+    border: 1px solid color-mix(in srgb, var(--color-secondary) 32%, var(--background));
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.5rem;
     font-size: 0.875rem;
     font-family: inherit;
     letter-spacing: inherit;
@@ -155,8 +158,9 @@
     color: inherit;
     resize: none;
     overflow: hidden;
-    min-height: 1.3rem;
+    min-height: 2rem;
     box-shadow: none;
+    transition: border-color var(--transition-time, 150ms), box-shadow var(--transition-time, 150ms), background var(--transition-time, 150ms);
   }
 
   textarea::placeholder {
@@ -166,7 +170,9 @@
 
   textarea:focus {
     outline: none;
-    box-shadow: none;
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 3%, var(--background));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 16%, transparent);
   }
 
   .meta {

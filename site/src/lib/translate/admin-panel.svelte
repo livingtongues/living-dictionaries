@@ -33,11 +33,10 @@
     toast.success(`Emailed ${data.notified.map(person => `${person.name || person.email} (${person.total_pending})`).join(', ')}`)
   }
 
-  function translators_for(locale: string): string {
-    const names = (summary?.translators ?? [])
+  function translators_for(locale: string): string[] {
+    return (summary?.translators ?? [])
       .filter(translator => translator.locales.includes(locale))
       .map(translator => translator.name || translator.email)
-    return names.join(', ')
   }
 </script>
 
@@ -51,13 +50,18 @@
     </div>
     <div class="grid">
       {#each summary.locales as stat (stat.locale)}
-        <button type="button" class={['locale-card', { active: stat.locale === active_locale }]} onclick={() => on_pick_locale(stat.locale)}>
+        {@const translator_names = translators_for(stat.locale)}
+        <button type="button" class={['locale-card', translator_names.length ? 'assigned' : 'unassigned', { active: stat.locale === active_locale }]} onclick={() => on_pick_locale(stat.locale)}>
           <div class="locale-name">{get_locale_display_name(stat.locale)}</div>
           <div class="bar"><div class="fill" style:width="{stat.total ? Math.round((stat.translated / stat.total) * 100) : 0}%"></div></div>
           <div class="counts">
             <span>{stat.translated}/{stat.total}</span>
             {#if stat.flagged}<span class="flagged-count">{stat.flagged} to review</span>{/if}
-            {#if translators_for(stat.locale)}<span class="who">{translators_for(stat.locale)}</span>{/if}
+            {#if translator_names.length}
+              <span class="who">{translator_names.join(', ')}</span>
+            {:else}
+              <span class="no-translator">No translator</span>
+            {/if}
           </div>
         </button>
       {/each}
@@ -98,15 +102,26 @@
   .locale-card {
     text-align: left;
     background: var(--background);
-    border: 1px solid transparent;
+    border: 1px solid var(--border-color);
     border-radius: 0.5rem;
     padding: 0.5rem 0.625rem;
     cursor: pointer;
-    transition: border-color var(--transition-time, 150ms);
+    transition: border-color var(--transition-time, 150ms), background var(--transition-time, 150ms);
+  }
+
+  .locale-card.assigned {
+    background: color-mix(in srgb, var(--success) 6%, var(--background));
+    border-color: color-mix(in srgb, var(--success) 24%, var(--border-color));
+  }
+
+  .locale-card.unassigned {
+    background: color-mix(in srgb, var(--warning) 7%, var(--background));
+    border-color: color-mix(in srgb, var(--warning) 28%, var(--border-color));
   }
 
   .locale-card.active {
     border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
   }
 
   .locale-name {
@@ -147,6 +162,13 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 100%;
+    color: color-mix(in srgb, var(--success) 72%, var(--color));
+    font-weight: 600;
+  }
+
+  .no-translator {
+    color: color-mix(in srgb, var(--warning) 74%, var(--color));
+    font-weight: 600;
   }
 
   .hint {

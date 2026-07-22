@@ -2,8 +2,11 @@
   import type { FeaturedEntry, FeaturedEntryStatus } from '$lib/db/server/featured-entries'
   import type { PageData } from './$types'
   import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
+  import { goto } from '$app/navigation'
+  import { page } from '$app/state'
   import { api_admin_featured_entries_set_status } from '$api/admin/featured-entries/_call'
   import { image_src, url_from_storage_path } from '$lib/utils/media-url'
+  import { read_choice_param, update_query_params } from '$lib/utils/url-search-params'
   import IconMdiPlay from '~icons/mdi/play'
   import IconMdiPause from '~icons/mdi/pause'
   import IconMdiCheck from '~icons/mdi/check'
@@ -20,9 +23,16 @@
   let rows = $derived(data.featured_entries.map(row => ({ ...row })))
 
   type Tab = FeaturedEntryStatus | 'all'
-  const TABS: Tab[] = ['suggested', 'approved', 'rejected', 'all']
-  let tab = $state<Tab>('suggested')
+  const TABS = ['suggested', 'approved', 'rejected', 'all'] as const satisfies readonly Tab[]
+  const tab = $derived(read_choice_param({ search_params: page.url.searchParams, key: 'status', choices: TABS, fallback: 'suggested' }))
   let action_error = $state('')
+
+  function set_tab(next_tab: Tab) {
+    if (next_tab === tab)
+      return
+    const url = update_query_params({ url: page.url, values: { status: next_tab }, defaults: { status: 'suggested' } })
+    void goto(url, { keepFocus: true, noScroll: true })
+  }
 
   const counts = $derived({
     suggested: rows.filter(row => row.status === 'suggested').length,
@@ -79,7 +89,7 @@
 
   <div class="tabs">
     {#each TABS as tab_option (tab_option)}
-      <button type="button" class={['btn btn-sm', { 'tab-active': tab === tab_option }]} onclick={() => tab = tab_option}>
+      <button type="button" class={['btn btn-sm', { 'tab-active': tab === tab_option }]} onclick={() => set_tab(tab_option)}>
         {tab_option} <span class="count">{counts[tab_option]}</span>
       </button>
     {/each}

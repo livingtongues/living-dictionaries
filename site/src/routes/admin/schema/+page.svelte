@@ -9,16 +9,18 @@
   import IconMdiShieldAccountOutline from '~icons/mdi/shield-account-outline'
   import { api_admin_schema } from '$api/admin/schema/_call'
   import { browser } from '$app/environment'
-  import { goto } from '$app/navigation'
+  import { afterNavigate, goto } from '$app/navigation'
   import { page } from '$app/state'
   import { onMount } from 'svelte'
+  import { read_choice_param, update_query_params } from '$lib/utils/url-search-params'
   import PastePane from './paste-pane.svelte'
   import { introspect_admin_local_db } from './local-db-source.svelte.js'
 
   let { data } = $props()
 
-  type SourceTab = 'shared' | 'dictionary' | 'admin' | 'paste'
-  let active_tab = $state<SourceTab>('shared')
+  const SOURCE_TABS = ['shared', 'dictionary', 'admin', 'paste'] as const
+  type SourceTab = typeof SOURCE_TABS[number]
+  const active_tab = $derived<SourceTab>(read_choice_param({ search_params: page.url.searchParams, key: 'source', choices: SOURCE_TABS, fallback: 'shared' }))
 
   interface SchemaGraphProps { schema: SchemaInfo }
   let SchemaGraph = $state<Component<SchemaGraphProps> | null>(null)
@@ -49,20 +51,7 @@
     return sources[active_tab].schema
   })
 
-  // The graph's focused view lives in `?table=`; a focus must never leak across
-  // sources, so switching the source tab drops it.
-  function clear_focus() {
-    if (!browser || !page.url.searchParams.has('table'))
-      return
-    const url = new URL(page.url)
-    url.searchParams.delete('table')
-    void goto(url, { keepFocus: true, noScroll: true, replaceState: true })
-  }
-
-  async function activate(tab: SourceTab) {
-    if (tab !== active_tab)
-      clear_focus()
-    active_tab = tab
+  async function load_source(tab: SourceTab) {
     if (tab === 'paste' || !browser)
       return
     const state = sources[tab]
@@ -89,8 +78,22 @@
     }
   }
 
+  function activate(tab: SourceTab) {
+    if (tab === active_tab)
+      return
+    const url = update_query_params({
+      url: page.url,
+      values: { source: tab, table: null },
+      defaults: { source: 'shared' },
+    })
+    void goto(url, { keepFocus: true, noScroll: true })
+  }
+
+  afterNavigate(() => {
+    void load_source(active_tab)
+  })
+
   onMount(() => {
-    void activate('shared')
     load_graph()
   })
 </script>

@@ -38,7 +38,7 @@ translate_store.summary = {
     { locale: 'ha', total: 981, translated: 0, flagged: 0, missing: 981 },
   ],
   translators: [
-    { user_id: 'u-tina', name: 'Tina Translator', email: 'tina@example.com', locales: ['es'] },
+    { user_id: 'u-tina', name: 'Tina Translator', email: 'tina@example.com', locales: ['es', 'fr'] },
     { user_id: 'u-raj', name: 'Raj', email: 'raj@example.com', locales: ['hi'] },
   ],
 }
@@ -71,14 +71,12 @@ export const shared_meta: StoryMeta = {
 
 /** A translator assigned es + fr: locale select, filter chips, mixed row states (human/missing/AI-flagged/en-changed). */
 export const Translator: PageStory<typeof Component> = {
-  csr: true,
   viewports: [{ width: 1000, height: 720 }, { width: 375, height: 720 }],
   page_data: { auth_user: user({ translator_locales: ['es', 'fr'] }), t },
 }
 
 /** Admin view: progress panel with per-locale cards + Notify button above the editor. */
 export const Admin: PageStory<typeof Component> = {
-  csr: true,
   viewports: [{ width: 1000, height: 760 }],
   page_data: { auth_user: user({ admin_level: 3, translator_locales: ['es', 'fr', 'hi', 'ha'] }), t },
 }

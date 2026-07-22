@@ -5,7 +5,7 @@
   import IconMdiMagnify from '~icons/mdi/magnify'
   import IconMdiMenuDown from '~icons/mdi/menu-down'
   import IconMdiMenuUp from '~icons/mdi/menu-up'
-  import { goto } from '$app/navigation'
+  import { afterNavigate, goto } from '$app/navigation'
   import { page } from '$app/state'
   import Pagination from '$lib/components/ui/Pagination.svelte'
   import type { DictionaryBucket } from '$lib/constants'
@@ -13,13 +13,18 @@
   import { fill_remaining_height } from '$lib/utils/fill-remaining-height'
   import { format_date } from '$lib/utils/format-relative-time'
   import { score_record } from '$lib/utils/fuzzy-score'
+  import { read_choice_param, read_positive_int_param, update_query_params } from '$lib/utils/url-search-params'
   import DictionaryRow from './DictionaryRow.svelte'
 
   let { data } = $props()
   const db = $derived(data.db)
 
-  type Filter = DictionaryBucket | 'unclassified'
-  type SortKey = 'name' | 'public' | 'entry_count' | 'managers' | 'contributors' | 'iso_639_3' | 'glottocode' | 'location' | 'created_at' | 'updated_at'
+  const FILTERS = ['public', 'unlisted', 'conlang', 'glossary', 'delete', 'secure', 'unclassified'] as const satisfies readonly (DictionaryBucket | 'unclassified')[]
+  type Filter = typeof FILTERS[number]
+  const SORT_KEYS = ['name', 'public', 'entry_count', 'managers', 'contributors', 'iso_639_3', 'glottocode', 'location', 'created_at', 'updated_at'] as const
+  type SortKey = typeof SORT_KEYS[number]
+  const SORT_DIRECTIONS = ['asc', 'desc'] as const
+  const URL_DEFAULTS = { filter: 'public', q: '', sort: 'name', dir: 'asc', page: 1 } as const
 
   interface Editor { role_id: string, user_id: string, name: string, email: string | null }
 
@@ -70,22 +75,34 @@
     return tally
   })
 
-  let active_filter = $state<Filter>((page.url.searchParams.get('filter') as Filter) ?? 'public')
-  function set_filter(filter: Filter) {
-    active_filter = filter
-    try {
-      void goto(`?filter=${filter}`, { keepFocus: true, noScroll: true, replaceState: true })
-    } catch {
-    // svelte-look story harness has no router
-    }
+  const active_filter = $derived(read_choice_param({ search_params: page.url.searchParams, key: 'filter', choices: FILTERS, fallback: 'public' }))
+
+  function navigate_query({ values, replace_state = false }: { values: Record<string, string | number | null>, replace_state?: boolean }) {
+    const url = update_query_params({ url: page.url, values, defaults: URL_DEFAULTS })
+    void goto(url, { keepFocus: true, noScroll: true, replaceState: replace_state })
   }
 
-  let search = $state(page.url.searchParams.get('search') ?? '')
-  let sort_key = $state<SortKey>('name')
-  let sort_desc = $state(false)
+  function set_filter(filter: Filter) {
+    navigate_query({ values: { filter, page: null } })
+  }
+
+  let search = $state(page.url.searchParams.get('q') ?? page.url.searchParams.get('search') ?? '')
+  afterNavigate(() => {
+    search = page.url.searchParams.get('q') ?? page.url.searchParams.get('search') ?? ''
+  })
+
+  const sort_key = $derived(read_choice_param({ search_params: page.url.searchParams, key: 'sort', choices: SORT_KEYS, fallback: 'name' }))
+  const sort_direction = $derived(read_choice_param({ search_params: page.url.searchParams, key: 'dir', choices: SORT_DIRECTIONS, fallback: 'asc' }))
+  const sort_desc = $derived(sort_direction === 'desc')
+
   function set_sort(key: SortKey) {
-    if (sort_key === key) sort_desc = !sort_desc
-    else { sort_key = key; sort_desc = key !== 'name' }
+    const next_desc = sort_key === key ? !sort_desc : key !== 'name'
+    navigate_query({ values: { sort: key, dir: next_desc ? 'desc' : 'asc', page: null }, replace_state: true })
+  }
+
+  function set_search(value: string) {
+    search = value
+    navigate_query({ values: { q: value, search: null, page: null }, replace_state: true })
   }
 
   const search_query = $derived(search.trim())
@@ -137,15 +154,9 @@
   })
 
   const PAGE_SIZE = 100
-  let current_page = $state(1)
-  // Reset to the first page whenever the filtered/sorted set changes underneath us.
-  $effect(() => {
-    void search_query
-    void active_filter
-    void sort_key
-    void sort_desc
-    current_page = 1
-  })
+  const requested_page = $derived(read_positive_int_param({ search_params: page.url.searchParams, key: 'page' }))
+  const page_count = $derived(Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)))
+  const current_page = $derived(Math.min(requested_page, page_count))
   const rendered = $derived(filtered.slice((current_page - 1) * PAGE_SIZE, current_page * PAGE_SIZE))
 
   async function on_change() {
@@ -187,15 +198,7 @@
     setTimeout(() => node.focus(), 15)
   }
 
-  const pills: { key: Filter, label: string }[] = [
-    { key: 'public', label: 'public' },
-    { key: 'unlisted', label: 'unlisted' },
-    { key: 'conlang', label: 'conlang' },
-    { key: 'glossary', label: 'glossary' },
-    { key: 'delete', label: 'delete' },
-    { key: 'secure', label: 'secure' },
-    { key: 'unclassified', label: 'unclassified' },
-  ]
+  const pills: { key: Filter, label: string }[] = FILTERS.map(key => ({ key, label: key }))
 
   interface Col { key?: SortKey, label: string, align?: 'right' }
   const columns: Col[] = [
@@ -243,7 +246,7 @@
 
 <div class="search-wrap">
   <IconMdiMagnify class="search-icon" />
-  <input type="search" placeholder="Search name, id, manager…" bind:value={search} use:autofocus class="search-input" />
+  <input type="search" placeholder="Search name, id, manager…" value={search} oninput={event => set_search(event.currentTarget.value)} {@attach autofocus} class="search-input" />
 </div>
 
 {#if loading}
@@ -298,7 +301,7 @@
     </table>
   </div>
 
-  <Pagination page={current_page} page_size={PAGE_SIZE} total={filtered.length} noun="dictionaries" on_change={page => current_page = page} />
+  <Pagination page={current_page} page_size={PAGE_SIZE} total={filtered.length} noun="dictionaries" on_change={page_number => navigate_query({ values: { page: page_number } })} />
 {/if}
 
 <style>

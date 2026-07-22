@@ -7,35 +7,43 @@
   import IconMdiMagnify from '~icons/mdi/magnify'
   import IconMdiMenuDown from '~icons/mdi/menu-down'
   import IconMdiMenuUp from '~icons/mdi/menu-up'
+  import { afterNavigate, goto } from '$app/navigation'
+  import { page } from '$app/state'
   import type { EffectiveAdminLevel } from '$lib/admins'
   import AdminBadge from '$lib/admin/AdminBadge.svelte'
   import DictionaryPickerModal from '$lib/admin/DictionaryPickerModal.svelte'
   import Pagination from '$lib/components/ui/Pagination.svelte'
+  import TranslatorBadge from '$lib/translate/translator-badge.svelte'
+  import { translate_store } from '$lib/translate/translate-store.svelte'
   import { get_admin_level, has_super_manager_role } from '$lib/admins'
   import { fill_remaining_height } from '$lib/utils/fill-remaining-height'
   import { download_as_csv } from '$lib/utils/csv'
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
   import { score_record } from '$lib/utils/fuzzy-score'
+  import { read_choice_param, read_positive_int_param, update_query_params } from '$lib/utils/url-search-params'
   import { api_admin_user_unsubscribe } from '../../api/admin/users/[id]/unsubscribe/_call'
   import { api_dictionaries_id_roles_post } from '../../api/dictionaries/[id]/roles/_call'
-  import { api_translate_summary } from '../../api/translate/summary/_call'
 
   type DictionaryRole = 'manager' | 'contributor'
+  const USER_FILTERS = ['all', 'admins', 'active_30', 'unsubscribed', 'with_roles', 'translators'] as const
+  type UserFilter = typeof USER_FILTERS[number]
+  const SORT_KEYS = ['name', 'email', 'roles', 'threads', 'last_msg', 'last_visit', 'joined', 'unsub'] as const
+  type SortKey = typeof SORT_KEYS[number]
+  const SORT_DIRECTIONS = ['asc', 'desc'] as const
+  const URL_DEFAULTS = { filter: 'all', q: '', sort: 'last_visit', dir: 'desc', page: 1 } as const
 
   let { data } = $props()
   const db = $derived(data.db)
 
   // `translator_languages` is server-only (never synced to admin clients), so the
   // translator roster comes from the admin-only /translate summary endpoint.
-  let translator_user_ids = $state<Set<string>>(new Set())
   onMount(async () => {
-    const { data: summary } = await api_translate_summary()
-    if (summary)
-      translator_user_ids = new Set(summary.translators.map(translator => translator.user_id))
+    await translate_store.refresh_summary()
   })
-
-  type UserFilter = 'all' | 'admins' | 'active_30' | 'unsubscribed' | 'with_roles' | 'translators'
-  type SortKey = 'name' | 'email' | 'roles' | 'threads' | 'last_msg' | 'last_visit' | 'joined' | 'unsub'
+  const translator_locales_by_user_id = $derived<Record<string, string[]>>(Object.fromEntries(
+    (translate_store.summary?.translators ?? []).map(translator => [translator.user_id, translator.locales]),
+  ))
+  const translator_count = $derived(translate_store.summary?.translators.length ?? 0)
 
   const users_query = $derived(db?.users.query({ order_by: 'COALESCE(updated_at, created_at) DESC', limit: 9999 }))
   const aliases_query = $derived(db?.email_aliases.query({ limit: 9999 }))
@@ -122,19 +130,34 @@
     return { total, unsubscribed, active_30, with_roles, admins }
   })
 
-  let search = $state('')
-  let user_filter = $state<UserFilter>('all')
-  let sort_key = $state<SortKey>('last_visit')
-  let sort_desc = $state(true)
+  let search = $state(page.url.searchParams.get('q') ?? '')
+  afterNavigate(() => {
+    search = page.url.searchParams.get('q') ?? ''
+  })
+
+  const user_filter = $derived(read_choice_param({ search_params: page.url.searchParams, key: 'filter', choices: USER_FILTERS, fallback: 'all' }))
+  const sort_key = $derived(read_choice_param({ search_params: page.url.searchParams, key: 'sort', choices: SORT_KEYS, fallback: 'last_visit' }))
+  const sort_direction = $derived(read_choice_param({ search_params: page.url.searchParams, key: 'dir', choices: SORT_DIRECTIONS, fallback: 'desc' }))
+  const sort_desc = $derived(sort_direction === 'desc')
+
+  function navigate_query({ values, replace_state = false }: { values: Record<string, string | number | null>, replace_state?: boolean }) {
+    const url = update_query_params({ url: page.url, values, defaults: URL_DEFAULTS })
+    void goto(url, { keepFocus: true, noScroll: true, replaceState: replace_state })
+  }
 
   function toggle_filter(target: UserFilter) {
-    if (target === 'all') user_filter = 'all'
-    else user_filter = user_filter === target ? 'all' : target
+    const next_filter = target === 'all' || user_filter === target ? 'all' : target
+    navigate_query({ values: { filter: next_filter, page: null } })
   }
 
   function set_sort(key: SortKey) {
-    if (sort_key === key) sort_desc = !sort_desc
-    else { sort_key = key; sort_desc = true }
+    const next_desc = sort_key === key ? !sort_desc : true
+    navigate_query({ values: { sort: key, dir: next_desc ? 'desc' : 'asc', page: null }, replace_state: true })
+  }
+
+  function set_search(value: string) {
+    search = value
+    navigate_query({ values: { q: value, page: null }, replace_state: true })
   }
 
   interface FilterPill { key: UserFilter, label: string, count: number }
@@ -143,7 +166,7 @@
     { key: 'admins', label: 'admins', count: summary.admins },
     { key: 'active_30', label: 'active last 30 days', count: summary.active_30 },
     { key: 'with_roles', label: 'with dictionary roles', count: summary.with_roles },
-    { key: 'translators', label: 'translators', count: translator_user_ids.size },
+    { key: 'translators', label: 'translators', count: translator_count },
     { key: 'unsubscribed', label: 'unsubscribed', count: summary.unsubscribed },
   ])
 
@@ -177,7 +200,7 @@
       if (user_filter === 'active_30' && !is_active_last_30_days(user.last_visit_at)) continue
       if (user_filter === 'with_roles' && roles.total === 0) continue
       if (user_filter === 'admins' && admin_level === null) continue
-      if (user_filter === 'translators' && !translator_user_ids.has(user.id)) continue
+      if (user_filter === 'translators' && !translator_locales_by_user_id[user.id]) continue
 
       let score = 0
       if (search_active) {
@@ -312,15 +335,9 @@
   }
 
   const PAGE_SIZE = 100
-  let current_page = $state(1)
-  // Reset to the first page whenever the filtered/sorted set changes underneath us.
-  $effect(() => {
-    void search_query
-    void user_filter
-    void sort_key
-    void sort_desc
-    current_page = 1
-  })
+  const requested_page = $derived(read_positive_int_param({ search_params: page.url.searchParams, key: 'page' }))
+  const page_count = $derived(Math.max(1, Math.ceil(rows.length / PAGE_SIZE)))
+  const current_page = $derived(Math.min(requested_page, page_count))
   const rendered_rows = $derived(rows.slice((current_page - 1) * PAGE_SIZE, current_page * PAGE_SIZE))
 
   function autofocus(node: HTMLInputElement) {
@@ -366,8 +383,9 @@
   <input
     type="search"
     placeholder="Search name, email, alias…"
-    bind:value={search}
-    use:autofocus
+    value={search}
+    oninput={event => set_search(event.currentTarget.value)}
+    {@attach autofocus}
     class="search-input" />
 </div>
 
@@ -411,6 +429,9 @@
                 </a>
                 {#if row_admin_level !== null}
                   <AdminBadge level={row_admin_level} />
+                {/if}
+                {#if translator_locales_by_user_id[row.id]?.length}
+                  <TranslatorBadge locales={translator_locales_by_user_id[row.id]} />
                 {/if}
               </div>
             </td>
@@ -484,7 +505,7 @@
     </table>
   </div>
 
-  <Pagination page={current_page} page_size={PAGE_SIZE} total={rows.length} noun="users" on_change={page => current_page = page} />
+  <Pagination page={current_page} page_size={PAGE_SIZE} total={rows.length} noun="users" on_change={page_number => navigate_query({ values: { page: page_number } })} />
 {/if}
 
 {#if add_target}
@@ -668,6 +689,7 @@
   .name-row {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 0.375rem;
     min-width: 0;
   }

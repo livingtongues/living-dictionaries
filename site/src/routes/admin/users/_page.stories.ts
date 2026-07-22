@@ -1,5 +1,6 @@
 import type { PageStory, StoryMeta } from 'svelte-look'
 import type Component from './+page.svelte'
+import { translate_store } from '$lib/translate/translate-store.svelte'
 
 export const shared_meta: StoryMeta = {
   viewports: [{ width: 1100, height: 600 }],
@@ -22,6 +23,13 @@ const users = [
   { id: 'user-1', email: 'maria@example.com', name: 'Maria Lopez', roles: ['super_manager'], unsubscribed_from_emails: null, last_visit_at: '2026-05-20T09:00:00Z', created_at: '2025-03-02T00:00:00Z', updated_at: '2026-05-20T09:00:00Z' },
   { id: 'user-2', email: 'tomas@example.com', name: 'Tomás Núñez', roles: null, unsubscribed_from_emails: '2026-04-01T00:00:00Z', last_visit_at: '2026-02-10T09:00:00Z', created_at: '2025-06-20T00:00:00Z', updated_at: '2026-02-10T09:00:00Z' },
 ]
+
+translate_store.summary = {
+  locales: [],
+  translators: [
+    { user_id: 'user-1', name: 'Maria Lopez', email: 'maria@example.com', locales: ['es', 'fr'] },
+  ],
+}
 
 const dictionaries = [
   { id: 'dict-1', name: 'Kalanga' },
