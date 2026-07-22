@@ -1,4 +1,35 @@
-import { make_additive_migration_resumable } from './dict-instance'
+import { make_additive_migration_resumable, poisoned_file_recovery_decision } from './dict-instance'
+
+describe(poisoned_file_recovery_decision, () => {
+  test('replaces a viewer\'s existing poisoned file (the recoverable case)', () => {
+    expect(poisoned_file_recovery_decision({ file_existed: true, has_editor_role: false, already_attempted: false }))
+      .toEqual({ replace: true, reason: 'viewer_replace' })
+  })
+
+  test('PRESERVES an editor\'s existing file — un-pushed writes cannot be proven absent', () => {
+    expect(poisoned_file_recovery_decision({ file_existed: true, has_editor_role: true, already_attempted: false }))
+      .toEqual({ replace: false, reason: 'editor_preserve' })
+  })
+
+  test('never replaces a freshly-fetched file (failure there is environmental, not a poisoned file)', () => {
+    expect(poisoned_file_recovery_decision({ file_existed: false, has_editor_role: false, already_attempted: false }))
+      .toEqual({ replace: false, reason: 'not_existing' })
+    // an editor with no prior file is likewise not eligible
+    expect(poisoned_file_recovery_decision({ file_existed: false, has_editor_role: true, already_attempted: false }))
+      .toEqual({ replace: false, reason: 'not_existing' })
+  })
+
+  test('bounds to once per worker lifetime — a second attempt is refused', () => {
+    expect(poisoned_file_recovery_decision({ file_existed: true, has_editor_role: false, already_attempted: true }))
+      .toEqual({ replace: false, reason: 'already_attempted' })
+  })
+
+  test('editor gate takes precedence over the once-per-lifetime bound', () => {
+    // even on the first attempt an editor is never eligible
+    expect(poisoned_file_recovery_decision({ file_existed: true, has_editor_role: true, already_attempted: true }))
+      .toEqual({ replace: false, reason: 'editor_preserve' })
+  })
+})
 
 describe(make_additive_migration_resumable, () => {
   test('repairs a partially applied additive migration in place', async () => {

@@ -16,7 +16,7 @@ active) + `i18n_translations` (UNIQUE (key_id, locale); `source` 'import'|'human
 
 ## 0. Safety
 
-- `~/code/vps-setup/bin/backup-vps-db living` if today's cron backup hasn't run yet (check `mcli ls r2/backup/sqlite/living/`).
+- `~/code/vps-setup/bin/backup-vps-db living` if today's cron backup hasn't run yet (check `mcli ls r2/backups-rolling/db/living/`).
 - All prod access rides the backup-vps-db pattern: `ssh living "docker exec sveltekit_blue node -e \"...\""` with better-sqlite3 opening `/data/shared.db` (WAL-safe). For anything beyond a trivial one-liner, write a script locally, `scp` it to the VPS, and `docker exec node /tmp/...` it (quoting sanity).
 - For a local dev run instead of prod, open `site/.data/shared.db` directly with `site/node_modules/better-sqlite3`.
 

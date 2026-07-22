@@ -98,25 +98,14 @@ proposals against this lens.
   first concrete instance of the plain-language directive above.
 
 ## Open proposals
-- **★ NEW — Fold cross-browser stale-bundle transients into `KNOWN_NOISE_PATTERNS`** *(ported from
-  tutor 07-08 candidate · filed 2026-07-15 · re-confirmed 4 rows on 2026-07-16 — grounded; verified NOT present).*
-  `classify-error.ts` already folds out Chrome's `Failed to fetch dynamically imported module`, but not
-  the identical stale-bundle-after-deploy transient in other engines' wording: **`Importing a module
-  script failed.`** (Safari/Firefox — 2 rows 07-15, 2 rows 07-16) and **`Unable to preload CSS`** (Vite's
-  `preloadError` prefix — tutor's 07-08 add; 2 rows 07-16). Same cause, same benign class; adding the two
-  strings keeps the real-error headline honest across browsers. One-line each. *(Skip bare `Failed to
-  fetch` / `Network error` — a real user's network failure shares those; fold via `bot_pct` instead.)*
-  **Build-next.**
-- **★ NEW — Fold the null-session zombie `sync_failed`/`leader_boot_failed` storm out of the
-  `real_errors` headline** *(filed 2026-07-16 — grounded; the metric is ~100× the true user-facing count).*
-  The forever `real_errors` rollup reads ~1,600–2,000/day but the genuine user-facing error count is a
-  handful — the bulk is ONE forgotten-laptop `sync_failed` zombie tab (~1,384/day, `session_id IS NULL`)
-  plus anon/bot `leader_boot_failed`, none of which `classify-error.ts` catches. Narrow, safe fix: in the
-  `real_errors` predicate (`is_noise_error_message` / the rollup), exclude `sync_failed` +
-  `leader_boot_failed` rows where **`session_id IS NULL`** (the zombie/bot signature). Keeps *real-session*
-  sync failures fully visible — just stops one dead tab from tripling the metric. Metric-honesty, aligned
-  with LD's known-noise lead; **NOT** a wedged-client watch panel (declined 07-14). Verified today: the
-  classifier folds Chrome dynamic-import / WebGL / `Script error.` / `aborted` but none of these families.
+- ✅ **SHIPPED 2026-07-22 (`d6871c60`) — Fold cross-browser stale-bundle transients into
+  `KNOWN_NOISE_PATTERNS`.** `classify-error.ts:24-26` now folds all three engines' wording:
+  `Failed to fetch dynamically imported module` (Chrome) + **`Importing a module script failed.`**
+  (Safari/Firefox) + **`Unable to preload CSS`** (Vite `preloadError`). Don't re-raise.
+- ✅ **SHIPPED 2026-07-22 (`d6871c60`) — Fold the null-session zombie `sync_failed`/`leader_boot_failed`
+  storm out of the `real_errors` headline.** `log-analytics.ts:1218` rollup now carries
+  `AND NOT (session_id IS NULL AND message IN ('sync_failed','leader_boot_failed'))`. The de-noised trend
+  confirms the payoff — genuine errors ~30-50/day vs the old ~1,600-2,000/day raw headline. Don't re-raise.
 - **★ NEW — Persist `/admin/analytics` compute cost as a trend** *(ported from tutor 07-15 green-night
   sweep · filed 2026-07-16 — LD has the identical ephemeral pattern; verified NOT present).* LD's
   `log-analytics.ts:750` `timed()` logs `console.log('[profile] <label>: <ms>ms')` into throwaway

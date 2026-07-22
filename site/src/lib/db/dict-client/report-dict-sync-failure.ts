@@ -209,6 +209,34 @@ export function report_dict_self_healed({ dict_id, reason, flushed_push }: {
 }
 
 /**
+ * Ship a "replaced a viewer's poisoned OPFS file from a fresh snapshot" marker
+ * (`dict_boot_file_replaced`) — the persisted file failed to open/migrate for a
+ * VIEWER boot (no local writes to lose), so `dict-instance.ts` dropped it and
+ * re-fetched rather than dead-ending into the re-election loop. THE row to look
+ * for when verifying the 2026-07-22 iOS `sqlite3_open_v2` recovery actually ran
+ * in the wild. A row here followed by a healthy `dict_boot` = a real recovery;
+ * a row here followed by `dict_boot_recovery_exhausted` = the environment (not
+ * just the file) is broken. `warn` — a recovered degradation, not an error.
+ */
+export function report_dict_file_replaced({ dict_id, boot_message }: { dict_id: string, boot_message: string }): void {
+  try {
+    void api_log({
+      entries: [{
+        level: 'warn',
+        message: 'dict_boot_file_replaced',
+        client_time: new Date().toISOString(),
+        user_agent: safe_user_agent(),
+        platform: 'web',
+        app_version: version ?? null,
+        context: { worker: true, engine: 'dict', dict_id, boot_message, session_id: worker_session_id ?? undefined },
+      }],
+    })
+  } catch {
+    // Never let telemetry break the recovery path.
+  }
+}
+
+/**
  * Ship the completed dict-DB boot as a `perf` row (`context.name = 'dict_boot'`)
  * — the one segment of the homepage→dictionary journey that was previously only
  * inferred from SPA `navigation` timings (2026-07-10 review, coverage gap B1).

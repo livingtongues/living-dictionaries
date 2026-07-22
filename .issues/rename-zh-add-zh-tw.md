@@ -45,7 +45,20 @@ fill-translations policy.
       clean, eslint 0 errors, svelte-look switcher screenshots (简体中文 + 繁體中文, light/dark),
       live SSR `?lang=zh-CN`→菜单/登录/关于 vs `?lang=zh-TW`→選單/登入/關於/建立.
 
-## PROD rollout (AWAIT Jacob's "go" — do NOT push before)
+## PROD rollout — ✅ DONE (2026-07-22)
+- ✅ Jacob committed+pushed the code; deploy ran the boot migration → prod zh renamed to zh-CN (1213 rows).
+- ✅ Backup taken (`r2/backups-rolling/db/living/2026-07-22T10-00-16Z.tar.zst`) — note: backups live
+  at `r2/backups-rolling/db/<host>/`, NOT the stale `r2/backup/sqlite/` path (fixed in the
+  fill-translations command).
+- ✅ Filled prod `/data/shared.db`: 1192 zh-TW rows, all `source='ai', needs_review='ai'` (1 stale
+  key skipped). Ran via `ssh living "docker exec -i sveltekit_blue node" < fill.mjs` (stdin so
+  better-sqlite3 resolves from the app dir) + `/tmp/zh-tw-values.json` docker cp'd in.
+- ✅ Live verified: `?lang=zh-CN`→菜单/登录/关于, `?lang=zh-TW`→選單/登入/關於/建立. Temp artifacts cleaned.
+- Note: `zh-CN`=1213 vs `zh-TW`=1192 — the 21 gap is zh-CN rows for removed/inactive keys (not
+  exported/shown); every ACTIVE key with Simplified now has Traditional parity.
+- /translate "Notify translators" button is safe to press to alert zh-TW reviewers.
+
+## (historical) PROD rollout plan — executed above
 Tooling: `ssh living` works from mustang; active container `sveltekit_blue`.
 1. `~/code/vps-setup/bin/backup-vps-db living` if today's cron backup hasn't run.
 2. Apply rename + zh-TW fill to prod `/data/shared.db` (rename is idempotent w/ the boot migration;

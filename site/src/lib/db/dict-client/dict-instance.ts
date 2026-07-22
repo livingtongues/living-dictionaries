@@ -7,7 +7,7 @@ import { dispatch_dict_write } from './dict-writes'
 import { evict_if_over_budget, touch_dict } from './opfs-lru'
 import { fetch_dict_snapshot } from './fetch-snapshot'
 import { open_memory_connection } from './memory-connection'
-import { report_dict_boot, report_dict_self_healed, report_dict_storage_reopened, report_dict_sync_halted, set_dict_log_session } from './report-dict-sync-failure'
+import { report_dict_boot, report_dict_file_replaced, report_dict_self_healed, report_dict_storage_reopened, report_dict_sync_halted, set_dict_log_session } from './report-dict-sync-failure'
 import { delete_opfs_db_file, open_opfs_connection, opfs_file_exists, write_opfs_db_file } from './worker/opfs-connection'
 import { DICT_DB_OPFS_PREFIX } from '$lib/constants'
 
@@ -53,6 +53,44 @@ import { DICT_DB_OPFS_PREFIX } from '$lib/constants'
  */
 export const BOOT_STRATEGY = 'blocking_snapshot_boot_with_idle_watchdog'
 
+export type PoisonedFileRecoveryReason
+  = 'not_existing' | 'editor_preserve' | 'already_attempted' | 'viewer_replace'
+
+/**
+ * Decide whether an EXISTING per-dict OPFS file that failed to open (or migrate)
+ * during boot may be dropped and re-fetched from a fresh snapshot, instead of
+ * dead-ending the boot into the infinite re-election loop that leaves a user
+ * locked out of that one dictionary for the session (the 2026-07-22 iOS
+ * `sqlite3_open_v2` finding).
+ *
+ * The ONLY provably-lossless case is a VIEWER boot: a viewer never writes, so
+ * its persisted file holds nothing but the snapshot plus server pulls — all
+ * server-authoritative and losslessly re-downloadable. An EDITOR's file may
+ * hold un-pushed local writes, and an unopenable file cannot be probed for them
+ * (that check lives INSIDE the file), so preservation wins and the editor stays
+ * refused exactly as before. Bounded to once per worker lifetime so a broken
+ * environment (a bad snapshot, an OS that can't hand out a sync-access-handle
+ * right now) can't refetch-loop — a second failure falls through to the normal
+ * exhaustion path.
+ *
+ * Fresh-file failures (`file_existed=false`) are never eligible: the snapshot
+ * was just written, so a failure there is an environment problem, not a
+ * poisoned persisted file, and re-fetching it would only loop.
+ */
+export function poisoned_file_recovery_decision({ file_existed, has_editor_role, already_attempted }: {
+  file_existed: boolean
+  has_editor_role: boolean
+  already_attempted: boolean
+}): { replace: boolean, reason: PoisonedFileRecoveryReason } {
+  if (!file_existed)
+    return { replace: false, reason: 'not_existing' }
+  if (has_editor_role)
+    return { replace: false, reason: 'editor_preserve' }
+  if (already_attempted)
+    return { replace: false, reason: 'already_attempted' }
+  return { replace: true, reason: 'viewer_replace' }
+}
+
 export function create_dict_instance(options: InstanceOptions): InstanceFactory {
   return async (context: InstanceContext): Promise<DbInstance> => {
     const { dict_id } = options
@@ -70,6 +108,12 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
     // snapshot with a baked cursor, so a SECOND wedge in the same session
     // means something deeper is wrong (let the breaker halt + prompt).
     let rebuild_attempted = false
+    // One poisoned-file recovery per worker lifetime — a VIEWER boot that can't
+    // open/migrate its persisted OPFS file has no local writes to lose, so it
+    // may drop the file and re-fetch a fresh snapshot rather than dead-ending
+    // (see `poisoned_file_recovery_decision`). Bounded so a broken environment
+    // can't refetch-loop.
+    let poison_recovery_attempted = false
     // Storage-lost self-heal budget (browser closed our held OPFS handle —
     // observed after tab suspension/system sleep). Capped so a browser that
     // closes the handle right back doesn't reopen-loop; each reopen keeps the
@@ -145,16 +189,8 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
       }
     }
 
-    /**
-     * Open + migrate the OPFS DB in place. Never delete an existing file here:
-     * an open failure means we cannot prove whether it contains unacknowledged
-     * writes, so preservation wins over an automatic reset.
-     */
-    async function open_opfs_prepared(): Promise<OpfsConnection> {
-      if (await opfs_file_exists({ path }))
-        console.info(`[dict-instance] ${dict_id} opening existing OPFS file (no fetch)`)
-      else
-        await drop_in_snapshot()
+    /** Open the OPFS file at `path` + run migrations in place. Closes the handle on failure (releasing the SAH so the file stays deletable). */
+    async function open_and_migrate_at_path(): Promise<OpfsConnection> {
       mark_boot_stage('opfs_open')
       context.report_progress?.('opfs_open')
       const { connection: opened } = await open_opfs_connection({ path, foreign_keys: true })
@@ -167,6 +203,40 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
       } catch (err) {
         await opened.close().catch(() => undefined)
         throw err
+      }
+    }
+
+    /**
+     * Open + migrate the OPFS DB in place. Never delete an EDITOR's existing
+     * file here: an open failure means we cannot prove whether it contains
+     * unacknowledged writes, so preservation wins over an automatic reset. A
+     * VIEWER's persisted file, by contrast, holds nothing but snapshot + server
+     * pulls, so a poisoned one is replaced from a fresh snapshot ONCE rather
+     * than dead-ending the boot into the re-election loop (2026-07-22 iOS
+     * `sqlite3_open_v2` finding). See `poisoned_file_recovery_decision`.
+     */
+    async function open_opfs_prepared(): Promise<OpfsConnection> {
+      const file_existed = await opfs_file_exists({ path })
+      if (file_existed)
+        console.info(`[dict-instance] ${dict_id} opening existing OPFS file (no fetch)`)
+      else
+        await drop_in_snapshot()
+      try {
+        return await open_and_migrate_at_path()
+      } catch (err) {
+        const { replace } = poisoned_file_recovery_decision({
+          file_existed,
+          has_editor_role,
+          already_attempted: poison_recovery_attempted,
+        })
+        if (!replace)
+          throw err
+        poison_recovery_attempted = true
+        console.warn(`[dict-instance] ${dict_id} viewer's existing OPFS file failed to open/migrate — replacing with a fresh snapshot:`, err)
+        report_dict_file_replaced({ dict_id, boot_message: err instanceof Error ? err.message : String(err) })
+        await delete_opfs_db_file({ path })
+        await drop_in_snapshot()
+        return await open_and_migrate_at_path()
       }
     }
 
