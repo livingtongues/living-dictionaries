@@ -215,7 +215,8 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
     bucket.logs++
     if (ERROR_LEVELS.has(row.level)) {
       bucket.errors++
-      if (!is_noise_error_message(row.message))
+      const is_null_session_zombie = !session_id && (row.message === 'sync_failed' || row.message === 'leader_boot_failed')
+      if (!is_noise_error_message(row.message) && !is_null_session_zombie)
         bucket.real_errors++
     }
     bump(bucket.levels, row.level)

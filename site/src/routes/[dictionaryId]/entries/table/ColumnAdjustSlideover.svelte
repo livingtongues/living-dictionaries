@@ -44,9 +44,8 @@
   }
 
   function move(i: number, direction: 'up' | 'down') {
-    const columnBeingMoved = $preferred_table_columns.splice(i, 1)
-    $preferred_table_columns.splice(direction === 'up' ? i - 1 : i + 1, 0, ...columnBeingMoved)
-    $preferred_table_columns = $preferred_table_columns // trigger Svelte reactivity;
+    const columnBeingMoved = preferred_table_columns.value.splice(i, 1)
+    preferred_table_columns.value.splice(direction === 'up' ? i - 1 : i + 1, 0, ...columnBeingMoved)
   }
 </script>
 
@@ -56,7 +55,7 @@
   {/snippet}
 
   <ul>
-    {#each $preferred_table_columns as column, i (column.field)}
+    {#each preferred_table_columns.value as column, i (column.field)}
       <li
         animate:flip
         class:selected={selectedColumn === column}>
@@ -70,7 +69,7 @@
                 <IconFa6SolidChevronUp />
               </button>
             {/if}
-            {#if i > 0 && i !== $preferred_table_columns.length - 1}
+            {#if i > 0 && i !== preferred_table_columns.value.length - 1}
               <button
                 type="button"
                 onclick={() => move(i, 'down')}

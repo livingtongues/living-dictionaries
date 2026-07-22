@@ -167,8 +167,6 @@ export function is_below_db_worker_capability(parsed: ParsedUserAgent): boolean 
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
-
   describe(parse_user_agent, () => {
     it('desktop Safari on Catalina (Wayne)', () => {
       const p = parse_user_agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6 Safari/605.1.15')

@@ -80,7 +80,7 @@
     {:else if search_params.value.view === 'table'}
       <EntriesTable
         {entries}
-        preferred_table_columns={$preferred_table_columns}
+        preferred_table_columns={preferred_table_columns.value}
         {dictionary}
         can_edit={can_edit}
         {writes} />

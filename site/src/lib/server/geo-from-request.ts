@@ -71,7 +71,6 @@ export function geo_key({ country, region }: { country: string | null | undefine
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
   function with_headers(map: Record<string, string>): { headers: Pick<Headers, 'get'> } {
     return { headers: new Headers(map) }
   }

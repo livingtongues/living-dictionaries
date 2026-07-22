@@ -1,12 +1,14 @@
 import type { LayoutLoad } from './$types'
 import { browser } from '$app/environment'
-import { createPersistedStore } from '$lib/state/persisted-store'
+import { PersistedState } from '$lib/state/persisted-state.svelte'
 import { getSupportedLocale } from '$lib/i18n/locales'
 import { getTranslator } from '$lib/i18n'
 import { default_columns } from '$lib/utils/default-columns'
 import { get_auth_user } from '$lib/auth/user.svelte'
 import { get_my_dictionary_roles } from '$lib/me/dictionary-roles.svelte'
 import { create_dictionaries_store, create_my_dictionaries_store } from '$lib/dictionaries'
+
+const table_columns_states = new Map<string, PersistedState<typeof default_columns>>()
 
 export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLocale, ssr_user, user_latitude, user_longitude } }) => {
   const urlLocale = searchParams.get('lang')
@@ -40,7 +42,12 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
   const my_dictionaries = create_my_dictionaries_store({ user_id: ssr_user?.id })
 
   const columns_key = `table_columns_03.18.2024-${ssr_user?.id ?? 'anon'}` // rename when adding more columns to invalidate the user's cache
-  const preferred_table_columns = createPersistedStore(columns_key, default_columns)
+  let preferred_table_columns = table_columns_states.get(columns_key)
+  if (!preferred_table_columns) {
+    preferred_table_columns = new PersistedState(columns_key, default_columns)
+    if (browser)
+      table_columns_states.set(columns_key, preferred_table_columns)
+  }
   const mode = import.meta.env.MODE as 'development' | 'production'
 
   return {

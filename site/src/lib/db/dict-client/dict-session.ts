@@ -81,15 +81,18 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
 
   let cached = globals.__ld_dict_clients[dict_id]
   if (!cached) {
+    let recovery_exhausted = false
     const client = create_db_client({
       instance_options: { dict_id, has_editor_role: options.has_editor_role, auth: options.auth, session_id: get_session_id() || null },
       // Worker-internal boot failures never reach the main-thread console.error
       // patch, so this is our only telemetry window. `last_stage` points the stall
       // at the exact boot phase (a slow `snapshot_fetch` vs a stuck `opfs_open`).
       on_boot_failed: ({ message, last_stage, attempt, will_retry }) => {
+        if (!will_retry)
+          recovery_exhausted = true
         log_event({
           level: will_retry ? 'warn' : 'error',
-          message: 'leader_boot_failed',
+          message: will_retry ? 'leader_boot_failed' : 'dict_boot_recovery_exhausted',
           context: { dict_id, boot_message: message, last_stage, attempt, will_retry },
         })
       },
@@ -102,6 +105,10 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
 
     const entry = cached
     client.on_ready(() => {
+      if (recovery_exhausted) {
+        log_event({ level: 'info', message: 'dict_boot_recovered', context: { dict_id } })
+        recovery_exhausted = false
+      }
       // Leader is ready — the snapshot is in OPFS and open, so drop the boot bar.
       // Fires on every leader (including hand-offs); ending the bar is idempotent.
       end_dict_boot_progress(dict_id)

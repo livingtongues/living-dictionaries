@@ -189,7 +189,6 @@ export function _reset_logs_db_for_tests(): void {
 }
 
 if (import.meta.vitest) {
-  const { describe, test, expect } = import.meta.vitest
   describe(split_client_logs_from_shared, () => {
     test('moves rows, drops the shared table, and is idempotent', () => {
       const shared_db = open_test_shared_db()

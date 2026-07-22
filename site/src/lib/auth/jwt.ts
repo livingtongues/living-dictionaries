@@ -43,8 +43,6 @@ export async function verify_jwt(token: string): Promise<JWTPayload> {
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect, beforeAll } = import.meta.vitest
-
   beforeAll(() => {
     process.env.JWT_SECRET = 'test-secret-that-is-long-enough-for-hs256'
   })

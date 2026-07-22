@@ -29,8 +29,6 @@ export function stream<T>(compute: () => T | Promise<T>): Promise<T> {
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
-
   describe(stream, () => {
     it('resolves a sync compute value', async () => {
       await expect(stream(() => 42)).resolves.toBe(42)

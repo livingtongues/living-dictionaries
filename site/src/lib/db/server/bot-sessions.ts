@@ -68,8 +68,6 @@ export function classify_ua_frequency_bot_sessions({ sessions, min_per_day = MIN
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
-
   describe(classify_ua_frequency_bot_sessions, () => {
     const CHROME = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
 

@@ -1,8 +1,8 @@
 import { browser } from '$app/environment'
-import { onDestroy } from 'svelte'
 
 export class PersistedState<T> {
   value = $state<T>() as T
+  #destroy: () => void
 
   constructor(private key: string, initial_value: T, { sync_tabs }: { sync_tabs?: boolean } = {}) {
     this.value = initial_value
@@ -10,19 +10,27 @@ export class PersistedState<T> {
     if (browser)
       this.#get_cached()
 
-    $effect(() => {
-      localStorage.setItem(this.key, this.#serialize(this.value))
-    })
-
-    if (sync_tabs && browser) {
-      window.addEventListener('storage', () => this.#get_cached())
+    if (!browser) {
+      this.#destroy = () => undefined
+      return
     }
 
-    onDestroy(() => {
-      if (sync_tabs && browser) {
-        window.removeEventListener('storage', () => this.#get_cached())
+    const storage_handler = () => this.#get_cached()
+    this.#destroy = $effect.root(() => {
+      $effect(() => {
+        localStorage.setItem(this.key, this.#serialize(this.value))
+      })
+      if (sync_tabs)
+        window.addEventListener('storage', storage_handler)
+      return () => {
+        if (sync_tabs)
+          window.removeEventListener('storage', storage_handler)
       }
     })
+  }
+
+  destroy(): void {
+    this.#destroy()
   }
 
   #get_cached() {

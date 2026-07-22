@@ -1,4 +1,4 @@
-const url_regex = /(((https?:\/\/)|(www\.))[^\s>]+\w\/?)/g
+const url_regex = /(((https?:\/\/)|(www\.))[^\s>]+\w\/?)/
 
 export function prepare_display(s: string): string {
   if (url_regex.test(s)) {
@@ -36,5 +36,8 @@ if (import.meta.vitest) {
   test('prepare_display handles no match', () => {
     expect(prepare_display('Foo')).toMatchInlineSnapshot('"Foo"')
     expect(prepare_display(undefined)).toMatchInlineSnapshot('undefined')
+  })
+  test('prepare_display is stable across repeated calls', () => {
+    expect([prepare_display('https://example.com'), prepare_display('https://example.com')]).toEqual(['example.com', 'example.com'])
   })
 }

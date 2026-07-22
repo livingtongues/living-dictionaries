@@ -64,7 +64,6 @@ export function distance_bucket(km: number): DistanceBucket {
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
   describe(haversine_km, () => {
     it('is ~0 for identical points', () => {
       expect(haversine_km({ lat1: 42.36, lng1: -71.06, lat2: 42.36, lng2: -71.06 })).toBe(0)

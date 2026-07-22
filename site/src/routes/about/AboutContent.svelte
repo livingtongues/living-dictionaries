@@ -295,7 +295,7 @@
   .api-band p {
     margin: 0 0 0.75rem;
     line-height: 1.6;
-    color: var(--color-secondary);
+    color: var(--color);
   }
 
   .api-band p:last-child {

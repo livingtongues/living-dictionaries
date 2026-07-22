@@ -7,7 +7,7 @@
   import { defaultPrintFields } from './print/print-fields'
   import { truncateAuthors } from './print/truncate-authors'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
-  import { createPersistedStore } from '$lib/state/persisted-store'
+  import { PersistedState } from '$lib/state/persisted-state.svelte'
   import type { QueryParamState } from '$lib/state/query-param-state.svelte'
   import { page } from '$app/state'
   import type { QueryParams } from '$lib/search/types'
@@ -40,13 +40,13 @@
 
   const visitor_max_entries = 300
 
-  const preferredPrintFields = createPersistedStore<IPrintFields>('printFields_11.8.2023', defaultPrintFields)
-  const headwordSize = createPersistedStore<number>('printHeadwordSize', 12)
-  const fontSize = createPersistedStore<number>('printFontSize', 12)
-  const imagePercent = createPersistedStore<number>('printImagePercent', 50)
-  const columnCount = createPersistedStore<number>('printColumnCount', 2)
-  const showLabels = createPersistedStore<boolean>('printShowLabels', true)
-  const showQrCode = createPersistedStore<boolean>('showQrCode', false)
+  const preferredPrintFields = new PersistedState<IPrintFields>('printFields_11.8.2023', defaultPrintFields)
+  const headwordSize = new PersistedState<number>('printHeadwordSize', 12)
+  const fontSize = new PersistedState<number>('printFontSize', 12)
+  const imagePercent = new PersistedState<number>('printImagePercent', 50)
+  const columnCount = new PersistedState<number>('printColumnCount', 2)
+  const showLabels = new PersistedState<boolean>('printShowLabels', true)
+  const showQrCode = new PersistedState<boolean>('showQrCode', false)
 </script>
 
 {#if dictionary.print_access || can_edit}
@@ -75,7 +75,7 @@
           type="number"
           min="1"
           max="10"
-          bind:value={$columnCount} />
+          bind:value={columnCount.value} />
       </div>
       <div class="control">
         <label for="headwordSize">{page.data.t('print.headword_size')} (pt)</label>
@@ -85,7 +85,7 @@
           type="number"
           min="6"
           max="30"
-          bind:value={$headwordSize} />
+          bind:value={headwordSize.value} />
       </div>
       <div class="control">
         <label for="fontSize">{page.data.t('print.font_size')} (pt)</label>
@@ -95,7 +95,7 @@
           type="number"
           min="6"
           max="24"
-          bind:value={$fontSize} />
+          bind:value={fontSize.value} />
       </div>
       <div class="control">
         <label for="imageSize">{page.data.t('misc.images')}:</label>
@@ -105,7 +105,7 @@
           type="number"
           min="1"
           max="100"
-          bind:value={$imagePercent} /><span class="percent-label">%</span>
+          bind:value={imagePercent.value} /><span class="percent-label">%</span>
       </div>
       <PrintFieldCheckboxes {entries} {preferredPrintFields} {showLabels} {showQrCode} />
     </div>
@@ -119,16 +119,16 @@
   <div class="print-layout">
     <div
       class="print-columns"
-      style="--column-count: {$columnCount}">
+      style:--column-count={columnCount.value}>
       {#each entries as entry (entry.id)}
         <PrintEntry
-          headwordSize={$headwordSize}
-          fontSize={$fontSize}
-          imagePercent={$imagePercent}
+          headwordSize={headwordSize.value}
+          fontSize={fontSize.value}
+          imagePercent={imagePercent.value}
           {entry}
-          showQrCode={$showQrCode}
-          showLabels={$showLabels}
-          selectedFields={$preferredPrintFields}
+          showQrCode={showQrCode.value}
+          showLabels={showLabels.value}
+          selectedFields={preferredPrintFields.value}
           {dictionary} />
       {/each}
     </div>

@@ -26,6 +26,7 @@ export function upload_import_file({ file, dictionary_id }: { file: File, dictio
   let status: number | null = null
   let file_id: string | null = null
   let upload_origin: string | null = null
+  const filename_extension = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase() ?? null : null
 
   async function run(): Promise<SourceFileRow> {
     const { data: registered, error } = await api_dict_files_register({
@@ -102,13 +103,13 @@ export function upload_import_file({ file, dictionary_id }: { file: File, dictio
       context: {
         dictionary_id,
         file_id,
-        filename: file.name,
-        mimetype: file.type || 'application/octet-stream',
-        size_bytes: file.size,
+        filename_extension,
+        bytes: file.size,
         stage,
         failure_kind,
         status,
-        upload_origin,
+        upload_target: upload_origin === (typeof window === 'undefined' ? null : window.location.origin) ? 'same_origin' : 'object_storage',
+        online: typeof navigator === 'undefined' ? null : navigator.onLine,
         error_message: error.message,
       },
     })

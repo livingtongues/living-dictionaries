@@ -3,6 +3,7 @@ import type { Readable } from 'svelte/store'
 import { api_gcs_serving_url } from '$api/gcs_serving_url/_call'
 import { api_upload } from '$api/upload/_call'
 import { DEV_LOCAL_PREFIX } from '$lib/utils/media-url'
+import { log_event } from '$lib/debug/remote-log'
 
 export type MediaKind = 'image' | 'audio' | 'video'
 
@@ -40,6 +41,7 @@ export function upload_media({ file, folder, dictionary_id, kind }: {
 
   let xhr: XMLHttpRequest | null = null
   let aborted = false
+  let stage: 'register' | 'upload' | 'serving_url' = 'register'
 
   async function run(): Promise<MediaUploadResult> {
     // `api_upload` returns `{ data: null, error }` on failure — guard before touching `data`
@@ -50,6 +52,7 @@ export function upload_media({ file, folder, dictionary_id, kind }: {
       throw new Error('Upload aborted.')
 
     const { presigned_upload_url, bucket, object_key, dev_mock } = upload
+    stage = 'upload'
     xhr = new XMLHttpRequest()
     await put_file({ xhr, file, url: presigned_upload_url, on_progress: progress => set({ progress: Math.min(progress, 99), preview_url }) })
 
@@ -65,6 +68,7 @@ export function upload_media({ file, folder, dictionary_id, kind }: {
       return { storage_path: object_key, serving_url: `${DEV_LOCAL_PREFIX}${object_key}` }
     }
 
+    stage = 'serving_url'
     const { data, error: serving_url_error } = await api_gcs_serving_url({ storage_path: `${bucket}/${object_key}` })
     if (serving_url_error || !data)
       throw new Error(serving_url_error?.message ?? 'Failed to get image serving URL.')
@@ -74,7 +78,24 @@ export function upload_media({ file, folder, dictionary_id, kind }: {
 
   const done = run()
   // log + mark the rejection handled for callers that ignore `done`; awaiting callers still get it
-  done.catch((err: unknown) => console.error(err))
+  done.catch((err: unknown) => {
+    const error = err instanceof Error ? err : new Error(String(err))
+    log_event({
+      level: 'error',
+      message: 'media_upload_failed',
+      stack: error.stack,
+      context: {
+        dictionary_id,
+        kind,
+        stage,
+        status: xhr?.status ?? null,
+        bytes: file.size,
+        mimetype: file.type || null,
+        online: typeof navigator === 'undefined' ? null : navigator.onLine,
+        error_message: error.message,
+      },
+    })
+  })
 
   return {
     progress: { subscribe },

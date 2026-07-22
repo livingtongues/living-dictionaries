@@ -147,13 +147,13 @@ describe(upload_import_file, () => {
       context: {
         dictionary_id: 'demo',
         file_id: 'file-1',
-        filename: 'scan.pdf',
-        mimetype: 'application/pdf',
-        size_bytes: 5,
+        filename_extension: 'pdf',
+        bytes: 5,
         stage: 'upload',
         failure_kind: 'network',
         status: 0,
-        upload_origin: 'https://r2.example',
+        upload_target: 'object_storage',
+        online: undefined,
         error_message: 'Failed to upload file.',
       },
     }))

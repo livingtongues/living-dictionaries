@@ -68,8 +68,6 @@ function midpoint(a: string, b: string | null): string {
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
-
   function sorted(keys: string[]): boolean {
     for (let i = 1; i < keys.length; i++) {
       if (keys[i - 1] >= keys[i])

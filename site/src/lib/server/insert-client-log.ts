@@ -232,7 +232,6 @@ export function _reset_rate_state(): void {
 }
 
 if (import.meta.vitest) {
-  const { describe, test, expect } = import.meta.vitest
   describe(insert_client_log, () => {
     test('inserts a minimal valid payload', () => {
       const db = open_logs_db(':memory:')

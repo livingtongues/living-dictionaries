@@ -1,4 +1,3 @@
-import { writable } from 'svelte/store'
 import type { Story, StoryMeta } from 'svelte-look'
 import type Component from './ColumnAdjustSlideover.svelte'
 
@@ -21,7 +20,7 @@ export const shared_meta: StoryMeta = {
       }
       return labels[key] || key
     },
-    preferred_table_columns: writable(columns),
+    preferred_table_columns: { value: columns },
   },
   csr: true,
 }

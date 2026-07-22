@@ -1213,7 +1213,10 @@ function build_daily_series(ctx: AnalyticsContext): { daily: DailyPoint[], rollu
     SELECT substr(received_at, 1, 10) day,
            COUNT(*) logs,
            SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL} THEN 1 ELSE 0 END) errors,
-           SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL} AND is_noise_msg(message) = 0 THEN 1 ELSE 0 END) real_errors,
+           SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL}
+                     AND is_noise_msg(message) = 0
+                     AND NOT (session_id IS NULL AND message IN ('sync_failed', 'leader_boot_failed'))
+                    THEN 1 ELSE 0 END) real_errors,
            SUM(CASE WHEN level IN ${ERROR_LEVELS_SQL} AND ? IS NOT NULL AND app_version IS NOT NULL AND app_version <> ? THEN 1 ELSE 0 END) stale_errors,
            COUNT(DISTINCT user_id) users,
            COUNT(DISTINCT session_id) sessions

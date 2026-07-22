@@ -2,14 +2,14 @@
   import { StandardPrintFields } from '$lib/types'
   import type { EntryData, IPrintFields } from '$lib/types'
 
-  import type { createPersistedStore } from '$lib/state/persisted-store'
+  import type { PersistedState } from '$lib/state/persisted-state.svelte'
   import { page } from '$app/state'
 
   interface Props {
     entries: EntryData[]
-    preferredPrintFields: ReturnType<typeof createPersistedStore<IPrintFields>>
-    showLabels: ReturnType<typeof createPersistedStore<boolean>>
-    showQrCode: ReturnType<typeof createPersistedStore<boolean>>
+    preferredPrintFields: PersistedState<IPrintFields>
+    showLabels: PersistedState<boolean>
+    showQrCode: PersistedState<boolean>
   }
 
   const {
@@ -19,7 +19,7 @@
     showQrCode,
   }: Props = $props()
 
-  const fieldsThatExist = $derived((Object.keys($preferredPrintFields) as (keyof IPrintFields)[]).filter((field) => {
+  const fieldsThatExist = $derived((Object.keys(preferredPrintFields.value) as (keyof IPrintFields)[]).filter((field) => {
     if (field === 'gloss') return true
     return entries.find((entry) => {
       if (field === 'parts_of_speech') return !!entry.senses?.find(sense => sense.parts_of_speech?.length)
@@ -37,8 +37,8 @@
       return entry.main[field]
     })
   }))
-  const activeFields = $derived(Object.keys($preferredPrintFields).filter(
-    field => $preferredPrintFields[field],
+  const activeFields = $derived(Object.keys(preferredPrintFields.value).filter(
+    field => preferredPrintFields.value[field],
   ))
   const showingFieldsWithLabels = $derived(activeFields.find(field =>
     Object.keys(StandardPrintFields).includes(field),
@@ -47,20 +47,20 @@
 
 {#each fieldsThatExist as field (field)}
   <div class="checkbox-row">
-    <input id={field} type="checkbox" bind:checked={$preferredPrintFields[field]} />
+    <input id={field} type="checkbox" bind:checked={preferredPrintFields.value[field]} />
     <label for={field}>{page.data.t(`entry_field.${field}`)}</label>
   </div>
 {/each}
 
 {#if showingFieldsWithLabels}
   <div class="checkbox-row">
-    <input id="showLabels" type="checkbox" bind:checked={$showLabels} />
+    <input id="showLabels" type="checkbox" bind:checked={showLabels.value} />
     <label for="showLabels">{page.data.t('print.labels')}</label>
   </div>
 {/if}
 
 <div class="checkbox-row">
-  <input id="showLabels" type="checkbox" bind:checked={$showQrCode} />
+  <input id="showLabels" type="checkbox" bind:checked={showQrCode.value} />
   <label for="showLabels">{page.data.t('print.qr_code')}</label>
 </div>
 

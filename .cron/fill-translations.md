@@ -19,6 +19,10 @@ diff is sane, runs the i18n `pnpm test` suites, then commits `i18n: AI translati
 YYYY-MM-DD` and pushes to `main` (which deploys + bakes the seed), and (5) reports per-locale
 counts filled / en_changed cleared vs re-flagged / anything skipped.
 
+The command also reads and writes dated `.cron/fill-translation-reviews/` receipts. Treat
+`staged-for-human-review` as the normal successful automated outcome; never call AI-written rows
+accepted until the human-review queue provides that evidence.
+
 Follow that command exactly — it holds the full context, prod-access pattern, and safety rules.
 When done, report the step-5 summary in this session and remind Jacob the "Notify translators"
 button on /translate is now safe to press. If prod is unreachable or the diff looks wrong, STOP

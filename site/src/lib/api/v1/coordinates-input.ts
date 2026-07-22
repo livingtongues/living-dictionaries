@@ -118,8 +118,6 @@ export function to_coordinates(value: unknown): Coordinates | null | undefined {
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
-
   describe(to_coordinates, () => {
     it('passes undefined/null through untouched', () => {
       expect(to_coordinates(undefined)).toBe(undefined)

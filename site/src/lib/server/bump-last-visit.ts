@@ -33,7 +33,6 @@ export function bump_last_visit({ db, user_id, now = new Date() }: {
 }
 
 if (import.meta.vitest) {
-  const { describe, test, expect } = import.meta.vitest
   const { default: BetterSqlite3 } = await import('better-sqlite3')
 
   function make_db(): Database.Database {

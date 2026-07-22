@@ -67,8 +67,6 @@ export function resolve_db_tier(caps: DbCapabilities = detect_db_capabilities())
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
-
   const caps = (over: Partial<DbCapabilities>): DbCapabilities => ({
     has_opfs: false,
     has_web_locks: false,

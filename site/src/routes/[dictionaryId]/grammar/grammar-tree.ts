@@ -153,7 +153,6 @@ export function first_multistring_value(field: Record<string, string> | null | u
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
   describe(first_multistring_value, () => {
     it('prefers the given language order', () => {
       expect(first_multistring_value({ en: 'verb', fr: 'verbe' }, ['fr', 'en'])).toBe('verbe')

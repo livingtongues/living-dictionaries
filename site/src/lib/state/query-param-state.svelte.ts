@@ -19,7 +19,7 @@ export function stringify(value: any, cleanFalseValues?: boolean) {
     return undefined
   if (typeof value === 'string')
     return value
-  const cleaned_value = clean_object(value, cleanFalseValues)
+  const cleaned_value = clean_object(value, { clean_false_values: cleanFalseValues })
   return cleaned_value === undefined ? undefined : JSON.stringify(cleaned_value)
 }
 
@@ -59,7 +59,7 @@ export class QueryParamState<T> {
     this.#replace_state = typeof options.replaceState === 'undefined' ? true : options.replaceState
     this.#storage_key = `${options.storagePrefix || ''}${key}`
     this.#value = startWith as T
-    this.#state_value = structuredClone(startWith)
+    this.#state_value = structuredClone($state.snapshot(startWith)) as T
 
     if (typeof window === 'undefined')
       return
@@ -145,7 +145,7 @@ export class QueryParamState<T> {
         console.info('parsed value equals current state value, skipping update')
       return
     }
-    this.#state_value = structuredClone(parsed_value)
+    this.#state_value = structuredClone($state.snapshot(parsed_value))
     this.#applying_url_value = true
     try {
       this.#value = parsed_value

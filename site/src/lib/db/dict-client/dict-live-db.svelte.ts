@@ -472,7 +472,7 @@ class DictLiveDbImpl {
    * each delete reaches `subscribe_deletes` exactly once per tab.
    */
   async #dict_write<T>(op: DictWriteOp, args: Record<string, unknown>): Promise<DictWriteOutcome<T>> {
-    const outcome = await this.#connection.dict_write<T>(op, { ...args, user_id: this.#user_id })
+    const outcome = await this.#connection.dict_write<T>(op, $state.snapshot({ ...args, user_id: this.#user_id }))
     for (const table of outcome.affected_tables) this.#notifier.notify(table)
     return outcome
   }

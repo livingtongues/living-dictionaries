@@ -22,6 +22,8 @@ import type { ClientLogLevel } from '$lib/db/schemas/shared.types'
 export const KNOWN_NOISE_PATTERNS = [
   'Network error for /api/log',
   'Failed to fetch dynamically imported module',
+  'Importing a module script failed.',
+  'Unable to preload CSS',
   'WebGL unavailable',
   'Failed to initialize WebGL',
   'aborted',
@@ -110,12 +112,12 @@ export function is_expected_error_response(message: string | null | undefined): 
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
-
   describe(is_known_noise, () => {
     it('flags the /api/log flush blip and chunk-load failures', () => {
       expect(is_known_noise('[post_request] Network error for /api/log: timeout')).toBe(true)
       expect(is_known_noise('Failed to fetch dynamically imported module: /_app/x.js')).toBe(true)
+      expect(is_known_noise('Importing a module script failed.')).toBe(true)
+      expect(is_known_noise('Unable to preload CSS for /_app/x.css')).toBe(true)
     })
     it('flags the no-WebGL globe failures', () => {
       expect(is_known_noise('Map failed to load (WebGL unavailable)')).toBe(true)

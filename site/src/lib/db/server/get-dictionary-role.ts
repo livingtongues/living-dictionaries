@@ -24,8 +24,6 @@ export function get_user_dict_role({ dictionary_id, user_id, db = get_shared_db(
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
-
   function seed() {
     const db = open_test_shared_db()
     const add_dict = db.prepare(`INSERT INTO dictionaries (id, name) VALUES (?, ?)`)

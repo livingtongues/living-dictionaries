@@ -6,7 +6,7 @@ import type Database from 'better-sqlite3'
  * import: 'default' })`. The keys are relative paths like
  * `./migrations/20260525_initial.sql`.
  *
- * Each migration wraps in BEGIN/COMMIT with FKs OFF so a partial failure
+ * Each migration and its ledger marker share one transaction with FKs OFF so a partial failure
  * rolls back cleanly. Critical for table-rebuild migrations
  * (CREATE _new -> INSERT -> DROP parent -> RENAME) which would otherwise
  * cascade-delete child rows during the DROP. See
@@ -39,23 +39,20 @@ export function run_sql_migrations({ db, migration_files }: {
     if (!name || applied.has(name))
       continue
 
+    const foreign_keys_enabled = Boolean(db.pragma('foreign_keys', { simple: true }))
     db.pragma('foreign_keys = OFF')
     try {
-      db.exec(`BEGIN; ${sql}; COMMIT;`)
-    } catch (error) {
-      try { db.exec('ROLLBACK') } catch { /* already rolled back */ }
-      db.pragma('foreign_keys = ON')
-      throw error
-    }
-    db.pragma('foreign_keys = ON')
-
-    const table_exists = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'`).get()
-    if (table_exists) {
-      db.prepare('INSERT INTO migrations (id, name, run_on) VALUES (?, ?, ?)').run(
-        crypto.randomUUID(),
-        name,
-        new Date().toISOString(),
-      )
+      db.transaction(() => {
+        db.exec(sql)
+        const table_exists = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'`).get()
+        if (table_exists) {
+          db.prepare('INSERT INTO migrations (id, name, run_on) VALUES (?, ?, ?)').run(
+            crypto.randomUUID(), name, new Date().toISOString(),
+          )
+        }
+      })()
+    } finally {
+      db.pragma(`foreign_keys = ${foreign_keys_enabled ? 'ON' : 'OFF'}`)
     }
   }
 }

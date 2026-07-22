@@ -146,40 +146,28 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
     }
 
     /**
-     * Open + migrate the OPFS DB, with ONE self-heal retry: a crash mid-write
-     * (journal_mode = MEMORY) or a bad snapshot can leave the file unopenable
-     * (SQLITE_CANTOPEN / NOTADB surfaces on open or on the first migration
-     * query). Without this the leader boots dead and every tab's RPC times out
-     * until the user manually clears site data.
+     * Open + migrate the OPFS DB in place. Never delete an existing file here:
+     * an open failure means we cannot prove whether it contains unacknowledged
+     * writes, so preservation wins over an automatic reset.
      */
     async function open_opfs_prepared(): Promise<OpfsConnection> {
-      for (let attempt = 0; attempt < 2; attempt++) {
-        try {
-          if (await opfs_file_exists({ path }))
-            console.info(`[dict-instance] ${dict_id} opening existing OPFS file (no fetch)`)
-          else
-            await drop_in_snapshot()
-          mark_boot_stage('opfs_open')
-          context.report_progress?.('opfs_open')
-          const { connection: opened } = await open_opfs_connection({ path, foreign_keys: true })
-          try {
-            mark_boot_stage('migrate')
-            context.report_progress?.('migrate')
-            await ensure_migrations({ dict_id, connection: opened })
-            await ensure_metadata({ dict_id, connection: opened })
-            return opened
-          } catch (err) {
-            await opened.close().catch(() => undefined)
-            throw err
-          }
-        } catch (err) {
-          if (attempt > 0)
-            throw err
-          console.warn(`[dict-instance] ${dict_id} self-heal: local DB unopenable — deleting + refetching:`, err)
-          await delete_opfs_db_file({ path })
-        }
+      if (await opfs_file_exists({ path }))
+        console.info(`[dict-instance] ${dict_id} opening existing OPFS file (no fetch)`)
+      else
+        await drop_in_snapshot()
+      mark_boot_stage('opfs_open')
+      context.report_progress?.('opfs_open')
+      const { connection: opened } = await open_opfs_connection({ path, foreign_keys: true })
+      try {
+        mark_boot_stage('migrate')
+        context.report_progress?.('migrate')
+        await ensure_migrations({ dict_id, connection: opened })
+        await ensure_metadata({ dict_id, connection: opened })
+        return opened
+      } catch (err) {
+        await opened.close().catch(() => undefined)
+        throw err
       }
-      throw new Error('unreachable')
     }
 
     async function open_and_wire(): Promise<void> {
@@ -285,7 +273,7 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
         return
       }
       console.warn(`[dict-instance] ${dict_id} snapshot expired — auto-resetting to a fresh snapshot`)
-      await reset().catch(err => console.error(`[dict-instance] ${dict_id} auto-reset failed:`, err))
+      await reset({ rescue_acknowledged: true }).catch(err => console.error(`[dict-instance] ${dict_id} auto-reset failed:`, err))
     }
 
     /**
@@ -311,7 +299,7 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
       }
       console.warn(`[dict-instance] ${dict_id} rebuilding from a fresh snapshot (${reason}; flushed_push=${flushed_push})`)
       report_dict_self_healed({ dict_id, reason, flushed_push })
-      await reset().catch(err => console.error(`[dict-instance] ${dict_id} rebuild reset failed:`, err))
+      await reset({ rescue_acknowledged: true }).catch(err => console.error(`[dict-instance] ${dict_id} rebuild reset failed:`, err))
     }
 
     /**
@@ -348,7 +336,12 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
     }
 
     /** Tear down + recreate the OPFS DB from a fresh snapshot (danger zone). */
-    async function reset(): Promise<void> {
+    async function reset({ rescue_acknowledged = false }: { rescue_acknowledged?: boolean } = {}): Promise<void> {
+      if (!rescue_acknowledged) {
+        await engine.flush_push_only()
+        if (await engine.has_pending())
+          throw new Error('reset refused: local writes lack durable server acknowledgement')
+      }
       engine.stop()
       // Serialize the teardown through the op-mutex so an in-flight exec or
       // sync apply-transaction can't hit a closed connection mid-statement.
@@ -474,16 +467,19 @@ async function ensure_migrations({ dict_id, connection }: { dict_id: string, con
   for (const name of DICT_MIGRATION_NAMES) {
     if (applied.has(name))
       continue
-    const sql = DICT_MIGRATIONS[name]
-    // SQLite can't BEGIN inside a multi-statement exec under wa-sqlite — run
-    // each statement separately. We treat one migration file as one logical
-    // unit; partial failure within a file is left to surface as an error
-    // (callers see the broken state on next open + can reset).
-    await connection.exec_raw(sql)
-    await connection.execute(
-      `INSERT INTO migrations (id, name, run_on) VALUES (?, ?, ?)`,
-      [crypto.randomUUID(), name, new Date().toISOString()],
-    )
+    const sql = await make_additive_migration_resumable({ connection, sql: DICT_MIGRATIONS[name] })
+    await connection.execute('BEGIN')
+    try {
+      await connection.exec_raw(sql)
+      await connection.execute(
+        `INSERT INTO migrations (id, name, run_on) VALUES (?, ?, ?)`,
+        [crypto.randomUUID(), name, new Date().toISOString()],
+      )
+      await connection.execute('COMMIT')
+    } catch (error) {
+      await connection.execute('ROLLBACK').catch(() => undefined)
+      throw error
+    }
   }
   if (LATEST_DICT_MIGRATION) {
     await connection.execute(
@@ -502,6 +498,31 @@ async function ensure_migrations({ dict_id, connection }: { dict_id: string, con
   )
   if (id_row[0]?.value && id_row[0].value !== dict_id)
     console.warn(`[dict-instance] OPFS file for ${dict_id} self-reports as ${id_row[0].value}`)
+}
+
+export async function make_additive_migration_resumable({ connection, sql }: { connection: Pick<OpfsConnection, 'query'>, sql: string }): Promise<string> {
+  const statements = sql.split(';')
+  const repaired: string[] = []
+  for (const statement of statements) {
+    const match = /\bALTER TABLE\s+(\w+)\s+ADD COLUMN\s+(\w+)/.exec(statement)
+    if (!match) {
+      repaired.push(statement)
+      continue
+    }
+    const [, table_name, column_name] = match
+    const columns = await connection.query<{ name: string, type: string, notnull: number }>(`PRAGMA table_info(${table_name})`)
+    const existing = columns.find(column => column.name === column_name)
+    if (!existing) {
+      repaired.push(statement)
+      continue
+    }
+    const definition = statement.slice((match.index ?? 0) + match[0].length).trim()
+    const expected_type = /^([A-Z]+)/i.exec(definition)?.[1]?.toUpperCase() ?? ''
+    const expected_not_null = /\bNOT NULL\b/i.test(definition)
+    if (existing.type.toUpperCase() !== expected_type || Boolean(existing.notnull) !== expected_not_null)
+      throw new Error(`migration repair refused: ${table_name}.${column_name} does not match the declared additive column`)
+  }
+  return repaired.join(';')
 }
 
 async function ensure_metadata({ dict_id, connection }: { dict_id: string, connection: OpfsConnection }) {

@@ -22,6 +22,10 @@ active) + `i18n_translations` (UNIQUE (key_id, locale); `source` 'import'|'human
 
 ## 1. Query the work
 
+Before writing, read the newest receipts in `.cron/fill-translation-reviews/` and count
+`needs_review = 'ai'` rows per locale. Review debt is evidence to report, never permission to
+clear flags or bypass the human gate.
+
 ```sql
 -- Missing: active keys × locales with no row
 SELECT k.id, k.en_value, loc.locale FROM i18n_keys k
@@ -73,5 +77,9 @@ suites, then commit the locale files (`i18n: AI translation fill YYYY-MM-DD`) an
 
 ## 5. Report
 
-Tell Jacob: per-locale counts filled, en_changed cleared vs re-flagged, anything skipped and
-why. Remind him the "Notify translators" button on `/translate` is now safe to press.
+Write `.cron/fill-translation-reviews/YYYY-MM-DD.md` with observed gaps, pre/post human-review
+queue counts, backup evidence, per-locale fills, `en_changed` outcomes, skips, verification,
+commit/push result, and exactly one terminal state: `staged-for-human-review`, `clean-no-op`,
+`partial`, `blocked`, or `accepted`. Reserve `accepted` for evidence that humans completed the
+review queue; a successful AI pass is `staged-for-human-review`. Tell Jacob the same compact result
+and remind him the "Notify translators" button on `/translate` is safe to press.

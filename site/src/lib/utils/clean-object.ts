@@ -1,16 +1,16 @@
-export function clean_object(obj: any, cleanFalseValues = false): any {
+export function clean_object(obj: any, { clean_false_values = false }: { clean_false_values?: boolean } = {}): any {
   const is_array = Array.isArray(obj)
   const is_object = typeof obj === 'object' && obj !== null
   if (is_array) {
     const result = obj
-      .filter(item => item !== null && item !== undefined && item !== '' && !(Array.isArray(item) && item.length === 0) && !(cleanFalseValues && item === false))
-      .map(item => (typeof item === 'object' ? clean_object(item, cleanFalseValues) : item))
+      .filter(item => item !== null && item !== undefined && item !== '' && !(Array.isArray(item) && item.length === 0) && !(clean_false_values && item === false))
+      .map(item => (typeof item === 'object' ? clean_object(item, { clean_false_values }) : item))
     return result.length === 0 ? undefined : result
   }
   if (is_object) {
     const result = Object.entries(obj)
-      .filter(([_, value]) => value !== null && value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0) && !(cleanFalseValues && value === false))
-      .reduce((acc, [key, value]) => ({ ...acc, [key]: typeof value === 'object' ? clean_object(value, cleanFalseValues) : value }), {})
+      .filter(([_, value]) => value !== null && value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0) && !(clean_false_values && value === false))
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: typeof value === 'object' ? clean_object(value, { clean_false_values }) : value }), {})
     return Object.keys(result).length === 0 ? undefined : result
   }
   return obj
@@ -49,7 +49,7 @@ if (import.meta.vitest) {
     })
     test('should remove false values from an object when flag set', () => {
       const obj = { b: false }
-      expect(clean_object(obj, true)).toBeUndefined()
+      expect(clean_object(obj, { clean_false_values: true })).toBeUndefined()
     })
     test('should remove null, undefined, empty string, and empty array values from an array', () => {
       const arr = ['a', null, undefined, '', [], { g: 'g', h: null, i: undefined, j: '', k: [] }]
