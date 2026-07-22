@@ -13,6 +13,7 @@
   import TranslateRow from '$lib/translate/translate-row.svelte'
   import { translate_store } from '$lib/translate/translate-store.svelte'
   import { read_choice_param, update_query_params } from '$lib/utils/url-search-params'
+  import IconMdiInformationOutline from '~icons/mdi/information-outline'
   import IconMdiShieldLockOutline from '~icons/mdi/shield-lock-outline'
   import IconMdiTranslate from '~icons/mdi/translate'
 
@@ -151,6 +152,14 @@
 
     <TranslateProgress locale={active_locale} counts={progress_counts} total={rows.length} {filter} on_pick_filter={pick_filter} />
 
+    <p class="help">
+      <IconMdiInformationOutline style="flex-shrink: 0; color: var(--primary)" />
+      <span>
+        Type in any box to change a translation — it <strong>saves automatically</strong> when you click away (or press ⌘/Ctrl + Enter), and a “Saved” note confirms it.
+        For an AI suggestion flagged for review, click <strong>Looks good</strong> to approve it as-is.
+      </span>
+    </p>
+
     {#if translate_store.loading}
       <p class="empty">Loading {get_locale_display_name(active_locale)}…</p>
     {:else if !visible_rows.length}
@@ -253,5 +262,24 @@
     color: var(--color-secondary);
     text-align: center;
     padding: 3rem 0;
+  }
+
+  .help {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--color-secondary);
+    background: color-mix(in srgb, var(--primary) 6%, var(--background));
+    border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+    border-radius: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0.75rem 0 1rem;
+  }
+
+  .help strong {
+    color: var(--color);
+    font-weight: 600;
   }
 </style>

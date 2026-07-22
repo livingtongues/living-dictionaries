@@ -99,6 +99,12 @@
         </button>
       {/each}
     </div>
+    <div class="legend" title="AI-translation trust per language">
+      <span class="legend-label">AI drafts:</span>
+      <span class="legend-item"><span class="status-icon conf-confident"><IconMdiCheckCircle /></span>{AI_CONFIDENCE_META.confident.label}</span>
+      <span class="legend-item"><span class="status-icon conf-decent"><IconMdiAlert /></span>{AI_CONFIDENCE_META.decent.label}</span>
+      <span class="legend-item"><span class="status-icon conf-low"><IconMdiFlag /></span>{AI_CONFIDENCE_META.low.label}</span>
+    </div>
     {#if !summary.translators.length}
       <p class="hint">No translators assigned yet — pick people on their <a href="/admin/users">admin user page</a>.</p>
     {/if}
@@ -236,6 +242,30 @@
   .no-translator {
     color: color-mix(in srgb, var(--warning) 74%, var(--color));
     font-weight: 600;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    margin-top: 0.75rem;
+    font-size: 0.6875rem;
+    color: var(--color-secondary);
+  }
+
+  .legend-label {
+    font-weight: 600;
+  }
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .legend-item .status-icon {
+    font-size: 0.8125rem;
   }
 
   .hint {
