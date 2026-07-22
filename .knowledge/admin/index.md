@@ -10,3 +10,6 @@ Knowledge for the local-first super-admin area (`/admin/*`).
 - [analytics-telemetry.md](./analytics-telemetry.md) — cross-repo `client_logs` analytics shapes:
   the three-signal bot classifier (frequency-bot two-signal gate), the `bot:` rollup namespace,
   and why warn-level `sync_failed` needs its own "Sync health" panel.
+- [email-threading.md](./email-threading.md) — inbound email gotchas (LD ⇄ house): SES overwrites
+  our `Message-ID` (so replies match only via the subject heuristic unless we persist the SES id),
+  reply-must-reopen-resolved-thread, and the assignee-first notification precedence.

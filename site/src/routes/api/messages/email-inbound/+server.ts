@@ -2,7 +2,7 @@ import type Database from 'better-sqlite3'
 import type { RequestHandler } from './$types'
 import { randomUUID } from 'node:crypto'
 import { env } from '$env/dynamic/private'
-import { get_admin_by_ld_address, is_internal_email } from '$lib/admins'
+import { get_admin_by_ld_address, is_admin, is_internal_email } from '$lib/admins'
 import { assign_directed_thread } from '$lib/email/assign-directed-thread'
 import { match_notification } from '$lib/agent/auto-resolve/notification-registry'
 import { resolve_notification_thread } from '$lib/agent/auto-resolve/resolve-notification'
@@ -185,14 +185,19 @@ export const POST: RequestHandler = async ({ request, url }) => {
   if (directed_admin)
     assign_directed_thread({ db, thread_id, admin: directed_admin, now })
 
-  // ntfy push — skip auto-resolved notifications (need no attention) and mail
-  // from US (our own `@livingdictionaries.app` domain / admins) so our own
-  // no-reply/OTP loops don't buzz phones. Directed mail pings only its admin.
+  // ntfy/email ping — skip auto-resolved notifications (need no attention) and
+  // mail from US (our own `@livingdictionaries.app` domain / admins) so our own
+  // no-reply/OTP loops don't buzz phones. Precedence: the thread's CURRENT
+  // assignee (so a reply to a thread assigned to you always pings you, honoring
+  // your channel) → the directed-alias admin → a team broadcast.
   if (!notification && !is_internal_email(from_email_lower)) {
     const subject = is_new ? `New email: ${body.subject}` : `Reply: ${body.subject}`
     const notify_body = `${body.from_name?.trim() || from_email_lower}: ${(body.body_text ?? '').slice(0, 200)}`
     const link = `${url.origin}/admin/messages/${thread_id}`
-    if (directed_admin)
+    const assignee_admin_email = get_thread_assignee_admin_email({ db, thread_id })
+    if (assignee_admin_email)
+      void notify_admin({ email: assignee_admin_email, subject, body: notify_body, link })
+    else if (directed_admin)
       void notify_admin({ email: directed_admin.email, subject, body: notify_body, link })
     else
       void notify_admins({ subject, body: notify_body, link })
@@ -220,6 +225,25 @@ export const POST: RequestHandler = async ({ request, url }) => {
     message_id: message_row_id,
     is_new_thread: is_new,
   } satisfies MessagesEmailInboundResponseBody)
+}
+
+/**
+ * The email of the thread's current assignee, but ONLY when that user is an
+ * allow-listed admin (so `notify_admin` will actually reach them). Returns null
+ * for an unassigned thread or a non-admin assignee — the caller then falls back
+ * to the directed-alias admin or a broadcast.
+ */
+function get_thread_assignee_admin_email({ db, thread_id }: {
+  db: Database.Database
+  thread_id: string
+}): string | null {
+  const row = db.prepare(`
+    SELECT u.email AS email
+    FROM message_threads t
+    JOIN users u ON u.id = t.assigned_to_user_id
+    WHERE t.id = ?
+  `).get(thread_id) as { email: string | null } | undefined
+  return row?.email && is_admin(row.email) ? row.email : null
 }
 
 /** Inserts thread (when new) + message + bumps last_message_at, atomically. */
@@ -264,9 +288,19 @@ function insert_inbound({
         now,
       )
     } else {
+      // A customer reply re-opens the thread: clear resolved (back into the
+      // unresolved inbox), read (surfaces as needing attention), and replied (the
+      // latest message is now from the customer, so the "Replied" badge should
+      // drop until an admin answers again — the reply endpoint re-sets replied_at
+      // via COALESCE on the next outbound). Safe for already-open threads.
       db.prepare(`
         UPDATE message_threads
         SET last_message_at = ?,
+            resolved_at = NULL,
+            resolved_by_user_id = NULL,
+            replied_at = NULL,
+            replied_by_user_id = NULL,
+            read_at = NULL,
             updated_at = ?
         WHERE id = ?
       `).run(received_at_iso, now, thread_id)

@@ -135,6 +135,26 @@ export function compose_raw_mime(parts: SendRawEmailParts): string {
   return msg.asRaw().replace(/\r\n|\r|\n/g, '\r\n')
 }
 
+/**
+ * SES overrides our custom `Message-ID:` header with its own, so the recipient's
+ * client threads on SES's id and their reply's `In-Reply-To` references it — NOT
+ * the `<…@livingdictionaries.app>` we set. To make inbound-reply threading match
+ * on headers (instead of only the subject heuristic), we reconstruct SES's id in
+ * the RFC 5322 angle-bracketed form `<{SES MessageId}@{region}.amazonses.com>`
+ * and persist it on the outbound `messages.message_id`. `us-east-1` uses the
+ * legacy `email.amazonses.com` domain. Returns null when there's no real id
+ * (dry-run / missing region) so callers keep the id they generated.
+ */
+export function build_ses_message_id({ ses_message_id, region }: {
+  ses_message_id: string | undefined | null
+  region: string | undefined | null
+}): string | null {
+  if (!ses_message_id || ses_message_id === 'dry-run' || !region)
+    return null
+  const domain = region === 'us-east-1' ? 'email.amazonses.com' : `${region}.amazonses.com`
+  return `<${ses_message_id}@${domain}>`
+}
+
 let ses_client_singleton: SESClient | null = null
 function get_ses_client(): SESClient {
   if (ses_client_singleton)
@@ -152,7 +172,7 @@ function get_ses_client(): SESClient {
   return ses_client_singleton
 }
 
-export async function send_raw_email(parts: SendRawEmailParts): Promise<{ ses_message_id: string }> {
+export async function send_raw_email(parts: SendRawEmailParts): Promise<{ ses_message_id: string, provider_message_id: string | null }> {
   const raw_mime = compose_raw_mime(parts)
 
   if (parts.dry_run) {
@@ -167,7 +187,7 @@ export async function send_raw_email(parts: SendRawEmailParts): Promise<{ ses_me
       console.info('References:', parts.references.join(' '))
     console.info('MIME size:', raw_mime.length, 'bytes')
     console.info('MIME preview:', raw_mime.slice(0, 200), '...')
-    return { ses_message_id: 'dry-run' }
+    return { ses_message_id: 'dry-run', provider_message_id: null }
   }
 
   const ses_client = get_ses_client()
@@ -185,9 +205,31 @@ export async function send_raw_email(parts: SendRawEmailParts): Promise<{ ses_me
     })
     const response: SendRawEmailCommandOutput = await ses_client.send(command)
     console.info('Raw email sent to', parts.to.email, '— SES MessageId:', response.MessageId, '— our Message-ID:', parts.message_id)
-    return { ses_message_id: response.MessageId ?? '' }
+    const ses_message_id = response.MessageId ?? ''
+    return {
+      ses_message_id,
+      provider_message_id: build_ses_message_id({ ses_message_id, region: env.AWS_SES_REGION }),
+    }
   } catch (error) {
     console.error('Error sending raw email to', parts.to.email, ':', error)
     throw Object.assign(new Error(`Failed to send raw email to ${parts.to.email}: ${(error as Error).message}`), { cause: error })
   }
+}
+
+if (import.meta.vitest) {
+  describe(build_ses_message_id, () => {
+    test('wraps the SES id in the regional amazonses.com domain', () => {
+      expect(build_ses_message_id({ ses_message_id: '010f-abc-000000', region: 'us-east-2' }))
+        .toBe('<010f-abc-000000@us-east-2.amazonses.com>')
+    })
+    test('uses the legacy email.amazonses.com domain for us-east-1', () => {
+      expect(build_ses_message_id({ ses_message_id: 'abc', region: 'us-east-1' }))
+        .toBe('<abc@email.amazonses.com>')
+    })
+    test('returns null for a dry-run id, empty id, or missing region', () => {
+      expect(build_ses_message_id({ ses_message_id: 'dry-run', region: 'us-east-2' })).toBeNull()
+      expect(build_ses_message_id({ ses_message_id: '', region: 'us-east-2' })).toBeNull()
+      expect(build_ses_message_id({ ses_message_id: 'abc', region: '' })).toBeNull()
+    })
+  })
 }

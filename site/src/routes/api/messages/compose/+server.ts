@@ -223,7 +223,7 @@ async function send_to_one({ db, admin_user_id, admin_email, admin_name, recipie
   insert_attachment_rows({ db, message_row_id, prepared: prepared_attachments, now })
 
   try {
-    await send_raw_email({
+    const { provider_message_id } = await send_raw_email({
       from: from_address,
       to: { email: recipient.email, name: recipient.name ?? undefined },
       cc: body.cc?.map(addr => ({ email: addr })),
@@ -237,6 +237,13 @@ async function send_to_one({ db, admin_user_id, admin_email, admin_name, recipie
       auto_submitted: 'no',
       attachments: send_attachments,
     })
+
+    // SES overrides our Message-ID; persist the id it actually stamped so the
+    // recipient's reply (whose In-Reply-To references it) threads on headers.
+    if (provider_message_id) {
+      db.prepare(`UPDATE messages SET message_id = ? WHERE id = ?`)
+        .run(provider_message_id, message_row_id)
+    }
 
     db.prepare(`UPDATE messages SET sent_at = ?, delivery_status = 'sent', updated_at = ? WHERE id = ?`)
       .run(now, new Date().toISOString(), message_row_id)

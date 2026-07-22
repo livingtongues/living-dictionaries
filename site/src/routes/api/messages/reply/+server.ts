@@ -168,7 +168,7 @@ export const POST: RequestHandler = async (event) => {
 
   // Send via SES — failure marks the row as 'failed' but doesn't throw.
   try {
-    await send_raw_email({
+    const { provider_message_id } = await send_raw_email({
       from: from_address,
       to: {
         email: thread.from_email,
@@ -186,6 +186,13 @@ export const POST: RequestHandler = async (event) => {
       auto_submitted: 'no',
       attachments: send_attachments,
     })
+
+    // SES overrides our Message-ID; persist the id it actually stamped so the
+    // customer's reply (whose In-Reply-To references it) threads on headers.
+    if (provider_message_id) {
+      db.prepare(`UPDATE messages SET message_id = ? WHERE id = ?`)
+        .run(provider_message_id, message_row_id)
+    }
 
     db.prepare(`
       UPDATE messages

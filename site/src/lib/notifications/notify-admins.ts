@@ -50,17 +50,15 @@ async function send_ping_email({ email, name, subject, body, link, email_html, e
 }
 
 /**
- * Fire-and-forget push notification to every admin's phone via ntfy.sh.
+ * Fire-and-forget broadcast to every on-duty admin, HONORING each admin's
+ * chosen `notify_channel` (ntfy push OR email) — an email-only admin
+ * (Diego/Greg/Cailie) must still receive broadcast pings, not just ntfy
+ * subscribers. Delegates per-admin to `notify_admin` and wraps the fan-out in
+ * `Promise.allSettled` so one slow / failing channel never breaks delivery for
+ * the rest. A broadcast should never fail the inbound endpoint.
  *
- * Each admin has their own random `ntfy_topic` in `$lib/admins.ts` so they
- * can subscribe on their phone independently. This function POSTs to every
- * admin's topic in parallel — wrapped in `Promise.allSettled` so one slow
- * or failing ntfy call never breaks delivery for the rest. ntfy outages
- * should never fail the inbound endpoint.
- *
- * Callers should still `void`-await this — it returns a settled-array
- * promise that resolves quickly (concurrent fetches), but you don't want
- * to block the inbound HTTP response on it.
+ * Callers should still `void`-await this — it resolves quickly (concurrent
+ * sends), but you don't want to block the inbound HTTP response on it.
  *
  * For local dev / tests, set `NTFY_DISABLED=1` to skip all pushes.
  */
@@ -81,12 +79,7 @@ export async function notify_admins({ subject, body, link }: NotifyAdminsParams)
     return
 
   await Promise.allSettled(
-    on_duty.map(admin => notify_one({
-      topic: admin.ntfy_topic,
-      subject,
-      body,
-      link,
-    })),
+    on_duty.map(admin => notify_admin({ email: admin.email, subject, body, link })),
   )
 }
 
