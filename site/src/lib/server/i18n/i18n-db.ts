@@ -50,7 +50,10 @@ export interface LocaleStats {
   locale: string
   total: number
   translated: number
+  /** Total needing review (`flagged_ai + flagged_en_changed`). */
   flagged: number
+  flagged_ai: number
+  flagged_en_changed: number
   missing: number
 }
 
@@ -251,15 +254,20 @@ export function approve_translation({ db, key_id, locale, updated_by_user_id, up
 export function get_locale_stats({ db }: { db: Database.Database }): LocaleStats[] {
   const { total } = db.prepare('SELECT COUNT(*) as total FROM i18n_keys WHERE removed_at IS NULL').get() as { total: number }
   const rows = db.prepare(`
-    SELECT t.locale, COUNT(*) as translated, SUM(t.needs_review IS NOT NULL) as flagged
+    SELECT t.locale,
+      COUNT(*) as translated,
+      SUM(t.needs_review = 'ai') as flagged_ai,
+      SUM(t.needs_review = 'en_changed') as flagged_en_changed
     FROM i18n_translations t
     JOIN i18n_keys k ON k.id = t.key_id AND k.removed_at IS NULL
-    GROUP BY t.locale`).all() as { locale: string, translated: number, flagged: number }[]
+    GROUP BY t.locale`).all() as { locale: string, translated: number, flagged_ai: number, flagged_en_changed: number }[]
   const by_locale = new Map(rows.map(row => [row.locale, row]))
   return TRANSLATABLE_LOCALES.map((locale) => {
     const row = by_locale.get(locale)
     const translated = row?.translated ?? 0
-    return { locale, total, translated, flagged: row?.flagged ?? 0, missing: total - translated }
+    const flagged_ai = row?.flagged_ai ?? 0
+    const flagged_en_changed = row?.flagged_en_changed ?? 0
+    return { locale, total, translated, flagged: flagged_ai + flagged_en_changed, flagged_ai, flagged_en_changed, missing: total - translated }
   })
 }
 
@@ -411,15 +419,16 @@ if (import.meta.vitest) {
   })
 
   describe(get_locale_stats, () => {
-    test('counts translated + flagged per locale with zeros for untouched locales', () => {
+    test('counts translated + flagged (split by review reason) per locale with zeros for untouched locales', () => {
       const db = make_db()
       sync_en_catalog({ db })
       upsert_translation({ db, key_id: 'misc.add', locale: 'es', value: 'Agregar', source: 'human' })
       upsert_translation({ db, key_id: 'misc.edit', locale: 'es', value: 'Editar', source: 'ai', needs_review: 'ai' })
+      upsert_translation({ db, key_id: 'header.contact_us', locale: 'es', value: 'Contáctenos', source: 'human', needs_review: 'en_changed' })
       const stats = get_locale_stats({ db })
       const spanish = stats.find(stat => stat.locale === 'es')
       const total = Object.keys(flatten_en()).length
-      expect(spanish).toEqual({ locale: 'es', total, translated: 2, flagged: 1, missing: total - 2 })
+      expect(spanish).toEqual({ locale: 'es', total, translated: 3, flagged: 2, flagged_ai: 1, flagged_en_changed: 1, missing: total - 3 })
       const hausa = stats.find(stat => stat.locale === 'ha')
       expect(hausa?.translated).toBe(0)
       db.close()

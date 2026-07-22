@@ -1,9 +1,18 @@
 <script lang="ts">
+  import type { LocaleStats } from '$lib/server/i18n/i18n-db'
+  import type { ProgressCounts } from './constants'
   import { api_translate_notify } from '$api/translate/notify/_call'
   import { get_locale_display_name } from '$lib/i18n/locales'
   import { toast } from '$lib/state/toast.svelte'
+  import { ai_confidence_for, AI_CONFIDENCE_META, is_unpublished_locale } from './constants'
+  import SegmentedBar from './segmented-bar.svelte'
   import { translate_store } from './translate-store.svelte'
+  import IconMdiAlert from '~icons/mdi/alert'
   import IconMdiBellOutline from '~icons/mdi/bell-outline'
+  import IconMdiCheckCircle from '~icons/mdi/check-circle'
+  import IconMdiEyeOffOutline from '~icons/mdi/eye-off-outline'
+  import IconMdiFlag from '~icons/mdi/flag'
+  import IconMdiShieldLockOutline from '~icons/mdi/shield-lock-outline'
 
   interface Props {
     active_locale: string
@@ -14,6 +23,15 @@
 
   let notifying = $state(false)
   const summary = $derived(translate_store.summary)
+
+  function card_counts(stat: LocaleStats): ProgressCounts {
+    return {
+      reviewed: stat.translated - stat.flagged,
+      ai: stat.flagged_ai,
+      en_changed: stat.flagged_en_changed,
+      missing: stat.missing,
+    }
+  }
 
   async function notify() {
     const pending_total = summary?.locales.reduce((sum, stat) => sum + stat.missing + stat.flagged, 0) ?? 0
@@ -43,7 +61,7 @@
 {#if summary}
   <div class="panel">
     <div class="panel-head">
-      <h2>Progress</h2>
+      <h2>Progress <span class="admin-badge" title="Admin only — translators don't see this panel"><IconMdiShieldLockOutline /></span></h2>
       <button type="button" class="btn-primary btn-sm" style="gap: 0.375rem" disabled={notifying} onclick={notify}>
         <IconMdiBellOutline /> {notifying ? 'Notifying…' : 'Notify translators'}
       </button>
@@ -51,9 +69,24 @@
     <div class="grid">
       {#each summary.locales as stat (stat.locale)}
         {@const translator_names = translators_for(stat.locale)}
+        {@const confidence = ai_confidence_for(stat.locale)}
         <button type="button" class={['locale-card', translator_names.length ? 'assigned' : 'unassigned', { active: stat.locale === active_locale }]} onclick={() => on_pick_locale(stat.locale)}>
-          <div class="locale-name">{get_locale_display_name(stat.locale)}</div>
-          <div class="bar"><div class="fill" style:width="{stat.total ? Math.round((stat.translated / stat.total) * 100) : 0}%"></div></div>
+          <div class="card-head">
+            <span class="locale-name">{get_locale_display_name(stat.locale)}</span>
+            <span class="status">
+              {#if is_unpublished_locale(stat.locale)}
+                <span class="status-icon unpublished" title="Unpublished — not yet public"><IconMdiEyeOffOutline /></span>
+              {/if}
+              {#if confidence === 'confident'}
+                <span class="status-icon conf-confident" title={AI_CONFIDENCE_META.confident.tooltip}><IconMdiCheckCircle /></span>
+              {:else if confidence === 'decent'}
+                <span class="status-icon conf-decent" title={AI_CONFIDENCE_META.decent.tooltip}><IconMdiAlert /></span>
+              {:else if confidence === 'low'}
+                <span class="status-icon conf-low" title={AI_CONFIDENCE_META.low.tooltip}><IconMdiFlag /></span>
+              {/if}
+            </span>
+          </div>
+          <SegmentedBar counts={card_counts(stat)} total={stat.total} size="mini" />
           <div class="counts">
             <span>{stat.translated}/{stat.total}</span>
             {#if stat.flagged}<span class="flagged-count">{stat.flagged} to review</span>{/if}
@@ -88,9 +121,18 @@
   }
 
   .panel-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
     font-size: 0.875rem;
     font-weight: 600;
     margin: 0;
+  }
+
+  .admin-badge {
+    display: inline-flex;
+    color: var(--color-secondary);
+    font-size: 0.9375rem;
   }
 
   .grid {
@@ -124,30 +166,55 @@
     box-shadow: 0 0 0 1px var(--primary);
   }
 
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem;
+    margin-bottom: 0.375rem;
+  }
+
   .locale-name {
     font-size: 0.8125rem;
     font-weight: 600;
-    margin-bottom: 0.375rem;
-  }
-
-  .bar {
-    height: 4px;
-    border-radius: 2px;
-    background: color-mix(in srgb, var(--color-secondary) 18%, var(--background));
     overflow: hidden;
-    margin-bottom: 0.375rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .fill {
-    height: 100%;
-    background: var(--primary);
-    border-radius: 2px;
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 0 0 auto;
+    font-size: 0.875rem;
+  }
+
+  .status-icon {
+    display: inline-flex;
+  }
+
+  .status-icon.unpublished {
+    color: var(--color-secondary);
+  }
+
+  .status-icon.conf-confident {
+    color: var(--success);
+  }
+
+  .status-icon.conf-decent {
+    color: var(--warning);
+  }
+
+  .status-icon.conf-low {
+    color: var(--danger);
   }
 
   .counts {
     display: flex;
     flex-wrap: wrap;
     gap: 0.375rem;
+    margin-top: 0.375rem;
     font-size: 0.6875rem;
     color: var(--color-secondary);
   }

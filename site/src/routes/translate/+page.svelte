@@ -9,6 +9,7 @@
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import AdminPanel from '$lib/translate/admin-panel.svelte'
   import { FILTER_LABELS, section_label, TRANSLATE_FILTERS } from '$lib/translate/constants'
+  import TranslateProgress from '$lib/translate/translate-progress.svelte'
   import TranslateRow from '$lib/translate/translate-row.svelte'
   import { translate_store } from '$lib/translate/translate-store.svelte'
   import { read_choice_param, update_query_params } from '$lib/utils/url-search-params'
@@ -23,15 +24,15 @@
     const url_locale = page.url.searchParams.get('locale')
     return url_locale && my_locales.includes(url_locale) ? url_locale : (my_locales[0] ?? '')
   })
-  const filter = $derived(read_choice_param({ search_params: page.url.searchParams, key: 'filter', choices: TRANSLATE_FILTERS, fallback: 'all' }))
+  const filter = $derived(read_choice_param<TranslateFilter>({ search_params: page.url.searchParams, key: 'filter', choices: TRANSLATE_FILTERS, fallback: 'all' }))
   let search = $state(page.url.searchParams.get('q') ?? '')
 
   const rows = $derived(translate_store.rows)
-  const counts = $derived({
-    all: rows.length,
+  const progress_counts = $derived({
+    reviewed: rows.filter(row => row.value && !row.needs_review).length,
+    ai: rows.filter(row => row.needs_review === 'ai').length,
+    en_changed: rows.filter(row => row.needs_review === 'en_changed').length,
     missing: rows.filter(row => !row.value).length,
-    flagged: rows.filter(row => row.needs_review).length,
-    pending: rows.filter(row => !row.value || row.needs_review).length,
   })
 
   const visible_rows = $derived.by(() => {
@@ -39,7 +40,9 @@
     return rows.filter((row) => {
       if (filter === 'missing' && row.value)
         return false
-      if (filter === 'flagged' && !row.needs_review)
+      if (filter === 'ai' && row.needs_review !== 'ai')
+        return false
+      if (filter === 'en_changed' && row.needs_review !== 'en_changed')
         return false
       if (filter === 'pending' && row.value && !row.needs_review)
         return false
@@ -129,6 +132,10 @@
   </div>
 {:else}
   <main>
+    {#if is_admin}
+      <AdminPanel active_locale={active_locale} on_pick_locale={pick_locale} />
+    {/if}
+
     <div class="toolbar">
       {#if my_locales.length > 1}
         <select value={active_locale} onchange={event => pick_locale((event.target as HTMLSelectElement).value)}>
@@ -139,20 +146,10 @@
       {:else}
         <div class="single-locale">{get_locale_display_name(active_locale)}</div>
       {/if}
-      <div class="filters">
-        {#each TRANSLATE_FILTERS as option (option)}
-          <button type="button" class={['filter-chip', { active: filter === option }]} onclick={() => pick_filter(option)}>
-            {FILTER_LABELS[option]}
-            <span class="count">{counts[option]}</span>
-          </button>
-        {/each}
-      </div>
       <input type="search" placeholder="Search keys and text…" value={search} oninput={event => set_search(event.currentTarget.value)} />
     </div>
 
-    {#if is_admin}
-      <AdminPanel active_locale={active_locale} on_pick_locale={pick_locale} />
-    {/if}
+    <TranslateProgress locale={active_locale} counts={progress_counts} total={rows.length} {filter} on_pick_filter={pick_filter} />
 
     {#if translate_store.loading}
       <p class="empty">Loading {get_locale_display_name(active_locale)}…</p>
@@ -179,6 +176,11 @@
 
 <style>
   main {
+    /* Progress-category palette, inherited by the segmented bars, legend chips and cards below. */
+    --cat-reviewed: var(--success);
+    --cat-ai: light-dark(hsl(258, 70%, 60%), hsl(258, 78%, 74%));
+    --cat-en-changed: var(--warning);
+    --cat-missing: light-dark(hsl(240, 5%, 74%), hsl(240, 5%, 42%));
     max-width: 64rem;
     margin: 0 auto;
     padding: 1rem 0.75rem 4rem;
@@ -224,40 +226,6 @@
   .single-locale {
     font-weight: 700;
     padding: 0.375rem 0.25rem;
-  }
-
-  .filters {
-    display: flex;
-    gap: 0.25rem;
-    flex-wrap: wrap;
-  }
-
-  .filter-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 0.375rem 0.625rem;
-    border-radius: 999px;
-    background: transparent;
-    color: var(--color-secondary);
-    cursor: pointer;
-    transition: background var(--transition-time, 150ms);
-  }
-
-  .filter-chip:hover {
-    background: var(--surface);
-  }
-
-  .filter-chip.active {
-    background: color-mix(in srgb, var(--primary) 12%, var(--background));
-    color: var(--primary);
-  }
-
-  .count {
-    font-size: 0.6875rem;
-    opacity: 0.8;
   }
 
   .section-head {

@@ -43,6 +43,8 @@ describe(GET, () => {
     const spanish = locales.find(stat => stat.locale === 'es')
     expect(spanish?.translated).toBe(1)
     expect(spanish?.flagged).toBe(1)
+    expect(spanish?.flagged_ai).toBe(1)
+    expect(spanish?.flagged_en_changed).toBe(0)
     expect(translators).toEqual([{ user_id: TRANSLATOR.user_id, name: 'Tina', email: 'tina@example.com', locales: ['es', 'fr'] }])
   })
 })

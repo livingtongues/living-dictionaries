@@ -73,7 +73,7 @@
       {#if !row.value && !draft}
         <span class="chip missing">Untranslated</span>
       {:else if row.needs_review === 'ai'}
-        <span class="chip review"><IconMdiRobotOutline /> AI translation — please review</span>
+        <span class="chip ai"><IconMdiRobotOutline /> AI translation — please review</span>
       {:else if row.needs_review === 'en_changed'}
         <span class="chip review"><IconMdiAlertOutline /> English changed — please review</span>
       {/if}
@@ -202,6 +202,12 @@
   .chip.review {
     background: color-mix(in srgb, var(--warning) 15%, var(--background));
     color: color-mix(in srgb, var(--warning) 70%, var(--color));
+  }
+
+  .chip.ai {
+    --ai: var(--cat-ai, hsl(258, 70%, 60%));
+    background: color-mix(in srgb, var(--ai) 15%, var(--background));
+    color: color-mix(in srgb, var(--ai) 68%, var(--color));
   }
 
   .chip.warn {

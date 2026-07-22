@@ -30,12 +30,18 @@ translate_store.rows = [
   row({ key_id: 'relationship_type.antonym', en_value: 'Antonym' }),
   row({ key_id: 'gl.es', en_value: 'Spanish', value: 'español', source: 'import' }),
 ]
+function locale_stat({ locale, total = 981, translated, flagged_ai = 0, flagged_en_changed = 0 }: { locale: string, total?: number, translated: number, flagged_ai?: number, flagged_en_changed?: number }) {
+  return { locale, total, translated, flagged_ai, flagged_en_changed, flagged: flagged_ai + flagged_en_changed, missing: total - translated }
+}
+
 translate_store.summary = {
   locales: [
-    { locale: 'es', total: 981, translated: 930, flagged: 12, missing: 51 },
-    { locale: 'fr', total: 981, translated: 981, flagged: 0, missing: 0 },
-    { locale: 'hi', total: 981, translated: 420, flagged: 96, missing: 561 },
-    { locale: 'ha', total: 981, translated: 0, flagged: 0, missing: 981 },
+    locale_stat({ locale: 'es', translated: 930, flagged_ai: 8, flagged_en_changed: 4 }),
+    locale_stat({ locale: 'fr', translated: 981 }),
+    locale_stat({ locale: 'hi', translated: 420, flagged_ai: 80, flagged_en_changed: 16 }),
+    locale_stat({ locale: 'sw', translated: 700, flagged_ai: 20, flagged_en_changed: 10 }),
+    locale_stat({ locale: 'as', translated: 150, flagged_ai: 120, flagged_en_changed: 5 }),
+    locale_stat({ locale: 'ha', translated: 300, flagged_ai: 250 }),
   ],
   translators: [
     { user_id: 'u-tina', name: 'Tina Translator', email: 'tina@example.com', locales: ['es', 'fr'] },
