@@ -59,9 +59,12 @@ export const POST: RequestHandler = async ({ request }) => {
       return new Response('bad message', { status: ResponseCodes.BAD_REQUEST })
     }
     const event_type = event.eventType ?? event.notificationType ?? 'unknown'
-    const is_delay = event_type === 'DeliveryDelay'
+    // Routine lifecycle events (every send produces Send + Delivery) log at
+    // info; only genuine feedback (bounce/complaint/reject/render-failure)
+    // warns, so error reviews aren't flooded by healthy traffic.
+    const is_routine = event_type === 'Send' || event_type === 'Delivery' || event_type === 'DeliveryDelay' || event_type === 'unknown'
     log_server_event({
-      level: is_delay ? 'info' : 'warn',
+      level: is_routine ? 'info' : 'warn',
       message: 'ses_feedback',
       context: {
         event_type,
