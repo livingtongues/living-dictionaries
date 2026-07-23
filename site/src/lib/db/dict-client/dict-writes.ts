@@ -1,7 +1,11 @@
 import type { MultiString } from '$lib/types'
+import type { SentenceToken, SentenceTokens } from '$lib/db/schemas/dictionary.types'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
 import { initial_keys } from '$lib/api/v1/fractional-index'
+import { analyze_sentence_tokens, load_lexeme_index, tokens_reference_sense } from '$lib/corpus/sentence-analysis'
+import type { LexemeIndex } from '$lib/corpus/match-tokens'
+import { is_punctuation_form, normalized_word_key } from '$lib/corpus/tokenize-sentence'
 
 /**
  * Worker-side atomic write orchestrators — LD's mirror of house's
@@ -193,6 +197,77 @@ export async function insert_entry_local({ connection, user_id, lexeme, entry_id
   return { result: entry, affected_tables: ['entries', 'senses'] }
 }
 
+/**
+ * Word→entry matching (.issues/texts-sentences-pipeline.md M3): compute the
+ * `tokens` value for a new/edited sentence text. The lexeme index is loaded
+ * lazily ONCE per orchestrator call and reused across rows.
+ */
+async function tokens_for_sentence({ connection, text, existing_tokens, index_cache }: {
+  connection: DictWriteConnection
+  text: unknown
+  existing_tokens?: unknown
+  index_cache: { index?: LexemeIndex }
+}): Promise<SentenceTokens | null> {
+  if (!text || typeof text !== 'object')
+    return (existing_tokens as SentenceTokens) ?? null
+  index_cache.index ??= await load_lexeme_index(connection)
+  const { tokens } = analyze_sentence_tokens({
+    text: text as MultiString,
+    existing_tokens: (existing_tokens as SentenceTokens) ?? null,
+    index: index_cache.index,
+  })
+  return tokens
+}
+
+/** Stamp + UPDATE a sentence's `tokens` column (JSON). */
+async function write_sentence_tokens({ connection, user_id, sentence_id, tokens }: {
+  connection: DictWriteConnection
+  user_id?: string
+  sentence_id: string
+  tokens: SentenceTokens | null
+}): Promise<void> {
+  const params: unknown[] = [tokens ? JSON.stringify(tokens) : null, new Date().toISOString()]
+  let set_clause = `tokens = ?, dirty = 1, updated_at = ?`
+  if (user_id) {
+    set_clause += `, updated_by_user_id = ?`
+    params.push(user_id)
+  }
+  params.push(sentence_id)
+  await connection.execute(`UPDATE sentences SET ${set_clause} WHERE id = ?`, params)
+}
+
+/**
+ * Drop `senses_in_sentences` rows whose token link vanished. TEXT sentences
+ * only — a standalone sentence's junction row may be a curated example link
+ * that predates tokens, so those are never auto-removed.
+ */
+async function cleanup_sense_links({ connection, sentence_id, text_id, tokens, sense_ids }: {
+  connection: DictWriteConnection
+  sentence_id: string
+  text_id: unknown
+  tokens: SentenceTokens | null
+  sense_ids: string[]
+}): Promise<{ affected_tables: string[], deleted_rows: { table_name: string, id: string }[] }> {
+  if (!text_id || !sense_ids.length)
+    return { affected_tables: [], deleted_rows: [] }
+  const deleted_rows: { table_name: string, id: string }[] = []
+  for (const sense_id of new Set(sense_ids)) {
+    if (tokens_reference_sense({ tokens, sense_id }))
+      continue
+    const existing = await connection.query<{ id: string }>(
+      `SELECT id FROM senses_in_sentences WHERE sentence_id = ? AND sense_id = ?`,
+      [sentence_id, sense_id],
+    )
+    if (!existing[0])
+      continue
+    await connection.execute(`INSERT OR IGNORE INTO deletes (table_name, id) VALUES (?, ?)`, ['senses_in_sentences', existing[0].id])
+    deleted_rows.push({ table_name: 'senses_in_sentences', id: existing[0].id })
+  }
+  if (!deleted_rows.length)
+    return { affected_tables: [], deleted_rows: [] }
+  return { affected_tables: ['senses_in_sentences', 'deletes'], deleted_rows }
+}
+
 /** New sentence linked to a sense. */
 export async function insert_sentence_local({ connection, user_id, sentence, sense_id }: {
   connection: DictWriteConnection
@@ -200,14 +275,32 @@ export async function insert_sentence_local({ connection, user_id, sentence, sen
   sentence: Record<string, unknown>
   sense_id: string
 }): Promise<DictWriteOutcome<Record<string, unknown>>> {
-  const new_sentence = await insert_row({ connection, table: 'sentences', row: sentence, user_id })
+  const index_cache = {}
+  const tokens = await tokens_for_sentence({ connection, text: sentence.text, existing_tokens: sentence.tokens, index_cache })
+  const new_sentence = await insert_row({ connection, table: 'sentences', row: { ...sentence, ...(tokens ? { tokens } : {}) }, user_id })
   await insert_row({ connection, table: 'senses_in_sentences', row: { sentence_id: new_sentence.id, sense_id }, user_id })
   return { result: new_sentence, affected_tables: ['sentences', 'senses_in_sentences'] }
+}
+
+/** Bulk sentence insert (text append / standalone add) with auto-matching. */
+export async function insert_sentences_local({ connection, user_id, rows }: {
+  connection: DictWriteConnection
+  user_id?: string
+  rows: Record<string, unknown>[]
+}): Promise<DictWriteOutcome<Record<string, unknown>[]>> {
+  const index_cache = {}
+  const results: Record<string, unknown>[] = []
+  for (const row of rows) {
+    const tokens = await tokens_for_sentence({ connection, text: row.text, existing_tokens: row.tokens, index_cache })
+    results.push(await insert_row({ connection, table: 'sentences', row: { ...row, ...(tokens ? { tokens } : {}) }, user_id }))
+  }
+  return { result: results, affected_tables: rows.length ? ['sentences'] : [] }
 }
 
 /**
  * New text + its ordered sentences (fractional sort_keys assigned in array
  * order) — the local-first mirror of the server's `v1-texts.create_text`.
+ * Each sentence is tokenized + auto-matched on the way in.
  */
 export async function insert_text_local({ connection, user_id, text_id, title, sentences }: {
   connection: DictWriteConnection
@@ -219,7 +312,9 @@ export async function insert_text_local({ connection, user_id, text_id, title, s
 }): Promise<DictWriteOutcome<Record<string, unknown>>> {
   const text = await insert_row({ connection, table: 'texts', row: { id: text_id, title }, user_id })
   const sort_keys = initial_keys(sentences.length)
+  const index_cache = {}
   for (const [index, sentence] of sentences.entries()) {
+    const tokens = await tokens_for_sentence({ connection, text: sentence.text, index_cache })
     await insert_row({
       connection,
       table: 'sentences',
@@ -227,12 +322,291 @@ export async function insert_text_local({ connection, user_id, text_id, title, s
         text: sentence.text,
         text_id: text.id,
         sort_key: sort_keys[index],
+        ...tokens ? { tokens } : {},
         ...sentence.ends_paragraph ? { ends_paragraph: 1 } : {},
       },
       user_id,
     })
   }
   return { result: text, affected_tables: sentences.length ? ['texts', 'sentences'] : ['texts'] }
+}
+
+/**
+ * Patch a sentence row (worker-side twin of the generic table update, plus:
+ * when `text` changes the tokens are recomputed in the SAME transaction —
+ * carry-over preserves confirmed/gold-IGT tokens by normalized form; vanished
+ * forms drop their token and clean their junction rows).
+ */
+export async function update_sentence_local({ connection, user_id, sentence }: {
+  connection: DictWriteConnection
+  user_id?: string
+  sentence: Record<string, unknown> & { id: string }
+}): Promise<DictWriteOutcome<Record<string, unknown>>> {
+  const { id, ...patch } = sentence
+  if (!id)
+    throw new Error('update_sentence: id is required')
+  const [existing] = await connection.query<Record<string, unknown>>(`SELECT * FROM sentences WHERE id = ?`, [id])
+  if (!existing)
+    throw new Error('update_sentence: sentence not found')
+
+  const stamped: Record<string, unknown> = { ...patch, dirty: 1, updated_at: new Date().toISOString() }
+  if (user_id)
+    stamped.updated_by_user_id = user_id
+  const stringified = stringify_dict_row('sentences', { ...stamped })
+  const columns = Object.keys(stringified)
+  await connection.execute(
+    `UPDATE sentences SET ${columns.map(column => `"${column}" = ?`).join(', ')} WHERE id = ?`,
+    [...columns.map(column => stringified[column]), id],
+  )
+
+  const affected_tables = ['sentences']
+  let deleted_rows: { table_name: string, id: string }[] | undefined
+  if ('text' in patch) {
+    const parsed = parse_dict_row('sentences', { ...existing, ...stamped })
+    const index = await load_lexeme_index(connection)
+    const analysis = analyze_sentence_tokens({
+      text: parsed.text as MultiString | null,
+      existing_tokens: (parsed.tokens as SentenceTokens) ?? null,
+      index,
+    })
+    if (analysis.changed) {
+      await write_sentence_tokens({ connection, user_id, sentence_id: id, tokens: analysis.tokens })
+      const cleanup = await cleanup_sense_links({
+        connection,
+        sentence_id: id,
+        text_id: existing.text_id,
+        tokens: analysis.tokens,
+        sense_ids: analysis.dropped_sense_ids,
+      })
+      affected_tables.push(...cleanup.affected_tables)
+      if (cleanup.deleted_rows.length)
+        ({ deleted_rows } = cleanup)
+    }
+  }
+
+  const [echo] = await connection.query<Record<string, unknown>>(`SELECT * FROM sentences WHERE id = ?`, [id])
+  return { result: parse_dict_row('sentences', echo), affected_tables, ...(deleted_rows ? { deleted_rows } : {}) }
+}
+
+/**
+ * Tokenize + auto-match sentences (a whole text or an explicit id list).
+ * Idempotent: rows whose analysis reproduces the stored tokens are untouched
+ * (no dirty churn — gold IGT sentences survive byte-identically).
+ */
+export async function analyze_sentences_local({ connection, user_id, text_id, sentence_ids }: {
+  connection: DictWriteConnection
+  user_id?: string
+  text_id?: string
+  sentence_ids?: string[]
+}): Promise<DictWriteOutcome<{ analyzed: number, changed: number }>> {
+  let rows: Record<string, unknown>[]
+  if (text_id) {
+    rows = await connection.query(`SELECT * FROM sentences WHERE text_id = ?`, [text_id])
+  } else if (sentence_ids?.length) {
+    rows = await connection.query(
+      `SELECT * FROM sentences WHERE id IN (${sentence_ids.map(() => '?').join(', ')})`,
+      sentence_ids,
+    )
+  } else {
+    throw new Error('analyze_sentences: text_id or sentence_ids required')
+  }
+
+  const index = await load_lexeme_index(connection)
+  const affected = new Set<string>()
+  const deleted_rows: { table_name: string, id: string }[] = []
+  let changed = 0
+  for (const raw of rows) {
+    const row = parse_dict_row('sentences', { ...raw })
+    const analysis = analyze_sentence_tokens({
+      text: row.text as MultiString | null,
+      existing_tokens: (row.tokens as SentenceTokens) ?? null,
+      index,
+    })
+    if (!analysis.changed)
+      continue
+    changed++
+    affected.add('sentences')
+    await write_sentence_tokens({ connection, user_id, sentence_id: row.id as string, tokens: analysis.tokens })
+    const cleanup = await cleanup_sense_links({
+      connection,
+      sentence_id: row.id as string,
+      text_id: row.text_id,
+      tokens: analysis.tokens,
+      sense_ids: analysis.dropped_sense_ids,
+    })
+    for (const table of cleanup.affected_tables) affected.add(table)
+    deleted_rows.push(...cleanup.deleted_rows)
+  }
+  return {
+    result: { analyzed: rows.length, changed },
+    affected_tables: [...affected],
+    ...(deleted_rows.length ? { deleted_rows } : {}),
+  }
+}
+
+export type TokenLinkAction = 'confirm' | 'ignore' | 'unlink'
+
+/**
+ * Human review actions on one token: confirm a match (optionally to a sense —
+ * mirrored into `senses_in_sentences`), link a different entry (same shape),
+ * ignore, or unlink back to unmatched. Gold IGT metadata (gloss/morphemes)
+ * always survives.
+ */
+export async function set_token_link_local({ connection, user_id, sentence_id, orthography, token_index, action, entry_id, sense_id }: {
+  connection: DictWriteConnection
+  user_id?: string
+  sentence_id: string
+  orthography: string
+  token_index: number
+  action: TokenLinkAction
+  entry_id?: string
+  sense_id?: string
+}): Promise<DictWriteOutcome<Record<string, unknown>>> {
+  const [raw] = await connection.query<Record<string, unknown>>(`SELECT * FROM sentences WHERE id = ?`, [sentence_id])
+  if (!raw)
+    throw new Error('set_token_link: sentence not found')
+  const row = parse_dict_row('sentences', raw)
+  const tokens = (row.tokens ?? {}) as SentenceTokens
+  const list = tokens[orthography]
+  const token = list?.[token_index]
+  if (!token)
+    throw new Error('set_token_link: token not found')
+
+  const previous_sense_id = token.sense_id
+  const base: SentenceToken = { form: token.form, start: token.start, end: token.end }
+  if (token.gloss)
+    base.gloss = token.gloss
+  if (token.morphemes)
+    base.morphemes = token.morphemes
+  if (action === 'confirm') {
+    if (!entry_id)
+      throw new Error('set_token_link: entry_id required to confirm')
+    list[token_index] = { ...base, entry_id, ...(sense_id ? { sense_id } : {}), status: 'confirmed' }
+  } else if (action === 'ignore') {
+    list[token_index] = { ...base, status: 'ignored' }
+  } else {
+    list[token_index] = base
+  }
+
+  await write_sentence_tokens({ connection, user_id, sentence_id, tokens })
+  const affected_tables = ['sentences']
+  const deleted_rows: { table_name: string, id: string }[] = []
+
+  if (action === 'confirm' && sense_id) {
+    const existing = await connection.query<{ id: string }>(
+      `SELECT id FROM senses_in_sentences WHERE sentence_id = ? AND sense_id = ?`,
+      [sentence_id, sense_id],
+    )
+    if (!existing[0]) {
+      await insert_row({ connection, table: 'senses_in_sentences', row: { sentence_id, sense_id }, user_id })
+      affected_tables.push('senses_in_sentences')
+    }
+  }
+  if (previous_sense_id && previous_sense_id !== sense_id) {
+    const cleanup = await cleanup_sense_links({
+      connection,
+      sentence_id,
+      text_id: row.text_id,
+      tokens,
+      sense_ids: [previous_sense_id],
+    })
+    for (const table of cleanup.affected_tables) {
+      if (!affected_tables.includes(table))
+        affected_tables.push(table)
+    }
+    deleted_rows.push(...cleanup.deleted_rows)
+  }
+
+  const [echo] = await connection.query<Record<string, unknown>>(`SELECT * FROM sentences WHERE id = ?`, [sentence_id])
+  return {
+    result: parse_dict_row('sentences', echo),
+    affected_tables,
+    ...(deleted_rows.length ? { deleted_rows } : {}),
+  }
+}
+
+/**
+ * New entry (+ first sense) minted from an unmatched token, confirmed against
+ * that sense in the same transaction.
+ */
+export async function create_entry_from_token_local({ connection, user_id, lexeme, entry_id, sentence_id, orthography, token_index }: {
+  connection: DictWriteConnection
+  user_id?: string
+  lexeme: MultiString
+  /** Client-generated (see the ids note in the header) — worker generates only as a fallback. */
+  entry_id?: string
+  sentence_id: string
+  orthography: string
+  token_index: number
+}): Promise<DictWriteOutcome<Record<string, unknown>>> {
+  const entry = await insert_row({ connection, table: 'entries', row: { id: entry_id, lexeme }, user_id })
+  const sense = await insert_row({ connection, table: 'senses', row: { entry_id: entry.id }, user_id })
+  const link = await set_token_link_local({
+    connection,
+    user_id,
+    sentence_id,
+    orthography,
+    token_index,
+    action: 'confirm',
+    entry_id: entry.id as string,
+    sense_id: sense.id as string,
+  })
+  const affected_tables = ['entries', 'senses', ...link.affected_tables.filter(table => !['entries', 'senses'].includes(table))]
+  return { result: entry, affected_tables, ...(link.deleted_rows?.length ? { deleted_rows: link.deleted_rows } : {}) }
+}
+
+/**
+ * "Ignore everywhere": mark every non-confirmed occurrence of a form
+ * (normalized-word equality) as `ignored` across all tokenized sentences.
+ */
+export async function ignore_form_local({ connection, user_id, form }: {
+  connection: DictWriteConnection
+  user_id?: string
+  form: string
+}): Promise<DictWriteOutcome<{ sentences_changed: number, occurrences: number }>> {
+  const key = normalized_word_key(form)
+  if (!key)
+    throw new Error('ignore_form: form has no word characters')
+  const rows = await connection.query<{ id: string, tokens: string }>(
+    `SELECT id, tokens FROM sentences WHERE tokens IS NOT NULL`,
+  )
+  let sentences_changed = 0
+  let occurrences = 0
+  for (const raw of rows) {
+    let tokens: SentenceTokens
+    try {
+      tokens = JSON.parse(raw.tokens)
+    } catch {
+      continue
+    }
+    let changed = false
+    for (const list of Object.values(tokens)) {
+      for (const [index, token] of list.entries()) {
+        if (token.status === 'confirmed' || token.sense_id || is_punctuation_form(token.form))
+          continue
+        if (token.status === 'ignored' && !token.entry_id && !token.candidates)
+          continue // already exactly ignored — avoid dirty churn
+        if (normalized_word_key(token.form) !== key)
+          continue
+        const replacement: SentenceToken = { form: token.form, start: token.start, end: token.end, status: 'ignored' }
+        if (token.gloss)
+          replacement.gloss = token.gloss
+        if (token.morphemes)
+          replacement.morphemes = token.morphemes
+        list[index] = replacement
+        changed = true
+        occurrences++
+      }
+    }
+    if (changed) {
+      sentences_changed++
+      await write_sentence_tokens({ connection, user_id, sentence_id: raw.id, tokens })
+    }
+  }
+  return {
+    result: { sentences_changed, occurrences },
+    affected_tables: sentences_changed ? ['sentences'] : [],
+  }
 }
 
 /** New audio row (+ optional speaker junction in the same transaction). */
@@ -329,6 +703,12 @@ const DICT_WRITE_OPS = {
   upsert_rows: upsert_rows_local,
   insert_entry: insert_entry_local,
   insert_sentence: insert_sentence_local,
+  insert_sentences: insert_sentences_local,
+  update_sentence: update_sentence_local,
+  analyze_sentences: analyze_sentences_local,
+  set_token_link: set_token_link_local,
+  create_entry_from_token: create_entry_from_token_local,
+  ignore_form: ignore_form_local,
   insert_text: insert_text_local,
   insert_audio: insert_audio_local,
   insert_photo: insert_photo_local,

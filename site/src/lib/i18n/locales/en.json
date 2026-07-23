@@ -618,6 +618,32 @@
   "image": {
     "photographer": "Photographer"
   },
+  "token": {
+    "suggested_match": "Suggested match",
+    "confirmed": "Confirmed",
+    "multiple_matches": "Multiple possible entries — pick one",
+    "not_in_dictionary": "Not in the dictionary yet",
+    "ignored": "Ignored",
+    "confirm": "Confirm",
+    "which_sense": "Which sense?",
+    "sense_unnamed": "Sense {number}",
+    "link_entry": "Link to entry",
+    "change_link": "Change link",
+    "remove_link": "Remove link",
+    "create_entry": "Create entry “{form}”",
+    "ignore": "Ignore",
+    "ignore_everywhere": "Ignore everywhere",
+    "ignore_everywhere_confirm": "Ignore every occurrence of “{form}” across this dictionary?",
+    "restore": "Restore",
+    "view_entry": "View entry",
+    "review": "Review",
+    "reanalyze": "Re-analyze",
+    "coverage": "{percent}% of words linked",
+    "used_in_sentence": "Used in 1 sentence",
+    "used_in_sentences": "Used in {count} sentences",
+    "show_all": "Show all {count}",
+    "gloss": "Gloss"
+  },
   "sentence": {
     "add": "Add sentence",
     "delete": "Delete sentence",

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { open_dictionary_db_in_memory } from './dictionary-db'
 import { open_dictionary_history_db_in_memory } from './dictionary-history-db'
 import * as sync_helpers from './dictionary-sync-helpers'
-import { apply_entry_delete, apply_entry_update, apply_entry_writes, apply_sentence_update, create_standalone_sentence, read_sentence_record } from './v1-entry-write'
+import { apply_entry_delete, apply_entry_update, apply_entry_writes, apply_sentence_update, create_standalone_sentence, mirror_token_sense_links, read_sentence_record } from './v1-entry-write'
 import { create_source } from './v1-sources'
 
 let db: Database.Database
@@ -574,5 +574,57 @@ describe('quick-wins fields: homograph, entry citations, sense sources', () => {
     expect(JSON.parse(entry.citations)).toEqual([{ slug: 's2' }])
     const sense = db.prepare(`SELECT * FROM senses WHERE id = ?`).get(sense_id) as Record<string, string>
     expect(JSON.parse(sense.sources)).toEqual(['s2'])
+  })
+})
+
+describe(mirror_token_sense_links, () => {
+  test('token sense_ids mirror into senses_in_sentences on PATCH; idempotent; unknown senses skipped', () => {
+    const report = apply_entry_writes({
+      db,
+      history_db,
+      user_id: 'u1',
+      entries: [{ lexeme: 'nak', senses: [{ glosses: { en: 'water' } }] }],
+    })
+    const [sense_id] = report.results[0].sense_ids
+
+    const { sentence } = create_standalone_sentence({ db, user_id: 'u1', input: { text: 'nak wia' } })
+    expect(count('senses_in_sentences')).toBe(0)
+
+    const patch = {
+      tokens: {
+        default: [
+          { form: 'nak', entry_id: report.results[0].entry_id, sense_id, status: 'confirmed' as const },
+          { form: 'wia', sense_id: 'nonexistent-sense' },
+        ],
+      },
+    }
+    const result = apply_sentence_update({ db, sentence_id: sentence.id, patch, user_id: 'u1' })
+    expect(result.found).toBeTruthy()
+    // known sense mirrored, unknown skipped
+    expect(count('senses_in_sentences')).toBe(1)
+    const junction = db.prepare(`SELECT sense_id, sentence_id FROM senses_in_sentences`).get() as { sense_id: string, sentence_id: string }
+    expect(junction).toEqual({ sense_id, sentence_id: sentence.id })
+
+    // re-PATCH is idempotent
+    apply_sentence_update({ db, sentence_id: sentence.id, patch, user_id: 'u1' })
+    expect(count('senses_in_sentences')).toBe(1)
+  })
+
+  test('create_standalone_sentence with sense-linked tokens mirrors immediately', () => {
+    const report = apply_entry_writes({
+      db,
+      history_db,
+      user_id: 'u1',
+      entries: [{ lexeme: 'toré', senses: [{ glosses: { en: '3PL' } }] }],
+    })
+    const [sense_id] = report.results[0].sense_ids
+    const { sentence } = create_standalone_sentence({
+      db,
+      user_id: 'u1',
+      input: { tokens: { default: [{ form: 'toré', sense_id, status: 'confirmed' }] } },
+    })
+    expect(count('senses_in_sentences')).toBe(1)
+    const junction = db.prepare(`SELECT sense_id, sentence_id FROM senses_in_sentences`).get() as { sense_id: string, sentence_id: string }
+    expect(junction).toEqual({ sense_id, sentence_id: sentence.id })
   })
 })

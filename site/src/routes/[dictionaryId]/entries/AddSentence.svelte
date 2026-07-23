@@ -13,12 +13,14 @@
 
   const props: Props = $props()
 
-  const { dict_db, dictionary } = $derived(page.data)
+  const { writes, dictionary } = $derived(page.data)
 
   async function add_sentence(new_value: string) {
     if (!new_value) return
-    const [sentence] = await dict_db.sentences.insert({ text: { [PRIMARY_ORTHOGRAPHY_CODE]: new_value } })
-    await goto(`/${dictionary.url}/sentence/${sentence.id}`)
+    // insert_sentences (worker op) tokenizes + auto-matches on the way in
+    const inserted = await writes.insert_sentences([{ text: { [PRIMARY_ORTHOGRAPHY_CODE]: new_value } }])
+    if (inserted?.[0])
+      await goto(`/${dictionary.url}/sentence/${inserted[0].id}`)
   }
 </script>
 

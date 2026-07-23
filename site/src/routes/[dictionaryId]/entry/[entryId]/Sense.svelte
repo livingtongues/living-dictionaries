@@ -42,7 +42,10 @@
   const hasSemanticDomain = $derived(sense_fields?.semantic_domains?.length || sense_fields?.write_in_semantic_domains?.length)
   // Deduped per-sense at the assemble_entry_data choke point already; the
   // guard-log here names this list if a dupe ever reaches the keyed `{#each}`.
-  const sentences = $derived(dedupe_keyed_children({ rows: sense.sentences ?? [], child_kind: 'sentences', entry_id: sense_row?.entry_id ?? sense.id, dict_id: dictionary?.id }))
+  // Text-linked sentences (confirmed token links) render in the entry-level
+  // concordance instead — only curated examples are editable here.
+  const sentences = $derived(dedupe_keyed_children({ rows: sense.sentences ?? [], child_kind: 'sentences', entry_id: sense_row?.entry_id ?? sense.id, dict_id: dictionary?.id })
+    .filter(sentence => !sentence.text_id))
 </script>
 
 {#each glossingLanguages as bcp (bcp)}

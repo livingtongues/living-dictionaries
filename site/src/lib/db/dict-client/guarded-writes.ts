@@ -128,23 +128,87 @@ export function create_guarded_writes({ dict_db, connection, dictionary, get_use
       return await db.writes.insert_sentence({ sentence, sense_id })
     }),
 
+    // Worker-side op (not the generic table update): when `text` changes the
+    // tokens are recomputed in the same transaction (carry-over preserves
+    // confirmed/gold-IGT tokens; vanished forms clean their junction rows).
     update_sentence: guard(async (db, sentence: DictUpdateType<'sentences'>) => {
-      await db.sentences.update(sentence)
-      return sentence
+      return await db.writes.update_sentence({ sentence })
+    }),
+
+    /** Bulk insert (text append / standalone add) with auto-matching. */
+    insert_sentences: guard(async (db, rows: DictInsertType<'sentences'>[]) => {
+      return await db.writes.insert_sentences({ rows })
     }),
 
     delete_sentence: guard(async (db, sentence_id: string) => {
       await db.sentences.delete(sentence_id)
     }),
 
-    insert_audio: guard(async (db, { storage_path, entry_id, speaker_id, source }: {
+    /** Tokenize + auto-match a whole text (reader "Re-analyze") or one sentence. */
+    analyze_text: guard(async (db, text_id: string) => {
+      return await db.writes.analyze_sentences({ text_id })
+    }),
+
+    analyze_sentence: guard(async (db, sentence_id: string) => {
+      return await db.writes.analyze_sentences({ sentence_ids: [sentence_id] })
+    }),
+
+    /** Confirm a token→entry match (sense link mirrors into `senses_in_sentences`). */
+    confirm_token: guard(async (db, { sentence_id, orthography, token_index, entry_id, sense_id }: {
+      sentence_id: string
+      orthography: string
+      token_index: number
+      entry_id: string
+      sense_id?: string
+    }) => {
+      return await db.writes.set_token_link({ sentence_id, orthography, token_index, action: 'confirm', entry_id, sense_id })
+    }),
+
+    /** Back to unmatched (drops link + junction row for text sentences). */
+    unlink_token: guard(async (db, { sentence_id, orthography, token_index }: {
+      sentence_id: string
+      orthography: string
+      token_index: number
+    }) => {
+      return await db.writes.set_token_link({ sentence_id, orthography, token_index, action: 'unlink' })
+    }),
+
+    ignore_token: guard(async (db, { sentence_id, orthography, token_index, form, everywhere }: {
+      sentence_id: string
+      orthography: string
+      token_index: number
+      /** The token's surface form — required for `everywhere`. */
+      form?: string
+      /** Bulk-ignore every non-confirmed occurrence across the dictionary. */
+      everywhere?: boolean
+    }) => {
+      if (everywhere && form)
+        return await db.writes.ignore_form({ form })
+      return await db.writes.set_token_link({ sentence_id, orthography, token_index, action: 'ignore' })
+    }),
+
+    /** New entry (+ first sense) from an unmatched token, confirmed in one transaction. */
+    create_entry_from_token: guard(async (db, { lexeme, sentence_id, orthography, token_index }: {
+      lexeme: MultiString
+      sentence_id: string
+      orthography: string
+      token_index: number
+    }) => {
+      const entry = await db.writes.create_entry_from_token({ lexeme, sentence_id, orthography, token_index })
+      track({ event: ENTRY_CREATED, props: { dictionary_id: dictionary.id, entry_id: entry.id } })
+      return entry
+    }),
+
+    insert_audio: guard(async (db, { id, storage_path, entry_id, speaker_id, source }: {
+      /** Pre-minted row uuid (R2 uploads key the object by it BEFORE the insert). */
+      id?: string
       storage_path: string
       entry_id: string
       speaker_id?: string
       /** A `sources.slug` registry ref — the speaker-less attribution path. */
       source?: string
     }) => {
-      return await db.writes.insert_audio({ audio: { storage_path, entry_id, ...(source ? { source } : {}) }, speaker_id })
+      return await db.writes.insert_audio({ audio: { ...(id ? { id } : {}), storage_path, entry_id, ...(source ? { source } : {}) }, speaker_id })
     }),
 
     update_audio: guard(async (db, audio: DictUpdateType<'audio'>) => {

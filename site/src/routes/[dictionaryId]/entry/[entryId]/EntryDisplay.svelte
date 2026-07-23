@@ -3,6 +3,7 @@
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
   import RelatedEntries from './RelatedEntries.svelte'
+  import EntryConcordance from '$lib/corpus/EntryConcordance.svelte'
   import Sense from './Sense.svelte'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { page } from '$app/state'
@@ -200,6 +201,8 @@
     {/if}
 
     <RelatedEntries entry_id={entry.id} {can_edit} />
+
+    <EntryConcordance sense_ids={senses.map(sense => sense.id)} />
 
     <!-- <div class="grow-1 order-last"></div> -->
   </div>

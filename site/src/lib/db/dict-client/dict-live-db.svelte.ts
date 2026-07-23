@@ -1,7 +1,7 @@
 import type { InferInsertModel, InferSelectModel, Table } from 'drizzle-orm'
 import type { MultiString } from '$lib/types'
 import type * as dict_schema from '$lib/db/schemas/dictionary'
-import type { DictWriteOp, DictWriteOutcome, JunctionTable } from './dict-writes'
+import type { DictWriteOp, DictWriteOutcome, JunctionTable, TokenLinkAction } from './dict-writes'
 import type { DictConnection } from './worker-connection'
 import { construct_outside_reaction } from '$lib/db/client/live/construct-outside-reaction.svelte'
 import { TableChangeNotifier } from '$lib/db/client/live/notifier'
@@ -86,6 +86,12 @@ export interface DictQueryAccessor<T extends DictTableName> {
 export interface DictWrites {
   insert_entry: (args: { lexeme: MultiString }) => Promise<DictPlainRowType<'entries'>>
   insert_sentence: (args: { sentence: DictInsertType<'sentences'>, sense_id: string }) => Promise<DictPlainRowType<'sentences'>>
+  insert_sentences: (args: { rows: DictInsertType<'sentences'>[] }) => Promise<DictPlainRowType<'sentences'>[]>
+  update_sentence: (args: { sentence: DictUpdateType<'sentences'> }) => Promise<DictPlainRowType<'sentences'>>
+  analyze_sentences: (args: { text_id?: string, sentence_ids?: string[] }) => Promise<{ analyzed: number, changed: number }>
+  set_token_link: (args: { sentence_id: string, orthography: string, token_index: number, action: TokenLinkAction, entry_id?: string, sense_id?: string }) => Promise<DictPlainRowType<'sentences'>>
+  create_entry_from_token: (args: { lexeme: MultiString, sentence_id: string, orthography: string, token_index: number }) => Promise<DictPlainRowType<'entries'>>
+  ignore_form: (args: { form: string }) => Promise<{ sentences_changed: number, occurrences: number }>
   insert_text: (args: { title: MultiString, sentences: { text: MultiString, ends_paragraph?: number }[] }) => Promise<DictPlainRowType<'texts'>>
   insert_audio: (args: { audio: DictInsertType<'audio'>, speaker_id?: string }) => Promise<DictPlainRowType<'audio'>>
   insert_photo: (args: { photo: DictInsertType<'photos'>, sense_id: string }) => Promise<DictPlainRowType<'photos'>>
@@ -492,6 +498,12 @@ class DictLiveDbImpl {
       this.#writes = {
         insert_entry: args => write('insert_entry', { entry_id: crypto.randomUUID(), ...args }),
         insert_sentence: args => write('insert_sentence', { ...args, sentence: { id: crypto.randomUUID(), ...args.sentence } }),
+        insert_sentences: args => write('insert_sentences', { rows: args.rows.map(row => ({ id: crypto.randomUUID(), ...row })) }),
+        update_sentence: args => write('update_sentence', args),
+        analyze_sentences: args => write('analyze_sentences', args),
+        set_token_link: args => write('set_token_link', args),
+        create_entry_from_token: args => write('create_entry_from_token', { entry_id: crypto.randomUUID(), ...args }),
+        ignore_form: args => write('ignore_form', args),
         insert_text: args => write('insert_text', { text_id: crypto.randomUUID(), ...args }),
         insert_audio: args => write('insert_audio', { ...args, audio: { id: crypto.randomUUID(), ...args.audio } }),
         insert_photo: args => write('insert_photo', { ...args, photo: { id: crypto.randomUUID(), ...args.photo } }),

@@ -299,3 +299,208 @@ describe(dispatch_dict_write, () => {
     expect(count('SELECT COUNT(*) c FROM tags')).toBe(2)
   })
 })
+
+// ─── M3 word→entry matching ops (.issues/texts-sentences-pipeline.md) ────────
+
+async function seed_matchable_entries() {
+  await run_atomic('insert_entry', { user_id, lexeme: { default: 'nak' } })
+  await run_atomic('insert_entry', { user_id, lexeme: { default: 'toré' } })
+}
+
+async function seed_text(sentences: { text: Record<string, string> }[]): Promise<{ text_id: string, sentence_ids: string[] }> {
+  const { result } = await run_atomic('insert_text', { user_id, title: { default: 'Story' }, sentences })
+  const text_id = (result as { id: string }).id
+  const rows = db.prepare('SELECT id FROM sentences WHERE text_id = ? ORDER BY sort_key').all(text_id) as { id: string }[]
+  return { text_id, sentence_ids: rows.map(row => row.id) }
+}
+
+function stored_tokens(sentence_id: string): Record<string, Record<string, unknown>[]> {
+  const raw = db.prepare('SELECT tokens FROM sentences WHERE id = ?').get(sentence_id) as { tokens: string | null }
+  return raw.tokens ? JSON.parse(raw.tokens) : null
+}
+
+function entry_id_for(lexeme_default: string): string {
+  const rows = db.prepare('SELECT id, lexeme FROM entries').all() as { id: string, lexeme: string }[]
+  return rows.find(row => JSON.parse(row.lexeme).default === lexeme_default).id
+}
+
+describe('insert_text auto-matching', () => {
+  test('sentences arrive tokenized with auto matches and ignored punctuation', async () => {
+    await seed_matchable_entries()
+    const { sentence_ids } = await seed_text([{ text: { default: 'Nak toré, kaq!' } }])
+    const tokens = stored_tokens(sentence_ids[0]).default
+    expect(tokens).toEqual([
+      { form: 'Nak', start: 0, end: 3, entry_id: entry_id_for('nak'), status: 'auto' },
+      { form: 'toré', start: 4, end: 8, entry_id: entry_id_for('toré'), status: 'auto' },
+      { form: ',', start: 8, end: 9, status: 'ignored' },
+      { form: 'kaq', start: 10, end: 13 },
+      { form: '!', start: 13, end: 14, status: 'ignored' },
+    ])
+  })
+})
+
+describe('set_token_link', () => {
+  test('confirm writes status + sense link and mirrors the junction; unlink cleans it', async () => {
+    await seed_matchable_entries()
+    const { sentence_ids } = await seed_text([{ text: { default: 'Nak kaq' } }])
+    const [sentence_id] = sentence_ids
+    const nak_id = entry_id_for('nak')
+    const sense = db.prepare('SELECT id FROM senses WHERE entry_id = ?').get(nak_id) as { id: string }
+
+    const confirm = await run_atomic('set_token_link', {
+      user_id, sentence_id, orthography: 'default', token_index: 0,
+      action: 'confirm', entry_id: nak_id, sense_id: sense.id,
+    })
+    expect(confirm.affected_tables).toEqual(['sentences', 'senses_in_sentences'])
+    expect(stored_tokens(sentence_id).default[0]).toEqual({
+      form: 'Nak', start: 0, end: 3, entry_id: nak_id, sense_id: sense.id, status: 'confirmed',
+    })
+    expect(count('SELECT COUNT(*) c FROM senses_in_sentences WHERE sentence_id = ? AND sense_id = ?', sentence_id, sense.id)).toBe(1)
+
+    // re-confirm is idempotent on the junction
+    await run_atomic('set_token_link', {
+      user_id, sentence_id, orthography: 'default', token_index: 0,
+      action: 'confirm', entry_id: nak_id, sense_id: sense.id,
+    })
+    expect(count('SELECT COUNT(*) c FROM senses_in_sentences WHERE sentence_id = ?', sentence_id)).toBe(1)
+
+    const unlink = await run_atomic('set_token_link', {
+      user_id, sentence_id, orthography: 'default', token_index: 0, action: 'unlink',
+    })
+    expect(unlink.deleted_rows).toHaveLength(1)
+    expect(stored_tokens(sentence_id).default[0]).toEqual({ form: 'Nak', start: 0, end: 3 })
+    expect(count('SELECT COUNT(*) c FROM senses_in_sentences WHERE sentence_id = ?', sentence_id)).toBe(0)
+  })
+
+  test('ignore keeps gold gloss but drops the link', async () => {
+    await seed_matchable_entries()
+    const { sentence_ids } = await seed_text([{ text: { default: 'Nak' } }])
+    const [sentence_id] = sentence_ids
+    // hand the token a gloss as if agent-written
+    const tokens = stored_tokens(sentence_id)
+    tokens.default[0].gloss = { en: 'water' }
+    db.prepare('UPDATE sentences SET tokens = ? WHERE id = ?').run(JSON.stringify(tokens), sentence_id)
+
+    await run_atomic('set_token_link', { user_id, sentence_id, orthography: 'default', token_index: 0, action: 'ignore' })
+    expect(stored_tokens(sentence_id).default[0]).toEqual({
+      form: 'Nak', start: 0, end: 3, gloss: { en: 'water' }, status: 'ignored',
+    })
+  })
+})
+
+describe('update_sentence re-tokenization', () => {
+  test('text edit preserves a confirmed link and cleans the junction of a vanished word', async () => {
+    await seed_matchable_entries()
+    const { sentence_ids } = await seed_text([{ text: { default: 'Nak toré' } }])
+    const [sentence_id] = sentence_ids
+    const nak_id = entry_id_for('nak')
+    const tore_id = entry_id_for('toré')
+    const nak_sense = (db.prepare('SELECT id FROM senses WHERE entry_id = ?').get(nak_id) as { id: string }).id
+    const tore_sense = (db.prepare('SELECT id FROM senses WHERE entry_id = ?').get(tore_id) as { id: string }).id
+    await run_atomic('set_token_link', { user_id, sentence_id, orthography: 'default', token_index: 0, action: 'confirm', entry_id: nak_id, sense_id: nak_sense })
+    await run_atomic('set_token_link', { user_id, sentence_id, orthography: 'default', token_index: 1, action: 'confirm', entry_id: tore_id, sense_id: tore_sense })
+
+    // drop "toré", keep "Nak", add a new word
+    const outcome = await run_atomic('update_sentence', {
+      user_id, sentence: { id: sentence_id, text: { default: 'Nak wia' } },
+    })
+    expect((outcome.result as { text: Record<string, string> }).text).toEqual({ default: 'Nak wia' })
+    expect(stored_tokens(sentence_id).default).toEqual([
+      { form: 'Nak', start: 0, end: 3, entry_id: nak_id, sense_id: nak_sense, status: 'confirmed' },
+      { form: 'wia', start: 4, end: 7 },
+    ])
+    expect(count('SELECT COUNT(*) c FROM senses_in_sentences WHERE sentence_id = ? AND sense_id = ?', sentence_id, nak_sense)).toBe(1)
+    expect(count('SELECT COUNT(*) c FROM senses_in_sentences WHERE sentence_id = ? AND sense_id = ?', sentence_id, tore_sense)).toBe(0)
+  })
+
+  test('translation-only patch does not touch tokens', async () => {
+    await seed_matchable_entries()
+    const { sentence_ids } = await seed_text([{ text: { default: 'Nak' } }])
+    const before = stored_tokens(sentence_ids[0])
+    await run_atomic('update_sentence', { user_id, sentence: { id: sentence_ids[0], translation: { en: 'Water' } } })
+    expect(stored_tokens(sentence_ids[0])).toEqual(before)
+  })
+})
+
+describe('analyze_sentences', () => {
+  test('fills gaps after a new entry appears; gold tokens survive byte-identically; idempotent', async () => {
+    const { text_id, sentence_ids } = await seed_text([{ text: { default: 'Nak kaq' } }])
+    const [sentence_id] = sentence_ids
+    // no entries yet — both words unmatched; simulate gold IGT on token 1
+    const tokens = stored_tokens(sentence_id)
+    tokens.default[1] = { ...tokens.default[1], gloss: { default: '3PL' }, status: 'confirmed' }
+    db.prepare('UPDATE sentences SET tokens = ?, dirty = 0 WHERE id = ?').run(JSON.stringify(tokens), sentence_id)
+
+    await run_atomic('insert_entry', { user_id, lexeme: { default: 'nak' } })
+    const first = await run_atomic('analyze_sentences', { user_id, text_id })
+    expect(first.result).toEqual({ analyzed: 1, changed: 1 })
+    expect(stored_tokens(sentence_id).default).toEqual([
+      { form: 'Nak', start: 0, end: 3, entry_id: entry_id_for('nak'), status: 'auto' },
+      { form: 'kaq', start: 4, end: 7, gloss: { default: '3PL' }, status: 'confirmed' },
+    ])
+
+    // second run: nothing changes, no dirty churn
+    db.prepare('UPDATE sentences SET dirty = 0 WHERE id = ?').run(sentence_id)
+    const second = await run_atomic('analyze_sentences', { user_id, text_id })
+    expect(second.result).toEqual({ analyzed: 1, changed: 0 })
+    expect(count('SELECT COUNT(*) c FROM sentences WHERE id = ? AND dirty = 1', sentence_id)).toBe(0)
+  })
+})
+
+describe('create_entry_from_token', () => {
+  test('mints entry + sense and confirms the token in one transaction', async () => {
+    const { sentence_ids } = await seed_text([{ text: { default: 'Zuq nak' } }])
+    const [sentence_id] = sentence_ids
+    const outcome = await run_atomic('create_entry_from_token', {
+      user_id, lexeme: { default: 'Zuq' }, sentence_id, orthography: 'default', token_index: 0,
+    })
+    const entry = outcome.result as { id: string }
+    expect(outcome.affected_tables).toEqual(['entries', 'senses', 'sentences', 'senses_in_sentences'])
+    const sense = db.prepare('SELECT id FROM senses WHERE entry_id = ?').get(entry.id) as { id: string }
+    expect(stored_tokens(sentence_id).default[0]).toEqual({
+      form: 'Zuq', start: 0, end: 3, entry_id: entry.id, sense_id: sense.id, status: 'confirmed',
+    })
+    expect(count('SELECT COUNT(*) c FROM senses_in_sentences WHERE sentence_id = ? AND sense_id = ?', sentence_id, sense.id)).toBe(1)
+  })
+})
+
+describe('ignore_form', () => {
+  test('bulk-ignores non-confirmed occurrences (normalized) but never confirmed ones', async () => {
+    await seed_matchable_entries()
+    const { sentence_ids } = await seed_text([
+      { text: { default: 'Nak kaq' } },
+      { text: { default: 'KAQ toré' } },
+      { text: { default: 'kaq!' } },
+    ])
+    // confirm the third occurrence so it must survive
+    const nak_id = entry_id_for('nak')
+    const sense = db.prepare('SELECT id FROM senses WHERE entry_id = ?').get(nak_id) as { id: string }
+    await run_atomic('set_token_link', { user_id, sentence_id: sentence_ids[2], orthography: 'default', token_index: 0, action: 'confirm', entry_id: nak_id, sense_id: sense.id })
+
+    const outcome = await run_atomic('ignore_form', { user_id, form: 'Kaq' })
+    expect(outcome.result).toEqual({ sentences_changed: 2, occurrences: 2 })
+    expect(stored_tokens(sentence_ids[0]).default[1].status).toBe('ignored')
+    expect(stored_tokens(sentence_ids[1]).default[0].status).toBe('ignored')
+    expect(stored_tokens(sentence_ids[2]).default[0].status).toBe('confirmed')
+
+    // idempotent — already-ignored rows are skipped
+    const again = await run_atomic('ignore_form', { user_id, form: 'kaq' })
+    expect(again.result).toEqual({ sentences_changed: 0, occurrences: 0 })
+  })
+})
+
+describe('insert_sentences', () => {
+  test('bulk append arrives tokenized + matched', async () => {
+    await seed_matchable_entries()
+    const { text_id } = await seed_text([{ text: { default: 'Nak' } }])
+    const outcome = await run_atomic('insert_sentences', {
+      user_id,
+      rows: [{ id: crypto.randomUUID(), text: { default: 'toré kaq' }, text_id, sort_key: 'zz' }],
+    })
+    const [row] = outcome.result as { id: string }[]
+    expect(stored_tokens(row.id).default).toEqual([
+      { form: 'toré', start: 0, end: 4, entry_id: entry_id_for('toré'), status: 'auto' },
+      { form: 'kaq', start: 5, end: 8 },
+    ])
+  })
+})

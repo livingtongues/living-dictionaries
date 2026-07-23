@@ -6,8 +6,206 @@ or surfaces as an entry suggestion a human can confirm. Entries/sentences/texts 
 searchable first-class citizens in ONE search surface. Karaoke playback (sentence audio/video +
 word timings) rides on the same foundation.
 
-**Status: M1 + M2 COMPLETE (2026-07-05), shipped together behind the admin-3 gate. Next: M3
-(matching).**
+**Status: M1 + M2 COMPLETE (2026-07-05), M3 (matching) ✅ COMPLETE (2026-07-23) — all behind the
+admin-3 gate (LIFT AT GA). Next milestones live in the "Future" section at the bottom.**
+
+## M3 — matching (✅ COMPLETE 2026-07-23)
+
+### State-of-the-world updates since the M3 section was drafted (2026-07-05)
+
+- **`SentenceToken` grew `gloss` (MultiString) + `morphemes` (Leipzig IGT)** — added for the
+  corpus agent's IGT import (commit `312ea0d3`, spec review in
+  `.issues/ld-igt-corpus-feedback-2026-07-14.md`). The matcher/re-analyze must PRESERVE these.
+- **v1 API already writes gold tokens**: `$lib/api/v1/sentence-igt.ts` (offset auto-derivation
+  with a left-to-right cursor, text synthesis from forms, `status` defaults `'confirmed'`),
+  threaded through sentence create/PATCH in `v1-entry-write.ts`. GAP: token `sense_id` is stored
+  in the JSON but NOT mirrored to `senses_in_sentences` (only the entry-example create path
+  writes the junction) — M3 closes this so agent-written sense links feed the concordance.
+- **Karaoke shipped** (`.issues/text-reader-audio-karaoke.md`): reader renders `tokens.default`
+  spans when timed; sentence-tap = play its span when audio+timing exist. Token tap targets must
+  coexist (word tap → popover; non-word sentence area keeps play/select behavior).
+- **Orama lives in the per-tab entry worker (comlink), NOT the leader worker** — the matcher
+  won't sit next to Orama. It runs as leader-worker `dict_write` ops reading lexemes straight
+  from dict.db via SQL (atomic per the op-mutex/transaction wrapper in `dict-instance.ts`),
+  reusing `simplify_lexeme_for_search` (`$lib/search/augment-entry-for-search.ts`) for
+  normalization parity with search.
+- **wenshanhua has gold agent-written tokens** (local seed: 15 sentences with `tokens.default`,
+  glosses; prod has ~1050 IGT examples) — prime test data AND clobber hazard.
+- Sentences also carry `citations` / `example_label` / `discourse_role`; texts carry
+  `summary`/`work_id`/tags/dialects — none block M3.
+
+### M3 interview decisions (2026-07-23)
+
+- **Popover = new anchored-popover primitive** in `components/ui/`: floating card near the word
+  on desktop, bottom sheet on mobile. (No popover primitive existed; Modal/Slideover too heavy.)
+- **Audience**: matched words tappable for ALL visitors (entry preview: headword, gloss, PoS,
+  photo thumb, link to entry page). Confirm/link/create/ignore actions + unmatched/ambiguous
+  highlighting are contributor+ only. Viewers see auto + confirmed links identically (no status
+  distinction outside review mode).
+- **Review mode** (unmatched/ambiguous highlighting + status distinction): default ON for
+  contributor+, toolbar toggle to turn off for pure reading; never shown to viewers.
+- **Auto-matcher NEVER sets `sense_id` or writes `senses_in_sentences`** — auto = `entry_id` +
+  `status:'auto'` only; the junction is written exclusively on confirm. BUT agents acting on
+  human instruction can write confirmed sense links via v1 (tokens PATCH) — hence the v1
+  junction-mirror fix below.
+- **Multi-sense confirm**: popover lists senses (gloss summaries), FIRST SENSE PRESELECTED —
+  confirm stays one tap; single-sense entries skip the picker.
+- **Concordance**: entry-level read-only "Used in N sentences" section. Split at render time by
+  `sentence.text_id`: curated examples (`text_id` NULL) stay in today's editable per-sense UI;
+  text occurrences render read-only, each linking to the reader anchored at the sentence
+  (`/text/{id}#{sentence_id}`), capped list + "show all" → search pre-scoped to Sentences.
+- **Auto re-tokenize on sentence text edit**, worker-side in the sentence-update write path:
+  recompute tokens whenever text changes, carry over `entry_id`/`sense_id`/`gloss`/`morphemes`/
+  `status` by normalized-form equality (ordered greedy); vanished forms drop their token +
+  `senses_in_sentences` cleanup. Gold IGT tokens survive unless their word was deleted.
+- **M3 scope extras**: sentence detail page gets the same token strip + popovers (shared
+  component); "ignore everywhere" bulk action in the popover (not waiting for M4); match-coverage
+  stat in the reader toolbar ("82% of words linked"). NOT in M3: dedicated v1 confirm-link
+  endpoint (M4) — the existing tokens PATCH + junction mirror covers agents.
+- **IGT gloss display**: popover shows token gloss + morphemes; the full under-word interlinear
+  gloss line is a SEPARATE follow-up milestone (alongside structured-grammar display).
+
+### M3 build progress (session 2026-07-23, mustang — handed off mid-verification)
+
+**DONE (all code written, unit-tested, and largely live-verified):**
+- ✅ Pure logic in `$lib/corpus/`: `tokenize-sentence.ts` (word/punct tokenizer, offsets,
+  `normalize_token_form` = lowercase + simplify + APOSTROPHE-VARIANT unification — achi entries
+  store U+2019 while sentence text has U+02BC; without unification nothing matches),
+  `match-tokens.ts` (`build_lexeme_index` + greedy longest n-gram `match_tokens`, fill-only),
+  `carry-over-tokens.ts` (two-pass ordered-greedy + moved-word rescue), `sentence-analysis.ts`
+  (`analyze_sentence_tokens` pipeline + `tokens_equal` canonical compare + `load_lexeme_index`),
+  `token-kind.ts`. All vitest-covered.
+- ✅ Worker ops in `dict-writes.ts`: `analyze_sentences`, `update_sentence` (re-tokenize on text
+  change + junction cleanup), `set_token_link` (confirm/ignore/unlink + junction mirror/cleanup),
+  `create_entry_from_token`, `ignore_form` (bulk), `insert_sentences`; `insert_text` +
+  `insert_sentence` now tokenize+match on ingest. 11 new tests in `dict-writes.test.ts` (29 total
+  green) incl. gold-IGT byte-identical idempotency.
+- ✅ Facade + guards: `DictWrites` typing in `dict-live-db.svelte.ts`, guarded ops in
+  `guarded-writes.ts` (`analyze_text/analyze_sentence/confirm_token/unlink_token/ignore_token/
+  create_entry_from_token/insert_sentences`, `update_sentence` now routes through the worker op);
+  `AddSentence`/`AppendSentencesModal`/`SentenceEditPanel`/sentence-detail all switched off
+  `_save()`/raw insert for text writes. `mocks/db.ts` updated.
+- ✅ UI: `components/ui/Popover.svelte` (anchored card / mobile bottom sheet, z 70);
+  `$lib/corpus/TokenizedSentence.svelte` (WHITESPACE-TIGHT parts renderer — template newlines
+  between tokens render as spaces and break CJK/punctuation adjacency, hence the one-line block;
+  absorbs karaoke; KaraokeSentence.svelte DELETED) + stories (4, verified light+dark);
+  `TokenPopover.svelte` (entry preview via `$entries_data`, sense radio picker first-preselected,
+  candidate list, link/create/ignore/unlink, `EntryPickerModal` at z 80 above popover);
+  reader toolbar (Review toggle default-ON, Re-analyze, coverage stat), sentence `<button>` →
+  `<span role="button">` (token buttons can't nest in a button); sentence-detail token strip +
+  Re-analyze; entry-page `EntryConcordance.svelte` (text sentences via junction, expand-in-place
+  instead of the search-scoped link — search can't filter sentences by entry); `Sense.svelte`
+  filters `text_id` sentences out of editable examples (+ `text_id` added to the EntryData pick).
+- ✅ v1 parity: `mirror_token_sense_links` in `v1-entry-write.ts` (additive/idempotent,
+  unknown-sense-skipping), called from sentence PATCH, standalone create, v1-texts create+append.
+  2 new tests green.
+- ✅ i18n `token.*` group (23 keys, EN only).
+- ✅ Headless e2e (`/tmp/ld-m3-e2e.mjs`, achi dict on mustang): 17/18 green (the 1 ❌ is a
+  first-run-only "no tokens yet" precondition — local achi.db is now already analyzed). Verified:
+  re-analyze, auto/ambiguous/unmatched/ignored rendering, phrase-merge ("Ri achi"), coverage
+  stat, confirm→junction→entry-page concordance, entry picker, ignore, review-toggle semantics,
+  preview-guard redirect. Screenshots /tmp/m3-*.png.
+
+**E2E environment lessons (don't relearn):**
+- Local-first + login ordering: visiting a dict page BEFORE login boots the OPFS db as viewer
+  from the PROD R2 snapshot (locally-seeded rows absent, and the prod cursor makes local /changes
+  a no-op). Log in from `/` first; editor boot then snapshots from the local VPS db.
+- True logged-out viewers can't reach `/text/*` at all (admin-3 corpus-preview guard) — viewer
+  token UX is verified via the ViewerMode story, not live.
+- Dev server on mustang: `nohup pnpm dev` → log /tmp/ld-dev.log (port 3041), still running.
+
+**Verification session (2026-07-23, mustang — ALL DONE):**
+1. ✅ Full gates: vitest 1875 passed (the only 3 failures are the CONCURRENT media/R2-key
+   session's WIP in `add-media.test.ts` / `media-route-handlers.ts` — not M3 files); `tsc` clean;
+   `pnpm check` 0 errors; `pnpm lint` clean after fixing 14 fresh M3-file errors (indent-only in
+   TokenizedSentence's whitespace-tight template — tag-internal, render-safe; destructuring in
+   match-tokens/carry-over; SvelteSet in EntryConcordance) — e2e re-ran 41/41 after.
+2. ✅ 41-check headless e2e (`/tmp/ld-m3-e2e.mjs` + idempotent server-side reset
+   `/tmp/ld-m3-reset.sh`) — ALL GREEN, covering: reset→untokenized, Re-analyze, coverage stat,
+   single-sense confirm (no radio), multi-sense confirm (sense radio, first preselected),
+   ambiguous candidate pick, entry picker, ignore occurrence + Restore, ignore-everywhere
+   (confirm dialog), create-entry-from-token (entry + junction verified server-side post-sync),
+   review toggle, entry concordance, standalone sentence Re-analyze + popover, `/texts/new`
+   fresh-ingest auto-match (no Re-analyze click) + text delete cleanup, mobile bottom sheet
+   (375px, `.card.sheet` + dimmed backdrop), dark mode (reader + popover screenshots),
+   viewer preview-guard redirect. Screenshots `/tmp/m3-*.png`.
+3. ✅ BUG FOUND+FIXED during verification: trailing-apostrophe asymmetry — `WORD_MATCH` drops a
+   trailing `'`/`’` from lexemes ("Juyub'" → key `juyub`) but U+02BC is category Lm so token
+   "juyubʼ" kept it (key `juyub'`) → never matched. `normalize_token_form` now strips word-edge
+   apostrophes after variant unification (tests added; achi coverage 36%→43%).
+4. ✅ Pluralization nit fixed: `token.used_in_sentence` ("Used in 1 sentence") singular key +
+   count===1 branch in `EntryConcordance.svelte`.
+5. ✅ Stories decision: SKIP TokenPopover/Popover stories — TokenPopover needs live `page.data`
+   (writes/entries_data/dictionary) which svelte-look mocks can't supply meaningfully, and
+   Popover's anchor is a live HTMLElement; visual coverage comes from the 4 TokenizedSentence
+   stories (light+dark, incl. ViewerMode) + the e2e screenshots of every popover state.
+6. ✅ i18n `token.*` group is now 24 EN keys — run `/fill-translations` before GA.
+
+**Verification lessons:**
+- Guarded writes throw `still_loading` until the entries bundle loads — an immediate
+  Re-analyze click after page mount is (correctly) blocked with a toast; e2e must retry.
+- Server-side `INSERT INTO deletes (table_name, id)` is the clean way to remove rows in a reset
+  script — the cascade trigger deletes the row and clients drop it via the tombstone sync.
+
+### M3 build plan
+
+Pure logic in `$lib/corpus/` (unit-tested), writes as leader-worker ops in `dict-writes.ts`,
+UI shared between reader + sentence detail.
+
+1. **Tokenizer** — `$lib/corpus/tokenize-sentence.ts`: whitespace + punctuation split, char
+   offsets, punctuation kept as tokens with `status:'ignored'`; tokenizes the default/
+   first-populated orthography only (v1). Normalizer = lowercase + `simplify_lexeme_for_search`
+   (shared helper so token forms and lexeme forms normalize identically).
+2. **Matcher** — `$lib/corpus/match-tokens.ts`: pure fn over a prebuilt lexeme index
+   (normalized form → entry ids, all orthographies; multi-word lexemes via greedy longest n-gram
+   up to the longest lexeme word-count). Single hit → `entry_id`+`status:'auto'`; multiple →
+   `candidates`; none → unmatched.
+3. **Carry-over** — `$lib/corpus/carry-over-tokens.ts`: re-tokenize preservation by normalized
+   form (ordered greedy), carrying entry/sense/gloss/morphemes/status; returns dropped sense_ids
+   for junction cleanup. Used by both edit-hook and Re-analyze.
+4. **Worker ops** (in `dict-writes.ts`, following the orchestrator pattern):
+   - `analyze_sentences` ({ text_id | sentence_ids }): read entry lexemes via SQL, tokenize +
+     match + carry-over, write `sentences.tokens`. Fills gaps only — never downgrades
+     confirmed/glossed tokens.
+   - sentence-update path: when `text` changes, re-tokenize with carry-over in the same
+     transaction (+ junction cleanup for dropped links).
+   - `confirm_token` ({ sentence_id, token_index, entry_id, sense_id }): status → 'confirmed',
+     set entry_id/sense_id, link `senses_in_sentences`.
+   - `link_token` (different entry via search picker) — same op with explicit entry.
+   - `unlink_token` / `ignore_token` ({ scope: 'occurrence' | 'everywhere' }): everywhere =
+     bulk status:'ignored' across all sentences for the normalized form. Junction cleanup: for
+     TEXT sentences (`text_id` set) removing the last token referencing a sense drops the
+     junction row; for STANDALONE sentences leave the junction alone (it may be a curated
+     example link).
+   - create-entry-from-token = existing `insert_entry` + `confirm_token` (entry's first sense).
+5. **Ingest hook**: `insert_text_local` + AddSentence + append paths run tokenize+match inline
+   (same transaction). Existing texts get tokens via the reader's "Re-analyze" button
+   (contributor+) — no automatic backfill (per the 2026-07-05 "when it runs" decision).
+6. **UI**:
+   - `components/ui/Popover.svelte` — anchored floating card (desktop) / bottom sheet (mobile),
+     new reusable primitive.
+   - `$lib/corpus/TokenizedSentence.svelte` — renders `tokens.default` spans (absorbs/wraps
+     KaraokeSentence's span rendering; karaoke highlight still works), token status classes,
+     review-mode aware, falls back to plain text when no tokens.
+   - `$lib/corpus/TokenPopover.svelte` — matched: entry preview + (editors) change-link/unlink/
+     confirm; unmatched: confirm-candidates/link (entry search picker, AddRelatedEntryModal
+     pattern — consider extracting a shared EntryPickerModal)/create/ignore; ambiguous:
+     candidate picker; multi-sense: sense list, first preselected.
+   - Reader toolbar: review-mode toggle + coverage stat + Re-analyze button.
+   - Sentence detail page: same token strip + popovers.
+7. **Entry page concordance**: "Used in N sentences" via `senses_in_sentences` joined to
+   sentences with `text_id` NOT NULL (render-time split), capped + show-all → sentences-scoped
+   search. Defensive: tokens referencing deleted entries render as unmatched.
+8. **v1 parity fix**: sentence create/PATCH mirrors token `sense_id` → `senses_in_sentences`
+   (additive, idempotent — removal stays a UI/worker concern). Shared server helper per the
+   editing-parity direction.
+9. **Verification**: vitest (tokenizer/matcher/carry-over round-trips incl. gold-IGT
+   preservation), svelte-look stories (popover states light+dark), dev-auth + browser-tools e2e
+   (ingest → auto-match → confirm → concordance), `pnpm check`/`lint`/`tsc`. Test dict:
+   wenshanhua (gold tokens must survive Re-analyze byte-identically).
+
+Known accepted risks: row-level LWW on concurrent token confirms (documented in code);
+token/match writes appear in history (collapse later in history UI if noisy).
 
 ## M2 — ✅ DONE (texts pages + ingest + reader)
 Shipped: `$lib/corpus/split-text-into-sentences.ts` splitter; `insert_text` write op (atomic

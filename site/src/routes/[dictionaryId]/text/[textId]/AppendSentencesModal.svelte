@@ -14,7 +14,7 @@
 
   const { text_id, last_sort_key, on_close }: Props = $props()
 
-  const { dictionary, dict_db } = $derived(page.data)
+  const { dictionary, writes } = $derived(page.data)
   const orthographies = $derived(get_orthographies(dictionary ?? {}))
 
   let body = $state('')
@@ -36,7 +36,8 @@
           ...sentence.ends_paragraph ? { ends_paragraph: 1 } : {},
         }
       })
-      await dict_db.sentences.insert(rows)
+      // worker op: tokenizes + auto-matches each appended sentence
+      await writes.insert_sentences(rows)
       on_close()
     } catch (err) {
       alert(err)

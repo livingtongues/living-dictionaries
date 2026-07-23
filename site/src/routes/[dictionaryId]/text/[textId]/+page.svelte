@@ -9,7 +9,10 @@
   import AppendSentencesModal from './AppendSentencesModal.svelte'
   import TextTags from './TextTags.svelte'
   import TextAudioPlayer from './TextAudioPlayer.svelte'
-  import KaraokeSentence from './KaraokeSentence.svelte'
+  import TokenizedSentence from '$lib/corpus/TokenizedSentence.svelte'
+  import TokenPopover from '$lib/corpus/TokenPopover.svelte'
+  import { pick_tokenization_orthography } from '$lib/corpus/tokenize-sentence'
+  import { token_kind } from '$lib/corpus/token-kind'
   import { get_headword } from '$lib/helpers/orthographies'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text } from '$lib/markdown/sanitize-rich-text'
@@ -22,6 +25,8 @@
   import IconFa6SolidPencil from '~icons/fa6-solid/pencil'
   import IconCarbonTranslate from '~icons/carbon/translate'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
+  import IconMdiMarker from '~icons/mdi/marker'
+  import IconMdiRefresh from '~icons/mdi/refresh'
 
   const { data } = $props()
   const { dictionary, can_edit } = $derived(data)
@@ -78,6 +83,57 @@
   const selected_sentence = $derived(selected_id ? dict_db?.sentences.id(selected_id) : null)
   let show_append = $state(false)
   let show_title_edit = $state(false)
+
+  // --- Word→entry matching (M3) ---
+  let review_mode = $state(true)
+  let analyzing = $state(false)
+  let token_popover = $state<{ sentence_id: string, orthography: string, token_index: number, anchor: HTMLElement } | null>(null)
+  const popover_sentence = $derived(token_popover ? dict_db?.sentences.id(token_popover.sentence_id) : null)
+
+  function sentence_code(sentence: DictRowType<'sentences'>): string {
+    return pick_tokenization_orthography(sentence.text) ?? 'default'
+  }
+
+  function sentence_text(sentence: DictRowType<'sentences'>): string {
+    return sentence.text?.[sentence_code(sentence)] ?? sentence_display(sentence)
+  }
+
+  function open_token_popover(sentence: DictRowType<'sentences'>, args: { token_index: number, anchor: HTMLElement }) {
+    token_popover = { sentence_id: sentence.id, orthography: sentence_code(sentence), token_index: args.token_index, anchor: args.anchor }
+  }
+
+  const coverage = $derived.by(() => {
+    let words = 0
+    let linked = 0
+    for (const sentence of ordered) {
+      for (const token of sentence.tokens?.[sentence_code(sentence)] ?? []) {
+        const kind = token_kind(token)
+        if (kind === 'punct' || kind === 'ignored')
+          continue
+        words++
+        if (token.entry_id)
+          linked++
+      }
+    }
+    return words ? Math.round((linked / words) * 100) : null
+  })
+
+  async function reanalyze() {
+    if (analyzing) return
+    analyzing = true
+    try {
+      await page.data.writes.analyze_text(text_id)
+    } finally {
+      analyzing = false
+    }
+  }
+
+  function sentence_keydown(event: KeyboardEvent, sentence: DictRowType<'sentences'>) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      on_sentence_click(sentence)
+    }
+  }
 
   function sentence_display(sentence: DictRowType<'sentences'>): string {
     return get_headword({ lexeme: sentence.text, orthographies: dictionary.orthographies }).value
@@ -190,6 +246,10 @@
 
     <div class="toolbar">
       <span class="meta">{page.data.t('text.sentence_count', { values: { count: String(ordered.length) } })}</span>
+      {#if can_edit && coverage !== null}
+        <span class="meta">·</span>
+        <span class="meta">{page.data.t('token.coverage', { values: { percent: String(coverage) } })}</span>
+      {/if}
       <span style="flex-grow: 1"></span>
       <button
         type="button"
@@ -200,6 +260,32 @@
         <IconCarbonTranslate />
         {page.data.t('text.show_translations')}
       </button>
+      {#if can_edit}
+        <button
+          type="button"
+          class="btn-outline btn-sm"
+          class:toolbar-active={review_mode}
+          style="gap: 0.375rem"
+          title={page.data.t('token.review')}
+          onclick={() => review_mode = !review_mode}>
+          <IconMdiMarker />
+          {page.data.t('token.review')}
+        </button>
+        <button
+          type="button"
+          class="btn-outline btn-sm"
+          style="gap: 0.375rem"
+          disabled={analyzing}
+          title={page.data.t('token.reanalyze')}
+          onclick={reanalyze}>
+          {#if analyzing}
+            <IconSvgSpinners3DotsFade />
+          {:else}
+            <IconMdiRefresh />
+          {/if}
+          {page.data.t('token.reanalyze')}
+        </button>
+      {/if}
       {#if can_edit}
         <HeadlessButton class="btn-primary btn-default" onclick={() => show_append = true}>
           <IconFaSolidPlus style="margin-top: -0.25rem" />
@@ -267,20 +353,27 @@
           {#each paragraph as sentence (sentence.id)}
             {#if show_translations}
               <span class="sentence-block" id={`s-${sentence.id}`}>
-                <button
-                  type="button"
+                <span
+                  role="button"
+                  tabindex="0"
                   class="sentence"
                   class:selected={selected_id === sentence.id}
                   class:anchored={anchored_id === sentence.id}
                   class:speaking={active_sentence_id === sentence.id}
-                  onclick={() => on_sentence_click(sentence)}>
-                  <KaraokeSentence
-                    {sentence}
+                  onclick={() => on_sentence_click(sentence)}
+                  onkeydown={event => sentence_keydown(event, sentence)}>
+                  <TokenizedSentence
+                    tokens={sentence.tokens}
+                    orthography={sentence_code(sentence)}
+                    text={sentence_text(sentence)}
+                    {can_edit}
+                    {review_mode}
                     timing={sentence_timings.get(sentence.id)}
-                    fallback_text={sentence_display(sentence)}
                     {current_ms}
-                    is_active={active_sentence_id === sentence.id} />
-                </button>
+                    is_active={active_sentence_id === sentence.id}
+                    selected_index={token_popover?.sentence_id === sentence.id ? token_popover.token_index : null}
+                    on_token_tap={args => open_token_popover(sentence, args)} />
+                </span>
                 {@render sentence_extras(sentence)}
                 {#each Object.values(sentence.translation || {}).filter(Boolean) as translation, translation_index (translation_index)}
                   <span class="translation">{translation}</span>
@@ -288,20 +381,27 @@
               </span>
             {:else}
               <span class="sentence-inline" id={`s-${sentence.id}`}>
-                <button
-                  type="button"
+                <span
+                  role="button"
+                  tabindex="0"
                   class="sentence"
                   class:selected={selected_id === sentence.id}
                   class:anchored={anchored_id === sentence.id}
                   class:speaking={active_sentence_id === sentence.id}
-                  onclick={() => on_sentence_click(sentence)}>
-                  <KaraokeSentence
-                    {sentence}
+                  onclick={() => on_sentence_click(sentence)}
+                  onkeydown={event => sentence_keydown(event, sentence)}>
+                  <TokenizedSentence
+                    tokens={sentence.tokens}
+                    orthography={sentence_code(sentence)}
+                    text={sentence_text(sentence)}
+                    {can_edit}
+                    {review_mode}
                     timing={sentence_timings.get(sentence.id)}
-                    fallback_text={sentence_display(sentence)}
                     {current_ms}
-                    is_active={active_sentence_id === sentence.id} />
-                </button>{@render sentence_extras(sentence)}
+                    is_active={active_sentence_id === sentence.id}
+                    selected_index={token_popover?.sentence_id === sentence.id ? token_popover.token_index : null}
+                    on_token_tap={args => open_token_popover(sentence, args)} />
+                </span>{@render sentence_extras(sentence)}
               </span>
             {/if}
           {/each}
@@ -349,6 +449,16 @@
     value={title_headword.value}
     on_update={save_title}
     on_close={() => show_title_edit = false} />
+{/if}
+
+{#if token_popover && popover_sentence}
+  <TokenPopover
+    sentence={popover_sentence}
+    orthography={token_popover.orthography}
+    token_index={token_popover.token_index}
+    anchor={token_popover.anchor}
+    {can_edit}
+    on_close={() => token_popover = null} />
 {/if}
 
 <style>
@@ -493,6 +603,7 @@
     border-radius: 0.25rem;
     padding: 0.0625rem 0.125rem;
     margin: -0.0625rem -0.125rem;
+    cursor: pointer;
   }
 
   .sentence:hover {

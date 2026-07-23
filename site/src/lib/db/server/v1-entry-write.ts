@@ -713,6 +713,52 @@ export interface CreateSentenceResult {
   cursor: string | null
 }
 
+/**
+ * Mirror token-level `sense_id`s into `senses_in_sentences` (M3 parity:
+ * agent-written confirmed links feed the entry-page concordance exactly like
+ * UI confirms). ADDITIVE + idempotent — removing a link stays a client/worker
+ * concern (a standalone sentence's junction row may be a curated example
+ * link). Unknown sense ids are skipped. Call INSIDE the caller's transaction.
+ */
+export function mirror_token_sense_links({ db, sentence_id, tokens, user_id, at, api_key_id }: {
+  db: Database.Database
+  sentence_id: string
+  tokens: SentenceTokens | null | undefined
+  user_id: string
+  at: string
+  api_key_id?: string | null
+}): HistoryEvent[] {
+  if (!tokens)
+    return []
+  const sense_ids = new Set<string>()
+  for (const list of Object.values(tokens)) {
+    for (const token of list) {
+      if (token.sense_id)
+        sense_ids.add(token.sense_id)
+    }
+  }
+  if (!sense_ids.size)
+    return []
+  const sense_exists = db.prepare(`SELECT 1 FROM senses WHERE id = ?`)
+  const junction_exists = db.prepare(`SELECT 1 FROM senses_in_sentences WHERE sense_id = ? AND sentence_id = ?`)
+  const events: HistoryEvent[] = []
+  for (const sense_id of sense_ids) {
+    if (!sense_exists.get(sense_id) || junction_exists.get(sense_id, sentence_id))
+      continue
+    const event = merge_dict_row({
+      db,
+      table_name: 'senses_in_sentences',
+      row: { id: crypto.randomUUID(), sense_id, sentence_id, created_at: at, updated_at: at },
+      user_id,
+      at,
+      api_key_id,
+    })
+    if (event)
+      events.push(event)
+  }
+  return events
+}
+
 /** Create one standalone sentence (`text_id` / `sort_key` stay null). */
 export function create_standalone_sentence({ db, history_db, input, user_id, api_key_id }: {
   db: Database.Database
@@ -736,14 +782,16 @@ export function create_standalone_sentence({ db, history_db, input, user_id, api
   db.exec('BEGIN IMMEDIATE')
   try {
     const event = merge_dict_row({ db, table_name: 'sentences', row: built.row, user_id, at: now, api_key_id })
+    const junction_events = mirror_token_sense_links({ db, sentence_id: built.sentence_id, tokens: built.row.tokens as SentenceTokens | null, user_id, at: now, api_key_id })
     const cursor = read_last_modified_at(db)
     const sentence = read_sentence_record(db, built.sentence_id)
     if (!sentence)
       throw new Error('sentence vanished after create')
     db.exec('COMMIT')
-    if (history_db && event) {
+    const events = [...(event ? [event] : []), ...junction_events]
+    if (history_db && events.length) {
       try {
-        record_history(history_db, [event])
+        record_history(history_db, events)
       } catch (err) {
         console.warn('Could not record v1 sentence create history:', err)
       }
@@ -822,11 +870,15 @@ export function apply_sentence_update({ db, history_db, sentence_id, patch, user
   db.exec('BEGIN IMMEDIATE')
   try {
     const event = merge_dict_row({ db, table_name: 'sentences', row, user_id, at: now, api_key_id })
+    const junction_events = 'tokens' in source
+      ? mirror_token_sense_links({ db, sentence_id, tokens: row.tokens as SentenceTokens | null, user_id, at: now, api_key_id })
+      : []
     const new_synced_up_to = read_last_modified_at(db)
     db.exec('COMMIT')
-    if (history_db && event) {
+    const events = [...(event ? [event] : []), ...junction_events]
+    if (history_db && events.length) {
       try {
-        record_history(history_db, [event])
+        record_history(history_db, events)
       } catch (err) {
         console.warn('Could not record v1 sentence update history:', err)
       }

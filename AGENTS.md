@@ -54,7 +54,9 @@ entry pages for managers], stats, about/grammar snippets — plus `entries` list
 with Words·Sentences·Texts scope chips [admin-3 preview; the texts/sentences corpus pipeline, see
 `.issues/texts-sentences-pipeline.md`] — entry detail, sentence detail, `texts` browse +
 `texts/new` paste-to-sentences ingest + `text/[id]` reader [same admin-3 preview, route-guarded
-via `$lib/corpus/corpus-preview-guard.ts` — lift at GA] — settings (public/print
+via `$lib/corpus/corpus-preview-guard.ts` — lift at GA; M3 word→entry matching is live: sentences
+auto-tokenize+match on ingest, token-tap popovers (confirm/link/create/ignore, `$lib/corpus/`),
+review-mode toolbar, entry-page "Used in N sentences" concordance] — settings (public/print
 toggles + delete + a dialects manager [manager: rename / map areal-extent geometry via
 GeoTaggingModal / delete]; catalog fields moved to home), about,
 contributors, grammar, history, export, import [manager-only, agent-driven: upload ANY-format resources → per-file instructions → "request import" creates a Jacob-assigned message thread; the original uploader (or a site admin) can edit requested instructions/source + the once-per-request note or permanently remove a resource, with every change appended to/reopening that thread and notifying its current assignee; files live in shared.db `source_files` (server-only) + R2 `import/{dict}/{file}`, served via `/api/v1/dictionaries/{id}/files/*`], invite) · `/chat` (standalone membership-based

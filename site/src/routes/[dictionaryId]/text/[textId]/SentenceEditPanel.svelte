@@ -24,9 +24,10 @@
   const show_discourse = $derived(grammar_sections_editable({ auth_user: page.data.auth_user }))
   const glossing_languages = $derived(order_entry_and_dictionary_gloss_languages(sentence?.translation, dictionary.gloss_languages))
 
+  // Worker op (not the live-row _save): text changes re-tokenize + re-match in
+  // the same transaction, preserving confirmed/gold-IGT tokens.
   async function save(patch: Record<string, unknown>) {
-    Object.assign(sentence, patch)
-    await sentence._save()
+    await page.data.writes.update_sentence({ id: sentence.id, ...patch })
   }
 
   async function delete_sentence() {

@@ -3,11 +3,15 @@
   import { goto } from '$app/navigation'
   import EntryField from '../../entry/[entryId]/EntryField.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import TokenizedSentence from '$lib/corpus/TokenizedSentence.svelte'
+  import TokenPopover from '$lib/corpus/TokenPopover.svelte'
+  import { pick_tokenization_orthography } from '$lib/corpus/tokenize-sentence'
   import { get_orthographies } from '$lib/helpers/orthographies'
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
   import IconSystemUiconsTrash from '~icons/system-uicons/trash'
   import IconCarbonDocument from '~icons/carbon/document'
+  import IconMdiRefresh from '~icons/mdi/refresh'
 
   const { data } = $props()
   const { dictionary, can_edit } = $derived(data)
@@ -24,10 +28,11 @@
   const sentences_scope_href = $derived(`/${dictionary.url}/entries?q=${encodeURIComponent('{"scope":"sentences"}')}`)
   const seo_title = $derived((Object.values(sentence?.text || {}).find(Boolean) as string) || page.data.t('sentence.sentence'))
 
+  // Worker op (not the live-row _save): text changes re-tokenize + re-match in
+  // the same transaction, preserving confirmed/gold-IGT tokens.
   async function save(patch: Record<string, unknown>) {
     if (!sentence) return
-    Object.assign(sentence, patch)
-    await sentence._save()
+    await page.data.writes.update_sentence({ id: sentence_id, ...patch })
   }
 
   async function delete_sentence() {
@@ -36,6 +41,23 @@
     if (!confirm(`${page.data.t('sentence.delete')}?`)) return
     await sentence._delete()
     await goto(sentences_scope_href)
+  }
+
+  // --- Word→entry matching (M3) ---
+  const token_orthography = $derived(sentence ? pick_tokenization_orthography(sentence.text) : null)
+  const token_text = $derived(token_orthography ? sentence?.text?.[token_orthography] ?? '' : '')
+  const has_tokens = $derived(!!(token_orthography && sentence?.tokens?.[token_orthography]?.length))
+  let token_popover = $state<{ token_index: number, anchor: HTMLElement } | null>(null)
+  let analyzing = $state(false)
+
+  async function reanalyze() {
+    if (analyzing) return
+    analyzing = true
+    try {
+      await page.data.writes.analyze_sentence(sentence_id)
+    } finally {
+      analyzing = false
+    }
   }
 </script>
 
@@ -74,8 +96,28 @@
       {/each}
     </div>
 
+    {#if has_tokens && token_orthography}
+      <div class="token-strip" class:can-edit={can_edit}>
+        <TokenizedSentence
+          tokens={sentence.tokens}
+          orthography={token_orthography}
+          text={token_text}
+          {can_edit}
+          review_mode={can_edit}
+          selected_index={token_popover?.token_index ?? null}
+          on_token_tap={args => token_popover = args} />
+      </div>
+    {/if}
     {#if can_edit}
       <div class="actions">
+        <button type="button" class="btn-outline btn-sm" style="gap: 0.375rem" disabled={analyzing} onclick={reanalyze}>
+          {#if analyzing}
+            <IconSvgSpinners3DotsFade />
+          {:else}
+            <IconMdiRefresh />
+          {/if}
+          {page.data.t('token.reanalyze')}
+        </button>
         <button type="button" class="btn-outline btn-sm" style="gap: 0.375rem; color: var(--danger)" onclick={delete_sentence}>
           <IconSystemUiconsTrash />
           {page.data.t('sentence.delete')}
@@ -128,8 +170,17 @@
     font-size: 1.125rem;
   }
 
+  .token-strip {
+    margin-top: 1rem;
+    font-size: 1.125rem;
+    line-height: 1.9;
+    max-width: 42rem;
+  }
+
   .actions {
     margin-top: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
   }
 
   .state-note {
@@ -144,3 +195,13 @@
   title={seo_title}
   dictionaryName={dictionary.name}
   description="A sentence in this Living Dictionary." />
+
+{#if token_popover && sentence && token_orthography}
+  <TokenPopover
+    {sentence}
+    orthography={token_orthography}
+    token_index={token_popover.token_index}
+    anchor={token_popover.anchor}
+    {can_edit}
+    on_close={() => token_popover = null} />
+{/if}

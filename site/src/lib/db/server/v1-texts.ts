@@ -13,13 +13,15 @@ import { read_last_modified_at } from './dictionary-db'
 import { record_history } from './dictionary-history-db'
 import { merge_dict_row } from './dictionary-sync-helpers'
 import { assert_known_source_slugs, load_source_slug_set } from './source-slugs'
-import { load_dialect_map, run_tombstone_delete } from './v1-entry-write'
+import { load_dialect_map, mirror_token_sense_links, run_tombstone_delete } from './v1-entry-write'
 
 /**
  * `/api/v1` TEXTS sub-resource: a per-dict long-text / story (`texts.title`) with
  * ORDERED child sentences. A text-sentence is a `sentences` row carrying
  * `text_id` + a fractional `sort_key` (+ `ends_paragraph`) and — unlike an
- * entry's example sentence — is NOT linked to a sense (no `senses_in_sentences`).
+ * entry's example sentence — is NOT linked to a sense by default; token-level
+ * `sense_id`s (confirmed IGT links) DO mirror into `senses_in_sentences` via
+ * `mirror_token_sense_links` so agent-written links feed the concordance.
  * Writes go through `merge_dict_row` (same path + history as a browser push).
  */
 
@@ -440,6 +442,7 @@ export function create_text({ db, history_db, user_id, api_key_id, input }: {
       const event = merge_dict_row({ db, table_name: 'sentences', row, user_id, at: now, api_key_id })
       if (event)
         events.push(event)
+      events.push(...mirror_token_sense_links({ db, sentence_id: row.id as string, tokens: row.tokens as SentenceTokens | null, user_id, at: now, api_key_id }))
     })
     const cursor = read_last_modified_at(db)
     db.exec('COMMIT')
@@ -533,7 +536,9 @@ export function apply_text_update({ db, history_db, text_id, patch, user_id, api
       let prev = last?.sort_key ?? null
       for (const sentence of patch.append_sentences) {
         const sort_key = key_between(prev, null)
-        push('sentences', build_text_sentence_row({ sentence, text_id, sort_key, now, source_slug_set }))
+        const sentence_row = build_text_sentence_row({ sentence, text_id, sort_key, now, source_slug_set })
+        push('sentences', sentence_row)
+        events.push(...mirror_token_sense_links({ db, sentence_id: sentence_row.id as string, tokens: sentence_row.tokens as SentenceTokens | null, user_id, at: now, api_key_id }))
         prev = sort_key
       }
     }
