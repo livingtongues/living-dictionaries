@@ -65,6 +65,10 @@ Not every uploaded file deserves a `sources` registry row:
   a GET). Never mark such a chunk done.
 - Numbered homographs in the source (caws1…caws6) are separate entries — carry the
   number in each entry's `homograph` field so they stay distinguishable.
+- **Relationships batch too**: for cognate ledgers and other large relationship
+  sets, `POST …/relationships` with `{ "relationships": [...] }` in batches of
+  ≤1000 — same per-item `results` contract as entries (`created`/`exists`/`failed`
+  in input order; retries are safe, re-POST only the `failed` ones).
 - Connected texts (stories, example paragraphs) are NOT entries — use the
   `…/texts` endpoints; interlinear glossed text goes in sentence `tokens`.
   Text-level metadata (sources, `citations`, `summary`, `dialects`, `work_id` for
@@ -95,7 +99,13 @@ Not every uploaded file deserves a `sources` registry row:
   by any orthography's exact spelling; `?elicitation_id=` for word-list ids.
 - **Diffs since a timestamp**: `?updated_since=<ISO>` (exclusive) lists what changed —
   handy for confirming exactly what your run touched.
-- **Per-import counts**: your `import_id` is a private tag on every imported entry.
+- **Per-import counts**: your `import_id` is a private tag on every imported entry —
+  `POST …/entries/batch-delete` with `{ "import_id": "…", "dry_run": true }` returns
+  the batch's live count without deleting anything.
+- **Big-import verification**: instead of paginating the whole dictionary, download
+  its gzipped SQLite snapshot and run COUNT/spot-check queries locally — see
+  `GET /api/v1/guides/snapshot` (rebuilt within ~30 min of an edit, so use API reads
+  to verify writes you made moments ago).
 - Spot-check ~10 imported entries against the source (diacritics intact, glosses on
   the right senses, examples attached to the right entries).
 - For grammar examples, verify the standalone sentence via
@@ -113,6 +123,29 @@ earlier import updates the fields you send but leaves stale data behind:
   these unlink routes exist and the tag/dialect survives elsewhere.
 - Deterministic ids (uuid5 of your source key) make re-syncs address the same
   rows every time — the repair path stays surgical instead of delete-and-reimport.
+
+## Recovering from a bad import
+
+When a whole batch is wrong (mis-mapped columns, wrong dictionary, duplicated run),
+don't issue thousands of single DELETEs — remove the batch by its `import_id`:
+
+1. **Dry-run first**: `POST …/entries/batch-delete` with
+   `{ "import_id": "<the one you used>", "dry_run": true }` →
+   `{ count, sample_entry_ids }`, no writes. Sanity-check both against your ledger.
+2. **Arm the real run** by echoing that count:
+   `{ "import_id": "…", "confirm_count": <count> }`. A mismatch with the live count
+   is rejected (409) — the batch changed since your dry-run, so re-check before
+   deleting. This stops a stale script from nuking a re-imported batch.
+3. Deletes are sync-safe tombstones: each entry's senses and links cascade, and the
+   emptied private `import_id` tag is removed too. **Orphaned standalone example
+   sentences created by the import are left in place** — delete any that matter via
+   `DELETE …/sentences/{sentenceId}`.
+4. Re-import with the SAME deterministic ids — your ledger keeps addressing the
+   same rows.
+
+**Full reset**: a dictionary is fully emptied by batch-deleting each `import_id`
+you used. If content predates your imports (or you've lost the ids), ask a Living
+Dictionaries admin to reset the dictionary instead.
 
 ## Report
 

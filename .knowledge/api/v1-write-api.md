@@ -70,6 +70,36 @@ rolled back with it (merged into the shared name→id map only on the item's suc
 `import_id` → a private batch tag attached to every entry (mirrors the legacy CSV
 importer's batch-tag idempotency trick).
 
+**Relationships batch too (2026-07-23, River gap 2)**: `POST …/relationships` accepts a
+bare array or `{ relationships }` (≤1000, reuses `MAX_ENTRIES_PER_REQUEST`) alongside the
+unchanged single-object body. Same savepoint-per-item contract; response counter for
+idempotent no-ops is named `existed` (entries uses `skipped`) because relationship dedupe
+is semantic (canonicalization: symmetric endpoint sort + inverse-alias flip collapses
+A→B/B→A INSIDE one batch), not id-echo. Custom-type creation history is buffered per item
+(`history_events` collector param on `find_or_create_relationship_type`) so a failed
+item's rolled-back custom type leaves no phantom history — the single path previously
+wrote it mid-transaction.
+
+## Batch delete by `import_id` (2026-07-23, River gap 8)
+
+`POST …/entries/batch-delete` — bad-import recovery without thousands of single DELETEs.
+Scope = entries linked to the private tag whose name == `import_id` (case-insensitive,
+mirroring tag find-or-create). Decisions (Jacob 2026-07-23):
+
+- **`confirm_count` is REQUIRED to arm a real run** — dry-run reports `{ count,
+  sample_entry_ids ≤20 }` with zero writes; the real run must echo that count, mismatch →
+  409. Rationale: a cheap tripwire so a stale script can't nuke a re-imported batch. A
+  real run without `confirm_count` → 400 (the error includes the live count).
+- **The emptied private tag is tombstoned too** → a repeat run 404s (retries can't
+  re-fire on a new import that reuses the same import_id name… they CAN if re-imported
+  with the same import_id — hence confirm_count).
+- **Orphaned standalone example sentences are LEFT** (junction cascade unlinks them;
+  documented in the guide + openapi). Revisit only if importers complain.
+- Implementation: `$lib/db/server/v1-batch-delete.ts` — tombstones via `delete_dict_row`
+  in chunked transactions (500/chunk) with per-chunk history; NEVER raw DELETE (sync
+  invariant). Server event `v1_batch_delete` logs count + tag_deleted.
+- Full-reset answer (docs only): batch-delete each import_id used, or ask an admin.
+
 ## Idempotency = client-supplied `id` (NOT a stored external_id)
 
 Decided 2026-07-01 (Jacob): the agent generates a **UUID v4** and sends it as the entry's

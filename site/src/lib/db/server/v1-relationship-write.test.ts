@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { open_dictionary_db_in_memory } from './dictionary-db'
 import { open_dictionary_history_db_in_memory } from './dictionary-history-db'
 import {
+  apply_relationship_batch,
   apply_relationship_create,
   apply_relationship_delete,
   find_or_create_relationship_type,
@@ -163,6 +164,58 @@ describe(apply_relationship_create, () => {
     const ok = apply_relationship_create({ db, input: { from_entry_id: 'dog', to_entry_id: 'perro', type: 'cognate', sources: ['swadesh'], note: 'shared etymon' }, user_id: 'u1' })
     expect(ok.relationship.sources).toEqual(['swadesh'])
     expect(ok.relationship.note).toEqual({ default: 'shared etymon' })
+  })
+})
+
+describe(apply_relationship_batch, () => {
+  test('mixed batch: created + exists + failed, per-item in input order, good items commit', () => {
+    apply_relationship_create({ db, input: { from_entry_id: 'dog', to_entry_id: 'perro', type: 'synonym' }, user_id: 'u1' })
+    const report = apply_relationship_batch({ db, user_id: 'u1', relationships: [
+      { from_entry_id: 'dog', to_entry_id: 'cat', type: 'antonym' },
+      { from_entry_id: 'dog', to_entry_id: 'perro', type: 'synonym' },
+      { from_entry_id: 'dog', to_entry_id: 'ghost', type: 'synonym' },
+    ] })
+    expect(report.created).toBe(1)
+    expect(report.existed).toBe(1)
+    expect(report.failed).toBe(1)
+    expect(report.results[0].status).toBe('created')
+    expect(report.results[1].status).toBe('exists')
+    expect(report.results[2]).toEqual({ status: 'failed', error: `to_entry_id 'ghost' not found` })
+    expect(relationship_count()).toBe(2)
+  })
+
+  test('canonicalization dedupes INSIDE one batch (A→B then B→A symmetric)', () => {
+    const report = apply_relationship_batch({ db, user_id: 'u1', relationships: [
+      { from_entry_id: 'dog', to_entry_id: 'perro', type: 'synonym' },
+      { from_entry_id: 'perro', to_entry_id: 'dog', type: 'synonym' },
+    ] })
+    expect(report.created).toBe(1)
+    expect(report.existed).toBe(1)
+    expect(report.results[1].relationship_id).toBe(report.results[0].relationship_id)
+    expect(relationship_count()).toBe(1)
+  })
+
+  test('a custom type created by a FAILED item rolls back with it (no orphan type or history)', () => {
+    const history_db = open_dictionary_history_db_in_memory()
+    const report = apply_relationship_batch({ db, history_db, user_id: 'u1', relationships: [
+      { from_entry_id: 'dog', to_entry_id: 'ghost', custom_type: { name: 'Compare' } },
+    ] })
+    expect(report.failed).toBe(1)
+    expect(list_relationship_types(db)).toHaveLength(0)
+    expect((history_db.prepare(`SELECT COUNT(*) c FROM changes`).get() as { c: number }).c).toBe(0)
+    history_db.close()
+  })
+
+  test('a retry of the whole batch is a safe no-op (all exists)', () => {
+    const inputs = [
+      { from_entry_id: 'dog', to_entry_id: 'perro', type: 'cognate' },
+      { from_entry_id: 'dog', to_entry_id: 'cat', type: 'antonym' },
+    ]
+    apply_relationship_batch({ db, user_id: 'u1', relationships: inputs })
+    const retry = apply_relationship_batch({ db, user_id: 'u1', relationships: inputs })
+    expect(retry.created).toBe(0)
+    expect(retry.existed).toBe(2)
+    expect(relationship_count()).toBe(2)
   })
 })
 

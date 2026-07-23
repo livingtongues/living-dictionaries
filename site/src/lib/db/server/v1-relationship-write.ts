@@ -64,12 +64,14 @@ export function list_relationship_types(db: Database.Database): RelationshipType
   return rows.map(parse_relationship_type)
 }
 
-export function find_or_create_relationship_type({ db, history_db, input, user_id, api_key_id }: {
+export function find_or_create_relationship_type({ db, history_db, input, user_id, api_key_id, history_events }: {
   db: Database.Database
   history_db?: Database.Database
   input: CustomRelationshipTypeInput
   user_id: string
   api_key_id?: string | null
+  /** When provided, history is COLLECTED here (batch path — recorded after commit) instead of written immediately. */
+  history_events?: HistoryEvent[]
 }): { type: RelationshipTypeRecord, created: boolean, cursor: string | null } {
   const name = to_multistring(input.name)
   if (!name)
@@ -93,7 +95,12 @@ export function find_or_create_relationship_type({ db, history_db, input, user_i
     at: now,
     api_key_id,
   })
-  commit_history(history_db, event)
+  if (history_events) {
+    if (event)
+      history_events.push(event)
+  } else {
+    commit_history(history_db, event)
+  }
   return { type: { id, name, inverse_name: symmetric ? null : (inverse_name ?? null), symmetric }, created: true, cursor: read_last_modified_at(db) }
 }
 
@@ -183,27 +190,32 @@ function sense_belongs_to_entry(db: Database.Database, sense_id: string, entry_i
  * partner (`hypernym`) with `flip: true`, so the caller swaps endpoints and every
  * stored row uses one slug per concept-pair.
  */
-function resolve_relationship_type({ db, history_db, input, user_id, api_key_id }: {
+function resolve_relationship_type({ db, input, user_id, api_key_id, history_events }: {
   db: Database.Database
-  history_db?: Database.Database
   input: RelationshipInput
   user_id: string
   api_key_id?: string | null
+  history_events: HistoryEvent[]
 }): { type?: string, custom_type_id?: string, symmetric: boolean, flip: boolean } {
   if (input.custom_type) {
-    const { type } = find_or_create_relationship_type({ db, history_db, input: input.custom_type, user_id, api_key_id })
+    const { type } = find_or_create_relationship_type({ db, input: input.custom_type, user_id, api_key_id, history_events })
     return { custom_type_id: type.id, symmetric: type.symmetric, flip: false }
   }
   return resolve_global_relationship_type(input.type as keyof typeof RELATIONSHIP_TYPES)
 }
 
-export function apply_relationship_create({ db, history_db, input, user_id, api_key_id }: {
+/**
+ * Validate + create ONE relationship inside an ALREADY-OPEN transaction.
+ * History events are collected into `history_events` (recorded by the caller
+ * after commit). Throws on invalid input / unknown ids.
+ */
+function create_relationship_in_open_tx({ db, input, user_id, api_key_id, history_events }: {
   db: Database.Database
-  history_db?: Database.Database
   input: RelationshipInput
   user_id: string
   api_key_id?: string | null
-}): { relationship: RelationshipView, created: boolean, cursor: string | null } {
+  history_events: HistoryEvent[]
+}): { relationship: RelationshipView, created: boolean } {
   const from_entry_id = (input.from_entry_id || '').trim()
   const to_entry_id = (input.to_entry_id || '').trim()
   if (!from_entry_id || !to_entry_id)
@@ -235,62 +247,158 @@ export function apply_relationship_create({ db, history_db, input, user_id, api_
   assert_known_source_slugs(sources, load_source_slug_set(db))
 
   const now = new Date().toISOString()
+
+  // Resolve type (global slug or find-or-create custom) — before dedupe so a
+  // custom type re-use maps to the same id.
+  const { type, custom_type_id, symmetric, flip } = resolve_relationship_type({ db, input, user_id, api_key_id, history_events })
+
+  // Inverse-alias flip (e.g. hyponym→hypernym) + symmetric endpoint sort so
+  // A→B and B→A collapse — shared with the browser editing UI.
+  const { from, to } = canonicalize_relationship_endpoints({
+    from: { entry_id: from_entry_id, sense_id: from_sense_id },
+    to: { entry_id: to_entry_id, sense_id: to_sense_id },
+    symmetric,
+    flip,
+  })
+
+  // Dedupe against the natural key (COALESCE mirrors the unique index).
+  const existing = db.prepare(
+    `SELECT * FROM entry_relationships
+      WHERE from_entry_id = ? AND COALESCE(from_sense_id,'') = ?
+        AND to_entry_id = ? AND COALESCE(to_sense_id,'') = ?
+        AND COALESCE(type,'') = ? AND COALESCE(custom_type_id,'') = ?`,
+  ).get(from.entry_id, from.sense_id ?? '', to.entry_id, to.sense_id ?? '', type ?? '', custom_type_id ?? '') as Record<string, unknown> | undefined
+
+  const type_cache = new Map<string, RelationshipTypeRecord>()
+  const lexeme_cache = new Map<string, MultiString>()
+
+  if (existing) {
+    const view = build_relationship_view({ db, row: parse_dict_row('entry_relationships', existing), viewpoint_entry_id: from_entry_id, type_cache, lexeme_cache })
+    return { relationship: view, created: false }
+  }
+
+  const id = crypto.randomUUID()
+  const event = merge_dict_row({
+    db,
+    table_name: 'entry_relationships',
+    row: prune({
+      id,
+      from_entry_id: from.entry_id,
+      from_sense_id: from.sense_id ?? undefined,
+      to_entry_id: to.entry_id,
+      to_sense_id: to.sense_id ?? undefined,
+      type,
+      custom_type_id,
+      note,
+      sources,
+      created_at: now,
+      updated_at: now,
+    }),
+    user_id,
+    at: now,
+    api_key_id,
+  })
+  if (event)
+    history_events.push(event)
+
+  const created_row = db.prepare(`SELECT * FROM entry_relationships WHERE id = ?`).get(id) as Record<string, unknown>
+  const view = build_relationship_view({ db, row: parse_dict_row('entry_relationships', created_row), viewpoint_entry_id: from_entry_id, type_cache, lexeme_cache })
+  return { relationship: view, created: true }
+}
+
+export function apply_relationship_create({ db, history_db, input, user_id, api_key_id }: {
+  db: Database.Database
+  history_db?: Database.Database
+  input: RelationshipInput
+  user_id: string
+  api_key_id?: string | null
+}): { relationship: RelationshipView, created: boolean, cursor: string | null } {
+  const history_events: HistoryEvent[] = []
+  db.exec('BEGIN IMMEDIATE')
+  let result: { relationship: RelationshipView, created: boolean }
+  let cursor: string | null
+  try {
+    result = create_relationship_in_open_tx({ db, input, user_id, api_key_id, history_events })
+    cursor = read_last_modified_at(db)
+    db.exec('COMMIT')
+  } catch (err) {
+    db.exec('ROLLBACK')
+    throw err
+  }
+
+  if (history_db && history_events.length) {
+    try {
+      record_history(history_db, history_events)
+    } catch (err) {
+      console.warn('Could not record v1 relationship history:', err)
+    }
+  }
+
+  return { relationship: result.relationship, created: result.created, cursor }
+}
+
+// ── Batch create ──────────────────────────────────────────────────────────────
+
+export interface RelationshipWriteResult {
+  /** `created` — new row. `exists` — idempotent no-op (identical relationship already present). `failed` — see `error`. */
+  status: 'created' | 'exists' | 'failed'
+  relationship_id?: string
+  error?: string
+}
+
+export interface RelationshipsBatchResult {
+  created: number
+  /** Items that were idempotent no-ops (an identical relationship already existed). */
+  existed: number
+  failed: number
+  results: RelationshipWriteResult[]
+  cursor: string | null
+}
+
+/**
+ * Batch-create relationships: ONE transaction for the whole call, a SAVEPOINT
+ * per item (per-item best-effort — a bad item rolls back just itself and is
+ * reported `failed`, the rest commit). Same contract shape as bulk entries:
+ * `results` in input order, retry-safe (`exists` on an idempotent re-POST).
+ */
+export function apply_relationship_batch({ db, history_db, relationships, user_id, api_key_id }: {
+  db: Database.Database
+  history_db?: Database.Database
+  relationships: RelationshipInput[]
+  user_id: string
+  api_key_id?: string | null
+}): RelationshipsBatchResult {
+  const history_events: HistoryEvent[] = []
+  const results: RelationshipWriteResult[] = []
+  let created = 0
+  let existed = 0
+  let failed = 0
+
   db.exec('BEGIN IMMEDIATE')
   try {
-    // Resolve type (global slug or find-or-create custom) — before dedupe so a
-    // custom type re-use maps to the same id. A newly created custom type records
-    // its own creation history via find_or_create (history_db passed through).
-    const history_events: HistoryEvent[] = []
-    const { type, custom_type_id, symmetric, flip } = resolve_relationship_type({ db, history_db, input, user_id, api_key_id })
-
-    // Inverse-alias flip (e.g. hyponym→hypernym) + symmetric endpoint sort so
-    // A→B and B→A collapse — shared with the browser editing UI.
-    const { from, to } = canonicalize_relationship_endpoints({
-      from: { entry_id: from_entry_id, sense_id: from_sense_id },
-      to: { entry_id: to_entry_id, sense_id: to_sense_id },
-      symmetric,
-      flip,
-    })
-
-    // Dedupe against the natural key (COALESCE mirrors the unique index).
-    const existing = db.prepare(
-      `SELECT * FROM entry_relationships
-        WHERE from_entry_id = ? AND COALESCE(from_sense_id,'') = ?
-          AND to_entry_id = ? AND COALESCE(to_sense_id,'') = ?
-          AND COALESCE(type,'') = ? AND COALESCE(custom_type_id,'') = ?`,
-    ).get(from.entry_id, from.sense_id ?? '', to.entry_id, to.sense_id ?? '', type ?? '', custom_type_id ?? '') as Record<string, unknown> | undefined
-
-    if (existing) {
-      db.exec('COMMIT')
-      const type_cache = new Map<string, RelationshipTypeRecord>()
-      const lexeme_cache = new Map<string, MultiString>()
-      const view = build_relationship_view({ db, row: parse_dict_row('entry_relationships', existing), viewpoint_entry_id: from_entry_id, type_cache, lexeme_cache })
-      return { relationship: view, created: false, cursor: read_last_modified_at(db) }
+    for (const input of relationships) {
+      db.exec('SAVEPOINT v1_rel_item')
+      // Buffer this item's history locally — merged only after RELEASE, so a
+      // rolled-back item leaves no phantom history (same as bulk entries).
+      const item_history: HistoryEvent[] = []
+      try {
+        const { relationship, created: was_created } = create_relationship_in_open_tx({ db, input, user_id, api_key_id, history_events: item_history })
+        db.exec('RELEASE v1_rel_item')
+        history_events.push(...item_history)
+        if (was_created) {
+          results.push({ status: 'created', relationship_id: relationship.id })
+          created++
+        } else {
+          results.push({ status: 'exists', relationship_id: relationship.id })
+          existed++
+        }
+      } catch (err) {
+        db.exec('ROLLBACK TO v1_rel_item')
+        db.exec('RELEASE v1_rel_item')
+        results.push({ status: 'failed', error: (err as Error).message })
+        failed++
+      }
     }
-
-    const id = crypto.randomUUID()
-    const event = merge_dict_row({
-      db,
-      table_name: 'entry_relationships',
-      row: prune({
-        id,
-        from_entry_id: from.entry_id,
-        from_sense_id: from.sense_id ?? undefined,
-        to_entry_id: to.entry_id,
-        to_sense_id: to.sense_id ?? undefined,
-        type,
-        custom_type_id,
-        note,
-        sources,
-        created_at: now,
-        updated_at: now,
-      }),
-      user_id,
-      at: now,
-      api_key_id,
-    })
-    if (event)
-      history_events.push(event)
 
     const cursor = read_last_modified_at(db)
     db.exec('COMMIT')
@@ -299,15 +407,11 @@ export function apply_relationship_create({ db, history_db, input, user_id, api_
       try {
         record_history(history_db, history_events)
       } catch (err) {
-        console.warn('Could not record v1 relationship history:', err)
+        console.warn('Could not record v1 relationship batch history:', err)
       }
     }
 
-    const type_cache = new Map<string, RelationshipTypeRecord>()
-    const lexeme_cache = new Map<string, MultiString>()
-    const created_row = db.prepare(`SELECT * FROM entry_relationships WHERE id = ?`).get(id) as Record<string, unknown>
-    const view = build_relationship_view({ db, row: parse_dict_row('entry_relationships', created_row), viewpoint_entry_id: from_entry_id, type_cache, lexeme_cache })
-    return { relationship: view, created: true, cursor }
+    return { created, existed, failed, results, cursor }
   } catch (err) {
     db.exec('ROLLBACK')
     throw err

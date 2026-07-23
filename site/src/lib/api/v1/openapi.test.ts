@@ -101,6 +101,7 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}': ['get'],
       '/api/v1/dictionaries/{id}/entries': ['get', 'post'],
       '/api/v1/dictionaries/{id}/entries/{entryId}': ['delete', 'get', 'patch'],
+      '/api/v1/dictionaries/{id}/entries/batch-delete': ['post'],
       '/api/v1/dictionaries/{id}/entries/{entryId}/tags/{tagId}': ['delete'],
       '/api/v1/dictionaries/{id}/entries/{entryId}/dialects/{dialectId}': ['delete'],
       '/api/v1/dictionaries/{id}/relationships': ['get', 'post'],

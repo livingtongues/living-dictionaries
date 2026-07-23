@@ -86,6 +86,37 @@ describe(POST, () => {
     expect((await res.json()).created).toBeFalsy()
     expect((dict_db.prepare(`SELECT COUNT(*) c FROM entry_relationships`).get() as { c: number }).c).toBe(1)
   })
+
+  test('batch body ({ relationships }) returns per-item results in order', async () => {
+    const res = await post_call({ api_key: api_token, body: { relationships: [
+      { from_entry_id: dog_id, to_entry_id: perro_id, type: 'cognate' },
+      { from_entry_id: dog_id, to_entry_id: perro_id, type: 'cognate' },
+      { from_entry_id: dog_id, to_entry_id: 'ghost', type: 'cognate' },
+    ] } })
+    expect(res.status).toBe(200)
+    const data = await res.json()
+    expect(data.created).toBe(1)
+    expect(data.existed).toBe(1)
+    expect(data.failed).toBe(1)
+    expect(data.results.map((r: { status: string }) => r.status)).toEqual(['created', 'exists', 'failed'])
+    expect((dict_db.prepare(`SELECT COUNT(*) c FROM entry_relationships`).get() as { c: number }).c).toBe(1)
+  })
+
+  test('bare-array batch body works too', async () => {
+    const res = await post_call({ api_key: api_token, body: [{ from_entry_id: dog_id, to_entry_id: perro_id, type: 'antonym' }] })
+    const data = await res.json()
+    expect(data.created).toBe(1)
+    expect(data.results[0].relationship_id).toBeTruthy()
+  })
+
+  test('400 on an empty batch', async () => {
+    await expect(post_call({ api_key: api_token, body: { relationships: [] } })).rejects.toMatchObject({ status: 400 })
+  })
+
+  test('400 when a batch exceeds the 1000-item cap', async () => {
+    const relationships = Array.from({ length: 1001 }, () => ({ from_entry_id: dog_id, to_entry_id: perro_id, type: 'cognate' }))
+    await expect(post_call({ api_key: api_token, body: { relationships } })).rejects.toMatchObject({ status: 400 })
+  })
 })
 
 describe(GET, () => {

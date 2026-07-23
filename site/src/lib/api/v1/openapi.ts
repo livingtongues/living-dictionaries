@@ -983,6 +983,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '- `PATCH …/tags/{tagId}` / `…/dialects/{dialectId}` — rename a tag/dialect (affects EVERY entry it\'s on); `DELETE` removes it globally (unlinks it everywhere).',
         '- `DELETE …/entries/{entryId}/tags/{tagId}` / `…/entries/{entryId}/dialects/{dialectId}` — unlink ONE tag/dialect from ONE entry (it survives on other entries).',
         'REPAIR & RE-SYNC SEMANTICS: PATCH is field-merge and NEVER deletes — re-syncing a corrected source over an earlier import updates fields but leaves stale senses/sentences/tags behind; remove those explicitly with the DELETE routes above. See the importing guide\'s repair section.',
+        'BAD-IMPORT RECOVERY: `POST …/entries/batch-delete` removes EVERY entry from one bulk import via its `import_id` (the private tag stamped on the batch). Two-step by design: `{ "import_id": "…", "dry_run": true }` reports `{ count, sample_entry_ids }` with no writes; the real run must echo that count back as `confirm_count` (mismatch → 409, so a stale script can\'t nuke a re-imported batch). The emptied private tag is deleted too; orphaned standalone example sentences are left. See the importing guide\'s recovery section.',
         '',
         '## Scope (v1)',
         'v1 covers entries, senses, example sentences, **texts** (connected passages with ordered sentences), speakers, tags, dialects, sources, and **media** (audio, photos, video). Text-only imports never need to touch media.',
@@ -999,7 +1000,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '**Reading media back**: `GET …/texts/{textId}` returns the text\'s audio (text- AND sentence-level, with `timings`, speakers, and a `download_url` per row) — one call serves text + sentences + audio + speakers. Download any stored media\'s bytes via `GET …/media/{storage_path}` (302-redirects to storage).',
         '',
         '## Limits',
-        'Batch ≤1000 entries per request AND keep each request body under ~16MB — split larger imports. A single media upload (file or fetched url) is capped separately (~25MB); for larger video use a `hosted_url` link instead. Writes are per-item best-effort (read `results`).',
+        'Batch ≤1000 entries (or ≤1000 relationships) per request AND keep each request body under ~16MB — split larger imports. A single media upload (file or fetched url) is capped separately (~25MB); for larger video use a `hosted_url` link instead. Writes are per-item best-effort (read `results`).',
         '',
         '## Bulk reads — dictionary snapshots',
         'Mirroring or bulk-reading a whole dictionary? Don\'t paginate the API — every dictionary except secure ones has a downloadable gzipped SQLite snapshot of its full database (entries, senses, sentences, texts, media rows, speakers, …) at `https://snapshots.livingdictionaries.app/dictionaries/{id}.db.gz` (no auth; use the dictionary id, not the url slug, if they differ). It is rebuilt within ~30 minutes of any edit (a 30-minute sweep that only rebuilds when content actually changed) and served with `Cache-Control: max-age=120` — so treat it as at most ~30 minutes stale, and use the write API\'s responses (not the snapshot) to verify your own fresh writes. **How to load and query it (URL shape, gunzip, key tables): `GET /api/v1/guides/snapshot`.** Secure dictionaries have no public snapshot — paginate the API instead.',
@@ -1080,6 +1081,25 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         },
         delete: { summary: 'Delete an entry (cascades senses/junctions)', parameters: [dict_id_param, entry_id_param], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
       },
+      '/api/v1/dictionaries/{id}/entries/batch-delete': {
+        post: {
+          summary: 'Delete every entry from one bulk import (dry-run + confirm)',
+          description: 'Bad-import recovery: removes the whole batch identified by `import_id` (the private tag stamped on every entry of a bulk `POST …/entries`; matched case-insensitively). Two-step by design: call with `"dry_run": true` first — it reports `{ count, sample_entry_ids }` and writes NOTHING — then arm the real run by echoing that count back as `confirm_count` (a mismatch with the live count → 409, so a stale script can\'t delete a re-imported batch). Deletes cascade each entry\'s senses and links, the emptied private tag is removed too, and orphaned standalone example sentences are deliberately left in place. Unknown `import_id` → 404. Editor+.',
+          parameters: [dict_id_param],
+          requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['import_id'], properties: {
+            import_id: { type: 'string', description: 'The `import_id` used on the original bulk entry POST.' },
+            dry_run: { type: 'boolean', description: 'true → report the blast radius only, no writes.' },
+            confirm_count: { type: 'integer', description: 'Required for a real run: the `count` a dry-run just reported.' },
+          } } } } },
+          responses: { 200: { description: '{ import_id, count, sample_entry_ids, deleted, tag_deleted? }', content: { 'application/json': { schema: { type: 'object', properties: {
+            import_id: { type: 'string' },
+            count: { type: 'integer', description: 'Dry-run: entries that WOULD be deleted. Real run: entries actually deleted.' },
+            sample_entry_ids: { type: 'array', items: { type: 'string' }, maxItems: 20 },
+            deleted: { type: 'boolean' },
+            tag_deleted: { type: 'boolean', description: 'Real run only: the emptied private import tag was removed.' },
+          } } } } }, 400: { description: 'Missing import_id, or a real run without confirm_count' }, 404: { description: 'No private import tag with that name' }, 409: { description: 'confirm_count does not match the live count — re-run dry_run' } },
+        },
+      },
       '/api/v1/dictionaries/{id}/entries/{entryId}/tags/{tagId}': {
         delete: { summary: 'Unlink a tag from this entry', description: 'Removes ONE tag from ONE entry; the tag (and its links to other entries) survives. To delete the tag everywhere use `DELETE …/tags/{tagId}`.', parameters: [dict_id_param, entry_id_param, tag_id_param], responses: { 200: { description: "{ result: 'unlinked' }" }, 404: { description: 'Tag not linked to this entry' } } },
       },
@@ -1091,11 +1111,18 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
           responses: { 200: { description: '{ relationships: RelationshipView[] }', content: { 'application/json': { schema: { type: 'object', properties: { relationships: { type: 'array', items: { $ref: '#/components/schemas/RelationshipView' } } } } } } }, 400: { description: 'Missing entry_id' } },
         },
         post: {
-          summary: 'Create a relationship',
-          description: 'Link two entries (optionally narrowed to senses) with a global or custom type. Idempotent: an identical relationship returns the existing row with `created: false` (symmetric types also dedupe the reverse direction). Editor+.',
+          summary: 'Create relationships (single or batch)',
+          description: 'Link two entries (optionally narrowed to senses) with a global or custom type. Body: ONE relationship object (response `{ relationship, created }`), or a batch — a bare array or `{ relationships: [...] }`, ≤1000/request (response `{ created, existed, failed, results }` with per-item results in input order — same contract as bulk entries; use batches for cognate ledgers and other large relationship sets). Idempotent either way: an identical relationship is a no-op (`created: false` / status `exists`), symmetric types also dedupe the reverse direction, and a batch is per-item best-effort (one bad item doesn\'t abort the rest — re-POST only the `failed` ones). Editor+.',
           parameters: [dict_id_param],
-          requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/RelationshipInput' } } } },
-          responses: { 200: { description: '{ relationship, created }', content: { 'application/json': { schema: { type: 'object', properties: { relationship: { $ref: '#/components/schemas/RelationshipView' }, created: { type: 'boolean', description: 'false = idempotent no-op (an identical relationship already existed).' } } } } } }, 400: { description: 'Bad input (missing/duplicate type, unknown entry/sense/source, self-link)' } },
+          requestBody: { required: true, content: { 'application/json': { schema: { oneOf: [
+            { $ref: '#/components/schemas/RelationshipInput' },
+            { type: 'array', items: { $ref: '#/components/schemas/RelationshipInput' } },
+            { type: 'object', properties: { relationships: { type: 'array', items: { $ref: '#/components/schemas/RelationshipInput' } } }, required: ['relationships'] },
+          ] } } } },
+          responses: { 200: { description: 'Single: { relationship, created }. Batch: { created, existed, failed, results }.', content: { 'application/json': { schema: { oneOf: [
+            { type: 'object', properties: { relationship: { $ref: '#/components/schemas/RelationshipView' }, created: { type: 'boolean', description: 'false = idempotent no-op (an identical relationship already existed).' } } },
+            { type: 'object', properties: { created: { type: 'integer' }, existed: { type: 'integer', description: 'Idempotent no-ops (an identical relationship already existed).' }, failed: { type: 'integer' }, results: { type: 'array', description: 'Per-item, in input order.', items: { type: 'object', properties: { status: { type: 'string', enum: ['created', 'exists', 'failed'] }, relationship_id: { type: 'string' }, error: { type: 'string' } } } } } },
+          ] } } } }, 400: { description: 'Bad input (single: missing/duplicate type, unknown entry/sense/source, self-link; batch: empty or >1000 items)' } },
         },
       },
       '/api/v1/dictionaries/{id}/relationships/{relationshipId}': {
