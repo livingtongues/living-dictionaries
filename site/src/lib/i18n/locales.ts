@@ -43,6 +43,14 @@ export const TRANSLATABLE_LOCALES = [
   ...Object.keys(UnpublishedLocales),
 ] as TranslatableLocale[]
 
+/** Resolve a committed locale-catalog path, accepting BCP-47 hyphens but rejecting unregistered locales. */
+export function locale_from_catalog_path(path: string): TranslatableLocale | undefined {
+  const locale = /locales\/(?:gl\/|ps\/|psAbbrev\/|sd\/)?([^/]+)\.json$/.exec(path)?.[1]
+  return locale && (TRANSLATABLE_LOCALES as string[]).includes(locale)
+    ? locale as TranslatableLocale
+    : undefined
+}
+
 export function get_locale_display_name(locale: string): string {
   return (Locales as Record<string, string>)[locale] || (UnpublishedLocales as Record<string, string>)[locale] || locale
 }
@@ -87,6 +95,17 @@ export function getSupportedLocale(userLocale: string | undefined): LocaleCode |
 }
 
 if (import.meta.vitest) {
+  describe(locale_from_catalog_path, () => {
+    test('discovers hyphenated root and nested catalogs', () => {
+      expect(locale_from_catalog_path('/src/lib/i18n/locales/zh-CN.json')).toBe('zh-CN')
+      expect(locale_from_catalog_path('/src/lib/i18n/locales/gl/zh-TW.json')).toBe('zh-TW')
+    })
+    test('retains registry validation', () => {
+      expect(locale_from_catalog_path('/src/lib/i18n/locales/not-registered.json')).toBe(undefined)
+      expect(locale_from_catalog_path('/src/lib/i18n/locales/other/fr.json')).toBe(undefined)
+    })
+  })
+
   describe(getSupportedLocale, () => {
     test('exact matches return the code', () => {
       expect(getSupportedLocale('en')).toBe('en')

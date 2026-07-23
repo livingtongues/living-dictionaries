@@ -16,7 +16,7 @@
  * viewer-mode (see `dict-session.ts`).
  */
 import type { BootFailure, BootProgressDetail, DbEvent, DbRequest, InstanceOptions, LeaderMeta, WorkerInitMessage } from './instance'
-import { db_channel_name, db_lock_name } from './instance'
+import { carry_poison_recovery_claim, db_channel_name, db_lock_name } from './instance'
 import { start_leader_election } from './leader-election'
 import type { LeaderElection } from './leader-election'
 import type { BootFault } from './boot-recovery'
@@ -80,6 +80,14 @@ export function create_db_client({ instance_options, on_boot_failed, on_boot_pro
     boot_attempt = 0
     reelect_attempt = 0
     if (reelect_timer) { clearTimeout(reelect_timer); reelect_timer = null }
+  })
+
+  // The claim is broadcast before the worker deletes the poisoned viewer file.
+  // Mutating the retained init options carries the spent permit into every later
+  // worker spawned by this tab; other open tabs receive the same broadcast and
+  // do likewise before a leader hand-off.
+  transport.on_event((event) => {
+    carry_poison_recovery_claim({ options: instance_options, event: event as DbEvent })
   })
 
   const election: LeaderElection = start_leader_election({

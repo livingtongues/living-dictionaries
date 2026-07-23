@@ -152,8 +152,13 @@ let session_started_at_ms = 0
 /** Epoch ms of the last real user interaction — drives the heartbeat idle gate. */
 let last_activity_at_ms = 0
 
-/** The current remote-log session id ('' before init) — threaded into worker telemetry (`InstanceOptions.session_id`). */
+/**
+ * The current page-session id, created synchronously on first access so a
+ * deep-link dictionary worker and the later root logger always share it.
+ */
 export function get_session_id(): string {
+  if (!session_id && typeof window !== 'undefined')
+    session_id = crypto.randomUUID()
   return session_id
 }
 
@@ -607,7 +612,7 @@ export function init_remote_logging(): void {
   if (typeof window === 'undefined')
     return
   initialized = true
-  session_id = crypto.randomUUID()
+  get_session_id()
   ensure_visitor_id()
   session_started_at_ms = Date.now()
 

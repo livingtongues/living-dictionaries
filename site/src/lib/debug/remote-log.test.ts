@@ -51,6 +51,18 @@ function all_sent_entries(): ClientLogPayload[] {
 }
 
 describe('remote-log buffer + flush', () => {
+  test('keeps an early worker correlation id when logging initializes later', async () => {
+    const module = await import('./remote-log')
+    const early_session_id = module.get_session_id()
+    module.init_remote_logging()
+    module.log_event({ level: 'warn', message: 'early-worker-event', context: { session_id: early_session_id } })
+    await module.flush_now()
+
+    expect(early_session_id).not.toBe('')
+    expect((find_sent_entry('early-worker-event')?.context as { session_id: string }).session_id).toBe(early_session_id)
+    expect(module.get_session_id()).toBe(early_session_id)
+  })
+
   test('buffers an entry and flushes via api_log', async () => {
     const module = await import('./remote-log')
     module.init_remote_logging()

@@ -11,24 +11,31 @@ import { toast } from '$lib/state/toast.svelte'
  * reads; stories seed it directly). Server-authoritative — every write goes
  * through /api/translate/* and the response is folded back into `rows`.
  */
-class TranslateStore {
-  locale = $state('')
-  rows = $state<TranslateRow[]>([])
+export class TranslateStore {
+  private snapshot = $state.raw<{ locale: string, rows: TranslateRow[] }>({ locale: '', rows: [] })
+  requested_locale = $state('')
   loading = $state(false)
   summary = $state<TranslateSummaryResponse | null>(null)
 
+  get locale() { return this.snapshot.locale }
+  set locale(locale: string) { this.snapshot = { ...this.snapshot, locale } }
+  get rows() { return this.snapshot.rows }
+  set rows(rows: TranslateRow[]) { this.snapshot = { ...this.snapshot, rows } }
+
   async load_locale(locale: string) {
-    this.locale = locale
+    this.requested_locale = locale
+    if (this.locale !== locale)
+      this.snapshot = { locale: '', rows: [] }
     this.loading = true
     const { data, error } = await api_translate_data({ locale })
-    if (this.locale !== locale)
+    if (this.requested_locale !== locale)
       return // switched again mid-flight
     this.loading = false
     if (error) {
       toast.error(`Could not load ${locale}: ${error.message}`)
       return
     }
-    this.rows = data.rows
+    this.snapshot = { locale, rows: data.rows }
   }
 
   async refresh_summary() {
@@ -42,7 +49,8 @@ class TranslateStore {
     const index = this.rows.findIndex(entry => entry.key_id === key_id)
     if (index === -1)
       return
-    this.rows[index] = {
+    const rows = [...this.rows]
+    rows[index] = {
       ...this.rows[index],
       value: row?.value ?? null,
       source: row?.source ?? null,
@@ -50,10 +58,13 @@ class TranslateStore {
       updated_at: row?.updated_at ?? null,
       updated_by_name: row?.updated_by_name ?? null,
     }
+    this.snapshot = { ...this.snapshot, rows }
   }
 
   /** Returns true on success (the row component keeps its draft on failure). */
   async save({ key_id, value }: { key_id: string, value: string }): Promise<boolean> {
+    if (!this.locale)
+      return false
     const { data, error } = await api_translate_save({ key_id, locale: this.locale, value })
     if (error) {
       toast.error(`Save failed: ${error.message}`)
@@ -64,6 +75,8 @@ class TranslateStore {
   }
 
   async approve({ key_id }: { key_id: string }): Promise<boolean> {
+    if (!this.locale)
+      return false
     const { data, error } = await api_translate_approve({ key_id, locale: this.locale })
     if (error) {
       toast.error(`Approve failed: ${error.message}`)

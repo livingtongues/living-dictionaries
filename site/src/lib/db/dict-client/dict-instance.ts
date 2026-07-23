@@ -108,12 +108,12 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
     // snapshot with a baked cursor, so a SECOND wedge in the same session
     // means something deeper is wrong (let the breaker halt + prompt).
     let rebuild_attempted = false
-    // One poisoned-file recovery per worker lifetime — a VIEWER boot that can't
+    // One poisoned-file recovery per page session — a VIEWER boot that can't
     // open/migrate its persisted OPFS file has no local writes to lose, so it
     // may drop the file and re-fetch a fresh snapshot rather than dead-ending
     // (see `poisoned_file_recovery_decision`). Bounded so a broken environment
     // can't refetch-loop.
-    let poison_recovery_attempted = false
+    let poison_recovery_attempted = options.poison_recovery_attempted ?? false
     // Storage-lost self-heal budget (browser closed our held OPFS handle —
     // observed after tab suspension/system sleep). Capped so a browser that
     // closes the handle right back doesn't reopen-loop; each reopen keeps the
@@ -232,6 +232,7 @@ export function create_dict_instance(options: InstanceOptions): InstanceFactory 
         if (!replace)
           throw err
         poison_recovery_attempted = true
+        context.emit_event({ type: 'poison_recovery_claimed' })
         console.warn(`[dict-instance] ${dict_id} viewer's existing OPFS file failed to open/migrate — replacing with a fresh snapshot:`, err)
         report_dict_file_replaced({ dict_id, boot_message: err instanceof Error ? err.message : String(err) })
         await delete_opfs_db_file({ path })

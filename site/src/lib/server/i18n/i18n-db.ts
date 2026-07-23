@@ -7,7 +7,7 @@
  * better-sqlite3 statements; no JSON columns.
  */
 import type Database from 'better-sqlite3'
-import { TRANSLATABLE_LOCALES } from '$lib/i18n/locales'
+import { locale_from_catalog_path, TRANSLATABLE_LOCALES } from '$lib/i18n/locales'
 import { en } from '$lib/i18n'
 
 export type I18nSource = 'import' | 'human' | 'ai'
@@ -149,21 +149,24 @@ export function sync_en_catalog({ db }: { db: Database.Database }): CatalogSyncR
  * are skipped — missing translation = no row. INSERT OR IGNORE keeps the
  * blue/green double-boot race harmless.
  */
-export async function seed_translations_if_empty({ db }: { db: Database.Database }): Promise<boolean> {
+type CatalogModules = Record<string, () => Promise<unknown>>
+
+export async function seed_translations_if_empty({ db, catalog_modules = import.meta.glob('$lib/i18n/locales/**/*.json') }: {
+  db: Database.Database
+  catalog_modules?: CatalogModules
+}): Promise<boolean> {
   const { count } = db.prepare('SELECT COUNT(*) as count FROM i18n_translations').get() as { count: number }
   if (count > 0)
     return false
 
-  const modules = import.meta.glob('$lib/i18n/locales/**/*.json')
   const insert = db.prepare(`
     INSERT OR IGNORE INTO i18n_translations (id, key_id, locale, value, source, created_at, updated_at)
     SELECT ?, id, ?, ?, 'import', ?, ? FROM i18n_keys WHERE id = ?`)
   const now = now_iso()
 
-  for (const [path, load] of Object.entries(modules)) {
-    const match = /locales\/(?:(?:gl|ps|psAbbrev|sd)\/)?(\w+)\.json$/.exec(path)
-    const locale = match?.[1]
-    if (!locale || !(TRANSLATABLE_LOCALES as string[]).includes(locale))
+  for (const [path, load] of Object.entries(catalog_modules)) {
+    const locale = locale_from_catalog_path(path)
+    if (!locale)
       continue
     const module = await load() as { default: Record<string, Record<string, string>> }
     for (const [section, items] of Object.entries(module.default)) {

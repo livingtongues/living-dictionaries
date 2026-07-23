@@ -19,7 +19,7 @@ describe(poisoned_file_recovery_decision, () => {
       .toEqual({ replace: false, reason: 'not_existing' })
   })
 
-  test('bounds to once per worker lifetime — a second attempt is refused', () => {
+  test('refuses a replacement after the page-session permit was claimed by an earlier worker', () => {
     expect(poisoned_file_recovery_decision({ file_existed: true, has_editor_role: false, already_attempted: true }))
       .toEqual({ replace: false, reason: 'already_attempted' })
   })

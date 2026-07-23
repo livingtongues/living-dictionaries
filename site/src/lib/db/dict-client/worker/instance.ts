@@ -39,6 +39,8 @@ export type DbEvent
     | { type: 'sync_status', is_syncing: boolean, last_error: string | null, last_sync_at: string | null }
     | { type: 'snapshot_expired' }
     | { type: 'schema_outdated' }
+  /** A viewer replacement consumed this page session's one poisoned-file recovery permit. */
+    | { type: 'poison_recovery_claimed' }
   /**
    * The repeat-fatal circuit breaker tripped: the same non-transient sync
    * failure recurred N× consecutively, so the engine halted retrying (see
@@ -95,6 +97,13 @@ export interface InstanceOptions {
   auth: AuthHeaders
   /** The spawning tab's remote-log session id — correlates worker telemetry rows with the leader tab's session. */
   session_id?: string | null
+  /** Shared by successive leader workers so re-election cannot refresh the viewer replacement budget. */
+  poison_recovery_attempted?: boolean
+}
+
+export function carry_poison_recovery_claim({ options, event }: { options: InstanceOptions, event: DbEvent }): void {
+  if (event.type === 'poison_recovery_claimed')
+    options.poison_recovery_attempted = true
 }
 
 export interface WorkerInitMessage {
@@ -128,4 +137,14 @@ export function db_channel_name(dict_id: string): string {
 
 export function db_lock_name(dict_id: string): string {
   return `${db_channel_name(dict_id)}-leader`
+}
+
+if (import.meta.vitest) {
+  describe(carry_poison_recovery_claim, () => {
+    test('carries a spent permit into the next worker options', () => {
+      const options: InstanceOptions = { dict_id: 'test', has_editor_role: false, auth: {} }
+      carry_poison_recovery_claim({ options, event: { type: 'poison_recovery_claimed' } })
+      expect(options.poison_recovery_attempted).toBe(true)
+    })
+  })
 }
