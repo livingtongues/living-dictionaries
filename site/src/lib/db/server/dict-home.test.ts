@@ -42,6 +42,7 @@ describe(get_featured_cards, () => {
       parts_of_speech: null,
       dialect: null,
       photo_serving_url: null,
+      photo_storage_path: null,
       audio_storage_path: null,
     })
     expect(cards[1]).toEqual({
@@ -53,6 +54,7 @@ describe(get_featured_cards, () => {
       parts_of_speech: ['n'],
       dialect: 'Northern',
       photo_serving_url: 'serving-e1',
+      photo_storage_path: 'photos/e1.jpg',
       audio_storage_path: 'audio/e1.mp3',
     })
   })

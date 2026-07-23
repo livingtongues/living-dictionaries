@@ -2,7 +2,7 @@
   import type { DictRowType } from '$lib/db/dict-client/dict-live-db.svelte'
   import { page } from '$app/state'
   import { SvelteSet } from 'svelte/reactivity'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
 
   /**
    * Entry-page concordance (.issues/texts-sentences-pipeline.md M3): text

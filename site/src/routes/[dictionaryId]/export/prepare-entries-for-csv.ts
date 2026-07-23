@@ -1,7 +1,7 @@
 import type { EntryData, Tables } from '$lib/types'
 import type { TranslateFunction } from '$lib/i18n/types'
 import { friendlyName } from './friendly-name'
-import { get_headword, get_orthographies } from '$lib/helpers/orthographies'
+import { get_headword, get_orthographies } from '$lib/orthography/orthographies'
 import { get_orthography_headers, get_sense_headers } from './assign-headers-for-csv'
 import { display_speaker_gender, format_orthographies, format_senses } from './assign-formatted-entry-values-for-csv'
 import { stripHTMLTags } from './strip-html-tags'

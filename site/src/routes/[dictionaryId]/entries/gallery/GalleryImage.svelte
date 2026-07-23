@@ -2,7 +2,8 @@
   import { fade } from 'svelte/transition'
   import { page } from '$app/state'
   import { portal } from '$lib/utils/portal'
-  import { image_src } from '$lib/utils/media-url'
+  import type { PhotoLike } from '$lib/utils/media-url'
+  import { photo_src } from '$lib/utils/media-url'
   import IconGgSpinner from '~icons/gg/spinner'
   import IconTablerAi from '~icons/tabler/ai'
   import IconMdiClose from '~icons/mdi/close'
@@ -12,7 +13,7 @@
 
   interface Props {
     title: string
-    gcs: string
+    photo: PhotoLike
     square: number
     href: string
     subtitle?: string
@@ -24,7 +25,7 @@
 
   const {
     title,
-    gcs,
+    photo,
     square,
     href,
     subtitle = undefined,
@@ -39,7 +40,7 @@
   let viewing = $state(false)
 
   const is_desktop = $derived(window_width >= 768)
-  const fullscreen_src = $derived(image_src(gcs, `w${is_desktop ? window_width - 24 : window_width}`))
+  const fullscreen_src = $derived(photo_src(photo, `w${is_desktop ? window_width - 24 : window_width}`))
 
   let preload_promise: Promise<void> | undefined
   let preloaded_src: string | undefined
@@ -78,7 +79,7 @@
   }} />
 
 <div class="thumb-wrap">
-  <img class="thumb" onclick={open} onmouseenter={start_preload} alt={title} src={image_src(gcs, `s${square}-p`)} />
+  <img class="thumb" onclick={open} onmouseenter={start_preload} alt={title} src={photo_src(photo, `s${square}-p`)} />
   {#if loading}
     <IconGgSpinner class="spinner" />
   {:else if photographer === 'AI'}

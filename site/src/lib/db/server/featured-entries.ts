@@ -14,6 +14,7 @@ export interface FeaturedEntry {
   gloss: string | null
   gloss_language: string | null
   photo_serving_url: string
+  photo_storage_path: string | null
   audio_storage_path: string
   dict_name: string
   longitude: number | null
@@ -75,7 +76,7 @@ export function set_featured_entry_status({ db, ids, status }: { db: Database.Da
 export function approved_featured_cards({ db }: { db: Database.Database }): FeaturedCard[] {
   const rows = db.prepare(`
     SELECT fe.id, fe.dict_id, COALESCE(d.url, fe.dict_id) AS dict_url, fe.dict_name, d.location AS dict_location, fe.entry_id,
-      fe.lexeme, fe.gloss, fe.gloss_language, fe.photo_serving_url, fe.audio_storage_path,
+      fe.lexeme, fe.gloss, fe.gloss_language, fe.photo_serving_url, fe.photo_storage_path, fe.audio_storage_path,
       fe.phonetic, fe.glosses, fe.speaker_name, fe.example_sentence,
       fe.longitude AS lng, fe.latitude AS lat
     FROM featured_entries fe

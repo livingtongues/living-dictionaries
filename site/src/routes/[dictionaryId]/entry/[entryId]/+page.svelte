@@ -10,7 +10,7 @@
   import JSON from '$lib/components/ui/JSON.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import { share } from '$lib/utils/share'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import JsonLd from '$lib/components/JsonLd.svelte'
   import ChangeHistory from '$lib/components/history/ChangeHistory.svelte'
@@ -310,5 +310,5 @@
   lng={dictionary.coordinates?.points?.[0]?.coordinates.longitude}
   lat={dictionary.coordinates?.points?.[0]?.coordinates.latitude}
   url="https://livingdictionaries.app/{dictionary.url}/entry/{entry.id}"
-  gcsPath={entry.senses?.[0]?.photos?.[0]?.serving_url}
+  photo={entry.senses?.[0]?.photos?.[0]}
   keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder" />

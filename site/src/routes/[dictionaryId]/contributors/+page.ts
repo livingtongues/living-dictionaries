@@ -5,7 +5,7 @@ import { api_dictionaries_id_roles_role_id_delete } from '$api/dictionaries/[id]
 import { api_dictionaries_id_invite_cancel } from '$api/dictionaries/[id]/invites/[invite_id]/_call'
 import { upload_media } from '$lib/media/upload-media'
 import { invalidate } from '$app/navigation'
-import { inviteHelper } from '$lib/helpers/invite-helper'
+import { inviteHelper } from '$lib/invite/invite'
 
 export const load = (async ({ parent, data }) => {
   const { t, dictionary } = await parent()
@@ -79,18 +79,18 @@ export const load = (async ({ parent, data }) => {
     },
 
     add_partner_image: (partner_id: string, file: File) => {
-      const handle = upload_media({ file, folder: `${dictionary_id}/partners/${partner_id}/logo`, dictionary_id, kind: 'image' })
-      const done = handle.done.then(async ({ storage_path, serving_url }) => {
+      // Not a photos row — a fresh uuid keys the R2 object (`{dict}/photo/{uuid}.{ext}`).
+      const handle = upload_media({ file, dictionary_id, kind: 'image', media_id: crypto.randomUUID() })
+      const done = handle.done.then(async ({ storage_path }) => {
         const { error } = await api_dictionaries_partners(dictionary_id, {
           action: 'set_photo',
           partner_id,
-          photo_serving_url: serving_url,
           photo_storage_path: storage_path,
         })
         if (error)
           throw new Error(error.message)
         await invalidate('contributors:reload')
-        return { storage_path, serving_url }
+        return { storage_path }
       })
       done.catch(() => undefined) // error renders in the upload tile
       return { ...handle, done }

@@ -2,7 +2,7 @@ import { expose, releaseProxy } from 'comlink'
 import type { EntryData, Tables } from '$lib/types'
 import type { WorkerPatch } from './worker-patch'
 import { _search_entries, _search_sentences, _search_texts, create_corpus_indexes, create_index, update_index_entry, update_index_sentence, update_index_text } from './orama.worker'
-import { should_include_tag } from '$lib/helpers/tag-visibility'
+import { should_include_tag } from '$lib/tag/visibility'
 import { assemble_entry_data } from './assemble-entry-data'
 import { augment_sentence_for_search, augment_text_for_search } from './augment-sentence-for-search'
 

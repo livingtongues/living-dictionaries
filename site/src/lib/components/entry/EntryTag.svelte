@@ -3,7 +3,7 @@
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
   import { page } from '$app/state'
-  import { should_include_tag } from '$lib/helpers/tag-visibility'
+  import { should_include_tag } from '$lib/tag/visibility'
 
   interface Props {
     tags: EntryData['tags']

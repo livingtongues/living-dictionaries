@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state'
-  import { get_orthographies } from '$lib/helpers/orthographies'
+  import { get_orthographies } from '$lib/orthography/orthographies'
   import IconIonMdVolumeHigh from '~icons/ion/md-volume-high'
   import IconCarbonImage from '~icons/carbon/image'
   import IconCarbonVideo from '~icons/carbon/video'

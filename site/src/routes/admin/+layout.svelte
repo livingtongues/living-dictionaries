@@ -12,6 +12,7 @@
   import IconMdiArrowLeft from '~icons/mdi/arrow-left'
   import IconMdiBookMultipleOutline from '~icons/mdi/book-multiple-outline'
   import IconMdiChartLine from '~icons/mdi/chart-line'
+  import IconMdiDatabaseOutline from '~icons/mdi/database-outline'
   import IconMdiCloudSync from '~icons/mdi/cloud-sync'
   import IconMdiForumOutline from '~icons/mdi/forum-outline'
   import IconMdiHeartPulse from '~icons/mdi/heart-pulse'
@@ -37,6 +38,7 @@
     // hide on mobile, where every link is icon-only anyway). Health + Schema
     // are Super Admin only (level 3) — raw log/db internals.
     { href: '/admin/analytics', label: 'Analytics', icon: IconMdiChartLine, compact: true, min_level: 2 },
+    { href: '/admin/storage', label: 'Storage', icon: IconMdiDatabaseOutline, compact: true, min_level: 2 },
     { href: '/admin/health', label: 'Health', icon: IconMdiHeartPulse, compact: true, min_level: 3 },
     { href: '/admin/schema', label: 'Schema', icon: IconMdiTableCog, compact: true, min_level: 3 },
     { href: '/admin/legal-review', label: 'Legal', icon: IconMdiScaleBalance, compact: true },

@@ -4,7 +4,7 @@
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { split_text_into_sentences } from '$lib/corpus/split-text-into-sentences'
-  import { get_orthographies } from '$lib/helpers/orthographies'
+  import { get_orthographies } from '$lib/orthography/orthographies'
   import IconFa6SolidArrowLeft from '~icons/fa6-solid/arrow-left'
   import IconFa6SolidArrowTurnUp from '~icons/fa6-solid/arrow-turn-up'
   import IconSystemUiconsTrash from '~icons/system-uicons/trash'

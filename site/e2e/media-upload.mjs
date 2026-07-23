@@ -1,21 +1,19 @@
 #!/usr/bin/env node
-// Proof for M4 media upload (legacy GCS, presigned PUT): a logged-in manager uploads a
-// PHOTO and an AUDIO file; the bytes go to GCS via a presigned PUT (intercepted → 200 here,
-// since the sandbox can't reach GCS), the image serving-url is minted via the GAE images
-// service (mocked locally), and the resulting media ROW persists through the M4 write/sync
-// path (wa-sqlite → POST /api/dictionary/[id]/changes → server SQLite) and renders on a
-// fresh reload.
+// Proof for media upload on the R2 key convention (post GCS→R2 migration, 2026-07):
+// a logged-in manager uploads a PHOTO and an AUDIO file.
+//   photo → multipart POST /api/photo-upload → original stored + WebP variants generated
+//           AFTER the response (real sharp) → row (serving_url '') syncs to server SQLite
+//   audio → /api/upload presign (dev-media mock) → XHR PUT → row syncs to server SQLite
 //
-//   pnpm -F site build && pnpm -F site test:media
+//   pnpm -F site test:media
 //
-// "Mock all the image magic": real `getSignedUrl` (pure local crypto) runs with FAKE GCS
-// creds, the GCS PUT + the lh3 image fetch are puppeteer-intercepted, and PROCESS_IMAGE_URL
-// points at a tiny local stub that returns an lh3 serving id. Nothing leaves the machine.
+// Runs against `vite dev` (not `node build`): the dev-media store keeps every byte local —
+// no interception, no fake cloud creds — while the sync path (wa-sqlite → /changes →
+// server SQLite) and the sharp variant pipeline are fully real.
 /* eslint-disable no-console, node/prefer-global/process, unicorn/prefer-dom-node-text-content */
 
 import { spawn } from 'node:child_process'
-import { createServer } from 'node:http'
-import { existsSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -25,13 +23,12 @@ import { launch } from '/home/jacob/.claude/skills/browser-tools/browser-launch.
 const dir = dirname(fileURLToPath(import.meta.url))
 const site_dir = join(dir, '..')
 const port = process.env.MEDIA_PORT || '3105'
-const image_mock_port = process.env.IMAGE_MOCK_PORT || '3106'
 const base = process.env.BASE_URL || `http://localhost:${port}`
 const dict_db_path = join(site_dir, '.data', 'dictionaries', 'achi.db')
-const serving_id = `MOCK_SERVING_${Date.now()}`
+const dev_media_dir = join(site_dir, '.data', 'dev-media')
+const UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
 
 let server
-let image_mock
 let browser
 
 function run(command, args) {
@@ -42,36 +39,19 @@ function run(command, args) {
   })
 }
 
-// Stand-in for the GAE images serving-url service (PROCESS_IMAGE_URL). The real one returns
-// an `http://lh3.googleusercontent.com/<id>` line for a stored image; we return a fixed id.
-function boot_image_mock() {
-  return new Promise((resolve) => {
-    image_mock = createServer((_req, res) => {
-      res.writeHead(200, { 'content-type': 'text/plain' })
-      res.end(`http://lh3.googleusercontent.com/${serving_id}\n`)
-    })
-    image_mock.listen(Number(image_mock_port), '127.0.0.1', resolve)
-  })
-}
-
-function boot_server() {
+function boot_dev_server() {
   return new Promise((resolve, reject) => {
-    console.log(`• booting \`node build\` on :${port}…`)
-    server = spawn('node', ['build'], {
+    console.log(`• booting \`vite dev\` on :${port}…`)
+    server = spawn('pnpm', ['dev', '--port', port, '--strictPort'], {
       cwd: site_dir,
-      env: {
-        ...process.env,
-        PORT: port,
-        JWT_SECRET: process.env.JWT_SECRET || 'e2e-test-secret-that-is-long-enough-for-hs256',
-        E2E_EXPOSE_OTP: 'true',
-        // Fake HMAC creds — getSignedUrl signs locally, never calls GCS.
-        GCLOUD_MEDIA_BUCKET_ACCESS_KEY_ID: 'e2e-fake-access-key',
-        GCLOUD_MEDIA_BUCKET_SECRET_ACCESS_KEY: 'e2e-fake-secret-key',
-        PROCESS_IMAGE_URL: `http://127.0.0.1:${image_mock_port}`,
-      },
+      detached: true, // own process group — teardown kills pnpm AND the vite child
+      env: { ...process.env, E2E_EXPOSE_OTP: 'true' },
     })
-    const timer = setTimeout(() => reject(new Error('server did not log "Listening on" within 30s')), 30000)
-    server.stdout.on('data', (chunk) => { if (chunk.toString().includes('Listening on')) { clearTimeout(timer); resolve() } })
+    const timer = setTimeout(() => reject(new Error('vite did not report ready within 60s')), 60000)
+    server.stdout.on('data', (chunk) => {
+      const text = chunk.toString()
+      if (text.includes('Local:') || text.includes('ready in')) { clearTimeout(timer); setTimeout(resolve, 500) }
+    })
     server.stderr.on('data', chunk => process.stderr.write(chunk))
     server.on('error', reject)
     server.on('close', code => reject(new Error(`server exited early (code ${code})`)))
@@ -127,17 +107,17 @@ async function flush_sync(page) {
   })
 }
 
-// 1x1 transparent PNG.
-const PNG_BYTES = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC', 'base64')
+// 24x24 solid PNG — a realistic (non-1x1) image so the sharp resize→webp variant
+// pipeline runs cleanly (a 1x1 PNG trips a `vipspng: libpng read error` in the
+// cover-resize on some libpng builds, which has nothing to do with the upload path).
+const REAL_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAKElEQVQ4jWOI6rlEFcQwalDUaBhFjaajntEs0jNajFwaLSEvDWQtAgBnTd4uzY9DTAAAAABJRU5ErkJggg==', 'base64')
 
 async function main() {
-  await boot_image_mock()
   if (!process.env.BASE_URL) {
-    if (!existsSync(join(site_dir, 'build/index.js'))) await run('pnpm', ['build'])
     console.log('• re-seeding achi fixture…')
     await run('pnpm', ['seed:achi-fixture'])
     clear_photos()
-    await boot_server()
+    await boot_dev_server()
   }
 
   const before = read_server_media('e_ja')
@@ -146,53 +126,31 @@ async function main() {
   const tmp = mkdtempSync(join(tmpdir(), 'ld-media-'))
   const png_path = join(tmp, 'cat.png')
   const mp3_path = join(tmp, 'word.mp3')
-  writeFileSync(png_path, PNG_BYTES)
+  writeFileSync(png_path, REAL_PNG)
   writeFileSync(mp3_path, Buffer.from([0xFF, 0xFB, 0x90, 0x00, 0, 0, 0, 0])) // tiny mp3 header bytes
 
   browser = await launch({ viewport: { width: 1100, height: 900 }, args: ['--lang=en-US'] })
   const page = await browser.newPage()
   await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
 
-  // Intercept the GCS PUT (bytes) and the lh3 image render — the only two things that would
-  // leave the machine. Everything else continues normally.
-  const cors_headers = {
-    'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET, PUT, POST, OPTIONS',
-    'access-control-allow-headers': '*',
-    'access-control-max-age': '3600',
-  }
-  let gcs_put_count = 0
-  await page.setRequestInterception(true)
-  page.on('request', (req) => {
-    const url = req.url()
-    if (/storage\.googleapis\.com|\.appspot\.com\.storage/.test(url)) {
-      // The browser sends a CORS preflight (OPTIONS) before the cross-origin PUT — answer it
-      // with permissive CORS headers (prod GCS has a real CORS policy; see gcloud.ts) so the
-      // actual PUT isn't blocked.
-      if (req.method() === 'OPTIONS')
-        return req.respond({ status: 204, headers: cors_headers, body: '' })
-      gcs_put_count++
-      console.log(`  [intercepted GCS ${req.method()}] ${url.slice(0, 80)}…`)
-      return req.respond({ status: 200, headers: cors_headers, body: '' })
-    }
-    if (/lh3\.googleusercontent\.com/.test(url))
-      return req.respond({ status: 200, contentType: 'image/png', body: PNG_BYTES })
-    return req.continue()
-  })
-
   const page_errors = []
   page.on('pageerror', (error) => { page_errors.push(error.message); console.log('  [pageerror]', error.message.slice(0, 200)) })
   page.on('dialog', (d) => { console.log('  [dialog]', d.message().slice(0, 200)); d.dismiss().catch(() => {}) })
   page.on('console', (m) => { if (m.type() === 'error') console.log(`  [console.error]`, m.text().slice(0, 200)) })
 
-  await page.goto(`${base}/achi/entry/e_ja`, { waitUntil: 'domcontentloaded' })
-  await page.waitForFunction(() => document.body.innerText.includes('water'))
+  await page.goto(`${base}/achi/entry/e_ja`, { waitUntil: 'domcontentloaded', timeout: 90000 })
+  // vite dev compiles the page + the wa-sqlite worker on first hit — generous wait.
+  await page.waitForFunction(() => document.body.innerText.includes('water'), { timeout: 90000 })
   await login(page)
   await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.waitForFunction(() => document.body.innerText.includes('Add Audio'), { timeout: 25000 })
-  console.log('✓ logged in as achi-manager; editor affordances present')
+  await page.waitForFunction(() => document.body.innerText.includes('Add Audio'), { timeout: 30000 })
+  // Edits are blocked (guarded-writes `still_loading`) until the entries bundle finishes
+  // loading from the wa-sqlite leader worker — slower to boot in headless CI than the app's
+  // click cadence. Wait for readiness so the media inserts don't race the read-model.
+  await page.waitForFunction(() => globalThis.__ld_entries_loading?.achi === false, { timeout: 90000 })
+  console.log('✓ logged in as achi-manager; editor affordances present + writes ready')
 
-  // ─── PHOTO (exercises /api/upload + /api/gcs_serving_url) ───────────────────────────────
+  // ─── PHOTO (exercises multipart POST /api/photo-upload + background variants) ────────────
   await page.evaluate(() => {
     const el = [...document.querySelectorAll('div')].find(d => d.textContent.trim() === 'Photo' && d.offsetParent)
     el.click()
@@ -211,22 +169,33 @@ async function main() {
   await image_input.uploadFile(png_path)
   console.log('• photo file added → uploading…')
   await page.waitForFunction(() => !document.querySelector('textarea[name=photo_source]'), { timeout: 20000 })
-  console.log('✓ photo upload flow completed (EditImage closed on serving_url)')
+  console.log('✓ photo upload flow completed (EditImage closed on storage_path)')
   await flush_sync(page)
 
-  // ─── AUDIO (exercises /api/upload; storage_path only) ───────────────────────────────────
+  // ─── AUDIO (exercises /api/upload presign; storage_path only) ───────────────────────────
   await page.evaluate(() => {
     const btn = [...document.querySelectorAll('button,div,span')].find(el => el.textContent.trim() === 'Add Audio' && el.offsetParent)
     btn.click()
   })
   // Add a speaker (a real user flow that also exercises insert_speaker), which reveals the
-  // SelectAudio file input. The speaker <select> carries the synthetic 'AddSpeaker' option.
-  await page.waitForFunction(() => [...document.querySelectorAll('select')].some(s => [...s.options].some(o => o.value === 'AddSpeaker')), { timeout: 10000 })
-  await page.$$eval('select', (selects) => {
-    const speaker_select = selects.find(s => [...s.options].some(o => o.value === 'AddSpeaker'))
-    speaker_select.setAttribute('data-e2e-speaker', '')
+  // SelectAudio file input. The picker (SelectSpeaker.svelte) is fixture-agnostic: with NO
+  // speakers seeded it's a "+Add" button; with existing speakers it's a <select> whose
+  // synthetic 'AddSpeaker' option opens the same AddSpeaker form. Handle both.
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll('select')].some(s => [...s.options].some(o => o.value === 'AddSpeaker'))
+    || !!document.querySelector('.select-prompt'), { timeout: 10000 })
+  await page.evaluate(() => {
+    const select = [...document.querySelectorAll('select')].find(s => [...s.options].some(o => o.value === 'AddSpeaker'))
+    if (select) {
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value').set
+      setter.call(select, 'AddSpeaker')
+      select.dispatchEvent(new Event('change', { bubbles: true }))
+    } else {
+      // No speakers seeded → the SelectSpeaker "+Add" button (first button beside the
+      // ".select-prompt" — scoped so we don't hit the entry's Source "+Add").
+      document.querySelector('.select-prompt').parentElement.querySelector('button').click()
+    }
   })
-  await page.select('select[data-e2e-speaker]', 'AddSpeaker')
   await page.waitForSelector('input#name', { timeout: 10000 })
   await page.evaluate(() => {
     const set_input = (el, value) => {
@@ -252,53 +221,64 @@ async function main() {
   await new Promise(r => setTimeout(r, 1500))
   await flush_sync(page)
 
-  // ─── Assert SERVER persistence (run-specific: the photo carries THIS run's serving_id) ────
+  // ─── Assert SERVER persistence on the R2 key convention ──────────────────────────────────
+  const photo_key_re = new RegExp(`^achi/photo/${UUID_RE.source}\\.png$`)
+  const audio_key_re = new RegExp(`^achi/audio/${UUID_RE.source}\\.`)
   let after = read_server_media('e_ja')
-  for (let i = 0; i < 25 && (!after.photos.some(p => p.serving_url === serving_id) || after.audio.length <= before.audio.length); i++) {
+  for (let i = 0; i < 25 && (!after.photos.some(p => photo_key_re.test(p.storage_path)) || after.audio.length <= before.audio.length); i++) {
     await new Promise(r => setTimeout(r, 1000))
     await flush_sync(page)
     after = read_server_media('e_ja')
   }
   console.log(`• server achi.db after: audio=${after.audio.length} photos=${after.photos.length} audio_speaker_links=${after.audio_speaker_links}`)
 
-  if (gcs_put_count < 2) throw new Error(`expected ≥2 GCS PUTs (photo+audio), intercepted ${gcs_put_count}`)
-  // The photo→sense and audio→speaker junctions must reach the server (they render the media).
+  const photo = after.photos.find(p => photo_key_re.test(p.storage_path))
+  if (!photo) throw new Error(`PHOTO row with an R2-convention storage_path did not persist (have: ${after.photos.map(p => p.storage_path).join(', ') || 'none'})`)
+  if (photo.serving_url !== '') throw new Error(`expected empty serving_url on the R2 convention, got '${photo.serving_url}'`)
+  if (photo.storage_path.split('/')[2].split('.')[0] !== photo.id) throw new Error(`photo key uuid ${photo.storage_path} != row id ${photo.id} (key must be the row uuid)`)
   const sense_photos = read_junction('sense_photos')
-  const audio_speakers = read_junction('audio_speakers')
   if (!sense_photos.length) throw new Error('sense_photos junction did not sync to server (photo unlinked)')
-  if (audio_speakers.length <= before.audio_speaker_links) throw new Error('audio→speaker junction did not sync to server')
-  const photo = after.photos.find(p => p.serving_url === serving_id)
-  if (!photo) throw new Error(`PHOTO row with serving_url ${serving_id} did not persist to server SQLite`)
-  if (!photo.storage_path) throw new Error('photo.storage_path empty')
-  if (after.audio.length <= before.audio.length) throw new Error('AUDIO row did not persist to server SQLite')
-  if (!after.audio.every(a => a.storage_path)) throw new Error('audio.storage_path empty')
+  const new_audio = after.audio.filter(a => audio_key_re.test(a.storage_path))
+  if (after.audio.length <= before.audio.length || !new_audio.length) throw new Error('AUDIO row on the R2 convention did not persist to server SQLite')
   if (after.audio_speaker_links < 1) throw new Error('audio→speaker link did not persist')
-  console.log('✓ photo + audio rows PERSISTED to the real server SQLite (serving_url + storage_path set)')
+  console.log('✓ photo + audio rows PERSISTED to the real server SQLite on R2-convention keys')
+
+  // ─── Variants: the post-response sharp pipeline must land all three WebPs locally ─────────
+  const photo_dir = join(dev_media_dir, 'achi', 'photo')
+  const base_name = photo.storage_path.split('/')[2].split('.')[0]
+  for (let i = 0; i < 20; i++) {
+    const files = existsSync(photo_dir) ? readdirSync(photo_dir) : []
+    if (['thumb', 'w900', 'w1600'].every(v => files.includes(`${base_name}_${v}.webp`))) break
+    await new Promise(r => setTimeout(r, 500))
+  }
+  const files = existsSync(photo_dir) ? readdirSync(photo_dir) : []
+  for (const variant of ['thumb', 'w900', 'w1600']) {
+    if (!files.includes(`${base_name}_${variant}.webp`))
+      throw new Error(`variant ${variant} missing in dev-media store (have: ${files.join(', ')})`)
+  }
+  console.log('✓ all three WebP variants generated by the background sharp pipeline')
 
   // ─── Fresh context (no OPFS) must load the media from the server snapshot ────────────────
   const fresh = await browser.createBrowserContext()
   const fresh_page = await fresh.newPage()
-  await fresh_page.setRequestInterception(true)
-  fresh_page.on('request', (req) => {
-    if (/lh3\.googleusercontent\.com/.test(req.url())) return req.respond({ status: 200, contentType: 'image/png', body: PNG_BYTES })
-    return req.continue()
-  })
   await fresh_page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
   await fresh_page.goto(`${base}/achi/entry/e_ja`, { waitUntil: 'domcontentloaded' })
-  await fresh_page.waitForFunction(serving => [...document.querySelectorAll('img')].some(img => img.src.includes(serving)), { timeout: 25000 }, serving_id)
+  await fresh_page.waitForFunction(key => [...document.querySelectorAll('img')].some(img => img.src.includes(key)), { timeout: 30000 }, base_name)
   console.log('✓ fresh (no-OPFS) context renders the uploaded photo from the server snapshot')
   await fresh.close()
 
   if (page_errors.length) throw new Error(`pageerror(s): ${page_errors.join(' | ')}`)
   console.log('✓ no uncaught page errors')
 
-  console.log('\n✅ media-upload PASS — presigned PUT (intercepted) → media row → server SQLite → fresh render')
+  console.log('\n✅ media-upload PASS — photo POST + variants + audio presign → media rows → server SQLite → fresh render')
 }
 
 main()
   .catch((error) => { console.error(`\n❌ media-upload FAIL — ${error.message}`); process.exitCode = 1 })
   .finally(async () => {
     if (browser) await browser.close().catch(() => {})
-    if (server && !server.killed) server.kill('SIGTERM')
-    if (image_mock) image_mock.close()
+    if (server && !server.killed) {
+      try { process.kill(-server.pid, 'SIGTERM') } catch { server.kill('SIGTERM') }
+    }
+    setTimeout(() => process.exit(process.exitCode ?? 0), 2000).unref() // orphaned child pipes must not hold node open
   })

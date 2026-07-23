@@ -9,7 +9,7 @@
   import type { QueryParams } from '$lib/search/types'
   import { page } from '$app/state'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
-  import { get_orthographies } from '$lib/helpers/orthographies'
+  import { get_orthographies } from '$lib/orthography/orthographies'
 
   interface Props {
     search_params: QueryParamState<QueryParams>

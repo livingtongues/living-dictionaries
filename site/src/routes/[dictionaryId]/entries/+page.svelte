@@ -283,7 +283,7 @@
   admin={auth_user.admin_level > 0}
   title="Entries"
   dictionaryName={dictionary.name}
-  gcsPath={dictionary.featured_image?.serving_url}
+  photo={dictionary.featured_image}
   lng={dictionary.coordinates?.points?.[0]?.coordinates.longitude}
   lat={dictionary.coordinates?.points?.[0]?.coordinates.latitude}
   description="The entries in this Living Dictionary are displayed in a comprehensive list that visitors can easily browse by using the page tabs at the bottom of the screen, or search by using the powerful search bar located at the top of the page."

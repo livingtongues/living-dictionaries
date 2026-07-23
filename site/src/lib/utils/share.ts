@@ -1,6 +1,6 @@
 import type { EntryData } from '$lib/types'
 import { page } from '$app/state'
-import { get_headword } from '$lib/helpers/orthographies'
+import { get_headword } from '$lib/orthography/orthographies'
 
 export async function share(dictionaryId: string, entry: EntryData) {
   const { data: { t, dictionary } } = page

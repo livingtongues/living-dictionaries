@@ -33,12 +33,15 @@ export function add_photo({ writes, dictionary_id, sense_id, file, source, photo
   const not_ready = writes.check_ready()
   if (not_ready)
     return blocked_handle(not_ready)
-  const handle = upload_media({ file, folder: `${dictionary_id}/images/${sense_id}`, dictionary_id, kind: 'image' })
-  const done = handle.done.then(async ({ storage_path, serving_url }) => {
-    const inserted = await writes.insert_photo({ photo: { storage_path, serving_url, source, photographer }, sense_id })
+  // Row uuid is minted BEFORE upload — the R2 object is keyed by it (`{dict}/photo/{id}.{ext}`).
+  const media_id = crypto.randomUUID()
+  const handle = upload_media({ file, dictionary_id, kind: 'image', media_id })
+  const done = handle.done.then(async ({ storage_path }) => {
+    // serving_url is '' on the R2 convention — `photo_src` derives urls from storage_path.
+    const inserted = await writes.insert_photo({ photo: { id: media_id, storage_path, serving_url: '', source, photographer }, sense_id })
     if (!inserted)
       throw new Error('The photo was uploaded but could not be saved — please try again.')
-    return { storage_path, serving_url }
+    return { storage_path }
   })
   done.catch(() => undefined) // surfaced to callers awaiting `done`; upload errors already logged
   return { ...handle, done }
@@ -58,7 +61,7 @@ export function add_audio({ writes, dictionary_id, entry_id, file, speaker_id, s
     return blocked_handle(not_ready)
   // Row uuid is minted BEFORE upload — the R2 object is keyed by it (`{dict}/audio/{id}.{ext}`).
   const media_id = crypto.randomUUID()
-  const handle = upload_media({ file, folder: `${dictionary_id}/audio/${entry_id}`, dictionary_id, kind: 'audio', media_id })
+  const handle = upload_media({ file, dictionary_id, kind: 'audio', media_id })
   const done = handle.done.then(async ({ storage_path }) => {
     // ONE atomic dict_write: audio row + speaker junction commit together.
     const inserted = await writes.insert_audio({ id: media_id, storage_path, entry_id, speaker_id, source })
@@ -84,7 +87,7 @@ export function add_video({ writes, dictionary_id, sense_id, file, speaker_id, s
     return blocked_handle(not_ready)
   // Row uuid is minted BEFORE upload — the R2 object is keyed by it (`{dict}/video/{id}.{ext}`).
   const media_id = crypto.randomUUID()
-  const handle = upload_media({ file, folder: `${dictionary_id}/videos/${sense_id}`, dictionary_id, kind: 'video', media_id })
+  const handle = upload_media({ file, dictionary_id, kind: 'video', media_id })
   const done = handle.done.then(async ({ storage_path }) => {
     // ONE atomic dict_write: video + sense junction + speaker junction.
     const inserted = await writes.insert_video({ video: { id: media_id, storage_path, ...(source ? { source } : {}) }, sense_id, speaker_id })

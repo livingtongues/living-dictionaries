@@ -18,6 +18,7 @@ const ssr_cards: DictHomeCard[] = story_cards.slice(0, 6).map((card, index) => (
   parts_of_speech: index % 3 === 0 ? ['n'] : null,
   dialect: null,
   photo_serving_url: card.photo_serving_url,
+  photo_storage_path: null,
   audio_storage_path: card.audio_storage_path,
 }))
 
@@ -59,6 +60,7 @@ const base = {
   auth_user: { admin_level: 0, user: null },
   is_manager: false,
   can_edit: false,
+  about_is_too_short: () => false,
   update_dictionary: async () => {},
 } as never
 

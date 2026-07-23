@@ -31,7 +31,9 @@ async function main() {
 
   const client = await get_ld_r2_client()
   const get_rows = db.prepare(`SELECT tbl, row_id, new_key, bytes, status FROM objects WHERE dict_id = ?`)
+  const get_variants = db.prepare(`SELECT variant, key, bytes FROM variants WHERE tbl = ? AND row_id = ?`)
   const mark_verified = db.prepare(`UPDATE dicts SET verified_at = ? WHERE dict_id = ?`)
+  const PHOTO_TABLES = new Set(['photos', 'partner_logos', 'featured_image'])
 
   let clean = 0
   let dirty = 0
@@ -39,6 +41,7 @@ async function main() {
     const remote = new Map([
       ...await list_prefix(client, `${dict_id}/audio/`),
       ...await list_prefix(client, `${dict_id}/video/`),
+      ...await list_prefix(client, `${dict_id}/photo/`),
     ])
     const problems: string[] = []
     let pending = 0
@@ -54,6 +57,18 @@ async function main() {
         problems.push(`ABSENT ${row.new_key}`)
       else if (size !== row.bytes)
         problems.push(`SIZE ${row.new_key}: r2=${size} state=${row.bytes}`)
+      if (PHOTO_TABLES.has(row.tbl)) {
+        const variants = get_variants.all(row.tbl, row.row_id) as { variant: string, key: string, bytes: number }[]
+        if (variants.length !== 3)
+          problems.push(`VARIANTS ${row.new_key}: only ${variants.length}/3 recorded`)
+        for (const variant of variants) {
+          const variant_size = remote.get(variant.key)
+          if (variant_size === undefined)
+            problems.push(`ABSENT ${variant.key}`)
+          else if (variant_size !== variant.bytes)
+            problems.push(`SIZE ${variant.key}: r2=${variant_size} state=${variant.bytes}`)
+        }
+      }
     }
     if (problems.length || pending) {
       dirty++

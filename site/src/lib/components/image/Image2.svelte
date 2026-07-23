@@ -1,15 +1,16 @@
 <script lang="ts">
   // learning from https://github.com/pngwn/peng-move/blob/main/src/lib/Animal.svelte
   import { spring } from 'svelte/motion'
-  import { image_src } from '$lib/utils/media-url'
+  import type { PhotoLike } from '$lib/utils/media-url'
+  import { photo_src } from '$lib/utils/media-url'
 
   interface Props {
-    gcs: string
+    photo: PhotoLike
     length: number
     dimensionType?: 'square' | 'width' | 'height'
   }
 
-  const { gcs, length, dimensionType = 'width' }: Props = $props()
+  const { photo, length, dimensionType = 'width' }: Props = $props()
 
   let imageEl: HTMLImageElement = $state()
 
@@ -51,7 +52,7 @@
     })
   }
 
-  const src = $derived(image_src(gcs, dimensionType === 'square'
+  const src = $derived(photo_src(photo, dimensionType === 'square'
     ? `s${length}-p`
     : dimensionType === 'width'
     ? `w${length}`

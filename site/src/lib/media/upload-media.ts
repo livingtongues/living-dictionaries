@@ -1,8 +1,7 @@
 import { writable } from 'svelte/store'
 import type { Readable } from 'svelte/store'
-import { api_gcs_serving_url } from '$api/gcs_serving_url/_call'
+import type { PhotoUploadResponseBody } from '../../routes/api/photo-upload/+server'
 import { api_upload } from '$api/upload/_call'
-import { DEV_LOCAL_PREFIX } from '$lib/utils/media-url'
 import { log_event } from '$lib/debug/remote-log'
 
 export type MediaKind = 'image' | 'audio' | 'video'
@@ -16,72 +15,73 @@ export interface MediaUploadProgress {
 
 export interface MediaUploadResult {
   storage_path: string
-  /** images only: lh3 hash, or a `dev-local:`-prefixed sentinel in dev */
-  serving_url?: string
 }
 
 export interface MediaUploadHandle {
   /** progress ONLY — success/failure flow through `done` */
   progress: Readable<MediaUploadProgress>
-  /** resolves with the landed paths; REJECTS on presign error, non-2xx PUT, network error, abort, or serving-url error */
+  /** resolves with the landed path; REJECTS on presign error, non-2xx PUT/POST, network error, or abort */
   done: Promise<MediaUploadResult>
   abort: () => void
 }
 
-/** Presign via `api_upload` → XHR PUT with progress → (images only: fetch the lh3 serving URL). */
-export function upload_media({ file, folder, dictionary_id, kind, media_id }: {
+/**
+ * All media lands on the R2 key convention `{dict}/{kind}/{media_id}.{ext}` —
+ * the caller mints the media row uuid BEFORE upload. Audio/video: presign via
+ * `api_upload` → XHR PUT. Images: XHR POST of the bytes to `/api/photo-upload`
+ * (the server stores the original, responds fast, and generates WebP variants
+ * after the response). No serving_url anywhere — rendering derives urls from
+ * `storage_path` (`photo_src` / `url_from_storage_path`).
+ */
+export function upload_media({ file, dictionary_id, kind, media_id }: {
   file: File | Blob
-  /** full storage folder including the dictionary id prefix, e.g. `${dictionary_id}/images/${sense_id}` */
-  folder: string
   dictionary_id: string
   kind: MediaKind
-  /** audio/video only: the pre-minted media row uuid — routes the upload to the R2 media bucket on the new key convention (server builds the key). */
-  media_id?: string
+  /** the pre-minted media row uuid — the R2 object key is built from it */
+  media_id: string
 }): MediaUploadHandle {
   const preview_url = kind === 'image' ? URL.createObjectURL(file) : undefined
   const { set, subscribe } = writable<MediaUploadProgress>({ progress: 0, preview_url })
 
   let xhr: XMLHttpRequest | null = null
   let aborted = false
-  let stage: 'register' | 'upload' | 'serving_url' = 'register'
+  let stage: 'register' | 'upload' = 'register'
 
   async function run(): Promise<MediaUploadResult> {
+    const on_progress = (progress: number) => set({ progress: Math.min(progress, 99), preview_url })
+
+    if (kind === 'image') {
+      stage = 'upload'
+      const form = new FormData()
+      form.set('dictionary_id', dictionary_id)
+      form.set('photo_id', media_id)
+      form.set('file', file instanceof File ? file : new File([file], derive_file_name({ file, kind })))
+      xhr = new XMLHttpRequest()
+      const response = await send_xhr({ xhr, method: 'POST', url: '/api/photo-upload', body: form, on_progress })
+      const { storage_path } = JSON.parse(response) as PhotoUploadResponseBody
+      set({ progress: 100, preview_url })
+      return { storage_path }
+    }
+
     // `api_upload` returns `{ data: null, error }` on failure — guard before touching `data`
     const { data: upload, error } = await api_upload({
-      folder,
       dictionary_id,
       file_name: derive_file_name({ file, kind }),
       file_type: file.type,
-      ...(media_id && kind !== 'image' ? { r2_media: { kind, media_id } } : {}),
+      file_size: file.size,
+      r2_media: { kind, media_id },
     })
     if (error || !upload)
       throw new Error(error?.message ?? 'Upload failed.')
     if (aborted)
       throw new Error('Upload aborted.')
 
-    const { presigned_upload_url, bucket, object_key, dev_mock } = upload
+    const { presigned_upload_url, object_key } = upload
     stage = 'upload'
     xhr = new XMLHttpRequest()
-    await put_file({ xhr, file, url: presigned_upload_url, on_progress: progress => set({ progress: Math.min(progress, 99), preview_url }) })
-
-    if (kind !== 'image') {
-      set({ progress: 100, preview_url })
-      return { storage_path: object_key }
-    }
-
-    // Dev media mock: bytes were stored locally; skip the (unconfigured)
-    // serving-url service and point at the local store via a sentinel.
-    if (dev_mock) {
-      set({ progress: 100, preview_url })
-      return { storage_path: object_key, serving_url: `${DEV_LOCAL_PREFIX}${object_key}` }
-    }
-
-    stage = 'serving_url'
-    const { data, error: serving_url_error } = await api_gcs_serving_url({ storage_path: `${bucket}/${object_key}` })
-    if (serving_url_error || !data)
-      throw new Error(serving_url_error?.message ?? 'Failed to get image serving URL.')
+    await send_xhr({ xhr, method: 'PUT', url: presigned_upload_url, body: file, content_type: file.type, on_progress })
     set({ progress: 100, preview_url })
-    return { storage_path: object_key, serving_url: data.serving_url }
+    return { storage_path: object_key }
   }
 
   const done = run()
@@ -122,12 +122,15 @@ function derive_file_name({ file, kind }: { file: File | Blob, kind: MediaKind }
   return `${kind}.${extension}`
 }
 
-function put_file({ xhr, file, url, on_progress }: {
+function send_xhr({ xhr, method, url, body, content_type, on_progress }: {
   xhr: XMLHttpRequest
-  file: File | Blob
+  method: 'PUT' | 'POST'
   url: string
+  body: File | Blob | FormData
+  /** set explicitly for raw-body PUTs; FormData sets its own multipart boundary */
+  content_type?: string
   on_progress: (progress: number) => void
-}): Promise<void> {
+}): Promise<string> {
   return new Promise((resolve, reject) => {
     xhr.upload.addEventListener('progress', (event) => {
       if (event.lengthComputable)
@@ -136,7 +139,7 @@ function put_file({ xhr, file, url, on_progress }: {
 
     xhr.addEventListener('load', () => {
       if (xhr.status >= 200 && xhr.status < 300)
-        resolve()
+        resolve(xhr.responseText)
       else
         reject(new Error(`Failed to upload file (status ${xhr.status}).`))
     })
@@ -144,8 +147,9 @@ function put_file({ xhr, file, url, on_progress }: {
     xhr.addEventListener('error', () => reject(new Error('Failed to upload file.')))
     xhr.addEventListener('abort', () => reject(new Error('Upload aborted.')))
 
-    xhr.open('PUT', url)
-    xhr.setRequestHeader('Content-Type', file.type)
-    xhr.send(file)
+    xhr.open(method, url)
+    if (content_type)
+      xhr.setRequestHeader('Content-Type', content_type)
+    xhr.send(body)
   })
 }

@@ -5,7 +5,7 @@
   import { goto } from '$app/navigation'
   import { page } from '$app/state'
   import { api_admin_featured_entries_set_status } from '$api/admin/featured-entries/_call'
-  import { image_src, url_from_storage_path } from '$lib/utils/media-url'
+  import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
   import { read_choice_param, update_query_params } from '$lib/utils/url-search-params'
   import IconMdiPlay from '~icons/mdi/play'
   import IconMdiPause from '~icons/mdi/pause'
@@ -106,7 +106,7 @@
       {#each visible as row (row.id)}
         <div class="card">
           <div class="photo-wrap">
-            <img src={image_src(row.photo_serving_url, 's400-p')} alt={row.lexeme} loading="lazy" />
+            <img src={photo_src({ storage_path: row.photo_storage_path, serving_url: row.photo_serving_url }, 's400-p')} alt={row.lexeme} loading="lazy" />
             <div class="photo-fade"></div>
             <div class="photo-text">
               <div class="lexeme">{row.lexeme}</div>

@@ -28,13 +28,14 @@ beforeEach(() => {
 describe(add_photo, () => {
   const writes = { check_ready, insert_photo }
 
-  test('uploads to the sense image folder then inserts the photo row', async () => {
-    mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/images/s1/1.jpg', serving_url: 'lh3-hash' })))
+  test('uploads with a pre-minted row uuid then inserts the photo row (serving_url empty on the R2 convention)', async () => {
+    mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/photo/x.jpg' })))
     const handle = add_photo({ writes, dictionary_id: 'demo', sense_id: 's1', file: new File(['x'], 'photo.jpg', { type: 'image/jpeg' }), source: 'my source', photographer: 'Ana' })
-    await expect(handle.done).resolves.toEqual({ storage_path: 'demo/images/s1/1.jpg', serving_url: 'lh3-hash' })
-    expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ folder: 'demo/images/s1', dictionary_id: 'demo', kind: 'image' }))
+    await expect(handle.done).resolves.toEqual({ storage_path: 'demo/photo/x.jpg' })
+    expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ dictionary_id: 'demo', kind: 'image', media_id: expect.stringMatching(/^[0-9a-f-]{36}$/) }))
+    const minted_id = mocked_upload_media.mock.calls[0][0].media_id
     expect(insert_photo).toHaveBeenCalledWith({
-      photo: { storage_path: 'demo/images/s1/1.jpg', serving_url: 'lh3-hash', source: 'my source', photographer: 'Ana' },
+      photo: { id: minted_id, storage_path: 'demo/photo/x.jpg', serving_url: '', source: 'my source', photographer: 'Ana' },
       sense_id: 's1',
     })
   })
@@ -55,7 +56,7 @@ describe(add_photo, () => {
   })
 
   test('insert swallowed by the guard (resolves undefined) → done rejects instead of phantom success', async () => {
-    mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/images/s1/1.jpg', serving_url: 'lh3-hash' })))
+    mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/photo/x.jpg' })))
     insert_photo.mockResolvedValue(undefined)
     const handle = add_photo({ writes, dictionary_id: 'demo', sense_id: 's1', file: new File(['x'], 'photo.jpg', { type: 'image/jpeg' }), source: 'my source' })
     await expect(handle.done).rejects.toThrow('could not be saved')
@@ -65,11 +66,11 @@ describe(add_photo, () => {
 describe(add_audio, () => {
   const writes = { check_ready, insert_audio }
 
-  test('uploads to the entry audio folder then runs the atomic audio+speaker insert', async () => {
+  test('uploads with a pre-minted row uuid then runs the atomic audio+speaker insert', async () => {
     mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/audio/e1/1.webm' })))
     const handle = add_audio({ writes, dictionary_id: 'demo', entry_id: 'e1', file: new Blob(['x'], { type: 'audio/webm' }), speaker_id: 'sp1', source: 'field-recordings' })
     await expect(handle.done).resolves.toEqual({ storage_path: 'demo/audio/e1/1.webm' })
-    expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ folder: 'demo/audio/e1', dictionary_id: 'demo', kind: 'audio', media_id: expect.stringMatching(/^[0-9a-f-]{36}$/) }))
+    expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ dictionary_id: 'demo', kind: 'audio', media_id: expect.stringMatching(/^[0-9a-f-]{36}$/) }))
     const minted_id = mocked_upload_media.mock.calls[0][0].media_id
     expect(insert_audio).toHaveBeenCalledWith({ id: minted_id, storage_path: 'demo/audio/e1/1.webm', entry_id: 'e1', speaker_id: 'sp1', source: 'field-recordings' })
   })
@@ -99,11 +100,11 @@ describe(add_audio, () => {
 describe(add_video, () => {
   const writes = { check_ready, insert_video }
 
-  test('uploads to the sense video folder then runs the atomic video insert (source included when given)', async () => {
+  test('uploads with a pre-minted row uuid then runs the atomic video insert (source included when given)', async () => {
     mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/videos/s1/1.mp4' })))
     const handle = add_video({ writes, dictionary_id: 'demo', sense_id: 's1', file: new Blob(['x'], { type: 'video/mp4' }), speaker_id: 'sp1', source: 'archive' })
     await expect(handle.done).resolves.toEqual({ storage_path: 'demo/videos/s1/1.mp4' })
-    expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ folder: 'demo/videos/s1', dictionary_id: 'demo', kind: 'video', media_id: expect.stringMatching(/^[0-9a-f-]{36}$/) }))
+    expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ dictionary_id: 'demo', kind: 'video', media_id: expect.stringMatching(/^[0-9a-f-]{36}$/) }))
     const minted_id = mocked_upload_media.mock.calls[0][0].media_id
     expect(insert_video).toHaveBeenCalledWith({ video: { id: minted_id, storage_path: 'demo/videos/s1/1.mp4', source: 'archive' }, sense_id: 's1', speaker_id: 'sp1' })
   })

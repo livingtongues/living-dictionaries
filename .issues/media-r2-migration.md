@@ -209,9 +209,224 @@ all 3 accounts: Poly 249e33…, Living Tongues 94e4ac…, HVSB aa1fb8…):
   add-media updated for pre-minted ids), `tsc` clean, eslint clean, `pnpm check` 0 errors.
 - ✅ Live dev verification: dev-auth → `/api/upload` r2_media → PUT → GET roundtrip on the new key;
   non-uuid 400; legacy photo presign unchanged.
-- ⏳ NEXT: copy finishes → `verify.ts` → commit+push flip (deploy) → `rewrite.ts
-  --confirm-dual-read-deployed` → spot-check entries → update AGENTS.md media bullet + vps-setup
-  backup leg (phase 6).
+- ✅ Copy complete (2026-07-23): 146,876/146,877 objects copied + byte-verified across 446/447
+  dicts. The 1 exception: `QAThAUaCXUaJVLwZeXEz` test dict, `audio/Test_…/NzPQ…wav` — dead in
+  both mirror AND GCS (404'd before migration too); left `missing`, row keeps old path.
+- ✅ Flip DEPLOYED (commit 561882e9 pushed by Jacob, verified live on VPS).
+- ✅ REWRITES DONE (2026-07-23): all 445 remaining dicts (afmaay first as canary), 146,876 rows
+  total, **0 diverged**. Verified on prod: `server_seq` bumped, `updated_at` untouched (LWW
+  preserved), shared.db cursor mirrored. Spot-checked gutob/siletz-dee-ni/gta — 0 old-convention
+  paths remain, sampled keys serve 200 from media.livingdictionaries.app with right content-type.
+- ✅ Snapshot rebuilds confirmed: builder swept 363 stale dicts; 367 fresh uploads within the
+  hour, remainder clears on the normal 30-min sweep.
+- ✅ Post-flip sweep run: re-pull-manifest found ZERO new old-convention rows (only the known dead
+  test object) — no uploads landed on GCS during the window. Audio+video migration COMPLETE.
+- ✅ Telemetry clean post-deploy: no media/upload errors; sync_failed at normal baseline
+  (30–140/hr stale-client noise, e.g. deleted dict `river`).
+- ✅ vps-setup backup-media leg 4 added (add-only server-side mirror → locked
+  `livingdictionaries-backups/media/`, runtime-pulled creds); first seed run in flight.
+- ✅ AGENTS.md media bullet + `.knowledge/domain/media-serving-urls.md` updated (R2 dual-read).
+
+## Phase 2+3 decisions (Jacob 2026-07-23, third round) — DO IT ALL NOW
+
+Order: **photos migration end-to-end → ledger + delete/reconcile sweep → /admin/storage dashboard.**
+
+- **No GCS listing anywhere in the dashboard** (GCS dies eventually). Sizes live in a server-only
+  shared.db **`media_objects` ledger** (dict_id, media_type, key, bytes, uploaded_at; NOT synced):
+  seeded from migration state.db bytes (audio/video) + photo-copy records; `+=` at upload time
+  (presign endpoint, photo upload endpoint, v1 store_media_bytes); trued-up by the sweep.
+- **Deletes: REAL R2 deletion via periodic sweep** with ~30-day grace on orphans (object without a
+  live row). Safe because the backups bucket holds a 1-year-locked copy of everything. The sweep =
+  delete-cleanup + ledger reconciler + abandoned-upload GC + missing-variant self-heal, in one job.
+- **Photo variants: WebP q~80** (thumb 400-square-crop, w900, w1600) + untouched original.
+  lh3-spec mapping: s150-p/s340-p/s400-p→thumb, w900→w900, w1200/w1600→w1600, s0→original.
+- **New photo uploads: POST bytes to server**; server stores ORIGINAL, responds immediately
+  (snappy — Jacob pushed on this), then generates+PUTs variants AFTER the response in-process
+  (adapter-node keeps running; crash gap self-healed by the sweep). sharp goes in `dependencies`.
+- **Dashboard** (/admin/storage): total · by dict · by category (= `dictionaries.bucket`, attributed
+  at query time to CURRENT bucket) · by type within each · trends. Daily rollup
+  `media_storage_daily` from the ledger (no R2 calls) + one-time retroactive backfill from media-row
+  `created_at` × ledger bytes (monthly cumulative growth curve; can't see already-deleted media).
+- After photos land on R2: drop the `living` GCS leg from vps-setup backup-media (house leg stays);
+  `mirror/gcs-living` sits frozen until the far-future teardown.
+
+## Phase 2+3 build log (2026-07-23, this session)
+
+- ✅ Audio/video backup mirror seeded: 146,878 obj / 29.1 GiB in `livingdictionaries-backups/media/`.
+- ✅ Photo serving core: `photo_src` (dual-read: R2-convention storage_path → WebP variant urls,
+  else lh3 via serving_url) + `photo_variant_key`/`variant_for_size_spec` in media-path/media-url;
+  ALL image_src call sites flipped (Image/Image2/GalleryImage take `photo` objects now; EntryMedia,
+  Cell, ListEntry, GalleryEntry, Partners, HomeEntryCard, PrintEntry, TokenPopover, WordCards,
+  FeaturedEntryFullscreen, FeaturedWordsView, dict home cover). SeoMetaTags: `photo` prop, og
+  v5 (`image_url` for R2 photos, gcsPath legacy); og +server drops both in text-only fallback.
+- ✅ Upload flip: `/api/photo-upload` (multipart POST, contributor+, respond-after-original,
+  variants in-process after response via `$lib/server/photo-variants.ts` [sharp, webp q80,
+  thumb/w900/w1600, EXIF-rotated]); upload-media.ts image branch → POST; add_photo mints row
+  uuid, serving_url ''; hero cover + partner logo mint fresh uuids; partners set_photo accepts
+  storage_path-only; v1 photos → r2_key + '' serving_url + background variants (uuid ids enforced
+  for ALL media now); /api/upload folder optional (legacy stale-client branch kept until GCS
+  teardown, gcs_serving_url endpoint kept too).
+- ✅ dev-media GET: missing new-convention keys 302 to media.livingdictionaries.app (pulled dicts
+  render real media in dev now).
+- ✅ Ledger: shared migration `20260723a_media_objects_ledger.sql` (`media_objects` +
+  `media_storage_daily`, server-only); `$lib/db/server/media-ledger.ts`
+  (record_media_object_by_key + parse_media_key); writes wired into photo-upload, photo-variants,
+  /api/upload presign (declared `file_size`), v1 media.
+- ✅ Sweep: `$lib/db/server/media-sweep-cron.ts` — hourly tick; daily rollup; weekly reconcile
+  (full R2 list → true-up/adopt/drop, per-dict orphan marking vs live rows incl. partner logos +
+  featured_image + derived variant keys, REAL deletion past 30d grace capped 5k/run, variant
+  self-heal capped 200/run); registered in hooks.server; `media_sweep_last_reconcile` in
+  db_metadata.
+- ✅ Dashboard: `/api/admin/storage` (+_call) + `/admin/storage` page (totals cards, type
+  SegmentedBar, by-bucket categories w/ type split, growth LineChart w/ type chips, sortable
+  filterable dict table) + admin nav link (min_level 2).
+- ✅ featured_entries: `photo_storage_path` column (20260723 migration), threaded through
+  server module/FeaturedCard/consumers/curate-command doc; rewrite backfills it via photo_id.
+- ✅ Driver: pull-manifest-photos (21,800 objects: 21,638 photos + 78 logos + 84 covers — all
+  storage_path'd, zero lh3-only), copy.ts photo branch (sharp variants → `variants` state table,
+  all-or-nothing per row), verify.ts photo prefix + variant checks, rewrite.ts v2 (photos +
+  shared.db partner/featured_image guarded updates + featured_entries backfill),
+  seed-ledger.ts (created_at collection → media_objects seed → monthly month-end backfill).
+- ✅ tsc / eslint / svelte-check / full vitest green. e2e media-upload.mjs REWRITTEN for the new
+  flow (vite dev + dev-media store, real sharp variants asserted on disk, R2-convention key
+  assertions) — was stale since the audio flip (still mocked GCS presign + lh3).
+- ⏳ Photo copy running (~5.5/s). Then: verify → **Jacob commits+pushes deploy** → rewrite
+  --confirm-dual-read-deployed → seed-ledger → photo post-flip sweep → re-run LD backup leg →
+  drop living GCS leg from vps-setup backup-media → AGENTS.md photos bullet.
+
+## HANDOFF (session swap 2026-07-23, ~09:20) — new session continues from here
+
+**Copy process** is `nohup`-detached on mustang (survives the old session): started as pid
+1877630, `pnpm tsx media-migration/copy.ts` from `scripts/`. Monitor DELICATELY — do NOT assume
+the pid; watch `pgrep -f 'media-migration/copy.ts'` + `scripts/media-migration/copy-photos-run.log`
++ state.db counts (`SELECT status, COUNT(*) FROM objects WHERE tbl IN
+('photos','partner_logos','featured_image') GROUP BY status`). If it died mid-run just re-run
+`pnpm tsx media-migration/copy.ts` — fully restartable/idempotent (only pending/error rows).
+Was at ~6,000/21,785, ~6/s (~45 min from then).
+
+**3 sharp-error rows (Jacob: STANDARDIZE these iPhone photos — HEIC is no end of trouble):**
+`SELECT tbl,row_id,old_path,error FROM objects WHERE status='error'` — 2 HEIC (iref security
+limit), 1 truncated JPEG. Plan: fetch each photo row's `serving_url` from its prod dict.db
+(docker exec on living; row ids above), pull `https://lh3.googleusercontent.com/{hash}=s0`
+(lh3 transcodes HEIC→standard web format), sharp-normalize to JPEG (`.jpeg()` q~85, .rotate()),
+PUT as the original under a **.jpg** key (UPDATE objects.new_key + content_type in state.db if
+the ext differs), generate+PUT the 3 webp variants, record `variants` rows + mark `copied` with
+the new bytes. Fallback for the truncated JPEG if lh3 also fails: `sharp(bytes, { failOn:
+'none' })` on the mirror bytes. Result: every photo original in R2 is a standard format (jpeg/
+png/webp/gif) — no HEIC ever lands in the bucket.
+
+**CONCURRENT SESSION WARNING**: session 019f8e34… ("helpers-folder migration") is actively
+dissolving `site/src/lib/helpers/` in the SAME working tree — dev-server SSR was broken mid-move
+(`$lib/helpers/orthographies` gone). Before running e2e/checks, wait for it to finish
+(`python3 ~/code/horse/scripts/find-sessions.py ~/code/living-dictionaries | head` — wait until
+only YOUR session is running). Their moves touched files I also edited (contributors/+page.ts
+imports) — merge state should be fine, but re-run tsc/lint/check/vitest after they land.
+
+**Remaining sequence** (all pieces already built — see build log above):
+1. Copy finishes + fix the 3 error photos → `pnpm tsx media-migration/verify.ts` (checks
+   originals + variants; only dicts with photo objects re-verify).
+2. Helpers session done → full checks: `pnpm tsc`, `pnpm lint` (repo root), `pnpm check`,
+   `pnpm vitest run`, then `pnpm test:media` (rewritten e2e: vite dev on :3105, asserts
+   R2-convention keys + real sharp variants in `.data/dev-media/achi/photo/`). NOTE the e2e
+   currently FAILS due to the helpers-session breakage (entry page 500/404) — it should pass
+   once their tree is consistent; if not, debug with `pnpm dev --port 3105` + curl.
+3. Optionally screenshot /admin/storage in dev (dev-auth skill, admin level 3 cookie).
+4. Tell Jacob: ready to commit+push (deploy). HE pushes. Verify deployed commit on living
+   (`ssh living 'cd /opt/hosting/sveltekit/code && git log --oneline -1'`), containers healthy.
+5. `pnpm tsx media-migration/rewrite.ts --confirm-dual-read-deployed` (canary a small photo dict
+   first, e.g. `--dict=<pick one with ~1-5 photos>`, spot-check photo_src urls serve 200 from
+   media.livingdictionaries.app incl. _thumb.webp, then full run). Verify prod: photos rows new
+   paths, partner logos + featured_image JSON updated, featured_entries.photo_storage_path
+   backfilled, snapshot builder churning, /admin telemetry quiet (check-logs skill).
+6. `pnpm tsx media-migration/seed-ledger.ts` (needs deployed schema = migration 20260723a).
+   Then spot-check /api/admin/storage on prod (admin session) + the sweep cron log line.
+7. Post-flip sweep: re-run pull-manifest.ts + pull-manifest-photos.ts → copy → verify → rewrite
+   (catches GCS-window uploads; expect ~zero).
+8. Re-run the LD backup-media leg 4 manually (see vps-setup bin/backup-media) so photos land in
+   the locked mirror; verify counts vs media bucket.
+9. vps-setup: DROP the `living` GCS leg from bin/backup-media (house stays), update its header +
+   `.knowledge/operations/r2-backup-system.md`. Jacob commits vps-setup when told.
+10. Docs: AGENTS.md media bullet (photos now on R2 too; lh3 only as legacy failsafe),
+    `.knowledge/domain/media-serving-urls.md`, issue wrap-up, `.knowledge` entry for the media
+    ledger/sweep architecture if warranted. DON'T commit LD repo — Jacob does.
+
+## Continuation session progress (2026-07-23, mustang — session 63437eca)
+
+- ✅ **Photo copy COMPLETE**: 21,800 objects copied (12.6 GB), 0 missing, 0 remaining errors.
+  Sources: 21,662 mirror + 100 gcs + 38 repaired.
+- ✅ **38 stuck photos repaired** via new `scripts/media-migration/fix-error-photos.ts` (Jacob's
+  "no HEIC in the bucket" directive): 22 VERBATIM (valid JPEGs sharp only rejected on a strict
+  failOn warning — Invalid SOS/ASCII — stored original bytes untouched, no lossy re-encode) + 16
+  TRANSCODED (13 HEIC iref-limit + gain-map + 1 truncated JPEG → lh3 `=s0` clean JPEG, or mirror
+  bytes with failOn:none+unlimited fallback; stored under `.jpg` keys, state.db new_key updated).
+  Script branches on the recorded error string (`heif|bad seek|premature end|corrupt header` →
+  transcode, else verbatim). Idempotent (only status='error' rows). Spot-checked repaired HEIC:
+  serves 200 image/jpeg + _thumb.webp 200 image/webp from media.livingdictionaries.app.
+- ✅ **verify.ts: 298 dicts clean, 0 problems** (every photo original + 3 variants present, exact
+  bytes).
+- ✅ **Tree checks green** (after helpers-migration session finished — only our session runs now):
+  tsc clean, lint clean, svelte-check 0 errors, full vitest green. Fixed 2 STALE tests in
+  `upload-media.test.ts` (missing the `file_size` field the Phase-2 flip added to the presign call).
+- ✅ **Direct server verification of the photo-upload path** (curl against `vite dev`, achi-manager
+  OTP login): POST `/api/photo-upload` → 200, R2-convention `storage_path` (`achi/photo/{uuid}.png`),
+  original stored + all 3 WebP variants generated by the background sharp pipeline. Realistic-image
+  variant pipeline proven (png+jpg, all 3 sizes). Migration code is SOUND.
+- ✅ **Fixed a real e2e bug**: `e2e/media-upload.mjs` used a 1x1 `REAL_PNG` that trips
+  `vipspng: libpng read error` in the cover-resize → replaced with a 24x24 PNG. (Nothing to do with
+  the upload path; a 1x1 image is just a degenerate test input.)
+- ⚠️ **KNOWN mustang ENV ISSUE (not a code regression, blocks only the browser e2e here)**:
+  `site/.data/dictionaries/achi.db` on mustang is a REAL Achi dictionary (487 entries, zero `e_*`),
+  NOT the e2e fixture (13 `e_*` entries incl. `e_ja`/"water"). So `/achi/entry/e_ja` 404s and
+  `pnpm test:media` can't complete the browser leg here. The previous session's handoff mis-blamed
+  the helpers session for this "entry page 500/404". achi.db is gitignored with no canonical copy on
+  mustang; the legacy content reseed was retired. **Run `pnpm test:media` on tuf** (fixture intact),
+  or restore `.data/dictionaries/achi.db` from tuf/the example repo. The server-side upload path is
+  fully verified via the direct curl test above regardless.
+- ⏭️ **READY for Jacob to commit+push the photo-migration deploy.** Tree also contains the completed
+  helpers-folder migration (separate task) — decide whether to split commits. After deploy: rewrite
+  --confirm-dual-read-deployed → seed-ledger → post-flip sweep → LD backup leg → drop GCS leg → docs.
+- ⏭️ HEIC-upload + EXIF-coords features (below) build AFTER this deploy as a separate follow-up
+  deploy (keeps the tested migration deploy clean).
+
+## Phase 2b: HEIC-upload handling + photo EXIF coordinates (Jacob 2026-07-23, this session — NOT YET BUILT)
+
+Two additive features, layered onto the Phase-2 photo flip code. Build alongside the migration
+finish; they don't block the flip. All four sub-decisions locked with Jacob.
+
+**Findings that drove the design:**
+- npm prebuilt `sharp` (site: 0.34 / libvips 8.18 / libheif 1.23) DOES bundle HEVC decode, but real
+  iPhone HEICs routinely trip libheif's **iref-16 security limit** (migration's stuck photos have
+  36–48 refs — HDR/Live-Photo gain-map images). `{ unlimited: true }` clears that limit but then
+  hits `bad seek` on the gain-map data → server HEIC decode is UNRELIABLE for exactly the photos we
+  care about. Verified by decoding a real prod HEIC both in site/ and scripts/ sharp.
+- Safari decodes HEIC natively (that's where HEIC comes from — iPhones) → browser canvas conversion
+  is strictly more robust than server-side.
+- Canvas conversion strips ALL EXIF (incl. GPS); sharp strips EXIF from WebP variants too → can't
+  rely on preserving the embedded blob. Extract to structured columns instead.
+
+**Decisions:**
+1. **HEIC upload (browser)** = `client_plus_net`: in `upload-media.ts` image branch, if file is
+   `image/heic`/`image/heif` (type or extension), convert to JPEG via `createImageBitmap(file)` →
+   `<canvas>` → `canvas.toBlob(…, 'image/jpeg', 0.9)` BEFORE upload (Safari native decode). Server
+   `/api/photo-upload` net: read `sharp(bytes).metadata()`; if format not web-displayable, try one
+   `sharp(bytes, { unlimited:true }).rotate().jpeg()`, else reject with a clear message (never store
+   a broken original).
+2. **HEIC via v1 API (agents)** = reject, don't attempt. Sniff incoming bytes by MAGIC NUMBER
+   (ftyp…heic/heif/mif1 — not the claimed extension) in `store_media_bytes`/v1 media handler →
+   return **415** with actionable body: `{ error:'unsupported_image_format', format, message, hint }`
+   where hint lists `sips -s format jpeg`, `magick in.heic out.jpg`, `heif-convert`. Document in
+   `openapi.json` + the `/api/v1/guides` import guide.
+3. **Photo EXIF coordinates**: add to `photos` table (dict-migration) — `latitude REAL`,
+   `longitude REAL`, `taken_at TEXT` (all nullable). Extract with **exifr** (new dep; tiny,
+   tree-shakeable, works browser+node, parses HEIC EXIF+GPS): browser reads GPS from the RAW file
+   BEFORE canvas conversion → sends lat/lng/taken_at as form fields; v1 API reads server-side from
+   received original bytes. Store structured, not the embedded blob (survives canvas/variant strip).
+   Thread through add_photo, photo-upload, v1 media write, guarded-writes, types.
+4. **Geoprivacy**: BLUNT ON INGEST — round lat/lng to **2 decimal places (~1.1 km, village-level)**
+   before storing; the house-level coord NEVER touches DB/backups/R2. **No scoot/jitter** (the grid
+   cell IS the ~1 km privacy envelope). De-stack markers visually at render time if the map looks
+   gridded (deterministic photo-id-seeded cosmetic offset only if needed — skip initially). UI: show
+   coords on photo/map, easy per-photo clear for managers (`capture_show_optional`).
 
 ## Final decisions (Jacob 2026-07-23, second round)
 

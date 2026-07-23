@@ -26,11 +26,12 @@ export function upload_cover_image({ file, dictionary_id, update_dictionary, on_
     return null
   }
 
-  const handle = upload_media({ file, folder: `${dictionary_id}/featured_images`, dictionary_id, kind: 'image' })
-  const done = handle.done.then(async ({ storage_path, serving_url }) => {
-    await update_dictionary({ featured_image: { storage_path, serving_url } })
+  // Not a photos row — a fresh uuid keys the R2 object (`{dict}/photo/{uuid}.{ext}`).
+  const handle = upload_media({ file, dictionary_id, kind: 'image', media_id: crypto.randomUUID() })
+  const done = handle.done.then(async ({ storage_path }) => {
+    await update_dictionary({ featured_image: { storage_path, serving_url: '' } })
     on_saved()
-    return { storage_path, serving_url }
+    return { storage_path }
   })
   done.catch(() => undefined) // error renders in the hero overlay
   return { ...handle, done }

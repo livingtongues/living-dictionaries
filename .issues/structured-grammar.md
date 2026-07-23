@@ -600,7 +600,7 @@ AND lifts the render gate together; EDIT gate stays admin-3 until GA.
   each). Markdown render = `$lib/markdown/render` `render_markdown_to_html` + `$lib/markdown/sanitize-rich-text`
   `sanitize_rich_text`; editor = `$lib/markdown/MarkdownEditor.svelte` (dynamic import, like today's page).
 - Language axis = gloss/analysis languages: `dictionary.gloss_languages` +
-  `order_entry_and_dictionary_gloss_languages` ($lib/helpers/glosses).
+  `order_entry_and_dictionary_gloss_languages` (`$lib/gloss/order-glosses`).
 - Story mock pattern: `page_data: { t: mock_t, dictionary, dict_db }` where `dict_db` is a plain object
   exposing just the collections the component reads (`{ grammar_sections: { rows: [...] , loading:false }, ... }`).
 - Entry page: `entry/[entryId]/+page.svelte` renders `<EntryDisplay/>`; add `<GrammarNotes/>` after it,

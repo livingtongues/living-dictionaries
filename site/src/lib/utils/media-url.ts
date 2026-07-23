@@ -10,7 +10,7 @@
  */
 
 import { R2_MEDIA_DOMAIN } from '$lib/constants'
-import { is_r2_media_path } from './media-path'
+import { is_r2_media_path, photo_variant_key, variant_for_size_spec } from './media-path'
 
 /** DEV-only `serving_url` sentinel for an image uploaded with no bucket (bytes live in `/api/dev-media`). */
 export const DEV_LOCAL_PREFIX = 'dev-local:'
@@ -48,6 +48,31 @@ export function image_src(serving_url: string, size: string): string {
   return `https://lh3.googleusercontent.com/${serving_url}=${size}`
 }
 
+/**
+ * PHOTO DUAL-READ (Phase 2, 2026-07): the one photo `src` builder every surface
+ * should use. A row whose `storage_path` follows the new R2 convention serves a
+ * WebP variant (or the original for `s0`) from the R2 media domain; anything
+ * else falls back to the legacy lh3 path via {@link image_src} (`serving_url`
+ * hash — kept on migrated rows as a failsafe, but `storage_path` wins). `size`
+ * is an lh3 size spec — see `variant_for_size_spec` for the mapping.
+ */
+export interface PhotoLike {
+  storage_path?: string | null
+  serving_url?: string | null
+}
+
+export function photo_src(photo: PhotoLike, size: string): string {
+  const { storage_path, serving_url } = photo
+  if (storage_path && is_r2_media_path(storage_path)) {
+    const variant = variant_for_size_spec(size)
+    const key = variant ? photo_variant_key({ original_key: storage_path, variant }) : storage_path
+    if (import.meta.env.DEV)
+      return `/api/dev-media/${key}`
+    return `${R2_MEDIA_DOMAIN}/${key}`
+  }
+  return image_src(serving_url ?? '', size)
+}
+
 if (import.meta.vitest) {
   test('image_src: real serving_url hash → public lh3 CDN (loads on dev with no bucket)', () => {
     expect(image_src('abc123', 's150-p')).toBe('https://lh3.googleusercontent.com/abc123=s150-p')
@@ -61,5 +86,22 @@ if (import.meta.vitest) {
   test('url_from_storage_path: dev routes through the local dev-media store', () => {
     // vitest runs with import.meta.env.DEV === true
     expect(url_from_storage_path('gta/audio/e1/1.mp3', 'some-bucket')).toBe('/api/dev-media/gta/audio/e1/1.mp3')
+  })
+
+  const uuid = '48af49b0-b410-4db1-babf-38ac53269e62'
+  test('photo_src: new-convention storage_path → variant from the media store (dev prefix in vitest)', () => {
+    expect(photo_src({ storage_path: `gta/photo/${uuid}.jpg`, serving_url: 'abc' }, 's400-p'))
+      .toBe(`/api/dev-media/gta/photo/${uuid}_thumb.webp`)
+    expect(photo_src({ storage_path: `gta/photo/${uuid}.jpg`, serving_url: 'abc' }, 'w1200'))
+      .toBe(`/api/dev-media/gta/photo/${uuid}_w1600.webp`)
+    expect(photo_src({ storage_path: `gta/photo/${uuid}.jpg` }, 's0'))
+      .toBe(`/api/dev-media/gta/photo/${uuid}.jpg`)
+  })
+  test('photo_src: legacy rows fall back to lh3 via serving_url', () => {
+    expect(photo_src({ storage_path: 'gta/images/x_123.jpg', serving_url: 'abc123' }, 'w900'))
+      .toBe('https://lh3.googleusercontent.com/abc123=w900')
+    expect(photo_src({ serving_url: `${DEV_LOCAL_PREFIX}achi/images/s1/9.jpg` }, 'w900'))
+      .toBe('/api/dev-media/achi/images/s1/9.jpg')
+    expect(photo_src({}, 's0')).toBe('/dev-placeholder-image.svg')
   })
 }

@@ -3,7 +3,7 @@
   import EntryField from './EntryField.svelte'
   import EntrySentence from './EntrySentence.svelte'
   import { page } from '$app/state'
-  import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
+  import { order_entry_and_dictionary_gloss_languages } from '$lib/gloss/order-glosses'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'

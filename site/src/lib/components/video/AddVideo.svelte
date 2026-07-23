@@ -14,7 +14,7 @@
   import RecordVideo from '$lib/components/video/RecordVideo.svelte'
   import VideoThirdParty from '$lib/components/video/VideoThirdParty.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
   import IconUilMicrophone from '~icons/uil/microphone'
 
   const { writes } = $derived(page.data)

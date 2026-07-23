@@ -1,6 +1,6 @@
 <script lang="ts">
   import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
-  import { image_src, url_from_storage_path } from '$lib/utils/media-url'
+  import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
   import { create_exclusive_audio } from '$lib/utils/exclusive-audio.svelte'
   import { card_hue } from './home-helpers'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
@@ -29,6 +29,7 @@
     glosses?: string[]
     dialect?: string | null
     photo_serving_url?: string | null
+    photo_storage_path?: string | null
     audio_storage_path?: string | null
     manage?: Manage | null
     /** Touch devices have no hover — the strip's mobile edit toggle forces the manage controls visible. */
@@ -45,12 +46,15 @@
     glosses = [],
     dialect = null,
     photo_serving_url = null,
+    photo_storage_path = null,
     audio_storage_path = null,
     manage = null,
     force_manage = false,
   }: Props = $props()
 
   const sparse = $derived(!alt && !phonetic && !pos && !glosses.length && !dialect)
+
+  const has_photo = $derived(!!(photo_serving_url || photo_storage_path))
 
   const audio = create_exclusive_audio()
 
@@ -68,9 +72,9 @@
   }
 </script>
 
-<a class="card" class:has-photo={!!photo_serving_url} {href} style:--hue={card_hue(entry_id)}>
-  {#if photo_serving_url}
-    <img src={image_src(photo_serving_url, 's340-p')} alt={lexeme} loading="lazy" />
+<a class="card" class:has-photo={has_photo} {href} style:--hue={card_hue(entry_id)}>
+  {#if has_photo}
+    <img src={photo_src({ storage_path: photo_storage_path, serving_url: photo_serving_url }, 's340-p')} alt={lexeme} loading="lazy" />
     <div class="scrim"></div>
   {/if}
   <div class="content" class:sparse>

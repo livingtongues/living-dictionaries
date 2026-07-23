@@ -85,6 +85,15 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       on_error: err => toast.error(err instanceof Error ? err.message : String(err)),
     })
 
+    // Mirror the entries-bundle loading state to a window global so e2e/debug can
+    // await write-readiness (edits are blocked while it's true — see guarded-writes
+    // `still_loading`). Same spirit as `__ld_dict_connections`.
+    if (browser) {
+      const globals = globalThis as typeof globalThis & { __ld_entries_loading?: Record<string, boolean> }
+      const loading_by_dict = (globals.__ld_entries_loading ??= {})
+      entries_ui.loading.subscribe((value) => { loading_by_dict[dictionary_id] = value })
+    }
+
     function about_is_too_short() {
       return !data.about_is_complete
     }

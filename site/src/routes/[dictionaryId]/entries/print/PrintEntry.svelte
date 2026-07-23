@@ -5,11 +5,12 @@
   import QrCode from './QrCode.svelte'
   import { defaultPrintFields } from './print-fields'
   import { page } from '$app/state'
-  import { order_example_sentences, order_glosses } from '$lib/helpers/glosses'
-  import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
-  import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
-  import { get_headword } from '$lib/helpers/orthographies'
-  import { image_src } from '$lib/utils/media-url'
+  import { order_example_sentences } from '$lib/example-sentence/order-example-sentences'
+  import { order_glosses } from '$lib/gloss/order-glosses'
+  import { add_periods_and_comma_separate_parts_of_speech } from '$lib/entry/format-parts-of-speech'
+  import { get_local_orthographies } from '$lib/entry/get-local-orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
+  import { photo_src } from '$lib/utils/media-url'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text } from '$lib/markdown/sanitize-rich-text'
 
@@ -192,7 +193,7 @@
   <img
     class="entry-photo"
     style="width:{imagePercent}%; max-height: 100vh;"
-    src={image_src(first_photo.serving_url, 's0')}
+    src={photo_src(first_photo, 's0')}
     alt={headword.value} />
 {/if}
 

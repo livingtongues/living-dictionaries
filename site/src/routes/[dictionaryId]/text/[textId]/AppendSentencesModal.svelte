@@ -4,7 +4,7 @@
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { split_text_into_sentences } from '$lib/corpus/split-text-into-sentences'
   import { key_between } from '$lib/api/v1/fractional-index'
-  import { get_orthographies } from '$lib/helpers/orthographies'
+  import { get_orthographies } from '$lib/orthography/orthographies'
 
   interface Props {
     text_id: string

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
   import type { DictRowType } from '$lib/db/dict-client/dict-live-db.svelte'
 
   interface Props {

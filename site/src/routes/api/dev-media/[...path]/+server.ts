@@ -2,8 +2,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { error, redirect } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
-import { ResponseCodes } from '$lib/constants'
+import { R2_MEDIA_DOMAIN, ResponseCodes } from '$lib/constants'
 import { dev_media_dir } from '$lib/server/dev-media-dir'
+import { is_r2_media_path } from '$lib/utils/media-path'
 
 /**
  * DEV-ONLY local media store. With no GCS bucket on dev, `/api/upload` hands the
@@ -65,8 +66,13 @@ export const GET: RequestHandler = ({ params }) => {
 
   const { path } = params
   const full = safe_join(path)
-  if (!existsSync(full))
+  if (!existsSync(full)) {
+    // Pulled-dict media on the R2 convention (incl. derived photo variants like
+    // `…_thumb.webp`) exists publicly — serve the real bytes instead of a dummy.
+    if (is_r2_media_path(path) || is_r2_media_path(path.replace(/_(?:thumb|w900|w1600)\.webp$/, '.webp')))
+      redirect(ResponseCodes.TEMPORARY_REDIRECT, `${R2_MEDIA_DOMAIN}/${path}`)
     redirect(ResponseCodes.TEMPORARY_REDIRECT, dummy_for(path))
+  }
 
   return new Response(new Uint8Array(readFileSync(full)), {
     headers: {

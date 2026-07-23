@@ -24,15 +24,15 @@
   import { page } from '$app/state'
   import { browser } from '$app/environment'
   import { goto, preloadCode } from '$app/navigation'
-  import { image_src } from '$lib/utils/media-url'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { photo_src } from '$lib/utils/media-url'
+  import { get_headword } from '$lib/orthography/orthographies'
   import { glossing_languages } from '$lib/glosses/glossing-languages'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import { key_between } from '$lib/api/v1/fractional-index'
   import { build_citation } from './contributors/build-citation'
   import { text_snippet, top_glosses } from './home/home-helpers'
-  import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
-  import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
+  import { get_local_orthographies } from '$lib/entry/get-local-orthographies'
+  import { add_periods_and_comma_separate_parts_of_speech } from '$lib/entry/format-parts-of-speech'
   import { upload_cover_image } from './home/hero-image'
   import IconMdiMagnify from '~icons/mdi/magnify'
   import IconMdiStarOutline from '~icons/mdi/star-outline'
@@ -72,6 +72,7 @@
     glosses: string[]
     dialect: string | null
     photo_serving_url: string | null
+    photo_storage_path: string | null
     audio_storage_path: string | null
   }
 
@@ -95,6 +96,7 @@
       glosses: top_glosses({ glosses: card.glosses, gloss_languages: dictionary.gloss_languages }),
       dialect: card.dialect,
       photo_serving_url: card.photo_serving_url,
+      photo_storage_path: card.photo_storage_path,
       audio_storage_path: card.audio_storage_path,
     }
   }
@@ -113,6 +115,7 @@
       glosses: top_glosses({ glosses, gloss_languages: dictionary.gloss_languages }),
       dialect: entry.dialects?.[0]?.name?.default ?? null,
       photo_serving_url: photo?.serving_url ?? null,
+      photo_storage_path: photo?.storage_path ?? null,
       audio_storage_path: entry.audios?.[0]?.storage_path ?? null,
     }
   }
@@ -299,11 +302,11 @@
   const show_nudges = $derived(is_manager && live_featured_ready && !$entries_loading)
   const nudge_star = $derived(show_nudges && featured_cards.length === 0)
   const nudge_location = $derived(is_manager && !is_con_lang && !has_coordinates)
-  // A featured_image without a usable serving_url (e.g. malformed legacy data) renders the same as no image.
-  const has_cover_image = $derived(!!dictionary.featured_image?.serving_url)
+  // A featured_image without a usable serving_url/storage_path (e.g. malformed legacy data) renders the same as no image.
+  const has_cover_image = $derived(!!(dictionary.featured_image?.serving_url || dictionary.featured_image?.storage_path))
   // Shared by the hero <img> and the fullscreen lightbox — same URL means the
   // lightbox paints instantly from cache, so the crossfade never shows a blink.
-  const cover_src = $derived(has_cover_image ? image_src(dictionary.featured_image.serving_url, 'w1600') : null)
+  const cover_src = $derived(has_cover_image ? photo_src(dictionary.featured_image, 'w1600') : null)
   let show_cover_lightbox = $state(false)
   const nudge_image = $derived(can_edit_cover && !has_cover_image)
   const nudge_about = $derived(is_manager && about_is_too_short())
@@ -489,6 +492,7 @@
               glosses={card.glosses}
               dialect={card.dialect}
               photo_serving_url={card.photo_serving_url}
+              photo_storage_path={card.photo_storage_path}
               audio_storage_path={card.audio_storage_path}
               force_manage={manage_open}
               manage={can_manage
@@ -550,6 +554,7 @@
             glosses={card.glosses}
             dialect={card.dialect}
             photo_serving_url={card.photo_serving_url}
+            photo_storage_path={card.photo_storage_path}
             audio_storage_path={card.audio_storage_path} />
         {/each}
       </div>
@@ -659,7 +664,7 @@
 <SeoMetaTags
   norobots={!dictionary.public}
   dictionaryName={dictionary.name}
-  gcsPath={dictionary.featured_image?.serving_url}
+  photo={dictionary.featured_image}
   lng={dictionary.coordinates?.points?.[0]?.coordinates.longitude}
   lat={dictionary.coordinates?.points?.[0]?.coordinates.latitude}
   description={seo_home_description} />

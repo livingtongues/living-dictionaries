@@ -5,8 +5,8 @@
   import Video from '../components/Video.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import Image from '$lib/components/image/Image.svelte'
-  import { order_glosses } from '$lib/helpers/glosses'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { order_glosses } from '$lib/gloss/order-glosses'
+  import { get_headword } from '$lib/orthography/orthographies'
   import { minutes_ago_in_ms } from '$lib/utils/time'
   import { page } from '$app/state'
   import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
@@ -171,7 +171,7 @@
           <Image
             square={128}
             title={headword.value}
-            gcs={first_photo.serving_url}
+            photo={first_photo}
             photo_source={first_photo.source}
             photographer={first_photo.photographer}
             {can_edit}

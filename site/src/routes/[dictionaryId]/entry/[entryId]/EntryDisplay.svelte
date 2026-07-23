@@ -10,7 +10,7 @@
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
-  import { get_orthographies } from '$lib/helpers/orthographies'
+  import { get_orthographies } from '$lib/orthography/orthographies'
   import { dedupe_keyed_children } from '$lib/utils/dedupe-keyed-children'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
   import IconSystemUiconsVersions from '~icons/system-uicons/versions'

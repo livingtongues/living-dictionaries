@@ -41,7 +41,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
   // Text-only fallback: drop the remote entry photo (the usual killer) and re-render.
   try {
-    const { gcsPath: _omit, ...text_props } = props
+    const { gcsPath: _omit, image_url: _omit_r2, ...text_props } = props
     return await component_to_png(OpenGraphImage, text_props, height, width)
   } catch (error) {
     log_server_event({ level: 'warn', message: 'og_render_failed', error, context: { reason: classify_og_failure(error), fallback: 'text_only', dict: props.dictionaryName ?? null } })

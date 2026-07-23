@@ -135,6 +135,16 @@ export function get_state_db(): Database.Database {
       verified_at TEXT,
       rewritten_at TEXT
     );
+    -- Photo WebP variants (thumb/w900/w1600) generated during the photo copy —
+    -- byte sizes recorded for verify + the media_objects ledger seed.
+    CREATE TABLE IF NOT EXISTS variants (
+      tbl TEXT NOT NULL,
+      row_id TEXT NOT NULL,
+      variant TEXT NOT NULL,
+      key TEXT NOT NULL,
+      bytes INTEGER NOT NULL,
+      PRIMARY KEY (tbl, row_id, variant)
+    );
   `)
   return db
 }

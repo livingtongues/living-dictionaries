@@ -12,7 +12,7 @@
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
 
   interface Props {

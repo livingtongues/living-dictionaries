@@ -28,8 +28,9 @@ approved cards. First seed batch (26 cards, 2026-07-04) predates the modal field
 
 ## Row shape (post-pivot, 2026-07-04)
 
-Card columns (strip): `lexeme`, `gloss`, `gloss_language`, `photo_serving_url`,
-`audio_storage_path`, `dict_name`, `longitude`/`latitude`.
+Card columns (strip): `lexeme`, `gloss`, `gloss_language`, `photo_serving_url` (legacy lh3
+hash — '' for R2-convention photos), `photo_storage_path` (copy from the photos row —
+renders via `photo_src`), `audio_storage_path`, `dict_name`, `longitude`/`latitude`.
 **Modal snapshot columns** (the card's quick-look modal — fill them ALL on every insert):
 `phonetic`, `glosses` (JSON MultiString, ALL gloss languages), `speaker_name` (via
 audio_speakers→speakers), `example_sentence` (JSON `{ text, translation }` MultiStrings from a
@@ -115,8 +116,8 @@ Same stdin-node pattern; include the new columns:
 ```sql
 INSERT OR IGNORE INTO featured_entries
   (id, dict_id, entry_id, sense_id, photo_id, audio_id, lexeme, gloss, gloss_language,
-   photo_serving_url, audio_storage_path, dict_name, longitude, latitude, status, agent_note,
-   source, phonetic, glosses, speaker_name, example_sentence, starred_at)
+   photo_serving_url, photo_storage_path, audio_storage_path, dict_name, longitude, latitude,
+   status, agent_note, source, phonetic, glosses, speaker_name, example_sentence, starred_at)
 VALUES (...)
 ```
 

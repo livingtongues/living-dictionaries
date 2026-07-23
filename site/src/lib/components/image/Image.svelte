@@ -1,7 +1,8 @@
 <script lang="ts">
   import { crossfade, fade, scale } from 'svelte/transition'
   import { page } from '$app/state'
-  import { image_src } from '$lib/utils/media-url'
+  import type { PhotoLike } from '$lib/utils/media-url'
+  import { photo_src } from '$lib/utils/media-url'
   import IconGgSpinner from '~icons/gg/spinner'
   import IconTablerAi from '~icons/tabler/ai'
   import IconMdiClose from '~icons/mdi/close'
@@ -11,7 +12,7 @@
 
   interface Props {
     title: string
-    gcs: string
+    photo: PhotoLike
     can_edit?: boolean
     square?: number
     width?: number
@@ -27,7 +28,7 @@
 
   const {
     title,
-    gcs,
+    photo,
     can_edit = false,
     square = undefined,
     width = undefined,
@@ -50,7 +51,7 @@
   let viewing = $state(false)
 
   const isDesktop = $derived(windowWidth >= 768)
-  const fullscreenSource = $derived(image_src(gcs, `w${isDesktop ? windowWidth - 24 : windowWidth}`))
+  const fullscreenSource = $derived(photo_src(photo, `w${isDesktop ? windowWidth - 24 : windowWidth}`))
 
   function load() {
     const timeout = setTimeout(() => (loading = true), 100)
@@ -80,7 +81,7 @@
       in:receive={{ key }}
       out:send={{ key }}
       alt={title}
-      src={image_src(gcs, square
+      src={photo_src(photo, square
         ? `s${square}-p`
         : width
         ? `w${width}`

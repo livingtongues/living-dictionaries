@@ -6,7 +6,7 @@
   import { aggregate_suggestions } from '$lib/corpus/aggregate-suggestions'
   import EntryPickerModal from '$lib/corpus/EntryPickerModal.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
   import IconMdiLinkVariant from '~icons/mdi/link-variant'

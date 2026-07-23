@@ -7,7 +7,7 @@
   import type { GrammarNode, GrammarSectionActions } from './grammar-section-actions'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text as sanitize } from '$lib/markdown/sanitize-rich-text'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
   import { first_multistring_value } from './grammar-tree'
   import type { MultiString } from '$lib/types'
   import IconFa6SolidPencil from '~icons/fa6-solid/pencil'

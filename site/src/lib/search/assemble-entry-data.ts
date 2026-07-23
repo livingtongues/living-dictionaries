@@ -1,5 +1,5 @@
 import type { EntryData, Tables } from '$lib/types'
-import { should_include_tag } from '$lib/helpers/tag-visibility'
+import { should_include_tag } from '$lib/tag/visibility'
 import { dedupe_by_id } from '$lib/utils/dedupe-by-id'
 
 type SenseSentences = NonNullable<EntryData['senses'][number]['sentences']>

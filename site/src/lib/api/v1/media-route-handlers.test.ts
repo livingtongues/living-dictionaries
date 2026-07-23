@@ -24,7 +24,6 @@ vi.mock('$lib/server/media-storage', async (orig) => {
   return {
     ...actual,
     store_media_bytes: vi.fn(({ folder, file_name, r2_key }: { folder?: string, file_name: string, r2_key?: string }) => Promise.resolve({ storage_path: r2_key ?? `${folder}/mock.${file_name.split('.').pop()}`, bucket: 'bucket', dev_mock: false })),
-    resolve_photo_serving_url: vi.fn(() => Promise.resolve('mockservinghash')),
   }
 })
 vi.mock('$lib/video/hosted-video-metadata', () => ({
@@ -177,10 +176,11 @@ describe(make_media_attach_handler, () => {
     await expect(attach({ cell: 'audio:entry', params: { entryId: 'e1' }, key: read_key })).rejects.toMatchObject({ status: 403 })
   })
 
-  test('photo→sense: multipart upload generates a serving_url + links the junction', async () => {
+  test('photo→sense: multipart upload lands on the R2 photo key + links the junction (no lh3 serving_url)', async () => {
     const res = await attach({ cell: 'photo:sense', params: { senseId: 's1' }, fields: { photographer: 'Sam' }, file: new File([JPEG_BYTES], 'pic.jpg', { type: 'image/jpeg' }) })
     const body = await res.json()
-    expect(body.photo.serving_url).toBe('mockservinghash')
+    expect(body.photo.storage_path).toMatch(/^dict-1\/photo\/[0-9a-f-]{36}\.jpg$/)
+    expect(body.photo.serving_url).toBe('')
     expect(body.photo.photographer).toBe('Sam')
     const junction = dict_db.prepare(`SELECT 1 FROM sense_photos WHERE sense_id = ? AND photo_id = ?`).get('s1', body.photo.id)
     expect(junction).toBeTruthy()

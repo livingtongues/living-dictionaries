@@ -2,7 +2,7 @@
   import { page } from '$app/state'
   import GrammarExampleSentence from './GrammarExampleSentence.svelte'
   import { move_down_key, move_up_key } from './grammar-tree'
-  import { get_headword, get_orthographies } from '$lib/helpers/orthographies'
+  import { get_headword, get_orthographies } from '$lib/orthography/orthographies'
   import type { DictRowType } from '$lib/db/dict-client/dict-live-db.svelte'
   import IconMdiChevronUp from '~icons/mdi/chevron-up'
   import IconMdiChevronDown from '~icons/mdi/chevron-down'

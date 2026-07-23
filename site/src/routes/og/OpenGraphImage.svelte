@@ -10,6 +10,8 @@
     height: number
     width: number
     gcsPath?: string
+    /** full absolute url (R2-convention photos) — takes precedence over gcsPath */
+    image_url?: string
   }
 
   const {
@@ -21,8 +23,9 @@
     height,
     width,
     gcsPath = undefined,
+    image_url = undefined,
   }: Props = $props()
-  const src = $derived(gcsPath ? `https://lh3.googleusercontent.com/${gcsPath}=w${width}-h${height}-c` : null)
+  const src = $derived(image_url ?? (gcsPath ? `https://lh3.googleusercontent.com/${gcsPath}=w${width}-h${height}-c` : null))
 
   const MAX_TITLE_LENGTH = 90
   const xPADDING = 48
@@ -45,7 +48,7 @@
     {src ? 'text-shadow: 2px 2px 3px hsla(0, 0%, 0%, 40%);' : ''}
   ">
   {#if src}
-    <img style="position: absolute; top:0; left:0; right: 0; bottom: 0;" alt="" {src} />
+    <img style="position: absolute; top:0; left:0; right: 0; bottom: 0; width: 100%; height: 100%; object-fit: cover;" alt="" {src} />
   {/if}
   <div
     style="

@@ -18,6 +18,7 @@ export interface DictHomeCard {
   parts_of_speech: string[] | null
   dialect: string | null
   photo_serving_url: string | null
+  photo_storage_path: string | null
   audio_storage_path: string | null
 }
 
@@ -31,6 +32,10 @@ const CARD_MEDIA_SUBQUERIES = `
      JOIN sense_photos sp ON sp.sense_id = s.id
      JOIN photos p ON p.id = sp.photo_id
    WHERE s.entry_id = e.id ORDER BY sp.created_at LIMIT 1) AS photo_serving_url,
+  (SELECT p.storage_path FROM senses s
+     JOIN sense_photos sp ON sp.sense_id = s.id
+     JOIN photos p ON p.id = sp.photo_id
+   WHERE s.entry_id = e.id ORDER BY sp.created_at LIMIT 1) AS photo_storage_path,
   (SELECT a.storage_path FROM audio a WHERE a.entry_id = e.id ORDER BY a.created_at LIMIT 1) AS audio_storage_path`
 
 function parse_json_column<T>(value: unknown): T | null {
@@ -53,6 +58,7 @@ function to_card(row: Record<string, unknown>): DictHomeCard {
     parts_of_speech: parse_json_column<string[]>(row.parts_of_speech),
     dialect: (row.dialect as string | null) ?? null,
     photo_serving_url: (row.photo_serving_url as string | null) ?? null,
+    photo_storage_path: (row.photo_storage_path as string | null) ?? null,
     audio_storage_path: (row.audio_storage_path as string | null) ?? null,
   }
 }

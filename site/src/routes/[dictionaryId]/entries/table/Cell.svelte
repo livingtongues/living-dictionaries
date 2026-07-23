@@ -8,7 +8,7 @@
   import Textbox from './cells/Textbox.svelte'
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
   import { page } from '$app/state'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
@@ -64,7 +64,7 @@
       <Image
         square={60}
         title={headword.value}
-        gcs={first_photo.serving_url}
+        photo={first_photo}
         photo_source={first_photo.source}
         photographer={first_photo.photographer}
         {can_edit}

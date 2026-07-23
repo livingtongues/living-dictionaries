@@ -5,8 +5,8 @@
   import Popover from '$lib/components/ui/Popover.svelte'
   import EntryPickerModal from './EntryPickerModal.svelte'
   import { token_kind } from './token-kind'
-  import { get_headword } from '$lib/helpers/orthographies'
-  import { image_src } from '$lib/utils/media-url'
+  import { get_headword } from '$lib/orthography/orthographies'
+  import { photo_src } from '$lib/utils/media-url'
   import IconMdiArrowRight from '~icons/mdi/arrow-right'
 
   interface Props {
@@ -58,8 +58,8 @@
   function entry_photo(entry: EntryData | undefined): string | null {
     for (const sense of entry?.senses ?? []) {
       const photo = sense.photos?.[0]
-      if (photo?.serving_url)
-        return image_src(photo.serving_url, 's96-p')
+      if (photo?.serving_url || photo?.storage_path)
+        return photo_src(photo, 's96-p')
     }
     return null
   }

@@ -13,7 +13,7 @@
   import TokenPopover from '$lib/corpus/TokenPopover.svelte'
   import { pick_tokenization_orthography } from '$lib/corpus/tokenize-sentence'
   import { token_kind } from '$lib/corpus/token-kind'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text } from '$lib/markdown/sanitize-rich-text'
   import { build_text_timings } from '$lib/media/media-timings'

@@ -2,7 +2,7 @@
   import { page } from '$app/state'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
   import type { DictRowType } from '$lib/db/dict-client/dict-live-db.svelte'
   import IconCarbonDocument from '~icons/carbon/document'
   import IconFaSolidPlus from '~icons/fa-solid/plus'

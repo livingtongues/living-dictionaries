@@ -2,7 +2,7 @@
   import type { Tables } from '$lib/types'
   import EntryField from './EntryField.svelte'
   import { page } from '$app/state'
-  import { get_orthographies } from '$lib/helpers/orthographies'
+  import { get_orthographies } from '$lib/orthography/orthographies'
   import IconSystemUiconsTrash from '~icons/system-uicons/trash'
 
   interface Props {

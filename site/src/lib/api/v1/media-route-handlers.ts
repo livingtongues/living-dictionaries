@@ -11,7 +11,9 @@ import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
 import { attach_media, delete_media, MEDIA_CELLS, media_requires_attribution, read_media_record, update_media_timings } from '$lib/db/server/v1-media-write'
 import { load_source_slug_set } from '$lib/db/server/source-slugs'
 import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
-import { MediaStorageNotConfiguredError, resolve_photo_serving_url, store_media_bytes } from '$lib/server/media-storage'
+import { MediaStorageNotConfiguredError, store_media_bytes } from '$lib/server/media-storage'
+import { record_media_object_by_key } from '$lib/db/server/media-ledger'
+import { store_photo_variants_in_background } from '$lib/server/photo-variants'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 import { build_r2_media_key, extract_media_extension } from '$lib/utils/media-path'
@@ -205,16 +207,16 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
       }
     }
 
-    // Audio/video bytes land in the R2 media bucket keyed by the row uuid
+    // Media bytes land in the R2 media bucket keyed by the row uuid
     // (`{dict_id}/{kind}/{media_id}.{ext}`) — so the id must exist BEFORE
     // storage. A caller-supplied id must then BE a uuid, or the resulting key
     // would fail the new-convention discriminator and serve from the wrong host.
-    if (cell.medium !== 'photo' && media_id && !UUID_REGEX.test(media_id))
+    if (media_id && !UUID_REGEX.test(media_id))
       error(ResponseCodes.BAD_REQUEST, `id must be a uuid for ${cell.medium} media`)
     const final_media_id = media_id ?? crypto.randomUUID()
     const r2_key_for = (file_name: string | undefined) => build_r2_media_key({
       dict_id: dictionary.id,
-      kind: cell.medium as 'audio' | 'video',
+      kind: cell.medium,
       media_id: final_media_id,
       extension: extract_media_extension(file_name ?? ''),
     })
@@ -235,6 +237,7 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
       } else if (parsed.bytes) {
         assert_media_bytes({ medium: cell.medium, bytes: parsed.bytes, declared_type: parsed.file_type })
         const stored = await store_bytes({ r2_key: r2_key_for(parsed.file_name), file_name: parsed.file_name ?? 'upload', file_type: parsed.file_type ?? 'application/octet-stream', bytes: parsed.bytes })
+        record_media_object_by_key({ key: stored.storage_path, bytes: parsed.bytes.length })
         media_fields.storage_path = stored.storage_path
       } else {
         error(ResponseCodes.BAD_REQUEST, 'Provide a video file, a url, or a hosted_elsewhere/hosted_url link')
@@ -245,27 +248,25 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
         error(ResponseCodes.BAD_REQUEST, 'Provide a file (multipart) or a url')
       assert_media_bytes({ medium: cell.medium, bytes: parsed.bytes, declared_type: parsed.file_type })
       const stored = await store_bytes({
-        ...(cell.medium === 'audio' ? { r2_key: r2_key_for(parsed.file_name) } : { folder: `${dictionary.id}/${cell.folder}/${owner_id}` }),
+        r2_key: r2_key_for(parsed.file_name),
         file_name: parsed.file_name ?? 'upload',
         file_type: parsed.file_type ?? 'application/octet-stream',
         bytes: parsed.bytes,
       })
+      record_media_object_by_key({ key: stored.storage_path, bytes: parsed.bytes.length })
       media_fields.storage_path = stored.storage_path
       if (cell.medium === 'photo') {
         media_fields.photographer = str(fields.photographer) ?? null
-        try {
-          media_fields.serving_url = await resolve_photo_serving_url({ bucket: stored.bucket, object_key: stored.storage_path, dev_mock: stored.dev_mock })
-        } catch (err) {
-          if (err instanceof MediaStorageNotConfiguredError)
-            error(ResponseCodes.SERVICE_UNAVAILABLE, err.message)
-          error(ResponseCodes.INTERNAL_SERVER_ERROR, `Serving-url generation failed: ${(err as Error).message}`)
-        }
+        // R2 convention: no lh3 serving_url — rendering derives urls from
+        // storage_path; WebP variants are generated after the response.
+        media_fields.serving_url = ''
+        store_photo_variants_in_background({ original_key: stored.storage_path, bytes: parsed.bytes })
       }
     }
 
     let result
     try {
-      result = attach_media({ db, history_db: get_dictionary_history_db(dictionary.id), cell_key, owner_id, media_id: cell.medium === 'photo' ? media_id : final_media_id, fields: media_fields, speaker_id, replace, user_id: access.user_id, api_key_id: access.key_id ?? null })
+      result = attach_media({ db, history_db: get_dictionary_history_db(dictionary.id), cell_key, owner_id, media_id: final_media_id, fields: media_fields, speaker_id, replace, user_id: access.user_id, api_key_id: access.key_id ?? null })
     } catch (err) {
       error(ResponseCodes.BAD_REQUEST, (err as Error).message)
     }

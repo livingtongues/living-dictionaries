@@ -5,7 +5,7 @@
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
-  import { get_orthographies } from '$lib/helpers/orthographies'
+  import { get_orthographies } from '$lib/orthography/orthographies'
   import { additional_keyboards, glossing_languages } from '$lib/glosses/glossing-languages'
   import { is_reserved_or_known_code, load_keyman_writing_systems } from '$lib/components/keyboards/keyman/writing-systems'
   import IconFa6SolidChevronUp from '~icons/fa6-solid/chevron-up'

@@ -1,10 +1,10 @@
 import type { EntryData, Orthography } from '$lib/types'
 import type { DeepPartial } from '$lib/utils/deep-partial'
-import { order_glosses } from '$lib/helpers/glosses'
-import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
+import { order_glosses } from '$lib/gloss/order-glosses'
+import { add_periods_and_comma_separate_parts_of_speech } from '$lib/entry/format-parts-of-speech'
 import { remove_italic_tags } from '$lib/utils/remove-italic-tags'
-import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
-import { get_headword } from '$lib/helpers/orthographies'
+import { get_local_orthographies } from '$lib/entry/get-local-orthographies'
+import { get_headword } from '$lib/orthography/orthographies'
 import type { TranslateFunction } from '$lib/i18n/types'
 
 export function seo_description({ entry, gloss_languages, orthographies, t }: {

@@ -44,6 +44,37 @@ export function build_r2_media_key({ dict_id, kind, media_id, extension }: {
   return `${dict_id}/${kind}/${media_id}.${extension}`
 }
 
+/**
+ * Photo VARIANTS (Phase 2): each photo original `{dict}/photo/{uuid}.{ext}` gets
+ * three WebP renditions keyed `{dict}/photo/{uuid}_{variant}.webp`. Variant keys
+ * deliberately do NOT match `is_r2_media_path` — only originals live in rows;
+ * variant urls are derived at render time from the original key + a size spec.
+ */
+export const PHOTO_VARIANTS = ['thumb', 'w900', 'w1600'] as const
+export type PhotoVariant = typeof PHOTO_VARIANTS[number]
+
+export function photo_variant_key({ original_key, variant }: { original_key: string, variant: PhotoVariant }): string {
+  return `${original_key.replace(/\.[\w-]{1,10}$/, '')}_${variant}.webp`
+}
+
+/**
+ * Map an lh3 size spec (the part after `=` in legacy serving urls — mostly
+ * `s150-p s340-p s400-p w900 w1200 w1600 s0`, plus dynamic `w{N}`/`h{N}` from
+ * the image viewers) onto the fixed variant set. `null` = untouched original.
+ */
+export function variant_for_size_spec(size: string): PhotoVariant | null {
+  if (size === 's0')
+    return null
+  const match = size.match(/^([swh])(\d+)/)
+  if (!match)
+    return null
+  const [, dimension_kind, raw] = match
+  const pixels = Number(raw)
+  if (dimension_kind === 's' && pixels <= 400)
+    return 'thumb'
+  return pixels <= 900 ? 'w900' : 'w1600'
+}
+
 if (import.meta.vitest) {
   const uuid = '48af49b0-b410-4db1-babf-38ac53269e62'
 
@@ -74,5 +105,27 @@ if (import.meta.vitest) {
   test(build_r2_media_key, () => {
     expect(build_r2_media_key({ dict_id: 'achi', kind: 'audio', media_id: uuid, extension: 'mp3' }))
       .toBe(`achi/audio/${uuid}.mp3`)
+  })
+
+  test(photo_variant_key, () => {
+    expect(photo_variant_key({ original_key: `gta/photo/${uuid}.jpg`, variant: 'thumb' }))
+      .toBe(`gta/photo/${uuid}_thumb.webp`)
+    expect(photo_variant_key({ original_key: `gta/photo/${uuid}.x-m4a`, variant: 'w900' }))
+      .toBe(`gta/photo/${uuid}_w900.webp`)
+  })
+
+  test('variant keys never match is_r2_media_path (rows hold originals only)', () => {
+    expect(is_r2_media_path(photo_variant_key({ original_key: `gta/photo/${uuid}.jpg`, variant: 'thumb' }))).toBe(false)
+  })
+
+  test('variant_for_size_spec: maps all 7 lh3 specs the app uses', () => {
+    expect(variant_for_size_spec('s150-p')).toBe('thumb')
+    expect(variant_for_size_spec('s340-p')).toBe('thumb')
+    expect(variant_for_size_spec('s400-p')).toBe('thumb')
+    expect(variant_for_size_spec('w900')).toBe('w900')
+    expect(variant_for_size_spec('w1200')).toBe('w1600')
+    expect(variant_for_size_spec('w1600')).toBe('w1600')
+    expect(variant_for_size_spec('s0')).toBe(null)
+    expect(variant_for_size_spec('garbage')).toBe(null)
   })
 }

@@ -1,11 +1,19 @@
-# Media serving URLs (GCS + App Engine Images magic URLs)
+# Media serving URLs (R2 + legacy GCS + App Engine Images magic URLs)
 
 How a stored media `storage_path` / `serving_url` becomes a real URL. The builders live in
-`site/src/lib/helpers/media-url.ts` (with tests) — this page captures the *external* GCS / App
+`site/src/lib/utils/media-url.ts` (with tests) — this page captures the *external* R2 / GCS / App
 Engine Images behavior those builders assume, which you can't infer from the code alone.
 
-## Audio / video (and raw photo bytes) — Firebase Storage download URL
-A storage path is served from the legacy GCS bucket as:
+## Audio / video — R2 (since 2026-07-23)
+Audio/video bytes were migrated GCS→R2 (`livingdictionaries-media` bucket, LD CF account). A
+new-convention path `{dict}/{audio|video}/{row_uuid}.{ext}` serves as
+`https://media.livingdictionaries.app/{path}`. Serving is dual-read: any path NOT matching the
+new convention (see `is_r2_media_path` in `site/src/lib/utils/media-path.ts`) falls back to the
+legacy GCS URL below. As of the migration all live rows are new-convention; the GCS fallback
+exists for stale clients + the one dead test object. GCS stays up as failsafe — don't tear down.
+
+## Legacy audio / video (and raw photo bytes) — Firebase Storage download URL
+An old-convention storage path is served from the legacy GCS bucket as:
 
 ```
 https://firebasestorage.googleapis.com/v0/b/${storage_bucket}/o/${encodeURIComponent(path)}?alt=media

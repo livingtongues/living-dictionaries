@@ -6,7 +6,7 @@
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
   import Image from '$lib/components/image/Image.svelte'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
   import { dedupe_keyed_children } from '$lib/utils/dedupe-keyed-children'
   import { page } from '$app/state'
   import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
@@ -62,7 +62,7 @@
       <Image
         width={400}
         title={headword.value}
-        gcs={photo.serving_url}
+        photo={photo}
         photo_source={photo.source}
         photographer={photo.photographer}
         {can_edit}

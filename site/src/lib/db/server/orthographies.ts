@@ -5,7 +5,7 @@ import { additional_keyboards, glossing_languages } from '$lib/glosses/glossing-
 import keyman_writing_systems from '$lib/components/keyboards/keyman/keyman-writing-systems.json'
 import { get_dictionary_db } from './dictionary-db'
 import { get_shared_db } from './shared-db'
-import { get_orthographies } from '$lib/helpers/orthographies'
+import { get_orthographies } from '$lib/orthography/orthographies'
 
 /**
  * Orthography (writing-system) registry management. The registry lives on

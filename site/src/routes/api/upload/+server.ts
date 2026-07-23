@@ -8,10 +8,12 @@ import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { gcs_is_configured, get_gcs } from '$lib/server/gcloud'
 import { get_r2_media, r2_media_is_configured } from '$lib/server/r2-media'
 import { log_server_event } from '$lib/server/log-server-event'
+import { record_media_object_by_key } from '$lib/db/server/media-ledger'
 import { build_r2_media_key, extract_media_extension } from '$lib/utils/media-path'
 
 export interface UploadRequestBody {
-  folder: string
+  /** legacy GCS flow only (stale clients) — new-code paths omit it */
+  folder?: string
   dictionary_id: string
   file_name: string
   file_type: string
@@ -22,6 +24,8 @@ export interface UploadRequestBody {
    * keep the legacy GCS `folder` flow until Phase 2.
    */
   r2_media?: { kind: 'audio' | 'video', media_id: string }
+  /** declared byte size — seeds the media ledger at presign time (trued-up by the sweep) */
+  file_size?: number
 }
 
 export interface UploadResponseBody {
@@ -36,7 +40,7 @@ export interface UploadResponseBody {
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 export const POST: RequestHandler = async (event) => {
-  const { folder, dictionary_id, file_name, file_type, r2_media } = await event.request.json() as UploadRequestBody
+  const { folder, dictionary_id, file_name, file_type, r2_media, file_size } = await event.request.json() as UploadRequestBody
 
   if (!dictionary_id?.trim())
     error(ResponseCodes.BAD_REQUEST, 'Missing dictionary_id')
@@ -88,6 +92,10 @@ export const POST: RequestHandler = async (event) => {
         ContentType: file_type,
         CacheControl: 'public, max-age=31536000, immutable',
       }), { expiresIn: 60 })
+      // Ledger seed with the DECLARED size — an abandoned PUT leaves a ledger row
+      // with no object; the weekly sweep reconciles both cases.
+      if (Number.isFinite(file_size) && file_size > 0)
+        record_media_object_by_key({ key: object_key, bytes: file_size })
       return json({ presigned_upload_url, bucket, object_key, item_id: r2_media.media_id } satisfies UploadResponseBody)
     } catch (err) {
       console.error(`Error creating R2 upload URL: ${err.message}`)

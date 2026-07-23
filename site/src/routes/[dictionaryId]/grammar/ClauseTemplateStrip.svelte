@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state'
   import { first_multistring_value } from './grammar-tree'
-  import { get_headword } from '$lib/helpers/orthographies'
+  import { get_headword } from '$lib/orthography/orthographies'
   import type { DictRowType } from '$lib/db/dict-client/dict-live-db.svelte'
 
   const { t, dictionary, dict_db, entries_data } = $derived(page.data)

@@ -30,6 +30,7 @@ export interface FeaturedCard {
   gloss: string | null
   gloss_language: string | null
   photo_serving_url: string
+  photo_storage_path?: string | null
   audio_storage_path: string
   lng: number | null
   lat: number | null

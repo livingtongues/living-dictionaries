@@ -4,9 +4,9 @@
   import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { url_from_storage_path } from '$lib/utils/media-url'
   import { create_exclusive_audio } from '$lib/utils/exclusive-audio.svelte'
-  import { get_headword } from '$lib/helpers/orthographies'
-  import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
-  import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
+  import { get_headword } from '$lib/orthography/orthographies'
+  import { get_local_orthographies } from '$lib/entry/get-local-orthographies'
+  import { add_periods_and_comma_separate_parts_of_speech } from '$lib/entry/format-parts-of-speech'
   import { top_glosses } from '../../home/home-helpers'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import { page } from '$app/state'
@@ -50,7 +50,7 @@
       title={headword.value}
       subtitle={glosses[0]}
       href="/{dictionary.url}/entry/{entry.id}"
-      gcs={first_photo.serving_url}
+      photo={first_photo}
       photo_source={first_photo.source}
       photographer={first_photo.photographer}
       {can_edit}

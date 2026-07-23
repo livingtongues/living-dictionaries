@@ -55,4 +55,30 @@ shared.prepare(
 ).run(randomUUID(), DICTIONARY_ID, MOCK_USER_ID, 'manager', now, now)
 shared.close()
 
+// The media/db-ops e2e flows navigate to the fixed test entry `e_ja` ("water") and
+// expect editor affordances + a sense to attach media to. The canonical achi content
+// fixture (13 `e_*` entries) can go missing on a machine that pulled the REAL achi dict
+// into `.data` instead — so ensure the minimum test entry + sense exist here rather than
+// depending on a fixture file that isn't in the repo. Idempotent: `INSERT OR IGNORE`
+// leaves the full fixture untouched when it's already present.
+const achi_db_path = join(data_dir, 'dictionaries', `${DICTIONARY_ID}.db`)
+try {
+  const achi = new Database(achi_db_path)
+  const has_entries = achi.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='entries'").get()
+  if (has_entries) {
+    achi.prepare(
+      `INSERT OR IGNORE INTO entries (id, lexeme, created_by_user_id, created_at, updated_by_user_id, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+    ).run('e_ja', JSON.stringify({ default: 'ja\'' }), MOCK_USER_ID, now, MOCK_USER_ID, now)
+    achi.prepare(
+      `INSERT OR IGNORE INTO senses (id, entry_id, glosses, created_by_user_id, created_at, updated_by_user_id, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    ).run('se_ja', 'e_ja', JSON.stringify({ en: 'water' }), MOCK_USER_ID, now, MOCK_USER_ID, now)
+  }
+  achi.close()
+  console.info(`✓ ensured achi.db test entry e_ja ("water") + sense se_ja`)
+} catch (error) {
+  console.warn(`⚠ could not seed achi.db test entry (${achi_db_path}): ${error instanceof Error ? error.message : error}`)
+}
+
 console.info(`✓ seeded shared.db: ${ACHI_MANAGER_EMAIL} (${MOCK_USER_ID}) as MANAGER of ${DICTIONARY_ID}`)

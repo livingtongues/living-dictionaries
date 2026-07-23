@@ -1,4 +1,4 @@
-import type { MultiString, Tables } from '$lib/types'
+import type { MultiString } from '$lib/types'
 import type { TranslateFunction } from '$lib/i18n/types'
 
 export function order_glosses({ glosses, dictionary_gloss_languages, t, label = false }:
@@ -20,18 +20,6 @@ export function order_glosses({ glosses, dictionary_gloss_languages, t, label = 
     if (label) return `${t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${gloss}`
     return gloss
   })
-}
-
-export function order_example_sentences({ sentence, dictionary_gloss_languages }:
-{
-  sentence: Partial<Tables<'sentences'>>
-  dictionary_gloss_languages: string[]
-},
-): string[] {
-  if (!sentence?.text?.default) return []
-
-  const sorted_sentence_translations = dictionary_gloss_languages.map(bcp => sentence.translation?.[bcp]).filter(Boolean)
-  return [sentence.text.default, sorted_sentence_translations].flat()
 }
 
 export function order_entry_and_dictionary_gloss_languages(

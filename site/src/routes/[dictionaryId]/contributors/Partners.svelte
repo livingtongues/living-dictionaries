@@ -104,7 +104,7 @@
           {can_edit}
           width={400}
           title="{partner.name} Logo"
-          gcs={partner.photo.serving_url}
+          photo={partner.photo}
           on_delete_image={() => delete_partner_image({ photo_id: partner.photo.id, partner_id: partner.id })} />
       </div>
     {:else}

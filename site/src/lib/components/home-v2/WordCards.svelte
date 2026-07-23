@@ -5,7 +5,7 @@
   import { crossfade, scale } from 'svelte/transition'
   import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { page } from '$app/state'
-  import { image_src, url_from_storage_path } from '$lib/utils/media-url'
+  import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
   import { bbox_contains } from './map/view-helpers'
   import FeaturedEntryFullscreen from './FeaturedEntryFullscreen.svelte'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
@@ -159,7 +159,7 @@
   // eslint-disable-next-line svelte/prefer-svelte-reactivity -- plain preload cache, never drives UI
   const preloaded = new Set<string>()
   function preload_card(card: FeaturedCard) {
-    const src = image_src(card.photo_serving_url, FULLSCREEN_SIZE)
+    const src = photo_src({ storage_path: card.photo_storage_path, serving_url: card.photo_serving_url }, FULLSCREEN_SIZE)
     if (preloaded.has(src))
       return
     const img = new Image()
@@ -178,7 +178,7 @@
     event.preventDefault()
     audio_element?.pause()
     playing_id = null
-    const src = image_src(card.photo_serving_url, FULLSCREEN_SIZE)
+    const src = photo_src({ storage_path: card.photo_storage_path, serving_url: card.photo_serving_url }, FULLSCREEN_SIZE)
     if (preloaded.has(src)) {
       show_fullscreen(card, card_key)
       return
@@ -282,7 +282,7 @@
       {#if !(fullscreen_card && fullscreen_key === card_key)}
         <img
           use:fade_in
-          src={image_src(card.photo_serving_url, 's340-p')}
+          src={photo_src({ storage_path: card.photo_storage_path, serving_url: card.photo_serving_url }, 's340-p')}
           alt={card.lexeme}
           loading={index < 8 ? 'eager' : 'lazy'}
           in:receive|local={{ key: card_key }}

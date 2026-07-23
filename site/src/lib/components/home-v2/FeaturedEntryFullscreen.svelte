@@ -4,7 +4,7 @@
   import { fade } from 'svelte/transition'
   import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { page } from '$app/state'
-  import { image_src, url_from_storage_path } from '$lib/utils/media-url'
+  import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
   import { portal } from '$lib/utils/portal'
   import IconMdiClose from '~icons/mdi/close'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
@@ -78,7 +78,7 @@
 
   <img
     class="image"
-    src={image_src(card.photo_serving_url, 'w1200')}
+    src={photo_src({ storage_path: card.photo_storage_path, serving_url: card.photo_serving_url }, 'w1200')}
     alt={card.lexeme}
     in:receive={{ key: crossfade_key }}
     out:send={{ key: crossfade_key }} />

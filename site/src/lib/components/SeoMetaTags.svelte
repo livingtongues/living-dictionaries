@@ -1,4 +1,7 @@
 <script lang="ts">
+  import type { PhotoLike } from '$lib/utils/media-url'
+  import { photo_src } from '$lib/utils/media-url'
+  import { is_r2_media_path } from '$lib/utils/media-path'
   import { seoTitle } from './seo-title'
   import { compressToEncodedURIComponent as encode } from '$lib/lz/lz-string'
   import { page } from '$app/state'
@@ -6,7 +9,7 @@
   const IMAGE_API = '/og'
   const DEFAULT_IMAGE
     = 'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media' // 1484 x 729
-  const OG_IMAGE_VERSION = 4
+  const OG_IMAGE_VERSION = 5
 
   interface Props {
     admin?: boolean
@@ -22,7 +25,7 @@
     url?: any
     width?: number
     height?: number
-    gcsPath?: string
+    photo?: PhotoLike | null
     /** Force the generated `/og` card even without a photo (e.g. entries, which
      * render a globe + lexeme + gloss card). Without a photo and without this,
      * the og:image falls back to the generic Living Tongues logo. */
@@ -45,7 +48,7 @@
     url = page.url.toString(),
     width = 1200,
     height = 600,
-    gcsPath = undefined,
+    photo = null,
     generate_og_image = false,
     lng = undefined,
     lat = undefined,
@@ -57,6 +60,15 @@
   const textTitle = $derived(seoTitle({ title: title || imageTitle, dictionaryName: expandedDictionaryName, admin }))
   const textDescription = $derived(description || imageDescription || 'Language Documentation Web App - Speeding the availability of language resources for endangered languages. Using technology to shift how we think about endangered languages. Rather than perceiving them as being antiquated, difficult to learn and on the brink of vanishing, we see them as modern and easily accessible for learning online in text and audio formats.')
 
+  const has_photo = $derived(!!(photo?.serving_url || (photo?.storage_path && is_r2_media_path(photo.storage_path))))
+  // R2-convention photos pass a full absolute url; legacy photos pass the lh3
+  // hash (the og renderer builds a cropped lh3 url from it).
+  const og_photo_url = $derived.by(() => {
+    if (!photo?.storage_path || !is_r2_media_path(photo.storage_path))
+      return undefined
+    const src = photo_src(photo, 'w1600')
+    return src.startsWith('/') ? `${page.url.origin}${src}` : src
+  })
   const imageProps = $derived({
     width,
     height,
@@ -65,11 +77,12 @@
     dictionaryName,
     lng,
     lat,
-    gcsPath: gcsPath?.replace('\n', ''), // this slipped into the server response, can remove after database cleaned
+    image_url: og_photo_url,
+    gcsPath: og_photo_url ? undefined : photo?.serving_url?.replace('\n', ''), // stray newline slipped into old rows
   })
   const encodedImageProps = $derived(encode(JSON.stringify(imageProps)))
   // og:image must be an absolute URL (https://ogp.me) — many scrapers drop relative ones.
-  const imageUrl = $derived(gcsPath || generate_og_image ? `${page.url.origin}${IMAGE_API}?props=${encodedImageProps}&v=${OG_IMAGE_VERSION}` : DEFAULT_IMAGE)
+  const imageUrl = $derived(has_photo || generate_og_image ? `${page.url.origin}${IMAGE_API}?props=${encodedImageProps}&v=${OG_IMAGE_VERSION}` : DEFAULT_IMAGE)
   const imageWidth = $derived(dictionaryName ? width.toString() : '987')
   const imageHeight = $derived(dictionaryName ? width.toString() : '299')
 
