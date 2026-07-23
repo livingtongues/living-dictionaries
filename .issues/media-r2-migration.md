@@ -388,6 +388,29 @@ imports) — merge state should be fine, but re-run tsc/lint/check/vitest after 
 - ⏭️ HEIC-upload + EXIF-coords features (below) build AFTER this deploy as a separate follow-up
   deploy (keeps the tested migration deploy clean).
 
+## e2e restored + COMMITTED & PUSHED (2026-07-23, session 63437eca)
+
+- ✅ **`pnpm test:media` GREEN** (twice, stable): photo POST + variants + audio presign →
+  media rows → server SQLite (R2-convention keys) → fresh-context render. Was broken by the
+  wrong-fixture env issue; fixed properly (Jacob: "get good coverage working, however"):
+  - `e2e/media-upload.mjs`: realistic 24x24 test PNG (1x1 tripped `vipspng: libpng read error`),
+    waits for entries-bundle readiness before editing (writes are gated on `still_loading` until
+    the wa-sqlite leader worker finishes — slower in headless CI), speaker picker handled
+    fixture-agnostically (both the "+Add" button [0 speakers] and the `<select>`+AddSpeaker form),
+    Add button scoped to `.select-prompt` so it doesn't hit the entry's Source "+Add".
+  - `seed-achi-fixture.ts`: idempotently ensures the `e_ja` ("water") entry + `se_ja` sense so the
+    fixture is self-sufficient (the canonical 13-entry `e_*` fixture isn't in the repo).
+  - `+layout.ts`: mirror entries-loading to `window.__ld_entries_loading[dict]` for e2e/debug.
+  - mustang's `.data/dictionaries/achi.db` pruned to the minimal fixture (e_ja/se_ja only) — a
+    local gitignored repair; the real 487-entry dict had replaced it.
+- ✅ **COMMITTED (6b806319) + PUSHED to main** (deploy webhook triggered) — combined photo-migration
+  + helpers-folder dissolution, per Jacob's one-commit request. Pre-commit hooks (full vitest +
+  check + lint:fix) passed. Transient migration `.log`s gitignored (scripts/.gitignore).
+- ⏭️ **NEXT (post-deploy prod sequence)**: verify deploy on VPS → rewrite.ts
+  --confirm-dual-read-deployed (canary a small photo dict, spot-check R2 serving, then full) →
+  seed-ledger → post-flip sweep → LD backup leg → drop GCS leg (vps-setup) → docs.
+- ⏭️ HEIC-upload + EXIF-coords features (below) still a separate follow-up deploy.
+
 ## Phase 2b: HEIC-upload handling + photo EXIF coordinates (Jacob 2026-07-23, this session — NOT YET BUILT)
 
 Two additive features, layered onto the Phase-2 photo flip code. Build alongside the migration
@@ -460,3 +483,33 @@ finish; they don't block the flip. All four sub-decisions locked with Jacob.
   legacy, listing times out), search-index (huge, legacy), livingdictionaries-snapshots (~1.3k
   dbs), livingdictionaries-attachments. cache + search-index are Firebase/Vercel-era leftovers —
   candidates for deletion in a separate cleanup (they're Standard class, just storage cost).
+
+## Prod finish sequence (2026-07-23, session fe5b55c0 — continues 63437eca after kill)
+
+- ✅ **Full prod rewrite COMPLETE**: 21,798 rows across 297 dicts, 0 diverged
+  (rewrite-photos-run.log). Spot-checked zapotec rows on new-convention paths; original 200
+  image/jpeg + `_thumb`/`_w900` 200 image/webp from media.livingdictionaries.app.
+- ✅ **Ledger seeded** — but NOT by seed-ledger: the media-sweep weekly reconcile ran at 10:50
+  (3 min after container start) and ADOPTED all 234,076 listed R2 objects with
+  uploaded_at≈now, so seed-ledger's INSERT OR IGNORE inserted 0 and the backfill saw 0 months.
+  **Repaired** via new `scripts/media-migration/repair-ledger-dates.ts` (UPDATE-based): all
+  233,428 migrated keys re-dated from real dict-db created_at (variants inherit owner);
+  backfill then produced **93 month-end points 2018-10 → 2026-06** (clean monotonic curve
+  0.26 GB → 42.9 GB). Ledger: 234,076 rows / 43.96 GB (21,800 photos + 65,400 variants +
+  146,689 audio + 187 video).
+- ⚠️→✅ **79,924 objects were marked orphaned** by that same 10:50 reconcile — it ran MID-REWRITE
+  (rewrite finished 11:04), so not-yet-rewritten photos' new keys had no live rows. No deletion
+  risk (30d grace) — backdated `media_sweep_last_reconcile`; the 11:50 tick re-reconciled:
+  `unorphaned: 79924, newly_orphaned: 0, deleted: 0`. Ledger fully consistent. LESSON: any future
+  bulk rewrite should backdate-or-hold the reconcile watermark first (the weekly reconcile fires
+  ~3 min after a container restart when overdue).
+- ✅ **Post-flip sweep (step 7)**: re-ran both pull-manifests — photos 0 new old-convention rows;
+  audio/video only the known dead 2019 test object (still `missing`). ZERO GCS-window uploads.
+- ⏳ **LD backup leg (step 8)** running in background (server-side rclone copy media →
+  livingdictionaries-backups/media, creds over SSH from living env).
+- ✅ **Step 9 (vps-setup, UNCOMMITTED — Jacob commits)**: dropped the living GCS leg from
+  bin/backup-media (house-only loop now, SKIP_LIVING_MEDIA removed; mirror/gcs-living retained);
+  updated .knowledge/operations/r2-backup-system.md + added the missing LD-R2-leg-4 section.
+- ✅ **Step 10 docs (LD, UNCOMMITTED)**: AGENTS.md media bullet rewritten (all media on R2,
+  photo-upload/variants/ledger/sweep); .knowledge/domain/media-serving-urls.md updated (photos on
+  R2, lh3 marked LEGACY, no-HEIC policy, dev section).

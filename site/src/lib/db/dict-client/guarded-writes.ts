@@ -221,16 +221,32 @@ export function create_guarded_writes({ dict_db, connection, dictionary, get_use
       return entry
     }),
 
-    insert_audio: guard(async (db, { id, storage_path, entry_id, speaker_id, source }: {
+    insert_audio: guard(async (db, { id, storage_path, entry_id, sentence_id, text_id, speaker_id, source }: {
       /** Pre-minted row uuid (R2 uploads key the object by it BEFORE the insert). */
       id?: string
       storage_path: string
-      entry_id: string
+      /** Owner — exactly one of entry_id | sentence_id | text_id. */
+      entry_id?: string
+      sentence_id?: string
+      text_id?: string
       speaker_id?: string
       /** A `sources.slug` registry ref — the speaker-less attribution path. */
       source?: string
     }) => {
-      return await db.writes.insert_audio({ audio: { ...(id ? { id } : {}), storage_path, entry_id, ...(source ? { source } : {}) }, speaker_id })
+      const owners = [entry_id, sentence_id, text_id].filter(Boolean)
+      if (owners.length !== 1)
+        throw new Error('insert_audio needs exactly one of entry_id | sentence_id | text_id')
+      return await db.writes.insert_audio({
+        audio: {
+          ...(id ? { id } : {}),
+          storage_path,
+          ...(entry_id ? { entry_id } : {}),
+          ...(sentence_id ? { sentence_id } : {}),
+          ...(text_id ? { text_id } : {}),
+          ...(source ? { source } : {}),
+        },
+        speaker_id,
+      })
     }),
 
     update_audio: guard(async (db, audio: DictUpdateType<'audio'>) => {

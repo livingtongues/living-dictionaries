@@ -84,6 +84,35 @@ export function build_text_timings({ ordered_sentence_ids, timings }: {
 }
 
 /**
+ * Encode absolute per-token spans back into ONE sentence's compact timing
+ * string — the inverse of `unpack_timing_string` (ported from tutor's
+ * `encode_word_timings`). `cursor_ms` is the end of the previous timed token
+ * (across sentences for text-level audio); returns the advanced cursor so
+ * callers can chain sentence-by-sentence like `build_text_timings` does.
+ */
+export function encode_token_spans({ token_spans, cursor_ms }: {
+  token_spans: (TokenSpan | undefined)[]
+  cursor_ms: number
+}): { timing_string: string, cursor_ms: number } {
+  let cursor = cursor_ms
+  const parts: string[] = []
+  for (const span of token_spans) {
+    if (!span) {
+      parts.push('')
+      continue
+    }
+    // Round via the cursor so a decode of the output reproduces the cursor
+    // exactly (fractional drag positions would otherwise drift the chain).
+    const offset = Math.round(span.start_ms - cursor)
+    const start_ms = cursor + offset
+    const duration = Math.round(span.end_ms - start_ms)
+    parts.push(`${offset},${duration}`)
+    cursor = start_ms + duration
+  }
+  return { timing_string: parts.join('|'), cursor_ms: cursor }
+}
+
+/**
  * Index of the token whose span contains `current_ms` (the highlighted word), or
  * -1 when none is active. Untimed (`undefined`) spans never match.
  */
@@ -168,6 +197,49 @@ if (import.meta.vitest) {
 
     test('null timings → empty map', () => {
       expect(build_text_timings({ ordered_sentence_ids: ['s1'], timings: null }).size).toBe(0)
+    })
+  })
+
+  describe(encode_token_spans, () => {
+    test('round-trips through unpack_timing_string', () => {
+      const timing_string = '648,40|0,50||10,90|0,300|'
+      const { spans, cursor_ms } = unpack_timing_string({ timing_string, cursor_ms: 0 })
+      const encoded = encode_token_spans({ token_spans: spans, cursor_ms: 0 })
+      expect(encoded.timing_string).toBe(timing_string)
+      expect(encoded.cursor_ms).toBe(cursor_ms)
+    })
+
+    test('chains from a non-zero cursor', () => {
+      const encoded = encode_token_spans({
+        token_spans: [
+          { start_ms: 1200, end_ms: 1300 },
+          { start_ms: 1310, end_ms: 1400 },
+        ],
+        cursor_ms: 1138,
+      })
+      expect(encoded.timing_string).toBe('62,100|10,90')
+      expect(encoded.cursor_ms).toBe(1400)
+    })
+
+    test('emits empty parts for untimed tokens', () => {
+      const encoded = encode_token_spans({
+        token_spans: [
+          { start_ms: 0, end_ms: 100 },
+          undefined,
+          { start_ms: 200, end_ms: 400 },
+        ],
+        cursor_ms: 0,
+      })
+      expect(encoded.timing_string).toBe('0,100||100,200')
+    })
+
+    test('rounds fractional drag positions to whole ms', () => {
+      const encoded = encode_token_spans({
+        token_spans: [{ start_ms: 10.4, end_ms: 110.6 }],
+        cursor_ms: 0,
+      })
+      expect(encoded.timing_string).toBe('10,101')
+      expect(encoded.cursor_ms).toBe(111)
     })
   })
 

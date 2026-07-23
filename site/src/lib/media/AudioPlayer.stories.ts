@@ -1,5 +1,5 @@
 import type { Story, StoryMeta } from 'svelte-look'
-import type Component from './TextAudioPlayer.svelte'
+import type Component from './AudioPlayer.svelte'
 
 export const shared_meta: StoryMeta = {
   viewports: [{ width: 440, height: 90 }],

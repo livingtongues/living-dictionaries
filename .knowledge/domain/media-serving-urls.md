@@ -4,13 +4,18 @@ How a stored media `storage_path` / `serving_url` becomes a real URL. The builde
 `site/src/lib/utils/media-url.ts` (with tests) — this page captures the *external* R2 / GCS / App
 Engine Images behavior those builders assume, which you can't infer from the code alone.
 
-## Audio / video — R2 (since 2026-07-23)
-Audio/video bytes were migrated GCS→R2 (`livingdictionaries-media` bucket, LD CF account). A
-new-convention path `{dict}/{audio|video}/{row_uuid}.{ext}` serves as
-`https://media.livingdictionaries.app/{path}`. Serving is dual-read: any path NOT matching the
-new convention (see `is_r2_media_path` in `site/src/lib/utils/media-path.ts`) falls back to the
-legacy GCS URL below. As of the migration all live rows are new-convention; the GCS fallback
-exists for stale clients + the one dead test object. GCS stays up as failsafe — don't tear down.
+## ALL media — R2 (audio/video + photos, since 2026-07-23)
+All media bytes were migrated GCS→R2 (`livingdictionaries-media` bucket, LD CF account). A
+new-convention path `{dict}/{audio|video|photo}/{row_uuid}.{ext}` serves as
+`https://media.livingdictionaries.app/{path}`. Photo size requests map to pre-generated WebP
+variants — `{original minus ext}_{thumb|w900|w1600}.webp` (thumb = 400 square crop); lh3-style
+size specs are mapped onto that fixed set by `variant_for_size_spec` (`s0` = untouched original).
+Serving is dual-read: any path NOT matching the new convention (see `is_r2_media_path` in
+`site/src/lib/utils/media-path.ts`) falls back to the legacy GCS/lh3 URLs below. As of the
+migration all live rows are new-convention; the fallback exists for stale clients + the one dead
+test object. GCS stays up as failsafe — don't tear down. During the photo migration, HEIC/broken
+originals (38) were standardized to JPEG via the lh3 `=s0` transcode — the bucket contains NO
+HEIC by policy.
 
 ## Legacy audio / video (and raw photo bytes) — Firebase Storage download URL
 An old-convention storage path is served from the legacy GCS bucket as:
@@ -24,8 +29,10 @@ e.g. `audio/mandarin-practice/…_1630105846753.wav` →
 object's metadata JSON instead of the bytes. Prod bucket: `talking-dictionaries-alpha.appspot.com`
 (`PUBLIC_STORAGE_BUCKET`).
 
-## Photos — App Engine Images "magic" serving URL (the resize trick)
-Photos are not served from the storage bucket directly. On upload, a path is passed through the
+## LEGACY photos — App Engine Images "magic" serving URL (the resize trick)
+(Pre-2026-07-23 mechanism — retained as the dual-read fallback + the `=s0` transcode source the
+migration used. New photos never touch this.) Photos were not served from the storage bucket
+directly. On upload, a path was passed through the
 App Engine Images `get_serving_url()` service (`PROCESS_IMAGE_URL` endpoint) which returns an
 `lh3.googleusercontent.com/<hash>` URL. We store just the hash (`serving_url`) and rebuild the
 `src` client-side as `https://lh3.googleusercontent.com/<hash>=<size-spec>`.
@@ -47,5 +54,6 @@ the app never stores multiple image sizes.
 ## Dev (no GCS bucket)
 In dev there's no bucket, so `media-url.ts` reroutes: freshly uploaded bytes use a `dev-local:` hash
 served from the local `/api/dev-media` store; an empty hash renders `/dev-placeholder-image.svg`;
-**real** photo hashes (incl. pulled-dict photos) still go to the public lh3 CDN, so they load
-without a bucket. Audio/video in dev 302 to a bundled dummy via `/api/dev-media`.
+**real** media (incl. pulled-dict photos) still loads without local creds — new-convention paths hit
+the public `media.livingdictionaries.app`, legacy hashes the public lh3 CDN. Audio/video dummies in
+dev 302 via `/api/dev-media`.

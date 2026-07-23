@@ -75,6 +75,18 @@ describe(add_audio, () => {
     expect(insert_audio).toHaveBeenCalledWith({ id: minted_id, storage_path: 'demo/audio/e1/1.webm', entry_id: 'e1', speaker_id: 'sp1', source: 'field-recordings' })
   })
 
+  test('text_id / sentence_id owners pass through to the insert', async () => {
+    mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/audio/t1/1.webm' })))
+    const handle = add_audio({ writes, dictionary_id: 'demo', text_id: 't1', file: new Blob(['x'], { type: 'audio/webm' }), speaker_id: 'sp1' })
+    await expect(handle.done).resolves.toEqual({ storage_path: 'demo/audio/t1/1.webm' })
+    expect(insert_audio).toHaveBeenCalledWith(expect.objectContaining({ text_id: 't1', speaker_id: 'sp1' }))
+    expect(insert_audio.mock.calls[0][0].entry_id).toBeUndefined()
+
+    const sentence_handle = add_audio({ writes, dictionary_id: 'demo', sentence_id: 'sen1', file: new Blob(['x'], { type: 'audio/webm' }), speaker_id: 'sp1' })
+    await sentence_handle.done
+    expect(insert_audio).toHaveBeenCalledWith(expect.objectContaining({ sentence_id: 'sen1' }))
+  })
+
   test('NO insert when the upload fails', async () => {
     mocked_upload_media.mockReturnValue(fake_handle(Promise.reject(new Error('network down'))))
     const handle = add_audio({ writes, dictionary_id: 'demo', entry_id: 'e1', file: new Blob(['x'], { type: 'audio/webm' }), speaker_id: 'sp1' })

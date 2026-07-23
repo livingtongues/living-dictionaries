@@ -48,10 +48,13 @@ export function add_photo({ writes, dictionary_id, sense_id, file, source, photo
 }
 
 /** Attribution: `speaker_id` and/or `source` (a `sources.slug` registry ref) — at least one. */
-export function add_audio({ writes, dictionary_id, entry_id, file, speaker_id, source }: {
+export function add_audio({ writes, dictionary_id, entry_id, sentence_id, text_id, file, speaker_id, source }: {
   writes: Pick<GuardedWrites, 'check_ready' | 'insert_audio'>
   dictionary_id: string
-  entry_id: string
+  /** Owner — exactly one of entry_id | sentence_id | text_id. */
+  entry_id?: string
+  sentence_id?: string
+  text_id?: string
   file: File | Blob
   speaker_id?: string
   source?: string
@@ -64,7 +67,7 @@ export function add_audio({ writes, dictionary_id, entry_id, file, speaker_id, s
   const handle = upload_media({ file, dictionary_id, kind: 'audio', media_id })
   const done = handle.done.then(async ({ storage_path }) => {
     // ONE atomic dict_write: audio row + speaker junction commit together.
-    const inserted = await writes.insert_audio({ id: media_id, storage_path, entry_id, speaker_id, source })
+    const inserted = await writes.insert_audio({ id: media_id, storage_path, entry_id, sentence_id, text_id, speaker_id, source })
     if (!inserted)
       throw new Error('The audio was uploaded but could not be saved — please try again.')
     return { storage_path }

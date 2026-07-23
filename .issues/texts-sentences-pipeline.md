@@ -7,8 +7,75 @@ searchable first-class citizens in ONE search surface. Karaoke playback (sentenc
 word timings) rides on the same foundation.
 
 **Status: M1 + M2 COMPLETE (2026-07-05), M3 (matching) ✅ COMPLETE (2026-07-23, pushed a4be4ae0),
-M4 (suggestions queue + v1 parity) ✅ COMPLETE (2026-07-23, unpushed) — all behind the admin-3
-gate (LIFT AT GA). Remaining: M5 (timings + karaoke).**
+M4 (suggestions queue + v1 parity) ✅ COMPLETE (2026-07-23, pushed 561882e9) — all behind the
+admin-3 gate (LIFT AT GA). Karaoke PLAYBACK shipped separately (fd1518a7, 2026-07-18: `$lib/media/
+media-timings.ts` decode utils, `TextAudioPlayer`, `KaraokeSentence`, v1 timings PATCH endpoints).
+M5 (audio attach + waveform timings editor — REFRAMED 2026-07-23, tap-along is DEAD)
+✅ COMPLETE (2026-07-23, mustang). Remaining: M6 (auto-align via forced alignment — separate
+issue `.issues/auto-align-timings.md`).**
+
+## M5 — audio attach + waveform timings editor (✅ COMPLETE 2026-07-23, mustang)
+
+### Interview decisions (2026-07-23)
+
+- **Tap-along timings entry is DEAD.** Timings become data that arrives from forced alignment
+  (M6) or the v1 API (external pipelines like tutor's wenshanhua push already do this). The
+  human's job is *adjusting* aligner output, not creating timings by ear — "listening to long
+  things and hitting the spacebar is error-prone and tedious; we're moving to a more automatic
+  world."
+- **Editor UX**: "Adjust timings" opens a full-width editor panel — sentence-scoped zoom with
+  prev/next sentence nav; waveform with a labeled region per timed token; drag each region's
+  start/end edge independently (gaps allowed, clamped by neighbors — the classic aligner error is
+  word TAILS running long/short); tap a region to play just that word; save re-encodes all timing
+  strings. Editor hidden when the audio row has no timings.
+- **Attach surfaces**: reader text-level "Add audio" (record or upload + speaker select) when no
+  text audio exists; sentence detail page gets attach + player + karaoke (sentence-scoped
+  timings, cursor from 0). NOT in SentenceEditPanel (sentence page is the per-sentence home).
+- **Permission**: contributor+ (`can_edit`), all still behind the admin-3 preview gate.
+- **Alignment itself is M6** (own issue) — LD-owned agnostic Modal app, LD-server-side
+  align_form derivation, manual button first, per-dict "approved → automatic" switch later.
+
+### Build plan — ALL DONE
+
+1. ✅ **`encode_token_spans`** in `$lib/media/media-timings.ts` — inverse of
+   `unpack_timing_string`; rounds via the cursor so decode reproduces the chain exactly
+   (fractional drag positions would otherwise drift). Round-trip tests.
+2. ✅ **`insert_audio` owner extension** — guarded-writes + `add_audio` accept exactly one of
+   `entry_id | sentence_id | text_id` (worker `insert_audio_local` already passed rows through).
+3. ✅ **`AttachAudioModal`** (`$lib/media/`) — attach (SelectSpeaker + Record/Select + progress)
+   AND manage (waveform, speaker/source reassign, download, delete) for text/sentence owners.
+4. ✅ **Reader wiring** — no audio → "Add audio" row; with audio → manage pencil +
+   "Adjust timings" (only when `timings` non-empty) beside the sticky player.
+5. ✅ **Sentence page** — player (moved `TextAudioPlayer` → `$lib/media/AudioPlayer.svelte`) +
+   karaoke on the token strip (single-sentence `build_text_timings`, cursor 0) + attach/manage +
+   adjust-timings.
+6. ✅ **`TimingsEditor`** (`$lib/media/` + pure `timings-editor-state.ts`) — full-screen portal
+   overlay: fetch+decode → per-window canvas waveform (window-normalized peaks), sentence-scoped
+   zoom w/ prev/next + arrow keys, min 100px/s with horizontal scroll (mobile), per-token regions
+   w/ inside-edge drag handles + grab-offset, clamps (neighbors, cross-sentence floor/ceiling,
+   20ms CTC-frame min), auto-play the word after a drag, tap region to hear it, staggered labels,
+   save re-encodes every sentence with the chained cursor via `writes.update_audio`.
+7. ✅ **i18n** — `timings.*` EN keys (adjust/editor_title/sentence_of/no_timings/drag_hint).
+8. ✅ **Verify** — vitest (site suite 1919 passed; new round-trip/clamp/reflow tests),
+   stories (TimingsEditor light+dark desktop+mobile, `csr: true` + synthesized WAV data-URI),
+   e2e `/tmp/ld-m5-e2e.mjs` **26/26** on real wenshanhua timings (drag→save→reopen→restore
+   round-trip left prod data byte-identical; sentence attach/delete; achi ingest+attach+cleanup),
+   `pnpm check`/`tsc`/`lint` clean. Screenshots `/tmp/m5-*.png`.
+
+### M5 lessons
+
+- **Region drag handles must sit INSIDE their region** — straddling the edge (±7px) made adjacent
+  tokens' handles overlap across small inter-word gaps and drags grabbed the wrong token
+  (crushed a neighbor to the 20ms min in e2e run 1). Pair with a grab-offset so the edge doesn't
+  jump to the pointer.
+- svelte-look stories are **SSR by default** — components whose whole body lives behind `$effect`
+  (fetch/decode) screenshot as their loading state; need `csr: true` + an `interactions`
+  `waitForSelector`. svelte-look doesn't serve the app's `static/` — synthesize media as a
+  data-URI in the story module.
+- Generic `.nav-row`-style class names collide with app-shell elements in e2e selectors — scope
+  queries to the overlay root.
+- Whole-ms encode rounding means a reopened region can differ from the pre-save width by <0.02% —
+  assert with tolerance.
 
 ## M4 — suggestions queue + v1 parity (✅ COMPLETE 2026-07-23, mustang)
 

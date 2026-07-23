@@ -8,7 +8,7 @@
   import SentenceEditPanel from './SentenceEditPanel.svelte'
   import AppendSentencesModal from './AppendSentencesModal.svelte'
   import TextTags from './TextTags.svelte'
-  import TextAudioPlayer from './TextAudioPlayer.svelte'
+  import TextAudioPlayer from '$lib/media/AudioPlayer.svelte'
   import TokenizedSentence from '$lib/corpus/TokenizedSentence.svelte'
   import TokenPopover from '$lib/corpus/TokenPopover.svelte'
   import { pick_tokenization_orthography } from '$lib/corpus/tokenize-sentence'
@@ -27,6 +27,9 @@
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import IconMdiMarker from '~icons/mdi/marker'
   import IconMdiRefresh from '~icons/mdi/refresh'
+  import IconMdiTune from '~icons/mdi/tune'
+  import AttachAudioModal from '$lib/media/AttachAudioModal.svelte'
+  import TimingsEditor from '$lib/media/TimingsEditor.svelte'
 
   const { data } = $props()
   const { dictionary, can_edit } = $derived(data)
@@ -168,6 +171,9 @@
   let current_ms = $state(0)
   let playing = $state(false)
   let player = $state<ReturnType<typeof TextAudioPlayer> | null>(null)
+  let show_audio_modal = $state(false)
+  let show_timings_editor = $state(false)
+  const has_timings = $derived(!!text_audio?.timings && Object.keys(text_audio.timings).length > 0)
 
   const active_sentence_id = $derived.by(() => {
     if (!text_audio) return null
@@ -321,6 +327,26 @@
     {#if text_audio}
       <div class="audio-bar">
         <TextAudioPlayer bind:this={player} bind:current_ms bind:playing {audio_url} speakers={speaker_labels} />
+        {#if can_edit}
+          <div class="audio-actions">
+            <button type="button" class="btn-outline btn-sm" title={page.data.t('audio.edit_audio')} onclick={() => show_audio_modal = true}>
+              <IconFa6SolidPencil style="font-size: 0.75rem" />
+            </button>
+            {#if has_timings}
+              <button type="button" class="btn-outline btn-sm" style="gap: 0.375rem" onclick={() => show_timings_editor = true}>
+                <IconMdiTune />
+                <span class="wide-only">{page.data.t('timings.adjust')}</span>
+              </button>
+            {/if}
+          </div>
+        {/if}
+      </div>
+    {:else if can_edit}
+      <div class="add-audio-row">
+        <button type="button" class="btn-outline btn-sm" style="gap: 0.375rem" onclick={() => show_audio_modal = true}>
+          <IconMaterialSymbolsHearing />
+          {page.data.t('audio.add_audio')}
+        </button>
       </div>
     {/if}
 
@@ -440,6 +466,25 @@
     {text_id}
     last_sort_key={ordered.length ? ordered[ordered.length - 1].sort_key : null}
     on_close={() => show_append = false} />
+{/if}
+
+{#if show_audio_modal}
+  <AttachAudioModal
+    title={display_title}
+    {text_id}
+    audio={text_audio ?? null}
+    on_close={() => show_audio_modal = false} />
+{/if}
+
+{#if show_timings_editor && text_audio}
+  <TimingsEditor
+    audio={text_audio}
+    {audio_url}
+    sentences={ordered.map(sentence => ({
+      id: sentence.id,
+      token_forms: (sentence.tokens?.[sentence_code(sentence)] ?? []).map(token => token.form),
+    }))}
+    on_close={() => show_timings_editor = false} />
 {/if}
 
 {#if show_title_edit}
@@ -568,6 +613,34 @@
     top: 0.5rem;
     z-index: 10;
     margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .audio-bar > :global(.player) {
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  .audio-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .add-audio-row {
+    margin-bottom: 1.25rem;
+  }
+
+  .wide-only {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .wide-only {
+      display: inline;
+    }
   }
 
   .clip-btn {

@@ -766,5 +766,12 @@
     "delete_cover_confirm": "Remove the cover photo?",
     "drop_cover_hint": "Drop an image to set the cover photo",
     "top_domains": "Top semantic domains"
+  },
+  "timings": {
+    "adjust": "Adjust timings",
+    "editor_title": "Adjust word timings",
+    "sentence_of": "Sentence {position} of {total}",
+    "no_timings": "This sentence has no word timings",
+    "drag_hint": "Drag a word's edges to match the audio. Tap a word to hear it."
   }
 }
