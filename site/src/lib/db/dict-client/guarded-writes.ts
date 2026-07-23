@@ -199,6 +199,28 @@ export function create_guarded_writes({ dict_db, connection, dictionary, get_use
       return entry
     }),
 
+    /** "Ignore everywhere" by form (suggestions queue rows have no single token context). */
+    ignore_form: guard(async (db, { form }: { form: string }) => {
+      return await db.writes.ignore_form({ form })
+    }),
+
+    /** Undo an "ignore everywhere" (drops the `ignored_forms` row + re-matches). */
+    restore_form: guard(async (db, { form }: { form: string }) => {
+      return await db.writes.restore_form({ form })
+    }),
+
+    /** Form-wide entry-level confirm from the suggestions queue (no sense/junction writes). */
+    link_form: guard(async (db, { form, entry_id }: { form: string, entry_id: string }) => {
+      return await db.writes.link_form({ form, entry_id })
+    }),
+
+    /** New entry (+ first sense) from the suggestions queue, linked form-wide. */
+    create_entry_from_form: guard(async (db, { lexeme, form }: { lexeme: MultiString, form: string }) => {
+      const entry = await db.writes.create_entry_from_form({ lexeme, form })
+      track({ event: ENTRY_CREATED, props: { dictionary_id: dictionary.id, entry_id: entry.id } })
+      return entry
+    }),
+
     insert_audio: guard(async (db, { id, storage_path, entry_id, speaker_id, source }: {
       /** Pre-minted row uuid (R2 uploads key the object by it BEFORE the insert). */
       id?: string

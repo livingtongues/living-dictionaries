@@ -1,4 +1,9 @@
-# Dictionary buckets — execute the `delete` bucket + consolidate `public` → `bucket`
+# Dictionary buckets — consolidate `public` → `bucket` (Part 1 delete-execution DONE)
+
+> **2026-07-23 status:** Part 1 is EXECUTED — prod `delete` bucket is down to 3 dicts (from 650);
+> Jacob handled the deletions through July. Only Part 2 (the `public` → `bucket` consolidation
+> design) remains live in this file. GCS media-byte orphan harvest now belongs to the media→R2
+> migration issue.
 
 Combined 2026-07-12 from `dictionary-buckets-cleanup.md` + `dictionary-public-vs-bucket-consolidation.md`.
 Classification itself is DONE and live (2026-07-04): all 2,232 prod dicts carry

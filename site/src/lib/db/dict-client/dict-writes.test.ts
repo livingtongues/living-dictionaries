@@ -487,6 +487,87 @@ describe('ignore_form', () => {
     const again = await run_atomic('ignore_form', { user_id, form: 'kaq' })
     expect(again.result).toEqual({ sentences_changed: 0, occurrences: 0 })
   })
+
+  test('persists the decision in ignored_forms (normalized, once) and future ingests honor it', async () => {
+    const outcome = await run_atomic('ignore_form', { user_id, form: 'Ri' })
+    expect(outcome.affected_tables).toEqual(['ignored_forms'])
+    expect(count(`SELECT COUNT(*) c FROM ignored_forms WHERE form = 'ri'`)).toBe(1)
+
+    const again = await run_atomic('ignore_form', { user_id, form: 'RI' })
+    expect(again.affected_tables).toEqual([])
+    expect(count(`SELECT COUNT(*) c FROM ignored_forms`)).toBe(1)
+
+    const { sentence_ids } = await seed_text([{ text: { default: 'Ri nak' } }])
+    expect(stored_tokens(sentence_ids[0]).default[0]).toEqual({ form: 'Ri', start: 0, end: 2, status: 'ignored' })
+  })
+})
+
+describe('restore_form', () => {
+  test('drops the ignored_forms row, un-ignores occurrences, and re-matches immediately', async () => {
+    await seed_matchable_entries()
+    await run_atomic('insert_entry', { user_id, lexeme: { default: 'kaq' } })
+    const { sentence_ids } = await seed_text([{ text: { default: 'Nak kaq zuq' } }])
+    await run_atomic('ignore_form', { user_id, form: 'kaq' })
+    await run_atomic('ignore_form', { user_id, form: 'zuq' })
+
+    const outcome = await run_atomic('restore_form', { user_id, form: 'KAQ' })
+    expect(outcome.result).toEqual({ sentences_changed: 1, occurrences: 1 })
+    expect(outcome.deleted_rows).toEqual([{ table_name: 'ignored_forms', id: expect.any(String) }])
+    expect(count(`SELECT COUNT(*) c FROM ignored_forms WHERE form = 'kaq'`)).toBe(0)
+    const tokens = stored_tokens(sentence_ids[0]).default
+    // kaq re-matched straight back to its entry; zuq (still ignored) untouched
+    expect(tokens[1]).toEqual({ form: 'kaq', start: 4, end: 7, entry_id: entry_id_for('kaq'), status: 'auto' })
+    expect(tokens[2]).toEqual({ form: 'zuq', start: 8, end: 11, status: 'ignored' })
+    // punctuation ignores are never restored
+    expect(count(`SELECT COUNT(*) c FROM ignored_forms`)).toBe(1)
+  })
+})
+
+describe('link_form', () => {
+  test('confirms every non-confirmed occurrence entry-level, skips confirmed, writes NO junction rows', async () => {
+    await seed_matchable_entries()
+    const { sentence_ids } = await seed_text([
+      { text: { default: 'Zuq nak' } },
+      { text: { default: 'zuq, ZUQ!' } },
+    ])
+    const nak_id = entry_id_for('nak')
+    const outcome = await run_atomic('link_form', { user_id, form: 'zuq', entry_id: nak_id })
+    expect(outcome.result).toEqual({ sentences_changed: 2, occurrences: 3 })
+    expect(stored_tokens(sentence_ids[0]).default[0]).toEqual({ form: 'Zuq', start: 0, end: 3, entry_id: nak_id, status: 'confirmed' })
+    expect(stored_tokens(sentence_ids[1]).default.filter(token => token.entry_id === nak_id)).toHaveLength(2)
+    expect(count('SELECT COUNT(*) c FROM senses_in_sentences')).toBe(0)
+
+    // idempotent: everything is confirmed now
+    const again = await run_atomic('link_form', { user_id, form: 'Zuq', entry_id: nak_id })
+    expect(again.result).toEqual({ sentences_changed: 0, occurrences: 0 })
+  })
+
+  test('linking lifts a dictionary-level ignore', async () => {
+    await seed_matchable_entries()
+    await seed_text([{ text: { default: 'Zuq nak' } }])
+    await run_atomic('ignore_form', { user_id, form: 'zuq' })
+    const outcome = await run_atomic('link_form', { user_id, form: 'zuq', entry_id: entry_id_for('nak') })
+    expect(count(`SELECT COUNT(*) c FROM ignored_forms WHERE form = 'zuq'`)).toBe(0)
+    expect(outcome.deleted_rows).toEqual([{ table_name: 'ignored_forms', id: expect.any(String) }])
+  })
+})
+
+describe('create_entry_from_form', () => {
+  test('mints entry + sense and links the form everywhere in one transaction', async () => {
+    const { sentence_ids } = await seed_text([
+      { text: { default: 'Zuq nak' } },
+      { text: { default: 'zuq!' } },
+    ])
+    const outcome = await run_atomic('create_entry_from_form', {
+      user_id, lexeme: { default: 'zuq' }, form: 'Zuq',
+    })
+    const entry = outcome.result as { id: string }
+    expect(outcome.affected_tables).toEqual(['entries', 'senses', 'sentences'])
+    expect(count('SELECT COUNT(*) c FROM senses WHERE entry_id = ?', entry.id)).toBe(1)
+    expect(stored_tokens(sentence_ids[0]).default[0]).toEqual({ form: 'Zuq', start: 0, end: 3, entry_id: entry.id, status: 'confirmed' })
+    expect(stored_tokens(sentence_ids[1]).default[0]).toEqual({ form: 'zuq', start: 0, end: 3, entry_id: entry.id, status: 'confirmed' })
+    expect(count('SELECT COUNT(*) c FROM senses_in_sentences')).toBe(0)
+  })
 })
 
 describe('insert_sentences', () => {

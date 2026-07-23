@@ -23,6 +23,8 @@
   import IconFa6SolidFileExport from '~icons/fa6-solid/file-export'
   import IconFa6SolidBook from '~icons/fa6-solid/book'
   import IconFa6SolidScroll from '~icons/fa6-solid/scroll'
+  import IconFa6SolidListCheck from '~icons/fa6-solid/list-check'
+  import { count_unmatched_forms } from '$lib/corpus/aggregate-suggestions'
 
   interface Props {
     dictionary: Tables<'dictionaries'>
@@ -102,6 +104,21 @@
         </span>
       {/if}
       <IconFa6SolidUserShield class="admin-gate-icon" style={texts_count ? 'margin-inline-start: 0.375rem' : ''} />
+    </a>
+    {@const unmatched_count = count_unmatched_forms(page.data.dict_db?.sentences.rows ?? [])}
+    <a
+      href={`/${dictionary.url}/suggestions`}
+      class:active={page.url.pathname.match(/\/suggestions(\/|$)/)}>
+      <IconFa6SolidListCheck />
+      <span class="item-label">
+        {page.data.t('token.suggestions')}
+      </span>
+      {#if unmatched_count}
+        <span class="count-pill" style="margin-inline-start: auto">
+          {new Intl.NumberFormat().format(unmatched_count)}
+        </span>
+      {/if}
+      <IconFa6SolidUserShield class="admin-gate-icon" style={unmatched_count ? 'margin-inline-start: 0.375rem' : ''} />
     </a>
   {/if}
   <a

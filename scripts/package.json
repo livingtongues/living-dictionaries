@@ -23,5 +23,8 @@
     "tsx": "^4.19.0",
     "typescript": "~5.7.2",
     "vitest": "^2.1.4"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1093.0"
   }
 }

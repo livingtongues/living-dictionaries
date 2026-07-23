@@ -588,3 +588,20 @@ export const text_dialects = sqliteTable('text_dialects', {
   updated_by_user_id: text().notNull(),
   updated_at: text().notNull(),
 })
+
+/**
+ * Dictionary-level "ignore everywhere" decisions for the corpus matcher.
+ * `form` is the NORMALIZED word key (`normalized_word_key`); member forms are
+ * emitted `status:'ignored'` on ingest/re-analyze so they never resurface in
+ * the suggestions queue.
+ */
+export const ignored_forms = sqliteTable('ignored_forms', {
+  id: text().primaryKey(),
+  form: text().notNull(),
+  dirty: integer(),
+  server_seq: integer(),
+  created_by_user_id: text().notNull(),
+  created_at: text().notNull(),
+  updated_by_user_id: text().notNull(),
+  updated_at: text().notNull(),
+})

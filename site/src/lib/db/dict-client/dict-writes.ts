@@ -3,9 +3,14 @@ import type { SentenceToken, SentenceTokens } from '$lib/db/schemas/dictionary.t
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
 import { initial_keys } from '$lib/api/v1/fractional-index'
-import { analyze_sentence_tokens, load_lexeme_index, tokens_reference_sense } from '$lib/corpus/sentence-analysis'
+import { analyze_sentence_tokens, load_ignored_forms, load_lexeme_index, tokens_reference_sense } from '$lib/corpus/sentence-analysis'
 import type { LexemeIndex } from '$lib/corpus/match-tokens'
+import { match_tokens } from '$lib/corpus/match-tokens'
 import { is_punctuation_form, normalized_word_key } from '$lib/corpus/tokenize-sentence'
+import type { TokenLinkAction } from '$lib/corpus/token-actions'
+import { apply_token_action } from '$lib/corpus/token-actions'
+
+export type { TokenLinkAction }
 
 /**
  * Worker-side atomic write orchestrators — LD's mirror of house's
@@ -206,15 +211,17 @@ async function tokens_for_sentence({ connection, text, existing_tokens, index_ca
   connection: DictWriteConnection
   text: unknown
   existing_tokens?: unknown
-  index_cache: { index?: LexemeIndex }
+  index_cache: { index?: LexemeIndex, ignored?: Set<string> }
 }): Promise<SentenceTokens | null> {
   if (!text || typeof text !== 'object')
     return (existing_tokens as SentenceTokens) ?? null
   index_cache.index ??= await load_lexeme_index(connection)
+  index_cache.ignored ??= await load_ignored_forms(connection)
   const { tokens } = analyze_sentence_tokens({
     text: text as MultiString,
     existing_tokens: (existing_tokens as SentenceTokens) ?? null,
     index: index_cache.index,
+    ignored_forms: index_cache.ignored,
   })
   return tokens
 }
@@ -364,10 +371,12 @@ export async function update_sentence_local({ connection, user_id, sentence }: {
   if ('text' in patch) {
     const parsed = parse_dict_row('sentences', { ...existing, ...stamped })
     const index = await load_lexeme_index(connection)
+    const ignored_forms = await load_ignored_forms(connection)
     const analysis = analyze_sentence_tokens({
       text: parsed.text as MultiString | null,
       existing_tokens: (parsed.tokens as SentenceTokens) ?? null,
       index,
+      ignored_forms,
     })
     if (analysis.changed) {
       await write_sentence_tokens({ connection, user_id, sentence_id: id, tokens: analysis.tokens })
@@ -412,6 +421,7 @@ export async function analyze_sentences_local({ connection, user_id, text_id, se
   }
 
   const index = await load_lexeme_index(connection)
+  const ignored_forms = await load_ignored_forms(connection)
   const affected = new Set<string>()
   const deleted_rows: { table_name: string, id: string }[] = []
   let changed = 0
@@ -421,6 +431,7 @@ export async function analyze_sentences_local({ connection, user_id, text_id, se
       text: row.text as MultiString | null,
       existing_tokens: (row.tokens as SentenceTokens) ?? null,
       index,
+      ignored_forms,
     })
     if (!analysis.changed)
       continue
@@ -444,13 +455,11 @@ export async function analyze_sentences_local({ connection, user_id, text_id, se
   }
 }
 
-export type TokenLinkAction = 'confirm' | 'ignore' | 'unlink'
-
 /**
  * Human review actions on one token: confirm a match (optionally to a sense —
  * mirrored into `senses_in_sentences`), link a different entry (same shape),
- * ignore, or unlink back to unmatched. Gold IGT metadata (gloss/morphemes)
- * always survives.
+ * ignore, or unlink back to unmatched. Token semantics live in the pure
+ * `apply_token_action` (shared with the v1 server endpoint).
  */
 export async function set_token_link_local({ connection, user_id, sentence_id, orthography, token_index, action, entry_id, sense_id }: {
   connection: DictWriteConnection
@@ -473,20 +482,7 @@ export async function set_token_link_local({ connection, user_id, sentence_id, o
     throw new Error('set_token_link: token not found')
 
   const previous_sense_id = token.sense_id
-  const base: SentenceToken = { form: token.form, start: token.start, end: token.end }
-  if (token.gloss)
-    base.gloss = token.gloss
-  if (token.morphemes)
-    base.morphemes = token.morphemes
-  if (action === 'confirm') {
-    if (!entry_id)
-      throw new Error('set_token_link: entry_id required to confirm')
-    list[token_index] = { ...base, entry_id, ...(sense_id ? { sense_id } : {}), status: 'confirmed' }
-  } else if (action === 'ignore') {
-    list[token_index] = { ...base, status: 'ignored' }
-  } else {
-    list[token_index] = base
-  }
+  list[token_index] = apply_token_action({ token, action, entry_id, sense_id })
 
   await write_sentence_tokens({ connection, user_id, sentence_id, tokens })
   const affected_tables = ['sentences']
@@ -557,7 +553,9 @@ export async function create_entry_from_token_local({ connection, user_id, lexem
 
 /**
  * "Ignore everywhere": mark every non-confirmed occurrence of a form
- * (normalized-word equality) as `ignored` across all tokenized sentences.
+ * (normalized-word equality) as `ignored` across all tokenized sentences, AND
+ * persist the decision in `ignored_forms` so future ingests/re-analyzes keep
+ * it ignored (M4 — the queue converges instead of resurfacing function words).
  */
 export async function ignore_form_local({ connection, user_id, form }: {
   connection: DictWriteConnection
@@ -603,10 +601,165 @@ export async function ignore_form_local({ connection, user_id, form }: {
       await write_sentence_tokens({ connection, user_id, sentence_id: raw.id, tokens })
     }
   }
+  const affected_tables = sentences_changed ? ['sentences'] : []
+  const [already_persisted] = await connection.query<{ id: string }>(`SELECT id FROM ignored_forms WHERE form = ?`, [key])
+  if (!already_persisted) {
+    await insert_row({ connection, table: 'ignored_forms', row: { form: key }, user_id })
+    affected_tables.push('ignored_forms')
+  }
   return {
     result: { sentences_changed, occurrences },
-    affected_tables: sentences_changed ? ['sentences'] : [],
+    affected_tables,
   }
+}
+
+/**
+ * Undo an "ignore everywhere": drop the `ignored_forms` row (tombstone-synced)
+ * and clear `ignored` status from the form's word occurrences, re-matching the
+ * affected sentences so auto links come straight back.
+ */
+export async function restore_form_local({ connection, user_id, form }: {
+  connection: DictWriteConnection
+  user_id?: string
+  form: string
+}): Promise<DictWriteOutcome<{ sentences_changed: number, occurrences: number }>> {
+  const key = normalized_word_key(form)
+  if (!key)
+    throw new Error('restore_form: form has no word characters')
+  const affected = new Set<string>()
+  const deleted_rows: { table_name: string, id: string }[] = []
+  const [persisted] = await connection.query<{ id: string }>(`SELECT id FROM ignored_forms WHERE form = ?`, [key])
+  if (persisted) {
+    // The tombstone's cascade trigger hard-deletes the row synchronously.
+    await connection.execute(`INSERT OR IGNORE INTO deletes (table_name, id) VALUES (?, ?)`, ['ignored_forms', persisted.id])
+    affected.add('ignored_forms')
+    affected.add('deletes')
+    deleted_rows.push({ table_name: 'ignored_forms', id: persisted.id })
+  }
+
+  const index = await load_lexeme_index(connection)
+  const ignored_forms = await load_ignored_forms(connection)
+  const rows = await connection.query<Record<string, unknown>>(`SELECT * FROM sentences WHERE tokens IS NOT NULL`)
+  let sentences_changed = 0
+  let occurrences = 0
+  for (const raw of rows) {
+    const row = parse_dict_row('sentences', { ...raw })
+    const tokens = row.tokens as SentenceTokens
+    let changed = false
+    for (const [orthography, list] of Object.entries(tokens)) {
+      let cleared = false
+      for (const [index_in_list, token] of list.entries()) {
+        if (token.status !== 'ignored' || token.entry_id || token.sense_id || token.candidates)
+          continue
+        if (is_punctuation_form(token.form) || normalized_word_key(token.form) !== key)
+          continue
+        list[index_in_list] = apply_token_action({ token, action: 'unlink' })
+        cleared = true
+        occurrences++
+      }
+      if (cleared) {
+        const text_string = (row.text as MultiString | null)?.[orthography] ?? ''
+        tokens[orthography] = match_tokens({ tokens: list, text: text_string, index, ignored_forms })
+        changed = true
+      }
+    }
+    if (changed) {
+      sentences_changed++
+      await write_sentence_tokens({ connection, user_id, sentence_id: row.id as string, tokens })
+    }
+  }
+  if (sentences_changed)
+    affected.add('sentences')
+  return {
+    result: { sentences_changed, occurrences },
+    affected_tables: [...affected],
+    ...(deleted_rows.length ? { deleted_rows } : {}),
+  }
+}
+
+/**
+ * Form-wide link (suggestions queue): every non-confirmed occurrence of the
+ * form becomes an entry-level `status:'confirmed'` link. NO sense/junction
+ * writes — sense links stay per-occurrence in the reader (bulk junction rows
+ * would fabricate concordance data for polysemous words). Linking also lifts
+ * a dictionary-level ignore on the form.
+ */
+export async function link_form_local({ connection, user_id, form, entry_id }: {
+  connection: DictWriteConnection
+  user_id?: string
+  form: string
+  entry_id: string
+}): Promise<DictWriteOutcome<{ sentences_changed: number, occurrences: number }>> {
+  const key = normalized_word_key(form)
+  if (!key)
+    throw new Error('link_form: form has no word characters')
+  if (!entry_id)
+    throw new Error('link_form: entry_id required')
+  const affected = new Set<string>()
+  const deleted_rows: { table_name: string, id: string }[] = []
+  const [persisted_ignore] = await connection.query<{ id: string }>(`SELECT id FROM ignored_forms WHERE form = ?`, [key])
+  if (persisted_ignore) {
+    await connection.execute(`INSERT OR IGNORE INTO deletes (table_name, id) VALUES (?, ?)`, ['ignored_forms', persisted_ignore.id])
+    affected.add('ignored_forms')
+    affected.add('deletes')
+    deleted_rows.push({ table_name: 'ignored_forms', id: persisted_ignore.id })
+  }
+
+  const rows = await connection.query<{ id: string, tokens: string }>(
+    `SELECT id, tokens FROM sentences WHERE tokens IS NOT NULL`,
+  )
+  let sentences_changed = 0
+  let occurrences = 0
+  for (const raw of rows) {
+    let tokens: SentenceTokens
+    try {
+      tokens = JSON.parse(raw.tokens)
+    } catch {
+      continue
+    }
+    let changed = false
+    for (const list of Object.values(tokens)) {
+      for (const [index_in_list, token] of list.entries()) {
+        if (token.status === 'confirmed' || token.sense_id || is_punctuation_form(token.form))
+          continue
+        if (normalized_word_key(token.form) !== key)
+          continue
+        list[index_in_list] = apply_token_action({ token, action: 'confirm', entry_id })
+        changed = true
+        occurrences++
+      }
+    }
+    if (changed) {
+      sentences_changed++
+      await write_sentence_tokens({ connection, user_id, sentence_id: raw.id, tokens })
+    }
+  }
+  if (sentences_changed)
+    affected.add('sentences')
+  return {
+    result: { sentences_changed, occurrences },
+    affected_tables: [...affected],
+    ...(deleted_rows.length ? { deleted_rows } : {}),
+  }
+}
+
+/**
+ * New entry (+ first sense) minted from the suggestions queue, then a
+ * form-wide entry-level link of every occurrence (see `link_form_local`).
+ */
+export async function create_entry_from_form_local({ connection, user_id, lexeme, entry_id, form }: {
+  connection: DictWriteConnection
+  user_id?: string
+  lexeme: MultiString
+  /** Client-generated (see the ids note in the header) — worker generates only as a fallback. */
+  entry_id?: string
+  form: string
+}): Promise<DictWriteOutcome<Record<string, unknown>>> {
+  const entry = await insert_row({ connection, table: 'entries', row: { id: entry_id, lexeme }, user_id })
+  await insert_row({ connection, table: 'senses', row: { entry_id: entry.id }, user_id })
+  const link = await link_form_local({ connection, user_id, form, entry_id: entry.id as string })
+  const affected_tables = ['entries', 'senses', ...link.affected_tables.filter(table => !['entries', 'senses'].includes(table))]
+  return { result: entry, affected_tables, ...(link.deleted_rows?.length ? { deleted_rows: link.deleted_rows } : {}) }
 }
 
 /** New audio row (+ optional speaker junction in the same transaction). */
@@ -709,6 +862,9 @@ const DICT_WRITE_OPS = {
   set_token_link: set_token_link_local,
   create_entry_from_token: create_entry_from_token_local,
   ignore_form: ignore_form_local,
+  restore_form: restore_form_local,
+  link_form: link_form_local,
+  create_entry_from_form: create_entry_from_form_local,
   insert_text: insert_text_local,
   insert_audio: insert_audio_local,
   insert_photo: insert_photo_local,

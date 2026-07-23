@@ -14,6 +14,7 @@ import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/se
 import { MediaStorageNotConfiguredError, resolve_photo_serving_url, store_media_bytes } from '$lib/server/media-storage'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
+import { build_r2_media_key, extract_media_extension } from '$lib/utils/media-path'
 import { parse_media_request } from './media-request'
 import { validate_media_bytes } from './validate-media-bytes'
 import { fetch_hosted_video_metadata } from '$lib/video/hosted-video-metadata'
@@ -149,15 +150,17 @@ function resolve_hosted(fields: Record<string, unknown>): HostedVideo | undefine
   return undefined
 }
 
-async function store_bytes({ folder, file_name, file_type, bytes }: { folder: string, file_name: string, file_type: string, bytes: Uint8Array }) {
+async function store_bytes({ folder, file_name, file_type, bytes, r2_key }: { folder?: string, file_name: string, file_type: string, bytes: Uint8Array, r2_key?: string }) {
   try {
-    return await store_media_bytes({ folder, file_name, file_type, bytes })
+    return await store_media_bytes({ folder, file_name, file_type, bytes, r2_key })
   } catch (err) {
     if (err instanceof MediaStorageNotConfiguredError)
       error(ResponseCodes.SERVICE_UNAVAILABLE, err.message)
     error(ResponseCodes.INTERNAL_SERVER_ERROR, `Upload failed: ${(err as Error).message}`)
   }
 }
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandler {
   const cell = MEDIA_CELLS[cell_key]
@@ -202,6 +205,20 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
       }
     }
 
+    // Audio/video bytes land in the R2 media bucket keyed by the row uuid
+    // (`{dict_id}/{kind}/{media_id}.{ext}`) — so the id must exist BEFORE
+    // storage. A caller-supplied id must then BE a uuid, or the resulting key
+    // would fail the new-convention discriminator and serve from the wrong host.
+    if (cell.medium !== 'photo' && media_id && !UUID_REGEX.test(media_id))
+      error(ResponseCodes.BAD_REQUEST, `id must be a uuid for ${cell.medium} media`)
+    const final_media_id = media_id ?? crypto.randomUUID()
+    const r2_key_for = (file_name: string | undefined) => build_r2_media_key({
+      dict_id: dictionary.id,
+      kind: cell.medium as 'audio' | 'video',
+      media_id: final_media_id,
+      extension: extract_media_extension(file_name ?? ''),
+    })
+
     const media_fields: MediaFieldInput = { source: source ?? null }
 
     if (fields.timings !== undefined && fields.timings !== null) {
@@ -217,7 +234,7 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
         media_fields.hosted_metadata = await fetch_hosted_video_metadata({ hosted_video: hosted })
       } else if (parsed.bytes) {
         assert_media_bytes({ medium: cell.medium, bytes: parsed.bytes, declared_type: parsed.file_type })
-        const stored = await store_bytes({ folder: `${dictionary.id}/${cell.folder}/${owner_id}`, file_name: parsed.file_name ?? 'upload', file_type: parsed.file_type ?? 'application/octet-stream', bytes: parsed.bytes })
+        const stored = await store_bytes({ r2_key: r2_key_for(parsed.file_name), file_name: parsed.file_name ?? 'upload', file_type: parsed.file_type ?? 'application/octet-stream', bytes: parsed.bytes })
         media_fields.storage_path = stored.storage_path
       } else {
         error(ResponseCodes.BAD_REQUEST, 'Provide a video file, a url, or a hosted_elsewhere/hosted_url link')
@@ -227,7 +244,12 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
       if (!parsed.bytes)
         error(ResponseCodes.BAD_REQUEST, 'Provide a file (multipart) or a url')
       assert_media_bytes({ medium: cell.medium, bytes: parsed.bytes, declared_type: parsed.file_type })
-      const stored = await store_bytes({ folder: `${dictionary.id}/${cell.folder}/${owner_id}`, file_name: parsed.file_name ?? 'upload', file_type: parsed.file_type ?? 'application/octet-stream', bytes: parsed.bytes })
+      const stored = await store_bytes({
+        ...(cell.medium === 'audio' ? { r2_key: r2_key_for(parsed.file_name) } : { folder: `${dictionary.id}/${cell.folder}/${owner_id}` }),
+        file_name: parsed.file_name ?? 'upload',
+        file_type: parsed.file_type ?? 'application/octet-stream',
+        bytes: parsed.bytes,
+      })
       media_fields.storage_path = stored.storage_path
       if (cell.medium === 'photo') {
         media_fields.photographer = str(fields.photographer) ?? null
@@ -243,7 +265,7 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
 
     let result
     try {
-      result = attach_media({ db, history_db: get_dictionary_history_db(dictionary.id), cell_key, owner_id, media_id, fields: media_fields, speaker_id, replace, user_id: access.user_id, api_key_id: access.key_id ?? null })
+      result = attach_media({ db, history_db: get_dictionary_history_db(dictionary.id), cell_key, owner_id, media_id: cell.medium === 'photo' ? media_id : final_media_id, fields: media_fields, speaker_id, replace, user_id: access.user_id, api_key_id: access.key_id ?? null })
     } catch (err) {
       error(ResponseCodes.BAD_REQUEST, (err as Error).message)
     }

@@ -23,7 +23,7 @@ vi.mock('$lib/server/media-storage', async (orig) => {
   const actual = await orig<typeof import('$lib/server/media-storage')>()
   return {
     ...actual,
-    store_media_bytes: vi.fn(({ folder, file_name }: { folder: string, file_name: string }) => Promise.resolve({ storage_path: `${folder}/mock.${file_name.split('.').pop()}`, bucket: 'bucket', dev_mock: false })),
+    store_media_bytes: vi.fn(({ folder, file_name, r2_key }: { folder?: string, file_name: string, r2_key?: string }) => Promise.resolve({ storage_path: r2_key ?? `${folder}/mock.${file_name.split('.').pop()}`, bucket: 'bucket', dev_mock: false })),
     resolve_photo_serving_url: vi.fn(() => Promise.resolve('mockservinghash')),
   }
 })
@@ -91,7 +91,8 @@ describe(make_media_attach_handler, () => {
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.created).toBeTruthy()
-    expect(body.audio.storage_path).toBe('dict-1/audio/e1/mock.mp3')
+    // Audio bytes land on the R2 key convention: {dict}/audio/{row uuid}.{ext}
+    expect(body.audio.storage_path).toBe(`dict-1/audio/${body.audio.id}.mp3`)
     expect(body.audio.speakers).toEqual([{ id: 'sp1', name: 'Ana' }])
     expect(store_media_bytes).toHaveBeenCalledTimes(1)
     expect(dict_db.prepare(`SELECT source FROM audio WHERE entry_id = ?`).get('e1')).toEqual({ source: 'field-2026' })
@@ -125,12 +126,18 @@ describe(make_media_attach_handler, () => {
   })
 
   test('idempotent id: re-POST is a no-op and does NOT re-upload', async () => {
-    const first = await (await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { id: 'aud-1', speaker_id: 'sp1' } })).json()
+    const aud_id = '3f0e2a10-9c1d-4d6e-8b2a-5f7c9d1e0a2b'
+    const first = await (await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { id: aud_id, speaker_id: 'sp1' } })).json()
     expect(first.created).toBeTruthy()
-    const second = await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { id: 'aud-1', speaker_id: 'sp1' } })
+    const second = await attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { id: aud_id, speaker_id: 'sp1' } })
     expect((await second.json()).created).toBeFalsy()
     expect(store_media_bytes).toHaveBeenCalledTimes(1)
     expect(dict_db.prepare(`SELECT COUNT(*) AS c FROM audio`).get()).toEqual({ c: 1 })
+  })
+
+  test('400 for a non-uuid caller-supplied id on audio (it becomes the R2 object key)', async () => {
+    await expect(attach({ cell: 'audio:entry', params: { entryId: 'e1' }, fields: { id: 'aud-1', speaker_id: 'sp1' } })).rejects.toMatchObject({ status: 400 })
+    expect(store_media_bytes).not.toHaveBeenCalled()
   })
 
   test('400 with actionable guidance when audio has neither speaker_id nor source', async () => {

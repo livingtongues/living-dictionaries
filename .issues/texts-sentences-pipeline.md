@@ -6,8 +6,83 @@ or surfaces as an entry suggestion a human can confirm. Entries/sentences/texts 
 searchable first-class citizens in ONE search surface. Karaoke playback (sentence audio/video +
 word timings) rides on the same foundation.
 
-**Status: M1 + M2 COMPLETE (2026-07-05), M3 (matching) ✅ COMPLETE (2026-07-23) — all behind the
-admin-3 gate (LIFT AT GA). Next milestones live in the "Future" section at the bottom.**
+**Status: M1 + M2 COMPLETE (2026-07-05), M3 (matching) ✅ COMPLETE (2026-07-23, pushed a4be4ae0),
+M4 (suggestions queue + v1 parity) ✅ COMPLETE (2026-07-23, unpushed) — all behind the admin-3
+gate (LIFT AT GA). Remaining: M5 (timings + karaoke).**
+
+## M4 — suggestions queue + v1 parity (✅ COMPLETE 2026-07-23, mustang)
+
+### Interview decisions (2026-07-23)
+
+- **Persistent ignore**: new syncable `ignored_forms` table in dict.db (normalized `form` key,
+  standard audit columns), consulted by the matcher — ingest/re-analyze emits `status:'ignored'`
+  for member forms so "ignore everywhere" survives future ingests and the queue converges.
+- **Queue facets**: Unmatched + Ambiguous (multi-candidate) + Ignored (restore action). Default =
+  Unmatched. Auto-unconfirmed stays reader-review-mode territory, NOT in the queue.
+- **Form-wide link/create semantics**: entry-level `status:'confirmed'` on every non-confirmed
+  occurrence; NO sense/junction writes from the queue (sense links stay per-occurrence in the
+  reader — bulk junction writes would fabricate concordance data for polysemy).
+- **Bulk actions**: checkbox multi-select, bulk IGNORE only. Link/create are per-row.
+- **v1 scope**: POST `sentences/[id]/tokens/actions` (per-token confirm/ignore/unlink, logic
+  extracted from `set_token_link_local` into a shared pure module), GET `suggestions` (same pure
+  aggregation function as the client), form-level actions endpoint (ignore/restore/link/create).
+  Timings PATCH deferred to M5.
+- **Restore semantics** (agent-decided): delete `ignored_forms` row + clear `ignored` status on
+  non-punct occurrences of the form lacking entry_id/sense, then re-match fills.
+
+### Build plan — ALL DONE
+
+1. ✅ Migration `20260723_ignored_forms.sql` (text_dialects template: table + updated_at/
+   server_seq indexes + lmod triggers + server_seq ai/au triggers + cascade re-declare).
+   Registered in: Drizzle `dictionary.ts`, `DICT_SYNCABLE_TABLES` (appended), 
+   `DICT_NATURAL_KEY_COLUMNS` (`['form']`), convergence-test SPECS, dict-json-columns test.
+2. ✅ Pure logic in `$lib/corpus/`: `aggregate-suggestions.ts` (3 facets, majority-casing
+   display_form, freq sort, `count_unmatched_forms` cheap pill path), `token-actions.ts`
+   (`apply_token_action` extracted from `set_token_link_local`, shared w/ v1), matcher accepts
+   `ignored_forms` set (checked AFTER matching — a new entry beats the ignore list),
+   `load_ignored_forms` beside `load_lexeme_index`.
+3. ✅ Worker ops: `ignore_form` upserts `ignored_forms`; new `restore_form` (tombstone + clear
+   occurrence ignores + immediate re-match), `link_form`, `create_entry_from_form` (link/create
+   also LIFT a dictionary-level ignore); every analyze/ingest path loads the ignored set.
+   Guarded writes (`ignore_form`/`restore_form`/`link_form`/`create_entry_from_form`),
+   DictWrites typing, mocks. 6 new dict-writes tests (34 green).
+4. ✅ `/[dictionaryId]/suggestions` page (corpus-preview-guard): facet chips w/ counts, rows w/
+   snippet (own sentence-map — the lazy `.id()` store left samples blank on first paint),
+   Create/Link(EntryPickerModal)/Ignore, ambiguous candidate pills, Ignored facet w/
+   everywhere-badge + Restore, checkbox multi-select + bulk-ignore bar. Side-menu item +
+   unmatched-count pill (admin-3 shield).
+5. ✅ v1: GET `suggestions` (occurrences capped at 20/row, totals exact), POST
+   `suggestions/actions` (ignore/restore/link/create_entry), POST
+   `sentences/[id]/tokens/actions` (confirm/ignore/unlink, junction mirror + cleanup). Shared
+   server module `$lib/db/server/v1-suggestions.ts` (merge_dict_row/delete_dict_row plumbing —
+   full-row merges, partial rows violate NOT NULL on the upsert INSERT); 5 tests. openapi.json
+   (`suggestions` tag, SuggestionRow/TokenAction schemas, tag_for_path rule) + openapi.test +
+   snapshot.md guide table updated.
+6. ✅ i18n: 15 new `token.*` EN keys (38 total — /fill-translations waits for GA per decision).
+   Stories SKIPPED for the queue page (same rationale as TokenPopover: needs live page.data).
+
+### Verification (2026-07-23)
+
+- vitest full suite 1903 passed; `tsc` clean; `pnpm check` 0 errors; `pnpm lint` clean.
+- Browser e2e `/tmp/ld-m4-e2e.mjs` — **35/35 green** on achi (mustang dev :3041): throwaway-text
+  ingest w/ nonsense forms → queue facets/counts/snippets, ignore→`ignored_forms` synced
+  server-side→ignored facet w/ badge→restore→tombstone verified, create-entry-from-form (entry+
+  sense server-side, 2 occurrences confirmed entry-level, NO junction rows), link-form via
+  picker modal (4 confirmed), ambiguous candidates render, bulk-select+bulk-ignore+restore,
+  side-menu pill, dark + mobile screenshots (`/tmp/m4-*.png`), cleanup (text deleted, entry
+  tombstoned, `ignored_forms` empty). Plus first-paint snippet check 8/8.
+- v1 via curl (dev-auth admin-3 cookie): GET suggestions facets, ignore/restore round-trip w/
+  sqlite verification, bad-action 400, tokens/actions confirm→unlink w/ junction semantics,
+  ghost-entry 400, unknown-sentence 404, `openapi.json?tag=suggestions` serves the 3 paths + 2
+  schemas.
+
+### E2E lessons (M4)
+
+- The FIRST guarded write on a fresh page load can hit `still_loading` — e2e must retry (same
+  as M3's Re-analyze lesson; applies to queue actions too).
+- `/texts/new` is a two-step flow: "Adjust sentences" → "Create text".
+- Dark-mode override class lives on `<html>` (documentElement), not body.
+- Queue `display_form` is majority-CASED — e2e row lookups must compare case-insensitively.
 
 ## M3 — matching (✅ COMPLETE 2026-07-23)
 

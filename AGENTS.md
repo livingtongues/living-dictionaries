@@ -56,7 +56,11 @@ with Words·Sentences·Texts scope chips [admin-3 preview; the texts/sentences c
 `texts/new` paste-to-sentences ingest + `text/[id]` reader [same admin-3 preview, route-guarded
 via `$lib/corpus/corpus-preview-guard.ts` — lift at GA; M3 word→entry matching is live: sentences
 auto-tokenize+match on ingest, token-tap popovers (confirm/link/create/ignore, `$lib/corpus/`),
-review-mode toolbar, entry-page "Used in N sentences" concordance] — settings (public/print
+review-mode toolbar, entry-page "Used in N sentences" concordance; M4 adds the `suggestions`
+review queue (unmatched/ambiguous/ignored facets, form-wide link/create/ignore backed by the
+syncable `ignored_forms` dict.db table the matcher consults, bulk ignore) + v1 parity
+(`…/suggestions(/actions)`, `…/sentences/{id}/tokens/actions` via
+`$lib/db/server/v1-suggestions.ts`)] — settings (public/print
 toggles + delete + a dialects manager [manager: rename / map areal-extent geometry via
 GeoTaggingModal / delete]; catalog fields moved to home), about,
 contributors, grammar, history, export, import [manager-only, agent-driven: upload ANY-format resources → per-file instructions → "request import" creates a Jacob-assigned message thread; the original uploader (or a site admin) can edit requested instructions/source + the once-per-request note or permanently remove a resource, with every change appended to/reopening that thread and notifying its current assignee; files live in shared.db `source_files` (server-only) + R2 `import/{dict}/{file}`, served via `/api/v1/dictionaries/{id}/files/*`], invite) · `/chat` (standalone membership-based

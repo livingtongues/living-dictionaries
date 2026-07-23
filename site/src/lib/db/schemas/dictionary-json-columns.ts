@@ -72,6 +72,7 @@ if (import.meta.vitest) {
     expect(DICT_JSON_COLUMNS.section_sentences).toEqual([])
     expect(DICT_JSON_COLUMNS.text_tags).toEqual([])
     expect(DICT_JSON_COLUMNS.text_dialects).toEqual([])
+    expect(DICT_JSON_COLUMNS.ignored_forms).toEqual([])
   })
 
   test('parse_dict_row + stringify_dict_row round trip', () => {

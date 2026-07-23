@@ -355,6 +355,33 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     },
   }
 
+  const SuggestionRow = {
+    type: 'object',
+    description: 'One aggregated word form in the suggestions queue.',
+    properties: {
+      key: { type: 'string', description: 'Normalized word key (grouping identity; what form-level actions match on).' },
+      display_form: { type: 'string', description: 'Most frequent surface spelling.' },
+      count: { type: 'integer', description: 'Total occurrences across all tokenized sentences (exact even when `occurrences` is capped).' },
+      sentence_count: { type: 'integer' },
+      occurrences: { type: 'array', items: { type: 'object', properties: { sentence_id: { type: 'string' }, text_id: { type: 'string', nullable: true }, orthography: { type: 'string' }, token_index: { type: 'integer' }, start: { type: 'integer' }, end: { type: 'integer' } } }, description: 'Capped at 20 per row.' },
+      candidates: { type: 'array', items: { type: 'string' }, description: 'Ambiguous facet only: union of candidate entry ids.' },
+      everywhere: { type: 'boolean', description: 'Ignored facet only: true when the form is in the dictionary-level ignore list.' },
+    },
+  }
+
+  const TokenAction = {
+    type: 'object',
+    required: ['orthography', 'token_index', 'action'],
+    description: 'One review action on one token of a sentence.',
+    properties: {
+      orthography: { type: 'string', description: 'Orthography code of the token list (usually `default`).' },
+      token_index: { type: 'integer' },
+      action: { type: 'string', enum: ['confirm', 'ignore', 'unlink'] },
+      entry_id: { type: 'string', description: 'Required for `confirm`.' },
+      sense_id: { type: 'string', description: 'Optional on `confirm` — a confirmed sense link also mirrors into the sense↔sentence junction (feeds the entry-page concordance).' },
+    },
+  }
+
   const TextPatch = {
     type: 'object',
     description: 'Edit a text: `title`/`sources`/`citations`/`summary`/`work_id` overwrite (`null` clears the nullable ones); `dialects` are ADDITIVE links; `append_sentences` add after the last sentence; `sentence_order` (a full list of existing sentence ids) reassigns their order. Edit a single sentence via `PATCH …/sentences/{id}`.',
@@ -1185,6 +1212,32 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         },
         delete: { summary: 'Delete a text (and its sentences)', parameters: [dict_id_param, { name: 'textId', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: "{ result: 'deleted' }" }, 404: {} } },
       },
+      '/api/v1/dictionaries/{id}/sentences/{sentenceId}/tokens/actions': {
+        post: {
+          summary: 'Review token↔entry links on one sentence',
+          description: 'Apply confirm/ignore/unlink actions to individual tokens of a sentence\'s `tokens` value (same semantics as the reader UI popovers). `confirm` requires `entry_id`; adding `sense_id` mirrors the link into `senses_in_sentences`; `unlink` also drops a stale junction row on text sentences. Gold IGT gloss/morphemes always survive. Returns the updated `{ sentence }`.',
+          parameters: [dict_id_param, sentence_id_param],
+          requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['actions'], properties: { actions: { type: 'array', items: { $ref: '#/components/schemas/TokenAction' } } } } } } },
+          responses: { 200: { description: '{ sentence }', content: { 'application/json': { schema: { type: 'object', properties: { sentence: { $ref: '#/components/schemas/SentenceFull' } } } } } }, 400: { description: 'Bad token index / missing entry_id' }, 404: {} },
+        },
+      },
+      '/api/v1/dictionaries/{id}/suggestions': {
+        get: {
+          summary: 'The suggestions queue (unmatched / ambiguous / ignored word forms)',
+          description: 'Aggregates every tokenized sentence into three frequency-sorted facets: `unmatched` (word forms with no entry link — entry-creation candidates), `ambiguous` (multi-candidate homographs awaiting a pick), `ignored` (occurrence ignores + the dictionary-level ignore list, `everywhere: true`). Same aggregation the queue UI shows humans.',
+          parameters: [dict_id_param],
+          responses: { 200: { description: '{ unmatched, ambiguous, ignored }', content: { 'application/json': { schema: { type: 'object', properties: { unmatched: { type: 'array', items: { $ref: '#/components/schemas/SuggestionRow' } }, ambiguous: { type: 'array', items: { $ref: '#/components/schemas/SuggestionRow' } }, ignored: { type: 'array', items: { $ref: '#/components/schemas/SuggestionRow' } } } } } } } },
+        },
+      },
+      '/api/v1/dictionaries/{id}/suggestions/actions': {
+        post: {
+          summary: 'Act on a word form everywhere (ignore / restore / link / create_entry)',
+          description: '`ignore` marks every non-confirmed occurrence ignored AND persists the form in the dictionary-level ignore list (future ingests stay ignored). `restore` undoes that (re-matches occurrences). `link` (requires `entry_id`) confirms every non-confirmed occurrence entry-level — no sense/junction writes; refine senses per-occurrence via `…/tokens/actions`. `create_entry` (requires `lexeme`) mints an entry + first sense, then links the form everywhere.',
+          parameters: [dict_id_param],
+          requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['action', 'form'], properties: { action: { type: 'string', enum: ['ignore', 'restore', 'link', 'create_entry'] }, form: { type: 'string', description: 'Surface or normalized form — matching is by normalized-word equality.' }, entry_id: { type: 'string' }, lexeme: { $ref: '#/components/schemas/MultiString' } } } } } },
+          responses: { 200: { description: '{ sentences_changed, occurrences, entry_id? }' }, 400: { description: 'Bad action / missing entry_id or lexeme' } },
+        },
+      },
       '/api/v1/dictionaries/{id}/feedback': {
         post: {
           summary: 'Send feedback to the LD team',
@@ -1355,6 +1408,8 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         TextSummary,
         TextFull,
         TextPatch,
+        SuggestionRow,
+        TokenAction,
         HostedElsewhere,
         SpeakerBrief,
         SpeakerFull,
@@ -1413,6 +1468,7 @@ export const OPENAPI_TAGS = [
   { name: 'guides', description: 'Format-import guides (markdown): how to parse + import spreadsheets, FLEx/LIFT/Toolbox, PDF scans, and the overall import workflow.' },
   { name: 'orthographies', description: 'Alternate writing systems.' },
   { name: 'featured-entries', description: 'The starred entries shown on the dictionary home page.' },
+  { name: 'suggestions', description: 'The word→entry matching review queue: unmatched/ambiguous/ignored forms aggregated across all tokenized sentences, plus per-token and form-wide review actions.' },
   { name: 'feedback', description: 'Send feedback/requests to the Living Dictionaries team.' },
 ] as const
 
@@ -1432,6 +1488,7 @@ const PATH_SEGMENT_TAGS: Record<string, string> = {
   'gloss-languages': 'dictionary',
   'sources': 'sources',
   'files': 'files',
+  'suggestions': 'suggestions',
 }
 
 /** Derive an operation's tag from its path (media wins over the owning resource). */
@@ -1444,6 +1501,9 @@ export function tag_for_path(path: string): string {
   // (`/entries/{entryId}/grammar`) groups with the grammar surface.
   if (/\/grammar(?:\/|$)/.test(path))
     return 'grammar'
+  // Token review actions group with the suggestions queue, not the sentence CRUD.
+  if (/\/tokens\/actions$/.test(path))
+    return 'suggestions'
   const rest = path.replace('/api/v1/dictionaries/{id}', '')
   if (rest === '' || rest === '/')
     return 'dictionary'

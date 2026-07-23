@@ -61,6 +61,7 @@ export const DICT_NATURAL_KEY_COLUMNS: Partial<Record<DictSyncableTable, readonl
   featured_entries: ['entry_id'],
   sources: ['slug'],
   entry_relationships: ['from_entry_id', 'from_sense_id', 'to_entry_id', 'to_sense_id', 'type', 'custom_type_id'],
+  ignored_forms: ['form'],
 }
 
 /**

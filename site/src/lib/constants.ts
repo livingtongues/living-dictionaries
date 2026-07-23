@@ -141,6 +141,12 @@ export function r2_dict_snapshot_key(dictionary_id: string): string {
   return `dictionaries/${dictionary_id}.db.gz`
 }
 
+/** Public serving domain of the R2 media bucket (audio/video on the new key convention; photos come in Phase 2). */
+export const R2_MEDIA_DOMAIN = 'https://media.livingdictionaries.app'
+
+/** R2 media bucket name (LD Cloudflare account; not secret — gated by the account creds). */
+export const R2_MEDIA_BUCKET = 'livingdictionaries-media'
+
 /** R2 snapshot rebuild interval for the in-process builder cron. */
 export const R2_SNAPSHOT_INTERVAL_MS = 30 * 60 * 1000
 

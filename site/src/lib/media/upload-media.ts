@@ -29,12 +29,14 @@ export interface MediaUploadHandle {
 }
 
 /** Presign via `api_upload` → XHR PUT with progress → (images only: fetch the lh3 serving URL). */
-export function upload_media({ file, folder, dictionary_id, kind }: {
+export function upload_media({ file, folder, dictionary_id, kind, media_id }: {
   file: File | Blob
   /** full storage folder including the dictionary id prefix, e.g. `${dictionary_id}/images/${sense_id}` */
   folder: string
   dictionary_id: string
   kind: MediaKind
+  /** audio/video only: the pre-minted media row uuid — routes the upload to the R2 media bucket on the new key convention (server builds the key). */
+  media_id?: string
 }): MediaUploadHandle {
   const preview_url = kind === 'image' ? URL.createObjectURL(file) : undefined
   const { set, subscribe } = writable<MediaUploadProgress>({ progress: 0, preview_url })
@@ -45,7 +47,13 @@ export function upload_media({ file, folder, dictionary_id, kind }: {
 
   async function run(): Promise<MediaUploadResult> {
     // `api_upload` returns `{ data: null, error }` on failure — guard before touching `data`
-    const { data: upload, error } = await api_upload({ folder, dictionary_id, file_name: derive_file_name({ file, kind }), file_type: file.type })
+    const { data: upload, error } = await api_upload({
+      folder,
+      dictionary_id,
+      file_name: derive_file_name({ file, kind }),
+      file_type: file.type,
+      ...(media_id && kind !== 'image' ? { r2_media: { kind, media_id } } : {}),
+    })
     if (error || !upload)
       throw new Error(error?.message ?? 'Upload failed.')
     if (aborted)

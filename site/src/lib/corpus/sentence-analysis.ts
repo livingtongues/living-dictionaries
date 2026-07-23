@@ -28,6 +28,12 @@ export async function load_lexeme_index(connection: QueryableConnection): Promis
   return build_lexeme_index(entries)
 }
 
+/** The dictionary-level ignore list (normalized keys) for the matcher. */
+export async function load_ignored_forms(connection: QueryableConnection): Promise<Set<string>> {
+  const rows = await connection.query<{ form: string }>(`SELECT form FROM ignored_forms`)
+  return new Set(rows.map(row => row.form))
+}
+
 export function parse_json_column<T>(value: unknown): T | null {
   if (value == null)
     return null
@@ -70,10 +76,12 @@ export interface SentenceAnalysis {
  * over, fills blanks from the lexeme index. Other orthographies' token lists
  * are preserved untouched.
  */
-export function analyze_sentence_tokens({ text, existing_tokens, index }: {
+export function analyze_sentence_tokens({ text, existing_tokens, index, ignored_forms }: {
   text: MultiString | null
   existing_tokens: SentenceTokens | null
   index: LexemeIndex
+  /** Dictionary-level ignore list (normalized keys, see `ignored_forms` table). */
+  ignored_forms?: Set<string>
 }): SentenceAnalysis {
   const orthography = pick_tokenization_orthography(text)
   if (!orthography)
@@ -82,7 +90,7 @@ export function analyze_sentence_tokens({ text, existing_tokens, index }: {
   const fresh = tokenize_sentence_text(text_string)
   const previous = existing_tokens?.[orthography] ?? []
   const { tokens: carried, dropped_sense_ids } = carry_over_tokens({ previous, next: fresh, text: text_string })
-  const matched = match_tokens({ tokens: carried, text: text_string, index })
+  const matched = match_tokens({ tokens: carried, text: text_string, index, ignored_forms })
   if (tokens_equal(previous, matched))
     return { changed: false, tokens: existing_tokens, dropped_sense_ids: [] }
   return {
@@ -144,6 +152,20 @@ if (import.meta.vitest) {
         index,
       })
       expect(tokens?.['sat-Olck']).toEqual([{ form: 'ᱯᱚ', start: 0, end: 2 }])
+    })
+
+    test('dictionary-level ignored forms are marked ignored on analysis', () => {
+      const { changed, tokens } = analyze_sentence_tokens({
+        text: { default: 'Nak zzz' },
+        existing_tokens: null,
+        index,
+        ignored_forms: new Set(['zzz']),
+      })
+      expect(changed).toBe(true)
+      expect(tokens?.default).toEqual([
+        { form: 'Nak', start: 0, end: 3, entry_id: 'e1', status: 'auto' },
+        { form: 'zzz', start: 4, end: 7, status: 'ignored' },
+      ])
     })
 
     test('empty text is a no-op', () => {

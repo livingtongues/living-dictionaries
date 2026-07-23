@@ -55,12 +55,16 @@ function is_fillable(token: SentenceToken): boolean {
 }
 
 /** Fill unmatched word tokens from the lexeme index. Returns a NEW array
- *  (input tokens are not mutated); phrase matches merge consecutive tokens. */
-export function match_tokens({ tokens, text, index }: {
+ *  (input tokens are not mutated); phrase matches merge consecutive tokens.
+ *  A form in `ignored_forms` (the dictionary-level ignore list, normalized
+ *  keys) is emitted `status:'ignored'` — but only when nothing matches, so
+ *  creating an entry for a previously-ignored form resumes matching. */
+export function match_tokens({ tokens, text, index, ignored_forms }: {
   tokens: SentenceToken[]
   /** The orthography's sentence text — merged phrase forms are sliced from it. */
   text: string
   index: LexemeIndex
+  ignored_forms?: Set<string>
 }): SentenceToken[] {
   const result: SentenceToken[] = []
   let position = 0
@@ -95,7 +99,11 @@ export function match_tokens({ tokens, text, index }: {
       break
     }
     if (!matched) {
-      result.push(token)
+      const key = normalized_word_key(token.form)
+      if (key && ignored_forms?.has(key))
+        result.push({ form: token.form, start: token.start, end: token.end, status: 'ignored' })
+      else
+        result.push(token)
       position++
     }
   }
@@ -166,6 +174,21 @@ if (import.meta.vitest) {
       const text = 'zzz'
       const tokens = [{ form: 'zzz', start: 0, end: 3 }]
       expect(match_tokens({ tokens, text, index })).toEqual(tokens)
+    })
+
+    test('dictionary-level ignored forms come out ignored, but a lexeme match wins over the ignore list', () => {
+      const text = 'Ri nak zzz'
+      const tokens = [
+        { form: 'Ri', start: 0, end: 2 },
+        { form: 'nak', start: 3, end: 6 },
+        { form: 'zzz', start: 7, end: 10 },
+      ]
+      const ignored_forms = new Set(['ri', 'nak', 'zzz'])
+      expect(match_tokens({ tokens, text, index, ignored_forms })).toEqual([
+        { form: 'Ri', start: 0, end: 2, status: 'ignored' },
+        { form: 'nak', start: 3, end: 6, entry_id: 'e1', status: 'auto' },
+        { form: 'zzz', start: 7, end: 10, status: 'ignored' },
+      ])
     })
   })
 }

@@ -642,7 +642,21 @@
     "used_in_sentence": "Used in 1 sentence",
     "used_in_sentences": "Used in {count} sentences",
     "show_all": "Show all {count}",
-    "gloss": "Gloss"
+    "gloss": "Gloss",
+    "suggestions": "Suggestions",
+    "suggestions_intro": "Words from your sentences that are not linked to entries yet. Create entries, link forms, or ignore function words.",
+    "facet_unmatched": "Unmatched",
+    "facet_ambiguous": "Ambiguous",
+    "facet_ignored": "Ignored",
+    "occurrence_count": "{count} × in {sentences} sentences",
+    "occurrence_count_one": "1 × in 1 sentence",
+    "ignored_everywhere": "Ignored everywhere",
+    "link_form_confirm": "Link every occurrence of “{form}” to this entry?",
+    "bulk_ignore": "Ignore {count} forms",
+    "bulk_ignore_confirm": "Ignore every occurrence of {count} selected forms across this dictionary?",
+    "no_unmatched": "No unmatched words — every word is linked or ignored.",
+    "no_ambiguous": "No ambiguous matches to review.",
+    "no_ignored": "Nothing has been ignored yet."
   },
   "sentence": {
     "add": "Add sentence",

@@ -56,10 +56,12 @@ export function add_audio({ writes, dictionary_id, entry_id, file, speaker_id, s
   const not_ready = writes.check_ready()
   if (not_ready)
     return blocked_handle(not_ready)
-  const handle = upload_media({ file, folder: `${dictionary_id}/audio/${entry_id}`, dictionary_id, kind: 'audio' })
+  // Row uuid is minted BEFORE upload — the R2 object is keyed by it (`{dict}/audio/{id}.{ext}`).
+  const media_id = crypto.randomUUID()
+  const handle = upload_media({ file, folder: `${dictionary_id}/audio/${entry_id}`, dictionary_id, kind: 'audio', media_id })
   const done = handle.done.then(async ({ storage_path }) => {
     // ONE atomic dict_write: audio row + speaker junction commit together.
-    const inserted = await writes.insert_audio({ storage_path, entry_id, speaker_id, source })
+    const inserted = await writes.insert_audio({ id: media_id, storage_path, entry_id, speaker_id, source })
     if (!inserted)
       throw new Error('The audio was uploaded but could not be saved — please try again.')
     return { storage_path }
@@ -80,10 +82,12 @@ export function add_video({ writes, dictionary_id, sense_id, file, speaker_id, s
   const not_ready = writes.check_ready()
   if (not_ready)
     return blocked_handle(not_ready)
-  const handle = upload_media({ file, folder: `${dictionary_id}/videos/${sense_id}`, dictionary_id, kind: 'video' })
+  // Row uuid is minted BEFORE upload — the R2 object is keyed by it (`{dict}/video/{id}.{ext}`).
+  const media_id = crypto.randomUUID()
+  const handle = upload_media({ file, folder: `${dictionary_id}/videos/${sense_id}`, dictionary_id, kind: 'video', media_id })
   const done = handle.done.then(async ({ storage_path }) => {
     // ONE atomic dict_write: video + sense junction + speaker junction.
-    const inserted = await writes.insert_video({ video: { storage_path, ...(source ? { source } : {}) }, sense_id, speaker_id })
+    const inserted = await writes.insert_video({ video: { id: media_id, storage_path, ...(source ? { source } : {}) }, sense_id, speaker_id })
     if (!inserted)
       throw new Error('The video was uploaded but could not be saved — please try again.')
     return { storage_path }

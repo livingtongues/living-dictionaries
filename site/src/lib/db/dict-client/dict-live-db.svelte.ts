@@ -92,6 +92,9 @@ export interface DictWrites {
   set_token_link: (args: { sentence_id: string, orthography: string, token_index: number, action: TokenLinkAction, entry_id?: string, sense_id?: string }) => Promise<DictPlainRowType<'sentences'>>
   create_entry_from_token: (args: { lexeme: MultiString, sentence_id: string, orthography: string, token_index: number }) => Promise<DictPlainRowType<'entries'>>
   ignore_form: (args: { form: string }) => Promise<{ sentences_changed: number, occurrences: number }>
+  restore_form: (args: { form: string }) => Promise<{ sentences_changed: number, occurrences: number }>
+  link_form: (args: { form: string, entry_id: string }) => Promise<{ sentences_changed: number, occurrences: number }>
+  create_entry_from_form: (args: { lexeme: MultiString, form: string }) => Promise<DictPlainRowType<'entries'>>
   insert_text: (args: { title: MultiString, sentences: { text: MultiString, ends_paragraph?: number }[] }) => Promise<DictPlainRowType<'texts'>>
   insert_audio: (args: { audio: DictInsertType<'audio'>, speaker_id?: string }) => Promise<DictPlainRowType<'audio'>>
   insert_photo: (args: { photo: DictInsertType<'photos'>, sense_id: string }) => Promise<DictPlainRowType<'photos'>>
@@ -504,6 +507,9 @@ class DictLiveDbImpl {
         set_token_link: args => write('set_token_link', args),
         create_entry_from_token: args => write('create_entry_from_token', { entry_id: crypto.randomUUID(), ...args }),
         ignore_form: args => write('ignore_form', args),
+        restore_form: args => write('restore_form', args),
+        link_form: args => write('link_form', args),
+        create_entry_from_form: args => write('create_entry_from_form', { entry_id: crypto.randomUUID(), ...args }),
         insert_text: args => write('insert_text', { text_id: crypto.randomUUID(), ...args }),
         insert_audio: args => write('insert_audio', { ...args, audio: { id: crypto.randomUUID(), ...args.audio } }),
         insert_photo: args => write('insert_photo', { ...args, photo: { id: crypto.randomUUID(), ...args.photo } }),

@@ -9,12 +9,24 @@
  * keep using the public lh3 CDN, so real pulled photos still load with no bucket.
  */
 
+import { R2_MEDIA_DOMAIN } from '$lib/constants'
+import { is_r2_media_path } from './media-path'
+
 /** DEV-only `serving_url` sentinel for an image uploaded with no bucket (bytes live in `/api/dev-media`). */
 export const DEV_LOCAL_PREFIX = 'dev-local:'
 
+/**
+ * DUAL-READ (GCS→R2 migration, 2026-07): new-convention paths
+ * (`{dict}/{audio|video|photo}/{uuid}.{ext}`) serve from the R2 media domain;
+ * every legacy path keeps serving from GCS until its row is rewritten by the
+ * migration driver (`scripts/media-migration/`). GCS stays live throughout as
+ * the fallback — do not tear it down while old-convention rows exist.
+ */
 export function url_from_storage_path(path: string, storage_bucket: string): string {
   if (import.meta.env.DEV)
     return `/api/dev-media/${path}`
+  if (is_r2_media_path(path))
+    return `${R2_MEDIA_DOMAIN}/${path}`
   return `https://firebasestorage.googleapis.com/v0/b/${storage_bucket}/o/${encodeURIComponent(path)}?alt=media`
 }
 

@@ -5,6 +5,7 @@ import { env } from '$env/dynamic/private'
 import { DEV_LOCAL_PREFIX } from '$lib/utils/media-url'
 import { dev_media_dir } from './dev-media-dir'
 import { gcs_is_configured, get_gcs } from './gcloud'
+import { get_r2_media, r2_media_is_configured } from './r2-media'
 
 /**
  * Server-side media byte storage for the v1 media write API — the direct-upload
@@ -15,11 +16,11 @@ import { gcs_is_configured, get_gcs } from './gcloud'
  */
 
 export interface StoredMedia {
-  /** GCS object key (also the stored `storage_path`). */
+  /** Object key (also the stored `storage_path`). */
   storage_path: string
-  /** GCS bucket the object landed in ('' in the dev mock). */
+  /** Bucket the object landed in ('' in the dev mock). */
   bucket: string
-  /** DEV-only: bytes went to the local `/api/dev-media` store, not GCS. */
+  /** DEV-only: bytes went to the local `/api/dev-media` store, not GCS/R2. */
   dev_mock: boolean
 }
 
@@ -27,16 +28,42 @@ export interface StoredMedia {
 export class MediaStorageNotConfiguredError extends Error {}
 
 /**
- * Upload media bytes and return the stored object key. On dev with no bucket the
- * bytes land in the local dev-media store (served back by `/api/dev-media`); in
- * prod with no GCS creds it throws {@link MediaStorageNotConfiguredError}.
+ * Upload media bytes and return the stored object key. Audio/video pass `r2_key`
+ * (the new `{dict_id}/{kind}/{media_row_id}.{ext}` convention) and land in the
+ * PUBLIC R2 media bucket; photos keep the legacy GCS `folder` flow until
+ * Phase 2. On dev with no bucket the bytes land in the local dev-media store
+ * (served back by `/api/dev-media`); in prod with no creds it throws
+ * {@link MediaStorageNotConfiguredError}.
  */
-export async function store_media_bytes({ folder, file_name, file_type, bytes }: {
-  folder: string
+export async function store_media_bytes({ folder, file_name, file_type, bytes, r2_key }: {
+  folder?: string
   file_name: string
   file_type: string
   bytes: Uint8Array
+  /** Full R2 media-bucket key — presence routes the bytes to R2 instead of GCS. */
+  r2_key?: string
 }): Promise<StoredMedia> {
+  if (r2_key) {
+    if (!r2_media_is_configured()) {
+      if (import.meta.env.DEV) {
+        const full = join(dev_media_dir(), r2_key)
+        mkdirSync(dirname(full), { recursive: true })
+        writeFileSync(full, Buffer.from(bytes))
+        return { storage_path: r2_key, bucket: '', dev_mock: true }
+      }
+      throw new MediaStorageNotConfiguredError('Media uploads are not configured (missing R2 credentials)')
+    }
+    const { client, bucket } = get_r2_media()
+    await client.send(new PutObjectCommand({
+      Bucket: bucket,
+      Key: r2_key,
+      Body: bytes,
+      ContentType: file_type,
+      CacheControl: 'public, max-age=31536000, immutable',
+    }))
+    return { storage_path: r2_key, bucket, dev_mock: false }
+  }
+
   const extension = file_name.split('.').pop() || 'bin'
   const object_key = `${folder}/${crypto.randomUUID()}.${extension}`
 

@@ -69,8 +69,9 @@ describe(add_audio, () => {
     mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/audio/e1/1.webm' })))
     const handle = add_audio({ writes, dictionary_id: 'demo', entry_id: 'e1', file: new Blob(['x'], { type: 'audio/webm' }), speaker_id: 'sp1', source: 'field-recordings' })
     await expect(handle.done).resolves.toEqual({ storage_path: 'demo/audio/e1/1.webm' })
-    expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ folder: 'demo/audio/e1', dictionary_id: 'demo', kind: 'audio' }))
-    expect(insert_audio).toHaveBeenCalledWith({ storage_path: 'demo/audio/e1/1.webm', entry_id: 'e1', speaker_id: 'sp1', source: 'field-recordings' })
+    expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ folder: 'demo/audio/e1', dictionary_id: 'demo', kind: 'audio', media_id: expect.stringMatching(/^[0-9a-f-]{36}$/) }))
+    const minted_id = mocked_upload_media.mock.calls[0][0].media_id
+    expect(insert_audio).toHaveBeenCalledWith({ id: minted_id, storage_path: 'demo/audio/e1/1.webm', entry_id: 'e1', speaker_id: 'sp1', source: 'field-recordings' })
   })
 
   test('NO insert when the upload fails', async () => {
@@ -102,15 +103,16 @@ describe(add_video, () => {
     mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/videos/s1/1.mp4' })))
     const handle = add_video({ writes, dictionary_id: 'demo', sense_id: 's1', file: new Blob(['x'], { type: 'video/mp4' }), speaker_id: 'sp1', source: 'archive' })
     await expect(handle.done).resolves.toEqual({ storage_path: 'demo/videos/s1/1.mp4' })
-    expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ folder: 'demo/videos/s1', dictionary_id: 'demo', kind: 'video' }))
-    expect(insert_video).toHaveBeenCalledWith({ video: { storage_path: 'demo/videos/s1/1.mp4', source: 'archive' }, sense_id: 's1', speaker_id: 'sp1' })
+    expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ folder: 'demo/videos/s1', dictionary_id: 'demo', kind: 'video', media_id: expect.stringMatching(/^[0-9a-f-]{36}$/) }))
+    const minted_id = mocked_upload_media.mock.calls[0][0].media_id
+    expect(insert_video).toHaveBeenCalledWith({ video: { id: minted_id, storage_path: 'demo/videos/s1/1.mp4', source: 'archive' }, sense_id: 's1', speaker_id: 'sp1' })
   })
 
   test('omits source from the video row when not given', async () => {
     mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/videos/s1/1.mp4' })))
     const handle = add_video({ writes, dictionary_id: 'demo', sense_id: 's1', file: new Blob(['x'], { type: 'video/mp4' }), speaker_id: 'sp1' })
     await handle.done
-    expect(insert_video).toHaveBeenCalledWith({ video: { storage_path: 'demo/videos/s1/1.mp4' }, sense_id: 's1', speaker_id: 'sp1' })
+    expect(insert_video).toHaveBeenCalledWith({ video: { id: expect.stringMatching(/^[0-9a-f-]{36}$/), storage_path: 'demo/videos/s1/1.mp4' }, sense_id: 's1', speaker_id: 'sp1' })
   })
 
   test('NO insert when the upload fails', async () => {

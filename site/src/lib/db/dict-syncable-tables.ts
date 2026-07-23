@@ -21,7 +21,8 @@
  *   grammar_sections (references entries, senses, clause_slots, self) →
  *   section_sentences (references grammar_sections + sentences),
  *   text_tags (references texts + tags),
- *   text_dialects (references texts + dialects)
+ *   text_dialects (references texts + dialects),
+ *   ignored_forms (no deps — dictionary-level matcher ignore list)
  */
 export const DICT_SYNCABLE_TABLES = [
   'entries',
@@ -53,6 +54,7 @@ export const DICT_SYNCABLE_TABLES = [
   'section_sentences',
   'text_tags',
   'text_dialects',
+  'ignored_forms',
 ] as const
 
 export type DictSyncableTable = typeof DICT_SYNCABLE_TABLES[number]

@@ -49,6 +49,7 @@ send its rows back through the write API wholesale.
 | `sources` | the citation registry the slug arrays reference |
 | `entry_relationships`, `relationship_types` | typed entry↔entry links |
 | `grammar_sections`, `clause_slots`, `glossing_abbreviations` | structured grammar |
+| `ignored_forms` | dictionary-level "ignore everywhere" word forms the matcher skips (see the `suggestions` API group) |
 
 Multilingual columns are JSON `{ "<locale>": "text" }`; array columns are JSON
 arrays. `sqlite3`'s `json_each`/`json_extract` make these queryable directly.

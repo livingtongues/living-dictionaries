@@ -1,3 +1,4 @@
 service-accounts.ts
 .env
 sheets-viewer-SA.json
+media-migration/state.db*

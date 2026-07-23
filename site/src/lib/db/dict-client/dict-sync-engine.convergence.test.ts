@@ -109,6 +109,7 @@ const SPECS: Partial<Record<DictSyncableTable, { parents: (keyof typeof PARENTS)
   featured_entries: { parents: ['entry'], columns: { entry_id: 'ent-1', sort_key: 'a0' } },
   sources: { parents: [], columns: { slug: 'shared-source' } },
   entry_relationships: { parents: ['entry', 'entry_b'], columns: { from_entry_id: 'ent-1', to_entry_id: 'ent-2', type: 'synonym' } },
+  ignored_forms: { parents: [], columns: { form: 'shared-form' } },
 }
 
 /** Natural-key columns only (what the dedup matches on) — SPECS may add required extras like sort_key. */

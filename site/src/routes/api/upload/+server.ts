@@ -6,13 +6,22 @@ import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { gcs_is_configured, get_gcs } from '$lib/server/gcloud'
+import { get_r2_media, r2_media_is_configured } from '$lib/server/r2-media'
 import { log_server_event } from '$lib/server/log-server-event'
+import { build_r2_media_key, extract_media_extension } from '$lib/utils/media-path'
 
 export interface UploadRequestBody {
   folder: string
   dictionary_id: string
   file_name: string
   file_type: string
+  /**
+   * Audio/video land in the R2 media bucket on the new key convention
+   * `{dict_id}/{kind}/{media_id}.{ext}` — the client mints the media row uuid
+   * BEFORE upload and inserts the row with that same id. Photos omit this and
+   * keep the legacy GCS `folder` flow until Phase 2.
+   */
+  r2_media?: { kind: 'audio' | 'video', media_id: string }
 }
 
 export interface UploadResponseBody {
@@ -20,12 +29,14 @@ export interface UploadResponseBody {
   bucket: string
   object_key: string
   item_id: string
-  /** DEV-only: bytes go to the local `/api/dev-media` store, not GCS. Images skip the serving-url fetch. */
+  /** DEV-only: bytes go to the local `/api/dev-media` store, not GCS/R2. Images skip the serving-url fetch. */
   dev_mock?: boolean
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+
 export const POST: RequestHandler = async (event) => {
-  const { folder, dictionary_id, file_name, file_type } = await event.request.json() as UploadRequestBody
+  const { folder, dictionary_id, file_name, file_type, r2_media } = await event.request.json() as UploadRequestBody
 
   if (!dictionary_id?.trim())
     error(ResponseCodes.BAD_REQUEST, 'Missing dictionary_id')
@@ -38,12 +49,56 @@ export const POST: RequestHandler = async (event) => {
   // upload. Contributors are LD's editing tier (client `can_edit` includes them).
   await verify_auth_dict_role(event, { dictionary, min_role: 'contributor' })
 
-  if (!folder?.trim())
-    error(ResponseCodes.BAD_REQUEST, 'Missing folder')
   if (!file_name?.trim())
     error(ResponseCodes.BAD_REQUEST, 'Missing file_name')
   if (!file_type?.trim())
     error(ResponseCodes.BAD_REQUEST, 'Missing file_type')
+
+  if (r2_media) {
+    if (r2_media.kind !== 'audio' && r2_media.kind !== 'video')
+      error(ResponseCodes.BAD_REQUEST, 'r2_media.kind must be audio or video')
+    if (!UUID_REGEX.test(r2_media.media_id ?? ''))
+      error(ResponseCodes.BAD_REQUEST, 'r2_media.media_id must be a uuid')
+    // Key is built from the CANONICAL dictionary id (the caller may have passed a slug).
+    const object_key = build_r2_media_key({
+      dict_id: dictionary.id,
+      kind: r2_media.kind,
+      media_id: r2_media.media_id,
+      extension: extract_media_extension(file_name),
+    })
+
+    if (!r2_media_is_configured()) {
+      if (import.meta.env.DEV) {
+        return json({
+          presigned_upload_url: `/api/dev-media/${object_key}`,
+          bucket: '',
+          object_key,
+          item_id: r2_media.media_id,
+          dev_mock: true,
+        } satisfies UploadResponseBody)
+      }
+      error(ResponseCodes.SERVICE_UNAVAILABLE, 'Media uploads are not configured (missing R2 credentials)')
+    }
+
+    try {
+      const { client, bucket } = get_r2_media()
+      const presigned_upload_url = await getSignedUrl(client, new PutObjectCommand({
+        Bucket: bucket,
+        Key: object_key,
+        ContentType: file_type,
+        CacheControl: 'public, max-age=31536000, immutable',
+      }), { expiresIn: 60 })
+      return json({ presigned_upload_url, bucket, object_key, item_id: r2_media.media_id } satisfies UploadResponseBody)
+    } catch (err) {
+      console.error(`Error creating R2 upload URL: ${err.message}`)
+      log_server_event({ level: 'error', message: 'upload_presign_failed', error: err, context: { dictionary_id, kind: r2_media.kind, file_type } })
+      error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error creating upload URL: ${err.message}`)
+    }
+  }
+
+  // Legacy GCS flow — photos (hero images, partner logos, sense photos) until Phase 2.
+  if (!folder?.trim())
+    error(ResponseCodes.BAD_REQUEST, 'Missing folder')
 
   if (!gcs_is_configured()) {
     // Dev media mock: no bucket configured locally — hand the client a PUT url to
