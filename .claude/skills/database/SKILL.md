@@ -213,8 +213,9 @@ this skill.
 3. **Never** raw `DELETE`/`UPDATE` without a `WHERE`, never `DROP TABLE` without per-command
    confirmation, never touch `users` unless explicitly told to delete an account.
 4. **Per-dict writes propagate via the R2 snapshot, not sync** — a VPS edit won't show in editors'
-   browsers until the next builder run (~30 min) or a manual rebuild
-   (`bin/build-all-snapshots.ts --dict-id=<id>`). Say so when the lag applies.
+   browsers until the next builder run (~30 min). The production image does not ship an ad-hoc
+   snapshot CLI; restarting the primary triggers the builder's immediate startup pass, but don't
+   restart solely to avoid this normal propagation lag. Say so when the lag applies.
 5. **Schema changes** belong in a migration file (deploy → `hooks.server.ts` applies on boot), not
    ad-hoc SQL. If you must run one live, stop **both** app containers first (`docker stop
    sveltekit_blue sveltekit_green`) to avoid WAL corruption — under blue/green both have the DB open.
@@ -690,7 +691,7 @@ $lib/db/
   the client `normalize_snapshot_header` flips the header bytes as a safety net.
   See `.knowledge/db/opfs-leader-worker-dict-db.md`.
 - **`storage_path` is a path, not a URL** — media (audio/photos/videos) stores
-  a storage path; resolve to the GCS / lh3 serving URL at render time (see
+  an R2 object key; resolve it through the media URL builders at render time (see
   `src/lib/helpers/media-url.ts` and `.knowledge/domain/media-serving-urls.md`),
   don't store URLs in the DB.
 - **Drizzle migrations are NOT used** — only the raw SQL files. Don't run

@@ -56,8 +56,8 @@ describe(html_to_markdown, () => {
   })
 
   test('CKEditor figure-wrapped image becomes a markdown image', () => {
-    const md = html_to_markdown('<figure class="image"><img src="https://lh3.googleusercontent.com/abc=w1000"></figure>')
-    expect(md).toContain('![](https://lh3.googleusercontent.com/abc=w1000)')
+    const md = html_to_markdown('<figure class="image"><img src="https://images.example/abc.webp"></figure>')
+    expect(md).toContain('![](https://images.example/abc.webp)')
     expect(md).not.toContain('<figure')
   })
 
@@ -103,19 +103,19 @@ describe(html_to_markdown, () => {
   })
 
   test('converted markdown reloaded into the editor is byte-stable (no first-save churn)', () => {
-    const md = html_to_markdown('<h2>About</h2><p>The <strong>Nahuatl</strong> dictionary, with <i>notes</i>.</p><ol><li>one</li><li>two</li></ol><figure class="image"><img src="https://lh3.googleusercontent.com/abc"></figure>')
+    const md = html_to_markdown('<h2>About</h2><p>The <strong>Nahuatl</strong> dictionary, with <i>notes</i>.</p><ol><li>one</li><li>two</li></ol><figure class="image"><img src="https://images.example/abc.webp"></figure>')
     expect(markdown_through_editor(md)).toBe(md)
   })
 })
 
 describe(render_markdown_to_html, () => {
   test('renders headings, emphasis, lists, and images', () => {
-    const html = render_markdown_to_html('## Grammar\n\n**Verbs** carry *affixes*.\n\n- one\n- two\n\n![](https://lh3.googleusercontent.com/abc)')
+    const html = render_markdown_to_html('## Grammar\n\n**Verbs** carry *affixes*.\n\n- one\n- two\n\n![](https://images.example/abc.webp)')
     expect(html).toContain('<h2>Grammar</h2>')
     expect(html).toContain('<strong>Verbs</strong>')
     expect(html).toContain('<em>affixes</em>')
     expect(html).toContain('<li>one</li>')
-    expect(html).toContain('<img src="https://lh3.googleusercontent.com/abc"')
+    expect(html).toContain('<img src="https://images.example/abc.webp"')
   })
 
   test('returns empty for blank input', () => {

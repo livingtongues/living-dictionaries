@@ -27,6 +27,8 @@ export interface MediaUploadHandle {
   /** resolves with the landed path; REJECTS on presign error, non-2xx PUT/POST, network error, or abort */
   done: Promise<MediaUploadResult>
   abort: () => void
+  /** The pre-minted media row uuid (set by the add_* wrappers; absent on a blocked handle). */
+  media_id?: string
 }
 
 /**
@@ -34,8 +36,7 @@ export interface MediaUploadHandle {
  * the caller mints the media row uuid BEFORE upload. Audio/video: presign via
  * `api_upload` → XHR PUT. Images: XHR POST of the bytes to `/api/photo-upload`
  * (the server stores the original, responds fast, and generates WebP variants
- * after the response). No serving_url anywhere — rendering derives urls from
- * `storage_path` (`photo_src` / `url_from_storage_path`).
+ * after the response). Rendering derives URLs from `storage_path`.
  */
 export function upload_media({ file, dictionary_id, kind, media_id }: {
   file: File | Blob

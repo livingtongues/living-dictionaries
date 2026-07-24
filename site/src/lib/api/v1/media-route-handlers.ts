@@ -5,7 +5,7 @@ import type { RequestHandler } from '@sveltejs/kit'
 import type DatabaseType from 'better-sqlite3'
 import type { MediaCategory } from './validate-media-bytes'
 import { parse_hosted_video_url } from '$lib/components/video/parse-hosted-video-url'
-import { ResponseCodes } from '$lib/constants'
+import { LARGE_VIDEO_REVIEW_BYTES, MAX_AUDIO_UPLOAD_BYTES, MAX_PHOTO_UPLOAD_BYTES, MAX_VIDEO_UPLOAD_BYTES, ResponseCodes } from '$lib/constants'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
 import { attach_media, delete_media, MEDIA_CELLS, media_requires_attribution, read_media_record, update_media_timings } from '$lib/db/server/v1-media-write'
@@ -14,6 +14,7 @@ import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/se
 import { MediaStorageNotConfiguredError, store_media_bytes } from '$lib/server/media-storage'
 import { record_media_object_by_key } from '$lib/db/server/media-ledger'
 import { store_photo_variants_in_background } from '$lib/server/photo-variants'
+import { store_video_thumbnail_in_background } from '$lib/server/video-thumbnails'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 import { build_r2_media_key, extract_media_extension } from '$lib/utils/media-path'
@@ -22,6 +23,8 @@ import { normalize_photo_exif } from '$lib/media/photo-coords'
 import { parse_media_request } from './media-request'
 import { validate_media_bytes } from './validate-media-bytes'
 import { fetch_hosted_video_metadata } from '$lib/video/hosted-video-metadata'
+import { get_shared_db } from '$lib/db/server/shared-db'
+import { post_large_video_notification } from '$lib/server/chat/large-video-notifier'
 
 /**
  * Factories that turn a {@link MediaCellKey} into the POST (attach) and DELETE
@@ -58,6 +61,14 @@ function owner_label(cell_key: MediaCellKey): string {
 /** Map a storage medium to the top-level content category the bytes must be. */
 function medium_category(medium: 'audio' | 'photo' | 'video'): MediaCategory {
   return medium === 'photo' ? 'image' : medium
+}
+
+function medium_upload_limit(medium: 'audio' | 'photo' | 'video'): number {
+  if (medium === 'video')
+    return MAX_VIDEO_UPLOAD_BYTES
+  if (medium === 'photo')
+    return MAX_PHOTO_UPLOAD_BYTES
+  return MAX_AUDIO_UPLOAD_BYTES
 }
 
 const INLINE_LIST_CAP = 20
@@ -164,9 +175,9 @@ function resolve_hosted(fields: Record<string, unknown>): HostedVideo | undefine
   return undefined
 }
 
-async function store_bytes({ folder, file_name, file_type, bytes, r2_key }: { folder?: string, file_name: string, file_type: string, bytes: Uint8Array, r2_key?: string }) {
+async function store_bytes({ file_type, bytes, r2_key }: { file_type: string, bytes: Uint8Array, r2_key: string }) {
   try {
-    return await store_media_bytes({ folder, file_name, file_type, bytes, r2_key })
+    return await store_media_bytes({ file_type, bytes, r2_key })
   } catch (err) {
     if (err instanceof MediaStorageNotConfiguredError)
       error(ResponseCodes.SERVICE_UNAVAILABLE, err.message)
@@ -191,7 +202,7 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
     if (!db.prepare(`SELECT 1 FROM "${cell.owner_table}" WHERE id = ?`).get(owner_id))
       error(ResponseCodes.NOT_FOUND, `${owner_label(cell_key)} not found`)
 
-    const parsed = await parse_media_request(event)
+    const parsed = await parse_media_request(event, { max_bytes: medium_upload_limit(cell.medium), medium: cell.medium })
     const { fields } = parsed
     const media_id = str(fields.id)
     const replace = truthy(fields.replace)
@@ -248,9 +259,12 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
         media_fields.hosted_metadata = await fetch_hosted_video_metadata({ hosted_video: hosted })
       } else if (parsed.bytes) {
         assert_media_bytes({ medium: cell.medium, bytes: parsed.bytes, declared_type: parsed.file_type })
-        const stored = await store_bytes({ r2_key: r2_key_for(parsed.file_name), file_name: parsed.file_name ?? 'upload', file_type: parsed.file_type ?? 'application/octet-stream', bytes: parsed.bytes })
+        const stored = await store_bytes({ r2_key: r2_key_for(parsed.file_name), file_type: parsed.file_type ?? 'application/octet-stream', bytes: parsed.bytes })
         record_media_object_by_key({ key: stored.storage_path, bytes: parsed.bytes.length })
         media_fields.storage_path = stored.storage_path
+        // Bytes are already in hand (no R2 re-fetch) — generate the `_thumb.webp`
+        // after the response, same as photo variants.
+        store_video_thumbnail_in_background({ original_key: stored.storage_path, bytes: parsed.bytes })
       } else {
         error(ResponseCodes.BAD_REQUEST, 'Provide a video file, a url, or a hosted_elsewhere/hosted_url link')
       }
@@ -261,7 +275,6 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
       assert_media_bytes({ medium: cell.medium, bytes: parsed.bytes, declared_type: parsed.file_type })
       const stored = await store_bytes({
         r2_key: r2_key_for(parsed.file_name),
-        file_name: parsed.file_name ?? 'upload',
         file_type: parsed.file_type ?? 'application/octet-stream',
         bytes: parsed.bytes,
       })
@@ -269,9 +282,6 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
       media_fields.storage_path = stored.storage_path
       if (cell.medium === 'photo') {
         media_fields.photographer = str(fields.photographer) ?? null
-        // R2 convention: no lh3 serving_url — rendering derives urls from
-        // storage_path; WebP variants are generated after the response.
-        media_fields.serving_url = ''
         // EXIF GPS + capture time: explicit request fields win over a read of
         // the bytes; either way coordinates are blunted to village level (2dp).
         const explicit = normalize_photo_exif({
@@ -298,6 +308,19 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
 
     mirror_dictionary_cursor({ dict_id: dictionary.id, cursor: result.new_synced_up_to })
     log_server_event({ level: 'info', message: 'v1_media_attached', user_id: access.user_id, context: { dictionary_id: dictionary.id, cell: cell_key, owner_id, media_id: result.media?.id, replace, via: access.via } })
+    if (cell.medium === 'video' && parsed.bytes && parsed.bytes.length > LARGE_VIDEO_REVIEW_BYTES && result.created && result.media?.id) {
+      post_large_video_notification({
+        shared_db: get_shared_db(),
+        dictionary,
+        dict_db: db,
+        cell_key,
+        owner_id,
+        media_id: result.media.id,
+        size_bytes: parsed.bytes.length,
+        actor_user_id: access.user_id,
+        base_url: event.url.origin,
+      })
+    }
 
     return json({ [cell.medium]: result.media, created: result.created })
   }

@@ -141,13 +141,94 @@ BATCH-DELETABLE. Plan: clean up + redo once decisions land.
   openapi.ts "Uploaded resources" section, and the three format guides'
   pointer lines updated; knowledge page updated.
 
-### Next (PAUSED — regroup with Jacob before restarting the import)
-1. Re-run phase 1 properly on the Enxet file: rebuild the stage with the
-   confirmed cleanup rules + the Guaraní-in-def split + headword-in-def cases
-   (69, hand-review) + LLM/manual gloss-vs-definition pass.
-2. Full preview.html review with Jacob (diverse sample + all flagged classes).
-3. Re-import under a new import_id with same deterministic uuid5 ids, after the
-   definition-field revival lands (check the other agent's progress).
+## ROUND 4 — phase-1 rebuild for real (2026-07-24, in progress)
+
+Jacob greenlit the restart + asked to keep improving importing.md as we go.
+
+### Stage v2 (`/tmp/enxet-import/stage.py` → `rows.jsonl`, 11,935 entries / 14,239 senses)
+- ✅ Line locators; per-sense named rules + flags; verbatim raw kept.
+- ✅ `extract_gn` (260 senses, 270 forms — `guaraní “X”` + bare-quoted continuations)
+- ✅ `lift_plural` (38) + 40 `pl_manual` → hand-decided (decisions-flagged.json)
+- ✅ `lift_lit` (221) + 24 `lit_only` kept as sense text (def)
+- ✅ `lift_paradigm` (19), `strip_separators` (~7.4k), `", ."` tail rule
+- ✅ NEW discoveries: 7 inline SFM markers (`\sc`→scientific_names ×2, `\va`/`\uv`→variant,
+  `\xv`→note, `\ps` in \lx); 18 lexemes with POS tails (nf/vi/pref v → n.f/vi/pref,
+  hidden by trailing whitespace+CRLF); 11 lexemes with leaked IPA → `phonetic`;
+  stray next-headword glue; inline sense numbers ("; 2 …"); ~87 truncated values
+  (dangling "por ejemplo:", "variante de", "; pl").
+
+### Gloss-vs-definition per-item pass (Jacob's locked no-shortcuts rule)
+- ✅ 1,124 pattern-hit senses read PERSONALLY line-by-line (metalinguistic 55,
+  expresion 16, usage 27, cuya 32, xref 57, que 937). Decisions in
+  `work/decisions-hits.jsonl` + `work/decisions-que.json` (652 g / 233 d / 52 splits).
+  Learning: long causative verb phrases are GLOSSES (polysynthetic verbs); the old
+  length heuristic would have been catastrophically wrong.
+- 🔄 12,988 remaining short values: 12 alphabetical chunks delegated to 3 spawned
+  sessions (512d97a8, 5c21f65f, 65e8d4ed) with `work/REST-PASS-INSTRUCTIONS.md`
+  (taxonomy + exceptions-only JSON contract + anomaly flags incl. gn_unmarked).
+  They write `work/decisions-rest-NN.json` + `findings-NN.md`. AUDIT their output.
+- ✅ 59 headword_in_def hand-decided (`work/decisions-headword.json`): ethnonyms/
+  biographies stay defs; packed examples → notes; contractions → notes; strays dropped.
+- ✅ `classify.py` merges all decision sources → `rows-final.jsonl`
+  (sense kinds: gloss / definition / both via splits; entry pos/phonetic fixes).
+
+### Done (all 12 rest-chunks folded + audited)
+- ✅ 3 reader sessions returned all 12 `decisions-rest-NN.json` + findings.
+  Lead audited every findings file, pulled + resolved ~30 flagged re-check refs
+  (`work/decisions-audit.json`, 43 entries — wrong-language/vernacular phantom
+  senses emptied w/ text lifted to notes; typos fixed; truncations flagged).
+- ✅ **BIG BUG found + fixed: 35 headwords lost their `\lx` marker** in the
+  source. Old parser glued each onto the previous entry (phantom extra sense +
+  stray tail — several readers had flagged these as `stray_text_dropped`!).
+  `stage.parse()` now recovers them as their own entries (line-keyed uuid5,
+  homograph on the one spelling collision: Mantawáseykha). Gotcha written to
+  flex-lift.md. Entry count 11,935 → 11,970.
+- ✅ Final pipeline: `classify.py` → `rows-final.jsonl` → `build_payload.py` →
+  `entries-payload.json` (11,969 entries after dropping 1 colophon non-entry;
+  14,219 senses: 13,224 glosses.es · 298 glosses.gn · 1,076 definition.es · 88
+  gloss+def splits; 55 POS, 53 plural_form, 11 phonetic, 2 scientific_names, 623
+  entries w/ markdown notes). All source+citation(l. N) stamped. 4.0 MB.
+  2,395 senses explicitly decided; 11,844 plain-gloss defaults (bulk-verified).
+- ✅ `preview.html` v2 (designed entry view; diverse sample + every flagged
+  class incl. the gn_unmarked catches). Screenshots reviewed — renders great.
+- ✅ Guide improvements folded live: importing.md (CRLF/whitespace trap, inline
+  markers, headword-column leaks, truncated values, polysynthetic-gloss +
+  split rules, parallelized-reading-with-subagents method) + flex-lift.md
+  (lost-`\lx` recovery, headword-column leaks, inline markers).
+
+### Remaining (PAUSED for Jacob sign-off — phase-1 gate before ANY API write)
+1. **Jacob reviews `preview.html`** (`/tmp/enxet-import/preview.html`) → sign-off.
+2. Confirm sequencing vs the definition-field revival (entries-list-redesign
+   lanes) — import now in parallel, or wait so re-imported definitions are
+   immediately list-visible/searchable.
+3. Mint fresh API key (old one may be stale post-wipe) OR reuse
+   `/tmp/enxet-import/api-key.json`; run import under new import_id
+   `enxet-lexicon-2026-07-r2` (batches ≤500, hard-fail on results-length
+   mismatch, ledger + rollback armed). Verify via snapshot COUNT/spot-checks.
+4. Commit the guide changes (publishes new text to live `/api/v1/guides`).
+
+## ROUND 5 — editor-only "needs review" field landed (2026-07-24)
+
+Jacob spotted the ~482 review-worthy entries + asked how to flag them for the
+reviewer (Diego, a manager — NOT a site admin) without showing the public. Built a
+first-class **`entries.review` `{ category, note }`** field (`.issues/entry-needs-review.md`,
+ALL DONE): editor-only (stripped from non-editor reads, filter-at-render like private
+tags), entries-list "Needs review" toggle + category facet, entry-page banner +
+Resolve, v1 API `review` on create/PATCH. Also fixed private-tag visibility so
+managers/contributors see private tags on their own dict.
+
+**Import must now populate `review`:** `build_payload.py` should emit an entry-level
+`review: { category, note }` for each flagged entry, mapping the stage flags →
+categories, e.g. `truncated_in_source|truncated_maybe → truncated`;
+`headword_echo|headword_in_def → headword_in_gloss`; `gn_unmarked → language_split`;
+`stray_text_dropped → dropped_text`; `pl_manual → uncertain_plural`;
+`vernacular_only|no_gloss → missing_gloss`; `possible_lexeme_gloss_mismatch|typo*|
+duplicated_text|needs_review → other`. `note` = the specific finding (may enumerate
+senses). Homograph near-dups (2) can also carry `category:"other"`. ~482 entries.
+
+Also: the homograph 3/5/5 Jacob saw were real complete `\hm` sets (146 sets / 405
+entries, all imported) — the preview just shows ONE representative per headword, so
+siblings looked "missing". No action.
 
 ## Follow-ups spawned
 

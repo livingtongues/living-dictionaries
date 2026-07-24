@@ -16,6 +16,7 @@
   import IconSystemUiconsVersions from '~icons/system-uicons/versions'
   import IconFaSolidTimes from '~icons/fa-solid/times'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
+  import ReviewBanner from '$lib/components/entry/ReviewBanner.svelte'
 
   interface Props {
     entry: EntryData
@@ -55,6 +56,10 @@
     await entry_row._save()
   }
 </script>
+
+{#if can_edit && fields?.review}
+  <ReviewBanner review={fields.review} onresolve={() => save_entry({ review: null })} />
+{/if}
 
 <div class="media-on-right-grid">
   <div dir="ltr" style="grid-area: title;">

@@ -40,7 +40,7 @@
   let viewing = $state(false)
 
   const is_desktop = $derived(window_width >= 768)
-  const fullscreen_src = $derived(photo_src(photo, `w${is_desktop ? window_width - 24 : window_width}`))
+  const fullscreen_src = $derived(photo_src({ photo, variant: is_desktop && window_width > 924 ? 'w1600' : 'w900' }))
 
   let preload_promise: Promise<void> | undefined
   let preloaded_src: string | undefined
@@ -79,7 +79,7 @@
   }} />
 
 <div class="thumb-wrap">
-  <img class="thumb" onclick={open} onmouseenter={start_preload} alt={title} src={photo_src(photo, `s${square}-p`)} />
+  <img class="thumb" onclick={open} onmouseenter={start_preload} alt={title} src={photo_src({ photo, variant: 'thumb' })} />
   {#if loading}
     <IconGgSpinner class="spinner" />
   {:else if photographer === 'AI'}

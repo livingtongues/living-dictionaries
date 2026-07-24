@@ -7,6 +7,7 @@
   import { page } from '$app/state'
   import Image from '$lib/components/image/Image.svelte'
   import AddImage from '$lib/components/image/AddImage.svelte'
+  import { SITE_MEDIA } from '$lib/constants'
 
   interface Props {
     admin?: number
@@ -31,9 +32,6 @@
     hide_living_tongues_logo,
     hideLivingTonguesLogo = false,
   }: Props = $props()
-
-  const LIVING_TONGUES_LOGO
-    = 'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FLiving_Tongues_Logo_transparent%20300dpi.png?alt=media'
 
   async function ask_partner_name() {
     const name = prompt(page.data.t('partnership.name'))?.trim()
@@ -67,7 +65,9 @@
       <img
         style="height: 100%; width: 100%; object-fit: cover"
         alt="Living Tongues Institute for Endangered Languages"
-        src={LIVING_TONGUES_LOGO} />
+        src="{SITE_MEDIA.living_tongues_logo}/w400.webp"
+        srcset="{SITE_MEDIA.living_tongues_logo}/w400.webp 400w, {SITE_MEDIA.living_tongues_logo}/w800.webp 800w"
+        sizes="400px" />
     </div>
   {:else if admin}
     <button

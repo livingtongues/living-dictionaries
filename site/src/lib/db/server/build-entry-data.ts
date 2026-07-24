@@ -15,10 +15,12 @@ import { assemble_entry_data } from '$lib/search/assemble-entry-data'
  * columns as the client bundle (`BUNDLE_DROP_COLUMNS`) so SSR and warm-client
  * output stay byte-identical.
  */
-export function build_entry_data({ db, entry_id, admin_level }: {
+export function build_entry_data({ db, entry_id, admin_level, can_edit = false }: {
   db: Database.Database
   entry_id: string
   admin_level: number
+  /** Editor of this dict — surfaces the editor-only `main.review` flag + private tags. */
+  can_edit?: boolean
 }): EntryData | null {
   const entry = select_one(db, 'entries', 'SELECT * FROM entries WHERE id = ?', [entry_id]) as (Tables<'entries'> & Record<string, unknown>) | undefined
   if (!entry)
@@ -81,6 +83,7 @@ export function build_entry_data({ db, entry_id, admin_level }: {
     tags: tags as NonNullable<EntryData['tags']>,
     dialects: dialects as NonNullable<EntryData['dialects']>,
     admin_level,
+    can_edit,
   })
 }
 

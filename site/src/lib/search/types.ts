@@ -18,7 +18,10 @@ export interface QueryParams {
   parts_of_speech?: string[]
   semantic_domains?: string[]
   speakers?: string[]
+  review_categories?: string[]
   // Boolean facets
+  has_review?: boolean
+  no_review?: boolean
   has_audio?: boolean
   no_audio?: boolean
   has_sentence?: boolean
@@ -44,7 +47,7 @@ export interface QueryParams {
   no_translation?: boolean
 }
 
-type ArrayFilters = 'orthographies' | 'sources' | 'tags' | 'dialects' | 'parts_of_speech' | 'semantic_domains' | 'speakers'
+type ArrayFilters = 'orthographies' | 'sources' | 'tags' | 'dialects' | 'parts_of_speech' | 'semantic_domains' | 'speakers' | 'review_categories'
 export type FilterListKeys = ArrayFilters & keyof QueryParams
 
 // type StoreValue<T> = T extends { subscribe: (run: (value: infer R) => void) => Unsubscriber } ? R : never

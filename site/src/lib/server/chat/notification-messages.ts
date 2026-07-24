@@ -17,13 +17,14 @@ export interface SystemNotificationContent {
 
 /**
  * Substrings the daily digest matches in each notification's `body_text` to
- * categorize it. They're the invariant phrases baked into the three formatters
+ * categorize it. They're invariant phrases baked into the formatters
  * below — the `import.meta.vitest` block asserts each formatter's output still
  * contains its marker, so the categorization can't silently drift.
  */
 export const NEW_USER_MARKER = 'signed up'
 export const NEW_DICTIONARY_MARKER = 'created a new dictionary'
 export const INVITE_MARKER = 'invited'
+export const LARGE_VIDEO_MARKER = 'video for review'
 
 function admin_user_url({ base_url, user_id }: { base_url: string, user_id: string }): string {
   return `${base_url}/admin/users/${user_id}`
@@ -94,6 +95,23 @@ export function format_invite_notification({ actor, actor_user_id, target_email,
   }
 }
 
+export function format_large_video_notification({ actor, actor_user_id, dictionary_name, size_mib, target_label, target_url, base_url }: {
+  actor: string
+  actor_user_id?: string | null
+  dictionary_name: string
+  size_mib: string
+  target_label: 'entry' | 'sentence' | 'text'
+  target_url: string
+  base_url: string
+}): SystemNotificationContent {
+  const body_text = `${actor} uploaded a ${size_mib} MiB video for review on a ${target_label} in "${dictionary_name}" — ${target_url}`
+  return {
+    subject: 'Large video uploaded',
+    body_text: append_user_url({ text: body_text, base_url, user_id: actor_user_id }),
+    body_html: `<p>${linked_user_html({ label: actor, base_url, user_id: actor_user_id })} uploaded a <strong>${escape_html(size_mib)} MiB video for review</strong> on the <a href="${escape_html(target_url)}">${escape_html(target_label)} in ${escape_html(dictionary_name)}</a>.</p>`,
+  }
+}
+
 /** Join a list of phrases naturally: "a", "a and b", "a, b, and c". */
 function natural_join(parts: string[]): string {
   if (parts.length <= 1)
@@ -117,6 +135,7 @@ export function summarize_notifications({ messages }: { messages: readonly { bod
   let users = 0
   let dictionaries = 0
   let invites = 0
+  let large_videos = 0
   let other = 0
   for (const message of messages) {
     const text = message.body_text
@@ -126,6 +145,8 @@ export function summarize_notifications({ messages }: { messages: readonly { bod
       users++
     else if (text.includes(INVITE_MARKER))
       invites++
+    else if (text.includes(LARGE_VIDEO_MARKER))
+      large_videos++
     else
       other++
   }
@@ -136,6 +157,8 @@ export function summarize_notifications({ messages }: { messages: readonly { bod
     parts.push(`${dictionaries} new ${dictionaries === 1 ? 'dictionary' : 'dictionaries'}`)
   if (invites)
     parts.push(`${invites} new invitation${invites === 1 ? '' : 's'}`)
+  if (large_videos)
+    parts.push(`${large_videos} large video${large_videos === 1 ? '' : 's'}`)
   if (other)
     parts.push(`${other} other notification${other === 1 ? '' : 's'}`)
   const total = messages.length
@@ -153,10 +176,11 @@ if (import.meta.vitest) {
         format_new_user_notification({ actor: 'B', email: 'b@b.com', base_url: 'https://ld.app' }),
         format_new_dictionary_notification({ dictionary_name: 'D', dictionary_id: 'd1', actor: 'A', base_url: 'https://ld.app' }),
         format_invite_notification({ actor: 'A', target_email: 't@b.com', role: 'manager', dictionary_name: 'D', dictionary_id: 'd1', base_url: 'https://ld.app' }),
+        format_large_video_notification({ actor: 'A', dictionary_name: 'D', size_mib: '25.1', target_label: 'entry', target_url: 'https://ld.app/d1/entry/e1', base_url: 'https://ld.app' }),
       ]
       const summary = summarize_notifications({ messages })
-      expect(summary.subject).toBe('4 new notifications')
-      expect(summary.body_text).toBe('2 new users, 1 new dictionary, and 1 new invitation')
+      expect(summary.subject).toBe('5 new notifications')
+      expect(summary.body_text).toBe('2 new users, 1 new dictionary, 1 new invitation, and 1 large video')
     })
 
     it('singularizes a lone dictionary and a single-item subject', () => {
@@ -174,6 +198,7 @@ if (import.meta.vitest) {
       expect(format_new_user_notification({ actor: 'A', email: 'a@b.com', base_url: 'https://ld.app' }).body_text).toContain(NEW_USER_MARKER)
       expect(format_new_dictionary_notification({ dictionary_name: 'D', dictionary_id: 'd1', actor: 'A', base_url: 'https://ld.app' }).body_text).toContain(NEW_DICTIONARY_MARKER)
       expect(format_invite_notification({ actor: 'A', target_email: 't@b.com', role: 'manager', dictionary_name: 'D', dictionary_id: 'd1', base_url: 'https://ld.app' }).body_text).toContain(INVITE_MARKER)
+      expect(format_large_video_notification({ actor: 'A', dictionary_name: 'D', size_mib: '25.1', target_label: 'entry', target_url: 'https://ld.app/d1/entry/e1', base_url: 'https://ld.app' }).body_text).toContain(LARGE_VIDEO_MARKER)
     })
   })
 
@@ -211,6 +236,25 @@ if (import.meta.vitest) {
       const content = format_invite_notification({ actor: 'Jane', actor_user_id: 'u1', target_email: 'target@example.com', role: 'manager', dictionary_name: 'Test', dictionary_id: 'd1', base_url: 'https://ld.app' })
       expect(content.body_html).toContain('<a href="https://ld.app/admin/users/u1">Jane</a> invited target@example.com')
       expect(content.body_text).toContain('https://ld.app/admin/users/u1')
+    })
+  })
+
+  describe(format_large_video_notification, () => {
+    it('links the uploader and review target while escaping labels', () => {
+      const content = format_large_video_notification({
+        actor: '<Jane>',
+        actor_user_id: 'u1',
+        dictionary_name: '<Dictionary>',
+        size_mib: '31.2',
+        target_label: 'entry',
+        target_url: 'https://ld.app/d1/entry/e1',
+        base_url: 'https://ld.app',
+      })
+      expect(content.subject).toBe('Large video uploaded')
+      expect(content.body_html).toContain('&lt;Jane&gt;')
+      expect(content.body_html).toContain('&lt;Dictionary&gt;')
+      expect(content.body_html).toContain('href="https://ld.app/d1/entry/e1"')
+      expect(content.body_text).toContain('31.2 MiB video for review')
     })
   })
 }

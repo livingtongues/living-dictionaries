@@ -41,7 +41,7 @@ describe(build_entry_data, () => {
     insert('sentences', { id: 'st1', text: { default: 'drink water' }, translation: { en: 'drink water' } })
     insert('senses_in_sentences', { id: 'sis1', sense_id: 's1', sentence_id: 'st1' })
 
-    insert('photos', { id: 'p1', storage_path: 'photos/p1', serving_url: 'lh3/p1' })
+    insert('photos', { id: 'p1', storage_path: 'photos/p1' })
     insert('sense_photos', { id: 'sp1', sense_id: 's1', photo_id: 'p1' })
 
     insert('speakers', { id: 'spk1', name: 'Ada' })
@@ -64,7 +64,7 @@ describe(build_entry_data, () => {
     expect(entry.senses[0]).not.toHaveProperty('entry_id')
     expect(entry.senses[0].glosses).toEqual({ en: 'water' })
     expect(entry.senses[0].sentences?.[0].text).toEqual({ default: 'drink water' })
-    expect(entry.senses[0].photos?.[0].serving_url).toBe('lh3/p1')
+    expect(entry.senses[0].photos?.[0].storage_path).toBe('photos/p1')
 
     expect(entry.audios?.[0].storage_path).toBe('audio/a1')
     expect(entry.audios?.[0].speakers?.[0].name).toBe('Ada')

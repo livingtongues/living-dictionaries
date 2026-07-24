@@ -126,11 +126,13 @@ The `.db-shm` / `.db-wal` files MUST be deleted on restore — SQLite recreates
 them clean on first open of the restored `.db`. Skipping that step causes
 corruption / lost writes from the restored snapshot.
 
-After restoring a per-dict DB, also **trigger a fresh R2 snapshot** so editors
-pull the restored content:
+Starting the primary after a per-dict restore triggers the snapshot builder's
+immediate reconcile + upload pass. Verify it completed:
 ```bash
-ssh living 'docker exec sveltekit_blue node /workspace/site/build/bin/build-all-snapshots.js --dict-id=DICT_ID'
+ssh living 'docker logs sveltekit_blue --since 10m 2>&1 | grep r2-snapshot-builder'
 ```
+
+The production image does not ship an ad-hoc snapshot CLI.
 
 ## List existing backups
 

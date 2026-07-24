@@ -64,14 +64,14 @@ describe(assemble_entry_data, () => {
     const result = assemble_entry_data(base_input({
       senses: [sense],
       sentences_by_sense: { 'sense-1': [{ id: 'st-1', text: { default: 'drink water' } } as any] },
-      photos_by_sense: { 'sense-1': [{ id: 'ph-1', serving_url: 'lh3/abc', storage_path: 'p/abc' } as any] },
+      photos_by_sense: { 'sense-1': [{ id: 'ph-1', storage_path: 'p/abc' } as any] },
     }))
 
     expect(result.senses).toHaveLength(1)
     expect(result.senses[0]).not.toHaveProperty('entry_id')
     expect(result.senses[0].glosses).toEqual({ en: 'water' })
     expect(result.senses[0].sentences).toHaveLength(1)
-    expect(result.senses[0].photos?.[0].serving_url).toBe('lh3/abc')
+    expect(result.senses[0].photos?.[0].storage_path).toBe('p/abc')
     expect(result.senses[0].videos).toBeUndefined()
   })
 
@@ -125,5 +125,38 @@ describe(assemble_entry_data, () => {
 
     const level_3 = assemble_entry_data(base_input({ tags, admin_level: 3 }))
     expect(level_3.tags?.map(t => t.id)).toEqual(['t-public', 't-private', 't-v4'])
+  })
+
+  test('private tags are visible to a plain editor (can_edit) even at admin_level 0', () => {
+    const tags = [
+      { id: 't-public', name: 'animals', private: 0 },
+      { id: 't-private', name: 'sensitive', private: 1 },
+      { id: 't-v4', name: 'v4-internal', private: 0 },
+    ] as any
+
+    const manager = assemble_entry_data(base_input({ tags, admin_level: 0, can_edit: true }))
+    // sees public + private, but NOT the super-admin-only v4 tag
+    expect(manager.tags?.map(t => t.id)).toEqual(['t-public', 't-private'])
+  })
+
+  function review_input(overrides: Partial<AssembleEntryDataInput> = {}) {
+    const entry = {
+      id: 'entry-1', dictionary_id: 'dict-1', lexeme: { default: 'jaʼ' },
+      review: { category: 'truncated', note: 'check the source' },
+      dirty: 1, created_by_user_id: 'u1', created_at: '2024-01-01T00:00:00Z',
+      updated_by_user_id: 'u1', updated_at: '2024-02-02T00:00:00Z',
+    } as unknown as Tables<'entries'> & Record<string, unknown>
+    return base_input({ entry, ...overrides })
+  }
+
+  test('strips the editor-only `review` flag for non-editors', () => {
+    const anon = assemble_entry_data(review_input({ can_edit: false }))
+    expect(anon.main.review).toBeUndefined()
+    expect('review' in anon.main).toBeFalsy()
+  })
+
+  test('keeps `review` for editors', () => {
+    const editor = assemble_entry_data(review_input({ can_edit: true }))
+    expect(editor.main.review).toEqual({ category: 'truncated', note: 'check the source' })
   })
 })

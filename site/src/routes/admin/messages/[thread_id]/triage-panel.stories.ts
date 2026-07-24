@@ -16,7 +16,7 @@ export const TechnicalWithDraft: Story<typeof Component> = {
       triage_category: 'technical',
       triage_confidence: 'high',
       triage_summary: 'Audio playback broken across entries — regression since last week.',
-      triage_advice: 'Check whether the audio serving URLs resolve for this dictionary (media-url.ts → GCS/lh3). Prompt for a coding agent: "For dictionary X, query the audio rows for recent entries and verify each storage_path resolves to a 200."',
+      triage_advice: 'Check whether the audio URLs resolve from the R2 media domain. Prompt for a coding agent: "For dictionary X, query the audio rows for recent entries and verify each storage_path resolves to a 200."',
       triage_draft_reply: 'Hi there,\n\nThanks for flagging this, and sorry for the trouble! I\'m looking into why the audio isn\'t playing — could you confirm the name of the dictionary and one entry where it happens?\n\nWarmly,\nThe Living Dictionaries Team',
       triage_at: now,
     },

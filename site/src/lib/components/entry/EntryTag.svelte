@@ -21,7 +21,7 @@
 
   const { tags: dictionary_tags, writes, auth_user } = $derived(page.data)
   const tag_ids = $derived(tags.map(tag => tag.id))
-  const visible_tags = $derived($dictionary_tags.filter(tag => should_include_tag(tag, auth_user.admin_level)))
+  const visible_tags = $derived($dictionary_tags.filter(tag => should_include_tag(tag, { admin_level: auth_user.admin_level, can_edit })))
   // Seed options from the dictionary-wide store, but always fold in this entry's
   // OWN tags so their names resolve even before that store has loaded (otherwise
   // the chip falls back to rendering the raw id — the "hash" bug). The entry's

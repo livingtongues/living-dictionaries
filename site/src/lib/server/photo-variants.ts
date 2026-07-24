@@ -8,9 +8,9 @@ import { log_server_event } from './log-server-event'
 
 /**
  * WebP variant generation for photos on the R2 key convention (Phase 2 decisions
- * 2026-07-23): thumb = 400px square crop (serves the s150-p/s340-p/s400-p specs),
- * w900 + w1600 width-capped, all WebP q80, never enlarged, EXIF-rotated (lh3 did
- * that for us before). Originals are stored untouched and serve `s0`.
+ * 2026-07-23): thumb = 400px square crop,
+ * w900 + w1600 width-capped, all WebP q80, never enlarged, and EXIF-rotated.
+ * Originals are stored untouched.
  *
  * Upload flow calls `generate_and_store_photo_variants` WITHOUT awaiting (fire
  * after the original is stored, respond immediately — Jacob wants snappy). A
@@ -43,7 +43,7 @@ export async function generate_and_store_photo_variants({ original_key, bytes }:
   for (const variant of ['thumb', 'w900', 'w1600'] as const) {
     const variant_bytes = await generate_photo_variant({ bytes, variant })
     const key = photo_variant_key({ original_key, variant })
-    await store_media_bytes({ file_name: key, file_type: 'image/webp', bytes: variant_bytes, r2_key: key })
+    await store_media_bytes({ file_type: 'image/webp', bytes: variant_bytes, r2_key: key })
     record_media_object_by_key({ key, bytes: variant_bytes.length })
     stored.push({ key, bytes: variant_bytes.length })
   }

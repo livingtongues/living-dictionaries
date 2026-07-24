@@ -1,4 +1,5 @@
 import type {
+  AlignConfig,
   DictionaryCatalogMetadata,
   DictionaryCoordinates,
   FeaturedImage,
@@ -172,6 +173,8 @@ export const dictionaries = sqliteTable('dictionaries', {
   // `grammar_sections` row + the column DROPPED (2026-07-15 cutover stage 2,
   // shared migration 20260715_drop_dictionaries_grammar.sql).
   write_in_collaborators: text({ mode: 'json' }).$type<string[]>(),
+  /** ADMIN-ONLY forced-alignment config (NULL = not configured; see `AlignConfig`). */
+  align_config: text({ mode: 'json' }).$type<AlignConfig>(),
   /**
    * Last `dict.db.db_metadata.last_modified_at` mirrored here by the push
    * endpoint. Single source of truth for "is this dict due for an R2 rebuild?"
@@ -207,17 +210,12 @@ export const dictionary_roles = sqliteTable('dictionary_roles', {
   updated_at: text().notNull(),
 })
 
-/**
- * Partner organizations shown on a dictionary's about page. The logo is
- * denormalized here (serving_url + storage_path copied from the legacy `photos`
- * row at migration time) so the about page renders entirely from shared.db.
- */
+/** Partner organizations shown on a dictionary's about page. */
 export const dictionary_partners = sqliteTable('dictionary_partners', {
   id: text().primaryKey(),
   dictionary_id: text().notNull().references(() => dictionaries.id, { onDelete: 'cascade' }),
   name: text().notNull(),
   photo_storage_path: text(),
-  photo_serving_url: text(),
   dirty: integer(),
   server_seq: integer(),
   created_at: text().notNull(),
@@ -357,6 +355,30 @@ export const source_files = sqliteTable('source_files', {
   uploaded_by_user_id: text().notNull().references(() => users.id, { onDelete: 'cascade' }),
   created_at: text().notNull(),
   updated_at: text().notNull(),
+})
+
+/**
+ * Forced-alignment job ledger (M6, `.issues/auto-align-timings.md`). One row
+ * per run; today's rows double as the rate-limit counters (per-dict + global).
+ * SERVER-ONLY: never syncs (not in `SYNCABLE_TABLE_NAMES`).
+ */
+export const align_jobs = sqliteTable('align_jobs', {
+  id: text().primaryKey(),
+  dictionary_id: text().notNull(),
+  target_kind: text({ enum: ['text', 'sentence'] }).notNull(),
+  /** Dict-db `texts.id` | `sentences.id` (cross-db, no FK). */
+  target_id: text().notNull(),
+  /** Dict-db `audio.id` the timings land on (cross-db, no FK). */
+  audio_id: text().notNull(),
+  status: text({ enum: ['running', 'done', 'failed'] }).notNull(),
+  /** Failure detail; on `done` optionally a coverage-gap summary. */
+  error: text(),
+  tokens_total: integer(),
+  tokens_aligned: integer(),
+  requested_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),
+  requested_via: text({ enum: ['ui', 'v1', 'auto'] }),
+  created_at: text().notNull(),
+  finished_at: text(),
 })
 
 /**

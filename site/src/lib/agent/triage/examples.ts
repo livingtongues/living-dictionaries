@@ -35,7 +35,7 @@ export const TRIAGE_EXAMPLES: readonly TriageExample[] = [
       category: 'technical',
       confidence: 'high',
       summary: 'Audio playback broken across entries — regression since last week.',
-      advice: 'Check whether the audio serving URLs resolve for this dictionary (media-url.ts → GCS/lh3) and whether recent uploads stored a valid storage_path. Prompt for a coding agent: "For dictionary X, query the audio rows for the most recent entries and verify each storage_path resolves to a 200 from the serving URL; report any 404s or null paths." Confirm it isn\'t a browser autoplay/codec issue.',
+      advice: 'Check whether the audio URLs resolve from the R2 media domain and whether recent uploads stored a valid storage_path. Prompt for a coding agent: "For dictionary X, query the audio rows for the most recent entries and verify each storage_path resolves to a 200 from the serving URL; report any 404s or null paths." Confirm it isn\'t a browser autoplay/codec issue.',
       draft_reply: 'Hi there,\n\nThanks for flagging this, and sorry for the trouble! I\'m looking into why the audio isn\'t playing — could you confirm the name of the dictionary and one entry where it happens, so I can check it directly? I\'ll get this sorted out.\n\nWarmly,\nThe Living Dictionaries Team',
       spam_reason: null,
     },

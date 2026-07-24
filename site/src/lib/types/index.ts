@@ -5,7 +5,6 @@ export type { Coordinates, IPoint, IRegion, LngLatFull } from './coordinates.int
 export type { IGlossLanguage, IGlossLanguages } from './gloss-language.interface'
 export type { MultiString } from './gloss.interface'
 export type { IExampleSentence } from './example-sentence.interface'
-export type { DictionaryPhoto, PartnerPhoto } from './photo.interface'
 export type { SemanticDomain } from './semantic-domain.interface'
 export type { GoogleAuthUserMetaData } from './user.interface'
 export type { PartOfSpeech } from './part-of-speech.interface'
@@ -22,6 +21,5 @@ export interface PartnerWithPhoto {
   photo?: {
     id: string
     storage_path: string
-    serving_url: string
   }
 }

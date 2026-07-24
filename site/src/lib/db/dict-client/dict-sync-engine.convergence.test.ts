@@ -90,7 +90,7 @@ const PARENTS: Record<string, string> = {
   speaker: `INSERT INTO speakers (id, name, created_by_user_id, updated_by_user_id, created_at, updated_at) VALUES ('spk-1', 'Speaker', 'u1', 'u1', '${T0}', '${T0}')`,
   audio: `INSERT INTO audio (id, entry_id, storage_path, created_by_user_id, updated_by_user_id, created_at, updated_at) VALUES ('aud-1', 'ent-1', 'audio/a.mp3', 'u1', 'u1', '${T0}', '${T0}')`,
   video: `INSERT INTO videos (id, storage_path, created_by_user_id, updated_by_user_id, created_at, updated_at) VALUES ('vid-1', 'video/v.mp4', 'u1', 'u1', '${T0}', '${T0}')`,
-  photo: `INSERT INTO photos (id, storage_path, serving_url, created_by_user_id, updated_by_user_id, created_at, updated_at) VALUES ('pho-1', 'photos/p.jpg', 'https://p', 'u1', 'u1', '${T0}', '${T0}')`,
+  photo: `INSERT INTO photos (id, storage_path, created_by_user_id, updated_by_user_id, created_at, updated_at) VALUES ('pho-1', 'photos/p.jpg', 'u1', 'u1', '${T0}', '${T0}')`,
   dialect: `INSERT INTO dialects (id, name, created_by_user_id, updated_by_user_id, created_at, updated_at) VALUES ('dia-1', '{}', 'u1', 'u1', '${T0}', '${T0}')`,
   tag: `INSERT INTO tags (id, name, created_by_user_id, updated_by_user_id, created_at, updated_at) VALUES ('tag-1', 'Tag', 'u1', 'u1', '${T0}', '${T0}')`,
 }

@@ -49,12 +49,9 @@ outlives the migration plan.
     sector-scoped.
 - **Runes gotchas:** `bind:value` to a `$derived` silently no-ops; `$state` bound to a child's
   non-undefined `$bindable(x)` fallback throws `props_invalid_value` at mount.
-- **R2 = DB snapshots + admin message attachments, NOT media bytes.** Media bytes stay on legacy
-  **GCS** (LD: serving URLs built via `PUBLIC_STORAGE_BUCKET`, prod
-  `talking-dictionaries-alpha.appspot.com`) / Firebase Storage (house) — **no media→R2 migration.**
-  R2 IS used for DB **snapshots** (`R2_SNAPSHOTS_BUCKET`, `lib/r2/client.ts`) and message
-  **attachments** (`R2_ATTACHMENTS_BUCKET`, `lib/r2/put-attachment.ts`). R2 vars are
-  `$env/dynamic/private` (runtime, NOT preflight-gated).
+- **R2 stores LD media, DB snapshots, imports, and admin message attachments.** User media lives in
+  `livingdictionaries-media` behind `media.livingdictionaries.app`; snapshots and attachments use
+  their dedicated buckets. R2 vars are `$env/dynamic/private` (runtime, NOT preflight-gated).
 - **Deploy = vps-setup GitHub webhook, NOT GitHub Actions.** There is no GH Actions deploy workflow
   in any LD branch — only CI (lint/check/test/lighthouse). The deploy mechanism + the env-var
   contract are documented in [supabase-cutover.md](./supabase-cutover.md).

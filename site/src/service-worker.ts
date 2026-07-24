@@ -63,7 +63,7 @@ sw.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url)
 
-  // Only same-origin http(s); let the browser handle cross-origin (GCS media, etc.).
+  // Only same-origin http(s); let the browser handle cross-origin media.
   if (!url.protocol.startsWith('http') || url.origin !== sw.location.origin)
     return
 

@@ -1,6 +1,5 @@
 import type { EntryData } from '$lib/types'
 import { augment_entry_for_search, simplify_lexeme_for_search } from './augment-entry-for-search'
-// import { complex } from '$lib/mocks/entries'
 
 describe(augment_entry_for_search, () => {
   test('does not choke on undefineds', () => {
@@ -14,6 +13,7 @@ describe(augment_entry_for_search, () => {
         "_orthographies": [],
         "_other": [],
         "_parts_of_speech": [],
+        "_review_categories": [],
         "_semantic_domains": [],
         "_sources": [],
         "_speakers": [],
@@ -23,6 +23,7 @@ describe(augment_entry_for_search, () => {
         "has_noun_class": false,
         "has_part_of_speech": false,
         "has_plural_form": false,
+        "has_review": false,
         "has_semantic_domain": false,
         "has_sentence": false,
         "has_speaker": false,

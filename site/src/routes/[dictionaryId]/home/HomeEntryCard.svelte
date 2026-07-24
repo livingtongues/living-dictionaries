@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
   import { create_exclusive_audio } from '$lib/utils/exclusive-audio.svelte'
   import { card_hue } from './home-helpers'
@@ -28,7 +27,6 @@
     pos?: string | null
     glosses?: string[]
     dialect?: string | null
-    photo_serving_url?: string | null
     photo_storage_path?: string | null
     audio_storage_path?: string | null
     manage?: Manage | null
@@ -45,7 +43,6 @@
     pos = null,
     glosses = [],
     dialect = null,
-    photo_serving_url = null,
     photo_storage_path = null,
     audio_storage_path = null,
     manage = null,
@@ -54,7 +51,7 @@
 
   const sparse = $derived(!alt && !phonetic && !pos && !glosses.length && !dialect)
 
-  const has_photo = $derived(!!(photo_serving_url || photo_storage_path))
+  const has_photo = $derived(!!photo_storage_path)
 
   const audio = create_exclusive_audio()
 
@@ -62,7 +59,7 @@
     event.preventDefault()
     event.stopPropagation()
     if (audio_storage_path)
-      audio.toggle(url_from_storage_path(audio_storage_path, PUBLIC_STORAGE_BUCKET))
+      audio.toggle(url_from_storage_path(audio_storage_path))
   }
 
   function manage_click(event: MouseEvent, action: () => void) {
@@ -74,7 +71,7 @@
 
 <a class="card" class:has-photo={has_photo} {href} style:--hue={card_hue(entry_id)}>
   {#if has_photo}
-    <img src={photo_src({ storage_path: photo_storage_path, serving_url: photo_serving_url }, 's340-p')} alt={lexeme} loading="lazy" />
+    <img src={photo_src({ photo: { storage_path: photo_storage_path }, variant: 'thumb' })} alt={lexeme} loading="lazy" />
     <div class="scrim"></div>
   {/if}
   <div class="content" class:sparse>

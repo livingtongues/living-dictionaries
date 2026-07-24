@@ -26,6 +26,7 @@ of the Supabase→SQLite cutover itself is [../supabase-cutover.md](../supabase-
   deletes/cleanups propagate to clients.
 
 ## Media & deploy
-- [media-upload.md](./media-upload.md) — GCS presigned upload flow + serving URLs.
+- [../domain/media-serving-urls.md](../domain/media-serving-urls.md) — R2 object conventions,
+  variants, CORS, storage ledger, orphan sweep, and backup.
 - [build-and-deploy-gotchas.md](./build-and-deploy-gotchas.md) — build/deploy + lockfile
   discipline (native deps in `dependencies`, preflight env grep, blue/green).

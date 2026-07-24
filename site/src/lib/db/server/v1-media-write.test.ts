@@ -32,8 +32,8 @@ const CELL_FIXTURES: Record<MediaCellKey, { owner_id: string, fields: MediaField
   'audio:entry': { owner_id: 'e1', fields: { storage_path: 'a.mp3', source: 'field-2026' } },
   'audio:sentence': { owner_id: 'sent1', fields: { storage_path: 'a.mp3', source: 'field-2026' } },
   'audio:text': { owner_id: 't1', fields: { storage_path: 'a.mp3', source: 'field-2026' } },
-  'photo:sense': { owner_id: 's1', fields: { storage_path: 'p.jpg', serving_url: 'hash', photographer: 'Sam', source: 'a free-text caption' } },
-  'photo:sentence': { owner_id: 'sent1', fields: { storage_path: 'p.jpg', serving_url: 'hash' } },
+  'photo:sense': { owner_id: 's1', fields: { storage_path: 'p.jpg', photographer: 'Sam', source: 'a free-text caption' } },
+  'photo:sentence': { owner_id: 'sent1', fields: { storage_path: 'p.jpg' } },
   'video:sense': { owner_id: 's1', fields: { hosted_elsewhere: { type: 'youtube', video_id: 'abc' }, source: 'field-2026' } },
   'video:sentence': { owner_id: 'sent1', fields: { storage_path: 'v.mp4', source: 'field-2026' } },
   'video:text': { owner_id: 't1', fields: { hosted_elsewhere: { type: 'vimeo', video_id: '123' }, source: 'field-2026' } },
@@ -79,7 +79,7 @@ describe(attach_media, () => {
   })
 
   test('rejects a speaker on a medium that has none (photo)', () => {
-    expect(() => attach_media({ db, cell_key: 'photo:sense', owner_id: 's1', fields: { storage_path: 'p.jpg', serving_url: 'h' }, speaker_id: 'sp1', user_id: USER }))
+    expect(() => attach_media({ db, cell_key: 'photo:sense', owner_id: 's1', fields: { storage_path: 'p.jpg' }, speaker_id: 'sp1', user_id: USER }))
       .toThrow('does not support a speaker')
   })
 
@@ -148,7 +148,7 @@ describe(attach_media, () => {
   })
 
   test('photo needs no attribution and its free-text source is stored verbatim', () => {
-    const result = attach_media({ db, cell_key: 'photo:sense', owner_id: 's1', fields: { storage_path: 'p.jpg', serving_url: 'h', source: 'any prose caption' }, user_id: USER })
+    const result = attach_media({ db, cell_key: 'photo:sense', owner_id: 's1', fields: { storage_path: 'p.jpg', source: 'any prose caption' }, user_id: USER })
     expect(result.created).toBeTruthy()
     expect(result.media.source).toBe('any prose caption')
   })
@@ -156,7 +156,7 @@ describe(attach_media, () => {
 
 describe(delete_media, () => {
   test('found:false when the media is not linked to this owner', () => {
-    const attached = attach_media({ db, cell_key: 'photo:sense', owner_id: 's1', fields: { storage_path: 'p.jpg', serving_url: 'h' }, user_id: USER })
+    const attached = attach_media({ db, cell_key: 'photo:sense', owner_id: 's1', fields: { storage_path: 'p.jpg' }, user_id: USER })
     // Correct id but wrong owner.
     const result = delete_media({ db, cell_key: 'photo:sense', owner_id: 'ghost-sense', media_id: attached.media.id, user_id: USER })
     expect(result.found).toBeFalsy()

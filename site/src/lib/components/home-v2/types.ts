@@ -29,8 +29,7 @@ export interface FeaturedCard {
   lexeme: string
   gloss: string | null
   gloss_language: string | null
-  photo_serving_url: string
-  photo_storage_path?: string | null
+  photo_storage_path: string
   audio_storage_path: string
   lng: number | null
   lat: number | null

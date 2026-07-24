@@ -10,6 +10,8 @@ const log = false
 
 let dictionary_id: string
 let admin: number
+/** Editor of this dict — surfaces private tags + the editor-only `review` flag. */
+let can_edit = false
 /** The ONE proxied callback to the main-thread store reducer (see worker-patch.ts). */
 let on_patch: (patch: WorkerPatch) => Promise<void>
 
@@ -120,7 +122,7 @@ function recompute_entry_tags(entry_id: string) {
   if (!entry_id) return
   entry_id_to_tags[entry_id] = pair_values(entry_tags, 'entry_id', entry_id)
     .map(join => tags[(join as Tables<'entry_tags'>).tag_id])
-    .filter(tag => tag && should_include_tag(tag, admin))
+    .filter(tag => tag && should_include_tag(tag, { admin_level: admin, can_edit }))
 }
 
 function recompute_entry_dialects(entry_id: string) {
@@ -583,7 +585,7 @@ export async function init_entries(
   ;(on_patch as unknown as { [releaseProxy]?: () => void } | undefined)?.[releaseProxy]?.()
   on_patch = _on_patch
 
-  ;({ dictionary_id, admin } = options)
+  ;({ dictionary_id, admin, can_edit } = options)
 
   // vps-migration M4 write/sync: the bundle is read on the main thread from the
   // browser wa-sqlite dict.db (snapshot + sync), NOT fetched from an endpoint.
@@ -614,7 +616,7 @@ export async function init_entries(
   for (const entry_tag of Object.values(entry_tags)) {
     if (!entry_id_to_tags[entry_tag.entry_id]) entry_id_to_tags[entry_tag.entry_id] = []
     const tag = tags[entry_tag.tag_id]
-    if (should_include_tag(tag, admin)) entry_id_to_tags[entry_tag.entry_id].push(tag)
+    if (should_include_tag(tag, { admin_level: admin, can_edit })) entry_id_to_tags[entry_tag.entry_id].push(tag)
   }
 
   // NOTE every junction loop below skips a missing referent: the bundle's
@@ -737,6 +739,7 @@ function process_entry(entry: Tables<'entries'>) {
     tags: (entry_id_to_tags[entry.id] || []) as any,
     dialects: (entry_id_to_dialects[entry.id] || []) as any,
     admin_level: admin,
+    can_edit,
   })
 }
 

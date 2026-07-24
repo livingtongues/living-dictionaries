@@ -161,7 +161,7 @@ the 2026-06-12 uno drop):
 - **`pnpm check` runs `svelte-kit sync`, which triggers a full-reload storm that hangs concurrent
   puppeteer `goto`s** — never run a check and the screenshot sweep in parallel.
 - **Block `googleusercontent.com`** (avatars intermittently `ERR_BLOCKED_BY_ORB`) for determinism.
-- **Mapbox tiles / YouTube + Vimeo embeds / firebase images flake** — eyeball those regions; the pixel
+- **Mapbox tiles / YouTube + Vimeo embeds / remote media images flake** — eyeball those regions; the pixel
   diff there is noise.
 - **Select e2e elements by semantic class / aria-label, never by icon class** — the old `i-*` selectors
   broke the instant icons were swapped; use `.add-sense-button` / `.delete-sense-button` etc.

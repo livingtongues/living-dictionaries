@@ -28,10 +28,10 @@ beforeEach(() => {
   db.prepare(`INSERT INTO dictionaries (id, url, name, public, entry_count, created_at, updated_at) VALUES ('achi', 'achi', 'Achi', 1, 120, ?, ?)`).run(now, now)
   db.prepare(`INSERT INTO dictionaries (id, url, name, public, entry_count, created_at, updated_at) VALUES ('gta', 'gta-slug', 'GtaɁ', 1, 80, ?, ?)`).run(now, now)
   const insert = db.prepare(`
-    INSERT INTO featured_entries (id, dict_id, entry_id, lexeme, gloss, gloss_language, photo_serving_url, audio_storage_path, dict_name, longitude, latitude, status)
+    INSERT INTO featured_entries (id, dict_id, entry_id, lexeme, gloss, gloss_language, photo_storage_path, audio_storage_path, dict_name, longitude, latitude, status)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-  insert.run('fe1', 'achi', 'e1', 'tz’ikin', 'bird', 'en', 'hash1', 'achi/audio/1.mp3', 'Achi', -90.4, 15.1, 'approved')
-  insert.run('fe2', 'gta', 'e2', 'gsoʔ', 'water', 'es', 'hash2', 'gta/audio/2.mp3', 'GtaɁ', 84.1, 19.2, 'suggested')
+  insert.run('fe1', 'achi', 'e1', 'tz’ikin', 'bird', 'en', 'achi/photo/1.jpg', 'achi/audio/1.mp3', 'Achi', -90.4, 15.1, 'approved')
+  insert.run('fe2', 'gta', 'e2', 'gsoʔ', 'water', 'es', 'gta/photo/2.jpg', 'gta/audio/2.mp3', 'GtaɁ', 84.1, 19.2, 'suggested')
 })
 
 afterEach(() => {

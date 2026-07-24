@@ -2,7 +2,7 @@
   import { crossfade, fade, scale } from 'svelte/transition'
   import { page } from '$app/state'
   import type { PhotoLike } from '$lib/utils/media-url'
-  import { photo_src } from '$lib/utils/media-url'
+  import { photo_src, photo_variant_for_dimensions } from '$lib/utils/media-url'
   import IconGgSpinner from '~icons/gg/spinner'
   import IconTablerAi from '~icons/tabler/ai'
   import IconMdiClose from '~icons/mdi/close'
@@ -74,7 +74,12 @@
   const current_photographer = $derived(gallery ? gallery[safe_index]?.photographer : photographer)
 
   const isDesktop = $derived(windowWidth >= 768)
-  const fullscreenSource = $derived(photo_src(current, `w${isDesktop ? windowWidth - 24 : windowWidth}`))
+  const fullscreen_variant = $derived(photo_variant_for_dimensions({ pixels: isDesktop ? windowWidth - 24 : windowWidth }))
+  const fullscreenSource = $derived(photo_src({ photo: current, variant: fullscreen_variant }))
+  const thumbnail_variant = $derived(photo_variant_for_dimensions({
+    is_square: square !== undefined,
+    pixels: square ?? width ?? height,
+  }))
 
   function step_gallery(delta: number) {
     if (!gallery) return
@@ -92,7 +97,7 @@
       viewing = true
     }
 
-    img.src = photo_src(photo, `w${isDesktop ? windowWidth - 24 : windowWidth}`)
+    img.src = photo_src({ photo, variant: fullscreen_variant })
   }
 </script>
 
@@ -113,13 +118,7 @@
       in:receive={{ key }}
       out:send={{ key }}
       alt={title}
-      src={photo_src(photo, square
-        ? `s${square}-p`
-        : width
-        ? `w${width}`
-        : height
-        ? `h${height}`
-        : 's0')} />
+      src={photo_src({ photo, variant: thumbnail_variant })} />
     {#if loading}
       <IconGgSpinner class="spinner" />
     {:else if photographer === 'AI'}

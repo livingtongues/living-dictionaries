@@ -31,7 +31,7 @@ import { SmallCaps } from './small-caps'
  *    colspan/rowspan some linguistic paradigms use, so it needs eyeballing.
  *
  * Headings capped at 1–3. Image is a standalone node (StarterKit doesn't
- * bundle it) — LD images are stable lh3/GCS URLs, so plain `![](url)`.
+ * bundle it), serialized as plain `![](url)`.
  */
 export function create_markdown_extensions(): Extensions {
   return [

@@ -17,6 +17,7 @@
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import AudioPlayer from '$lib/media/AudioPlayer.svelte'
   import AttachAudioModal from '$lib/media/AttachAudioModal.svelte'
+  import AutoAlignButton from '$lib/media/AutoAlignButton.svelte'
   import TimingsEditor from '$lib/media/TimingsEditor.svelte'
   import { build_text_timings } from '$lib/media/media-timings'
   import type { DictRowType } from '$lib/db/dict-client/dict-live-db.svelte'
@@ -138,6 +139,9 @@
               <button type="button" class="btn-outline btn-sm" style="gap: 0.375rem" title={page.data.t('timings.adjust')} onclick={() => show_timings_editor = true}>
                 <IconMdiTune />
               </button>
+            {/if}
+            {#if page.data.is_manager && page.data.align_enabled}
+              <AutoAlignButton target_kind="sentence" target_id={sentence_id} audio_id={sentence_audio.id} {has_timings} />
             {/if}
           </div>
         {/if}

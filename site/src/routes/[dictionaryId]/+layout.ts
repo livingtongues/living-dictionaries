@@ -8,7 +8,6 @@ import { create_guarded_writes } from '$lib/db/dict-client/guarded-writes'
 import { get_dict_session } from '$lib/db/dict-client/dict-session'
 import { toast } from '$lib/state/toast.svelte'
 import { api_dictionaries_catalog } from '$api/dictionaries/[id]/catalog/_call'
-import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
 import { browser } from '$app/environment'
 import { invalidate } from '$app/navigation'
 import { create_entries_ui_store } from '$lib/search/entries-ui-store'
@@ -106,6 +105,8 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
 
     return {
       dictionary,
+      align_enabled: data.align_enabled,
+      auto_align: data.auto_align,
       is_manager,
       is_contributor,
       can_edit,
@@ -114,7 +115,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
       dict_sync_status,
       about_is_too_short,
       update_dictionary,
-      url_from_storage_path: (path: string) => url_from_storage_path(path, PUBLIC_STORAGE_BUCKET),
+      url_from_storage_path,
       default_entries_per_page,
       writes,
 

@@ -3,12 +3,10 @@ import { env } from '$env/dynamic/private'
 import { R2_MEDIA_BUCKET } from '$lib/constants'
 
 /**
- * R2 client pointed at the PUBLIC media bucket (`livingdictionaries-media`,
- * served via media.livingdictionaries.app) — audio/video bytes on the new
- * `{dict_id}/{kind}/{media_row_id}.{ext}` key convention (photos migrate in
- * Phase 2). Same account creds as the snapshots/attachments clients; only the
- * bucket differs. Not configured (e.g. local dev) → callers fall back to the
- * dev-media store / 503, mirroring the GCS pattern.
+ * R2 client pointed at the public media bucket (`livingdictionaries-media`,
+ * served via media.livingdictionaries.app). Same account credentials as the
+ * snapshots/attachments clients; only the bucket differs. Not configured
+ * (e.g. local dev) → callers use the dev-media store or return 503.
  */
 
 let media_client_singleton: S3Client | null = null

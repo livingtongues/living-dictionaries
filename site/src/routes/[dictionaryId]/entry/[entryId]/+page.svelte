@@ -22,6 +22,7 @@
   import IconMdiHistory from '~icons/mdi/history'
   import IconMdiStar from '~icons/mdi/star'
   import IconMdiStarOutline from '~icons/mdi/star-outline'
+  import { photo_src } from '$lib/utils/media-url'
 
   const { data } = $props()
   const {
@@ -125,6 +126,13 @@
 
   const entry_description = $derived(seo_description({ entry, gloss_languages: dictionary.gloss_languages, orthographies: dictionary.orthographies, t: page.data.t }))
   const entry_url = $derived(`https://livingdictionaries.app/${dictionary.url}/entry/${entry.id}`)
+  const entry_image = $derived.by(() => {
+    const photo = entry.senses?.[0]?.photos?.[0]
+    if (!photo?.storage_path)
+      return null
+    const src = photo_src({ photo, variant: 'w1600' })
+    return src.startsWith('/') ? `${page.url.origin}${src}` : src
+  })
 
   // schema.org DefinedTerm — lets search + AI answer engines parse the entry as data.
   const json_ld = $derived({
@@ -135,7 +143,7 @@
     'name': headword.value,
     ...entry_description && { description: entry_description },
     ...dictionary.iso_639_3 && { inLanguage: dictionary.iso_639_3 },
-    ...entry.senses?.[0]?.photos?.[0]?.serving_url && { image: entry.senses[0].photos[0].serving_url },
+    ...entry_image && { image: entry_image },
     'inDefinedTermSet': {
       '@type': 'DefinedTermSet',
       '@id': `https://livingdictionaries.app/${dictionary.url}`,

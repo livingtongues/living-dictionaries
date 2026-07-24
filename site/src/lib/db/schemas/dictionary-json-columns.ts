@@ -54,7 +54,7 @@ export function stringify_dict_row(table: string, row: Record<string, unknown>):
 
 if (import.meta.vitest) {
   test('DICT_JSON_COLUMNS covers core dict tables', () => {
-    expect(DICT_JSON_COLUMNS.entries).toEqual(['lexeme', 'notes', 'linguistic_history', 'sources', 'citations', 'scientific_names', 'coordinates', 'unsupported_fields'])
+    expect(DICT_JSON_COLUMNS.entries).toEqual(['lexeme', 'notes', 'linguistic_history', 'sources', 'citations', 'scientific_names', 'coordinates', 'unsupported_fields', 'review'])
     expect(DICT_JSON_COLUMNS.senses).toEqual(['definition', 'glosses', 'parts_of_speech', 'semantic_domains', 'write_in_semantic_domains', 'plural_form', 'variant', 'sources'])
     expect(DICT_JSON_COLUMNS.sentences).toEqual(['text', 'translation', 'sources', 'tokens', 'citations'])
     expect(DICT_JSON_COLUMNS.texts).toEqual(['title', 'sources', 'citations', 'summary'])

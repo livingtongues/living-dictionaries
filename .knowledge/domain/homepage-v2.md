@@ -125,7 +125,7 @@ outputs are committed; eslint-ignored as generated).
   dropped in favor of this more visual view; those snapshot columns are still baked on the card
   if the modal is ever wanted back.)
 - Curation: `.claude/commands/curate-featured-words.md` (agent harvests prod per-dict DBs →
-  vision-checks lh3 thumbs → inserts `suggested`); Jacob approves at `/admin/featured-words`
+  vision-checks R2 thumbs → inserts `suggested`); Jacob approves at `/admin/featured-words`
   (source badges distinguish agent vs editor-star rows);
   **approved cards + stats ship via build-time bake** (`/api/homepage/export` →
   `scripts/fetch-homepage-baked.mjs` in the Dockerfile, i18n-bake pattern; committed seed =
@@ -173,5 +173,5 @@ outputs are committed; eslint-ignored as generated).
   `image/Image.svelte`). The tapped card `<img>` is unmounted (`{#if !(fullscreen_card && key match)}`)
   so it `send`s out while the viewer image `receive`s in; chrome (backdrop/top-bar/bottom-bar) fades
   **per-child, NOT on the root** — a root `transition:fade` would hide the 200ms close-morph after
-  its own 150ms. A `gg/spinner` shows on the card after 100ms while the `w1200` preloads; hover +
+  its own 150ms. A `gg/spinner` shows on the card after 100ms while the `w1600` variant preloads; hover +
   pointerdown warm that image into a plain `Set` cache first (so most taps skip the spinner).

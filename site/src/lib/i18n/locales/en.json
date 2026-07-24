@@ -780,6 +780,12 @@
     "editor_title": "Adjust word timings",
     "sentence_of": "Sentence {position} of {total}",
     "no_timings": "This sentence has no word timings",
-    "drag_hint": "Drag a word's edges to match the audio. Tap a word to hear it."
+    "drag_hint": "Drag a word's edges to match the audio. Tap a word to hear it.",
+    "auto_align": "Auto-align",
+    "aligning": "Aligning…",
+    "align_replaces_existing": "This will replace the existing word timings (including any manual adjustments). Continue?",
+    "align_done": "Alignment finished — word timings updated",
+    "align_failed": "Alignment failed",
+    "align_gaps": "{count} words could not be aligned and were left untimed"
   }
 }

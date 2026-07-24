@@ -33,7 +33,6 @@
 //     xs: { en: 'This is a banana', vn: '我很喜歡吃香蕉' },
 //     sf: { path: 'https://database.com/sound.mp3', speakerName: 'Bob Smith' },
 //     pf: {
-//       gcs: 'Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc',
 //     },
 //     xv: '',
 //   },
@@ -42,7 +41,6 @@
 //     lx: 'tree',
 //     gl: { es: 'arbol' },
 //     pf: {
-//       gcs: 'Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc',
 //       source: 'local_import',
 //     },
 //   },
@@ -86,7 +84,6 @@
 //     ub: '9yznFRnjuNOcdZf8ZGW16xDLkFh1',
 //     pf: {
 //       source: 'local_import',
-//       gcs: 'lwNfI3yEZ2ZOLwFXl_zxW8DPcjpbUvAGZL0aacvYRbw8JpMsFVlq5-y63CwDYd_cSwrFlYX2_O6I7jqwPGxV4A\n',
 //     },
 //     createdBy: 'OTD',
 //     ph: 'ʧ͡i.kaj',
@@ -210,7 +207,6 @@
 //     },
 //     pf: {
 //       source: 'local_import',
-//       gcs: 'RFMsChWMpLTc-0Oo8srvCtHr40UTMQz-mcuqNkcVanRagRQLd_s7iZqTbTE74EHdjh1TGTjDo8YvcVkePgmN8Q',
 //     },
 //     sdn: ['1.5'],
 //     lx: 'geseʔ',

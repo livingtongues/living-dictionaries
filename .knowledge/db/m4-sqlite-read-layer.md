@@ -46,7 +46,7 @@ single-file copies with `sqlite3 SRC "VACUUM INTO 'DEST'"` (folds the WAL; avoid
   Project = `parse_dict_row` (JSON parse via `DICT_JSON_COLUMNS`) + `WHERE deleted IS NULL` +
   **drop `dirty`/`created_by_user_id`/`updated_by_user_id`** so they don't leak into the search
   index / EntryData `main`. The worker keys arrays back into Records (`key_by_id` / `key_by_pair`).
-  Column names otherwise match what the worker expects (storage_path, serving_url, hosted_elsewhere, …).
+  Column names otherwise match what the worker expects (`storage_path`, `hosted_elsewhere`, …).
 
 ## adapter-node native-deps gotcha (confirmed, as house warned)
 `better-sqlite3` MUST be in **`dependencies`** (+ `drizzle-orm`, used by the schema types), NOT

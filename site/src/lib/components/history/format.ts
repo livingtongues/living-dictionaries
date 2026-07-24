@@ -54,7 +54,6 @@ const FIELD_LABELS: Record<string, string> = {
   title: 'Title',
   name: 'Name',
   storage_path: 'File',
-  serving_url: 'Image',
   photographer: 'Photographer',
   videographer: 'Videographer',
   source: 'Source',

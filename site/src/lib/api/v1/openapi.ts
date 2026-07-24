@@ -124,6 +124,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       coordinates: { ...CoordinatesNullableRef, description: 'Where-spoken geometry for this form: the attestation/elicitation point(s) (and/or region[s]). See the `Coordinates` schema.' },
       dialects: { ...StringOrStringArray, description: 'Dialect names — found-or-created on this dictionary.' },
       tags: { ...StringOrStringArray, description: 'Tag names — found-or-created.' },
+      review: { allOf: [{ $ref: '#/components/schemas/EntryReview' }], nullable: true, description: 'Editor-only "needs review" flag `{ category, note }` — set it for anything you had to guess/salvage so a human reviews it. Never shown to the public.' },
       senses: { type: 'array', items: { $ref: '#/components/schemas/SenseInput' }, description: 'Defaults to one empty sense if omitted.' },
     },
   }
@@ -164,6 +165,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       coordinates: { ...CoordinatesNullableRef, description: 'Whole-object replace: `{ points?, regions? }` overwrites; `null` clears; omit → untouched.' },
       dialects: StringOrStringArray,
       tags: StringOrStringArray,
+      review: { allOf: [{ $ref: '#/components/schemas/EntryReview' }], nullable: true, description: 'Editor-only "needs review" flag — `{ category, note }` sets/replaces it, `null` clears it ("Resolve"), omit → untouched.' },
       senses: { type: 'array', items: { $ref: '#/components/schemas/SensePatch' } },
     },
   }
@@ -382,6 +384,29 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     },
   }
 
+  const AlignJob = {
+    type: 'object',
+    description: 'One forced-alignment run. Poll `GET …/align-jobs/{jobId}` until `status` leaves `running`; on `done` the audio row\'s `timings` are updated (re-read the text/sentence to get them).',
+    properties: {
+      id: { type: 'string' },
+      status: { type: 'string', enum: ['running', 'done', 'failed'] },
+      error: { type: 'string', nullable: true, description: 'Failure detail when `status` is `failed`.' },
+      tokens_total: { type: 'integer', nullable: true, description: 'Word (non-punctuation) tokens in the aligned material.' },
+      tokens_aligned: { type: 'integer', nullable: true, description: 'Word tokens that could be romanized for the aligner — the rest are coverage gaps (left untimed).' },
+      created_at: { type: 'string' },
+      finished_at: { type: 'string', nullable: true },
+    },
+  }
+  const AlignCoverage = {
+    type: 'object',
+    description: 'Romanization coverage computed before the aligner runs.',
+    properties: {
+      tokens_total: { type: 'integer' },
+      tokens_aligned: { type: 'integer' },
+      gap_forms: { type: 'array', items: { type: 'string' }, description: 'Distinct word forms that could not be romanized (they stay untimed). Linking them to entries with Latin material closes the gaps.' },
+    },
+  }
+
   const TextPatch = {
     type: 'object',
     description: 'Edit a text: `title`/`sources`/`citations`/`summary`/`work_id` overwrite (`null` clears the nullable ones); `dialects` are ADDITIVE links; `append_sentences` add after the last sentence; `sentence_order` (a full list of existing sentence ids) reassigns their order. Edit a single sentence via `PATCH …/sentences/{id}`.',
@@ -453,6 +478,16 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     },
   }
 
+  const EntryReview = {
+    type: 'object',
+    required: ['category', 'note'],
+    description: 'EDITOR-ONLY "needs review" flag. Queues an entry for a human reviewer WITHOUT showing the public — it never appears in the reader UI or search for non-editors (though it does sync in the public snapshot, same as a `private` tag). Use it on import for anything you had to guess, salvage, or split; a reviewer clears it ("Resolve"). On READ it is present under `entry.main.review` ONLY when the caller is an editor.',
+    properties: {
+      category: { type: 'string', description: 'Free bucket label for triage — drives the entries-list "Needs review" category facet. Reuse a small consistent vocabulary within an import, e.g. `truncated`, `headword_in_gloss`, `language_split`, `uncertain_gloss`, `dropped_text`, `missing_gloss`, `other`.' },
+      note: { type: 'string', description: 'The specific thing to check (may enumerate senses). Shown verbatim in the editor-only banner on the entry page.' },
+    },
+  }
+
   const EntryMain = {
     type: 'object',
     description: 'The entry\'s top-level scalar fields. These are exactly the fields you POST at the top level of `EntryInput` (lexeme, phonetic, notes, sources, …) — on READ they live here, nested under `entry.main`.',
@@ -469,6 +504,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       scientific_names: { type: 'array', items: { type: 'string' }, nullable: true },
       elicitation_id: { type: 'string', nullable: true },
       coordinates: { ...CoordinatesNullableRef, description: 'Where-spoken geometry (attestation/elicitation location) for this form, when set.' },
+      review: { allOf: [{ $ref: '#/components/schemas/EntryReview' }], nullable: true, description: 'Editor-only "needs review" flag — present only for editor callers.' },
     },
   }
 
@@ -598,7 +634,6 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     properties: {
       id: { type: 'string' },
       storage_path: { type: 'string' },
-      serving_url: { type: 'string', description: 'lh3 image-serving hash (generated server-side).' },
       source: { type: 'string', nullable: true, description: 'Free-text attribution/caption prose.' },
       photographer: { type: 'string', nullable: true },
       latitude: { type: 'number', nullable: true, description: 'EXIF GPS, blunted to 2 decimals (~1.1 km, village-level) on ingest.' },
@@ -759,6 +794,23 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     }
   }
 
+  function align_start_op({ owner_label, owner_params }: { owner_label: string, owner_params: unknown[] }) {
+    return {
+      post: {
+        summary: `Auto-align this ${owner_label}'s audio (forced alignment)`,
+        description: `Start a fire-and-forget forced-alignment job: the server romanizes the ${owner_label}'s tokenized words per the dictionary's alignment configuration, runs the MMS aligner against this audio, and writes the resulting karaoke \`timings\` onto the audio row. Returns immediately with the job + romanization coverage — poll \`GET …/align-jobs/{jobId}\`. Replaces any existing timings (including manual adjustments). Requires the dictionary's alignment to be configured by the Living Dictionaries team; rate-limited per dictionary per day.`,
+        parameters: [dict_id_param, ...owner_params, audio_id_param],
+        responses: {
+          200: { description: '{ job, coverage }', content: { 'application/json': { schema: { type: 'object', properties: { job: { $ref: '#/components/schemas/AlignJob' }, coverage: { $ref: '#/components/schemas/AlignCoverage' } } } } } },
+          400: { description: 'Alignment not configured / nothing to align / no romanizable tokens' },
+          404: { description: `audio not linked to this ${owner_label}` },
+          409: { description: 'An alignment is already running for this audio' },
+          429: { description: 'Daily alignment limit reached' },
+        },
+      },
+    }
+  }
+
   const media_paths = {
     '/api/v1/dictionaries/{id}/entries/{entryId}/audio': media_attach_op({ summary: 'Attach audio to an entry', description: 'Upload a pronunciation recording for the headword (multipart `file` or JSON `url`). Attribution required: `speaker_id` and/or `source` (a registry slug). Use `replace: true` for one-audio-per-headword imports.', owner_params: [entry_id_param], request_body: audio_request_body, medium: 'audio' }),
     '/api/v1/dictionaries/{id}/entries/{entryId}/audio/{audioId}': media_delete_op({ owner_label: 'entry', owner_params: [entry_id_param], media_id_p: audio_id_param, medium: 'audio' }),
@@ -776,6 +828,16 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     '/api/v1/dictionaries/{id}/texts/{textId}/audio/{audioId}': { ...media_delete_op({ owner_label: 'text', owner_params: [text_id_param], media_id_p: audio_id_param, medium: 'audio' }), ...audio_timings_patch_op({ owner_label: 'text', owner_params: [text_id_param] }) },
     '/api/v1/dictionaries/{id}/texts/{textId}/videos': media_attach_op({ summary: 'Attach a video to a text', description: 'Upload (`file`/`url`) or link (`hosted_url`/`hosted_elsewhere`) a video for a text. Attribution required: `speaker_id` and/or `source`.', owner_params: [text_id_param], request_body: video_request_body, medium: 'video' }),
     '/api/v1/dictionaries/{id}/texts/{textId}/videos/{videoId}': media_delete_op({ owner_label: 'text', owner_params: [text_id_param], media_id_p: video_id_param, medium: 'video' }),
+    '/api/v1/dictionaries/{id}/texts/{textId}/audio/{audioId}/align': align_start_op({ owner_label: 'text', owner_params: [text_id_param] }),
+    '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio/{audioId}/align': align_start_op({ owner_label: 'sentence', owner_params: [sentence_id_param] }),
+    '/api/v1/dictionaries/{id}/align-jobs/{jobId}': {
+      get: {
+        summary: 'Poll an alignment job',
+        description: 'Status of a forced-alignment run started via `POST …/audio/{audioId}/align`. On `done`, re-read the text/sentence — the audio `timings` were updated.',
+        parameters: [dict_id_param, { name: 'jobId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { 200: { description: '{ job }', content: { 'application/json': { schema: { type: 'object', properties: { job: { $ref: '#/components/schemas/AlignJob' } } } } } }, 404: {} },
+      },
+    },
     '/api/v1/dictionaries/{id}/media/{storagePath}': {
       get: {
         summary: 'Download media bytes by storage_path',
@@ -1032,7 +1094,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '**Reading media back**: `GET …/texts/{textId}` returns the text\'s audio (text- AND sentence-level, with `timings`, speakers, and a `download_url` per row) — one call serves text + sentences + audio + speakers. Download any stored media\'s bytes via `GET …/media/{storage_path}` (302-redirects to storage).',
         '',
         '## Limits',
-        'Batch ≤1000 entries (or ≤1000 relationships) per request AND keep each request body under ~16MB — split larger imports. A single media upload (file or fetched url) is capped separately (~25MB); for larger video use a `hosted_url` link instead. Writes are per-item best-effort (read `results`).',
+        'Batch ≤1000 entries (or ≤1000 relationships) per request AND keep each non-video request body under ~16MB — split larger imports. Uploaded audio is capped at 25MB, photos at 10MB, and video at 100MB; for larger video use a `hosted_url` link instead. Writes are per-item best-effort (read `results`).',
         '',
         '## Bulk reads — dictionary snapshots',
         'Mirroring or bulk-reading a whole dictionary? Don\'t paginate the API — every dictionary except secure ones has a downloadable gzipped SQLite snapshot of its full database (entries, senses, sentences, texts, media rows, speakers, …) at `https://snapshots.livingdictionaries.app/dictionaries/{id}.db.gz` (no auth; use the dictionary id, not the url slug, if they differ). It is rebuilt within ~30 minutes of any edit (a 30-minute sweep that only rebuilds when content actually changed) and served with `Cache-Control: max-age=120` — so treat it as at most ~30 minutes stale, and use the write API\'s responses (not the snapshot) to verify your own fresh writes. **How to load and query it (URL shape, gunzip, key tables): `GET /api/v1/guides/snapshot`.** Secure dictionaries have no public snapshot — paginate the API instead.',
@@ -1404,6 +1466,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         EntriesListResponse,
         SentenceFull,
         SenseFull,
+        EntryReview,
         EntryMain,
         EntryFull,
         EntryResponse,
@@ -1415,6 +1478,8 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         TextPatch,
         SuggestionRow,
         TokenAction,
+        AlignJob,
+        AlignCoverage,
         HostedElsewhere,
         SpeakerBrief,
         SpeakerFull,
@@ -1474,6 +1539,7 @@ export const OPENAPI_TAGS = [
   { name: 'orthographies', description: 'Alternate writing systems.' },
   { name: 'featured-entries', description: 'The starred entries shown on the dictionary home page.' },
   { name: 'suggestions', description: 'The word→entry matching review queue: unmatched/ambiguous/ignored forms aggregated across all tokenized sentences, plus per-token and form-wide review actions.' },
+  { name: 'alignment', description: 'Forced alignment: auto-generate karaoke word-timings for text/sentence audio from the dictionary\'s tokenized sentences (requires team-configured romanization).' },
   { name: 'feedback', description: 'Send feedback/requests to the Living Dictionaries team.' },
 ] as const
 
@@ -1500,6 +1566,9 @@ const PATH_SEGMENT_TAGS: Record<string, string> = {
 export function tag_for_path(path: string): string {
   if (path.startsWith('/api/v1/guides'))
     return 'guides'
+  // Alignment wins over the media grouping its /audio/ segment would trigger.
+  if (/\/align$/.test(path) || path.includes('/align-jobs/'))
+    return 'alignment'
   if (/\/(?:audio|photos|videos)(?:\/|$)/.test(path))
     return 'media'
   // Grammar wins over the owning resource, so the entry reverse-lookup

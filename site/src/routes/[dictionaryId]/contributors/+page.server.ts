@@ -64,17 +64,17 @@ export const load: PageServerLoad = async ({ parent, depends, isDataRequest }) =
     `).all(dictionary.id) as ContributorInvite[]
 
     const partner_rows = db.prepare(`
-      SELECT id, name, photo_serving_url, photo_storage_path
+      SELECT id, name, photo_storage_path
       FROM dictionary_partners
       WHERE dictionary_id = ?
       ORDER BY created_at ASC
-    `).all(dictionary.id) as { id: string, name: string, photo_serving_url: string | null, photo_storage_path: string | null }[]
+    `).all(dictionary.id) as { id: string, name: string, photo_storage_path: string | null }[]
 
     const partners: PartnerWithPhoto[] = partner_rows.map(row => ({
       id: row.id,
       name: row.name,
-      photo: row.photo_serving_url
-        ? { id: row.id, storage_path: row.photo_storage_path ?? '', serving_url: row.photo_serving_url }
+      photo: row.photo_storage_path
+        ? { id: row.id, storage_path: row.photo_storage_path }
         : undefined,
     })) as PartnerWithPhoto[]
 

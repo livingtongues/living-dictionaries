@@ -10,8 +10,8 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
 - [orthographies-model.md](./orthographies-model.md) — the alternate-writing-system registry:
   immutable `code` keys, why `lexeme.default` stays the primary, the Keyman dataset (and the live-API
   subset gotcha), custom-code rules, and human/agent parity.
-- [media-serving-urls.md](./media-serving-urls.md) — how GCS storage paths become image/audio
-  URLs, and the App Engine Images `lh3` magic-URL resize/crop spec the photo pipeline depends on.
+- [media-serving-urls.md](./media-serving-urls.md) — R2 object conventions, photo/video variants,
+  immutable site assets, bucket CORS, storage ledger, orphan sweep, and locked backup.
 - Imports are agent-driven now: managers upload resources on `/{dict}/import` → a request
   message reaches the team → an agent imports via `/api/v1` following the guides at
   `/api/v1/guides` (the old Google-Sheets template + `scripts/import/` CLI are retired).
@@ -41,3 +41,7 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
   admin levels 1-2 are deliberately blocked, the no-existence-leak rule, accepted media/metadata
   leaks, no invite exemption (manual back-end setup; river is the one prod case), and the
   "contributor = editing tier" server-gate fix (prod has zero 'editor' rows).
+- [forced-alignment.md](./forced-alignment.md) — auto-timings (M6): the dumb-Modal-endpoint /
+  smart-LD-server split, why romanization + the bespoke per-dict converter registry live server-side
+  and admin-only, the two-runtime (Modal prod / local-CPU dev) aligner, the per-token align_form
+  cascade, the `auto_align` graduation switch, job/rate-limit mechanics, and deploy/dev gotchas.

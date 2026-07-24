@@ -26,8 +26,8 @@ ops) is **landed + committed**; durable design notes live in
   BroadcastChannel (structured-cloned to ALL tabs). Matters once big dicts meet multi-tab editors.
   **Full plan with pros/cons, ride-along checklist, and phased Jacob checkpoints:
   `.issues/in-worker-orama.md`** (post-cutover; trigger conditions listed there).
-- [ ] **Media-byte orphan sweep** — hard-deleting a media row never deletes GCS bytes (also listed in
-  `cutover.md` deferred backlog).
+- [x] **Media-byte orphan sweep** — R2 media is ledgered and reconciled weekly; unreferenced objects
+  are deleted after a 30-day grace period (`$lib/db/server/media-sweep-cron.ts`).
 - [ ] **opfs-lru size staleness** (minor) — `size_bytes` only refreshed at open; a dict growing
   during a long session under-counts until next open.
 - [ ] **Dev-bucket / prod-only guard for the R2 snapshot builder** — local dev once pushed snapshots

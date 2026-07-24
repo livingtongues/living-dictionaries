@@ -4,6 +4,7 @@ notes
 .env*
 supabase-creds.private
 /.data/
+alignment/.venv/
 
 # Personal / local-only
 .eslintcache

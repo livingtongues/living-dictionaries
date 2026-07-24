@@ -3,7 +3,6 @@
   import type { MapView } from './map/WorldMap.svelte'
   import { onMount } from 'svelte'
   import { crossfade, scale } from 'svelte/transition'
-  import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { page } from '$app/state'
   import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
   import { bbox_contains } from './map/view-helpers'
@@ -12,7 +11,7 @@
   import IconGgSpinner from '~icons/gg/spinner'
 
   /** Same size FeaturedEntryFullscreen renders — preload it so the crossfade has the pixels ready. */
-  const FULLSCREEN_SIZE = 'w1200'
+  const FULLSCREEN_VARIANT = 'w1600'
   // Morphs the tapped card image into the fullscreen viewer (shared between the two components).
   const [send, receive] = crossfade({ duration: 200, fallback: scale })
 
@@ -85,7 +84,7 @@
       return
     }
     audio_element?.pause()
-    audio_element = new Audio(url_from_storage_path(card.audio_storage_path, PUBLIC_STORAGE_BUCKET))
+    audio_element = new Audio(url_from_storage_path(card.audio_storage_path))
     const finish = () => {
       if (playing_id === card.id) {
         playing_id = null
@@ -159,7 +158,7 @@
   // eslint-disable-next-line svelte/prefer-svelte-reactivity -- plain preload cache, never drives UI
   const preloaded = new Set<string>()
   function preload_card(card: FeaturedCard) {
-    const src = photo_src({ storage_path: card.photo_storage_path, serving_url: card.photo_serving_url }, FULLSCREEN_SIZE)
+    const src = photo_src({ photo: { storage_path: card.photo_storage_path }, variant: FULLSCREEN_VARIANT })
     if (preloaded.has(src))
       return
     const img = new Image()
@@ -178,7 +177,7 @@
     event.preventDefault()
     audio_element?.pause()
     playing_id = null
-    const src = photo_src({ storage_path: card.photo_storage_path, serving_url: card.photo_serving_url }, FULLSCREEN_SIZE)
+    const src = photo_src({ photo: { storage_path: card.photo_storage_path }, variant: FULLSCREEN_VARIANT })
     if (preloaded.has(src)) {
       show_fullscreen(card, card_key)
       return
@@ -259,6 +258,8 @@
      Downloads should only start from the fullscreen viewer's own links. -->
 <div
   class="strip"
+  role="region"
+  aria-label="Featured words"
   data-sveltekit-preload-data="off"
   bind:this={scroller}
   onpointerenter={() => paused = true}
@@ -282,7 +283,7 @@
       {#if !(fullscreen_card && fullscreen_key === card_key)}
         <img
           use:fade_in
-          src={photo_src({ storage_path: card.photo_storage_path, serving_url: card.photo_serving_url }, 's340-p')}
+          src={photo_src({ photo: { storage_path: card.photo_storage_path }, variant: 'thumb' })}
           alt={card.lexeme}
           loading={index < 8 ? 'eager' : 'lazy'}
           in:receive|local={{ key: card_key }}

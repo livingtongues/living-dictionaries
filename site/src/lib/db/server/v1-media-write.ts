@@ -17,8 +17,8 @@ import { run_tombstone_delete } from './v1-entry-write'
  * `merge_dict_row` + `delete_dict_row` (same path + history as a browser editor
  * push), so audit stamping, sync triggers, and change-history all match a human
  * edit. Everything is parametrized by {@link MEDIA_CELLS} — one code path for all
- * eight owner→medium combinations. Byte storage + serving-url happen in the route
- * (see `$lib/server/media-storage.ts`); this module only touches the DB.
+ * eight owner→medium combinations. Byte storage happens in the route; this module
+ * only touches the DB.
  */
 
 export type MediaCellKey
@@ -38,27 +38,24 @@ export interface MediaCellConfig {
   owner_param: string
   /** SvelteKit route param carrying the media id on DELETE (e.g. `audioId`). */
   media_param: string
-  /** Storage-path folder segment: `audio` | `images` | `videos`. */
-  folder: string
   link: LinkConfig
   /** Present for media that can carry a speaker (audio, video). */
   speaker?: { junction: DictSyncableTable, media_col: string }
 }
 
 export const MEDIA_CELLS: Record<MediaCellKey, MediaCellConfig> = {
-  'audio:entry': { medium: 'audio', media_table: 'audio', owner_table: 'entries', owner_param: 'entryId', media_param: 'audioId', folder: 'audio', link: { kind: 'column', column: 'entry_id' }, speaker: { junction: 'audio_speakers', media_col: 'audio_id' } },
-  'audio:sentence': { medium: 'audio', media_table: 'audio', owner_table: 'sentences', owner_param: 'sentenceId', media_param: 'audioId', folder: 'audio', link: { kind: 'column', column: 'sentence_id' }, speaker: { junction: 'audio_speakers', media_col: 'audio_id' } },
-  'audio:text': { medium: 'audio', media_table: 'audio', owner_table: 'texts', owner_param: 'textId', media_param: 'audioId', folder: 'audio', link: { kind: 'column', column: 'text_id' }, speaker: { junction: 'audio_speakers', media_col: 'audio_id' } },
-  'photo:sense': { medium: 'photo', media_table: 'photos', owner_table: 'senses', owner_param: 'senseId', media_param: 'photoId', folder: 'images', link: { kind: 'junction', table: 'sense_photos', owner_col: 'sense_id', media_col: 'photo_id' } },
-  'photo:sentence': { medium: 'photo', media_table: 'photos', owner_table: 'sentences', owner_param: 'sentenceId', media_param: 'photoId', folder: 'images', link: { kind: 'junction', table: 'sentence_photos', owner_col: 'sentence_id', media_col: 'photo_id' } },
-  'video:sense': { medium: 'video', media_table: 'videos', owner_table: 'senses', owner_param: 'senseId', media_param: 'videoId', folder: 'videos', link: { kind: 'junction', table: 'sense_videos', owner_col: 'sense_id', media_col: 'video_id' }, speaker: { junction: 'video_speakers', media_col: 'video_id' } },
-  'video:sentence': { medium: 'video', media_table: 'videos', owner_table: 'sentences', owner_param: 'sentenceId', media_param: 'videoId', folder: 'videos', link: { kind: 'junction', table: 'sentence_videos', owner_col: 'sentence_id', media_col: 'video_id' }, speaker: { junction: 'video_speakers', media_col: 'video_id' } },
-  'video:text': { medium: 'video', media_table: 'videos', owner_table: 'texts', owner_param: 'textId', media_param: 'videoId', folder: 'videos', link: { kind: 'column', column: 'text_id' }, speaker: { junction: 'video_speakers', media_col: 'video_id' } },
+  'audio:entry': { medium: 'audio', media_table: 'audio', owner_table: 'entries', owner_param: 'entryId', media_param: 'audioId', link: { kind: 'column', column: 'entry_id' }, speaker: { junction: 'audio_speakers', media_col: 'audio_id' } },
+  'audio:sentence': { medium: 'audio', media_table: 'audio', owner_table: 'sentences', owner_param: 'sentenceId', media_param: 'audioId', link: { kind: 'column', column: 'sentence_id' }, speaker: { junction: 'audio_speakers', media_col: 'audio_id' } },
+  'audio:text': { medium: 'audio', media_table: 'audio', owner_table: 'texts', owner_param: 'textId', media_param: 'audioId', link: { kind: 'column', column: 'text_id' }, speaker: { junction: 'audio_speakers', media_col: 'audio_id' } },
+  'photo:sense': { medium: 'photo', media_table: 'photos', owner_table: 'senses', owner_param: 'senseId', media_param: 'photoId', link: { kind: 'junction', table: 'sense_photos', owner_col: 'sense_id', media_col: 'photo_id' } },
+  'photo:sentence': { medium: 'photo', media_table: 'photos', owner_table: 'sentences', owner_param: 'sentenceId', media_param: 'photoId', link: { kind: 'junction', table: 'sentence_photos', owner_col: 'sentence_id', media_col: 'photo_id' } },
+  'video:sense': { medium: 'video', media_table: 'videos', owner_table: 'senses', owner_param: 'senseId', media_param: 'videoId', link: { kind: 'junction', table: 'sense_videos', owner_col: 'sense_id', media_col: 'video_id' }, speaker: { junction: 'video_speakers', media_col: 'video_id' } },
+  'video:sentence': { medium: 'video', media_table: 'videos', owner_table: 'sentences', owner_param: 'sentenceId', media_param: 'videoId', link: { kind: 'junction', table: 'sentence_videos', owner_col: 'sentence_id', media_col: 'video_id' }, speaker: { junction: 'video_speakers', media_col: 'video_id' } },
+  'video:text': { medium: 'video', media_table: 'videos', owner_table: 'texts', owner_param: 'textId', media_param: 'videoId', link: { kind: 'column', column: 'text_id' }, speaker: { junction: 'video_speakers', media_col: 'video_id' } },
 }
 
 export interface MediaFieldInput {
   storage_path?: string | null
-  serving_url?: string
   /** Audio/video: a `sources.slug` registry ref (strict). Photos: free-text caption/attribution. */
   source?: string | null
   photographer?: string | null
@@ -77,7 +74,6 @@ export interface MediaFieldInput {
 export interface MediaRecord {
   id: string
   storage_path?: string | null
-  serving_url?: string | null
   hosted_elsewhere?: HostedVideo | null
   hosted_metadata?: HostedMetadata | null
   source?: string | null
@@ -120,7 +116,7 @@ function build_media_columns(cell: MediaCellConfig, fields: MediaFieldInput): Re
   if (cell.medium === 'audio')
     return { storage_path: fields.storage_path, source: fields.source ?? null, timings: fields.timings ?? null }
   if (cell.medium === 'photo')
-    return { storage_path: fields.storage_path, serving_url: fields.serving_url, source: fields.source ?? null, photographer: fields.photographer ?? null, latitude: fields.latitude ?? null, longitude: fields.longitude ?? null, taken_at: fields.taken_at ?? null }
+    return { storage_path: fields.storage_path, source: fields.source ?? null, photographer: fields.photographer ?? null, latitude: fields.latitude ?? null, longitude: fields.longitude ?? null, taken_at: fields.taken_at ?? null }
   // video
   return { storage_path: fields.storage_path ?? null, hosted_elsewhere: fields.hosted_elsewhere ?? null, hosted_metadata: fields.hosted_metadata ?? null, source: fields.source ?? null, videographer: fields.videographer ?? null }
 }
@@ -161,7 +157,6 @@ export function read_media_record({ db, cell_key, media_id }: { db: Database.Dat
     record.text_id = row.text_id ?? null
   } else if (cell.medium === 'photo') {
     record.storage_path = row.storage_path
-    record.serving_url = row.serving_url
     record.source = row.source ?? null
     record.photographer = row.photographer ?? null
     record.latitude = row.latitude ?? null

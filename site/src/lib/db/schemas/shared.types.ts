@@ -66,7 +66,6 @@ export const PRIMARY_ORTHOGRAPHY_CODE = 'default'
 /** Featured image blob on dictionary catalog rows. */
 export interface FeaturedImage {
   storage_path?: string
-  serving_url?: string
   width?: number
   height?: number
 }
@@ -78,4 +77,24 @@ export interface DictionaryCatalogMetadata {
   population?: number
   thumbnail?: string
   type?: string
+}
+
+/**
+ * `dictionaries.align_config` — ADMIN-ONLY forced-alignment configuration
+ * (never shown to managers; white-glove per-dictionary setup, see
+ * `.issues/auto-align-timings.md`). NULL column = alignment not configured.
+ */
+export interface AlignConfig {
+  /**
+   * Primary source for a token's MMS align_form (a-z + apostrophe):
+   * - 'token_text' — ascii-distill the token's surface form
+   * - 'orthography:<code>' — the linked entry's lexeme in that orthography
+   * - 'phonetic' — the linked entry's phonetic field
+   * Tokens whose primary source yields nothing cascade through the others.
+   */
+  primary: 'token_text' | `orthography:${string}` | 'phonetic'
+  /** Optional bespoke per-dictionary converter (a key in the server's converter registry) applied before ascii distillation. */
+  converter?: string
+  /** Graduation switch: dictionary is approved for AUTOMATIC alignment on audio attach. */
+  auto_align?: boolean
 }

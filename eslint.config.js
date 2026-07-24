@@ -40,6 +40,7 @@ export default tseslint.config(
       '**/.vercel/**',
       '**/coverage/**',
       '**/node_modules/**',
+      '**/.venv/**',
       '**/.eslintcache',
       '**/*.md',
       '**/.claude/**',

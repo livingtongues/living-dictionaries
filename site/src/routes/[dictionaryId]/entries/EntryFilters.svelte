@@ -27,7 +27,7 @@
     total,
   }: Props = $props()
 
-  const { tags, dialects, speakers, sources, dictionary } = $derived(page.data)
+  const { tags, dialects, speakers, sources, dictionary, can_edit } = $derived(page.data)
   const source_labels = $derived(Object.fromEntries(($sources || []).map(source => [source.slug, source.abbreviation || source.citation || source.slug])))
   // The primary/default orthography only appears as a filter option once it's been given a
   // name in settings — an unnamed 'default' would otherwise show as that raw, meaningless code.
@@ -65,6 +65,21 @@
         </HeadlessButton>
       </header>
       <div class="filter-scroll">
+        {#if can_edit && result_facets.has_review?.values.true}
+          <h4>{page.data.t({ dynamicKey: 'entry.needs_review', fallback: 'Needs review' })}</h4>
+          <ToggleFacet
+            bind:checked={search_params.value.has_review}
+            count={result_facets.has_review.values.true}
+            label={page.data.t({ dynamicKey: 'entry.needs_review', fallback: 'Needs review' })} />
+          {#if result_facets._review_categories?.count}
+            <FilterList
+              {search_params}
+              search_param_key="review_categories"
+              values={result_facets._review_categories.values}
+              label={page.data.t({ dynamicKey: 'entry.review_category', fallback: 'Review category' })} />
+          {/if}
+          <hr />
+        {/if}
         <h4>Typo Tolerance</h4>
         <input
           style="width: 100%"

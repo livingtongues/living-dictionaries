@@ -25,7 +25,7 @@ vi.mock('$lib/auth/google', () => ({
         sub: 'google-sub-123',
         email: 'user@gmail.com',
         name: 'Google User',
-        picture: 'https://lh3.googleusercontent.com/photo.jpg',
+        picture: 'https://profiles.example/photo.jpg',
       }
     }
     if (id_token === 'greg-personal-gmail-token') {
@@ -33,7 +33,7 @@ vi.mock('$lib/auth/google', () => ({
         sub: 'google-sub-greg',
         email: 'greg.personal@gmail.com',
         name: 'Greg (Google Profile Name)',
-        picture: 'https://lh3.googleusercontent.com/greg.jpg',
+        picture: 'https://profiles.example/greg.jpg',
       }
     }
     throw new Error('Invalid token')
@@ -101,7 +101,7 @@ describe(POST, () => {
     const body = await response.json() as AuthGoogleResponseBody
     expect(body.user.email).toBe('user@gmail.com')
     expect(body.user.name).toBe('Google User')
-    expect(body.user.avatar_url).toBe('https://lh3.googleusercontent.com/photo.jpg')
+    expect(body.user.avatar_url).toBe('https://profiles.example/photo.jpg')
 
     const session_cookie = cookies_set.find(c => c.name === 'session')
     expect(session_cookie).toBeTruthy()
@@ -140,7 +140,7 @@ describe(POST, () => {
     expect(body.user.name).toBe('Chosen Name')
     expect(body.user.email).toBe('canonical@allowlist.test')
     // Avatar is refreshed from the latest Google profile.
-    expect(body.user.avatar_url).toBe('https://lh3.googleusercontent.com/photo.jpg')
+    expect(body.user.avatar_url).toBe('https://profiles.example/photo.jpg')
   })
 
   test('an allow-listed admin logging in via Google with a DIFFERENT verified email keeps primary email, admin level, and canonical JWT claims', async () => {

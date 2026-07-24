@@ -29,6 +29,7 @@
   import IconMdiRefresh from '~icons/mdi/refresh'
   import IconMdiTune from '~icons/mdi/tune'
   import AttachAudioModal from '$lib/media/AttachAudioModal.svelte'
+  import AutoAlignButton from '$lib/media/AutoAlignButton.svelte'
   import TimingsEditor from '$lib/media/TimingsEditor.svelte'
 
   const { data } = $props()
@@ -337,6 +338,9 @@
                 <IconMdiTune />
                 <span class="wide-only">{page.data.t('timings.adjust')}</span>
               </button>
+            {/if}
+            {#if data.is_manager && data.align_enabled}
+              <AutoAlignButton target_kind="text" target_id={text_id} audio_id={text_audio.id} {has_timings} />
             {/if}
           </div>
         {/if}

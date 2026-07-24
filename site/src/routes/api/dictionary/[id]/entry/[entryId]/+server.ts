@@ -51,15 +51,20 @@ export const GET: RequestHandler = async (event) => {
     /* anonymous reader — public tags only */
   }
 
+  // Editor of this dict (site admin, or a manager/contributor grant) — surfaces
+  // the editor-only `review` flag + private tags in SSR so it matches the warm
+  // client build. Role is resolved once and reused for the secure-access check.
+  const role = user_id ? get_user_dict_role({ dictionary_id: dictionary.id, user_id }) : null
+  const can_edit = admin_level >= 1 || role === 'manager' || role === 'contributor'
+
   // Secure dictionary: members + level-3 admins only; everyone else gets the
   // same 404 as an unknown dictionary id.
   if (is_secure_dictionary(dictionary)) {
-    const role = user_id ? get_user_dict_role({ dictionary_id: dictionary.id, user_id }) : null
     if (!can_access_secure_dictionary({ role, admin_level }))
       error(ResponseCodes.NOT_FOUND, 'dictionary not found')
   }
 
   const db = get_dictionary_db(dictionary.id)
-  const entry = build_entry_data({ db, entry_id, admin_level })
+  const entry = build_entry_data({ db, entry_id, admin_level, can_edit })
   return json({ entry } satisfies DictionaryEntryResponseBody)
 }

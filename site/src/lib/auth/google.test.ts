@@ -67,7 +67,7 @@ function make_token(options: MakeTokenOptions = {}) {
     email = 'user@gmail.com',
     email_verified = true,
     name = 'Google User',
-    picture = 'https://lh3.googleusercontent.com/photo.jpg',
+    picture = 'https://profiles.example/photo.jpg',
     expires_in_seconds = 60 * 60,
   } = options
 
@@ -90,7 +90,7 @@ describe('verify_google_id_token', () => {
       sub: 'google-sub-123',
       email: 'user@gmail.com',
       name: 'Google User',
-      picture: 'https://lh3.googleusercontent.com/photo.jpg',
+      picture: 'https://profiles.example/photo.jpg',
     })
   })
 

@@ -2,7 +2,7 @@
   // learning from https://github.com/pngwn/peng-move/blob/main/src/lib/Animal.svelte
   import { spring } from 'svelte/motion'
   import type { PhotoLike } from '$lib/utils/media-url'
-  import { photo_src } from '$lib/utils/media-url'
+  import { photo_src, photo_variant_for_dimensions } from '$lib/utils/media-url'
 
   interface Props {
     photo: PhotoLike
@@ -52,13 +52,10 @@
     })
   }
 
-  const src = $derived(photo_src(photo, dimensionType === 'square'
-    ? `s${length}-p`
-    : dimensionType === 'width'
-    ? `w${length}`
-    : dimensionType === 'height'
-    ? `h${length}`
-    : 's0'))
+  const src = $derived(photo_src({
+    photo,
+    variant: photo_variant_for_dimensions({ is_square: dimensionType === 'square', pixels: length }),
+  }))
 </script>
 
 <img

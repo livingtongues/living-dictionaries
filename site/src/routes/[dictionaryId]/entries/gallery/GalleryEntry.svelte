@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { EntryData, Tables } from '$lib/types'
   import GalleryImage from './GalleryImage.svelte'
-  import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { url_from_storage_path } from '$lib/utils/media-url'
   import { create_exclusive_audio } from '$lib/utils/exclusive-audio.svelte'
   import { get_headword } from '$lib/orthography/orthographies'
@@ -82,7 +81,7 @@
         type="button"
         class="overlay-button play"
         class:playing={audio.playing}
-        onclick={() => audio.toggle(url_from_storage_path(audio_storage_path, PUBLIC_STORAGE_BUCKET))}
+        onclick={() => audio.toggle(url_from_storage_path(audio_storage_path))}
         aria-label="{audio.playing ? t('misc.pause') : t('misc.play')} {headword.value}">
         <IconMaterialSymbolsHearing />
       </button>

@@ -7,11 +7,11 @@ import { dev_media_dir } from '$lib/server/dev-media-dir'
 import { is_r2_media_path } from '$lib/utils/media-path'
 
 /**
- * DEV-ONLY local media store. With no GCS bucket on dev, `/api/upload` hands the
- * client a PUT url here instead of a presigned GCS url; the bytes land in
+ * DEV-ONLY local media store. `/api/upload` hands the client a local PUT URL;
+ * the bytes land in
  * `<DATA_DIR>/dev-media/<path>` and are served back by GET so you can see/play
  * your real upload. When a requested file isn't local (e.g. existing pulled-dict
- * audio/video, which lives in the bucket we don't have), GET 302-redirects to a
+ * audio/video), GET 302-redirects to a
  * bundled dummy so the UI degrades gracefully. Compiled out of prod builds via
  * the `import.meta.env.DEV` guard; never creates `dev-media/` in prod.
  */

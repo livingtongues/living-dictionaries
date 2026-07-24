@@ -82,7 +82,7 @@ if (import.meta.vitest) {
     expect(JSON_COLUMNS.users).toEqual(['providers', 'roles'])
     expect(JSON_COLUMNS.email_codes).toEqual([])
     expect(JSON_COLUMNS.email_aliases).toEqual([])
-    expect(JSON_COLUMNS.dictionaries).toEqual(['alternate_names', 'gloss_languages', 'coordinates', 'metadata', 'orthographies', 'featured_image', 'write_in_collaborators'])
+    expect(JSON_COLUMNS.dictionaries).toEqual(['alternate_names', 'gloss_languages', 'coordinates', 'metadata', 'orthographies', 'featured_image', 'write_in_collaborators', 'align_config'])
     expect(JSON_COLUMNS.dictionary_roles).toEqual([])
     expect(JSON_COLUMNS.dictionary_partners).toEqual([])
     expect(JSON_COLUMNS.invites).toEqual([])

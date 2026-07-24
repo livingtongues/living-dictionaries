@@ -26,11 +26,20 @@ yours generously so theirs is spent only on decisions.
   not SQLite; a "`.csv`" may be tab-separated. Check magic bytes / run `file`,
   then read the head yourself.
 - Detect the **encoding** (UTF-8 vs legacy codepages, mojibake, NFC/NFD
-  normalization of diacritics) before parsing anything.
+  normalization of diacritics) before parsing anything. Watch **CRLF + trailing
+  whitespace**: a `$`-anchored grep silently misses annotations hidden behind
+  `\r` or trailing spaces (one file hid 18 POS-tagged headwords this way —
+  normalize line endings before profiling).
 - **Profile the structure**: which markers/columns exist, how often each occurs,
   which are always empty, which repeat within a record, min/max/median value
   lengths, records per structural shape. Empty-looking fields and outliers are
   where surprises live.
+- Profile markers **inline as well as line-initial** — compilers typo a marker
+  mid-line (`… \sc Micrurus frontalis`) and a line-initial-only parser will glue
+  it into the previous field as if it were word-wrap. Those strays are hand-typed
+  treasure: scientific names, variant forms, POS, examples.
+- Inspect the **headword column itself**, not just the definition side: POS tags,
+  IPA transcriptions, and even fragments of the next record leak into it.
 - Read the resource's own front/back matter and first records — compiled
   dictionaries often open with prose about the alphabet, orthography, and
   abbreviation conventions that decodes the rest of the file.
@@ -69,7 +78,9 @@ records). One row per source record, carrying:
 
 - the **verbatim original** (so nothing is ever lost and every cleanup is diffable)
 - the cleaned/parsed fields and their **proposed API field mapping**
-- **flags** for anything odd, and a note of which cleanup rules touched the row
+- **flags** for anything odd, and a note of which cleanup rules touched the row —
+  design these so they map cleanly onto the entry `review` field's categories
+  (§2.3), so "anything you had to guess/salvage" becomes the reviewer's queue
 - a **source locator** (line number, page, record id) for tracebacks
 - the record's **deterministic id** (uuid5 of a stable source key) — assigned here,
   not at POST time
@@ -99,6 +110,21 @@ structure hiding in prose. Real catches that only bulk eyeballing finds:
 - Cross-references (`véase X`, `variante de X`) that should become entry
   relationships, not prose.
 - Senses wrongly split or merged by the source's own line formatting.
+- **Truncated values**: entries ending in `:`, "por ejemplo", "variante de", or a
+  dangling connective — the source lost content there. Flag and report them;
+  never guess a completion.
+
+Two judgment rules that recur in gloss-vs-definition work:
+
+- For **polysynthetic languages** a long phrase is usually still a GLOSS: "hacer
+  que alguien vuelva a pararse acá" is the translation equivalent of one verb, and
+  a sentence-shaped rendering of a finite verb form ("se está lamiendo el gato")
+  is a gloss too. Definition means *describes instead of translating* ("tipo de
+  planta con...", "persona que...", "prefijo verbal que...") — judge content, not
+  length or shape.
+- When one value holds BOTH an equivalent and a description ("iglesia; lugar en
+  que se reúne la gente"), **split it**: equivalent → `glosses`, description →
+  `definition`. Never duplicate the same text into both.
 
 Method: when you find an issue, **quantify the class across the whole dataset**
 (query the staging store), decide a rule, and mass-apply it. Whatever doesn't fit
@@ -106,6 +132,16 @@ a pattern gets a **manual pass, item by item** — no shortcuts, and no cheap
 proxies (string length does NOT distinguish a gloss from a definition; read the
 content and judge each value). Record every rule and every manual decision in the
 staging rows so the cleanup is auditable and re-runnable from the original.
+
+For a large dataset, **parallelize the reading with sub-agent sessions** instead
+of skimping: first read a meaningful slice yourself (in the Enxet import: all
+~1,100 pattern-flagged values) to crystallize the taxonomy, then hand the
+remaining chunks to spawned sessions with (a) that written taxonomy with worked
+examples, (b) an exceptions-only decision-file contract keyed by stable refs, and
+(c) the anomaly flags to hunt for. The lead agent then audits: spot-check each
+reader's decisions against the raw chunk, and personally re-verify every item a
+reader marked unsure. Chunks sorted by value text make patterns cluster and read
+faster.
 
 ### 1.5 Render a human-readable preview
 
@@ -194,6 +230,10 @@ manager can refine it later.
   `…/texts` endpoints; interlinear glossed text goes in sentence `tokens`.
   Text-level metadata (sources, `citations`, `summary`, `dialects`, `work_id` for
   parallel versions) lives on the TEXT — don't repeat it on every sentence.
+- After attaching text/sentence audio you can either PATCH karaoke `timings`
+  you computed yourself, or have the server force-align them:
+  `POST …/audio/{audioId}/align` (see the `alignment` tag — requires the
+  dictionary's romanization to be configured by the Living Dictionaries team).
 - A sentence is a first-class row, not content stored inside a sense. For a
   free-standing grammar example, `POST …/sentences` with the full sentence/IGT
   payload, then attach the returned `sentence.id` to a grammar section with
@@ -206,7 +246,27 @@ manager can refine it later.
   `GET …/texts?tag=sensitive-cn` for an exact, case-insensitive tag-name filter;
   this avoids hardcoding text IDs in downstream consumers.
 - Never invent data. If glosses/POS are ambiguous in the source, leave the field
-  empty rather than guessing, and note it in your report.
+  empty rather than guessing.
+- **Flag anything you had to guess, salvage, split, or truncate for a human
+  reviewer** — set the entry's `review` field: `{ "category": "...", "note": "..." }`.
+  This is EDITOR-ONLY (never shown to the public — it's stripped from non-editor
+  reads, same bar as a private tag) and gives the dictionary's manager a real
+  review queue: the entries list has a "Needs review" filter + a per-category
+  facet, and the entry page shows a banner with your `note` and a "Resolve" button
+  that clears it. Prefer this over burying caveats in your final report.
+  - `category` is a free bucket label that drives the facet — reuse a small,
+    consistent vocabulary across the import. Good buckets from real imports:
+    `truncated` (value cut off in the source), `headword_in_gloss` (the headword
+    leaked into its own gloss/definition), `language_split` (you separated
+    content in another language into its own gloss field), `uncertain_gloss`
+    (the gloss/definition call needs a linguist's eye), `dropped_text` (you
+    dropped stray/unparseable text — say what), `missing_gloss` (vernacular-only,
+    no gloss found), `other` (freeform — the note carries it).
+  - `note` is the bespoke thing to check; it may enumerate senses (e.g.
+    `"Sense 2: gn form auto-split; verify."`). It's shown verbatim.
+  - Clear it when resolved by PATCHing the entry with `"review": null` — the same
+    thing the human's "Resolve" button does. (A human can also import faithfully
+    now and review in-app later, which is exactly what this field is for.)
 
 ### 2.4 Verifying an import
 

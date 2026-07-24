@@ -4,6 +4,7 @@ import { building, dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { get_r2_media, r2_media_is_configured } from '$lib/server/r2-media'
 import { generate_and_store_photo_variants } from '$lib/server/photo-variants'
+import { generate_and_store_video_thumbnail } from '$lib/server/video-thumbnails'
 import { log_server_event } from '$lib/server/log-server-event'
 import { photo_variant_key, PHOTO_VARIANTS } from '$lib/utils/media-path'
 import { dictionary_db_path } from './dictionary-db'
@@ -24,7 +25,7 @@ import { get_shared_db } from './shared-db'
  *
  * Live references = dict.db audio/videos/photos storage_paths (+ derived photo
  * variant keys) + shared.db partner logos + dictionaries.featured_image. Only
- * new-convention keys participate; legacy GCS paths are ignored entirely.
+ * Only valid R2 media keys participate.
  */
 
 const TICK_MS = 60 * 60 * 1000 // hourly tick; the day/week gates below decide the real work
@@ -34,6 +35,8 @@ const ORPHAN_GRACE_MS = 30 * 24 * 60 * 60 * 1000
 const ABANDONED_PRESIGN_GRACE_MS = 60 * 60 * 1000
 const DELETE_CAP_PER_RUN = 5000
 const VARIANT_HEAL_CAP_PER_RUN = 200
+/** Videos are fetched back whole + run through ffmpeg — heavier than photo variants, so a smaller cap. */
+const VIDEO_THUMB_HEAL_CAP_PER_RUN = 40
 const RECONCILE_WATERMARK_KEY = 'media_sweep_last_reconcile'
 
 export function run_media_rollup_once(): void {
@@ -68,9 +71,14 @@ function live_keys_for_dict(dict_id: string): Set<string> {
     if (!path || !parse_media_key(path))
       return
     keys.add(path)
-    if (parse_media_key(path).media_type === 'photo') {
+    const { media_type } = parse_media_key(path)
+    if (media_type === 'photo') {
       for (const variant of PHOTO_VARIANTS)
         keys.add(photo_variant_key({ original_key: path, variant }))
+    } else if (media_type === 'video') {
+      // Videos derive only a single `_thumb.webp` sibling (no w900/w1600) — keep it
+      // in the live set so the orphan sweep never deletes a generated thumbnail.
+      keys.add(photo_variant_key({ original_key: path, variant: 'thumb' }))
     }
   }
   try {
@@ -111,6 +119,8 @@ export interface MediaReconcileSummary {
   deleted: number
   variants_healed: number
   variant_heal_failures: number
+  video_thumbs_healed: number
+  video_thumb_heal_failures: number
 }
 
 export async function run_media_reconcile_once(): Promise<MediaReconcileSummary> {
@@ -118,7 +128,7 @@ export async function run_media_reconcile_once(): Promise<MediaReconcileSummary>
   const { client, bucket } = get_r2_media()
   const now = Date.now()
   const now_iso = new Date(now).toISOString()
-  const summary: MediaReconcileSummary = { listed: 0, adopted: 0, size_fixed: 0, ledger_rows_dropped: 0, newly_orphaned: 0, unorphaned: 0, deleted: 0, variants_healed: 0, variant_heal_failures: 0 }
+  const summary: MediaReconcileSummary = { listed: 0, adopted: 0, size_fixed: 0, ledger_rows_dropped: 0, newly_orphaned: 0, unorphaned: 0, deleted: 0, variants_healed: 0, variant_heal_failures: 0, video_thumbs_healed: 0, video_thumb_heal_failures: 0 }
 
   const remote = await list_media_bucket()
   summary.listed = remote.size
@@ -216,6 +226,30 @@ export async function run_media_reconcile_once(): Promise<MediaReconcileSummary>
     } catch (err) {
       summary.variant_heal_failures++
       console.error(`[media-sweep] variant heal failed for ${key}: ${err.message}`)
+    }
+  }
+
+  // 5. Self-heal video originals missing their `_thumb.webp` (browser uploads
+  //    presign straight to R2, so the fast-path endpoint may have been skipped /
+  //    failed; this also backfills older videos). Fetches the object back + ffmpeg.
+  const videos_missing_thumb: string[] = []
+  for (const [key] of remote) {
+    const parsed = parse_media_key(key)
+    if (!parsed || parsed.media_type !== 'video' || parsed.is_variant)
+      continue
+    if (!remote.has(photo_variant_key({ original_key: key, variant: 'thumb' })))
+      videos_missing_thumb.push(key)
+  }
+  for (const key of videos_missing_thumb.slice(0, VIDEO_THUMB_HEAL_CAP_PER_RUN)) {
+    try {
+      const stored = await generate_and_store_video_thumbnail({ original_key: key })
+      if (stored)
+        summary.video_thumbs_healed++
+      else
+        summary.video_thumb_heal_failures++
+    } catch (err) {
+      summary.video_thumb_heal_failures++
+      console.error(`[media-sweep] video thumb heal failed for ${key}: ${err.message}`)
     }
   }
 

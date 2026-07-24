@@ -1,5 +1,4 @@
 import type { RequestHandler } from './$types'
-import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { load_v1_dictionary_context } from '$lib/db/server/v1-route-context'
@@ -30,5 +29,5 @@ export const GET: RequestHandler = async (event) => {
   if (!known)
     error(ResponseCodes.NOT_FOUND, 'media not found in this dictionary')
 
-  redirect(ResponseCodes.FOUND, url_from_storage_path(storage_path, PUBLIC_STORAGE_BUCKET))
+  redirect(ResponseCodes.FOUND, url_from_storage_path(storage_path))
 }

@@ -17,6 +17,8 @@ export const entries_index_schema = {
   _parts_of_speech: 'string[]', // augmented
   _semantic_domains: 'string[]', // augmented
   _speakers: 'string[]', // augmented
+  _review_categories: 'string[]', // editor-only "needs review" category buckets (empty for non-editors — review is stripped upstream)
+  has_review: 'boolean', // editor-only "needs review" flag
   has_audio: 'boolean',
   has_sentence: 'boolean',
   has_image: 'boolean',

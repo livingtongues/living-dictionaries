@@ -16,8 +16,8 @@ const BLANK_PNG = Buffer.from(
 /**
  * Share-image endpoint (Open Graph cards). Link scrapers (Facebook/Slack/…)
  * hit this — a 500 silently breaks every share of that page, so every failure
- * degrades instead: bad props → generic card; satori/resvg failure (e.g. the
- * lh3 entry-photo fetch dying) → text-only card without the remote photo;
+ * degrades instead: bad props → generic card; satori/resvg failure (e.g. a
+ * remote entry-photo fetch dying) → text-only card without the remote photo;
  * total render failure → a blank 200 PNG. Each emits `og_render_failed`.
  */
 export const GET: RequestHandler = async ({ url }) => {
@@ -41,7 +41,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
   // Text-only fallback: drop the remote entry photo (the usual killer) and re-render.
   try {
-    const { gcsPath: _omit, image_url: _omit_r2, ...text_props } = props
+    const { image_url: _omit, ...text_props } = props
     return await component_to_png(OpenGraphImage, text_props, height, width)
   } catch (error) {
     log_server_event({ level: 'warn', message: 'og_render_failed', error, context: { reason: classify_og_failure(error), fallback: 'text_only', dict: props.dictionaryName ?? null } })

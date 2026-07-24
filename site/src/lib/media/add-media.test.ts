@@ -2,10 +2,13 @@ import { readable } from 'svelte/store'
 import type { MediaUploadHandle, MediaUploadResult } from './upload-media'
 import { upload_media } from './upload-media'
 import { add_audio, add_photo, add_video } from './add-media'
+import { api_video_generate_thumbnail } from '$api/video/generate-thumbnail/_call'
 
 vi.mock('./upload-media', () => ({ upload_media: vi.fn() }))
+vi.mock('$api/video/generate-thumbnail/_call', () => ({ api_video_generate_thumbnail: vi.fn(() => Promise.resolve({ data: { accepted: true }, error: null })) }))
 
 const mocked_upload_media = vi.mocked(upload_media)
+const mocked_generate_thumbnail = vi.mocked(api_video_generate_thumbnail)
 
 function fake_handle(done: Promise<MediaUploadResult>): MediaUploadHandle {
   done.catch(() => undefined)
@@ -28,14 +31,14 @@ beforeEach(() => {
 describe(add_photo, () => {
   const writes = { check_ready, insert_photo }
 
-  test('uploads with a pre-minted row uuid then inserts the photo row (serving_url empty on the R2 convention)', async () => {
+  test('uploads with a pre-minted row uuid then inserts the R2 photo row', async () => {
     mocked_upload_media.mockReturnValue(fake_handle(Promise.resolve({ storage_path: 'demo/photo/x.jpg' })))
     const handle = add_photo({ writes, dictionary_id: 'demo', sense_id: 's1', file: new File(['x'], 'photo.jpg', { type: 'image/jpeg' }), source: 'my source', photographer: 'Ana' })
     await expect(handle.done).resolves.toEqual({ storage_path: 'demo/photo/x.jpg' })
     expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ dictionary_id: 'demo', kind: 'image', media_id: expect.stringMatching(/^[0-9a-f-]{36}$/) }))
     const minted_id = mocked_upload_media.mock.calls[0][0].media_id
     expect(insert_photo).toHaveBeenCalledWith({
-      photo: { id: minted_id, storage_path: 'demo/photo/x.jpg', serving_url: '', source: 'my source', photographer: 'Ana', latitude: null, longitude: null, taken_at: null },
+      photo: { id: minted_id, storage_path: 'demo/photo/x.jpg', source: 'my source', photographer: 'Ana', latitude: null, longitude: null, taken_at: null },
       sense_id: 's1',
     })
   })
@@ -119,6 +122,7 @@ describe(add_video, () => {
     expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ dictionary_id: 'demo', kind: 'video', media_id: expect.stringMatching(/^[0-9a-f-]{36}$/) }))
     const minted_id = mocked_upload_media.mock.calls[0][0].media_id
     expect(insert_video).toHaveBeenCalledWith({ video: { id: minted_id, storage_path: 'demo/videos/s1/1.mp4', source: 'archive' }, sense_id: 's1', speaker_id: 'sp1' })
+    expect(mocked_generate_thumbnail).toHaveBeenCalledWith({ dictionary_id: 'demo', storage_path: 'demo/videos/s1/1.mp4', sense_id: 's1', file_size: 1 })
   })
 
   test('omits source from the video row when not given', async () => {

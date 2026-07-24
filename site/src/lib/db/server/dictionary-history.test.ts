@@ -153,7 +153,7 @@ describe('resolve_owners — the entry≠text boundary + the prince matrix', () 
     expect(resolve_owners(db, 'speakers', { id: 'sp1', name: 'Ann' })).toEqual([])
     expect(resolve_owners(db, 'tags', { id: 'tg1', name: 'verb' })).toEqual([])
     expect(resolve_owners(db, 'dialects', { id: 'd1', name: 'north' })).toEqual([])
-    expect(resolve_owners(db, 'photos', { id: 'p1', storage_path: 'x', serving_url: 'y' })).toEqual([])
+    expect(resolve_owners(db, 'photos', { id: 'p1', storage_path: 'x' })).toEqual([])
   })
 })
 

@@ -1,18 +1,12 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { env } from '$env/dynamic/private'
-import { DEV_LOCAL_PREFIX } from '$lib/utils/media-url'
 import { dev_media_dir } from './dev-media-dir'
-import { gcs_is_configured, get_gcs } from './gcloud'
 import { get_r2_media, r2_media_is_configured } from './r2-media'
 
 /**
- * Server-side media byte storage for the v1 media write API — the direct-upload
- * counterpart of the browser's presign flow (`api/upload` + `api/gcs_serving_url`).
- * The agent's bytes reach OUR server (multipart or a fetched url), so we PUT them
- * straight to GCS here (or the dev-media store on dev with no bucket), then
- * `fetch_serving_url` mints the lh3 hash photos need.
+ * Server-side R2 media byte storage for endpoints where bytes reach our server
+ * directly (multipart upload, fetched URL, or generated derivative).
  */
 
 export interface StoredMedia {
@@ -20,7 +14,7 @@ export interface StoredMedia {
   storage_path: string
   /** Bucket the object landed in ('' in the dev mock). */
   bucket: string
-  /** DEV-only: bytes went to the local `/api/dev-media` store, not GCS/R2. */
+  /** DEV-only: bytes went to the local `/api/dev-media` store, not R2. */
   dev_mock: boolean
 }
 
@@ -28,94 +22,34 @@ export interface StoredMedia {
 export class MediaStorageNotConfiguredError extends Error {}
 
 /**
- * Upload media bytes and return the stored object key. Audio/video pass `r2_key`
- * (the new `{dict_id}/{kind}/{media_row_id}.{ext}` convention) and land in the
- * PUBLIC R2 media bucket; photos keep the legacy GCS `folder` flow until
- * Phase 2. On dev with no bucket the bytes land in the local dev-media store
- * (served back by `/api/dev-media`); in prod with no creds it throws
+ * Upload media bytes to the public R2 media bucket and return the object key.
+ * On dev with no bucket the bytes land in the local dev-media store; in prod
+ * with no credentials it throws
  * {@link MediaStorageNotConfiguredError}.
  */
-export async function store_media_bytes({ folder, file_name, file_type, bytes, r2_key }: {
-  folder?: string
-  file_name: string
+export async function store_media_bytes({ file_type, bytes, r2_key }: {
   file_type: string
   bytes: Uint8Array
-  /** Full R2 media-bucket key — presence routes the bytes to R2 instead of GCS. */
-  r2_key?: string
+  /** Full `{dict_id}/{kind}/{media_row_id}.{ext}` or derivative key. */
+  r2_key: string
 }): Promise<StoredMedia> {
-  if (r2_key) {
-    if (!r2_media_is_configured()) {
-      if (import.meta.env.DEV) {
-        const full = join(dev_media_dir(), r2_key)
-        mkdirSync(dirname(full), { recursive: true })
-        writeFileSync(full, Buffer.from(bytes))
-        return { storage_path: r2_key, bucket: '', dev_mock: true }
-      }
-      throw new MediaStorageNotConfiguredError('Media uploads are not configured (missing R2 credentials)')
-    }
-    const { client, bucket } = get_r2_media()
-    await client.send(new PutObjectCommand({
-      Bucket: bucket,
-      Key: r2_key,
-      Body: bytes,
-      ContentType: file_type,
-      CacheControl: 'public, max-age=31536000, immutable',
-    }))
-    return { storage_path: r2_key, bucket, dev_mock: false }
-  }
-
-  const extension = file_name.split('.').pop() || 'bin'
-  const object_key = `${folder}/${crypto.randomUUID()}.${extension}`
-
-  if (!gcs_is_configured()) {
+  if (!r2_media_is_configured()) {
     if (import.meta.env.DEV) {
-      const full = join(dev_media_dir(), object_key)
+      const full = join(dev_media_dir(), r2_key)
       mkdirSync(dirname(full), { recursive: true })
       writeFileSync(full, Buffer.from(bytes))
-      return { storage_path: object_key, bucket: '', dev_mock: true }
+      return { storage_path: r2_key, bucket: '', dev_mock: true }
     }
-    throw new MediaStorageNotConfiguredError('Media uploads are not configured (missing GCS credentials)')
+    throw new MediaStorageNotConfiguredError('Media uploads are not configured (missing R2 credentials)')
   }
 
-  const { client, bucket } = get_gcs()
+  const { client, bucket } = get_r2_media()
   await client.send(new PutObjectCommand({
     Bucket: bucket,
-    Key: object_key,
+    Key: r2_key,
     Body: bytes,
     ContentType: file_type,
-    ACL: 'public-read',
+    CacheControl: 'public, max-age=31536000, immutable',
   }))
-  return { storage_path: object_key, bucket, dev_mock: false }
-}
-
-const SERVING_URL_PREFIX = 'http://lh3.googleusercontent.com/'
-
-/**
- * Resolve the lh3 `serving_url` hash a photo row needs. On the dev mock it returns
- * the `dev-local:` sentinel; otherwise it calls the App Engine Images service
- * (`PROCESS_IMAGE_URL`) — the same call the `api/gcs_serving_url` route makes.
- */
-export async function resolve_photo_serving_url({ bucket, object_key, dev_mock }: {
-  bucket: string
-  object_key: string
-  dev_mock: boolean
-}): Promise<string> {
-  if (dev_mock)
-    return `${DEV_LOCAL_PREFIX}${object_key}`
-  return await fetch_serving_url({ storage_path: `${bucket}/${object_key}` })
-}
-
-/**
- * Fetch the lh3 serving-url hash for an already-stored object from the App Engine
- * Images service. Throws {@link MediaStorageNotConfiguredError} when the service
- * URL is unset. Shared by the v1 media endpoints and `api/gcs_serving_url`.
- */
-export async function fetch_serving_url({ storage_path }: { storage_path: string }): Promise<string> {
-  if (!env.PROCESS_IMAGE_URL)
-    throw new MediaStorageNotConfiguredError('Image serving-url service is not configured (missing PROCESS_IMAGE_URL)')
-  const result = await fetch(`${env.PROCESS_IMAGE_URL}/${storage_path}`)
-  const url = (await result.text()).trim()
-  if (!url.startsWith(SERVING_URL_PREFIX))
-    throw new Error(`Unexpected serving url response: ${url}`)
-  return url.replace(SERVING_URL_PREFIX, '')
+  return { storage_path: r2_key, bucket, dev_mock: false }
 }

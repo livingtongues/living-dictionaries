@@ -2,8 +2,8 @@
 
 > **2026-07-23 status:** Part 1 is EXECUTED — prod `delete` bucket is down to 3 dicts (from 650);
 > Jacob handled the deletions through July. Only Part 2 (the `public` → `bucket` consolidation
-> design) remains live in this file. GCS media-byte orphan harvest now belongs to the media→R2
-> migration issue.
+> design) remains live in this file. Media-byte orphan cleanup is handled by the R2 ledger
+> reconcile.
 
 Combined 2026-07-12 from `dictionary-buckets-cleanup.md` + `dictionary-public-vs-bucket-consolidation.md`.
 Classification itself is DONE and live (2026-07-04): all 2,232 prod dicts carry
@@ -14,9 +14,9 @@ reviewable in `/admin/buckets` + `/admin/dictionaries`. Tooling: `scripts/bucket
 
 Back up a tarball → R2 first, then batch-drive the existing teardown endpoint
 `DELETE /api/dictionaries/[id]` (admin-only; shared.db tombstones + dict.db + history.db + R2
-snapshot; GCS media harvest deferred to `.issues/admin-media-storage-dashboard.md`). Safety check
+snapshot; R2 media cleanup is handled by the ledger reconcile). Safety check
 on the 650 delete-bucket dicts: 629 entries · 124 audio · 157 photos · 4 videos total — nothing
-of value; 111 have a few stray media files whose GCS bytes get orphaned at teardown.
+of value; media bytes become ordinary R2 orphans at teardown and age through the grace period.
 
 Fresh-empty junk ("test test test") couldn't be deleted under the stale rule (≤3 entries + no
 content activity ≥1yr) — bucketed `glossary`/`conlang` by intent; a NEXT sweep (re-run
@@ -62,5 +62,5 @@ public number and `bucket = 'unlisted'` for unlisted.
 ## Gotchas
 - Bulk `updated_at` bumps on dictionaries rows are restamp events — activity signals avoid
   catalog `updated_at`.
-- Related: `.issues/admin-media-storage-dashboard.md` (orphaned-media visibility feeds the GCS
-  harvest), `.issues/sandbox-playground-dictionaries.md` (stops new junk at the source).
+- Related: `/admin/storage` (orphaned-media visibility for the R2 reconcile),
+  `.issues/sandbox-playground-dictionaries.md` (stops new junk at the source).

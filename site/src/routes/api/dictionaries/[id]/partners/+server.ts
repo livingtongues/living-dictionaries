@@ -26,17 +26,17 @@ export const GET: RequestHandler = async (event) => {
 
   const db = get_shared_db()
   const rows = db.prepare(`
-    SELECT id, name, photo_serving_url, photo_storage_path
+    SELECT id, name, photo_storage_path
     FROM dictionary_partners
     WHERE dictionary_id = ?
     ORDER BY created_at ASC
-  `).all(dictionary.id) as { id: string, name: string, photo_serving_url: string | null, photo_storage_path: string | null }[]
+  `).all(dictionary.id) as { id: string, name: string, photo_storage_path: string | null }[]
 
   const partners: PartnerWithPhoto[] = rows.map(row => ({
     id: row.id,
     name: row.name,
-    photo: (row.photo_serving_url || row.photo_storage_path)
-      ? { id: row.id, storage_path: row.photo_storage_path ?? '', serving_url: row.photo_serving_url ?? '' }
+    photo: row.photo_storage_path
+      ? { id: row.id, storage_path: row.photo_storage_path }
       : undefined,
   })) as PartnerWithPhoto[]
 
@@ -50,14 +50,14 @@ export const GET: RequestHandler = async (event) => {
  * admin.db sync engine pulls the change — managers have no local mirror, so the
  * contributors `+page.server.ts` re-reads on `invalidate`.
  *
- * The logo (`photo_serving_url` / `photo_storage_path`) is denormalized onto the
- * partner row — there's no separate photos table. The image upload itself runs
+ * The logo `photo_storage_path` is denormalized onto the partner row — there's
+ * no separate photos table. The image upload itself runs
  * client-side; this endpoint only records the resulting paths.
  *
  * One POST, discriminated by `action`:
  *   - `add`          → INSERT a partner by name
  *   - `delete`       → DELETE a partner
- *   - `set_photo`    → set the partner's logo serving_url + storage_path
+ *   - `set_photo`    → set the partner's logo storage path
  *   - `remove_photo` → clear the partner's logo
  */
 
@@ -73,8 +73,6 @@ interface SetPhotoBody {
   action: 'set_photo'
   partner_id: string
   photo_storage_path: string
-  /** legacy lh3 hash — new R2-convention uploads omit it (rendering derives from storage_path) */
-  photo_serving_url?: string
 }
 interface RemovePhotoBody {
   action: 'remove_photo'
@@ -133,9 +131,9 @@ export const POST: RequestHandler = async (event) => {
           error(ResponseCodes.BAD_REQUEST, 'partner_id and photo_storage_path required')
         db.prepare(`
           UPDATE dictionary_partners
-          SET photo_serving_url = ?, photo_storage_path = ?, dirty = 1, updated_at = ?
+          SET photo_storage_path = ?, dirty = 1, updated_at = ?
           WHERE id = ? AND dictionary_id = ?
-        `).run(body.photo_serving_url ?? '', body.photo_storage_path, now, body.partner_id, dictionary.id)
+        `).run(body.photo_storage_path, now, body.partner_id, dictionary.id)
         return json({ result: 'success' } satisfies DictionariesIdPartnersResponseBody)
       }
       case 'remove_photo': {
@@ -143,7 +141,7 @@ export const POST: RequestHandler = async (event) => {
           error(ResponseCodes.BAD_REQUEST, 'partner_id required')
         db.prepare(`
           UPDATE dictionary_partners
-          SET photo_serving_url = NULL, photo_storage_path = NULL, dirty = 1, updated_at = ?
+          SET photo_storage_path = NULL, dirty = 1, updated_at = ?
           WHERE id = ? AND dictionary_id = ?
         `).run(now, body.partner_id, dictionary.id)
         return json({ result: 'success' } satisfies DictionariesIdPartnersResponseBody)

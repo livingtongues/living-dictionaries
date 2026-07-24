@@ -54,6 +54,26 @@ sense; markers before the first sense belong to the entry.
   `\ge`/`\gn` pair between a `\de` and its own overflow text). Before trusting
   any "unexpected" marker content, read a few occurrences in context; if it reads
   as the continuation of the previous field, glue it back on.
+- **Headwords that lost their `\lx` marker** — the costliest SFM defect. A bare
+  line carrying a headword (its `\lx` deleted by a bad edit) sits at a record
+  boundary and is followed by its own `\de`; a naïve "bare line = word-wrap"
+  parser glues the headword onto the PREVIOUS entry's last field and turns that
+  entry's `\de` into a phantom extra sense. Disambiguate by the line that
+  FOLLOWS: a fresh `\de` right after the bare line ⇒ it's a lost headword →
+  start a new record; a closing `\ge`/`\gn` (or lowercase continuation) ⇒ it's
+  word-wrap → glue. One real file hid 35 entries this way (and stray `´`/`.`
+  lines preceded a few of them — drop punctuation-only lines). Give a recovered
+  headword a deterministic id keyed on its source line, and a homograph if its
+  spelling collides with a surviving `\lx`.
+- **The headword column leaks non-headword content**: POS tags (`\lx foo nf`,
+  `\lx foo \ps vi`), IPA transcriptions (`\lx foo [ˈfu]`), and fragments of the
+  next record all show up in `\lx`. Lift them to `parts_of_speech` / `phonetic`
+  and strip. Trailing whitespace + CRLF hides these from `$`-anchored greps —
+  normalize line endings first.
+- **Inline (mid-line) markers**: a compiler may type `\sc`, `\va`, `\xv` in the
+  middle of a `\de` line instead of on their own line. A line-initial-only parser
+  swallows them as text — scan for `\\[a-z]+` anywhere, not just at line start,
+  and route them (`\sc`→`scientific_names`, `\va`→`variant`, `\xv`→example note).
 - **`\de` values can be glosses in disguise**: judge each value — a short
   translation equivalent ("vender.", "torre, edificio alto") belongs in
   `glosses`, while descriptive/metalinguistic prose ("prefijo verbal que

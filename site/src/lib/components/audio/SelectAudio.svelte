@@ -1,6 +1,7 @@
 <script lang="ts">
   import IconUpload from '~icons/fa-solid/upload'
   import { page } from '$app/state'
+  import { MAX_AUDIO_UPLOAD_BYTES } from '$lib/constants'
 
   const unsupported_audio_formats = [
     'audio/aiff',
@@ -29,7 +30,7 @@
 
     const fileToCheck = files.item(0)
 
-    // Client-side validation: Must be audio and smaller than 100MB.
+    // Client-side validation: Must be audio and within the upload ceiling.
     if (fileToCheck.type.split('/')[0] !== 'audio')
       return alert(`${page.data.t('upload.error')}`)
 
@@ -38,10 +39,9 @@
       return alert(`Unsupported audio format`)
     }
 
-    // Must be smaller than 100MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
-    if (fileToCheck.size > 104857600) {
+    if (fileToCheck.size > MAX_AUDIO_UPLOAD_BYTES) {
       return alert(
-        `${page.data.t('upload.file_must_be_smaller')} 100MB`,
+        `${page.data.t('upload.file_must_be_smaller')} 25MB`,
       )
     }
 

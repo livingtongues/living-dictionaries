@@ -15,13 +15,12 @@ import type { PhotoExif } from '$lib/media/photo-coords'
 import { build_r2_media_key, extract_media_extension } from '$lib/utils/media-path'
 
 /**
- * Photo upload (Phase 2, replaces the presign + lh3 serving-url flow): the
- * browser POSTs the bytes here; we store the ORIGINAL on the R2 key convention
+ * The browser POSTs photo bytes here; we store the original on the R2 key convention
  * `{dict}/photo/{photo_row_uuid}.{ext}` and respond immediately (upload feels
  * presign-fast); the three WebP variants are generated + stored AFTER the
  * response, in-process (adapter-node keeps running; a crash in the gap is
  * self-healed by the media reconcile sweep). The client inserts the photo row
- * with the SAME pre-minted uuid and `serving_url: ''`.
+ * with the same pre-minted uuid.
  */
 
 export interface PhotoUploadResponseBody {
@@ -99,7 +98,7 @@ export const POST: RequestHandler = async (event) => {
   })
 
   try {
-    await store_media_bytes({ file_name, file_type, bytes, r2_key: storage_path })
+    await store_media_bytes({ file_type, bytes, r2_key: storage_path })
   } catch (err) {
     if (err instanceof MediaStorageNotConfiguredError)
       error(ResponseCodes.SERVICE_UNAVAILABLE, err.message)

@@ -17,8 +17,7 @@ const ssr_cards: DictHomeCard[] = story_cards.slice(0, 6).map((card, index) => (
   glosses: card.gloss ? { [card.gloss_language ?? 'en']: card.gloss } : null,
   parts_of_speech: index % 3 === 0 ? ['n'] : null,
   dialect: null,
-  photo_serving_url: card.photo_serving_url,
-  photo_storage_path: null,
+  photo_storage_path: card.photo_storage_path,
   audio_storage_path: card.audio_storage_path,
 }))
 
@@ -33,7 +32,7 @@ const dictionary = {
   alternate_names: ['Didayi', 'Gata'],
   gloss_languages: ['en', 'or', 'hi'],
   coordinates: { points: [{ coordinates: { longitude: 82.991, latitude: 18.617 } }] },
-  featured_image: { serving_url: story_cards[0]?.photo_serving_url },
+  featured_image: { storage_path: story_cards[0]?.photo_storage_path },
   // Markdown (as stored) — the escaped \[gaq\] must render as [gaq] in the snippet.
   about: String.raw`GtaɁ \[gaq\] (also known as **Didayi**) is a Munda language spoken by the Didayi people of Odisha, India. This dictionary documents the language as spoken in the Koraput district, with audio recordings from native speakers across three generations. The materials were collected, annotated and transcribed by researchers working alongside community members, under the auspices of a long-running documentation project that continues to add new entries every year.`,
   citation: null,

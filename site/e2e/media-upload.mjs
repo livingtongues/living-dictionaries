@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Proof for media upload on the R2 key convention (post GCS→R2 migration, 2026-07):
+// Proof for media upload on the R2 key convention:
 // a logged-in manager uploads a PHOTO and an AUDIO file.
 //   photo → multipart POST /api/photo-upload → original stored + WebP variants generated
-//           AFTER the response (real sharp) → row (serving_url '') syncs to server SQLite
+//           AFTER the response (real sharp) → row syncs to server SQLite
 //   audio → /api/upload presign (dev-media mock) → XHR PUT → row syncs to server SQLite
 //
 //   pnpm -F site test:media
@@ -62,7 +62,7 @@ function read_server_media(entry_id) {
   const db = new Database(dict_db_path, { readonly: true })
   try {
     const audio = db.prepare('SELECT id, storage_path FROM audio WHERE entry_id = ?').all(entry_id)
-    const photos = db.prepare('SELECT id, storage_path, serving_url FROM photos').all()
+    const photos = db.prepare('SELECT id, storage_path FROM photos').all()
     const audio_speakers = db.prepare('SELECT COUNT(*) AS c FROM audio_speakers').get()
     return { audio, photos, audio_speaker_links: audio_speakers.c }
   } finally {
@@ -234,7 +234,6 @@ async function main() {
 
   const photo = after.photos.find(p => photo_key_re.test(p.storage_path))
   if (!photo) throw new Error(`PHOTO row with an R2-convention storage_path did not persist (have: ${after.photos.map(p => p.storage_path).join(', ') || 'none'})`)
-  if (photo.serving_url !== '') throw new Error(`expected empty serving_url on the R2 convention, got '${photo.serving_url}'`)
   if (photo.storage_path.split('/')[2].split('.')[0] !== photo.id) throw new Error(`photo key uuid ${photo.storage_path} != row id ${photo.id} (key must be the row uuid)`)
   const sense_photos = read_junction('sense_photos')
   if (!sense_photos.length) throw new Error('sense_photos junction did not sync to server (photo unlinked)')

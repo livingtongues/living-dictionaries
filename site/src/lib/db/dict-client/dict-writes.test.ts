@@ -285,7 +285,7 @@ describe(dispatch_dict_write, () => {
   test('re-sent insert_photo (same client-stamped id) collides loudly, no duplicate', async () => {
     const entry_id = await seed_entry()
     const sense = db.prepare('SELECT id FROM senses WHERE entry_id = ?').get(entry_id) as { id: string }
-    const args = { user_id, photo: { id: crypto.randomUUID(), storage_path: 'p/a.jpg', serving_url: 'https://img' }, sense_id: sense.id }
+    const args = { user_id, photo: { id: crypto.randomUUID(), storage_path: 'p/a.jpg' }, sense_id: sense.id }
     await run_atomic('insert_photo', args)
     await expect(run_atomic('insert_photo', args)).rejects.toThrow()
     expect(count('SELECT COUNT(*) c FROM photos')).toBe(1)

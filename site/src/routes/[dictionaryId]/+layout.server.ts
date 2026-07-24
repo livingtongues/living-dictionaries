@@ -51,8 +51,17 @@ export const load: LayoutServerLoad = async ({ params: { dictionaryId: dictionar
     redirect(ResponseCodes.MOVED_PERMANENTLY, build_canonical_path({ pathname: url.pathname, search: url.search, canonical_url: dictionary.url }))
 
   return {
-    dictionary: dictionary as unknown as Tables<'dictionaries'>,
+    // `align_config` internals are ADMIN-ONLY (white-glove romanization setup —
+    // see .issues/auto-align-timings.md): the client only gets presence flags.
+    dictionary: strip_align_config(dictionary) as unknown as Tables<'dictionaries'>,
+    align_enabled: !!dictionary.align_config,
+    auto_align: !!dictionary.align_config?.auto_align,
     ssr_role,
     about_is_complete: about_has_meaningful_content(dictionary.about),
   }
+}
+
+function strip_align_config(dictionary: NonNullable<ReturnType<typeof get_dictionary_by_url_or_id>>) {
+  const { align_config, ...rest } = dictionary
+  return rest
 }

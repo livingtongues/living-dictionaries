@@ -14,13 +14,13 @@ code fully torn down (2026-07; deploys run from `main`) — the one-page histori
 
 ## Categories
 - [db/](./db/index.md) — the living SQLite/local-first architecture docs: schema + migration
-  recipes, sync invariants, the OPFS leader-worker model, media upload, build/deploy gotchas.
+  recipes, sync invariants, the OPFS leader-worker model, and build/deploy gotchas.
 - [testing/](./testing/index.md) — verification conventions: the puppeteer-core deep-flow
   harness and its headless-browser gotchas.
 - [tooling/](./tooling/index.md) — dev tooling that augments the app: the sqlite-proxy /
   `live_share` / `sqlite-query.sh` stack for querying the live browser DBs.
-- [domain/](./domain/index.md) — app-domain knowledge: related-entries model, media serving
-  URLs (GCS + lh3 magic URLs), the dictionary import process.
+- [domain/](./domain/index.md) — app-domain knowledge: related-entries model, R2 media serving,
+  and the dictionary import process.
 - [admin/](./admin/index.md) — the `/admin` super-admin area: the house feature port
   (schema-graph canvas, server-authoritative team chat, ntfy dashboard, message triage) and
   which files stay near-identical to `house`.

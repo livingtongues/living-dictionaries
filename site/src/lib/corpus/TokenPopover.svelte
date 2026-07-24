@@ -58,8 +58,8 @@
   function entry_photo(entry: EntryData | undefined): string | null {
     for (const sense of entry?.senses ?? []) {
       const photo = sense.photos?.[0]
-      if (photo?.serving_url || photo?.storage_path)
-        return photo_src(photo, 's96-p')
+      if (photo?.storage_path)
+        return photo_src({ photo, variant: 'thumb' })
     }
     return null
   }

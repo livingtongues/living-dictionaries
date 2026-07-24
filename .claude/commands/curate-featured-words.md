@@ -28,9 +28,9 @@ approved cards. First seed batch (26 cards, 2026-07-04) predates the modal field
 
 ## Row shape (post-pivot, 2026-07-04)
 
-Card columns (strip): `lexeme`, `gloss`, `gloss_language`, `photo_serving_url` (legacy lh3
-hash — '' for R2-convention photos), `photo_storage_path` (copy from the photos row —
-renders via `photo_src`), `audio_storage_path`, `dict_name`, `longitude`/`latitude`.
+Card columns (strip): `lexeme`, `gloss`, `gloss_language`, `photo_storage_path` (copy from the
+photos row; renders via `photo_src`), `audio_storage_path`, `dict_name`,
+`longitude`/`latitude`.
 **Modal snapshot columns** (the card's quick-look modal — fill them ALL on every insert):
 `phonetic`, `glosses` (JSON MultiString, ALL gloss languages), `speaker_name` (via
 audio_speakers→speakers), `example_sentence` (JSON `{ text, translation }` MultiStrings from a
@@ -45,7 +45,7 @@ modal fields:
 
 ```sql
 SELECT e.id AS entry_id, e.lexeme, e.phonetic, s.id AS sense_id, s.glosses,
-  p.id AS photo_id, p.serving_url, a.id AS audio_id, a.storage_path,
+  p.id AS photo_id, p.storage_path AS photo_storage_path, a.id AS audio_id, a.storage_path,
   (SELECT sp.name FROM audio_speakers aspk JOIN speakers sp ON sp.id = aspk.speaker_id
    WHERE aspk.audio_id = a.id LIMIT 1) AS speaker_name,
   (SELECT json_object('text', json(st.text), 'translation', json(st.translation))
@@ -99,15 +99,17 @@ Filter + pick as before:
 
 ## Step 4 — vision-check every image (mandatory)
 
-Build a contact sheet of `https://lh3.googleusercontent.com/<serving_url>=s150-p` thumbs +
-labels, screenshot it headless (browser-tools skill), and **look at it**. Reject:
+Build a contact sheet from each photo's R2 thumbnail key
+`https://media.livingdictionaries.app/{photo_storage_path_without_extension}_thumb.webp`, screenshot
+it headless (browser-tools skill), and **look at it**. Reject:
 - clipart / stock-graphic look, watermarked stock (gettyimages etc.)
 - literal color squares, broken/blank images
 - image-word mismatches, boring/unclear photos
 - lexemes in scripts most devices lack fonts for (e.g. Wancho 𞋃𞋜 → tofu boxes)
 - human face portrait shots, more zoomed out candid sorts of things are fine
 
-Jacob will check audio on the admin review page: `https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/<url-encoded storage_path>?alt=media`
+Jacob will check audio on the admin review page, which serves the R2 object through
+`https://media.livingdictionaries.app/{audio_storage_path}`.
 
 ## Step 5 — insert as 'suggested' on prod
 
@@ -116,7 +118,7 @@ Same stdin-node pattern; include the new columns:
 ```sql
 INSERT OR IGNORE INTO featured_entries
   (id, dict_id, entry_id, sense_id, photo_id, audio_id, lexeme, gloss, gloss_language,
-   photo_serving_url, photo_storage_path, audio_storage_path, dict_name, longitude, latitude,
+   photo_storage_path, audio_storage_path, dict_name, longitude, latitude,
    status, agent_note, source, phonetic, glosses, speaker_name, example_sentence, starred_at)
 VALUES (...)
 ```

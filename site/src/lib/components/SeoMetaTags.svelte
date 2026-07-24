@@ -1,15 +1,14 @@
 <script lang="ts">
   import type { PhotoLike } from '$lib/utils/media-url'
   import { photo_src } from '$lib/utils/media-url'
-  import { is_r2_media_path } from '$lib/utils/media-path'
   import { seoTitle } from './seo-title'
   import { compressToEncodedURIComponent as encode } from '$lib/lz/lz-string'
   import { page } from '$app/state'
+  import { SITE_MEDIA } from '$lib/constants'
 
   const IMAGE_API = '/og'
-  const DEFAULT_IMAGE
-    = 'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media' // 1484 x 729
-  const OG_IMAGE_VERSION = 5
+  const DEFAULT_IMAGE = `${SITE_MEDIA.seo_default}/1200x630.png`
+  const OG_IMAGE_VERSION = 6
 
   interface Props {
     admin?: boolean
@@ -47,7 +46,7 @@
     handle = 'livingtongues',
     url = page.url.toString(),
     width = 1200,
-    height = 600,
+    height = 630,
     photo = null,
     generate_og_image = false,
     lng = undefined,
@@ -60,13 +59,11 @@
   const textTitle = $derived(seoTitle({ title: title || imageTitle, dictionaryName: expandedDictionaryName, admin }))
   const textDescription = $derived(description || imageDescription || 'Language Documentation Web App - Speeding the availability of language resources for endangered languages. Using technology to shift how we think about endangered languages. Rather than perceiving them as being antiquated, difficult to learn and on the brink of vanishing, we see them as modern and easily accessible for learning online in text and audio formats.')
 
-  const has_photo = $derived(!!(photo?.serving_url || (photo?.storage_path && is_r2_media_path(photo.storage_path))))
-  // R2-convention photos pass a full absolute url; legacy photos pass the lh3
-  // hash (the og renderer builds a cropped lh3 url from it).
+  const has_photo = $derived(!!photo?.storage_path)
   const og_photo_url = $derived.by(() => {
-    if (!photo?.storage_path || !is_r2_media_path(photo.storage_path))
+    if (!photo?.storage_path)
       return undefined
-    const src = photo_src(photo, 'w1600')
+    const src = photo_src({ photo, variant: 'w1600' })
     return src.startsWith('/') ? `${page.url.origin}${src}` : src
   })
   const imageProps = $derived({
@@ -78,13 +75,12 @@
     lng,
     lat,
     image_url: og_photo_url,
-    gcsPath: og_photo_url ? undefined : photo?.serving_url?.replace('\n', ''), // stray newline slipped into old rows
   })
   const encodedImageProps = $derived(encode(JSON.stringify(imageProps)))
   // og:image must be an absolute URL (https://ogp.me) — many scrapers drop relative ones.
   const imageUrl = $derived(has_photo || generate_og_image ? `${page.url.origin}${IMAGE_API}?props=${encodedImageProps}&v=${OG_IMAGE_VERSION}` : DEFAULT_IMAGE)
-  const imageWidth = $derived(dictionaryName ? width.toString() : '987')
-  const imageHeight = $derived(dictionaryName ? width.toString() : '299')
+  const imageWidth = $derived(dictionaryName ? width.toString() : '1200')
+  const imageHeight = $derived(dictionaryName ? height.toString() : '630')
 
   // Canonical: the explicit `url` prop when a page passes one (e.g. entries), else the
   // current path with the query string stripped — collapses filter/pagination states

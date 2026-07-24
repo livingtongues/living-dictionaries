@@ -29,9 +29,9 @@ const bilingual_dictionary = {
 } as unknown as Tables<'dictionaries'>
 
 const mock_audio = { id: 'a1', storage_path: 'demo/audio/a1.mp3', updated_at: '2026-01-01T00:00:00Z' } as unknown as NonNullable<EntryData['audios']>[0]
-const mock_photo = { id: 'p1', serving_url: '', storage_path: null } as unknown as NonNullable<EntryData['senses'][0]['photos']>[0]
+const mock_photo = { id: 'p1', storage_path: null } as unknown as NonNullable<EntryData['senses'][0]['photos']>[0]
 // R2-convention photo whose variant webps exist in the local dev-media store (real image bytes in stories).
-const mock_photo_real = { id: 'p2', serving_url: '', storage_path: 'demo/photo/9f000000-0000-4000-8000-000000000001.jpg' } as unknown as NonNullable<EntryData['senses'][0]['photos']>[0]
+const mock_photo_real = { id: 'p2', storage_path: 'demo/photo/9f000000-0000-4000-8000-000000000001.jpg' } as unknown as NonNullable<EntryData['senses'][0]['photos']>[0]
 // Legacy (non-R2) storage path → no derivable thumbnail → icon-chip fallback.
 const mock_video = { id: 'v1', storage_path: 'demo/video/v1.mp4' } as unknown as NonNullable<EntryData['senses'][0]['videos']>[0]
 // R2-convention path → `_thumb.webp` sibling requested (dev store serves a placeholder when absent).

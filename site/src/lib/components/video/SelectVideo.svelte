@@ -1,6 +1,7 @@
 <script lang="ts">
   import IconUpload from '~icons/fa-solid/upload'
   import { page } from '$app/state'
+  import { MAX_VIDEO_UPLOAD_BYTES } from '$lib/constants'
 
   interface Props {
     children?: import('svelte').Snippet<[any]>
@@ -20,7 +21,7 @@
       return alert(`${page.data.t('upload.error')}`)
 
     // Must be smaller than 100MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
-    if (fileToCheck.size > 104857600) {
+    if (fileToCheck.size > MAX_VIDEO_UPLOAD_BYTES) {
       return alert(
         `${page.data.t('upload.file_must_be_smaller')} 100MB`,
       )

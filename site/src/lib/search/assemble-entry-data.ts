@@ -25,6 +25,9 @@ export interface AssembleEntryDataInput {
   dialects: NonNullable<EntryData['dialects']>
   /** Numeric admin level of the viewer (0 = anonymous/regular) — gates private + `v4` tags. */
   admin_level: number
+  /** Editor of THIS dictionary (manager/contributor/admin). Gates the editor-only
+   *  `main.review` flag + (with `admin_level`) private-tag visibility. Default false. */
+  can_edit?: boolean
 }
 
 /**
@@ -42,9 +45,11 @@ export interface AssembleEntryDataInput {
  * read-model); editing still flows through the live `DictLiveDb` row.
  */
 export function assemble_entry_data(input: AssembleEntryDataInput): EntryData {
-  const { entry, senses, sentences_by_sense, photos_by_sense, videos_by_sense, audios, tags, dialects, admin_level } = input
+  const { entry, senses, sentences_by_sense, photos_by_sense, videos_by_sense, audios, tags, dialects, admin_level, can_edit = false } = input
 
   // Strip entry bookkeeping columns → `main` (mirrors the worker's destructure).
+  // `review` is EDITOR-ONLY: drop it for non-editors so it never reaches the
+  // public via SSR page data or the local Orama index (same bar as private tags).
   const {
     id,
     dictionary_id,
@@ -55,8 +60,10 @@ export function assemble_entry_data(input: AssembleEntryDataInput): EntryData {
     updated_by_user_id,
     dirty,
     updated_at,
-    ...main
+    review,
+    ...rest
   } = entry as Tables<'entries'> & Record<string, unknown>
+  const main = (can_edit && review ? { ...rest, review } : rest) as EntryData['main']
 
   // De-dupe every id-keyed child array. The entry surfaces render these in
   // keyed `{#each … (row.id)}` blocks; a single duplicate junction row in a
@@ -78,12 +85,12 @@ export function assemble_entry_data(input: AssembleEntryDataInput): EntryData {
   }) as EntryData['senses']
 
   const deduped_audios = dedupe_by_id(audios)
-  const visible_tags = dedupe_by_id(tags).filter(tag => should_include_tag(tag, admin_level))
+  const visible_tags = dedupe_by_id(tags).filter(tag => should_include_tag(tag, { admin_level, can_edit }))
   const deduped_dialects = dedupe_by_id(dialects)
 
   return {
     id: id as string,
-    main: main as EntryData['main'],
+    main,
     updated_at: updated_at as string,
     senses: senses_with_all,
     ...(deduped_audios.length ? { audios: deduped_audios } : {}),

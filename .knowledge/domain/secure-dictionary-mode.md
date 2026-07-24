@@ -13,8 +13,8 @@ Implementation lives in `$lib/db/server/secure-dictionary.ts` + `verify_auth_dic
   response; blocked API calls get the same `404 dictionary not found` as an unknown id (including
   converting the would-be 401 for anonymous callers). A *member* with insufficient rank keeps the
   normal 403 — they already know the dict exists.
-- **Accepted leaks** (Jacob signed off): media bytes on public GCS/lh3 URLs remain fetchable by
-  anyone holding the URL (signed-URL work explicitly out of scope, "not worried at all");
+- **Accepted leaks** (Jacob signed off): media bytes on the public R2 media domain remain fetchable
+  by anyone holding the URL (signed-URL work explicitly out of scope, "not worried at all");
   catalog metadata (name, entry_count…) stays visible to level-1+ admins via the admin sync /
   `?visibility=private` listing / admin globe overlay.
 - **API keys keep working** on secure dicts — they're dict-scoped and minted by manager+, inside

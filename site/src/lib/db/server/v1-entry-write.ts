@@ -5,7 +5,7 @@ import type { EntriesWriteResponseBody, EntryInput, EntryPatch, EntryWriteResult
 import type { SentenceTokens, SourceCitation } from '$lib/db/schemas/dictionary.types'
 import type { MultiString } from '$lib/types'
 import { to_coordinates } from '$lib/api/v1/coordinates-input'
-import { resolve_client_id, to_multistring, to_string_array } from '$lib/api/v1/entry-input'
+import { resolve_client_id, to_multistring, to_review, to_string_array } from '$lib/api/v1/entry-input'
 import { citation_slugs, resolve_sentence_igt, to_citations, to_discourse_role } from '$lib/api/v1/sentence-igt'
 import { normalize_part_of_speech } from '$lib/mappings/parts-of-speech'
 import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
@@ -234,6 +234,7 @@ function build_entry({ db, entry, entry_id, now, dialect_map, tag_map, source_sl
       scientific_names: to_string_array(entry.scientific_names),
       elicitation_id: entry.elicitation_id?.trim() || undefined,
       coordinates: to_coordinates(entry.coordinates) ?? undefined,
+      review: to_review(entry.review) ?? undefined,
       created_at: now,
       updated_at: now,
     }),
@@ -438,6 +439,10 @@ function build_entry_patch_row({ existing, patch, now, source_slug_set }: { exis
   }
   if ('coordinates' in source) {
     row.coordinates = to_coordinates(source.coordinates) ?? null
+    changed = true
+  }
+  if ('review' in source) {
+    row.review = to_review(patch.review) ?? null
     changed = true
   }
   return changed ? row : null

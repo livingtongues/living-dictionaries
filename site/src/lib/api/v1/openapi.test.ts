@@ -33,7 +33,7 @@ function request_body_property_keys({ path, method }: { path: string, method: st
 const ENTRY_INPUT_KEYS: Record<keyof EntryInput, true> = {
   id: true, lexeme: true, homograph: true, phonetic: true, interlinearization: true, morphology: true,
   notes: true, linguistic_history: true, sources: true, citations: true, scientific_names: true, elicitation_id: true,
-  coordinates: true, dialects: true, tags: true, senses: true,
+  coordinates: true, dialects: true, tags: true, review: true, senses: true,
 }
 const SENSE_INPUT_KEYS: Record<keyof SenseInput, true> = {
   id: true, glosses: true, definition: true, parts_of_speech: true, semantic_domains: true,
@@ -50,7 +50,7 @@ const SENTENCE_PATCH_KEYS: Record<keyof SentencePatch, true> = {
 const ENTRY_PATCH_KEYS: Record<keyof EntryPatch, true> = {
   lexeme: true, homograph: true, phonetic: true, interlinearization: true, morphology: true, notes: true,
   linguistic_history: true, sources: true, citations: true, scientific_names: true, elicitation_id: true,
-  coordinates: true, dialects: true, tags: true, senses: true,
+  coordinates: true, dialects: true, tags: true, review: true, senses: true,
 }
 // Dialect request bodies live in the route files (no named component schema); TS fails
 // to compile if a key is added/removed without updating these, and the runtime test then
@@ -164,6 +164,9 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}/texts/{textId}/audio/{audioId}': ['delete', 'patch'],
       '/api/v1/dictionaries/{id}/texts/{textId}/videos': ['post'],
       '/api/v1/dictionaries/{id}/texts/{textId}/videos/{videoId}': ['delete'],
+      '/api/v1/dictionaries/{id}/texts/{textId}/audio/{audioId}/align': ['post'],
+      '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio/{audioId}/align': ['post'],
+      '/api/v1/dictionaries/{id}/align-jobs/{jobId}': ['get'],
       '/api/v1/dictionaries/{id}/media/{storagePath}': ['get'],
     })
   })

@@ -8,7 +8,7 @@ enum _CustomPrintFields {
   phonetic = 'Phonetic',
   parts_of_speech = 'Part of Speech',
   example_sentence = 'Example Sentences', // xv or xs
-  photo = 'Photo', // pf.gcs
+  photo = 'Photo',
   speaker = 'Speaker', // sf.sp or sf.speakerName
   sources = 'Source',
   noun_class = 'Noun Class',

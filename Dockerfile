@@ -43,6 +43,10 @@ FROM node:24-alpine AS runner
 
 WORKDIR /workspace
 
+# ffmpeg: extracts a frame for video thumbnails ($lib/server/video-thumbnails.ts —
+# the upload fast path + weekly media-sweep self-heal). Alpine's package is small.
+RUN apk add --no-cache ffmpeg
+
 # Recreate workspace structure for the prod install.
 COPY --from=builder /app/pnpm-lock.yaml /app/pnpm-workspace.yaml /app/package.json ./
 COPY --from=builder /app/site/package.json site/
@@ -75,6 +79,9 @@ WORKDIR /workspace/site
 
 ENV NODE_ENV=production
 ENV PORT=3000
+# Adapter-node's global ceiling must accommodate a 100 MiB multipart video.
+# `hooks.server.ts` retains the 16 MiB ceiling for every non-video route.
+ENV BODY_SIZE_LIMIT=105M
 # DATA_DIR comes from env_file `.env` on the VPS (set to `/data`, the volume mount).
 # Unset → the app falls back to `.data` relative to cwd for non-Docker local dev.
 

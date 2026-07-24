@@ -5,7 +5,7 @@
 Of 2,232 production dictionaries, ~1,600 are cruft: explorers who created a dict and moved on
 (650 now in the `delete` bucket), self-declared conlangs (696), and classroom/study glossaries
 (269). Every one of these minted a real catalog row, a per-dict SQLite file, an R2 snapshot slot,
-and full GCS media-upload rights. The create form's conlang checkbox proves people *tell us*
+and full R2 media-upload rights. The create form's conlang checkbox proves people *tell us*
 they're playing — we just don't give them a playground, so they play in production.
 
 ## What the architecture already gives us
@@ -30,7 +30,7 @@ The local-first stack makes a **zero-server playground** unusually cheap:
 "Try Living Dictionaries" button (homepage / create-dictionary page) → opens `/playground` using
 the SAME entry-editing components, backed by a dict DB that exists only in this browser.
 
-- **No shared.db row, no server sync, no GCS.** `open_dict` gets a `local_only` flag: skip
+- **No shared.db row, no server sync, no R2.** `open_dict` gets a `local_only` flag: skip
   snapshot fetch from R2 (seed from bundled sample), never construct the sync engine.
 - **Seeded, not empty**: bundle a small curated sample (~30–50 entries with glosses, a few
   photos/audio referencing existing PUBLIC dict media URLs — no new storage) so the first

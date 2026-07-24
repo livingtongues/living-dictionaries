@@ -8,6 +8,7 @@
   import Modal from '$lib/components/ui/Modal.svelte'
   import { format_date } from '$lib/utils/format-relative-time'
   import { api_dictionaries_id_delete } from '../../api/dictionaries/[id]/_call'
+  import AlignConfigCell from './AlignConfigCell.svelte'
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte'
   import RoleCell from './RoleCell.svelte'
 
@@ -173,6 +174,9 @@
   {:else}
     <span class="dim">—</span>
   {/if}
+</td>
+<td class="center-cell">
+  <AlignConfigCell {dictionary} />
 </td>
 <td class="meta-cell">{format_date(dictionary.created_at)}</td>
 <td class="meta-cell">{format_date(dictionary.updated_at)}</td>

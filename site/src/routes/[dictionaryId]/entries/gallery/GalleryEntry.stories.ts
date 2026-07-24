@@ -16,7 +16,7 @@ const dictionary = {
 
 const photo = {
   id: 'p1',
-  serving_url: 'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g',
+  storage_path: 'demo/photo/9f000000-0000-4000-8000-000000000001.jpg',
   source: 'Community field collection',
   photographer: 'A. Photographer',
 }

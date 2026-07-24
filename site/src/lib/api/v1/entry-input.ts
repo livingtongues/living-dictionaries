@@ -1,3 +1,4 @@
+import type { EntryReview } from '$lib/db/schemas/dictionary.types'
 import type { Coordinates, MultiString } from '$lib/types'
 
 /** Cap per-request batch size; agents chunk larger imports. */
@@ -130,6 +131,12 @@ export interface EntryInput {
   dialects?: string[] | string
   /** Tag names — found-or-created on this dictionary. */
   tags?: string[] | string
+  /** EDITOR-ONLY "needs review" flag `{ category, note }` — queue this entry for a
+   *  human reviewer WITHOUT showing the public. `category` is a free bucket label
+   *  (drives the entries-list "Needs review" facet); `note` is the bespoke thing to
+   *  check. Set it on import for anything you had to guess/salvage; a reviewer
+   *  clears it. Never rendered to non-editors. */
+  review?: EntryReview | null
   senses?: SenseInput[]
 }
 
@@ -193,6 +200,9 @@ export interface EntryPatch {
   coordinates?: Coordinates | null
   dialects?: string[] | string
   tags?: string[] | string
+  /** EDITOR-ONLY "needs review" flag — `{ category, note }` sets/replaces it;
+   *  `null` clears it (the "Resolve" action). Omit → untouched. Never public. */
+  review?: EntryReview | null
   senses?: SensePatch[]
 }
 
@@ -261,4 +271,40 @@ export function to_string_array(value: unknown): string[] | undefined {
     .map(item => item.trim())
     .filter(Boolean)
   return out.length ? out : undefined
+}
+
+/**
+ * Coerce an `EntryInput.review` / `EntryPatch.review` value into a stored
+ * `EntryReview` (`{ category, note }`). `null` → `null` (clear); `undefined` or
+ * an empty/blank object → `undefined` (omit/untouched); otherwise trimmed, with
+ * `category` defaulting to `other` when only a note is supplied.
+ */
+export function to_review(value: unknown): EntryReview | null | undefined {
+  if (value === null) return null
+  if (value === undefined || typeof value !== 'object') return undefined
+  const source = value as Record<string, unknown>
+  const category = typeof source.category === 'string' ? source.category.trim() : ''
+  const note = typeof source.note === 'string' ? source.note.trim() : ''
+  if (!category && !note) return undefined
+  return { category: category || 'other', note }
+}
+
+if (import.meta.vitest) {
+  describe(to_review, () => {
+    it('returns null for null (clear/resolve)', () => {
+      expect(to_review(null)).toBe(null)
+    })
+    it('returns undefined for undefined / non-objects / empty', () => {
+      expect(to_review(undefined)).toBe(undefined)
+      expect(to_review('nope')).toBe(undefined)
+      expect(to_review({})).toBe(undefined)
+      expect(to_review({ category: '  ', note: '' })).toBe(undefined)
+    })
+    it('trims and keeps a full review', () => {
+      expect(to_review({ category: ' truncated ', note: ' check source ' })).toEqual({ category: 'truncated', note: 'check source' })
+    })
+    it('defaults category to `other` when only a note is given', () => {
+      expect(to_review({ note: 'freeform concern' })).toEqual({ category: 'other', note: 'freeform concern' })
+    })
+  })
 }

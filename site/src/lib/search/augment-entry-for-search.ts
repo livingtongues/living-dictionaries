@@ -35,6 +35,10 @@ export function augment_entry_for_search(entry: EntryData) {
 
   const _sources = (entry.main.sources || []).filter(Boolean)
 
+  // `entry.main.review` is only present for editors (stripped upstream in
+  // assemble_entry_data), so these facets are naturally empty/false for the public.
+  const _review_categories = entry.main.review?.category ? [entry.main.review.category] : []
+
   return {
     id: entry.id,
     _lexeme,
@@ -50,6 +54,8 @@ export function augment_entry_for_search(entry: EntryData) {
     _speakers,
     _parts_of_speech: _parts_of_speech.map(use_underscores_for_spaces_periods),
     _semantic_domains: _semantic_domains.map(use_underscores_for_spaces_periods),
+    _review_categories,
+    has_review: !!entry.main.review,
     has_audio: !!entry.audios?.length,
     has_sentence: !!entry.senses?.find(sense => sense.sentences?.length),
     has_image: !!entry.senses?.find(sense => sense.photos?.length),

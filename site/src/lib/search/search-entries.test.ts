@@ -115,6 +115,7 @@ describe(search_entries, () => {
               ],
               "_other": [],
               "_parts_of_speech": [],
+              "_review_categories": [],
               "_semantic_domains": [],
               "_sources": [],
               "_speakers": [],
@@ -124,6 +125,7 @@ describe(search_entries, () => {
               "has_noun_class": false,
               "has_part_of_speech": false,
               "has_plural_form": false,
+              "has_review": false,
               "has_semantic_domain": false,
               "has_sentence": false,
               "has_speaker": false,
@@ -141,6 +143,7 @@ describe(search_entries, () => {
             "_orthographies": 1,
             "_other": 0,
             "_parts_of_speech": 0,
+            "_review_categories": 0,
             "_semantic_domains": 0,
             "_sources": 0,
             "_speakers": 0,
@@ -160,6 +163,7 @@ describe(search_entries, () => {
             },
             "_other": {},
             "_parts_of_speech": {},
+            "_review_categories": {},
             "_semantic_domains": {},
             "_sources": {},
             "_speakers": {},
@@ -193,6 +197,7 @@ describe(search_entries, () => {
             },
             "_other": {},
             "_parts_of_speech": {},
+            "_review_categories": {},
             "_semantic_domains": {},
             "_sources": {},
             "_speakers": {},
@@ -466,6 +471,18 @@ describe(search_entries, () => {
               },
               "type": "Radix",
             },
+            "_review_categories": {
+              "isArray": true,
+              "node": {
+                "c": [],
+                "d": [],
+                "e": false,
+                "k": "",
+                "s": "",
+                "w": "",
+              },
+              "type": "Radix",
+            },
             "_semantic_domains": {
               "isArray": true,
               "node": {
@@ -564,6 +581,16 @@ describe(search_entries, () => {
               },
               "type": "Bool",
             },
+            "has_review": {
+              "isArray": false,
+              "node": {
+                "false": [
+                  1,
+                ],
+                "true": [],
+              },
+              "type": "Bool",
+            },
             "has_semantic_domain": {
               "isArray": false,
               "node": {
@@ -617,6 +644,8 @@ describe(search_entries, () => {
             "_parts_of_speech",
             "_semantic_domains",
             "_speakers",
+            "_review_categories",
+            "has_review",
             "has_audio",
             "has_sentence",
             "has_image",
@@ -635,6 +664,7 @@ describe(search_entries, () => {
             "_orthographies": "string[]",
             "_other": "string[]",
             "_parts_of_speech": "string[]",
+            "_review_categories": "string[]",
             "_semantic_domains": "string[]",
             "_sources": "string[]",
             "_speakers": "string[]",
@@ -644,6 +674,7 @@ describe(search_entries, () => {
             "has_noun_class": "boolean",
             "has_part_of_speech": "boolean",
             "has_plural_form": "boolean",
+            "has_review": "boolean",
             "has_semantic_domain": "boolean",
             "has_sentence": "boolean",
             "has_speaker": "boolean",
@@ -672,6 +703,7 @@ describe(search_entries, () => {
             },
             "_other": {},
             "_parts_of_speech": {},
+            "_review_categories": {},
             "_semantic_domains": {},
             "_sources": {},
             "_speakers": {},
@@ -688,6 +720,7 @@ describe(search_entries, () => {
           "isSorted": true,
           "language": "multi",
           "sortableProperties": [
+            "has_review",
             "has_audio",
             "has_sentence",
             "has_image",
@@ -704,6 +737,7 @@ describe(search_entries, () => {
             "has_noun_class": "boolean",
             "has_part_of_speech": "boolean",
             "has_plural_form": "boolean",
+            "has_review": "boolean",
             "has_semantic_domain": "boolean",
             "has_sentence": "boolean",
             "has_speaker": "boolean",
@@ -759,6 +793,18 @@ describe(search_entries, () => {
               "type": "boolean",
             },
             "has_plural_form": {
+              "docs": {
+                "1": 0,
+              },
+              "orderedDocs": [
+                [
+                  1,
+                  false,
+                ],
+              ],
+              "type": "boolean",
+            },
+            "has_review": {
               "docs": {
                 "1": 0,
               },

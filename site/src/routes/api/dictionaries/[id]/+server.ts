@@ -23,8 +23,8 @@ import { error, json } from '@sveltejs/kit'
  *      id would surface the previous dict's orphaned change history.
  *   3. Delete the R2 snapshot object `dictionaries/{id}.db.gz`.
  *
- * NOTE: orphaned-media harvest is DEFERRED — media blobs live on legacy GCS
- * (not moving off GCS yet) and are left for a future cleanup sweep.
+ * Referenced media objects become ledger orphans after the DB disappears; the
+ * R2 media sweep applies its normal grace period before deleting them.
  */
 
 export interface DictionariesIdDeleteResponseBody {
@@ -100,7 +100,7 @@ export const DELETE: RequestHandler = async (event) => {
 
   return json({
     result: 'deleted',
-    orphaned_media_count: 0, // deferred — media stays on legacy GCS for now
+    orphaned_media_count: 0, // deletion is asynchronous through the R2 media sweep
     db_files_removed,
   } satisfies DictionariesIdDeleteResponseBody)
 }

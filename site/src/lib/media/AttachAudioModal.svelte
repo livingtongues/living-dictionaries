@@ -6,6 +6,7 @@
   import type { MediaUploadHandle } from '$lib/media/upload-media'
   import type { DictRowType } from '$lib/db/dict-client/dict-live-db.svelte'
   import { add_audio } from '$lib/media/add-media'
+  import { run_auto_align } from '$lib/media/auto-align'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import JSON from '$lib/components/ui/JSON.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
@@ -50,7 +51,23 @@
       speaker_id,
       source: source_slug,
     })
-    handle.done.then(() => upload_triggered = true).catch(() => undefined) // error renders in the progress pill
+    handle.done.then(async () => {
+      upload_triggered = true
+      // Graduated dictionary (`auto_align`): align automatically on attach. The
+      // row must reach the server first — push it, then fire the job.
+      if (page.data.auto_align && (text_id || sentence_id) && handle.media_id) {
+        const sync_now = page.data.connection ? () => page.data.connection.sync_now() : undefined
+        await sync_now?.()
+        void run_auto_align({
+          dictionary_id: page.data.dictionary.id,
+          target_kind: text_id ? 'text' : 'sentence',
+          target_id: text_id ?? sentence_id,
+          audio_id: handle.media_id,
+          t: page.data.t,
+          sync_now,
+        })
+      }
+    }).catch(() => undefined) // error renders in the progress pill
     return handle
   }
 

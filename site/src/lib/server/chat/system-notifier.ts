@@ -30,9 +30,11 @@ function ensure_system_notifier(db: Database.Database): void {
     .run(ROOM_NOTIFICATIONS, NOTIFICATIONS_ROOM_NAME, now, now)
 }
 
-export function post_system_notification({ db, content }: {
+export function post_system_notification({ db, content, client_message_id }: {
   db: Database.Database
   content: SystemNotificationContent
+  /** Stable event id for request retries that must not create duplicate notices. */
+  client_message_id?: string
 }): void {
   ensure_system_notifier(db)
 
@@ -42,6 +44,7 @@ export function post_system_notification({ db, content }: {
     user_id: SYSTEM_USER_ID,
     body_html: content.body_html,
     body_text: content.body_text,
+    client_message_id,
   })
 }
 

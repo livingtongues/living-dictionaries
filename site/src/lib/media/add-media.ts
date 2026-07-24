@@ -4,6 +4,7 @@ import { upload_media } from './upload-media'
 import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
 import { track } from '$lib/debug/remote-log'
 import { MEDIA_UPLOADED } from '$lib/debug/log-events'
+import { api_video_generate_thumbnail } from '$api/video/generate-thumbnail/_call'
 
 /** Which editing surface launched the upload — for the `media_uploaded` analytics event. */
 export type MediaUploadContext = 'list' | 'entry' | 'table'
@@ -47,13 +48,11 @@ export function add_photo({ writes, dictionary_id, sense_id, file, source, photo
   const media_id = crypto.randomUUID()
   const handle = upload_media({ file, dictionary_id, kind: 'image', media_id })
   const done = handle.done.then(async ({ storage_path, exif }) => {
-    // serving_url is '' on the R2 convention — `photo_src` derives urls from storage_path.
     // EXIF coords arrive pre-blunted to village level (2dp); absent = null.
     const inserted = await writes.insert_photo({
       photo: {
         id: media_id,
         storage_path,
-        serving_url: '',
         source,
         photographer,
         latitude: exif?.latitude ?? null,
@@ -99,7 +98,7 @@ export function add_audio({ writes, dictionary_id, entry_id, sentence_id, text_i
     return { storage_path }
   })
   done.catch(() => undefined)
-  return { ...handle, done }
+  return { ...handle, done, media_id }
 }
 
 /** Attribution: `speaker_id` and/or `source` (a `sources.slug` registry ref) — at least one. */
@@ -124,6 +123,9 @@ export function add_video({ writes, dictionary_id, sense_id, file, speaker_id, s
     if (!inserted)
       throw new Error('The video was uploaded but could not be saved — please try again.')
     track_media_uploaded({ dictionary_id, media: 'video', context })
+    // Fire-and-forget: the server re-fetches the object from R2 and generates the
+    // `_thumb.webp` (the media-sweep self-heal is the safety net if this fails).
+    void api_video_generate_thumbnail({ dictionary_id, storage_path, sense_id, file_size: file.size })
     return { storage_path }
   })
   done.catch(() => undefined)

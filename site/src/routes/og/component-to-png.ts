@@ -41,7 +41,7 @@ function render_svg({ markup, height, width, load_dynamic }: {
 /**
  * Name the failure class for `og_render_failed` telemetry — the old blanket
  * `og_font_unsupported` label actively misled triage when the real fault was
- * satori failing to FETCH the entry photo from lh3 (2026-07-08 review).
+ * satori failing to fetch a remote entry photo (2026-07-08 review).
  */
 export function classify_og_failure(error: unknown): 'image_fetch' | 'font' | 'render' {
   const message = (error as { message?: unknown } | null | undefined)?.message
@@ -182,8 +182,8 @@ function hash(str: string) {
 
 if (import.meta.vitest) {
   describe(classify_og_failure, () => {
-    test('an lh3 photo fetch failure is image_fetch (the 2026-07-08 mislabel)', () => {
-      expect(classify_og_failure(new Error(`Can't load image https://lh3.googleusercontent.com/abc=w1200: fetch failed`))).toBe('image_fetch')
+    test('an R2 photo fetch failure is image_fetch (the 2026-07-08 mislabel)', () => {
+      expect(classify_og_failure(new Error(`Can't load image https://media.livingdictionaries.app/dict/photo/id_w1600.webp: fetch failed`))).toBe('image_fetch')
     })
     test('an opentype GSUB parse failure is font', () => {
       expect(classify_og_failure(new Error('lookupType: 5 - substFormat: 3 is not yet supported'))).toBe('font')

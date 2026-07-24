@@ -10,9 +10,9 @@ export const shared_meta: StoryMeta = {
 }
 
 const noop = (() => {}) as never
-// Empty serving_url resolves to the bundled dev placeholder, so the fullscreen
+// No storage path resolves to the bundled dev placeholder, so the fullscreen
 // preload succeeds and the viewer (where the credit footer lives) opens.
-const photo = { serving_url: '' } as never
+const photo = {} as never
 
 const base = {
   title: 'tz’ikin',

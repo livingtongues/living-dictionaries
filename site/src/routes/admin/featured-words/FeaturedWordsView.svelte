@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { FeaturedEntry, FeaturedEntryStatus } from '$lib/db/server/featured-entries'
   import type { PageData } from './$types'
-  import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { goto } from '$app/navigation'
   import { page } from '$app/state'
   import { api_admin_featured_entries_set_status } from '$api/admin/featured-entries/_call'
@@ -52,7 +51,7 @@
       return
     }
     audio_element?.pause()
-    audio_element = new Audio(url_from_storage_path(row.audio_storage_path, PUBLIC_STORAGE_BUCKET))
+    audio_element = new Audio(url_from_storage_path(row.audio_storage_path))
     audio_element.onended = () => playing_id = null
     audio_element.onerror = () => playing_id = null
     playing_id = row.id
@@ -106,7 +105,7 @@
       {#each visible as row (row.id)}
         <div class="card">
           <div class="photo-wrap">
-            <img src={photo_src({ storage_path: row.photo_storage_path, serving_url: row.photo_serving_url }, 's400-p')} alt={row.lexeme} loading="lazy" />
+            <img src={photo_src({ photo: { storage_path: row.photo_storage_path }, variant: 'thumb' })} alt={row.lexeme} loading="lazy" />
             <div class="photo-fade"></div>
             <div class="photo-text">
               <div class="lexeme">{row.lexeme}</div>

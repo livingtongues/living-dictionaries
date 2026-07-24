@@ -141,11 +141,20 @@ export function r2_dict_snapshot_key(dictionary_id: string): string {
   return `dictionaries/${dictionary_id}.db.gz`
 }
 
-/** Public serving domain of the R2 media bucket (audio/video on the new key convention; photos come in Phase 2). */
+/** Public serving domain of the R2 media bucket. */
 export const R2_MEDIA_DOMAIN = 'https://media.livingdictionaries.app'
 
 /** R2 media bucket name (LD Cloudflare account; not secret — gated by the account creds). */
 export const R2_MEDIA_BUCKET = 'livingdictionaries-media'
+
+/** Immutable site-owned assets, versioned by source-content hash in the media bucket. */
+export const SITE_MEDIA = {
+  about_fieldwork_board: `${R2_MEDIA_DOMAIN}/site/about-fieldwork-board/ab98243d634d`,
+  about_language_documentation: `${R2_MEDIA_DOMAIN}/site/about-language-documentation/5bddf8b6ab88`,
+  about_plant_recording: `${R2_MEDIA_DOMAIN}/site/about-plant-recording/cdcd020ed8d`,
+  living_tongues_logo: `${R2_MEDIA_DOMAIN}/site/living-tongues-logo/9b4da02f0f94`,
+  seo_default: `${R2_MEDIA_DOMAIN}/site/seo-default/332522756bfe`,
+} as const
 
 /** R2 snapshot rebuild interval for the in-process builder cron. */
 export const R2_SNAPSHOT_INTERVAL_MS = 30 * 60 * 1000
@@ -156,8 +165,13 @@ export const SNAPSHOT_EXPIRED_DAYS = 60
 /** Total OPFS budget for viewer-only dict.db files (editor dicts are exempt). */
 export const VIEWER_OPFS_BUDGET_BYTES = 200 * 1024 * 1024
 
-/** Max bytes accepted for a v1 media upload (multipart file or fetched-from-url). Large videos should use `hosted_elsewhere` links instead. */
-export const MAX_MEDIA_UPLOAD_BYTES = 25 * 1024 * 1024
+/** Uploaded media ceilings. Photos keep their smaller image pipeline limit; videos get room for short field recordings. */
+export const MAX_AUDIO_UPLOAD_BYTES = 25 * 1024 * 1024
+export const MAX_PHOTO_UPLOAD_BYTES = 10 * 1024 * 1024
+export const MAX_VIDEO_UPLOAD_BYTES = 100 * 1024 * 1024
+
+/** Uploaded videos above this size remain allowed but create an admin review notification. */
+export const LARGE_VIDEO_REVIEW_BYTES = 25 * 1024 * 1024
 
 /** Timeout for the server-side fetch of a media `url` supplied to a v1 media endpoint. */
 export const MEDIA_FETCH_TIMEOUT_MS = 30_000

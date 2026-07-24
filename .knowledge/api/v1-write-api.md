@@ -318,10 +318,10 @@ thread `3eb63b49…`, itself an end-to-end test of the feedback channel). Decisi
   Decoration of `download_url` happens at the ROUTE layer
   (`add_audio_download_urls` in `v1-texts.ts`) because only the route knows the
   request origin.
-- **Bytes are exposed via a redirecting endpoint**, NOT raw firebasestorage URLs:
+- **Bytes are exposed via a redirecting endpoint**, not raw bucket URLs:
   `GET …/media/{...storage_path}` verifies the path belongs to a media row in
   THIS dictionary (keeps private dicts behind key scoping), then 302s to
-  `url_from_storage_path` (firebasestorage in prod, `/api/dev-media` in dev).
+  `url_from_storage_path` (the R2 custom domain in prod, `/api/dev-media` in dev).
   Rationale: stable consumer URL that survives a future storage-backend move.
 - **`timings` is audio-only in the API** (videos have the column too but no
   consumer; attach 400s on non-audio timings). Accepted on audio attach (object

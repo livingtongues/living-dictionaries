@@ -6,7 +6,7 @@ export const shared_meta: StoryMeta = {
   page_data: { t: story_t, locale: 'en' },
 }
 
-/** Real seed cards (lh3 CDN photos load over the network). */
+/** Real seed cards (R2 photos load over the network). */
 export const Strip: Story<typeof Component> = {
   viewports: [{ width: 1200, height: 220 }],
   props: {

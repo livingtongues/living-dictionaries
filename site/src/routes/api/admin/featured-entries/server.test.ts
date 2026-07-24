@@ -17,10 +17,10 @@ beforeAll(() => {
 beforeEach(() => {
   db = open_test_shared_db()
   const insert = db.prepare(`
-    INSERT INTO featured_entries (id, dict_id, entry_id, lexeme, gloss, gloss_language, photo_serving_url, audio_storage_path, dict_name, status)
+    INSERT INTO featured_entries (id, dict_id, entry_id, lexeme, gloss, gloss_language, photo_storage_path, audio_storage_path, dict_name, status)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-  insert.run('fe1', 'achi', 'e1', 'tz’ikin', 'bird', 'en', 'hash1', 'achi/audio/1.mp3', 'Achi', 'suggested')
-  insert.run('fe2', 'gta', 'e2', 'gsoʔ', 'water', 'es', 'hash2', 'gta/audio/2.mp3', 'GtaɁ', 'approved')
+  insert.run('fe1', 'achi', 'e1', 'tz’ikin', 'bird', 'en', 'achi/photo/1.jpg', 'achi/audio/1.mp3', 'Achi', 'suggested')
+  insert.run('fe2', 'gta', 'e2', 'gsoʔ', 'water', 'es', 'gta/photo/2.jpg', 'gta/audio/2.mp3', 'GtaɁ', 'approved')
 })
 
 afterEach(() => {

@@ -124,10 +124,11 @@ add_entry({ id: 'demo_audio', lexeme: 'yenneq', phonetic: 'jen.neq', senses: [{ 
 insert('audio', { id: 'demo_audio_a1', entry_id: 'demo_audio', sentence_id: null, text_id: null, storage_path: 'dev/audio/aud_ja.mp3', source: null })
 
 // 9 — photo only
+const PHOTO_UUID_MOON = '33333333-3333-4333-8333-333333333333'
 const [photo_sense] = add_entry({ id: 'demo_photo', lexeme: 'sekhet', senses: [{ glosses: { es: 'luna, mes', en: 'moon, month' } }] })
-write_dev_image({ key: 'dev/photo/demo-moon.png', color: '#334155', label: 'moon' })
-insert('photos', { id: 'demo_photo_p1', storage_path: '', serving_url: 'dev-local:dev/photo/demo-moon.png', source: 'Demo fixture photo', photographer: 'Demo Photographer' })
-insert('sense_photos', { id: 'demo_photo_sp1', sense_id: photo_sense, photo_id: 'demo_photo_p1' })
+write_dev_image({ key: `dev/photo/${PHOTO_UUID_MOON}.png`, color: '#334155', label: 'moon' })
+insert('photos', { id: PHOTO_UUID_MOON, storage_path: `dev/photo/${PHOTO_UUID_MOON}.png`, source: 'Demo fixture photo', photographer: 'Demo Photographer' })
+insert('sense_photos', { id: 'demo_photo_sp1', sense_id: photo_sense, photo_id: PHOTO_UUID_MOON })
 
 // 10 — video only, UPLOADED file with an R2-convention key: its `_thumb.webp`
 // sibling EXISTS in the dev-media store → real video thumbnail renders.
@@ -159,10 +160,15 @@ const [all_media_sense] = add_entry({
   ],
 })
 insert('audio', { id: 'demo_all_a1', entry_id: 'demo_all_media', sentence_id: null, text_id: null, storage_path: 'dev/audio/aud_tzi.mp3', source: null })
-for (const [index, color] of [['a', '#b45309'], ['b', '#0e7490'], ['c', '#4d7c0f']] as const) {
-  write_dev_image({ key: `dev/photo/demo-house-${index}.png`, color, label: `house ${index}` })
-  insert('photos', { id: `demo_all_p_${index}`, storage_path: '', serving_url: `dev-local:dev/photo/demo-house-${index}.png`, source: `Demo fixture photo ${index}`, photographer: null })
-  insert('sense_photos', { id: `demo_all_sp_${index}`, sense_id: all_media_sense, photo_id: `demo_all_p_${index}` })
+const gallery_photos = [
+  { label: 'a', color: '#b45309', id: '44444444-4444-4444-8444-444444444444' },
+  { label: 'b', color: '#0e7490', id: '55555555-5555-4555-8555-555555555555' },
+  { label: 'c', color: '#4d7c0f', id: '66666666-6666-4666-8666-666666666666' },
+] as const
+for (const { label, color, id } of gallery_photos) {
+  write_dev_image({ key: `dev/photo/${id}.png`, color, label: `house ${label}` })
+  insert('photos', { id, storage_path: `dev/photo/${id}.png`, source: `Demo fixture photo ${label}`, photographer: null })
+  insert('sense_photos', { id: `demo_all_sp_${label}`, sense_id: all_media_sense, photo_id: id })
 }
 insert('videos', { id: 'demo_all_v1', storage_path: `dev/video/${VIDEO_UUID_B}.mp4`, hosted_elsewhere: null, hosted_metadata: null, source: null, videographer: null, text_id: null })
 insert('sense_videos', { id: 'demo_all_sv1', sense_id: all_media_sense, video_id: 'demo_all_v1' })

@@ -221,6 +221,7 @@
     { label: 'Gloss langs' },
     { label: 'Alternate names' },
     { label: 'Orthographies' },
+    { label: 'Align' },
     { key: 'created_at', label: 'Created', align: 'right' },
     { key: 'updated_at', label: 'Updated', align: 'right' },
     { label: 'Used by community' },

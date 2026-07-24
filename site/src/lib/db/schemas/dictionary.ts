@@ -1,5 +1,5 @@
 import type { DictionaryCoordinates } from './shared.types'
-import type { HostedElsewhere, HostedMetadata, MediaTimings, MultiString, SentenceTokens, SourceCitation } from './dictionary.types'
+import type { EntryReview, HostedElsewhere, HostedMetadata, MediaTimings, MultiString, SentenceTokens, SourceCitation } from './dictionary.types'
 import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 import { DISCOURSE_ROLES, SOURCE_TYPES, TAG_KINDS } from '$lib/constants'
 import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
@@ -73,6 +73,9 @@ export const entries = sqliteTable('entries', {
   coordinates: text({ mode: 'json' }).$type<DictionaryCoordinates>(),
   unsupported_fields: text({ mode: 'json' }).$type<Record<string, unknown>>(),
   elicitation_id: text(),
+  /** EDITOR-ONLY "needs review" flag `{ category, note }` (see `EntryReview`).
+   *  Stripped from non-editor `EntryData` — never shown to the public. */
+  review: text({ mode: 'json' }).$type<EntryReview>(),
   dirty: integer(),
   server_seq: integer(),
   created_by_user_id: text().notNull(),
@@ -265,7 +268,6 @@ export const sentence_videos = sqliteTable('sentence_videos', {
 export const photos = sqliteTable('photos', {
   id: text().primaryKey(),
   storage_path: text().notNull(),
-  serving_url: text().notNull(),
   /** Free-text caption/attribution prose shown under the photo — NOT a registry ref (unlike audio/videos.source). */
   source: text(),
   photographer: text(),

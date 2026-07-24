@@ -19,7 +19,7 @@ export const WithPhotoFullData: Story<typeof Component> = {
     pos: 'n.',
     glosses: [story_cards[0].gloss, 'helecho'],
     dialect: 'Northern',
-    photo_serving_url: story_cards[0].photo_serving_url,
+    photo_storage_path: story_cards[0].photo_storage_path,
     audio_storage_path: story_cards[0].audio_storage_path,
   },
 }
@@ -94,7 +94,7 @@ export const ManageControls: Story<typeof Component> = {
     entry_id: 'e1',
     lexeme: story_cards[0].lexeme,
     glosses: [story_cards[0].gloss],
-    photo_serving_url: story_cards[0].photo_serving_url,
+    photo_storage_path: story_cards[0].photo_storage_path,
     audio_storage_path: story_cards[0].audio_storage_path,
     manage: {
       can_move_left: true,

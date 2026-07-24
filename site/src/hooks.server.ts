@@ -1,4 +1,4 @@
-import type { HandleServerError } from '@sveltejs/kit'
+import type { Handle, HandleServerError } from '@sveltejs/kit'
 import { dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { start_chat_reping_cron_once } from '$lib/db/server/chat-reping-cron'
@@ -15,6 +15,7 @@ import { ensure_notifications_room } from '$lib/server/chat/ensure-team-membersh
 import { is_cross_origin_form_forbidden } from '$lib/server/csrf'
 import { boot_i18n_catalog } from '$lib/server/i18n/boot'
 import { log_server_event } from '$lib/server/log-server-event'
+import { MAX_VIDEO_UPLOAD_BYTES } from '$lib/constants'
 import { json } from '@sveltejs/kit'
 
 // Force shared.db open + SQL migrations at server boot rather than lazily on the
@@ -92,6 +93,14 @@ start_media_sweep_cron_once()
  * limit; this only changes the SHAPE of the rejection.
  */
 const BODY_SIZE_LIMIT_BYTES = parse_byte_size(env.BODY_SIZE_LIMIT)
+const STANDARD_BODY_SIZE_LIMIT_BYTES = 16 * 1024 * 1024
+const VIDEO_MULTIPART_OVERHEAD_BYTES = 1024 * 1024
+
+function request_body_limit(event: Parameters<Handle>[0]['event']): number | null {
+  if (event.request.method === 'POST' && event.route.id && /^\/api\/v1\/dictionaries\/\[id\]\/(?:senses\/\[senseId\]|sentences\/\[sentenceId\]|texts\/\[textId\])\/videos$/.test(event.route.id))
+    return Math.min(BODY_SIZE_LIMIT_BYTES ?? Number.POSITIVE_INFINITY, MAX_VIDEO_UPLOAD_BYTES + VIDEO_MULTIPART_OVERHEAD_BYTES)
+  return Math.min(BODY_SIZE_LIMIT_BYTES ?? Number.POSITIVE_INFINITY, STANDARD_BODY_SIZE_LIMIT_BYTES)
+}
 
 /** @type {import('@sveltejs/kit').Handle} */
 export function handle({ event, resolve }) {
@@ -105,10 +114,11 @@ export function handle({ event, resolve }) {
     return new Response(message, { status: 403, headers: { 'content-type': 'text/plain' } })
   }
 
-  if (BODY_SIZE_LIMIT_BYTES !== null) {
+  const body_size_limit = request_body_limit(event)
+  if (body_size_limit !== null && Number.isFinite(body_size_limit)) {
     const content_length = Number(event.request.headers.get('content-length'))
-    if (Number.isFinite(content_length) && content_length > BODY_SIZE_LIMIT_BYTES) {
-      return new Response(`Payload too large: ${content_length} bytes exceeds the ${BODY_SIZE_LIMIT_BYTES}-byte limit.`, {
+    if (Number.isFinite(content_length) && content_length > body_size_limit) {
+      return new Response(`Payload too large: ${content_length} bytes exceeds the ${body_size_limit}-byte limit.`, {
         status: 413,
         headers: { 'content-type': 'text/plain' },
       })

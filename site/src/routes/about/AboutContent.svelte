@@ -19,6 +19,7 @@
   import IconMdiDatabaseExportOutline from '~icons/mdi/database-export-outline'
   import IconMdiCounter from '~icons/mdi/counter'
   import IconMdiRobotOutline from '~icons/mdi/robot-outline'
+  import { SITE_MEDIA } from '$lib/constants'
 
   const t = $derived(page.data.t)
 
@@ -90,8 +91,9 @@
     <img
       alt="man in front of alphabet and storyboard drawing"
       loading="lazy"
-      src="https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w900"
-      srcset="https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w300 300w, https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w600 600w, https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w1200 1200w" />
+      src="{SITE_MEDIA.about_fieldwork_board}/w900.webp"
+      srcset="{SITE_MEDIA.about_fieldwork_board}/w480.webp 480w, {SITE_MEDIA.about_fieldwork_board}/w900.webp 900w, {SITE_MEDIA.about_fieldwork_board}/w1200.webp 1200w"
+      sizes="(max-width: 768px) 100vw, 768px" />
   </figure>
 
   <h2 class="section-title">{t('about.why_document')}</h2>
@@ -102,8 +104,9 @@
     <img
       alt="Recording language data"
       loading="lazy"
-      src="https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w900"
-      srcset="https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w300 300w, https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w600 600w, https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w1200 1200w" />
+      src="{SITE_MEDIA.about_language_documentation}/w900.webp"
+      srcset="{SITE_MEDIA.about_language_documentation}/w480.webp 480w, {SITE_MEDIA.about_language_documentation}/w900.webp 900w, {SITE_MEDIA.about_language_documentation}/w1200.webp 1200w"
+      sizes="(max-width: 768px) 100vw, 768px" />
   </figure>
 
   <h2 class="section-title">{t('about.what_is_LT')}</h2>
@@ -114,8 +117,9 @@
     <img
       alt="Recording plant words"
       loading="lazy"
-      src="https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w900"
-      srcset="https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w300 300w, https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w600 600w, https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w1200 1200w" />
+      src="{SITE_MEDIA.about_plant_recording}/w900.webp"
+      srcset="{SITE_MEDIA.about_plant_recording}/w480.webp 480w, {SITE_MEDIA.about_plant_recording}/w900.webp 900w, {SITE_MEDIA.about_plant_recording}/w1200.webp 1200w"
+      sizes="(max-width: 768px) 100vw, 768px" />
   </figure>
 
   <h2 class="section-title">{t('about.translators')}</h2>

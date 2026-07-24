@@ -97,7 +97,7 @@ Canonical env contents (after cutover): see `.issues/cutover-runbook.md`
 1. **Logs first**: `docker logs sveltekit_blue --tail 200`. Look for stack traces and migration errors.
 2. **Migration crashes on boot.** `hooks.server.ts` force-applies migrations at module load — a failed migration crashes boot loudly. Check `migrations` table state via the **database** skill's production-VPS section. Note LD has TWO migration buckets: `shared-migrations/` (for `shared.db`) and `dictionary-migrations/` (for each `dictionaries/<id>.db`). A bad dict-migration trips the boot sweep that bumps every dict to the latest `dict_db_schema_version`.
 3. **Cloudflare cache** can mask deploys → `curl -I https://new.livingdictionaries.app/ | grep -i cf` to confirm fresh response.
-4. **R2 snapshot builder issues** — the cron-driven builder writes per-dict `.db.gz` snapshots to R2 (`snapshots.livingdictionaries.app`). The kill switch is `R2_SNAPSHOT_BUILDER_ENABLED=false` in `.env` + restart. Manual fallback: `bin/build-all-snapshots.ts` (see cutover runbook).
+4. **R2 snapshot builder issues** — the cron-driven builder writes per-dict `.db.gz` snapshots to R2 (`snapshots.livingdictionaries.app`). The kill switch is `R2_SNAPSHOT_BUILDER_ENABLED=false` in `.env` + restart. The production image has no ad-hoc snapshot CLI; a primary restart runs an immediate reconcile + upload pass.
 5. **Email-in webhook 401s** usually mean `INTERNAL_INGEST_SECRET` on the VPS .env no longer matches the value the Cloudflare Worker sends. Both ends are hand-rotated — the secret lives in two places.
 6. **SES sends failing** — outbound network test from container:
    ```bash

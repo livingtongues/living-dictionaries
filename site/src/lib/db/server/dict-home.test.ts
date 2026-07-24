@@ -11,7 +11,7 @@ function seed_entry(db: ReturnType<typeof open_dictionary_db_in_memory>, options
     db.prepare(`INSERT INTO entry_dialects (id, entry_id, dialect_id, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES (?, ?, ?, ${audit})`).run(`${id}-ed1`, id, `${id}-d1`)
   }
   if (with_photo) {
-    db.prepare(`INSERT INTO photos (id, storage_path, serving_url, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES (?, ?, ?, ${audit})`).run(`${id}-p1`, `photos/${id}.jpg`, `serving-${id}`)
+    db.prepare(`INSERT INTO photos (id, storage_path, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES (?, ?, ${audit})`).run(`${id}-p1`, `photos/${id}.jpg`)
     db.prepare(`INSERT INTO sense_photos (id, sense_id, photo_id, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES (?, ?, ?, ${audit})`).run(`${id}-sp1`, `${id}-s1`, `${id}-p1`)
   }
   if (with_audio)
@@ -41,7 +41,6 @@ describe(get_featured_cards, () => {
       glosses: null,
       parts_of_speech: null,
       dialect: null,
-      photo_serving_url: null,
       photo_storage_path: null,
       audio_storage_path: null,
     })
@@ -53,7 +52,6 @@ describe(get_featured_cards, () => {
       glosses: { en: 'fruit' },
       parts_of_speech: ['n'],
       dialect: 'Northern',
-      photo_serving_url: 'serving-e1',
       photo_storage_path: 'photos/e1.jpg',
       audio_storage_path: 'audio/e1.mp3',
     })

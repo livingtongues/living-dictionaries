@@ -73,6 +73,13 @@ export async function search_entries({ query_params, entries_per_page, page_inde
       _speakers: {
         limit: 100,
       },
+      _review_categories: {
+        limit: 50,
+      },
+      has_review: {
+        true: true,
+        false: true,
+      },
       has_audio: {
         true: true,
         false: true,
@@ -118,6 +125,9 @@ export async function search_entries({ query_params, entries_per_page, page_inde
       ...query_params.parts_of_speech ? { _parts_of_speech: query_params.parts_of_speech } : {},
       ...query_params.semantic_domains ? { _semantic_domains: query_params.semantic_domains } : {},
       ...query_params.speakers ? { _speakers: query_params.speakers } : {},
+      ...query_params.review_categories ? { _review_categories: query_params.review_categories } : {},
+      ...query_params.has_review ? { has_review: true } : {},
+      ...query_params.no_review ? { has_review: false } : {},
       ...(query_params.has_image || query_params.view === 'gallery') ? { has_image: true } : {},
       ...(query_params.no_image && query_params.view !== 'gallery') ? { has_image: false } : {},
       ...query_params.has_audio ? { has_audio: true } : {},

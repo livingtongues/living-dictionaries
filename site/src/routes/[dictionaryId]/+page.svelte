@@ -71,7 +71,6 @@
     pos: string | null
     glosses: string[]
     dialect: string | null
-    photo_serving_url: string | null
     photo_storage_path: string | null
     audio_storage_path: string | null
   }
@@ -95,7 +94,6 @@
       pos: format_pos(card.parts_of_speech),
       glosses: top_glosses({ glosses: card.glosses, gloss_languages: dictionary.gloss_languages }),
       dialect: card.dialect,
-      photo_serving_url: card.photo_serving_url,
       photo_storage_path: card.photo_storage_path,
       audio_storage_path: card.audio_storage_path,
     }
@@ -114,7 +112,6 @@
       pos: format_pos(entry.senses?.[0]?.parts_of_speech),
       glosses: top_glosses({ glosses, gloss_languages: dictionary.gloss_languages }),
       dialect: entry.dialects?.[0]?.name?.default ?? null,
-      photo_serving_url: photo?.serving_url ?? null,
       photo_storage_path: photo?.storage_path ?? null,
       audio_storage_path: entry.audios?.[0]?.storage_path ?? null,
     }
@@ -302,11 +299,11 @@
   const show_nudges = $derived(is_manager && live_featured_ready && !$entries_loading)
   const nudge_star = $derived(show_nudges && featured_cards.length === 0)
   const nudge_location = $derived(is_manager && !is_con_lang && !has_coordinates)
-  // A featured_image without a usable serving_url/storage_path (e.g. malformed legacy data) renders the same as no image.
-  const has_cover_image = $derived(!!(dictionary.featured_image?.serving_url || dictionary.featured_image?.storage_path))
+  // A featured_image without a storage path renders the same as no image.
+  const has_cover_image = $derived(!!dictionary.featured_image?.storage_path)
   // Shared by the hero <img> and the fullscreen lightbox — same URL means the
   // lightbox paints instantly from cache, so the crossfade never shows a blink.
-  const cover_src = $derived(has_cover_image ? photo_src(dictionary.featured_image, 'w1600') : null)
+  const cover_src = $derived(has_cover_image ? photo_src({ photo: dictionary.featured_image, variant: 'w1600' }) : null)
   let show_cover_lightbox = $state(false)
   const nudge_image = $derived(can_edit_cover && !has_cover_image)
   const nudge_about = $derived(is_manager && about_is_too_short())
@@ -491,7 +488,6 @@
               pos={card.pos}
               glosses={card.glosses}
               dialect={card.dialect}
-              photo_serving_url={card.photo_serving_url}
               photo_storage_path={card.photo_storage_path}
               audio_storage_path={card.audio_storage_path}
               force_manage={manage_open}
@@ -553,7 +549,6 @@
             pos={card.pos}
             glosses={card.glosses}
             dialect={card.dialect}
-            photo_serving_url={card.photo_serving_url}
             photo_storage_path={card.photo_storage_path}
             audio_storage_path={card.audio_storage_path} />
         {/each}

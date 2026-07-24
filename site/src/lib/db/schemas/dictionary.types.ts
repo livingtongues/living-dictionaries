@@ -106,6 +106,21 @@ export interface HostedElsewhere {
   start_at_seconds?: number
 }
 
+/**
+ * `entries.review` — an EDITOR-ONLY "needs review" flag with a bespoke note.
+ * Set by imports (or humans) to queue an entry for a reviewer; cleared
+ * ("Resolve") once handled. Never shown to the public: it syncs in the snapshot
+ * but is stripped from non-editor `EntryData` (same bar as `private` tags).
+ * `category` is a FREE string (found-or-created, like tags) so imports can name
+ * their own buckets — it drives the entries-list "Needs review" category facet.
+ */
+export interface EntryReview {
+  /** Short bucket label for triage/faceting, e.g. `truncated`, `guarani_split`, `other`. */
+  category: string
+  /** The specific thing to check (may enumerate senses); shown in the editor-only banner. */
+  note: string
+}
+
 /** Best-effort cached metadata for a `videos.hosted_elsewhere` reference. */
 export interface HostedMetadata {
   title?: string

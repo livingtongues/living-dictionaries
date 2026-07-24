@@ -159,6 +159,12 @@ describe(apply_entry_writes, () => {
     expect(report.new_synced_up_to).not.toBe(before?.value)
   })
 
+  test('stores an editor-only review flag supplied on create', () => {
+    const report = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'flagged', review: { category: 'guarani_split', note: 'verify gn form' } }] })
+    const entry = db.prepare(`SELECT review FROM entries WHERE id = ?`).get(report.results[0].entry_id) as { review: string }
+    expect(JSON.parse(entry.review)).toEqual({ category: 'guarani_split', note: 'verify gn form' })
+  })
+
   test('records change history for created entries', () => {
     apply_entry_writes({ db, history_db, user_id: 'u1', entries: [{ lexeme: 'hist', senses: [{ glosses: { en: 'history' } }] }] })
     const entry_inserts = history_db.prepare(`SELECT COUNT(*) AS c FROM changes WHERE table_name = 'entries' AND op = 'insert'`).get() as { c: number }
@@ -239,6 +245,17 @@ describe(apply_entry_update, () => {
     expect(entry.phonetic).toBe('mˈbwa')
     expect(JSON.parse(entry.lexeme)).toEqual({ default: 'mbwa' }) // untouched
     expect(entry.updated_by_user_id).toBe('u2')
+  })
+
+  test('sets a review flag then clears it with review: null (the Resolve path)', () => {
+    const { entry_id } = seed_entry()
+    apply_entry_update({ db, entry_id, patch: { review: { category: 'truncated', note: 'check source' } }, user_id: 'u1' })
+    let entry = db.prepare(`SELECT review FROM entries WHERE id = ?`).get(entry_id) as { review: string | null }
+    expect(JSON.parse(entry.review as string)).toEqual({ category: 'truncated', note: 'check source' })
+
+    apply_entry_update({ db, entry_id, patch: { review: null }, user_id: 'u1' })
+    entry = db.prepare(`SELECT review FROM entries WHERE id = ?`).get(entry_id) as { review: string | null }
+    expect(entry.review).toBe(null)
   })
 
   test('updates an existing sense by id and adds a new sense', () => {

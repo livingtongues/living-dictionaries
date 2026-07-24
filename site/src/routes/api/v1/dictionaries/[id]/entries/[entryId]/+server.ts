@@ -36,7 +36,7 @@ export const GET: RequestHandler = async (event) => {
     error(ResponseCodes.BAD_REQUEST, 'Missing entry id')
 
   const db = get_dictionary_db(dictionary.id)
-  const entry = build_entry_data({ db, entry_id, admin_level: 1 })
+  const entry = build_entry_data({ db, entry_id, admin_level: 1, can_edit: true })
   if (!entry)
     error(ResponseCodes.NOT_FOUND, 'entry not found')
 
@@ -78,7 +78,7 @@ export const PATCH: RequestHandler = async (event) => {
   mirror_dictionary_cursor({ dict_id: dictionary.id, cursor: result.new_synced_up_to })
   log_server_event({ level: 'info', message: 'v1_entry_updated', user_id: access.user_id, context: { dictionary_id: dictionary.id, entry_id, via: access.via } })
 
-  const entry = build_entry_data({ db, entry_id, admin_level: 1 })
+  const entry = build_entry_data({ db, entry_id, admin_level: 1, can_edit: true })
   if (!entry)
     error(ResponseCodes.NOT_FOUND, 'entry not found')
   return json({ entry } satisfies V1EntryResponseBody)

@@ -2,7 +2,6 @@
   import type { FeaturedCard } from './types'
   import { onMount } from 'svelte'
   import { fade } from 'svelte/transition'
-  import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
   import { page } from '$app/state'
   import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
   import { portal } from '$lib/utils/portal'
@@ -48,7 +47,7 @@
   onMount(() => {
     document.body.style.overflow = 'hidden'
     // Opening the image is very likely followed by a play tap — warm the audio now.
-    audio_element = new Audio(url_from_storage_path(card.audio_storage_path, PUBLIC_STORAGE_BUCKET))
+    audio_element = new Audio(url_from_storage_path(card.audio_storage_path))
     audio_element.preload = 'auto'
     audio_element.onended = () => playing = false
     audio_element.onerror = () => playing = false
@@ -78,7 +77,7 @@
 
   <img
     class="image"
-    src={photo_src({ storage_path: card.photo_storage_path, serving_url: card.photo_serving_url }, 'w1200')}
+    src={photo_src({ photo: { storage_path: card.photo_storage_path }, variant: 'w1600' })}
     alt={card.lexeme}
     in:receive={{ key: crossfade_key }}
     out:send={{ key: crossfade_key }} />
