@@ -1,6 +1,6 @@
 # Importing from FLEx / LIFT / Toolbox (SFM/MDF)
 
-Read `/api/v1/guides/importing` first for the overall workflow.
+Read `/api/v1/guides/importing` first for the mandatory two-phase workflow (data preparation before any API write).
 
 ## Which export are you holding?
 

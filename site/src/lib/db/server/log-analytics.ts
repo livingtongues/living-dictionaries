@@ -799,14 +799,15 @@ export type AnalyticsScope = 'light' | 'usage' | 'diagnostics' | 'full'
  * blocks the event loop for the compute, and the operator visits far less often
  * than any sane TTL — so under the old expire-then-recompute model nearly every
  * human load paid the full compute (the "always slow" dashboard). Now the last
- * successful entry returns instantly at any age and a background task refreshes
- * it for next time; the UI surfaces `generated_at` so the staleness is visible.
- * The `pipeline` liveness panel is the one thing recomputed FRESH on every call (it
- * answers "is ingest broken RIGHT NOW?" — a couple of indexed MAX lookups). Only
- * DEFAULT-arg calls are cached (a test injecting shared_db/now/… bypasses).
+ * successful entry returns instantly. When the daily rollup watermark advances,
+ * the next real request starts one background refresh; no dashboard visits means
+ * no analytics compute. The UI surfaces `generated_at` so the staleness is
+ * visible. The `pipeline` liveness panel is the one thing recomputed FRESH on
+ * every call (it answers "is ingest broken RIGHT NOW?" — a couple of indexed MAX
+ * lookups). Only DEFAULT-arg calls are cached (a test injecting
+ * shared_db/now/… bypasses).
  */
-const analytics_cache = new Map<string, { at_ms: number, value: LogAnalytics }>()
-const ANALYTICS_CACHE_TTL_MS = 15 * 60_000
+const analytics_cache = new Map<string, { rollup_watermark: string | null, value: LogAnalytics }>()
 const analytics_revalidating = new Set<string>()
 
 export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalytics {
@@ -820,11 +821,11 @@ export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalyti
   const cacheable = options.shared_db === undefined && options.logs_db === undefined && options.archive_db === undefined && options.now === undefined
     && options.current_app_version === undefined && options.bot_ua_min_per_day === undefined
   const cache_key = `${days}:${audience}:${scope}`
+  const rollup_watermark = cacheable ? get_rollup_watermark(shared_db) : null
   if (cacheable) {
     const hit = analytics_cache.get(cache_key)
-    const age_ms = hit ? now.getTime() - hit.at_ms : Infinity
     if (hit) {
-      if (age_ms >= ANALYTICS_CACHE_TTL_MS)
+      if (hit.rollup_watermark !== rollup_watermark)
         schedule_analytics_revalidation({ cache_key, days, audience, scope })
       return { ...hit.value, pipeline: build_pipeline_health({ shared_db, logs_db }) }
     }
@@ -833,13 +834,13 @@ export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalyti
   const value = compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope })
   options.on_computed?.({ duration_ms: Math.round(performance.now() - compute_started_at) })
   if (cacheable)
-    analytics_cache.set(cache_key, { at_ms: now.getTime(), value })
+    analytics_cache.set(cache_key, { rollup_watermark, value })
   return value
 }
 
 /**
- * Background refresh of one expired cache entry, after the stale response has
- * gone out (setTimeout → next tick). Single-flight per key; the sync compute
+ * Background refresh after the daily rollup advances, once the stale response
+ * has gone out (setTimeout → next tick). Single-flight per key; the sync compute
  * still blocks the event loop when it runs, just never in a request's path.
  */
 function schedule_analytics_revalidation({ cache_key, days, audience, scope }: { cache_key: string, days: number, audience: Audience, scope: AnalyticsScope }): void {
@@ -849,8 +850,9 @@ function schedule_analytics_revalidation({ cache_key, days, audience, scope }: {
   setTimeout(() => {
     try {
       const now = new Date()
+      const shared_db = get_shared_db()
       const value = compute_log_analytics({
-        shared_db: get_shared_db(),
+        shared_db,
         logs_db: get_logs_db(),
         archive_db: get_log_archive_db(),
         days,
@@ -860,7 +862,7 @@ function schedule_analytics_revalidation({ cache_key, days, audience, scope }: {
         bot_ua_min_per_day: MIN_UA_BOT_SESSIONS_PER_DAY,
         scope,
       })
-      analytics_cache.set(cache_key, { at_ms: now.getTime(), value })
+      analytics_cache.set(cache_key, { rollup_watermark: get_rollup_watermark(shared_db), value })
     } catch (err) {
       console.error('[log-analytics] background revalidation failed:', (err as Error).message)
     } finally {
@@ -1045,9 +1047,9 @@ function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, curr
     missing_i18n_keys,
     boot_health,
     uptime,
-    // Never computed here (this result is cached 15 min — a "live" reading must
-    // not ride it). The analytics API endpoint injects a fresh section for
-    // level-3 admins; everyone else sees null.
+    // Never computed here (the analytics snapshot is daily-rollup cached, so a
+    // "live" reading must not ride it). The analytics API endpoint injects a
+    // fresh section for level-3 admins; everyone else sees null.
     host: null,
   }
 }

@@ -1,36 +1,150 @@
 # Importing a dictionary: the orchestration guide
 
 You are importing someone's language materials into a Living Dictionary through the
-`/api/v1` API. This guide is the workflow; the format-specific guides
-(`/api/v1/guides/spreadsheets`, `flex-lift`, `pdf-scans`) cover parsing.
+`/api/v1` API. **Always start here**, whatever the source format; the format guides
+(`/api/v1/guides/spreadsheets`, `flex-lift`, `pdf-scans`) cover parsing details.
 
-## Before you write anything
+The work has two phases, in strict order:
 
-1. `GET /api/v1/dictionaries/{id}` — learn the gloss languages, orthographies, and
-   current entry count. If the source material uses a gloss language or writing
-   system the dictionary doesn't have yet, add it first (`POST …/gloss-languages`
-   with `{ "code": "fr" }` / the orthographies endpoint) or ask the requester.
+1. **Data preparation** — inspect, question, stage locally, review by eye, clean,
+   get human sign-off. **No API writes happen in this phase.**
+2. **API usage** — register the source, write in idempotent batches, verify,
+   repair, report.
 
-### Orthographies vs dialects — the most consequential modeling fork
+Rushing to phase 2 is the classic failure mode: an import can be technically
+flawless and still wrong because the data wasn't understood. This is someone's
+real language; agent time is cheap and human review time is precious — spend
+yours generously so theirs is spent only on decisions.
 
-For multi-variety material, decide UP FRONT which model fits:
+---
 
-- **Same speech, different writing systems** (a romanization + a native script,
-  competing spelling conventions): ONE entry per word, with each spelling stored
-  under its own orthography key inside `lexeme` (`{ "default": "...", "sat-Olck": "..." }`).
-  Register each writing system via the orthographies endpoint first.
-- **Different speech varieties** (dialects that pronounce/word things differently):
-  SEPARATE entries, each tagged with its `dialects: ["Coastal"]`, linked with a
-  `dialectal_variant` relationship when they name the same concept.
+## Phase 1 — Data preparation (before you touch the API)
 
-Mixing these up is very costly to repair — when unsure, ask the requester.
+### 1.1 Inspect the resource
+
+- **Never trust the file extension.** A "`.db`" may be a Toolbox SFM text file,
+  not SQLite; a "`.csv`" may be tab-separated. Check magic bytes / run `file`,
+  then read the head yourself.
+- Detect the **encoding** (UTF-8 vs legacy codepages, mojibake, NFC/NFD
+  normalization of diacritics) before parsing anything.
+- **Profile the structure**: which markers/columns exist, how often each occurs,
+  which are always empty, which repeat within a record, min/max/median value
+  lengths, records per structural shape. Empty-looking fields and outliers are
+  where surprises live.
+- Read the resource's own front/back matter and first records — compiled
+  dictionaries often open with prose about the alphabet, orthography, and
+  abbreviation conventions that decodes the rest of the file.
+
+### 1.2 Ask the human the linguistic questions inspection raises
+
+Initial inspection always surfaces questions only a human (the requester, or the
+dictionary's manager) can settle. **Batch them** — present each with the evidence
+and your recommended answer, and don't proceed on the consequential ones without
+an answer. Typical questions:
+
+- Which **gloss/translation languages** does the material actually contain, and do
+  they match the dictionary's configured gloss languages?
+- What do **unknown markers, columns, or abbreviation conventions** mean?
+- How does the source mark **homographs**, and should its numbering carry over?
+- **Provenance**: who compiled this, when, from what — feeds the source row (§2.2).
+- **Orthographies vs dialects** — the most consequential modeling fork for
+  multi-variety material; decide UP FRONT which model fits:
+  - **Same speech, different writing systems** (a romanization + a native script,
+    competing spelling conventions): ONE entry per word, with each spelling stored
+    under its own orthography key inside `lexeme`
+    (`{ "default": "...", "sat-Olck": "..." }`). Register each writing system via
+    the orthographies endpoint first.
+  - **Different speech varieties** (dialects that pronounce/word things
+    differently): SEPARATE entries, each tagged with its `dialects: ["Coastal"]`,
+    linked with a `dialectal_variant` relationship when they name the same concept.
+
+  Mixing these up is very costly to repair — when unsure, ask.
+
+### 1.3 Stage everything locally
+
+Parse the whole resource into a local staging store you can query and re-generate
+from — **JSONL rows** for flat data, a **local SQLite db** when the data is
+relational (entries + senses + examples + texts, or cross-references between
+records). One row per source record, carrying:
+
+- the **verbatim original** (so nothing is ever lost and every cleanup is diffable)
+- the cleaned/parsed fields and their **proposed API field mapping**
+- **flags** for anything odd, and a note of which cleanup rules touched the row
+- a **source locator** (line number, page, record id) for tracebacks
+- the record's **deterministic id** (uuid5 of a stable source key) — assigned here,
+  not at POST time
+
+The staging store is the single source of truth for everything downstream: the
+preview (§1.5) and the API payloads are both generated from it, never hand-edited.
+
+### 1.4 Pore over the data — by eye, in large amounts
+
+This is the longest step and the reason phase 1 exists. Do not sample five records
+and declare victory: **read hundreds of records, scan thousands**, sorted and
+grouped different ways (by length, by punctuation, by rare characters, by
+structural shape). You are looking for errors, corruption, inconsistencies, and
+structure hiding in prose. Real catches that only bulk eyeballing finds:
+
+- A **second language hiding inside another field** — one import assumed a source
+  held only Spanish glosses; reading records in bulk revealed Guaraní equivalents
+  embedded inside the Spanish definition strings (`… guaraní "¡haley!"`). No
+  marker, column, or heuristic flagged it.
+- Separator and markup noise (trailing `;` on thousands of values), word-wrap
+  overflow glued to the wrong field.
+- **Structured data hiding in prose**: plural forms (`pl amyepeyk`), person/gender
+  paradigm tags (`2/3PMS`), literal-translation asides (`lit "…"`), etymologies
+  and usage examples packed into a definition — each belongs in its own API field,
+  not left as noise inside a gloss.
+- The **headword leaking into its own gloss/definition**.
+- Cross-references (`véase X`, `variante de X`) that should become entry
+  relationships, not prose.
+- Senses wrongly split or merged by the source's own line formatting.
+
+Method: when you find an issue, **quantify the class across the whole dataset**
+(query the staging store), decide a rule, and mass-apply it. Whatever doesn't fit
+a pattern gets a **manual pass, item by item** — no shortcuts, and no cheap
+proxies (string length does NOT distinguish a gloss from a definition; read the
+content and judge each value). Record every rule and every manual decision in the
+staging rows so the cleanup is auditable and re-runnable from the original.
+
+### 1.5 Render a human-readable preview
+
+Before any write, produce a **`preview.html`** (or equivalent): a designed,
+readable dictionary-entry view — never a raw JSON dump — showing:
+
+- a **diverse sample** (~20–40 entries) covering every structural shape: single- and
+  multi-sense, homographs, empty/minimal records, the longest values, the weirdest,
+- **every flagged or manually-decided case** (the full list when it's small),
+- lifted/relocated data made visible (notes, plural forms, cross-references), so
+  the human can see where things will land.
+
+The human reviews meaning and correctness; your job is to make that effortless.
+
+### 1.6 Get sign-off, in batches
+
+Two natural checkpoints: the inspection questions (§1.2) up front, and the
+cleanup rules + preview review before writing. Batch questions rather than
+trickling them; propose a recommended answer for each. Only after the human signs
+off on the preview do you enter phase 2.
+
+---
+
+## Phase 2 — API usage
+
+### 2.1 Before you write anything
+
+1. `GET /api/v1/dictionaries/{id}` — confirm gloss languages, orthographies, and
+   current entry count against what phase 1 established. If the material uses a
+   gloss language or writing system the dictionary doesn't have yet, add it first
+   (`POST …/gloss-languages` with `{ "code": "fr" }` / the orthographies endpoint).
 2. `GET /api/v1/dictionaries/{id}/files` — the uploaded resources, each with the
    uploader's `import_instructions` (authoritative — follow them) and optional
-   `source_note`. Download each via `GET …/files/{fileId}`.
+   `source_note`. Download each via `GET …/files/{fileId}`. (You did this in
+   phase 1; re-check instructions haven't changed.)
 3. Read `?view=index` of the OpenAPI spec, then pull the tags you need
    (`?tag=entries`, `?tag=texts`, …).
 
-## Register a source for every import
+### 2.2 Register a source for every import
 
 **Every import gets a `sources` registry row** — even when the uploader gave no
 citation and the material looks like an unpublished working file. Untraceable
@@ -58,11 +172,11 @@ manager can refine it later.
    sentences, and texts when you know the page/example number (for a scanned
    dictionary you always do — record it).
 
-## Writing the data
+### 2.3 Writing the data
 
 - **Generate a UUID yourself for every entry** and send it as `id` — it is the
   idempotency key (re-POST of the same id is a safe no-op) and your handle for later
-  `PATCH` fixes. Keep a local ledger mapping source-record → uuid.
+  `PATCH` fixes. Use the deterministic ids from your staging store (§1.3).
 - **Batch** `POST …/entries` with `{ "entries": [...], "import_id": "<slug>-2026-07" }`
   in batches of ≤1000 entries (and ≤~16MB per request). The `import_id` becomes a
   private tag so the whole batch can be found or cleaned up later.
@@ -94,7 +208,7 @@ manager can refine it later.
 - Never invent data. If glosses/POS are ambiguous in the source, leave the field
   empty rather than guessing, and note it in your report.
 
-## Verifying an import
+### 2.4 Verifying an import
 
 - **Live counts / full sweeps**: paginate `GET …/entries` (`updated_at` ASC).
   `limit` is silently capped at 500 — advance `offset` by the number of entries
@@ -118,7 +232,7 @@ manager can refine it later.
 - For grammar examples, verify the standalone sentence via
   `GET …/sentences/{sentenceId}` after creating and attaching it.
 
-## Repair & re-sync semantics
+### 2.5 Repair & re-sync semantics
 
 `PATCH` is **field-merge and never deletes**. Re-syncing a corrected source over an
 earlier import updates the fields you send but leaves stale data behind:
@@ -131,7 +245,7 @@ earlier import updates the fields you send but leaves stale data behind:
 - Deterministic ids (uuid5 of your source key) make re-syncs address the same
   rows every time — the repair path stays surgical instead of delete-and-reimport.
 
-## Recovering from a bad import
+### 2.6 Recovering from a bad import
 
 When a whole batch is wrong (mis-mapped columns, wrong dictionary, duplicated run),
 don't issue thousands of single DELETEs — remove the batch by its `import_id`:
@@ -154,7 +268,8 @@ don't issue thousands of single DELETEs — remove the batch by its `import_id`:
 you used. If content predates your imports (or you've lost the ids), ask a Living
 Dictionaries admin to reset the dictionary instead.
 
-## Report
+### 2.7 Report
 
 Reply to the requester with: what was imported, counts, the `import_id`, decisions
-you made (skipped sections, source rows created), and anything needing human review.
+you made (cleanup rules applied, skipped sections, source rows created), and
+anything needing human review.

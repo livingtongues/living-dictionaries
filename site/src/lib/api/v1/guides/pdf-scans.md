@@ -1,6 +1,6 @@
 # Importing from PDF scans of printed dictionaries
 
-Read `/api/v1/guides/importing` first for the overall workflow. A scanned published
+Read `/api/v1/guides/importing` first for the mandatory two-phase workflow (data preparation before any API write). A scanned published
 dictionary is almost always a real **source**: create the `sources` registry row
 first and link the file to it (`PATCH …/files/{fileId}` with `source_id`).
 

@@ -2,10 +2,16 @@
 
 **The `/api/v1` guides are the source of truth for import workflow** — start every
 import (even internal ones) by reading `site/src/lib/api/v1/guides/importing.md`
-(+ the format guide that matches the file) and follow them exactly. Anything
-generally useful learned during an import goes INTO those guides so outside
-agents benefit; this page holds only the insider-only bits the public guides
-can't say. First run: Enxet, 2026-07-24 (`.issues/enxet-import.md`).
+(+ the format guide that matches the file) and follow them exactly. The guide is
+two-phase and the order is not optional: **phase 1 data preparation** (inspect →
+ask the human the linguistic questions inspection raises → stage locally as
+JSONL/local SQLite → eyeball the data in bulk → clean with auditable rules +
+manual passes → `preview.html` sign-off) happens entirely BEFORE any API write;
+**phase 2** is the API usage. Anything generally useful learned during an import
+goes INTO those guides so outside agents benefit; this page holds only the
+insider-only bits the public guides can't say. First run: Enxet, 2026-07-24
+(`.issues/enxet-import.md` — its first attempt skipped the bulk-eyeballing step
+and had to be wiped and redone; that failure is why phase 1 exists).
 
 ## Do the import THROUGH the public API, not raw SQL
 
@@ -45,3 +51,12 @@ that. Insider access is for fetching bytes, verification reads, and backups.
   file, not SQLite. `file` + `head` before choosing a parser.
 - **Report**: per Jacob's call on the first run, report to Jacob in-session
   rather than replying in the import thread (revisit as the workflow matures).
+- **Wiping a dictionary's imported content: use the API batch-delete, NEVER a
+  db-file swap/restore.** Any browser that already synced the dictionary holds a
+  cursor ≥ the server's seq watermark; replacing/restoring `dictionaries/{id}.db`
+  resets the watermark below that cursor, so the client's `/changes` calls
+  fast-bail forever (`counter <= cursor` → empty response) and it keeps the
+  deleted entries locally with no path to recovery. `POST …/entries/batch-delete`
+  (dry-run → `confirm_count`) writes proper tombstones that sync down. Verified
+  on the Enxet wipe 2026-07-24: 11,935 entries → 0 live rows + 11,936 tombstones,
+  entry_count mirror → 0, `sources` row deliberately left for reuse.

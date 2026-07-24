@@ -110,6 +110,45 @@ possession paradigms; mid-string person tags.
 Current live import (import_id `enxet-lexicon-2026-07`, 11,935 entries) is
 BATCH-DELETABLE. Plan: clean up + redo once decisions land.
 
+## ROUND 3 — wipe + workflow-guide restructure (2026-07-24)
+
+### Jacob's decisions (LOCKED)
+- ✅ Wipe enxet and start fresh.
+- definition-field revival: being handled by ANOTHER agent (first-class,
+  multilingual, list+search) — irrelevant to this issue now; just target the
+  field per its final shape when re-importing.
+- gloss vs definition: **LLM/manual pass over all 14k defs with per-item
+  judgment** — as patterns emerge, mass-apply them; items without a pattern get
+  a manual pass. NO shortcuts, no length heuristics. "Someone's real language;
+  agent time is cheap."
+- Cleanup rules confirmed: strip trailing `;`/`,`/whitespace noise; lift
+  `pl <form>` → `plural_form`; lift inline paradigm tags (2/3PMS, 1PS…) →
+  notes/morphology; move `lit "…"` asides → notes (handle as best judged).
+- Jacob ALSO spotted **Guaraní glosses embedded inside Spanish defs** (¡Chó! →
+  `¡fuera de aquí! guaraní "¡haley!";`) — round-1 analysis wrongly concluded
+  "no Guaraní content". Bulk eyeballing must find + split these into
+  glosses.gn. Quantify the class (`guaraní` mentions and similar) in the stage.
+
+### Done this round
+- ✅ **Wipe executed via API batch-delete** (dry-run 11,935 → confirmed run):
+  0 live entries/senses, 11,936 tombstones, entry_count mirror 0. `sources` row
+  `enxet-lexicon` kept for reuse. (File swap/restore rejected: synced clients'
+  cursors would out-run the reset watermark and fast-bail forever — recorded in
+  `.knowledge/domain/import-workflow.md`.)
+- ✅ **importing.md restructured as the two-phase master guide** (Phase 1 data
+  preparation: inspect → human questions → local JSONL/SQLite staging → bulk
+  eyeballing → preview.html → sign-off; Phase 2 API usage). index.ts blurb,
+  openapi.ts "Uploaded resources" section, and the three format guides'
+  pointer lines updated; knowledge page updated.
+
+### Next (PAUSED — regroup with Jacob before restarting the import)
+1. Re-run phase 1 properly on the Enxet file: rebuild the stage with the
+   confirmed cleanup rules + the Guaraní-in-def split + headword-in-def cases
+   (69, hand-review) + LLM/manual gloss-vs-definition pass.
+2. Full preview.html review with Jacob (diverse sample + all flagged classes).
+3. Re-import under a new import_id with same deterministic uuid5 ids, after the
+   definition-field revival lands (check the other agent's progress).
+
 ## Follow-ups spawned
 
 - `.issues/admin-api-key.md`

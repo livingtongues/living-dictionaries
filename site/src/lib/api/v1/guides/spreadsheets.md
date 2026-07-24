@@ -1,6 +1,6 @@
 # Importing from spreadsheets (CSV / Excel / Google Sheets)
 
-Read `/api/v1/guides/importing` first for the overall workflow.
+Read `/api/v1/guides/importing` first for the mandatory two-phase workflow (data preparation before any API write).
 
 ## Reading the sheet
 

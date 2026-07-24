@@ -16,7 +16,7 @@ export interface GuideInfo {
 
 /** Hand-curated blurbs, in recommended reading order (`importing` first). */
 const GUIDE_DESCRIPTIONS: Record<string, string> = {
-  'importing': 'START HERE for any import job: workflow, triaging whether a resource is a real source (registry row + file linking), batching, idempotency, verification, repair/re-sync, reporting.',
+  'importing': 'START HERE for any import job — the two-phase workflow. Phase 1 data preparation (inspect the resource, ask the human the linguistic questions inspection raises, stage locally as JSONL/SQLite, review the data by eye in bulk, clean, preview.html sign-off); phase 2 API usage (source registry row + file linking, batching, idempotency, verification, repair/re-sync, rollback, reporting).',
   'spreadsheets': 'CSV/Excel/Google Sheets: column-mapping heuristics, multi-sense and multi-value cells, encoding traps.',
   'flex-lift': 'FLEx, LIFT, and Toolbox/Shoebox SFM-MDF: which export to prefer and the backslash-marker → API field map.',
   'pdf-scans': 'Scanned printed dictionaries: front-matter legend, page-range workflow, diacritic fidelity, per-page citations.',
