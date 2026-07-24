@@ -84,8 +84,10 @@ Interview complete 2026-07-23/24 — ALL decisions below are Jacob-approved. Bui
    catalog row in `+layout.server.ts`. 6 EN `timings.*` keys.
 6. ✅ **Modal app deployed** `ld-forced-aligner` (jacob-8 account) →
    `https://jacob-8--ld-forced-aligner-forcedalignment-align.modal.run`; verified live.
-   ⬜ **DEPLOY STEP (needs tuf — Jacob):** add `MODAL_ALIGN_URL=<that url>` to
-   `vps-setup/secrets-decrypted/sveltekit-living.env`, `bin/sync living`, then push LD `main`.
+   ✅ **PROD ENV WIRED (tuf):** added `MODAL_ALIGN_URL=<that url>` to
+   `vps-setup/secrets-decrypted/sveltekit-living.env` and ran `bin/sync living --env-only`;
+   verified the exact value remotely and verified normalized local/remote env contents match.
+   The remaining deployment action is pushing LD `main`.
    Until then prod align attempts fail cleanly (no dict has `align_config` in prod yet, so the
    button is hidden anyway). Dev needs NOTHING (local CPU runner via `alignment/`).
 7. ✅ **Verification**: local CLI align; vitest **1944 passed**; tsc/eslint clean on the align
