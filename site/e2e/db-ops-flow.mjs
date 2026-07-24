@@ -6,16 +6,16 @@
 // skill) against the running `pnpm dev` server (dev-only paths — dev_admin_level,
 // dev-media — need DEV mode, so we do NOT boot a node build here).
 //
-//   pnpm -F site seed:achi-fixture        # restore the non-admin achi manager role
+//   pnpm -F site seed:dev-fixture        # restore the non-admin dev manager role
 //   pnpm -F site test:db                  # against http://localhost:3041 (default)
 //   BASE_URL=http://localhost:3041 pnpm -F site test:db
 //
 // Identity: logs in via the dev inline-OTP path as the seeded NON-admin
-// `achi-manager@example.com` (can_edit from a real dictionary_roles row). Asserts
+// `dev-manager@example.com` (can_edit from a real dictionary_roles row). Asserts
 // the audit columns are stamped with that user's id (MOCK_USER_ID).
 //
 // Net-zero: every row it creates it deletes; the one e_ja phonetic edit is
-// captured and restored — so achi stays the clean fixture and the script re-runs.
+// captured and restored — so dev stays the clean fixture and the script re-runs.
 /* eslint-disable no-console, node/prefer-global/process, unicorn/prefer-dom-node-text-content -- node CLI: console is the output channel + process drives the exit code; innerText is right for asserting RENDERED text */
 
 import process from 'node:process'
@@ -30,9 +30,9 @@ const dir = dirname(fileURLToPath(import.meta.url))
 const site_dir = join(dir, '..')
 const screenshot_dir = join(dir, 'screenshots')
 const base = process.env.BASE_URL || 'http://localhost:3041'
-const DICT = 'achi'
+const DICT = 'dev'
 const MOCK_USER_ID = '00000000-0000-4000-8000-000000000001'
-const MANAGER_EMAIL = 'achi-manager@example.com'
+const MANAGER_EMAIL = 'dev-manager@example.com'
 const server_db_path = join(site_dir, '.data', 'dictionaries', `${DICT}.db`)
 
 let browser
@@ -74,11 +74,11 @@ async function shot(page, name) {
   await page.screenshot({ path: join(screenshot_dir, `db-${String(shot_index).padStart(2, '0')}-${name}.png`) }).catch(() => {})
 }
 
-// In-page: SQL against the browser's wa-sqlite achi.db via the cached DictConnection.
+// In-page: SQL against the browser's wa-sqlite dev.db via the cached DictConnection.
 function dbq(page, sql, params = []) {
   return page.evaluate(async (sql, params) => {
-    const conn = globalThis.__ld_dict_connections?.achi?.connection
-    if (!conn) throw new Error('achi DictConnection not on globalThis yet')
+    const conn = globalThis.__ld_dict_connections?.dev?.connection
+    if (!conn) throw new Error('dev DictConnection not on globalThis yet')
     return await conn.query(sql, params)
   }, sql, params)
 }
@@ -86,15 +86,15 @@ function dbq(page, sql, params = []) {
 // In-page: call a DictLiveDb table method (insert/update/upsert/delete) → its result.
 function livedb(page, table, method, arg) {
   return page.evaluate(async (table, method, arg) => {
-    const db = globalThis.__ld_dict_connections?.achi?.dict_db
-    if (!db) throw new Error('achi dict_db not on globalThis yet')
+    const db = globalThis.__ld_dict_connections?.dev?.dict_db
+    if (!db) throw new Error('dev dict_db not on globalThis yet')
     return await db[table][method](arg)
   }, table, method, arg)
 }
 
 function syncNow(page) {
   return page.evaluate(async () => {
-    const conn = globalThis.__ld_dict_connections?.achi?.connection
+    const conn = globalThis.__ld_dict_connections?.dev?.connection
     if (conn) await conn.sync_now()
   })
 }
@@ -105,7 +105,7 @@ function serverRow(table, id) {
 }
 
 // Self-heal: if a prior run crashed after auto-sync pushed a test row but before
-// its net-zero cleanup, the server achi.db holds a ZZ-test leftover (count != 13).
+// its net-zero cleanup, the server dev.db holds a ZZ-test leftover (count != 13).
 // Purge directly from the server file so the fresh browser pulls a clean 13.
 function purge_server_leftovers() {
   const db = new Database(server_db_path)
@@ -122,16 +122,16 @@ function purge_server_leftovers() {
       db.prepare('DELETE FROM entry_tags WHERE tag_id=?').run(t.id)
       db.prepare('DELETE FROM tags WHERE id=?').run(t.id)
     }
-    if (entries.length || tags.length) console.log(`• purged ${entries.length} entry + ${tags.length} tag leftover(s) from server achi.db`)
+    if (entries.length || tags.length) console.log(`• purged ${entries.length} entry + ${tags.length} tag leftover(s) from server dev.db`)
   } finally { db.close() }
 }
 
 async function main() {
   await mkdir(screenshot_dir, { recursive: true })
 
-  // Restore the non-admin achi manager role (idempotent; small shared.db upsert).
-  console.log('• seeding achi-manager role…')
-  await run('pnpm', ['seed:achi-fixture'])
+  // Restore the non-admin dev manager role (idempotent; small shared.db upsert).
+  console.log('• seeding dev-manager role…')
+  await run('pnpm', ['seed:dev-fixture'])
   purge_server_leftovers()
 
   browser = await launch({ viewport: { width: 1200, height: 950 }, args: ['--lang=en-US'] })
@@ -214,12 +214,12 @@ async function main() {
   // consistent — so poll rather than assume one syncNow + one read).
   let srv
   for (let i = 0; i < 16 && !srv; i++) { await syncNow(page).catch(() => {}); await wait(500); srv = serverRow('entries', test_entry_id) }
-  assert(srv, 'test entry did NOT reach server achi.db after sync')
+  assert(srv, 'test entry did NOT reach server dev.db after sync')
   assert(String(srv.lexeme).includes('ZZ-test'), `server lexeme unexpected (${srv.lexeme})`)
   assert(srv.updated_by_user_id === MOCK_USER_ID, 'server row updated_by not stamped')
   const local_dirty = (await dbq(page, 'SELECT dirty FROM entries WHERE id = ?', [test_entry_id]))[0]
   assert(!local_dirty || !local_dirty.dirty, 'local dirty not cleared after sync')
-  step('F sync → row persisted to REAL server achi.db with stamped editor; local dirty cleared by id')
+  step('F sync → row persisted to REAL server dev.db with stamped editor; local dirty cleared by id')
 
   // ── net-zero cleanup of the test rows (keeps the list at 13 for section E) ──
   // Deletes are now HARD (tombstone trigger + FK cascade). To stay deterministic
@@ -228,11 +228,11 @@ async function main() {
   // direct local SQL.
   purge_server_leftovers()
   await page.evaluate(async (ids) => {
-    const conn = globalThis.__ld_dict_connections.achi.connection
+    const conn = globalThis.__ld_dict_connections.dev.connection
     await conn.execute('DELETE FROM entry_tags WHERE id = ?', [ids.j])
     await conn.execute('DELETE FROM tags WHERE id = ?', [ids.tag])
     await conn.execute('DELETE FROM entries WHERE id = ?', [ids.entry])
-    globalThis.__ld_dict_connections.achi.dict_db.notify_table('entries')
+    globalThis.__ld_dict_connections.dev.dict_db.notify_table('entries')
   }, { j: jIns[0].id, tag: test_tag_id, entry: test_entry_id })
   assert((await dbq(page, 'SELECT count(*) c FROM entries WHERE id = ?', [test_entry_id]))[0].c === 0, 'test entry not removed locally')
   assert(!serverRow('entries', test_entry_id), 'test entry not removed from server')
@@ -289,19 +289,19 @@ async function main() {
   // poll the real server file until auto-sync has pushed the pilot edit
   let eja_srv
   for (let i = 0; i < 20 && eja_srv?.phonetic !== 'PILOT-EDITED'; i++) { await wait(500); eja_srv = serverRow('entries', 'e_ja') }
-  assert(eja_srv?.phonetic === 'PILOT-EDITED', 'pilot phonetic did not persist to server achi.db')
+  assert(eja_srv?.phonetic === 'PILOT-EDITED', 'pilot phonetic did not persist to server dev.db')
   await goto(page, `${base}/${DICT}/entry/e_ja`)
   await page.waitForFunction(() => document.body.innerText.includes('PILOT-EDITED'), { timeout: 25000 })
   step('reload → pilot phonetic persisted to REAL server SQLite + re-rendered from it')
 
   // ── restore e_ja phonetic (net-zero) ──────────────────────────────────────
   await page.evaluate(async (val) => {
-    await globalThis.__ld_dict_connections.achi.dict_db.entries.update({ id: 'e_ja', phonetic: val })
+    await globalThis.__ld_dict_connections.dev.dict_db.entries.update({ id: 'e_ja', phonetic: val })
   }, eja_before)
   await syncNow(page)
   const eja_restored = (await dbq(page, 'SELECT phonetic FROM entries WHERE id = ?', ['e_ja']))[0].phonetic
   assert(eja_restored === eja_before, `e_ja phonetic not restored (got ${eja_restored})`)
-  step(`net-zero cleanup: e_ja phonetic restored to "${eja_before ?? '(empty)'}" — achi clean`)
+  step(`net-zero cleanup: e_ja phonetic restored to "${eja_before ?? '(empty)'}" — dev clean`)
 
   if (page_errors.length) throw new Error(`pageerror(s): ${page_errors.join(' | ')}`)
   step('no uncaught page errors during the flow')

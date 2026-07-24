@@ -20,11 +20,17 @@ PORT=3097 pnpm -F site test:flow            # change the self-booted server's po
 
 Exit code is non-zero on any failed assertion. Screenshots land in `e2e/screenshots/` (git-ignored).
 
-## What `achi-flow.mjs` covers
-A logged-in **mock manager** (`can_edit`) exercises the full editor: entries list (13 entries) →
-open an entry overlay → edit the phonetic field via its EditFieldModal → add a sense → delete that
-sense → assert the original survives. Since M4 the 13 achi entries are read from `achi.db`
-(seeded by `pnpm -F site seed:achi-fixture`); edits still ride the stub (write = M4-write).
+## What `dev-flow.mjs` covers
+A logged-in **mock manager** (`can_edit`) exercises the full editor: entries list (count read
+from the server DB, so the fixture can grow) → open an entry overlay → edit the phonetic field via
+its EditFieldModal → add a sense → delete that sense → assert the original survives.
+
+The fixture is the local-only **`dev` "Dev Playground" dictionary** (slug doesn't exist in prod —
+seeded by `pnpm -F site seed:dev-fixture`, which registers the catalog row + the non-admin
+`dev-manager@example.com` manager and copies the legacy achi.db content into
+`.data/dictionaries/dev.db` on first run). `pnpm -F site seed:variety` adds ~18 `demo_*`
+entries covering the entries-list design space (definitions, multi-sense, media, orthographies,
+homographs).
 
 ## M4 SQLite-read flows
 - `test:catalog` (`catalog-sqlite.mjs`) — the dictionary catalog reads from `shared.db`: API

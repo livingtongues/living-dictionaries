@@ -77,6 +77,21 @@ Roles are checked live per request (`verify_auth_dict_role`) — no re-login nee
 - Dictionary pages are local-first (per-dictionary OPFS leader worker syncing `/changes`) — give
   the first load of a dictionary a moment before asserting on entry data.
 
+## The `dev` fixture dictionary (use this for UI testing)
+
+The local-only **"Dev Playground"** dictionary (slug `dev` — deliberately absent from prod, so
+nothing you do there can be confused with real data, and its catalog/orthographies are editable
+with impunity):
+
+```bash
+pnpm -F site seed:dev-fixture   # catalog row + dev-manager@example.com (manager) + base entries
+pnpm -F site seed:variety       # ~18 demo_* entries covering the entries-list design space
+```
+
+Log in as `dev-manager@example.com` for the editor view; logged-out works too (no prod R2
+snapshot exists → empty-DB + `/changes` backfill path). E2E flows all target this dict — see
+`site/e2e/E2E.md`.
+
 ## Getting data
 
 A fresh checkout has empty `site/.data/` dictionaries. Read the **database** skill

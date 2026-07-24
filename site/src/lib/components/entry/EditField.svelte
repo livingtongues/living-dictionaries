@@ -116,7 +116,7 @@
         <Keyman fixed target=".ProseMirror" canChooseKeyboard position="bottom">
           <MarkdownEditor preset="minimal" bind:value />
         </Keyman>
-      {:else if field === 'gloss' || field === 'example_sentence'}
+      {:else if field === 'gloss' || field === 'definition' || field === 'example_sentence'}
         <Keyman fixed {bcp}>
           <input
             bind:this={inputEl}

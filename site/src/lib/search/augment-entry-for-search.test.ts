@@ -7,6 +7,7 @@ describe(augment_entry_for_search, () => {
     const result_from_nothing = augment_entry_for_search({ senses: [], main: { lexeme: { default: '' } } } as unknown as EntryData)
     expect(result_from_nothing).toMatchInlineSnapshot(`
       {
+        "_definitions": [],
         "_dialects": [],
         "_glosses": [],
         "_lexeme": [],
@@ -51,6 +52,17 @@ describe(augment_entry_for_search, () => {
     expect(result._tags).toEqual(['tag1', 'tag2'])
     expect(result._dialects).toEqual(['dialect1', 'dialect2'])
     expect(result._speakers).toEqual(['speaker1', 'speaker2', 'speaker3'])
+  })
+
+  test('brings in definitions from every sense and locale', () => {
+    const result = augment_entry_for_search({
+      main: { lexeme: { default: '' } },
+      senses: [
+        { definition: { en: 'first definition', es: 'primera definición' } },
+        { definition: { en: 'second definition', es: '' } },
+      ],
+    } as unknown as EntryData)
+    expect(result._definitions).toEqual(['first definition', 'primera definición', 'second definition'])
   })
 })
 

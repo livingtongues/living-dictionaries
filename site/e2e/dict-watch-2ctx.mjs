@@ -63,13 +63,13 @@ async function login_manager(page) {
     const { code } = await send.json()
     const verify = await fetch('/api/auth/email/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, code }) })
     return { status: verify.status }
-  }, 'achi-manager@example.com')
+  }, 'dev-manager@example.com')
   if (result.status !== 200) throw new Error(`login failed: ${result.status}`)
 }
 
 async function sync_now(page) {
   await page.evaluate(async () => {
-    const c = globalThis.__ld_dict_connections?.achi?.connection
+    const c = globalThis.__ld_dict_connections?.dev?.connection
     if (c) await c.sync_now().catch(() => {})
   })
 }
@@ -77,8 +77,8 @@ async function sync_now(page) {
 async function main() {
   if (!process.env.BASE_URL) {
     if (!existsSync(join(site_dir, 'build/index.js'))) await run('pnpm', ['build'])
-    console.log('• re-seeding achi fixture (clean phonetic = haʔ)…')
-    await run('pnpm', ['seed:achi-fixture'])
+    console.log('• re-seeding dev fixture (clean phonetic = haʔ)…')
+    await run('pnpm', ['seed:dev-fixture'])
     await boot_server()
   }
 
@@ -91,7 +91,7 @@ async function main() {
   const page_a = await ctx_a.newPage()
   await page_a.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
   attach_error_capture(page_a, errors_a)
-  await page_a.goto(`${base}/achi/entry/e_ja`, { waitUntil: 'domcontentloaded' })
+  await page_a.goto(`${base}/dev/entry/e_ja`, { waitUntil: 'domcontentloaded' })
   await page_a.waitForFunction(() => document.body.innerText.includes('water'))
   await login_manager(page_a)
   await page_a.reload({ waitUntil: 'domcontentloaded' })
@@ -103,7 +103,7 @@ async function main() {
   const page_b = await ctx_b.newPage()
   await page_b.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
   attach_error_capture(page_b, errors_b)
-  await page_b.goto(`${base}/achi/entry/e_ja`, { waitUntil: 'domcontentloaded' })
+  await page_b.goto(`${base}/dev/entry/e_ja`, { waitUntil: 'domcontentloaded' })
   await page_b.waitForFunction(() => document.body.innerText.includes('water'), { timeout: 25000 })
   await page_b.waitForFunction(() => document.body.innerText.includes('haʔ') && !document.body.innerText.includes('Add Audio'))
   if (await page_b.evaluate(() => document.body.innerText.includes('Add Audio'))) throw new Error('context B should be a read-only viewer (saw Add Audio)')
@@ -138,7 +138,7 @@ async function main() {
   await sync_now(page_b)
   await page_b.waitForFunction(value => document.body.innerText.includes(value), { timeout: 20000 }, marker)
   // Prove it was the watcher, not a navigation: the URL/title never changed and the original gloss survives.
-  const still_same_view = await page_b.evaluate(() => location.pathname === '/achi/entry/e_ja' && document.body.innerText.includes('water'))
+  const still_same_view = await page_b.evaluate(() => location.pathname === '/dev/entry/e_ja' && document.body.innerText.includes('water'))
   if (!still_same_view) throw new Error('context B navigated/reloaded — the assertion no longer proves the watcher')
   console.log('✓ context B: sync pull → watcher re-indexed e_ja → marker shown WITHOUT reload')
 

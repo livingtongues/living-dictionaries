@@ -23,6 +23,7 @@ export function augment_entry_for_search(entry: EntryData) {
     .map(([key]) => key)
 
   const _glosses = senses.flatMap(sense => Object.values(sense.glosses || {}).filter(Boolean))
+  const _definitions = senses.flatMap(sense => Object.values(sense.definition || {}).filter(Boolean))
 
   const sentences = senses.flatMap(sense =>
     sense.sentences?.flatMap(s => (s.text ? Object.values(s.text).filter(Boolean) : [])) || [],
@@ -38,6 +39,7 @@ export function augment_entry_for_search(entry: EntryData) {
     id: entry.id,
     _lexeme,
     _glosses,
+    _definitions,
     _other,
     ...(entry.main.elicitation_id ? { _elicitation_id: entry.main.elicitation_id } : {}),
     // Filters

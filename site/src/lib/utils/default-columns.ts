@@ -25,6 +25,10 @@ export const default_columns: IColumn[] = [
     width: 250,
   },
   {
+    field: 'definition',
+    width: 300,
+  },
+  {
     field: 'local_orthography',
     width: 170,
   },

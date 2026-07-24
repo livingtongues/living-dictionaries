@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Verifies the stale-entries-view fix (.issues/stale-entries-view-after-live-delete.md):
-// after create → delete → auto-navigation back to /achi/entries, the list must correct
+// after create → delete → auto-navigation back to /dev/entries, the list must correct
 // itself (count back to baseline, lexeme gone) WITHOUT any user input — driven purely by
 // the search_index_updated counter pulse.
 //
@@ -50,7 +50,7 @@ try {
     })
   })
 
-  await page.goto(`${base}/achi/entries`, { waitUntil: 'networkidle2' })
+  await page.goto(`${base}/dev/entries`, { waitUntil: 'networkidle2' })
   await page.waitForFunction(() => /\/\s*[\d,]+/.test(document.querySelector('.results-meta')?.textContent ?? ''), { timeout: 30000 })
   const baseline = await results_total(page)
   console.log(`• baseline total: ${baseline}`)
@@ -68,15 +68,15 @@ try {
     page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 20000 }),
     page.click('.modal button[type="submit"], [role="dialog"] button[type="submit"]'),
   ])
-  assert(page.url().includes('/achi/entry/'), `created "${lexeme}" and navigated to its page (${page.url()})`)
+  assert(page.url().includes('/dev/entry/'), `created "${lexeme}" and navigated to its page (${page.url()})`)
 
-  // delete (confirm() auto-accepted) → app navigates back to /achi/entries
+  // delete (confirm() auto-accepted) → app navigates back to /dev/entries
   await page.waitForSelector('.delete-label', { timeout: 10000 })
   await Promise.all([
     page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 20000 }),
     page.evaluate(() => document.querySelector('.delete-label').closest('button').click()),
   ])
-  assert(page.url().endsWith('/achi/entries'), 'navigated back to the entries list')
+  assert(page.url().endsWith('/dev/entries'), 'navigated back to the entries list')
 
   // THE assertion: no keystrokes, no reload — the view must self-correct.
   let final_total = await results_total(page)

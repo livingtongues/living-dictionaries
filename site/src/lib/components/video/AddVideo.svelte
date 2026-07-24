@@ -6,7 +6,8 @@
   import SelectVideo from './SelectVideo.svelte'
   import PasteVideoLink from './PasteVideoLink.svelte'
   import type { MediaUploadHandle } from '$lib/media/upload-media'
-  import { add_video } from '$lib/media/add-media'
+  import type { MediaUploadContext } from '$lib/media/add-media'
+  import { add_video, track_media_uploaded } from '$lib/media/add-media'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
@@ -22,9 +23,13 @@
   interface Props {
     on_close: () => void
     entry: EntryData
+    /** A file dropped onto a row before the modal opened — staged for upload once attribution is chosen. */
+    initial_file?: File
+    context?: MediaUploadContext
   }
 
-  const { on_close, entry }: Props = $props()
+  const { on_close, entry, initial_file = undefined, context = 'entry' }: Props = $props()
+  const staged_file: File | undefined = initial_file
 
   let hosted_video: HostedVideo = $state()
   let hosted_metadata: HostedMetadata = $state()
@@ -32,7 +37,7 @@
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: page.data.dictionary?.orthographies }))
 
   function start_upload({ file, speaker_id, source_slug }: { file: File | Blob, speaker_id?: string, source_slug?: string }): MediaUploadHandle {
-    const handle = add_video({ writes, dictionary_id: page.data.dictionary.id, file, sense_id: entry.senses[0].id, speaker_id, source: source_slug })
+    const handle = add_video({ writes, dictionary_id: page.data.dictionary.id, file, sense_id: entry.senses[0].id, speaker_id, source: source_slug, context })
     handle.done.then(() => upload_triggered = true).catch(() => undefined) // error renders in the progress pill
     return handle
   }
@@ -41,6 +46,7 @@
     const data = await writes.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video, ...(hosted_metadata ? { hosted_metadata } : {}), ...(source_slug ? { source: source_slug } : {}) } })
     if (speaker_id)
       await writes.assign_speaker({ speaker_id, media: 'video', media_id: data.id })
+    track_media_uploaded({ dictionary_id: page.data.dictionary.id, media: 'video', context })
     on_close()
   }
 </script>
@@ -66,7 +72,12 @@
       {:else if speaker_id || source_slug}
         <ShowHide>
           {#snippet children({ show: record, toggle })}
-            {#if !record && !upload_triggered}
+            {#if staged_file && !upload_triggered}
+              {@const handle = start_upload({ file: staged_file, speaker_id, source_slug })}
+              {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
+                <UploadProgressBarStatus {handle} />
+              {/await}
+            {:else if !record && !upload_triggered}
               <PasteVideoLink on_pasted_valid_url={({ hosted_video: pasted_video, hosted_metadata: pasted_metadata }) => { hosted_video = pasted_video; hosted_metadata = pasted_metadata }} />
               <SelectVideo>
                 {#snippet children({ file })}

@@ -5,6 +5,7 @@ export type EntriesIndex = Orama<typeof entries_index_schema>
 export const entries_index_schema = {
   _lexeme: 'string[]', // all orthographies as they are and a simplified version (diacritics stripped and ipa characters replaced with common keyboard characters to make easier to type)
   _glosses: 'string[]', // includes all glosses for all senses
+  _definitions: 'string[]', // includes all definitions in all languages for all senses
   // _sentences: 'string[]', // includes all sentences in all languages for all senses
   _other: 'string[]', // phonetic, notes, scientific_names, interlinearization,morphology, plural_form, sentences
 

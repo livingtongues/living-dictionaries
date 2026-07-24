@@ -2,6 +2,15 @@ import { readable } from 'svelte/store'
 import type { MediaUploadHandle } from './upload-media'
 import { upload_media } from './upload-media'
 import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
+import { track } from '$lib/debug/remote-log'
+import { MEDIA_UPLOADED } from '$lib/debug/log-events'
+
+/** Which editing surface launched the upload — for the `media_uploaded` analytics event. */
+export type MediaUploadContext = 'list' | 'entry' | 'table'
+
+export function track_media_uploaded({ dictionary_id, media, context }: { dictionary_id: string, media: 'audio' | 'photo' | 'video', context?: MediaUploadContext }) {
+  track({ event: MEDIA_UPLOADED, props: { dictionary_id, media, context: context ?? 'entry' } })
+}
 
 // Upload→insert orchestrators: `done` includes the DB insert, so a failed
 // upload REJECTS `done` and no row is ever inserted. Callers render
@@ -22,13 +31,14 @@ function blocked_handle(error: Error): MediaUploadHandle {
   return { progress: readable({ progress: 0 }), done, abort: () => undefined }
 }
 
-export function add_photo({ writes, dictionary_id, sense_id, file, source, photographer }: {
+export function add_photo({ writes, dictionary_id, sense_id, file, source, photographer, context }: {
   writes: Pick<GuardedWrites, 'check_ready' | 'insert_photo'>
   dictionary_id: string
   sense_id: string
   file: File
   source: string
   photographer?: string
+  context?: MediaUploadContext
 }): MediaUploadHandle {
   const not_ready = writes.check_ready()
   if (not_ready)
@@ -54,6 +64,7 @@ export function add_photo({ writes, dictionary_id, sense_id, file, source, photo
     })
     if (!inserted)
       throw new Error('The photo was uploaded but could not be saved — please try again.')
+    track_media_uploaded({ dictionary_id, media: 'photo', context })
     return { storage_path }
   })
   done.catch(() => undefined) // surfaced to callers awaiting `done`; upload errors already logged
@@ -61,7 +72,7 @@ export function add_photo({ writes, dictionary_id, sense_id, file, source, photo
 }
 
 /** Attribution: `speaker_id` and/or `source` (a `sources.slug` registry ref) — at least one. */
-export function add_audio({ writes, dictionary_id, entry_id, sentence_id, text_id, file, speaker_id, source }: {
+export function add_audio({ writes, dictionary_id, entry_id, sentence_id, text_id, file, speaker_id, source, context }: {
   writes: Pick<GuardedWrites, 'check_ready' | 'insert_audio'>
   dictionary_id: string
   /** Owner — exactly one of entry_id | sentence_id | text_id. */
@@ -71,6 +82,7 @@ export function add_audio({ writes, dictionary_id, entry_id, sentence_id, text_i
   file: File | Blob
   speaker_id?: string
   source?: string
+  context?: MediaUploadContext
 }): MediaUploadHandle {
   const not_ready = writes.check_ready()
   if (not_ready)
@@ -83,6 +95,7 @@ export function add_audio({ writes, dictionary_id, entry_id, sentence_id, text_i
     const inserted = await writes.insert_audio({ id: media_id, storage_path, entry_id, sentence_id, text_id, speaker_id, source })
     if (!inserted)
       throw new Error('The audio was uploaded but could not be saved — please try again.')
+    track_media_uploaded({ dictionary_id, media: 'audio', context })
     return { storage_path }
   })
   done.catch(() => undefined)
@@ -90,13 +103,14 @@ export function add_audio({ writes, dictionary_id, entry_id, sentence_id, text_i
 }
 
 /** Attribution: `speaker_id` and/or `source` (a `sources.slug` registry ref) — at least one. */
-export function add_video({ writes, dictionary_id, sense_id, file, speaker_id, source }: {
+export function add_video({ writes, dictionary_id, sense_id, file, speaker_id, source, context }: {
   writes: Pick<GuardedWrites, 'check_ready' | 'insert_video'>
   dictionary_id: string
   sense_id: string
   file: File | Blob
   speaker_id?: string
   source?: string
+  context?: MediaUploadContext
 }): MediaUploadHandle {
   const not_ready = writes.check_ready()
   if (not_ready)
@@ -109,6 +123,7 @@ export function add_video({ writes, dictionary_id, sense_id, file, speaker_id, s
     const inserted = await writes.insert_video({ video: { id: media_id, storage_path, ...(source ? { source } : {}) }, sense_id, speaker_id })
     if (!inserted)
       throw new Error('The video was uploaded but could not be saved — please try again.')
+    track_media_uploaded({ dictionary_id, media: 'video', context })
     return { storage_path }
   })
   done.catch(() => undefined)

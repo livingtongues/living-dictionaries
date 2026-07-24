@@ -1562,8 +1562,13 @@ describe(get_log_analytics, () => {
                 "event": "locale_changed",
                 "seen": false,
               },
+              {
+                "count": 0,
+                "event": "media_uploaded",
+                "seen": false,
+              },
             ],
-            "never_emitted": 7,
+            "never_emitted": 8,
           },
           "generated_at": "2026-06-30T12:00:00.000Z",
           "geo": {

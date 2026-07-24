@@ -3,6 +3,7 @@
   import IconTrashAlt from '~icons/fa-regular/trash-alt'
   import type { EntryData } from '$lib/types'
   import type { MediaUploadHandle } from '$lib/media/upload-media'
+  import type { MediaUploadContext } from '$lib/media/add-media'
   import { add_audio } from '$lib/media/add-media'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import JSON from '$lib/components/ui/JSON.svelte'
@@ -19,9 +20,12 @@
     on_close: () => void
     entry: EntryData
     sound_file: EntryData['audios'][0]
+    /** A file dropped onto a row before the modal opened — staged for upload once attribution is chosen. */
+    initial_file?: File
+    context?: MediaUploadContext
   }
 
-  const { on_close, entry, sound_file }: Props = $props()
+  const { on_close, entry, sound_file, initial_file = undefined, context = 'entry' }: Props = $props()
 
   let upload_triggered = $state(false)
   const { auth_user, writes, url_from_storage_path } = $derived(page.data)
@@ -31,7 +35,7 @@
   // `props_invalid_value` at runtime, which crashed the audio editor (no record/upload UI showed).
   let readyToRecord: boolean = $state(false)
 
-  let file: File = $state()
+  let file: File = $state(initial_file)
   let audioBlob: Blob = $state(null)
 
   $effect(() => {
@@ -52,6 +56,7 @@
       entry_id: entry.id,
       speaker_id,
       source: source_slug,
+      context,
     })
     handle.done.then(() => upload_triggered = true).catch(() => undefined) // error renders in the progress pill
     return handle

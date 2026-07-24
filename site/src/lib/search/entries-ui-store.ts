@@ -39,6 +39,7 @@ export function create_entries_ui_store({
 
   const is_editor = get(can_edit)
   const is_admin = get(admin)
+  let reconciled_after_bootstrap_sync = false
 
   if (browser && connection)
     void load_bundle_with_retry(connection)
@@ -68,6 +69,27 @@ export function create_entries_ui_store({
           }
         }
         replace_orama_watcher({ dict_id: dictionary_id, make: () => create_orama_watcher({ connection: conn, dict_db, initial_watermark: watermark }) })
+      }
+
+      // Reconcile once after the bootstrap sync: the per-table bundle reads
+      // aren't atomic, so the initial `/changes` apply can commit BETWEEN them —
+      // a torn bundle where later-read tables hold rows whose referents were
+      // missed, and the missed rows also sit below the watcher's watermark
+      // (their updated_at predates rows that DID land in the bundle). When the
+      // post-sync total row count differs from what the bundle read, redo the
+      // full load. Cold no-snapshot boots (new dict pre-R2-build, the local-only
+      // dev dict) hit this reliably; warm boots no-op.
+      if (!reconciled_after_bootstrap_sync) {
+        reconciled_after_bootstrap_sync = true
+        try {
+          await conn.sync_now()
+          const tables = Object.keys(bundle)
+          const sum_sql = tables.map(table => `(SELECT COUNT(*) FROM "${table}")`).join(' + ')
+          const [row] = await conn.query<{ n: number }>(`SELECT ${sum_sql} AS n`)
+          const bundle_total = Object.values(bundle).reduce((total, rows) => total + rows.length, 0)
+          if (row && row.n !== bundle_total)
+            return load_bundle_with_retry(conn)
+        } catch { /* initial sync failure is already logged by dict-session */ }
       }
     } catch (err) {
       // Cold-boot wait-out: the dict `+layout.ts` now returns before the leader
@@ -101,6 +123,7 @@ export function create_entries_ui_store({
         return load_bundle_with_retry(conn, attempt + 1, boot_attempt)
       }
       const code = sqlite_code_of(err)
+      console.error('Failed to read dict bundle from wa-sqlite:', err)
       log_event({
         level: 'error',
         message: 'Failed to read dict bundle from wa-sqlite',
@@ -108,6 +131,7 @@ export function create_entries_ui_store({
           dict_id: dictionary_id,
           sqlite_code: code,
           sqlite_code_name: decode_sqlite_code(code),
+          error: (err as Error)?.message ?? String(err),
           snapshot_expired_recently: snapshot_expired_recently(dictionary_id),
           retried: attempt > 0,
         },

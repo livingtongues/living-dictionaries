@@ -22,3 +22,10 @@ entries list."
 `enxet` (unlisted) is a perfect live specimen — mixed gloss-only /
 definition-only / empty senses (539 lexeme-only entries). Verify with
 svelte-look stories + the deep-flow browser harness.
+
+## Resolution (2026-07-24)
+
+Audit complete — findings + the full fix were executed via `.issues/entries-list-redesign.md`
+(list redesign, first-class multilingual definition in entry view, Orama `_definitions`, table
+definition columns, print definition field, media-upload telemetry). Gallery/OG/homepage stay
+gloss-only by design (short form). CSV already had definitions.

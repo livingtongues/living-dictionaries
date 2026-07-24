@@ -2,6 +2,10 @@ import { defaultExclude, defineConfig } from 'vitest/config'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import Icons from 'unplugin-icons/vite'
 
+// EXIF timestamps (and any other TZ-less local-time parsing) are interpreted in the
+// machine TZ — pin tests to UTC so they pass identically on any dev machine (prod runs UTC).
+process.env.TZ = 'UTC'
+
 const alias = {
   '$lib': new URL('./src/lib', import.meta.url).pathname,
   '$api': new URL('./src/routes/api', import.meta.url).pathname,

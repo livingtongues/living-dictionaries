@@ -145,6 +145,15 @@
         sense.glosses = { ...sense.glosses, [column.bcp]: new_value }
         update_sense({ glosses: sense?.glosses })
       }} />
+  {:else if column.field === 'definition'}
+    <Textbox
+      field={column.field}
+      value={sense?.definition?.[column.bcp]}
+      display={column.display}
+      on_update={(new_value) => {
+        sense.definition = { ...sense.definition, [column.bcp]: new_value }
+        update_sense({ definition: sense.definition })
+      }} />
   {:else if column.field === 'example_sentence'}
     {@const sentence = sense?.sentences?.[0]}
     {#if column.bcp === 'vn'}

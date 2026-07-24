@@ -617,9 +617,14 @@ export async function init_entries(
     if (should_include_tag(tag, admin)) entry_id_to_tags[entry_tag.entry_id].push(tag)
   }
 
+  // NOTE every junction loop below skips a missing referent: the bundle's
+  // per-table reads aren't atomic, so a sync commit racing them can produce
+  // junction rows whose parent row wasn't in its (earlier-read) table yet.
+  // The post-sync reconcile in entries-ui-store re-reads a torn bundle.
   for (const entry_dialect of Object.values(entry_dialects)) {
-    if (!entry_id_to_dialects[entry_dialect.entry_id]) entry_id_to_dialects[entry_dialect.entry_id] = []
     const dialect = dialects[entry_dialect.dialect_id]
+    if (!dialect) continue
+    if (!entry_id_to_dialects[entry_dialect.entry_id]) entry_id_to_dialects[entry_dialect.entry_id] = []
     entry_id_to_dialects[entry_dialect.entry_id].push(dialect)
   }
 
@@ -632,24 +637,29 @@ export async function init_entries(
   }
 
   for (const { sense_id, sentence_id } of Object.values(senses_in_sentences)) {
+    const sentence = sentences[sentence_id]
+    if (!sentence) continue
     if (!sense_id_to_sentences[sense_id]) sense_id_to_sentences[sense_id] = []
-    sense_id_to_sentences[sense_id].push(sentences[sentence_id])
+    sense_id_to_sentences[sense_id].push(sentence)
   }
 
   for (const { sense_id, photo_id } of Object.values(sense_photos)) {
+    const photo = photos[photo_id]
+    if (!photo) continue
     if (!sense_id_to_photos[sense_id]) sense_id_to_photos[sense_id] = []
-    sense_id_to_photos[sense_id].push(photos[photo_id])
+    sense_id_to_photos[sense_id].push(photo)
   }
 
   for (const video_speaker of Object.values(video_speakers)) {
-    if (!video_id_to_speakers[video_speaker.video_id]) video_id_to_speakers[video_speaker.video_id] = []
     const speaker = speakers[video_speaker.speaker_id]
+    if (!speaker) continue
+    if (!video_id_to_speakers[video_speaker.video_id]) video_id_to_speakers[video_speaker.video_id] = []
     video_id_to_speakers[video_speaker.video_id].push(speaker)
   }
   for (const { sense_id, video_id } of Object.values(sense_videos)) {
-    if (!sense_id_to_videos[sense_id]) sense_id_to_videos[sense_id] = []
     const video = videos[video_id]
-
+    if (!video) continue
+    if (!sense_id_to_videos[sense_id]) sense_id_to_videos[sense_id] = []
     sense_id_to_videos[sense_id].push({
       ...video,
       ...(video_id_to_speakers[video_id] ? { speakers: video_id_to_speakers[video_id] } : {}),
@@ -657,8 +667,9 @@ export async function init_entries(
   }
 
   for (const audio_speaker of Object.values(audio_speakers)) {
-    if (!audio_id_to_speakers[audio_speaker.audio_id]) audio_id_to_speakers[audio_speaker.audio_id] = []
     const speaker = speakers[audio_speaker.speaker_id]
+    if (!speaker) continue
+    if (!audio_id_to_speakers[audio_speaker.audio_id]) audio_id_to_speakers[audio_speaker.audio_id] = []
     audio_id_to_speakers[audio_speaker.audio_id].push(speaker)
   }
   for (const audio of Object.values(audios)) {

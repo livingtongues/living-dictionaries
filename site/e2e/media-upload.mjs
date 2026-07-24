@@ -24,7 +24,7 @@ const dir = dirname(fileURLToPath(import.meta.url))
 const site_dir = join(dir, '..')
 const port = process.env.MEDIA_PORT || '3105'
 const base = process.env.BASE_URL || `http://localhost:${port}`
-const dict_db_path = join(site_dir, '.data', 'dictionaries', 'achi.db')
+const dict_db_path = join(site_dir, '.data', 'dictionaries', 'dev.db')
 const dev_media_dir = join(site_dir, '.data', 'dev-media')
 const UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
 
@@ -79,7 +79,7 @@ function read_junction(table) {
   }
 }
 
-// The achi fixture seeds audio (reset each run) but NOT photos, so uploaded photos accumulate
+// The dev fixture seeds audio (reset each run) but NOT photos, so uploaded photos accumulate
 // across runs — clear them so each run starts clean and `before.photos` is 0.
 function clear_photos() {
   const db = new Database(dict_db_path)
@@ -96,13 +96,13 @@ async function login(page) {
     const { code } = await send.json()
     const verify = await fetch('/api/auth/email/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, code }) })
     return { status: verify.status }
-  }, 'achi-manager@example.com')
+  }, 'dev-manager@example.com')
   if (result.status !== 200) throw new Error(`login failed: ${result.status}`)
 }
 
 async function flush_sync(page) {
   await page.evaluate(async () => {
-    const c = globalThis.__ld_dict_connections?.achi?.connection
+    const c = globalThis.__ld_dict_connections?.dev?.connection
     if (c) await c.sync_now().catch(() => {})
   })
 }
@@ -114,14 +114,14 @@ const REAL_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAACX
 
 async function main() {
   if (!process.env.BASE_URL) {
-    console.log('• re-seeding achi fixture…')
-    await run('pnpm', ['seed:achi-fixture'])
+    console.log('• re-seeding dev fixture…')
+    await run('pnpm', ['seed:dev-fixture'])
     clear_photos()
     await boot_dev_server()
   }
 
   const before = read_server_media('e_ja')
-  console.log(`• server achi.db before: audio=${before.audio.length} photos=${before.photos.length}`)
+  console.log(`• server dev.db before: audio=${before.audio.length} photos=${before.photos.length}`)
 
   const tmp = mkdtempSync(join(tmpdir(), 'ld-media-'))
   const png_path = join(tmp, 'cat.png')
@@ -138,7 +138,7 @@ async function main() {
   page.on('dialog', (d) => { console.log('  [dialog]', d.message().slice(0, 200)); d.dismiss().catch(() => {}) })
   page.on('console', (m) => { if (m.type() === 'error') console.log(`  [console.error]`, m.text().slice(0, 200)) })
 
-  await page.goto(`${base}/achi/entry/e_ja`, { waitUntil: 'domcontentloaded', timeout: 90000 })
+  await page.goto(`${base}/dev/entry/e_ja`, { waitUntil: 'domcontentloaded', timeout: 90000 })
   // vite dev compiles the page + the wa-sqlite worker on first hit — generous wait.
   await page.waitForFunction(() => document.body.innerText.includes('water'), { timeout: 90000 })
   await login(page)
@@ -147,8 +147,8 @@ async function main() {
   // Edits are blocked (guarded-writes `still_loading`) until the entries bundle finishes
   // loading from the wa-sqlite leader worker — slower to boot in headless CI than the app's
   // click cadence. Wait for readiness so the media inserts don't race the read-model.
-  await page.waitForFunction(() => globalThis.__ld_entries_loading?.achi === false, { timeout: 90000 })
-  console.log('✓ logged in as achi-manager; editor affordances present + writes ready')
+  await page.waitForFunction(() => globalThis.__ld_entries_loading?.dev === false, { timeout: 90000 })
+  console.log('✓ logged in as dev-manager; editor affordances present + writes ready')
 
   // ─── PHOTO (exercises multipart POST /api/photo-upload + background variants) ────────────
   await page.evaluate(() => {
@@ -222,15 +222,15 @@ async function main() {
   await flush_sync(page)
 
   // ─── Assert SERVER persistence on the R2 key convention ──────────────────────────────────
-  const photo_key_re = new RegExp(`^achi/photo/${UUID_RE.source}\\.png$`)
-  const audio_key_re = new RegExp(`^achi/audio/${UUID_RE.source}\\.`)
+  const photo_key_re = new RegExp(`^dev/photo/${UUID_RE.source}\\.png$`)
+  const audio_key_re = new RegExp(`^dev/audio/${UUID_RE.source}\\.`)
   let after = read_server_media('e_ja')
   for (let i = 0; i < 25 && (!after.photos.some(p => photo_key_re.test(p.storage_path)) || after.audio.length <= before.audio.length); i++) {
     await new Promise(r => setTimeout(r, 1000))
     await flush_sync(page)
     after = read_server_media('e_ja')
   }
-  console.log(`• server achi.db after: audio=${after.audio.length} photos=${after.photos.length} audio_speaker_links=${after.audio_speaker_links}`)
+  console.log(`• server dev.db after: audio=${after.audio.length} photos=${after.photos.length} audio_speaker_links=${after.audio_speaker_links}`)
 
   const photo = after.photos.find(p => photo_key_re.test(p.storage_path))
   if (!photo) throw new Error(`PHOTO row with an R2-convention storage_path did not persist (have: ${after.photos.map(p => p.storage_path).join(', ') || 'none'})`)
@@ -244,7 +244,7 @@ async function main() {
   console.log('✓ photo + audio rows PERSISTED to the real server SQLite on R2-convention keys')
 
   // ─── Variants: the post-response sharp pipeline must land all three WebPs locally ─────────
-  const photo_dir = join(dev_media_dir, 'achi', 'photo')
+  const photo_dir = join(dev_media_dir, 'dev', 'photo')
   const base_name = photo.storage_path.split('/')[2].split('.')[0]
   for (let i = 0; i < 20; i++) {
     const files = existsSync(photo_dir) ? readdirSync(photo_dir) : []
@@ -262,7 +262,7 @@ async function main() {
   const fresh = await browser.createBrowserContext()
   const fresh_page = await fresh.newPage()
   await fresh_page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
-  await fresh_page.goto(`${base}/achi/entry/e_ja`, { waitUntil: 'domcontentloaded' })
+  await fresh_page.goto(`${base}/dev/entry/e_ja`, { waitUntil: 'domcontentloaded' })
   await fresh_page.waitForFunction(key => [...document.querySelectorAll('img')].some(img => img.src.includes(key)), { timeout: 30000 }, base_name)
   console.log('✓ fresh (no-OPFS) context renders the uploaded photo from the server snapshot')
   await fresh.close()

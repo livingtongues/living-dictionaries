@@ -252,6 +252,7 @@
     "filters": "Filters",
     "select_semantic_domains": "Select Semantic Domains",
     "upload_photo": "Upload Photo",
+    "drop_media_hint": "Tip: drag & drop an audio, photo, or video file onto an entry",
     "list": "List",
     "add_entry": "Add Entry",
     "search_entries": "Search Entries",
@@ -298,7 +299,7 @@
     "gloss": "Translation",
     "plural_form": "Plural form",
     "scientific_names": "Scientific Name",
-    "definition_english": "Definition (deprecated)",
+    "definition": "Definition",
     "video": "Video",
     "custom_tags": "Custom tags",
     "linguistic_history": "Linguistic History"

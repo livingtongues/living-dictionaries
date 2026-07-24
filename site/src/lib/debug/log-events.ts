@@ -35,6 +35,9 @@ export const ENTRY_UNFEATURED = 'entry_unfeatured'
 /** A visitor switched the UI language via the language switcher. props: from, to. */
 export const LOCALE_CHANGED = 'locale_changed'
 
+/** Media was uploaded/attached via the editing UI. props: dictionary_id, media (audio|photo|video), context (list|entry|table). */
+export const MEDIA_UPLOADED = 'media_uploaded'
+
 /**
  * Every analytics event the app is SUPPOSED to emit. The dashboard's
  * self-instrumentation panel compares this list against what's actually been
@@ -52,4 +55,5 @@ export const ALL_TRACKED_EVENTS = [
   ENTRY_FEATURED,
   ENTRY_UNFEATURED,
   LOCALE_CHANGED,
+  MEDIA_UPLOADED,
 ] as const

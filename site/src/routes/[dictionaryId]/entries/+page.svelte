@@ -60,6 +60,13 @@
       }
       const { elapsed: { formatted }, count, hits, facets } = await run()
       if (search_inited_ms !== time) return
+      if (count && !hits.length && page_index > 0) {
+        // A filter/view/query change shrank the results below the current page
+        // (e.g. gallery toggled while on page 2) — snap to the last page that
+        // still has results; the $effect re-runs the search.
+        search_params.value.page = Math.ceil(count / entries_per_page)
+        return
+      }
       result_facets = facets
       search_results_count = count
       search_time = formatted
@@ -158,9 +165,10 @@
           <div class="results-meta">
             {#if typeof search_results_count !== 'undefined'}
               {#if search_results_count > 0}
-                {results_label}: {current_page_index * entries_per_page + 1}-{Math.min((current_page_index + 1) * entries_per_page, search_results_count)} /
-                {search_results_count}
-                ({search_time.includes('μs') ? '<1ms' : search_time})
+                <span title={search_time.includes('μs') ? '<1ms' : search_time}>
+                  {results_label}: {current_page_index * entries_per_page + 1}-{Math.min((current_page_index + 1) * entries_per_page, search_results_count)} /
+                  {search_results_count}
+                </span>
               {:else}
                 {results_label}:
                 0 /
@@ -169,6 +177,9 @@
             {/if}
             {#if $loading}
               <span class="loading-spinner" title="Ensuring all entries are up to date"><IconSvgSpinners3DotsFade style="vertical-align: -4px" /></span>
+            {/if}
+            {#if can_edit && !scope && !search_params.value.view}
+              <span class="drop-hint">{page.data.t('entry.drop_media_hint')}</span>
             {/if}
           </div>
           {#if scope === 'sentences'}
@@ -246,6 +257,19 @@
     color: var(--color-secondary); /* ≈ gray-500 */
     margin-bottom: 0.25rem;
     display: flex;
+    align-items: baseline;
+  }
+
+  .drop-hint {
+    display: none;
+    margin-left: auto;
+    opacity: 0.8;
+  }
+
+  @media (min-width: 768px) {
+    .drop-hint {
+      display: inline;
+    }
   }
 
   .filters-gap {

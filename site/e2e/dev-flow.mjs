@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Deep end-to-end flow test of the achi dictionary editor, driven with puppeteer-core against the
+// Deep end-to-end flow test of the dev dictionary editor, driven with puppeteer-core against the
 // system Chrome (no binary download — same engine svelte-look uses). Self-contained: it boots its
 // own production `node build` server, runs the manager edit flow, asserts, screenshots each step,
 // then tears everything down. Set BASE_URL to point at an already-running server and skip booting.
@@ -8,9 +8,9 @@
 //   BASE_URL=http://localhost:3041 pnpm -F site test:flow   # against a running server
 //
 // M4-auth: real auth. Logs in via the dev OTP path (send-code returns the code when
-// E2E_EXPOSE_OTP=true) as the seeded NON-admin `achi-manager@example.com`, so `can_edit`
-// resolves from a real `dictionary_roles` row (not an admin bypass). Run `pnpm seed:achi-fixture`
-// first to seed the achi entries + the manager user/role into `.data`.
+// E2E_EXPOSE_OTP=true) as the seeded NON-admin `dev-manager@example.com`, so `can_edit`
+// resolves from a real `dictionary_roles` row (not an admin bypass). Run `pnpm seed:dev-fixture`
+// first to seed the dev entries + the manager user/role into `.data`.
 /* eslint-disable no-console, node/prefer-global/process, unicorn/prefer-dom-node-text-content -- node CLI: console is the output channel + process drives the exit code; innerText (not textContent) is the right API for asserting on whitespace-normalized RENDERED text */
 
 import { spawn } from 'node:child_process'
@@ -24,7 +24,7 @@ import { launch } from '/home/jacob/.claude/skills/browser-tools/browser-launch.
 const dir = dirname(fileURLToPath(import.meta.url))
 const site_dir = join(dir, '..')
 const screenshot_dir = join(dir, 'screenshots')
-const server_db_path = join(site_dir, '.data', 'dictionaries', 'achi.db')
+const server_db_path = join(site_dir, '.data', 'dictionaries', 'dev.db')
 const wait = ms => new Promise(r => setTimeout(r, ms))
 
 function server_phonetic(id) {
@@ -119,14 +119,14 @@ async function main() {
 
   // 0a — logged out: entry renders read-only. `Add Audio` is gated behind
   // can_edit, so its ABSENCE proves the logged-out viewer can't edit.
-  await page.goto(`${base}/achi/entry/e_ja`, { waitUntil: 'domcontentloaded' })
+  await page.goto(`${base}/dev/entry/e_ja`, { waitUntil: 'domcontentloaded' })
   await page.waitForFunction(() => document.body.innerText.includes('water'))
   const logged_out_can_edit = await page.evaluate(() => document.body.innerText.includes('Add Audio'))
   if (logged_out_can_edit) throw new Error('logged-out user sees the "Add Audio" edit affordance — can_edit should be false')
   await shot(page, 'logged-out-entry')
   step('logged out → entry renders read-only (no edit affordance)')
 
-  // 0b — log in as the seeded NON-admin achi manager via the dev OTP API (in-page, cookies stick)
+  // 0b — log in as the seeded NON-admin dev manager via the dev OTP API (in-page, cookies stick)
   const login = await page.evaluate(async (email) => {
     const send = await fetch('/api/auth/email/send-code', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email }) })
     const { code } = await send.json()
@@ -134,19 +134,25 @@ async function main() {
     const verify_body = await verify.json()
     const me = await (await fetch('/api/auth/me')).json()
     return { verify_status: verify.status, user: verify_body.user, me }
-  }, 'achi-manager@example.com')
+  }, 'dev-manager@example.com')
   if (login.verify_status !== 200) throw new Error(`verify failed: ${login.verify_status} ${JSON.stringify(login.user)}`)
   if (!login.me?.email) throw new Error('logged-in /api/auth/me returned no user')
-  if (login.me.is_admin || login.me.admin_level !== null) throw new Error(`achi manager must be NON-admin, got is_admin=${login.me.is_admin} admin_level=${login.me.admin_level}`)
+  if (login.me.is_admin || (login.me.admin_level ?? 0) > 0) throw new Error(`dev manager must be NON-admin, got is_admin=${login.me.is_admin} admin_level=${login.me.admin_level}`)
   step(`logged in as ${login.me.email} (non-admin: is_admin=${login.me.is_admin}, admin_level=${login.me.admin_level})`)
 
-  // 1 — entries list renders the seeded dummy entries
-  await page.goto(`${base}/achi/entries`, { waitUntil: 'domcontentloaded' })
-  await page.waitForFunction(() => document.body.innerText.includes('1-13 / 13'), { timeout: 25000 })
-  const entry_count = await page.evaluate(() => document.querySelectorAll('a[href*="/entry/"]').length)
-  if (entry_count !== 13) throw new Error(`expected 13 entry links, found ${entry_count}`)
+  // 1 — entries list renders every seeded entry (count read from the server DB
+  // so the fixture can grow — e.g. the demo_* variety seed — without breaking this)
+  const db_entry_count = (() => {
+    const db = new Database(server_db_path, { readonly: true })
+    try { return db.prepare('SELECT COUNT(*) AS n FROM entries').get().n } finally { db.close() }
+  })()
+  await page.goto(`${base}/dev/entries`, { waitUntil: 'domcontentloaded' })
+  await page.waitForFunction(n => document.body.innerText.includes(`/ ${n}`), { timeout: 25000 }, db_entry_count)
+  const first_page_expected = Math.min(20, db_entry_count)
+  const entry_count = await page.evaluate(() => document.querySelectorAll('.entry-row a[href*="/entry/"]').length)
+  if (entry_count !== first_page_expected) throw new Error(`expected ${first_page_expected} entry links, found ${entry_count}`)
   await shot(page, 'entries-list')
-  step(`entries list shows 13 entries (${entry_count} links)`)
+  step(`entries list shows ${db_entry_count} entries (${entry_count} links on page 1)`)
 
   // 2 — open an entry → overlay editor
   await page.evaluate(() => {
@@ -154,7 +160,7 @@ async function main() {
     if (!link) throw new Error('entry link for e_ja not found')
     link.click()
   })
-  await page.waitForFunction(() => location.pathname === '/achi/entry/e_ja')
+  await page.waitForFunction(() => location.pathname === '/dev/entry/e_ja')
   await page.waitForFunction(() => document.body.innerText.includes('Add Audio'))
   await shot(page, 'entry-overlay')
   step('clicked entry e_ja → overlay editor open')
@@ -214,10 +220,10 @@ async function main() {
   // server SQLite via snapshot), and assert the phonetic edit PERSISTED + the
   // add/delete-sense netted back to one sense.
   await page.evaluate(async () => {
-    const c = globalThis.__ld_dict_connections?.achi?.connection
+    const c = globalThis.__ld_dict_connections?.dev?.connection
     if (c) await c.sync_now().catch(() => {})
   })
-  await page.goto(`${base}/achi/entry/e_ja`, { waitUntil: 'domcontentloaded' })
+  await page.goto(`${base}/dev/entry/e_ja`, { waitUntil: 'domcontentloaded' })
   await page.waitForFunction(() => document.body.innerText.includes('Add Audio'), { timeout: 25000 })
   await page.waitForFunction(() => document.body.innerText.includes('haʔ-EDITED'), { timeout: 10000 })
   const after_reload = await page.evaluate(() => ({
@@ -234,8 +240,8 @@ async function main() {
   // restore e_ja phonetic (net-zero) so the fixture stays clean + the flow re-runs.
   // Mutate-then-save the live row, then poll the server file until the sync lands.
   await page.evaluate(async () => {
-    const conn = globalThis.__ld_dict_connections?.achi?.connection
-    const db = globalThis.__ld_dict_connections?.achi?.dict_db
+    const conn = globalThis.__ld_dict_connections?.dev?.connection
+    const db = globalThis.__ld_dict_connections?.dev?.dict_db
     if (db) await db.entries.update({ id: 'e_ja', phonetic: 'haʔ' })
     if (conn) await conn.sync_now().catch(() => {})
   })
@@ -247,7 +253,7 @@ async function main() {
   if (page_errors.length) throw new Error(`pageerror(s) during flow: ${page_errors.join(' | ')}`)
   step('no uncaught page errors during the flow')
 
-  console.log('\n✅ achi deep-flow PASS — real-auth manager edit + sync round-trip verified')
+  console.log('\n✅ dev deep-flow PASS — real-auth manager edit + sync round-trip verified')
 }
 
 async function cleanup() {
@@ -257,7 +263,7 @@ async function cleanup() {
 
 main()
   .catch(async (error) => {
-    console.error(`\n❌ achi deep-flow FAIL — ${error.message}`)
+    console.error(`\n❌ dev deep-flow FAIL — ${error.message}`)
     if (active_page) {
       try {
         const diagnostics = await active_page.evaluate(() => ({

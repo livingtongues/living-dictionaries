@@ -22,6 +22,7 @@
   const fieldsThatExist = $derived((Object.keys(preferredPrintFields.value) as (keyof IPrintFields)[]).filter((field) => {
     if (field === 'gloss') return true
     return entries.find((entry) => {
+      if (field === 'definition') return !!entry.senses?.find(sense => Object.values(sense.definition || {}).some(Boolean))
       if (field === 'parts_of_speech') return !!entry.senses?.find(sense => sense.parts_of_speech?.length)
       if (field === 'local_orthography')
         return Object.keys(entry.main.lexeme).length > 1

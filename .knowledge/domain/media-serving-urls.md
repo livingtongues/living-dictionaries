@@ -32,6 +32,16 @@ works on this zone) because already-cached objects keep serving their old header
 are UUIDs, a new upload = a new key), so browsers/edge never re-download unchanged media; the CORS
 `maxAgeSeconds` only caches the preflight handshake, not bytes.
 
+### Video thumbnails (convention decided 2026-07-24, generation pending)
+Uploaded videos get a poster image at the photo-variant-style key
+**`{original key minus ext}_thumb.webp`** (e.g. `{dict}/video/{uuid}_thumb.webp`) — NO schema
+column. `video_thumb_src()` in `media-url.ts` resolves it (priority: cached
+`hosted_metadata.thumbnail_url` for YouTube/Vimeo → derived `_thumb.webp` key → null), and every
+UI `<img>` using it MUST keep an `onerror` fallback (icon chip) because thumbnails are generated
+OUT-OF-BAND — a separate batch session writes the webp objects to R2; the UI lights up per-video
+as they land. Generator contract: 400px-ish square-crop webp at exactly that key, nothing else to
+update.
+
 ## Legacy audio / video (and raw photo bytes) — Firebase Storage download URL
 An old-convention storage path is served from the legacy GCS bucket as:
 

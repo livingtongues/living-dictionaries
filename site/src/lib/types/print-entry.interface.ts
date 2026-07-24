@@ -3,6 +3,7 @@
 enum _CustomPrintFields {
   // lexeme always shows
   gloss = 'Glosses',
+  definition = 'Definitions',
   local_orthography = 'Alternate Orthographies', // lo, lo2, lo3, lo4, lo5
   phonetic = 'Phonetic',
   parts_of_speech = 'Part of Speech',

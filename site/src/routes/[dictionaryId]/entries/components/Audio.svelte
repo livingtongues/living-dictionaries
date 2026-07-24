@@ -63,7 +63,17 @@
 
 <ShowHide>
   {#snippet children({ show, toggle })}
-    {#if sound_file}
+    {#if sound_file && context === 'list'}
+      <!-- Listen-only for EVERYONE (editors edit via the row's ⋯ menu) — no hidden long-press edit. -->
+      <button
+        type="button"
+        class="{klass} list-play-button"
+        class:playing
+        title={page.data.t('audio.listen')}
+        onclick={() => initAudio()}>
+        <IconMaterialSymbolsHearing style="font-size: 1.125rem" />
+      </button>
+    {:else if sound_file}
       {@const updated_within_last_5_minutes = sound_file.updated_at && can_edit && new Date(sound_file.updated_at).getTime() > minutes_ago_in_ms(5)}
       <div
         class:recently-updated={updated_within_last_5_minutes}
@@ -77,12 +87,7 @@
           else
             initAudio()
         }}>
-        {#if context === 'list'}
-          <IconMaterialSymbolsHearing class="{playing ? 'playing-color' : ''}" style="font-size: 1.25rem; margin-top: 0.25rem" />
-          <div class="listen-label">
-            {page.data.t('audio.listen')}
-          </div>
-        {:else if context === 'table'}
+        {#if context === 'table'}
           <IconMaterialSymbolsHearing class="{playing ? 'playing-color' : ''}" style="font-size: 1.125rem; margin-top: 0.25rem" />
         {:else if context === 'entry'}
           <IconMaterialSymbolsHearing class="{playing ? 'playing-color' : ''}" style="font-size: 1.125rem; margin-bottom: 0.25rem" />
@@ -95,11 +100,11 @@
           </div>
         {/if}
       </div>
-    {:else if can_edit}
+    {:else if can_edit && context !== 'list'}
       <div
         class="{klass} audio-action add-audio"
         onclick={toggle}>
-        <IconUilMicrophone class="{context === 'list' || context === 'table' ? 'mic-color' : ''}" style="font-size: 1.125rem; margin: 0.25rem" />
+        <IconUilMicrophone class="{context === 'table' ? 'mic-color' : ''}" style="font-size: 1.125rem; margin: 0.25rem" />
         {#if context === 'entry'}
           <div style="font-size: 0.75rem; line-height: 1rem">
             {page.data.t('audio.add_audio')}
@@ -110,7 +115,7 @@
 
     {#if show}
       {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
-        <EditAudio {entry} {sound_file} on_close={toggle} />
+        <EditAudio {entry} {sound_file} {context} on_close={toggle} />
       {/await}
     {/if}
   {/snippet}
@@ -150,16 +155,32 @@
     color: rgb(30 64 175); /* blue-800 */
   }
 
-  .listen-label {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    text-align: center;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-    width: 100%;
-    overflow-wrap: break-word;
+  .list-play-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: none;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    color: var(--primary);
+    cursor: pointer;
+    transition: background var(--transition-time, 150ms), transform 75ms;
+  }
+
+  .list-play-button:hover {
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+
+  .list-play-button:active {
+    transform: scale(0.93);
+  }
+
+  .list-play-button.playing {
+    background: var(--primary);
+    color: var(--on-primary);
   }
 
   .entry-label {

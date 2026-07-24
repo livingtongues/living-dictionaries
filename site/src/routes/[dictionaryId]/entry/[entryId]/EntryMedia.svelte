@@ -63,10 +63,11 @@
         width={400}
         title={headword.value}
         photo={photo}
+        {photos}
         photo_source={photo.source}
         photographer={photo.photographer}
         {can_edit}
-        on_delete_image={async () => await writes.delete_photo(photo.id)} />
+        on_delete_image={async photo_id => await writes.delete_photo(photo_id ?? photo.id)} />
     </div>
   {/each}
   {#if can_edit}

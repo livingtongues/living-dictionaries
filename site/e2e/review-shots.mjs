@@ -40,7 +40,7 @@ async function main() {
   await shot(page, '/dictionaries', 'dictionaries-list')
   await shot(page, '/torwali/entries', 'torwali-entries', 4500)
   await shot(page, '/torwali/about', 'torwali-about')
-  await shot(page, '/achi/entries', 'achi-entries', 4500)
+  await shot(page, '/dev/entries', 'dev-entries', 4500)
 }
 main().catch(e => { console.error(e); process.exitCode = 1 })
   .finally(async () => { try { await browser?.close() } catch {} try { server?.kill() } catch {} })

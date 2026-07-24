@@ -75,6 +75,21 @@ describe(search_entries, () => {
     expect(results.hits).toHaveLength(1)
   })
 
+  test('finds entries by definitions across senses and locales', async () => {
+    const results = await search([
+      {
+        main: { lexeme: { default: 'esotman taki' } },
+        senses: [{ definition: { en: 'a common bird' } }, { definition: { es: 'un ave nocturna' } }],
+      },
+      {
+        main: { lexeme: { default: 'etxmatohu' } },
+        senses: [{ definition: { en: 'a kind of tree' } }],
+      },
+    ], 'nocturna')
+    expect(results.hits).toHaveLength(1)
+    expect(results.hits[0].document._lexeme[0]).toBe('esotman taki')
+  })
+
   test('inspect tokens', () => {
     const index_json = get_index_json([
       { main: { lexeme: { default: 'esotman taki' } }, senses: [{ glosses: { pt: 'fácil', tri: 'wamekatota' } }] },
@@ -86,6 +101,7 @@ describe(search_entries, () => {
           "count": 1,
           "docs": {
             "1": {
+              "_definitions": [],
               "_dialects": [],
               "_glosses": [
                 "fácil",
@@ -118,6 +134,7 @@ describe(search_entries, () => {
         },
         "index": {
           "avgFieldLength": {
+            "_definitions": 0,
             "_dialects": 0,
             "_glosses": 1,
             "_lexeme": 9,
@@ -130,6 +147,7 @@ describe(search_entries, () => {
             "_tags": 0,
           },
           "fieldLengths": {
+            "_definitions": {},
             "_dialects": {},
             "_glosses": {
               "1": 1,
@@ -148,6 +166,7 @@ describe(search_entries, () => {
             "_tags": {},
           },
           "frequencies": {
+            "_definitions": {},
             "_dialects": {},
             "_glosses": {
               "1": {
@@ -180,6 +199,18 @@ describe(search_entries, () => {
             "_tags": {},
           },
           "indexes": {
+            "_definitions": {
+              "isArray": true,
+              "node": {
+                "c": [],
+                "d": [],
+                "e": false,
+                "k": "",
+                "s": "",
+                "w": "",
+              },
+              "type": "Radix",
+            },
             "_dialects": {
               "isArray": true,
               "node": {
@@ -577,6 +608,7 @@ describe(search_entries, () => {
           "searchableProperties": [
             "_lexeme",
             "_glosses",
+            "_definitions",
             "_other",
             "_orthographies",
             "_sources",
@@ -596,6 +628,7 @@ describe(search_entries, () => {
             "has_semantic_domain",
           ],
           "searchablePropertiesWithTypes": {
+            "_definitions": "string[]",
             "_dialects": "string[]",
             "_glosses": "string[]",
             "_lexeme": "string[]",
@@ -617,6 +650,7 @@ describe(search_entries, () => {
             "has_video": "boolean",
           },
           "tokenOccurrences": {
+            "_definitions": {},
             "_dialects": {},
             "_glosses": {
               "fácil": 1,

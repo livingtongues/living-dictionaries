@@ -60,7 +60,7 @@ async function login_manager(page) {
     const { code } = await send.json()
     const verify = await fetch('/api/auth/email/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, code }) })
     return { status: verify.status }
-  }, 'achi-manager@example.com')
+  }, 'dev-manager@example.com')
   if (result.status !== 200) throw new Error(`login failed: ${result.status}`)
 }
 
@@ -68,8 +68,8 @@ async function main() {
   if (!provided_base) {
     // Always rebuild — this test exists to verify freshly-changed source in the prod bundle.
     await run('pnpm', ['build'])
-    console.log('• seeding achi fixture (13 entries incl. e_ja = "water")…')
-    await run('pnpm', ['seed:achi-fixture'])
+    console.log('• seeding dev fixture (13 entries incl. e_ja = "water")…')
+    await run('pnpm', ['seed:dev-fixture'])
     await boot_server()
   } else {
     console.log(`• using BASE_URL=${base} (not booting a server)`)
@@ -84,13 +84,13 @@ async function main() {
 
   const context = await browser.createBrowserContext()
 
-  // ---- Tab A: log in as the seeded achi manager, open e_ja (editable). Done FIRST, while A is the
+  // ---- Tab A: log in as the seeded dev manager, open e_ja (editable). Done FIRST, while A is the
   // foreground tab, so its `innerText`-based render waits resolve. ----
   page_a = await context.newPage()
   await page_a.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
   page_a.on('pageerror', e => errors_a.push(e.message))
   page_a.on('dialog', d => d.accept().catch(() => {})) // entry-delete fires a confirm()
-  await page_a.goto(`${base}/achi/entry/e_ja`, { waitUntil: 'domcontentloaded' })
+  await page_a.goto(`${base}/dev/entry/e_ja`, { waitUntil: 'domcontentloaded' })
   await page_a.waitForFunction(() => document.body.innerText.includes('water'), { timeout: 60000 })
   await login_manager(page_a)
   await page_a.reload({ waitUntil: 'domcontentloaded' })
@@ -102,7 +102,7 @@ async function main() {
   page_b = await context.newPage()
   await page_b.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
   page_b.on('pageerror', e => errors_b.push(e.message))
-  await page_b.goto(`${base}/achi/entries`, { waitUntil: 'domcontentloaded' })
+  await page_b.goto(`${base}/dev/entries`, { waitUntil: 'domcontentloaded' })
   await page_b.waitForFunction(`${ENTRY_LINKS} === 13`, { timeout: 60000 })
   if (!await page_b.evaluate(`${HAS_EJA}`)) throw new Error('tab B list missing e_ja before the delete')
   console.log('✓ tab B: entries list shows 13 entries incl. e_ja ("water")')
@@ -121,7 +121,7 @@ async function main() {
   await page_b.bringToFront()
   await page_b.waitForFunction(`${ENTRY_LINKS} === 12`, { timeout: 15000 })
     .catch(() => { throw new Error('tab B entry count did not drop to 12 within 15s — cross-tab rows_deleted broadcast did not reach B') })
-  const b_after = await page_b.evaluate(`({ gone: !(${HAS_EJA}), still_on_list: location.pathname === '/achi/entries', count: ${ENTRY_LINKS} })`)
+  const b_after = await page_b.evaluate(`({ gone: !(${HAS_EJA}), still_on_list: location.pathname === '/dev/entries', count: ${ENTRY_LINKS} })`)
   if (!b_after.gone) throw new Error('tab B still shows the e_ja link after delete')
   if (!b_after.still_on_list) throw new Error('tab B navigated/reloaded — assertion no longer proves the cross-tab broadcast')
   console.log(`✓ tab B: e_ja removed from the search index WITHOUT reload (${b_after.count} entries left)`)

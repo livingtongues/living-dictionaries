@@ -53,16 +53,27 @@
   {/if}
 
   {#each entry.senses || [] as sense, index (sense.id)}
+    {@const glosses = order_glosses({
+      glosses: sense.glosses || {},
+      dictionary_gloss_languages: dictionary.gloss_languages,
+      t: page.data.t,
+    })}
+    {@const definitions = order_glosses({
+      glosses: sense.definition || {},
+      dictionary_gloss_languages: dictionary.gloss_languages,
+      t: page.data.t,
+    })}
     <div></div>
     {#if entry.senses.length > 1}<span class="sense-index">{index + 1}.</span>{/if}
     {#if selectedFields.parts_of_speech && sense.parts_of_speech}<i>{add_periods_and_comma_separate_parts_of_speech(sense.parts_of_speech)}</i>{/if}
-    {#if selectedFields.gloss && sense.glosses}
+    {#if selectedFields.gloss && glosses.length}
       <span>
-        {@html sanitize(order_glosses({
-          glosses: sense.glosses,
-          dictionary_gloss_languages: dictionary.gloss_languages,
-          t: page.data.t,
-        }).join(', '))}{selectedFields.example_sentence && sense.sentences?.length > 0 ? ';' : ''}
+        {@html sanitize(glosses.join(', '))}{selectedFields.example_sentence && sense.sentences?.length > 0 && !(selectedFields.definition && definitions.length) ? ';' : ''}
+      </span>
+    {/if}
+    {#if selectedFields.definition && definitions.length}
+      <span>
+        {selectedFields.gloss && glosses.length ? ' — ' : ''}{definitions.join('; ')}{selectedFields.example_sentence && sense.sentences?.length > 0 ? ';' : ''}
       </span>
     {/if}
 

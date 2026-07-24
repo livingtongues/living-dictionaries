@@ -12,6 +12,7 @@ import { end_dict_boot_progress, report_dict_boot_progress } from './dict-boot-p
 import { create_dict_live_db } from './dict-live-db.svelte'
 import { DictSyncStatus } from './dict-sync-status.svelte'
 import { mark_snapshot_expired } from './snapshot-expired-tracker'
+import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
 import { get_session_id, log_event } from '$lib/debug/remote-log'
 import { live_share } from '$lib/db/client/live-share.svelte'
 import { toast } from '$lib/state/toast.svelte'
@@ -184,6 +185,9 @@ export async function get_dict_session({ dict_id, can_edit, user_id, user_email,
   let session = globals.__ld_dict_connections[dict_id]
   if (!session) {
     const connection = await open({ dict_id, has_editor_role: can_edit, auth: {} })
+    session = { connection, dict_db: create_dict_live_db(connection, { user_id }), sync_status: new DictSyncStatus(connection) }
+    globals.__ld_dict_connections[dict_id] = session
+
     // Bootstrap sync — fire-and-forget so navigation stays instant. `open_dict`
     // returns before the leader worker is ready (a cold-boot snapshot download
     // runs in the background), so this `sync_now()` RPC queues in the transport
@@ -192,13 +196,21 @@ export async function get_dict_session({ dict_id, can_edit, user_id, user_email,
     // reactively as the sync applies (`tables_changed` re-queries every store +
     // the Orama feed). A MemoryVFS fallback boot (pre-iOS-17) may flash an
     // empty list briefly before pull-since-null fills it — accepted.
-    void connection.sync_now().catch(err => log_event({
+    //
+    // On completion, notify EVERY syncable table: the worker's `tables_changed`
+    // broadcast can fire before this tab's subscription attaches (bootstrap sync
+    // racing the transport handshake on a cold no-snapshot boot), which left
+    // stores frozen on their pre-sync empty read — a permanent "Loading…" for
+    // anonymous viewers of a dict with no R2 snapshot. Re-notifying after the
+    // RPC resolves is an idempotent re-query, cheap relative to a boot.
+    const { dict_db: booted_dict_db } = session
+    void connection.sync_now().then(() => {
+      for (const table of DICT_SYNCABLE_TABLES) booted_dict_db.notify_table(table)
+    }).catch(err => log_event({
       level: 'error',
       message: 'initial dict sync failed',
       context: { dict_id, code: (err as { code?: string })?.code ?? null, error: (err as Error)?.message ?? String(err) },
     }))
-    session = { connection, dict_db: create_dict_live_db(connection, { user_id }), sync_status: new DictSyncStatus(connection) }
-    globals.__ld_dict_connections[dict_id] = session
 
     subscribe_sync_sentinels({ connection, dict_id, t, reload })
 

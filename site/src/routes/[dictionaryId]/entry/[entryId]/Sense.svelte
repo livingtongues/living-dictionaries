@@ -39,6 +39,7 @@
   }
 
   const glossingLanguages = $derived(order_entry_and_dictionary_gloss_languages(sense_fields?.glosses, glossLanguages))
+  const definition_languages = $derived(order_entry_and_dictionary_gloss_languages(sense_fields?.definition, glossLanguages))
   const hasSemanticDomain = $derived(sense_fields?.semantic_domains?.length || sense_fields?.write_in_semantic_domains?.length)
   // Deduped per-sense at the assemble_entry_data choke point already; the
   // guard-log here names this list if a dupe ever reaches the keyed `{#each}`.
@@ -60,17 +61,17 @@
     }} />
 {/each}
 
-<!-- Only in Bahasa Lani (id: jaRhn6MAZim4Blvr1iEv) -->
-{#if sense_fields?.definition}
+{#each definition_languages as bcp (bcp)}
   <EntryField
-    value={sense_fields?.definition?.en}
-    field="definition_english"
-    display="Definition (deprecated)"
+    value={sense_fields?.definition?.[bcp]}
+    field="definition"
+    {bcp}
     {can_edit}
+    display={`${page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${page.data.t('entry_field.definition')}`}
     on_update={(new_value) => {
-      save_sense({ definition: new_value ? { en: new_value } : null })
+      save_sense({ definition: { ...sense_row?.definition, [bcp]: new_value } })
     }} />
-{/if}
+{/each}
 
 {#if sense_fields?.parts_of_speech?.length || can_edit}
   <div class="side-section" class:at-end={!sense_fields?.parts_of_speech?.length}>

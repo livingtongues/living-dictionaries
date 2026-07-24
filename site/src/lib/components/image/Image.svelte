@@ -7,12 +7,25 @@
   import IconTablerAi from '~icons/tabler/ai'
   import IconMdiClose from '~icons/mdi/close'
   import IconMdiArrowRight from '~icons/mdi/arrow-right'
+  import IconMdiChevronLeft from '~icons/mdi/chevron-left'
+  import IconMdiChevronRight from '~icons/mdi/chevron-right'
   import IconMdiTrashCanOutline from '~icons/mdi/trash-can-outline'
   import IconMdiCameraOutline from '~icons/mdi/camera-outline'
+
+  interface GalleryPhoto extends PhotoLike {
+    id?: string
+    source?: string | null
+    photographer?: string | null
+  }
 
   interface Props {
     title: string
     photo: PhotoLike
+    /**
+     * Full photo set for viewer navigation (prev/next + arrow keys). The thumb
+     * still renders `photo`; the viewer opens at its position in this array.
+     */
+    photos?: GalleryPhoto[]
     can_edit?: boolean
     square?: number
     width?: number
@@ -23,12 +36,14 @@
     href?: string
     /** Secondary line under the viewer title (e.g. the entry's gloss). */
     subtitle?: string
-    on_delete_image: () => Promise<any>
+    /** Receives the id of the photo currently shown in the viewer (single-photo callers can ignore it). */
+    on_delete_image: (photo_id?: string) => Promise<any>
   }
 
   const {
     title,
     photo,
+    photos = undefined,
     can_edit = false,
     square = undefined,
     width = undefined,
@@ -49,11 +64,25 @@
   let windowWidth: number = $state()
   let loading = $state(false)
   let viewing = $state(false)
+  let view_index = $state(0)
+
+  const gallery = $derived(photos && photos.length > 1 ? photos : null)
+  // Clamp against live deletes shrinking the array while the viewer is open.
+  const safe_index = $derived(gallery ? Math.min(view_index, gallery.length - 1) : 0)
+  const current = $derived(gallery ? gallery[safe_index] : photo)
+  const current_source = $derived(gallery ? gallery[safe_index]?.source : photo_source)
+  const current_photographer = $derived(gallery ? gallery[safe_index]?.photographer : photographer)
 
   const isDesktop = $derived(windowWidth >= 768)
-  const fullscreenSource = $derived(photo_src(photo, `w${isDesktop ? windowWidth - 24 : windowWidth}`))
+  const fullscreenSource = $derived(photo_src(current, `w${isDesktop ? windowWidth - 24 : windowWidth}`))
+
+  function step_gallery(delta: number) {
+    if (!gallery) return
+    view_index = (safe_index + delta + gallery.length) % gallery.length
+  }
 
   function load() {
+    view_index = gallery ? Math.max(0, gallery.indexOf(photo as GalleryPhoto)) : 0
     const timeout = setTimeout(() => (loading = true), 100)
     const img = new Image()
 
@@ -63,14 +92,17 @@
       viewing = true
     }
 
-    img.src = fullscreenSource
+    img.src = photo_src(photo, `w${isDesktop ? windowWidth - 24 : windowWidth}`)
   }
 </script>
 
 <svelte:window
   bind:innerWidth={windowWidth}
   onkeydown={(e) => {
+    if (!viewing) return
     if (e.key === 'Escape') viewing = false
+    else if (e.key === 'ArrowLeft') step_gallery(-1)
+    else if (e.key === 'ArrowRight') step_gallery(1)
   }} />
 
 <div class="image-wrap">
@@ -113,21 +145,32 @@
         {#if subtitle}
           <div class="viewer-subtitle">{subtitle}</div>
         {/if}
+        {#if gallery}
+          <div class="gallery-badge">{safe_index + 1} / {gallery.length}</div>
+        {/if}
       </div>
       <button type="button" class="viewer-button" aria-label={page.data.t('misc.cancel')} onclick={() => viewing = false}>
         <IconMdiClose style="font-size: 1.375rem" />
       </button>
     </div>
-    {#if photo_source || photographer || can_edit}
+    {#if gallery}
+      <button type="button" class="viewer-button gallery-nav prev" aria-label="Previous image" onclick={(e) => { e.stopPropagation(); step_gallery(-1) }}>
+        <IconMdiChevronLeft style="font-size: 1.625rem" />
+      </button>
+      <button type="button" class="viewer-button gallery-nav next" aria-label="Next image" onclick={(e) => { e.stopPropagation(); step_gallery(1) }}>
+        <IconMdiChevronRight style="font-size: 1.625rem" />
+      </button>
+    {/if}
+    {#if current_source || current_photographer || can_edit}
       <div class="viewer-footer" transition:fade={{ duration: 150 }}>
         <div class="credit" onclick={e => e.stopPropagation()}>
-          {#if photographer === 'AI'}
+          {#if current_photographer === 'AI'}
             <span class="ai-chip"><IconTablerAi style="font-size: 1.375rem" /> generated</span>
-          {:else if photographer}
-            <span class="credit-line"><IconMdiCameraOutline style="opacity: 0.7" /> {photographer}</span>
+          {:else if current_photographer}
+            <span class="credit-line"><IconMdiCameraOutline style="opacity: 0.7" /> {current_photographer}</span>
           {/if}
-          {#if photo_source}
-            <span class="credit-line source">{photo_source}</span>
+          {#if current_source}
+            <span class="credit-line source">{current_source}</span>
           {/if}
         </div>
         {#if can_edit}
@@ -137,7 +180,7 @@
             onclick={async (e) => {
               e.stopPropagation()
               if (confirm(page.data.t('entry.delete_image')))
-                await on_delete_image()
+                await on_delete_image(gallery ? gallery[safe_index]?.id : undefined)
             }}>
             <IconMdiTrashCanOutline style="font-size: 1.125rem" />
             {page.data.t('misc.delete')}
@@ -281,6 +324,39 @@
   .viewer-subtitle {
     font-size: 0.875rem;
     opacity: 0.8;
+  }
+
+  .gallery-badge {
+    display: inline-block;
+    margin-top: 0.375rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.15);
+    backdrop-filter: blur(4px);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+  }
+
+  .gallery-nav:active {
+    transform: translateY(-50%) scale(0.93);
+  }
+
+  .gallery-nav.prev {
+    left: 0.75rem;
+  }
+
+  .gallery-nav.next {
+    right: 0.75rem;
   }
 
   .viewer-button {

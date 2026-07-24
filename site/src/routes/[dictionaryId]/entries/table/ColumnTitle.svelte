@@ -22,7 +22,7 @@
     <IconIcOutlineImage style="font-size: 1.25rem; margin-left: auto; margin-right: auto" />
     {#if verbose}{page.data.t('entry.image')}{/if}
     <!-- {:else if column.field === 'checked'} ✓ -->
-  {:else if ['gloss', 'example_sentence', 'local_orthography'].includes(column.field)}
+  {:else if ['gloss', 'definition', 'example_sentence', 'local_orthography'].includes(column.field)}
     <span style="text-transform: capitalize" title={column.explanation}> {column.display || page.data.t(i18nKey)} </span>
   {:else}
     {page.data.t(i18nKey)}

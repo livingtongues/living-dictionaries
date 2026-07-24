@@ -6,18 +6,27 @@
   import Modal from '$lib/components/ui/Modal.svelte'
   import { page } from '$app/state'
   import AddImage from '$lib/components/image/AddImage.svelte'
+  import StagedImageThumb from '$lib/components/ui/StagedImageThumb.svelte'
+  import type { MediaUploadContext } from '$lib/media/add-media'
   import { add_photo } from '$lib/media/add-media'
+  import type { MediaUploadHandle } from '$lib/media/upload-media'
 
   interface Props {
     on_close: () => void
     sense_id: string
+    /** A file dropped onto a row before the modal opened — staged for upload once source + rights are given. */
+    initial_file?: File
+    context?: MediaUploadContext
   }
 
-  const { on_close, sense_id }: Props = $props()
+  const { on_close, sense_id, initial_file = undefined, context = 'entry' }: Props = $props()
   let photo_source: string = $state()
   let photographer: string = $state()
   let rights = $state(false)
   let ai_image = $state(false)
+  let staged_file: File | null = $state(initial_file ?? null)
+  let staged_handle: MediaUploadHandle | null = $state(null)
+  const staged_preview_url = $derived(staged_file ? URL.createObjectURL(staged_file) : null)
 
   function handle_image_upload(file: File) {
     const handle = add_photo({
@@ -27,6 +36,7 @@
       file,
       source: photo_source,
       photographer,
+      context,
     })
     handle.done.then(on_close).catch(() => undefined) // error renders in the upload tile
     return handle
@@ -87,11 +97,31 @@
 
   <div style="margin-bottom: 1.5rem"></div>
 
-  <AddImage upload_image={handle_image_upload} require_entry_fields>
-    <div style="font-size: 0.75rem; line-height: 1rem">
-      {page.data.t('entry_field.photo')}
+  {#if staged_file}
+    <div class="staged-row">
+      {#if staged_handle}
+        {#await import('$lib/components/image/UploadImageStatus.svelte') then { default: UploadImageStatus }}
+          <div style="display: flex; flex-direction: column; flex-grow: 1">
+            <UploadImageStatus handle={staged_handle} on_finish={() => { staged_handle = null; staged_file = null }} />
+          </div>
+        {/await}
+      {:else}
+        <StagedImageThumb src={staged_preview_url} alt={staged_file.name} on_remove={() => staged_file = null} />
+        <HeadlessButton
+          class="btn-primary btn-default"
+          disabled={!$apply_button_label.ready_to_upload}
+          onclick={() => staged_handle = handle_image_upload(staged_file)}>
+          {page.data.t('misc.upload')}
+        </HeadlessButton>
+      {/if}
     </div>
-  </AddImage>
+  {:else}
+    <AddImage upload_image={handle_image_upload} require_entry_fields>
+      <div style="font-size: 0.75rem; line-height: 1rem">
+        {page.data.t('entry_field.photo')}
+      </div>
+    </AddImage>
+  {/if}
 
   <div class="modal-footer">
     <HeadlessButton class="btn btn-default" onclick={on_close}>
@@ -131,5 +161,11 @@
   .counter {
     color: var(--color-secondary); /* ≈ gray-500 */
     margin-left: auto;
+  }
+
+  .staged-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 </style>

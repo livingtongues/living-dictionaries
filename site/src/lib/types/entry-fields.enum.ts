@@ -19,7 +19,7 @@ enum EntryFields {
   parts_of_speech = 'ps',
   semantic_domains = 'sdn',
   speaker = 'speaker',
-  definition_english = 'de', // only Bahasa Lani
+  definition = 'de',
   photo = 'pf',
   audio = 'sf',
   coordinates = 'co', // not known in i18n

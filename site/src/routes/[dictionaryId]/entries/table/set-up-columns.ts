@@ -6,7 +6,14 @@ import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
 import { browser } from '$app/environment'
 
 export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionaries'>): IColumn[] {
-  const cols = columns.filter(column => !column.hidden)
+  const columns_with_definition = [...columns]
+  if (!columns_with_definition.some(column => column.field === 'definition')) {
+    const gloss_index = columns_with_definition.findIndex(column => column.field === 'gloss')
+    const definition_index = gloss_index >= 0 ? gloss_index + 1 : columns_with_definition.length
+    columns_with_definition.splice(definition_index, 0, { field: 'definition', width: 300 })
+  }
+
+  const cols = columns_with_definition.filter(column => !column.hidden)
 
   const glossIndex = cols.findIndex(col => col.field === 'gloss')
   if (browser && glossIndex >= 0) {
@@ -23,6 +30,23 @@ export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionarie
       })
     })
     cols.splice(glossIndex, 1, ...glossColumns)
+  }
+
+  const definition_index = cols.findIndex(column => column.field === 'definition')
+  if (browser && definition_index >= 0) {
+    const { data } = page
+    const definition_columns: IColumn[] = []
+    dictionary.gloss_languages.forEach((bcp) => {
+      definition_columns.push({
+        field: 'definition',
+        bcp,
+        width: cols[definition_index].width,
+        sticky: cols[definition_index].sticky || false,
+        display: `${data?.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })} ${data?.t('entry_field.definition')}`,
+        explanation: vernacularName(bcp),
+      })
+    })
+    cols.splice(definition_index, 1, ...definition_columns)
   }
 
   const exampleSentenceIndex = cols.findIndex(col => col.field === 'example_sentence')

@@ -2,6 +2,7 @@ import type { IPrintFields } from '$lib/types'
 
 export const defaultPrintFields: IPrintFields = {
   gloss: true,
+  definition: true,
   local_orthography: true,
   phonetic: true,
   parts_of_speech: true,
