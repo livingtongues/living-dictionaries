@@ -19,48 +19,68 @@ function entries_store(entries: Record<string, any>) {
   return Object.assign(readable(entries), { loading: readable(false) })
 }
 
-const populated = entries_store({
-  e1: { id: 'e1', main: { lexeme: { default: 'atl' } }, senses: [{ glosses: { en: 'water' }, photos: [{ storage_path: 'images/a.jpg' }] }] },
-  e2: { id: 'e2', main: { lexeme: { default: 'tletl' } }, senses: [{ glosses: { en: 'fire' } }], audios: [{ storage_path: 'audio/b.mp3' }] },
-  e3: { id: 'e3', main: { lexeme: { default: 'tepetl' } }, senses: [{ glosses: { en: 'mountain' } }] },
-})
+function media_connection(rows_by_table: Record<string, number>) {
+  return {
+    query: async (sql: string) => {
+      const table = Object.keys(rows_by_table).find(name => sql.includes(`FROM ${name}`))
+      if (!table) return []
+      return Array.from({ length: rows_by_table[table] }, (_, index) => ({ storage_path: `demo/${table}/uuid-${index}.bin` }))
+    },
+  }
+}
 
-const without_media = entries_store({
+const populated = entries_store({
   e1: { id: 'e1', main: { lexeme: { default: 'atl' } }, senses: [{ glosses: { en: 'water' } }] },
   e2: { id: 'e2', main: { lexeme: { default: 'tletl' } }, senses: [{ glosses: { en: 'fire' } }] },
 })
 
 const shared_props = {
   dictionary,
-  url_from_storage_path: (path: string) => `https://lh3.example/${path}`,
+  url_from_storage_path: (path: string) => `https://media.livingdictionaries.app/${path}`,
   auth_user: { is_admin: false },
 } as never
 
 export const ManagerWithMedia: PageStory<typeof Component> = {
-  props: { ...(shared_props as object), is_manager: true, entries_data: populated } as never,
-}
-
-export const ManagerEmpty: PageStory<typeof Component> = {
-  props: { ...(shared_props as object), is_manager: true, entries_data: entries_store({}) } as never,
+  csr: true,
+  props: {
+    ...(shared_props as object),
+    is_manager: true,
+    entries_data: populated,
+    connection: media_connection({ photos: 3, audio: 12, videos: 1 }),
+  } as never,
 }
 
 export const ManagerWithoutMedia: PageStory<typeof Component> = {
-  props: { ...(shared_props as object), is_manager: true, entries_data: without_media } as never,
+  csr: true,
+  props: {
+    ...(shared_props as object),
+    is_manager: true,
+    entries_data: populated,
+    connection: media_connection({}),
+  } as never,
+}
+
+export const ManagerEmpty: PageStory<typeof Component> = {
+  csr: true,
+  props: {
+    ...(shared_props as object),
+    is_manager: true,
+    entries_data: entries_store({}),
+    connection: media_connection({}),
+  } as never,
 }
 
 export const NotManager: PageStory<typeof Component> = {
   props: { ...(shared_props as object), is_manager: false, entries_data: populated } as never,
 }
 
-export const ManagerImagesSelected: PageStory<typeof Component> = {
-  csr: true,
-  props: { ...(shared_props as object), is_manager: true, entries_data: populated } as never,
-  interactions: async (page) => {
-    await page.waitForSelector('input[type="checkbox"]')
-    await page.click('input[type="checkbox"]')
-  },
-}
-
 export const AdminManager: PageStory<typeof Component> = {
-  props: { ...(shared_props as object), auth_user: { is_admin: true }, is_manager: true, entries_data: populated } as never,
+  csr: true,
+  props: {
+    ...(shared_props as object),
+    auth_user: { is_admin: true },
+    is_manager: true,
+    entries_data: populated,
+    connection: media_connection({ photos: 3, audio: 12, videos: 1 }),
+  } as never,
 }

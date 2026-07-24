@@ -18,7 +18,7 @@ assessment posted 2026-07-24):
   (migration `20260724_log_daily_sessions_locales.sql`) → panels count TRUE
   unique visitors (visitor_id, session_id fallback pre-rollout).
 - Analytics cache is **stale-while-revalidate** (`get_log_analytics`): fresh <15min,
-  serve-stale + background refresh up to 48h, inline compute past that. Header
+  serve the last successful snapshot + background refresh at any age. Header
   shows "data computed X ago (cached; refreshes in the background)".
 - Panel ("Languages") rides the `usage` scope on /admin/analytics: browser
   preference (✳/amber = unsupported) vs language-in-use, plus the

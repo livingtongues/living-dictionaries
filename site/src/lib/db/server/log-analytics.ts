@@ -798,18 +798,15 @@ export type AnalyticsScope = 'light' | 'usage' | 'diagnostics' | 'full'
  * Memo of whole-window computes, served STALE-WHILE-REVALIDATE. better-sqlite3
  * blocks the event loop for the compute, and the operator visits far less often
  * than any sane TTL — so under the old expire-then-recompute model nearly every
- * human load paid the full compute (the "always slow" dashboard). Now an
- * expired entry (up to MAX_STALE) returns instantly and a background task
- * refreshes it for next time; the UI surfaces `generated_at` so the staleness
- * is visible, and month-trend reading tolerates days-old data fine. The
- * `pipeline` liveness panel is the one thing recomputed FRESH on every call (it
+ * human load paid the full compute (the "always slow" dashboard). Now the last
+ * successful entry returns instantly at any age and a background task refreshes
+ * it for next time; the UI surfaces `generated_at` so the staleness is visible.
+ * The `pipeline` liveness panel is the one thing recomputed FRESH on every call (it
  * answers "is ingest broken RIGHT NOW?" — a couple of indexed MAX lookups). Only
  * DEFAULT-arg calls are cached (a test injecting shared_db/now/… bypasses).
  */
 const analytics_cache = new Map<string, { at_ms: number, value: LogAnalytics }>()
 const ANALYTICS_CACHE_TTL_MS = 15 * 60_000
-/** Past this, a cached entry is too old even for trend-reading — recompute inline. */
-const ANALYTICS_CACHE_MAX_STALE_MS = 48 * 3_600_000
 const analytics_revalidating = new Set<string>()
 
 export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalytics {
@@ -826,7 +823,7 @@ export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalyti
   if (cacheable) {
     const hit = analytics_cache.get(cache_key)
     const age_ms = hit ? now.getTime() - hit.at_ms : Infinity
-    if (hit && age_ms < ANALYTICS_CACHE_MAX_STALE_MS) {
+    if (hit) {
       if (age_ms >= ANALYTICS_CACHE_TTL_MS)
         schedule_analytics_revalidation({ cache_key, days, audience, scope })
       return { ...hit.value, pipeline: build_pipeline_health({ shared_db, logs_db }) }
