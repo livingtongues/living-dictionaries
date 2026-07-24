@@ -186,6 +186,29 @@ describe(make_media_attach_handler, () => {
     expect(junction).toBeTruthy()
   })
 
+  test('photo→sense: HEIC bytes are 415-rejected with conversion instructions (no-HEIC bucket policy)', async () => {
+    const heic = new Uint8Array([0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63]) // ftyp heic
+    const err = await Promise.resolve(attach({ cell: 'photo:sense', params: { senseId: 's1' }, file: new File([heic], 'pic.heic', { type: 'image/heic' }) })).catch(caught => caught)
+    expect(err.status).toBe(415)
+    expect(err.body.message).toContain('Convert to JPEG')
+    expect(store_media_bytes).not.toHaveBeenCalled()
+  })
+
+  test('photo→sense: explicit latitude/longitude/taken_at are stored blunted to village level (2dp)', async () => {
+    const res = await attach({
+      cell: 'photo:sense',
+      params: { senseId: 's1' },
+      fields: { latitude: '19.318472', longitude: '-98.23751', taken_at: '2023-05-01T10:00:00Z' },
+      file: new File([JPEG_BYTES], 'pic.jpg', { type: 'image/jpeg' }),
+    })
+    const body = await res.json()
+    expect(body.photo.latitude).toBe(19.32)
+    expect(body.photo.longitude).toBe(-98.24)
+    expect(body.photo.taken_at).toBe('2023-05-01T10:00:00.000Z')
+    const row = dict_db.prepare(`SELECT latitude, longitude, taken_at FROM photos WHERE id = ?`).get(body.photo.id)
+    expect(row).toEqual({ latitude: 19.32, longitude: -98.24, taken_at: '2023-05-01T10:00:00.000Z' })
+  })
+
   test('video→sense: hosted_url (multipart, no file) is parsed to hosted_elsewhere', async () => {
     const res = await attach({ cell: 'video:sense', params: { senseId: 's1' }, fields: { hosted_url: 'https://www.youtube.com/watch?v=GrsknWZpr-k', source: 'field-2026' }, file: null })
     const body = await res.json()

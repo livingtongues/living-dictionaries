@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { sniff_bytes, validate_media_bytes } from './validate-media-bytes'
+import { HEIC_REJECTION_REASON, is_heic_bytes, sniff_bytes, validate_media_bytes } from './validate-media-bytes'
 
 function bytes(...values: number[]): Uint8Array {
   return new Uint8Array(values)
@@ -20,6 +20,9 @@ const MP3_SYNC = bytes(0xFF, 0xFB, 0x90, 0x00)
 const FLAC = ascii('fLaC', [0x00, 0x00, 0x00, 0x22])
 const MP4 = bytes(0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6F, 0x6D) // ftyp isom
 const M4A = bytes(0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70, 0x4D, 0x34, 0x41, 0x20) // ftyp M4A
+const HEIC = bytes(0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63) // ftyp heic
+const HEIF_MIF1 = bytes(0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x6D, 0x69, 0x66, 0x31) // ftyp mif1
+const AVIF = bytes(0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66) // ftyp avif
 const WEBM = bytes(0x1A, 0x45, 0xDF, 0xA3, 0, 0, 0, 0)
 const OGG = ascii('OggS', [0x00, 0x02, 0x00, 0x00])
 
@@ -42,6 +45,9 @@ describe(sniff_bytes, () => {
     expect(sniff_bytes(FLAC)).toEqual({ kind: 'media', category: 'audio' })
     expect(sniff_bytes(MP4)).toEqual({ kind: 'media', category: 'video' })
     expect(sniff_bytes(M4A)).toEqual({ kind: 'media', category: 'audio' })
+    expect(sniff_bytes(HEIC)).toEqual({ kind: 'media', category: 'image', container: 'HEIC' })
+    expect(sniff_bytes(HEIF_MIF1)).toEqual({ kind: 'media', category: 'image', container: 'HEIC' })
+    expect(sniff_bytes(AVIF)).toEqual({ kind: 'media', category: 'image' })
   })
 
   test('flags category-ambiguous containers as media, naming the container', () => {
@@ -96,6 +102,24 @@ describe(validate_media_bytes, () => {
   test('accepts real media served with a generic octet-stream content-type', () => {
     expect(validate_media_bytes({ category: 'audio', declared_type: 'application/octet-stream', bytes: MP3_SYNC })).toEqual({ ok: true })
     expect(validate_media_bytes({ category: 'audio', declared_type: null, bytes: FLAC })).toEqual({ ok: true })
+  })
+
+  // No-HEIC bucket policy: HEVC-encoded stills are rejected with an actionable
+  // fix-it reason (server libheif is unreliable on real iPhone files; browsers
+  // can't display HEIC). AVIF stays accepted — sharp decodes AV1 fine.
+  test('rejects HEIC with conversion instructions; accepts AVIF', () => {
+    const result = validate_media_bytes({ category: 'image', declared_type: 'image/heic', bytes: HEIC })
+    expect(result.ok).toBeFalsy()
+    expect(result.reason).toBe(HEIC_REJECTION_REASON)
+    expect(validate_media_bytes({ category: 'image', declared_type: 'application/octet-stream', bytes: HEIF_MIF1 }).ok).toBeFalsy()
+    expect(validate_media_bytes({ category: 'image', declared_type: 'image/avif', bytes: AVIF })).toEqual({ ok: true })
+  })
+
+  test(is_heic_bytes, () => {
+    expect(is_heic_bytes(HEIC)).toBeTruthy()
+    expect(is_heic_bytes(HEIF_MIF1)).toBeTruthy()
+    expect(is_heic_bytes(AVIF)).toBeFalsy()
+    expect(is_heic_bytes(JPEG)).toBeFalsy()
   })
 
   test('rejects empty bytes', () => {

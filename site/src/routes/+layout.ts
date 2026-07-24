@@ -1,7 +1,7 @@
 import type { LayoutLoad } from './$types'
 import { browser } from '$app/environment'
 import { PersistedState } from '$lib/state/persisted-state.svelte'
-import { getSupportedLocale } from '$lib/i18n/locales'
+import { get_supported_locale } from '$lib/i18n/locales'
 import { getTranslator } from '$lib/i18n'
 import { default_columns } from '$lib/utils/default-columns'
 import { get_auth_user } from '$lib/auth/user.svelte'
@@ -12,7 +12,7 @@ const table_columns_states = new Map<string, PersistedState<typeof default_colum
 
 export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLocale, ssr_user, user_latitude, user_longitude } }) => {
   const urlLocale = searchParams.get('lang')
-  const locale = getSupportedLocale(urlLocale || serverLocale) || 'en'
+  const locale = get_supported_locale(urlLocale || serverLocale) || 'en'
   const t = await getTranslator(locale)
 
   // Source of truth = the server's verified session cookie, surfaced as

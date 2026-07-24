@@ -372,6 +372,8 @@ export class Sync {
             delete (row as Record<string, unknown>).dirty
           else
             (row as { dirty: number | null }).dirty = null
+          if (table_name === 'dictionary_roles')
+            await this.#remove_clean_legacy_role_collision(row as SyncRow<'dictionary_roles'>)
           await this.#upsert_row(table_name, row)
         }
         affected_tables.add(table_name)
@@ -506,5 +508,19 @@ export class Sync {
        ON CONFLICT(${id_column}) DO UPDATE SET ${update_set}`,
       values,
     )
+  }
+
+  async #remove_clean_legacy_role_collision(row: SyncRow<'dictionary_roles'>) {
+    const collisions = await this.#connection.query<{ id: string, dirty: number | null }>(
+      `SELECT id, dirty
+       FROM dictionary_roles
+       WHERE dictionary_id = ? AND user_id = ? AND role = ? AND id <> ?`,
+      [row.dictionary_id, row.user_id, row.role, row.id],
+    )
+    for (const collision of collisions) {
+      if (collision.dirty === 1)
+        continue
+      await this.#connection.execute('DELETE FROM dictionary_roles WHERE id = ?', [collision.id])
+    }
   }
 }

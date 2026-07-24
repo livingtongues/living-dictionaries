@@ -104,7 +104,7 @@ describe(upload_media, () => {
     expect(form.get('photo_id')).toBe(PHOTO_ID)
     expect((form.get('file') as File).name).toBe('photo.jpg')
     xhr.finish(200, JSON.stringify({ storage_path: `demo/photo/${PHOTO_ID}.jpg` }))
-    await expect(handle.done).resolves.toEqual({ storage_path: `demo/photo/${PHOTO_ID}.jpg` })
+    await expect(handle.done).resolves.toEqual({ storage_path: `demo/photo/${PHOTO_ID}.jpg`, exif: { latitude: undefined, longitude: undefined, taken_at: undefined } })
     expect(mocked_api_upload).not.toHaveBeenCalled() // images skip the presign flow entirely
     expect(get(handle.progress).progress).toBe(100)
   })

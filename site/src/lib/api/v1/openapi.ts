@@ -6,7 +6,7 @@
  */
 
 import { DISCOURSE_ROLES, RELATIONSHIP_TYPES, SOURCE_TYPES } from '$lib/constants'
-import { partsOfSpeech } from '$lib/mappings/parts-of-speech'
+import { parts_of_speech } from '$lib/mappings/parts-of-speech'
 
 export function build_openapi_spec({ origin }: { origin: string }): Record<string, unknown> {
   const MultiString = {
@@ -93,7 +93,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       id: client_id_prop,
       glosses: { ...StringOrMultiString, description: 'Short glosses keyed by gloss-language code.' },
       definition: { ...StringOrMultiString, description: 'Longer definition(s).' },
-      parts_of_speech: { ...StringOrStringArray, description: `POS abbreviation(s). Send the abbreviation or its full English name — both are matched case-insensitively and stored as the canonical lowercase abbreviation ("N" / "Noun" → "n"). Values outside this list are stored verbatim, so only use custom values for genuinely language-specific categories. Supported: ${partsOfSpeech.map(({ enAbbrev, enName }) => `${enAbbrev} (${enName})`).join(', ')}.` },
+      parts_of_speech: { ...StringOrStringArray, description: `POS abbreviation(s). Send the abbreviation or its full English name — both are matched case-insensitively and stored as the canonical lowercase abbreviation ("N" / "Noun" → "n"). Values outside this list are stored verbatim, so only use custom values for genuinely language-specific categories. Supported: ${parts_of_speech.map(({ enAbbrev, enName }) => `${enAbbrev} (${enName})`).join(', ')}.` },
       semantic_domains: { ...StringOrStringArray, description: 'Semantic domain keys.' },
       write_in_semantic_domains: { ...StringOrStringArray, description: 'Free-text semantic domains.' },
       noun_class: { type: 'string' },
@@ -594,13 +594,16 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   }
   const PhotoMedia = {
     type: 'object',
-    description: 'A stored photo. Attaches to a sense or a sentence. `source` + `photographer` are the free-text attribution shown under the image (there is no separate caption field; unlike audio/video, a photo `source` is NOT a registry slug).',
+    description: 'A stored photo. Attaches to a sense or a sentence. `source` + `photographer` are the free-text attribution shown under the image (there is no separate caption field; unlike audio/video, a photo `source` is NOT a registry slug). HEIC/HEIF uploads are rejected with 415 — convert to JPEG/PNG/WebP first (e.g. `magick photo.heic photo.jpg`). EXIF GPS + capture time are read from the bytes automatically; coordinates are stored at village-level precision (2 decimals, ~1.1 km) for contributor privacy.',
     properties: {
       id: { type: 'string' },
       storage_path: { type: 'string' },
       serving_url: { type: 'string', description: 'lh3 image-serving hash (generated server-side).' },
       source: { type: 'string', nullable: true, description: 'Free-text attribution/caption prose.' },
       photographer: { type: 'string', nullable: true },
+      latitude: { type: 'number', nullable: true, description: 'EXIF GPS, blunted to 2 decimals (~1.1 km, village-level) on ingest.' },
+      longitude: { type: 'number', nullable: true, description: 'EXIF GPS, blunted to 2 decimals (~1.1 km, village-level) on ingest.' },
+      taken_at: { type: 'string', format: 'date-time', nullable: true, description: 'EXIF capture timestamp.' },
       created_at: { type: 'string', format: 'date-time' },
       updated_at: { type: 'string', format: 'date-time' },
     },
@@ -650,11 +653,13 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     json_required: ['url'],
     json_props: { url: url_prop, speaker_id: attributed_speaker_prop, source: attributed_source_prop, timings: audio_timings_json_prop, id: media_id_prop, replace: media_replace_prop },
   })
+  const photo_coord_prop = { type: 'number', description: 'Optional explicit GPS (overrides EXIF). Stored blunted to 2 decimals (~1.1 km, village-level) — finer precision is never kept.' }
+  const photo_taken_at_prop = { type: 'string', format: 'date-time', description: 'Optional explicit capture time (overrides EXIF).' }
   const photo_request_body = media_request_body({
     multipart_required: ['file'],
-    multipart_props: { file: file_prop, source: { type: 'string' }, photographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+    multipart_props: { file: file_prop, source: { type: 'string' }, photographer: { type: 'string' }, latitude: photo_coord_prop, longitude: photo_coord_prop, taken_at: photo_taken_at_prop, id: media_id_prop, replace: media_replace_prop },
     json_required: ['url'],
-    json_props: { url: url_prop, source: { type: 'string', description: 'Free-text attribution/description shown under the photo (NOT a registry slug).' }, photographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },
+    json_props: { url: url_prop, source: { type: 'string', description: 'Free-text attribution/description shown under the photo (NOT a registry slug).' }, photographer: { type: 'string' }, latitude: photo_coord_prop, longitude: photo_coord_prop, taken_at: photo_taken_at_prop, id: media_id_prop, replace: media_replace_prop },
   })
   const video_request_body = media_request_body({
     multipart_props: { file: file_prop, hosted_url: { type: 'string', description: 'A YouTube/Vimeo watch URL (parsed to `hosted_elsewhere`) — use instead of a file for hosted video.' }, speaker_id: attributed_speaker_prop, source: attributed_source_prop, videographer: { type: 'string' }, id: media_id_prop, replace: media_replace_prop },

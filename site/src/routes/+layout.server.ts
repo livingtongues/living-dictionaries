@@ -4,7 +4,7 @@ import { verify_jwt } from '$lib/auth/jwt'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { bump_last_visit } from '$lib/server/bump-last-visit'
 import { get_user } from '$lib/server/get-user'
-import { findSupportedLocaleFromAcceptedLanguages } from '$lib/i18n/locales'
+import { find_supported_locale_from_accepted_languages } from '$lib/i18n/locales'
 
 /**
  * Resolve the signed-in user from the httpOnly `session` JWT cookie so the
@@ -14,7 +14,7 @@ import { findSupportedLocaleFromAcceptedLanguages } from '$lib/i18n/locales'
  */
 export const load: LayoutServerLoad = async ({ cookies, request }) => {
   const chosenLocale = cookies.get('locale')
-  const acceptedLanguage = findSupportedLocaleFromAcceptedLanguages(request.headers.get('accept-language'))
+  const acceptedLanguage = find_supported_locale_from_accepted_languages(request.headers.get('accept-language'))
 
   const user_latitude = request.headers.get('cf-iplatitude')
   const user_longitude = request.headers.get('cf-iplongitude')

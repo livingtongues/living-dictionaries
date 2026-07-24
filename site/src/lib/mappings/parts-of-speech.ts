@@ -1,6 +1,6 @@
 import type { PartOfSpeech } from '$lib/types'
 
-export const partsOfSpeech: PartOfSpeech[] = [
+export const parts_of_speech: PartOfSpeech[] = [
   { enAbbrev: 'n', enName: 'noun' },
   { enAbbrev: 'n.f', enName: 'noun, feminine' },
   { enAbbrev: 'n.m', enName: 'noun, masculine' },
@@ -102,7 +102,7 @@ export const partsOfSpeech: PartOfSpeech[] = [
 ]
 
 const canonical_abbrev_lookup = new Map<string, string>()
-for (const { enAbbrev, enName } of partsOfSpeech) {
+for (const { enAbbrev, enName } of parts_of_speech) {
   canonical_abbrev_lookup.set(enAbbrev.toLowerCase(), enAbbrev)
   const name_lookup_key = enName.toLowerCase()
   if (!canonical_abbrev_lookup.has(name_lookup_key))
@@ -138,7 +138,7 @@ if (import.meta.vitest) {
   })
 }
 
-export const mayanPOS = [
+export const mayan_pos = [
   'sustantivo generalmente no poseido',
   'adverbio de tiempo',
   'sustantivo siempre poseido',
@@ -160,7 +160,7 @@ export const mayanPOS = [
   'derivación posicional',
 ]
 
-export const mayanDictionaries = [
+export const mayan_dictionaries = [
   'achi',
   'akateko',
   'chalchiteko',

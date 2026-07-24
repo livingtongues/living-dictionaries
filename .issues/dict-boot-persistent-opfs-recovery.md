@@ -38,3 +38,13 @@ The iPhone recovery was not acceptably bounded, however. It emitted **36 `dict_b
 - [x] Preserve correlation for worker boot telemetry created before root logger initialization: `get_session_id()` now creates the page-session id synchronously and `init_remote_logging()` retains it.
 - [x] Verify a real iOS viewer can recover from `sqlite3_open_v2`. ✅ `iipay-aa`, current build `1784732741243`, recovered at 17:49 UTC after the repeated replacement loop.
 - [x] Verify recovery on Android Chrome. ✅ `poqomchi`, current build `1784732741243`, recovered at 19:17 UTC after a stalled `opfs_open` boot.
+
+## 2026-07-23 production check (session bound held)
+
+Commit `1cd1caf6` fixed the cross-worker/page-session bound. The rolling 24-hour data contains 362
+`dict_boot_file_replaced` rows across 356 distinct sessions — crawler breadth, not yesterday's
+one-session replacement loop — and only six extra rows beyond one per session. The current build
+recorded one successful viewer recovery and no signed-in recovery exhaustion. Three anonymous Safari
+sessions exhausted (`nukuoro`, `kalinago`, `arayeke-taino`); the current-build `arayeke-taino` viewer
+is the only fresh one. Viewer recovery is now bounded and proven. The deferred editor write-ledger
+item remains the only open engineering branch.

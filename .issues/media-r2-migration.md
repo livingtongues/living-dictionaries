@@ -475,7 +475,10 @@ finish; they don't block the flip. All four sub-decisions locked with Jacob.
 ## Notes
 
 - CF admin token: Jacob provided in-session 2026-07-23 (cfut_…) — user-scoped, works on all three
-  accounts for R2 bucket admin + GraphQL analytics. NOT stored anywhere; ask Jacob if needed again.
+  accounts for R2 bucket admin + GraphQL analytics. 2026-07-24: scrubbed from ALL session
+  transcripts on mustang (Jacob's request). One deliberate copy remains at
+  `~/code/backpack/.secrets.local` (a backpack-DNS session stored it) — flagged to Jacob;
+  recommend rolling the token.
 - LD app R2 creds (`R2_ACCOUNT_ID/ACCESS_KEY_ID/SECRET_ACCESS_KEY` in living's
   `/opt/hosting/sveltekit/.env`) are account-wide Object R/W — can read/write all LD-account
   buckets incl. the future media bucket.
@@ -505,8 +508,17 @@ finish; they don't block the flip. All four sub-decisions locked with Jacob.
   ~3 min after a container restart when overdue).
 - ✅ **Post-flip sweep (step 7)**: re-ran both pull-manifests — photos 0 new old-convention rows;
   audio/video only the known dead 2019 test object (still `missing`). ZERO GCS-window uploads.
-- ⏳ **LD backup leg (step 8)** running in background (server-side rclone copy media →
-  livingdictionaries-backups/media, creds over SSH from living env).
+- ✅ **LD backup leg (step 8) COMPLETE**: server-side rclone copy media →
+  livingdictionaries-backups/media (creds over SSH from living env). Parity verified — source
+  234,150 obj / 41.011 GiB, backup 234,152 / 41.011 GiB (exact bytes; backup carries 2 extra
+  retained-after-source-delete objects by the add-only design). The first copy was killed near the
+  end (42 obj short); a resume filled the gap.
+- 🐞→✅ **Fixed a real production-script bug found doing step 8**: leg 4's `rclone copy` to the
+  lock-enabled backup bucket tries to REFRESH modtime on every already-present object on incremental
+  re-runs → `ObjectLockedByBucketPolicy` 409 × ~234k (a weekly ntfy "234142 errors" flood, backup
+  otherwise fine). Added **`--ignore-existing`** (keys are immutable uuids → skip by name; only new
+  keys transfer). Verified: re-run now "nothing to transfer", 0 errors, exit 0. This is part of the
+  UNCOMMITTED vps-setup changes.
 - ✅ **Step 9 (vps-setup, UNCOMMITTED — Jacob commits)**: dropped the living GCS leg from
   bin/backup-media (house-only loop now, SKIP_LIVING_MEDIA removed; mirror/gcs-living retained);
   updated .knowledge/operations/r2-backup-system.md + added the missing LD-R2-leg-4 section.

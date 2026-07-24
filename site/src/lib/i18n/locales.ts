@@ -55,14 +55,14 @@ export function get_locale_display_name(locale: string): string {
   return (Locales as Record<string, string>)[locale] || (UnpublishedLocales as Record<string, string>)[locale] || locale
 }
 
-export function findSupportedLocaleFromAcceptedLanguages(acceptedLanguageHeader: string | null) {
-  const locales = acceptedLanguageHeader
+export function find_supported_locale_from_accepted_languages(accepted_language_header: string | null) {
+  const locales = accepted_language_header
     ?.split(',')
     ?.map(lang => lang.split(';')[0].trim()) ?? []
   for (const locale of locales) {
-    const supportedLocale = getSupportedLocale(locale)
-    if (supportedLocale)
-      return supportedLocale
+    const supported_locale = get_supported_locale(locale)
+    if (supported_locale)
+      return supported_locale
   }
 }
 
@@ -86,12 +86,12 @@ const LOCALE_ALIASES: Record<string, LocaleCode> = {
   'zh-MO': 'zh-TW',
 }
 
-export function getSupportedLocale(userLocale: string | undefined): LocaleCode | undefined {
-  if (!userLocale)
+export function get_supported_locale(user_locale: string | undefined): LocaleCode | undefined {
+  if (!user_locale)
     return
-  if (Object.keys(Locales).includes(userLocale))
-    return userLocale as LocaleCode
-  return LOCALE_ALIASES[userLocale]
+  if (Object.keys(Locales).includes(user_locale))
+    return user_locale as LocaleCode
+  return LOCALE_ALIASES[user_locale]
 }
 
 if (import.meta.vitest) {
@@ -106,35 +106,35 @@ if (import.meta.vitest) {
     })
   })
 
-  describe(getSupportedLocale, () => {
+  describe(get_supported_locale, () => {
     test('exact matches return the code', () => {
-      expect(getSupportedLocale('en')).toBe('en')
-      expect(getSupportedLocale('zh-CN')).toBe('zh-CN')
-      expect(getSupportedLocale('zh-TW')).toBe('zh-TW')
+      expect(get_supported_locale('en')).toBe('en')
+      expect(get_supported_locale('zh-CN')).toBe('zh-CN')
+      expect(get_supported_locale('zh-TW')).toBe('zh-TW')
     })
     test('disambiguates the two Chinese scripts via aliases', () => {
-      expect(getSupportedLocale('zh')).toBe('zh-CN') // legacy cookie → Simplified
-      expect(getSupportedLocale('zh-Hans')).toBe('zh-CN')
-      expect(getSupportedLocale('zh-Hant')).toBe('zh-TW')
-      expect(getSupportedLocale('zh-HK')).toBe('zh-TW')
+      expect(get_supported_locale('zh')).toBe('zh-CN') // legacy cookie → Simplified
+      expect(get_supported_locale('zh-Hans')).toBe('zh-CN')
+      expect(get_supported_locale('zh-Hant')).toBe('zh-TW')
+      expect(get_supported_locale('zh-HK')).toBe('zh-TW')
     })
     test('regional English aliases resolve to en', () => {
-      expect(getSupportedLocale('en-GB')).toBe('en')
+      expect(get_supported_locale('en-GB')).toBe('en')
     })
     test('unsupported or empty input returns undefined', () => {
-      expect(getSupportedLocale('xx')).toBe(undefined)
-      expect(getSupportedLocale(undefined)).toBe(undefined)
-      expect(getSupportedLocale('')).toBe(undefined)
+      expect(get_supported_locale('xx')).toBe(undefined)
+      expect(get_supported_locale(undefined)).toBe(undefined)
+      expect(get_supported_locale('')).toBe(undefined)
     })
   })
 
-  describe(findSupportedLocaleFromAcceptedLanguages, () => {
+  describe(find_supported_locale_from_accepted_languages, () => {
     test('picks the first supported token, mapping variants', () => {
-      expect(findSupportedLocaleFromAcceptedLanguages('zh-Hant;q=0.9,en;q=0.8')).toBe('zh-TW')
-      expect(findSupportedLocaleFromAcceptedLanguages('fr-CA,fr;q=0.9')).toBe('fr')
+      expect(find_supported_locale_from_accepted_languages('zh-Hant;q=0.9,en;q=0.8')).toBe('zh-TW')
+      expect(find_supported_locale_from_accepted_languages('fr-CA,fr;q=0.9')).toBe('fr')
     })
     test('null header → undefined', () => {
-      expect(findSupportedLocaleFromAcceptedLanguages(null)).toBe(undefined)
+      expect(find_supported_locale_from_accepted_languages(null)).toBe(undefined)
     })
   })
 }

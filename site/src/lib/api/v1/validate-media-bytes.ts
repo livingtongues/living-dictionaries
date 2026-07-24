@@ -34,6 +34,19 @@ export interface MediaValidation {
   reason?: string
 }
 
+/**
+ * HEIC/HEIF is rejected everywhere (bucket policy: no HEIC — server libheif is
+ * unreliable on real iPhone HDR/Live-Photo files, and browsers can't display it).
+ * The reason tells the caller exactly how to fix and retry.
+ */
+export const HEIC_REJECTION_REASON = 'HEIC/HEIF images are not accepted. Convert to JPEG, PNG, or WebP first, then retry — e.g. macOS: `sips -s format jpeg photo.heic --out photo.jpg` · ImageMagick: `magick photo.heic photo.jpg` · libheif: `heif-convert photo.heic photo.jpg`.'
+
+/** True when the leading bytes are an HEVC-encoded HEIF still (Apple HEIC family). */
+export function is_heic_bytes(bytes: Uint8Array): boolean {
+  const sniff = sniff_media_magic(bytes)
+  return sniff?.container === 'HEIC'
+}
+
 function ascii_at(bytes: Uint8Array, offset: number, text: string): boolean {
   if (offset + text.length > bytes.length)
     return false
@@ -54,12 +67,19 @@ function bytes_at(bytes: Uint8Array, signature: number[]): boolean {
   return true
 }
 
-/** Resolve an ISO-BMFF (`ftyp`) major brand to a category. Defaults to video. */
-function ftyp_category(bytes: Uint8Array): MediaCategory {
+/** HEIF-family major brands (HEVC-encoded stills — Apple HEIC and friends). */
+const HEIF_BRANDS = ['heic', 'heix', 'heim', 'heis', 'hevc', 'hevm', 'hevs', 'mif1', 'msf1']
+
+/** Resolve an ISO-BMFF (`ftyp`) major brand to a sniff result. Defaults to video. */
+function ftyp_sniff(bytes: Uint8Array): SniffResult {
   const brand = String.fromCharCode(bytes[8] ?? 0, bytes[9] ?? 0, bytes[10] ?? 0, bytes[11] ?? 0).toLowerCase()
   if (brand.startsWith('m4a') || brand.startsWith('m4b') || brand.startsWith('f4a'))
-    return 'audio'
-  return 'video'
+    return { kind: 'media', category: 'audio' }
+  if (HEIF_BRANDS.includes(brand))
+    return { kind: 'media', category: 'image', container: 'HEIC' }
+  if (brand === 'avif' || brand === 'avis')
+    return { kind: 'media', category: 'image' } // AV1-coded — sharp decodes these fine
+  return { kind: 'media', category: 'video' }
 }
 
 /** Positively identify a known media container by magic bytes. */
@@ -95,9 +115,9 @@ export function sniff_media_magic(bytes: Uint8Array): SniffResult | null {
   // OGG can carry audio (Vorbis/Opus/FLAC) or video (Theora) — ambiguous.
   if (ascii_at(bytes, 0, 'OggS'))
     return { kind: 'media', container: 'Ogg' }
-  // ISO-BMFF (MP4 / MOV / M4A): 'ftyp' box at byte 4.
+  // ISO-BMFF (MP4 / MOV / M4A / HEIC / AVIF): 'ftyp' box at byte 4.
   if (ascii_at(bytes, 4, 'ftyp'))
-    return { kind: 'media', category: ftyp_category(bytes) }
+    return ftyp_sniff(bytes)
   // Matroska / WebM — ambiguous (usually video, can be audio-only).
   if (bytes_at(bytes, [0x1A, 0x45, 0xDF, 0xA3]))
     return { kind: 'media', container: 'Matroska/WebM' }
@@ -204,6 +224,9 @@ export function validate_media_bytes({ category, declared_type, bytes }: {
   }
   if (sniff.kind === 'media' && sniff.category && sniff.category !== category) {
     return { ok: false, reason: `The provided data is ${sniff.category}, but this endpoint expects ${category}.` }
+  }
+  if (category === 'image' && sniff.container === 'HEIC') {
+    return { ok: false, reason: HEIC_REJECTION_REASON }
   }
   // A category-AMBIGUOUS media container (Ogg / Matroska-WebM / bare RIFF) is
   // always audio-or-video, never an image — so it must NOT pass the image

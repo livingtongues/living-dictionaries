@@ -746,6 +746,8 @@ interface LogAnalyticsOptions {
    *   adoption / storage / boot_health / uptime).
    */
   scope?: AnalyticsScope
+  /** Called once after a whole analytics calculation; cache hits do not call it. */
+  on_computed?: (timing: { duration_ms: number }) => void
 }
 
 /** Panel-compute scope — see `LogAnalyticsOptions.scope`. */
@@ -779,7 +781,9 @@ export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalyti
     if (hit && now.getTime() - hit.at_ms < ANALYTICS_CACHE_TTL_MS)
       return { ...hit.value, pipeline: build_pipeline_health({ shared_db, logs_db }) }
   }
+  const compute_started_at = performance.now()
   const value = compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope })
+  options.on_computed?.({ duration_ms: Math.round(performance.now() - compute_started_at) })
   if (cacheable)
     analytics_cache.set(cache_key, { at_ms: now.getTime(), value })
   return value
@@ -822,7 +826,7 @@ const EMPTY_MISSING_I18N: LogAnalytics['missing_i18n_keys'] = { total: 0, distin
 const EMPTY_EVENT_COVERAGE: LogAnalytics['event_coverage'] = { events: [], never_emitted: 0 }
 const EMPTY_GEO_LATENCY: { ttfb_by_country: GeoLatency[], ttfb_by_distance: GeoLatency[], lcp_by_country: GeoLatency[], lcp_by_distance: GeoLatency[] } = { ttfb_by_country: [], ttfb_by_distance: [], lcp_by_country: [], lcp_by_distance: [] }
 
-function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope }: Required<Omit<LogAnalyticsOptions, 'current_app_version'>> & { current_app_version: string | null }): LogAnalytics {
+function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope }: Required<Omit<LogAnalyticsOptions, 'current_app_version' | 'on_computed'>> & { current_app_version: string | null }): LogAnalytics {
   // Which heavy, cleanly-independent builders to run this compute (the shared
   // core always runs). `light` = neither; each page's tier requests its own half.
   const want_usage = scope === 'usage' || scope === 'full'

@@ -5,7 +5,9 @@
   import type { Tables } from '$lib/types'
   import { page } from '$app/state'
   import { SOURCE_TYPES } from '$lib/constants'
+  import { log_warning } from '$lib/debug/remote-log'
   import { slugify } from '$lib/utils/slugify'
+  import { commit_source, find_existing_source } from './source-save'
 
   interface Props {
     /** Existing source to edit, or `null`/undefined to create a new one. */
@@ -15,10 +17,12 @@
   }
 
   const { source = null, on_close, on_saved }: Props = $props()
-  const { writes } = $derived(page.data)
-  const is_edit = !!source?.id
+  const { writes, dictionary } = $derived(page.data)
+  const sources = $derived(page.data.sources)
+  const is_edit = $derived(!!source?.id)
 
   // Seed once from the prop — this modal is freshly mounted for each open.
+  // svelte-ignore state_referenced_locally
   const seed: Partial<Tables<'sources'>> = source ?? {}
   let slug = $state(seed.slug ?? '')
   let slug_touched = $state(!!seed.slug)
@@ -30,6 +34,13 @@
   let license = $state(seed.license ?? '')
   let type = $state<SourceType | ''>(seed.type ?? '')
   let saving = $state(false)
+  let failure_message = $state('')
+  const clean_slug = $derived(slugify(slug))
+  const existing_source = $derived(find_existing_source({
+    sources: $sources ?? [],
+    slug: clean_slug,
+    source_id: source?.id,
+  }))
 
   // Auto-fill the slug from the abbreviation (fallback citation) until the user edits it directly.
   $effect(() => {
@@ -38,12 +49,19 @@
   })
 
   async function save() {
-    const clean_slug = slugify(slug)
     if (!clean_slug) {
-      alert(page.data.t({ dynamicKey: 'source.slug_required', fallback: 'A slug is required (add an abbreviation or citation).' }))
+      failure_message = page.data.t({ dynamicKey: 'source.slug_required', fallback: 'A slug is required (add an abbreviation or citation).' })
+      return
+    }
+    if (existing_source) {
+      failure_message = page.data.t({
+        dynamicKey: 'source.slug_exists',
+        fallback: `A source already uses “${clean_slug}”. Use that source or choose a different slug.`,
+      })
       return
     }
     saving = true
+    failure_message = ''
     const fields = {
       slug: clean_slug,
       citation: citation.trim() || null,
@@ -54,12 +72,36 @@
       license: license.trim() || null,
       type: type || null,
     }
-    if (is_edit)
-      await writes.update_source({ id: source.id, ...fields })
-    else
-      await writes.insert_source(fields)
+    const result = await commit_source({
+      write: () => is_edit
+        ? writes.update_source({ id: source.id, ...fields })
+        : writes.insert_source(fields),
+      slug: clean_slug,
+      on_saved,
+      on_close,
+    })
+    if ('failure_kind' in result) {
+      const { failure_kind } = result
+      failure_message = failure_kind === 'duplicate_slug'
+        ? page.data.t({ dynamicKey: 'source.slug_exists', fallback: `A source already uses “${clean_slug}”. Use that source or choose a different slug.` })
+        : page.data.t({ dynamicKey: 'source.save_failed', fallback: 'The source could not be saved. Your edits are still here; please try again.' })
+      log_warning({
+        message: 'source_save_failed',
+        context: {
+          dictionary_id: dictionary?.id ?? null,
+          operation: is_edit ? 'update' : 'create',
+          failure_kind,
+          slug: clean_slug,
+        },
+      })
+    }
     saving = false
-    on_saved?.({ slug: clean_slug })
+  }
+
+  function reuse_existing_source() {
+    if (!existing_source || !on_saved)
+      return
+    on_saved({ slug: existing_source.slug })
     on_close()
   }
 </script>
@@ -116,9 +158,28 @@
     {#if !is_edit}
       <label>
         <span>{page.data.t({ dynamicKey: 'source.slug', fallback: 'Slug (stable id)' })}</span>
-        <input bind:value={slug} oninput={() => (slug_touched = true)} placeholder="smith-2020" />
+        <input
+          bind:value={slug}
+          aria-invalid={existing_source ? 'true' : undefined}
+          oninput={() => { slug_touched = true; failure_message = '' }}
+          placeholder="smith-2020" />
         <small>{page.data.t({ dynamicKey: 'source.slug_hint', fallback: 'Referenced by entries.' })}</small>
       </label>
+    {/if}
+
+    {#if failure_message || existing_source}
+      <div class="save-error" role="alert">
+        <span>{failure_message || page.data.t({ dynamicKey: 'source.slug_exists', fallback: `A source already uses “${clean_slug}”. Use that source or choose a different slug.` })}</span>
+        {#if existing_source && on_saved}
+          <button type="button" onclick={reuse_existing_source}>
+            {page.data.t({ dynamicKey: 'source.use_existing', fallback: `Use ${existing_source.abbreviation || existing_source.citation || existing_source.slug}` })}
+          </button>
+        {:else if existing_source}
+          <a href={`/${dictionary?.id}/sources`}>
+            {page.data.t({ dynamicKey: 'source.view_existing', fallback: 'View the existing source' })}
+          </a>
+        {/if}
+      </div>
     {/if}
 
     <div class="modal-footer">
@@ -153,5 +214,22 @@
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
+  }
+  .save-error {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.375rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+    color: var(--danger);
+    font-size: 0.875rem;
+  }
+  .save-error button,
+  .save-error a {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
   }
 </style>

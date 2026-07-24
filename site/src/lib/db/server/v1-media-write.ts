@@ -67,6 +67,11 @@ export interface MediaFieldInput {
   hosted_metadata?: HostedMetadata | null
   /** Audio: sentence id → compact word-timing string (see `MediaTimings`). */
   timings?: MediaTimings | null
+  /** Photos: EXIF GPS, ALREADY blunted to village level (2dp) by the route. */
+  latitude?: number | null
+  longitude?: number | null
+  /** Photos: EXIF capture timestamp (ISO 8601). */
+  taken_at?: string | null
 }
 
 export interface MediaRecord {
@@ -85,6 +90,10 @@ export interface MediaRecord {
   sentence_id?: string | null
   text_id?: string | null
   speakers?: { id: string, name: string }[]
+  /** Photos: EXIF-derived, village-level (2dp). */
+  latitude?: number | null
+  longitude?: number | null
+  taken_at?: string | null
   created_at: string
   updated_at: string
 }
@@ -111,7 +120,7 @@ function build_media_columns(cell: MediaCellConfig, fields: MediaFieldInput): Re
   if (cell.medium === 'audio')
     return { storage_path: fields.storage_path, source: fields.source ?? null, timings: fields.timings ?? null }
   if (cell.medium === 'photo')
-    return { storage_path: fields.storage_path, serving_url: fields.serving_url, source: fields.source ?? null, photographer: fields.photographer ?? null }
+    return { storage_path: fields.storage_path, serving_url: fields.serving_url, source: fields.source ?? null, photographer: fields.photographer ?? null, latitude: fields.latitude ?? null, longitude: fields.longitude ?? null, taken_at: fields.taken_at ?? null }
   // video
   return { storage_path: fields.storage_path ?? null, hosted_elsewhere: fields.hosted_elsewhere ?? null, hosted_metadata: fields.hosted_metadata ?? null, source: fields.source ?? null, videographer: fields.videographer ?? null }
 }
@@ -155,6 +164,9 @@ export function read_media_record({ db, cell_key, media_id }: { db: Database.Dat
     record.serving_url = row.serving_url
     record.source = row.source ?? null
     record.photographer = row.photographer ?? null
+    record.latitude = row.latitude ?? null
+    record.longitude = row.longitude ?? null
+    record.taken_at = row.taken_at ?? null
   } else {
     record.storage_path = row.storage_path ?? null
     record.hosted_elsewhere = (row.hosted_elsewhere as HostedVideo) ?? null

@@ -36,9 +36,22 @@ export function add_photo({ writes, dictionary_id, sense_id, file, source, photo
   // Row uuid is minted BEFORE upload — the R2 object is keyed by it (`{dict}/photo/{id}.{ext}`).
   const media_id = crypto.randomUUID()
   const handle = upload_media({ file, dictionary_id, kind: 'image', media_id })
-  const done = handle.done.then(async ({ storage_path }) => {
+  const done = handle.done.then(async ({ storage_path, exif }) => {
     // serving_url is '' on the R2 convention — `photo_src` derives urls from storage_path.
-    const inserted = await writes.insert_photo({ photo: { id: media_id, storage_path, serving_url: '', source, photographer }, sense_id })
+    // EXIF coords arrive pre-blunted to village level (2dp); absent = null.
+    const inserted = await writes.insert_photo({
+      photo: {
+        id: media_id,
+        storage_path,
+        serving_url: '',
+        source,
+        photographer,
+        latitude: exif?.latitude ?? null,
+        longitude: exif?.longitude ?? null,
+        taken_at: exif?.taken_at ?? null,
+      },
+      sense_id,
+    })
     if (!inserted)
       throw new Error('The photo was uploaded but could not be saved — please try again.')
     return { storage_path }

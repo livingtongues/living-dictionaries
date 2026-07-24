@@ -2,7 +2,7 @@ import type { DictionaryCoordinates } from './shared.types'
 import type { HostedElsewhere, HostedMetadata, MediaTimings, MultiString, SentenceTokens, SourceCitation } from './dictionary.types'
 import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
 import { DISCOURSE_ROLES, SOURCE_TYPES, TAG_KINDS } from '$lib/constants'
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 /**
  * Drizzle schema for `dictionaries/{id}.db`. One file per dictionary; all
@@ -269,6 +269,11 @@ export const photos = sqliteTable('photos', {
   /** Free-text caption/attribution prose shown under the photo — NOT a registry ref (unlike audio/videos.source). */
   source: text(),
   photographer: text(),
+  /** EXIF GPS, blunted to 2 decimals (~1.1km, village-level) on ingest — finer precision never reaches the DB. */
+  latitude: real(),
+  longitude: real(),
+  /** EXIF capture timestamp (ISO 8601). */
+  taken_at: text(),
   dirty: integer(),
   server_seq: integer(),
   created_by_user_id: text().notNull(),

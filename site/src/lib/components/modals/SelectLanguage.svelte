@@ -6,7 +6,7 @@
   import Modal from '$lib/components/ui/Modal.svelte'
   import LoginModal from '$lib/components/LoginModal.svelte'
   import { page } from '$app/state'
-  import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/change-locale'
+  import { change_locale, locales, unpublished_locales } from '$lib/i18n/change-locale'
   import { api_contact } from '$api/contact/_call'
   import { toast } from '$lib/state/toast.svelte'
 
@@ -79,15 +79,15 @@
     {#each locales as [bcp, name] (bcp)}
       <HeadlessButton
         class="{locale.includes(bcp) ? 'btn-primary' : 'btn-ghost'} btn-default locale-pill"
-        onclick={() => changeLocale(bcp)}>
+        onclick={() => change_locale(bcp)}>
         {name}
       </HeadlessButton>
     {/each}
     {#if auth_user.is_admin}
-      {#each unpublishedLocales as [bcp, name] (bcp)}
+      {#each unpublished_locales as [bcp, name] (bcp)}
         <HeadlessButton
           class="{locale.includes(bcp) ? 'btn-primary' : 'btn-ghost'} btn-default locale-pill"
-          onclick={() => changeLocale(bcp)}>
+          onclick={() => change_locale(bcp)}>
           {name}
           <IconKey />
         </HeadlessButton>

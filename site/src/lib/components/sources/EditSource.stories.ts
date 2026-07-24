@@ -14,8 +14,8 @@ const writes = {
 }
 
 export const shared_meta: StoryMeta = {
-  viewports: [{ width: 640, height: 720 }],
-  page_data: { t, writes },
+  viewports: [{ width: 640, height: 900 }],
+  page_data: { t, writes, sources: { subscribe: (run: (sources: unknown[]) => void) => { run([]); return () => {} } }, dictionary: { id: 'demo' } },
 }
 
 export const Create: Story<typeof Component> = {
@@ -44,5 +44,25 @@ export const Edit: Story<typeof Component> = {
       license: '',
       type: 'dictionary',
     } as any,
+  },
+}
+
+export const DuplicateSlug: Story<typeof Component> = {
+  csr: true,
+  page_data: {
+    t,
+    writes,
+    dictionary: { id: 'demo' },
+    sources: {
+      subscribe: (run: (sources: unknown[]) => void) => {
+        run([{ id: 'existing-source', slug: 'smith-2020', abbreviation: 'Smith 2020' }])
+        return () => {}
+      },
+    },
+  },
+  props: {
+    source: { abbreviation: 'Smith 2020' } as any,
+    on_close: () => {},
+    on_saved: () => {},
   },
 }

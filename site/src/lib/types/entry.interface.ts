@@ -2,7 +2,7 @@ import type { Tables } from './db'
 
 type EntryDataSense = Pick<Tables<'senses'>, 'id' | 'updated_at' | 'created_at' | 'definition' | 'glosses' | 'noun_class' | 'parts_of_speech' | 'plural_form' | 'semantic_domains' | 'sources' | 'variant' | 'write_in_semantic_domains'> & {
   sentences?: Pick<Tables<'sentences'>, 'id' | 'updated_at' | 'text' | 'translation' | 'text_id'>[]
-  photos?: Pick<Tables<'photos'>, 'id' | 'updated_at' | 'photographer' | 'storage_path' | 'serving_url' | 'source'>[]
+  photos?: Pick<Tables<'photos'>, 'id' | 'updated_at' | 'photographer' | 'storage_path' | 'serving_url' | 'source' | 'latitude' | 'longitude' | 'taken_at'>[]
   videos?: Pick<Tables<'videos'>, 'id' | 'updated_at' | 'hosted_elsewhere' | 'hosted_metadata' | 'source' | 'storage_path' | 'videographer'>[]
 }
 

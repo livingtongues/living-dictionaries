@@ -17,6 +17,8 @@ import { store_photo_variants_in_background } from '$lib/server/photo-variants'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 import { build_r2_media_key, extract_media_extension } from '$lib/utils/media-path'
+import { extract_photo_exif } from '$lib/server/photo-exif'
+import { normalize_photo_exif } from '$lib/media/photo-coords'
 import { parse_media_request } from './media-request'
 import { validate_media_bytes } from './validate-media-bytes'
 import { fetch_hosted_video_metadata } from '$lib/video/hosted-video-metadata'
@@ -36,6 +38,16 @@ function str(value: unknown): string | undefined {
 
 function truthy(value: unknown): boolean {
   return value === true || value === 'true'
+}
+
+function num(value: unknown): number | null {
+  if (typeof value === 'number')
+    return Number.isFinite(value) ? value : null
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  return null
 }
 
 /** Owner label for error messages (e.g. `audio:entry` → `entry`). */
@@ -260,6 +272,17 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
         // R2 convention: no lh3 serving_url — rendering derives urls from
         // storage_path; WebP variants are generated after the response.
         media_fields.serving_url = ''
+        // EXIF GPS + capture time: explicit request fields win over a read of
+        // the bytes; either way coordinates are blunted to village level (2dp).
+        const explicit = normalize_photo_exif({
+          latitude: num(fields.latitude),
+          longitude: num(fields.longitude),
+          taken_at: str(fields.taken_at) ?? null,
+        })
+        const exif = { ...await extract_photo_exif(parsed.bytes), ...explicit }
+        media_fields.latitude = exif.latitude ?? null
+        media_fields.longitude = exif.longitude ?? null
+        media_fields.taken_at = exif.taken_at ?? null
         store_photo_variants_in_background({ original_key: stored.storage_path, bytes: parsed.bytes })
       }
     }

@@ -42,7 +42,7 @@ export const POST: RequestHandler = async ({ request }) => {
   }
 
   const allowed_arn = env.SES_SNS_TOPIC_ARN
-  if (allowed_arn && envelope.TopicArn && envelope.TopicArn !== allowed_arn)
+  if (allowed_arn && envelope.TopicArn !== allowed_arn)
     return new Response('forbidden topic', { status: ResponseCodes.FORBIDDEN })
 
   if (envelope.Type === 'SubscriptionConfirmation') {

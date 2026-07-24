@@ -87,6 +87,29 @@ afterEach(() => {
 })
 
 describe('dictionary_roles duplicate-grant convergence (adopt-canonical)', () => {
+  test('a full resync replaces a clean legacy duplicate with the canonical server role', async () => {
+    insert_role({ db: server_db, id: 'role-canon', updated_at: T1 })
+    insert_role({ db: client_db, id: 'role-legacy', updated_at: T0 })
+    client_db.prepare(
+      `INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at)
+       VALUES ('role-legitimate-manager', 'd1', 'u1', 'manager', ?, ?)`,
+    ).run(T0, T0)
+    server_db.prepare(
+      `INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at)
+       VALUES ('role-legitimate-manager', 'd1', 'u1', 'manager', ?, ?)`,
+    ).run(T0, T0)
+
+    const result = await make_engine().sync()
+
+    expect(result?.success).toBeTruthy()
+    expect(client_db.prepare(
+      `SELECT id, role FROM dictionary_roles WHERE dictionary_id = 'd1' AND user_id = 'u1' ORDER BY role`,
+    ).all()).toEqual([
+      { id: 'role-canon', role: 'contributor' },
+      { id: 'role-legitimate-manager', role: 'manager' },
+    ])
+  })
+
   test('a client whose fresh-minted grant already exists server-side converges instead of wedging', async () => {
     insert_role({ db: server_db, id: 'role-canon', updated_at: T0 })
     insert_role({ db: client_db, id: 'role-loser', dirty: true, updated_at: T1 })

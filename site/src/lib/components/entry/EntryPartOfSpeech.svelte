@@ -2,7 +2,7 @@
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
   import { page } from '$app/state'
-  import { mayanDictionaries, mayanPOS, partsOfSpeech } from '$lib/mappings/parts-of-speech'
+  import { mayan_dictionaries, mayan_pos, parts_of_speech } from '$lib/mappings/parts-of-speech'
 
   interface Props {
     value?: string[]
@@ -20,19 +20,19 @@
     on_update,
   }: Props = $props()
 
-  const parts_of_speech_options = $derived(partsOfSpeech.map(part => ({
+  const parts_of_speech_options = $derived(parts_of_speech.map(part => ({
     value: part.enAbbrev,
     name: page.data.t({ dynamicKey: `ps.${part.enAbbrev}`, fallback: part.enName }),
   })) satisfies SelectOption[])
 
-  const mayan_pos_options: SelectOption[] = mayanPOS.map((pos) => {
+  const mayan_pos_options: SelectOption[] = mayan_pos.map((pos) => {
     return {
       value: pos,
       name: pos,
     }
   })
 
-  const options = $derived(mayanDictionaries.includes(dictionaryId)
+  const options = $derived(mayan_dictionaries.includes(dictionaryId)
     ? [...parts_of_speech_options, ...mayan_pos_options]
     : parts_of_speech_options)
 </script>

@@ -35,7 +35,7 @@ describe(add_photo, () => {
     expect(mocked_upload_media).toHaveBeenCalledWith(expect.objectContaining({ dictionary_id: 'demo', kind: 'image', media_id: expect.stringMatching(/^[0-9a-f-]{36}$/) }))
     const minted_id = mocked_upload_media.mock.calls[0][0].media_id
     expect(insert_photo).toHaveBeenCalledWith({
-      photo: { id: minted_id, storage_path: 'demo/photo/x.jpg', serving_url: '', source: 'my source', photographer: 'Ana' },
+      photo: { id: minted_id, storage_path: 'demo/photo/x.jpg', serving_url: '', source: 'my source', photographer: 'Ana', latitude: null, longitude: null, taken_at: null },
       sense_id: 's1',
     })
   })

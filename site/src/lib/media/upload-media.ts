@@ -1,8 +1,10 @@
 import { writable } from 'svelte/store'
 import type { Readable } from 'svelte/store'
 import type { PhotoUploadResponseBody } from '../../routes/api/photo-upload/+server'
+import type { PhotoExif } from './photo-coords'
 import { api_upload } from '$api/upload/_call'
 import { log_event } from '$lib/debug/remote-log'
+import { prepare_image_upload } from './prepare-image-upload'
 
 export type MediaKind = 'image' | 'audio' | 'video'
 
@@ -15,6 +17,8 @@ export interface MediaUploadProgress {
 
 export interface MediaUploadResult {
   storage_path: string
+  /** Images only — EXIF-derived, blunted to village level (2dp) server-side. */
+  exif?: PhotoExif
 }
 
 export interface MediaUploadHandle {
@@ -52,15 +56,24 @@ export function upload_media({ file, dictionary_id, kind, media_id }: {
 
     if (kind === 'image') {
       stage = 'upload'
+      // HEIC → JPEG (Safari decodes natively) + EXIF GPS/date read from the
+      // ORIGINAL before conversion strips it. Never blocks the upload on failure.
+      const prepared = await prepare_image_upload(file).catch(() => ({ file, exif: {} as PhotoExif }))
       const form = new FormData()
       form.set('dictionary_id', dictionary_id)
       form.set('photo_id', media_id)
-      form.set('file', file instanceof File ? file : new File([file], derive_file_name({ file, kind })))
+      form.set('file', prepared.file instanceof File ? prepared.file : new File([prepared.file], derive_file_name({ file: prepared.file, kind })))
+      if (prepared.exif.latitude !== undefined) {
+        form.set('latitude', String(prepared.exif.latitude))
+        form.set('longitude', String(prepared.exif.longitude))
+      }
+      if (prepared.exif.taken_at)
+        form.set('taken_at', prepared.exif.taken_at)
       xhr = new XMLHttpRequest()
       const response = await send_xhr({ xhr, method: 'POST', url: '/api/photo-upload', body: form, on_progress })
-      const { storage_path } = JSON.parse(response) as PhotoUploadResponseBody
+      const { storage_path, latitude, longitude, taken_at } = JSON.parse(response) as PhotoUploadResponseBody
       set({ progress: 100, preview_url })
-      return { storage_path }
+      return { storage_path, exif: { latitude, longitude, taken_at } }
     }
 
     // `api_upload` returns `{ data: null, error }` on failure — guard before touching `data`
