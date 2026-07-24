@@ -56,7 +56,11 @@ export const ManagerImagesSelected: PageStory<typeof Component> = {
   csr: true,
   props: { ...(shared_props as object), is_manager: true, entries_data: populated } as never,
   interactions: async (page) => {
-    await page.waitForSelector('#images')
-    await page.click('#images')
+    await page.waitForSelector('input[type="checkbox"]')
+    await page.click('input[type="checkbox"]')
   },
+}
+
+export const AdminManager: PageStory<typeof Component> = {
+  props: { ...(shared_props as object), auth_user: { is_admin: true }, is_manager: true, entries_data: populated } as never,
 }

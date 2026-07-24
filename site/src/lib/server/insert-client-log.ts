@@ -54,6 +54,7 @@ export function insert_client_log({
   user_id,
   source = 'client',
   geo = EMPTY_GEO,
+  browser_locale = null,
   db = get_logs_db(),
   now = new Date(),
 }: {
@@ -63,6 +64,8 @@ export function insert_client_log({
   source?: 'client' | 'server'
   /** Approximate location from CF edge headers (server-side). All-null for server telemetry / dev. */
   geo?: RequestGeo
+  /** Primary `Accept-Language` tag (server-side, like geo) — null when absent/garbage. */
+  browser_locale?: string | null
   db?: Database.Database
   now?: Date
 }): boolean {
@@ -92,8 +95,8 @@ export function insert_client_log({
       INSERT INTO client_logs (
         id, received_at, client_time, user_id, level, message, stack,
         url, user_agent, platform, app_version, build_target, context, source,
-        session_id, visitor_id, country, region, city, latitude, longitude
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        session_id, visitor_id, browser_locale, country, region, city, latitude, longitude
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       received_at,
@@ -111,6 +114,7 @@ export function insert_client_log({
       source,
       session_id,
       visitor_id,
+      browser_locale,
       geo.country,
       geo.region,
       geo.city,

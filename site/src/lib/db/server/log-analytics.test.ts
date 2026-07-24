@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import process from 'node:process'
 import { insert_client_log } from '$lib/server/insert-client-log'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
-import { build_host_stats, get_log_analytics } from './log-analytics'
+import { build_host_stats, fold_locale, get_log_analytics } from './log-analytics'
 import { _reset_log_archive_db_for_tests, open_log_archive_db } from './log-archive-db'
 import { open_logs_db } from './logs-db'
 import { open_test_shared_db } from './shared-db'
@@ -28,7 +28,7 @@ afterEach(() => {
   logs_db.close()
 })
 
-function add_log({ day, level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, user_agent = null, app_version = null, stack = null, geo, target_db = logs_db }: {
+function add_log({ day, level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, user_agent = null, app_version = null, stack = null, geo, browser_locale = null, target_db = logs_db }: {
   day: string
   level?: 'error' | 'warn' | 'info' | 'unhandled_rejection' | 'crash'
   message?: string
@@ -39,9 +39,10 @@ function add_log({ day, level = 'info', message = 'heartbeat', source = 'client'
   app_version?: string | null
   stack?: string | null
   geo?: RequestGeo
+  browser_locale?: string | null
   target_db?: Database.Database
 }): void {
-  insert_client_log({ payload: { level, message, context, user_agent, app_version, stack }, user_id, source, ...(geo ? { geo } : {}), db: target_db, now: new Date(`${day}T10:00:00.000Z`) })
+  insert_client_log({ payload: { level, message, context, user_agent, app_version, stack }, user_id, source, ...(geo ? { geo } : {}), browser_locale, db: target_db, now: new Date(`${day}T10:00:00.000Z`) })
 }
 
 describe(get_log_analytics, () => {
@@ -69,6 +70,42 @@ describe(get_log_analytics, () => {
     expect(analytics.totals.errors).toBe(1)
     expect(analytics.totals.real_errors).toBe(1)
     expect(analytics.totals.unique_users).toBe(2)
+  })
+
+  test('locales: folds browser preference, counts distinct visitors, and flags the supported-but-unused mismatch', () => {
+    // Visitor v1: two sessions, browser prefers pt-BR (folds to pt, unsupported→NO, pt is supported), uses en → mismatch.
+    add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's1', visitor_id: 'v1', ui_locale: 'en' }, browser_locale: 'pt-BR' })
+    add_log({ day: '2026-06-29', message: 'session_start', context: { session_id: 's2', visitor_id: 'v1', ui_locale: 'en' }, browser_locale: 'pt-BR' })
+    // Visitor v2: browser prefers Polish (unsupported), uses en — demand signal, NOT a mismatch.
+    add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's3', visitor_id: 'v2', ui_locale: 'en' }, browser_locale: 'pl-PL' })
+    // Visitor v3: browser prefers Traditional Chinese and uses it — aligned.
+    add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's4', visitor_id: 'v3', ui_locale: 'zh-TW' }, browser_locale: 'zh-Hant' })
+    // A crawler with a locale header must not count.
+    add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's5', visitor_id: 'v4', ui_locale: 'en' }, browser_locale: 'fr', user_agent: 'Googlebot/2.1 (+http://www.google.com/bot.html)' })
+
+    const { locales } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+
+    expect(locales.sessions_with_browser_locale).toBe(4)
+    expect(locales.sessions_with_ui_locale).toBe(4)
+    expect(locales.browser).toEqual([
+      { locale: 'pt', visitors: 1, sessions: 2, supported: true },
+      { locale: 'pl', visitors: 1, sessions: 1, supported: false },
+      { locale: 'zh-TW', visitors: 1, sessions: 1, supported: true },
+    ])
+    expect(locales.in_use).toEqual([
+      { locale: 'en', visitors: 2, sessions: 3, supported: true },
+      { locale: 'zh-TW', visitors: 1, sessions: 1, supported: true },
+    ])
+    // Only the supported-language visitor stuck on English is a mismatch.
+    expect(locales.mismatch).toEqual([{ locale: 'pt', visitors: 1 }])
+    expect(locales.mismatch_visitors).toBe(1)
+  })
+
+  test('locales: light scope skips the panel (empty shape)', () => {
+    add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's1', visitor_id: 'v1', ui_locale: 'es' }, browser_locale: 'es' })
+    const { locales } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, scope: 'light' })
+    expect(locales.browser).toEqual([])
+    expect(locales.sessions_with_browser_locale).toBe(0)
   })
 
   test('top dictionaries unions unique visitors over the rolling last 30 days across hot and archive logs', () => {
@@ -1520,8 +1557,13 @@ describe(get_log_analytics, () => {
                 "event": "entry_unfeatured",
                 "seen": false,
               },
+              {
+                "count": 0,
+                "event": "locale_changed",
+                "seen": false,
+              },
             ],
-            "never_emitted": 6,
+            "never_emitted": 7,
           },
           "generated_at": "2026-06-30T12:00:00.000Z",
           "geo": {
@@ -1591,6 +1633,14 @@ describe(get_log_analytics, () => {
             "failed_stale": 1,
             "recovered": 1,
             "timeouts": 1,
+          },
+          "locales": {
+            "browser": [],
+            "in_use": [],
+            "mismatch": [],
+            "mismatch_visitors": 0,
+            "sessions_with_browser_locale": 0,
+            "sessions_with_ui_locale": 0,
           },
           "missing_i18n_keys": {
             "distinct_keys": 0,
@@ -2003,5 +2053,16 @@ describe(build_host_stats, () => {
   test('get_log_analytics leaves host null (endpoint injects it fresh)', () => {
     const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(analytics.host).toBeNull()
+  })
+})
+
+describe(fold_locale, () => {
+  test('published-locale aliases win; other tags fold to the bare language subtag', () => {
+    expect(fold_locale('zh-Hant')).toBe('zh-TW')
+    expect(fold_locale('zh-Hans')).toBe('zh-CN')
+    expect(fold_locale('en-GB')).toBe('en')
+    expect(fold_locale('pt-BR')).toBe('pt')
+    expect(fold_locale('pl-PL')).toBe('pl')
+    expect(fold_locale('fil')).toBe('fil')
   })
 })

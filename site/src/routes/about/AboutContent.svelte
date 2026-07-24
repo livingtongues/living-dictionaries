@@ -43,7 +43,6 @@
   ]
 
   const roadmap = [
-    'import_export',
     'flashcard_view',
     'peer_review',
     'suggestions_from_users',

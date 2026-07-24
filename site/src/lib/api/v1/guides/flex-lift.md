@@ -48,3 +48,14 @@ sense; markers before the first sense belong to the entry.
 - Interlinear texts exported from FLEx (`\t`/`\m`/`\g` lines or flextext XML) are
   TEXTS with per-token glossing — use the `…/texts` endpoints and sentence `tokens`,
   not entries.
+- **Hard-wrapped files scramble marker values**: many SFM files were word-wrapped
+  by an editor, so a long value continues on bare lines below its marker — and
+  sometimes the wrapped tail lands AFTER empty boilerplate markers (an empty
+  `\ge`/`\gn` pair between a `\de` and its own overflow text). Before trusting
+  any "unexpected" marker content, read a few occurrences in context; if it reads
+  as the continuation of the previous field, glue it back on.
+- **`\de` values can be glosses in disguise**: judge each value — a short
+  translation equivalent ("vender.", "torre, edificio alto") belongs in
+  `glosses`, while descriptive/metalinguistic prose ("prefijo verbal que
+  indica…") belongs in `definition`. Put each value in ONE field (never copy to
+  both), and never fabricate a gloss by truncating a definition.

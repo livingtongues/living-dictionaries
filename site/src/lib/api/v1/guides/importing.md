@@ -30,26 +30,33 @@ Mixing these up is very costly to repair — when unsure, ask the requester.
 3. Read `?view=index` of the OpenAPI spec, then pull the tags you need
    (`?tag=entries`, `?tag=texts`, …).
 
-## Triage each resource: is it a source?
+## Register a source for every import
 
-Not every uploaded file deserves a `sources` registry row:
+**Every import gets a `sources` registry row** — even when the uploader gave no
+citation and the material looks like an unpublished working file. Untraceable
+data is a permanent cost; a best-effort source row is cheap and the dictionary's
+manager can refine it later.
 
-- **A random working spreadsheet / word list someone typed up** — NOT a source.
-  Import the data; leave the file unlinked.
-- **A published or citable work** (a printed dictionary scan, a thesis, a published
-  wordlist, archived fieldwork) — IS a source:
-  1. `POST …/sources` with a stable `slug` (e.g. `smith-1979`), full `citation`,
-     `abbreviation`, `author`, `year`, `type` (dictionary/wordlist/fieldwork/
-     manuscript/video/grammar/phrasebook/hymnal/primer/corpus/other), and
-     `orthography` if its forms use a specific script.
-     If the uploader's `source_note` is thin, write the best citation you can from
-     the material itself (title page, colophon).
-  2. `PATCH …/files/{fileId}` with `{ "source_id": "<the new source's id>" }` so the
-     original file lives permanently behind its source.
-  3. Stamp imported records: entry/sense/sentence/text `sources: ["smith-1979"]`, and
-     use `citations: [{ "slug": "smith-1979", "locator": "p. 31" }]` on entries,
-     sentences, and texts when you know the page/example number (for a scanned
-     dictionary you always do — record it).
+1. `POST …/sources` with a **simple, stable `slug`**. Prefer `author-year`
+   (e.g. `smith-1979`) when known; with unknown provenance use something short
+   and generic (e.g. `enxet-lexicon`). The slug is the permanent key stamped on
+   every record, so keep it plain enough to still fit after the manager improves
+   the citation. Include full `citation`, `abbreviation`, `author`, `year`,
+   `type` (dictionary/wordlist/fieldwork/manuscript/video/grammar/phrasebook/
+   hymnal/primer/corpus/other), and `orthography` if its forms use a specific
+   script.
+   - If the uploader's `source_note` is thin or absent, write a **best-effort
+     citation from what you can observe** (title page, colophon, file format,
+     language pair, uploading organization). Describing observed facts is not
+     inventing data — but never guess authorship or publication details; write
+     "author and publication details unrecorded" instead and let the manager
+     iterate on it.
+2. `PATCH …/files/{fileId}` with `{ "source_id": "<the new source's id>" }` so the
+   original file lives permanently behind its source.
+3. Stamp imported records: entry/sense/sentence/text `sources: ["smith-1979"]`, and
+   use `citations: [{ "slug": "smith-1979", "locator": "p. 31" }]` on entries,
+   sentences, and texts when you know the page/example number (for a scanned
+   dictionary you always do — record it).
 
 ## Writing the data
 

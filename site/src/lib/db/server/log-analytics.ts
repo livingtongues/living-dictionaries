@@ -9,6 +9,7 @@ import { ALL_TRACKED_EVENTS, DICTIONARY_OPENED, ENTRY_CREATED, ENTRY_DELETED } f
 import { is_below_db_worker_capability, is_bot_user_agent, parse_user_agent } from '$lib/debug/parse-user-agent'
 import { SYNCABLE_TABLE_NAMES } from '$lib/db/sync/types'
 import { distance_bucket, DISTANCE_BUCKETS, distance_to_origin_km } from '$lib/geo/distance'
+import { get_supported_locale, Locales } from '$lib/i18n/locales'
 import { geo_key } from '$lib/server/geo-from-request'
 import type { HostStats } from '$lib/server/host-stats'
 import { read_host_stats } from '$lib/server/host-stats'
@@ -367,6 +368,8 @@ export interface LogAnalytics {
   entry_edits: EntryEditChannels
   /** Per-dictionary viewership (forever rollup + live tail) — who's being viewed, how much. */
   top_dictionaries: TopDictionaries
+  /** Browser-preferred vs in-use UI languages (rollup + live tail) — the "which i18n locales to add" panel. */
+  locales: LocaleAnalytics
   /** Top missing i18n keys — the live translation-gap worklist (hot window, human). */
   missing_i18n_keys: MissingI18nKeys
   /** Fresh-viewer boot-cascade health — empty-dictionary regression detector (hot window, audience). */
@@ -400,6 +403,38 @@ export interface UptimeSummary {
   /** Distinct `context.vantage` labels seen (probe origins). */
   vantages: string[]
   daily: UptimeDailyPoint[]
+}
+
+/** One language's demand: distinct visitors (visitor_id, session-fallback) + sessions. */
+export interface LocaleDemand {
+  /** Folded language key — bare language subtag (`pt` folds pt-BR/pt-PT) except the zh scripts (`zh-CN`/`zh-TW`). */
+  locale: string
+  visitors: number
+  sessions: number
+  /** True when the key is a published UI locale. */
+  supported: boolean
+}
+
+/**
+ * Locale demand + adoption (window sessions: forever rollup + live tail, admin
+ * sessions excluded — they'd skew "what languages do visitors want"):
+ * `browser` = what visitors' browsers PREFER (Accept-Language, supported or not
+ * — the "which languages should we add" ranking); `in_use` = what the UI
+ * actually rendered in; `mismatch` = visitors whose browser prefers a supported
+ * non-English locale but who ran the site in English (bad translation or they
+ * never found the switcher). Both signals started 2026-07-24 — older sessions
+ * carry no locale and sit outside the coverage denominators.
+ */
+export interface LocaleAnalytics {
+  /** Sessions carrying a browser_locale (coverage denominator for `browser`). */
+  sessions_with_browser_locale: number
+  /** Sessions carrying a ui_locale (coverage denominator for `in_use`). */
+  sessions_with_ui_locale: number
+  browser: LocaleDemand[]
+  in_use: LocaleDemand[]
+  /** Supported non-English browser locales whose visitors used English instead, largest first. */
+  mismatch: { locale: string, visitors: number }[]
+  mismatch_visitors: number
 }
 
 /**
@@ -674,6 +709,12 @@ interface WindowSession {
   region: string | null
   /** Signed-in user for the session — lets the geo panel exclude admin sessions. NULL = anon. */
   user_id: string | null
+  /** Persistent per-browser id — locale panels count distinct visitors. NULL pre-rollout. */
+  visitor_id: string | null
+  /** Primary Accept-Language tag (server-stamped) — what the browser PREFERS. NULL pre-rollout. */
+  browser_locale: string | null
+  /** Locale the UI actually rendered in (`session_start` context). NULL pre-rollout. */
+  ui_locale: string | null
 }
 
 /**
@@ -754,16 +795,22 @@ interface LogAnalyticsOptions {
 export type AnalyticsScope = 'light' | 'usage' | 'diagnostics' | 'full'
 
 /**
- * Memo of whole-window computes. With finalized days served from rollups +
- * slice-indexed live scans the compute is cheap, but better-sqlite3 still blocks
- * the event loop for it — and the dashboard tolerates staleness ("within a day is
- * fine"), so a generous TTL keeps audience/range flips + reloads at ~0 cost. The
+ * Memo of whole-window computes, served STALE-WHILE-REVALIDATE. better-sqlite3
+ * blocks the event loop for the compute, and the operator visits far less often
+ * than any sane TTL — so under the old expire-then-recompute model nearly every
+ * human load paid the full compute (the "always slow" dashboard). Now an
+ * expired entry (up to MAX_STALE) returns instantly and a background task
+ * refreshes it for next time; the UI surfaces `generated_at` so the staleness
+ * is visible, and month-trend reading tolerates days-old data fine. The
  * `pipeline` liveness panel is the one thing recomputed FRESH on every call (it
  * answers "is ingest broken RIGHT NOW?" — a couple of indexed MAX lookups). Only
  * DEFAULT-arg calls are cached (a test injecting shared_db/now/… bypasses).
  */
 const analytics_cache = new Map<string, { at_ms: number, value: LogAnalytics }>()
 const ANALYTICS_CACHE_TTL_MS = 15 * 60_000
+/** Past this, a cached entry is too old even for trend-reading — recompute inline. */
+const ANALYTICS_CACHE_MAX_STALE_MS = 48 * 3_600_000
+const analytics_revalidating = new Set<string>()
 
 export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalytics {
   const { shared_db = get_shared_db(), logs_db = get_logs_db(), days = 30, now = new Date(), current_app_version = version, audience = 'humans', bot_ua_min_per_day = MIN_UA_BOT_SESSIONS_PER_DAY, scope = 'full' } = options
@@ -778,8 +825,12 @@ export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalyti
   const cache_key = `${days}:${audience}:${scope}`
   if (cacheable) {
     const hit = analytics_cache.get(cache_key)
-    if (hit && now.getTime() - hit.at_ms < ANALYTICS_CACHE_TTL_MS)
+    const age_ms = hit ? now.getTime() - hit.at_ms : Infinity
+    if (hit && age_ms < ANALYTICS_CACHE_MAX_STALE_MS) {
+      if (age_ms >= ANALYTICS_CACHE_TTL_MS)
+        schedule_analytics_revalidation({ cache_key, days, audience, scope })
       return { ...hit.value, pipeline: build_pipeline_health({ shared_db, logs_db }) }
+    }
   }
   const compute_started_at = performance.now()
   const value = compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope })
@@ -787,6 +838,38 @@ export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalyti
   if (cacheable)
     analytics_cache.set(cache_key, { at_ms: now.getTime(), value })
   return value
+}
+
+/**
+ * Background refresh of one expired cache entry, after the stale response has
+ * gone out (setTimeout → next tick). Single-flight per key; the sync compute
+ * still blocks the event loop when it runs, just never in a request's path.
+ */
+function schedule_analytics_revalidation({ cache_key, days, audience, scope }: { cache_key: string, days: number, audience: Audience, scope: AnalyticsScope }): void {
+  if (analytics_revalidating.has(cache_key))
+    return
+  analytics_revalidating.add(cache_key)
+  setTimeout(() => {
+    try {
+      const now = new Date()
+      const value = compute_log_analytics({
+        shared_db: get_shared_db(),
+        logs_db: get_logs_db(),
+        archive_db: get_log_archive_db(),
+        days,
+        now,
+        current_app_version: version,
+        audience,
+        bot_ua_min_per_day: MIN_UA_BOT_SESSIONS_PER_DAY,
+        scope,
+      })
+      analytics_cache.set(cache_key, { at_ms: now.getTime(), value })
+    } catch (err) {
+      console.error('[log-analytics] background revalidation failed:', (err as Error).message)
+    } finally {
+      analytics_revalidating.delete(cache_key)
+    }
+  }, 0)
 }
 
 /** Per-section timing, printed when ANALYTICS_PROFILE=1 (e.g. a scratch vitest run on a real DB copy). */
@@ -822,6 +905,7 @@ const EMPTY_UPTIME: LogAnalytics['uptime'] = { probes: 0, availability: null, tt
 const EMPTY_API_V1: LogAnalytics['api_v1'] = { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] }
 const EMPTY_ENTRY_EDITS: LogAnalytics['entry_edits'] = { ui_total: 0, api_total: 0, daily: [] }
 const EMPTY_TOP_DICTIONARIES: LogAnalytics['top_dictionaries'] = { distinct_dictionaries: 0, prev_month: '', site_visitors_30d: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] }
+const EMPTY_LOCALES: LogAnalytics['locales'] = { sessions_with_browser_locale: 0, sessions_with_ui_locale: 0, browser: [], in_use: [], mismatch: [], mismatch_visitors: 0 }
 const EMPTY_MISSING_I18N: LogAnalytics['missing_i18n_keys'] = { total: 0, distinct_keys: 0, sessions: 0, keys: [] }
 const EMPTY_EVENT_COVERAGE: LogAnalytics['event_coverage'] = { events: [], never_emitted: 0 }
 const EMPTY_GEO_LATENCY: { ttfb_by_country: GeoLatency[], ttfb_by_distance: GeoLatency[], lcp_by_country: GeoLatency[], lcp_by_distance: GeoLatency[] } = { ttfb_by_country: [], ttfb_by_distance: [], lcp_by_country: [], lcp_by_distance: [] }
@@ -922,6 +1006,7 @@ function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, curr
   const api_v1 = want_usage ? timed('build_api_v1', () => build_api_v1_activity(ctx)) : EMPTY_API_V1
   const entry_edits = want_usage ? timed('build_entry_edits', () => build_entry_edit_channels({ ctx, rollup_rows, live_by_day })) : EMPTY_ENTRY_EDITS
   const top_dictionaries = want_usage ? timed('build_top_dictionaries', () => build_top_dictionaries(ctx)) : EMPTY_TOP_DICTIONARIES
+  const locales = want_usage ? timed('build_locales', () => build_locales(ctx)) : EMPTY_LOCALES
   const missing_i18n_keys = scope === 'full' ? timed('build_missing_i18n', () => build_missing_i18n_keys(ctx)) : EMPTY_MISSING_I18N
   const boot_health = want_diagnostics ? timed('build_boot_health', () => build_boot_health(ctx)) : EMPTY_BOOT_HEALTH
   const uptime = want_diagnostics ? timed('build_uptime', () => build_uptime(ctx)) : EMPTY_UPTIME
@@ -959,6 +1044,7 @@ function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, curr
     api_v1,
     entry_edits,
     top_dictionaries,
+    locales,
     missing_i18n_keys,
     boot_health,
     uptime,
@@ -1059,7 +1145,7 @@ function query_window_sessions({ shared_db, logs_db, window_start_day, live_star
   live_start_iso: string
 }): { window_sessions: WindowSession[], materialized_days: Set<string> } {
   const materialized = shared_db.prepare(`
-    SELECT day, session_id, user_agent, heartbeats, has_user_id, webdriver, db_tier, country, region, user_id
+    SELECT day, session_id, user_agent, heartbeats, has_user_id, webdriver, db_tier, country, region, user_id, visitor_id, browser_locale, ui_locale
     FROM log_daily_sessions
     WHERE day >= ? AND day < ?
     ORDER BY day
@@ -1075,7 +1161,10 @@ function query_window_sessions({ shared_db, logs_db, window_start_day, live_star
            MAX(json_extract(CASE WHEN json_valid(context) THEN context END, '$.db_tier')) db_tier,
            MAX(country) country,
            MAX(region) region,
-           MAX(user_id) user_id
+           MAX(user_id) user_id,
+           MAX(visitor_id) visitor_id,
+           MAX(browser_locale) browser_locale,
+           MAX(json_extract(CASE WHEN json_valid(context) THEN context END, '$.ui_locale')) ui_locale
     FROM client_logs
     WHERE received_at >= ? AND session_id IS NOT NULL
     GROUP BY session_id
@@ -1099,8 +1188,95 @@ function query_window_sessions({ shared_db, logs_db, window_start_day, live_star
     existing.country = existing.country ?? row.country
     existing.region = existing.region ?? row.region
     existing.user_id = existing.user_id ?? row.user_id
+    existing.visitor_id = existing.visitor_id ?? row.visitor_id
+    existing.browser_locale = existing.browser_locale ?? row.browser_locale
+    existing.ui_locale = existing.ui_locale ?? row.ui_locale
   }
   return { window_sessions: [...merged.values()], materialized_days }
+}
+
+/**
+ * Fold a raw locale tag into the panel's language key: a published-locale alias
+ * match wins (so `zh-Hant`→`zh-TW`, `en-GB`→`en`), else the bare language
+ * subtag (`pt-BR`→`pt`) — regional variants of an unsupported language should
+ * rank together when deciding what to add.
+ */
+export function fold_locale(tag: string): string {
+  const supported = get_supported_locale(tag)
+  if (supported)
+    return supported
+  const language = tag.split('-')[0].toLowerCase()
+  return get_supported_locale(language) ?? language
+}
+
+const LOCALE_LIST_LIMIT = 40
+
+/** Ranked LocaleDemand list from per-key visitor/session sets. */
+function rank_locale_demand(groups: Map<string, { visitors: Set<string>, sessions: number }>): LocaleDemand[] {
+  const published = new Set(Object.keys(Locales))
+  return [...groups.entries()]
+    .map(([locale, group]) => ({ locale, visitors: group.visitors.size, sessions: group.sessions, supported: published.has(locale) }))
+    .sort((first, second) => second.visitors - first.visitors || second.sessions - first.sessions)
+    .slice(0, LOCALE_LIST_LIMIT)
+}
+
+/** See `LocaleAnalytics`. Bot sessions follow the audience toggle; admin sessions always excluded (like geo areas). */
+function build_locales(ctx: AnalyticsContext): LocaleAnalytics {
+  const { audience, window_sessions, bot_session_ids, admin_user_ids } = ctx
+  const browser_groups = new Map<string, { visitors: Set<string>, sessions: number }>()
+  const in_use_groups = new Map<string, { visitors: Set<string>, sessions: number }>()
+  const mismatch_groups = new Map<string, Set<string>>()
+  let sessions_with_browser_locale = 0
+  let sessions_with_ui_locale = 0
+
+  const group_for = (groups: Map<string, { visitors: Set<string>, sessions: number }>, key: string) => {
+    let group = groups.get(key)
+    if (!group) {
+      group = { visitors: new Set(), sessions: 0 }
+      groups.set(key, group)
+    }
+    return group
+  }
+
+  for (const session of window_sessions) {
+    const is_bot = is_bot_user_agent(session.user_agent) || session.webdriver === 1 || bot_session_ids.has(session.session_id)
+    if ((audience === 'bots') !== is_bot)
+      continue
+    if (session.user_id && admin_user_ids.has(session.user_id))
+      continue
+    const visitor_key = session.visitor_id ?? session.session_id
+    const browser_key = session.browser_locale ? fold_locale(session.browser_locale) : null
+    if (browser_key) {
+      sessions_with_browser_locale++
+      const group = group_for(browser_groups, browser_key)
+      group.visitors.add(visitor_key)
+      group.sessions++
+    }
+    if (session.ui_locale) {
+      sessions_with_ui_locale++
+      const group = group_for(in_use_groups, session.ui_locale)
+      group.visitors.add(visitor_key)
+      group.sessions++
+    }
+    // The discovery gap: browser prefers a supported non-EN locale, session ran in EN.
+    if (browser_key && browser_key !== 'en' && session.ui_locale === 'en' && get_supported_locale(browser_key)) {
+      const visitors = mismatch_groups.get(browser_key) ?? new Set<string>()
+      visitors.add(visitor_key)
+      mismatch_groups.set(browser_key, visitors)
+    }
+  }
+
+  const mismatch = [...mismatch_groups.entries()]
+    .map(([locale, visitors]) => ({ locale, visitors: visitors.size }))
+    .sort((first, second) => second.visitors - first.visitors)
+  return {
+    sessions_with_browser_locale,
+    sessions_with_ui_locale,
+    browser: rank_locale_demand(browser_groups),
+    in_use: rank_locale_demand(in_use_groups),
+    mismatch,
+    mismatch_visitors: mismatch.reduce((sum, entry) => sum + entry.visitors, 0),
+  }
 }
 
 /**

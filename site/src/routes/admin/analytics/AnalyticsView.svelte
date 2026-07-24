@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types'
-  import { BROWSER_COLORS, country_flag, db_tier_color, DEVICE_META, one_decimal, OS_COLORS, short_time, USERS_COLOR } from '$lib/analytics/dashboard-format'
+  import { BROWSER_COLORS, country_flag, db_tier_color, DEVICE_META, one_decimal, OS_COLORS, USERS_COLOR } from '$lib/analytics/dashboard-format'
+  import { get_locale_display_name } from '$lib/i18n/locales'
   import { log_insights } from '$lib/analytics/insights'
   import AtAGlance from '$lib/analytics/AtAGlance.svelte'
   import type { DonutDatum } from '$lib/charts/DonutChart.svelte'
@@ -103,6 +104,30 @@
   const geo = $derived(analytics.geo)
   const area_bars = $derived(geo.areas.map(area => ({ label: `${country_flag(area.country)} ${area.key}`, value: area.sessions })))
 
+  // --- Languages: browser preference (supported or not) vs UI language in use. ---
+  const locales_data = $derived(analytics.locales)
+  const UNSUPPORTED_COLOR = '#f59e0b'
+  /** English display name for any language tag (Intl covers the unsupported ones). */
+  function locale_label(locale: string): string {
+    let name = get_locale_display_name(locale)
+    if (name === locale) {
+      try {
+        name = new Intl.DisplayNames(['en'], { type: 'language' }).of(locale) ?? locale
+      } catch { /* garbage tag — show the code */ }
+    }
+    return name === locale ? locale : `${name} · ${locale}`
+  }
+  const browser_locale_bars = $derived(locales_data.browser.map(row => ({
+    label: `${row.supported ? '' : '✳ '}${locale_label(row.locale)}`,
+    value: row.visitors,
+    ...(row.supported ? {} : { color: UNSUPPORTED_COLOR }),
+  })))
+  const in_use_bars = $derived(locales_data.in_use.map(row => ({ label: locale_label(row.locale), value: row.visitors, color: USERS_COLOR })))
+  const mismatch_bars = $derived(locales_data.mismatch.map(row => ({ label: locale_label(row.locale), value: row.visitors, color: UNSUPPORTED_COLOR })))
+
+  // SWR cache means the payload can be hours old — say so plainly ("show us what's cached").
+  const data_age = $derived(format_relative_time(analytics.generated_at))
+
   // Per-dictionary unique visitors — rolling 30d + previous month + live 7d.
   const top_dictionaries = $derived(analytics.top_dictionaries)
   const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -118,7 +143,7 @@
 <div class="analytics">
   <header class="head">
     <h1>Analytics</h1>
-    <span class="sub">usage · last {analytics.window_days} days · generated {short_time(analytics.generated_at)}</span>
+    <span class="sub" title={format_date_time(analytics.generated_at)}>usage · last {analytics.window_days} days · <b>data computed {data_age}</b> (cached; refreshes in the background)</span>
     <div class="audience-toggle" role="group" aria-label="Audience filter">
       <a class="seg" class:active={analytics.audience === 'humans'} href="?audience=humans" data-sveltekit-noscroll>🧑 Humans</a>
       <a class="seg" class:active={analytics.audience === 'bots'} href="?audience=bots" data-sveltekit-noscroll>🤖 Bots</a>
@@ -268,6 +293,46 @@
   </section>
 
   {#if !is_bots}
+    <section class="panel">
+      <h2>Languages <span class="hint">unique visitors · browser preference vs UI language used · admins excluded · ✳ = not yet supported</span></h2>
+      {#if locales_data.sessions_with_browser_locale === 0 && locales_data.sessions_with_ui_locale === 0}
+        <p class="muted">No locale data yet — tracking starts with the 2026-07-24 deploy (browser preference from <code>Accept-Language</code>; in-use locale from <code>session_start</code>). Reads low until the window fills.</p>
+      {:else}
+        {#if locales_data.mismatch_visitors > 0}
+          <p class="cap-warn">
+            ⚠️ {format_number(locales_data.mismatch_visitors)} visitors' browsers prefer a language we already support, but their sessions ran in English — bad translation, or they never found the language switcher.
+          </p>
+        {/if}
+        <div class="grid dev-grid">
+          <div class="dev-block">
+            <div class="block-h">Browser preference <span class="hint">what visitors' browsers ask for, supported or not</span></div>
+            {#if browser_locale_bars.length}
+              <BarChart data={browser_locale_bars} format={format_number} label_width={172} />
+            {:else}
+              <p class="muted">No browser-locale data in window.</p>
+            {/if}
+          </div>
+          <div class="dev-block">
+            <div class="block-h">Language in use <span class="hint">what the UI actually rendered in</span></div>
+            {#if in_use_bars.length}
+              <BarChart data={in_use_bars} format={format_number} label_width={172} />
+            {:else}
+              <p class="muted">No in-use locale data in window.</p>
+            {/if}
+          </div>
+        </div>
+        <div class="grid dev-grid">
+          {#if mismatch_bars.length}
+            <div class="dev-block">
+              <div class="block-h">Supported but unused <span class="hint">browser prefers it · session ran in English</span></div>
+              <BarChart data={mismatch_bars} format={format_number} label_width={172} />
+            </div>
+          {/if}
+          <p class="muted">Amber ✳ languages are the "should we add this?" ranking — visitors whose browsers prefer a language the UI doesn't offer. Coverage: {format_number(locales_data.sessions_with_browser_locale)} sessions carried a browser locale, {format_number(locales_data.sessions_with_ui_locale)} an in-use locale (both populate from 2026-07-24 onward). Regional variants fold together (pt-BR → pt) except the two Chinese scripts.</p>
+        </div>
+      {/if}
+    </section>
+
     <section class="panel">
       <h2>Agent API activity <span class="hint">/api/v1 writes · server v1_* audit rows · hot window</span></h2>
       {#if api_v1.total === 0}

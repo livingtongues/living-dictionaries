@@ -59,7 +59,7 @@ export function normalize_route(pathname: string | null | undefined): string {
   return `dictionary:${sub}`
 }
 
-interface AccumRow { source: string, level: string, message: string, user_id: string | null, context: string | null, session_id: string | null, visitor_id: string | null, country: string | null, region: string | null, user_agent: string | null }
+interface AccumRow { source: string, level: string, message: string, user_id: string | null, context: string | null, session_id: string | null, visitor_id: string | null, browser_locale: string | null, country: string | null, region: string | null, user_agent: string | null }
 
 /**
  * Aggregate one UTC day's `client_logs` (read from `logs.db`) into shared.db's
@@ -70,7 +70,7 @@ interface AccumRow { source: string, level: string, message: string, user_id: st
  */
 export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_logs_db() }: { day: string, shared_db?: Database.Database, logs_db?: Database.Database }): { metrics_written: number } {
   const rows = logs_db.prepare(`
-    SELECT coalesce(source,'client') source, level, message, user_id, context, session_id, visitor_id, country, region, user_agent
+    SELECT coalesce(source,'client') source, level, message, user_id, context, session_id, visitor_id, browser_locale, country, region, user_agent
     FROM client_logs WHERE substr(received_at, 1, 10) = ?
   `).all(day) as AccumRow[]
 
@@ -116,6 +116,12 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
     region: string | null
     /** First non-null signed-in user for the session — lets the reader exclude admin sessions from geo. */
     user_id: string | null
+    /** Persistent per-browser id (first non-null) — the locale panels' unique-visitor key. */
+    visitor_id: string | null
+    /** Primary Accept-Language tag (server-stamped column; first non-null). */
+    browser_locale: string | null
+    /** Locale the UI rendered in — from `session_start` context. */
+    ui_locale: string | null
   }
   const admin_user_ids = get_admin_user_ids({ shared_db })
   const parsed_rows: ParsedRow[] = []
@@ -129,7 +135,7 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
     if (session_id) {
       let activity = session_activity.get(session_id)
       if (!activity) {
-        activity = { session_id, day, user_agent: row.user_agent, heartbeats: 0, has_user_id: false, db_tier: null, country: null, region: null, user_id: null }
+        activity = { session_id, day, user_agent: row.user_agent, heartbeats: 0, has_user_id: false, db_tier: null, country: null, region: null, user_id: null, visitor_id: null, browser_locale: null, ui_locale: null }
         session_activity.set(session_id, activity)
       }
       if (!activity.user_agent && row.user_agent)
@@ -144,6 +150,10 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
         webdriver_sessions.add(session_id)
       if (!activity.db_tier && typeof context?.db_tier === 'string')
         activity.db_tier = context.db_tier
+      activity.visitor_id ??= row.visitor_id
+      activity.browser_locale ??= row.browser_locale
+      if (!activity.ui_locale && typeof context?.ui_locale === 'string')
+        activity.ui_locale = context.ui_locale
       if (!activity.country && row.country) {
         activity.country = row.country
         activity.region = row.region
@@ -291,8 +301,8 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
   // the reader re-classifies from the stored UA/webdriver/heartbeats) so the
   // capability/geo panels never re-scan raw rows for finalized days.
   const insert_session = shared_db.prepare(`
-    INSERT INTO log_daily_sessions (day, session_id, user_agent, heartbeats, has_user_id, webdriver, db_tier, country, region, user_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO log_daily_sessions (day, session_id, user_agent, heartbeats, has_user_id, webdriver, db_tier, country, region, user_id, visitor_id, browser_locale, ui_locale)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `)
   const insert_dict_view = shared_db.prepare(`
     INSERT INTO dictionary_daily_views (day, dictionary_id, sessions, anon_sessions, visitors, anon_visitors)
@@ -320,6 +330,9 @@ export function rollup_day({ day, shared_db = get_shared_db(), logs_db = get_log
         session.country,
         session.region,
         session.user_id,
+        session.visitor_id,
+        session.browser_locale,
+        session.ui_locale,
       )
     }
     // Full-day REPLACE (same idempotency contract as the metrics/sessions above).

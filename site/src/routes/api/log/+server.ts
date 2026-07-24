@@ -4,6 +4,7 @@ import { timingSafeEqual } from 'node:crypto'
 import { env } from '$env/dynamic/private'
 import { verify_jwt } from '$lib/auth/jwt'
 import { ResponseCodes } from '$lib/constants'
+import { browser_locale_from_request } from '$lib/server/browser-locale-from-request'
 import { geo_from_request } from '$lib/server/geo-from-request'
 import { insert_client_log, rate_limit_allow } from '$lib/server/insert-client-log'
 import { json } from '@sveltejs/kit'
@@ -82,10 +83,13 @@ export const POST: RequestHandler = async (event) => {
   // Approximate location from CF edge headers — same for the whole request, so
   // resolve once and stamp every entry in the batch.
   const geo = geo_from_request(event.request)
+  // Primary Accept-Language tag — the "which languages should the UI support"
+  // signal, resolved once per request like geo.
+  const browser_locale = browser_locale_from_request(event.request)
 
   let accepted = 0
   for (const entry of entries) {
-    if (insert_client_log({ payload: entry, user_id, source, geo }))
+    if (insert_client_log({ payload: entry, user_id, source, geo, browser_locale }))
       accepted++
   }
 

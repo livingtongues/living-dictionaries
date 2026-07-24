@@ -32,6 +32,9 @@ export const ENTRY_FEATURED = 'entry_featured'
 /** An editor removed an entry from the featured strip. props: dictionary_id, entry_id. */
 export const ENTRY_UNFEATURED = 'entry_unfeatured'
 
+/** A visitor switched the UI language via the language switcher. props: from, to. */
+export const LOCALE_CHANGED = 'locale_changed'
+
 /**
  * Every analytics event the app is SUPPOSED to emit. The dashboard's
  * self-instrumentation panel compares this list against what's actually been
@@ -48,4 +51,5 @@ export const ALL_TRACKED_EVENTS = [
   ENTRY_DELETED,
   ENTRY_FEATURED,
   ENTRY_UNFEATURED,
+  LOCALE_CHANGED,
 ] as const

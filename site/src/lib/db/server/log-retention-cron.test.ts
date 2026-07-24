@@ -27,7 +27,7 @@ afterEach(() => {
   archive_db.close()
 })
 
-function add_log({ day = '2026-06-01', time = '12:00:00', level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, user_agent = null, geo, db = logs_db }: {
+function add_log({ day = '2026-06-01', time = '12:00:00', level = 'info', message = 'heartbeat', source = 'client', user_id = null, context = null, user_agent = null, geo, browser_locale = null, db = logs_db }: {
   day?: string
   time?: string
   level?: 'error' | 'warn' | 'info' | 'unhandled_rejection' | 'crash'
@@ -37,6 +37,7 @@ function add_log({ day = '2026-06-01', time = '12:00:00', level = 'info', messag
   context?: Record<string, unknown> | null
   user_agent?: string | null
   geo?: RequestGeo
+  browser_locale?: string | null
   db?: Database.Database
 }): void {
   insert_client_log({
@@ -44,6 +45,7 @@ function add_log({ day = '2026-06-01', time = '12:00:00', level = 'info', messag
     user_id,
     source,
     ...(geo ? { geo } : {}),
+    browser_locale,
     db,
     now: new Date(`${day}T${time}.000Z`),
   })
@@ -103,6 +105,21 @@ describe(rollup_day, () => {
     expect(sessions).toEqual([
       { session_id: 's1', heartbeats: 1, has_user_id: 1 },
       { session_id: 's2', heartbeats: 0, has_user_id: 0 },
+    ])
+  })
+
+  test('materializes visitor_id, browser_locale, and ui_locale per session', () => {
+    add_log({ message: 'session_start', context: { session_id: 's1', visitor_id: 'v1', ui_locale: 'es' }, browser_locale: 'pt-BR' })
+    add_log({ message: 'heartbeat', context: { session_id: 's1', visitor_id: 'v1' }, browser_locale: 'pt-BR' })
+    // A session with no locale signals stays null (pre-rollout / bot shape).
+    add_log({ message: 'session_start', context: { session_id: 's2' } })
+
+    rollup_day({ day: '2026-06-01', shared_db, logs_db })
+
+    const sessions = shared_db.prepare(`SELECT session_id, visitor_id, browser_locale, ui_locale FROM log_daily_sessions WHERE day = '2026-06-01' ORDER BY session_id`).all()
+    expect(sessions).toEqual([
+      { session_id: 's1', visitor_id: 'v1', browser_locale: 'pt-BR', ui_locale: 'es' },
+      { session_id: 's2', visitor_id: null, browser_locale: null, ui_locale: null },
     ])
   })
 

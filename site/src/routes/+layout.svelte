@@ -40,7 +40,7 @@
   onMount(() => {
     init_color_scheme()
     init_pwa_install()
-    init_remote_logging()
+    init_remote_logging({ ui_locale: page.data.locale ?? null })
     // Ship genuinely-missing i18n keys (no English base) to client_logs as an
     // actionable `warn`. i18n already console.warns for dev, so this only ships —
     // log_event (not log_warning) avoids a duplicate console line. Deduped per

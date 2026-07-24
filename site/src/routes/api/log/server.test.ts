@@ -29,10 +29,12 @@ afterEach(() => {
   db.close()
 })
 
-function call(body: unknown, options: { token?: string, cookie_token?: string, client_address?: string } = {}) {
+function call(body: unknown, options: { token?: string, cookie_token?: string, client_address?: string, accept_language?: string } = {}) {
   const headers: Record<string, string> = { 'content-type': 'application/json' }
   if (options.token)
     headers.Authorization = `Bearer ${options.token}`
+  if (options.accept_language)
+    headers['accept-language'] = options.accept_language
   const url = 'http://localhost/api/log'
   const request = new Request(url, {
     method: 'POST',
@@ -66,6 +68,18 @@ describe(POST, () => {
     expect(row.user_id).toBeNull()
     expect(row.level).toBe('error')
     expect(row.message).toBe('boom from test')
+  })
+
+  test('stamps browser_locale from Accept-Language on every entry (null when absent)', async () => {
+    await call({ entries: [{ level: 'info', message: 'one' }, { level: 'error', message: 'two' }] }, { client_address: '10.0.0.11', accept_language: 'pt-br,pt;q=0.9,en;q=0.8' })
+    await call({ level: 'error', message: 'no header' }, { client_address: '10.0.0.12' })
+
+    const rows = db.prepare('SELECT message, browser_locale FROM client_logs ORDER BY message').all() as { message: string, browser_locale: string | null }[]
+    expect(rows).toEqual([
+      { message: 'no header', browser_locale: null },
+      { message: 'one', browser_locale: 'pt-BR' },
+      { message: 'two', browser_locale: 'pt-BR' },
+    ])
   })
 
   test('accepts a batch of entries', async () => {

@@ -450,4 +450,10 @@ export const log_daily_sessions = sqliteTable('log_daily_sessions', {
   region: text(),
   /** Signed-in user for the session (first non-null seen). Lets the analytics Geography panel exclude admin sessions. NULL = anon or pre-migration. */
   user_id: text(),
+  /** Persistent per-browser id — locale panels count distinct visitors (COALESCE to session_id pre-migration). */
+  visitor_id: text(),
+  /** Primary Accept-Language tag (e.g. 'pt-BR') — what the browser PREFERS, supported or not. */
+  browser_locale: text(),
+  /** The locale the UI actually rendered in (`session_start` context) — what the visitor USES. */
+  ui_locale: text(),
 }, table => [primaryKey({ columns: [table.day, table.session_id] })])

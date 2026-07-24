@@ -151,6 +151,8 @@ let session_id = ''
 let session_started_at_ms = 0
 /** Epoch ms of the last real user interaction — drives the heartbeat idle gate. */
 let last_activity_at_ms = 0
+/** The resolved UI locale for this session, passed to `init_remote_logging`. */
+let session_ui_locale: string | null = null
 
 /**
  * The current page-session id, created synchronously on first access so a
@@ -605,13 +607,19 @@ export async function flush_now(): Promise<void> {
  * Wire global handlers and patch `console.error`. Idempotent — safe to call
  * twice. Call once from `+layout.svelte` `onMount` after the auth/region
  * setup so the enrichment fields are populated.
+ *
+ * `ui_locale` is the resolved locale the UI actually renders in (cookie /
+ * `?lang` / Accept-Language fallback) — stamped into `session_start` so the
+ * locale analytics can compare "what the browser prefers" (server-stamped
+ * `browser_locale`) against "what the visitor is using".
  */
-export function init_remote_logging(): void {
+export function init_remote_logging({ ui_locale = null }: { ui_locale?: string | null } = {}): void {
   if (initialized)
     return
   if (typeof window === 'undefined')
     return
   initialized = true
+  session_ui_locale = ui_locale
   get_session_id()
   ensure_visitor_id()
   session_started_at_ms = Date.now()
@@ -713,6 +721,7 @@ export function init_remote_logging(): void {
       memory_mb: get_memory_mb(),
       pathname: safe_pathname(),
       visibility: safe_visibility_state(),
+      ui_locale: session_ui_locale,
       ...screen_context(),
       // Device fitness for the local-first DB, captured up front so we can see
       // which tier (opfs-worker / idb-worker / idb-main / SSR-floor) each session
@@ -846,6 +855,7 @@ export function _reset_for_tests(): void {
   session_id = ''
   session_started_at_ms = 0
   last_activity_at_ms = 0
+  session_ui_locale = null
   flush_chain = Promise.resolve()
   try {
     localStorage.removeItem(STORAGE_KEY)
