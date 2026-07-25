@@ -8,7 +8,7 @@
 
   const resolved = $derived(
     db?.message_threads.query({
-      where: 'resolved_at IS NOT NULL',
+      where: 'resolved_at IS NOT NULL AND thread_kind IS NULL',
       order_by: 'resolved_at DESC',
       limit: 9999,
     }),

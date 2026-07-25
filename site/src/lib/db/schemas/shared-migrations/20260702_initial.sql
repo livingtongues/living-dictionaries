@@ -369,7 +369,7 @@ CREATE TABLE IF NOT EXISTS messages (
   id TEXT PRIMARY KEY,
   thread_id TEXT NOT NULL REFERENCES message_threads(id) ON DELETE CASCADE,
   author_user_id TEXT REFERENCES users(id) ON DELETE SET NULL, -- nullable; resolved at write time
-  author_kind TEXT NOT NULL, -- 'customer' | 'admin' | 'agent'
+  author_kind TEXT NOT NULL, -- 'customer' | 'admin' | 'agent' | 'system' (machine-generated event line)
   body_text TEXT,
   body_html TEXT,
   -- RFC threading — populated by D4 `/api/messages/contact` (from the CF

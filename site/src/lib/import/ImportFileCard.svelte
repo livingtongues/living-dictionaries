@@ -4,10 +4,9 @@
   import IconFa6SolidTrash from '~icons/fa6-solid/trash'
   import IconFa6SolidDownload from '~icons/fa6-solid/download'
   import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
-  import IconMdiProgressWrench from '~icons/mdi/progress-wrench'
+  import IconMdiLockOutline from '~icons/mdi/lock-outline'
   import { page } from '$app/state'
   import { api_dict_file_delete, api_dict_file_update } from '$api/v1/dictionaries/[id]/files/_call'
-  import { import_in_progress } from '$lib/import/file-lifecycle'
   import { format_bytes } from '$lib/utils/format-bytes'
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
   import { toast } from '$lib/state/toast.svelte'
@@ -21,7 +20,9 @@
   const { file, dictionary_id, on_changed }: Props = $props()
   const { t } = $derived(page.data)
   const requested = $derived(!!file.import_requested_at)
-  const in_progress = $derived(import_in_progress(file))
+  // Once we start, the resource is permanent history: no edit, no delete.
+  const locked = $derived(file.is_frozen)
+  const can_mutate = $derived(!locked && (!requested || file.can_manage_requested))
 
   let instructions_edit = $state<string | null>(null)
   let source_note_edit = $state<string | null>(null)
@@ -98,10 +99,10 @@
     <IconFa6SolidFile style="flex-shrink: 0; opacity: 0.5" />
     <span class="file-name" title={file.filename}>{file.filename}</span>
     <span class="file-size">{format_bytes(file.size_bytes)}</span>
-    {#if in_progress}
-      <span class="badge progress-badge" title={t('import_page.in_progress_explanation')}>
-        <IconMdiProgressWrench />
-        {t('import_page.in_progress')}
+    {#if locked}
+      <span class="badge locked-badge" title={t('import_page.locked_explanation')}>
+        <IconMdiLockOutline />
+        {t('import_page.locked')}
       </span>
     {:else if requested}
       <span class="badge requested-badge" title={format_date_time(file.import_requested_at)}>
@@ -114,12 +115,12 @@
     <a class="icon-btn" href={`/api/v1/dictionaries/${dictionary_id}/files/${file.id}`} title={t('import_page.download_file')} download={file.filename}>
       <IconFa6SolidDownload />
     </a>
-    {#if requested && file.can_manage_requested}
+    {#if requested && can_mutate}
       <button type="button" class="icon-btn" title={t('import_page.edit_metadata')} onclick={start_editing}>
         <IconMdiPencilOutline />
       </button>
     {/if}
-    {#if !requested || file.can_manage_requested}
+    {#if can_mutate}
       <button type="button" class="icon-btn danger" title={t('import_page.delete_file')} onclick={remove}>
         <IconFa6SolidTrash />
       </button>
@@ -216,12 +217,12 @@
     background: color-mix(in srgb, var(--primary), transparent 86%);
     color: var(--primary);
   }
-  .progress-badge {
+  .locked-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    background: color-mix(in srgb, var(--warning), transparent 86%);
-    color: var(--warning);
+    background: color-mix(in srgb, var(--color) 8%, var(--background));
+    color: var(--color-secondary);
     font-weight: 600;
   }
   .icon-btn {

@@ -14,6 +14,7 @@
   import IconMdiChartLine from '~icons/mdi/chart-line'
   import IconMdiDatabaseOutline from '~icons/mdi/database-outline'
   import IconMdiCloudSync from '~icons/mdi/cloud-sync'
+  import IconMdiFileImportOutline from '~icons/mdi/file-import-outline'
   import IconMdiForumOutline from '~icons/mdi/forum-outline'
   import IconMdiHeartPulse from '~icons/mdi/heart-pulse'
   import IconMdiImageMultipleOutline from '~icons/mdi/image-multiple-outline'
@@ -31,6 +32,9 @@
     { href: '/admin/dictionaries', label: 'Dictionaries', icon: IconMdiBookMultipleOutline },
     { href: '/admin/users', label: 'Users', icon: IconMdiAccountMultipleOutline },
     { href: '/admin/messages', label: 'Messages', icon: IconMdiMessageTextOutline },
+    // Import conversations deliberately do NOT appear in the inbox above — both
+    // sides work them on the dictionary's own page (.issues/import-conversations.md).
+    { href: '/admin/imports', label: 'Imports', icon: IconMdiFileImportOutline },
     // Chat lives OUTSIDE /admin (membership-based — partners + super managers
     // join too), but admins keep this entry point + unread badge.
     { href: '/chat', label: 'Chat', icon: IconMdiForumOutline },

@@ -26,6 +26,7 @@ function file(overrides: Partial<ImportFileForClient> = {}): ImportFileForClient
     created_at: '2026-07-17T01:00:00Z',
     updated_at: '2026-07-17T01:00:00Z',
     can_manage_requested: true,
+    is_frozen: false,
     ...overrides,
   }
 }
@@ -47,9 +48,9 @@ export const Requested: Story<typeof Component> = {
   props: { ...base, file: file({ import_instructions: 'Import all entries. Skip the grammar sketch at the front.', source_note: 'Smith 1979 print dictionary', import_requested_at: '2026-07-17T02:00:00Z', import_thread_id: 't1' }) },
 }
 
-/** We picked the job up — the resource is filed under its source, so the manager sees an in-progress pill until the request is closed. */
-export const ImportInProgress: Story<typeof Component> = {
-  props: { ...base, file: file({ import_instructions: 'Import all entries. Skip the grammar sketch at the front.', source_note: 'Smith 1979 print dictionary', import_requested_at: '2026-07-17T02:00:00Z', import_thread_id: 't1', source_id: 'src-1' }) },
+/** We started the job — the resource became permanent dictionary history, so edit + delete are gone and a lock badge explains why. */
+export const Locked: Story<typeof Component> = {
+  props: { ...base, file: file({ import_instructions: 'Import all entries. Skip the grammar sketch at the front.', source_note: 'Smith 1979 print dictionary', import_requested_at: '2026-07-17T02:00:00Z', import_thread_id: 't1', source_id: 'src-1', is_frozen: true }) },
 }
 
 /** Explicit batched editor shown after clicking the requested card's pencil. */

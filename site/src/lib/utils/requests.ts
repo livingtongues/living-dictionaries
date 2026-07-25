@@ -44,6 +44,27 @@ export async function post_request<T extends Record<string, any>, ExpectedRespon
   }
 }
 
+/** Same contract as `post_request`, for endpoints that PATCH a partial update. */
+export async function patch_request<T extends Record<string, any>, ExpectedResponse extends Record<string, any>>(route: string, data: T, options?: {
+  headers?: RequestInit['headers']
+  signal?: AbortSignal
+  log_errors?: boolean
+}): Promise<Return<ExpectedResponse>> {
+  try {
+    const response = await fetch(route, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+      headers: { ...get_default_headers(), ...options?.headers },
+      signal: options?.signal,
+    })
+    return handle_response<ExpectedResponse>(response)
+  } catch (err) {
+    if (options?.log_errors !== false)
+      console.error(`[patch_request] Network error for ${route}:`, err)
+    return { data: null, error: { status: 0, message: `Network error: ${(err as Error).message}` } }
+  }
+}
+
 export async function get_request<ExpectedResponse extends Record<string, any>>(route: string, options?: {
   /**
    * Custom fetch — pass a SvelteKit universal-load `fetch` so SSR calls run

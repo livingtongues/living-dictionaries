@@ -4,7 +4,7 @@ import type { V1FileConfirmResponseBody } from './[file_id]/confirm/+server'
 import type { V1FilesRequestImportRequestBody, V1FilesRequestImportResponseBody } from './request-import/+server'
 import type { V1ImportRequestPatchRequestBody, V1ImportRequestPatchResponseBody } from './requests/[thread_id]/+server'
 import { ResponseCodes } from '$lib/constants'
-import { get_request, post_request } from '$lib/utils/requests'
+import { get_request, patch_request, post_request } from '$lib/utils/requests'
 
 /** Session-cookie clients (the import + sources pages). Agents hit the same endpoints with a Bearer key. */
 
@@ -21,21 +21,7 @@ export async function api_dict_file_confirm({ dictionary_id, file_id }: { dictio
 }
 
 export async function api_dict_file_update({ dictionary_id, file_id, ...body }: { dictionary_id: string, file_id: string } & V1FilePatchRequestBody) {
-  try {
-    const response = await fetch(`/api/v1/dictionaries/${dictionary_id}/files/${file_id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(body),
-      headers: { 'content-type': 'application/json' },
-    })
-    if (response.status !== ResponseCodes.OK) {
-      const message = await response.text()
-      return { data: null, error: { status: response.status, message } }
-    }
-    const data = await response.json() as V1FilePatchResponseBody
-    return { data, error: null }
-  } catch (err) {
-    return { data: null, error: { status: 0, message: (err as Error).message } }
-  }
+  return await patch_request<V1FilePatchRequestBody, V1FilePatchResponseBody>(`/api/v1/dictionaries/${dictionary_id}/files/${file_id}`, body)
 }
 
 export async function api_dict_file_delete({ dictionary_id, file_id }: { dictionary_id: string, file_id: string }) {
@@ -56,21 +42,7 @@ export async function api_dict_file_delete({ dictionary_id, file_id }: { diction
 }
 
 export async function api_dict_import_request_update({ dictionary_id, thread_id, ...body }: { dictionary_id: string, thread_id: string } & V1ImportRequestPatchRequestBody) {
-  try {
-    const response = await fetch(`/api/v1/dictionaries/${dictionary_id}/files/requests/${thread_id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(body),
-      headers: { 'content-type': 'application/json' },
-    })
-    if (response.status !== ResponseCodes.OK) {
-      const message = await response.text()
-      return { data: null, error: { status: response.status, message } }
-    }
-    const data = await response.json() as V1ImportRequestPatchResponseBody
-    return { data, error: null }
-  } catch (err) {
-    return { data: null, error: { status: 0, message: (err as Error).message } }
-  }
+  return await patch_request<V1ImportRequestPatchRequestBody, V1ImportRequestPatchResponseBody>(`/api/v1/dictionaries/${dictionary_id}/files/requests/${thread_id}`, body)
 }
 
 export async function api_dict_files_request_import({ dictionary_id, ...body }: { dictionary_id: string } & V1FilesRequestImportRequestBody) {

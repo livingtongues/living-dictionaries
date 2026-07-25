@@ -562,6 +562,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   const dialect_id_param = { name: 'dialectId', in: 'path', required: true, schema: { type: 'string' } }
   const source_id_param = { name: 'sourceId', in: 'path', required: true, schema: { type: 'string' } }
   const file_id_param = { name: 'fileId', in: 'path', required: true, schema: { type: 'string' } }
+  const conversation_id_param = { name: 'threadId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' }, description: 'The import conversation (import-request) id.' }
   const orthography_code_param = { name: 'code', in: 'path', required: true, schema: { type: 'string' }, description: 'The orthography\'s immutable code (a BCP-47 tag, a custom slug, or `default` for the primary).' }
   const text_id_param = { name: 'textId', in: 'path', required: true, schema: { type: 'string' } }
   const audio_id_param = { name: 'audioId', in: 'path', required: true, schema: { type: 'string' } }
@@ -1388,6 +1389,36 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       '/api/v1/dictionaries/{id}/files/requests/{threadId}': {
         patch: { summary: 'Update an import request note', description: 'Updates the once-per-batch overall note, appends the change to/reopens the original request thread, and notifies its current assignee. Original requester or site admin only.', parameters: [dict_id_param, { name: 'threadId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['request_note'], properties: { request_note: { type: 'string', nullable: true } } } } } }, responses: { 200: { description: '{ request }' }, 403: { description: 'Import request owned by another requester' }, 404: {} } },
       },
+      '/api/v1/dictionaries/{id}/conversations': {
+        get: { summary: 'List import conversations', description: 'Every import request for this dictionary, newest first — including finished ones, which stay as the dictionary\'s permanent record. Each carries `unread`, `open_questions`, `artifact_count`, and `resource_count`.', parameters: [dict_id_param], responses: { 200: { description: '{ conversations }' } } },
+      },
+      '/api/v1/dictionaries/{id}/conversations/{threadId}': {
+        get: { summary: 'Read one import conversation', description: 'The whole conversation: `conversation`, `messages`, the `resources` it covers, `artifacts` (report/preview HTML), `questions`, plus `is_team` and `is_frozen`.', parameters: [dict_id_param, conversation_id_param], responses: { 200: { description: '{ conversation, messages, resources, artifacts, questions, is_team, is_frozen }' }, 404: {} } },
+        patch: { summary: 'Claim or resolve the job', description: '`{ "started": true }` claims the job (guide Phase 0) and FREEZES its resources — from then on the uploaded files, instructions, and request note are permanent history nobody can edit or delete. Idempotent. `{ "resolved": true|false }` just marks the job done for our own queue; it never affects the freeze or the manager\'s access. Team/API-key only.', parameters: [dict_id_param, conversation_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { started: { type: 'boolean', enum: [true] }, resolved: { type: 'boolean' } } } } } }, responses: { 200: { description: '{ conversation }' }, 400: { description: 'Neither started nor resolved supplied' }, 403: { description: 'Not the Living Dictionaries team' } } },
+      },
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/messages': {
+        post: { summary: 'Post a message', description: 'Adds a message to the conversation and notifies the other side (the manager gets an email linking back here; our assignee gets a push). Nothing in a conversation is private — there are no internal notes. Use this at the end of a job for a few warm sentences pointing at the report; keep the long-form content in the report artifact.', parameters: [dict_id_param, conversation_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['body_text'], properties: { body_text: { type: 'string' } } } } } }, responses: { 200: { description: '{ message_id }' }, 400: { description: 'Empty body_text' } } },
+      },
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/read': {
+        post: { summary: 'Mark the conversation read', description: 'Stamps the caller\'s read position. A team read also re-arms the internal activity notice, so the next manager post announces itself again.', parameters: [dict_id_param, conversation_id_param], responses: { 200: { description: '{ result }' } } },
+      },
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/withdraw': {
+        post: { summary: 'Withdraw an unstarted request', description: 'The uploader\'s escape hatch for a mistaken request: un-stamps the resources (they become ordinary editable uploads again) and removes the conversation. Refused once the job has been started. Original requester or site admin only.', parameters: [dict_id_param, conversation_id_param], responses: { 200: { description: '{ result }' }, 403: { description: 'Already started, or not the requester' } } },
+      },
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/artifacts': {
+        get: { summary: 'List the conversation\'s artifacts', description: 'The generated preview/report HTML documents filed against this import.', parameters: [dict_id_param, conversation_id_param], responses: { 200: { description: '{ artifacts }' } } },
+        post: { summary: 'File a report (or preview) HTML artifact', description: 'Stores a self-contained HTML document and renders it on the manager\'s conversation page permanently — the durable home for the report described in guide §2.7. IMPORTANT: artifacts are served under `Content-Security-Policy: default-src \'none\'`, so JavaScript never runs — build collapsible sections from `<details>`/`<summary>` and inline your CSS in a `<style>` tag. `stats` becomes the summary line (e.g. `{ "entries": 1827 }`). Max 5MB. Team/API-key only.', parameters: [dict_id_param, conversation_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['kind', 'html'], properties: { kind: { type: 'string', enum: ['report', 'preview'] }, title: { type: 'string' }, html: { type: 'string' }, import_id: { type: 'string', nullable: true }, source_id: { type: 'string', nullable: true }, stats: { type: 'object', additionalProperties: true, nullable: true } } } } } }, responses: { 200: { description: '{ artifact }' }, 400: { description: 'Bad kind / empty html / over 5MB' }, 403: { description: 'Not the Living Dictionaries team' } } },
+      },
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/artifacts/{artifactId}': {
+        get: { summary: 'Download an artifact', description: 'Serves the stored HTML (add `?download` for an attachment disposition). Script execution is blocked by CSP.', parameters: [dict_id_param, conversation_id_param, { name: 'artifactId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }], responses: { 200: { description: 'HTML' }, 404: {} } },
+      },
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/questions': {
+        get: { summary: 'List the conversation\'s questions', description: 'Including each one\'s answer once the manager has given it — poll this to pick up their decisions.', parameters: [dict_id_param, conversation_id_param], responses: { 200: { description: '{ questions }' } } },
+        post: { summary: 'Ask answerable questions', description: 'Files the whole-import questions from your report as objects the manager answers in the app. `kind` is `text` (open prose), `choice` (one option), or `multi_choice`; the choice kinds need >= 2 `options` — always include an escape option so "not sure" is answerable. `report_anchor` is an `id` in your report HTML, deep-linked from the question. Keep `title` short and leave the long explanation in the report. Per-entry questions belong in the `review` queue instead. Appended after any existing questions. Team/API-key only.', parameters: [dict_id_param, conversation_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['questions'], properties: { questions: { type: 'array', items: { type: 'object', required: ['kind', 'title'], properties: { kind: { type: 'string', enum: ['text', 'choice', 'multi_choice'] }, title: { type: 'string' }, body_html: { type: 'string' }, options: { type: 'array', items: { type: 'object', required: ['value', 'label'], properties: { value: { type: 'string' }, label: { type: 'string' } } } }, report_anchor: { type: 'string' } } } } } } } } }, responses: { 200: { description: '{ questions }' }, 400: { description: 'Bad kind / missing title / choice question with < 2 options' }, 403: { description: 'Not the Living Dictionaries team' } } },
+      },
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/questions/{questionId}': {
+        patch: { summary: 'Answer or close a question', description: 'Managers answer with `answer_text` (free text) or `answer_values` (chosen option values); an empty answer clears it and reopens the question. The answer is mirrored into the conversation as a message. `status` parks a question without an answer and is team-only.', parameters: [dict_id_param, conversation_id_param, { name: 'questionId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { answer_text: { type: 'string', nullable: true }, answer_values: { type: 'array', items: { type: 'string' }, nullable: true }, status: { type: 'string', enum: ['open', 'closed'] } } } } } }, responses: { 200: { description: '{ question }' }, 400: { description: 'Values sent for a text question, or two values for a single-choice one' }, 403: { description: 'Only the team can close a question' }, 404: {} } },
+      },
       '/api/v1/guides': {
         get: { summary: 'List the format-import guides', description: 'Public. Returns `{ guides: [{ slug, title, description, url }] }` in recommended reading order (`importing` first).', responses: { 200: { description: '{ guides }' } } },
       },
@@ -1535,6 +1566,7 @@ export const OPENAPI_TAGS = [
   { name: 'speakers', description: 'Speaker records for audio/video attribution.' },
   { name: 'sources', description: 'The citation/source registry entries and sentences reference by slug.' },
   { name: 'files', description: 'Uploaded import resources (original spreadsheets, FLEx/LIFT exports, PDF scans…) with per-file import instructions — list, download, upload, link to sources. Write scope required for everything (never public).' },
+  { name: 'conversations', description: 'Import conversations: the durable page where a dictionary manager and the Living Dictionaries team work one import request together — claim/resolve the job, post messages, file the report artifact, and ask answerable questions.' },
   { name: 'guides', description: 'Format-import guides (markdown): how to parse + import spreadsheets, FLEx/LIFT/Toolbox, PDF scans, and the overall import workflow.' },
   { name: 'orthographies', description: 'Alternate writing systems.' },
   { name: 'featured-entries', description: 'The starred entries shown on the dictionary home page.' },
@@ -1559,6 +1591,7 @@ const PATH_SEGMENT_TAGS: Record<string, string> = {
   'gloss-languages': 'dictionary',
   'sources': 'sources',
   'files': 'files',
+  'conversations': 'conversations',
   'suggestions': 'suggestions',
 }
 

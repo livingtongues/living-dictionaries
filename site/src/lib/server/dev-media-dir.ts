@@ -1,5 +1,5 @@
-import { existsSync, unlinkSync } from 'node:fs'
-import { join, resolve, sep } from 'node:path'
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
+import { dirname, join, resolve, sep } from 'node:path'
 import process from 'node:process'
 
 /**
@@ -12,21 +12,39 @@ export function dev_media_dir(): string {
   return join(process.env.DATA_DIR || '.data', 'dev-media')
 }
 
-/** Idempotently remove one object from the local DEV-only media store. */
-export function delete_dev_media({ key }: { key: string }): boolean {
+function dev_media_path({ key }: { key: string }): string {
   const root = resolve(dev_media_dir())
   const full = resolve(root, key)
   if (!full.startsWith(`${root}${sep}`))
     throw new Error('Invalid dev-media key')
+  return full
+}
+
+/** Idempotently remove one object from the local DEV-only media store. */
+export function delete_dev_media({ key }: { key: string }): boolean {
+  const full = dev_media_path({ key })
   if (!existsSync(full))
     return false
   unlinkSync(full)
   return true
 }
 
+/** Write bytes into the local DEV-only media store, creating parent folders. */
+export function write_dev_media({ key, content }: { key: string, content: Buffer | string }): void {
+  const full = dev_media_path({ key })
+  mkdirSync(dirname(full), { recursive: true })
+  writeFileSync(full, content)
+}
+
+/** Read bytes back out of the local DEV-only media store, or null when absent. */
+export function read_dev_media({ key }: { key: string }): Buffer | null {
+  const full = dev_media_path({ key })
+  return existsSync(full) ? readFileSync(full) : null
+}
+
 if (import.meta.vitest) {
   test('delete_dev_media removes bytes and is idempotent', async () => {
-    const { mkdirSync, mkdtempSync, rmSync, writeFileSync } = await import('node:fs')
+    const { mkdtempSync, rmSync } = await import('node:fs')
     const { tmpdir } = await import('node:os')
     const test_data_dir = mkdtempSync(join(tmpdir(), 'ld-dev-media-'))
     const previous_data_dir = process.env.DATA_DIR
@@ -34,10 +52,11 @@ if (import.meta.vitest) {
     try {
       const key = 'import/demo/file-1'
       const full = join(dev_media_dir(), key)
-      mkdirSync(resolve(full, '..'), { recursive: true })
-      writeFileSync(full, 'bytes')
+      write_dev_media({ key, content: 'bytes' })
+      expect(read_dev_media({ key })?.toString()).toBe('bytes')
       expect(delete_dev_media({ key })).toBe(true)
       expect(existsSync(full)).toBe(false)
+      expect(read_dev_media({ key })).toBe(null)
       expect(delete_dev_media({ key })).toBe(false)
       expect(() => delete_dev_media({ key: '../outside' })).toThrow('Invalid dev-media key')
     } finally {

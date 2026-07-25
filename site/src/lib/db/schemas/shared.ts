@@ -286,13 +286,99 @@ export const message_threads = sqliteTable('message_threads', {
   dictionary_id: text(),
   /** Editable overall note for a source_files import-request batch. */
   import_request_note: text(),
+  /**
+   * Import conversations (`.issues/import-conversations.md`). `'import'` threads
+   * are worked on the dictionary's own `/{dict}/import/{thread_id}` page by BOTH
+   * sides and are filtered out of /admin/messages; NULL is every legacy
+   * contact-form/email thread.
+   */
+  thread_kind: text({ enum: ['import'] }),
+  /**
+   * Stamped when the team begins work (guide Phase 0) — the entire freeze rule.
+   * Once set, the uploaded resources are permanent dictionary history: managers
+   * can no longer edit or delete them (they may "withdraw" before it).
+   */
+  started_at: text(),
+  started_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),
+  /**
+   * Notifications-room dedupe counter, bumped when an admin opens the
+   * conversation. See the migration — it rides `chat_messages`' unique
+   * `client_message_id` index to guarantee one notice per unread batch.
+   */
+  activity_batch: integer(),
+})
+
+/**
+ * Membership + per-person notification bookkeeping for an import conversation,
+ * giving us chat's one-ping-per-unread-batch policy. SERVER-ONLY: never syncs.
+ */
+export const thread_participants = sqliteTable('thread_participants', {
+  thread_id: text().notNull().references(() => message_threads.id, { onDelete: 'cascade' }),
+  user_id: text().notNull().references(() => users.id, { onDelete: 'cascade' }),
+  side: text({ enum: ['manager', 'team'] }).notNull(),
+  last_read_at: text(),
+  last_notified_at: text(),
+  created_at: text().notNull(),
+}, table => [primaryKey({ columns: [table.thread_id, table.user_id] })])
+
+/**
+ * Generated HTML artifacts for an import conversation — the pre-write preview
+ * and the post-write report. Bytes live in the private attachments bucket under
+ * `import/{dictionary_id}/artifacts/{id}.html`, rendered in a sandboxed iframe on
+ * the conversation page. Frozen snapshots, never regenerated in place.
+ * SERVER-ONLY: never syncs.
+ */
+export const thread_artifacts = sqliteTable('thread_artifacts', {
+  id: text().primaryKey(),
+  thread_id: text().notNull().references(() => message_threads.id, { onDelete: 'cascade' }),
+  dictionary_id: text().notNull(),
+  kind: text({ enum: ['preview', 'report'] }).notNull(),
+  title: text(),
+  storage_key: text().notNull(),
+  mimetype: text().notNull(),
+  size_bytes: integer().notNull(),
+  /** The v1 write batch this reports on. */
+  import_id: text(),
+  /** Dict-db `sources.id` (cross-db, no FK). */
+  source_id: text(),
+  stats_json: text(),
+  created_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),
+  created_at: text().notNull(),
+})
+
+/**
+ * The questions an import raises, as answerable objects rather than prose buried
+ * in an email. Long-form context (examples, links to live entries) stays in the
+ * report artifact; `report_anchor` deep-links into it. SERVER-ONLY: never syncs.
+ */
+export const thread_questions = sqliteTable('thread_questions', {
+  id: text().primaryKey(),
+  thread_id: text().notNull().references(() => message_threads.id, { onDelete: 'cascade' }),
+  dictionary_id: text().notNull(),
+  position: integer().notNull(),
+  kind: text({ enum: ['text', 'choice', 'multi_choice'] }).notNull(),
+  title: text().notNull(),
+  /** Short context, agent-authored and trusted. */
+  body_html: text(),
+  /** `[{ value, label }]` for the choice kinds. */
+  options_json: text(),
+  report_anchor: text(),
+  answer_text: text(),
+  answer_values_json: text(),
+  answered_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),
+  answered_at: text(),
+  status: text({ enum: ['open', 'answered', 'closed'] }).notNull(),
+  created_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),
+  created_at: text().notNull(),
+  updated_at: text().notNull(),
 })
 
 export const messages = sqliteTable('messages', {
   id: text().primaryKey(),
   thread_id: text().notNull().references(() => message_threads.id, { onDelete: 'cascade' }),
   author_user_id: text().references(() => users.id, { onDelete: 'set null' }),
-  author_kind: text({ enum: ['customer', 'admin', 'agent'] }).notNull(),
+  /** `'system'` is a machine-generated event line (an import conversation's “X updated the instructions”), rendered as a divider rather than a message. */
+  author_kind: text({ enum: ['customer', 'admin', 'agent', 'system'] }).notNull(),
   body_text: text(),
   body_html: text(),
   message_id: text(),

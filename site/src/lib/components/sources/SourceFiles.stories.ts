@@ -26,6 +26,7 @@ export const CorrectedSource: Story<typeof Component> = {
         created_at: '2026-07-24T12:00:00Z',
         updated_at: '2026-07-24T12:00:00Z',
         can_manage_requested: true,
+        is_frozen: true,
       },
       {
         id: 'file-2',
@@ -44,6 +45,7 @@ export const CorrectedSource: Story<typeof Component> = {
         created_at: '2026-07-20T12:00:00Z',
         updated_at: '2026-07-20T12:00:00Z',
         can_manage_requested: true,
+        is_frozen: true,
       },
     ],
   },

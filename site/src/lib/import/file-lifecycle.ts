@@ -1,22 +1,20 @@
 import type { ImportFileForClient, ImportRequestSummary } from './types'
 
 /**
- * What the manager still sees on their Import page. A resource is filed under
- * its permanent source at the START of an import job (that's provenance, and it
- * makes the source downloadable right away), so `source_id` is NOT the "job
- * done" marker — the request thread being resolved is. Requested resources
- * therefore stay listed, showing an in-progress pill, until we close the thread.
+ * What the manager sees on their Import page. Since import conversations became
+ * the dictionary's permanent record (`.issues/import-conversations.md`), NOTHING
+ * is ever dropped from this list: a request and its resources stay visible under
+ * "Past imports" forever, long after we resolve it. Resources filed under a
+ * source WITHOUT ever being requested (an agent's own upload) belong on the
+ * Sources page instead, so those are the only ones excluded.
  */
-export function active_import_files({ files, requests }: {
-  files: ImportFileForClient[]
-  requests: ImportRequestSummary[]
-}): ImportFileForClient[] {
-  const open_threads = new Set(requests.filter(request => !request.resolved_at).map(request => request.thread_id))
-  return files.filter(file => !file.source_id || (!!file.import_thread_id && open_threads.has(file.import_thread_id)))
+export function listed_import_files({ files }: { files: ImportFileForClient[] }): ImportFileForClient[] {
+  return files.filter(file => !file.source_id || !!file.import_thread_id)
 }
 
-export function import_in_progress(file: ImportFileForClient): boolean {
-  return !!file.import_requested_at && !!file.source_id
+/** Requested and we've started — the resources are frozen and the work is underway. */
+export function import_in_progress(request: Pick<ImportRequestSummary, 'started_at' | 'resolved_at'>): boolean {
+  return !!request.started_at && !request.resolved_at
 }
 
 export function completed_source_files_by_source(files: ImportFileForClient[]): Record<string, ImportFileForClient[]> {
@@ -48,42 +46,32 @@ if (import.meta.vitest) {
     created_at: '2026-07-24T00:00:00Z',
     updated_at: '2026-07-24T00:00:00Z',
     can_manage_requested: true,
+    is_frozen: false,
     ...overrides,
   })
 
-  const request = (overrides: Partial<ImportRequestSummary> = {}): ImportRequestSummary => ({
-    thread_id: 'thread-1',
-    request_note: null,
-    requested_at: '2026-07-24T01:00:00Z',
-    can_manage: true,
-    resolved_at: null,
-    ...overrides,
-  })
-
-  describe(active_import_files, () => {
-    test('keeps unlinked resources and hides files linked outside an open request', () => {
-      expect(active_import_files({
+  describe(listed_import_files, () => {
+    test('keeps unlinked resources and every requested one, drops agent uploads filed straight to a source', () => {
+      expect(listed_import_files({
         files: [
           file(),
           file({ id: 'requested', import_requested_at: '2026-07-24T01:00:00Z', import_thread_id: 'thread-1' }),
-          file({ id: 'archived', source_id: 'source-1' }),
+          file({ id: 'agent-upload', source_id: 'source-1' }),
         ],
-        requests: [request()],
       }).map(row => row.id)).toEqual(['file-1', 'requested'])
     })
 
-    test('keeps a source-linked resource visible while its request thread is open, drops it once resolved', () => {
-      const files = [file({ id: 'in-progress', source_id: 'source-1', import_requested_at: '2026-07-24T01:00:00Z', import_thread_id: 'thread-1' })]
-      expect(active_import_files({ files, requests: [request()] }).map(row => row.id)).toEqual(['in-progress'])
-      expect(active_import_files({ files, requests: [request({ resolved_at: '2026-07-25T00:00:00Z' })] })).toEqual([])
+    test('a finished import stays listed forever — resolving no longer hides the record', () => {
+      const files = [file({ id: 'done', source_id: 'source-1', import_requested_at: '2026-07-24T01:00:00Z', import_thread_id: 'thread-1', is_frozen: true })]
+      expect(listed_import_files({ files }).map(row => row.id)).toEqual(['done'])
     })
   })
 
   describe(import_in_progress, () => {
-    test('is true only once a requested resource has been filed under its source', () => {
-      expect(import_in_progress(file({ import_requested_at: '2026-07-24T01:00:00Z', source_id: 'source-1' }))).toBe(true)
-      expect(import_in_progress(file({ import_requested_at: '2026-07-24T01:00:00Z' }))).toBe(false)
-      expect(import_in_progress(file({ source_id: 'source-1' }))).toBe(false)
+    test('is true only between starting and resolving', () => {
+      expect(import_in_progress({ started_at: null, resolved_at: null })).toBe(false)
+      expect(import_in_progress({ started_at: '2026-07-25T00:00:00Z', resolved_at: null })).toBe(true)
+      expect(import_in_progress({ started_at: '2026-07-25T00:00:00Z', resolved_at: '2026-07-26T00:00:00Z' })).toBe(false)
     })
   })
 

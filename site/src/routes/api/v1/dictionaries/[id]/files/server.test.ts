@@ -175,7 +175,7 @@ describe(PATCH, () => {
     expect((await linked.json()).file.source_id).toBe('src-1')
   })
 
-  test('a requested-file update appends one follow-up, reopens the thread, and notifies its assignee', async () => {
+  test('a requested-file update appends one follow-up and notifies its assignee, without touching resolve state', async () => {
     const { file, thread_id } = await request_registered_file()
     shared_db.prepare(`UPDATE message_threads SET read_at = 'x', replied_at = 'x', resolved_at = 'x' WHERE id = ?`).run(thread_id)
 
@@ -186,11 +186,11 @@ describe(PATCH, () => {
 
     const messages = shared_db.prepare('SELECT body_text FROM messages WHERE thread_id = ? ORDER BY created_at').all(thread_id) as { body_text: string }[]
     expect(messages).toHaveLength(2)
-    expect(messages[1].body_text).toContain('Import resource metadata updated by Mgr <mgr@x.com>.')
-    expect(messages[1].body_text).toContain('Instructions: Import entries and examples.')
+    expect(messages[1].body_text).toBe('Mgr updated the details for scan.pdf.')
+    // Resolve is a plain manual button — no backend state machine reopens it.
     const thread = shared_db.prepare('SELECT read_at, replied_at, resolved_at FROM message_threads WHERE id = ?').get(thread_id) as Record<string, string | null>
-    expect(thread).toEqual({ read_at: null, replied_at: null, resolved_at: null })
-    expect(notify_admin).toHaveBeenCalledWith(expect.objectContaining({ email: 'jwrunner7@gmail.com', link: `http://localhost/admin/messages/${thread_id}` }))
+    expect(thread).toEqual({ read_at: 'x', replied_at: 'x', resolved_at: 'x' })
+    expect(notify_admin).toHaveBeenCalledWith(expect.objectContaining({ email: 'jwrunner7@gmail.com', link: `http://localhost/dict-one/import/${thread_id}` }))
   })
 
   test('a site admin doing the import job edits quietly — no customer follow-up, no self-ping, thread stays as it was', async () => {
@@ -236,7 +236,7 @@ describe(REQUEST_IMPORT, () => {
       .rejects.toMatchObject({ status: 400, body: expect.objectContaining({ message: expect.stringContaining('already filed under a source') }) })
   })
 
-  test('creates an assigned thread with an agent-ready body and stamps the files', async () => {
+  test('creates an assigned import conversation seeded with the requester note, and stamps the files', async () => {
     const file = await register_file()
     shared_db.prepare(`UPDATE source_files SET upload_confirmed_at = '2026-07-17T00:00:00Z', import_instructions = 'Import all entries; skip the intro pages.' WHERE id = ?`).run(file.id)
 
@@ -250,14 +250,19 @@ describe(REQUEST_IMPORT, () => {
     expect(thread.assigned_to_user_id).toBe('u-jacob')
     expect(thread.import_request_note).toBe('This is a 1979 published dictionary.')
 
-    const message = shared_db.prepare('SELECT body_text FROM messages WHERE thread_id = ?').get(thread_id) as { body_text: string }
-    expect(message.body_text).toContain(`Download: http://localhost/api/v1/dictionaries/dict-1/files/${file.id}`)
-    expect(message.body_text).toContain('Import all entries; skip the intro pages.')
-    expect(message.body_text).toContain('This is a 1979 published dictionary.')
-    expect(message.body_text).toContain('/api/v1/guides/importing')
-    expect(message.body_text).toContain('dictionary id: dict-1')
-    expect(message.body_text).toContain('Register the source and file these resources under it NOW')
-    expect(message.body_text).toContain('Closing this request thread is what marks the job done')
+    // Kept out of the admin inbox — this is worked on the dictionary's own page.
+    expect(thread.thread_kind).toBe('import')
+    expect(thread.started_at).toBe(null)
+
+    // The conversation opens with the requester's OWN words. The agent-ready
+    // kickoff runbook is never stored; it renders behind the admin-only
+    // "Copy job brief" button.
+    const message = shared_db.prepare('SELECT body_text, author_kind FROM messages WHERE thread_id = ?').get(thread_id) as { body_text: string, author_kind: string }
+    expect(message.body_text).toBe('This is a 1979 published dictionary.')
+    expect(message.author_kind).toBe('customer')
+
+    const participants = shared_db.prepare('SELECT user_id, side FROM thread_participants WHERE thread_id = ? ORDER BY side').all(thread_id)
+    expect(participants).toEqual([{ user_id: 'mgr-1', side: 'manager' }, { user_id: 'u-jacob', side: 'team' }])
 
     const stamped = shared_db.prepare('SELECT import_requested_at, import_thread_id FROM source_files WHERE id = ?').get(file.id) as Record<string, string>
     expect(stamped.import_thread_id).toBe(thread_id)
@@ -298,8 +303,10 @@ describe(DELETE, () => {
     expect(delete_import_object).toHaveBeenCalledWith({ key: file.storage_key })
     const messages = shared_db.prepare('SELECT body_text FROM messages WHERE thread_id = ? ORDER BY created_at').all(thread_id) as { body_text: string }[]
     expect(messages).toHaveLength(2)
-    expect(messages[0].body_text).toContain(file.filename)
-    expect(messages[1].body_text).toContain('Import resource removed by Mgr <mgr@x.com>.')
+    expect(messages[0].body_text).toBe('Overall request note.')
+    expect(messages[1].body_text).toContain('Mgr removed scan.pdf.')
+    // The card goes away with the file, so the event line keeps its metadata.
+    expect(messages[1].body_text).toContain('Instructions: Import all entries.')
     expect(notify_admin).toHaveBeenCalledWith(expect.objectContaining({ email: 'jwrunner7@gmail.com' }))
   })
 

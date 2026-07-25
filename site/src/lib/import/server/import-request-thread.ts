@@ -2,15 +2,16 @@ import type { Database } from 'better-sqlite3'
 import type { DictApiAccess } from '$lib/auth/verify-dict-api-access'
 import type { SourceFileRow } from '$lib/db/server/source-files'
 import type { ImportRequestSummary } from '$lib/import/types'
-import { randomUUID } from 'node:crypto'
 import { is_admin } from '$lib/admins'
 import { ResponseCodes } from '$lib/constants'
+import { post_conversation_message } from '$lib/db/server/import-conversations'
 import { error } from '@sveltejs/kit'
 
 interface ImportThreadRow {
   id: string
   from_user_id: string | null
   assigned_email: string | null
+  started_at: string | null
 }
 
 export function is_site_admin_user({ db, user_id }: { db: Database, user_id: string }): boolean {
@@ -35,6 +36,31 @@ export function require_requested_file_owner({ db, access, file }: {
     error(ResponseCodes.FORBIDDEN, 'Only the original uploader or a site admin can change a requested resource')
 }
 
+/**
+ * The freeze (`.issues/import-conversations.md`). Once the team stamps
+ * `started_at`, the uploaded resources are permanent dictionary history — the
+ * uploader can no longer edit or remove them. Only a site admin can, and only
+ * deliberately. Before the stamp the uploader may still edit or withdraw.
+ */
+export function is_requested_file_frozen({ db, file }: { db: Database, file: SourceFileRow }): boolean {
+  if (!file.import_thread_id)
+    return false
+  const thread = db.prepare('SELECT started_at FROM message_threads WHERE id = ?')
+    .get(file.import_thread_id) as { started_at: string | null } | undefined
+  return !!thread?.started_at
+}
+
+export function require_unfrozen_resource({ db, access, file }: {
+  db: Database
+  access: DictApiAccess
+  file: SourceFileRow
+}): void {
+  if (is_site_admin_user({ db, user_id: access.user_id }))
+    return
+  if (is_requested_file_frozen({ db, file }))
+    error(ResponseCodes.FORBIDDEN, 'We have started work on this import, so its resources are now part of the dictionary\'s permanent record and can no longer be changed or removed. Post in the import conversation if something is wrong.')
+}
+
 function get_import_thread({ db, dictionary_id, thread_id }: {
   db: Database
   dictionary_id: string
@@ -44,6 +70,7 @@ function get_import_thread({ db, dictionary_id, thread_id }: {
     SELECT
       message_threads.id,
       message_threads.from_user_id,
+      message_threads.started_at,
       assigned_user.email AS assigned_email
     FROM message_threads
     LEFT JOIN users AS assigned_user ON assigned_user.id = message_threads.assigned_to_user_id
@@ -84,6 +111,7 @@ export function list_import_requests({ db, dictionary_id, access }: {
       message_threads.import_request_note AS request_note,
       message_threads.from_user_id,
       message_threads.resolved_at,
+      message_threads.started_at,
       MIN(source_files.import_requested_at) AS requested_at
     FROM message_threads
     INNER JOIN source_files ON source_files.import_thread_id = message_threads.id
@@ -95,6 +123,7 @@ export function list_import_requests({ db, dictionary_id, access }: {
     request_note: string | null
     from_user_id: string | null
     resolved_at: string | null
+    started_at: string | null
     requested_at: string
   }[]
   return rows.map(row => ({
@@ -103,9 +132,18 @@ export function list_import_requests({ db, dictionary_id, access }: {
     requested_at: row.requested_at,
     can_manage: is_admin_user || row.from_user_id === access.user_id,
     resolved_at: row.resolved_at,
+    started_at: row.started_at,
   }))
 }
 
+/**
+ * Records a requester-side change (edited instructions, removed resource) in the
+ * conversation. Written as an `author_kind = 'system'` event line, NOT a
+ * message: it is machine-generated, and rendering it as a chat bubble made the
+ * manager appear to have typed "Import resource metadata updated by Name
+ * <email>" at themselves. Deliberately does NOT clear `resolved_at` — resolve is
+ * a plain manual button and new activity surfaces via the Notifications room.
+ */
 export function append_import_request_followup({ db, dictionary_id, thread_id, access, body_text, now = new Date().toISOString() }: {
   db: Database
   dictionary_id: string
@@ -113,35 +151,36 @@ export function append_import_request_followup({ db, dictionary_id, thread_id, a
   access: DictApiAccess
   body_text: string
   now?: string
-}): { assigned_email: string | null } {
+}): { assigned_email: string | null, message_row_id: string } {
   const thread = get_import_thread({ db, dictionary_id, thread_id })
   if (!thread)
     error(ResponseCodes.NOT_FOUND, 'import request not found')
 
-  db.prepare(`
-    INSERT INTO messages (id, thread_id, author_user_id, author_kind, body_text, created_at, updated_at)
-    VALUES (?, ?, ?, 'customer', ?, ?, ?)
-  `).run(randomUUID(), thread_id, access.user_id, body_text, now, now)
-  db.prepare(`
-    UPDATE message_threads SET
-      last_message_at = ?,
-      read_at = NULL,
-      replied_at = NULL,
-      replied_by_user_id = NULL,
-      resolved_at = NULL,
-      resolved_by_user_id = NULL,
-      updated_at = ?
-    WHERE id = ?
-  `).run(now, now, thread_id)
-  return { assigned_email: thread.assigned_email }
+  const message_row_id = post_conversation_message({
+    db,
+    thread_id,
+    user_id: access.user_id,
+    author_kind: 'system',
+    body_text,
+    now,
+  })
+  return { assigned_email: thread.assigned_email, message_row_id }
 }
 
+/** `Name <email>` — for admin-facing pings, where the address is the useful part. */
 export function actor_label({ db, user_id }: { db: Database, user_id: string }): string {
   const actor = db.prepare('SELECT name, email FROM users WHERE id = ?')
     .get(user_id) as { name: string | null, email: string } | undefined
   if (!actor)
     return `User ${user_id}`
   return `${actor.name || actor.email} <${actor.email}>`
+}
+
+/** Just the display name — for event lines the manager reads in their own conversation. */
+export function actor_name({ db, user_id }: { db: Database, user_id: string }): string {
+  const actor = db.prepare('SELECT name, email FROM users WHERE id = ?')
+    .get(user_id) as { name: string | null, email: string } | undefined
+  return actor?.name || actor?.email || `User ${user_id}`
 }
 
 export function format_file_metadata(file: Pick<SourceFileRow, 'filename' | 'import_instructions' | 'source_note'>): string {

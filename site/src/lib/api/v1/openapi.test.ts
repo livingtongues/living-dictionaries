@@ -168,6 +168,15 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}/sentences/{sentenceId}/audio/{audioId}/align': ['post'],
       '/api/v1/dictionaries/{id}/align-jobs/{jobId}': ['get'],
       '/api/v1/dictionaries/{id}/media/{storagePath}': ['get'],
+      '/api/v1/dictionaries/{id}/conversations': ['get'],
+      '/api/v1/dictionaries/{id}/conversations/{threadId}': ['get', 'patch'],
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/messages': ['post'],
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/read': ['post'],
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/withdraw': ['post'],
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/artifacts': ['get', 'post'],
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/artifacts/{artifactId}': ['get'],
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/questions': ['get', 'post'],
+      '/api/v1/dictionaries/{id}/conversations/{threadId}/questions/{questionId}': ['patch'],
     })
   })
 

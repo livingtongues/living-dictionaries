@@ -6,7 +6,7 @@ import { create_pending_source_file, list_source_files, MAX_IMPORT_FILE_BYTES } 
 import type { SourceFileRow } from '$lib/db/server/source-files'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { load_v1_dictionary_context } from '$lib/db/server/v1-route-context'
-import { can_manage_requested_file, list_import_requests } from '$lib/import/server/import-request-thread'
+import { can_manage_requested_file, is_requested_file_frozen, list_import_requests } from '$lib/import/server/import-request-thread'
 import { presign_import_upload, r2_is_configured } from '$lib/r2/import-files'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
@@ -43,6 +43,7 @@ export const GET: RequestHandler = async (event) => {
   const files = list_source_files({ db, dictionary_id: dictionary.id }).map(file => ({
     ...file,
     can_manage_requested: !file.import_requested_at || can_manage_requested_file({ db, access, file }),
+    is_frozen: is_requested_file_frozen({ db, file }),
   }))
   const requests = list_import_requests({ db, dictionary_id: dictionary.id, access })
   return json({ files, requests } satisfies V1FilesGetResponseBody)

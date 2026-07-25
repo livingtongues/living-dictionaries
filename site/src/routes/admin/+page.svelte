@@ -11,6 +11,7 @@
   import IconMdiCloudSync from '~icons/mdi/cloud-sync'
   import IconMdiContentCopy from '~icons/mdi/content-copy'
   import IconMdiDatabaseOutline from '~icons/mdi/database-outline'
+  import IconMdiFileImportOutline from '~icons/mdi/file-import-outline'
   import IconMdiForumOutline from '~icons/mdi/forum-outline'
   import IconMdiHeartPulse from '~icons/mdi/heart-pulse'
   import IconMdiImageMultipleOutline from '~icons/mdi/image-multiple-outline'
@@ -59,6 +60,7 @@
     { href: '/admin/dictionaries', title: 'Dictionaries', body: 'Every dictionary on the platform — visibility, entry counts, partners, and per-dictionary roles.', cta: 'Browse', icon: IconMdiBookOpenPageVariantOutline, accent: 'var(--success)' },
     { href: '/admin/users', title: 'Users', body: 'Registered users with their dictionaries, email aliases, thread history, and unsubscribe state.', cta: 'Browse', icon: IconMdiAccountMultipleOutline, accent: 'var(--success)' },
     { href: '/admin/messages', title: 'Messages', body: 'Inbound support & feedback email threads. Reply via SES, assign to an admin, match unknown senders, mark resolved.', cta: 'Open inbox', icon: IconMdiMessageTextOutline, accent: 'var(--primary)' },
+    { href: '/admin/imports', title: 'Imports', body: 'Import conversations with dictionary managers — their uploaded resources, our report, and the questions waiting on an answer.', cta: 'Open', icon: IconMdiFileImportOutline, accent: 'var(--primary)' },
     { href: '/chat', title: 'Chat', body: 'Channels + 1:1 DMs with admins, super managers, and partners — with a phone/email ping when a message is waiting for you.', cta: 'Open chat', icon: IconMdiForumOutline, accent: 'var(--primary)' },
     { href: '/translate', title: 'Translations', body: 'DB-backed interface translations — per-language progress, review flags on AI or changed-English values, and a button to email translators their pending work.', cta: 'Open dashboard', icon: IconMdiTranslate, accent: 'var(--warning)' },
     { href: '/admin/featured-words', title: 'Featured', body: 'Curate the homepage featured-word rotation — pick entries, preview cards, and reorder.', cta: 'Open', icon: IconMdiImageMultipleOutline, accent: 'var(--success)' },

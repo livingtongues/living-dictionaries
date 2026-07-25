@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { route_admin_for_imports } from '$lib/agent/triage/routing'
 import { ResponseCodes } from '$lib/constants'
 import { get_shared_db } from '$lib/db/server/shared-db'
-import { build_import_request_body } from '$lib/import/server/import-request-body'
+import { ensure_participant, post_conversation_message } from '$lib/db/server/import-conversations'
 import { list_source_files, mark_files_requested } from '$lib/db/server/source-files'
 import { load_v1_dictionary_context } from '$lib/db/server/v1-route-context'
 import { assign_directed_thread } from '$lib/email/assign-directed-thread'
@@ -62,23 +62,26 @@ export const POST: RequestHandler = async (event) => {
 
   const { origin } = event.url
   const subject = `Import request: ${dictionary.name}`
-  const body_text = build_import_request_body({ origin, dictionary, requester, files, note: body.message })
+  const import_url = `${origin}/${dictionary.url}/import`
 
   const thread_id = randomUUID()
-  const message_id = randomUUID()
   const now = new Date().toISOString()
   const request_note = body.message?.trim() || null
   const insert = db.transaction(() => {
+    // `thread_kind = 'import'` keeps this OUT of /admin/messages — an import
+    // conversation is worked by BOTH sides on the dictionary's own page.
     db.prepare(`
       INSERT INTO message_threads (
-        id, subject, source, from_user_id, from_email, from_name, url,
-        dictionary_id, import_request_note, last_message_at, created_at, updated_at
-      ) VALUES (?, ?, 'contact_form', ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(thread_id, subject, requester.id, requester.email, requester.name ?? null, `${origin}/${dictionary.url}/import`, dictionary.id, request_note, now, now, now)
-    db.prepare(`
-      INSERT INTO messages (id, thread_id, author_user_id, author_kind, body_text, created_at, updated_at)
-      VALUES (?, ?, ?, 'customer', ?, ?, ?)
-    `).run(message_id, thread_id, requester.id, body_text, now, now)
+        id, subject, source, thread_kind, from_user_id, from_email, from_name, url,
+        dictionary_id, import_request_note, activity_batch, last_message_at, created_at, updated_at
+      ) VALUES (?, ?, 'contact_form', 'import', ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)
+    `).run(thread_id, subject, requester.id, requester.email, requester.name ?? null, import_url, dictionary.id, request_note, now, now, now)
+    ensure_participant({ db, thread_id, user_id: requester.id, side: 'manager', now })
+    // The requester's own note opens the conversation. The agent-ready kickoff
+    // runbook is deliberately NOT stored — it renders on demand behind the
+    // admin-only "Copy job brief" button (`.issues/import-conversations.md`).
+    if (request_note)
+      post_conversation_message({ db, thread_id, user_id: requester.id, author_kind: 'customer', body_text: request_note, now })
   })
   insert()
 
@@ -87,11 +90,14 @@ export const POST: RequestHandler = async (event) => {
   const import_admin = route_admin_for_imports()
   if (import_admin) {
     assign_directed_thread({ db, thread_id, admin: import_admin, now })
+    const assignee = db.prepare('SELECT id FROM users WHERE email = ?').get(import_admin.email) as { id: string } | undefined
+    if (assignee)
+      ensure_participant({ db, thread_id, user_id: assignee.id, side: 'team', now })
     void notify_admin({
       email: import_admin.email,
       subject: `Import request: ${dictionary.name}`,
       body: `${requester.name || requester.email} uploaded ${files.length} resource${files.length === 1 ? '' : 's'} to import.`,
-      link: `${origin}/admin/messages/${thread_id}`,
+      link: `${import_url}/${thread_id}`,
     })
   }
 

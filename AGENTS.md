@@ -76,7 +76,20 @@ runs the MMS_FA aligner (`MODAL_ALIGN_URL` → LD-owned Modal app `ld-forced-ali
 settings (public/print
 toggles + delete + a dialects manager [manager: rename / map areal-extent geometry via
 GeoTaggingModal / delete]; catalog fields moved to home), about,
-contributors, grammar, history, export, import [manager-only, agent-driven: upload ANY-format resources → per-file instructions → "request import" creates a Jacob-assigned message thread; the original uploader (or a site admin) can edit requested instructions/source + the once-per-request note or permanently remove a resource, with every change appended to/reopening that thread and notifying its current assignee; files live in shared.db `source_files` (server-only) + private R2 `import/{dict}/{file}`, served via `/api/v1/dictionaries/{id}/files/*`; after verified success, `source_id` is the completion marker that removes a file from Import and displays it under the proper source on Sources for managers — keep the existing private key], invite) · `/chat` (standalone membership-based
+contributors, grammar, history, export, import [manager-only, agent-driven: upload ANY-format resources → per-file instructions →
+"request import" opens an **import conversation** — a `message_threads` row with
+`thread_kind='import'`, deliberately EXCLUDED from /admin/messages, worked by BOTH sides at
+`/{dict}/import/{threadId}` (messages, the report artifact rendered in a sandboxed
+script-blocked iframe, and answerable questions). `started_at` is the whole freeze rule:
+before it the uploader may edit or withdraw, after it the resources are permanent dictionary
+history. Nothing is ever hidden — resolved requests stay under "Past imports" forever.
+Server-only tables `thread_participants` / `thread_artifacts` / `thread_questions`; files in
+`source_files` + private R2 `import/{dict}/{file}`; one endpoint set
+`/api/v1/dictionaries/{id}/conversations/*` serves managers, admins, and agents alike. Notify:
+manager → chat-style email with a deep link (a stray inbox reply auto-threads back); assignee →
+direct ping; every other admin → one Notifications-room notice per unread batch, rolled into the
+8am digest. The agent kickoff runbook is DERIVED on demand (`…/conversations/{id}/brief`), never
+stored — there are no internal notes. See `.issues/import-conversations.md`], invite) · `/chat` (standalone membership-based
 chat — DB-managed channels + DMs for admins, super managers, and partners; server-authoritative
 via `/api/chat/*` polling, gate = admin OR a `users.chat_access` grant (toggled on /admin/users/[id]) OR member of ≥1 room — one circle, any chat member can DM any other; `admin_room` channels manageable only by
 super admins) · `/translate` (standalone translator backend — server-authoritative via
@@ -85,7 +98,7 @@ unmatched→match + AI triage, users, dictionaries [paginated table w/ serve/tol
 triage via `dictionaries.bucket`; `bucket='secure'` is ENFORCED — direct-role holders + level-3
 admins only, everyone else sees the unknown-slug redirect/404, no public R2 snapshot; rule lives
 in `$lib/db/server/secure-dictionary.ts` + `verify_auth_dict_role`], analytics, schema graph,
-sync, triage-examples, legal-review, featured-words) · `/og` (share image) · `/terms` ·
+sync, imports [cross-dictionary index of import conversations — the only place open ones are visible, since they never hit the inbox], triage-examples, legal-review, featured-words) · `/og` (share image) · `/terms` ·
 `/privacy-policy` · `/setlocale`.
 
 Inbound email is AI-triaged by `$lib/agent/*` (xAI Grok, env-gated on `XAI_API_KEY`; classifies →

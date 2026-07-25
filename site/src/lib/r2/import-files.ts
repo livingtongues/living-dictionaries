@@ -36,6 +36,25 @@ export async function head_import_object({ key }: { key: string }): Promise<numb
   }
 }
 
+/**
+ * Server-side upload for small generated objects (import report/preview HTML).
+ * Unlike the manager's 100MB resource uploads these are a few dozen KB and are
+ * produced by us, so they ride straight through Node instead of a presigned PUT.
+ */
+export async function put_import_object({ key, content, mimetype }: {
+  key: string
+  content: Buffer | string
+  mimetype: string
+}): Promise<void> {
+  const { client, bucket } = get_r2()
+  await client.send(new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: content,
+    ContentType: mimetype,
+  }))
+}
+
 /** Idempotent — a missing key is not an error on R2. */
 export async function delete_import_object({ key }: { key: string }): Promise<void> {
   const { client, bucket } = get_r2()

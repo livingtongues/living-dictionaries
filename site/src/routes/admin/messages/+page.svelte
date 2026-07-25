@@ -29,7 +29,7 @@
 
   const unresolved = $derived(
     db?.message_threads.query({
-      where: 'resolved_at IS NULL',
+      where: 'resolved_at IS NULL AND thread_kind IS NULL',
       order_by: 'last_message_at DESC',
       limit: 9999,
     }),

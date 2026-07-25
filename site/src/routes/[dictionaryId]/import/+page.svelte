@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { ImportFileForClient, ImportRequestSummary } from '$lib/import/types'
-  import { active_import_files } from '$lib/import/file-lifecycle'
+  import type { ConversationSummary } from '$api/v1/dictionaries/[id]/conversations/+server'
+  import type { ImportFileForClient } from '$lib/import/types'
+  import { listed_import_files } from '$lib/import/file-lifecycle'
   import IconMdiClose from '~icons/mdi/close'
   import IconMdiMessageOutline from '~icons/mdi/message-outline'
   import IconFa6SolidRobot from '~icons/fa6-solid/robot'
@@ -8,11 +9,12 @@
   import IconFa6SolidPaperPlane from '~icons/fa6-solid/paper-plane'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import ImportFileCard from '$lib/import/ImportFileCard.svelte'
-  import ImportRequestGroup from '$lib/import/ImportRequestGroup.svelte'
+  import ImportRequestCard from '$lib/import/ImportRequestCard.svelte'
   import UploadProgressRow from '$lib/import/UploadProgressRow.svelte'
   import { upload_import_file } from '$lib/import/upload-import-file'
   import type { ImportUploadHandle } from '$lib/import/upload-import-file'
   import { api_dict_files_list, api_dict_files_request_import } from '$api/v1/dictionaries/[id]/files/_call'
+  import { api_conversations_list } from '$api/v1/dictionaries/[id]/conversations/_call'
   import { toast } from '$lib/state/toast.svelte'
   import { page } from '$app/state'
 
@@ -21,7 +23,7 @@
   const { t } = $derived(page.data)
 
   let files = $state<ImportFileForClient[]>([])
-  let requests = $state<ImportRequestSummary[]>([])
+  let conversations = $state<ConversationSummary[]>([])
   interface ActiveUpload {
     key: string
     filename: string
@@ -35,13 +37,7 @@
 
   const MAX_BYTES = 100 * 1024 * 1024
 
-  const import_files = $derived(active_import_files({ files, requests }))
-  const pending_files = $derived(import_files.filter(file => !file.import_requested_at))
-  const requested_files = $derived(import_files.filter(file => !!file.import_requested_at))
-  const requested_groups = $derived(requests.map(request => ({
-    request,
-    files: requested_files.filter(file => file.import_thread_id === request.thread_id),
-  })).filter(group => group.files.length > 0))
+  const pending_files = $derived(listed_import_files({ files }).filter(file => !file.import_requested_at))
   const missing_instructions = $derived(pending_files.filter(file => !file.import_instructions?.trim()))
   const can_request = $derived(pending_files.length > 0 && missing_instructions.length === 0 && active_uploads.length === 0 && !requesting)
 
@@ -53,9 +49,11 @@
         toast.error(error.message)
       return
     }
-    const { files: listed_files, requests: listed_requests } = listed
-    files = listed_files.filter(file => !!file.upload_confirmed_at)
-    requests = listed_requests
+    files = listed.files.filter(file => !!file.upload_confirmed_at)
+
+    const { data: listed_conversations } = await api_conversations_list({ dictionary_id: dictionary.id })
+    if (listed_conversations)
+      ({ conversations } = listed_conversations)
   }
 
   $effect(() => {
@@ -177,11 +175,11 @@
       </div>
     {/if}
 
-    {#if requested_groups.length}
-      <h4 class="requested-heading">{t('import_page.requested_files')}</h4>
+    {#if conversations.length}
+      <h4 class="requested-heading">{t('import_page.past_imports')}</h4>
       <div class="request-groups">
-        {#each requested_groups as group (group.request.thread_id)}
-          <ImportRequestGroup request={group.request} files={group.files} dictionary_id={dictionary.id} on_changed={refresh_files} />
+        {#each conversations as conversation (conversation.id)}
+          <ImportRequestCard {conversation} dictionary_url={dictionary.url} />
         {/each}
       </div>
     {/if}

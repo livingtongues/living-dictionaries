@@ -25,6 +25,7 @@ export const NEW_USER_MARKER = 'signed up'
 export const NEW_DICTIONARY_MARKER = 'created a new dictionary'
 export const INVITE_MARKER = 'invited'
 export const LARGE_VIDEO_MARKER = 'video for review'
+export const IMPORT_CONVERSATION_MARKER = 'import conversation'
 
 function admin_user_url({ base_url, user_id }: { base_url: string, user_id: string }): string {
   return `${base_url}/admin/users/${user_id}`
@@ -112,6 +113,33 @@ export function format_large_video_notification({ actor, actor_user_id, dictiona
   }
 }
 
+/**
+ * New activity in an import conversation (`.issues/import-conversations.md`).
+ * Posted so EVERY admin can see it and pitch in — the assignee gets a separate
+ * direct ping. Deduped upstream by `activity_batch`, so at most one of these
+ * exists per conversation per unread batch.
+ */
+export function format_import_conversation_notification({ actor, actor_user_id, dictionary_name, dictionary_url, thread_id, summary, base_url }: {
+  /** Who posted — display name or email. */
+  actor: string
+  actor_user_id?: string | null
+  dictionary_name: string
+  /** The dictionary's url slug, for the conversation deep link. */
+  dictionary_url: string
+  thread_id: string
+  /** One-line preview of what was said. */
+  summary: string
+  base_url: string
+}): SystemNotificationContent {
+  const url = `${base_url}/${dictionary_url}/import/${thread_id}`
+  const body_text = `${actor} posted in the import conversation for "${dictionary_name}": ${summary} — ${url}`
+  return {
+    subject: 'Import conversation activity',
+    body_text: append_user_url({ text: body_text, base_url, user_id: actor_user_id }),
+    body_html: `<p>${linked_user_html({ label: actor, base_url, user_id: actor_user_id })} posted in the <a href="${escape_html(url)}">import conversation for ${escape_html(dictionary_name)}</a>: ${escape_html(summary)}</p>`,
+  }
+}
+
 /** Join a list of phrases naturally: "a", "a and b", "a, b, and c". */
 function natural_join(parts: string[]): string {
   if (parts.length <= 1)
@@ -136,10 +164,15 @@ export function summarize_notifications({ messages }: { messages: readonly { bod
   let dictionaries = 0
   let invites = 0
   let large_videos = 0
+  let import_conversations = 0
   let other = 0
   for (const message of messages) {
     const text = message.body_text
-    if (text.includes(NEW_DICTIONARY_MARKER))
+    // `import conversation` is checked before INVITE_MARKER ('invited'), which
+    // a manager's message preview could otherwise contain by coincidence.
+    if (text.includes(IMPORT_CONVERSATION_MARKER))
+      import_conversations++
+    else if (text.includes(NEW_DICTIONARY_MARKER))
       dictionaries++
     else if (text.includes(NEW_USER_MARKER))
       users++
@@ -159,6 +192,8 @@ export function summarize_notifications({ messages }: { messages: readonly { bod
     parts.push(`${invites} new invitation${invites === 1 ? '' : 's'}`)
   if (large_videos)
     parts.push(`${large_videos} large video${large_videos === 1 ? '' : 's'}`)
+  if (import_conversations)
+    parts.push(`${import_conversations} import conversation${import_conversations === 1 ? '' : 's'} with new activity`)
   if (other)
     parts.push(`${other} other notification${other === 1 ? '' : 's'}`)
   const total = messages.length
@@ -199,6 +234,27 @@ if (import.meta.vitest) {
       expect(format_new_dictionary_notification({ dictionary_name: 'D', dictionary_id: 'd1', actor: 'A', base_url: 'https://ld.app' }).body_text).toContain(NEW_DICTIONARY_MARKER)
       expect(format_invite_notification({ actor: 'A', target_email: 't@b.com', role: 'manager', dictionary_name: 'D', dictionary_id: 'd1', base_url: 'https://ld.app' }).body_text).toContain(INVITE_MARKER)
       expect(format_large_video_notification({ actor: 'A', dictionary_name: 'D', size_mib: '25.1', target_label: 'entry', target_url: 'https://ld.app/d1/entry/e1', base_url: 'https://ld.app' }).body_text).toContain(LARGE_VIDEO_MARKER)
+      expect(format_import_conversation_notification({ actor: 'A', dictionary_name: 'D', dictionary_url: 'd1', thread_id: 't1', summary: 'hi', base_url: 'https://ld.app' }).body_text).toContain(IMPORT_CONVERSATION_MARKER)
+    })
+
+    it('counts import conversations, and a preview containing "invited" does not steal the category', () => {
+      const summary = summarize_notifications({
+        messages: [
+          format_import_conversation_notification({ actor: 'Manny', dictionary_name: 'D', dictionary_url: 'd1', thread_id: 't1', summary: 'we invited a linguist to check it', base_url: 'https://ld.app' }),
+          format_import_conversation_notification({ actor: 'Manny', dictionary_name: 'E', dictionary_url: 'd2', thread_id: 't2', summary: 'thanks!', base_url: 'https://ld.app' }),
+        ],
+      })
+      expect(summary.body_text).toBe('2 import conversations with new activity')
+    })
+  })
+
+  describe(format_import_conversation_notification, () => {
+    it('deep-links the conversation and escapes the message preview', () => {
+      const content = format_import_conversation_notification({ actor: 'Manny', actor_user_id: 'u1', dictionary_name: 'Eastern Pomo', dictionary_url: 'eastern-pomo', thread_id: 't1', summary: '<b>done</b>', base_url: 'https://ld.app' })
+      expect(content.body_html).toContain('href="https://ld.app/eastern-pomo/import/t1"')
+      expect(content.body_html).toContain('&lt;b&gt;done&lt;/b&gt;')
+      expect(content.body_html).not.toContain('<b>done</b>')
+      expect(content.subject).toBe('Import conversation activity')
     })
   })
 

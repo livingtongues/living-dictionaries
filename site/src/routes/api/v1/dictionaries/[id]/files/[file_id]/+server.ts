@@ -6,7 +6,7 @@ import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { delete_source_file, get_source_file, update_source_file } from '$lib/db/server/source-files'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { load_v1_dictionary_context } from '$lib/db/server/v1-route-context'
-import { actor_label, append_import_request_followup, format_file_metadata, is_site_admin_user, require_requested_file_owner } from '$lib/import/server/import-request-thread'
+import { actor_label, actor_name, append_import_request_followup, format_file_metadata, is_site_admin_user, require_requested_file_owner, require_unfrozen_resource } from '$lib/import/server/import-request-thread'
 import { notify_admin } from '$lib/notifications/notify-admins'
 import { get_attachment_stream, R2AttachmentNotFound } from '$lib/r2/get-attachment'
 import { delete_import_object, r2_is_configured } from '$lib/r2/import-files'
@@ -65,8 +65,10 @@ export const PATCH: RequestHandler = async (event) => {
   const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
   const db = get_shared_db()
   const existing = require_file({ dictionary_id: dictionary.id, file_id: event.params.file_id })
-  if (existing.import_requested_at)
+  if (existing.import_requested_at) {
     require_requested_file_owner({ db, access, file: existing })
+    require_unfrozen_resource({ db, access, file: existing })
+  }
 
   const body = await event.request.json() as V1FilePatchRequestBody
   const fields: Partial<Record<SourceFileUpdatableField, string | null>> = {}
@@ -114,11 +116,9 @@ export const PATCH: RequestHandler = async (event) => {
         dictionary_id: dictionary.id,
         thread_id: existing.import_thread_id,
         access,
-        body_text: [
-          `Import resource metadata updated by ${actor_label({ db, user_id: access.user_id })}.`,
-          '',
-          format_file_metadata(file),
-        ].join('\n'),
+        // The resource block on the conversation page already shows the current
+        // instructions, so the event line only needs to say who touched what.
+        body_text: `${actor_name({ db, user_id: access.user_id })} updated the details for ${file.filename}.`,
       })
       assigned_email = email
     }
@@ -132,7 +132,7 @@ export const PATCH: RequestHandler = async (event) => {
       email: assigned_email,
       subject: `Import resource updated: ${dictionary.name}`,
       body: `${actor_label({ db, user_id: access.user_id })} updated ${existing.filename}.`,
-      link: `${event.url.origin}/admin/messages/${existing.import_thread_id}`,
+      link: `${event.url.origin}/${dictionary.url}/import/${existing.import_thread_id}`,
     })
   }
   log_server_event({ level: 'info', message: 'import_file_updated', user_id: access.user_id, context: { dictionary_id: dictionary.id, file_id: event.params.file_id, fields: Object.keys(fields), via: access.via } })
@@ -145,8 +145,10 @@ export const DELETE: RequestHandler = async (event) => {
   const file = require_file({ dictionary_id: dictionary.id, file_id: event.params.file_id })
   const db = get_shared_db()
 
-  if (file.import_requested_at)
+  if (file.import_requested_at) {
     require_requested_file_owner({ db, access, file })
+    require_unfrozen_resource({ db, access, file })
+  }
 
   if (!r2_is_configured() && !dev)
     error(ResponseCodes.SERVICE_UNAVAILABLE, 'File storage is not configured')
@@ -175,8 +177,10 @@ export const DELETE: RequestHandler = async (event) => {
         dictionary_id: dictionary.id,
         thread_id: file.import_thread_id,
         access,
+        // A removal takes the resource card away with it, so the event line
+        // keeps the metadata as the only surviving record of what was there.
         body_text: [
-          `Import resource removed by ${actor_label({ db, user_id: access.user_id })}.`,
+          `${actor_name({ db, user_id: access.user_id })} removed ${file.filename}.`,
           '',
           format_file_metadata(file),
         ].join('\n'),
@@ -191,7 +195,7 @@ export const DELETE: RequestHandler = async (event) => {
       email: assigned_email,
       subject: `Import resource removed: ${dictionary.name}`,
       body: `${actor_label({ db, user_id: access.user_id })} removed ${file.filename}.`,
-      link: `${event.url.origin}/admin/messages/${file.import_thread_id}`,
+      link: `${event.url.origin}/${dictionary.url}/import/${file.import_thread_id}`,
     })
   }
   log_server_event({ level: 'info', message: 'import_file_deleted', user_id: access.user_id, context: { dictionary_id: dictionary.id, file_id: file.id, via: access.via } })

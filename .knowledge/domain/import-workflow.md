@@ -73,36 +73,24 @@ that. Insider access is for fetching bytes, verification reads, and backups
 
 ## Handing the job back (the last step)
 
-The import is not "done" when the data lands — it's done when the requester has
-been told. Leave Jacob a one-click finish:
+The import is not "done" when the data lands — it's done when the requester has been
+told, on their own **import conversation** (`/{dict}/import/{threadId}`), which is where
+the whole job lives from Phase 0 onward. The public guide (§2.7) has the full procedure;
+what's ours alone:
 
-1. Post the technical summary as a message in the import thread (counts,
-   `import_id`, decisions, review-queue size, backup paths).
-2. Write the **requester-facing** version into that thread's
-   `triage_draft_reply` — plain, warm, no engineering vocabulary; what came in,
-   what's live now, how to work the "Needs review" queue, what you'd like them to
-   check. The admin triage panel renders it with a "use draft" button that loads
-   it into the reply editor. Bump `message_threads.updated_at` in the same UPDATE
-   or the local-first admin client will never pull it (`/changes` filters on
-   `updated_at > cursor`).
-   - The draft body is a **cover note for the report HTML** (guide §2.7), not a
-     summary of it: warm, a few sentences, pointing at the report's questions
-     section. Everything long-form (questions with examples + live entry links,
-     counts, rules) lives in the attachment, so the email stays short.
-   - `triage_draft_reply` is text-only and the composer stages attachments from the
-     admin's own file picker at send time, so **park the report where Jacob can
-     attach it in one click**: put it on the technical-summary message as a real
-     `message_attachments` row (upload the bytes to the attachments R2 bucket with
-     `storage_key` = the attachment id, per `$lib/r2/put-attachment.ts`, then insert
-     the row). It then renders as a download link on that message in
-     `/admin/messages/[thread_id]` — Jacob downloads it there, presses "use draft",
-     and attaches it to the send.
-   - Until the parked work in `.issues/future/import-report-artifact.md` lands, that
-     attachment is the only copy the requester gets — inboxes lose things, so keep
-     the generating script and its inputs in `~/import-work/{dict}/` so the report
-     can be regenerated verbatim.
-3. Tell Jacob in-session that it's ready. He sends the reply and **resolves the
-   thread** — resolution is what clears the request from the manager's Import page
-   (`active_import_files` keeps requested resources visible, showing an
-   "Import in progress" pill, until the thread is resolved). Filing a resource
-   under its source at kickoff no longer ends the request.
+1. Post the report artifact and the questions per the guide. They land on the manager's
+   page permanently — there is no emailed attachment to lose any more, and
+   `triage_draft_reply` + the `message_attachments` parking trick are **obsolete**
+   (import threads carry `thread_kind = 'import'` and never appear in /admin/messages).
+2. Keep the generating script and its inputs in `~/import-work/{dict}/` anyway, so a
+   report can be regenerated verbatim if we need to correct it. Artifacts are frozen
+   snapshots — to fix one, post a new one rather than editing in place.
+3. Post the short closing message LAST: that's the thing that emails the manager, so it
+   should be the moment everything else is already visible on the page.
+4. Tell Jacob in-session that it's ready. He reads it at `/admin/imports` (the only
+   cross-dictionary view — these never hit the inbox) and clicks **Resolve**. Resolving
+   is bookkeeping for our queue only: it does not lock, hide, or close anything, and the
+   manager keeps posting there forever.
+
+Design decisions, and the audit that produced them, are in
+`.issues/import-conversations.md`.

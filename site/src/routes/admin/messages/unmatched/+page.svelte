@@ -15,7 +15,7 @@
 
   const threads_query = $derived(
     db?.message_threads.query({
-      where: 'from_user_id IS NULL',
+      where: 'from_user_id IS NULL AND thread_kind IS NULL',
       order_by: 'last_message_at DESC',
       limit: 9999,
     }),

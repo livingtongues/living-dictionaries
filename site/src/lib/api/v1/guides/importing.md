@@ -8,24 +8,26 @@ You are importing someone's language materials into a Living Dictionary through 
 
 **Phase 0 — set up the job**
 
-1. Download every resource; read the uploader's instructions (they are authoritative).
-2. `POST …/sources` for the work, then `PATCH …/files/{fileId}` with its `source_id`
+1. `PATCH …/conversations/{threadId}` with `{ "started": true }` — claims the job and
+   freezes the uploader's resources as permanent record.
+2. Download every resource; read the uploader's instructions (they are authoritative).
+3. `POST …/sources` for the work, then `PATCH …/files/{fileId}` with its `source_id`
    — do this before any data work, so every record you write is traceable.
 
 **Phase 1 — data preparation (no data writes)**
 
-3. Inspect and profile the material.
-4. Ask the human the linguistic questions inspection raises.
-5. Stage everything locally, verbatim + cleaned, from a re-runnable pipeline.
-6. Pore over the data by eye, in bulk; clean with auditable rules + manual passes.
-7. Render a human-readable preview from the final payload and get sign-off.
+4. Inspect and profile the material.
+5. Ask the human the linguistic questions inspection raises.
+6. Stage everything locally, verbatim + cleaned, from a re-runnable pipeline.
+7. Pore over the data by eye, in bulk; clean with auditable rules + manual passes.
+8. Render a human-readable preview from the final payload and get sign-off.
 
 **Phase 2 — API usage**
 
-8. Write in idempotent batches under one `import_id`, with a resumable ledger.
-9. Verify counts and spot-check content against the source.
-10. Leave a `review` task on every entry a human still has to decide.
-11. Hand back a report: the questions the import raises first, then what was imported.
+9. Write in idempotent batches under one `import_id`, with a resumable ledger.
+10. Verify counts and spot-check content against the source.
+11. Leave a `review` task on every entry a human still has to decide.
+12. File the report and the questions on the conversation, then say you are done.
 
 Rushing to phase 2 is the classic failure mode: an import can be technically
 flawless and still wrong because the data wasn't understood. This is someone's
@@ -42,7 +44,24 @@ yours generously so theirs is spent only on decisions.
 uploader's `import_instructions` (**authoritative — follow them**) and an optional
 `source_note`. Download each via `GET …/files/{fileId}`.
 
-### 0.2 Register the source, and file the resources under it
+### 0.2 Claim the job
+
+Every uploaded batch has an **import conversation** — the page at
+`/{dictionaryId}/import/{threadId}` where the manager who sent you the material can see
+everything and talk to you. `GET …/conversations` lists them; the one you want is the
+request whose resources you were given.
+
+`PATCH …/conversations/{threadId}` with `{ "started": true }` **before you touch
+anything else**. That stamp does two things: it tells the manager work has begun, and it
+freezes the request — from then on the uploaded files, their instructions, and the request
+note are permanent dictionary history that nobody can edit or delete. You are about to
+build records that cite those files, so they must stop moving.
+
+(Before you start it, the uploader can still fix their instructions or withdraw the
+request. That window closes the moment you claim the job — so if the instructions look
+wrong or incomplete, ask in the conversation FIRST, then start.)
+
+### 0.3 Register the source, and file the resources under it
 
 **Every import gets a `sources` registry row** — even when the uploader gave no
 citation and the material looks like an unpublished working file. Untraceable data
@@ -460,3 +479,52 @@ paths, no JSON, no internal ids, no talk of batches or endpoints. Say "meaning" 
 "alternate spelling", not `glosses` and `variant`. Keep the machine-facing facts (source
 slug, `import_id`, dates) to one small section at the end, for whoever picks the job up
 next.
+
+**Say each thing once.** A question explained at the top must not be re-explained in the
+per-entry list or used again as a rule's worked example — repeat the item so it stays
+findable, but point back ("explained in question 3 above") instead of restating it. A
+report that says the same thing three times reads as though nobody proofread it.
+
+#### Filing it
+
+`POST …/conversations/{threadId}/artifacts` with `{ "kind": "report", "html": "…",
+"import_id": "…", "stats": { … } }`. The report is stored and rendered on the manager's
+conversation page and stays there permanently, so it outlives any inbox. `stats` becomes
+the summary line above it (`{ "entries": 1827, "senses": 2018 }` → "1,827 entries · 2,018
+senses").
+
+**Reports are rendered with JavaScript disabled** — served under
+`Content-Security-Policy: default-src 'none'` because the HTML is yours, not ours, and it
+runs on our origin. Build it out of `<details>`/`<summary>` sections and anchor links; a
+scripted "expand all" button will silently do nothing. Inline your CSS in a `<style>` tag
+(`style-src 'unsafe-inline'` is granted); external stylesheets, fonts, images, and scripts
+are all blocked, so keep the document self-contained.
+
+#### Then file the questions as answerable objects
+
+The whole-import questions from the top of the report also go in as **real objects the
+manager can answer in the app** — `POST …/conversations/{threadId}/questions`:
+
+```json
+{ "questions": [
+  { "kind": "text", "title": "Who compiled this list, roughly when, and from what?",
+    "body_html": "Even “a 1990s class handout” lets us cite it properly.",
+    "report_anchor": "#q-provenance" },
+  { "kind": "choice", "title": "Is the raised dot a morpheme break or vowel length?",
+    "options": [ { "value": "morpheme", "label": "Morpheme break" },
+                 { "value": "length", "label": "Vowel length" },
+                 { "value": "unsure", "label": "Not sure — please investigate" } ],
+    "report_anchor": "#q-raised-dot" }
+] }
+```
+
+Keep `title` short and `body_html` to a sentence or two — the long form is already in the
+report, and `report_anchor` (an `id` in your HTML) links straight to it. Use `choice` /
+`multi_choice` whenever the useful answers are enumerable; always give an escape option so
+"not sure" is answerable. Per-entry questions stay in the `review` queue (§2.3) — do NOT
+duplicate 30 of them here.
+
+Finally, `POST …/conversations/{threadId}/messages` with a few warm sentences saying the
+import is in and pointing at the report and the questions. That is the manager's
+notification: it emails them a link back to the conversation. Do not write the report's
+contents into the message.
