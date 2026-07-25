@@ -9,6 +9,7 @@
   import ConversationHeader from '$lib/import/conversation/ConversationHeader.svelte'
   import ConversationMessage from '$lib/import/conversation/ConversationMessage.svelte'
   import QuestionList from '$lib/import/conversation/QuestionList.svelte'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { format_bytes } from '$lib/utils/format-bytes'
   import { toast } from '$lib/state/toast.svelte'
 
@@ -118,12 +119,21 @@
   {/if}
 </div>
 
+<SeoMetaTags
+  norobots
+  title={t('import_page.import')}
+  dictionaryName={dictionary.name}
+  description="An import conversation for this Living Dictionary." />
+
 <style>
   .conversation-page {
     max-width: 768px;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    /* The composer is the last thing on the page — without this it sits flush
+       against the bottom edge of the viewport. */
+    padding-bottom: 3rem;
   }
   .back {
     display: inline-flex;

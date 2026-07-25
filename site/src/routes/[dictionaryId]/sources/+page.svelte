@@ -11,6 +11,7 @@
   import IconFaSolidPlus from '~icons/fa-solid/plus'
   import IconFaSolidPen from '~icons/fa-solid/pen'
   import IconFaSolidTrash from '~icons/fa-solid/trash'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
   const { sources, can_edit, is_manager, dictionary, writes, t } = $derived(page.data)
   const connection = $derived(page.data.connection as { query: <T>(sql: string, params?: unknown[]) => Promise<T[]> } | null)
@@ -92,8 +93,6 @@
   }
 </script>
 
-<svelte:head><title>{t({ dynamicKey: 'source.sources', fallback: 'Sources' })}</title></svelte:head>
-
 <div class="header">
   <h3 class="sources-heading">{t({ dynamicKey: 'source.sources', fallback: 'Sources' })}</h3>
   {#if can_edit}
@@ -149,6 +148,12 @@
 {#if editing !== undefined}
   <EditSource source={editing} on_close={() => (editing = undefined)} />
 {/if}
+
+<SeoMetaTags
+  norobots
+  title={t({ dynamicKey: 'source.sources', fallback: 'Sources' })}
+  dictionaryName={dictionary.name}
+  description="Where the words in this Living Dictionary came from." />
 
 <style>
   .sources-heading {

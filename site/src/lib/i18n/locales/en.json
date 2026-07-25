@@ -614,7 +614,7 @@
     "open_full_report": "Open full report",
     "download_report": "Download",
     "questions_heading": "Questions for you",
-    "questions_intro": "Answer any of these whenever you can — partial answers help, and you can change them later.",
+    "questions_intro": "Answer any of these whenever you can — click Save on each one. Partial answers help, and you can change them later.",
     "questions_progress": "{answered} of {total} answered",
     "question_placeholder": "Type your answer…",
     "question_save": "Save answer",

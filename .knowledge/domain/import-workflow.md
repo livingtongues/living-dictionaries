@@ -98,8 +98,16 @@ what's ours alone:
 **Never write an internal note into an import thread.** Every `messages` row in it
 renders on the manager's conversation page — the design has no private side. Engineering
 records (backup paths, payload hashes, key ids, rollback handles) belong in
-`.issues/{dict}-import.md`. Two pre-conversation threads had to be repaired for exactly
-this (`20260725b_import_legacy_conversation_messages.sql`).
+`.issues/{dict}-import.md`.
+
+**Threads that predate the conversation UI need their history backfilled by hand.** An
+import handed back over plain email (Enxet) leaves the conversation page empty — the
+manager sees an import with no record of what we told them. Copy the real `messages` rows
+from the contact thread into the import thread, preserving `created_at`; `server_seq` is
+trigger-assigned so admin clients pick them up. Do this as a **surgical one-off script,
+never a migration** (a migration that matches rows once is permanent clutter). Also
+advance the team participant's `last_read_at`, or the copied closing "thanks!" resurfaces
+as new activity on /admin/imports. Record: `.issues/import-feedback-2026-07-25.md`.
 
 Design decisions, and the audit that produced them, are in
 `.issues/import-conversations.md`.

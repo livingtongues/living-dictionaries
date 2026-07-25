@@ -8,6 +8,7 @@
   import { invalidateAll } from '$app/navigation'
   import { page } from '$app/state'
   import { stream_resolve } from '$lib/state/stream-resolve.svelte'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
   const { data } = $props()
   const { auth_user, dictionary, is_manager, is_contributor } = $derived(data)
@@ -112,6 +113,12 @@
     {page.data.t('invite.invalid_invitation')}
   </p>
 {/if}
+
+<SeoMetaTags
+  norobots
+  title={page.data.t('invite.accept_invitation')}
+  dictionaryName={dictionary.name}
+  description="An invitation to help build this Living Dictionary." />
 
 <style>
   .terms-note {

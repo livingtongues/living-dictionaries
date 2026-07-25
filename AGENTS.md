@@ -98,7 +98,7 @@ unmatched→match + AI triage, users, dictionaries [paginated table w/ serve/tol
 triage via `dictionaries.bucket`; `bucket='secure'` is ENFORCED — direct-role holders + level-3
 admins only, everyone else sees the unknown-slug redirect/404, no public R2 snapshot; rule lives
 in `$lib/db/server/secure-dictionary.ts` + `verify_auth_dict_role`], analytics, schema graph,
-sync, imports [cross-dictionary index of import conversations — the only place open ones are visible, since they never hit the inbox], triage-examples, legal-review, featured-words) · `/og` (share image) · `/terms` ·
+sync, imports [cross-dictionary index of import conversations — the only place open ones are visible, since they never hit the inbox; sortable table, resolved sink to a "Past imports" group, status + "waiting on" derived in `$lib/import/import-status.ts`], triage-examples, legal-review, featured-words) · `/og` (share image) · `/terms` ·
 `/privacy-policy` · `/setlocale`.
 
 Inbound email is AI-triaged by `$lib/agent/*` (xAI Grok, env-gated on `XAI_API_KEY`; classifies →

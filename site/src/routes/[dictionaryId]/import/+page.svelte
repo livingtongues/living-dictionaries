@@ -17,6 +17,7 @@
   import { api_conversations_list } from '$api/v1/dictionaries/[id]/conversations/_call'
   import { toast } from '$lib/state/toast.svelte'
   import { page } from '$app/state'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
   const { data } = $props()
   const { dictionary, is_manager } = $derived(data)
@@ -212,12 +213,19 @@
   {/if}
 </div>
 
+<SeoMetaTags
+  norobots
+  title={t('import_page.import')}
+  dictionaryName={dictionary.name}
+  description="Send us your existing word list and we will import it into this Living Dictionary." />
+
 <style>
   .import-page {
     max-width: 768px;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    padding-bottom: 3rem;
   }
 
   .import-heading {

@@ -112,13 +112,19 @@
     </div>
   {/if}
 
-  {#if dirty}
-    <div class="save-row">
-      <button type="button" class="btn-primary btn-sm" disabled={saving} onclick={save}>
-        {saving ? t('import_page.sending') : t('import_page.question_save')}
-      </button>
-    </div>
-  {/if}
+  <!-- Always rendered, even when there's nothing to save: a button that only
+       appears once you type reads as "maybe this autosaves?" (Jacob, 2026-07-25). -->
+  <div class="save-row">
+    <button type="button" class="btn-primary btn-sm" disabled={saving || !dirty} onclick={save}>
+      {#if saving}
+        {t('import_page.sending')}
+      {:else if answered && !dirty}
+        {t('import_page.question_saved')}
+      {:else}
+        {t('import_page.question_save')}
+      {/if}
+    </button>
+  </div>
 </li>
 
 <style>
