@@ -96,6 +96,23 @@ export const MixedFields: Story<typeof Component> = {
   },
 }
 
+export const SourcesUseReadableStore: Story<typeof Component> = {
+  page_data: {
+    sources: writable([
+      { id: 'source-1', slug: 'enxet-lexicon', abbreviation: 'Enxet Lexicon' },
+    ]),
+  },
+  props: {
+    search_params: mock_search_params(),
+    on_close: () => {},
+    result_facets: {
+      ...array_facets,
+      _sources: { count: 1, values: { 'enxet-lexicon': 11_971 } },
+      has_sentence: bool_facet({ has: 11_971 }),
+    } as any,
+  },
+}
+
 const river_dictionary = {
   id: 'river',
   url: 'river',

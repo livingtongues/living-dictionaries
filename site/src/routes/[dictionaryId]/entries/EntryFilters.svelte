@@ -29,7 +29,7 @@
   }: Props = $props()
 
   const { sources, dictionary, can_edit } = $derived(page.data)
-  const source_labels = $derived(Object.fromEntries((sources || []).map(source => [source.slug, source.abbreviation || source.citation || source.slug])))
+  const source_labels = $derived(Object.fromEntries(($sources || []).map(source => [source.slug, source.abbreviation || source.citation || source.slug])))
   // The primary/default orthography only appears as a filter option once it's been given a
   // name in settings — an unnamed 'default' would otherwise show as that raw, meaningless code.
   const orthography_labels = $derived.by(() => {
