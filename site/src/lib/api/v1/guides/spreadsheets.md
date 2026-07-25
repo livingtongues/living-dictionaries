@@ -28,8 +28,15 @@ Typical shapes to look for:
 | IPA / pronunciation | `phonetic` |
 | dialect / village / region | `dialects` (entry-level, created by name) |
 | notes / comments | `notes` |
-| source / reference | `sources` (slug — create registry rows first) |
+| source / reference | `sources` (slug — create registry rows first); with a page/example number use `citations: [{ slug, locator }]` |
 | id / ref number | `elicitation_id` if it's genuinely a word-list/elicitation code |
+| homonym / homograph number, or a repeated headword | `homograph` ("1", "2") on each of the separate entries |
+| latitude + longitude (where recorded/elicited) | `coordinates: { points: [{ coordinates: { latitude, longitude } }] }` |
+| scientific / Latin name | `scientific_names` |
+| noun class / gender | `senses[].noun_class` |
+| morphology / morpheme breakdown | `morphology` (word-level parse) — a running interlinear line is `interlinearization` |
+| etymology / borrowed from | `linguistic_history` |
+| image / audio filename or URL | not an entry field — attach after the write (see Media below) |
 
 - **Multiple senses in one row** often appear as numbered column groups (gloss 2,
   POS 2, …) or `;`-separated glosses — split them into separate senses only when the
@@ -38,6 +45,20 @@ Typical shapes to look for:
   sample before splitting on commas (glosses like "small, red car" are one value).
 - One spreadsheet row is usually one entry — dedupe repeated headwords into one
   entry with multiple senses only when the rows are obviously the same lexeme.
+  When they're genuinely different words that share a spelling, keep them as
+  separate entries and number them in `homograph` so they stay distinguishable.
+
+## Media columns
+
+Sheets often carry a photo/audio column — a filename pointing into a folder the
+uploader sent, or a public URL. These are not entry fields: write the entries
+first, then attach with `POST …/entries/{entryId}/audio`,
+`…/senses/{senseId}/photos|videos`, or `…/sentences/{sentenceId}/…`, sending either
+multipart `file` or a JSON `url` (the server fetches it). Audio/video REQUIRE
+attribution — `speaker_id` (create the speakers first, usually from a "recorded by"
+column) and/or `source`. Use `replace: true` for one-recording-per-headword sheets
+so re-runs don't stack duplicates. Keep a filename→entry-id map in your ledger so
+the attach pass is resumable.
 
 ## Sanity checks
 

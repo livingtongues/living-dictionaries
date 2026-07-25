@@ -992,7 +992,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
   const SentenceTokenInput = {
     type: 'object',
     required: ['form'],
-    description: 'A writable interlinear token — the GOLD alignment from a glossed source. `start`/`end` are OPTIONAL on write: omit them and the server derives offsets by walking the ORDERED `form`s against the sentence `text` with a LEFT-TO-RIGHT CURSOR that consumes each match in turn (a global search would collide — ~28% of real sentences repeat a form). Derivation therefore requires each `form` to be an exact substring of `text`, in order: keep surface forms byte-identical to the text (do not strip footnote/tone/OCR artifacts from the form but not the text, or vice-versa). On read, offsets are always present.',
+    description: 'A writable interlinear token — the GOLD alignment from a glossed source. `start`/`end` are OPTIONAL on write: omit them and the server derives offsets by walking the ORDERED `form`s against the sentence `text` with a LEFT-TO-RIGHT CURSOR that consumes each match in turn (a global search would collide — ~28% of real sentences repeat a form). Derivation therefore requires each `form` to be an exact substring of `text`, in order: keep surface forms byte-identical to the text (do not strip footnote/tone/transcription artifacts from the form but not the text, or vice-versa). On read, offsets are always present.',
     properties: {
       form: { type: 'string', description: 'Surface form exactly as it appears in the sentence text (byte-identical, so offset derivation can locate it).' },
       start: { type: 'integer', description: 'Char offset into the orthography\'s text. Optional on write (derived if omitted).' },
@@ -1071,7 +1071,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         '',
         '## Edits & deletes',
         '`PATCH …/entries/{entryId}` field-merges the entry: provided fields overwrite, omitted ones stay. `senses` are a true upsert by client `id`: an id already on the entry → field-merge that sense; an unknown id (or none) → create the sense WITH that id, so deterministic import ids (e.g. uuid5 of a stable external key) keep addressing the same sense across re-syncs. Example sentences upsert by id too; send `{ "id": "<existing-sentence-id>" }` alone to link an existing sentence without rewriting it (re-sent links are not duplicated; an unknown id-only reference fails). `dialects`/`tags` are added (never removed) by this call. `DELETE …/entries/{entryId}` removes the entry and its senses.',
-        'For surgical, single-row fixes (e.g. correcting ONE OCR typo) read the ids from the entry READ shape (`senses[].id`, `senses[].sentences[].id`, `tags[].id`, `dialects[].id`) and use the dedicated routes:',
+        'For surgical, single-row fixes (e.g. correcting ONE transcription typo) read the ids from the entry READ shape (`senses[].id`, `senses[].sentences[].id`, `tags[].id`, `dialects[].id`) and use the dedicated routes:',
         '- `POST …/sentences` — create a standalone sentence, then attach its id to a grammar section and/or link it to a sense by id; `GET`/`PATCH`/`DELETE …/sentences/{sentenceId}` read, edit, or remove it.',
         '- `DELETE …/senses/{senseId}` — delete one sense (refused for an entry\'s LAST sense → delete the entry instead).',
         '- `PATCH …/tags/{tagId}` / `…/dialects/{dialectId}` — rename a tag/dialect (affects EVERY entry it\'s on); `DELETE` removes it globally (unlinks it everywhere).',

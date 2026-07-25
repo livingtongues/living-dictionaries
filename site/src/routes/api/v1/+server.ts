@@ -55,19 +55,19 @@ export const GET: RequestHandler = (event) => {
   <h2>Editing &amp; cleanup</h2>
   <p>Field-merge a whole entry with <code>PATCH …/entries/&lt;entryId&gt;</code>, or fix ONE row by its id (read ids from <code>GET …/entries/&lt;entryId&gt;</code>):</p>
   <ul>
-    <li><code>PATCH</code>/<code>DELETE …/sentences/&lt;id&gt;</code> — edit or remove a single example sentence (the OCR-typo fix).</li>
+    <li><code>PATCH</code>/<code>DELETE …/sentences/&lt;id&gt;</code> — edit or remove a single example sentence (the transcription-typo fix).</li>
     <li><code>DELETE …/senses/&lt;id&gt;</code> — remove one sense (not the entry's last).</li>
     <li><code>PATCH</code>/<code>DELETE …/tags/&lt;id&gt;</code> &amp; <code>…/dialects/&lt;id&gt;</code> — rename (affects every entry) or delete globally.</li>
     <li><code>DELETE …/entries/&lt;entryId&gt;/tags/&lt;id&gt;</code> (or <code>/dialects/&lt;id&gt;</code>) — unlink one from a single entry, keeping it elsewhere.</li>
   </ul>
 
   <h2>Importing from a PDF / scanned dictionary</h2>
-  <p class="muted">Tool-agnostic outline — pick current tools, they change fast.</p>
+  <p class="muted"><strong>Do not use OCR.</strong> It is trained on majority languages and silently substitutes look-alike letters for the very characters that matter here (ɓ→b, ŋ→n, ɔ→o, dropped tone marks), and these books are often typewritten, smudged, or many-generation photocopies. Read every page with vision instead. Full detail: <code>GET /api/v1/guides/pdf-scans</code>.</p>
   <ol>
-    <li><strong>Pages → images</strong> at ~300 dpi (e.g. PyMuPDF / pdftoppm).</li>
-    <li><strong>OCR with a layout-aware vision-language model</strong> — a document-parsing VLM handles multi-column dictionaries well; pick a current one. Where glyphs/diacritics look wrong, fall back to inspecting the image directly.</li>
+    <li><strong>Pages → images</strong> at 300 dpi or higher (e.g. PyMuPDF / pdftoppm). An embedded PDF text layer is a hint at best — never import it directly.</li>
+    <li><strong>Look at every single page yourself</strong> with a vision model and transcribe what you see. <strong>Zoom in</strong> (re-render or crop at 600–1200 dpi) on any diacritic or glyph you're less than certain about — liberally. Never guess a character; flag it.</li>
     <li><strong>Structure</strong> the text into the entry shape: identify headwords (often numbered homographs; in many orthographies short/monosyllabic), separate the vernacular phrase from the gloss, and attach usages as <code>example_sentences</code>.</li>
-    <li><strong>Respect orthography</strong> — validate tokens against the language's spelling rules; never transliterate or "clean up" diacritics. Flag low-confidence OCR as a private tag (e.g. <code>needs-review</code>) instead of inventing data.</li>
+    <li><strong>Respect orthography</strong> — validate every character against the alphabet chart in the book's front matter; never transliterate or "clean up" diacritics. Set the entry's <code>review</code> field on anything still ambiguous after zooming instead of inventing data.</li>
     <li><strong>Import idempotently</strong>: generate a UUID <code>id</code> per source entry and record it against your source id (dedupe/resume by it — re-POSTing an existing <code>id</code> is a no-op); <code>import_id</code> tags the run; batches ≤1000; read per-item <code>results</code>, re-send only failures. Spot-check with <code>GET …/entries/&lt;entryId&gt;</code>. <span class="muted"><code>elicitation_id</code> is for word-list/elicitation ordering — persisted &amp; queryable via <code>?elicitation_id=</code>, so use it for dedupe only if your source id is genuinely elicitation data.</span></li>
   </ol>
 

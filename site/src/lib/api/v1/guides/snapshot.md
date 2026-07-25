@@ -42,13 +42,15 @@ send its rows back through the write API wholesale.
 | `sentences` | examples + text lines: `text`, `translation`, `tokens` (interlinear), `text_id` + `sort_key` when part of a text |
 | `senses_in_sentences` | sense ↔ example-sentence junction |
 | `texts` | connected passages: `title`, `summary`, `sources`, `citations`, `work_id` (parallel-version grouping) |
-| `audio` / `photos` / `videos` | media rows (`storage_path` — fetch bytes via `GET …/media/{storage_path}` on the API) |
+| `audio` | media rows that link DIRECTLY by `entry_id` / `sentence_id` / `text_id`; `storage_path` (fetch bytes via `GET …/media/{storage_path}` on the API) + `timings` (karaoke word timings) |
+| `photos` / `videos` | media rows with NO owner column — join through `sense_photos`, `sentence_photos`, `sense_videos`, `sentence_videos` (videos also carry `text_id` directly) |
 | `speakers`, `audio_speakers`, `video_speakers` | attribution |
 | `dialects`, `entry_dialects`, `text_dialects` | variety labels + links |
 | `tags`, `entry_tags`, `text_tags` | labels incl. `import_id` batch tags |
 | `sources` | the citation registry the slug arrays reference |
-| `entry_relationships`, `relationship_types` | typed entry↔entry links |
-| `grammar_sections`, `clause_slots`, `glossing_abbreviations` | structured grammar |
+| `entry_relationships`, `relationship_types` | typed entry↔entry links (globals like `synonym`/`hypernym` plus per-dictionary custom types) |
+| `grammar_sections`, `clause_slots`, `glossing_abbreviations`, `section_sentences` | structured grammar + the sentences cited in each section |
+| `featured_entries` | the curated entries pinned on the dictionary's home page |
 | `ignored_forms` | dictionary-level "ignore everywhere" word forms the matcher skips (see the `suggestions` API group) |
 
 Multilingual columns are JSON `{ "<locale>": "text" }`; array columns are JSON

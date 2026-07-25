@@ -85,6 +85,22 @@ been told. Leave Jacob a one-click finish:
    it into the reply editor. Bump `message_threads.updated_at` in the same UPDATE
    or the local-first admin client will never pull it (`/changes` filters on
    `updated_at > cursor`).
+   - The draft body is a **cover note for the report HTML** (guide §2.7), not a
+     summary of it: warm, a few sentences, pointing at the report's questions
+     section. Everything long-form (questions with examples + live entry links,
+     counts, rules) lives in the attachment, so the email stays short.
+   - `triage_draft_reply` is text-only and the composer stages attachments from the
+     admin's own file picker at send time, so **park the report where Jacob can
+     attach it in one click**: put it on the technical-summary message as a real
+     `message_attachments` row (upload the bytes to the attachments R2 bucket with
+     `storage_key` = the attachment id, per `$lib/r2/put-attachment.ts`, then insert
+     the row). It then renders as a download link on that message in
+     `/admin/messages/[thread_id]` — Jacob downloads it there, presses "use draft",
+     and attaches it to the send.
+   - Until the parked work in `.issues/future/import-report-artifact.md` lands, that
+     attachment is the only copy the requester gets — inboxes lose things, so keep
+     the generating script and its inputs in `~/import-work/{dict}/` so the report
+     can be regenerated verbatim.
 3. Tell Jacob in-session that it's ready. He sends the reply and **resolves the
    thread** — resolution is what clears the request from the manager's Import page
    (`active_import_files` keeps requested resources visible, showing an

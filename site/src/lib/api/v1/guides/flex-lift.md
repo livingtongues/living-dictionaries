@@ -16,7 +16,7 @@ Read `/api/v1/guides/importing` first for the mandatory workflow (register the s
 | Marker | Meaning | Maps to |
 |---|---|---|
 | `\lx` | lexeme (starts a record) | `lexeme` |
-| `\hm` | homonym number | separate entries (keep numbering in `notes` if useful) |
+| `\hm` | homonym number | separate entries, each carrying the number in `homograph` |
 | `\lc` | citation form | usually `lexeme` display form; note the difference in `notes` |
 | `\a`, `\va` | allomorph / variant | `senses[].variant` |
 | `\ph` | phonetic | `phonetic` |
@@ -27,13 +27,33 @@ Read `/api/v1/guides/importing` first for the mandatory workflow (register the s
 | `\xv` | example (vernacular) | example sentence `text` |
 | `\xe` / `\xn` | example translation | example sentence `translation` |
 | `\sd` / `\is` | semantic domain | `senses[].semantic_domains` / `write_in_semantic_domains` |
+| `\pl` / `\sg` | plural / singular form | `senses[].plural_form` (put the odd one out in `variant`) |
+| `\sc` | scientific name | `scientific_names` |
+| `\mr` | morphemic form / reconstruction | `morphology` |
+| `\et` / `\eg` / `\es` / `\bw` | etymology, its gloss, its source, borrowed word | `linguistic_history` (and a `borrowed_from` relationship when the donor word is in this dictionary) |
+| `\so` | source of the record | `sources` (create the registry row first) |
+| `\rf` | reference for the example that follows | `citations: [{ slug, locator }]` on the sentence |
 | `\nt` / `\cmt` | notes | `notes` |
 | `\se` | subentry | its own entry (link the relationship if clearly derivational) |
 | `\cf` / `\mn` | cross-reference | entry relationship (or `notes` when the target is ambiguous) |
+| `\sy` / `\an` | synonym / antonym | `POST …/relationships` with type `synonym` / `antonym` |
+| `\pc` | picture file | `POST …/senses/{senseId}/photos` (see Media below) |
+| `\sf` / `\sfx` | sound file | `POST …/entries/{entryId}/audio` or `…/sentences/{id}/audio` |
 | `\dt` | edit date | ignore |
 
 MDF hierarchy matters: markers between one `\ps`/`\sn` and the next belong to that
 sense; markers before the first sense belong to the entry.
+
+## Media
+
+`\pc` / `\sf` markers (and LIFT `<urlref>`) name files that live in a media folder
+beside the export — ask the uploader for it if it wasn't included. Import the rows
+first, then attach the bytes: `POST …/entries/{entryId}/audio`,
+`…/senses/{senseId}/photos|videos`, `…/sentences/{sentenceId}/audio|photos|videos`
+with either multipart `file` or a JSON `url` the server fetches. Audio and video
+REQUIRE attribution — `speaker_id` (create speakers first) and/or `source`. For a
+one-pronunciation-per-headword import, send `replace: true` so re-runs don't stack
+duplicates.
 
 ## Gotchas
 

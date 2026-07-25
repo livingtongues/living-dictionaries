@@ -25,7 +25,7 @@ You are importing someone's language materials into a Living Dictionary through 
 8. Write in idempotent batches under one `import_id`, with a resumable ledger.
 9. Verify counts and spot-check content against the source.
 10. Leave a `review` task on every entry a human still has to decide.
-11. Report, and leave a reply the requester can be sent.
+11. Hand back a report: the questions the import raises first, then what was imported.
 
 Rushing to phase 2 is the classic failure mode: an import can be technically
 flawless and still wrong because the data wasn't understood. This is someone's
@@ -67,7 +67,8 @@ record from your first write, and filing the file signals that the job is underw
    the bytes — the object keeps its existing private storage key. It records the
    permanent association and shows the manager that the import is in progress.
    If one request contains materials from different works, create a source per work
-   and link each file to the right one.
+   and link each file to the right one. Filed resources stay under that source
+   permanently, downloadable by dictionary managers from the Sources page.
 3. Later revisions of the same work (a corrected export sent mid-job) become
    **additional files under the same source** — never overwrite the original.
 
@@ -224,6 +225,11 @@ dictionary-entry view, never a raw JSON dump, showing:
 - the exact final `review.category` + `review.note` for every queued entry (§2.3),
   displayed as the editor will see it.
 
+Give it a **table of contents at the top with jump links, and make every section
+collapsible** (`<details>`) — same structure as the report (§2.7). At import scale
+these documents are navigated, not scrolled: a reader wants to collapse everything,
+open the one section they care about, and find it instantly.
+
 The human reviews meaning and correctness; your job is to make that effortless.
 
 ### 1.6 Get sign-off, in batches
@@ -262,7 +268,8 @@ off on the preview do you enter phase 2.
 - Drive it from a **runner, not ad-hoc calls**: validate the payload before the
   first write, stop on the first failure, and persist a ledger (bound to a hash of
   the payload) after every batch so an interrupted run resumes instead of
-  double-writing.
+  double-writing. Keep that ledger and the `import_id` in the technical record —
+  after you're gone they are the only handle anyone has on the batch.
 - **Hard-fail any batch whose `results.length` differs from the chunk you sent.**
   A mismatch means the request didn't reach the endpoint as intended (a classic
   cause: an http→https or trailing-slash redirect silently turning your POST into
@@ -413,13 +420,43 @@ don't issue thousands of single DELETEs — remove the batch by its `import_id`:
 you used. If content predates your imports (or you've lost the ids), ask a Living
 Dictionaries admin to reset the dictionary instead.
 
-### 2.7 Report
+### 2.7 Report back to the human
 
-Tell the requester, in their language not yours: what was imported and how much,
-the decisions you made (cleanup rules applied, anything skipped, the source you
-registered), how many entries are waiting in their review queue and how to work
-through them, and anything still unresolved. Keep the `import_id` and your ledger
-in the technical record for whoever maintains the import.
+The preview (§1.5) is what the human approves; the **report** is what they keep. After
+the write, generate a `report.html` — same designed, readable HTML as the preview, with
+the same table of contents + collapsible sections — and hand it to the person whose
+material you imported. An import is not finished when the rows land; it is finished when
+the human knows what happened to their language data and what you need from them.
 
-The resources you filed under their source in §0.2 stay there permanently, and a
-dictionary manager can download them from the Sources page.
+**Put every question the import raises at the TOP, before any statistics.** This is the
+one artifact in the whole workflow with room to explain a question properly. A `review`
+note (§2.3) has to fit on an entry page and be answerable from that page alone; a chat
+message gets skimmed. The report can show the original rows, the record you produced from
+them, and why you hesitated — so do that, and do not compress a question into a one-liner
+just because the review note had to be one:
+
+- **One question per case**, in plain language, ending in an actual question.
+- **Show the evidence**: the source row(s) verbatim, and the record as it now exists.
+- **Link each question to the live entry** it concerns —
+  `https://livingdictionaries.app/{dictionaryId}/entry/{entryId}`. The entries exist by
+  now; a reader who can click through and fix the word while reading about it will.
+- **Separate whole-import questions from per-entry ones.** Provenance, an unexplained
+  symbol that recurs in dozens of forms, whether dialect labels should exist at all — one
+  answer to any of those can be applied in bulk, so they earn the top of the document. The
+  per-entry questions (your review queue, expanded) come after them.
+- Report a question **even when you resolved it by a defensible rule**, if a speaker could
+  overrule the rule. State what you did and why; that is not the same as leaving it open.
+- Say plainly what you did NOT import and why — a row you dropped is the one thing a human
+  cannot discover by browsing their own dictionary.
+
+Then, in this order: **what was imported** (the counts you verified in §2.4 against the
+live dictionary, not your staging numbers, and a statement that every source record is
+accounted for), **the decisions you applied** with a worked example of each rule, **the
+review queue** with how to work it (the "Needs review" filter and the Resolve button), and
+**what is still unresolved**.
+
+Write it for the dictionary's owner, not for another engineer: no field names, no code
+paths, no JSON, no internal ids, no talk of batches or endpoints. Say "meaning" and
+"alternate spelling", not `glosses` and `variant`. Keep the machine-facing facts (source
+slug, `import_id`, dates) to one small section at the end, for whoever picks the job up
+next.

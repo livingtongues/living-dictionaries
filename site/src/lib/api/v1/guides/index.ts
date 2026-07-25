@@ -19,7 +19,7 @@ const GUIDE_DESCRIPTIONS: Record<string, string> = {
   'importing': 'START HERE for any import job — the ordered runbook. Phase 0 set up (download the resources, register the source, file the resources under it); phase 1 data preparation (inspect, ask the human the linguistic questions inspection raises, stage locally as JSONL/SQLite, review the data by eye in bulk, clean, preview sign-off); phase 2 API usage (batching, idempotency, the human review queue, verification, repair/re-sync, rollback, reporting).',
   'spreadsheets': 'CSV/Excel/Google Sheets: column-mapping heuristics, multi-sense and multi-value cells, encoding traps.',
   'flex-lift': 'FLEx, LIFT, and Toolbox/Shoebox SFM-MDF: which export to prefer and the backslash-marker → API field map.',
-  'pdf-scans': 'Scanned printed dictionaries: front-matter legend, page-range workflow, diacritic fidelity, per-page citations.',
+  'pdf-scans': 'Scanned printed dictionaries: why NOT to use OCR (read every page with vision instead, zooming in on uncertain diacritics), front-matter legend, page-range workflow, diacritic fidelity, per-page citations.',
   'snapshot': 'Bulk reads without pagination: download the dictionary\'s gzipped SQLite snapshot, open it read-only, and query the key tables locally.',
 }
 
