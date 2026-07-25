@@ -500,6 +500,12 @@ scripted "expand all" button will silently do nothing. Inline your CSS in a `<st
 (`style-src 'unsafe-inline'` is granted); external stylesheets, fonts, images, and scripts
 are all blocked, so keep the document self-contained.
 
+Two consequences worth designing for up front: any `<details>` an anchor points INTO must
+be `open` by default (without script you cannot rely on a jump expanding a collapsed
+section), and every internal link should target **the specific item**, not the section
+heading it lives under — give each write-up its own `id`. An index of 28 rows whose links
+all land at the top of one section is an index that does not work.
+
 #### Then file the questions as answerable objects
 
 The whole-import questions from the top of the report also go in as **real objects the

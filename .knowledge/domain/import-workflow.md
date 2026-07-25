@@ -86,11 +86,20 @@ what's ours alone:
    report can be regenerated verbatim if we need to correct it. Artifacts are frozen
    snapshots — to fix one, post a new one rather than editing in place.
 3. Post the short closing message LAST: that's the thing that emails the manager, so it
-   should be the moment everything else is already visible on the page.
+   should be the moment everything else is already visible on the page. Only that POST
+   (and a question *answer*) notifies — `POST …/artifacts` and `POST …/questions` are
+   silent. **Use that:** file the report and the questions, let Jacob read the page, and
+   keep the one irreversible step for after his go-ahead.
 4. Tell Jacob in-session that it's ready. He reads it at `/admin/imports` (the only
    cross-dictionary view — these never hit the inbox) and clicks **Resolve**. Resolving
    is bookkeeping for our queue only: it does not lock, hide, or close anything, and the
-   manager keeps posting there forever.
+   manager keeps posting there forever. Revoke the per-dict API key at the same time.
+
+**Never write an internal note into an import thread.** Every `messages` row in it
+renders on the manager's conversation page — the design has no private side. Engineering
+records (backup paths, payload hashes, key ids, rollback handles) belong in
+`.issues/{dict}-import.md`. Two pre-conversation threads had to be repaired for exactly
+this (`20260725b_import_legacy_conversation_messages.sql`).
 
 Design decisions, and the audit that produced them, are in
 `.issues/import-conversations.md`.

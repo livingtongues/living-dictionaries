@@ -219,6 +219,13 @@ this skill.
 5. **Schema changes** belong in a migration file (deploy → `hooks.server.ts` applies on boot), not
    ad-hoc SQL. If you must run one live, stop **both** app containers first (`docker stop
    sveltekit_blue sveltekit_green`) to avoid WAL corruption — under blue/green both have the DB open.
+   **One-off DATA repair is the opposite — fix it surgically here, never as a migration** (Jacob,
+   2026-07-25). A migration that will only ever match rows once is permanent clutter in the chain.
+   The safe shape for live surgery: a `node` script that reads the affected rows, prints a plan of
+   `action | id | new value`, exits unless `APPLY=1`, then writes in ONE transaction and prints the
+   after-state + `integrity_check`. Back up first (rule 6), dry-run it, then
+   `ssh living 'docker exec -i -e APPLY=1 sveltekit_blue node' < fix.js`. Record what you did in the
+   relevant `.issues/` file — that file becomes the only history of the change.
 6. **Back up before destructive `shared.db` / high-value per-dict ops** — see `backup-vps-db.md` for
    the online-backup → R2 pattern; quick ad-hoc:
    `ssh living 'sudo cp /opt/hosting/data/shared.db /opt/hosting/data/shared.db.bak-$(date -u +%Y%m%d-%H%M%S)'`.

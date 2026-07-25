@@ -324,7 +324,7 @@
           <div class="speed-sub">p95 {format_ms(navigation_metric?.p95 ?? null)} · n={format_number(navigation_metric?.count ?? 0)}{#if (navigation_metric?.count ?? 0) > 0 && is_thin_sample(navigation_metric?.count)}<span class="thin-mark" title="thin data — under {THIN_SAMPLE_N} samples">*</span>{/if}</div>
           {#if nav_within || nav_entering}
             <div class="speed-sub">
-              {#if nav_within}inside a dictionary {format_ms(nav_within.p50)}{/if}{#if nav_within && nav_entering} · {/if}{#if nav_entering}entering one {format_ms(nav_entering.p50)}{/if}
+              {#if nav_within}inside a dictionary {format_ms(nav_within.p50)}{/if}{nav_within && nav_entering ? ' · ' : ''}{#if nav_entering}entering one {format_ms(nav_entering.p50)}{/if}
             </div>
           {/if}
           {#if navigation_spark.length > 1}

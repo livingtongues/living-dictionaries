@@ -239,8 +239,23 @@ and flagged, and `á`/`ó`/`é` are real one-vowel words.
   key = the attachment id) — downloadable from `/admin/messages/c19c206d…`.
 - `triage_draft_reply` set (2,148 chars, cover-note style), `updated_at` +
   `last_message_at` bumped in the same UPDATE (thread server_seq 186423).
-- **NOT SENT** — waiting on Jacob. He downloads the report from that message,
-  presses "use draft", attaches it, sends, and resolves the thread.
+- **SUPERSEDED 2026-07-25 by import conversations.** Both of the above are gone:
+  the technical summary was an internal note that the new manager-facing
+  conversation page would have shown the requester, so it was tombstoned on the
+  live shared.db (this issue file is its record), and the emailed-attachment flow
+  no longer exists.
+- **Where the hand-back lives now:** the import conversation
+  `/eastern-pomo/import/c19c206d-6fad-41b0-9bf1-36f6e3a1a0cb`. Filed on prod
+  2026-07-25 08:38Z: report artifact `6829314a-9722-4a22-81cd-bb6cb134eee0`
+  (82,882 bytes) + all 6 questions, `stats {entries:1827, senses:2018,
+  review_flags:28}`. Filing an artifact or questions emails NOBODY — verified
+  `last_notified_at` still NULL on both participants.
+- **SENT 2026-07-25 08:53:34Z** with Jacob's go-ahead — the short closing message
+  (`post-closing-message.mjs`), which is the only call that emails jcirelli.
+  Delivery confirmed via the participant `last_notified_at` stamp + clean logs.
+- Afterwards: stale `triage_draft_reply` cleared, key
+  `4029ec89-ca2f-4540-94ed-4424ac9be60c` revoked (401 confirmed), token file
+  deleted. **Remaining: Jacob clicks Resolve at `/admin/imports`.**
 - Follow-up cron: horse job **`c-660936`**, 2026-08-25 09:00, living-dictionaries —
   revisit the 139 `sentence-row-recategorize` entries (and how many review flags got
   resolved) and recommend, without converting anything unasked.
@@ -254,6 +269,9 @@ and flagged, and `á`/`ó`/`é` are real one-vowel words.
 `~/import-work/eastern-pomo/` on mustang — `raw.xlsx`, `stage.py`, `review.py`,
 `chunk-01..18.txt`, `decisions.json`, `apply.py`, `payload.json`, `artifact.py`,
 `preview.py`/`preview.html`, `report.py`/`report.html`, `verification.json`,
-`run_import.py`/`ledger.json`, `api-token.private` (now revoked).
+`run_import.py`/`ledger.json`, `file-report-and-questions.mjs` (files the report +
+questions; prod by default, `BASE=http://localhost:3041` for dev),
+`post-closing-message.mjs`, `api-key-id.private` (the 2026-07-25 key `4029ec89-…`,
+revoked; the token file is deleted).
 Recreate the venv with
 `uv venv .venv && uv pip install --python .venv/bin/python openpyxl pyspellchecker`.

@@ -70,7 +70,7 @@
         <span class="chip warn">Missing {missing_tokens.join(' ')}</span>
       {/if}
       {#if row.updated_at}
-        <span class="when" title={row.updated_at}>{#if !row.needs_review && row.updated_by_name}{row.updated_by_name} · {/if}{format_relative_time(row.updated_at)}</span>
+        <span class="when" title={row.updated_at}>{!row.needs_review && row.updated_by_name ? `${row.updated_by_name} · ` : ''}{format_relative_time(row.updated_at)}</span>
       {/if}
       {#if dirty}
         <button type="button" class="btn-primary btn-sm" disabled={saving} onclick={save}>

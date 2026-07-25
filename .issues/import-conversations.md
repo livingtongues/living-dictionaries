@@ -314,10 +314,60 @@ Triage never touches them (it only runs on inbound email classification).
   artifact + questions → manager answers → notification rows asserted in
   `.data/shared.db`.
 
-## Then: finish Eastern Pomo — BLOCKED ON DEPLOY
+## Post-deploy sweep (2026-07-25, after Jacob shipped it)
 
-The report work is done; the production steps cannot run until this ships,
-because the migration has to create the tables on the VPS first.
+Deploy confirmed on the VPS: `20260725_import_conversations.sql` ran at
+08:23:28Z, the three child tables exist, and the backfill stamped
+`thread_kind='import'` + `started_at` + participants on all four legacy threads
+('Iipay Aa, Eastern Pomo, Ponca, Enxet).
+
+**The gap the backfill missed — legacy MESSAGES.** Every message in an import
+thread now renders to the manager, and those four threads were written when an
+import request was an admin-inbox EMAIL. So on prod, live, the requester could
+see:
+
+1. the first message of each thread — the **agent kickoff runbook** (auth
+   header, "read the guides", `.knowledge/domain/import-workflow.md`, an
+   outdated step 6). New requests never store this (it's derived at
+   `…/conversations/{id}/brief`), but the old rows still carried it.
+2. Eastern Pomo's 3,645-char **internal engineering note** — VPS backup paths,
+   payload sha256, the revoked API key id, `.issues/` filenames, and a closing
+   instruction to "download the report from this message and attach it when
+   sending" alongside an attachment that no longer exists.
+3. Enxet's metadata follow-up as a **`customer` bubble** reading "Import
+   resource metadata updated by Jacob <jwrunner7@gmail.com>" — the exact defect
+   fixed in code for new rows, still sitting in the old one.
+
+✅ **Repaired surgically on the live shared.db, not by a migration.** Jacob's
+call, and the right one: a data fix that will only ever run once does not belong
+in the migration chain, where it is dead weight forever. (A migration + test was
+written first and deleted — don't reach for that shape again for one-off data.)
+Each thread now looks like a request written today: the requester's note becomes
+the whole first message (or there is no first message, if they wrote no note),
+machine follow-ups become plain-voice `system` events, and the engineering notes
+are tombstoned — their home is `.issues/{dict}-import.md`.
+
+The script pattern that made it safe (worth reusing for any live-data surgery):
+build the plan by reading rows, print it with `action | id | new value`, exit
+unless `APPLY=1`, then write inside one transaction and print the after-state.
+`ssh living 'docker exec -i -e APPLY=1 sveltekit_blue node' < script.js`, with a
+`sudo cp` backup of shared.db first.
+
+Result: eastern-pomo 2 messages → 0, enxet → one 42-char system line, iipay-aa →
+Vincent's 107-char note, ponca → 0. `integrity_check` ok, no FK violations, 4
+tombstones carrying `server_seq` so admin clients drop them too.
+
+### Also fixed: a separator swallowed by Svelte whitespace trimming
+
+The artifact header rendered "28 review flags ·7/25/2026" — a literal ` · ` at
+the end of an `{#if}` block loses its trailing space when Svelte trims at the
+block edge. `ArtifactBlock` now joins the meta line in the script. The same
+construct was live in two other places and is fixed there too:
+`translate-row.svelte` and `admin/health/HealthView.svelte`. (Note for next
+time: `{' · '}` also works but the `svelte/no-useless-mustaches` lint rejects
+it — use an expression or join in the script.)
+
+## Then: finish Eastern Pomo — DONE, handed to the requester 2026-07-25
 
 - ✅ `report.html` regenerated with the de-dup pass. `report.py` now carries an
   `explained_above` registry (questions declare `covers=[…]`), so an entry a
@@ -333,11 +383,41 @@ because the migration has to create the tables on the VPS first.
   enhancement — hidden by CSS, revealed by the script — and every section that
   anchors point into is `open` by default. Verified by serving the real 79 KB
   report through the dev artifact endpoint: `#q3` lands on question 3 with no JS.
-- ⏳ **Needs deploy first**, then: `PATCH …/conversations/{tid}` is unnecessary
-  (the migration backfills `started_at`), `POST …/artifacts` with `report.html`,
-  `POST …/questions` with the 6 (raised-dot as a `choice`: boundary / long vowel /
-  both / not sure), clear the stale `triage_draft_reply`, and post the short
-  closing message. The exact question payload is in `/tmp/upload-real-report.mjs`
-  on mustang — regenerate it rather than trusting that path to survive.
-- ⏳ Requires a fresh per-dict API key (the old one was revoked 2026-07-25).
-- ⛔ **Nothing goes to the requester without Jacob's explicit go-ahead.**
+- ✅ The review-queue index now jumps to the **specific** write-up (`#rq-1`…
+  `#rq-27`, or the general question's `#qN` for the one word it already covers)
+  instead of sending all 28 rows to the section heading. Verified with JS off:
+  `#rq-14` lands on `phaatáy`, the same word its index row names, no duplicate ids.
+- ✅ Fresh per-dict write key minted on prod (`4029ec89-…`, attributed to Jacob),
+  used for the whole hand-back, then **revoked** 08:54:37Z — confirmed 401
+  afterwards, token file deleted.
+- ✅ **Report + all 6 questions FILED on production** —
+  artifact `6829314a-9722-4a22-81cd-bb6cb134eee0`, 82,882 bytes, `import_id` and
+  `source_id` attached, stats `{entries:1827, senses:2018, review_flags:28}`.
+  Neither endpoint notifies anyone (only `POST …/messages` and a question ANSWER
+  do), so this landed silently — which is exactly what made it possible to stage
+  the whole page and keep the one irreversible step for last. Verified the
+  artifact fetches back byte-identical (sha256 match) under
+  `default-src 'none'` with no `script-src`, `nosniff`, `frame-ancestors 'self'`.
+- ✅ The filing script is now real and reusable at
+  `~/import-work/eastern-pomo/file-report-and-questions.mjs` (prod by default,
+  `BASE=…` for dev) — it replaces the throwaway `/tmp` one.
+- ✅ Manager's-eye verification: filed the same artifact + 6 questions onto the
+  dev `achi` conversation and screenshotted `/achi/import/{id}` as the manager —
+  report inline in the sandboxed frame (script execution blocked, as designed),
+  "Questions for you · 0 of 6 answered", radios on the raised-dot question,
+  "full context in the report" deep links, composer below. Fixture removed after.
+- ✅ **Closing message SENT** at 08:53:34Z with Jacob's go-ahead, after the legacy
+  messages were cleaned — three short paragraphs pointing at the report and the
+  questions, nothing of the report's contents repeated
+  (`~/import-work/eastern-pomo/post-closing-message.mjs`). It posts as
+  `author_kind='agent'` attributed to Jacob, so the manager sees "Jacob · Our
+  team". SES delivery confirmed by the `last_notified_at` stamp (only written
+  after a successful send) plus no `import_conversation_email_failed` in the
+  logs; the outbound RFC `message_id` was written back onto the message row, so a
+  stray inbox reply threads straight back into the conversation.
+- ✅ Stale `triage_draft_reply` cleared (2,148 chars of the dead
+  attach-to-an-email workflow) with `dirty = 1` so admin clients pick it up.
+- ⏳ **Jacob:** read it at `/admin/imports` and click **Resolve** — the queue
+  bookkeeping. Nothing locks; jcirelli keeps posting there forever.
+- Follow-up cron already scheduled: horse job `c-660936`, 2026-08-25, to revisit
+  the 139 `sentence-row-recategorize` entries and the review queue.

@@ -32,15 +32,17 @@
       return ''
     }
   })
+
+  // Joined here rather than in the markup: Svelte trims whitespace at a block
+  // edge, so a literal ` · ` inside an `{#if}` loses its trailing space.
+  const meta = $derived([summary, format_date_time(artifact.created_at)].filter(Boolean).join(' · '))
 </script>
 
 <section class="artifact">
   <header>
     <div class="titles">
       <h4>{artifact.title || t('import_page.report_heading')}</h4>
-      <p class="summary">
-        {#if summary}{summary} · {/if}{format_date_time(artifact.created_at)}
-      </p>
+      <p class="summary">{meta}</p>
     </div>
     <div class="actions">
       <a class="btn btn-sm" href={src} target="_blank" rel="noopener">
