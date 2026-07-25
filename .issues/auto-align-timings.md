@@ -84,12 +84,11 @@ Interview complete 2026-07-23/24 — ALL decisions below are Jacob-approved. Bui
    catalog row in `+layout.server.ts`. 6 EN `timings.*` keys.
 6. ✅ **Modal app deployed** `ld-forced-aligner` (jacob-8 account) →
    `https://jacob-8--ld-forced-aligner-forcedalignment-align.modal.run`; verified live.
-   ✅ **PROD ENV WIRED (tuf):** added `MODAL_ALIGN_URL=<that url>` to
-   `vps-setup/secrets-decrypted/sveltekit-living.env` and ran `bin/sync living --env-only`;
-   verified the exact value remotely and verified normalized local/remote env contents match.
-   The remaining deployment action is pushing LD `main`.
-   Until then prod align attempts fail cleanly (no dict has `align_config` in prod yet, so the
-   button is hidden anyway). Dev needs NOTHING (local CPU runner via `alignment/`).
+   ✅ **DEPLOY STEP:** `MODAL_ALIGN_URL` added to the production environment and LD deployed.
+   Read-only production verification on 2026-07-24 confirmed the env var is present, the
+   `20260724a_align.sql` migration ran, and the `align_config` column + `align_jobs` table are live.
+   No dictionary has `align_config` yet, so the feature remains hidden until its first white-glove
+   rollout. Dev needs NOTHING (local CPU runner via `alignment/`).
 7. ✅ **Verification**: local CLI align; vitest **1944 passed**; tsc/eslint clean on the align
    surface; browser e2e `/tmp/ld-m6-e2e.mjs` **28/28** (config→sync→attach→auto-align→karaoke→
    editor→re-align confirm→sentence-level→v1 400/404/404/429→teardown, screenshot

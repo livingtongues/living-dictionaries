@@ -10,6 +10,7 @@
   import { page } from '$app/state'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import { get_orthographies } from '$lib/orthography/orthographies'
+  import { get_review_category_label } from '$lib/entry/review-category'
 
   interface Props {
     search_params: QueryParamState<QueryParams>
@@ -27,8 +28,8 @@
     total,
   }: Props = $props()
 
-  const { tags, dialects, speakers, sources, dictionary, can_edit } = $derived(page.data)
-  const source_labels = $derived(Object.fromEntries(($sources || []).map(source => [source.slug, source.abbreviation || source.citation || source.slug])))
+  const { sources, dictionary, can_edit } = $derived(page.data)
+  const source_labels = $derived(Object.fromEntries((sources || []).map(source => [source.slug, source.abbreviation || source.citation || source.slug])))
   // The primary/default orthography only appears as a filter option once it's been given a
   // name in settings — an unnamed 'default' would otherwise show as that raw, meaningless code.
   const orthography_labels = $derived.by(() => {
@@ -45,6 +46,10 @@
     Object.entries(result_facets?._orthographies?.values ?? {})
       .filter(([key]) => key in orthography_labels)
       .filter(([key, count]) => count !== total || search_params.value.orthographies?.includes(key)),
+  ))
+  const review_category_labels = $derived(Object.fromEntries(
+    Object.keys(result_facets?._review_categories?.values ?? {})
+      .map(category => [category, get_review_category_label(category)]),
   ))
 </script>
 
@@ -76,6 +81,7 @@
               {search_params}
               search_param_key="review_categories"
               values={result_facets._review_categories.values}
+              keys_to_values={review_category_labels}
               label={page.data.t({ dynamicKey: 'entry.review_category', fallback: 'Review category' })} />
           {/if}
           <hr />

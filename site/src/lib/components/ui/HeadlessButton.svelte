@@ -15,6 +15,7 @@
     loading?: boolean
     class?: string
     style?: string
+    aria_label?: string
     children?: import('svelte').Snippet
   }
 
@@ -31,6 +32,7 @@
     loading = $bindable(false),
     class: classes = undefined,
     style: inline_style = undefined,
+    aria_label = undefined,
     children,
   }: Props = $props()
 
@@ -71,7 +73,8 @@
     {target}
     rel={rel ?? (target === '_blank' ? 'noopener noreferrer' : undefined)}
     class={classes}
-    style={inline_style}>
+    style={inline_style}
+    aria-label={aria_label}>
     {@render children?.()}
     {#if showExternalLinkIcon}
       <IconTablerExternalLink style="vertical-align: -2px" />
@@ -85,7 +88,8 @@
     {title}
     onclick={runWithSpinner}
     oncontextmenu={right_with_spinner}
-    disabled={disable}>
+    disabled={disable}
+    aria-label={aria_label}>
     {@render children?.()}
     {#if loading}
       <IconGgSpinner class="headless-spinner" style="vertical-align: -2px; margin-left: 0.25rem; margin-right: -0.25rem;" />

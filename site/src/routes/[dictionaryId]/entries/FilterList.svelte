@@ -34,7 +34,8 @@
     search_params.value[search_param_key] = search_params.value[search_param_key].filter((existing_item: string) => existing_item !== item)
   }
 
-  function make_item_readable(_item: string, _keys_to_values: Record<string, string>) {
+  function make_item_readable(_item: string, _keys_to_values?: Record<string, string>) {
+    if (_keys_to_values?.[_item]) return _keys_to_values[_item]
     const item = restore_spaces_periods_from_underscores(_item)
     return _keys_to_values?.[item] || item
   }

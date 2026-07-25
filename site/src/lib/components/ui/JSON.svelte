@@ -26,7 +26,11 @@
 
 <ShowHide>
   {#snippet children({ show, toggle })}
-    <HeadlessButton class="btn-ghost btn-default" onclick={toggle}>
+    <HeadlessButton
+      class="btn-ghost btn-default"
+      onclick={toggle}
+      title="View JSON"
+      aria_label="View JSON">
       <IconFaSolidCode />
     </HeadlessButton>
     {#if show}

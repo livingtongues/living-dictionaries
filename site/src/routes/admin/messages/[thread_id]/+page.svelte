@@ -350,10 +350,12 @@
                   </span>
                 </li>
               {:else}
-                <li class="att-item">
-                  <IconMdiPaperclip />
-                  {att.filename}
-                  <span class="att-size">({format_bytes(att.size_bytes)})</span>
+                <li>
+                  <a class="att-item" href={message_attachment_url(att.id)} download={att.filename}>
+                    <IconMdiPaperclip />
+                    {att.filename}
+                    <span class="att-size">({format_bytes(att.size_bytes)})</span>
+                  </a>
                 </li>
               {/if}
             {/each}
@@ -565,6 +567,11 @@
     border-radius: 0.375rem;
     background: var(--background);
     color: var(--color);
+    text-decoration: none;
+  }
+  .att-item:hover {
+    color: var(--primary);
+    text-decoration: underline;
   }
   .att-size {
     color: var(--color-secondary);

@@ -1,16 +1,18 @@
 <script lang="ts">
-  import type { EntryReview } from '$lib/db/schemas/dictionary.types'
+  import type { EntryReview, SourceCitation } from '$lib/db/schemas/dictionary.types'
   import { page } from '$app/state'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
+  import { get_review_category_label } from '$lib/entry/review-category'
   import IconFaSolidExclamationTriangle from '~icons/fa-solid/exclamation-triangle'
 
   interface Props {
     review: EntryReview
+    citations?: SourceCitation[] | null
     /** Clears the flag ("Resolve"). */
     onresolve: () => void
   }
 
-  const { review, onresolve }: Props = $props()
+  const { review, citations = [], onresolve }: Props = $props()
 </script>
 
 <!-- EDITOR-ONLY: the caller renders this only when `can_edit`, and non-editor
@@ -20,9 +22,22 @@
   <div class="review-body">
     <div class="review-head">
       <span class="review-title">{page.data.t?.({ dynamicKey: 'entry.needs_review', fallback: 'Needs review' }) ?? 'Needs review'}</span>
-      {#if review.category}<span class="review-category">{review.category}</span>{/if}
+      {#if review.category}<span class="review-category">{get_review_category_label(review.category)}</span>{/if}
     </div>
     {#if review.note}<div class="review-note">{review.note}</div>{/if}
+    {#if citations.length}
+      <details class="source-details">
+        <summary>{page.data.t?.({ dynamicKey: 'entry.source_details', fallback: 'Source details' }) ?? 'Source details'}</summary>
+        <ul>
+          {#each citations as citation (`${citation.slug}:${citation.locator ?? ''}`)}
+            <li>
+              <span>{citation.slug}</span>
+              {#if citation.locator}<span class="source-locator"> · {citation.locator}</span>{/if}
+            </li>
+          {/each}
+        </ul>
+      </details>
+    {/if}
   </div>
   <HeadlessButton class="btn-outline btn-sm review-resolve" onclick={onresolve}>
     {page.data.t?.({ dynamicKey: 'entry.resolve_review', fallback: 'Resolve' }) ?? 'Resolve'}
@@ -81,8 +96,45 @@
     color: color-mix(in srgb, var(--color) 85%, var(--background));
   }
 
+  .source-details {
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+    color: color-mix(in srgb, var(--color) 68%, var(--background));
+  }
+
+  .source-details summary {
+    cursor: pointer;
+    width: fit-content;
+  }
+
+  .source-details ul {
+    margin: 0.25rem 0 0;
+    padding-left: 1.25rem;
+  }
+
+  .source-locator {
+    font-variant-numeric: tabular-nums;
+  }
+
   .review-banner :global(.review-resolve) {
     flex-shrink: 0;
     align-self: center;
+  }
+
+  @media (max-width: 30rem) {
+    .review-banner {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .review-body,
+    .review-banner :global(.review-resolve) {
+      grid-column: 2;
+    }
+
+    .review-banner :global(.review-resolve) {
+      justify-self: start;
+      align-self: start;
+    }
   }
 </style>

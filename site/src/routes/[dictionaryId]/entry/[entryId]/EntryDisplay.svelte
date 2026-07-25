@@ -58,7 +58,10 @@
 </script>
 
 {#if can_edit && fields?.review}
-  <ReviewBanner review={fields.review} onresolve={() => save_entry({ review: null })} />
+  <ReviewBanner
+    review={fields.review}
+    citations={fields.citations}
+    onresolve={() => save_entry({ review: null })} />
 {/if}
 
 <div class="media-on-right-grid">

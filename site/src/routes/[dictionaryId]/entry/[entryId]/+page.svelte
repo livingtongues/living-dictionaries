@@ -39,6 +39,14 @@
 
   let show_history = $state(false)
 
+  function go_back() {
+    if (history.length > 1) {
+      history.back()
+    } else {
+      window.location.href = `/${dictionary.url}/entries`
+    }
+  }
+
   // One `entry_opened` per entry viewed (re-fires on navigation to another entry).
   let last_opened_entry_id = ''
   $effect(() => {
@@ -157,46 +165,40 @@
   class:raised={shallow}
   class="action-bar">
   <HeadlessButton
-    class="btn-ghost btn-default entry-back-button"
-
-    onclick={() => {
-      if (history.length > 1) {
-        history.back()
-      } else {
-        window.location.href = `/${dictionary.url}/entries`
-      }
-    }}>
+    class="btn-ghost entry-back-button"
+    title={page.data.t('misc.back')}
+    aria_label={page.data.t('misc.back')}
+    onclick={go_back}>
     <IconArrowLeft class="rtl-x-flip" />
-    {page.data.t('misc.back')}
   </HeadlessButton>
 
-  <div>
+  <div class="entry-actions">
     {#if dev || auth_user.admin_level >= 3}
       <JSON obj={entry} />
     {/if}
     {#if can_edit}
       <HeadlessButton
         style="color: var(--danger)"
-        class="btn-ghost btn-default"
+        class="btn-ghost entry-delete-button"
+        title={page.data.t('misc.delete')}
+        aria_label={page.data.t('misc.delete')}
         onclick={async () => {
           const confirmation = confirm(page.data.t('entry.delete_entry'))
-          if (confirmation) await writes.delete_entry(entry.id)
-          history.back()
+          if (confirmation) {
+            await writes.delete_entry(entry.id)
+            go_back()
+          }
         }}>
-
-        <span class="delete-label">
-          {page.data.t('misc.delete')}
-        </span>
-        <IconTrash class="icon-gap" />
+        <IconTrash />
       </HeadlessButton>
     {/if}
-    {#if !shallow}
-      <HeadlessButton class="btn-ghost btn-default entry-share-button" onclick={() => share(dictionary.url, entry)}>
-        <span>{page.data.t('misc.share')}</span>
-        <div style="width: 0.5rem"></div>
-        <IconShareSquare class="rtl-x-flip" />
-      </HeadlessButton>
-    {/if}
+    <HeadlessButton
+      class="btn-ghost entry-share-button"
+      title={page.data.t('misc.share')}
+      aria_label={page.data.t('misc.share')}
+      onclick={() => share(dictionary.url, entry)}>
+      <IconShareSquare class="rtl-x-flip" />
+    </HeadlessButton>
     {#if is_manager && dict_db}
       <button
         type="button"
@@ -263,37 +265,26 @@
   }
 
   .action-bar :global(.entry-back-button) {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
-  }
-
-  .delete-label {
-    display: none;
-  }
-
-  @media (min-width: 768px) {
-    .delete-label {
-      display: inline;
-    }
-  }
-
-  .icon-gap {
-    margin-left: 0.25rem;
-  }
-
-  .action-bar :global(.entry-share-button) {
-    display: inline-flex !important;
-    align-items: center;
-  }
-
-  .entry-history-button,
-  .entry-star-button {
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2.5rem;
+    height: 2.5rem;
     padding: 0;
-    color: var(--primary);
-    font-size: 1.375rem;
-    vertical-align: middle;
+    font-size: 1.25rem;
+  }
+
+  .entry-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.125rem;
+  }
+
+  .entry-actions > :global(button) {
+    flex: 0 0 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    font-size: 1.25rem;
+    line-height: 1;
   }
 
   .entry-star-button {
@@ -302,6 +293,10 @@
 
   .entry-star-button.starred {
     color: var(--warning);
+  }
+
+  .entry-history-button {
+    color: var(--primary);
   }
 </style>
 

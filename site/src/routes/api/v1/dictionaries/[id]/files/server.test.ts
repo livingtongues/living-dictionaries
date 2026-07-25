@@ -216,6 +216,13 @@ describe(REQUEST_IMPORT, () => {
       .rejects.toMatchObject({ status: 400 })
   })
 
+  test('400 when a file is already completed under a source', async () => {
+    const file = await register_file()
+    shared_db.prepare(`UPDATE source_files SET upload_confirmed_at = '2026-07-17T00:00:00Z', import_instructions = 'Import all entries.', source_id = 'src-1' WHERE id = ?`).run(file.id)
+    await expect(REQUEST_IMPORT(event({ handler: 'request', token: await manager_token(), body: { file_ids: [file.id] } })))
+      .rejects.toMatchObject({ status: 400, body: expect.objectContaining({ message: expect.stringContaining('completed source') }) })
+  })
+
   test('creates an assigned thread with an agent-ready body and stamps the files', async () => {
     const file = await register_file()
     shared_db.prepare(`UPDATE source_files SET upload_confirmed_at = '2026-07-17T00:00:00Z', import_instructions = 'Import all entries; skip the intro pages.' WHERE id = ?`).run(file.id)
@@ -236,6 +243,8 @@ describe(REQUEST_IMPORT, () => {
     expect(message.body_text).toContain('This is a 1979 published dictionary.')
     expect(message.body_text).toContain('/api/v1/guides/importing')
     expect(message.body_text).toContain('Dictionary id: dict-1')
+    expect(message.body_text).toContain('after the imported data passes verification')
+    expect(message.body_text).toContain('Do not set source_id before verification')
 
     const stamped = shared_db.prepare('SELECT import_requested_at, import_thread_id FROM source_files WHERE id = ?').get(file.id) as Record<string, string>
     expect(stamped.import_thread_id).toBe(thread_id)

@@ -117,7 +117,11 @@ export interface HostedElsewhere {
 export interface EntryReview {
   /** Short bucket label for triage/faceting, e.g. `truncated`, `guarani_split`, `other`. */
   category: string
-  /** The specific thing to check (may enumerate senses); shown in the editor-only banner. */
+  /**
+   * A self-contained, plain-language task for the human reviewer. Include the
+   * complete original/imported values needed to decide; keep provenance in the
+   * entry's structured `citations`, which the banner renders separately.
+   */
   note: string
 }
 

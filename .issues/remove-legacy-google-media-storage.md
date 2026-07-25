@@ -89,6 +89,16 @@ Design decisions from Jacob:
   the snapshot at 2026-07-24T10:55:12Z; the public object has the matching new Last-Modified value
   and contains zero copies of the dead audio row. The authoritative snapshot queue is back to zero.
 - ✅ Completed final production snapshot verification and stopped before deployment.
+- ✅ Confirmed commit `bfcd4bd3` deployed, removed `PUBLIC_STORAGE_BUCKET` and
+  `PROCESS_IMAGE_URL` from both live VPS env copies, and force-recreated green then blue behind
+  health gates. Both containers have zero obsolete variables and still have the two deferred
+  private HMAC credentials. External verification: homepage and `/healthz` return 200, the removed
+  `/api/gcs_serving_url` returns 404, homepage HTML contains no legacy media reference, and the
+  R2 default SEO asset returns 200 with its immutable one-year cache policy.
+- ⏳ Remove the same two variables from the canonical tuf file
+  `vps-setup/secrets-decrypted/sveltekit-living.env`, then run
+  `bin/sync living --env-only`. This only prevents a future sync from restoring them; the active
+  containers are already clean.
 
 ## Audit result — 2026-07-24 (historical baseline, resolved above)
 
@@ -246,9 +256,10 @@ The living VPS still configures:
 
 Required sequence after the R2-only deploy and data verification:
 
-1. Immediately remove `PUBLIC_STORAGE_BUCKET` and `PROCESS_IMAGE_URL` from the canonical living env
-   and deployed VPS env, then restart. The former is exposed by `$env/dynamic/public` even with no
-   code reference.
+1. ✅ Removed `PUBLIC_STORAGE_BUCKET` and `PROCESS_IMAGE_URL` from the deployed VPS env and
+   recreated both app containers. The former would be exposed by `$env/dynamic/public` if left.
+   The matching canonical tuf edit and `bin/sync living --env-only` remain as the one local
+   follow-up so a future sync cannot restore the variables.
 2. Leave the private HMAC env entries and storage resources untouched for the one-month safety
    window.
 3. At the scheduled 2026-08-24 audit, remove the private HMAC env entries, revoke the credentials,

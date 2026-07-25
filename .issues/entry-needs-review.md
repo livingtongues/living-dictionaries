@@ -65,8 +65,155 @@ no-gloss, misc).
       harness quirk, untouched/unrelated). `tsc`: only the concurrent media-WIP `serving_url` errors.
       `eslint`: 0 errors. `svelte-check`: clean for my components.
 - ✅ svelte-look screenshots of the banner (light+dark, all flavors).
-- [ ] NEXT: run Enxet import with `review` populated per flag→category (tracked in enxet-import.md).
+- ✅ Enxet import ran with `review` populated; the follow-up audit below then
+      rewrote 317 actionable reviews and removed 181 stale ones.
 
 ## Notes
 - Horse `<Followup>` rendering bug (nested question answers) delegated to a spawned Opus horse
   session (`d4eade6f`) → `~/code/horse/.issues/followup-rendering-bug.md`.
+
+## Follow-up — write for the human reviewer, not the importing agent (2026-07-24)
+
+Jacob reviewed the production Enxet banners and found that the current notes mix
+three different concerns into one programmer-facing sentence:
+
+1. the human review task;
+2. the importer's implementation terminology (`glosses.gn`, "record boundary");
+3. the agent traceback (`source l. 15873`).
+
+The reviewer only has the entry page in front of them. The banner must contain
+enough plain-language information to make the decision there; it must not tell a
+human to open or parse the source file. Source provenance should be a separate,
+structured, visually secondary line for a future agent.
+
+### Code/data audit
+
+- The category chip currently renders the raw free-string key, so
+  `language_split` / `dropped_text` leak programmer-style underscores. The
+  entries-list facet already humanizes underscores; the banner does not.
+- `EntryReview` is currently `{ category, note }`. Every imported Enxet entry
+  already has structured entry-level `citations: [{ slug: "enxet-lexicon",
+  locator: "l. …" }]`, so the banner can render the requested source line from
+  existing normalized provenance instead of duplicating it inside `review`.
+- All 498 Enxet notes use agent-oriented templates containing source line
+  numbers and verbs such as "verify against the source", "inspect", or
+  "compare". The 43 language-split notes additionally expose the storage field
+  name `glosses.gn`.
+- The 38 `dropped_text` entries reveal a deeper stale-flag problem. Those flags
+  were assigned before the parser recovered 35 headwords whose `\lx` marker was
+  missing. In final staging, 36 of the 38 entries have no other review finding
+  and no longer need human review at all; 4 entries retain a different valid
+  concern after removing the obsolete flag. Keeping these banners would ask a
+  human to verify an already-resolved parser repair.
+- Removing only the stale `stray_text_dropped` concern changes the Enxet queue
+  from 498 to **462** entries:
+  - `truncated` 200
+  - `headword_in_gloss` 141
+  - `language_split` 43
+  - `other` 33
+  - `uncertain_plural` 29
+  - `missing_gloss` 16
+
+### Initial direction before the full 498-item audit (superseded where noted below)
+
+- Keep stable category keys in data/search, but display them as human labels
+  (`language split`, `headword in gloss`).
+- Keep `review.note` exclusively human-facing: plain language, explicit
+  before/after values, and a concrete question/action. It may name "Sense 2"
+  when needed, but never a source line, JSON/database field, or instruction to
+  inspect the source.
+- Render a separate subdued source line from `entry.main.citations`, e.g.
+  `Source: enxet-lexicon · line 15,873`. This keeps one source of truth and is
+  still available to agents through the existing v1 `entry.main.citations`.
+- Rewrite Enxet's review metadata only through the v1 PATCH API after a generated
+  all-notes preview is approved. Do not alter headwords, senses, translations,
+  notes, homographs, or other imported linguistic content.
+- Remove the 36 reviews that are now purely stale; preserve and rewrite the
+  other 462. Back up first, use a payload-hash-bound resumable patch ledger, and
+  verify exact live category counts + authenticated browser rendering.
+- Update the OpenAPI descriptions and importing guide with the reviewer-writing
+  contract so future agents do not repeat the mistake.
+
+### Jacob's decisions
+
+- ✅ Rewrite Enxet's existing review metadata and remove reviews made obsolete
+  by the parser repair.
+- ✅ Human instructions use plain English; Spanish/Guaraní data values remain
+  verbatim.
+- ✅ Source provenance uses the entry's existing structured citation and is
+  hidden behind a collapsed `Source details` disclosure.
+- ✅ Manually review all 498 current Enxet review items against the staged raw
+  text + final fields before changing production. Do not treat a category-wide
+  template substitution as review.
+- ✅ Strengthen the API import Phase 1 instructions with the full human-review
+  contract established here.
+
+### Manual audit result
+
+- ✅ Read all **498** current review items against the staged verbatim value and
+  final imported translation/definition/Guaraní/plural/Notes fields.
+- **317 remain actionable and are rewritten; 181 are removed.** Final categories:
+  - `truncated`: 100
+  - `headword_in_gloss`: 97
+  - `other`: 44
+  - `language_split`: 42
+  - `missing_gloss`: 20
+  - `uncertain_plural`: 14
+- The removals are not blanket category deletion:
+  - 35 obsolete lost-`\lx` / stray-tail records after the headword recovery;
+  - 15 `pl` flags that were grammatical information already preserved in Notes,
+    not missing plural forms;
+  - values that merely mention Guaraní rather than contain a Guaraní translation;
+  - expected names/ethnonyms/comparisons left intact with no import decision;
+  - complete literal explanations and explicitly labelled Guaraní values that had
+    been falsely classified as truncated.
+- Three dropped-text cases remain real and now explain the complete human task:
+  `Áye’` (`apye’` omitted and not recovered elsewhere), `Másse apto` (literal
+  split left malformed visible text), and `Yakwátam’ák` (`Yalaqe’` may be an
+  untranslated missing entry).
+- The audit found additional bespoke problems hidden by category templates:
+  `Leklek` has recoverable “lechuzón de campos” vs imported “lechuzón de cam”;
+  `Nennaqsapma` imported a longer translation than its staged “tragar”; `Sawo
+  pakxak` has contradictory comparison names in definition vs Notes; several
+  literal/Guaraní splits left dangling punctuation or words.
+- Audit artifacts:
+  - `/tmp/enxet-import/review-human-final-audit.json` — all 498, each marked
+    manually reviewed with keep/rewrite/remove decision and reason.
+  - `/tmp/enxet-import/review-final.json` — the 317 final API review objects,
+    keyed by stable entry UUID.
+  - Final regenerated payload SHA-256:
+    `f4e268d1b8b6ca0461d3d5a872b53e60e933061fc4a8b4ab326c0ded79db14a2`.
+    A structural diff proves all 11,969 entries' non-review data is unchanged.
+
+### Follow-up implementation (complete)
+
+- ✅ Review category keys now have centralized human labels (including
+  `headword_in_gloss` → “Enxet text in Spanish” and `truncated` → “Possibly
+  incomplete”) in both the entry banner and review facet.
+- ✅ `ReviewBanner` receives the entry's existing citations and renders them
+  under a collapsed **Source details** disclosure.
+- ✅ Banner/filter strings are present in the English i18n catalog rather than
+  existing only as code fallbacks.
+- ✅ Phase 1 + Phase 2 importing guidance, OpenAPI, and TS docs now define the
+  self-contained human-note contract and explicitly separate citations.
+- ✅ Verification:
+  - full Vitest suite: 1,978 passed / 3 skipped;
+  - `tsc`, ESLint, and `svelte-check` clean (46 pre-existing Svelte warnings);
+  - svelte-look stories checked in light/dark at desktop and 360px, including
+    expanded Source details and long notes;
+  - `svelte-fix` reports no component issues.
+- ✅ Fresh online pre-patch backup:
+  `/opt/hosting/data/.import-backups/enxet-pre-review-rewrite-20260724T143539Z.db`
+  (20,131,840 bytes; integrity `ok`; 11,969 entries / 498 reviews; SHA-256
+  `67459acea183178eb064a13883954d56b580edfbb2b6096bbe7ea82184fb8d7e`).
+- ✅ Patched all 498 existing review fields through the deployed v1 API with a
+  resumable hash-bound ledger and GET-before-PATCH conflict protection:
+  **317 rewritten, 181 cleared, 0 failures/conflicts**. Every resulting value
+  was read back through the API and compared exactly. Ledger:
+  `/tmp/enxet-import/review-patch-ledger.json`.
+- ✅ Independent production DB verification: integrity `ok`; 11,969 entries;
+  exactly 317 reviews with the six expected category counts.
+- ✅ Authenticated production-browser verification as a real Enxet manager:
+  exact rewritten notes rendered for `Áye’` and `Hem askok`, the stale banner
+  was absent for `Ekpayhegwe egwáxok`, and the queue returned exactly 317.
+  No page/console errors or horizontal overflow.

@@ -5,6 +5,7 @@ import { open_dictionary_db_in_memory } from '$lib/db/server/dictionary-db'
 import { open_dictionary_history_db_in_memory } from '$lib/db/server/dictionary-history-db'
 import { apply_entry_writes } from '$lib/db/server/v1-entry-write'
 import { open_test_shared_db } from '$lib/db/server/shared-db'
+import { create_pending_source_file } from '$lib/db/server/source-files'
 import { GET, POST } from './+server'
 import { DELETE } from './[sourceId]/+server'
 
@@ -77,6 +78,26 @@ describe(POST, () => {
 })
 
 describe(DELETE, () => {
+  test('409 while a permanent source file is attached', async () => {
+    await post_source({ slug: 'smith1999' })
+    const source_id = (dict_db.prepare(`SELECT id FROM sources WHERE slug = 'smith1999'`).get() as { id: string }).id
+    const file = create_pending_source_file({
+      db: shared_db,
+      dictionary_id: 'dict-1',
+      filename: 'smith.txt',
+      mimetype: 'text/plain',
+      size_bytes: 10,
+      uploaded_by_user_id: 'edt-1',
+    })
+    shared_db.prepare('UPDATE source_files SET source_id = ? WHERE id = ?').run(source_id, file.id)
+
+    await expect(delete_source(source_id)).rejects.toMatchObject({
+      status: 409,
+      body: expect.objectContaining({ message: expect.stringContaining('permanent file') }),
+    })
+    expect(dict_db.prepare('SELECT id FROM sources WHERE id = ?').get(source_id)).toEqual({ id: source_id })
+  })
+
   test('409 while referenced; remove_from_all strips refs (no JSON corruption) then deletes', async () => {
     await post_source({ slug: 'smith1999' })
     apply_entry_writes({ db: dict_db, history_db, user_id: 'edt-1', entries: [{ lexeme: 'mbwa', sources: ['smith1999'], notes: { en: 'keep me' } }] })

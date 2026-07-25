@@ -71,10 +71,10 @@ try {
   assert(page.url().includes('/dev/entry/'), `created "${lexeme}" and navigated to its page (${page.url()})`)
 
   // delete (confirm() auto-accepted) → app navigates back to /dev/entries
-  await page.waitForSelector('.delete-label', { timeout: 10000 })
+  await page.waitForSelector('.entry-delete-button', { timeout: 10000 })
   await Promise.all([
     page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 20000 }),
-    page.evaluate(() => document.querySelector('.delete-label').closest('button').click()),
+    page.click('.entry-delete-button'),
   ])
   assert(page.url().endsWith('/dev/entries'), 'navigated back to the entries list')
 

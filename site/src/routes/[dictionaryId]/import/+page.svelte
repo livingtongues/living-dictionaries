@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { ImportFileForClient, ImportRequestSummary } from '$lib/import/types'
+  import { active_import_files } from '$lib/import/file-lifecycle'
   import IconMdiClose from '~icons/mdi/close'
   import IconMdiMessageOutline from '~icons/mdi/message-outline'
   import IconFa6SolidRobot from '~icons/fa6-solid/robot'
@@ -34,8 +35,9 @@
 
   const MAX_BYTES = 100 * 1024 * 1024
 
-  const pending_files = $derived(files.filter(file => !file.import_requested_at))
-  const requested_files = $derived(files.filter(file => !!file.import_requested_at))
+  const import_files = $derived(active_import_files(files))
+  const pending_files = $derived(import_files.filter(file => !file.import_requested_at))
+  const requested_files = $derived(import_files.filter(file => !!file.import_requested_at))
   const requested_groups = $derived(requests.map(request => ({
     request,
     files: requested_files.filter(file => file.import_thread_id === request.thread_id),

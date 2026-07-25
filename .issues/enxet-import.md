@@ -141,7 +141,7 @@ BATCH-DELETABLE. Plan: clean up + redo once decisions land.
   openapi.ts "Uploaded resources" section, and the three format guides'
   pointer lines updated; knowledge page updated.
 
-## ROUND 4 — phase-1 rebuild for real (2026-07-24, in progress)
+## ROUND 4 — phase-1 rebuild for real (2026-07-24; completed in Rounds 7–8)
 
 Jacob greenlit the restart + asked to keep improving importing.md as we go.
 
@@ -230,8 +230,314 @@ Also: the homograph 3/5/5 Jacob saw were real complete `\hm` sets (146 sets / 40
 entries, all imported) — the preview just shows ONE representative per headword, so
 siblings looked "missing". No action.
 
+## ROUND 6 — phase-1 audit after pull (2026-07-24)
+
+**Gate result at the start of this audit: NOT ready for an API write yet.** The
+linguistic staging work was sound and the payload passed the real write helper, but
+the final payload/preview/runner had four pre-write defects. All four are repaired
+and verified in Round 7 below.
+
+### Audit checks that passed
+
+- ✅ Pulled `main` to `f24de7c9`; preserved the unrelated local issue-file edits.
+- ✅ Live uploaded file is unchanged: API download and local source both SHA-256
+  `255cd5361ca5324af37d769045ac0ca57d30cc4e2e8da6653a126ccb5de6d974`.
+  Instructions remain "Just import everything".
+- ✅ Source is valid UTF-8 + NFC (no U+FFFD/NUL); CRLF normalization is deliberate.
+- ✅ Regenerated `stage.py` → `classify.py` → `build_payload.py` → `preview2.py`.
+  All four outputs were byte-identical to the pre-audit artifacts:
+  - 11,970 staged entries / 14,239 staged senses
+  - 11,969 payload entries after the one confirmed colophon drop
+  - 14,219 data-bearing payload senses; 543 entries omit `senses`, so the API creates
+    one default empty sense for each (expected DB total = **14,762 senses**)
+  - 0 duplicate entry/sense UUIDs; all 11,969 records carry the source + line citation
+- ✅ All 12 rest-reading chunks exist and cover 13,112 refs (the round-4 prose's
+  "12,988" was stale/wrong), plus 1,124 pattern refs. The late lost-`\lx` repair
+  replaces 44 old glued senses with 47 recovered senses; all 47 were re-audited here
+  (7 explicit exception decisions in `decisions-recovered.json`, the rest valid
+  plain glosses/definitions).
+- ✅ Browser-rendered `preview.html`: no page/console errors, no horizontal overflow,
+  388 rendered entry cards; screenshots rechecked.
+- ✅ Ran the complete payload through `apply_entry_writes` against an in-memory
+  migrated dict.db, in 500-entry chunks with source + `import_id`: **11,969 created,
+  0 failed**, 14,762 DB senses.
+- ✅ Read-only live API preflight: old key is still valid; Enxet has 0 entries,
+  gloss languages `es` + `gn`, no extra orthographies; source `enxet-lexicon` exists
+  and remains linked to the uploaded file; production OpenAPI exposes `EntryReview`.
+
+### Blocking repairs
+
+1. **Review queue is absent from the payload.** `entries-payload.json` has 0
+   `review` values. The intended flag union is exactly **482 entries** when the
+   round-5 mapping also includes `gn_mention_unextracted → language_split` and
+   `source_uncertainty → other`. `build_payload.py` must generate one category +
+   a bespoke, line/sense-specific note per entry.
+2. **Preview is not the promised final-payload review.** It exposes only 8 selected
+   flag sections, omitting classes such as headword echo, uncertain plural,
+   mismatch, unfixed typo, and duplicated text; it also reports all 14,239 staged
+   senses rather than the 14,219 data-bearing payload senses / 543 default-empty
+   entries. Regenerate it from the actual payload/review mapping, show every review
+   category and the exact reviewer note, then obtain sign-off.
+3. **Three cleaned headwords collide without homograph numbers.** POS-tail cleanup
+   turns separate source rows into identical `(lexeme, homograph=null)` pairs:
+   `Amya’a` (lines 342/375), `Ekyetnayam` (10513/10521), and `Ekyetneykha`
+   (10549/10561). Assign deterministic synthetic homographs 1/2 after ALL headword
+   cleanup (the same rule already used for recovered `Mantawáseykha`), while keeping
+   the UUID source key raw/stable; then rerun the downstream artifacts and preview.
+4. **`import.py` is still the discarded round-1 importer.** It reparses the source
+   with the bad length heuristic, asserts 11,935 entries, and uses old import id
+   `enxet-lexicon-2026-07`. Replace it with a payload-only runner for
+   `entries-payload.json`, import id `enxet-lexicon-2026-07-r2`, hard result-length
+   checks, failure stop, resumable ledger, and rollback dry-run metadata.
+
+### Additional review finding
+
+The audit found **three** source homograph groups with effectively duplicate imported
+content, not two: `Negyenkenweykekxa’` 1/2 (lines 36214/36220), `Nempatmeyam` 1/2
+(39965/39971), and `Néltaháneykxa’` 1/2/3 (52160/52166/52172). Preserve them faithfully,
+but add `review.category="other"` with a source-duplicate note to all seven entries.
+Source numbering oddities (`Segaqhe` 5–10, `Sẽltámeyéyak` 1/2/4/5, four singleton
+`\hm` markers) are present verbatim in the source — parser fidelity issues are ruled out.
+
+## ROUND 7 — repaired final phase-1 package (2026-07-24)
+
+**Gate result: READY FOR PHASE-1 HUMAN SIGN-OFF, then the phase-2 API write.**
+No production entries have been written.
+
+### Why the rebuilt payload initially had zero reviews
+
+Nothing from the prior review pass was lost. The 482 review-worthy entries were still
+encoded as specific flags and decisions in `rows-final.jsonl`. Round 5 added the new
+`entries.review` API/schema field after the Enxet payload pipeline had already been
+built, but `build_payload.py` was never given the promised flag → `{ category, note }`
+serialization step. The old payload therefore faithfully rebuilt the linguistic data
+while dropping the new review field. Prior-session transcripts confirm the last Enxet
+handoff explicitly left that bridge as the next task.
+
+### Repairs completed
+
+- ✅ Added `/tmp/enxet-import/review.py`: translates every staged review flag into
+  one entry-level category plus a bespoke source-line/sense-specific note. The final
+  payload contains **498 reviews**: all original 482 candidates plus 8 synthetic
+  homograph assignments, 1 source-missing homograph number, and all 7 records in the
+  3 effectively duplicate source-homograph groups.
+- ✅ Added post-cleanup homograph finalization. The three newly discovered cleaned
+  collisions plus the previously recovered `Mantawáseykha` pair now import as
+  deterministic homographs 1/2 without changing their stable source-derived UUIDs.
+  `Nenláneykekxa’` remains faithfully unnumbered but is explicitly flagged for review.
+  Final payload has **zero duplicate `(lexeme, homograph)` pairs**.
+- ✅ Rebuilt `preview.html` from the exact API payload/review mapping. It reports
+  payload counts (not intermediate staging counts), includes a diverse 33-entry
+  structural sample, and renders **all 498 review entries exactly once**, grouped by
+  the category the reviewer will see.
+- ✅ Replaced the obsolete round-1 `import.py` with a payload-only, resumable runner
+  for `entries-payload.json` and import id `enxet-lexicon-2026-07-r2`. Production
+  writes require both `--run` and an explicit fresh backup path; validation happens
+  before writes; it checks response length/status per entry, persists an atomic
+  payload-hash-bound ledger after every ≤500-entry batch, safely resumes, and arms
+  rollback verification through the private import tag.
+
+### Exact final artifact
+
+- Payload: `/tmp/enxet-import/entries-payload.json`
+- SHA-256: `eca191b6540848f12944a3f44766074c482f21fbc3a44f183fcd5972d8809aea`
+- 11,969 entries; 14,219 data-bearing payload senses; 543 entries intentionally
+  receive the API's default empty sense → **14,762 DB senses**
+- 498 reviews:
+  - `truncated`: 200
+  - `headword_in_gloss`: 140
+  - `language_split`: 43
+  - `dropped_text`: 38
+  - `other`: 32
+  - `uncertain_plural`: 29
+  - `missing_gloss`: 16
+- Source SHA-256 (local and live API download):
+  `255cd5361ca5324af37d769045ac0ca57d30cc4e2e8da6653a126ccb5de6d974`
+
+### Final verification
+
+- ✅ Ran the entire pipeline twice; `rows.jsonl`, `rows-final.jsonl`,
+  `entries-payload.json`, and `preview.html` were byte-for-byte deterministic.
+- ✅ `py_compile` clean for all six pipeline/preview/import scripts.
+- ✅ Browser audit: 531 cards (33 sample + 498 review), 498 unique review IDs,
+  exact per-category counts, no empty rendered fields, no page/console errors,
+  no horizontal overflow. Light/dark preview screenshots rechecked.
+- ✅ Ran the exact final payload through the production `apply_entry_writes`
+  helper against an in-memory migrated dictionary DB in 24 × ≤500 batches:
+  **11,969 created, 0 failed, 14,762 senses, 498 stored reviews**, exact category
+  counts, all repaired homograph pairs 1/2, and 11,969 private import-tag links.
+- ✅ Final live API preflight: key valid; Enxet still has 0 entries; gloss languages
+  `es` + `gn`; source/file linkage and "Just import everything" instructions
+  unchanged; import rollback tag count 0.
+- ✅ Runner safety check: `--run` without `--backup` exits before preflight/import
+  and creates no ledger.
+- ✅ Fresh online SQLite rollback backup made from the still-empty live DB:
+  `/opt/hosting/data/.import-backups/enxet-pre-r2-20260724T130236Z.db`
+  (17,051,648 bytes; `PRAGMA integrity_check = ok`; SHA-256
+  `c6674df9c4dea2719242c4cd9d942a1feff7af8abc4ea336e8624af25ca30108`).
+
+### Phase-1 gate (completed in Round 8)
+
+Jacob reviewed `/tmp/enxet-import/preview.html` and signed off on phase 1. The
+phase-2 command used was:
+
+```bash
+cd /tmp/enxet-import
+python3 import.py --run --backup /opt/hosting/data/.import-backups/enxet-pre-r2-20260724T130236Z.db
+```
+
+After the runner completes, verify live entry/sense/review/category/import-tag counts
+and spot-check the browser before considering the import complete.
+
+## ROUND 8 — phase-2 production API import complete (2026-07-24)
+
+Jacob approved the final phase-1 preview and authorized the production import.
+
+### Import result
+
+- ✅ Ran `/tmp/enxet-import/import.py --run` against the exact approved payload
+  SHA-256 `eca191b6540848f12944a3f44766074c482f21fbc3a44f183fcd5972d8809aea`,
+  with rollback backup
+  `/opt/hosting/data/.import-backups/enxet-pre-r2-20260724T130236Z.db`.
+- ✅ All 24 API batches returned exact result-array lengths:
+  **11,969 created, 0 existed, 0 failed**.
+- ✅ Runner's final batch-delete dry-run found exactly **11,969** entries under
+  private import tag `enxet-lexicon-2026-07-r2`; nothing was deleted.
+- ✅ Atomic resumable ledger completed at
+  `/tmp/enxet-import/ledger-r2.json` (`completed_at` 2026-07-24T13:07:31Z).
+
+### Independent live verification
+
+- ✅ Production `enxet.db`: `PRAGMA integrity_check = ok`; 11,969 entries;
+  14,762 senses; 498 valid nonblank review objects.
+- ✅ Exact review counts:
+  `truncated` 200 · `headword_in_gloss` 140 · `language_split` 43 ·
+  `dropped_text` 38 · `other` 32 · `uncertain_plural` 29 ·
+  `missing_gloss` 16.
+- ✅ All 11,969 entries carry source `enxet-lexicon` and an `l. …` citation.
+  All 11,969 are linked to the private rollback tag.
+- ✅ Zero duplicate final `(lexeme, homograph)` pairs. The four synthetic pairs
+  (`Amya’a`, `Ekyetnayam`, `Ekyetneykha`, `Mantawáseykha`) are all 1/2.
+- ✅ Deployed v1 GET returned the exact lexeme, senses, review category, and
+  bespoke note from the approved payload. Catalog `entry_count` is 11,969.
+- ✅ Authenticated production browser check as a real Enxet manager:
+  - Entry `A-²` rendered the exact `truncated` review banner + Resolve button.
+  - Entries list loaded all 11,969 records.
+  - Needs review filter returned exactly 498.
+  - All seven review category facets appeared with their exact counts.
+  - No page errors, console errors, or horizontal overflow.
+  - Screenshots:
+    `/tmp/enxet-import/production-review-entry.png` and
+    `/tmp/enxet-import/production-review-queue.png`.
+
+### API/documentation defects encountered
+
+None. The import did not require a workaround, no response contract differed from
+the deployed OpenAPI/guide expectations, and no repair checklist is needed.
+
+## ROUND 9 — human-facing review queue rewrite complete (2026-07-24)
+
+Jacob found the production review notes were written like importer tracebacks
+(`glosses.gn`, source line numbers, “verify the source”) rather than tasks a
+dictionary manager could answer from the entry page. Decisions: plain English,
+structured citations collapsed under Source details, rewrite/prune existing
+reviews, and personally audit all 498.
+
+- ✅ Audited all 498 against staged verbatim + final fields: **317 rewrite/keep,
+  181 remove**. Final category counts: truncated 100 · headword-in-gloss 97 ·
+  other 44 · language-split 42 · missing-gloss 20 · uncertain-plural 14.
+- ✅ `/tmp/enxet-import/review-human-final-audit.json` records every decision;
+  `/tmp/enxet-import/review-final.json` is the stable UUID-keyed patch source.
+- ✅ Rebuilt payload contains the same 11,969 entries and zero non-review data
+  changes; new SHA-256
+  `f4e268d1b8b6ca0461d3d5a872b53e60e933061fc4a8b4ab326c0ded79db14a2`.
+- ✅ Category labels are human-facing in the entry banner and queue; existing
+  citations now appear under collapsed **Source details**. Long notes use the
+  full banner width on mobile, and the new UI strings are in the English i18n
+  catalog.
+- ✅ Phase 1 + Phase 2 importing guidance, OpenAPI, and TS docs now require
+  self-contained, plain-language review questions and keep agent provenance in
+  structured citations.
+- ✅ Full verification passed: 1,978 Vitest tests (3 skipped), `tsc`, ESLint,
+  `svelte-check`, `svelte-fix`, and light/dark desktop/mobile svelte-look
+  screenshots.
+- ✅ Fresh online backup before mutation:
+  `/opt/hosting/data/.import-backups/enxet-pre-review-rewrite-20260724T143539Z.db`
+  (integrity `ok`; SHA-256
+  `67459acea183178eb064a13883954d56b580edfbb2b6096bbe7ea82184fb8d7e`).
+- ✅ Patched the 498 existing review fields through v1: **317 rewritten, 181
+  cleared, 0 failures/conflicts**. The hash-bound ledger is
+  `/tmp/enxet-import/review-patch-ledger.json`; every result was independently
+  read back and compared to `/tmp/enxet-import/review-final.json`.
+- ✅ Live DB is healthy and contains the exact final queue:
+  `truncated` 100 · `headword_in_gloss` 97 · `other` 44 ·
+  `language_split` 42 · `missing_gloss` 20 · `uncertain_plural` 14.
+- ✅ Authenticated live-browser checks confirmed exact notes, a removed stale
+  banner, the 317-entry queue, all six categories, and no page/console errors
+  or horizontal overflow.
+
+### API/documentation checklist
+
+- [x] Phase 1 now distinguishes broad importer/audit flags from the final human
+  review queue and requires re-evaluating every flag after deterministic repairs.
+- [x] Review notes must be answerable from the entry page, use UI vocabulary
+  such as “Spanish translation” and “Notes,” quote the complete relevant
+  original/imported/omitted text, and end with a concrete question or action.
+- [x] Source slug/locator belongs in structured `citations`, not the human note;
+  the UI exposes it in collapsed Source details.
+- [x] Phase 2 examples, OpenAPI descriptions, and TS docs match that contract.
+- [x] No v1 API defect or documentation/API mismatch was encountered during the
+  import or the 498-item rewrite. No workaround or remaining repair item exists.
+
 ## Follow-ups spawned
 
 - `.issues/admin-api-key.md`
 - `.issues/gloss-definition-display-audit.md` (now upgraded: definition field is
   deprecated/invisible/unsearchable — decide whether to revive it)
+
+## ROUND 10 — Gundolf correction audit and production update (2026-07-24)
+
+Gundolf's July 23 `Enxet-SFM-for-LD.txt` is a corrected source revision, not a
+duplicate of Diego's uploaded file. The new export repairs real record
+boundaries and meanings, but also introduces new missing-space artifacts, so it
+was reconciled semantically rather than blindly re-imported.
+
+- ✅ Compared all records between the two source revisions and built a
+  deterministic identity map: 11,969 existing identities preserved, 3 genuine
+  new entries, 1 obsolete recovered entry, and 5 stale senses.
+- ✅ Retained complete wording from the earlier source wherever the corrected
+  export only damaged spacing/truncated a value; accepted the corrected
+  revision's genuine sense splits/merges, homograph numbering, headwords, and
+  meanings.
+- ✅ Re-audited all carried review tasks. Removed five that the correction
+  resolved and added one self-contained `missing_gloss` task for new entry
+  `Yalaqe’`. Final queue: 313 reviews — truncated 99,
+  headword-in-gloss 97, language-split 42, other 40, missing-gloss 21,
+  uncertain-plural 14.
+- ✅ Created a hot production backup before mutation:
+  `/opt/hosting/data/.import-backups/enxet-pre-gundolf-correction-20260724T160343Z.db`
+  (20,348,928 bytes, `PRAGMA integrity_check = ok`, SHA-256
+  `2cc138b43f621eb9226e0a5b217c311125bd5417a8505ba04b960cf1c1b46d05`).
+- ✅ Applied the correction through v1: 11,968 existing entry PATCHes, 3 entry
+  creates, 5 stale-sense deletes, and 1 superseded-entry delete. Zero failures,
+  retries, or response-contract mismatches.
+- ✅ Independent readback found exactly 11,971 live entries, all 11,971 under
+  import tag `enxet-lexicon-2026-07-r2`; every changed/new target matched the
+  audited payload and the removed entry was absent.
+- ✅ Preserved the original source file and added Gundolf's corrected revision
+  as a second private permanent resource under source `enxet-lexicon`:
+  `source_files.id = 10b14c13-e9b3-4d5d-840f-1a9f0f89f6c0`, R2 key
+  `import/enxet/10b14c13-e9b3-4d5d-840f-1a9f0f89f6c0`. Its v1 download matches
+  the received file exactly (1,077,435 bytes; SHA-256
+  `074a6b98d4bdcfbebe789d8cde8426ec5687cacc78bb4ee7e81ac660f959e142`).
+
+### API/documentation checklist from the correction
+
+- [ ] Batch entry PATCH is missing; citation-locator revisions required 11,968
+  single-entry requests.
+- [ ] Runtime accepts `null` to clear entry `notes` and sense `variant`, but the
+  TypeScript/OpenAPI PATCH shapes do not document that contract consistently.
+
+Tracked for follow-up in
+`.issues/api-entry-patch-bulk-and-clear-semantics.md`. Neither item blocked or
+weakened the verified correction.

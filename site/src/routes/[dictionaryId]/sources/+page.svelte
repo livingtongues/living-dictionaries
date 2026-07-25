@@ -1,17 +1,42 @@
 <script lang="ts">
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
+  import SourceFiles from '$lib/components/sources/SourceFiles.svelte'
   import { page } from '$app/state'
   import type { Tables } from '$lib/types'
+  import type { ImportFileForClient } from '$lib/import/types'
+  import { completed_source_files_by_source } from '$lib/import/file-lifecycle'
   import EditSource from '$lib/components/sources/EditSource.svelte'
+  import { api_dict_files_list } from '$api/v1/dictionaries/[id]/files/_call'
+  import { toast } from '$lib/state/toast.svelte'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
   import IconFaSolidPen from '~icons/fa-solid/pen'
   import IconFaSolidTrash from '~icons/fa-solid/trash'
 
-  const { sources, can_edit, writes, t } = $derived(page.data)
+  const { sources, can_edit, is_manager, dictionary, writes, t } = $derived(page.data)
   const connection = $derived(page.data.connection as { query: <T>(sql: string, params?: unknown[]) => Promise<T[]> } | null)
 
   let editing = $state<Tables<'sources'> | null | undefined>(undefined) // undefined = closed, null = create
   let usage = $state<Record<string, number>>({})
+  let source_files = $state<ImportFileForClient[]>([])
+  let source_files_loaded = $state(false)
+  const source_files_by_source = $derived(completed_source_files_by_source(source_files))
+
+  async function refresh_source_files(): Promise<boolean> {
+    const { data, error } = await api_dict_files_list({ dictionary_id: dictionary.id })
+    if (error) {
+      if (error.status !== 401 && error.status !== 403)
+        toast.error(error.message)
+      return false
+    }
+    source_files = data.files
+    source_files_loaded = true
+    return true
+  }
+
+  $effect(() => {
+    if (is_manager)
+      refresh_source_files()
+  })
 
   // Total reference count per slug across entries + senses + sentences + texts
   // (slug arrays) + audio + videos (scalar slug columns) + entry/sentence/text
@@ -44,6 +69,15 @@
   })
 
   async function delete_source(source: Tables<'sources'>) {
+    if (is_manager && !source_files_loaded && !(await refresh_source_files()))
+      return
+    if (source_files_by_source[source.id]?.length) {
+      toast.error(t({
+        dynamicKey: 'source.files_prevent_delete',
+        fallback: 'This source has permanent files attached and cannot be deleted. Edit its citation instead, or contact us to move the files.',
+      }))
+      return
+    }
     const count = usage[source.slug] || 0
     const label = source.abbreviation || source.citation || source.slug
     if (count > 0) {
@@ -97,6 +131,16 @@
             </td>
           {/if}
         </tr>
+        {#if is_manager && source_files_by_source[source.id]?.length}
+          <tr class="source-files-row">
+            <td colspan={can_edit ? 5 : 4}>
+              <SourceFiles
+                dictionary_id={dictionary.id}
+                files={source_files_by_source[source.id]}
+                label={t({ dynamicKey: 'source.files', fallback: 'Source files' })} />
+            </td>
+          </tr>
+        {/if}
       {/each}
     </tbody>
   </table>
@@ -140,6 +184,9 @@
   }
   .citation {
     max-width: 28rem;
+  }
+  .source-files-row td {
+    padding: 0.35rem 0.5rem 0.75rem;
   }
   .num {
     text-align: right;

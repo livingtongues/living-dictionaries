@@ -3,6 +3,7 @@ import type { SourceRecord } from '$lib/db/server/v1-sources'
 import { ResponseCodes } from '$lib/constants'
 import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { get_dictionary_history_db } from '$lib/db/server/dictionary-history-db'
+import { get_shared_db } from '$lib/db/server/shared-db'
 import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/server/v1-route-context'
 import { apply_source_delete, apply_source_update, count_source_references, get_source, remove_source_from_all } from '$lib/db/server/v1-sources'
 import { log_server_event } from '$lib/server/log-server-event'
@@ -76,6 +77,13 @@ export const DELETE: RequestHandler = async (event) => {
   const source = get_source(db, source_id)
   if (!source)
     error(ResponseCodes.NOT_FOUND, 'source not found')
+
+  const attached_file_count = (get_shared_db().prepare(`
+    SELECT COUNT(*) AS count FROM source_files
+    WHERE dictionary_id = ? AND source_id = ?
+  `).get(dictionary.id, source_id) as { count: number }).count
+  if (attached_file_count > 0)
+    error(ResponseCodes.CONFLICT, `source '${source.slug}' has ${attached_file_count} permanent file${attached_file_count === 1 ? '' : 's'} attached; reassign or unlink them before deleting the source`)
 
   const remove_from_all = event.url.searchParams.get('remove_from_all') === 'true'
   const counts = count_source_references(db, source.slug)

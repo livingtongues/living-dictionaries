@@ -51,6 +51,8 @@ export const POST: RequestHandler = async (event) => {
       error(ResponseCodes.BAD_REQUEST, `File "${file.filename}" has not finished uploading`)
     if (!file.import_instructions?.trim())
       error(ResponseCodes.BAD_REQUEST, `File "${file.filename}" needs import instructions before requesting`)
+    if (file.source_id)
+      error(ResponseCodes.BAD_REQUEST, `File "${file.filename}" is already attached to a completed source`)
     if (file.import_requested_at)
       error(ResponseCodes.BAD_REQUEST, `File "${file.filename}" is already part of a requested import`)
     return file
@@ -84,7 +86,8 @@ export const POST: RequestHandler = async (event) => {
     '--- For the importing agent ---',
     `- API base: ${origin}/api/v1`,
     `- Full reference: ${origin}/api/v1/openapi.json (fetch ?view=index first, then ?tag=<group>)`,
-    `- Import guides: ${origin}/api/v1/guides — start with ${origin}/api/v1/guides/importing (covers source-registry linking: when a resource is a real published source, create it via POST …/sources and PATCH the file's source_id)`,
+    `- Import guides: ${origin}/api/v1/guides — start with ${origin}/api/v1/guides/importing`,
+    '- Completion requirement: after the imported data passes verification, PATCH every imported file with the proper source_id. That is the completion marker that removes it from the active Import queue and makes it downloadable under that source on the Sources page. Do not set source_id before verification.',
     `- Dictionary id: ${dictionary.id}`,
     '- Auth: every request (including the download links above) needs an `Authorization: Bearer <write-scope API key>` header — mint one on the dictionary\'s Agents page.',
   ].join('\n')

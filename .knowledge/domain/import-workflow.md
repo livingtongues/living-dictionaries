@@ -31,6 +31,15 @@ that. Insider access is for fetching bytes, verification reads, and backups.
   (`docker exec sveltekit_blue printenv R2_SECRET_ACCESS_KEY` etc.); use local
   `aws s3 cp --endpoint-url https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com`.
   (The `/files/{id}` endpoint works too once you have a key.)
+- **Complete the Import-page lifecycle only after verification**: keep each
+  uploaded resource at its existing private
+  `import/{dictionary_id}/{file_id}` key, then PATCH its `source_id` to the
+  proper dict-db source. That field is deliberately both the permanent
+  association and the UI completion marker: linked files disappear from
+  `/{dict}/import` and appear beneath their source on `/{dict}/sources` for
+  managers. Do not link before verification, do not copy the object to the
+  public `livingdictionaries-media` bucket, and link every file used by the
+  import (not just the primary data file).
 - **Mint the API key**: one INSERT into `shared.db.api_keys` — replicate
   `site/src/lib/api-keys/api-key.ts` (`ldk_` + 43-char base64url of 32 random
   bytes; store only the sha-256 hex as `token_hash`, plus `token_prefix` = first

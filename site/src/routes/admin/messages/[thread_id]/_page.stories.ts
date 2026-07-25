@@ -69,7 +69,17 @@ const messages = [
 const db = {
   message_threads: make_table([thread], 'id'),
   messages: make_table(messages, 'id'),
-  message_attachments: make_table([] as Row[], 'id'),
+  message_attachments: make_table([
+    {
+      id: 'attachment-1',
+      message_id: 'msg-1',
+      filename: 'Enxet-SFM-for-LD.txt',
+      mimetype: 'text/plain',
+      size_bytes: 1077435,
+      disposition: 'attachment',
+      created_at: '2026-05-29T10:00:00Z',
+    },
+  ], 'id'),
   users: make_table([
     { id: 'user-demo', email: 'maria@example.com', name: 'Maria Lopez' },
     { id: 'admin-1', email: 'jwrunner7@gmail.com', name: 'Jacob Bowdoin' },

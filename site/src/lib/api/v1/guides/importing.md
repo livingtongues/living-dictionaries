@@ -9,7 +9,7 @@ The work has two phases, in strict order:
 1. **Data preparation** — inspect, question, stage locally, review by eye, clean,
    get human sign-off. **No API writes happen in this phase.**
 2. **API usage** — register the source, write in idempotent batches, verify,
-   repair, report.
+   repair, file the uploaded resources under their permanent source, report.
 
 Rushing to phase 2 is the classic failure mode: an import can be technically
 flawless and still wrong because the data wasn't understood. This is someone's
@@ -79,14 +79,41 @@ records). One row per source record, carrying:
 - the **verbatim original** (so nothing is ever lost and every cleanup is diffable)
 - the cleaned/parsed fields and their **proposed API field mapping**
 - **flags** for anything odd, and a note of which cleanup rules touched the row —
-  design these so they map cleanly onto the entry `review` field's categories
-  (§2.3), so "anything you had to guess/salvage" becomes the reviewer's queue
+  design these so unresolved findings map cleanly onto the entry `review`
+  field's categories (§2.3)
 - a **source locator** (line number, page, record id) for tracebacks
 - the record's **deterministic id** (uuid5 of a stable source key) — assigned here,
   not at POST time
 
 The staging store is the single source of truth for everything downstream: the
 preview (§1.5) and the API payloads are both generated from it, never hand-edited.
+
+Flags and cleanup logs are intentionally broader than the final human review
+queue. A flag records what the importer noticed; `review` means **a real question
+is still unresolved after the final cleanup**. Re-evaluate every flagged row after
+all parser repairs and transformations have run. Remove stale findings when the
+pipeline recovered the missing record, moved explicitly labelled data into its
+unambiguous destination, or otherwise resolved the issue. Do not ask a human to
+re-approve deterministic cleanup just to preserve an importer audit trail.
+
+Draft the final `review.note` during Phase 1, against the exact final fields the
+reviewer will see. The note is a small editorial task, not a traceback:
+
+- It must be answerable from the entry page alone. Name the sense when useful,
+  explain what changed, include the **complete original and imported values**
+  needed to decide, and end with a concrete question.
+- Use plain language and the labels a human sees in the UI: "Spanish
+  translation", "Guaraní translation", "definition", "Notes", and "plural
+  form". Never expose code paths such as `glosses.gn`, internal flag names,
+  parser terminology, JSON/DB vocabulary, or shorthand written for another
+  programmer.
+- If text was omitted, include the exact omitted text plus enough surrounding
+  text to decide where it belongs. Never say only "text was dropped" and ask the
+  reviewer to find it elsewhere.
+- Keep provenance out of the human note. Put the source slug + locator in the
+  entry's structured `citations`; the editor UI exposes it separately under
+  collapsed **Source details** for an agent or specialist who needs a traceback.
+  Never tell the human reviewer to open, inspect, or compare the source file.
 
 ### 1.4 Pore over the data — by eye, in large amounts
 
@@ -153,6 +180,10 @@ readable dictionary-entry view — never a raw JSON dump — showing:
 - **every flagged or manually-decided case** (the full list when it's small),
 - lifted/relocated data made visible (notes, plural forms, cross-references), so
   the human can see where things will land.
+- the exact final `review.category` + `review.note` for every queued entry,
+  displayed as the editor will see it. Read every generated note once more after
+  the final pipeline run; category-wide templates do not replace this item-by-item
+  audit.
 
 The human reviews meaning and correctness; your job is to make that effortless.
 
@@ -201,8 +232,10 @@ manager can refine it later.
      inventing data — but never guess authorship or publication details; write
      "author and publication details unrecorded" instead and let the manager
      iterate on it.
-2. `PATCH …/files/{fileId}` with `{ "source_id": "<the new source's id>" }` so the
-   original file lives permanently behind its source.
+2. Keep the source id for finalization (§2.7), but **do not link the uploaded
+   file yet**. Setting its `source_id` is the completion marker: it removes the
+   resource from the active Import queue. Wait until the data has passed §2.4
+   verification.
 3. Stamp imported records: entry/sense/sentence/text `sources: ["smith-1979"]`, and
    use `citations: [{ "slug": "smith-1979", "locator": "p. 31" }]` on entries,
    sentences, and texts when you know the page/example number (for a scanned
@@ -248,7 +281,8 @@ manager can refine it later.
 - Never invent data. If glosses/POS are ambiguous in the source, leave the field
   empty rather than guessing.
 - **Flag anything you had to guess, salvage, split, or truncate for a human
-  reviewer** — set the entry's `review` field: `{ "category": "...", "note": "..." }`.
+  reviewer and could not fully resolve during Phase 1** — set the entry's
+  `review` field: `{ "category": "...", "note": "..." }`.
   This is EDITOR-ONLY (never shown to the public — it's stripped from non-editor
   reads, same bar as a private tag) and gives the dictionary's manager a real
   review queue: the entries list has a "Needs review" filter + a per-category
@@ -262,8 +296,11 @@ manager can refine it later.
     (the gloss/definition call needs a linguist's eye), `dropped_text` (you
     dropped stray/unparseable text — say what), `missing_gloss` (vernacular-only,
     no gloss found), `other` (freeform — the note carries it).
-  - `note` is the bespoke thing to check; it may enumerate senses (e.g.
-    `"Sense 2: gn form auto-split; verify."`). It's shown verbatim.
+  - `note` is the self-contained, plain-language task shown verbatim. It may
+    enumerate senses. A good language-split note is:
+    `"Sense 1: I placed “ñakyra’i” in the Guaraní translation instead of the Spanish text.\nOriginal text: “cigarra pequeña, chicharra, ñakyra’i.”\nSpanish translation: “cigarra pequeña, chicharra”\nIs “ñakyra’i” Guaraní, and are both translations now correct?"`
+    The human has the before/after values and a precise decision; the entry's
+    `citations` carry the source slug and locator separately.
   - Clear it when resolved by PATCHing the entry with `"review": null` — the same
     thing the human's "Resolve" button does. (A human can also import faithfully
     now and review in-app later, which is exactly what this field is for.)
@@ -328,8 +365,29 @@ don't issue thousands of single DELETEs — remove the batch by its `import_id`:
 you used. If content predates your imports (or you've lost the ids), ask a Living
 Dictionaries admin to reset the dictionary instead.
 
-### 2.7 Report
+### 2.7 Complete the uploaded-resource lifecycle
+
+Only after the imported data passes verification, file every uploaded resource
+under the source it represents:
+
+`PATCH …/files/{fileId}` with `{ "source_id": "<source id>" }`.
+
+This does not move or publicize the bytes. It keeps the existing private R2
+object and records its permanent source association. For imports requested
+through the Living Dictionary Import page, `source_id` is also the completion
+marker: the file leaves the active Import queue and becomes downloadable by
+dictionary managers beneath the proper source on the Sources page.
+
+- Link **every file used by the import**, not only the main data file.
+- If one request contains materials from different works, create/reuse the
+  proper source for each and link each file individually.
+- Do not set `source_id` before verification. If the import fails or still needs
+  repair, the resources must remain visible in the active queue.
+- Keep the current file row and storage key. Never copy import resources into
+  the public audio/photo/video bucket.
+
+### 2.8 Report
 
 Reply to the requester with: what was imported, counts, the `import_id`, decisions
-you made (cleanup rules applied, skipped sections, source rows created), and
-anything needing human review.
+you made (cleanup rules applied, skipped sections, source rows created), the
+files you completed under those sources, and anything needing human review.

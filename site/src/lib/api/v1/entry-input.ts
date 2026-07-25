@@ -277,7 +277,9 @@ export function to_string_array(value: unknown): string[] | undefined {
  * Coerce an `EntryInput.review` / `EntryPatch.review` value into a stored
  * `EntryReview` (`{ category, note }`). `null` → `null` (clear); `undefined` or
  * an empty/blank object → `undefined` (omit/untouched); otherwise trimmed, with
- * `category` defaulting to `other` when only a note is supplied.
+ * `category` defaulting to `other` when only a note is supplied. The API guide
+ * defines the human-facing note contract; source provenance belongs in the
+ * entry's `citations`, not in this value.
  */
 export function to_review(value: unknown): EntryReview | null | undefined {
   if (value === null) return null

@@ -8,14 +8,21 @@ function t(key: string | { dynamicKey?: string, fallback?: string }): string {
 }
 
 export const shared_meta: StoryMeta = {
-  viewports: [{ width: 640, height: 260 }],
+  viewports: [
+    { width: 640, height: 420 },
+    { width: 360, height: 520 },
+  ],
   page_data: { t },
   csr: true,
 }
 
 export const WithCategory: Story<typeof Component> = {
   props: {
-    review: { category: 'truncated', note: 'The Spanish definition looks cut off in the source (ends "…; pl"). Check the original and complete it.' },
+    review: {
+      category: 'truncated',
+      note: 'Sense 1: The Spanish definition appears to end abruptly.\nOriginal text: “planta usada para calmar dolores musculares llamada también”\nWhat name is missing?',
+    },
+    citations: [{ slug: 'enxet-lexicon', locator: 'l. 8,912' }],
     onresolve: () => {},
   },
 }
@@ -24,9 +31,24 @@ export const LongNote: Story<typeof Component> = {
   props: {
     review: {
       category: 'language_split',
-      note: 'Sense 2: a Guaraní form ("tajykatĩ") was auto-split out of the Spanish definition into glosses.gn — verify it belongs there.\nSense 3: the headword echoed inside its own definition; a packed example was lifted to notes.',
+      note: 'Sense 1: I placed “ñakyra’i” in the Guaraní translation instead of the Spanish text.\nOriginal text: “cigarra pequeña, chicharra, ñakyra’i.”\nSpanish translation: “cigarra pequeña, chicharra”\nIs “ñakyra’i” Guaraní, and are both translations now correct?',
     },
+    citations: [{ slug: 'enxet-lexicon', locator: 'l. 15,873' }],
     onresolve: () => {},
+  },
+}
+
+export const ExpandedSourceDetails: Story<typeof Component> = {
+  props: {
+    review: {
+      category: 'other',
+      note: 'Sense 1: I left “apye’” out of the Spanish translation because it appears to be Enxet text with no explanation.\nOriginal text: “excremento; estiércol; caca; apye’”\nSpanish translation: “excremento; estiércol; caca”\nIs “apye’” a variant, a separate entry, or part of this translation?',
+    },
+    citations: [{ slug: 'enxet-lexicon', locator: 'l. 2,809' }],
+    onresolve: () => {},
+  },
+  interactions: async (page) => {
+    await page.click('summary')
   },
 }
 

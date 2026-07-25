@@ -18,7 +18,7 @@ export interface V1FilePatchRequestBody {
   filename?: string
   import_instructions?: string | null
   source_note?: string | null
-  /** An existing dict-db `sources.id` — links this file to its permanent source. Null unlinks. */
+  /** An existing dict-db `sources.id` — after successful verification, files this resource under its permanent source and completes its Import-page lifecycle. Null unlinks. */
   source_id?: string | null
 }
 

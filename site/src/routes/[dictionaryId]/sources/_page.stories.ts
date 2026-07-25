@@ -14,6 +14,8 @@ export const shared_meta: StoryMeta = {
     t: mock_t,
     sources,
     can_edit: true,
+    is_manager: true,
+    dictionary: { id: 'demo' },
     connection: null,
     writes: { remove_source_and_delete: async () => {} },
   },
@@ -22,5 +24,5 @@ export const shared_meta: StoryMeta = {
 export const Default: PageStory<typeof Component> = {}
 
 export const ReadOnly: PageStory<typeof Component> = {
-  page_data: { can_edit: false },
+  page_data: { can_edit: false, is_manager: false },
 }
