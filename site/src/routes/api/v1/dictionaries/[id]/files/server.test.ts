@@ -193,6 +193,19 @@ describe(PATCH, () => {
     expect(notify_admin).toHaveBeenCalledWith(expect.objectContaining({ email: 'jwrunner7@gmail.com', link: `http://localhost/admin/messages/${thread_id}` }))
   })
 
+  test('a site admin doing the import job edits quietly — no customer follow-up, no self-ping, thread stays as it was', async () => {
+    const { file, thread_id } = await request_registered_file()
+    shared_db.prepare(`UPDATE message_threads SET read_at = 'x', resolved_at = 'x' WHERE id = ?`).run(thread_id)
+    dict_db.prepare(`INSERT INTO sources (id, slug, created_by_user_id, created_at, updated_by_user_id, updated_at) VALUES ('src-kickoff', 'smith-1979', 'mgr-1', '2026-01-01', 'mgr-1', '2026-01-01')`).run()
+    notify_admin.mockClear()
+
+    const response = await PATCH(event({ handler: 'patch', token: await admin_token(), file_id: file.id, body: { source_id: 'src-kickoff' } }))
+    expect((await response.json()).file.source_id).toBe('src-kickoff')
+    expect(shared_db.prepare('SELECT COUNT(*) AS count FROM messages WHERE thread_id = ?').get(thread_id)).toEqual({ count: 1 })
+    expect(shared_db.prepare('SELECT read_at, resolved_at FROM message_threads WHERE id = ?').get(thread_id)).toEqual({ read_at: 'x', resolved_at: 'x' })
+    expect(notify_admin).not.toHaveBeenCalled()
+  })
+
   test('requested resources are uploader-only, with site-admin and uploader API-key parity', async () => {
     const first = await request_registered_file()
     await expect(PATCH(event({ handler: 'patch', token: await other_manager_token(), file_id: first.file.id, body: { source_note: 'Nope' } })))
@@ -216,11 +229,11 @@ describe(REQUEST_IMPORT, () => {
       .rejects.toMatchObject({ status: 400 })
   })
 
-  test('400 when a file is already completed under a source', async () => {
+  test('400 when a file is already filed under a source', async () => {
     const file = await register_file()
     shared_db.prepare(`UPDATE source_files SET upload_confirmed_at = '2026-07-17T00:00:00Z', import_instructions = 'Import all entries.', source_id = 'src-1' WHERE id = ?`).run(file.id)
     await expect(REQUEST_IMPORT(event({ handler: 'request', token: await manager_token(), body: { file_ids: [file.id] } })))
-      .rejects.toMatchObject({ status: 400, body: expect.objectContaining({ message: expect.stringContaining('completed source') }) })
+      .rejects.toMatchObject({ status: 400, body: expect.objectContaining({ message: expect.stringContaining('already filed under a source') }) })
   })
 
   test('creates an assigned thread with an agent-ready body and stamps the files', async () => {
@@ -242,9 +255,9 @@ describe(REQUEST_IMPORT, () => {
     expect(message.body_text).toContain('Import all entries; skip the intro pages.')
     expect(message.body_text).toContain('This is a 1979 published dictionary.')
     expect(message.body_text).toContain('/api/v1/guides/importing')
-    expect(message.body_text).toContain('Dictionary id: dict-1')
-    expect(message.body_text).toContain('after the imported data passes verification')
-    expect(message.body_text).toContain('Do not set source_id before verification')
+    expect(message.body_text).toContain('dictionary id: dict-1')
+    expect(message.body_text).toContain('Register the source and file these resources under it NOW')
+    expect(message.body_text).toContain('Closing this request thread is what marks the job done')
 
     const stamped = shared_db.prepare('SELECT import_requested_at, import_thread_id FROM source_files WHERE id = ?').get(file.id) as Record<string, string>
     expect(stamped.import_thread_id).toBe(thread_id)

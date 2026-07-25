@@ -4,12 +4,28 @@ You are importing someone's language materials into a Living Dictionary through 
 `/api/v1` API. **Always start here**, whatever the source format; the format guides
 (`/api/v1/guides/spreadsheets`, `flex-lift`, `pdf-scans`) cover parsing details.
 
-The work has two phases, in strict order:
+## The runbook
 
-1. **Data preparation** — inspect, question, stage locally, review by eye, clean,
-   get human sign-off. **No API writes happen in this phase.**
-2. **API usage** — register the source, write in idempotent batches, verify,
-   repair, file the uploaded resources under their permanent source, report.
+**Phase 0 — set up the job**
+
+1. Download every resource; read the uploader's instructions (they are authoritative).
+2. `POST …/sources` for the work, then `PATCH …/files/{fileId}` with its `source_id`
+   — do this before any data work, so every record you write is traceable.
+
+**Phase 1 — data preparation (no data writes)**
+
+3. Inspect and profile the material.
+4. Ask the human the linguistic questions inspection raises.
+5. Stage everything locally, verbatim + cleaned, from a re-runnable pipeline.
+6. Pore over the data by eye, in bulk; clean with auditable rules + manual passes.
+7. Render a human-readable preview from the final payload and get sign-off.
+
+**Phase 2 — API usage**
+
+8. Write in idempotent batches under one `import_id`, with a resumable ledger.
+9. Verify counts and spot-check content against the source.
+10. Leave a `review` task on every entry a human still has to decide.
+11. Report, and leave a reply the requester can be sent.
 
 Rushing to phase 2 is the classic failure mode: an import can be technically
 flawless and still wrong because the data wasn't understood. This is someone's
@@ -18,7 +34,51 @@ yours generously so theirs is spent only on decisions.
 
 ---
 
-## Phase 1 — Data preparation (before you touch the API)
+## Phase 0 — Set up the job
+
+### 0.1 Get the material
+
+`GET …/dictionaries/{id}/files` lists the uploaded resources, each with the
+uploader's `import_instructions` (**authoritative — follow them**) and an optional
+`source_note`. Download each via `GET …/files/{fileId}`.
+
+### 0.2 Register the source, and file the resources under it
+
+**Every import gets a `sources` registry row** — even when the uploader gave no
+citation and the material looks like an unpublished working file. Untraceable data
+is a permanent cost; a best-effort source row is cheap and the dictionary's manager
+can refine it later. Do it now, not at the end: the slug has to be stamped on every
+record from your first write, and filing the file signals that the job is underway.
+
+1. `POST …/sources` with a **simple, stable `slug`**. Prefer `author-year`
+   (e.g. `smith-1979`) when known; with unknown provenance use something short and
+   generic (e.g. `enxet-lexicon`). The slug is the permanent key stamped on every
+   record, so keep it plain enough to still fit after the manager improves the
+   citation. Include `citation`, `abbreviation`, `author`, `year`, `type`
+   (dictionary/wordlist/fieldwork/manuscript/video/grammar/phrasebook/hymnal/
+   primer/corpus/other), and `orthography` if its forms use a specific script.
+   - If the uploader's `source_note` is thin or absent, write a **best-effort
+     citation from what you can observe** (title page, colophon, file format,
+     language pair, uploading organization). Describing observed facts is not
+     inventing data — but never guess authorship or publication details; write
+     "author and publication details unrecorded" and let the manager iterate.
+2. `PATCH …/files/{fileId}` with `{ "source_id": "<source id>" }` for **every file
+   in the request**, not just the main data file. This does not move or publicize
+   the bytes — the object keeps its existing private storage key. It records the
+   permanent association and shows the manager that the import is in progress.
+   If one request contains materials from different works, create a source per work
+   and link each file to the right one.
+3. Later revisions of the same work (a corrected export sent mid-job) become
+   **additional files under the same source** — never overwrite the original.
+
+Then stamp what you write: `sources: ["smith-1979"]` on entries/senses/sentences/
+texts, plus `citations: [{ "slug": "smith-1979", "locator": "p. 31" }]` on entries,
+sentences, and texts whenever you know a page/line/example number (for a scanned
+dictionary you always do — record it).
+
+---
+
+## Phase 1 — Data preparation (before you write any data)
 
 ### 1.1 Inspect the resource
 
@@ -28,16 +88,15 @@ yours generously so theirs is spent only on decisions.
 - Detect the **encoding** (UTF-8 vs legacy codepages, mojibake, NFC/NFD
   normalization of diacritics) before parsing anything. Watch **CRLF + trailing
   whitespace**: a `$`-anchored grep silently misses annotations hidden behind
-  `\r` or trailing spaces (one file hid 18 POS-tagged headwords this way —
-  normalize line endings before profiling).
+  `\r` or trailing spaces — normalize line endings before profiling.
 - **Profile the structure**: which markers/columns exist, how often each occurs,
   which are always empty, which repeat within a record, min/max/median value
   lengths, records per structural shape. Empty-looking fields and outliers are
   where surprises live.
 - Profile markers **inline as well as line-initial** — compilers typo a marker
-  mid-line (`… \sc Micrurus frontalis`) and a line-initial-only parser will glue
-  it into the previous field as if it were word-wrap. Those strays are hand-typed
-  treasure: scientific names, variant forms, POS, examples.
+  mid-line and a line-initial-only parser will glue it into the previous field as
+  if it were word-wrap. Those strays are hand-typed treasure: scientific names,
+  variant forms, POS, examples.
 - Inspect the **headword column itself**, not just the definition side: POS tags,
   IPA transcriptions, and even fragments of the next record leak into it.
 - Read the resource's own front/back matter and first records — compiled
@@ -55,7 +114,7 @@ an answer. Typical questions:
   they match the dictionary's configured gloss languages?
 - What do **unknown markers, columns, or abbreviation conventions** mean?
 - How does the source mark **homographs**, and should its numbering carry over?
-- **Provenance**: who compiled this, when, from what — feeds the source row (§2.2).
+- **Provenance**: who compiled this, when, from what — improves the source row.
 - **Orthographies vs dialects** — the most consequential modeling fork for
   multi-variety material; decide UP FRONT which model fits:
   - **Same speech, different writing systems** (a romanization + a native script,
@@ -78,42 +137,20 @@ records). One row per source record, carrying:
 
 - the **verbatim original** (so nothing is ever lost and every cleanup is diffable)
 - the cleaned/parsed fields and their **proposed API field mapping**
-- **flags** for anything odd, and a note of which cleanup rules touched the row —
-  design these so unresolved findings map cleanly onto the entry `review`
-  field's categories (§2.3)
+- **flags** for anything odd, and a note of which cleanup rules touched the row
 - a **source locator** (line number, page, record id) for tracebacks
-- the record's **deterministic id** (uuid5 of a stable source key) — assigned here,
-  not at POST time
+- the record's **deterministic id** (uuid5 of a stable RAW source key) — assigned
+  here, not at POST time, and never re-keyed on a value your cleanup can change
 
 The staging store is the single source of truth for everything downstream: the
 preview (§1.5) and the API payloads are both generated from it, never hand-edited.
+Keep the whole pipeline **re-runnable from the original file**; run it twice and
+diff — byte-identical output is your proof that no manual fix-up crept in.
 
-Flags and cleanup logs are intentionally broader than the final human review
-queue. A flag records what the importer noticed; `review` means **a real question
-is still unresolved after the final cleanup**. Re-evaluate every flagged row after
-all parser repairs and transformations have run. Remove stale findings when the
-pipeline recovered the missing record, moved explicitly labelled data into its
-unambiguous destination, or otherwise resolved the issue. Do not ask a human to
-re-approve deterministic cleanup just to preserve an importer audit trail.
-
-Draft the final `review.note` during Phase 1, against the exact final fields the
-reviewer will see. The note is a small editorial task, not a traceback:
-
-- It must be answerable from the entry page alone. Name the sense when useful,
-  explain what changed, include the **complete original and imported values**
-  needed to decide, and end with a concrete question.
-- Use plain language and the labels a human sees in the UI: "Spanish
-  translation", "Guaraní translation", "definition", "Notes", and "plural
-  form". Never expose code paths such as `glosses.gn`, internal flag names,
-  parser terminology, JSON/DB vocabulary, or shorthand written for another
-  programmer.
-- If text was omitted, include the exact omitted text plus enough surrounding
-  text to decide where it belongs. Never say only "text was dropped" and ask the
-  reviewer to find it elsewhere.
-- Keep provenance out of the human note. Put the source slug + locator in the
-  entry's structured `citations`; the editor UI exposes it separately under
-  collapsed **Source details** for an agent or specialist who needs a traceback.
-  Never tell the human reviewer to open, inspect, or compare the source file.
+**Re-check identity after cleanup.** Transformations that touch headwords create
+collisions that didn't exist in the source (stripping a POS tail can turn two
+distinct rows into the same `(lexeme, homograph)` pair). Finalize homograph
+numbering as the LAST step, after all headword cleanup, and keep the ids stable.
 
 ### 1.4 Pore over the data — by eye, in large amounts
 
@@ -121,36 +158,36 @@ This is the longest step and the reason phase 1 exists. Do not sample five recor
 and declare victory: **read hundreds of records, scan thousands**, sorted and
 grouped different ways (by length, by punctuation, by rare characters, by
 structural shape). You are looking for errors, corruption, inconsistencies, and
-structure hiding in prose. Real catches that only bulk eyeballing finds:
+structure hiding in prose. Classes worth hunting, because only bulk eyeballing
+finds them:
 
-- A **second language hiding inside another field** — one import assumed a source
-  held only Spanish glosses; reading records in bulk revealed Guaraní equivalents
-  embedded inside the Spanish definition strings (`… guaraní "¡haley!"`). No
-  marker, column, or heuristic flagged it.
+- A **second language hiding inside another field** — glosses in a third language
+  embedded in the definition string, with no marker or column to flag them.
 - Separator and markup noise (trailing `;` on thousands of values), word-wrap
   overflow glued to the wrong field.
-- **Structured data hiding in prose**: plural forms (`pl amyepeyk`), person/gender
-  paradigm tags (`2/3PMS`), literal-translation asides (`lit "…"`), etymologies
-  and usage examples packed into a definition — each belongs in its own API field,
-  not left as noise inside a gloss.
+- **Structured data hiding in prose**: plural forms, person/gender paradigm tags,
+  literal-translation asides, etymologies and usage examples packed into a
+  definition — each belongs in its own API field, not left as noise inside a gloss.
 - The **headword leaking into its own gloss/definition**.
-- Cross-references (`véase X`, `variante de X`) that should become entry
+- Cross-references ("see X", "variant of X") that should become entry
   relationships, not prose.
 - Senses wrongly split or merged by the source's own line formatting.
-- **Truncated values**: entries ending in `:`, "por ejemplo", "variante de", or a
-  dangling connective — the source lost content there. Flag and report them;
-  never guess a completion.
+- **Truncated values**: entries ending in `:`, "for example", or a dangling
+  connective — the source lost content there. Flag and report them; never guess a
+  completion.
+- **Records the parser silently ate**: reconcile your record count against a count
+  taken a different way (raw headword-pattern grep, file size per record). A
+  defect in the source's own structure can hide dozens of entries inside their
+  neighbours.
 
 Two judgment rules that recur in gloss-vs-definition work:
 
-- For **polysynthetic languages** a long phrase is usually still a GLOSS: "hacer
-  que alguien vuelva a pararse acá" is the translation equivalent of one verb, and
-  a sentence-shaped rendering of a finite verb form ("se está lamiendo el gato")
-  is a gloss too. Definition means *describes instead of translating* ("tipo de
-  planta con...", "persona que...", "prefijo verbal que...") — judge content, not
-  length or shape.
-- When one value holds BOTH an equivalent and a description ("iglesia; lugar en
-  que se reúne la gente"), **split it**: equivalent → `glosses`, description →
+- For **polysynthetic languages** a long phrase is usually still a GLOSS: a whole
+  clause can be the translation equivalent of one verb. Definition means
+  *describes instead of translating* ("type of plant with...", "person who...",
+  "verbal prefix that..."). Judge content, not length or shape.
+- When one value holds BOTH an equivalent and a description ("church; place where
+  people gather"), **split it**: equivalent → `glosses`, description →
   `definition`. Never duplicate the same text into both.
 
 Method: when you find an issue, **quantify the class across the whole dataset**
@@ -161,29 +198,31 @@ content and judge each value). Record every rule and every manual decision in th
 staging rows so the cleanup is auditable and re-runnable from the original.
 
 For a large dataset, **parallelize the reading with sub-agent sessions** instead
-of skimping: first read a meaningful slice yourself (in the Enxet import: all
-~1,100 pattern-flagged values) to crystallize the taxonomy, then hand the
-remaining chunks to spawned sessions with (a) that written taxonomy with worked
-examples, (b) an exceptions-only decision-file contract keyed by stable refs, and
-(c) the anomaly flags to hunt for. The lead agent then audits: spot-check each
-reader's decisions against the raw chunk, and personally re-verify every item a
-reader marked unsure. Chunks sorted by value text make patterns cluster and read
+of skimping: first read a meaningful slice yourself to crystallize the taxonomy,
+then hand the remaining chunks to spawned sessions with (a) that written taxonomy
+with worked examples, (b) an exceptions-only decision-file contract keyed by stable
+refs, and (c) the anomaly flags to hunt for. The lead agent then audits: spot-check
+each reader's decisions against the raw chunk, and personally re-verify every item
+a reader marked unsure. Chunks sorted by value text make patterns cluster and read
 faster.
 
 ### 1.5 Render a human-readable preview
 
-Before any write, produce a **`preview.html`** (or equivalent): a designed,
-readable dictionary-entry view — never a raw JSON dump — showing:
+Before any write, generate a **`preview.html`** (or equivalent) **from the final
+payload** — not from an intermediate staging file, or its counts and text will
+disagree with what you actually import. It is a designed, readable
+dictionary-entry view, never a raw JSON dump, showing:
 
-- a **diverse sample** (~20–40 entries) covering every structural shape: single- and
-  multi-sense, homographs, empty/minimal records, the longest values, the weirdest,
-- **every flagged or manually-decided case** (the full list when it's small),
-- lifted/relocated data made visible (notes, plural forms, cross-references), so
-  the human can see where things will land.
-- the exact final `review.category` + `review.note` for every queued entry,
-  displayed as the editor will see it. Read every generated note once more after
-  the final pipeline run; category-wide templates do not replace this item-by-item
-  audit.
+- the payload's own counts (entries, senses, and how many entries will get the
+  API's default empty sense),
+- a **diverse sample** (~20–40 entries) covering every structural shape: single-
+  and multi-sense, homographs, empty/minimal records, the longest values, the
+  weirdest,
+- **every flagged or manually-decided case**, and lifted/relocated data made
+  visible (notes, plural forms, cross-references), so the human can see where
+  things will land,
+- the exact final `review.category` + `review.note` for every queued entry (§2.3),
+  displayed as the editor will see it.
 
 The human reviews meaning and correctness; your job is to make that effortless.
 
@@ -204,44 +243,15 @@ off on the preview do you enter phase 2.
    current entry count against what phase 1 established. If the material uses a
    gloss language or writing system the dictionary doesn't have yet, add it first
    (`POST …/gloss-languages` with `{ "code": "fr" }` / the orthographies endpoint).
-2. `GET /api/v1/dictionaries/{id}/files` — the uploaded resources, each with the
-   uploader's `import_instructions` (authoritative — follow them) and optional
-   `source_note`. Download each via `GET …/files/{fileId}`. (You did this in
-   phase 1; re-check instructions haven't changed.)
+2. Re-check that the uploader's instructions haven't changed since phase 0.
 3. Read `?view=index` of the OpenAPI spec, then pull the tags you need
    (`?tag=entries`, `?tag=texts`, …).
+4. **Write down the numbers you expect** — entries, senses, entries carrying each
+   review category — so verification is a comparison, not a vibe. Note that an
+   entry sent without `senses` is created with one default empty sense, so expected
+   DB senses = data-bearing senses + entries with no senses.
 
-### 2.2 Register a source for every import
-
-**Every import gets a `sources` registry row** — even when the uploader gave no
-citation and the material looks like an unpublished working file. Untraceable
-data is a permanent cost; a best-effort source row is cheap and the dictionary's
-manager can refine it later.
-
-1. `POST …/sources` with a **simple, stable `slug`**. Prefer `author-year`
-   (e.g. `smith-1979`) when known; with unknown provenance use something short
-   and generic (e.g. `enxet-lexicon`). The slug is the permanent key stamped on
-   every record, so keep it plain enough to still fit after the manager improves
-   the citation. Include full `citation`, `abbreviation`, `author`, `year`,
-   `type` (dictionary/wordlist/fieldwork/manuscript/video/grammar/phrasebook/
-   hymnal/primer/corpus/other), and `orthography` if its forms use a specific
-   script.
-   - If the uploader's `source_note` is thin or absent, write a **best-effort
-     citation from what you can observe** (title page, colophon, file format,
-     language pair, uploading organization). Describing observed facts is not
-     inventing data — but never guess authorship or publication details; write
-     "author and publication details unrecorded" instead and let the manager
-     iterate on it.
-2. Keep the source id for finalization (§2.7), but **do not link the uploaded
-   file yet**. Setting its `source_id` is the completion marker: it removes the
-   resource from the active Import queue. Wait until the data has passed §2.4
-   verification.
-3. Stamp imported records: entry/sense/sentence/text `sources: ["smith-1979"]`, and
-   use `citations: [{ "slug": "smith-1979", "locator": "p. 31" }]` on entries,
-   sentences, and texts when you know the page/example number (for a scanned
-   dictionary you always do — record it).
-
-### 2.3 Writing the data
+### 2.2 Writing the data
 
 - **Generate a UUID yourself for every entry** and send it as `id` — it is the
   idempotency key (re-POST of the same id is a safe no-op) and your handle for later
@@ -249,6 +259,10 @@ manager can refine it later.
 - **Batch** `POST …/entries` with `{ "entries": [...], "import_id": "<slug>-2026-07" }`
   in batches of ≤1000 entries (and ≤~16MB per request). The `import_id` becomes a
   private tag so the whole batch can be found or cleaned up later.
+- Drive it from a **runner, not ad-hoc calls**: validate the payload before the
+  first write, stop on the first failure, and persist a ledger (bound to a hash of
+  the payload) after every batch so an interrupted run resumes instead of
+  double-writing.
 - **Hard-fail any batch whose `results.length` differs from the chunk you sent.**
   A mismatch means the request didn't reach the endpoint as intended (a classic
   cause: an http→https or trailing-slash redirect silently turning your POST into
@@ -280,33 +294,54 @@ manager can refine it later.
   this avoids hardcoding text IDs in downstream consumers.
 - Never invent data. If glosses/POS are ambiguous in the source, leave the field
   empty rather than guessing.
-- **Flag anything you had to guess, salvage, split, or truncate for a human
-  reviewer and could not fully resolve during Phase 1** — set the entry's
-  `review` field: `{ "category": "...", "note": "..." }`.
-  This is EDITOR-ONLY (never shown to the public — it's stripped from non-editor
-  reads, same bar as a private tag) and gives the dictionary's manager a real
-  review queue: the entries list has a "Needs review" filter + a per-category
-  facet, and the entry page shows a banner with your `note` and a "Resolve" button
-  that clears it. Prefer this over burying caveats in your final report.
-  - `category` is a free bucket label that drives the facet — reuse a small,
-    consistent vocabulary across the import. Good buckets from real imports:
-    `truncated` (value cut off in the source), `headword_in_gloss` (the headword
-    leaked into its own gloss/definition), `language_split` (you separated
-    content in another language into its own gloss field), `uncertain_gloss`
-    (the gloss/definition call needs a linguist's eye), `dropped_text` (you
-    dropped stray/unparseable text — say what), `missing_gloss` (vernacular-only,
-    no gloss found), `other` (freeform — the note carries it).
-  - `note` is the self-contained, plain-language task shown verbatim. It may
-    enumerate senses. A good language-split note is:
-    `"Sense 1: I placed “ñakyra’i” in the Guaraní translation instead of the Spanish text.\nOriginal text: “cigarra pequeña, chicharra, ñakyra’i.”\nSpanish translation: “cigarra pequeña, chicharra”\nIs “ñakyra’i” Guaraní, and are both translations now correct?"`
-    The human has the before/after values and a precise decision; the entry's
-    `citations` carry the source slug and locator separately.
-  - Clear it when resolved by PATCHing the entry with `"review": null` — the same
-    thing the human's "Resolve" button does. (A human can also import faithfully
-    now and review in-app later, which is exactly what this field is for.)
+
+### 2.3 The human review queue (`review`)
+
+**Flag anything you had to guess, salvage, split, or truncate and could not fully
+resolve** — set the entry's `review` field: `{ "category": "...", "note": "..." }`.
+This is EDITOR-ONLY (never shown to the public — it's stripped from non-editor
+reads, same bar as a private tag) and gives the dictionary's manager a real review
+queue: the entries list has a "Needs review" filter + a per-category facet, and the
+entry page shows a banner with your `note` and a "Resolve" button that clears it.
+Prefer this over burying caveats in your final report. Clear one by PATCHing the
+entry with `"review": null` — the same thing the human's "Resolve" button does.
+
+**Your importer flags are not the review queue.** A flag records what you noticed;
+`review` means *a real question is still unresolved after the final cleanup*.
+Re-evaluate every flagged row after all repairs have run, and drop findings the
+pipeline resolved. Never ask a human to re-approve deterministic cleanup just to
+preserve your audit trail.
+
+- `category` is a free bucket label that drives the facet — reuse a small,
+  consistent vocabulary across the import. Good buckets from real imports:
+  `truncated` (value cut off in the source), `headword_in_gloss` (the headword
+  leaked into its own gloss/definition), `language_split` (you separated content in
+  another language into its own gloss field), `uncertain_gloss` (the
+  gloss/definition call needs a linguist's eye), `dropped_text` (you dropped
+  stray/unparseable text — say what), `missing_gloss` (vernacular-only, no gloss
+  found), `other` (freeform — the note carries it).
+- `note` is a **self-contained editorial task**, shown verbatim to a dictionary
+  manager who has only the entry page in front of them:
+  - Answerable from the entry page alone. Name the sense when useful, explain what
+    changed, include the **complete original and imported values** needed to
+    decide, and end with a concrete question.
+  - Plain language, using the labels a human sees in the UI ("Spanish
+    translation", "definition", "Notes", "plural form"). Never expose code paths
+    like `glosses.gn`, internal flag names, parser terminology, or JSON/DB
+    vocabulary.
+  - If text was omitted, quote the exact omitted text plus enough surrounding text
+    to place it. Never say only "text was dropped" and send them hunting.
+  - Keep provenance OUT of the note — the source slug + locator belong in the
+    entry's `citations`, which the editor UI shows separately under collapsed
+    Source details. Never tell a human reviewer to open or compare the source file.
+
+  A good language-split note reads like:
+  `"Sense 1: I put “ñakyra’i” in the Guaraní translation instead of the Spanish text.\nOriginal text: “cigarra pequeña, chicharra, ñakyra’i.”\nSpanish translation: “cigarra pequeña, chicharra”\nIs “ñakyra’i” Guaraní, and are both translations now correct?"`
 
 ### 2.4 Verifying an import
 
+- Compare against the numbers you wrote down in §2.1 — entries, senses, and the
+  per-category review counts.
 - **Live counts / full sweeps**: paginate `GET …/entries` (`updated_at` ASC).
   `limit` is silently capped at 500 — advance `offset` by the number of entries
   RETURNED while `has_more` is true, never by your requested limit (a
@@ -339,8 +374,21 @@ earlier import updates the fields you send but leaves stale data behind:
 - `dialects`/`tags` in a PATCH are ADDITIVE. Unlink a wrong one from a single entry
   with `DELETE …/entries/{entryId}/tags/{tagId}` (or `…/dialects/{dialectId}`) —
   these unlink routes exist and the tag/dialect survives elsewhere.
+- Send an explicit `null` to clear a nullable field; omitting it leaves the old
+  value. Read the row back after the first one to confirm the field really cleared.
 - Deterministic ids (uuid5 of your source key) make re-syncs address the same
   rows every time — the repair path stays surgical instead of delete-and-reimport.
+- There is **no batch PATCH** — corrections are one request per entry. Budget for
+  that, and don't rewrite fields (like citation locators) across a whole import for
+  cosmetic reasons.
+
+**A corrected revision of an already-imported source** is a reconciliation job, not
+a re-import. Build an identity map between the old and new records first, then
+audit the differences: a "fixed" export routinely repairs some records while
+damaging others (lost spaces, newly truncated values). Keep the better wording per
+field, accept genuine sense splits/merges, delete the senses the correction really
+dropped, and re-audit your review queue against the new text. File the corrected
+export as an additional resource under the same source.
 
 ### 2.6 Recovering from a bad import
 
@@ -365,29 +413,13 @@ don't issue thousands of single DELETEs — remove the batch by its `import_id`:
 you used. If content predates your imports (or you've lost the ids), ask a Living
 Dictionaries admin to reset the dictionary instead.
 
-### 2.7 Complete the uploaded-resource lifecycle
+### 2.7 Report
 
-Only after the imported data passes verification, file every uploaded resource
-under the source it represents:
+Tell the requester, in their language not yours: what was imported and how much,
+the decisions you made (cleanup rules applied, anything skipped, the source you
+registered), how many entries are waiting in their review queue and how to work
+through them, and anything still unresolved. Keep the `import_id` and your ledger
+in the technical record for whoever maintains the import.
 
-`PATCH …/files/{fileId}` with `{ "source_id": "<source id>" }`.
-
-This does not move or publicize the bytes. It keeps the existing private R2
-object and records its permanent source association. For imports requested
-through the Living Dictionary Import page, `source_id` is also the completion
-marker: the file leaves the active Import queue and becomes downloadable by
-dictionary managers beneath the proper source on the Sources page.
-
-- Link **every file used by the import**, not only the main data file.
-- If one request contains materials from different works, create/reuse the
-  proper source for each and link each file individually.
-- Do not set `source_id` before verification. If the import fails or still needs
-  repair, the resources must remain visible in the active queue.
-- Keep the current file row and storage key. Never copy import resources into
-  the public audio/photo/video bucket.
-
-### 2.8 Report
-
-Reply to the requester with: what was imported, counts, the `import_id`, decisions
-you made (cleanup rules applied, skipped sections, source rows created), the
-files you completed under those sources, and anything needing human review.
+The resources you filed under their source in §0.2 stay there permanently, and a
+dictionary manager can download them from the Sources page.

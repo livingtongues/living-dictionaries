@@ -35,7 +35,7 @@
 
   const MAX_BYTES = 100 * 1024 * 1024
 
-  const import_files = $derived(active_import_files(files))
+  const import_files = $derived(active_import_files({ files, requests }))
   const pending_files = $derived(import_files.filter(file => !file.import_requested_at))
   const requested_files = $derived(import_files.filter(file => !!file.import_requested_at))
   const requested_groups = $derived(requests.map(request => ({

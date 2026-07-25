@@ -570,6 +570,8 @@
     "uploading": "Uploading…",
     "uploaded": "Uploaded",
     "requested": "Import requested",
+    "in_progress": "Import in progress",
+    "in_progress_explanation": "We have started importing this resource. It is already filed under its source, and leaves this page when the import is finished.",
     "instructions_label": "How should we import this?",
     "instructions_placeholder": "e.g. Import all entries with their example sentences. Glosses are in Spanish. Skip the introduction pages.",
     "instructions_required": "Required — every file needs import instructions before you can send the request.",

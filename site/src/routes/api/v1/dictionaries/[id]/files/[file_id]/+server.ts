@@ -6,7 +6,7 @@ import { get_dictionary_db } from '$lib/db/server/dictionary-db'
 import { delete_source_file, get_source_file, update_source_file } from '$lib/db/server/source-files'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { load_v1_dictionary_context } from '$lib/db/server/v1-route-context'
-import { actor_label, append_import_request_followup, format_file_metadata, require_requested_file_owner } from '$lib/import/server/import-request-thread'
+import { actor_label, append_import_request_followup, format_file_metadata, is_site_admin_user, require_requested_file_owner } from '$lib/import/server/import-request-thread'
 import { notify_admin } from '$lib/notifications/notify-admins'
 import { get_attachment_stream, R2AttachmentNotFound } from '$lib/r2/get-attachment'
 import { delete_import_object, r2_is_configured } from '$lib/r2/import-files'
@@ -18,7 +18,7 @@ export interface V1FilePatchRequestBody {
   filename?: string
   import_instructions?: string | null
   source_note?: string | null
-  /** An existing dict-db `sources.id` — after successful verification, files this resource under its permanent source and completes its Import-page lifecycle. Null unlinks. */
+  /** An existing dict-db `sources.id` — files this resource under its permanent source (do it when you START the import, so the material is traceable from the first write). Null unlinks. */
   source_id?: string | null
 }
 
@@ -99,11 +99,16 @@ export const PATCH: RequestHandler = async (event) => {
   if (!changed_fields.length)
     return json({ file: existing } satisfies V1FilePatchResponseBody)
 
+  // Our own import team edits a requested resource as part of doing the job (filing
+  // it under its source at kickoff) — that must not reopen the thread with a
+  // customer-voice follow-up or ping the assignee about their own action.
+  const notify_requester_changes = !is_site_admin_user({ db, user_id: access.user_id })
+
   let assigned_email: string | null = null
   let file: SourceFileRow | null = null
   const update = db.transaction(() => {
     file = update_source_file({ db, dictionary_id: dictionary.id, file_id: event.params.file_id, fields })
-    if (existing.import_requested_at && existing.import_thread_id && file) {
+    if (notify_requester_changes && existing.import_requested_at && existing.import_thread_id && file) {
       const { assigned_email: email } = append_import_request_followup({
         db,
         dictionary_id: dictionary.id,
@@ -122,7 +127,7 @@ export const PATCH: RequestHandler = async (event) => {
   if (!file)
     error(ResponseCodes.NOT_FOUND, 'file not found')
 
-  if (existing.import_requested_at) {
+  if (notify_requester_changes && existing.import_requested_at) {
     void notify_admin({
       email: assigned_email,
       subject: `Import resource updated: ${dictionary.name}`,

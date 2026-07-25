@@ -36,6 +36,7 @@ export const RequestedGroup: Story<typeof Component> = {
       request_note: 'The handwritten notes in the margins are important; include them where practical.',
       requested_at: '2026-07-17T02:00:00Z',
       can_manage: true,
+      resolved_at: null,
     },
     files: [file],
   },

@@ -13,7 +13,7 @@ interface ImportThreadRow {
   assigned_email: string | null
 }
 
-function is_site_admin_user({ db, user_id }: { db: Database, user_id: string }): boolean {
+export function is_site_admin_user({ db, user_id }: { db: Database, user_id: string }): boolean {
   const user = db.prepare('SELECT email FROM users WHERE id = ?').get(user_id) as { email: string } | undefined
   return is_admin(user?.email)
 }
@@ -83,6 +83,7 @@ export function list_import_requests({ db, dictionary_id, access }: {
       message_threads.id AS thread_id,
       message_threads.import_request_note AS request_note,
       message_threads.from_user_id,
+      message_threads.resolved_at,
       MIN(source_files.import_requested_at) AS requested_at
     FROM message_threads
     INNER JOIN source_files ON source_files.import_thread_id = message_threads.id
@@ -93,6 +94,7 @@ export function list_import_requests({ db, dictionary_id, access }: {
     thread_id: string
     request_note: string | null
     from_user_id: string | null
+    resolved_at: string | null
     requested_at: string
   }[]
   return rows.map(row => ({
@@ -100,6 +102,7 @@ export function list_import_requests({ db, dictionary_id, access }: {
     request_note: row.request_note,
     requested_at: row.requested_at,
     can_manage: is_admin_user || row.from_user_id === access.user_id,
+    resolved_at: row.resolved_at,
   }))
 }
 

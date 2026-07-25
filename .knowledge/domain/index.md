@@ -15,9 +15,11 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
 - Imports are agent-driven now: managers upload resources on `/{dict}/import` → a request
   message reaches the team → an agent imports via `/api/v1` following the guides at
   `/api/v1/guides` (the old Google-Sheets template + `scripts/import/` CLI are retired).
-- [import-workflow.md](./import-workflow.md) — insider recipe for running an import ourselves:
-  the API guides stay the source of truth; how to fetch the uploaded file from R2, mint a
-  per-dict API key (admin attribution gotcha), backup, and verify via direct DB reads.
+- [import-workflow.md](./import-workflow.md) — the team-only wrapper around an import: where the
+  kickoff brief comes from, why the API guides stay the source of truth, how to fetch the uploaded
+  file from R2, mint a per-dict API key (admin attribution gotcha), back up, verify via direct DB
+  reads, and hand the finished job back to Jacob (draft reply → he sends → he resolves the thread,
+  which is what clears the manager's Import page).
 - [change-history.md](./change-history.md) — the server-side per-dict audit log (entry/text/sentence
   edit timelines): where capture hooks in, the separate `{id}.history.db` + owners-index shape, how it
   survives schema drift, the entry≠text attribution boundary, and the red-phase correctness bugs.

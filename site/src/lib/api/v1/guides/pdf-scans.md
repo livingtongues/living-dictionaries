@@ -1,8 +1,9 @@
 # Importing from PDF scans of printed dictionaries
 
-Read `/api/v1/guides/importing` first for the mandatory two-phase workflow (data preparation before any API write). A scanned published
+Read `/api/v1/guides/importing` first for the mandatory workflow (register the source, then prepare the data before any data write). A scanned published
 dictionary is almost always a real **source**: create the `sources` registry row
-first and link the file to it (`PATCH …/files/{fileId}` with `source_id`).
+and link the file to it (`PATCH …/files/{fileId}` with `source_id`) before you
+start extracting.
 
 ## Working the scan
 
@@ -22,7 +23,7 @@ first and link the file to it (`PATCH …/files/{fileId}` with `source_id`).
   image; if still unsure, skip and log rather than guess.
 - Keep the printed sense numbering (1., 2., …) as separate senses.
 - Example sentences: keep the printed example with its translation, and record the
-  page in a citation — `citations: [{ "slug": "smith-1979", "locus": "p. 214" }]` —
+  page in a citation — `citations: [{ "slug": "smith-1979", "locator": "p. 214" }]` —
   so every imported sentence points back to its exact page.
 - Run-on / derived forms listed inside an entry become their own entries linked by a
   relationship (or `notes` when the derivation is unclear).

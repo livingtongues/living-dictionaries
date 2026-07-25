@@ -31,8 +31,8 @@ function format_mb(bytes: number): string {
  * this": turns a batch of uploaded resources into a message thread for the
  * team, deterministically assigned to the import owner (Jacob). The message
  * body is agent-ready — one copy button on the admin side and the whole job
- * (downloads, per-file instructions, API pointers) can be dumped into an
- * agent session.
+ * (downloads, per-file instructions, and an ordered runbook pointing at the
+ * guides) can be dumped into an agent session.
  */
 export const POST: RequestHandler = async (event) => {
   const { dictionary, access } = await load_v1_dictionary_context({ event, access: 'write' })
@@ -52,7 +52,7 @@ export const POST: RequestHandler = async (event) => {
     if (!file.import_instructions?.trim())
       error(ResponseCodes.BAD_REQUEST, `File "${file.filename}" needs import instructions before requesting`)
     if (file.source_id)
-      error(ResponseCodes.BAD_REQUEST, `File "${file.filename}" is already attached to a completed source`)
+      error(ResponseCodes.BAD_REQUEST, `File "${file.filename}" is already filed under a source — unlink it first if it still needs importing`)
     if (file.import_requested_at)
       error(ResponseCodes.BAD_REQUEST, `File "${file.filename}" is already part of a requested import`)
     return file
@@ -84,12 +84,18 @@ export const POST: RequestHandler = async (event) => {
     file_sections.join('\n\n'),
     '',
     '--- For the importing agent ---',
-    `- API base: ${origin}/api/v1`,
-    `- Full reference: ${origin}/api/v1/openapi.json (fetch ?view=index first, then ?tag=<group>)`,
-    `- Import guides: ${origin}/api/v1/guides — start with ${origin}/api/v1/guides/importing`,
-    '- Completion requirement: after the imported data passes verification, PATCH every imported file with the proper source_id. That is the completion marker that removes it from the active Import queue and makes it downloadable under that source on the Sources page. Do not set source_id before verification.',
-    `- Dictionary id: ${dictionary.id}`,
-    '- Auth: every request (including the download links above) needs an `Authorization: Bearer <write-scope API key>` header — mint one on the dictionary\'s Agents page.',
+    '',
+    `Auth: EVERY request below (including the downloads above) needs an \`Authorization: Bearer <write-scope API key>\` header. API base: ${origin}/api/v1 · dictionary id: ${dictionary.id}`,
+    '',
+    'Run the job in this order:',
+    `1. Read ${origin}/api/v1/guides/importing FIRST — it is the mandatory workflow and it is not optional. Then the format guide matching each file (${origin}/api/v1/guides), and the API reference as ${origin}/api/v1/openapi.json?view=index followed by ?tag=<group>.`,
+    '2. Download every resource above and inspect it — never trust the file extension.',
+    '3. Register the source and file these resources under it NOW, before any data work: POST …/sources with a simple stable slug, then PATCH …/files/{fileId} with {"source_id": "<source id>"} for EVERY file in this request. The manager then sees an "import in progress" marker, and every record you write can carry the slug + a locator from the first write.',
+    '4. Phase 1 — data preparation, with NO data writes yet: profile the material, ask the requester the linguistic questions inspection raises, stage locally, read the data in bulk, clean with auditable rules, then get human sign-off on a rendered preview.',
+    '5. Phase 2 — write in idempotent batches under one import_id, verify counts and spot-check content against the source, and set the editor-only `review` field on anything a human still has to decide.',
+    '6. Finish: post your summary in this thread and leave a requester-facing reply ready to send. Closing this request thread is what marks the job done and clears it from the manager\'s Import page — filing the resources under the source (step 3) does not.',
+    '',
+    'Living Dictionaries team agents: also read `.knowledge/domain/import-workflow.md` in the repo for the insider-only steps (production access, backups, handing the job back).',
   ].join('\n')
 
   const thread_id = randomUUID()

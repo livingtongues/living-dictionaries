@@ -4,8 +4,10 @@
   import IconFa6SolidTrash from '~icons/fa6-solid/trash'
   import IconFa6SolidDownload from '~icons/fa6-solid/download'
   import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
+  import IconMdiProgressWrench from '~icons/mdi/progress-wrench'
   import { page } from '$app/state'
   import { api_dict_file_delete, api_dict_file_update } from '$api/v1/dictionaries/[id]/files/_call'
+  import { import_in_progress } from '$lib/import/file-lifecycle'
   import { format_bytes } from '$lib/utils/format-bytes'
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
   import { toast } from '$lib/state/toast.svelte'
@@ -19,6 +21,7 @@
   const { file, dictionary_id, on_changed }: Props = $props()
   const { t } = $derived(page.data)
   const requested = $derived(!!file.import_requested_at)
+  const in_progress = $derived(import_in_progress(file))
 
   let instructions_edit = $state<string | null>(null)
   let source_note_edit = $state<string | null>(null)
@@ -95,7 +98,12 @@
     <IconFa6SolidFile style="flex-shrink: 0; opacity: 0.5" />
     <span class="file-name" title={file.filename}>{file.filename}</span>
     <span class="file-size">{format_bytes(file.size_bytes)}</span>
-    {#if requested}
+    {#if in_progress}
+      <span class="badge progress-badge" title={t('import_page.in_progress_explanation')}>
+        <IconMdiProgressWrench />
+        {t('import_page.in_progress')}
+      </span>
+    {:else if requested}
       <span class="badge requested-badge" title={format_date_time(file.import_requested_at)}>
         {t('import_page.requested')} · {format_relative_time(file.import_requested_at)}
       </span>
@@ -207,6 +215,14 @@
   .requested-badge {
     background: color-mix(in srgb, var(--primary), transparent 86%);
     color: var(--primary);
+  }
+  .progress-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: color-mix(in srgb, var(--warning), transparent 86%);
+    color: var(--warning);
+    font-weight: 600;
   }
   .icon-btn {
     display: inline-flex;
