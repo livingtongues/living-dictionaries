@@ -176,6 +176,17 @@ export const LARGE_VIDEO_REVIEW_BYTES = 25 * 1024 * 1024
 /** Timeout for the server-side fetch of a media `url` supplied to a v1 media endpoint. */
 export const MEDIA_FETCH_TIMEOUT_MS = 30_000
 
+/**
+ * Forced-alignment (M6) service deadlines — ONE meaning for a `running`
+ * align_jobs row. The aligner backends (Modal fetch / local subprocess) are
+ * aborted at the execution deadline; a `running` row older than the stale bound
+ * has no live owner (its process died mid-run) and is swept to `failed`; the
+ * browser stops polling at the poll deadline and offers a retry.
+ */
+export const ALIGN_EXECUTION_DEADLINE_MS = 5 * 60 * 1000
+export const ALIGN_JOB_STALE_AFTER_MS = ALIGN_EXECUTION_DEADLINE_MS + 60_000
+export const ALIGN_POLL_DEADLINE_MS = ALIGN_JOB_STALE_AFTER_MS + 10_000
+
 export const ACCESS_TOKEN_COOKIE_NAME = 'sb-access-token'
 export const REFRESH_TOKEN_COOKIE_NAME = 'sb-refresh-token'
 

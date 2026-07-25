@@ -72,6 +72,26 @@ confirm) via the same `run_auto_align` used by the button. There is deliberately
   the dev-media audio path passed to it MUST be absolute (`resolve(dev_media_dir(), storage_path)`,
   not `join` — a relative `.data/...` resolves against the alignment dir → ffmpeg "No such file").
 
+## Job lifecycle — why the deadlines are shaped this way (2026-07-25)
+
+The first version had no bound on execution, so an interrupted process (deploy/restart) or a
+backend that never settled left a `running` row that blocked every retry with HTTP 409 while the
+browser polled forever. Hardening decisions worth keeping:
+
+- **One meaning for `running` = "a live process owns this".** Enforced by a deadline chain in
+  `$lib/constants.ts`: execution deadline (both backends abort) < stale bound (a `running` row
+  older than this had no live owner and is swept to `failed`) < browser poll deadline (so the
+  client always reaches a terminal state, then offers retry).
+- **No boot sweep** even though "a fresh process owns nothing" is tempting: prod runs blue/green,
+  two containers over one `/data`, so a booting standby must not fail the primary's live jobs.
+  Age-based sweeping at request + status-poll time is uniformly safe and sufficient.
+- **No `(audio_id, status)` index.** The daily caps (20/dict, 200/site) keep the table small and
+  both queries are per-request, not hot-path — deliberately not paid for with client schema churn.
+- The local subprocess is spawned **detached and killed by process group**: `uv run` → python means
+  a plain `child.kill()` orphans the compute-heavy grandchild.
+- A job that finishes AFTER being expired still writes `done` (the terminal UPDATE is by job id) —
+  truthful, because the timings really did land.
+
 ## Deploy dependency
 
 Prod needs `MODAL_ALIGN_URL` in `sveltekit-living.env` pointing at the deployed Modal endpoint.

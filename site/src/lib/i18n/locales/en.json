@@ -792,6 +792,7 @@
     "align_replaces_existing": "This will replace the existing word timings (including any manual adjustments). Continue?",
     "align_done": "Alignment finished — word timings updated",
     "align_failed": "Alignment failed",
+    "align_timed_out": "Alignment is taking too long — please try again",
     "align_gaps": "{count} words could not be aligned and were left untimed"
   }
 }

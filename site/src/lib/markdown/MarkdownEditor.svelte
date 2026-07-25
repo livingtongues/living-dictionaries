@@ -2,6 +2,7 @@
   import { Editor } from '@tiptap/core'
   import { Placeholder } from '@tiptap/extension-placeholder'
   import { onDestroy, onMount } from 'svelte'
+  import { create_editor_tick } from '$lib/state/editor-tick.svelte'
   import { create_markdown_extensions, get_editor_markdown } from './extensions'
   import IconMdiFormatBold from '~icons/mdi/format-bold'
   import IconMdiFormatHeader1 from '~icons/mdi/format-header-1'
@@ -39,9 +40,8 @@
   // $state.raw — Svelte's deep proxy would break Tiptap's class instance.
   let editor: Editor | null = $state.raw(null)
   let element: HTMLDivElement | undefined = $state()
-  let tick = $state(0)
+  const tick = create_editor_tick()
   let suppressing_update = false
-  let destroying = false
   let last_external_value: string | null = null
 
   function emit_markdown(edited: Editor) {
@@ -71,14 +71,10 @@
       },
       onTransaction: () => {
         // ProseMirror dispatches a blur transaction synchronously during teardown,
-        // which lands inside Svelte's template/derived context — a direct `tick++`
-        // there throws state_unsafe_mutation. Defer out of the reactive context.
-        if (destroying)
-          return
-        queueMicrotask(() => {
-          if (!destroying)
-            tick++
-        })
+        // which lands inside Svelte's block-effect/derived context — a direct
+        // `tick++` there throws state_unsafe_mutation. `create_editor_tick`
+        // defers it out of that context and drops it once torn down.
+        tick.bump()
       },
       editorProps: {
         attributes: { class: 'tw-prose markdown-editor-content' },
@@ -87,7 +83,7 @@
   })
 
   onDestroy(() => {
-    destroying = true
+    tick.stop()
     editor?.destroy()
   })
 
@@ -144,17 +140,17 @@
     editor.chain().focus().setImage({ src: url }).run()
   }
 
-  const bold_active = $derived.by(() => { void tick; return editor?.isActive('bold') ?? false })
-  const italic_active = $derived.by(() => { void tick; return editor?.isActive('italic') ?? false })
-  const link_active = $derived.by(() => { void tick; return editor?.isActive('link') ?? false })
-  const bullet_list_active = $derived.by(() => { void tick; return editor?.isActive('bulletList') ?? false })
-  const ordered_list_active = $derived.by(() => { void tick; return editor?.isActive('orderedList') ?? false })
-  const blockquote_active = $derived.by(() => { void tick; return editor?.isActive('blockquote') ?? false })
-  const heading_1_active = $derived.by(() => { void tick; return editor?.isActive('heading', { level: 1 }) ?? false })
-  const heading_2_active = $derived.by(() => { void tick; return editor?.isActive('heading', { level: 2 }) ?? false })
-  const heading_3_active = $derived.by(() => { void tick; return editor?.isActive('heading', { level: 3 }) ?? false })
-  const can_undo = $derived.by(() => { void tick; return editor?.can().undo() ?? false })
-  const can_redo = $derived.by(() => { void tick; return editor?.can().redo() ?? false })
+  const bold_active = $derived.by(() => { void tick.value; return editor?.isActive('bold') ?? false })
+  const italic_active = $derived.by(() => { void tick.value; return editor?.isActive('italic') ?? false })
+  const link_active = $derived.by(() => { void tick.value; return editor?.isActive('link') ?? false })
+  const bullet_list_active = $derived.by(() => { void tick.value; return editor?.isActive('bulletList') ?? false })
+  const ordered_list_active = $derived.by(() => { void tick.value; return editor?.isActive('orderedList') ?? false })
+  const blockquote_active = $derived.by(() => { void tick.value; return editor?.isActive('blockquote') ?? false })
+  const heading_1_active = $derived.by(() => { void tick.value; return editor?.isActive('heading', { level: 1 }) ?? false })
+  const heading_2_active = $derived.by(() => { void tick.value; return editor?.isActive('heading', { level: 2 }) ?? false })
+  const heading_3_active = $derived.by(() => { void tick.value; return editor?.isActive('heading', { level: 3 }) ?? false })
+  const can_undo = $derived.by(() => { void tick.value; return editor?.can().undo() ?? false })
+  const can_redo = $derived.by(() => { void tick.value; return editor?.can().redo() ?? false })
 </script>
 
 <div class="markdown-editor" class:disabled>

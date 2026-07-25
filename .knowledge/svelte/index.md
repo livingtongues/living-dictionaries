@@ -13,3 +13,9 @@ lookup-able in the svelte docs).
   against a raw element is always false → a reconciling `$effect` loops forever
   (`effect_update_depth_exceeded`). Fix = `$state.raw` (or compare by primitive key).
   Was the "parts of speech menu freezes after first search" bug.
+- [third-party-callbacks-during-teardown.md](./third-party-callbacks-during-teardown.md) —
+  component teardown runs inside the parent BLOCK_EFFECT, so a library callback
+  fired synchronously from `destroy()` (TipTap's blur transaction) mutating
+  `$state` throws `state_unsafe_mutation`. Fix = defer + stop-at-teardown
+  (`create_editor_tick`), plus how to trace a minified prod stack to the real
+  component.

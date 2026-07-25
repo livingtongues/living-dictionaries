@@ -492,8 +492,8 @@ reviews, and personally audit all 498.
 ## Follow-ups spawned
 
 - `.issues/admin-api-key.md`
-- `.issues/gloss-definition-display-audit.md` (now upgraded: definition field is
-  deprecated/invisible/unsearchable — decide whether to revive it)
+- Gloss/definition display audit — definition was deprecated/invisible/unsearchable; audited and
+  fixed through `.issues/entries-list-redesign.md` (audit issue closed 2026-07-25)
 
 ## ROUND 10 — Gundolf correction audit and production update (2026-07-24)
 

@@ -1,7 +1,7 @@
 # Entries list redesign + gloss/definition parity
 
-Master plan (2026-07-24, decisions locked with Jacob). Absorbs the implementation half of
-`gloss-definition-display-audit.md` (audit findings live there). Enxet made definitions common
+Master plan (2026-07-24, decisions locked with Jacob). Absorbed the gloss/definition display audit
+in full (that issue was completed and deleted 2026-07-25). Enxet made definitions common
 (2,540 definition-only senses) and exposed that `definition` was invisible almost everywhere.
 
 ## Locked decisions

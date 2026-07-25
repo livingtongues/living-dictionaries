@@ -12,6 +12,7 @@
   import IconMdiRedo from '~icons/mdi/redo'
   import IconMdiUndo from '~icons/mdi/undo'
   import { onDestroy, onMount } from 'svelte'
+  import { create_editor_tick } from '$lib/state/editor-tick.svelte'
   import { should_autolink } from '$lib/utils/should-autolink'
 
   type ToolbarPreset = 'email' | 'document' | 'none'
@@ -67,8 +68,9 @@
   // see through). The reference change still triggers reactivity.
   let editor: Editor | null = $state.raw(null)
   let element: HTMLDivElement | undefined = $state()
-  /** Bumped on every editor transaction to retrigger derived toolbar state. */
-  let tick = $state(0)
+  /** Bumped on every editor transaction to retrigger derived toolbar state.
+   *  Deferred + teardown-guarded — see `create_editor_tick`. */
+  const tick = create_editor_tick()
   let suppressing_update = false
   /**
    * The last `value` we observed externally (either from the initial mount or
@@ -130,7 +132,7 @@
           on_change?.(html)
         },
         onTransaction: () => {
-          tick++
+          tick.bump()
         },
         editorProps: {
           attributes: {
@@ -153,11 +155,16 @@
 
     return () => {
       cancelled = true
+      tick.stop()
       local_editor?.destroy()
     }
   })
 
   onDestroy(() => {
+    // stop() FIRST — `destroy()` blurs the DOM and ProseMirror dispatches that
+    // blur transaction synchronously inside the block effect tearing this
+    // component down (production state_unsafe_mutation, 2026-07-24).
+    tick.stop()
     editor?.destroy()
   })
 
@@ -208,21 +215,21 @@
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
   }
 
-  // Reactive toolbar state — `tick` is read inside each derived so that the
-  // value re-evaluates on every editor transaction (TipTap's `onTransaction`
-  // bumps tick). `void tick` makes the dependency explicit without producing
-  // a usable value in the expression.
-  const bold_active = $derived.by(() => { void tick; return editor?.isActive('bold') ?? false })
-  const italic_active = $derived.by(() => { void tick; return editor?.isActive('italic') ?? false })
-  const link_active = $derived.by(() => { void tick; return editor?.isActive('link') ?? false })
-  const bullet_list_active = $derived.by(() => { void tick; return editor?.isActive('bulletList') ?? false })
-  const ordered_list_active = $derived.by(() => { void tick; return editor?.isActive('orderedList') ?? false })
-  const blockquote_active = $derived.by(() => { void tick; return editor?.isActive('blockquote') ?? false })
-  const heading_1_active = $derived.by(() => { void tick; return editor?.isActive('heading', { level: 1 }) ?? false })
-  const heading_2_active = $derived.by(() => { void tick; return editor?.isActive('heading', { level: 2 }) ?? false })
-  const heading_3_active = $derived.by(() => { void tick; return editor?.isActive('heading', { level: 3 }) ?? false })
-  const can_undo = $derived.by(() => { void tick; return editor?.can().undo() ?? false })
-  const can_redo = $derived.by(() => { void tick; return editor?.can().redo() ?? false })
+  // Reactive toolbar state — `tick.value` is read inside each derived so that
+  // the value re-evaluates on every editor transaction (TipTap's
+  // `onTransaction` bumps it). `void tick.value` makes the dependency explicit
+  // without producing a usable value in the expression.
+  const bold_active = $derived.by(() => { void tick.value; return editor?.isActive('bold') ?? false })
+  const italic_active = $derived.by(() => { void tick.value; return editor?.isActive('italic') ?? false })
+  const link_active = $derived.by(() => { void tick.value; return editor?.isActive('link') ?? false })
+  const bullet_list_active = $derived.by(() => { void tick.value; return editor?.isActive('bulletList') ?? false })
+  const ordered_list_active = $derived.by(() => { void tick.value; return editor?.isActive('orderedList') ?? false })
+  const blockquote_active = $derived.by(() => { void tick.value; return editor?.isActive('blockquote') ?? false })
+  const heading_1_active = $derived.by(() => { void tick.value; return editor?.isActive('heading', { level: 1 }) ?? false })
+  const heading_2_active = $derived.by(() => { void tick.value; return editor?.isActive('heading', { level: 2 }) ?? false })
+  const heading_3_active = $derived.by(() => { void tick.value; return editor?.isActive('heading', { level: 3 }) ?? false })
+  const can_undo = $derived.by(() => { void tick.value; return editor?.can().undo() ?? false })
+  const can_redo = $derived.by(() => { void tick.value; return editor?.can().redo() ?? false })
 </script>
 
 <div class={['rich-text-editor', classes]} class:disabled>

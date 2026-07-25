@@ -7,7 +7,7 @@ import type { TokenSpan } from '$lib/media/media-timings'
 import { randomUUID } from 'node:crypto'
 import { resolve } from 'node:path'
 import { dev } from '$app/environment'
-import { R2_MEDIA_DOMAIN } from '$lib/constants'
+import { ALIGN_JOB_STALE_AFTER_MS, R2_MEDIA_DOMAIN } from '$lib/constants'
 import { parse_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import { PRIMARY_ORTHOGRAPHY_CODE } from '$lib/db/schemas/shared.types'
 import { encode_token_spans, unpack_timing_string } from '$lib/media/media-timings'
@@ -30,10 +30,19 @@ import { run_alignment } from './align-runner'
  * aligner (Modal or local CPU, `align-runner.ts`) → re-encode the chained
  * per-sentence timing strings → `update_media_timings` (normal sync delivers
  * them to clients and karaoke lights up).
+ *
+ * LIFECYCLE: `running` means "a live process owns this". Execution is bounded
+ * by `ALIGN_EXECUTION_DEADLINE_MS` in both backends; any `running` row older
+ * than `ALIGN_JOB_STALE_AFTER_MS` lost its owner (deploy/restart/crash) and is
+ * swept to `failed` before duplicate detection and on every status read, so an
+ * audio can never be wedged at HTTP 409 and the browser always reaches a
+ * terminal, retryable state.
  */
 
 export const ALIGN_DICT_DAILY_LIMIT = 20
 export const ALIGN_GLOBAL_DAILY_LIMIT = 200
+
+export const ALIGN_JOB_EXPIRED_ERROR = `Alignment did not finish within ${Math.round(ALIGN_JOB_STALE_AFTER_MS / 60_000)} minutes (server restarted or the aligner stalled) — try again`
 
 export class AlignRequestError extends Error {
   constructor(public status: number, message: string) {
@@ -53,6 +62,45 @@ export interface AlignJobRow {
   tokens_aligned: number | null
   created_at: string
   finished_at: string | null
+}
+
+export interface ExpiredAlignJob {
+  id: string
+  dictionary_id: string
+  audio_id: string
+  created_at: string
+}
+
+/**
+ * The ONE meaning of `running`: a live process owns this job. A row older than
+ * `ALIGN_JOB_STALE_AFTER_MS` cannot have a live owner — both aligner backends
+ * abort at `ALIGN_EXECUTION_DEADLINE_MS` and the terminal write follows
+ * immediately — so it was interrupted (deploy/restart/crash) and is failed here
+ * in ONE atomic UPDATE. Fresh `running` rows are untouched, which is what keeps
+ * "one active job per audio" true. Exported (with injectable db/now) for tests.
+ */
+export function expire_stale_align_jobs({ db, now = Date.now() }: { db?: Database.Database, now?: number } = {}): ExpiredAlignJob[] {
+  const shared = db ?? get_shared_db()
+  const cutoff = new Date(now - ALIGN_JOB_STALE_AFTER_MS).toISOString()
+  return shared.prepare(`
+    UPDATE align_jobs SET status = 'failed', error = ?, finished_at = ?
+    WHERE status = 'running' AND created_at < ?
+    RETURNING id, dictionary_id, audio_id, created_at
+  `).all(ALIGN_JOB_EXPIRED_ERROR, new Date(now).toISOString(), cutoff) as ExpiredAlignJob[]
+}
+
+/** Production path: recover interrupted jobs + record that it happened. */
+function sweep_stale_align_jobs(): void {
+  const expired = expire_stale_align_jobs()
+  if (!expired.length)
+    return
+  log_server_event({ level: 'warn', message: 'align_job_expired', context: { count: expired.length, jobs: expired.slice(0, 20) } })
+}
+
+/** Duplicate detection — only a LIVE `running` row blocks a new request. */
+export function has_running_align_job({ db, audio_id }: { db?: Database.Database, audio_id: string }): boolean {
+  const shared = db ?? get_shared_db()
+  return !!shared.prepare(`SELECT id FROM align_jobs WHERE audio_id = ? AND status = 'running'`).get(audio_id)
 }
 
 export function check_align_rate_limit(dictionary_id: string): void {
@@ -165,8 +213,8 @@ export function request_align_job({ dictionary_id, target_kind, target_id, audio
     throw new AlignRequestError(400, 'Alignment is not configured for this dictionary — contact the Living Dictionaries team to set it up')
 
   const shared = get_shared_db()
-  const running = shared.prepare(`SELECT id FROM align_jobs WHERE audio_id = ? AND status = 'running'`).get(audio_id)
-  if (running)
+  sweep_stale_align_jobs()
+  if (has_running_align_job({ db: shared, audio_id }))
     throw new AlignRequestError(409, 'An alignment is already running for this audio')
 
   check_align_rate_limit(dictionary_id)
@@ -250,7 +298,12 @@ async function execute_align_job({ job, derived, storage_path, user_id }: {
   }
 }
 
+/**
+ * Status read for the polling browser/agent. Sweeps first so a job whose owner
+ * died reports `failed` (retryable) instead of `running` forever.
+ */
 export function get_align_job({ job_id, dictionary_id }: { job_id: string, dictionary_id: string }): AlignJobRow | undefined {
+  sweep_stale_align_jobs()
   return get_shared_db().prepare(`SELECT id, dictionary_id, target_kind, target_id, audio_id, status, error, tokens_total, tokens_aligned, created_at, finished_at FROM align_jobs WHERE id = ? AND dictionary_id = ?`).get(job_id, dictionary_id) as AlignJobRow | undefined
 }
 
