@@ -13,7 +13,7 @@ import { read_last_modified_at } from './dictionary-db'
 import { record_history } from './dictionary-history-db'
 import { merge_dict_row } from './dictionary-sync-helpers'
 import { assert_known_source_slugs, load_source_slug_set } from './source-slugs'
-import { load_dialect_map, mirror_token_sense_links, run_tombstone_delete } from './v1-entry-write'
+import { load_dialect_map, merge_citations, merge_multistring, merge_sources, mirror_token_sense_links, run_tombstone_delete } from './v1-entry-write'
 
 /**
  * `/api/v1` TEXTS sub-resource: a per-dict long-text / story (`texts.title`) with
@@ -500,26 +500,26 @@ export function apply_text_update({ db, history_db, text_id, patch, user_id, api
     delete row.updated_by_user_id
     let text_row_changed = false
     if (patch.title !== undefined) {
-      const title = to_multistring(patch.title)
+      const title = merge_multistring(existing.title, patch_source.title)
       if (!title)
         throw new Error('text title cannot be empty')
       row.title = title
       text_row_changed = true
     }
     if ('sources' in patch_source) {
-      const sources = to_string_array(patch.sources) ?? null
-      assert_known_source_slugs(sources ?? undefined, source_slug_set)
-      row.sources = sources
+      const merged = merge_sources(existing.sources, patch_source.sources === null ? null : to_string_array(patch.sources))
+      assert_known_source_slugs(merged ?? undefined, source_slug_set)
+      row.sources = merged
       text_row_changed = true
     }
     if ('citations' in patch_source) {
-      const citations = to_citations(patch.citations)
-      assert_known_source_slugs(citation_slugs(citations), source_slug_set)
-      row.citations = citations ?? null
+      const merged = merge_citations(existing.citations, patch.citations === null ? null : to_citations(patch.citations))
+      assert_known_source_slugs(citation_slugs(merged ?? undefined), source_slug_set)
+      row.citations = merged
       text_row_changed = true
     }
     if ('summary' in patch_source) {
-      row.summary = to_multistring(patch.summary) ?? null
+      row.summary = merge_multistring(existing.summary, patch_source.summary)
       text_row_changed = true
     }
     if ('work_id' in patch_source) {

@@ -192,7 +192,8 @@ export interface EntryPatch {
   notes?: MultiString | string
   linguistic_history?: MultiString | string
   sources?: string[] | string
-  /** Whole-array replace: source refs with a citation locus. */
+  /** Source refs with a citation locus. MERGED with the row's existing citations
+   *  (deduped by slug+locator) — `null` clears them all. */
   citations?: SourceCitationInput[]
   scientific_names?: string[] | string
   elicitation_id?: string

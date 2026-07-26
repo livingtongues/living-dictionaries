@@ -13,6 +13,7 @@ import { get_supported_locale, Locales } from '$lib/i18n/locales'
 import { geo_key } from '$lib/server/geo-from-request'
 import type { HostStats } from '$lib/server/host-stats'
 import { read_host_stats } from '$lib/server/host-stats'
+import { WatermarkSwrCache } from '$lib/server/watermark-swr-cache'
 import { get_admin_user_ids } from './admin-user-ids'
 import { classify_ua_frequency_bot_sessions, MIN_UA_BOT_SESSIONS_PER_DAY } from './bot-sessions'
 import { get_log_archive_db } from './log-archive-db'
@@ -806,9 +807,24 @@ export type AnalyticsScope = 'light' | 'usage' | 'diagnostics' | 'full'
  * every call (it answers "is ingest broken RIGHT NOW?" — a couple of indexed MAX
  * lookups). Only DEFAULT-arg calls are cached (a test injecting
  * shared_db/now/… bypasses).
+ *
+ * The cache mechanics — watermark comparison, per-key single-flight, next-tick
+ * scheduling, generation-safe `clear()` — live in the payload-agnostic
+ * `$lib/server/watermark-swr-cache` (same controller + behavioral contract in
+ * tutor/house). This file supplies only the LD-specific inputs.
  */
-const analytics_cache = new Map<string, { rollup_watermark: string | null, value: LogAnalytics }>()
-const analytics_revalidating = new Set<string>()
+const analytics_cache = new WatermarkSwrCache<LogAnalytics>({
+  read_watermark: () => get_rollup_watermark(get_shared_db()),
+  on_background_error: error => console.error('[log-analytics] background revalidation failed:', error.message),
+})
+
+/**
+ * Drop every memoized window. Generation-safe — a refresh already in flight
+ * finishes but cannot repopulate the cache with pre-invalidation data.
+ */
+export function clear_log_analytics_cache(): void {
+  analytics_cache.clear()
+}
 
 export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalytics {
   const { shared_db = get_shared_db(), logs_db = get_logs_db(), days = 30, now = new Date(), current_app_version = version, audience = 'humans', bot_ua_min_per_day = MIN_UA_BOT_SESSIONS_PER_DAY, scope = 'full' } = options
@@ -820,55 +836,38 @@ export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalyti
   // keeps tests from touching the real .data files.
   const cacheable = options.shared_db === undefined && options.logs_db === undefined && options.archive_db === undefined && options.now === undefined
     && options.current_app_version === undefined && options.bot_ua_min_per_day === undefined
-  const cache_key = `${days}:${audience}:${scope}`
-  const rollup_watermark = cacheable ? get_rollup_watermark(shared_db) : null
-  if (cacheable) {
-    const hit = analytics_cache.get(cache_key)
-    if (hit) {
-      if (hit.rollup_watermark !== rollup_watermark)
-        schedule_analytics_revalidation({ cache_key, days, audience, scope })
-      return { ...hit.value, pipeline: build_pipeline_health({ shared_db, logs_db }) }
-    }
+  const compute_in_request_path = (): LogAnalytics => {
+    const compute_started_at = performance.now()
+    const value = compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope })
+    options.on_computed?.({ duration_ms: Math.round(performance.now() - compute_started_at) })
+    return value
   }
-  const compute_started_at = performance.now()
-  const value = compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope })
-  options.on_computed?.({ duration_ms: Math.round(performance.now() - compute_started_at) })
-  if (cacheable)
-    analytics_cache.set(cache_key, { rollup_watermark, value })
-  return value
-}
+  if (!cacheable)
+    return compute_in_request_path()
 
-/**
- * Background refresh after the daily rollup advances, once the stale response
- * has gone out (setTimeout → next tick). Single-flight per key; the sync compute
- * still blocks the event loop when it runs, just never in a request's path.
- */
-function schedule_analytics_revalidation({ cache_key, days, audience, scope }: { cache_key: string, days: number, audience: Audience, scope: AnalyticsScope }): void {
-  if (analytics_revalidating.has(cache_key))
-    return
-  analytics_revalidating.add(cache_key)
-  setTimeout(() => {
-    try {
-      const now = new Date()
-      const shared_db = get_shared_db()
-      const value = compute_log_analytics({
-        shared_db,
-        logs_db: get_logs_db(),
-        archive_db: get_log_archive_db(),
-        days,
-        now,
-        current_app_version: version,
-        audience,
-        bot_ua_min_per_day: MIN_UA_BOT_SESSIONS_PER_DAY,
-        scope,
-      })
-      analytics_cache.set(cache_key, { rollup_watermark: get_rollup_watermark(shared_db), value })
-    } catch (err) {
-      console.error('[log-analytics] background revalidation failed:', (err as Error).message)
-    } finally {
-      analytics_revalidating.delete(cache_key)
-    }
-  }, 0)
+  return analytics_cache.get_or_schedule({
+    key: `${days}:${audience}:${scope}`,
+    // A `miss` runs in this request's path (and reports its cost through
+    // `on_computed`); a `refresh` runs next tick, after the stale response has
+    // gone out, with its own clock + fresh live handles. The background pass
+    // stays silent: `on_computed` belongs to the request that scheduled it.
+    compute: ({ reason }) => reason === 'miss'
+      ? compute_in_request_path()
+      : compute_log_analytics({
+          shared_db: get_shared_db(),
+          logs_db: get_logs_db(),
+          archive_db: get_log_archive_db(),
+          days,
+          now: new Date(),
+          current_app_version: version,
+          audience,
+          bot_ua_min_per_day: MIN_UA_BOT_SESSIONS_PER_DAY,
+          scope,
+        }),
+    // Pipeline liveness answers "is ingest broken RIGHT NOW?" — never from a
+    // day-old blob (a couple of indexed MAX lookups, so it's free enough).
+    project: value => ({ ...value, pipeline: build_pipeline_health({ shared_db, logs_db }) }),
+  })
 }
 
 /** Per-section timing, printed when ANALYTICS_PROFILE=1 (e.g. a scratch vitest run on a real DB copy). */

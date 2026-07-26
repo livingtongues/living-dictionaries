@@ -386,7 +386,59 @@ const ENTRY_PATCH_MULTISTRING_FIELDS = ['notes', 'linguistic_history'] as const
 const ENTRY_PATCH_ARRAY_FIELDS = ['sources', 'scientific_names'] as const
 const SENSE_PATCH_TEXT_FIELDS = ['noun_class'] as const
 const SENSE_PATCH_MULTISTRING_FIELDS = ['glosses', 'definition', 'plural_form', 'variant'] as const
-const SENSE_PATCH_ARRAY_FIELDS = ['parts_of_speech', 'semantic_domains', 'write_in_semantic_domains', 'sources'] as const
+const SENSE_PATCH_ARRAY_FIELDS = ['parts_of_speech', 'semantic_domains', 'write_in_semantic_domains'] as const
+
+/**
+ * PATCH semantics split on one seam: **provenance and translations accumulate, content
+ * is corrected.**
+ *
+ * `sources` / `citations` union with what is already on the row, and multi-language
+ * fields overlay key by key, so a second contributor patching an entry can never
+ * silently delete the first one's attribution — or, worse, delete the Spanish gloss by
+ * sending only English. `parts_of_speech`, `semantic_domains` and `scientific_names` are
+ * statements ABOUT the word, so a patch replaces them outright.
+ *
+ * Escape hatches: send `null` to clear a whole field, or `""` for one language key to
+ * drop just that language.
+ */
+export function merge_sources(existing: unknown, incoming: string[] | null | undefined): string[] | null {
+  if (incoming === null)
+    return null
+  const before = Array.isArray(existing) ? existing as string[] : []
+  const merged = [...before, ...(incoming ?? [])].filter((slug, index, all) => all.indexOf(slug) === index)
+  return merged.length ? merged : null
+}
+
+export function merge_citations(existing: unknown, incoming: SourceCitation[] | null | undefined): SourceCitation[] | null {
+  if (incoming === null)
+    return null
+  const before = Array.isArray(existing) ? existing as SourceCitation[] : []
+  const merged = [...before]
+  for (const citation of incoming ?? []) {
+    const at = merged.findIndex(c => c.slug === citation.slug && (c.locator ?? null) === (citation.locator ?? null))
+    if (at === -1)
+      merged.push(citation)
+  }
+  return merged.length ? merged : null
+}
+
+export function merge_multistring(existing: unknown, incoming: unknown): MultiString | null {
+  if (incoming === null)
+    return null
+  const merged: MultiString = { ...(existing && typeof existing === 'object' ? existing as MultiString : {}) }
+  const overlay = typeof incoming === 'string' ? { default: incoming } : incoming
+  if (!overlay || typeof overlay !== 'object')
+    return Object.keys(merged).length ? merged : null
+  for (const [key, raw] of Object.entries(overlay as Record<string, unknown>)) {
+    if (typeof raw !== 'string')
+      continue
+    if (raw.trim())
+      merged[key] = raw
+    else
+      delete merged[key] // an explicit "" drops just that language
+  }
+  return Object.keys(merged).length ? merged : null
+}
 
 function read_parsed_row({ db, table, id }: { db: Database.Database, table: string, id: string }): Record<string, unknown> | undefined {
   const row = db.prepare(`SELECT * FROM "${table}" WHERE id = ?`).get(id) as Record<string, unknown> | undefined
@@ -404,7 +456,7 @@ function build_entry_patch_row({ existing, patch, now, source_slug_set }: { exis
   delete row.updated_by_user_id // let merge_dict_row re-stamp the current editor
   let changed = false
   if ('lexeme' in source) {
-    const lexeme = to_multistring(patch.lexeme)
+    const lexeme = merge_multistring(existing.lexeme, source.lexeme)
     if (!lexeme)
       throw new Error('lexeme cannot be empty')
     row.lexeme = lexeme
@@ -418,23 +470,26 @@ function build_entry_patch_row({ existing, patch, now, source_slug_set }: { exis
   }
   for (const field of ENTRY_PATCH_MULTISTRING_FIELDS) {
     if (field in source) {
-      row[field] = to_multistring(source[field]) ?? null
+      row[field] = merge_multistring(existing[field], source[field])
       changed = true
     }
   }
   for (const field of ENTRY_PATCH_ARRAY_FIELDS) {
     if (field in source) {
-      const value = to_string_array(source[field]) ?? null
-      if (field === 'sources')
-        assert_known_source_slugs(value ?? undefined, source_slug_set)
-      row[field] = value
+      row[field] = to_string_array(source[field]) ?? null
       changed = true
     }
   }
+  if ('sources' in source) {
+    const merged = merge_sources(existing.sources, source.sources === null ? null : to_string_array(source.sources))
+    assert_known_source_slugs(merged ?? undefined, source_slug_set)
+    row.sources = merged
+    changed = true
+  }
   if ('citations' in source) {
-    const citations = to_citations(patch.citations)
-    assert_known_source_slugs(citation_slugs(citations), source_slug_set)
-    row.citations = citations ?? null
+    const merged = merge_citations(existing.citations, patch.citations === null ? null : to_citations(patch.citations))
+    assert_known_source_slugs(citation_slugs(merged ?? undefined), source_slug_set)
+    row.citations = merged
     changed = true
   }
   if ('coordinates' in source) {
@@ -461,18 +516,21 @@ function build_sense_patch_row({ existing, sense, now, source_slug_set }: { exis
   }
   for (const field of SENSE_PATCH_MULTISTRING_FIELDS) {
     if (field in source) {
-      row[field] = to_multistring(source[field]) ?? null
+      row[field] = merge_multistring(existing[field], source[field])
       changed = true
     }
   }
   for (const field of SENSE_PATCH_ARRAY_FIELDS) {
     if (field in source) {
-      const value = (field === 'parts_of_speech' ? to_parts_of_speech(source[field]) : to_string_array(source[field])) ?? null
-      if (field === 'sources')
-        assert_known_source_slugs(value ?? undefined, source_slug_set)
-      row[field] = value
+      row[field] = (field === 'parts_of_speech' ? to_parts_of_speech(source[field]) : to_string_array(source[field])) ?? null
       changed = true
     }
+  }
+  if ('sources' in source) {
+    const merged = merge_sources(existing.sources, source.sources === null ? null : to_string_array(source.sources))
+    assert_known_source_slugs(merged ?? undefined, source_slug_set)
+    row.sources = merged
+    changed = true
   }
   return changed ? row : null
 }
@@ -831,17 +889,17 @@ export function apply_sentence_update({ db, history_db, sentence_id, patch, user
   delete row.updated_by_user_id
   let changed = false
   if ('text' in source) {
-    row.text = to_multistring(patch.text) ?? null
+    row.text = merge_multistring(existing.text, source.text)
     changed = true
   }
   if ('translation' in source) {
-    row.translation = to_multistring(patch.translation) ?? null
+    row.translation = merge_multistring(existing.translation, source.translation)
     changed = true
   }
   if ('sources' in source) {
-    const sources = to_string_array(patch.sources) ?? null
-    assert_known_source_slugs(sources ?? undefined, load_source_slug_set(db))
-    row.sources = sources
+    const merged = merge_sources(existing.sources, source.sources === null ? null : to_string_array(patch.sources))
+    assert_known_source_slugs(merged ?? undefined, load_source_slug_set(db))
+    row.sources = merged
     changed = true
   }
   if ('ends_paragraph' in source) {
@@ -856,9 +914,9 @@ export function apply_sentence_update({ db, history_db, sentence_id, patch, user
     changed = true
   }
   if ('citations' in source) {
-    const citations = to_citations(patch.citations)
-    assert_known_source_slugs(citation_slugs(citations), load_source_slug_set(db))
-    row.citations = citations ?? null
+    const merged = merge_citations(existing.citations, patch.citations === null ? null : to_citations(patch.citations))
+    assert_known_source_slugs(citation_slugs(merged ?? undefined), load_source_slug_set(db))
+    row.citations = merged
     changed = true
   }
   if ('example_label' in source) {

@@ -579,7 +579,7 @@ describe('quick-wins fields: homograph, entry citations, sense sources', () => {
     expect(bad_sense.results[0]).toMatchObject({ status: 'failed' })
   })
 
-  test('patch overwrites homograph + citations and replaces sense sources', () => {
+  test('patch overwrites a scalar but MERGES citations and sense sources', () => {
     seed_source('s1')
     seed_source('s2')
     const report = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'x', homograph: '1', citations: [{ slug: 's1', locator: '3' }], senses: [{ id: crypto.randomUUID(), sources: ['s1'] }] }] })
@@ -588,9 +588,59 @@ describe('quick-wins fields: homograph, entry citations, sense sources', () => {
     apply_entry_update({ db, entry_id, patch: { homograph: '2', citations: [{ slug: 's2' }], senses: [{ id: sense_id, sources: ['s2'] }] }, user_id: 'u1' })
     const entry = db.prepare(`SELECT * FROM entries WHERE id = ?`).get(entry_id) as Record<string, string>
     expect(entry.homograph).toBe('2')
-    expect(JSON.parse(entry.citations)).toEqual([{ slug: 's2' }])
+    expect(JSON.parse(entry.citations)).toEqual([{ slug: 's1', locator: '3' }, { slug: 's2' }])
     const sense = db.prepare(`SELECT * FROM senses WHERE id = ?`).get(sense_id) as Record<string, string>
-    expect(JSON.parse(sense.sources)).toEqual(['s2'])
+    expect(JSON.parse(sense.sources)).toEqual(['s1', 's2'])
+  })
+
+  test('a second importer cannot delete the first one\'s provenance, and re-sending is idempotent', () => {
+    seed_source('s1')
+    seed_source('s2')
+    const report = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'y', sources: ['s1'], citations: [{ slug: 's1', locator: 'p. 4' }] }] })
+    const entry_id = report.results[0].entry_id as string
+    apply_entry_update({ db, entry_id, patch: { sources: ['s2'], citations: [{ slug: 's2', locator: 'row 9' }] }, user_id: 'u2' })
+    apply_entry_update({ db, entry_id, patch: { sources: ['s2'], citations: [{ slug: 's2', locator: 'row 9' }] }, user_id: 'u2' })
+    const entry = db.prepare(`SELECT * FROM entries WHERE id = ?`).get(entry_id) as Record<string, string>
+    expect(JSON.parse(entry.sources)).toEqual(['s1', 's2'])
+    expect(JSON.parse(entry.citations)).toEqual([{ slug: 's1', locator: 'p. 4' }, { slug: 's2', locator: 'row 9' }])
+
+    apply_entry_update({ db, entry_id, patch: { sources: null, citations: null }, user_id: 'u2' })
+    const cleared = db.prepare(`SELECT * FROM entries WHERE id = ?`).get(entry_id) as Record<string, string>
+    expect(cleared.sources).toBeNull()
+    expect(cleared.citations).toBeNull()
+  })
+
+  test('patching one language leaves the others alone; "" drops just that one', () => {
+    const report = apply_entry_writes({ db, user_id: 'u1', entries: [{
+      lexeme: 'z',
+      notes: { default: 'a note' },
+      senses: [{ id: crypto.randomUUID(), glosses: { en: 'dog', es: 'perro' } }],
+    }] })
+    const entry_id = report.results[0].entry_id as string
+    const sense_id = report.results[0].sense_ids?.[0] as string
+
+    apply_entry_update({ db, entry_id, patch: { senses: [{ id: sense_id, glosses: { en: 'dog, hound' } }] }, user_id: 'u1' })
+    const sense = db.prepare(`SELECT * FROM senses WHERE id = ?`).get(sense_id) as Record<string, string>
+    expect(JSON.parse(sense.glosses)).toEqual({ en: 'dog, hound', es: 'perro' })
+
+    apply_entry_update({ db, entry_id, patch: { senses: [{ id: sense_id, glosses: { es: '' } }] }, user_id: 'u1' })
+    const dropped = db.prepare(`SELECT * FROM senses WHERE id = ?`).get(sense_id) as Record<string, string>
+    expect(JSON.parse(dropped.glosses)).toEqual({ en: 'dog, hound' })
+
+    apply_entry_update({ db, entry_id, patch: { notes: null }, user_id: 'u1' })
+    const entry = db.prepare(`SELECT * FROM entries WHERE id = ?`).get(entry_id) as Record<string, string>
+    expect(entry.notes).toBeNull()
+  })
+
+  test('parts_of_speech and scientific_names still REPLACE — they state what the word is', () => {
+    const report = apply_entry_writes({ db, user_id: 'u1', entries: [{ lexeme: 'w', scientific_names: ['Salix exigua'], senses: [{ id: crypto.randomUUID(), parts_of_speech: ['n'] }] }] })
+    const entry_id = report.results[0].entry_id as string
+    const sense_id = report.results[0].sense_ids?.[0] as string
+    apply_entry_update({ db, entry_id, patch: { scientific_names: ['Salix lasiolepis'], senses: [{ id: sense_id, parts_of_speech: ['v'] }] }, user_id: 'u1' })
+    const entry = db.prepare(`SELECT * FROM entries WHERE id = ?`).get(entry_id) as Record<string, string>
+    expect(JSON.parse(entry.scientific_names)).toEqual(['Salix lasiolepis'])
+    const sense = db.prepare(`SELECT * FROM senses WHERE id = ?`).get(sense_id) as Record<string, string>
+    expect(JSON.parse(sense.parts_of_speech)).toEqual(['v'])
   })
 })
 

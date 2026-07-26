@@ -131,13 +131,13 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
 
   const SensePatch = {
     allOf: [{ $ref: '#/components/schemas/SenseInput' }],
-    description: 'A sense within a PATCH — a true upsert by client id. With an `id` already on this entry → field-merge that sense; with an unknown `id` (or none) → create the sense WITH that id (deterministic import ids keep addressing the same sense across re-syncs). An `id` belonging to a different entry is a 400. Example sentences upsert by id; `{ id }` alone links an existing sentence without rewriting it, existing links are not duplicated, and an unknown id-only reference is a 400.',
+    description: 'A sense within a PATCH — a true upsert by client id. With an `id` already on this entry → field-merge that sense; with an unknown `id` (or none) → create the sense WITH that id (deterministic import ids keep addressing the same sense across re-syncs). An `id` belonging to a different entry is a 400. On PATCH, provenance MERGES and language keys overlay: `sources`/`citations` union with what is there, sending one gloss language leaves the others untouched, `""` drops one language, `null` clears a field. `parts_of_speech`/`semantic_domains` are replaced outright. Example sentences upsert by id; `{ id }` alone links an existing sentence without rewriting it, existing links are not duplicated, and an unknown id-only reference is a 400.',
     properties: { id: { type: 'string' } },
   }
 
   const SentencePatch = {
     type: 'object',
-    description: 'Field-merge for one sentence (`PATCH …/sentences/{id}`) — works on both an entry\'s example sentence and a text-sentence. Provided fields overwrite; omitted ones stay.',
+    description: 'Field-merge for one sentence (`PATCH …/sentences/{id}`) — works on both an entry\'s example sentence and a text-sentence. Omitted fields stay. `text`/`translation` overlay language keys and `sources`/`citations` MERGE, so patching one language or one source never deletes another; `null` clears a field.',
     properties: {
       text: { ...StringOrMultiString, description: 'The sentence in the vernacular.' },
       translation: { ...StringOrMultiString, description: 'Translation(s), keyed by gloss-language code.' },
@@ -156,11 +156,11 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       phonetic: { type: 'string' },
       interlinearization: { type: 'string' },
       morphology: { type: 'string' },
-      notes: { ...StringOrMultiString, description: 'Rich text stored as MARKDOWN (headings/bold/lists/links) — write markdown, not HTML.' },
+      notes: { ...StringOrMultiString, description: 'Rich text stored as MARKDOWN (headings/bold/lists/links) — write markdown, not HTML. On PATCH, language keys MERGE: sending one language leaves the others untouched, `""` drops just that language, and `null` clears the field.' },
       linguistic_history: StringOrMultiString,
-      sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist (create via `POST …/sources`). Replaces the entry\'s current source list.' },
-      citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitation' }, description: 'Whole-array replace of the entry\'s citation loci.' },
-      scientific_names: StringOrStringArray,
+      sources: { ...StringOrStringArray, description: 'Source slug(s) — each must already exist (create via `POST …/sources`). On PATCH these MERGE with the slugs already on the row (deduped) so you cannot delete another contributor\'s attribution; send `null` to clear the list.' },
+      citations: { type: 'array', items: { $ref: '#/components/schemas/SourceCitation' }, description: 'Source refs with a citation locus (page/example number). On PATCH these MERGE with the citations already on the row (deduped by slug+locator); send `null` to clear them.' },
+      scientific_names: { ...StringOrStringArray, description: 'Whole-array replace — a scientific name states what the word IS, so a PATCH says the new list outright.' },
       elicitation_id: { type: 'string' },
       coordinates: { ...CoordinatesNullableRef, description: 'Whole-object replace: `{ points?, regions? }` overwrites; `null` clears; omit → untouched.' },
       dialects: StringOrStringArray,

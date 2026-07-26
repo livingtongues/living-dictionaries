@@ -205,6 +205,33 @@ SWAPS to `secondary` once it resolves (`secondary ?? primary` — both are compl
 objects, so no fragile field-merge; the heavy panels show their normal empty states until the swap).
 The `light` cache entry is shared by both pages.
 
+## The stale-while-revalidate cache is a COPIED controller, not a shared package (2026-07-26)
+
+All three apps independently grew the same expensive-dashboard cache inside `log-analytics.ts`, then
+drifted (LD had a `Set`-based single flight and no way to invalidate; tutor/house had tokens +
+generation guards). The parity decision (2026-07-25 sweep, Option A) is **one behavioral contract,
+three app-local copies**: `$lib/server/watermark-swr-cache.ts` + its behavioral test file is
+copy-paste-shared like the worker harness — same API, same tests — while cache keys, watermark
+source, computation, freshness projection, and logging stay app-specific. **Fix it in one repo →
+port to the other two**; do not try to publish it as a package (the three payload shapes and
+freshness policies have no reason to converge).
+
+Invariants worth stating because a naive edit breaks them silently:
+- **Clear must be generation-safe.** `clear()` bumps a generation counter; an in-flight refresh
+  started before it completes but discards its result. Without that, invalidation is a lie whenever
+  a refresh is mid-flight.
+- **Single-flight is tokenized, not a boolean/Set.** The `finally` releases the key only if the
+  token still matches, so a `clear()` mid-flight can hand the key to a newer refresh without the old
+  one deleting its claim.
+- **Projection applies to cached hits only** (LD splices fresh `pipeline` liveness onto a stale
+  blob) and is never what gets stored.
+- **The background pass is silent.** `on_computed` (the `admin_analytics_computed` event) fires only
+  for a compute in a request's path — the endpoint's closure carries that request's `user_id`, so
+  re-firing it from a background refresh would attribute the cost to a user who wasn't there. Tutor
+  logs its own event from both paths; that difference is intentional, not drift.
+- The controller re-reads the watermark **before** each background compute, so a rollup that lands
+  mid-compute leaves the entry stale (it refreshes again) instead of being stamped current.
+
 **Malformed-`context` read guard (2026-07-16, borrowed from house `7023529`):** every
 `json_extract(context, …)` in `log-analytics.ts` is wrapped as
 `json_extract(CASE WHEN json_valid(context) THEN context END, …)`. A single row with invalid JSON in

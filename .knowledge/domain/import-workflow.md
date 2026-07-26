@@ -62,6 +62,14 @@ that. Insider access is for fetching bytes, verification reads, and backups
   `/data/dictionaries/{id}.db` in the container beat paginating the API —
   counts, review-category counts, and spot-checks of ~10 entries' full content
   against your staged source (deterministic uuid5 ids make lookups trivial).
+  **Copy the `-wal` alongside the `.db` and `PRAGMA wal_checkpoint(TRUNCATE)`
+  after pulling it**, or you silently read a stale database: an 'Iipay Aa
+  verification pass reported 1 relationship instead of 581 because the last
+  stream written was still entirely in the WAL. (There is no `sqlite3` binary
+  in the app container or on the VPS host — pull the files to your own box.)
+  Keep the pre-import snapshot too: diffing pre vs post is the strongest check
+  there is — it proves exactly which of the manager's rows changed, in which
+  fields, and that nothing else moved.
 - **Wiping imported content: use the API batch-delete, NEVER a db-file
   swap/restore.** Any browser that already synced the dictionary holds a cursor ≥
   the server's seq watermark; replacing/restoring `dictionaries/{id}.db` resets the

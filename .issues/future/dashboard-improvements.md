@@ -106,15 +106,11 @@ proposals against this lens.
   storm out of the `real_errors` headline.** `log-analytics.ts:1218` rollup now carries
   `AND NOT (session_id IS NULL AND message IN ('sync_failed','leader_boot_failed'))`. The de-noised trend
   confirms the payoff — genuine errors ~30-50/day vs the old ~1,600-2,000/day raw headline. Don't re-raise.
-- **★ NEW — Persist `/admin/analytics` compute cost as a trend** *(ported from tutor 07-15 green-night
-  sweep · filed 2026-07-16 — LD has the identical ephemeral pattern; verified NOT present).* LD's
-  `log-analytics.ts:750` `timed()` logs `console.log('[profile] <label>: <ms>ms')` into throwaway
-  `docker logs`, so the standing "is the dashboard getting slower?" watch has no persisted trend to read
-  (identical to what tutor flagged on poly). Emit **one** `log_server_event({ level:'info', message:
-  'admin_analytics_computed', context:{ scope, days, audience, total_ms, cache_hit:false } })` per
-  *uncached* whole-window compute (skip cache hits → ~a handful/day, admin-only). Then the daily log
-  review can trend dashboard build-cost week-over-week and catch a slow regression weeks early — exactly
-  what the standing load-perf watch is for. Observability, LOW.
+- ✅ **SHIPPED 2026-07-24 (`10aacd6c`) — Persist `/admin/analytics` compute cost as a trend.**
+  `get_log_analytics` now calls `on_computed` only for an uncached whole-window calculation; the
+  admin endpoint emits one bounded `admin_analytics_computed` server event with duration, scope,
+  days, and audience. Stale-while-revalidate caching keeps expired aggregates out of the request
+  path. Production emitted six events in the July 25 review window, confirming the telemetry.
 - ~~**★ Sync-Health: surface the `sync_halted_repeated_failure` terminal wedge**~~ **DROPPED
   (Jacob, 07-14 ruling):** "wedges are your job to find and fix, not mine to watch in a dashboard —
   surface as actionable digest items, not a panel." No wedged-client dashboard panels. `sync_halted_*`

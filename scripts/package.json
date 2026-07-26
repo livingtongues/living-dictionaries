@@ -14,7 +14,9 @@
   },
   "main": "index.ts",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "sqlite-query": "./sqlite-query.sh"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
