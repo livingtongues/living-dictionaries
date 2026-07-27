@@ -5,13 +5,14 @@ import { json } from '@sveltejs/kit'
 /**
  * GET /api/v1/openapi.json
  *
- * The comprehensive, machine-readable OpenAPI 3.1 spec an agent fetches to
- * self-configure. Public (docs only, no secrets) — auth is described within.
+ * The machine-readable OpenAPI 3.1 endpoint reference. Public (docs only, no
+ * secrets) — auth is described within. NOT the first thing an agent should read:
+ * `GET /api/v1` routes it to the guide for its job first.
  *
- * Progressive disclosure (the full spec is large + growing):
- *  • `?view=index` → a compact map (paths + summaries + schema names only).
- *  • `?tag=<name>` → just that group's paths, with full ($ref-complete) schemas.
- *  • no query params → the complete spec (backward-compatible default).
+ * Progressive disclosure (the complete document is ~200KB and growing):
+ *  • no query params → the COMPACT INDEX (paths + summaries + schema names).
+ *  • `?tag=<name>` → that group's paths + only the schemas they reach.
+ *  • `?view=full` → the complete document.
  */
 export const GET: RequestHandler = (event) => {
   const spec = build_openapi_spec({ origin: event.url.origin })

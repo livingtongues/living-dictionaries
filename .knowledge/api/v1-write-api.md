@@ -336,7 +336,7 @@ thread `3eb63b49…`, itself an end-to-end test of the feedback channel). Decisi
   wrong: the builder skips only secure), rebuilt ≤~30 min after an edit,
   `Cache-Control: max-age=120`. Jacob explicitly wanted the cadence note;
   explicitly NO `snapshot` field on API responses. A how-to-load guide lives at
-  `/api/v1/guides/snapshot`.
+  `/api/v1/guides/consume` (renamed from `snapshot` in the 2026-07-27 restructure).
 
 ## 2026-07-19 quick wins (from agent feedback threads — .issues/v1-api-quick-wins.md)
 
@@ -368,3 +368,43 @@ decisions that code alone won't tell you:
   orthography delete. Codes validate against `glossing-languages-list.json`.
 - The 07-18 claim "entry tags are additive-only" was a FALSE alarm — the unlink
   route existed since 07-01; the fix was discoverability (guides' repair section).
+
+
+## The onboarding funnel — front door → guides → reference (2026-07-27)
+
+`.issues/api-v1-front-door-restructure.md` has the full plan + measurements. The
+decisions that reading the code won't tell you:
+
+- **The problem was ORDERING, not content.** `AgentPrompt.svelte` told every agent
+  to fetch `openapi.json` first — 207 KB (~52k tokens) whose `info.description` had
+  15 `##` sections, with the one pointer to `/api/v1/guides/importing` sitting in
+  section 13. The guides (the part carrying the judgement calls) were structurally
+  invisible on first contact. Jacob's framing: an agent should first orient by what
+  its human is actually doing, get its own house in order via the guide, and only
+  then meet the endpoint reference.
+- **Guides are now the PRIMARY documentation layer**; `openapi.json` is the
+  appendix. When you learn something from a real import/cleanup, it belongs in a
+  guide, not in a schema `description`. The spec's `info.description` is
+  deliberately a ~10-line stub that points back to `GET /api/v1` — resist regrowing
+  it.
+- **`GET /api/v1` serves JSON to anything that doesn't explicitly ask for
+  `text/html`.** Bare `curl` and Python `requests` both send `Accept: */*`; agents
+  shell out with bare curl constantly, so the wildcard resolves to JSON on purpose.
+  This is the one behavioural change a pre-existing HTTP client could notice.
+- **`openapi.json`'s default flipped to the compact index.** `?view=full` is a
+  permanent, free escape hatch — keep it forever, but don't make full the default
+  again "for compatibility"; Jacob explicitly rejected handicapping the design for
+  one external test suite (endpoints themselves never changed).
+- **Personalization is best-effort and must never fail closed.** An invalid,
+  revoked, or junk key returns the ANONYMOUS front door, never a 401 — agents paste
+  bad keys, and a 401 at the front door would strand them before they can read
+  anything. `load_front_door_context` swallows every error by design.
+- **`suggest_task` reads two server-only signals** an agent can't see for itself:
+  open `message_threads` with `thread_kind='import'`, and `source_files` rows with
+  no `source_id`. That's what makes "you have work waiting → start at the import
+  guide" possible on the first call.
+- **The admin route tree is a mirror, not a copy** — each page fetches the live
+  endpoint it documents (`/api/v1`, `/api/v1/guides/*`, `openapi.json?tag=`), so the
+  human docs cannot drift from what agents receive. Built with no admin-only
+  assumptions so it can be lifted to a public `/api-docs` later; that was
+  deliberately deferred, not forgotten.

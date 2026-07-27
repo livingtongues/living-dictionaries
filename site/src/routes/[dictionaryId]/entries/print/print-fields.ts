@@ -1,6 +1,6 @@
 import type { IPrintFields } from '$lib/types'
 
-export const defaultPrintFields: IPrintFields = {
+export const default_print_fields: IPrintFields = {
   gloss: true,
   definition: true,
   local_orthography: true,

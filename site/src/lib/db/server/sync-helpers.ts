@@ -270,7 +270,11 @@ function apply_sync({ db, request, tables, skip_keys }: {
           .filter(id => !skip_keys?.has(`${table_name}::${id}`)),
       )
       let filtered = rows.filter(row => !uploaded_ids.has(row_key_of(table_name, row)))
-      filtered = filtered.map(row => strip_unknown_columns(table_name, row))
+      filtered = filtered.map((row) => {
+        const stripped = strip_unknown_columns(table_name, row)
+        normalize_server_dirty(stripped as Record<string, unknown>)
+        return stripped
+      })
 
       if (filtered.length > 0) {
         const existing = response.changes[table_name]
@@ -459,6 +463,21 @@ function merge_row<K extends SyncableTableName>({ db, table_name, row, response 
     echo_server_row({ db, table_name, id: merge_id, response })
 }
 
+/**
+ * `dirty` is a purely CLIENT-side flag ("this browser holds an edit it still has
+ * to push"). It is MEANINGLESS on a canonical shared.db row: what carries a
+ * server write down to admin clients is the `server_seq` trigger, which fires on
+ * every insert/update. Pre-2026-07-27 route code nonetheless wrote `dirty = 1`
+ * on ~10 shared.db paths (351 rows in production) believing it was what drove
+ * the pull; those writes are gone, and this scrubs the outgoing copy so a legacy
+ * row can never be inherited as phantom "unsaved work". Mirrors
+ * `normalize_server_dirty` on the per-dictionary path.
+ */
+function normalize_server_dirty(row: Record<string, unknown>): void {
+  if ('dirty' in row)
+    row.dirty = null
+}
+
 /** Push the server's current row for `id` into `response.changes` (parsed). */
 function echo_server_row<K extends SyncableTableName>({ db, table_name, id, response }: {
   db: Database.Database
@@ -474,6 +493,7 @@ function echo_server_row<K extends SyncableTableName>({ db, table_name, id, resp
   })
   if (!server_row)
     return
+  normalize_server_dirty(server_row as Record<string, unknown>)
   const existing_changes = response.changes[table_name]
   if (existing_changes)
     (existing_changes as SyncRow<K>[]).push(server_row)

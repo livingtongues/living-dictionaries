@@ -1050,71 +1050,16 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       title: 'Living Dictionaries Write API',
       version: '1.0.0',
       description: [
-        'Programmatic, bulk-capable read/write access to a SINGLE Living Dictionary — an agent can do anything a human editor can (add/edit/delete entries with senses, glosses, example sentences, dialects, tags, speakers, sources, and connected texts).',
+        'Endpoint reference for the Living Dictionaries Write API — programmatic read/write access to ONE dictionary. An agent can do anything a human editor can.',
+        '',
+        '## Read your task guide before this document',
+        'The starting point is `GET /api/v1` — a small front door that routes you to the GUIDE for the job you are actually doing (importing, cleanup, bulk reads, media, corpus). If you came straight here, go there first. The guides carry the judgement calls (what to ask your human, what never to guess, how not to corrupt a language\'s data); this document carries only field shapes. `GET /api/v1/guides/api-basics` covers the mechanics every job shares: auth, the dictionary id, multilingual fields, generating your own ids for idempotency, batch results, errors, and size limits.',
         '',
         '## Auth',
-        'Every request carries `Authorization: Bearer ldk_…` — an API key minted on the dictionary\'s Agents page. A key is scoped to ONE dictionary and grants either **read** or **read & write** access (read & write is the default; a read key can only `GET`). A key for dictionary A cannot touch dictionary B (403).',
+        'Every request carries `Authorization: Bearer ldk_…` — a key minted on the dictionary\'s Agents page, scoped to ONE dictionary, granting either read or read & write. A key for dictionary A cannot touch dictionary B (403). Every path\'s `{id}` is that dictionary\'s id or url-slug.',
         '',
-        '## The dictionary id',
-        'Every path needs `{id}` — the id (or url-slug) of the dictionary your key is scoped to. Whoever gave you the key tells you the id (it is also the `<id>` in the dictionary\'s web URL `…/<id>`). Confirm it with `GET /api/v1/dictionaries/{id}`; a wrong id for your key returns 403/404.',
-        '',
-        '## Multilingual fields (IMPORTANT)',
-        'Headwords/glosses/translations/notes are multilingual. Every such field accepts EITHER a plain string (stored under the `default` writing system) OR a `{ "<locale>": "text" }` map. Use `default` for the vernacular (the language being documented) and gloss-language codes (e.g. `en`, `es`, `fr`) for glosses & translations. **Call `GET /api/v1/dictionaries/{id}` first to read the dictionary\'s valid `gloss_languages`** and key your glosses by those codes. Full Unicode (IPA, diacritics, non-Latin scripts) is supported and stored verbatim — never transliterate or strip diacritics.',
-        '',
-        '## Recommended import workflow',
-        '1. `GET /api/v1/dictionaries/{id}` → note `gloss_languages` (which locale codes to use; if your source glosses in a language not listed, add it first via `POST …/gloss-languages`). `entry_count` is updated asynchronously and lags — **do not use it to verify a fresh import** (it can read 0 right after a bulk POST). For a live count, paginate `/entries` instead.',
-        '2. `POST /api/v1/dictionaries/{id}/entries` with `{ "entries": [ … ], "import_id": "my-import-2026" }` in batches of ≤1000 (and ≤~16MB/request — see Limits). **Generate a UUID (v4) yourself for each entry and send it as `id`.** That id IS your idempotency key: you already know it (record it in your ledger keyed by your source id), you use it directly for later `PATCH …/entries/{id}` edits, and a re-POST of the same id is a safe no-op. The whole batch shares an `import_id`, which tags every entry with a private tag of that name so you can find/clean the batch later.',
-        '3. Read the per-item `results` array. Each item is `{ status: "created"|"exists"|"failed", entry_id?, sense_ids?, error? }` (one per input entry, in order). `exists` means an entry with that `id` was already present and was skipped — so retrying a timed-out batch never duplicates. Re-POST only the `failed` ones.',
-        '4. Spot-verify with `GET /api/v1/dictionaries/{id}/entries/{entryId}` (returns the full nested entry — the READ shape), or bulk-read with `GET /api/v1/dictionaries/{id}/entries?include=senses`. Heads-up on the input→output asymmetry: top-level scalars you POST come back nested under `entry.main`, and `senses[].example_sentences` come back as `senses[].sentences`. See the `EntryResponse` schema. (`elicitation_id` is for word-list/elicitation ordering; it is persisted and queryable via `?elicitation_id=`, so use it for dedupe only if your source id is genuinely elicitation data — otherwise use your own `id` as above.)',
-        '',
-        '## Data model',
-        'An **entry** is a headword (`lexeme`) plus metadata and one or more **senses**. A **sense** is one meaning: its `glosses` (short translations keyed by gloss-language), an optional longer `definition`, `parts_of_speech`, `semantic_domains`, and `example_sentences`. `parts_of_speech` values should come from the supported abbreviation list in the `SenseInput` schema (abbrevs and full English names are matched case-insensitively and stored as the canonical lowercase abbrev, e.g. "N"/"Noun" → "n"; anything else is stored verbatim). An **example sentence** has vernacular `text` + `translation`(s). `dialects` and `tags` are entry-level labels (referenced by name; created automatically if new). If you omit `senses`, one empty sense is created. An entry may carry `coordinates` — where-spoken geometry (points/regions) marking where THIS form was attested/elicited; a **dialect** has its own `coordinates` too, for the variety\'s areal extent (set via the `…/dialects` endpoints so one polygon isn\'t repeated across thousands of entries). See the `Coordinates` schema for the shape + limits. A **text** is a separate object: a connected passage/story (`title`) with its own ORDERED list of sentences (each with optional paragraph breaks) — use the `…/texts` endpoints for those; they are independent of entries.',
-        '',
-        '## Edits & deletes',
-        '`PATCH …/entries/{entryId}` field-merges the entry: provided fields overwrite, omitted ones stay. `senses` are a true upsert by client `id`: an id already on the entry → field-merge that sense; an unknown id (or none) → create the sense WITH that id, so deterministic import ids (e.g. uuid5 of a stable external key) keep addressing the same sense across re-syncs. Example sentences upsert by id too; send `{ "id": "<existing-sentence-id>" }` alone to link an existing sentence without rewriting it (re-sent links are not duplicated; an unknown id-only reference fails). `dialects`/`tags` are added (never removed) by this call. `DELETE …/entries/{entryId}` removes the entry and its senses.',
-        'For surgical, single-row fixes (e.g. correcting ONE transcription typo) read the ids from the entry READ shape (`senses[].id`, `senses[].sentences[].id`, `tags[].id`, `dialects[].id`) and use the dedicated routes:',
-        '- `POST …/sentences` — create a standalone sentence, then attach its id to a grammar section and/or link it to a sense by id; `GET`/`PATCH`/`DELETE …/sentences/{sentenceId}` read, edit, or remove it.',
-        '- `DELETE …/senses/{senseId}` — delete one sense (refused for an entry\'s LAST sense → delete the entry instead).',
-        '- `PATCH …/tags/{tagId}` / `…/dialects/{dialectId}` — rename a tag/dialect (affects EVERY entry it\'s on); `DELETE` removes it globally (unlinks it everywhere).',
-        '- `DELETE …/entries/{entryId}/tags/{tagId}` / `…/entries/{entryId}/dialects/{dialectId}` — unlink ONE tag/dialect from ONE entry (it survives on other entries).',
-        'REPAIR & RE-SYNC SEMANTICS: PATCH is field-merge and NEVER deletes — re-syncing a corrected source over an earlier import updates fields but leaves stale senses/sentences/tags behind; remove those explicitly with the DELETE routes above. See the importing guide\'s repair section.',
-        'BAD-IMPORT RECOVERY: `POST …/entries/batch-delete` removes EVERY entry from one bulk import via its `import_id` (the private tag stamped on the batch). Two-step by design: `{ "import_id": "…", "dry_run": true }` reports `{ count, sample_entry_ids }` with no writes; the real run must echo that count back as `confirm_count` (mismatch → 409, so a stale script can\'t nuke a re-imported batch). The emptied private tag is deleted too; orphaned standalone example sentences are left. See the importing guide\'s recovery section.',
-        '',
-        '## Scope (v1)',
-        'v1 covers entries, senses, example sentences, **texts** (connected passages with ordered sentences), speakers, tags, dialects, sources, and **media** (audio, photos, video). Text-only imports never need to touch media.',
-        '',
-        '## Media (audio / photos / videos)',
-        'Attach media with ONE call that uploads + links it: `POST` the bytes as multipart `file`, OR JSON `{ "url": "https://…" }` (the server fetches it). Each returns the created media object (with its `id`) and `created`.',
-        '**Audio and video require attribution**: `speaker_id` (an existing speaker — create via `POST …/speakers`) and/or `source` (a sources-registry slug — create via `POST …/sources`, same strict create-first rule as entry sources). Use a speaker when you know who is speaking; use a source when the recording comes from a website/archive/publication. NEVER invent a placeholder speaker to satisfy this — speakers are real people (with birth decade/gender/birthplace shown on the contributors page); provenance belongs in a source.',
-        '- **audio** → an entry (headword pronunciation), a sentence, or a text: `POST …/entries/{entryId}/audio`, `…/sentences/{sentenceId}/audio`, `…/texts/{textId}/audio`.',
-        '- **photos** → a sense or a sentence: `POST …/senses/{senseId}/photos`, `…/sentences/{sentenceId}/photos`. Optional free-text `source`/`photographer` (shown as the on-image caption — for photos this is NOT a registry slug).',
-        '- **videos** → a sense, sentence, or text: `POST …/senses/{senseId}/videos`, etc. Upload bytes OR link a hosted video via `hosted_url` (a YouTube/Vimeo watch URL) — preferred for large video, which would exceed the upload cap.',
-        'Idempotency + replace: send your own `id` (UUID) so a re-POST is a no-op; send `replace: true` to first remove existing media of that type on that owner (e.g. exactly one pronunciation per headword). Remove media with `DELETE …/{audioId|photoId|videoId}`.',
-        'Typical import: create the entry (get its `id` + `sense_ids`), then `POST …/entries/{entryId}/audio` with the pronunciation and `POST …/senses/{senseId}/photos` with the illustrative photo.',
-        'Karaoke **timings**: sentence/text audio can carry per-word timings (`MediaTimings` schema — sentence id → compact timing string aligned to the sentence\'s stored tokens). Send `timings` on the audio POST, or set/correct them later via `PATCH …/sentences/{sentenceId}/audio/{audioId}` / `…/texts/{textId}/audio/{audioId}` (e.g. after running forced alignment on the uploaded bytes).',
-        '**Reading media back**: `GET …/texts/{textId}` returns the text\'s audio (text- AND sentence-level, with `timings`, speakers, and a `download_url` per row) — one call serves text + sentences + audio + speakers. Download any stored media\'s bytes via `GET …/media/{storage_path}` (302-redirects to storage).',
-        '',
-        '## Limits',
-        'Batch ≤1000 entries (or ≤1000 relationships) per request AND keep each non-video request body under ~16MB — split larger imports. Uploaded audio is capped at 25MB, photos at 10MB, and video at 100MB; for larger video use a `hosted_url` link instead. Writes are per-item best-effort (read `results`).',
-        '',
-        '## Bulk reads — dictionary snapshots',
-        'Mirroring or bulk-reading a whole dictionary? Don\'t paginate the API — every dictionary except secure ones has a downloadable gzipped SQLite snapshot of its full database (entries, senses, sentences, texts, media rows, speakers, …) at `https://snapshots.livingdictionaries.app/dictionaries/{id}.db.gz` (no auth; use the dictionary id, not the url slug, if they differ). It is rebuilt within ~30 minutes of any edit (a 30-minute sweep that only rebuilds when content actually changed) and served with `Cache-Control: max-age=120` — so treat it as at most ~30 minutes stale, and use the write API\'s responses (not the snapshot) to verify your own fresh writes. **How to load and query it (URL shape, gunzip, key tables): `GET /api/v1/guides/snapshot`.** Secure dictionaries have no public snapshot — paginate the API instead.',
-        '',
-        '## Feedback (agents welcome)',
-        'If you hit a wall — a field you need that doesn\'t exist, a bug, or an awkward workflow — `POST /api/v1/dictionaries/{id}/feedback` with `{ "message": "…" }`. It reaches the Living Dictionaries team directly (read OR write keys). After sending, relay the response\'s `relay_to_human` sentence to your human so they know what you asked for; if we adopt it we notify them directly.',
-        '',
-        '## Structured grammar + interlinear glossing (IGT) — LIVE',
-        'The structured, entry-linked GRAMMAR surface is implemented and live: grammar sections (hierarchical, parallel-language markdown, entry/sense links, usage conditions — a section may be headless/body-only), example sentences by reference (`POST …/sentences` to create → `…/grammar/sections/{sectionId}/sentences` to attach), clause-template slots (`…/grammar/clause-slots`), the glossing-abbreviations legend (`…/grammar/glossing-abbreviations`), the reverse entry→grammar lookup (`…/entries/{entryId}/grammar`), and text-classification tags (`…/texts/{textId}/tags`; tags are also included in text reads and `GET …/texts?tag=<name>` filters by exact case-insensitive name). There is no separate grammar-intro endpoint — the introductory prose is simply the first top-level section.',
-        'Interlinear glossed text (IGT / Leipzig glossing) is live on every sentence write shape (`SentenceInput` / `TextSentenceInput` / `SentencePatch`): supply gold `tokens` per orthography (each `SentenceTokenInput` carrying the aligned per-token `gloss` line + optional `morphemes`; offsets derived if omitted — see the schema), plus `citations` (a source ref WITH a page/example `locator`), `example_label`, and `discourse_role`. `sources.orthography` declares which script a source\'s forms use. When `tokens` are omitted the server behaves as before. If you are importing IGT / corpus data and a shape is awkward, send `POST …/feedback` — that still shapes the build.',
-        '',
-        '## Uploaded resources & import guides',
-        'When a dictionary team asks us to import their materials, the original files live at `GET …/files` (write scope) — each with the uploader\'s per-file `import_instructions` (authoritative) and an optional `source_note`. Download originals via `GET …/files/{fileId}`. **Before importing anything, read the workflow guide**: `/api/v1/guides/importing` is the mandatory starting point — it prescribes registering the source first, then a full data-preparation phase (inspect, question the human, stage locally, review the data by eye, preview sign-off) BEFORE any data write, then the API-usage phase. `GET /api/v1/guides` lists it plus the format guides (spreadsheets, flex-lift, pdf-scans). Every import gets a `sources` row, and every uploaded file gets linked to the source it represents at the START of the job (`PATCH …/files/{fileId}` with `source_id`) — that keeps the material traceable from your first write and makes it downloadable beneath its source on the manager-only Sources page. Linking is provenance, not a completion marker: an import request is finished when the Living Dictionaries team closes its request thread.',
-        '',
-        '## Fetching this spec (progressive disclosure)',
-        'This document is comprehensive and grows over time. If you only need part of it, fetch a slice instead of the whole thing: `GET /api/v1/openapi.json?view=index` returns a compact map (every path + its method summaries + tag, plus the list of schema names) — read that first; then `GET /api/v1/openapi.json?tag=<name>` returns just one group\'s paths WITH their full ($ref-complete) schemas. Tag names are in the top-level `tags` list (e.g. `entries`, `media`, `texts`, `dialects`, `sources`). Fetching with no query params returns everything (this document).',
-        '',
-        '## Clients',
-        'Any standard HTTP client works (curl, Python `requests`/`urllib`, fetch, etc.) — there is nothing special about this API. Sending a descriptive `User-Agent` (e.g. naming your import tool) is good practice.',
+        '## Fetching this document',
+        'By default `GET /api/v1/openapi.json` returns a COMPACT INDEX: every path with its method summaries and tag, plus the list of schema names. Read that, then fetch just the group you need WITH full ($ref-complete) schemas via `?tag=<name>` (tag names are in the top-level `tags` list). `?view=full` returns the complete ~200KB document — rarely what you want.',
       ].join('\n'),
     },
     servers: [{ url: origin }],
@@ -1419,8 +1364,11 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       '/api/v1/dictionaries/{id}/conversations/{threadId}/questions/{questionId}': {
         patch: { summary: 'Answer or close a question', description: 'Managers answer with `answer_text` (free text) or `answer_values` (chosen option values); an empty answer clears it and reopens the question. The answer is mirrored into the conversation as a message. `status` parks a question without an answer and is team-only.', parameters: [dict_id_param, conversation_id_param, { name: 'questionId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { answer_text: { type: 'string', nullable: true }, answer_values: { type: 'array', items: { type: 'string' }, nullable: true }, status: { type: 'string', enum: ['open', 'closed'] } } } } } }, responses: { 200: { description: '{ question }' }, 400: { description: 'Values sent for a text question, or two values for a single-choice one' }, 403: { description: 'Only the team can close a question' }, 404: {} } },
       },
+      '/api/v1': {
+        get: { summary: 'START HERE — the front door', description: 'Public, tiny, and the correct first call. Returns a task-routing document: what this API is, auth, and a menu of JOBS (import, cleanup, consume, media, corpus, ask-us) — each with the guide to read and the next call to make. Send your API key (optional) and it also names your dictionary, its gloss languages, and suggests which job you are here for. Responds with JSON unless `Accept` asks for `text/html`; `?format=json|html` overrides.', responses: { 200: { description: 'The front-door document' } } },
+      },
       '/api/v1/guides': {
-        get: { summary: 'List the format-import guides', description: 'Public. Returns `{ guides: [{ slug, title, description, url }] }` in recommended reading order (`importing` first).', responses: { 200: { description: '{ guides }' } } },
+        get: { summary: 'List the task playbooks', description: 'Public. Returns `{ guides: [{ slug, title, description, url }] }` in recommended reading order (`api-basics` and `importing` first).', responses: { 200: { description: '{ guides }' } } },
       },
       '/api/v1/guides/{slug}': {
         get: { summary: 'Read one guide (markdown)', description: 'Public. Returns the guide as `text/markdown`.', parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: 'Markdown text' }, 404: {} } },
@@ -1555,6 +1503,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
  * the OpenAPI `tags` list and the `?tag=<name>` slice served by `select_openapi_view`.
  */
 export const OPENAPI_TAGS = [
+  { name: 'start', description: 'The front door (`GET /api/v1`) — the task-routing document you should have read before this spec.' },
   { name: 'dictionary', description: 'Read the dictionary\'s metadata (gloss languages, orthographies, entry count) — call this first.' },
   { name: 'entries', description: 'Create, read, update, and delete entries, their senses, and example sentences.' },
   { name: 'media', description: 'Attach or remove audio, photos, and videos on entries, senses, sentences, and texts.' },
@@ -1567,7 +1516,7 @@ export const OPENAPI_TAGS = [
   { name: 'sources', description: 'The citation/source registry entries and sentences reference by slug.' },
   { name: 'files', description: 'Uploaded import resources (original spreadsheets, FLEx/LIFT exports, PDF scans…) with per-file import instructions — list, download, upload, link to sources. Write scope required for everything (never public).' },
   { name: 'conversations', description: 'Import conversations: the durable page where a dictionary manager and the Living Dictionaries team work one import request together — claim/resolve the job, post messages, file the report artifact, and ask answerable questions.' },
-  { name: 'guides', description: 'Format-import guides (markdown): how to parse + import spreadsheets, FLEx/LIFT/Toolbox, PDF scans, and the overall import workflow.' },
+  { name: 'guides', description: 'The task playbooks (markdown) — the primary documentation layer: api-basics, the import runbook + its format guides, cleanup, consume, media, corpus.' },
   { name: 'orthographies', description: 'Alternate writing systems.' },
   { name: 'featured-entries', description: 'The starred entries shown on the dictionary home page.' },
   { name: 'suggestions', description: 'The word→entry matching review queue: unmatched/ambiguous/ignored forms aggregated across all tokenized sentences, plus per-token and form-wide review actions.' },
@@ -1597,6 +1546,8 @@ const PATH_SEGMENT_TAGS: Record<string, string> = {
 
 /** Derive an operation's tag from its path (media wins over the owning resource). */
 export function tag_for_path(path: string): string {
+  if (path === '/api/v1')
+    return 'start'
   if (path.startsWith('/api/v1/guides'))
     return 'guides'
   // Alignment wins over the media grouping its /audio/ segment would trigger.
@@ -1619,19 +1570,22 @@ export function tag_for_path(path: string): string {
 }
 
 /**
- * Progressive disclosure for the (large + growing) spec. The default full spec is
- * ~100KB; an agent can fetch a compact map first, then just the group it needs:
- *  • `view=index` → `info` + a `{ path → { method → { summary, tags } } }` map +
- *    the schema NAMES only. No property bodies — a cheap first read.
- *  • `tag=<name>` → only that group's paths, WITH the full ($ref-complete) schemas.
- *  • neither → the complete spec (backward compatible default).
+ * Progressive disclosure for the (large + growing) spec — the full document is
+ * ~200KB, so the DEFAULT is the compact index and everything else is opt-in:
+ *  • no params (or `view=index`) → `info` + a `{ path → { method → { summary,
+ *    tags } } }` map + the schema NAMES only. No property bodies — a cheap first
+ *    read that self-describes how to get more.
+ *  • `tag=<name>` → only that group's paths, with only the schemas REACHABLE from
+ *    them (so a "slice" is actually a slice — see `reachable_schema_names`).
+ *  • `view=full` → the complete document. A permanent escape hatch for anyone
+ *    generating a client; costs one query param and constrains nothing.
  */
 export function select_openapi_view({ spec, view, tag }: { spec: Record<string, unknown>, view?: string | null, tag?: string | null }): Record<string, unknown> {
-  if (view === 'index')
-    return build_openapi_index(spec)
+  if (view === 'full')
+    return spec
   if (tag)
     return filter_openapi_by_tag({ spec, tag })
-  return spec
+  return build_openapi_index(spec)
 }
 
 function build_openapi_index(spec: Record<string, unknown>): Record<string, unknown> {
@@ -1651,9 +1605,10 @@ function build_openapi_index(spec: Record<string, unknown>): Record<string, unkn
       title: info.title,
       version: info.version,
       description: [
-        'COMPACT INDEX of the Living Dictionaries Write API. Each path lists its method(s), one-line summary, and tag.',
+        'COMPACT INDEX of the Living Dictionaries Write API (the default view). Each path lists its method(s), one-line summary, and tag.',
+        'FIRST, THOUGH: `GET /api/v1` is the front door — a small doc that routes you to the GUIDE for the job you are doing. Read that guide before this reference; it carries the judgement calls, this carries only field shapes. `GET /api/v1/guides/api-basics` covers auth, multilingual fields, idempotency, errors, and limits.',
         'Every request needs `Authorization: Bearer ldk_…` (an API key scoped to one dictionary).',
-        'Fetch the operations WITH full request/response schemas for a group via `?tag=<name>` (e.g. `openapi.json?tag=entries`); the tag names are in the top-level `tags` list. Omit all query params for the complete spec. `schema_names` lists every component schema.',
+        'Fetch the operations WITH full request/response schemas for a group via `?tag=<name>` (e.g. `openapi.json?tag=entries`); the tag names are in the top-level `tags` list. `?view=full` returns the complete ~200KB document. `schema_names` lists every component schema.',
       ].join('\n'),
     },
     servers: spec.servers,
@@ -1671,6 +1626,46 @@ function filter_openapi_by_tag({ spec, tag }: { spec: Record<string, unknown>, t
       paths[path] = kept
   }
   const tags = (spec.tags as { name: string }[]).filter(t => t.name === tag)
-  // Keep ALL component schemas so every `$ref` in the kept paths still resolves.
-  return { ...spec, tags, paths }
+
+  const components = spec.components as { schemas?: Record<string, unknown> } | undefined
+  const all_schemas = components?.schemas ?? {}
+  const keep = reachable_schema_names({ roots: paths, schemas: all_schemas })
+  const schemas = Object.fromEntries(Object.entries(all_schemas).filter(([name]) => keep.has(name)))
+
+  return { ...spec, tags, paths, components: { ...components, schemas } }
+}
+
+/**
+ * Every schema name reachable from `roots` by following `$ref`s transitively.
+ *
+ * Without this a `?tag=` slice carried ALL component schemas "so refs resolve",
+ * which made `?tag=entries` 99KB — half the spec, for one group. Walking the refs
+ * keeps the slice self-contained AND small.
+ */
+export function reachable_schema_names({ roots, schemas }: { roots: unknown, schemas: Record<string, unknown> }): Set<string> {
+  const found = new Set<string>()
+  const queue: unknown[] = [roots]
+
+  while (queue.length) {
+    const node = queue.pop()
+    if (!node || typeof node !== 'object')
+      continue
+    if (Array.isArray(node)) {
+      queue.push(...node)
+      continue
+    }
+    for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+      if (key === '$ref' && typeof value === 'string') {
+        const name = value.split('/').pop() ?? ''
+        if (name && !found.has(name)) {
+          found.add(name)
+          // Follow into the referenced schema — its own refs count as reachable.
+          queue.push(schemas[name])
+        }
+        continue
+      }
+      queue.push(value)
+    }
+  }
+  return found
 }

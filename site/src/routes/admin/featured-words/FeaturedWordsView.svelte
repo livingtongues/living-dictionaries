@@ -12,6 +12,7 @@
   import IconMdiClose from '~icons/mdi/close'
   import IconMdiUndoVariant from '~icons/mdi/undo-variant'
   import IconMdiOpenInNew from '~icons/mdi/open-in-new'
+  import { play_audio_element } from '$lib/media/play-audio-element'
 
   interface Props {
     data: Omit<PageData, 'featured_entries'> & { featured_entries: Awaited<PageData['featured_entries']> }
@@ -55,7 +56,7 @@
     audio_element.onended = () => playing_id = null
     audio_element.onerror = () => playing_id = null
     playing_id = row.id
-    void audio_element.play()
+    play_audio_element({ audio: audio_element, context: { surface: 'admin_featured_words', entry_id: row.id, storage_path: row.audio_storage_path }, on_failure: () => { playing_id = null } })
   }
 
   function with_status(id: string, status: FeaturedEntryStatus) {

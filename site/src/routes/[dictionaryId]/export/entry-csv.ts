@@ -1,6 +1,6 @@
 import type { EntryData, Tables } from '$lib/types'
 import type { TranslateFunction } from '$lib/i18n/types'
-import { stripHTMLTags } from './strip-html-tags'
+import { strip_html_tags } from './strip-html-tags'
 import { get_headword, get_orthographies } from '$lib/orthography/orthographies'
 import { render_markdown_to_html } from '$lib/markdown/render'
 import { decades } from '$lib/components/media/ages'
@@ -75,7 +75,7 @@ export function build_entry_columns(entry: EntryData, { dictionary, t, url_from_
   add('morphology', 'Morphology', entry.main.morphology)
   add('dialects', 'Dialects', entry.dialects?.map(({ name }) => name.default).join(', '))
   // markdown renders to HTML first so BOTH eras strip to plain text for CSV
-  add('notes', 'Notes', stripHTMLTags(render_markdown_to_html(entry.main.notes?.default)))
+  add('notes', 'Notes', strip_html_tags(render_markdown_to_html(entry.main.notes?.default)))
   add('linguistic_history', 'Linguistic History', entry.main.linguistic_history?.default)
   add('sources', 'Source(s)', entry.main.sources?.join(' | '))
   add('scientific_names', 'Scientific name(s)', entry.main.scientific_names?.join(' | '))

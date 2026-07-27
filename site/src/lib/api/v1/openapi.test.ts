@@ -133,6 +133,7 @@ describe(build_openapi_spec, () => {
       '/api/v1/dictionaries/{id}/files/{fileId}/confirm': ['post'],
       '/api/v1/dictionaries/{id}/files/request-import': ['post'],
       '/api/v1/dictionaries/{id}/files/requests/{threadId}': ['patch'],
+      '/api/v1': ['get'],
       '/api/v1/guides': ['get'],
       '/api/v1/guides/{slug}': ['get'],
       '/api/v1/dictionaries/{id}/speakers': ['get', 'post'],
@@ -262,8 +263,15 @@ describe(tag_for_path, () => {
 })
 
 describe(select_openapi_view, () => {
-  test('no view/tag → the full spec unchanged', () => {
-    expect(select_openapi_view({ spec, view: null, tag: null })).toBe(spec)
+  test('no view/tag → the COMPACT INDEX, not the full spec (the ~200KB doc is opt-in)', () => {
+    const defaulted = select_openapi_view({ spec, view: null, tag: null }) as { schema_names?: string[], components?: unknown }
+    expect(defaulted).not.toBe(spec)
+    expect(defaulted.schema_names).toBeDefined()
+    expect(defaulted.components).toBeUndefined()
+  })
+
+  test('view=full → the complete spec unchanged (the permanent escape hatch)', () => {
+    expect(select_openapi_view({ spec, view: 'full', tag: null })).toBe(spec)
   })
 
   test('view=index → summaries + schema names only, no property bodies', () => {
@@ -283,7 +291,7 @@ describe(select_openapi_view, () => {
     expect(index.components).toBeUndefined()
   })
 
-  test('tag=dialects → only dialect paths, full schemas retained for $ref resolution', () => {
+  test('tag=dialects → only dialect paths, carrying only the schemas they reach', () => {
     const sliced = select_openapi_view({ spec, tag: 'dialects' }) as {
       paths: Record<string, unknown>
       tags: { name: string }[]
@@ -294,9 +302,32 @@ describe(select_openapi_view, () => {
       '/api/v1/dictionaries/{id}/dialects/{dialectId}',
     ])
     expect(sliced.tags).toEqual([OPENAPI_TAGS.find(t => t.name === 'dialects')])
-    // All schemas kept so `#/components/schemas/Coordinates` still resolves.
+    // Reachable: DialectInput refs Coordinates, which refs GeoPoint → LngLat.
     expect(sliced.components.schemas.Coordinates).toBeDefined()
-    expect(sliced.components.schemas.EntryInput).toBeDefined()
+    expect(sliced.components.schemas.LngLat).toBeDefined()
+    // Unreachable from these two paths — the whole point of the pruning.
+    expect(sliced.components.schemas.EntryInput).toBeUndefined()
+  })
+
+  test('every $ref in a sliced spec still resolves (the pruning must be transitive)', () => {
+    for (const { name } of OPENAPI_TAGS) {
+      const sliced = select_openapi_view({ spec, tag: name }) as {
+        paths: Record<string, unknown>
+        components: { schemas: Record<string, unknown> }
+      }
+      const refs = [...JSON.stringify(sliced.paths ?? {}).matchAll(/#\/components\/schemas\/(\w+)/g)]
+        .concat([...JSON.stringify(sliced.components.schemas).matchAll(/#\/components\/schemas\/(\w+)/g)])
+      for (const [, schema_name] of refs)
+        expect(sliced.components.schemas[schema_name], `${name} slice is missing ${schema_name}`).toBeDefined()
+    }
+  })
+
+  test('a tag slice is genuinely small — pruning cut entries from ~99KB to a fraction', () => {
+    const full_bytes = JSON.stringify(spec).length
+    const entries_bytes = JSON.stringify(select_openapi_view({ spec, tag: 'entries' })).length
+    // `entries` is the biggest group; even it must stay well under half the doc.
+    // eslint-disable-next-line no-restricted-syntax -- genuine size budget
+    expect(entries_bytes / full_bytes).toBeLessThan(0.35)
   })
 
   test('tag=media → collects the audio/photo/video paths across owners', () => {

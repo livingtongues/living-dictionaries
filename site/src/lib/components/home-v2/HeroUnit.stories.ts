@@ -69,3 +69,49 @@ export const DotHover: Story<typeof Component> = {
     await new Promise(resolve => setTimeout(resolve, 200))
   },
 }
+
+const connector_dict = { ...story_dicts[2], lat: 0, lng: 0 }
+const connector_card = {
+  ...story_cards[0],
+  dict_id: connector_dict.id,
+  dict_url: connector_dict.url,
+  dict_name: connector_dict.name,
+  lat: connector_dict.lat,
+  lng: connector_dict.lng,
+}
+
+/** Clicking the entry-count suffix of a red connector label opens its dictionary popover. */
+export const ConnectorEntryCountClick: Story<typeof Component> = {
+  viewports: [{ width: 720, height: 620 }],
+  props: {
+    dicts: [connector_dict],
+    ssr_map: build_ssr_map({ points: [[connector_dict.lng, connector_dict.lat]] }),
+    cards: [connector_card],
+  },
+  interactions: async (page) => {
+    await page.waitForSelector('canvas')
+    await page.hover('.card')
+    await new Promise(resolve => setTimeout(resolve, 500))
+    const canvas = await page.$('canvas')
+    const canvas_box = await canvas.boundingBox()
+    // Equal Earth's cropped visible-world fit places [0, 0] slightly left and
+    // below center. Sweep only the right-hand suffix area (outside "Kihunde")
+    // so minor font rasterization differences cannot make the story flaky.
+    let suffix_point: { x: number, y: number } | null = null
+    outer: for (let y_ratio = 0.48; y_ratio <= 0.6; y_ratio += 0.01) {
+      for (let x_ratio = 0.48; x_ratio <= 0.55; x_ratio += 0.01) {
+        const x = canvas_box.x + canvas_box.width * x_ratio
+        const y = canvas_box.y + canvas_box.height * y_ratio
+        await page.mouse.move(x, y)
+        if (await page.$('canvas.hover-dot')) {
+          suffix_point = { x, y }
+          break outer
+        }
+      }
+    }
+    if (!suffix_point)
+      throw new Error('The entry-count suffix was not clickable')
+    await page.mouse.click(suffix_point.x, suffix_point.y)
+    await page.waitForSelector('.popover')
+  },
+}

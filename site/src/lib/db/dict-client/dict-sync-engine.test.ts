@@ -303,6 +303,164 @@ describe('DictSyncEngine junction natural-key replace-all apply ordering', () =>
   })
 })
 
+/**
+ * The pull-only client's `dirty` reconcile. A browser that downloaded a
+ * snapshot back when the SERVER minted `dirty = 1` on canonical rows inherited
+ * flags it can never push off — a synced row never rides a pull again, so
+ * nothing on the wire ever revisits it, and the tab warns `dirty_rows_stuck`
+ * forever (7 dictionaries still doing this in production 2026-07-27).
+ *
+ * The engine must NEVER decide locally that a viewer's flags are phantom: a
+ * contributor whose login or role lapsed after writing is also a viewer holding
+ * dirty rows, and that work is irreplaceable. It asks; the server vouches.
+ */
+describe('DictSyncEngine inherited-dirty reconcile', () => {
+  let db: BetterSqlite3.Database
+
+  beforeEach(() => {
+    vi.mocked(api_log).mockClear()
+    _reset_dict_failure_throttle_for_tests()
+    db = new BetterSqlite3(':memory:')
+    db.exec('CREATE TABLE db_metadata (key TEXT PRIMARY KEY, value TEXT);')
+    db.exec('CREATE TABLE deletes (table_name TEXT NOT NULL, id TEXT NOT NULL);')
+    for (const table of DICT_SYNCABLE_TABLES)
+      db.exec(`CREATE TABLE "${table}" (id TEXT PRIMARY KEY, dirty INTEGER, updated_at TEXT);`)
+  })
+
+  afterEach(() => {
+    db.close()
+  })
+
+  function connection(): EngineConnection {
+    return {
+      query: <T>(sql: string, params: unknown[] = []) => Promise.resolve(db.prepare(sql).all(...(params as never[])) as T[]),
+      execute: (sql: string, params?: unknown[]) => {
+        if (params?.length)
+          db.prepare(sql).run(...(params as never[]))
+        else
+          db.exec(sql)
+        return Promise.resolve()
+      },
+    }
+  }
+
+  /** Captures the request body so we can assert on what was (or wasn't) probed. */
+  function stub_server(redundant_dirty?: Record<string, string[]>) {
+    const requests: Record<string, unknown>[] = []
+    globalThis.fetch = vi.fn((_url: string, init: { body: string }) => {
+      requests.push(JSON.parse(init.body) as Record<string, unknown>)
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ new_synced_up_to: 5, changes: {}, deletes: [], redundant_dirty }),
+      })
+    }) as never
+    return requests
+  }
+
+  function viewer_engine() {
+    return new DictSyncEngine({ dict_id: 'test-dict', connection: connection(), has_editor_role: false, get_auth: () => ({}) as never })
+  }
+
+  const dirty_ids = (): string[] =>
+    (db.prepare(`SELECT id FROM entries WHERE dirty = 1 ORDER BY id`).all() as { id: string }[]).map(row => row.id)
+
+  test('a viewer probes its inherited flags and clears the ones the server vouches for', async () => {
+    db.prepare(`INSERT INTO entries (id, dirty, updated_at) VALUES ('inherited', 1, '2026-07-01T00:00:00.000Z')`).run()
+    const requests = stub_server({ entries: ['inherited'] })
+
+    await viewer_engine().sync_once()
+
+    expect(requests[0].dirty_probes).toEqual({ entries: [{ id: 'inherited', updated_at: '2026-07-01T00:00:00.000Z' }] })
+    expect(dirty_ids()).toEqual([])
+  })
+
+  test('a flag the server does NOT vouch for survives — real unsynced work is never swept', async () => {
+    db.prepare(`INSERT INTO entries (id, dirty, updated_at) VALUES ('real-work', 1, '2026-07-01T00:00:00.000Z')`).run()
+    stub_server({}) // server vouches for nothing
+
+    await viewer_engine().sync_once()
+
+    expect(dirty_ids()).toEqual(['real-work'])
+  })
+
+  test('only PROBED ids are cleared, so a row written during the round-trip is untouched', async () => {
+    db.prepare(`INSERT INTO entries (id, dirty, updated_at) VALUES ('probed', 1, '2026-07-01T00:00:00.000Z')`).run()
+
+    // The write lands DURING the network round-trip — after the probe list was
+    // built, before the verdict is applied. Writes serialize against the apply
+    // transaction, not the fetch, so this is a real interleaving.
+    globalThis.fetch = vi.fn(() => {
+      db.prepare(`INSERT INTO entries (id, dirty, updated_at) VALUES ('written-mid-flight', 1, '2026-07-02T00:00:00.000Z')`).run()
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        // A stale/over-broad verdict naming BOTH ids must not reach the new row.
+        json: () => Promise.resolve({ new_synced_up_to: 5, changes: {}, deletes: [], redundant_dirty: { entries: ['probed', 'written-mid-flight'] } }),
+      })
+    }) as never
+
+    await viewer_engine().sync_once()
+
+    expect(dirty_ids()).toEqual(['written-mid-flight'])
+  })
+
+  test('an EDITOR never probes — its flags drain through the push path', async () => {
+    db.prepare(`INSERT INTO entries (id, dirty, updated_at) VALUES ('mine', 1, '2026-07-01T00:00:00.000Z')`).run()
+    const requests = stub_server()
+
+    const engine = new DictSyncEngine({ dict_id: 'test-dict', connection: connection(), has_editor_role: true, get_auth: () => ({}) as never })
+    await engine.sync_once()
+
+    expect(requests[0].dirty_probes).toBeUndefined()
+  })
+
+  test('a clean viewer sends no probe payload at all', async () => {
+    const requests = stub_server()
+
+    await viewer_engine().sync_once()
+
+    expect(requests[0].dirty_probes).toBeUndefined()
+  })
+
+  test('probing is once per session — a second sync does not re-ask the same question', async () => {
+    db.prepare(`INSERT INTO entries (id, dirty, updated_at) VALUES ('stuck', 1, '2026-07-01T00:00:00.000Z')`).run()
+    const requests = stub_server({}) // vouches for nothing → the flag stays
+
+    const engine = viewer_engine()
+    await engine.sync_once()
+    await engine.sync_once()
+
+    expect(requests[0].dirty_probes).toBeDefined()
+    expect(requests[1].dirty_probes).toBeUndefined()
+  })
+
+  test('a cleared batch re-arms the probe so a capped drain finishes across syncs', async () => {
+    db.prepare(`INSERT INTO entries (id, dirty, updated_at) VALUES ('first', 1, '2026-07-01T00:00:00.000Z')`).run()
+    db.prepare(`INSERT INTO entries (id, dirty, updated_at) VALUES ('second', 1, '2026-07-01T00:00:00.000Z')`).run()
+    const requests = stub_server({ entries: ['first'] })
+
+    const engine = viewer_engine()
+    await engine.sync_once()
+    await engine.sync_once()
+
+    expect(requests[1].dirty_probes).toEqual({ entries: [{ id: 'second', updated_at: '2026-07-01T00:00:00.000Z' }] })
+  })
+
+  test('the drain is reported once, at info level, with the count', async () => {
+    db.prepare(`INSERT INTO entries (id, dirty, updated_at) VALUES ('a', 1, '2026-07-01T00:00:00.000Z')`).run()
+    db.prepare(`INSERT INTO entries (id, dirty, updated_at) VALUES ('b', 1, '2026-07-01T00:00:00.000Z')`).run()
+    stub_server({ entries: ['a', 'b'] })
+
+    await viewer_engine().sync_once()
+
+    const [[payload]] = vi.mocked(api_log).mock.calls
+    expect(payload.entries[0].message).toBe('dirty_flags_reconciled')
+    expect(payload.entries[0].level).toBe('info')
+    expect(payload.entries[0].context).toMatchObject({ dict_id: 'test-dict', cleared: 2 })
+  })
+})
+
 // Cross-app hardening Part 2 (mirrored from house): a repeated same-signature
 // fatal failure must trip the circuit breaker — halt the 30s retry loop + fire
 // the prompt hook once — while transient failures keep retrying forever.

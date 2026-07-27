@@ -6,12 +6,11 @@
 
   const prompt = $derived(`You can access and help me with my Living Dictionary through its API.
 
-- API base: ${page.url.origin}/api/v1
-- Full reference (fetch this first): ${page.url.origin}/api/v1/openapi.json
+- Start here (fetch this first): ${page.url.origin}/api/v1
 - Dictionary id: ${dictionary_id}
 - Auth: add the header \`Authorization: Bearer <YOUR_API_KEY>\` to every request (I'll give you the key separately).
 
-Read the reference to help me with the tasks I give you.`)
+That first URL routes you to the right guide for whatever task I give you — read the guide before the endpoint reference.`)
 
   let copied = $state(false)
 

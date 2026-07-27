@@ -2,7 +2,7 @@
   import type { Coordinates, IPoint, IRegion, LngLatFull } from '$lib/types'
   import { onMount } from 'svelte'
   import InitableShowHide from './InitableShowHide.svelte'
-  import { flattenCoordinates } from './flatten-coordinates'
+  import { flatten_coordinates } from './flatten-coordinates'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
@@ -73,7 +73,7 @@
 
 <Modal on_close={on_close} noscroll>
   <div style="height: 24rem">
-    <Map pointsToFit={flattenCoordinates(coordinates)} {lng} {lat} zoom={6}>
+    <Map pointsToFit={flatten_coordinates(coordinates)} {lng} {lat} zoom={6}>
       <NavigationControl />
       {#each coordinates?.points || [] as point, index (point)}
         <Marker

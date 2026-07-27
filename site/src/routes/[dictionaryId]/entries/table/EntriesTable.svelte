@@ -2,7 +2,7 @@
   import type { EntryData, IColumn, Tables } from '$lib/types'
   import ColumnTitle from './ColumnTitle.svelte'
   import Cell from './Cell.svelte'
-  import { setUpColumns } from './set-up-columns'
+  import { set_up_columns } from './set-up-columns'
   import { minutes_ago_in_ms } from '$lib/utils/time'
   import { browser } from '$app/environment'
   import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
@@ -23,7 +23,7 @@
     writes,
   }: Props = $props()
 
-  const columns = $derived(setUpColumns(preferred_table_columns, dictionary))
+  const columns = $derived(set_up_columns(preferred_table_columns, dictionary))
   let selectedColumn: IColumn = $state()
 
   function getLeftValue(index: number) {

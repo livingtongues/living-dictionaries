@@ -10,6 +10,7 @@
   import type { DictRowType } from '$lib/db/dict-client/dict-live-db.svelte'
   import { decode_audio_buffer } from '$lib/components/audio/waveform-utils'
   import { clamp_edge, encode_all_timings, init_editor_spans } from './timings-editor-state'
+  import { play_audio_element } from '$lib/media/play-audio-element'
 
   interface Props {
     audio: DictRowType<'audio'>
@@ -82,7 +83,7 @@
     stop_at_ms = end_ms
     audio_element.currentTime = start_ms / 1000
     current_ms = start_ms
-    void audio_element.play()
+    play_audio_element({ audio: audio_element, context: { surface: 'timings_editor_span' } })
   }
 
   // --- window (sentence-scoped zoom) ---
@@ -241,7 +242,7 @@
     const ms = window_bounds.start_ms + ratio * window_duration
     audio_element.currentTime = ms / 1000
     current_ms = ms
-    void audio_element.play()
+    play_audio_element({ audio: audio_element, context: { surface: 'timings_editor_scrub' } })
   }
 
   function toggle_play() {

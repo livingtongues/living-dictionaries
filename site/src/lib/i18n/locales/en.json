@@ -152,6 +152,7 @@
     "listen": "Listen",
     "pause": "Pause",
     "unavailable": "Audio unavailable",
+    "playback_failed": "This audio could not be played. Please check your connection and try again.",
     "add_audio": "Add Audio",
     "undo_permission_denied_explanation": "Permission to access your microphone was denied. If you previously clicked 'No', please reload and click 'Yes' when your browser asks for permission to use your microphone.",
     "reload": "Reload",

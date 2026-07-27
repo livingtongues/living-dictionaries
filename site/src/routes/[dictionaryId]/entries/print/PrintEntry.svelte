@@ -3,7 +3,7 @@
   import sanitize from 'xss'
   import { tick } from 'svelte'
   import QrCode from './QrCode.svelte'
-  import { defaultPrintFields } from './print-fields'
+  import { default_print_fields } from './print-fields'
   import { page } from '$app/state'
   import { order_example_sentences } from '$lib/example-sentence/order-example-sentences'
   import { order_glosses } from '$lib/gloss/order-glosses'
@@ -27,7 +27,7 @@
 
   const {
     entry,
-    selectedFields = defaultPrintFields,
+    selectedFields = default_print_fields,
     imagePercent = 50,
     fontSize = 12,
     headwordSize = 12,

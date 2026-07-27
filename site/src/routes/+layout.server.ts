@@ -1,6 +1,9 @@
 import type { AuthUserData } from '$lib/auth/types'
 import type { LayoutServerLoad } from './$types'
 import { verify_jwt } from '$lib/auth/jwt'
+import { dev } from '$app/environment'
+import { env } from '$env/dynamic/private'
+import { is_bot_request } from '$lib/server/is-bot-request'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { bump_last_visit } from '$lib/server/bump-last-visit'
 import { get_user } from '$lib/server/get-user'
@@ -40,6 +43,16 @@ export const load: LayoutServerLoad = async ({ cookies, request }) => {
     ssr_user,
     user_latitude,
     user_longitude,
+    /**
+     * Crawler/automated agent, decided ONCE here from the request UA with the
+     * same `is_bot_user_agent` the analytics use — never a second helper (house
+     * grew two that disagreed). Consumers skip client-side work a robot can't
+     * use: the dictionary layout skips booting the whole offline database
+     * (leader election + OPFS snapshot download + search index). 2026-07-27
+     * measurement: 1,476 of 1,943 dictionary boots in 24h were robot sessions,
+     * ~6.3 GB of snapshot downloads in a day.
+     */
+    is_bot: is_bot_request({ user_agent: request.headers.get('user-agent'), is_dev: dev, e2e_expose_otp: env.E2E_EXPOSE_OTP }),
     // Locales with ≥1 assigned translator — a published locale absent from this
     // list shows the "needs a reviewer" recruiting prompt in the language switcher.
     locales_with_translators: get_locales_with_translators(),

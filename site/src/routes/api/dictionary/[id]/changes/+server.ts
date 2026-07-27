@@ -76,10 +76,17 @@ export const POST: RequestHandler = async (event) => {
   const counter = read_server_seq_counter(dict_db)
   const cursor = typeof body.synced_up_to === 'number' ? body.synced_up_to : null
 
+  // Does this caller want a read-only `dirty` verdict this round? A poisoned
+  // pull-only client is BY DEFINITION fully caught up (its flags sit on rows
+  // that synced long ago), so it lands in the fast-bail below every single
+  // time — dropping the probe silently and leaving the flags immortal. Same
+  // trap as the push rule under it; found by the browser e2e, 2026-07-27.
+  const has_probes = Object.values(body.dirty_probes ?? {}).some(rows => rows && rows.length)
+
   // Fast bail: nothing to push AND nothing written on the server since cursor.
   // MUST NOT bail when the editor has dirty rows/tombstones to push, or the
   // push is silently dropped (cursor often equals the server watermark).
-  if (!has_push && cursor !== null && counter <= cursor) {
+  if (!has_push && !has_probes && cursor !== null && counter <= cursor) {
     const fast_bail: DictChangesResponse = {
       new_synced_up_to: cursor,
       changes: {},

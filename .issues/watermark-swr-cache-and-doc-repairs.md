@@ -88,3 +88,31 @@ refresh can repopulate a cleared cache).
   collect into an array and assert on it instead).
 - Unrelated worktree changes (the active import/API-v1 lane, `.cron/` model swaps, the deleted
   `2026-07-18` log review) were left untouched; nothing was committed.
+
+## 5. Cross-repo convergence close-out (2026-07-27)
+
+The three copies are now **byte-identical**: `watermark-swr-cache.test.ts` md5 matches in
+house/LD/tutor, and `watermark-swr-cache.ts` differs only in the app-name token on line 3
+(`house:` / `LD:` / `tutor:`) — verified by direct diff, not by assertion.
+
+- ✅ The union suite earned itself twice: two independent `clear()` defects, each caught by a
+  DIFFERENT app's pre-existing test — (a) an in-flight refresh whose generation was captured at RUN
+  time instead of SCHEDULE time repopulated a cleared cache (found in LD, missing in tutor until
+  patched); (b) with persistence attached, `clear()` left the durable copy on disk so the next read
+  served the invalidated payload straight back (found in tutor). Fixes + tests in all three.
+- ✅ **`settle()` now has direct coverage** (the last open item from the house lane). Two tests, 25
+  total in the union suite:
+  - *waits for a compute in flight, including one a scheduled refresh just started* — a manually
+    released promise proves `settle()` is still pending while the refresh runs, and the refreshed
+    value is visible after. Sabotaging `settle()` to `await Promise.resolve()` makes it FAIL, so it
+    genuinely pins the seam `await_pending_analytics_computes` / `warm_analytics_caches` rest on.
+  - *resolves when nothing is in flight and never rejects on a failed compute* — `allSettled`
+    semantics, plus the rule that a caller-initiated `refresh_async` owns its own rejection
+    (`on_background_error` stays empty).
+  - Documented in the test what `settle()` deliberately does NOT cover: work that is merely
+    SCHEDULED has not started, so a caller must let the scheduler run first.
+- ⚠️ **Lint style for new tests in this file** (bit us twice now). Beyond the `require-await` /
+  `no-empty-function` rules already noted: `vitest/prefer-to-be-falsy` + `prefer-to-be-truthy` reject
+  `expect(flag).toBe(false/true)`. Since our own convention prefers precise matchers over
+  `toBeFalsy()`, assert on an **order log** (`expect(order).toEqual(['released', 'settled'])`)
+  instead of a boolean flag — satisfies both rules.

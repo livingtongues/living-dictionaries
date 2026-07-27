@@ -10,6 +10,13 @@
     height: number
     width: number
     image_url?: string
+    /**
+     * Intrinsic pixel size of `image_url`, set by the `/og` route when it had to
+     * transcode the photo: satori can measure a remote file but NOT a data URI,
+     * and an unmeasurable image throws "Image size cannot be determined".
+     */
+    image_width?: number
+    image_height?: number
   }
 
   const {
@@ -21,8 +28,11 @@
     height,
     width,
     image_url = undefined,
+    image_width = undefined,
+    image_height = undefined,
   }: Props = $props()
   const src = $derived(image_url ?? null)
+  const intrinsic_size = $derived(image_width && image_height ? { width: image_width, height: image_height } : {})
 
   const MAX_TITLE_LENGTH = 90
   const xPADDING = 48
@@ -45,7 +55,9 @@
     {src ? 'text-shadow: 2px 2px 3px hsla(0, 0%, 0%, 40%);' : ''}
   ">
   {#if src}
-    <img style="position: absolute; top:0; left:0; right: 0; bottom: 0; width: 100%; height: 100%; object-fit: cover;" alt="" {src} />
+    <!-- Explicit px size, not 100%: satori resolves a percentage against the parent's
+      CONTENT box, so the photo used to stop 96×72px short of the card edges. -->
+    <img style="position: absolute; top:0; left:0; width: {width}px; height: {height}px; object-fit: cover;" alt="" {src} {...intrinsic_size} />
   {/if}
   <div
     style="

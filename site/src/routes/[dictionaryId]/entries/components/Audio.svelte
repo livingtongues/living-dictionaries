@@ -1,5 +1,7 @@
 <script module lang="ts">
   import { writable } from 'svelte/store'
+  import { play_audio_element } from '$lib/media/play-audio-element'
+  import { toast } from '$lib/state/toast.svelte'
 
   interface AudioState {
     current_audio: HTMLAudioElement | null
@@ -11,7 +13,11 @@
     is_playing: false,
   })
 
-  function playAudio(url: string) {
+  /** Failure handling (telemetry + not lying about the playing state) lives in `play_audio_element`. */
+  function play_audio({ url, context }: {
+    url: string
+    context: { dictionary_id: string, entry_id: string, audio_id?: string, storage_path?: string, failure_message: string }
+  }) {
     audioStore.update((store) => {
       if (store.current_audio) {
         store.current_audio.pause()
@@ -19,7 +25,21 @@
       }
 
       const audio = new Audio(url)
-      audio.play()
+      play_audio_element({
+        audio,
+        context: {
+          surface: 'entry_audio',
+          dictionary_id: context.dictionary_id,
+          entry_id: context.entry_id,
+          audio_id: context.audio_id ?? null,
+          storage_path: context.storage_path ?? null,
+        },
+        on_failure: () => {
+          // Say something. A silent failed tap is why these visitors tapped five times.
+          toast.error(context.failure_message)
+          audioStore.set({ current_audio: null, is_playing: false })
+        },
+      })
 
       audio.addEventListener('ended', () => {
         audioStore.set({ current_audio: null, is_playing: false })
@@ -55,7 +75,16 @@
 
   function initAudio() {
     track({ event: AUDIO_PLAYED, props: { dictionary_id: page.params.dictionaryId, entry_id: entry.id, audio_id: sound_file?.id, context } })
-    playAudio(url_from_storage_path(sound_file.storage_path))
+    play_audio({
+      url: url_from_storage_path(sound_file.storage_path),
+      context: {
+        dictionary_id: page.params.dictionaryId,
+        entry_id: entry.id,
+        audio_id: sound_file?.id,
+        storage_path: sound_file?.storage_path,
+        failure_message: page.data.t('audio.playback_failed'),
+      },
+    })
   }
 
   const playing = $derived($audioStore.is_playing && $audioStore.current_audio?.src === url_from_storage_path(sound_file?.storage_path))

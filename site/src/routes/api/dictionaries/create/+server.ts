@@ -14,8 +14,10 @@ import { error, json } from '@sveltejs/kit'
  * Create a new dictionary. The caller becomes its `manager`.
  *
  * Inserts a `dictionaries` catalog row + a creator `dictionary_roles` row in a
- * single transaction against shared.db (`dirty = 1` so the admin.db engine
- * pulls it down on next sync). `id` doubles as the URL slug; it must be unique.
+ * single transaction against shared.db; the admin.db engine pulls both rows down
+ * on next sync via their `server_seq` triggers (`dirty` is a client-only flag,
+ * never written to a canonical row). `id` doubles as the URL slug and must be
+ * unique.
  * Returns the new id so the page can redirect to `/{id}`.
  */
 export interface DictionariesCreateRequestBody {
@@ -76,9 +78,9 @@ export const POST: RequestHandler = async (event) => {
       INSERT INTO dictionaries (
         id, url, name, gloss_languages, alternate_names, location, coordinates,
         iso_639_3, glottocode, community_permission, author_connection,
-        con_language_description, bucket, entry_count, dirty, created_at,
+        con_language_description, bucket, entry_count, created_at,
         created_by_user_id, updated_at, updated_by_user_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?)
     `).run(
       id,
       id,
@@ -100,8 +102,8 @@ export const POST: RequestHandler = async (event) => {
     )
 
     db.prepare(`
-      INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, dirty, created_at, updated_at)
-      VALUES (?, ?, ?, 'manager', 1, ?, ?)
+      INSERT INTO dictionary_roles (id, dictionary_id, user_id, role, created_at, updated_at)
+      VALUES (?, ?, ?, 'manager', ?, ?)
     `).run(role_id, id, user_id, now, now)
   })
 

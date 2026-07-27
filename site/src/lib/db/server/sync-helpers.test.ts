@@ -64,6 +64,46 @@ describe(process_sync, () => {
   })
 })
 
+/**
+ * `dirty` means "this browser holds an edit it still has to push" — it is
+ * meaningless on a canonical server row. Until 2026-07-27 ~10 shared.db route
+ * writes set `dirty = 1` believing that was what made admin clients pull the
+ * change (351 production rows carried it). What actually drives the pull is the
+ * `server_seq` trigger. These pin BOTH halves so the belief can't come back.
+ */
+describe('canonical shared.db rows never carry `dirty`', () => {
+  test('a plain server-side UPDATE (no dirty flag) still rides the next pull, because server_seq moved', () => {
+    db.prepare(`INSERT INTO dictionaries (id, name, updated_at) VALUES ('d1', 'Demo', '2026-07-27T00:00:00.000Z')`).run()
+
+    const first = process_sync({ db, request: empty_request() })
+    const cursor = first.new_synced_up_to
+
+    // Exactly what the catalog / gloss-languages / orthographies writers now do.
+    db.prepare(`UPDATE dictionaries SET name = ?, updated_at = ? WHERE id = ?`)
+      .run('Renamed', '2026-07-27T00:00:01.000Z', 'd1')
+
+    const request = empty_request()
+    request.synced_up_to = cursor
+    const response = process_sync({ db, request })
+
+    const pulled = response.changes.dictionaries?.find(row => row.id === 'd1')
+    expect(pulled?.name).toBe('Renamed')
+    expect(pulled?.dirty).toBe(null)
+    expect(db.prepare(`SELECT dirty FROM dictionaries WHERE id = 'd1'`).get()).toEqual({ dirty: null })
+  })
+
+  test('a legacy row still holding dirty = 1 is served with dirty nulled, so no client inherits phantom unsaved work', () => {
+    db.prepare(`INSERT INTO dictionaries (id, name, dirty, updated_at) VALUES ('d1', 'Legacy', 1, '2026-07-27T00:00:00.000Z')`).run()
+
+    const response = process_sync({ db, request: empty_request() })
+
+    expect(response.changes.dictionaries?.find(row => row.id === 'd1')?.dirty).toBe(null)
+    // The live row is left alone — clearing 351 production rows is a separate,
+    // deliberate data repair, not something a read path does silently.
+    expect(db.prepare(`SELECT dirty FROM dictionaries WHERE id = 'd1'`).get()).toEqual({ dirty: 1 })
+  })
+})
+
 describe('dictionary_roles natural-key dedup (adopt-canonical + loser echo)', () => {
   const T0 = '2026-07-09T00:00:00.000Z'
   const T1 = '2026-07-09T00:00:01.000Z'

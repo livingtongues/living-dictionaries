@@ -10,7 +10,7 @@ import { create_dictionaries_store, create_my_dictionaries_store } from '$lib/di
 
 const table_columns_states = new Map<string, PersistedState<typeof default_columns>>()
 
-export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLocale, ssr_user, user_latitude, user_longitude } }) => {
+export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLocale, ssr_user, user_latitude, user_longitude, is_bot } }) => {
   const urlLocale = searchParams.get('lang')
   const locale = get_supported_locale(urlLocale || serverLocale) || 'en'
   const t = await getTranslator(locale)
@@ -62,5 +62,8 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
     mode,
     user_latitude,
     user_longitude,
+    // Re-exported so a universal child load can read it from `parent()` — see
+    // the dictionary layout, which skips the whole offline-DB boot for robots.
+    is_bot,
   }
 }

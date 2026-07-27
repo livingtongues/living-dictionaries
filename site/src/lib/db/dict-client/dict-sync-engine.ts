@@ -6,10 +6,10 @@ import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
 import type { AuthHeaders } from './worker/instance'
 import { ResponseCodes } from '$lib/constants'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
-import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
+import { DICT_SYNCABLE_TABLES, MAX_DIRTY_PROBES } from '$lib/db/dict-syncable-tables'
 import { classify_sync_failure, is_storage_lost_error, RepeatFailureTracker } from '$lib/db/sync/sync-failure-classify'
 import { LATEST_DICT_MIGRATION } from './dict-migrations-bundle'
-import { report_dict_stuck_dirty, report_dict_sync_failure } from './report-dict-sync-failure'
+import { report_dict_dirty_reconciled, report_dict_stuck_dirty, report_dict_sync_failure } from './report-dict-sync-failure'
 
 /** The slice of the worker's connection the engine needs (reads + writes). */
 export interface EngineConnection {
@@ -138,6 +138,18 @@ export class DictSyncEngine {
    */
   #repeated_failure_blocked = false
   #repeat_tracker = new RepeatFailureTracker()
+  /**
+   * Armed while this VIEWER session should ask the server which of its `dirty`
+   * flags are redundant (see `#build_dirty_probes`). Starts armed so a browser
+   * carrying inherited flags heals on its first sync; re-armed by the stuck
+   * watchdog only when the previous probe made progress, so a genuinely-stuck
+   * client probes once and then stops re-asking the same question forever.
+   */
+  #probe_dirty = true
+  /** Flags cleared by the last applied probe verdict — reported after the commit. */
+  #reconciled_dirty = 0
+  /** Dirty-row count at the previous watchdog tick, for the re-arm test above. */
+  #dirty_at_last_check = -1
 
   constructor(options: SyncEngineOptions) {
     this.#dict_id = options.dict_id
@@ -195,18 +207,45 @@ export class DictSyncEngine {
     if (this.#stopped)
       return
     let dirty_rows = 0
+    // Per-table counts + the oldest flag's age are what tell an INHERITED flag
+    // apart from a real wedge: junction-only rows (`entry_dialects`/`entry_tags`)
+    // held by someone with no editor role, older than this session, are the
+    // known server-side-flag class (2026-07-26: 5,437 rows across 33
+    // dictionaries) — harmless. Anything else, or a holder WITH an editor role,
+    // is a genuine "this person's work is not reaching the server".
+    const tables: Record<string, number> = {}
+    let oldest_dirty_updated_at: string | null = null
     for (const table of DICT_SYNCABLE_TABLES) {
-      const rows = await this.#connection.query<{ c: number }>(`SELECT COUNT(*) AS c FROM "${table}" WHERE dirty = 1`)
-      dirty_rows += rows[0]?.c ?? 0
+      const rows = await this.#connection.query<{ c: number, oldest: string | null }>(
+        `SELECT COUNT(*) AS c, MIN(updated_at) AS oldest FROM "${table}" WHERE dirty = 1`,
+      )
+      const count = rows[0]?.c ?? 0
+      if (!count)
+        continue
+      dirty_rows += count
+      tables[table] = count
+      const oldest = rows[0]?.oldest ?? null
+      if (oldest && (!oldest_dirty_updated_at || oldest < oldest_dirty_updated_at))
+        oldest_dirty_updated_at = oldest
     }
     const delete_rows = await this.#connection.query<{ c: number }>(`SELECT COUNT(*) AS c FROM deletes`)
     const deletes = delete_rows[0]?.c ?? 0
     const pending = dirty_rows + deletes > 0
+    // A pull-only session that still holds flags gets ONE more reconcile attempt
+    // per watchdog tick — flags can arrive after the first sync (an old pull
+    // carrying a pre-fix row). Only when the count CHANGED, so a client whose
+    // flags are genuinely un-pushable stops re-asking the identical question.
+    if (pending && !this.#has_editor_role && dirty_rows !== this.#dirty_at_last_check)
+      this.#probe_dirty = true
+    this.#dirty_at_last_check = dirty_rows
     if (pending && this.#pending_at_last_check) {
       report_dict_stuck_dirty({
         dict_id: this.#dict_id,
         dirty_rows,
         deletes,
+        tables,
+        has_editor_role: this.#has_editor_role,
+        oldest_dirty_updated_at,
         last_sync_at: this.#last_sync_at,
         last_error: this.#last_error,
       })
@@ -336,8 +375,47 @@ export class DictSyncEngine {
       synced_up_to,
       dirty_rows,
       deletes,
+      dirty_probes: await this.#build_dirty_probes(),
       latest_dict_migration: LATEST_DICT_MIGRATION,
     }
+  }
+
+  /**
+   * Ask the server which of THIS session's `dirty` flags it can already account
+   * for. Viewers only: an editor's flags drain through the real push path, which
+   * clears them by pushed id.
+   *
+   * Why a viewer can hold dirty rows at all: a server-side write that set
+   * `dirty = 1` on a canonical row (fixed 2026-07-27) shipped that flag to every
+   * visitor via the snapshot, and a pull-only client has no way to clear it — so
+   * the tab warns `dirty_rows_stuck` every 30 minutes forever. Server + snapshots
+   * are clean now, but browsers that downloaded a poisoned copy never revisit
+   * those rows (a synced row never rides a pull again), so they need this.
+   *
+   * We deliberately do NOT decide locally that a viewer's flags are phantom — a
+   * contributor whose login lapsed after writing is a viewer holding real work.
+   * The server's `canonical.updated_at >= local.updated_at` test is what makes
+   * the clear safe (see `resolve_redundant_dirty`).
+   */
+  async #build_dirty_probes(): Promise<DictChangesRequest['dirty_probes']> {
+    if (this.#has_editor_role || !this.#probe_dirty)
+      return undefined
+    this.#probe_dirty = false
+
+    const probes: NonNullable<DictChangesRequest['dirty_probes']> = {}
+    let budget = MAX_DIRTY_PROBES
+    for (const table of DICT_SYNCABLE_TABLES) {
+      if (budget <= 0)
+        break
+      const rows = await this.#connection.query<{ id: string, updated_at: string }>(
+        `SELECT id, updated_at FROM "${table}" WHERE dirty = 1 LIMIT ${budget}`,
+      )
+      if (!rows.length)
+        continue
+      probes[table] = rows.map(row => ({ id: row.id, updated_at: row.updated_at }))
+      budget -= rows.length
+    }
+    return Object.keys(probes).length ? probes : undefined
   }
 
   async #post(request: DictChangesRequest): Promise<DictChangesResponse> {
@@ -389,6 +467,15 @@ export class DictSyncEngine {
       this.#on_tables_changed?.(affected)
     if (deleted_rows.length > 0)
       this.#on_rows_deleted?.(deleted_rows)
+    if (this.#reconciled_dirty > 0) {
+      // Reported AFTER the commit so the count reflects durable work. This is
+      // the one-time drain of inherited phantom flags — seeing it stop is how we
+      // know the residue is gone.
+      report_dict_dirty_reconciled({ dict_id: this.#dict_id, cleared: this.#reconciled_dirty })
+      // More may remain (probe budget) — re-arm so the next sync finishes the job.
+      this.#probe_dirty = true
+      this.#reconciled_dirty = 0
+    }
   }
 
   async #apply_transaction({ response, request, affected, deleted_rows }: {
@@ -496,6 +583,23 @@ export class DictSyncEngine {
         // Drain only the tombstones we actually pushed (a delete added mid-flight stays queued).
         for (const { table_name, id } of request.deletes ?? [])
           await this.#connection.execute(`DELETE FROM deletes WHERE table_name = ? AND id = ?`, [table_name, id])
+      }
+
+      // Clear the flags the server vouched for — by id, and ONLY ids we probed,
+      // so a row written during this round-trip can't be caught by the verdict.
+      if (response.redundant_dirty) {
+        let cleared = 0
+        for (const table of DICT_SYNCABLE_TABLES) {
+          const probed = new Set((request.dirty_probes?.[table] ?? []).map(probe => probe.id))
+          for (const id of response.redundant_dirty[table] ?? []) {
+            if (!probed.has(id))
+              continue
+            await this.#connection.execute(`UPDATE "${table}" SET dirty = NULL WHERE id = ? AND dirty = 1`, [id])
+            cleared += 1
+          }
+        }
+        if (cleared)
+          this.#reconciled_dirty += cleared
       }
 
       // Persist the new watermark in db_metadata for next sync. `ON CONFLICT DO

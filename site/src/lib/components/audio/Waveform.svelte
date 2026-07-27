@@ -2,6 +2,7 @@
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import { decode_audio_buffer, get_peaks } from './waveform-utils'
+  import { play_audio_element } from '$lib/media/play-audio-element'
 
   // Pared down from tutor's audio stack — zoom/scroll, section highlighting, paragraph
   // segments, and live-recording rendering live in tutor: site/src/lib/audio/Waveform.svelte
@@ -121,14 +122,14 @@
     playing = false
   }
 
-  async function start_stop() {
+  function start_stop() {
     if (!audio) return
     if (playing) {
       audio.pause()
       audio.currentTime = 0
       current_time = 0
     } else {
-      await audio.play()
+      play_audio_element({ audio, context: { surface: 'waveform' }, on_failure: () => { playing = false } })
     }
   }
 

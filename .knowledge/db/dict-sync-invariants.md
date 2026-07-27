@@ -94,6 +94,14 @@ Non-obvious facts locked in by `server-seq.test.ts` and the migration comments:
   cascade-nulled rows visible to pulls).
 - Server strips a pushed `server_seq` (like `dirty`) and reassigns — a client value could hide the
   row below peers' cursors.
+- **`server_seq` — not `dirty` — is what carries a SERVER-side write down to clients.** For a year
+  ~15 shared.db route statements set `dirty = 1` with comments claiming it was what made admin
+  clients pull the change; it never was (house inherited the same two statements, and both database
+  skills told operators to do it during live surgery). `dirty` is a CLIENT-only flag, the server
+  never reads it, and clients null it on every pulled row — so those writes were inert except for
+  minting phantom "unsaved work" on canonical rows (351 in shared.db, 5,437 in dict DBs). Removed at
+  source + scrubbed on the way out 2026-07-27. If you ever feel the urge to flag a server row so
+  clients notice it: the UPDATE already did that.
 - Client-side the same triggers run but their values are meaningless; the cursor comes ONLY from
   the response (`db_metadata.synced_seq`). Fresh snapshots carry a baked `synced_seq` (R2 builder +
   `/db` endpoint — the `/db` endpoint also now strips `deletes`, fixing an editor-bootstrap

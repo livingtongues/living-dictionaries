@@ -119,9 +119,13 @@ function ensure_junction({ db, junction_table, label_column, entry_id, canonical
     return 0
   if (!dry_run) {
     const now = new Date().toISOString()
+    // NO `dirty` — this is a SERVER-side write, and `dirty` means "an unsynced
+    // local edit in this browser". Setting it here minted canonical rows that
+    // every client inherited and no viewer could ever clear (the 5,437-row
+    // phantom-unsaved-work class, 2026-07-26). Propagation is `server_seq`'s job.
     db.prepare(
-      `INSERT INTO "${junction_table}" (id, entry_id, "${label_column}", dirty, created_by_user_id, created_at, updated_by_user_id, updated_at)
-       VALUES (?, ?, ?, 1, ?, ?, ?, ?)`,
+      `INSERT INTO "${junction_table}" (id, entry_id, "${label_column}", created_by_user_id, created_at, updated_by_user_id, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
     ).run(randomUUID(), entry_id, canonical_id, user_id, now, user_id, now)
   }
   return 1
@@ -163,7 +167,7 @@ function dedup_tags({ db, user_id, dry_run, report }: {
     if (any_public && canonical.private) {
       report.tag_privacy_widened++
       if (!dry_run) {
-        db.prepare(`UPDATE tags SET "private" = NULL, dirty = 1, updated_at = ? WHERE id = ?`)
+        db.prepare(`UPDATE tags SET "private" = NULL, updated_at = ? WHERE id = ?`)
           .run(new Date().toISOString(), canonical.id)
       }
     }
@@ -220,7 +224,7 @@ function dedup_dialects({ db, user_id, dry_run, report }: {
     if (filled) {
       report.dialect_locales_filled += filled
       if (!dry_run) {
-        db.prepare(`UPDATE dialects SET name = ?, dirty = 1, updated_at = ? WHERE id = ?`)
+        db.prepare(`UPDATE dialects SET name = ?, updated_at = ? WHERE id = ?`)
           .run(JSON.stringify(merged_name), new Date().toISOString(), canonical.id)
       }
     }

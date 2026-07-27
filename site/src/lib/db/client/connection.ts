@@ -115,5 +115,5 @@ function request_persistent_storage() {
   navigator.storage?.persist?.().then((granted) => {
     if (granted)
       console.info('Persistent storage granted')
-  })
+  }).catch(() => undefined) // some browsers reject outright; never an unhandled rejection at boot
 }

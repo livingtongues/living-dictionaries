@@ -5,6 +5,7 @@
   import { crossfade, scale } from 'svelte/transition'
   import { page } from '$app/state'
   import { photo_src, url_from_storage_path } from '$lib/utils/media-url'
+  import { play_audio_element } from '$lib/media/play-audio-element'
   import { bbox_contains } from './map/view-helpers'
   import FeaturedEntryFullscreen from './FeaturedEntryFullscreen.svelte'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
@@ -97,7 +98,7 @@
     on_active_dict?.(card.dict_id)
     // Hitting play often precedes tapping into the fullscreen view — warm its larger image.
     preload_card(card)
-    void audio_element.play()
+    play_audio_element({ audio: audio_element, context: { surface: 'home_word_card', dictionary_id: card.dict_id, entry_id: card.id, storage_path: card.audio_storage_path }, on_failure: finish })
   }
 
   // --- auto-drift (pauses on hover/touch/focus/audio/fullscreen; off under reduced motion) ---

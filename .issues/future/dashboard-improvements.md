@@ -98,6 +98,27 @@ proposals against this lens.
   first concrete instance of the plain-language directive above.
 
 ## Open proposals
+- **★★★ NEW — Stop the analytics compute from blocking the server** *(ported from house 2026-07-26 ·
+  filed 2026-07-26 · **HIGH**, promoted to its own issue
+  <File path=".issues/analytics-compute-blocks-server.md" />).* Not a panel — the standing "load
+  performance outranks any new panel" rule, with hard evidence. LD's 15 production
+  `admin_analytics_computed` samples run **11–80 s**, twice in the same second (cold miss isn't
+  single-flighted), in synchronous `better-sqlite3` that blocks the whole Node process; real users
+  logged **5 × `sync_failed` HTTP 502** inside those windows. House built the fix this week —
+  `breathe.ts` + stage runner, `watermark-cache-file-store.ts` (survives deploys), single-flight on
+  miss, and an index jump-scan replacing the distinct-user-agent full scan (6,756 ms → 3 ms; LD's copy
+  is `log-analytics.ts:941` over a 2 GB file). Port house's implementation; don't redesign.
+- **★ NEW — Mark the in-progress day as PROVISIONAL on every traffic chart** *(ported from house
+  2026-07-26 · filed 2026-07-26 · MEDIUM).* Confirmed independently in LD data: the 07-25 review read
+  **651** human sessions for July 25 from the live tail; the finalized rollup for that same day now
+  reads **536** (−18%), because finalization reclassifies crawler sessions with a full day of
+  evidence. The newest point is systematically overstated and then drops, so the chart reads as growth
+  followed by a fall. Render the last bar/point hatched or dimmed with a "partial day" label wherever
+  daily series are drawn.
+- **★ NEW — Persist per-stage timings inside `admin_analytics_computed`** *(ported from house
+  2026-07-26 · filed 2026-07-26 · LOW).* The event carries `total_ms` only; the stage breakdown exists
+  solely behind a developer env var, so "which query is slow?" costs a hand-measurement session (both
+  house's and LD's July 26 reviews had to do it). Record the stage map in the existing event.
 - ✅ **SHIPPED 2026-07-22 (`d6871c60`) — Fold cross-browser stale-bundle transients into
   `KNOWN_NOISE_PATTERNS`.** `classify-error.ts:24-26` now folds all three engines' wording:
   `Failed to fetch dynamically imported module` (Chrome) + **`Importing a module script failed.`**

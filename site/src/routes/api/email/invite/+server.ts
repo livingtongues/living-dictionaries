@@ -35,8 +35,8 @@ export const POST: RequestHandler = async (event) => {
     const now = new Date().toISOString()
     db.prepare(`
       INSERT INTO invites
-        (id, dictionary_id, inviter_user_id, inviter_email, target_email, role, status, dirty, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, 'queued', 1, ?, ?)
+        (id, dictionary_id, inviter_user_id, inviter_email, target_email, role, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, 'queued', ?, ?)
     `).run(invite_id, dictionary_id, user_id, inviter_email, target_email.trim().toLowerCase(), role, now, now)
 
     const roleMessage
@@ -65,7 +65,7 @@ https://livingtongues.org (Living Tongues Homepage)
 https://livingdictionaries.app (Living Dictionaries website)`,
     })
 
-    db.prepare(`UPDATE invites SET status = 'sent', dirty = 1, updated_at = ? WHERE id = ?`)
+    db.prepare(`UPDATE invites SET status = 'sent', updated_at = ? WHERE id = ?`)
       .run(new Date().toISOString(), invite_id)
 
     // Log the invite into the admin Notifications room (batched into the daily

@@ -23,9 +23,9 @@ function strip_url_junk(input: string): string {
     .replace(OWN_DOMAIN, '')
 }
 
-export function convertToFriendlyUrl(url: string, maxLength = 25) {
+export function convert_to_friendly_url(url: string, max_length = 25) {
   return strip_url_junk(url)
-    .slice(0, maxLength)
+    .slice(0, max_length)
     .trim()
     .replace(SPACES, '-')
     .normalize('NFD') // separate diacritics from letters in unicode
@@ -34,21 +34,21 @@ export function convertToFriendlyUrl(url: string, maxLength = 25) {
 }
 
 if (import.meta.vitest) {
-  describe(convertToFriendlyUrl, () => {
+  describe(convert_to_friendly_url, () => {
     test('remove diacritics', () => {
-      expect(convertToFriendlyUrl('résumé')).toEqual('resume')
-      expect(convertToFriendlyUrl('mañana')).toEqual('manana')
+      expect(convert_to_friendly_url('résumé')).toEqual('resume')
+      expect(convert_to_friendly_url('mañana')).toEqual('manana')
     })
 
     test('trims, truncates, lowercases, turn space into hyphen, and removes diacritics', () => {
-      expect(convertToFriendlyUrl(' Hi! This is my 1st résumé and a bit long')).toMatchInlineSnapshot('"hi-this-is-my-1st-resume"')
+      expect(convert_to_friendly_url(' Hi! This is my 1st résumé and a bit long')).toMatchInlineSnapshot('"hi-this-is-my-1st-resume"')
     })
 
     test('strips a pasted URL down to its meaningful part (the httpslivingdictionari case)', () => {
-      expect(convertToFriendlyUrl('https://livingdictionaries.app/zapoteco-de-analco/entries')).toEqual('zapoteco-de-analcoentrie')
-      expect(convertToFriendlyUrl('https://livingdictionaries.app')).toEqual('')
-      expect(convertToFriendlyUrl('www.example.com my language')).toEqual('examplecom-my-language')
-      expect(convertToFriendlyUrl('http://My Language')).toEqual('my-language')
+      expect(convert_to_friendly_url('https://livingdictionaries.app/zapoteco-de-analco/entries')).toEqual('zapoteco-de-analcoentrie')
+      expect(convert_to_friendly_url('https://livingdictionaries.app')).toEqual('')
+      expect(convert_to_friendly_url('www.example.com my language')).toEqual('examplecom-my-language')
+      expect(convert_to_friendly_url('http://My Language')).toEqual('my-language')
     })
   })
 

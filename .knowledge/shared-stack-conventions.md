@@ -44,7 +44,12 @@ outlives the migration plan.
     never sync otherwise);
   - `db_metadata` triggers use `ON CONFLICT DO UPDATE` (NOT `INSERT OR REPLACE`, which 500s under
     an upsert);
-  - `/changes` fast-bail must NOT drop pushes when `cursor == watermark`;
+  - `/changes` fast-bail must NOT drop pushes when `cursor == watermark` — and the rule generalizes
+    to ANY new request field (it bit twice: editor pushes, then LD's read-only `dirty_probes`, whose
+    senders are by definition fully caught up). Every request term needs its own term in the bail;
+  - `dirty` is CLIENT-only — never write it server-side; `server_seq` is what carries a server write
+    to clients, and only the SERVER may vouch that a client's dirty flag is redundant (a lapsed
+    editor is a non-editor holding real work);
   - `ensure_initial_sync()` before any writes; keep a local `users` row so FKs resolve; deletes are
     sector-scoped.
 - **Runes gotchas:** `bind:value` to a `$derived` silently no-ops; `$state` bound to a child's

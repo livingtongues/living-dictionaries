@@ -103,6 +103,30 @@ what's ours alone:
    is bookkeeping for our queue only: it does not lock, hide, or close anything, and the
    manager keeps posting there forever. Revoke the per-dict API key at the same time.
 
+## "Exactly as laid out" is an instruction, not the end of the conversation
+
+Jacob, 2026-07-27 (Catawba pilot): *"The goal of the import is to make the dictionary
+as good as possible — we're not a strict import monkey."* A rigid instruction is
+authoritative and we follow it, but we also **ask which mode they want**, because the
+uploader is choosing between options they don't know exist. They wrote their file in an
+era that had never heard of Living Dictionaries; they know their data, not our fields.
+The value we add is reading the material and putting its hidden structure where the
+search, filters and views can reach it — that is a much better use of an import than a
+robotic copy. If they'd rather drive their own agent, point them at
+`/api/v1/guides/importing`, which is written for that kind of analysis. This is now
+question 1 in §1.2 of the public guide.
+
+## Small "pilot" uploads are fidelity tests — answer them as such
+
+A 14-row file sent to "test accuracy and consistency" wants proof, not prose. What
+worked (Catawba, 2026-07-27): a **codepoint table** in the report showing every headword
+character by its Unicode number, a stated list of what was NOT changed (no accents
+stripped, no case folded, no commas split), and three *independent* verification paths —
+a re-derived payload check that never imports the builder, a full public-API read-back of
+every row, and a pre/post dict.db diff proving `+N −0 changed=0`. Also disclose display
+asymmetries before they read as data loss (see `parts-of-speech-i18n.md`: the entry page
+names a POS in full, word lists and print abbreviate it).
+
 **Never write an internal note into an import thread.** Every `messages` row in it
 renders on the manager's conversation page — the design has no private side. Engineering
 records (backup paths, payload hashes, key ids, rollback handles) belong in

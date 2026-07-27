@@ -1,7 +1,20 @@
-# Bulk reads via dictionary snapshots
+# Reading a dictionary — apps, analysis, mirrors
 
-Mirroring, analyzing, or bulk-reading a whole dictionary? Don't paginate the API —
-download the dictionary's SQLite snapshot and query it locally.
+You're feeding something that READS this dictionary: a language-learning or
+flashcard app, a corpus analysis, a mirror, a study tool. You need bulk data out,
+not writes in.
+
+**Don't paginate the API.** Download the dictionary's whole SQLite snapshot and
+query it locally — one HTTP request, no key needed, every table with real joins
+instead of thousands of round-trips.
+
+Two things to respect while you build:
+
+- **These are living communities' languages.** Attribute the dictionary, link back
+  to it, and don't present its content as your own. Audio recordings are of real
+  named people.
+- **Never round-trip the snapshot's rows back through the write API.** It is a read
+  mirror; pushing it back will fight the humans editing the real thing.
 
 ## The URL
 
@@ -62,3 +75,30 @@ The snapshot is rebuilt within **~30 minutes** of any edit (a 30-minute sweep th
 only rebuilds when content actually changed) and CDN-cached briefly. Treat it as at
 most ~30 minutes stale — and always verify your OWN fresh writes via the write
 API's responses, never via the snapshot.
+
+## Media bytes
+
+The snapshot carries media **rows**, not media bytes. Each `audio` / `photos` /
+`videos` row has a `storage_path`; fetch the actual file with:
+
+```
+GET /api/v1/dictionaries/{id}/media/{storage_path}
+```
+
+which 302-redirects to storage. Photos also exist as pre-generated WebP variants
+(`_thumb`, `_w900`, `_w1600`) — use the smallest that suits your UI rather than the
+original.
+
+## When to use the API instead of the snapshot
+
+- **Secure dictionaries** (restricted-access communities) have no public snapshot —
+  paginate the API with a read key.
+- **Small targeted lookups** — a handful of entries by id or lexeme. `GET
+  …/entries?lexeme=…&match=exact` is cheaper than a 40MB download.
+- **Incremental catch-up** — `GET …/entries?updated_since=<ISO>` returns only what
+  changed, ordered by `updated_at ASC`. Good for keeping a mirror warm between
+  snapshot refreshes.
+- **Verifying your own writes** — always the API, never the snapshot.
+
+A read-only key is enough for all of these; ask your human for a **read** key rather
+than a read & write one if you never write.

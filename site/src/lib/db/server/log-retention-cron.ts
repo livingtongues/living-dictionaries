@@ -690,7 +690,17 @@ const SINGLETON_KEY = Symbol.for('living.log-retention-cron.state')
 interface CronState { interval: ReturnType<typeof setInterval>, in_flight: boolean }
 interface GlobalWithCron { [SINGLETON_KEY]?: CronState }
 
-export function start_log_retention_cron_once(): void {
+export function start_log_retention_cron_once({ after_sweep }: {
+  /**
+   * Ran after every sweep — the sweep is what ADVANCES the rollup watermark, i.e.
+   * the exact moment every analytics cache entry goes stale. The caller passes
+   * the analytics warm-up so the recompute happens here, off the request path,
+   * instead of in front of the next admin (Jacob's standing rule 2026-07-27:
+   * analytics must never block a request). Injected rather than imported to keep
+   * this module free of a cycle with `log-analytics.ts`.
+   */
+  after_sweep?: () => Promise<void>
+} = {}): void {
   // No env flag — log retention always runs on the active node so trends never
   // silently stop accumulating. Two hardcoded guards only:
   //   - dev/build: dormant locally (matches the other crons; unit tests cover it).
@@ -711,11 +721,11 @@ export function start_log_retention_cron_once(): void {
     // .unref(): a background maintenance timer must never be the sole reason the
     // Node process stays alive. No-op in prod (the HTTP server holds Node open),
     // but lets one-shot in-process importers exit cleanly instead of hanging.
-    interval: setInterval(() => run_guarded(state), RETENTION_INTERVAL_MS).unref(),
+    interval: setInterval(() => run_guarded(state, after_sweep), RETENTION_INTERVAL_MS).unref(),
     in_flight: false,
   }
   slot[SINGLETON_KEY] = state
-  run_guarded(state) // first sweep on boot
+  run_guarded(state, after_sweep) // first sweep on boot
   console.info(`[log-retention] Started — sweeping every ${RETENTION_INTERVAL_MS / 3_600_000}h (hot ${HOT_WINDOW_DAYS}d, archive ${ARCHIVE_WINDOW_DAYS}d).`)
 }
 
@@ -728,13 +738,14 @@ export function stop_log_retention_cron(): void {
   delete slot[SINGLETON_KEY]
 }
 
-function run_guarded(state: CronState): void {
+function run_guarded(state: CronState, after_sweep?: () => Promise<void>): void {
   if (state.in_flight)
     return
   state.in_flight = true
   try {
     const result = run_log_retention_once()
     console.info(`[log-retention] rolled ${result.days_rolled} day(s), archived ${result.archived}, pruned ${result.pruned}.`)
+    after_sweep?.().catch(err => console.error('[log-retention] after-sweep hook failed:', err))
   } catch (err) {
     console.error('[log-retention] sweep failed:', err)
     log_server_event({ level: 'error', message: 'log_retention_sweep_failed', error: err })

@@ -1,6 +1,7 @@
 import type { DictChangesRequest } from './dictionary-sync-helpers'
 import { open_dictionary_db_in_memory } from './dictionary-db'
-import { DICT_NATURAL_KEY_COLUMNS, process_dict_changes, read_server_seq_counter } from './dictionary-sync-helpers'
+import { DICT_NATURAL_KEY_COLUMNS, MAX_DIRTY_PROBES, process_dict_changes, read_server_seq_counter } from './dictionary-sync-helpers'
+import { clear_dirty_flags } from './r2-snapshot-builder'
 
 describe('dictionary.db push + pull', () => {
   test('fresh dict + push entry → row lands + last_modified_at advances', () => {
@@ -528,6 +529,205 @@ describe('DICT_NATURAL_KEY_COLUMNS leaf-ness guard', () => {
       }
     }
     expect(referrers).toEqual([])
+    db.close()
+  })
+})
+
+describe('server-side `dirty` flags never reach a client', () => {
+  /**
+   * The 2026-07-26 class: 5,437 canonical rows across 33 dictionaries carrying
+   * `dirty = 1` from bulk SERVER-side writes. Every visitor inherits them, and a
+   * viewer's engine is pull-only, so nothing can ever clear them — the tab warns
+   * `dirty_rows_stuck` forever and the signal that should catch a real editor
+   * wedge is drowned out.
+   */
+  function seed_entry_with_server_dirty_flag(db: ReturnType<typeof open_dictionary_db_in_memory>, now: string): void {
+    process_dict_changes({
+      db,
+      request: {
+        synced_up_to: null,
+        dirty_rows: { entries: [{ id: 'entry_1', lexeme: { en: 'hello' }, dirty: 1, created_by_user_id: 'u1', created_at: now, updated_by_user_id: 'u1', updated_at: now }] },
+        deletes: [],
+        latest_dict_migration: '20260606_initial.sql',
+      },
+      user_id: 'u1',
+      is_editor: true,
+    })
+    // Exactly what the old server-side maintenance writes left behind.
+    db.prepare(`UPDATE entries SET dirty = 1 WHERE id = 'entry_1'`).run()
+  }
+
+  test('a pull never carries a server row flagged dirty', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    const now = new Date().toISOString()
+    seed_entry_with_server_dirty_flag(db, now)
+
+    const response = process_dict_changes({
+      db,
+      request: { synced_up_to: null, dirty_rows: {}, deletes: [], latest_dict_migration: '20260606_initial.sql' },
+      user_id: 'viewer',
+      is_editor: false,
+    })
+
+    expect(response.changes.entries?.[0]?.id).toBe('entry_1')
+    expect(response.changes.entries?.[0]?.dirty).toBe(null)
+    db.close()
+  })
+
+  test('merging any row clears a dirty flag the SERVER row already carried', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    const now = new Date().toISOString()
+    seed_entry_with_server_dirty_flag(db, now)
+    expect((db.prepare(`SELECT dirty FROM entries WHERE id = 'entry_1'`).get() as { dirty: number }).dirty).toBe(1)
+
+    const later = new Date(Date.now() + 1000).toISOString()
+    process_dict_changes({
+      db,
+      request: {
+        synced_up_to: null,
+        dirty_rows: { entries: [{ id: 'entry_1', lexeme: { en: 'hello there' }, dirty: 1, created_by_user_id: 'u1', created_at: now, updated_by_user_id: 'u1', updated_at: later }] },
+        deletes: [],
+        latest_dict_migration: '20260606_initial.sql',
+      },
+      user_id: 'u1',
+      is_editor: true,
+    })
+
+    expect((db.prepare(`SELECT dirty FROM entries WHERE id = 'entry_1'`).get() as { dirty: number | null }).dirty).toBe(null)
+    db.close()
+  })
+
+  test('a snapshot copy ships with every dirty flag cleared', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    const now = new Date().toISOString()
+    seed_entry_with_server_dirty_flag(db, now)
+
+    expect(clear_dirty_flags(db)).toBe(1)
+    expect((db.prepare(`SELECT dirty FROM entries WHERE id = 'entry_1'`).get() as { dirty: number | null }).dirty).toBe(null)
+    // Idempotent: a clean snapshot clears nothing.
+    expect(clear_dirty_flags(db)).toBe(0)
+    db.close()
+  })
+})
+
+/**
+ * The residue the fixes above CANNOT reach: browsers that downloaded a poisoned
+ * copy before them. A synced row never rides a pull again, and a pull-only
+ * client can never push, so those flags are immortal without this probe.
+ *
+ * The safety rule under test: a flag is cleared ONLY when the server can vouch
+ * that it holds the row at least as new. Everything else stays flagged, because
+ * a contributor whose login lapsed AFTER writing is also a non-editor holding
+ * dirty rows — and that work is irreplaceable.
+ */
+describe('dirty_probes → redundant_dirty (the pull-only client\'s reconcile)', () => {
+  const NOW = '2026-07-27T00:00:00.000Z'
+  const EARLIER = '2026-07-26T00:00:00.000Z'
+  const LATER = '2026-07-28T00:00:00.000Z'
+
+  function seed_entry(db: ReturnType<typeof open_dictionary_db_in_memory>, { id, at }: { id: string, at: string }): void {
+    process_dict_changes({
+      db,
+      request: {
+        synced_up_to: null,
+        dirty_rows: { entries: [{ id, lexeme: { en: id }, dirty: 1, created_by_user_id: 'u1', created_at: at, updated_by_user_id: 'u1', updated_at: at }] },
+        deletes: [],
+        latest_dict_migration: '20260606_initial.sql',
+      },
+      user_id: 'u1',
+      is_editor: true,
+    })
+  }
+
+  function probe(db: ReturnType<typeof open_dictionary_db_in_memory>, probes: DictChangesRequest['dirty_probes']) {
+    return process_dict_changes({
+      db,
+      request: { synced_up_to: 0, dirty_rows: {}, deletes: [], dirty_probes: probes, latest_dict_migration: '20260606_initial.sql' },
+      user_id: 'viewer',
+      is_editor: false,
+    })
+  }
+
+  test('an inherited flag on a row the server already holds is reported redundant', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    seed_entry(db, { id: 'entry_1', at: NOW })
+
+    // The viewer's local copy is exactly what the server sent it.
+    const response = probe(db, { entries: [{ id: 'entry_1', updated_at: NOW }] })
+
+    expect(response.redundant_dirty?.entries).toEqual(['entry_1'])
+    db.close()
+  })
+
+  test('a server copy NEWER than the local one is still redundant — the local edit already landed', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    seed_entry(db, { id: 'entry_1', at: LATER })
+
+    const response = probe(db, { entries: [{ id: 'entry_1', updated_at: EARLIER }] })
+
+    expect(response.redundant_dirty?.entries).toEqual(['entry_1'])
+    db.close()
+  })
+
+  test('REAL unsynced work is never reported redundant — a lapsed editor keeps their row', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    seed_entry(db, { id: 'entry_1', at: EARLIER })
+
+    // The local copy is NEWER: this person edited it and it never reached the
+    // server. Clearing the flag here would silently discard their work.
+    const response = probe(db, { entries: [{ id: 'entry_1', updated_at: LATER }] })
+
+    expect(response.redundant_dirty).toBeUndefined()
+    db.close()
+  })
+
+  test('a row the server has never seen is never reported redundant', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    seed_entry(db, { id: 'entry_1', at: NOW })
+
+    const response = probe(db, { entries: [{ id: 'entry_local_only', updated_at: NOW }] })
+
+    expect(response.redundant_dirty).toBeUndefined()
+    db.close()
+  })
+
+  test('probes are READ-ONLY — they touch no row and mint no tombstone', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    seed_entry(db, { id: 'entry_1', at: NOW })
+    const before = db.prepare(`SELECT * FROM entries WHERE id = 'entry_1'`).get()
+    const seq_before = read_server_seq_counter(db)
+
+    probe(db, { entries: [{ id: 'entry_1', updated_at: NOW }] })
+
+    expect(db.prepare(`SELECT * FROM entries WHERE id = 'entry_1'`).get()).toEqual(before)
+    expect(read_server_seq_counter(db)).toBe(seq_before)
+    expect(db.prepare(`SELECT COUNT(*) AS n FROM deletes`).get()).toEqual({ n: 0 })
+    db.close()
+  })
+
+  test('a request with no probes gets no verdict field at all', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    seed_entry(db, { id: 'entry_1', at: NOW })
+
+    const response = process_dict_changes({
+      db,
+      request: { synced_up_to: 0, dirty_rows: {}, deletes: [], latest_dict_migration: '20260606_initial.sql' },
+      user_id: 'viewer',
+      is_editor: false,
+    })
+
+    expect(response.redundant_dirty).toBeUndefined()
+    db.close()
+  })
+
+  test('the probe budget is capped, so a poisoned client cannot ask for unbounded work', () => {
+    const db = open_dictionary_db_in_memory('test_dict')
+    const ids = Array.from({ length: MAX_DIRTY_PROBES + 25 }, (_, i) => `entry_${i}`)
+    for (const id of ids) seed_entry(db, { id, at: NOW })
+
+    const response = probe(db, { entries: ids.map(id => ({ id, updated_at: NOW })) })
+
+    expect(response.redundant_dirty?.entries).toHaveLength(MAX_DIRTY_PROBES)
     db.close()
   })
 })

@@ -125,4 +125,52 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
 - **2026-07-22 — three top backlog items SHIPPED in one commit `d6871c60` (06:08 UTC):** (1) `real_errors` null-session zombie exclusion (`log-analytics.ts:1218` `AND NOT (session_id IS NULL AND message IN ('sync_failed','leader_boot_failed'))`), (2) cross-browser stale-bundle strings in `KNOWN_NOISE_PATTERNS` (`classify-error.ts:24-26`: `Importing a module script failed.` / `Unable to preload CSS`), (3) OPFS dict-boot recovery hardening + telemetry. Import/media upload enrichment (`import_upload_failed`/`media_upload_failed`) also landed. Don't re-raise ANY of these four — they're DONE and deployed in build `1784714151639`. Next run: confirm `real_errors` headline dropped to ~30-50/day on finalized rollups.
 - **2026-07-22 — OPFS dict-boot recovery: telemetry works, HEALING does not yet.** New `dict_boot_recovery_exhausted`/`dict_boot_recovered` events fire correctly and BOUND the re-election loop (was the point), but 24h showed **7 exhausted / 0 recovered**. The genuine open case: signed-in iOS `alclaveria`/`boienen` `sqlite3_open_v2` at `opfs_open` — reset-from-snapshot refuses because it can't open the file to prove dirty-state. Anon/webdriver `kalinago`/`ngabere` were stale-bundle worker-chunk fetch failures (reset can't help, correct). This is the still-open iOS/Android checkbox in `.issues/dict-boot-persistent-opfs-recovery.md`, NOT a new bug. Surface as digest action item, not a dashboard panel (07-14 no-wedged-panel ruling). `dict_boot_recovery_exhausted` on anon/webdriver/stale-bundle sessions = known-noise; only the current-build signed-in ones are real.
 - **2026-07-22 — the crawl is the SAME re-intensified Googlebot-mobile (Nexus 5X) SEO indexing, sustained 120-172k rows/day since 07-19** (roughly flat, not growing). Benign, host CPU 3.8% avg. US-SC "human" sessions (~122) are residual datacenter/crawler leakage my rough UA filter misses — NOT real audience; the prod dashboard's `is_bot_ua`+webdriver filter is stricter. Don't re-investigate as a new crawl per the 07-13 baseline; just watch `logs.db` size (2.33GB, ~230MB/day, fine at 18% disk).
+- **2026-07-26 — `dirty_rows_stuck` is DOMINATED by inherited server-side flags, not real wedges.**
+  5,437 stale `dirty=1` rows across **33 dictionaries**, all in `entry_dialects`/`entry_tags` — the
+  unpatched 07-21 Yokoim root cause, now quantified in `.issues/yokoim-dirty-rows-stuck-2026-07-20.md`.
+  Pull-only clients inherit them via the snapshot and warn forever. Don't re-triage individual
+  `dirty_rows_stuck` rows on affected dicts, and don't treat them as lost user work; the fix is the
+  server-merge normalization + a one-off cleanup. A row only deserves triage if the reporting user
+  HOLDS a role on that dictionary.
+- **2026-07-26 — satori (`/og`) cannot decode WebP; the 07-23 photo→R2 migration broke every share
+  card's photo.** 111 failed renders/day, degrading to text-only cards. Filed
+  `.issues/og-share-image-webp-regression.md`. Once fixed, `og_render_failed reason:"image_fetch"`
+  should be ~0 — the residual `reason:"font"` handful stays known-noise. Standing rule: any future
+  media-format migration must check the share-card path.
+- **2026-07-26 — `/admin/analytics` cold compute BLOCKS the whole site (11–80 s) and caused real
+  HTTP 502s.** Accepted inbound Phase D port from house (already built there): breathe/stage yielding,
+  disk-persisted cache, single-flight cold miss, index jump-scan for distinct user agents. Tracked in
+  `.issues/analytics-compute-blocks-server.md`. Don't re-derive the diagnosis; don't propose new
+  dashboard panels until this ships.
+- **2026-07-26 — the newest day on any daily chart is systematically OVERSTATED (~18%).** Live-tail
+  session counts finalize downward when the rollup reclassifies crawler sessions (07-25: 651 live →
+  536 finalized). Always label the last point partial in reports; a backlog item exists to do it on the
+  dashboard.
+- **2026-07-26 — audio `play()` rejections (`Failed to load because no supported source was found`)
+  are UNDIAGNOSABLE until enriched.** Rising 1→19/day across real anonymous visitors, but all
+  referenced R2 audio objects verified 200/correct content-type. `Audio.svelte` calls `play()` with no
+  catch, so rows carry no url/error name/readyState. ENRICH FIRST (`audio_play_failed`), then diagnose
+  — same rule as the 07-14 waveform-decode case. Don't guess a fix.
 - **2026-07-22 21:04 — viewer OPFS replacement HEALS but is not session-bounded.** Current build `1784732741243` produced the first real recoveries (iPhone `iipay-aa`; Android `poqomchi`), closing the "0 recovered" watch. But the iPhone emitted 36 `dict_boot_file_replaced` rows over 9 minutes because the once-only budget resets with each worker re-election; all replacement rows also lost `session_id` during the root-onMount/child-boot race. Keep the existing OPFS issue open for a cross-worker session bound + correlation; editor recovery remains separately deferred.
+  **↑ 2026-07-26: the session-bound watch is CLOSED** — 161 `dict_boot_file_replaced` rows across 161
+  sessions, `max_per_session = 1`, with `session_id` present. Only the signed-in-editor recovery case
+  (1 exhausted row, iPhone/`boienen` `sqlite3_open_v2`) remains open in the issue.
+- **2026-07-27 — ANALYTICS AND TELEMETRY MUST NEVER BLOCK A REQUEST PATH (Jacob, standing law).**
+  "Analytics are supposed to help me and speed me up, not slow me down… it shouldn't be blocking."
+  Any admin/analytics/telemetry computation that is expensive is **precomputed, warmed off-request, or
+  deferred** — never run synchronously in front of a user. Concretely, as shipped this night:
+  `get_log_analytics` is async + stage-chunked (`breathe()` between every blocking stage), single-flighted
+  on the cold miss, persisted to `DATA_DIR/analytics-cache/*.json` so a deploy never hands the next
+  admin a cold compute, and **warmed** from the retention cron's `after_sweep` hook (the moment the
+  watermark advances) plus 30 s after boot. When adding an analytics query, the question is not "is it
+  fast enough" but "whose request pays for it" — the answer must be "nobody's".
+- **2026-07-27 — an image-format migration silently breaks satori-based share rendering; CHECK THE
+  SHARE-CARD PATH WHENEVER MEDIA FORMATS CHANGE (standing outbound rule, adopted fleet-wide).**
+  Verified this night rather than assumed: **upgrading satori does not help.** satori ≥ 0.26 parses
+  WebP, but satori only emits `<image href>` into an SVG — the rasterizer is `@resvg/resvg-js`, and
+  2.6.2 (the newest release) still decodes only PNG/JPEG/GIF/SVG. A bump would merely convert a loud
+  `og_render_failed` into a silently photo-less card. The durable fix is to make `/og` format-agnostic:
+  `routes/og/card-image.ts` transcodes anything undecodable to a JPEG data URI before rendering. Two
+  traps it cost to find: satori **cannot measure a data URI** (needs explicit `<img width height>` or it
+  throws "Image size cannot be determined"), and satori resolves a percentage width against the parent's
+  CONTENT box (the card photo had always stopped 96×72 px short of the edges).

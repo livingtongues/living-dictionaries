@@ -19,6 +19,15 @@ River's 2,549 affected prod senses were repaired in place (lowercased + `updated
 trigger advanced `last_modified_at` and clients pulled the fix via `/changes` — no history events;
 backup left at `/data/dictionaries/river.db.bak-2026-07-02T02-56-52-813Z`).
 
+### Two display surfaces, two different strings (bit an import report, 2026-07-27)
+The same stored abbrev renders as the **full name** on the entry detail page
+(`EntryPartOfSpeech` → `ModalEditableArray` shows each option's `name`, i.e.
+`t('ps.<abbrev>')` → "verb suffix") but as the **abbreviation** on the dictionary home word
+cards, the gallery and the print view (`add_periods_and_comma_separate_parts_of_speech` +
+`psAbbrev.*` → "v.suff."). Semantic domains always render as names. Worth stating when you
+tell a manager what their uploaded label will "look like" — the honest answer is "both,
+depending where you are looking".
+
 ## Non-English locale files are DB-baked, not hand-maintained (Google Sheet RETIRED)
 `site/src/lib/i18n/locales/**/<locale>.json` (main + `{ps,psAbbrev,gl,sd}/`) are NOT hand-edited
 like `locales/en.json` (English is code-owned — edit those). Every non-English value lives in

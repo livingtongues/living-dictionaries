@@ -6,6 +6,7 @@ import { add_gloss_language, remove_gloss_language } from './gloss-languages'
 
 let shared_db: Database.Database
 let dict_db: Database.Database
+let seq_at_setup: number
 
 vi.mock('./shared-db', async () => {
   const actual = await vi.importActual<typeof import('./shared-db')>('./shared-db')
@@ -21,6 +22,7 @@ beforeEach(() => {
   dict_db = open_dictionary_db_in_memory('d1')
   shared_db.prepare(`INSERT INTO users (id, email) VALUES ('u1', 'u1@example.com')`).run()
   shared_db.prepare(`INSERT INTO dictionaries (id, name, gloss_languages) VALUES ('d1', 'Demo', ?)`).run(JSON.stringify(['en']))
+  seq_at_setup = (shared_db.prepare(`SELECT server_seq FROM dictionaries WHERE id = 'd1'`).get() as { server_seq: number }).server_seq
 })
 
 afterEach(() => {
@@ -28,14 +30,21 @@ afterEach(() => {
   dict_db.close()
 })
 
+/**
+ * Reads the persisted list, asserting the write left the row in the shape a
+ * CANONICAL row must have: `dirty` untouched (a client-only flag — this used to
+ * assert `dirty === 1`, which was the bug) and a fresh `server_seq`, which is
+ * what actually carries the change down to admin clients.
+ */
 function stored(): string[] {
-  const row = shared_db.prepare(`SELECT gloss_languages, dirty FROM dictionaries WHERE id = 'd1'`).get() as { gloss_languages: string, dirty: number }
-  expect(row.dirty).toBe(1)
+  const row = shared_db.prepare(`SELECT gloss_languages, dirty, server_seq FROM dictionaries WHERE id = 'd1'`).get() as { gloss_languages: string, dirty: number | null, server_seq: number }
+  expect(row.dirty).toBe(null)
+  expect(row.server_seq).not.toBe(seq_at_setup)
   return JSON.parse(row.gloss_languages) as string[]
 }
 
 describe(add_gloss_language, () => {
-  test('appends a supported code and marks the catalog row dirty', () => {
+  test('appends a supported code, leaving the canonical row clean', () => {
     expect(add_gloss_language({ dict_id: 'd1', user_id: 'u1', code: 'fr' })).toEqual(['en', 'fr'])
     expect(stored()).toEqual(['en', 'fr'])
   })

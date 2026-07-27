@@ -2,7 +2,7 @@
   import IconInfoCircle from '~icons/fa-solid/info-circle'
   import type { IPoint, IRegion } from '$lib/types'
   import { onMount } from 'svelte'
-  import { convertToFriendlyUrl, is_url_like } from './convert-to-friendly-url'
+  import { convert_to_friendly_url, is_url_like } from './convert-to-friendly-url'
   import { log_event } from '$lib/debug/remote-log'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import Form from '$lib/components/ui/Form.svelte'
@@ -36,7 +36,7 @@
   let conlang_source = $state('')
   let conlang_use = $state('')
 
-  const urlFromName = $derived(convertToFriendlyUrl(name, MAX_URL_LENGTH))
+  const urlFromName = $derived(convert_to_friendly_url(name, MAX_URL_LENGTH))
   let customUrl: string = $state()
   const urlToUse = $derived(customUrl || urlFromName)
   let isUniqueURL = $state(true)
@@ -61,7 +61,7 @@
     if (is_url_like(newCustomUrl))
       url_like_input = newCustomUrl
     if (customUrl !== newCustomUrl)
-      customUrl = convertToFriendlyUrl(newCustomUrl, MAX_URL_LENGTH)
+      customUrl = convert_to_friendly_url(newCustomUrl, MAX_URL_LENGTH)
   }
 
   onMount(() => {

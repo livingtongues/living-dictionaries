@@ -19,10 +19,10 @@ function read_gloss_languages(dict_id: string): string[] {
   return row.gloss_languages ? JSON.parse(row.gloss_languages) as string[] : []
 }
 
-/** Persist the list to shared.db (mirrors the catalog endpoint: dirty + audit). */
+/** Persist the list to shared.db (mirrors the catalog endpoint: audit stamps, no `dirty`). */
 function write_gloss_languages({ dict_id, user_id, gloss_languages }: { dict_id: string, user_id: string | null, gloss_languages: string[] }): void {
   get_shared_db().prepare(
-    'UPDATE dictionaries SET gloss_languages = ?, updated_at = ?, updated_by_user_id = ?, dirty = 1 WHERE id = ?',
+    'UPDATE dictionaries SET gloss_languages = ?, updated_at = ?, updated_by_user_id = ? WHERE id = ?',
   ).run(JSON.stringify(gloss_languages), new Date().toISOString(), user_id, dict_id)
 }
 

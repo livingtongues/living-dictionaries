@@ -31,16 +31,19 @@ export const GET: RequestHandler = async (event) => {
   // an unknown/absent value falls back to the full compute (e.g. the log-review reader).
   const scope_param = event.url.searchParams.get('scope')
   const scope: AnalyticsScope = scope_param === 'light' || scope_param === 'usage' || scope_param === 'diagnostics' ? scope_param : 'full'
-  const analytics = get_log_analytics({
+  const analytics = await get_log_analytics({
     days: 30,
     audience,
     scope,
-    on_computed: ({ duration_ms }) => {
+    // `stages` is the per-stage breakdown that used to exist only behind
+    // ANALYTICS_PROFILE=1 — without it a review knows the total cost and never
+    // where it went (2026-07-26 coverage gap §5.3).
+    on_computed: ({ duration_ms, stages }) => {
       log_server_event({
         level: 'info',
         message: 'admin_analytics_computed',
         user_id: auth.user_id,
-        context: { duration_ms, days: 30, audience, scope },
+        context: { duration_ms, days: 30, audience, scope, stages },
       })
     },
   })

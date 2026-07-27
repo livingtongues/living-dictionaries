@@ -91,14 +91,26 @@ export function report_dict_sync_failure({ dict_id, error }: {
  * but nothing reaches the server" class (auth silently broken, a table the
  * push loop misses, engine wedged) that per-attempt `sync_failed` rows can
  * miss. Throttled to one row per `STUCK_DIRTY_THROTTLE_MS`.
+ *
+ * `tables` / `has_editor_role` / `oldest_dirty_updated_at` exist so a row
+ * SELF-CLASSIFIES. Before 2026-07-27 telling a genuine wedge apart from a
+ * server-side flag this client merely inherited took a hand query across 33
+ * production dictionaries; `has_editor_role: false` + junction-only `tables` +
+ * an `oldest_dirty_updated_at` predating the session is the harmless class.
  */
 export const STUCK_DIRTY_THROTTLE_MS = 30 * 60 * 1000
 let stuck_last_shipped_at = 0
 
-export function report_dict_stuck_dirty({ dict_id, dirty_rows, deletes, last_sync_at, last_error }: {
+export function report_dict_stuck_dirty({ dict_id, dirty_rows, deletes, tables, has_editor_role, oldest_dirty_updated_at, last_sync_at, last_error }: {
   dict_id: string
   dirty_rows: number
   deletes: number
+  /** Dirty rows per table — junction-only counts mark the inherited-flag class. */
+  tables: Record<string, number>
+  /** False ⇒ this client is pull-only and CANNOT clear these flags; they were inherited, not written here. */
+  has_editor_role: boolean
+  /** Oldest dirty row's `updated_at` — older than this session ⇒ not work this browser did. */
+  oldest_dirty_updated_at: string | null
   last_sync_at: string | null
   last_error: string | null
 }): void {
@@ -117,7 +129,40 @@ export function report_dict_stuck_dirty({ dict_id, dirty_rows, deletes, last_syn
         user_agent: safe_user_agent(),
         platform: 'web',
         app_version: version ?? null,
-        context: { worker: true, engine: 'dict', dict_id, dirty_rows, deletes, last_sync_at, last_error, session_id: worker_session_id ?? undefined },
+        context: { worker: true, engine: 'dict', dict_id, dirty_rows, deletes, tables, has_editor_role, oldest_dirty_updated_at, last_sync_at, last_error, session_id: worker_session_id ?? undefined },
+      }],
+    })
+  } catch {
+    // Never let telemetry break the sync path.
+  }
+}
+
+/**
+ * Ship the one-time drain of INHERITED `dirty` flags
+ * (`dirty_flags_reconciled`): the server confirmed it already holds these rows
+ * at least as new, so a pull-only client cleared flags it could never push.
+ *
+ * Info-level and unthrottled — it is rare (once per poisoned browser, then
+ * never again) and it is the signal that tells us the residue from the
+ * server-side-flag bug is actually shrinking. When this stops appearing AND
+ * `dirty_rows_stuck` stops with it, the cleanup is complete.
+ */
+export function report_dict_dirty_reconciled({ dict_id, cleared }: {
+  dict_id: string
+  cleared: number
+}): void {
+  try {
+    if (is_offline())
+      return
+    void api_log({
+      entries: [{
+        level: 'info',
+        message: 'dirty_flags_reconciled',
+        client_time: new Date().toISOString(),
+        user_agent: safe_user_agent(),
+        platform: 'web',
+        app_version: version ?? null,
+        context: { worker: true, engine: 'dict', dict_id, cleared, session_id: worker_session_id ?? undefined },
       }],
     })
   } catch {

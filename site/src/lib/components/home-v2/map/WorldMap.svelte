@@ -68,8 +68,8 @@
   let country_features: GeoJSON.Feature[] = []
   let base_dots: { x: number, y: number, dict: MapDict }[] = []
   let visible_clusters: Cluster<MapDict>[] = []
-  /** Screen boxes of the drawn single-dict name labels — so clicking a label
-   *  opens its popover just like clicking the dot (rebuilt every draw). */
+  /** Screen boxes of drawn single-dict labels — including connector suffixes —
+   *  so clicking any visible label text opens its popover (rebuilt every draw). */
   let label_hit_boxes: { dict_id: string, x: number, y: number, width: number, height: number }[] = []
   let colors: MapColors | null = null
   let font_family = 'sans-serif'
@@ -443,19 +443,21 @@
         continue
       const box = { x: pos.x + placed.dx, y: pos.y + placed.dy, width: placed.width, height: placed.height }
       placer.block(box)
-      label_hit_boxes.push({ dict_id: id, x: box.x, y: box.y, width: box.width, height: box.height })
       if (placed.leader)
         draw_leader({ dot: pos, box })
       const baseline_y = box.y + 10.5
       const alpha = connector_alpha.get(id) ?? 0
+      let hit_box = box
       if (alpha < 0.99)
         draw_plain_label({ text: dict.name, x: box.x, y: baseline_y, font: dict_font, fill: colors.dict_label, alpha: 1 - alpha })
       if (alpha > 0.01) {
         // reserve the wider red text (name + "· N entries") so nearby labels dodge it
         const text = connector_text(dict)
-        placer.block({ x: box.x - 2, y: baseline_y - 11, width: measure(text, dict_font) + 4, height: 14 })
+        hit_box = { x: box.x - 2, y: baseline_y - 11, width: measure(text, dict_font) + 4, height: 14 }
+        placer.block(hit_box)
         deferred_red.push({ text, x: box.x, y: baseline_y, alpha, align: 'left' })
       }
+      label_hit_boxes.push({ dict_id: id, ...hit_box })
     }
 
     // connector dict hidden inside a cluster (or no labels at this zoom yet) —
@@ -473,7 +475,9 @@
       const text_width = measure(text, dict_font)
       const x = Math.max(text_width / 2 + 4, Math.min(width - text_width / 2 - 4, cluster.x))
       const y = cluster.y - 12
-      placer.block({ x: x - text_width / 2, y: y - 11, width: text_width, height: LABEL_HEIGHT })
+      const hit_box = { x: x - text_width / 2, y: y - 11, width: text_width, height: LABEL_HEIGHT }
+      placer.block(hit_box)
+      label_hit_boxes.push({ dict_id, ...hit_box })
       deferred_red.push({ text, x, y, alpha: opacity, align: 'center' })
     }
 
@@ -626,8 +630,8 @@
     return best
   }
 
-  /** A drawn dict-name label under the cursor → its dict (labels sit offset from
-   *  the dot, so they miss find_cluster). A few px of padding for tap-friendliness. */
+  /** A drawn single-dict label under the cursor → its dict (labels sit offset
+   *  from the dot, so they miss find_cluster). A few px of padding for taps. */
   function find_label_dict(x: number, y: number): MapDict | null {
     for (const box of label_hit_boxes) {
       if (x >= box.x - 3 && x <= box.x + box.width + 3 && y >= box.y - 3 && y <= box.y + box.height + 3)
@@ -695,8 +699,8 @@
       return
     }
 
-    // a dictionary-name label is clickable too → open that dict's popover, same
-    // as tapping the dot itself
+    // a dictionary label is clickable too → open that dict's popover, same as
+    // tapping the dot itself
     const label_dict = find_label_dict(x, y)
     if (label_dict) {
       selected_dict = label_dict

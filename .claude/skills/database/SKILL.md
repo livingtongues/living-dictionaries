@@ -208,8 +208,11 @@ this skill.
    changed, and the row count.
 2. **Express deletes as tombstones**, not raw `DELETE`: `INSERT INTO deletes (table_name, id) VALUES
    (?, ?)` fires `process_delete_cascade` (trigger DELETEs + FK-cascades children) so peers + the
-   snapshot builder drop the row on next sync too. Set `dirty = 1` + bump `updated_at` on any
-   `shared.db` edit so admin clients pick it up.
+   snapshot builder drop the row on next sync too. Bump `updated_at` on any `shared.db` edit (it is
+   the LWW arbiter). **Never set `dirty` on a server-side row** — it is a CLIENT-only flag ("this
+   browser holds an unpushed edit"); what makes admin clients pull a server write is the `server_seq`
+   trigger, which fires on every insert/update. Writing it server-side just mints phantom "unsaved
+   work" (2026-07-27: 5,437 such rows in dict DBs, 351 in shared.db).
 3. **Never** raw `DELETE`/`UPDATE` without a `WHERE`, never `DROP TABLE` without per-command
    confirmation, never touch `users` unless explicitly told to delete an account.
 4. **Per-dict writes propagate via the R2 snapshot, not sync** — a VPS edit won't show in editors'

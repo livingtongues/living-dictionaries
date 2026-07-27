@@ -1,7 +1,7 @@
 const maxLengthLookingGoodInLetter = 43
 const firstCommaAndTypeOfDividerRgx = /(,|and|&)/
 
-export function truncateAuthors(authors: string): string {
+export function truncate_authors(authors: string): string {
   if (!authors) return ''
   if (authors.length < maxLengthLookingGoodInLetter) return `${authors.trim().replace(/,$/, '')}, `
 

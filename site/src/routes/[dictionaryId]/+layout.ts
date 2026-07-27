@@ -21,7 +21,7 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
 
   try {
-    const { auth_user, dict_roles, t } = await parent()
+    const { auth_user, dict_roles, t, is_bot } = await parent()
 
     // M4: the catalog row is resolved server-side from shared.db in +layout.server.ts.
     // Long-form `about`/`grammar`/`citation`/`write_in_collaborators` are folded onto it
@@ -65,7 +65,20 @@ export const load: LayoutLoad = async ({ parent, depends, data }) => {
     // sentinels, dev SQL proxy) is owned by `dict-session.ts`. Null during SSR;
     // cache hits re-stamp editor capability + audit user (this load re-runs on
     // every navigation and on invalidateAll).
-    const session = await get_dict_session({ dict_id: dictionary_id, can_edit, user_id: auth_user.user?.id, user_email: auth_user.user?.email, t })
+    // Robots never get the offline database. Booting it means electing a leader,
+    // spawning a worker and downloading a multi-megabyte OPFS snapshot that a
+    // crawler cannot use: measured 2026-07-27, 1,476 of 1,943 dictionary boots in
+    // 24h were robot sessions (~76%), 1,474 of them cold, ~6.3 GB of snapshot
+    // bytes in one day — about 90% of all cold snapshot traffic. `is_bot` is
+    // resolved server-side in the root `+layout.server.ts` from the request UA.
+    //
+    // Nothing about DISCOVERY changes: entry and dictionary pages are isomorphic
+    // and keep their full server-rendered content + Open Graph tags, and the
+    // per-dictionary sitemap enumerates every entry URL. A robot simply sees the
+    // client-rendered entries LIST empty — which is what it effectively already
+    // saw. Every downstream consumer already handles a null session: that is the
+    // SSR path.
+    const session = is_bot ? null : await get_dict_session({ dict_id: dictionary_id, can_edit, user_id: auth_user.user?.id, user_email: auth_user.user?.email, t })
     const connection = session?.connection ?? null
     const dict_db = session?.dict_db ?? null
     const dict_sync_status = session?.sync_status ?? null

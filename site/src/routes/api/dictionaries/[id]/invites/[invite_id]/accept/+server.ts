@@ -11,8 +11,9 @@ import { error, json } from '@sveltejs/kit'
  * Claim an invite. The invite id is the secret (a UUID emailed to the target),
  * so any authenticated user holding the link may accept it (parity with the
  * legacy flow). Inserts a `dictionary_roles` grant for the current user and
- * flips the invite to `claimed`. Both writes set `dirty = 1` so the admin.db
- * sync engine pulls them down.
+ * flips the invite to `claimed`. Admin clients pick both writes up from the
+ * `server_seq` triggers — `dirty` is a client-only flag and is never written to a
+ * canonical row (see `sync-helpers.ts`).
  */
 export interface DictionariesIdInvitesInviteIdAcceptResponseBody {
   result: 'accepted'
@@ -48,14 +49,13 @@ export const POST: RequestHandler = async (event) => {
     const role_id = crypto.randomUUID()
     db.prepare(`
       INSERT INTO dictionary_roles
-        (id, dictionary_id, user_id, role, invited_by_user_id, dirty, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, 1, ?, ?)
+        (id, dictionary_id, user_id, role, invited_by_user_id, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT (dictionary_id, user_id, role) DO UPDATE SET
-        dirty = 1,
         updated_at = excluded.updated_at
     `).run(role_id, dict_id, user_id, invite.role, invite.inviter_user_id, now, now)
 
-    db.prepare(`UPDATE invites SET status = 'claimed', dirty = 1, updated_at = ? WHERE id = ?`)
+    db.prepare(`UPDATE invites SET status = 'claimed', updated_at = ? WHERE id = ?`)
       .run(now, invite_id)
   } catch (err) {
     console.error(`Error accepting invite: ${(err as Error).message}`)

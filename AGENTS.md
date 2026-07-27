@@ -104,8 +104,14 @@ sync, imports [cross-dictionary index of import conversations — the only place
 Inbound email is AI-triaged by `$lib/agent/*` (xAI Grok, env-gated on `XAI_API_KEY`; classifies →
 auto-assigns/auto-resolves → drafts a reply); mail addressed to an admin's own alias (jacob@…)
 skips triage and deterministically assigns to that admin. See `.knowledge/admin/ai-triage-pipeline.md`.
-Agent-facing format-import guides are served at `/api/v1/guides` (markdown in `$lib/api/v1/guides/`)
-and rendered on /admin/api-docs.
+**Agent onboarding is a funnel, not a spec dump** — `GET /api/v1` is THE front door
+(`$lib/api/v1/front-door.ts`, content-negotiated JSON/HTML from one object; an optional API key adds
+the dictionary + a `suggested_task`). It routes to a task **guide** (markdown in
+`$lib/api/v1/guides/`, served at `/api/v1/guides`) — guides are the primary doc layer, carrying the
+judgement calls. `openapi.json` is the appendix and defaults to a compact index (`?tag=` for one
+group, `?view=full` for all ~200KB). /admin/api-docs mirrors those hops as a route tree
+(front door → guides/[slug] → reference/[tag] → schemas), each page loading the live endpoint it
+mirrors. Keep the Agents-page prompt (`AgentPrompt.svelte`) pointed at `/api/v1`, never the spec.
 
 ## Human/agent editing parity (a direction we're walking toward)
 The agent-facing `/api/v1` write API (per-dict API keys, `openapi.json`, `$lib/db/server/v1-*`) and

@@ -80,10 +80,10 @@ function read_orthographies(dict_id: string): Orthography[] {
   return row.orthographies ? JSON.parse(row.orthographies) as Orthography[] : []
 }
 
-/** Persist the registry to shared.db (mirrors the catalog endpoint: dirty + audit). */
+/** Persist the registry to shared.db (mirrors the catalog endpoint: audit stamps, no `dirty`). */
 function write_orthographies({ dict_id, user_id, orthographies }: { dict_id: string, user_id: string | null, orthographies: Orthography[] }): void {
   get_shared_db().prepare(
-    'UPDATE dictionaries SET orthographies = ?, updated_at = ?, updated_by_user_id = ?, dirty = 1 WHERE id = ?',
+    'UPDATE dictionaries SET orthographies = ?, updated_at = ?, updated_by_user_id = ? WHERE id = ?',
   ).run(JSON.stringify(orthographies), new Date().toISOString(), user_id, dict_id)
 }
 

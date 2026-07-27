@@ -10,8 +10,12 @@ import { error, json } from '@sveltejs/kit'
 /**
  * Update a dictionary's catalog metadata in shared.db. Manager-gated (site
  * admins bypass). Used by the dictionary settings page + the about / grammar
- * tabs. Only allowlisted fields are touched; JSON columns are stringified. Sets
- * `dirty = 1` so the admin.db sync engine pulls the change.
+ * tabs. Only allowlisted fields are touched; JSON columns are stringified.
+ *
+ * Deliberately does NOT set `dirty`. That is a CLIENT-only flag ("this browser
+ * holds an edit it still has to push"); what carries a server-side write down to
+ * admin clients is the `server_seq` trigger, which fires on EVERY update. See
+ * the canonical-row rule in `sync-helpers.ts`.
  *
  * The caller sends a partial `{ field: value }` — every key must be in
  * ALLOWED_FIELDS or the request is rejected (defense against arbitrary column
@@ -75,7 +79,7 @@ export const POST: RequestHandler = async (event) => {
   }
 
   const now = new Date().toISOString()
-  set_clauses.push('updated_at = ?', 'updated_by_user_id = ?', 'dirty = 1')
+  set_clauses.push('updated_at = ?', 'updated_by_user_id = ?')
   values.push(now, user_id, dictionary.id)
 
   try {

@@ -9,6 +9,7 @@
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import IconMdiArrowRight from '~icons/mdi/arrow-right'
   import IconMdiBookOpenPageVariantOutline from '~icons/mdi/book-open-page-variant-outline'
+  import { play_audio_element } from '$lib/media/play-audio-element'
 
   type CrossfadeFns = ReturnType<typeof import('svelte/transition').crossfade>
 
@@ -36,7 +37,7 @@
       return
     }
     playing = true
-    void audio_element.play()
+    play_audio_element({ audio: audio_element, context: { surface: 'home_featured_fullscreen' }, on_failure: () => { playing = false } })
   }
 
   function close() {

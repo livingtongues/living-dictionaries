@@ -46,9 +46,10 @@ export const GET: RequestHandler = async (event) => {
 /**
  * Manager-scoped CRUD for `dictionary_partners` (the partner organizations
  * shown on a dictionary's contributors tab). Site admins bypass via
- * `verify_auth_dict_role`. Writes directly to shared.db with `dirty = 1` so the
- * admin.db sync engine pulls the change — managers have no local mirror, so the
- * contributors `+page.server.ts` re-reads on `invalidate`.
+ * `verify_auth_dict_role`. Writes directly to shared.db; admin clients pull the
+ * change from the `server_seq` trigger (`dirty` is a client-only flag, never
+ * written to a canonical row — see `sync-helpers.ts`). Managers have no local
+ * mirror, so the contributors `+page.server.ts` re-reads on `invalidate`.
  *
  * The logo `photo_storage_path` is denormalized onto the partner row — there's
  * no separate photos table. The image upload itself runs
@@ -114,8 +115,8 @@ export const POST: RequestHandler = async (event) => {
         const partner_id = crypto.randomUUID()
         db.prepare(`
           INSERT INTO dictionary_partners
-            (id, dictionary_id, name, dirty, created_at, updated_at)
-          VALUES (?, ?, ?, 1, ?, ?)
+            (id, dictionary_id, name, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?)
         `).run(partner_id, dictionary.id, name, now, now)
         return json({ result: 'success', partner_id } satisfies DictionariesIdPartnersResponseBody)
       }
@@ -131,7 +132,7 @@ export const POST: RequestHandler = async (event) => {
           error(ResponseCodes.BAD_REQUEST, 'partner_id and photo_storage_path required')
         db.prepare(`
           UPDATE dictionary_partners
-          SET photo_storage_path = ?, dirty = 1, updated_at = ?
+          SET photo_storage_path = ?, updated_at = ?
           WHERE id = ? AND dictionary_id = ?
         `).run(body.photo_storage_path, now, body.partner_id, dictionary.id)
         return json({ result: 'success' } satisfies DictionariesIdPartnersResponseBody)
@@ -141,7 +142,7 @@ export const POST: RequestHandler = async (event) => {
           error(ResponseCodes.BAD_REQUEST, 'partner_id required')
         db.prepare(`
           UPDATE dictionary_partners
-          SET photo_storage_path = NULL, dirty = 1, updated_at = ?
+          SET photo_storage_path = NULL, updated_at = ?
           WHERE id = ? AND dictionary_id = ?
         `).run(now, body.partner_id, dictionary.id)
         return json({ result: 'success' } satisfies DictionariesIdPartnersResponseBody)

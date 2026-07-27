@@ -1,4 +1,5 @@
 import type { RequestHandler } from './$types'
+import { card_image } from './card-image'
 import { classify_og_failure, component_to_png } from './component-to-png'
 import OpenGraphImage from './OpenGraphImage.svelte'
 import { decompressFromEncodedURIComponent as decode } from '$lib/lz/lz-string'
@@ -32,6 +33,17 @@ export const GET: RequestHandler = async ({ url }) => {
   }
   const height = (props.height as number) || HEIGHT
   const width = (props.width as number) || WIDTH
+
+  // The photo has to arrive in a format resvg can rasterize — since the 2026-07-23
+  // WebP migration it does not, so `card_image` transcodes it (see card-image.ts).
+  // An unobtainable photo becomes `undefined`, which renders the globe card directly
+  // instead of burning two doomed renders on the way to the text-only fallback.
+  if (typeof props.image_url === 'string') {
+    const image = await card_image({ image_url: props.image_url, width, height })
+    props.image_url = image?.url ?? undefined
+    props.image_width = image?.width
+    props.image_height = image?.height
+  }
 
   try {
     return await component_to_png(OpenGraphImage, props, height, width)

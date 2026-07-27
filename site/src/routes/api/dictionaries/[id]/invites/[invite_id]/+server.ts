@@ -9,8 +9,9 @@ import { error, json } from '@sveltejs/kit'
  * DELETE /api/dictionaries/[id]/invites/[invite_id]
  *
  * Cancel an outstanding invite. Manager (on this dict) or site admin only.
- * Marks the invite `status = 'cancelled'` (kept for audit) and sets `dirty = 1`
- * so the admin.db sync engine pulls the change.
+ * Marks the invite `status = 'cancelled'` (kept for audit). Admin clients pick
+ * the change up from the `server_seq` trigger — `dirty` is a client-only flag and
+ * is never written to a canonical row (see `sync-helpers.ts`).
  */
 export interface DictionariesIdInvitesInviteIdDeleteResponseBody {
   result: 'cancelled'
@@ -35,7 +36,7 @@ export const DELETE: RequestHandler = async (event) => {
     error(ResponseCodes.NOT_FOUND, 'invite not found on this dictionary')
 
   const now = new Date().toISOString()
-  db.prepare(`UPDATE invites SET status = 'cancelled', dirty = 1, updated_at = ? WHERE id = ?`)
+  db.prepare(`UPDATE invites SET status = 'cancelled', updated_at = ? WHERE id = ?`)
     .run(now, invite_id)
 
   return json({ result: 'cancelled' } satisfies DictionariesIdInvitesInviteIdDeleteResponseBody)

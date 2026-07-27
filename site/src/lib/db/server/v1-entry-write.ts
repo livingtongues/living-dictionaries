@@ -383,7 +383,14 @@ function entry_exists(db: Database.Database, entry_id: string): boolean {
 
 const ENTRY_PATCH_TEXT_FIELDS = ['homograph', 'phonetic', 'interlinearization', 'morphology', 'elicitation_id'] as const
 const ENTRY_PATCH_MULTISTRING_FIELDS = ['notes', 'linguistic_history'] as const
-const ENTRY_PATCH_ARRAY_FIELDS = ['sources', 'scientific_names'] as const
+/**
+ * REPLACE-on-patch arrays. `sources` is deliberately NOT here: it accumulates
+ * (see `merge_sources` below and the PATCH-semantics note). It used to be listed,
+ * whose only effect was to write a replaced value that the merge block two dozen
+ * lines down immediately overwrote — dead work that read as if the two rules
+ * disagreed.
+ */
+const ENTRY_PATCH_ARRAY_FIELDS = ['scientific_names'] as const
 const SENSE_PATCH_TEXT_FIELDS = ['noun_class'] as const
 const SENSE_PATCH_MULTISTRING_FIELDS = ['glosses', 'definition', 'plural_form', 'variant'] as const
 const SENSE_PATCH_ARRAY_FIELDS = ['parts_of_speech', 'semantic_domains', 'write_in_semantic_domains'] as const

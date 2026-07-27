@@ -1,6 +1,6 @@
 import type { Coordinates } from '$lib/types'
 
-export function flattenCoordinates(coordinates: Coordinates): number[][] {
+export function flatten_coordinates(coordinates: Coordinates): number[][] {
   const flattened = []
   const points = coordinates?.points?.map(({ coordinates }) => {
     return [coordinates.longitude, coordinates.latitude]
@@ -18,7 +18,7 @@ export function flattenCoordinates(coordinates: Coordinates): number[][] {
 }
 
 if (import.meta.vitest) {
-  describe(flattenCoordinates, () => {
+  describe(flatten_coordinates, () => {
     test('returns an array of number tuples [lng, lat]', () => {
       const coordinates: Coordinates = {
         points: [
@@ -34,7 +34,7 @@ if (import.meta.vitest) {
           ] },
         ],
       }
-      expect(flattenCoordinates(coordinates)).toEqual([
+      expect(flatten_coordinates(coordinates)).toEqual([
         [121.1, 23.2],
         [120.9605, 23.6978],
         [121, 23.2],
@@ -49,25 +49,25 @@ if (import.meta.vitest) {
         points: [],
         regions: [],
       }
-      expect(flattenCoordinates(coordinates)).toEqual([])
+      expect(flatten_coordinates(coordinates)).toEqual([])
     })
 
     test('handles no points', () => {
       const coordinates: Coordinates = {
         regions: [],
       }
-      expect(flattenCoordinates(coordinates)).toEqual([])
+      expect(flatten_coordinates(coordinates)).toEqual([])
     })
 
     test('handles no regions', () => {
       const coordinates: Coordinates = {
         points: [],
       }
-      expect(flattenCoordinates(coordinates)).toEqual([])
+      expect(flatten_coordinates(coordinates)).toEqual([])
     })
 
     test('handles null', () => {
-      expect(flattenCoordinates(null)).toEqual([])
+      expect(flatten_coordinates(null)).toEqual([])
     })
   })
 }

@@ -4,6 +4,7 @@
   import IconMdiPause from '~icons/mdi/pause'
   import IconMdiAccountVoice from '~icons/mdi/account-voice'
   import IconMdiVolumeOff from '~icons/mdi/volume-off'
+  import { play_audio_element } from '$lib/media/play-audio-element'
 
   interface SpeakerLabel {
     name: string
@@ -52,7 +53,7 @@
     if (playing)
       element.pause()
     else
-      void element.play()
+      play_audio_element({ audio: element, context: { surface: 'audio_player' } })
   }
 
   export function seek(ms: number) {
@@ -67,7 +68,7 @@
     stop_at_ms = end_ms
     element.currentTime = start_ms / 1000
     current_ms = start_ms
-    void element.play()
+    play_audio_element({ audio: element, context: { surface: 'audio_player_span' } })
   }
 
   function on_scrub(event: Event) {

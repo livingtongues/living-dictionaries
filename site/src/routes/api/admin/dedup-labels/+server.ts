@@ -78,7 +78,7 @@ export const POST: RequestHandler = async (event) => {
     if (report_has_changes(report)) {
       per_dict.push({ dict_id: id, ...report })
       if (!dry_run) {
-        shared.prepare(`UPDATE dictionaries SET updated_at = ?, dirty = 1 WHERE id = ?`)
+        shared.prepare(`UPDATE dictionaries SET updated_at = ? WHERE id = ?`)
           .run(new Date().toISOString(), id)
       }
     }

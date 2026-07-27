@@ -58,3 +58,11 @@ export const DICT_SYNCABLE_TABLES = [
 ] as const
 
 export type DictSyncableTable = typeof DICT_SYNCABLE_TABLES[number]
+
+/**
+ * Hard cap on `dirty_probes` ids per `/changes` request (the read-only "does the
+ * server already have these rows?" question a pull-only client asks about flags
+ * it can never push). Lives HERE, not in `db/server/dictionary-sync-helpers.ts`,
+ * for the client-bundle reason in this file's header — both sides import it.
+ */
+export const MAX_DIRTY_PROBES = 500

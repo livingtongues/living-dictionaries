@@ -13,6 +13,8 @@ import { get_supported_locale, Locales } from '$lib/i18n/locales'
 import { geo_key } from '$lib/server/geo-from-request'
 import type { HostStats } from '$lib/server/host-stats'
 import { read_host_stats } from '$lib/server/host-stats'
+import { breathe } from '$lib/server/breathe'
+import { create_watermark_cache_file_store } from '$lib/server/watermark-cache-file-store'
 import { WatermarkSwrCache } from '$lib/server/watermark-swr-cache'
 import { get_admin_user_ids } from './admin-user-ids'
 import { classify_ua_frequency_bot_sessions, MIN_UA_BOT_SESSIONS_PER_DAY } from './bot-sessions'
@@ -788,8 +790,8 @@ interface LogAnalyticsOptions {
    *   adoption / storage / boot_health / uptime).
    */
   scope?: AnalyticsScope
-  /** Called once after a whole analytics calculation; cache hits do not call it. */
-  on_computed?: (timing: { duration_ms: number }) => void
+  /** Called once after a whole analytics calculation (miss OR background refresh); cache hits do not call it. */
+  on_computed?: (timing: { duration_ms: number, stages: StageTimings }) => void
 }
 
 /** Panel-compute scope — see `LogAnalyticsOptions.scope`. */
@@ -813,20 +815,116 @@ export type AnalyticsScope = 'light' | 'usage' | 'diagnostics' | 'full'
  * `$lib/server/watermark-swr-cache` (same controller + behavioral contract in
  * tutor/house). This file supplies only the LD-specific inputs.
  */
+/**
+ * Payload-shape version for the on-disk cache. **Bump this whenever the
+ * `LogAnalytics` shape changes** (a new panel field, a renamed key) — older
+ * files then read as a miss instead of hydrating the dashboard with a payload
+ * the current UI can't render.
+ */
+const ANALYTICS_CACHE_FORMAT = 1
+
 const analytics_cache = new WatermarkSwrCache<LogAnalytics>({
   read_watermark: () => get_rollup_watermark(get_shared_db()),
   on_background_error: error => console.error('[log-analytics] background revalidation failed:', error.message),
+  // Durable payloads: the in-memory map dies with the container, and LD deploys
+  // several times a day, so before this every deploy handed the next admin an
+  // 11–80 s cold compute. A restart now paints the last computed numbers
+  // (staleness is already on the page as "computed N minutes ago") and refreshes
+  // behind them.
+  persistence: create_watermark_cache_file_store<LogAnalytics>({
+    dir: () => join(process.env.DATA_DIR || '.data', 'analytics-cache'),
+    format_version: ANALYTICS_CACHE_FORMAT,
+  }),
 })
 
 /**
- * Drop every memoized window. Generation-safe — a refresh already in flight
- * finishes but cannot repopulate the cache with pre-invalidation data.
+ * Drop every memoized window, in memory AND on disk. Generation-safe — a refresh
+ * already in flight finishes but cannot repopulate the cache with
+ * pre-invalidation data.
  */
 export function clear_log_analytics_cache(): void {
   analytics_cache.clear()
 }
 
-export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalytics {
+/**
+ * Await every analytics compute currently in flight — including a background
+ * refresh a stale read just scheduled. A stage-chunked compute spans many
+ * event-loop turns, so this is how a test (or the warm-up job) knows the cache
+ * is armed without guessing a number of ticks.
+ */
+export async function await_pending_analytics_computes(): Promise<void> {
+  await analytics_cache.settle()
+}
+
+/**
+ * Recompute + persist the payloads the dashboards land on, OFF the request path.
+ *
+ * Called at boot and by the retention cron right after it advances the rollup
+ * watermark — i.e. at the exact moment every cached entry goes stale — so the
+ * next human visit is a cache hit instead of a wait. Standing rule (Jacob,
+ * 2026-07-27): analytics must never block a request path.
+ *
+ * Only the keys the two admin pages actually land on are warmed (30 days,
+ * humans); other ranges and the bots audience stay on-demand, served from their
+ * persisted copy while a background refresh runs.
+ */
+export async function warm_analytics_caches(): Promise<void> {
+  for (const scope of ['light', 'usage', 'diagnostics'] as const) {
+    try {
+      await analytics_cache.refresh_async({
+        key: cache_key({ days: 30, audience: 'humans', scope }),
+        compute: () => compute_live_analytics({ days: 30, audience: 'humans', scope }),
+      })
+    } catch (error) {
+      console.error(`[log-analytics] warm-up of ${scope} failed:`, (error as Error).message)
+    }
+  }
+}
+
+/** Wait this long after boot before warming — the first seconds belong to the traffic a fresh deploy is taking. */
+const BOOT_WARM_DELAY_MS = 30_000
+
+/**
+ * Arm the cache shortly after boot, off the request path. A container starts
+ * with an empty in-memory map; the persisted payload covers the gap instantly,
+ * and this replaces it with current numbers without any human waiting.
+ */
+export function start_analytics_warm_up(): void {
+  setTimeout(() => {
+    warm_analytics_caches().catch(error => console.error('[log-analytics] boot warm-up failed:', error.message))
+  }, BOOT_WARM_DELAY_MS).unref()
+}
+
+function cache_key({ days, audience, scope }: { days: number, audience: Audience, scope: AnalyticsScope }): string {
+  return `${days}:${audience}:${scope}`
+}
+
+/**
+ * A compute reading only LIVE inputs — the singleton handles and `new Date()`
+ * resolved INSIDE the callback, because a background refresh reuses the callback
+ * of whichever request found the entry stale.
+ */
+function compute_live_analytics({ days, audience, scope, timings = {} }: {
+  days: number
+  audience: Audience
+  scope: AnalyticsScope
+  timings?: StageTimings
+}): Promise<LogAnalytics> {
+  return compute_log_analytics({
+    shared_db: get_shared_db(),
+    logs_db: get_logs_db(),
+    archive_db: get_log_archive_db(),
+    days,
+    now: new Date(),
+    current_app_version: version,
+    audience,
+    bot_ua_min_per_day: MIN_UA_BOT_SESSIONS_PER_DAY,
+    scope,
+    timings,
+  })
+}
+
+export function get_log_analytics(options: LogAnalyticsOptions = {}): Promise<LogAnalytics> {
   const { shared_db = get_shared_db(), logs_db = get_logs_db(), days = 30, now = new Date(), current_app_version = version, audience = 'humans', bot_ua_min_per_day = MIN_UA_BOT_SESSIONS_PER_DAY, scope = 'full' } = options
   const archive_db = options.archive_db === undefined
     ? (options.logs_db === undefined ? get_log_archive_db() : null)
@@ -836,49 +934,97 @@ export function get_log_analytics(options: LogAnalyticsOptions = {}): LogAnalyti
   // keeps tests from touching the real .data files.
   const cacheable = options.shared_db === undefined && options.logs_db === undefined && options.archive_db === undefined && options.now === undefined
     && options.current_app_version === undefined && options.bot_ua_min_per_day === undefined
-  const compute_in_request_path = (): LogAnalytics => {
+  /** Report a compute's cost — total AND the per-stage map, so a future review never hand-measures. */
+  const reported = async (run: () => Promise<{ value: LogAnalytics, timings: StageTimings }>): Promise<LogAnalytics> => {
     const compute_started_at = performance.now()
-    const value = compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope })
-    options.on_computed?.({ duration_ms: Math.round(performance.now() - compute_started_at) })
+    const { value, timings } = await run()
+    options.on_computed?.({ duration_ms: Math.round(performance.now() - compute_started_at), stages: timings })
     return value
   }
-  if (!cacheable)
-    return compute_in_request_path()
 
-  return analytics_cache.get_or_schedule({
-    key: `${days}:${audience}:${scope}`,
-    // A `miss` runs in this request's path (and reports its cost through
-    // `on_computed`); a `refresh` runs next tick, after the stale response has
-    // gone out, with its own clock + fresh live handles. The background pass
-    // stays silent: `on_computed` belongs to the request that scheduled it.
-    compute: ({ reason }) => reason === 'miss'
-      ? compute_in_request_path()
-      : compute_log_analytics({
-          shared_db: get_shared_db(),
-          logs_db: get_logs_db(),
-          archive_db: get_log_archive_db(),
-          days,
-          now: new Date(),
-          current_app_version: version,
-          audience,
-          bot_ua_min_per_day: MIN_UA_BOT_SESSIONS_PER_DAY,
-          scope,
-        }),
+  if (!cacheable) {
+    return reported(async () => {
+      const timings: StageTimings = {}
+      return { value: await compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope, timings }), timings }
+    })
+  }
+
+  return analytics_cache.get_or_schedule_async({
+    key: cache_key({ days, audience, scope }),
+    // Both a `miss` and a background `refresh` read their live inputs inside the
+    // callback — a refresh reuses whichever request's callback found the entry
+    // stale, so `now` and the singleton handles cannot be captured out here. Both
+    // report their cost: a background compute that takes 40 s is exactly what the
+    // next review needs to see.
+    compute: () => reported(async () => {
+      const timings: StageTimings = {}
+      return { value: await compute_live_analytics({ days, audience, scope, timings }), timings }
+    }),
     // Pipeline liveness answers "is ingest broken RIGHT NOW?" — never from a
     // day-old blob (a couple of indexed MAX lookups, so it's free enough).
     project: value => ({ ...value, pipeline: build_pipeline_health({ shared_db, logs_db }) }),
   })
 }
 
-/** Per-section timing, printed when ANALYTICS_PROFILE=1 (e.g. a scratch vitest run on a real DB copy). */
+/**
+ * Distinct user agents seen in the window — the input to crawler classification.
+ *
+ * A plain `SELECT DISTINCT user_agent … WHERE received_at >= ?` reads the WHOLE
+ * `(user_agent, received_at)` index to return a few hundred rows; house measured
+ * the identical query at **6,756 ms cold** (3 ms warm) against a 1.4 GB logs.db,
+ * its single most expensive stage — and LD's file is 2.0 GB. This is the classic
+ * loose-index/skip scan: walk the distinct values with
+ * `MIN(user_agent) WHERE user_agent > previous` (one seek per value) and probe
+ * each for a row inside the window. Same strings, ~3 ms.
+ */
+function query_distinct_window_user_agents({ logs_db, window_start_iso }: {
+  logs_db: Database.Database
+  window_start_iso: string
+}): string[] {
+  const rows = logs_db.prepare(`
+    WITH RECURSIVE distinct_ua(value) AS (
+      SELECT MIN(user_agent) FROM client_logs WHERE user_agent IS NOT NULL
+      UNION ALL
+      SELECT (SELECT MIN(user_agent) FROM client_logs WHERE user_agent > distinct_ua.value)
+      FROM distinct_ua WHERE distinct_ua.value IS NOT NULL
+    )
+    SELECT value FROM distinct_ua
+    WHERE value IS NOT NULL
+      AND EXISTS (SELECT 1 FROM client_logs WHERE user_agent = distinct_ua.value AND received_at >= ?)
+  `).all(window_start_iso) as { value: string }[]
+  return rows.map(row => row.value)
+}
+
+/** Milliseconds spent per labelled stage of one compute. Rides `admin_analytics_computed`. */
+export type StageTimings = Record<string, number>
+
+/** Per-section timing also printed when ANALYTICS_PROFILE=1 (a scratch vitest run on a real DB copy). */
 const PROFILE = process.env.ANALYTICS_PROFILE === '1'
-function timed<T>(label: string, fn: () => T): T {
-  if (!PROFILE)
-    return fn()
-  const start = performance.now()
-  const result = fn()
-  // eslint-disable-next-line no-console
-  console.log(`[profile] ${label}: ${(performance.now() - start).toFixed(1)}ms`)
+
+/**
+ * Run ONE blocking stage of a compute: yield the event loop first, then time the
+ * (synchronous, better-sqlite3) work.
+ *
+ * The yield is the point. Until 2026-07-27 the whole aggregation was one
+ * uninterrupted synchronous run — production measured 11–80 s, during which this
+ * process answered NOBODY (5 × HTTP 502 on real contributors' syncs inside the
+ * 2026-07-24 18:18 window). Breathing between stages turns one long block into a
+ * series of short ones that other requests can slot into. It does not make the
+ * work faster; it makes it polite.
+ *
+ * The timing is the second point: per-stage cost used to exist only behind
+ * `ANALYTICS_PROFILE=1`, so production knew the total and never where it went.
+ * The recorded map now rides the `admin_analytics_computed` event.
+ */
+async function stage<T>({ timings, label, run }: { timings: StageTimings, label: string, run: () => T }): Promise<T> {
+  await breathe()
+  const started = performance.now()
+  const result = run()
+  const elapsed = performance.now() - started
+  timings[label] = Number(((timings[label] ?? 0) + elapsed).toFixed(1))
+  if (PROFILE)
+    // eslint-disable-next-line no-console
+    console.log(`[profile] ${label}: ${elapsed.toFixed(1)}ms`)
   return result
 }
 
@@ -908,7 +1054,7 @@ const EMPTY_MISSING_I18N: LogAnalytics['missing_i18n_keys'] = { total: 0, distin
 const EMPTY_EVENT_COVERAGE: LogAnalytics['event_coverage'] = { events: [], never_emitted: 0 }
 const EMPTY_GEO_LATENCY: { ttfb_by_country: GeoLatency[], ttfb_by_distance: GeoLatency[], lcp_by_country: GeoLatency[], lcp_by_distance: GeoLatency[] } = { ttfb_by_country: [], ttfb_by_distance: [], lcp_by_country: [], lcp_by_distance: [] }
 
-function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope }: Required<Omit<LogAnalyticsOptions, 'current_app_version' | 'on_computed'>> & { current_app_version: string | null }): LogAnalytics {
+async function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, current_app_version, audience, bot_ua_min_per_day, scope, timings }: Required<Omit<LogAnalyticsOptions, 'current_app_version' | 'on_computed'>> & { current_app_version: string | null, timings: StageTimings }): Promise<LogAnalytics> {
   // Which heavy, cleanly-independent builders to run this compute (the shared
   // core always runs). `light` = neither; each page's tier requests its own half.
   const want_usage = scope === 'usage' || scope === 'full'
@@ -930,17 +1076,15 @@ function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, curr
   // ONE session source feeds all session-shaped classification (see WindowSession):
   // materialized finalized days from `log_daily_sessions` + the live tail, merged
   // by session_id so a boundary/midnight-spanning session still counts once.
-  const { window_sessions, materialized_days } = timed('query_window_sessions', () => query_window_sessions({ shared_db, logs_db, window_start_day, live_start_day, live_start_iso }))
+  const { window_sessions, materialized_days } = await stage({ timings, label: 'query_window_sessions', run: () => query_window_sessions({ shared_db, logs_db, window_start_day, live_start_day, live_start_iso }) })
   const freq_bot_sessions = classify_ua_frequency_bot_sessions({ sessions: window_sessions, min_per_day: bot_ua_min_per_day })
   const webdriver_session_ids = window_sessions.filter(session => session.webdriver === 1).map(session => session.session_id)
   const bot_session_ids = new Set([...freq_bot_sessions, ...webdriver_session_ids])
 
   // Crawler UAs actually seen in the HOT window, classified ONCE in JS (few
   // hundred distinct strings). The temp sets only filter live raw-row scans.
-  const window_uas = timed('distinct_uas', () => logs_db.prepare(`
-    SELECT DISTINCT user_agent FROM client_logs WHERE received_at >= ? AND user_agent IS NOT NULL
-  `).all(window_start_iso) as { user_agent: string }[])
-  const bot_uas = window_uas.map(row => row.user_agent).filter(ua => is_bot_user_agent(ua))
+  const window_uas = await stage({ timings, label: 'distinct_uas', run: () => query_distinct_window_user_agents({ logs_db, window_start_iso }) })
+  const bot_uas = window_uas.filter(ua => is_bot_user_agent(ua))
 
   // Audience filter for hot rows — pure column probes against two TEMP sets (no
   // JS UDF, no per-row context JSON parse; the old ~seconds-long freeze). A row is
@@ -965,25 +1109,25 @@ function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, curr
   const admin_user_ids = get_admin_user_ids({ shared_db })
   const ctx: AnalyticsContext = { shared_db, logs_db, archive_db, audience, audience_filter, is_bot_row, rollup_metric, window_start_iso, window_start_day, live_start_day, live_start_iso, materialized_days, hot_min_day, current_app_version, days, now, bot_session_ids, window_sessions, admin_user_ids }
 
-  const { daily, rollup_rows, live_by_day } = timed('build_daily_series', () => build_daily_series(ctx))
+  const { daily, rollup_rows, live_by_day } = await stage({ timings, label: 'build_daily_series', run: () => build_daily_series(ctx) })
   // `area_counts` is seeded from the cold `geo:` rollup here, then the window-session
   // loop in `build_capability` mutates it further — so it's threaded through both.
-  const { event_counts, top_events, top_routes, by_source, area_counts } = timed('build_usage_and_areas', () => build_usage_and_areas({ ctx, rollup_rows, live_by_day }))
+  const { event_counts, top_events, top_routes, by_source, area_counts } = await stage({ timings, label: 'build_usage_and_areas', run: () => build_usage_and_areas({ ctx, rollup_rows, live_by_day }) })
 
-  const error_clusters = timed('build_error_clusters', () => build_error_clusters(ctx))
-  const unique_users = timed('build_unique_users', () => build_unique_users(ctx))
-  const capability = timed('build_capability', () => build_capability({ ctx, area_counts }))
+  const error_clusters = await stage({ timings, label: 'build_error_clusters', run: () => build_error_clusters(ctx) })
+  const unique_users = await stage({ timings, label: 'build_unique_users', run: () => build_unique_users(ctx) })
+  const capability = await stage({ timings, label: 'build_capability', run: () => build_capability({ ctx, area_counts }) })
   // Performance/Web Vitals also feed Analytics' Experience summary; the other
   // latency breakdowns remain diagnostics-only. The light tier skips both.
-  const performance = want_experience ? timed('build_performance', () => build_performance({ ctx, daily })) : EMPTY_PERFORMANCE
-  const web_vitals = want_experience ? timed('build_web_vitals', () => build_web_vitals(ctx)) : EMPTY_WEB_VITALS
-  const geo_latency = want_diagnostics ? timed('build_geo_latency', () => build_geo_latency(ctx)) : EMPTY_GEO_LATENCY
+  const performance = want_experience ? await stage({ timings, label: 'build_performance', run: () => build_performance({ ctx, daily }) }) : EMPTY_PERFORMANCE
+  const web_vitals = want_experience ? await stage({ timings, label: 'build_web_vitals', run: () => build_web_vitals(ctx) }) : EMPTY_WEB_VITALS
+  const geo_latency = want_diagnostics ? await stage({ timings, label: 'build_geo_latency', run: () => build_geo_latency(ctx) }) : EMPTY_GEO_LATENCY
   // `geo` areas stay core (both pages); only the TTFB/LCP latency splits are diagnostics-gated.
   const geo = build_geo_areas({ area_counts, ttfb_by_country: geo_latency.ttfb_by_country, ttfb_by_distance: geo_latency.ttfb_by_distance, lcp_by_country: geo_latency.lcp_by_country, lcp_by_distance: geo_latency.lcp_by_distance })
-  const errors_by_version = want_diagnostics ? timed('build_errors_by_version', () => build_errors_by_version(ctx)) : EMPTY_ERRORS_BY_VERSION
-  const deploys = timed('build_deploys', () => build_deploys(ctx))
-  const pipeline = timed('build_pipeline', () => build_pipeline_health({ shared_db, logs_db }))
-  const server_faults = want_diagnostics ? timed('build_server_faults', () => build_server_faults(ctx)) : EMPTY_SERVER_FAULTS
+  const errors_by_version = want_diagnostics ? await stage({ timings, label: 'build_errors_by_version', run: () => build_errors_by_version(ctx) }) : EMPTY_ERRORS_BY_VERSION
+  const deploys = await stage({ timings, label: 'build_deploys', run: () => build_deploys(ctx) })
+  const pipeline = await stage({ timings, label: 'build_pipeline', run: () => build_pipeline_health({ shared_db, logs_db }) })
+  const server_faults = want_diagnostics ? await stage({ timings, label: 'build_server_faults', run: () => build_server_faults(ctx) }) : EMPTY_SERVER_FAULTS
 
   // event_coverage is a usage panel — cheap, but gated with the usage tier.
   const event_coverage: EventCoverage = want_usage
@@ -996,18 +1140,18 @@ function compute_log_analytics({ shared_db, logs_db, archive_db, days, now, curr
       })()
     : EMPTY_EVENT_COVERAGE
 
-  const leader_health = want_diagnostics ? timed('build_leader_health', () => build_leader_health(ctx)) : EMPTY_LEADER_HEALTH
-  const sync_health = want_diagnostics ? timed('build_sync_health', () => build_sync_health(ctx)) : EMPTY_SYNC_HEALTH
-  const build_adoption = want_diagnostics ? timed('build_build_adoption', () => build_build_adoption(ctx)) : EMPTY_BUILD_ADOPTION
-  const storage = want_diagnostics ? timed('build_storage', () => build_storage({ shared_db, logs_db })) : EMPTY_STORAGE
+  const leader_health = want_diagnostics ? await stage({ timings, label: 'build_leader_health', run: () => build_leader_health(ctx) }) : EMPTY_LEADER_HEALTH
+  const sync_health = want_diagnostics ? await stage({ timings, label: 'build_sync_health', run: () => build_sync_health(ctx) }) : EMPTY_SYNC_HEALTH
+  const build_adoption = want_diagnostics ? await stage({ timings, label: 'build_build_adoption', run: () => build_build_adoption(ctx) }) : EMPTY_BUILD_ADOPTION
+  const storage = want_diagnostics ? await stage({ timings, label: 'build_storage', run: () => build_storage({ shared_db, logs_db }) }) : EMPTY_STORAGE
   // Usage-heavy (analytics page only) — skipped for the diagnostics/light tiers.
-  const api_v1 = want_usage ? timed('build_api_v1', () => build_api_v1_activity(ctx)) : EMPTY_API_V1
-  const entry_edits = want_usage ? timed('build_entry_edits', () => build_entry_edit_channels({ ctx, rollup_rows, live_by_day })) : EMPTY_ENTRY_EDITS
-  const top_dictionaries = want_usage ? timed('build_top_dictionaries', () => build_top_dictionaries(ctx)) : EMPTY_TOP_DICTIONARIES
-  const locales = want_usage ? timed('build_locales', () => build_locales(ctx)) : EMPTY_LOCALES
-  const missing_i18n_keys = scope === 'full' ? timed('build_missing_i18n', () => build_missing_i18n_keys(ctx)) : EMPTY_MISSING_I18N
-  const boot_health = want_diagnostics ? timed('build_boot_health', () => build_boot_health(ctx)) : EMPTY_BOOT_HEALTH
-  const uptime = want_diagnostics ? timed('build_uptime', () => build_uptime(ctx)) : EMPTY_UPTIME
+  const api_v1 = want_usage ? await stage({ timings, label: 'build_api_v1', run: () => build_api_v1_activity(ctx) }) : EMPTY_API_V1
+  const entry_edits = want_usage ? await stage({ timings, label: 'build_entry_edits', run: () => build_entry_edit_channels({ ctx, rollup_rows, live_by_day }) }) : EMPTY_ENTRY_EDITS
+  const top_dictionaries = want_usage ? await stage({ timings, label: 'build_top_dictionaries', run: () => build_top_dictionaries(ctx) }) : EMPTY_TOP_DICTIONARIES
+  const locales = want_usage ? await stage({ timings, label: 'build_locales', run: () => build_locales(ctx) }) : EMPTY_LOCALES
+  const missing_i18n_keys = scope === 'full' ? await stage({ timings, label: 'build_missing_i18n', run: () => build_missing_i18n_keys(ctx) }) : EMPTY_MISSING_I18N
+  const boot_health = want_diagnostics ? await stage({ timings, label: 'build_boot_health', run: () => build_boot_health(ctx) }) : EMPTY_BOOT_HEALTH
+  const uptime = want_diagnostics ? await stage({ timings, label: 'build_uptime', run: () => build_uptime(ctx) }) : EMPTY_UPTIME
 
   return {
     audience,

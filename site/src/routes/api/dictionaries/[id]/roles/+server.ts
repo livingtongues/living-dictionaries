@@ -130,11 +130,10 @@ export const POST: RequestHandler = async (event) => {
     const role_id = crypto.randomUUID()
     db.prepare(`
       INSERT INTO dictionary_roles
-        (id, dictionary_id, user_id, role, invited_by_user_id, dirty, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, 1, ?, ?)
+        (id, dictionary_id, user_id, role, invited_by_user_id, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT (dictionary_id, user_id, role) DO UPDATE SET
         invited_by_user_id = excluded.invited_by_user_id,
-        dirty              = 1,
         updated_at         = excluded.updated_at
     `).run(role_id, dict_id, target_user.id, role, auth.user_id, now, now)
     log_server_event({ level: 'info', message: 'dictionary_role_granted', user_id: auth.user_id, context: { dictionary_id: dict_id, target_user_id: target_user.id, role } })
@@ -145,8 +144,8 @@ export const POST: RequestHandler = async (event) => {
   const invite_id = crypto.randomUUID()
   db.prepare(`
     INSERT INTO invites
-      (id, dictionary_id, inviter_user_id, inviter_email, target_email, role, status, dirty, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, 'queued', 1, ?, ?)
+      (id, dictionary_id, inviter_user_id, inviter_email, target_email, role, status, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, 'queued', ?, ?)
   `).run(invite_id, dict_id, auth.user_id, auth.email, target_email, role, now, now)
   log_server_event({ level: 'info', message: 'dictionary_invite_created', user_id: auth.user_id, context: { dictionary_id: dict_id, role } })
   return json({ result: 'invite_created', invite_id } satisfies DictionariesIdRolesPostResponseBody)

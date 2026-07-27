@@ -2,7 +2,9 @@
 
 You are importing someone's language materials into a Living Dictionary through the
 `/api/v1` API. **Always start here**, whatever the source format; the format guides
-(`/api/v1/guides/spreadsheets`, `flex-lift`, `pdf-scans`) cover parsing details.
+(`/api/v1/guides/spreadsheets`, `flex-lift`, `pdf-scans`) cover parsing details, and
+`/api/v1/guides/api-basics` covers the mechanics every job shares (auth, multilingual
+fields, generating your own ids, limits) if you haven't read it.
 
 ## The runbook
 
@@ -134,6 +136,17 @@ dictionary's manager) can settle. **Batch them** — present each with the evide
 and your recommended answer, and don't proceed on the consequential ones without
 an answer. Typical questions:
 
+- **Literal columns, or a real lexicographic pass?** Ask this whenever the
+  instructions are rigid ("import exactly as laid out", "just map these columns").
+  Follow the instruction — it is authoritative — but ask the question too, because an
+  uploader who has only ever seen their own file is choosing between options they do
+  not know exist. Material of any age was written for a page, not for a set of fields:
+  alternate forms sit on their own rows, literal translations and usage notes are
+  packed inside glosses, cross-references are prose, plurals and paradigm forms are
+  filed as headwords, examples hide inside definitions. Left as typed, that content is
+  text nobody can search, filter or browse on; moved into its own field it is what
+  makes the dictionary work. A straight copy is rarely the best dictionary available
+  from the same bytes — and the choice belongs to the owner, not to you.
 - Which **gloss/translation languages** does the material actually contain, and do
   they match the dictionary's configured gloss languages?
 - What do **unknown markers, columns, or abbreviation conventions** mean?
@@ -598,7 +611,7 @@ preserve your audit trail.
   the batch's live count without deleting anything.
 - **Big-import verification**: instead of paginating the whole dictionary, download
   its gzipped SQLite snapshot and run COUNT/spot-check queries locally — see
-  `GET /api/v1/guides/snapshot` (rebuilt within ~30 min of an edit, so use API reads
+  `GET /api/v1/guides/consume` (rebuilt within ~30 min of an edit, so use API reads
   to verify writes you made moments ago).
 - Spot-check ~10 imported entries against the source (diacritics intact, glosses on
   the right senses, examples attached to the right entries).

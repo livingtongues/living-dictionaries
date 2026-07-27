@@ -82,13 +82,13 @@ export const POST: RequestHandler = async (event) => {
   const txn = db.transaction(() => {
     db.prepare(`
       UPDATE message_threads
-      SET from_user_id = ?, dirty = 1, updated_at = ?
+      SET from_user_id = ?, updated_at = ?
       WHERE id = ?
     `).run(user.id, now, thread_id)
 
     const backfill = db.prepare(`
       UPDATE messages
-      SET author_user_id = ?, dirty = 1, updated_at = ?
+      SET author_user_id = ?, updated_at = ?
       WHERE thread_id = ? AND author_kind = 'customer' AND author_user_id IS NULL
     `).run(user.id, now, thread_id)
     messages_backfilled = backfill.changes

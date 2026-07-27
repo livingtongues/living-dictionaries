@@ -1,11 +1,11 @@
 import type { IColumn, Tables } from '$lib/types'
 import { page } from '$app/state'
-import { vernacularName } from '$lib/gloss/vernacular-name'
+import { vernacular_name } from '$lib/gloss/vernacular-name'
 import { get_orthographies } from '$lib/orthography/orthographies'
 import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
 import { browser } from '$app/environment'
 
-export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionaries'>): IColumn[] {
+export function set_up_columns(columns: IColumn[], dictionary: Tables<'dictionaries'>): IColumn[] {
   const columns_with_definition = [...columns]
   if (!columns_with_definition.some(column => column.field === 'definition')) {
     const gloss_index = columns_with_definition.findIndex(column => column.field === 'gloss')
@@ -15,21 +15,21 @@ export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionarie
 
   const cols = columns_with_definition.filter(column => !column.hidden)
 
-  const glossIndex = cols.findIndex(col => col.field === 'gloss')
-  if (browser && glossIndex >= 0) {
+  const gloss_index = cols.findIndex(col => col.field === 'gloss')
+  if (browser && gloss_index >= 0) {
     const { data } = page
-    const glossColumns: IColumn[] = []
+    const gloss_columns: IColumn[] = []
     dictionary.gloss_languages.forEach((bcp) => {
-      glossColumns.push({
+      gloss_columns.push({
         field: 'gloss',
         bcp,
-        width: cols[glossIndex].width,
-        sticky: cols[glossIndex].sticky || false,
+        width: cols[gloss_index].width,
+        sticky: cols[gloss_index].sticky || false,
         display: data?.t({ dynamicKey: `gl.${bcp}`, fallback: bcp }),
-        explanation: vernacularName(bcp),
+        explanation: vernacular_name(bcp),
       })
     })
-    cols.splice(glossIndex, 1, ...glossColumns)
+    cols.splice(gloss_index, 1, ...gloss_columns)
   }
 
   const definition_index = cols.findIndex(column => column.field === 'definition')
@@ -43,41 +43,41 @@ export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionarie
         width: cols[definition_index].width,
         sticky: cols[definition_index].sticky || false,
         display: `${data?.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })} ${data?.t('entry_field.definition')}`,
-        explanation: vernacularName(bcp),
+        explanation: vernacular_name(bcp),
       })
     })
     cols.splice(definition_index, 1, ...definition_columns)
   }
 
-  const exampleSentenceIndex = cols.findIndex(col => col.field === 'example_sentence')
-  if (browser && exampleSentenceIndex >= 0) {
+  const example_sentence_index = cols.findIndex(col => col.field === 'example_sentence')
+  if (browser && example_sentence_index >= 0) {
     const { data } = page
-    const exampleSentenceColumns: IColumn[] = [
+    const example_sentence_columns: IColumn[] = [
       {
         field: 'example_sentence',
         bcp: 'vn', // vernacular
-        width: cols[exampleSentenceIndex].width,
-        sticky: cols[exampleSentenceIndex].sticky || false,
+        width: cols[example_sentence_index].width,
+        sticky: cols[example_sentence_index].sticky || false,
         display: data?.t('entry_field.example_sentence'),
       },
     ]
     dictionary.gloss_languages.forEach((bcp) => {
-      exampleSentenceColumns.push({
+      example_sentence_columns.push({
         field: 'example_sentence',
         bcp,
-        width: cols[exampleSentenceIndex].width,
-        sticky: cols[exampleSentenceIndex].sticky || false,
+        width: cols[example_sentence_index].width,
+        sticky: cols[example_sentence_index].sticky || false,
         display: `${data?.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })} ${data?.t('entry_field.example_sentence')}`,
       })
     })
-    cols.splice(exampleSentenceIndex, 1, ...exampleSentenceColumns)
+    cols.splice(example_sentence_index, 1, ...example_sentence_columns)
   }
 
-  const orthographyIndex = cols.findIndex(({ field }) => field === 'local_orthography')
-  if (orthographyIndex >= 0) {
-    const alternateOrthographyColumns: IColumn[] = []
+  const orthography_index = cols.findIndex(({ field }) => field === 'local_orthography')
+  if (orthography_index >= 0) {
+    const alternate_orthography_columns: IColumn[] = []
     for (const orthography of get_orthographies(dictionary).alternates) {
-      alternateOrthographyColumns.push({
+      alternate_orthography_columns.push({
         field: 'local_orthography',
         width: 170,
         display: orthography.name,
@@ -85,7 +85,7 @@ export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionarie
         bcp: orthography.bcp,
       })
     }
-    cols.splice(orthographyIndex, 1, ...alternateOrthographyColumns)
+    cols.splice(orthography_index, 1, ...alternate_orthography_columns)
   }
 
   if (DICTIONARIES_WITH_VARIANTS.includes(dictionary.id))

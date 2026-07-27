@@ -5,7 +5,7 @@ import type { DictSyncableTable } from '$lib/db/dict-syncable-tables'
 import { parse_dict_row, stringify_dict_row } from '$lib/db/schemas/dictionary-json-columns'
 import * as dict_schema from '$lib/db/schemas/dictionary'
 import { getTableColumns } from 'drizzle-orm'
-import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
+import { DICT_SYNCABLE_TABLES, MAX_DIRTY_PROBES } from '$lib/db/dict-syncable-tables'
 import { build_delta, build_snapshot, resolve_owners } from './dictionary-history-capture'
 import { record_history } from './dictionary-history-db'
 
@@ -13,7 +13,7 @@ import { record_history } from './dictionary-history-db'
 // so the browser dict-client can import the VALUE without dragging native server
 // code into its bundle. Re-exported here for back-compat with server importers.
 export type { DictSyncableTable }
-export { DICT_SYNCABLE_TABLES }
+export { DICT_SYNCABLE_TABLES, MAX_DIRTY_PROBES }
 
 const VALID_COLUMNS: Record<DictSyncableTable, Set<string>> = Object.fromEntries(
   DICT_SYNCABLE_TABLES.map(name => [
@@ -110,8 +110,22 @@ export interface DictChangesRequest {
   dirty_rows?: Partial<Record<DictSyncableTable, Record<string, unknown>[]>>
   /** Tombstones to apply. Editors only. */
   deletes?: { table_name: string, id: string }[]
+  /**
+   * READ-ONLY probes — "do you already have these rows?" Sent by a session that
+   * holds `dirty` rows it cannot push (a viewer), to find out which of those
+   * flags are redundant. Nothing is written from a probe; see
+   * `resolve_redundant_dirty` for the exact "redundant" test and why it can
+   * never discard real work.
+   */
+  dirty_probes?: Partial<Record<DictSyncableTable, DirtyProbe[]>>
   /** Bundled migration filename (Q10.3 — for schema_outdated detection). */
   latest_dict_migration: string
+}
+
+export interface DirtyProbe {
+  id: string
+  /** The local row's `updated_at` — the LWW arbiter this row would be pushed with. */
+  updated_at: string
 }
 
 export interface DictChangesResponse {
@@ -126,6 +140,12 @@ export interface DictChangesResponse {
    * converges when the parent's tombstone arrives via pull.
    */
   skipped_orphans?: SkippedOrphan[]
+  /**
+   * Answer to `dirty_probes`: ids whose canonical copy is already at least as
+   * new as the client's, so the local `dirty` flag has nothing left to
+   * contribute and is safe to clear. Absent when nothing was probed.
+   */
+  redundant_dirty?: Partial<Record<DictSyncableTable, string[]>>
 }
 
 export interface SkippedOrphan {
@@ -371,8 +391,10 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
       const rows = db.prepare(
         `SELECT * FROM "${table_name}" ${where_sql} ORDER BY server_seq ASC`,
       ).all(...params) as Record<string, unknown>[]
-      for (const row of rows)
+      for (const row of rows) {
         parse_dict_row(table_name, row)
+        normalize_server_dirty(row)
+      }
       const filtered = rows.filter(row => !uploaded_keys.has(`${table_name}::${row.id}`))
       if (filtered.length)
         response.changes[table_name] = filtered
@@ -413,9 +435,18 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
         const rows = response.changes[loser.table_name] ?? (response.changes[loser.table_name] = [])
         if (!rows.some(row => row.id === loser.canonical_id)) {
           parse_dict_row(loser.table_name, canonical)
+          normalize_server_dirty(canonical)
           rows.push(canonical)
         }
       }
+    }
+
+    // PROBES: read-only, and answered LAST so the verdict reflects everything
+    // this transaction just applied.
+    if (request.dirty_probes) {
+      const redundant = resolve_redundant_dirty({ db, probes: request.dirty_probes })
+      if (Object.keys(redundant).length)
+        response.redundant_dirty = redundant
     }
 
     // New cursor = the counter's current value. Exact under BEGIN IMMEDIATE:
@@ -439,6 +470,75 @@ function apply_dict_changes({ db, request, user_id, is_editor, history_db, skip_
     db.exec('ROLLBACK')
     throw error
   }
+}
+
+/**
+ * Which probed `dirty` flags are REDUNDANT — i.e. the canonical row is already
+ * at least as new as the client's copy, so pushing it could not add anything.
+ *
+ * This is the whole safety argument for the client-side sweep. The naive fix
+ * ("a non-editor's dirty flags are phantom, clear them") is wrong: a
+ * contributor whose login or role lapsed AFTER writing is a non-editor holding
+ * REAL unsynced work — the engine's own watchdog calls that the most dangerous
+ * variant. So we never decide locally. A flag is cleared only when the server
+ * says `canonical.updated_at >= local.updated_at`, which means one of:
+ *
+ *   - the row was never locally edited at all (the inherited-phantom case: a
+ *     server-side write minted `dirty = 1`, a snapshot carried it to every
+ *     visitor, and a viewer can never push it off), or
+ *   - the local edit DID reach the server already and the flag is just stale.
+ *
+ * Either way there is nothing to lose. A row the server has never seen, or
+ * holds an OLDER copy of, is left flagged — that is genuine pending work, and
+ * `dirty_rows_stuck` should keep firing for it.
+ */
+export function resolve_redundant_dirty({ db, probes }: {
+  db: Database.Database
+  probes: Partial<Record<DictSyncableTable, DirtyProbe[]>>
+}): Partial<Record<DictSyncableTable, string[]>> {
+  const redundant: Partial<Record<DictSyncableTable, string[]>> = {}
+  let budget = MAX_DIRTY_PROBES
+
+  for (const table_name of DICT_SYNCABLE_TABLES) {
+    const table_probes = probes[table_name]
+    if (!table_probes?.length || budget <= 0)
+      continue
+    const ids: string[] = []
+    for (const probe of table_probes.slice(0, budget)) {
+      budget -= 1
+      if (!probe?.id || typeof probe.updated_at !== 'string')
+        continue
+      const canonical = db.prepare(
+        `SELECT updated_at FROM "${table_name}" WHERE id = ?`,
+      ).get(probe.id) as { updated_at: string } | undefined
+      // Absent server-side = a local creation that never landed (or a row since
+      // deleted). Not redundant — leave the flag alone.
+      if (!canonical)
+        continue
+      if (canonical.updated_at >= probe.updated_at)
+        ids.push(probe.id)
+    }
+    if (ids.length)
+      redundant[table_name] = ids
+  }
+
+  return redundant
+}
+
+/**
+ * Never hand a client a server row that claims to hold unsaved local work.
+ *
+ * `dirty` is a purely CLIENT-side flag ("this browser has writes to push"). A
+ * canonical server row carrying `dirty = 1` — legacy rows from bulk server-side
+ * writes — is inherited by every client that pulls it or boots from a snapshot,
+ * and a viewer with no editor role can never clear it: their engine is pull-only,
+ * so they warn `dirty_rows_stuck` every 30 minutes forever. 5,437 such rows
+ * across 33 dictionaries on 2026-07-26; this strips them ON THE WAY OUT, so even
+ * a row nobody ever re-pushes stops spreading.
+ */
+function normalize_server_dirty(row: Record<string, unknown>): void {
+  if ('dirty' in row)
+    row.dirty = null
 }
 
 /**
@@ -520,6 +620,16 @@ export function merge_dict_row({ db, table_name, row, user_id, at, api_key_id, d
   const stringified = stringify_dict_row(table_name, { ...merge_source })
   const allowed = VALID_COLUMNS[table_name]
   const columns = Object.keys(stringified).filter(c => c !== 'dirty' && c !== 'server_seq' && allowed.has(c))
+  // `dirty` means "this client has unsaved local work" — it is MEANINGLESS on the
+  // server, and a canonical row carrying `dirty = 1` is a bug that spreads: the
+  // snapshot ships it to every visitor, and a pull-only client can never clear a
+  // flag it is not allowed to push (5,437 such rows across 33 dictionaries,
+  // 2026-07-26). A pushed value is still never trusted (filtered above) — this
+  // clears a flag the SERVER row already had.
+  if (allowed.has('dirty')) {
+    columns.push('dirty')
+    stringified.dirty = null
+  }
   if (!columns.includes('updated_by_user_id')) {
     columns.push('updated_by_user_id')
     stringified.updated_by_user_id = user_id

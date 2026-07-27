@@ -46,13 +46,13 @@ function add_log({ day, level = 'info', message = 'heartbeat', source = 'client'
 }
 
 describe(get_log_analytics, () => {
-  test('builds a zero-filled daily series + window totals from live logs', () => {
+  test('builds a zero-filled daily series + window totals from live logs', async () => {
     add_log({ day: '2026-06-30', message: 'session_start', user_id: 'u1', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', message: 'search_performed', user_id: 'u1', context: { session_id: 's1', query: 'jesus' } })
     add_log({ day: '2026-06-30', level: 'error', message: 'boom', context: { session_id: 's1' } })
     add_log({ day: '2026-06-29', message: 'heartbeat', user_id: 'u2', context: { session_id: 's2' } })
 
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     expect(analytics.daily).toHaveLength(30)
     const last_day = analytics.daily[analytics.daily.length - 1]
@@ -72,7 +72,7 @@ describe(get_log_analytics, () => {
     expect(analytics.totals.unique_users).toBe(2)
   })
 
-  test('locales: folds browser preference, counts distinct visitors, and flags the supported-but-unused mismatch', () => {
+  test('locales: folds browser preference, counts distinct visitors, and flags the supported-but-unused mismatch', async () => {
     // Visitor v1: two sessions, browser prefers pt-BR (folds to pt, unsupported→NO, pt is supported), uses en → mismatch.
     add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's1', visitor_id: 'v1', ui_locale: 'en' }, browser_locale: 'pt-BR' })
     add_log({ day: '2026-06-29', message: 'session_start', context: { session_id: 's2', visitor_id: 'v1', ui_locale: 'en' }, browser_locale: 'pt-BR' })
@@ -83,7 +83,7 @@ describe(get_log_analytics, () => {
     // A crawler with a locale header must not count.
     add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's5', visitor_id: 'v4', ui_locale: 'en' }, browser_locale: 'fr', user_agent: 'Googlebot/2.1 (+http://www.google.com/bot.html)' })
 
-    const { locales } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const { locales } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     expect(locales.sessions_with_browser_locale).toBe(4)
     expect(locales.sessions_with_ui_locale).toBe(4)
@@ -101,14 +101,14 @@ describe(get_log_analytics, () => {
     expect(locales.mismatch_visitors).toBe(1)
   })
 
-  test('locales: light scope skips the panel (empty shape)', () => {
+  test('locales: light scope skips the panel (empty shape)', async () => {
     add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's1', visitor_id: 'v1', ui_locale: 'es' }, browser_locale: 'es' })
-    const { locales } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, scope: 'light' })
+    const { locales } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, scope: 'light' })
     expect(locales.browser).toEqual([])
     expect(locales.sessions_with_browser_locale).toBe(0)
   })
 
-  test('top dictionaries unions unique visitors over the rolling last 30 days across hot and archive logs', () => {
+  test('top dictionaries unions unique visitors over the rolling last 30 days across hot and archive logs', async () => {
     const archive_db = open_log_archive_db(':memory:')
     try {
       db.prepare(`
@@ -140,7 +140,7 @@ describe(get_log_analytics, () => {
       add_log({ day: '2026-05-31', message: 'session_start', context: { session_id: 's-old', visitor_id: 'visitor-old' }, target_db: archive_db })
       add_log({ day: '2026-05-31', message: 'dictionary_opened', context: { session_id: 's-old', visitor_id: 'visitor-old', dictionary_id: 'old' }, target_db: archive_db })
 
-      const { top_dictionaries } = get_log_analytics({ shared_db: db, logs_db, archive_db, days: 30, now: NOW })
+      const { top_dictionaries } = await get_log_analytics({ shared_db: db, logs_db, archive_db, days: 30, now: NOW })
 
       expect(top_dictionaries.site_visitors_30d).toBe(3)
       expect(top_dictionaries.site_visitors_prev_month).toBe(10)
@@ -166,7 +166,7 @@ describe(get_log_analytics, () => {
     }
   })
 
-  test('boot_health clusters the fresh-viewer boot cascade + computes non-recovery', () => {
+  test('boot_health clusters the fresh-viewer boot cascade + computes non-recovery', async () => {
     // Session A: failed boot (snapshot_expired) that NEVER opened an entry.
     add_log({ day: '2026-06-30', level: 'error', message: 'initial dict sync failed', context: { session_id: 'a', code: 'snapshot_expired', dict_id: 'apatani' } })
     add_log({ day: '2026-06-30', level: 'error', message: 'Failed to read dict bundle from wa-sqlite', context: { session_id: 'a', sqlite_code_name: 'MISUSE', dict_id: 'apatani' } })
@@ -176,7 +176,7 @@ describe(get_log_analytics, () => {
     // A non-boot error must NOT be counted.
     add_log({ day: '2026-06-30', level: 'error', message: 'boom', context: { session_id: 'c' } })
 
-    const { boot_health } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const { boot_health } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(boot_health.failed_sessions).toBe(2)
     expect(boot_health.recovered_sessions).toBe(1)
     expect(boot_health.non_recovery_pct).toBe(0.5)
@@ -188,7 +188,7 @@ describe(get_log_analytics, () => {
     expect(bundle_row?.code).toBe('MISUSE')
   })
 
-  test('dict_boot splits cold vs warm, joins catalog names, and ranks slowest first', () => {
+  test('dict_boot splits cold vs warm, joins catalog names, and ranks slowest first', async () => {
     db.prepare(`INSERT INTO dictionaries (id, name, url) VALUES ('apatani', 'Apatani', 'apatani')`).run()
     // Two cold boots of apatani (snapshot download) + one warm re-open.
     add_log({ day: '2026-06-30', message: 'perf', context: { name: 'dict_boot', duration_ms: 3000, cold: true, dict_id: 'apatani', snapshot_bytes: 4_000_000, session_id: 's1' } })
@@ -199,7 +199,7 @@ describe(get_log_analytics, () => {
     // A non-dict_boot perf row must NOT be counted.
     add_log({ day: '2026-06-30', message: 'perf', context: { name: 'page_load', duration_ms: 900, session_id: 's5' } })
 
-    const { performance } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const { performance } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     const { dict_boot } = performance
     expect(dict_boot.total).toBe(4)
     expect(dict_boot.cold.count).toBe(3)
@@ -214,7 +214,7 @@ describe(get_log_analytics, () => {
     expect(summary_row?.count).toBe(4)
   })
 
-  test('nav_sections splits SPA hops into entering vs within a dictionary', () => {
+  test('nav_sections splits SPA hops into entering vs within a dictionary', async () => {
     // Homepage → dictionary entries: the cold first hop.
     add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's1', from: '/', to: '/apatani/entries', duration_ms: 800 } })
     // Within a dictionary (warm hops).
@@ -223,14 +223,14 @@ describe(get_log_analytics, () => {
     // Dictionary → about page: not a dict destination.
     add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's1', from: '/apatani/entries', to: '/about', duration_ms: 100 } })
 
-    const { performance } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const { performance } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     const sections = new Map(performance.nav_sections.map(section => [section.section, section]))
     expect(sections.get('entering_dictionary')).toMatchObject({ count: 1, p50: 800 })
     expect(sections.get('within_dictionary')).toMatchObject({ count: 2, p50: 20 })
     expect(sections.get('other')).toMatchObject({ count: 1, p50: 100 })
   })
 
-  test('sync_health splits sync_failed by kind + current/stale build and isolates currently-stuck client_behind tabs', () => {
+  test('sync_health splits sync_failed by kind + current/stale build and isolates currently-stuck client_behind tabs', async () => {
     // Rows land at T10:00; NOW at T10:30 keeps the same-day ones inside the 45-min stuck window.
     const now = new Date('2026-06-30T10:30:00.000Z')
     // A client_behind on the CURRENT build (recovers — NOT stuck).
@@ -243,7 +243,7 @@ describe(get_log_analytics, () => {
     // A different kind on the current build.
     add_log({ day: '2026-06-30', level: 'warn', message: 'sync_failed', app_version: 'CUR', context: { kind: 'network' } })
 
-    const { sync_health } = get_log_analytics({ shared_db: db, logs_db, days: 30, now, current_app_version: 'CUR' })
+    const { sync_health } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now, current_app_version: 'CUR' })
     expect(sync_health.total).toBe(5)
     expect(sync_health.client_behind).toEqual({ total: 4, current: 1, stale: 3 })
     expect(sync_health.by_kind[0]).toEqual({ kind: 'client_behind', count: 4, current: 1, stale: 3 })
@@ -254,7 +254,7 @@ describe(get_log_analytics, () => {
     expect(sync_health.oldest_unresolved_at).toBe(sync_health.stuck[0].first_seen)
   })
 
-  test('build_adoption buckets active sessions by build age and names the users on stale builds', () => {
+  test('build_adoption buckets active sessions by build age and names the users on stale builds', async () => {
     const now = NOW
     const cur = String(now.getTime() - 2 * 3600_000) // deployed 2h ago
     const behind = String(now.getTime() - 86_400_000) // 1 day old
@@ -270,7 +270,7 @@ describe(get_log_analytics, () => {
     // A session_start older than 24h is not "active" — ignored.
     add_log({ day: '2026-06-28', message: 'session_start', app_version: stale, context: { session_id: 's6' } })
 
-    const { build_adoption } = get_log_analytics({ shared_db: db, logs_db, days: 30, now, current_app_version: cur })
+    const { build_adoption } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now, current_app_version: cur })
     expect(build_adoption.current).toBe(2)
     expect(build_adoption.behind).toBe(1)
     expect(build_adoption.stale).toBe(1)
@@ -284,30 +284,30 @@ describe(get_log_analytics, () => {
     expect(current_build?.sessions).toBe(2)
   })
 
-  test('storage never throws and yields no db rows for in-memory handles', () => {
-    const { storage } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+  test('storage never throws and yields no db rows for in-memory handles', async () => {
+    const { storage } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     // `:memory:` handles have no stat-able file; dict_dbs depends on DATA_DIR presence.
     expect(storage.dbs.every(row => row.name === 'logs-archive.db')).toBeTruthy()
   })
 
-  test('errors_by_version folds post-deploy settling churn (errors within 30min of a build first appearing)', () => {
+  test('errors_by_version folds post-deploy settling churn (errors within 30min of a build first appearing)', async () => {
     // Build B1 first appears 2026-06-29; a same-window error the NEXT day is 24h
     // later → past the deploy tail, so it's a standing fault, not settling.
     add_log({ day: '2026-06-29', level: 'error', message: 'chunk load fail', app_version: 'B1', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', level: 'error', message: 'chunk load fail', app_version: 'B1', context: { session_id: 's2' } })
 
-    const { errors_by_version } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: 'B1' })
+    const { errors_by_version } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: 'B1' })
     expect(errors_by_version.total).toBe(2)
     // Only the first-day error is within DEPLOY_TAIL_MINUTES of B1's first appearance.
     expect(errors_by_version.deploy_tail_errors).toBe(1)
     expect(errors_by_version.deploy_tail_pct).toBe(0.5)
   })
 
-  test('geo LCP split: LCP web_vitals grouped by country + by distance to Boston', () => {
+  test('geo LCP split: LCP web_vitals grouped by country + by distance to Boston', async () => {
     add_log({ day: '2026-06-30', message: 'perf', context: { name: 'web_vital', metric: 'LCP', value: 3400, session_id: 'a' }, geo: { country: 'US', region: 'MA', city: 'Boston', latitude: 42.36, longitude: -71.06 } })
     add_log({ day: '2026-06-30', message: 'perf', context: { name: 'web_vital', metric: 'LCP', value: 9000, session_id: 'b' }, geo: { country: 'AU', region: null, city: null, latitude: -33.87, longitude: 151.2 } })
 
-    const { geo } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const { geo } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(geo.lcp_by_country.find(row => row.label === 'US')?.p50).toBe(3400)
     expect(geo.lcp_by_country.find(row => row.label === 'AU')?.p50).toBe(9000)
     // Boston ≈ 0 km from origin, Sydney ≫ 10,000 km — the far-region cold-snapshot tail.
@@ -315,12 +315,12 @@ describe(get_log_analytics, () => {
     expect(geo.lcp_by_distance.find(row => row.label === '> 10,000 km')?.p50).toBe(9000)
   })
 
-  test('builds synthetic uptime + latency from uptime_probe server rows', () => {
+  test('builds synthetic uptime + latency from uptime_probe server rows', async () => {
     add_log({ day: '2026-06-30', message: 'uptime_probe', source: 'server', context: { ok: true, status: 200, ttfb_ms: 300, total_ms: 500, vantage: 'mustang-my' } })
     add_log({ day: '2026-06-30', message: 'uptime_probe', source: 'server', context: { ok: true, status: 200, ttfb_ms: 400, total_ms: 700, vantage: 'mustang-my' } })
     add_log({ day: '2026-06-29', message: 'uptime_probe', source: 'server', context: { ok: false, status: 503, ttfb_ms: 200, total_ms: 300, vantage: 'mustang-my' } })
 
-    const { uptime } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const { uptime } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(uptime.probes).toBe(3)
     expect(uptime.availability).toBeCloseTo(2 / 3) // 2 ok of 3 probes carrying an ok signal
     expect(uptime.ttfb.p50).toBe(300)
@@ -329,12 +329,12 @@ describe(get_log_analytics, () => {
     expect(uptime.daily).toHaveLength(2)
   })
 
-  test('daily real_errors folds out known-noise + expected-response rows, raw errors keeps them', () => {
+  test('daily real_errors folds out known-noise + expected-response rows, raw errors keeps them', async () => {
     add_log({ day: '2026-06-30', level: 'error', message: 'boom', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', level: 'error', message: 'Failed to fetch dynamically imported module: /_app/x.js', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', level: 'crash', message: 'Not found: /river/feedback', context: { session_id: 's1' } })
 
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     const last_day = analytics.daily[analytics.daily.length - 1]
     expect(last_day?.errors).toBe(3) // raw count keeps the stale-chunk + 404 rows
     expect(last_day?.real_errors).toBe(1) // only 'boom' is a genuine fault
@@ -342,35 +342,35 @@ describe(get_log_analytics, () => {
     expect(analytics.totals.real_errors).toBe(1)
   })
 
-  test('daily stale_errors counts errors from non-current builds (deploy-day fold); unknown current version → 0', () => {
+  test('daily stale_errors counts errors from non-current builds (deploy-day fold); unknown current version → 0', async () => {
     add_log({ day: '2026-06-30', level: 'error', message: 'boom on old bundle', app_version: 'v-old', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', level: 'error', message: 'boom on current', app_version: 'v-cur', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', level: 'error', message: 'boom no version', context: { session_id: 's1' } })
 
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: 'v-cur' })
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: 'v-cur' })
     const last_day = analytics.daily[analytics.daily.length - 1]
     expect(last_day?.errors).toBe(3)
     expect(last_day?.stale_errors).toBe(1) // only the v-old row; version-less rows aren't assumed stale
     expect(analytics.totals.stale_errors).toBe(1)
 
     // Without a known current version the fold is off (everything would read stale otherwise).
-    const unknown = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: null })
+    const unknown = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: null })
     expect(unknown.totals.stale_errors).toBe(0)
   })
 
-  test('top_routes ranks by distinct sessions so one loop-heavy session cannot outrank real routes', () => {
+  test('top_routes ranks by distinct sessions so one loop-heavy session cannot outrank real routes', async () => {
     // One session hammers /milang/entries 50×; three sessions each visit /about once.
     for (let i = 0; i < 50; i++)
       add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's-loop', to: '/milang/entries' } })
     for (const sid of ['s1', 's2', 's3'])
       add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: sid, to: '/about' } })
 
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(analytics.top_routes[0]).toEqual({ route: 'about', count: 3, sessions: 3 })
     expect(analytics.top_routes[1]).toEqual({ route: 'dictionary:entries', count: 50, sessions: 1 })
   })
 
-  test('api_v1 panel aggregates server v1_* events by day / event / dictionary / via with a failure split', () => {
+  test('api_v1 panel aggregates server v1_* events by day / event / dictionary / via with a failure split', async () => {
     add_log({ day: '2026-06-30', source: 'server', message: 'v1_entry_updated', context: { dictionary_id: 'river', via: 'api_key' } })
     add_log({ day: '2026-06-30', source: 'server', message: 'v1_entry_updated', context: { dictionary_id: 'river', via: 'api_key' } })
     add_log({ day: '2026-06-30', source: 'server', message: 'v1_media_attached', context: { dictionary_id: 'river', via: 'api_key' } })
@@ -380,7 +380,7 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', source: 'server', message: 'auth_login' })
     add_log({ day: '2026-06-30', source: 'client', message: 'v1_entry_updated', context: { session_id: 's1' } })
 
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(analytics.api_v1.total).toBe(5)
     expect(analytics.api_v1.failures).toBe(1)
     expect(analytics.api_v1.daily).toEqual([
@@ -398,7 +398,7 @@ describe(get_log_analytics, () => {
     ])
   })
 
-  test('entry_edits merges rollup + live tail into a UI-vs-API daily trend, bulk-weighted', () => {
+  test('entry_edits merges rollup + live tail into a UI-vs-API daily trend, bulk-weighted', async () => {
     // Finalized days: rollup metrics only (no raw rows left). 06-28 carries the
     // weighted `api_entry_edits` metric; 06-27 predates it → `event:v1_*` fallback.
     db.prepare(`
@@ -418,7 +418,7 @@ describe(get_log_analytics, () => {
     // Non-entry ops don't count in either channel.
     add_log({ day: '2026-06-30', source: 'server', message: 'v1_media_attached', context: { dictionary_id: 'river' } })
 
-    const { entry_edits } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const { entry_edits } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(entry_edits.daily).toHaveLength(30) // zero-filled window
     const by_day = new Map(entry_edits.daily.map(point => [point.day, point]))
     expect(by_day.get('2026-06-30')).toEqual({ day: '2026-06-30', ui: 3, api: 13 })
@@ -428,7 +428,7 @@ describe(get_log_analytics, () => {
     expect(entry_edits.api_total).toBe(4744)
   })
 
-  test('server_faults clusters server error rows by route+message and flags schema drift', () => {
+  test('server_faults clusters server error rows by route+message and flags schema drift', async () => {
     // Two occurrences of the same labelled fault, one carrying a status.
     add_log({ day: '2026-06-30', source: 'server', level: 'error', message: 'dictionary_create_failed', context: { route: '/api/dictionaries/create', status: 500 } })
     add_log({ day: '2026-06-30', source: 'server', level: 'error', message: 'dictionary_create_failed', context: { route: '/api/dictionaries/create', status: 500 } })
@@ -440,7 +440,7 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', source: 'server', level: 'warn', message: 'sync_missing_syncable_table' })
     add_log({ day: '2026-06-30', source: 'client', level: 'error', message: 'no such column: x', context: { session_id: 's1' } })
 
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(analytics.server_faults.total).toBe(4)
     expect(analytics.server_faults.schema_drift_count).toBe(2)
     expect(analytics.server_faults.clusters).toHaveLength(3)
@@ -455,14 +455,14 @@ describe(get_log_analytics, () => {
     expect(analytics.server_faults.clusters.find(cluster => cluster.message === 'no such table: orthographies')?.is_schema_drift).toBeTruthy()
   })
 
-  test('surfaces analytics events (infra excluded) and normalized route buckets', () => {
+  test('surfaces analytics events (infra excluded) and normalized route buckets', async () => {
     add_log({ day: '2026-06-30', message: 'search_performed', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', message: 'search_performed', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', message: 'entry_opened', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's1', to: '/dictionaries' } })
     add_log({ day: '2026-06-30', message: 'navigation', context: { session_id: 's1', to: '/my-dict/entries/x' } })
 
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     const search = analytics.top_events.find(event => event.event === 'search_performed')
     expect(search?.count).toBe(2)
@@ -473,34 +473,34 @@ describe(get_log_analytics, () => {
     expect(analytics.top_routes.find(route => route.route === 'dictionary:entry')?.count).toBe(1)
   })
 
-  test('splits client vs server source and clusters errors', () => {
+  test('splits client vs server source and clusters errors', async () => {
     add_log({ day: '2026-06-30', level: 'error', message: 'client-err' })
     add_log({ day: '2026-06-30', level: 'error', message: 'server-err', source: 'server' })
 
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     expect(analytics.by_source.find(s => s.source === 'client')?.errors).toBe(1)
     expect(analytics.by_source.find(s => s.source === 'server')?.errors).toBe(1)
     expect(analytics.error_clusters.map(e => e.message).sort()).toEqual(['client-err', 'server-err'])
   })
 
-  test('audience toggle filters usage to humans (default) or bots', () => {
+  test('audience toggle filters usage to humans (default) or bots', async () => {
     const BOT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
     const HUMAN = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15'
     add_log({ day: '2026-06-30', message: 'session_start', user_agent: HUMAN, context: { session_id: 'hs' } })
     add_log({ day: '2026-06-30', message: 'session_start', user_agent: BOT, context: { session_id: 'bs1' } })
     add_log({ day: '2026-06-30', message: 'session_start', user_agent: BOT, context: { session_id: 'bs2' } })
 
-    const humans = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, audience: 'humans' })
+    const humans = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, audience: 'humans' })
     expect(humans.audience).toBe('humans')
     expect(humans.totals.sessions).toBe(1)
 
-    const bots = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, audience: 'bots' })
+    const bots = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, audience: 'bots' })
     expect(bots.audience).toBe('bots')
     expect(bots.totals.sessions).toBe(2)
   })
 
-  test('excludes navigator.webdriver (headed Playwright) sessions from humans even with a plain Chrome UA', () => {
+  test('excludes navigator.webdriver (headed Playwright) sessions from humans even with a plain Chrome UA', async () => {
     // Headed Playwright reports a real Chrome UA — the bot regex can't catch it;
     // the `context.webdriver` flag is the signal (M1).
     const HEADED_PLAYWRIGHT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36'
@@ -511,30 +511,30 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 'auto', webdriver: true }, user_agent: HEADED_PLAYWRIGHT })
     add_log({ day: '2026-06-30', message: 'search_performed', context: { session_id: 'auto', webdriver: true }, user_agent: HEADED_PLAYWRIGHT })
 
-    const humans = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, audience: 'humans' })
+    const humans = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, audience: 'humans' })
     expect(humans.totals.sessions).toBe(1) // only the real human
     expect(humans.top_events.find(event => event.event === 'search_performed')?.count).toBe(1)
     // The automated session is bucketed as a bot, kept out of the human total.
     expect(humans.capability.bot_sessions).toBe(1)
     expect(humans.capability.total_sessions).toBe(1)
 
-    const bots = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, audience: 'bots' })
+    const bots = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, audience: 'bots' })
     expect(bots.totals.sessions).toBe(1) // the webdriver session shows under bots
   })
 
-  test('clusters repeated errors, tags + sinks known-noise', () => {
+  test('clusters repeated errors, tags + sinks known-noise', async () => {
     for (let i = 0; i < 5; i++)
       add_log({ day: '2026-06-30', level: 'error', message: 'boom', user_id: `u${i}` })
     for (let i = 0; i < 30; i++)
       add_log({ day: '2026-06-30', level: 'error', message: '[post_request] Network error for /api/log' })
 
-    const clusters = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW }).error_clusters
+    const clusters = (await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })).error_clusters
     expect(clusters.find(c => c.message === 'boom')).toMatchObject({ count: 5, users: 5, is_noise: false })
     expect(clusters[0].message).toBe('boom')
     expect(clusters[clusters.length - 1]).toMatchObject({ is_noise: true })
   })
 
-  test('error clusters carry per-session breadth + bot share for the loop / mostly-crawler markers', () => {
+  test('error clusters carry per-session breadth + bot share for the loop / mostly-crawler markers', async () => {
     const BOT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
     // One crawler session storms the same rejection 3x; a human session hits it once.
     for (let hit = 0; hit < 3; hit++)
@@ -542,7 +542,7 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', level: 'unhandled_rejection', message: 'Failed to fetch', context: { session_id: 'human1' } })
     add_log({ day: '2026-06-30', level: 'error', message: 'server-only-fault', source: 'server' })
 
-    const { error_clusters } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const { error_clusters } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     const fetch_cluster = error_clusters.find(cluster => cluster.message === 'Failed to fetch')
     expect(fetch_cluster?.sessions).toBe(2)
     expect(fetch_cluster?.max_per_session).toBe(3) // the crawler's 3-row storm
@@ -556,7 +556,7 @@ describe(get_log_analytics, () => {
     expect(server_cluster?.bot_pct).toBeNull()
   })
 
-  test('scope gates the heavy page-specific sections while keeping the shared core identical', () => {
+  test('scope gates the heavy page-specific sections while keeping the shared core identical', async () => {
     add_log({ day: '2026-06-30', message: 'session_start', user_id: 'u1', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', message: 'search_performed', user_id: 'u1', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms: 500 } })
@@ -564,10 +564,10 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', source: 'server', message: 'v1_entry_created', context: { dictionary_id: 'd1', via: 'api_key' } })
 
     const base = { shared_db: db, logs_db, days: 30, now: NOW } as const
-    const full = get_log_analytics(base)
-    const light = get_log_analytics({ ...base, scope: 'light' })
-    const usage = get_log_analytics({ ...base, scope: 'usage' })
-    const diagnostics = get_log_analytics({ ...base, scope: 'diagnostics' })
+    const full = await get_log_analytics(base)
+    const light = await get_log_analytics({ ...base, scope: 'light' })
+    const usage = await get_log_analytics({ ...base, scope: 'usage' })
+    const diagnostics = await get_log_analytics({ ...base, scope: 'diagnostics' })
 
     // Full computes BOTH halves.
     expect(full.api_v1.total).toBe(1)
@@ -598,7 +598,7 @@ describe(get_log_analytics, () => {
     expect(light.geo.areas).toEqual(full.geo.areas)
   })
 
-  test('missing i18n keys: ranks by distinct sessions, dedupes keys, excludes bots', () => {
+  test('missing i18n keys: ranks by distinct sessions, dedupes keys, excludes bots', async () => {
     const BOT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
     // `sd.animal` hit in two sessions (3 rows) → outranks `ps.verbo` (1 session, 1 row).
     add_log({ day: '2026-06-30', level: 'warn', message: 'i18n missing key: sd.animal', context: { session_id: 's1', i18n_key: 'sd.animal', locale: 'es' } })
@@ -608,7 +608,7 @@ describe(get_log_analytics, () => {
     // A bot session must be excluded from the human worklist.
     add_log({ day: '2026-06-30', level: 'warn', message: 'i18n missing key: sd.fish', context: { session_id: 'b1', i18n_key: 'sd.fish', locale: 'es' }, user_agent: BOT })
 
-    const { missing_i18n_keys } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const { missing_i18n_keys } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(missing_i18n_keys.distinct_keys).toBe(2) // bot's sd.fish excluded
     expect(missing_i18n_keys.total).toBe(4)
     expect(missing_i18n_keys.sessions).toBe(2)
@@ -617,7 +617,7 @@ describe(get_log_analytics, () => {
     expect(missing_i18n_keys.keys.find(row => row.key === 'sd.fish')).toBeUndefined()
   })
 
-  test('device / OS / browser breakdown excludes bots and flags below-capability sessions', () => {
+  test('device / OS / browser breakdown excludes bots and flags below-capability sessions', async () => {
     const SAFARI17 = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15'
     const SAFARI14 = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Safari/605.1.15'
     const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1'
@@ -629,7 +629,7 @@ describe(get_log_analytics, () => {
     add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's5' }, user_agent: ANDROID })
     add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's3' }, user_agent: APPLEBOT })
 
-    const { capability } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const { capability } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     expect(capability.bot_sessions).toBe(1)
     expect(capability.total_sessions).toBe(4) // bots excluded from human total
@@ -646,7 +646,7 @@ describe(get_log_analytics, () => {
     expect(capability.db_tiers.find(tier => tier.tier === 'opfs-worker')?.sessions).toBe(1)
   })
 
-  test('excludes bot/headless sessions from usage, events, geo + perf (kept only in capability.bot_sessions)', () => {
+  test('excludes bot/headless sessions from usage, events, geo + perf (kept only in capability.bot_sessions)', async () => {
     const HUMAN = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36'
     const HEADLESS = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/148.0.0.0 Safari/537.36'
     const la: RequestGeo = { country: 'US', region: 'CA', city: 'Los Angeles', latitude: 34.05, longitude: -118.24 }
@@ -665,7 +665,7 @@ describe(get_log_analytics, () => {
     // Server row carries no user_agent (NULL) → always kept.
     add_log({ day: '2026-06-30', source: 'server', message: 'auth_login' })
 
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     const today = analytics.daily[analytics.daily.length - 1]
     expect(today?.sessions).toBe(1) // only the human session
     expect(today?.users).toBe(1)
@@ -683,7 +683,7 @@ describe(get_log_analytics, () => {
     expect(analytics.by_source.find(source => source.source === 'server')?.logs).toBe(1)
   })
 
-  test('aggregates perf timings into per-metric percentiles, dropping web_vitals', () => {
+  test('aggregates perf timings into per-metric percentiles, dropping web_vitals', async () => {
     // page_load: 5 samples 100..500 → p50 = 300, p95 = 500, max 500.
     for (const ms of [100, 200, 300, 400, 500])
       add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms: ms } })
@@ -692,7 +692,7 @@ describe(get_log_analytics, () => {
     // web_vital carries `value`, not `duration_ms` — must be excluded from timings.
     add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'web_vital', metric: 'LCP', value: 2.1 } })
 
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     const page_load = analytics.performance.summary.find(metric => metric.name === 'page_load')
     expect(page_load).toMatchObject({ count: 5, p50: 300, p95: 500, max: 500 })
@@ -708,7 +708,7 @@ describe(get_log_analytics, () => {
     expect(latest?.metrics.page_load).toEqual({ p50: 300, p95: 500, count: 5 })
   })
 
-  test('groups page-load timings per route, slowest p95 first (L2)', () => {
+  test('groups page-load timings per route, slowest p95 first (L2)', async () => {
     const base = 'https://new.livingdictionaries.app'
     const now = new Date('2026-06-30T10:00:00Z')
     const perf = (duration_ms: number, url: string) =>
@@ -720,14 +720,14 @@ describe(get_log_analytics, () => {
     perf(1000, `${base}/my-dict/entries/abc`)
     perf(2000, `${base}/my-dict/entries/def`)
 
-    const { by_route } = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW }).performance
+    const { by_route } = (await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })).performance
     // Slowest route (by p95) first.
     expect(by_route[0]).toMatchObject({ route: 'dictionary:entry', count: 2, p95: 2000 })
     const about = by_route.find(row => row.route === 'about')
     expect(about).toMatchObject({ count: 2, p95: 200 }) // /about + /about?x=1 collapse to one route
   })
 
-  test('builds geo areas (hot + cold rollup) and geo-splits TTFB by country + distance', () => {
+  test('builds geo areas (hot + cold rollup) and geo-splits TTFB by country + distance', async () => {
     const la: RequestGeo = { country: 'US', region: 'CA', city: 'Los Angeles', latitude: 34.05, longitude: -118.24 }
     const ny: RequestGeo = { country: 'US', region: 'NY', city: 'New York', latitude: 40.71, longitude: -74.01 }
     // Hot sessions: two in US-CA, one in US-NY. page_load TTFB rows carry coordinates.
@@ -740,7 +740,7 @@ describe(get_log_analytics, () => {
     // A cold (archived) day with only a geo rollup row.
     db.prepare(`INSERT INTO log_daily_metrics (day, metric, source, value) VALUES ('2026-06-05', 'geo:US-CA', 'client', 5)`).run()
 
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
 
     // Areas merge hot (2 US-CA + 1 US-NY) with the cold rollup (+5 US-CA).
     expect(analytics.geo.areas.find(area => area.key === 'US-CA')).toEqual({ key: 'US-CA', country: 'US', sessions: 7 })
@@ -756,11 +756,11 @@ describe(get_log_analytics, () => {
     expect(far?.p50).toBe(220)
   })
 
-  test('falls back to the rollup for archived (cold) days with no live rows', () => {
+  test('falls back to the rollup for archived (cold) days with no live rows', async () => {
     // An old day that has only a rollup row (raw logs already archived away).
     db.prepare(`INSERT INTO log_daily_metrics (day, metric, source, value) VALUES ('2026-06-05', 'logs', 'client', 42), ('2026-06-05', 'sessions', 'client', 7), ('2026-06-05', 'errors', 'client', 3)`).run()
 
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     const cold = analytics.daily.find(point => point.day === '2026-06-05')
     // Archived days predate the split, so real_errors falls back to the raw error count.
     // stale_errors is hot-only (no app_version in the rollup) → 0 on cold days.
@@ -773,7 +773,7 @@ describe(get_log_analytics, () => {
   // LogAnalytics object so any change a field-specific test doesn't watch is
   // caught. `archived_rows` reads a real file via get_log_archive_db(), so point
   // DATA_DIR at a fresh temp dir (→ empty archive → deterministic 0).
-  test('full-object output snapshot (refactor drift guard)', () => {
+  test('full-object output snapshot (refactor drift guard)', async () => {
     const MAC_SAFARI = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15'
     const OLD_SAFARI = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Safari/605.1.15'
     const GOOGLEBOT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
@@ -838,7 +838,7 @@ describe(get_log_analytics, () => {
       // A cold (archived) day with only rollup rows, incl a geo bucket + an event.
       db.prepare(`INSERT INTO log_daily_metrics (day, metric, source, value) VALUES ('2026-06-05', 'logs', 'client', 42), ('2026-06-05', 'sessions', 'client', 7), ('2026-06-05', 'errors', 'client', 3), ('2026-06-05', 'geo:US-CA', 'client', 5), ('2026-06-05', 'event:search_performed', 'client', 9), ('2026-06-05', 'nav:about', 'client', 4)`).run()
 
-      const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: 'v-cur' })
+      const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, current_app_version: 'v-cur' })
       // `storage` stat-syncs real files (the temp-dir archive) — zero its
       // machine-varying byte sizes so the drift guard stays deterministic.
       analytics.storage = { dbs: analytics.storage.dbs.map(row => ({ ...row, db_bytes: 0, wal_bytes: 0, wal_ratio: null })), dict_dbs: analytics.storage.dict_dbs }
@@ -2055,8 +2055,8 @@ describe(build_host_stats, () => {
     expect(host.now).toBeNull()
   })
 
-  test('get_log_analytics leaves host null (endpoint injects it fresh)', () => {
-    const analytics = get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+  test('get_log_analytics leaves host null (endpoint injects it fresh)', async () => {
+    const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
     expect(analytics.host).toBeNull()
   })
 })

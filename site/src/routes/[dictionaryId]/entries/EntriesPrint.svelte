@@ -4,8 +4,8 @@
   import { build_citation } from '../contributors/build-citation'
   import PrintEntry from './print/PrintEntry.svelte'
   import PrintFieldCheckboxes from './print/PrintFieldCheckboxes.svelte'
-  import { defaultPrintFields } from './print/print-fields'
-  import { truncateAuthors } from './print/truncate-authors'
+  import { default_print_fields } from './print/print-fields'
+  import { truncate_authors } from './print/truncate-authors'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import { PersistedState } from '$lib/state/persisted-state.svelte'
   import type { QueryParamState } from '$lib/state/query-param-state.svelte'
@@ -40,7 +40,7 @@
 
   const visitor_max_entries = 300
 
-  const preferredPrintFields = new PersistedState<IPrintFields>('printFields_11.8.2023', defaultPrintFields)
+  const preferredPrintFields = new PersistedState<IPrintFields>('printFields_11.8.2023', default_print_fields)
   const headwordSize = new PersistedState<number>('printHeadwordSize', 12)
   const fontSize = new PersistedState<number>('printFontSize', 12)
   const imagePercent = new PersistedState<number>('printImagePercent', 50)
@@ -136,7 +136,7 @@
       dir="ltr"
       class="citation"
       style="writing-mode: tb; min-width: 0;">
-      {build_citation({ t: page.data.t, dictionary, custom_citation: truncateAuthors(dictionary.citation), partners })}
+      {build_citation({ t: page.data.t, dictionary, custom_citation: truncate_authors(dictionary.citation), partners })}
     </div>
   </div>
 {:else}

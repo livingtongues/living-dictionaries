@@ -65,6 +65,14 @@ Both only surface once you actually PUSH an editor edit, which is why M4-read/au
    `<=` and was returned empty — the dirty rows never merged. **Fix:** compute `has_push` (editor has
    dirty rows or tombstones) and skip the fast-bail when `has_push`.
 
+   **It bit a second time, 2026-07-27**, with `dirty_probes` (the pull-only client's "does the server
+   already have these rows?" reconcile). A client holding INHERITED dirty flags is by definition fully
+   caught up — its flags sit on rows that synced long ago — so it hit the bail on every sync and the
+   probe was dropped in silence. Same fix shape (`has_probes`). **The rule generalizes: anything a
+   client puts in the request body needs its own term in the bail test, because "caught up" says
+   nothing about whether the client has a question.** Both times, the code path was fine in unit tests
+   that called the helper directly — only a request through the real endpoint showed it.
+
 ### A THIRD sync bug (LD-only divergence from the example) — found by LD-MEDIA
 **The dirty-flag clear was a blanket `UPDATE "<table>" SET dirty = NULL WHERE dirty = 1`** in
 `dict-sync-engine.ts` `#apply_response` — it cleared EVERY currently-dirty row, not just the ones this

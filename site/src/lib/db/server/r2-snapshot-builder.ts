@@ -6,6 +6,7 @@ import { join } from 'node:path'
 import { gzipSync } from 'node:zlib'
 import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { r2_dict_snapshot_key, R2_SNAPSHOT_INTERVAL_MS, SNAPSHOT_EXPIRED_DAYS } from '$lib/constants'
+import { DICT_SYNCABLE_TABLES } from '$lib/db/dict-syncable-tables'
 import { get_r2_snapshot_client } from '$lib/r2/snapshot-client'
 import { get_dictionary_db } from './dictionary-db'
 import { reconcile_dictionary_catalog } from './reconcile-dictionaries'
@@ -199,6 +200,16 @@ export async function build_and_upload_snapshot(dict_id: string) {
       if (has_deletes)
         temp_db.exec('DELETE FROM deletes')
 
+      // Nobody boots a snapshot already holding "unsaved work". `dirty` is a
+      // client-only flag; a canonical row carrying it is inherited by every
+      // visitor and can never be cleared by a viewer (pull-only clients don't
+      // push), so the tab warns `dirty_rows_stuck` forever. Cleared in the COPY,
+      // never in the live dictionary db. (2026-07-26: 5,437 such rows across 33
+      // dictionaries.)
+      const dirty_cleared = clear_dirty_flags(temp_db)
+      if (dirty_cleared)
+        console.info(`[r2-snapshot-builder] ${dict_id}: cleared ${dirty_cleared} inherited dirty flag(s) from the snapshot.`)
+
       // Bake the snapshot's own sync cursor into it: everything in this file has
       // server_seq ≤ the counter, so a client booting from it starts pulling from
       // exactly here (`db_metadata.synced_seq` is the key the engine reads).
@@ -228,6 +239,29 @@ export async function build_and_upload_snapshot(dict_id: string) {
  * for the editor `/db` endpoint, which builds its snapshot the same way.
  * Tolerates a pre-20260709 source (no counter table) by skipping.
  */
+/**
+ * Clear every `dirty` flag in a SNAPSHOT copy (never the live dictionary db).
+ *
+ * `dirty` says "this browser holds an unsynced local edit" — it is meaningless
+ * on a canonical row, and a viewer inheriting one can never clear it (pull-only
+ * clients don't push), so their tab believes it has unsaved work forever. Also
+ * self-heals dictionaries whose rows were flagged by pre-2026-07-27 server
+ * writes: the first re-snapshot ships them clean.
+ *
+ * Returns the number of rows cleared (logged so the one-time drain is visible).
+ */
+export function clear_dirty_flags(snapshot_db: Database.Database): number {
+  let cleared = 0
+  for (const table of DICT_SYNCABLE_TABLES) {
+    const columns = snapshot_db.pragma(`table_info("${table}")`) as { name: string }[]
+    // Tolerates a table that doesn't exist (empty pragma) or predates the column.
+    if (!columns.some(column => column.name === 'dirty'))
+      continue
+    cleared += snapshot_db.prepare(`UPDATE "${table}" SET dirty = NULL WHERE dirty IS NOT NULL`).run().changes
+  }
+  return cleared
+}
+
 export function bake_synced_seq(snapshot_db: Database.Database): void {
   const has_counter = snapshot_db.prepare(
     `SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'server_seq_counter'`,

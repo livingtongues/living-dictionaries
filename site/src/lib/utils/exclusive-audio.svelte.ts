@@ -1,3 +1,5 @@
+import { play_audio_element } from '$lib/media/play-audio-element'
+
 let stop_current: (() => void) | null = null
 
 /** In-place card audio playback — one card plays at a time across the whole page. */
@@ -22,7 +24,9 @@ export function create_exclusive_audio() {
     audio_element.onended = stop
     audio_element.onerror = stop
     playing = true
-    void audio_element.play()
+    // A rejected play() never reaches `onerror`, so without this the card would
+    // sit showing a pause icon forever with nothing playing.
+    play_audio_element({ audio: audio_element, context: { surface: 'exclusive_audio' }, on_failure: stop })
   }
 
   return {

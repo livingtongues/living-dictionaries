@@ -3,6 +3,7 @@ import { dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { start_chat_reping_cron_once } from '$lib/db/server/chat-reping-cron'
 import { start_host_stats_cron_once } from '$lib/db/server/host-stats-cron'
+import { start_analytics_warm_up, warm_analytics_caches } from '$lib/db/server/log-analytics'
 import { start_log_retention_cron_once } from '$lib/db/server/log-retention-cron'
 import { get_logs_db, split_client_logs_from_shared } from '$lib/db/server/logs-db'
 import { start_media_sweep_cron_once } from '$lib/db/server/media-sweep-cron'
@@ -51,7 +52,18 @@ if (env.R2_SNAPSHOT_BUILDER_ENABLED === 'true' && env.IS_STANDBY !== 'true')
 
 // Two-tier client_logs retention + the forever log_daily_metrics rollup. Always
 // runs on the active node — only self-gates on IS_STANDBY + dev/build (no enable flag).
-start_log_retention_cron_once()
+// `after_sweep` recomputes the admin analytics payloads right after the sweep
+// advances the rollup watermark (the moment they all go stale), so that work
+// happens here instead of in front of the next admin — analytics must never
+// block a request path (standing rule, 2026-07-27).
+start_log_retention_cron_once({ after_sweep: warm_analytics_caches })
+
+// Same rule at boot: a fresh container's in-memory cache is empty, so warm it
+// off the request path (delayed — the first seconds belong to the traffic a
+// fresh deploy is taking). Until it lands, reads are served from the payload
+// persisted under DATA_DIR by the previous container.
+if (!dev)
+  start_analytics_warm_up()
 
 // Periodic `wal_checkpoint(TRUNCATE)` on the central DBs (shared.db / logs.db /
 // logs-archive.db) so their WAL files can't ratchet up unbounded under steady
