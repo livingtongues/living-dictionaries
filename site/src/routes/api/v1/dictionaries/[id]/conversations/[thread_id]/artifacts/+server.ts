@@ -44,7 +44,7 @@ export const GET: RequestHandler = async (event) => {
 }
 
 /**
- * POST a generated HTML artifact (guide §2.7). Stored verbatim and never
+ * POST a generated HTML artifact (guide §2.8). Stored verbatim and never
  * regenerated in place — a report is a frozen snapshot of what we said at the
  * time, which is the only version worth keeping.
  */

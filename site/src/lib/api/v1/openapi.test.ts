@@ -98,7 +98,8 @@ describe(build_openapi_spec, () => {
       Object.entries(paths).map(([path, ops]) => [path, Object.keys(ops).sort()]),
     )
     expect(path_methods).toEqual({
-      '/api/v1/dictionaries/{id}': ['get'],
+      '/api/v1/dictionaries/{id}': ['get', 'patch'],
+      '/api/v1/dictionaries/{id}/cover-image': ['delete', 'post'],
       '/api/v1/dictionaries/{id}/entries': ['get', 'post'],
       '/api/v1/dictionaries/{id}/entries/{entryId}': ['delete', 'get', 'patch'],
       '/api/v1/dictionaries/{id}/entries/batch-delete': ['post'],

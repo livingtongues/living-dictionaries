@@ -10,6 +10,7 @@
   import TextTags from './TextTags.svelte'
   import TextAudioPlayer from '$lib/media/AudioPlayer.svelte'
   import TokenizedSentence from '$lib/corpus/TokenizedSentence.svelte'
+  import InterlinearGloss from '$lib/corpus/InterlinearGloss.svelte'
   import TokenPopover from '$lib/corpus/TokenPopover.svelte'
   import { pick_tokenization_orthography } from '$lib/corpus/tokenize-sentence'
   import { token_kind } from '$lib/corpus/token-kind'
@@ -24,6 +25,7 @@
   import IconFaSolidPlus from '~icons/fa-solid/plus'
   import IconFa6SolidPencil from '~icons/fa6-solid/pencil'
   import IconCarbonTranslate from '~icons/carbon/translate'
+  import IconMdiBookAlphabet from '~icons/mdi/book-alphabet'
   import IconMaterialSymbolsHearing from '~icons/material-symbols/hearing'
   import IconMdiMarker from '~icons/mdi/marker'
   import IconMdiRefresh from '~icons/mdi/refresh'
@@ -83,6 +85,7 @@
     : [])
 
   let show_translations = $state(true)
+  let show_glosses = $state(false)
   let selected_id = $state<string | null>(null)
   const selected_sentence = $derived(selected_id ? dict_db?.sentences.id(selected_id) : null)
   let show_append = $state(false)
@@ -101,6 +104,15 @@
   function sentence_text(sentence: DictRowType<'sentences'>): string {
     return sentence.text?.[sentence_code(sentence)] ?? sentence_display(sentence)
   }
+
+  /** Gold interlinear tokens for a sentence, empty when it carries no analysis. */
+  function igt_tokens(sentence: DictRowType<'sentences'>) {
+    const tokens = sentence.tokens?.[sentence_code(sentence)] ?? []
+    return tokens.some(token => token.gloss || token.morphemes?.length) ? tokens : []
+  }
+
+  // The gloss toggle only appears for a text that actually has interlinear data.
+  const text_has_igt = $derived(ordered.some(sentence => igt_tokens(sentence).length > 0))
 
   function open_token_popover(sentence: DictRowType<'sentences'>, args: { token_index: number, anchor: HTMLElement }) {
     token_popover = { sentence_id: sentence.id, orthography: sentence_code(sentence), token_index: args.token_index, anchor: args.anchor }
@@ -267,6 +279,17 @@
         <IconCarbonTranslate />
         {page.data.t('text.show_translations')}
       </button>
+      {#if text_has_igt}
+        <button
+          type="button"
+          class="btn-outline btn-sm"
+          class:toolbar-active={show_glosses}
+          style="gap: 0.375rem"
+          onclick={() => show_glosses = !show_glosses}>
+          <IconMdiBookAlphabet />
+          {page.data.t(show_glosses ? 'grammar.hide_glosses' : 'grammar.show_glosses')}
+        </button>
+      {/if}
       {#if can_edit}
         <button
           type="button"
@@ -377,7 +400,7 @@
       {/if}
     {/snippet}
 
-    <article class="reader" class:interlinear={show_translations}>
+    <article class="reader" class:interlinear={show_translations || show_glosses}>
       {#each paragraphs as paragraph, paragraph_index (paragraph_index)}
         <p class="paragraph">
           {#each paragraph as sentence (sentence.id)}
@@ -392,17 +415,21 @@
                   class:speaking={active_sentence_id === sentence.id}
                   onclick={() => on_sentence_click(sentence)}
                   onkeydown={event => sentence_keydown(event, sentence)}>
-                  <TokenizedSentence
-                    tokens={sentence.tokens}
-                    orthography={sentence_code(sentence)}
-                    text={sentence_text(sentence)}
-                    {can_edit}
-                    {review_mode}
-                    timing={sentence_timings.get(sentence.id)}
-                    {current_ms}
-                    is_active={active_sentence_id === sentence.id}
-                    selected_index={token_popover?.sentence_id === sentence.id ? token_popover.token_index : null}
-                    on_token_tap={args => open_token_popover(sentence, args)} />
+                  {#if show_glosses && igt_tokens(sentence).length}
+                    <InterlinearGloss tokens={igt_tokens(sentence)} language={page.data.dictionary.gloss_languages?.[0]} link_entries={false} />
+                  {:else}
+                    <TokenizedSentence
+                      tokens={sentence.tokens}
+                      orthography={sentence_code(sentence)}
+                      text={sentence_text(sentence)}
+                      {can_edit}
+                      {review_mode}
+                      timing={sentence_timings.get(sentence.id)}
+                      {current_ms}
+                      is_active={active_sentence_id === sentence.id}
+                      selected_index={token_popover?.sentence_id === sentence.id ? token_popover.token_index : null}
+                      on_token_tap={args => open_token_popover(sentence, args)} />
+                  {/if}
                 </span>
                 {@render sentence_extras(sentence)}
                 {#each Object.values(sentence.translation || {}).filter(Boolean) as translation, translation_index (translation_index)}

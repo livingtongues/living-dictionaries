@@ -21,7 +21,7 @@
   const { dictionary } = $derived(page.data)
   const orthographies = $derived(get_orthographies(dictionary ?? {}))
   // Discourse role is a structured-grammar preview field — admin-3 only until the cutover.
-  const show_discourse = $derived(grammar_sections_editable({ auth_user: page.data.auth_user }))
+  const show_discourse = $derived(grammar_sections_editable({ auth_user: page.data.auth_user, is_manager: page.data.is_manager }))
   const glossing_languages = $derived(order_entry_and_dictionary_gloss_languages(sentence?.translation, dictionary.gloss_languages))
 
   // Worker op (not the live-row _save): text changes re-tokenize + re-match in

@@ -1043,6 +1043,29 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     },
   }
 
+  const DictionaryCatalogPatch = {
+    type: 'object',
+    description: 'Partial update of the dictionary\'s own catalog metadata. Send ONLY the keys you are changing; any key not listed here is rejected with a 400. `gloss_languages`, `orthographies`, the cover photo and publication have their own endpoints.',
+    properties: {
+      name: { type: 'string', description: 'Display name of the dictionary.' },
+      url: { type: 'string', description: 'URL slug. Changing it breaks existing links — confirm with the manager first.' },
+      about: { type: 'string', description: 'Long-form markdown shown on the About page. For an imported work this is where its preface, acknowledgements, contributor bios and bibliography belong — attribute them to their authors rather than presenting them as the dictionary\'s own voice.' },
+      citation: { type: 'string', description: 'How this dictionary asks to be cited.' },
+      alternate_names: { type: 'array', items: { type: 'string' }, description: 'Other names the language is known by.' },
+      location: { type: 'string', description: 'Free-text description of where the language is spoken.' },
+      coordinates: { $ref: '#/components/schemas/Coordinates' },
+      iso_639_3: { type: 'string', description: 'ISO 639-3 code.' },
+      glottocode: { type: 'string', description: 'Glottolog code.' },
+      copyright: { type: 'string' },
+      author_connection: { type: 'string', description: 'The dictionary owner\'s stated relationship to the community.' },
+      community_permission: { type: 'string' },
+      con_language_description: { type: 'string', description: 'Only for constructed languages.' },
+      language_used_by_community: { type: 'integer', description: '1 = still used by the community.' },
+      hide_living_tongues_logo: { type: 'integer' },
+      write_in_collaborators: { type: 'array', items: { type: 'string' }, description: 'Contributor names with no user account — they appear on the contributors page.' },
+    },
+  }
+
   const spec = {
     openapi: '3.1.0',
     tags: OPENAPI_TAGS,
@@ -1069,9 +1092,34 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       '/api/v1/dictionaries/{id}': {
         get: {
           summary: 'Dictionary metadata',
-          description: 'Returns gloss_languages, orthographies, entry_count, etc. Call this first so glosses/translations use valid locale codes. NOTE: `entry_count` is eventually-consistent (updated asynchronously) — it lags after a bulk import; do not rely on it to verify a fresh import. Paginate `/entries` for a live count.',
+          description: 'Returns gloss_languages, orthographies, entry_count, featured_image, etc. Call this first so glosses/translations use valid locale codes. NOTE: `entry_count` is eventually-consistent (updated asynchronously) — it lags after a bulk import; do not rely on it to verify a fresh import. Paginate `/entries` for a live count.',
           parameters: [dict_id_param],
           responses: { 200: { description: 'Dictionary metadata' }, 401: { description: 'Missing/invalid key' }, 403: { description: 'Key scoped to another dictionary' }, 404: { description: 'Not found' } },
+        },
+        patch: {
+          summary: 'Update the dictionary\'s catalog fields',
+          description: 'Write the dictionary\'s OWN metadata — most importantly `about`, the long-form markdown shown on its About page (the natural home for an imported work\'s preface, acknowledgements, and bibliography), and `citation`, how the dictionary asks to be cited. Send only the fields you are changing. Four things live behind their own doors instead: `gloss_languages` (`…/gloss-languages`), `orthographies` (`…/orthographies`), the cover photo (`…/cover-image`), and publication (`public`/`print_access` — a human decision; ask rather than flip it).',
+          parameters: [dict_id_param],
+          requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/DictionaryCatalogPatch' } } } },
+          responses: { 200: { description: 'The updated dictionary metadata' }, 400: { description: 'Unknown or non-updatable field' }, 401: { description: 'Missing/invalid key' }, 403: { description: 'Read-scope key, or key scoped to another dictionary' }, 404: { description: 'Not found' } },
+        },
+      },
+      '/api/v1/dictionaries/{id}/cover-image': {
+        post: {
+          summary: 'Set the dictionary cover photo',
+          description: 'Upload the hero image shown at the top of the dictionary home page — multipart `file`, or JSON `{ "url": "https://…" }` and we fetch it. One call uploads and sets it; any previous cover is replaced. Max 10 MB. Prefer a photograph of the community or its place over a book jacket or logo, and make sure whoever holds the rights has agreed to it being published.',
+          parameters: [dict_id_param],
+          requestBody: { required: true, content: {
+            'multipart/form-data': { schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } },
+            'application/json': { schema: { type: 'object', properties: { url: { type: 'string', description: 'Public image url we fetch server-side.' } }, required: ['url'] } },
+          } },
+          responses: { 200: { description: 'The stored cover image' }, 400: { description: 'No image provided' }, 401: { description: 'Missing/invalid key' }, 403: { description: 'Read-scope key' }, 413: { description: 'Larger than 10 MB' }, 415: { description: 'Not a supported image' }, 503: { description: 'Media storage not configured' } },
+        },
+        delete: {
+          summary: 'Remove the dictionary cover photo',
+          description: 'Clears `featured_image`. The stored bytes are collected later by the media sweep.',
+          parameters: [dict_id_param],
+          responses: { 200: { description: 'Cleared' }, 401: { description: 'Missing/invalid key' }, 403: { description: 'Read-scope key' }, 404: { description: 'Not found' } },
         },
       },
       '/api/v1/dictionaries/{id}/entries': {
@@ -1352,7 +1400,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
       },
       '/api/v1/dictionaries/{id}/conversations/{threadId}/artifacts': {
         get: { summary: 'List the conversation\'s artifacts', description: 'The generated preview/report HTML documents filed against this import.', parameters: [dict_id_param, conversation_id_param], responses: { 200: { description: '{ artifacts }' } } },
-        post: { summary: 'File a report (or preview) HTML artifact', description: 'Stores a self-contained HTML document and renders it on the manager\'s conversation page permanently — the durable home for the report described in guide §2.7. IMPORTANT: artifacts are served under `Content-Security-Policy: default-src \'none\'`, so JavaScript never runs — build collapsible sections from `<details>`/`<summary>` and inline your CSS in a `<style>` tag. `stats` becomes the summary line (e.g. `{ "entries": 1827 }`). Max 5MB. Team/API-key only.', parameters: [dict_id_param, conversation_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['kind', 'html'], properties: { kind: { type: 'string', enum: ['report', 'preview'] }, title: { type: 'string' }, html: { type: 'string' }, import_id: { type: 'string', nullable: true }, source_id: { type: 'string', nullable: true }, stats: { type: 'object', additionalProperties: true, nullable: true } } } } } }, responses: { 200: { description: '{ artifact }' }, 400: { description: 'Bad kind / empty html / over 5MB' }, 403: { description: 'Not the Living Dictionaries team' } } },
+        post: { summary: 'File a report (or preview) HTML artifact', description: 'Stores a self-contained HTML document and renders it on the manager\'s conversation page permanently — the durable home for the report described in guide §2.8. IMPORTANT: artifacts are served under `Content-Security-Policy: default-src \'none\'`, so JavaScript never runs — build collapsible sections from `<details>`/`<summary>` and inline your CSS in a `<style>` tag. `stats` becomes the summary line (e.g. `{ "entries": 1827 }`). Max 5MB. Team/API-key only.', parameters: [dict_id_param, conversation_id_param], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['kind', 'html'], properties: { kind: { type: 'string', enum: ['report', 'preview'] }, title: { type: 'string' }, html: { type: 'string' }, import_id: { type: 'string', nullable: true }, source_id: { type: 'string', nullable: true }, stats: { type: 'object', additionalProperties: true, nullable: true } } } } } }, responses: { 200: { description: '{ artifact }' }, 400: { description: 'Bad kind / empty html / over 5MB' }, 403: { description: 'Not the Living Dictionaries team' } } },
       },
       '/api/v1/dictionaries/{id}/conversations/{threadId}/artifacts/{artifactId}': {
         get: { summary: 'Download an artifact', description: 'Serves the stored HTML (add `?download` for an attachment disposition). Script execution is blocked by CSP.', parameters: [dict_id_param, conversation_id_param, { name: 'artifactId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }], responses: { 200: { description: 'HTML' }, 404: {} } },
@@ -1481,6 +1529,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         Morpheme,
         SentenceTokenInput,
         SentenceTokenFull,
+        DictionaryCatalogPatch,
         GlossingAbbreviationInput,
         GlossingAbbreviationFull,
       },
@@ -1504,7 +1553,7 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
  */
 export const OPENAPI_TAGS = [
   { name: 'start', description: 'The front door (`GET /api/v1`) — the task-routing document you should have read before this spec.' },
-  { name: 'dictionary', description: 'Read the dictionary\'s metadata (gloss languages, orthographies, entry count) — call this first.' },
+  { name: 'dictionary', description: 'Read the dictionary\'s metadata (gloss languages, orthographies, entry count) — call this first — and write its own catalog fields: the About prose, citation, where it is spoken, language codes, and the home-page cover photo.' },
   { name: 'entries', description: 'Create, read, update, and delete entries, their senses, and example sentences.' },
   { name: 'media', description: 'Attach or remove audio, photos, and videos on entries, senses, sentences, and texts.' },
   { name: 'texts', description: 'Connected passages/stories with their own ordered sentences, plus `…/texts/{textId}/tags` classification (genre/motif/tale-type).' },
@@ -1538,6 +1587,7 @@ const PATH_SEGMENT_TAGS: Record<string, string> = {
   'dialects': 'dialects',
   'orthographies': 'orthographies',
   'gloss-languages': 'dictionary',
+  'cover-image': 'dictionary',
   'sources': 'sources',
   'files': 'files',
   'conversations': 'conversations',

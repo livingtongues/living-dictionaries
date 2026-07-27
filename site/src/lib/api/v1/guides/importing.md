@@ -33,7 +33,7 @@ fields, generating your own ids, limits) if you haven't read it.
 9. Write in idempotent batches under one `import_id`, with a resumable ledger.
 10. Verify counts and spot-check content against the source.
 11. Leave a `review` task on every entry a human still has to decide.
-12. File the report and the questions on the conversation, then say you are done.
+12. Put the work's prose where it belongs (about / grammar / cover photo), then file\n    the report and the questions on the conversation and say you are done.
 
 Rushing to phase 2 is the classic failure mode: an import can be technically
 flawless and still wrong because the data wasn't understood. This is someone's
@@ -395,7 +395,7 @@ replaced this way, through five review passes, and the whole-record card caught 
 four on sight.
 
 Give it a **table of contents at the top with jump links, and make every section
-collapsible** (`<details>`) — same structure as the report (§2.7). At import scale
+collapsible** (`<details>`) — same structure as the report (§2.8). At import scale
 these documents are navigated, not scrolled: a reader wants to collapse everything,
 open the one section they care about, and find it instantly.
 
@@ -658,7 +658,34 @@ field, accept genuine sense splits/merges, delete the senses the correction real
 dropped, and re-audit your review queue against the new text. File the corrected
 export as an additional resource under the same source.
 
-### 2.6 Recovering from a bad import
+### 2.6 The material that isn't entries
+
+A published work is more than its headwords, and most of what surrounds them has a home:
+
+| In the source | Where it goes |
+|---|---|
+| Preface, acknowledgements, contributor/elder biographies, bibliography | `about` — `PATCH …/dictionaries/{id}` with markdown |
+| Grammar sketch / "notes on pronunciation and grammar" | the grammar section tree (`…/grammar/sections`), one section per heading, nested; see the `corpus` guide |
+| Abbreviation/gloss legend | `…/grammar/glossing-abbreviations`, so every code in a gloss line becomes tappable |
+| A photograph of the community or its place | `POST …/cover-image` (multipart `file` or `{ url }`) |
+| How the work asks to be cited | `citation` |
+
+Two rules for this material specifically:
+
+- **Attribute it, don't absorb it.** A preface written by a named author stays that
+  author's preface — introduce it (“From the preface by …”) rather than reprinting it in
+  the dictionary's own voice. The same goes for elder biographies: they are the most
+  human thing in most of these books and they deserve their names attached.
+- **Ask before you publish someone else's photograph.** A book jacket, a plate, or a
+  portrait carries rights that the person who sent you the file may not hold. Ask on the
+  conversation who to credit — a community photo they own is nearly always the better
+  cover anyway.
+
+`public` and `print_access` are deliberately NOT writable through the API. Whether a
+dictionary goes live is the community's decision; if you think it's ready, say so on the
+conversation and let a human click it.
+
+### 2.7 Recovering from a bad import
 
 When a whole batch is wrong (mis-mapped columns, wrong dictionary, duplicated run),
 don't issue thousands of single DELETEs — remove the batch by its `import_id`:
@@ -681,7 +708,7 @@ don't issue thousands of single DELETEs — remove the batch by its `import_id`:
 you used. If content predates your imports (or you've lost the ids), ask a Living
 Dictionaries admin to reset the dictionary instead.
 
-### 2.7 Report back to the human
+### 2.8 Report back to the human
 
 The preview (§1.5) is what the human approves; the **report** is what they keep. After
 the write, generate a `report.html` — same designed, readable HTML as the preview, with

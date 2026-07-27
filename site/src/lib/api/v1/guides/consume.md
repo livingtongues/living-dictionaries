@@ -24,8 +24,7 @@ https://snapshots.livingdictionaries.app/dictionaries/{id}.db.gz
 
 - No auth. Use the dictionary **id**, not the url slug, if they differ (read the id
   from `GET /api/v1/dictionaries/{slug}`).
-- Every dictionary has one **except secure dictionaries** (restricted-access
-  communities) — those have no public snapshot; paginate the API instead.
+- If the file 404s, that dictionary has no public snapshot — paginate the API instead.
 
 ## Loading it
 
@@ -91,8 +90,7 @@ original.
 
 ## When to use the API instead of the snapshot
 
-- **Secure dictionaries** (restricted-access communities) have no public snapshot —
-  paginate the API with a read key.
+- **No snapshot available** (the `.db.gz` 404s) — paginate the API with a read key.
 - **Small targeted lookups** — a handful of entries by id or lexeme. `GET
   …/entries?lexeme=…&match=exact` is cheaper than a 40MB download.
 - **Incremental catch-up** — `GET …/entries?updated_since=<ISO>` returns only what

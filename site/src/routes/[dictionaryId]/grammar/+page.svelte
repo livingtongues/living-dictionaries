@@ -2,16 +2,18 @@
   import { page } from '$app/state'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import GrammarSectionsView from './GrammarSectionsView.svelte'
+  import GlossingLegend from '$lib/corpus/GlossingLegend.svelte'
   import { grammar_sections_editable } from '$lib/corpus/grammar-preview'
 
   const { data } = $props()
   const { is_manager, dictionary } = $derived(data)
 
-  // Since the 2026-07-15 cutover the section tree renders for everyone; STRUCTURAL
-  // editing stays admin-3 (`grammar_sections_editable`), while managers get a
-  // scoped intro-prose editor (`is_manager`). The legacy `dictionaries.grammar`
-  // blob has been migrated into sections + the column dropped (cutover stage 2).
-  const sections_editable = $derived(grammar_sections_editable({ auth_user: page.data.auth_user }))
+  // Since the 2026-07-15 cutover the section tree renders for everyone; since
+  // 2026-07-27 STRUCTURAL editing is open to the dictionary's own managers (site
+  // admins still bypass). `prose_editable` is now redundant for managers but stays
+  // for the admin-3-only case. The legacy `dictionaries.grammar` blob has been
+  // migrated into sections + the column dropped (cutover stage 2).
+  const sections_editable = $derived(grammar_sections_editable({ auth_user: page.data.auth_user, is_manager }))
 </script>
 
 <div class="grammar">
@@ -21,6 +23,7 @@
 
   <div class="sections-block">
     <GrammarSectionsView editable={sections_editable} prose_editable={is_manager} />
+    <GlossingLegend />
   </div>
 </div>
 

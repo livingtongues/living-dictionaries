@@ -35,9 +35,34 @@ const clause_slots = [
   { id: 'sl3', sort_key: 'c', name: { en: 'Verb stem' }, code: 'V' },
 ]
 
+// q1 carries GOLD interlinear tokens — it renders as aligned form/gloss columns
+// with tappable legend codes instead of a plain line. q2 has none, so the two
+// example shapes sit side by side in one story.
 const sentences = [
-  { id: 'q1', text: { default: 'Ni-tlahtoa' }, translation: { en: 'I speak.' }, discourse_role: 'storyline' },
+  {
+    id: 'q1',
+    text: { default: 'Nitlahtoa' },
+    translation: { en: 'I speak.' },
+    discourse_role: 'storyline',
+    tokens: {
+      default: [{
+        form: 'Nitlahtoa',
+        start: 0,
+        end: 9,
+        morphemes: [
+          { form: 'Ni', gloss: { default: '1SG' } },
+          { form: 'tlahtoa', gloss: { en: 'speak' }, entry_id: 'tlahtoa', separator: '-' },
+        ],
+      }],
+    },
+  },
   { id: 'q2', text: { default: 'Ti-tlahtoa' }, translation: { en: 'You speak.' } },
+]
+
+const glossing_abbreviations = [
+  { id: 'g1', code: '1SG', name: { en: 'first person singular' }, category: 'person' },
+  { id: 'g2', code: '2SG', name: { en: 'second person singular' }, category: 'person' },
+  { id: 'g3', code: 'PL', name: { en: 'plural' }, category: 'number' },
 ]
 
 const section_sentences = [
@@ -52,7 +77,7 @@ function page_data({ rows, admin_level = 0 }: { rows: { id: string }[], admin_le
     entries_data,
     auth_user: { admin_level },
     writes: {},
-    dict_db: mock_dict_db({ grammar_sections: rows, clause_slots, sentences, section_sentences }),
+    dict_db: mock_dict_db({ grammar_sections: rows, clause_slots, sentences, section_sentences, glossing_abbreviations: rows.length ? glossing_abbreviations : [] }),
   } as never
 }
 
@@ -73,9 +98,17 @@ export const ViewerEmpty: PageStory<typeof Component> = {
   props: { dictionary, is_manager: false } as never,
 }
 
-// Manager (non-admin-3): sees the migrated intro with a scoped prose "edit" only.
+// Manager (non-admin-3) on the migrated headless intro. Since the 2026-07-27
+// graduation a manager also gets the full structural controls.
 export const ManagerProse: PageStory<typeof Component> = {
   page_data: page_data({ rows: headless_intro }),
+  props: { dictionary, is_manager: true } as never,
+}
+
+// A manager on the full tree — the post-graduation state: structural editing,
+// clause-template strip, interlinear example, and the glossing legend.
+export const ManagerSections: PageStory<typeof Component> = {
+  page_data: page_data({ rows: section_rows }),
   props: { dictionary, is_manager: true } as never,
 }
 

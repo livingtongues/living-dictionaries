@@ -4,6 +4,7 @@
   import EntryField from '../../entry/[entryId]/EntryField.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import TokenizedSentence from '$lib/corpus/TokenizedSentence.svelte'
+  import InterlinearGloss from '$lib/corpus/InterlinearGloss.svelte'
   import TokenPopover from '$lib/corpus/TokenPopover.svelte'
   import { pick_tokenization_orthography } from '$lib/corpus/tokenize-sentence'
   import { get_orthographies } from '$lib/orthography/orthographies'
@@ -56,6 +57,8 @@
   const token_orthography = $derived(sentence ? pick_tokenization_orthography(sentence.text) : null)
   const token_text = $derived(token_orthography ? sentence?.text?.[token_orthography] ?? '' : '')
   const has_tokens = $derived(!!(token_orthography && sentence?.tokens?.[token_orthography]?.length))
+  const igt_tokens = $derived(token_orthography ? sentence?.tokens?.[token_orthography] ?? [] : [])
+  const has_igt = $derived(igt_tokens.some(token => token.gloss || token.morphemes?.length))
   let token_popover = $state<{ token_index: number, anchor: HTMLElement } | null>(null)
   let analyzing = $state(false)
 
@@ -163,6 +166,11 @@
           on_token_tap={args => token_popover = args} />
       </div>
     {/if}
+    {#if has_igt}
+      <div class="igt-strip">
+        <InterlinearGloss tokens={igt_tokens} language={glossing_languages[0]} />
+      </div>
+    {/if}
     {#if can_edit}
       <div class="actions">
         {#if !sentence_audio}
@@ -236,6 +244,11 @@
     font-size: 1.125rem;
     line-height: 1.9;
     max-width: 42rem;
+  }
+
+  .igt-strip {
+    margin-top: 1rem;
+    font-size: 1.0625rem;
   }
 
   .actions {

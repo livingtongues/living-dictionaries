@@ -33,7 +33,12 @@
     "slot_code": "Short code (optional)",
     "edit_clause_slots": "Edit clause slots",
     "delete_slot_confirm": "Delete this clause slot?",
-    "slot_unassigned": "Unassigned"
+    "slot_unassigned": "Unassigned",
+    "glossing_legend": "Glossing abbreviations",
+    "no_legend_entry": "No expansion recorded for this code",
+    "show_glosses": "Show glosses",
+    "hide_glosses": "Hide glosses",
+    "open_sentence": "Open sentence"
   },
   "discourse": {
     "role": "Discourse role",

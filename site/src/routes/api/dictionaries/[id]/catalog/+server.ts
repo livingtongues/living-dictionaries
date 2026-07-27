@@ -1,39 +1,20 @@
 import type { RequestHandler } from './$types'
 import { verify_auth_dict_role } from '$lib/auth/verify-dict-role'
 import { ResponseCodes } from '$lib/constants'
+import { CatalogFieldError, update_dictionary_catalog } from '$lib/db/server/dictionary-catalog'
 import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
-import { validate_orthographies_array } from '$lib/db/server/orthographies'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
 
 /**
  * Update a dictionary's catalog metadata in shared.db. Manager-gated (site
- * admins bypass). Used by the dictionary settings page + the about / grammar
- * tabs. Only allowlisted fields are touched; JSON columns are stringified.
+ * admins bypass). Used by the dictionary settings page + the about tab.
  *
- * Deliberately does NOT set `dirty`. That is a CLIENT-only flag ("this browser
- * holds an edit it still has to push"); what carries a server-side write down to
- * admin clients is the `server_seq` trigger, which fires on EVERY update. See
- * the canonical-row rule in `sync-helpers.ts`.
- *
- * The caller sends a partial `{ field: value }` — every key must be in
- * ALLOWED_FIELDS or the request is rejected (defense against arbitrary column
- * writes).
+ * The caller sends a partial `{ field: value }`; the allowlist, JSON handling
+ * and validation all live in `$lib/db/server/dictionary-catalog.ts`, shared with
+ * the agent-facing `PATCH /api/v1/dictionaries/[id]`.
  */
-const JSON_FIELDS = new Set([
-  'alternate_names', 'gloss_languages', 'coordinates', 'metadata',
-  'orthographies', 'featured_image', 'write_in_collaborators',
-])
-
-const SCALAR_FIELDS = new Set([
-  'name', 'url', 'location', 'iso_639_3', 'glottocode', 'copyright',
-  'author_connection', 'community_permission', 'con_language_description',
-  'about', 'citation', 'public', 'print_access',
-  'language_used_by_community', 'hide_living_tongues_logo',
-])
-
-const ALLOWED_FIELDS = new Set([...JSON_FIELDS, ...SCALAR_FIELDS])
 
 export type DictionariesCatalogRequestBody = Record<string, unknown>
 
@@ -49,44 +30,14 @@ export const POST: RequestHandler = async (event) => {
   const { user_id } = await verify_auth_dict_role(event, { dictionary, min_role: 'manager' })
 
   const body = await event.request.json() as DictionariesCatalogRequestBody
-  const keys = Object.keys(body)
-  if (keys.length === 0)
-    error(ResponseCodes.BAD_REQUEST, 'No fields to update')
-
-  for (const key of keys) {
-    if (!ALLOWED_FIELDS.has(key))
-      error(ResponseCodes.BAD_REQUEST, `Field not updatable: ${key}`)
-  }
-
-  if ('orthographies' in body) {
-    try {
-      validate_orthographies_array(body.orthographies)
-    } catch (err) {
-      error(ResponseCodes.BAD_REQUEST, (err as Error).message)
-    }
-  }
-
-  const db = get_shared_db()
-  const set_clauses: string[] = []
-  const values: unknown[] = []
-  for (const key of keys) {
-    const value = body[key]
-    set_clauses.push(`"${key}" = ?`)
-    if (JSON_FIELDS.has(key))
-      values.push(value == null ? null : JSON.stringify(value))
-    else
-      values.push(value ?? null)
-  }
-
-  const now = new Date().toISOString()
-  set_clauses.push('updated_at = ?', 'updated_by_user_id = ?')
-  values.push(now, user_id, dictionary.id)
 
   try {
-    db.prepare(`UPDATE dictionaries SET ${set_clauses.join(', ')} WHERE id = ?`).run(...values)
+    update_dictionary_catalog({ db: get_shared_db(), dictionary_id: dictionary.id, fields: body, user_id })
   } catch (err) {
+    if (err instanceof CatalogFieldError)
+      error(ResponseCodes.BAD_REQUEST, err.message)
     console.error(`Error updating dictionary catalog: ${(err as Error).message}`)
-    log_server_event({ level: 'error', message: 'dictionary_catalog_update_failed', error: err, user_id, context: { dictionary_id: dictionary.id, fields: keys } })
+    log_server_event({ level: 'error', message: 'dictionary_catalog_update_failed', error: err, user_id, context: { dictionary_id: dictionary.id, fields: Object.keys(body) } })
     error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Could not update dictionary')
   }
 

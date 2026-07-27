@@ -1,17 +1,75 @@
-# Importing from PDF scans of printed dictionaries
+# Importing printed dictionaries from PDF
 
-Read `/api/v1/guides/importing` first for the mandatory workflow (register the source, then prepare the data before any data write). A scanned published
-dictionary is almost always a real **source**: create the `sources` registry row
-and link the file to it (`PATCH …/files/{fileId}` with `source_id`) before you
-start extracting.
+Read `/api/v1/guides/importing` first for the mandatory workflow (register the source,
+then prepare the data before any data write). A published dictionary is almost always a
+real **source**: create the `sources` registry row and link the file to it
+(`PATCH …/files/{fileId}` with `source_id`) before you start extracting.
+
+Two very different jobs share the `.pdf` extension — a **scan** of a printed page and a
+**born-digital** export from the publisher's typesetting software. Tell them apart first;
+the correct method for one is the wrong method for the other.
+
+## First: is it actually a scan?
+
+Check before anything else — the right method is the opposite for the two cases.
+
+```
+pdfinfo book.pdf     # a Creator/Producer like "Adobe InDesign" or "LaTeX" = born-digital
+pdffonts book.pdf    # embedded fonts with real encodings = born-digital
+pdftotext -f 50 -l 50 book.pdf -   # returns clean prose = there is a real text layer
+```
+
+A **born-digital** PDF (exported from InDesign, LaTeX, Word — anything published since
+roughly 2000) carries the typesetter's ACTUAL characters. That text layer is not a
+guess, and re-typing it by eye would *add* errors rather than remove them. Use it — but
+read "The font-glyph trap" below first, because these files fail in their own quiet way.
+
+A **scan** — page images, no text layer, or a text layer some tool OCR'd in — is the
+case the rest of this page is about.
+
+## The font-glyph trap (born-digital files)
+
+Publishers of minority-language dictionaries commission custom fonts, and a custom font
+subset often has no `ToUnicode` mapping for the very characters the language needed the
+font for. Those characters do not extract as themselves: they come out as **control
+characters, private-use codepoints, or a plausible-looking wrong letter** — and, because
+each font subset (regular / bold / italic / small-caps headings) is encoded separately,
+the SAME letter can arrive as several different codes.
+
+A real example: a 2019 university-press Ponca dictionary rendered `đ`/`Đ` — the letter
+for /ð/, the most distinctive consonant in the language — as `\x17`, `\x08`, `\x16`,
+`\x05` and `\x1e` depending on which font ran, ~6,000 occurrences in all. Terminals
+print those as nothing. A pipeline that trusted `pdftotext` would have silently deleted
+that letter from every word in the dictionary.
+
+So, before you trust one character of the text layer:
+
+1. **Inventory every codepoint** in the extracted text and sort by frequency. Anything
+   in the C0 control range, the private use area, or that you can't name is a suspect.
+2. **Identify each suspect by looking at the page.** Render the page it occurs on
+   (`pdftoppm -r 200 -png -f N -l N`), find the spot, and see what glyph is actually
+   printed. The book's own alphabet chart usually names it outright.
+3. **Build an explicit code → character map, per font if needed**, and record it in your
+   report. Extract with a tool that exposes the font per span (PyMuPDF `get_text("dict")`,
+   pdfminer) when one code means different things in different fonts.
+4. **Re-run the codepoint inventory on the DECODED text.** Zero unknowns is the pass
+   condition, and it is worth failing your pipeline over.
+5. **Watch the headings.** All-caps display fonts often encode the same letters a third
+   way — as a base letter plus a combining/spacing diacritic (`A` + U+02DB for `Ą`).
+
+Two smaller born-digital traps: ligature glyphs (`ﬁ`, `ﬂ`) can extract with a spurious
+space (`"fi rst"`) depending on the tool, and multi-column pages interleave unless you
+extract with x-coordinates and split the columns yourself. Both are why you still
+**look at rendered pages** even when the text layer is exact — you are verifying
+structure and layout rather than transcribing characters.
 
 ## Do NOT use OCR. Read every page with your own eyes.
 
 This is the single most important rule on this page, and it is the opposite of the
 advice you'd apply to a normal document.
 
-**Traditional OCR (Tesseract, ABBYY, any "extract text from PDF" tool) is not an
-acceptable method for these materials.** It is trained on majority languages —
+**For a genuine scan, traditional OCR (Tesseract, ABBYY, any "extract text from PDF"
+tool) is not an acceptable method.** It is trained on majority languages —
 English, Spanish, French, Chinese — and these books are not that. It fails here in
 two specific, unrecoverable ways:
 
@@ -37,9 +95,9 @@ invisible in the text alone.
 ### The method
 
 1. **Pages → images** at **300 dpi or higher** (`pdftoppm -r 300 -png`, PyMuPDF, or
-   equivalent). If a PDF has an embedded text layer, treat it as a *hint only* — it
-   is usually the output of exactly the OCR you are avoiding. Never import it
-   directly.
+   equivalent). If a *scan* has an embedded text layer, treat it as a **hint only** — it
+   is the output of exactly the OCR you are avoiding. Never import it directly. (A
+   born-digital file is the opposite case — see above.)
 2. **Actually view each page image.** One page (or one column) per look. Transcribe
    what you *see*, character by character, not what you'd expect the word to be.
 3. **Zoom in whenever you are not certain of a diacritic or glyph.** Re-render the
