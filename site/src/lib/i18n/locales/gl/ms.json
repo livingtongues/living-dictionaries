@@ -218,7 +218,6 @@
     "srm": "Bahasa Saramaccan",
     "sas": "Bahasa Sasak",
     "srr": "Bahasa Se(e)rer",
-    "seh ": "Bahasa Sena",
     "srp": "Bahasa Serbia",
     "shn": "Bahasa Shan",
     "sal": "Bahasa Shina",
@@ -302,6 +301,7 @@
     "cag": "Nivaclé",
     "haw": "Bahasa Hawaii",
     "qvi": "Quichua Dataran Tinggi Imbabura",
-    "default": "Lalai"
+    "default": "Lalai",
+    "seh": "Bahasa Sena"
   }
 }

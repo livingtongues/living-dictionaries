@@ -218,7 +218,6 @@
     "srm": "Saramaccan",
     "sas": "Sasak",
     "srr": "SE (ሠ) rer",
-    "seh ": "Sena",
     "srp": "ሰሪቢያን",
     "shn": "ሻን",
     "sal": "Shina",
@@ -302,6 +301,7 @@
     "cag": "ኒቫክሌ",
     "haw": "ሐዋያን",
     "qvi": "ኢምባቡራ ሃይላንድ ኪቹዋ",
-    "default": "ነባሪ"
+    "default": "ነባሪ",
+    "seh": "Sena"
   }
 }

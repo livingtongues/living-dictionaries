@@ -218,7 +218,6 @@
     "srm": "Saramaccan",
     "sas": "sasak",
     "srr": "Se (e) RER",
-    "seh ": "Sena",
     "srp": "serbio",
     "shn": "Shan",
     "sal": "Shina",
@@ -302,6 +301,7 @@
     "cag": "Nivaclé",
     "haw": "hawaiano",
     "qvi": "Quichua de las tierras altas de Imbabura",
-    "default": "Predeterminado"
+    "default": "Predeterminado",
+    "seh": "Sena"
   }
 }

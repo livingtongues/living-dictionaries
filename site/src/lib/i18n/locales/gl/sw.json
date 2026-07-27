@@ -218,7 +218,6 @@
     "srm": "Saramaccan",
     "sas": "Sasak",
     "srr": "Se(e)rer",
-    "seh ": "Sena",
     "srp": "Kiserbia",
     "shn": "Shan",
     "sal": "Shina",
@@ -302,6 +301,7 @@
     "cag": "Nivaclé",
     "haw": "Kihawaii",
     "qvi": "Imbabura Highland Quichua",
-    "default": "Chaguo-msingi"
+    "default": "Chaguo-msingi",
+    "seh": "Sena"
   }
 }

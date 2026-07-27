@@ -218,7 +218,6 @@
     "srm": "Saramaccan",
     "sas": "sasak",
     "srr": "Se (e) rer",
-    "seh ": "Sena",
     "srp": "Serbian",
     "shn": "Shan",
     "sal": "Shina",
@@ -302,6 +301,7 @@
     "cag": "Nivaclé",
     "haw": "Hawaiian",
     "qvi": "Babban Titin Imbabura Quichua",
-    "default": "Asali"
+    "default": "Asali",
+    "seh": "Sena"
   }
 }

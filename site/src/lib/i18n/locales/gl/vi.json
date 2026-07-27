@@ -218,7 +218,6 @@
     "srm": "tiếng Saramaccan",
     "sas": "tiếng Sasak",
     "srr": "tiếng Se(e)rer",
-    "seh ": "tiếng Sena",
     "srp": "tiếng Serbia",
     "shn": "tiếng Shan",
     "sal": "tiếng Shina",
@@ -302,6 +301,7 @@
     "cag": "Tiếng Nivaclé",
     "haw": "Tiếng Hawaii",
     "qvi": "Tiếng Quichua vùng cao Imbabura",
-    "default": "Mặc định"
+    "default": "Mặc định",
+    "seh": "tiếng Sena"
   }
 }

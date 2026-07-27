@@ -218,7 +218,6 @@
     "srm": "Saramacano",
     "sas": "Sasak",
     "srr": "Sererê",
-    "seh ": "Sena",
     "srp": "Sérvio",
     "shn": "Xã",
     "sal": "Shina",
@@ -302,6 +301,7 @@
     "cag": "Nivaclé",
     "haw": "havaiano",
     "qvi": "Quíchua das Terras Altas de Imbabura",
-    "default": "Padrão"
+    "default": "Padrão",
+    "seh": "Sena"
   }
 }
