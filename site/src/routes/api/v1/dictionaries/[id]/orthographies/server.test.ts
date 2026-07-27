@@ -74,6 +74,11 @@ describe(POST, () => {
     expect(listed.orthographies).toEqual([{ code: 'village-spelling', name: 'Village', used_by: { entries: 0, sentences: 0 } }])
   })
 
+  test('stores the characters an alternate needs tap-buttons for', async () => {
+    const { orthography } = await (await post({ code: 'village-spelling', name: 'Village', characters: ['\u0111', '\u0259'] })).json()
+    expect(orthography).toEqual({ code: 'village-spelling', name: 'Village', characters: ['\u0111', '\u0259'] })
+  })
+
   test('a known writing-system tag auto-wires its bcp', async () => {
     const { orthography } = await (await post({ code: 'srb-sora', name: 'Sompeng' })).json()
     expect(orthography).toEqual({ code: 'srb-sora', name: 'Sompeng', bcp: 'srb-sora' })
@@ -103,6 +108,17 @@ describe(PATCH, () => {
     const { orthography } = await (await patch('default', { name: 'Latin', bcp: 'sat-Latn' })).json()
     expect(orthography).toEqual({ code: 'default', name: 'Latin', bcp: 'sat-Latn', primary: true })
     expect(read_stored_orthographies()).toEqual([{ code: 'default', name: 'Latin', bcp: 'sat-Latn', primary: true }])
+  })
+
+  test('sets the primary\'s search tap-button characters, then clears them', async () => {
+    const { orthography } = await (await patch('default', { characters: [' \u0111 ', '\u02BC', '\u0111', ''] })).json()
+    expect(orthography).toEqual({ code: 'default', name: '', characters: ['\u0111', '\u02BC'], primary: true })
+    const cleared = await (await patch('default', { characters: [] })).json()
+    expect(cleared.orthography.characters).toBeUndefined()
+  })
+
+  test('rejects a malformed characters list', async () => {
+    await expect(patch('default', { characters: 'abc' })).rejects.toMatchObject({ status: 400 })
   })
 })
 

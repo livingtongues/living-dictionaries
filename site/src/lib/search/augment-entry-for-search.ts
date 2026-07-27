@@ -83,7 +83,8 @@ export function restore_spaces_periods_from_underscores(string: string) {
 const ipa_to_common_keyboard = {
   ɛ: 'e',
   ɘ: 'e',
-  ǝ: 'e',
+  ǝ: 'e', // U+01DD turned e
+  ə: 'e', // U+0259 schwa
   ɪ: 'i',
   ɔ: 'o',
   ø: 'o',
@@ -105,6 +106,7 @@ const ipa_to_common_keyboard = {
   ɚ: 'r',
   ð: 'd',
   ɖ: 'd',
+  đ: 'd', // U+0111 d with stroke — no NFD decomposition, so it needs an explicit mapping
   θ: 't',
   ʈ: 't',
   ʌ: 'v',

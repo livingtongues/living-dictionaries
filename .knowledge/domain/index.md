@@ -8,8 +8,9 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
 - [related-entries-model.md](./related-entries-model.md) — why related entries use flat
   parent/child/sibling references instead of nested sub-entries, and the per-type editing rules.
 - [orthographies-model.md](./orthographies-model.md) — the alternate-writing-system registry:
-  immutable `code` keys, why `lexeme.default` stays the primary, the Keyman dataset (and the live-API
-  subset gotcha), custom-code rules, and human/agent parity.
+  immutable `code` keys, why `lexeme.default` stays the primary, the per-orthography `characters`
+  search tap-buttons, the Keyman dataset (and the live-API subset gotcha), custom-code rules, and
+  human/agent parity.
 - [media-serving-urls.md](./media-serving-urls.md) — R2 object conventions, photo/video variants,
   immutable site assets, bucket CORS, storage ledger, orphan sweep, and locked backup.
 - Imports are agent-driven now: managers upload resources on `/{dict}/import` → a request

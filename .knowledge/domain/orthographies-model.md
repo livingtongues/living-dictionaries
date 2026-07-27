@@ -8,7 +8,7 @@ Keyman lookup in `$lib/components/keyboards/keyman/writing-systems.ts`.
 ## The core model
 
 `dictionaries.orthographies` (shared.db catalog JSON) is an ordered list of
-`{ code, name, bcp?, notes?, primary? }`. **`code` is the immutable key** each spelling is stored under
+`{ code, name, bcp?, notes?, characters?, primary? }`. **`code` is the immutable key** each spelling is stored under
 inside every entry's `lexeme` and every sentence's `text` MultiString. `name` is the editable label;
 `bcp` drives the Keyman keyboard; renaming edits `name`, never `code`.
 
@@ -36,6 +36,31 @@ So the upgrade was *semantic*, not a rename: you can label the primary and give 
 Future "promote an alternate to canonical" should be a **one-time data operation** that swaps the
 `default` key's contents with an alternate's across all entries, keeping the site code simple (always
 `lexeme.default`), rather than adding a per-dict `primary_code` accessor.
+
+## `characters` — the search tap-buttons (added 2026-07-27)
+
+An orthography may carry `characters?: string[]` — the letters of that writing system a normal
+keyboard can't produce (`đ ʼ ə ą́ ·`). The entries search box renders the union across the registry as
+tap-buttons that splice into the search input at the caret. **Why it lives here rather than in a
+per-dictionary hardcode or a new table:** the alphabet IS a property of a writing system, and the
+catalog JSON already had a UI, a v1 endpoint pair, validation and sync — the feature cost one optional
+field. Jacob's ask was explicitly "a few buttons, not a Keyman keyboard", and "make it work for more
+than one dictionary".
+
+Decisions worth remembering:
+- **Opt-in, never auto-derived at render time.** A live scan would put a character row on all ~800
+  dictionaries and would rank noise (en dashes, stray Cyrillic) as if it were alphabet. Instead the
+  settings editor has a **Detect** button that scans that orthography's own headwords in the local
+  wa-sqlite dict.db and proposes a frequency-ranked inventory the manager then trims
+  (`derive_special_characters`). Zero config work for the manager, zero surprise for everyone else.
+- **An item may be several codepoints.** Ponca's `ą́` has no precomposed form (NFC keeps
+  `ą` + U+0301), so items are capped by UTF-16 length (8), not at one character, and detection keeps
+  combining marks glued to their base (`\p{M}` run) instead of offering a bare floating accent.
+- **Accented vowels mostly don't NEED a button** — search indexes a diacritic-stripped form of every
+  lexeme, so `ą á ę` are all reachable by typing plain `a`/`e`. The characters that genuinely need one
+  are the precomposed/IPA letters with no NFD decomposition: `đ ʼ ə ʃ ·`. (`ə` and `đ` were missing
+  from `ipa_to_common_keyboard` until this landed.) Managers still list the vowels because people type
+  whole words.
 
 ## Codes: BCP-47 vs custom, and Keyman
 

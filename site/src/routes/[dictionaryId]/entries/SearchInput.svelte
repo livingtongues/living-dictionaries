@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { QueryParamState } from '$lib/state/query-param-state.svelte'
+  import { tick } from 'svelte'
   import { page } from '$app/state'
   import type { QueryParams } from '$lib/search/types'
+  import SpecialCharacterButtons from '$lib/orthography/SpecialCharacterButtons.svelte'
+  import { insert_at_caret } from '$lib/utils/insert-at-caret'
   import IconCarbonSearch from '~icons/carbon/search'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
   import IconMaterialSymbolsFilterAlt from '~icons/material-symbols/filter-alt'
@@ -13,49 +16,79 @@
     placeholder?: string
     /** Focus the input on mount (used by the dictionary home's search pill hand-off). */
     focus_on_mount?: boolean
+    /** Characters no keyboard can type, from the dictionary's registered orthographies. */
+    special_characters?: string[]
   }
 
-  const { on_show_filter_menu, search_params, index_ready = false, placeholder = undefined, focus_on_mount = false }: Props = $props()
+  const { on_show_filter_menu, search_params, index_ready = false, placeholder = undefined, focus_on_mount = false, special_characters = [] }: Props = $props()
 
   let input_el = $state<HTMLInputElement>()
   $effect(() => {
     if (focus_on_mount)
       input_el?.focus()
   })
+
+  async function type_character(character: string) {
+    if (!input_el) return
+    const { value, caret } = insert_at_caret({
+      value: search_params.value.query || '',
+      start: input_el.selectionStart,
+      end: input_el.selectionEnd,
+      text: character,
+    })
+    search_params.value.query = value
+    if (search_params.value.page && search_params.value.page > 1)
+      search_params.value.page = 1
+    await tick()
+    input_el.focus()
+    input_el.setSelectionRange(caret, caret)
+  }
 </script>
 
-<div class="search-wrap">
-  <div class="input-wrap">
-    <div class="search-icon">
-      {#if index_ready}
-        <IconCarbonSearch style="color: var(--color-secondary)" />
-      {:else}
-        <IconSvgSpinners3DotsFade style="vertical-align: -4px" />
-      {/if}
+<div class="search-column">
+  <div class="search-wrap">
+    <div class="input-wrap">
+      <div class="search-icon">
+        {#if index_ready}
+          <IconCarbonSearch style="color: var(--color-secondary)" />
+        {:else}
+          <IconSvgSpinners3DotsFade style="vertical-align: -4px" />
+        {/if}
+      </div>
+      <input
+        type="search"
+        bind:this={input_el}
+        bind:value={search_params.value.query}
+        oninput={() => {
+          if (search_params.value.page && search_params.value.page > 1) {
+            search_params.value.page = 1
+          }
+        }}
+        placeholder={placeholder ?? page.data.t('entry.search_entries')} />
     </div>
-    <input
-      type="search"
-      bind:this={input_el}
-      bind:value={search_params.value.query}
-      oninput={() => {
-        if (search_params.value.page && search_params.value.page > 1) {
-          search_params.value.page = 1
-        }
-      }}
-      placeholder={placeholder ?? page.data.t('entry.search_entries')} />
+    <button
+      type="button"
+      onclick={on_show_filter_menu}
+      class="filter-button">
+      <IconMaterialSymbolsFilterAlt style="color: color-mix(in srgb, var(--color) 45%, var(--background))" />
+      <span class="filter-label">
+        {page.data.t('entry.filters')}
+      </span>
+    </button>
   </div>
-  <button
-    type="button"
-    onclick={on_show_filter_menu}
-    class="filter-button">
-    <IconMaterialSymbolsFilterAlt style="color: color-mix(in srgb, var(--color) 45%, var(--background))" />
-    <span class="filter-label">
-      {page.data.t('entry.filters')}
-    </span>
-  </button>
+
+  <SpecialCharacterButtons characters={special_characters} on_select={type_character} />
 </div>
 
 <style>
+  .search-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex-grow: 1;
+    min-width: 0;
+  }
+
   .search-wrap {
     display: flex;
     flex-grow: 1;

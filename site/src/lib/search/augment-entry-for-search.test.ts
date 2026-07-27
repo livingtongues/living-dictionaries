@@ -72,4 +72,9 @@ describe(simplify_lexeme_for_search, () => {
     expect(simplify_lexeme_for_search('põsret')).toEqual('posret')
     expect(simplify_lexeme_for_search('akʰe:')).toEqual('akhe:')
   })
+
+  test('maps stroked/schwa letters that have no decomposition to keyboard letters', () => {
+    expect(simplify_lexeme_for_search('Iđádiđaì')).toEqual('Idadidai')
+    expect(simplify_lexeme_for_search('ʃəbe')).toEqual('sebe')
+  })
 })

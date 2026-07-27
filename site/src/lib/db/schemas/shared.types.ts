@@ -56,6 +56,13 @@ export interface Orthography {
   bcp?: string
   /** Optional notes from the editor. */
   notes?: string
+  /**
+   * Characters of this writing system that a normal keyboard can't produce
+   * (`đ`, `ʼ`, `ə`, `ą́`…). Rendered as tap-buttons beside the entries search box so
+   * anyone can type the language. An item may be a multi-codepoint grapheme
+   * (`ą́` = `ą` + U+0301). Empty/absent → no buttons.
+   */
+  characters?: string[]
   /** True only for the pinned slot-0 primary (whose `code` is always `'default'`). */
   primary?: boolean
 }

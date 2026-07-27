@@ -17,6 +17,7 @@
   import { page } from '$app/state'
   import { goto } from '$app/navigation'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import { get_special_characters } from '$lib/orthography/special-characters'
   import { browser } from '$app/environment'
   import { track, track_timing } from '$lib/debug/remote-log'
   import { SEARCH_PERFORMED } from '$lib/debug/log-events'
@@ -124,6 +125,10 @@
     return page.data.t('dictionary.entries')
   })
 
+  // Characters no keyboard can type (`đ ʼ ə`…), registered per writing system on
+  // the dictionary's orthographies — tap-buttons under the search box.
+  const special_characters = $derived(get_special_characters(dictionary))
+
   const search_placeholder = $derived.by(() => {
     if (scope === 'sentences') return page.data.t('sentence.search_sentences')
     if (scope === 'texts') return page.data.t('dictionary.texts')
@@ -153,7 +158,7 @@
       {/if}
       <div class="search-bar">
 
-        <SearchInput {search_params} index_ready={true} on_show_filter_menu={toggle} placeholder={search_placeholder} focus_on_mount={!!page.state.focus_search} />
+        <SearchInput {search_params} index_ready={true} on_show_filter_menu={toggle} placeholder={search_placeholder} focus_on_mount={!!page.state.focus_search} {special_characters} />
         <div style="width: 0.25rem"></div>
         {#if !scope}
           <SwitchView bind:view={search_params.value.view} can_print={!!dictionary.print_access || can_edit} />
@@ -226,7 +231,9 @@
   .search-bar {
     display: flex;
     margin-bottom: 0.25rem;
-    align-items: center;
+    /* flex-start, not center: the search column grows taller than the view
+       switcher when a dictionary registers special-character tap-buttons. */
+    align-items: flex-start;
     position: sticky;
     top: 0;
     padding-top: 0.5rem;

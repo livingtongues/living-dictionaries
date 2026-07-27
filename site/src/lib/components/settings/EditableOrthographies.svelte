@@ -6,6 +6,7 @@
   import { page } from '$app/state'
   import Filter from '$lib/components/Filter.svelte'
   import { get_orthographies } from '$lib/orthography/orthographies'
+  import { derive_special_characters, format_characters, parse_characters_input } from '$lib/orthography/special-characters'
   import { additional_keyboards, glossing_languages } from '$lib/glosses/glossing-languages'
   import { is_reserved_or_known_code, load_keyman_writing_systems } from '$lib/components/keyboards/keyman/writing-systems'
   import IconFa6SolidChevronUp from '~icons/fa6-solid/chevron-up'
@@ -44,10 +45,11 @@
   let custom_code = $state('')
 
   function commit(next: { primary: Orthography, alternates: Orthography[] }) {
-    const primary_configured = !!(next.primary.name?.trim() || next.primary.bcp || next.primary.notes)
+    const primary_configured = !!(next.primary.name?.trim() || next.primary.bcp || next.primary.notes || next.primary.characters?.length)
     const primary_entry: Orthography = { code: 'default', name: next.primary.name?.trim() || '', primary: true }
     if (next.primary.bcp) primary_entry.bcp = next.primary.bcp
     if (next.primary.notes) primary_entry.notes = next.primary.notes
+    if (next.primary.characters?.length) primary_entry.characters = next.primary.characters
     const orthographies = [...(primary_configured ? [primary_entry] : []), ...next.alternates]
     return on_update(orthographies)
   }
@@ -56,6 +58,41 @@
     if (code === registry.primary.code)
       return commit({ primary: { ...registry.primary, name }, alternates: registry.alternates })
     return commit({ primary: registry.primary, alternates: registry.alternates.map(orthography => orthography.code === code ? { ...orthography, name } : orthography) })
+  }
+
+  /**
+   * The characters this writing system needs that a keyboard can't produce — they
+   * become tap-buttons beside the entries search box.
+   */
+  function set_characters(code: string, characters: string[]) {
+    if (code === registry.primary.code)
+      return commit({ primary: { ...registry.primary, characters }, alternates: registry.alternates })
+    return commit({ primary: registry.primary, alternates: registry.alternates.map(orthography => orthography.code === code ? { ...orthography, characters } : orthography) })
+  }
+
+  let detecting = $state<string | null>(null)
+
+  /** Propose an inventory from the dictionary's own headwords in this orthography. */
+  async function detect_characters(code: string) {
+    const { dict_db } = page.data
+    if (!dict_db) return
+    detecting = code
+    try {
+      const rows = await dict_db.entries.query({
+        where: `lexeme IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(lexeme) WHERE key = ? AND value IS NOT NULL AND value != '')`,
+        params: [code],
+        limit: 5000,
+      }).snapshot()
+      const texts = rows.map(row => row.lexeme?.[code]).filter(Boolean)
+      const characters = derive_special_characters({ texts })
+      if (!characters.length) {
+        alert('No unusual characters found in these headwords — nothing to add.')
+        return
+      }
+      await set_characters(code, characters)
+    } finally {
+      detecting = null
+    }
   }
 
   function move(index: number, direction: -1 | 1) {
@@ -133,42 +170,67 @@
 {/if}
 <div class="hint">The primary headword is always first. Add more writing systems for the same words.</div>
 
-<div class="ortho-list">
-  <div class="ortho-row primary-row">
-    <span class="badge">1</span>
+{#snippet characters_row(orthography: Orthography)}
+  <div class="chars-row">
     <input
-      class="name-input"
-      placeholder={page.data.t('entry_field.lexeme')}
-      value={registry.primary.name}
-      onchange={event => rename(registry.primary.code, (event.target as HTMLInputElement).value)} />
-    <button type="button" class="kb-button" class:has-kb={!!registry.primary.bcp} title="Writing system / keyboard" onclick={() => open_picker('primary')}>
-      <IconFa6SolidKeyboard />
-      {registry.primary.bcp || 'set'}
+      class="chars-input"
+      placeholder="Hard-to-type characters, e.g. đ ʼ ą"
+      title="Shown as tap-buttons beside the entries search box"
+      value={format_characters(orthography.characters)}
+      onchange={event => set_characters(orthography.code, parse_characters_input((event.target as HTMLInputElement).value))} />
+    <button
+      type="button"
+      class="kb-button"
+      title="Propose them from this dictionary's own headwords"
+      disabled={detecting === orthography.code}
+      onclick={() => detect_characters(orthography.code)}>
+      {detecting === orthography.code ? 'Detecting…' : 'Detect'}
     </button>
+  </div>
+{/snippet}
+
+<div class="ortho-list">
+  <div class="ortho-block">
+    <div class="ortho-row primary-row">
+      <span class="badge">1</span>
+      <input
+        class="name-input"
+        placeholder={page.data.t('entry_field.lexeme')}
+        value={registry.primary.name}
+        onchange={event => rename(registry.primary.code, (event.target as HTMLInputElement).value)} />
+      <button type="button" class="kb-button" class:has-kb={!!registry.primary.bcp} title="Writing system / keyboard" onclick={() => open_picker('primary')}>
+        <IconFa6SolidKeyboard />
+        {registry.primary.bcp || 'set'}
+      </button>
+    </div>
+    {@render characters_row(registry.primary)}
   </div>
 
   {#each registry.alternates as orthography, index (orthography.code)}
-    <div class="ortho-row">
-      <span class="badge">{index + 2}</span>
-      <input
-        class="name-input"
-        placeholder={orthography.code}
-        value={orthography.name}
-        onchange={event => rename(orthography.code, (event.target as HTMLInputElement).value)} />
-      <span class="code-tag" title="immutable code">{orthography.code}</span>
-      <button type="button" class="icon-button" title="Move up" disabled={index === 0} onclick={() => move(index, -1)}>
-        <IconFa6SolidChevronUp />
-      </button>
-      <button type="button" class="icon-button" title="Move down" disabled={index === registry.alternates.length - 1} onclick={() => move(index, 1)}>
-        <IconFa6SolidChevronDown />
-      </button>
-      {#if usage_counts[orthography.code] === 0}
-        <button type="button" class="icon-button danger" title="Delete" onclick={() => remove(orthography)}>
-          <IconFa6SolidTrash />
+    <div class="ortho-block">
+      <div class="ortho-row">
+        <span class="badge">{index + 2}</span>
+        <input
+          class="name-input"
+          placeholder={orthography.code}
+          value={orthography.name}
+          onchange={event => rename(orthography.code, (event.target as HTMLInputElement).value)} />
+        <span class="code-tag" title="immutable code">{orthography.code}</span>
+        <button type="button" class="icon-button" title="Move up" disabled={index === 0} onclick={() => move(index, -1)}>
+          <IconFa6SolidChevronUp />
         </button>
-      {:else if usage_counts[orthography.code] > 0}
-        <span class="code-tag" title="Used by {usage_counts[orthography.code]} entries/sentences — clear it from those to delete">in use</span>
-      {/if}
+        <button type="button" class="icon-button" title="Move down" disabled={index === registry.alternates.length - 1} onclick={() => move(index, 1)}>
+          <IconFa6SolidChevronDown />
+        </button>
+        {#if usage_counts[orthography.code] === 0}
+          <button type="button" class="icon-button danger" title="Delete" onclick={() => remove(orthography)}>
+            <IconFa6SolidTrash />
+          </button>
+        {:else if usage_counts[orthography.code] > 0}
+          <span class="code-tag" title="Used by {usage_counts[orthography.code]} entries/sentences — clear it from those to delete">in use</span>
+        {/if}
+      </div>
+      {@render characters_row(orthography)}
     </div>
   {/each}
 </div>
@@ -223,8 +285,32 @@
   .ortho-list {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem;
     margin-bottom: 0.5rem;
+  }
+
+  .ortho-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .chars-row {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding-left: 1.625rem;
+  }
+
+  .chars-input {
+    flex-grow: 1;
+    min-width: 0;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--surface);
+    color: var(--color);
+    font-size: 0.8125rem;
   }
 
   .ortho-row {

@@ -6,6 +6,7 @@ import keyman_writing_systems from '$lib/components/keyboards/keyman/keyman-writ
 import { get_dictionary_db } from './dictionary-db'
 import { get_shared_db } from './shared-db'
 import { get_orthographies } from '$lib/orthography/orthographies'
+import { validate_characters } from '$lib/orthography/special-characters'
 
 /**
  * Orthography (writing-system) registry management. The registry lives on
@@ -57,6 +58,12 @@ export function validate_orthographies_array(orthographies: unknown): Orthograph
     const key = code.toLowerCase()
     if (seen.has(key)) throw new Error(`duplicate orthography code "${code}"`)
     seen.add(key)
+    const { characters } = orthography as { characters?: unknown }
+    if (characters !== undefined) {
+      const cleaned = validate_characters(characters)
+      if (cleaned.length) (orthography as Orthography).characters = cleaned
+      else delete (orthography as Orthography).characters
+    }
   }
   return orthographies as Orthography[]
 }
@@ -99,6 +106,8 @@ export interface OrthographyInput {
   name?: string
   bcp?: string
   notes?: string
+  /** Characters a normal keyboard can't type — tap-buttons beside search. */
+  characters?: string[]
 }
 
 /** Validate + normalize a new alternate code (throws on invalid). Auto-wires bcp for known tags. */
@@ -118,6 +127,8 @@ function build_alternate({ input, existing }: { input: OrthographyInput, existin
   const bcp = (input.bcp ?? '').trim() || (is_known_writing_system(code) ? code : '')
   if (bcp) orthography.bcp = bcp
   if (input.notes?.trim()) orthography.notes = input.notes.trim()
+  const characters = validate_characters(input.characters)
+  if (characters.length) orthography.characters = characters
   return orthography
 }
 
@@ -132,6 +143,8 @@ export interface OrthographyPatch {
   name?: string
   bcp?: string | null
   notes?: string | null
+  /** Replaces the whole list; `[]`/`null` clears it. */
+  characters?: string[] | null
 }
 
 /**
@@ -151,6 +164,11 @@ export function update_orthography({ dict_id, user_id, code, patch }: { dict_id:
     if (patch.notes !== undefined) {
       if (patch.notes) next.notes = patch.notes.trim()
       else delete next.notes
+    }
+    if (patch.characters !== undefined) {
+      const characters = validate_characters(patch.characters)
+      if (characters.length) next.characters = characters
+      else delete next.characters
     }
     return next
   }
