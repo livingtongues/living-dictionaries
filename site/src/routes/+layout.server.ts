@@ -45,8 +45,10 @@ export const load: LayoutServerLoad = async ({ cookies, request }) => {
     user_longitude,
     /**
      * Crawler/automated agent, decided ONCE here from the request UA with the
-     * same `is_bot_user_agent` the analytics use — never a second helper (house
-     * grew two that disagreed). Consumers skip client-side work a robot can't
+     * fleet-canonical `$lib/utils/bot-user-agent.ts` the analytics also use —
+     * never a second helper (house grew two that disagreed, and LD's own
+     * imprecise copy blanked the app for CUBOT phones and WhatsApp's in-app
+     * browser on 2026-07-27). Consumers skip client-side work a robot can't
      * use: the dictionary layout skips booting the whole offline database
      * (leader election + OPFS snapshot download + search index). 2026-07-27
      * measurement: 1,476 of 1,943 dictionary boots in 24h were robot sessions,

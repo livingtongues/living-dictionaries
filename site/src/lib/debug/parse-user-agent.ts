@@ -113,20 +113,13 @@ function detect_os_version({ ua, os }: { ua: string, os: string }): string | nul
 }
 
 /**
- * Crawler / automated-agent detection. ~29% of house "sessions" are bots
- * (Applebot, Googlebot, GPTBot, …) — they have no OPFS/worker, never convert, and
- * polluted the analytics enough to send a `log-and-fix` chase down a false trail
- * (an Applebot `has_opfs:false` row read as "old Safari user"). Exclude them from
- * the human-facing browser/capability breakdown. Substring match on the common
- * tokens — cheap and good enough; UA bot-spoofing isn't a threat model here.
+ * Crawler detection deliberately does NOT live here. It is the fleet-canonical
+ * `$lib/utils/bot-user-agent.ts` — one copy, adopted verbatim in house/LD/tutor
+ * and guarded by `bot-user-agent.parity.test.ts`. This file's own substring
+ * regex was the 2026-07-27 outage: it called every CUBOT phone and every
+ * WhatsApp in-app browser a robot, and since `f8b13cde` that verdict gates the
+ * whole offline-database boot — those people got a blank dictionary.
  */
-const BOT_PATTERN = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|embedly|quora link preview|pinterest|whatsapp|telegrambot|headless|lighthouse|pagespeed|gptbot|chatgpt|claude|ccbot|perplexity|applebot|googlebot|googleother|yandex|baidu|duckduck|semrush|ahrefs|petalbot|dataforseo|python-requests|axios|curl|wget|node-fetch|go-http/i
-
-export function is_bot_user_agent(ua: string | null | undefined): boolean {
-  if (!ua)
-    return false
-  return BOT_PATTERN.test(ua)
-}
 
 export function parse_user_agent(ua: string | null | undefined): ParsedUserAgent {
   if (!ua)
@@ -205,25 +198,6 @@ if (import.meta.vitest) {
 
     it('null / empty UA', () => {
       expect(parse_user_agent(null)).toEqual({ browser: 'Other', major: null, version: null, os: 'Other', os_version: null, device: 'desktop' })
-    })
-  })
-
-  describe(is_bot_user_agent, () => {
-    it('flags Applebot (the one that caused the false alarm)', () => {
-      expect(is_bot_user_agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15 (Applebot/0.1; +http://www.apple.com/go/applebot)')).toBe(true)
-    })
-    it('flags Googlebot + GPTBot', () => {
-      expect(is_bot_user_agent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')).toBe(true)
-      expect(is_bot_user_agent('Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; GPTBot/1.0; +https://openai.com/gptbot')).toBe(true)
-    })
-    it('flags GoogleOther (the "GoogleOther" crawler has no "bot" token)', () => {
-      expect(is_bot_user_agent('Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.7827.200 Mobile Safari/537.36 (compatible; GoogleOther)')).toBe(true)
-    })
-    it('does NOT flag a real Safari user', () => {
-      expect(is_bot_user_agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15')).toBe(false)
-    })
-    it('does NOT flag real Chrome', () => {
-      expect(is_bot_user_agent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36')).toBe(false)
     })
   })
 

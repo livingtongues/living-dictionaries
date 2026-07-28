@@ -1,13 +1,22 @@
-import { is_bot_user_agent } from '$lib/debug/parse-user-agent'
+import { is_bot_user_agent } from '$lib/utils/bot-user-agent'
 
 /**
  * Is THIS request a crawler/automated agent, for the purposes of skipping client
  * work a robot can't use (the dictionary layout's whole offline-DB boot)?
  *
- * Detection itself is `is_bot_user_agent` and nothing else — one source of truth,
- * shared with the analytics (house grew two helpers that disagreed; don't).
- * This adds only the two environments where a headless browser is a HUMAN's
- * proxy and must keep the full app:
+ * Detection itself is the fleet-canonical `$lib/utils/bot-user-agent.ts` and
+ * nothing else — one copy, adopted verbatim in house/LD/tutor, guarded by
+ * `bot-user-agent.parity.test.ts`. Never grow a second matcher here.
+ *
+ * ⚠️ It MUST be `is_bot_user_agent`, never the sibling export
+ * `is_bot_or_unknown_user_agent`. They have identical signatures and
+ * deliberately OPPOSITE behaviour on a missing User-Agent. house's fail-closed
+ * variant gates a background download; THIS gates the entire offline database,
+ * so failing closed on a UA-less request would hand that visitor an empty
+ * entries list and block every edit. A missing UA is a person here.
+ *
+ * This wrapper adds only the two environments where a headless browser is a
+ * HUMAN's proxy and must keep the full app:
  *
  *  - **dev** — the local dev server, where a screenshot/e2e/debug browser is us;
  *  - **an e2e run** — every LD e2e harness boots `node build` with
@@ -46,6 +55,35 @@ if (import.meta.vitest) {
     })
     test('even a declared crawler UA passes through in dev (a screenshot script spoofing one)', () => {
       expect(is_bot_request({ ...base, user_agent: GOOGLEBOT, is_dev: true })).toBe(false)
+    })
+
+    /**
+     * The 2026-07-27 outage of function: these people were served a null dict
+     * session — no leader election, no worker, no offline database, so an empty
+     * entries list and every edit blocked. Each one is a REGRESSION GUARD on the
+     * gate itself, not just on the matcher.
+     */
+    describe('people the old substring matcher blanked the app for', () => {
+      test('a CUBOT phone is a person (the brand name contains "bot")', () => {
+        expect(is_bot_request({ ...base, user_agent: 'Mozilla/5.0 (Linux; Android 12; CUBOT NOTE 20) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36' })).toBe(false)
+      })
+      test('WhatsApp\'s in-app browser is a person — the most common way a shared link is opened', () => {
+        expect(is_bot_request({ ...base, user_agent: 'Mozilla/5.0 (Linux; Android 13; SM-A536B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36 WhatsApp/2.24.6.78' })).toBe(false)
+      })
+      test('WhatsApp\'s link unfurler still IS a robot (bare UA, no browser token)', () => {
+        expect(is_bot_request({ ...base, user_agent: 'WhatsApp/2.19.81 A' })).toBe(true)
+      })
+      test('Sogou\'s consumer mobile browser is a person; its web spider is not', () => {
+        expect(is_bot_request({ ...base, user_agent: 'Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/116.0.0.0 Mobile Safari/537.36 SogouMobileBrowser/5.28.1' })).toBe(false)
+        expect(is_bot_request({ ...base, user_agent: 'Sogou web spider/4.0(+http://www.sogou.com/docs/help/webmasters.htm#07)' })).toBe(true)
+      })
+    })
+
+    test('a MISSING User-Agent is a PERSON — failing closed here blanks the whole app', () => {
+      // Guards against someone swapping in `is_bot_or_unknown_user_agent`, whose
+      // signature is identical and whose missing-UA policy is the opposite.
+      expect(is_bot_request({ ...base, user_agent: null })).toBe(false)
+      expect(is_bot_request({ ...base, user_agent: '' })).toBe(false)
     })
   })
 }
