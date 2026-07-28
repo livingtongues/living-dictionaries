@@ -119,3 +119,28 @@ no-fetch path, the fetch-failure degrade, the intrinsic-dimension contract, and 
 **Still to verify after deploy:** `og_render_failed` with `reason:"image_fetch"` should drop to ~0/day
 (the `reason:"font"` handful is separate known noise), and `og_image_transcode_failed` should stay at
 0.
+
+## Post-deploy verification — 2026-07-27 nightly log review
+
+**The photo is back. ✅** A live production card was fetched and viewed
+(`/sibe/entry/pGxAn5gkEMN1SfLfcgwl` → its real `og:image` URL → a 1200×630 PNG with the entry photo
+full-bleed behind the lexeme). `og_render_failed reason:"image_fetch"` stopped dead at **05:11 UTC**,
+before the 09:54 deploy; **zero** since, versus 280 on July 26. The three-day photo-less-card
+regression is closed.
+
+Two things did **not** land as predicted, both tracked in
+<File path=".issues/og-endpoint-load-outages.md" />:
+
+1. **`og_image_transcode_failed` is not 0 — it is 84 in 24 h**, and none of it is a codec fault. Every
+   row is `TypeError: fetch failed` or `TimeoutError: The operation was aborted due to timeout`
+   fetching the R2 photo. The same URLs fetch in 13–150 ms when the box is idle; they fail only inside
+   the load bursts described in the load issue. Fixing the load fixes these.
+2. **`reason:"font"` jumped from ~3/day to 127/day** — not a new fault, an *unmasked* one. The error is
+   the long-standing `@shuding/opentype.js` "lookupType: 5 - substFormat: 3 is not yet supported"
+   thrown while parsing a dynamically fetched Google font. Previously the WebP image error threw first
+   and the font error never got a chance to be reported. It is a `warn` on a retry path: the card still
+   renders via the `static_fonts_only` fallback. Cost: dictionaries whose script has no static fallback
+   render tofu boxes in the card text (confirmed visually — the Manchu card shows `□□□□`, while the
+   Chinese gloss on the same card renders correctly). Cosmetic, not a failure; worth a separate,
+   low-priority fix (bundle more static Noto scripts, or skip the dynamic-font path for scripts known
+   to trip the parser).

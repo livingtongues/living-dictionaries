@@ -98,6 +98,26 @@ proposals against this lens.
   first concrete instance of the plain-language directive above.
 
 ## Open proposals
+- **★★★ NEW — "User-observed availability" series next to Synthetic uptime** *(filed 2026-07-27 —
+  grounded in a live P1; **HIGH**).* Today the `/admin/health` Synthetic uptime panel reported
+  **271 probes, 2 failures, 99.3% availability** on a day when Caddy refused **1,553 requests** across
+  five total 1–3 minute outages and 21 signed-in users logged HTTP 502. A 5-minute probe cadence
+  cannot see a 1-minute outage — it will miss ~4 of 5. The corrective signal is already logged and
+  nothing reads it as availability: `sync_failed` rows carry an HTTP `status`, and 502/503 there means
+  a real user got no server. **Build:** a second series inside the existing uptime panel — daily count
+  of user-observed 5xx + **distinct users affected** + the worst hour of the day, with the synthetic
+  series kept alongside (the gap between "probe says up" and "users say down" is the insight). No new
+  telemetry needed. Aggregate-health shaped, no per-error list (honors 2026-07-14 + 2026-07-22).
+  Incident context: <File path=".issues/og-endpoint-load-outages.md" />.
+- **★★ NEW — Sync liveness: read the SUCCESS side, not just failures** *(ported from tutor 2026-07-27
+  · filed 2026-07-27 · MEDIUM).* Tutor's review found its sync panel entirely failure-driven and
+  therefore blind to a device that quietly stopped syncing (a 4-day stall produced zero failure rows).
+  **Verified in LD source tonight: identical gap** — `build_sync_health`
+  (`log-analytics.ts:2463`) queries exactly one message, `sync_failed`, and every returned field
+  counts a fault. LD already emits the success signal server-side: **1,719 `dict_changes_pushed`
+  events today**. Build a liveness strip — pushes/day, distinct dictionaries + users pushing, and the
+  failure share as a **percentage of attempts** rather than a raw count — so the panel answers "is
+  syncing working for everyone" instead of "how many failures". Port tutor's shape; don't redesign.
 - **★★★ NEW — Stop the analytics compute from blocking the server** *(ported from house 2026-07-26 ·
   filed 2026-07-26 · **HIGH**, promoted to its own issue
   <File path=".issues/analytics-compute-blocks-server.md" />).* Not a panel — the standing "load

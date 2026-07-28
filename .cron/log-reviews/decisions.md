@@ -174,3 +174,48 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   traps it cost to find: satori **cannot measure a data URI** (needs explicit `<img width height>` or it
   throws "Image size cannot be determined"), and satori resolves a percentage width against the parent's
   CONTENT box (the card photo had always stopped 96×72 px short of the edges).
+- **2026-07-27 — the `/og` share-image endpoint is the new top production risk: it took the WHOLE SITE
+  down five times in one evening.** Caddy logged **1,553 `no upstreams available`** (both blue AND green
+  unhealthy at once) and 21 signed-in users hit HTTP 502. Every non-deploy outage minute (17:35,
+  18:44–45, 19:00–04, 19:50, 20:19–21) coincides with an `/og` render burst on a ~5-min crawler cycle.
+  Reproduced on demand in prod: 8 concurrent card renders push trivial `/healthz` to **3,251 ms** vs
+  Caddy's 2 s health timeout. Cost is satori+resvg (~700–840 ms/card, synchronous), NOT sharp (56–88 ms).
+  Three unbounded properties: unbounded PNG `Map` cache (serving container 2.87 GiB vs idle standby
+  1.17 GiB after 7 h ⇒ ~1,000 renders/hour), unbounded concurrency, unbounded outbound fetches (Google
+  Fonts fetch has NO timeout). Tracked in `.issues/og-endpoint-load-outages.md`. Don't re-derive.
+- **2026-07-27 — the 07-26 WebP share-card fix WORKED and must NOT be reverted.** Photo verified back on
+  a live card; `og_render_failed reason:"image_fetch"` 280/day → **0** since 05:11 UTC. Two follow-ons
+  are NOT new bugs: (a) `og_image_transcode_failed` (84/day) is transient R2 fetch timeout *caused by*
+  the load above, not a codec fault; (b) `reason:"font"` 3→127/day is the pre-existing opentype
+  `lookupType: 5 - substFormat: 3` failure **unmasked** now that the image no longer throws first — the
+  card still renders via `static_fonts_only`, cost is tofu boxes for unbundled scripts (Manchu confirmed
+  visually). Don't re-triage either as a regression.
+- **2026-07-27 — the 5,437 phantom `dirty` flags are GONE.** Full scan of all 1,284 dictionary DBs:
+  **0 stale flags, 0 dictionaries**. The 07-26 fleet-wide finding is closed server-side; the only residue
+  is client-local on stale tabs (`boienen-old-buhi-langua`, 2 rows, anon, build 1784893994761) — the
+  known `.issues/client-side-phantom-dirty-residue.md` case. Stop re-raising the server-side cleanup.
+- **2026-07-27 — a 5-minute synthetic uptime probe CANNOT see a 1–3 minute outage** (LD reported 99.3%
+  availability on a day with five total outages). Standing instrument rule: percentile/latency panels and
+  5-min probes are the wrong tools for short total outages — user-observed 5xx (`sync_failed` `status`)
+  is the honest availability signal. Broadcast to house + tutor; all three share the blind spot.
+- **2026-07-27 — `dict_boot_recovery_exhausted` is NOT session-bounded** (the successful-replacement path
+  is). One anon iPhone on `tuscarora` emitted 38 rows in one session / 77 across three. Known iOS
+  `sqlite3_open_v2`@`opfs_open` case in `.issues/dict-boot-persistent-opfs-recovery.md` — bound the
+  give-up path so one device can't dominate error counts; don't re-triage the device.
+- **2026-07-27 (Jacob, OVERRIDES two prior standing decisions — now law) — robot classification is ONE
+  canonical copy, adopted VERBATIM, guarded by a drift test.** The file is
+  `site/src/lib/utils/bot-user-agent.ts` (byte-identical in house/LD/tutor; LD adopted house's copy
+  2026-07-28), and LD's guard is `bot-user-agent.parity.test.ts`. What was endorsed is house's
+  **precision**: word boundary on `bot|crawler|spider`, device-brand stripping (CUBOT is a phone), and
+  `whatsapp` counting only without a `mozilla` token. **The two exports have opposite missing-UA policy
+  — anything gating a whole app surface must use `is_bot_user_agent` (missing UA = human).** LD's
+  dictionary boot gate hands a robot a null session, so failing closed there = a blank application.
+  Don't re-propose per-repo matchers; don't "simplify" the two exports into one.
+- **2026-07-28 — `/og` shape repaired: render once + persist, time-budget the renders.** Approved four
+  repairs landed (disk store under `<DATA_DIR>/og-cache`, bounded renders, capped in-process caches,
+  timed-out font fetch). Measurement changed the plan twice and the lessons are now standing:
+  **a concurrency limit alone is nearly a no-op on a single thread** (a burst arrives as a backlog, not
+  as concurrent handlers — every render logged `wait_ms: 0`), and **a microtask slot-handoff makes
+  starvation WORSE** (18.3 s `/healthz`; hand off with `setImmediate`). Writeup:
+  `.knowledge/server/synchronous-work-on-the-request-thread.md`. Residual: worst case is still ~1–2
+  render durations; the real cure (render off the main thread) is NOT done.
