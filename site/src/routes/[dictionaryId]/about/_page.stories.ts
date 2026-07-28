@@ -4,6 +4,7 @@ import { mock_t } from '$lib/mocks/mock-t'
 
 export const shared_meta: StoryMeta = {
   page_data: { t: mock_t },
+  viewports: [{ width: 900, height: 640 }],
 }
 
 const dictionary = {
@@ -31,6 +32,31 @@ export const ManagerWithContent: PageStory<typeof Component> = {
 
 export const ManagerEmpty: PageStory<typeof Component> = {
   props: { ...(shared_props as object), is_manager: true, dictionary: { ...dictionary, about: '' } } as never,
+}
+
+// The guidance modal — the not-editing home for the five prompting questions.
+export const GuidanceModal: PageStory<typeof Component> = {
+  props: { ...(shared_props as object), is_manager: true } as never,
+  csr: true,
+  interactions: async (page) => {
+    const buttons = await page.$$('.header-row button')
+    await buttons[1].click()
+    await page.waitForSelector('[role="dialog"]')
+    await new Promise(resolve => setTimeout(resolve, 400))
+  },
+}
+
+// Editing: guidance becomes the full-width collapsible card above a
+// side-by-side editor + live preview.
+export const ManagerEditing: PageStory<typeof Component> = {
+  props: { ...(shared_props as object), is_manager: true } as never,
+  csr: true,
+  interactions: async (page) => {
+    const buttons = await page.$$('.header-row button')
+    await buttons[0].click()
+    await page.waitForSelector('.editor-column textarea, .editor-column [contenteditable]')
+    await new Promise(resolve => setTimeout(resolve, 400))
+  },
 }
 
 // Pre-cutover rows still hold CKEditor HTML — pins the html-era read shim.

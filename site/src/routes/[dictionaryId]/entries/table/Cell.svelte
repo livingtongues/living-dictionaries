@@ -17,6 +17,7 @@
   import Image from '$lib/components/image/Image.svelte'
   import type { GuardedWrites } from '$lib/db/dict-client/guarded-writes'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
+  import ReviewIndicator from '$lib/components/entry/ReviewIndicator.svelte'
   import IconIcOutlineCloudUpload from '~icons/ic/outline-cloud-upload'
   import IconIcOutlineCameraAlt from '~icons/ic/outline-camera-alt'
 
@@ -213,6 +214,7 @@
         update_entry({ lexeme: entry.main.lexeme })
       }} />
   {:else if column.field === 'lexeme'}
+    {#if entry.main.review}<span class="table-review"><ReviewIndicator review={entry.main.review} /></span>{/if}
     <Textbox
       field={column.field}
       value={entry.main.lexeme.default}
@@ -289,6 +291,13 @@
     height: 100%;
     width: 100%;
     display: flex;
+  }
+
+  .table-review {
+    align-self: center;
+    display: inline-flex;
+    padding-inline-start: 0.375rem;
+    font-size: 1rem;
   }
 
   .cell :global(.table-audio-cell) {

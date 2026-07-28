@@ -7,6 +7,7 @@
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/gloss/order-glosses'
   import { get_headword } from '$lib/orthography/orthographies'
+  import ReviewIndicator from '$lib/components/entry/ReviewIndicator.svelte'
   import { minutes_ago_in_ms } from '$lib/utils/time'
   import { video_thumb_src } from '$lib/utils/media-url'
   import { page } from '$app/state'
@@ -130,7 +131,7 @@
     onclick={on_click}
     class="entry-link">
     <div class="headword-line">
-      <span class="lexeme">{headword.value}{#if entry.main.homograph}<sup class="homograph">{entry.main.homograph}</sup>{/if}</span>
+      <span class="lexeme">{headword.value}{#if entry.main.homograph}<sup class="homograph">{entry.main.homograph}</sup>{/if}{#if entry.main.review}<ReviewIndicator review={entry.main.review} />{/if}</span>
       {#if entry.main.phonetic}
         <span class="phonetic">[{entry.main.phonetic}]</span>
       {/if}

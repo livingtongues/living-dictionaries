@@ -4,6 +4,7 @@
   import SectionEditor from './SectionEditor.svelte'
   import GrammarExampleSentence from './GrammarExampleSentence.svelte'
   import { prose_editable_node } from './grammar-section-actions'
+  import { section_dom_id } from './grammar-toc'
   import type { GrammarNode, GrammarSectionActions } from './grammar-section-actions'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text as sanitize } from '$lib/markdown/sanitize-rich-text'
@@ -66,7 +67,7 @@
   const is_empty = $derived(!title_languages.length && !body_languages.length && !usage_languages.length)
 </script>
 
-<div class="section" id={`section-${section.id}`} style={`--depth: ${node.depth}`}>
+<div class="section" id={section_dom_id(section.id)} data-grammar-anchor={section.id} style={`--depth: ${node.depth}`}>
   <div class="head">
     <span class="number">{node.number}</span>
     {#if title_languages.length}
@@ -169,6 +170,14 @@
     border-left: 2px solid color-mix(in srgb, var(--primary) 30%, transparent);
     padding-left: 0.875rem;
     margin: 0.5rem 0 0.5rem calc(var(--depth) * 0.25rem);
+    /* clear the sticky header + the mobile "you are here" bar on anchor jumps */
+    scroll-margin-top: 7rem;
+  }
+
+  @media (min-width: 1024px) {
+    .section {
+      scroll-margin-top: 4rem;
+    }
   }
 
   .head {

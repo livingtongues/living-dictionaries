@@ -309,3 +309,14 @@ export const MobileEditorAllMedia: Story<typeof Component> = {
     }),
   },
 }
+
+export const EditorNeedsReview: Story<typeof Component> = {
+  props: {
+    ...shared_props,
+    can_edit: true,
+    entry: full_entry({
+      senses: [{ glosses: { en: 'village' } }],
+      main_extra: { review: { category: 'part-two-differs', note: 'The book’s two halves print this definition differently.' } },
+    }),
+  },
+}

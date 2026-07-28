@@ -38,7 +38,8 @@
     "no_legend_entry": "No expansion recorded for this code",
     "show_glosses": "Show glosses",
     "hide_glosses": "Hide glosses",
-    "open_sentence": "Open sentence"
+    "open_sentence": "Open sentence",
+    "contents": "Contents"
   },
   "discourse": {
     "role": "Discourse role",
@@ -408,6 +409,7 @@
     "close": "Close",
     "loading": "Loading",
     "edit": "Edit",
+    "done": "Done",
     "invalid": "Invalid",
     "next": "Next",
     "export": "Export",

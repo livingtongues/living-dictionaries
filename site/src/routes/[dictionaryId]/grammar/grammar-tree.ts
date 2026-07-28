@@ -15,6 +15,14 @@ export interface GrammarSectionLike {
   sort_key: string
   /** Explicit label ("2.2.1.1"); when absent, the positional number is used. */
   number_label?: string | null
+  /** Per-language title. A blank one marks a section as a preface (see `is_numbered`). */
+  title?: Record<string, string> | null
+}
+
+/** True when the section carries a non-blank title in at least one language. */
+export function has_title(section: GrammarSectionLike): boolean {
+  const { title } = section
+  return !!title && Object.values(title).some(value => value?.trim())
 }
 
 export interface GrammarTreeNode<T extends GrammarSectionLike> {
@@ -41,6 +49,12 @@ function compare_siblings<T extends GrammarSectionLike>(first: T, second: T): nu
  * missing row (or at themselves) are treated as roots so a broken link can
  * never hide a section. Ordering within each sibling group is by `sort_key`
  * (id as a stable tiebreak).
+ *
+ * NUMBERING skips a **childless untitled** section — that shape is a preface
+ * (the migrated-blob intro, or a grammar whose opening prose sits above the
+ * numbered chapters), and a bare "1." in front of it reads like a bug. It
+ * doesn't consume a number, so its titled siblings still count 1..N. An
+ * untitled section WITH children is structural and numbers normally.
  */
 export function build_section_tree<T extends GrammarSectionLike>(rows: T[]): GrammarTreeNode<T>[] {
   const by_id = new Map(rows.map(row => [row.id, row]))
@@ -58,8 +72,15 @@ export function build_section_tree<T extends GrammarSectionLike>(rows: T[]): Gra
 
   function build(parent_key: string | null, prefix: string, depth: number): GrammarTreeNode<T>[] {
     const siblings = (children_of.get(parent_key) ?? []).slice().sort(compare_siblings)
+    let counter = 0
     return siblings.map((section, index) => {
-      const positional_number = prefix ? `${prefix}.${index + 1}` : `${index + 1}`
+      const children_rows = children_of.get(section.id) ?? []
+      const numbered = has_title(section) || !!section.number_label || children_rows.length > 0
+      if (numbered)
+        counter++
+      const positional_number = numbered
+        ? (prefix ? `${prefix}.${counter}` : `${counter}`)
+        : ''
       return {
         section,
         positional_number,

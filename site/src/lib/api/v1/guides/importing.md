@@ -549,8 +549,10 @@ manager's curation is the record; you may add to it, never overwrite it.**
 resolve** — set the entry's `review` field: `{ "category": "...", "note": "..." }`.
 This is EDITOR-ONLY (never shown to the public — it's stripped from non-editor
 reads, same bar as a private tag) and gives the dictionary's manager a real review
-queue: the entries list has a "Needs review" filter + a per-category facet, and the
-entry page shows a banner with your `note` and a "Resolve" button that clears it.
+queue: the entries list has a "Needs review" filter + a per-category facet, editors
+see a small orange indicator beside flagged words in the list/table/gallery views,
+and the entry page shows a banner with your `note` and a "Resolve" button that
+clears it.
 Prefer this over burying caveats in your final report. Clear one by PATCHing the
 entry with `"review": null` — the same thing the human's "Resolve" button does.
 
@@ -559,6 +561,23 @@ entry with `"review": null` — the same thing the human's "Resolve" button does
 Re-evaluate every flagged row after all repairs have run, and drop findings the
 pipeline resolved. Never ask a human to re-approve deterministic cleanup just to
 preserve your audit trail.
+
+**Never flag a difference a rule can settle.** When two copies of a value disagree
+only in quote-mark glyphs, whitespace, a comma before quoted speech, a period inside
+a closing quote, or capitalization the corpus itself decides — settle it yourself
+using the source's own majority habit, record the call in the report's decisions
+section, and move on. The Ponca import shipped 694 raw disagreement flags and the
+very first one a human opened differed only in curly quotes; triage cut the queue to
+349 real questions. A queue diluted with trivia teaches reviewers to stop reading
+it. The mirror rule: differences in *language* (a stress mark, a vowel, a wording
+change, a part of speech) are never trivia — those stay.
+
+**A comparison note must make the difference legible in one read.** If the flag asks
+"which of these two versions should stand?", quote BOTH versions in full AND name
+what differs ("the finder list says “inanimate” where the main dictionary says
+“animate or inanimate”") — never print one version and make the reviewer diff two
+near-identical strings by eye. If the difference resists a one-line description, say
+"the wording differs throughout — read both" rather than a mangled span list.
 
 - `category` is a free bucket label that drives the facet — reuse a small,
   consistent vocabulary across the import. Good buckets from real imports:
@@ -750,6 +769,25 @@ accounted for), **the decisions you applied** with a worked example of each rule
 review queue** with how to work it (the "Needs review" filter and the Resolve button), and
 **what is still unresolved**.
 
+**The review-queue section must break the flags down by category** — a bare total is
+not a review-queue section. For each category: a plain-language explanation of *why*
+entries land there, its count, and two or three linked examples showing exactly what
+the reviewer will face, with the full per-category list inside a collapsed
+`<details>`. A manager who has read this section should be able to predict what any
+flag in their queue will ask before opening it.
+
+**Tell the decisions as a story, not a changelog.** The report is often the manager's
+first close look at how dictionary-making works — the script problems you untangled,
+why homographs stay separate, what made the source's typography tricky, the judgement
+calls a linguist would find interesting. A paragraph of honest narrative per decision,
+each with one worked, linked example, teaches them more than ten terse bullets.
+
+**Length: the main flow reads in one sitting; depth lives in collapsed `<details>`.**
+Long enough that every category and every decision rule gets its one worked example —
+short enough that nothing is said twice and no exhaustive list interrupts the prose.
+(Anti-pattern from a real import: a 167KB report whose main flow was a wall of
+per-row "original spreadsheet row" blocks — thorough, and unread.)
+
 Write it for the dictionary's owner, not for another engineer: no field names, no code
 paths, no JSON, no internal ids, no talk of batches or endpoints. Say "meaning" and
 "alternate spelling", not `glosses` and `variant`. Keep the machine-facing facts (source
@@ -760,6 +798,21 @@ next.
 per-entry list or used again as a rule's worked example — repeat the item so it stays
 findable, but point back ("explained in question 3 above") instead of restating it. A
 report that says the same thing three times reads as though nobody proofread it.
+
+#### Before you POST it — a mechanical checklist
+
+Run these checks against the generated HTML; each catches a failure that has actually
+shipped:
+
+1. **Every headword is a link.** The pre-write *preview* legitimately has no entry
+   links (the entries don't exist yet) — so a report derived from the preview builder
+   will silently ship with zero links unless you add them. Build headword rendering
+   through one helper that looks up the entry id and **raises on an unknown word**,
+   and assert the final HTML's `entry/` link count equals the helper's call count.
+2. **The review queue is broken down by category with linked examples** (above).
+3. **Every decision rule has a worked example.**
+4. **Questions and judgement calls are at the top**, before any statistics.
+5. **Anchored `<details>` are `open`; every index row targets its own `id`** (below).
 
 #### Filing it
 
@@ -806,7 +859,13 @@ report, and `report_anchor` (an `id` in your HTML) links straight to it. Use `ch
 "not sure" is answerable. Per-entry questions stay in the `review` queue (§2.3) — do NOT
 duplicate 30 of them here.
 
-Finally, `POST …/conversations/{threadId}/messages` with a few warm sentences saying the
-import is in and pointing at the report and the questions. That is the manager's
-notification: it emails them a link back to the conversation. Do not write the report's
-contents into the message.
+Finally, the conversation message — a few warm sentences saying the import is in and
+pointing at the report and the questions. That message is the manager's notification: the
+moment it is posted, it emails them a link back to the conversation. **Do not post it
+yourself. DRAFT it and hand the draft to the human running the import** — they review it
+and post it from the conversation page. Two reasons this is a hard rule: the message is
+the one human-voiced step of the whole import and deserves a human's eyes before it fires
+an email; and a resumed or duplicated agent session that "finishes" the workflow a second
+time will double-send the email, which reads as spam to the very person the import is
+for. Everything else in this guide is safely idempotent — the notification email is not.
+Do not write the report's contents into the message either way.

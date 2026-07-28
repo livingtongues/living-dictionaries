@@ -556,9 +556,16 @@ the book's own quirk. Final stats: **4,553 + 4,388 entries · 4,858 + 4,667 sens
       + 12 prose pages re-verified (opus-5 wave 1 + sol backfill/wave 2); 10 real bug
       classes fixed, corrections 33 → 58, examples 122 → 131, review flags 639 → 624,
       preview rebuilt. Full detail in the AUDIT ROUND 3 section above.
-- [ ] **Post to the conversation** (artifact + message, NO questions) after round 3 is clean.
-- [ ] **Phase 2 writes** in idempotent batches under one `import_id`.
-- [ ] **Revoke the API key** `f9375f18-e388-434b-bcff-8c29f8638029` when finished.
+- [x] ✅ **Post to the conversation** — report artifact `a64e7686-23fa-4d38-9e73-af8b631721ee`
+      (kind `report`, rebuilt post-import framing, stats line 5,257/5,617/131/59) posted
+      2026-07-28. NO questions, NO message (message is DRAFTED for Jacob — new workflow rule).
+- [x] ✅ **Phase 2 writes** — DONE on prod 2026-07-28 under `import_id` `ponca-book-2026-07-28`.
+      See PHASE 2 EXECUTION below. Prod ponca.db: 5,257 entries · 5,617 senses · 199 sentences ·
+      668 relationships · 59 sections · 8 slots · 65 legend · 68 links · 634 review-flagged
+      (624 part-two-differs + 10 uncertain-join). Backup first:
+      `/opt/hosting/data/ponca.db.pre-import-2026-07-28.bak`.
+- [x] ✅ **Revoke the API key** `f9375f18-e388-434b-bcff-8c29f8638029` — revoked_at
+      2026-07-28T06:34Z, token verified 401.
 
 ## Grammar sketch (pdf 20–59) — ✅ STAGED 2026-07-27
 
@@ -907,6 +914,110 @@ on the conversation BEFORE the import runs so he can object, but we do not block
    report (permission to reproduce; credit for the jacket photograph or a community photo instead;
    does it go public).
 
+## PHASE 2 EXECUTION (session started 2026-07-28, after round 3)
+
+Jacob's ruling (2026-07-28 evening): wrap up → **Phase 2 writes FIRST → then post the report
+artifact → then DRAFT (never post) the message for Greg**. Workflow change ordered: the agent
+never posts the final conversation message itself — it always hands a draft to the human
+(importing.md guide updated accordingly). Rationale: a resumed lane once double-sent a message.
+
+State verified at start: prod deployed with the full v1 surface (PATCH dictionary, cover-image,
+sources, grammar, relationships all live; GET /api/v1/dictionaries/ponca returns
+`featured_image`, entry_count 0). Token in `~/import-work/ponca/token.private` works. No idle
+lane sessions remained to close (all exited). Existing prod orthographies:
+`[{code: "Pronunciation", name: "Pronunciation"}]` (unused — will be deleted; respelling lives
+in `phonetic`).
+
+### Writer: `~/import-work/ponca/write.py`
+Deterministic uuid5 ids (idempotent re-POST). Mapping decisions taken this session:
+- pos: canonicalize the cleanly-mappable abbrevs (n.→n, v.→v, adj., adv., pron.→pro, prep.,
+  conj., interj.→int, v.t.→vt, v.i.→vi, aux. v.→v.aux); compounds split on `/` (and `, `)
+  only when every piece maps; everything else (v. phr., 1st pers. sing., …) stored verbatim.
+- sense.literal → appended to definition as `lit., …` (book's own inline style).
+- sense.labels (archaic/usu./masc./fem.) → definition prefix `(archaic) …`.
+- english_keys not already present in the entry's text (114 of 4,387) → entry `notes`
+  ("Part Two lists this entry under: …") — notes are Orama-indexed, so they stay searchable.
+- review[] → EntryReview category `part-two-differs`, note enumerating each field with Part
+  Two's version + its pdf page; `uncertain_joins` → category `uncertain-join` (or folded into
+  the note when both).
+- citations: entry → `pdf p{page}` + one per part_two_page; examples + grammar sentences same
+  slug `headman-oneill-2019`.
+- homographs: 295 duplicated lexemes numbered "1"/"2"/"3" in book order.
+- related forms → own entries (form as printed, incl. lowercase) + `derived_from` relationship
+  (from=derived, to=base); if the form casefold-matches an existing main headword, link only,
+  don't create.
+- gendered speech variants: NOT auto-linked (pair data was never staged; english_key grouping
+  would false-positive — Wisą́ga/Wižį́đe are younger/elder sibling, not gender variants of each
+  other). masc./fem. labels + parenthetical alternates are preserved in definitions. Follow-up
+  for Greg/manager noted in report. (Supersedes locked decision 5's linking half.)
+- orthographies: PATCH `default` → name "Ponca", characters `đ ʼ ą ę į ų ǫ š ž č ʃ ə ·`;
+  DELETE the unused `Pronunciation` alternate.
+- catalog PATCH: `about` = about.md, `citation` = the UNP citation, `copyright` = © 2019 Louis
+  Headman.
+- grammar order: source → clause-slots → glossing-abbreviations → sentences → sections
+  (tree, parents first) → section↔sentence links from the sentences' `_section` keys.
+- import_id: `ponca-book-2026-07-28`.
+
+### Rehearsal findings — 3 residual staged-data bugs found by LOOKING at the rendered site
+(all crop-verified, fixed at the pipeline stage, diffs exact):
+1. **p363 Akʼíđahà (P2)**: P2 runs P1's related form akʼíwahà inline; its example paren leaked
+   out as a garbled sense example ("wą́giđèxtì" / translation full of Ponca). Content already
+   survives in the related-form gloss → explicit drop in senses.py `EXAMPLE_FIXES` (must-fire
+   guarded, like the typo map).
+2. **p74/p401 Áwa**: "(áwađià?, ~ is he, she, it?; áwakeà?, ~ is it?)" is a Q&A pair → split
+   into TWO examples (same EXAMPLE_FIXES map). merged.jsonl diff = exactly these 2 entries,
+   examples stay 131.
+3. **Grammar chart cells `**Ą- **`** — a bold run ending in a space doesn't parse as GFM bold →
+   literal asterisks on /grammar. Fixed in blocks.py `tidy_marker_runs` (markdown_table moves
+   run-edge whitespace outside the markers); 19 spans across 5 section bodies, lint+check 0,
+   body diff = exactly those cells. Lesson: the "verified through the markdown pipeline" check
+   asserted table STRUCTURE, not per-cell bold parsing.
+Also confirmed NOT bugs: "I let him Heđúškà dance" (proper-noun dance name in English print);
+sentence route redirect (corpus-preview-guard, admin-3 only — expected).
+
+### Prod run — ✅ COMPLETE 2026-07-28
+- started PATCH · source existed (`7651c97f`) · file linked · catalog (about 29,527 chars +
+  citation + copyright) · primary orthography "Ponca" + 13 characters, "Pronunciation"
+  alternate deleted · cover uploaded (788,643 bytes → featured_image with variants).
+- Entries: first 500-batch OK, second hit **Cloudflare's 100s limit (524, rolled back
+  clean)** → re-ran at `--batch-size 150`, resumed idempotently (500 skipped), 0 failed.
+  **Lesson: ≤150 entries/batch through Cloudflare on prod.**
+- related (590 + 668 relationships) · grammar (8/65/68/59/68) all clean; verify:
+  entry_count 5257, featured_image true.
+- Live-site verification (headless): the empty logged-out entries list was NOT privacy and
+  NOT snapshot staleness — it was **`is_bot`**: HeadlessChrome's UA is (correctly) treated
+  as a robot, and robots never boot the offline DB. With a normal Chrome UA the logged-out
+  prod pages render fully: entries 5,257 with tap-buttons + facets in ~5s, grammar page
+  complete (clause strip, tables, prose). R2 snapshot rebuilt to 8.9MB within the 30-min
+  window. Insider spot-check: 10 random entries (incl. related-form entries) pulled from
+  prod ponca.db and compared field-by-field against the staged inputs — 0 mismatches.
+- Report artifact posted; API key revoked; guide (importing.md §2.8), brief step 7
+  (`import-request-body.ts`) and `.knowledge/domain/import-workflow.md` all updated to the
+  new **draft-don't-post** message rule (+ the ≤150-entries-per-prod-batch CF gotcha).
+- Uncommitted repo changes from this session: `site/src/lib/api/v1/guides/importing.md`,
+  `site/src/lib/import/server/import-request-body.ts`, `.knowledge/domain/import-workflow.md`,
+  this issue file. Message to Greg: DRAFTED for Jacob, not posted. Conversation left
+  UNRESOLVED — Jacob posts the message, then resolves at /admin/imports.
+
+### Run order
+1. ✅ Local rehearsal DONE (2026-07-28): dev server + local ponca dict mirroring prod catalog
+   (incl. the stray "Pronunciation" orthography), full write via write.py (session auth), all
+   idempotency re-runs clean. Screenshot-verified: home (hero image, orthography chip, about/
+   grammar snippets, 5,257 entries stat after warm boot — the 0s on first paint are the
+   local-first cold-boot race, not bad data), entries list (char tap-buttons, pos facets
+   noun 2324/verb 1390, examples facet), entry pages (homograph superscript, phonetic, canonical
+   pos chips, import tag, source chip with pdf-page locator, examples, "Root of" related
+   entries), /grammar (clause template strip, 73 tables incl. fixed bold cells, IGT blocks with
+   aligned morphemes + small-caps legend codes + entry links). Counts in local dict.db:
+   entries 5257 (4667+590) · senses 5617 · relationships 668 · sentences 199 (131+68) ·
+   sections 59 · slots 8 · legend 65 · links 68 · source 1.
+2. VPS backup of `dictionaries/ponca.db` → then prod run: PATCH conversation started → source
+   → file source_id → catalog/orthographies/cover → entries → related → grammar → verify counts.
+3. Rebuild report.py as the POST-import report (round-3 numbers, no "questions" card) → POST
+   artifact kind `report`.
+4. Draft Greg's message → hand to Jacob (NOT posted). 5. Revoke API key. 6. Update guide
+   (importing.md draft-don't-post) + knowledge.
+
 ## The artifact to post (BUILT, not yet posted)
 
 `report.py` → `preview.html` (13KB, no scripts, inline styles only, renders in the sandboxed
@@ -918,3 +1029,62 @@ Post as `kind: "preview"` — it doubles as the pre-write rendered preview the g
 Endpoints confirmed live: `POST …/conversations/{threadId}/artifacts` `{kind, title, html, stats}`
 and `POST …/messages` `{body_text}` (the message is what emails the manager). Per the 2026-07-28
 ruling: NO `/questions` posts. Post after audit round 3 comes back clean.
+
+## REVIEW-FLAG TRIAGE + REPORT v2 — ✅ COMPLETE 2026-07-28
+
+Jacob's rulings after reading the first report: (a) every lexeme printed in a report must
+LINK to its live entry (the rule was already in importing.md §2.8 — the v1 builder was
+derived from the *preview* builder, which legitimately has no links, and the checklist was
+never re-run: a process failure, not an ambiguity); (b) review flags must not be petty —
+settle trivia ourselves choosing whichever typesetting looks best; (c) surviving notes must
+be legible in one read; (d) reports need a per-category review explanation with examples;
+(e) reports should tell the linguistic/editorial story (Greg is learning) but stay
+one-sitting readable — v1 was too short, iipay-aa (167KB) too long.
+
+### Triage (`review-triage.py` → `resolve-review.py` → `review-patch.py`)
+- 706 raw flag items (694 P1-vs-P2 + 12 uncertain joins) bucketed by difference class.
+- Settled by rule + ~45 hand overrides: 258 drop · 48 adopt · 5 literal · 2 sense_fix ·
+  2 fix · 12 joins. **Kept 358 items on 349 entries** (was 624 entries / 694 items).
+- Rules encoded: stress-marks → main dictionary (129); syllable separators → the variant
+  matching the headword's word-breaks (39); oⁿm vs oⁿ before b → plain (141:13 corpus
+  majority, 6 cases); shortened finder-list copies → fuller (44); pos detail → fuller
+  label wins (31); style/quote/case → the book's own majority habit (21:2 for `as in “…”`
+  without a comma, 100:18 against period-inside-quote, respellings never capitalized).
+- Notes rewritten: BOTH versions quoted + the difference named; falls back to "the wording
+  differs throughout — read both" when the span list would be mangled.
+- Categories split from one bucket into four: `definition-differs` (271) ·
+  `respelling-differs` (32) · `part-of-speech-differs` (29) · `possibly-two-words` (17).
+- **Bug caught by a wide crop**: p77 has TWO run-on forms (bašnúʼšnudè under Bašnúʼde,
+  bašnúšnúde under Bašnúde). A narrow crop showed the wrong one and I "fixed" a correct
+  lexeme on prod; reverted. LESSON: crop wide enough to see the neighbouring entries.
+- 634 PATCHes applied to local rehearsal then prod (0 errors; the freshly minted key needs
+  **`role='write'`** — the schema comment's 'manager' 403s "read-only key").
+
+### Report v2 (`report.py` rewritten, 249KB)
+- `Linker.lex()` is the ONLY way to print a headword — raises on an unknown word; build
+  asserts `href` count == lex() call count (641 links). This class of miss can't recur.
+- Structure: 3 questions at top (gendered pairs · the m-before-b · stress marks) → counts →
+  đ/fonts → three-pass verification → sample entries → **How the linguistic decisions were
+  made** (narrative) → **review queue by category** with worked examples + collapsed full
+  lists → **What we settled ourselves** (every case, collapsed) → not-imported → next → record.
+- Posted as artifact `a999a59d-bc38-4bf1-b1c8-e7474e95555a`; old `a64e7686…` deleted from
+  `thread_artifacts` AND from R2 (`import/ponca/artifacts/…`), so Greg sees exactly one.
+- API key `review-triage 2026-07-28` minted → used → **revoked** (401 verified).
+
+### App feature: review indicator in list views
+`$lib/components/entry/ReviewIndicator.svelte` (orange ⚠, same #d97706 as ReviewBanner,
+title = "Needs review · <category label>") rendered in list/table/gallery next to the
+headword whenever `entry.main.review` exists — which is editor-only by construction
+(`assemble_entry_data` strips `review` for non-editors), so no extra gate needed.
+Story `EditorNeedsReview` added; svelte-look verified light+dark; browser-verified against
+real flagged Ponca data (349 filtered, 4 category facets, indicators inline).
+
+### Guide updates (importing.md)
+§2.3: "Never flag a difference a rule can settle" + "A comparison note must make the
+difference legible in one read" + the list-view indicator in the queue description.
+§2.8: review-queue-by-category requirement · tell decisions as a story · length rule
+(one-sitting main flow, depth in `<details>`; names the 167KB anti-pattern) · a
+**pre-POST checklist** whose first item is the preview→report link trap.
+
+Verification: `pnpm test` 2,269 passed (use `--maxWorkers=2`; full parallelism OOMs → 137),
+`tsc` clean, eslint clean on changed files, `pnpm check` 0 errors.

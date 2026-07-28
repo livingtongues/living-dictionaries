@@ -6,31 +6,30 @@
   import {
     after_sibling_key,
     append_child_key,
-    build_section_tree,
     move_down_key,
     move_up_key,
   } from './grammar-tree'
   import type { GrammarNode, GrammarSectionActions } from './grammar-section-actions'
+  import { CLAUSE_TEMPLATE_ANCHOR } from './grammar-toc'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
   import IconMdiCog from '~icons/mdi/cog'
 
   interface Props {
-    /** Admin-3: may add / reorder / nest / link / delete + full section editor. */
+    /** The section tree, built once in `+page.svelte` so the TOC shares it. */
+    tree: GrammarNode[]
+    loading: boolean
+    /** Edit mode is ON and the viewer may add / reorder / nest / link / delete. */
     editable: boolean
     /** Manager (non-admin-3): may edit the intro section's prose + start one when none exists. */
     prose_editable?: boolean
+    /** The dictionary defines clause slots — mirrors the TOC's pinned entry. */
+    has_clause_slots?: boolean
   }
 
-  const { editable, prose_editable = false }: Props = $props()
+  const { tree, loading, editable, prose_editable = false, has_clause_slots = false }: Props = $props()
 
   const { t, dict_db } = $derived(page.data)
-
-  // Mirror the text reader's live-read pattern: read `.rows` in a $derived that
-  // depends only on the stable `dict_db` (not a churning live object).
-  const rows = $derived([...(dict_db?.grammar_sections.rows ?? [])])
-  const loading = $derived(dict_db?.grammar_sections.loading ?? true)
-  const tree = $derived(build_section_tree(rows))
 
   let editing_id = $state<string | null>(null)
   let show_slot_manager = $state(false)
@@ -115,20 +114,29 @@
   }
 
   // Add a headless top-level section (the same shape the blob backfill produces)
-  // and open it. Serves both admin-3 "add section" and the manager "add grammar"
+  // and open it. Serves both "add section" and the manager "add grammar"
   // (start grammar on a dict with none yet — opens in the prose-only editor).
   async function add_root_section() {
     const sort_key = append_child_key(tree.map(node => node.section.sort_key))
     const [row] = await dict_db.grammar_sections.insert({ parent_id: null, sort_key })
     if (row) editing_id = row.id
   }
+
+  // Leaving edit mode closes whatever editor was open, so read mode is truly read-only.
+  $effect(() => {
+    if (!editable && !prose_editable) editing_id = null
+  })
 </script>
 
 <div class="sections">
   {#if loading}
     <div class="state-note"><IconSvgSpinners3DotsFade /></div>
   {:else}
-    <ClauseTemplateStrip />
+    {#if has_clause_slots}
+      <div id={CLAUSE_TEMPLATE_ANCHOR} data-grammar-anchor={CLAUSE_TEMPLATE_ANCHOR} class="anchor">
+        <ClauseTemplateStrip />
+      </div>
+    {/if}
 
     {#if editable}
       <div class="slot-controls">
@@ -168,6 +176,16 @@
 <style>
   .sections {
     margin-top: 0.5rem;
+  }
+
+  .anchor {
+    scroll-margin-top: 7rem;
+  }
+
+  @media (min-width: 1024px) {
+    .anchor {
+      scroll-margin-top: 4rem;
+    }
   }
 
   .slot-controls {

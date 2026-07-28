@@ -12,7 +12,12 @@ import {
 import { initial_keys, key_between } from '$lib/api/v1/fractional-index'
 
 function section(id: string, parent_id: string | null, sort_key: string, number_label?: string): GrammarSectionLike {
-  return { id, parent_id, sort_key, number_label }
+  return { id, parent_id, sort_key, number_label, title: { en: `Section ${id}` } }
+}
+
+/** A preface-shaped row: prose but no title in any language. */
+function untitled(id: string, parent_id: string | null, sort_key: string): GrammarSectionLike {
+  return { id, parent_id, sort_key, title: { en: '  ' } }
 }
 
 /** True when every key sorts strictly before the next — the ordering invariant. */
@@ -66,6 +71,27 @@ describe(build_section_tree, () => {
     ]
     const tree = build_section_tree(rows)
     expect(tree.map(node => node.section.id).sort()).toEqual(['orphan', 'selfref'])
+  })
+
+  test('a childless untitled preface takes no number and does not shift its siblings', () => {
+    const [a, b, c] = initial_keys(3)
+    const tree = build_section_tree([
+      untitled('preface', null, a),
+      section('r1', null, b),
+      section('r2', null, c),
+    ])
+    expect(tree.map(node => node.number)).toEqual(['', '1', '2'])
+  })
+
+  test('an untitled section WITH children is structural and numbers normally', () => {
+    const [a, b] = initial_keys(2)
+    const tree = build_section_tree([
+      untitled('wrapper', null, a),
+      section('child', 'wrapper', a),
+      section('r2', null, b),
+    ])
+    expect(tree.map(node => node.number)).toEqual(['1', '2'])
+    expect(tree[0].children[0].number).toBe('1.1')
   })
 
   test('tracks depth for indentation', () => {

@@ -58,6 +58,12 @@ that. Insider access is for fetching bytes, verification reads, and backups
 - **Backup first**: `sudo cp /opt/hosting/data/dictionaries/{id}.db
   /opt/hosting/data/.import-backups/{id}-pre-{run}-{ts}.db` on the VPS (cheap;
   `import_id` batch-delete is the real rollback).
+- **Prod entry batches must stay ≤150 per POST.** Cloudflare cuts any response at
+  ~100s (error 524); a 500-entry batch fits locally but times out on the VPS
+  (Ponca 2026-07-28 — the cut batch rolled back cleanly and the deterministic-id
+  re-run resumed with `skipped`, but don't rely on that; the server may also keep
+  processing after CF gives up, so wait for the count to go stable before
+  re-POSTing). Locally 500 is fine.
 - **Verify with insider reads**: direct read-only queries against
   `/data/dictionaries/{id}.db` in the container beat paginating the API —
   counts, review-category counts, and spot-checks of ~10 entries' full content
@@ -93,11 +99,15 @@ what's ours alone:
 2. Keep the generating script and its inputs in `~/import-work/{dict}/` anyway, so a
    report can be regenerated verbatim if we need to correct it. Artifacts are frozen
    snapshots — to fix one, post a new one rather than editing in place.
-3. Post the short closing message LAST: that's the thing that emails the manager, so it
-   should be the moment everything else is already visible on the page. Only that POST
-   (and a question *answer*) notifies — `POST …/artifacts` and `POST …/questions` are
-   silent. **Use that:** file the report and the questions, let Jacob read the page, and
-   keep the one irreversible step for after his go-ahead.
+3. The short closing message is **DRAFTED by the agent, POSTED by Jacob — always**
+   (his 2026-07-28 ruling, after a resumed lane once picked up a drafted message and
+   double-sent it). That POST is the thing that emails the manager, and only it (and a
+   question *answer*) notifies — `POST …/artifacts` and `POST …/questions` are silent.
+   So: file the report and the questions (silent), then hand Jacob the message draft
+   in-session and he posts it from the conversation page once everything else is
+   already visible there. The agent never touches `POST …/messages` on an import
+   thread. (importing.md §2.8 + the request-body brief step 7 say the same to outside
+   agents.)
 4. Tell Jacob in-session that it's ready. He reads it at `/admin/imports` (the only
    cross-dictionary view — these never hit the inbox) and clicks **Resolve**. Resolving
    is bookkeeping for our queue only: it does not lock, hide, or close anything, and the
@@ -143,3 +153,44 @@ as new activity on /admin/imports. Record: `.issues/import-feedback-2026-07-25.m
 
 Design decisions, and the audit that produced them, are in
 `.issues/import-conversations.md`.
+
+## The review queue's real enemy is trivia (Ponca, 2026-07-28)
+
+Ponca staged 694 flags from comparing the book's two typesettings, and the FIRST one
+Jacob opened differed only in curly-vs-straight quotes — invisible without a diff tool.
+His ruling, now §2.3 of the guide: **an importer that can name a difference class can
+settle it; only differences in the language itself reach a human.** Triage classified
+every item (quote glyphs, whitespace, case, separators, superset wording, real wording)
+and settled 348 of them, choosing per class *whichever typesetting looks most deliberate*
+rather than blanket-preferring one half. What made the rules defensible was **grounding
+each in a corpus majority of the source itself** — the book writes `as in “…”` without a
+comma 21 times against 2, capitalizes 0 of 4,667 respellings, writes oⁿ before b 141
+times against 13 — so each call cites the book's own habit rather than our taste.
+
+Two durable lessons beyond the rules:
+- **Crop wide.** A narrow page crop showed the run-on form belonging to the *neighbouring*
+  entry, and a correct lexeme got "fixed" on prod before a wider crop revealed p.77 has
+  two nearly identical run-ons under two different headwords.
+- **Split the flag category by question kind** (`definition-differs`,
+  `respelling-differs`, `part-of-speech-differs`, `possibly-two-words`). One bucket of
+  349 is a chore; four labelled facets let a reviewer pick the kind they're competent to
+  judge. The entries-list facet auto-humanizes unknown category slugs, so hyphenated
+  lowercase names render fine without touching `review-category.ts`.
+
+## Reports: the preview→report link trap, and how long is long enough
+
+The guide has required for months that **every headword printed in a report links to its
+live entry**. Ponca's v1 report shipped with zero links anyway, because the report builder
+was cloned from the **preview** builder — and a preview correctly has no links, since the
+entries don't exist yet. The fix is structural, not a reminder: render headwords through
+one helper that resolves the entry id and **raises on an unknown word**, then assert the
+final HTML's link count equals the helper's call count. A report that forgets is now a
+build failure.
+
+Length calibration across four imports: Catawba 27KB (thin), Eastern Pomo 83KB (right),
+Iipay Aa 167KB (a wall of per-row detail in the main flow — thorough and unread), Ponca v1
+15KB (too short). The rule that came out of it: **the main flow reads in one sitting;
+exhaustive evidence lives in collapsed `<details>`.** And because a manager's first import
+is also their education in how dictionary-making works, the decisions section should be
+narrative — the script problems, why homographs stay separate, what the typography hid —
+not a terse changelog.

@@ -44,6 +44,9 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
   admin levels 1-2 are deliberately blocked, the no-existence-leak rule, accepted media/metadata
   leaks, no invite exemption (manual back-end setup; river is the one prod case), and the
   "contributor = editing tier" server-gate fix (prod has zero 'editor' rows).
+- [grammar-page-navigation.md](./grammar-page-navigation.md) — why the grammar TOC is a RIGHT rail
+  (the left one is taken), read-mode-first with one Edit toggle, the untitled-section-is-a-preface
+  numbering rule, Ponca's flattened root, and the document-order scroll-spy model.
 - [forced-alignment.md](./forced-alignment.md) — auto-timings (M6): the dumb-Modal-endpoint /
   smart-LD-server split, why romanization + the bespoke per-dict converter registry live server-side
   and admin-only, the two-runtime (Modal prod / local-CPU dev) aligner, the per-token align_form

@@ -1,8 +1,15 @@
 <script lang="ts">
+  import GuidanceList from './GuidanceList.svelte'
   import IconMdiChevronDown from '~icons/mdi/chevron-down'
   import IconMdiChevronUp from '~icons/mdi/chevron-up'
   import { slide } from 'svelte/transition'
   import { page } from '$app/state'
+
+  /**
+   * The collapsible guidance card shown at the top of the About EDITOR. When not
+   * editing the same questions are reachable from the header's "Guidance" button
+   * (a modal) instead, so a finished About never has a card wedged above it.
+   */
 
   let hide_questions = $state(false)
 </script>
@@ -19,19 +26,14 @@
     </button>
   </div>
   {#if !hide_questions}
-    <ul transition:slide={{ duration: 300 }}>
-      <li>{page.data.t('about.question_1')}</li>
-      <li>{page.data.t('about.question_2')}</li>
-      <li>{page.data.t('about.question_3')}</li>
-      <li>{page.data.t('about.question_4')}</li>
-      <li>{page.data.t('about.question_5')}</li>
-    </ul>
+    <div transition:slide={{ duration: 300 }} class="list-wrap">
+      <GuidanceList />
+    </div>
   {/if}
 </div>
 
 <style>
   .guide-card {
-    max-width: 550px;
     margin-bottom: 1rem;
     padding: 0.75rem 1rem;
     background: var(--surface);
@@ -57,14 +59,7 @@
     color: var(--color-secondary);
   }
 
-  ul {
-    list-style-type: disc;
-    padding-left: 1.25rem;
+  .list-wrap {
     margin-top: 0.5rem;
-    line-height: 1.5;
-  }
-
-  li {
-    margin-bottom: 0.25rem;
   }
 </style>
