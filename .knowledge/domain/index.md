@@ -20,7 +20,9 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
   kickoff brief comes from, why the API guides stay the source of truth, how to fetch the uploaded
   file from R2, mint a per-dict API key (admin attribution gotcha), back up, verify via direct DB
   reads, and hand the finished job back to Jacob (draft reply → he sends → he resolves the thread,
-  which is what clears the manager's Import page).
+  which is what clears the manager's Import page). Also: **what belongs in the review queue** — the
+  two Ponca cuts (694 → 375 → 38), why a POS difference is never a review item, and the structured
+  `review.comparisons` diff banner that replaced "describe the difference in prose".
 - [change-history.md](./change-history.md) — the server-side per-dict audit log (entry/text/sentence
   edit timelines): where capture hooks in, the separate `{id}.history.db` + owners-index shape, how it
   survives schema drift, the entry≠text attribution boundary, and the red-phase correctness bugs.

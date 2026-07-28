@@ -17,6 +17,8 @@
   import IconFaSolidTimes from '~icons/fa-solid/times'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
   import ReviewBanner from '$lib/components/entry/ReviewBanner.svelte'
+  import type { EntryReviewComparison } from '$lib/db/schemas/dictionary.types'
+  import { get_review_target_value, remove_review_comparison } from '$lib/entry/review-apply'
 
   interface Props {
     entry: EntryData
@@ -55,12 +57,44 @@
     Object.assign(entry_row, patch)
     await entry_row._save()
   }
+
+  function review_sense(sense_id?: string) {
+    if (!sense_id) return null
+    return dict_db?.senses.id(sense_id) ?? senses.find(sense => sense.id === sense_id) ?? null
+  }
+
+  function current_review_value(comparison: EntryReviewComparison) {
+    return get_review_target_value({ apply: comparison.apply, entry: fields ?? {}, sense: review_sense(comparison.apply?.sense_id) })
+  }
+
+  /** "Use this" — write the chosen version, then drop the comparison it settled. */
+  async function apply_review_value({ comparison, value }: { comparison: EntryReviewComparison, value: string }) {
+    const { apply } = comparison
+    const review = fields?.review
+    if (!apply || !review) return
+
+    if (apply.target === 'entry.phonetic') {
+      await save_entry({ phonetic: value })
+    } else if (apply.target === 'entry.lexeme' && apply.key) {
+      await save_entry({ lexeme: { ...entry_row?.lexeme, [apply.key]: value } })
+    } else if (apply.sense_id && apply.key) {
+      const sense_row = dict_db?.senses.id(apply.sense_id)
+      if (!sense_row) return
+      const field = apply.target === 'sense.glosses' ? 'glosses' : 'definition'
+      Object.assign(sense_row, { [field]: { ...sense_row[field], [apply.key]: value } })
+      await sense_row._save()
+    }
+
+    await save_entry({ review: remove_review_comparison({ review, comparison }) })
+  }
 </script>
 
 {#if can_edit && fields?.review}
   <ReviewBanner
     review={fields.review}
     citations={fields.citations}
+    current_value={current_review_value}
+    onapply={apply_review_value}
     onresolve={() => save_entry({ review: null })} />
 {/if}
 

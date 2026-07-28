@@ -37,6 +37,18 @@ filters pick them up.
 `tweened` bars (Progress) render at their START value in a fresh SSR/CSR shot. To screenshot a
 filled bar, set `csr: true` and `await` ~ the tween duration in `interactions` before the shot.
 
+## Attachments and portals silently no-op without `csr: true`
+Stories default to **SSR only** (`svelte/server`'s `render()` — see svelte-look
+`src/render/ssr.ts`), so nothing client-side ever runs: no `{@attach}`, no `use:portal`, no
+`$effect`. The failure mode is nasty because it isn't an error — the component renders its
+static markup and the missing behaviour just looks like a bug in your code. Hit this building
+`$lib/entry-links/` (a DOM attachment rewrites prose into tappable words, and the popover
+portals): the story showed plain unlinked text while the real app worked fine.
+Any story for behaviour that only exists at runtime needs `csr: true`, plus `interactions` with
+a `page.waitForSelector(...)` so the shot happens after the effect lands. The svelte-ui skill
+mentions `csr` for "`onMount`/browser APIs" — read that as *anything client-only*, attachments
+included.
+
 ## Layout stories can't pass a `children` snippet — make the layout's render optional
 For page/layout components, svelte-look folds **all** story `props` into `data`
 (`props = { data: { ...page_data, ...props } }` in both the SSR path and the CSR

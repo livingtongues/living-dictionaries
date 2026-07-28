@@ -320,3 +320,20 @@ export const EditorNeedsReview: Story<typeof Component> = {
     }),
   },
 }
+
+/** The flag sits after every spelling on the headword line, not between the word and its respelling. */
+export const EditorNeedsReviewWithAlternateSpelling: Story<typeof Component> = {
+  props: {
+    ...shared_props,
+    can_edit: true,
+    entry: full_entry({
+      senses: [{ glosses: { en: 'to point at' }, parts_of_speech: ['v'] }],
+      main_extra: {
+        lexeme: { default: 'Áʼbazù', pronunciation: 'äʼ-bä-zù' },
+        phonetic: null,
+        homograph: '1',
+        review: { category: 'definition-differs', note: 'The book’s two halves define this word differently. Which should the entry say?' },
+      },
+    }),
+  },
+}

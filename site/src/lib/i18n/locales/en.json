@@ -39,7 +39,8 @@
     "show_glosses": "Show glosses",
     "hide_glosses": "Hide glosses",
     "open_sentence": "Open sentence",
-    "contents": "Contents"
+    "contents": "Contents",
+    "multiple_entries": "Multiple entries"
   },
   "discourse": {
     "role": "Discourse role",
@@ -269,6 +270,8 @@
     "review_category": "Review category",
     "resolve_review": "Resolve",
     "source_details": "Source details",
+    "review_use_this": "Use this",
+    "review_in_use": "In use",
     "has_exists": "Has",
     "does_not_exist": "No",
     "image": "Image",

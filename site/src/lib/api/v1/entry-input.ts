@@ -1,4 +1,4 @@
-import type { EntryReview } from '$lib/db/schemas/dictionary.types'
+import type { EntryReview, EntryReviewApply, EntryReviewComparison, EntryReviewComparisonSide } from '$lib/db/schemas/dictionary.types'
 import type { Coordinates, MultiString } from '$lib/types'
 
 /** Cap per-request batch size; agents chunk larger imports. */
@@ -131,11 +131,12 @@ export interface EntryInput {
   dialects?: string[] | string
   /** Tag names — found-or-created on this dictionary. */
   tags?: string[] | string
-  /** EDITOR-ONLY "needs review" flag `{ category, note }` — queue this entry for a
-   *  human reviewer WITHOUT showing the public. `category` is a free bucket label
-   *  (drives the entries-list "Needs review" facet); `note` is the bespoke thing to
-   *  check. Set it on import for anything you had to guess/salvage; a reviewer
-   *  clears it. Never rendered to non-editors. */
+  /** EDITOR-ONLY "needs review" flag `{ category, note, comparisons? }` — queue this
+   *  entry for a human reviewer WITHOUT showing the public. `category` is a free
+   *  bucket label (drives the entries-list "Needs review" facet); `note` is the
+   *  bespoke thing to check; `comparisons` carry competing values the banner diffs
+   *  (and can apply with one click). Set it on import for anything you had to
+   *  guess/salvage; a reviewer clears it. Never rendered to non-editors. */
   review?: EntryReview | null
   senses?: SenseInput[]
 }
@@ -288,8 +289,54 @@ export function to_review(value: unknown): EntryReview | null | undefined {
   const source = value as Record<string, unknown>
   const category = typeof source.category === 'string' ? source.category.trim() : ''
   const note = typeof source.note === 'string' ? source.note.trim() : ''
-  if (!category && !note) return undefined
-  return { category: category || 'other', note }
+  const comparisons = to_review_comparisons(source.comparisons)
+  if (!category && !note && !comparisons) return undefined
+  return { category: category || 'other', note, ...(comparisons ? { comparisons } : {}) }
+}
+
+const APPLY_TARGETS: EntryReviewApply['target'][] = ['entry.lexeme', 'entry.phonetic', 'sense.glosses', 'sense.definition']
+
+/**
+ * Coerce `review.comparisons` — the competing values the banner diffs. Drops
+ * any item missing a field label or either side's value, and drops an `apply`
+ * target that couldn't be written (unknown target, or a sense target with no
+ * `sense_id`/`key`).
+ */
+export function to_review_comparisons(value: unknown): EntryReviewComparison[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  const comparisons: EntryReviewComparison[] = []
+  for (const item of value) {
+    if (!item || typeof item !== 'object') continue
+    const source = item as Record<string, unknown>
+    const field = typeof source.field === 'string' ? source.field.trim() : ''
+    const a = to_comparison_side(source.a)
+    const b = to_comparison_side(source.b)
+    if (!field || !a || !b) continue
+    const apply = to_review_apply(source.apply)
+    comparisons.push({ field, a, b, ...(apply ? { apply } : {}) })
+  }
+  return comparisons.length ? comparisons : undefined
+}
+
+function to_comparison_side(value: unknown): EntryReviewComparisonSide | undefined {
+  if (!value || typeof value !== 'object') return undefined
+  const source = value as Record<string, unknown>
+  const label = typeof source.label === 'string' ? source.label.trim() : ''
+  const side_value = typeof source.value === 'string' ? source.value.trim() : ''
+  if (!side_value) return undefined
+  return { label, value: side_value }
+}
+
+function to_review_apply(value: unknown): EntryReviewApply | undefined {
+  if (!value || typeof value !== 'object') return undefined
+  const source = value as Record<string, unknown>
+  const target = APPLY_TARGETS.find(known => known === source.target)
+  if (!target) return undefined
+  const sense_id = typeof source.sense_id === 'string' ? source.sense_id.trim() : ''
+  const key = typeof source.key === 'string' ? source.key.trim() : ''
+  if (target.startsWith('sense.') && (!sense_id || !key)) return undefined
+  if (target === 'entry.lexeme' && !key) return undefined
+  return { target, ...(sense_id ? { sense_id } : {}), ...(key ? { key } : {}) }
 }
 
 if (import.meta.vitest) {
@@ -308,6 +355,62 @@ if (import.meta.vitest) {
     })
     it('defaults category to `other` when only a note is given', () => {
       expect(to_review({ note: 'freeform concern' })).toEqual({ category: 'other', note: 'freeform concern' })
+    })
+    it('keeps comparisons alongside the note', () => {
+      expect(to_review({
+        category: 'definition-differs',
+        note: 'Which should the entry say?',
+        comparisons: [{
+          field: 'Definition',
+          a: { label: 'Main dictionary (p62)', value: 'to point at an animate thing' },
+          b: { label: 'Finder list (p345)', value: 'to point at an inanimate thing' },
+          apply: { target: 'sense.definition', sense_id: '11111111-2222-3333-4444-555555555555', key: 'en' },
+        }],
+      })).toEqual({
+        category: 'definition-differs',
+        note: 'Which should the entry say?',
+        comparisons: [{
+          field: 'Definition',
+          a: { label: 'Main dictionary (p62)', value: 'to point at an animate thing' },
+          b: { label: 'Finder list (p345)', value: 'to point at an inanimate thing' },
+          apply: { target: 'sense.definition', sense_id: '11111111-2222-3333-4444-555555555555', key: 'en' },
+        }],
+      })
+    })
+    it('keeps a review that is only comparisons', () => {
+      const review = to_review({ comparisons: [{ field: 'Pronunciation guide', a: { label: 'A', value: 'äʼ-bä' }, b: { label: 'B', value: 'äʼ-bā' } }] })
+      expect(review?.category).toBe('other')
+      expect(review?.comparisons).toHaveLength(1)
+    })
+  })
+
+  describe(to_review_comparisons, () => {
+    it('returns undefined for a non-array or an all-invalid array', () => {
+      expect(to_review_comparisons(undefined)).toBe(undefined)
+      expect(to_review_comparisons([{ field: 'Definition' }])).toBe(undefined)
+      expect(to_review_comparisons([{ a: { value: 'x' }, b: { value: 'y' } }])).toBe(undefined)
+    })
+    it('trims labels and values', () => {
+      expect(to_review_comparisons([{ field: ' Definition ', a: { label: ' Main ', value: ' one ' }, b: { label: ' Finder ', value: ' two ' } }]))
+        .toEqual([{ field: 'Definition', a: { label: 'Main', value: 'one' }, b: { label: 'Finder', value: 'two' } }])
+    })
+    it('drops an unwritable apply target but keeps the comparison', () => {
+      const [comparison] = to_review_comparisons([{
+        field: 'Definition',
+        a: { label: 'Main', value: 'one' },
+        b: { label: 'Finder', value: 'two' },
+        apply: { target: 'sense.definition', key: 'en' },
+      }])
+      expect(comparison.apply).toBe(undefined)
+    })
+    it('drops an unknown apply target', () => {
+      const [comparison] = to_review_comparisons([{
+        field: 'Notes',
+        a: { label: 'Main', value: 'one' },
+        b: { label: 'Finder', value: 'two' },
+        apply: { target: 'entry.notes', key: 'en' },
+      }])
+      expect(comparison.apply).toBe(undefined)
     })
   })
 }

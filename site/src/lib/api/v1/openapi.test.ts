@@ -86,6 +86,12 @@ describe(build_openapi_spec, () => {
     expect(schema('EntryInput').required).toEqual(['lexeme'])
   })
 
+  test('a review carries optional structured comparisons the banner can diff and apply', () => {
+    expect(Object.keys(schema('EntryReview').properties ?? {})).toEqual(['category', 'note', 'comparisons'])
+    expect(schema('EntryReviewComparison').required).toEqual(['field', 'a', 'b'])
+    expect(schema('EntryReviewApply').required).toEqual(['target'])
+  })
+
   test('SensePatch extends SenseInput and adds an optional id', () => {
     const sense_patch = schema('SensePatch')
     expect(sense_patch.allOf).toEqual([{ $ref: '#/components/schemas/SenseInput' }])

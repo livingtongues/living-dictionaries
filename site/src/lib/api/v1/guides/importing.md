@@ -550,7 +550,7 @@ resolve** — set the entry's `review` field: `{ "category": "...", "note": "...
 This is EDITOR-ONLY (never shown to the public — it's stripped from non-editor
 reads, same bar as a private tag) and gives the dictionary's manager a real review
 queue: the entries list has a "Needs review" filter + a per-category facet, editors
-see a small orange indicator beside flagged words in the list/table/gallery views,
+see a small orange indicator on flagged words in the list/table/gallery views,
 and the entry page shows a banner with your `note` and a "Resolve" button that
 clears it.
 Prefer this over burying caveats in your final report. Clear one by PATCHing the
@@ -572,12 +572,35 @@ very first one a human opened differed only in curly quotes; triage cut the queu
 it. The mirror rule: differences in *language* (a stress mark, a vowel, a wording
 change, a part of speech) are never trivia — those stay.
 
-**A comparison note must make the difference legible in one read.** If the flag asks
-"which of these two versions should stand?", quote BOTH versions in full AND name
-what differs ("the finder list says “inanimate” where the main dictionary says
-“animate or inanimate”") — never print one version and make the reviewer diff two
-near-identical strings by eye. If the difference resists a one-line description, say
-"the wording differs throughout — read both" rather than a mangled span list.
+**A comparison belongs in `review.comparisons`, not in prose.** When the flag asks
+"which of these two versions should stand?", put the two values in
+`comparisons: [{ field, a: { label, value }, b: { label, value }, apply? }]` and keep
+the `note` to the framing sentence plus the question. The banner then renders the
+pair with the differing spans highlighted on both sides (character-level for a
+one-letter difference; nothing highlighted when the two wordings barely overlap,
+because there the whole thing differs) — so the reviewer never diffs two
+near-identical strings by eye. `field` is the human label of what's disputed
+(`Definition`, `Pronunciation guide`). `label` says where each version comes from
+(`Main dictionary (p62)`).
+
+Set `apply` when writing the chosen version IS the whole answer, and the reviewer gets a
+one-click "Use this" on each side: `{ target, sense_id?, key? }` with `target` one of
+`entry.lexeme` (`key` = orthography code), `entry.phonetic`, `sense.glosses` or
+`sense.definition` (`sense_id` + `key` = language code). The banner marks whichever version
+the entry already holds as "In use", and clears the whole review once the last comparison
+is settled.
+
+**Default to omitting `apply`.** If the other version is already recorded anywhere on the
+entry — the usual case when you merged a second source's reading as a SECOND SENSE — then
+applying it would overwrite one sense with a duplicate of another. There the question isn't
+which string to write, it's whether both senses belong, so drop `apply` and ask that:
+"Both readings are kept here as separate senses — is that right, or does the word only
+carry one of them?" Same when the two halves may be describing different words entirely
+(the answer is splitting the entry, not editing a definition).
+
+Which parts of speech to write is never a reviewer's question: **union both sources'
+labels** onto the sense (using a canonical compound code like `n.suff` when one source
+prints "n. suffix") instead of flagging the disagreement.
 
 - `category` is a free bucket label that drives the facet — reuse a small,
   consistent vocabulary across the import. Good buckets from real imports:
@@ -610,6 +633,9 @@ near-identical strings by eye. If the difference resists a one-line description,
 
   A good language-split note reads like:
   `"Sense 1: I put “ñakyra’i” in the Guaraní translation instead of the Spanish text.\nOriginal text: “cigarra pequeña, chicharra, ñakyra’i.”\nSpanish translation: “cigarra pequeña, chicharra”\nIs “ñakyra’i” Guaraní, and are both translations now correct?"`
+
+  A good two-versions review reads like:
+  `{ "category": "definition-differs", "note": "The book’s two halves define this word differently. Which should the entry say?", "comparisons": [{ "field": "Definition", "a": { "label": "Main dictionary (p62)", "value": "to point at a particular animate or inanimate thing" }, "b": { "label": "English finder list (p345)", "value": "to point at a particular inanimate thing" }, "apply": { "target": "sense.definition", "sense_id": "…", "key": "en" } }] }`
 
 ### 2.4 Verifying an import
 

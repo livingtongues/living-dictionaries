@@ -37,10 +37,27 @@ const section_sentences = [
 const intro_rows = [
   { id: 'intro', parent_id: null, sort_key: 'i', title: null, body: { en: 'Nahuatl is a *polysynthetic* language; a single verb can express a whole clause.' }, entry_id: null, sense_id: null },
 ]
+const table_rows = [
+  {
+    id: 'paradigm',
+    parent_id: null,
+    sort_key: 'a',
+    title: { en: 'Subject paradigm' },
+    body: {
+      en: `| Person | Singular | Dual | Inclusive plural | Exclusive plural | Unspecified |
+| --- | --- | --- | --- | --- | --- |
+| First person | wa- | wą́- | aⁿgí- | aⁿgá- | wažį́- |
+| Second person | ya- | yą́- | ažá- | ažá- | yažį́- |`,
+    },
+    entry_id: null,
+    sense_id: null,
+  },
+]
 const dict_db = mock_dict_db({ grammar_sections: [...intro_rows, ...rows], clause_slots, sentences, section_sentences })
 
 const [node] = build_section_tree(rows as never)
 const [intro_node] = build_section_tree(intro_rows as never)
+const [table_node] = build_section_tree(table_rows as never)
 
 const read_actions: GrammarSectionActions = {
   editable: false,
@@ -73,4 +90,9 @@ export const Editable: Story<typeof Component> = {
 // Manager (non-admin-3) on the headless intro: a single scoped prose "edit" button.
 export const ManagerProse: Story<typeof Component> = {
   props: { node: intro_node, actions: prose_actions } as never,
+}
+
+export const WideTable: Story<typeof Component> = {
+  viewports: [{ width: 420, height: 420 }, { width: 900, height: 420 }],
+  props: { node: table_node, actions: read_actions } as never,
 }

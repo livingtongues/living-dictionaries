@@ -3,80 +3,92 @@
  * highlight, the active chapter's auto-expansion, and the mobile "you are here"
  * bar.
  *
- * Every landmark tags itself `data-grammar-anchor="<id>"`. An IntersectionObserver
- * with a negative top `rootMargin` puts a line just below the sticky chrome and
- * fires whenever a landmark crosses it; the callback records each landmark's
- * above/below state and the active one is simply the LAST landmark in document
- * order that sits above the line. That handles nesting for free (a subsection's
- * top comes after its parent's, so the deepest one you've entered wins) and
- * needs no scroll listener.
+ * Every landmark tags itself `data-grammar-anchor="<id>"`. On each scroll frame
+ * we measure where those landmarks sit and take the LAST one (document order)
+ * whose top has passed under the sticky chrome — i.e. the heading you are
+ * currently reading beneath. Nesting works for free: a subsection's top comes
+ * after its parent's, so the deepest one you've entered wins.
+ *
+ * The line each landmark is tested against is its OWN `scroll-margin-top` (plus
+ * a small epsilon), which is the same line `scrollIntoView` parks it on — so a
+ * TOC click and the spy can never disagree about which section you just landed
+ * on, at any breakpoint, with no magic number to keep in sync with the CSS.
+ *
+ * This replaced an IntersectionObserver implementation that recorded each
+ * landmark's above/below state from IO callbacks. IO with `threshold: 0` only
+ * fires on VISIBILITY transitions, never on top-edge crossings, so a section
+ * taller than the viewport (Ponca's pronunciation guide is 13KB of prose) kept
+ * the `false` it was given when it first appeared at the viewport BOTTOM until
+ * it scrolled entirely out the top — leaving the TOC blank, or highlighting the
+ * previous chapter, for the whole time you were reading it.
  */
 
-/** Distance below the viewport top where a section counts as "entered" (sticky header + mobile bar). */
-const DEFAULT_OFFSET_PX = 104
+/** Slack below a landmark's scroll-margin line, so a jump lands INSIDE its target. */
+const EPSILON_PX = 4
+
+interface Landmark {
+  id: string
+  element: HTMLElement
+  /** The landmark's own `scroll-margin-top`, in px — where a jump parks it. */
+  line: number
+}
 
 export class GrammarScrollSpy {
   active_id = $state<string | null>(null)
-  #offset: number
-
-  constructor(offset = DEFAULT_OFFSET_PX) {
-    this.#offset = offset
-  }
 
   /** Svelte attachment for the element wrapping every `[data-grammar-anchor]`. */
   watch = (container: HTMLElement) => {
-    // Plain object, not a Map — this is internal bookkeeping read only inside
-    // `recompute`, so it must NOT be reactive.
-    let above: Record<string, boolean> = {}
-    let anchors: HTMLElement[] = []
-    let observer: IntersectionObserver | null = null
+    let landmarks: Landmark[] = []
+    let frame = 0
 
     const recompute = () => {
+      frame = 0
       let found: string | null = null
-      for (const anchor of anchors) {
-        const { grammarAnchor: id } = anchor.dataset
-        if (id && above[id])
+      for (const { id, element, line } of landmarks) {
+        if (element.getBoundingClientRect().top <= line + EPSILON_PX)
           found = id
       }
-      this.active_id = found ?? anchors[0]?.dataset.grammarAnchor ?? null
+      this.active_id = found ?? landmarks[0]?.id ?? null
     }
 
-    const measure = (element: HTMLElement) => {
-      const { grammarAnchor: id } = element.dataset
-      if (id)
-        above[id] = element.getBoundingClientRect().top <= this.#offset
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(recompute)
     }
 
+    // Reading `scroll-margin-top` per landmark is the expensive part, so it
+    // happens here (on structural change / resize) rather than per frame.
     const rescan = () => {
-      observer?.disconnect()
-      anchors = [...container.querySelectorAll<HTMLElement>('[data-grammar-anchor]')]
-      above = {}
-      observer = new IntersectionObserver((entries) => {
-        for (const entry of entries)
-          measure(entry.target as HTMLElement)
-        recompute()
-      }, { rootMargin: `-${this.#offset}px 0px 0px 0px`, threshold: 0 })
-      for (const anchor of anchors) {
-        measure(anchor)
-        observer.observe(anchor)
-      }
+      landmarks = [...container.querySelectorAll<HTMLElement>('[data-grammar-anchor]')]
+        .map((element) => {
+          const { grammarAnchor: id } = element.dataset
+          if (!id) return null
+          return { id, element, line: Number.parseFloat(getComputedStyle(element).scrollMarginTop) || 0 }
+        })
+        .filter((landmark): landmark is Landmark => !!landmark)
       recompute()
     }
 
     rescan()
 
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', rescan)
+
     // Sections appear as the dictionary DB loads and come and go while editing.
-    let queued = 0
+    // childList only — attribute churn (the TOC's own active class) must not
+    // retrigger this.
+    let rescan_frame = 0
     const mutations = new MutationObserver(() => {
-      cancelAnimationFrame(queued)
-      queued = requestAnimationFrame(rescan)
+      cancelAnimationFrame(rescan_frame)
+      rescan_frame = requestAnimationFrame(rescan)
     })
     mutations.observe(container, { childList: true, subtree: true })
 
     return () => {
-      cancelAnimationFrame(queued)
+      cancelAnimationFrame(frame)
+      cancelAnimationFrame(rescan_frame)
+      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('resize', rescan)
       mutations.disconnect()
-      observer?.disconnect()
     }
   }
 }

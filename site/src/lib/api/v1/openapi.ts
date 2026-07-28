@@ -485,7 +485,40 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
     description: 'EDITOR-ONLY "needs review" task. Queues an entry for a human reviewer WITHOUT showing the public — it never appears in the reader UI or search for non-editors (though it does sync in the public snapshot, same as a `private` tag). Use it only for a question that remains unresolved after import cleanup, not as an audit log of deterministic transformations already completed. The note must be answerable from the entry page alone; structured source provenance belongs in the entry\'s `citations` and is rendered separately under collapsed Source details. A reviewer clears it ("Resolve"). On READ it is present under `entry.main.review` ONLY when the caller is an editor.',
     properties: {
       category: { type: 'string', description: 'Free bucket label for triage — drives the entries-list "Needs review" category facet. Reuse a small consistent vocabulary within an import, e.g. `truncated`, `headword_in_gloss`, `language_split`, `uncertain_gloss`, `dropped_text`, `missing_gloss`, `other`.' },
-      note: { type: 'string', description: 'A self-contained, plain-language question shown verbatim in the editor-only banner. Name the sense when useful; include the complete original and imported/omitted values needed to decide and end with a concrete question. Never use code paths (`glosses.gn`), internal flag/parser jargon, source-line tracebacks, or instructions to inspect the source file.' },
+      note: { type: 'string', description: 'A self-contained, plain-language question shown verbatim in the editor-only banner. Name the sense when useful; include the complete original and imported/omitted values needed to decide and end with a concrete question. Never use code paths (`glosses.gn`), internal flag/parser jargon, source-line tracebacks, or instructions to inspect the source file. When `comparisons` carry the competing values, keep the note to the framing sentence plus the question — do NOT repeat the values in prose.' },
+      comparisons: { type: 'array', items: { $ref: '#/components/schemas/EntryReviewComparison' }, description: 'Competing values for one or more fields. The banner renders each pair with the differing spans highlighted (so the reviewer sees the difference instead of hunting for it) and, when `apply` is set, offers one-click "Use this" on each version.' },
+    },
+  }
+
+  const EntryReviewComparison = {
+    type: 'object',
+    required: ['field', 'a', 'b'],
+    description: 'One disputed field and its two versions. Use it whenever a review exists because two sources (or two printings of one source) disagree about a value.',
+    properties: {
+      field: { type: 'string', description: 'Human label for the disputed field, e.g. `Definition`, `Part of speech`, `Pronunciation guide`.' },
+      a: { $ref: '#/components/schemas/EntryReviewComparisonSide' },
+      b: { $ref: '#/components/schemas/EntryReviewComparisonSide' },
+      apply: { $ref: '#/components/schemas/EntryReviewApply' },
+    },
+  }
+
+  const EntryReviewComparisonSide = {
+    type: 'object',
+    required: ['value'],
+    properties: {
+      label: { type: 'string', description: 'Where this version comes from, e.g. `Main dictionary (p62)`.' },
+      value: { type: 'string', description: 'The value exactly as that source prints it.' },
+    },
+  }
+
+  const EntryReviewApply = {
+    type: 'object',
+    required: ['target'],
+    description: 'Where a chosen version gets written when the reviewer clicks "Use this". Omit it when the two versions are not directly writable (e.g. the two halves may be different words entirely).',
+    properties: {
+      target: { type: 'string', enum: ['entry.lexeme', 'entry.phonetic', 'sense.glosses', 'sense.definition'] },
+      sense_id: { type: 'string', description: 'Required for `sense.*` targets.' },
+      key: { type: 'string', description: 'Orthography code for `entry.lexeme` (e.g. `default`); language code for `sense.glosses` / `sense.definition` (e.g. `en`). Unused by `entry.phonetic`.' },
     },
   }
 
@@ -1495,6 +1528,9 @@ export function build_openapi_spec({ origin }: { origin: string }): Record<strin
         SentenceFull,
         SenseFull,
         EntryReview,
+        EntryReviewComparison,
+        EntryReviewComparisonSide,
+        EntryReviewApply,
         EntryMain,
         EntryFull,
         EntryResponse,

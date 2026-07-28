@@ -131,7 +131,7 @@
     onclick={on_click}
     class="entry-link">
     <div class="headword-line">
-      <span class="lexeme">{headword.value}{#if entry.main.homograph}<sup class="homograph">{entry.main.homograph}</sup>{/if}{#if entry.main.review}<ReviewIndicator review={entry.main.review} />{/if}</span>
+      <span class="lexeme">{headword.value}{#if entry.main.homograph}<sup class="homograph">{entry.main.homograph}</sup>{/if}</span>
       {#if entry.main.phonetic}
         <span class="phonetic">[{entry.main.phonetic}]</span>
       {/if}
@@ -143,6 +143,9 @@
           {/if}
         {/each}
       {/if}
+
+      <!-- After every spelling of the word, not wedged between the word and its respelling. -->
+      {#if entry.main.review}<ReviewIndicator review={entry.main.review} />{/if}
     </div>
 
     {#if single_sense}

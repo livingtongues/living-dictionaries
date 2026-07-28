@@ -219,8 +219,15 @@ easy to override.
   padding: 0.1875em 0.375em;
 }
 
+/* Columns hug their content and the table stays left-aligned instead of
+   stretching to fill the page — a 2-column paradigm table on a wide screen is
+   unreadable when its cells get pushed 1000px apart. A genuinely wide table
+   scrolls within its own box instead of widening the whole page. */
 .tw-prose :where(table) {
-  width: 100%;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
   table-layout: auto;
   margin-top: 2em;
   margin-bottom: 2em;

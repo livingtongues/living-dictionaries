@@ -9,12 +9,16 @@
   import { build_section_tree, has_title } from './grammar-tree'
   import { active_breadcrumb, build_toc_entries, GLOSSING_LEGEND_ANCHOR } from './grammar-toc'
   import { GrammarScrollSpy } from './scroll-spy.svelte'
+  import { build_entry_link_index } from '$lib/entry-links/exact-lexeme-index'
+  import { set_entry_mention_context } from '$lib/entry-links/mention-context'
+  import type { EntryMentionClick } from '$lib/entry-links/link-entry-mentions'
+  import EntryMentionPopover from '$lib/entry-links/EntryMentionPopover.svelte'
   import IconFa6SolidPencil from '~icons/fa6-solid/pencil'
   import IconMdiCheck from '~icons/mdi/check'
 
   const { data } = $props()
   const { is_manager, dictionary } = $derived(data)
-  const { t, dict_db } = $derived(page.data)
+  const { t, dict_db, entries_data } = $derived(page.data)
 
   // Since the 2026-07-15 cutover the section tree renders for everyone; since
   // 2026-07-27 STRUCTURAL editing is open to the dictionary's own managers (site
@@ -54,6 +58,20 @@
     active_id: spy.active_id,
     prefer_languages: dictionary.gloss_languages ?? [],
   }))
+
+  // Any entry mentioned in the prose becomes tappable (audio + gloss + jump).
+  // Editing swaps the prose for a textarea, so the index is only built for
+  // readers — that also keeps a 5k-entry rebuild off the editing path.
+  const entry_link_index = $derived(edit_mode
+    ? null
+    : build_entry_link_index(Object.entries($entries_data).map(([id, entry]) => ({ id, lexeme: entry.main.lexeme }))))
+
+  let open_mention = $state<EntryMentionClick | null>(null)
+
+  set_entry_mention_context({
+    get index() { return entry_link_index },
+    open: (detail) => { open_mention = detail },
+  })
 </script>
 
 <div class="grammar">
@@ -98,6 +116,14 @@
     {/if}
   </div>
 </div>
+
+{#if open_mention}
+  <EntryMentionPopover
+    entry_ids={open_mention.entry_ids}
+    form={open_mention.form}
+    anchor={open_mention.anchor}
+    on_close={() => open_mention = null} />
+{/if}
 
 <SeoMetaTags
   norobots={!dictionary.public}

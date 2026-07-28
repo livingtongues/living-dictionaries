@@ -8,6 +8,8 @@
   import type { GrammarNode, GrammarSectionActions } from './grammar-section-actions'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text as sanitize } from '$lib/markdown/sanitize-rich-text'
+  import { link_entry_mentions } from '$lib/entry-links/link-entry-mentions'
+  import { get_entry_mention_context } from '$lib/entry-links/mention-context'
   import { get_headword } from '$lib/orthography/orthographies'
   import { first_multistring_value } from './grammar-tree'
   import type { MultiString } from '$lib/types'
@@ -65,6 +67,18 @@
     .filter((sentence): sentence is NonNullable<typeof sentence> => !!sentence))
 
   const is_empty = $derived(!title_languages.length && !body_languages.length && !usage_languages.length)
+
+  const mentions = get_entry_mention_context()
+
+  function prose_html(value: string | undefined): string {
+    return sanitize(render_markdown_to_html(value || ''))
+  }
+
+  // Passing `html` in keeps the attachment tied to the markup it decorated —
+  // Svelte tears down and re-runs it whenever either the prose or the index changes.
+  function decorate(html: string) {
+    return link_entry_mentions({ index: mentions?.index ?? null, html, on_click: detail => mentions?.open(detail) })
+  }
 </script>
 
 <div class="section" id={section_dom_id(section.id)} data-grammar-anchor={section.id} style={`--depth: ${node.depth}`}>
@@ -123,9 +137,10 @@
     <SectionEditor {section} prose_only={!actions.editable} on_close={() => actions.set_editing(null)} />
   {:else}
     {#each body_languages as bcp (bcp)}
-      <div class="body tw-prose">
-        {#if multilingual}<span class="lang-tag body-lang">{language_label(bcp)}</span>{/if}
-        {@html sanitize(render_markdown_to_html(section.body?.[bcp] || ''))}
+      {@const html = prose_html(section.body?.[bcp])}
+      <div class="body tw-prose" {@attach decorate(html)}>
+        {#if multilingual}<span class="lang-tag body-lang no-entry-links">{language_label(bcp)}</span>{/if}
+        {@html html}
       </div>
     {/each}
 
@@ -133,9 +148,10 @@
       <div class="usage">
         <span class="usage-label">{t('grammar.usage_conditions')}</span>
         {#each usage_languages as bcp (bcp)}
-          <div class="body tw-prose">
-            {#if multilingual}<span class="lang-tag body-lang">{language_label(bcp)}</span>{/if}
-            {@html sanitize(render_markdown_to_html(section.usage_conditions?.[bcp] || ''))}
+          {@const html = prose_html(section.usage_conditions?.[bcp])}
+          <div class="body tw-prose" {@attach decorate(html)}>
+            {#if multilingual}<span class="lang-tag body-lang no-entry-links">{language_label(bcp)}</span>{/if}
+            {@html html}
           </div>
         {/each}
       </div>
@@ -284,6 +300,28 @@
 
   .body {
     margin-top: 0.375rem;
+  }
+
+  /* Words the entry-link pass wrapped. Injected into `{@html}` output, so the
+     rule has to be :global — and it must inherit every surrounding style
+     (bold/italic in a paradigm cell) rather than look like a control. */
+  .body :global(.entry-mention) {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: inherit;
+    cursor: pointer;
+    border-bottom: 1px dotted color-mix(in srgb, var(--primary) 55%, transparent);
+  }
+
+  .body :global(.entry-mention:hover),
+  .body :global(.entry-mention:focus-visible) {
+    border-bottom-color: var(--primary);
+    color: var(--primary);
   }
 
   .body-lang {

@@ -20,3 +20,39 @@ Hard rules (any agent, this repo or others):
    sessions' JSONLs (timestamps on every tool_use), and replay per-file. Watch for post-revert
    sed/codemod passes — damaged files may be HEAD+codemod, not clean HEAD, so replay the
    *transformation*, don't blind-restore pre-revert content.
+
+## Production data is shared mutable state too — not just the working tree
+
+The same "check who else is running" rule applies to the **prod dictionary DBs**, and it's
+easier to forget because nothing local warns you.
+
+Encountered 2026-07-28: a grammar-page session was about to PATCH prod `ponca`
+`grammar_sections` (an ALL-CAPS → Title Case rewrite) while a *different* session was in the
+middle of a long-running bulk prod patch of the same dictionary's entries/senses from a
+Ponca import audit.
+
+How to check, and what the tells are:
+
+1. `horse list --all-hosts` — a session whose title names the same dictionary/feature is a
+   red flag. `python3 ~/code/horse/scripts/extract-session-text.py <jsonl>` shows what it is
+   actually doing right now (tool markers are enough).
+2. **Poll the DB for live writes** — the definitive test, since a session can be `listening`
+   while a backgrounded job still writes:
+   `SELECT MAX(updated_at) FROM entries` twice, ~45s apart. Moving = hands off.
+3. A whole table sharing ONE identical `updated_at` means a bulk re-import/merge just ran,
+   not human edits — expect the shape of the data to have changed under you (Ponca's grammar
+   went from nested-under-one-root to 20 flat top-level sections between two reads).
+4. `horse send <project> <session-id> "<question>"` is the coordination primitive — ask
+   whether they plan further writes to YOUR table before you start.
+
+Also: `site/.data/dictionaries/*.db` is shared between sessions on the same box (agents pull
+prod copies into it). Don't overwrite one to get a fresh copy — `VACUUM INTO` a scratch path
+(e.g. `/tmp/…`) and read from there.
+
+### Don't whole-file-rewrite a shared file to make a one-line change
+Adding one i18n key with a `json.load` → `json.dump` round-trip on
+`site/src/lib/i18n/locales/en.json` is a read-modify-write over a file other sessions edit
+constantly; it got away with it (the other session's keys survived), but the same move loses
+whatever landed between the read and the write, and can reflow the entire file into an
+unreviewable diff. Use a targeted `Edit` on the surrounding lines instead, and check
+`git diff <file>` afterwards — you should see ONLY your line plus any concurrent additions.

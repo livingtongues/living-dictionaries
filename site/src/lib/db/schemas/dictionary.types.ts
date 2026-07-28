@@ -121,8 +121,46 @@ export interface EntryReview {
    * A self-contained, plain-language task for the human reviewer. Include the
    * complete original/imported values needed to decide; keep provenance in the
    * entry's structured `citations`, which the banner renders separately.
+   *
+   * When `comparisons` carry the competing values, keep the note to the framing
+   * sentence + the question — don't repeat the values in prose.
    */
   note: string
+  /**
+   * Competing values the reviewer must choose between (e.g. a word printed two
+   * ways in two halves of one book). The banner renders each pair with the
+   * differing spans highlighted, so the reviewer sees the difference instead of
+   * hunting for it.
+   */
+  comparisons?: EntryReviewComparison[]
+}
+
+/** One disputed field, with the two versions of its value. */
+export interface EntryReviewComparison {
+  /** Human label naming the disputed field, e.g. `Definition`, `Pronunciation guide`. */
+  field: string
+  a: EntryReviewComparisonSide
+  b: EntryReviewComparisonSide
+  /** Set to let the reviewer apply either version with one click. */
+  apply?: EntryReviewApply
+}
+
+export interface EntryReviewComparisonSide {
+  /** Where this version comes from, e.g. `Main dictionary (p62)`. */
+  label: string
+  value: string
+}
+
+/** Where a chosen comparison value gets written. */
+export interface EntryReviewApply {
+  target: 'entry.lexeme' | 'entry.phonetic' | 'sense.glosses' | 'sense.definition'
+  /** Required for `sense.*` targets. */
+  sense_id?: string
+  /**
+   * Orthography code for `entry.lexeme` (e.g. `default`), language code for
+   * `sense.glosses` / `sense.definition` (e.g. `en`). Unused by `entry.phonetic`.
+   */
+  key?: string
 }
 
 /** Best-effort cached metadata for a `videos.hosted_elsewhere` reference. */

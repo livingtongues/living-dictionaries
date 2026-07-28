@@ -177,6 +177,54 @@ Two durable lessons beyond the rules:
   judge. The entries-list facet auto-humanizes unknown category slugs, so hyphenated
   lowercase names render fine without touching `review-category.ts`.
 
+### Round 4: the second cut, 375 items → 38 (same dictionary, same day)
+
+The triage above still left 375 items, and Jacob's next sample was again trivia — a space before a
+`~`, and `n. suffix` vs `n., suffix`. Three rulings, now encoded in §2.3 of the importing guide:
+
+- **A part-of-speech difference is NEVER a review item.** Union both sources' labels onto the sense
+  (canonical compound code when one prints "n. suffix"). 29 flags → 0.
+- **Same-meaning paraphrases get settled by taking the fuller/better-formed wording**; only a
+  materially different claim (different referent, or one half describing another word) survives.
+  271 → 16.
+- **A respelling disagreement is settled against the book's own alphabet table** — the headword's
+  letters decide which respelling is the typo. 32 → 2.
+
+Every settled call is listed with its reason in the report, which is what makes an aggressive
+auto-settle acceptable: aggressive + auditable beats timid + noisy. The generalizable test is
+**"would answering this change the dictionary?"** — if the two versions mean the same thing, no
+human should ever see it.
+
+### Show the difference, don't describe it
+
+The prose instruction "quote both versions AND name what differs" produced notes a reviewer still
+had to diff by eye. It's now structured data: `review.comparisons[]` (types in
+`dictionary.types.ts`, diff in `$lib/entry/review-diff.ts`, UI in `ReviewBanner.svelte`). Design
+calls worth keeping:
+
+- **Both sides get the SAME highlight**, not red/green add/remove — neither version is wrong yet;
+  which one is right is the question being asked.
+- **Character-level refinement only inside short, similar replaced blocks.** Refining two unrelated
+  words to characters produces confetti, so the refinement is dropped below ~50% character overlap,
+  and when >60% of a value is marked the diff renders with **no** marks at all (the whole wording
+  differs — marking everything says nothing).
+- **`apply` is optional on purpose, and the default should be "no".** Offer one-click "Use this"
+  only when writing that value IS the whole answer. Ponca shipped `apply` on 21 of 21 comparisons
+  and 15 were wrong: the import had already merged the finder list's reading as a **second sense**,
+  so applying the "other" version would have overwritten sense 1 with a duplicate of sense 2. The
+  test: **if the other reading already exists anywhere on the entry, the question is about the
+  senses, not the string** — drop `apply` and ask about the senses instead ("both readings are kept
+  here as separate senses — is that right?"). Same for `possibly-two-words`, where the answer is
+  splitting the entry, not editing a definition.
+
+### Deploy ordering gotcha (cost us a re-run)
+
+`to_review()` **drops unknown fields**, so writing data that depends on a new review field through
+the v1 API *before* the code is deployed silently strips it — the entries land with a question and
+no values. Either deploy the schema first, or (what we did) write self-contained interim notes and
+re-run the structured patch after the deploy. Any long import lane that adds a field to a stored
+JSON blob should check which side ships first.
+
 ## Reports: the preview→report link trap, and how long is long enough
 
 The guide has required for months that **every headword printed in a report links to its
