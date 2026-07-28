@@ -159,10 +159,14 @@ wire, and visually verified.
 - **Moving the render off the main thread** (see residual above).
 - **Nothing about this morning's photo fix was touched** — `card-image.ts` is unchanged.
 
-### Follow-up worth filing after review
+### Follow-up — DONE 2026-07-28
 
 `/og` renders on the request thread at all. A worker thread (or a tiny render sidecar) would make
 `/healthz` completely immune, and would let the budget be relaxed so more cards render per pass.
+→ Done: <File path=".issues/og-render-off-main-thread.md" />. satori + resvg moved into a worker
+thread; measured on the same box, a 20-card burst took `/healthz`'s worst case from 757 ms to
+136 ms, and the number of health checks answered DURING the burst from 12 to 57. The budget was
+relaxed to 0.9 and the wait deadline to 8 s as predicted.
 
 ## Shipped + verified in production — 2026-07-28 02:0x UTC
 

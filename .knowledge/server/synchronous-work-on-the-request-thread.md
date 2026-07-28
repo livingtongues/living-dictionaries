@@ -42,9 +42,33 @@ rotation when it fails. So the question for any synchronous handler is not "is i
 - Watch out for `mkdirSync` under `/proc` — it HANGS in this sandbox rather than erroring. Use "a
   file where a directory should be" (ENOTDIR) to test unwritable-path handling.
 
-## Residual, and the real cure
+## The real cure: move the work off the thread (done for `/og`, 2026-07-28)
 
-With all of the above, the worst case is still ~1–2 units of synchronous work (poll-phase FIFO can
-put another expensive request ahead of the health check). For `/og` that is ~0.8–1.7 s in production
-against a 2 s timeout — under it, but thin. The durable fix for any handler in this class is to move
-the work **off the main thread** (worker thread or a sidecar process). Not done for `/og` yet.
+Everything above only *rations* the damage — the worst case stayed ~1–2 units of synchronous work,
+because poll-phase FIFO can put another expensive request ahead of the health check. The durable fix
+for any handler in this class is a **worker thread**. `/og` did it (`render-pool.ts` +
+`render-worker.js`, `.issues/og-render-off-main-thread.md`); same box, same build, before vs after,
+20 distinct cards:
+
+| | in-process | worker |
+|---|---:|---:|
+| `/healthz` max during the burst | 757 ms | **136 ms** |
+| health checks answered during the burst | 12 | **57** |
+
+The count is the more honest metric than the latency: a blocked server doesn't answer a health check
+*slowly*, it doesn't answer it at all until the loop comes back.
+
+Two things that generalize to the next handler that needs this:
+
+- **A worker can't import your app.** The Docker runner copies only `site/build`, so a `.ts` worker
+  file next to your route simply isn't there at runtime. Ship the worker's SOURCE: author it as
+  plain `.js`, import it with vite's `?raw` (inlined into the bundle at build time), spawn with
+  `new Worker(source, { eval: true })`. Everything it needs then has to arrive via `workerData` or
+  the job message.
+- **Eval'd worker code is CommonJS, and bare specifiers resolve against `process.cwd()`** — not
+  against the bundle. `import('satori')` inside one fails with
+  `Cannot find package 'satori' imported from /tmp/[worker eval]` if cwd isn't the app dir. Resolve
+  packages in the parent with `import.meta.resolve` and pass absolute `file://` URLs.
+- Keep the queue/budget anyway. It stops the worker pegging the box's second core, and it is what
+  sheds a backlog. With rendering off-thread the budget can be loose (`/og` went 0.5 → 0.9) and the
+  wait deadline long, since waiting now costs a socket rather than the thread.

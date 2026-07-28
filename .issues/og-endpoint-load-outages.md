@@ -87,6 +87,13 @@ In rough priority order:
    logs only failures, so its request volume and duration are invisible and had to be inferred from
    container memory growth.
 
+## Status
+
+Items 1–5 shipped 2026-07-27/28 (see
+<File path=".issues/canonical-bot-detection-and-og-endpoint-shape.md" />), and the residual they left
+— the render still happening on the request thread at all — is closed by
+<File path=".issues/og-render-off-main-thread.md" />: satori/resvg now run in a worker thread.
+
 ## Standing rule this violates
 
 2026-07-27 (Jacob): *analytics and telemetry must never block a request path* — "it shouldn't be

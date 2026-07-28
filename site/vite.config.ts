@@ -1,9 +1,9 @@
-import { readFileSync } from 'node:fs'
 import { sveltekit } from '@sveltejs/kit/vite'
 import { defineConfig } from 'vite'
-import type { Plugin, UserConfig } from 'vite'
+import type { UserConfig } from 'vite'
 import Icons from 'unplugin-icons/vite'
 import { sqlite_proxy } from './sqlite-proxy/vite-plugin'
+import { raw_fonts } from './vite-plugins/raw-fonts'
 
 // svelte-look is a `link:../../svelte-look` workspace dep that doesn't exist in
 // the Docker build context. Import it lazily so a missing target degrades to
@@ -25,7 +25,7 @@ export default defineConfig(async (): Promise<UserConfig> => ({
     // `font-size` on the icon or its parent IS the icon size (default would be 1.2em)
     Icons({ compiler: 'svelte', scale: 1 }),
     sveltekit(),
-    rawFonts(['.ttf']),
+    raw_fonts(['.ttf']),
     // Dev-only HTTP+WS proxy so the agent CLI (`scripts/sqlite-query.sh`) can
     // query the live browser wa-sqlite DBs (admin shared.db + per-dict dict.db).
     sqlite_proxy(),
@@ -65,20 +65,5 @@ export default defineConfig(async (): Promise<UserConfig> => ({
 function getReplacements() {
   return {
     'import.meta.vitest': false,
-  }
-}
-
-function rawFonts(extensions: string[]): Plugin {
-  return {
-    name: 'vite-plugin-raw-fonts',
-    resolveId(id) {
-      return extensions.some(ext => id.endsWith(ext)) ? id : null
-    },
-    transform(code, id) {
-      if (extensions.some(ext => id.endsWith(ext))) {
-        const buffer = readFileSync(id)
-        return { code: `export default ${JSON.stringify(buffer)}`, map: null }
-      }
-    },
   }
 }

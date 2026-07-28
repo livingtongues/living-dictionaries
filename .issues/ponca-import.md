@@ -443,38 +443,6 @@ subsets* simply carry no ToUnicode mapping for `đ`, which is a PDF export artef
 `Č` · `ò` · `Ų` · `ų` · `ǫ` · `ẋ` — plus combining U+0301/U+0300/U+0328 for the stressed nasals.
 This inventory is exactly the input the search tap-buttons need.
 
-## NEXT UP — the search character tap-buttons (Jacob, decided 2026-07-27)
-
-Ponca needs `ʃ` and `ə` (and `đ`, `ą́`…) tappable next to the search box — nobody can type them.
-Jacob: *"something very simple, not a Keyman keyboard… a few buttons for these special characters
-right there on this dictionary"*, and *"do it in a way that works for more than just one
-dictionary"* — hardcoding for `ponca` first is acceptable, standardise at the second dictionary.
-Feed it from the dictionary's registered orthography/alphabet rather than a per-dict hardcode if
-that lands cleanly.
-
-## KNOWN BUG — ✅ RESOLVED by the vision sweep (see the sweep section below): the gloss-leak
-class (POS/labels as gloss) is fixed at the source, `Ámąđì`/`Akíđé` extract cleanly, and the
-example counts below are superseded by the sweep-final stats.
-
-## (historical) example-sentence extraction needs another pass
-
-Only ~229 of the book's parenthetical `(~ …)` notes are real Ponca example sentences; the same
-notation is also used for plain **English usage notes** ("to use a lid to ~ the food"), which are
-not sentences at all. `is_ponca()` now separates them by testing for Ponca-only letters with the
-`~` removed (expanding first would make every English note look Ponca) — that part works, and the
-English notes correctly stay in the definition.
-
-**Still broken in the ~229 kept examples**, seen while verifying tilde expansion:
-- `Ađį́ą́gađį̀` → translation "we are **pl.** the dishes" and `Agđítʼamà` → "the ducks are **phr.**":
-  the `~` in the translation is expanded with the sense gloss, and for these entries the gloss is
-  wrong — a POS abbreviation (`pl.`, `phr.`, `/ v.`) leaked into it. So the **gloss** extraction is
-  wrong for a subset of entries, and the examples merely expose it. Find and fix that class first.
-- `Ámąđì` → text/translation mangled ("iđádi míʼxe kèʼ, walk uponkiđaì, they caused"): nested or
-  multi-part parentheticals are being split wrongly.
-- `Akíđé` → `He"úškà` in the translation where the text has `Heđúškà`.
-
-Do NOT post entry-count claims about examples to the conversation until this is resolved.
-
 ## VISION SWEEP — ✅ COMPLETE (2026-07-27, all 346 body pages, 3 waves)
 
 Every body page (pdf 61–231, 233–407) vision-checked by gpt-5.6-sol lanes (findings in
@@ -518,8 +486,10 @@ the book's own quirk. Final stats: **4,553 + 4,388 entries · 4,858 + 4,667 sens
 
 ### Book quirks confirmed against page images (NOT bugs — do not "fix")
 
-- Book's own typos kept verbatim: "meterorite" p140, "broadcoth" p204, "pharmarcy" p134,
-  "nazalize" p84, "continuouly" p92, "twetieth-century" (+`source_typo` respellings).
+- ~~Book's own typos kept verbatim: "meterorite" p140, "broadcoth" p204, "pharmarcy" p134,
+  "nazalize" p84, "continuouly" p92, "twetieth-century" (+`source_typo` respellings).~~
+  **SUPERSEDED 2026-07-28**: Jacob ordered obvious ENGLISH misspellings corrected — see the
+  AUDIT ROUND 2 section (`corrections.py`). Ponca-side inconsistencies still faithful.
 - Book-internal inconsistencies (print verified): `moⁿkoⁿʼ` no hyphen p134 vs hyphenated sibling;
   `theⁿ` no macron p185; `zheⁿ` vs `zhēⁿ` p78 (two Bažį́de entries differ); `Heđúska-` with plain
   s p111 (vs Heđúškà elsewhere); `awíʃwaą̀` truly printed WITHOUT đ p74+p401 (both parts agree);
@@ -548,7 +518,8 @@ the book's own quirk. Final stats: **4,553 + 4,388 entries · 4,858 + 4,667 sens
       them findable argues for real entries.
 - [ ] **Gendered speech variants** (Part Two `(masc./fem.)` + whole alternate headwords) — model as
       `dialectal_variant` relationships, or as alternate forms? Needs Greg.
-- [ ] **Example phrases** — see the KNOWN BUG section above; fix the gloss leak first.
+- [x] ✅ **Example phrases** — gloss-leak class fixed in round 1; round 2 fixed the remaining
+      splitter bugs (question marks, stranded Ponca fragments, Q&A pairs). 122 examples staged.
 - [x] ✅ **Search character tap-buttons** — SHIPPED 2026-07-27 (site feature, tracked in
       `.issues/orthography-character-buttons.md`). Data-driven, no per-dict code: `Orthography`
       gained `characters?: string[]` on the existing catalog JSON, so the row is fed from the
@@ -565,8 +536,9 @@ the book's own quirk. Final stats: **4,553 + 4,388 entries · 4,858 + 4,667 sens
       `ipa_to_common_keyboard`, so those two now have plain-keyboard search forms (`e`, `d`) —
       accented vowels already did (NFD diacritic stripping).
 - [x] ✅ **Grammar sketch** (pdf 20–59) → staging JSON — DONE 2026-07-27. Staging only; nothing
-      written to the dictionary or the conversation. **59 sections · 74 markdown tables ·
-      68 IGT examples · 65 legend codes · 8 clause slots.** Detail in "Grammar sketch" below.
+      written to the dictionary or the conversation. **59 sections · 73 markdown tables ·
+      68 IGT examples · 65 legend codes · 8 clause slots** (74→73 after the round-2 sweep
+      merged the p25 stub table back into its row). Detail in "Grammar sketch" below.
 - [x] ✅ **Prose** → `about` — `prose.py` → `about.md` (Preface 11 paras · Acknowledgments 19,
       Elders' bios come out as **Name**: bolded leads · Bibliography 7 entries with the `———.`
       author-repeat row correctly reassembled — same-row font fragments cluster within 4pt).
@@ -575,10 +547,16 @@ the book's own quirk. Final stats: **4,553 + 4,388 entries · 4,858 + 4,667 sens
       (2100×1220 text-free powwow crowd crop, y 1780–3000) staged in `~/import-work/ponca/`.
       POST to `…/cover-image` happens in Phase 2 (rights question to Greg stands).
 - [x] ✅ **Vision verification sweep** — DONE, all 346 pages, see the sweep section above.
-- [ ] **Rendered preview + human sign-off** before any writes (guide §1.2 / §2.5).
-      `preview.html` REBUILT with sweep-final + merged numbers (4,667 entries / 5,027 senses /
-      649 review-flagged) + a "checked against the printed pages" card. **WITH JACOB for review
-      now** — post to the conversation only after he approves.
+- [x] ✅ **Rendered preview + human sign-off** — Jacob reviewed the report 2026-07-28 ("looks
+      great"), ordered the misspelling corrections + audits, and ruled: no questions to Greg,
+      post artifact + message once audit round 3 is clean, then proceed. `preview.html` carries
+      the round-2 numbers (4,667 entries / 5,027 senses / 639 review-flagged) + the
+      "checked twice" card.
+- [x] ✅ **AUDIT ROUND 3** — DONE 2026-07-28, session `560e3f1e`. All 346 body + 40 grammar
+      + 12 prose pages re-verified (opus-5 wave 1 + sol backfill/wave 2); 10 real bug
+      classes fixed, corrections 33 → 58, examples 122 → 131, review flags 639 → 624,
+      preview rebuilt. Full detail in the AUDIT ROUND 3 section above.
+- [ ] **Post to the conversation** (artifact + message, NO questions) after round 3 is clean.
 - [ ] **Phase 2 writes** in idempotent batches under one `import_id`.
 - [ ] **Revoke the API key** `f9375f18-e388-434b-bcff-8c29f8638029` when finished.
 
@@ -620,7 +598,7 @@ every chart is rebuilt from x/y. Four things carried it, none of them string heu
 
 Wrapped prose cells join with a space, stacked form-over-gloss cells with `<br>` — decided by the
 column measure, and only in columns wide enough to hold prose. Verified end-to-end through the
-site's OWN markdown pipeline (`markdown-it {html:true}` + the `xss` whitelist): all 74 tables
+site's OWN markdown pipeline (`markdown-it {html:true}` + the `xss` whitelist): all tables
 become `<table>`, `<br>` survives sanitisation, nothing renders literally.
 
 Content spot-checked against rendered page crops for p29, p30, p44 (the 6×6 conjugation grid),
@@ -687,11 +665,9 @@ tokens locate left-to-right in the text (mirroring the server's `derive_tokens`)
 2. **3 subsection titles are OURS**, marked `"_synthetic": true` — `The suffix -tigđè`,
    `The particles gá and á`, `The verb -ną́ʼą 'to hear (something)'`. The book runs these
    paradigms on without a caption; the wording is lifted from its own prose.
-3. **The blue editorial annotations in the introduction** (excluded at extract time, pp45/57/58).
-   One is real content: under the 10-column instrumental-prefix chart on p45 sits **`Gi-` 'one's
-   own (makes it possessive)'** — an 11th prefix that was never typeset in black. Ask whether to
-   add it. The other two are `/wi’akchi` beside the numeral **1** (p57) and `/ šap’e na,ba` beside
-   **12** (p58) — look like respelling corrections.
+3. ~~The blue editorial annotations~~ **RESOLVED 2026-07-28**: the p45 `Gi-` prefix is now
+   INCLUDED as an appended chart row marked as an editorial addition (Jacob's ruling). The two
+   numeral respellings (`/wi’akchi` at **1** p57, `/ šap’e na,ba` at **12** p58) stay excluded.
 4. **The intensive infix `-ʼi-`** sits inside the stem, so glossed examples show the stem split
    around it (`đi-ʼi-hą` = `lift-PL.INTNS-lift`). Noted in the `PL.INTNS` legend entry.
 5. **`Wáđiʼihąì`** is glossed both 'he/she/it lifts them' and 'they lift them' — the book says so
@@ -699,7 +675,217 @@ tokens locate left-to-right in the text (mirroring the server's `derive_tokens`)
 6. **The book's own caption misprint on p40**: "Second person singular subject (**“I”**)" should
    read "you". Kept verbatim.
 7. The 10-column instrumental-prefix chart is stored **transposed** to 2 columns (unreadable as
-   10 columns on a phone); the other 73 tables keep the book's own shape.
+   10 columns on a phone); the other 72 tables keep the book's own shape.
+
+## AUDIT ROUND 2 — full re-verification (2026-07-28, in progress)
+
+Jacob approved the preview content but ordered: (a) **correct obvious English misspellings**
+(superseding the "kept verbatim" rule for ENGLISH typos only — Ponca-side inconsistencies stay
+faithful), (b) update this file, (c) a second full audit: orchestrator does the important checks
+itself + gpt-5.6-sol vision lanes re-verify EVERY page at 40 pages/lane, grammar included.
+
+### English typo corrections — ✅ DONE
+`corrections.py` (new pipeline stage, applied in `senses.py` to English-side fields only:
+gloss/definition/literal/example translation/related-form gloss/english_key). **28 misspellings,
+48 total firings** across both parts — the full map with page cites is in `corrections.py`
+(meterorite→meteorite, broadcoth→broadcloth, pharmarcy→pharmacy, habeus→habeas,
+accipter→accipiter, oftens→often, twelth/eleveth, childen, practioner, supressed, aquaintance,
+twetieth/twenthieth→twentieth, etc.). Found via a wordfreq sweep over ALL English text (entries +
+about.md + grammar) — two passes: zero/low-freq words near common words, then zero-freq words
+near rare-but-real words. Latin binomials (piscivorus, vociferus, erminea, columbarius, gerardii,
+pomifera are all CORRECT Latin), rare-real words (bedew, adulate, congealment, overripen,
+automized, philio) and all Ponca text untouched. Each fix must fire ≥1× or senses.py exits
+nonzero (guards against upstream drift). Side effect: 5 P1↔P2 definition disagreements were
+typo-vs-correct pairs and vanished — review-flagged entries 648 → **644**. about.md + grammar
+had NO typos (ritualism/bivocational/unbiasedly/ejective/hacek/ogonek are real words; the odd
+"words" flagged there are Ponca substrings).
+
+### Orchestrator's own structural audit — ✅ clean
+Invariant scan of merged.jsonl (markdown leaks, double spaces, control chars, empty senses,
+unexpanded `~` in examples, unstripped/unbalanced fields, label-as-gloss, dup entries): only 3
+flags, all crop-verified as the BOOK's own print: `Eʼbéʼ` really is two back-to-back entries on
+p94 (dup is faithful); `Éʼžą̀hì` p95 and `Stápʼì` p170 parentheticals are never closed in Part
+One's print (P2 closes Stápʼì's — already captured as a review diff).
+
+### Vision sweep round 2 — SPAWNED 2026-07-28 (11 lanes, ids in /tmp/wave-ids.txt)
+- Round-1 findings archived: `sweep/findings-round1/`, `sweep/triaged-round1.json`.
+- Expected files REGENERATED from the corrected data; `lane-prompt.md` now lists the 28
+  intentional corrections (lanes must not report them; NEW book typos → severity "low",
+  field "book_typo").
+- 9 body lanes × 40 pages (offsets 0..320) over all 346 body pages.
+- **NEW: grammar lane** (pdf 20–59 vs page-annotated `grammar-blocks.md`,
+  `grammar-lane-prompt.md`, findings → `sweep/findings-grammar/`) and **prose lane**
+  (pdf 8–18 + 408 vs `about.md`, `prose-lane-prompt.md`, findings → `sweep/findings-prose/`).
+  Intro/prose page images rendered into `sweep/img/` (pdf 8–18, 20–59, 408).
+- After the wave: `triage.py` (body findings only — grammar/prose findings need manual review,
+  the triager only knows `pages-{part}.jsonl`), then hand-adjudicate confirmed + needs_eyes,
+  fix at the earliest stage, re-run, re-triage. Then rebuild `preview.html`.
+
+### Round-2 results: prose + grammar lanes — ✅ DONE (2026-07-28)
+- **Prose lane: 12/12 pages, 0 issues** (about.md verified word-for-word against print).
+- **Grammar lane: 40/40 pages, 5 findings → 3 REAL bugs, all FIXED** (crop-verified):
+  1. **p25 pronunciation key**: the /ʼ/ row's 6-line wrapped cell broke — 3 lines exceeded
+     PROSE_WIDTH so absorption refused them → prose leak + a stub table. Fix in `grammar.py`
+     `classify_rows`: a line starting EXACTLY at a non-first column edge is a wrapped cell
+     no matter how wide (real prose starts at the page margin). Tables 74 → 73 (stub merged
+     back into its row).
+  2. **p34**: "To start with a simple case…" landed as a row of the person-prefix chart —
+     the seed run fused the two charts ACROSS the caption between them, so their ruled boxes
+     merged and the sentence read as "inside". Fix in `seed_runs`: a caption/heading
+     interrupts a run (it titles the NEXT chart).
+  3. **p38 "appears be-fore"**: the hyphen-oracle's respelling shortcut (count("/")==1) was
+     poisoned by the slashed pair "object/patient" in the same paragraph. Fix in `lines.py`:
+     `in_prose=True` (used by grammar.py + prose.py joins) skips the respelling shortcut.
+  Adjudicated NOT bugs: p20 "Introduction" is the book's part-title (our root deliberately
+  uses the meaningful subtitle); p37 `Amą́đį` — 8× zoom shows the print really has plain A,
+  no ogonek (lane over-corrected the book's grammar). `lint.py` + `check.py` re-run: 0
+  problems, about.md byte-identical, blocks diff = exactly the three fixes.
+
+### Round-2 results: body lanes — ✅ COMPLETE (2026-07-28, all 346 pages, 9 lanes × 40)
+230 findings → triage.py → live-check (a finding is *stale* once its "parsed" claim no longer
+appears in the regenerated expected file). Every confirmed/needs_eyes/both_present finding
+adjudicated; real bugs found and FIXED (stage in parens):
+
+1. **Parenthetical alternate form BEFORE the pos** (`parse.py`) — "(masc./fem.) (**Nąbúhu
+   žį́gà** /…/ [masc.]) n., little finger": pos was lost and the paren note + "n." became the
+   gloss. ~24 entries per part (little finger/toe, thumb, Tʼegá, meadowlark, mosquito, Otoe,
+   Santee, Sabáʼa…). Held notes now re-attach at the body tail → they land in the definition.
+2. **Bold markers inside respellings** (`parse.py`) — `/wä-moⁿ**ʼ**/`, `moⁿ**-**äʼ`: style
+   markers stripped from phonetic (~10 entries; review_phonetic 220 → 210).
+3. **POS label chains** (`parse.py`) — "pres./past t." as ONE italic run now splits on "/"
+   for the continuation test; fixes "sing./pl.", "3rd pers. sing./pl." too (Gđíze, Íʼkʼigđaè,
+   Akíbažì, Ayáđaì, Atíʼ, Ađį́ʼ, Itʼúšʼpʼà — labels had leaked into glosses/translations:
+   "they pres./ past t. the money").
+4. **Related-form label chains** (`senses.py`) — "__pl./ emphatic__, __wíwítʼa__, they are
+   mine": label chain now becomes the form's pos ("pl./emphatic"), the next run is the form.
+   Plus: the book's stray unmatched ")" there (P1 p221, crop-verified) is dropped.
+5. **Numbered senses inside a RELATED form's gloss** (`senses.py`) — the "2. …" hoist to the
+   entry now fires ONLY when the entry itself opened a "1." list (Bíʼze p79 keeps nąbíze's
+   two senses in its gloss; Bihútʼą̀ p80 still hoists correctly).
+6. **Quoted literals** (`senses.py`) — 'lit., "in between or in the middle," usu. used…'
+   ends at the closing quote (p180).
+7. **Multi-comma literals** (`senses.py`) — explicit crop-verified LITERAL_EXTEND set for
+   "flat, wide, or broad water" (p154) + "long, curved head" (p157). A general heuristic was
+   tried and REVERTED: literal continuations and definition synonym runs are structurally
+   identical ("flying canoe, airplane, or jet-propelled aircraft") — do NOT generalize.
+8. **Example splitter** (`senses.py`) — the "?" of a question joins the Ponca text
+   (`Ánąskà à?`); a short Ponca fragment stranded before the first comma is the Ponca tail
+   (`~ì` p85, `~aì` p361, `~ à?` p96); "…; answer: …" Q&A parens become TWO examples (Edí).
+9. **"ca. 1800s" dating notes fold into labels** (`senses.py`) — 7 entries where a date was
+   the gloss; real glosses (drum, weak man, write…) now surface.
+10. **More book typos corrected** (`corrections.py`, now **33 fixes / 59 firings** incl. one
+    phrase): continously, extinquish (an english_key — the first sweep never scanned keys),
+    "cause by a sickness"→caused, philio→philia (P2 p264 prints philia for the same entry),
+    Spings→Springs (capitalized, so the proper-noun filter had hidden it).
+
+Adjudicated NOT bugs (crop-verified): the mid-respelling dots (`/ä·ēʼ/` p69, `/thē·-üʼ/`
+p91, `/thē·-xēʼ/` p92, `/āʼ·-…/` p99, `xoⁿʼ· -dā` p223 — print really has them; lanes can't
+see the dot), `míxa amà` p264 (grave in print), Gaxđą́/Háʼ/Xą́·de homograph mixups,
+p395 "utility poles" keyed to the telephone definition (the book's own copy-paste error,
+kept + review-flagged), Eʼbéʼ printed twice on p94 (real duplicate entries in print),
+Éʼžą̀hì p95 + Stápʼì p170 parens never closed in P1's print.
+
+**Sweep.py expected files now render sense labels + per-sense pos** (the "archaic missing"
+false-positive cluster — ~40 findings — was the renderer omitting `labels`, data was right).
+
+### Final state after both audit rounds
+**4,667 entries · 5,027 senses · 668 related forms · 122 examples · 639 review-flagged ·
+0 markup leaks / control chars / empty senses / unexpanded ~ · 0 unknown characters.**
+Grammar: 59 sections · 73 tables · 68 IGT · 65 legend · 8 slots, lint+check 0 problems.
+preview.html REBUILT (sweep card now says "checked twice", 33 corrected misspellings).
+Round-2 artifacts: `sweep/findings{,-grammar,-prose}/`, `sweep/triaged.json`,
+`sweep/live.json`; round 1 archived as `sweep/findings-round1/` + `triaged-round1.json`.
+
+## AUDIT ROUND 3 — final full re-verification — ✅ COMPLETE (2026-07-28, session 560e3f1e)
+
+Fresh sweep, per Jacob **≥20 pages per lane**. Round-2 artifacts archived
+(`sweep/findings-round2/` etc.). Expected files regenerated before spawning; `lane-prompt.md`
+corrections list updated 28 → 33 (the round-2 additions were missing → would have caused
+false positives). Coverage: **all 346 body pages + grammar 40 + prose 12**.
+
+- Wave 1 (12 lanes: body 61–241 + grammar ×2 + prose) on **opus-5** `--key personal` — ~⅓
+  finished, the rest hit the session limit; Jacob spawned a gpt-5.6-sol recovery orchestrator
+  that backfilled them. Wave 2 (body 242–407, 8 lanes) opus died instantly on the limit
+  (resets 7am UTC) → respawned on **gpt-5.6-sol** (Jacob's own recovery pattern).
+- 114 findings → triage.py → `live-check.py` (NEW script, the round-2 stale rule) → every
+  live confirmed/needs_eyes/both_present hand-adjudicated against ~35 rendered crops.
+
+### Real bugs found and FIXED (stage in parens; all crop-verified; full /tmp diff reviewed)
+1. **`is_ponca` counted ASCII fragments of Ponca words as English markers** (`senses.py`) —
+   "ađái"→"a", "tʼiną́kʼa"→"in" hit the ≥2-marker veto; **15 real Ponca examples per book**
+   (8 P1 + 7 P2 twins: Baiáxa, Batʼą́tʼąđį̀, Edábe, Mąšíáhà, Mą́teádi, Mą́teátʼa, Ubáhadì,
+   Wéʼnąxđè…) were never extracted. Fix: whole-token-ASCII counting. Examples 122 → **131**.
+2. **Related form lost its first italic run across a roman `~`** (`senses.py`) — p69
+   Ąguágađį̀ "`__ągù__ ~ __ągúáđi__`" → form is now "ągù ~ ągúáđi" (RELATED.search had
+   skipped to the second run).
+3. **`, (` comma artifact** (`senses.py`) — merge/literal rejoins inserted ", " before
+   parenthetical notes the print sets with a bare space ("a meteorite falling (The one…",
+   ~20 entries per part). All joins now paren-aware.
+4. **Book's `;` flattened to `,`** (`senses.py`) — gloss_partition now returns the consumed
+   separator and merge_senses reuses it (Čákʼì p81 "lazy way; an extremely casual…").
+5. **Em dashes** — (a) wrap-join after a line-ending "—" now joins tight (`lines.py`; the
+   book sets closed dashes — "roundhouse—traditionally" p176, + grammar prose);
+   (b) a depth-0 "—" is now a gloss boundary (`senses.py`): Tʼiʼbútʼa gloss "roundhouse",
+   Míʼgđą̀/Wáʼđixè gloss "married", Đaúją, Héʼúbažą̀ literal.
+6. **Translation `~` used the propagated entry gloss** (`senses.py` expand_tilde) —
+   "he comes here calendar" → "monthly" (Míʼíđawà): a numbered sense's own SINGLE-WORD lead
+   now takes precedence. (First attempt used any local lead — regressed Égidą̀/Údąžì/
+   Wáđatʼą̀į with long phrases; constrained to one word, regressions reverted.)
+7. **pos "n. /v." → "n./v."** (`parse.py`, 4 entries; crop-verified tight in print p168).
+8. **Hyphen-oracle review sets** (`lines.py`) — DISSOLVE: down-size p93, rest-room p388,
+   work-station p12 (about.md), in-complete p339 (killed a spurious review flag — P1 was
+   already right); KEEP: bä-ägä (the ONLY dissolved respelling-interior wrap in the book —
+   Sabáʼa p161 /sä-bäʼ-ägä/); NEW SUSPENDED set: "yellow- or gold-colored" p252 keeps
+   hyphen + space.
+9. **Grammar** (`grammar.py`) — p33 Gíđe chart now `mode: "gap"` via TABLE_SPECS (single
+   row-pair defeats auto_mode; now `<br>`-stacked like its siblings); NEW
+   `unify_respelling_glottals`: /…/ respelling spans now use ʼ U+02BC matching the 9,726
+   entry phonetics (the decode had mixed ’/ʼ for the same glyph, p21 vs p25).
+10. **corrections.py 33 → 58 fixes** (113 firings): +18 words (pronounciation ×9(!),
+    occuring, occured, apperance, descendents, excercise, Bristish, Cucurbitasceae,
+    Curcurbitaceae, Fasgaceae, charaterized, sombody, Morman, Prolcyon, Txideinae,
+    Brachycern, daugher, Zanaida) and +7 phrases ("It was call į́ʼę"→called, "Arkansas
+    Rover"→River, "no long burning"→longer, "the the"→the, "as in in sports"→in,
+    "Helianthus x annus"→annuus, "breath deeply"→breathe). Sol lanes' book_typo reports
+    (triaged lane_wrong because we DO match the page) were the richest source.
+
+### Adjudicated NOT bugs (crop-verified this round — extraction matched print every time)
+All 14 diacritic/glottal lane claims: p138 `Máze` plain á (siblings print Mą́ze — book),
+p245 `Uxđəáʼbážì` acute, p341 `Tʼàgeʼžįgàhì` grave, p334 `Wétʼąįʼ` trailing glottal,
+p252 theⁿ, p258 zheⁿ, p260 Íkʼipʼahą̀ + tʼoⁿgäʼ, p284, p328 ×2, p330, p332, p341.
+Book quirks kept: Niʼé "n" p151/p338 + Kúʼzi "adj" p339 (dots really absent), racoon
+(real variant), prophesy (real word), "an heired of" p304 (book's own garble),
+"a upper-body", "made milk and cream" (omission — not inserting words), p33 `Wéđe` without
+· (p45 prints Wé·đe — book inconsistency), p45 blue "ones own" (we correct to "one's" per
+policy on an explicitly-marked editorial row). Xʼáʼđe/Ínąhì "trailing clause after related
+forms lands in definition" = deliberate no-data-loss design.
+
+### Final state after round 3
+**4,667 entries · 5,027 senses · 668 related forms · 131 examples · 624 review-flagged ·
+0 structural flags** (markup/control/empty-gloss/unexpanded-~/dups — audit script re-run
+clean). Grammar 59 sections · 73 tables · 68 IGT · 65 legend · 8 slots; `lint.py` +
+`check.py` = 0. about.md: workstation fix only. Full baseline diff (`/tmp/ponca-r3-baseline`)
+reviewed field-by-field — every change intentional. Expected files regenerated; final
+live-check: every remaining live finding is an adjudicated not-a-bug or a squash-substring
+false-positive of a fixed item. `preview.html` REBUILT (58 corrections, "third pass" line,
+fresh totals). Round-3 artifacts: `sweep/findings{,-grammar,-prose}/`, `triaged.json`,
+`live.json`; round 2 archived as `*-round2`.
+
+## Decisions: Jacob 2026-07-28 — NO questions to Greg, just get it done
+
+Jacob reviewed the drafted question set and killed it entirely:
+- **Rights/permission: confirmed.** The rights holders gave the book and ASKED for a Living
+  Dictionary — no need to ask.
+- **Cover image: approved** — use the staged jacket powwow crop; Greg can change it later
+  himself.
+- **Visibility: separate process**, not part of the import conversation.
+- **The blue `Gi-` 11th instrumental prefix: INCLUDE it** — done, appended to the p45 chart
+  marked "an editorial addition printed in blue in the book" (grammar.py TABLE_SPECS
+  append_rows; the two blue numeral respellings on pp57–58 stay excluded — they conflict
+  with the printed respelling rather than adding a missing item).
+- **No pre-import questions at all.** Post the report; Greg replies if something needs
+  fixing. Wipe-and-reimport is cheap (blank dictionary), so fix-on-reply beats ask-first.
+- Posting plan is therefore: **artifact + message only, zero `/questions` posts.**
 
 ## Decisions taken with Jacob 2026-07-27 (Greg is NOT asked in advance)
 
@@ -729,26 +915,6 @@ iframe; screenshot-verified). Contents: what the book contains, **the `đ` / fon
 staged entries rendered as they will appear, the decisions above, what happens next.
 
 Post as `kind: "preview"` — it doubles as the pre-write rendered preview the guide requires.
-Endpoints confirmed live: `POST …/conversations/{threadId}/artifacts` `{kind, title, html, stats}`,
-`POST …/questions` `{questions:[{kind: text|choice|multi_choice, title, body_html, options}]}`,
-`POST …/messages` `{body_text}` (the message is what emails the manager).
-
-**Hold the post until the example-sentence bug above is fixed** — the artifact should not carry
-counts that are about to change.
-
-## Original question wording (superseded by the decisions above; kept as drafting source)
-
-1. **`ʃ` and `ə` as letters.** The book's alphabet uses `ʃ` (U+0283 esh) for the [ɪ] vowel and `ə`
-   for schwa, each with its own A–Z section and a nasalized counterpart. Keep these exact characters
-   in the Living Dictionary (affects typing and search), or use a more conventional spelling?
-2. **Related/inflected forms** (625 per part) — promote to their own searchable entries linked back
-   to the base word, or keep them inside the definition text?
-3. **Gendered speech variants** — Part Two records male/female speech forms
-   (`Sipʼáhi utʼą́ga` (masc./fem.) vs `Sipʼóho tʼągą́` [masc.]). Separate entries linked as
-   variants, or alternate forms on one entry?
-4. **Homographs** — `Iđádiđaì` is 3 entries and `Watéʼ` 2. Keep as separate entries (faithful to the
-   book) or merge into one entry with multiple senses?
-5. **Part One ↔ Part Two disagreements** — where the two typesettings differ (respelling, POS,
-   gloss), should we import Part One's version and flag, or hold the entry for review?
-6. **Rights** (from the locked decisions): permission to reproduce the complete dictionary; credit
-   for the jacket photograph or a community photo instead; does the dictionary go public.
+Endpoints confirmed live: `POST …/conversations/{threadId}/artifacts` `{kind, title, html, stats}`
+and `POST …/messages` `{body_text}` (the message is what emails the manager). Per the 2026-07-28
+ruling: NO `/questions` posts. Post after audit round 3 comes back clean.

@@ -1,6 +1,7 @@
 import { defaultExclude, defineConfig } from 'vitest/config'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import Icons from 'unplugin-icons/vite'
+import { raw_fonts } from './vite-plugins/raw-fonts'
 
 // EXIF timestamps (and any other TZ-less local-time parsing) are interpreted in the
 // machine TZ — pin tests to UTC so they pass identically on any dev machine (prod runs UTC).
@@ -24,7 +25,9 @@ export default defineConfig({
         // so `.svelte` imports compile for SSR (tests exercising `svelte/server`
         // render, e.g. email) — but still excludes the `.svelte.test.ts` reactive
         // suite, which needs the browser resolve condition below.
-        plugins: [svelte()],
+        // raw_fonts: `/og`'s renderer imports notoSans.ttf as bytes; without the
+        // plugin its integration test would hand satori an asset URL string.
+        plugins: [svelte(), raw_fonts(['.ttf'])],
         test: {
           name: 'unit',
           alias,

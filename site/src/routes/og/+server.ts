@@ -22,27 +22,29 @@ const CARD_HEADERS = { 'content-type': 'image/png', 'cache-control': 'public, im
 const DEGRADED_HEADERS = { 'content-type': 'image/png', 'cache-control': 'public, no-transform, max-age=60' }
 
 /**
- * How much of this process the share cards may have.
+ * How much of this BOX the share cards may have.
  *
- * ONE at a time (satori + resvg are synchronous, so two renders just double how
- * long the thread is unavailable), AND never more than half of any 10 s window.
- * The budget is the part that matters: measured on a 2-core box, a burst of new
- * cards does not arrive as concurrent handlers — it arrives as a BACKLOG, 20
- * cards = 38 s of back-to-back rendering, and a `/healthz` that lands behind it
- * waited 28 s. That is the 2026-07-27 outage (Caddy's health timeout is 2 s).
- * With the budget, `/og` hands back cheap cards instead of monopolizing the
- * thread, and the crawler picks up the real ones on its next pass.
+ * The rendering itself no longer runs here — satori + resvg live in a worker
+ * thread (`render-worker.js`), so a card can never make this thread unreachable
+ * the way it did on 2026-07-27. What's left for the queue to bound is the box's
+ * second core and the backlog: ONE render at a time (one worker), a cap on how
+ * many requests may sit waiting for it, and a ceiling on how much of any 10 s
+ * window the renderer may occupy at all.
+ *
+ * The budget is deliberately loose now (0.9 vs the 0.5 that protected the
+ * request thread): a burst may keep the worker busy nearly continuously —
+ * that's what it's for — but never so relentlessly that `sharp`, sync, and the
+ * crons are fighting one core for the whole window.
  */
 const render_queue = create_render_queue({
   limit: 1,
-  // Waiting costs nothing — the budget is the CPU ceiling — and scrapers are
-  // patient, so wait long enough to hand back a REAL card instead of the spare.
-  // Measured: with a 2 s deadline a 20-new-card burst yielded ONE real card; 4 s
-  // yields several, with identical `/healthz` behaviour.
-  wait_deadline_ms: 4000,
+  // Waiting is now free for everyone else — the waiter holds a socket, not the
+  // thread — and scrapers are patient, so wait long enough to hand back a REAL
+  // card rather than the spare. (Facebook's scraper gives ~10 s.)
+  wait_deadline_ms: 8000,
   max_waiting: 12,
   busy_window_ms: 10_000,
-  busy_ratio: 0.5,
+  busy_ratio: 0.9,
 })
 
 /**
@@ -98,10 +100,12 @@ function warm_generic_card_when_idle(): void {
  * remote entry-photo fetch dying) → text-only card without the remote photo;
  * total render failure → a blank 200 PNG. Each emits `og_render_failed`.
  *
- * Shape (2026-07-27, `.issues/og-endpoint-load-outages.md`): a card is rendered
- * ONCE and stored on disk, so the crawler bursts that re-request the same cards
- * every five minutes now cost one file read. Only a genuine miss reaches the
- * render queue, and only one render runs at a time.
+ * Shape (2026-07-27/28, `.issues/og-endpoint-load-outages.md`): a card is
+ * rendered ONCE and stored on disk, so the crawler bursts that re-request the
+ * same cards every five minutes now cost one file read. Only a genuine miss
+ * reaches the render queue, only one render runs at a time, and the render
+ * itself happens in a WORKER THREAD — so even a miss costs this thread nothing
+ * but a `postMessage`, and a health check can never queue behind a card.
  */
 export const GET: RequestHandler = async ({ url }) => {
   const props_param = url.searchParams.get('props')
@@ -159,7 +163,12 @@ export const GET: RequestHandler = async ({ url }) => {
       log_server_event({ level: 'info', message: 'og_card_rendered', context: { render_ms: Date.now() - started_at, wait_ms, width, height, photo: !!props.image_url } })
       return png_response(png, CARD_HEADERS)
     } catch (error) {
-      log_server_event({ level: 'warn', message: 'og_render_failed', error, context: { reason: classify_og_failure(error), dict: props.dictionaryName ?? null, title: props.title ?? null } })
+      const reason = classify_og_failure(error)
+      log_server_event({ level: 'warn', message: 'og_render_failed', error, context: { reason, dict: props.dictionaryName ?? null, title: props.title ?? null } })
+      // A dead or wedged RENDERER will fail the fallback the same way, and a
+      // second render timeout would hold this slot for another 20 s. Give up now.
+      if (reason === 'worker')
+        return degraded_response()
     }
 
     // Text-only fallback: drop the remote entry photo (the usual killer) and re-render.
