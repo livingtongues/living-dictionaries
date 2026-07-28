@@ -54,7 +54,13 @@ export function classify_og_failure(error: unknown): 'image_fetch' | 'font' | 'r
   return 'render'
 }
 
-const get_png = withCache(async (html: string, height: number, width: number) => {
+/**
+ * NOT memoized in process. Rendered cards are persisted by `card-store.ts` and
+ * looked up before this is ever called — the old in-process `withCache` here was
+ * an unbounded `Map` holding every ~220 KB PNG for the life of the container
+ * (2.87 GiB serving vs 1.17 GiB idle standby, 2026-07-27). Disk is the cache.
+ */
+async function get_png(html: string, height: number, width: number): Promise<Uint8Array> {
   const markup = toReactNode(html)
   let svg: string
   try {
@@ -76,22 +82,22 @@ const get_png = withCache(async (html: string, height: number, width: number) =>
   })
 
   return resvg.render().asPng()
-})
+}
 
-export async function component_to_png(component: Component<any>, props: Record<string, unknown>, height: number, width: number) {
+/** The card bytes. The caller stores them and builds the response. */
+export function render_component_to_png({ component, props, height, width }: {
+  component: Component<any>
+  props: Record<string, unknown>
+  height: number
+  width: number
+}): Promise<Uint8Array> {
   // Svelte 5 SSR: `render(Component, { props })` replaces the removed Svelte 4
   // `Component.render(props)`. `.body` carries the markup (OpenGraphImage uses
   // inline styles, so there's no `.head` CSS to fold in); strip the hydration
   // comment markers satori-html doesn't need.
   const result = render(component, { props })
   const markup = result.body.replace(/<!--[[\]]?-->/g, '')
-  const png = await get_png(markup, height, width)
-  return new Response(png, {
-    headers: {
-      'content-type': 'image/png',
-      'cache-control': 'public, immutable, no-transform, max-age=31536000',
-    },
-  })
+  return get_png(markup, height, width)
 }
 
 // @TODO: Cover most languages with Noto Sans.
@@ -114,7 +120,15 @@ const languageFontMap = {
 }
 type LanguageCode = keyof typeof languageFontMap
 
-const loadDynamicAsset = withCache(
+/**
+ * Google Fonts has no business holding a render slot open. Production logged
+ * repeated `Failed to load dynamic font … AggregateError [ETIMEDOUT]` — with no
+ * timeout at all, one CDN hiccup pinned the (now single) render slot for the
+ * full ~21 s OS connect timeout while `/healthz` starved behind it.
+ */
+const FONT_FETCH_TIMEOUT_MS = 3000
+
+const loadDynamicAsset = with_bounded_cache(
   async (code: LanguageCode, text: string) => {
     // Try to load from Google Fonts.
     let names = languageFontMap[code]
@@ -129,6 +143,7 @@ const loadDynamicAsset = withCache(
 
         const css = await (
           await fetch(API, {
+            signal: AbortSignal.timeout(FONT_FETCH_TIMEOUT_MS),
             headers: {
               // Make sure it returns TTF.
               'User-Agent':
@@ -141,7 +156,7 @@ const loadDynamicAsset = withCache(
 
         if (!resource) return
 
-        const res = await fetch(resource[1])
+        const res = await fetch(resource[1], { signal: AbortSignal.timeout(FONT_FETCH_TIMEOUT_MS) })
         if (res.status === ResponseCodes.OK) {
           const font = await res.arrayBuffer()
           return {
@@ -158,12 +173,25 @@ const loadDynamicAsset = withCache(
   },
 )
 
-function withCache(fn: (...args: any[]) => any) {
-  const cache = new Map()
+/** Font subsets are keyed per (script, text run) — a card's worth of glyphs each. */
+const FONT_CACHE_LIMIT = 100
+
+/**
+ * Bounded memo, insertion-ordered so the oldest entry is evicted first. Caches
+ * NEGATIVE results too (a `undefined` from a failed/timed-out font fetch), so a
+ * font CDN outage costs one attempt per text run rather than one per request.
+ *
+ * The unbounded version of this used to wrap the PNG renderer as well; that was
+ * the 1.7 GiB leak. Anything cached in this process is now capped.
+ */
+function with_bounded_cache(fn: (...args: any[]) => any) {
+  const cache = new Map<string, any>()
   return async (...args: (string | number)[]) => {
     const key = hash(args.join())
     if (cache.has(key)) return cache.get(key)
     const result = await fn(...args)
+    if (cache.size >= FONT_CACHE_LIMIT)
+      cache.delete(cache.keys().next().value)
     cache.set(key, result)
     return result
   }

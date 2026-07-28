@@ -26,6 +26,9 @@ code fully torn down (2026-07; deploys run from `main`) — the one-page histori
   which files stay near-identical to `house`.
 - [api/](./api/index.md) — public/programmatic APIs: the agent-friendly `/api/v1` bulk
   write API + per-dictionary API keys (reuses the human `merge_dict_row` write path).
+- [server/](./server/index.md) — how the single Node process behaves under load: what actually
+  protects the container's health check from synchronous work on a request path (measured from the
+  2026-07-27 `/og` outages), and how to measure it without fooling yourself.
 - [svelte/](./svelte/index.md) — Svelte 5 runtime-internals gotchas: the
   `current_sources` dependency-exclusion rule that freezes lazily-created stores
   (why `construct_outside_reaction` exists).
