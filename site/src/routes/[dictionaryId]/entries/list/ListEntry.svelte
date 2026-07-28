@@ -42,15 +42,13 @@
   const headword = $derived(get_headword({ lexeme: entry.main.lexeme, orthographies: dictionary.orthographies }))
 
   // Media rail: flush full-bleed against the card's top/right/bottom edges while
-  // the row is short; a floating centered thumb once the text makes the card
-  // taller than the thumb cap (pure-CSS block-size container queries can't do
-  // this on auto-height rows, so measure).
-  let row_height = $state(0)
-  const FLUSH_MAX_PX = 104 // 6.5rem — beyond this the full-bleed square would stretch
-  const media_floating = $derived(row_height > FLUSH_MAX_PX)
-  // Explicit square width for flush thumbs: `height: 100%` + `aspect-ratio` can't
-  // size a flex parent (circular), so the measured row height sets it instead.
-  const flush_thumb_width = $derived(row_height ? `${Math.min(row_height, FLUSH_MAX_PX)}px` : '3.5rem')
+  // the row is short, a floating centered thumb once the text makes the card
+  // taller than the thumb cap. The switch is a pure-CSS size container query on
+  // `.media-slot` — NEVER measure the row and feed it back into the row's own
+  // layout: doing so quivered rows forever (see the CSS comments below).
+  const show_video = $derived(!!first_video && !dictionary.con_language_description)
+  const show_photo = $derived(!!first_sense.photos?.length)
+  const thumb_count = $derived((show_video ? 1 : 0) + (show_photo ? 1 : 0))
 
   const video_thumb_url = $derived(first_video ? video_thumb_src(first_video) : null)
   let video_thumb_errored = $state(false)
@@ -110,8 +108,8 @@
   class:recently-updated={updated_within_last_5_minutes}
   class:dragging
   class:has-audio={!!entry.audios?.[0]}
+  class:has-media={thumb_count > 0}
   class="entry-row"
-  bind:clientHeight={row_height}
   ondragover={(e) => {
     if (!can_edit || !e.dataTransfer?.types.includes('Files')) return
     e.preventDefault()
@@ -250,49 +248,51 @@
     </button>
   {/if}
 
-  {#if (first_video && !dictionary.con_language_description) || first_sense.photos?.length}
-    <div class="media-rail" class:floating={media_floating} style="--flush-thumb-width: {flush_thumb_width}">
-      {#if first_video && !dictionary.con_language_description}
-        <ShowHide>
-          {#snippet children({ show, toggle })}
-            <button type="button" class="media-thumb video-thumb" title={page.data.t('video.view')} onclick={toggle}>
-              {#if video_thumb_url && !video_thumb_errored}
-                <img src={video_thumb_url} alt="" onerror={() => video_thumb_errored = true} />
-                <span class="play-overlay"><IconMdiPlay style="font-size: 1.25rem" /></span>
-              {:else}
-                <IconBiCameraVideo style="font-size: 1.125rem" />
+  {#if thumb_count}
+    <div class="media-slot" style="--thumb-count: {thumb_count}">
+      <div class="media-rail">
+        {#if show_video}
+          <ShowHide>
+            {#snippet children({ show, toggle })}
+              <button type="button" class="media-thumb video-thumb" title={page.data.t('video.view')} onclick={toggle}>
+                {#if video_thumb_url && !video_thumb_errored}
+                  <img src={video_thumb_url} alt="" onerror={() => video_thumb_errored = true} />
+                  <span class="play-overlay"><IconMdiPlay style="font-size: 1.25rem" /></span>
+                {:else}
+                  <IconBiCameraVideo style="font-size: 1.125rem" />
+                {/if}
+              </button>
+              {#if show}
+                {#await import('$lib/components/video/PlayVideo.svelte') then { default: PlayVideo }}
+                  <PlayVideo
+                    lexeme={headword.value}
+                    video={first_video}
+                    {can_edit}
+                    on_close={toggle} />
+                {/await}
               {/if}
-            </button>
-            {#if show}
-              {#await import('$lib/components/video/PlayVideo.svelte') then { default: PlayVideo }}
-                <PlayVideo
-                  lexeme={headword.value}
-                  video={first_video}
-                  {can_edit}
-                  on_close={toggle} />
-              {/await}
-            {/if}
-          {/snippet}
-        </ShowHide>
-      {/if}
+            {/snippet}
+          </ShowHide>
+        {/if}
 
-      {#if first_sense.photos?.length}
-        {@const [first_photo] = first_sense.photos}
-        <div class="media-thumb photo-block">
-          <Image
-            square={192}
-            title={headword.value}
-            photo={first_photo}
-            photos={first_sense.photos}
-            photo_source={first_photo.source}
-            photographer={first_photo.photographer}
-            {can_edit}
-            on_delete_image={photo_id => writes.delete_photo(photo_id ?? first_photo.id)} />
-          {#if first_sense.photos.length > 1}
-            <IconFluentImageStack20Regular class="photo-stack-icon" />
-          {/if}
-        </div>
-      {/if}
+        {#if show_photo}
+          {@const [first_photo] = first_sense.photos}
+          <div class="media-thumb photo-block">
+            <Image
+              square={192}
+              title={headword.value}
+              photo={first_photo}
+              photos={first_sense.photos}
+              photo_source={first_photo.source}
+              photographer={first_photo.photographer}
+              {can_edit}
+              on_delete_image={photo_id => writes.delete_photo(photo_id ?? first_photo.id)} />
+            {#if first_sense.photos.length > 1}
+              <IconFluentImageStack20Regular class="photo-stack-icon" />
+            {/if}
+          </div>
+        {/if}
+      </div>
     </div>
   {/if}
 </div>
@@ -476,16 +476,40 @@
     border-radius: 9999px;
   }
 
-  /* Right media rail. FLUSH (default): stretches to the card's top/right/bottom
-     edges via negative margins, thumbs fill the full row height as squares, and
-     the card radius clips the outer corners. FLOATING (row taller than the
-     thumb cap): centered fixed-size rounded thumbs on plain card background. */
-  .media-rail {
+  /* Right media rail, in two looks. FLUSH (default): thumbs fill the row as
+     squares, bleeding to the card's top/right/bottom edges via the slot's
+     negative margins, card radius clipping the outer corners. FLOATING (row
+     taller than the thumb cap): smaller centered rounded thumbs inset from the
+     right edge, on plain card background.
+
+     The switch is a size container query on `.media-slot`, NOT a measurement.
+     Two rules keep it loop-free — break either and rows quiver forever at 60fps:
+       1. `.media-slot` has a FIXED width and `container-type: size`, so nothing
+          inside it can change the row's height OR the text column's width.
+       2. The thumbs live in an out-of-flow `.media-rail`, so an image's natural
+          aspect ratio never feeds back into the row height (non-square thumbs —
+          `withoutEnlargement` keeps small originals unpadded — are what made the
+          old measured version oscillate 104px ⇄ 127px).
+     Rows with media get a `min-height` equal to the cap so short cards still
+     show a full square. */
+  .media-slot {
     align-self: stretch;
     flex-shrink: 0;
+    position: relative;
+    width: calc(var(--thumb-count, 1) * 6.5rem + (var(--thumb-count, 1) - 1) * 2px);
+    margin: -0.5rem -0.625rem -0.5rem 0.125rem;
+    container-type: size;
+  }
+
+  .has-media {
+    min-height: 6.5rem;
+  }
+
+  .media-rail {
+    position: absolute;
+    inset: 0;
     display: flex;
     gap: 2px;
-    margin: -0.5rem -0.625rem -0.5rem 0.125rem;
     border-radius: 0 0.75rem 0.75rem 0;
     overflow: hidden;
   }
@@ -493,25 +517,28 @@
   .media-thumb {
     position: relative;
     height: 100%;
-    width: var(--flush-thumb-width, 3.5rem);
-    flex-shrink: 0;
+    flex: 1 1 0;
+    min-width: 0;
     border: none;
     padding: 0;
     overflow: hidden;
     background: color-mix(in srgb, var(--color) 8%, transparent);
   }
 
-  .media-rail.floating {
-    align-self: center;
-    margin: 0 0 0 0.125rem;
-    border-radius: 0;
-    overflow: visible;
-  }
+  @container (height > 6.5rem) {
+    .media-rail {
+      inset: 0 0.625rem 0 auto;
+      align-items: center;
+      justify-content: flex-end;
+      border-radius: 0;
+      overflow: visible;
+    }
 
-  .media-rail.floating .media-thumb {
-    height: 5.5rem;
-    width: 5.5rem;
-    border-radius: 0.5rem;
+    .media-thumb {
+      flex: 0 0 5.5rem;
+      height: 5.5rem;
+      border-radius: 0.5rem;
+    }
   }
 
   .video-thumb {

@@ -15,6 +15,16 @@ Durable conventions/gotchas for verifying LD beyond what the code shows.
   (`pnpm build` + `JWT_SECRET=<any> PORT=… DATA_DIR=$PWD/.data node build`) + puppeteer
   CDP network throttling. Full pattern write-up: house
   `.knowledge/architecture/admin-streaming-snappy-nav.md`.
+- **Headless UAs are robots in production — set a real UA.** Since the 2026-07-27 bot gate,
+  `+layout.server.ts` marks any crawler-looking user-agent (incl. `HeadlessChrome`) as
+  `is_bot`, and `[dictionaryId]/+layout.ts` then skips `get_dict_session()` entirely: no leader
+  election, no worker, no OPFS snapshot → the entries list renders **empty forever** with no
+  error. Dev is exempt (`is_dev`), prod is not, so this only bites when driving the live site.
+  Always `page.setUserAgent('…Chrome/…')` before hitting `livingdictionaries.app`.
+  To repro a prod dictionary locally instead, insert its catalog row into `.data/shared.db` —
+  a logged-out viewer pulls the real snapshot from public R2 and `/api/dev-media` 302s photos to
+  R2, so the local page is byte-identical to prod (recipe in
+  `.issues/entries-list-row-quiver.md`).
 - [browser-deep-flow.md](./browser-deep-flow.md) — the puppeteer-core deep-flow harness
   (`site/e2e/achi-flow.mjs` + `db-ops-flow.mjs`): why puppeteer-core over Playwright, server
   options (self-boot `node build` vs `BASE_URL=:3041` — media/admin need dev mode), real-auth

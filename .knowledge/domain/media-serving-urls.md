@@ -30,6 +30,13 @@ site assets are code-versioned infrastructure, not user media and not orphan-swe
 - larger width requests → `_w1600.webp`
 - no requested dimension → the original
 
+**`_thumb.webp` is NOT guaranteed square.** Its sharp resize carries `withoutEnlargement: true`,
+so an original smaller than 400px on a side keeps its own aspect ratio instead of being cropped to
+a square — legacy dictionaries are full of 288×216 … 288×351 thumbs (Iquito, 2026-07-27). Never
+let CSS/JS assume a 1:1 thumbnail; give the box its size and `object-fit: cover` into it. Letting
+a thumb's natural aspect drive layout is what caused the entries-list row quiver (see
+`svelte/layout-measure-feedback-loops.md`).
+
 HEIC/HEIF uploads are rejected with conversion instructions. For accepted formats, the original is
 stored first, then variants are generated in-process. The weekly media reconcile repairs missing
 derivatives.
