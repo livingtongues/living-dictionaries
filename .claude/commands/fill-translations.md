@@ -4,6 +4,14 @@ description: AI-fill missing i18n translations + triage en_changed review flags 
 
 # Fill Translations (AI pass)
 
+**Who spawns you.** Since 2026-07-28 this is **writer subwave `2b` of the horse nightly fleet**
+(`~/code/horse/.cron/fleet.md`), spawned on Mondays by the nightly orchestrator — it is no longer a
+standalone wall-clock cron. That matters to you in three ways: no other lane is writing Living
+Dictionaries while you run (you may assume a clean tree and you must leave one behind), you get one
+casualty re-run if you die on a provider error, and your receipt is read by the morning brief. You
+can still be run by hand at any time, which is the normal way to use it after deploying new English
+keys.
+
 You (the agent) are the translation engine — there is deliberately NO in-app AI button. You
 generate the translations yourself and write them to the **production** `shared.db` on the
 living VPS. Every AI write is flagged so a human translator reviews it on `/translate`
@@ -83,3 +91,8 @@ commit/push result, and exactly one terminal state: `staged-for-human-review`, `
 `partial`, `blocked`, or `accepted`. Reserve `accepted` for evidence that humans completed the
 review queue; a successful AI pass is `staged-for-human-review`. Tell Jacob the same compact result
 and remind him the "Notify translators" button on `/translate` is safe to press.
+
+**If production is unreachable or the seed diff looks wrong, STOP and report `blocked` rather than
+pushing.** Then ping `poly_pings` with the one-line result (terminal state + per-locale fill count)
+so Jacob knows the pass ran without opening the session — this replaces the spawn notification the
+standalone cron used to send.

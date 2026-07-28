@@ -47,11 +47,24 @@ a repo job by editing its file and committing; `horse cron run <id>` still trigg
 
 | id | source | schedule | runs | output |
 |---|---|---|---|---|
-| `living-dictionaries/fill-translations` | `.cron/fill-translations.md` (repo, `runs_on: mustang`, `claude · claude-opus-5`) | weekly `every: 0 22 * * 1` (Mon 22:00 UTC = Tue 06:00 MYT) | AI-fill missing i18n translations + `en_changed` triage via `.claude/commands/fill-translations.md`; refresh seed + push `main` | commit + summary in its session |
 | `living-dictionaries/seo-review` | `.cron/seo-review.md` (repo, `runs_on: mustang`, `claude · claude-opus-5`) | monthly `every: 10 22 1 * *` (1st, 22:10 UTC) | SEO/GEO discoverability audit of production page-types via `.claude/commands/seo-review.md`; audit-first | dated digest in `.cron/seo-reviews/` |
 | `living-dictionaries/api-conformance-review` | `.cron/api-conformance-review.md` (repo, `runs_on: mustang`, `claude · claude-opus-5`) | monthly `every: 10 22 15 * *` (15th, 22:10 UTC) + post-milestone | v1 OpenAPI ↔ code conformance ledger via `.claude/commands/api-conformance-review.md`; audit-first | dated digest in `.cron/api-conformance-reviews/` |
 | `living-dictionaries/invoice-2026-07-24` | `.cron/invoice-2026-07-24.md` (repo, `runs_on: mustang`) | one-time `at: 2026-07-23T23:00` (self-re-arms ~4-weekly) | Living Tongues invoice draft; reads/writes `.cron/invoice-reviews/` for its hours anchor | summary in the Horse chat session + dated record in `.cron/invoice-reviews/` |
 
-> The daily log review is no longer a cron here — the **horse nightly orchestrator** spawns it
-> (see `~/code/horse/.cron/fleet.md`). The `log-and-fix` *command* stays at
-> `.claude/commands/log-and-fix.md`; its output stays in `.cron/log-reviews/`.
+### Lanes the horse nightly fleet spawns against this repo (not crons here)
+
+| lane | when | playbook | output |
+|---|---|---|---|
+| `log-review` | tier 1, nightly (parallel, read-only) | `.claude/commands/log-and-fix.md` | `.cron/log-reviews/YYYY-MM-DD.md` |
+| `fill-translations` | **writer subwave `2b`**, Mondays | `.claude/commands/fill-translations.md` | commit on `main` + `.cron/fill-translation-reviews/YYYY-MM-DD.md` |
+
+`fill-translations` moved out of this folder on **2026-07-28**. It was `every: 0 22 * * 1`, which
+put a writer that **commits and pushes `main`** outside the fleet's ordered-writer discipline — on
+2026-07-27 the orchestrator had to hand-write a *"do not target living-dictionaries tonight"*
+exception into the parity sweep's spawn prompt to keep the single-writer guarantee. As subwave `2b`
+it runs **before** parity-sweep (which picks its repo at runtime and may pick this one), so it hands
+parity a clean tree instead of racing it; it also gains a casualty re-run and a line in the morning
+brief. It starts roughly 20 minutes earlier than 22:00 UTC and floats with the length of the night —
+its only real timing constraint (run after new English keys are deployed) is human-paced and
+unaffected. It is still runnable on demand: `horse spawn living-dictionaries "Do
+.claude/commands/fill-translations.md"`.
