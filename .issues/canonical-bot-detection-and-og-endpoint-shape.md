@@ -163,3 +163,24 @@ wire, and visually verified.
 
 `/og` renders on the request thread at all. A worker thread (or a tiny render sidecar) would make
 `/healthz` completely immune, and would let the budget be relaxed so more cards render per pass.
+
+## Shipped + verified in production — 2026-07-28 02:0x UTC
+
+Deployed from `main` (61059e77). Measured from mustang, where the network floor is ~0.29 s:
+
+- `/healthz` held **200 at ~0.30 s throughout the container swap** — two 1.0 s samples at the swap
+  itself, then straight back to the floor. No outage window.
+- A live entry card (`/sibe/entry/pGxAn5gkEMN1SfLfcgwl`) serves `cache-control: public, immutable,
+  max-age=31536000`, 1200×630, 221 KB. First fetch 2.2 s (the render), repeats **TTFB 0.29 s — the
+  same number as `/healthz`**, i.e. a file read with no CPU. One repeat came back at 1.07 s TTFB
+  (the other container's first read of that file); still comfortably under Caddy's 2 s.
+- `/healthz` sampled while cards were being fetched: 0.28–0.31 s, flat.
+
+Test-suite note from the same session: `server.test.ts` was flaky under a loaded parallel run — the
+once-per-process **generic-card warm** is a background `setTimeout` render that landed at an
+unpredictable moment and added a phantom call to every render count. `GENERIC_PROPS` /
+`GENERIC_CARD_KEY` moved into `generic-card.ts` so the suite can seed the spare tyre (killing the
+warm) and assert on **specific store keys** instead of file counts; the one test that wants the warm
+clears the seed and `vi.waitFor`s it. GOTCHA that cost a debug cycle: lz-string's URI alphabet
+includes `+`, which `searchParams.get` reads back as a space — a test that hashes its own encoded
+param computes a different key than the route does. Key off the parsed URL.
