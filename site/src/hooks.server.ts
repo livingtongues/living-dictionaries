@@ -50,7 +50,15 @@ start_crons_once({ defs: CRONS })
 // 2026-07-27). Until it lands, reads are served from the payload persisted
 // under DATA_DIR by the previous container. Steady-state re-warms happen via
 // the log-retention cron's `after_sweep` hook (see the roster).
-if (!dev)
+//
+// IS_STANDBY-gated for the same reason every cron is: the warm-up is three
+// whole-window scans of a 2 GB logs.db, and on a 2-vCPU box BOTH containers
+// running it 30s apart after a deploy stalled BOTH event loops past Caddy's
+// 5s health timeout — no healthy upstream, site-wide 503 (2026-07-29, see
+// `.issues/analytics-warm-up-not-standby-gated.md`). The standby reads the
+// payload the primary persisted under the SHARED DATA_DIR, which is exactly
+// what that file store is for, so gating costs it nothing.
+if (!dev && env.IS_STANDBY !== 'true')
   start_analytics_warm_up()
 
 /**
