@@ -248,6 +248,14 @@ export function bake_synced_seq(snapshot_db: Database.Database): void {
   ).run(String(counter?.seq ?? 0))
 }
 
+/**
+ * The body is gzip bytes uploaded as an OPAQUE blob — deliberately NO
+ * `ContentEncoding: 'gzip'`. On house's zone, Cloudflare transparently
+ * DECOMPRESSED a `Content-Encoding: gzip` R2 object at the edge and served
+ * every cold reader ~2.4× the bytes; LD's zone happened to pass it through,
+ * but that's zone config we don't want to depend on. An opaque blob can't be
+ * transformed; the client inflates by magic-byte sniff (`fetch-snapshot.ts`).
+ */
 async function upload_to_r2({ key, bytes }: { key: string, bytes: Uint8Array }) {
   const { client, bucket } = get_r2_snapshot_client()
   await client.send(new PutObjectCommand({
@@ -255,7 +263,6 @@ async function upload_to_r2({ key, bytes }: { key: string, bytes: Uint8Array }) 
     Key: key,
     Body: bytes,
     ContentType: 'application/octet-stream',
-    ContentEncoding: 'gzip',
     CacheControl: 'public, max-age=120',
   }))
 }

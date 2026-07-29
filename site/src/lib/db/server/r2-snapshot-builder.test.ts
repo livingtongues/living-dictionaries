@@ -119,7 +119,7 @@ describe(sweep_dirty_dictionaries, () => {
     expect(row.snapshot_uploaded_at).toBe(null)
   })
 
-  test('uploads gzip-encoded octet-stream to the snapshots bucket', async () => {
+  test('uploads gzip bytes as an OPAQUE blob — no ContentEncoding, so no CDN can transparently decompress it (house\'s zone did, serving 2.4× the bytes)', async () => {
     insert_dict({ id: 'd1', updated_at: '2026-01-01T00:00:00.000Z', snapshot_uploaded_at: null })
 
     await sweep_dirty_dictionaries()
@@ -127,9 +127,11 @@ describe(sweep_dirty_dictionaries, () => {
     const [[command]] = put_spy.mock.calls
     const input = put_input(command)
     expect(input.Bucket).toBe('test-snapshots')
-    expect(input.ContentEncoding).toBe('gzip')
+    expect(input.ContentEncoding).toBe(undefined)
     expect(input.ContentType).toBe('application/octet-stream')
     expect(input.Body).toBeInstanceOf(Uint8Array)
+    const body = input.Body as Uint8Array
+    expect([body[0], body[1]]).toEqual([0x1F, 0x8B]) // gzip magic bytes
   })
 
   test('prunes tombstones older than the snapshot-expiry window from the source db', async () => {

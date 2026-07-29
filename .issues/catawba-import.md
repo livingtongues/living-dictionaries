@@ -165,6 +165,57 @@ view show the abbreviation via `add_periods_and_comma_separate_parts_of_speech` 
 `psAbbrev.*` (`p.`, `v.suff.`). An earlier draft of the report claimed the entry page
 abbreviates — wrong. Semantic domains always render as names.
 
+## Requester answers (2026-07-27) — thread RE-OPENED
+
+thohahente answered all three questions on 2026-07-27T18:15–18:22Z. Answering **re-opens the
+thread** (`resolved_at` → null; intended behavior, asserted by
+`routes/api/v1/dictionaries/[id]/conversations/server.test.ts:192`), so it went back into the
+queue unread and unassigned-to-anyone-new. The "Resolved" line below was stale from 07-27 to 07-29.
+
+1. **`41af66bf…` literal vs shaped → `literal`.** One row, one word, columns as given. Matches
+   what the pilot did; nothing to change. This is the mandate for their bulk upload.
+2. **`e2ea86d1…` the "near" triple → `separate`.** Already three headwords — no data change.
+   Follow-up message gives the reason: *"These are particles that are phonetically distinct
+   depending on what they attach to in speech. Although they share the English gloss 'near,' the
+   different forms represent meaningful phonological variants in Catawba and should not be merged."*
+   **Deliberately NOT written into the entries as notes** — that would be exactly the "shaping"
+   answer 1 rules out. The rationale lives in the thread and here.
+3. **`fedbfcc5…` the Rudes citation → confirmed**, see the fix below.
+
+### Reconciling answers 1 and 3 (matters for the bulk upload)
+
+Answer 3 also states: *"Rudes is a source, not the governing linguistic authority. Standardization,
+entry structure, classification and treatment of forms follow the rules established for the
+contemporary Catawba dictionary project and the decisions of the Catawba Language Group and
+Dr. Rebekah Ingram."* That is not in tension with "literal" — **they do the shaping upstream per
+their own project rules, and LD writes exactly what arrives.** An agent working the bulk upload
+must not re-analyse or restructure their material.
+
+## Citation correction ✅ (2026-07-29)
+
+The stored source record still asserted the work and "Page 3" were unconfirmed — false once they
+answered, and visible on 14 public entry pages. Fixed by direct VPS edit (no API key needed; the
+temporary one stays revoked). Backup:
+`/opt/hosting/data/dictionaries/catawba.db.bak-citation-confirm-20260729-093602`.
+
+`sources` row `0551f5bd-cc36-40d2-93fd-c01c226c6840` (slug `rudes-catawba`), `server_seq` 199 → 200:
+
+| field | before | after |
+|---|---|---|
+| `citation` | "…Page 3… have not yet been confirmed." | "Blair A. Rudes. Catawba-English/English-Catawba Dictionary. Draft, Winter 2005–2006. …" + the governing-authority statement appended (Jacob's call) |
+| `author` | null | `Blair A. Rudes` (natural order — corpus convention, cf. "Ernest E. Heimbach") |
+| `year` | null | `2005–2006` (TEXT column exists for ranges) |
+| `type` | `other` | `manuscript` (corpus uses `manuscript` for unpublished, `dictionary` for published; this is an unpublished draft) |
+
+**`p. 3` locator restored** on all 14 entries — `citations = [{"slug":"rudes-catawba","locator":"p. 3"}]`,
+`server_seq` 201–214. It was stripped on 07-27 *only* because the filename's "Page 3" was
+unguessable; that is now confirmed. `EntrySource.svelte` de-dupes `sources` ∪ `citations` into one
+`chip_slugs` set, so this renders as a single chip **"Rudes p. 3"**, not a second source section —
+verified via the `WithCitationLocators` svelte-look story (light + dark).
+
+`dirty` left null on every touched row (client-only flag); `integrity_check` ok. Per-dict writes
+reach editors' browsers on the next R2 snapshot build (~30 min), not instantly.
+
 ## Progress
 
 - ✅ Phase 0 (claim, download, inspect, source registered + file filed)
@@ -173,5 +224,27 @@ abbreviates — wrong. Semantic domains always render as names.
 - ✅ Phase 2 writes (14 entries / 14 senses, verified three ways)
 - ✅ Report + questions filed
 - ✅ Jacob's closing message remains; duplicate agent message removed
-- ✅ Resolved at `/admin/imports`
+- ✅ Resolved at `/admin/imports` (07-27) — **re-opened 07-27T18:15Z by the requester's answers**
 - ✅ Temporary API key revoked
+- ✅ Requester answers processed; citation + locator corrected (07-29)
+- ⬜ Jacob to send the closing reply (draft below) and re-resolve the thread
+- ⬜ Report artifact `b231f28c…` still carries the old "unconfirmed" wording — left frozen; the
+  corrected citation now lives on the source record and in the reply
+
+## Draft closing reply (awaiting Jacob's send)
+
+> Thank you — that's exactly what we needed.
+>
+> We've recorded the source properly now: Blair A. Rudes, *Catawba-English/English-Catawba
+> Dictionary*, draft, Winter 2005–2006, with the 14 pilot words cited to page 3. We've also noted
+> on the source record that Rudes is source material rather than the governing authority, and that
+> standardization and entry structure follow the Catawba Language Group's and Dr. Ingram's
+> decisions — so anyone who works on this dictionary later sees that alongside the citation.
+>
+> The three words for "near" stay as three separate headwords, and your explanation of why is
+> recorded with them.
+>
+> For the bulk upload we'll take your material literally — one row, one word, columns as given —
+> and we won't re-analyse or restructure it. That fits what you described: your team does the
+> standardization, and we store faithfully what you send. When your agent is ready, point it at
+> the import guides in the API docs and give it room to work through them.

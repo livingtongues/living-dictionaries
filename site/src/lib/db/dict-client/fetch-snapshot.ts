@@ -46,8 +46,26 @@ export async function fetch_dict_snapshot(options: FetchSnapshotOptions): Promis
   const fetched = options.has_editor_role
     ? await fetch_from_vps(options)
     : await fetch_from_r2(options)
-  normalize_snapshot_header(fetched.bytes)
-  return fetched
+  const bytes = await decode_snapshot_bytes(fetched.bytes)
+  normalize_snapshot_header(bytes)
+  return { ...fetched, bytes }
+}
+
+/**
+ * The R2 object is gzip bytes uploaded as an OPAQUE blob (no `Content-Encoding`
+ * — see `upload_to_r2` in `r2-snapshot-builder.ts`: with the header set, a
+ * Cloudflare zone MAY transparently decompress the object at the edge and serve
+ * ~2.4× the bytes, which is exactly what house's zone did). Sniff the magic
+ * bytes so every form works: gzip (1f 8b) → inflate; SQLite → use as-is (the
+ * VPS editor path, whose same-origin `Content-Encoding: gzip` fetch already
+ * transparently decodes, plus any legacy encoded R2 object still edge-cached).
+ */
+export async function decode_snapshot_bytes(raw: Uint8Array): Promise<Uint8Array> {
+  if (raw[0] === 0x1F && raw[1] === 0x8B) {
+    const stream = new Blob([raw as unknown as BlobPart]).stream().pipeThrough(new DecompressionStream('gzip'))
+    return new Uint8Array(await new Response(stream).arrayBuffer())
+  }
+  return raw
 }
 
 /**
@@ -108,7 +126,9 @@ async function fetch_from_r2({ dict_id, r2_base_url, signal, on_progress }: Fetc
     const detail = await response.text().catch(() => '')
     throw new Error(`R2 snapshot fetch failed (${response.status}): ${detail.slice(0, 200)}`)
   }
-  // R2 sets Content-Encoding: gzip; fetch transparently decodes.
+  // Opaque gzip blob (no Content-Encoding): fetch does NOT decode; the caller
+  // inflates via `decode_snapshot_bytes`. Progress here ticks COMPRESSED bytes
+  // (fine — the R2 path has no `x-db-bytes`, so its bar is indeterminate).
   const bytes = await read_body_with_progress(response, on_progress)
   return { bytes, source: 'r2' }
 }

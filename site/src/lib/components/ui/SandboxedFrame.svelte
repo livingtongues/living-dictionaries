@@ -53,6 +53,17 @@
       const doc = iframe?.contentDocument
       if (!doc?.body)
         return
+      // Report links point at live entries/pages. Without a target they navigate
+      // THIS frame — which is sandboxed without `allow-scripts`, so the app loads
+      // as a dead scriptless shell inside a 70vh box with no way back. Forced
+      // here rather than asked of the artifact authors so every report already
+      // filed behaves correctly (all four shipped without a target).
+      for (const link of Array.from(doc.querySelectorAll<HTMLAnchorElement>('a[href]'))) {
+        if (link.getAttribute('href')?.startsWith('#'))
+          continue // in-document anchors must stay in the frame
+        link.target = '_blank'
+        link.rel = 'noopener'
+      }
       new ResizeObserver(measure).observe(doc.body)
       for (const image of Array.from(doc.images)) {
         if (!image.complete)
