@@ -29,6 +29,14 @@ The render/send seam lives in `$lib/email/` in every app:
 `Paragraph`, `Preview`, `Row`, `Shell`, `Title`, `TrackingPixel`, `markdown/MarkdownToEmailHtml`,
 `markdown/RenderToken` (markdown/ exists in tutor + house only).
 
+**`Preview.svelte` (the hidden inbox preheader) is byte-identical in house + tutor and
+`const`-drift-only in LD — keep it that way.** Two things about it are load-bearing (both landed
+2026-07-29, house-first): the whitespace filler is `repeat(Math.max(0, 150 - text.length))`
+because a bare `150 - length` throws a `RangeError` on any preheader over 150 chars, and an EMPTY
+`preview` renders NOTHING at all (the client then shows the start of the body copy — the normal
+default, and better than repeating the subject line, which is what house's newsletters/automations
+used to do before they grew their own `preheader` column).
+
 **Any email component with a `<style>` block MUST carry `<svelte:options css="injected" />`** —
 without it Svelte SSR emits only the class names and the styles (all the mobile media queries)
 silently never reach the sent email. house + LD shipped that way until 2026-07-29; tutor had it

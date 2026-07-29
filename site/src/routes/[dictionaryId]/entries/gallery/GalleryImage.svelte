@@ -14,7 +14,6 @@
   interface Props {
     title: string
     photo: PhotoLike
-    square: number
     href: string
     subtitle?: string
     photo_source?: string
@@ -26,7 +25,6 @@
   const {
     title,
     photo,
-    square,
     href,
     subtitle = undefined,
     photo_source = undefined,
@@ -79,7 +77,8 @@
   }} />
 
 <div class="thumb-wrap">
-  <img class="thumb" onclick={open} onmouseenter={start_preload} alt={title} src={photo_src({ photo, variant: 'thumb' })} />
+  <!-- w900, not thumb: gallery cells run up to 500 CSS px (1000 device px on retina) — thumb's 400px is short even at 1x -->
+  <img class="thumb" onclick={open} onmouseenter={start_preload} alt={title} src={photo_src({ photo, variant: 'w900' })} />
   {#if loading}
     <IconGgSpinner class="spinner" />
   {:else if photographer === 'AI'}

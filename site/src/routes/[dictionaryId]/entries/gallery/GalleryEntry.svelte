@@ -46,7 +46,6 @@
 {#if first_photo}
   <div class="card">
     <GalleryImage
-      square={480}
       title={headword.value}
       subtitle={glosses[0]}
       href="/{dictionary.url}/entry/{entry.id}"

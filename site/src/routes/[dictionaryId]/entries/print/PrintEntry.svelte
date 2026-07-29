@@ -204,7 +204,7 @@
   <img
     class="entry-photo"
     style="width:{imagePercent}%; max-height: 100vh;"
-    src={photo_src({ photo: first_photo, variant: 'original' })}
+    src={photo_src({ photo: first_photo, variant: 'w1600' })}
     alt={headword.value} />
 {/if}
 
