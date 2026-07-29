@@ -188,6 +188,20 @@ export const BookDesktopScrolled: PageStory<typeof Component> = {
   },
 }
 
+// The foot of the book: the clause-template strip and the glossing legend sit
+// together as reference apparatus, and the TOC pins both below the chapters.
+export const BookDesktopReference: PageStory<typeof Component> = {
+  viewports: [{ width: 1280, height: 900 }],
+  page_data: page_data({ rows: book_rows }),
+  props: { dictionary, is_manager: false } as never,
+  csr: true,
+  interactions: async (page) => {
+    await page.waitForSelector('.rail')
+    await page.evaluate(() => document.getElementById('grammar-clause-template')?.scrollIntoView())
+    await new Promise(resolve => setTimeout(resolve, 400))
+  },
+}
+
 // Narrow viewport: the sticky "you are here" bar, closed.
 export const BookMobile: PageStory<typeof Component> = {
   viewports: [{ width: 480, height: 780 }],

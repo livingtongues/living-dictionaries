@@ -19,6 +19,8 @@ function question(overrides: Partial<ThreadQuestionRow> = {}): ThreadQuestionRow
     body_html: 'Even “a 1990s community class handout” lets us cite it properly.',
     options_json: null,
     report_anchor: '#q-provenance',
+    entries_query: null,
+    entries_query_label: null,
     answer_text: null,
     answer_values_json: null,
     answered_by_user_id: null,
@@ -39,6 +41,15 @@ export const MixedKinds: Story<typeof Component> = {
     questions: [
       question(),
       question({
+        id: 'q1b',
+        position: 2,
+        title: 'Should I keep the parts of speech I worked out from the English?',
+        body_html: 'I inferred these from the English gloss, so a speaker should confirm the pattern before we keep them.',
+        report_anchor: '#q-parts-of-speech',
+        entries_query: JSON.stringify({ sources: ['mg-bitd-wordlist'], no_part_of_speech: true }),
+        entries_query_label: 'Show me these 1,191 entries',
+      }),
+      question({
         id: 'q2',
         position: 2,
         kind: 'choice',
@@ -50,6 +61,8 @@ export const MixedKinds: Story<typeof Component> = {
           { value: 'unsure', label: 'Not sure — please investigate' },
         ]),
         report_anchor: '#q-raised-dot',
+        // No label of its own — falls back to the translated default.
+        entries_query: JSON.stringify({ query: '·' }),
       }),
       question({
         id: 'q3',

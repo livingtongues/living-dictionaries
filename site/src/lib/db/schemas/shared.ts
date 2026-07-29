@@ -363,6 +363,14 @@ export const thread_questions = sqliteTable('thread_questions', {
   /** `[{ value, label }]` for the choice kinds. */
   options_json: text(),
   report_anchor: text(),
+  /**
+   * A validated entries-view filter object (`$lib/search/entries-query-link.ts`),
+   * rendered as a "show me these entries" button — the question asked ON the rows
+   * it concerns, where the curator's judgement is cheapest to give.
+   */
+  entries_query: text(),
+  /** The agent's own wording for that button, e.g. "Show me these 1,191 entries". */
+  entries_query_label: text(),
   answer_text: text(),
   answer_values_json: text(),
   answered_by_user_id: text().references(() => users.id, { onDelete: 'set null' }),

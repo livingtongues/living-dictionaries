@@ -48,13 +48,54 @@ unnumbered preface. Script: `scripts/one-off/2026-07-28-ponca-flatten-grammar-ro
 Treat this as the template for any future PDF import that arrives with a redundant wrapper
 section — flatten it rather than teaching the UI to hide it.
 
+## Reference apparatus lives at the FOOT of the page (2026-07-29)
+
+The clause-template strip was originally pinned above the whole section tree for any dictionary
+with `clause_slots`. On Ponca that shoved the dictionary's own opening essay below the fold, so a
+reader met a diagram of slots before a sentence of prose. Jacob's call: **the clause strip and the
+glossing legend are both reference apparatus and belong at the bottom**, with their TOC entries
+pinned in that same order. `+page.svelte` owns both landmarks now; `GrammarSectionsView` renders
+sections only. The edit-mode "Edit clause slots" control deliberately stayed at the TOP — it is the
+only way to create a first slot, and at the foot of a 77KB grammar nobody would find it.
+
+## TOC clicks are deep links (2026-07-29)
+
+Clicking a TOC entry writes `#section-<id>` with **`replaceState` from `$app/navigation`** — not
+`pushState` (a TOC is clicked many times per read; 20 hash entries make Back useless) and not
+native `history.replaceState` (SvelteKit dev-warns on that). The call is try/catch'd because
+svelte-look mounts components with no router and `$app/navigation` throws there — svelte-look shims
+`$app/state` only. Loading a URL that already carries a hash needs a **retry**: the browser's own
+hash scroll fires long before the dict DB has streamed the sections in, so `+page.svelte` re-applies
+the hash once (non-smooth) as rows arrive.
+
 ## Scroll-spy mechanics worth not rediscovering
 
 Sections render their children *inside* the parent's `.section` div, so a whole-section
-IntersectionObserver reports the parent visible whenever any child is. The working model
-(`scroll-spy.svelte.ts`) is instead: every landmark carries `data-grammar-anchor`, an IO with a
-negative top `rootMargin` records each one's above/below state as it crosses a line just under the
-sticky chrome, and **active = the last landmark in document order that is above the line**.
-Nesting then works for free (a subsection's top comes after its parent's, so the deepest one you've
-entered wins) and no scroll listener is needed. A `MutationObserver` re-scans because sections
-appear as the dict DB loads and come and go while editing.
+IntersectionObserver reports the parent visible whenever any child is. **IntersectionObserver was
+tried and abandoned** (2026-07-28): with `threshold: 0` it fires only on visibility transitions,
+never on top-edge crossings, so a section taller than the viewport kept its stale above/below flag
+the entire time you were reading it — measured 40/40 wrong scroll samples. The current model
+(`scroll-spy.svelte.ts`, whose header comment is the authority) measures landmark positions fresh
+on each rAF-throttled scroll frame and takes the last landmark past its OWN `scroll-margin-top`
+line. Active is still **the last landmark in document order above the line**, so nesting works for
+free. A `MutationObserver` re-scans because sections appear as the dict DB loads and come and go
+while editing.
+
+## Section bodies render ABOVE their children — partition imports accordingly
+
+`GrammarSection.svelte` renders `body → usage_conditions → example sentences → children`. A
+chapter's own body therefore always precedes every subsection, and **a chapter can only read in
+true document order if every one of its tables lives in a subsection**. Any table left in the
+parent body jumps ahead of all the subsections no matter how the prose around it is arranged.
+
+Ponca's PDF import ignored this: it concatenated all of a chapter's interleaved prose into the
+parent body and pushed only the *captioned* tables into children, so "…as given here:" ended up
+six paragraphs from its table. The 2026-07-29 repair (`.issues/ponca-grammar-round-2.md` Lane 2,
+`scripts/ponca/repartition-grammar.py`) moved each paragraph into the child whose table it leads
+into or comments on — 38 sections, prose never edited, verified as identical multisets of exact
+strings before/after. Five of the ten chapters came out in exact PDF order; the other five still
+hold uncaptioned tables in the parent and can't be fixed without inventing subsections.
+
+**Lesson for the next grammar import: make one subsection per table group (lead-in prose + table +
+follow-up commentary), including uncaptioned tables — never leave a table in a parent that has
+children.**

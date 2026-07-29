@@ -39,7 +39,6 @@
     "show_glosses": "Show glosses",
     "hide_glosses": "Hide glosses",
     "open_sentence": "Open sentence",
-    "contents": "Contents",
     "multiple_entries": "Multiple entries"
   },
   "discourse": {
@@ -631,6 +630,7 @@
     "question_save": "Save answer",
     "question_saved": "Saved",
     "question_context_link": "full context in the report",
+    "question_entries_link": "Show me these entries",
     "no_conversation_messages": "No messages yet.",
     "started_on": "We started work on",
     "resolved_on": "Completed",

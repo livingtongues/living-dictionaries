@@ -1,9 +1,11 @@
 <script lang="ts">
   import type { QuestionOption, ThreadQuestionRow } from '$lib/db/server/import-conversations'
   import IconMdiCheckCircle from '~icons/mdi/check-circle'
+  import IconMdiFormatListBulleted from '~icons/mdi/format-list-bulleted'
   import IconMdiOpenInNew from '~icons/mdi/open-in-new'
   import { page } from '$app/state'
   import { api_conversation_answer_question, conversation_artifact_url } from '$api/v1/dictionaries/[id]/conversations/_call'
+  import { entries_query_href } from '$lib/search/entries-query-link'
   import { toast } from '$lib/state/toast.svelte'
 
   interface Props {
@@ -37,6 +39,12 @@
       ? `${conversation_artifact_url({ dictionary_id, thread_id, artifact_id: report_artifact_id })}${question.report_anchor}`
       : null,
   )
+  // The entries this question is about. `page.params.dictionaryId` is the URL
+  // the manager is already on (the canonical slug); `dictionary_id` is the
+  // fallback for anywhere this card renders outside a dictionary route.
+  const entries_href = $derived(question.entries_query
+    ? entries_query_href({ dictionary_url: page.params.dictionaryId || dictionary_id, entries_query: question.entries_query })
+    : null)
 
   function toggle_value(value: string) {
     const current = answer_values
@@ -83,11 +91,23 @@
     <div class="context">{@html question.body_html}</div>
   {/if}
 
-  {#if anchor_href}
-    <a class="anchor" href={anchor_href} target="_blank" rel="noopener">
-      {t('import_page.question_context_link')}
-      <IconMdiOpenInNew />
-    </a>
+  {#if entries_href || anchor_href}
+    <div class="links">
+      <!-- The question asked ON its rows: the manager answers from the entries
+           themselves rather than from memory (2026-07-29). -->
+      {#if entries_href}
+        <a class="btn-primary btn-sm" href={entries_href} target="_blank" rel="noopener">
+          <IconMdiFormatListBulleted />
+          {question.entries_query_label || t('import_page.question_entries_link')}
+        </a>
+      {/if}
+      {#if anchor_href}
+        <a class="anchor" href={anchor_href} target="_blank" rel="noopener">
+          {t('import_page.question_context_link')}
+          <IconMdiOpenInNew />
+        </a>
+      {/if}
+    </div>
   {/if}
 
   {#if question.kind === 'text'}
@@ -171,11 +191,21 @@
     line-height: 1.5;
     color: color-mix(in srgb, var(--color) 78%, var(--background));
   }
+  .links {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .links a.btn-primary {
+    gap: 0.3rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
   .anchor {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    align-self: flex-start;
     font-size: 0.76rem;
     color: var(--primary);
     text-decoration: underline;

@@ -3,6 +3,7 @@
   import sanitize from 'xss'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { page } from '$app/state'
+  import GlossedText from '$lib/corpus/GlossedText.svelte'
 
   interface Props {
     value: string
@@ -11,6 +12,8 @@
     bcp?: string
     display: string
     on_update: (new_value: string) => void
+    /** Light up the dictionary's glossing-abbreviation codes inside the value. */
+    gloss_codes?: boolean
   }
 
   const {
@@ -20,6 +23,7 @@
     bcp = undefined,
     display,
     on_update,
+    gloss_codes = false,
   }: Props = $props()
   const { can_edit } = $derived(page.data)
 
@@ -34,7 +38,11 @@
       class="textbox-cell"
       style="padding: 0.1em 0.25em"
       onclick={() => set(can_edit)}>
-      {@html sanitizedHtml}
+      {#if gloss_codes && value}
+        <GlossedText text={value} />
+      {:else}
+        {@html sanitizedHtml}
+      {/if}
       &nbsp;
     </div>
 

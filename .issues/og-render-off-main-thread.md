@@ -105,12 +105,42 @@ stall** (asserted `< 250 ms`).
 - [x] Queue shedding is bounded and behaving as designed under the crawler flood: `queue_full`,
       `wait_deadline`, and `busy_window` return the generic card instead of risking site availability.
 
-## Production status at 21:05 UTC 2026-07-28 (log-review run 2, read-only)
+## Production status at 02:30 UTC 2026-07-29 — SHIPPED and verified (read-only)
 
-The diagnosis above is right and the fix passes its tests locally — but **it never reached
-production**: the repair to `render-worker.js` / `+server.ts` / `component-to-png.ts` is still
-uncommitted in the mustang working tree, and `main`'s newest commit (`97444112`, 11:20 UTC) predates
-the failure. Production numbers at 21:05 UTC:
+The repair reached production in `1a169a89` (committed 01:17 UTC, deploy completing ~01:31), and
+the poisoned renderer is **gone**:
+
+| Signal | Before (24 h to 01:30 UTC) | After (01:35 → 02:30 UTC) |
+|---|---:|---:|
+| `Failed to unwrap exclusive reference of Resvg …` | 11,817 — **last row 01:30:51 UTC** | **0** |
+| `og_card_rendered` (events; telemetry is coalesced now) | none between 17:26 and 23:00 | **853 in 55 min** (~930/h) |
+| `og_render_failed` | ~2,400/h | **123 in 55 min** |
+| `og_render_worker_timeout` | 7–13/h | **10/h — unchanged** |
+
+The deploy check below is therefore satisfied. **Two residuals survive it**, both share-preview
+quality/capacity rather than availability:
+
+1. **The 20 s worker timeouts are untouched by the concurrency fix** — a steady 7–13/hour before
+   AND after (172 in 24 h). Every logged one is a plain 1200×630 card
+   (`{"render_timeout_ms":20000,"width":1200,"height":630}`), so it is not a giant-card effect.
+2. **`reason:"font"` now dominates what still fails**: 1,424 rows in 24 h on **one** dictionary
+   (Torwali English Urdu), plus Judeo-Kashani (20), Mehri (4), Hazaragi (2) — the Arabic-script
+   cards. Each burns a render, then a `retry: static_fonts_only`, then a `fallback: text_only`.
+   Adjacent and now FIXED in the tree: `load_dynamic_asset` fell back to `code = 'unknown'`
+   without re-reading `names`, so any script missing from `language_font_map` threw `names is not
+   iterable` and was mis-reported as `dynamic_font_fetch` (caught on an emoji card at 01:35:58
+   UTC). That cost one wasted attempt and a misleading log per unmapped text run, not a card.
+
+**Do NOT port this endpoint's capacity settings to house** (queue limit 1, `busy_ratio` 0.9,
+`wait_deadline_ms` 8000, `max_waiting` 12, the 20 s render timeout). They are tuned to LD's 2-core
+box under a crawler flood house does not have, and were explicitly not endorsed for porting. What
+DID go across separately are the two shape fixes — the dimension ceiling and the outbound-fetch
+allow-list (2026-07-29, `.issues/nightly-2026-07-28-approved-execution.md`).
+
+### The superseded 21:05 UTC 2026-07-28 reading (kept for the record)
+
+At that moment the repair was still uncommitted in the mustang working tree and `main`'s newest
+commit (`97444112`, 11:20 UTC) predated the failure. Production numbers at 21:05 UTC:
 
 - **18,633** `Failed to unwrap exclusive reference of Resvg type from napi value` rows since
   12:15 UTC — effectively 100% of render attempts.
@@ -124,4 +154,15 @@ the failure. Production numbers at 21:05 UTC:
   quiet day.
 
 Deploy check to run afterwards: `og_card_rendered` returns to hundreds/hour, `og_render_failed`
-`reason:"render"` goes to ~0, and the og-cache file count grows again.
+`reason:"render"` goes to ~0, and the og-cache file count grows again. ✅ All three confirmed at
+02:30 UTC 2026-07-29 (table at the top of this section).
+
+## Still open (P2, share-preview quality)
+
+- **The 20 s timeouts** (7–13/hour) have no diagnosis yet. They are NOT the Resvg concurrency bug
+  and NOT big cards. Next probe: correlate a timeout minute against `reason:"font"` minutes — a
+  dynamic Google-font fetch that hangs past the pool's render timeout is the obvious suspect, and
+  the font fetch's own `AbortSignal.timeout(3000)` only covers the fetch, not the retry chain.
+- **Arabic-script cards render text-only**, so Torwali's share previews are permanently degraded.
+  Worth checking whether the static font set should simply include a Noto Arabic subset rather
+  than depending on a Google Fonts round trip per text run.

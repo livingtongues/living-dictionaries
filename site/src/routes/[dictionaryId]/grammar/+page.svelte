@@ -4,11 +4,12 @@
   import GrammarSectionsView from './GrammarSectionsView.svelte'
   import GrammarToc from './GrammarToc.svelte'
   import GrammarTocBar from './GrammarTocBar.svelte'
+  import ClauseTemplateStrip from './ClauseTemplateStrip.svelte'
   import GlossingLegend from '$lib/corpus/GlossingLegend.svelte'
   import { grammar_sections_editable } from '$lib/corpus/grammar-preview'
   import { build_section_tree, has_title } from './grammar-tree'
-  import { active_breadcrumb, build_toc_entries, GLOSSING_LEGEND_ANCHOR } from './grammar-toc'
-  import { GrammarScrollSpy } from './scroll-spy.svelte'
+  import { active_breadcrumb, build_toc_entries, CLAUSE_TEMPLATE_ANCHOR, GLOSSING_LEGEND_ANCHOR } from './grammar-toc'
+  import { GrammarScrollSpy, scroll_to_anchor } from './scroll-spy.svelte'
   import { build_entry_link_index } from '$lib/entry-links/exact-lexeme-index'
   import { set_entry_mention_context } from '$lib/entry-links/mention-context'
   import type { EntryMentionClick } from '$lib/entry-links/link-entry-mentions'
@@ -68,6 +69,19 @@
 
   let open_mention = $state<EntryMentionClick | null>(null)
 
+  // Deep link: `/{dict}/grammar#section-<id>` has to land on its section, but
+  // the sections only exist once the dictionary DB has streamed in — long after
+  // the browser gave up on its own hash scroll. Retry as rows arrive, once.
+  let hash_landed = false
+  $effect(() => {
+    // Read both so the effect re-runs as the sections arrive.
+    const sections_rendered = !loading || rows.length > 0
+    const dom_id = page.url.hash.slice(1)
+    if (hash_landed || !dom_id || !sections_rendered) return
+    if (scroll_to_anchor({ dom_id, smooth: false }))
+      hash_landed = true
+  })
+
   set_entry_mention_context({
     get index() { return entry_link_index },
     open: (detail) => { open_mention = detail },
@@ -100,7 +114,15 @@
 
   <div class="layout" {@attach spy.watch}>
     <div class="main">
-      <GrammarSectionsView {tree} {loading} editable={editing} prose_editable={editing && is_manager} {has_clause_slots} />
+      <GrammarSectionsView {tree} {loading} editable={editing} prose_editable={editing && is_manager} />
+      <!-- Reference apparatus, both pinned to the bottom of the TOC in this same
+        order: pinning the clause strip above the tree used to push the
+        dictionary's own opening prose off the first screen. -->
+      {#if has_clause_slots}
+        <div id={CLAUSE_TEMPLATE_ANCHOR} data-grammar-anchor={CLAUSE_TEMPLATE_ANCHOR} class="clause-anchor">
+          <ClauseTemplateStrip />
+        </div>
+      {/if}
       {#if has_legend}
         <div id={GLOSSING_LEGEND_ANCHOR} data-grammar-anchor={GLOSSING_LEGEND_ANCHOR} class="legend-anchor">
           <GlossingLegend />
@@ -110,7 +132,7 @@
 
     {#if show_toc}
       <aside class="rail">
-        <div class="rail-heading">{t('grammar.contents')}</div>
+        <div class="rail-heading">{t('dictionary.grammar')}</div>
         <GrammarToc entries={toc_entries} follow_active />
       </aside>
     {/if}
@@ -167,8 +189,13 @@
     min-width: 0;
   }
 
-  .legend-anchor {
+  .legend-anchor,
+  .clause-anchor {
     scroll-margin-top: 7rem;
+  }
+
+  .clause-anchor {
+    margin-top: 1.5rem;
   }
 
   .rail {
@@ -196,7 +223,8 @@
       display: block;
     }
 
-    .legend-anchor {
+    .legend-anchor,
+    .clause-anchor {
       scroll-margin-top: 4rem;
     }
   }

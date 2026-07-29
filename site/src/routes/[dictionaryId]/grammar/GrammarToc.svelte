@@ -1,12 +1,15 @@
 <script lang="ts">
   import type { TocEntry } from './grammar-toc'
+  import { page } from '$app/state'
+  import { replaceState } from '$app/navigation'
   import { scroll_to_anchor } from './scroll-spy.svelte'
 
   /**
    * The table-of-contents list itself — shared verbatim by the desktop right
    * rail and the mobile overlay. Entries are real anchors so middle-click /
    * copy-link keep working; the click handler only upgrades the jump to a
-   * smooth scroll.
+   * smooth scroll and writes the landmark into the URL hash, so the address bar
+   * always holds a shareable deep link to the section you are reading.
    */
 
   interface Props {
@@ -21,10 +24,20 @@
 
   let nav: HTMLElement | undefined = $state()
 
+  // REPLACE rather than push: a TOC is used many times per read, and burying the
+  // route you arrived from under 20 hash entries makes Back useless. The catch is
+  // for svelte-look stories, which mount without a router — the scroll still runs.
+  function write_hash(dom_id: string) {
+    try {
+      replaceState(`#${dom_id}`, page.state)
+    } catch (_no_router) { /* no router */ }
+  }
+
   function jump(event: MouseEvent, dom_id: string) {
     if (event.metaKey || event.ctrlKey || event.shiftKey) return
     event.preventDefault()
-    scroll_to_anchor(dom_id)
+    scroll_to_anchor({ dom_id })
+    write_hash(dom_id)
     on_navigate?.()
   }
 

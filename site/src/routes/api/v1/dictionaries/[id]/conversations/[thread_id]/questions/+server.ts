@@ -1,7 +1,9 @@
 import type { RequestHandler } from './$types'
 import type { NewQuestion, QuestionOption, ThreadQuestionRow } from '$lib/db/server/import-conversations'
+import type { EntriesQuery } from '$lib/search/entries-query-link'
 import { ResponseCodes } from '$lib/constants'
 import { create_questions, list_questions } from '$lib/db/server/import-conversations'
+import { parse_entries_query } from '$lib/search/entries-query-link'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { load_v1_dictionary_context } from '$lib/db/server/v1-route-context'
 import { require_conversation, require_team } from '$lib/import/server/conversation-access'
@@ -20,6 +22,14 @@ export interface V1ConversationQuestionsPostRequestBody {
     options?: QuestionOption[]
     /** Fragment id inside the report artifact, e.g. `#q-raised-dot`. */
     report_anchor?: string
+    /**
+     * The entries this question is about, as an entries-view filter — rendered
+     * as a "show me these entries" button so the manager answers from the rows
+     * instead of from memory. e.g. `{ sources: ['smith-1979'], no_audio: true }`.
+     */
+    entries_query?: EntriesQuery
+    /** Your own wording for that button, e.g. "Show me these 1,191 entries". */
+    entries_query_label?: string
   }[]
 }
 
@@ -61,12 +71,23 @@ export const POST: RequestHandler = async (event) => {
     const options = question.options?.filter(option => option?.value && option?.label) ?? []
     if (question.kind !== 'text' && options.length < 2)
       error(ResponseCodes.BAD_REQUEST, `questions[${index}] is a ${question.kind} question, so it needs at least two options`)
+    // A filter typo must be REJECTED, never ignored: a button that shows the
+    // manager the wrong set of entries is worse than no button at all.
+    let entries_query: string | null = null
+    if (question.entries_query !== undefined && question.entries_query !== null) {
+      const parsed = parse_entries_query(question.entries_query)
+      if (parsed.error)
+        error(ResponseCodes.BAD_REQUEST, `questions[${index}]: ${parsed.error}`)
+      entries_query = JSON.stringify(parsed.entries_query)
+    }
     return {
       kind: question.kind,
       title: question.title.trim(),
       body_html: question.body_html?.trim() || null,
       options: question.kind === 'text' ? null : options,
       report_anchor: question.report_anchor?.trim() || null,
+      entries_query,
+      entries_query_label: entries_query ? question.entries_query_label?.trim() || null : null,
     }
   })
 

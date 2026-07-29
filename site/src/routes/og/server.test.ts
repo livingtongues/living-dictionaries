@@ -16,7 +16,7 @@ import { compressToEncodedURIComponent as encode } from '$lib/lz/lz-string'
  * than one at a time.
  */
 
-interface RenderCall { at: number }
+interface RenderCall { at: number, width: number, height: number, props: Record<string, unknown> }
 
 const renderer = {
   /** Every call the route made into the renderer — the point is that there are FEW. */
@@ -31,8 +31,8 @@ vi.mock('./component-to-png', async (import_original) => {
   const actual = await import_original<typeof import('./component-to-png')>()
   return {
     ...actual,
-    async render_component_to_png({ width }: { width: number }) {
-      renderer.calls.push({ at: Date.now() })
+    async render_component_to_png({ width, height, props }: { width: number, height: number, props: Record<string, unknown> }) {
+      renderer.calls.push({ at: Date.now(), width, height, props })
       renderer.concurrent++
       renderer.peak_concurrent = Math.max(renderer.peak_concurrent, renderer.concurrent)
       try {
@@ -202,6 +202,43 @@ describe('GET /og — the shed card is a real card, not a transparent pixel', ()
     const body = Buffer.from(await shed[0].arrayBuffer())
     // The stubbed renderer's bytes — i.e. the STORED generic card, not the 1×1.
     expect(body.toString()).toBe('fake-png-1200')
+  })
+})
+
+describe('GET /og — a URL cannot ask for an unbounded drawing', () => {
+  test('THE FIX: a 20,000×20,000 request is clamped before it reaches the renderer', async () => {
+    const response = await get(card_url({ ...CARD, width: 20_000, height: 20_000 }))
+    expect(response.status).toBe(200)
+    expect(renderer.calls[0].width).toBe(2400)
+    expect(renderer.calls[0].height).toBe(2400)
+  })
+
+  test('the clamped size is written back into the props the card draws with', async () => {
+    await get(card_url({ ...CARD, width: 20_000, height: 20_000 }))
+    // Otherwise the viewport is 2400px and the photo inside it is 20,000px.
+    expect(renderer.calls[0].props.width).toBe(2400)
+    expect(renderer.calls[0].props.height).toBe(2400)
+  })
+
+  test('a missing or nonsense size still draws the real 1200×630 card', async () => {
+    const { width: _w, height: _h, ...sizeless } = CARD
+    await get(card_url(sizeless))
+    await get(card_url({ ...CARD, width: 0, height: -4, title: 'Zero' }))
+    for (const call of renderer.calls) {
+      expect(call.width).toBe(1200)
+      expect(call.height).toBe(630)
+    }
+  })
+})
+
+describe('GET /og — a URL cannot make this server fetch an arbitrary host', () => {
+  test('THE FIX: a foreign photo host is dropped, and the card renders without it', async () => {
+    const fetch_spy = vi.spyOn(globalThis, 'fetch')
+    const response = await get(card_url({ ...CARD, image_url: 'http://169.254.169.254/latest/meta-data/' }))
+    expect(response.status).toBe(200)
+    expect(fetch_spy).not.toHaveBeenCalled()
+    expect(renderer.calls[0].props.image_url).toBe(undefined)
+    fetch_spy.mockRestore()
   })
 })
 

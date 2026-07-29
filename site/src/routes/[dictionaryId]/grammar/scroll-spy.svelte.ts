@@ -93,9 +93,14 @@ export class GrammarScrollSpy {
   }
 }
 
-/** Smooth-scroll a landmark into view under the sticky chrome. */
-export function scroll_to_anchor(dom_id: string) {
+/**
+ * Scroll a landmark into view under the sticky chrome. Returns false when the
+ * landmark isn't in the DOM yet — the deep-link handler retries as the
+ * dictionary DB streams sections in.
+ */
+export function scroll_to_anchor({ dom_id, smooth = true }: { dom_id: string, smooth?: boolean }): boolean {
   const element = document.getElementById(dom_id)
-  if (!element) return
-  element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  if (!element) return false
+  element.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant', block: 'start' })
+  return true
 }

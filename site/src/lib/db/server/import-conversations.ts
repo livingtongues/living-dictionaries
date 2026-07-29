@@ -65,6 +65,9 @@ export interface ThreadQuestionRow {
   body_html: string | null
   options_json: string | null
   report_anchor: string | null
+  /** JSON entries-view filter (`$lib/search/entries-query-link.ts`) — the "show me these entries" button. */
+  entries_query: string | null
+  entries_query_label: string | null
   answer_text: string | null
   answer_values_json: string | null
   answered_by_user_id: string | null
@@ -288,6 +291,9 @@ export interface NewQuestion {
   body_html?: string | null
   options?: QuestionOption[] | null
   report_anchor?: string | null
+  /** Already-validated JSON (see `parse_entries_query`) — never raw agent input. */
+  entries_query?: string | null
+  entries_query_label?: string | null
 }
 
 export function create_questions({ db, thread_id, dictionary_id, questions, created_by_user_id, now = new Date().toISOString() }: {
@@ -303,8 +309,9 @@ export function create_questions({ db, thread_id, dictionary_id, questions, crea
   const insert = db.prepare(`
     INSERT INTO thread_questions (
       id, thread_id, dictionary_id, position, kind, title, body_html,
-      options_json, report_anchor, status, created_by_user_id, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?, ?)
+      options_json, report_anchor, entries_query, entries_query_label,
+      status, created_by_user_id, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?, ?)
   `)
   const ids: string[] = []
   const write = db.transaction(() => {
@@ -321,6 +328,8 @@ export function create_questions({ db, thread_id, dictionary_id, questions, crea
         question.body_html ?? null,
         question.options?.length ? JSON.stringify(question.options) : null,
         question.report_anchor ?? null,
+        question.entries_query ?? null,
+        question.entries_query_label ?? null,
         created_by_user_id,
         now,
         now,

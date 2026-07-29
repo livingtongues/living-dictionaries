@@ -306,6 +306,33 @@ describe(POST_QUESTIONS, () => {
       .rejects.toMatchObject({ status: 400 })
   })
 
+  test('a question can name the entries it is about, and a filter typo is a 400 rather than a wrong button', async () => {
+    const { thread_id } = await open_conversation()
+    const created = await (await POST_QUESTIONS(event({
+      method: 'POST',
+      api_key: agent_token,
+      params: { thread_id },
+      body: {
+        questions: [{
+          kind: 'text',
+          title: 'Should I keep the parts of speech I worked out from the English?',
+          entries_query: { sources: ['mg-bitd-wordlist'], no_part_of_speech: true, no_audio: false },
+          entries_query_label: 'Show me these 1,191 entries',
+        }],
+      },
+    }))).json()
+    // Stored normalized: the false facet is dropped, the real ones survive.
+    expect(JSON.parse(created.questions[0].entries_query)).toEqual({ sources: ['mg-bitd-wordlist'], no_part_of_speech: true })
+    expect(created.questions[0].entries_query_label).toBe('Show me these 1,191 entries')
+
+    await expect(POST_QUESTIONS(event({
+      method: 'POST',
+      api_key: agent_token,
+      params: { thread_id },
+      body: { questions: [{ kind: 'text', title: 'x', entries_query: { no_parts_of_speech: true } }] },
+    }))).rejects.toMatchObject({ status: 400 })
+  })
+
   test('an agent files a mixed batch and the manager answers both kinds', async () => {
     const { thread_id } = await open_conversation()
     const created = await (await POST_QUESTIONS(event({

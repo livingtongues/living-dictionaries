@@ -1,5 +1,5 @@
 ---
-description: AI-fill missing i18n translations + triage en_changed review flags in the production DB, then refresh the committed seed files and push (which deploys + bakes them). Run after deploying new/changed English keys, BEFORE hitting "Notify translators".
+description: AI-fill missing i18n translations + triage en_changed review flags in the production DB, then refresh the committed seed files and LEAVE THEM UNCOMMITTED for Jacob to review. Run after deploying new/changed English keys, BEFORE hitting "Notify translators".
 ---
 
 # Fill Translations (AI pass)
@@ -7,10 +7,10 @@ description: AI-fill missing i18n translations + triage en_changed review flags 
 **Who spawns you.** Since 2026-07-28 this is **writer subwave `2b` of the horse nightly fleet**
 (`~/code/horse/.cron/fleet.md`), spawned on Mondays by the nightly orchestrator — it is no longer a
 standalone wall-clock cron. That matters to you in three ways: no other lane is writing Living
-Dictionaries while you run (you may assume a clean tree and you must leave one behind), you get one
-casualty re-run if you die on a provider error, and your receipt is read by the morning brief. You
-can still be run by hand at any time, which is the normal way to use it after deploying new English
-keys.
+Dictionaries while you run (so you may assume a clean tree, and the only uncommitted changes at the
+end are yours — the refreshed locale seed files, which you leave for Jacob), you get one casualty
+re-run if you die on a provider error, and your receipt is read by the morning brief. You can still
+be run by hand at any time, which is the normal way to use it after deploying new English keys.
 
 You (the agent) are the translation engine — there is deliberately NO in-app AI button. You
 generate the translations yourself and write them to the **production** `shared.db` on the
@@ -72,27 +72,40 @@ For each `en_changed` row, compare the CURRENT English against the existing tran
 - **Substantive meaning change**: draft your best updated translation but LEAVE it flagged →
   same UPDATE but `needs_review = 'ai'` (the translator sees "AI translation — please review").
 
-## 4. Refresh the committed seed files + deploy
+## 4. Refresh the seed files — and STOP there
 
 ```bash
 cd ~/code/living-dictionaries/site
 pnpm i18n:refresh        # pulls prod /api/i18n/export → overwrites src/lib/i18n/locales/**
 ```
 
-Verify the diff is sane (only expected locales/keys changed), run `pnpm test` on the i18n
-suites, then commit the locale files (`i18n: AI translation fill YYYY-MM-DD`) and push to
-`main` — that deploy bakes the new values into the app.
+Verify the diff is sane (only expected locales/keys changed) and run `pnpm test` on the i18n
+suites. Then **leave the locale files uncommitted.**
+
+> **You NEVER commit and NEVER push** (2026-07-29, Jacob — see
+> `.cron/fill-translation-reviews/decisions.md`). This lane has the same contract as every
+> other worker: make the changes, leave them in the working tree, report. A push to `main` is
+> a **deploy** of the whole site, and that decision is Jacob's, not a nightly lane's. He reviews
+> the seed diff and commits it himself — which is what bakes the values into the app.
+>
+> Writing the production `shared.db` is still yours to do: that is the lane's product, it is
+> flagged for human review on `/translate`, and it is live the moment you write it. The bundled
+> seed files are only the fallback copy.
+
+Do not offer to push, do not ask for permission to push, and do not re-propose push
+authorization.
 
 ## 5. Report
 
 Write `.cron/fill-translation-reviews/YYYY-MM-DD.md` with observed gaps, pre/post human-review
-queue counts, backup evidence, per-locale fills, `en_changed` outcomes, skips, verification,
-commit/push result, and exactly one terminal state: `staged-for-human-review`, `clean-no-op`,
-`partial`, `blocked`, or `accepted`. Reserve `accepted` for evidence that humans completed the
-review queue; a successful AI pass is `staged-for-human-review`. Tell Jacob the same compact result
-and remind him the "Notify translators" button on `/translate` is safe to press.
+queue counts, backup evidence, per-locale fills, `en_changed` outcomes, skips, verification, the
+uncommitted seed diff you left behind (files + line counts), and exactly one terminal state:
+`staged-for-human-review`, `clean-no-op`, `partial`, `blocked`, or `accepted`. Reserve `accepted`
+for evidence that humans completed the review queue; a successful AI pass is
+`staged-for-human-review`. Tell Jacob the same compact result, name the uncommitted files waiting
+for him, and remind him the "Notify translators" button on `/translate` is safe to press.
 
-**If production is unreachable or the seed diff looks wrong, STOP and report `blocked` rather than
-pushing.** Then ping `poly_pings` with the one-line result (terminal state + per-locale fill count)
-so Jacob knows the pass ran without opening the session — this replaces the spawn notification the
-standalone cron used to send.
+**If production is unreachable or the seed diff looks wrong, STOP and report `blocked`.** Then ping
+`poly_pings` with the one-line result (terminal state + per-locale fill count) so Jacob knows the
+pass ran without opening the session — this replaces the spawn notification the standalone cron
+used to send.

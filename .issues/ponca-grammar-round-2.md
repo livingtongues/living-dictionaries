@@ -1,0 +1,214 @@
+# Ponca grammar round 2 — clause strip placement, section re-partition, POS standardization, TOC deep links
+
+From Jacob's 2026-07-29 review of https://livingdictionaries.app/ponca/grammar. All decisions
+below are Jacob-approved. Coordinator session farms the work to three lanes (opus 5, key=work).
+
+## Decisions (Jacob, 2026-07-29)
+
+1. **Clause template strip** currently renders pinned ABOVE the whole section tree whenever a
+   dict has `clause_slots` rows (Ponca's were agent-created 2026-07-28), which interrupts the
+   dictionary's untitled intro essay. → **Collapse to a TOC entry that jumps to the strip
+   rendered at the BOTTOM near the glossing legend.**
+2. **Subsection flattening**: the import concatenated all of a parent's interleaved prose into
+   its body and pushed tables into child sections, so lead-in sentences ("as given here:") no
+   longer sit next to their tables. → **Re-partition content, model unchanged**: each table
+   subsection absorbs its lead-in prose + follow-up commentary; parent keeps only the true
+   intro. **Audit ALL 11 parents with children** against the PDF.
+3. **Grammar "Parts of Speech" section** (`5bffc336`): drop the table entirely; keep the intro
+   prose ("the verb is at the heart of the language…"). Customs map to standard site POS where
+   possible; anything else written out in full (bespoke POS render verbatim — confirmed:
+   `translate_part_of_speech` falls back to raw string).
+4. **Sense POS cleanup** (prod, 48 distinct values): (a) merge typo variants (apply directly);
+   (b) map customs→standard where a true equivalent exists — dry-run report for Jacob FIRST;
+   (c) person/tense pseudo-POS (~97 senses, e.g. `["v","1st pers. sing."]`, all with EMPTY
+   morphology) → move to `entries.morphology` as **Leipzig glossing codes** (`1SG`,
+   `1PL.PST`) consistent with the dict's `glossing_abbreviations` legend; report first.
+5. **Morphology code rendering**: reuse `build_gloss_splitter` (`$lib/corpus/gloss-legend.ts`)
+   so legend codes in morphology display small-caps + tap-to-expand, like `InterlinearGloss`.
+6. **Grammar TOC**: rail heading says "Grammar" not "Contents"; clicking a TOC entry must
+   UPDATE THE URL HASH (deep-linkable), and loading a URL with a hash scrolls there.
+
+## Key facts for lanes
+
+- Ponca import workspace with the PDF lives at `~/import-work/ponca/` on mustang (`raw.pdf`,
+  `full.txt`, `pages/`, `grammar-blocks.md`, `grammar-sections.json`,
+  `glossing-abbreviations.json`, `clause-slots.json`).
+- Prod access: `ssh living 'docker exec -i sveltekit_blue node' < script.js` (better-sqlite3,
+  `/data/dictionaries/ponca.db`); see database skill "Querying / modifying the production VPS
+  DBs". Writes go through the v1 API with a scoped attributed key + R2 backup first — follow
+  the de-CAPS runbook precedent in `.issues/grammar-polish-and-entry-links.md` ("Ponca caps
+  rewrite") and `scripts/ponca/decaps-grammar.cjs`.
+- Per-dict writes propagate to browsers via the R2 snapshot (~30 min), not live sync.
+- 11 parents with children (prod ids): 986477d1, e30492c7, 759d0367, 04455415, f62c1a47,
+  8acaaeba, 13f97ae7, ea1aca92, c59a4322, e233d9d5 (+ intro-less parents — re-derive the list).
+- Glossing legend = dict.db `glossing_abbreviations` (65 Leipzig-style rows, agent-curated);
+  renderer `$lib/corpus/GlossingLegend.svelte`; splitter + tap-to-expand pattern in
+  `$lib/corpus/gloss-legend.ts` + `InterlinearGloss.svelte`.
+- Standard POS list: `site/src/lib/mappings/parts-of-speech.ts` (~95 official). Bespoke POS
+  display raw everywhere.
+
+## Lanes
+
+### Lane 1 — code (site) — ✅ DONE 2026-07-29 (working tree, NOT committed)
+- [x] ✅ Move ClauseTemplateStrip render to the bottom of GrammarSectionsView-area, adjacent to
+      GlossingLegend; TOC pinned entry for it moves next to the legend entry; scroll-spy anchors
+      keep working.
+- [x] ✅ TOC rail heading `grammar.contents` → use the "Grammar" label (`dictionary.grammar`);
+      check GrammarTocBar (mobile) for the same.
+- [x] ✅ TOC deep links: click updates `location.hash` (history API, no SvelteKit nav re-run,
+      keep smooth scroll + on_navigate close behavior); on first load with a hash, scroll to
+      that anchor once sections render (dict_db loads async — wait for rows).
+- [x] ✅ Morphology glossing-code rendering: wherever entry `morphology` displays, split with
+      `build_gloss_splitter` over the dict's `glossing_abbreviations`; matched codes small-caps
+      + tap-to-expand (reuse InterlinearGloss pieces/popover). No-op for dicts with no legend.
+- [x] ✅ Verify: svelte-look stories (grammar page incl. strip-at-bottom, TOC, morphology codes),
+      vitest, tsc, lint, pnpm check — plus a real-data puppeteer pass on local `/ponca`.
+
+#### What changed (Lane 1)
+- `grammar/+page.svelte` owns BOTH bottom landmarks now: `ClauseTemplateStrip` (new
+  `.clause-anchor`, `margin-top: 1.5rem`) then `GlossingLegend`. Rail heading = `dictionary.grammar`.
+  A new one-shot `$effect` lands an incoming URL hash once the sections exist.
+- `GrammarSectionsView.svelte`: strip + `CLAUSE_TEMPLATE_ANCHOR` + the `has_clause_slots` prop
+  removed. The edit-mode "Edit clause slots" button / `ClauseSlotManager` deliberately STAYED at the
+  top — it is the only way to create a first slot, and burying it under 77KB of prose hides it.
+- `grammar-toc.ts`: the clause-template pinned entry moved from first to just above the legend entry
+  (test now asserts the whole order).
+- `scroll-spy.svelte.ts`: `scroll_to_anchor({ dom_id, smooth })` (options object) and it RETURNS
+  whether the element existed — that return is what makes the deep-link retry work.
+- `GrammarToc.svelte`: a click writes the hash via `replaceState` from `$app/navigation`.
+- NEW `$lib/corpus/GlossedText.svelte` (+ stories): legend-aware plain-text renderer, extracted from
+  `InterlinearGloss`'s code button + popover. Wired into `EntryField` (`field === 'morphology'`) and
+  the entries-table `Textbox` through a new `gloss_codes` prop set in `Cell.svelte` (+ new
+  `Textbox.stories.ts`).
+- `grammar.contents` deleted from `en.json` (no other locale had it translated).
+
+#### Lessons / gotchas (Lane 1)
+- **`replaceState`, not `pushState`**: a TOC gets clicked many times per read, and 20 hash entries
+  make Back useless. It is wrapped in try/catch because svelte-look mounts components WITHOUT a
+  SvelteKit router and `$app/navigation`'s `replaceState` throws there (svelte-look shims
+  `$app/state` only). Native `history.replaceState` was rejected — SvelteKit dev-warns on it.
+- **Deep-link timing**: the browser's own hash scroll fires long before the dict DB streams sections
+  in, so the hash must be re-applied. The effect reads `loading` AND `rows` unconditionally so it
+  re-runs when rows arrive, and uses `smooth: false` (a page-load jump shouldn't animate).
+- `svelte/indent` errors on a comment-only `catch {}` body — put the comment on the `catch` line.
+- `GlossedText`'s code button calls `stopPropagation()`: both host fields are click-to-edit, so
+  without it tapping a code also opened the edit modal behind the popover.
+- Print (`PrintEntry.svelte`) left as plain text on purpose — a popover means nothing on paper.
+- Verified on local prod-shaped Ponca data (puppeteer, `/ponca/grammar`): rail says "Grammar", the
+  two landmarks are last in DOM and TOC, a TOC click writes `#section-<id>` and scrolls, and a cold
+  load of that URL parks the section at its 4rem scroll-margin line. Morphology round-tripped by
+  typing `1SG-đihą́-2SG.OBJ` into an entry (small-caps + popover confirmed; value cleared after).
+- Mobile: the sticky TOC bar's no-breadcrumb fallback now reads "Grammar", which duplicates the h3
+  directly above it at the very top of the page (it turns into the section name as soon as you
+  scroll). Say the word if you'd rather it read something else when idle.
+
+### Lane 2 — Ponca re-partition (prod content) — ✅ DONE 2026-07-29
+- [x] For every parent with children: reconstruct the PDF reading order from
+      `~/import-work/ponca/` artifacts; move lead-in/commentary prose from parent body into the
+      owning subsection bodies (prose may precede AND follow a table inside a subsection body).
+      Parent keeps only prose that genuinely precedes the first subsection.
+- [x] HARD INVARIANT: no prose created, deleted, or reworded — text only re-homed; verify by
+      normalized-concatenation comparison before/after per chapter.
+- [x] R2 backup + scoped attributed API key (label it), PATCH via v1 grammar API, read-back
+      verify, history-db attribution check, revoke key. Eyeball rendered prod page (human UA).
+
+See **"Lane 2 execution log"** at the bottom for method, decisions, verification and residuals.
+
+### Lane 3 — POS standardization (report first, partial apply)
+- ✅ Apply directly (with backup + key): typo-variant merges — `past. t.`→`past t.`,
+      `prep phr.`→`prep. phr.`, `3rd pers sing.`→`3rd pers. sing.`, `s./pl.`→`sing./pl.`.
+      Exactly 4 senses; all 4 PATCHed via v1 on 2026-07-29. Backup
+      `r2/backups-rolling/db/living/2026-07-29T02-06-44Z.tar.zst`; key
+      `8f723026-3383-4772-ad2b-eabbf032253a` ("Ponca POS typo merge 2026-07-29",
+      Jacob-attributed) revoked `2026-07-29T02:12:33.389Z`. Read-back: 0 typo values remain,
+      distinct POS values 48→44; `ponca.history.db` holds exactly 4 `senses` update rows for
+      that key with deltas confined to `parts_of_speech`; both DBs `integrity_check` ok.
+      Script: `scripts/ponca/pos-typo-merge.cjs` (`--dry` / `--apply --key=` / `--verify`).
+- ✅ DRY-RUN REPORT → `.issues/ponca-pos-report.md`:
+      - each remaining custom vs the standard list — proposed mapping or "write out in full";
+      - person/tense→morphology plan: per-entry proposed Leipzig code string (from the dict's
+        legend codes; list any code that would need adding to `glossing_abbreviations`), which
+        real POS remains (add `v` where the only POS was a person label — list for eyeball);
+      - proposed replacement body for the "Parts of Speech" grammar section (intro prose kept,
+        table dropped; note whether any usage labels like archaic/slang/lit. still earn a spot).
+- ✅ STOPPED after the report — 8 decisions listed in its part 5 await Jacob before any apply.
+
+## Status
+- ✅ Lane 1 spawned: 2d4d933a — code complete, uncommitted
+- ✅ Lane 2 spawned: 54d0e5e5
+- ✅ Lane 3 spawned: c37169a3
+
+## Lane 2 execution log (2026-07-29, session 54d0e5e5) — APPLIED TO PRODUCTION
+
+### Scope re-derived
+Prod has **10** parents with children (the issue said "11"; the listed 10 ids were right):
+`986477d1 e30492c7 759d0367 04455415 f62c1a47 8acaaeba 13f97ae7 ea1aca92 c59a4322 e233d9d5`.
+
+### Method
+1. `~/import-work/ponca/grammar-blocks.md` is the PDF reading order (headings, `**CAPTION**`
+   + `<!-- table -->` groups, paragraphs). Parsed it into per-chapter block sequences.
+   **Text came from PROD, never from the blocks file** — prod carries the de-CAPS + round-4 +
+   italics fixes; the blocks file supplied ORDER only.
+2. Proved the import's split was mechanical: for all 10 chapters the parent body's blocks are
+   EXACTLY the chapter's non-captioned blocks in order, and each child body is EXACTLY the
+   n-th captioned table (normalized compare — 10/10 parents, 39/39 children matched).
+3. Assigned every parent paragraph to `parent` / `child n before table` / `child n after table`
+   by hand, then rebuilt the bodies (blocks joined with a blank line).
+
+### Assignment rules used
+- **Back-reference opener → `after` the previous child's table; forward/fresh opener → `before`
+  the next child's table.** (For a bridge paragraph both render identically; the rule only
+  decides which heading it falls under.)
+- **Prose before the first captioned table stays in the parent** — it is the chapter intro and
+  already renders immediately above child 1.
+- **Prose that owns a plain (uncaptioned) table stays in the parent with it.** Plain tables were
+  never moved… except:
+- **Three empty stub subsections were filled** with the parent-body material their titles name
+  exactly (prose *and* its plain tables). They were body-less placeholders holding only example
+  sentences: `cfcf7220` "The verb -ną́ʼą ‘to hear (something)’" (4 paras + 4 tables from
+  f62c1a47), `8c418763` "The suffix -tigđè" and `6ba79576` "The particles gá and á" (1 para +
+  1 table each, from 13f97ae7). This is the only place a table changed section.
+
+### Result
+**38 sections PATCHed** (10 parents… 9 changed + 29 children; `e233d9d5` needed no change).
+Renderer is `parent body → usage → examples → children`, so a chapter can only be in perfect PDF
+order when every one of its tables is a child. That now holds for 5 chapters
+(`986477d1 e30492c7 ea1aca92 c59a4322 e233d9d5` — verified block-for-block against the PDF).
+
+### Verification
+- Invariants (before vs after, whole dictionary, all 59 sections): prose blocks **101 → 101**,
+  table blocks **73 → 73**, both **identical multisets of exact strings** — nothing created,
+  deleted or reworded. Counts equal the PDF's own 101 paragraphs / 73 tables.
+- Titles unchanged, section count 59, every `parent_id` + `sort_key` unchanged.
+- Read-back from prod: **49/49 bodies byte-identical to the plan**.
+- Backup BEFORE the write (online-backup API, `integrity_check: ok`, 59 sections):
+  `r2/backups-rolling/db/living/ponca-pre-repartition-2026-07-29T02-15-59Z.db.zst`
+  (also kept at `~/import-work/ponca/ponca-pre-repartition-2026-07-29T02-15-59Z.db.zst`).
+- Key: `d1d9cbc0-3c27-4699-94ad-e8cb346fbba9`, label "Ponca grammar section re-partition
+  2026-07-29", attributed to jacob@livingtongues.org, minted 02:17:21Z, **revoked 02:20:27Z**
+  (0 active ponca keys remain).
+- History db: exactly **38 `changes` rows, 38 distinct row_ids, op=update, all with that
+  api_key_id and user_id=de2d3715…**; no other key wrote in the window.
+  `ponca.db` + `ponca.history.db` `integrity_check: ok`; 0 `dirty` rows.
+- Rendered prod (headless Chrome, human UA, after the 02:32Z snapshot rebuild): 59 sections,
+  **zero page errors**, structure dumped block-by-block and matches the plan exactly.
+  Screenshots: `/tmp/ponca-lane2/shot-{basic,suffixes,tense}.png`,
+  full page `/tmp/ponca-lane2/prod-grammar-full.png`; working files in `/tmp/ponca-lane2/`.
+- Tooling kept in the repo: **`scripts/ponca/repartition-grammar.py`** (stdlib only;
+  `--plan` / `--verify` / `--apply --key=`). It reproduces the applied plan byte-for-byte, and
+  **refuses to run again** once prod no longer matches the PDF block sequence — so a careless
+  re-run cannot double-move prose.
+
+### Residual imperfections (NOT regressions — all pre-existed; need a model change to fix)
+Because the parent body always renders above its children, parent-retained plain tables now sit
+*before* the subsections rather than in PDF position:
+- §7 Š-: the `Íʼbahą̀ ‘to know’` para + table renders right after the chapter intro.
+- §8 B-/Na-: the `Mąđí ‘to walk’` para + table + follow-up likewise.
+- §9 Both subj/obj: the "basic system of conjugation is now apparent" summary + full Đihą́ chart
+  renders before the six Đihą́ paradigms (it summarizes them).
+- §10 Verb Prefixes: the five instrumental/adverbial-prefix tables stay in the parent, so §10.1
+  (`Sé ‘to cut’`) still renders after them — its lead-in is the chapter intro and had to stay.
+- §11 Verbal Suffixes: the cause/negation para + table sits between the intro (which ends
+  "…the particle **čábe**…as illustrated below:") and §11.1 čábe.
+Fixing any of these would mean inventing new subsections (titles = new content), which is out of
+"model unchanged" scope. Flagging for Jacob: say the word and each can become its own subsection.

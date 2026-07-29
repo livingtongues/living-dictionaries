@@ -48,8 +48,10 @@ permanently, shown on /admin/storage, and a re-runnable CSV generator.
 - ✅ Tests (116 files server suites), `pnpm check` 0 errors, eslint clean on touched files
 - 🔄 Backfill probe RUNNING on mustang: `/tmp/media-keys.json` (169,011 keys) → `/tmp/media-metadata.jsonl`, log `/tmp/media-probe.log`, ~15/s ≈ 3h (concurrency didn't help — per-file latency bound). On finish: re-run once to retry transient tcp failures, then scp JSONL → living `/opt/hosting/data/media-metadata.jsonl`.
 - ✅ `scripts/language-stats/language-stats.js` — verified on prod (216 language rows + unlisted aggregate); reads ledger durations, falls back to `/data/media-metadata.jsonl` pre-deploy
-- [ ] After probe: generate final CSV (JSONL fallback path), draft reply email
-- [ ] After Jacob commits+deploys: run apply.js (dry-run → APPLY=1) to land durations in the ledger permanently, delete the JSONL from /opt/hosting/data
+- ✅ Probe complete: 168,977/169,011 (34 unresolvable: 33 animated webp — sharp in the sweep will fill post-deploy — + 1 corrupt mp3 `siletz-dee-ni/audio/698218aa…`). 313 header-only 44-byte WAVs (broken uploads, zero audio) recorded as duration_ms=0. JSONL shipped to living `/opt/hosting/data/media-metadata.jsonl`.
+- ✅ Final CSV generated (216 languages, all-fields-escaped after prod iso/glottocode values with embedded commas broke rows 80/85): `~/reports/living-dictionaries-language-stats-2026-07-29.csv` (mustang). Totals — public: 221 dicts / 273,554 entries / 555,212 words / 94,380 entries-with-audio / 56.9 h audio / 0.6 h video; unlisted: 397 dicts / 232,877 entries / 28.5 h audio. Platform-wide probed audio: 93.3 h.
+- ✅ Reply email drafted: `~/reports/world-bank-reply-draft.md`
+- [ ] After Jacob commits+deploys: run apply.js (dry-run → APPLY=1) to land durations in the ledger permanently, then `sudo rm /opt/hosting/data/media-metadata.jsonl`
 
 ## Notes
 - Probe failures observed: transient tcp (retry succeeds) + webm without header duration (~100 algonquin videos; ffmpeg full-decode fallback added).

@@ -32,7 +32,7 @@
         <span class="crumb-number">{breadcrumb.number}</span>
         {breadcrumb.label}
       {:else}
-        {t('grammar.contents')}
+        {t('dictionary.grammar')}
       {/if}
     </span>
     <IconMdiChevronDown class="chevron" style={`flex-shrink: 0; transition: transform 200ms; transform: rotate(${open ? 180 : 0}deg)`} />

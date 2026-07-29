@@ -1,5 +1,6 @@
 import type { RequestHandler } from './$types'
 import { card_image } from './card-image'
+import { card_dimension, CARD_HEIGHT, CARD_WIDTH } from './card-dimensions'
 import { card_key, read_card, save_card } from './card-store'
 import { classify_og_failure, render_component_to_png } from './component-to-png'
 import { GENERIC_CARD_KEY, GENERIC_PROPS } from './generic-card'
@@ -8,9 +9,6 @@ import { create_render_queue } from './render-queue'
 import OpenGraphImage from './OpenGraphImage.svelte'
 import { decompressFromEncodedURIComponent as decode } from '$lib/lz/lz-string'
 import { log_server_event } from '$lib/server/log-server-event'
-
-const HEIGHT = 630
-const WIDTH = 1200
 
 /** 1×1 transparent PNG — the absolute last resort so a social scraper NEVER sees a 500. */
 const BLANK_PNG: Uint8Array = Buffer.from(
@@ -85,7 +83,7 @@ function warm_generic_card_when_idle(): void {
     if (!slot)
       return
     try {
-      save_card({ key: GENERIC_CARD_KEY, png: await render_component_to_png({ component: OpenGraphImage, props: { ...GENERIC_PROPS }, height: HEIGHT, width: WIDTH }) })
+      save_card({ key: GENERIC_CARD_KEY, png: await render_component_to_png({ component: OpenGraphImage, props: { ...GENERIC_PROPS }, height: CARD_HEIGHT, width: CARD_WIDTH }) })
     } catch (error) {
       record_og_event({ level: 'warn', message: 'og_render_failed', error, context: { reason: classify_og_failure(error), fallback: 'generic_warm' } })
     } finally {
@@ -127,8 +125,14 @@ export const GET: RequestHandler = async ({ url }) => {
     log_server_event({ level: 'warn', message: 'og_render_failed', error, context: { reason: 'parse' } })
     props = { ...GENERIC_PROPS }
   }
-  const height = (props.height as number) || HEIGHT
-  const width = (props.width as number) || WIDTH
+  // Clamped, never trusted: `props` is whatever the URL said, and an unbounded
+  // size is a one-request OOM (see card-dimensions.ts). Written BACK into
+  // `props` so the component's inner geometry matches the viewport it's drawn
+  // into — a clamped card with a 20,000px photo inside it is still a bad card.
+  const height = card_dimension({ requested: props.height, fallback: CARD_HEIGHT })
+  const width = card_dimension({ requested: props.width, fallback: CARD_WIDTH })
+  props.height = height
+  props.width = width
 
   const queued_at = Date.now()
   const slot = await render_queue.acquire()

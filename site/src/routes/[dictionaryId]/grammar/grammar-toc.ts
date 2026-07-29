@@ -60,7 +60,9 @@ function contains_id<T extends GrammarSectionLike>(node: GrammarTreeNode<T>, id:
 /**
  * The flat, render-ready entry list: chapters, with the active chapter's
  * subsections spliced in beneath it. `clause_template` / `glossing_legend` pin
- * the two non-section landmarks to the top and bottom.
+ * the two non-section landmarks to the BOTTOM, in the order they render — both
+ * are reference apparatus, and pinning the clause strip to the top used to
+ * shove the grammar's own opening prose below the fold.
  */
 export function build_toc_entries<T extends GrammarSectionLike>({
   tree,
@@ -79,17 +81,6 @@ export function build_toc_entries<T extends GrammarSectionLike>({
 }): TocEntry[] {
   const chapter_id = active_chapter_id({ tree, active_id })
   const entries: TocEntry[] = []
-
-  if (clause_template_label) {
-    entries.push({
-      id: CLAUSE_TEMPLATE_ANCHOR,
-      dom_id: CLAUSE_TEMPLATE_ANCHOR,
-      label: clause_template_label,
-      number: '',
-      depth: 0,
-      is_active: active_id === CLAUSE_TEMPLATE_ANCHOR,
-    })
-  }
 
   for (const chapter of tree) {
     if (!has_title(chapter.section)) continue
@@ -114,6 +105,17 @@ export function build_toc_entries<T extends GrammarSectionLike>({
         is_active: child.section.id === active_id,
       })
     }
+  }
+
+  if (clause_template_label) {
+    entries.push({
+      id: CLAUSE_TEMPLATE_ANCHOR,
+      dom_id: CLAUSE_TEMPLATE_ANCHOR,
+      label: clause_template_label,
+      number: '',
+      depth: 0,
+      is_active: active_id === CLAUSE_TEMPLATE_ANCHOR,
+    })
   }
 
   if (glossing_legend_label) {

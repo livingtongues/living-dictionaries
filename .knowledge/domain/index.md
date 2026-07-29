@@ -48,7 +48,9 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
   "contributor = editing tier" server-gate fix (prod has zero 'editor' rows).
 - [grammar-page-navigation.md](./grammar-page-navigation.md) — why the grammar TOC is a RIGHT rail
   (the left one is taken), read-mode-first with one Edit toggle, the untitled-section-is-a-preface
-  numbering rule, Ponca's flattened root, and the document-order scroll-spy model.
+  numbering rule, Ponca's flattened root, the document-order scroll-spy model (and why
+  IntersectionObserver failed), and why a parent body renders above its children — so an import
+  must give every table group its own subsection.
 - [forced-alignment.md](./forced-alignment.md) — auto-timings (M6): the dumb-Modal-endpoint /
   smart-LD-server split, why romanization + the bespoke per-dict converter registry live server-side
   and admin-only, the two-runtime (Modal prod / local-CPU dev) aligner, the per-token align_form

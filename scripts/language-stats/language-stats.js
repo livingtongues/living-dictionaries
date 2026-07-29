@@ -119,8 +119,8 @@ const sorted = [...by_glottocode.entries()].sort((a, b) => b[1].entries - a[1].e
 for (const [glottocode, language] of sorted) {
   lines.push([
     csv_escape([...new Set(language.names)].join(' / ')),
-    glottocode.startsWith('no-glottocode:') ? '' : glottocode,
-    [...language.isos].join(' / '),
+    csv_escape(glottocode.startsWith('no-glottocode:') ? '' : glottocode),
+    csv_escape([...language.isos].join(' / ')),
     language.dictionaries,
     language.entries,
     language.words,

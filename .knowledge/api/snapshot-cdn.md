@@ -30,3 +30,16 @@ Verification on 2026-07-20: a cache-busted request returned HTTP 200,
 ```bash
 curl -sSI 'https://snapshots.livingdictionaries.app/dictionaries/babanki.db.gz?cache-rule-verify=1'
 ```
+
+## LD's zone has NO checked-in desired state (2026-07-29)
+
+This page is the only record of any LD cache rule, and it covers exactly one of them. Unlike
+house — whose rules live in `vps-setup/cloudflare/hvsb-cache-rules.json` and are applied by
+`vps-setup/bin/cf-cache-rules` — nothing in any repo describes what LD's zone *should* look like,
+so its current state is unknowable without a token. In particular the sitemap/`llms.txt` rule that
+sits ahead of the snapshot rule has never been written down, and no one can tell from the repo
+whether `/og`, `/api/*`, or the app HTML are cached at the edge at all.
+
+Before writing a desired-state file, READ the live ruleset (`Zone.Cache Rules:Read`) — writing it
+from this page alone would encode a guess. Scoping notes are in
+`.issues/nightly-2026-07-28-approved-execution.md`.

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state'
   import GrammarSection from './GrammarSection.svelte'
-  import ClauseTemplateStrip from './ClauseTemplateStrip.svelte'
   import ClauseSlotManager from './ClauseSlotManager.svelte'
   import {
     after_sibling_key,
@@ -10,7 +9,6 @@
     move_up_key,
   } from './grammar-tree'
   import type { GrammarNode, GrammarSectionActions } from './grammar-section-actions'
-  import { CLAUSE_TEMPLATE_ANCHOR } from './grammar-toc'
   import IconFaSolidPlus from '~icons/fa-solid/plus'
   import IconSvgSpinners3DotsFade from '~icons/svg-spinners/3-dots-fade'
   import IconMdiCog from '~icons/mdi/cog'
@@ -23,11 +21,9 @@
     editable: boolean
     /** Manager (non-admin-3): may edit the intro section's prose + start one when none exists. */
     prose_editable?: boolean
-    /** The dictionary defines clause slots — mirrors the TOC's pinned entry. */
-    has_clause_slots?: boolean
   }
 
-  const { tree, loading, editable, prose_editable = false, has_clause_slots = false }: Props = $props()
+  const { tree, loading, editable, prose_editable = false }: Props = $props()
 
   const { t, dict_db } = $derived(page.data)
 
@@ -132,12 +128,6 @@
   {#if loading}
     <div class="state-note"><IconSvgSpinners3DotsFade /></div>
   {:else}
-    {#if has_clause_slots}
-      <div id={CLAUSE_TEMPLATE_ANCHOR} data-grammar-anchor={CLAUSE_TEMPLATE_ANCHOR} class="anchor">
-        <ClauseTemplateStrip />
-      </div>
-    {/if}
-
     {#if editable}
       <div class="slot-controls">
         <button type="button" class="btn-outline btn-sm" style="gap: 0.375rem" onclick={() => show_slot_manager = !show_slot_manager}>
@@ -176,16 +166,6 @@
 <style>
   .sections {
     margin-top: 0.5rem;
-  }
-
-  .anchor {
-    scroll-margin-top: 7rem;
-  }
-
-  @media (min-width: 1024px) {
-    .anchor {
-      scroll-margin-top: 4rem;
-    }
   }
 
   .slot-controls {

@@ -41,15 +41,19 @@ describe(build_toc_entries, () => {
     expect(entries.find(entry => entry.id === 'pronunciation')?.is_active).toBeFalsy()
   })
 
-  test('pins the clause template and glossing legend when labelled', () => {
+  test('pins the clause template and glossing legend below the chapters, in render order', () => {
     const entries = build_toc_entries({
       tree: ponca_like(),
       active_id: null,
       clause_template_label: 'Clause template',
       glossing_legend_label: 'Glossing abbreviations',
     })
-    expect(entries[0].id).toBe(CLAUSE_TEMPLATE_ANCHOR)
-    expect(entries[entries.length - 1].id).toBe(GLOSSING_LEGEND_ANCHOR)
+    expect(entries.map(entry => entry.id)).toEqual([
+      'pronunciation',
+      'verb',
+      CLAUSE_TEMPLATE_ANCHOR,
+      GLOSSING_LEGEND_ANCHOR,
+    ])
   })
 
   test('omits the pinned entries when their labels are blank', () => {

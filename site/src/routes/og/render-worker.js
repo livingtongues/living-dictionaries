@@ -146,7 +146,14 @@ const HTTP_OK = 200
 
 const load_dynamic_asset = with_bounded_cache(async (code, text) => {
   let names = language_font_map[code]
-  if (!names) code = 'unknown'
+  // Re-read after falling back — otherwise `names` stays undefined and the loop
+  // below throws `names is not iterable`, which the catch then reports as a
+  // spurious `dynamic_font_fetch` failure. Production hit it on an emoji card
+  // (2026-07-29T01:35) and on every other script missing from the map.
+  if (!names) {
+    code = 'unknown'
+    names = language_font_map[code]
+  }
 
   try {
     if (typeof names === 'string')

@@ -875,7 +875,14 @@ manager can answer in the app** — `POST …/conversations/{threadId}/questions
     "options": [ { "value": "morpheme", "label": "Morpheme break" },
                  { "value": "length", "label": "Vowel length" },
                  { "value": "unsure", "label": "Not sure — please investigate" } ],
-    "report_anchor": "#q-raised-dot" }
+    "report_anchor": "#q-raised-dot" },
+  { "kind": "choice", "title": "Should I keep the parts of speech I worked out from the English?",
+    "options": [ { "value": "keep", "label": "Keep them" },
+                 { "value": "drop", "label": "Drop them" },
+                 { "value": "unsure", "label": "Not sure — let me look first" } ],
+    "entries_query": { "sources": ["smith-1979"], "no_part_of_speech": true },
+    "entries_query_label": "Show me these 1,191 entries",
+    "report_anchor": "#q-parts-of-speech" }
 ] }
 ```
 
@@ -884,6 +891,26 @@ report, and `report_anchor` (an `id` in your HTML) links straight to it. Use `ch
 `multi_choice` whenever the useful answers are enumerable; always give an escape option so
 "not sure" is answerable. Per-entry questions stay in the `review` queue (§2.3) — do NOT
 duplicate 30 of them here.
+
+**Attach `entries_query` to every question you can.** It renders as a button that opens the
+manager's own entries view filtered to exactly the rows the question is about, and it is the
+single highest-value thing you can do to actually get an answer. The evidence is blunt: across
+the first five any-format imports, 15 questions were asked and 3 were answered — all three on a
+14-row pilot the curator had just read. The curator with the largest import answered none of his
+six, then went to his entries list and hand-built
+`?q={"no_audio":true,"no_part_of_speech":true}` — the filter that two of those unanswered
+questions were about. A question about 2,729 rows he has to *imagine* loses to the rows he can
+*see*; your job is to remove that distance.
+
+The value is any subset of the entries view's own filters — array facets `sources`, `dialects`,
+`speakers`, `tags`, `orthographies`, `parts_of_speech`, `semantic_domains`, `review_categories`;
+the boolean pairs `has_audio`/`no_audio`, `has_part_of_speech`/`no_part_of_speech`,
+`has_image`/`no_image`, `has_sentence`/`no_sentence`, `has_speaker`/`no_speaker`,
+`has_review`/`no_review` and the rest; plus a free-text `query`. **A typo is a 400, not a
+shrug** — a button that shows the wrong set is worse than no button. You already know the
+affected set: you wrote those rows with a `source_id` and set their review flags.
+`entries_query_label` is your own wording for the button — include the count when you know it
+("Show me these 1,191 entries"), because the number is what makes the click feel worth it.
 
 Finally, the conversation message — a few warm sentences saying the import is in and
 pointing at the report and the questions. That message is the manager's notification: the

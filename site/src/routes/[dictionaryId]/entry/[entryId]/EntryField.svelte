@@ -2,6 +2,7 @@
   import type { EntryFieldValue } from '$lib/types'
   import sanitize from 'xss'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
+  import GlossedText from '$lib/corpus/GlossedText.svelte'
   import { render_markdown_to_html } from '$lib/markdown/render'
   import { sanitize_rich_text } from '$lib/markdown/sanitize-rich-text'
   import IconFa6SolidPencil from '~icons/fa6-solid/pencil'
@@ -53,6 +54,9 @@
                 </span>
               {:else if field === 'phonetic'}
                 [{value}]
+              {:else if field === 'morphology'}
+                <!-- `1SG-lift-PL` etc: legend codes render small-caps + tappable. -->
+                <GlossedText text={value} />
               {:else if field === 'scientific_names' && !value?.includes('<i>')}
                 <i>{value}</i>
               {:else}
