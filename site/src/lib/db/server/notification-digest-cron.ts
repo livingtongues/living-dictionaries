@@ -10,7 +10,6 @@
  * dev/build, IS_STANDBY-gated (primary only), singleton.
  */
 import type Database from 'better-sqlite3'
-import { building, dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { get_admin } from '$lib/admins'
 import { ROOM_NOTIFICATIONS } from '$lib/chat/constants'
@@ -20,7 +19,6 @@ import { log_server_event } from '$lib/server/log-server-event'
 import { get_shared_db, open_test_shared_db } from './shared-db'
 
 const DIGEST_HOUR_PT = 8
-const CHECK_INTERVAL_MS = 60 * 60 * 1000 // hourly
 const DIGEST_DAY_KEY = 'notification_digest_last_day'
 const SITE_URL = env.ORIGIN || 'https://new.livingdictionaries.app'
 
@@ -94,50 +92,16 @@ export async function sweep_notification_digest({ db = get_shared_db(), base_url
   return sent
 }
 
-const SINGLETON_KEY = Symbol.for('ld.notification-digest-cron.state')
-interface CronState { interval: ReturnType<typeof setInterval>, in_flight: boolean }
-interface GlobalWithCron { [SINGLETON_KEY]?: CronState }
-
-export function start_notification_digest_cron_once(): void {
-  if (building || dev)
-    return
-  if (env.IS_STANDBY === 'true') {
-    console.info('[notification-digest] IS_STANDBY — cron disabled on standby container.')
-    return
+/** The roster's `run`: one sweep with its queryable failure event. */
+export async function run_notification_digest_sweep(): Promise<void> {
+  try {
+    const sent = await sweep_notification_digest()
+    if (sent > 0)
+      console.info(`[notification-digest] sent ${sent} daily digest(s).`)
+  } catch (err) {
+    console.error('[notification-digest] sweep failed:', err)
+    log_server_event({ level: 'error', message: 'notification_digest_sweep_failed', error: err })
   }
-  const slot = globalThis as unknown as GlobalWithCron
-  if (slot[SINGLETON_KEY]) {
-    console.info('[notification-digest] Already running — skip.')
-    return
-  }
-  const state: CronState = {
-    interval: setInterval(() => run_guarded(state), CHECK_INTERVAL_MS),
-    in_flight: false,
-  }
-  slot[SINGLETON_KEY] = state
-  console.info(`[notification-digest] Started — sweeping hourly, digest at ${DIGEST_HOUR_PT}am Pacific.`)
-}
-
-export function stop_notification_digest_cron(): void {
-  const slot = globalThis as unknown as GlobalWithCron
-  const state = slot[SINGLETON_KEY]
-  if (!state)
-    return
-  clearInterval(state.interval)
-  delete slot[SINGLETON_KEY]
-}
-
-function run_guarded(state: CronState): void {
-  if (state.in_flight)
-    return
-  state.in_flight = true
-  void sweep_notification_digest()
-    .then((sent) => { if (sent > 0) console.info(`[notification-digest] sent ${sent} daily digest(s).`) })
-    .catch((err) => {
-      console.error('[notification-digest] sweep failed:', err)
-      log_server_event({ level: 'error', message: 'notification_digest_sweep_failed', error: err })
-    })
-    .finally(() => { state.in_flight = false })
 }
 
 if (import.meta.vitest) {

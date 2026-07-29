@@ -32,7 +32,9 @@
         <span class="crumb-number">{breadcrumb.number}</span>
         {breadcrumb.label}
       {:else}
-        {t('dictionary.grammar')}
+        <!-- At the top of the page the page heading right above already says
+          "Grammar" — here the bar is offering the table of contents. -->
+        {t('grammar.contents')}
       {/if}
     </span>
     <IconMdiChevronDown class="chevron" style={`flex-shrink: 0; transition: transform 200ms; transform: rotate(${open ? 180 : 0}deg)`} />

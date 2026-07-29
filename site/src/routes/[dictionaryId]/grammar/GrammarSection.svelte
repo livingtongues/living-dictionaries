@@ -10,6 +10,8 @@
   import { sanitize_rich_text as sanitize } from '$lib/markdown/sanitize-rich-text'
   import { link_entry_mentions } from '$lib/entry-links/link-entry-mentions'
   import { get_entry_mention_context } from '$lib/entry-links/mention-context'
+  import { link_gloss_codes } from '$lib/corpus/link-gloss-codes'
+  import { get_gloss_code_context } from '$lib/corpus/gloss-code-context'
   import { get_headword } from '$lib/orthography/orthographies'
   import { first_multistring_value } from './grammar-tree'
   import type { MultiString } from '$lib/types'
@@ -69,6 +71,7 @@
   const is_empty = $derived(!title_languages.length && !body_languages.length && !usage_languages.length)
 
   const mentions = get_entry_mention_context()
+  const gloss_codes = get_gloss_code_context()
 
   function prose_html(value: string | undefined): string {
     return sanitize(render_markdown_to_html(value || ''))
@@ -78,6 +81,12 @@
   // Svelte tears down and re-runs it whenever either the prose or the index changes.
   function decorate(html: string) {
     return link_entry_mentions({ index: mentions?.index ?? null, html, on_click: detail => mentions?.open(detail) })
+  }
+
+  // Runs after the entry-link pass and skips its buttons (and it, ours), so the
+  // two decorations of the same prose can never fight over a word.
+  function decorate_codes(html: string) {
+    return link_gloss_codes({ catalog: gloss_codes?.catalog ?? null, html, on_click: detail => gloss_codes?.open(detail) })
   }
 </script>
 
@@ -138,7 +147,7 @@
   {:else}
     {#each body_languages as bcp (bcp)}
       {@const html = prose_html(section.body?.[bcp])}
-      <div class="body tw-prose" {@attach decorate(html)}>
+      <div class="body tw-prose" {@attach decorate(html)} {@attach decorate_codes(html)}>
         {#if multilingual}<span class="lang-tag body-lang no-entry-links">{language_label(bcp)}</span>{/if}
         {@html html}
       </div>
@@ -149,7 +158,7 @@
         <span class="usage-label">{t('grammar.usage_conditions')}</span>
         {#each usage_languages as bcp (bcp)}
           {@const html = prose_html(section.usage_conditions?.[bcp])}
-          <div class="body tw-prose" {@attach decorate(html)}>
+          <div class="body tw-prose" {@attach decorate(html)} {@attach decorate_codes(html)}>
             {#if multilingual}<span class="lang-tag body-lang no-entry-links">{language_label(bcp)}</span>{/if}
             {@html html}
           </div>
@@ -322,6 +331,34 @@
   .body :global(.entry-mention:focus-visible) {
     border-bottom-color: var(--primary);
     color: var(--primary);
+  }
+
+  /* Glossing codes the catalog pass wrapped — same small-caps treatment as an
+     interlinear gloss, and like the entry links these are injected into
+     `{@html}` output, so the rules have to be :global. */
+  .body :global(.gloss-code) {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-variant-caps: all-small-caps;
+    font-feature-settings: 'c2sc', 'smcp';
+    letter-spacing: 0.03em;
+    font-weight: 600;
+    text-align: inherit;
+    cursor: help;
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+    text-decoration-color: color-mix(in srgb, var(--color) 35%, transparent);
+  }
+
+  .body :global(.gloss-code:hover),
+  .body :global(.gloss-code:focus-visible) {
+    color: var(--primary);
+    text-decoration-color: var(--primary);
   }
 
   .body-lang {

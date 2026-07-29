@@ -67,10 +67,8 @@ Shipped:
   every question it can — the guides are the primary doc layer, so the judgement call lives there.
 - EN i18n key `import_page.question_entries_link`; stories + svelte-look screenshots.
 
-Follow-up for Jacob (needs the deploy first, so NOT done here): hand-fill the two live 'Iipay Aa
-questions — #2 → `{"sources":["mg-bitd-wordlist"],"has_audio":true}`, #3 →
-`{"sources":["mg-bitd-wordlist"],"no_part_of_speech":true}` — and watch whether answered/issued
-moves on that import. SQL is at the bottom of this file.
+✅ Follow-up DONE on prod after the deploy (2026-07-29 05:33 UTC) — see "'Iipay Aa retrofit" below.
+The two filters the business review proposed were both wrong; the live data is what decided them.
 
 ## 4. ✅ fill-translations never pushes or commits
 
@@ -119,25 +117,47 @@ today). Fixed; it is three lines and sits inside the file item 5 covers.
 
 ---
 
-## Post-deploy SQL for the two live 'Iipay Aa questions (Jacob, after deploying item 3)
+## 'Iipay Aa retrofit — APPLIED on prod 2026-07-29 05:33 UTC
 
-```sql
--- On the living VPS, /data/shared.db. Titles are matched loosely; check the SELECT first.
-SELECT id, position, substr(title,1,80) FROM thread_questions
-WHERE dictionary_id = 'iipay-aa' AND status = 'open' ORDER BY position;
+Vincent's 6 questions predate the column, so they were filled by hand in the container
+(`shared.db`, backup `shared.db.bak-20260729-053241`). **Two of six got a button** — the other four
+have no expressible set. Rollback is `SET entries_query = NULL, entries_query_label = NULL` on the
+two ids; both were NULL before.
 
-UPDATE thread_questions
-   SET entries_query = '{"page":1,"sources":["mg-bitd-wordlist"],"has_audio":true}',
-       entries_query_label = 'Show me the entries that already had a word',
-       updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
- WHERE id = '<question #2 id>';
+| # | Question | `entries_query` | rows |
+|---|---|---|---|
+| 3 | keep the parts of speech I worked out? | `{"sources":["mg-bitd-wordlist"],"has_part_of_speech":true}` | 2,866 |
+| 5 | should the 69 names/placenames stay? | `{"sources":["mg-bitd-wordlist"],"review_categories":["missing_gloss"]}` | 65 |
 
-UPDATE thread_questions
-   SET entries_query = '{"page":1,"sources":["mg-bitd-wordlist"],"no_part_of_speech":true}',
-       entries_query_label = 'Show me the entries with no part of speech',
-       updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
- WHERE id = '<question #3 id>';
-```
+Labels: "Show me these 2,866 entries" / "Show me these 65 entries". Both hrefs were built by the
+real `entries_query_href` against the exact stored strings before calling it done.
+
+**The business review's two proposed filters were both wrong** — it derived them from the URL the
+curator hand-built for himself, not from the sets the questions concern. Verified against live
+`iipay-aa.db`:
+
+- #3's `no_part_of_speech: true` → **0 rows**. Every wordlist entry HAS a part of speech; that is the
+  premise of the question. Inverted to `has_part_of_speech`.
+- #2's `has_audio: true` → 137 rows, not the 1,191 the question names. Those 1,191 carry no
+  `mg-bitd-wordlist` stamp — **question #6 is asking permission to stamp them**. So #2 and #6 are
+  both un-filterable until #6 is answered, and #2 can get its button then. A button showing the
+  wrong 137 is exactly the failure `parse_entries_query` exists to prevent.
+- #1 (what are MG/BITD) and #4 (the `(h-)` markers) are not about a retrievable set at all.
+
+Caveats on the two that shipped: #3's 2,866 includes 137 of his own entries that the import only
+stamped (their POS is his, not the agent's) — 4.8% noise, and no facet distinguishes creator. #5's
+65 flagged rows approximate the 69 names the question names (63 of the 65 notes are explicitly
+name/placename); entries whose names got a gloss carry no flag.
+
+Watch: answered/issued on this import, and whether either button gets a click.
+
+### Bystander observation — possible FIRST curator flag resolutions
+
+`iipay-aa.db` review flags read **115** now vs **121** recorded at handoff, and Vincent has made
+exactly **6** edits to wordlist-sourced entries since (latest 2026-07-29 04:33 UTC), all on rows that
+now carry no flag. That is consistent with him resolving 6 flags — against the business review's
+"zero of 496 resolved". Needs a proper check (deleted entries would produce the same arithmetic)
+before anyone repeats the zero.
 
 ## Cloudflare desired-state file (investigation only — item 6)
 

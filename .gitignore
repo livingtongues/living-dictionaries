@@ -5,6 +5,7 @@ notes
 supabase-creds.private
 /.data/
 alignment/.venv/
+__pycache__/
 
 # Personal / local-only
 .eslintcache

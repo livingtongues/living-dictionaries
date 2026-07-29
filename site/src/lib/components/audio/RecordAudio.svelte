@@ -3,6 +3,7 @@
   import type { Options, StereoAudioRecorder } from 'recordrtc'
   import { page } from '$app/state'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
+  import { audio_has_no_samples } from '$lib/media/empty-audio'
   import IconUilMicrophone from '~icons/uil/microphone'
 
   interface Props {
@@ -37,11 +38,13 @@
   }
 
   let recordingTime = $state(0)
+  let no_audio_captured = $state(false)
   let interval
 
   async function record() {
     try {
       audioBlob = null
+      no_audio_captured = false
 
       stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -77,10 +80,15 @@
   function stop() {
     if (recorder) {
       recorder.stop(
-        (blob) => {
+        async (blob) => {
           turnOffMic()
+          // A mic that yielded no data still produces a valid 44-byte WAV header —
+          // uploading it would create a permanently broken player (see empty-audio.ts).
+          if (audio_has_no_samples(new Uint8Array(await blob.arrayBuffer()))) {
+            no_audio_captured = true
+            return
+          }
           audioBlob = blob
-        // checkBlobForUpload(blob, lexeme);
         },
         // @ts-ignore
         (err) => {
@@ -126,6 +134,9 @@
       </HeadlessButton>
     {/if}
   {:else if !recorder}
+    {#if no_audio_captured}
+      <div class="record-error">{page.data.t('audio.no_audio_captured')}</div>
+    {/if}
     <HeadlessButton onclick={record} class="btn btn-default record-full record-tall">
       {page.data.t('audio.tap_to_record')}
     </HeadlessButton>
@@ -156,6 +167,14 @@
 
   :global(.record-tall) {
     height: 6rem;
+  }
+
+  .record-error {
+    color: var(--danger);
+    font-size: 0.875rem;
+    line-height: 1.35;
+    text-align: center;
+    margin-bottom: 0.5rem;
   }
 
   .record-hint {

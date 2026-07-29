@@ -1,6 +1,4 @@
 import type Database from 'better-sqlite3'
-import { building, dev } from '$app/environment'
-import { env } from '$env/dynamic/private'
 import { is_noise_error_message } from '$lib/debug/classify-error'
 import { DICTIONARY_OPENED } from '$lib/debug/log-events'
 import { is_bot_user_agent } from '$lib/utils/bot-user-agent'
@@ -35,7 +33,6 @@ import { get_shared_db } from './shared-db'
 const HOT_WINDOW_DAYS = 14
 const ARCHIVE_WINDOW_DAYS = 60
 const DAY_MS = 24 * 60 * 60 * 1000
-const RETENTION_INTERVAL_MS = 6 * 60 * 60 * 1000 // sweep every 6h; self-heals a missed window same-day
 
 const ERROR_LEVELS = new Set(['error', 'unhandled_rejection', 'crash'])
 const TOP_LEVEL_ROUTES = new Set(['dictionaries', 'about', 'tutorials', 'account', 'create-dictionary', 'admin', 'terms'])
@@ -686,70 +683,21 @@ export function run_log_retention_once({ shared_db = get_shared_db(), logs_db = 
   return { days_rolled, archived, pruned }
 }
 
-const SINGLETON_KEY = Symbol.for('living.log-retention-cron.state')
-interface CronState { interval: ReturnType<typeof setInterval>, in_flight: boolean }
-interface GlobalWithCron { [SINGLETON_KEY]?: CronState }
-
-export function start_log_retention_cron_once({ after_sweep }: {
-  /**
-   * Ran after every sweep — the sweep is what ADVANCES the rollup watermark, i.e.
-   * the exact moment every analytics cache entry goes stale. The caller passes
-   * the analytics warm-up so the recompute happens here, off the request path,
-   * instead of in front of the next admin (Jacob's standing rule 2026-07-27:
-   * analytics must never block a request). Injected rather than imported to keep
-   * this module free of a cycle with `log-analytics.ts`.
-   */
-  after_sweep?: () => Promise<void>
-} = {}): void {
-  // No env flag — log retention always runs on the active node so trends never
-  // silently stop accumulating. Two hardcoded guards only:
-  //   - dev/build: dormant locally (matches the other crons; unit tests cover it).
-  //   - IS_STANDBY: standby containers must never run singleton jobs — the active
-  //     container (no IS_STANDBY) is the sole cron node.
-  if (building || dev)
-    return
-  if (env.IS_STANDBY === 'true') {
-    console.info('[log-retention] IS_STANDBY — cron disabled on standby container.')
-    return
-  }
-  const slot = globalThis as unknown as GlobalWithCron
-  if (slot[SINGLETON_KEY]) {
-    console.info('[log-retention] Already running — skip.')
-    return
-  }
-  const state: CronState = {
-    // .unref(): a background maintenance timer must never be the sole reason the
-    // Node process stays alive. No-op in prod (the HTTP server holds Node open),
-    // but lets one-shot in-process importers exit cleanly instead of hanging.
-    interval: setInterval(() => run_guarded(state, after_sweep), RETENTION_INTERVAL_MS).unref(),
-    in_flight: false,
-  }
-  slot[SINGLETON_KEY] = state
-  run_guarded(state, after_sweep) // first sweep on boot
-  console.info(`[log-retention] Started — sweeping every ${RETENTION_INTERVAL_MS / 3_600_000}h (hot ${HOT_WINDOW_DAYS}d, archive ${ARCHIVE_WINDOW_DAYS}d).`)
-}
-
-export function stop_log_retention_cron(): void {
-  const slot = globalThis as unknown as GlobalWithCron
-  const state = slot[SINGLETON_KEY]
-  if (!state)
-    return
-  clearInterval(state.interval)
-  delete slot[SINGLETON_KEY]
-}
-
-function run_guarded(state: CronState, after_sweep?: () => Promise<void>): void {
-  if (state.in_flight)
-    return
-  state.in_flight = true
+/**
+ * The roster's `run` (scheduled by `cron-scheduler.ts`, see `crons.ts`): one
+ * retention sweep + the injected after-sweep hook (analytics cache re-warm —
+ * injected by the roster to keep this module free of a cycle with
+ * `log-analytics.ts`), with its own queryable failure event. No env flag — log
+ * retention always runs on the active node so trends never silently stop
+ * accumulating.
+ */
+export function run_log_retention_sweep({ after_sweep }: { after_sweep?: () => Promise<void> } = {}): void {
   try {
     const result = run_log_retention_once()
-    console.info(`[log-retention] rolled ${result.days_rolled} day(s), archived ${result.archived}, pruned ${result.pruned}.`)
+    console.info(`[log-retention] rolled ${result.days_rolled} day(s), archived ${result.archived}, pruned ${result.pruned} (hot ${HOT_WINDOW_DAYS}d, archive ${ARCHIVE_WINDOW_DAYS}d).`)
     after_sweep?.().catch(err => console.error('[log-retention] after-sweep hook failed:', err))
   } catch (err) {
     console.error('[log-retention] sweep failed:', err)
     log_server_event({ level: 'error', message: 'log_retention_sweep_failed', error: err })
-  } finally {
-    state.in_flight = false
   }
 }

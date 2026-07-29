@@ -18,7 +18,6 @@ import { log_server_event } from '$lib/server/log-server-event'
 import { get_shared_db, open_test_shared_db } from './shared-db'
 
 const REPING_AFTER_MS = 24 * 60 * 60 * 1000 // ~1 day unread → one gentle nudge
-const CHECK_INTERVAL_MS = 60 * 60 * 1000 // hourly sweep
 /** Deep-link base for the cron (no request context). Tracks the deployed domain via ORIGIN. */
 const SITE_URL = env.ORIGIN || 'https://new.livingdictionaries.app'
 
@@ -82,49 +81,16 @@ export async function sweep_chat_repings({ db = get_shared_db(), base_url = SITE
   return sent
 }
 
-const SINGLETON_KEY = Symbol.for('ld.chat-reping-cron.state')
-interface CronState { interval: ReturnType<typeof setInterval>, in_flight: boolean }
-interface GlobalWithCron { [SINGLETON_KEY]?: CronState }
-
-export function start_chat_reping_cron_once(): void {
-  // Standby containers never run singleton jobs — only the primary.
-  if (env.IS_STANDBY === 'true') {
-    console.info('[chat-reping] IS_STANDBY — cron disabled on standby container.')
-    return
+/** The roster's `run`: one sweep with its queryable failure event. */
+export async function run_chat_reping_sweep(): Promise<void> {
+  try {
+    const sent = await sweep_chat_repings()
+    if (sent > 0)
+      console.info(`[chat-reping] sent ${sent} gentle re-ping(s).`)
+  } catch (err) {
+    console.error('[chat-reping] sweep failed:', err)
+    log_server_event({ level: 'error', message: 'chat_reping_sweep_failed', error: err })
   }
-  const slot = globalThis as unknown as GlobalWithCron
-  if (slot[SINGLETON_KEY]) {
-    console.info('[chat-reping] Already running — skip.')
-    return
-  }
-  const state: CronState = {
-    interval: setInterval(() => run_guarded(state), CHECK_INTERVAL_MS),
-    in_flight: false,
-  }
-  slot[SINGLETON_KEY] = state
-  console.info(`[chat-reping] Started — sweeping every ${CHECK_INTERVAL_MS / 60_000}m.`)
-}
-
-export function stop_chat_reping_cron(): void {
-  const slot = globalThis as unknown as GlobalWithCron
-  const state = slot[SINGLETON_KEY]
-  if (!state)
-    return
-  clearInterval(state.interval)
-  delete slot[SINGLETON_KEY]
-}
-
-function run_guarded(state: CronState): void {
-  if (state.in_flight)
-    return
-  state.in_flight = true
-  void sweep_chat_repings()
-    .then((sent) => { if (sent > 0) console.info(`[chat-reping] sent ${sent} gentle re-ping(s).`) })
-    .catch((err) => {
-      console.error('[chat-reping] sweep failed:', err)
-      log_server_event({ level: 'error', message: 'chat_reping_sweep_failed', error: err })
-    })
-    .finally(() => { state.in_flight = false })
 }
 
 if (import.meta.vitest) {

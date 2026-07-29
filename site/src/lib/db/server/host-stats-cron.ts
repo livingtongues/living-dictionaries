@@ -1,5 +1,3 @@
-import { building, dev } from '$app/environment'
-import { env } from '$env/dynamic/private'
 import { log_server_event } from '$lib/server/log-server-event'
 import { read_host_stats } from '$lib/server/host-stats'
 
@@ -20,12 +18,7 @@ import { read_host_stats } from '$lib/server/host-stats'
  * singleton via globalThis.
  */
 
-const SAMPLE_INTERVAL_MS = 5 * 60 * 1000
 const CPU_TRACKER = 'host-stats-cron'
-
-const SINGLETON_KEY = Symbol.for('living.host-stats-cron.state')
-interface CronState { interval: ReturnType<typeof setInterval> }
-interface GlobalWithCron { [SINGLETON_KEY]?: CronState }
 
 /** One sample: read the host and write the `host_stats` event. Exported for tests. */
 export function sample_host_stats_once({ log = log_server_event }: { log?: typeof log_server_event } = {}): void {
@@ -37,33 +30,10 @@ export function sample_host_stats_once({ log = log_server_event }: { log?: typeo
   }
 }
 
-export function start_host_stats_cron_once(): void {
-  if (building || dev)
-    return
-  if (env.IS_STANDBY === 'true') {
-    console.info('[host-stats] IS_STANDBY — cron disabled on standby container.')
-    return
-  }
-  const slot = globalThis as unknown as GlobalWithCron
-  if (slot[SINGLETON_KEY]) {
-    console.info('[host-stats] Already running — skip.')
-    return
-  }
-  // Prime the CPU baseline now so the first logged event (in 5 min) carries a
-  // real full-window average instead of a null.
+/**
+ * The roster's `on_start`: prime the CPU baseline at schedule time so the first
+ * logged event carries a real full-window average instead of a null.
+ */
+export function prime_host_stats_baseline(): void {
   read_host_stats({ tracker: CPU_TRACKER })
-  slot[SINGLETON_KEY] = {
-    // .unref(): background telemetry must never keep Node alive on its own.
-    interval: setInterval(() => sample_host_stats_once(), SAMPLE_INTERVAL_MS).unref(),
-  }
-  console.info(`[host-stats] Started — logging a host_stats event every ${SAMPLE_INTERVAL_MS / 60_000} min.`)
-}
-
-export function stop_host_stats_cron(): void {
-  const slot = globalThis as unknown as GlobalWithCron
-  const state = slot[SINGLETON_KEY]
-  if (!state)
-    return
-  clearInterval(state.interval)
-  delete slot[SINGLETON_KEY]
 }

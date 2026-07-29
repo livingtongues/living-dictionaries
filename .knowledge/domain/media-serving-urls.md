@@ -71,3 +71,40 @@ after the 30-day grace period.
 
 The separate locked R2 backup mirrors originals under `livingdictionaries-backups/media/` with
 one-year retention. Site assets are also covered by the whole-bucket backup path.
+
+## Intrinsic media metadata (duration / dimensions)
+
+`media_objects.duration_ms | width | height` were added 2026-07-29 and backfilled by ffprobe-ing
+every original over the public CDN from a dev box (ffprobe range-reads headers — it does not pull
+whole files). Platform truth at backfill: **93.3 h of audio across 146,986 files** (mean ≈2.3 s —
+these are single-word pronunciations, not long recordings) and 0.9 h of hosted video.
+
+Gotchas that cost real time:
+
+- **A byte-size estimate of audio hours is worthless here.** Half the bytes are uncompressed WAV
+  (~1411 kbps) and half are ~84 kbps MP3, so a single bytes→hours constant was off by ~50%
+  (guessed ~140 h, truth 93 h). Measure, don't extrapolate.
+- **ffprobe misdetects some valid MP3s as H.264** and emits NAL-unit errors with no duration.
+  Forcing `-f mp3` reads them fine. Never conclude "corrupt" from a failed autodetect probe —
+  browsers decode by content-type and play these normally.
+- **MediaRecorder/WebM files carry no header duration**; a full decode pass
+  (`ffmpeg -i … -f null - -progress pipe:1`, read the last `out_time_us`) is the only way.
+- **Animated WebP has no ffprobe dimensions** (VP8X/ANIM container); sharp reads it, so the sweep's
+  probe fills those rows.
+- Probing is latency-bound, not bandwidth-bound: raising concurrency from 16 → 48 did not move the
+  ~15 files/s rate.
+
+## Empty recordings (the 44-byte WAV trap)
+
+`RecordAudio.svelte` records via RecordRTC `StereoAudioRecorder` with `mimeType: 'audio/wav'`, so
+**WAV is encoded in the browser**. A microphone that yields no samples still produces a perfectly
+valid 44-byte RIFF/WAVE header with a `data` chunk of size 0 — an upload that looks fine everywhere
+except playback, where it is a permanently broken player. 313 accumulated 2018→2026 across 14
+dictionaries and 8 unrelated users (one dictionary lost 63% of its recordings this way) before
+`$lib/media/empty-audio.ts` began rejecting them at the recorder, at the presign floor, and in
+`validate_media_bytes`. If empty recordings ever reappear, suspect a NEW upload path that bypasses
+those three guards.
+
+Detection must stay conservative: only a positively-located zero-size/truncated `data` chunk counts
+as empty. A bare RIFF/WAVE header stub is inconclusive (it is also what the test fixtures use), and
+`data` is not always at offset 36 — LIST/fact chunks can precede it, so walk the chunk list.

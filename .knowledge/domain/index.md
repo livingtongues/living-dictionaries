@@ -12,7 +12,9 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
   search tap-buttons, the Keyman dataset (and the live-API subset gotcha), custom-code rules, and
   human/agent parity.
 - [media-serving-urls.md](./media-serving-urls.md) — R2 object conventions, photo/video variants,
-  immutable site assets, bucket CORS, storage ledger, orphan sweep, and locked backup.
+  immutable site assets, bucket CORS, storage ledger, orphan sweep, locked backup, intrinsic
+  duration/dimension metadata (and why byte-size estimates of audio hours lie), plus the
+  44-byte empty-WAV trap the browser recorder can produce.
 - Imports are agent-driven now: managers upload resources on `/{dict}/import` → a request
   message reaches the team → an agent imports via `/api/v1` following the guides at
   `/api/v1/guides` (the old Google-Sheets template + `scripts/import/` CLI are retired).
@@ -51,6 +53,10 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
   numbering rule, Ponca's flattened root, the document-order scroll-spy model (and why
   IntersectionObserver failed), and why a parent body renders above its children — so an import
   must give every table group its own subsection.
+- [glossing-abbreviations.md](./glossing-abbreviations.md) — the site-wide standard Leipzig catalog
+  under every dictionary's own legend: the override rule, why standard codes never enter a dict's
+  legend section, the three matching modes (gloss cell / free-text field / prose) and the ambiguous-
+  code filter, and why the prose DOM pass must undo itself on teardown.
 - [forced-alignment.md](./forced-alignment.md) — auto-timings (M6): the dumb-Modal-endpoint /
   smart-LD-server split, why romanization + the bespoke per-dict converter registry live server-side
   and admin-only, the two-runtime (Modal prod / local-CPU dev) aligner, the per-token align_form

@@ -29,6 +29,11 @@ The render/send seam lives in `$lib/email/` in every app:
 `Paragraph`, `Preview`, `Row`, `Shell`, `Title`, `TrackingPixel`, `markdown/MarkdownToEmailHtml`,
 `markdown/RenderToken` (markdown/ exists in tutor + house only).
 
+**Any email component with a `<style>` block MUST carry `<svelte:options css="injected" />`** —
+without it Svelte SSR emits only the class names and the styles (all the mobile media queries)
+silently never reach the sent email. house + LD shipped that way until 2026-07-29; tutor had it
+from the start.
+
 Benign drift that is NOT a fork (flatten freely when touching a file):
 
 - LD destructures `$props()` with `const ... =`; house/tutor mostly use `let ... =`.
@@ -43,7 +48,13 @@ Benign drift that is NOT a fork (flatten freely when touching a file):
   `Row` adds `x_padding`; several components use `<svelte:options css="injected" />`.
 - **house** — `Footer` renders the hvsb.app account-settings unsubscribe copy
   (`show_unsubscribe`); `markdown/` adds `wrap_link` (per-recipient click-tracking rewrite) and
-  `standalone-link.ts` (standalone link paragraph → CTA button) for newsletters/automations.
+  `standalone-link.ts` (standalone link paragraph → CTA button) for newsletters/automations;
+  `Row` adds `cell_class` (outer-td class for `<style>`-block overrides — the masthead's mobile
+  edge-to-edge query lives in `Header`);
+  `Header` takes a `banner_url` that REPLACES the brand-colored bar with the baked masthead photo
+  (`/api/email/header-image/<id>` — photo + wordmark burned into one JPEG by satori/resvg, because
+  live text over a background image is not portable in Outlook). Every house-branded email passes
+  one. Port it only alongside that endpoint + an image pool to feed it.
 - **living-dictionaries** — `Body.svelte` deliberately omits the `<tbody>` wrapper
   (email-client typography); `CallToActionButton`/`Footer` markup restructured; brand copy is
   Living Tongues Institute / Living Dictionaries.

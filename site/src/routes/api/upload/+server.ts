@@ -9,6 +9,7 @@ import { get_r2_media, r2_media_is_configured } from '$lib/server/r2-media'
 import { log_server_event } from '$lib/server/log-server-event'
 import { record_media_object_by_key } from '$lib/db/server/media-ledger'
 import { build_r2_media_key, extract_media_extension } from '$lib/utils/media-path'
+import { MIN_AUDIO_UPLOAD_BYTES } from '$lib/media/empty-audio'
 
 export interface UploadRequestBody {
   dictionary_id: string
@@ -60,6 +61,9 @@ export const POST: RequestHandler = async (event) => {
     error(ResponseCodes.BAD_REQUEST, 'r2_media.media_id must be a uuid')
   if (!Number.isSafeInteger(file_size) || file_size <= 0)
     error(ResponseCodes.BAD_REQUEST, 'file_size must be a positive integer')
+  // A 44-byte WAV is a header with zero samples — a recording that captured nothing.
+  if (r2_media.kind === 'audio' && file_size < MIN_AUDIO_UPLOAD_BYTES)
+    error(ResponseCodes.BAD_REQUEST, 'Audio file contains no sound')
   const max_bytes = r2_media.kind === 'video' ? MAX_VIDEO_UPLOAD_BYTES : MAX_AUDIO_UPLOAD_BYTES
   if (file_size > max_bytes)
     error(ResponseCodes.PAYLOAD_TOO_LARGE, `${r2_media.kind === 'video' ? 'Video' : 'Audio'} exceeds the ${max_bytes / 1024 / 1024}MB upload limit`)

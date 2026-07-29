@@ -1,8 +1,13 @@
-# Ponca POS standardization — dry-run report
+# Ponca POS standardization — ✅ APPLIED TO PRODUCTION 2026-07-29
 
-Lane 3 of `.issues/ponca-grammar-round-2.md`. Everything below **except part 0 is a
-proposal** — nothing in parts 1–3 has been written to production. Jacob reviews, then a
-follow-up session applies.
+Lane 3 (dry-run report) + Lane 5 (apply) of `.issues/ponca-grammar-round-2.md`.
+
+**Status: everything in this report is now live on production** — part 0 landed
+2026-07-29T02:11Z, parts 1–4 landed 2026-07-29T05:22Z with Jacob's decisions applied
+(see **part 6 — apply log** at the bottom for the runbook, counts and the two places
+his calls overrode a recommendation). The parts below are left in their original
+"proposed" voice so the reasoning behind each call stays readable; part 6 records what
+actually happened.
 
 All numbers are measured on **production** `/data/dictionaries/ponca.db`, 2026-07-29
 (5,257 entries · 5,617 senses · 4,999 senses carrying a part of speech).
@@ -72,7 +77,7 @@ POS editor does not silently lose it).
 
 ---
 
-## 2. Custom → standard mappings (proposed, NOT applied)
+## 2. Custom → standard mappings — ✅ applied (part 6)
 
 The book's abbreviations were built for a printed page with a key at the front. With the key
 table dropped from the grammar (part 4), anything that can't become a standard abbrev should
@@ -111,7 +116,7 @@ senses, `PL` in morphology on others). The counts in part 3 assume the move.
 
 ---
 
-## 3. Person / tense → `entries.morphology` as Leipzig codes (proposed, NOT applied)
+## 3. Person / tense → `entries.morphology` as Leipzig codes — ✅ applied (part 6)
 
 ### 3a. Scope
 
@@ -399,7 +404,16 @@ Notes on the draft:
 
 ---
 
-## 5. Decisions needed from Jacob
+## 4b. Section body — ✅ applied verbatim (part 6), including the new second paragraph
+
+---
+
+## 5. Decisions needed from Jacob — ✅ ALL ANSWERED (Jacob, 2026-07-29)
+
+Answers, in the order listed below: (1) written-out customs yes · (2) `pl`→`PL` yes ·
+(3) `pl. pron.`→`pro`+`PL` and `pl./emphatic`→`poss`+`PL.EMPH` yes · (4) keep `v`+`PST.PTCP`
+yes · (5) order `1PL.PST` yes · (6) add `1`+`2` yes · (7) **Wéšną → `adj`** · (8) accept the
+over-claim (option a). Recorded in `.issues/ponca-grammar-round-2.md` "Round 2b".
 
 1. **Written-out customs** — `prepositional phrase` / `pronoun phrase` as literal POS strings
    (2a), vs. some other treatment.
@@ -415,3 +429,75 @@ Once answered, the apply pass is one script in the same shape as
 `scripts/ponca/pos-typo-merge.cjs`: PATCH `senses[].parts_of_speech` + `morphology` on the
 entry, plus a PATCH of `…/grammar/sections/{id}` for the section body and 1–2
 `glossing_abbreviations` inserts.
+
+---
+
+## 6. Apply log — 2026-07-29 (Lane 5)
+
+Script: **`scripts/ponca/pos-migration.cjs`** (`--dry` / `--dry --json` / `--apply --key=` /
+`--verify`), run inside the prod container exactly like its predecessor:
+`ssh living 'docker exec -i sveltekit_blue node - --dry' < scripts/ponca/pos-migration.cjs`.
+It re-derives the plan from live prod data using the rules in parts 2–3 rather than
+transcribing the 3g table — so the table became an independent check, not the input.
+
+**Plan validation before writing.** `--dry --json` was diffed locally against the part-3g
+table (110 rows) — 108 of 110 matched byte-for-byte on lexeme · gloss · before · after ·
+morphology. The only two diffs were Jacob's two deliberate overrides:
+
+| sense | report 3g | applied |
+|---|---|---|
+| Wéšną "pleased" | `v` | **`adj`** (decision 7) |
+| wíwítʼa "they are mine" | `v` | **`poss`** (decision 3 / 2b option A) |
+
+**Runbook**
+
+- **Backup first** — `~/code/vps-setup/bin/backup-vps-db living` → shared.db + 1,413 per-dict
+  DBs → `r2/backups-rolling/db/living/2026-07-29T05-11-42Z.tar.zst` (246 MiB, 144s).
+- **Scoped attributed key** — `api_keys` row `416499f8-1530-4923-aaf0-59339b0ae66b`,
+  `dictionary_id='ponca'`, `role='write'`, label **"Ponca POS migration 2026-07-29"**,
+  `created_by_user_id` = Jacob (`f0fdbb2f-…`).
+- **Writes via the v1 API** — 121 `PATCH /api/v1/dictionaries/ponca/entries/{id}` (each
+  carrying that entry's `senses[].parts_of_speech` + its `morphology`), 2 POST
+  `…/grammar/glossing-abbreviations`, 1 PATCH `…/grammar/sections/5bffc336-…`.
+  **121/121 entries ok**, all three non-entry calls `200`.
+- **Key revoked** at `2026-07-29T05:23:40.903Z`; a write with it now returns `401`. No live
+  `ponca` keys remain.
+
+**Read-back (`--verify`)**
+
+- senses still needing migration **0**; stale POS values remaining **none**.
+- distinct POS values **44 → 23** (the 21 standard ones minus `pl`, plus the two written-out
+  phrases).
+- entries carrying morphology **0 → 105** (110 senses; 5 entries have two affected senses that
+  agree — Ađį́ʼ, Agđáđį, Đéđaì, Ną́de ąpíʼmąžį̀ ×2 spellings). Per-entry distribution matches
+  part 3d's per-sense distribution once those pairs collapse.
+- written-out POS live: `prepositional phrase` 14 (13 + the `n./prep. phr.` split),
+  `pronoun phrase` 1; `suff` 20→21, `pro` 69→76, `poss` 2→3, `adj` 682→683.
+- legend rows `1` "first person" + `2` "second person" present, `category='person and number'`.
+- POS section body 1,045 chars, 10 usage-label rows, no `past part.` → the 37-row key is gone.
+
+**History attribution** — `ponca.history.db` holds exactly **234** rows for that key id:
+105 `entries/update` (delta = `morphology` only), 126 `senses/update` (delta =
+`parts_of_speech` only), 2 `glossing_abbreviations/insert`, 1 `grammar_sections/update`;
+single `user_id` = Jacob. `integrity_check` `ok` on both `ponca.db` and `ponca.history.db`.
+
+**Rendered-page eyeball** (after the 05:44Z snapshot sweep, headless puppeteer with a real
+desktop UA — the documented bot gate makes a `HeadlessChrome` UA render dictionary pages
+empty forever, see `.knowledge/testing/index.md`):
+
+- `/ponca/grammar` §2 "Parts of Speech" — intro prose, the new explanatory paragraph, and the
+  10-row usage-label table; the sentence pointing at the deleted key is gone
+  (`/tmp/ponca-lane5/grammar-pos.png`).
+- Glossing abbreviations legend — `1` "first person" and `2` "second person" sit in the
+  PERSON AND NUMBER group (`/tmp/ponca-lane5/legend.png`).
+- Entry Ąʼwą́đataì "ate" — Part of Speech **verb**, Morphology **1PL.PST** rendered as
+  tap-to-expand codes (`/tmp/ponca-lane5/entry.png`). Áʼnazeatą̀ shows POS
+  "prepositional phrase". No page errors.
+
+**Gotcha for the next script in this family** — the v1 entry GET/PATCH response nests
+entry-level fields under `entry.main`, so `entry.morphology` reads `null` in a response echo
+even when the write succeeded; look at `entry.main.morphology` (the apply log's per-entry line
+prints the misleading path — harmless, the DB read-back is the real check).
+
+> Browsers pick all of this up on the next R2 snapshot rebuild (~30 min sweep), not by live
+> sync.

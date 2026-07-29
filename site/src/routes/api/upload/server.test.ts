@@ -49,7 +49,7 @@ function token(user: { id: string, email: string }) {
 }
 
 const media_id = '48af49b0-b410-4db1-babf-38ac53269e62'
-const valid_body = { dictionary_id: 'dict1', file_name: 'voice.wav', file_type: 'audio/wav', file_size: 5, r2_media: { kind: 'audio', media_id } }
+const valid_body = { dictionary_id: 'dict1', file_name: 'voice.wav', file_type: 'audio/wav', file_size: 40_000, r2_media: { kind: 'audio', media_id } }
 
 function set_creds() {
   process.env.R2_ACCOUNT_ID = 'test-account'
@@ -99,6 +99,14 @@ describe(POST, () => {
       await expect(call({ token: await token({ id: 'u_ed', email: 'manager@example.com' }), body }))
         .rejects.toMatchObject({ status: 400 })
     }
+  })
+
+  test('400 for an audio recording that captured no sound (44-byte WAV header)', async () => {
+    await expect(call({ token: await token({ id: 'u_ed', email: 'manager@example.com' }), body: { ...valid_body, file_size: 44 } }))
+      .rejects.toMatchObject({ status: 400 })
+    // videos are unaffected by the audio floor
+    const video_body = { ...valid_body, file_name: 'clip.mp4', file_type: 'video/mp4', file_size: 44, r2_media: { kind: 'video' as const, media_id } }
+    expect((await call({ token: await token({ id: 'u_ed', email: 'manager@example.com' }), body: video_body })).status).toBe(200)
   })
 
   test('enforces 25 MiB for audio and 100 MiB for video', async () => {

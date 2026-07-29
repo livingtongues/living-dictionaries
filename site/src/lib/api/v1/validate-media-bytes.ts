@@ -11,6 +11,8 @@
  * formats aren't false-rejected (the magic sniff is the backstop there).
  */
 
+import { wav_data_chunk_is_empty } from '$lib/media/empty-audio'
+
 export type MediaCategory = 'audio' | 'image' | 'video'
 
 type SniffKind = 'media' | 'html' | 'xml' | 'json' | 'pdf' | 'text' | 'unknown'
@@ -206,9 +208,9 @@ function declared_type_conflicts({ declared_type, category }: { declared_type: s
 
 /**
  * Validate that `bytes` (optionally with a `declared_type` content-type) really are
- * `category` media. Returns `{ ok: false, reason }` on a rejection the route maps to
- * 415; `{ ok: true }` when the content is media-consistent (or generically labeled +
- * not sniffed as non-media).
+ * `category` media (empty-sample audio is rejected too). Returns `{ ok: false, reason }`
+ * on a rejection the route maps to 415; `{ ok: true }` when the content is
+ * media-consistent (or generically labeled + not sniffed as non-media).
  */
 export function validate_media_bytes({ category, declared_type, bytes }: {
   category: MediaCategory
@@ -239,6 +241,11 @@ export function validate_media_bytes({ category, declared_type, bytes }: {
   }
   if (declared_type_conflicts({ declared_type, category })) {
     return { ok: false, reason: `The content-type "${declared_type}" is not ${category}.` }
+  }
+  // A WAV whose `data` chunk is empty is a recording that captured nothing — it
+  // would only ever render as a broken player (see empty-audio.ts).
+  if (category === 'audio' && wav_data_chunk_is_empty(bytes)) {
+    return { ok: false, reason: 'The provided audio contains no sound (empty recording).' }
   }
   return { ok: true }
 }

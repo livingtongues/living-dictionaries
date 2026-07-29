@@ -9,11 +9,17 @@
   import { grammar_sections_editable } from '$lib/corpus/grammar-preview'
   import { build_section_tree, has_title } from './grammar-tree'
   import { active_breadcrumb, build_toc_entries, CLAUSE_TEMPLATE_ANCHOR, GLOSSING_LEGEND_ANCHOR } from './grammar-toc'
-  import { GrammarScrollSpy, scroll_to_anchor } from './scroll-spy.svelte'
+  import { GrammarScrollSpy, scroll_to_anchor, scroll_to_top } from './scroll-spy.svelte'
+  import { clear_section_hash } from './grammar-hash'
   import { build_entry_link_index } from '$lib/entry-links/exact-lexeme-index'
   import { set_entry_mention_context } from '$lib/entry-links/mention-context'
   import type { EntryMentionClick } from '$lib/entry-links/link-entry-mentions'
   import EntryMentionPopover from '$lib/entry-links/EntryMentionPopover.svelte'
+  import type { LegendEntry } from '$lib/corpus/gloss-legend'
+  import type { GlossCodeClick } from '$lib/corpus/link-gloss-codes'
+  import { build_gloss_catalog } from '$lib/corpus/gloss-catalog'
+  import { set_gloss_code_context } from '$lib/corpus/gloss-code-context'
+  import GlossCodePopover from '$lib/corpus/GlossCodePopover.svelte'
   import IconFa6SolidPencil from '~icons/fa6-solid/pencil'
   import IconMdiCheck from '~icons/mdi/check'
 
@@ -69,6 +75,16 @@
 
   let open_mention = $state<EntryMentionClick | null>(null)
 
+  // Codes in the prose expand the same way they do in an interlinear gloss:
+  // the dictionary's own legend layered over the standard Leipzig catalog. Only
+  // for readers — while editing, the prose is a textarea.
+  const legend = $derived((dict_db?.glossing_abbreviations.rows ?? []) as unknown as LegendEntry[])
+  const gloss_catalog = $derived(edit_mode
+    ? null
+    : build_gloss_catalog({ legend, language: dictionary.gloss_languages?.[0] ?? null, t }))
+
+  let open_gloss_code = $state<GlossCodeClick | null>(null)
+
   // Deep link: `/{dict}/grammar#section-<id>` has to land on its section, but
   // the sections only exist once the dictionary DB has streamed in — long after
   // the browser gave up on its own hash scroll. Retry as rows arrive, once.
@@ -86,12 +102,26 @@
     get index() { return entry_link_index },
     open: (detail) => { open_mention = detail },
   })
+
+  set_gloss_code_context({
+    get catalog() { return gloss_catalog },
+    open: (detail) => { open_gloss_code = detail },
+  })
+
+  // The TOC's own heading is a "you are nowhere in particular" target: back to
+  // the top of the page, and the section hash goes with it.
+  function back_to_top() {
+    scroll_to_top()
+    clear_section_hash()
+  }
 </script>
 
 <div class="grammar">
   <div class="header-row">
     <h3 class="grammar-heading">
-      {t('dictionary.grammar')}
+      <button type="button" class="to-top" title={t('grammar.back_to_top')} onclick={back_to_top}>
+        {t('dictionary.grammar')}
+      </button>
     </h3>
     {#if can_edit}
       <button
@@ -132,7 +162,9 @@
 
     {#if show_toc}
       <aside class="rail">
-        <div class="rail-heading">{t('dictionary.grammar')}</div>
+        <button type="button" class="rail-heading to-top" title={t('grammar.back_to_top')} onclick={back_to_top}>
+          {t('dictionary.grammar')}
+        </button>
         <GrammarToc entries={toc_entries} follow_active />
       </aside>
     {/if}
@@ -145,6 +177,14 @@
     form={open_mention.form}
     anchor={open_mention.anchor}
     on_close={() => open_mention = null} />
+{/if}
+
+{#if open_gloss_code && gloss_catalog}
+  <GlossCodePopover
+    code={open_gloss_code.code}
+    expansion={gloss_catalog.expand(open_gloss_code.code)}
+    anchor={open_gloss_code.anchor}
+    on_close={() => open_gloss_code = null} />
 {/if}
 
 <SeoMetaTags
@@ -176,6 +216,25 @@
     line-height: 1.75rem;
     font-weight: 600;
     margin-right: 0.25rem;
+  }
+
+  /* Both headings are live "back to top" targets — styled as the heading text
+     they replace, never as a control. */
+  .to-top {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .to-top:hover {
+    color: var(--primary);
   }
 
   .layout {

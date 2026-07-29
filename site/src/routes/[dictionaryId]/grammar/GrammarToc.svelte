@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { TocEntry } from './grammar-toc'
-  import { page } from '$app/state'
-  import { replaceState } from '$app/navigation'
+  import { write_section_hash } from './grammar-hash'
   import { scroll_to_anchor } from './scroll-spy.svelte'
 
   /**
@@ -24,20 +23,11 @@
 
   let nav: HTMLElement | undefined = $state()
 
-  // REPLACE rather than push: a TOC is used many times per read, and burying the
-  // route you arrived from under 20 hash entries makes Back useless. The catch is
-  // for svelte-look stories, which mount without a router — the scroll still runs.
-  function write_hash(dom_id: string) {
-    try {
-      replaceState(`#${dom_id}`, page.state)
-    } catch (_no_router) { /* no router */ }
-  }
-
   function jump(event: MouseEvent, dom_id: string) {
     if (event.metaKey || event.ctrlKey || event.shiftKey) return
     event.preventDefault()
     scroll_to_anchor({ dom_id })
-    write_hash(dom_id)
+    write_section_hash(dom_id)
     on_navigate?.()
   }
 

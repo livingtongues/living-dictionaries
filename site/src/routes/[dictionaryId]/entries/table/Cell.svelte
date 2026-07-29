@@ -252,7 +252,7 @@
       field={column.field}
       value={entry.main[column.field]}
       display={page.data.t(`entry_field.${column.field}`)}
-      gloss_codes={column.field === 'morphology'}
+      gloss_codes={column.field === 'morphology' || column.field === 'interlinearization'}
       on_update={(new_value) => {
         entry.main[column.field] = new_value
         update_entry({ [column.field]: new_value })

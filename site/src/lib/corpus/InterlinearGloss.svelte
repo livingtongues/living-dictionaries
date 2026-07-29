@@ -2,8 +2,9 @@
   import type { Morpheme, SentenceToken } from '$lib/db/schemas/dictionary.types'
   import type { LegendEntry } from './gloss-legend'
   import { page } from '$app/state'
-  import Popover from '$lib/components/ui/Popover.svelte'
-  import { build_gloss_splitter, gloss_for_language, legend_expansion } from './gloss-legend'
+  import GlossCodePopover from './GlossCodePopover.svelte'
+  import { build_gloss_catalog } from './gloss-catalog'
+  import { gloss_for_language } from './gloss-legend'
 
   interface Props {
     /** The token list for the displayed orthography (`sentences.tokens[code]`). */
@@ -15,11 +16,10 @@
   }
 
   const { tokens, language = null, link_entries = true }: Props = $props()
-  const { dictionary, dict_db, t } = $derived(page.data)
+  const { dictionary, dict_db } = $derived(page.data)
 
   const legend = $derived((dict_db?.glossing_abbreviations.rows ?? []) as unknown as LegendEntry[])
-  const legend_by_code = $derived(new Map(legend.map(entry => [entry.code, entry])))
-  const split_gloss = $derived(build_gloss_splitter(legend.map(entry => entry.code)))
+  const catalog = $derived(build_gloss_catalog({ legend, language, t: page.data.t }))
 
   /** Punctuation carries no analysis — keep it out of the aligned columns. */
   const columns = $derived(tokens.filter(token => token.status !== 'ignored'))
@@ -51,9 +51,6 @@
   }
 
   let open_code = $state<{ code: string, anchor: HTMLElement } | null>(null)
-  const open_expansion = $derived(open_code
-    ? legend_expansion({ entry: legend_by_code.get(open_code.code), language })
-    : '')
 
   function entry_href(entry_id: string | undefined): string | null {
     return link_entries && entry_id ? `/${dictionary.url}/entry/${entry_id}` : null
@@ -67,10 +64,10 @@
         {#each cells_of(token) as cell, cell_index (cell_index)}
           <div class="cell">
             <div class="form">{#if entry_href(cell.entry_id)}<a href={entry_href(cell.entry_id)}>{cell.form}</a>{:else}{cell.form}{/if}{#if cell.separator}<span class="sep">{cell.separator}</span>{/if}</div>
-            <div class="gloss">{#each split_gloss(cell.gloss) as piece, piece_index (piece_index)}{#if piece.code}<button
+            <div class="gloss">{#each catalog.split_gloss_cell(cell.gloss) as piece, piece_index (piece_index)}{#if piece.code}<button
               type="button"
               class="code"
-              title={legend_expansion({ entry: legend_by_code.get(piece.code), language })}
+              title={catalog.expand(piece.code)}
               onclick={event => open_code = { code: piece.code, anchor: event.currentTarget }}>{piece.text}</button>{:else}{piece.text}{/if}{/each}{#if cell.separator}<span class="sep">{cell.separator}</span>{/if}</div>
           </div>
         {/each}
@@ -79,12 +76,11 @@
   </div>
 
   {#if open_code}
-    <Popover anchor={open_code.anchor} on_close={() => open_code = null} max_width="16rem">
-      <div class="expansion">
-        <span class="expansion-code">{open_code.code}</span>
-        <span class="expansion-name">{open_expansion || t('grammar.no_legend_entry')}</span>
-      </div>
-    </Popover>
+    <GlossCodePopover
+      code={open_code.code}
+      expansion={catalog.expand(open_code.code)}
+      anchor={open_code.anchor}
+      on_close={() => open_code = null} />
   {/if}
 {/if}
 
@@ -159,23 +155,4 @@
     text-decoration-color: var(--primary);
   }
 
-  .expansion {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 0.75rem 0.875rem;
-  }
-
-  .expansion-code {
-    font-variant-caps: all-small-caps;
-    font-feature-settings: 'c2sc', 'smcp';
-    letter-spacing: 0.03em;
-    font-weight: 700;
-    color: var(--color-secondary);
-    font-size: 0.875rem;
-  }
-
-  .expansion-name {
-    font-size: 0.9375rem;
-  }
 </style>

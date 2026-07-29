@@ -1,17 +1,11 @@
 import type { Handle, HandleServerError } from '@sveltejs/kit'
 import { dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
-import { start_chat_reping_cron_once } from '$lib/db/server/chat-reping-cron'
-import { start_host_stats_cron_once } from '$lib/db/server/host-stats-cron'
-import { start_analytics_warm_up, warm_analytics_caches } from '$lib/db/server/log-analytics'
-import { start_log_retention_cron_once } from '$lib/db/server/log-retention-cron'
+import { start_crons_once } from '$lib/db/server/cron-scheduler'
+import { CRONS } from '$lib/db/server/crons'
+import { start_analytics_warm_up } from '$lib/db/server/log-analytics'
 import { get_logs_db, split_client_logs_from_shared } from '$lib/db/server/logs-db'
-import { start_media_sweep_cron_once } from '$lib/db/server/media-sweep-cron'
-import { start_notification_digest_cron_once } from '$lib/db/server/notification-digest-cron'
-import { start_r2_snapshot_builder } from '$lib/db/server/r2-snapshot-builder'
 import { get_shared_db } from '$lib/db/server/shared-db'
-import { start_system_outbox_cron_once } from '$lib/db/server/system-outbox-cron'
-import { start_wal_checkpoint_cron_once } from '$lib/db/server/wal-checkpoint-cron'
 import { ensure_notifications_room } from '$lib/server/chat/ensure-team-membership'
 import { is_cross_origin_form_forbidden } from '$lib/server/csrf'
 import { boot_i18n_catalog } from '$lib/server/i18n/boot'
@@ -40,61 +34,24 @@ ensure_notifications_room()
 // keys) and, on a virgin DB, seed translations from the committed locale files.
 boot_i18n_catalog()
 
-// Per-dictionary `dictionaries/{id}.db.gz` snapshot builder. Sweeps every 30 min
-// in-process, backs up + gzips + PUTs each changed dict to the public R2
-// snapshots bucket (viewers read from there). Gated by R2_SNAPSHOT_BUILDER_ENABLED
-// so only the designated builder node runs it (no-op in dev / web nodes).
-// Also skipped on blue-green standby containers (IS_STANDBY=true) — only the
-// primary runs singleton background jobs. See vps-setup
-// .issues/blue-green-fleet-rollout.md.
-if (env.R2_SNAPSHOT_BUILDER_ENABLED === 'true' && env.IS_STANDBY !== 'true')
-  start_r2_snapshot_builder()
+// Boot ALL background crons through the wall-clock scheduler. The roster
+// (`$lib/db/server/crons.ts`) declares every job + cadence in one place; the
+// scheduler (`cron-scheduler.ts`) persists `last_run_at` in `cron_runs` so
+// cadence is INDEPENDENT of deploy frequency — a boot where nothing is due runs
+// nothing (no more boot burst starving the blue/green standby — the Living 503,
+// 2026-07-29), while genuinely overdue work still runs, deferred past the
+// deploy warmup window and spaced out. IS_STANDBY-gated as a whole (the primary
+// is the sole cron node) + globalThis singleton.
+start_crons_once({ defs: CRONS })
 
-// Two-tier client_logs retention + the forever log_daily_metrics rollup. Always
-// runs on the active node — only self-gates on IS_STANDBY + dev/build (no enable flag).
-// `after_sweep` recomputes the admin analytics payloads right after the sweep
-// advances the rollup watermark (the moment they all go stale), so that work
-// happens here instead of in front of the next admin — analytics must never
-// block a request path (standing rule, 2026-07-27).
-start_log_retention_cron_once({ after_sweep: warm_analytics_caches })
-
-// Same rule at boot: a fresh container's in-memory cache is empty, so warm it
-// off the request path (delayed — the first seconds belong to the traffic a
-// fresh deploy is taking). Until it lands, reads are served from the payload
-// persisted under DATA_DIR by the previous container.
+// A fresh container's in-memory analytics cache is empty, so warm it off the
+// request path (delayed — the first seconds belong to the traffic a fresh
+// deploy is taking; analytics must never block a request, standing rule
+// 2026-07-27). Until it lands, reads are served from the payload persisted
+// under DATA_DIR by the previous container. Steady-state re-warms happen via
+// the log-retention cron's `after_sweep` hook (see the roster).
 if (!dev)
   start_analytics_warm_up()
-
-// Periodic `wal_checkpoint(TRUNCATE)` on the central DBs (shared.db / logs.db /
-// logs-archive.db) so their WAL files can't ratchet up unbounded under steady
-// sync/read load. Primary-only (IS_STANDBY-gated) + singleton + dev/build-dormant.
-// Per-dictionary DBs are deliberately out of scope pending investigation.
-start_wal_checkpoint_cron_once()
-
-// Host-resource sampler: every 5 min, one `host_stats` server event (whole-box
-// CPU/RAM/disk read from /proc inside the container — see host-stats.ts) feeding
-// the /admin/health "Host resources" panel. Primary-only (IS_STANDBY-gated) +
-// singleton + dev/build-dormant.
-start_host_stats_cron_once()
-
-// Admin team-chat gentle re-ping cron. Hourly, sends exactly one more nudge for
-// chat pings unread ~1 day. IS_STANDBY-guarded + singleton-guarded; notify_admin
-// is a no-op under NTFY_DISABLED so dev stays quiet.
-start_chat_reping_cron_once()
-
-// Notifications-room daily digest. Hourly sweep; once/day at 8am Pacific it sends
-// each on-duty admin ONE summary of unread platform events (replaced the noisy
-// per-event ping). Dev/build-dormant + IS_STANDBY-guarded + singleton.
-start_notification_digest_cron_once()
-
-// System-outbox drain. Every 20s, delivers agent-authored System messages queued
-// into chat_system_outbox (posts as System + pings members). Dev/build-dormant +
-// IS_STANDBY-guarded + singleton.
-start_system_outbox_cron_once()
-
-// Media storage sweep: daily media_objects→media_storage_daily rollup +
-// weekly R2 reconcile / orphan cleanup / variant self-heal (see the module).
-start_media_sweep_cron_once()
 
 /**
  * Adapter-node enforces `BODY_SIZE_LIMIT` by THROWING mid-body-read, which

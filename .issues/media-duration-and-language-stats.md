@@ -51,7 +51,36 @@ permanently, shown on /admin/storage, and a re-runnable CSV generator.
 - ✅ Probe complete: 168,977/169,011 (34 unresolvable: 33 animated webp — sharp in the sweep will fill post-deploy — + 1 corrupt mp3 `siletz-dee-ni/audio/698218aa…`). 313 header-only 44-byte WAVs (broken uploads, zero audio) recorded as duration_ms=0. JSONL shipped to living `/opt/hosting/data/media-metadata.jsonl`.
 - ✅ Final CSV generated (216 languages, all-fields-escaped after prod iso/glottocode values with embedded commas broke rows 80/85): `~/reports/living-dictionaries-language-stats-2026-07-29.csv` (mustang). Totals — public: 221 dicts / 273,554 entries / 555,212 words / 94,380 entries-with-audio / 56.9 h audio / 0.6 h video; unlisted: 397 dicts / 232,877 entries / 28.5 h audio. Platform-wide probed audio: 93.3 h.
 - ✅ Reply email drafted: `~/reports/world-bank-reply-draft.md`
-- [ ] After Jacob commits+deploys: run apply.js (dry-run → APPLY=1) to land durations in the ledger permanently, then `sudo rm /opt/hosting/data/media-metadata.jsonl`
+- ✅ DEPLOYED + BACKFILLED (2026-07-29). Prod ledger: audio 146,986 objects / **93.31 h** / 0 missing duration; video 187 / **0.93 h** / 0 missing; photos 21,846 with dimensions, 33 missing (animated WebP — the sweep's sharp probe fills these). Staged JSONL removed from /opt/hosting/data.
+- ✅ Final CSV regenerated post-cleanup: `~/reports/living-dictionaries-language-stats-2026-07-29.csv` — 216 languages / 221 dicts / 273,583 entries / 555,242 words / 94,341 entries-with-audio / 56.9 h audio / 0.6 h video; unlisted row 397 dicts / 232,877 entries / 28.45 h. Medians: 424 entries, 606 words, 86 entries-with-audio.
+
+## Empty-recording cleanup + prevention (2026-07-29)
+The duration probe surfaced **313 header-only WAVs** — each exactly 44 bytes, `RIFF`/`WAVE`
+with a `data` chunk of declared size **0** (verified by downloading and parsing ALL 313, not
+sampling). Zero audio samples, i.e. permanently broken players.
+- ROOT CAUSE: `RecordAudio.svelte` records via RecordRTC `StereoAudioRecorder` with
+  `mimeType: 'audio/wav'` — WAV is encoded IN THE BROWSER, so a mic yielding no data emits a
+  bare 44-byte header, and nothing checked the blob. Spread over 2018→2026-06, 14 dictionaries,
+  8 unrelated users (galadagon 177/281 = 63%, dogon 60/94, dymetris 28/44) — an ongoing leak,
+  not legacy cruft.
+- ✅ DELETED via `scripts/media-metadata-backfill/delete-empty-audio.js` (tombstones, APPLY=1).
+  Backups first at `/opt/hosting/data/backups-20260729-050717/` (shared.db + all 14 dict DBs).
+  Verified after: 0 empty rows remain, 0 orphan `audio_speakers`, `integrity_check` ok on all 14.
+  R2 objects intentionally left — the sweep orphans them, deletes after the 30d grace (backup
+  mirror holds 1 year).
+- ✅ PREVENTION (both layers): new `$lib/media/empty-audio.ts`
+  (`wav_data_chunk_is_empty` walks the chunk list — LIST/fact chunks can precede `data` — and
+  only claims "empty" when it POSITIVELY finds a zero-size/truncated data chunk; a header stub
+  is inconclusive, which keeps the existing 12-byte WAV test fixture valid). Wired into:
+  RecordAudio `stop()` → shows `audio.no_audio_captured` and refuses the blob;
+  `/api/upload` presign → 400 below `MIN_AUDIO_UPLOAD_BYTES` (45) for `kind: 'audio'` only;
+  `validate_media_bytes` → rejects empty-data WAV on the v1/byte paths.
+- NOT corrupt after all: `siletz-dee-ni/audio/698218aa…mp3` — ffprobe misdetects it as H.264;
+  forced as mp3 it's a clean 3.66 s / 128 kbps clip with real signal (mean −25 dB), served as
+  `audio/mpeg`, plays fine. Duration set manually to 3657 ms. The 33 dimension-less photos are
+  animated WebP (browsers render them fine).
+- Verified: full suite 319 files / 2354 tests green, `pnpm check` 0 errors, eslint clean,
+  svelte-look screenshot of the new error state (light + dark).
 
 ## Notes
 - Probe failures observed: transient tcp (retry succeeds) + webm without header duration (~100 algonquin videos; ffmpeg full-decode fallback added).

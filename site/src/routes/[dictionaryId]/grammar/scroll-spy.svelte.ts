@@ -104,3 +104,8 @@ export function scroll_to_anchor({ dom_id, smooth = true }: { dom_id: string, sm
   element.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant', block: 'start' })
   return true
 }
+
+/** Back to the very top of the page — what the TOC's own heading means. */
+export function scroll_to_top({ smooth = true }: { smooth?: boolean } = {}) {
+  window.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'instant' })
+}

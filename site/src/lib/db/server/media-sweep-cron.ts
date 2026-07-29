@@ -1,7 +1,5 @@
 import { DeleteObjectsCommand, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
 import Database from 'better-sqlite3'
-import { building, dev } from '$app/environment'
-import { env } from '$env/dynamic/private'
 import { get_r2_media, r2_media_is_configured } from '$lib/server/r2-media'
 import { generate_and_store_photo_variants } from '$lib/server/photo-variants'
 import { generate_and_store_video_thumbnail } from '$lib/server/video-thumbnails'
@@ -29,7 +27,6 @@ import { get_shared_db } from './shared-db'
  * Only valid R2 media keys participate.
  */
 
-const TICK_MS = 60 * 60 * 1000 // hourly tick; the day/week gates below decide the real work
 const RECONCILE_EVERY_MS = 6.5 * 24 * 60 * 60 * 1000
 const ORPHAN_GRACE_MS = 30 * 24 * 60 * 60 * 1000
 /** Presign-seeded ledger rows younger than this may simply not have finished uploading. */
@@ -259,37 +256,16 @@ export async function run_media_reconcile_once(): Promise<MediaReconcileSummary>
   return summary
 }
 
-const SINGLETON_KEY = Symbol.for('living.media-sweep-cron.state')
-interface CronState { interval: ReturnType<typeof setInterval>, in_flight: boolean }
-interface GlobalWithCron { [SINGLETON_KEY]?: CronState }
-
-export function start_media_sweep_cron_once(): void {
-  if (building || dev)
-    return
-  if (env.IS_STANDBY === 'true') {
-    console.info('[media-sweep] IS_STANDBY — cron disabled on standby container.')
-    return
-  }
-  if (!r2_media_is_configured()) {
-    console.info('[media-sweep] R2 media creds absent — cron disabled.')
-    return
-  }
-  const slot = globalThis as unknown as GlobalWithCron
-  if (slot[SINGLETON_KEY])
-    return
-  const state: CronState = {
-    interval: setInterval(() => void run_guarded(state), TICK_MS).unref(),
-    in_flight: false,
-  }
-  slot[SINGLETON_KEY] = state
-  void run_guarded(state)
-  console.info('[media-sweep] Started — daily ledger rollup, weekly R2 reconcile + orphan cleanup.')
+/** The roster's `disabled_reason`: dormant without R2 media credentials. */
+export function media_sweep_disabled_reason(): string | null {
+  return r2_media_is_configured() ? null : 'R2 media creds absent'
 }
 
-async function run_guarded(state: CronState): Promise<void> {
-  if (state.in_flight)
-    return
-  state.in_flight = true
+/**
+ * The roster's `run`: hourly tick — daily ledger rollup + (when the weekly
+ * watermark is due) the R2 reconcile / orphan cleanup / metadata probe.
+ */
+export async function run_media_sweep(): Promise<void> {
   try {
     run_media_rollup_once()
     const db = get_shared_db()
@@ -308,7 +284,5 @@ async function run_guarded(state: CronState): Promise<void> {
   } catch (err) {
     console.error('[media-sweep] failed:', err)
     log_server_event({ level: 'error', message: 'media_sweep_failed', error: err })
-  } finally {
-    state.in_flight = false
   }
 }

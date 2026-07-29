@@ -72,6 +72,28 @@ describe(validate_media_bytes, () => {
     expect(validate_media_bytes({ category: 'video', declared_type: 'video/mp4', bytes: MP4 })).toEqual({ ok: true })
   })
 
+  test('rejects a WAV recording that captured no sound', () => {
+    // 44-byte RIFF/WAVE header with a `data` chunk of size 0 — the shape of the
+    // 313 empty recordings the browser recorder produced 2018-2026.
+    const empty_wav = new Uint8Array(44)
+    const view = new DataView(empty_wav.buffer)
+    const write = (offset: number, text: string) => {
+      for (let index = 0; index < text.length; index++)
+        empty_wav[offset + index] = text.charCodeAt(index)
+    }
+    write(0, 'RIFF')
+    view.setUint32(4, 36, true)
+    write(8, 'WAVE')
+    write(12, 'fmt ')
+    view.setUint32(16, 16, true)
+    write(36, 'data')
+    view.setUint32(40, 0, true)
+
+    const result = validate_media_bytes({ category: 'audio', declared_type: 'audio/wav', bytes: empty_wav })
+    expect(result.ok).toBeFalsy()
+    expect(result).toMatchObject({ reason: expect.stringContaining('no sound') })
+  })
+
   test('rejects an HTML error page fetched as audio (the reported bug)', () => {
     const result = validate_media_bytes({ category: 'audio', declared_type: 'text/html; charset=utf-8', bytes: HTML })
     expect(result.ok).toBeFalsy()

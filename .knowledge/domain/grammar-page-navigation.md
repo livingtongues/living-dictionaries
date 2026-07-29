@@ -68,6 +68,16 @@ svelte-look mounts components with no router and `$app/navigation` throws there 
 hash scroll fires long before the dict DB has streamed the sections in, so `+page.svelte` re-applies
 the hash once (non-smooth) as rows arrive.
 
+## The two headings mean "top of the page" (2026-07-29)
+
+The page `h3` and the desktop rail heading both read "Grammar" and both are buttons: click either
+and the page smooth-scrolls to the top AND the section hash is dropped (`clear_section_hash` in
+`grammar-hash.ts`, which also owns the TOC's `write_section_hash`), so the URL stops claiming you
+are inside a chapter. The mobile sticky bar is NOT a third copy of the heading — with no breadcrumb
+to show it reads **"Contents"**, because the page heading immediately above it already says
+Grammar. (It briefly read "Grammar" on 2026-07-29; Jacob's call was that duplicating the heading
+wastes the one line of chrome mobile readers get.)
+
 ## Scroll-spy mechanics worth not rediscovering
 
 Sections render their children *inside* the parent's `.section` div, so a whole-section
@@ -90,12 +100,30 @@ parent body jumps ahead of all the subsections no matter how the prose around it
 
 Ponca's PDF import ignored this: it concatenated all of a chapter's interleaved prose into the
 parent body and pushed only the *captioned* tables into children, so "…as given here:" ended up
-six paragraphs from its table. The 2026-07-29 repair (`.issues/ponca-grammar-round-2.md` Lane 2,
-`scripts/ponca/repartition-grammar.py`) moved each paragraph into the child whose table it leads
-into or comments on — 38 sections, prose never edited, verified as identical multisets of exact
-strings before/after. Five of the ten chapters came out in exact PDF order; the other five still
-hold uncaptioned tables in the parent and can't be fixed without inventing subsections.
+six paragraphs from its table. The 2026-07-29 repair came in two passes
+(`.issues/ponca-grammar-round-2.md` Lanes 2 and 6), both moving text only — prose never created,
+deleted or reworded, verified as identical multisets of exact strings before/after:
+
+1. **Lane 2** (`scripts/ponca/repartition-grammar.py`) moved each paragraph into the child whose
+   table it leads into or comments on — 38 sections. That got 5 of the 10 chapters into exact PDF
+   order; the other 5 still held **uncaptioned** tables in the parent.
+2. **Lane 6** (`scripts/ponca/promote-residual-subsections.py`) created the 9 subsections those
+   tables needed (59 → 68 sections). All 10 chapters now match PDF block order.
+
+**A title is not "new content" if you lift it.** Lane 6 looked blocked because a new subsection
+needs a title and the PDF gives these tables no caption. The way through: take the title verbatim
+from the section's own lead-in prose or table (`The adverbial prefix Áʼ-`, `Xíáđa ‘to fall’`), in
+whatever naming style the siblings already use, and make the script ASSERT it — each title carries
+a list of fragments that must appear (normalized) inside its own body, so a hand-written title
+cannot silently smuggle in new wording.
 
 **Lesson for the next grammar import: make one subsection per table group (lead-in prose + table +
 follow-up commentary), including uncaptioned tables — never leave a table in a parent that has
 children.**
+
+Both scripts also model what a prod content-repair script should be: **guarded** (refuses to run
+unless prod still matches the exact block sequence it expects, so it cannot double-move prose) and
+**idempotent** (fixed UUIDs for created rows). Verify with an INDEPENDENT check that re-derives
+order from the source artifact rather than from the plan — Lane 6's `--order` walks the prod tree
+in render order (parent body → children, depth-first) and diffs it against the PDF block list; run
+it BEFORE the write too, where it should reproduce exactly the known-bad chapters.

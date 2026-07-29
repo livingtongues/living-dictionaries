@@ -28,7 +28,8 @@ export const NoMatch: Story<typeof Component> = {
   props: { text: 'reduplicated stem' },
 }
 
-// A dictionary with no legend at all: pass-through, no small-caps.
+// A dictionary with NO legend of its own still gets the standard Leipzig
+// catalog — the codes light up and expand to the site-wide (translatable) names.
 export const NoLegend: Story<typeof Component> = {
   page_data: {
     t: mock_t,
@@ -36,6 +37,17 @@ export const NoLegend: Story<typeof Component> = {
     dict_db: mock_dict_db({ glossing_abbreviations: [] }),
   } as never,
   props: { text: '1SG-đihą́-PL' },
+}
+
+// Free-text fields are prose as often as they are analysis: a standalone "A" is
+// an English word before it is a Leipzig code, so it stays plain.
+export const AmbiguousCodesLeftAlone: Story<typeof Component> = {
+  page_data: {
+    t: mock_t,
+    dictionary: { gloss_languages: ['en'] },
+    dict_db: mock_dict_db({ glossing_abbreviations: [] }),
+  } as never,
+  props: { text: 'A stem doubled in the PL' },
 }
 
 // Tapping a code opens its expansion.

@@ -1,3 +1,5 @@
+<svelte:options css="injected" />
+
 <script lang="ts">
   // @ts-nocheck
   import type { ComponentProps } from 'svelte'

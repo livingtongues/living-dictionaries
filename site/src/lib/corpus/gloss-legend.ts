@@ -63,6 +63,64 @@ export function build_gloss_splitter(codes: readonly string[]): (gloss: string) 
 }
 
 /**
+ * A character that, sitting next to a candidate code, proves the code is only
+ * PART of a word — letters, digits, and combining marks (the diacritics all over
+ * a vernacular form like `đihą́`, which must not turn `DU` loose inside it).
+ */
+const WORD_CHARACTER = /[\p{L}\p{N}\p{M}_]/u
+
+/**
+ * Build a splitter that only matches codes standing on their own, bounded by
+ * non-word characters. This is the rule for RUNNING PROSE and for free-text
+ * fields, where the substring matcher above would light up fragments of
+ * ordinary words; only a gloss cell is analysis-by-definition enough to take a
+ * match anywhere.
+ *
+ * Dot-composites are matched WHOLE (`1PL.PST` is one tappable unit) whenever
+ * every part is a known code — Leipzig's period joins the meanings of a single
+ * morpheme, so splitting it into two buttons would misrepresent the analysis.
+ */
+export function build_token_gloss_splitter({ codes }: { codes: readonly string[] }): (text: string) => GlossPiece[] {
+  const usable = [...new Set(codes.filter(code => code?.trim()))]
+    .sort((first, second) => second.length - first.length)
+  if (!usable.length)
+    return text => (text ? [{ text }] : [])
+
+  const alternation = usable.map(escape_regex).join('|')
+  const pattern = new RegExp(`(?:${alternation})(?:\\.(?:${alternation}))*`, 'gu')
+
+  return (text: string): GlossPiece[] => {
+    if (!text)
+      return []
+    const pieces: GlossPiece[] = []
+    let cursor = 0
+    pattern.lastIndex = 0
+    let match = pattern.exec(text)
+    while (match) {
+      const start = match.index
+      const end = start + match[0].length
+      const before = start > 0 ? text[start - 1] : ''
+      const after = end < text.length ? text[end] : ''
+      if ((before && WORD_CHARACTER.test(before)) || (after && WORD_CHARACTER.test(after))) {
+        // Mid-word: step one character on rather than past the whole candidate,
+        // so a real code starting inside it still gets its chance.
+        pattern.lastIndex = start + 1
+        match = pattern.exec(text)
+        continue
+      }
+      if (start > cursor)
+        pieces.push({ text: text.slice(cursor, start) })
+      pieces.push({ text: match[0], code: match[0] })
+      cursor = end
+      match = pattern.exec(text)
+    }
+    if (cursor < text.length)
+      pieces.push({ text: text.slice(cursor) })
+    return pieces
+  }
+}
+
+/**
  * Read a gloss for the reader's language. Per the locked convention, a
  * language-neutral category code lives under the reserved `default` key, so a
  * per-language lexical gloss wins when present and the neutral code survives
@@ -111,6 +169,51 @@ if (import.meta.vitest) {
     test('an empty legend passes the gloss through untouched', () => {
       expect(build_gloss_splitter([])('anything')).toEqual([{ text: 'anything' }])
       expect(build_gloss_splitter([])('')).toEqual([])
+    })
+  })
+
+  describe(build_token_gloss_splitter, () => {
+    test('matches a code standing alone but never inside a word', () => {
+      const split = build_token_gloss_splitter({ codes: ['DU', 'PL'] })
+      expect(split('the DU forms')).toEqual([{ text: 'the ' }, { text: 'DU', code: 'DU' }, { text: ' forms' }])
+      expect(split('DUST PLUME')).toEqual([{ text: 'DUST PLUME' }])
+    })
+
+    test('takes hyphens, slashes and parentheses as boundaries', () => {
+      const split = build_token_gloss_splitter({ codes: ['1SG', 'PL'] })
+      expect(split('1SG-đihą́-PL')).toEqual([
+        { text: '1SG', code: '1SG' },
+        { text: '-đihą́-' },
+        { text: 'PL', code: 'PL' },
+      ])
+      expect(split('(PL)')).toEqual([{ text: '(' }, { text: 'PL', code: 'PL' }, { text: ')' }])
+    })
+
+    test('a combining diacritic still counts as part of the word', () => {
+      const split = build_token_gloss_splitter({ codes: ['PL'] })
+      expect(split('PĹ')).toEqual([{ text: 'PĹ' }])
+    })
+
+    test('matches a dot-composite whole when every part is a code', () => {
+      const split = build_token_gloss_splitter({ codes: ['1PL', 'PST', 'SBJ'] })
+      expect(split('1PL.PST')).toEqual([{ text: '1PL.PST', code: '1PL.PST' }])
+      expect(split('1PL.PST.SBJ!')).toEqual([{ text: '1PL.PST.SBJ', code: '1PL.PST.SBJ' }, { text: '!' }])
+      // An unknown part ends the composite rather than dragging it in.
+      expect(split('1PL.xyz')).toEqual([{ text: '1PL', code: '1PL' }, { text: '.xyz' }])
+    })
+
+    test('a curated code containing a period wins over its own prefix', () => {
+      const split = build_token_gloss_splitter({ codes: ['1SG', '1SG.SBJ', 'SBJ'] })
+      expect(split('1SG.SBJ')).toEqual([{ text: '1SG.SBJ', code: '1SG.SBJ' }])
+    })
+
+    test('sentence-final punctuation does not block a match', () => {
+      const split = build_token_gloss_splitter({ codes: ['NEG'] })
+      expect(split('marked NEG.')).toEqual([{ text: 'marked ' }, { text: 'NEG', code: 'NEG' }, { text: '.' }])
+    })
+
+    test('an empty code list passes the text through untouched', () => {
+      expect(build_token_gloss_splitter({ codes: [] })('anything')).toEqual([{ text: 'anything' }])
     })
   })
 

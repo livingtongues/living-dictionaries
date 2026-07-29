@@ -1,7 +1,5 @@
 import { statSync } from 'node:fs'
 import type Database from 'better-sqlite3'
-import { building, dev } from '$app/environment'
-import { env } from '$env/dynamic/private'
 import { log_server_event } from '$lib/server/log-server-event'
 import { get_log_archive_db } from './log-archive-db'
 import { get_logs_db } from './logs-db'
@@ -44,7 +42,6 @@ import { get_shared_db } from './shared-db'
  * Ported from house/site/src/lib/db/server/wal-checkpoint-cron.ts.
  */
 
-const CHECKPOINT_INTERVAL_MS = 5 * 60 * 1000 // every 5 min keeps the WAL small even under steady write load
 /** A -wal still this large right after a TRUNCATE means a reader pinned it — worth an agent's attention. */
 const WAL_WARN_BYTES = 64 * 1024 * 1024
 
@@ -131,49 +128,8 @@ function mb(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)}MB`
 }
 
-const SINGLETON_KEY = Symbol.for('living.wal-checkpoint-cron.state')
-interface CronState { interval: ReturnType<typeof setInterval>, in_flight: boolean }
-interface GlobalWithCron { [SINGLETON_KEY]?: CronState }
-
-export function start_wal_checkpoint_cron_once(): void {
-  // dev/build: dormant locally (no long-lived busy WAL to tame).
-  // IS_STANDBY: only the primary runs singleton maintenance (both containers
-  // hold the same files open — the primary is the sole cron node).
-  if (building || dev)
-    return
-  if (env.IS_STANDBY === 'true') {
-    console.info('[wal-checkpoint] IS_STANDBY — cron disabled on standby container.')
-    return
-  }
-  const slot = globalThis as unknown as GlobalWithCron
-  if (slot[SINGLETON_KEY]) {
-    console.info('[wal-checkpoint] Already running — skip.')
-    return
-  }
-  const state: CronState = {
-    // .unref(): a background maintenance timer must never keep Node alive on its
-    // own (matches the other crons; lets one-shot importers exit cleanly).
-    interval: setInterval(() => run_guarded(state), CHECKPOINT_INTERVAL_MS).unref(),
-    in_flight: false,
-  }
-  slot[SINGLETON_KEY] = state
-  run_guarded(state) // first checkpoint on boot — reclaim whatever the previous container left behind
-  console.info(`[wal-checkpoint] Started — truncating central server WALs every ${CHECKPOINT_INTERVAL_MS / 60_000} min.`)
-}
-
-export function stop_wal_checkpoint_cron(): void {
-  const slot = globalThis as unknown as GlobalWithCron
-  const state = slot[SINGLETON_KEY]
-  if (!state)
-    return
-  clearInterval(state.interval)
-  delete slot[SINGLETON_KEY]
-}
-
-function run_guarded(state: CronState): void {
-  if (state.in_flight)
-    return
-  state.in_flight = true
+/** The roster's `run`: one sweep + its summary log line + the queryable failure event. */
+export function run_wal_checkpoint_sweep(): void {
   try {
     const results = run_wal_checkpoint_once()
     const summary = results.map(result => `${result.name} ${mb(result.wal_bytes_before)}→${mb(result.wal_bytes_after)}`).join(', ')
@@ -181,7 +137,5 @@ function run_guarded(state: CronState): void {
   } catch (err) {
     console.error('[wal-checkpoint] sweep failed:', err)
     log_server_event({ level: 'error', message: 'wal_checkpoint_sweep_failed', error: err })
-  } finally {
-    state.in_flight = false
   }
 }

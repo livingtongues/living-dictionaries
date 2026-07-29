@@ -54,8 +54,8 @@
                 </span>
               {:else if field === 'phonetic'}
                 [{value}]
-              {:else if field === 'morphology'}
-                <!-- `1SG-lift-PL` etc: legend codes render small-caps + tappable. -->
+              {:else if field === 'morphology' || field === 'interlinearization'}
+                <!-- `1SG-lift-PL` etc: glossing codes render small-caps + tappable. -->
                 <GlossedText text={value} />
               {:else if field === 'scientific_names' && !value?.includes('<i>')}
                 <i>{value}</i>

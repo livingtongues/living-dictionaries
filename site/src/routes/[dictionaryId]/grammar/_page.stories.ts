@@ -64,6 +64,21 @@ const book_rows = [
   chapter('numerals', 'zz', 'PONCA NUMERICAL SYSTEM'),
 ]
 
+// Prose the way a real grammar writes it: codes in a paradigm table, codes mid
+// sentence, and traps — a bare "3", an ALLCAPS word containing a code (PLUME),
+// and a code glued to a vernacular form — none of which may light up.
+const gloss_prose_rows = [
+  {
+    id: 'gp',
+    parent_id: null,
+    sort_key: 'a',
+    title: { en: 'Person marking' },
+    body: { en: 'The 1SG prefix precedes the stem, while 2SG.OBJ follows it; a 1PL.PST form therefore carries two markers. Class 3 verbs take a PLUME of suffixes, and the sequence PLđihą́ is never broken.\n\n| Person | Prefix | Gloss |\n| --- | --- | --- |\n| 1 | a- | 1SG |\n| 2 | đa- | 2SG |\n| plural | -i | PL |' },
+    entry_id: null,
+    sense_id: null,
+  },
+]
+
 const clause_slots = [
   { id: 'sl1', sort_key: 'a', name: { en: 'Subject' }, code: 'SBJ' },
   { id: 'sl2', sort_key: 'b', name: { en: 'Object' }, code: 'OBJ' },
@@ -199,6 +214,60 @@ export const BookDesktopReference: PageStory<typeof Component> = {
     await page.waitForSelector('.rail')
     await page.evaluate(() => document.getElementById('grammar-clause-template')?.scrollIntoView())
     await new Promise(resolve => setTimeout(resolve, 400))
+  },
+}
+
+// Scrolled deep, then the rail heading is clicked: it is a "back to top"
+// target, so the page returns to the preface (and drops the section hash).
+export const BookDesktopBackToTop: PageStory<typeof Component> = {
+  viewports: [{ width: 1280, height: 900 }],
+  page_data: page_data({ rows: book_rows, slots: [] }),
+  props: { dictionary, is_manager: false } as never,
+  csr: true,
+  interactions: async (page) => {
+    await page.waitForSelector('.rail')
+    await page.evaluate(() => document.getElementById('section-tense')?.scrollIntoView())
+    await new Promise(resolve => setTimeout(resolve, 300))
+    await page.click('.rail-heading')
+    await new Promise(resolve => setTimeout(resolve, 900))
+  },
+}
+
+// ── Glossing codes in the prose ────────────────────────────────────────────
+// Curated (1SG, 2SG, PL) and standard-catalog (2SG.OBJ, 1PL.PST) codes alike go
+// small-caps and tappable; "3", "PLUME" and "PLđihą́" stay plain text.
+export const ProseGlossCodes: PageStory<typeof Component> = {
+  viewports: [{ width: 820, height: 560 }],
+  page_data: page_data({ rows: gloss_prose_rows, slots: [] }),
+  props: { dictionary, is_manager: false } as never,
+  csr: true,
+  interactions: async (page) => {
+    await page.waitForSelector('.gloss-code')
+  },
+}
+
+// Tapping a composed code shows the expansion assembled from its parts.
+export const ProseGlossCodeExpanded: PageStory<typeof Component> = {
+  viewports: [{ width: 820, height: 560 }],
+  page_data: page_data({ rows: gloss_prose_rows, slots: [] }),
+  props: { dictionary, is_manager: false } as never,
+  csr: true,
+  interactions: async (page) => {
+    await page.waitForSelector('[data-gloss-code="1PL.PST"]')
+    await page.click('[data-gloss-code="1PL.PST"]')
+    await page.waitForSelector('[role="dialog"]')
+  },
+}
+
+// Narrow viewport at the top of the page: the bar offers the "Contents" (the
+// heading right above it already says Grammar).
+export const BookMobileIdle: PageStory<typeof Component> = {
+  viewports: [{ width: 480, height: 400 }],
+  page_data: page_data({ rows: book_rows, slots: [] }),
+  props: { dictionary, is_manager: false } as never,
+  csr: true,
+  interactions: async (page) => {
+    await page.waitForSelector('.toc-bar')
   },
 }
 
