@@ -14,6 +14,7 @@ import { load_v1_dictionary_context, mirror_dictionary_cursor } from '$lib/db/se
 import { MediaStorageNotConfiguredError, store_media_bytes } from '$lib/server/media-storage'
 import { record_media_object_by_key } from '$lib/db/server/media-ledger'
 import { store_photo_variants_in_background } from '$lib/server/photo-variants'
+import { read_photo_dimensions } from '$lib/server/photo-dimensions'
 import { store_video_thumbnail_in_background } from '$lib/server/video-thumbnails'
 import { log_server_event } from '$lib/server/log-server-event'
 import { error, json } from '@sveltejs/kit'
@@ -278,7 +279,8 @@ export function make_media_attach_handler(cell_key: MediaCellKey): RequestHandle
         file_type: parsed.file_type ?? 'application/octet-stream',
         bytes: parsed.bytes,
       })
-      record_media_object_by_key({ key: stored.storage_path, bytes: parsed.bytes.length })
+      const dimensions = cell.medium === 'photo' ? await read_photo_dimensions(parsed.bytes) : null
+      record_media_object_by_key({ key: stored.storage_path, bytes: parsed.bytes.length, ...dimensions })
       media_fields.storage_path = stored.storage_path
       if (cell.medium === 'photo') {
         media_fields.photographer = str(fields.photographer) ?? null

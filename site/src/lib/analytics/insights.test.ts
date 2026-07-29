@@ -45,7 +45,15 @@ function make_analytics(overrides: Partial<LogAnalytics> = {}): LogAnalytics {
     locales: { sessions_with_browser_locale: 0, sessions_with_ui_locale: 0, browser: [], in_use: [], mismatch: [], mismatch_visitors: 0 },
     missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
     boot_health: { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] },
-    uptime: { probes: 0, availability: null, ttfb: { p50: null, p95: null }, total: { p50: null, p95: null }, vantages: [], daily: [] },
+    uptime: {
+      probes: 0,
+      availability: null,
+      ttfb: { p50: null, p95: null },
+      total: { p50: null, p95: null },
+      vantages: [],
+      daily: [],
+      user_observed: { failures: 0, affected_users: 0, affected_sessions: 0, worst_hour: null, worst_hour_failures: 0, daily: [] },
+    },
     host: null,
     ...overrides,
   }

@@ -84,4 +84,18 @@ describe('the share-card renderer, off the request thread', () => {
     expect(signature_of(png)).toEqual(PNG_SIGNATURE)
     expect(render_pool_stats().spawns).toBe(spawns_before)
   }, 60_000)
+
+  test('concurrent callers are serialized inside the worker so native Resvg references never overlap', async () => {
+    const cards = await Promise.all(Array.from({ length: 8 }, (_, index) =>
+      render_component_to_png({
+        component: OpenGraphImage,
+        props: { ...CARD_PROPS, title: `Concurrent ${index}` },
+        height: HEIGHT,
+        width: WIDTH,
+      })))
+
+    expect(cards).toHaveLength(8)
+    for (const png of cards)
+      expect(signature_of(png)).toEqual(PNG_SIGNATURE)
+  }, 120_000)
 })

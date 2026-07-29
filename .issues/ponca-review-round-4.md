@@ -87,10 +87,8 @@ Order matters (the respelling apply-target depends on the orthography move landi
 - ✅ Surviving reviews rewritten; settled ones cleared.
 - ✅ Regenerated + replaced the report artifact (`0d5c2ca5…`, `review_flags: 38`); the superseded
       artifact row + its R2 object are gone. Thread still has **0 messages** — nothing has gone out.
-- ✅ Verified on prod by SQL; verified the new UI in a browser against a **local copy of the
-      post-round-4 prod DB** (prod itself still runs pre-deploy code — see "Remaining").
-- ⬜ **Remaining (needs a deploy):** restore the short note + structured `comparisons` on the 38
-      surviving prod reviews.
+- ✅ Verified on prod by SQL and in a signed-in browser on livingdictionaries.app (post-deploy).
+- ✅ Structured `comparisons` restored on the 38 surviving prod reviews (post-deploy pass below).
 
 ## Notes / gotchas carried in
 
@@ -137,22 +135,28 @@ asked "should this entry carry both senses?" when it already did. Fixed in
 Generalizable: **only offer an apply when writing that value is the whole answer.** If the other
 reading already lives on a sibling sense, the question is about the senses, not the string.
 
-### Interim state on prod — IMPORTANT
+### Post-deploy pass — ✅ DONE (2026-07-28 11:30 UTC, commit `97444112`)
 
-The deployed server predates `comparisons` and `to_review()` drops unknown fields, so the 38 live
-reviews currently carry **self-contained prose notes** (values spelled out inside `note`, written by
-`round4-interim-notes.py`). They read fine — the deployed banner already has `white-space: pre-wrap`.
+While the old code was live, `to_review()` dropped the unknown `comparisons` field, so the 38 reviews
+carried self-contained prose notes for ~2h (`round4-interim-notes.py`). After Jacob deployed:
 
-**Post-deploy checklist** (one pass, one temporary write key — mint a fresh `role='write'` key, then
-revoke it; the round-4 key `d501dbcd` is already revoked):
+1. ✅ Backed up prod (`/opt/hosting/data/.import-backups/ponca-pre-round4-comparisons-20260728-112743.db`).
+2. ✅ `round4-restore-comparisons.py … --execute` — 38 PATCHes; prod now holds the short note +
+   structured comparisons **with the corrected apply targets**: 21 comparisons, 6 with `apply`.
+3. ✅ Report artifact regenerated from the updated `report.py` and posted
+   (`a10d5a1c-c7d5-4fc5-b7b2-ef745ea5f0a8`); superseded row `0d5c2ca5…` + its R2 object deleted —
+   exactly one artifact remains.
+4. ✅ Temporary write key `98c4fe1a…` revoked (0 live ponca keys); raw token deleted.
+5. ✅ Verified in a real browser signed in as an admin on **livingdictionaries.app**:
+   `Uhítʼaʼžì` shows the character-level diff (`bä` marked), `In use` + a working `Use this`;
+   `Kʼukʼúmi` shows the diff with **no** apply button and the corrected question; the entries list
+   shows ⚠ at the end of each headword line with facets **Needs review (38) · Possibly two words
+   (20) · Definition differs (16) · Respelling differs (2)**. No page errors.
+6. ✅ Final DB state: 38 flags · 21 comparisons · 6 applies · 0 `phonetic` · 0 dirty rows ·
+   `integrity_check ok` · thread still at **0 messages**.
 
-1. `python3 round4-restore-comparisons.py --base https://livingdictionaries.app --token-file … --execute`
-   — 38 idempotent PATCHes; puts the short note + structured `comparisons` back (this also carries
-   the corrected notes/apply targets to prod).
-2. Regenerate + replace the report artifact from the updated `report.py` (same swap the round-4 run
-   did: insert the new `thread_artifacts` row, delete the old row + its R2 object).
-3. Re-verify: 38 flags, 21 comparisons, 6 with `apply`; spot-check one multi-sense entry
-   (`Kʼukʼúmi`) shows no "Use this", and `Uhítʼaʼžì` does.
+**JWT gotcha for future prod browser checks:** the session JWT puts the user id in `sub`
+(`.setSubject(id)`), not a `user_id` claim — a token with `user_id` verifies as signed-out.
 
 ### Verification performed (2026-07-28, this session)
 

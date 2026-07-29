@@ -134,6 +134,20 @@
     { label: 'p50', color: 'var(--primary)', points: uptime_days.map(point => ({ date: point.day, value: point.ttfb_p50 as number })) },
     { label: 'p95', color: USERS_COLOR, points: uptime_days.map(point => ({ date: point.day, value: point.ttfb_p95 as number })) },
   ])
+  const observed_failures = $derived(uptime.user_observed)
+  const observed_failure_series = $derived([
+    {
+      label: '5xx events',
+      color: 'var(--danger)',
+      area: true,
+      points: observed_failures.daily.map(point => ({ date: point.day, value: point.failures })),
+    },
+    {
+      label: 'affected users',
+      color: USERS_COLOR,
+      points: observed_failures.daily.map(point => ({ date: point.day, value: point.users })),
+    },
+  ])
 
   // --- Host resources (whole-VPS CPU/RAM/disk — the `host_stats` family). Only
   // present for level-3 admins (the API injects it; null hides the panel). Live
@@ -823,16 +837,35 @@
   </section>
 
   <section class="panel">
-    <h2>Synthetic uptime <span class="hint">off-box probe · availability + fixed-vantage latency · hot window</span></h2>
-    {#if uptime.probes > 0}
-      <p class="uptime-verdict" class:ok={uptime_healthy} class:danger={!uptime_healthy}>
-        {#if uptime.availability !== null}
-          {format_pct(uptime.availability)} availability
+    <h2>Availability <span class="hint">off-box probes + failures observed by signed-in sync clients · hot window</span></h2>
+    <div class="availability-verdicts">
+      <div>
+        <div class="availability-label">Synthetic probe</div>
+        {#if uptime.probes > 0}
+          <p class="uptime-verdict" class:ok={uptime_healthy} class:danger={!uptime_healthy}>
+            {#if uptime.availability !== null}
+              {format_pct(uptime.availability)} availability
+            {:else}
+              availability n/a
+            {/if}
+            <span class="hint">· {format_number(uptime.probes)} probe{uptime.probes === 1 ? '' : 's'}{#if uptime.vantages.length} · from {uptime.vantages.join(', ')}{/if}</span>
+          </p>
         {:else}
-          availability n/a
+          <p class="muted">No probe data in window.</p>
         {/if}
-        <span class="hint">· {format_number(uptime.probes)} probe{uptime.probes === 1 ? '' : 's'}{#if uptime.vantages.length} · from {uptime.vantages.join(', ')}{/if}</span>
-      </p>
+      </div>
+      <div>
+        <div class="availability-label">User-observed server failures</div>
+        <p class="uptime-verdict" class:ok={observed_failures.failures === 0} class:danger={observed_failures.failures > 0}>
+          {format_number(observed_failures.failures)} sync 5xx
+          <span class="hint">· {format_number(observed_failures.affected_users)} affected user{observed_failures.affected_users === 1 ? '' : 's'} · {format_number(observed_failures.affected_sessions)} session{observed_failures.affected_sessions === 1 ? '' : 's'}</span>
+        </p>
+        {#if observed_failures.worst_hour}
+          <p class="availability-detail">Worst hour: {format_date_time(new Date(`${observed_failures.worst_hour}:00:00.000Z`))} · {format_number(observed_failures.worst_hour_failures)} failure{observed_failures.worst_hour_failures === 1 ? '' : 's'}</p>
+        {/if}
+      </div>
+    </div>
+    {#if uptime.probes > 0}
       <p class="cap-hint">A probe only records when <code>/api/log</code> (same origin) is reachable, so availability is the success rate of recorded probes — a full outage self-suppresses. The latency trend is the primary signal.</p>
       <div class="perf-summary uptime-summary">
         <div class="perf-stat">
@@ -854,8 +887,12 @@
         <h3 class="perf-h3">Server TTFB <span class="hint">ms · fixed vantage · p50 / p95</span></h3>
         <ComboChart series={uptime_ttfb_series} height={180} value_format={format_ms} />
       {/if}
+    {/if}
+    {#if observed_failure_series[0].points.length}
+      <h3 class="perf-h3 observed-title">User-observed 5xx <span class="hint">sync failures / affected signed-in users per day</span></h3>
+      <ComboChart series={observed_failure_series} height={150} />
     {:else}
-      <p class="muted">No synthetic probe data in window. An off-box monitor (the mustang uptime prober) POSTs <code>uptime_probe</code> availability + latency samples here every few minutes.</p>
+      <p class="availability-detail observed-title">No HTTP 5xx responses reached signed-in dictionary-sync clients in this window.</p>
     {/if}
   </section>
 
@@ -1009,9 +1046,6 @@
     border-radius: 0.5rem;
     background: color-mix(in srgb, var(--primary) 10%, transparent);
     font-size: 0.85rem;
-  }
-  tr.noise {
-    opacity: 0.55;
   }
   .pipeline {
     display: flex;
@@ -1367,6 +1401,24 @@
   .uptime-verdict.danger { color: var(--danger); }
   .uptime-verdict .hint { font-weight: 400; }
   .uptime-summary { grid-template-columns: repeat(2, minmax(0, 12rem)); }
+  .availability-verdicts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .availability-label {
+    color: var(--color-secondary);
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+  .availability-detail {
+    color: var(--color-secondary);
+    font-size: 0.75rem;
+    margin: -0.2rem 0 0;
+  }
+  .observed-title { margin-top: 1rem; }
   .lvl { text-transform: uppercase; font-size: 0.6875rem; color: var(--danger); }
   .msg { word-break: break-word; }
   .nowrap { white-space: nowrap; }
@@ -1436,6 +1488,7 @@
     .grid { grid-template-columns: 1fr; }
     .perf-summary { grid-template-columns: 1fr; }
     .speed-grid { grid-template-columns: 1fr; }
+    .availability-verdicts { grid-template-columns: 1fr; }
     .host-meters { grid-template-columns: repeat(2, 1fr); }
   }
   /* Collapse long error/row lists behind a toggle — the verdict/stat cards above

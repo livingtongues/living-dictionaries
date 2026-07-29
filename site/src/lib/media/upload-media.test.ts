@@ -4,6 +4,8 @@ import { upload_media } from './upload-media'
 import { api_upload } from '$api/upload/_call'
 
 vi.mock('$api/upload/_call', () => ({ api_upload: vi.fn() }))
+// jsdom media elements never fire loadedmetadata — skip the real 3s-timeout probe
+vi.mock('./probe-duration', () => ({ probe_media_duration_ms: () => Promise.resolve(null) }))
 
 const mocked_api_upload = vi.mocked(api_upload)
 

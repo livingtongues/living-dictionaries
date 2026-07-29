@@ -390,6 +390,15 @@ export interface LogAnalytics {
 
 /** One day of synthetic-probe availability + latency (hot window). */
 export interface UptimeDailyPoint { day: string, probes: number, up: number, ttfb_p50: number | null, ttfb_p95: number | null }
+export interface UserObservedFailureDailyPoint { day: string, failures: number, users: number }
+export interface UserObservedAvailability {
+  failures: number
+  affected_users: number
+  affected_sessions: number
+  worst_hour: string | null
+  worst_hour_failures: number
+  daily: UserObservedFailureDailyPoint[]
+}
 /**
  * Synthetic external uptime + latency, from the `uptime_probe` server-log family
  * (an off-box monitor hits the site every ~5 min and POSTs `{ status, ok, ttfb_ms,
@@ -407,6 +416,8 @@ export interface UptimeSummary {
   /** Distinct `context.vantage` labels seen (probe origins). */
   vantages: string[]
   daily: UptimeDailyPoint[]
+  /** HTTP 5xx responses observed by signed-in human dictionary-sync clients. */
+  user_observed: UserObservedAvailability
 }
 
 /** One language's demand: distinct visitors (visitor_id, session-fallback) + sessions. */
@@ -1046,7 +1057,15 @@ const EMPTY_SYNC_HEALTH: LogAnalytics['sync_health'] = { total: 0, by_kind: [], 
 const EMPTY_BUILD_ADOPTION: LogAnalytics['build_adoption'] = { total: 0, current: 0, behind: 0, stale: 0, unknown: 0, stranded_pct: null, builds: [] }
 const EMPTY_STORAGE: LogAnalytics['storage'] = { dbs: [], dict_dbs: null }
 const EMPTY_BOOT_HEALTH: LogAnalytics['boot_health'] = { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] }
-const EMPTY_UPTIME: LogAnalytics['uptime'] = { probes: 0, availability: null, ttfb: { p50: null, p95: null }, total: { p50: null, p95: null }, vantages: [], daily: [] }
+const EMPTY_UPTIME: LogAnalytics['uptime'] = {
+  probes: 0,
+  availability: null,
+  ttfb: { p50: null, p95: null },
+  total: { p50: null, p95: null },
+  vantages: [],
+  daily: [],
+  user_observed: { failures: 0, affected_users: 0, affected_sessions: 0, worst_hour: null, worst_hour_failures: 0, daily: [] },
+}
 const EMPTY_API_V1: LogAnalytics['api_v1'] = { total: 0, failures: 0, daily: [], by_event: [], by_dictionary: [], by_via: [] }
 const EMPTY_ENTRY_EDITS: LogAnalytics['entry_edits'] = { ui_total: 0, api_total: 0, daily: [] }
 const EMPTY_TOP_DICTIONARIES: LogAnalytics['top_dictionaries'] = { distinct_dictionaries: 0, prev_month: '', site_visitors_30d: 0, site_visitors_prev_month: 0, site_visitors_7d: 0, dictionaries: [] }
@@ -1503,6 +1522,40 @@ function build_uptime(ctx: AnalyticsContext): UptimeSummary {
       ttfb_p95: percentile(bucket.ttfb, 95),
     }))
 
+  const observed_rows = ctx.logs_db.prepare(`
+    SELECT substr(received_at, 1, 10) day,
+           substr(received_at, 1, 13) hour,
+           user_id,
+           session_id
+    FROM client_logs
+    WHERE received_at >= ?
+      AND source = 'client'
+      AND message = 'sync_failed'
+      AND user_id IS NOT NULL
+      AND json_valid(context)
+      AND CAST(json_extract(context, '$.status') AS INTEGER) BETWEEN 500 AND 599
+      AND NOT (${ctx.is_bot_row})
+    ORDER BY received_at
+  `).all(ctx.window_start_iso) as { day: string, hour: string, user_id: string, session_id: string | null }[]
+  const observed_users = new Set<string>()
+  const observed_sessions = new Set<string>()
+  const observed_by_day = new Map<string, { failures: number, users: Set<string> }>()
+  const observed_by_hour = new Map<string, number>()
+  for (const row of observed_rows) {
+    observed_users.add(row.user_id)
+    if (row.session_id)
+      observed_sessions.add(row.session_id)
+    const day_bucket = observed_by_day.get(row.day) ?? { failures: 0, users: new Set<string>() }
+    day_bucket.failures++
+    day_bucket.users.add(row.user_id)
+    observed_by_day.set(row.day, day_bucket)
+    observed_by_hour.set(row.hour, (observed_by_hour.get(row.hour) ?? 0) + 1)
+  }
+  const [worst_hour_entry] = [...observed_by_hour.entries()]
+    .sort(([first_hour, first_count], [second_hour, second_count]) =>
+      second_count - first_count || second_hour.localeCompare(first_hour),
+    )
+
   return {
     probes: rows.length,
     availability: ok_denominator > 0 ? up / ok_denominator : null,
@@ -1510,6 +1563,16 @@ function build_uptime(ctx: AnalyticsContext): UptimeSummary {
     total: { p50: percentile(total_values, 50), p95: percentile(total_values, 95) },
     vantages: [...vantages].sort(),
     daily,
+    user_observed: {
+      failures: observed_rows.length,
+      affected_users: observed_users.size,
+      affected_sessions: observed_sessions.size,
+      worst_hour: worst_hour_entry?.[0] ?? null,
+      worst_hour_failures: worst_hour_entry?.[1] ?? 0,
+      daily: [...observed_by_day.entries()]
+        .sort(([first], [second]) => first.localeCompare(second))
+        .map(([day, bucket]) => ({ day, failures: bucket.failures, users: bucket.users.size })),
+    },
   }
 }
 

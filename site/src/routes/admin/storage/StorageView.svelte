@@ -23,6 +23,16 @@
     return `${bytes} B`
   }
 
+  function format_duration(duration_ms: number): string {
+    const hours = duration_ms / 3_600_000
+    if (hours >= 10)
+      return `${Math.round(hours).toLocaleString()} h`
+    if (hours >= 1)
+      return `${hours.toFixed(1)} h`
+    const minutes = duration_ms / 60_000
+    return minutes >= 1 ? `${Math.round(minutes)} min` : `${Math.round(duration_ms / 1000)} s`
+  }
+
   const total_bytes = $derived(data.totals.reduce((sum, row) => sum + row.bytes, 0))
   const total_objects = $derived(data.totals.reduce((sum, row) => sum + row.object_count, 0))
   const total_variant_bytes = $derived(data.totals.reduce((sum, row) => sum + row.variant_bytes, 0))
@@ -116,6 +126,7 @@
     sort_button('dict_id', 'Dictionary'),
     sort_button('bucket', 'Category'),
     sort_button('audio_bytes', 'Audio'),
+    sort_button('audio_duration_ms', 'Audio time'),
     sort_button('video_bytes', 'Video'),
     sort_button('photo_bytes', 'Photo'),
     sort_button('total_bytes', 'Total'),
@@ -146,6 +157,11 @@
     <div class="card">
       <div class="card-value" style:color={TYPE_COLORS[row.media_type]}>{format_bytes(row.bytes)}</div>
       <div class="card-label">{row.media_type} · {row.object_count.toLocaleString()}</div>
+      {#if row.duration_ms}
+        <div class="card-note">
+          {format_duration(row.duration_ms)} of recordings{row.missing_duration_count ? ` · ${row.missing_duration_count.toLocaleString()} not yet measured` : ''}
+        </div>
+      {/if}
       {#if row.media_type === 'photo'}
         <div class="card-note">bytes include 3 resized copies per photo ({format_bytes(row.variant_bytes)})</div>
       {:else if row.media_type === 'video'}
@@ -221,6 +237,7 @@
           <td><a href="/{dict.dict_id}" target="_blank" rel="noreferrer">{dict.name ?? dict.dict_id}</a></td>
           <td><span class="bucket {dict.bucket ?? 'unclassified'}">{dict.bucket ?? '—'}</span></td>
           <td class="numeric">{dict.audio_bytes ? format_bytes(dict.audio_bytes) : '—'}</td>
+          <td class="numeric">{dict.audio_duration_ms ? format_duration(dict.audio_duration_ms) : '—'}</td>
           <td class="numeric">{dict.video_bytes ? format_bytes(dict.video_bytes) : '—'}</td>
           <td class="numeric">{dict.photo_bytes ? format_bytes(dict.photo_bytes) : '—'}</td>
           <td class="numeric total-col">{format_bytes(dict.total_bytes)}</td>

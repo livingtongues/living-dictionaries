@@ -34,7 +34,8 @@ code fully torn down (2026-07; deploys run from `main`) — the one-page histori
   (why `construct_outside_reaction` exists).
 - [workflow/](./workflow/index.md) — multi-agent working discipline: the shared-working-tree
   rules from the 2026-07-12 codemod clobber (check `horse list` + `git status` before bulk
-  reverts; JSONL-replay recovery).
+  reverts; JSONL-replay recovery), and the two failure modes of parallel verification lanes
+  (session-limit stalls vs. lanes that skip the evidence read).
 
 ## Pointers to the reference repo
 The **target** architecture (SQLite shared.db + per-dict dict.db, wa-sqlite/better-sqlite3,

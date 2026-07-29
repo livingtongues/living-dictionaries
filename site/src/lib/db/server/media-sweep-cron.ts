@@ -9,6 +9,7 @@ import { log_server_event } from '$lib/server/log-server-event'
 import { photo_variant_key, PHOTO_VARIANTS } from '$lib/utils/media-path'
 import { dictionary_db_path } from './dictionary-db'
 import { parse_media_key } from './media-ledger'
+import { run_media_metadata_probe_once } from './media-metadata-probe'
 import { get_shared_db } from './shared-db'
 
 /**
@@ -298,6 +299,11 @@ async function run_guarded(state: CronState): Promise<void> {
       const summary = await run_media_reconcile_once()
       console.info(`[media-sweep] reconcile: ${JSON.stringify(summary)}`)
       log_server_event({ level: 'info', message: 'media_sweep_reconciled', context: { ...summary } })
+      const probe = await run_media_metadata_probe_once()
+      if (probe.probed > 0) {
+        console.info(`[media-sweep] metadata probe: ${JSON.stringify(probe)}`)
+        log_server_event({ level: 'info', message: 'media_metadata_probed', context: { ...probe } })
+      }
     }
   } catch (err) {
     console.error('[media-sweep] failed:', err)

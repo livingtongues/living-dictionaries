@@ -146,6 +146,17 @@ function build_uptime(): LogAnalytics['uptime'] {
     total: { p50: 214, p95: 690 },
     vantages: ['mustang-my'],
     daily,
+    user_observed: {
+      failures: 7,
+      affected_users: 3,
+      affected_sessions: 4,
+      worst_hour: '2026-06-21T14',
+      worst_hour_failures: 4,
+      daily: [
+        { day: '2026-06-21', failures: 5, users: 2 },
+        { day: '2026-06-23', failures: 2, users: 1 },
+      ],
+    },
   }
 }
 
@@ -568,6 +579,14 @@ export const empty_analytics: LogAnalytics = {
   locales: { sessions_with_browser_locale: 0, sessions_with_ui_locale: 0, browser: [], in_use: [], mismatch: [], mismatch_visitors: 0 },
   missing_i18n_keys: { total: 0, distinct_keys: 0, sessions: 0, keys: [] },
   boot_health: { failed_sessions: 0, recovered_sessions: 0, non_recovery_pct: null, snapshot_expired_sessions: 0, by_message: [], daily: [] },
-  uptime: { probes: 0, availability: null, ttfb: { p50: null, p95: null }, total: { p50: null, p95: null }, vantages: [], daily: [] },
+  uptime: {
+    probes: 0,
+    availability: null,
+    ttfb: { p50: null, p95: null },
+    total: { p50: null, p95: null },
+    vantages: [],
+    daily: [],
+    user_observed: { failures: 0, affected_users: 0, affected_sessions: 0, worst_hour: null, worst_hour_failures: 0, daily: [] },
+  },
   host: { now: null, samples: 0, latest: null, hourly: [] },
 }

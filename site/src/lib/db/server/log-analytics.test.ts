@@ -329,6 +329,28 @@ describe(get_log_analytics, () => {
     expect(uptime.daily).toHaveLength(2)
   })
 
+  test('adds signed-in human sync 5xx breadth and worst hour to uptime', async () => {
+    add_log({ day: '2026-06-29', level: 'warn', message: 'sync_failed', user_id: 'u1', context: { status: 503, session_id: 's1' } })
+    add_log({ day: '2026-06-30', level: 'warn', message: 'sync_failed', user_id: 'u1', context: { status: 500, session_id: 's2' } })
+    add_log({ day: '2026-06-30', level: 'warn', message: 'sync_failed', user_id: 'u2', context: { status: 502, session_id: 's3' } })
+    add_log({ day: '2026-06-30', level: 'warn', message: 'sync_failed', user_id: 'u3', context: { status: 404, session_id: 's4' } })
+    add_log({ day: '2026-06-30', level: 'warn', message: 'sync_failed', user_id: null, context: { status: 503, session_id: 'anonymous' } })
+
+    const { uptime } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
+
+    expect(uptime.user_observed).toEqual({
+      failures: 3,
+      affected_users: 2,
+      affected_sessions: 3,
+      worst_hour: '2026-06-30T10',
+      worst_hour_failures: 2,
+      daily: [
+        { day: '2026-06-29', failures: 1, users: 1 },
+        { day: '2026-06-30', failures: 2, users: 2 },
+      ],
+    })
+  })
+
   test('daily real_errors folds out known-noise + expected-response rows, raw errors keeps them', async () => {
     add_log({ day: '2026-06-30', level: 'error', message: 'boom', context: { session_id: 's1' } })
     add_log({ day: '2026-06-30', level: 'error', message: 'Failed to fetch dynamically imported module: /_app/x.js', context: { session_id: 's1' } })
@@ -1987,6 +2009,14 @@ describe(get_log_analytics, () => {
             "ttfb": {
               "p50": null,
               "p95": null,
+            },
+            "user_observed": {
+              "affected_sessions": 0,
+              "affected_users": 0,
+              "daily": [],
+              "failures": 0,
+              "worst_hour": null,
+              "worst_hour_failures": 0,
             },
             "vantages": [],
           },

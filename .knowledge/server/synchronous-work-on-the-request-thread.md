@@ -72,3 +72,17 @@ Two things that generalize to the next handler that needs this:
 - Keep the queue/budget anyway. It stops the worker pegging the box's second core, and it is what
   sheds a backlog. With rendering off-thread the budget can be loose (`/og` went 0.5 → 0.9) and the
   wait deadline long, since waiting now costs a socket rather than the thread.
+
+## Two costs of moving work off the request thread (learned 2026-07-28)
+
+- **A single-threaded worker still needs its OWN serialization.** Bounding concurrency in the parent
+  is not enough if the worker's message handler is `async`: two overlapping jobs then share native
+  state. `/og`'s renderer failed 100% of the time for nine hours with
+  `Failed to unwrap exclusive reference of Resvg type from napi value`, and a fresh worker recovers
+  for only about a minute before the next overlapping pair poisons it again — so a container restart
+  is not a workaround. Chain jobs inside the worker (`tail = tail.then(...)`).
+- **Telemetry that fires only on the request path goes blind the moment the work leaves it.** LD's
+  `admin_analytics_computed` is emitted only by the admin endpoint; after computation moved to the
+  boot warm-up and the post-retention-sweep hook, the caches kept being rebuilt while the metric
+  recorded nothing for days. Emit the cost event from the background path too, with a field naming
+  the trigger — otherwise "no events" reads as "no computes".

@@ -23,6 +23,8 @@ export interface StorageDictRow {
   variant_bytes: number
   /** Unique media items (originals only — resized copies not counted). */
   object_count: number
+  audio_duration_ms: number
+  video_duration_ms: number
 }
 
 export interface StorageTrendPoint {
@@ -34,7 +36,7 @@ export interface StorageTrendPoint {
 export interface AdminStorageResponseBody {
   generated_at: string
   last_reconcile: string | null
-  totals: { media_type: string, bytes: number, object_count: number, variant_count: number, variant_bytes: number }[]
+  totals: { media_type: string, bytes: number, object_count: number, variant_count: number, variant_bytes: number, duration_ms: number, /** originals still missing a probed/declared duration */ missing_duration_count: number }[]
   orphaned: { bytes: number, object_count: number }
   dicts: StorageDictRow[]
   trend: StorageTrendPoint[]
@@ -51,7 +53,9 @@ export const GET: RequestHandler = async (event) => {
     SELECT media_type, SUM(bytes) AS bytes,
       SUM(CASE WHEN is_variant = 0 THEN 1 ELSE 0 END) AS object_count,
       SUM(is_variant) AS variant_count,
-      SUM(CASE WHEN is_variant = 1 THEN bytes ELSE 0 END) AS variant_bytes
+      SUM(CASE WHEN is_variant = 1 THEN bytes ELSE 0 END) AS variant_bytes,
+      COALESCE(SUM(duration_ms), 0) AS duration_ms,
+      SUM(CASE WHEN is_variant = 0 AND media_type IN ('audio', 'video') AND duration_ms IS NULL THEN 1 ELSE 0 END) AS missing_duration_count
     FROM media_objects GROUP BY media_type ORDER BY bytes DESC
   `).all() as AdminStorageResponseBody['totals']
 
@@ -67,7 +71,9 @@ export const GET: RequestHandler = async (event) => {
       SUM(CASE WHEN m.media_type = 'photo' THEN m.bytes ELSE 0 END) AS photo_bytes,
       SUM(m.bytes) AS total_bytes,
       SUM(CASE WHEN m.is_variant = 1 THEN m.bytes ELSE 0 END) AS variant_bytes,
-      SUM(CASE WHEN m.is_variant = 0 THEN 1 ELSE 0 END) AS object_count
+      SUM(CASE WHEN m.is_variant = 0 THEN 1 ELSE 0 END) AS object_count,
+      COALESCE(SUM(CASE WHEN m.media_type = 'audio' THEN m.duration_ms ELSE 0 END), 0) AS audio_duration_ms,
+      COALESCE(SUM(CASE WHEN m.media_type = 'video' THEN m.duration_ms ELSE 0 END), 0) AS video_duration_ms
     FROM media_objects m
     LEFT JOIN dictionaries d ON d.id = m.dict_id
     GROUP BY m.dict_id

@@ -97,18 +97,31 @@ proposals against this lens.
   derived from schema-drift / server-faults / sync-storm / boot-health / stale-build signals. The
   first concrete instance of the plain-language directive above.
 
-## Open proposals
-- **★★★ NEW — "User-observed availability" series next to Synthetic uptime** *(filed 2026-07-27 —
-  grounded in a live P1; **HIGH**).* Today the `/admin/health` Synthetic uptime panel reported
+## Shipped (2026-07-28, `.issues/log-review-recommendations-2026-07-28.md`)
+
+- ✅ **"User-observed availability" beside Synthetic uptime.** The existing `/admin/health`
+  availability panel now pairs probe availability/latency with signed-in human sync-client HTTP
+  5xx counts, distinct affected users/sessions, worst hour, and a daily failures/breadth trend.
+  The implementation is aggregate-only and uses existing `sync_failed.context.status` telemetry.
+  It was motivated by the day when the Synthetic uptime panel reported
   **271 probes, 2 failures, 99.3% availability** on a day when Caddy refused **1,553 requests** across
   five total 1–3 minute outages and 21 signed-in users logged HTTP 502. A 5-minute probe cadence
-  cannot see a 1-minute outage — it will miss ~4 of 5. The corrective signal is already logged and
-  nothing reads it as availability: `sync_failed` rows carry an HTTP `status`, and 502/503 there means
-  a real user got no server. **Build:** a second series inside the existing uptime panel — daily count
-  of user-observed 5xx + **distinct users affected** + the worst hour of the day, with the synthetic
-  series kept alongside (the gap between "probe says up" and "users say down" is the insight). No new
-  telemetry needed. Aggregate-health shaped, no per-error list (honors 2026-07-14 + 2026-07-22).
-  Incident context: <File path=".issues/og-endpoint-load-outages.md" />.
+  cannot reliably see a 1-minute outage.
+
+## Open proposals
+
+- **★★ NEW — Share-card (Open Graph) subsystem health line on `/admin/health`** *(filed 2026-07-28
+  run 2 · MEDIUM-HIGH · verified absent: no `og_*` reference exists in `log-analytics.ts` or either
+  admin page).* This subsystem took the whole site down five times on 2026-07-27 and then failed
+  **100% of its renders for nine hours on 07-28** (18,633 `Failed to unwrap exclusive reference of
+  Resvg type from napi value` rows; zero successful cards after 17:26 UTC; every share link serving
+  the generic card) — and NOTHING on either dashboard changed. One aggregate line, no error list:
+  **cards rendered today · success rate as % of attempts · requests shed · worker deaths/timeouts ·
+  age of the newest stored card in `/data/og-cache`**. All five inputs already exist as events
+  (`og_card_rendered`, `og_render_failed`, `og_render_shed`, `og_render_worker_timeout`). Reads as a
+  verdict sentence ("Share cards: 98% of 1,204 renders succeeded today") per the standing plain-language
+  directive. Pair with the pending telemetry coalescing so the panel's inputs stay cheap.
+
 - **★★ NEW — Sync liveness: read the SUCCESS side, not just failures** *(ported from tutor 2026-07-27
   · filed 2026-07-27 · MEDIUM).* Tutor's review found its sync panel entirely failure-driven and
   therefore blind to a device that quietly stopped syncing (a 4-day stall produced zero failure rows).
@@ -118,16 +131,17 @@ proposals against this lens.
   events today**. Build a liveness strip — pushes/day, distinct dictionaries + users pushing, and the
   failure share as a **percentage of attempts** rather than a raw count — so the panel answers "is
   syncing working for everyone" instead of "how many failures". Port tutor's shape; don't redesign.
-- **★★★ NEW — Stop the analytics compute from blocking the server** *(ported from house 2026-07-26 ·
-  filed 2026-07-26 · **HIGH**, promoted to its own issue
+- ✅ **SHIPPED 2026-07-27 — Stop the analytics compute from blocking the server** *(ported from house
+  2026-07-26 · promoted to its own issue
   <File path=".issues/analytics-compute-blocks-server.md" />).* Not a panel — the standing "load
   performance outranks any new panel" rule, with hard evidence. LD's 15 production
-  `admin_analytics_computed` samples run **11–80 s**, twice in the same second (cold miss isn't
-  single-flighted), in synchronous `better-sqlite3` that blocks the whole Node process; real users
-  logged **5 × `sync_failed` HTTP 502** inside those windows. House built the fix this week —
+  `admin_analytics_computed` samples ran **11–80 s**, twice in the same second, in synchronous
+  `better-sqlite3` that blocked the whole Node process; real users logged **5 × `sync_failed` HTTP
+  502** inside those windows. The shipped repair uses
   `breathe.ts` + stage runner, `watermark-cache-file-store.ts` (survives deploys), single-flight on
   miss, and an index jump-scan replacing the distinct-user-agent full scan (6,756 ms → 3 ms; LD's copy
-  is `log-analytics.ts:941` over a 2 GB file). Port house's implementation; don't redesign.
+  is in `log-analytics.ts` over a 2 GB file). Both 30-second-after-boot and post-retention-sweep
+  warmers now compute away from a human request.
 - **★ NEW — Mark the in-progress day as PROVISIONAL on every traffic chart** *(ported from house
   2026-07-26 · filed 2026-07-26 · MEDIUM).* Confirmed independently in LD data: the 07-25 review read
   **651** human sessions for July 25 from the live tail; the finalized rollup for that same day now
@@ -135,10 +149,9 @@ proposals against this lens.
   evidence. The newest point is systematically overstated and then drops, so the chart reads as growth
   followed by a fall. Render the last bar/point hatched or dimmed with a "partial day" label wherever
   daily series are drawn.
-- **★ NEW — Persist per-stage timings inside `admin_analytics_computed`** *(ported from house
-  2026-07-26 · filed 2026-07-26 · LOW).* The event carries `total_ms` only; the stage breakdown exists
-  solely behind a developer env var, so "which query is slow?" costs a hand-measurement session (both
-  house's and LD's July 26 reviews had to do it). Record the stage map in the existing event.
+- ✅ **SHIPPED 2026-07-27 — Persist per-stage timings inside `admin_analytics_computed`** *(ported
+  from house 2026-07-26).* `StageTimings` now records every labelled builder and the endpoint includes
+  the `stages` map in each uncached-compute event.
 - ✅ **SHIPPED 2026-07-22 (`d6871c60`) — Fold cross-browser stale-bundle transients into
   `KNOWN_NOISE_PATTERNS`.** `classify-error.ts:24-26` now folds all three engines' wording:
   `Failed to fetch dynamically imported module` (Chrome) + **`Importing a module script failed.`**

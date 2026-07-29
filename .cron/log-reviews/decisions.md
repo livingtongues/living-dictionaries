@@ -219,3 +219,37 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   starvation WORSE** (18.3 s `/healthz`; hand off with `setImmediate`). Writeup:
   `.knowledge/server/synchronous-work-on-the-request-thread.md`. Residual: worst case is still ~1–2
   render durations; the real cure (render off the main thread) is NOT done.
+- **2026-07-28 — `/og` worker isolation fixed the AVAILABILITY fault but failed its first production
+  quality check.** Commit `2561a72c` ended user-observed HTTP 502 sync failures (last at 05:30 UTC,
+  before deployment), so never move satori/resvg back onto the request thread. Open residual in
+  `.issues/og-render-off-main-thread.md`: 72 twenty-second worker timeouts plus a post-12:15 storm of
+  failed text-only fallback renders; degraded generic cards are P2 share quality, not P1 site outage.
+- **2026-07-28 — `audio_play_failed` now separates expected control flow from a real object fault.**
+  `AbortError` saying `play()` was interrupted by `pause()` is expected tap/close behavior and should
+  not warn. `NotSupportedError` + media error code 4 remains actionable; tonight's concrete object is
+  `norsii/audio/92d2d861-9ee1-4993-9969-c2823aa3dcfa/1763654313463.wav`. Inspect bytes/headers/codec
+  before proposing a player fix.
+- **2026-07-28 run 2 — the `/og` share-card renderer is 100% BROKEN IN PRODUCTION and the fix is
+  written but UNCOMMITTED.** Since 12:15 UTC every render throws `Failed to unwrap exclusive
+  reference of Resvg type from napi value` (18,633 rows; zero successful cards after 17:26; the
+  `/data/og-cache` disk store has not been written since). Every share link therefore serves the
+  58,460-byte generic card. Cause = one worker accepting overlapping async jobs; the serialization
+  fix + 8-card concurrency test live in the mustang working tree (`render-worker.js`, `+server.ts`,
+  `component-to-png.ts`) and pass. **Next run: first check whether it deployed** — if `og_card_rendered`
+  is back and `og_render_failed reason:"render"` is ~0, close it; if the tree is still uncommitted,
+  re-raise as the top item, don't re-derive the diagnosis.
+- **2026-07-28 run 2 — the worker isolation DID fix availability; stop re-checking it.** Only ONE
+  `sync_failed` HTTP 502 (20:51 UTC, Greg/iquito) in the 15 h after the 05:47 deploy, vs 20–44/hour
+  before. Never move satori/resvg back onto the request thread.
+- **2026-07-28 run 2 — `audio_play_failed` "no supported source" is CLIENT-SIDE STALE PATHS, proven,
+  not lost media.** All failing URLs 404; server dict DBs hold 0 legacy paths (tutelo-saponi 0/1,540,
+  iipay-aa 0/4,663, norsii 0/216); the `media_objects` ledger has 0 `audio/dict_%` keys of 234,497 and
+  0 orphaned; canonical URLs 200. The 07-23 migration rewrote paths without marking rows changed, so
+  existing browsers never pull the correction — hence the client-side repair migration
+  (`20260728_repair_legacy_audio_paths.sql`, also uncommitted). Don't re-investigate R2 or the sweep
+  cron for this family; just verify the migration shipped.
+- **2026-07-28 run 2 — `admin_analytics_computed` fires ONLY on the request path
+  (`routes/api/admin/analytics/+server.ts:44`), so moving compute to the warm path made dashboard
+  cost UNMEASURABLE** (caches rewritten 17:26 UTC today; newest event 07-25). Generalized lesson,
+  broadcast to house + tutor: when work moves off the request path, its cost telemetry must move with
+  it (add a `trigger` field). Don't read "no events" as "no computes".

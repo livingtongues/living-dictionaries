@@ -18,6 +18,8 @@ export interface UploadRequestBody {
   r2_media?: { kind: 'audio' | 'video', media_id: string }
   /** declared byte size — seeds the media ledger at presign time (trued-up by the sweep) */
   file_size: number
+  /** browser-decoded playback duration — seeds the ledger; the sweep probes rows still missing it */
+  duration_ms?: number
 }
 
 export interface UploadResponseBody {
@@ -32,7 +34,7 @@ export interface UploadResponseBody {
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 export const POST: RequestHandler = async (event) => {
-  const { dictionary_id, file_name, file_type, r2_media, file_size } = await event.request.json() as UploadRequestBody
+  const { dictionary_id, file_name, file_type, r2_media, file_size, duration_ms } = await event.request.json() as UploadRequestBody
 
   if (!dictionary_id?.trim())
     error(ResponseCodes.BAD_REQUEST, 'Missing dictionary_id')
@@ -90,7 +92,8 @@ export const POST: RequestHandler = async (event) => {
       ContentLength: file_size,
       CacheControl: 'public, max-age=31536000, immutable',
     }), { expiresIn: 60 })
-    record_media_object_by_key({ key: object_key, bytes: file_size })
+    const declared_duration_ms = Number.isSafeInteger(duration_ms) && duration_ms > 0 ? duration_ms : null
+    record_media_object_by_key({ key: object_key, bytes: file_size, duration_ms: declared_duration_ms })
     return json({ presigned_upload_url, bucket, object_key, item_id: r2_media.media_id } satisfies UploadResponseBody)
   } catch (err) {
     console.error(`Error creating R2 upload URL: ${err.message}`)

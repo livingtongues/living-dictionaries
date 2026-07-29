@@ -93,6 +93,35 @@ stall** (asserted `< 250 ms`).
 
 ## Post-deploy check (fill in after the next deploy)
 
-- [ ] `/healthz` through the container swap, and during a crawler burst.
-- [ ] `og_card_rendered` `render_ms` in production (expect ~700–900 ms, unchanged — the point is
-      *who pays*, not how long it takes) and zero `og_render_worker_died` / `_timeout` rows.
+- [x] `/healthz` stayed responsive enough that the prior user-visible 502 storm stopped: the last
+      HTTP 502 `sync_failed` row was 05:30 UTC, before the worker deployment completed.
+- [x] Diagnosed and repaired **72 `og_render_worker_timeout` rows** plus the post-12:15
+      fallback-render storm. One worker accepted overlapping async message handlers, so concurrent
+      calls reused napi `Resvg` state and failed with `Failed to unwrap exclusive reference of Resvg
+      type from napi value`; the failures then cascaded into 20-second timeouts. Worker-local
+      rendering is serialized and a real eight-card concurrency regression test passes.
+- [x] Coalesced routine success, shedding, and repeated render-failure telemetry into one-minute
+      summaries while retaining worker death/timeout events immediately.
+- [x] Queue shedding is bounded and behaving as designed under the crawler flood: `queue_full`,
+      `wait_deadline`, and `busy_window` return the generic card instead of risking site availability.
+
+## Production status at 21:05 UTC 2026-07-28 (log-review run 2, read-only)
+
+The diagnosis above is right and the fix passes its tests locally — but **it never reached
+production**: the repair to `render-worker.js` / `+server.ts` / `component-to-png.ts` is still
+uncommitted in the mustang working tree, and `main`'s newest commit (`97444112`, 11:20 UTC) predates
+the failure. Production numbers at 21:05 UTC:
+
+- **18,633** `Failed to unwrap exclusive reference of Resvg type from napi value` rows since
+  12:15 UTC — effectively 100% of render attempts.
+- **Zero** `og_card_rendered` events after 17:26 UTC; `/data/og-cache` (1,020 files, 175 MB) has not
+  been written since that minute.
+- Two different card URLs fetched live both return the identical 58,460-byte **generic** card, so
+  every social/link preview of any Living Dictionaries page is currently generic.
+- 119 twenty-second worker timeouts (still 1–12/hour), a downstream effect of the same poisoned
+  renderer.
+- Cost: **72,206 server log rows today (79% of all rows)**, and host CPU average 16.5% vs ~4% on a
+  quiet day.
+
+Deploy check to run afterwards: `og_card_rendered` returns to hundreds/hour, `og_render_failed`
+`reason:"render"` goes to ~0, and the og-cache file count grows again.

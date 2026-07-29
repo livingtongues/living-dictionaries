@@ -3,6 +3,7 @@ import { card_image } from './card-image'
 import { card_key, read_card, save_card } from './card-store'
 import { classify_og_failure, render_component_to_png } from './component-to-png'
 import { GENERIC_CARD_KEY, GENERIC_PROPS } from './generic-card'
+import { record_og_event } from './og-telemetry'
 import { create_render_queue } from './render-queue'
 import OpenGraphImage from './OpenGraphImage.svelte'
 import { decompressFromEncodedURIComponent as decode } from '$lib/lz/lz-string'
@@ -86,7 +87,7 @@ function warm_generic_card_when_idle(): void {
     try {
       save_card({ key: GENERIC_CARD_KEY, png: await render_component_to_png({ component: OpenGraphImage, props: { ...GENERIC_PROPS }, height: HEIGHT, width: WIDTH }) })
     } catch (error) {
-      log_server_event({ level: 'warn', message: 'og_render_failed', error, context: { reason: classify_og_failure(error), fallback: 'generic_warm' } })
+      record_og_event({ level: 'warn', message: 'og_render_failed', error, context: { reason: classify_og_failure(error), fallback: 'generic_warm' } })
     } finally {
       slot.release()
     }
@@ -134,7 +135,7 @@ export const GET: RequestHandler = async ({ url }) => {
   if (!slot) {
     // Saturated. Costing this request ZERO CPU is the whole point — the site
     // staying up beats a pretty card, and the short TTL brings the scraper back.
-    log_server_event({ level: 'warn', message: 'og_render_shed', context: { waited_ms: Date.now() - queued_at, ...render_queue.stats() } })
+    record_og_event({ level: 'warn', message: 'og_render_shed', context: { wait_ms: Date.now() - queued_at, ...render_queue.stats() } })
     return degraded_response()
   }
   const wait_ms = Date.now() - queued_at
@@ -160,11 +161,11 @@ export const GET: RequestHandler = async ({ url }) => {
       // Miss-only telemetry: once the store is warm this IS the render rate. The
       // endpoint used to log failures ONLY, so its cost had to be inferred from
       // container memory growth (2.87 GiB vs 1.17 GiB) rather than measured.
-      log_server_event({ level: 'info', message: 'og_card_rendered', context: { render_ms: Date.now() - started_at, wait_ms, width, height, photo: !!props.image_url } })
+      record_og_event({ level: 'info', message: 'og_card_rendered', context: { render_ms: Date.now() - started_at, wait_ms, width, height, photo: !!props.image_url } })
       return png_response(png, CARD_HEADERS)
     } catch (error) {
       const reason = classify_og_failure(error)
-      log_server_event({ level: 'warn', message: 'og_render_failed', error, context: { reason, dict: props.dictionaryName ?? null, title: props.title ?? null } })
+      record_og_event({ level: 'warn', message: 'og_render_failed', error, context: { reason, dict: props.dictionaryName ?? null, title: props.title ?? null } })
       // A dead or wedged RENDERER will fail the fallback the same way, and a
       // second render timeout would hold this slot for another 20 s. Give up now.
       if (reason === 'worker')
@@ -178,7 +179,7 @@ export const GET: RequestHandler = async ({ url }) => {
       save_card({ key, png })
       return png_response(png, CARD_HEADERS)
     } catch (error) {
-      log_server_event({ level: 'warn', message: 'og_render_failed', error, context: { reason: classify_og_failure(error), fallback: 'text_only', dict: props.dictionaryName ?? null } })
+      record_og_event({ level: 'warn', message: 'og_render_failed', error, context: { reason: classify_og_failure(error), fallback: 'text_only', dict: props.dictionaryName ?? null } })
       // NOT stored under this card's key: a failure must never become this URL's
       // permanent answer.
       return degraded_response()

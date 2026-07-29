@@ -163,19 +163,25 @@ export async function seed_translations_if_empty({ db, catalog_modules = import.
     INSERT OR IGNORE INTO i18n_translations (id, key_id, locale, value, source, created_at, updated_at)
     SELECT ?, id, ?, ?, 'import', ?, ? FROM i18n_keys WHERE id = ?`)
   const now = now_iso()
-
-  for (const [path, load] of Object.entries(catalog_modules)) {
-    const locale = locale_from_catalog_path(path)
-    if (!locale)
-      continue
-    const module = await load() as { default: Record<string, Record<string, string>> }
-    for (const [section, items] of Object.entries(module.default)) {
+  const insert_catalog = db.transaction(({ catalog, locale }: {
+    catalog: Record<string, Record<string, string>>
+    locale: string
+  }) => {
+    for (const [section, items] of Object.entries(catalog)) {
       for (const [item, value] of Object.entries(items)) {
         if (typeof value !== 'string' || !value.trim())
           continue
         insert.run(crypto.randomUUID(), locale, value, now, now, `${section}.${item}`)
       }
     }
+  })
+
+  for (const [path, load] of Object.entries(catalog_modules)) {
+    const locale = locale_from_catalog_path(path)
+    if (!locale)
+      continue
+    const module = await load() as { default: Record<string, Record<string, string>> }
+    insert_catalog({ catalog: module.default, locale })
   }
   return true
 }

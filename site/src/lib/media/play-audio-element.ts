@@ -1,5 +1,11 @@
 import { log_warning } from '$lib/debug/remote-log'
 
+export function is_expected_play_interruption(error: unknown): boolean {
+  if (!(error instanceof Error) || error.name !== 'AbortError')
+    return false
+  return /interrupted by (?:a call to pause|a new load request)/i.test(error.message)
+}
+
 /**
  * Start playback and NAME the failure when it doesn't start.
  *
@@ -20,19 +26,37 @@ export function play_audio_element({ audio, context, on_failure }: {
   on_failure?: () => void
 }): void {
   audio.play().catch((error) => {
-    log_warning({
-      message: 'audio_play_failed',
-      context: {
-        ...context,
-        url: audio.currentSrc || audio.src || null,
-        error_name: (error as Error)?.name ?? null,
-        error_message: (error as Error)?.message ?? String(error),
-        media_error_code: audio.error?.code ?? null,
-        ready_state: audio.readyState,
-        network_state: audio.networkState,
-        online: typeof navigator !== 'undefined' ? navigator.onLine : null,
-      },
-    })
+    if (!is_expected_play_interruption(error)) {
+      log_warning({
+        message: 'audio_play_failed',
+        context: {
+          ...context,
+          url: audio.currentSrc || audio.src || null,
+          error_name: (error as Error)?.name ?? null,
+          error_message: (error as Error)?.message ?? String(error),
+          media_error_code: audio.error?.code ?? null,
+          ready_state: audio.readyState,
+          network_state: audio.networkState,
+          online: typeof navigator !== 'undefined' ? navigator.onLine : null,
+        },
+      })
+    }
     on_failure?.()
+  })
+}
+
+if (import.meta.vitest) {
+  describe(is_expected_play_interruption, () => {
+    it('recognizes play requests interrupted by pause or a new load', () => {
+      const paused = new DOMException('The play() request was interrupted by a call to pause().', 'AbortError')
+      const loaded = new DOMException('The play() request was interrupted by a new load request.', 'AbortError')
+      expect(is_expected_play_interruption(paused)).toBe(true)
+      expect(is_expected_play_interruption(loaded)).toBe(true)
+    })
+
+    it('keeps unexpected AbortError and media failures visible', () => {
+      expect(is_expected_play_interruption(new DOMException('The operation was aborted.', 'AbortError'))).toBe(false)
+      expect(is_expected_play_interruption(new DOMException('No supported source.', 'NotSupportedError'))).toBe(false)
+    })
   })
 }

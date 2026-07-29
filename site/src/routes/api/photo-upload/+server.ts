@@ -6,6 +6,7 @@ import { get_dictionary_by_url_or_id } from '$lib/db/server/get-dictionary'
 import { record_media_object_by_key } from '$lib/db/server/media-ledger'
 import { MediaStorageNotConfiguredError, store_media_bytes } from '$lib/server/media-storage'
 import { store_photo_variants_in_background } from '$lib/server/photo-variants'
+import { read_photo_dimensions } from '$lib/server/photo-dimensions'
 import { extract_photo_exif } from '$lib/server/photo-exif'
 import { transcode_image_to_jpeg } from '$lib/server/photo-transcode'
 import { log_server_event } from '$lib/server/log-server-event'
@@ -107,7 +108,8 @@ export const POST: RequestHandler = async (event) => {
     error(ResponseCodes.INTERNAL_SERVER_ERROR, `Photo upload failed: ${err.message}`)
   }
 
-  record_media_object_by_key({ key: storage_path, bytes: bytes.length })
+  const dimensions = await read_photo_dimensions(bytes)
+  record_media_object_by_key({ key: storage_path, bytes: bytes.length, ...dimensions })
   store_photo_variants_in_background({ original_key: storage_path, bytes })
 
   return json({ storage_path, ...exif } satisfies PhotoUploadResponseBody)

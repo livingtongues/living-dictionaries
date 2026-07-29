@@ -5,6 +5,7 @@ import type { PhotoExif } from './photo-coords'
 import { api_upload } from '$api/upload/_call'
 import { log_event } from '$lib/debug/remote-log'
 import { prepare_image_upload } from './prepare-image-upload'
+import { probe_media_duration_ms } from './probe-duration'
 
 export type MediaKind = 'image' | 'audio' | 'video'
 
@@ -77,12 +78,14 @@ export function upload_media({ file, dictionary_id, kind, media_id }: {
       return { storage_path, exif: { latitude, longitude, taken_at } }
     }
 
+    const duration_ms = await probe_media_duration_ms({ file, kind })
     // `api_upload` returns `{ data: null, error }` on failure — guard before touching `data`
     const { data: upload, error } = await api_upload({
       dictionary_id,
       file_name: derive_file_name({ file, kind }),
       file_type: file.type,
       file_size: file.size,
+      ...duration_ms ? { duration_ms } : {},
       r2_media: { kind, media_id },
     })
     if (error || !upload)

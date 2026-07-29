@@ -86,11 +86,16 @@ async function render_png({ markup, height, width, id }) {
   }
 
   const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: width } })
-  return resvg.render().asPng()
+  const rendered = resvg.render()
+  return rendered.asPng()
 }
 
+let render_tail = Promise.resolve()
+
 parentPort.on('message', (job) => {
-  render_png(job).then(
+  const render = render_tail.then(() => render_png(job))
+  render_tail = render.catch(() => undefined)
+  render.then(
     (png) => {
       // Cloned, not transferred: `asPng()` hands back a node Buffer, whose backing
       // ArrayBuffer may be a slice of the shared 8 KB pool — transferring that

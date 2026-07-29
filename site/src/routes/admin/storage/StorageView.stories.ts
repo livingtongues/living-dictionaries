@@ -26,6 +26,9 @@ function make_dict({ dict_id, name, bucket, audio_gb = 0, photo_gb = 0, video_gb
     total_bytes: (audio_gb + photo_gb + video_gb) * 1e9,
     variant_bytes,
     object_count: Math.round((audio_gb + photo_gb + video_gb) * 4000),
+    // ≈ mp3 at 128kbps → 1 GB ≈ 17.4 h; video ≈ 1 GB ≈ 1.5 h
+    audio_duration_ms: Math.round(audio_gb * 17.4 * 3_600_000),
+    video_duration_ms: Math.round(video_gb * 1.5 * 3_600_000),
   }
 }
 
@@ -60,9 +63,9 @@ const data: AdminStorageResponseBody = {
   generated_at: '2026-07-24T12:00:00Z',
   last_reconcile: '2026-07-24T10:50:00Z',
   totals: [
-    { media_type: 'audio', bytes: sum(dict => dict.audio_bytes), object_count: 146726, variant_count: 0, variant_bytes: 0 },
-    { media_type: 'photo', bytes: sum(dict => dict.photo_bytes), object_count: 21817, variant_count: 65451, variant_bytes: sum(dict => dict.variant_bytes) },
-    { media_type: 'video', bytes: sum(dict => dict.video_bytes), object_count: 187, variant_count: 0, variant_bytes: 0 },
+    { media_type: 'audio', bytes: sum(dict => dict.audio_bytes), object_count: 146726, variant_count: 0, variant_bytes: 0, duration_ms: sum(dict => dict.audio_duration_ms), missing_duration_count: 214 },
+    { media_type: 'photo', bytes: sum(dict => dict.photo_bytes), object_count: 21817, variant_count: 65451, variant_bytes: sum(dict => dict.variant_bytes), duration_ms: 0, missing_duration_count: 0 },
+    { media_type: 'video', bytes: sum(dict => dict.video_bytes), object_count: 187, variant_count: 0, variant_bytes: 0, duration_ms: sum(dict => dict.video_duration_ms), missing_duration_count: 0 },
   ],
   orphaned: { bytes: 0, object_count: 0 },
   dicts,
