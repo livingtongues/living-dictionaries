@@ -761,6 +761,14 @@ the same table of contents + collapsible sections — and hand it to the person 
 material you imported. An import is not finished when the rows land; it is finished when
 the human knows what happened to their language data and what you need from them.
 
+**If you are the LD team, do not hand-roll the shell.** `scripts/import-report/artifact.py`
+in the repo is the shared one: contents, collapsible sections, stats, destination links,
+the headword `Linker` that refuses to print an unlinked word, and a `question()` that emits
+the report block and the `POST …/questions` payload from one call so the two can't drift.
+It is a toolkit, not a template — `Section.add()` takes arbitrary markup, so render whatever
+your source actually needs and skip the rest. (Outside agents writing their own HTML: the
+rules below are the same, and the three failures that shell encodes are called out inline.)
+
 **Put every question the import raises at the TOP, before any statistics.** This is the
 one artifact in the whole workflow with room to explain a question properly. A `review`
 note (§2.3) has to fit on an entry page and be answerable from that page alone; a chat
@@ -839,6 +847,19 @@ shipped:
 3. **Every decision rule has a worked example.**
 4. **Questions and judgement calls are at the top**, before any statistics.
 5. **Anchored `<details>` are `open`; every index row targets its own `id`** (below).
+6. **The report links to the dictionary, not just to entries.** The home page, and every
+   page the import produced that the prose brags about — Grammar, About, the word list, the
+   `has_review` filter, one link per review category. A report that announces a Grammar page
+   and doesn't link it makes the reader go hunting. (Ponca shipped 649 entry links and zero
+   links to the dictionary itself.)
+7. **The font stack is NOT `system-ui` / `-apple-system` / `Helvetica`.** Use LD's own
+   (`site/src/lib/theme.css` `--font-sans`: `"Segoe UI", Arial, "Noto Sans", …`). Mac Chrome's
+   `.SF NS` renders combining diacritics wrong — stacking them over a dotted i instead of
+   replacing the dot — and a report is mostly diacritic-heavy headwords. Three reports shipped
+   with the broken stack before anyone noticed.
+8. **Don't put `target` on your links.** The conversation page forces `_blank` on every
+   non-`#` link when it renders the frame, so entries open in a tab while your in-document
+   contents links keep working. Setting it yourself only breaks the standalone-tab reading.
 
 #### Filing it
 
@@ -911,6 +932,15 @@ shrug** — a button that shows the wrong set is worse than no button. You alrea
 affected set: you wrote those rows with a `source_id` and set their review flags.
 `entries_query_label` is your own wording for the button — include the count when you know it
 ("Show me these 1,191 entries"), because the number is what makes the click feel worth it.
+
+**A `query` button must be verified before you file it, and is usually the wrong tool.** The
+free-text `query` runs the dictionary's Orama search with `tolerance: 1`, so it matches
+neighbours: on Ponca, `"masc."` (meant to find 37 entries labelled masc./fem.) returned 69,
+led by *máse* "to cut something", and `"fem."` pulled in *femur*. Open the URL your query
+builds and count the rows BEFORE filing the question. If the set you mean is only
+identifiable by text inside a definition, there is no precise filter for it — file the
+question with just its `report_anchor` and no button. That is not a failure; a button onto
+the wrong rows tells the manager you don't know their data.
 
 Finally, the conversation message — a few warm sentences saying the import is in and
 pointing at the report and the questions. That message is the manager's notification: the

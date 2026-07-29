@@ -242,3 +242,57 @@ exhaustive evidence lives in collapsed `<details>`.** And because a manager's fi
 is also their education in how dictionary-making works, the decisions section should be
 narrative — the script problems, why homographs stay separate, what the typography hid —
 not a terse changelog.
+
+### Why the shell is in the repo now (2026-07-29)
+
+Each import had its own copy-pasted `artifact.py`; the copies drifted and all of them
+carried the same three invisible defects, which is exactly the shape of bug a shared module
+kills. It now lives at `scripts/import-report/artifact.py`. What the copies got wrong:
+
+- **A font stack that breaks the subject matter.** They used `-apple-system` / `Helvetica` /
+  `system-ui` — the three families `site/src/lib/theme.css` bans on purpose, because Mac
+  Chrome's `.SF NS` stacks combining diacritics over a dotted i instead of replacing the dot.
+  A report is almost entirely diacritic-heavy headwords, so this was the worst possible place
+  for it, and it shipped three times unnoticed. Reports use LD's `--font-sans`.
+- **An "Expand all" button that could never work.** Artifacts are served
+  `default-src 'none'` — no script, in the iframe *or* in a standalone tab. Two copies
+  shipped one; it was permanently hidden by its own feature-detect, so nobody noticed.
+- **Report structure treated as optional.** Ponca's from-scratch builder produced the best
+  prose of the five and no contents, no collapsible sections and no `<h2>` at all — 13 flat
+  cards, ~11 screens in a 70vh frame. Prose quality and navigability are independent, and a
+  reviewer reading the draft will only notice the first.
+
+Two structural guarantees the shell now enforces rather than documents: `Doc.render()`
+**refuses** to close a section holding a filed question's `report_anchor` (no script can
+expand it), and `question()` emits the report block and the `POST …/questions` payload from
+one call so the wording can't drift between the two.
+
+### A report has to link to the DICTIONARY, not just to entries
+
+Ponca v2 shipped 649 entry links and **zero** links to `/ponca`, `/ponca/grammar`,
+`/ponca/about` or `/ponca/entries` — while its opening paragraph advertised the Grammar page
+and the About page. The headword-link rule had been enforced so hard that the destinations
+nobody thought to count were missed entirely. v3 carries a row of destination chips under the
+contents, plus one link per review-queue category.
+
+### Links inside the report frame needed an app-side fix
+
+Every report ever filed emitted `<a href>` with no `target`. `SandboxedFrame` grants
+`allow-popups allow-popups-to-escape-sandbox` *specifically* so entry links open in a tab —
+but those flags do nothing unless the link asks for one, so a click navigated the frame
+itself, loading the app as a dead scriptless shell in a 70vh box with no way back. Fixed in
+the **parent**, not the builders (`SandboxedFrame.on_load()` sets `target="_blank"` on every
+non-`#` link), because that repairs the four artifacts already filed. Report builders should
+therefore NOT set `target` themselves — doing so only breaks standalone-tab reading.
+
+### `entries_query` on a free-text `query` is usually a trap
+
+The button that opens a question's own rows is the highest-value thing on a question — but
+the entries view's only text facet is the Orama search at `tolerance: 1`, which matches
+neighbours. Ponca's 37 gendered entries are identifiable only by "masc."/"fem." inside a
+definition: `"masc."` returned 69 rows led by *máse* "to cut something", `"fem."` 78 led by
+*femur*. `QueryParams.tolerance` exists but is not read from the URL `q` param, so a link
+can't force 0. Open the URL and count before filing; if the set is only findable by
+definition text, file the question with just its `report_anchor`. **There is currently no way
+to point a question at an arbitrary set of entries** — every facet is categorical. An
+`entry_ids` option would close that gap.
