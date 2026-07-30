@@ -3,7 +3,12 @@ import { log_server_event } from '$lib/server/log-server-event'
 
 interface OgEvent {
   level: ClientLogLevel
-  message: 'og_card_rendered' | 'og_render_failed' | 'og_render_shed'
+  /**
+   * `og_card_served` is the DENOMINATOR the other three lacked: store hits were
+   * invisible, so "96% of renders succeeded" read healthy on a night when 55% of
+   * `/og` requests were shed to the generic card (2026-07-29 review).
+   */
+  message: 'og_card_served' | 'og_card_rendered' | 'og_render_failed' | 'og_render_shed'
   error?: unknown
   context?: Record<string, unknown>
 }
@@ -61,13 +66,21 @@ export function create_og_telemetry({ emit = log_server_event, window_ms = WINDO
 
   function record(event: OgEvent) {
     const context = event.context ?? {}
+    // One bucket per distinguishable CAUSE. `script` / `family` / `timed_out`
+    // are here because "1,536 font failures/day" was unactionable until it could
+    // be split — 1,486 of them turned out to be one Arabic-script dictionary,
+    // and only a per-script split says so (2026-07-29 review).
     const key = [
       event.message,
+      context.source,
       context.reason,
       context.reason_source,
       context.retry,
       context.fallback,
       context.last_shed,
+      context.script,
+      context.family,
+      context.timed_out,
     ].join('|')
     const bucket = buckets.get(key) ?? {
       event,

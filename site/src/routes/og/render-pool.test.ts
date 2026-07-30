@@ -13,6 +13,11 @@ const ECHO = `
   const { parentPort } = require('node:worker_threads')
   parentPort.on('message', ({ id, width }) => parentPort.postMessage({ type: 'done', id, png: new Uint8Array([width & 0xFF]) }))
 `
+/** 200 ms per "render", so a pile-up of them is measurably longer than the bound below. */
+const SLOW_ECHO = `
+  const { parentPort } = require('node:worker_threads')
+  parentPort.on('message', ({ id, width }) => setTimeout(() => parentPort.postMessage({ type: 'done', id, png: new Uint8Array([width & 0xFF]) }), 200))
+`
 const CRASHES = `
   const { parentPort } = require('node:worker_threads')
   parentPort.on('message', () => process.exit(3))
@@ -40,7 +45,9 @@ function make(source: string, overrides: Partial<Parameters<typeof create_render
   const pool = create_render_pool({
     source,
     worker_data: {},
-    render_timeout_ms: 500,
+    // Generous: spawning a worker under vitest costs ~500 ms on its own, and
+    // none of these cases is about the clock (the two that are set their own).
+    render_timeout_ms: 3000,
     idle_shutdown_ms: 60_000,
     on_event: event => events.push(event),
     ...overrides,
@@ -91,6 +98,18 @@ describe(create_render_pool, () => {
     pool.shutdown()
   })
 
+  test('THE TIMEOUT MEASURES A RENDER, NOT A QUEUE — waiting jobs do not spend their own clock', async () => {
+    // This pool used to post every job at once, so eight concurrent callers all
+    // started their bound simultaneously and the last was "timed out" by the
+    // seven ahead of it. The clock now starts when the worker RECEIVES the job,
+    // so a bound barely longer than one render is correct under a pile-up.
+    const { pool } = make(SLOW_ECHO, { render_timeout_ms: 1500 })
+    const widths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] // 12 × 200 ms = 2.4 s of rendering
+    const results = await Promise.all(widths.map(width => pool.render({ ...JOB, width })))
+    expect(results.map(bytes => bytes[0])).toEqual(widths)
+    pool.shutdown()
+  }, 20_000)
+
   test('a worker that dies mid-render rejects that render and the NEXT one respawns', async () => {
     const { pool, events } = make(CRASHES)
     await expect(pool.render(JOB)).rejects.toThrow(/exited with code 3/)
@@ -118,11 +137,13 @@ describe(create_render_pool, () => {
     pool.shutdown()
   })
 
-  test('shutdown rejects whatever is in flight rather than leaving a hung promise', async () => {
+  test('shutdown rejects whatever is outstanding rather than leaving a hung promise', async () => {
     const { pool } = make(NEVER_ANSWERS, { render_timeout_ms: 60_000 })
     const pending = pool.render(JOB)
+    const queued = pool.render(JOB)
     pool.shutdown()
     await expect(pending).rejects.toThrow(/shut down/)
+    await expect(queued).rejects.toThrow(/shut down/)
   })
 
   test('renders queued together all get their OWN answer (ids never cross)', async () => {

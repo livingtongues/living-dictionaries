@@ -2,9 +2,12 @@ import { createHash } from 'node:crypto'
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, statSync, unlinkSync, utimesSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import type { RemoteCardStore } from './card-store-remote'
+import { remote_card_store } from './card-store-remote'
 
 /**
- * Render each share card ONCE, then serve it from disk.
+ * Render each share card ONCE, then serve it from disk — with R2 behind the disk
+ * as the tier that actually HOLDS the card space.
  *
  * WHY (2026-07-27 review + `.issues/og-endpoint-load-outages.md`): `/og` rendered
  * a 1200×630 PNG **per request**, synchronously, on the single Node thread —
@@ -20,7 +23,7 @@ import { join } from 'node:path'
  * "whose request pays for it."* For a share card the answer is nobody's — it was
  * rendered once and stored.
  *
- * Deliberately dumb + fail-open, like `watermark-cache-file-store.ts`: any
+ * Deliberately dumb + fail-open: any
  * unreadable/corrupt file reads as a miss (we just render again), and a failed
  * write never breaks the response that already has a perfectly good PNG in hand.
  * Writes are atomic (temp + rename) so the blue and green containers can share
@@ -30,18 +33,41 @@ import { join } from 'node:path'
  * are already served `immutable, max-age=31536000`, so a stored card is exactly
  * as fresh as the URL contract already promises. Bump `SeoMetaTags`'
  * `OG_IMAGE_VERSION` (which travels as `?v=`) to invalidate everything.
+ *
+ * WHY DISK IS ONLY A CACHE (2026-07-30, `.issues/og-card-store-on-r2.md`): the
+ * card space is 1,291 dictionaries + 589,990 entries ≈ 104 GB against 76 GB of
+ * free disk. There is no cap that makes disk hold it, and the 1,000-entry cap it
+ * ran with meant 18,174 renders/day for 1,000 slots while 55% of `/og` requests
+ * were shed to the generic card. The durable tier is R2
+ * (`card-store-remote.ts`); disk is the ~15 ms hot tier in front of it and the
+ * one tier that keeps serving during an R2 outage.
  */
 
 /** Bumped when the stored BYTES' meaning changes (a card redesign, a new size). */
 const STORE_FORMAT = 1
 
-/** ~220 KB per card → the two caps below are roughly 250 MB of disk, worst case. */
-const MAX_ENTRIES = 1000
-const MAX_BYTES = 250_000_000
+/**
+ * The hot tier's size — a LATENCY knob now, never again the thing that decides
+ * whether we re-render (Jacob, 2026-07-30). ~173 KB per card, so ~5,000 cards is
+ * about 1 GB: 1.3% of free disk for the whole popular head of the card space,
+ * with everything past it one R2 GET away instead of one 450 ms render away.
+ */
+const MAX_ENTRIES = 5000
+const MAX_BYTES = 1_000_000_000
 /** Amortize the O(n) prune: one readdir per this many saves, never on the hot path. */
 const PRUNE_EVERY_SAVES = 25
 /** Approximate LRU without a metadata write per hit. */
 const TOUCH_AFTER_MS = 24 * 60 * 60 * 1000
+
+/**
+ * The R2 tier, swappable so the store's own tests can drive a hit, a fault and a
+ * back-fill without a bucket. Production never calls the setter.
+ */
+let remote: RemoteCardStore = remote_card_store
+
+export function set_remote_card_store(store: RemoteCardStore): void {
+  remote = store
+}
 
 /** Resolved per call, never captured: `DATA_DIR` can change after module init (tests). */
 function store_dir(): string {
@@ -67,8 +93,13 @@ export function card_key({ props_param, image_version }: {
     .slice(0, 32)
 }
 
-/** The stored PNG, or null on any miss/fault (the caller then renders). */
-export function read_card(key: string): Uint8Array | null {
+/**
+ * The DISK tier only, synchronously.
+ *
+ * Kept sync and separate because the shed path (`degraded_response()`) must cost
+ * a shed request nothing at all — no await, no network, no R2.
+ */
+export function read_local_card(key: string): Uint8Array | null {
   let png: Uint8Array
   try {
     png = readFileSync(file_path(key))
@@ -79,7 +110,38 @@ export function read_card(key: string): Uint8Array | null {
   return png
 }
 
+export interface StoredCard {
+  png: Uint8Array
+  source: 'disk' | 'r2'
+}
+
+/**
+ * The card from whichever tier has it: disk, then R2, then nothing.
+ *
+ * An R2 hit BACK-FILLS the disk tier, so the popular head of the card space
+ * settles onto local disk by itself and only the long tail pays a round trip.
+ * Every R2 fault is a plain miss (see `card-store-remote.ts`), so the worst case
+ * is exactly the old behaviour: we render.
+ */
+export async function read_stored_card(key: string): Promise<StoredCard | null> {
+  const local = read_local_card(key)
+  if (local)
+    return { png: local, source: 'disk' }
+
+  const remote_png = await remote.read(key)
+  if (!remote_png)
+    return null
+  save_local_card({ key, png: remote_png })
+  return { png: remote_png, source: 'r2' }
+}
+
+/** Store a card in BOTH tiers: disk now, R2 right after the response goes out. */
 export function save_card({ key, png }: { key: string, png: Uint8Array }): void {
+  save_local_card({ key, png })
+  remote.write({ key, png })
+}
+
+function save_local_card({ key, png }: { key: string, png: Uint8Array }): void {
   try {
     const dir = store_dir()
     mkdirSync(dir, { recursive: true })
@@ -194,15 +256,15 @@ if (import.meta.vitest) {
     })
   })
 
-  describe(read_card, () => {
+  describe(read_local_card, () => {
     test('a miss is null, not a throw (an empty store is the normal cold state)', () => {
-      expect(read_card('nothing-here')).toBe(null)
+      expect(read_local_card('nothing-here')).toBe(null)
     })
 
     test('a saved card comes back byte-for-byte', () => {
       const png = Buffer.from([0x89, 0x50, 0x4E, 0x47, 1, 2, 3])
       save_card({ key: 'k1', png })
-      expect(read_card('k1')).toEqual(png)
+      expect(read_local_card('k1')).toEqual(png)
     })
 
     test('an unwritable DATA_DIR degrades to a miss instead of failing the response', () => {
@@ -211,7 +273,59 @@ if (import.meta.vitest) {
       writeFileSync(not_a_dir, 'x')
       process.env.DATA_DIR = not_a_dir
       expect(() => save_card({ key: 'k2', png: Buffer.from([1]) })).not.toThrow()
-      expect(read_card('k2')).toBe(null)
+      expect(read_local_card('k2')).toBe(null)
+    })
+  })
+
+  describe(read_stored_card, () => {
+    const REMOTE_PNG = Buffer.from([9, 9, 9])
+
+    /** A remote tier that answers every read with `holds` (null = a miss/fault). */
+    function stub_remote(holds: Uint8Array | null = null) {
+      const reads: string[] = []
+      const writes: string[] = []
+      set_remote_card_store({
+        read: (key) => {
+          reads.push(key)
+          return Promise.resolve(holds)
+        },
+        write: ({ key }) => {
+          writes.push(key)
+        },
+        stats: () => ({ configured: true, breaker_open: false, consecutive_faults: 0, absent_keys: 0, gets: 0, puts: 0, faults: 0 }),
+        reset: () => undefined,
+      })
+      return { reads, writes }
+    }
+
+    afterEach(() => set_remote_card_store(remote_card_store))
+
+    test('a disk hit never touches R2', async () => {
+      const { reads } = stub_remote()
+      const png = Buffer.from([1, 2, 3])
+      save_card({ key: 'hot', png })
+      expect(await read_stored_card('hot')).toEqual({ png, source: 'disk' })
+      expect(reads).toEqual([])
+    })
+
+    test('a disk miss served from R2 BACK-FILLS disk, so the next hit is local', async () => {
+      const { reads } = stub_remote(REMOTE_PNG)
+      expect(await read_stored_card('cold')).toEqual({ png: REMOTE_PNG, source: 'r2' })
+      expect(reads).toEqual(['cold'])
+      expect(read_local_card('cold')).toEqual(REMOTE_PNG)
+      expect(await read_stored_card('cold')).toEqual({ png: REMOTE_PNG, source: 'disk' })
+    })
+
+    test('an R2 fault is a miss (the caller renders), never a throw', async () => {
+      stub_remote(null)
+      expect(await read_stored_card('gone')).toBe(null)
+    })
+
+    test('saving a card writes BOTH tiers', () => {
+      const { writes } = stub_remote()
+      save_card({ key: 'both', png: Buffer.from([4]) })
+      expect(read_local_card('both')).toEqual(Buffer.from([4]))
+      expect(writes).toEqual(['both'])
     })
   })
 
@@ -244,8 +358,8 @@ if (import.meta.vitest) {
       const result = prune_card_store()
       expect(result.removed).toBe(5)
       expect(result.kept).toBe(MAX_ENTRIES)
-      expect(read_card('n0')).toBe(null)
-      expect(read_card(`n${MAX_ENTRIES + 4}`)).toEqual(png)
+      expect(read_local_card('n0')).toBe(null)
+      expect(read_local_card(`n${MAX_ENTRIES + 4}`)).toEqual(png)
     })
   })
 }

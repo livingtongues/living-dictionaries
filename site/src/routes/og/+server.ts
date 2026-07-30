@@ -1,7 +1,7 @@
 import type { RequestHandler } from './$types'
 import { card_image } from './card-image'
 import { card_dimension, CARD_HEIGHT, CARD_WIDTH } from './card-dimensions'
-import { card_key, read_card, save_card } from './card-store'
+import { card_key, read_local_card, read_stored_card, save_card } from './card-store'
 import { classify_og_failure, render_component_to_png } from './component-to-png'
 import { GENERIC_CARD_KEY, GENERIC_PROPS } from './generic-card'
 import { record_og_event } from './og-telemetry'
@@ -55,9 +55,15 @@ function png_response(png: Uint8Array, headers: Record<string, string>): Respons
   return new Response(new Uint8Array(png), { headers })
 }
 
-/** A shed request costs no CPU: the stored generic card if we have one, else 1×1. */
+/**
+ * A shed request costs no CPU: the stored generic card if we have one, else 1×1.
+ *
+ * SYNCHRONOUS ON PURPOSE — memory + disk only, never R2. Being free is the whole
+ * property that makes shedding safe; the moment this awaits a network call, the
+ * saturation path starts costing what saturation was declared to avoid.
+ */
 function degraded_response(): Response {
-  return png_response(read_card(GENERIC_CARD_KEY) ?? BLANK_PNG, DEGRADED_HEADERS)
+  return png_response(read_local_card(GENERIC_CARD_KEY) ?? BLANK_PNG, DEGRADED_HEADERS)
 }
 
 let generic_warm_attempted = false
@@ -71,7 +77,7 @@ let generic_warm_attempted = false
 function warm_generic_card_when_idle(): void {
   if (generic_warm_attempted)
     return
-  if (read_card(GENERIC_CARD_KEY)) {
+  if (read_local_card(GENERIC_CARD_KEY)) {
     generic_warm_attempted = true
     return
   }
@@ -110,9 +116,16 @@ export const GET: RequestHandler = async ({ url }) => {
   const props_param = url.searchParams.get('props')
   const key = card_key({ props_param, image_version: url.searchParams.get('v') })
 
-  const stored = read_card(key)
-  if (stored)
-    return png_response(stored, CARD_HEADERS)
+  // Disk, then R2 — deliberately BEFORE and OUTSIDE the render queue. This is
+  // I/O, not CPU, so it doesn't belong in the gate that bounds the box's second
+  // core, and it must be allowed to turn a would-be SHED request into a real
+  // card: on 2026-07-29, 55% of `/og` traffic was shed while the card being
+  // asked for had already been rendered, just evicted.
+  const stored = await read_stored_card(key)
+  if (stored) {
+    record_og_event({ level: 'info', message: 'og_card_served', context: { source: stored.source } })
+    return png_response(stored.png, CARD_HEADERS)
+  }
 
   warm_generic_card_when_idle()
 
@@ -166,6 +179,7 @@ export const GET: RequestHandler = async ({ url }) => {
       // endpoint used to log failures ONLY, so its cost had to be inferred from
       // container memory growth (2.87 GiB vs 1.17 GiB) rather than measured.
       record_og_event({ level: 'info', message: 'og_card_rendered', context: { render_ms: Date.now() - started_at, wait_ms, width, height, photo: !!props.image_url } })
+      record_og_event({ level: 'info', message: 'og_card_served', context: { source: 'render' } })
       return png_response(png, CARD_HEADERS)
     } catch (error) {
       const reason = classify_og_failure(error)
@@ -181,6 +195,7 @@ export const GET: RequestHandler = async ({ url }) => {
       const { image_url: _omit, ...text_props } = props
       const png = await render_component_to_png({ component: OpenGraphImage, props: text_props, height, width })
       save_card({ key, png })
+      record_og_event({ level: 'info', message: 'og_card_served', context: { source: 'render' } })
       return png_response(png, CARD_HEADERS)
     } catch (error) {
       record_og_event({ level: 'warn', message: 'og_render_failed', error, context: { reason: classify_og_failure(error), fallback: 'text_only', dict: props.dictionaryName ?? null } })

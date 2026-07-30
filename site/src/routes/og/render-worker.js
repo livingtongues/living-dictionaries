@@ -67,6 +67,7 @@ async function render_png({ markup, height, width, id }) {
   }
 
   let svg
+  last_dynamic_asset = { script: null, family: null } // never label this card with the last one's script
   try {
     svg = await satori(to_react_node(markup), {
       ...base_options,
@@ -81,7 +82,7 @@ async function render_png({ markup, height, width, id }) {
     // Retry with NotoSans only (non-Latin glyphs may tofu) so the card never 500s.
     // An `image_fetch` fault fails this retry too; the route's outer catch then
     // renders the text-only fallback card.
-    warn({ id, error, context: { retry: 'static_fonts_only', width, height } })
+    warn({ id, error, context: { retry: 'static_fonts_only', script: last_dynamic_asset.script, family: last_dynamic_asset.family, width, height } })
     svg = await satori(to_react_node(markup), base_options)
   }
 
@@ -144,6 +145,17 @@ const FONT_CACHE_LIMIT = 100
 /** `$lib/constants` is unreachable from an eval'd worker (see the file header). */
 const HTTP_OK = 200
 
+/**
+ * The last dynamic font this render asked for, so the `static_fonts_only` retry
+ * can NAME the script that cost it.
+ *
+ * Without this, "1,536 font failures a day" was a number nobody could act on: it
+ * took a hand-written log query to discover that 1,486 of them were one
+ * Arabic-script dictionary (2026-07-29 review). Set here, read there — safe
+ * because the worker renders exactly one card at a time (`render_tail`).
+ */
+let last_dynamic_asset = { script: null, family: null }
+
 const load_dynamic_asset = with_bounded_cache(async (code, text) => {
   let names = language_font_map[code]
   // Re-read after falling back — otherwise `names` stays undefined and the loop
@@ -155,11 +167,14 @@ const load_dynamic_asset = with_bounded_cache(async (code, text) => {
     names = language_font_map[code]
   }
 
+  let family = null
   try {
     if (typeof names === 'string')
       names = [names]
 
     for (const name of names) {
+      family = name
+      last_dynamic_asset = { script: code, family: name }
       const API = `https://fonts.googleapis.com/css2?family=${name}&text=${encodeURIComponent(text)}`
 
       const css = await (
@@ -187,7 +202,9 @@ const load_dynamic_asset = with_bounded_cache(async (code, text) => {
       }
     }
   } catch (error) {
-    warn({ id: null, error, context: { reason: 'dynamic_font_fetch', text } })
+    // `timed_out` separates "Google Fonts is slow/unreachable" (ours to bound)
+    // from "that font's tables break the parser" (ours to bundle around).
+    warn({ id: null, error, context: { reason: 'dynamic_font_fetch', script: code, family, timed_out: error?.name === 'TimeoutError' || error?.name === 'AbortError', text } })
   }
 })
 

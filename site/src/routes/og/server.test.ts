@@ -1,7 +1,9 @@
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { card_key, read_card, save_card } from './card-store'
+import type { RemoteCardStore } from './card-store-remote'
+import { card_key, read_local_card, save_card, set_remote_card_store } from './card-store'
+import { remote_card_store } from './card-store-remote'
 import { GENERIC_CARD_KEY } from './generic-card'
 import { compressToEncodedURIComponent as encode } from '$lib/lz/lz-string'
 
@@ -109,7 +111,7 @@ describe('GET /og — render once, store, serve', () => {
     expect(response.headers.get('content-type')).toBe('image/png')
     expect(response.headers.get('cache-control')).toContain('immutable')
     expect(renderer.calls).toHaveLength(1)
-    expect(read_card(key_for(CARD))).toEqual(Buffer.from('fake-png-1200'))
+    expect(read_local_card(key_for(CARD))).toEqual(Buffer.from('fake-png-1200'))
   })
 
   test('THE FIX: the same card is never rendered twice — a crawler burst costs a file read', async () => {
@@ -139,6 +141,74 @@ describe('GET /og — render once, store, serve', () => {
     const { GET: fresh_get } = await import('./+server')
     const response = await fresh_get({ url: new URL(card_url(CARD)) } as unknown as Parameters<typeof GET>[0])
     expect(response.headers.get('cache-control')).toContain('immutable')
+    expect(renderer.calls).toHaveLength(1)
+  })
+})
+
+describe('GET /og — the R2 tier', () => {
+  /** A remote store holding `holds`, recording what the route asked it. */
+  function stub_remote(holds: Uint8Array | null = null) {
+    const reads: string[] = []
+    const writes: string[] = []
+    set_remote_card_store({
+      read: (key) => {
+        reads.push(key)
+        return Promise.resolve(holds)
+      },
+      write: ({ key }) => {
+        writes.push(key)
+      },
+      stats: () => ({ configured: true, breaker_open: false, consecutive_faults: 0, absent_keys: 0, gets: 0, puts: 0, faults: 0 }),
+      reset: () => undefined,
+    } satisfies RemoteCardStore)
+    return { reads, writes }
+  }
+
+  afterEach(() => set_remote_card_store(remote_card_store))
+
+  test('THE POINT: a card already in R2 is SERVED, not re-rendered — and lands back on disk', async () => {
+    const stored = Buffer.from('card-from-r2')
+    const { reads } = stub_remote(stored)
+
+    const response = await get(card_url(CARD))
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(stored)
+    expect(response.headers.get('cache-control')).toContain('immutable')
+    expect(renderer.calls).toHaveLength(0)
+    expect(reads).toEqual([key_for(CARD)])
+    // Back-filled, so the next request doesn't even ask R2.
+    expect(read_local_card(key_for(CARD))).toEqual(stored)
+    await get(card_url(CARD))
+    expect(reads).toHaveLength(1)
+  })
+
+  test('a rendered card is pushed to R2 as well as disk', async () => {
+    const { writes } = stub_remote()
+    await get(card_url(CARD))
+    expect(renderer.calls).toHaveLength(1)
+    expect(writes).toEqual([key_for(CARD)])
+  })
+
+  test('THE SHED PATH STAYS FREE: a saturating burst never asks R2 for the generic card', async () => {
+    const { reads } = stub_remote(null)
+    renderer.delay_ms = 300
+    const responses = await Promise.all(
+      Array.from({ length: 40 }, (_, i) => get(card_url({ ...CARD, title: `Shed ${i}` }))),
+    )
+    const shed = responses.filter(response => !response.headers.get('cache-control').includes('immutable'))
+    // eslint-disable-next-line no-restricted-syntax -- wall-clock-dependent count
+    expect(shed.length).toBeGreaterThan(0)
+    // Each request looked up its OWN card once (that lookup is what can rescue a
+    // shed request); the fallback card is answered from disk, synchronously.
+    expect(reads).not.toContain(GENERIC_CARD_KEY)
+    expect(new Set(reads).size).toBe(reads.length)
+  })
+
+  test('an empty R2 (no bucket, no creds, an outage) is just a miss — the card renders', async () => {
+    const { reads } = stub_remote(null)
+    const response = await get(card_url(CARD))
+    expect(response.status).toBe(200)
+    expect(response.headers.get('cache-control')).toContain('immutable')
+    expect(reads).toEqual([key_for(CARD)])
     expect(renderer.calls).toHaveLength(1)
   })
 })
@@ -189,7 +259,7 @@ describe('GET /og — the shed card is a real card, not a transparent pixel', ()
 
     // The first request warms the spare tyre in the background, off its own path.
     await fresh(card_url(CARD))
-    await vi.waitFor(() => expect(read_card(GENERIC_CARD_KEY)).toBeTruthy())
+    await vi.waitFor(() => expect(read_local_card(GENERIC_CARD_KEY)).toBeTruthy())
     expect(renderer.calls).toHaveLength(2) // the card itself + the generic fallback
 
     renderer.delay_ms = 300
@@ -257,6 +327,6 @@ describe('GET /og — degrading', () => {
     expect(response.status).toBe(200)
     expect(response.headers.get('cache-control')).toContain('max-age=60')
     // A blank card must never become this URL's permanent answer.
-    expect(read_card(key_for(failing_card))).toBe(null)
+    expect(read_local_card(key_for(failing_card))).toBe(null)
   })
 })

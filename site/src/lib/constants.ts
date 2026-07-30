@@ -156,6 +156,20 @@ export const SITE_MEDIA = {
   seo_default: `${R2_MEDIA_DOMAIN}/site/seo-default/332522756bfe`,
 } as const
 
+/**
+ * R2 bucket holding rendered `/og` share cards.
+ *
+ * A NAME, not an env var (same reasoning as `R2_MEDIA_BUCKET`): the account
+ * credentials already in the environment reach every bucket, so a new bucket
+ * needs no `.env` edit, no `vps-setup` secrets round-trip, and no preflight-gated
+ * static import. Dedicated rather than a prefix inside the media bucket because
+ * `vps-setup/bin/backup-media` mirrors that whole bucket into a 1-year-locked
+ * prefix, and share cards are 100% regenerable — they must never enter a backup
+ * set. Nothing here is backed up, and a 90-day lifecycle rule is the garbage
+ * collector for generations orphaned by an `OG_IMAGE_VERSION` bump.
+ */
+export const R2_OG_CACHE_BUCKET = 'livingdictionaries-og-cache'
+
 /** R2 snapshot rebuild interval for the in-process builder cron. */
 export const R2_SNAPSHOT_INTERVAL_MS = 30 * 60 * 1000
 

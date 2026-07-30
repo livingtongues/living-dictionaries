@@ -98,7 +98,7 @@ if (import.meta.vitest) {
     })
     test('a dead or wedged render worker is its own class, not a mystery render fault', () => {
       expect(classify_og_failure(new Error('og render worker exited with code 1'))).toBe('worker')
-      expect(classify_og_failure(new Error('og render timed out after 20000ms'))).toBe('worker')
+      expect(classify_og_failure(new Error('og render timed out after 10000ms'))).toBe('worker')
     })
     test('anything else is render', () => {
       expect(classify_og_failure(new Error('something unexpected'))).toBe('render')

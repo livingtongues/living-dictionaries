@@ -95,16 +95,16 @@ render   worker thread · ~450 ms p50                → only a genuine first-ev
    matters (see below) — `vps-setup/bin/backup-media` mirrors the *whole* media bucket into the
    1-year-locked `livingdictionaries-backups/media`.
 
-### Questions put to Jacob (recommendation in bold; update this section with his answers)
+### Questions put to Jacob — ANSWERED 2026-07-30 (all as recommended)
 
-| # | question | recommendation |
+| # | question | settled |
 |---|---|---|
-| 1 | disk hot tier, or R2 only? | **keep disk as hot tier** — 13–26 ms, already tested, and the only tier that still serves during an R2 outage |
-| 2 | which bucket? | **new dedicated `livingdictionaries-og-cache`** — invisible to `backup-media`, invisible to the weekly media sweep, own expiry rule |
-| 3 | read transport? | **signed `GetObject`** (~280 ms, one code path); public-CDN reads (~10 ms) are a later one-line upgrade if the tail shows up in telemetry |
-| 4 | disk tier size? | **~5,000 cards / 1 GB** (1.3% of free disk) |
-| 5 | add `og_card_served {source}` telemetry now? | **yes, minimal** — hits are invisible today, so there is no way to prove tomorrow that R2 is serving |
-| 6 | lifecycle expiry? | **90 days** |
+| 1 | disk hot tier, or R2 only? | **keep disk as hot tier** — 13–26 ms, and the only tier that still serves during an R2 outage ✅ |
+| 2 | which bucket? | **dedicated `livingdictionaries-og-cache`** — invisible to `backup-media`, invisible to the media sweep, own expiry rule ✅ |
+| 3 | read transport? | **signed `GetObject`** (lane's call); public-CDN reads are a later one-line upgrade if the tail shows up in telemetry ✅ |
+| 4 | disk tier size? | **5,000 cards / 1 GB** (1.3% of free disk) ✅ |
+| 5 | add `og_card_served {source}` telemetry now? | **yes** — hits were invisible, so nothing could prove R2 is serving ✅ |
+| 6 | lifecycle expiry? | **90 days** ✅ |
 
 **Why not the media bucket** (`livingdictionaries-media` under `og/`): it ships with zero
 provisioning, and the `og/` key shape is already safely ignored by `parse_media_key()` (so the weekly
@@ -122,7 +122,14 @@ name is a **constant in `$lib/constants.ts`, not a new env var** — so there is
 `vps-setup` secrets round-trip, and no preflight-gated static import. Until Jacob creates the bucket
 the code fails open and the endpoint behaves exactly as it does today.
 
-### Jacob's provisioning steps (blocked on his admin `cfut_` token — the app token cannot create buckets)
+### ⛔ BLOCKED ON JACOB: create the bucket (confirmed 2026-07-30 — the app's R2 token CANNOT)
+
+Tried from the `living` box with the app's own credentials (a dependency-free SigV4 signer run inside
+`sveltekit_blue`, so the creds never left the container). `ListBuckets` → **403**, `CreateBucket
+livingdictionaries-og-cache` → **403 AccessDenied**, while `ListObjectsV2` against
+`livingdictionaries-media` and `-snapshots` → **200**. So the token is object-scoped, exactly as the
+plan assumed. The code is deployed and fails open: until the bucket exists every R2 GET reads as a
+404 → plain miss → render, i.e. today's behaviour with a 1 GB disk tier instead of a 250 MB one.
 
 1. Create R2 bucket `livingdictionaries-og-cache` (same LD account).
 2. Lifecycle rule: delete objects at age 90 d.
@@ -135,29 +142,54 @@ the code fails open and the endpoint behaves exactly as it does today.
 
 ---
 
-## Work
+## Work — ✅ BUILT 2026-07-30 (commit pending Jacob's bucket for the R2 leg to do anything)
 
-- [ ] `site/src/lib/server/r2-og-cache.ts` — client + `og_cache_is_configured()`, mirroring
-      `r2-media.ts` (singleton, `reset_*_client()` test hook, bucket name from `$lib/constants.ts`).
-- [ ] `site/src/routes/og/card-store-remote.ts` — `read_remote_card` / `write_remote_card`, timeouts,
-      circuit breaker, negative cache. Every path fail-open.
-- [ ] `site/src/routes/og/card-store.ts` — keep `card_key` / disk read / disk save / prune. Split the
-      sync disk read (`read_local_card`, used by the shed path) from a new async
-      `read_stored_card()` = disk → R2 → null, which on an R2 hit **back-fills the disk tier** so the
-      next hit is local. `save_card()` writes disk sync + schedules the R2 PUT.
-- [ ] `site/src/routes/og/+server.ts` — `await read_stored_card(key)` on the hot path; the R2 read
-      happens **outside** the render queue slot (it is I/O, not CPU, and it must be allowed to turn a
-      would-be *shed* into a real card). `degraded_response()` stays sync on memory+disk.
-- [ ] Telemetry: `og_card_served` with `source: 'disk' | 'r2' | 'render'`, coalesced through the
-      existing `og-telemetry.ts` 60 s bucket (counts only, no per-request rows).
-- [ ] Tests — extend the existing inline suite in `card-store.ts` and `server.test.ts`:
-      - a disk miss + R2 hit serves the card, **back-fills disk**, and does NOT render
-      - an R2 fault / missing creds / `NoSuchKey` / timeout is a **miss**, never a throw
-      - the PUT is not awaited by the response, and a failed PUT doesn't fail the response
-      - the circuit breaker stops calling R2 after N faults and recovers after M ms
-      - the shed path still answers from memory/disk with **zero** awaits on R2
-      - the existing prune/LRU/`card_key` assertions keep passing (caps still enforced)
-- [ ] Gates: `npx vitest run`, `tsc`/`pnpm check`, `eslint` on touched files.
+- [x] `site/src/lib/server/r2-og-cache.ts` — client + `og_cache_is_configured()`, mirroring
+      `r2-media.ts` (singleton, `reset_r2_og_cache_client()` test hook, bucket name
+      `R2_OG_CACHE_BUCKET` in `$lib/constants.ts`, `maxAttempts: 1`).
+- [x] `site/src/routes/og/card-store-remote.ts` — `create_remote_card_store()` factory + the
+      `remote_card_store` singleton. Deadline on every call (GET 2 s / PUT 5 s, enforced by BOTH an
+      abort signal and a race), consecutive-fault breaker (5 faults → 30 s open), bounded negative
+      cache (500 keys / 60 s). `create_r2_transport()` keeps the S3 command construction testable.
+- [x] `site/src/routes/og/card-store.ts` — `read_local_card` (sync, disk only, used by the shed path)
+      vs `read_stored_card` (async: disk → R2 → null, **back-fills disk** on an R2 hit).
+      `save_card()` writes disk sync + schedules the R2 PUT. Caps raised to 5,000 / 1 GB.
+      `set_remote_card_store()` is the test seam.
+- [x] `site/src/routes/og/+server.ts` — `await read_stored_card(key)` before and OUTSIDE the render
+      queue. `degraded_response()` stays synchronous on memory+disk.
+- [x] Telemetry: `og_card_served { source: 'disk' | 'r2' | 'render' }` through the existing 60 s
+      coalescing bucket, with `source` added to the bucket key.
+- [x] Tests — 96 green in `src/routes/og`, covering: R2 hit serves + back-fills + does NOT render ·
+      empty/absent/faulted R2 is a miss, never a throw · the PUT isn't awaited and a failed PUT never
+      surfaces · the breaker opens after N faults and recovers · the negative cache expires and is
+      bounded · a hung GET settles at the deadline AND aborts · a saturating burst never asks R2 for
+      the generic card · the S3 transport's bucket/key/headers, `NoSuchKey`/`NoSuchBucket`/404 → null,
+      a 503 still throws · all pre-existing prune/LRU/`card_key` assertions.
+- [x] Gates: `pnpm test` (2,372 ✓), `pnpm check` (0 errors), `pnpm lint` (clean on touched files),
+      `pnpm build`.
+- [x] Local end-to-end against the REAL built server (`node build`, throwaway `DATA_DIR`): cold →
+      render, warm → identical bytes from disk, disk file deleted → clean R2 miss → re-render, zero
+      unhandled errors. `logs.db` then showed exactly
+      `og_card_served {source:'disk',count:1}` + `og_card_served {source:'render',count:2}`.
+
+### Folded in from item K (same files)
+
+- [x] **house's job dispatch ported into LD's render pool.** One job dispatched at a time and the
+      liveness clock starts when the worker is HANDED the job, so the timeout bounds a render rather
+      than a render plus everything queued in front of it — which is why 20 s was firing in
+      production on jobs that were merely waiting. Timeout accordingly 20 s → 10 s. House's
+      pile-up test came with it.
+- [x] **LD's font-fallback crash fix ported into house** (`house/site/src/lib/server/satori/
+      render-worker.js`): re-read `names` after falling back to `unknown`, so an unmapped script
+      stops throwing `names is not iterable` and reporting a spurious `dynamic_font_fetch` failure.
+      House's map is SHORTER than LD's, so more scripts land there. House lane 1 had already pushed,
+      so this was safe to touch.
+- [x] **`script` / `family` / `timed_out` on `og_render_failed`** in both repos: the worker records
+      the last dynamic font it asked for (safe — one render at a time) so the `static_fonts_only`
+      retry can name the script that cost it, and the font-fetch catch reports the family plus
+      whether it was a timeout. The og-telemetry bucket key splits on all three, so "1,536 font
+      failures" becomes a per-script breakdown. This is what sizes the font-BUNDLING work
+      (`.issues/bundle-render-fonts.md`, filed in both repos).
 
 ## Verification plan
 
@@ -169,12 +201,36 @@ the code fails open and the endpoint behaves exactly as it does today.
   `ls /opt/hosting/data/og-cache | wc -l` should stop being pinned at the cap while
   `og_render_shed` collapses. Re-measure `og_card_rendered` / `og_render_shed` on the next log review.
 
+## Still open
+
+- ⛔ **Jacob creates `livingdictionaries-og-cache` + the 90-day lifecycle rule** (steps above). Until
+  then the R2 tier is a permanent clean miss and LD behaves as it did, with a 4× bigger disk tier.
+- **Post-deploy re-measure** (do this once the bucket exists): `og_card_served` should show `r2` as a
+  real source, `og_render_shed` should collapse from ~36k/day, and
+  `ls /opt/hosting/data/og-cache | wc -l` should stop being pinned at the cap.
+- **The public-CDN read path** (~10 ms vs ~280 ms for a signed GET) stays a one-line upgrade for
+  later, gated on the tail actually showing up in `og_card_served` timings. Needs a custom domain on
+  the bucket.
+
 ## Notes
 
-- **house holds byte-identical constants** at `house/site/src/lib/server/satori/card-store.ts:44-45`
-  and is a latent instance of the same fault (its card space — chapters + entities — is smaller, so
-  it isn't symptomatic yet). NOT touched by this work. Portability assessment goes in the report.
-- Working tree was already dirty from another lane (parity sweep) plus a failing
-  `cron-scheduler.test.ts`; neither is ours to fix.
+- **house holds byte-identical card-store constants** at
+  `house/site/src/lib/server/satori/card-store.ts:44-45` and is a latent instance of the same fault
+  (its card space — chapters + entities — is much smaller, so it isn't symptomatic yet). The R2 tier
+  was NOT ported: house should take it when its card space grows or its shed rate becomes visible,
+  and the shape here (factory + injected transport + fail-open) is designed to be liftable.
+- Working tree was dirty from two other lanes throughout (the nightly parity sweep, then the
+  analytics-snapshot lane actively editing `log-analytics.ts`). Everything here was staged
+  file-by-file; the pre-commit hook (`vitest run --changed`) had to be bypassed because it picks up
+  the OTHER lane's half-written files. Each commit re-ran its own files' suites first.
+- Prod verification of the internal system-chat endpoint (JOB 1) covered every gate — no token → 404,
+  through Caddy → 404, good token + bad payload → 400, good token + unknown room → 500 "room not
+  found" (which proves the endpoint really reaches `deliver_system_message`), on BOTH containers. A
+  successful POST was deliberately NOT sent: every chat room on prod contains real people, and a test
+  message would have emailed them. Delivery itself is covered by `system-message.ts`'s own suite.
+- **Follow-up (small):** `${DATA_DIR}/.internal-api-token` is created LAZILY, on the first request to
+  `/api/internal/system-chat`, not at boot as the docs say. It was provisioned on prod by making one
+  (rejected) request. Add the boot call to `hooks.server.ts` when the analytics lane stops editing
+  that file — or just leave it lazy and fix the wording in `/system-chat` + the vps-setup issue.
 </content>
 </invoke>
