@@ -5,7 +5,7 @@
  *
  * Channels are DB-managed `chat_rooms` rows (see chat-db.ts `create_channel`
  * etc.) — there is no fixed channel list in source anymore. The one system
- * room (`notifications`) is ensured at boot by `ensure_notifications_room`;
+ * room (`notifications`) is ensured at fan-out time by the System notifier;
  * its membership is UI-managed.
  */
 export {

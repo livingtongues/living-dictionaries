@@ -35,9 +35,10 @@
     // Import conversations deliberately do NOT appear in the inbox above — both
     // sides work them on the dictionary's own page (.issues/import-conversations.md).
     { href: '/admin/imports', label: 'Imports', icon: IconMdiFileImportOutline },
-    // Chat lives OUTSIDE /admin (membership-based — partners + super managers
-    // join too), but admins keep this entry point + unread badge.
-    { href: '/chat', label: 'Chat', icon: IconMdiForumOutline },
+    // Chat is membership-based and lives at /chat for partners + super managers;
+    // this is the same page mounted INSIDE the admin, so an admin at work never
+    // has to leave the admin to answer a message.
+    { href: '/admin/chat', label: 'Chat', icon: IconMdiForumOutline },
     // Dev tools — `compact` renders them icon-only on desktop (labels still
     // hide on mobile, where every link is icon-only anyway). Health + Schema
     // are Super Admin only (level 3) — raw log/db internals.

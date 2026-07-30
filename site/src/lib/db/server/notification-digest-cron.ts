@@ -76,8 +76,14 @@ export async function sweep_notification_digest({ db = get_shared_db(), base_url
   for (const member of members) {
     if (!member.email)
       continue
+    // Belt-and-braces behind the derived membership: the digest quotes platform
+    // notices that carry new signups' email addresses, so it never leaves the
+    // admin allow-list even if a membership row somehow got in by hand.
+    const admin = get_admin(member.email)
+    if (!admin)
+      continue
     // Off-duty admins keep chat access but opt out of broadcast-style pings.
-    if (get_admin(member.email)?.notify === false)
+    if (admin.notify === false)
       continue
     const unread = unread_stmt.all(ROOM_NOTIFICATIONS, member.user_id, member.last_read_at, member.last_read_at) as { body_text: string }[]
     if (!unread.length)
@@ -147,6 +153,18 @@ if (import.meta.vitest) {
       expect((db.prepare('SELECT value FROM db_metadata WHERE key = ?').get(DIGEST_DAY_KEY) as { value: string }).value).toBe('2026-07-14')
       // Same day → guarded.
       expect(await sweep_notification_digest({ db, now: new Date('2026-07-14T20:00:00.000Z') })).toBe(0)
+    })
+
+    it('NEVER digests a non-admin, even holding a membership row — it quotes signup emails', async () => {
+      const db = open_test_shared_db()
+      seed_notifications(db)
+      const now = new Date().toISOString()
+      db.prepare('INSERT INTO users (id, email, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
+        .run('u-evie', 'evie@example.com', 'Evie', now, now)
+      db.prepare('INSERT INTO chat_room_members (room_id, user_id, created_at) VALUES (?, ?, ?)')
+        .run(ROOM_NOTIFICATIONS, 'u-evie', now)
+      // Still 4 — the 4 admins. Evie is in the room but not in the allow-list.
+      expect(await sweep_notification_digest({ db, now: eight_am_pt })).toBe(4)
     })
 
     it('skips a member who has already read all notifications', async () => {

@@ -6,7 +6,8 @@
  * Channels are DB-managed rows: admins (level >= 2) create channels and manage
  * their members in the UI; rooms flagged `admin_room` are only manageable by
  * super admins (level 3). The one system room (`notifications`) is ensured at
- * boot by `ensure_notifications_room`; its membership is UI-managed. Raw
+ * fan-out time by `post_system_notification`, and its membership is DERIVED
+ * from the admin allow-list there (never hand-edited). Raw
  * better-sqlite3 statements — chat has no JSON columns, so the auto-parse
  * driver isn't needed.
  */
@@ -19,6 +20,7 @@ import { open_test_shared_db } from '$lib/db/server/shared-db'
 import {
   MESSAGE_PAGE_LIMIT,
   PRESENCE_WINDOW_MS,
+  ROOM_NOTIFICATIONS,
   SYSTEM_ROOM_IDS,
   SYSTEM_USER_ID,
 } from './constants'
@@ -206,8 +208,22 @@ export function delete_room({ db, room_id }: { db: Database.Database, room_id: s
   return { storage_keys }
 }
 
+/**
+ * The Notifications room's membership is DERIVED from the admin allow-list
+ * (reconciled at fan-out time by `ensure_notifications_members`), so it must
+ * never be hand-edited from the members popover: an added non-admin would
+ * receive the daily digest, which carries new signups' email addresses. This is
+ * NARROW on purpose — `admin_room` stays a MANAGE gate, not a membership rule,
+ * because Anna is a legitimate non-admin member of `diego-anna-greg`.
+ */
+function refuse_system_room(room_id: string): void {
+  if ((SYSTEM_ROOM_IDS as readonly string[]).includes(room_id))
+    throw new ChatError('This room\'s membership follows the admin list and can\'t be edited', 400)
+}
+
 /** Add a registered user to a room (idempotent). */
 export function add_room_member({ db, room_id, user_id }: { db: Database.Database, room_id: string, user_id: string }): void {
+  refuse_system_room(room_id)
   if (!get_room({ db, room_id }))
     throw new ChatError('Room not found', 404)
   const user = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id)
@@ -218,11 +234,36 @@ export function add_room_member({ db, room_id, user_id }: { db: Database.Databas
 }
 
 export function remove_room_member({ db, room_id, user_id }: { db: Database.Database, room_id: string, user_id: string }): void {
+  refuse_system_room(room_id)
   // The System bot is never a real member (it posts by bypassing the gate); it
   // must never be added/removed as one.
   if (user_id === SYSTEM_USER_ID)
     throw new ChatError('The System bot cannot be removed', 400)
   db.prepare('DELETE FROM chat_room_members WHERE room_id = ? AND user_id = ?').run(room_id, user_id)
+}
+
+/**
+ * Reconcile the Notifications room from the admin allow-list — every admin, only
+ * admins — creating a minimal `users` row for an admin who has never logged in
+ * so the digest can reach them. Called at FAN-OUT time, never at boot: Jacob
+ * deploys ~15×/day and boot work runs ~30×/day across blue+green.
+ *
+ * `ensure_notifications_room` used to seed NO members at all, so a newly added
+ * admin silently never received the digest.
+ */
+export function ensure_notifications_members({ db }: { db: Database.Database }): void {
+  const ts = now_iso()
+  const find_user = db.prepare('SELECT id FROM users WHERE email = ? LIMIT 1')
+  const insert_user = db.prepare('INSERT INTO users (id, email, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(email) DO NOTHING')
+  const add_member = db.prepare('INSERT INTO chat_room_members (room_id, user_id, created_at) VALUES (?, ?, ?) ON CONFLICT(room_id, user_id) DO NOTHING')
+  for (const admin of ADMINS) {
+    let row = find_user.get(admin.email) as { id: string } | undefined
+    if (!row) {
+      insert_user.run(crypto.randomUUID(), admin.email, admin.name, ts, ts)
+      row = find_user.get(admin.email) as { id: string }
+    }
+    add_member.run(ROOM_NOTIFICATIONS, row.id, ts)
+  }
 }
 
 /** Is this user a member of at least one room? */
@@ -683,6 +724,38 @@ if (import.meta.vitest) {
       expect(() => create_channel({ db, name: '   ', created_by_user_id: 'u-jacob' })).toThrow(ChatError)
       const admin_room = create_channel({ db, name: 'Admins only', created_by_user_id: 'u-jacob', admin_room: true })
       expect(admin_room.admin_room).toBe(1)
+    })
+  })
+
+  describe(ensure_notifications_members, () => {
+    it('adds every allow-listed admin (creating missing user rows) and is idempotent', () => {
+      const db = fresh_db()
+      db.prepare('DELETE FROM chat_room_members').run()
+      db.prepare('DELETE FROM chat_rooms').run()
+      db.prepare('INSERT INTO chat_rooms (id, kind, name, admin_room) VALUES (?, \'channel\', \'Notifications\', 1)').run(ROOM_NOTIFICATIONS)
+      ensure_notifications_members({ db })
+      ensure_notifications_members({ db })
+      const count = (db.prepare('SELECT COUNT(*) AS c FROM chat_room_members WHERE room_id = ?').get(ROOM_NOTIFICATIONS) as { c: number }).c
+      expect(count).toBe(ADMINS.length)
+    })
+  })
+
+  describe(add_room_member, () => {
+    it('refuses to hand-edit the derived Notifications membership, both ways', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-evie', 'evie@example.com')
+      db.prepare('INSERT INTO chat_rooms (id, kind, name, admin_room) VALUES (?, \'channel\', \'Notifications\', 1) ON CONFLICT(id) DO NOTHING').run(ROOM_NOTIFICATIONS)
+      expect(() => add_room_member({ db, room_id: ROOM_NOTIFICATIONS, user_id: 'u-evie' })).toThrow(ChatError)
+      expect(() => remove_room_member({ db, room_id: ROOM_NOTIFICATIONS, user_id: 'u-evie' })).toThrow(ChatError)
+    })
+
+    it('still allows a NON-admin in an admin_room — Anna is a real member of one', () => {
+      const db = fresh_db()
+      seed_user(db, 'u-jacob', 'jwrunner7@gmail.com')
+      seed_user(db, 'u-anna', 'anna@example.com')
+      const room = create_channel({ db, name: 'Diego, Anna & Greg', created_by_user_id: 'u-jacob', admin_room: true })
+      add_room_member({ db, room_id: room.id, user_id: 'u-anna' })
+      expect(is_member({ db, room_id: room.id, user_id: 'u-anna' })).toBe(true)
     })
   })
 

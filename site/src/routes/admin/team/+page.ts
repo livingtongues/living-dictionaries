@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit'
 
-/** Team chat moved out of /admin to the standalone membership-based /chat. */
+/** Team chat moved from /admin/team to the two-door /chat + /admin/chat. */
 export function load({ url }: { url: URL }) {
-  redirect(301, `/chat${url.search}`)
+  redirect(301, `/admin/chat${url.search}`)
 }

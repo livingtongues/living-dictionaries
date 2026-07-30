@@ -11,7 +11,7 @@
  */
 import type Database from 'better-sqlite3'
 import type { SystemNotificationContent } from './notification-messages'
-import { post_message } from './chat-db'
+import { ensure_notifications_members, post_message } from './chat-db'
 import { ROOM_NOTIFICATIONS, SYSTEM_USER_NAME } from './constants'
 import { SYSTEM_USER_ID } from '$lib/chat/constants'
 
@@ -28,6 +28,11 @@ function ensure_system_notifier(db: Database.Database): void {
     .run(SYSTEM_USER_ID, SYSTEM_USER_NAME, now, now)
   db.prepare('INSERT INTO chat_rooms (id, kind, name, admin_room, created_at, updated_at) VALUES (?, \'channel\', ?, 1, ?, ?) ON CONFLICT(id) DO NOTHING')
     .run(ROOM_NOTIFICATIONS, NOTIFICATIONS_ROOM_NAME, now, now)
+  // Membership is DERIVED from the admin allow-list, reconciled HERE rather than
+  // at boot: every admin, only admins. This is also what replaced
+  // `ensure_notifications_room()`'s boot call — it seeded no members, so a newly
+  // added admin silently never got the daily digest.
+  ensure_notifications_members({ db })
 }
 
 export function post_system_notification({ db, content, client_message_id }: {
