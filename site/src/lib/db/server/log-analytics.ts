@@ -685,6 +685,43 @@ function percentile(values: number[], pct: number): number | null {
   return sorted[Math.min(Math.max(rank, 1), sorted.length) - 1]
 }
 
+/**
+ * Largest value across one or more lists, or null when they're all empty.
+ *
+ * NOT `Math.max(...values)`: spreading an array into a call passes one ARGUMENT per
+ * element, and a bucket with enough samples overflows the call stack. That is not
+ * hypothetical — the first production run of the analytics checkpoint (2026-07-30)
+ * crashed on the `bots` audience with `RangeError: Maximum call stack size exceeded`
+ * inside `build_performance`, because crawlers hammer a single route hard enough to
+ * put six figures of timings in one bucket. Humans never came close, which is why
+ * this survived until both audiences started being computed unconditionally.
+ */
+function max_of(...lists: number[][]): number | null {
+  let largest: number | null = null
+  for (const values of lists) {
+    for (const value of values) {
+      if (largest === null || value > largest)
+        largest = value
+    }
+  }
+  return largest
+}
+
+if (import.meta.vitest) {
+  describe(max_of, () => {
+    it('takes the largest across every list and returns null when all are empty', () => {
+      expect(max_of([3, 9, 4])).toBe(9)
+      expect(max_of([3], [], [11, 2])).toBe(11)
+      expect(max_of([], [])).toBe(null)
+    })
+    it('survives a bot-scale bucket that `Math.max(...values)` would overflow', () => {
+      const many = Array.from({ length: 300_000 }, (_, index) => index)
+      expect(max_of(many)).toBe(299_999)
+      expect(() => Math.max(...many)).toThrow(RangeError)
+    })
+  })
+}
+
 function day_string(date: Date): string {
   return date.toISOString().slice(0, 10)
 }
@@ -1946,7 +1983,7 @@ function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: Daily
   const perf_names = [...PERF_METRICS, ...[...perf_all.keys()].filter(name => !PERF_METRICS.includes(name as typeof PERF_METRICS[number]))]
   const summary: PerfSummary[] = perf_names.map((name) => {
     const values = perf_all.get(name) ?? []
-    return { name, count: values.length, p50: percentile(values, 50), p90: percentile(values, 90), p95: percentile(values, 95), max: values.length ? Math.max(...values) : null, slowest: perf_slowest.get(name) ?? null }
+    return { name, count: values.length, p50: percentile(values, 50), p90: percentile(values, 90), p95: percentile(values, 95), max: max_of(values), slowest: perf_slowest.get(name) ?? null }
   })
   const daily_perf: PerfDailyPoint[] = daily.map((point) => {
     const day_map = perf_by_day.get(point.day)
@@ -1968,14 +2005,14 @@ function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: Daily
     route_perf_values.get(route)?.push(row.duration_ms)
   }
   const by_route: RoutePerf[] = [...route_perf_values.entries()]
-    .map(([route, values]) => ({ route, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95), max: Math.max(...values) }))
+    .map(([route, values]) => ({ route, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95), max: max_of(values) }))
     .sort((first, second) => (second.p95 ?? 0) - (first.p95 ?? 0))
     .slice(0, ROUTE_PERF_LIMIT)
 
   // Navigation by destination route — most-travelled first (the common paths, e.g.
   // home→dictionary:entry, are what matter; slow ones surface via their p95 column).
   const nav_by_route: RoutePerf[] = [...nav_route_values.entries()]
-    .map(([route, values]) => ({ route, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95), max: Math.max(...values) }))
+    .map(([route, values]) => ({ route, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95), max: max_of(values) }))
     .sort((first, second) => second.count - first.count)
     .slice(0, ROUTE_PERF_LIMIT)
 
@@ -1998,7 +2035,7 @@ function build_performance({ ctx, daily }: { ctx: AnalyticsContext, daily: Daily
     lcp_route_values.get(route)?.push(row.value)
   }
   const lcp_by_route: RoutePerf[] = [...lcp_route_values.entries()]
-    .map(([route, values]) => ({ route, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95), max: Math.max(...values) }))
+    .map(([route, values]) => ({ route, count: values.length, p50: percentile(values, 50), p95: percentile(values, 95), max: max_of(values) }))
     .sort((first, second) => second.count - first.count)
     .slice(0, ROUTE_PERF_LIMIT)
 
@@ -2062,7 +2099,7 @@ function build_dict_boot(ctx: AnalyticsContext): DictBootPerf {
       cold_count: values.cold.length,
       cold_p50: percentile(values.cold, 50),
       warm_p50: percentile(values.warm, 50),
-      max: values.cold.length + values.warm.length ? Math.max(...values.cold, ...values.warm) : null,
+      max: max_of(values.cold, values.warm),
     }))
     .sort((first, second) => (second.cold_p50 ?? second.warm_p50 ?? 0) - (first.cold_p50 ?? first.warm_p50 ?? 0))
     .slice(0, ROUTE_PERF_LIMIT)
