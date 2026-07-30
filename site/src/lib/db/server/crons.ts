@@ -6,7 +6,6 @@ import { run_log_retention_sweep } from './log-retention-cron'
 import { media_sweep_disabled_reason, run_media_sweep } from './media-sweep-cron'
 import { run_notification_digest_sweep } from './notification-digest-cron'
 import { r2_snapshot_disabled_reason, run_r2_snapshot_sweep } from './r2-snapshot-builder'
-import { run_system_outbox_sweep } from './system-outbox-cron'
 import { run_wal_checkpoint_sweep } from './wal-checkpoint-cron'
 
 /**
@@ -30,7 +29,10 @@ export const CRONS: CronDef[] = [
   {
     name: 'wal-checkpoint',
     description: 'TRUNCATE-checkpoint shared/logs/archive WALs so they never ratchet up under multi-connection load',
-    every_ms: minutes(5),
+    // 15 not 5: only ~5 MB of WAL accrues per 5 min here, and a checkpoint costs
+    // O(frames) while holding readers off — so a SLOWER cadence means a LONGER
+    // stall. This is the balance point, not a saving (Jacob, 2026-07-29).
+    every_ms: minutes(15),
     run: run_wal_checkpoint_sweep,
   },
   {
@@ -43,7 +45,7 @@ export const CRONS: CronDef[] = [
   {
     name: 'log-retention',
     description: 'Roll client_logs into daily metrics, archive past the hot window, prune the archive, re-warm analytics',
-    every_ms: hours(6),
+    every_ms: days(1),
     run: () => run_log_retention_sweep({ after_sweep: warm_analytics_caches }),
   },
   {
@@ -56,26 +58,24 @@ export const CRONS: CronDef[] = [
   {
     name: 'media-sweep',
     description: 'Daily media ledger rollup + weekly R2 reconcile / orphan cleanup / variant self-heal',
-    every_ms: hours(1),
+    // Was hourly and no-opped 23×/day: the body is already a daily rollup + a
+    // 6.5-day reconcile, so the tick was pure polling.
+    every_ms: days(1),
     run: run_media_sweep,
     disabled_reason: media_sweep_disabled_reason,
   },
   {
     name: 'notification-digest',
     description: 'Once/day at 8am Pacific: one summary per on-duty admin of unread platform events',
-    every_ms: hours(1),
+    every_ms: days(1),
+    at: { hour: 8, minute: 0, tz: 'America/Los_Angeles' },
     run: run_notification_digest_sweep,
   },
   {
     name: 'chat-reping',
     description: 'One gentle extra nudge for admin team-chat pings unread ~1 day',
-    every_ms: hours(1),
+    every_ms: days(1),
+    at: { hour: 8, minute: 5, tz: 'America/Los_Angeles' },
     run: run_chat_reping_sweep,
-  },
-  {
-    name: 'system-outbox',
-    description: 'Drain agent-enqueued System chat messages (chat_system_outbox) — snappy on-demand delivery',
-    every_ms: seconds(20),
-    run: run_system_outbox_sweep,
   },
 ]

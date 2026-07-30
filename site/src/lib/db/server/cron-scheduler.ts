@@ -48,6 +48,23 @@ export interface CronDef {
   /** Wall-clock cadence in ms (use the seconds/minutes/hours/days helpers in crons.ts). */
   every_ms: number
   /**
+   * Pin a DAILY cron to a wall-clock LOCAL time instead of "every_ms after the
+   * last run". Only valid with `every_ms: days(1)`.
+   *
+   * WHY: jobs that must happen at a human hour (the 8am digest) used to be
+   * declared hourly and then no-op 23 times a day, checking "is it 8am in
+   * America/Los_Angeles yet?" — 24 wakeups to do one thing. A bare `days(1)`
+   * can't replace that: it drifts to whatever time the cron first ran, so a
+   * job whose body still guards on "at/after 8am PT" would fire at 6am,
+   * skip, and never send again.
+   *
+   * DST: the delay is computed as "seconds until that tz's wall clock next
+   * reads HH:MM", re-derived after every run, so it tracks DST automatically.
+   * Only the transition day itself can land ±1h off; it self-corrects the
+   * next day, which is well inside what a daily digest cares about.
+   */
+  at?: { hour: number, minute: number, tz: string }
+  /**
    * One run. May throw — the scheduler catches, logs a `cron_run_failed`
    * server event, and keeps the cadence. Files with a domain-specific failure
    * event (e.g. `log_retention_sweep_failed`) keep their own try/catch too.
@@ -71,6 +88,31 @@ export const QUIET_AFTER_BOOT_MS = 150_000
 export const OVERDUE_SPACING_MS = 20_000
 /** Crons at or above this cadence get persisted wall-clock scheduling; below = plain ticks. */
 export const PERSIST_THRESHOLD_MS = 5 * 60_000
+
+/**
+ * Epoch ms of the next moment `tz`'s wall clock reads `hour:minute`.
+ *
+ * Deliberately computed as a DELTA from the current local time-of-day rather
+ * than by constructing a date in the target zone: `Intl` can tell us what time
+ * it is somewhere, but building "8am tomorrow in Los Angeles" as an epoch means
+ * hand-rolling offset math that breaks twice a year. Asking "how many seconds
+ * until that clock reads 08:00" is the same answer with none of the arithmetic.
+ */
+export function next_daily_at(now_ms: number, at: { hour: number, minute: number, tz: string }): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: at.tz,
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(new Date(now_ms))
+  const part = (type: string) => Number(parts.find(p => p.type === type)?.value ?? '0')
+  // `hour12: false` renders midnight as "24" in some ICU versions — normalize.
+  const local_seconds = (part('hour') % 24) * 3600 + part('minute') * 60 + part('second')
+  const target_seconds = at.hour * 3600 + at.minute * 60
+  const delta = target_seconds - local_seconds
+  return now_ms + (delta > 0 ? delta : delta + 86_400) * 1000
+}
 
 interface CronRuntime {
   def: CronDef
@@ -133,6 +175,12 @@ export function start_crons_once({ defs, db, now = Date.now }: StartOptions): vo
     if (def.every_ms < PERSIST_THRESHOLD_MS) {
       // Cheap tick-style cron: natural first tick, no persistence, no quiet gate.
       run_at = boot + def.every_ms
+    } else if (def.at) {
+      // Clock-pinned: always the next time that clock strikes — deliberately NO
+      // overdue ladder. A missed 8am digest must not fire at 3pm the moment the
+      // box comes back; "at 8am" is the whole contract. (Still floored past the
+      // warmup window for the pathological case of booting seconds before it.)
+      run_at = Math.max(next_daily_at(boot, def.at), boot + QUIET_AFTER_BOOT_MS)
     } else {
       const due_at = runtime.last_run_at === null ? boot : runtime.last_run_at + def.every_ms
       const quiet_floor = boot + QUIET_AFTER_BOOT_MS
@@ -146,7 +194,10 @@ export function start_crons_once({ defs, db, now = Date.now }: StartOptions): vo
       }
     }
     schedule(runtime, run_at, shared_db, now)
-    console.info(`[crons] '${def.name}' every ${format_ms(def.every_ms)}, next in ${format_ms(run_at - boot)}${runtime.last_run_at === null ? ' (first-ever run)' : ''}.`)
+    const cadence = def.at
+      ? `daily at ${String(def.at.hour).padStart(2, '0')}:${String(def.at.minute).padStart(2, '0')} ${def.at.tz}`
+      : `every ${format_ms(def.every_ms)}`
+    console.info(`[crons] '${def.name}' ${cadence}, next in ${format_ms(run_at - boot)}${runtime.last_run_at === null ? ' (first-ever run)' : ''}.`)
   }
 }
 
@@ -177,7 +228,10 @@ async function execute(runtime: CronRuntime, db: Database.Database, now: () => n
     persist_last_run(db, def.name, started)
   // Next run keys off this run's START (steady wall-clock phase); if the run
   // overran its own interval, push at least 1s out so we never hot-loop.
-  schedule(runtime, Math.max(started + def.every_ms, now() + 1000), db, now)
+  // A clock-pinned cron re-derives from the CURRENT time, which is what makes
+  // it follow DST without anyone storing an offset.
+  const next_at = def.at ? next_daily_at(now(), def.at) : started + def.every_ms
+  schedule(runtime, Math.max(next_at, now() + 1000), db, now)
 }
 
 function read_last_runs(db: Database.Database): Map<string, number> {

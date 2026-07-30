@@ -72,12 +72,24 @@ Key design facts:
     and 2 new dictionaries" via `summarize_notifications`). Regular DMs/channels still ping instantly;
     the reping cron explicitly excludes `notifications`.
 - **Agent-authored System messages** (Jacob's agent posting as System into any room so recipients
-  know it's the agent, not Jacob) go through the **`chat_system_outbox`** table: the agent raw-INSERTs
-  one row (no API/auth — Jacob rejected that; `/system-chat` slash command documents it), and
-  `system-outbox-cron.ts` (~20s) drains it — `post_message` as System + normal member ping (skipping
-  `skip_user_id`, the human being acted for). Pings need the SvelteKit runtime for SES/ntfy, which is
-  why a bare SQL insert can't ping and the outbox+cron exists. A past raw-insert attempt "didn't show"
-  because `require_member` threw (System wasn't a DM member) — now bypassed.
+  know it's the agent, not Jacob) POST to the loopback-only **`/api/internal/system-chat`** endpoint,
+  which calls `deliver_system_message` inside the runtime — `post_message` as System + the normal
+  member ping (skipping `skip_user_id`, the human being acted for). The pings need the SvelteKit
+  runtime for SES/ntfy, which is why a bare SQL insert from a separate `node` process can't deliver.
+  The `/system-chat` slash command documents the whole flow.
+  - **Was `chat_system_outbox` + a 20s drain cron until 2026-07-29** — 4,320 wakeups/day, up to 20s
+    late, and the agent had to poll `processed_at` to learn the outcome. Jacob: "The agent should get
+    a failure if it doesn't work. It should wait till its call returns." The table still EXISTS but is
+    unused and unwritten; dropping it needs a shared migration, which throws `CLIENT_BEHIND` at every
+    user until they reload.
+  - **Auth is two gates, both fail closed** (`$lib/server/internal-token.ts`): an `x-internal-token`
+    header matching `${DATA_DIR}/.internal-api-token`, and a refusal of any request carrying proxy
+    headers, so the route is unusable from the public internet even with the token. The token is
+    SELF-PROVISIONED into the data volume on first boot (exclusive `wx` create, so blue and green
+    can't both win) rather than living in `vps-setup` secrets — mustang deliberately holds no
+    decryption password, and rotation is `rm .internal-api-token` + a restart.
+  - A past raw-insert attempt "didn't show" because `require_member` threw (System wasn't a DM
+    member) — now bypassed.
 - Presence heartbeat runs only on /chat + inside /admin; the rooms/unread poll runs site-wide for
   members (root layout → avatar dot + UserMenu badge). A member browsing elsewhere still gets
   email pings — deliberate.

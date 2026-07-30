@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { open_test_shared_db } from '$lib/db/server/shared-db'
-import { get_cron_runtimes, OVERDUE_SPACING_MS, QUIET_AFTER_BOOT_MS, start_crons_once, stop_all_crons } from './cron-scheduler'
+import { get_cron_runtimes, next_daily_at, OVERDUE_SPACING_MS, QUIET_AFTER_BOOT_MS, start_crons_once, stop_all_crons } from './cron-scheduler'
 import type { CronDef } from './cron-scheduler'
 import { minutes, seconds } from './crons'
 
@@ -113,5 +113,46 @@ describe(start_crons_once, () => {
     expect(calls).toBe(1)
     await vi.advanceTimersByTimeAsync(seconds(10))
     expect(calls).toBe(2)
+  })
+})
+
+describe(next_daily_at, () => {
+  const PT = 'America/Los_Angeles'
+
+  test('finds the next 08:00 Pacific during PDT (UTC-7)', () => {
+    // 2026-07-29 12:00 UTC = 05:00 PDT → 8am PT is 3h away, same day.
+    const from = Date.parse('2026-07-29T12:00:00.000Z')
+    expect(next_daily_at(from, { hour: 8, minute: 0, tz: PT })).toBe(from + 3 * 3600_000)
+  })
+
+  test('rolls to tomorrow once the hour has passed', () => {
+    // 16:00 UTC = 09:00 PDT — 8am is behind us, so the answer is 23h out.
+    const from = Date.parse('2026-07-29T16:00:00.000Z')
+    expect(next_daily_at(from, { hour: 8, minute: 0, tz: PT })).toBe(from + 23 * 3600_000)
+  })
+
+  test('tracks the DST offset instead of a hardcoded UTC hour', () => {
+    // The whole reason this is computed from the target zone's clock: 8am PT is
+    // 15:00 UTC in summer and 16:00 UTC in winter. A fixed UTC hour would drift.
+    const summer = Date.parse('2026-07-29T00:00:00.000Z')
+    const winter = Date.parse('2026-12-29T00:00:00.000Z')
+    const at = { hour: 8, minute: 0, tz: PT }
+    expect(new Date(next_daily_at(summer, at)).toISOString()).toBe('2026-07-29T15:00:00.000Z')
+    expect(new Date(next_daily_at(winter, at)).toISOString()).toBe('2026-12-29T16:00:00.000Z')
+  })
+
+  test('a clock-pinned cron is scheduled at its hour, never on the boot ladder', () => {
+    const def: CronDef = {
+      name: 'digest',
+      description: 'daily digest',
+      every_ms: 86_400_000,
+      at: { hour: 8, minute: 0, tz: PT },
+      run: () => Promise.resolve(),
+    }
+    start_crons_once({ defs: [def], db })
+    const runtime = get_cron_runtimes().find(entry => entry.name === 'digest')
+    // 12:00 UTC = 05:00 PDT, so it must be 3h out — not QUIET_AFTER_BOOT_MS.
+    expect(runtime?.next_run_at).toBe(Date.now() + 3 * 3600_000)
+    expect(runtime?.next_run_at).not.toBe(Date.now() + QUIET_AFTER_BOOT_MS)
   })
 })
