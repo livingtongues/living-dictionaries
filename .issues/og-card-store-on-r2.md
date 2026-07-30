@@ -201,6 +201,31 @@ plan assumed. The code is deployed and fails open: until the bucket exists every
   `ls /opt/hosting/data/og-cache | wc -l` should stop being pinned at the cap while
   `og_render_shed` collapses. Re-measure `og_card_rendered` / `og_render_shed` on the next log review.
 
+## Deployed + verified in production 2026-07-30
+
+Deploy 09:12 UTC (LD `3128e2bf` + `b10d0eb8`). Two fetches of a cold entry card, then the coalesced
+telemetry read straight out of `/data/logs.db`:
+
+```
+og_card_served {"source":"render","count":1}
+og_card_served {"source":"disk","count":1}
+og_remote_card_fault {"operation":"get","breaker_open":false,"count":2}
+```
+
+Exactly the designed ladder — first request rendered, second served from the disk tier, and the R2
+tier faulting **without the endpoint noticing** (the card still came back 200, byte-identical).
+
+R2 latency measured from the box the same hour (dependency-free SigV4 probe inside the container):
+missing bucket **36–166 ms**, missing key in a real bucket **209–231 ms**. So the two GET faults hit
+the 2,000 ms deadline because the PROCESS was busy, not because R2 is slow — which is why
+`elapsed_ms` now rides on the fault event.
+
+⚠️ **Watch `og_render_worker_timeout` on the next log review.** The pool's bound went 20 s → 10 s with
+the dispatch port. Baseline before the change: 2 events in a 45-minute window *at 20 s* — so real
+wedges predate it. One fired at 10 s within the first hour after. If the daily count rises materially,
+raise LD's bound toward 15 s rather than reverting the dispatch fix: LD's worker fetches Google Fonts
+INSIDE the render (up to 2 × 3 s), which house's does not. Noted in `decisions.md` too.
+
 ## Still open
 
 - ⛔ **Jacob creates `livingdictionaries-og-cache` + the 90-day lifecycle rule** (steps above). Until

@@ -163,6 +163,7 @@ export function create_remote_card_store({
       if (!usable() || known_absent(key))
         return null
       gets++
+      const started = now()
       try {
         const png = await with_deadline(get_timeout_ms, signal => get_object({ key, signal }))
         record_success()
@@ -170,7 +171,11 @@ export function create_remote_card_store({
           remember_absent(key)
         return png
       } catch (error) {
-        record_fault({ error, context: { operation: 'get' } })
+        // `elapsed_ms` (a sample — the coalescing bucket keeps the first event's
+        // context) distinguishes "R2 is slow" from "this process was too busy to
+        // service the callback": R2 itself answers a missing key in ~215 ms and a
+        // missing bucket in ~40 ms, measured from the box 2026-07-30.
+        record_fault({ error, context: { operation: 'get', elapsed_ms: now() - started } })
         return null
       }
     },
@@ -182,12 +187,13 @@ export function create_remote_card_store({
       // already on its way out and must never wait on R2.
       setTimeout(() => {
         puts++
+        const started = now()
         void with_deadline(put_timeout_ms, signal => put_object({ key, png, signal }))
           .then(() => {
             record_success()
             absent_until.delete(key)
           })
-          .catch(error => record_fault({ error, context: { operation: 'put' } }))
+          .catch(error => record_fault({ error, context: { operation: 'put', elapsed_ms: now() - started } }))
       }, 0).unref?.()
     },
 

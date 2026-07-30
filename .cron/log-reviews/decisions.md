@@ -284,3 +284,25 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   `$lib/server/`, so deploy↔error correlation is reverse-guessed from client `app_version` first-seen.
   This also blocks the long-parked "deploy-settling error band" backlog item. Emit
   `{ app_version, commit, container: blue|green, is_standby }` once at boot.
+- **2026-07-30 — the `/og` store is now disk → R2 → render, and there are THREE new things to read.**
+  Deployed 09:12 UTC. (1) `og_card_served { source: 'disk' | 'r2' | 'render' }` is the denominator the
+  endpoint never had — the honest verdict is *share of `/og` requests answered with the dictionary's own
+  card*, not "% of renders that succeeded". (2) `og_remote_card_fault { operation, elapsed_ms }` means
+  the R2 tier faulted; it is ALWAYS fail-open (the card just renders), so treat a low rate as noise and
+  a sustained rate as "the tier is doing nothing". R2 itself answers in 36–231 ms from the box, so a
+  fault with `elapsed_ms` near the 2,000 ms deadline means the PROCESS was busy, not R2. (3) The disk
+  caps went 1,000 → 5,000 entries / 250 MB → 1 GB, so `og_render_shed` should fall a long way even
+  before the bucket exists. ⛔ **`livingdictionaries-og-cache` does not exist yet — Jacob must create
+  it** (the app's R2 token is object-scoped: 403 on CreateBucket, verified). Until then every R2 GET is
+  a clean 404 miss and `source:'r2'` will never appear.
+- **2026-07-30 — the render-pool timeout was 20 s measuring the WRONG THING; it is now 10 s measuring
+  the right one.** The pool used to post every job at once and start each job's clock at POST time, so
+  concurrent callers timed each other out — a queue length reported as a wedged renderer. It now
+  dispatches one job at a time with the clock starting at hand-over. **Watch `og_render_worker_timeout`
+  on the next review**: baseline was 2 events in a 45-minute window at 20 s (i.e. real wedges existed
+  before this change). If the daily count rises materially, raise LD's bound toward 15 s rather than
+  reverting the dispatch change — LD's worker fetches Google Fonts INSIDE the render (up to 2 × 3 s),
+  which house's does not.
+- **2026-07-30 — `og_render_failed` now carries `script` / `family` / `timed_out`.** The 07-29 "1,536
+  font failures = one Arabic dictionary" finding had to be reached by hand; it is now a group-by. Use it
+  to size `.issues/bundle-render-fonts.md` (filed in LD and house) before choosing which faces to bundle.
