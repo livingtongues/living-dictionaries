@@ -29,6 +29,25 @@
   import IconMdiPound from '~icons/mdi/pound'
   import IconMdiShieldLockOutline from '~icons/mdi/shield-lock-outline'
 
+  interface Props {
+    /**
+     * The door this page was entered through — `/chat` or `/admin/chat`. Room
+     * selection pushes `${base_path}?room=…` so a deep link (and the back
+     * button) keeps you on the side of the house you came in on. Both are REAL
+     * pages: every chat notification email ever sent points at `/chat?room=…`,
+     * and an admin working in the admin shouldn't be bounced out of it.
+     */
+    base_path: string
+    /**
+     * `site` renders the page's own <Header> + the signed-out / not-a-member
+     * gate screens and sizes itself against the viewport. `admin` renders
+     * neither (the admin layout owns the header + the gate) and fills its
+     * flex parent.
+     */
+    chrome: 'site' | 'admin'
+  }
+  let { base_path, chrome }: Props = $props()
+
   const auth_user = $derived(page.data.auth_user)
 
   let active_room_id = $state<string>('')
@@ -242,7 +261,7 @@
     first_unread_id = null
     replying_to = null
     has_more_older = false
-    await goto(`/chat?room=${encodeURIComponent(room_id)}`, { replaceState: true, keepFocus: true, noScroll: true })
+    await goto(`${base_path}?room=${encodeURIComponent(room_id)}`, { replaceState: true, keepFocus: true, noScroll: true })
     await load_messages(room_id)
     void chat_store.refresh_rooms()
   }
@@ -342,13 +361,13 @@
   })
 </script>
 
-<svelte:head><title>Chat · Living Dictionaries</title></svelte:head>
-
 <svelte:window onkeydown={(event) => { if (event.key === 'Escape') show_members = false }} />
 
-<Header>Chat</Header>
+{#if chrome === 'site'}
+  <Header>Chat</Header>
+{/if}
 
-{#if !auth_user.user}
+{#if chrome === 'site' && !auth_user.user}
   <div class="gate-screen">
     <IconMdiForumOutline style="font-size: 2rem; color: var(--primary)" />
     <h1 class="gate-title">Chat</h1>
@@ -362,14 +381,14 @@
       {/snippet}
     </ShowHide>
   </div>
-{:else if !auth_user.is_chat_member}
+{:else if chrome === 'site' && !auth_user.is_chat_member}
   <div class="gate-screen">
     <IconMdiShieldLockOutline style="font-size: 2rem; color: var(--color-secondary)" />
     <h1 class="gate-title">Chat is invite-only</h1>
     <p class="gate-text">You're not in any channels yet — an admin can add you.</p>
   </div>
 {:else}
-  <div class={['chat-page', mobile_view === 'rooms' ? 'show-rooms' : 'show-thread']}>
+  <div class={['chat-page', chrome, mobile_view === 'rooms' ? 'show-rooms' : 'show-thread']}>
     <aside class="sidebar">
       <div class="group">
         <div class="group-label">Channels</div>
@@ -489,12 +508,21 @@
   /* The site header is a 3rem sticky bar; the chat pane fills the rest of the
      viewport with its own internal scrolling. */
   .chat-page {
-    height: calc(100vh - 3rem - 1rem);
-    min-height: 480px;
     display: grid;
     grid-template-columns: 240px 1fr;
     gap: 1rem;
+  }
+  /* The site header is a 3rem sticky bar; the chat pane fills the rest of the
+     viewport with its own internal scrolling. */
+  .chat-page.site {
+    height: calc(100vh - 3rem - 1rem);
+    min-height: 480px;
     padding: 0.5rem 1rem 0;
+  }
+  /* Inside /admin the layout is already a fixed-height flex column. */
+  .chat-page.admin {
+    flex: 1;
+    min-height: 0;
   }
   .sidebar {
     overflow-y: auto;

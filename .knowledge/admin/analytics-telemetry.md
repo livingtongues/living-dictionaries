@@ -223,6 +223,32 @@ counters were each strictly larger (the copy held ~5 more minutes of traffic), a
 `missing_i18n_keys` went from empty to 449 keys because the old `scope === 'full'` gate meant NO
 page ever computed it. Cost: 24–32 s and ~1.0 GB RSS per payload.
 
+**What the FIRST real deploy measured (living, 2026-07-30).** humans 70 s / 702 MB RSS, bots 51 s /
+1193 MB RSS, both under the 2048 MB child heap cap. Throughout the 81 s the child ran, `/healthz`
+measured on-box stayed at **45–70 ms** — that single fact is the whole return on this rewrite, and
+it is the number to re-measure if anyone ever proposes moving a compute back inline.
+
+**Precomputing every combination executes code paths nothing ever ran.** This is the lesson, not a
+footnote. The old design computed a payload only when a human opened the page with those exact
+parameters, so a combination nobody clicked was never proven to work at all. Two latent bugs fell out
+of the very first run of the checkpoint, both of them things a dashboard visit would have hit years
+ago if anyone had visited that way:
+
+- **The bots audience had almost certainly NEVER computed successfully in production.** Living's old
+  `analytics-cache/` directory held only `30-humans-*` files. The first checkpoint run confirmed why:
+  `Math.max(...values)` in `build_performance` threw `RangeError: Maximum call stack size exceeded`,
+  because a spread passes one ARGUMENT per element and crawlers pile six figures of timings into a
+  single route bucket. Humans never came close. Fixed with a `max_of` loop (`log-analytics.ts`, 5 call
+  sites) — and the same latent bug was found and fixed in tutor, and still exists in house.
+  Generalize: **never spread a data-derived array into a call.** `[...values].sort()` is fine (array
+  literal, no argument list); `Math.max(...values)`, `arr.push(...other)` and `fn(...rows)` are not.
+- **A ported component's CSS variables silently fell back.** `CheckpointBar.svelte` came from house
+  and used `var(--text-muted, #64748b)` / `var(--border, #e2e8f0)`. Neither variable exists in LD's or
+  tutor's `theme.css` (they're `--color-secondary` / `--border-color`), so the fallbacks won and both
+  dashboards rendered light-mode colours in dark mode. A fallback value makes a wrong variable name
+  invisible — when porting a component across these three repos, grep the target's `theme.css` for
+  every var it names.
+
 **A coupling constraint that survived the rewrite:** `area_counts` is threaded
 `build_usage_and_areas` → mutated by `build_capability` → fed with `build_geo_latency` into
 `build_geo_areas`. That trio must stay one ordered sequence inside the compute.
