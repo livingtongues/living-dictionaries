@@ -4,6 +4,12 @@
 Severity: 🔴 P1 — ~45 s of hard "no upstreams available" after every deploy, several deploys/day.
 READ-ONLY diagnosis — nothing changed on the box. Site self-recovered at 13:10:57 UTC.**
 
+**✅ CLOSED 2026-07-30. The `IS_STANDBY` gate shipped the same day this was filed and fixed the
+outage (0 `no upstreams available` on the next deploy, down from 265). Today the thing being gated
+was DELETED: there is no boot warm-up any more — analytics is a daily checkpoint computed by a niced
+child process, and a fresh container reads the file off the data volume. See
+`vps-setup/.issues/analytics-and-cron-simplification.md`.**
+
 ## Root cause (one line)
 
 `start_analytics_warm_up()` in <File path="site/src/hooks.server.ts" line="54" /> is gated on `!dev`

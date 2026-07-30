@@ -1,7 +1,12 @@
 # The admin analytics compute freezes the whole site for up to 80 seconds
 
-**Filed 2026-07-26 from the daily log review. ✅ PORTED 2026-07-27 (uncommitted — Jacob owns the
-commit). See "What shipped" at the bottom.**
+**Filed 2026-07-26 from the daily log review. Mitigated 2026-07-27 (see "What shipped" at the
+bottom). ✅ FULLY RESOLVED 2026-07-30 — the compute left the serving process: `get_log_analytics`
+now runs ONLY in a `nice -n 19` child process, once a day, and the dashboards read the JSON
+checkpoint it writes (`analytics-snapshot.ts`). The measurements below are the reason that happened;
+the mitigations they justified (SWR cache, disk persistence, `breathe()`, scope axis, boot warm-up)
+are all deleted. Design + parity verification:
+`vps-setup/.issues/analytics-and-cron-simplification.md` + `.knowledge/admin/analytics-telemetry.md`.**
 
 ## What's wrong
 

@@ -95,7 +95,8 @@ export function create_render_queue({ limit, wait_deadline_ms, max_waiting, busy
          * microtask: resolving the next waiter directly chains two synchronous
          * renders inside one loop iteration, so the loop never reaches its poll
          * phase and a queued `/healthz` waits for the WHOLE queue instead of one
-         * card. Same reasoning as `$lib/server/breathe.ts`.
+         * card. (This is the last home of that reasoning: `$lib/server/breathe.ts` was deleted
+         * 2026-07-30 with the analytics cache machinery it existed for.)
          */
         setImmediate(() => next.resolve(grant()))
       }),

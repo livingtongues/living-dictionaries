@@ -101,13 +101,6 @@ describe(get_log_analytics, () => {
     expect(locales.mismatch_visitors).toBe(1)
   })
 
-  test('locales: light scope skips the panel (empty shape)', async () => {
-    add_log({ day: '2026-06-30', message: 'session_start', context: { session_id: 's1', visitor_id: 'v1', ui_locale: 'es' }, browser_locale: 'es' })
-    const { locales } = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW, scope: 'light' })
-    expect(locales.browser).toEqual([])
-    expect(locales.sessions_with_browser_locale).toBe(0)
-  })
-
   test('top dictionaries unions unique visitors over the rolling last 30 days across hot and archive logs', async () => {
     const archive_db = open_log_archive_db(':memory:')
     try {
@@ -576,48 +569,6 @@ describe(get_log_analytics, () => {
     expect(server_cluster?.max_per_session).toBeNull()
     expect(server_cluster?.bot_sessions).toBe(0)
     expect(server_cluster?.bot_pct).toBeNull()
-  })
-
-  test('scope gates the heavy page-specific sections while keeping the shared core identical', async () => {
-    add_log({ day: '2026-06-30', message: 'session_start', user_id: 'u1', context: { session_id: 's1' } })
-    add_log({ day: '2026-06-30', message: 'search_performed', user_id: 'u1', context: { session_id: 's1' } })
-    add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'page_load', duration_ms: 500 } })
-    add_log({ day: '2026-06-30', message: 'perf', context: { session_id: 's1', name: 'web_vital', metric: 'LCP', value: 1200 } })
-    add_log({ day: '2026-06-30', source: 'server', message: 'v1_entry_created', context: { dictionary_id: 'd1', via: 'api_key' } })
-
-    const base = { shared_db: db, logs_db, days: 30, now: NOW } as const
-    const full = await get_log_analytics(base)
-    const light = await get_log_analytics({ ...base, scope: 'light' })
-    const usage = await get_log_analytics({ ...base, scope: 'usage' })
-    const diagnostics = await get_log_analytics({ ...base, scope: 'diagnostics' })
-
-    // Full computes BOTH halves.
-    expect(full.api_v1.total).toBe(1)
-    expect(full.web_vitals).toHaveLength(1)
-
-    // Light skips BOTH halves (usage-heavy + diagnostics-heavy).
-    expect(light.api_v1.total).toBe(0)
-    expect(light.web_vitals).toEqual([])
-    expect(light.performance.summary).toEqual([])
-
-    // Usage computes its own panels plus the Experience summary inputs, while
-    // still skipping the rest of diagnostics and the removed i18n worklist.
-    expect(usage.api_v1.total).toBe(1)
-    expect(usage.web_vitals).toHaveLength(1)
-    expect(usage.performance.summary.find(metric => metric.name === 'page_load')).toMatchObject({ count: 1, p50: 500 })
-    expect(usage.missing_i18n_keys.keys).toEqual([])
-
-    // Diagnostics computes the diagnostics half, skips usage.
-    expect(diagnostics.web_vitals).toHaveLength(1)
-    expect(diagnostics.api_v1.total).toBe(0)
-
-    // The shared CORE is byte-identical regardless of scope — the swap-in tier can't
-    // change any top-of-page summary number.
-    expect(light.daily).toEqual(full.daily)
-    expect(light.totals).toEqual(full.totals)
-    expect(light.top_events).toEqual(full.top_events)
-    expect(light.capability).toEqual(full.capability)
-    expect(light.geo.areas).toEqual(full.geo.areas)
   })
 
   test('missing i18n keys: ranks by distinct sessions, dedupes keys, excludes bots', async () => {
@@ -1632,7 +1583,12 @@ describe(get_log_analytics, () => {
               },
             ],
           },
-          "host": null,
+          "host": {
+            "hourly": [],
+            "latest": null,
+            "now": null,
+            "samples": 0,
+          },
           "leader_health": {
             "failed": 2,
             "failed_by_code": [
@@ -1925,14 +1881,7 @@ describe(get_log_analytics, () => {
             "total": 1,
           },
           "storage": {
-            "dbs": [
-              {
-                "db_bytes": 0,
-                "name": "logs-archive.db",
-                "wal_bytes": 0,
-                "wal_ratio": null,
-              },
-            ],
+            "dbs": [],
             "dict_dbs": null,
           },
           "sync_health": {
@@ -2085,9 +2034,13 @@ describe(build_host_stats, () => {
     expect(host.now).toBeNull()
   })
 
-  test('get_log_analytics leaves host null (endpoint injects it fresh)', async () => {
+  test('the checkpoint carries the LOGGED half and leaves `now` null for the endpoint to fill', async () => {
     const analytics = await get_log_analytics({ shared_db: db, logs_db, days: 30, now: NOW })
-    expect(analytics.host).toBeNull()
+    // The hourly trend + latest sample are database work, so they ride the daily
+    // checkpoint; the live /proc reading is layered on at request time (a stale
+    // `now` from 03:30 would be a lie, so it is deliberately null here).
+    expect(analytics.host?.now).toBeNull()
+    expect(analytics.host?.hourly).toBeDefined()
   })
 })
 

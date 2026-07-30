@@ -4,6 +4,7 @@
   import { get_locale_display_name } from '$lib/i18n/locales'
   import { log_insights } from '$lib/analytics/insights'
   import AtAGlance from '$lib/analytics/AtAGlance.svelte'
+  import CheckpointBar from '$lib/analytics/CheckpointBar.svelte'
   import type { DonutDatum } from '$lib/charts/DonutChart.svelte'
   import type { Segment } from '$lib/charts/SegmentedBar.svelte'
   import BarChart from '$lib/charts/BarChart.svelte'
@@ -15,7 +16,10 @@
   import { format_date_time, format_relative_time } from '$lib/utils/format-relative-time'
 
   interface Props {
-    data: Omit<PageData, 'primary' | 'secondary'> & { analytics: NonNullable<Awaited<PageData['secondary']>> }
+    data: Omit<PageData, 'checkpoint'> & {
+      analytics: NonNullable<NonNullable<Awaited<PageData['checkpoint']>>['analytics']>
+      checkpoint: NonNullable<Awaited<PageData['checkpoint']>>['checkpoint']
+    }
   }
 
   let { data }: Props = $props()
@@ -125,9 +129,6 @@
   const in_use_bars = $derived(locales_data.in_use.map(row => ({ label: locale_label(row.locale), value: row.visitors, color: USERS_COLOR })))
   const mismatch_bars = $derived(locales_data.mismatch.map(row => ({ label: locale_label(row.locale), value: row.visitors, color: UNSUPPORTED_COLOR })))
 
-  // SWR cache means the payload can be hours old — say so plainly ("show us what's cached").
-  const data_age = $derived(format_relative_time(analytics.generated_at))
-
   // Per-dictionary unique visitors — rolling 30d + previous month + live 7d.
   const top_dictionaries = $derived(analytics.top_dictionaries)
   const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -143,7 +144,7 @@
 <div class="analytics">
   <header class="head">
     <h1>Analytics</h1>
-    <span class="sub" title={format_date_time(analytics.generated_at)}>usage · last {analytics.window_days} days · <b>data computed {data_age}</b> (cached; refreshes in the background)</span>
+    <CheckpointBar checkpoint={data.checkpoint} label={`usage · last ${analytics.window_days} days`} />
     <div class="audience-toggle" role="group" aria-label="Audience filter">
       <a class="seg" class:active={analytics.audience === 'humans'} href="?audience=humans" data-sveltekit-noscroll>🧑 Humans</a>
       <a class="seg" class:active={analytics.audience === 'bots'} href="?audience=bots" data-sveltekit-noscroll>🤖 Bots</a>

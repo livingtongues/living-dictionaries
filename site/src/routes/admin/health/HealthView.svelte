@@ -3,6 +3,7 @@
   import { ago, country_flag, format_bytes, format_ms, is_thin_sample, perf_label, short_time, short_version, THIN_SAMPLE_N, USERS_COLOR } from '$lib/analytics/dashboard-format'
   import { log_insights } from '$lib/analytics/insights'
   import AtAGlance from '$lib/analytics/AtAGlance.svelte'
+  import CheckpointBar from '$lib/analytics/CheckpointBar.svelte'
   import ComboChart from '$lib/charts/ComboChart.svelte'
   import LineChart from '$lib/charts/LineChart.svelte'
   import VitalBar from '$lib/charts/VitalBar.svelte'
@@ -11,7 +12,10 @@
   import DeploysPanel from './DeploysPanel.svelte'
 
   interface Props {
-    data: Omit<PageData, 'primary' | 'secondary'> & { analytics: NonNullable<Awaited<PageData['secondary']>> }
+    data: Omit<PageData, 'checkpoint'> & {
+      analytics: NonNullable<NonNullable<Awaited<PageData['checkpoint']>>['analytics']>
+      checkpoint: NonNullable<Awaited<PageData['checkpoint']>>['checkpoint']
+    }
   }
 
   let { data }: Props = $props()
@@ -27,7 +31,7 @@
   // stale-chunk burst is visible without reading as a regression.
   const error_series = $derived([
     { label: 'Real errors', color: 'var(--danger)', area: true, points: daily.map(point => ({ date: point.day, value: point.real_errors })) },
-    { label: 'Known noise', color: 'var(--text-muted, #94a3b8)', points: daily.map(point => ({ date: point.day, value: point.errors - point.real_errors })) },
+    { label: 'Known noise', color: 'var(--color-secondary)', points: daily.map(point => ({ date: point.day, value: point.errors - point.real_errors })) },
     ...(totals.stale_errors > 0
       ? [{ label: 'From stale builds', color: 'var(--color-secondary)', points: daily.map(point => ({ date: point.day, value: point.stale_errors })) }]
       : []),
@@ -196,7 +200,7 @@
 <div class="analytics">
   <header class="head">
     <h1>Site health</h1>
-    <span class="sub">diagnostics · last {analytics.window_days} days · generated {short_time(analytics.generated_at)}</span>
+    <CheckpointBar checkpoint={data.checkpoint} label={`diagnostics · last ${analytics.window_days} days`} />
     <a class="health-link" href="/admin/analytics">← Usage analytics</a>
     <div class="audience-toggle" role="group" aria-label="Audience filter">
       <a class="seg" class:active={analytics.audience === 'humans'} href="?audience=humans" data-sveltekit-noscroll>🧑 Humans</a>

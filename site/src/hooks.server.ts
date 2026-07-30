@@ -3,7 +3,7 @@ import { dev } from '$app/environment'
 import { env } from '$env/dynamic/private'
 import { start_crons_once } from '$lib/db/server/cron-scheduler'
 import { CRONS } from '$lib/db/server/crons'
-import { start_analytics_warm_up } from '$lib/db/server/log-analytics'
+import { start_analytics_snapshot_catchup } from '$lib/db/server/analytics-snapshot'
 import { get_logs_db, split_client_logs_from_shared } from '$lib/db/server/logs-db'
 import { get_shared_db } from '$lib/db/server/shared-db'
 import { ensure_notifications_room } from '$lib/server/chat/ensure-team-membership'
@@ -44,22 +44,19 @@ boot_i18n_catalog()
 // is the sole cron node) + globalThis singleton.
 start_crons_once({ defs: CRONS })
 
-// A fresh container's in-memory analytics cache is empty, so warm it off the
-// request path (delayed — the first seconds belong to the traffic a fresh
-// deploy is taking; analytics must never block a request, standing rule
-// 2026-07-27). Until it lands, reads are served from the payload persisted
-// under DATA_DIR by the previous container. Steady-state re-warms happen via
-// the log-retention cron's `after_sweep` hook (see the roster).
+// Analytics: NOTHING happens at boot. The dashboards read a daily JSON checkpoint
+// from the data volume (written by a niced child process — see
+// `analytics-snapshot.ts`), and that volume survives deploys, so a fresh container
+// is already warm. This call only covers the two cases where no usable checkpoint
+// exists — the first deploy of the feature, or a box that was down through its
+// 03:30 window — and even then it just forks a niced child three minutes in,
+// holding up nothing.
 //
-// IS_STANDBY-gated for the same reason every cron is: the warm-up is three
-// whole-window scans of a 2 GB logs.db, and on a 2-vCPU box BOTH containers
-// running it 30s apart after a deploy stalled BOTH event loops past Caddy's
-// 5s health timeout — no healthy upstream, site-wide 503 (2026-07-29, see
-// `.issues/analytics-warm-up-not-standby-gated.md`). The standby reads the
-// payload the primary persisted under the SHARED DATA_DIR, which is exactly
-// what that file store is for, so gating costs it nothing.
-if (!dev && env.IS_STANDBY !== 'true')
-  start_analytics_warm_up()
+// It replaces `start_analytics_warm_up()`, which ran three whole-window scans of a
+// 2 GB logs.db inside THIS process 30s after boot. On a 2-vCPU box both blue/green
+// containers doing that at once stalled both event loops past Caddy's health
+// timeout — no healthy upstream, site-wide 503 (2026-07-29).
+start_analytics_snapshot_catchup()
 
 /**
  * Adapter-node enforces `BODY_SIZE_LIMIT` by THROWING mid-body-read, which

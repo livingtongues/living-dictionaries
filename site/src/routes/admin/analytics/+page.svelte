@@ -1,27 +1,29 @@
 <script lang="ts">
   import AdminPageSkeleton from '$lib/components/ui/AdminPageSkeleton.svelte'
   import LoadError from '$lib/components/ui/LoadError.svelte'
+  import CheckpointBar from '$lib/analytics/CheckpointBar.svelte'
   import AnalyticsView from './AnalyticsView.svelte'
 
   let { data } = $props()
-
-  // Progressive swap: `primary` (light tier) paints first; when the full
-  // `secondary` (usage) tier resolves we render from it instead, so the heavy
-  // panels fill in below without blocking the top summary.
-  let secondary = $state<Awaited<typeof data.secondary> | undefined>(undefined)
-  $effect(() => {
-    secondary = undefined
-    data.secondary?.then((value) => { secondary = value }).catch(() => {
-    // Detail tier failed to load — stay on the light `primary` render.
-    })
-  })
 </script>
 
-{#if data.primary}
-  {#await data.primary}
+{#if data.checkpoint}
+  {#await data.checkpoint}
     <AdminPageSkeleton variant="panels" title_width="9rem" cards={4} panels={3} />
-  {:then primary}
-    <AnalyticsView data={{ ...data, analytics: secondary ?? primary }} />
+  {:then result}
+    {#if result.analytics}
+      <AnalyticsView data={{ ...data, analytics: result.analytics, checkpoint: result.checkpoint }} />
+    {:else}
+      <!-- No checkpoint on disk yet: the very first deploy, or the file was pruned.
+           Deliberately NOT a compute — the button forks the niced child instead. -->
+      <div class="wrap">
+        <h1>Analytics</h1>
+        <p>Nothing to show yet. These dashboards render a checkpoint that a background
+          job computes once a day (03:30 Pacific, in a low-priority process). Recompute
+          to build one now — it takes a couple of minutes.</p>
+        <CheckpointBar checkpoint={result.checkpoint} empty />
+      </div>
+    {/if}
   {:catch error}
     <div class="wrap"><LoadError {error} label="Couldn’t load analytics." /></div>
   {/await}
@@ -29,4 +31,5 @@
 
 <style>
   .wrap { max-width: 70rem; margin: 0 auto; padding: 1.5rem 1rem; }
+  .wrap p { color: var(--color-secondary); max-width: none; }
 </style>

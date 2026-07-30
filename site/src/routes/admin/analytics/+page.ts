@@ -5,13 +5,15 @@ import { browser } from '$app/environment'
 /**
  * Universal load — the admin parent data comes from a universal `+layout.ts`, so
  * this page can't use a `+page.server.ts` (the types require universal-load keys).
- * Instead it fetches the server-computed analytics via the admin-gated API endpoint
+ * Instead it fetches the daily analytics CHECKPOINT via the admin-gated API endpoint
  * (passing the load `fetch` so SSR keeps the direct-handler optimization).
  *
- * Progressive/top-down loading: TWO streamed fetches. `primary` is the shared
- * light tier (summary + charts) — it paints first; `secondary` is the full usage
- * half, which the page SWAPS in below when it resolves. Both are returned
- * un-awaited so client-side nav transitions to a skeleton immediately.
+ * ONE fetch, un-awaited. This used to be two streamed "tiers" (a light payload
+ * first, the heavy one swapped in behind it) because the server computed the payload
+ * per request and the heavy half took tens of seconds. The server now reads a JSON
+ * file the daily job wrote, so there is nothing to stage: the whole payload arrives
+ * in one hop, and the promise stays un-awaited only so client-side nav paints a
+ * skeleton instead of blocking.
  */
 export const load: PageLoad = async ({ fetch, parent, url }) => {
   const { auth_user } = await parent()
@@ -19,22 +21,23 @@ export const load: PageLoad = async ({ fetch, parent, url }) => {
   // no-access shell and won't render this page, so skip the admin-gated fetch
   // that would otherwise 401 and crash into the generic site-wide error page.
   if (!auth_user.user || !auth_user.is_admin)
-    return { primary: null, secondary: null }
+    return { checkpoint: null }
 
   // The Humans/Bots toggle is a URL param; reading it makes `load` re-run (re-fetch)
-  // when the operator flips it.
+  // when the operator flips it. BOTH audiences are precomputed, so flipping it can
+  // never trigger a compute.
   const audience = url.searchParams.get('audience') === 'bots' ? 'bots' : 'humans'
 
   // SSR skips the fetch (this universal load re-runs on hydration; its promise
   // doesn't stream on SSR anyway) — the page renders a skeleton and fills in.
   if (!browser)
-    return { primary: null, secondary: null }
+    return { checkpoint: null }
 
-  async function fetch_scope(scope: 'light' | 'usage') {
-    const { data, error: err } = await api_admin_analytics({ fetch, audience, scope })
+  async function fetch_checkpoint() {
+    const { data, error: err } = await api_admin_analytics({ fetch, audience })
     if (err || !data)
       throw new Error(err?.message ?? 'Failed to load analytics')
-    return data.analytics
+    return data
   }
-  return { primary: fetch_scope('light'), secondary: fetch_scope('usage') }
+  return { checkpoint: fetch_checkpoint() }
 }

@@ -685,11 +685,15 @@ export function run_log_retention_once({ shared_db = get_shared_db(), logs_db = 
 
 /**
  * The roster's `run` (scheduled by `cron-scheduler.ts`, see `crons.ts`): one
- * retention sweep + the injected after-sweep hook (analytics cache re-warm —
- * injected by the roster to keep this module free of a cycle with
- * `log-analytics.ts`), with its own queryable failure event. No env flag — log
- * retention always runs on the active node so trends never silently stop
- * accumulating.
+ * retention sweep + the injected after-sweep hook, with its own queryable failure
+ * event. No env flag — log retention always runs on the active node so trends never
+ * silently stop accumulating.
+ *
+ * The hook is where the daily analytics checkpoint gets kicked (a niced child
+ * process — see `analytics-snapshot.ts`), and the ORDER matters: this sweep advances
+ * the rollup watermark first, so the child's payload is built on finalized rollups
+ * rather than re-scanning raw rows for a day that was about to be materialized
+ * anyway. It's injected by the roster to keep this module free of a cycle.
  */
 export function run_log_retention_sweep({ after_sweep }: { after_sweep?: () => Promise<void> } = {}): void {
   try {

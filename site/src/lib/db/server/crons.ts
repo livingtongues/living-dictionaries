@@ -1,7 +1,7 @@
 import type { CronDef } from './cron-scheduler'
+import { spawn_analytics_snapshot_job } from './analytics-snapshot'
 import { run_chat_reping_sweep } from './chat-reping-cron'
 import { prime_host_stats_baseline, sample_host_stats_once } from './host-stats-cron'
-import { warm_analytics_caches } from './log-analytics'
 import { run_log_retention_sweep } from './log-retention-cron'
 import { media_sweep_disabled_reason, run_media_sweep } from './media-sweep-cron'
 import { run_notification_digest_sweep } from './notification-digest-cron'
@@ -44,9 +44,15 @@ export const CRONS: CronDef[] = [
   },
   {
     name: 'log-retention',
-    description: 'Roll client_logs into daily metrics, archive past the hot window, prune the archive, re-warm analytics',
+    description: 'Roll client_logs into daily metrics, archive past the hot window, prune the archive, then compute the analytics checkpoint',
+    // THE daily maintenance moment, pinned to the quietest hour rather than
+    // drifting to wherever a reboot left it. It ends by forking the niced
+    // analytics child, so the heaviest read of the day (a 30-day scan of a 2 GB
+    // logs.db, once per audience) happens at 03:30 Pacific, at nice 19, in a
+    // process that isn't serving anyone.
     every_ms: days(1),
-    run: () => run_log_retention_sweep({ after_sweep: warm_analytics_caches }),
+    at: { hour: 3, minute: 30, tz: 'America/Los_Angeles' },
+    run: () => run_log_retention_sweep({ after_sweep: async () => { await spawn_analytics_snapshot_job({ reason: 'cron' }) } }),
   },
   {
     name: 'r2-snapshot-builder',

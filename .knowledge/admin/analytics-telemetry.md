@@ -180,57 +180,52 @@ the DATA fields (`sessions`, `max_per_session`, `bot_sessions`, `bot_pct`), not 
 computed from a per-(cluster, session) pass over hot rows keyed by message + stack_head; server rows
 (NULL session_id) stay null.
 
-## Admin analytics: one endpoint, scoped compute + progressive top-down loading (2026-07-14)
+## Admin analytics: a DAILY CHECKPOINT computed by a niced child process (2026-07-30)
 
-`/admin/analytics` (usage) and `/admin/health` (diagnostics) BOTH fetch the SAME
-`/api/admin/analytics` endpoint and share `get_log_analytics`. It used to compute the ENTIRE
-`LogAnalytics` blob (both pages' panels) on every call. Now `get_log_analytics({ scope })` gates the
-cleanly-independent heavy builders:
-- `light` — shared core only (daily / deploys / totals / geo AREAS / capability / top events+routes /
-  by_source / event_coverage / error_clusters / pipeline).
-- `usage` — light + api_v1 / top_dictionaries / missing_i18n_keys.
-- `diagnostics` — light + performance / web_vitals / geo LATENCY / errors_by_version / server_faults /
-  leader+sync health / build_adoption / storage / boot_health / uptime.
-- `full` (default) — everything; the log-review reader keeps this. Cache key includes scope.
+Supersedes everything this page used to say about scoped computes, progressive tiers and the
+stale-while-revalidate cache. The whole of that machinery — `scope: light|usage|diagnostics|full`
+with its `EMPTY_*` skip-defaults, `WatermarkSwrCache` + its disk persistence, `breathe()` yields
+between stages, the boot warm-up, the per-request `project()` freshness splices — existed for ONE
+reason: `get_log_analytics` is 11–80 s of synchronous better-sqlite3 work, and it was running
+inside the process that serves requests. It is all deleted.
 
-**Coupling constraint (why the split isn't cleaner):** `area_counts` is threaded
-`build_usage_and_areas` -> mutated by `build_capability` -> fed with `build_geo_latency` into
-`build_geo_areas`. So `geo.areas` / `geo.located_sessions` / `capability` MUST stay core (both pages);
-only `geo`'s TTFB/LCP *latency* splits are diagnostics-gated. Skipped sections return typed
-`EMPTY_*` consts (tsc-checked against the field types; mirror `empty_analytics`).
+**The shape now** (identical in house + tutor; fix one, port to the other two):
+- The daily `log-retention` cron (pinned `at: 03:30` local) advances the rollup watermark, then
+  **forks a child process** which self-`nice`s to 19, opens READ-ONLY handles, computes every
+  (window × audience) payload the UI can request, writes each to
+  `${DATA_DIR}/analytics/<range>-<audience>.json` (atomic temp+rename), reports its summary over
+  IPC and exits. The PARENT writes the `analytics_snapshot_computed` telemetry, so the child stays
+  read-only.
+- The request path is `readFileSync` + `JSON.parse` + (LD/house only) one `/proc` read for
+  `host.now`. **No queries.** A missing/corrupt/older-format file renders a "no checkpoint yet"
+  state with a Recompute button — never a computation.
+- Recompute (`POST /api/admin/analytics/recompute`, L3) forks the same child. It's the only way an
+  operator can cause an analytics compute at all.
 
-**Progressive render:** each `+page.ts` returns TWO streamed promises — `primary` (`scope=light`,
-paints first) + `secondary` (the page's full half). `+page.svelte` renders `primary` immediately and
-SWAPS to `secondary` once it resolves (`secondary ?? primary` — both are complete `LogAnalytics`
-objects, so no fragile field-merge; the heavy panels show their normal empty states until the swap).
-The `light` cache entry is shared by both pages.
+**Why a CHILD PROCESS and not a worker thread:** `nice` applies to a process (a thread inherits the
+process priority and Node exposes no per-thread hook), the child's RSS is reclaimed by its exit, and
+an OOM kills the child instead of the site.
 
-## The stale-while-revalidate cache is a COPIED controller, not a shared package (2026-07-26)
+**How the child finds its own code — the load-bearing trick.** The Docker runner copies only
+`site/build`, so a `.ts` file next to the module does not exist at runtime. But a BUNDLED CHUNK is a
+real file at a real path and rollup keeps `import.meta.url` intact in ESM output, so
+`analytics-snapshot.ts` forks *the chunk that contains it* and re-enters through an
+`ANALYTICS_SNAPSHOT_CHILD=1` guard at the bottom of the file. Two consequences, both load-bearing:
+- **`$env/dynamic/private` is EMPTY in the child** — it is populated by `Server.init()` in
+  `build/index.js`, which the child never runs. Read `process.env` directly.
+- The child must never import `hooks.server.ts` (it doesn't): no migrations, no crons, no listener.
+- In DEV there is no bundle, so the job runs inline (`inline = dev`).
 
-All three apps independently grew the same expensive-dashboard cache inside `log-analytics.ts`, then
-drifted (LD had a `Set`-based single flight and no way to invalidate; tutor/house had tokens +
-generation guards). The parity decision (2026-07-25 sweep, Option A) is **one behavioral contract,
-three app-local copies**: `$lib/server/watermark-swr-cache.ts` + its behavioral test file is
-copy-paste-shared like the worker harness — same API, same tests — while cache keys, watermark
-source, computation, freshness projection, and logging stay app-specific. **Fix it in one repo →
-port to the other two**; do not try to publish it as a package (the three payload shapes and
-freshness policies have no reason to converge).
+**Verified against production (2026-07-30):** the new compute was run on mustang against a copy of
+living's real 2.1 GB `logs.db` and diffed against the payloads the OLD code had written on the box
+minutes earlier — **19 sections byte-identical, all 29 finalized days identical**; the ~6 differing
+counters were each strictly larger (the copy held ~5 more minutes of traffic), and
+`missing_i18n_keys` went from empty to 449 keys because the old `scope === 'full'` gate meant NO
+page ever computed it. Cost: 24–32 s and ~1.0 GB RSS per payload.
 
-Invariants worth stating because a naive edit breaks them silently:
-- **Clear must be generation-safe.** `clear()` bumps a generation counter; an in-flight refresh
-  started before it completes but discards its result. Without that, invalidation is a lie whenever
-  a refresh is mid-flight.
-- **Single-flight is tokenized, not a boolean/Set.** The `finally` releases the key only if the
-  token still matches, so a `clear()` mid-flight can hand the key to a newer refresh without the old
-  one deleting its claim.
-- **Projection applies to cached hits only** (LD splices fresh `pipeline` liveness onto a stale
-  blob) and is never what gets stored.
-- **The background pass is silent.** `on_computed` (the `admin_analytics_computed` event) fires only
-  for a compute in a request's path — the endpoint's closure carries that request's `user_id`, so
-  re-firing it from a background refresh would attribute the cost to a user who wasn't there. Tutor
-  logs its own event from both paths; that difference is intentional, not drift.
-- The controller re-reads the watermark **before** each background compute, so a rollup that lands
-  mid-compute leaves the entry stale (it refreshes again) instead of being stamped current.
+**A coupling constraint that survived the rewrite:** `area_counts` is threaded
+`build_usage_and_areas` → mutated by `build_capability` → fed with `build_geo_latency` into
+`build_geo_areas`. That trio must stay one ordered sequence inside the compute.
 
 **Malformed-`context` read guard (2026-07-16, borrowed from house `7023529`):** every
 `json_extract(context, …)` in `log-analytics.ts` is wrapped as

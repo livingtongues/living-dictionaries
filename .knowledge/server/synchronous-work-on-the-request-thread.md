@@ -22,8 +22,10 @@ rotation when it fails. So the question for any synchronous handler is not "is i
    run before the loop returns to its poll phase, so two synchronous units chain inside ONE
    iteration and pending I/O is never serviced. Measured `/healthz` at **18.3 s** across a burst of
    8 — worse than having no queue at all. Hand off with `setImmediate` (check phase, after poll):
-   `$lib/server/breathe.ts` exists for exactly this and its doc comment is the canonical
-   explanation.
+   `$lib/server/breathe.ts` used to be the canonical write-up of this; it was deleted 2026-07-30
+   along with the analytics cache machinery it served (analytics moved into a niced child process,
+   where there is no request to be polite to). The surviving reference implementation + explanation
+   is `routes/og/render-queue.ts`.
 
 3. **What actually bounds the damage is a TIME BUDGET, not a concurrency number.** "At most half of
    any 10 s window may be spent on this work" caps the share of the process the endpoint can take,
@@ -82,7 +84,10 @@ Two things that generalize to the next handler that needs this:
   for only about a minute before the next overlapping pair poisons it again — so a container restart
   is not a workaround. Chain jobs inside the worker (`tail = tail.then(...)`).
 - **Telemetry that fires only on the request path goes blind the moment the work leaves it.** LD's
-  `admin_analytics_computed` is emitted only by the admin endpoint; after computation moved to the
+  `admin_analytics_computed` was emitted only by the admin endpoint; after computation moved to the
   boot warm-up and the post-retention-sweep hook, the caches kept being rebuilt while the metric
   recorded nothing for days. Emit the cost event from the background path too, with a field naming
-  the trigger — otherwise "no events" reads as "no computes".
+  the trigger — otherwise "no events" reads as "no computes". (2026-07-30: analytics went all the way
+  off-process into a niced child. The lesson is now baked into the design — the child reports over
+  IPC and the PARENT logs `analytics_snapshot_computed` with `reason`, `peak_rss_mb` and per-stage
+  timings.)
