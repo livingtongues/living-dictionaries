@@ -229,15 +229,6 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   not warn. `NotSupportedError` + media error code 4 remains actionable; tonight's concrete object is
   `norsii/audio/92d2d861-9ee1-4993-9969-c2823aa3dcfa/1763654313463.wav`. Inspect bytes/headers/codec
   before proposing a player fix.
-- **2026-07-28 run 2 — the `/og` share-card renderer is 100% BROKEN IN PRODUCTION and the fix is
-  written but UNCOMMITTED.** Since 12:15 UTC every render throws `Failed to unwrap exclusive
-  reference of Resvg type from napi value` (18,633 rows; zero successful cards after 17:26; the
-  `/data/og-cache` disk store has not been written since). Every share link therefore serves the
-  58,460-byte generic card. Cause = one worker accepting overlapping async jobs; the serialization
-  fix + 8-card concurrency test live in the mustang working tree (`render-worker.js`, `+server.ts`,
-  `component-to-png.ts`) and pass. **Next run: first check whether it deployed** — if `og_card_rendered`
-  is back and `og_render_failed reason:"render"` is ~0, close it; if the tree is still uncommitted,
-  re-raise as the top item, don't re-derive the diagnosis.
 - **2026-07-28 run 2 — the worker isolation DID fix availability; stop re-checking it.** Only ONE
   `sync_failed` HTTP 502 (20:51 UTC, Greg/iquito) in the 15 h after the 05:47 deploy, vs 20–44/hour
   before. Never move satori/resvg back onto the request thread.
@@ -247,9 +238,49 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   0 orphaned; canonical URLs 200. The 07-23 migration rewrote paths without marking rows changed, so
   existing browsers never pull the correction — hence the client-side repair migration
   (`20260728_repair_legacy_audio_paths.sql`, also uncommitted). Don't re-investigate R2 or the sweep
-  cron for this family; just verify the migration shipped.
+  cron for this family. **2026-07-29: the migration SHIPPED** (`site/src/lib/db/schemas/dictionary-migrations/20260728_repair_legacy_audio_paths.sql`, committed) and `audio_play_failed` fell to 2 rows/day. Closed.
 - **2026-07-28 run 2 — `admin_analytics_computed` fires ONLY on the request path
   (`routes/api/admin/analytics/+server.ts:44`), so moving compute to the warm path made dashboard
   cost UNMEASURABLE** (caches rewritten 17:26 UTC today; newest event 07-25). Generalized lesson,
   broadcast to house + tutor: when work moves off the request path, its cost telemetry must move with
   it (add a `trigger` field). Don't read "no events" as "no computes".
+- **2026-07-29 — the 07-28 Resvg `unwrap exclusive reference` storm is CLOSED, verified in prod.**
+  8,184 `og_render_failed reason:"render"` rows, ALL before 01:30 UTC; `og_card_rendered` has run
+  continuously since 02:00. The serialization fix deployed (commits `1a169a89` / `a81734e2`). Don't
+  re-raise; don't re-derive.
+- **2026-07-29 — the `/og` disk store THRASHES: `MAX_ENTRIES = 1000` against an unbounded card space.**
+  Cards average 173 KB so the ENTRY cap binds first (store: 1,015 files / 176 MB of a 250 MB byte
+  budget), and the store is permanently full and evicting. Measured cost: **18,174 renders/day for
+  1,000 slots** (~18 re-renders per stored card per day), **36,346 shed requests = 55% of all `/og`
+  traffic answered with the generic card**, ~7.8 core-hours/day. Render cost itself is FINE (p50 452 ms,
+  p90 1.6 s) — the fault is volume, not speed. Fix is a budget (≈20,000 entries / 3.5–4 GB on a 75 GB-free
+  disk), not an architecture change. **house has the byte-identical cap** (`site/src/lib/server/satori/
+  card-store.ts:44`) and shipped its store on 07-29 — broadcast outbound.
+- **2026-07-29 — a card store with NO hit-rate telemetry looks healthy while thrashing (standing
+  instrument rule, fleet-wide).** `routes/og/+server.ts:113` returns a stored card with zero telemetry,
+  so the endpoint's denominator is unknowable and the filed health-line panel's "success rate as % of
+  attempts" would have read 96% on a night when 55% of shares served the generic card. Backlog item
+  CORRECTED in place — don't build it against the render-only denominator.
+- **2026-07-29 — `dict_boot_recovery_exhausted` unbounded-loop is now PROVEN to distort the error
+  headline, on DESKTOP CHROME.** One anonymous Windows/Chrome-150 tab on `bahasa-lani` (public,
+  369 entries, healthy 1.35 MB server snapshot; every other session opened it fine) emitted 839
+  `leader_boot_failed` + 421 exhausted rows over 5 h — **74% of all client error rows**, pushing
+  `real_errors` 117 → 312. `dict-session.ts:91` logs on every callback with no cap. Third and worst
+  instance of the 07-27 "bound the give-up path" item. Also: nothing consumes `recovery_exhausted`, so
+  the visitor watched `DictBootProgress` spin for five hours — a user-facing failure surface is needed.
+  Don't re-triage the device; fix the bound.
+- **2026-07-29 — `og_render_failed reason:"font"` is effectively ONE dictionary.** 1,486 of 1,536 daily
+  font failures are "Torwali English Urdu Dictionary" (tail: Judeo-Kashani, Hazaragi, Kholosi — all
+  Arabic-script). Pre-existing opentype `lookupType: 5 - substFormat: 3`, unmasked (not caused) by the
+  07-26 WebP fix per the 07-27 ruling. Each costs a DOUBLED render (`static_fonts_only` retry) and still
+  ships tofu. Bundling a working Arabic-script face fixes appearance AND removes ~1,500 renders/day.
+- **2026-07-29 — the `db_tier` mix is now 100% `opfs-worker`** (904 of 904 sessions, zero `idb-worker` /
+  `idb-main` / below-capability). The leader-elected OPFS worker is simply THE runtime; stop treating
+  fallback tiers as a live concern unless the distribution moves.
+- **2026-07-29 — LD's biggest log family is now LD's OWN share-card telemetry, not crawler noise**
+  (16,800 server warn rows/day = 48% of all rows). When house's ingest-suppression port comes up again,
+  LD's correct first cut is coalescing `og_render_shed` into a periodic counter — not crawler filtering.
+- **2026-07-29 — the server logs NO boot event.** No `server_started` anywhere in `hooks.server.ts` or
+  `$lib/server/`, so deploy↔error correlation is reverse-guessed from client `app_version` first-seen.
+  This also blocks the long-parked "deploy-settling error band" backlog item. Emit
+  `{ app_version, commit, container: blue|green, is_standby }` once at boot.

@@ -122,6 +122,31 @@ proposals against this lens.
   verdict sentence ("Share cards: 98% of 1,204 renders succeeded today") per the standing plain-language
   directive. Pair with the pending telemetry coalescing so the panel's inputs stay cheap.
 
+  **⚠️ CORRECTED 2026-07-29 — do NOT build the denominator as originally written.** "Success rate as %
+  of attempts" over `og_card_rendered` / `og_render_failed` **excludes every disk-store hit**, which is
+  the majority of healthy traffic. Built as filed, the panel would have read *"96% of renders
+  succeeded"* on 07-29 — a night when **55% of all `/og` requests (36,346 of 65,982) were SHED and
+  served the generic card**. That is worse than no panel. Two changes:
+  1. The verdict must be **"share of `/og` requests answered with the dictionary's own card"** =
+     (store hits + successful renders) / all requests. That needs a store-hit event first —
+     `routes/og/+server.ts:113` returns a stored card with zero telemetry (filed as a Phase B
+     coverage gap 2026-07-29: coalesced `og_card_served { source, ua_class }`).
+  2. Add a **store-pressure** line: entries vs cap, bytes vs cap, evictions/day. The entire root cause
+     of the 07-29 thrash was one invisible number — `MAX_ENTRIES = 1000` in `card-store.ts`, full and
+     evicting, against an unbounded card space (18,174 renders/day for 1,000 slots, ~18 re-renders per
+     stored card per day, ~7.8 core-hours of wasted CPU).
+
+  Gated on the store-hit telemetry; still the highest-value item in this file.
+
+- **★ NEW — Record tab `visibility` / `was_hidden` on leader-fault rows** *(ported from house 2026-07-29
+  · filed 2026-07-29 · LOW cost, MEDIUM value).* House proved it separates genuine foreground stalls
+  from explainable background-tab throttling — a distinction that previously required replaying a
+  session by hand. LD needed exactly this on 07-29: establishing that the wedged `bahasa-lani` tab
+  (839 `leader_boot_failed` + 421 `dict_boot_recovery_exhausted` over five hours) was in the
+  FOREGROUND took a manual session replay. Add `visibility` + `was_hidden` to the `leader_boot_failed`
+  / `dict_boot_recovery_exhausted` / `sync_failed` contexts, then split the boot-health panel's counts
+  by it. Not a new panel — a field that makes an existing one honest.
+
 - **★★ NEW — Sync liveness: read the SUCCESS side, not just failures** *(ported from tutor 2026-07-27
   · filed 2026-07-27 · MEDIUM).* Tutor's review found its sync panel entirely failure-driven and
   therefore blind to a device that quietly stopped syncing (a 4-day stall produced zero failure rows).
