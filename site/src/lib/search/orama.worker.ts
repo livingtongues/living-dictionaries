@@ -10,7 +10,7 @@ import type { SentencesIndex, TextsIndex } from './corpus-schemas'
 import { search_sentences, search_texts } from './search-corpus'
 import type { SearchCorpusOptions } from './search-corpus'
 import type { augment_sentence_for_search, augment_text_for_search } from './augment-sentence-for-search'
-import { createMultilingualTokenizer } from './multilingual-tokenizer'
+import { create_multilingual_tokenizer } from './multilingual-tokenizer'
 
 let orama_index: Record<string, EntriesIndex>
 let sentences_index: Record<string, SentencesIndex>
@@ -27,7 +27,7 @@ export async function create_index(entries: EntryData[], dictionary_id: string) 
   console.time('Index Entries Time')
   const index = create({
     schema: entries_index_schema,
-    components: { tokenizer: createMultilingualTokenizer() },
+    components: { tokenizer: create_multilingual_tokenizer() },
   })
   await insertMultiple(index, entries_augmented_for_search)
   orama_index = { [dictionary_id]: index }
@@ -78,14 +78,14 @@ export async function create_corpus_indexes({ sentence_docs, text_docs, dictiona
   console.time('Index Corpus Time')
   const s_index = create({
     schema: sentences_index_schema,
-    components: { tokenizer: createMultilingualTokenizer() },
+    components: { tokenizer: create_multilingual_tokenizer() },
   })
   await insertMultiple(s_index, sentence_docs)
   sentences_index = { [dictionary_id]: s_index }
 
   const t_index = create({
     schema: texts_index_schema,
-    components: { tokenizer: createMultilingualTokenizer() },
+    components: { tokenizer: create_multilingual_tokenizer() },
   })
   await insertMultiple(t_index, text_docs)
   texts_index = { [dictionary_id]: t_index }

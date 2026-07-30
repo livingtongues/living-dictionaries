@@ -3,13 +3,13 @@ import type { EntryData } from '$lib/types'
 import { search_entries } from './search-entries'
 import { entries_index_schema } from './entries-schema'
 import { augment_entry_for_search } from './augment-entry-for-search'
-import { createMultilingualTokenizer } from './multilingual-tokenizer'
+import { create_multilingual_tokenizer } from './multilingual-tokenizer'
 import type { DeepPartial } from '$lib/utils/deep-partial'
 
 function search(entries: DeepPartial<EntryData>[], query: string) {
   const index = create({
     schema: entries_index_schema,
-    components: { tokenizer: createMultilingualTokenizer() },
+    components: { tokenizer: create_multilingual_tokenizer() },
   })
   const entries_augmented_for_search = entries.map(augment_entry_for_search)
   insertMultiple(index, entries_augmented_for_search)
@@ -28,7 +28,7 @@ function search(entries: DeepPartial<EntryData>[], query: string) {
 function get_index_json(entries: DeepPartial<EntryData>[]) {
   const index = create({
     schema: entries_index_schema,
-    components: { tokenizer: createMultilingualTokenizer() },
+    components: { tokenizer: create_multilingual_tokenizer() },
   })
   const entries_augmented_for_search = entries.map(augment_entry_for_search)
   insertMultiple(index, entries_augmented_for_search)

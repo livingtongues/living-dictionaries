@@ -1,13 +1,13 @@
-export function bindEvents(el, handlers) {
+export function bind_events({ emitter, handlers }: { emitter: any, handlers: Record<string, any> }) {
   const unbindings = []
 
   for (const [handler, fn] of Object.entries(handlers)) {
-    el.on(handler, fn)
+    emitter.on(handler, fn)
     unbindings.push([handler, fn])
   }
 
   return () => {
     for (const [handler, fn] of unbindings)
-      el.off(handler, fn)
+      emitter.off(handler, fn)
   }
 }

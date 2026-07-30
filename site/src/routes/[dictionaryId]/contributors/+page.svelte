@@ -67,7 +67,7 @@
         <ContributorInvitationStatus
           admin={auth_user.admin_level > 0}
           {invite}
-          on_delete_invite={editor_edits.cancelInvite(invite.id)}>
+          on_delete_invite={editor_edits.cancel_invite(invite.id)}>
           {#snippet prefix()}
             <i>{page.data.t('contributors.invitation_sent')}:</i>
           {/snippet}
@@ -77,7 +77,7 @@
   {/if}
 </div>
 {#if is_manager}
-  <HeadlessButton onclick={editor_edits.inviteHelper('manager')} class="btn-primary btn-default" style="gap: 0.4rem">
+  <HeadlessButton onclick={editor_edits.invite_helper('manager')} class="btn-primary btn-default" style="gap: 0.4rem">
     <IconMdiEmailOutline />
     {page.data.t('contributors.invite_manager')}
   </HeadlessButton>
@@ -102,7 +102,7 @@
       {#if is_manager}
         <div style="flex-grow: 1"></div>
         <HeadlessButton
-          onclick={editor_edits.removeContributor(contributor.id)}
+          onclick={editor_edits.remove_contributor(contributor.id)}
           class="btn-ghost btn-sm delete-button"
           style="gap: 0.25rem">
           {page.data.t('misc.delete')}
@@ -117,14 +117,14 @@
         <ContributorInvitationStatus
           admin={auth_user.admin_level > 0}
           {invite}
-          on_delete_invite={editor_edits.cancelInvite(invite.id)}>
+          on_delete_invite={editor_edits.cancel_invite(invite.id)}>
           {#snippet prefix()}
             <i>{page.data.t('contributors.invitation_sent')}:</i>
           {/snippet}
         </ContributorInvitationStatus>
       </div>
     {/each}
-    <HeadlessButton onclick={editor_edits.inviteHelper('contributor')} class="btn-primary btn-default" style="gap: 0.4rem">
+    <HeadlessButton onclick={editor_edits.invite_helper('contributor')} class="btn-primary btn-default" style="gap: 0.4rem">
       <IconMdiEmailOutline />
       {page.data.t('contributors.invite_contributors')}
     </HeadlessButton>
@@ -158,7 +158,7 @@
         <HeadlessButton
           class="btn-ghost btn-sm delete-button"
           style="gap: 0.25rem"
-          onclick={editor_edits.removeWriteInCollaborator(write_in_collaborators, collaborator)}>{page.data.t('misc.delete')}
+          onclick={editor_edits.remove_write_in_collaborator({ current_collaborators: write_in_collaborators, name: collaborator })}>{page.data.t('misc.delete')}
           <IconMdiClose /></HeadlessButton>
       {/if}
     </div>
@@ -166,7 +166,7 @@
 </div>
 
 {#if is_manager}
-  <HeadlessButton onclick={async () => await editor_edits.writeInCollaborator(write_in_collaborators)} class="btn-primary btn-default" style="gap: 0.4rem">
+  <HeadlessButton onclick={async () => await editor_edits.write_in_collaborator(write_in_collaborators)} class="btn-primary btn-default" style="gap: 0.4rem">
     <IconMdiPencilOutline />
     {page.data.t('contributors.write_in_contributor')}
   </HeadlessButton>

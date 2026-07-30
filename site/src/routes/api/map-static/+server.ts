@@ -7,7 +7,7 @@ import type { IPoint, IRegion } from '$lib/types'
 import { env } from '$env/dynamic/private'
 import { PUBLIC_mapboxAccessToken } from '$env/static/public'
 import { ResponseCodes } from '$lib/constants'
-import { shapeGeoJson } from '$lib/components/maps/mapbox/static/shape-geo-json'
+import { shape_geo_json } from '$lib/components/maps/mapbox/static/shape-geo-json'
 
 // Server-cached proxy for the Mapbox Static Images API. Every unique
 // points/regions/size/mode combination is fetched from Mapbox at most once per
@@ -106,7 +106,7 @@ export const GET: RequestHandler = async ({ url }) => {
   const mode = url.searchParams.get('mode') === 'dark' ? 'dark' : 'light'
   const zoom = clamp({ value: Number(url.searchParams.get('zoom')) || 3, min: 0, max: 15 })
 
-  const geojson = shapeGeoJson(points, regions)
+  const geojson = shape_geo_json({ points, regions })
   const overlay = encodeURIComponent(JSON.stringify(geojson))
   const is_single_point = points.length === 1 && !regions.length
   const viewport = is_single_point

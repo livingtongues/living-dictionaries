@@ -21,11 +21,11 @@ const dictionary = {
 }
 
 const editor_edits = {
-  inviteHelper: () => noop,
-  removeContributor: () => noop,
-  cancelInvite: () => noop,
-  writeInCollaborator: noop,
-  removeWriteInCollaborator: () => noop,
+  invite_helper: () => noop,
+  remove_contributor: () => noop,
+  cancel_invite: () => noop,
+  write_in_collaborator: noop,
+  remove_write_in_collaborator: () => noop,
 }
 
 const partner_edits = {

@@ -5,7 +5,7 @@
   import type { GeocoderOptions, Result, Results } from '@mapbox/mapbox-gl-geocoder'
   import { mapKey } from '../context'
   import type { MapKeyContext } from '../context'
-  import { bindEvents } from '../event-bindings'
+  import { bind_events } from '../event-bindings'
   import { load_script_once, load_styles_once } from '$lib/utils/load-once'
 
   const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
@@ -102,7 +102,7 @@
     if (value)
       geocoder.setInput(value)
 
-    unbind = bindEvents(geocoder, handlers)
+    unbind = bind_events({ emitter: geocoder, handlers })
 
     // keep Geolocate button from submitting form, can also be solved by wrapping Map in a form that preventsDefault
     const button = document.querySelector('[aria-label="Geolocate"]') as HTMLButtonElement

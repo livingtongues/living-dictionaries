@@ -51,7 +51,7 @@ export function tokenize(input: string, language?: string, prop = '', _withCache
   return Array.from(new Set(tokens))
 }
 
-export function createMultilingualTokenizer(): DefaultTokenizer {
+export function create_multilingual_tokenizer(): DefaultTokenizer {
   return {
     language: 'multi',
     tokenize,

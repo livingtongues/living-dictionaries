@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PhotoLike } from '$lib/utils/media-url'
   import { photo_src } from '$lib/utils/media-url'
-  import { seoTitle } from './seo-title'
+  import { seo_title } from './seo-title'
   import { compressToEncodedURIComponent as encode } from '$lib/lz/lz-string'
   import { page } from '$app/state'
   import { SITE_MEDIA } from '$lib/constants'
@@ -56,7 +56,7 @@
   const expandedDictionaryName = $derived(dictionaryName
     ? `${dictionaryName} ${page.data.t('misc.LD_singular')}`
     : null)
-  const textTitle = $derived(seoTitle({ title: title || imageTitle, dictionaryName: expandedDictionaryName, admin }))
+  const textTitle = $derived(seo_title({ title: title || imageTitle, dictionary_name: expandedDictionaryName, admin }))
   const textDescription = $derived(description || imageDescription || 'Language Documentation Web App - Speeding the availability of language resources for endangered languages. Using technology to shift how we think about endangered languages. Rather than perceiving them as being antiquated, difficult to learn and on the brink of vanishing, we see them as modern and easily accessible for learning online in text and audio formats.')
 
   const has_photo = $derived(!!photo?.storage_path)

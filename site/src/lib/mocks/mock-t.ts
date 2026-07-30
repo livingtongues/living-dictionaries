@@ -3,7 +3,7 @@ import { interpolate } from '$lib/i18n/interpolate'
 
 /**
  * Synchronous English `t` for svelte-look stories. The real translator
- * (`getTranslator`) is async, but stories need a plain value in `page_data`.
+ * (`get_translator`) is async, but stories need a plain value in `page_data`.
  * Mirrors the real `splitByFirstPeriod` (split on the FIRST period) so keys like
  * `ps.pr.n` resolve correctly, and interpolates `{placeholder}` values. Falls
  * back to the key itself when missing.

@@ -4,7 +4,7 @@
   import type { ErrorEvent, EventData, LngLat, LngLatBoundsLike, LngLatLike, Map, MapboxOptions } from 'mapbox-gl'
   import { mapKey } from '../context'
   import { EventQueue } from '../queue'
-  import { bindEvents } from '../event-bindings'
+  import { bind_events } from '../event-bindings'
   import { get_time_zone_longitude } from '../../utils/get-time-zone-longitude'
   import { ADDED_FEATURE_ID_PREFIX } from '../../utils/random-id'
   import { load_script_once, load_styles_once } from '$lib/utils/load-once'
@@ -142,7 +142,7 @@
     mapbox = window.mapboxgl
     queue.start(map)
 
-    unbind = bindEvents(map, handlers)
+    unbind = bind_events({ emitter: map, handlers })
   })
 
   onDestroy(async () => {

@@ -1,17 +1,17 @@
 import { page } from '$app/state'
 import { api_dictionary_invite } from '$api/email/invite/_call'
 
-export async function inviteHelper(
-  role: 'manager' | 'contributor',
-  dictionary_id: string,
-) {
+export async function invite_helper({ role, dictionary_id }: {
+  role: 'manager' | 'contributor'
+  dictionary_id: string
+}) {
   const { data: { t } } = page
 
   const target_email = prompt(`${t('contact.email')}?`)
   if (!target_email) return
 
-  const isEmail = /^\S[^\s@]*@\S[^\s.]*\.\S+$/.test(target_email)
-  if (!isEmail)
+  const is_email = /^\S[^\s@]*@\S[^\s.]*\.\S+$/.test(target_email)
+  if (!is_email)
     return alert(t('misc.invalid'))
 
   const { error } = await api_dictionary_invite({

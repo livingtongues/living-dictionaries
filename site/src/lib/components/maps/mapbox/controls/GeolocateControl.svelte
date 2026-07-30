@@ -2,7 +2,7 @@
   import { getContext, onMount } from 'svelte'
   import { mapKey } from '../context'
   import type { MapKeyContext } from '../context'
-  import { bindEvents } from '../event-bindings'
+  import { bind_events } from '../event-bindings'
 
   const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey)
   const map = getMap()
@@ -32,7 +32,7 @@
   }
 
   onMount(() => {
-    const unbind = bindEvents(geolocate, handlers)
+    const unbind = bind_events({ emitter: geolocate, handlers })
     return () => {
       unbind()
       map?.removeControl(geolocate)

@@ -1,4 +1,4 @@
-import type { en, getTranslator } from '.'
+import type { en, get_translator } from '.'
 
 export type TranslationKeys = Flatten<TranslationKeysNested>
 
@@ -11,4 +11,4 @@ type TranslationKeysNested = {
 type StringKeyof<T> = Extract<keyof T, string>
 type Flatten<T> = T extends infer U ? { [K in keyof U]: U[K] } extends Record<keyof U, infer V> ? V : never : never
 
-export type TranslateFunction = Awaited<ReturnType<typeof getTranslator>>
+export type TranslateFunction = Awaited<ReturnType<typeof get_translator>>

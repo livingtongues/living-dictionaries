@@ -5,7 +5,7 @@ import { api_dictionaries_id_roles_role_id_delete } from '$api/dictionaries/[id]
 import { api_dictionaries_id_invite_cancel } from '$api/dictionaries/[id]/invites/[invite_id]/_call'
 import { upload_media } from '$lib/media/upload-media'
 import { invalidate } from '$app/navigation'
-import { inviteHelper } from '$lib/invite/invite'
+import { invite_helper } from '$lib/invite/invite'
 
 export const load = (async ({ parent, data }) => {
   const { t, dictionary } = await parent()
@@ -27,12 +27,12 @@ export const load = (async ({ parent, data }) => {
   }
 
   const editor_edits = {
-    inviteHelper: (role: 'manager' | 'contributor') => {
+    invite_helper: (role: 'manager' | 'contributor') => {
       return async function () {
-        await reload_after_operation(() => inviteHelper(role, dictionary_id))
+        await reload_after_operation(() => invite_helper({ role, dictionary_id }))
       }
     },
-    removeContributor: (role_id: string) => {
+    remove_contributor: (role_id: string) => {
       return async function () {
         if (!confirm(`${t('misc.delete')}?`)) return
         await reload_after_operation(async () => {
@@ -41,18 +41,18 @@ export const load = (async ({ parent, data }) => {
         })
       }
     },
-    writeInCollaborator: async (current_collaborators: string[]) => {
+    write_in_collaborator: async (current_collaborators: string[]) => {
       const name = prompt(`${t('speakers.name')}?`)
       if (!name) return
       await reload_after_operation(() => save_catalog({ write_in_collaborators: [...current_collaborators, name] }))
     },
-    removeWriteInCollaborator: (current_collaborators: string[], name: string) => {
+    remove_write_in_collaborator: ({ current_collaborators, name }: { current_collaborators: string[], name: string }) => {
       return async function () {
         if (!confirm(`${t('misc.delete')}?`)) return
-        await reload_after_operation(() => save_catalog({ write_in_collaborators: current_collaborators.filter(n => n !== name) }))
+        await reload_after_operation(() => save_catalog({ write_in_collaborators: current_collaborators.filter(existing_name => existing_name !== name) }))
       }
     },
-    cancelInvite: (invite_id: string) => {
+    cancel_invite: (invite_id: string) => {
       return async function () {
         if (!confirm(`${t('misc.cancel')}?`)) return
         await reload_after_operation(async () => {

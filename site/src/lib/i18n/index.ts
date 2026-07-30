@@ -90,7 +90,7 @@ async function load_locale_file(path_promise: Promise<unknown>): Promise<Record<
   }
 }
 
-export async function getTranslator(locale: LocaleCode) {
+export async function get_translator(locale: LocaleCode) {
   if (!loadedTranslations[locale]) {
     loadedTranslations[locale] = {
       ...await load_locale_file(import(`./locales/${locale}.json`)),
@@ -157,11 +157,11 @@ if (import.meta.vitest) {
     })
   })
 
-  describe(getTranslator, () => {
+  describe(get_translator, () => {
     test('reports a fully-missing key (no English base) once per unique key', async () => {
       const reported: string[] = []
       set_missing_translation_handler(info => reported.push(info.key))
-      const t = await getTranslator('en')
+      const t = await get_translator('en')
 
       // `gl.zz-not-a-real-language` exists in neither the active locale nor English.
       expect(t({ dynamicKey: 'gl.zz-not-a-real-language', fallback: 'fb' })).toBe('fb')
@@ -174,7 +174,7 @@ if (import.meta.vitest) {
     test('renders free-form POS / semantic-domain values raw with NO missing-key report', async () => {
       const reported: string[] = []
       set_missing_translation_handler(info => reported.push(info.key))
-      const t = await getTranslator('en')
+      const t = await get_translator('en')
 
       // User-entered values (custom domains, unknown POS) are data, not UI strings.
       expect(t({ dynamicKey: 'ps.v-è', fallback: 'v-è' })).toBe('v-è')
@@ -188,7 +188,7 @@ if (import.meta.vitest) {
     })
 
     test('canonical POS / semantic-domain keys still translate', async () => {
-      const t = await getTranslator('en')
+      const t = await get_translator('en')
       expect(t({ dynamicKey: 'ps.n' })).toBe('noun')
       expect(t({ dynamicKey: 'sd.1' })).toBe('Universe and the natural world')
     })
@@ -196,7 +196,7 @@ if (import.meta.vitest) {
     test('does NOT report when an English fallback exists', async () => {
       const reported: string[] = []
       set_missing_translation_handler(info => reported.push(info.key))
-      const t = await getTranslator('en')
+      const t = await get_translator('en')
 
       expect(t('misc.add')).toBeTruthy() // real key present in English base
       expect(reported).toEqual([])

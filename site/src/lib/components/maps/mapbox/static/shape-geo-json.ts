@@ -3,7 +3,7 @@ import type { Feature, FeatureCollection, Point, Polygon } from 'geojson'
 import { sort_points } from '../../utils/polygon-from-coordinates'
 // http://geojson.io/ to create GeoJSON easily
 
-export function convertPointsIntoRegion(
+export function convert_points_into_region(
   points: {
     longitude: number
     latitude: number
@@ -12,16 +12,16 @@ export function convertPointsIntoRegion(
   const sorted = sort_points(
     points.map(({ longitude, latitude }) => ({ lng: longitude, lat: latitude })),
   )
-  const sortedLooped = [...sorted, sorted[0]]
-  return sortedLooped.map(({ lng, lat }) => ({ longitude: lng, latitude: lat }))
+  const sorted_looped = [...sorted, sorted[0]]
+  return sorted_looped.map(({ lng, lat }) => ({ longitude: lng, latitude: lat }))
 }
 
-function getPointFeature(point: IPoint, options = { primary: false }): Feature<Point> {
+function get_point_feature({ point, primary = false }: { point: IPoint, primary?: boolean }): Feature<Point> {
   const coordinates = [
     +point.coordinates.longitude.toFixed(3),
     +point.coordinates.latitude.toFixed(3),
   ]
-  const properties = options.primary ? { 'marker-color': '#578da5', 'marker-symbol': 'star' } : {}
+  const properties = primary ? { 'marker-color': '#578da5', 'marker-symbol': 'star' } : {}
   return {
     type: 'Feature',
     properties,
@@ -32,11 +32,11 @@ function getPointFeature(point: IPoint, options = { primary: false }): Feature<P
   }
 }
 
-function getPolygonFeature(region: IRegion): Feature<Polygon> {
+function get_polygon_feature(region: IRegion): Feature<Polygon> {
   const sorted = sort_points(region.coordinates.map(({ longitude, latitude }) => ({ lng: longitude, lat: latitude })))
-  const sortedLooped = [...sorted, sorted[0]]
+  const sorted_looped = [...sorted, sorted[0]]
   const coordinates = [
-    sortedLooped.map(({ lng, lat }) => [
+    sorted_looped.map(({ lng, lat }) => [
       +lng.toFixed(3),
       +lat.toFixed(3),
     ]),
@@ -57,15 +57,15 @@ function getPolygonFeature(region: IRegion): Feature<Polygon> {
   }
 }
 
-export function shapeGeoJson(points: IPoint[] = [], regions: IRegion[] = [], options = { primary: false }): FeatureCollection {
+export function shape_geo_json({ points = [], regions = [], primary = false }: { points?: IPoint[], regions?: IRegion[], primary?: boolean }): FeatureCollection {
   const features: FeatureCollection['features'] = []
   for (const region of regions)
-    features.push(getPolygonFeature(region))
+    features.push(get_polygon_feature(region))
 
   // add points afterwards so pins show on top of regions
   for (const [index, point] of points.entries()) {
-    const isFirstPoint = index === 0
-    features.push(getPointFeature(point, { primary: options.primary && isFirstPoint }))
+    const is_first_point = index === 0
+    features.push(get_point_feature({ point, primary: primary && is_first_point }))
   }
   return {
     type: 'FeatureCollection',
@@ -74,14 +74,14 @@ export function shapeGeoJson(points: IPoint[] = [], regions: IRegion[] = [], opt
 }
 
 if (import.meta.vitest) {
-  const twoPoints = [
+  const two_points = [
     { coordinates: { longitude: 126.123456789, latitude: 40.123456789 } },
     { coordinates: { longitude: 127.123456789, latitude: 41.123456789 } },
   ]
 
-  describe(shapeGeoJson, () => {
+  describe(shape_geo_json, () => {
     test('two simple points', () => {
-      expect(shapeGeoJson(twoPoints)).toMatchInlineSnapshot(`
+      expect(shape_geo_json({ points: two_points })).toMatchInlineSnapshot(`
         {
           "features": [
             {
@@ -114,9 +114,9 @@ if (import.meta.vitest) {
 
     test('primary, secondary points and region', () => {
       expect(
-        shapeGeoJson(
-          twoPoints,
-          [
+        shape_geo_json({
+          points: two_points,
+          regions: [
             {
               coordinates: [
                 { longitude: -126.91406249999999, latitude: 40.97989806962013 },
@@ -126,8 +126,8 @@ if (import.meta.vitest) {
               ],
             },
           ],
-          { primary: true },
-        ),
+          primary: true,
+        }),
       ).toMatchInlineSnapshot(`
         {
           "features": [
