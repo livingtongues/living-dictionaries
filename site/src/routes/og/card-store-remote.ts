@@ -1,5 +1,6 @@
 import { GetObjectCommand, NoSuchKey, PutObjectCommand } from '@aws-sdk/client-s3'
 import { get_r2_og_cache, og_cache_is_configured } from '$lib/server/r2-og-cache'
+import { record_og_event } from './og-telemetry'
 
 /**
  * The share-card store's DURABLE tier: R2.
@@ -257,6 +258,11 @@ function is_absent_error(error: unknown): boolean {
 export const remote_card_store: RemoteCardStore = create_remote_card_store({
   ...create_r2_transport({ get_client: get_r2_og_cache }),
   is_configured: og_cache_is_configured,
+  // Fail-open must not mean fail-SILENT: a store that quietly stopped storing
+  // looks exactly like a store that is working (the same blindness that let the
+  // disk tier thrash for weeks). Coalesced, so an R2 outage costs one row a
+  // minute, not one per card.
+  on_event: ({ message, error, context }) => record_og_event({ level: 'warn', message, error, context }),
 })
 
 if (import.meta.vitest) {

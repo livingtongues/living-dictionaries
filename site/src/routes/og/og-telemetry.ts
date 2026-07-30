@@ -8,7 +8,7 @@ interface OgEvent {
    * invisible, so "96% of renders succeeded" read healthy on a night when 55% of
    * `/og` requests were shed to the generic card (2026-07-29 review).
    */
-  message: 'og_card_served' | 'og_card_rendered' | 'og_render_failed' | 'og_render_shed'
+  message: 'og_card_served' | 'og_card_rendered' | 'og_render_failed' | 'og_render_shed' | 'og_remote_card_fault'
   error?: unknown
   context?: Record<string, unknown>
 }
@@ -81,6 +81,7 @@ export function create_og_telemetry({ emit = log_server_event, window_ms = WINDO
       context.script,
       context.family,
       context.timed_out,
+      context.operation,
     ].join('|')
     const bucket = buckets.get(key) ?? {
       event,
