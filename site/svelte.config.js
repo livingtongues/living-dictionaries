@@ -13,6 +13,15 @@ const config = {
     alias: {
       $api: 'src/routes/api',
     },
+    // Absolute asset/script URLs. SvelteKit's default (`relative: true`) bakes a
+    // path-depth-relative URL into the SSR'd page — on an entry page that's
+    // `../../service-worker.js` — but registration runs on the window `load`
+    // event, so a visitor who navigates before that fires resolves it against
+    // the URL they navigated TO, gets a 404, and spends the whole session with
+    // no service worker (no offline support, no cached app code) and nothing in
+    // telemetry to say so. We never serve under a base path, so relative URLs
+    // buy us nothing. Ported from house `ce08077c`.
+    paths: { relative: false },
     // Disable SvelteKit's built-in cross-origin form CSRF guard so we can
     // re-implement it in hooks.server.ts with a carve-out for token-authenticated
     // `/api/v1/*` uploads (see src/lib/server/csrf.ts). The built-in runs before
