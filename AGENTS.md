@@ -52,7 +52,7 @@ with in-place manager editing of catalog fields [name, codes, languages, orthogr
 cover image], starred "featured entries" strip [synced dict.db `featured_entries`, star toggle on
 entry pages for managers], stats, about/grammar snippets — plus `entries` list — unified search
 with Words·Sentences·Texts scope chips [admin-3 preview; the texts/sentences corpus pipeline, see
-`.issues/texts-sentences-pipeline.md`] — entry detail, sentence detail, `texts` browse +
+`.issues/corpus-ga-graduation.md`] — entry detail, sentence detail, `texts` browse +
 `texts/new` paste-to-sentences ingest + `text/[id]` reader [same admin-3 preview, route-guarded
 via `$lib/corpus/corpus-preview-guard.ts` — lift at GA; M3 word→entry matching is live: sentences
 auto-tokenize+match on ingest, token-tap popovers (confirm/link/create/ignore, `$lib/corpus/`),
@@ -72,7 +72,7 @@ NFD cascade token_text→lexeme-orthography→phonetic + a bespoke per-dict `con
 runs the MMS_FA aligner (`MODAL_ALIGN_URL` → LD-owned Modal app `ld-forced-aligner` in the top-level
 `alignment/` uv package in prod; local CPU subprocess of that same package in dev), and writes
 `audio.timings`; v1 parity `POST …/audio/{audioId}/align` + `GET …/align-jobs/{id}`; per-dict
-`auto_align` graduation flag aligns automatically on attach, `.issues/auto-align-timings.md`)] —
+`auto_align` graduation flag aligns automatically on attach, `.knowledge/domain/forced-alignment.md`)] —
 settings (public/print
 toggles + delete + a dialects manager [manager: rename / map areal-extent geometry via
 GeoTaggingModal / delete]; catalog fields moved to home), about,
@@ -89,7 +89,7 @@ Server-only tables `thread_participants` / `thread_artifacts` / `thread_question
 manager → chat-style email with a deep link (a stray inbox reply auto-threads back); assignee →
 direct ping; every other admin → one Notifications-room notice per unread batch, rolled into the
 8am digest. The agent kickoff runbook is DERIVED on demand (`…/conversations/{id}/brief`), never
-stored — there are no internal notes. See `.issues/import-conversations.md`], invite) · `/chat` (standalone membership-based
+stored — there are no internal notes. See `.knowledge/domain/import-workflow.md`], invite) · `/chat` (standalone membership-based
 chat — DB-managed channels + DMs for admins, super managers, and partners; server-authoritative
 via `/api/chat/*` polling, gate = admin OR a `users.chat_access` grant (toggled on /admin/users/[id]) OR member of ≥1 room — one circle, any chat member can DM any other; `admin_room` channels manageable only by
 super admins) · `/translate` (standalone translator backend — server-authoritative via

@@ -229,6 +229,8 @@
   }
 
   async function save_title(new_value: string) {
+    const not_ready = page.data.writes.check_ready()
+    if (not_ready) return
     if (!text || !new_value) return
     text.title = { ...(text.title || {}), [title_headword.code]: new_value }
     await text._save()

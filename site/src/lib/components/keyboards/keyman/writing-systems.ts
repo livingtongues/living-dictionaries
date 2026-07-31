@@ -21,8 +21,11 @@ let cache: Promise<KeymanWritingSystems> | undefined
  * share one import.
  */
 export function load_keyman_writing_systems(): Promise<KeymanWritingSystems> {
-  if (!cache)
+  if (!cache) {
     cache = import('./keyman-writing-systems.json').then(module => module.default as KeymanWritingSystems)
+    // A failed chunk fetch must not poison the cache — let a later call retry.
+    cache.catch(() => { cache = undefined })
+  }
   return cache
 }
 

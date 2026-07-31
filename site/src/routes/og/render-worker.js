@@ -30,7 +30,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- eval'd worker code is CommonJS: `import` statements are a syntax error here. */
 const { parentPort, workerData } = require('node:worker_threads')
 
-const { font, module_urls = {}, language_font_map = {} } = workerData
+const { font, cairo_font, module_urls = {}, language_font_map = {} } = workerData
 
 /** @param {string} specifier */
 function load(specifier) {
@@ -55,6 +55,7 @@ function render_chain() {
 render_chain()
 
 const font_data = Buffer.from(font)
+const cairo_font_data = cairo_font ? Buffer.from(cairo_font) : null
 
 /**
  * A FRESH options object with a FRESH `fonts` ARRAY, every single time.
@@ -79,7 +80,10 @@ const font_data = Buffer.from(font)
  * separately, and `font_data` is the same Buffer every time.
  */
 function fresh_options({ height, width }) {
-  return { fonts: [{ name: 'Noto+Sans', data: font_data, style: 'normal' }], height, width }
+  const fonts = [{ name: 'Noto+Sans', data: font_data, style: 'normal' }]
+  if (cairo_font_data)
+    fonts.push({ name: 'Cairo', data: cairo_font_data, weight: 400, style: 'normal' })
+  return { fonts, height, width }
 }
 
 /** @param {{ markup: string, height: number, width: number, id: number }} job */

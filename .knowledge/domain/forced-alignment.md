@@ -5,7 +5,7 @@ automatically instead of the dead tap-along flow. Code: `alignment/` (top-level 
 `site/src/lib/db/server/align/`, `site/src/lib/api/v1/align-route-handlers.ts`,
 `site/src/lib/media/{AutoAlignButton.svelte,auto-align.ts}`,
 `site/src/routes/admin/dictionaries/AlignConfigCell.svelte`. Full build log +
-decisions: `.issues/auto-align-timings.md`. This page holds only what the code doesn't say.
+decisions: `.issues/auto-align-timings.md` (now in git history). This page holds only what the code doesn't say.
 
 ## The dumb-endpoint / smart-server split (the core design)
 

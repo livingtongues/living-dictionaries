@@ -3,6 +3,7 @@ import type { Component } from 'svelte'
 import { create_render_pool } from './render-pool'
 // Vite plugin turns this import into the result of readFileSync during build.
 import NotoSans from './notoSans.ttf'
+import Cairo from './cairo.ttf'
 // The worker's own SOURCE, inlined as a string at build time — see render-worker.js.
 import worker_source from './render-worker.js?raw'
 import { record_og_event } from './og-telemetry'
@@ -39,7 +40,7 @@ const pool = create_render_pool({
   source: worker_source,
   // The font map is DATA and rides in, so it can live in a typed file with a
   // test that pins its keys to the installed satori (`font-map.ts`).
-  worker_data: { font: Buffer.from(NotoSans), module_urls: resolve_module_urls(), language_font_map: LANGUAGE_FONT_MAP },
+  worker_data: { font: Buffer.from(NotoSans), cairo_font: Buffer.from(Cairo), module_urls: resolve_module_urls(), language_font_map: LANGUAGE_FONT_MAP },
   on_event: ({ message, error, context }) => {
     if (message === 'og_render_failed')
       record_og_event({ level: 'warn', message, error, context })

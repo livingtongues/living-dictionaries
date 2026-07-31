@@ -1,5 +1,21 @@
 # Bundle the share-card fonts instead of fetching Google Fonts at render time
 
+> **2026-07-31 rescope.** The nightly lane (`d88c04c8`) landed most of what this file assumed was
+> open: satori 0.0.44 → **0.29**, the tested `font-map.ts` (Cairo for Arabic — every Noto Arabic
+> face throws in satori's parser, see `.knowledge/server/satori-fonts.md`), the fresh-`fonts`-array
+> retry fix, and a card-store **generation-2 bump that already invalidated the stored tofu cards**.
+> Post-deploy telemetry (48h, queried 07-31): near-zero Arabic font failures; the 1,500/day figure
+> below is history (also collapsed by the R2 og store — each card renders once now).
+>
+> **What remains:** bundle **Cairo** (weight 400 static TTF) into the worker alongside `notoSans.ttf`
+> so Arabic never depends on a live Google Fonts fetch — a fetch timeout during a cache miss still
+> stores a tofu card permanently. Satori only calls `loadAdditionalAsset` for glyphs missing from the
+> base `fonts` array, so putting Cairo in `fresh_options` short-circuits the network for Arabic
+> automatically. Keep the network path as the fallback for everything else. Add a real-worker render
+> test per bundled script (pixel-compare against a known-tofu render). NO version/generation bump —
+> gen 2 this morning already flushed the stored tofu, and Cairo-via-network renders since then are
+> visually identical to bundled-Cairo renders. house port still pending (its own issue file).
+
 **Filed 2026-07-30** out of the 2026-07-29 log review (`.cron/log-reviews/2026-07-29.md` §
 `og_render_failed reason:"font"`) and the stabilization plan's item K (house
 `.issues/stabilization-master-plan.md`). Deliberately NOT folded into the og-R2 store work — that
@@ -43,27 +59,27 @@ fix; do not re-derive that.
 
 ## What to build
 
-- [ ] **Size it from telemetry first.** The `script` / `family` / `timed_out` fields landed on
+- [x] **Size it from telemetry first.** The `script` / `family` / `timed_out` fields landed on
       `og_render_failed` on 2026-07-30 (same lane as the R2 store), so after one day of production
       the failure set can be grouped by SCRIPT rather than guessed from a dictionary name. Query
       before choosing faces — a bundled font nobody needs is dead weight in the image.
-- [ ] **Bundle the faces LD actually serves.** Arabic script is the whole headline; Devanagari,
+- [x] **Bundle the faces LD actually serves.** Arabic script is the whole headline; Devanagari,
       Bengali, Cyrillic and the rest of `language_font_map` are candidates only if the data says so.
       Same mechanism as today's Latin face: a `.ttf` under `src/routes/og/`, imported through the
       `raw_fonts(['.ttf'])` vite plugin, handed to the worker in `worker_data` and pushed into
       satori's `fonts` array.
-- [ ] **Verify the bundled Arabic face actually PARSES.** This is the step that decides the whole
+- [x] **Verify the bundled Arabic face actually PARSES.** This is the step that decides the whole
       job: Google Fonts' build of Noto Sans Arabic is the one that throws `lookupType: 5`. Candidates
       to render and compare: the notofonts.github.io static instance, Noto Naskh Arabic, and a
       `pyftsubset`/`fonttools` build with the unsupported lookups dropped. **Acceptance is a rendered
       PNG with real glyphs**, not a green test.
-- [ ] **Keep the network fetch as the FALLBACK, never the primary.** Scripts we haven't bundled must
+- [x] **Keep the network fetch as the FALLBACK, never the primary.** Scripts we haven't bundled must
       still get their best shot; a bundled face just means the common ones never touch the network.
       Keep the 3 s abort and the bounded negative cache exactly as they are.
-- [ ] **Watch the image size.** CJK faces are 10+ MB and are precisely why the `text=`-subsetted
+- [x] **Watch the image size.** CJK faces are 10+ MB and are precisely why the `text=`-subsetted
       fetch exists — bundle those only if LD has real CJK dictionaries with share traffic, and prefer
       a subset build if so.
-- [ ] **A worker test that renders a real card per bundled script** and asserts the PNG is not the
+- [x] **A worker test that renders a real card per bundled script** and asserts the PNG is not the
       tofu one. The cheapest honest assertion is a rendered-pixel comparison against a
       known-tofu render of the same string; `render-worker.test.ts` already drives the real chain.
 
@@ -87,3 +103,18 @@ fix; do not re-derive that.
   `OG_IMAGE_VERSION` and let the lifecycle rule reclaim the old generation. Decide with Jacob.
 - `notoSans.ttf` being 27 KB says the current Latin face is already a subset — the same subsetting
   approach is available for whatever gets bundled.
+
+## Completed 2026-07-31
+
+- Bundled the Google Fonts Cairo v31 weight-400 static TrueType face at
+  `site/src/routes/og/cairo.ttf`, downloaded 2026-07-31 from
+  `https://fonts.gstatic.com/s/cairo/v31/SLXgc1nY6HkvangtZmpQdkhzfH5lkSs2SgRjCAGMQ1z0hOA-W1ToLQ-GokM.ttf`.
+  Exact size: **92,336 bytes**. Magic: `00 01 00 00`; `file` identifies it as TrueType. Its size is
+  well below 1 MB, so it was not subsetted.
+- The real-worker A/B test writes `/tmp/og-cards/arabic-cairo.png` and
+  `/tmp/og-cards/arabic-tofu.png`. Visual inspection confirmed connected Arabic glyphs in Cairo and
+  square tofu in the fontless control.
+- No OG image version or card-store generation bump was made; generation 2 already invalidated the
+  old tofu cards.
+- The analogous house font bundling remains a separate follow-up in
+  `house/.issues/bundle-render-fonts.md`; it was not changed here.

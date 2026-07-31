@@ -2,7 +2,7 @@
 
 Measured facts and rulings that the code can't tell you. The mechanics live in
 `src/routes/og/card-store.ts`, `card-store-remote.ts` and `$lib/server/r2-og-cache.ts`; the plan and
-its numbers are `.issues/og-card-store-on-r2.md`.
+its numbers are `.issues/og-card-store-on-r2.md` (git history).
 
 ## The card space is bigger than the disk, permanently
 

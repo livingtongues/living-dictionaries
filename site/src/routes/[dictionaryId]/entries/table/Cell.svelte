@@ -100,6 +100,7 @@
       value={sense?.parts_of_speech}
       showPlus={false}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         sense.parts_of_speech = new_value
         update_sense({ parts_of_speech: new_value })
       }} />
@@ -110,10 +111,12 @@
       semantic_domain_keys={sense?.semantic_domains}
       write_in_semantic_domains={sense?.write_in_semantic_domains}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         sense.semantic_domains = new_value
         update_sense({ semantic_domains: new_value })
       }}
       on_update_write_in={(new_value) => {
+        if (writes.check_ready()) return
         sense.write_in_semantic_domains = new_value
         update_sense({ write_in_semantic_domains: new_value })
       }} />
@@ -134,6 +137,7 @@
       {can_edit}
       value={entry.main.sources}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         entry.main.sources = new_value
         update_entry({ sources: new_value })
       }} />
@@ -143,6 +147,7 @@
       value={sense?.glosses?.[column.bcp]}
       display={column.display}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         sense.glosses = { ...sense.glosses, [column.bcp]: new_value }
         update_sense({ glosses: sense?.glosses })
       }} />
@@ -152,6 +157,7 @@
       value={sense?.definition?.[column.bcp]}
       display={column.display}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         sense.definition = { ...sense.definition, [column.bcp]: new_value }
         update_sense({ definition: sense.definition })
       }} />
@@ -200,6 +206,7 @@
       value={entry.main.scientific_names?.[0]}
       display={page.data.t('entry_field.scientific_names')}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         entry.main.scientific_names = [new_value]
         update_entry({ scientific_names: entry.main.scientific_names })
       }} />
@@ -210,6 +217,7 @@
       value={entry.main.lexeme[orthography_field]}
       display={column.display}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         entry.main.lexeme[orthography_field] = new_value
         update_entry({ lexeme: entry.main.lexeme })
       }} />
@@ -220,6 +228,7 @@
       value={entry.main.lexeme.default}
       display={page.data.t('entry_field.lexeme')}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         if (new_value) {
           entry.main.lexeme.default = new_value
           update_entry({ lexeme: entry.main.lexeme })
@@ -231,6 +240,7 @@
       value={entry.main.notes?.default}
       display={page.data.t('entry_field.notes')}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         if (new_value) {
           entry.main.notes = { default: new_value }
           update_entry({ notes: entry.main.notes })
@@ -242,6 +252,7 @@
       value={entry.main.linguistic_history?.default}
       display={page.data.t('entry_field.linguistic_history')}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         if (new_value) {
           entry.main.linguistic_history = { default: new_value }
           update_entry({ linguistic_history: entry.main.linguistic_history })
@@ -254,6 +265,7 @@
       display={page.data.t(`entry_field.${column.field}`)}
       gloss_codes={column.field === 'morphology' || column.field === 'interlinearization'}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         entry.main[column.field] = new_value
         update_entry({ [column.field]: new_value })
       }} />
@@ -263,6 +275,7 @@
       value={sense?.noun_class}
       display={page.data.t(`entry_field.${column.field}`)}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         sense.noun_class = new_value
         update_sense({ noun_class: new_value })
       }} />
@@ -272,6 +285,7 @@
       value={sense?.plural_form?.default}
       display={page.data.t(`entry_field.${column.field}`)}
       on_update={(new_value) => {
+        if (writes.check_ready()) return
         sense.plural_form = { default: new_value }
         update_sense({ plural_form: sense?.plural_form })
       }} />

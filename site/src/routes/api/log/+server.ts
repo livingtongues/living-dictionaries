@@ -51,7 +51,17 @@ export const POST: RequestHandler = async (event) => {
   // Trusted server-to-server ingestion (e.g. an uptime prober): a valid
   // X-Log-Source-Secret tags entries `source='server'` AND bypasses the anonymous
   // per-IP rate limiter — trusted callers shouldn't compete in the client bucket.
-  const source: 'client' | 'server' = is_trusted_server(event) ? 'server' : 'client'
+  //
+  // A SUPPLIED-but-invalid secret is a hard 401, never a silent client-path
+  // fallback: from 2026-07-16 to -30 the prober posted 3,903 probes that were
+  // 200-accepted as anonymous client rows (LD's container was missing
+  // UPTIME_PROBE_SECRET), so /admin/health showed zero uptime while both ends
+  // reported success. Failing loudly lets the prober's `curl -f` catch drift.
+  // Requests with NO header remain normal anonymous client logging.
+  const trust = classify_source(event)
+  if (trust === 'invalid_secret')
+    return json({ error: 'invalid X-Log-Source-Secret' }, { status: ResponseCodes.UNAUTHORIZED })
+  const source = trust
 
   if (source === 'client') {
     const ip = safe_get_client_address(event)
@@ -97,21 +107,24 @@ export const POST: RequestHandler = async (event) => {
 }
 
 /**
- * True when the request carries a valid `X-Log-Source-Secret` matching
- * `UPTIME_PROBE_SECRET`. Constant-time compare; never throws. When the env var
- * is unset (dev, or any machine without the secret) this is always false, so
- * the trusted path is inert until the secret is provisioned.
+ * Three-way trust classification of `X-Log-Source-Secret` against
+ * `UPTIME_PROBE_SECRET`. Constant-time compare; never throws.
+ *  - no header → 'client' (normal anonymous logging)
+ *  - header matches → 'server'
+ *  - header supplied but mismatched OR the env var is unset → 'invalid_secret'
+ *    (the caller is claiming trust it can't prove — 401 upstream, so secret
+ *    drift is loud instead of silently degrading to client attribution)
  */
-function is_trusted_server(event: { request: Request }): boolean {
-  const expected = env.UPTIME_PROBE_SECRET
-  if (!expected)
-    return false
+export function classify_source(event: { request: Request }): 'client' | 'server' | 'invalid_secret' {
   const provided = event.request.headers.get('x-log-source-secret')
   if (!provided)
-    return false
+    return 'client'
+  const expected = env.UPTIME_PROBE_SECRET
+  if (!expected)
+    return 'invalid_secret'
   const a = Buffer.from(provided)
   const b = Buffer.from(expected)
-  return a.length === b.length && timingSafeEqual(a, b)
+  return a.length === b.length && timingSafeEqual(a, b) ? 'server' : 'invalid_secret'
 }
 
 function extract_single_entry(body: ApiLogRequestBody | null): ClientLogPayload[] {

@@ -25,6 +25,10 @@ the stuff you can't learn by reading one file. The data model itself lives in `A
   which is what clears the manager's Import page). Also: **what belongs in the review queue** — the
   two Ponca cuts (694 → 375 → 38), why a POS difference is never a review item, and the structured
   `review.comparisons` diff banner that replaced "describe the difference in prose".
+- [import-guide-rationale.md](./import-guide-rationale.md) — WHY each rule in the public
+  `importing.md` guide exists (lane sizing by context budget, how to read a row, audit passes,
+  merge-imports semantics) — every rule traced to a quality failure in the 'Iipay Aa run
+  (4,048 rows, 663 corrections). The guide states the rules; this records the evidence.
 - [change-history.md](./change-history.md) — the server-side per-dict audit log (entry/text/sentence
   edit timelines): where capture hooks in, the separate `{id}.history.db` + owners-index shape, how it
   survives schema drift, the entry≠text attribution boundary, and the red-phase correctness bugs.

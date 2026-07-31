@@ -18,7 +18,7 @@ An import job has three surfaces. Two of them are NOT here:
 3. **This page** — only what pertains to us: insider access, and how the job is
    handed back to Jacob.
 
-First run: Enxet, 2026-07-24 (`.issues/enxet-import.md`, 10 rounds). Its first
+First run: Enxet, 2026-07-24 (`.issues/enxet-import.md`, git history, 10 rounds). Its first
 attempt skipped bulk data review and had to be wiped and redone — that failure is
 why Phase 1 exists. Workflow overhaul afterwards: `.issues/import-workflow-v2.md`.
 
@@ -152,7 +152,7 @@ advance the team participant's `last_read_at`, or the copied closing "thanks!" r
 as new activity on /admin/imports. Record: `.issues/import-feedback-2026-07-25.md`.
 
 Design decisions, and the audit that produced them, are in
-`.issues/import-conversations.md`.
+`.issues/import-conversations.md` (git history).
 
 ## The review queue's real enemy is trivia (Ponca, 2026-07-28)
 

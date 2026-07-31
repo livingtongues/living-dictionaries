@@ -1,7 +1,7 @@
 # Grammar page navigation — read-first, right-rail TOC
 
 The `/{dict}/grammar` page grew from a single markdown blob into a section tree
-(`.issues/structured-grammar.md`). Ponca — the first real one — is 59 sections / 77KB of prose /
+(`.issues/structured-grammar.md`, git history). Ponca — the first real one — is 59 sections / 77KB of prose /
 19 chapters, which is what forced the 2026-07-28 redesign
 (`.issues/about-grammar-page-redesign.md`). These are the decisions behind it that the code alone
 won't explain.

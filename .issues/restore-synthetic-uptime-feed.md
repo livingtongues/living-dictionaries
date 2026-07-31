@@ -15,14 +15,23 @@ Production review on 2026-07-30 found that the external Mustang prober is runnin
 
 ## Repair
 
-- [ ] On **tuf**, add the same `UPTIME_PROBE_SECRET` used by the Mustang prober/house to the
-      canonical Living environment file, then run `vps-setup/bin/sync living --env-only` and restart
-      or deploy Living.
-- [ ] Make a supplied-but-invalid `X-Log-Source-Secret` fail observably (for example HTTP 401),
-      while requests with no header remain valid anonymous client logging. This lets the prober's
-      existing `curl -f` warning catch future secret drift.
-- [ ] Verify the next `uptime_probe` row has `source='server'`, then recompute or wait for the next
-      daily analytics checkpoint and confirm `/admin/health` shows probes again.
-- [ ] Decide whether to backfill the existing unmistakable Mustang rows
-      (`message='uptime_probe'`, `context.vantage='mustang-my'`) to `source='server'`; otherwise the
-      panel will rebuild history naturally as the 14-day hot window advances.
+- [x] On **tuf**, add `UPTIME_PROBE_SECRET` to the canonical Living env — DONE 2026-07-31 (tuf
+      session `e9cb90dd`): verified identical to house's value, appended to
+      `secrets-decrypted/sveltekit-living.env`, `bin/sync living --env-only`, blue/green rolling
+      restart (green → healthz → blue, no downtime), both containers verified via printenv.
+      **OUTSTANDING for Jacob:** `bin/secrets-encrypt` needs his passphrase — the plaintext env is
+      ahead of the committed encrypted archive until he runs it in ~/code/vps-setup and commits.
+- [x] Make a supplied-but-invalid `X-Log-Source-Secret` fail observably — 2026-07-31:
+      `classify_source()` in `/api/log` now 401s when the header is supplied but mismatched OR the
+      server has no secret configured (the exact 07-16 drift); no header stays anonymous client
+      logging. 4 new tests in `server.test.ts`. Goes live with LD's next deploy — until then the
+      prober's `curl -f` still 200s.
+- [x] Verified end-to-end 2026-07-31: post-restart prober run landed
+      `2026-07-31T13:39:37Z source='server'` (ttfb 1144ms, ok). The prober's pre-fix run had logged
+      its post-failure warning; post-fix run was clean.
+- [x] Backfilled 2026-07-31 (Jacob-approved): scoped UPDATE (`message='uptime_probe'` +
+      `vantage='mustang-my'` + `source='client'`) flipped **3,846** rows in `logs.db` and **3,386**
+      in `logs-archive.db`; zero non-server probe rows remain.
+- [ ] `/admin/health` shows probes after the NEXT daily analytics checkpoint (03:30 PT cron writes
+      the JSON the page reads) — confirm tomorrow, then this issue can be deleted. The 401
+      hardening in `/api/log` ships with the next LD deploy.

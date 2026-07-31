@@ -1,8 +1,10 @@
 import { Worker } from 'node:worker_threads'
+import { mkdir, writeFile } from 'node:fs/promises'
 import { render } from 'svelte/server'
 import type { Component } from 'svelte'
 import { render_component_to_png, render_pool_stats, shutdown_render_pool } from './component-to-png'
 import NotoSans from './notoSans.ttf'
+import Cairo from './cairo.ttf'
 import worker_source from './render-worker.js?raw'
 import OpenGraphImage from './OpenGraphImage.svelte'
 
@@ -81,13 +83,13 @@ async function measure_loop_stall<T>(work: () => Promise<T>): Promise<{ result: 
  * One card through a throwaway worker with a font map of the test's choosing —
  * the only way to exercise a font that misbehaves without shipping one.
  */
-async function render_with_font_map({ title, language_font_map }: { title: string, language_font_map: Record<string, string[]> }): Promise<Uint8Array> {
+async function render_with_font_map({ title, language_font_map, cairo_font }: { title: string, language_font_map: Record<string, string[]>, cairo_font?: ArrayBuffer }): Promise<Uint8Array> {
   const markup = render(OpenGraphImage as Component<any>, { props: { ...CARD_PROPS, title } }).body.replace(/<!--[[\]]?-->/g, '')
   const module_urls: Record<string, string> = {}
   for (const specifier of ['satori', 'satori-html', '@resvg/resvg-js'])
     module_urls[specifier] = import.meta.resolve(specifier)
 
-  const worker = new Worker(worker_source, { eval: true, workerData: { font: Buffer.from(NotoSans as unknown as ArrayBuffer), module_urls, language_font_map } })
+  const worker = new Worker(worker_source, { eval: true, workerData: { font: Buffer.from(NotoSans as unknown as ArrayBuffer), cairo_font: cairo_font ? Buffer.from(cairo_font) : undefined, module_urls, language_font_map } })
   try {
     return await new Promise<Uint8Array>((resolve, reject) => {
       worker.on('message', (message) => {
@@ -105,6 +107,24 @@ async function render_with_font_map({ title, language_font_map }: { title: strin
 }
 
 describe('the share-card renderer, off the request thread', () => {
+  test('bundled Cairo renders Arabic glyphs instead of tofu without a network fallback', async () => {
+    const title = 'šäš شش'
+    const language_font_map = { 'ar-AR': [], 'unknown': [] }
+    const [cairo_png, tofu_png] = await Promise.all([
+      render_with_font_map({ title, language_font_map, cairo_font: Cairo as unknown as ArrayBuffer }),
+      render_with_font_map({ title, language_font_map }),
+    ])
+
+    await mkdir('/tmp/og-cards', { recursive: true })
+    await Promise.all([
+      writeFile('/tmp/og-cards/arabic-cairo.png', cairo_png),
+      writeFile('/tmp/og-cards/arabic-tofu.png', tofu_png),
+    ])
+
+    expect(signature_of(cairo_png)).toEqual(PNG_SIGNATURE)
+    expect(cairo_png).not.toEqual(tofu_png)
+  }, 60_000)
+
   test('a multi-script headword asks for a MAPPED font for every script it contains', async () => {
     // satori renamed every script code between 0.0.44 and 0.26+; this repo made
     // that jump on 2026-07-31. `font-map.ts` proves the map's keys against the

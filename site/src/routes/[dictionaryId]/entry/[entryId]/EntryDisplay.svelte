@@ -53,6 +53,8 @@
   const senses = $derived(dedupe_keyed_children({ rows: entry.senses || [], child_kind: 'senses', entry_id: entry.id, dict_id: dictionary.id }))
 
   async function save_entry(patch: Partial<NonNullable<typeof entry_row>>) {
+    const not_ready = writes.check_ready()
+    if (not_ready) return
     if (!entry_row) return
     Object.assign(entry_row, patch)
     await entry_row._save()

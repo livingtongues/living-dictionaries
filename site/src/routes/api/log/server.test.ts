@@ -29,12 +29,14 @@ afterEach(() => {
   db.close()
 })
 
-function call(body: unknown, options: { token?: string, cookie_token?: string, client_address?: string, accept_language?: string } = {}) {
+function call(body: unknown, options: { token?: string, cookie_token?: string, client_address?: string, accept_language?: string, source_secret?: string } = {}) {
   const headers: Record<string, string> = { 'content-type': 'application/json' }
   if (options.token)
     headers.Authorization = `Bearer ${options.token}`
   if (options.accept_language)
     headers['accept-language'] = options.accept_language
+  if (options.source_secret)
+    headers['x-log-source-secret'] = options.source_secret
   const url = 'http://localhost/api/log'
   const request = new Request(url, {
     method: 'POST',
@@ -162,6 +164,43 @@ describe(POST, () => {
     const final = await (last_response as Response).json()
     expect(final.rate_limited).toBeTruthy()
     expect(final.accepted).toBe(0)
+  })
+
+  // The 2026-07-16→30 incident class: the prober's supplied secret must never
+  // silently degrade to client attribution — see classify_source in +server.ts.
+  describe('X-Log-Source-Secret trust', () => {
+    afterEach(() => {
+      delete process.env.UPTIME_PROBE_SECRET
+    })
+
+    test('a matching secret stores the row as source=server', async () => {
+      process.env.UPTIME_PROBE_SECRET = 'probe-secret'
+      const response = await call({ level: 'info', message: 'uptime_probe' }, { client_address: '10.0.1.1', source_secret: 'probe-secret' })
+      expect(response.status).toBe(200)
+      const row = db.prepare('SELECT source FROM client_logs').get() as { source: string }
+      expect(row.source).toBe('server')
+    })
+
+    test('a mismatched secret is a 401 and stores nothing', async () => {
+      process.env.UPTIME_PROBE_SECRET = 'probe-secret'
+      const response = await call({ level: 'info', message: 'uptime_probe' }, { client_address: '10.0.1.2', source_secret: 'stale-secret' })
+      expect(response.status).toBe(401)
+      expect(count_rows()).toBe(0)
+    })
+
+    test('a supplied secret with NO server secret configured is a 401, not a client row (the 07-16 drift)', async () => {
+      const response = await call({ level: 'info', message: 'uptime_probe' }, { client_address: '10.0.1.3', source_secret: 'probe-secret' })
+      expect(response.status).toBe(401)
+      expect(count_rows()).toBe(0)
+    })
+
+    test('no header remains anonymous client logging even when a secret is configured', async () => {
+      process.env.UPTIME_PROBE_SECRET = 'probe-secret'
+      const response = await call({ level: 'error', message: 'plain client row' }, { client_address: '10.0.1.4' })
+      expect(response.status).toBe(200)
+      const row = db.prepare('SELECT source FROM client_logs').get() as { source: string }
+      expect(row.source).toBe('client')
+    })
   })
 
   test('malformed JSON body returns 200 with accepted=0', async () => {

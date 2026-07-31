@@ -115,7 +115,9 @@
   let usage_counts = $state<Record<string, number>>({})
   $effect(() => {
     for (const orthography of registry.alternates) {
-      usage_count(orthography.code).then((count) => { usage_counts[orthography.code] = count })
+      usage_count(orthography.code)
+        .then((count) => { usage_counts[orthography.code] = count })
+        .catch(error => console.error('orthography usage count failed', error))
     }
   })
 
@@ -133,7 +135,9 @@
   function open_picker(target: 'new' | 'primary') {
     picker_target = target
     custom_code = ''
-    load_keyman_writing_systems().then((systems) => { keyman_writing_systems = systems })
+    load_keyman_writing_systems()
+      .then((systems) => { keyman_writing_systems = systems })
+      .catch(error => console.error('Keyman writing-systems map failed to load', error))
   }
 
   function choose_option(option: WritingSystemOption) {

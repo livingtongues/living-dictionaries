@@ -2,7 +2,9 @@
 
 Source: agent feedback thread `434cc872-4582-418d-87b9-6128ad311327` (River, 2026-07-18, marked
 resolved 2026-07-19), building on the homograph field + `homophone` relationship type
-(`.issues/v1-api-quick-wins.md` §2–3 — **land those first**; this issue keys off them).
+(v1-api-quick-wins §2–3, since LANDED — `entries.homograph` + the `homophone` relationship type
+shipped in `20260719_entry_citations_homograph_sense_sources_text_metadata.sql`; this issue is
+unblocked).
 
 **Jacob decision (2026-07-19): full design-first issue — schema options analyzed, recommendation
 made, API + UI phased. Builder starts with the design below validated against the schema, not from

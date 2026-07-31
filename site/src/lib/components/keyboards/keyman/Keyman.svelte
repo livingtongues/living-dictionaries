@@ -53,9 +53,11 @@
   let target_poll: ReturnType<typeof setInterval>
 
   onMount(async () => {
-    load_keyman_writing_systems().then((systems) => {
-      keyman_writing_systems = systems
-    })
+    load_keyman_writing_systems()
+      .then((systems) => {
+        keyman_writing_systems = systems
+      })
+      .catch(error => console.error('Keyman writing-systems map failed to load', error))
 
     await load_script_once(`https://s.keyman.com/kmw/engine/${version}/keymanweb.js`)
 

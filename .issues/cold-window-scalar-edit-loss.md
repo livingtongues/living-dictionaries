@@ -24,3 +24,15 @@ Possible directions (not decided):
 - queue cold-window edits and replay onto the live row when it arrives (most work, best UX)
 
 Not a regression — this predates the media/write-seam/dict-session refactors.
+
+## Resolution (2026-07-31)
+
+- ✅ Gated `EntryDisplay.svelte`'s `save_entry()` with `writes.check_ready()` before the live-row lookup.
+- ✅ Gated `Sense.svelte`'s `save_sense()` with `writes.check_ready()` before the live-row lookup.
+- ✅ Gated the direct live-DB scalar `on_update` handlers in `entries/table/Cell.svelte` before their optimistic read-model mutations.
+- ✅ Gated `text/[textId]/+page.svelte`'s `save_title()` before the live text-row lookup.
+- ✅ Audited `entries/AddEntry.svelte`: deliberately unchanged because its callback reaches `writes.insert_entry()`, which is already guarded.
+- ✅ Audited `entries/AddSentence.svelte`: deliberately unchanged because it reaches `writes.insert_sentences()`, which is already guarded.
+- ✅ Preserved the post-gate missing-row returns; a genuinely deleted row remains a separate out-of-scope case.
+
+Verification: `pnpm exec tsc --noEmit`, `pnpm check` (0 errors), targeted `pnpm lint`, and `guarded-writes.test.ts` (11 tests) all pass.

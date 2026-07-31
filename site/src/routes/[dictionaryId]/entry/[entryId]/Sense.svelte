@@ -33,6 +33,8 @@
   const sense_fields = $derived(sense_row ?? sense)
 
   async function save_sense(patch: Partial<NonNullable<typeof sense_row>>) {
+    const not_ready = writes.check_ready()
+    if (not_ready) return
     if (!sense_row) return
     Object.assign(sense_row, patch)
     await sense_row._save()

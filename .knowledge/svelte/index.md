@@ -9,6 +9,9 @@ lookup-able in the svelte docs).
   `container-type: size` pattern that replaces it, and the across-frames measurement that proves
   a fix.
 
+- [unguarded-promises.md](./unguarded-promises.md) — `void promise` is not a guard; when a
+  fire-and-forget promise gates a user-facing feature it needs a named `.catch`. Includes the
+  "safe by construction" `_call.ts` exemption and the poisoned module-level promise-cache trap.
 - [lazily-created-state-in-deriveds.md](./lazily-created-state-in-deriveds.md) —
   signals created during a reaction's run are excluded from its dependencies
   (`current_sources`); lazily-constructed stores silently freeze their first reader;

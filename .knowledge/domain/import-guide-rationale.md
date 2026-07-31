@@ -1,4 +1,6 @@
-# Import guide v3+v4 — lane sizing, how to read a row, audit passes, and merge-imports
+# Import guide rationale — why each importing.md rule exists
+
+(Moved from `.issues/import-guide-v3-lane-and-merge-guidance.md` 2026-07-31 — knowledge, not work.)
 
 Proposed edits to `site/src/lib/api/v1/guides/importing.md`, derived from auditing the
 'Iipay Aa run (4,048 rows, 16 reader lanes, 663 corrections). Every item below is a gap
@@ -168,7 +170,7 @@ redundant against. Those two sections are where a manager's sign-off actually ma
 
 ## Audit findings on the 'Iipay Aa payload itself
 
-Tracked separately; see `.issues/iipay-aa-import.md`. Summary of what the audit
+Tracked separately; see `.issues/iipay-aa-import.md` (git history). Summary of what the audit
 (6 × `gpt-5.6-sol` lanes over the final payload + the lead's own passes) turned up:
 
 - ✅ Structural integrity clean: all 4,048 rows accounted for exactly once, no duplicate

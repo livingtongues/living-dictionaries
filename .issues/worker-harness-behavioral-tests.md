@@ -2,6 +2,17 @@
 
 **Recommendation strength: WORTH EXPLORING (pure win, no refactor risk). Not yet assigned.**
 
+**Update 2026-07-31:** the reload-once work landed `worker/db-client.test.ts` (fake `Worker` +
+fake timers: zero respawns on a terminal failure, retry ladder still runs for retryable messages,
+script-load failure reports terminal) — so the boot-wiring seam below now has a beachhead; extend
+it rather than starting fresh. transport.ts and leader-election.ts remain untested.
+
+**Folded in from `entries-filter-structured-clone-regression.md` (fixed 2026-07-20, `f4c3d8bc`):**
+the one unchecked residual — a regression test with NESTED filter arrays proving the entries-search
+worker payload is structured-cloneable (must exercise the real worker/Comlink boundary or assert
+cloneability of the payload; a direct `search_entries.ts` unit test misses this class — `$state`
+proxies survive a shallow spread).
+
 ## Problem
 
 The most failure-prone async machinery in the app — the per-dict leader-worker harness in

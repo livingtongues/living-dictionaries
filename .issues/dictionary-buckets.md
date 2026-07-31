@@ -1,45 +1,11 @@
-# Dictionary buckets — consolidate `public` → `bucket` (Part 1 delete-execution DONE)
+# Dictionary buckets Part 2 — consolidate `dictionaries.public` → `bucket` (design, later)
 
-> **2026-07-23 status:** Part 1 is EXECUTED — prod `delete` bucket is down to 3 dicts (from 650);
-> Jacob handled the deletions through July. Only Part 2 (the `public` → `bucket` consolidation
-> design) remains live in this file. Media-byte orphan cleanup is handled by the R2 ledger
-> reconcile.
-
-Combined 2026-07-12 from `dictionary-buckets-cleanup.md` + `dictionary-public-vs-bucket-consolidation.md`.
-Classification itself is DONE and live (2026-07-04): all 2,232 prod dicts carry
-`dictionaries.bucket` (`public 221 · unlisted 396 · conlang 696 · glossary 269 · delete 650`),
-reviewable in `/admin/buckets` + `/admin/dictionaries`. Tooling: `scripts/bucket-classification/`.
-
-## Part 1 — execute the `delete` bucket (needs Jacob's go-ahead)
-
-Back up a tarball → R2 first, then batch-drive the existing teardown endpoint
-`DELETE /api/dictionaries/[id]` (admin-only; shared.db tombstones + dict.db + history.db + R2
-snapshot; R2 media cleanup is handled by the ledger reconcile). Safety check
-on the 650 delete-bucket dicts: 629 entries · 124 audio · 157 photos · 4 videos total — nothing
-of value; media bytes become ordinary R2 orphans at teardown and age through the grace period.
-
-Fresh-empty junk ("test test test") couldn't be deleted under the stale rule (≤3 entries + no
-content activity ≥1yr) — bucketed `glossary`/`conlang` by intent; a NEXT sweep (re-run
-`build-assignments.js` against fresh stats) graduates them to delete.
-
-✅ **2026-07-12 conlang/glossary purge (Jacob-approved):** deleted 344 conlang/glossary dicts with
-<10 entries AND no content edit (per-dict `MAX(updated_at)` across content tables) AND no member
-`last_visit_at` within 6 months. Executed by batch-driving `DELETE /api/dictionaries/[id]` from
-inside the container with a minted admin JWT; shared.db backed up first
-(`shared.db.bak-20260712-105523`+). 344/344 succeeded, 344 `dictionaries` tombstones written.
-Record: `scripts/one-off/2026-07-12-purged-conlang-glossary.csv`. Remaining conlang/glossary:
-468 + 163 = 631 (253 of them still <10 entries but had recent activity — recheck in a future sweep).
-
-### Notables for Jacob's in-app review before deleting
-- **`river`** — 8,692 entries + 4,733 audio, kept `unlisted`; worth a look.
-- **`tla-wilano`** — 1,034 entries + 704 audio, answered YES to conlang on the old form → `conlang`.
-- Team/test dicts kept OUT of delete (fresh activity): `jacob-test2`, `test-004`,
-  `example-v4-senses`, `test-language-x`, `test-german` → all `glossary`; hand-delete whenever.
-  `sugtstun-test` kept `unlisted` (referenced in `DICTIONARIES_WITH_VARIANTS` constant!).
-- Media-heavy conlangs (future media-squash targets): `leshing` (2,460 audio / 2,159 photos),
-  `orich` (1,180 audio), `taharini` (806 audio).
-
-## Part 2 — consolidate `dictionaries.public` → `bucket` (design, later)
+> Part 1 (classification + delete-bucket execution) is DONE — full record in git history of this
+> file. All prod dicts carry `dictionaries.bucket`; the `delete` bucket was executed through July
+> (650 → ~3, plus a 344-dict conlang/glossary purge, record:
+> `scripts/one-off/2026-07-12-purged-conlang-glossary.csv`). One leftover sweep idea: re-run
+> `scripts/bucket-classification/build-assignments.js` against fresh stats to graduate the
+> fresh-empty junk (~253 conlang/glossary dicts <10 entries that had recent activity in July).
 
 Jacob (2026-07-06): treat **`bucket`** as the single source of listing/visibility truth and drop
 the boolean `public` column eventually, but KEEP the first-went-public signal —

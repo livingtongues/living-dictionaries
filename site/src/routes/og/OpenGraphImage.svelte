@@ -68,7 +68,7 @@
       height: 100%;
       font-weight: 400;
     ">
-    {#if lat && lng}
+    {#if typeof lat === 'number' && typeof lng === 'number'}
       <div style="display: flex; position: absolute; bottom: 0; right: 0;">
         <SvgGlobe placeLatitude={lat} placeLongitude={lng} size={globeSize} />
       </div>
