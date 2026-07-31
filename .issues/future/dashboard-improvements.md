@@ -136,7 +136,42 @@ proposals against this lens.
      evicting, against an unbounded card space (18,174 renders/day for 1,000 slots, ~18 re-renders per
      stored card per day, ~7.8 core-hours of wasted CPU).
 
-  Gated on the store-hit telemetry; still the highest-value item in this file.
+  **UPDATE 2026-07-30 — partially ungated, but the denominator is still incomplete.** Current source
+  now emits coalesced `og_card_served { source: 'disk' | 'r2' | 'render' }`, and the first five
+  post-deploy hours recorded 192 own-card serves, 180 renders, 15 render-failure events and 6 shed
+  requests. That event is the own-card **numerator**, not the all-request denominator:
+  `degraded_response()` still emits no `og_card_served { source:'generic' }`, and one failed request
+  can emit more than one render-failure row through its fallback ladder. Therefore an honest own-card
+  share is still impossible. Finish the coverage with a single terminal outcome per request
+  (`disk|r2|render|generic`) and add the still-absent store-pressure fields (entries/bytes/evictions).
+  R2 source will remain zero until the approved `livingdictionaries-og-cache` bucket exists.
+
+  **⚠️ RECALIBRATE 2026-07-30 run 2 — the thresholds in this item were written for a subsystem doing
+  18,174 renders/day. It now does ~300.** The bucket EXISTS (152 cards / 35.1 MB, first object
+  11:23:56 UTC) and total `/og` request volume collapsed ~100× at the 09:12 deploy: ≈2,900/h → ≈25/h,
+  with shed requests 22,058 (pre-deploy half of the day) → **5** (post-deploy half) and worker
+  timeouts ~1/h. A panel calibrated to the old baseline would read "healthy" through almost any
+  future regression, so **every number on this line must be a share or a rate, never a raw count**.
+  Three concrete changes: (1) include `source: 'r2'` in the store-tier split now that the remote tier
+  is live — reading zero is currently CORRECT, because the 5,000-entry disk tier never evicts at this
+  volume; (2) add `remote_puts` / `remote_gets` / `remote_faults` / `breaker_open` to the
+  store-pressure line, all of which `card-store-remote.ts` already tracks in `stats()` and never
+  emits; (3) still BLOCKED on the terminal `source:'generic'` outcome — `degraded_response()`
+  (`routes/og/+server.ts:65`) returns with no telemetry at all. House filed the identical
+  denominator + store-pressure gap independently on the same night.
+
+- **★ NEW — Annotate availability and error trends with DEPLOY BOUNDARIES** *(filed 2026-07-30 run 2
+  · MEDIUM · blocked on the `server_started` coverage gap).* Tonight every single server error was
+  deploy-shaped and none was not: zero Caddy `no upstreams available`, and all 273 failed health
+  checks plus all 86 client-observed 502/520/522/525 rows fell inside 06:29–12:33 UTC — four deploys
+  plus the last run of the old six-hourly retention schedule — with nine completely clean hours
+  after. The dashboard cannot express that distinction, so a two-minute deploy blip and a real
+  outage draw the same spike. Reaching the conclusion required reading the reverse proxy's log by
+  hand and reverse-inferring build boundaries from client `app_version` first-seen. Not a new panel:
+  a deploy-boundary rule drawn onto the existing availability/error series, plus a "n of m errors
+  occurred within 10 minutes of a deploy" verdict line. **Prerequisite:** emit `server_started`
+  `{ app_version, commit, container, is_standby }` — verified absent from source and from every row
+  ever written.
 
 - **★ NEW — Record tab `visibility` / `was_hidden` on leader-fault rows** *(ported from house 2026-07-29
   · filed 2026-07-29 · LOW cost, MEDIUM value).* House proved it separates genuine foreground stalls
@@ -156,6 +191,10 @@ proposals against this lens.
   events today**. Build a liveness strip — pushes/day, distinct dictionaries + users pushing, and the
   failure share as a **percentage of attempts** rather than a raw count — so the panel answers "is
   syncing working for everyone" instead of "how many failures". Port tutor's shape; don't redesign.
+  **UPDATE 2026-07-30:** still verified absent and fully data-ready: the latest 24 hours contain
+  **905 `dict_changes_pushed` successes from 16 users**, versus 244 `sync_failed` rows and four
+  terminal halts. This is the highest-value ready dashboard item while the share-card outcome
+  denominator remains incomplete.
 - ✅ **SHIPPED 2026-07-27 — Stop the analytics compute from blocking the server** *(ported from house
   2026-07-26 · promoted to its own issue
   <File path=".issues/analytics-compute-blocks-server.md" />).* Not a panel — the standing "load

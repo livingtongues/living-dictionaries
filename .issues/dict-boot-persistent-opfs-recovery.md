@@ -15,7 +15,9 @@ Plan:
 - [x] **Viewer poisoned-file recovery built (2026-07-22).** `dict-instance.ts` `open_opfs_prepared` now catches an open/migrate failure on an EXISTING file and, for a **viewer** boot, drops the poisoned file + re-fetches a fresh snapshot ONCE (`poisoned_file_recovery_decision`, pure + unit-tested; bounded by `poison_recovery_attempted`). Editors are preserved (un-pushed writes can't be probed on an unopenable file). New `dict_boot_file_replaced` (`warn`) telemetry marks a real recovery in the wild. This clears the anonymous/viewer half of the iOS `sqlite3_open_v2` + duplicate-column families — the majority of exhausted sessions.
 - [x] Verify viewer recovery on Android Chrome and iOS Safari contexts. ✅ Current build recovered `poqomchi` on Android and `iipay-aa` on iPhone; per-dictionary OPFS isolation remains intact.
 - [ ] **Editor recovery (follow-up, bigger change).** A signed-in editor with a poisoned file (e.g. `alclaveria`/`boienen`) is still preserved-and-refused, because we can't prove the un-openable file has no un-pushed writes. To recover editors safely we'd need a DURABLE external write-ledger (a per-dict "has un-pushed writes" marker kept OUTSIDE the dict file — e.g. a tiny sidecar, updated on write/cleared on successful push) so an unopenable file can be judged clean without opening it. Deferred: it's a write-path change with its own consistency/failure modes, out of scope for the provably-safe viewer build.
-- [x] Emit one terminal/recovered event per session instead of an unbounded re-election log loop. ✅ `dict_boot_recovery_exhausted` / `dict_boot_recovered`.
+- [ ] Emit one terminal/recovered event per session instead of an unbounded re-election log loop.
+      `dict_boot_recovery_exhausted` / `dict_boot_recovered` exist, but the session bound regressed
+      (see the 2026-07-30 production check below).
 
 Severity: P2 for signed-in editors or persistent current-build recurrence; otherwise P3/watch for isolated anonymous embedded-browser sessions.
 
@@ -48,3 +50,27 @@ recorded one successful viewer recovery and no signed-in recovery exhaustion. Th
 sessions exhausted (`nukuoro`, `kalinago`, `arayeke-taino`); the current-build `arayeke-taino` viewer
 is the only fresh one. Viewer recovery is now bounded and proven. The deferred editor write-ledger
 item remains the only open engineering branch.
+
+## 2026-07-30 production check (terminal-event bound regressed; editor corruption is live)
+
+Two distinct current-source gaps are now proven:
+
+1. One anonymous foreground `bahasa-lani` tab emitted **421
+   `dict_boot_recovery_exhausted` rows over five hours**. Current
+   `site/src/lib/db/dict-client/dict-session.ts` logs every `on_boot_failed` callback whose
+   `will_retry` is false; its `recovery_exhausted` boolean controls only the later recovered event,
+   not terminal-event emission. The earlier “once per session” checkbox was therefore incorrect.
+   Bound this event in the page-session/main-thread lifetime and carry `visibility` / `was_hidden`
+   so a future review does not need a session replay to prove foreground impact.
+2. A signed-in Iipay Aa contributor hit two `sync_halted_repeated_failure` latches with
+   `database disk image is malformed` in two fresh sessions. Both `PRAGMA quick_check` and
+   `PRAGMA integrity_check` return `ok` on the authoritative server
+   `/data/dictionaries/iipay-aa.db`, so this is browser-local OPFS corruption. No later push from
+   that contributor was observed. This is the concrete editor case the durable external
+   write-ledger branch exists for: the app cannot safely replace an unreadable editor file because
+   it cannot prove whether unpushed work is inside it.
+
+- [ ] Contact the affected contributor with a cautious recovery path; clearing the local file may
+      discard unpushed edits, so do not present it as lossless.
+- [ ] Build the external write-ledger/editor recovery branch before the next editor-local corruption
+      incident.

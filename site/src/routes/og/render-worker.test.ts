@@ -1,5 +1,22 @@
+import { Worker } from 'node:worker_threads'
+import { render } from 'svelte/server'
+import type { Component } from 'svelte'
 import { render_component_to_png, render_pool_stats, shutdown_render_pool } from './component-to-png'
+import NotoSans from './notoSans.ttf'
+import worker_source from './render-worker.js?raw'
 import OpenGraphImage from './OpenGraphImage.svelte'
+
+/**
+ * The pool reports its non-fatal notes (a font it couldn't map, a font CDN that
+ * answered 500) through `record_og_event` — intercepting it is how a test reads
+ * what the worker said, without giving production code a test-only channel.
+ */
+const logged: { message: string, context?: Record<string, unknown> | null }[] = []
+vi.mock('./og-telemetry', () => ({
+  record_og_event: (event: { message: string, context?: Record<string, unknown> | null }) => {
+    logged.push(event)
+  },
+}))
 
 /**
  * The real chain — svelte SSR → satori → resvg → PNG — through the real worker,
@@ -60,7 +77,75 @@ async function measure_loop_stall<T>(work: () => Promise<T>): Promise<{ result: 
   }
 }
 
+/**
+ * One card through a throwaway worker with a font map of the test's choosing —
+ * the only way to exercise a font that misbehaves without shipping one.
+ */
+async function render_with_font_map({ title, language_font_map }: { title: string, language_font_map: Record<string, string[]> }): Promise<Uint8Array> {
+  const markup = render(OpenGraphImage as Component<any>, { props: { ...CARD_PROPS, title } }).body.replace(/<!--[[\]]?-->/g, '')
+  const module_urls: Record<string, string> = {}
+  for (const specifier of ['satori', 'satori-html', '@resvg/resvg-js'])
+    module_urls[specifier] = import.meta.resolve(specifier)
+
+  const worker = new Worker(worker_source, { eval: true, workerData: { font: Buffer.from(NotoSans as unknown as ArrayBuffer), module_urls, language_font_map } })
+  try {
+    return await new Promise<Uint8Array>((resolve, reject) => {
+      worker.on('message', (message) => {
+        if (message.type === 'done')
+          resolve(message.png)
+        if (message.type === 'failed')
+          reject(new Error(message.message))
+      })
+      worker.on('error', reject)
+      worker.postMessage({ id: 1, markup, height: HEIGHT, width: WIDTH })
+    })
+  } finally {
+    await worker.terminate()
+  }
+}
+
 describe('the share-card renderer, off the request thread', () => {
+  test('a multi-script headword asks for a MAPPED font for every script it contains', async () => {
+    // satori renamed every script code between 0.0.44 and 0.26+; this repo made
+    // that jump on 2026-07-31. `font-map.ts` proves the map's keys against the
+    // installed satori; this proves the WORKER's copy of the lookup (which
+    // cannot import that file) agrees — including the `|`-joined codes satori
+    // emits for Han. Hebrew + Greek + Han + emoji in one string, which only
+    // resolves because the loader hands satori ALL the matching families and it
+    // falls back per glyph.
+    //
+    // Asserts on `font_unmapped` ONLY, never on a fetch outcome: this must not
+    // start failing because Google Fonts was slow on somebody's laptop.
+    logged.length = 0
+    const png = await render_component_to_png({
+      component: OpenGraphImage,
+      props: { ...CARD_PROPS, title: 'מַלְאָך λόγος 聖書 🔥' },
+      height: HEIGHT,
+      width: WIDTH,
+    })
+    expect(signature_of(png)).toEqual(PNG_SIGNATURE)
+    expect(logged.filter(event => event.context?.reason === 'font_unmapped')).toEqual([])
+  }, 60_000)
+
+  test('a font whose tables break the parser costs the GLYPHS, not the card', async () => {
+    // The `static_fonts_only` retry never actually ran with static fonts only:
+    // satori caches its FontLoader in a WeakMap keyed by the IDENTITY of
+    // `options.fonts`, and this worker reused one array, so the retry
+    // re-rendered against the loader that had just been handed the font that
+    // threw. That is why the 1,486 daily font failures from one Arabic-script
+    // dictionary (2026-07-29 review) were GENERIC cards, not tofu ones.
+    //
+    // The reproducer is Arabic TEXT in a Noto Arabic face: every one of them
+    // throws `lookupType: 5 - substFormat: 3 is not yet supported` in
+    // `@shuding/opentype.js` while shaping required ligatures. The map is passed
+    // explicitly so this keeps reproducing whatever `font-map.ts` says today.
+    const png = await render_with_font_map({
+      title: 'العربية',
+      language_font_map: { 'ar-AR': ['Noto+Sans+Arabic'], 'unknown': ['Noto+Sans'] },
+    })
+    expect(signature_of(png)).toEqual(PNG_SIGNATURE)
+  }, 60_000)
+
   test('THE FIX: a real 1200×630 card renders WITHOUT blocking this thread', async () => {
     const { result: png, elapsed_ms, worst_stall_ms } = await measure_loop_stall(() =>
       render_component_to_png({ component: OpenGraphImage, props: { ...CARD_PROPS }, height: HEIGHT, width: WIDTH }))

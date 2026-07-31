@@ -7,8 +7,8 @@
   import IconMdiCheck from '~icons/mdi/check'
   import IconMdiCog from '~icons/mdi/cog'
   import IconMdiForum from '~icons/mdi/forum'
-  import IconMdiKey from '~icons/mdi/key'
   import IconMdiLogout from '~icons/mdi/logout'
+  import IconMdiShieldAccount from '~icons/mdi/shield-account'
   import IconMdiTranslate from '~icons/mdi/translate'
   import IconMdiWrench from '~icons/mdi/wrench'
   import { build_personas, is_active_persona } from '$lib/auth/view-as'
@@ -87,7 +87,7 @@
 
     {#if auth_user.is_admin}
       <a href="/admin" onclick={close}>
-        <IconMdiKey />
+        <IconMdiShieldAccount />
         Admin Panel
       </a>
     {/if}
@@ -95,7 +95,7 @@
     {#if auth_user.is_chat_member}
       <a href="/chat" onclick={close}>
         <IconMdiForum />
-        Chat
+        Team (editors & contributors)
         {#if chat_store.total_unread > 0}
           <span class="chat-badge">{chat_store.total_unread}</span>
         {/if}

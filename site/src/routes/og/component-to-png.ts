@@ -6,6 +6,7 @@ import NotoSans from './notoSans.ttf'
 // The worker's own SOURCE, inlined as a string at build time — see render-worker.js.
 import worker_source from './render-worker.js?raw'
 import { record_og_event } from './og-telemetry'
+import { LANGUAGE_FONT_MAP } from './font-map'
 import { log_server_event } from '$lib/server/log-server-event'
 
 /**
@@ -36,7 +37,9 @@ export function classify_og_failure(error: unknown): 'image_fetch' | 'font' | 'r
  */
 const pool = create_render_pool({
   source: worker_source,
-  worker_data: { font: Buffer.from(NotoSans), module_urls: resolve_module_urls() },
+  // The font map is DATA and rides in, so it can live in a typed file with a
+  // test that pins its keys to the installed satori (`font-map.ts`).
+  worker_data: { font: Buffer.from(NotoSans), module_urls: resolve_module_urls(), language_font_map: LANGUAGE_FONT_MAP },
   on_event: ({ message, error, context }) => {
     if (message === 'og_render_failed')
       record_og_event({ level: 'warn', message, error, context })

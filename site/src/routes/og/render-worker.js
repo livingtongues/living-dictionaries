@@ -30,7 +30,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- eval'd worker code is CommonJS: `import` statements are a syntax error here. */
 const { parentPort, workerData } = require('node:worker_threads')
 
-const { font, module_urls = {} } = workerData
+const { font, module_urls = {}, language_font_map = {} } = workerData
 
 /** @param {string} specifier */
 function load(specifier) {
@@ -56,21 +56,41 @@ render_chain()
 
 const font_data = Buffer.from(font)
 
+/**
+ * A FRESH options object with a FRESH `fonts` ARRAY, every single time.
+ *
+ * Not a style choice — satori caches its FontLoader in a WeakMap keyed by the
+ * IDENTITY of `options.fonts` (`Is.has(e.fonts) ? … : Is.set(e.fonts, new …)`),
+ * and `loadAdditionalAsset` results are `addFonts`-ed into that loader. Reusing
+ * one array, as this file did until 2026-07-31, has two consequences that were
+ * both live in production:
+ *
+ *  1. **The retry below was a no-op.** It re-rendered against the very loader
+ *     that had just been handed the font that threw, so "retry with NotoSans
+ *     only" never once ran with NotoSans only. Measured: an Arabic card failed,
+ *     retried, and failed identically — which is why the 1,486 daily font
+ *     failures from one Arabic-script dictionary (2026-07-29 review) were
+ *     GENERIC CARDS, not merely tofu ones.
+ *  2. **Every dynamic font ever fetched accumulated in one loader** for the life
+ *     of the worker — unbounded growth across distinct (script, text) runs, and
+ *     one unparseable face poisoning every later card whose text needs fallback.
+ *
+ * A new array costs nothing: satori caches the PARSED font by data buffer
+ * separately, and `font_data` is the same Buffer every time.
+ */
+function fresh_options({ height, width }) {
+  return { fonts: [{ name: 'Noto+Sans', data: font_data, style: 'normal' }], height, width }
+}
+
 /** @param {{ markup: string, height: number, width: number, id: number }} job */
 async function render_png({ markup, height, width, id }) {
   const { satori, to_react_node, Resvg } = await render_chain()
-
-  const base_options = {
-    fonts: [{ name: 'Noto+Sans', data: font_data, style: 'normal' }],
-    height,
-    width,
-  }
 
   let svg
   last_dynamic_asset = { script: null, family: null } // never label this card with the last one's script
   try {
     svg = await satori(to_react_node(markup), {
-      ...base_options,
+      ...fresh_options({ height, width }),
       // Dynamically-fetched Google fonts (for non-Latin scripts) are parsed INSIDE
       // satori by @shuding/opentype.js, which throws on some GSUB tables it doesn't
       // support (e.g. "lookupType: 5 - substFormat: 3 is not yet supported") — the
@@ -83,7 +103,7 @@ async function render_png({ markup, height, width, id }) {
     // An `image_fetch` fault fails this retry too; the route's outer catch then
     // renders the text-only fallback card.
     warn({ id, error, context: { retry: 'static_fonts_only', script: last_dynamic_asset.script, family: last_dynamic_asset.family, width, height } })
-    svg = await satori(to_react_node(markup), base_options)
+    svg = await satori(to_react_node(markup), fresh_options({ height, width }))
   }
 
   const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: width } })
@@ -114,25 +134,6 @@ function warn({ id, error, context }) {
   parentPort.postMessage({ type: 'warn', id, message: error?.message ?? String(error), stack: error?.stack ?? null, context })
 }
 
-// @TODO: Cover most languages with Noto Sans.
-const language_font_map = {
-  zh: 'Noto+Sans+SC',
-  ja: 'Noto+Sans+JP',
-  ko: 'Noto+Sans+KR',
-  th: 'Noto+Sans+Thai',
-  he: 'Noto+Sans+Hebrew',
-  ar: 'Noto+Sans+Arabic',
-  bn: 'Noto+Sans+Bengali',
-  ta: 'Noto+Sans+Tamil',
-  te: 'Noto+Sans+Telugu',
-  ml: 'Noto+Sans+Malayalam',
-  devanagari: 'Noto+Sans+Devanagari',
-  kannada: 'Noto+Sans+Kannada',
-  symbol: ['Noto+Sans+Symbols', 'Noto+Sans+Symbols+2'],
-  math: 'Noto+Sans+Math',
-  unknown: 'Noto+Sans',
-}
-
 /**
  * Google Fonts has no business holding a render open. Production logged repeated
  * `Failed to load dynamic font … AggregateError [ETIMEDOUT]` — with no timeout at
@@ -156,57 +157,97 @@ const HTTP_OK = 200
  */
 let last_dynamic_asset = { script: null, family: null }
 
+/**
+ * MIRRORS `families_for_script` in `font-map.ts` — an eval'd worker cannot
+ * import it, but the MAP itself is not duplicated: it rides `workerData`. See
+ * that file for why a code may name several scripts at once (`ja-JP|zh-CN|…`).
+ */
+function families_for(code) {
+  const families = [...new Set(String(code).split('|').flatMap(part => language_font_map[part] || []))]
+  if (families.length)
+    return { families, mapped: true }
+  return { families: language_font_map.unknown || [], mapped: false }
+}
+
+/**
+ * The fonts satori should add for one script + text run.
+ *
+ * EVERY exit that yields no usable font WARNS. Google Fonts answers 200 with a
+ * perfectly valid font containing none of the requested glyphs, so a silent
+ * `unknown` rescue makes a wrong card indistinguishable from a right one — it
+ * gets cached for a year and nobody finds out. A card with missing glyphs is a
+ * FAILURE that happens to have pixels. (house, 2026-07-30: a day of tofu Hebrew
+ * and CJK cards with zero telemetry.)
+ *
+ * Returns an ARRAY, and fetches the whole candidate list in PARALLEL: satori
+ * resolves fallbacks per GLYPH across every font it has been handed, so giving
+ * it all four Han faces (or both Symbols faces) is strictly better than picking
+ * one on our behalf — and parallel keeps four families inside one 3 s bound
+ * rather than four of them, which would blow the pool's render deadline.
+ */
 const load_dynamic_asset = with_bounded_cache(async (code, text) => {
-  let names = language_font_map[code]
-  // Re-read after falling back — otherwise `names` stays undefined and the loop
-  // below throws `names is not iterable`, which the catch then reports as a
-  // spurious `dynamic_font_fetch` failure. Production hit it on an emoji card
-  // (2026-07-29T01:35) and on every other script missing from the map.
-  if (!names) {
-    code = 'unknown'
-    names = language_font_map[code]
+  const { families, mapped } = families_for(code)
+  if (!mapped) {
+    warn({
+      id: null,
+      error: new Error(`no font is mapped for satori script "${code}" — its glyphs will be missing`),
+      context: { reason: 'font_unmapped', script: code, text },
+    })
   }
 
-  let family = null
+  const fonts = (await Promise.all(families.map(family => load_font_family({ code, family, text })))).filter(Boolean)
+  if (!fonts.length) {
+    warn({
+      id: null,
+      error: new Error(`no font could be loaded for satori script "${code}"`),
+      context: { reason: 'font_unavailable', script: code, families: families.join(','), text },
+    })
+    return undefined
+  }
+  return fonts
+})
+
+/** One family's subset for this text run, or null (having said why). */
+async function load_font_family({ code, family, text }) {
+  last_dynamic_asset = { script: code, family }
+  const API = `https://fonts.googleapis.com/css2?family=${family}&text=${encodeURIComponent(text)}`
   try {
-    if (typeof names === 'string')
-      names = [names]
+    const css = await (
+      await fetch(API, {
+        signal: AbortSignal.timeout(FONT_FETCH_TIMEOUT_MS),
+        headers: {
+          // Make sure it returns TTF.
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1',
+        },
+      })
+    ).text()
 
-    for (const name of names) {
-      family = name
-      last_dynamic_asset = { script: code, family: name }
-      const API = `https://fonts.googleapis.com/css2?family=${name}&text=${encodeURIComponent(text)}`
-
-      const css = await (
-        await fetch(API, {
-          signal: AbortSignal.timeout(FONT_FETCH_TIMEOUT_MS),
-          headers: {
-            // Make sure it returns TTF.
-            'User-Agent':
-              'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1',
-          },
-        })
-      ).text()
-
-      const resource = css.match(/src: url\((.+)\) format\('(opentype|truetype)'\)/)
-      if (!resource) return
-
-      const res = await fetch(resource[1], { signal: AbortSignal.timeout(FONT_FETCH_TIMEOUT_MS) })
-      if (res.status === HTTP_OK) {
-        return {
-          name: `satori_${code}_fallback_${text}`,
-          data: await res.arrayBuffer(),
-          weight: 400,
-          style: 'normal',
-        }
-      }
+    const resource = css.match(/src: url\((.+)\) format\('(opentype|truetype)'\)/)
+    if (!resource) {
+      // Used to be a bare `return` — a misspelled family or a Google response
+      // shape change would silently produce an unstyled card forever.
+      warn({ id: null, error: new Error(`no TTF in the Google Fonts CSS for ${family}`), context: { reason: 'font_css_unparsable', script: code, family, text } })
+      return null
     }
+
+    const res = await fetch(resource[1], { signal: AbortSignal.timeout(FONT_FETCH_TIMEOUT_MS) })
+    if (res.status !== HTTP_OK) {
+      warn({ id: null, error: new Error(`Google Fonts answered ${res.status} for ${family}`), context: { reason: 'font_fetch_status', status: res.status, script: code, family, text } })
+      return null
+    }
+
+    // The name must be unique per FAMILY as well as per script: satori keys its
+    // font table by name, so two families sharing one name would shadow each
+    // other and the per-glyph fallback would have only one face to try.
+    return { name: `satori_${code}_${family}_fallback_${text}`, data: await res.arrayBuffer(), weight: 400, style: 'normal' }
   } catch (error) {
     // `timed_out` separates "Google Fonts is slow/unreachable" (ours to bound)
     // from "that font's tables break the parser" (ours to bundle around).
     warn({ id: null, error, context: { reason: 'dynamic_font_fetch', script: code, family, timed_out: error?.name === 'TimeoutError' || error?.name === 'AbortError', text } })
+    return null
   }
-})
+}
 
 /**
  * Bounded memo, insertion-ordered so the oldest entry is evicted first. Caches

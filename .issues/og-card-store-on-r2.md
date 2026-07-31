@@ -228,11 +228,28 @@ INSIDE the render (up to 2 × 3 s), which house's does not. Noted in `decisions.
 
 ## Still open
 
-- ⛔ **Jacob creates `livingdictionaries-og-cache` + the 90-day lifecycle rule** (steps above). Until
-  then the R2 tier is a permanent clean miss and LD behaves as it did, with a 4× bigger disk tier.
-- **Post-deploy re-measure** (do this once the bucket exists): `og_card_served` should show `r2` as a
-  real source, `og_render_shed` should collapse from ~36k/day, and
-  `ls /opt/hosting/data/og-cache | wc -l` should stop being pinned at the cap.
+- ✅ **Jacob created `livingdictionaries-og-cache`** — verified 2026-07-30 21:29 UTC by a signed
+  listing from inside `sveltekit_blue`: **152 objects / 35.1 MB**, oldest `2026-07-30T11:23:56Z`,
+  newest `2026-07-30T21:29:19Z`. `og_remote_card_fault` (all `NoSuchBucket`) ran 09:18–10:49 UTC and
+  then stopped permanently, which is the same fact from the other side.
+- ⚠️ **The 90-day lifecycle rule is UNVERIFIED from here** — the app's R2 token is object-scoped and
+  `GET ?lifecycle=` returns 403 `AccessDenied`. Confirm it in the Cloudflare dashboard.
+- ✅ **Post-deploy re-measure done 2026-07-30 run 2** — and the result is bigger than the hit-rate
+  improvement this issue predicted. Total `/og` request volume fell ~100× at the 09:12 deploy
+  (≈2,900/h → ≈25/h); `og_render_shed` went **22,058 → 5** across the two halves of the day; the disk
+  store settled at **1,307 files / 243.5 MB** against the new 5,000-entry / 1 GB caps, i.e. no longer
+  pinned. **Why volume itself fell:** a shed response carries `max-age=60` (deliberately, so the
+  scraper returns) while a real card is immutable-for-a-year — so while most responses were sheds the
+  edge could cache nothing and the same scrapers came back every minute. The shedding fed itself.
+- **`og_card_served source:'r2'` has still never appeared, and that is CORRECT.** At ~15 renders/hour
+  the 5,000-entry disk tier never evicts, so the remote tier is never read. Expect `r2` to appear
+  after a deploy wipes a container's disk tier, or when volume grows.
+- ✅ **`og_render_worker_timeout` watch CLOSED: keep 10 s.** 142 (07-28 @ 20 s) → 219 (07-29 @ 20 s)
+  → 106 (07-30), of which only 12 in the 12 h after the deploy (~1/h). Do NOT raise toward 15 s.
+- ⚠️ **The `script` / `family` fields added here DO NOT POPULATE** — 2 of 2,313 `og_render_failed`
+  events carry them, because they only exist on the worker retry path and only after a web font
+  resolved. The working group-by is `context.dict`: Torwali English Urdu Dictionary = 838 of 880 font
+  events (95%). Size `.issues/bundle-render-fonts.md` from that, and tell house (same fields).
 - **The public-CDN read path** (~10 ms vs ~280 ms for a signed GET) stays a one-line upgrade for
   later, gated on the tail actually showing up in `og_card_served` timings. Needs a custom domain on
   the bucket.

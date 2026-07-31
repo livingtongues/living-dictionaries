@@ -274,6 +274,18 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   Arabic-script). Pre-existing opentype `lookupType: 5 - substFormat: 3`, unmasked (not caused) by the
   07-26 WebP fix per the 07-27 ruling. Each costs a DOUBLED render (`static_fonts_only` retry) and still
   ships tofu. Bundling a working Arabic-script face fixes appearance AND removes ~1,500 renders/day.
+- **2026-07-31 — SUPERSEDES the line above: those Arabic cards were serving the GENERIC card, not a
+  tofu one, and the `static_fonts_only` retry never worked.** satori caches its FontLoader in a
+  WeakMap keyed by the IDENTITY of `options.fonts`; `render-worker.js` reused one array, so the
+  retry re-rendered against the loader that had just been handed the font that threw — identical
+  failure, identical stack (measured). So the render failed outright and the route fell back to the
+  generic card; "ships tofu" understated it. Fixed with a fresh fonts array per satori call, plus
+  the satori 0.0.44 → 0.29 upgrade and a font map pinned to the installed library by a test
+  (`.issues/satori-upgrade-and-font-map-safety-net.md`). Arabic now maps to **Cairo** — NO Noto
+  Arabic face is parseable by satori's opentype fork, so "bundle a working Arabic face" was the
+  right instinct with the wrong family. Emoji headwords were tofu too and now render. Mechanism +
+  verification method in `.knowledge/server/satori-fonts.md`; **never close a font finding on the
+  absence of error rows — render it and look at it.**
 - **2026-07-29 — the `db_tier` mix is now 100% `opfs-worker`** (904 of 904 sessions, zero `idb-worker` /
   `idb-main` / below-capability). The leader-elected OPFS worker is simply THE runtime; stop treating
   fallback tiers as a live concern unless the distribution moves.
@@ -285,9 +297,11 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   This also blocks the long-parked "deploy-settling error band" backlog item. Emit
   `{ app_version, commit, container: blue|green, is_standby }` once at boot.
 - **2026-07-30 — the `/og` store is now disk → R2 → render, and there are THREE new things to read.**
-  Deployed 09:12 UTC. (1) `og_card_served { source: 'disk' | 'r2' | 'render' }` is the denominator the
-  endpoint never had — the honest verdict is *share of `/og` requests answered with the dictionary's own
-  card*, not "% of renders that succeeded". (2) `og_remote_card_fault { operation, elapsed_ms }` means
+  Deployed 09:12 UTC. (1) `og_card_served { source: 'disk' | 'r2' | 'render' }` is the own-card
+  NUMERATOR the endpoint never had, but `degraded_response()` still emits no terminal
+  `source:'generic'` outcome — the all-request denominator remains incomplete. Never compute the
+  health line from render failures (one request can emit several through the fallback ladder).
+  (2) `og_remote_card_fault { operation, elapsed_ms }` means
   the R2 tier faulted; it is ALWAYS fail-open (the card just renders), so treat a low rate as noise and
   a sustained rate as "the tier is doing nothing". R2 itself answers in 36–231 ms from the box, so a
   fault with `elapsed_ms` near the 2,000 ms deadline means the PROCESS was busy, not R2. (3) The disk
@@ -306,3 +320,51 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
 - **2026-07-30 — `og_render_failed` now carries `script` / `family` / `timed_out`.** The 07-29 "1,536
   font failures = one Arabic dictionary" finding had to be reached by hand; it is now a group-by. Use it
   to size `.issues/bundle-render-fonts.md` (filed in LD and house) before choosing which faces to bundle.
+- **2026-07-30 — the six-hour retention/analytics stall is CLOSED in current code.** The old
+  retention cron + in-process cache warm made Caddy lose `/healthz` for minutes at the exact
+  six-hour cadence and produced 101 signed-in sync 5xx rows in this review window. Commits
+  `3ee98475` (retention daily at 03:30 Pacific) + `de9652f0` (`get_log_analytics` only in a nice-19
+  child; dashboards read JSON) remove both causes. Current build `1785413707704` has no genuine
+  errors. Do not re-propose request-path cache mitigation; verify the daily child/checkpoint instead.
+- **2026-07-30 — a blank Synthetic uptime panel means MISATTRIBUTED probes, not no prober.**
+  All 3,903 Mustang `uptime_probe` rows since 07-16 are `source='client'` because Living production
+  lacks `UPTIME_PROBE_SECRET`; `build_uptime` correctly reads only trusted `source='server'`.
+  `/api/log` silently returns 200 for a supplied-but-invalid server secret, so Mustang never warns.
+  Open repair: `.issues/restore-synthetic-uptime-feed.md`.
+- **2026-07-30 run 2 — the `/og` bucket EXISTS and the share-card subsystem is FIXED; the fix was
+  bigger than a hit-rate improvement.** `livingdictionaries-og-cache` holds 152 cards / 35.1 MB
+  (first object 11:23:56 UTC), so the ⛔ "Jacob must create the bucket" blocker is CLOSED. Total
+  `/og` request volume fell ~100× at the 09:12 deploy (≈2,900/h → ≈25/h); shed went 22,058 →
+  **5**. Mechanism worth remembering fleet-wide: **a shedding card store FEEDS ITSELF** — a shed
+  response carries `max-age=60` while a real card is immutable-for-a-year, so while most responses
+  were sheds the edge cached nothing and the same scrapers returned every minute. `og_card_served
+  source:'r2'` reading zero is CORRECT, not a bug: the disk tier (1,307 files / 243.5 MB against
+  5,000 / 1 GB caps) never evicts at ~15 cards/h, so R2 is never consulted. Broadcast outbound to
+  house (byte-identical card-store constants).
+- **2026-07-30 run 2 — `og_render_worker_timeout` watch is CLOSED: keep the 10 s bound.** 142
+  (07-28, at 20 s) → 219 (07-29, at 20 s) → 106 (07-30), and only 12 in the 12 h after the deploy
+  (~1/h). The count did not rise when the bound halved; do NOT raise toward 15 s.
+- **2026-07-30 run 2 — the `script` / `family` enrichment on `og_render_failed` DOES NOT POPULATE**
+  (2 of 2,313 events). It only exists on the worker retry path and only after a web font resolved.
+  The working group-by is `context.dict`, and it confirms the 07-29 finding unchanged: **Torwali
+  English Urdu Dictionary = 838 of 880 font events (95%)**, tail Judeo-Kashani 20 / Kholosi 6. Size
+  `.issues/bundle-render-fonts.md` from `dict`, not `script`. Broadcast to house (same fields added).
+- **2026-07-30 run 2 — the post-fix AVAILABILITY BASELINE: every 5xx today was deploy-shaped.** Zero
+  Caddy `no upstreams available`; all 273 failed health checks and all 86 client-observed 502/520/
+  522/525 rows fall inside 06:29–12:33 UTC, which contains four deploys plus the LAST run of the old
+  six-hourly retention schedule (06:27 UTC). Nine clean hours after 12:33. Treat any 5xx OUTSIDE a
+  deploy window as a new incident.
+- **2026-07-30 run 2 — a stale worker-chunk 404 can lock a SIGNED-IN EDITOR out of a private
+  dictionary, and that is NOT the 07-09 zombie-tab family.** A contributor on private `algonquin`
+  spent 6 minutes in an unbounded retry loop (39 `leader_boot_failed` + 14
+  `dict_boot_recovery_exhausted`) on a deleted `/_app/immutable/workers/chunks/*.js`. Foreground tab,
+  real user, her own dictionary, a load that can never succeed. `schema_outdated_reload` is the
+  existing in-code precedent (it fired for the same person that morning and worked). The 07-09 "no
+  forced-reload" ruling stands for background zombie tabs only.
+- **2026-07-30 run 2 — the 64 `idb-worker` sessions are ALL Applebot.** Humans remain 100%
+  `opfs-worker`; the 07-29 "stop watching the tier mix" ruling stands. Bot-filter before reading the
+  `db_tier` distribution as a capability regression.
+- **2026-07-30 run 2 — the daily analytics checkpoint's ONLY silent failure mode is "it stopped
+  being written".** Assert every run: an `analytics_snapshot_computed` < 26 h old, `failed: []`, and
+  `reason` = the cron rather than `boot-catchup`. (Tonight's pair were boot-catchup at 11:31 fail /
+  11:45 success, 122.5 s, 1,193 MB peak — the first pinned 03:30 Pacific run is 07-31.)

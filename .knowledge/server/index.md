@@ -16,3 +16,4 @@ this category is about the runtime.
   get their own bucket rather than a prefix in the backed-up media bucket; each tier's measured
   latency; and the two properties (a free shed path, a fault that reads as a miss) that must never be
   traded away.
+- [satori-fonts.md](./satori-fonts.md) — satori's script codes are version-specific AND `|`-joined, its FontLoader is cached by `options.fonts` array identity (so a same-array retry is a no-op and dynamic fonts accumulate), Noto Arabic is unparseable by its bundled opentype fork, colour emoji is not subsettable, and every font failure mode returns 200 with a valid-but-glyphless font. Also: what the 0.0.44 → 0.29 upgrade did and did not change visually.

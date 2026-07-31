@@ -8,7 +8,15 @@
 
   const IMAGE_API = '/og'
   const DEFAULT_IMAGE = `${SITE_MEDIA.seo_default}/1200x630.png`
-  const OG_IMAGE_VERSION = 6
+  /**
+   * Bump to invalidate every stored + edge-cached share card at once (it travels
+   * as `?v=` into `card_key`).
+   *
+   * | v | why |
+   * |---|-----|
+   * | 7 | 2026-07-31 — satori 0.0.44 → 0.29. Its script codes were renamed, so the old font map was about to go dead; on the way through we found that Arabic dictionaries had been serving the GENERIC card (Noto Arabic is unparseable and the retry was broken) and Thai/emoji headwords were rendering as tofu. Every card stored under the old renderer is wrong or stale. See `.issues/satori-upgrade-and-font-map-safety-net.md`. |
+   */
+  const OG_IMAGE_VERSION = 7
 
   interface Props {
     admin?: boolean

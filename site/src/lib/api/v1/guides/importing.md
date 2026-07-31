@@ -77,7 +77,7 @@ record from your first write, and filing the file signals that the job is underw
 
 1. `POST …/sources` with a **simple, stable `slug`**. Prefer `author-year`
    (e.g. `smith-1979`) when known; with unknown provenance use something short and
-   generic (e.g. `enxet-lexicon`). The slug is the permanent key stamped on every
+   generic (e.g. `smith-lexicon`). The slug is the permanent key stamped on every
    record, so keep it plain enough to still fit after the manager improves the
    citation. Include `citation`, `abbreviation`, `author`, `year`, `type`
    (dictionary/wordlist/fieldwork/manuscript/video/grammar/phrasebook/hymnal/
@@ -361,6 +361,10 @@ How to run them:
   edited, rows written off, review flags. Converging numbers are the evidence that
   a sign-off means something; a late pass that still moves them a lot is a pass
   that would otherwise have shipped damage. Put that table in the report.
+- **For a printed-book source, each pass is a page-image comparison sweep**, not a
+  text read: see "Verifying a born-digital extraction" in `/api/v1/guides/pdf-scans`
+  for the expected-file mechanics, why lane findings are leads rather than verdicts,
+  and the crop-adjudication step.
 
 ### 1.5 Render a human-readable preview
 
@@ -566,7 +570,7 @@ preserve your audit trail.
 only in quote-mark glyphs, whitespace, a comma before quoted speech, a period inside
 a closing quote, or capitalization the corpus itself decides — settle it yourself
 using the source's own majority habit, record the call in the report's decisions
-section, and move on. The Ponca import shipped 694 raw disagreement flags and the
+section, and move on. One book import shipped 694 raw disagreement flags and the
 very first one a human opened differed only in curly quotes; triage cut the queue to
 349 real questions. A queue diluted with trivia teaches reviewers to stop reading
 it. The mirror rule: differences in *language* (a stress mark, a vowel, a wording
@@ -850,7 +854,7 @@ shipped:
 6. **The report links to the dictionary, not just to entries.** The home page, and every
    page the import produced that the prose brags about — Grammar, About, the word list, the
    `has_review` filter, one link per review category. A report that announces a Grammar page
-   and doesn't link it makes the reader go hunting. (Ponca shipped 649 entry links and zero
+   and doesn't link it makes the reader go hunting. (One import shipped 649 entry links and zero
    links to the dictionary itself.)
 7. **The font stack is NOT `system-ui` / `-apple-system` / `Helvetica`.** Use LD's own
    (`site/src/lib/theme.css` `--font-sans`: `"Segoe UI", Arial, "Noto Sans", …`). Mac Chrome's
@@ -935,8 +939,8 @@ affected set: you wrote those rows with a `source_id` and set their review flags
 
 **A `query` button must be verified before you file it, and is usually the wrong tool.** The
 free-text `query` runs the dictionary's Orama search with `tolerance: 1`, so it matches
-neighbours: on Ponca, `"masc."` (meant to find 37 entries labelled masc./fem.) returned 69,
-led by *máse* "to cut something", and `"fem."` pulled in *femur*. Open the URL your query
+neighbours: in one dictionary, `"masc."` (meant to find 37 entries labelled masc./fem.)
+returned 69, led by an unrelated headword one letter away, and `"fem."` pulled in *femur*. Open the URL your query
 builds and count the rows BEFORE filing the question. If the set you mean is only
 identifiable by text inside a definition, there is no precise filter for it — file the
 question with just its `report_anchor` and no button. That is not a failure; a button onto

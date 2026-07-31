@@ -43,8 +43,15 @@ import { remote_card_store } from './card-store-remote'
  * one tier that keeps serving during an R2 outage.
  */
 
-/** Bumped when the stored BYTES' meaning changes (a card redesign, a new size). */
-const STORE_FORMAT = 1
+/**
+ * Bumped when the stored BYTES' meaning changes (a card redesign, a new size).
+ *
+ * | v | why |
+ * |---|-----|
+ * | 1 | initial |
+ * | 2 | 2026-07-31 — the satori 0.0.44 → 0.29 upgrade. `OG_IMAGE_VERSION` alone would not have been enough: it only changes the URLs new markup emits, and a scraper re-fetching the `?v=6` URL it already holds would keep being served the stored generic/tofu card forever. |
+ */
+const STORE_FORMAT = 2
 
 /**
  * The hot tier's size — a LATENCY knob now, never again the thing that decides
