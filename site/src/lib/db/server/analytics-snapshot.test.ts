@@ -1,3 +1,4 @@
+import { fork } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -176,6 +177,58 @@ describe(spawn_analytics_snapshot_job, () => {
     // The `exit` handler is what clears the guard.
     const exit_handler = child.on.mock.calls.find(([event]: [string]) => event === 'exit')?.[1] as (code: number, signal: null) => void
     exit_handler(0, null)
+    expect(analytics_snapshot_running()).toBeFalsy()
+  })
+
+  /**
+   * REGRESSION (2026-07-30 nightly review): a child that fails to LAUNCH used to
+   * wedge the guard forever, because node fires `error` WITHOUT `exit` and the
+   * `error` handler only logged. From then on the daily 03:30 compute, the boot
+   * catch-up and the Recompute button all answered `already-running` for the life
+   * of the container.
+   */
+  test('a child that fails to LAUNCH releases the guard — real fork, node fires `error` with NO `exit`', async () => {
+    const events: string[] = []
+    // Deliberately unlaunchable: a node binary that does not exist. This is the
+    // real `fork`, so the test asserts node's ACTUAL event delivery, not our model
+    // of it — the whole defect was a wrong model of it.
+    const fork_impl = ((module_path: string, args: string[], options: Record<string, unknown>) => {
+      const child = fork(module_path, args, { ...options, execPath: join(data_dir, 'no-such-node-binary') })
+      child.on('error', () => events.push('error'))
+      child.on('exit', () => events.push('exit'))
+      return child
+    }) as never
+
+    expect(await spawn_analytics_snapshot_job({ reason: 'cron', fork_impl, inline: false })).toBe('spawned')
+    await vi.waitFor(() => expect(events).toContain('error'), { timeout: 5000 })
+
+    expect(events).not.toContain('exit')
+    expect(analytics_snapshot_running()).toBeFalsy()
+    // The proof that matters to an operator: the next job actually runs.
+    const next_child = { pid: 9, on: vi.fn(), kill: vi.fn() }
+    expect(await spawn_analytics_snapshot_job({ reason: 'manual', fork_impl: (() => next_child) as never, inline: false })).toBe('spawned')
+  })
+
+  test('a late `exit` from an already-errored child cannot clear a LATER job\'s guard', async () => {
+    const first = { pid: 1, on: vi.fn(), kill: vi.fn() }
+    const second = { pid: 2, on: vi.fn(), kill: vi.fn() }
+    const fork_impl = vi.fn().mockReturnValueOnce(first).mockReturnValueOnce(second) as never
+    const handler_of = (child: typeof first, event: string) =>
+      child.on.mock.calls.find(([name]: [string]) => name === event)?.[1] as (...args: unknown[]) => void
+
+    expect(await spawn_analytics_snapshot_job({ reason: 'cron', fork_impl, inline: false })).toBe('spawned')
+    handler_of(first, 'error')(new Error('spawn ENOENT'))
+    expect(analytics_snapshot_running()).toBeFalsy()
+
+    expect(await spawn_analytics_snapshot_job({ reason: 'manual', fork_impl, inline: false })).toBe('spawned')
+    expect(analytics_snapshot_running()).toBeTruthy()
+
+    // `error` can be followed by `exit` for a child that spawned and then died.
+    // That second event belongs to a settled job and must be inert.
+    handler_of(first, 'exit')(1, null)
+    expect(analytics_snapshot_running()).toBeTruthy()
+
+    handler_of(second, 'exit')(0, null)
     expect(analytics_snapshot_running()).toBeFalsy()
   })
 })

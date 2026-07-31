@@ -8,6 +8,28 @@ export PATH="$HOME/.local/share/pnpm:$PATH"
 # commit without pulling in files you didn't stage.
 echo "Running pre-commit checks..."
 
+# Which staged files are IDENTICAL in the index and the working tree, recorded
+# BEFORE lint:fix touches anything. Only these may be re-staged afterwards.
+#
+# WHY (a real incident in house, 2026-07-30, ported here 07-31): the old hook ended
+# with a blanket `git diff --cached --name-only | xargs git add`, whose comment
+# claimed it "re-stages only files that were already staged". That is FALSE —
+# `git add <path>` stages the WHOLE working-tree file, not the hunks you staged. So
+# a file staged in part on purpose — or one another agent is editing in this shared
+# tree — got swallowed whole into someone else's commit, AFTER the tests and
+# typecheck, where nothing is watching. In house it put an import of a
+# still-untracked module on `main` and left it unbuildable until the owning lane
+# pushed, and separately swallowed three paragraphs of another agent's AGENTS.md.
+# LD is especially exposed: the Monday translation lane exists precisely to leave an
+# uncommitted seed-file diff sitting in the tree.
+#
+# The rule this encodes: NEVER stage a file whose working-tree copy we did not
+# already own. A file with unstaged changes keeps them, and lint:fix's own edits to
+# it are simply left for its author to stage.
+staged_clean=$(git diff --cached --name-only --diff-filter=d | while IFS= read -r file; do
+    [ -n "$file" ] && git diff --quiet -- "$file" && printf '%s\n' "$file"
+done)
+
 # Tests run scoped: `vitest --changed` traces the module graph from all uncommitted changes
 # (staged + unstaged + untracked) and runs only the affected test files. Blind spot: files loaded
 # via import.meta.glob (the .sql migrations in shared-db.ts / dictionary-db.ts / history + the
@@ -34,7 +56,22 @@ pnpm check || { echo "❌ svelte-check failed. Commit aborted."; exit 1; }
 
 echo "→ pnpm lint:fix"
 pnpm lint:fix || { echo "❌ Lint failed. Commit aborted."; exit 1; }
-# Re-stage only files that were already staged (in case lint:fix modified them)
-git diff --cached --name-only --diff-filter=d | xargs -r git add
+# Re-stage lint:fix's edits — but ONLY for files that were fully staged before it
+# ran (see `staged_clean` above). Never `git add` a file with unstaged changes.
+# `printf '%s\n'` — with a bare `%s` the last path carries no newline and `read`
+# never yields it, which silently drops every single-file commit's lint fixes.
+printf '%s\n' "$staged_clean" | while IFS= read -r file; do
+    [ -n "$file" ] && git add -- "$file"
+done
+skipped=$(git diff --cached --name-only --diff-filter=d | while IFS= read -r file; do
+    [ -n "$file" ] && ! git diff --quiet -- "$file" && printf '%s\n' "$file"
+done)
+if [ -n "$skipped" ]; then
+    echo "ℹ️  Staged files that also have UNSTAGED changes — committing only what you staged:"
+    printf '   %s\n' $skipped
+fi
 
 echo "✅ All pre-commit checks passed."
+# Explicit: a hook exits with its last command's status, and the loops above can
+# legitimately end on a false test.
+exit 0

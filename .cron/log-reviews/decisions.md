@@ -4,10 +4,24 @@ Durable Jacob decisions this lane must honor. **Read this FIRST, before the date
 Maintenance: dated one-liners; add on a durable debrief decision (declines, kill-list items,
 standing baselines); DELETE once shipped or obsolete. Keep it small — standing law, not a log.
 
+- **2026-07-31 — THE RELOAD-ONCE RULE, approved portfolio-wide and SHIPPED in LD.** *When the missing
+  thing is a build artifact the server has DELETED, retrying is provably useless — reload ONCE onto
+  the current build instead of retrying N times.* `/_app/immutable/*` is content-hashed, so a 404
+  there is permanent for that bundle. Earned on 07-29: a signed-in contributor was locked out of the
+  private `algonquin` dictionary for SIX MINUTES while the app chased a deleted worker chunk 39
+  times. Code: `$lib/db/client/stale-build-artifact.ts` (classifier, injected into `db-client.ts`)
+  + `$lib/db/dict-client/stale-bundle-recovery.ts` (one reload, foreground-only, then a toast).
+  Triage: `stale_bundle_reload` / `_deferred` / `_gave_up` are the terminal rows — **`_gave_up` is a
+  real user stuck on a stale bundle, always escalate it**; a rising `stale_bundle_reload` count is
+  just deploys working as intended. Apply the same shape to any NEW retry loop over a build artifact.
 - **2026-07-09 — stale-client `sync_failed` storms: IGNORE.** Greg's stuck tab is a forgotten old
   laptop (he's been nudged); **no forced-reload mechanism will be built.** Stale-tab/stale-build
   retry noise is KNOWN-NOISE — filter it from triage, stop re-raising it, drop the carried
   "stale-client recovery" coverage item.
+  **NARROWED 2026-07-31** by the rule above, and only there: this still governs forgotten BACKGROUND
+  tabs belonging to nobody's active work (a hidden tab is never reloaded behind the user — it waits
+  for `visibilitychange`). The one carve-out is a FOREGROUND tab whose load can provably never
+  succeed. Do not read the 07-09 decline as forbidding that.
 - **2026-07-07 — the conlang fork is fenced off from mission reporting.** Don't count it or
   report on it.
 - **2026-07-05 — `api/email/html/new-user-welcome.ts`: KEEP** even though it's orphaned — Jacob

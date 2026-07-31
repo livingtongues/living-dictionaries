@@ -39,11 +39,45 @@ summary. B, C and D are read-and-recommend — they propose, they don't build.
 for this lane (declines, known-noise rulings like the stale-tab storms, watch baselines); **never
 re-raise anything listed there.** Then skim the last couple of dated digests for carried items.
 
+**Carry forward what an earlier run found today.** Jacob sometimes runs this lane by hand mid-day
+and does **not** act on what it finds. So a **nightly** run must also read every digest run-section
+written since `last_nightly_run_ended_at` (its own earlier runs today, plus any run dated after the
+last nightly one) and fold their still-open findings into tonight's report as findings in their own
+right — a `## Carried forward from earlier runs` section, each item naming the run it came from,
+each re-checked against current data/code (drop anything since fixed or now covered by
+`decisions.md`, and say in one line what you dropped and why). **The watermark governs which RAW
+DATA you scan; earlier digests are folded in as FINDINGS.** Without this, a mid-day finding dies in
+a file Jacob skimmed instead of reaching the morning debrief.
+
 ## Default scope
 
-- **Window:** last **24h**, all levels — but always render **7-day** and **30-day** trend context.
+- **Window: everything since MY OWN last run — a persisted watermark, not a fixed 24-hour net.**
+  Before Phase A, read **`.cron/log-reviews/watermark.json`**:
+
+  ```json
+  { "last_run_ended_at": "2026-07-30T21:41:00Z", "last_nightly_run_ended_at": "2026-07-30T21:41:00Z" }
+  ```
+
+  Scan from `last_run_ended_at` to now, and state the exact window — both ISO timestamps **and** its
+  length in hours — in the report header. Every query below bounds `received_at` on that timestamp
+  instead of a hard-coded 24 hours.
+
+  - **File missing or unreadable** → derive the watermark from the newest
+    `# Log review — … (run N · HH:MM UTC)` header across `.cron/log-reviews/*.md`. Still nothing →
+    fall back to `24h` and say so in the report.
+  - **Watermark older than 7 days** (long downtime, fresh clone) → clamp the scan to 7 days and
+    state in the report that it was clamped and what that skips.
+  - Always render **7-day** and **30-day** trend context regardless of the window.
+- **Am I the nightly run?** Yes if the invocation says so (the fleet manifest spawns this lane with
+  `— nightly fleet run`), otherwise if you started between **20:00 and 02:00 UTC**. Only a nightly
+  run advances `last_nightly_run_ended_at` and only a nightly run does the carry-forward pass above.
+- **A run NEVER skips itself because a report already exists for today.** There is no such rule and
+  there never was — the append rule in Output is the whole answer, and the watermark already keeps a
+  same-day re-run cheap. If you catch yourself deciding whether tonight's run is redundant: stop,
+  run it, append it.
 - **Filter `build_target='production'`** to drop local/preview test noise where it helps.
-- **Overridable** by the invocation ("last 7 days", "only errors", a `user_id`). Honor it.
+- **Overridable** by the invocation ("last 7 days", "only errors", a `user_id`). An explicit
+  instruction always beats the watermark.
 
 ## Background — how logs get here
 
@@ -318,19 +352,25 @@ currently the furthest-along dashboard; recent LD-only wins worth flagging for t
 
 ## Output
 
-1. **Write `.cron/log-reviews/YYYY-MM-DD.md`** (create the folder if missing). **If a digest already exists for today** (a manual + scheduled run, or a catch-up re-run after downtime), **append a new `# Log review — YYYY-MM-DD (run N · HH:MM UTC)` section rather than overwriting it** — never clobber an earlier run's memory. **Memory upkeep after writing:** add any newly-durable decision (a decline, a known-noise ruling, a standing baseline) as a dated one-liner to `.cron/log-reviews/decisions.md` (delete obsolete lines), then **prune** to the newest **7** dated digests in `.cron/log-reviews/` — delete older, git history is the archive:
+1. **Write `.cron/log-reviews/YYYY-MM-DD.md`** (create the folder if missing). **If a digest already exists for today** (a manual + scheduled run, or a catch-up re-run after downtime), **append a new `# Log review — YYYY-MM-DD (run N · HH:MM UTC)` section rather than overwriting it** — never clobber an earlier run's memory. This append rule is why there is **no** "skip tonight, today's report is good enough" judgment call: an existing report is never a reason not to run. **Memory upkeep after writing:** add any newly-durable decision (a decline, a known-noise ruling, a standing baseline) as a dated one-liner to `.cron/log-reviews/decisions.md` (delete obsolete lines), then **prune** to the newest **7** dated digests in `.cron/log-reviews/` — delete older, git history is the archive:
 
 ```markdown
-# Log review — YYYY-MM-DD (new.livingdictionaries.app · window: last 24h)
+# Log review — YYYY-MM-DD (new.livingdictionaries.app · run N · HH:MM UTC · window: <ISO from> → <ISO to>, N.Nh since my last run)
 
 ## TL;DR
 - <3-5 bullets: health verdict, top issue, top opportunity>
+
+## Carried forward from earlier runs
+<NIGHTLY runs only. Every still-open finding from digest run-sections written since
+`last_nightly_run_ended_at` (a mid-day manual run Jacob didn't act on), each naming its source run
+and re-verified against current data/code. One line for anything dropped and why. "None — this is
+the first run since the last nightly" is a valid, expected answer.>
 
 ## 1. Errors & crashes
 <clusters by severity, each with root-cause hypothesis + action item>
 
 ## 2. Usage & engagement
-<sessions/users 24h·7d·30d, durations, top routes/events, surprises.
+<sessions/users this-window·7d·30d, durations, top routes/events, surprises.
 **Who's doing what:** a named line per active ADMIN (when, how long, which admin/manager tools,
 anything notable) + a generic/anonymous picture of everyone else — never name individual non-admins.>
 
@@ -340,7 +380,7 @@ anything notable) + a generic/anonymous picture of everyone else — never name 
 ## 4. Health & housekeeping
 <volume, growth, db size, retention status, noise>
 
-## Host resources (past 24h)
+## Host resources (this window)
 <3-5 lines from A5: verdict + CPU avg/hottest-window, RAM+swap, disk %. Flags become action items.>
 
 ## 5. Coverage gaps (Phase B)
@@ -357,7 +397,12 @@ sibling-app (house/tutor) wins worth borrowing + any LD win the siblings should 
 <daily counts table or sparkline data>
 ```
 
-2. **The report FILE is the artifact — follow the shared contract** at
+2. **Update `.cron/log-reviews/watermark.json` as the LAST thing you do** (create it if missing).
+   Set `last_run_ended_at` to now (ISO-8601 UTC); if this was a **nightly** run, set
+   `last_nightly_run_ended_at` to the same value. Write it even when the run was clean and dry — a
+   dry run still consumed its window, and skipping the write makes the next run re-scan it.
+
+3. **The report FILE is the artifact — follow the shared contract** at
    `~/code/horse/.cron/report-style.md`: fully self-contained (a reader never opens this session),
    no unexpanded abbreviations, **MDX + charts encouraged** (this loop sits on rich data — small
    inline-SVG charts of error/usage/perf trends travel all the way to Jacob's phone via the morning

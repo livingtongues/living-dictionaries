@@ -21,6 +21,32 @@ Hard rules (any agent, this repo or others):
    sed/codemod passes — damaged files may be HEAD+codemod, not clean HEAD, so replay the
    *transformation*, don't blind-restore pre-revert content.
 
+## The pre-commit hook itself was a clobber vector (fixed 2026-07-31)
+
+`.githooks/pre-commit` used to end with
+`git diff --cached --name-only --diff-filter=d | xargs -r git add`, commented "re-stage only files
+that were already staged". **That comment was false.** `git add <path>` stages the WHOLE working-tree
+file, not the hunks you staged — so the hook silently swept another agent's in-flight edits into your
+commit, and defeated any deliberate partial stage. Worse, it ran AFTER the tests and the typecheck,
+where nothing was watching, so the swept-in content was never checked.
+
+It cost house two bad commits on 07-30: one carried another lane's `hooks.server.ts` importing a
+still-untracked module (`main` unbuildable until that lane pushed), one swallowed three paragraphs of
+another agent's AGENTS.md. LD was specifically exposed because the Monday translation lane exists to
+leave an uncommitted seed-file diff sitting in the tree.
+
+The hook now records which staged files are **byte-identical in index and worktree BEFORE** lint:fix
+runs, re-stages only those, and prints the ones it skipped. Two things to not undo:
+
+- `printf '%s\n'` (not a bare `%s`) when feeding the path list back through `read` — without the
+  newline the last path is never yielded, which silently drops **every single-file commit's** lint
+  fixes.
+- the trailing explicit `exit 0` — a hook exits with its last command's status and those `git diff
+  --quiet` loops legitimately end on a false test.
+
+If you see `ℹ️  Staged files that also have UNSTAGED changes`, that is the hook working: lint:fix's
+edits to those files were deliberately left for their owner to stage.
+
 ## Production data is shared mutable state too — not just the working tree
 
 The same "check who else is running" rule applies to the **prod dictionary DBs**, and it's

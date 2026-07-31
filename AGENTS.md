@@ -113,6 +113,22 @@ group, `?view=full` for all ~200KB). /admin/api-docs mirrors those hops as a rou
 (front door → guides/[slug] → reference/[tag] → schemas), each page loading the live endpoint it
 mirrors. Keep the Agents-page prompt (`AgentPrompt.svelte`) pointed at `/api/v1`, never the spec.
 
+## The reload-once rule (portfolio-wide, approved 2026-07-31)
+
+**When the missing thing is a build artifact the server has DELETED, retrying is provably useless —
+reload ONCE onto the current build instead of retrying N times.** `/_app/immutable/*` is
+content-hashed, so a 404 there is permanent for this bundle; only the current build can help. It cost
+a signed-in contributor a six-minute lockout from her own private dictionary on 2026-07-29 (39
+`leader_boot_failed` + 14 `dict_boot_recovery_exhausted` chasing a chunk a deploy had removed).
+
+Implemented for the dict leader-worker boot: classifier `$lib/db/client/stale-build-artifact.ts`
+(injected into the app-agnostic `worker/db-client.ts` as `boot_failure_terminal_reason`, never
+hard-coded there — that folder is copy-paste-shared with house) → recovery
+`$lib/db/dict-client/stale-bundle-recovery.ts`. Every outcome emits exactly one terminal row
+(`stale_bundle_reload` / `_deferred` / `_gave_up`) so the rule stays measurable. Apply the same shape
+to any NEW retry loop over a build artifact. Deliberately narrower than the declined zombie-tab
+forced reload: foreground tabs only, once per guard window, then a toast.
+
 ## Human/agent editing parity (a direction we're walking toward)
 The agent-facing `/api/v1` write API (per-dict API keys, `openapi.json`, `$lib/db/server/v1-*`) and
 the human editing UI should reach **full feature parity** — anything a human can edit, an agent can

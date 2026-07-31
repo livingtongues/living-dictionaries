@@ -95,7 +95,7 @@
     {#if auth_user.is_chat_member}
       <a href="/chat" onclick={close}>
         <IconMdiForum />
-        Team (editors & contributors)
+        Chat
         {#if chat_store.total_unread > 0}
           <span class="chat-badge">{chat_store.total_unread}</span>
         {/if}

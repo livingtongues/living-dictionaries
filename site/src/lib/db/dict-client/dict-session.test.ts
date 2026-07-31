@@ -55,7 +55,7 @@ describe(get_dict_session, () => {
     const second = await get_dict_session({ dict_id: 'cache', can_edit: false, user_id: 'user-1', t }, deps)
     expect(second).toBe(first)
     expect(open_dict).toHaveBeenCalledTimes(1)
-    expect(open_dict).toHaveBeenCalledWith({ dict_id: 'cache', has_editor_role: false, auth: {} })
+    expect(open_dict).toHaveBeenCalledWith({ dict_id: 'cache', has_editor_role: false, auth: {}, t })
     expect((connection.sync_now as Mock)).toHaveBeenCalledTimes(1)
   })
 
@@ -65,7 +65,7 @@ describe(get_dict_session, () => {
     await get_dict_session({ dict_id: 'promote', can_edit: false, user_id: 'user-1', t }, deps)
     await get_dict_session({ dict_id: 'promote', can_edit: true, user_id: 'user-1', t }, deps)
     expect(open_dict).toHaveBeenCalledTimes(2)
-    expect(open_dict).toHaveBeenLastCalledWith({ dict_id: 'promote', has_editor_role: true, auth: {} })
+    expect(open_dict).toHaveBeenLastCalledWith({ dict_id: 'promote', has_editor_role: true, auth: {}, t })
   })
 
   test('re-stamps the audit user on every cache hit (login/logout mid-session)', async () => {

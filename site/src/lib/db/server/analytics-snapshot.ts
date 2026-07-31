@@ -370,15 +370,47 @@ export async function spawn_analytics_snapshot_job({ reason, fork_impl = fork, i
     }, CHILD_TIMEOUT_MS)
     timer.unref()
     let summary: SnapshotJobSummary | null = null
+    /**
+     * Release the in-flight guard EXACTLY ONCE for this child.
+     *
+     * WHY THIS EXISTS (2026-07-30 nightly review, verified by running node — not
+     * from the docs): node delivers `error` WITHOUT `exit` when a child fails to
+     * LAUNCH (ENOENT and friends). The old code cleared the guard only in `exit`
+     * and merely logged in `error`, so ONE launch failure left `running` set for
+     * the life of the container — the 03:30 daily compute, the boot catch-up AND
+     * the admin Recompute button all answered `already-running` forever after.
+     * A launch failure is likeliest under memory/process pressure, i.e. exactly
+     * when the dashboards matter.
+     *
+     * The `settled` latch is the other half: `error` CAN be followed by `exit`
+     * (a child that spawned and then died), and a blind second `set_running(null)`
+     * would clear the guard belonging to a LATER job that had already started.
+     */
+    let settled = false
+    function settle(): boolean {
+      if (settled)
+        return false
+      settled = true
+      clearTimeout(timer)
+      set_running(null)
+      return true
+    }
     child.on('message', (message) => {
       summary = message as SnapshotJobSummary
     })
     child.on('error', (error) => {
       console.error('[analytics-snapshot] child could not be spawned:', error)
+      if (!settle())
+        return
+      log_server_event({
+        level: 'warn',
+        message: 'analytics_snapshot_failed',
+        context: { reason, code: null, signal: null, spawn_error: (error as Error)?.message ?? String(error), written: [], failed: [] },
+      })
     })
     child.on('exit', (code, signal) => {
-      clearTimeout(timer)
-      set_running(null)
+      if (!settle())
+        return
       // The child stays read-only, so the PARENT owns the telemetry write.
       if (code === 0 && summary) {
         log_server_event({

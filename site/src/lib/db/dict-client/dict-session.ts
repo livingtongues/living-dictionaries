@@ -5,6 +5,8 @@ import type { DictLiveDb } from './dict-live-db.svelte'
 import type { TranslateFunction } from '$lib/i18n/types'
 import type { ReloadGuard } from '$lib/db/client/client-behind-recovery'
 import { CLIENT_BEHIND_GUARD_KEY, decide_client_behind_recovery } from '$lib/db/client/client-behind-recovery'
+import { missing_build_artifact_reason } from '$lib/db/client/stale-build-artifact'
+import { recover_from_stale_bundle } from './stale-bundle-recovery'
 import { create_db_client } from './worker/db-client'
 import { ensure_persistent_storage } from './worker/persistent-storage'
 import { create_dict_worker_connection } from './worker-connection'
@@ -57,10 +59,23 @@ interface DictClientGlobals {
   __ld_dict_clients?: Record<string, { client: DbClient, has_editor_role: boolean, auth: AuthHeaders }>
 }
 
+/** Used only when `open_dict` is called without a translate function (never from the dict layout). */
+const STALE_BUNDLE_FALLBACK_COPY: Record<string, string> = {
+  'misc.app_update_needed': 'A new version of the app is needed to keep syncing this dictionary. Please reload the page.',
+  'misc.reload': 'Reload',
+  'misc.close': 'Close',
+}
+
 interface OpenDictOptions {
   dict_id: string
   has_editor_role: boolean
   auth: AuthHeaders
+  /**
+   * Only for the stale-bundle give-up toast (the reload-once rule). Optional so
+   * `open_dict` stays callable without an i18n context; falls back to English.
+   * Like the broadcast sentinels, the FIRST open's `t` is the one that sticks.
+   */
+  t?: TranslateFunction
 }
 
 // Intentionally async-without-await: it no longer awaits `client.ready()` (that's
@@ -80,6 +95,8 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
   if (options.has_editor_role)
     void ensure_persistent_storage({ allow_prompt: true })
 
+  const boot_t = options.t ?? (((key: string) => STALE_BUNDLE_FALLBACK_COPY[key] ?? key) as TranslateFunction)
+
   let cached = globals.__ld_dict_clients[dict_id]
   if (!cached) {
     let recovery_exhausted = false
@@ -88,7 +105,22 @@ export async function open_dict(options: OpenDictOptions): Promise<DictConnectio
       // Worker-internal boot failures never reach the main-thread console.error
       // patch, so this is our only telemetry window. `last_stage` points the stall
       // at the exact boot phase (a slow `snapshot_fetch` vs a stuck `opfs_open`).
-      on_boot_failed: ({ message, last_stage, attempt, will_retry }) => {
+      // THE RELOAD-ONCE RULE (`$lib/db/client/stale-build-artifact.ts`): a boot
+      // failure caused by a chunk the server has DELETED can never be retried into
+      // success, so it never enters the ladder — the client reports it terminal and
+      // the app reloads once onto the current build.
+      boot_failure_terminal_reason: ({ message }) => missing_build_artifact_reason({
+        message,
+        online: typeof navigator === 'undefined' || navigator.onLine !== false,
+      }),
+      on_boot_failed: ({ message, last_stage, attempt, will_retry, terminal_reason }) => {
+        if (terminal_reason) {
+          // `recover_from_stale_bundle` emits the single terminal row for this
+          // outcome (reloaded / deferred / gave_up); a `dict_boot_recovery_exhausted`
+          // on top would double-count the same event in error triage.
+          recover_from_stale_bundle({ dict_id, boot_message: message, reason: terminal_reason, t: boot_t })
+          return
+        }
         if (!will_retry)
           recovery_exhausted = true
         log_event({
@@ -184,7 +216,7 @@ export async function get_dict_session({ dict_id, can_edit, user_id, user_email,
   globals.__ld_dict_connections ??= {}
   let session = globals.__ld_dict_connections[dict_id]
   if (!session) {
-    const connection = await open({ dict_id, has_editor_role: can_edit, auth: {} })
+    const connection = await open({ dict_id, has_editor_role: can_edit, auth: {}, t })
     session = { connection, dict_db: create_dict_live_db(connection, { user_id }), sync_status: new DictSyncStatus(connection) }
     globals.__ld_dict_connections[dict_id] = session
 
@@ -226,7 +258,7 @@ export async function get_dict_session({ dict_id, can_edit, user_id, user_email,
     // capability: `open_dict` reuses the cached per-dict client and `set_role`
     // is idempotent, so this is cheap. Without it, local writes would queue
     // dirty=1 and never push until a full reload.
-    void open({ dict_id, has_editor_role: true, auth: {} })
+    void open({ dict_id, has_editor_role: true, auth: {}, t })
       .catch(err => console.warn('editor capability re-assert failed (retried next load)', err))
   }
 

@@ -24,7 +24,7 @@ House keys its single viewer + per-user admin DB by `role`+`user_id`. LD is mult
 file, so there must be exactly **one leader per dictionary**, keyed by **`dict_id` alone**
 (`ld-db-<dict_id>` channel, `ld-db-<dict_id>-leader` lock, `ld-db-leader-<dict_id>` worker name).
 There is NO role in the harness — the editor capability is **promoted in place** via a `set_role`
-RPC (mirrors the old SharedWorker boot+promote). `dict-lifecycle.ts` re-asserts `set_role` on
+RPC (mirrors the old SharedWorker boot+promote). `dict-session.ts` re-asserts `set_role` on
 every leader `ready` so an editor tab re-promotes a viewer-booted leader after a hand-off.
 
 ## The WAL-header gotcha (the thing that will re-bite if you forget it)

@@ -206,6 +206,17 @@ inside the process that serves requests. It is all deleted.
 process priority and Node exposes no per-thread hook), the child's RSS is reclaimed by its exit, and
 an OOM kills the child instead of the site.
 
+**The in-flight guard must be released on `error`, not only on `exit` (fixed 2026-07-31).** Node
+delivers `'error'` **WITHOUT** `'exit'` when a child fails to LAUNCH — verified by running node, not
+read in the docs: `fork(path, [], { execPath: '/nonexistent' })` emits exactly one `error` (ENOENT)
+and never an `exit`. The original code cleared the guard only in `exit`, so ONE launch failure left
+`running` set for the life of the container and the 03:30 cron, the boot catch-up **and** the
+Recompute button all answered `already-running` forever after — silently, and most likely under the
+memory/process pressure that makes dashboards matter. A `settled` latch makes the release
+exactly-once, because `error` CAN be followed by `exit` (a child that spawned then died) and a blind
+second release would clear a *later* job's guard. Same defect shipped in house and tutor; each repo's
+worker owns its own fix.
+
 **How the child finds its own code — the load-bearing trick.** The Docker runner copies only
 `site/build`, so a `.ts` file next to the module does not exist at runtime. But a BUNDLED CHUNK is a
 real file at a real path and rollup keeps `import.meta.url` intact in ESM output, so

@@ -124,6 +124,12 @@ export interface BootFailure {
   attempt: number
   /** Whether the spawning tab will retry its own boot (vs. resign leadership). */
   will_retry: boolean
+  /**
+   * Set when the app's injected policy proved retrying CANNOT help (currently
+   * `missing_build_artifact` — a deploy deleted the chunk this bundle asks for).
+   * Both the retry ladder and the re-election are skipped; the app owns the cure.
+   */
+  terminal_reason?: string | null
 }
 
 /**

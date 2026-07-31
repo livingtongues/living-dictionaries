@@ -8,6 +8,9 @@ Dev tooling that augments the app but isn't part of the shipped runtime.
 - [pwa-icon-generation.md](./pwa-icon-generation.md) — generating manifest/PWA icon PNGs
   without ImageMagick/sharp (puppeteer-core + local Chromium screenshot trick), and the
   Android maskable-icon fix (full-bleed art + `purpose: "any maskable"`).
+- [git-hosted-eslint-plugin.md](./git-hosted-eslint-plugin.md) — why
+  `eslint-plugin-svelte-stylistic` is a `github:` dep (npm 0.0.4 uses the ESLint-10-removed
+  `getSourceCode()`) and the four environmental reasons a contributor's install of it fails.
 - [test-suite-performance.md](./test-suite-performance.md) — the 2026-07 commit-gate speedup:
   serialized-template DB opens (`open_test_shared_db` + the template inside
   `open_dictionary_db_in_memory`) and the `vitest run --changed` pre-commit hook with its `.sql`

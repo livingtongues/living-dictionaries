@@ -37,7 +37,7 @@ export interface DbClient {
   destroy: () => void
 }
 
-export function create_db_client({ instance_options, on_boot_failed, on_boot_progress }: {
+export function create_db_client({ instance_options, on_boot_failed, on_boot_progress, boot_failure_terminal_reason }: {
   instance_options: InstanceOptions
   /**
    * Fired on the main thread every time a spawned leader worker posts
@@ -53,6 +53,17 @@ export function create_db_client({ instance_options, on_boot_failed, on_boot_pro
    * The app wires this to a boot download progress bar.
    */
   on_boot_progress?: (info: { stage: string, detail?: BootProgressDetail }) => void
+  /**
+   * Injected policy: given a boot failure message, is retrying PROVABLY useless?
+   * Return a reason string if so, `null` to run the normal ladder. Default: nothing
+   * is terminal.
+   *
+   * This is a hook rather than a hard-coded rule so the harness stays app-agnostic
+   * (it is copy-paste-shared with house — see its `$lib/db/worker/PARITY.md`). LD
+   * passes the deleted-build-artifact classifier; see
+   * `$lib/db/client/stale-build-artifact.ts` for the rule and the incident.
+   */
+  boot_failure_terminal_reason?: (info: { message: string }) => string | null
 }): DbClient {
   const { dict_id } = instance_options
   const channel_name = db_channel_name(dict_id)
@@ -106,12 +117,22 @@ export function create_db_client({ instance_options, on_boot_failed, on_boot_pro
       type: 'module',
       name: `ld-db-leader-${dict_id}`,
     })
-    // The worker posts `boot_failed` if it can't open the DB — a throw OR a
-    // watchdog timeout on a HANGING factory (leader-worker.ts). It never announced
-    // `ready`, so otherwise every tab's RPCs wedge as "no leader responded". Retry
-    // our own boot a few times (covers a transient stall + self-heals a SINGLE tab
-    // with no other waiter to promote); once the budget is spent, RESIGN so the
-    // browser can promote another tab (or, if none, callers fall back).
+    // Exactly ONE boot outcome per spawned worker. Both channels below can fire for
+    // the same worker (its script loads, its import 404s, then it errors), and
+    // handling either twice would double-count the ladder.
+    let handled = false
+
+    // A worker whose SCRIPT ITSELF cannot be fetched never posts anything — it
+    // fires `error` on the Worker object. Unhandled (as it was), that was a SILENT
+    // permanent wedge: no `boot_failed`, no `ready`, and the tab still holding the
+    // lock. The URL is a content-hashed `/_app/immutable/*` chunk, so a failure to
+    // load it is the deleted-build-artifact case BY CONSTRUCTION — no message
+    // sniffing needed.
+    spawned.onerror = (event) => {
+      const message = (event as ErrorEvent)?.message || 'leader worker script failed to load'
+      handle_boot_failure({ message, terminal_reason: boot_failure_terminal_reason?.({ message }) ?? 'missing_build_artifact' })
+    }
+
     spawned.onmessage = (event: MessageEvent<{ type?: string, message?: string, last_stage?: string, stage?: string, detail?: BootProgressDetail }>) => {
       if (event.data?.type === 'boot_progress') {
         on_boot_progress?.({ stage: event.data.stage ?? '', detail: event.data.detail })
@@ -119,17 +140,54 @@ export function create_db_client({ instance_options, on_boot_failed, on_boot_pro
       }
       if (event.data?.type !== 'boot_failed')
         return
+      const message = event.data.message ?? 'unknown'
+      handle_boot_failure({
+        message,
+        last_stage: event.data.last_stage,
+        terminal_reason: boot_failure_terminal_reason?.({ message }) ?? null,
+      })
+    }
+
+    // The worker posts `boot_failed` if it can't open the DB — a throw OR a
+    // watchdog timeout on a HANGING factory (leader-worker.ts). It never announced
+    // `ready`, so otherwise every tab's RPCs wedge as "no leader responded". Retry
+    // our own boot a few times (covers a transient stall + self-heals a SINGLE tab
+    // with no other waiter to promote); once the budget is spent, RESIGN so the
+    // browser can promote another tab (or, if none, callers fall back). The one
+    // exception is a `terminal_reason` — see below.
+    function handle_boot_failure({ message, last_stage, terminal_reason }: { message: string, last_stage?: string, terminal_reason: string | null }): void {
+      if (handled) return
+      handled = true
+      spawned.onerror = null
       spawned.terminate()
       if (worker === spawned) worker = null
+      // THE RELOAD-ONCE RULE: when the artifact is gone from the server, no number
+      // of retries can succeed — burning the ladder just costs the person minutes
+      // (39 retries / 6 minutes for one signed-in editor, 2026-07-29). Report it as
+      // terminal immediately and let the app reload onto the current build. We also
+      // do NOT resign + re-elect: re-electing this tab would re-run the same
+      // impossible import, and promoting another tab of the same stale bundle would
+      // hand it the same impossibility.
+      if (terminal_reason) {
+        console.warn(`[db-client] leader worker boot failed on a missing build artifact — not retrying (${terminal_reason}):`, message)
+        // Resign (but never re-acquire): this tab cannot boot a leader, so holding
+        // the lock only wedges every other tab. A tab already on the CURRENT build
+        // can take over immediately. Done BEFORE the callback because the app's
+        // recovery is a synchronous `location.reload()`.
+        election.resign()
+        on_boot_failed?.({ message, last_stage, attempt: boot_attempt, will_retry: false, terminal_reason })
+        return
+      }
       const { will_retry, delay_ms } = boot_retry_decision({ attempt: boot_attempt })
       on_boot_failed?.({
-        message: event.data.message ?? 'unknown',
-        last_stage: event.data.last_stage,
+        message,
+        last_stage,
         attempt: boot_attempt,
         will_retry,
+        terminal_reason: null,
       })
       if (will_retry) {
-        console.warn(`[db-client] leader worker boot failed (attempt ${boot_attempt + 1}) — retrying in ${delay_ms}ms:`, event.data.message)
+        console.warn(`[db-client] leader worker boot failed (attempt ${boot_attempt + 1}) — retrying in ${delay_ms}ms:`, message)
         boot_attempt++
         boot_retry_timer = setTimeout(() => { boot_retry_timer = null; spawn_leader_worker() }, delay_ms)
       } else {
@@ -139,7 +197,7 @@ export function create_db_client({ instance_options, on_boot_failed, on_boot_pro
         // cause (deploy window, poor connection) clears. `on_ready` cancels this
         // the moment any tab becomes a healthy leader.
         const reelect_ms = reelect_delay({ attempt: reelect_attempt })
-        console.warn(`[db-client] leader worker boot failed — retries exhausted, resigning + re-electing in ${reelect_ms}ms:`, event.data.message)
+        console.warn(`[db-client] leader worker boot failed — retries exhausted, resigning + re-electing in ${reelect_ms}ms:`, message)
         boot_attempt = 0
         reelect_attempt++
         election.resign()

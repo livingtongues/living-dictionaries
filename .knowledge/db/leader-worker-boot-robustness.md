@@ -39,16 +39,50 @@ fixed 12 s watchdog. See `.issues/leader-worker-boot-hang-robustness.md`.
    poor connection) **self-heals without a manual close**. `on_ready` cancels the backoff the moment
    any tab becomes a healthy leader. (The in-flight-query side was already covered — LD's
    `dict-live-db` uses `client/live/live-query-retry.ts`.)
-4. **Boot telemetry** (`db-client.ts` `on_boot_failed` hook → `dict-lifecycle.ts`). Worker-internal
+4. **Boot telemetry** (`db-client.ts` `on_boot_failed` hook → `dict-session.ts`). Worker-internal
    errors NEVER reach the main-thread `console.error` patch, so boot failures were invisible in
    `client_logs` (why the incident was hard to diagnose). The hook logs `leader_boot_failed`
    `{ dict_id, boot_message, last_stage, attempt, will_retry }` — `last_stage` (from the progress
    ticks) points a stall at the exact phase.
 
+## The ladder has an EXIT: the reload-once rule (2026-07-31)
+
+The idle watchdog + retry ladder + re-election above all assume the failure is **transient**. One
+class isn't: a boot failure caused by a **build artifact the deploy deleted**. `/_app/immutable/*` is
+content-hashed, so a 404 there is permanent for that bundle and every retry is guaranteed to fail.
+
+On 2026-07-29 a signed-in contributor opened the private `algonquin` dict from a pre-deploy tab; the
+leader worker's `await import('../dict-instance')` chased a removed chunk through 39
+`leader_boot_failed` → 14 `dict_boot_recovery_exhausted` → **six minutes locked out of her own
+dictionary**. Nothing in the ladder could ever have succeeded.
+
+So `db-client.ts` now takes an **injected** `boot_failure_terminal_reason` policy. When it returns a
+reason the client skips the ladder AND the re-election entirely, resigns the lock (a tab already on
+the current build can lead immediately) and reports `on_boot_failed({ will_retry: false,
+terminal_reason })`. Non-obvious pieces, in order of how easily they'd be undone:
+
+- **The policy is injected, not hard-coded.** `dict-client/worker/` is copy-paste-shared with house
+  and house's `parity.test.ts` rejects unclassified files in that folder — so LD's classifier lives
+  OUTSIDE it, at `$lib/db/client/stale-build-artifact.ts`. Don't "simplify" it back inside.
+- **`navigator.onLine === false` vetoes the classification.** Offline produces the identical message,
+  but there the artifact may well still exist — retrying is plausible, and a reload would trade a
+  spinner for the browser's offline page.
+- **`spawned.onerror` is now handled.** A worker whose SCRIPT itself 404s posts nothing at all: no
+  `boot_failed`, no `ready`, lock still held. That was a silent permanent wedge, invisible in
+  `client_logs`. It's terminal by construction (the URL is a hashed immutable chunk) — no message
+  sniffing.
+- **Hidden tabs are deferred, not reloaded.** Standing decision 2026-07-09 declined forced reloads
+  for zombie background tabs; the recovery waits for `visibilitychange`, and only then spends its
+  one-shot budget.
+- **Terminal telemetry replaces `dict_boot_recovery_exhausted` for this class** — exactly one of
+  `stale_bundle_reload` / `_deferred` / `_gave_up` per occurrence, so triage never double-counts and
+  "did the rule rescue people?" is answerable. `_gave_up` means the reload did NOT pick up newer code
+  (stale SW/CDN) and a real person is stuck behind a toast.
+
 ## Main-thread boot is non-blocking (2026-07-07)
 
 The WORKER still awaits the download in the factory (above) — but the **main thread no longer
-awaits the leader's `ready()`**. `open_dict` (`dict-lifecycle.ts`) returns the `DictConnection`
+awaits the leader's `ready()`**. `open_dict` (`dict-session.ts`) returns the `DictConnection`
 shim **immediately**; the dict `[dictionaryId]/+layout.ts` load no longer blocks, so navigating
 into a dictionary (homepage "Open entry", entries list, the map "Open dictionary" popover) is
 **instant** even on a cold first open. The shim's queries/execs queue in the transport and resolve
@@ -85,6 +119,12 @@ the shared harness (already diverged on the role/dict axis — mirror by *functi
 of the above (idle watchdog, `reacquire`, `on_boot_failed`, `report_progress`) were mirrored into
 house's `site/src/lib/db/worker/` the same day. House's fast factories emit no ticks, so the idle
 watchdog is just a lenient 20 s cap there — strictly safe.
+
+**NOT yet mirrored (2026-07-31):** the reload-once seam — `db-client.ts`'s
+`boot_failure_terminal_reason` option, the `spawned.onerror` handler, and `BootFailure.terminal_reason`
+in `instance.ts`. All three files are 🔴 divergent in house's `PARITY.md`, so LD taking them first
+breaks nothing; house's own worker is re-examining its triage. When house adopts them, the classifier
++ recovery pair are the parts worth copying verbatim.
 
 ## Unrelated: 413 for oversized bodies
 
