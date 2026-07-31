@@ -58,7 +58,7 @@ export const POST: RequestHandler = async (event) => {
   // UPTIME_PROBE_SECRET), so /admin/health showed zero uptime while both ends
   // reported success. Failing loudly lets the prober's `curl -f` catch drift.
   // Requests with NO header remain normal anonymous client logging.
-  const trust = classify_source(event)
+  const trust = _classify_source(event)
   if (trust === 'invalid_secret')
     return json({ error: 'invalid X-Log-Source-Secret' }, { status: ResponseCodes.UNAUTHORIZED })
   const source = trust
@@ -115,7 +115,7 @@ export const POST: RequestHandler = async (event) => {
  *    (the caller is claiming trust it can't prove — 401 upstream, so secret
  *    drift is loud instead of silently degrading to client attribution)
  */
-export function classify_source(event: { request: Request }): 'client' | 'server' | 'invalid_secret' {
+export function _classify_source(event: { request: Request }): 'client' | 'server' | 'invalid_secret' {
   const provided = event.request.headers.get('x-log-source-secret')
   if (!provided)
     return 'client'
