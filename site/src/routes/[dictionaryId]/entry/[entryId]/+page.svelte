@@ -6,6 +6,7 @@
   import GrammarNotes from './GrammarNotes.svelte'
   import { grammar_sections_visible } from '$lib/corpus/grammar-preview'
   import { seo_description } from './seo_description'
+  import { seo_entry_title } from './seo_entry_title'
   import HeadlessButton from '$lib/components/ui/HeadlessButton.svelte'
   import JSON from '$lib/components/ui/JSON.svelte'
   import Modal from '$lib/components/ui/Modal.svelte'
@@ -133,6 +134,7 @@
   }
 
   const entry_description = $derived(seo_description({ entry, gloss_languages: dictionary.gloss_languages, orthographies: dictionary.orthographies, t: page.data.t }))
+  const entry_title = $derived(seo_entry_title({ entry, headword: headword.value, gloss_languages: dictionary.gloss_languages, t: page.data.t }))
   const entry_url = $derived(`https://livingdictionaries.app/${dictionary.url}/entry/${entry.id}`)
   const entry_image = $derived.by(() => {
     const photo = entry.senses?.[0]?.photos?.[0]
@@ -307,6 +309,7 @@
 <SeoMetaTags
   norobots={!dictionary.public}
   generate_og_image
+  title={entry_title ?? undefined}
   imageTitle={headword.value}
   imageDescription={entry_description}
   dictionaryName={dictionary.name}
