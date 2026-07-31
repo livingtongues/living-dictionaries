@@ -29,6 +29,8 @@ const noop = (() => {}) as never
 const base = { me_user_id: 'u-jacob', on_edit: noop, on_delete: noop, on_react: noop, on_reply: noop, on_jump: noop }
 
 const file_attachment = { id: 'a1', message_id: 'm1', filename: 'field-notes.pdf', mimetype: 'application/pdf', size_bytes: 248_000, created_at: '2026-06-24T15:30:00.000Z' }
+const video_attachment = { id: 'a2', message_id: 'm1', filename: '2026-07-31-combined.mp4', mimetype: 'video/mp4', size_bytes: 171_533_384, created_at: '2026-06-24T15:30:00.000Z' }
+const audio_attachment = { id: 'a3', message_id: 'm1', filename: 'interview-take-2.m4a', mimetype: 'audio/mp4', size_bytes: 41_000_000, created_at: '2026-06-24T15:30:00.000Z' }
 
 const reply_text = { message_id: 'm0', author_user_id: 'u-greg', snippet: 'Can you double-check the phonetics on entry #42 before we publish it tonight?', deleted: false, attachment: null }
 const reply_deleted = { message_id: 'm0', author_user_id: 'u-diego', snippet: '', deleted: true, attachment: null }
@@ -61,6 +63,16 @@ export const Deleted: Story<typeof Component> = {
 
 export const WithFileAttachment: Story<typeof Component> = {
   props: { message: message({ attachments: [file_attachment] }), author_name: 'Anna', is_own: false, ...base },
+}
+
+export const WithVideoAttachment: Story<typeof Component> = {
+  viewports: [{ width: 520, height: 340 }],
+  props: { message: message({ body_html: '<p>Here\'s the whole session — the interesting part starts around 1:01.</p>', body_text: 'Here\'s the whole session', attachments: [video_attachment] }), author_name: 'Jacob', is_own: true, ...base },
+}
+
+export const WithAudioAttachment: Story<typeof Component> = {
+  viewports: [{ width: 520, height: 200 }],
+  props: { message: message({ body_html: '<p>Second take of the elder\'s story.</p>', body_text: 'Second take', attachments: [audio_attachment] }), author_name: 'Anna', is_own: false, ...base },
 }
 
 export const AttachmentOnly: Story<typeof Component> = {

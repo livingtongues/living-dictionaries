@@ -18,6 +18,16 @@ import { env } from '$env/dynamic/private'
 let r2_client_singleton: S3Client | null = null
 let r2_bucket_singleton: string | null = null
 
+/**
+ * Whether attachment storage is wired up. False in local dev (no credentials),
+ * where callers fall back to the `<DATA_DIR>/dev-media` store so the whole
+ * upload → serve → play loop is exercisable offline.
+ */
+export function r2_attachments_is_configured(): boolean {
+  const { R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ATTACHMENTS_BUCKET } = env
+  return Boolean(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_ATTACHMENTS_BUCKET)
+}
+
 export function get_r2(): { client: S3Client, bucket: string } {
   if (r2_client_singleton && r2_bucket_singleton)
     return { client: r2_client_singleton, bucket: r2_bucket_singleton }

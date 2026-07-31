@@ -6,7 +6,7 @@
   import ChatComposer from '$lib/chat/chat-composer.svelte'
   import ChatMessageItem from '$lib/chat/chat-message-item.svelte'
   import { chat_store } from '$lib/chat/chat-store.svelte'
-  import { MESSAGE_PAGE_LIMIT } from '$lib/chat/constants'
+  import { MAX_CHAT_ATTACHMENT_BYTES, MAX_CHAT_ATTACHMENTS_PER_MESSAGE, MESSAGE_PAGE_LIMIT } from '$lib/chat/constants'
   import NewChannelForm from '$lib/chat/new-channel-form.svelte'
   import ReadBubbles from '$lib/chat/read-bubbles.svelte'
   import { caught_up_others, compute_read_boundaries, first_unread_message_id } from '$lib/chat/read-receipts'
@@ -22,7 +22,11 @@
   import { api_chat_messages } from '$api/chat/messages/_call'
   import { api_chat_react } from '$api/chat/react/_call'
   import { api_chat_send } from '$api/chat/send/_call'
-  import { api_chat_upload } from '$api/chat/upload/_call'
+  import { api_chat_upload_commit } from '$api/chat/upload/commit/_call'
+  import FileDropZone from '$lib/components/ui/FileDropZone.svelte'
+  import { format_bytes } from '$lib/chat/attachments'
+  import { upload_files } from '$lib/chat/chat-upload'
+  import type { UploadProgress } from '$lib/chat/chat-upload'
   import IconMdiAccountPlusOutline from '~icons/mdi/account-plus-outline'
   import IconMdiArrowLeft from '~icons/mdi/arrow-left'
   import IconMdiForumOutline from '~icons/mdi/forum-outline'
@@ -57,6 +61,10 @@
   let first_unread_id = $state<string | null>(null)
   let loading = $state(true)
   let sending = $state(false)
+  let uploads = $state<UploadProgress[]>([])
+  /** Set while a batch is in flight; null once it settles (the button then means "dismiss"). */
+  let cancel_upload: (() => void) | null = $state(null)
+  let composer = $state<{ stage_external_files: (files: File[]) => void }>()
   let thread_el = $state<HTMLDivElement>()
   // On narrow screens we show EITHER the room list or the thread (not both).
   let mobile_view = $state<'rooms' | 'thread'>('thread')
@@ -266,17 +274,46 @@
     void chat_store.refresh_rooms()
   }
 
+  function cancel_or_dismiss_upload() {
+    if (cancel_upload)
+      cancel_upload()
+    else
+      uploads = []
+  }
+
+  /**
+   * Bytes go up BEFORE the message is posted. The old order (post, then upload)
+   * was fine for 20 MB but leaves a 200 MB video's message sitting in the room
+   * attachment-less for minutes; uploading first means a message only ever
+   * appears complete, and a failed/cancelled upload never posts an empty shell.
+   */
   async function send({ body_html, body_text, files }: { body_html: string, body_text: string, files: File[] }) {
     const room_id = active_room_id
     const reply = replying_to
     replying_to = null
     sending = true
-    const { data } = await api_chat_send({ room_id, body_html, body_text, has_attachments: files.length > 0, client_message_id: crypto.randomUUID(), reply_to_message_id: reply?.id ?? null })
+
+    let committable: Awaited<ReturnType<typeof upload_files>['done']> = []
+    if (files.length) {
+      const handle = upload_files({ room_id, files, on_progress: (entries) => { uploads = entries } })
+      cancel_upload = handle.cancel
+      committable = await handle.done
+      cancel_upload = null
+      if (!committable.length) {
+        // Every file failed or was cancelled — leave the panel up so the reason
+        // is readable, and don't post a message the user didn't get to finish.
+        sending = false
+        return
+      }
+    }
+
+    const { data } = await api_chat_send({ room_id, body_html, body_text, has_attachments: committable.length > 0, client_message_id: crypto.randomUUID(), reply_to_message_id: reply?.id ?? null })
     if (!data?.message) {
       sending = false
       return
     }
-    const uploaded = files.length ? (await api_chat_upload({ message_id: data.message.id, files })).data : null
+    const uploaded = committable.length ? (await api_chat_upload_commit({ message_id: data.message.id, uploads: committable })).data : null
+    uploads = []
     // Synthesize the reply preview optimistically; the next poll replaces it with
     // the server's live-resolved version.
     const reply_to = reply
@@ -433,73 +470,89 @@
     </aside>
 
     <section class="main">
-      <header class="thread-head">
-        <button type="button" class="rooms-back" onclick={() => { mobile_view = 'rooms' }} aria-label="Back to rooms">
-          <IconMdiArrowLeft /> Rooms
-        </button>
-        <span class="thread-title">
-          {#if active_room}{chat_store.room_title(active_room)}{:else}Chat{/if}
-        </span>
-        {#if active_room?.kind === 'channel'}
-          <span class="members-wrap">
-            <button type="button" class="members-btn" aria-haspopup="menu" aria-expanded={show_members} onclick={() => { show_members = !show_members }}>
-              {active_room.member_ids.length} members
-            </button>{#if others_online_count > 0}<button type="button" class="online-btn" aria-haspopup="menu" aria-expanded={show_members} onclick={() => { show_members = !show_members }}>
-              · {others_online_count} other{others_online_count === 1 ? '' : 's'} online
-            </button>{/if}
-            {#if show_members}
-              <RoomMembersPopover
-                room={active_room}
-                on_dm={open_member_dm}
-                on_changed={() => chat_store.refresh_rooms()}
-                on_deleted={on_room_deleted}
-                close={() => { show_members = false }} />
-            {/if}
+      <!-- Room-wide: dropping onto the message list or the header stages files,
+           not just a small target on the composer. -->
+      <FileDropZone
+        disabled={!active_room_id}
+        on_files={files => composer?.stage_external_files(files)}
+        label="Drop files to attach"
+        sub_label={`Up to ${MAX_CHAT_ATTACHMENTS_PER_MESSAGE} files, ${format_bytes(MAX_CHAT_ATTACHMENT_BYTES)} each`}>
+        <header class="thread-head">
+          <button type="button" class="rooms-back" onclick={() => { mobile_view = 'rooms' }} aria-label="Back to rooms">
+            <IconMdiArrowLeft /> Rooms
+          </button>
+          <span class="thread-title">
+            {#if active_room}{chat_store.room_title(active_room)}{:else}Chat{/if}
           </span>
-        {/if}
-      </header>
-
-      <div class="thread" bind:this={thread_el}>
-        {#if loading}
-          <p class="empty">Loading…</p>
-        {:else if !messages.length}
-          <p class="empty">No messages yet. Say hello 👋</p>
-        {:else}
-          {#if has_more_older}
-            <div class="load-older">
-              <button type="button" class="load-older-btn" onclick={load_older} disabled={loading_older}>
-                {loading_older ? 'Loading…' : 'Load older messages'}
-              </button>
-            </div>
+          {#if active_room?.kind === 'channel'}
+            <span class="members-wrap">
+              <button type="button" class="members-btn" aria-haspopup="menu" aria-expanded={show_members} onclick={() => { show_members = !show_members }}>
+                {active_room.member_ids.length} members
+              </button>{#if others_online_count > 0}<button type="button" class="online-btn" aria-haspopup="menu" aria-expanded={show_members} onclick={() => { show_members = !show_members }}>
+                · {others_online_count} other{others_online_count === 1 ? '' : 's'} online
+              </button>{/if}
+              {#if show_members}
+                <RoomMembersPopover
+                  room={active_room}
+                  on_dm={open_member_dm}
+                  on_changed={() => chat_store.refresh_rooms()}
+                  on_deleted={on_room_deleted}
+                  close={() => { show_members = false }} />
+              {/if}
+            </span>
           {/if}
-          {#each messages as message, index (message.id)}
-            {#if message.id === first_unread_id}
-              <UnreadDivider />
-            {/if}
-            <ChatMessageItem
-              {message}
-              author_name={chat_store.name_for(message.author_user_id)}
-              reply_author_name={message.reply_to ? chat_store.name_for(message.reply_to.author_user_id) : ''}
-              is_own={message.author_user_id === chat_store.me_user_id}
-              me_user_id={chat_store.me_user_id}
-              on_edit={edit_msg}
-              on_delete={delete_msg}
-              on_react={react}
-              on_reply={start_reply}
-              on_jump={jump_to} />
-            {#if read_boundaries.get(message.id)}
-              <ReadBubbles members={members_for(read_boundaries.get(message.id))} />
-            {/if}
-            {#if index === messages.length - 1 && seen_summary}
-              <div class="seen-summary">{seen_summary}</div>
-            {/if}
-          {/each}
-        {/if}
-      </div>
+        </header>
 
-      <div class="composer-wrap">
-        <ChatComposer {sending} {reply_target} on_cancel_reply={() => { replying_to = null }} on_send={send} placeholder="Write your message…" />
-      </div>
+        <div class="thread" bind:this={thread_el}>
+          {#if loading}
+            <p class="empty">Loading…</p>
+          {:else if !messages.length}
+            <p class="empty">No messages yet. Say hello 👋</p>
+          {:else}
+            {#if has_more_older}
+              <div class="load-older">
+                <button type="button" class="load-older-btn" onclick={load_older} disabled={loading_older}>
+                  {loading_older ? 'Loading…' : 'Load older messages'}
+                </button>
+              </div>
+            {/if}
+            {#each messages as message, index (message.id)}
+              {#if message.id === first_unread_id}
+                <UnreadDivider />
+              {/if}
+              <ChatMessageItem
+                {message}
+                author_name={chat_store.name_for(message.author_user_id)}
+                reply_author_name={message.reply_to ? chat_store.name_for(message.reply_to.author_user_id) : ''}
+                is_own={message.author_user_id === chat_store.me_user_id}
+                me_user_id={chat_store.me_user_id}
+                on_edit={edit_msg}
+                on_delete={delete_msg}
+                on_react={react}
+                on_reply={start_reply}
+                on_jump={jump_to} />
+              {#if read_boundaries.get(message.id)}
+                <ReadBubbles members={members_for(read_boundaries.get(message.id))} />
+              {/if}
+              {#if index === messages.length - 1 && seen_summary}
+                <div class="seen-summary">{seen_summary}</div>
+              {/if}
+            {/each}
+          {/if}
+        </div>
+
+        <div class="composer-wrap">
+          <ChatComposer
+            bind:this={composer}
+            {sending}
+            {reply_target}
+            {uploads}
+            on_cancel_upload={cancel_or_dismiss_upload}
+            on_cancel_reply={() => { replying_to = null }}
+            on_send={send}
+            placeholder="Write your message…" />
+        </div>
+      </FileDropZone>
     </section>
   </div>
 {/if}

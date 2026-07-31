@@ -22,6 +22,7 @@ export const ADMIN_DB_ID_FOR_USER_PREFIX = 'admin_db_id_for_user_'
 
 export enum ResponseCodes {
   OK = 200,
+  PARTIAL_CONTENT = 206,
   INTERNAL_SERVER_ERROR = 500,
   NOT_FOUND = 404,
   BAD_REQUEST = 400,
@@ -34,6 +35,7 @@ export enum ResponseCodes {
   FORBIDDEN = 403,
   PAYLOAD_TOO_LARGE = 413,
   UNSUPPORTED_MEDIA_TYPE = 415,
+  RANGE_NOT_SATISFIABLE = 416,
   CONFLICT = 409,
   GONE = 410,
   BAD_GATEWAY = 502,

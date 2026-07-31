@@ -9,6 +9,33 @@ export function is_image_mimetype(mimetype: string | null): boolean {
   return !!mimetype && mimetype.startsWith('image/')
 }
 
+export function is_video_mimetype(mimetype: string | null): boolean {
+  return !!mimetype && mimetype.startsWith('video/')
+}
+
+export function is_audio_mimetype(mimetype: string | null): boolean {
+  return !!mimetype && mimetype.startsWith('audio/')
+}
+
+/**
+ * Whether the serving endpoint may hand this back with
+ * `Content-Disposition: inline`.
+ *
+ * SVG is deliberately EXCLUDED: it's an `image/*` type that executes script
+ * when navigated to directly, and chat attachments are served from our own
+ * origin to a membership (which in LD includes non-admin partners) — inline SVG
+ * would be stored XSS. Inline `<img>` thumbnails still render fine, because an
+ * `<img>` ignores `Content-Disposition` entirely; only opening the URL in a tab
+ * changes, and that becomes a download.
+ */
+export function is_inline_safe_mimetype(mimetype: string | null): boolean {
+  if (!mimetype)
+    return false
+  if (mimetype === 'image/svg+xml')
+    return false
+  return is_image_mimetype(mimetype) || is_video_mimetype(mimetype) || is_audio_mimetype(mimetype)
+}
+
 const UNITS = ['B', 'KB', 'MB', 'GB']
 
 export function format_bytes(size: number | null): string {

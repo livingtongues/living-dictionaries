@@ -649,6 +649,15 @@ export function list_my_rooms({ db, user_id, admin_level = 0 }: { db: Database.D
   })
 }
 
+/**
+ * The room a message the caller authored belongs to. Attachment commit needs
+ * this BEFORE inserting, to check the uploaded object key is scoped to that
+ * room (`is_chat_storage_key_for_room`).
+ */
+export function own_message_room_id({ db, message_id, user_id }: { db: Database.Database, message_id: string, user_id: string }): string {
+  return require_own_message({ db, message_id, user_id }).room_id
+}
+
 function require_own_message({ db, message_id, user_id }: { db: Database.Database, message_id: string, user_id: string }): ChatMessageRow {
   const message = db.prepare('SELECT * FROM chat_messages WHERE id = ?').get(message_id) as ChatMessageRow | undefined
   if (!message)

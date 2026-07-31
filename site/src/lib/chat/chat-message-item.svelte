@@ -13,7 +13,8 @@
   import IconMdiPencilOutline from '~icons/mdi/pencil-outline'
   import IconMdiReplyOutline from '~icons/mdi/reply-outline'
   import IconMdiTrashCanOutline from '~icons/mdi/trash-can-outline'
-  import { chat_attachment_url, format_bytes, is_image_mimetype } from './attachments'
+  import IconMdiDownload from '~icons/mdi/download'
+  import { chat_attachment_url, format_bytes, is_audio_mimetype, is_image_mimetype, is_video_mimetype } from './attachments'
   import ReactionPicker from './reaction-picker.svelte'
 
   interface Props {
@@ -139,6 +140,31 @@
             <button type="button" class="att-image" title={attachment.filename} onclick={() => { viewer_url = chat_attachment_url(attachment.id) }}>
               <img src={chat_attachment_url(attachment.id)} alt={attachment.filename} loading="lazy" />
             </button>
+          {:else if is_video_mimetype(attachment.mimetype)}
+            <!-- `preload="metadata"` fetches only the moov atom + a poster frame,
+                 so a room full of 200 MB recordings costs kilobytes to render.
+                 Seeking works because the serving endpoint honours Range. -->
+            <figure class="att-media">
+              <video src={chat_attachment_url(attachment.id)} controls preload="metadata" playsinline></video>
+              <figcaption>
+                <span class="att-name">{attachment.filename}</span>
+                {#if attachment.size_bytes}<span class="att-size">{format_bytes(attachment.size_bytes)}</span>{/if}
+                <a class="att-download" href={chat_attachment_url(attachment.id)} download={attachment.filename} title="Download">
+                  <IconMdiDownload />
+                </a>
+              </figcaption>
+            </figure>
+          {:else if is_audio_mimetype(attachment.mimetype)}
+            <figure class="att-media att-audio">
+              <audio src={chat_attachment_url(attachment.id)} controls preload="metadata"></audio>
+              <figcaption>
+                <span class="att-name">{attachment.filename}</span>
+                {#if attachment.size_bytes}<span class="att-size">{format_bytes(attachment.size_bytes)}</span>{/if}
+                <a class="att-download" href={chat_attachment_url(attachment.id)} download={attachment.filename} title="Download">
+                  <IconMdiDownload />
+                </a>
+              </figcaption>
+            </figure>
           {:else}
             <a class="att-file" href={chat_attachment_url(attachment.id)} target="_blank" rel="noopener">
               <IconMdiFileOutline />
@@ -344,6 +370,45 @@
     max-width: 14rem;
     max-height: 12rem;
     object-fit: cover;
+  }
+  .att-media {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+    max-width: 26rem;
+    min-width: 0;
+  }
+  .att-media video {
+    display: block;
+    width: 100%;
+    max-height: 16rem;
+    border-radius: 0.5rem;
+    background: #000;
+  }
+  .att-media audio {
+    display: block;
+    width: 100%;
+  }
+  .att-audio {
+    max-width: 20rem;
+  }
+  .att-media figcaption {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--color-secondary);
+    min-width: 0;
+  }
+  .att-download {
+    display: inline-flex;
+    margin-left: auto;
+    color: var(--color-secondary);
+    flex-shrink: 0;
+  }
+  .att-download:hover {
+    color: var(--color);
   }
   .att-file {
     display: inline-flex;

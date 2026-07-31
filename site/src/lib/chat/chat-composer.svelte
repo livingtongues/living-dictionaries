@@ -4,13 +4,15 @@
   import RichTextEditor from '$lib/components/ui/RichTextEditor.svelte'
   import StagedImageThumb from '$lib/components/ui/StagedImageThumb.svelte'
   import { html_to_text } from '$lib/utils/html-to-text'
-  import { paste_image_from_clipboard } from '$lib/utils/paste-image-from-clipboard'
+  import { paste_files_from_clipboard } from '$lib/utils/paste-files-from-clipboard'
   import { onDestroy } from 'svelte'
   import IconMdiClose from '~icons/mdi/close'
   import IconMdiPaperclip from '~icons/mdi/paperclip'
   import IconMdiReplyOutline from '~icons/mdi/reply-outline'
   import IconMdiSend from '~icons/mdi/send'
   import { format_bytes, is_image_mimetype } from './attachments'
+  import ChatUploadProgress from './chat-upload-progress.svelte'
+  import type { UploadProgress } from './chat-upload'
 
   interface Props {
     placeholder?: string
@@ -19,8 +21,11 @@
     reply_target?: { author_name: string, snippet: string } | null
     on_cancel_reply?: () => void
     on_send: (input: { body_html: string, body_text: string, files: File[] }) => Promise<void> | void
+    /** Live per-file upload progress for the send in flight (empty when idle). */
+    uploads?: UploadProgress[]
+    on_cancel_upload?: () => void
   }
-  let { placeholder = 'Write a message…', sending = false, reply_target = null, on_cancel_reply, on_send }: Props = $props()
+  let { placeholder = 'Write a message…', sending = false, reply_target = null, on_cancel_reply, on_send, uploads = [], on_cancel_upload }: Props = $props()
 
   interface StagedFile {
     file: File
@@ -67,10 +72,19 @@
       file_input.value = ''
   }
 
+  /**
+   * Component export (reachable via `bind:this`) so a drop anywhere in the room
+   * — not just on the composer — stages files through the SAME validation as
+   * the paperclip picker.
+   */
+  export function stage_external_files(files: File[]) {
+    add_files(files)
+  }
+
   function handle_paste(event: ClipboardEvent) {
-    const file = paste_image_from_clipboard(event)
-    if (file)
-      add_files([file])
+    const files = paste_files_from_clipboard(event)
+    if (files.length)
+      add_files(files)
   }
 
   function remove_file(index: number) {
@@ -117,6 +131,10 @@
   {/if}
 
   <RichTextEditor bind:value={html} {placeholder} {on_keydown} on_paste={handle_paste} toolbar="email" />
+
+  {#if uploads.length}
+    <ChatUploadProgress entries={uploads} on_cancel={on_cancel_upload} />
+  {/if}
 
   {#if staged.length}
     <div class="chips">

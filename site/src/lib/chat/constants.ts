@@ -26,10 +26,22 @@ export const SYSTEM_ROOM_IDS = [ROOM_NOTIFICATIONS] as const
 export const SYSTEM_USER_ID = 'system'
 export const SYSTEM_USER_NAME = 'System'
 
-/** Per-file upload ceiling for chat attachments (matches the message-attachment limit). */
-export const MAX_CHAT_ATTACHMENT_BYTES = 20 * 1024 * 1024
+/**
+ * Per-file upload ceiling for chat attachments. Bytes never touch the app
+ * server — the browser PUTs them straight to R2 with a presigned URL — so this
+ * is bounded by what's reasonable to store/stream, not by `BODY_SIZE_LIMIT`.
+ * 500 MB comfortably holds a long screen recording.
+ */
+export const MAX_CHAT_ATTACHMENT_BYTES = 500 * 1024 * 1024
 /** Most files allowed on a single message. */
 export const MAX_CHAT_ATTACHMENTS_PER_MESSAGE = 10
+/**
+ * Presigned-PUT lifetime. Generous because a 500 MB upload on a slow uplink
+ * legitimately takes many minutes and the URL is consumed by a single PUT.
+ */
+export const CHAT_UPLOAD_URL_TTL_SECONDS = 60 * 60
+/** Object-key prefix for chat attachments in the private attachments bucket. */
+export const CHAT_STORAGE_PREFIX = 'chat'
 
 /**
  * Newest-first page size for the message list / poll / load-older paging. Not

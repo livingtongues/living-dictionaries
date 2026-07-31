@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve, sep } from 'node:path'
 import process from 'node:process'
 
@@ -40,6 +40,12 @@ export function write_dev_media({ key, content }: { key: string, content: Buffer
 export function read_dev_media({ key }: { key: string }): Buffer | null {
   const full = dev_media_path({ key })
   return existsSync(full) ? readFileSync(full) : null
+}
+
+/** Byte size of one object in the local DEV-only store, or null when absent — the dev stand-in for HeadObject. */
+export function dev_media_size({ key }: { key: string }): number | null {
+  const full = dev_media_path({ key })
+  return existsSync(full) ? statSync(full).size : null
 }
 
 if (import.meta.vitest) {
