@@ -11,7 +11,7 @@
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
   import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
-  import { glossing_languages } from '$lib/glosses/glossing-languages'
+  import { glossing_languages } from '$lib/gloss/glossing-languages'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { debounce } from '$lib/utils/debounce'
   import { browser, dev } from '$app/environment'

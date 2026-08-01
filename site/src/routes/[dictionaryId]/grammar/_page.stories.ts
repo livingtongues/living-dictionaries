@@ -217,6 +217,22 @@ export const BookDesktopReference: PageStory<typeof Component> = {
   },
 }
 
+// The collapsed "standard abbreviations used here" roll, expanded: the standard
+// Leipzig codes the page's prose actually uses that the curated table above
+// doesn't already cover (1PL, OBJ, PST — from the prose composites).
+export const LegendStandardExpanded: PageStory<typeof Component> = {
+  viewports: [{ width: 820, height: 700 }],
+  page_data: page_data({ rows: gloss_prose_rows, slots: [] }),
+  props: { dictionary, is_manager: false } as never,
+  csr: true,
+  interactions: async (page) => {
+    await page.waitForSelector('.legend .standard summary')
+    await page.evaluate(() => document.querySelector('.legend')?.scrollIntoView())
+    await page.click('.legend .standard summary')
+    await new Promise(resolve => setTimeout(resolve, 200))
+  },
+}
+
 // Scrolled deep, then the rail heading is clicked: it is a "back to top"
 // target, so the page returns to the preface (and drops the section hash).
 export const BookDesktopBackToTop: PageStory<typeof Component> = {

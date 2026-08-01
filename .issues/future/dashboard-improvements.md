@@ -110,6 +110,38 @@ proposals against this lens.
 
 ## Open proposals
 
+- **★★ NEW — Self-heal outcome split on the existing boot-health panel** *(filed 2026-07-31 ·
+  MEDIUM-HIGH · verified absent: `log-analytics.ts` contains ZERO references to `stale_bundle_reload`,
+  `stale_bundle_reload_deferred` or `stale_bundle_reload_gave_up`).* The reload-once rule shipped
+  2026-07-31 (commit `68a52023`) and emits exactly one terminal row per outcome, but neither dashboard
+  reads any of them, so the mechanism is invisible. Not a wedged-client list (declined 2026-07-14) and
+  not an error feed — a **rate on a panel that already exists** (`build_boot_health`), answering:
+
+  > Of the sessions whose dictionary boot failed on a missing build file, what share reloaded
+  > automatically · deferred (background tab) · gave up · **were on a build too old to contain the
+  > rule at all**?
+
+  That last bucket is the one nothing measures and the only one that needs a human. Evidence from the
+  night it was filed: the rule worked 2 for 2 (`taiwanese-hokkien-tai-gi` 08:39 anonymous,
+  `conlangjupus` 19:50 signed-in — neither session failed again) **while two signed-in people stayed
+  broken all day** on bundles predating their own fix (Rebekah Ingram / `algonquin`, bundle
+  2026-07-29, third day; Evelyn Halstead / `solari`, bundle 2026-07-05, failing continuously since at
+  least 2026-07-17 with 1,266 rows from ONE session). No aggregate view can currently state both
+  facts. Inputs all exist as events; the "too old to contain the rule" bucket is
+  `app_version < 1785481261029` on a boot-failure row. Derive the residual list the same way the
+  review does — sessions with ≥10 sync/boot failures whose `app_version` predates the relevant fix —
+  and surface it as a digest action item, never as a panel to watch.
+
+- **★ NEW — `prune_stale_files()` deletes another process's in-flight temp file** *(ported from tutor
+  2026-07-31 · LOW cost · verified present in LD at `analytics-snapshot.ts:160`).* Not a panel — a
+  correctness fix in the checkpoint machinery both dashboards now depend on. The loop deletes every
+  directory entry that is not one of the two keep-keys, including a `<key>.json.<pid>.<ts>.tmp` being
+  written concurrently by the other blue/green container, which breaks the explicit guarantee
+  documented on `write_analytics_snapshot()`. LD's checkpoint takes **104 s** (tutor's takes 300 ms),
+  so LD's overlap window is three orders of magnitude wider — the same reason house prioritised it.
+  One-line predicate: skip anything ending in `.tmp`. Tutor's writeup:
+  `~/code/tutor/.issues/analytics-snapshot-prune-deletes-inflight-temp.md`.
+
 - **★★ NEW — Share-card (Open Graph) subsystem health line on `/admin/health`** *(filed 2026-07-28
   run 2 · MEDIUM-HIGH · verified absent: no `og_*` reference exists in `log-analytics.ts` or either
   admin page).* This subsystem took the whole site down five times on 2026-07-27 and then failed

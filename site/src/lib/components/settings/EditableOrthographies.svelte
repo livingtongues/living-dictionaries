@@ -7,7 +7,7 @@
   import Filter from '$lib/components/Filter.svelte'
   import { get_orthographies } from '$lib/orthography/orthographies'
   import { derive_special_characters, format_characters, parse_characters_input } from '$lib/orthography/special-characters'
-  import { additional_keyboards, glossing_languages } from '$lib/glosses/glossing-languages'
+  import { additional_keyboards, glossing_languages } from '$lib/gloss/glossing-languages'
   import { is_reserved_or_known_code, load_keyman_writing_systems } from '$lib/components/keyboards/keyman/writing-systems'
   import IconFa6SolidChevronUp from '~icons/fa6-solid/chevron-up'
   import IconFa6SolidChevronDown from '~icons/fa6-solid/chevron-down'

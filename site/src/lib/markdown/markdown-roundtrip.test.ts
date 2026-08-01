@@ -93,6 +93,22 @@ describe(html_to_markdown, () => {
     expect(md).toContain('colspan="2"')
   })
 
+  test('simple table with a header row serializes as GFM markdown', () => {
+    const source = '| Person | Singular | Plural |\n| --- | --- | --- |\n| First | ni- | ti- |\n| Second | ti- | an- |'
+    const md = markdown_through_editor(source)
+    expect(md).toContain('| Person | Singular | Plural |')
+    expect(md).toContain('| First | ni- | ti- |')
+    expect(md).not.toContain('<table')
+  })
+
+  test('table spans serialize as stable cleaned HTML', () => {
+    const source = '<table><tbody><tr><th colspan="2"><p>Subject prefixes</p></th><th><p>Plural</p></th></tr><tr><th><p>Person</p></th><td><p>Singular</p></td><td><p>Plural</p></td></tr></tbody></table>'
+    const once = markdown_through_editor(source)
+    expect(once).toContain('<table')
+    expect(once).toContain('colspan="2"')
+    expect(markdown_through_editor(once)).toBe(once)
+  })
+
   test('CKEditor small-caps span → pandoc span, renders back to span.smallcaps', () => {
     const md = html_to_markdown('<p>The <span style="font-variant:small-caps">Dogon</span> language.</p>')
     expect(md).toBe('The [Dogon]{.smallcaps} language.')

@@ -32,6 +32,12 @@ export interface GlossCatalog {
   split_gloss_cell: (text: string) => GlossPiece[]
   split_field: (text: string) => GlossPiece[]
   split_prose: (text: string) => GlossPiece[]
+  /**
+   * The STANDARD codes (not curated by the dictionary — those have their own
+   * legend table) present in the given content, sorted. Dot-composites count
+   * per part. Feeds the collapsed "standard abbreviations" page-foot section.
+   */
+  standard_codes_used: (content: { gloss_cells?: readonly string[], prose?: readonly string[] }) => string[]
 }
 
 /** How the parts of a dot-composite are strung together for the reader. */
@@ -55,14 +61,31 @@ export function build_gloss_catalog({ legend, language, t }: {
   const dictionary_by_code = new Map(legend.filter(entry => entry?.code).map(entry => [entry.code, entry]))
   const dictionary_codes = [...dictionary_by_code.keys()]
 
-  function expansion_of(code: string): string {
-    const curated = dictionary_by_code.get(code)
-    if (curated)
-      return legend_expansion({ entry: curated, language })
+  function standard_expansion(code: string): string {
     const standard = standard_gloss_name(code)
     // Only ever look up codes the standard catalog actually owns — a bespoke
     // code is dictionary data, not a missing UI string to report.
     return standard ? t({ dynamicKey: `gloss.${code}`, fallback: standard }) : ''
+  }
+
+  /**
+   * True when a curated row merely restates the standard wording — it adds
+   * nothing about this language, so the localized standard expansion should win.
+   * (Curated rows exist for what the standard set CAN'T cover.)
+   */
+  function is_restatement(code: string, wording: string): boolean {
+    const standard = standard_gloss_name(code)
+    return !!standard && wording.trim().toLowerCase() === standard.toLowerCase()
+  }
+
+  function expansion_of(code: string): string {
+    const curated = dictionary_by_code.get(code)
+    if (curated) {
+      const wording = legend_expansion({ entry: curated, language })
+      if (!is_restatement(code, wording))
+        return wording
+    }
+    return standard_expansion(code)
   }
 
   function expand(code: string): string {
@@ -90,11 +113,33 @@ export function build_gloss_catalog({ legend, language, t }: {
       split_curated(text).flatMap(piece => (piece.code ? [piece] : split_rest(piece.text)))
   }
 
+  const split_gloss_cell = layered(split_standard)
+
+  function standard_codes_used({ gloss_cells = [], prose = [] }: { gloss_cells?: readonly string[], prose?: readonly string[] }): string[] {
+    const used = new Set<string>()
+    function collect(pieces: GlossPiece[]) {
+      for (const piece of pieces) {
+        if (!piece.code)
+          continue
+        for (const part of piece.code.split('.')) {
+          // Any curated code belongs to the curated table above, not here —
+          // even a restatement row (which that table renders localized anyway).
+          if (standard_gloss_name(part) && !dictionary_by_code.has(part))
+            used.add(part)
+        }
+      }
+    }
+    for (const cell of gloss_cells) collect(split_gloss_cell(cell))
+    for (const text of prose) collect(split_all_prose(text))
+    return [...used].sort()
+  }
+
   return {
     expand,
     has: (code: string) => !!expand(code),
-    split_gloss_cell: layered(split_standard),
+    split_gloss_cell,
     split_field: layered(split_standard_unambiguous),
     split_prose: split_all_prose,
+    standard_codes_used,
   }
 }

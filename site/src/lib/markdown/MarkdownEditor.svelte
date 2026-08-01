@@ -16,6 +16,16 @@
   import IconMdiLinkVariant from '~icons/mdi/link-variant'
   import IconMdiMinus from '~icons/mdi/minus'
   import IconMdiRedo from '~icons/mdi/redo'
+  import IconMdiTableColumn from '~icons/mdi/table-column'
+  import IconMdiTableColumnPlusAfter from '~icons/mdi/table-column-plus-after'
+  import IconMdiTableColumnRemove from '~icons/mdi/table-column-remove'
+  import IconMdiTableHeadersEye from '~icons/mdi/table-headers-eye'
+  import IconMdiTableMergeCells from '~icons/mdi/table-merge-cells'
+  import IconMdiTablePlus from '~icons/mdi/table-plus'
+  import IconMdiTableRemove from '~icons/mdi/table-remove'
+  import IconMdiTableRowPlusAfter from '~icons/mdi/table-row-plus-after'
+  import IconMdiTableRowRemove from '~icons/mdi/table-row-remove'
+  import IconMdiTableSplitCell from '~icons/mdi/table-split-cell'
   import IconMdiUndo from '~icons/mdi/undo'
 
   interface Props {
@@ -116,6 +126,16 @@
   function set_heading(level: 1 | 2 | 3) { editor?.chain().focus().toggleHeading({ level }).run() }
   function undo() { editor?.chain().focus().undo().run() }
   function redo() { editor?.chain().focus().redo().run() }
+  function insert_table() { editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() }
+  function add_row_after() { editor?.chain().focus().addRowAfter().run() }
+  function delete_row() { editor?.chain().focus().deleteRow().run() }
+  function add_column_after() { editor?.chain().focus().addColumnAfter().run() }
+  function delete_column() { editor?.chain().focus().deleteColumn().run() }
+  function toggle_header_row() { editor?.chain().focus().toggleHeaderRow().run() }
+  function toggle_header_column() { editor?.chain().focus().toggleHeaderColumn().run() }
+  function merge_cells() { editor?.chain().focus().mergeCells().run() }
+  function split_cell() { editor?.chain().focus().splitCell().run() }
+  function delete_table() { editor?.chain().focus().deleteTable().run() }
 
   function toggle_link() {
     if (!editor)
@@ -151,6 +171,9 @@
   const heading_3_active = $derived.by(() => { void tick.value; return editor?.isActive('heading', { level: 3 }) ?? false })
   const can_undo = $derived.by(() => { void tick.value; return editor?.can().undo() ?? false })
   const can_redo = $derived.by(() => { void tick.value; return editor?.can().redo() ?? false })
+  const in_table = $derived.by(() => { void tick.value; return editor?.isActive('table') ?? false })
+  const can_merge_cells = $derived.by(() => { void tick.value; return editor?.can().mergeCells() ?? false })
+  const can_split_cell = $derived.by(() => { void tick.value; return editor?.can().splitCell() ?? false })
 </script>
 
 <div class="markdown-editor" class:disabled>
@@ -171,11 +194,28 @@
     {#if preset === 'document'}
       <button type="button" onclick={set_horizontal_rule} disabled={disabled || !editor} title="Divider" aria-label="Divider"><IconMdiMinus /></button>
       <button type="button" onclick={insert_image} disabled={disabled || !editor} title="Insert image from URL" aria-label="Insert image from URL"><IconMdiImagePlus /></button>
+      <button type="button" onclick={insert_table} disabled={disabled || !editor || in_table} title="Insert table" aria-label="Insert table"><IconMdiTablePlus /></button>
     {/if}
     <span class="separator"></span>
     <button type="button" onclick={undo} disabled={disabled || !can_undo || !editor} title="Undo (Ctrl+Z)" aria-label="Undo"><IconMdiUndo /></button>
     <button type="button" onclick={redo} disabled={disabled || !can_redo || !editor} title="Redo (Ctrl+Shift+Z)" aria-label="Redo"><IconMdiRedo /></button>
   </div>
+
+  {#if in_table}
+    <div class="toolbar table-toolbar">
+      <button type="button" onclick={add_row_after} disabled={disabled || !editor} title="Add row below" aria-label="Add row below"><IconMdiTableRowPlusAfter /></button>
+      <button type="button" onclick={delete_row} disabled={disabled || !editor} title="Delete row" aria-label="Delete row"><IconMdiTableRowRemove /></button>
+      <button type="button" onclick={add_column_after} disabled={disabled || !editor} title="Add column right" aria-label="Add column right"><IconMdiTableColumnPlusAfter /></button>
+      <button type="button" onclick={delete_column} disabled={disabled || !editor} title="Delete column" aria-label="Delete column"><IconMdiTableColumnRemove /></button>
+      <span class="separator"></span>
+      <button type="button" onclick={toggle_header_row} disabled={disabled || !editor} title="Toggle header row" aria-label="Toggle header row"><IconMdiTableHeadersEye /></button>
+      <button type="button" onclick={toggle_header_column} disabled={disabled || !editor} title="Toggle header column" aria-label="Toggle header column"><IconMdiTableColumn /></button>
+      <button type="button" onclick={merge_cells} disabled={disabled || !editor || !can_merge_cells} title="Merge cells" aria-label="Merge cells"><IconMdiTableMergeCells /></button>
+      <button type="button" onclick={split_cell} disabled={disabled || !editor || !can_split_cell} title="Split cell" aria-label="Split cell"><IconMdiTableSplitCell /></button>
+      <span class="separator"></span>
+      <button type="button" onclick={delete_table} disabled={disabled || !editor} title="Delete table" aria-label="Delete table"><IconMdiTableRemove /></button>
+    </div>
+  {/if}
 
   <div bind:this={element} class="editor-mount"></div>
 </div>
@@ -238,6 +278,10 @@
     cursor: not-allowed;
   }
 
+  .table-toolbar {
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  }
+
   .separator {
     width: 1px;
     height: 1rem;
@@ -259,6 +303,35 @@
 
   :global(.markdown-editor .ProseMirror img) {
     max-width: 100%;
+  }
+
+  :global(.markdown-editor .ProseMirror table) {
+    display: table;
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+    margin: 2em 0;
+  }
+
+  :global(.markdown-editor .ProseMirror td),
+  :global(.markdown-editor .ProseMirror th) {
+    border: 1px solid var(--border-color);
+    padding: 0.25rem 0.5rem;
+    vertical-align: top;
+    position: relative;
+  }
+
+  :global(.markdown-editor .ProseMirror th) {
+    font-weight: 600;
+    background: var(--surface);
+  }
+
+  :global(.markdown-editor .ProseMirror .selectedCell::after) {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
+    pointer-events: none;
   }
 
   :global(.markdown-editor .ProseMirror p.is-editor-empty:first-child::before) {

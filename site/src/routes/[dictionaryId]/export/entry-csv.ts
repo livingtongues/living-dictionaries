@@ -4,8 +4,8 @@ import { strip_html_tags } from './strip-html-tags'
 import { get_headword, get_orthographies } from '$lib/orthography/orthographies'
 import { render_markdown_to_html } from '$lib/markdown/render'
 import { decades } from '$lib/components/media/ages'
-import { glossing_languages } from '$lib/glosses/glossing-languages'
-import { translate_part_of_speech, translate_part_of_speech_abbreviation, translate_semantic_domain_keys } from '$lib/transformers/translate_keys_to_current_language'
+import { glossing_languages } from '$lib/gloss/glossing-languages'
+import { translate_part_of_speech, translate_part_of_speech_abbreviation, translate_semantic_domain_keys } from '$lib/i18n/translate-keys-to-current-language'
 
 /**
  * Single-pass CSV builder: each entry emits an ordered list of

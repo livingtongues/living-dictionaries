@@ -13,7 +13,7 @@
   import { onDestroy, onMount, tick } from 'svelte'
   import type { KeymanWritingSystems } from './writing-systems'
   import { keyboard_for_bcp, load_keyman_writing_systems } from './writing-systems'
-  import { additional_keyboards, glossing_languages } from '../../../glosses/glossing-languages'
+  import { additional_keyboards, glossing_languages } from '$lib/gloss/glossing-languages'
   import Modal from '$lib/components/ui/Modal.svelte'
   import ShowHide from '$lib/components/ui/ShowHide.svelte'
   import { load_script_once } from '$lib/utils/load-once'

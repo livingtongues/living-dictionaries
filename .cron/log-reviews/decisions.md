@@ -382,3 +382,46 @@ standing baselines); DELETE once shipped or obsolete. Keep it small — standing
   being written".** Assert every run: an `analytics_snapshot_computed` < 26 h old, `failed: []`, and
   `reason` = the cron rather than `boot-catchup`. (Tonight's pair were boot-catchup at 11:31 fail /
   11:45 success, 122.5 s, 1,193 MB peak — the first pinned 03:30 Pacific run is 07-31.)
+  **↑ 2026-07-31: the first pinned run PASSED** — 10:31/10:32 UTC (03:31 PT), `reason:"cron"`,
+  `failed: []`, 104.6 s, peak 1,077 MB. The assertion is now routine; only re-report on failure.
+- **2026-07-31 — A CLIENT-SIDE SELF-HEAL CAN NEVER REACH THE TABS THAT PREDATE IT (standing law,
+  fleet-wide).** Every recovery mechanism ships INSIDE the bundle, so a tab open since before it
+  shipped is running a version that contains none of it and will never heal — healing requires the
+  one action it cannot take alone. Two proven residents: Evelyn Halstead (`solari`, bundle
+  2026-07-05, 1,266 `sync_failed client_behind` rows from ONE session, continuously since at least
+  2026-07-17 — the `schema_outdated` auto-reload landed 2026-07-12, a week after her bundle, so she
+  has never logged `schema_outdated_reload` NOR `schema_outdated_reload_gave_up`) and Rebekah Ingram
+  (`algonquin`, bundle 2026-07-29, third day, deleted worker chunk — the reload-once rule shipped
+  07-31 07:01). **Corollary:** the residual population is never zero, IS enumerable, and belongs in
+  the nightly digest as a human-nudge item (per the 07-14 no-wedged-panel ruling), never a dashboard.
+  Regenerate with: sessions having ≥10 `sync_failed`/`leader_boot_failed`/`dict_boot_recovery_exhausted`
+  rows whose `app_version` predates the relevant fix. Don't re-derive the mechanism; don't propose a
+  client-side fix for these two — nudge them, or add a server-side lever an OLD client already obeys.
+- **2026-07-31 — the reload-once rule is PRODUCTION-VERIFIED: 2 for 2, no loops.**
+  `stale_bundle_reload` fired for `taiwanese-hokkien-tai-gi` (08:39, anon) and `conlangjupus` (19:50,
+  signed-in); neither session failed again. It also correctly DECLINED to reload a storage fault it
+  could not fix (`kalanga`, `Failed to parse String to BigInt`) — the classifier boundary works. Stop
+  re-verifying the rule itself; only the residual pre-fix population (above) still matters.
+- **2026-07-31 — ZERO server-side `crash` rows have EVER been written** (0 of 1.3 M rows) while
+  browsers report ~130 `Internal Error` 500 pages per week. `hooks.server.ts` `handleError` claims to
+  log every 5xx with its stack and that record does not exist; there is also **no `hooks.client.ts`
+  in the repo at all**, so a client-side navigation error is equally invisible. Every 500 LD serves
+  is currently undiagnosable. Do NOT triage individual `Internal Error` rows until an `error_id`
+  ties them to a server record — `.issues/ssr-500-has-no-server-side-record.md`.
+- **2026-07-31 — `malformed_query_param` on key `q` is OUR bug, not user input.** The entries view
+  registers `q` as a JSON object, so a plain `?q=birthday` (the guessable/shareable URL) is replaced
+  with `{}` — unfiltered list, empty search box, no message. The `/admin/dictionaries?q=…` copies of
+  the warning are a LEAK: `QueryParamState` opens an `$effect.root` and `destroy()` is never called
+  in app code, so an entries-page instance keeps reacting to unrelated routes for the tab's life.
+  `.issues/entries-q-param-and-leaked-query-param-state.md`. Don't re-triage the warning.
+- **2026-07-31 — the satori font repair WORKED and the share-card subsystem is quiet.** Font-related
+  `og_render_failed` 1,451 (07-28) → 693 → 292 → **16**; worker timeouts 142 → 219 → 107 → **32** at
+  the 10 s bound (keep it). 334 requests served (273 render / 61 disk / 0 R2 — zero R2 is CORRECT at
+  this volume, the disk tier never evicts). Stop re-checking the font fix.
+- **2026-07-31 — the log instrument now measures PEOPLE, not robots: a new volume baseline.**
+  172,020 rows/day (07-20) → **18,757** (07-31), error rows 3,503 → **152**, while human sessions
+  held 500–950/day throughout. Treat a return above ~50,000 rows/day as a NEW event to investigate;
+  the 07-13 "100k+ = new crawl" threshold is superseded.
+- **2026-07-31 — with a once-daily checkpoint, the dashboards' newest day is ALWAYS frozen at
+  ~03:30 Pacific**, a stronger form of the 07-26 "last point is partial" caveat. Never read today's
+  bar on `/admin/analytics` as a live number, and label it before anything else on that page.

@@ -37,6 +37,7 @@
     "delete_slot_confirm": "Delete this clause slot?",
     "slot_unassigned": "Unassigned",
     "glossing_legend": "Glossing abbreviations",
+    "standard_abbreviations": "Standard abbreviations used here",
     "no_legend_entry": "No expansion recorded for this code",
     "show_glosses": "Show glosses",
     "hide_glosses": "Hide glosses",

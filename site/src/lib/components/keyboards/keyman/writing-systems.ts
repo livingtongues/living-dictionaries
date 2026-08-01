@@ -1,4 +1,4 @@
-import { additional_keyboards, glossing_languages } from '../../../glosses/glossing-languages'
+import { additional_keyboards, glossing_languages } from '$lib/gloss/glossing-languages'
 
 /** One entry of the minimal Keyman writing-systems map (`keyman-writing-systems.json`). */
 export interface KeymanWritingSystem {

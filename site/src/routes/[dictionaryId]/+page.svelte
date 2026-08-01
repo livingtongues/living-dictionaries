@@ -26,7 +26,7 @@
   import { goto, preloadCode } from '$app/navigation'
   import { photo_src } from '$lib/utils/media-url'
   import { get_headword } from '$lib/orthography/orthographies'
-  import { glossing_languages } from '$lib/glosses/glossing-languages'
+  import { glossing_languages } from '$lib/gloss/glossing-languages'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import { key_between } from '$lib/api/v1/fractional-index'
   import { build_citation } from './contributors/build-citation'
