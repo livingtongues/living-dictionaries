@@ -11,6 +11,7 @@ import { building, dev } from '$app/environment'
 import { log_server_event } from '$lib/server/log-server-event'
 import SqliteDatabase from 'better-sqlite3'
 import { get_log_analytics } from './log-analytics'
+import { compute_monthly_metrics, missing_metric_months, save_monthly_metrics } from './monthly-metrics'
 
 /**
  * THE analytics dashboards' data source: one JSON file per (window, audience),
@@ -186,6 +187,9 @@ export interface SnapshotJobSummary {
   written: { key: string, computed_ms: number, bytes: number }[]
   failed: { key: string, message: string }[]
   pruned: string[]
+  /** Months whose `monthly_metrics` row this run computed (usually none — only
+   *  on the 1st, or on the first deploy that backfills). */
+  monthly_metrics: string[]
 }
 
 /**
@@ -226,7 +230,7 @@ export async function run_analytics_snapshot_job({ reason, now = () => new Date(
 }): Promise<SnapshotJobSummary> {
   const started = performance.now()
   const data_dir = process.env.DATA_DIR || '.data'
-  const summary: SnapshotJobSummary = { reason, duration_ms: 0, peak_rss_mb: 0, written: [], failed: [], pruned: [] }
+  const summary: SnapshotJobSummary = { reason, duration_ms: 0, peak_rss_mb: 0, written: [], failed: [], pruned: [], monthly_metrics: [] }
   let shared_db: Database.Database | null = null
   let logs_db: Database.Database | null = null
   let archive_db: Database.Database | null = null
@@ -265,6 +269,7 @@ export async function run_analytics_snapshot_job({ reason, now = () => new Date(
       }
     }
     summary.pruned = prune_stale_files()
+    summary.monthly_metrics = freeze_monthly_metrics({ data_dir, shared_db, logs_db, archive_db, now: now() })
   } finally {
     shared_db?.close()
     logs_db?.close()
@@ -272,6 +277,50 @@ export async function run_analytics_snapshot_job({ reason, now = () => new Date(
     summary.duration_ms = Math.round(performance.now() - started)
   }
   return summary
+}
+
+/**
+ * Freeze any missing `monthly_metrics` row (see `monthly-metrics.ts`). Runs here
+ * because this is already the daily niced off-thread moment and the retention
+ * sweep has just finalized the previous month — so on the 1st the month is whole
+ * before it is measured. A no-op on all other days.
+ *
+ * THE ONE PLACE THIS CHILD WRITES. Everything else it touches is read-only by
+ * design, so the write is deliberately narrow: a separate short-lived handle,
+ * opened directly rather than through `get_shared_db()` so the migration runner
+ * still never fires in the child, used for a single small INSERT and closed.
+ * Failure is swallowed into the summary — a missing month is recoverable next
+ * run, a dead analytics child is not.
+ */
+function freeze_monthly_metrics({ data_dir, shared_db, logs_db, archive_db, now }: {
+  data_dir: string
+  shared_db: Database.Database
+  logs_db: Database.Database
+  archive_db: Database.Database | null
+  now: Date
+}): string[] {
+  const months = missing_metric_months({ shared_db, now })
+  if (!months.length)
+    return []
+  let writable: Database.Database | null = null
+  try {
+    writable = new SqliteDatabase(join(data_dir, 'shared.db'), { fileMustExist: true })
+    writable.pragma('busy_timeout = 15000')
+    const written: string[] = []
+    for (const month of months) {
+      const computed = performance.now()
+      const metrics = compute_monthly_metrics({ month, shared_db, logs_db, archive_db, now })
+      save_monthly_metrics({ shared_db: writable, metrics })
+      written.push(month)
+      console.info(`[analytics-snapshot] monthly_metrics ${month} computed in ${Math.round(performance.now() - computed)}ms (${metrics.site_visitors} visitors over ${metrics.days_counted}d).`)
+    }
+    return written
+  } catch (error) {
+    console.error('[analytics-snapshot] monthly_metrics failed:', error)
+    return []
+  } finally {
+    writable?.close()
+  }
 }
 
 // ── Parent side: spawning the child ─────────────────────────────────────────

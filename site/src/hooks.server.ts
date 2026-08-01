@@ -122,6 +122,17 @@ function parse_byte_size(raw: string | undefined): number | null {
  * this the cause vanished into ephemeral `docker logs` (which rotate away on
  * redeploy — exactly what made the 2026-06-26 dict-load 500s unrecoverable).
  *
+ * VERIFIED 2026-08-01 (the "zero `crash` rows have ever been written" finding of
+ * the 07-31 review): this hook has been running correctly the whole time —
+ * production holds 32,871 rows it wrote (32,804 × 404 at `info`, 61 × 405 at
+ * `warn`, 6 × 500 that were all genuine client aborts). The count of `crash` rows
+ * is zero because NO server-side 5xx render has ever happened; every one of the
+ * ~403 "Internal Error" pages browsers reported was raised by SvelteKit in the
+ * BROWSER (399 of them within 2 s of `session_start` — i.e. during hydration),
+ * where nothing logged it until `hooks.client.ts` landed alongside this note.
+ * `error_id` below makes that ambiguity permanently unrepeatable: a client crash
+ * row carrying one came from here, one without it came from the browser.
+ *
  * Returns the safe shape SvelteKit shows the client; never throws (the logger
  * swallows its own errors).
  */
@@ -144,11 +155,20 @@ export const handleError: HandleServerError = ({ error, event, status, message }
     return { message }
   // 4xx (expected: missing route, auth gate) are not crashes; 5xx are.
   const level = is_client_abort ? 'info' : status >= 500 ? 'crash' : status === 404 ? 'info' : 'warn'
+  // The join key between this server row and the browser's `crash` row for the
+  // same page. Deliberately NOT part of `message` — the log review clusters by
+  // message, and a unique id per row would shatter one cluster into hundreds.
+  const error_id = level === 'crash' ? new_error_id() : null
   log_server_event({
     level,
     message: error instanceof Error ? error.message : message,
     error,
-    context: { route: event.route.id, path: event.url.pathname, status },
+    context: { route: event.route.id, path: event.url.pathname, status, ...(error_id ? { error_id } : {}) },
   })
-  return { message }
+  return error_id ? { message, error_id } : { message }
+}
+
+/** Short, human-quotable reference — long enough to be unique within a day's 500s. */
+function new_error_id(): string {
+  return crypto.randomUUID().slice(0, 8)
 }

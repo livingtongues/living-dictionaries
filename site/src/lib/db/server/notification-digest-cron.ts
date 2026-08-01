@@ -50,10 +50,12 @@ export function pacific_day_and_hour(now: Date): { day: string, hour: number } {
  * One sweep pass. Sends at most once per Pacific day (>= 8am). Exported for tests
  * + a future "force" button. Returns the number of admins pinged.
  */
-export async function sweep_notification_digest({ db = get_shared_db(), base_url = SITE_URL, now = new Date() }: {
+export async function sweep_notification_digest({ db = get_shared_db(), base_url = SITE_URL, now = new Date(), notify = notify_user }: {
   db?: Database.Database
   base_url?: string
   now?: Date
+  /** Injectable so tests can drive a failing recipient. */
+  notify?: typeof notify_user
 } = {}): Promise<number> {
   const { day, hour } = pacific_day_and_hour(now)
   if (hour < DIGEST_HOUR_PT)
@@ -61,6 +63,16 @@ export async function sweep_notification_digest({ db = get_shared_db(), base_url
   const last_day = (db.prepare('SELECT value FROM db_metadata WHERE key = ?').get(DIGEST_DAY_KEY) as { value: string } | undefined)?.value
   if (last_day === day)
     return 0
+
+  // CLAIM THE DAY BEFORE SENDING ANYTHING (2026-07-31 overnight brief). The stamp
+  // used to be written after the loop, so ONE failing recipient — an SES throttle,
+  // a bad address — threw out of the whole sweep with the day unclaimed, and the
+  // next hourly tick re-sent to EVERY admin who had already received it. From 8am
+  // Pacific to midnight that is up to 16 identical digests. Claiming first makes a
+  // failed sweep cost at most one missed digest for one person (recorded below and
+  // recoverable by hand) instead of a mailstorm for everyone.
+  db.prepare('INSERT INTO db_metadata (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+    .run(DIGEST_DAY_KEY, day)
 
   const members = db.prepare('SELECT m.user_id, m.last_read_at, u.email, u.name FROM chat_room_members m LEFT JOIN users u ON u.id = m.user_id WHERE m.room_id = ?')
     .all(ROOM_NOTIFICATIONS) as DigestMember[]
@@ -89,12 +101,16 @@ export async function sweep_notification_digest({ db = get_shared_db(), base_url
     if (!unread.length)
       continue
     const summary = summarize_notifications({ messages: unread })
-    await notify_user({ email: member.email, name: member.name, subject: summary.subject, body: summary.body_text, link })
-    sent++
+    // Per-recipient isolation, for the same reason the day is claimed up front:
+    // one undeliverable address must not cost the other admins their digest.
+    try {
+      await notify({ email: member.email, name: member.name, subject: summary.subject, body: summary.body_text, link })
+      sent++
+    } catch (err) {
+      log_server_event({ level: 'error', message: 'notification_digest_send_failed', error: err, context: { day }, user_id: member.user_id })
+    }
   }
 
-  db.prepare('INSERT INTO db_metadata (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
-    .run(DIGEST_DAY_KEY, day)
   return sent
 }
 
@@ -165,6 +181,25 @@ if (import.meta.vitest) {
         .run(ROOM_NOTIFICATIONS, 'u-evie', now)
       // Still 4 — the 4 admins. Evie is in the room but not in the allow-list.
       expect(await sweep_notification_digest({ db, now: eight_am_pt })).toBe(4)
+    })
+
+    it('claims the day BEFORE sending, so one failed send never re-mails everyone on the next tick', async () => {
+      const db = open_test_shared_db()
+      seed_notifications(db)
+      const attempted: string[] = []
+      const failing_notify = ({ email }: { email?: string | null }) => {
+        attempted.push(email ?? '')
+        if (attempted.length === 1)
+          return Promise.reject(new Error('SES throttled'))
+        return Promise.resolve()
+      }
+      // 4 admins attempted, the first one fails → 3 delivered, and crucially the
+      // day is already claimed, so the next hourly tick sends NOTHING.
+      expect(await sweep_notification_digest({ db, now: eight_am_pt, notify: failing_notify })).toBe(3)
+      expect(attempted).toHaveLength(4)
+      expect((db.prepare('SELECT value FROM db_metadata WHERE key = ?').get(DIGEST_DAY_KEY) as { value: string }).value).toBe('2026-07-14')
+      expect(await sweep_notification_digest({ db, now: new Date('2026-07-14T16:30:00.000Z'), notify: failing_notify })).toBe(0)
+      expect(attempted).toHaveLength(4)
     })
 
     it('skips a member who has already read all notifications', async () => {

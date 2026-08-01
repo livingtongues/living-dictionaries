@@ -3,6 +3,7 @@ import { spawn_analytics_snapshot_job } from './analytics-snapshot'
 import { run_chat_reping_sweep } from './chat-reping-cron'
 import { prime_host_stats_baseline, sample_host_stats_once } from './host-stats-cron'
 import { run_log_retention_sweep } from './log-retention-cron'
+import { run_monthly_metrics_announcement } from './monthly-metrics-announce'
 import { media_sweep_disabled_reason, run_media_sweep } from './media-sweep-cron'
 import { run_notification_digest_sweep } from './notification-digest-cron'
 import { r2_snapshot_disabled_reason, run_r2_snapshot_sweep } from './r2-snapshot-builder'
@@ -52,7 +53,13 @@ export const CRONS: CronDef[] = [
     // process that isn't serving anyone.
     every_ms: days(1),
     at: { hour: 3, minute: 30, tz: 'America/Los_Angeles' },
-    run: () => run_log_retention_sweep({ after_sweep: async () => { await spawn_analytics_snapshot_job({ reason: 'cron' }) } }),
+    // The monthly summary posts AFTER the child exits: the child freezes the
+    // month's `monthly_metrics` row, but pings need SES/ntfy, which only exist
+    // in this runtime. A no-op on every day except the first of a month.
+    run: () => run_log_retention_sweep({ after_sweep: async () => {
+      await spawn_analytics_snapshot_job({ reason: 'cron' })
+      await run_monthly_metrics_announcement()
+    } }),
   },
   {
     name: 'r2-snapshot-builder',

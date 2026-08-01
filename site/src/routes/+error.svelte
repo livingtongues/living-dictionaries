@@ -7,6 +7,7 @@
   import { dev } from '$app/environment'
   import { init_remote_logging, log_event } from '$lib/debug/remote-log'
   import { http_status_to_log_level } from '$lib/debug/classify-error'
+  import { take_client_error } from '$lib/debug/last-client-error'
 
   onMount(() => {
     init_remote_logging()
@@ -14,10 +15,23 @@
     // (shared with the analytics side via `classify-error`).
     const { status } = page
     const level = http_status_to_log_level(status)
+    // `page.error.message` is SvelteKit's sanitized text ("Internal Error") for
+    // anything that broke in the BROWSER — which is why this row was
+    // unattributable for its whole history. `hooks.client.ts` parks the real
+    // exception for us; a server-rendered error page parks nothing and instead
+    // carries an `error_id` naming the server row that already holds the stack.
+    const cause = take_client_error()
     log_event({
       level,
       message: page.error?.message || 'Error page shown',
-      context: { status, url: page.url?.href },
+      stack: cause?.stack ?? null,
+      context: {
+        status,
+        url: page.url?.href,
+        cause: cause?.message ?? null,
+        error_id: page.error?.error_id ?? null,
+        origin: page.error?.error_id ? 'server' : 'client',
+      },
     })
   })
 </script>
@@ -57,6 +71,11 @@
     {page.status}
     -
     {page.error.message}
+    <!-- Server-side 5xx only: the reference that finds the stack in telemetry. -->
+    {#if page.error.error_id}
+      <br>
+      <code>ref: {page.error.error_id}</code>
+    {/if}
   </p>
 
   {#if dev && page.error.message}

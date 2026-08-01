@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { RemoteCardStore } from './card-store-remote'
 import { remote_card_store } from './card-store-remote'
+import { record_og_event } from './og-telemetry'
 
 /**
  * Render each share card ONCE, then serve it from disk — with R2 behind the disk
@@ -163,12 +164,42 @@ function save_local_card({ key, png }: { key: string, png: Uint8Array }): void {
   saves_since_prune++
   if (saves_since_prune >= PRUNE_EVERY_SAVES) {
     saves_since_prune = 0
-    // Off the request path — the response is already on its way out.
-    setTimeout(() => prune_card_store(), 0).unref?.()
+    // Off the request path — the response is already on its way out. The prune
+    // result doubles as the store-state telemetry: resident entries/bytes +
+    // evictions, coalesced, so cache pressure is a measured number instead of a
+    // directory listing nobody takes.
+    setTimeout(() => {
+      const { removed, kept, bytes } = prune_card_store()
+      record_og_event({
+        level: 'info',
+        message: 'og_store_state',
+        context: { kept, bytes, removed, max_entries: MAX_ENTRIES, max_bytes: MAX_BYTES, ...remote_store_state() },
+      })
+    }, 0).unref?.()
   }
 }
 
 let saves_since_prune = 0
+
+/**
+ * The DURABLE tier's own numbers, folded into the same snapshot event.
+ *
+ * The R2 tier shipped counting `gets`/`puts`/`faults` internally and emitting
+ * none of them, which made it unfalsifiable from telemetry: it is only READ on a
+ * disk miss, so while the disk tier still has room, "working perfectly" and
+ * "silently broken" both produce zero `og_card_served { source: 'r2' }` and zero
+ * `og_remote_card_fault` (2026-07-31 overnight brief — the same gap house filed
+ * and fixed the following night). Counters are cumulative per container since
+ * boot; the event is a snapshot, so each flush reports the latest.
+ */
+export function remote_store_state(): Record<string, unknown> {
+  try {
+    const { configured, breaker_open, absent_keys, gets, puts, faults } = remote.stats()
+    return { remote_configured: configured, remote_gets: gets, remote_puts: puts, remote_faults: faults, breaker_open, absent_keys }
+  } catch {
+    return {} // the disk half of the state is worth having even if the remote tier can't answer
+  }
+}
 
 /** Bump mtime on a hit so the prune's oldest-first order approximates LRU. */
 function touch_if_stale(key: string): void {
@@ -333,6 +364,37 @@ if (import.meta.vitest) {
       save_card({ key: 'both', png: Buffer.from([4]) })
       expect(read_local_card('both')).toEqual(Buffer.from([4]))
       expect(writes).toEqual(['both'])
+    })
+  })
+
+  describe(remote_store_state, () => {
+    afterEach(() => set_remote_card_store(remote_card_store))
+
+    test('reports the R2 tier\'s counters so a silently-broken tier stops looking identical to a healthy one', () => {
+      set_remote_card_store({
+        read: () => Promise.resolve(null),
+        write: () => undefined,
+        stats: () => ({ configured: true, breaker_open: true, consecutive_faults: 2, absent_keys: 7, gets: 12, puts: 3, faults: 5 }),
+        reset: () => undefined,
+      })
+      expect(remote_store_state()).toEqual({
+        remote_configured: true,
+        remote_gets: 12,
+        remote_puts: 3,
+        remote_faults: 5,
+        breaker_open: true,
+        absent_keys: 7,
+      })
+    })
+
+    test('a remote tier that cannot answer never breaks the snapshot', () => {
+      set_remote_card_store({
+        read: () => Promise.resolve(null),
+        write: () => undefined,
+        stats: () => { throw new Error('no client') },
+        reset: () => undefined,
+      })
+      expect(remote_store_state()).toEqual({})
     })
   })
 
