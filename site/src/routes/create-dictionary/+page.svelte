@@ -5,7 +5,6 @@
   import IconMdiKeyboardOutline from '~icons/mdi/keyboard-outline'
   import IconMdiAccountGroupOutline from '~icons/mdi/account-group-outline'
   import IconMdiDatabaseImportOutline from '~icons/mdi/database-import-outline'
-  import IconMdiHeartOutline from '~icons/mdi/heart-outline'
   import type { IPoint, IRegion } from '$lib/types'
   import { onMount } from 'svelte'
   import { convert_to_friendly_url, is_url_like } from './convert-to-friendly-url'
@@ -88,12 +87,11 @@
     { icon: IconMdiKeyboardOutline, key: 'keyboards' },
     { icon: IconMdiAccountGroupOutline, key: 'collaboration' },
     { icon: IconMdiDatabaseImportOutline, key: 'import' },
-    { icon: IconMdiHeartOutline, key: 'free' },
   ] as const
 
   // The visible "About" sections and the FAQPage JSON-LD share this array so
   // structured data can never drift from what the page actually says.
-  const faqs = $derived(['what', 'who', 'need', 'after', 'conlang'].map(topic => ({
+  const faqs = $derived(['what', 'who', 'need', 'after'].map(topic => ({
     question: page.data.t(`create.faq_${topic}_q` as 'create.faq_what_q'),
     answer: page.data.t(`create.faq_${topic}_a` as 'create.faq_what_a'),
   })))
@@ -221,11 +219,8 @@ Use: ${conlang_use.trim()}`
         {/if}
         <div class="spacer"></div>
 
-        <div class="label-sm" style="display: block">
+        <div class="label-sm stack-label">
           {page.data.t('create.conlang_question')}
-        </div>
-        <div class="hint" style="margin-bottom: 0.5rem">
-          {page.data.t('create.conlang_hint')}
         </div>
 
         <label class="radio-label">
@@ -248,12 +243,19 @@ Use: ${conlang_use.trim()}`
         </label>
         <div class="spacer"></div>
 
+        {#if !conlang}
+          <div class="conlang-warning">
+            {page.data.t('create.conlang_warning')}
+          </div>
+          <div class="spacer"></div>
+        {/if}
+
         {#if conlang === true}
           <div class="conlang-info">
-            {page.data.t('create.conlang_terms_1')}
+            {page.data.t('create.conlang_info_1')}
           </div>
           <div class="conlang-info">
-            {page.data.t('create.conlang_terms_2')}
+            {page.data.t('create.conlang_info_2')}
           </div>
           <div class="spacer"></div>
           <div class="checkbox-row">
@@ -576,7 +578,7 @@ Use: ${conlang_use.trim()}`
     flex-direction: column; /* (was flex-col without display:flex — inert, kept for parity) */
     justify-content: center;
     padding: 1rem;
-    max-width: 28rem;
+    max-width: 32rem;
     margin-left: auto;
     margin-right: auto;
   }
@@ -607,6 +609,7 @@ Use: ${conlang_use.trim()}`
   }
 
   .create-form input:not([type='radio']):not([type='checkbox']),
+  .create-form textarea,
   .create-form select {
     width: 100%;
   }
@@ -709,6 +712,11 @@ Use: ${conlang_use.trim()}`
 
   .checkbox-row label {
     cursor: pointer;
+  }
+
+  .conlang-warning {
+    margin-bottom: 0.75rem;
+    font-weight: 600;
   }
 
   .conlang-info {
